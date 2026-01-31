@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { useContextService, compileWhen } from './context';
 import type { ContextState } from './context';
 import type { BaseCommand } from './primitives';
+import { logger } from './logger';
 
 export interface KeybindingItem {
     key: string;
@@ -29,6 +30,7 @@ function resolveKeybinding(
     // O(1) lookup per candidate using pre-compiled matcher
     for (const candidate of candidates) {
         if (candidate.matches(context)) {
+            logger.debug('KEYMAP', `Shortcut Match: [${e.key}] -> ${candidate.command}`, { when: candidate.when });
             return candidate;
         }
     }

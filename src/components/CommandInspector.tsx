@@ -1,0 +1,182 @@
+import { useState, useEffect, useMemo } from 'react';
+import { useTodoEngine } from '../lib/todo_engine';
+import { SIDEBAR_REGISTRY, TODO_LIST_REGISTRY, CONSTITUTION_REGISTRY } from '../lib/todo_commands';
+import { evalContext } from '../lib/context';
+
+interface KeyLog {
+    key: string;
+    code: string;
+    timestamp: number;
+}
+
+export function CommandInspector() {
+    const { state, activeKeybindingMap, ctx } = useTodoEngine();
+    const [rawKeys, setRawKeys] = useState<KeyLog[]>([]);
+    const [physicalZone, setPhysicalZone] = useState<string | null>('NONE');
+
+    const currentCommands = useMemo(() => {
+        const zone = (ctx as any).activeZone;
+        const reg = zone === 'sidebar' ? SIDEBAR_REGISTRY : (zone === 'todoList' ? TODO_LIST_REGISTRY : CONSTITUTION_REGISTRY);
+        return reg.getAll().map(cmd => {
+            return {
+                id: cmd.id,
+                label: cmd.label || cmd.id,
+                kb: cmd.kb || [],
+                enabled: cmd.when ? evalContext(cmd.when, ctx) : true
+            };
+        });
+    }, [ctx]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            setRawKeys(prev => [{
+                key: e.key,
+                code: e.code,
+                timestamp: Date.now()
+            }, ...prev].slice(0, 3));
+        };
+        const trackFocus = () => {
+            const el = document.activeElement;
+            const zone = el ? el.closest('[data-zone-id]') : null;
+            setPhysicalZone(zone ? zone.getAttribute('data-zone-id') : 'NONE');
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('focusin', trackFocus);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('focusin', trackFocus);
+        };
+    }, []);
+
+    const history = [...state.history].reverse().slice(0, 10);
+
+    return (
+        <div className="w-[320px] h-screen bg-slate-900/90 border-l border-white/10 flex flex-col shadow-[[-20px_0_50px_rgba(0,0,0,0.3)]] backdrop-blur-3xl overflow-hidden font-mono select-none flex-shrink-0 z-50">
+            {/* Header */}
+            <div className="p-3 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                    <span className="text-[10px] font-black tracking-tighter text-white uppercase opacity-80">System Inspector</span>
+                </div>
+                <div className="px-1.5 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-[8px] text-indigo-400 font-bold uppercase">v2.4-atomic</div>
+            </div>
+
+            <div className="flex-1 overflow-auto custom-scrollbar">
+                {/* 0. KEY MONITOR SECTION */}
+                <section className="p-3 border-b border-white/5 bg-black/10">
+                    <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="w-1 h-3 bg-pink-500 rounded-full animate-pulse" /> Raw Input
+                        </div>
+                        <span className="text-[7px] opacity-40">last 3 events</span>
+                    </h3>
+                    <div className="flex gap-1.5 overflow-hidden">
+                        {rawKeys.map((log, i) => (
+                            <div key={log.timestamp + i} className={`px-2 py-1.5 rounded-lg border bg-black/40 flex flex-col items-center min-w-[60px] transition-all duration-300 ${i === 0 ? 'border-pink-500/50 scale-105 shadow-[0_0_15px_rgba(236,72,153,0.2)]' : 'border-white/5 opacity-40'}`}>
+                                <span className="text-[10px] font-black text-white">{log.key === ' ' ? 'SPACE' : log.key.toUpperCase()}</span>
+                                <span className="text-[7px] text-slate-600 font-bold">{log.code}</span>
+                            </div>
+                        ))}
+                        {rawKeys.length === 0 && (
+                            <div className="text-[9px] text-slate-700 italic flex-1 py-1">Awaiting interaction...</div>
+                        )}
+                    </div>
+                </section>
+
+                {/* 1. STATE & CONTEXT SECTION */}
+                <section className="p-3 border-b border-white/5">
+                    <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <span className="w-1 h-3 bg-indigo-500/40 rounded-full" /> Live State
+                    </h3>
+                    <div className="space-y-1.5 bg-black/20 p-2 rounded-xl border border-white/5">
+                        <div className="flex justify-between items-center px-1">
+                            <span className="text-[9px] text-slate-500">focusId</span>
+                            <span className="text-[10px] text-indigo-400 font-bold">{JSON.stringify(state.focusId)}</span>
+                        </div>
+                        <div className="flex justify-between items-center px-1 pt-1 border-t border-white/5">
+                            <span className="text-[9px] text-slate-500 uppercase font-black">FocusZone ID</span>
+                            <span className="text-[10px] text-emerald-400 font-bold">{(ctx as any).activeZone || 'NONE'}</span>
+                        </div>
+                        <div className="flex justify-between items-center px-1">
+                            <span className="text-[9px] text-slate-500 uppercase font-black">DOM Focus ID</span>
+                            <span className={`text-[10px] font-bold ${physicalZone === 'NONE' ? 'text-slate-500 italic opacity-50' : 'text-pink-400'}`}>
+                                {physicalZone === 'NONE' ? `(virtual: ${(ctx as any).activeZone || 'NONE'})` : physicalZone}
+                            </span>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 2. COMMAND REGISTRY (DENSE) */}
+                <section className="p-3 border-b border-white/5 bg-white/[0.01]">
+                    <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <span className="w-1 h-3 bg-emerald-500/40 rounded-full" /> Registry
+                        </div>
+                        <span className="text-[7px] text-slate-600 font-bold uppercase tracking-tight">
+                            {(ctx as any).activeZone || 'CONSTITUTION'}
+                        </span>
+                    </h3>
+                    <div className="grid gap-1">
+                        {currentCommands.map(cmd => (
+                            <div key={cmd.id} className={`flex items-center justify-between p-1.5 rounded-lg border transition-all ${cmd.enabled ? 'bg-white/[0.03] border-white/5' : 'bg-black/20 border-transparent opacity-30 grayscale'}`}>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-[8px] font-black text-indigo-500 truncate leading-none mb-0.5">{cmd.id}</span>
+                                    <span className="text-[10px] text-slate-300 font-medium truncate uppercase tracking-tighter">{cmd.label || cmd.id}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 ml-2">
+                                    {cmd.kb.map(key => (
+                                        <kbd key={key} className={`min-w-[18px] h-4 flex items-center justify-center px-1 rounded bg-black/40 border text-[8px] font-black ${activeKeybindingMap.get(key) && cmd.enabled ? 'border-indigo-500 text-indigo-400 bg-indigo-500/20 shadow-[0_0_5px_rgba(99,102,241,0.3)]' : 'border-white/10 text-slate-600'}`}>
+                                            {key === ' ' ? 'SPC' : key.toUpperCase()}
+                                        </kbd>
+                                    ))}
+                                    <div className={`w-1 h-1 rounded-full ${cmd.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* 3. EVENT LOGS (COMPACT DIFF STYLE) */}
+                <section className="p-3">
+                    <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <span className="w-1 h-3 bg-pink-500/40 rounded-full" /> Event Stream
+                    </h3>
+                    <div className="space-y-2">
+                        {history.map((entry, i) => (
+                            <div key={i} className="group relative pl-3 border-l border-white/10 hover:border-indigo-500/40 transition-colors">
+                                <div className="flex items-baseline justify-between mb-1">
+                                    <span className="text-[9px] font-black text-indigo-400 uppercase tracking-tighter">{entry.command.type}</span>
+                                    <span className="text-[8px] text-slate-600 font-bold italic">#{state.history.length - i}</span>
+                                </div>
+                                <div className="bg-black/30 p-1.5 rounded-md border border-white/[0.02] text-[8px] leading-tight break-all">
+                                    <span className="text-slate-500">payload:</span> <span className="text-slate-400">{JSON.stringify('payload' in entry.command ? entry.command.payload : {})}</span>
+                                </div>
+                                <div className="mt-1 flex gap-2 overflow-hidden">
+                                    <span className="text-[8px] text-slate-600 whitespace-nowrap">→ focus: {JSON.stringify(entry.resultingState.focusId)}</span>
+                                </div>
+                            </div>
+                        ))}
+                        {history.length === 0 && (
+                            <div className="text-[9px] text-slate-700 italic text-center py-4 border border-dashed border-white/5 rounded-xl">Waiting for telemetry...</div>
+                        )}
+                    </div>
+                </section>
+            </div>
+
+            {/* Sticky Footer Status */}
+            <div className="p-2 border-t border-white/5 bg-black/40 flex items-center justify-between px-3">
+                <div className="flex items-center gap-3">
+                    <div className="flex flex-col">
+                        <span className="text-[7px] text-slate-600 uppercase font-black tracking-widest">Buffer Status</span>
+                        <span className="text-[9px] text-emerald-500 font-bold">READY_STREAM</span>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <span className="text-[7px] text-slate-600 uppercase font-black block">Memory Usage</span>
+                    <span className="text-[9px] text-slate-400 font-bold tabular-nums">1.24MB</span>
+                </div>
+            </div>
+        </div>
+    );
+}
