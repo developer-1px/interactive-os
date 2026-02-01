@@ -1,16 +1,16 @@
 import type { AppState } from './types';
 import { CommandRegistry } from './command';
-import { createHelper } from './definition';
+import { defineCommand } from './definition';
 
 // --- Defines ---
 
 // 1. Global
-export const Patch = createHelper<AppState, Partial<AppState>>({
+export const Patch = defineCommand<AppState, Partial<AppState>>({
     id: 'PATCH',
     run: (state, payload) => ({ ...state, ...payload })
 });
 
-export const SetFocus = createHelper<AppState, { id: any }>({
+export const SetFocus = defineCommand<AppState, { id: any }>({
     id: 'SET_FOCUS',
     run: (state, payload) => {
         if (state.focusId === payload.id) return state;
@@ -19,7 +19,7 @@ export const SetFocus = createHelper<AppState, { id: any }>({
 });
 
 // 2. Sidebar
-export const MoveCategoryUp = createHelper<AppState, any>({
+export const MoveCategoryUp = defineCommand<AppState, any>({
     id: 'MOVE_CATEGORY_UP',
     kb: ['ArrowUp'],
     run: (state) => {
@@ -28,7 +28,7 @@ export const MoveCategoryUp = createHelper<AppState, any>({
     }
 });
 
-export const MoveCategoryDown = createHelper<AppState, any>({
+export const MoveCategoryDown = defineCommand<AppState, any>({
     id: 'MOVE_CATEGORY_DOWN',
     kb: ['ArrowDown'],
     run: (state) => {
@@ -37,7 +37,7 @@ export const MoveCategoryDown = createHelper<AppState, any>({
     }
 });
 
-export const SelectCategory = createHelper<AppState, { id?: string }>({
+export const SelectCategory = defineCommand<AppState, { id?: string }>({
     id: 'SELECT_CATEGORY',
     kb: ['Enter', ' '],
     run: (state, payload) => {
@@ -46,14 +46,14 @@ export const SelectCategory = createHelper<AppState, { id?: string }>({
     }
 });
 
-export const JumpToList = createHelper<AppState, any>({
+export const JumpToList = defineCommand<AppState, any>({
     id: 'JUMP_TO_LIST',
     kb: ['ArrowRight'],
     run: (state) => ({ ...state, focusId: 'DRAFT' })
 });
 
 // 3. TodoList
-export const AddTodo = createHelper<AppState, { text?: string }>({
+export const AddTodo = defineCommand<AppState, { text?: string }>({
     id: 'ADD_TODO',
     kb: ['Enter'],
     when: 'isInputFocused',
@@ -65,7 +65,7 @@ export const AddTodo = createHelper<AppState, { text?: string }>({
     }
 });
 
-export const ToggleTodo = createHelper<AppState, { id?: number }>({
+export const ToggleTodo = defineCommand<AppState, { id?: number }>({
     id: 'TOGGLE_TODO',
     kb: [' '],
     run: (state, payload) => {
@@ -75,7 +75,7 @@ export const ToggleTodo = createHelper<AppState, { id?: number }>({
     }
 });
 
-export const DeleteTodo = createHelper<AppState, { id?: number }>({
+export const DeleteTodo = defineCommand<AppState, { id?: number }>({
     id: 'DELETE_TODO',
     kb: ['Delete', 'Backspace'],
     run: (state, payload) => {
@@ -91,10 +91,11 @@ export const DeleteTodo = createHelper<AppState, { id?: number }>({
     }
 });
 
-export const MoveFocusUp = createHelper<AppState, any>({
+export const MoveFocusUp = defineCommand<AppState, any>({
     id: 'MOVE_FOCUS_UP',
     kb: ['ArrowUp'],
     when: '!isEditing',
+    allowInInput: true,
     run: (state) => {
         const visibleTodos = state.todos.filter(t => t.categoryId === state.selectedCategoryId);
         const focusIndex = state.focusId === 'DRAFT' || state.focusId === 'draft' ? -1 : visibleTodos.findIndex(t => String(t.id) === String(state.focusId));
@@ -113,10 +114,11 @@ export const MoveFocusUp = createHelper<AppState, any>({
     }
 });
 
-export const MoveFocusDown = createHelper<AppState, any>({
+export const MoveFocusDown = defineCommand<AppState, any>({
     id: 'MOVE_FOCUS_DOWN',
     kb: ['ArrowDown'],
     when: '!isEditing',
+    allowInInput: true,
     run: (state) => {
         const visibleTodos = state.todos.filter(t => t.categoryId === state.selectedCategoryId);
         const focusIndex = state.focusId === 'DRAFT' || state.focusId === 'draft' ? -1 : visibleTodos.findIndex(t => String(t.id) === String(state.focusId));
@@ -135,7 +137,7 @@ export const MoveFocusDown = createHelper<AppState, any>({
     }
 });
 
-export const StartEdit = createHelper<AppState, { id?: number }>({
+export const StartEdit = defineCommand<AppState, { id?: number }>({
     id: 'START_EDIT',
     kb: ['Enter'],
     when: '!isEditing',
@@ -149,25 +151,34 @@ export const StartEdit = createHelper<AppState, { id?: number }>({
     }
 });
 
-export const JumpToSidebar = createHelper<AppState, any>({
+export const JumpToSidebar = defineCommand<AppState, any>({
     id: 'JUMP_TO_SIDEBAR',
     kb: ['ArrowLeft'],
+    allowInInput: true,
+    when: '!isFieldFocused || cursorAtStart',
     run: (state) => ({ ...state, focusId: state.selectedCategoryId })
 });
 
-export const SyncEditDraft = createHelper<AppState, { text: string }>({
+export const SyncDraft = defineCommand<AppState, { text: string }>({
+    id: 'SYNC_DRAFT',
+    log: false,
+    run: (state, payload) => ({ ...state, draft: payload.text })
+});
+
+export const SyncEditDraft = defineCommand<AppState, { text: string }>({
     id: 'SYNC_EDIT_DRAFT',
+    log: false,
     run: (state, payload) => ({ ...state, editDraft: payload.text })
 });
 
-export const CancelEdit = createHelper<AppState, any>({
+export const CancelEdit = defineCommand<AppState, any>({
     id: 'CANCEL_EDIT',
     kb: ['Escape'],
     when: 'isEditing',
     run: (state) => ({ ...state, editingId: null, editDraft: '' })
 });
 
-export const UpdateTodoText = createHelper<AppState, any>({
+export const UpdateTodoText = defineCommand<AppState, any>({
     id: 'UPDATE_TODO_TEXT',
     kb: ['Enter'],
     when: 'isEditing',
@@ -199,6 +210,7 @@ export type InferredTodoCommand =
     | ReturnType<typeof MoveFocusDown>
     | ReturnType<typeof StartEdit>
     | ReturnType<typeof JumpToSidebar>
+    | ReturnType<typeof SyncDraft>
     | ReturnType<typeof SyncEditDraft>
     | ReturnType<typeof CancelEdit>
     | ReturnType<typeof UpdateTodoText>;
@@ -207,7 +219,7 @@ export type InferredTodoCommand =
 export const SideBarCommands = [MoveCategoryUp, MoveCategoryDown, SelectCategory, JumpToList];
 export const TodoListCommands = [
     AddTodo, ToggleTodo, DeleteTodo, MoveFocusUp, MoveFocusDown,
-    StartEdit, JumpToSidebar, SyncEditDraft, CancelEdit, UpdateTodoText
+    StartEdit, JumpToSidebar, SyncDraft, SyncEditDraft, CancelEdit, UpdateTodoText
 ];
 export const GlobalCommands = [Patch, SetFocus];
 

@@ -2,9 +2,8 @@ import { useCommandCenter, createCommandStore, CommandRegistry } from './command
 
 import { CONSTITUTION_REGISTRY, SIDEBAR_REGISTRY, TODO_LIST_REGISTRY } from './todo_commands';
 import type { AppState, TodoCommand, HistoryEntry } from './types';
-import { conditionRegistry } from './context';
-import type { ConditionDefinition } from './context';
-import { useEffect, useMemo } from 'react';
+import { setGlobalEngine } from './primitives/CommandContext';
+import { useMemo } from 'react';
 
 // Initialize Unified Engine Registry (The "Brain" knows all, but UI is scoped)
 const ENGINE_REGISTRY = new CommandRegistry<AppState>();
@@ -16,9 +15,9 @@ const registry = ENGINE_REGISTRY;
 
 const INITIAL_STATE: AppState = {
     categories: [
-        { id: 'cat_inbox', text: 'Inbox', icon: '📥' },
-        { id: 'cat_work', text: 'Work', icon: '💼' },
-        { id: 'cat_personal', text: 'Personal', icon: '👤' }
+        { id: 'cat_inbox', text: 'Inbox' },
+        { id: 'cat_work', text: 'Work' },
+        { id: 'cat_personal', text: 'Personal' }
     ],
     selectedCategoryId: 'cat_inbox',
     todos: [
@@ -34,30 +33,9 @@ const INITIAL_STATE: AppState = {
     history: []
 };
 
-// --- 3. Condition Definitions ---
+// --- 3. Condition Definitions (Inlined) ---
+// Conditions are now evaluated directly in mapStateToContext
 
-export const TODO_CONDITIONS: ConditionDefinition<AppState>[] = [
-    {
-        id: 'categoryListFocus',
-        description: 'True if a category is currently focused',
-        run: (s) => typeof s.focusId === 'string' && s.focusId.startsWith('cat_')
-    },
-    {
-        id: 'todoListFocus',
-        description: 'True if a todo item is currently focused',
-        run: (s) => typeof s.focusId === 'number'
-    },
-    {
-        id: 'isEditing',
-        description: 'True if a todo is currently being edited inline',
-        run: (s) => s.editingId !== null
-    },
-    {
-        id: 'isInputFocused',
-        description: 'True if the main creation input is focused',
-        run: (s) => s.focusId === 'DRAFT'
-    }
-];
 
 /**
  * useTodoStore: Global Zustand store for Todo application state.
@@ -89,41 +67,43 @@ export const useTodoStore = createCommandStore<AppState, TodoCommand>(
  * Returns everything the View needs, pre-bound to the global store.
  */
 export function useTodoEngine() {
-    // Register conditions once on mount
-    useEffect(() => {
-        TODO_CONDITIONS.forEach(cond => {
-            if (!conditionRegistry.get(cond.id)) {
-                conditionRegistry.register(cond);
-            }
-        });
-    }, []);
+    // Note: Condition Registry side-effect removed. Logic is now direct.
 
     const config = useMemo(() => ({
         mapStateToContext: (state: AppState) => {
             const isSidebar = String(state.focusId).startsWith('cat_');
             const isTodo = state.focusId === 'DRAFT' || state.focusId === 'draft' || typeof state.focusId === 'number';
 
+            // Direct Evaluation of Conditions
+            const conditions = {
+                categoryListFocus: typeof state.focusId === 'string' && state.focusId.startsWith('cat_'),
+                todoListFocus: typeof state.focusId === 'number',
+                isEditing: state.editingId !== null,
+                isInputFocused: state.focusId === 'DRAFT'
+            };
+
             const ctx: Record<string, any> = {
                 editDraft: state.editDraft,
                 focusId: state.focusId,
                 selectedCategoryId: state.selectedCategoryId,
                 hasTodos: state.todos.length > 0,
-                filteredTodos: state.todos.filter(t => t.categoryId === state.selectedCategoryId),
-                activeZone: isSidebar ? 'sidebar' : isTodo ? 'todoList' : null
+                activeZone: isSidebar ? 'sidebar' : isTodo ? 'todoList' : null,
+                ...conditions
             };
-
-            // Dynamically evaluate all registered conditions
-            conditionRegistry.getAll().forEach(cond => {
-                ctx[cond.id] = (cond as ConditionDefinition<AppState>).run(state);
-            });
 
             return ctx;
         }
     }), []);
 
-    return useCommandCenter<AppState, TodoCommand>(
+    const engine = useCommandCenter<AppState, TodoCommand>(
         useTodoStore,
         registry,
         config
     );
+
+    // Wire up global singleton bridge
+    // We wrap it in a closure to match the hook signature
+    setGlobalEngine(() => engine.providerValue);
+
+    return engine;
 }

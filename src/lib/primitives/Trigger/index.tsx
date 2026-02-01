@@ -1,10 +1,10 @@
-import { useContext, cloneElement, isValidElement } from 'react';
+import { cloneElement, isValidElement } from 'react';
 import type { ReactNode, ReactElement, MouseEvent as ReactMouseEvent } from 'react';
 import { logger } from '../../logger';
-import { CommandContext } from '../CommandContext';
+import { useCommandEngine } from '../CommandContext';
 import type { BaseCommand } from '../types';
 
-export interface ActionProps<T extends BaseCommand> {
+export interface TriggerProps<T extends BaseCommand> {
     command: T
     children: ReactNode
     asChild?: boolean
@@ -12,15 +12,15 @@ export interface ActionProps<T extends BaseCommand> {
     allowPropagation?: boolean
 }
 
-export const Action = <T extends BaseCommand>({ command, children, asChild, dispatch: customDispatch, allowPropagation = false }: ActionProps<T>) => {
-    const { dispatch: contextDispatch } = useContext(CommandContext)
+export const Trigger = <T extends BaseCommand>({ command, children, asChild, dispatch: customDispatch, allowPropagation = false }: TriggerProps<T>) => {
+    const { dispatch: contextDispatch } = useCommandEngine()
     const dispatch = customDispatch || contextDispatch
 
     const handleClick = (e: ReactMouseEvent) => {
         if (!allowPropagation) {
             e.stopPropagation()
         }
-        logger.debug('PRIMITIVE', `Action Clicked: [${command.type}]`);
+        logger.debug('PRIMITIVE', `Trigger Clicked: [${command.type}]`);
         dispatch(command)
     }
 

@@ -3,6 +3,8 @@ export interface CommandDefinition<S, P> {
     run: (state: S, payload: P) => S;
     when?: string;
     kb?: string[];
+    allowInInput?: boolean;
+    log?: boolean;
 }
 
 export interface CommandFactory<S, P> {
@@ -18,13 +20,15 @@ export interface CommandFactory<S, P> {
     run: (state: S, payload: P) => S;
     when?: string;
     kb?: string[];
+    allowInInput?: boolean;
+    log?: boolean;
 }
 
 /**
- * createHelper:
+ * defineCommand:
  * Merges the Factory function and the Definition object into one entity.
  */
-export function createHelper<S, P>(def: CommandDefinition<S, P>): CommandFactory<S, P> {
+export function defineCommand<S, P>(def: CommandDefinition<S, P>): CommandFactory<S, P> {
     const factory = ((payload: P) => ({ type: def.id, payload })) as CommandFactory<S, P>;
 
     // Attach properties
@@ -32,6 +36,8 @@ export function createHelper<S, P>(def: CommandDefinition<S, P>): CommandFactory
     factory.run = def.run;
     factory.when = def.when;
     factory.kb = def.kb;
+    factory.allowInInput = def.allowInInput;
+    factory.log = def.log;
 
     return factory;
 }

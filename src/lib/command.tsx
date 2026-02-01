@@ -3,7 +3,7 @@ import { create } from 'zustand';
 
 import type { KeybindingItem } from './keybinding';
 import { useContextService, evalContext } from './context';
-import { Action, Field, Option, FocusZone, CommandContext } from './primitives';
+import { Trigger, Field, Item, Zone } from './primitives';
 
 import { logger } from './logger';
 
@@ -14,6 +14,8 @@ export interface CommandDefinition<S, P = any, K extends string = string> {
     when?: string; // Context logic
     kb?: string[]; // Default keybindings
     args?: P;      // Default args for keybindings
+    allowInInput?: boolean;
+    log?: boolean; // Default true. Set to false to suppress logging.
 
     /**
      * Returns the next state given current state and payload.
@@ -85,7 +87,8 @@ export class CommandRegistry<S, K extends string = string> {
                         key,
                         command: cmd.id,
                         when: cmd.when,
-                        args: cmd.args
+                        args: cmd.args,
+                        allowInInput: cmd.allowInInput
                     });
                 });
             }
@@ -121,7 +124,9 @@ export function createCommandStore<S, A extends { type: string; payload?: any }>
             const nextInnerState = cmd.run(prev.state, action.payload);
             const finalState = config?.onStateChange ? config.onStateChange(nextInnerState, action) : nextInnerState;
 
-            logger.traceCommand(action.type, action.payload, prev.state, finalState);
+            if (cmd.log !== false) {
+                logger.traceCommand(action.type, action.payload, prev.state, finalState);
+            }
 
             return { state: finalState };
         })
@@ -174,18 +179,13 @@ export function useCommandCenter<S, A extends { type: any; payload?: any }, K ex
         });
     }, [registry, state, context]);
 
-    const Provider = useMemo(() => {
-        return ({ children }: { children: React.ReactNode }) => (
-            <CommandContext.Provider value={{
-                dispatch: dispatch as any,
-                currentFocusId: (state as any).focusId,
-                activeZone: context.activeZone as string | null,
-                registry: registry
-            }}>
-                {children}
-            </CommandContext.Provider>
-        );
-    }, [dispatch, (state as any).focusId, context.activeZone, registry]);
+    const providerValue = useMemo(() => ({
+        dispatch: dispatch as any,
+        currentFocusId: (state as any).focusId,
+        activeZone: context.activeZone as string | null,
+        registry: registry,
+        ctx: context
+    }), [dispatch, (state as any).focusId, context.activeZone, registry, context]);
 
     return {
         state,
@@ -194,11 +194,11 @@ export function useCommandCenter<S, A extends { type: any; payload?: any }, K ex
         keybindings,
         commands: commandStatusList,
         activeKeybindingMap,
-        Action,
+        Trigger,
         Field,
-        Option,
-        FocusZone,
-        Provider,
+        Item,
+        Zone,
+        providerValue,
         registry
     };
 }

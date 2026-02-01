@@ -13,6 +13,7 @@ export function CommandInspector() {
     const { state, activeKeybindingMap, ctx } = useTodoEngine();
     const [rawKeys, setRawKeys] = useState<KeyLog[]>([]);
     const [physicalZone, setPhysicalZone] = useState<string | null>('NONE');
+    const [isInputActive, setIsInputActive] = useState(false);
 
     const currentCommands = useMemo(() => {
         const zone = (ctx as any).activeZone;
@@ -22,7 +23,9 @@ export function CommandInspector() {
                 id: cmd.id,
                 label: cmd.label || cmd.id,
                 kb: cmd.kb || [],
-                enabled: cmd.when ? evalContext(cmd.when, ctx) : true
+                enabled: cmd.when ? evalContext(cmd.when, ctx) : true,
+                allowInInput: cmd.allowInInput,
+                log: cmd.log
             };
         });
     }, [ctx]);
@@ -39,13 +42,30 @@ export function CommandInspector() {
             const el = document.activeElement;
             const zone = el ? el.closest('[data-zone-id]') : null;
             setPhysicalZone(zone ? zone.getAttribute('data-zone-id') : 'NONE');
+
+            // Detect native input focus
+            if (el && (
+                el.tagName === 'INPUT' ||
+                el.tagName === 'TEXTAREA' ||
+                el.getAttribute('contenteditable') === 'true'
+            )) {
+                setIsInputActive(true);
+            } else {
+                setIsInputActive(false);
+            }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         document.addEventListener('focusin', trackFocus);
+        document.addEventListener('focusout', trackFocus); // Also track blur/focusout
+
+        // Initial check
+        trackFocus();
+
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('focusin', trackFocus);
+            document.removeEventListener('focusout', trackFocus);
         };
     }, []);
 
@@ -56,8 +76,10 @@ export function CommandInspector() {
             {/* Header */}
             <div className="p-3 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
-                    <span className="text-[10px] font-black tracking-tighter text-white uppercase opacity-80">System Inspector</span>
+                    <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.6)] transition-colors duration-300 ${isInputActive ? 'bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.6)]' : 'bg-indigo-500'}`} />
+                    <span className="text-[10px] font-black tracking-tighter text-white uppercase opacity-80">
+                        {isInputActive ? 'Input Mode' : 'System Inspector'}
+                    </span>
                 </div>
                 <div className="px-1.5 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-[8px] text-indigo-400 font-bold uppercase">v2.4-atomic</div>
             </div>
@@ -104,6 +126,12 @@ export function CommandInspector() {
                                 {physicalZone === 'NONE' ? `(virtual: ${(ctx as any).activeZone || 'NONE'})` : physicalZone}
                             </span>
                         </div>
+                        {isInputActive && (
+                            <div className="flex justify-between items-center px-1 pt-1 border-t border-white/5">
+                                <span className="text-[9px] text-pink-500 uppercase font-black">INPUT LOCK</span>
+                                <span className="text-[10px] text-pink-400 font-bold">ACTIVE</span>
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -118,22 +146,38 @@ export function CommandInspector() {
                         </span>
                     </h3>
                     <div className="grid gap-1">
-                        {currentCommands.map(cmd => (
-                            <div key={cmd.id} className={`flex items-center justify-between p-1.5 rounded-lg border transition-all ${cmd.enabled ? 'bg-white/[0.03] border-white/5' : 'bg-black/20 border-transparent opacity-30 grayscale'}`}>
-                                <div className="flex flex-col min-w-0">
-                                    <span className="text-[8px] font-black text-indigo-500 truncate leading-none mb-0.5">{cmd.id}</span>
-                                    <span className="text-[10px] text-slate-300 font-medium truncate uppercase tracking-tighter">{cmd.label || cmd.id}</span>
+                        {currentCommands.map(cmd => {
+                            const isBlockedByInput = isInputActive && !cmd.allowInInput;
+                            const isDisabled = !cmd.enabled || isBlockedByInput;
+
+                            return (
+                                <div key={cmd.id} className={`flex items-center justify-between p-1.5 rounded-lg border transition-all ${!isDisabled ? 'bg-white/[0.03] border-white/5' : 'bg-black/20 border-transparent opacity-30 grayscale'}`}>
+                                    <div className="flex flex-col min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <span className={`text-[8px] font-black truncate leading-none ${isBlockedByInput ? 'text-pink-500/50 line-through' : 'text-indigo-500'}`}>{cmd.id}</span>
+                                            {/* Property Badges */}
+                                            <div className="flex gap-0.5">
+                                                {(cmd as any).allowInInput && (
+                                                    <span className="text-[6px] px-1 bg-pink-500/20 text-pink-400 border border-pink-500/20 rounded font-bold uppercase" title="Executable in Input Fields">INPUT_SAFE</span>
+                                                )}
+                                                {(cmd as any).log === false && (
+                                                    <span className="text-[6px] px-1 bg-slate-500/20 text-slate-500 border border-slate-500/20 rounded font-bold uppercase" title="Logging Suppressed">NO_LOG</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <span className="text-[10px] text-slate-300 font-medium truncate uppercase tracking-tighter">{cmd.label || cmd.id}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 ml-2">
+                                        {cmd.kb.map(key => (
+                                            <kbd key={key} className={`min-w-[18px] h-4 flex items-center justify-center px-1 rounded bg-black/40 border text-[8px] font-black ${activeKeybindingMap.get(key) && !isDisabled ? 'border-indigo-500 text-indigo-400 bg-indigo-500/20 shadow-[0_0_5px_rgba(99,102,241,0.3)]' : 'border-white/10 text-slate-600'}`}>
+                                                {key === ' ' ? 'SPC' : key.toUpperCase()}
+                                            </kbd>
+                                        ))}
+                                        <div className={`w-1 h-1 rounded-full ${!isDisabled ? 'bg-emerald-500' : 'bg-slate-700'}`} />
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-1.5 ml-2">
-                                    {cmd.kb.map(key => (
-                                        <kbd key={key} className={`min-w-[18px] h-4 flex items-center justify-center px-1 rounded bg-black/40 border text-[8px] font-black ${activeKeybindingMap.get(key) && cmd.enabled ? 'border-indigo-500 text-indigo-400 bg-indigo-500/20 shadow-[0_0_5px_rgba(99,102,241,0.3)]' : 'border-white/10 text-slate-600'}`}>
-                                            {key === ' ' ? 'SPC' : key.toUpperCase()}
-                                        </kbd>
-                                    ))}
-                                    <div className={`w-1 h-1 rounded-full ${cmd.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`} />
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </section>
 

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
 import { logger } from './logger';
 import type { ReactNode, FC } from 'react';
 
@@ -8,35 +8,10 @@ export type ContextState = Record<ContextKey, ContextValue>;
 
 // --- 1. Condition & Evaluator Pattern ---
 
-export interface ConditionDefinition<S = any> {
-    id: string;
-    description?: string;
-    run: (state: S) => boolean;
-}
+
+
 
 type Evaluator = (context: ContextState) => boolean;
-
-/**
- * Universal Condition Registry
- */
-export class ConditionRegistry<S = any> {
-    private conditions = new Map<string, ConditionDefinition<S>>();
-
-    register(definition: ConditionDefinition<S>) {
-        this.conditions.set(definition.id, definition);
-        logger.debug('SYSTEM', `Registered Condition: [${definition.id}]`);
-    }
-
-    get(id: string): ConditionDefinition<S> | undefined {
-        return this.conditions.get(id);
-    }
-
-    getAll(): ConditionDefinition<S>[] {
-        return Array.from(this.conditions.values());
-    }
-}
-
-export const conditionRegistry = new ConditionRegistry();
 
 const compilationCache = new Map<string, Evaluator>();
 
@@ -76,11 +51,7 @@ function _compile(expression: string): Evaluator {
         return (ctx) => ctx[key] != parsedVal;
     }
 
-    // E. Registry Lookup (Priority)
-    const registered = conditionRegistry.get(expression);
-    if (registered) {
-        return (ctx) => !!ctx[registered.id];
-    }
+
 
     // F. Direct Key Truthy Check
     const key = expression;
@@ -133,6 +104,9 @@ const GlobalContext = createContext<{
 export const ContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [context, setCtx] = useState<ContextState>({});
 
+    const pendingLogUpdates = useRef<ContextState>({});
+    const logTimeoutRef = useRef<any>(null);
+
     const setContext = useCallback((key: ContextKey, value: ContextValue) => {
         setCtx(prev => (prev[key] === value ? prev : { ...prev, [key]: value }));
     }, []);
@@ -144,7 +118,19 @@ export const ContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
             if (!hasChanged) return prev;
 
-            logger.debug('CONTEXT', 'Sync ->', updates);
+            // Debounced Logging: Accumulate updates and log once every 500ms
+            Object.assign(pendingLogUpdates.current, updates);
+
+            if (logTimeoutRef.current) {
+                clearTimeout(logTimeoutRef.current);
+            }
+
+            logTimeoutRef.current = setTimeout(() => {
+                logger.debug('CONTEXT', 'Sync (Debounced) ->', { ...pendingLogUpdates.current });
+                pendingLogUpdates.current = {}; // Reset after log
+                logTimeoutRef.current = null;
+            }, 500);
+
             return { ...prev, ...updates };
         });
     }, []);

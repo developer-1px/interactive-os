@@ -1,7 +1,7 @@
-export type ZoneId = 'sidebar' | 'todoList';
+
 export type FocusTarget = 'DRAFT' | number | string | null;
 
-export interface Category { id: string; text: string; icon?: string }
+export interface Category { id: string; text: string; }
 export interface Todo { id: number; text: string; completed: boolean; categoryId: string }
 
 import type { InferredTodoCommand } from './todo_commands';

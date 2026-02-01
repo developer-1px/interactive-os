@@ -7,23 +7,22 @@ import { TodoPanel } from './components/TodoPanel'
 // --- 1. Main Component ---
 function TodoApp() {
   // App is now a perfectly Pure View.
-  const { Provider } = useTodoEngine();
+  // We call the engine hook to initialize the system and register the singleton.
+  useTodoEngine();
 
   return (
-    <Provider>
-      <div className="h-screen w-screen bg-slate-950 flex overflow-hidden font-sans text-slate-200 select-none">
+    <div className="h-screen w-screen bg-slate-950 flex overflow-hidden font-sans text-slate-200 select-none">
 
 
-        {/* 1. Category Navigation (Isolated Component) */}
-        <Sidebar />
+      {/* 1. Category Navigation (Isolated Component) */}
+      <Sidebar />
 
-        {/* 2. Main Work Area (Isolated Component) */}
-        <TodoPanel />
+      {/* 2. Main Work Area (Isolated Component) */}
+      <TodoPanel />
 
-        {/* 3. Global System Inspector */}
-        <CommandInspector />
-      </div>
-    </Provider>
+      {/* 3. Global System Inspector */}
+      <CommandInspector />
+    </div>
   )
 }
 
