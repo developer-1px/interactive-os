@@ -103,13 +103,8 @@ export const Field = <T extends BaseCommand>({
         isComposingRef.current = true;
     };
 
-    const handleCompositionEnd = (e: any) => {
+    const handleCompositionEnd = () => {
         isComposingRef.current = false;
-        const val = e.currentTarget.value;
-        setLocalValue(val);
-        if (syncCommand) dispatch({ ...syncCommand, payload: { ...syncCommand.payload, text: val } });
-        else if (name) dispatch({ type: 'PATCH', payload: { [name]: val } });
-        else if (updateType) dispatch({ type: updateType, payload: { text: val } });
     };
 
     // --- Context Sensor Logic ---

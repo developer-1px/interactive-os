@@ -37,15 +37,46 @@ const INITIAL_STATE: AppState = {
 // Conditions are now evaluated directly in mapStateToContext
 
 
+const STORAGE_KEY = 'interactive-os-todo-v2';
+
+const loadState = (): AppState => {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            // Merge with structure to ensure new fields exists if schema evolves
+            return { ...INITIAL_STATE, ...parsed, history: [] }; // Don't persist history for now
+        }
+    } catch (e) {
+        console.warn('Failed to load state', e);
+    }
+    return INITIAL_STATE;
+};
+
+const saveState = (state: AppState) => {
+    try {
+        // Persist only data, not transient UI state.
+        // We EXCLUDE: history, editingId, editDraft
+        // We KEEP: todos, categories, selectedCategoryId, draft (maybe?)
+        // Let's keep 'draft' as it might be useful, but definitely NOT 'editingId'.
+        const { history, editingId, editDraft, ...subState } = state;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(subState));
+    } catch (e) {
+        console.warn('Failed to save state', e);
+    }
+};
+
 /**
  * useTodoStore: Global Zustand store for Todo application state.
  * Allows access to state and dispatch from any component.
  */
 export const useTodoStore = createCommandStore<AppState, TodoCommand>(
     registry,
-    INITIAL_STATE,
+    { ...loadState(), editingId: null, editDraft: '' }, // Force reset of transient state on load
     {
         onStateChange: (newState, action) => {
+            saveState(newState);
+
             const historyEntry: HistoryEntry = {
                 command: action,
                 resultingState: {

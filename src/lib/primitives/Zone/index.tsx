@@ -61,23 +61,28 @@ export function Zone({ id, children, dispatch: customDispatch, currentFocusId: c
                     activeEl.isContentEditable
                 );
 
-                const match = bindings.find((b: { key: string }) => b.key.toLowerCase() === e.key.toLowerCase());
+                const matches = bindings.filter((b: { key: string }) => b.key.toLowerCase() === e.key.toLowerCase());
 
-                if (match) {
-                    // 1. Evaluate Condition
-                    const isEnabled = match.when ? evalContext(match.when, ctxRef.current) : true;
-                    if (!isEnabled) {
-                        return; // Allow native behavior if condition fails
+                if (matches.length > 0) {
+                    // Find the first ENABLED command for this key
+                    const activeMatch = matches.find((match: any) => {
+                        const isEnabled = match.when ? evalContext(match.when, ctxRef.current) : true;
+
+                        // Validated Input Gate for this specific match
+                        if (isEnabled && isInputActive && !match.allowInInput) {
+                            return false;
+                        }
+
+                        return isEnabled;
+                    });
+
+                    if (activeMatch) {
+                        e.preventDefault();
+                        // logger.debug('KEYMAP', `Zone exec: ${activeMatch.command}`);
+                        dispatch({ type: activeMatch.command, payload: activeMatch.args });
+                    } else {
+                        // All matches disabled
                     }
-
-                    // 2. Input Gate
-                    // Critical Gate: If in input, block unless explicitly allowed
-                    if (isInputActive && !match.allowInInput) {
-                        return;
-                    }
-
-                    e.preventDefault();
-                    dispatch({ type: match.command, payload: match.args });
                 }
             };
             window.addEventListener('keydown', handleKeyDown);

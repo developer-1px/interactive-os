@@ -3,7 +3,7 @@
  * Features: Layered Badges, Dev-only silencing, Grouped execution tracing.
  */
 
-const IS_DEV = import.meta.env.DEV;
+const IS_DEV = false; // import.meta.env.DEV;
 
 type LogLayer = 'ENGINE' | 'KEYMAP' | 'CONTEXT' | 'PRIMITIVE' | 'SYSTEM';
 
@@ -43,7 +43,7 @@ class AntigravityLogger {
     group(layer: LogLayer, label: string) {
         if (!IS_DEV) return;
         const [badge, style] = this.getBadge(layer);
-        console.group(`${badge} %c${label}`, style, 'font-weight: bold; color: white;');
+        console.groupCollapsed(`${badge} %c${label}`, style, 'font-weight: bold; color: white;');
     }
 
     groupEnd() {
