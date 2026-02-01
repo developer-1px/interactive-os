@@ -96,8 +96,22 @@ export const TodoListCommands = [
         kb: ['ArrowUp'],
         when: '!isEditing',
         run: (state) => {
-            const focusIndex = state.focusId === 'DRAFT' ? -1 : state.todos.findIndex(t => String(t.id) === String(state.focusId));
-            const nextFocus = focusIndex === 0 ? 'DRAFT' : (focusIndex > 0 ? state.todos[focusIndex - 1].id : state.focusId);
+            const visibleTodos = state.todos.filter(t => t.categoryId === state.selectedCategoryId);
+            const focusIndex = state.focusId === 'DRAFT' || state.focusId === 'draft' ? -1 : visibleTodos.findIndex(t => String(t.id) === String(state.focusId));
+
+            // If focus is not in visible list (and not draft), reset to Draft
+            if (focusIndex === -1 && state.focusId !== 'DRAFT' && state.focusId !== 'draft') return { ...state, focusId: 'DRAFT' };
+
+            let nextFocus: string | number = state.focusId;
+            if (state.focusId === 'DRAFT' || state.focusId === 'draft') {
+                // From draft, go to bottom? Or stay? Typical behavior: Up from draft goes to bottom of list
+                nextFocus = visibleTodos.length > 0 ? visibleTodos[visibleTodos.length - 1].id : 'DRAFT';
+            } else if (focusIndex === 0) {
+                // Top of list -> Draft
+                nextFocus = 'DRAFT';
+            } else {
+                nextFocus = visibleTodos[focusIndex - 1].id;
+            }
             return { ...state, focusId: nextFocus };
         }
     }),
@@ -106,8 +120,21 @@ export const TodoListCommands = [
         kb: ['ArrowDown'],
         when: '!isEditing',
         run: (state) => {
-            const focusIndex = state.focusId === 'DRAFT' ? -1 : state.todos.findIndex(t => String(t.id) === String(state.focusId));
-            const nextFocus = focusIndex < state.todos.length - 1 ? state.todos[focusIndex + 1].id : state.focusId;
+            const visibleTodos = state.todos.filter(t => t.categoryId === state.selectedCategoryId);
+            const focusIndex = state.focusId === 'DRAFT' || state.focusId === 'draft' ? -1 : visibleTodos.findIndex(t => String(t.id) === String(state.focusId));
+
+            // If focus is not in visible list (and not draft), reset to Draft
+            if (focusIndex === -1 && state.focusId !== 'DRAFT' && state.focusId !== 'draft') return { ...state, focusId: 'DRAFT' };
+
+            let nextFocus: string | number = state.focusId;
+            if (state.focusId === 'DRAFT' || state.focusId === 'draft') {
+                nextFocus = visibleTodos.length > 0 ? visibleTodos[0].id : 'DRAFT';
+            } else if (focusIndex < visibleTodos.length - 1) {
+                nextFocus = visibleTodos[focusIndex + 1].id;
+            } else {
+                // Bottom of list -> Draft (Loop or Stay? Let's loop to Draft for cycle)
+                nextFocus = 'DRAFT';
+            }
             return { ...state, focusId: nextFocus };
         }
     }),

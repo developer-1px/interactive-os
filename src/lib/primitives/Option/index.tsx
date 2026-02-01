@@ -1,6 +1,6 @@
 import { useContext, useRef, useEffect, isValidElement, cloneElement } from 'react';
 import type { ReactNode, ReactElement } from 'react';
-import { CommandContext } from './CommandContext';
+import { CommandContext } from '../CommandContext';
 
 export interface OptionProps {
     id: string | number

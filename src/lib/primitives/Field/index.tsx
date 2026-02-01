@@ -1,7 +1,7 @@
 import { useContext, useState, useRef, useEffect, isValidElement, cloneElement } from 'react';
 import type { ReactNode, ReactElement, ChangeEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { CommandContext } from './CommandContext';
-import type { BaseCommand } from './types';
+import { CommandContext } from '../CommandContext';
+import type { BaseCommand } from '../types';
 
 export interface FieldProps<T extends BaseCommand> {
     value: string

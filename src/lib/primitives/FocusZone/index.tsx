@@ -1,14 +1,14 @@
 import { useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { CommandContext, FocusContext } from './CommandContext';
-import type { BaseCommand } from './types';
+import { CommandContext, FocusContext } from '../CommandContext';
+import type { BaseCommand } from '../types';
 
 export interface FocusZoneProps {
     id: string;
     children: ReactNode;
     dispatch?: (cmd: BaseCommand) => void;
-    currentFocusId?: any;
-    defaultFocusId?: any;
+    currentFocusId?: string | null;
+    defaultFocusId?: string;
     registry?: any;
 }
 
@@ -55,10 +55,11 @@ export function FocusZone({ id, children, dispatch: customDispatch, currentFocus
         <FocusContext.Provider value={{ zoneId: id, isActive }}>
             <div
                 data-zone-id={id}
+                data-active={isActive}
                 onFocus={handleFocus}
                 onClick={handleClick}
                 tabIndex={-1}
-                className={`outline-none transition-all duration-700 h-full flex flex-col ${!isActive ? 'grayscale opacity-30 scale-[0.98] blur-[0.5px]' : 'grayscale-0 opacity-100 scale-100'}`}
+                className="outline-none transition-all duration-700 h-full flex flex-col data-[active=false]:grayscale data-[active=false]:opacity-30 data-[active=false]:scale-[0.98] data-[active=false]:blur-[0.5px] data-[active=true]:grayscale-0 data-[active=true]:opacity-100 data-[active=true]:scale-100"
                 style={{ flex: id === 'sidebar' ? 'none' : '1' }}
             >
                 {children}
