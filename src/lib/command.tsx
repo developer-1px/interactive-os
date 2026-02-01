@@ -1,10 +1,10 @@
 import { useMemo, useLayoutEffect } from 'react';
 import { create } from 'zustand';
-import { useKeybindingRegistry } from './keybinding';
+
 import type { KeybindingItem } from './keybinding';
 import { useContextService, evalContext } from './context';
 import { Action, Field, Option, FocusZone, CommandContext } from './primitives';
-import type { BaseCommand, ActionProps, FieldProps, OptionProps, FocusZoneProps } from './primitives';
+
 import { logger } from './logger';
 
 export interface CommandDefinition<S, P = any, K extends string = string> {

@@ -16,7 +16,7 @@ export const Option = ({ id, active, children, asChild, dispatch: customDispatch
     const dispatch = customDispatch || contextDispatch
     const innerRef = useRef<HTMLDivElement>(null)
 
-    const isActuallyActive = active !== undefined ? active : (currentFocusId === id);
+    const isActuallyActive = active !== undefined ? active : (String(currentFocusId) === String(id));
 
     useEffect(() => {
         if (isActuallyActive && innerRef.current && document.activeElement !== innerRef.current) {

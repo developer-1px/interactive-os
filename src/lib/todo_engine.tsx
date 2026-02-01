@@ -1,13 +1,13 @@
 import { useCommandCenter, createCommandStore, CommandRegistry } from './command';
-import { Action, Field, Option, FocusZone, CommandContext } from './primitives';
+
 import { CONSTITUTION_REGISTRY, SIDEBAR_REGISTRY, TODO_LIST_REGISTRY } from './todo_commands';
-import type { AppState, TodoCommand, HistoryEntry, CommandType } from './types';
+import type { AppState, TodoCommand, HistoryEntry } from './types';
 import { conditionRegistry } from './context';
 import type { ConditionDefinition } from './context';
 import { useEffect, useMemo } from 'react';
 
 // Initialize Unified Engine Registry (The "Brain" knows all, but UI is scoped)
-const ENGINE_REGISTRY = new CommandRegistry<AppState, CommandType>();
+const ENGINE_REGISTRY = new CommandRegistry<AppState>();
 [CONSTITUTION_REGISTRY, SIDEBAR_REGISTRY, TODO_LIST_REGISTRY].forEach(reg => {
     reg.getAll().forEach(cmd => ENGINE_REGISTRY.register(cmd));
 });
@@ -121,7 +121,7 @@ export function useTodoEngine() {
         }
     }), []);
 
-    return useCommandCenter<AppState, TodoCommand, CommandType>(
+    return useCommandCenter<AppState, TodoCommand>(
         useTodoStore,
         registry,
         config

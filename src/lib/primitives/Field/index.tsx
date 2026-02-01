@@ -20,7 +20,7 @@ export interface FieldProps<T extends BaseCommand> {
 export const Field = <T extends BaseCommand>({
     value,
     active,
-    autoFocus,
+
     updateType,
     name,
     commitCommand,
@@ -35,7 +35,11 @@ export const Field = <T extends BaseCommand>({
     const [localValue, setLocalValue] = useState(value)
     const innerRef = useRef<HTMLInputElement>(null)
 
-    const isActive = active !== undefined ? active : (currentFocusId === 'DRAFT' || currentFocusId === name);
+    const isActive = active !== undefined ? active : (
+        currentFocusId === name ||
+        (name === 'draft' && String(currentFocusId).toLowerCase() === 'draft') ||
+        (name === 'DRAFT' && String(currentFocusId).toUpperCase() === 'DRAFT')
+    );
 
     useEffect(() => { setLocalValue(value) }, [value])
     useEffect(() => {

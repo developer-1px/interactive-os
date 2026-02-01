@@ -44,7 +44,7 @@ export function FocusZone({ id, children, dispatch: customDispatch, currentFocus
         }
     };
 
-    const handleClick = (e: React.MouseEvent) => {
+    const handleClick = () => {
         // If clicking on the zone background or children when not active, reclaim focus
         if (!isActive && defaultFocusId) {
             dispatch({ type: 'SET_FOCUS', payload: { id: defaultFocusId } });

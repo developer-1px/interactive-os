@@ -1,8 +1,11 @@
+import { Action } from '../lib/primitives/Action';
+import { Option } from '../lib/primitives/Option';
+import { FocusZone } from '../lib/primitives/FocusZone';
 import { useTodoEngine } from '../lib/todo_engine';
-import { SIDEBAR_REGISTRY } from '../lib/todo_commands';
+import { SIDEBAR_REGISTRY, SelectCategory } from '../lib/todo_commands';
 
 export function Sidebar() {
-    const { state, Action, Option, dispatch, FocusZone } = useTodoEngine();
+    const { state } = useTodoEngine();
 
     return (
         <FocusZone
@@ -27,10 +30,9 @@ export function Sidebar() {
                         <Option
                             key={cat.id}
                             id={cat.id}
-                            active={state.focusId === cat.id}
                             asChild
                         >
-                            <Action command={{ type: 'SELECT_CATEGORY', payload: { id: cat.id } }} asChild>
+                            <Action command={SelectCategory({ id: cat.id })} asChild>
                                 <div
                                     className={`flex items-center gap-4 px-4 py-4 rounded-2xl cursor-pointer transition-all border ${state.selectedCategoryId === cat.id
                                         ? 'bg-indigo-500 text-white border-indigo-400 shadow-[0_10px_20px_rgba(99,102,241,0.2)]'

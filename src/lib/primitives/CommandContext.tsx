@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import type { BaseCommand } from './types';
+
 
 // --- 0. Context for Focus Zones ---
 export interface FocusContextValue {

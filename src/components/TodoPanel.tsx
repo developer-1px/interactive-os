@@ -1,8 +1,12 @@
+import { Action } from '../lib/primitives/Action';
+import { Option } from '../lib/primitives/Option';
+import { Field } from '../lib/primitives/Field';
+import { FocusZone } from '../lib/primitives/FocusZone';
 import { useTodoEngine } from '../lib/todo_engine';
-import { TODO_LIST_REGISTRY } from '../lib/todo_commands';
+import { TODO_LIST_REGISTRY, AddTodo, ToggleTodo, DeleteTodo, SyncEditDraft } from '../lib/todo_commands';
 
 export function TodoPanel() {
-    const { state, Action, Field, Option, ctx, FocusZone } = useTodoEngine();
+    const { state, ctx } = useTodoEngine();
     const filteredTodos = (ctx.filteredTodos as unknown as any[]) || [];
 
     return (
@@ -26,9 +30,8 @@ export function TodoPanel() {
                             value={state.draft}
                             name="draft"
                             updateType="PATCH"
-                            active={state.focusId === 'DRAFT'}
                             autoFocus
-                            commitCommand={{ type: 'ADD_TODO' }}
+                            commitCommand={AddTodo({})}
                             asChild
                         >
                             <input type="text" placeholder="Entry Buffer..." className={`w-full bg-slate-800/20 border-2 rounded-2xl px-6 py-5 text-lg font-medium focus:outline-none transition-all ${state.focusId === 'DRAFT' ? 'border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.1)] bg-slate-800/40' : 'border-white/5'}`} />
@@ -40,7 +43,6 @@ export function TodoPanel() {
                             <Option
                                 key={todo.id}
                                 id={todo.id}
-                                active={state.focusId === todo.id}
                                 asChild
                             >
                                 <div
@@ -50,7 +52,7 @@ export function TodoPanel() {
                                         }`}
                                 >
                                     <div className="flex items-center justify-center mr-5">
-                                        <Action command={{ type: 'TOGGLE_TODO', payload: { id: todo.id } }} asChild>
+                                        <Action command={ToggleTodo({ id: todo.id })} asChild>
                                             <button className={`w-7 h-7 rounded-xl transition-all flex items-center justify-center border-2 ${todo.completed ? 'bg-indigo-500 border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)]' : 'bg-slate-800 border-white/5 group-hover:border-white/20'}`}>
                                                 {todo.completed && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path d="M5 13l4 4L19 7" /></svg>}
                                             </button>
@@ -62,7 +64,7 @@ export function TodoPanel() {
                                             value={state.editDraft}
                                             active={true}
                                             autoFocus={true}
-                                            syncCommand={{ type: 'SYNC_EDIT_DRAFT', payload: { text: '' } }}
+                                            syncCommand={SyncEditDraft({ text: '' })}
                                             asChild
                                         >
                                             <input
@@ -74,7 +76,7 @@ export function TodoPanel() {
                                         <span className={`flex-1 text-base font-bold transition-all ${todo.completed ? 'text-slate-600 line-through' : 'text-slate-200'}`}>{todo.text}</span>
                                     )}
 
-                                    <Action command={{ type: 'DELETE_TODO', payload: { id: todo.id } }} asChild>
+                                    <Action command={DeleteTodo({ id: todo.id })} asChild>
                                         <button className="p-2.5 text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                     </Action>
                                 </div>
