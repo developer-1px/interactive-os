@@ -11,8 +11,8 @@ export interface FieldProps<T extends BaseCommand> extends Omit<InputHTMLAttribu
     updateType?: string
     name?: string
     commitCommand?: T
-    syncCommand?: T
-    cancelCommand?: T
+    syncCommand?: BaseCommand
+    cancelCommand?: BaseCommand
     children?: ReactNode
     asChild?: boolean
     dispatch?: (cmd: any) => void

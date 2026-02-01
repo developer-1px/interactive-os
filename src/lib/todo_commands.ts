@@ -1,25 +1,28 @@
 import type { AppState } from './types';
 import { CommandRegistry } from './command';
-import { defineCommand } from './definition';
+import { createCommandFactory } from './definition';
 
 // --- Defines ---
 
+// Initialize factory with State type ONCE.
+const defineCommand = createCommandFactory<AppState>();
+
 // 1. Global
-export const Patch = defineCommand<AppState, Partial<AppState>>({
+export const Patch = defineCommand({
     id: 'PATCH',
-    run: (state, payload) => ({ ...state, ...payload })
+    run: (state, payload: Partial<AppState>) => ({ ...state, ...payload })
 });
 
-export const SetFocus = defineCommand<AppState, { id: any }>({
+export const SetFocus = defineCommand({
     id: 'SET_FOCUS',
-    run: (state, payload) => {
+    run: (state, payload: { id: any }) => {
         if (state.focusId === payload.id) return state;
         return { ...state, focusId: payload.id };
     }
 });
 
 // 2. Sidebar
-export const MoveCategoryUp = defineCommand<AppState, any>({
+export const MoveCategoryUp = defineCommand({
     id: 'MOVE_CATEGORY_UP',
     kb: ['ArrowUp'],
     run: (state) => {
@@ -28,7 +31,7 @@ export const MoveCategoryUp = defineCommand<AppState, any>({
     }
 });
 
-export const MoveCategoryDown = defineCommand<AppState, any>({
+export const MoveCategoryDown = defineCommand({
     id: 'MOVE_CATEGORY_DOWN',
     kb: ['ArrowDown'],
     run: (state) => {
@@ -37,27 +40,27 @@ export const MoveCategoryDown = defineCommand<AppState, any>({
     }
 });
 
-export const SelectCategory = defineCommand<AppState, { id?: string }>({
+export const SelectCategory = defineCommand({
     id: 'SELECT_CATEGORY',
     kb: ['Enter', ' '],
-    run: (state, payload) => {
+    run: (state, payload: { id?: string } = {}) => {
         const id = payload?.id || (state.focusId as string);
         return (!id || typeof id !== 'string') ? state : { ...state, selectedCategoryId: id };
     }
 });
 
-export const JumpToList = defineCommand<AppState, any>({
+export const JumpToList = defineCommand({
     id: 'JUMP_TO_LIST',
     kb: ['ArrowRight'],
     run: (state) => ({ ...state, focusId: 'DRAFT' })
 });
 
 // 3. TodoList
-export const AddTodo = defineCommand<AppState, { text?: string }>({
+export const AddTodo = defineCommand({
     id: 'ADD_TODO',
     kb: ['Enter'],
     when: 'isInputFocused',
-    run: (state, payload) => {
+    run: (state, payload: { text?: string } = {}) => {
         const text = payload?.text || state.draft;
         if (!text || !text.trim()) return state;
         const newTodo = { id: Date.now(), text: text.trim(), completed: false, categoryId: state.selectedCategoryId };
@@ -65,20 +68,20 @@ export const AddTodo = defineCommand<AppState, { text?: string }>({
     }
 });
 
-export const ToggleTodo = defineCommand<AppState, { id?: number }>({
+export const ToggleTodo = defineCommand({
     id: 'TOGGLE_TODO',
     kb: [' '],
-    run: (state, payload) => {
+    run: (state, payload: { id?: number } = {}) => {
         const targetId = payload?.id || state.focusId;
         if (targetId === null || targetId === 'DRAFT') return state;
         return { ...state, todos: state.todos.map(t => String(t.id) == String(targetId) ? { ...t, completed: !t.completed } : t) };
     }
 });
 
-export const DeleteTodo = defineCommand<AppState, { id?: number }>({
+export const DeleteTodo = defineCommand({
     id: 'DELETE_TODO',
     kb: ['Delete', 'Backspace'],
-    run: (state, payload) => {
+    run: (state, payload: { id?: number } = {}) => {
         const targetId = payload?.id || state.focusId;
         const remaining = state.todos.filter(t => String(t.id) !== String(targetId));
         if (remaining.length === state.todos.length) return state;
@@ -91,7 +94,7 @@ export const DeleteTodo = defineCommand<AppState, { id?: number }>({
     }
 });
 
-export const MoveFocusUp = defineCommand<AppState, any>({
+export const MoveFocusUp = defineCommand({
     id: 'MOVE_FOCUS_UP',
     kb: ['ArrowUp'],
     when: '!isEditing',
@@ -114,7 +117,7 @@ export const MoveFocusUp = defineCommand<AppState, any>({
     }
 });
 
-export const MoveFocusDown = defineCommand<AppState, any>({
+export const MoveFocusDown = defineCommand({
     id: 'MOVE_FOCUS_DOWN',
     kb: ['ArrowDown'],
     when: '!isEditing',
@@ -137,11 +140,11 @@ export const MoveFocusDown = defineCommand<AppState, any>({
     }
 });
 
-export const StartEdit = defineCommand<AppState, { id?: number }>({
+export const StartEdit = defineCommand({
     id: 'START_EDIT',
     kb: ['Enter'],
     when: '!isEditing',
-    run: (state, payload) => {
+    run: (state, payload: { id?: number } = {}) => {
         // Allow explicit payload ID or fallback to focusId
         const targetId = payload?.id !== undefined ? payload.id : state.focusId;
 
@@ -151,7 +154,7 @@ export const StartEdit = defineCommand<AppState, { id?: number }>({
     }
 });
 
-export const JumpToSidebar = defineCommand<AppState, any>({
+export const JumpToSidebar = defineCommand({
     id: 'JUMP_TO_SIDEBAR',
     kb: ['ArrowLeft'],
     allowInInput: true,
@@ -159,26 +162,26 @@ export const JumpToSidebar = defineCommand<AppState, any>({
     run: (state) => ({ ...state, focusId: state.selectedCategoryId })
 });
 
-export const SyncDraft = defineCommand<AppState, { text: string }>({
+export const SyncDraft = defineCommand({
     id: 'SYNC_DRAFT',
     log: false,
-    run: (state, payload) => ({ ...state, draft: payload.text })
+    run: (state, payload: { text: string }) => ({ ...state, draft: payload.text })
 });
 
-export const SyncEditDraft = defineCommand<AppState, { text: string }>({
+export const SyncEditDraft = defineCommand({
     id: 'SYNC_EDIT_DRAFT',
     log: false,
-    run: (state, payload) => ({ ...state, editDraft: payload.text })
+    run: (state, payload: { text: string }) => ({ ...state, editDraft: payload.text })
 });
 
-export const CancelEdit = defineCommand<AppState, any>({
+export const CancelEdit = defineCommand({
     id: 'CANCEL_EDIT',
     kb: ['Escape'],
     when: 'isEditing',
     run: (state) => ({ ...state, editingId: null, editDraft: '' })
 });
 
-export const UpdateTodoText = defineCommand<AppState, any>({
+export const UpdateTodoText = defineCommand({
     id: 'UPDATE_TODO_TEXT',
     kb: ['Enter'],
     when: 'isEditing',
@@ -224,8 +227,21 @@ export const TodoListCommands = [
 export const GlobalCommands = [Patch, SetFocus];
 
 // Registries
-// Note: CommandRegistry expects CommandDefinition, which our Helper IS (compatible with interface).
-export const SIDEBAR_REGISTRY = new CommandRegistry<AppState, any>(); // any for payload generic
+// CommandRegistry expects CommandDefinition. 
+// Our "Helper" (CommandFactory) *includes* properties of CommandDefinition (via intersection in definition.ts)
+// BUT, the factory function type `CommandFactory` has `id`, `run`, etc. as properties.
+// The `register` method expects `CommandDefinition`.
+// Does `CommandFactory` extends `CommandDefinition`?
+// In my `definition.ts`:
+// interface CommandFactory extends CommandDefinition { ... } 
+// Wait, I didn't extend it. I duplicated properties.
+// And `CommandRegistry.register` expects `CommandDefinition`.
+// Since the structure matches (structural typing), it MIGHT work.
+// But `CommandFactory` is a function. `CommandDefinition` is an object.
+// A function WITH properties is technically an object.
+// Let's verify if `CommandRegistry` accepts it.
+
+export const SIDEBAR_REGISTRY = new CommandRegistry<AppState, any>();
 SideBarCommands.forEach(cmd => SIDEBAR_REGISTRY.register(cmd));
 
 export const TODO_LIST_REGISTRY = new CommandRegistry<AppState, any>();

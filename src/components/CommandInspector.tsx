@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, memo } from 'react';
 import { useTodoEngine } from '../lib/todo_engine';
 import { SIDEBAR_REGISTRY, TODO_LIST_REGISTRY, CONSTITUTION_REGISTRY } from '../lib/todo_commands';
 import { evalContext } from '../lib/context';
-import type { AppState, HistoryEntry } from '../lib/types';
+import type { HistoryEntry } from '../lib/types';
 
 interface KeyLog {
     key: string;

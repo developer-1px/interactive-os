@@ -1,39 +1,13 @@
+
 import { useMemo, useLayoutEffect } from 'react';
 import { create } from 'zustand';
 
 import type { KeybindingItem } from './keybinding';
 import { useContextService, evalContext } from './context';
 import { Trigger, Field, Item, Zone } from './primitives';
+import type { CommandDefinition } from './definition';
 
 import { logger } from './logger';
-
-export interface CommandDefinition<S, P = any, K extends string = string> {
-    id: K;
-    label?: string;
-    icon?: string;
-    when?: string; // Context logic
-    kb?: string[]; // Default keybindings
-    args?: P;      // Default args for keybindings
-    allowInInput?: boolean;
-    log?: boolean; // Default true. Set to false to suppress logging.
-
-    /**
-     * Returns the next state given current state and payload.
-     */
-    run: (state: S, payload: P) => S;
-
-    /**
-     * Optional: Determine if command is enabled/visible beyond the 'when' clause.
-     */
-    enabled?: (state: S) => boolean;
-}
-
-/**
- * defineCommand: Factory for individual commands
- */
-export function defineCommand<S, P = any, K extends string = string>(def: CommandDefinition<S, P, K>): CommandDefinition<S, P, K> {
-    return def;
-}
 
 export interface CommandGroup<S, P = any, K extends string = string> {
     id: string;
