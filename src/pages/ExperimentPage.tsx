@@ -5,8 +5,8 @@ import { CommandContext } from '../lib/primitives/CommandContext';
 import { ContextProvider } from '../lib/context';
 import { createCommandStore, useCommandCenter, CommandRegistry } from '../lib/command';
 import type { AppState } from '../lib/types';
-import { UNIFIED_TODO_REGISTRY } from '../lib/todo_commands';
-import { TODO_KEYMAP } from '../lib/todo_keys';
+import { UNIFIED_TODO_REGISTRY } from '../lib/todoCommands';
+import { TODO_KEYMAP } from '../lib/todoKeys';
 
 // --- Shared Engine Setup ---
 function useSharedIsolatedEngine() {

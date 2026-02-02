@@ -1,6 +1,6 @@
 import { useRef, useEffect, isValidElement, cloneElement } from 'react';
 import type { ReactNode, ReactElement } from 'react';
-import { useCommandEngine } from '../CommandContext';
+import { useCommandEngine } from './CommandContext';
 
 export interface ItemProps {
     id: string | number

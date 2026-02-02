@@ -1,19 +1,8 @@
 import { useState } from 'react';
-import {
-    MockButton,
-    MockInput,
-    MockToggle,
-    MockBadge,
-    MockIcon,
-    MockShortcut,
-    MockText,
-    MockWindow,
-    MockScrollArea,
-    MockDivider,
-    MockSpinner,
-    MockToast,
-    MockCursor
-} from '../components/mocks';
+import { MockButton, MockInput, MockToggle } from '../components/mocks/MockInteraction';
+import { MockBadge, MockIcon, MockShortcut, MockText } from '../components/mocks/MockPrimitives';
+import { MockWindow, MockScrollArea, MockDivider } from '../components/mocks/MockStructure';
+import { MockSpinner, MockToast, MockCursor } from '../components/mocks/MockFeedback';
 import { Package, Bell, Layout } from 'lucide-react';
 
 export default function ShowcasePage() {

@@ -6,9 +6,6 @@ export interface CommandDefinition<S, P, K extends string = string> {
     label?: string;
     icon?: string;
     when?: string | LogicNode;
-    kb?: string[]; // Default keybindings
-    args?: P;      // Default args for keybindings
-    allowInInput?: boolean;
     log?: boolean;
     enabled?: (state: S) => boolean;
 }
@@ -27,9 +24,6 @@ export interface CommandFactory<S, P, K extends string = string> {
     label?: string;
     icon?: string;
     when?: string | LogicNode;
-    kb?: string[];
-    args?: P;
-    allowInInput?: boolean;
     log?: boolean;
     enabled?: (state: S) => boolean;
 }
@@ -48,9 +42,6 @@ export function createCommandFactory<S>() {
         factory.label = def.label;
         factory.icon = def.icon;
         factory.when = def.when;
-        factory.kb = def.kb;
-        factory.args = def.args;
-        factory.allowInInput = def.allowInInput;
         factory.log = def.log;
         factory.enabled = def.enabled;
 

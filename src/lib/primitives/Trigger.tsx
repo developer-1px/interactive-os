@@ -1,8 +1,8 @@
 import { cloneElement, isValidElement } from 'react';
 import type { ReactNode, ReactElement, MouseEvent as ReactMouseEvent } from 'react';
-import { logger } from '../../logger';
-import { useCommandEngine } from '../CommandContext';
-import type { BaseCommand } from '../types';
+import { logger } from '../logger';
+import { useCommandEngine } from './CommandContext';
+import type { BaseCommand } from './types';
 
 export interface TriggerProps<T extends BaseCommand> {
     command: T

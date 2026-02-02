@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { evalContext } from '../../context';
-import { getCanonicalKey, normalizeKeyDefinition } from '../../keybinding';
+import { evalContext } from '../context';
+import { getCanonicalKey, normalizeKeyDefinition } from '../keybinding';
 import type { ReactNode } from 'react';
-import { FocusContext, useCommandEngine } from '../CommandContext';
-import type { BaseCommand } from '../types';
-import { useFocusStore } from '../../../stores/useFocusStore';
+import { FocusContext, useCommandEngine } from './CommandContext';
+import type { BaseCommand } from './types';
+import { useFocusStore } from '../../stores/useFocusStore';
 
 export interface ZoneProps {
     id: string;

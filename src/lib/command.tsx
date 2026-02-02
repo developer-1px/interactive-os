@@ -4,7 +4,10 @@ import { create } from 'zustand';
 
 import type { KeybindingItem, KeymapConfig } from './keybinding';
 import { useContextService, evalContext } from './context';
-import { Trigger, Field, Item, Zone } from './primitives';
+import { Trigger } from './primitives/Trigger';
+import { Field } from './primitives/Field';
+import { Item } from './primitives/Item';
+import { Zone } from './primitives/Zone';
 import type { CommandDefinition } from './definition';
 
 import { logger } from './logger';
@@ -126,8 +129,9 @@ export class CommandRegistry<S, K extends string = string> {
             return {
                 ...binding,
                 when: binding.when || cmd.when,
-                args: binding.args || cmd.args,
-                allowInInput: binding.allowInInput || cmd.allowInInput
+                // Removed cmd.args fallback (deprecated)
+                args: binding.args,
+                allowInInput: binding.allowInInput // Strict Separation: Binding owns the context!
             };
         });
     }
@@ -209,7 +213,8 @@ export function useCommandCenter<S, A extends { type: any; payload?: any }, K ex
             return {
                 id: cmd.id,
                 label: cmd.label || cmd.id,
-                kb: cmd.kb || [],
+                // kb: cmd.kb || [], // Deprecated: Command doesn't own keys anymore
+                kb: [], // Set to empty, UI should use keybindings map or separate lookup
                 enabled: isContextActive && isLogicEnabled
             };
         });

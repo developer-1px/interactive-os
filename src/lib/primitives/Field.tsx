@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, isValidElement, cloneElement } from 'react';
 import type { ReactNode, ReactElement, ChangeEvent, KeyboardEvent as ReactKeyboardEvent, InputHTMLAttributes } from 'react';
-import { useCommandEngine } from '../CommandContext';
-import { useContextService } from '../../context';
-import type { BaseCommand } from '../types';
+import { useCommandEngine } from './CommandContext';
+import { useContextService } from '../context';
+import type { BaseCommand } from './types';
 
 export interface FieldProps<T extends BaseCommand> extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'name' | 'onBlur' | 'onFocus'> {
     value: string

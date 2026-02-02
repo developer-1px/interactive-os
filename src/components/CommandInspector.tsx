@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, memo } from 'react';
 import { Kbd } from './Kbd';
-import { useTodoEngine } from '../lib/todo_engine';
+import { useTodoEngine } from '../lib/todoEngine';
 
 import { evalContext } from '../lib/context';
 import { getCanonicalKey } from '../lib/keybinding';
@@ -123,8 +123,15 @@ const CommandRow = memo(({ cmd, isDisabled, isBlockedByInput, activeKeybindingMa
                         <Kbd
                             key={key}
                             size="xs"
-                            variant={activeKeybindingMap.get(key) && !isDisabled ? 'active' : 'ghost'}
-                            className={!isDisabled && !activeKeybindingMap.get(key) ? (isLastExecuted ? 'text-white border-white/20 bg-indigo-400/50' : 'text-slate-500 scale-90 border-white/5 bg-black/20') : 'scale-90'}
+                            // If active: 'active'. If disabled: 'ghost'. If enabled but idle: 'default'.
+                            variant={isDisabled ? 'ghost' : (activeKeybindingMap.get(key) ? 'active' : 'default')}
+                            className={
+                                isDisabled
+                                    ? 'opacity-30 scale-95' // Disabled: Faded & Small
+                                    : activeKeybindingMap.get(key)
+                                        ? '' // Active: Handled by variant='active'
+                                        : (isLastExecuted ? 'text-white border-white/20 bg-indigo-400/50' : 'text-slate-400 bg-white/5 border-white/10') // Idle: Clearer contrast
+                            }
                         >
                             {key === ' ' ? 'SPC' : key.toUpperCase()}
                         </Kbd>
@@ -135,9 +142,10 @@ const CommandRow = memo(({ cmd, isDisabled, isBlockedByInput, activeKeybindingMa
     );
 });
 
-import type { MenuItem } from '../lib/todo_menus';
-import { SIDEBAR_MENU, TODOLIST_MENU, GLOBAL_MENU } from '../lib/todo_menus';
-import { UNIFIED_TODO_REGISTRY } from '../lib/todo_commands';
+import type { MenuItem } from '../lib/todoMenus';
+import { SIDEBAR_MENU, TODOLIST_MENU, GLOBAL_MENU } from '../lib/todoMenus';
+import { UNIFIED_TODO_REGISTRY } from '../lib/todoCommands';
+import { TODO_KEYMAP } from '../lib/todoKeys';
 
 const RegistryMonitor = memo(({ ctx, activeKeybindingMap, isInputActive, lastCommandId, historyCount }: {
     ctx: any,
@@ -154,20 +162,35 @@ const RegistryMonitor = memo(({ ctx, activeKeybindingMap, isInputActive, lastCom
             const cmd = UNIFIED_TODO_REGISTRY.get(item.command);
             if (!cmd) return null;
 
+            // Lookup Keybinding & Gating Context
+            let keys: string[] = [];
+            let allowInInput = false;
+
+            // 1. Check Zone-Specific
+            if (ctx.activeZone && TODO_KEYMAP.zones && (TODO_KEYMAP.zones as any)[ctx.activeZone]) {
+                const zoneBindings = (TODO_KEYMAP.zones as any)[ctx.activeZone];
+                const match = zoneBindings.find((b: any) => b.command === cmd.id);
+                if (match) {
+                    keys.push(match.key);
+                    allowInInput = !!match.allowInInput;
+                }
+            }
+
+            // 2. Check Global (if not found in zone, or as fallback)
+            if (keys.length === 0 && TODO_KEYMAP.global) {
+                const globalMatch = TODO_KEYMAP.global.find((b: any) => b.command === cmd.id);
+                if (globalMatch) {
+                    keys.push(globalMatch.key);
+                    allowInInput = !!globalMatch.allowInInput;
+                }
+            }
+
             return {
                 id: cmd.id,
                 label: cmd.label || cmd.id,
-                // We don't have keybindings in Command anymore (moved to external keymap)
-                // We could lookup from keybinding map if we wanted to show them?
-                // Inspector's Kbd component uses `cmd.kb` which was inferred before.
-                // Now we need to efficiently find keys for this command.
-                // But wait, `CommandDefinition` doesn't have `kb` in the new `todo_commands.ts`?
-                // The old code assumed `cmd.kb` existed or was injected.
-                // The `getKeybindings()` method returned bindings. 
-                // We should probably inject keys here.
-                kb: [], // Placeholder for now, or we lookup from a global map.
+                kb: keys,
                 enabled: item.when ? evalContext(item.when, ctx) : true,
-                allowInInput: cmd.allowInInput,
+                allowInInput: allowInInput,
                 log: cmd.log,
                 when: item.when // Show the Menu's condition
             };

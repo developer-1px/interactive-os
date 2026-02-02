@@ -1,7 +1,9 @@
-import { Zone, Item, Trigger } from '../lib/primitives';
+import { Zone } from '../lib/primitives/Zone';
+import { Item } from '../lib/primitives/Item';
+import { Trigger } from '../lib/primitives/Trigger';
 import { Kbd } from './Kbd';
-import { useTodoEngine } from '../lib/todo_engine';
-import { SelectCategory } from '../lib/todo_commands';
+import { useTodoEngine } from '../lib/todoEngine';
+import { SelectCategory } from '../lib/todoCommands';
 import { Inbox, Briefcase, User, Layout, MoveUp, MoveDown, CornerDownLeft, ArrowRight } from 'lucide-react';
 
 export function Sidebar() {
@@ -19,7 +21,7 @@ export function Sidebar() {
     };
 
     return (
-        <Zone id="sidebar" area="nav" defaultFocusId={state.ui.selectedCategoryId || state.data.categories[0]?.id}>
+        <Zone id="sidebar" area="nav" defaultFocusId={state.ui.selectedCategoryId || state.data.categoryOrder[0]}>
             <div className="w-72 flex flex-col h-full bg-[#0F1117] border-r border-white/5 relative overflow-hidden">
                 {/* Background Ambient Glow */}
                 <div className="absolute top-0 left-0 w-full h-96 bg-indigo-500/10 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
@@ -35,34 +37,39 @@ export function Sidebar() {
 
                 <div className="flex-1 overflow-y-auto py-4 px-4 custom-scrollbar z-10 space-y-1">
                     <div className="text-[10px] font-bold tracking-widest text-slate-500 uppercase px-4 mb-2">Space</div>
-                    {state.data.categories.map(cat => (
-                        <Item
-                            key={cat.id}
-                            id={cat.id}
-                            className={`group relative px-4 py-2 rounded-xl text-sm font-medium outline-none cursor-pointer transition-all duration-300 overflow-hidden
+                    {state.data.categoryOrder.map(catId => {
+                        const cat = state.data.categories[catId];
+                        if (!cat) return null;
+
+                        return (
+                            <Item
+                                key={cat.id}
+                                id={cat.id}
+                                className={`group relative px-4 py-2 rounded-xl text-sm font-medium outline-none cursor-pointer transition-all duration-300 overflow-hidden
                                 hover:bg-white/[0.02]
                                 data-[active=true]:bg-white/[0.03] data-[active=true]:shadow-[0_4px_20px_rgba(0,0,0,0.2)] data-[active=true]:translate-x-1
                                 focus:bg-white/[0.03] focus:translate-x-1
                                 before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:bg-indigo-500 before:rounded-r-full before:opacity-0 data-[active=true]:before:opacity-100 focus:before:opacity-100 before:transition-opacity
                             `}
-                        >
-                            <Trigger command={SelectCategory({ id: cat.id })} asChild>
-                                <div className="flex items-center gap-3 w-full h-full">
-                                    <span className={`transition-colors duration-300 ${state.ui.selectedCategoryId === cat.id ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300'}`}>
-                                        {getIcon(cat.id)}
-                                    </span>
-                                    <span className={`transition-colors duration-300 ${state.ui.selectedCategoryId === cat.id ? 'text-white font-bold' : 'text-slate-400 group-hover:text-slate-200'}`}>
-                                        {cat.text}
-                                    </span>
+                            >
+                                <Trigger command={SelectCategory({ id: cat.id })} asChild>
+                                    <div className="flex items-center gap-3 w-full h-full">
+                                        <span className={`transition-colors duration-300 ${state.ui.selectedCategoryId === cat.id ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300'}`}>
+                                            {getIcon(cat.id)}
+                                        </span>
+                                        <span className={`transition-colors duration-300 ${state.ui.selectedCategoryId === cat.id ? 'text-white font-bold' : 'text-slate-400 group-hover:text-slate-200'}`}>
+                                            {cat.text}
+                                        </span>
 
-                                    {/* Selection Indicator */}
-                                    {state.ui.selectedCategoryId === cat.id && (
-                                        <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse" />
-                                    )}
-                                </div>
-                            </Trigger>
-                        </Item>
-                    ))}
+                                        {/* Selection Indicator */}
+                                        {state.ui.selectedCategoryId === cat.id && (
+                                            <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse" />
+                                        )}
+                                    </div>
+                                </Trigger>
+                            </Item>
+                        )
+                    })}
                 </div>
 
                 <div className="p-6 mt-auto border-t border-white/5 bg-black/20 z-10">

@@ -18,7 +18,8 @@ import { defineCommand } from '@/lib/command';
 export const AddTodo = defineCommand({
   id: 'ADD_TODO',
   label: '새 할 일 추가',
-  kb: ['Control+Enter'],
+  label: '새 할 일 추가',
+  // keybinding은 이제 todo_keys.ts에서 별도로 관리합니다.
   when: 'ctx.zone == "main"', // 문맥 조건 (Context Condition)
   run: (state, payload) => {
     return {

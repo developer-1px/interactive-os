@@ -1,11 +1,19 @@
-import { Zone, Item, Field, Trigger } from '../lib/primitives';
-import { useTodoEngine } from '../lib/todo_engine';
-import { AddTodo, ToggleTodo, DeleteTodo, SyncEditDraft, UpdateTodoText, CancelEdit, StartEdit, SyncDraft } from '../lib/todo_commands';
+import { Zone } from '../lib/primitives/Zone';
+import { Item } from '../lib/primitives/Item';
+import { Field } from '../lib/primitives/Field';
+import { Trigger } from '../lib/primitives/Trigger';
+import { useTodoEngine } from '../lib/todoEngine';
+import { AddTodo, ToggleTodo, DeleteTodo, SyncEditDraft, UpdateTodoText, CancelEdit, StartEdit, SyncDraft } from '../lib/todoCommands';
 import { Plus, Check, CornerDownLeft, Trash2, Sparkles, Loader2 } from 'lucide-react';
 
 export function TodoPanel() {
     const { state } = useTodoEngine();
-    const todos = state.data.todos.filter(t => t.categoryId === state.ui.selectedCategoryId);
+
+    // Derived View based on Order & Lookup
+    const visibleTodoIds = state.data.todoOrder.filter(id => state.data.todos[id]?.categoryId === state.ui.selectedCategoryId);
+    const visibleTodos = visibleTodoIds.map(id => state.data.todos[id]);
+
+    const activeCategory = state.data.categories[state.ui.selectedCategoryId];
 
     return (
         <Zone id="todoList" area="main" defaultFocusId="DRAFT">
@@ -21,11 +29,11 @@ export function TodoPanel() {
                                 <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Tasks</span>
                             </h2>
                             <p className="text-slate-500 font-medium text-sm">
-                                {state.data.categories.find(c => c.id === state.ui.selectedCategoryId)?.text || 'Inbox'}
+                                {activeCategory?.text || 'Inbox'}
                             </p>
                         </div>
                         <div className="text-xs font-mono text-slate-600 bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
-                            {todos.filter(t => t.completed).length} / {todos.length} done
+                            {visibleTodos.filter(t => t.completed).length} / {visibleTodos.length} done
                         </div>
                     </header>
 
@@ -58,7 +66,7 @@ export function TodoPanel() {
                         </Item>
 
                         {/* TODO ITEMS */}
-                        {todos.map(todo => {
+                        {visibleTodos.map(todo => {
                             const isEditing = state.ui.editingId === todo.id;
                             return (
                                 <Item
@@ -131,7 +139,7 @@ export function TodoPanel() {
                             );
                         })}
 
-                        {todos.length === 0 && (
+                        {visibleTodos.length === 0 && (
                             <div className="py-20 flex flex-col items-center justify-center text-center opacity-30">
                                 <div className="mb-4 text-slate-500">
                                     <Sparkles size={48} strokeWidth={1} />

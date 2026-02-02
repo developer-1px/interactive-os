@@ -1,6 +1,6 @@
 
 import type { KeymapConfig } from './keybinding';
-import type { TodoCommandId } from './todo_types';
+import type { TodoCommandId } from './todoTypes';
 import { createLogicExpect, createLogicRule } from './logic/builder';
 import type { TodoContext } from './logic/schema';
 
@@ -11,8 +11,8 @@ const Rule = createLogicRule<TodoContext>();
 // 4. Default Keymap Definition (Hierarchical)
 export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
     global: [
-        { key: 'Meta+z', command: 'UNDO' },
-        { key: 'Meta+Shift+Z', command: 'REDO' }
+        { key: 'Meta+z', command: 'UNDO', allowInInput: true },
+        { key: 'Meta+Shift+Z', command: 'REDO', allowInInput: true }
     ],
     zones: {
         sidebar: [
@@ -20,12 +20,14 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
             { key: 'Meta+ArrowDown', command: 'MOVE_CATEGORY_DOWN' },
             { key: 'Enter', command: 'SELECT_CATEGORY' },
             { key: 'Space', command: 'SELECT_CATEGORY' },
+            { key: 'ArrowUp', command: 'MOVE_SIDEBAR_FOCUS_UP' },
+            { key: 'ArrowDown', command: 'MOVE_SIDEBAR_FOCUS_DOWN' },
             { key: 'ArrowRight', command: 'JUMP_TO_LIST' }
         ],
         todoList: [
             // Navigation
-            { key: 'ArrowUp', command: 'MOVE_FOCUS_UP' },
-            { key: 'ArrowDown', command: 'MOVE_FOCUS_DOWN' },
+            { key: 'ArrowUp', command: 'MOVE_FOCUS_UP', allowInInput: true },
+            { key: 'ArrowDown', command: 'MOVE_FOCUS_DOWN', allowInInput: true },
             // Structure
             { key: 'Meta+ArrowUp', command: 'MOVE_ITEM_UP' },
             { key: 'Meta+ArrowDown', command: 'MOVE_ITEM_DOWN' },
@@ -33,7 +35,8 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
             {
                 key: 'Enter',
                 command: 'ADD_TODO',
-                when: Expect('isDraftFocused').toBe(true)
+                when: Expect('isDraftFocused').toBe(true),
+                allowInInput: true
             },
             // Editing Triggers
             {
@@ -47,12 +50,14 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
             {
                 key: 'Enter',
                 command: 'UPDATE_TODO_TEXT',
-                when: Expect('isEditing').toBe(true)
+                when: Expect('isEditing').toBe(true),
+                allowInInput: true
             },
             {
                 key: 'Escape',
                 command: 'CANCEL_EDIT',
-                when: Expect('isEditing').toBe(true)
+                when: Expect('isEditing').toBe(true),
+                allowInInput: true
             },
             // Deletion & Toggle (No Edit Guard)
             {
@@ -77,7 +82,8 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
                 when: Rule.or(
                     Expect('isEditing').toBe(false),
                     Expect('cursorAtStart' as keyof TodoContext).toBe(true)
-                )
+                ),
+                allowInInput: true
             }
         ]
     }

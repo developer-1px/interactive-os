@@ -1,4 +1,4 @@
-import type { TodoCommandId } from './todo_types';
+import type { TodoCommandId } from './todoTypes';
 import { createLogicExpect, createLogicRule } from './logic/builder';
 import type { TodoContext } from './logic/schema';
 
@@ -21,6 +21,20 @@ export const SIDEBAR_MENU: MenuItem[] = [
     },
     {
         command: 'MOVE_CATEGORY_DOWN',
+        when: Rule.and(
+            Expect('activeZone').toBe('sidebar'),
+            Expect('focusIndex').toBeLessThanKey('maxIndex')
+        )
+    },
+    {
+        command: 'MOVE_SIDEBAR_FOCUS_UP',
+        when: Rule.and(
+            Expect('activeZone').toBe('sidebar'),
+            Expect('focusIndex').toBeGreaterThan(0)
+        )
+    },
+    {
+        command: 'MOVE_SIDEBAR_FOCUS_DOWN',
         when: Rule.and(
             Expect('activeZone').toBe('sidebar'),
             Expect('focusIndex').toBeLessThanKey('maxIndex')
