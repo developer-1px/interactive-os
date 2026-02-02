@@ -7,17 +7,17 @@ import {
   Edit3,
   Terminal,
 } from "lucide-react";
-import { useCommandEngine } from "../lib/primitives/CommandContext";
-import { CommandContext } from "../lib/primitives/CommandContext";
-import { ContextProvider } from "../lib/context";
+import { useCommandEngine } from "@os/core/command/CommandContext";
+import { CommandContext } from "@os/core/command/CommandContext";
+import { ContextProvider } from "@os/core/context";
 import {
   createCommandStore,
   CommandRegistry,
-} from "../lib/command";
-import { useCommandCenter } from "../lib/hooks/useCommandCenter";
-import type { AppState } from "../lib/types";
-import { UNIFIED_TODO_REGISTRY } from "../lib/commands";
-import { TODO_KEYMAP } from "../lib/todoKeys";
+} from "@os/core/command/store";
+import { useCommandCenter } from "@os/core/command/useCommandCenter";
+import type { AppState } from "@apps/todo/model/types";
+import { UNIFIED_TODO_REGISTRY } from "@apps/todo/features/commands/index";
+import { TODO_KEYMAP } from "@apps/todo/features/todoKeys";
 
 // --- Shared Engine Setup ---
 function useSharedIsolatedEngine() {

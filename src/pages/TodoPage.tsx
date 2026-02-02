@@ -1,5 +1,5 @@
-import { Sidebar } from "../components/Sidebar";
-import { TodoPanel } from "../components/TodoPanel";
+import { Sidebar } from "@apps/todo/widgets/Sidebar";
+import { TodoPanel } from "@apps/todo/widgets/TodoPanel";
 
 export default function TodoPage() {
   return (

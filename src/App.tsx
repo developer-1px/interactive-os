@@ -5,17 +5,17 @@ import {
   Outlet,
   useLocation,
 } from "react-router-dom";
-import { ContextProvider } from "./lib/context";
-import { useTodoEngine } from "./lib/todoEngine";
-import { CommandInspector } from "./components/CommandInspector";
-import { GlobalNav } from "./components/GlobalNav";
+import { ContextProvider } from "@os/core/context";
+import { useTodoEngine } from "@apps/todo/lib/todoEngine";
+import { CommandInspector } from "@os/debug/Inspector";
+import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import TodoPage from "./pages/TodoPage";
 import SettingsPage from "./pages/SettingsPage";
 import ShowcasePage from "./pages/ShowcasePage";
 import DocsPage from "./pages/DocsPage";
 import ExperimentPage from "./pages/ExperimentPage";
 
-import { ClipboardManager } from "./os/ClipboardManager";
+import { ClipboardManager } from "@apps/todo/features/clipboard/ClipboardManager";
 
 // --- Main Layout ---
 function MainLayout() {

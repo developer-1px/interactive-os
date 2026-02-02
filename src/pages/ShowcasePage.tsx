@@ -3,23 +3,23 @@ import {
   MockButton,
   MockInput,
   MockToggle,
-} from "../components/mocks/MockInteraction";
+} from "@apps/todo/mocks/MockInteraction";
 import {
   MockBadge,
   MockIcon,
   MockShortcut,
   MockText,
-} from "../components/mocks/MockPrimitives";
+} from "@apps/todo/mocks/MockPrimitives";
 import {
   MockWindow,
   MockScrollArea,
   MockDivider,
-} from "../components/mocks/MockStructure";
+} from "@apps/todo/mocks/MockStructure";
 import {
   MockSpinner,
   MockToast,
   MockCursor,
-} from "../components/mocks/MockFeedback";
+} from "@apps/todo/mocks/MockFeedback";
 import { Package, Bell, Layout } from "lucide-react";
 
 export default function ShowcasePage() {
