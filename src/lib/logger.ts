@@ -63,7 +63,7 @@ class AntigravityLogger {
   /**
    * Special trace for Command Execution
    */
-  traceCommand(id: string, payload: any, prevState: any, nextState: any) {
+  traceCommand(id: string, payload: unknown, prevState: unknown, nextState: unknown) {
     if (!IS_DEV) return;
     this.group("ENGINE", `Action: ${id}`);
     console.log("%cPayload:", "color: #f59e0b; font-weight: bold;", payload);

@@ -1,7 +1,7 @@
 import { Zone } from "../lib/primitives/Zone";
 import { useTodoEngine } from "../lib/todoEngine";
 import { Item } from "../lib/primitives/Item";
-import { ToggleTodo } from "../lib/todoCommands";
+import { ToggleTodo } from "../lib/commands/list";
 import { Check } from "lucide-react";
 import { Trigger } from "../lib/primitives/Trigger";
 

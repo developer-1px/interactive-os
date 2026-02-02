@@ -1,4 +1,4 @@
-import type { InferredTodoCommand } from "./todoCommands";
+import type { InferredTodoCommand } from "./commands";
 
 export type TodoCommand = InferredTodoCommand;
 

@@ -37,7 +37,7 @@ export const Trigger = <T extends BaseCommand>({
   if (asChild && isValidElement(children)) {
     const child = children as ReactElement<any>;
     return cloneElement(child, {
-      onClick: (e: any) => {
+      onClick: (e: ReactMouseEvent) => {
         child.props.onClick?.(e);
         handleClick(e);
       },

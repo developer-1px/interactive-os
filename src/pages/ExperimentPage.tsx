@@ -12,11 +12,11 @@ import { CommandContext } from "../lib/primitives/CommandContext";
 import { ContextProvider } from "../lib/context";
 import {
   createCommandStore,
-  useCommandCenter,
   CommandRegistry,
 } from "../lib/command";
+import { useCommandCenter } from "../lib/hooks/useCommandCenter";
 import type { AppState } from "../lib/types";
-import { UNIFIED_TODO_REGISTRY } from "../lib/todoCommands";
+import { UNIFIED_TODO_REGISTRY } from "../lib/commands";
 import { TODO_KEYMAP } from "../lib/todoKeys";
 
 // --- Shared Engine Setup ---
@@ -59,6 +59,7 @@ function useSharedIsolatedEngine() {
       editDraft: "",
       viewMode: "list",
     },
+    effects: [],
     history: { past: [], future: [] },
   };
 
@@ -92,9 +93,11 @@ function useSharedIsolatedEngine() {
 // --- Mock Components (The "Ugly" UI) ---
 
 function MockCategoryBrain() {
-  const { state, dispatch } = useCommandEngine();
+  const { state, dispatch } = useCommandEngine<AppState>();
+  if (!state) return null;
+  const { selectedCategoryId } = state?.ui || { selectedCategoryId: "" };
+  if (!state) return <div>Loading...</div>;
   const { categories } = state.data;
-  const { selectedCategoryId } = state.ui;
 
   return (
     <div className="p-4 space-y-2">
@@ -159,7 +162,9 @@ function MockCategoryBrain() {
 }
 
 function MockTodoBrain() {
-  const { state, dispatch } = useCommandEngine();
+  const { state, dispatch } = useCommandEngine<AppState>();
+  if (!state) return null;
+  if (!state) return null;
   const { todos } = state.data;
   const { selectedCategoryId } = state.ui;
 
@@ -242,7 +247,8 @@ function MockTodoBrain() {
 }
 
 function MockControlDeck() {
-  const { state, dispatch } = useCommandEngine();
+  const { state, dispatch } = useCommandEngine<AppState>();
+  if (!state) return null;
 
   return (
     <div className="p-4 flex flex-col gap-4">
@@ -295,7 +301,8 @@ function MockControlDeck() {
 }
 
 function MockStateMonitor() {
-  const { state } = useCommandEngine();
+  const { state } = useCommandEngine<AppState>();
+  if (!state) return null;
   return (
     <div className="p-4 h-full overflow-hidden flex flex-col">
       <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">

@@ -20,9 +20,38 @@ class FocusStrategyRegistry {
   }
 
   resolve(zoneId: string, state: AppState, ctx: TodoContext): string | null {
+    // 1. Try Custom Strategy
     const strategy = this.strategies[zoneId];
-    if (!strategy) return null;
-    return strategy(state, ctx);
+    if (strategy) {
+      const result = strategy(state, ctx);
+      if (result) return result;
+    }
+
+    // 2. Fallback: Generic Engine Strategy (Data-Driven)
+    return this.defaultStrategy(zoneId);
+  }
+
+  private defaultStrategy(zoneId: string): string | null {
+    // Lazy import or direct access to store state to avoid circular dependency issues if possible
+    // Assuming useFocusStore is available globally or imported
+    // We can't easily import hook here if it's strictly logic, but extracting state is fine.
+
+    // We need to access the ZoneRegistry "DB"
+    const registry = require("../stores/useFocusStore").useFocusStore.getState().zoneRegistry;
+    const zone = registry[zoneId];
+    if (!zone) return null;
+
+    // A. Priority: items[0] (Smart Resume could be here later)
+    if (zone.items && zone.items.length > 0) {
+      return zone.items[0];
+    }
+
+    // B. Fallback: defaultFocusId
+    if (zone.defaultFocusId) {
+      return zone.defaultFocusId;
+    }
+
+    return null;
   }
 }
 

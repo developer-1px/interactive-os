@@ -1,11 +1,22 @@
 import { create } from "zustand";
 
-interface ZoneMetadata {
+interface ZoneNeighbors {
+  up?: string;
+  down?: string;
+  left?: string;
+  right?: string;
+}
+
+export interface ZoneMetadata {
   id: string;
   area?: string;
   defaultFocusId?: string;
   items?: string[]; // Ordered list of focusable IDs within this zone
   navMode?: "clamp" | "wrap"; // Navigation Strategy: Stop at edge or Wrap around
+
+  // Navigation Topology
+  neighbors?: ZoneNeighbors;
+  layout?: "column" | "row" | "grid";
 }
 
 interface FocusState {

@@ -39,57 +39,84 @@ export const navigationMiddleware = (
         }
       }
       // --- EFFECT: NAVIGATION ---
+      // --- EFFECT: NAVIGATION ---
       else if (effect.type === "NAVIGATE") {
         let targetId: string | null = null;
+        let isExternal = false;
 
-        // Navigation Logic (Strategies)
-        // This relies on the current Active Zone to decide what "UP" means.
+        // 1. Try Internal Navigation first
+        if (zoneData?.items && zoneData.items.length > 0) {
+          // Helper: Simple list math
+          const getNextInternal = (delta: number) => {
+            const idx = zoneData.items!.indexOf(String(currentFocus));
+            if (idx === -1) return zoneData.items![0]; // If lost, go to first
 
-        // Helper: Strategy Resolver
-        const resolveNavigation = (items: string[], currentId: string | null, delta: number, mode: "clamp" | "wrap" = "clamp"): string | null => {
-          if (!items || items.length === 0) return null;
-          let idx = -1;
-          if (currentId) idx = items.indexOf(String(currentId));
-          if (idx === -1) return items[0];
+            const nextIdx = idx + delta;
+            // Boundary Check for External Handoff
+            if (nextIdx < 0 || nextIdx >= zoneData.items!.length) {
+              return null; // Boundary hit!
+            }
+            return zoneData.items![nextIdx];
+          };
 
-          const nextIdx = idx + delta;
-          if (mode === "wrap") {
-            return items[(nextIdx + items.length) % items.length];
-          } else {
-            if (nextIdx < 0 || nextIdx >= items.length) return null;
-            return items[nextIdx];
+          // Direction Logic for Internal
+          if (effect.direction === "UP" && zoneData.layout !== "row") { // Column/Grid
+            targetId = getNextInternal(-1);
+          } else if (effect.direction === "DOWN" && zoneData.layout !== "row") {
+            targetId = getNextInternal(1);
+          } else if (effect.direction === "LEFT" && zoneData.layout !== "column") { // Row/Grid
+            targetId = getNextInternal(-1);
+          } else if (effect.direction === "RIGHT" && zoneData.layout !== "column") {
+            targetId = getNextInternal(1);
           }
-        };
+        }
 
-        if (effect.direction === "UP" && zoneData?.items) {
-          targetId = resolveNavigation(zoneData.items, currentFocus, -1, zoneData.navMode);
-        } else if (effect.direction === "DOWN" && zoneData?.items) {
-          targetId = resolveNavigation(zoneData.items, currentFocus, 1, zoneData.navMode);
-        } else if (effect.direction === "LEFT") {
-          // Zone Switching Logic (Simplified for now)
-          if (activeZoneId?.startsWith("board_col_")) {
-            const catId = activeZoneId.replace("board_col_", "");
-            const order = rawNewState.data.categoryOrder;
-            const idx = order.indexOf(catId);
-            if (idx > 0) targetId = `board_col_${order[idx - 1]}`;
-            else targetId = "sidebar";
+        // 2. If Internal failed (or wasn't applicable), Try External (Neighbors)
+        if (!targetId && zoneData?.neighbors) {
+          let neighborZoneId: string | undefined;
+          switch (effect.direction) {
+            case "UP": neighborZoneId = zoneData.neighbors.up; break;
+            case "DOWN": neighborZoneId = zoneData.neighbors.down; break;
+            case "LEFT": neighborZoneId = zoneData.neighbors.left; break;
+            case "RIGHT": neighborZoneId = zoneData.neighbors.right; break;
           }
-        } else if (effect.direction === "RIGHT") {
-          if (activeZoneId === "sidebar" && rawNewState.ui.viewMode === "board") {
-            const order = rawNewState.data.categoryOrder;
-            if (order.length > 0) targetId = `board_col_${order[0]}`;
-          } else if (activeZoneId?.startsWith("board_col_")) {
-            const catId = activeZoneId.replace("board_col_", "");
-            const order = rawNewState.data.categoryOrder;
-            const idx = order.indexOf(catId);
-            if (idx !== -1 && idx < order.length - 1) targetId = `board_col_${order[idx + 1]}`;
+
+          if (neighborZoneId) {
+            targetId = neighborZoneId;
+            isExternal = true;
+          }
+        }
+
+        // 3. Special Fallback for Board/Sidebar (Legacy Logic) 
+        // TODO: This should eventually be moved to declarative neighbors config.
+        if (!targetId && !isExternal) {
+          if (effect.direction === "LEFT") {
+            if (activeZoneId?.startsWith("board_col_")) {
+              const catId = activeZoneId.replace("board_col_", "");
+              const order = rawNewState.data.categoryOrder;
+              const idx = order.indexOf(catId);
+              if (idx > 0) targetId = `board_col_${order[idx - 1]}`;
+              else targetId = "sidebar";
+              isExternal = true;
+            }
+          } else if (effect.direction === "RIGHT") {
+            if (activeZoneId === "sidebar" && rawNewState.ui.viewMode === "board") {
+              const order = rawNewState.data.categoryOrder;
+              if (order.length > 0) targetId = `board_col_${order[0]}`;
+              isExternal = true;
+            } else if (activeZoneId?.startsWith("board_col_")) {
+              const catId = activeZoneId.replace("board_col_", "");
+              const order = rawNewState.data.categoryOrder;
+              const idx = order.indexOf(catId);
+              if (idx !== -1 && idx < order.length - 1) targetId = `board_col_${order[idx + 1]}`;
+              isExternal = true;
+            }
           }
         }
 
         // Execute Navigation Result
         if (targetId) {
-          const isZone = targetId === "sidebar" || targetId === "listView" || targetId.startsWith("board_");
-          if (isZone) {
+          if (isExternal) {
             useFocusStore.getState().setActiveZone(targetId);
             // Resolve default focus for the zone
             const ctx = mapStateToContext(rawNewState) as unknown as import("../logic/schema").TodoContext;

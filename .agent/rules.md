@@ -31,6 +31,7 @@
 - **Strict Type Safety**: NO `any` allowed. Use Strict Union Patterns for all registries and state.
 - **Logic-First Architecture**: Logic must be purely separated from UI. Use the Pure Command Pattern.
 - **Zero-Latency Design**: All interactions must default to Optimistic Updates.
+- **OS-First Engineering**: When implementing a requirement, do not simply "make it work" in the component. Design it as an OS-level primitive (e.g., Focus Strategy, Command Middleware) to ensure system-wide consistency and reusability.
 
 ## Detailed Design Principles
 
@@ -38,6 +39,7 @@
 - **Liability of Code**: Every line of code is a liability. If it doesn't serve a feature, delete it.
 - **No Speculative Code**: Do not write code for "future use" (YAGNI).
 - **Boilerplate-Zero**: Favor factory functions (`createCommandFactory`) over manual repetition.
+- **No Ad-Hoc Logic**: Never hardcode feature-specific logic (e.g., `if (id === 'DRAFT')`) inside generic primitives. Use configuration or strict data-driven patterns.
 
 ### 2. Single Responsibility (SRP)
 - **Atomic File Integrity**: One file per logical unit (Component, Hook, or Utility).

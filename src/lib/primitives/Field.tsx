@@ -31,9 +31,11 @@ export interface FieldProps<T extends BaseCommand>
   cancelCommand?: BaseCommand;
   children?: ReactNode;
   asChild?: boolean;
-  dispatch?: (cmd: any) => void;
+  dispatch?: (cmd: BaseCommand) => void;
   commitOnBlur?: boolean;
 }
+
+import { useFocusStore } from "../../stores/useFocusStore";
 
 export const Field = <T extends BaseCommand>({
   value,
@@ -47,13 +49,17 @@ export const Field = <T extends BaseCommand>({
   children,
   asChild,
   commitOnBlur = true,
+  blurOnInactive = false,
   dispatch: customDispatch,
   ...rest
-}: FieldProps<T>) => {
+}: FieldProps<T> & { blurOnInactive?: boolean }) => {
   const { dispatch: contextDispatch, currentFocusId } = useCommandEngine();
   // Safe Context Usage: Check if we are inside a provider that supports updating context
   const contextService = useContextService();
-  const updateContext = contextService?.updateContext || (() => {}); // Fallback
+  const updateContext = contextService?.updateContext || (() => { }); // Fallback
+
+  // OS-Level Direct Subscription (Faster/Robust than Context for pure Focus state)
+  const osFocusedItemId = useFocusStore((s) => s.focusedItemId);
 
   const dispatch = customDispatch || contextDispatch;
   const [localValue, setLocalValue] = useState(value);
@@ -63,13 +69,18 @@ export const Field = <T extends BaseCommand>({
     end: null,
   });
 
+  /* 
+    Refactored Field Primitive: 
+    - Purely Reactive to "Active" State.
+    - No App-specific Logic (DRAFT).
+    - Strict ID Matching.
+  */
+
   const isActive =
     active !== undefined
       ? active
-      : currentFocusId === name ||
-        (name === "draft" &&
-          String(currentFocusId).toLowerCase() === "draft") ||
-        (name === "DRAFT" && String(currentFocusId).toUpperCase() === "DRAFT");
+      : (name !== undefined && String(name) === String(currentFocusId)) ||
+      (name !== undefined && String(name) === String(osFocusedItemId));
 
   useEffect(() => {
     if (!isComposingRef.current) {
@@ -78,14 +89,18 @@ export const Field = <T extends BaseCommand>({
   }, [value]);
 
   // Auto-focus and Cursor Restoration
+  // Driven strictly by `isActive`
   useEffect(() => {
     if (isActive && innerRef.current) {
+      // 1. If already focused, do nothing
       if (document.activeElement === innerRef.current) {
         return;
       }
 
+      // 2. Claim physical focus
       innerRef.current.focus();
 
+      // 3. Restore Selection Range (if applicable)
       if (cursorRef.current.start !== null && cursorRef.current.end !== null) {
         const { start, end } = cursorRef.current;
         requestAnimationFrame(() => {
@@ -98,8 +113,11 @@ export const Field = <T extends BaseCommand>({
           }
         });
       }
+    } else if (!isActive && blurOnInactive && innerRef.current && document.activeElement === innerRef.current) {
+      // Feature: Configurable Focus Retention
+      innerRef.current.blur();
     }
-  }, [isActive]);
+  }, [isActive, blurOnInactive]);
 
   const commitChange = (value: string) => {
     if (innerRef.current) {
@@ -156,12 +174,11 @@ export const Field = <T extends BaseCommand>({
     ref: innerRef,
     value: localValue,
     onFocus: () => {
-      // console.log('Field: Setting focus to', name || 'DRAFT');
+      // console.log('Field: Setting focus to', name);
       // GUARD: Only dispatch if we aren't already the focus.
       // This prevents "Focus Stealing Loops" and "Max Update Depth" errors.
-      const targetId = name || "DRAFT";
-      if (currentFocusId !== targetId) {
-        dispatch({ type: "SET_FOCUS", payload: { id: targetId } });
+      if (name && currentFocusId !== name) {
+        dispatch({ type: "SET_FOCUS", payload: { id: name } });
       }
 
       // Still update context (safe, it's just a boolean flag)

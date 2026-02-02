@@ -1,9 +1,10 @@
-import { useCommandCenter, createCommandStore } from "./command";
+import { createCommandStore } from "./command";
+import { useCommandCenter } from "./hooks/useCommandCenter";
 import { useContextService } from "./context";
 import { useFocusStore } from "../stores/useFocusStore";
 
-import { UNIFIED_TODO_REGISTRY } from "./todoCommands";
-import type { AppState, TodoCommand } from "./types";
+import { UNIFIED_TODO_REGISTRY } from "./commands";
+import type { AppState, TodoCommand, OSEnvironment } from "./types";
 import { TODO_KEYMAP } from "./todoKeys";
 import { setGlobalEngine } from "./primitives/CommandContext";
 import { useMemo, useLayoutEffect } from "react";
@@ -12,11 +13,11 @@ import { focusRegistry } from "./logic/focusStrategies";
 
 // Imported domain logic
 import { loadState } from "./todo/persistence";
-import {
-  listStrategy,
-  boardStrategy,
-  sidebarStrategy,
-} from "./todo/focusStrategies";
+// import {
+//   listStrategy,
+//   boardStrategy,
+//   sidebarStrategy,
+// } from "./todo/focusStrategies";
 import { navigationMiddleware } from "./todo/navigationMiddleware";
 import { mapStateToContext } from "./todo/contextMapper";
 
@@ -24,20 +25,20 @@ import { mapStateToContext } from "./todo/contextMapper";
 const ENGINE_REGISTRY = UNIFIED_TODO_REGISTRY;
 ENGINE_REGISTRY.setKeymap(TODO_KEYMAP);
 
-// Register Strategies (Now using imported strategies)
-focusRegistry.register("listView", listStrategy);
-focusRegistry.register("boardView", boardStrategy);
-focusRegistry.register("sidebar", sidebarStrategy);
+// Register Strategies (Now fully generic!)
+// focusRegistry.register("listView", listStrategy);
+// focusRegistry.register("boardView", boardStrategy);
+// focusRegistry.register("sidebar", sidebarStrategy);
 
 /**
  * useTodoStore: Global Zustand store for Todo application state.
  */
-export const useTodoStore = createCommandStore<AppState, TodoCommand>(
+export const useTodoStore = createCommandStore<AppState, TodoCommand, OSEnvironment>(
   ENGINE_REGISTRY,
   loadState(),
   {
     onStateChange: navigationMiddleware,
-    getEnv: () => {
+    getEnv: (): OSEnvironment => {
       // OS-Level Environment Injection
       const { focusedItemId, activeZoneId } = useFocusStore.getState();
       return {

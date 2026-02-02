@@ -12,8 +12,8 @@ import {
     CancelEdit,
     StartEdit,
     SyncDraft,
-    ToggleView,
-} from "../lib/todoCommands";
+} from "../lib/commands/list";
+import { ToggleView } from "../lib/commands/board";
 import {
     Plus,
     Check,
@@ -132,6 +132,7 @@ export function TodoPanel() {
                                         syncCommand={SyncDraft({ text: "" })}
                                         commitCommand={AddTodo({})}
                                         commitOnBlur={false}
+                                        blurOnInactive={true}
                                     />
                                     <div className="opacity-0 group-data-[active=true]:opacity-100 transition-opacity">
                                         <span className="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-1 rounded border border-indigo-500/20 flex items-center gap-1">
@@ -183,6 +184,7 @@ export function TodoPanel() {
                                                         commitCommand={UpdateTodoText({})} // Enter saves
                                                         cancelCommand={CancelEdit({})} // Esc cancels
                                                         className="w-full bg-transparent outline-none text-white text-lg font-medium border-b border-indigo-500/50 pb-1"
+                                                        blurOnInactive={true}
                                                     />
                                                 ) : (
                                                     <span

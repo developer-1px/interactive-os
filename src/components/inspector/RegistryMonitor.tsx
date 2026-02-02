@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import type { MenuItem } from "../../lib/todoMenus";
 import { SIDEBAR_MENU, TODOLIST_MENU, GLOBAL_MENU } from "../../lib/todoMenus";
-import { UNIFIED_TODO_REGISTRY } from "../../lib/todoCommands";
+import { UNIFIED_TODO_REGISTRY } from "../../lib/commands";
 import { TODO_KEYMAP } from "../../lib/todoKeys";
 import { evalContext } from "../../lib/context";
 import { CommandRow } from "./CommandRow";

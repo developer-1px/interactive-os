@@ -7,30 +7,33 @@ export interface FocusContextValue {
 }
 export const FocusContext = createContext<FocusContextValue | null>(null);
 
-export interface CommandContextValue {
-  dispatch: (cmd: any) => void;
-  currentFocusId?: any;
+import type { BaseCommand } from "./types";
+import type { CommandRegistry } from "../command";
+
+export interface CommandContextValue<S = unknown> {
+  dispatch: (cmd: BaseCommand) => void;
+  currentFocusId?: string | number | null;
   activeZone?: string | null;
-  registry?: any;
+  registry?: CommandRegistry<S, any, any>;
   ctx?: any;
-  state?: any; // Expose full state for advanced consumers (like MockBrains)
+  state?: S; // Expose full state for advanced consumers (like MockBrains)
 }
 
-export const CommandContext = createContext<CommandContextValue | null>(null);
+export const CommandContext = createContext<CommandContextValue<any> | null>(null);
 
 // --- Bridge Pattern for Provider-less Usage ---
-let globalEngineHelper: (() => CommandContextValue) | null = null;
+let globalEngineHelper: (() => CommandContextValue<any>) | null = null;
 
-export const setGlobalEngine = (hook: () => CommandContextValue) => {
+export const setGlobalEngine = (hook: () => CommandContextValue<any>) => {
   globalEngineHelper = hook;
 };
 
-export const useCommandEngine = () => {
+export const useCommandEngine = <S = unknown>() => {
   const context = useContext(CommandContext);
-  if (context) return context;
+  if (context) return context as unknown as CommandContextValue<S>;
 
   if (globalEngineHelper) {
-    return globalEngineHelper();
+    return globalEngineHelper() as unknown as CommandContextValue<S>;
   }
 
   throw new Error(

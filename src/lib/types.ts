@@ -32,7 +32,7 @@ export interface Todo {
   categoryId: string;
 }
 
-import type { InferredTodoCommand } from "./todoCommands";
+import type { InferredTodoCommand } from "./commands";
 export type TodoCommand = InferredTodoCommand;
 // Removed manual CommandType and TodoCommand unions in favor of Inference.
 

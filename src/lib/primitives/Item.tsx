@@ -1,4 +1,4 @@
-import { useRef, useEffect, isValidElement, cloneElement } from "react";
+import { isValidElement, cloneElement } from "react";
 import type { ReactNode, ReactElement } from "react";
 // import { useCommandEngine } from "./CommandContext";
 import { useFocusStore } from "../../stores/useFocusStore";
@@ -19,41 +19,28 @@ export const Item = ({
   asChild,
   className,
 }: ItemProps) => {
-  // const { dispatch: contextDispatch } = useCommandEngine();
-  // const dispatch = customDispatch || contextDispatch;
-
-  const innerRef = useRef<HTMLDivElement>(null);
+  /* Refactor: Virtual Focus Logic - Logic-less Item */
+  /* The Zone (parent) holds the physical focus (tabIndex=0). Item just renders style. */
 
   // OS-Level Focus Subscription
   const focusedItemId = useFocusStore((s) => s.focusedItemId);
   const setFocus = useFocusStore((s) => s.setFocus);
 
+  // Derive "Virtual Active" state
   const isActuallyActive =
     active !== undefined ? active : String(focusedItemId) === String(id);
 
-  useEffect(() => {
-    if (isActuallyActive && innerRef.current) {
-      // Prevent stealing focus if a child (like an Input Field) already has it
-      if (innerRef.current.contains(document.activeElement)) {
-        return;
-      }
-      if (document.activeElement !== innerRef.current) {
-        innerRef.current.focus();
-      }
-    }
-  }, [isActuallyActive]);
-
   const baseProps = {
-    ref: innerRef,
-    tabIndex: 0,
-    "data-active": isActuallyActive,
-    onFocus: (e: React.FocusEvent) => {
-      e.stopPropagation();
-      setFocus(String(id));
-    },
+    // ref: innerRef, // Virtual Focus doesn't need ref focus
+    role: "option", // Semantic for activedescendant
+    id: String(id), // ID for aria-activedescendant matching
+    "aria-selected": isActuallyActive,
+    "data-active": isActuallyActive ? "true" : undefined,
     onClick: (e: React.MouseEvent) => {
       e.stopPropagation();
       setFocus(String(id));
+      // Optional: Ensure parent Zone gets physical focus if not already?
+      // With Zone's generic onFocus, clicking inside should bubble focus to Zone.
     },
   };
 

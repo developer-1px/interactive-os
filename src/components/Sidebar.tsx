@@ -3,7 +3,7 @@ import { Item } from "../lib/primitives/Item";
 import { Trigger } from "../lib/primitives/Trigger";
 import { Kbd } from "./Kbd";
 import { useTodoEngine } from "../lib/todoEngine";
-import { SelectCategory } from "../lib/todoCommands";
+import { SelectCategory } from "../lib/commands/categories";
 import {
   Inbox,
   Briefcase,
