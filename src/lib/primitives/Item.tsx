@@ -11,12 +11,18 @@ export interface ItemProps {
     className?: string
 }
 
+import { useFocusStore } from '../../stores/useFocusStore';
+
 export const Item = ({ id, active, children, asChild, dispatch: customDispatch, className }: ItemProps) => {
-    const { dispatch: contextDispatch, currentFocusId } = useCommandEngine()
+    const { dispatch: contextDispatch } = useCommandEngine()
     const dispatch = customDispatch || contextDispatch
     const innerRef = useRef<HTMLDivElement>(null)
 
-    const isActuallyActive = active !== undefined ? active : (String(currentFocusId) === String(id));
+    // OS-Level Focus Subscription
+    const focusedItemId = useFocusStore(s => s.focusedItemId);
+    const setFocus = useFocusStore(s => s.setFocus);
+
+    const isActuallyActive = active !== undefined ? active : (String(focusedItemId) === String(id));
 
     useEffect(() => {
         if (isActuallyActive && innerRef.current) {
@@ -34,8 +40,14 @@ export const Item = ({ id, active, children, asChild, dispatch: customDispatch, 
         ref: innerRef,
         tabIndex: 0,
         "data-active": isActuallyActive,
-        onFocus: () => dispatch({ type: 'SET_FOCUS', payload: { id } }),
-        onClick: (e: React.MouseEvent) => { e.stopPropagation(); dispatch({ type: 'SET_FOCUS', payload: { id } }); }
+        onFocus: (e: React.FocusEvent) => {
+            e.stopPropagation();
+            setFocus(String(id));
+        },
+        onClick: (e: React.MouseEvent) => {
+            e.stopPropagation();
+            setFocus(String(id));
+        }
     }
 
     if (asChild && isValidElement(children)) {

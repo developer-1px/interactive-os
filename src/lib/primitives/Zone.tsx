@@ -5,6 +5,14 @@ import type { ReactNode } from 'react';
 import { FocusContext, useCommandEngine } from './CommandContext';
 import type { BaseCommand } from './types';
 import { useFocusStore } from '../../stores/useFocusStore';
+import { focusRegistry } from '../logic/focusStrategies';
+
+export interface ZoneNeighbors {
+    up?: string;
+    down?: string;
+    left?: string;
+    right?: string;
+}
 
 export interface ZoneProps {
     id: string;
@@ -17,9 +25,14 @@ export interface ZoneProps {
     area?: string;
     /** Manual override for active state */
     active?: boolean;
+
+    /** Focus Topology: Neighbors */
+    neighbors?: ZoneNeighbors;
+    /** Focus Layout: Internal Navigation Strategy */
+    layout?: 'column' | 'row' | 'grid';
 }
 
-export function Zone({ id, children, dispatch: customDispatch, currentFocusId: customFocusId, defaultFocusId, registry: customRegistry, area, active }: ZoneProps) {
+export function Zone({ id, children, dispatch: customDispatch, currentFocusId: customFocusId, defaultFocusId, registry: customRegistry, area, active, neighbors, layout = 'column' }: ZoneProps) {
     const { dispatch: contextDispatch, currentFocusId: contextFocusId, registry: contextRegistry, ctx } = useCommandEngine();
     const dispatch = customDispatch || contextDispatch;
     const currentFocusId = customFocusId !== undefined ? customFocusId : contextFocusId;
@@ -98,6 +111,67 @@ export function Zone({ id, children, dispatch: customDispatch, currentFocusId: c
         }
     }, [isActive, registry, dispatch]);
 
+    // --- Declarative Spatial Navigation ---
+    useEffect(() => {
+        if (!isActive || !neighbors) return;
+
+        const handleSpatialNav = (e: KeyboardEvent) => {
+            if (e.defaultPrevented) return;
+
+            // Should input stop navigation?
+            const activeEl = document.activeElement as HTMLElement;
+            const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+            // If editing text, we generally don't want to jump zones unless at boundary (advanced)
+            // For MVP, we aggressively block if input is active to be safe
+            if (isInput) return;
+
+            let targetZoneId: string | undefined;
+
+            switch (e.key) {
+                case 'ArrowUp':
+                    if (layout === 'column' || layout === 'grid') return; // Internal for Column
+                    targetZoneId = neighbors.up;
+                    break;
+                case 'ArrowDown':
+                    if (layout === 'column' || layout === 'grid') return; // Internal for Column
+                    targetZoneId = neighbors.down;
+                    break;
+                case 'ArrowLeft':
+                    if (layout === 'row' || layout === 'grid') return; // Internal for Row
+                    targetZoneId = neighbors.left;
+                    break;
+                case 'ArrowRight':
+                    if (layout === 'row' || layout === 'grid') return; // Internal for Row
+                    targetZoneId = neighbors.right;
+                    break;
+            }
+
+            if (targetZoneId) {
+                e.preventDefault();
+
+                // --- Headless Focus Controller Pattern ---
+                // 1. Activate Zone Jurisdiction (OS Layer)
+                setActiveZone(targetZoneId);
+
+                // 2. Resolve Content Focus (App Layer Delegate)
+                // We use the central registry to find the ENTRY STRATEGY for this zone.
+                // This decouples Zone from knowing about "todos" or "categories".
+                const { state, ctx } = useCommandEngine(); // Now returns state too
+                if (state && ctx) {
+                    const targetFocusId = focusRegistry.resolve(targetZoneId, state as any, ctx);
+
+                    if (targetFocusId) {
+                        // OS-Level Focus Dispatch
+                        useFocusStore.getState().setFocus(targetFocusId);
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleSpatialNav);
+        return () => window.removeEventListener('keydown', handleSpatialNav);
+    }, [isActive, neighbors, layout, setActiveZone, dispatch]);
+
     const handleFocus = (e: React.FocusEvent) => {
         // 1. Claim Jurisdiction
         if (!isActive) {
@@ -105,8 +179,9 @@ export function Zone({ id, children, dispatch: customDispatch, currentFocusId: c
         }
 
         // 2. Default Internal Focus
-        if (e.target === e.currentTarget && defaultFocusId && currentFocusId === null) {
-            dispatch({ type: 'SET_FOCUS', payload: { id: defaultFocusId } });
+        // Only if we focused the Zone container itself (not a child)
+        if (e.target === e.currentTarget && defaultFocusId) {
+            useFocusStore.getState().setFocus(defaultFocusId);
         }
     };
 
@@ -117,7 +192,7 @@ export function Zone({ id, children, dispatch: customDispatch, currentFocusId: c
 
             // 2. Restore Focus if needed
             if (defaultFocusId) {
-                dispatch({ type: 'SET_FOCUS', payload: { id: defaultFocusId } });
+                useFocusStore.getState().setFocus(defaultFocusId);
             }
         }
     };

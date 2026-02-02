@@ -12,7 +12,8 @@ const Rule = createLogicRule<TodoContext>();
 export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
     global: [
         { key: 'Meta+z', command: 'UNDO', allowInInput: true },
-        { key: 'Meta+Shift+Z', command: 'REDO', allowInInput: true }
+        { key: 'Meta+Shift+Z', command: 'REDO', allowInInput: true },
+        { key: 'Meta+Shift+V', command: 'TOGGLE_VIEW', allowInInput: true }
     ],
     zones: {
         sidebar: [
@@ -21,16 +22,17 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
             { key: 'Enter', command: 'SELECT_CATEGORY' },
             { key: 'Space', command: 'SELECT_CATEGORY' },
             { key: 'ArrowUp', command: 'MOVE_SIDEBAR_FOCUS_UP' },
-            { key: 'ArrowDown', command: 'MOVE_SIDEBAR_FOCUS_DOWN' },
-            { key: 'ArrowRight', command: 'JUMP_TO_LIST' }
+            { key: 'ArrowDown', command: 'MOVE_SIDEBAR_FOCUS_DOWN' }
         ],
-        todoList: [
+        listView: [
             // Navigation
             { key: 'ArrowUp', command: 'MOVE_FOCUS_UP', allowInInput: true },
             { key: 'ArrowDown', command: 'MOVE_FOCUS_DOWN', allowInInput: true },
+
             // Structure
             { key: 'Meta+ArrowUp', command: 'MOVE_ITEM_UP' },
             { key: 'Meta+ArrowDown', command: 'MOVE_ITEM_DOWN' },
+
             // Creation (Strict Draft Guard)
             {
                 key: 'Enter',
@@ -38,6 +40,7 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
                 when: Expect('isDraftFocused').toBe(true),
                 allowInInput: true
             },
+
             // Editing Triggers
             {
                 key: 'Enter',
@@ -59,32 +62,38 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
                 when: Expect('isEditing').toBe(true),
                 allowInInput: true
             },
+
             // Deletion & Toggle (No Edit Guard)
-            {
-                key: 'Backspace',
-                command: 'DELETE_TODO',
-                when: Expect('isEditing').toBe(false)
-            },
-            {
-                key: 'Delete',
-                command: 'DELETE_TODO',
-                when: Expect('isEditing').toBe(false)
-            },
-            {
-                key: 'Space',
-                command: 'TOGGLE_TODO',
-                when: Expect('isEditing').toBe(false)
-            },
+            { key: 'Backspace', command: 'DELETE_TODO', when: Expect('isEditing').toBe(false) },
+            { key: 'Delete', command: 'DELETE_TODO', when: Expect('isEditing').toBe(false) },
+            { key: 'Space', command: 'TOGGLE_TODO', when: Expect('isEditing').toBe(false) },
+
             // Cross-Zone
             {
                 key: 'ArrowLeft',
                 command: 'JUMP_TO_SIDEBAR',
-                when: Rule.or(
-                    Expect('isEditing').toBe(false),
-                    Expect('cursorAtStart' as keyof TodoContext).toBe(true)
+                when: Rule.and(
+                    Rule.or(
+                        Expect('isEditing').toBe(false),
+                        Expect('cursorAtStart' as keyof TodoContext).toBe(true)
+                    ),
+                    Expect('activeZone').toBe('listView')
                 ),
                 allowInInput: true
             }
+        ],
+        boardView: [
+            // Navigation
+            { key: 'ArrowUp', command: 'MOVE_FOCUS_UP', allowInInput: true },
+            { key: 'ArrowDown', command: 'MOVE_FOCUS_DOWN', allowInInput: true },
+
+            // Column Navigation (Handled by Zone Neighbors Declaratively)
+            // ArrowRight/Left falls through to Zone Spatial Nav
+
+            // Item Actions (Shared)
+            { key: 'Space', command: 'TOGGLE_TODO', when: Expect('isEditing').toBe(false) },
+            { key: 'Backspace', command: 'DELETE_TODO', when: Expect('isEditing').toBe(false) },
+            { key: 'Delete', command: 'DELETE_TODO', when: Expect('isEditing').toBe(false) }
         ]
     }
 };

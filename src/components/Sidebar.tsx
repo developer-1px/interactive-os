@@ -21,7 +21,14 @@ export function Sidebar() {
     };
 
     return (
-        <Zone id="sidebar" area="nav" defaultFocusId={state.ui.selectedCategoryId || state.data.categoryOrder[0]}>
+        <Zone
+            id="sidebar"
+            area="nav"
+            defaultFocusId={state.ui.selectedCategoryId || state.data.categoryOrder[0]}
+            // Point to First Column explicitly
+            neighbors={{ right: state.ui.viewMode === 'board' ? `board_col_${state.data.categoryOrder[0]}` : 'listView' }}
+            layout="column"
+        >
             <div className="w-72 flex flex-col h-full bg-[#0F1117] border-r border-white/5 relative overflow-hidden">
                 {/* Background Ambient Glow */}
                 <div className="absolute top-0 left-0 w-full h-96 bg-indigo-500/10 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />

@@ -14,7 +14,7 @@ export interface HistoryEntry {
         todos: Record<number, Todo>;
         todoOrder: number[];
         draft: string;
-        focusId: FocusTarget;
+        // focusId: FocusTarget; // Moved to OS Layer
     };
     groupId?: string; // For transaction support
 }
@@ -31,10 +31,12 @@ export interface DataState {
 
 export interface UIState {
     selectedCategoryId: string;
-    focusId: FocusTarget;
+    // focusId: FocusTarget; // Moved to OS Layer (useFocusStore)
+    focusRequest?: string; // Signals a request to the OS to change focus
     draft: string;
     editingId: FocusTarget;
     editDraft: string;
+    viewMode: 'list' | 'board';
 }
 
 export interface HistoryState {

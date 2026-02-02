@@ -9,10 +9,11 @@ export interface TodoContext {
     isOrdering: boolean; // e.g. dragging or special mode? (Maybe not needed yet)
 
     // Environment
-    activeZone: 'sidebar' | 'todoList' | null;
+    activeZone: 'sidebar' | 'listView' | 'boardView' | null;
     isEditing: boolean;
     isDraftFocused: boolean;
-    isFieldFocused: boolean; // Added for strict typing
+    isFieldFocused: boolean;
+    cursorAtStart?: boolean; // Extrinsic
 
     // Data Stats
     hasCategories: boolean;
@@ -20,4 +21,9 @@ export interface TodoContext {
 
     // Selection
     selectedCategoryId: string;
+
+    // View State
+    viewMode: 'list' | 'board';
+    isFirstColumn?: boolean;
+    isLastColumn?: boolean;
 }

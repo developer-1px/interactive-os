@@ -11,10 +11,19 @@ interface FocusState {
     // Registry of known zones to validate focus targets and store metadata
     zoneRegistry: Record<string, ZoneMetadata>;
 
+    // --- Item Focus (The "Cursor") ---
+    focusedItemId: string | null;
+
     // Actions
     registerZone: (data: ZoneMetadata) => void;
     unregisterZone: (id: string) => void;
     setActiveZone: (id: string) => void;
+
+    /**
+     * Move the OS Cursor to a specific Item ID.
+     * This is the "Physical" layer of focus.
+     */
+    setFocus: (itemId: string | null) => void;
 
     // Optional: History for "Alt-Tab" behavior
     history: string[];
@@ -22,6 +31,7 @@ interface FocusState {
 
 export const useFocusStore = create<FocusState>((set) => ({
     activeZoneId: 'sidebar', // Default to sidebar or main
+    focusedItemId: null,
     zoneRegistry: {},
     history: [],
 
@@ -45,5 +55,7 @@ export const useFocusStore = create<FocusState>((set) => ({
             activeZoneId: id,
             history: newHistory
         };
-    })
+    }),
+
+    setFocus: (itemId) => set({ focusedItemId: itemId })
 }));
