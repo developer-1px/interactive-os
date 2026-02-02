@@ -11,6 +11,7 @@ export type TodoCommand = InferredTodoCommand;
 export interface HistoryEntry {
     command: TodoCommand;
     resultingState: { todos: Todo[]; draft: string; focusId: FocusTarget; };
+    groupId?: string; // For transaction support
 }
 
 export interface DataState {

@@ -1,16 +1,16 @@
 ---
-description: Create a structured investigation report or issue ticket in docs/0-inbox
+description: docs/0-inbox에 구조화된 조사 보고서나 이슈 티켓을 생성합니다.
 ---
 
-1. **Context Analysis**: Understand the user's issue, bug report, or feature request.
-2. **Target Directory**: Ensure `docs/0-inbox` exists.
-3. **File Creation**:
-   - Generate a filename: `YYYY-MM-DD_ShortTitle.md` (e.g., `2026-02-02_FocusLossAnalysis.md`).
-   - Create the file in `docs/0-inbox/`.
-4. **Content Structure**:
-   - **Title**: Clear and descriptive.
-   - **Context**: What is the problem/goal?
-   - **Analysis**: Technical details, root cause, or tradeoffs.
-   - **Proposal/Plan**: Suggested next steps.
-5. **Language Rule**: **The report must be written in KOREAN (한글)** unless the user explicitly requests another language.
-6. **Notification**: Notify the user with the path of the created report.
+1. **맥락 분석**: 사용자의 문제, 버그 제보, 또는 기능 요청을 파악합니다.
+2. **대상 디렉토리**: `docs/0-inbox`가 존재하는지 확인합니다.
+3. **파일 생성**:
+   - 파일명 생성: `YYYY-MM-DD_ShortTitle.md` (예: `2026-02-02_FocusLossAnalysis.md`).
+   - `docs/0-inbox/` 경로에 파일을 생성합니다.
+4. **내용 구조**:
+   - **제목**: 명확하고 서술적으로 작성합니다.
+   - **배경 (Context)**: 문제나 목표가 무엇인가요?
+   - **분석 (Analysis)**: 기술적 세부사항, 근본 원인, 또는 트레이드오프.
+   - **제안/계획 (Proposal/Plan)**: 권장되는 다음 단계.
+5. **언어 규칙**: 사용자가 별도로 요청하지 않는 한, **보고서는 반드시 한국어로 작성해야 합니다.**
+6. **알림**: 생성된 보고서의 경로를 사용자에게 알립니다.

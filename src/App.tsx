@@ -7,6 +7,9 @@ import TodoPage from './pages/TodoPage'
 import SettingsPage from './pages/SettingsPage'
 import ShowcasePage from './pages/ShowcasePage'
 import DocsPage from './pages/DocsPage'
+import ExperimentPage from './pages/ExperimentPage'
+
+import { ClipboardManager } from './os/ClipboardManager'
 
 // --- Main Layout ---
 function MainLayout() {
@@ -19,6 +22,8 @@ function MainLayout() {
 
   return (
     <div className="h-screen w-screen bg-slate-950 flex overflow-hidden font-sans text-slate-200 select-none">
+      <ClipboardManager />
+
       {/* 0. Global Activity Bar */}
       <GlobalNav />
 
@@ -46,6 +51,7 @@ export default function App() {
               <div className="flex-1 flex items-center justify-center text-slate-500">Profile Placeholder</div>
             } />
             <Route path="/showcase" element={<ShowcasePage />} />
+            <Route path="/experiment" element={<ExperimentPage />} />
             <Route path="/docs/*" element={<DocsPage />} />
           </Route>
         </Routes>

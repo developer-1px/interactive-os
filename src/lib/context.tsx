@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
 import { logger } from './logger';
 import type { ReactNode, FC } from 'react';
+import type { LogicNode } from './logic/builder';
 
 export type ContextKey = string;
 export type ContextValue = boolean | string | number | null | undefined;
@@ -59,12 +60,46 @@ function _compile(expression: string): Evaluator {
 }
 
 /**
+ * recursively evaluates a LogicNode tree
+ */
+function evalNode(node: LogicNode, ctx: ContextState): boolean {
+    if (node.op === 'and') return evalNode(node.left!, ctx) && evalNode(node.right!, ctx);
+    if (node.op === 'or') return evalNode(node.left!, ctx) || evalNode(node.right!, ctx);
+
+    // Comparison
+    if (!node.key) return false;
+    const leftVal = ctx[node.key];
+
+    // Resolve right value: either dynamic ref or static val
+    // We treat null/undefined as 0 or false depending on context? 
+    // For now, strict comparison.
+    const rightVal = node.ref ? ctx[node.ref] : node.val;
+
+    switch (node.op) {
+        case 'eq': return leftVal == rightVal;
+        case 'neq': return leftVal != rightVal;
+        case 'gt': return Number(leftVal) > Number(rightVal);
+        case 'gte': return Number(leftVal) >= Number(rightVal);
+        case 'lt': return Number(leftVal) < Number(rightVal);
+        case 'lte': return Number(leftVal) <= Number(rightVal);
+    }
+    return false;
+}
+
+/**
  * Compiles a 'when' clause string into a reusable function (Evaluator).
  * Optimized with a compilation cache to prevent redundant parsing and logging.
  */
-export function compileWhen(expression: string | undefined): Evaluator {
+export function compileWhen(expression: string | LogicNode | undefined): Evaluator {
     if (!expression) return () => true;
 
+    // Handle LogicNode (Builder)
+    if (typeof expression !== 'string') {
+        const node = expression;
+        return (ctx) => evalNode(node, ctx);
+    }
+
+    // Handle Legacy String
     if (compilationCache.has(expression)) {
         return compilationCache.get(expression)!;
     }
@@ -78,7 +113,7 @@ export function compileWhen(expression: string | undefined): Evaluator {
 /**
  * Legacy immediate evaluator (wraps compiler for backward compat/testing)
  */
-export function evalContext(expression: string | undefined, context: ContextState): boolean {
+export function evalContext(expression: string | LogicNode | undefined, context: ContextState): boolean {
     return compileWhen(expression)(context);
 }
 

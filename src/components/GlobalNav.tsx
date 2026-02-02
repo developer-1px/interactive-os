@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Layout, Search, Settings, User, Package, Book } from 'lucide-react';
+import { Layout, Search, Settings, User, Package, Book, Beaker } from 'lucide-react';
 
 export function GlobalNav() {
     const navItems = [
@@ -7,6 +7,7 @@ export function GlobalNav() {
         { id: 'search', icon: Search, path: '/search', label: 'Search' },
         { id: 'docs', icon: Book, path: '/docs', label: 'Documentation' },
         { id: 'showcase', icon: Package, path: '/showcase', label: 'Showcase' },
+        { id: 'experiment', icon: Beaker, path: '/experiment', label: 'Separation Lab' },
     ];
 
     const bottomItems = [

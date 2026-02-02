@@ -131,8 +131,18 @@ export const Field = <T extends BaseCommand>({
         value: localValue,
         onFocus: () => {
             // console.log('Field: Setting focus to', name || 'DRAFT');
-            dispatch({ type: 'SET_FOCUS', payload: { id: name || 'DRAFT' } });
-            updateContext({ isFieldFocused: true });
+            // GUARD: Only dispatch if we aren't already the focus.
+            // This prevents "Focus Stealing Loops" and "Max Update Depth" errors.
+            const targetId = name || 'DRAFT';
+            if (currentFocusId !== targetId) {
+                dispatch({ type: 'SET_FOCUS', payload: { id: targetId } });
+            }
+
+            // Still update context (safe, it's just a boolean flag)
+            if (!contextService?.context.isFieldFocused) {
+                updateContext({ isFieldFocused: true });
+            }
+
             // Initial check on focus
             requestAnimationFrame(updateCursorContext);
         },

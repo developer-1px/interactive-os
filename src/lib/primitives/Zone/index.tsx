@@ -53,8 +53,7 @@ export function Zone({ id, children, dispatch: customDispatch, currentFocusId: c
             const handleKeyDown = (e: KeyboardEvent) => {
                 if (e.defaultPrevented) return; // Respect handled events
 
-                // --- Input Trap Logic ---
-                // If focus is in an input, ONLY allow whitelisted commands
+                // --- Input Trap Logic & Extrinsic State ---
                 const activeEl = document.activeElement as HTMLElement;
                 const isInputActive = activeEl && (
                     activeEl.tagName === 'INPUT' ||
@@ -62,11 +61,15 @@ export function Zone({ id, children, dispatch: customDispatch, currentFocusId: c
                     activeEl.isContentEditable
                 );
 
+                const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+                const isAtStart = isInput ? (activeEl as HTMLInputElement).selectionStart === 0 && (activeEl as HTMLInputElement).selectionEnd === 0 : false;
+
+                // Inject extrinsic state into context
+                const runtimeCtx = { ...ctxRef.current, cursorAtStart: isAtStart };
+
                 const canonicalEventKey = getCanonicalKey(e);
-                // logger.debug('KEY', `Canonical: ${canonicalEventKey} (Original: ${e.key})`);
 
                 const matches = bindings.filter((b: { key: string }) => {
-                    // Normalize the definition to match our canonical format (e.g. "meta" -> "Meta")
                     const normalizedDef = normalizeKeyDefinition(b.key);
                     return normalizedDef === canonicalEventKey;
                 });
@@ -74,7 +77,7 @@ export function Zone({ id, children, dispatch: customDispatch, currentFocusId: c
                 if (matches.length > 0) {
                     // Find the first ENABLED command for this key
                     const activeMatch = matches.find((match: any) => {
-                        const isEnabled = match.when ? evalContext(match.when, ctxRef.current) : true;
+                        const isEnabled = match.when ? evalContext(match.when, runtimeCtx) : true;
 
                         // Validated Input Gate for this specific match
                         if (isEnabled && isInputActive && !match.allowInInput) {
@@ -86,10 +89,7 @@ export function Zone({ id, children, dispatch: customDispatch, currentFocusId: c
 
                     if (activeMatch) {
                         e.preventDefault();
-                        // logger.debug('KEYMAP', `Zone exec: ${activeMatch.command}`);
                         dispatch({ type: activeMatch.command, payload: activeMatch.args });
-                    } else {
-                        // All matches disabled
                     }
                 }
             };

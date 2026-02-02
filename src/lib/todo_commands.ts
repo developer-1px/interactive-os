@@ -1,11 +1,9 @@
 import type { AppState } from './types';
 import { CommandRegistry } from './command';
 import { createCommandFactory } from './definition';
-
-// --- Defines ---
-
-// Initialize factory with State type ONCE.
+// 1. Context-Aware Factories
 const defineCommand = createCommandFactory<AppState>();
+
 
 // 1. Global
 
@@ -24,14 +22,14 @@ export const SetFocus = defineCommand({
 
 export const Undo = defineCommand({
     id: 'UNDO',
-    kb: ['Meta+z'],
+
     allowInInput: true,
     run: (s) => s // Handled by middleware
 });
 
 export const Redo = defineCommand({
     id: 'REDO',
-    kb: ['Meta+Shift+z'],
+
     allowInInput: true,
     run: (s) => s // Handled by middleware
 });
@@ -39,33 +37,38 @@ export const Redo = defineCommand({
 // 2. Sidebar
 export const MoveCategoryUp = defineCommand({
     id: 'MOVE_CATEGORY_UP',
-    kb: ['ArrowUp'],
-    enabled: (state) => {
-        const idx = state.data.categories.findIndex(c => c.id === state.ui.focusId);
-        return idx > 0;
-    },
+
+    // Pure Logic: Swaps category with previous one if possible
     run: (state) => {
         const idx = state.data.categories.findIndex(c => c.id === state.ui.focusId);
-        return idx <= 0 ? state : { ...state, ui: { ...state.ui, focusId: state.data.categories[idx - 1].id } };
+        if (idx <= 0) return state; // Guard
+
+        // Swap logic...
+        const newCats = [...state.data.categories];
+        [newCats[idx], newCats[idx - 1]] = [newCats[idx - 1], newCats[idx]];
+
+        return { ...state, data: { ...state.data, categories: newCats } };
     }
 });
 
 export const MoveCategoryDown = defineCommand({
     id: 'MOVE_CATEGORY_DOWN',
-    kb: ['ArrowDown'],
-    enabled: (state) => {
-        const idx = state.data.categories.findIndex(c => c.id === state.ui.focusId);
-        return idx !== -1 && idx < state.data.categories.length - 1;
-    },
+
     run: (state) => {
         const idx = state.data.categories.findIndex(c => c.id === state.ui.focusId);
-        return (idx === -1 || idx >= state.data.categories.length - 1) ? state : { ...state, ui: { ...state.ui, focusId: state.data.categories[idx + 1].id } };
+        if (idx === -1 || idx >= state.data.categories.length - 1) return state; // Guard
+
+        // Swap logic...
+        const newCats = [...state.data.categories];
+        [newCats[idx], newCats[idx + 1]] = [newCats[idx + 1], newCats[idx]];
+
+        return { ...state, data: { ...state.data, categories: newCats } };
     }
 });
 
 export const SelectCategory = defineCommand({
     id: 'SELECT_CATEGORY',
-    kb: ['Enter', ' '],
+
     run: (state, payload: { id?: string } = {}) => {
         const id = payload?.id || (state.ui.focusId as string);
         return (!id || typeof id !== 'string') ? state : { ...state, ui: { ...state.ui, selectedCategoryId: id } };
@@ -74,19 +77,17 @@ export const SelectCategory = defineCommand({
 
 export const JumpToList = defineCommand({
     id: 'JUMP_TO_LIST',
-    kb: ['ArrowRight'],
+
     run: (state) => ({ ...state, ui: { ...state.ui, focusId: 'DRAFT' } })
 });
 
 // 3. TodoList
 export const AddTodo = defineCommand({
     id: 'ADD_TODO',
-    kb: ['Enter'],
-    when: 'isInputFocused',
     allowInInput: true,
-    enabled: (state) => !!state.ui.draft.trim(),  // Disabled if draft is empty (UI feedback)
-    run: (state, payload: { text?: string } = {}) => {
-        const text = payload?.text || state.ui.draft;
+    // when deleted: strictly guarded by Keybinding (isDraftFocused)
+    run: (state) => {
+        const text = state.ui.draft;
         if (!text || !text.trim()) return state;
         const newTodo = { id: Date.now(), text: text.trim(), completed: false, categoryId: state.ui.selectedCategoryId };
         return {
@@ -97,10 +98,28 @@ export const AddTodo = defineCommand({
     }
 });
 
+export const ImportTodos = defineCommand({
+    id: 'IMPORT_TODOS',
+    run: (state, payload: { items: any[] }) => {
+        if (!payload.items || !Array.isArray(payload.items) || payload.items.length === 0) return state;
+
+        const newTodos = payload.items.map((item, idx) => ({
+            id: Date.now() + idx,
+            text: typeof item === 'string' ? item : (item.text || 'Untitled'),
+            completed: typeof item === 'object' ? item.completed || false : false,
+            categoryId: state.ui.selectedCategoryId
+        }));
+
+        return {
+            ...state,
+            data: { ...state.data, todos: [...state.data.todos, ...newTodos] }
+        };
+    }
+});
+
 export const ToggleTodo = defineCommand({
     id: 'TOGGLE_TODO',
-    kb: [' '],
-    enabled: (state) => typeof state.ui.focusId === 'number',
+
     run: (state, payload: { id?: number } = {}) => {
         const targetId = payload?.id || state.ui.focusId;
         if (targetId === null || targetId === 'DRAFT') return state;
@@ -116,8 +135,7 @@ export const ToggleTodo = defineCommand({
 
 export const DeleteTodo = defineCommand({
     id: 'DELETE_TODO',
-    kb: ['Delete', 'Backspace'],
-    enabled: (state) => typeof state.ui.focusId === 'number',
+
     run: (state, payload: { id?: number } = {}) => {
         const targetId = payload?.id || state.ui.focusId;
 
@@ -135,8 +153,7 @@ export const DeleteTodo = defineCommand({
 
 export const MoveFocusUp = defineCommand({
     id: 'MOVE_FOCUS_UP',
-    kb: ['ArrowUp'],
-    when: '!isEditing',
+
     allowInInput: true,
     run: (state) => {
         const visibleTodos = state.data.todos.filter(t => t.categoryId === state.ui.selectedCategoryId);
@@ -158,8 +175,7 @@ export const MoveFocusUp = defineCommand({
 
 export const MoveFocusDown = defineCommand({
     id: 'MOVE_FOCUS_DOWN',
-    kb: ['ArrowDown'],
-    when: '!isEditing',
+
     allowInInput: true,
     run: (state) => {
         const visibleTodos = state.data.todos.filter(t => t.categoryId === state.ui.selectedCategoryId);
@@ -181,90 +197,57 @@ export const MoveFocusDown = defineCommand({
 
 export const MoveItemUp = defineCommand({
     id: 'MOVE_ITEM_UP',
-    kb: ['Meta+ArrowUp'],
-    when: '!isEditing && todoListFocus',
-    enabled: (state) => {
-        const { focusId, selectedCategoryId } = state.ui;
-        if (typeof focusId !== 'number') return false;
-        const visibleTodos = state.data.todos.filter(t => t.categoryId === selectedCategoryId);
-        const focusIndex = visibleTodos.findIndex(t => t.id === focusId);
-        return focusIndex > 0;
-    },
+
     run: (state) => {
         const { focusId, selectedCategoryId } = state.ui;
-        // Only works if a specific todo is focused
-        if (typeof focusId !== 'number') return state;
+        if (typeof focusId !== 'number') return state; // Guard
 
         const allTodos = state.data.todos;
         const visibleTodos = allTodos.filter(t => t.categoryId === selectedCategoryId);
-        const focusIndexInVisible = visibleTodos.findIndex(t => t.id === focusId);
+        const focusIndex = visibleTodos.findIndex(t => t.id === focusId);
 
-        // Cannot move up if it's already at the top
-        if (focusIndexInVisible <= 0) return state;
+        if (focusIndex <= 0) return state; // Guard
 
-        const currentTodo = visibleTodos[focusIndexInVisible];
-        const prevTodo = visibleTodos[focusIndexInVisible - 1];
-
-        const idxCurrent = allTodos.findIndex(t => t.id === currentTodo.id);
-        const idxPrev = allTodos.findIndex(t => t.id === prevTodo.id);
-
+        // Swap logic
         const newTodos = [...allTodos];
-        // Swap
-        newTodos[idxCurrent] = prevTodo;
-        newTodos[idxPrev] = currentTodo;
+        const globalIdx = newTodos.findIndex(t => t.id === focusId);
+        const prevItem = visibleTodos[focusIndex - 1];
+        const prevGlobalIdx = newTodos.findIndex(t => t.id === prevItem.id);
 
-        return {
-            ...state,
-            data: { ...state.data, todos: newTodos }
-        };
+        [newTodos[globalIdx], newTodos[prevGlobalIdx]] = [newTodos[prevGlobalIdx], newTodos[globalIdx]];
+
+        return { ...state, data: { ...state.data, todos: newTodos } };
     }
 });
 
 export const MoveItemDown = defineCommand({
     id: 'MOVE_ITEM_DOWN',
-    kb: ['Meta+ArrowDown'],
-    when: '!isEditing && todoListFocus',
-    enabled: (state) => {
-        const { focusId, selectedCategoryId } = state.ui;
-        if (typeof focusId !== 'number') return false;
-        const visibleTodos = state.data.todos.filter(t => t.categoryId === selectedCategoryId);
-        const focusIndex = visibleTodos.findIndex(t => t.id === focusId);
-        return focusIndex !== -1 && focusIndex < visibleTodos.length - 1;
-    },
+
     run: (state) => {
         const { focusId, selectedCategoryId } = state.ui;
-        if (typeof focusId !== 'number') return state;
+        if (typeof focusId !== 'number') return state; // Guard
 
         const allTodos = state.data.todos;
         const visibleTodos = allTodos.filter(t => t.categoryId === selectedCategoryId);
-        const focusIndexInVisible = visibleTodos.findIndex(t => t.id === focusId);
+        const focusIndex = visibleTodos.findIndex(t => t.id === focusId);
 
-        // Cannot move down if at bottom
-        if (focusIndexInVisible === -1 || focusIndexInVisible >= visibleTodos.length - 1) return state;
+        if (focusIndex === -1 || focusIndex >= visibleTodos.length - 1) return state; // Guard
 
-        const currentTodo = visibleTodos[focusIndexInVisible];
-        const nextTodo = visibleTodos[focusIndexInVisible + 1];
-
-        const idxCurrent = allTodos.findIndex(t => t.id === currentTodo.id);
-        const idxNext = allTodos.findIndex(t => t.id === nextTodo.id);
-
+        // Swap logic
         const newTodos = [...allTodos];
-        // Swap
-        newTodos[idxCurrent] = nextTodo;
-        newTodos[idxNext] = currentTodo;
+        const globalIdx = newTodos.findIndex(t => t.id === focusId);
+        const nextItem = visibleTodos[focusIndex + 1];
+        const nextGlobalIdx = newTodos.findIndex(t => t.id === nextItem.id);
 
-        return {
-            ...state,
-            data: { ...state.data, todos: newTodos }
-        };
+        [newTodos[globalIdx], newTodos[nextGlobalIdx]] = [newTodos[nextGlobalIdx], newTodos[globalIdx]];
+
+        return { ...state, data: { ...state.data, todos: newTodos } };
     }
 });
 
 export const StartEdit = defineCommand({
     id: 'START_EDIT',
-    kb: ['Enter'],
-    when: '!isEditing',
-    enabled: (state) => typeof state.ui.focusId === 'number',
+
     run: (state, payload: { id?: number } = {}) => {
         // Allow explicit payload ID or fallback to focusId
         const targetId = payload?.id !== undefined ? payload.id : state.ui.focusId;
@@ -277,9 +260,8 @@ export const StartEdit = defineCommand({
 
 export const JumpToSidebar = defineCommand({
     id: 'JUMP_TO_SIDEBAR',
-    kb: ['ArrowLeft'],
+
     allowInInput: true,
-    when: '!isFieldFocused || cursorAtStart',
     run: (state) => ({ ...state, ui: { ...state.ui, focusId: state.ui.selectedCategoryId } })
 });
 
@@ -297,18 +279,14 @@ export const SyncEditDraft = defineCommand({
 
 export const CancelEdit = defineCommand({
     id: 'CANCEL_EDIT',
-    kb: ['Escape'],
-    when: 'isEditing',
+
     allowInInput: true,
     run: (state) => ({ ...state, ui: { ...state.ui, editingId: null, editDraft: '' } })
 });
 
 export const UpdateTodoText = defineCommand({
     id: 'UPDATE_TODO_TEXT',
-    kb: ['Enter'],
-    when: 'isEditing',
     allowInInput: true,
-    enabled: (state) => !!state.ui.editingId,
     run: (state) => {
         if (!state.ui.editingId) return state;
         return {
@@ -333,6 +311,7 @@ export type InferredTodoCommand =
     | ReturnType<typeof SelectCategory>
     | ReturnType<typeof JumpToList>
     | ReturnType<typeof AddTodo>
+    | ReturnType<typeof ImportTodos>
     | ReturnType<typeof ToggleTodo>
     | ReturnType<typeof DeleteTodo>
     | ReturnType<typeof MoveFocusUp>
@@ -352,32 +331,16 @@ export type InferredTodoCommand =
 export const GlobalCommands = [Patch, SetFocus, Undo, Redo];
 export const SideBarCommands = [MoveCategoryUp, MoveCategoryDown, SelectCategory, JumpToList, ...GlobalCommands];
 export const TodoListCommands = [
-    AddTodo, ToggleTodo, DeleteTodo, MoveFocusUp, MoveFocusDown,
+    AddTodo, ImportTodos, ToggleTodo, DeleteTodo, MoveFocusUp, MoveFocusDown,
     MoveItemUp, MoveItemDown,
     StartEdit, JumpToSidebar, SyncDraft, SyncEditDraft, CancelEdit, UpdateTodoText,
     ...GlobalCommands
 ];
 
 // Registries
-// CommandRegistry expects CommandDefinition. 
-// Our "Helper" (CommandFactory) *includes* properties of CommandDefinition (via intersection in definition.ts)
-// BUT, the factory function type `CommandFactory` has `id`, `run`, etc. as properties.
-// The `register` method expects `CommandDefinition`.
-// Does `CommandFactory` extends `CommandDefinition`?
-// In my `definition.ts`:
-// interface CommandFactory extends CommandDefinition { ... } 
-// Wait, I didn't extend it. I duplicated properties.
-// And `CommandRegistry.register` expects `CommandDefinition`.
-// Since the structure matches (structural typing), it MIGHT work.
-// But `CommandFactory` is a function. `CommandDefinition` is an object.
-// A function WITH properties is technically an object.
-// Let's verify if `CommandRegistry` accepts it.
+export const UNIFIED_TODO_REGISTRY = new CommandRegistry<AppState, any>();
 
-export const SIDEBAR_REGISTRY = new CommandRegistry<AppState, any>();
-SideBarCommands.forEach(cmd => SIDEBAR_REGISTRY.register(cmd));
+// Register all commands
+const ALL_COMMAND_GROUPS = [GlobalCommands, SideBarCommands, TodoListCommands];
+ALL_COMMAND_GROUPS.flat().forEach(cmd => UNIFIED_TODO_REGISTRY.register(cmd));
 
-export const TODO_LIST_REGISTRY = new CommandRegistry<AppState, any>();
-TodoListCommands.forEach(cmd => TODO_LIST_REGISTRY.register(cmd));
-
-export const CONSTITUTION_REGISTRY = new CommandRegistry<AppState, any>();
-GlobalCommands.forEach(cmd => CONSTITUTION_REGISTRY.register(cmd));

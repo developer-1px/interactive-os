@@ -1,6 +1,6 @@
 import { Zone, Item, Field, Trigger } from '../lib/primitives';
 import { useTodoEngine } from '../lib/todo_engine';
-import { TODO_LIST_REGISTRY, AddTodo, ToggleTodo, DeleteTodo, SyncEditDraft, UpdateTodoText, CancelEdit, StartEdit, SyncDraft } from '../lib/todo_commands';
+import { AddTodo, ToggleTodo, DeleteTodo, SyncEditDraft, UpdateTodoText, CancelEdit, StartEdit, SyncDraft } from '../lib/todo_commands';
 import { Plus, Check, CornerDownLeft, Trash2, Sparkles, Loader2 } from 'lucide-react';
 
 export function TodoPanel() {
@@ -8,7 +8,7 @@ export function TodoPanel() {
     const todos = state.data.todos.filter(t => t.categoryId === state.ui.selectedCategoryId);
 
     return (
-        <Zone id="todoList" area="main" registry={TODO_LIST_REGISTRY} defaultFocusId="DRAFT">
+        <Zone id="todoList" area="main" defaultFocusId="DRAFT">
             <div className="flex-1 flex flex-col h-full relative bg-[#090A0C] overflow-hidden">
                 {/* Ambient Background */}
                 <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-900/10 rounded-full blur-[120px] pointer-events-none" />

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, memo } from 'react';
 import { Kbd } from './Kbd';
 import { useTodoEngine } from '../lib/todo_engine';
-import { SIDEBAR_REGISTRY, TODO_LIST_REGISTRY, CONSTITUTION_REGISTRY } from '../lib/todo_commands';
+
 import { evalContext } from '../lib/context';
 import { getCanonicalKey } from '../lib/keybinding';
 import type { HistoryEntry } from '../lib/types';
@@ -135,6 +135,10 @@ const CommandRow = memo(({ cmd, isDisabled, isBlockedByInput, activeKeybindingMa
     );
 });
 
+import type { MenuItem } from '../lib/todo_menus';
+import { SIDEBAR_MENU, TODOLIST_MENU, GLOBAL_MENU } from '../lib/todo_menus';
+import { UNIFIED_TODO_REGISTRY } from '../lib/todo_commands';
+
 const RegistryMonitor = memo(({ ctx, activeKeybindingMap, isInputActive, lastCommandId, historyCount }: {
     ctx: any,
     activeKeybindingMap: Map<string, boolean>,
@@ -144,30 +148,44 @@ const RegistryMonitor = memo(({ ctx, activeKeybindingMap, isInputActive, lastCom
 }) => {
     const currentCommands = useMemo(() => {
         const zone = ctx.activeZone;
-        const reg = zone === 'sidebar' ? SIDEBAR_REGISTRY : (zone === 'todoList' ? TODO_LIST_REGISTRY : CONSTITUTION_REGISTRY);
-        return reg.getAll().map(cmd => ({
-            id: cmd.id,
-            label: cmd.label || cmd.id,
-            kb: cmd.kb || [],
-            enabled: cmd.when ? evalContext(cmd.when, ctx) : true,
-            allowInInput: cmd.allowInInput,
-            log: cmd.log,
-            when: cmd.when
-        }));
+        const menu = zone === 'sidebar' ? SIDEBAR_MENU : (zone === 'todoList' ? TODOLIST_MENU : GLOBAL_MENU);
+
+        return menu.map((item: MenuItem) => {
+            const cmd = UNIFIED_TODO_REGISTRY.get(item.command);
+            if (!cmd) return null;
+
+            return {
+                id: cmd.id,
+                label: cmd.label || cmd.id,
+                // We don't have keybindings in Command anymore (moved to external keymap)
+                // We could lookup from keybinding map if we wanted to show them?
+                // Inspector's Kbd component uses `cmd.kb` which was inferred before.
+                // Now we need to efficiently find keys for this command.
+                // But wait, `CommandDefinition` doesn't have `kb` in the new `todo_commands.ts`?
+                // The old code assumed `cmd.kb` existed or was injected.
+                // The `getKeybindings()` method returned bindings. 
+                // We should probably inject keys here.
+                kb: [], // Placeholder for now, or we lookup from a global map.
+                enabled: item.when ? evalContext(item.when, ctx) : true,
+                allowInInput: cmd.allowInInput,
+                log: cmd.log,
+                when: item.when // Show the Menu's condition
+            };
+        }).filter(Boolean);
     }, [ctx]); // Intentionally using the stable 'ctx' passed from parent
 
     return (
         <section className="px-3 py-2 border-b border-white/5 bg-white/[0.01]">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-1 h-3 bg-emerald-500/40 rounded-full" /> Command Registry
+                    <span className="w-1 h-3 bg-emerald-500/40 rounded-full" /> Command Registry (via Menu)
                 </h3>
                 <span className="text-[7px] font-bold text-slate-600 uppercase tracking-tight px-1.5 py-0.5 bg-white/5 rounded border border-white/5">
                     {ctx.activeZone || 'GLOBAL'}
                 </span>
             </div>
             <div className="flex flex-col gap-px">
-                {currentCommands.map(cmd => {
+                {currentCommands.map((cmd: any) => {
                     const isBlockedByInput = isInputActive && !cmd.allowInInput;
                     const isDisabled = !cmd.enabled || isBlockedByInput;
 
@@ -305,7 +323,7 @@ export function CommandInspector() {
     }, []);
 
     return (
-        <div className="w-[800px] h-screen bg-slate-900/90 border-l border-white/10 flex flex-col shadow-[[-20px_0_50px_rgba(0,0,0,0.3)]] backdrop-blur-3xl overflow-hidden font-mono select-none flex-shrink-0 z-50 transition-all duration-300">
+        <div className="w-[640px] h-screen bg-slate-900/90 border-l border-white/10 flex flex-col shadow-[[-20px_0_50px_rgba(0,0,0,0.3)]] backdrop-blur-3xl overflow-hidden font-mono select-none flex-shrink-0 z-50 transition-all duration-300">
             {/* Header */}
             <div className="p-3 border-b border-white/5 bg-white/[0.02] flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-2">

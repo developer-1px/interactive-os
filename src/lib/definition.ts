@@ -1,9 +1,11 @@
+import type { LogicNode } from './logic/builder';
+
 export interface CommandDefinition<S, P, K extends string = string> {
     id: K;
     run: (state: S, payload: P) => S;
     label?: string;
     icon?: string;
-    when?: string;
+    when?: string | LogicNode;
     kb?: string[]; // Default keybindings
     args?: P;      // Default args for keybindings
     allowInInput?: boolean;
@@ -24,7 +26,7 @@ export interface CommandFactory<S, P, K extends string = string> {
     run: (state: S, payload: P) => S;
     label?: string;
     icon?: string;
-    when?: string;
+    when?: string | LogicNode;
     kb?: string[];
     args?: P;
     allowInInput?: boolean;

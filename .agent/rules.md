@@ -25,5 +25,10 @@ These rules are the **ABSOLUTE LAW** of the project. Violations are considered c
   - **Environment (L4)** ➔ **Engine (L3)** ➔ **Logic (L2)** ➔ **State (L1)**.
   - *Never* import a Component (L4) into a Primitve (L2).
 
+### D. Separation & Scalability (Testability Mandate)
+- **Lazy-Load Readiness**: Architectures MUST support code splitting. Avoid monolithic global manifests that force bundling every command in the application at boot time.
+- **Test Isolation (Dependency Injection)**: Components should NOT rely solely on global singleton contexts. Always provide a prop-based override (e.g., `<Zone registry={mockRegistry} />`) to enable isolated unit testing without bootstrapping the entire engine.
+- **Type-Safety Over Convenience**: Do not sacrifice static analysis for DX. Avoid "Stringly Typed" registry lookups unless strictly typed via Unions/Enums.
+
 ## 2. Knowledge Graph
 - **Mandatory Reference**: Before implementing any major feature, you **MUST** consult the "Antigravity Core System" Knowledge Item.

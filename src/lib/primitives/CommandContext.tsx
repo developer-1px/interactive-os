@@ -14,6 +14,7 @@ export interface CommandContextValue {
     activeZone?: string | null;
     registry?: any;
     ctx?: any;
+    state?: any; // Expose full state for advanced consumers (like MockBrains)
 }
 
 export const CommandContext = createContext<CommandContextValue | null>(null);

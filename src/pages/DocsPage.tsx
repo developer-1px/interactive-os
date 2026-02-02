@@ -104,19 +104,19 @@ const TreeItem = ({ node, depth = 0 }: { node: TreeNode; depth?: number }) => {
     );
 };
 
-const MarkdownComponents = {
-    h1: ({ node, ...props }) => <h1 className="text-4xl font-light tracking-tight mb-8 mt-4 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400" {...props} />,
-    h2: ({ node, ...props }) => <h2 className="text-2xl font-semibold text-white mt-12 mb-6 tracking-tight border-b border-white/5 pb-2" {...props} />,
-    h3: ({ node, ...props }) => <h3 className="text-xl font-medium text-slate-100 mt-8 mb-4" {...props} />,
-    h4: ({ node, ...props }) => <h4 className="text-lg font-medium text-indigo-300 mt-6 mb-3" {...props} />,
-    p: ({ node, ...props }) => <p className="text-slate-300 leading-7 mb-4 font-light" {...props} />,
-    ul: ({ node, ...props }) => <ul className="list-disc list-outside ml-6 mb-4 text-slate-300 marker:text-indigo-500" {...props} />,
-    ol: ({ node, ...props }) => <ol className="list-decimal list-outside ml-6 mb-4 text-slate-300 marker:text-indigo-500" {...props} />,
-    li: ({ node, ...props }) => <li className="mb-2 pl-1" {...props} />,
+const MarkdownComponents: any = {
+    h1: ({ node, ...props }: any) => <h1 className="text-4xl font-light tracking-tight mb-8 mt-4 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400" {...props} />,
+    h2: ({ node, ...props }: any) => <h2 className="text-2xl font-semibold text-white mt-12 mb-6 tracking-tight border-b border-white/5 pb-2" {...props} />,
+    h3: ({ node, ...props }: any) => <h3 className="text-xl font-medium text-slate-100 mt-8 mb-4" {...props} />,
+    h4: ({ node, ...props }: any) => <h4 className="text-lg font-medium text-indigo-300 mt-6 mb-3" {...props} />,
+    p: ({ node, ...props }: any) => <p className="text-slate-300 leading-7 mb-4 font-light" {...props} />,
+    ul: ({ node, ...props }: any) => <ul className="list-disc list-outside ml-6 mb-4 text-slate-300 marker:text-indigo-500" {...props} />,
+    ol: ({ node, ...props }: any) => <ol className="list-decimal list-outside ml-6 mb-4 text-slate-300 marker:text-indigo-500" {...props} />,
+    li: ({ node, ...props }: any) => <li className="mb-2 pl-1" {...props} />,
     strong: ({ node, ...props }: any) => <strong className="font-bold text-white drop-shadow-sm" {...props} />,
-    a: ({ node, ...props }) => <a className="text-indigo-400 hover:text-indigo-300 transition-colors underline decoration-indigo-500/30 underline-offset-4" {...props} />,
-    blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-indigo-500/30 pl-6 py-2 my-6 bg-white/[0.02] text-slate-400 italic rounded-r border-t border-b border-r border-transparent" {...props} />,
-    hr: ({ node, ...props }) => <hr className="border-white/10 my-10" {...props} />,
+    a: ({ node, ...props }: any) => <a className="text-indigo-400 hover:text-indigo-300 transition-colors underline decoration-indigo-500/30 underline-offset-4" {...props} />,
+    blockquote: ({ node, ...props }: any) => <blockquote className="border-l-4 border-indigo-500/30 pl-6 py-2 my-6 bg-white/[0.02] text-slate-400 italic rounded-r border-t border-b border-r border-transparent" {...props} />,
+    hr: ({ node, ...props }: any) => <hr className="border-white/10 my-10" {...props} />,
     code: ({ node, className, children, ...props }: any) => {
         return (
             <code

@@ -2,7 +2,7 @@
 import { useMemo, useLayoutEffect } from 'react';
 import { create } from 'zustand';
 
-import type { KeybindingItem } from './keybinding';
+import type { KeybindingItem, KeymapConfig } from './keybinding';
 import { useContextService, evalContext } from './context';
 import { Trigger, Field, Item, Zone } from './primitives';
 import type { CommandDefinition } from './definition';
@@ -24,6 +24,7 @@ export function defineGroup<S, K extends string = string>(id: string, when: stri
 
 export class CommandRegistry<S, K extends string = string> {
     private commands: Map<K, CommandDefinition<S, any, K>> = new Map();
+    private keymap: KeybindingItem<any>[] | KeymapConfig<any> = [];
 
     register(definition: CommandDefinition<S, any, K>) {
         this.commands.set(definition.id, definition);
@@ -44,6 +45,18 @@ export class CommandRegistry<S, K extends string = string> {
         logger.debug('SYSTEM', `Registered Group: [${group.id}] with ${group.commands.length} commands`);
     }
 
+    /**
+     * Set external key mapping (KeybindingItem[] or KeymapConfig)
+     */
+    setKeymap(keymap: KeybindingItem<any>[] | KeymapConfig<any>) {
+        this.keymap = keymap;
+        // Count entries for logging
+        const count = Array.isArray(keymap)
+            ? keymap.length
+            : (keymap.global?.length || 0) + Object.values(keymap.zones || {}).reduce((acc: number, arr: any) => acc + arr.length, 0);
+        logger.debug('SYSTEM', `Loaded External Keymap: ${count} entries`);
+    }
+
     get(id: K): CommandDefinition<S, any, K> | undefined {
         return this.commands.get(id);
     }
@@ -52,22 +65,71 @@ export class CommandRegistry<S, K extends string = string> {
         return Array.from(this.commands.values());
     }
 
-    getKeybindings(): KeybindingItem[] {
-        const bindings: KeybindingItem[] = [];
-        this.commands.forEach(cmd => {
-            if (cmd.kb) {
-                cmd.kb.forEach(key => {
-                    bindings.push({
-                        key,
-                        command: cmd.id,
-                        when: cmd.when,
-                        args: cmd.args,
-                        allowInInput: cmd.allowInInput
+    getKeybindings(): KeybindingItem<any>[] {
+        let rawBindings: KeybindingItem<any>[] = [];
+
+        // Normalize Input: Flatten if it's a Config Tree
+        if (Array.isArray(this.keymap)) {
+            rawBindings = this.keymap;
+        } else {
+            // Flatten Logic
+            // 1. Global
+            if (this.keymap.global) {
+                rawBindings.push(...this.keymap.global);
+            }
+            // 2. Zones (Apply Scope Logic)
+            if (this.keymap.zones) {
+                Object.entries(this.keymap.zones).forEach(([zoneId, bindings]) => {
+                    const scopedBindings = (bindings as KeybindingItem<any>[]).map(b => {
+                        // Scope Condition: activeZone == zoneId
+                        const scopeStr = `activeZone == '${zoneId}'`;
+                        const scopeNode = {
+                            op: 'eq',
+                            key: 'activeZone',
+                            val: zoneId,
+                            description: `activeZone == '${zoneId}'`
+                        };
+
+                        let newWhen: any;
+
+                        if (!b.when) {
+                            newWhen = scopeNode;
+                        } else if (typeof b.when === 'string') {
+                            newWhen = `(${b.when}) && ${scopeStr}`;
+                        } else {
+                            // Assume LogicNode
+                            newWhen = {
+                                op: 'and',
+                                left: b.when,
+                                right: scopeNode,
+                                description: `(${b.when.description || 'Custom'} AND ${scopeNode.description})`
+                            };
+                        }
+
+                        return {
+                            ...b,
+                            when: newWhen
+                        };
                     });
+                    rawBindings.push(...scopedBindings);
                 });
             }
+        }
+
+        return rawBindings.map(binding => {
+            const cmd = this.get(binding.command as K);
+            if (!cmd) return binding;
+
+            // Merging logic (as discussed)
+            // If binding has 'when', use it (it now includes zone scope).
+            // Default to command.when ONLY if binding.when is missing (e.g. global).
+            return {
+                ...binding,
+                when: binding.when || cmd.when,
+                args: binding.args || cmd.args,
+                allowInInput: binding.allowInInput || cmd.allowInInput
+            };
         });
-        return bindings;
     }
 }
 
@@ -158,8 +220,9 @@ export function useCommandCenter<S, A extends { type: any; payload?: any }, K ex
         currentFocusId: (state as any).ui?.focusId ?? (state as any).focusId,
         activeZone: context.activeZone as string | null,
         registry: registry,
-        ctx: context
-    }), [dispatch, (state as any).focusId, context.activeZone, registry, context]);
+        ctx: context,
+        state: state
+    }), [dispatch, (state as any).focusId, context.activeZone, registry, context, state]);
 
     return {
         state,

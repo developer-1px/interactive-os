@@ -1,7 +1,7 @@
 import { Zone, Item, Trigger } from '../lib/primitives';
 import { Kbd } from './Kbd';
 import { useTodoEngine } from '../lib/todo_engine';
-import { SIDEBAR_REGISTRY, SelectCategory } from '../lib/todo_commands';
+import { SelectCategory } from '../lib/todo_commands';
 import { Inbox, Briefcase, User, Layout, MoveUp, MoveDown, CornerDownLeft, ArrowRight } from 'lucide-react';
 
 export function Sidebar() {
@@ -19,7 +19,7 @@ export function Sidebar() {
     };
 
     return (
-        <Zone id="sidebar" area="nav" registry={SIDEBAR_REGISTRY} defaultFocusId={state.ui.selectedCategoryId || state.data.categories[0]?.id}>
+        <Zone id="sidebar" area="nav" defaultFocusId={state.ui.selectedCategoryId || state.data.categories[0]?.id}>
             <div className="w-72 flex flex-col h-full bg-[#0F1117] border-r border-white/5 relative overflow-hidden">
                 {/* Background Ambient Glow */}
                 <div className="absolute top-0 left-0 w-full h-96 bg-indigo-500/10 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />

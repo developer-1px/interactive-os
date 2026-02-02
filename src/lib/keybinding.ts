@@ -1,11 +1,18 @@
 
-export interface KeybindingItem {
+import type { LogicNode } from './logic/builder';
+
+export interface KeybindingItem<T = string> {
     key: string;
-    command: string;
+    command: T;
     args?: any;
-    when?: string;
+    when?: string | LogicNode;
     preventDefault?: boolean;
     allowInInput?: boolean;
+}
+
+export interface KeymapConfig<T = string> {
+    global?: KeybindingItem<T>[];
+    zones?: Record<string, KeybindingItem<T>[]>;
 }
 
 /**
