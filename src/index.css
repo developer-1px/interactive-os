@@ -22,3 +22,28 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* Custom Animation for Command Inspector */
+@keyframes flash-command {
+  0% {
+    background-color: rgba(99, 102, 241, 0.9); /* Indigo 500 equivalent */
+    transform: scale(1.04);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+    z-index: 50;
+    border-color: rgba(129, 140, 248, 1); /* Indigo 400 */
+  }
+  15% {
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+    box-shadow: none;
+    z-index: 0;
+    border-color: transparent; /* Or base border color */
+  }
+}
+
+.animate-flash-command {
+  animation: flash-command 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}

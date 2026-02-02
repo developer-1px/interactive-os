@@ -13,13 +13,26 @@ export interface HistoryEntry {
     resultingState: { todos: Todo[]; draft: string; focusId: FocusTarget; };
 }
 
-export interface AppState {
+export interface DataState {
     categories: Category[];
-    selectedCategoryId: string;
     todos: Todo[];
-    draft: string;
+}
+
+export interface UIState {
+    selectedCategoryId: string;
     focusId: FocusTarget;
+    draft: string;
     editingId: FocusTarget;
     editDraft: string;
-    history: HistoryEntry[]
+}
+
+export interface HistoryState {
+    past: HistoryEntry[];
+    future: HistoryEntry[];
+}
+
+export interface AppState {
+    data: DataState;
+    ui: UIState;
+    history: HistoryState;
 }

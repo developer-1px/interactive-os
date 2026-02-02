@@ -29,6 +29,25 @@ export const AddTodo = defineCommand({
 });
 ```
 
+### 2.1. 설계 원칙: 왜 `when`은 문자열인가요? (Why String?)
+
+`when` 속성은 함수가 아닌 문자열로 정의됩니다. 이는 다음과 같은 중요한 이유 때문입니다:
+
+1.  **관측 가능성 (Observability)**: 커맨드 인스펙터(`Cmd+D`)는 문자열로 된 조건을 화면에 표시하고, 현재 컨텍스트에 대해 시각적으로 '참/거짓'을 평가할 수 있습니다. 함수는 내부를 들여다볼 수 없습니다.
+2.  **직렬화 (Serializability)**: 커맨드 정의를 JSON 형태로 저장하거나 전송할 수 있게 하여, 원격 설정이나 플러그인 시스템 확장을 가능하게 합니다.
+3.  **역할 분리**:
+    - `when` (String): **컨텍스트(Context)** 확인 (Focus, Mode, Zone 등 환경 요인)
+    - `enabled` (Function): **데이터(State)** 확인 (권한, 데이터 개수 등 비즈니스 로직)
+
+```typescript
+// 권장 패턴
+{
+  id: 'DELETE_ITEM',
+  when: '!isEditing', // 환경 확인 (Inspector에서 보임)
+  enabled: (state) => state.selectedCount > 0 // 데이터 로직 (Inspector에서 안 보임)
+}
+```
+
 ## 3. 커맨드 등록 (Registering Commands)
 애플리케이션 루트 또는 기능 로더(Feature Loader) 내에서 커맨드를 등록하십시오.
 

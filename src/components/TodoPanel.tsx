@@ -5,7 +5,7 @@ import { Plus, Check, CornerDownLeft, Trash2, Sparkles, Loader2 } from 'lucide-r
 
 export function TodoPanel() {
     const { state } = useTodoEngine();
-    const todos = state.todos.filter(t => t.categoryId === state.selectedCategoryId);
+    const todos = state.data.todos.filter(t => t.categoryId === state.ui.selectedCategoryId);
 
     return (
         <Zone id="todoList" area="main" registry={TODO_LIST_REGISTRY} defaultFocusId="DRAFT">
@@ -21,7 +21,7 @@ export function TodoPanel() {
                                 <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Tasks</span>
                             </h2>
                             <p className="text-slate-500 font-medium text-sm">
-                                {state.categories.find(c => c.id === state.selectedCategoryId)?.text || 'Inbox'}
+                                {state.data.categories.find(c => c.id === state.ui.selectedCategoryId)?.text || 'Inbox'}
                             </p>
                         </div>
                         <div className="text-xs font-mono text-slate-600 bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
@@ -43,7 +43,7 @@ export function TodoPanel() {
                             </div>
                             <Field
                                 name="DRAFT"
-                                value={state.draft}
+                                value={state.ui.draft}
                                 placeholder="What needs to be done?"
                                 className="flex-1 bg-transparent outline-none text-lg text-white placeholder:text-slate-600 font-medium"
                                 syncCommand={SyncDraft({ text: '' })}
@@ -59,7 +59,7 @@ export function TodoPanel() {
 
                         {/* TODO ITEMS */}
                         {todos.map(todo => {
-                            const isEditing = state.editingId === todo.id;
+                            const isEditing = state.ui.editingId === todo.id;
                             return (
                                 <Item
                                     key={todo.id}
@@ -85,7 +85,7 @@ export function TodoPanel() {
                                         {isEditing ? (
                                             <Field
                                                 name="EDIT"
-                                                value={state.editDraft}
+                                                value={state.ui.editDraft}
                                                 active={true}
                                                 autoFocus
                                                 syncCommand={SyncEditDraft({ text: '' })}

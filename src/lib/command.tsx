@@ -84,7 +84,7 @@ export function createCommandStore<S, A extends { type: string; payload?: any }>
     registry: CommandRegistry<S>,
     initialState: S,
     config?: {
-        onStateChange?: (state: S, action: A) => S,
+        onStateChange?: (state: S, action: A, prevState: S) => S,
     }
 ) {
     return create<CommandStoreState<S, A>>((set) => ({
@@ -96,7 +96,7 @@ export function createCommandStore<S, A extends { type: string; payload?: any }>
                 return prev;
             }
             const nextInnerState = cmd.run(prev.state, action.payload);
-            const finalState = config?.onStateChange ? config.onStateChange(nextInnerState, action) : nextInnerState;
+            const finalState = config?.onStateChange ? config.onStateChange(nextInnerState, action, prev.state) : nextInnerState;
 
             if (cmd.log !== false) {
                 logger.traceCommand(action.type, action.payload, prev.state, finalState);
@@ -155,7 +155,7 @@ export function useCommandCenter<S, A extends { type: any; payload?: any }, K ex
 
     const providerValue = useMemo(() => ({
         dispatch: dispatch as any,
-        currentFocusId: (state as any).focusId,
+        currentFocusId: (state as any).ui?.focusId ?? (state as any).focusId,
         activeZone: context.activeZone as string | null,
         registry: registry,
         ctx: context

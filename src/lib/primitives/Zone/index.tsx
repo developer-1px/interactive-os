@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { evalContext } from '../../context';
+import { getCanonicalKey, normalizeKeyDefinition } from '../../keybinding';
 import type { ReactNode } from 'react';
 import { FocusContext, useCommandEngine } from '../CommandContext';
 import type { BaseCommand } from '../types';
@@ -61,7 +62,14 @@ export function Zone({ id, children, dispatch: customDispatch, currentFocusId: c
                     activeEl.isContentEditable
                 );
 
-                const matches = bindings.filter((b: { key: string }) => b.key.toLowerCase() === e.key.toLowerCase());
+                const canonicalEventKey = getCanonicalKey(e);
+                // logger.debug('KEY', `Canonical: ${canonicalEventKey} (Original: ${e.key})`);
+
+                const matches = bindings.filter((b: { key: string }) => {
+                    // Normalize the definition to match our canonical format (e.g. "meta" -> "Meta")
+                    const normalizedDef = normalizeKeyDefinition(b.key);
+                    return normalizedDef === canonicalEventKey;
+                });
 
                 if (matches.length > 0) {
                     // Find the first ENABLED command for this key

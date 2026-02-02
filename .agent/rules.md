@@ -2,6 +2,11 @@
 
 These rules are the **ABSOLUTE LAW** of the project. Violations are considered critical technical debt.
 
+## 0. The First Principle (AI-Native Engineering)
+- **Zero-Cost Self-Healing**: Code must be written such that an AI agent can diagnose and fix issues purely through type system errors, without runtime trial-and-error.
+- **Type-Strictness > String Parsing**: NEVER use loose flexible strings where a strict union type or enum can exist. If an AI has to parse a string's usage across the codebase to understand valid values, IT IS A VIOLATION.
+- **Rationale**: Loose types force AI agents to "guess" and verify, burning enormous context and token costs. Strict types allow immediate, zero-shot self-correction.
+
 ## 1. Logic & Architecture (The "Red Team" Standard)
 
 ### A. Declarative Jurisdiction (CRITICAL)
