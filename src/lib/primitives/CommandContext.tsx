@@ -1,20 +1,19 @@
-import { createContext, useContext } from 'react';
-
+import { createContext, useContext } from "react";
 
 // --- 0. Context for Focus Zones ---
 export interface FocusContextValue {
-    zoneId: string;
-    isActive: boolean;
+  zoneId: string;
+  isActive: boolean;
 }
 export const FocusContext = createContext<FocusContextValue | null>(null);
 
 export interface CommandContextValue {
-    dispatch: (cmd: any) => void;
-    currentFocusId?: any;
-    activeZone?: string | null;
-    registry?: any;
-    ctx?: any;
-    state?: any; // Expose full state for advanced consumers (like MockBrains)
+  dispatch: (cmd: any) => void;
+  currentFocusId?: any;
+  activeZone?: string | null;
+  registry?: any;
+  ctx?: any;
+  state?: any; // Expose full state for advanced consumers (like MockBrains)
 }
 
 export const CommandContext = createContext<CommandContextValue | null>(null);
@@ -23,16 +22,18 @@ export const CommandContext = createContext<CommandContextValue | null>(null);
 let globalEngineHelper: (() => CommandContextValue) | null = null;
 
 export const setGlobalEngine = (hook: () => CommandContextValue) => {
-    globalEngineHelper = hook;
+  globalEngineHelper = hook;
 };
 
 export const useCommandEngine = () => {
-    const context = useContext(CommandContext);
-    if (context) return context;
+  const context = useContext(CommandContext);
+  if (context) return context;
 
-    if (globalEngineHelper) {
-        return globalEngineHelper();
-    }
+  if (globalEngineHelper) {
+    return globalEngineHelper();
+  }
 
-    throw new Error('Command Engine not initialized. Wrap in Provider or call setGlobalEngine().');
+  throw new Error(
+    "Command Engine not initialized. Wrap in Provider or call setGlobalEngine().",
+  );
 };

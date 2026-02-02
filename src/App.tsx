@@ -1,15 +1,21 @@
-import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
-import { ContextProvider } from './lib/context'
-import { useTodoEngine } from './lib/todoEngine'
-import { CommandInspector } from './components/CommandInspector'
-import { GlobalNav } from './components/GlobalNav'
-import TodoPage from './pages/TodoPage'
-import SettingsPage from './pages/SettingsPage'
-import ShowcasePage from './pages/ShowcasePage'
-import DocsPage from './pages/DocsPage'
-import ExperimentPage from './pages/ExperimentPage'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Outlet,
+  useLocation,
+} from "react-router-dom";
+import { ContextProvider } from "./lib/context";
+import { useTodoEngine } from "./lib/todoEngine";
+import { CommandInspector } from "./components/CommandInspector";
+import { GlobalNav } from "./components/GlobalNav";
+import TodoPage from "./pages/TodoPage";
+import SettingsPage from "./pages/SettingsPage";
+import ShowcasePage from "./pages/ShowcasePage";
+import DocsPage from "./pages/DocsPage";
+import ExperimentPage from "./pages/ExperimentPage";
 
-import { ClipboardManager } from './os/ClipboardManager'
+import { ClipboardManager } from "./os/ClipboardManager";
 
 // --- Main Layout ---
 function MainLayout() {
@@ -31,9 +37,9 @@ function MainLayout() {
       <Outlet />
 
       {/* 3. Global System Inspector */}
-      {!location.pathname.startsWith('/docs') && <CommandInspector />}
+      {!location.pathname.startsWith("/docs") && <CommandInspector />}
     </div>
-  )
+  );
 }
 
 export default function App() {
@@ -44,12 +50,22 @@ export default function App() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<TodoPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/search" element={
-              <div className="flex-1 flex items-center justify-center text-slate-500">Search Placeholder</div>
-            } />
-            <Route path="/profile" element={
-              <div className="flex-1 flex items-center justify-center text-slate-500">Profile Placeholder</div>
-            } />
+            <Route
+              path="/search"
+              element={
+                <div className="flex-1 flex items-center justify-center text-slate-500">
+                  Search Placeholder
+                </div>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <div className="flex-1 flex items-center justify-center text-slate-500">
+                  Profile Placeholder
+                </div>
+              }
+            />
             <Route path="/showcase" element={<ShowcasePage />} />
             <Route path="/experiment" element={<ExperimentPage />} />
             <Route path="/docs/*" element={<DocsPage />} />
@@ -57,5 +73,5 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </ContextProvider>
-  )
+  );
 }
