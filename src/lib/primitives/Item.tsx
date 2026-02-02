@@ -1,28 +1,27 @@
 import { useRef, useEffect, isValidElement, cloneElement } from "react";
 import type { ReactNode, ReactElement } from "react";
-import { useCommandEngine } from "./CommandContext";
+// import { useCommandEngine } from "./CommandContext";
+import { useFocusStore } from "../../stores/useFocusStore";
 
 export interface ItemProps {
   id: string | number;
   active?: boolean;
   children: ReactNode;
   asChild?: boolean;
-  dispatch?: (cmd: any) => void;
+  // dispatch?: (cmd: any) => void; // Unused
   className?: string;
 }
-
-import { useFocusStore } from "../../stores/useFocusStore";
 
 export const Item = ({
   id,
   active,
   children,
   asChild,
-  dispatch: customDispatch,
   className,
 }: ItemProps) => {
-  const { dispatch: contextDispatch } = useCommandEngine();
-  const dispatch = customDispatch || contextDispatch;
+  // const { dispatch: contextDispatch } = useCommandEngine();
+  // const dispatch = customDispatch || contextDispatch;
+
   const innerRef = useRef<HTMLDivElement>(null);
 
   // OS-Level Focus Subscription

@@ -23,28 +23,41 @@ import { TODO_KEYMAP } from "../lib/todoKeys";
 function useSharedIsolatedEngine() {
   const initialState: AppState = {
     data: {
-      categories: [
-        { id: "c1", text: "Work" },
-        { id: "c2", text: "Personal" },
-        { id: "c3", text: "Shopping" },
-      ],
-      todos: [
-        { id: 101, text: "Review PR #123", completed: false, categoryId: "c1" },
-        {
+      categories: {
+        c1: { id: "c1", text: "Work" },
+        c2: { id: "c2", text: "Personal" },
+        c3: { id: "c3", text: "Shopping" },
+      },
+      todos: {
+        101: {
+          id: 101,
+          text: "Review PR #123",
+          completed: false,
+          categoryId: "c1",
+        },
+        102: {
           id: 102,
           text: "Write Documentation",
           completed: true,
           categoryId: "c1",
         },
-        { id: 201, text: "Buy Milk", completed: false, categoryId: "c3" },
-      ],
+        201: {
+          id: 201,
+          text: "Buy Milk",
+          completed: false,
+          categoryId: "c3",
+        },
+      },
+      categoryOrder: ["c1", "c2", "c3"],
+      todoOrder: [101, 102, 201],
     },
     ui: {
       selectedCategoryId: "c1",
       draft: "",
-      focusId: "c1",
+      // focusId: "c1", // Removed from UI State
       editingId: null,
       editDraft: "",
+      viewMode: "list",
     },
     history: { past: [], future: [] },
   };
@@ -81,7 +94,7 @@ function useSharedIsolatedEngine() {
 function MockCategoryBrain() {
   const { state, dispatch } = useCommandEngine();
   const { categories } = state.data;
-  const { selectedCategoryId, focusId } = state.ui;
+  const { selectedCategoryId } = state.ui;
 
   return (
     <div className="p-4 space-y-2">
@@ -89,9 +102,12 @@ function MockCategoryBrain() {
         Categories (Data)
       </h3>
       <ul className="space-y-1">
-        {categories.map((category: any) => {
+        {state.data.categoryOrder.map((catId: string) => {
+          const category = categories[catId];
+          if (!category) return null;
           const isSelected = category.id === selectedCategoryId;
-          const isFocused = category.id === focusId;
+          // const isFocused = category.id === focusId; // focusId moved to OS
+          const isFocused = false; // Mocking for now, or fetch from useFocusStore if needed
           return (
             <li
               key={category.id}
@@ -147,9 +163,12 @@ function MockTodoBrain() {
   const { todos } = state.data;
   const { selectedCategoryId } = state.ui;
 
-  const visibleTodos = todos.filter(
-    (t: any) => t.categoryId === selectedCategoryId,
-  );
+  const { todoOrder } = state.data;
+  // const { selectedCategoryId } = state.ui; // Already declared above
+
+  const visibleTodos = todoOrder
+    .map((id: number) => todos[id])
+    .filter((t: any) => t && t.categoryId === selectedCategoryId);
 
   return (
     <div className="p-4 space-y-2">
@@ -200,8 +219,8 @@ function MockTodoBrain() {
               payload: { text: `New Item ${Date.now()}` },
             })
           } // Verify if ADD_TODO supports payload? In code it reads from draft.
-          // Wait, ADD_TODO reads from state.ui.draft.
-          // We need to set draft first.
+        // Wait, ADD_TODO reads from state.ui.draft.
+        // We need to set draft first.
         >
           Add Random Item (Fails if Draft Empty)
         </button>
@@ -254,17 +273,21 @@ function MockControlDeck() {
           Focus Teleport
         </h3>
         <div className="grid grid-cols-3 gap-2">
-          {state.data.categories.map((c: any) => (
-            <button
-              key={c.id}
-              className="p-2 bg-white/5 hover:bg-white/10 rounded text-xs text-left truncat"
-              onClick={() =>
-                dispatch({ type: "SET_FOCUS", payload: { id: c.id } })
-              }
-            >
-              Focus {c.text}
-            </button>
-          ))}
+          {state.data.categoryOrder.map((id: string) => {
+            const c = state.data.categories[id];
+            if (!c) return null;
+            return (
+              <button
+                key={c.id}
+                className="p-2 bg-white/5 hover:bg-white/10 rounded text-xs text-left truncat"
+                onClick={() =>
+                  dispatch({ type: "SET_FOCUS", payload: { id: c.id } })
+                }
+              >
+                Focus {c.text}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useTodoStore } from "../lib/todoEngine";
+import { useFocusStore } from "../stores/useFocusStore";
 
 /**
  * ClipboardManager
@@ -22,12 +23,14 @@ export function ClipboardManager() {
       if (isInputActive()) return;
 
       const state = useTodoStore.getState().state;
-      const { focusId } = state.ui;
+      // Get Focus from OS Store
+      const focusId = useFocusStore.getState().focusedItemId;
       const { todos, categories } = state.data;
 
       // 1. Copying a Todo Item
-      if (typeof focusId === "number") {
-        const todo = todos.find((t) => t.id === focusId);
+      if (typeof focusId !== "object" && !isNaN(Number(focusId))) { // Check if numeric ID (Todo)
+        const todoId = Number(focusId);
+        const todo = todos[todoId];
         if (todo) {
           e.preventDefault();
           const text = todo.text;
@@ -40,7 +43,7 @@ export function ClipboardManager() {
       }
       // 2. Copying a Category
       else if (typeof focusId === "string" && focusId.startsWith("cat_")) {
-        const category = categories.find((c) => c.id === focusId);
+        const category = categories[focusId];
         if (category) {
           e.preventDefault();
           e.clipboardData?.setData("text/plain", category.text);

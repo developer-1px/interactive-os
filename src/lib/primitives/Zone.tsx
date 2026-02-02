@@ -36,7 +36,7 @@ export function Zone({
   id,
   children,
   dispatch: customDispatch,
-  currentFocusId: customFocusId,
+  // currentFocusId: customFocusId,
   defaultFocusId,
   registry: customRegistry,
   area,
@@ -46,13 +46,10 @@ export function Zone({
 }: ZoneProps) {
   const {
     dispatch: contextDispatch,
-    currentFocusId: contextFocusId,
     registry: contextRegistry,
     ctx,
   } = useCommandEngine();
   const dispatch = customDispatch || contextDispatch;
-  const currentFocusId =
-    customFocusId !== undefined ? customFocusId : contextFocusId;
   const registry = customRegistry || contextRegistry;
 
   // --- Focus Store Integration (Jurisdictional Focus) ---
@@ -98,7 +95,7 @@ export function Zone({
           (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA");
         const isAtStart = isInput
           ? (activeEl as HTMLInputElement).selectionStart === 0 &&
-            (activeEl as HTMLInputElement).selectionEnd === 0
+          (activeEl as HTMLInputElement).selectionEnd === 0
           : false;
 
         // Inject extrinsic state into context

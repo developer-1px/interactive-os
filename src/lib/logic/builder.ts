@@ -21,7 +21,7 @@ export class ComparisonBuilder<T, K extends keyof T> {
     return {
       op: "eq",
       key: String(this.k),
-      value,
+      val: value,
       description: `${String(this.k)} == ${value}`,
     };
   }
@@ -29,7 +29,7 @@ export class ComparisonBuilder<T, K extends keyof T> {
     return {
       op: "neq",
       key: String(this.k),
-      value,
+      val: value,
       description: `${String(this.k)} != ${value}`,
     };
   }
@@ -38,7 +38,7 @@ export class ComparisonBuilder<T, K extends keyof T> {
     return {
       op: "gt",
       key: String(this.k),
-      value,
+      val: value,
       description: `${String(this.k)} > ${value}`,
     };
   }
@@ -46,7 +46,7 @@ export class ComparisonBuilder<T, K extends keyof T> {
     return {
       op: "gte",
       key: String(this.k),
-      value,
+      val: value,
       description: `${String(this.k)} >= ${value}`,
     };
   }
@@ -54,7 +54,7 @@ export class ComparisonBuilder<T, K extends keyof T> {
     return {
       op: "lt",
       key: String(this.k),
-      value,
+      val: value,
       description: `${String(this.k)} < ${value}`,
     };
   }
@@ -62,7 +62,7 @@ export class ComparisonBuilder<T, K extends keyof T> {
     return {
       op: "lte",
       key: String(this.k),
-      value,
+      val: value,
       description: `${String(this.k)} <= ${value}`,
     };
   }
