@@ -17,7 +17,7 @@ import {
   boardStrategy,
   sidebarStrategy,
 } from "./todo/focusStrategies";
-import { todoPhysicsMiddleware } from "./todo/navigationPhysics";
+import { navigationMiddleware } from "./todo/navigationMiddleware";
 import { mapStateToContext } from "./todo/contextMapper";
 
 // Initialize Unified Engine Registry (The "Brain" knows all, but UI is scoped)
@@ -36,7 +36,19 @@ export const useTodoStore = createCommandStore<AppState, TodoCommand>(
   ENGINE_REGISTRY,
   loadState(),
   {
-    onStateChange: todoPhysicsMiddleware,
+    onStateChange: navigationMiddleware,
+    getEnv: () => {
+      // OS-Level Environment Injection
+      const { focusedItemId, activeZoneId } = useFocusStore.getState();
+      return {
+        focusId: focusedItemId,
+        activeZone: activeZoneId,
+      };
+    },
+    onDispatch: (action: TodoCommand) => {
+      // "Smart Dispatch" - now purely handled by Context Receiver in commands
+      return action;
+    }
   },
 );
 

@@ -26,3 +26,35 @@
 - **Formatter**: Use `biome` for formatting and linting.
 - **Indentation**: 2 spaces (Enforced by `biome.json`).
 - **Imports**: Organized automatically by Biome.
+
+## Architectural Principles
+- **Strict Type Safety**: NO `any` allowed. Use Strict Union Patterns for all registries and state.
+- **Logic-First Architecture**: Logic must be purely separated from UI. Use the Pure Command Pattern.
+- **Zero-Latency Design**: All interactions must default to Optimistic Updates.
+
+## Detailed Design Principles
+
+### 1. Code Minimalism (Less is More)
+- **Liability of Code**: Every line of code is a liability. If it doesn't serve a feature, delete it.
+- **No Speculative Code**: Do not write code for "future use" (YAGNI).
+- **Boilerplate-Zero**: Favor factory functions (`createCommandFactory`) over manual repetition.
+
+### 2. Single Responsibility (SRP)
+- **Atomic File Integrity**: One file per logical unit (Component, Hook, or Utility).
+- **Limit Complexity**: If a file exceeds 200 lines, it is a candidate for splitting.
+- **Colocation**: Tests and styles must live next to their implementation.
+
+### 3. Layered Architecture (Framework Standard)
+**Strict Unidirectional Flow**: `UI -> Action -> State -> UI`
+- **L1 Core (`src/lib`)**: Pure TypeScript logic. No UI dependencies.
+- **L2 State (`src/stores`)**: Global state management and side-effects.
+- **L3 View (`src/components`)**: Dumb components. Data in, Events out.
+- **L4 App (`src/pages`)**: Composition and Routing.
+> **Constraint**: Lower layers (L1) MUST NOT import from Higher layers (L3/L4).
+
+### 4. Modern FE Standards (Verified)
+- **Headless-First**: Design the logic/state machine *before* thinking about pixels.
+- **Immutable State**: Usage of `immer` is mandatory for complex state updates.
+- **Composition > Inheritance**: Use Hooks and Component Composition.
+- **Strict Inference**: Do not strictly type variable declarations if TS can infer them correctly (keeps code minimal).
+

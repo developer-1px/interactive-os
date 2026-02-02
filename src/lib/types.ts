@@ -1,3 +1,24 @@
+
+/**
+ * OSEnvironment:
+ * Standardized OS-level context provided to all commands.
+ * This is "Transparent" and "TypeSafe" as requested.
+ */
+export interface OSEnvironment {
+  focusId: string | number | null;
+  activeZone: string | null;
+}
+
+
+export type AppEffect =
+  | { type: "FOCUS_ID"; id: string | number }
+  | {
+    type: "NAVIGATE";
+    direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
+    targetZone?: string;
+  }
+  | { type: "SCROLL_INTO_VIEW"; id: string | number };
+
 export type FocusTarget = "DRAFT" | number | string | null;
 
 export interface Category {
@@ -39,7 +60,7 @@ export interface DataState {
 export interface UIState {
   selectedCategoryId: string;
   // focusId: FocusTarget; // Moved to OS Layer (useFocusStore)
-  focusRequest?: string; // Signals a request to the OS to change focus
+  // focusRequest removed in favor of state.effects
   draft: string;
   editingId: FocusTarget;
   editDraft: string;
@@ -54,5 +75,6 @@ export interface HistoryState {
 export interface AppState {
   data: DataState;
   ui: UIState;
+  effects: AppEffect[]; // [NEW] FIFO Queue for Side Effects
   history: HistoryState;
 }

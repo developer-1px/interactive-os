@@ -27,14 +27,14 @@ export const SIDEBAR_MENU: MenuItem[] = [
     ),
   },
   {
-    command: "MOVE_SIDEBAR_FOCUS_UP",
+    command: "NAVIGATE_UP",
     when: Rule.and(
       Expect("activeZone").toBe("sidebar"),
       Expect("focusIndex").toBeGreaterThan(0),
     ),
   },
   {
-    command: "MOVE_SIDEBAR_FOCUS_DOWN",
+    command: "NAVIGATE_DOWN",
     when: Rule.and(
       Expect("activeZone").toBe("sidebar"),
       Expect("focusIndex").toBeLessThanKey("maxIndex"),
@@ -73,11 +73,11 @@ export const TODOLIST_MENU: MenuItem[] = [
     ),
   },
   {
-    command: "MOVE_FOCUS_UP",
+    command: "NAVIGATE_UP",
     when: Expect("isEditing").toBeFalsy(),
   },
   {
-    command: "MOVE_FOCUS_DOWN",
+    command: "NAVIGATE_DOWN",
     when: Expect("isEditing").toBeFalsy(),
   },
   {
@@ -101,13 +101,7 @@ export const TODOLIST_MENU: MenuItem[] = [
       Expect("focusIndex").toBeGreaterThanOrEqual(0),
     ),
   },
-  {
-    command: "JUMP_TO_SIDEBAR",
-    when: Rule.or(
-      Expect("isEditing").toBeFalsy(),
-      Expect("cursorAtStart" as keyof TodoContext).toBe(true),
-    ),
-  },
+
   { command: "SYNC_DRAFT" },
   { command: "SYNC_EDIT_DRAFT" },
   {

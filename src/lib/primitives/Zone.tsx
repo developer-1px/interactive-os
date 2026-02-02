@@ -30,6 +30,10 @@ export interface ZoneProps {
   neighbors?: ZoneNeighbors;
   /** Focus Layout: Internal Navigation Strategy */
   layout?: "column" | "row" | "grid";
+  /** Ordered list of focusable IDs for generic navigation */
+  items?: string[];
+  /** Navigation Behavior: 'clamp' (stop at end) or 'wrap' (loop) */
+  navMode?: "clamp" | "wrap";
 }
 
 export function Zone({
@@ -43,6 +47,8 @@ export function Zone({
   active,
   neighbors,
   layout = "column",
+  items = [],
+  navMode = "clamp",
 }: ZoneProps) {
   const {
     dispatch: contextDispatch,
@@ -59,10 +65,11 @@ export function Zone({
   const setActiveZone = useFocusStore((s) => s.setActiveZone);
 
   // Register this zone with the window manager
+  // Now includes `items` and `navMode` for generic navigation!
   useEffect(() => {
-    registerZone({ id, area, defaultFocusId });
+    registerZone({ id, area, defaultFocusId, items, navMode });
     return () => unregisterZone(id);
-  }, [id, area, defaultFocusId, registerZone, unregisterZone]);
+  }, [id, area, defaultFocusId, registerZone, unregisterZone, items, navMode]);
 
   // Active state is now derived from the global store (unless manually overridden)
   const isStoreActive = activeZoneId === id;
@@ -134,72 +141,57 @@ export function Zone({
     }
   }, [isActive, registry, dispatch]);
 
-  // --- Declarative Spatial Navigation ---
+  // --- Declarative Spatial Navigation (Universal Command Dispatch) ---
   useEffect(() => {
     if (!isActive || !neighbors) return;
 
     const handleSpatialNav = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return;
 
-      // Should input stop navigation?
       const activeEl = document.activeElement as HTMLElement;
       const isInput =
         activeEl &&
         (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA");
-      // If editing text, we generally don't want to jump zones unless at boundary (advanced)
-      // For MVP, we aggressively block if input is active to be safe
       if (isInput) return;
 
+      let commandId: string | undefined;
       let targetZoneId: string | undefined;
 
       switch (e.key) {
         case "ArrowUp":
-          if (layout === "column" || layout === "grid") return; // Internal for Column
+          if (layout === "column" || layout === "grid") return;
+          commandId = "NAVIGATE_UP";
           targetZoneId = neighbors.up;
           break;
         case "ArrowDown":
-          if (layout === "column" || layout === "grid") return; // Internal for Column
+          if (layout === "column" || layout === "grid") return;
+          commandId = "NAVIGATE_DOWN";
           targetZoneId = neighbors.down;
           break;
         case "ArrowLeft":
-          if (layout === "row" || layout === "grid") return; // Internal for Row
+          if (layout === "row" || layout === "grid") return;
+          commandId = "NAVIGATE_LEFT";
           targetZoneId = neighbors.left;
           break;
         case "ArrowRight":
-          if (layout === "row" || layout === "grid") return; // Internal for Row
+          if (layout === "row" || layout === "grid") return;
+          commandId = "NAVIGATE_RIGHT";
           targetZoneId = neighbors.right;
           break;
       }
 
-      if (targetZoneId) {
+      if (commandId && targetZoneId) {
         e.preventDefault();
-
-        // --- Headless Focus Controller Pattern ---
-        // 1. Activate Zone Jurisdiction (OS Layer)
-        setActiveZone(targetZoneId);
-
-        // 2. Resolve Content Focus (App Layer Delegate)
-        // We use the central registry to find the ENTRY STRATEGY for this zone.
-        // This decouples Zone from knowing about "todos" or "categories".
-        const { state, ctx } = useCommandEngine(); // Now returns state too
-        if (state && ctx) {
-          const targetFocusId = focusRegistry.resolve(
-            targetZoneId,
-            state as any,
-            ctx,
-          );
-
-          if (targetFocusId) {
-            // OS-Level Focus Dispatch
-            useFocusStore.getState().setFocus(targetFocusId);
-          }
-        }
+        dispatch({
+          type: commandId,
+          payload: { targetZone: targetZoneId },
+        });
       }
     };
 
     window.addEventListener("keydown", handleSpatialNav);
     return () => window.removeEventListener("keydown", handleSpatialNav);
-  }, [isActive, neighbors, layout, setActiveZone, dispatch]);
+  }, [isActive, neighbors, layout, dispatch]);
 
   const handleFocus = (e: React.FocusEvent) => {
     // 1. Claim Jurisdiction

@@ -4,6 +4,8 @@ interface ZoneMetadata {
   id: string;
   area?: string;
   defaultFocusId?: string;
+  items?: string[]; // Ordered list of focusable IDs within this zone
+  navMode?: "clamp" | "wrap"; // Navigation Strategy: Stop at edge or Wrap around
 }
 
 interface FocusState {

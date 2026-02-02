@@ -35,8 +35,9 @@ export function BoardView() {
             <Zone
               key={catId}
               id={`board_col_${catId}`}
-              area="board-column"
+              area="boardView"
               neighbors={{ left: prevZone, right: nextZone }}
+              items={[`board_col_${catId}_header`, ...catTodos.map((t) => String(t.id))]}
               layout="column" // Items in column stack vertically
             >
               <div
@@ -76,11 +77,10 @@ export function BoardView() {
                           <Trigger command={ToggleTodo({ id: todo.id })}>
                             <div
                               className={`w-4 h-4 mt-1 rounded border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 
-                                                        ${
-                                                          isCompleted
-                                                            ? "bg-indigo-500 border-indigo-500"
-                                                            : "border-slate-600 hover:border-slate-400"
-                                                        }`}
+                                                        ${isCompleted
+                                  ? "bg-indigo-500 border-indigo-500"
+                                  : "border-slate-600 hover:border-slate-400"
+                                }`}
                             >
                               {isCompleted && (
                                 <Check

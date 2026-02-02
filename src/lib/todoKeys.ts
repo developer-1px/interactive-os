@@ -13,6 +13,12 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
     { key: "Meta+z", command: "UNDO", allowInInput: true },
     { key: "Meta+Shift+Z", command: "REDO", allowInInput: true },
     { key: "Meta+Shift+V", command: "TOGGLE_VIEW", allowInInput: true },
+
+    // Universal Navigation
+    { key: "ArrowUp", command: "NAVIGATE_UP", allowInInput: true },
+    { key: "ArrowDown", command: "NAVIGATE_DOWN", allowInInput: true },
+    { key: "ArrowLeft", command: "NAVIGATE_LEFT", allowInInput: true },
+    { key: "ArrowRight", command: "NAVIGATE_RIGHT", allowInInput: true },
   ],
   zones: {
     sidebar: [
@@ -20,13 +26,10 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
       { key: "Meta+ArrowDown", command: "MOVE_CATEGORY_DOWN" },
       { key: "Enter", command: "SELECT_CATEGORY" },
       { key: "Space", command: "SELECT_CATEGORY" },
-      { key: "ArrowUp", command: "MOVE_SIDEBAR_FOCUS_UP" },
-      { key: "ArrowDown", command: "MOVE_SIDEBAR_FOCUS_DOWN" },
+      // Navigation lifted to global
     ],
     listView: [
-      // Navigation
-      { key: "ArrowUp", command: "MOVE_FOCUS_UP", allowInInput: true },
-      { key: "ArrowDown", command: "MOVE_FOCUS_DOWN", allowInInput: true },
+      // Navigation lifted to global
 
       // Structure
       { key: "Meta+ArrowUp", command: "MOVE_ITEM_UP" },
@@ -79,24 +82,11 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
         when: Expect("isEditing").toBe(false),
       },
 
-      // Cross-Zone
-      {
-        key: "ArrowLeft",
-        command: "JUMP_TO_SIDEBAR",
-        when: Rule.and(
-          Rule.or(
-            Expect("isEditing").toBe(false),
-            Expect("cursorAtStart" as keyof TodoContext).toBe(true),
-          ),
-          Expect("activeZone").toBe("listView"),
-        ),
-        allowInInput: true,
-      },
+      // Cross-Zone: Handled by Zone Declarative Neighbors
+
     ],
     boardView: [
-      // Navigation
-      { key: "ArrowUp", command: "MOVE_FOCUS_UP", allowInInput: true },
-      { key: "ArrowDown", command: "MOVE_FOCUS_DOWN", allowInInput: true },
+      // Navigation lifted to global
 
       // Column Navigation (Handled by Zone Neighbors Declaratively)
       // ArrowRight/Left falls through to Zone Spatial Nav

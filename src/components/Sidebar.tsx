@@ -45,6 +45,8 @@ export function Sidebar() {
             ? `board_col_${state.data.categoryOrder[0]}`
             : "listView",
       }}
+      items={state.data.categoryOrder}
+      navMode="wrap" // Example: Rolling Navigation for Sidebar
       layout="column"
     >
       <div className="w-72 flex flex-col h-full bg-[#0F1117] border-r border-white/5 relative overflow-hidden">

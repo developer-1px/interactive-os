@@ -28,11 +28,11 @@ export function defineGroup<S, K extends string = string>(
   return { id, when, commands };
 }
 
-export class CommandRegistry<S, K extends string = string> {
-  private commands: Map<K, CommandDefinition<S, any, K>> = new Map();
+export class CommandRegistry<S, K extends string = string, E = any> {
+  private commands: Map<K, CommandDefinition<S, any, K, E>> = new Map();
   private keymap: KeybindingItem<any>[] | KeymapConfig<any> = [];
 
-  register(definition: CommandDefinition<S, any, K>) {
+  register(definition: CommandDefinition<S, any, K, E>) {
     this.commands.set(definition.id, definition);
     logger.debug("SYSTEM", `Registered Command: [${definition.id}]`);
   }
@@ -65,14 +65,14 @@ export class CommandRegistry<S, K extends string = string> {
     const count = Array.isArray(keymap)
       ? keymap.length
       : (keymap.global?.length || 0) +
-        Object.values(keymap.zones || {}).reduce(
-          (acc: number, arr: any) => acc + arr.length,
-          0,
-        );
+      Object.values(keymap.zones || {}).reduce(
+        (acc: number, arr: any) => acc + arr.length,
+        0,
+      );
     logger.debug("SYSTEM", `Loaded External Keymap: ${count} entries`);
   }
 
-  get(id: K): CommandDefinition<S, any, K> | undefined {
+  get(id: K): CommandDefinition<S, any, K, E> | undefined {
     return this.commands.get(id);
   }
 
@@ -163,17 +163,25 @@ export interface CommandStoreState<S, A> {
 export function createCommandStore<
   S,
   A extends { type: string; payload?: any },
+  E = any,
 >(
-  registry: CommandRegistry<S>,
+  registry: CommandRegistry<S, any, E>,
   initialState: S,
   config?: {
     onStateChange?: (state: S, action: A, prevState: S) => S;
+    onDispatch?: (action: A) => A; // Interceptor
+    getEnv?: () => E; // Environment Getter
   },
 ) {
   return create<CommandStoreState<S, A>>((set) => ({
     state: initialState,
-    dispatch: (action) =>
+    dispatch: (startAction) =>
       set((prev) => {
+        // Run interceptor if defined
+        const action = config?.onDispatch
+          ? config.onDispatch(startAction)
+          : startAction;
+
         const cmd = registry.get(action.type);
         if (!cmd) {
           logger.warn(
@@ -182,7 +190,11 @@ export function createCommandStore<
           );
           return prev;
         }
-        const nextInnerState = cmd.run(prev.state, action.payload);
+
+        // Inject Environment (Context Receiver Pattern)
+        const env = config?.getEnv ? config.getEnv() : ({} as E);
+
+        const nextInnerState = cmd.run(prev.state, action.payload, env);
         const finalState = config?.onStateChange
           ? config.onStateChange(nextInnerState, action, prev.state)
           : nextInnerState;
@@ -209,9 +221,10 @@ export function useCommandCenter<
   S,
   A extends { type: any; payload?: any },
   K extends string = string,
+  E = any
 >(
-  store: ReturnType<typeof createCommandStore<S, A>>,
-  registry: CommandRegistry<S, K>,
+  store: ReturnType<typeof createCommandStore<S, A, E>>,
+  registry: CommandRegistry<S, K, E>,
   config?: {
     mapStateToContext?: (state: S) => any;
   },

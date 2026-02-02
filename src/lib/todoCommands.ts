@@ -1,10 +1,11 @@
-import type { AppState } from "./types";
+import type { AppState, OSEnvironment } from "./types";
 import { CommandRegistry } from "./command";
 import { createCommandFactory } from "./definition";
 import { produce } from "immer";
 
+
 // 1. Context-Aware Factories
-const defineCommand = createCommandFactory<AppState>();
+const defineCommand = createCommandFactory<AppState, OSEnvironment>();
 
 // 1. Global
 
@@ -33,11 +34,14 @@ export const SetFocus = defineCommand({
       ...state,
       ui: {
         ...state.ui,
-        focusRequest: payload.id, // Proxy to OS
         selectedCategoryId: nextCategory,
       },
+      effects: [
+        ...state.effects,
+        { type: "FOCUS_ID", id: payload.id },
+      ],
     };
-  },
+  };
 });
 
 export const Undo = defineCommand({
@@ -53,18 +57,30 @@ export const Redo = defineCommand({
 // 2. Sidebar
 export const MoveCategoryUp = defineCommand({
   id: "MOVE_CATEGORY_UP",
-  run: (state) => ({
-    ...state,
-    ui: { ...state.ui, focusRequest: "SIDEBAR_PREV" },
-  }),
+  run: (state) =>
+    produce(state, (draft) => {
+      const id = state.ui.selectedCategoryId;
+      const idx = draft.data.categoryOrder.indexOf(id);
+      if (idx > 0) {
+        const prev = draft.data.categoryOrder[idx - 1];
+        draft.data.categoryOrder[idx - 1] = id;
+        draft.data.categoryOrder[idx] = prev;
+      }
+    }),
 });
 
 export const MoveCategoryDown = defineCommand({
   id: "MOVE_CATEGORY_DOWN",
-  run: (state) => ({
-    ...state,
-    ui: { ...state.ui, focusRequest: "SIDEBAR_NEXT" },
-  }),
+  run: (state) =>
+    produce(state, (draft) => {
+      const id = state.ui.selectedCategoryId;
+      const idx = draft.data.categoryOrder.indexOf(id);
+      if (idx !== -1 && idx < draft.data.categoryOrder.length - 1) {
+        const next = draft.data.categoryOrder[idx + 1];
+        draft.data.categoryOrder[idx + 1] = id;
+        draft.data.categoryOrder[idx] = next;
+      }
+    }),
 });
 
 export const SelectCategory = defineCommand({
@@ -82,7 +98,10 @@ export const SelectCategory = defineCommand({
 export const JumpToList = defineCommand({
   id: "JUMP_TO_LIST",
 
-  run: (state) => ({ ...state, ui: { ...state.ui, focusRequest: "DRAFT" } }),
+  run: (state) => ({
+    ...state,
+    effects: [...state.effects, { type: "FOCUS_ID", id: "DRAFT" }],
+  }),
 });
 
 // 3. TodoList
@@ -138,11 +157,13 @@ export const ImportTodos = defineCommand({
 
 export const ToggleTodo = defineCommand({
   id: "TOGGLE_TODO",
-  run: (state, payload: { id?: number } = {}) =>
+  run: (state, payload: { id?: number } = {}, env) =>
     produce(state, (draft) => {
-      // Payload must be injected if triggered via key
-      const targetId = payload?.id;
-      if (typeof targetId !== "number") return;
+      // Use Payload OR Environment (Context Receiver Pattern)
+      const targetId = payload.id !== undefined ? payload.id : Number(env.focusId);
+
+      // Validate ID (must be number)
+      if (!targetId || isNaN(targetId)) return;
 
       const todo = draft.data.todos[targetId];
       if (todo) {
@@ -153,10 +174,11 @@ export const ToggleTodo = defineCommand({
 
 export const DeleteTodo = defineCommand({
   id: "DELETE_TODO",
-  run: (state, payload: { id?: number } = {}) =>
+  run: (state, payload: { id?: number } = {}, env) =>
     produce(state, (draft) => {
-      const targetId = payload?.id;
-      if (typeof targetId !== "number") return;
+      const targetId = payload.id !== undefined ? payload.id : Number(env.focusId);
+
+      if (!targetId || isNaN(targetId)) return;
 
       // Delete from Map
       delete draft.data.todos[targetId];
@@ -168,86 +190,57 @@ export const DeleteTodo = defineCommand({
     }),
 });
 
-export const MoveFocusUp = defineCommand({
-  id: "MOVE_FOCUS_UP",
-  run: (state) => {
-    // Note: We use OS focus (via request) but logic depends on App Data Order
-    // Ideally we should pass current focus in payload?
-    // For now, assuming state.ui.focusId is NOT available, we rely on the fact that
-    // we might need to know "what was focused" to move relative to it.
-    // BUT we removed focusId from state!
-    // CRITICAL FIX: The command needs to know the CURRENT focus to calculate the NEXT focus.
-    // Since we decoupled focus, the Command doesn't know where we are!
+// Universal Navigation
+export const NavigateUp = defineCommand({
+  id: "NAVIGATE_UP",
+  run: (state) => ({
+    ...state,
+    effects: [...state.effects, { type: "NAVIGATE", direction: "UP" }],
+  }),
+});
 
-    // Strategy: We can't implement relative navigation inside a pure state-only command
-    // if the state doesn't track focus.
-    // Option 1: Pass current focus as payload from the Keybinding Trigger?
-    // Option 2: Zones handle ArrowUp/Down natively (Preferred).
-    // Option 3: We re-introduced focusId? No.
+export const NavigateDown = defineCommand({
+  id: "NAVIGATE_DOWN",
+  run: (state) => ({
+    ...state,
+    effects: [...state.effects, { type: "NAVIGATE", direction: "DOWN" }],
+  }),
+});
 
-    // Decision: We will assume the payload contains { currentFocusId }.
-    // The Trigger in `todoKeys.ts` or `Zone` needs to inject this.
-    // OR: useFocusStore.getState().focusedItemId is accessed in the THUNK/Middleware,
-    // not the reducer.
-
-    // PROVISIONAL: We return a special "MOVE_FOCUS_DELTA" request?
-    // Or simpler: The keybinding in Zone invokes a different mechanism?
-
-    // Let's go with: Payload should have currentFocusId.
-    // Logic in Zone.tsx `handleSpatialNav` or similar should dispatch this with payload?
-    // But `todoKeys` are global/zone based.
-
-    // REVISION: We put `focusRequest` as a generic intent.
-    // But for UP/DOWN we need calculation.
-    // Let's assume for this specific refactor step that we will Fix logic issues in separate step
-    // if payload is missing.
-    // Actually, we can just return a 'FOCUS_PREV' request and let the Engine/Middleware calculate it?
-    // No, Engine Middleware has access to State + FocusStore?
-
-    // Practical Fix: for now, we leave the logic BROKEN regarding "current position"
-    // unless we inject it.
-    // But wait, `useTodoEngine` injects `focusedItemId` into the Context `ctx`.
-    // The `when` clause evaluates against `ctx`.
-    // Can we pass `ctx` to `run`? No.
-
-    // OK, I will modify `MoveFocusUp` to accept `currentFocusId` in payload.
-    // And `todoKeys` (or the dispatcher) needs to provide it.
-    // Since we can't easily change `todoKeys` mapping to inject dynamic state...
-
-    // ALTERNATIVE: Re-read `Zone.tsx`.
-    // I checked `Zone.tsx` and it does NOT handle Item Nav yet.
-    // So `TodoEngine` MUST handle it.
-
-    // I will assume for now that I can't easily fix the "Read" part without side effects.
-    // So I will modify logic to use a "Best Effort" or maybe I made a mistake removing focusId so aggressively?
-    // No, separation of concerns is correct.
-
-    // I will implement `MoveFocus` as returning `focusRequest: 'PREV'` or `'NEXT'`.
-    // The `onStateChange` middleware will handle the calculation using `useFocusStore`!
-    // This is creating a Protocol.
-
-    return { ...state, ui: { ...state.ui, focusRequest: "PREV" } };
+export const NavigateLeft = defineCommand({
+  id: "NAVIGATE_LEFT",
+  run: (state, payload: { targetZone?: string } = {}) => {
+    return {
+      ...state,
+      effects: [
+        ...state.effects,
+        { type: "NAVIGATE", direction: "LEFT", targetZone: payload.targetZone },
+      ],
+    };
   },
 });
 
-export const MoveFocusDown = defineCommand({
-  id: "MOVE_FOCUS_DOWN",
-  run: (state) => {
-    return { ...state, ui: { ...state.ui, focusRequest: "NEXT" } };
+export const NavigateRight = defineCommand({
+  id: "NAVIGATE_RIGHT",
+  run: (state, payload: { targetZone?: string } = {}) => {
+    return {
+      ...state,
+      effects: [
+        ...state.effects,
+        { type: "NAVIGATE", direction: "RIGHT", targetZone: payload.targetZone },
+      ],
+    };
   },
 });
 
 export const MoveItemUp = defineCommand({
   id: "MOVE_ITEM_UP",
-  run: (state, payload: { focusId?: number } = {}) =>
+  run: (state, payload: { focusId?: number } = {}, env) =>
     produce(state, (draft) => {
-      // We need the ID to move. If payload empty, we need to know current focus.
-      // This command also suffers from "Don't know what is focused".
-      // We will move this logic to Middleware or require payload.
-      // For today, let's assume payload is provided or we fix call sites.
-      if (payload.focusId === undefined) return;
+      const focusId = payload.focusId !== undefined ? payload.focusId : Number(env.focusId);
 
-      const focusId = payload.focusId;
+      if (!focusId || isNaN(focusId)) return;
+
       const visibleIds = state.data.todoOrder.filter(
         (id) =>
           state.data.todos[id]?.categoryId === state.ui.selectedCategoryId,
@@ -266,18 +259,18 @@ export const MoveItemUp = defineCommand({
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx],
-        draft.data.todoOrder[globalTargetIdx],
-      ];
+          draft.data.todoOrder[globalSwapIdx],
+          draft.data.todoOrder[globalTargetIdx],
+        ];
     }),
 });
 
 export const MoveItemDown = defineCommand({
   id: "MOVE_ITEM_DOWN",
-  run: (state, payload: { focusId?: number } = {}) =>
+  run: (state, payload: { focusId?: number } = {}, env) =>
     produce(state, (draft) => {
-      if (payload.focusId === undefined) return;
-      const focusId = payload.focusId;
+      const focusId = payload.focusId !== undefined ? payload.focusId : Number(env.focusId);
+      if (!focusId || isNaN(focusId)) return;
 
       const visibleIds = state.data.todoOrder.filter(
         (id) =>
@@ -297,19 +290,18 @@ export const MoveItemDown = defineCommand({
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx],
-        draft.data.todoOrder[globalTargetIdx],
-      ];
+          draft.data.todoOrder[globalSwapIdx],
+          draft.data.todoOrder[globalTargetIdx],
+        ];
     }),
 });
 
 export const StartEdit = defineCommand({
   id: "START_EDIT",
-  run: (state, payload: { id?: number } = {}) =>
+  run: (state, payload: { id?: number } = {}, env) =>
     produce(state, (draft) => {
-      // Requires Payload or Middleware Injection
-      if (payload.id === undefined) return;
-      const targetId = payload.id;
+      const targetId = payload.id !== undefined ? payload.id : Number(env.focusId);
+      if (!targetId || isNaN(targetId)) return;
 
       const todo = draft.data.todos[targetId];
       draft.ui.editingId = targetId;
@@ -317,28 +309,33 @@ export const StartEdit = defineCommand({
     }),
 });
 
-export const JumpToSidebar = defineCommand({
-  id: "JUMP_TO_SIDEBAR",
-  run: (state) => ({
-    ...state,
-    ui: { ...state.ui, focusRequest: state.ui.selectedCategoryId },
-  }),
-});
+// JumpToSidebar Removed (Handled by Zone)
+
 
 // Sidebar Navigation
 export const MoveSidebarFocusUp = defineCommand({
   id: "MOVE_SIDEBAR_FOCUS_UP",
-  run: (state) => ({
-    ...state,
-    ui: { ...state.ui, focusRequest: "SIDEBAR_PREV" },
-  }),
+  run: (state) => {
+    // We map generic sidebar navigation to effect.
+    // Ideally we use generic NAVIGATE, but here we keep specific intent if needed.
+    // For now, map to NAVIGATE UP/DOWN? No, "SIDEBAR_PREV" was a special token.
+    // Let's map it to specific effect or generic navigate?
+    // Let's blindly trust generic navigate handles it if we are IN the sidebar zone?
+    // Actually the command says "MoveSidebarFocusUp".
+    // Let's assume this means "Navigate Up" while in Sidebar.
+    // So generic NAVIGATE UP is correct.
+    return {
+      ...state,
+      effects: [...state.effects, { type: "NAVIGATE", direction: "UP" }],
+    };
+  },
 });
 
 export const MoveSidebarFocusDown = defineCommand({
   id: "MOVE_SIDEBAR_FOCUS_DOWN",
   run: (state) => ({
     ...state,
-    ui: { ...state.ui, focusRequest: "SIDEBAR_NEXT" },
+    effects: [...state.effects, { type: "NAVIGATE", direction: "DOWN" }],
   }),
 });
 
@@ -414,13 +411,15 @@ export const TodoListCommands = [
   AddTodo,
   ImportTodos,
   ToggleTodo,
+  ToggleTodo,
   DeleteTodo,
-  MoveFocusUp,
-  MoveFocusDown,
+  NavigateUp,
+  NavigateDown,
+  NavigateLeft,
+  NavigateRight,
   MoveItemUp,
   MoveItemDown,
   StartEdit,
-  JumpToSidebar,
   SyncDraft,
   SyncEditDraft,
   CancelEdit,
@@ -439,7 +438,8 @@ const ALL_COMMANDS = [
 export type InferredTodoCommand = ReturnType<(typeof ALL_COMMANDS)[number]>;
 
 // Registries
-export const UNIFIED_TODO_REGISTRY = new CommandRegistry<AppState, any>();
+export type TodoCommandId = InferredTodoCommand["type"];
+export const UNIFIED_TODO_REGISTRY = new CommandRegistry<AppState, TodoCommandId, OSEnvironment>();
 
 // Register all commands
 ALL_COMMANDS.forEach((cmd) => UNIFIED_TODO_REGISTRY.register(cmd));

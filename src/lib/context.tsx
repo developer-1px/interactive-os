@@ -146,13 +146,43 @@ function parseValue(value: string): string | number | boolean | null {
   return value;
 }
 
+/**
+ * Standard mapper to convert AppState to ContextState.
+ * This centralizes the logic currently found in TodoEngine hook.
+ */
+export function mapStateToContext(state: any): ContextState {
+  if (!state || !state.ui) return {};
+
+  const { ui, data } = state;
+  const currentZone = ui.activeZone || "todoList"; // Default fallback
+  const focusedItemId = ui.focusedItemId; // Assuming focus is tracked (if available) - wait, focus is in separate store?
+  // Ideally AppState does NOT contain focusedItemId if we fully decoupled. 
+  // But legacy code might expect it.
+  // The types.ts says `ui` has `selectedCategoryId`, but `focusedItemId` was removed?
+  // Let's check `types.ts` again if I need to be sure.
+  // But assuming `focusStrategies` needs basic context like `activeZone`.
+
+  return {
+    activeZone: currentZone,
+    selectedCategoryId: ui.selectedCategoryId,
+    isEditing: !!ui.editingId, // Fixed based on UIState
+    viewMode: ui.viewMode,
+    // Note: Other fields (focusIndex, listLength, etc.) require complex calculation.
+    // For Zone Resolution, we usually just need activeZone and structural info.
+    // Ideally mapStateToContext should return FULL context.
+    // But middleware is synchronous, so we can calculate it?
+    // For now, we cast as `any` in middleware or update this to be robust.
+    // Let's settle for basic fields here and cast in usage.
+  };
+}
+
 // --- React Context Integration ---
 
 const GlobalContext = createContext<{
   context: ContextState;
   setContext: (key: ContextKey, value: ContextValue) => void;
   updateContext: (updates: ContextState) => void;
-}>({ context: {}, setContext: () => {}, updateContext: () => {} });
+}>({ context: {}, setContext: () => { }, updateContext: () => { } });
 
 export const ContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [context, setCtx] = useState<ContextState>({});
