@@ -15,7 +15,7 @@ export interface ZoneProps {
   strategy?: NavigationStrategy; // default: 'spatial'
   preset?: InteractionPreset;    // default: 'seamless'
   layout?: "column" | "row" | "grid";
-  navMode?: "clamp" | "wrap";
+  navMode?: "clamped" | "loop";
   focusable?: boolean;           // If true, this zone can also be focused as an item
   payload?: any;                 // Optional data for focusable zones
 
@@ -41,7 +41,7 @@ export function Zone({
   strategy = "spatial",
   preset = "seamless",
   layout = "column",
-  navMode = "clamp",
+  navMode = "clamped",
   focusable = false,
   payload,
   className,

@@ -20,8 +20,10 @@ interface NavigationContext {
     items: string[];
     direction: Direction;
     layout?: "column" | "row" | "grid";
-    navMode?: "clamp" | "wrap";
+    navMode?: "clamped" | "loop";
     itemRects?: Record<string, DOMRect>; // For Spatial
+    stickyX?: number | null;
+    stickyY?: number | null;
 }
 
 /**
@@ -29,7 +31,7 @@ interface NavigationContext {
  * Index-based navigation for lists.
  */
 export function findNextRovingTarget(ctx: NavigationContext): string | null {
-    const { currentId, items, direction, layout = "column", navMode = "clamp" } = ctx;
+    const { currentId, items, direction, layout = "column", navMode = "clamped" } = ctx;
     if (!currentId || items.length === 0) return items[0] || null;
 
     const currentIndex = items.indexOf(currentId);
@@ -62,11 +64,11 @@ export function findNextRovingTarget(ctx: NavigationContext): string | null {
 
     // Handle Bounds
     if (nextIndex < 0) {
-        if (navMode === "wrap") return items[items.length - 1];
+        if (navMode === "loop") return items[items.length - 1];
         return null; // Hit edge -> Bubble
     }
     if (nextIndex >= items.length) {
-        if (navMode === "wrap") return items[0];
+        if (navMode === "loop") return items[0];
         return null; // Hit edge -> Bubble
     }
 
@@ -78,7 +80,7 @@ export function findNextRovingTarget(ctx: NavigationContext): string | null {
  * Physics-based navigation using DOM Rects.
  */
 export function findNextSpatialTarget(ctx: NavigationContext): string | null {
-    const { currentId, items, direction } = ctx;
+    const { currentId, items, direction, stickyX, stickyY } = ctx;
     if (!currentId) return items[0] || null;
 
     const currentEl = document.getElementById(currentId);
@@ -86,59 +88,67 @@ export function findNextSpatialTarget(ctx: NavigationContext): string | null {
     const currentRect = currentEl.getBoundingClientRect();
 
     let bestId: string | null = null;
-    let bestDist = Infinity;
+    let minScore = Infinity;
 
-    // Basic Spatial Heuristic
     items.forEach((id) => {
         if (id === currentId) return;
         const el = document.getElementById(id);
         if (!el) return;
         const rect = el.getBoundingClientRect();
 
-        let isValid = false;
-        let dist = Infinity;
-
-        // Center Points
-        const cx = currentRect.left + currentRect.width / 2;
-        const cy = currentRect.top + currentRect.height / 2;
-        const tx = rect.left + rect.width / 2;
-        const ty = rect.top + rect.height / 2;
-
-        // Projections
-        const dx = tx - cx;
-        const dy = ty - cy;
-
+        // 1. Strict Directional Filter
+        let isCorrectDirection = false;
         switch (direction) {
-            case "UP":
-                // Must be above (dy < 0) and reasonably aligned vertically
-                if (dy < 0) {
-                    // Priority: Vertical distance, penalized by horizontal deviation
-                    isValid = true;
-                    dist = (dy * dy) + (dx * dx * 1.5); // Penaize horizontal
-                }
-                break;
-            case "DOWN":
-                if (dy > 0) {
-                    isValid = true;
-                    dist = (dy * dy) + (dx * dx * 1.5);
-                }
-                break;
-            case "LEFT":
-                if (dx < 0) {
-                    isValid = true;
-                    dist = (dx * dx) + (dy * dy * 1.5);
-                }
-                break;
-            case "RIGHT":
-                if (dx > 0) {
-                    isValid = true;
-                    dist = (dx * dx) + (dy * dy * 1.5);
-                }
-                break;
+            case "UP": isCorrectDirection = rect.bottom <= currentRect.top + 2; break;
+            case "DOWN": isCorrectDirection = rect.top >= currentRect.bottom - 2; break;
+            case "LEFT": isCorrectDirection = rect.right <= currentRect.left + 2; break;
+            case "RIGHT": isCorrectDirection = rect.left >= currentRect.right - 2; break;
+        }
+        if (!isCorrectDirection) return;
+
+        // 2. Calculate Distances
+        // Primary Distance: Gap between closest edges in the movement direction
+        let dPrimary = 0;
+        // Secondary Distance: Gap between segments in the orthogonal dimension
+        let dSecondary = 0;
+        // Alignment: Center-to-center distance in the orthogonal dimension (tie-breaker)
+        let dCenter = 0;
+
+        if (direction === "UP" || direction === "DOWN") {
+            dPrimary = direction === "UP" ? currentRect.top - rect.bottom : rect.top - currentRect.bottom;
+            dSecondary = Math.max(0, rect.left - currentRect.right, currentRect.left - rect.right);
+
+            // Use stickyX if available to preserve horizontal lane
+            const sourceX = (stickyX !== undefined && stickyX !== null)
+                ? stickyX
+                : (currentRect.left + currentRect.width / 2);
+            const targetX = rect.left + rect.width / 2;
+            dCenter = Math.abs(targetX - sourceX);
+        } else {
+            dPrimary = direction === "LEFT" ? currentRect.left - rect.right : rect.left - currentRect.right;
+            dSecondary = Math.max(0, rect.top - currentRect.bottom, currentRect.top - rect.bottom);
+
+            // Use stickyY if available to preserve vertical lane
+            const sourceY = (stickyY !== undefined && stickyY !== null)
+                ? stickyY
+                : (currentRect.top + currentRect.height / 2);
+            const targetY = rect.top + rect.height / 2;
+            dCenter = Math.abs(targetY - sourceY);
         }
 
-        if (isValid && dist < bestDist) {
-            bestDist = dist;
+        // 3. Scoring Heuristic (TV Navigation Industry Standard)
+        // Primary distance is the main factor.
+        // Secondary distance is heavily penalized.
+        // If segments overlap (dSecondary == 0), the element is much more likely to be picked.
+
+        // Weighting: 
+        // 1 * Primary Distance 
+        // + 24 * Secondary Distance (High penalty for non-overlapping items)
+        // + 0.1 * Center distance (Tie-breaker for aligned items)
+        const score = (dPrimary * dPrimary) + (dSecondary * dSecondary * 24) + dCenter;
+
+        if (score < minScore) {
+            minScore = score;
             bestId = id;
         }
     });

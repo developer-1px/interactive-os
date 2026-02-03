@@ -31,19 +31,53 @@ export function createOSRegistry<S>() {
             log: true,
             run: (state: S, payload: { direction: Direction; sourceId?: string }) => {
                 const dir = payload.direction;
-                const { focusPath, zoneRegistry, focusedItemId, setActiveZone, setFocus } = useFocusStore.getState();
+                const {
+                    focusPath,
+                    zoneRegistry,
+                    focusedItemId,
+                    setActiveZone,
+                    setFocus,
+                    stickyX,
+                    stickyY,
+                    setSpatialSticky
+                } = useFocusStore.getState();
+
+                // 1. Spatial Memory (Sticky Anchor Management)
+                const isVertical = dir === "UP" || dir === "DOWN";
+                const isHorizontal = dir === "LEFT" || dir === "RIGHT";
+
+                let activeStickyX = stickyX;
+                let activeStickyY = stickyY;
+
+                // Axis Reset: If we move vertically, we want to anchor the X, but clear the Y.
+                // If we don't have an anchor yet, we establish one from the current element.
+                if (isVertical) {
+                    activeStickyY = null; // Clear horizontal anchor
+                    if (activeStickyX === null && focusedItemId) {
+                        const el = document.getElementById(focusedItemId);
+                        if (el) {
+                            const rect = el.getBoundingClientRect();
+                            activeStickyX = rect.left + rect.width / 2;
+                        }
+                    }
+                } else if (isHorizontal) {
+                    activeStickyX = null; // Clear vertical anchor
+                    if (activeStickyY === null && focusedItemId) {
+                        const el = document.getElementById(focusedItemId);
+                        if (el) {
+                            const rect = el.getBoundingClientRect();
+                            activeStickyY = rect.top + rect.height / 2;
+                        }
+                    }
+                }
 
                 // Bubble Path: Active -> Root
                 const bubblePath = focusPath.length > 0 ? [...focusPath].reverse() : (payload.sourceId ? [payload.sourceId] : []);
-
-                let targetId: string | null = null;
-                let handled = false;
 
                 for (const zoneId of bubblePath) {
                     const zoneMetadata = zoneRegistry[zoneId];
                     if (!zoneMetadata) continue;
 
-                    // Identify the "Representative Item" in this zone's jurisdiction
                     const zoneItems = zoneMetadata.items || [];
                     let localPivot: string | null = null;
 
@@ -65,15 +99,19 @@ export function createOSRegistry<S>() {
                         }
                     }
 
-                    targetId = findNextTarget(zoneMetadata.strategy || "spatial", {
+                    const targetId = findNextTarget(zoneMetadata.strategy || "spatial", {
                         currentId: localPivot,
                         items: zoneItems,
                         direction: dir,
                         layout: zoneMetadata.layout,
-                        navMode: zoneMetadata.navMode
+                        navMode: zoneMetadata.navMode,
+                        stickyX: activeStickyX,
+                        stickyY: activeStickyY
                     });
 
                     if (targetId) {
+                        // 2. Zone Entry Logic (Deep Dive)
+                        let finalTargetId = targetId;
                         const targetEl = document.getElementById(targetId);
                         const isZone = targetEl?.hasAttribute("data-zone-id");
                         const nestedZoneEl = isZone ? targetEl : targetEl?.querySelector("[data-zone-id]");
@@ -82,22 +120,24 @@ export function createOSRegistry<S>() {
                         if (targetZoneId && zoneRegistry[targetZoneId]) {
                             const nestedZone = zoneRegistry[targetZoneId];
                             if (nestedZone.preset === "seamless" && nestedZone.items?.length) {
-                                targetId = nestedZone.lastFocusedId || nestedZone.items[0];
+                                // Preserve Sticky Index if it was an index-based zone
+                                const { stickyIndex } = useFocusStore.getState();
+                                const idealIndex = stickyIndex ?? 0;
+                                const clampedIndex = Math.min(idealIndex, nestedZone.items.length - 1);
+                                finalTargetId = nestedZone.items[clampedIndex];
                             }
                         }
 
-                        // Execute Focus Change
-                        setFocus(targetId);
+                        // 3. APPLY CHANGE
+                        // We set the sticky coordinates FIRST so setFocus doesn't overwrite them
+                        setSpatialSticky(activeStickyX, activeStickyY);
+                        setFocus(finalTargetId);
 
-                        // Update Active Zone
-                        const finalEl = document.getElementById(targetId);
+                        const finalEl = document.getElementById(finalTargetId);
                         const finalZoneId = finalEl?.closest("[data-zone-id]")?.getAttribute("data-zone-id");
-                        if (finalZoneId) {
-                            setActiveZone(finalZoneId);
-                        }
+                        if (finalZoneId) setActiveZone(finalZoneId);
 
-                        handled = true;
-                        break;
+                        return state;
                     }
 
                     if (zoneMetadata.preset !== "seamless") break;
@@ -155,6 +195,23 @@ export function createOSRegistry<S>() {
                 }
                 return state;
             },
+        },
+        {
+            id: OS_COMMANDS.EXIT,
+            label: "Exit Zone",
+            run: (state: S) => {
+                const { activeZoneId, zoneRegistry, setActiveZone, setFocus } = useFocusStore.getState();
+                if (!activeZoneId) return state;
+
+                const currentZone = zoneRegistry[activeZoneId];
+                if (currentZone?.parentId) {
+                    // Navigate to Parent ID
+                    setFocus(currentZone.parentId);
+                    setActiveZone(currentZone.parentId);
+                }
+
+                return state;
+            }
         }
     ];
 }

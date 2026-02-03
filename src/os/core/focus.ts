@@ -19,7 +19,7 @@ export interface ZoneMetadata {
 
   // State
   lastFocusedId?: string;
-  navMode?: "clamp" | "wrap";
+  navMode?: "clamped" | "loop";
 }
 
 export interface FocusObject {
@@ -45,6 +45,9 @@ interface FocusState {
   // --- Item Focus (The "Cursor") ---
   focusedItemId: string | null;
   activeObject: FocusObject | null; // The Source of Truth
+  stickyIndex: number; // Virtual coordinate for preservation across zones
+  stickyX: number | null; // Spatial memory for X (Vertical movement)
+  stickyY: number | null; // Spatial memory for Y (Horizontal movement)
 
   // Actions
   registerZone: (data: ZoneMetadata) => void;
@@ -55,7 +58,8 @@ interface FocusState {
    * Move the OS Cursor to a specific Item ID.
    * This is the "Physical" layer of focus.
    */
-  setFocus: (itemId: string | null, object?: FocusObject) => void;
+  setFocus: (itemId: string | null, object?: FocusObject | null) => void;
+  setSpatialSticky: (x: number | null, y: number | null) => void;
 
   updatePayload: (id: string, payload: any) => void;
   updateZoneItems: (id: string, items: string[]) => void;
@@ -79,6 +83,9 @@ export const useFocusStore = create<FocusState>((set) => ({
   activeZoneId: "sidebar", // Default to sidebar or main
   focusedItemId: null,
   activeObject: null,
+  stickyIndex: 0,
+  stickyX: null,
+  stickyY: null,
   zoneRegistry: {},
   focusPath: [],
   history: [],
@@ -86,14 +93,10 @@ export const useFocusStore = create<FocusState>((set) => ({
   registerZone: (data) =>
     set((state) => {
       const newRegistry = { ...state.zoneRegistry, [data.id]: data };
-
-      // If no active zone exists or current one is missing from registry,
-      // treat the first registering zone as the anchor.
       let nextActiveId = state.activeZoneId;
       if (!nextActiveId || !state.zoneRegistry[nextActiveId]) {
         nextActiveId = data.id;
       }
-
       return {
         zoneRegistry: newRegistry,
         activeZoneId: nextActiveId,
@@ -105,19 +108,11 @@ export const useFocusStore = create<FocusState>((set) => ({
     set((state) => {
       const isUnregisteringActive = state.activeZoneId === id;
       const isInPath = state.focusPath.includes(id);
-
       const newRegistry = { ...state.zoneRegistry };
       delete newRegistry[id];
 
-      // Recovery Trigger: Current focus target or its lineage is gone
       if (isUnregisteringActive || isInPath) {
-        // 1. Find surviving zones from the current active path
         const survivors = state.focusPath.filter((pathId) => pathId !== id && newRegistry[pathId]);
-
-        // 2. Decide new target:
-        //    Priority A: Nearest surviving ancestor/leaf in path
-        //    Priority B: First available zone in the registry (the "First Zone" fallback)
-        //    Priority C: null
         const nextActiveId =
           survivors.length > 0
             ? survivors[survivors.length - 1]
@@ -129,17 +124,13 @@ export const useFocusStore = create<FocusState>((set) => ({
           focusPath: computePath(nextActiveId, newRegistry),
         };
       }
-
       return { zoneRegistry: newRegistry };
     }),
 
   setActiveZone: (id) =>
     set((state) => {
       if (state.activeZoneId === id) return state;
-
       const path = computePath(id, state.zoneRegistry);
-
-      // Add current to history before switching
       const newHistory = state.activeZoneId
         ? [state.activeZoneId, ...state.history].slice(0, 10)
         : state.history;
@@ -151,29 +142,55 @@ export const useFocusStore = create<FocusState>((set) => ({
       };
     }),
 
+  setSpatialSticky: (x, y) => set({ stickyX: x, stickyY: y }),
+
   setFocus: (itemId, object) => set((state) => {
     if (itemId === state.focusedItemId) return state;
 
-    // 1. Determine the target zone for this focus
     let targetZoneId = object?.group?.id;
-
-    // A. If the item itself is a zone, it becomes the active leaf
     if (itemId && state.zoneRegistry[itemId]) {
       targetZoneId = itemId;
-    }
-    // B. Otherwise, find which zone owns this item via the registry
-    else if (itemId && !targetZoneId) {
+    } else if (itemId && !targetZoneId) {
       targetZoneId = Object.values(state.zoneRegistry).find((z) =>
         z.items?.includes(itemId)
       )?.id;
     }
 
+    // Preserve Vertical Pivot across horizontal zones
+    let nextStickyIndex = state.stickyIndex;
+    if (object && typeof object.index === 'number') {
+      nextStickyIndex = object.index;
+    } else if (itemId && targetZoneId) {
+      const idx = state.zoneRegistry[targetZoneId]?.items?.indexOf(itemId);
+      if (idx !== undefined && idx !== -1) {
+        nextStickyIndex = idx;
+      }
+    }
+
+    // Capture Physical Anchor if not already locked
+    let nextX = state.stickyX;
+    let nextY = state.stickyY;
+
+    // If focus is changed by something other than a locked navigation, 
+    // or if we're just starting, we should capture the new physical position.
+    // NOTE: The registry will explicitly 'hold' these values during continuous movement.
+    if (itemId) {
+      const el = document.getElementById(itemId);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        if (nextX === null) nextX = rect.left + rect.width / 2;
+        if (nextY === null) nextY = rect.top + rect.height / 2;
+      }
+    }
+
     const nextState: Partial<FocusState> = {
       focusedItemId: itemId,
+      stickyIndex: nextStickyIndex,
+      stickyX: nextX,
+      stickyY: nextY,
       activeObject: (object || (itemId ? { id: itemId, group: { id: targetZoneId } } : null)) as any,
     };
 
-    // 2. Synchronize Active Zone & Path
     if (targetZoneId && targetZoneId !== state.activeZoneId) {
       nextState.activeZoneId = targetZoneId;
       nextState.focusPath = computePath(targetZoneId, state.zoneRegistry);

@@ -35,7 +35,7 @@ export function Sidebar() {
     <Zone
       id="sidebar"
       area="nav"
-      navMode="wrap" // Example: Rolling Navigation for Sidebar
+      navMode="loop" // Example: Rolling Navigation for Sidebar
       layout="column"
     >
       <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">
