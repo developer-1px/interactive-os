@@ -86,8 +86,8 @@ export const Navigate = defineOSCommand({
             // 0. Direction Policy Guard
             if (zoneMetadata.allowedDirections) {
                 if (!zoneMetadata.allowedDirections.includes(dir)) {
-                    logger.debug("NAVIGATION", `Blocked by Zone Policy: ${zoneId} allows [${zoneMetadata.allowedDirections}] but got ${dir}`);
-                    return state;
+                    logger.debug("NAVIGATION", `Blocked by Zone Policy: ${zoneId} allows [${zoneMetadata.allowedDirections}] but got ${dir}. Bubbling...`);
+                    continue;
                 }
             }
 

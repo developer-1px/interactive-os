@@ -19,6 +19,7 @@ export interface ZoneProps {
   navMode?: "clamped" | "loop";
   focusable?: boolean;           // If true, this zone can also be focused as an item
   payload?: any;                 // Optional data for focusable zones
+  integrated?: boolean;          // If true, nested items register with parent zone instead
 
   // Declared Capabilities (Zero-Config Discovery)
 
@@ -46,6 +47,7 @@ export function Zone({
   layout = "column",
   navMode = "clamped",
   focusable = false,
+  integrated = false,
   className,
   style,
   allowedDirections,
@@ -70,9 +72,9 @@ export function Zone({
   const isActive = isInPath; // Visual Active State (Grayscale Logic)
 
   // --- 1. Registration (Identity & Capability Awareness) ---
-  const context = useContext(FocusContext);
+  const parentContext = useContext(FocusContext);
   // If we are nested, our parent is the current context's zoneId
-  const parentId = context?.zoneId;
+  const parentId = parentContext?.zoneId;
 
   // Ref to track registered commands and prevent redundant registration calls
   const registeredCommandsRef = useRef(new Set<string>());
@@ -134,7 +136,10 @@ export function Zone({
   }, [id]);
 
   // --- 4. Stable Context ---
-  const focusContextValue = useMemo(() => ({ zoneId: id, isActive }), [id, isActive]);
+  const focusContextValue = useMemo(() => ({
+    zoneId: integrated && parentContext ? parentContext.zoneId : id,
+    isActive
+  }), [id, isActive, integrated, parentContext]);
 
   return (
     <FocusContext.Provider value={focusContextValue}>

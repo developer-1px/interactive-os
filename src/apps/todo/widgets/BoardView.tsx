@@ -59,6 +59,7 @@ export function BoardView() {
                     payload={category}
                     strategy="spatial"
                     preset="seamless"
+                    integrated
                     layout="column"
                     allowedDirections={["UP", "DOWN", "LEFT", "RIGHT"]}
                     area="boardView"
