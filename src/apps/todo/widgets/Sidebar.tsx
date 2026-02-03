@@ -63,15 +63,25 @@ export function Sidebar() {
               <Item
                 key={category.id}
                 id={category.id}
-                className={`group relative px-4 py-2.5 rounded-xl text-sm font-semibold outline-none cursor-pointer transition-colors duration-200 overflow-hidden
-                                hover:bg-slate-50
+                onPointerEnter={() => {
+                  useEngine().dispatch({
+                    type: "OS_FOCUS",
+                    payload: {
+                      id: category.id,
+                      sourceId: "sidebar"
+                    }
+                  });
+                }}
+                className={`group relative px-4 py-2.5 rounded-xl text-sm font-semibold outline-none ring-0 cursor-pointer transition-colors duration-200 overflow-hidden
+                                hover:bg-slate-100
                                 data-[active=true]:bg-indigo-50/50
-                                focus:bg-indigo-50/50
-                                before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:bg-indigo-600 before:rounded-r-full before:opacity-0 data-[active=true]:before:opacity-100 focus:before:opacity-100 before:transition-opacity
+                                focus:bg-slate-100
+                                focus:outline-none focus:ring-0
+                                before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:bg-indigo-600 before:rounded-r-full before:opacity-0 data-[active=true]:before:opacity-100 before:transition-opacity
                             `}
               >
                 <Trigger command={SelectCategory({ id: category.id })} asChild>
-                  <div className="flex items-center gap-3 w-full h-full">
+                  <button type="button" className="flex items-center gap-3 w-full h-full outline-none ring-0 focus:outline-none focus:ring-0">
                     <span
                       className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
                     >
@@ -87,7 +97,7 @@ export function Sidebar() {
                     {state.ui.selectedCategoryId === category.id && (
                       <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-indigo-600" />
                     )}
-                  </div>
+                  </button>
                 </Trigger>
               </Item>
             );

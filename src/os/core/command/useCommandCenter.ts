@@ -1,4 +1,4 @@
-import { useMemo, useLayoutEffect } from "react";
+import React, { useMemo, useLayoutEffect, useRef } from "react";
 
 import { useContextService, evalContext } from "@os/core/context";
 import { Trigger } from "@os/ui/Trigger";
@@ -28,9 +28,16 @@ export function useCommandCenter<
     const { context, updateContext } = useContextService();
 
     // 0. Continuous Context Synchronization
+    // 0. Continuous Context Synchronization
+    const prevContextRef = useRef<any>(null); // Use existing react import or fully qualified
     useLayoutEffect(() => {
         if (config?.mapStateToContext) {
-            updateContext(config.mapStateToContext(state));
+            const nextCtx = config.mapStateToContext(state);
+            // Simple deep equality check to prevent infinite loops
+            if (JSON.stringify(nextCtx) !== JSON.stringify(prevContextRef.current)) {
+                prevContextRef.current = nextCtx;
+                updateContext(nextCtx);
+            }
         }
     }, [state, config?.mapStateToContext, updateContext]);
 

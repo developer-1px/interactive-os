@@ -34,7 +34,7 @@ export function BoardView() {
         </header>
 
         <div className="flex-1 overflow-hidden -mx-12 px-12 pb-12">
-          <div className="flex-1 flex h-full gap-6 overflow-x-auto custom-scrollbar items-start bg-white">
+          <div className="flex-1 overflow-x-auto custom-scrollbar bg-white h-full">
             {/* Top-Level Board Zone: Spatial Navigation between Columns */}
             <OS.Zone
               id="board"
@@ -42,6 +42,7 @@ export function BoardView() {
               preset="seamless"
               layout="row"
               area="boardView"
+              className="gap-10"
             >
               {categoryOrder.map((categoryId) => {
                 const category = categories[categoryId];
@@ -56,9 +57,10 @@ export function BoardView() {
                     id={`col-${categoryId}`}
                     focusable
                     payload={category}
-                    strategy="roving"
+                    strategy="spatial"
                     preset="seamless"
                     layout="column"
+                    allowedDirections={["UP", "DOWN", "LEFT", "RIGHT"]}
                     area="boardView"
                     className={`w-80 flex-shrink-0 flex flex-col max-h-full rounded-2xl bg-slate-50/50 border transition-colors duration-200 outline-none
                               ${activeColumn ? "border-indigo-200 bg-white" : "border-slate-100"}

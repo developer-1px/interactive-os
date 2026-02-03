@@ -126,7 +126,7 @@ export function InputEngine() {
             if (itemEl) {
                 const itemId = itemEl.getAttribute('data-item-id');
                 // Prevent browser focus drift (Keep it on Body or Zone)
-                e.preventDefault();
+                // e.preventDefault(); // <-- REMOVED: Caused click event suppression and focus mismatches
                 if (itemId) {
                     dispatch({
                         type: OS_COMMANDS.FOCUS,

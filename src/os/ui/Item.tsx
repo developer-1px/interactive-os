@@ -9,7 +9,7 @@ export interface ItemState {
   isSelected: boolean;
 }
 
-export interface ItemProps {
+export interface ItemProps extends Omit<React.HTMLAttributes<HTMLElement>, "id" | "children"> {
   id: string | number;
 
   // Data Binding
@@ -33,6 +33,7 @@ export const Item = ({
   payload,
   index = 0,
   selected = false,
+  ...rest
 }: ItemProps) => {
   const stringId = String(id);
 
@@ -50,10 +51,6 @@ export const Item = ({
   // When WE become the focused item, we are responsible for telling the store 
   // "Here is the data you are looking at". 
   // This removes the need for the Store to hunt for data.
-  // --- 3. Payload Beacon (Write on Activate) ---
-  // When WE become the focused item, we are responsible for telling the store 
-  // "Here is the data you are looking at". 
-  // This removes the need for the Store to hunt for data.
   // --- 0. Active Registration (Self-Report) ---
   const addItem = useFocusStore((s) => s.addItem);
   const removeItem = useFocusStore((s) => s.removeItem);
@@ -66,9 +63,6 @@ export const Item = ({
   }, [zoneId, stringId, addItem, removeItem]);
 
   // --- 3. Payload Beacon (Write on Activate) ---
-  // When WE become the focused item, we are responsible for telling the store 
-  // "Here is the data you are looking at". 
-  // This removes the need for the Store to hunt for data.
   const prevPayloadRef = useRef<any>(null);
 
   useLayoutEffect(() => {
@@ -108,8 +102,10 @@ export const Item = ({
     "data-selected": selected ? "true" : undefined,
     "data-active": isFocused ? "true" : undefined, // Legacy compat
 
-    // NO LOCAL HANDLERS (onMouseDown/onClick removed)
-    // All interaction is handled by InputEngine via data-item-id
+    // NO LOCAL HANDLERS (onMouseDown/onClick removed) - BUT ALLOWED IF PASSED EXPLICITLY
+    // All interaction is handled by InputEngine via data-item-id, 
+    // but we allow ...rest for special cases like "Focus Follows Mouse".
+    ...rest
   };
 
   // --- Strategy A: Function as Child ---

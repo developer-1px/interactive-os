@@ -99,6 +99,8 @@ export function Zone({
   }, [id, registry]);
 
   // --- 1. Zone Registration (Lifecycle) ---
+  const directionsKey = allowedDirections?.join(",") || "";
+
   useEffect(() => {
     registerZone({
       id,
@@ -112,7 +114,18 @@ export function Zone({
       items: [], // Active Registration will populate this
     } as any);
     return () => unregisterZone(id);
-  }, [id, parentId, area, strategy, layout, preset, navMode, allowedDirections, registerZone, unregisterZone]);
+  }, [
+    id,
+    parentId,
+    area,
+    strategy,
+    layout,
+    preset,
+    navMode,
+    directionsKey,
+    registerZone,
+    unregisterZone,
+  ]);
 
   // --- 3. Reactive Item Sync (DEPRECATED) ---
   // Replaced by Active Registration in OS.Item

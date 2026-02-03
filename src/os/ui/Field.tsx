@@ -162,7 +162,8 @@ export const Field = <T extends BaseCommand>({
     });
   };
 
-  const { onKeyDown: externalKeyDown, ...otherProps } = rest as any;
+  // FIX: Destructure className so it doesn't override our composed className when spreading otherProps
+  const { onKeyDown: externalKeyDown, className: customClassName, ...otherProps } = rest as any;
 
   const handleInput = (e: FormEvent<HTMLElement>) => {
     const text = (e.currentTarget as HTMLElement).innerText;
@@ -180,18 +181,22 @@ export const Field = <T extends BaseCommand>({
   };
 
   const styles = isActive
-    ? otherProps.className
-    : `pointer-events-none truncate ${otherProps.className || ""}`;
+    ? customClassName
+    : `pointer-events-none truncate ${customClassName || ""}`;
 
   // Robust Placeholder using CSS pseudo-element
   // We use the 'empty' state of localValue to toggle the class.
-  // This avoids reliance on :empty pseudo-class which can be flaky with <br>.
-  const shouldShowPlaceholder = placeholder && !localValue;
+  // ContentEditable often introduces a single newline/br when empty, so we check for that.
+  // NOTE: We do NOT use trim() here because ' ' should hide placeholder (native input behavior).
+  const isValueEmpty = !localValue || localValue === "\n";
+  const shouldShowPlaceholder = placeholder && isValueEmpty;
 
   // Tailwind Arbitrary Value for content.
   // We apply it as a class.
+  // CRITICAL FIX: Added 'top-0 left-0' to clamp it to the field.
+  // Removed 'empty:' prefix to rely strictly on our JS 'isValueEmpty' check.
   const placeholderClasses = shouldShowPlaceholder
-    ? "before:content-[attr(data-placeholder)] before:text-gray-400 before:opacity-50 before:pointer-events-none before:absolute before:truncate max-w-full"
+    ? "before:content-[attr(data-placeholder)] before:text-slate-400 before:opacity-50 before:pointer-events-none before:absolute before:top-0 before:left-0 before:truncate before:w-full before:h-full"
     : "";
 
   // Multiline vs Singleline styling
@@ -210,7 +215,7 @@ export const Field = <T extends BaseCommand>({
     "aria-multiline": multiline,
     tabIndex: isActive ? 0 : -1,
     // Add relative to host to anchor the absolute placeholder
-    className: `${styles} ${placeholderClasses} ${lineClasses} ${displayClasses} relative`.trim(),
+    className: `${placeholderClasses} ${styles} ${lineClasses} ${displayClasses} relative`.trim(),
     "data-placeholder": placeholder,
 
     // Always null, content controlled by useLayoutEffect
