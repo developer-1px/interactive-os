@@ -58,6 +58,7 @@ function useSharedIsolatedEngine() {
       editingId: null,
       editDraft: "",
       viewMode: "list",
+      isInspectorOpen: false,
     },
     effects: [],
     history: { past: [], future: [] },

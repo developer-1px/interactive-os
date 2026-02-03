@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       "@os": "/src/os",
       "@apps": "/src/apps",
+      "@": "/src",
     },
   },
 });

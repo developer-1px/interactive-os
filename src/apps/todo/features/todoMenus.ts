@@ -1,9 +1,8 @@
 import type { TodoCommandId } from "@apps/todo/model/todoTypes";
-import { createLogicExpect, createLogicRule } from "@apps/todo/logic/builder";
+import { createLogicExpect, Rule } from "@os/core/logic/builder";
 import type { TodoContext } from "@apps/todo/logic/schema";
 
 const Expect = createLogicExpect<TodoContext>();
-const Rule = createLogicRule<TodoContext>();
 
 export interface MenuItem {
   command: TodoCommandId;

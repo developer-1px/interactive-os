@@ -1,59 +1,119 @@
-import { isValidElement, cloneElement } from "react";
+import { isValidElement, cloneElement, useContext, useLayoutEffect, useMemo } from "react";
 import type { ReactNode, ReactElement } from "react";
-// import { useCommandEngine } from "./CommandContext";
 import { useFocusStore } from "@os/core/focus";
+import { FocusContext } from "@os/core/command/CommandContext";
+
+// --- Types ---
+export interface ItemState {
+  isFocused: boolean;
+  isSelected: boolean;
+}
 
 export interface ItemProps {
   id: string | number;
-  active?: boolean;
-  children: ReactNode;
+
+  // Data Binding
+  payload?: any;
+  index?: number;
+
+  // Visuals (Polymorphic)
+  children: ReactNode | ((state: ItemState) => ReactNode);
   asChild?: boolean;
-  // dispatch?: (cmd: any) => void; // Unused
   className?: string;
+
+  // Overrides
+  selected?: boolean;
 }
 
 export const Item = ({
   id,
-  active,
   children,
   asChild,
   className,
+  payload,
+  index = 0,
+  selected = false,
 }: ItemProps) => {
-  /* Refactor: Virtual Focus Logic - Logic-less Item */
-  /* The Zone (parent) holds the physical focus (tabIndex=0). Item just renders style. */
+  const stringId = String(id);
 
-  // OS-Level Focus Subscription
+  // --- 1. Store Projection (Read-Only Beacon) ---
   const focusedItemId = useFocusStore((s) => s.focusedItemId);
   const setFocus = useFocusStore((s) => s.setFocus);
 
-  // Derive "Virtual Active" state
-  const isActuallyActive =
-    active !== undefined ? active : String(focusedItemId) === String(id);
+  const isFocused = focusedItemId === stringId;
+
+  // --- 2. Context Awareness ---
+  const focusContext = useContext(FocusContext);
+  const zoneId = focusContext?.zoneId || "unknown";
+
+  // --- 3. Payload Beacon (Write on Activate) ---
+  // When WE become the focused item, we are responsible for telling the store 
+  // "Here is the data you are looking at". 
+  // This removes the need for the Store to hunt for data.
+  useLayoutEffect(() => {
+    if (isFocused) {
+      setFocus(stringId, {
+        id: stringId,
+        index,
+        payload,
+        group: { id: zoneId }
+      });
+    }
+  }, [isFocused, stringId, index, payload, zoneId, setFocus]);
+
+  // --- 4. Render Props Calculation ---
+  const itemState: ItemState = useMemo(() => ({
+    isFocused,
+    isSelected: selected
+  }), [isFocused, selected]);
 
   const baseProps = {
-    // ref: innerRef, // Virtual Focus doesn't need ref focus
-    role: "option", // Semantic for activedescendant
-    id: String(id), // ID for aria-activedescendant matching
-    "aria-selected": isActuallyActive,
-    "data-active": isActuallyActive ? "true" : undefined,
-    onClick: (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setFocus(String(id));
-      // Optional: Ensure parent Zone gets physical focus if not already?
-      // With Zone's generic onFocus, clicking inside should bubble focus to Zone.
-    },
+    id: stringId,
+    "data-item-id": stringId, // Essential for Zone MutationObserver & Global Mouse Sink
+
+    // Accessibility (Virtual)
+    role: "option",
+    "aria-selected": isFocused,
+    tabIndex: -1, // The Black Hole
+
+    // Styling Hooks
+    "data-focused": isFocused ? "true" : undefined,
+    "data-selected": selected ? "true" : undefined,
+    "data-active": isFocused ? "true" : undefined, // Legacy compat
+
+    // NO LOCAL HANDLERS (onMouseDown/onClick removed)
+    // All interaction is handled by InputEngine via data-item-id
   };
 
+  // --- Strategy A: Function as Child ---
+  if (typeof children === "function") {
+    const rendered = children(itemState);
+    if (isValidElement(rendered)) {
+      const element = rendered as ReactElement<any>;
+      return cloneElement(element, {
+        ...baseProps,
+        // Merge ClassNames intelligently
+        className: `${element.props.className || ""} ${className || ""}`.trim()
+      } as any);
+    }
+    return <>{rendered}</>;
+  }
+
+  // --- Strategy B: asChild (Radix style) ---
   if (asChild && isValidElement(children)) {
     const child = children as ReactElement<any>;
     return cloneElement(child, {
       ...baseProps,
-      className:
-        `outline-none ${child.props.className || ""} ${className || ""}`.trim(),
+      className: `${child.props.className || ""} ${className || ""}`.trim()
     });
   }
+
+  // --- Strategy C: Wrapper (Default) ---
   return (
-    <div {...baseProps} className={`outline-none ${className || ""}`.trim()}>
+    <div
+      {...baseProps}
+      className={`outline-none ${className || ""}`.trim()}
+    >
       {children}
     </div>
   );

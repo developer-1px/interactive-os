@@ -4,10 +4,10 @@ import { useContextService } from "@os/core/context";
 import { useFocusStore } from "@os/core/focus";
 
 import { UNIFIED_TODO_REGISTRY } from "@apps/todo/features/commands/index";
-import type { AppState, TodoCommand, OSEnvironment } from "@apps/todo/model/types";
+import type { AppState, TodoCommand } from "@apps/todo/model/types";
 import { TODO_KEYMAP } from "@apps/todo/features/todoKeys";
-import { setGlobalEngine } from "@os/core/command/CommandContext";
 import { useMemo, useLayoutEffect } from "react";
+import { createOSRegistry } from "@os/core/command/osRegistry";
 
 // Imported domain logic
 import { loadState } from "@apps/todo/features/todo_details/persistence";
@@ -17,10 +17,12 @@ import { loadState } from "@apps/todo/features/todo_details/persistence";
 //   sidebarStrategy,
 // } from "./todo/focusStrategies";
 import { navigationMiddleware } from "@apps/todo/features/todo_details/navigationMiddleware";
-import { mapStateToContext } from "@apps/todo/features/todo_details/contextMapper";
+import { mapStateToContext } from "@apps/todo/bridge/contextMapper";
 
 // Initialize Unified Engine Registry (The "Brain" knows all, but UI is scoped)
 const ENGINE_REGISTRY = UNIFIED_TODO_REGISTRY;
+// Register OS Standard Commands
+createOSRegistry<AppState>().forEach(cmd => ENGINE_REGISTRY.register(cmd as any));
 ENGINE_REGISTRY.setKeymap(TODO_KEYMAP);
 
 // Register Strategies (Now fully generic!)
@@ -31,23 +33,16 @@ ENGINE_REGISTRY.setKeymap(TODO_KEYMAP);
 /**
  * useTodoStore: Global Zustand store for Todo application state.
  */
-export const useTodoStore = createCommandStore<AppState, TodoCommand, OSEnvironment>(
+export const useTodoStore = createCommandStore<AppState, TodoCommand>(
   ENGINE_REGISTRY,
   loadState(),
   {
     onStateChange: navigationMiddleware,
-    getEnv: (): OSEnvironment => {
-      // OS-Level Environment Injection
-      const { focusedItemId, activeZoneId } = useFocusStore.getState();
-      return {
-        focusId: focusedItemId,
-        activeZone: activeZoneId,
-      };
-    },
+    // getEnv removed (Pure Payload Architecture)
     onDispatch: (action: TodoCommand) => {
       // "Smart Dispatch" - now purely handled by Context Receiver in commands
       return action;
-    }
+    },
   },
 );
 
@@ -57,16 +52,16 @@ export const useTodoStore = createCommandStore<AppState, TodoCommand, OSEnvironm
  */
 export function useTodoEngine() {
   // OS-Level Focus Subscription
-  const focusedItemId = useFocusStore((s) => s.focusedItemId);
   const activeZoneId = useFocusStore((s) => s.activeZoneId); // Subscribe to Zone too
+  const focusPath = useFocusStore((s) => s.focusPath);
 
   // Memoize config to depend on OS Focus
   const config = useMemo(
     () => ({
       mapStateToContext: (state: AppState) =>
-        mapStateToContext(state, focusedItemId, activeZoneId),
+        mapStateToContext(state, activeZoneId, focusPath),
     }),
-    [focusedItemId, activeZoneId],
+    [activeZoneId, focusPath],
   );
 
   const engine = useCommandCenter<AppState, TodoCommand>(
@@ -76,6 +71,7 @@ export function useTodoEngine() {
   );
 
   // Patch state into providerValue for Headless Focus Strategies
+  // (Memoized: only re-emits when core identity changes)
   const providerValueWithState = useMemo(
     () => ({
       ...engine.providerValue,
@@ -84,16 +80,14 @@ export function useTodoEngine() {
     [engine.providerValue, engine.state],
   );
 
-  // Wire up global singleton bridge
-  setGlobalEngine(() => providerValueWithState);
-
   const contextService = useContextService();
 
   useLayoutEffect(() => {
     if (contextService) {
-      contextService.updateContext({ activeZone: activeZoneId });
+      contextService.updateContext({ activeZone: activeZoneId || undefined });
     }
   }, [activeZoneId, contextService]);
 
-  return engine;
+  // Return the FULL provider value to be consumed by App.tsx
+  return providerValueWithState;
 }

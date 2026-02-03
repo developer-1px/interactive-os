@@ -1,8 +1,8 @@
-import type { LogicNode } from "@apps/todo/logic/builder";
+import type { LogicNode } from "@os/core/logic/types";
 
-export interface CommandDefinition<S, P, K extends string = string, E = any> {
+export interface CommandDefinition<S, P, K extends string = string> {
   id: K;
-  run: (state: S, payload: P, env: E) => S;
+  run: (state: S, payload: P) => S;
   label?: string;
   icon?: string;
   when?: string | LogicNode;
@@ -11,7 +11,7 @@ export interface CommandDefinition<S, P, K extends string = string, E = any> {
   injectFocus?: boolean;
 }
 
-export interface CommandFactory<S, P, K extends string = string, E = any> {
+export interface CommandFactory<S, P, K extends string = string> {
   /**
    * The Factory Call: Creates the command object.
    */
@@ -21,7 +21,7 @@ export interface CommandFactory<S, P, K extends string = string, E = any> {
    * The Definition Properties: Used by the Registry/Engine.
    */
   id: K;
-  run: (state: S, payload: P, env: E) => S;
+  run: (state: S, payload: P) => S;
   label?: string;
   icon?: string;
   when?: string | LogicNode;
@@ -34,14 +34,14 @@ export interface CommandFactory<S, P, K extends string = string, E = any> {
  * createCommandFactory:
  * Creates a strongly typed `defineCommand` helper for a specific State type.
  */
-export function createCommandFactory<S, E = any>() {
+export function createCommandFactory<S>() {
   return function defineCommand<P, K extends string = string>(
-    def: CommandDefinition<S, P, K, E>,
-  ): CommandFactory<S, P, K, E> {
+    def: CommandDefinition<S, P, K>,
+  ): CommandFactory<S, P, K> {
     const factory = ((payload: P) => ({
       type: def.id,
       payload,
-    })) as CommandFactory<S, P, K, E>;
+    })) as CommandFactory<S, P, K>;
 
     // Attach properties
     factory.id = def.id;

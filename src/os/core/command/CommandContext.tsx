@@ -14,9 +14,10 @@ export interface CommandContextValue<S = unknown> {
   dispatch: (cmd: BaseCommand) => void;
   currentFocusId?: string | number | null;
   activeZone?: string | null;
-  registry?: CommandRegistry<S, any, any>;
+  registry?: CommandRegistry<S, any>;
   ctx?: any;
   state?: S; // Expose full state for advanced consumers (like MockBrains)
+  activeKeybindingMap?: Map<string, boolean>;
 }
 
 export const CommandContext = createContext<CommandContextValue<any> | null>(null);

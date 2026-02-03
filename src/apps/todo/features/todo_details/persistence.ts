@@ -42,6 +42,7 @@ export const INITIAL_STATE: AppState = {
     editingId: null,
     editDraft: "",
     viewMode: "list",
+    isInspectorOpen: true,
   },
   effects: [],
   history: {
@@ -52,18 +53,19 @@ export const INITIAL_STATE: AppState = {
 
 const STORAGE_KEY = "interactive-os-todo-v3";
 
+
+
+// const INSPECTOR_KEY = "antigravity_inspector_open";
+
 export const loadState = (): AppState => {
+  let loadedState = INITIAL_STATE;
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       // Quick migration check
-      if (Array.isArray(parsed.todos)) {
-        return INITIAL_STATE;
-      }
-
-      if (parsed.categories && parsed.todos) {
-        return {
+      if (!Array.isArray(parsed.todos) && parsed.categories && parsed.todos) {
+        loadedState = {
           ...INITIAL_STATE,
           data: {
             ...INITIAL_STATE.data,
@@ -80,7 +82,29 @@ export const loadState = (): AppState => {
   } catch (e) {
     console.warn("Failed to load state", e);
   }
-  return INITIAL_STATE;
+
+  // Load Inspector State (Separate Persistence)
+  // DISABLED: Force Inspector Open by default for development
+  /*
+  try {
+    const inspectorStored = localStorage.getItem(INSPECTOR_KEY);
+    // User requested: "First start is open" -> Logic: If null, use true (INITIAL_STATE has true).
+    // If stored "false", use false. if stored "true", use true.
+    if (inspectorStored !== null) {
+      loadedState = {
+        ...loadedState,
+        ui: {
+          ...loadedState.ui,
+          isInspectorOpen: JSON.parse(inspectorStored),
+        },
+      };
+    }
+  } catch (e) {
+    console.warn("Failed to load inspector state", e);
+  }
+  */
+
+  return loadedState;
 };
 
 export const saveState = (state: AppState) => {

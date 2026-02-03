@@ -1,44 +1,41 @@
 import { memo } from "react";
-import { Kbd } from "@os/debug/components/Kbd";
+import type { LoggedKey } from "@os/debug/inputTelemetry";
 
-export interface KeyLog {
-    key: string;
-    code: string;
-    timestamp: number;
-}
+export type KeyLog = LoggedKey;
 
 export const KeyMonitor = memo(({ rawKeys }: { rawKeys: KeyLog[] }) => (
-    <section className="px-3 py-2 border-b border-white/5 bg-black/10">
-        <div className="flex items-center justify-between mb-2">
-            <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                <span className="w-1 h-3 bg-pink-500 rounded-full animate-pulse" /> Raw
+    <section className="border-b border-[#e5e5e5]">
+        <div className="flex items-center justify-between px-3 py-2 bg-[#f8f8f8]">
+            <h3 className="text-[8px] font-black text-[#999999] flex items-center gap-2 uppercase tracking-[0.2em]">
+                <div className="w-1 h-2.5 bg-[#f48771] opacity-50" />
                 Input
             </h3>
-            <span className="text-[7px] font-bold text-slate-700 uppercase tracking-wide">
-                Event Buffer
+            <span className="text-[7px] font-mono text-[#cccccc] tracking-[0.3em] uppercase">
+                Telem
             </span>
         </div>
-        <div className="flex gap-1.5 overflow-hidden h-10 items-center">
+        <div className="flex gap-1.5 overflow-x-auto p-3 min-h-[44px] bg-[#ffffff] custom-scrollbar">
             {rawKeys.map((log, i) => (
-                <Kbd
+                <div
                     key={log.timestamp + i}
-                    className={`flex-col !h-full !min-w-[50px] gap-0.5 transition-all duration-300 ${i === 0 ? "border-pink-500/50 bg-pink-500/10 shadow-[0_0_15px_rgba(236,72,153,0.1)]" : "opacity-40 scale-95 border-transparent bg-transparent"}`}
-                    variant="default"
-                    size="sm"
+                    className={`flex flex-col items-center justify-center min-w-[32px] h-8 border transition-all duration-200 ${i === 0
+                            ? "border-[#f48771]/30 bg-[#f48771]/5 shadow-[inset_0_0_8px_rgba(244,135,113,0.05)]"
+                            : "border-[#f0f0f0] opacity-30 grayscale"
+                        }`}
                 >
                     <span
-                        className={`text-[10px] font-black leading-none ${i === 0 ? "text-pink-100" : "text-slate-500"}`}
+                        className={`text-[9px] font-black leading-none ${i === 0 ? "text-[#f48771]" : "text-[#999999]"}`}
                     >
-                        {log.key === " " ? "SPC" : log.key.toUpperCase()}
+                        {log.key}
                     </span>
-                    <span className="text-[7px] text-slate-600 font-bold leading-none">
+                    <span className="text-[5px] text-[#cccccc] font-mono mt-1 uppercase tracking-tighter">
                         {log.code}
                     </span>
-                </Kbd>
+                </div>
             ))}
             {rawKeys.length === 0 && (
-                <div className="text-[9px] text-slate-700 italic flex-1 flex items-center h-full pl-1">
-                    No active input
+                <div className="text-[8px] font-black text-[#eeeeee] tracking-[0.3em] flex-1 flex items-center pl-1 font-mono">
+                    IDLE
                 </div>
             )}
         </div>

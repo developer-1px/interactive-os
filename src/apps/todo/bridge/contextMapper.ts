@@ -7,14 +7,19 @@ import type { ContextState } from "@os/core/context";
  * Standard mapper to convert AppState to ContextState.
  * This centralizes the logic currently found in TodoEngine hook.
  */
-export function mapStateToContext(state: any): ContextState {
+export function mapStateToContext(
+    state: any,
+    activeZoneId?: string | null,
+    focusPath?: string[]
+): ContextState {
     if (!state || !state.ui) return {};
 
     const { ui } = state;
-    const currentZone = ui.activeZone || "todoList"; // Default fallback
+    const currentZone = activeZoneId || ui.activeZone || "todoList";
 
     return {
         activeZone: currentZone,
+        focusPath: focusPath || [currentZone], // Expose Path to Evaluation Context
         selectedCategoryId: ui.selectedCategoryId,
         isEditing: !!ui.editingId, // Fixed based on UIState
         viewMode: ui.viewMode,

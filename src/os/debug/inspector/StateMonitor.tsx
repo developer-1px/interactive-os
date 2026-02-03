@@ -5,55 +5,60 @@ export const StateMonitor = memo(
     ({
         focusId,
         activeZone,
+        focusPath,
         physicalZone,
         isInputActive,
     }: {
         focusId: FocusTarget;
         activeZone: string;
+        focusPath?: string[];
         physicalZone: string;
         isInputActive: boolean;
     }) => (
-        <section className="px-3 py-2 border-b border-white/5">
-            <div className="flex items-center justify-between mb-2">
-                <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-1 h-3 bg-indigo-500/40 rounded-full" /> Live
+        <section className="border-b border-[#333]">
+            <div className="flex items-center justify-between px-3 py-2 bg-[#f8f8f8]">
+                <h3 className="text-[8px] font-black text-[#999999] flex items-center gap-2 uppercase tracking-[0.2em]">
+                    <div className="w-1 h-2.5 bg-[#c586c0] opacity-50" />
                     Context
                 </h3>
                 {isInputActive && (
-                    <span className="text-[7px] font-bold text-pink-500 px-1.5 py-0.5 bg-pink-500/10 rounded border border-pink-500/20">
-                        LOCKED
+                    <span className="text-[7px] font-black text-[#f48771] px-1.5 py-0.5 bg-[#f48771]/5 border border-[#f48771]/10 uppercase tracking-widest">
+                        Lock
                     </span>
                 )}
             </div>
-            <div className="grid grid-cols-[80px_1fr] gap-y-1.5 gap-x-2">
-                <span className="text-[9px] text-slate-500 font-bold text-right pt-[1px]">
-                    Focus ID
-                </span>
-                <div className="min-w-0">
-                    <span className="text-[10px] text-indigo-400 font-bold font-mono truncate block">
-                        {JSON.stringify(focusId)}
-                    </span>
+            <div className="grid grid-cols-[80px_1fr] border-t border-[#e5e5e5] bg-[#ffffff]">
+                <div className="px-3 py-1 border-r border-[#e5e5e5] text-[8px] text-[#999999] font-black uppercase tracking-widest text-right bg-[#fcfcfc]">
+                    Focus
+                </div>
+                <div className="px-3 py-1 text-[9px] font-mono text-[#4ec9b0] truncate">
+                    {JSON.stringify(focusId)}
                 </div>
 
-                <span className="text-[9px] text-slate-500 font-bold text-right pt-[1px]">
-                    Virtual Zone
-                </span>
-                <div className="min-w-0">
-                    <span className="text-[10px] text-emerald-400 font-bold font-mono truncate block">
-                        {activeZone || "NULL"}
-                    </span>
+                <div className="px-3 py-1 border-r border-[#e5e5e5] text-[8px] text-[#999999] font-black uppercase tracking-widest text-right bg-[#fcfcfc] border-t border-[#e5e5e5]">
+                    Zone
+                </div>
+                <div className="px-3 py-1 text-[9px] font-mono text-[#007acc] border-t border-[#e5e5e5] flex gap-1 items-center overflow-hidden">
+                    {focusPath ? (
+                        <div className="flex items-center gap-1 truncate">
+                            {focusPath.map((z, i) => (
+                                <span key={i} className="flex items-center gap-1 shrink-0">
+                                    {i > 0 && <span className="text-[#cccccc] font-sans">/</span>}
+                                    {z}
+                                </span>
+                            ))}
+                        </div>
+                    ) : (
+                        <span className="truncate">{activeZone || "NULL"}</span>
+                    )}
                 </div>
 
-                <span className="text-[9px] text-slate-500 font-bold text-right pt-[1px]">
-                    DOM Source
-                </span>
-                <div className="min-w-0">
-                    <span
-                        className={`text-[10px] font-bold font-mono truncate block ${physicalZone === "NONE" ? "text-slate-600 italic" : "text-pink-400"}`}
-                    >
-                        {physicalZone === "NONE"
-                            ? `(Virtual: ${activeZone || "NONE"})`
-                            : physicalZone}
+                <div className="px-3 py-1 border-r border-[#e5e5e5] text-[8px] text-[#999999] font-black uppercase tracking-widest text-right bg-[#fcfcfc] border-t border-[#e5e5e5]">
+                    Source
+                </div>
+                <div className="px-3 py-1 text-[9px] font-mono truncate border-t border-[#e5e5e5]">
+                    <span className={physicalZone === "NONE" ? "text-[#cccccc] italic" : "text-[#ce9178]"}>
+                        {physicalZone === "NONE" ? "VIRTUAL" : physicalZone.toUpperCase()}
                     </span>
                 </div>
             </div>

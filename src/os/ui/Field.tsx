@@ -223,47 +223,39 @@ export const Field = <T extends BaseCommand>({
       });
     },
     onKeyDown: (e: ReactKeyboardEvent) => {
-      // Priority: Internal Logic (Structure/Safety) -> External Logic (App Specific)
+      // 1. IME Safety Only. 
+      // InputEngine's global listener respects 'e.isComposing', so we allow bubbling.
+      // But we prevent internal key duplication if needed.
 
-      // 1. Internal Safety
       if (e.nativeEvent.isComposing || isComposingRef.current) {
-        // CRITICAL: Stop propagation so the Global Zone listener doesn't see 'Enter'
-        // and trigger a duplicate AddTodo command.
-        // ALSO: Stop propagation for navigation keys to prevent Sidebar jump or list navigation during composition.
-        if (
-          ["Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(
-            e.key,
-          )
-        ) {
+        if (["Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+          // Stop propagation to prevent Zone navigation while typing in IME
           e.stopPropagation();
         }
-        if (e.key === "Enter") {
-          e.preventDefault();
-        }
-        // Allow arrows to move within composition
+        if (e.key === "Enter") e.preventDefault();
         return;
       }
 
+      // 2. Cancellation (Standard for Inputs)
+      if (e.key === "Escape") {
+        // Escape is usually safe to propagate for "Global Cancel", 
+        // BUT standard input behavior is "Clear or Blur".
+        // We let the Global Registry handle ESC -> CANCEL_EDIT
+      }
+
+      // 3. Commit (Enter)
       if (e.key === "Enter") {
-        e.stopPropagation();
-        e.preventDefault();
-        commitChange(localValue);
-        // Don't return, let external handle if they want (though stopProp usually limits it)
+        // We let it BUBBLE to the Global InputEngine.
+        // The InputEngine sees "Enter", checks Registry for "COMMIT_EDIT" (when: isEditing).
+        // It fires.
+
+        // CORRECTION: We intentionally do NOT prevent default here.
+        // We rely on InputEngine to catch it if there's a binding.
+        // If we block it here, InputEngine ignores it (defaultPrevented check).
       }
 
-      // 2. Cancellation
-      if (e.key === "Escape" && cancelCommand) {
-        e.stopPropagation();
-        dispatch(cancelCommand);
-      }
-
-      // 3. External Handler
-      if (externalKeyDown) {
-        externalKeyDown(e);
-      }
-
-      // Note: We deliberately removed the 'ArrowLeft' trap.
-      // We let it bubble. Zone will check 'cursorAtStart' context and decide if it handles it.
+      // External handler support (for legacy)
+      if (externalKeyDown) externalKeyDown(e);
     },
     ...otherProps,
   };
@@ -278,5 +270,19 @@ export const Field = <T extends BaseCommand>({
       },
     });
   }
-  return <input type="text" {...baseProps} />;
+
+  // --- Mode Switch Implementation ---
+  // If NOT active, we render a 'fake' input (span) to prevent browser interaction.
+  if (!isActive) {
+    return (
+      <span
+        className={`pointer-events-none truncate ${otherProps.className || ""}`}
+      // We might want to maintain some visual semblance if it was an input
+      >
+        {localValue || otherProps.placeholder || ""}
+      </span>
+    );
+  }
+
+  return <input type="text" {...baseProps} autoFocus />;
 };

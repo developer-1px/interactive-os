@@ -1,5 +1,5 @@
 import { CommandRegistry } from "@os/core/command/store";
-import type { AppState, OSEnvironment } from "@apps/todo/model/types";
+import type { AppState } from "@apps/todo/model/appState";
 
 // Import all commands
 import * as Global from "@apps/todo/features/commands/global";
@@ -35,7 +35,8 @@ export type InferredTodoCommand = ReturnType<(typeof ALL_COMMANDS)[number]>;
 
 // Strict Registry
 export type TodoCommandId = InferredTodoCommand["type"];
-export const UNIFIED_TODO_REGISTRY = new CommandRegistry<AppState, TodoCommandId, OSEnvironment>();
+export const UNIFIED_TODO_REGISTRY = new CommandRegistry<AppState, TodoCommandId>();
 
 // Register all
+console.log("[TODO ENGINE] Registering commands:", ALL_COMMANDS.length);
 ALL_COMMANDS.forEach((cmd) => UNIFIED_TODO_REGISTRY.register(cmd));

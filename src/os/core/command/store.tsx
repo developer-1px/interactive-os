@@ -2,6 +2,8 @@ import { create } from "zustand";
 
 import type { KeybindingItem, KeymapConfig } from "@os/core/input/keybinding";
 import type { CommandDefinition } from "@os/core/command/definition";
+import { Rule } from "@os/core/logic/builder";
+import type { ContextState, LogicNode } from "@os/core/logic/types";
 
 import { logger } from "@os/debug/logger";
 
@@ -12,12 +14,15 @@ export interface CommandGroup<S, P = any, K extends string = string> {
 }
 
 
+import { OS } from "@os/core/context";
+import { useFocusStore } from "@os/core/focus";
 
-export class CommandRegistry<S, K extends string = string, E = any> {
-  private commands: Map<K, CommandDefinition<S, any, K, E>> = new Map();
+
+export class CommandRegistry<S, K extends string = string> {
+  private commands: Map<K, CommandDefinition<S, any, K>> = new Map();
   private keymap: KeybindingItem<any>[] | KeymapConfig<any> = [];
 
-  register(definition: CommandDefinition<S, any, K, E>) {
+  register(definition: CommandDefinition<S, any, K>) {
     this.commands.set(definition.id, definition);
     logger.debug("SYSTEM", `Registered Command: [${definition.id}]`);
   }
@@ -57,7 +62,7 @@ export class CommandRegistry<S, K extends string = string, E = any> {
     logger.debug("SYSTEM", `Loaded External Keymap: ${count} entries`);
   }
 
-  get(id: K): CommandDefinition<S, any, K, E> | undefined {
+  get(id: K): CommandDefinition<S, any, K> | undefined {
     return this.commands.get(id);
   }
 
@@ -82,29 +87,19 @@ export class CommandRegistry<S, K extends string = string, E = any> {
         Object.entries(this.keymap.zones).forEach(([zoneId, bindings]) => {
           const scopedBindings = (bindings as KeybindingItem<any>[]).map(
             (b) => {
-              // Scope Condition: activeZone == zoneId
-              const scopeStr = `activeZone == '${zoneId}'`;
-              const scopeNode = {
-                op: "eq",
-                key: "activeZone",
-                val: zoneId,
-                description: `activeZone == '${zoneId}'`,
-              };
+              // Scope Condition: activeZone == zoneId OR area == zoneId
+              const scopeStr = `(activeZone == '${zoneId}' || area == '${zoneId}')`;
+              const scopeEvaluator = (ctx: ContextState) =>
+                ctx.activeZone === zoneId || ctx.area === zoneId;
 
-              let newWhen: any;
+              let newWhen: string | LogicNode;
 
               if (!b.when) {
-                newWhen = scopeNode;
+                newWhen = scopeEvaluator;
               } else if (typeof b.when === "string") {
                 newWhen = `(${b.when}) && ${scopeStr}`;
               } else {
-                // Assume LogicNode
-                newWhen = {
-                  op: "and",
-                  left: b.when,
-                  right: scopeNode,
-                  description: `(${b.when.description || "Custom"} AND ${scopeNode.description})`,
-                };
+                newWhen = Rule.and(b.when, scopeEvaluator);
               }
 
               return {
@@ -148,14 +143,12 @@ export interface CommandStoreState<S, A> {
 export function createCommandStore<
   S,
   A extends { type: string; payload?: any },
-  E = any,
 >(
-  registry: CommandRegistry<S, any, E>,
+  registry: CommandRegistry<S, any>,
   initialState: S,
   config?: {
     onStateChange?: (state: S, action: A, prevState: S) => S;
     onDispatch?: (action: A) => A; // Interceptor
-    getEnv?: () => E; // Environment Getter
   },
 ) {
   return create<CommandStoreState<S, A>>((set) => ({
@@ -176,13 +169,47 @@ export function createCommandStore<
           return prev;
         }
 
-        // Inject Environment (Context Receiver Pattern)
-        const env = config?.getEnv ? config.getEnv() : ({} as E);
+        // Middleware Resolution: Resolve OS.FOCUS sentinel
+        // We do a shallow check for OS.FOCUS in the payload
+        let resolvedPayload = action.payload;
+        if (resolvedPayload && typeof resolvedPayload === "object") {
+          // Check if any value is OS.FOCUS
+          const hasSentinel = Object.values(resolvedPayload).includes(OS.FOCUS);
 
-        const nextInnerState = cmd.run(prev.state, action.payload, env);
+          if (hasSentinel) {
+            const focusId = useFocusStore.getState().focusedItemId;
+            if (focusId) {
+              // Resolve
+              resolvedPayload = { ...resolvedPayload }; // Shallow clone
+              Object.keys(resolvedPayload).forEach((key) => {
+                if (resolvedPayload[key] === OS.FOCUS) {
+                  // Resolve to number if possible, else string
+                  // Assuming ID is usually number in Todo App context, but stringent typing might be needed
+                  // For now, we cast to Number if it looks like one, or keep as string.
+                  // BUT: focusedItemId is string. The App expects number often.
+                  // We should trust the App to handle string-number conversion or provide explicit type?
+                  // Let's resolve to explicit ID (string) and hope App handles it (or we cast here).
+                  // Antigravity Standard: IDs are strings in OS, but mapped to numbers in Todo?
+                  // TodoEngine uses number IDs.
+                  // Let's safe-cast to Number if not NaN, else string.
+                  const num = Number(focusId);
+                  resolvedPayload[key] = !isNaN(num) ? num : focusId;
+                }
+              });
+              logger.debug("ENGINE", `Resolved Payload via OS.FOCUS ->`, resolvedPayload);
+            } else {
+              logger.warn("ENGINE", "OS.FOCUS sentinel found but no active focus!");
+            }
+          }
+        }
+
+        const resolvedAction = { ...action, payload: resolvedPayload };
+
+        const nextInnerState = cmd.run(prev.state, resolvedPayload);
         const finalState = config?.onStateChange
-          ? config.onStateChange(nextInnerState, action, prev.state)
+          ? config.onStateChange(nextInnerState, resolvedAction, prev.state)
           : nextInnerState;
+
 
         if (cmd.log !== false) {
           logger.traceCommand(

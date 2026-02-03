@@ -14,11 +14,10 @@ import type { CommandRegistry, createCommandStore } from "@os/core/command/store
 export function useCommandCenter<
     S,
     A extends { type: any; payload?: any },
-    K extends string = string,
-    E = any
+    K extends string = string
 >(
-    store: ReturnType<typeof createCommandStore<S, A, E>>,
-    registry: CommandRegistry<S, K, E>,
+    store: ReturnType<typeof createCommandStore<S, A>>,
+    registry: CommandRegistry<S, K>,
     config?: {
         mapStateToContext?: (state: S) => any;
     },
@@ -67,6 +66,7 @@ export function useCommandCenter<
             registry: registry,
             ctx: context,
             state: state,
+            activeKeybindingMap,
         }),
         [
             dispatch,
@@ -75,6 +75,7 @@ export function useCommandCenter<
             registry,
             context,
             state,
+            activeKeybindingMap,
         ],
     );
 

@@ -1,13 +1,9 @@
 import { memo } from "react";
 import {
-    Eye,
-    EyeOff,
     GitGraph,
     TextCursorInput,
-    Zap,
-    Ban,
 } from "lucide-react";
-import { Kbd } from "@os/debug/components/Kbd";
+import { Kbd } from "@os/ui";
 
 export interface ProcessedCommand {
     id: string;
@@ -17,8 +13,9 @@ export interface ProcessedCommand {
     allowInInput: boolean;
     log?: boolean;
     when?: string;
-    isMenuVisible: boolean;
     isLogicEnabled: boolean;
+    currentPayload?: any;
+    jurisdiction?: "ZONE" | "GLOBAL";
 }
 
 export const CommandRow = memo(
@@ -28,6 +25,7 @@ export const CommandRow = memo(
         isBlockedByInput,
         activeKeybindingMap,
         isLastExecuted,
+        currentPayload,
         trigger,
     }: {
         cmd: ProcessedCommand;
@@ -35,123 +33,98 @@ export const CommandRow = memo(
         isBlockedByInput: boolean;
         activeKeybindingMap: Map<string, boolean>;
         isLastExecuted: boolean;
+        currentPayload?: any;
         trigger: number;
     }) => {
-        // We use the 'trigger' (history count) as a key suffix ONLY when this command is active.
-        // This forces React to remount the style-carrying div on every execution,
-        // guaranteeing the CSS animation plays from 0% every time.
         const animationKey = isLastExecuted ? `active-${trigger}` : "static";
-
-        // Status Logic
-        const isMenuVisible = cmd.isMenuVisible;
         const isLogicEnabled = cmd.isLogicEnabled;
 
         return (
             <div
                 key={animationKey}
-                className={`group flex items-center justify-between px-2 py-1 rounded border transition-colors duration-200 
-                ${isLastExecuted ? "animate-flash-command bg-indigo-500/80 border-indigo-400" : !isDisabled ? "bg-white/[0.03] border-white/5" : "bg-transparent border-transparent opacity-40 grayscale"}
+                className={`group flex items-center justify-between px-3 py-1.5 border-b border-[#f0f0f0] transition-colors duration-150 
+                ${isLastExecuted ? "animate-flash-command bg-[#007acc]/10" : !isDisabled ? "hover:bg-[#f8f8f8]" : "opacity-30 grayscale-[0.5]"}
             `}
             >
-                <div className="flex items-center gap-2 min-w-0 overflow-hidden">
-                    {/* Status Dot (The Gate) */}
+                <div className="flex items-center gap-3 min-w-0 overflow-hidden flex-1">
+                    {/* Status Dot */}
                     <div
-                        title={isLogicEnabled ? "Logic Gate: OPEN" : "Logic Gate: CLOSED"}
-                        className="relative flex items-center justify-center w-3 h-3 flex-shrink-0"
+                        title={isLogicEnabled ? "Logic: ENABLED" : "Logic: DISABLED"}
+                        className="flex-shrink-0"
                     >
-                        <span
-                            className={`w-1.5 h-1.5 rounded-full transition-colors ${isLastExecuted ? "bg-white shadow-[0_0_5px_rgba(255,255,255,0.8)]" : isLogicEnabled ? "bg-emerald-500" : "bg-slate-700"}`}
+                        <div
+                            className={`w-1 h-1 rounded-full transition-colors ${isLastExecuted ? "bg-[#007acc] shadow-[0_0_4px_#007acc]" : isLogicEnabled ? "bg-[#4ec9b0]" : "bg-[#cccccc]"}`}
                         />
-                        {!isLogicEnabled && (
-                            <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-500">
-                                <Ban size={8} />
-                            </div>
-                        )}
                     </div>
 
-                    <span
-                        className={`text-[9px] font-bold font-mono truncate flex-shrink-0 w-[100px] transition-colors ${isLastExecuted ? "text-white" : isBlockedByInput ? "text-slate-500 line-through" : "text-indigo-300"}`}
-                    >
-                        {cmd.id}
-                    </span>
-                    <span
-                        className={`text-[9px] font-medium truncate tracking-tight transition-all duration-200 ${isLastExecuted ? "text-indigo-100 opacity-100" : "text-slate-500 opacity-0 group-hover:opacity-100"}`}
-                    >
-                        {cmd.label}
-                    </span>
+                    {/* Content */}
+                    <div className="flex flex-col justify-center min-w-0">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                            <span
+                                className={`text-[9px] font-bold tracking-tight truncate leading-none ${isLastExecuted ? "text-[#007acc]" : "text-[#444444]"}`}
+                            >
+                                {cmd.label}
+                            </span>
+                            {currentPayload && (
+                                <span className="text-[6px] font-bold px-1 py-0.5 bg-[#007acc]/5 text-[#007acc] rounded-[2px] border border-[#007acc]/10 leading-none flex-shrink-0">
+                                    {Object.keys(currentPayload).length}P
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden">
+                            <span
+                                className={`text-[7px] font-mono truncate tracking-tight uppercase flex-shrink-0 ${isLastExecuted ? "text-[#007acc] opacity-70" : isBlockedByInput ? "text-[#cccccc] line-through" : "text-[#999999]"}`}
+                            >
+                                {cmd.id}
+                            </span>
+                            {currentPayload && (
+                                <span className="text-[6px] font-mono text-[#cccccc] truncate uppercase tracking-tighter">
+                                    → {JSON.stringify(currentPayload)}
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                    {/* Triad Indicators */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Indicators */}
                     <div
-                        className={`flex items-center gap-1 transition-opacity ${isLastExecuted ? "opacity-90 text-indigo-100" : "opacity-60"}`}
+                        className={`flex items-center gap-1.5 transition-opacity ${isLastExecuted ? "opacity-100" : "opacity-30 group-hover:opacity-100"}`}
                     >
-                        {/* 1. Visual Availability (Menu) */}
-                        <div
-                            title={isMenuVisible ? "Visible in Menu" : "Hidden from Menu"}
-                            className={`${isMenuVisible ? (isLastExecuted ? "text-white" : "text-indigo-400") : "text-slate-700"}`}
-                        >
-                            {isMenuVisible ? <Eye size={9} /> : <EyeOff size={9} />}
-                        </div>
-
-                        {/* 2. Logic Gate (When) - Displayed if condition exists */}
+                        {/* 1. Logic (When) */}
                         {cmd.when && (
                             <div
-                                title={`Condition: ${cmd.when}`}
-                                className={`${isLogicEnabled ? (isLastExecuted ? "text-emerald-200" : "text-emerald-500") : "text-rose-500"} transition-colors`}
+                                title={`When: ${cmd.when}`}
+                                className={`${isLogicEnabled ? "text-[#4ec9b0]" : "text-[#f48771]"}`}
                             >
-                                <GitGraph size={9} />
+                                <GitGraph size={8} />
                             </div>
                         )}
 
-                        {/* 3. Input Safety */}
+                        {/* 2. Input */}
                         {cmd.allowInInput && (
-                            <div
-                                title="Input Safe (Executable in input fields)"
-                                className={isLastExecuted ? "text-pink-300" : "text-pink-500"}
-                            >
-                                <TextCursorInput size={9} />
-                            </div>
-                        )}
-                        {/* 4. Log Visibility */}
-                        {cmd.log === false && (
-                            <div
-                                title="No Log (Hidden from history)"
-                                className={
-                                    isLastExecuted ? "text-indigo-300" : "text-slate-600"
-                                }
-                            >
-                                <Zap size={9} className="rotate-180" />
+                            <div title="Input Safe" className="text-[#ce9178]">
+                                <TextCursorInput size={8} />
                             </div>
                         )}
                     </div>
 
                     {/* Keys */}
-                    <div className="flex items-center gap-1 min-w-[30px] justify-end ml-1">
+                    <div className="flex items-center gap-1 min-w-[32px] justify-end ml-2">
                         {cmd.kb.map((key: string) => (
-                            <Kbd
+                            <div
                                 key={key}
-                                size="xs"
-                                // If active: 'active'. If disabled: 'ghost'. If enabled but idle: 'default'.
-                                variant={
-                                    isDisabled
-                                        ? "ghost"
-                                        : activeKeybindingMap.get(key)
-                                            ? "active"
-                                            : "default"
-                                }
-                                className={
-                                    isDisabled
-                                        ? "opacity-30 scale-95" // Disabled: Faded & Small
-                                        : activeKeybindingMap.get(key)
-                                            ? "" // Active: Handled by variant='active'
-                                            : isLastExecuted
-                                                ? "text-white border-white/20 bg-indigo-400/50"
-                                                : "text-slate-400 bg-white/5 border-white/10" // Idle: Clearer contrast
-                                }
+                                className={`px-1 py-0.5 rounded-xs border text-[7px] font-mono transition-colors ${isDisabled
+                                    ? "border-[#f0f0f0] text-[#cccccc]"
+                                    : activeKeybindingMap.get(key)
+                                        ? "bg-[#007acc] border-[#007acc] text-white"
+                                        : isLastExecuted
+                                            ? "border-[#007acc] text-[#007acc]"
+                                            : "border-[#e5e5e5] text-[#888888] bg-[#f8f8f8]"
+                                    }`}
                             >
-                                {key === " " ? "SPC" : key.toUpperCase()}
-                            </Kbd>
+                                <Kbd shortcut={key} />
+                            </div>
                         ))}
                     </div>
                 </div>

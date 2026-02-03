@@ -8,45 +8,45 @@ export const EventStream = memo(({ history }: { history: HistoryEntry[] }) => {
     );
 
     return (
-        <section className="px-3 py-2">
-            <div className="flex items-center justify-between mb-2">
-                <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-1 h-3 bg-pink-500/40 rounded-full" /> Event Stream
-                    (Past)
+        <section className="bg-[#ffffff]">
+            <div className="flex items-center justify-between px-3 py-1 bg-[#f8f8f8] border-b border-[#e5e5e5]">
+                <h3 className="text-[8px] font-black text-[#999999] flex items-center gap-2 uppercase tracking-[0.2em]">
+                    <div className="w-0.5 h-2 bg-[#ce9178] opacity-50" />
+                    History
                 </h3>
             </div>
-            <div className="space-y-1 relative">
-                {/* Timeline Line */}
-                <div className="absolute left-[3.5px] top-1 bottom-1 w-[1px] bg-white/5" />
+            <div className="flex flex-col bg-[#ffffff]">
+                {recentHistory.map((entry, i) => {
+                    const payload = "payload" in entry.command ? entry.command.payload : {};
+                    const payloadKeys = payload ? Object.keys(payload) : [];
+                    const keyCount = payloadKeys.length;
 
-                {recentHistory.map((entry, i) => (
-                    <div key={i} className="group relative pl-3.5">
-                        {/* Timeline Dot */}
-                        <div className="absolute left-[1px] top-[5px] w-[5px] h-[5px] rounded-full bg-slate-800 border border-slate-700 group-hover:bg-indigo-500 group-hover:border-indigo-400 transition-colors z-10" />
-
-                        <div className="flex items-baseline justify-between mb-0.5">
-                            <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-tight">
-                                {entry.command.type}
-                            </span>
-                            <span className="text-[8px] text-slate-700 font-mono">
-                                #{history.length - i}
-                            </span>
+                    return (
+                        <div key={i} className="group border-b border-[#f0f0f0] px-3 py-1.5 hover:bg-[#fcfcfc] transition-colors">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[8px] font-black text-[#666666] uppercase tracking-widest leading-none">
+                                        {entry.command.type}
+                                    </span>
+                                    {keyCount > 0 && (
+                                        <span className="px-1 py-0.5 rounded-[2px] bg-[#f0f0f0] text-[6px] font-bold text-[#999] leading-none">
+                                            {keyCount} P
+                                        </span>
+                                    )}
+                                </div>
+                                <span className="text-[7px] text-[#cccccc] font-mono leading-none">
+                                    #{history.length - i}
+                                </span>
+                            </div>
+                            <div className="text-[7px] text-[#aaaaaa] font-mono truncate mt-1 uppercase tracking-tighter">
+                                {JSON.stringify(payload)}
+                            </div>
                         </div>
-                        <div className="text-[8px] text-slate-500 pl-1 border-l-2 border-transparent group-hover:border-white/10 transition-all truncate font-mono">
-                            {JSON.stringify(
-                                "payload" in entry.command ? entry.command.payload : {},
-                            )}
-                            {/* Removed focusId from display as it was removed from State */}
-                            {/* <span className="mx-1 text-slate-700">→</span>
-              <span className="text-emerald-500/60">
-                {String((entry.resultingState as any).focusId)}
-              </span> */}
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
                 {recentHistory.length === 0 && (
-                    <div className="text-[9px] text-slate-700 italic py-8 text-center border border-dashed border-white/5 rounded-lg bg-white/[0.01]">
-                        Waiting for events...
+                    <div className="p-4 text-[8px] text-[#eeeeee] font-black tracking-[0.4em] text-center font-mono uppercase">
+                        Idle
                     </div>
                 )}
             </div>

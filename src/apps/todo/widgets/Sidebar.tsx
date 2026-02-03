@@ -35,68 +35,54 @@ export function Sidebar() {
     <Zone
       id="sidebar"
       area="nav"
-      defaultFocusId={
-        state.ui.selectedCategoryId || state.data.categoryOrder[0]
-      }
-      // Point to First Column explicitly
-      neighbors={{
-        right:
-          state.ui.viewMode === "board"
-            ? `board_col_${state.data.categoryOrder[0]}`
-            : "listView",
-      }}
-      items={state.data.categoryOrder}
       navMode="wrap" // Example: Rolling Navigation for Sidebar
       layout="column"
     >
-      <div className="w-72 flex flex-col h-full bg-[#0F1117] border-r border-white/5 relative overflow-hidden">
-        {/* Background Ambient Glow */}
-        <div className="absolute top-0 left-0 w-full h-96 bg-indigo-500/10 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-
+      <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">
         <div className="p-8 pb-4 z-10">
-          <h1 className="font-bold text-white text-xl tracking-tight flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <h1 className="font-black text-slate-900 text-xl tracking-tight flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-200">
               <Layout size={16} className="text-white" />
             </div>
-            <span className="opacity-90">Interactive</span>
+            <span className="opacity-90">Todo App</span>
           </h1>
         </div>
 
         <div className="flex-1 overflow-y-auto py-4 px-4 custom-scrollbar z-10 space-y-1">
-          <div className="text-[10px] font-bold tracking-widest text-slate-500 uppercase px-4 mb-2">
-            Space
+          <div className="text-[10px] font-black tracking-widest text-slate-400 uppercase px-4 mb-2">
+            Categories
           </div>
-          {state.data.categoryOrder.map((catId) => {
-            const category = state.data.categories[catId];
+          {state.data.categoryOrder.map((categoryId) => {
+            const category = state.data.categories[categoryId];
             if (!category) return null;
 
             return (
               <Item
                 key={category.id}
                 id={category.id}
-                className={`group relative px-4 py-2 rounded-xl text-sm font-medium outline-none cursor-pointer transition-all duration-300 overflow-hidden
-                                hover:bg-white/[0.02]
-                                data-[active=true]:bg-white/[0.03] data-[active=true]:shadow-[0_4px_20px_rgba(0,0,0,0.2)] data-[active=true]:translate-x-1
-                                focus:bg-white/[0.03] focus:translate-x-1
-                                before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:bg-indigo-500 before:rounded-r-full before:opacity-0 data-[active=true]:before:opacity-100 focus:before:opacity-100 before:transition-opacity
+                className={`group relative px-4 py-2.5 rounded-xl text-sm font-semibold outline-none cursor-pointer transition-colors duration-200 overflow-hidden
+                                hover:bg-slate-50
+                                data-[active=true]:bg-indigo-50/50
+                                focus:bg-indigo-50/50
+                                before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:bg-indigo-600 before:rounded-r-full before:opacity-0 data-[active=true]:before:opacity-100 focus:before:opacity-100 before:transition-opacity
                             `}
               >
                 <Trigger command={SelectCategory({ id: category.id })} asChild>
                   <div className="flex items-center gap-3 w-full h-full">
                     <span
-                      className={`transition-colors duration-300 ${state.ui.selectedCategoryId === category.id ? "text-indigo-400" : "text-slate-500 group-hover:text-slate-300"}`}
+                      className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
                     >
                       {getIcon(category.id)}
                     </span>
                     <span
-                      className={`transition-colors duration-300 ${state.ui.selectedCategoryId === category.id ? "text-white font-bold" : "text-slate-400 group-hover:text-slate-200"}`}
+                      className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-slate-900 font-bold" : "text-slate-500 group-hover:text-slate-800"}`}
                     >
                       {category.text}
                     </span>
 
                     {/* Selection Indicator */}
                     {state.ui.selectedCategoryId === category.id && (
-                      <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse" />
+                      <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-indigo-600" />
                     )}
                   </div>
                 </Trigger>
@@ -105,33 +91,33 @@ export function Sidebar() {
           })}
         </div>
 
-        <div className="p-6 mt-auto border-t border-white/5 bg-black/20 z-10">
+        <div className="p-6 mt-auto border-t border-slate-100 bg-slate-50/50 z-10">
           <div className="flex justify-between items-center mb-3">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-              Guide
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Navigation
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400 font-mono">
-            <div className="flex items-center gap-1.5">
-              <Kbd size="xs" variant="ghost" className="bg-white/10">
+          <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500 font-mono">
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200">
                 <MoveUp size={10} />
               </Kbd>
-              <Kbd size="xs" variant="ghost" className="bg-white/10">
+              <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200">
                 <MoveDown size={10} />
               </Kbd>
               <span>Nav</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Kbd size="xs" variant="ghost" className="bg-white/10">
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200">
                 <CornerDownLeft size={10} />
               </Kbd>
               <span>Select</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Kbd size="xs" variant="ghost" className="bg-white/10">
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200">
                 <ArrowRight size={10} />
               </Kbd>
-              <span>Focus List</span>
+              <span>Focus</span>
             </div>
           </div>
         </div>

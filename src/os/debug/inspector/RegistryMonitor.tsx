@@ -1,14 +1,20 @@
 import { memo, useMemo } from "react";
-import type { MenuItem } from "@apps/todo/features/todoMenus";
-import { SIDEBAR_MENU, TODOLIST_MENU, GLOBAL_MENU } from "@apps/todo/features/todoMenus";
-// import { UNIFIED_TODO_REGISTRY } from "@apps/todo/features/commands/index";
-import { TODO_KEYMAP } from "@apps/todo/features/todoKeys";
 import { evalContext } from "@os/core/context";
 import { CommandRow } from "@os/debug/inspector/CommandRow";
 import type { ProcessedCommand } from "@os/debug/inspector/CommandRow";
-import { useFocusStore } from "@os/core/focus";
+import type { CommandRegistry } from "@os/core/command/store";
+import type { KeybindingItem } from "@os/core/input/keybinding";
 
-import type { CommandRegistry } from "@os/core/command/store"; // Import generic type
+// Zero-Base Jurisdiction Detection
+// Pure Logic: If ANY binding relies on a Zone Scope -> It is a Zone Command.
+const getJurisdiction = (bindings: KeybindingItem[]) => {
+    const hasZoneScope = bindings.some(b => {
+        const condition = !b.when ? "" : typeof b.when === 'string' ? b.when : b.when.toString();
+        // Strict Check: The string must explicitly mention checking activeZone
+        return condition.includes("activeZone ==");
+    });
+    return hasZoneScope ? 'ZONE' : 'GLOBAL';
+};
 
 export const RegistryMonitor = memo(
     ({
@@ -17,184 +23,132 @@ export const RegistryMonitor = memo(
         activeKeybindingMap,
         isInputActive,
         lastCommandId,
+        lastPayload,
         historyCount,
     }: {
         ctx: any;
-        registry: CommandRegistry<any, any, any>;
+        registry: CommandRegistry<any, any>;
         activeKeybindingMap: Map<string, boolean>;
         isInputActive: boolean;
         lastCommandId: string | null;
+        lastPayload: any;
         historyCount: number;
     }) => {
-        // Access Zone Registry to find "Parents" (Areas)
-        const zoneRegistry = useFocusStore((s) => s.zoneRegistry);
 
         const registryData = useMemo(() => {
-            if (!registry) return [];
-            const zone = ctx.activeZone;
-            const zoneMeta = zone ? zoneRegistry[zone] : null;
-            const activeArea = zoneMeta?.area;
+            if (!registry || !ctx) return { zoneCommands: [], globalCommands: [] };
 
-            // 1. Identify Menu Context
-            // TODO: Menu should also be Area-aware? For now, we stick to zone-based unless we refactor menus.
-            const activeMenu =
-                zone === "sidebar"
-                    ? SIDEBAR_MENU
-                    : zone === "todoList"
-                        ? TODOLIST_MENU
-                        : GLOBAL_MENU;
+            // 1. Get Sources
+            const bindings = registry.getKeybindings();
+            const commands = registry.getAll();
 
-            const menuCommandIds = new Set(activeMenu.map((m: MenuItem) => m.command));
+            // 2. Map All Commands (Single Pass)
+            const processed: ProcessedCommand[] = commands.map(cmd => {
+                const cmdBindings = bindings.filter(b => b.command === cmd.id);
+                const isLogicEnabled = cmd.when ? evalContext(cmd.when, ctx) : true;
 
-            // 2. Iterate ALL commands & Filter by Scope (Nested)
-            const relevantCommands: ProcessedCommand[] = registry.getAll()
-                .filter(cmd => {
-                    // Scope Filter:
-                    // 1. Logic Enabled? (Must be true to be relevant?)
-                    // Actually let's allow "Disabled" relevant commands to show as disabled.
+                // Collect Binding State
+                const activeKeys: string[] = [];
+                let allowInInput = false;
+                let boundArgs: any = null;
 
-                    // 1. Is it in the Active Menu?
-                    if (menuCommandIds.has(cmd.id)) return true;
-
-                    // 2. Is it Global?
-                    const isGlobal = TODO_KEYMAP.global?.some((b: any) => b.command === cmd.id);
-                    if (isGlobal) return true;
-
-                    // 3. Is it bound in the Active Zone?
-                    if (zone && TODO_KEYMAP.zones && (TODO_KEYMAP.zones as any)[zone]) {
-                        const zoneBindings = (TODO_KEYMAP.zones as any)[zone];
-                        if (zoneBindings.some((b: any) => b.command === cmd.id)) return true;
+                cmdBindings.forEach(b => {
+                    const isBindingActive = b.when ? evalContext(b.when, ctx) : true;
+                    if (isBindingActive) {
+                        activeKeys.push(b.key);
+                        if (b.allowInInput) allowInInput = true;
+                        if (b.args) boundArgs = b.args;
                     }
+                });
 
-                    // 4. Is it bound in the Active Area (Parent Zone)?
-                    if (activeArea && TODO_KEYMAP.zones && (TODO_KEYMAP.zones as any)[activeArea]) {
-                        const areaBindings = (TODO_KEYMAP.zones as any)[activeArea];
-                        if (areaBindings.some((b: any) => b.command === cmd.id)) return true;
-                    }
+                // Detect Jurisdiction
+                const jurisdiction = getJurisdiction(cmdBindings);
 
-                    // 5. Is it currently Logic Enabled? (Catch-all for dynamic context commands)
-                    const isExampleEnabled = cmd.when ? evalContext(cmd.when, ctx) : true;
-                    if (isExampleEnabled) return true;
-
-                    return false;
-                })
-                .map(
-                    (cmd) => {
-                        // --- A. Logic Gate Check ---
-                        const isLogicEnabled = cmd.when ? evalContext(cmd.when, ctx) : true;
-
-                        // --- B. Menu Check (Visual) ---
-                        const isMenuVisible = menuCommandIds.has(cmd.id);
-
-                        // --- C. Keybinding Check (Physical) ---
-                        const keys: string[] = [];
-                        let allowInInput = false;
-
-                        // Helper to check bindings
-                        const checkBindings = (scope: string) => {
-                            if (
-                                scope &&
-                                TODO_KEYMAP.zones &&
-                                (TODO_KEYMAP.zones as any)[scope]
-                            ) {
-                                const bindings = (TODO_KEYMAP.zones as any)[scope];
-                                const match = bindings.find((b: any) => b.command === cmd.id);
-                                if (match) {
-                                    keys.push(match.key);
-                                    allowInInput = !!match.allowInInput;
-                                }
-                            }
-                        };
-
-                        // C-1. Check Zone-Specific
-                        if (zone) checkBindings(zone);
-
-                        // C-2. Check Area-Specific (Fallback/Inherit)
-                        // Only add if not found in specific zone? Or accumulate? 
-                        // Usually specific overrides generic. If keys found, we stop?
-                        // Let's accumulate for now or prioritize Zone.
-                        if (keys.length === 0 && activeArea) checkBindings(activeArea);
-
-                        // C-3. Check Global (Last Resort)
-                        if (keys.length === 0 && TODO_KEYMAP.global) {
-                            const globalMatch = TODO_KEYMAP.global.find(
-                                (b: any) => b.command === cmd.id,
-                            );
-                            if (globalMatch) {
-                                keys.push(globalMatch.key);
-                                allowInInput = !!globalMatch.allowInInput;
-                            }
-                        }
-
-                        // --- D. Final Availability ---
-                        const isEnabled = isLogicEnabled;
-                        const whenString = typeof cmd.when === 'string' ? cmd.when : undefined;
-
-                        return {
-                            id: cmd.id,
-                            label: cmd.label || cmd.id,
-                            kb: keys,
-                            enabled: isEnabled,
-                            allowInInput: allowInInput,
-                            log: cmd.log,
-                            when: whenString,
-                            isMenuVisible,
-                            isLogicEnabled,
-                        };
-                    },
-                );
-
-            // 3. Sort for Usability
-            return relevantCommands.sort((a, b) => {
-                const aHasKey = a.kb && a.kb.length > 0;
-                const bHasKey = b.kb && b.kb.length > 0;
-                if (aHasKey && !bHasKey) return -1;
-                if (!aHasKey && bHasKey) return 1;
-                if (a.allowInInput && !b.allowInInput) return -1;
-                if (!a.allowInInput && b.allowInInput) return 1;
-                if (a.enabled && !b.enabled) return -1;
-                if (!a.enabled && b.enabled) return 1;
-                if (a.isMenuVisible && !b.isMenuVisible) return -1;
-                if (!a.isMenuVisible && b.isMenuVisible) return 1;
-                return a.id.localeCompare(b.id);
+                return {
+                    id: cmd.id,
+                    label: cmd.label || cmd.id,
+                    kb: activeKeys,
+                    enabled: isLogicEnabled && (cmdBindings.length === 0 || activeKeys.length > 0),
+                    allowInInput,
+                    log: cmd.log,
+                    when: typeof cmd.when === 'string' ? cmd.when : cmd.when?.toString(),
+                    isLogicEnabled,
+                    currentPayload: boundArgs,
+                    jurisdiction
+                };
             });
-        }, [ctx, zoneRegistry]); // Updated dependency
 
-        // Display Active Zone + Area if available
-        const activeZone = ctx.activeZone || "GLOBAL";
-        const activeArea = ctx.activeZone && zoneRegistry[ctx.activeZone]?.area;
-        const displayScope = activeArea ? `${activeZone} < ${activeArea}` : activeZone;
+            // 3. Sort & Split
+            const sorter = (a: ProcessedCommand, b: ProcessedCommand) => {
+                const aHash = a.kb.length > 0;
+                const bHash = b.kb.length > 0;
+                if (aHash && !bHash) return -1;
+                if (!aHash && bHash) return 1;
+                return a.id.localeCompare(b.id);
+            };
+
+            return {
+                zoneCommands: processed.filter(c => c.jurisdiction === 'ZONE').sort(sorter),
+                globalCommands: processed.filter(c => c.jurisdiction !== 'ZONE').sort(sorter)
+            };
+        }, [ctx, registry]);
+
+        // Display Helpers
+        const activeZone = ctx?.activeZone || "GLOBAL";
+
+        const renderCommandList = (commands: ProcessedCommand[]) => (
+            commands.map((cmd) => {
+                const isBlockedByInput = isInputActive && !cmd.allowInInput;
+                const isDisabled = !cmd.enabled || isBlockedByInput;
+                const isSelected = cmd.id === lastCommandId;
+
+                return (
+                    <CommandRow
+                        key={cmd.id}
+                        cmd={cmd}
+                        isDisabled={isDisabled}
+                        isBlockedByInput={isBlockedByInput}
+                        activeKeybindingMap={activeKeybindingMap}
+                        isLastExecuted={isSelected}
+                        currentPayload={isSelected ? lastPayload : cmd.currentPayload}
+                        trigger={historyCount}
+                    />
+                );
+            })
+        );
 
         return (
-            <section className="px-3 py-2 border-b border-white/5 bg-white/[0.01]">
-                <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                        <span className="w-1 h-3 bg-emerald-500/40 rounded-full" /> Registry
-                        HUD
+            <section className="border-b border-[#333]">
+                {/* Zone Section Header */}
+                <div className="flex items-center justify-between px-3 py-1 bg-[#f8f8f8] border-b border-[#f0f0f0]">
+                    <h3 className="text-[8px] font-black text-[#666666] flex items-center gap-2 uppercase tracking-[0.2em]">
+                        <div className="w-0.5 h-2 bg-[#4ec9b0] opacity-80" />
+                        Zone
                     </h3>
-                    <span className="text-[7px] font-bold text-slate-600 uppercase tracking-tight px-1.5 py-0.5 bg-white/5 rounded border border-white/5 truncate max-w-[120px]">
-                        {displayScope}
+                    <span className="text-[7px] font-mono text-[#007acc] truncate max-w-[150px] uppercase font-bold">
+                        {activeZone}
                     </span>
                 </div>
-                <div className="flex flex-col gap-px">
-                    {registryData.map((cmd) => {
-                        const isBlockedByInput = isInputActive && !cmd.allowInInput;
-                        const isDisabled = !cmd.enabled || isBlockedByInput;
+                <div className="flex flex-col bg-[#ffffff] min-h-[30px]">
+                    {registryData.zoneCommands.length === 0 && (
+                        <div className="p-2 text-[8px] text-[#cccccc] italic text-center leading-none">
+                            No context commands.
+                        </div>
+                    )}
+                    {renderCommandList(registryData.zoneCommands)}
+                </div>
 
-                        return (
-                            <CommandRow
-                                key={cmd.id}
-                                cmd={cmd}
-                                isDisabled={isDisabled}
-                                isBlockedByInput={isBlockedByInput}
-                                activeKeybindingMap={activeKeybindingMap}
-                                isLastExecuted={cmd.id === lastCommandId}
-                                trigger={historyCount}
-                            />
-                        );
-                    })}
+                {/* OS Section Header */}
+                <div className="flex items-center justify-between px-3 py-1 bg-[#fcfcfc] border-y border-[#f0f0f0]">
+                    <h3 className="text-[8px] font-black text-[#999999] flex items-center gap-2 uppercase tracking-[0.2em]">
+                        <div className="w-0.5 h-2 bg-[#999999] opacity-30" />
+                        Global
+                    </h3>
+                </div>
+                <div className="flex flex-col bg-[#ffffff]">
+                    {renderCommandList(registryData.globalCommands)}
                 </div>
             </section>
         );
-    },
+    }
 );

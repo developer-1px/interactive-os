@@ -1,4 +1,4 @@
-import type { LogicNode } from "@apps/todo/logic/builder";
+import type { LogicNode } from "@os/core/logic/types";
 
 export interface KeybindingItem<T = string> {
   key: string;

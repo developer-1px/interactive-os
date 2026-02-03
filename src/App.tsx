@@ -3,11 +3,9 @@ import {
   Routes,
   Route,
   Outlet,
-  useLocation,
 } from "react-router-dom";
 import { ContextProvider } from "@os/core/context";
-import { useTodoEngine } from "@apps/todo/lib/todoEngine";
-import { CommandInspector } from "@os/debug/Inspector";
+
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import TodoPage from "./pages/TodoPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -15,30 +13,18 @@ import ShowcasePage from "./pages/ShowcasePage";
 import DocsPage from "./pages/DocsPage";
 import ExperimentPage from "./pages/ExperimentPage";
 
-import { ClipboardManager } from "@apps/todo/features/clipboard/ClipboardManager";
+import { TodoAppShell } from "@apps/todo/TodoAppShell";
 
 // --- Main Layout ---
 function MainLayout() {
-  // App is now a perfectly Pure View.
-  // We call the engine hook to initialize the system and register the singleton.
-  // This must run at the top level to keep the OS alive across route changes.
-  useTodoEngine();
-
-  const location = useLocation();
-
   return (
-    <div className="h-screen w-screen bg-slate-950 flex overflow-hidden font-sans text-slate-200 select-none">
-      <ClipboardManager />
-
+    <TodoAppShell>
       {/* 0. Global Activity Bar */}
       <GlobalNav />
 
       {/* Route Content (Sidebar + Main Panel, or Settings, etc.) */}
       <Outlet />
-
-      {/* 3. Global System Inspector */}
-      {!location.pathname.startsWith("/docs") && <CommandInspector />}
-    </div>
+    </TodoAppShell>
   );
 }
 

@@ -1,5 +1,5 @@
 import { defineCommand } from "@apps/todo/features/commands/factory";
-import type { AppState } from "@apps/todo/model/types";
+import type { AppState } from "@apps/todo/model/appState";
 
 export const Patch = defineCommand({
     id: "PATCH",
@@ -34,6 +34,17 @@ export const SetFocus = defineCommand({
             ],
         };
     },
+});
+
+export const ToggleInspector = defineCommand({
+    id: "TOGGLE_INSPECTOR",
+    run: (state) => ({
+        ...state,
+        ui: {
+            ...state.ui,
+            isInspectorOpen: !state.ui.isInspectorOpen,
+        },
+    }),
 });
 
 export const Undo = defineCommand({

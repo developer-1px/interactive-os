@@ -1,5 +1,6 @@
 import { produce } from "immer";
 import { defineCommand } from "@apps/todo/features/commands/factory";
+import { OS } from "@os/core/context";
 
 export const AddTodo = defineCommand({
     id: "ADD_TODO",
@@ -53,10 +54,10 @@ export const ImportTodos = defineCommand({
 
 export const ToggleTodo = defineCommand({
     id: "TOGGLE_TODO",
-    run: (state, payload: { id?: number } = {}, env) =>
+    run: (state, payload: { id: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
-            // Use Payload OR Environment (Context Receiver Pattern)
-            const targetId = payload.id !== undefined ? payload.id : Number(env.focusId);
+            // Middleware guarantees payload.id is number (resolved from OS.FOCUS)
+            const targetId = payload.id as number;
 
             // Validate ID (must be number)
             if (!targetId || isNaN(targetId)) return;
@@ -70,9 +71,9 @@ export const ToggleTodo = defineCommand({
 
 export const DeleteTodo = defineCommand({
     id: "DELETE_TODO",
-    run: (state, payload: { id?: number } = {}, env) =>
+    run: (state, payload: { id: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
-            const targetId = payload.id !== undefined ? payload.id : Number(env.focusId);
+            const targetId = payload.id as number;
 
             if (!targetId || isNaN(targetId)) return;
 
@@ -88,9 +89,9 @@ export const DeleteTodo = defineCommand({
 
 export const MoveItemUp = defineCommand({
     id: "MOVE_ITEM_UP",
-    run: (state, payload: { focusId?: number } = {}, env) =>
+    run: (state, payload: { focusId: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
-            const focusId = payload.focusId !== undefined ? payload.focusId : Number(env.focusId);
+            const focusId = payload.focusId as number;
 
             if (!focusId || isNaN(focusId)) return;
 
@@ -120,9 +121,9 @@ export const MoveItemUp = defineCommand({
 
 export const MoveItemDown = defineCommand({
     id: "MOVE_ITEM_DOWN",
-    run: (state, payload: { focusId?: number } = {}, env) =>
+    run: (state, payload: { focusId: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
-            const focusId = payload.focusId !== undefined ? payload.focusId : Number(env.focusId);
+            const focusId = payload.focusId as number;
             if (!focusId || isNaN(focusId)) return;
 
             const visibleIds = state.data.todoOrder.filter(
@@ -151,9 +152,9 @@ export const MoveItemDown = defineCommand({
 
 export const StartEdit = defineCommand({
     id: "START_EDIT",
-    run: (state, payload: { id?: number } = {}, env) =>
+    run: (state, payload: { id: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
-            const targetId = payload.id !== undefined ? payload.id : Number(env.focusId);
+            const targetId = payload.id as number;
             if (!targetId || isNaN(targetId)) return;
 
             const todo = draft.data.todos[targetId];

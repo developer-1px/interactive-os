@@ -29,27 +29,26 @@ export function GlobalNav() {
   ];
 
   return (
-    <div className="w-12 h-screen flex flex-col items-center py-4 bg-[#0B0D12] border-r border-white/5 z-50 flex-shrink-0">
+    <div className="w-10 h-screen flex flex-col items-center py-3 bg-[#F8FAFC] border-r border-slate-200 z-50 flex-shrink-0">
       {/* Top Navigation */}
-      <nav className="flex flex-col gap-4 w-full items-center">
+      <nav className="flex flex-col gap-2.5 w-full items-center">
         {navItems.map((item) => (
           <NavLink
             key={item.id}
             to={item.path}
             className={({ isActive }) => `
-                            relative w-12 h-12 flex items-center justify-center text-slate-500 transition-all duration-200
-                            hover:text-slate-300
-                            ${isActive ? "text-indigo-400" : ""}
+                            relative w-8 h-8 flex items-center justify-center text-slate-400 transition-all duration-200 rounded-lg
+                            hover:text-slate-600 hover:bg-slate-100
+                            ${isActive ? "text-indigo-600 bg-indigo-50" : ""}
                         `}
             title={item.label}
           >
             {({ isActive }) => (
               <>
-                {/* Active Indicator Bar */}
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 bg-indigo-500 rounded-r-full shadow-[0_0_12px_rgba(99,102,241,0.5)]" />
-                )}
-                <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                {/* Active Indicator Bar - keeping it minimal or removing it for a button-like feel */}
+                {/* Note: I'm removing the side bar indicator in favor of the button background style check above for compactness, 
+                    but if we want the bar, we can keep it inside or outside. Let's try the button style first as it's cleaner at this size. */}
+                <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
               </>
             )}
           </NavLink>
@@ -59,24 +58,22 @@ export function GlobalNav() {
       <div className="flex-1" />
 
       {/* Bottom Actions */}
-      <div className="flex flex-col gap-4 w-full items-center mb-2">
+      <div className="flex flex-col gap-2.5 w-full items-center mb-1">
         {bottomItems.map((item) => (
           <NavLink
             key={item.id}
             to={item.path}
             className={({ isActive }) => `
-                            relative w-12 h-12 flex items-center justify-center text-slate-500 transition-all duration-200
-                            hover:text-slate-300
-                            ${isActive ? "text-indigo-400" : ""}
+                            relative w-8 h-8 flex items-center justify-center text-slate-400 transition-all duration-200 rounded-lg
+                            hover:text-slate-600 hover:bg-slate-100
+                            ${isActive ? "text-indigo-600 bg-indigo-50" : ""}
                         `}
+            tabIndex={-1}
             title={item.label}
           >
             {({ isActive }) => (
               <>
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 bg-indigo-500 rounded-r-full shadow-[0_0_12px_rgba(99,102,241,0.5)]" />
-                )}
-                <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
               </>
             )}
           </NavLink>
