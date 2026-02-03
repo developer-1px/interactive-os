@@ -1,14 +1,11 @@
 import type { LogicNode } from "@os/core/logic/types";
+import { ZoneRegistry } from "./zoneRegistry";
 
 export interface CommandDefinition<S, P, K extends string = string> {
   id: K;
   run: (state: S, payload: P) => S;
-  label?: string;
-  icon?: string;
   when?: string | LogicNode;
   log?: boolean;
-  enabled?: (state: S) => boolean;
-  injectFocus?: boolean;
 }
 
 export interface CommandFactory<S, P, K extends string = string> {
@@ -22,36 +19,47 @@ export interface CommandFactory<S, P, K extends string = string> {
    */
   id: K;
   run: (state: S, payload: P) => S;
-  label?: string;
-  icon?: string;
   when?: string | LogicNode;
   log?: boolean;
-  enabled?: (state: S) => boolean;
-  injectFocus?: boolean;
+  zoneId?: string;
 }
 
 /**
  * createCommandFactory:
  * Creates a strongly typed `defineCommand` helper for a specific State type.
  */
-export function createCommandFactory<S>() {
+// Zone-Aware Command Factory
+export function createCommandFactory<S, Z extends string = string>(zoneId?: Z) {
   return function defineCommand<P, K extends string = string>(
-    def: CommandDefinition<S, P, K>,
+    def: CommandDefinition<S, P, K>
   ): CommandFactory<S, P, K> {
-    const factory = ((payload: P) => ({
-      type: def.id,
-      payload,
-    })) as CommandFactory<S, P, K>;
+    const factory = ((payload: P) => {
+      const action = {
+        type: def.id,
+        payload,
+      };
+      // Zero-Config Discovery: Embed definition for JIT registration
+      Object.defineProperty(action, "_def", {
+        value: def,
+        enumerable: false, // Hidden from iteration/serialization
+        writable: false,
+      });
+      return action;
+    }) as CommandFactory<S, P, K>;
 
     // Attach properties
     factory.id = def.id;
     factory.run = def.run;
-    factory.label = def.label;
-    factory.icon = def.icon;
     factory.when = def.when;
     factory.log = def.log;
-    factory.enabled = def.enabled;
-    factory.injectFocus = def.injectFocus;
+
+    // Zone Awareness
+    factory.zoneId = zoneId;
+
+    // Auto-Register to Zone Registry (Discovery)
+    if (zoneId) {
+      ZoneRegistry.register(zoneId, factory);
+    }
 
     return factory;
   };

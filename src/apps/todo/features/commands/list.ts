@@ -1,8 +1,8 @@
 import { produce } from "immer";
-import { defineCommand } from "@apps/todo/features/commands/factory";
+import { defineListCommand } from "@apps/todo/features/commands/factory";
 import { OS } from "@os/core/context";
 
-export const AddTodo = defineCommand({
+export const AddTodo = defineListCommand({
     id: "ADD_TODO",
     run: (state) =>
         produce(state, (draft) => {
@@ -28,7 +28,7 @@ export const AddTodo = defineCommand({
         }),
 });
 
-export const ImportTodos = defineCommand({
+export const ImportTodos = defineListCommand({
     id: "IMPORT_TODOS",
     run: (state, payload: { items: any[] }) =>
         produce(state, (draft) => {
@@ -52,7 +52,7 @@ export const ImportTodos = defineCommand({
         }),
 });
 
-export const ToggleTodo = defineCommand({
+export const ToggleTodo = defineListCommand({
     id: "TOGGLE_TODO",
     run: (state, payload: { id: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
@@ -69,7 +69,7 @@ export const ToggleTodo = defineCommand({
         }),
 });
 
-export const DeleteTodo = defineCommand({
+export const DeleteTodo = defineListCommand({
     id: "DELETE_TODO",
     run: (state, payload: { id: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
@@ -87,7 +87,7 @@ export const DeleteTodo = defineCommand({
         }),
 });
 
-export const MoveItemUp = defineCommand({
+export const MoveItemUp = defineListCommand({
     id: "MOVE_ITEM_UP",
     run: (state, payload: { focusId: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
@@ -119,7 +119,7 @@ export const MoveItemUp = defineCommand({
         }),
 });
 
-export const MoveItemDown = defineCommand({
+export const MoveItemDown = defineListCommand({
     id: "MOVE_ITEM_DOWN",
     run: (state, payload: { focusId: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
@@ -150,7 +150,7 @@ export const MoveItemDown = defineCommand({
         }),
 });
 
-export const StartEdit = defineCommand({
+export const StartEdit = defineListCommand({
     id: "START_EDIT",
     run: (state, payload: { id: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
@@ -163,7 +163,7 @@ export const StartEdit = defineCommand({
         }),
 });
 
-export const SyncDraft = defineCommand({
+export const SyncDraft = defineListCommand({
     id: "SYNC_DRAFT",
     log: false,
     run: (state, payload: { text: string }) => ({
@@ -172,7 +172,7 @@ export const SyncDraft = defineCommand({
     }),
 });
 
-export const SyncEditDraft = defineCommand({
+export const SyncEditDraft = defineListCommand({
     id: "SYNC_EDIT_DRAFT",
     log: false,
     run: (state, payload: { text: string }) => ({
@@ -181,7 +181,7 @@ export const SyncEditDraft = defineCommand({
     }),
 });
 
-export const CancelEdit = defineCommand({
+export const CancelEdit = defineListCommand({
     id: "CANCEL_EDIT",
 
     run: (state) => ({
@@ -190,7 +190,7 @@ export const CancelEdit = defineCommand({
     }),
 });
 
-export const UpdateTodoText = defineCommand({
+export const UpdateTodoText = defineListCommand({
     id: "UPDATE_TODO_TEXT",
     run: (state) =>
         produce(state, (draft) => {

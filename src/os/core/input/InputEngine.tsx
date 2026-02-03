@@ -46,71 +46,64 @@ export function InputEngine() {
 
 
             // 3. Registry Resolution (Bubbling Layer)
+            // 3. Registry Resolution (Bubbling Layer)
             // We traverse from Active Zone (Leaf) -> Parents (Root)
             if (registry) {
                 const canonicalKey = getCanonicalKey(e);
                 const bindings = registry.getKeybindings();
-                const focusPath = useFocusStore.getState().focusPath;
+                const focusStoreState = useFocusStore.getState();
+                const focusPath = focusStoreState.focusPath;
+                const currentActiveZoneId = focusStoreState.activeZoneId;
 
                 // Create a bubbling path: ActiveZone -> ... -> Root
                 // If focusPath is empty (metrics not ready), fallback to [activeZoneId]
-                const bubblePath = focusPath.length > 0 ? [...focusPath].reverse() : (activeZoneId ? [activeZoneId] : []);
+                const bubblePath = focusPath.length > 0 ? [...focusPath].reverse() : (currentActiveZoneId ? [currentActiveZoneId] : []);
 
                 // Add "global" as the final fallback
                 bubblePath.push("global");
 
                 let handled = false;
 
-                for (const zoneId of bubblePath) {
-                    if (handled) break;
+                // Optimization: Filter bindings by key first
+                const keyMatches = bindings.filter(b => normalizeKeyDefinition(b.key) === canonicalKey);
 
-                    const isGlobal = zoneId === "global";
-                    const zoneMetadata = isGlobal ? null : zoneRegistry[zoneId];
-                    const zoneArea = zoneMetadata?.area;
+                if (keyMatches.length > 0) {
+                    for (const layerId of bubblePath) {
+                        if (handled) break;
 
-                    // Context for this specific layer
-                    const layerCtx = {
-                        ...ctx,
-                        isInput,
-                        activeZone: isGlobal ? undefined : zoneId, // Logic: "Am I the active zone?"
-                        area: zoneArea
-                    };
+                        const isGlobal = layerId === "global";
+                        const zoneMetadata = isGlobal ? null : zoneRegistry[layerId];
+                        const zoneArea = zoneMetadata?.area;
 
-                    const match = bindings.find(b => {
-                        const normalizedBinding = normalizeKeyDefinition(b.key);
-                        if (normalizedBinding !== canonicalKey) return false;
-                        if (isInput && !b.allowInInput) return false;
+                        // Find bindings that belong to this jurisdiction
+                        const layerBindings = keyMatches.filter(b => {
+                            if (isGlobal) {
+                                return !b.zoneId; // Global bindings have no zoneId
+                            }
+                            // Match Zone specific OR Area specific bindings
+                            return b.zoneId === layerId || (zoneArea && b.zoneId === zoneArea);
+                        });
 
-                        // SCOPE CHECK:
-                        // 1. If Global, only allow global bindings (no 'when' usually, or explicit global flag)
-                        //    Actually, our store.tsx flattened bindings already include scope logic in 'when'.
-                        //    BUT: That scope logic is `activeZone == id`.
-                        //    We need to relax that. We want "If I am in the bubble path, I am valid".
-                        //    
-                        //    Correction: The store.tsx `getKeybindings()` injects `activeZone == zoneId`.
-                        //    This is too strict for bubbling. It prevents a parent from handling a child's event.
-                        //    
-                        //    FIX: We should IGNORE the store's baked-in scope check if we are doing custom bubbling here.
-                        //    OR: We rely on `evalContext` with a tricked `activeZone`.
-                        //    
-                        //    Let's try tricking `activeZone` in `layerCtx`.
-                        //    If we set `activeZone: zoneId`, then the baked-in `activeZone == zoneId` check passes!
+                        for (const binding of layerBindings) {
+                            // Context for evaluation - Use REAL context, no tricking.
+                            const evaluationCtx = {
+                                ...ctx,
+                                isInput
+                            };
 
-                        if (b.when && !evalContext(b.when, layerCtx)) return false;
+                            // 4. Input Safety Check
+                            if (isInput && !binding.allowInInput) continue;
 
-                        // If the binding was scoped to a specific zone (via keymap.zones), 
-                        // we must ensure we are currently checking THAT zone.
-                        // (The 'when' clause injection in store.tsx handles this)
-                        return true;
-                    });
+                            if (binding.when && !evalContext(binding.when, evaluationCtx)) continue;
 
-                    if (match) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        logKey(e as any, activeZoneId || "global", true);
-                        dispatch({ type: match.command, payload: match.args });
-                        handled = true;
-                        return;
+                            // Success
+                            e.preventDefault();
+                            e.stopPropagation();
+                            logKey(e as any, currentActiveZoneId || "global", true);
+                            dispatch({ type: binding.command, payload: binding.args });
+                            handled = true;
+                            break;
+                        }
                     }
                 }
             }

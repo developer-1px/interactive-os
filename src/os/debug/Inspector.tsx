@@ -122,7 +122,6 @@ export function CommandInspector() {
             lastPayload={lastPayload}
             historyCount={historyCount}
           />
-          <EventStream history={state.history?.past || []} />
         </div>
 
         {/* Right Column: Split Layout */}

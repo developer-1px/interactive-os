@@ -28,12 +28,11 @@ export interface GenericCommand {
 
 export interface HistoryEntry {
     command: GenericCommand; // Was TodoCommand
-    resultingState: {
-        todos: Record<number, Todo>;
-        todoOrder: number[];
-        draft: string;
-        // focusId: FocusTarget; // Moved to OS Layer
-    };
+    timestamp: number;
+    // Snapshot state for undo/redo (optional if just logging)
+    snapshot?: any;
+    // Legacy support
+    resultingState?: any;
     groupId?: string; // For transaction support
 }
 

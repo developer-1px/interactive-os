@@ -1,42 +1,45 @@
-import { CommandRegistry } from "@os/core/command/store";
-import type { AppState } from "@apps/todo/model/appState";
+import { ToggleView } from "./board";
+import {
+    MoveCategoryUp,
+    MoveCategoryDown,
+    SelectCategory,
+    JumpToList,
+} from "./categories";
+import {
+    AddTodo,
+    ImportTodos,
+    ToggleTodo,
+    DeleteTodo,
+    MoveItemUp,
+    MoveItemDown,
+    StartEdit,
+    SyncDraft,
+    SyncEditDraft,
+    CancelEdit,
+    UpdateTodoText,
+} from "./list";
 
-// Import all commands
-import * as Global from "@apps/todo/features/commands/global";
-import * as Categories from "@apps/todo/features/commands/categories";
-import * as List from "@apps/todo/features/commands/list";
-import * as Navigation from "@apps/todo/features/commands/navigation";
-import * as Board from "@apps/todo/features/commands/board";
+// Re-export constants
+export * from "./board";
+export * from "./categories";
+export * from "./list";
 
-// Construct Arrays for Grouping
-const GlobalCommands = Object.values(Global);
-const SideBarCommands = [
-    ...Object.values(Categories),
-    ...GlobalCommands,
-];
-const TodoListCommands = [
-    ...Object.values(List),
-    ...Object.values(Navigation),
-    ...GlobalCommands,
-];
-
-// Unified Command List (Flattened & Unique)
-const ALL_COMMANDS = [
-    ...new Set([
-        ...GlobalCommands,
-        ...SideBarCommands,
-        ...TodoListCommands,
-        ...Object.values(Board) // Don't forget Board
-    ]),
-];
-
-// Inferred Union
-export type InferredTodoCommand = ReturnType<(typeof ALL_COMMANDS)[number]>;
-
-// Strict Registry
-export type TodoCommandId = InferredTodoCommand["type"];
-export const UNIFIED_TODO_REGISTRY = new CommandRegistry<AppState, TodoCommandId>();
-
-// Register all
-console.log("[TODO ENGINE] Registering commands:", ALL_COMMANDS.length);
-ALL_COMMANDS.forEach((cmd) => UNIFIED_TODO_REGISTRY.register(cmd));
+// Union Type (Actions)
+// We extract the ReturnType of each factory to get the Action shape { type: K, payload: P }
+export type InferredTodoCommand =
+    | ReturnType<typeof ToggleView>
+    | ReturnType<typeof MoveCategoryUp>
+    | ReturnType<typeof MoveCategoryDown>
+    | ReturnType<typeof SelectCategory>
+    | ReturnType<typeof JumpToList>
+    | ReturnType<typeof AddTodo>
+    | ReturnType<typeof ImportTodos>
+    | ReturnType<typeof ToggleTodo>
+    | ReturnType<typeof DeleteTodo>
+    | typeof MoveItemUp extends (...args: any) => any ? ReturnType<typeof MoveItemUp> : never
+    | typeof MoveItemDown extends (...args: any) => any ? ReturnType<typeof MoveItemDown> : never
+    | ReturnType<typeof StartEdit>
+    | ReturnType<typeof SyncDraft>
+    | ReturnType<typeof SyncEditDraft>
+    | ReturnType<typeof CancelEdit>
+    | ReturnType<typeof UpdateTodoText>;

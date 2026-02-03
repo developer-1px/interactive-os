@@ -1,11 +1,13 @@
-import type { TodoCommandId } from "@apps/todo/model/todoTypes";
+import type { TodoCommandId } from "@apps/todo/model/types";
 import { createLogicExpect, Rule } from "@os/core/logic/builder";
 import type { TodoContext } from "@apps/todo/logic/schema";
+import { OS_COMMANDS } from "@os/core/command/osCommands";
 
 const Expect = createLogicExpect<TodoContext>();
 
 export interface MenuItem {
   command: TodoCommandId;
+  args?: any;
   when?: any; // LogicNode
 }
 
@@ -26,14 +28,16 @@ export const SIDEBAR_MENU: MenuItem[] = [
     ),
   },
   {
-    command: "NAVIGATE_UP",
+    command: OS_COMMANDS.NAVIGATE,
+    args: { direction: "UP" },
     when: Rule.and(
       Expect("activeZone").toBe("sidebar"),
       Expect("focusIndex").toBeGreaterThan(0),
     ),
   },
   {
-    command: "NAVIGATE_DOWN",
+    command: OS_COMMANDS.NAVIGATE,
+    args: { direction: "DOWN" },
     when: Rule.and(
       Expect("activeZone").toBe("sidebar"),
       Expect("focusIndex").toBeLessThanKey("maxIndex"),
@@ -41,10 +45,8 @@ export const SIDEBAR_MENU: MenuItem[] = [
   },
   { command: "SELECT_CATEGORY", when: Expect("activeZone").toBe("sidebar") },
   { command: "JUMP_TO_LIST", when: Expect("activeZone").toBe("sidebar") },
-  { command: "UNDO" },
-  { command: "REDO" },
-  { command: "PATCH" },
-  { command: "SET_FOCUS" },
+  { command: OS_COMMANDS.UNDO },
+  { command: OS_COMMANDS.REDO },
 ];
 
 // 2. TodoList Menu
@@ -72,11 +74,13 @@ export const TODOLIST_MENU: MenuItem[] = [
     ),
   },
   {
-    command: "NAVIGATE_UP",
+    command: OS_COMMANDS.NAVIGATE,
+    args: { direction: "UP" },
     when: Expect("isEditing").toBeFalsy(),
   },
   {
-    command: "NAVIGATE_DOWN",
+    command: OS_COMMANDS.NAVIGATE,
+    args: { direction: "DOWN" },
     when: Expect("isEditing").toBeFalsy(),
   },
   {
@@ -101,8 +105,8 @@ export const TODOLIST_MENU: MenuItem[] = [
     ),
   },
 
-  { command: "SYNC_DRAFT" },
-  { command: "SYNC_EDIT_DRAFT" },
+  //{ command: "SYNC_DRAFT" }, // Not menu items usually?
+  //{ command: "SYNC_EDIT_DRAFT" },
   {
     command: "CANCEL_EDIT",
     when: Expect("isEditing").toBeTruthy(),
@@ -111,16 +115,12 @@ export const TODOLIST_MENU: MenuItem[] = [
     command: "UPDATE_TODO_TEXT",
     when: Expect("isEditing").toBeTruthy(),
   },
-  { command: "UNDO" },
-  { command: "REDO" },
-  { command: "PATCH" },
-  { command: "SET_FOCUS" },
+  { command: OS_COMMANDS.UNDO },
+  { command: OS_COMMANDS.REDO },
 ];
 
 // 3. Global Menu
 export const GLOBAL_MENU: MenuItem[] = [
-  { command: "UNDO" },
-  { command: "REDO" },
-  { command: "PATCH" },
-  { command: "SET_FOCUS" },
+  { command: OS_COMMANDS.UNDO },
+  { command: OS_COMMANDS.REDO },
 ];

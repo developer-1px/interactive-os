@@ -60,3 +60,12 @@
 - **Composition > Inheritance**: Use Hooks and Component Composition.
 - **Strict Inference**: Do not strictly type variable declarations if TS can infer them correctly (keeps code minimal).
 
+## Agent & Automation Rules
+
+### Workflow & Config Path Priority
+- **Resolution Strategy**: When searching for slash command workflows (`/inbox`, `/fix`, etc.) or project configuration, the Agent MUST **always** look in the **Current Workspace Root** first (e.g., `./.agent/...`).
+- **Fallback Policy**: The User Home Directory (`~/.agent/...`) should only be checked if the file is confirmed missing from the workspace root.
+- **Safety**: Do not assume global paths exist. Always `list_dir` on the project root first to discover local capabilities.
+
+### Uncertainty Principle
+- **Ask Before Implementing**: If you are unsure about a requirement or implementation detail, DO NOT implement it. Ask the user for clarification first.

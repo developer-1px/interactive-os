@@ -1,7 +1,7 @@
 import { produce } from "immer";
-import { defineCommand } from "@apps/todo/features/commands/factory";
+import { defineSidebarCommand } from "@apps/todo/features/commands/factory";
 
-export const MoveCategoryUp = defineCommand({
+export const MoveCategoryUp = defineSidebarCommand({
     id: "MOVE_CATEGORY_UP",
     run: (state) =>
         produce(state, (draft) => {
@@ -15,7 +15,7 @@ export const MoveCategoryUp = defineCommand({
         }),
 });
 
-export const MoveCategoryDown = defineCommand({
+export const MoveCategoryDown = defineSidebarCommand({
     id: "MOVE_CATEGORY_DOWN",
     run: (state) =>
         produce(state, (draft) => {
@@ -29,7 +29,7 @@ export const MoveCategoryDown = defineCommand({
         }),
 });
 
-export const SelectCategory = defineCommand({
+export const SelectCategory = defineSidebarCommand({
     id: "SELECT_CATEGORY",
 
     run: (state, payload: { id?: string } = {}) => {
@@ -41,7 +41,7 @@ export const SelectCategory = defineCommand({
     },
 });
 
-export const JumpToList = defineCommand({
+export const JumpToList = defineSidebarCommand({
     id: "JUMP_TO_LIST",
 
     run: (state) => ({
@@ -50,20 +50,3 @@ export const JumpToList = defineCommand({
     }),
 });
 
-export const MoveSidebarFocusUp = defineCommand({
-    id: "MOVE_SIDEBAR_FOCUS_UP",
-    run: (state) => {
-        return {
-            ...state,
-            effects: [...state.effects, { type: "NAVIGATE", direction: "UP" }],
-        };
-    },
-});
-
-export const MoveSidebarFocusDown = defineCommand({
-    id: "MOVE_SIDEBAR_FOCUS_DOWN",
-    run: (state) => ({
-        ...state,
-        effects: [...state.effects, { type: "NAVIGATE", direction: "DOWN" }],
-    }),
-});

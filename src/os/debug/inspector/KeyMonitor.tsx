@@ -17,10 +17,10 @@ export const KeyMonitor = memo(({ rawKeys }: { rawKeys: KeyLog[] }) => (
         <div className="flex gap-1.5 overflow-x-auto p-3 min-h-[44px] bg-[#ffffff] custom-scrollbar">
             {rawKeys.map((log, i) => (
                 <div
-                    key={log.timestamp + i}
+                    key={`${log.timestamp}-${log.key}-${i}`}
                     className={`flex flex-col items-center justify-center min-w-[32px] h-8 border transition-all duration-200 ${i === 0
-                            ? "border-[#f48771]/30 bg-[#f48771]/5 shadow-[inset_0_0_8px_rgba(244,135,113,0.05)]"
-                            : "border-[#f0f0f0] opacity-30 grayscale"
+                        ? "border-[#f48771]/30 bg-[#f48771]/5 shadow-[inset_0_0_8px_rgba(244,135,113,0.05)]"
+                        : "border-[#f0f0f0] opacity-30 grayscale"
                         }`}
                 >
                     <span

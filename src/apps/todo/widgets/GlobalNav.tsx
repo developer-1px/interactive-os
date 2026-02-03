@@ -6,7 +6,7 @@ import {
   User,
   Package,
   Book,
-  Beaker,
+  MousePointer2,
 } from "lucide-react";
 
 export function GlobalNav() {
@@ -15,12 +15,7 @@ export function GlobalNav() {
     { id: "search", icon: Search, path: "/search", label: "Search" },
     { id: "docs", icon: Book, path: "/docs", label: "Documentation" },
     { id: "showcase", icon: Package, path: "/showcase", label: "Showcase" },
-    {
-      id: "experiment",
-      icon: Beaker,
-      path: "/experiment",
-      label: "Separation Lab",
-    },
+    { id: "focus-showcase", icon: MousePointer2, path: "/focus-showcase", label: "Focus Lab" },
   ];
 
   const bottomItems = [

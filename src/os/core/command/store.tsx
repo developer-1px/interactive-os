@@ -2,8 +2,9 @@ import { create } from "zustand";
 
 import type { KeybindingItem, KeymapConfig } from "@os/core/input/keybinding";
 import type { CommandDefinition } from "@os/core/command/definition";
-import { Rule } from "@os/core/logic/builder";
-import type { ContextState, LogicNode } from "@os/core/logic/types";
+
+import type { PersistenceAdapter } from "@os/core/persistence/adapter";
+import { LocalStorageAdapter } from "@os/core/persistence/adapter";
 
 import { logger } from "@os/debug/logger";
 
@@ -48,18 +49,47 @@ export class CommandRegistry<S, K extends string = string> {
 
   /**
    * Set external key mapping (KeybindingItem[] or KeymapConfig)
+   * Auto-Registers commands found in the keymap that are Command Objects.
    */
   setKeymap(keymap: KeybindingItem<any>[] | KeymapConfig<any>) {
     this.keymap = keymap;
+
+    // Zero-Config Discovery: Collect all bindings
+    const allBindings: KeybindingItem<any>[] = [];
+    if (Array.isArray(keymap)) {
+      allBindings.push(...keymap);
+    } else {
+      if (keymap.global) allBindings.push(...keymap.global);
+      if (keymap.zones) {
+        Object.values(keymap.zones).forEach(arr => allBindings.push(...arr));
+      }
+    }
+
+    // Scan for Object Commands
+    let autoRegistered = 0;
+    allBindings.forEach(binding => {
+      const cmd = binding.command;
+      // Duck Type Check: Is it a CommandFactory?
+      if (
+        cmd &&
+        typeof cmd === 'function' &&
+        'id' in cmd &&
+        'run' in cmd
+      ) {
+        // It IS a command factory.
+        const definition = cmd as unknown as CommandDefinition<S, any, K>;
+
+        // Check if already registered
+        if (!this.commands.has(definition.id)) {
+          this.register(definition);
+          autoRegistered++;
+        }
+      }
+    });
+
     // Count entries for logging
-    const count = Array.isArray(keymap)
-      ? keymap.length
-      : (keymap.global?.length || 0) +
-      Object.values(keymap.zones || {}).reduce(
-        (acc: number, arr: any) => acc + arr.length,
-        0,
-      );
-    logger.debug("SYSTEM", `Loaded External Keymap: ${count} entries`);
+    const count = allBindings.length;
+    logger.debug("SYSTEM", `Loaded External Keymap: ${count} entries (${autoRegistered} auto-discovered)`);
   }
 
   get(id: K): CommandDefinition<S, any, K> | undefined {
@@ -87,24 +117,9 @@ export class CommandRegistry<S, K extends string = string> {
         Object.entries(this.keymap.zones).forEach(([zoneId, bindings]) => {
           const scopedBindings = (bindings as KeybindingItem<any>[]).map(
             (b) => {
-              // Scope Condition: activeZone == zoneId OR area == zoneId
-              const scopeStr = `(activeZone == '${zoneId}' || area == '${zoneId}')`;
-              const scopeEvaluator = (ctx: ContextState) =>
-                ctx.activeZone === zoneId || ctx.area === zoneId;
-
-              let newWhen: string | LogicNode;
-
-              if (!b.when) {
-                newWhen = scopeEvaluator;
-              } else if (typeof b.when === "string") {
-                newWhen = `(${b.when}) && ${scopeStr}`;
-              } else {
-                newWhen = Rule.and(b.when, scopeEvaluator);
-              }
-
               return {
                 ...b,
-                when: newWhen,
+                zoneId, // Tag the binding with its zone of origin
               };
             },
           );
@@ -114,7 +129,15 @@ export class CommandRegistry<S, K extends string = string> {
     }
 
     return rawBindings.map((binding) => {
-      const cmd = this.get(binding.command as K);
+      // Logic Update: Support Object References in Keybinding
+      // binding.command can be "ADD_TODO" (string) OR CommandFactory object
+      const commandId = typeof binding.command === 'function' && 'id' in binding.command
+        ? (binding.command as any).id
+        : (typeof binding.command === 'object' && 'id' in (binding.command as any))
+          ? (binding.command as any).id
+          : binding.command;
+
+      const cmd = this.get(commandId as K);
       if (!cmd) return binding;
 
       // Merging logic (as discussed)
@@ -122,6 +145,7 @@ export class CommandRegistry<S, K extends string = string> {
       // Default to command.when ONLY if binding.when is missing (e.g. global).
       return {
         ...binding,
+        command: commandId, // Normalize to string ID for internal consumption
         when: binding.when || cmd.when,
         // Removed cmd.args fallback (deprecated)
         args: binding.args,
@@ -149,10 +173,46 @@ export function createCommandStore<
   config?: {
     onStateChange?: (state: S, action: A, prevState: S) => S;
     onDispatch?: (action: A) => A; // Interceptor
+    persistence?: {
+      key: string;
+      adapter?: PersistenceAdapter;
+      debounceMs?: number;
+    };
   },
 ) {
+  // 1. Auto-Hydrate
+  let startState = initialState;
+  if (config?.persistence) {
+    const { key, adapter = LocalStorageAdapter } = config.persistence;
+    const loaded = adapter.load(key);
+    if (loaded && typeof loaded === "object" && !Array.isArray(loaded)) {
+      // Smarter Merge: 
+      // We want to preserve the root structure of initialState while overlaying loaded data.
+      // Especially important if AppState structure changed (e.g. data moved or keys added).
+      startState = {
+        ...initialState,
+        ...loaded,
+        // Deep merge data/ui if they exist to avoid wiping out default keys in newer app versions
+        data: (initialState as any).data && (loaded as any).data
+          ? { ...(initialState as any).data, ...(loaded as any).data }
+          : (loaded as any).data || (initialState as any).data,
+        ui: (initialState as any).ui && (loaded as any).ui
+          ? { ...(initialState as any).ui, ...(loaded as any).ui }
+          : (loaded as any).ui || (initialState as any).ui,
+      };
+
+      logger.debug("ENGINE", `◈ Hydrated state from [${key}]`, {
+        keys: Object.keys(loaded),
+        hasData: !!(loaded as any).data
+      });
+    }
+  }
+
+  // Debounce Timer
+  let saveTimeout: any;
+
   return create<CommandStoreState<S, A>>((set) => ({
-    state: initialState,
+    state: startState,
     dispatch: (startAction) =>
       set((prev) => {
         // Run interceptor if defined
@@ -218,6 +278,35 @@ export function createCommandStore<
             prev.state,
             finalState,
           );
+        }
+
+        // Persistence Hook
+        if (config?.persistence) {
+          const { key, adapter = LocalStorageAdapter, debounceMs = 300 } = config.persistence;
+          clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(() => {
+            // Persist the FULL state.
+            // If Apps want partial, they should split state or we add 'selector' to config later.
+            // For Todo App compatibility (it saved `state.data`), we might have an issue.
+            // User's Todo App previously saved `state.data`.
+            // Now we save `state`.
+            // The `persistence.ts` loader logic was `loadedState = { ...INITIAL_STATE, data: ... }` assuming full state structure or data-only structure?
+            // `loadState` in `persistence.ts` did: `const parsed = JSON.parse(stored); ... loadedState = { ...INITIAL, data: { ...parsed?? No } }`.
+            // Wait, previous `loadState` logic:
+            // `if (!Array.isArray(parsed.todos) && parsed.categories) { loadedState = { ...INITIAL, data: { ...parsed } } }`
+            // It assumed the stored object WAS the data object structure (categories, todos).
+            // So `state.data` was stored.
+            // If I now store `state` (which has `data`, `ui`, `effects`...), the structure changes.
+            // Breaking Change? Yes. 
+            // Better to default to storing EVERYTHING, and update `Todo` to handle it?
+            // Or add a `selector` to config?
+            // Let's store `state.data` by default? No, that assumes `state` has `data`.
+            // Standard approach: Store everything.
+            // I will implement "Store Everything".
+            // If this breaks Todo's hydration (which expects data-only structure in localStorage), I will wipe the storage key or update key name.
+            // I'll change the key to "interactive-os-todo-v4" to avoid conflicts.
+            adapter.save(key, finalState);
+          }, debounceMs);
         }
 
         return { state: finalState };

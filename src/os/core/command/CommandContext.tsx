@@ -22,6 +22,12 @@ export interface CommandContextValue<S = unknown> {
 
 export const CommandContext = createContext<CommandContextValue<any> | null>(null);
 
+export const useEngine = <S = any>() => {
+  const ctx = useContext(CommandContext);
+  if (!ctx) throw new Error("useEngine must be used within an OS.App");
+  return ctx as CommandContextValue<S>;
+};
+
 // --- Bridge Pattern for Provider-less Usage ---
 let globalEngineHelper: (() => CommandContextValue<any>) | null = null;
 

@@ -1,6 +1,6 @@
-import { defineCommand } from "@apps/todo/features/commands/factory";
+import { defineGlobalCommand } from "@apps/todo/features/commands/factory";
 
-export const ToggleView = defineCommand({
+export const ToggleView = defineGlobalCommand({
     id: "TOGGLE_VIEW",
     run: (state) => ({
         ...state,

@@ -2,17 +2,29 @@ export type NavigationStrategy = "spatial" | "roving" | "grid";
 export type InteractionPreset = "seamless" | "nested" | "modal";
 export type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
 
+import { logger } from "@os/debug/logger";
+
 /**
  * Unified Navigation Finder
  * Dispatches to the appropriate strategy engine.
  */
 export function findNextTarget(strategy: NavigationStrategy, ctx: NavigationContext): string | null {
-    switch (strategy) {
-        case "roving": return findNextRovingTarget(ctx);
-        case "spatial": return findNextSpatialTarget(ctx);
-        case "grid": return findNextGridTarget(ctx);
-        default: return findNextSpatialTarget(ctx);
-    }
+    const result = (() => {
+        switch (strategy) {
+            case "roving": return findNextRovingTarget(ctx);
+            case "spatial": return findNextSpatialTarget(ctx);
+            case "grid": return findNextGridTarget(ctx);
+            default: return findNextSpatialTarget(ctx);
+        }
+    })();
+
+    logger.debug("NAVIGATION", `Strategy: ${strategy} -> Result: ${result}`, {
+        itemsCount: ctx.items.length,
+        firstItem: ctx.items[0],
+        currentId: ctx.currentId,
+        direction: ctx.direction
+    });
+    return result;
 }
 
 interface NavigationContext {
@@ -32,19 +44,45 @@ interface NavigationContext {
  */
 export function findNextRovingTarget(ctx: NavigationContext): string | null {
     const { currentId, items, direction, layout = "column", navMode = "clamped" } = ctx;
-    if (!currentId || items.length === 0) return items[0] || null;
 
-    const currentIndex = items.indexOf(currentId);
-    if (currentIndex === -1) return items[0];
+    // JIT Spatial Sort: Ensure items are sorted by Visual Position
+    // This allows active registration (temporal order) to be compatible with spatial expectations.
+    const sortedItems = [...items].sort((a, b) => {
+        const elA = document.getElementById(a);
+        const elB = document.getElementById(b);
+        if (!elA || !elB) return 0; // Fallback to stable sort
+
+        const rectA = elA.getBoundingClientRect();
+        const rectB = elB.getBoundingClientRect();
+        const threshold = 4; // visual tolerance
+
+        if (layout === "column") {
+            // Sort by Y -> X
+            const deltaY = rectA.top - rectB.top;
+            if (Math.abs(deltaY) < threshold) {
+                return rectA.left - rectB.left;
+            }
+            return deltaY;
+        } else {
+            // Sort by X -> Y
+            const deltaX = rectA.left - rectB.left;
+            if (Math.abs(deltaX) < threshold) {
+                return rectA.top - rectB.top;
+            }
+            return deltaX;
+        }
+    });
+
+    if (!currentId || sortedItems.length === 0) return sortedItems[0] || null;
+
+    const currentIndex = sortedItems.indexOf(currentId);
+    if (currentIndex === -1) return sortedItems[0];
 
     let nextIndex = currentIndex;
     const isVertical = layout === "column";
     const isHorizontal = layout === "row";
 
-    // Simple 1D Mapping
-    // Up/Left -> Previous
-    // Down/Right -> Next
-    // (Assuming standard list behavior)
+    // Debug Log sort result if needed (omitted for perf)
 
     if (
         (isVertical && direction === "UP") ||
@@ -57,22 +95,21 @@ export function findNextRovingTarget(ctx: NavigationContext): string | null {
     ) {
         nextIndex++;
     } else {
-        // Orthogonal movement in 1D list -> possibly bubble up?
-        // For now, return null to indicate "End of Zone" for bubbling
+        // Orthogonal movement in 1D list -> Bubble up
         return null;
     }
 
     // Handle Bounds
     if (nextIndex < 0) {
-        if (navMode === "loop") return items[items.length - 1];
+        if (navMode === "loop") return sortedItems[sortedItems.length - 1];
         return null; // Hit edge -> Bubble
     }
-    if (nextIndex >= items.length) {
-        if (navMode === "loop") return items[0];
-        return null; // Hit edge -> Bubble
+    if (nextIndex >= sortedItems.length) {
+        if (navMode === "loop") return sortedItems[0];
+        return null;  // Hit edge -> Bubble
     }
 
-    return items[nextIndex];
+    return sortedItems[nextIndex];
 }
 
 /**
@@ -116,39 +153,71 @@ export function findNextSpatialTarget(ctx: NavigationContext): string | null {
 
         if (direction === "UP" || direction === "DOWN") {
             dPrimary = direction === "UP" ? currentRect.top - rect.bottom : rect.top - currentRect.bottom;
-            dSecondary = Math.max(0, rect.left - currentRect.right, currentRect.left - rect.right);
 
             // Use stickyX if available to preserve horizontal lane
             const sourceX = (stickyX !== undefined && stickyX !== null)
                 ? stickyX
                 : (currentRect.left + currentRect.width / 2);
+
+            // Strict Sticky Overlap: If stickyX is active, we check if target strictly contains the lane.
+            if (stickyX !== undefined && stickyX !== null) {
+                // Check if stickyX is strictly within target X range (with tolerance)
+                // If overlap is 0 (point vs range), we check distance to range
+                if (stickyX >= rect.left && stickyX <= rect.right) {
+                    dSecondary = 0;
+                } else {
+                    dSecondary = Math.min(Math.abs(stickyX - rect.left), Math.abs(stickyX - rect.right));
+                }
+            } else {
+                dSecondary = Math.max(0, rect.left - currentRect.right, currentRect.left - rect.right);
+            }
+
             const targetX = rect.left + rect.width / 2;
             dCenter = Math.abs(targetX - sourceX);
         } else {
             dPrimary = direction === "LEFT" ? currentRect.left - rect.right : rect.left - currentRect.right;
-            dSecondary = Math.max(0, rect.top - currentRect.bottom, currentRect.top - rect.bottom);
 
             // Use stickyY if available to preserve vertical lane
             const sourceY = (stickyY !== undefined && stickyY !== null)
                 ? stickyY
                 : (currentRect.top + currentRect.height / 2);
+
+            // Strict Sticky Overlap: If stickyY is active, we check if target strictly contains the lane.
+            if (stickyY !== undefined && stickyY !== null) {
+                if (stickyY >= rect.top && stickyY <= rect.bottom) {
+                    dSecondary = 0;
+                } else {
+                    dSecondary = Math.min(Math.abs(stickyY - rect.top), Math.abs(stickyY - rect.bottom));
+                }
+            } else {
+                dSecondary = Math.max(0, rect.top - currentRect.bottom, currentRect.top - rect.bottom);
+            }
+
             const targetY = rect.top + rect.height / 2;
             dCenter = Math.abs(targetY - sourceY);
         }
 
-        // 3. Scoring Heuristic (TV Navigation Industry Standard)
-        // Primary distance is the main factor.
-        // Secondary distance is heavily penalized.
-        // If segments overlap (dSecondary == 0), the element is much more likely to be picked.
+        // 3. Scoring Heuristic
+        // We categorize candidates into "Overlapping" (Same Line) and "Non-Overlapping" (Different Line).
+        // Overlapping candidates are ALWAYS prioritized over Non-Overlapping ones, regardless of distance.
+        const isOverlapping = dSecondary === 0;
 
-        // Weighting: 
-        // 1 * Primary Distance 
-        // + 24 * Secondary Distance (High penalty for non-overlapping items)
-        // + 0.1 * Center distance (Tie-breaker for aligned items)
-        const score = (dPrimary * dPrimary) + (dSecondary * dSecondary * 24) + dCenter;
+        // Base Score: Low is better
+        // We add a massive penalty for non-overlapping items to stratify the two groups.
+        // Group 1 (Overlapping): Score range [0, 1M]
+        // Group 2 (Non-Overlapping): Score range [10M, ...]
+        const overlapPenalty = isOverlapping ? 0 : 10_000_000;
 
-        if (score < minScore) {
-            minScore = score;
+        // Within the group, we use standard euclidean-ish weighting.
+        // Primary distance is king.
+        // dCenter is tie-breaker.
+        // dSecondary is still used for Group 2 sorting.
+        const weightedScore = (dPrimary * dPrimary) + (dSecondary * dSecondary * 10) + dCenter;
+
+        const finalScore = overlapPenalty + weightedScore;
+
+        if (finalScore < minScore) {
+            minScore = finalScore;
             bestId = id;
         }
     });

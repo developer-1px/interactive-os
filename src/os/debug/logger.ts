@@ -3,9 +3,9 @@
  * Features: Layered Badges, Dev-only silencing, Grouped execution tracing.
  */
 
-const IS_DEV = false; // import.meta.env.DEV;
+const IS_DEV = import.meta.env.DEV;
 
-type LogLayer = "ENGINE" | "KEYMAP" | "CONTEXT" | "PRIMITIVE" | "SYSTEM";
+type LogLayer = "ENGINE" | "KEYMAP" | "CONTEXT" | "PRIMITIVE" | "SYSTEM" | "NAVIGATION";
 
 const LayerColors: Record<LogLayer, string> = {
   ENGINE: "#6366f1", // Indigo
@@ -13,6 +13,7 @@ const LayerColors: Record<LogLayer, string> = {
   CONTEXT: "#10b981", // Emerald
   PRIMITIVE: "#f59e0b", // Amber
   SYSTEM: "#64748b", // Slate
+  NAVIGATION: "#3b82f6", // Blue
 };
 
 class AntigravityLogger {

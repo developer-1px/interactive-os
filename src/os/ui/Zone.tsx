@@ -1,8 +1,9 @@
-import { useRef, useLayoutEffect, useContext } from "react";
+import { useRef, useLayoutEffect, useEffect, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
-import { FocusContext } from "@os/core/command/CommandContext";
+import { FocusContext, CommandContext } from "@os/core/command/CommandContext";
 import { useFocusStore } from "@os/core/focus";
 import type { NavigationStrategy, InteractionPreset } from "@os/core/navigation";
+import { ZoneRegistry } from "@os/core/command/zoneRegistry";
 
 export interface ZoneProps {
   id: string;
@@ -18,6 +19,8 @@ export interface ZoneProps {
   navMode?: "clamped" | "loop";
   focusable?: boolean;           // If true, this zone can also be focused as an item
   payload?: any;                 // Optional data for focusable zones
+
+  // Declared Capabilities (Zero-Config Discovery)
 
   // Overrides (Legacy Compat - but we ignore handlers now)
   active?: boolean;
@@ -43,32 +46,60 @@ export function Zone({
   layout = "column",
   navMode = "clamped",
   focusable = false,
-  payload,
   className,
   style,
-}: ZoneProps) {
+  allowedDirections,
+}: ZoneProps & {
+  allowedDirections?: ("UP" | "DOWN" | "LEFT" | "RIGHT")[],
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // --- Global Store Integration ---
-  const {
-    focusPath,
-    focusedItemId,
-    setFocus,
-    registerZone,
-    unregisterZone,
-    updateZoneItems
-  } = useFocusStore();
+  // --- Global Store & Registry Integration ---
+  // FIXED: Use selectors to prevent re-renders when zoneRegistry updates (stopping the specific discovery loop)
+  const focusPath = useFocusStore(state => state.focusPath);
+  const focusedItemId = useFocusStore(state => state.focusedItemId);
+
+  // Actions (Stable references)
+  const registerZone = useFocusStore(state => state.registerZone);
+  const unregisterZone = useFocusStore(state => state.unregisterZone);
+
+  const { registry } = useContext(CommandContext) || {}; // Access Registry for JIT Registration
 
   const isInPath = focusPath.includes(id); // Ancestor or Self
   const isFocused = focusedItemId === id;
   const isActive = isInPath; // Visual Active State (Grayscale Logic)
 
-  // --- 1. Registration (Identity Awareness) ---
+  // --- 1. Registration (Identity & Capability Awareness) ---
   const context = useContext(FocusContext);
   // If we are nested, our parent is the current context's zoneId
   const parentId = context?.zoneId;
 
+  // Ref to track registered commands and prevent redundant registration calls
+  const registeredCommandsRef = useRef(new Set<string>());
+
   useLayoutEffect(() => {
+    // A. Capability Registration (Zero-Config Discovery)
+    const discoveredCommands = ZoneRegistry.getCommands(id);
+    if (registry && discoveredCommands.length > 0) {
+      discoveredCommands.forEach(cmd => {
+        // Duck Type Check
+        if (cmd && cmd.id) {
+          // Check if WE already registered this command in this component instance
+          if (!registeredCommandsRef.current.has(cmd.id)) {
+            // Check if Registry already has it (Global prevention)
+            if (!registry.get(cmd.id)) {
+              registry.register(cmd);
+            }
+            // Mark as handled for this component lifecycle
+            registeredCommandsRef.current.add(cmd.id);
+          }
+        }
+      });
+    }
+  }, [id, registry]);
+
+  // --- 1. Zone Registration (Lifecycle) ---
+  useEffect(() => {
     registerZone({
       id,
       parentId,
@@ -76,61 +107,24 @@ export function Zone({
       strategy,
       layout,
       preset,
-      navMode
+      navMode,
+      allowedDirections,
+      items: [], // Active Registration will populate this
     } as any);
     return () => unregisterZone(id);
-  }, [id, parentId, area, strategy, layout, preset, navMode, registerZone, unregisterZone]);
+  }, [id, parentId, area, strategy, layout, preset, navMode, allowedDirections, registerZone, unregisterZone]);
 
-
-  // --- 2. Focus Sync (If focusable) ---
+  // --- 3. Reactive Item Sync (DEPRECATED) ---
+  // Replaced by Active Registration in OS.Item
   useLayoutEffect(() => {
-    if (focusable && isFocused) {
-      setFocus(id, {
-        id,
-        index: 0,
-        payload,
-        group: { id: parentId || "root" }
-      });
-    }
-  }, [focusable, isFocused, id, payload, parentId, setFocus]);
+    return () => { };
+  }, [id]);
 
-
-  // --- 3. Reactive Item Sync ---
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    const syncItems = () => {
-      if (!containerRef.current) return;
-      // We look for [data-item-id] to know "what's reachable" in this zone
-      // CRITICAL: We only want DIRECT children items, but querySelectorAll is subtree.
-      // However, our InputEngine handles bubbling, so maybe subtree is fine?
-      // Actually, updateZoneItems expects the list of targets.
-      const items = Array.from(containerRef.current.querySelectorAll("[data-item-id]"))
-        .filter(el => {
-          // Only include if this zone is its nearest zone parent
-          const nearestZone = el.parentElement?.closest("[data-zone-id]");
-          return nearestZone?.getAttribute("data-zone-id") === id;
-        })
-        .map((el) => el.getAttribute("data-item-id"))
-        .filter((id): id is string => !!id);
-
-      updateZoneItems(id, items);
-    };
-
-    syncItems();
-    const observer = new MutationObserver(syncItems);
-    observer.observe(containerRef.current, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["data-item-id"]
-    });
-
-    return () => observer.disconnect();
-  }, [id, updateZoneItems]);
+  // --- 4. Stable Context ---
+  const focusContextValue = useMemo(() => ({ zoneId: id, isActive }), [id, isActive]);
 
   return (
-    <FocusContext.Provider value={{ zoneId: id, isActive }}>
+    <FocusContext.Provider value={focusContextValue}>
       <div
         ref={containerRef}
         id={id}
@@ -145,7 +139,6 @@ export function Zone({
           ${isActive ? "grayscale-0" : "grayscale opacity-80"} 
           transition-all duration-200 ${className || ""}`}
         style={{
-          flex: id === "sidebar" ? "none" : "1",
           ...style
         }}
       >

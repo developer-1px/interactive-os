@@ -2,7 +2,8 @@ import { Zone } from "@os/ui/Zone";
 import { Item } from "@os/ui/Item";
 import { Trigger } from "@os/ui/Trigger";
 import { Kbd } from "@os/debug/components/Kbd";
-import { useTodoEngine } from "@apps/todo/lib/todoEngine";
+import { useEngine } from "@os/core/command/CommandContext";
+import type { AppState } from "@apps/todo/model/types";
 import { SelectCategory } from "@apps/todo/features/commands/categories";
 import {
   Inbox,
@@ -16,7 +17,8 @@ import {
 } from "lucide-react";
 
 export function Sidebar() {
-  const { state } = useTodoEngine();
+  const { state } = useEngine<AppState>();
+  if (!state) return null;
 
   const getIcon = (id: string) => {
     switch (id) {
@@ -37,6 +39,7 @@ export function Sidebar() {
       area="nav"
       navMode="loop" // Example: Rolling Navigation for Sidebar
       layout="column"
+      style={{ flex: "none" }}
     >
       <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">
         <div className="p-8 pb-4 z-10">

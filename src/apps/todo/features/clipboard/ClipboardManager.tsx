@@ -1,6 +1,7 @@
-import { useEffect } from "react";
-import { useTodoStore } from "@apps/todo/lib/todoEngine";
+import { useEffect, useRef } from "react";
+import { useEngine } from "@os/core/command/CommandContext";
 import { useFocusStore } from "@os/core/focus";
+import type { AppState } from "@apps/todo/model/types";
 
 /**
  * ClipboardManager
@@ -11,21 +12,24 @@ import { useFocusStore } from "@os/core/focus";
  * Future: Move to src/os/ if we formalize that directory.
  */
 export function ClipboardManager() {
-  // We access the store directly to get state for Copy
-  const store = useTodoStore();
+  const { state, dispatch } = useEngine<AppState>();
+
+  // Use explicit ref to avoid stale closures in event listeners
+  // forcing re-attachment on every state change is too expensive for global listeners
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     const handleCopy = (e: ClipboardEvent) => {
-      // Only handle copy if we are in a zone that supports it?
-      // Or just check if there is a selection.
-
       // Check if user is in an input field (native behavior should prevail)
       if (isInputActive()) return;
 
-      const state = useTodoStore.getState().state;
+      const currentState = stateRef.current;
+      if (!currentState) return;
+
       // Get Focus from OS Store
       const focusId = useFocusStore.getState().focusedItemId;
-      const { todos, categories } = state.data;
+      const { todos, categories } = currentState.data;
 
       // 1. Copying a Todo Item
       if (typeof focusId !== "object" && !isNaN(Number(focusId))) { // Check if numeric ID (Todo)
@@ -79,7 +83,7 @@ export function ClipboardManager() {
       }
 
       if (items.length > 0) {
-        store.dispatch({ type: "IMPORT_TODOS", payload: { items } });
+        dispatch({ type: "IMPORT_TODOS", payload: { items } } as any);
       }
     };
 
@@ -90,7 +94,7 @@ export function ClipboardManager() {
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("paste", handlePaste);
     };
-  }, []);
+  }, [dispatch]); // dispatch is stable
 
   return null;
 }

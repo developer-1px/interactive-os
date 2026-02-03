@@ -1,48 +1,65 @@
 import type { KeymapConfig } from "@os/core/input/keybinding";
-import type { TodoCommandId } from "@apps/todo/model/types";
 import { createLogicExpect, Rule } from "@os/core/logic/builder";
 import type { TodoContext } from "@apps/todo/logic/schema";
 import { OS } from "@os/core/context";
+
+// Command Imports (Direct References)
 import { OS_COMMANDS } from "@os/core/command/osCommands";
+import { ToggleView } from "@apps/todo/features/commands/board";
+import {
+  MoveCategoryUp,
+  MoveCategoryDown,
+  SelectCategory
+} from "@apps/todo/features/commands/categories";
+import {
+  AddTodo,
+  ToggleTodo,
+  DeleteTodo,
+  MoveItemUp,
+  MoveItemDown,
+  StartEdit,
+  CancelEdit,
+  UpdateTodoText,
+} from "@apps/todo/features/commands/list";
 
 // 1. Strict Context Builders
 const Expect = createLogicExpect<TodoContext>();
 
 // 4. Default Keymap Definition (Hierarchical)
-export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
+// Now using Direct Object References (CommandFactory) instead of string IDs.
+// The OS Core (store.ts) resolves these objects to their .id automatically.
+export const TODO_KEYMAP: KeymapConfig<any> = {
   global: [
-    { key: "Meta+z", command: OS_COMMANDS.UNDO, allowInInput: true },
-    { key: "Meta+Shift+Z", command: OS_COMMANDS.REDO, allowInInput: true },
-    { key: "Meta+Shift+V", command: "TOGGLE_VIEW", allowInInput: true },
-    { key: "Meta+i", command: OS_COMMANDS.TOGGLE_INSPECTOR, allowInInput: true },
+    { key: "Meta+Shift+V", command: ToggleView, allowInInput: true },
+    { key: "Meta+I", command: "OS_TOGGLE_INSPECTOR", allowInInput: true },
 
-
-    // Universal Navigation
+    // Standard OS Navigation (Global Fallback)
     { key: "ArrowUp", command: OS_COMMANDS.NAVIGATE, args: { direction: "UP" }, allowInInput: true },
     { key: "ArrowDown", command: OS_COMMANDS.NAVIGATE, args: { direction: "DOWN" }, allowInInput: true },
-    { key: "ArrowLeft", command: OS_COMMANDS.NAVIGATE, args: { direction: "LEFT" }, allowInInput: true },
-    { key: "ArrowRight", command: OS_COMMANDS.NAVIGATE, args: { direction: "RIGHT" }, allowInInput: true },
+    { key: "ArrowLeft", command: OS_COMMANDS.NAVIGATE, args: { direction: "LEFT" } },
+    { key: "ArrowRight", command: OS_COMMANDS.NAVIGATE, args: { direction: "RIGHT" } },
   ],
   zones: {
     sidebar: [
-      { key: "Meta+ArrowUp", command: "MOVE_CATEGORY_UP" },
-      { key: "Meta+ArrowDown", command: "MOVE_CATEGORY_DOWN" },
-      { key: "Enter", command: "SELECT_CATEGORY", args: { id: OS.FOCUS } },
-      { key: "Space", command: "SELECT_CATEGORY", args: { id: OS.FOCUS } },
-      // Navigation lifted to global
+      { key: "Meta+ArrowUp", command: MoveCategoryUp },
+      { key: "Meta+ArrowDown", command: MoveCategoryDown },
+      { key: "Enter", command: SelectCategory, args: { id: OS.FOCUS } },
+      { key: "Space", command: SelectCategory, args: { id: OS.FOCUS } },
     ],
 
     listView: [
-      // Navigation lifted to global
+      // General Navigation
 
-      // Structure
-      { key: "Meta+ArrowUp", command: "MOVE_ITEM_UP", args: { focusId: OS.FOCUS } },
-      { key: "Meta+ArrowDown", command: "MOVE_ITEM_DOWN", args: { focusId: OS.FOCUS } },
+
+      // Structure - Reorder Items (Meta + Arrow)
+      // Note: Meta+Arrows are reserved for "Move Item", not "Navigate Focus"
+      { key: "Meta+ArrowUp", command: MoveItemUp, args: { focusId: OS.FOCUS } },
+      { key: "Meta+ArrowDown", command: MoveItemDown, args: { focusId: OS.FOCUS } },
 
       // Creation (Strict Draft Guard)
       {
         key: "Enter",
-        command: "ADD_TODO",
+        command: AddTodo,
         when: Expect("isDraftFocused").toBe(true),
         allowInInput: true,
       },
@@ -50,7 +67,7 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
       // Editing Triggers
       {
         key: "Enter",
-        command: "START_EDIT",
+        command: StartEdit,
         args: { id: OS.FOCUS },
         when: Rule.and(
           Expect("isEditing").toBe(false),
@@ -59,13 +76,13 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
       },
       {
         key: "Enter",
-        command: "UPDATE_TODO_TEXT",
+        command: UpdateTodoText,
         when: Expect("isEditing").toBe(true),
         allowInInput: true,
       },
       {
         key: "Escape",
-        command: "CANCEL_EDIT",
+        command: CancelEdit,
         when: Expect("isEditing").toBe(true),
         allowInInput: true,
       },
@@ -73,48 +90,40 @@ export const TODO_KEYMAP: KeymapConfig<TodoCommandId> = {
       // Deletion & Toggle (No Edit Guard)
       {
         key: "Backspace",
-        command: "DELETE_TODO",
+        command: DeleteTodo,
         args: { id: OS.FOCUS },
         when: Expect("isEditing").toBe(false),
       },
       {
         key: "Delete",
-        command: "DELETE_TODO",
+        command: DeleteTodo,
         args: { id: OS.FOCUS },
         when: Expect("isEditing").toBe(false),
       },
       {
         key: "Space",
-        command: "TOGGLE_TODO",
+        command: ToggleTodo,
         args: { id: OS.FOCUS },
         when: Expect("isEditing").toBe(false),
       },
-
-      // Cross-Zone: Handled by Zone Declarative Neighbors
-
     ],
     boardView: [
-      // Navigation lifted to global
-
-      // Column Navigation (Handled by Zone Neighbors Declaratively)
-      // ArrowRight/Left falls through to Zone Spatial Nav
-
       // Item Actions (Shared)
       {
         key: "Space",
-        command: "TOGGLE_TODO",
+        command: ToggleTodo,
         args: { id: OS.FOCUS },
         when: Expect("isEditing").toBe(false),
       },
       {
         key: "Backspace",
-        command: "DELETE_TODO",
+        command: DeleteTodo,
         args: { id: OS.FOCUS },
         when: Expect("isEditing").toBe(false),
       },
       {
         key: "Delete",
-        command: "DELETE_TODO",
+        command: DeleteTodo,
         args: { id: OS.FOCUS },
         when: Expect("isEditing").toBe(false),
       },

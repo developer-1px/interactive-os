@@ -7,6 +7,8 @@ import { Item } from "@os/ui/Item";
 import { Zone } from "@os/ui/Zone";
 import type { CommandRegistry, createCommandStore } from "@os/core/command/store";
 
+import { useFocusStore } from "@os/core/focus";
+
 /**
  * useCommandCenter:
  * Now uses the Zustand store and provides synchronized metadata and primitives.
@@ -36,27 +38,48 @@ export function useCommandCenter<
     const keybindings = useMemo(() => registry.getKeybindings(), [registry]);
 
     // 3. Auto-calculate UI metadata
+    // We import useFocusStore to access Zone Registry for Area lookups
+    const zoneRegistry = useFocusStore((s) => s.zoneRegistry);
+
+    // Note: To be reactive to registry changes (dynamic zones), we might want a subscription.
+    // However, zone registration is rare. Usually static layout.
+    // Actually, useFocusStore() inside the hook would be better for reactivity if zones change? 
+    // Yes, but focusPath is already in context?
+    // Let's rely on context.focusPath for hierarchy, and zoneRegistry lookup for area.
+
     const activeKeybindingMap = useMemo(() => {
         const res = new Map<string, boolean>();
+        const focusPath = context.focusPath || [];
+
+        // Determine Active Area based on Active Zone (leaf of path)
+        const activeZoneId = (context as any).activeZone || (focusPath.length > 0 ? focusPath[0] : null);
+        const activeArea = activeZoneId ? zoneRegistry[activeZoneId]?.area : undefined;
+
         keybindings.forEach((kb) => {
-            res.set(kb.key, evalContext(kb.when, context));
+            const isLogicEnabled = evalContext(kb.when, context);
+
+            // Scope Check: Match Zone ID in Path OR active Area
+            const isScopeEnabled = !kb.zoneId ||
+                focusPath.includes(kb.zoneId) ||
+                (activeArea && activeArea === kb.zoneId);
+
+            res.set(kb.key, !!(isLogicEnabled && isScopeEnabled));
         });
         return res;
-    }, [keybindings, context]);
+    }, [keybindings, context, zoneRegistry]);
 
     const commandStatusList = useMemo(() => {
         return registry.getAll().map((cmd) => {
             const isContextActive = evalContext(cmd.when, context);
-            const isLogicEnabled = cmd.enabled ? cmd.enabled(state) : true;
+            const isLogicEnabled = true;
             return {
                 id: cmd.id,
-                label: cmd.label || cmd.id,
-                // kb: cmd.kb || [], // Deprecated: Command doesn't own keys anymore
-                kb: [], // Set to empty, UI should use keybindings map or separate lookup
+                label: cmd.id,
+                kb: [],
                 enabled: isContextActive && isLogicEnabled,
             };
         });
-    }, [registry, state, context]);
+    }, [registry, context]);
 
     const providerValue = useMemo(
         () => ({

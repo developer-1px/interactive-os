@@ -1,11 +1,13 @@
 import { OS } from "@os/ui";
-import { useTodoEngine } from "@apps/todo/lib/todoEngine";
+import { useEngine } from "@os/core/command/CommandContext";
 import { ToggleTodo } from "@apps/todo/features/commands/list";
 import { ToggleView } from "@apps/todo/features/commands/board";
 import { Check, List } from "lucide-react";
+import type { AppState } from "@apps/todo/model/types";
 
 export function BoardView() {
-  const { state } = useTodoEngine();
+  const { state } = useEngine<AppState>();
+  if (!state) return null;
   const { categoryOrder, categories, todos, todoOrder } = state.data;
   const { selectedCategoryId } = state.ui;
   const activeCategory = categories[selectedCategoryId];

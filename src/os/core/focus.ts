@@ -1,7 +1,5 @@
 import { create } from "zustand";
 
-
-
 export interface ZoneMetadata {
   id: string;
   parentId?: string; // Hierarchical Link
@@ -20,6 +18,7 @@ export interface ZoneMetadata {
   // State
   lastFocusedId?: string;
   navMode?: "clamped" | "loop";
+  allowedDirections?: ("UP" | "DOWN" | "LEFT" | "RIGHT")[];
 }
 
 export interface FocusObject {
@@ -64,6 +63,10 @@ interface FocusState {
   updatePayload: (id: string, payload: any) => void;
   updateZoneItems: (id: string, items: string[]) => void;
 
+  // Active Registration
+  addItem: (zoneId: string, itemId: string) => void;
+  removeItem: (zoneId: string, itemId: string) => void;
+
   // Optional: History for "Alt-Tab" behavior
   history: string[];
 }
@@ -92,7 +95,12 @@ export const useFocusStore = create<FocusState>((set) => ({
 
   registerZone: (data) =>
     set((state) => {
-      const newRegistry = { ...state.zoneRegistry, [data.id]: data };
+      // console.log(`[FocusStore] Registering Zone: ${data.id}`);
+      const existing = state.zoneRegistry[data.id];
+      // Preserve existing items if active registration happened first
+      const merged = { ...data, items: existing?.items || data.items || [] };
+
+      const newRegistry = { ...state.zoneRegistry, [data.id]: merged };
       let nextActiveId = state.activeZoneId;
       if (!nextActiveId || !state.zoneRegistry[nextActiveId]) {
         nextActiveId = data.id;
@@ -106,6 +114,7 @@ export const useFocusStore = create<FocusState>((set) => ({
 
   unregisterZone: (id) =>
     set((state) => {
+      // console.log(`[FocusStore] Unregistering Zone: ${id}`);
       const isUnregisteringActive = state.activeZoneId === id;
       const isInPath = state.focusPath.includes(id);
       const newRegistry = { ...state.zoneRegistry };
@@ -208,15 +217,46 @@ export const useFocusStore = create<FocusState>((set) => ({
     return {};
   }),
 
+  addItem: (zoneId, itemId) => set((state) => {
+    const zone = state.zoneRegistry[zoneId] || { id: zoneId, items: [] };
+    const currentItems = zone.items || [];
+    if (!currentItems.includes(itemId)) {
+      console.log(`[FocusStore] Active Register: ${itemId} -> ${zoneId}`);
+      return {
+        zoneRegistry: {
+          ...state.zoneRegistry,
+          [zoneId]: { ...zone, items: [...currentItems, itemId] }
+        }
+      };
+    }
+    return {};
+  }),
+
+  removeItem: (zoneId, itemId) => set((state) => {
+    const zone = state.zoneRegistry[zoneId];
+    if (zone && zone.items) {
+      return {
+        zoneRegistry: {
+          ...state.zoneRegistry,
+          [zoneId]: { ...zone, items: zone.items.filter(i => i !== itemId) }
+        }
+      };
+    }
+    return {};
+  }),
+
   updateZoneItems: (id, items) => set((state) => {
     const zone = state.zoneRegistry[id];
     if (zone) {
+      console.log(`[FocusStore] Passive Sync for ${id}: Count=${items.length}`);
       return {
         zoneRegistry: {
           ...state.zoneRegistry,
           [id]: { ...zone, items },
         },
       };
+    } else {
+      console.warn(`[FocusStore] Passive Sync FAILED: Zone ${id} missing`);
     }
     return {};
   }),

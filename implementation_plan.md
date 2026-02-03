@@ -1,61 +1,40 @@
-# Refactor: Introduce `state.effects` Queue
+# Refactoring App Structure & TodoAppShell
 
 ## Goal
-Replace the ambiguous `ui.focusRequest` (Transient Field) with a dedicated `state.effects` (Effect Queue).
-This clarifies that these values are **Side Effects** meant to be consumed and discarded, solving the user's confusion about "why UI state resets".
+Decouple the `TodoAppShell` to remove unnecessary structural complexity. Establish a clear "Global OS" layer in `App.tsx` and move app-specific logic (Clipboard, specific Zones) to `TodoPage`.
+
+## User Review Required
+> [!IMPORTANT]
+> - `TodoAppShell.tsx` will be **DELETED**.
+> - `GlobalNav` will now sit outside the `main` Zone of the Todo App, directly in the root layout.
+> - `ClipboardManager` will be moved to `TodoPage.tsx`, meaning it will **only be active on the Todo route**, not globally. (Please confirm if this is desired behavior. Given it's in `apps/todo`, this seems correct).
 
 ## Proposed Changes
 
-### 1. `src/lib/types.ts`
-- Define `AppEffect` type.
-- Add `effects: AppEffect[]` to `AppState`.
-- Remove `focusRequest` from `UIState`.
+### [Root] src/App.tsx
+#### [MODIFY] App.tsx
+- Initialize `useTodoEngine` at the top level (or in a `AntigravityRuntime` wrapper).
+- Wrap the application in `AntigravityOS`.
+- Refactor `MainLayout` to:
+  - Render `GlobalNav` (Left).
+  - Render `Outlet` (Center/Main).
+  - Render `Inspector` (Right, conditional).
+- Remove `TodoAppShell` usage.
 
-```typescript
-export type AppEffect = 
-  | { type: 'FOCUS_ID'; id: string | number }
-  | { type: 'NAVIGATE'; direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'; targetZone?: string }
-  | { type: 'SCROLL_INTO_VIEW'; id: string | number };
+### [Apps] src/apps/todo
+#### [DELETE] TodoAppShell.tsx
+- File will be removed.
 
-export interface AppState {
-  data: DataState;
-  ui: UIState;
-  effects: AppEffect[]; // [NEW] FIFO Queue
-  history: HistoryState;
-}
-```
-
-### 2. `src/lib/todoCommands.ts`
-- Update all commands that were setting `focusRequest` to instead push to `state.effects`.
-- Example:
-  ```typescript
-  // AS-IS
-  draft.ui.focusRequest = 'NAVIGATE_DOWN';
-  
-  // TO-BE
-  draft.effects.push({ type: 'NAVIGATE', direction: 'DOWN' });
-  ```
-
-### 3. `src/lib/todo/navigationMiddleware.ts` (Renamed from `navigationPhysics.ts`)
-- **Formal Pipeline Stage**: This middleware will act as the "Effect Processor".
-- **Logic**:
-  1. Check `state.effects` queue.
-  2. If empty, do generic integrity checks (optional).
-  3. If present, consume effects one by one (FIFO).
-  4. For each effect (`FOCUS`, `NAVIGATE`), calculate target ID using `focusStrategies`.
-  5. Update `useFocusStore` (OS Layer).
-  6. **Clear the Effect**: Remove processed effect from queue.
-
-### 4. `src/lib/todoEngine.tsx`
-- Rename import `todoPhysicsMiddleware` -> `navigationMiddleware`.
-- Initialize `effects: []` in initial state.
+### [Pages] src/pages
+#### [MODIFY] TodoPage.tsx
+- Import `Zone` from `@os/ui/Zone`.
+- Import `ClipboardManager` from `@apps/todo/features/clipboard/ClipboardManager`.
+- Wrap contents in `<Zone id="todo-app" ...>`.
+- Include `<ClipboardManager />`.
 
 ## Verification Plan
-
-### Automated
-1. **Type Check**: `npx tsc --noEmit` must pass. This is critical as `focusRequest` removal should break all legacy usages.
-
-### Manual
-1. **Focus Navigation**: Arrow keys must still move focus.
-2. **Deletion**: Deleting an item must move focus to neighbor.
-3. **Inspector**: Verify that `effects` array appears in state (if visible) or at least focus mechanics still work.
+### Manual Verification
+- **Navigation**: Verify clicking GlobalNav items works and doesn't trigger unrelated zone logic.
+- **Inspector**: Verify Inspector toggles correctly (Cmd+I or state change) and appears on the right without breaking layout.
+- **Todo App**: Verify Todo functionality (Sidebar, Panel) works as before within its new Zone.
+- **Clipboard**: Verify copy/paste works within Todo page.

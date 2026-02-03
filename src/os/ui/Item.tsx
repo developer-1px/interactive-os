@@ -1,4 +1,4 @@
-import { isValidElement, cloneElement, useContext, useLayoutEffect, useMemo } from "react";
+import { isValidElement, cloneElement, useContext, useLayoutEffect, useMemo, useRef } from "react";
 import type { ReactNode, ReactElement } from "react";
 import { useFocusStore } from "@os/core/focus";
 import { FocusContext } from "@os/core/command/CommandContext";
@@ -50,14 +50,41 @@ export const Item = ({
   // When WE become the focused item, we are responsible for telling the store 
   // "Here is the data you are looking at". 
   // This removes the need for the Store to hunt for data.
+  // --- 3. Payload Beacon (Write on Activate) ---
+  // When WE become the focused item, we are responsible for telling the store 
+  // "Here is the data you are looking at". 
+  // This removes the need for the Store to hunt for data.
+  // --- 0. Active Registration (Self-Report) ---
+  const addItem = useFocusStore((s) => s.addItem);
+  const removeItem = useFocusStore((s) => s.removeItem);
+
+  useLayoutEffect(() => {
+    if (zoneId && zoneId !== "unknown") {
+      addItem(zoneId, stringId);
+      return () => removeItem(zoneId, stringId);
+    }
+  }, [zoneId, stringId, addItem, removeItem]);
+
+  // --- 3. Payload Beacon (Write on Activate) ---
+  // When WE become the focused item, we are responsible for telling the store 
+  // "Here is the data you are looking at". 
+  // This removes the need for the Store to hunt for data.
+  const prevPayloadRef = useRef<any>(null);
+
   useLayoutEffect(() => {
     if (isFocused) {
-      setFocus(stringId, {
-        id: stringId,
-        index,
-        payload,
-        group: { id: zoneId }
-      });
+      // JSON-based equality check for simple payloads (safer than deep-equal lib here)
+      const isPayloadEqual = JSON.stringify(payload) === JSON.stringify(prevPayloadRef.current);
+
+      if (!isPayloadEqual) {
+        prevPayloadRef.current = payload;
+        setFocus(stringId, {
+          id: stringId,
+          index,
+          payload,
+          group: { id: zoneId }
+        });
+      }
     }
   }, [isFocused, stringId, index, payload, zoneId, setFocus]);
 

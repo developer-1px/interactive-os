@@ -1,10 +1,9 @@
-import type { InferredTodoCommand } from "@apps/todo/features/commands/index";
 import type { OSCommand } from "@os/core/command/osCommands";
 
 export * from "@apps/todo/model/appState";
 
-export type TodoCommand = InferredTodoCommand | OSCommand;
+export type TodoCommand = OSCommand | { type: string; payload?: any };
 
-// Extract just the IDs (e.g. "ADD_TODO" | "DELETE_TODO" | ...)
-export type TodoCommandId = TodoCommand["type"];
+// Extract just the IDs
+export type TodoCommandId = string;
 

@@ -2,7 +2,8 @@ import { Zone } from "@os/ui/Zone";
 import { Item } from "@os/ui/Item";
 import { Field } from "@os/ui/Field";
 import { Trigger } from "@os/ui/Trigger";
-import { useTodoEngine } from "@apps/todo/lib/todoEngine";
+import { useEngine } from "@os/core/command/CommandContext";
+import type { AppState } from "@apps/todo/model/types";
 import {
     AddTodo,
     ToggleTodo,
@@ -25,7 +26,8 @@ import {
 } from "lucide-react";
 
 export function ListView() {
-    const { state } = useTodoEngine();
+    const { state } = useEngine<AppState>();
+    if (!state) return null;
     const activeCategory = state.data.categories[state.ui.selectedCategoryId];
 
     const visibleTodoIds = state.data.todoOrder.filter(

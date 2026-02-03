@@ -7,6 +7,7 @@ export interface KeybindingItem<T = string> {
   when?: string | LogicNode;
   preventDefault?: boolean;
   allowInInput?: boolean;
+  zoneId?: string; // Metadata: Which zone did this come from?
 }
 
 export interface KeymapConfig<T = string> {
