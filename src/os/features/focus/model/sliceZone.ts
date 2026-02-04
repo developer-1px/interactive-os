@@ -4,6 +4,7 @@ import { computePath } from "@os/features/focus/lib/pathUtils";
 import { executeRecovery } from "@os/features/focus/axes/handlerRecovery";
 import { DEFAULT_RECOVERY_POLICY } from "@os/features/focus/model/recoveryTypes";
 import type { FocusState } from "@os/features/focus/model/focusTypes";
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
 
 export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set, get) => ({
     activeZoneId: "sidebar",
@@ -122,9 +123,13 @@ export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set
             // Apply recovery if we removed the focused item
             if (isRemovingFocused && recoveryTargetId) {
                 newState.focusedItemId = recoveryTargetId;
+                import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
+
+                // ... imports ...
+
                 // Trigger DOM focus after state update
                 requestAnimationFrame(() => {
-                    const el = document.getElementById(recoveryTargetId!);
+                    const el = DOMInterface.getItem(recoveryTargetId!);
                     el?.focus();
                 });
             } else if (isRemovingFocused) {

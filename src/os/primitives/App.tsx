@@ -10,6 +10,9 @@ import { FocusEngine } from "@os/features/focus/ui/FocusEngine";
 import { Zone } from "@os/primitives/Zone";
 import { useInspectorPersistence } from "@os/features/inspector/useInspectorPersistence";
 
+// Middleware
+import { resolveFocusMiddleware } from "@os/features/focus/bridge/commandMiddleware";
+
 export function App<S>({
     definition,
     children
@@ -32,9 +35,13 @@ export function App<S>({
         // Set Keymap
         registry.setKeymap(definition.keymap);
 
-        // Create Store
+        // Create Store with Middleware
         const store = createCommandStore(registry, definition.model.initial, {
             persistence: definition.model.persistence,
+
+            // Inject Focus Bridge Middleware (Decoupling Command from Focus)
+            middleware: [resolveFocusMiddleware],
+
             onStateChange: (state: S, action: any, prev: S) => {
                 let next = state;
                 if (definition.middleware) {

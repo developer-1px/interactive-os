@@ -2,6 +2,7 @@ import { isValidElement, cloneElement, useContext, useLayoutEffect, useMemo, use
 import type { ReactNode, ReactElement } from "react";
 import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
 import { FocusContext } from "@os/features/command/ui/CommandContext.tsx";
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface"; // [NEW] Registry
 
 // --- Types ---
 interface ItemState {
@@ -42,6 +43,16 @@ export const Item = ({
   const setFocus = useFocusStore((s) => s.setFocus);
 
   const isFocused = focusedItemId === stringId;
+
+  const itemRef = useRef<HTMLElement>(null);
+
+  // [NEW] DOM Registry
+  useLayoutEffect(() => {
+    if (itemRef.current) {
+      DOMInterface.registerItem(stringId, itemRef.current);
+    }
+    return () => DOMInterface.unregisterItem(stringId);
+  }, [stringId]);
 
   // --- 2. Context Awareness ---
   const focusContext = useContext(FocusContext);
@@ -134,6 +145,7 @@ export const Item = ({
   // --- Strategy C: Wrapper (Default) ---
   return (
     <div
+      ref={itemRef as any}
       {...baseProps}
       className={`outline-none ${className || ""}`.trim()}
     >

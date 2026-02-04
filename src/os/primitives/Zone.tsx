@@ -4,6 +4,7 @@ import { FocusContext, CommandContext } from "@os/features/command/ui/CommandCon
 import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
 import { ZoneRegistry } from "@os/features/jurisdiction/model/ZoneRegistry.ts";
 import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver.ts";
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface"; // [NEW] Registry Integration
 import type { FocusBehavior } from "@os/entities/FocusBehavior.ts";
 import type { FocusDirection } from "@os/entities/FocusDirection.ts";
 import type { FocusEdge } from "@os/entities/FocusEdge.ts";
@@ -93,6 +94,14 @@ export function Zone({
 
   // Ref to track registered commands and prevent redundant registration calls
   const registeredCommandsRef = useRef(new Set<string>());
+
+  useLayoutEffect(() => {
+    // [NEW] DOM Registry Registration
+    if (containerRef.current) {
+      DOMInterface.registerZone(id, containerRef.current);
+    }
+    return () => DOMInterface.unregisterZone(id);
+  }, [id]);
 
   useLayoutEffect(() => {
     // A. Capability Registration (Zero-Config Discovery)

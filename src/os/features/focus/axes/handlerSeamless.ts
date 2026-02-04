@@ -3,6 +3,8 @@
 import type { Direction } from "@os/entities/Direction";
 import type { ZoneMetadata } from "@os/entities/ZoneMetadata";
 
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
+
 interface SeamlessContext {
     currentZoneId: string;
     direction: Direction;
@@ -14,12 +16,10 @@ interface SeamlessContext {
  */
 function sortByVisualOrder(zones: ZoneMetadata[]): ZoneMetadata[] {
     return zones.sort((a, b) => {
-        const elA = document.querySelector(`[data-zone-id="${a.id}"]`);
-        const elB = document.querySelector(`[data-zone-id="${b.id}"]`);
-        if (!elA || !elB) return 0;
+        const rectA = DOMInterface.getZoneRect(a.id);
+        const rectB = DOMInterface.getZoneRect(b.id);
 
-        const rectA = elA.getBoundingClientRect();
-        const rectB = elB.getBoundingClientRect();
+        if (!rectA || !rectB) return 0;
 
         // Sort by Y first, then X (reading order)
         if (Math.abs(rectA.top - rectB.top) > 4) {
@@ -45,18 +45,16 @@ export function findSiblingZone(ctx: SeamlessContext): ZoneMetadata | null {
     if (siblings.length === 0) return null;
 
     // Get DOM positions
-    const currentEl = document.querySelector(`[data-zone-id="${currentZoneId}"]`);
-    if (!currentEl) return null;
-    const currentRect = currentEl.getBoundingClientRect();
+    const currentRect = DOMInterface.getZoneRect(currentZoneId);
+    if (!currentRect) return null;
 
     // Find best candidate based on spatial direction
     let best: ZoneMetadata | null = null;
     let bestScore = Infinity;
 
     for (const sibling of siblings) {
-        const el = document.querySelector(`[data-zone-id="${sibling.id}"]`);
-        if (!el) continue;
-        const rect = el.getBoundingClientRect();
+        const rect = DOMInterface.getZoneRect(sibling.id);
+        if (!rect) continue;
 
         let isValid = false;
         let score = 0;
@@ -124,18 +122,23 @@ export function getSeamlessEntryItem(
     }
 
     // Get source item's position
-    const sourceEl = document.querySelector(`[data-item-id="${sourceItemId}"]`);
-    if (!sourceEl) {
+    let sourceRect: DOMRect | null = null;
+    if (sourceItemId) {
+        sourceRect = DOMInterface.getItemRect(sourceItemId);
+    }
+
+    // Fallback if no source item or rect not found
+    if (!sourceRect) {
         return direction === "RIGHT" || direction === "DOWN" ? items[0] : items[items.length - 1];
     }
-    const sourceRect = sourceEl.getBoundingClientRect();
 
     // Collect all item rects
     const itemRects: { id: string; rect: DOMRect }[] = [];
     for (const itemId of items) {
-        const el = document.querySelector(`[data-item-id="${itemId}"]`);
-        if (!el) continue;
-        itemRects.push({ id: itemId, rect: el.getBoundingClientRect() });
+        const rect = DOMInterface.getItemRect(itemId);
+        if (rect) {
+            itemRects.push({ id: itemId, rect });
+        }
     }
     if (itemRects.length === 0) return items[0];
 
