@@ -1,7 +1,7 @@
 import { memo } from "react";
 import type { LoggedKey } from "@os/debug/inputTelemetry";
 
-export type KeyLog = LoggedKey;
+type KeyLog = LoggedKey;
 
 export const KeyMonitor = memo(({ rawKeys }: { rawKeys: KeyLog[] }) => (
     <section className="border-b border-[#e5e5e5]">

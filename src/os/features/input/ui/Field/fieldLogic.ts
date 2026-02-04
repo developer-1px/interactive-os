@@ -25,7 +25,7 @@ const checkValueEmpty = (value: string | undefined | null): boolean => {
     return !value || value === "\n";
 };
 
-export interface FieldStyleParams {
+interface FieldStyleParams {
     isActive: boolean;
     isFocused: boolean;
     multiline: boolean;

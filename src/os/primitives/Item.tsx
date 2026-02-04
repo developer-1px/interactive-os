@@ -4,7 +4,7 @@ import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
 import { FocusContext } from "@os/features/command/ui/CommandContext.tsx";
 
 // --- Types ---
-export interface ItemState {
+interface ItemState {
   isFocused: boolean;
   isSelected: boolean;
 }

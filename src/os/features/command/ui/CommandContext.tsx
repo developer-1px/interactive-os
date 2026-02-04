@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 
 // --- 0. Context for Focus Zones ---
-export interface FocusContextValue {
+interface FocusContextValue {
   zoneId: string;
   isActive: boolean;
 }
@@ -10,7 +10,7 @@ export const FocusContext = createContext<FocusContextValue | null>(null);
 import type { BaseCommand } from "@os/entities/BaseCommand";
 import type { CommandRegistry } from "@os/features/command/model/commandStore";
 
-export interface CommandContextValue<S = unknown> {
+interface CommandContextValue<S = unknown> {
   dispatch: (cmd: BaseCommand) => void;
   currentFocusId?: string | number | null;
   activeZone?: string | null;

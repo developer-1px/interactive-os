@@ -7,13 +7,13 @@ export type AppEffect =
     }
     | { type: "SCROLL_INTO_VIEW"; id: string | number };
 
-export type FocusTarget = "DRAFT" | number | string | null;
+type FocusTarget = "DRAFT" | number | string | null;
 
-export interface Category {
+interface Category {
     id: string;
     text: string;
 }
-export interface Todo {
+interface Todo {
     id: number;
     text: string;
     completed: boolean;

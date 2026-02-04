@@ -1,7 +1,7 @@
 // Spatial Navigation Engine (2D: grid)
 // Physics-based navigation using DOM Rects
 
-export type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
+type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
 
 export interface NavigationContext {
     currentId: string | null;
