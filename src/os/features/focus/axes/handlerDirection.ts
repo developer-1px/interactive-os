@@ -1,7 +1,7 @@
 // Direction Axis Dispatcher
 // Unified entry point for all direction navigation
 
-import { logger } from "@os/debug/logger";
+import { logger } from "@os/app/debug/logger";
 import type { AxisHandler } from "@os/features/focus/lib/focusPipeline";
 import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver";
 import { collectItemRects } from "@os/features/focus/lib/domUtils";

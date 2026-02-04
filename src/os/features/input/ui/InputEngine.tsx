@@ -3,7 +3,7 @@ import { useFocusStore } from "@os/features/focus/model/focusStore";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext";
 import { getCanonicalKey, normalizeKeyDefinition } from "@os/features/input/lib/keybindingMatcher";
 import { evalContext } from "@os/features/AntigravityOS";
-import { useInputTelemetry } from "@os/debug/inputTelemetry";
+import { useInputTelemetry } from "@os/app/debug/inputTelemetry";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 
 /**

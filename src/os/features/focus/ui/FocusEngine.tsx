@@ -1,11 +1,11 @@
-import { useCommandListener } from "@os/shared/hooks/useCommandListener";
+import { useCommandListener } from "@os/features/command/hooks/useCommandListener";
 import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver";
 import { useFocusStore } from "@os/features/focus/model/focusStore";
 import { executeNavigation } from "@os/features/focus/lib/focusOrchestrator";
 import { executeTabNavigation, type TabNavigationContext } from "@os/features/focus/axes/handlerTab";
 import { OS_COMMANDS, type OSNavigatePayload } from "@os/features/command/definitions/commandsShell";
 import { useFocusBridge } from "@os/features/focus/lib/focusBridge";
-import { logger } from "@os/debug/logger";
+import { logger } from "@os/app/debug/logger";
 
 /**
  * FocusEngine
@@ -29,7 +29,8 @@ export function FocusEngine() {
         // --- SPATIAL NAVIGATION (Arrows) ---
         {
             command: OS_COMMANDS.NAVIGATE,
-            handler: (payload: OSNavigatePayload) => {
+            handler: (payload) => {
+                const navPayload = payload as OSNavigatePayload;
                 const { activeZoneId, focusedItemId, focusPath, zoneRegistry, stickyX, stickyY, stickyIndex } = useFocusStore.getState();
 
                 if (!activeZoneId) return;
@@ -38,7 +39,7 @@ export function FocusEngine() {
                 if (!activeZone) return;
 
                 const result = executeNavigation({
-                    direction: payload.direction,
+                    direction: navPayload.direction,
                     focusPath,
                     zoneRegistry,
                     focusedItemId,

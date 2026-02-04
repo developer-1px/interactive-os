@@ -2,11 +2,11 @@
 // Re-exports all OS primitives and utilities
 
 // UI Primitives
-import { App } from "@os/primitives/App";
-import { Zone } from "@os/primitives/Zone";
-import { Item } from "@os/primitives/Item";
-import { Field } from "@os/primitives/Field";
-import { Trigger } from "@os/primitives/Trigger";
+import { App } from "@os/app/export/primitives/App";
+import { Zone } from "@os/app/export/primitives/Zone";
+import { Item } from "@os/app/export/primitives/Item";
+import { Field } from "@os/app/export/primitives/Field";
+import { Trigger } from "@os/app/export/primitives/Trigger";
 import { Kbd } from "@os/shared/ui/Kbd";
 
 // Logic Evaluation

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Zone } from "@os/primitives/Zone.tsx";
-import { Item } from "@os/primitives/Item.tsx";
-import { Field } from "@os/primitives/Field.tsx";
+import { Zone } from "@os/app/export/primitives/Zone.tsx";
+import { Item } from "@os/app/export/primitives/Item.tsx";
+import { Field } from "@os/app/export/primitives/Field.tsx";
 import { Sliders, LayoutGrid, List, MessageSquare, Maximize, Edit3 } from "lucide-react";
 import type { FocusDirection } from "@os/entities/FocusDirection";
 import type { FocusEdge } from "@os/entities/FocusEdge";

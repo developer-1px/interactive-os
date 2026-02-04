@@ -4,6 +4,7 @@ import {
   useCallback,
   isValidElement,
   cloneElement,
+  useLayoutEffect,
 } from "react";
 import type {
   ReactNode,
@@ -13,9 +14,9 @@ import type {
   FormEvent,
 } from "react";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
-import { useCommandListener } from "@os/shared/hooks/useCommandListener.ts";
+import { useCommandListener } from "@os/features/command/hooks/useCommandListener";
 import { OS_COMMANDS } from "@os/features/command/definitions/osCommands.ts";
-import { getCaretPosition } from "../features/input/ui/Field/fieldUtils.ts";
+import { getCaretPosition } from "../../../features/input/ui/Field/fieldUtils.ts";
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
 import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
 import type { FocusTarget } from "@os/entities/FocusTarget.ts";
@@ -26,13 +27,14 @@ import {
   getFieldClasses,
   getCommitAction,
   getSyncAction,
-} from "../features/input/ui/Field/fieldLogic.ts";
+} from "../../../features/input/ui/Field/fieldLogic.ts";
 import {
   useFieldState,
   useFieldDOMSync,
   useFieldFocus,
   useFieldContext,
-} from "../features/input/ui/Field/useFieldHooks.ts";
+} from "../../../features/input/ui/Field/useFieldHooks.ts";
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts"; // [NEW] Registry
 
 /** 
  * Field mode determines when editing is activated:
@@ -118,6 +120,16 @@ export const Field = <T extends BaseCommand>({
   // Use Custom Hook for State
   const { localValue, setLocalValue, isComposingRef } = useFieldState({ value });
   localValueRef.current = localValue;
+
+  // [NEW] DOM Registry Registration
+  useLayoutEffect(() => {
+    if (name && innerRef.current) {
+      DOMInterface.registerItem(name, innerRef.current);
+    }
+    return () => {
+      if (name) DOMInterface.unregisterItem(name);
+    };
+  }, [name]);
 
   // Use Logic for Active State (is this field focused?)
   const isFocused = shouldActivateField(

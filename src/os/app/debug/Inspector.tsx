@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-import { useCommandEngine } from "@os/features/command/ui/CommandContext";
-import { KeyMonitor } from "@os/debug/inspector/KeyMonitor";
-import { StateMonitor } from "@os/debug/inspector/StateMonitor";
-import { RegistryMonitor } from "@os/debug/inspector/RegistryMonitor";
-import { EventStream } from "@os/debug/inspector/EventStream";
-import { DataStateViewer } from "@os/debug/inspector/DataStateViewer";
-import { OSStateViewer } from "@os/debug/inspector/OSStateViewer";
-import { useInputTelemetry } from "@os/debug/inputTelemetry";
+import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
+import { KeyMonitor } from "@os/app/debug/inspector/KeyMonitor.tsx";
+import { StateMonitor } from "@os/app/debug/inspector/StateMonitor.tsx";
+import { RegistryMonitor } from "@os/app/debug/inspector/RegistryMonitor.tsx";
+import { EventStream } from "@os/app/debug/inspector/EventStream.tsx";
+import { DataStateViewer } from "@os/app/debug/inspector/DataStateViewer.tsx";
+import { OSStateViewer } from "@os/app/debug/inspector/OSStateViewer.tsx";
+import { useInputTelemetry } from "@os/app/debug/inputTelemetry.ts";
 
 // --- Main Component ---
 

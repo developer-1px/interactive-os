@@ -1,4 +1,4 @@
-import { logger } from "@os/debug/logger";
+import { logger } from "@os/app/debug/logger";
 import type { KeymapConfig } from "@os/features/input/lib/keybindingMatcher";
 import type { CommandDefinition } from "@os/entities/CommandDefinition";
 import type { KeybindingItem } from "@os/entities/KeybindingItem";

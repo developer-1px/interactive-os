@@ -1,7 +1,7 @@
-import { Zone } from "@os/primitives/Zone.tsx";
-import { Item } from "@os/primitives/Item.tsx";
-import { Trigger } from "@os/primitives/Trigger.tsx";
-import { Kbd } from "@os/debug/components/Kbd";
+import { Zone } from "@os/app/export/primitives/Zone.tsx";
+import { Item } from "@os/app/export/primitives/Item.tsx";
+import { Trigger } from "@os/app/export/primitives/Trigger.tsx";
+import { Kbd } from "@os/app/debug/components/Kbd";
 import { useFocusStore } from "@os/features/focus/model/focusStore";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";

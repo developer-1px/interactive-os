@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { OS } from "@os/features/AntigravityOS";
-import { Field } from "@os/primitives/Field.tsx";
+import { Field } from "@os/app/export/primitives/Field.tsx";
 import { Star } from "lucide-react";
 
 /**

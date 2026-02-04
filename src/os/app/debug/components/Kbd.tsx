@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { useOS, type OS } from "@/lib/hooks/use-os";
+import { useOS, type OS } from "@/lib/hooks/use-os.ts";
 
 // Utility for merging tailwind classes safely
 function cn(...inputs: ClassValue[]) {

@@ -1,7 +1,7 @@
-import { Zone } from "@os/primitives/Zone.tsx";
-import { Item } from "@os/primitives/Item.tsx";
-import { Field } from "@os/primitives/Field.tsx";
-import { Trigger } from "@os/primitives/Trigger.tsx";
+import { Zone } from "@os/app/export/primitives/Zone.tsx";
+import { Item } from "@os/app/export/primitives/Item.tsx";
+import { Field } from "@os/app/export/primitives/Field.tsx";
+import { Trigger } from "@os/app/export/primitives/Trigger.tsx";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 import {

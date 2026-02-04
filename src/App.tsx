@@ -9,12 +9,13 @@ import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import TodoPage from "./pages/TodoPage";
 import SettingsPage from "./pages/SettingsPage";
 import FocusShowcasePage from "./pages/FocusShowcasePage";
+import FocusShowcasePage2 from "./pages/FocusShowcasePage2";
 import BuilderPage from "./pages/BuilderPage";
 import DocsPage from "./pages/DocsPage";
 
 import { OS } from "@os/features/AntigravityOS";
 import { TodoApp } from "@apps/todo/app";
-import { CommandInspector } from "@os/debug/Inspector";
+import { CommandInspector } from "@os/app/debug/Inspector";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 
@@ -78,6 +79,7 @@ export default function App() {
           />
           <Route path="/builder" element={<BuilderPage />} />
           <Route path="/focus-showcase" element={<FocusShowcasePage />} />
+          <Route path="/focus-showcase-2" element={<FocusShowcasePage2 />} />
           <Route path="/docs/*" element={<DocsPage />} />
         </Route>
       </Routes>

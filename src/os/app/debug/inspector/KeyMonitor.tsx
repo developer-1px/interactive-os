@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { LoggedKey } from "@os/debug/inputTelemetry";
+import type { LoggedKey } from "@os/app/debug/inputTelemetry.ts";
 
 type KeyLog = LoggedKey;
 

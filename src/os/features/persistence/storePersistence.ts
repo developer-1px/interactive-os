@@ -1,4 +1,4 @@
-import { logger } from "@os/debug/logger";
+import { logger } from "@os/app/debug/logger";
 import type { PersistenceAdapter } from "@os/features/persistence/adapter";
 import { LocalStorageAdapter } from "@os/features/persistence/adapter";
 

@@ -123,7 +123,8 @@ export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set
             // Apply recovery if we removed the focused item
             if (isRemovingFocused && recoveryTargetId) {
                 newState.focusedItemId = recoveryTargetId;
-                import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
+
+                // Trigger DOM focus after state update
 
                 // ... imports ...
 

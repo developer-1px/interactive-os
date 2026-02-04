@@ -1,6 +1,6 @@
 import { OS } from "@os/features/AntigravityOS";
 import { useFocusStore } from "@os/features/focus/model/focusStore";
-import { logger } from "@os/debug/logger";
+import { logger } from "@os/app/debug/logger";
 
 /**
  * Middleware to resolve OS.FOCUS sentinel in payloads to the actual focused item ID.

@@ -6,7 +6,7 @@ type CommandListener = {
     /** Command type to listen for */
     command: string;
     /** Handler called when command is dispatched */
-    handler: (payload: any) => void;
+    handler: (payload: unknown) => void;
     /** Optional: Only respond if this condition is true */
     when?: () => boolean;
 };
@@ -24,10 +24,11 @@ type CommandListener = {
  * ]);
  */
 export function useCommandListener(listeners: CommandListener[]) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const addListener = useCommandEventBus((s: any) => s.addListener);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const removeListener = useCommandEventBus((s: any) => s.removeListener);
+    // Select stable references to avoid re-renders
+    const addListener = useCommandEventBus((s) => s.addListener);
+    const removeListener = useCommandEventBus((s) => s.removeListener);
+
+    // Stable ref for listeners to avoid effect re-execution on listener array recreation
     const listenersRef = useRef(listeners);
 
     useLayoutEffect(() => {

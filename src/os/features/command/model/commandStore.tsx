@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { logger } from "@os/debug/logger";
+import { logger } from "@os/app/debug/logger";
 import { useCommandEventBus } from "@os/features/command/lib/commandEventBus";
 
 // Modules

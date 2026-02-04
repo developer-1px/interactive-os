@@ -4,7 +4,7 @@ import { FocusContext, CommandContext } from "@os/features/command/ui/CommandCon
 import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
 import { ZoneRegistry } from "@os/features/jurisdiction/model/ZoneRegistry.ts";
 import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver.ts";
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface"; // [NEW] Registry Integration
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts"; // [NEW] Registry Integration
 import type { FocusBehavior } from "@os/entities/FocusBehavior.ts";
 import type { FocusDirection } from "@os/entities/FocusDirection.ts";
 import type { FocusEdge } from "@os/entities/FocusEdge.ts";

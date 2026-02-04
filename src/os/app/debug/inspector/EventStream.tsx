@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import type { HistoryEntry } from "@apps/todo/model/types";
+import type { HistoryEntry } from "@apps/todo/model/types.ts";
 
 export const EventStream = memo(({ history }: { history: HistoryEntry[] }) => {
     const recentHistory = useMemo(

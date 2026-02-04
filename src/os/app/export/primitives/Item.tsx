@@ -2,7 +2,7 @@ import { isValidElement, cloneElement, useContext, useLayoutEffect, useMemo, use
 import type { ReactNode, ReactElement } from "react";
 import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
 import { FocusContext } from "@os/features/command/ui/CommandContext.tsx";
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface"; // [NEW] Registry
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts"; // [NEW] Registry
 
 // --- Types ---
 interface ItemState {

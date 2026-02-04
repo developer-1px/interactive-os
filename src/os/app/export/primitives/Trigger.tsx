@@ -1,14 +1,16 @@
-import { cloneElement, isValidElement } from "react";
+import { cloneElement, isValidElement, useRef, useLayoutEffect } from "react";
 import type {
   ReactNode,
   ReactElement,
   MouseEvent as ReactMouseEvent,
 } from "react";
-import { logger } from "@os/debug/logger.ts";
+import { logger } from "@os/app/debug/logger.ts";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts"; // [NEW] Registry
 
 export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttributes<HTMLButtonElement> {
+  id?: string;
   command: T;
   children: ReactNode;
   asChild?: boolean;
@@ -17,6 +19,7 @@ export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttribute
 }
 
 export const Trigger = <T extends BaseCommand>({
+  id,
   command,
   children,
   asChild,
@@ -27,6 +30,17 @@ export const Trigger = <T extends BaseCommand>({
 }: TriggerProps<T>) => {
   const { dispatch: contextDispatch } = useCommandEngine();
   const dispatch = customDispatch || contextDispatch;
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // [NEW] DOM Registry Registration
+  useLayoutEffect(() => {
+    if (id && triggerRef.current) {
+      DOMInterface.registerItem(id, triggerRef.current);
+    }
+    return () => {
+      if (id) DOMInterface.unregisterItem(id);
+    };
+  }, [id]);
 
   const handleClick = (e: ReactMouseEvent) => {
     if (!allowPropagation) {
@@ -49,5 +63,5 @@ export const Trigger = <T extends BaseCommand>({
       // For now, let's keep it simple: className merging is critical.
     });
   }
-  return <button tabIndex={-1} onClick={handleClick} className={className} {...rest}>{children}</button>;
+  return <button ref={triggerRef} id={id} tabIndex={-1} onClick={handleClick} className={className} {...rest}>{children}</button>;
 };
