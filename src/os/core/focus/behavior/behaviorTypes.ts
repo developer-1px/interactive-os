@@ -2,7 +2,16 @@
 
 export type FocusDirection = "none" | "v" | "h" | "grid";
 export type FocusEdge = "loop" | "stop";
+
+/**
+ * Tab Navigation Policy (v7.3 Semantics)
+ * 
+ * - `loop`: Focus stays trapped within the zone (cycles at boundaries)
+ * - `escape`: Jump to the next/previous **Zone** (Zone-level granularity)
+ * - `flow`: Linear traversal through all items across zones (Item-level granularity)
+ */
 export type FocusTab = "loop" | "escape" | "flow";
+
 export type FocusTarget = "real" | "virtual";
 export type FocusEntry = "first" | "restore" | "selected";
 

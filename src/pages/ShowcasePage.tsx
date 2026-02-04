@@ -1,236 +1,353 @@
 import { OS } from "@os/ui";
-import { MockText, MockBadge } from "@apps/todo/mocks/MockPrimitives";
-import { Layers, MousePointer2, Grid3X3, Monitor, Layout as LayoutIcon, Type, Package } from "lucide-react";
+import { Monitor, Repeat, ArrowRightFromLine, ArrowRight, CornerDownRight, Box, Layers } from "lucide-react";
 
 export default function ShowcasePage() {
   return (
-    <div className="flex-1 h-full bg-[#050608] overflow-y-auto custom-scrollbar p-12 relative">
-      {/* Background Ambient Decor */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-900/10 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[140px] pointer-events-none" />
+    <div className="flex-1 h-full bg-[#050505] text-white overflow-y-auto custom-scrollbar font-sans selection:bg-indigo-500/30">
 
-      <header className="mb-16 border-b border-white/5 pb-10">
-        <div className="flex items-center gap-6 mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-700 flex items-center justify-center shadow-xl shadow-indigo-500/20">
-            <Monitor size={28} className="text-white" />
-          </div>
-          <div>
-            <MockText variant="h1" className="text-4xl font-black tracking-tight text-white">Focus Engine Showcase</MockText>
-            <p className="text-slate-400 mt-2 font-medium">Demonstrating Hierarchical Bubbling & Spatial Physics</p>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <MockBadge label="Spatial v2.0" color="success" />
-          <MockBadge label="TV-Grade Physics" color="info" />
-          <MockBadge label="Seamless Preset" color="neutral" />
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-16">
-
-        {/* Scenario 1: Basic Roving List (The Sidebar Pattern) */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Layers className="text-indigo-400" size={20} />
-            <h2 className="text-xl font-bold text-white uppercase tracking-widest text-sm">01. Roving List</h2>
-          </div>
-          <OS.Zone
-            id="roving-showcase"
-            role="menu"
-            className="bg-white/5 rounded-3xl border border-white/10 p-4 space-y-2 overflow-hidden"
-          >
-            {["Identity", "Security", "Infrastructure", "Telemetry", "Audit Log"].map((label, i) => (
-              <OS.Item key={label} id={`roving-${i}`} payload={{ label }}>
-                {({ isFocused }: { isFocused: boolean }) => (
-                  <div className={`p-4 rounded-xl transition-all duration-200 flex items-center gap-4 cursor-pointer
-                    ${isFocused ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 translate-x-2" : "text-slate-400 hover:bg-white/5"}
-                  `}>
-                    <div className={`w-2 h-2 rounded-full ${isFocused ? "bg-white" : "bg-slate-700"}`} />
-                    <span className="font-semibold">{label}</span>
-                  </div>
-                )}
-              </OS.Item>
-            ))}
-          </OS.Zone>
-        </section>
-
-        {/* Scenario 2: Standard Grid (The Gallery Pattern) */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Grid3X3 className="text-pink-400" size={20} />
-            <h2 className="text-xl font-bold text-white uppercase tracking-widest text-sm">02. Uniform Grid</h2>
-          </div>
-          <OS.Zone
-            id="grid-showcase"
-            role="grid"
-            className="grid grid-cols-3 gap-4"
-          >
-            {Array.from({ length: 9 }).map((_, i) => (
-              <OS.Item key={i} id={`grid-item-${i}`} className="aspect-square">
-                {({ isFocused }: { isFocused: boolean }) => (
-                  <div className={`w-full h-full rounded-2xl border transition-all duration-300 flex items-center justify-center overflow-hidden relative
-                    ${isFocused ? "border-pink-500 ring-4 ring-pink-500/20 scale-105 z-10" : "border-white/10 bg-white/5"}
-                  `}>
-                    <div className={`absolute inset-0 bg-gradient-to-br from-pink-500/20 to-transparent transition-opacity ${isFocused ? 'opacity-100' : 'opacity-0'}`} />
-                    <span className={`text-2xl font-black ${isFocused ? 'text-white' : 'text-slate-700'}`}>{i + 1}</span>
-                  </div>
-                )}
-              </OS.Item>
-            ))}
-          </OS.Zone>
-        </section>
-
-        {/* Scenario 3: Complex Web Builder (TV-Style Spatial) */}
-        <section className="xl:col-span-2 space-y-6">
-          <div className="flex items-center gap-3 mb-4">
-            <LayoutIcon className="text-cyan-400" size={20} />
-            <h2 className="text-xl font-bold text-white uppercase tracking-widest text-sm">03. Web Builder Complexity (Physics Test)</h2>
-          </div>
-
-          <OS.Zone
-            id="builder-showcase"
-            role="grid"
-            className="relative bg-slate-900/50 rounded-[40px] border border-white/5 p-12 min-h-[600px] overflow-hidden"
-          >
-            {/* Header Section */}
-            <div className="flex justify-between items-start mb-12">
-              <OS.Item id="builder-logo" className="group">
-                {({ isFocused }: { isFocused: boolean }) => (
-                  <div className={`px-6 py-3 rounded-full border transition-all ${isFocused ? 'bg-white text-black border-white' : 'border-white/20 text-white'}`}>
-                    <span className="font-black uppercase tracking-tighter text-lg italic">Antigravity.Core</span>
-                  </div>
-                )}
-              </OS.Item>
-
-              <div className="flex gap-4">
-                {["Draft", "Publish"].map(btn => (
-                  <OS.Item key={btn} id={`btn-${btn}`}>
-                    {({ isFocused }: { isFocused: boolean }) => (
-                      <button className={`px-8 py-3 rounded-xl font-bold transition-all ${isFocused ? 'bg-cyan-500 text-white scale-110 shadow-lg shadow-cyan-500/40' : 'bg-white/10 text-slate-400'}`}>
-                        {btn}
-                      </button>
-                    )}
-                  </OS.Item>
-                ))}
-              </div>
+      {/* Hero Section */}
+      <div className="relative border-b border-white/10 bg-gradient-to-b from-indigo-900/20 to-transparent">
+        <div className="max-w-7xl mx-auto px-12 py-16">
+          <div className="flex items-start gap-6">
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
+              <Monitor className="text-indigo-400" size={32} />
             </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold tracking-wider border border-indigo-500/30">
+                  V7.3 SYSTEM
+                </span>
+                <span className="text-xs text-slate-500 uppercase tracking-widest font-semibold">Focus Engine Benchmark</span>
+              </div>
+              <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-slate-500">
+                Focus Navigation Architectures
+              </h1>
+              <p className="text-lg text-slate-400 max-w-2xl leading-relaxed">
+                Verify the behavior of the <strong>6-Axis Focus System</strong>.
+                Test the "Zone Jump" (Escape) vs "Linear Flow" (Flow) paradigms deeply integrated into the OS kernel.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Main Canvas Area */}
-            <div className="grid grid-cols-12 gap-8 items-start">
+      <div className="max-w-7xl mx-auto px-12 py-12 pb-32 space-y-20">
 
-              {/* Left Content Column */}
-              <div className="col-span-7 space-y-8">
-                <OS.Item id="hero-title">
-                  {({ isFocused }: { isFocused: boolean }) => (
-                    <div className={`p-8 rounded-3xl border transition-all ${isFocused ? 'bg-white/10 border-cyan-500/50' : 'border-transparent'}`}>
-                      <h1 className="text-6xl font-black text-white leading-tight">Build at the speed of <br /><span className="text-cyan-400">Thought.</span></h1>
+        {/* 1. THE TAB STRATEGY (Primary Demo) */}
+        <section>
+          <div className="flex items-center gap-4 mb-8">
+            <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Box className="text-indigo-400" size={20} />
+              Navigation Policies
+            </h2>
+            <div className="h-px flex-1 bg-gradient-to-l from-white/10 to-transparent" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            {/* Card 1: Loop (Trap) */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl" />
+              <OS.Zone
+                id="demo-loop"
+                direction="v"
+                tab="loop"
+                className="relative h-full bg-[#0A0A0A] border border-white/10 rounded-3xl p-8 flex flex-col space-y-6 hover:border-pink-500/30 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-pink-400">
+                      <Repeat size={18} />
+                      <h3 className="font-bold text-sm tracking-widest uppercase">Loop Policy</h3>
                     </div>
-                  )}
-                </OS.Item>
+                    <p className="text-xs text-slate-500">Traps focus inside.</p>
+                  </div>
+                  <div className="px-2 py-1 rounded bg-pink-500/10 text-pink-400 text-[10px] font-mono border border-pink-500/20">
+                    tab="loop"
+                  </div>
+                </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                  {Array.from({ length: 2 }).map((_, i) => (
-                    <OS.Item key={i} id={`card-small-${i}`}>
+                <div className="space-y-2 flex-1">
+                  {["Modal Confirm", "Modal Cancel", "More Options"].map((item, i) => (
+                    <OS.Item key={item} id={`loop-${i}`}>
                       {({ isFocused }: { isFocused: boolean }) => (
-                        <div className={`h-48 rounded-3xl p-6 border transition-all ${isFocused ? 'bg-indigo-600 scale-105 shadow-xl' : 'bg-white/5 border-white/5'}`}>
-                          <div className="w-10 h-10 rounded-lg bg-white/20 mb-4" />
-                          <div className="h-4 bg-white/20 rounded w-3/4 mb-2" />
-                          <div className="h-4 bg-white/10 rounded w-1/2" />
+                        <div className={`
+                          px-4 py-3 rounded-xl border flex items-center justify-between group/item cursor-pointer
+                          transition-all duration-200
+                          ${isFocused
+                            ? 'bg-pink-500/10 border-pink-500/50 shadow-[0_0_20px_-5px_rgba(236,72,153,0.3)]'
+                            : 'bg-white/5 border-white/5 hover:bg-white/10'}
+                        `}>
+                          <span className={`text-sm ${isFocused ? 'text-pink-200 font-medium' : 'text-slate-400'}`}>
+                            {item}
+                          </span>
+                          {isFocused && <div className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />}
                         </div>
                       )}
                     </OS.Item>
                   ))}
                 </div>
+
+                <div className="pt-4 border-t border-white/5 text-[11px] text-slate-600 font-mono text-center">
+                  Press TAB to cycle explicitly within this zone.
+                </div>
+              </OS.Zone>
+            </div>
+
+            {/* Card 2: Escape (Zone Jump) - NEW STANDARD */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl" />
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500 text-black text-[10px] font-bold rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] z-10">
+                RECOMMENDED
               </div>
 
-              {/* Right Floating Media Column */}
-              <div className="col-span-5 relative mt-12">
-                <OS.Item id="floating-image" className="z-20 relative">
-                  {({ isFocused }: { isFocused: boolean }) => (
-                    <div className={`aspect-[4/5] rounded-[2rem] bg-gradient-to-br from-indigo-500 to-purple-600 p-1 transition-all duration-500 ${isFocused ? 'scale-110 rotate-2' : 'rotate-[-2deg]'}`}>
-                      <div className="w-full h-full rounded-[1.8rem] bg-slate-900 flex items-center justify-center">
-                        <MockBadge label="PRO VISION" color="info" />
-                      </div>
+              <OS.Zone
+                id="demo-escape"
+                direction="v"
+                tab="escape"
+                className="relative h-full bg-[#0A0A0A] border border-emerald-500/30 rounded-3xl p-8 flex flex-col space-y-6 shadow-[0_0_40px_-20px_rgba(16,185,129,0.1)]"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <ArrowRightFromLine size={18} />
+                      <h3 className="font-bold text-sm tracking-widest uppercase">Escape Policy</h3>
                     </div>
-                  )}
-                </OS.Item>
+                    <p className="text-xs text-slate-500">Jump to next Zone.</p>
+                  </div>
+                  <div className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-mono border border-emerald-500/20">
+                    tab="escape"
+                  </div>
+                </div>
 
-                {/* Overlapping Widget Card */}
-                <div className="absolute -left-20 -bottom-10 z-30">
-                  <OS.Item id="widget-card">
-                    {({ isFocused }: { isFocused: boolean }) => (
-                      <div className={`w-64 p-6 rounded-2xl bg-white text-black shadow-2xl transition-all duration-300 ${isFocused ? 'scale-125 -translate-y-4' : ''}`}>
-                        <p className="text-xs font-black uppercase text-slate-400 mb-2">Engagement Rate</p>
-                        <h2 className="text-3xl font-black tracking-tighter">98.4%</h2>
-                        <div className="mt-4 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-indigo-600 w-4/5" />
+                <div className="space-y-2 flex-1">
+                  {["List Item A", "List Item B", "List Item C"].map((item, i) => (
+                    <OS.Item key={item} id={`escape-${i}`}>
+                      {({ isFocused }: { isFocused: boolean }) => (
+                        <div className={`
+                          px-4 py-3 rounded-xl border flex items-center justify-between group/item cursor-pointer
+                          transition-all duration-200
+                          ${isFocused
+                            ? 'bg-emerald-500/10 border-emerald-500/50 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)]'
+                            : 'bg-white/5 border-white/5 hover:bg-white/10'}
+                        `}>
+                          <span className={`text-sm ${isFocused ? 'text-emerald-200 font-medium' : 'text-slate-400'}`}>
+                            {item}
+                          </span>
+                          <span className="text-[10px] text-slate-600 font-mono opacity-0 group-hover/item:opacity-100 transition-opacity">
+                            Arrow Keys
+                          </span>
                         </div>
-                      </div>
-                    )}
-                  </OS.Item>
+                      )}
+                    </OS.Item>
+                  ))}
+                </div>
+
+                <div className="pt-4 border-t border-white/5 text-[11px] text-slate-600 font-mono text-center">
+                  TAB jumps to the next card immediately. <br />Use ARROWS to navigate items.
+                </div>
+              </OS.Zone>
+            </div>
+
+            {/* Card 3: Flow (Linear) */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl" />
+              <OS.Zone
+                id="demo-flow"
+                direction="v"
+                tab="flow"
+                className="relative h-full bg-[#0A0A0A] border border-white/10 rounded-3xl p-8 flex flex-col space-y-6 hover:border-blue-500/30 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-blue-400">
+                      <ArrowRight size={18} />
+                      <h3 className="font-bold text-sm tracking-widest uppercase">Flow Policy</h3>
+                    </div>
+                    <p className="text-xs text-slate-500">Linear Form Style.</p>
+                  </div>
+                  <div className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[10px] font-mono border border-blue-500/20">
+                    tab="flow"
+                  </div>
+                </div>
+
+                <div className="space-y-3 flex-1">
+                  {["Username Input", "Password Input", "Confirm Button"].map((item, i) => (
+                    <OS.Item key={item} id={`flow-${i}`}>
+                      {({ isFocused }: { isFocused: boolean }) => (
+                        <div className={`
+                          px-4 py-3 rounded-xl border flex items-center justify-between group/item cursor-pointer
+                          transition-all duration-200
+                          ${isFocused
+                            ? 'bg-blue-500/10 border-blue-500/50 shadow-[0_0_20px_-5px_rgba(59,130,246,0.3)] transform translate-x-1'
+                            : 'bg-white/5 border-white/5 hover:bg-white/10'}
+                        `}>
+                          <span className={`text-sm ${isFocused ? 'text-blue-200 font-medium' : 'text-slate-400'}`}>
+                            {item}
+                          </span>
+                          {isFocused && <CornerDownRight size={14} className="text-blue-400" />}
+                        </div>
+                      )}
+                    </OS.Item>
+                  ))}
+                </div>
+
+                <div className="pt-4 border-t border-white/5 text-[11px] text-slate-600 font-mono text-center">
+                  TAB moves to the NEXT ITEM linearly.<br />(Like a legacy form)
+                </div>
+              </OS.Zone>
+            </div>
+
+          </div>
+        </section>
+
+
+        {/* 2. NESTED ZONES DEMO - ESCAPE vs FLOW */}
+        <section>
+          <div className="flex items-center gap-4 mb-8">
+            <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Layers className="text-orange-400" size={20} />
+              Nested Zone Patterns
+            </h2>
+            <div className="h-px flex-1 bg-gradient-to-l from-white/10 to-transparent" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            {/* Nested Escape Pattern */}
+            <div className="bg-white/5 rounded-3xl p-8 border border-white/10 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <ArrowRightFromLine size={18} />
+                    <h3 className="font-bold tracking-tight">Nested Escape</h3>
+                  </div>
+                  <p className="text-xs text-slate-500">Tab jumps between zones. Arrows explore within.</p>
+                </div>
+                <div className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-mono border border-emerald-500/20">
+                  RECOMMENDED
                 </div>
               </div>
 
+              <OS.Zone
+                id="nested-escape-outer"
+                direction="v"
+                tab="escape"
+                className="p-6 bg-[#0A0A0A] rounded-2xl border border-emerald-500/20 space-y-4"
+              >
+                <div className="flex items-center justify-between text-emerald-500 text-[10px] font-mono">
+                  <span>Zone: nested-escape-outer</span>
+                  <span className="bg-emerald-500/10 px-2 py-0.5 rounded">Level 1</span>
+                </div>
+
+                <div className="space-y-2">
+                  {["Parent A", "Parent B"].map((item, i) => (
+                    <OS.Item key={item} id={`esc-outer-${i}`}>
+                      {({ isFocused }: { isFocused: boolean }) => (
+                        <div className={`px-4 py-3 rounded-xl border transition-all ${isFocused ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-white/5 border-white/5'}`}>
+                          <span className={`text-sm ${isFocused ? 'text-emerald-200' : 'text-slate-400'}`}>{item}</span>
+                        </div>
+                      )}
+                    </OS.Item>
+                  ))}
+                </div>
+
+                {/* Inner Zone */}
+                <OS.Zone
+                  id="nested-escape-inner"
+                  direction="v"
+                  tab="escape"
+                  className="p-4 bg-black/50 rounded-xl border border-emerald-500/10 space-y-2"
+                >
+                  <div className="text-emerald-600 text-[10px] font-mono mb-2">Zone: nested-escape-inner (Level 2)</div>
+                  {["Child 1", "Child 2", "Child 3"].map((item, i) => (
+                    <OS.Item key={item} id={`esc-inner-${i}`}>
+                      {({ isFocused }: { isFocused: boolean }) => (
+                        <div className={`px-3 py-2 rounded-lg border flex items-center gap-2 transition-all ${isFocused ? 'bg-emerald-500/20 border-emerald-500/40' : 'bg-transparent border-white/5'}`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${isFocused ? 'bg-emerald-400' : 'bg-slate-700'}`} />
+                          <span className={`text-xs ${isFocused ? 'text-emerald-200' : 'text-slate-500'}`}>{item}</span>
+                        </div>
+                      )}
+                    </OS.Item>
+                  ))}
+                </OS.Zone>
+              </OS.Zone>
+
+              <p className="text-[11px] text-slate-600 text-center font-mono">
+                Tab: Jump to sibling zone → Arrow: Navigate items
+              </p>
             </div>
 
-            {/* Bottom Toolbelt */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl">
-              {['Move', 'Text', 'Draw', 'Frame', 'Comment'].map((tool) => (
-                <OS.Item key={tool} id={`tool-${tool}`}>
-                  {({ isFocused }: { isFocused: boolean }) => (
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isFocused ? 'bg-cyan-500 text-white' : 'text-slate-500 hover:text-white'}`}>
-                      <MockIcon name={tool} />
-                    </div>
-                  )}
-                </OS.Item>
-              ))}
-            </div>
-
-          </OS.Zone>
-        </section>
-
-        {/* Scenario 4: Focus Trapping (The Modal Pattern) */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3 mb-4">
-            <MousePointer2 className="text-orange-400" size={20} />
-            <h2 className="text-xl font-bold text-white uppercase tracking-widest text-sm">04. Modal Jurisdictions</h2>
-          </div>
-          <div className="h-64 bg-white/5 rounded-3xl border border-white/10 p-8 flex items-center justify-center relative overflow-hidden">
-            <MockText variant="body" className="text-slate-600 italic">Background is inactive</MockText>
-
-            <OS.Zone
-              id="modal-zone"
-              role="dialog"
-              className="absolute inset-x-12 inset-y-8 bg-slate-800 border-2 border-orange-500 rounded-2xl shadow-2xl p-6 flex flex-col justify-between"
-            >
-              <MockText variant="h2" className="text-white">Exit Confirmation</MockText>
-              <div className="flex gap-4">
-                <OS.Item id="modal-cancel">
-                  {({ isFocused }: { isFocused: boolean }) => (
-                    <button className={`flex-1 py-3 rounded-lg font-bold transition-all ${isFocused ? 'bg-white text-black' : 'bg-white/5 text-slate-400'}`}>Cancel</button>
-                  )}
-                </OS.Item>
-                <OS.Item id="modal-confirm">
-                  {({ isFocused }: { isFocused: boolean }) => (
-                    <button className={`flex-1 py-3 rounded-lg font-bold transition-all ${isFocused ? 'bg-orange-500 text-white' : 'bg-orange-900/20 text-orange-900'}`}>Confirm</button>
-                  )}
-                </OS.Item>
+            {/* Nested Flow Pattern */}
+            <div className="bg-white/5 rounded-3xl p-8 border border-white/10 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-blue-400">
+                    <ArrowRight size={18} />
+                    <h3 className="font-bold tracking-tight">Nested Flow</h3>
+                  </div>
+                  <p className="text-xs text-slate-500">Tab traverses all items linearly across zones.</p>
+                </div>
+                <div className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[10px] font-mono border border-blue-500/20">
+                  FORM STYLE
+                </div>
               </div>
-            </OS.Zone>
+
+              <OS.Zone
+                id="nested-flow-outer"
+                direction="v"
+                tab="flow"
+                className="p-6 bg-[#0A0A0A] rounded-2xl border border-blue-500/20 space-y-4"
+              >
+                <div className="flex items-center justify-between text-blue-500 text-[10px] font-mono">
+                  <span>Zone: nested-flow-outer</span>
+                  <span className="bg-blue-500/10 px-2 py-0.5 rounded">Level 1</span>
+                </div>
+
+                <div className="space-y-2">
+                  {["Field 1", "Field 2"].map((item, i) => (
+                    <OS.Item key={item} id={`flow-outer-${i}`}>
+                      {({ isFocused }: { isFocused: boolean }) => (
+                        <div className={`px-4 py-3 rounded-xl border transition-all ${isFocused ? 'bg-blue-500/10 border-blue-500/50' : 'bg-white/5 border-white/5'}`}>
+                          <span className={`text-sm ${isFocused ? 'text-blue-200' : 'text-slate-400'}`}>{item}</span>
+                        </div>
+                      )}
+                    </OS.Item>
+                  ))}
+                </div>
+
+                {/* Inner Zone */}
+                <OS.Zone
+                  id="nested-flow-inner"
+                  direction="v"
+                  tab="flow"
+                  className="p-4 bg-black/50 rounded-xl border border-blue-500/10 space-y-2"
+                >
+                  <div className="text-blue-600 text-[10px] font-mono mb-2">Zone: nested-flow-inner (Level 2)</div>
+                  {["Sub-field A", "Sub-field B", "Sub-field C"].map((item, i) => (
+                    <OS.Item key={item} id={`flow-inner-${i}`}>
+                      {({ isFocused }: { isFocused: boolean }) => (
+                        <div className={`px-3 py-2 rounded-lg border flex items-center gap-2 transition-all ${isFocused ? 'bg-blue-500/20 border-blue-500/40' : 'bg-transparent border-white/5'}`}>
+                          <CornerDownRight size={12} className={isFocused ? 'text-blue-400' : 'text-slate-700'} />
+                          <span className={`text-xs ${isFocused ? 'text-blue-200' : 'text-slate-500'}`}>{item}</span>
+                        </div>
+                      )}
+                    </OS.Item>
+                  ))}
+                </OS.Zone>
+              </OS.Zone>
+
+              <p className="text-[11px] text-slate-600 text-center font-mono">
+                Tab: Next item (linear) → Arrow: Same behavior
+              </p>
+            </div>
+
           </div>
         </section>
 
       </div>
     </div>
   );
-}
-
-function MockIcon({ name }: { name: string }) {
-  switch (name) {
-    case 'Move': return <MousePointer2 size={18} />;
-    case 'Text': return <Type size={18} />;
-    case 'Draw': return <Grid3X3 size={18} />;
-    // Default fallback
-    default: return <Package size={18} />;
-  }
 }

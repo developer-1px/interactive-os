@@ -5,6 +5,14 @@
   outline-offset: 0 !important;
 }
 
+/* Scroll margin for focus navigation - breathing room when scrolling into view */
+[data-item-id] {
+  scroll-margin-block: 10vh;
+  /* Vertical: 10% of viewport height */
+  scroll-margin-inline: 5vw;
+  /* Horizontal: 5% of viewport width */
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

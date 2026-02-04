@@ -88,17 +88,17 @@ export const Tab = defineOSCommand({
             setFocus
         } = useFocusStore.getState();
 
-        if (!activeZoneId) return state;
+        if (!activeZoneId || !focusedItemId) return state;
 
         const reverse = payload?.reverse ?? false;
+        const activeZone = zoneRegistry[activeZoneId];
 
         const nextId = executeTabNavigation({
             focusedItemId,
             zoneId: activeZoneId,
             registry: zoneRegistry,
             isShiftTab: reverse,
-            zoneItems: [], // Deprecated in favor of recursive builder
-            behavior: zoneRegistry[activeZoneId]?.behavior || {
+            behavior: activeZone?.behavior || {
                 direction: "v",
                 edge: "stop",
                 entry: "first",
@@ -111,11 +111,6 @@ export const Tab = defineOSCommand({
 
         if (nextId) {
             setFocus(nextId);
-            // Optionally update active zone if the item belongs to a different zone
-            // The cursorSlice.setFocus logic should handle this via `computePath`, 
-            // but let's be safe or rely on the store's intelligence.
-            // cursorSlice.ts:57 -> Updates activeZoneId if targetZoneId changes.
-            // So just setFocus is enough.
         }
 
         return state;

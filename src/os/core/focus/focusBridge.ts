@@ -75,11 +75,16 @@ export function useFocusBridge() {
         const activeZone = activeZoneId ? zoneRegistry[activeZoneId] : null;
         const targetMode = activeZone?.behavior?.target ?? "real";
 
-        // Only apply DOM focus if not already focused (prevents infinite loops)
         const el = document.getElementById(focusedItemId);
-        if (el && document.activeElement !== el) {
+        if (!el) return;
+
+        // Apply focus if not already focused
+        if (document.activeElement !== el) {
             applyFocus(focusedItemId, targetMode, { preventScroll: true });
         }
+
+        // Scroll into view if needed (only when out of viewport)
+        el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
     }, [focusedItemId]);
 }
 

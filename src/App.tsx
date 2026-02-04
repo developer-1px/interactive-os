@@ -11,6 +11,7 @@ import TodoPage from "./pages/TodoPage";
 import SettingsPage from "./pages/SettingsPage";
 import ShowcasePage from "./pages/ShowcasePage";
 import FocusShowcasePage from "./pages/FocusShowcasePage";
+import BuilderPage from "./pages/BuilderPage";
 import DocsPage from "./pages/DocsPage";
 
 import { OS } from "@os/ui";
@@ -81,6 +82,7 @@ export default function App() {
               }
             />
             <Route path="/showcase" element={<ShowcasePage />} />
+            <Route path="/builder" element={<BuilderPage />} />
             <Route path="/focus-showcase" element={<FocusShowcasePage />} />
             <Route path="/docs/*" element={<DocsPage />} />
           </Route>

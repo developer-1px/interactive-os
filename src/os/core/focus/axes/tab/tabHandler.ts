@@ -1,173 +1,154 @@
-// Tab Axis: Tab key navigation logic
-// Handles linear navigation across nested zones with skip policies
+// Tab Axis: Tab key navigation logic (v7.3 Semantics)
+// - loop: Focus trapped within zone
+// - escape: Jump to next Zone in DOM order
+// - flow: Linear item traversal across all zones
 
 import type { FocusBehavior } from "../../behavior/behaviorTypes";
 import type { ZoneMetadata } from "../../focusTypes";
 
 export interface TabNavigationContext {
     focusedItemId: string | null;
-    zoneItems: string[]; // Only used for current zone (deprecated in recursor)
     zoneId: string;
     isShiftTab: boolean;
     registry: Record<string, ZoneMetadata>;
     behavior: FocusBehavior;
 }
 
-/**
- * Executes the Tab Navigation logic.
- * Returns the ID of the next item to focus, or null if no move is possible/defined.
- */
+type Registry = Record<string, ZoneMetadata>;
+
+// ─────────────────────────────────────────────────────────────
+// Main Entry
+// ─────────────────────────────────────────────────────────────
+
 export function executeTabNavigation(ctx: TabNavigationContext): string | null {
-    const { focusedItemId, registry, isShiftTab, zoneId } = ctx;
-
-    // 1. Identify the 'Root' of the current navigation context
-    // Ideally, we want to traverse the entire visible tree.
-    // For now, we find the top-most parent of the current zone to act as the traversal root.
-    const rootZoneId = findRootZoneId(zoneId, registry);
-    if (!rootZoneId) return null;
-
-    // 2. Build the Linear Sequence (Flattened Tree)
-    const sequence = buildLinearTabSequence(rootZoneId, registry);
-    if (sequence.length === 0) return null;
-
-    // 3. Find Current Position
-    const currentIndex = focusedItemId ? sequence.indexOf(focusedItemId) : -1;
-
-    // 4. Resolve Next Position (with Wraparound/Looping Logic)
-    let nextIndex = currentIndex;
-
-    // Default Loop Behavior: Global Wrap
-    // If we want per-zone 'escape' vs 'loop', we'd need to check the active zone's behavior.
-    // For a unified "Tab" experience, global wrapping is usually preferred or 'stops' at ends.
-    // Let's implement 'Loop' by default for the sequence.
-
-    if (currentIndex === -1) {
-        // If lost, start at beginning (or end if Shift+Tab)
-        nextIndex = isShiftTab ? sequence.length - 1 : 0;
-    } else {
-        nextIndex = isShiftTab ? currentIndex - 1 : currentIndex + 1;
-
-        // Handle Edge Cases
-        if (nextIndex < 0) {
-            nextIndex = sequence.length - 1; // Wrap to end
-        } else if (nextIndex >= sequence.length) {
-            nextIndex = 0; // Wrap to start
-        }
+    switch (ctx.behavior.tab) {
+        case "loop": return executeLoopNavigation(ctx);
+        case "escape": return executeEscapeNavigation(ctx);
+        case "flow": return executeFlowNavigation(ctx);
+        default: return null;
     }
-
-    // 5. Apply Skip Policy (Find next valid item)
-    // We scan up to sequence.length times to avoid infinite loops if all are disabled.
-    const direction = isShiftTab ? -1 : 1;
-    let attempts = 0;
-    while (attempts < sequence.length) {
-        const candidateId = sequence[nextIndex];
-
-        if (!shouldSkipItem(candidateId, ctx.behavior.tabSkip)) {
-            return candidateId;
-        }
-
-        // Advance
-        nextIndex += direction;
-
-        // Wrap again during scan
-        if (nextIndex < 0) nextIndex = sequence.length - 1;
-        if (nextIndex >= sequence.length) nextIndex = 0;
-
-        attempts++;
-    }
-
-    return null; // All items skipped
 }
 
-/**
- * Recursively builds a linear list of all item IDs in the zone tree.
- * Sorts children by DOM order to ensuring intuitive visual flow.
- */
-function buildLinearTabSequence(zoneId: string, registry: Record<string, ZoneMetadata>): string[] {
-    const zone = registry[zoneId];
+// ─────────────────────────────────────────────────────────────
+// LOOP: Trapped within current zone
+// ─────────────────────────────────────────────────────────────
+
+function executeLoopNavigation(ctx: TabNavigationContext): string | null {
+    const rootId = findAncestor(ctx.zoneId, ctx.registry, z => z.behavior?.tab === "loop") ?? ctx.zoneId;
+    const sequence = buildSequence(rootId, ctx.registry);
+    return navigateSequence(sequence, ctx.focusedItemId, ctx.isShiftTab, true, ctx.behavior.tabSkip);
+}
+
+// ─────────────────────────────────────────────────────────────
+// ESCAPE: Jump to next zone in DOM order
+// ─────────────────────────────────────────────────────────────
+
+function executeEscapeNavigation(ctx: TabNavigationContext): string | null {
+    const zones = sortByDOM(Object.values(ctx.registry), z => `[data-zone-id="${z.id}"]`);
+    const currentIdx = zones.findIndex(z => z.id === ctx.zoneId);
+    if (currentIdx === -1) return null;
+
+    const dir = ctx.isShiftTab ? -1 : 1;
+    for (let i = 1; i < zones.length; i++) {
+        const nextZone = zones[(currentIdx + i * dir + zones.length) % zones.length];
+        const entry = resolveEntry(nextZone, ctx.isShiftTab, ctx.registry);
+        if (entry) return entry;
+    }
+    return null;
+}
+
+// ─────────────────────────────────────────────────────────────
+// FLOW: Linear traversal across entire tree
+// ─────────────────────────────────────────────────────────────
+
+function executeFlowNavigation(ctx: TabNavigationContext): string | null {
+    const rootId = findRoot(ctx.zoneId, ctx.registry);
+    if (!rootId) return null;
+    const sequence = buildSequence(rootId, ctx.registry);
+    return navigateSequence(sequence, ctx.focusedItemId, ctx.isShiftTab, false, ctx.behavior.tabSkip);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────
+
+function navigateSequence(
+    seq: string[],
+    currentId: string | null,
+    reverse: boolean,
+    wrap: boolean,
+    skip?: "none" | "skip-disabled"
+): string | null {
+    if (seq.length === 0) return null;
+
+    const dir = reverse ? -1 : 1;
+    const idx = currentId ? seq.indexOf(currentId) : -1;
+    let next = idx === -1 ? (reverse ? seq.length - 1 : 0) : idx + dir;
+
+    for (let i = 0; i < seq.length; i++) {
+        if (wrap) next = (next + seq.length) % seq.length;
+        if (next < 0 || next >= seq.length) return null;
+        if (!isSkipped(seq[next], skip)) return seq[next];
+        next += dir;
+    }
+    return null;
+}
+
+function buildSequence(zoneId: string, reg: Registry): string[] {
+    const zone = reg[zoneId];
     if (!zone) return [];
 
-    const sequence: string[] = [];
+    const items = zone.items ? [...zone.items] : [];
+    const children = sortByDOM(
+        Object.values(reg).filter(z => z.parentId === zoneId),
+        z => `[data-zone-id="${z.id}"]`
+    );
+    children.forEach(c => items.push(...buildSequence(c.id, reg)));
 
-    // 1. Add Own Items
-    if (zone.items && zone.items.length > 0) {
-        // Sort items by DOM order? 
-        // Usually `zone.items` is already sorted by the Zone logic (or should be).
-        // Let's trust registry order for now, or perform a quick DOM sort if robust compliance is needed.
-        // For "Diet" plan, trusting registry is safer/faster.
-        sequence.push(...zone.items);
-    }
-
-    // 2. Find Child Zones
-    const childZones = Object.values(registry).filter(z => z.parentId === zoneId);
-
-    // 3. Sort Child Zones by DOM Position
-    if (childZones.length > 0) {
-        childZones.sort((a, b) => {
-            const elA = document.querySelector(`[data-zone-id="${a.id}"]`);
-            const elB = document.querySelector(`[data-zone-id="${b.id}"]`);
-            if (elA && elB) {
-                // Determine order bits
-                const order = elA.compareDocumentPosition(elB);
-                if (order & Node.DOCUMENT_POSITION_FOLLOWING) return -1; // A before B
-                if (order & Node.DOCUMENT_POSITION_PRECEDING) return 1;  // B before A
-            }
-            return 0;
-        });
-
-        // 4. Recurse
-        for (const child of childZones) {
-            // Need to insert child items at the right place relative to parent items?
-            // "Nested Zones" usually mean visual nesting.
-            // A simple append strategy works for "Container -> Child -> Child" structure
-            // But if mixed "Item, ChildZone, Item", we assume ChildZones come AFTER parent items 
-            // OR parent has no items.
-            // Refinement: If parent has items AND children, pure append might be wrong if they are visually interleaved.
-            // BUT: Zone architecture usually implies "Items" are distinct from "SubZones".
-            // We append subzone content after parent content for now.
-            sequence.push(...buildLinearTabSequence(child.id, registry));
-        }
-    }
-
-    // Sort the ENTIRE sequence by DOM order?
-    // This is the most robust way to handle fully interleaved items and nested zones.
-    // It ignores the logical tree structure slightly but guarantees "Visual Tab Order".
-    // Let's do a final sort on the sequence for safety.
-    return sortIdsByDom(sequence);
+    return sortByDOM(items, id => `#${id}`);
 }
 
-function findRootZoneId(startId: string, registry: Record<string, ZoneMetadata>): string | null {
-    let current = registry[startId];
-    if (!current) return null;
-
-    // Traverse up until no parent
-    while (current.parentId && registry[current.parentId]) {
-        current = registry[current.parentId];
+function resolveEntry(zone: ZoneMetadata, reverse: boolean, reg: Registry): string | null {
+    const items = zone.items || [];
+    if (items.length > 0) {
+        if (reverse) return items[items.length - 1];
+        if (zone.behavior?.entry === "restore" && zone.lastFocusedId) return zone.lastFocusedId;
+        return items[0];
     }
-    return current.id;
+    // Check child zones
+    const children = sortByDOM(Object.values(reg).filter(z => z.parentId === zone.id), z => `[data-zone-id="${z.id}"]`);
+    const target = reverse ? children[children.length - 1] : children[0];
+    return target ? resolveEntry(target, reverse, reg) : null;
 }
 
-function sortIdsByDom(ids: string[]): string[] {
-    return ids.sort((idA, idB) => {
-        const elA = document.getElementById(idA);
-        const elB = document.getElementById(idB);
+function findAncestor(id: string, reg: Registry, pred: (z: ZoneMetadata) => boolean): string | null {
+    let cur = reg[id];
+    while (cur) {
+        if (pred(cur)) return cur.id;
+        cur = cur.parentId ? reg[cur.parentId] : undefined!;
+    }
+    return null;
+}
+
+function findRoot(id: string, reg: Registry): string | null {
+    let cur = reg[id];
+    if (!cur) return null;
+    while (cur.parentId && reg[cur.parentId]) cur = reg[cur.parentId];
+    return cur.id;
+}
+
+function sortByDOM<T>(items: T[], selector: (item: T) => string): T[] {
+    return [...items].sort((a, b) => {
+        const elA = document.querySelector(selector(a));
+        const elB = document.querySelector(selector(b));
         if (!elA || !elB) return 0;
-
-        const order = elA.compareDocumentPosition(elB);
-        if (order & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
-        if (order & Node.DOCUMENT_POSITION_PRECEDING) return 1;
-        return 0;
+        const pos = elA.compareDocumentPosition(elB);
+        return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : pos & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
     });
 }
 
-function shouldSkipItem(itemId: string, policy?: "none" | "skip-disabled"): boolean {
-    if (policy === "skip-disabled") {
-        const el = document.getElementById(itemId);
-        if (el) {
-            const ariaDisabled = el.getAttribute("aria-disabled") === "true";
-            const disabled = el.hasAttribute("disabled");
-            return ariaDisabled || disabled;
-        }
-    }
-    return false;
+function isSkipped(id: string, policy?: "none" | "skip-disabled"): boolean {
+    if (policy !== "skip-disabled") return false;
+    const el = document.getElementById(id);
+    return el?.getAttribute("aria-disabled") === "true" || el?.hasAttribute("disabled") || false;
 }

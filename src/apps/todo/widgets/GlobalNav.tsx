@@ -14,7 +14,8 @@ export function GlobalNav() {
     { id: "todo", icon: Layout, path: "/", label: "Todo" },
     { id: "search", icon: Search, path: "/search", label: "Search" },
     { id: "docs", icon: Book, path: "/docs", label: "Documentation" },
-    { id: "showcase", icon: Package, path: "/showcase", label: "Showcase" },
+    { id: "showcase", icon: Package, path: "/showcase", label: "Benchmarks" },
+    { id: "builder", icon: Layout, path: "/builder", label: "Web Builder" },
     { id: "focus-showcase", icon: MousePointer2, path: "/focus-showcase", label: "Focus Lab" },
   ];
 

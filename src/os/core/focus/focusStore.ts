@@ -13,3 +13,7 @@ export const useFocusStore = create<FocusState>()((...a) => ({
   ...createSpatialSlice(...a),
 }));
 
+// Expose for debugging in development
+if (typeof window !== "undefined") {
+  (window as any).__FOCUS_STORE__ = useFocusStore;
+}
