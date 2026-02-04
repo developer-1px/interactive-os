@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { OS } from "@os/ui";
+import { Field } from "@os/ui/Field";
 import { ArrowRight } from "lucide-react";
 
 /**
@@ -8,6 +10,12 @@ import { ArrowRight } from "lucide-react";
  * Focus Verification Mode: All text interactive via OS.Item
  */
 export function CTABlock() {
+    const [values, setValues] = useState({
+        headline: "Ready to build something amazing?",
+        subtext: "Start free. No credit card required. Cancel anytime.",
+        footer: "Join 10,000+ teams already using our platform"
+    });
+
     return (
         <OS.Zone
             id="cta-block"
@@ -22,36 +30,40 @@ export function CTABlock() {
 
             <div className="relative max-w-3xl mx-auto text-center">
                 {/* Headline */}
-                <OS.Item id="cta-headline">
-                    {({ isFocused }: { isFocused: boolean }) => (
-                        <div
+                <div className="mb-6">
+                    <OS.Item id="cta-headline" asChild>
+                        <Field
+                            name="cta-headline"
+                            mode="deferred"
+                            value={values.headline}
+                            onCommit={(val: string) => setValues(prev => ({ ...prev, headline: val }))}
                             className={`
-                mb-6 transition-all duration-300 rounded-2xl p-4 -mx-4 cursor-default
-                ${isFocused ? "bg-white/10 ring-2 ring-white/50" : ""}
-              `}
-                        >
-                            <h2 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em] text-white">
-                                Ready to build something amazing?
-                            </h2>
-                        </div>
-                    )}
-                </OS.Item>
+                                transition-all duration-300 rounded-2xl p-4 -mx-4 cursor-default
+                                text-4xl md:text-5xl font-semibold tracking-[-0.03em] text-white
+                                data-[focused=true]:bg-white/10 data-[focused=true]:ring-2 data-[focused=true]:ring-white/50
+                                data-[editing=true]:bg-white/20 data-[editing=true]:shadow-2xl
+                            `}
+                        />
+                    </OS.Item>
+                </div>
 
                 {/* Subtext */}
-                <OS.Item id="cta-subtext">
-                    {({ isFocused }: { isFocused: boolean }) => (
-                        <div
+                <div className="mb-10">
+                    <OS.Item id="cta-subtext" asChild>
+                        <Field
+                            name="cta-subtext"
+                            mode="deferred"
+                            value={values.subtext}
+                            onCommit={(val: string) => setValues(prev => ({ ...prev, subtext: val }))}
                             className={`
-                mb-10 transition-all duration-300 rounded-xl p-3 -mx-3 cursor-default
-                ${isFocused ? "bg-white/10 ring-2 ring-white/50" : ""}
-              `}
-                        >
-                            <p className="text-lg text-white/70">
-                                Start free. No credit card required. Cancel anytime.
-                            </p>
-                        </div>
-                    )}
-                </OS.Item>
+                                transition-all duration-300 rounded-xl p-3 -mx-3 cursor-default
+                                text-lg text-white/70
+                                data-[focused=true]:bg-white/10 data-[focused=true]:ring-2 data-[focused=true]:ring-white/50
+                                data-[editing=true]:bg-white/20
+                            `}
+                        />
+                    </OS.Item>
+                </div>
 
                 {/* CTA Button */}
                 <OS.Item id="cta-button">
@@ -72,15 +84,21 @@ export function CTABlock() {
                 </OS.Item>
 
                 {/* Footer Note */}
-                <OS.Item id="cta-footer">
-                    {({ isFocused }: { isFocused: boolean }) => (
-                        <div className={`mt-8 px-2 py-1 rounded inline-block transition-all ${isFocused ? "bg-white/10" : ""}`}>
-                            <p className="text-sm text-white/50">
-                                Join 10,000+ teams already using our platform
-                            </p>
-                        </div>
-                    )}
-                </OS.Item>
+                <div className="mt-8">
+                    <OS.Item id="cta-footer" asChild>
+                        <Field
+                            name="cta-footer"
+                            mode="deferred"
+                            value={values.footer}
+                            onCommit={(val: string) => setValues(prev => ({ ...prev, footer: val }))}
+                            className={`
+                                px-2 py-1 rounded inline-block transition-all
+                                text-sm text-white/50
+                                data-[focused=true]:bg-white/10 data-[focused=true]:text-white/80
+                            `}
+                        />
+                    </OS.Item>
+                </div>
             </div>
         </OS.Zone>
     );

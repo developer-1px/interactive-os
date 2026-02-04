@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { OS } from "@os/ui";
+import { Field } from "@os/ui/Field";
 import { Star } from "lucide-react";
 
 /**
@@ -9,7 +11,12 @@ import { Star } from "lucide-react";
  *   - Card (Nested Zone) -> Title, Quote, Role (Items)
  */
 export function TestimonialsBlock() {
-    const testimonials = [
+    const [header, setHeader] = useState({
+        eyebrow: "TESTIMONIALS",
+        title: "Loved by thousands."
+    });
+
+    const [testimonials, setTestimonials] = useState([
         {
             id: "testimonial-1",
             name: "Sarah Chen",
@@ -34,7 +41,7 @@ export function TestimonialsBlock() {
             avatar: "EP",
             color: "emerald",
         },
-    ];
+    ]);
 
     const colorMap: Record<string, { bg: string; text: string; ring: string; light: string }> = {
         violet: { bg: "bg-violet-100", text: "text-violet-600", ring: "ring-violet-500", light: "bg-violet-50" },
@@ -53,36 +60,40 @@ export function TestimonialsBlock() {
             <div className="max-w-5xl mx-auto">
                 {/* Section Header */}
                 <div className="text-center mb-16">
-                    <OS.Item id="testimonials-eyebrow">
-                        {({ isFocused }: { isFocused: boolean }) => (
-                            <div className={`inline-block mb-4 transition-all px-2 py-1 rounded-md ${isFocused ? "scale-105 bg-emerald-50 ring-1 ring-emerald-200" : ""}`}>
-                                <span className="text-[13px] text-emerald-600 font-semibold tracking-[0.2em]">
-                                    TESTIMONIALS
-                                </span>
-                            </div>
-                        )}
-                    </OS.Item>
+                    <div className="mb-4">
+                        <OS.Item id="testimonials-eyebrow" asChild>
+                            <Field
+                                name="testimonials-eyebrow"
+                                mode="deferred"
+                                value={header.eyebrow}
+                                onCommit={(val: string) => setHeader(prev => ({ ...prev, eyebrow: val }))}
+                                className={`
+                                    inline-block transition-all px-2 py-1 rounded-md text-[13px] text-emerald-600 font-semibold tracking-[0.2em]
+                                    data-[focused=true]:scale-105 data-[focused=true]:bg-emerald-50 data-[focused=true]:ring-1 data-[focused=true]:ring-emerald-200
+                                `}
+                            />
+                        </OS.Item>
+                    </div>
                     <div>
-                        <OS.Item id="testimonials-title">
-                            {({ isFocused }: { isFocused: boolean }) => (
-                                <div
-                                    className={`
-                      inline-block transition-all duration-300 rounded-xl p-3 -mx-3
-                      ${isFocused ? "bg-slate-100 ring-2 ring-violet-500" : ""}
-                    `}
-                                >
-                                    <h2 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em] text-slate-900">
-                                        Loved by thousands.
-                                    </h2>
-                                </div>
-                            )}
+                        <OS.Item id="testimonials-title" asChild>
+                            <Field
+                                name="testimonials-title"
+                                mode="deferred"
+                                value={header.title}
+                                onCommit={(val: string) => setHeader(prev => ({ ...prev, title: val }))}
+                                className={`
+                                    inline-block transition-all duration-300 rounded-xl p-3 -mx-3
+                                    text-4xl md:text-5xl font-semibold tracking-[-0.03em] text-slate-900
+                                    data-[focused=true]:bg-slate-100 data-[focused=true]:ring-2 data-[focused=true]:ring-violet-500
+                                `}
+                            />
                         </OS.Item>
                     </div>
                 </div>
 
                 {/* Testimonial Cards - Nested Zones */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {testimonials.map((t) => {
+                    {testimonials.map((t, index) => {
                         const colors = colorMap[t.color];
                         return (
                             <OS.Zone
@@ -103,33 +114,51 @@ export function TestimonialsBlock() {
                                 </div>
 
                                 {/* Quote */}
-                                <OS.Item id={`${t.id}-quote`}>
-                                    {({ isFocused }: { isFocused: boolean }) => (
-                                        <p className={`text-slate-600 leading-relaxed mb-6 min-h-[60px] p-1 -m-1 rounded ${isFocused ? "bg-white ring-1 ring-slate-200 shadow-sm" : ""}`}>
-                                            {t.quote}
-                                        </p>
-                                    )}
-                                </OS.Item>
+                                <div className="mb-6 h-full flex flex-col items-start min-h-[80px]">
+                                    <OS.Item id={`${t.id}-quote`} asChild>
+                                        <Field
+                                            name={`${t.id}-quote`}
+                                            mode="deferred"
+                                            multiline
+                                            value={t.quote}
+                                            onCommit={(val: string) => setTestimonials(prev => prev.map((item, i) => i === index ? { ...item, quote: val } : item))}
+                                            className={`
+                                                text-slate-600 leading-relaxed p-1 -m-1 rounded w-full
+                                                data-[focused=true]:bg-white data-[focused=true]:ring-1 data-[focused=true]:ring-slate-200 data-[focused=true]:shadow-sm
+                                            `}
+                                        />
+                                    </OS.Item>
+                                </div>
 
                                 {/* Author */}
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 ${colors.bg} rounded-full flex items-center justify-center font-semibold text-sm ${colors.text}`}>
+                                    <div className={`w-10 h-10 ${colors.bg} rounded-full flex items-center justify-center font-semibold text-sm ${colors.text} shrink-0`}>
                                         {t.avatar}
                                     </div>
-                                    <div>
-                                        <OS.Item id={`${t.id}-name`}>
-                                            {({ isFocused }: { isFocused: boolean }) => (
-                                                <div className={`font-medium text-slate-900 text-sm px-1 -mx-1 rounded inline-block ${isFocused ? "bg-white ring-1 ring-slate-200" : ""}`}>
-                                                    {t.name}
-                                                </div>
-                                            )}
+                                    <div className="flex flex-col items-start min-w-0">
+                                        <OS.Item id={`${t.id}-name`} asChild>
+                                            <Field
+                                                name={`${t.id}-name`}
+                                                mode="deferred"
+                                                value={t.name}
+                                                onCommit={(val: string) => setTestimonials(prev => prev.map((item, i) => i === index ? { ...item, name: val } : item))}
+                                                className={`
+                                                    font-medium text-slate-900 text-sm px-1 -mx-1 rounded inline-block truncate w-full
+                                                    data-[focused=true]:bg-white data-[focused=true]:ring-1 data-[focused=true]:ring-slate-200
+                                                `}
+                                            />
                                         </OS.Item>
-                                        <OS.Item id={`${t.id}-role`}>
-                                            {({ isFocused }: { isFocused: boolean }) => (
-                                                <div className={`text-xs text-slate-500 px-1 -mx-1 rounded inline-block ${isFocused ? "bg-white ring-1 ring-slate-200" : ""}`}>
-                                                    {t.role}
-                                                </div>
-                                            )}
+                                        <OS.Item id={`${t.id}-role`} asChild>
+                                            <Field
+                                                name={`${t.id}-role`}
+                                                mode="deferred"
+                                                value={t.role}
+                                                onCommit={(val: string) => setTestimonials(prev => prev.map((item, i) => i === index ? { ...item, role: val } : item))}
+                                                className={`
+                                                    text-xs text-slate-500 px-1 -mx-1 rounded inline-block truncate w-full
+                                                    data-[focused=true]:bg-white data-[focused=true]:ring-1 data-[focused=true]:ring-slate-200
+                                                `}
+                                            />
                                         </OS.Item>
                                     </div>
                                 </div>

@@ -116,129 +116,209 @@ os/core/
 
 ## 4. 리팩토링 제안 (Refactoring Proposal)
 
+### 4.0. 네이밍 규칙 (Naming Convention)
+
+> [!IMPORTANT]
+> **파일명 = 핵심 Export명** 규칙을 준수합니다.
+> 파일 내 주요 함수/클래스/인터페이스명을 그대로 파일명으로 사용합니다.
+
+#### 응집도 기반 Prefix 규칙
+
+> [!TIP]
+> **응집도가 높은 개념은 Prefix로** 사용하여 알파벳순 정렬 시 유사 파일이 모이도록 합니다.
+
+```
+❌ BAD (흩어짐)                    ✅ GOOD (그룹핑)
+clipboardCommands.ts              commandsClipboard.ts
+fieldCommands.ts                  commandsField.ts
+navigationCommands.ts             commandsNavigation.ts
+shellCommands.ts                  commandsShell.ts
+```
+
+| 패턴 | 설명 | 예시 |
+|------|------|------|
+| `commands*` | 커맨드 정의 그룹 | `commandsNavigation.ts`, `commandsClipboard.ts` |
+| `handler*` | 핸들러 그룹 | `handlerDirection.ts`, `handlerEdge.ts` |
+| `slice*` | 슬라이스 그룹 | `sliceCursor.ts`, `sliceZone.ts`, `sliceSpatial.ts` |
+
+#### Postfix 키 풀 (단일 책임 파일)
+
+| Postfix | 용도 | 예시 |
+|---------|------|------|
+| `Store` | Zustand 스토어 | `focusStore.ts` → `useFocusStore()` |
+| `Registry` | 레지스트리 클래스 | `CommandRegistry.ts` → `CommandRegistry` |
+| `Context` | React Context | `JurisdictionContext.tsx` |
+| `Resolver` | 리졸버 함수 | `behaviorResolver.ts` → `resolveBehavior()` |
+| `Pipeline` | 파이프라인 로직 | `focusPipeline.ts` → `runFocusPipeline()` |
+| `Presets` | 프리셋 정의 | `behaviorPresets.ts` → `FOCUS_PRESETS` |
+
+#### Prefix 키 풀
+
+| Prefix | 용도 | 예시 |
+|--------|------|------|
+| `use` | React Hook | `useCommandCenter.ts` → `useCommandCenter()` |
+| `create` | 팩토리 함수 | `createCommandFactory.ts` → `createCommandFactory()` |
+
+
+### 4.0.1. FSD 세그먼트 전략
+
+| Segment | 역할 | 규칙 |
+|---------|------|------|
+| `model/` | 상태 관리 (Store, Slice) | `*Store.ts`, `*Slice.ts`, `*Registry.ts` |
+| `lib/` | 순수 함수, 유틸리티 | `*Handler.ts`, `*Resolver.ts`, `*Pipeline.ts` |
+| `ui/` | React 컴포넌트 | `*Context.tsx`, `*.tsx` |
+
+
 ### 4.1. 새로운 폴더 구조
 
 ```
 src/os/
-├── index.ts                           # [NEW] 통합 Public API
-├── types/                             # [NEW] 📋 시스템 명세 (인터페이스)
-│   ├── index.ts                       # 전체 타입 Re-export
-│   ├── focus.types.ts                 # FocusState, NavContext, etc.
-│   ├── command.types.ts               # CommandDefinition, CommandFactory
-│   ├── zone.types.ts                  # ZoneMetadata, FocusBehavior
-│   └── input.types.ts                 # Keybinding, InputEvent
 │
-├── engine/                            # [RENAME: core → engine] ⚙️ 런타임 엔진
-│   ├── AntigravityOS.tsx              # OS Shell
-│   ├── command/                       # Command Engine
-│   │   ├── index.ts
-│   │   ├── registry.ts                # [FROM: store.tsx - Registry 분리]
-│   │   ├── store.ts                   # [FROM: store.tsx - Store 분리]
-│   │   ├── eventBus.ts                # [RENAME]
-│   │   ├── definitions/               # [RENAME: commands → definitions]
-│   │   │   ├── base.ts                # [FROM: osCommands.ts]
-│   │   │   ├── navigation.ts
-│   │   │   ├── clipboard.ts
-│   │   │   ├── field.ts
-│   │   │   └── shell.ts
-│   │   └── hooks/
-│   │       ├── useCommandCenter.ts
-│   │       └── useCommandListener.ts
-│   │
-│   ├── focus/                         # Focus Engine
-│   │   ├── index.ts
-│   │   ├── store.ts                   # 통합 스토어
-│   │   ├── coordinator.ts             # [RENAME: focusBridge]
-│   │   ├── pipeline.ts
-│   │   ├── orchestrator.ts
-│   │   ├── axes/                      # 7-Axis Handlers (유지)
-│   │   │   ├── index.ts               # [NEW] 축 요약 및 Re-export
-│   │   │   ├── direction/
-│   │   │   ├── edge/
-│   │   │   ├── entry/
-│   │   │   ├── recovery/
-│   │   │   ├── restore/
-│   │   │   ├── tab/
-│   │   │   └── target/
-│   │   ├── behavior/                  # 동작 프리셋
-│   │   │   ├── presets.ts
-│   │   │   └── resolver.ts
-│   │   ├── slices/                    # [RENAME: store → slices]
-│   │   │   ├── cursorSlice.ts
-│   │   │   ├── spatialSlice.ts
-│   │   │   └── zoneSlice.ts
-│   │   └── utils/
-│   │
-│   ├── input/                         # Input Engine
-│   │   ├── InputEngine.tsx
-│   │   └── keybinding.ts
-│   │
-│   ├── jurisdiction/                  # [NEW] 🏛️ 관할권 시스템
-│   │   ├── index.ts
-│   │   ├── ZoneRegistry.ts            # [FROM: command/zoneRegistry.ts]
-│   │   └── context.tsx                # [FROM: command/CommandContext.tsx]
-│   │
-│   ├── logic/                         # Condition Evaluator
-│   │   ├── index.ts
-│   │   ├── builder.ts
-│   │   ├── evaluator.ts
-│   │   └── types.ts
-│   │
-│   └── persistence/                   # Persistence Adapter
+├── entities/                          # 📋 도메인 인터페이스 (파일명 = 인터페이스명)
+│   ├── ZoneMetadata.ts                # interface ZoneMetadata
+│   ├── FocusBehavior.ts               # interface FocusBehavior  
+│   ├── FocusState.ts                  # interface FocusState
+│   ├── NavContext.ts                  # interface NavContext
+│   ├── NavResult.ts                   # interface NavResult
+│   ├── FocusObject.ts                 # interface FocusObject
+│   ├── CommandDefinition.ts           # interface CommandDefinition
+│   ├── CommandFactory.ts              # interface CommandFactory
+│   ├── KeybindingItem.ts              # interface KeybindingItem
+│   └── Direction.ts                   # type Direction (enum-like)
 │
-├── ui/                                # 🎨 UI 프리미티브 (유지)
-│   ├── index.ts
-│   ├── primitives/                    # [NEW] 핵심 프리미티브 그룹
-│   │   ├── Zone.tsx
-│   │   ├── Item.tsx
-│   │   ├── Field.tsx
-│   │   ├── Trigger.tsx
-│   │   └── Kbd.tsx
-│   ├── App.tsx                        # App Shell
-│   └── field/                         # Field 헬퍼
-│       ├── fieldLogic.ts
-│       ├── fieldUtils.ts
+├── features/                          # ⚙️ OS 핵심 기능 (FSD Feature Slice)
+│   │
+│   ├── command/                       # 🎯 Command Feature
+│   │   ├── model/                     # 상태 관리
+│   │   │   ├── commandStore.ts        # createCommandStore
+│   │   │   └── CommandRegistry.ts     # CommandRegistry class
+│   │   ├── lib/                       # 순수 함수
+│   │   │   ├── createCommandFactory.ts
+│   │   │   └── resolveCommand.ts
+│   │   ├── ui/                        # 컴포넌트
+│   │   │   └── CommandContext.tsx
+│   │   └── definitions/               # OS 기본 커맨드 정의
+│   │       ├── commandsClipboard.ts   # 알파벳순 그룹핑
+│   │       ├── commandsField.ts
+│   │       ├── commandsNavigation.ts
+│   │       └── commandsShell.ts
+│   │
+│   ├── focus/                         # 🎯 Focus Feature
+│   │   ├── model/                     # 상태 관리
+│   │   │   ├── focusStore.ts          # Zustand store
+│   │   │   ├── sliceCursor.ts         # 알파벳순 그룹핑
+│   │   │   ├── sliceSpatial.ts
+│   │   │   └── sliceZone.ts
+│   │   ├── lib/                       # 순수 함수
+│   │   │   ├── focusPipeline.ts       # Navigation pipeline
+│   │   │   ├── focusOrchestrator.ts   # Orchestration logic
+│   │   │   ├── behaviorPresets.ts     # Preset definitions
+│   │   │   └── behaviorResolver.ts    # Behavior resolution
+│   │   ├── axes/                      # 7-Axis Handlers (알파벳순)
+│   │   │   ├── handlerDirection.ts
+│   │   │   ├── handlerEdge.ts
+│   │   │   ├── handlerEntry.ts
+│   │   │   ├── handlerRecovery.ts
+│   │   │   ├── handlerRestore.ts
+│   │   │   ├── handlerSeamless.ts
+│   │   │   ├── handlerTab.ts
+│   │   │   └── handlerTarget.ts
+│   │   └── lib/                       # 축별 순수 로직
+│   │       ├── navigationRoving.ts
+│   │       └── navigationSpatial.ts
+│   │
+│   ├── input/                         # 🎯 Input Feature
+│   │   ├── model/
+│   │   │   └── inputStore.ts          # (필요시)
+│   │   ├── lib/
+│   │   │   └── keybindingMatcher.ts   # 키 매칭 순수 함수
+│   │   └── ui/
+│   │       └── InputEngine.tsx        # Global input listener
+│   │
+│   ├── jurisdiction/                  # 🏛️ Jurisdiction Feature
+│   │   ├── model/
+│   │   │   └── ZoneRegistry.ts        # Zone → Command 매핑 스토어
+│   │   ├── lib/
+│   │   │   └── jurisdictionResolver.ts
+│   │   └── ui/
+│   │       └── JurisdictionContext.tsx
+│   │
+│   ├── logic/                         # 🧮 Logic Feature (Condition DSL)
+│   │   ├── lib/
+│   │   │   ├── logicBuilder.ts
+│   │   │   └── logicEvaluator.ts
+│   │   └── LogicNode.ts               # Type definition
+│   │
+│   └── persistence/                   # 💾 Persistence Feature
+│       ├── lib/
+│       │   └── LocalStorageAdapter.ts
+│       └── PersistenceAdapter.ts      # Interface
+│
+├── widgets/                           # 🎨 OS UI 위젯 (복합 컴포넌트)
+│   ├── Zone.tsx                       # OS.Zone
+│   ├── Item.tsx                       # OS.Item
+│   ├── Field.tsx                      # OS.Field
+│   ├── Trigger.tsx                    # OS.Trigger
+│   ├── Kbd.tsx                        # OS.Kbd
+│   └── App.tsx                        # OS.App (Shell)
+│
+├── shared/                            # 🔧 공유 유틸리티
+│   ├── lib/
+│   │   ├── fieldLogic.ts
+│   │   └── fieldUtils.ts
+│   └── hooks/
+│       ├── useCommandCenter.ts
+│       ├── useCommandListener.ts
 │       └── useFieldHooks.ts
 │
-└── debug/                             # 🔍 디버그 도구 (유지)
-    ├── Inspector.tsx
-    ├── logger.ts
-    └── ...
+└── debug/                             # 🔍 디버그 도구
+    ├── ui/
+    │   └── Inspector.tsx
+    └── lib/
+        ├── logger.ts
+        └── inputTelemetry.ts
 ```
 
-### 4.2. 인터페이스 통합 (`types/`)
+### 4.2. 엔티티 네이밍 규칙 (`entities/`)
 
 > [!IMPORTANT]
-> 모든 Public 인터페이스를 `os/types/`에 집중시켜 **시스템 명세를 한눈에 파악** 가능하게 함
+> **1 File = 1 Interface** 규칙을 준수합니다.
+> 파일명은 인터페이스명과 **완전히 동일**해야 합니다.
 
-#### `types/focus.types.ts`
+| 파일명 | 내용 |
+|--------|------|
+| `ZoneMetadata.ts` | `export interface ZoneMetadata { ... }` |
+| `FocusBehavior.ts` | `export interface FocusBehavior { ... }` |
+| `FocusState.ts` | `export interface FocusState { ... }` (Combined type) |
+| `NavContext.ts` | `export interface NavContext { ... }` |
+| `NavResult.ts` | `export interface NavResult { ... }` |
+| `FocusObject.ts` | `export interface FocusObject { ... }` |
+| `CommandDefinition.ts` | `export interface CommandDefinition<S, P, K> { ... }` |
+| `CommandFactory.ts` | `export interface CommandFactory<S, P, K> { ... }` |
+| `KeybindingItem.ts` | `export interface KeybindingItem<K> { ... }` |
+| `Direction.ts` | `export type Direction = "UP" \| "DOWN" \| "LEFT" \| "RIGHT";` |
+
+#### 예시: `entities/NavContext.ts`
 ```typescript
-// Focus System Core Types
-export interface FocusState { ... }
-export interface NavContext { ... }
-export interface NavResult { ... }
-export interface FocusObject { ... }
-export type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
+import type { Direction } from "./Direction";
+import type { ZoneMetadata } from "./ZoneMetadata";
+import type { FocusBehavior } from "./FocusBehavior";
+
+/** Unified context passed through the navigation pipeline */
+export interface NavContext {
+    direction: Direction;
+    focusPath: string[];
+    zoneRegistry: Record<string, ZoneMetadata>;
+    focusedItemId: string | null;
+    stickyX: number | null;
+    stickyY: number | null;
+    currentZoneId?: string;
+    behavior?: FocusBehavior;
+    items?: string[];
+    targetId?: string | null;
+}
 ```
 
-#### `types/zone.types.ts`
-```typescript
-// Zone & Jurisdiction Types
-export interface ZoneMetadata { ... }
-export interface FocusBehavior { ... }
-export type FocusDirection = "v" | "h" | "grid";
-export type FocusEdge = "wrap" | "stop" | "escape";
-export type FocusTab = "loop" | "escape" | "flow";
-export type FocusEntry = "first" | "last" | "restore";
-```
-
-#### `types/command.types.ts`
-```typescript
-// Command System Types
-export interface CommandDefinition<S, P, K> { ... }
-export interface CommandFactory<S, P, K> { ... }
-export interface CommandGroup<S, P, K> { ... }
-```
 
 ### 4.3. 큰 파일 분리
 
@@ -248,7 +328,7 @@ export interface CommandGroup<S, P, K> { ... }
 |----------|------|----------|
 | `registry.ts` | `CommandRegistry` 클래스 | ~130줄 |
 | `store.ts` | `createCommandStore` 함수 | ~150줄 |
-| `types.ts` → `@os/types/command.types.ts` | 타입 정의 | ~30줄 |
+| `entities/command.ts` | 타입 정의 | ~30줄 |
 
 ### 4.4. 관할권 시스템 명시화 (`jurisdiction/`)
 
@@ -258,7 +338,7 @@ export interface CommandGroup<S, P, K> { ... }
 현재 `command/zoneRegistry.ts`와 `command/CommandContext.tsx`를 별도 폴더로 분리하여 이 개념을 명시화합니다.
 
 ```
-engine/jurisdiction/
+features/jurisdiction/
 ├── index.ts
 ├── ZoneRegistry.ts      # Zone → Command 매핑
 └── context.tsx          # FocusContext, CommandContext
@@ -274,20 +354,20 @@ engine/jurisdiction/
 | `osCommands.ts` | `definitions/base.ts` | 계층 구조 명확화 |
 | `behaviorPresets.ts` | `presets.ts` | 중복 제거 (폴더가 `behavior/`) |
 | `behaviorResolver.ts` | `resolver.ts` | 중복 제거 |
-| `behaviorTypes.ts` | `@os/types/zone.types.ts` | 타입 통합 |
+| `behaviorTypes.ts` | `@os/entities/zone.ts` | 타입 통합 |
 | `commandEventBus.ts` | `eventBus.ts` | 중복 제거 (폴더가 `command/`) |
 
 ---
 
 ## 6. 마이그레이션 전략 (Migration Strategy)
 
-### Phase 1: 타입 통합 (Low Risk)
-1. `os/types/` 폴더 생성
-2. 분산된 타입들을 복사 후 Re-export
+### Phase 1: 엔티티 통합 (Low Risk)
+1. `os/entities/` 폴더 생성
+2. 분산된 타입들을 모델링하여 Re-export
 3. 기존 import 경로를 점진적으로 업데이트
 
 ### Phase 2: 폴더 구조 개선 (Medium Risk)
-1. `core/` → `engine/` 리네임
+1. `core/` → `features/` 리네임
 2. `jurisdiction/` 폴더 생성 및 파일 이동
 3. `ui/primitives/` 생성
 
@@ -304,24 +384,24 @@ engine/jurisdiction/
 
 | 항목 | Before | After |
 |------|--------|-------|
-| 타입 찾기 | 5-6개 파일 검색 | `os/types/` 확인 |
+| 도메인 찾기 | 5-6개 파일 검색 | `os/entities/` 확인 |
 | 시스템 구조 파악 | 코드 분석 필요 | 폴더명으로 파악 |
 | 새 기능 위치 결정 | 모호함 | 명확한 도메인 분리 |
 
 ### 7.2. 문서화 자동화
 
 ```
-os/types/                    → API Reference 자동 생성 가능
-engine/focus/axes/           → 7-Axis 문서 매핑
-engine/jurisdiction/         → 관할권 패턴 문서화
+os/entities/                 → Domain Model Reference 자동 생성 가능
+features/focus/axes/         → 7-Axis 문서 매핑
+features/jurisdiction/       → 관할권 패턴 문서화
 ```
 
 ### 7.3. 테스트 구조화
 
 ```
 __tests__/
-├── types/          # 타입 테스트 (선택)
-├── engine/
+├── entities/       # 도메인 로직 테스트
+├── features/
 │   ├── command/
 │   ├── focus/
 │   └── jurisdiction/
@@ -335,7 +415,7 @@ __tests__/
 본 리팩토링은 **코드의 기능은 그대로 유지**하면서 **구조적 명확성**을 확보하는 것을 목표로 합니다.
 
 핵심 원칙:
-1. **인터페이스 우선 (Interface First)**: `types/` 폴더로 명세 집중
+1. **엔티티 우선 (Entity First)**: `entities/` 폴더로 도메인 모델 집중
 2. **도메인 명시화 (Explicit Domain)**: `jurisdiction/` 등 핵심 개념 폴더화
 3. **책임 분리 (Single Responsibility)**: 큰 파일 분리
 4. **네이밍 일관성 (Naming Consistency)**: 폴더 컨텍스트 활용

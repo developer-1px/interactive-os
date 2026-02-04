@@ -76,6 +76,7 @@ function TextEditItem({ id, label, placeholder, defaultValue, multiline }: TextE
                     </div>
                     <Field
                         name={id}
+                        mode="deferred"
                         value={defaultValue}
                         placeholder={placeholder}
                         multiline={multiline}

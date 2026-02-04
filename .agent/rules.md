@@ -1,26 +1,78 @@
 # Project Rules & Standards
 
 ## Naming Conventions
+
+### Core Principle: File = Export
 - **Match Filenames to Exports**: File names must exactly match the name of the main component, function, or interface they export.
   - **Components**: Use PascalCase (e.g., `TodoItem.tsx`, not `todo-item.tsx`).
   - **Hooks/Functions**: Use camelCase (e.g., `useCommand.ts`, not `use-command.ts`).
-  - **Avoid Kebab-case**: Do not use kebab-case for filenames unless the file exports strictly just constants or configuration that doesn't map to a single symbol (and even then, prefer camelCase if possible).
-- **No Abbreviations**: Avoid using abbreviations. Use full, descriptive names.
-  - **Example**: Use `category` instead of `cat`.
-  - **General Rule**: Do not shorten words; write them out fully to maximize clarity.
-  - **Exceptions**: Widely accepted domain standards are permitted:
-    - `ctx` (Context)
-    - `cmd` (Command)
-    - `id` (Identifier)
-    - `ref` (Reference)
-    - `props` (Properties)
-    - `e` (Event)
+  - **Avoid Kebab-case**: Do not use kebab-case for filenames.
+
+### Cohesion-Based Prefix Grouping
+- **Rule**: When multiple files share a central concept for cohesion, use that concept as a **prefix** so files group alphabetically.
+- **Pattern**:
+  ```
+  ❌ BAD (scattered)              ✅ GOOD (grouped)
+  clipboardCommands.ts           commandsClipboard.ts
+  cursorSlice.ts                 sliceCursor.ts
+  directionHandler.ts            handlerDirection.ts
+  rovingNavigation.ts            navigationRoving.ts
+  ```
+
+### Postfix Key Pool (Single Responsibility Files)
+| Postfix | Usage | Example |
+|---------|-------|---------|
+| `Store` | Zustand store | `focusStore.ts` → `useFocusStore()` |
+| `Registry` | Registry class | `CommandRegistry.ts` → `CommandRegistry` |
+| `Context` | React Context | `JurisdictionContext.tsx` |
+| `Resolver` | Resolver function | `behaviorResolver.ts` → `resolveBehavior()` |
+| `Pipeline` | Pipeline logic | `focusPipeline.ts` → `runFocusPipeline()` |
+| `Presets` | Preset definitions | `behaviorPresets.ts` → `FOCUS_PRESETS` |
+
+### Prefix Key Pool
+| Prefix | Usage | Example |
+|--------|-------|---------|
+| `use` | React Hook | `useCommandCenter.ts` → `useCommandCenter()` |
+| `create` | Factory function | `createCommandFactory.ts` → `createCommandFactory()` |
+| `commands*` | Command definitions group | `commandsNavigation.ts`, `commandsClipboard.ts` |
+| `handler*` | Handler group | `handlerDirection.ts`, `handlerEdge.ts` |
+| `slice*` | State slice group | `sliceCursor.ts`, `sliceZone.ts` |
+| `navigation*` | Navigation logic group | `navigationRoving.ts`, `navigationSpatial.ts` |
+
+### No Abbreviations
+- **Avoid abbreviations**. Use full, descriptive names.
+- **Exceptions**: Widely accepted domain standards:
+  - `ctx` (Context), `cmd` (Command), `id` (Identifier), `ref` (Reference), `props` (Properties), `e` (Event)
 
 ## Directory Structure
-- **No Barrel Files (`index.ts`/`index.tsx`)**: Avoid using `index.tsx` or `index.ts` files to re-export modules.
-  - **Preferred**: `components/TodoItem/TodoItem.tsx`
-  - **Avoid**: `components/TodoItem/index.tsx`
-- **Exception**: Barrel files are permitted ONLY for large, encapsulated modules where the API is strictly internal/private and a single entry point is necessary for encapsulation.
+
+### FSD Segment Strategy
+- **Feature-Sliced Design (FSD)** segments within each feature:
+
+| Segment | Role | Naming Pattern |
+|---------|------|----------------|
+| `model/` | State management (Store, Slice) | `*Store.ts`, `slice*.ts`, `*Registry.ts` |
+| `lib/` | Pure functions, utilities | `*Handler.ts`, `*Resolver.ts`, `*Pipeline.ts` |
+| `ui/` | React components | `*Context.tsx`, `*.tsx` |
+
+### No Barrel Files (`index.ts`)
+- **STRICTLY PROHIBITED**: Do not use `index.ts` to re-export modules.
+- **Reason**: AI and developers confuse similarly-named modules. Direct path imports are mandatory.
+- **Preferred**: `import { useFocusStore } from "@os/features/focus/model/focusStore"`
+- **Avoid**: `import { useFocusStore } from "@os/features/focus"`
+
+### Entity Files (`entities/`)
+- **1 File = 1 Interface** rule for domain entities.
+- **File name = Interface name** exactly.
+- **Example**:
+  ```
+  entities/
+  ├── ZoneMetadata.ts      # interface ZoneMetadata
+  ├── NavContext.ts        # interface NavContext
+  ├── CommandDefinition.ts # interface CommandDefinition
+  └── Direction.ts         # type Direction
+  ```
+
 
 ## Code Style & Formatting
 - **Formatter**: Use `biome` for formatting and linting.

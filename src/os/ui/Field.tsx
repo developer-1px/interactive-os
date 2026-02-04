@@ -61,6 +61,11 @@ export interface FieldProps<T extends BaseCommand>
   dispatch?: (cmd: BaseCommand) => void;
   commitOnBlur?: boolean;
 
+  // Callbacks for local state
+  onCommit?: (value: string) => void;
+  onSync?: (value: string) => void;
+  onCancel?: () => void;
+
   // Field Mode
   mode?: FieldMode;
 
@@ -80,6 +85,9 @@ export const Field = <T extends BaseCommand>({
   commitCommand,
   syncCommand,
   cancelCommand,
+  onCommit,
+  onSync,
+  onCancel,
   children,
   asChild,
   commitOnBlur = true,
@@ -146,11 +154,13 @@ export const Field = <T extends BaseCommand>({
     if (innerRef.current) {
       cursorRef.current = getCaretPosition(innerRef.current);
     }
-    const action = getCommitAction(localValueRef.current, commitCommand, name, updateType);
+    const val = localValueRef.current;
+    onCommit?.(val);
+    const action = getCommitAction(val, commitCommand, name, updateType);
     if (action) {
       dispatch(action);
     }
-  }, [commitCommand, name, updateType, dispatch]);
+  }, [commitCommand, name, updateType, dispatch, onCommit]);
 
   // --- 3.5 Command Listeners (Deferred Mode) ---
   // These respond to OS-level commands dispatched via keymap
@@ -173,6 +183,7 @@ export const Field = <T extends BaseCommand>({
       handler: () => {
         setLocalValue(valueRef.current);
         setIsEditing(false);
+        onCancel?.();
         if (cancelCommand) dispatch(cancelCommand);
       },
       when: () => isFocusedRef.current && isEditing,
@@ -186,6 +197,7 @@ export const Field = <T extends BaseCommand>({
       cursorRef.current = getCaretPosition(innerRef.current);
     }
 
+    onCommit?.(currentText);
     const action = getCommitAction(currentText, commitCommand, name, updateType);
     if (action) {
       dispatch(action);
@@ -197,6 +209,7 @@ export const Field = <T extends BaseCommand>({
     setLocalValue(text);
     updateCursorContext();
 
+    onSync?.(text);
     const action = getSyncAction(text, syncCommand, name, updateType);
     if (action) {
       dispatch(action);

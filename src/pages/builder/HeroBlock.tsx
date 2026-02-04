@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { OS } from "@os/ui";
+import { Field } from "@os/ui/Field";
 
 /**
  * HeroBlock
@@ -7,6 +9,12 @@ import { OS } from "@os/ui";
  * Focus Verification Mode: All text elements are focusable Items
  */
 export function HeroBlock() {
+    const [values, setValues] = useState({
+        badge: "NEW — Now with AI-powered layouts",
+        headline: "Build websites that convert.",
+        subheadline: "The visual builder for teams who ship fast. No code required, just drag, drop, and publish."
+    });
+
     return (
         <OS.Zone
             id="hero-block"
@@ -31,53 +39,54 @@ export function HeroBlock() {
 
             <div className="relative max-w-4xl mx-auto px-8 py-32 text-center">
                 {/* Announcement Badge */}
-                <OS.Item id="hero-badge">
-                    {({ isFocused }: { isFocused: boolean }) => (
-                        <div
+                <div className="mb-8">
+                    <OS.Item id="hero-badge" asChild>
+                        <Field
+                            name="hero-badge"
+                            mode="deferred"
+                            value={values.badge}
+                            onCommit={(val: string) => setValues(prev => ({ ...prev, badge: val }))}
                             className={`
-                inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8 text-[13px] font-medium transition-all duration-300 cursor-default
-                ${isFocused
-                                    ? "bg-violet-600 text-white scale-105 shadow-lg shadow-violet-500/30"
-                                    : "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-50"
-                                }
-              `}
-                        >
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            <span>NEW — Now with AI-powered layouts</span>
-                        </div>
-                    )}
-                </OS.Item>
+                                inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-300 cursor-default
+                                data-[focused=true]:bg-violet-600 data-[focused=true]:text-white data-[focused=true]:scale-105 data-[focused=true]:shadow-lg data-[focused=true]:shadow-violet-500/30
+                                data-[focused=false]:bg-slate-100 data-[focused=false]:text-slate-600 data-[focused=false]:border data-[focused=false]:border-slate-200
+                                data-[editing=true]:ring-2 data-[editing=true]:ring-violet-300 data-[editing=true]:bg-violet-700
+                            `}
+                        />
+                    </OS.Item>
+                </div>
 
                 {/* Main Headline */}
-                <OS.Item id="hero-headline">
-                    {({ isFocused }: { isFocused: boolean }) => (
-                        <div
-                            className={`
-                mb-6 transition-all duration-300 rounded-2xl p-4 -mx-4 cursor-default
-                ${isFocused ? "bg-slate-100 ring-2 ring-violet-500" : ""}
-              `}
-                        >
-                            <h1 className="text-[56px] md:text-[72px] font-semibold tracking-[-0.04em] leading-[1.05] text-slate-900">
-                                Build websites that convert.
-                            </h1>
-                        </div>
-                    )}
+                <OS.Item id="hero-headline" asChild>
+                    <Field
+                        name="hero-headline"
+                        mode="deferred"
+                        value={values.headline}
+                        onCommit={(val: string) => setValues(prev => ({ ...prev, headline: val }))}
+                        className={`
+                            mb-6 transition-all duration-300 rounded-2xl p-4 -mx-4 cursor-default
+                            text-[56px] md:text-[72px] font-semibold tracking-[-0.04em] leading-[1.05] text-slate-900
+                            data-[focused=true]:bg-slate-100 data-[focused=true]:ring-2 data-[focused=true]:ring-violet-500
+                            data-[editing=true]:bg-white data-[editing=true]:shadow-xl
+                        `}
+                    />
                 </OS.Item>
 
                 {/* Subheadline */}
-                <OS.Item id="hero-subheadline">
-                    {({ isFocused }: { isFocused: boolean }) => (
-                        <div
-                            className={`
-                mb-12 max-w-xl mx-auto transition-all duration-300 rounded-xl p-3 -mx-3 cursor-default
-                ${isFocused ? "bg-slate-100 ring-2 ring-violet-500" : ""}
-              `}
-                        >
-                            <p className="text-lg text-slate-500 leading-relaxed font-normal">
-                                The visual builder for teams who ship fast. No code required, just drag, drop, and publish.
-                            </p>
-                        </div>
-                    )}
+                <OS.Item id="hero-subheadline" asChild>
+                    <Field
+                        name="hero-subheadline"
+                        mode="deferred"
+                        multiline
+                        value={values.subheadline}
+                        onCommit={(val: string) => setValues(prev => ({ ...prev, subheadline: val }))}
+                        className={`
+                            mb-12 max-w-xl mx-auto transition-all duration-300 rounded-xl p-3 -mx-3 cursor-default
+                            text-lg text-slate-500 leading-relaxed font-normal
+                            data-[focused=true]:bg-slate-100 data-[focused=true]:ring-2 data-[focused=true]:ring-violet-500
+                            data-[editing=true]:bg-white data-[editing=true]:shadow-lg
+                        `}
+                    />
                 </OS.Item>
 
                 {/* CTA Buttons */}
