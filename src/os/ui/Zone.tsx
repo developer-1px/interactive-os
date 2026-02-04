@@ -19,6 +19,7 @@ export interface ZoneProps {
   tab?: FocusTab;
   entry?: FocusEntry;
   restore?: boolean;
+  seamless?: boolean;      // Enable spatial cross-zone navigation (TV-like)
 
   focusable?: boolean;           // If true, this zone can also be focused as an item
   payload?: any;                 // Optional data for focusable zones
@@ -53,6 +54,7 @@ export function Zone({
   tab,
   entry,
   restore,
+  seamless,
 
   focusable = false,
   integrated = false,
@@ -119,10 +121,12 @@ export function Zone({
       ...(tab && { tab }),
       ...(entry && { entry }),
       ...(restore !== undefined && { restore }),
+      ...(seamless !== undefined && { seamless }),
     };
     return resolveBehavior(role, overrides);
-  }, [role, direction, edge, tab, entry, restore]);
+  }, [role, direction, edge, tab, entry, restore, seamless]);
 
+  // Registration: Update on every relevant prop change (registerZone handles merging)
   useEffect(() => {
     registerZone({
       id,
@@ -132,7 +136,6 @@ export function Zone({
       allowedDirections,
       items: [],
     } as any);
-    return () => unregisterZone(id);
   }, [
     id,
     parentId,
@@ -140,8 +143,12 @@ export function Zone({
     behavior,
     directionsKey,
     registerZone,
-    unregisterZone,
   ]);
+
+  // Cleanup: Only unregister on unmount (when component is removed)
+  useEffect(() => {
+    return () => unregisterZone(id);
+  }, [id, unregisterZone]);
 
 
 

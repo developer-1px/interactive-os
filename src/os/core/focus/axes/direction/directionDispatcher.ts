@@ -9,6 +9,7 @@ import { collectItemRects } from "../../utils/domUtils";
 import { resolvePivot, getBubblePath } from "../../utils/pivotUtils";
 import { findNextRovingTarget, type NavigationContext } from "./rovingNavigation";
 import { findNextSpatialTarget } from "./spatialNavigation";
+import { findSiblingZone, getSeamlessEntryItem } from "../edge/seamlessHandler";
 
 export type { Direction } from "../../focusTypes";
 
@@ -68,6 +69,35 @@ export const directionAxis: AxisHandler = (ctx) => {
         // Direction Filter (bubble unhandled directions)
         const isVerticalDir = direction === "UP" || direction === "DOWN";
         const isHorizontalDir = direction === "LEFT" || direction === "RIGHT";
+        const isMatchingDirection = (
+            (behavior.direction === "v" && isVerticalDir) ||
+            (behavior.direction === "h" && isHorizontalDir) ||
+            behavior.direction === "grid"
+        );
+
+        // Seamless: allow cross-direction navigation to sibling zones
+        if (behavior.seamless && !isMatchingDirection && behavior.direction !== "none") {
+            const siblingZone = findSiblingZone({
+                currentZoneId: zoneId,
+                direction,
+                zoneRegistry
+            });
+
+            if (siblingZone) {
+                const entryId = getSeamlessEntryItem(siblingZone, direction, focusedItemId ?? undefined);
+                if (entryId) {
+                    logger.debug("NAVIGATION", `Seamless cross-direction to zone: ${siblingZone.id}, entry: ${entryId}`);
+                    return {
+                        ...ctx,
+                        currentZoneId: siblingZone.id,
+                        behavior: siblingZone.behavior,
+                        items: siblingZone.items,
+                        targetId: entryId,
+                    };
+                }
+            }
+            continue; // Bubble up if no sibling found
+        }
 
         if (behavior.direction === "v" && isHorizontalDir) continue;
         if (behavior.direction === "h" && isVerticalDir) continue;
@@ -93,6 +123,29 @@ export const directionAxis: AxisHandler = (ctx) => {
                 pivotId: localPivot,
                 targetId,
             };
+        }
+
+        // Seamless: attempt cross-zone navigation to sibling zone (same-direction edge case)
+        if (behavior.seamless && !targetId) {
+            const siblingZone = findSiblingZone({
+                currentZoneId: zoneId,
+                direction,
+                zoneRegistry
+            });
+
+            if (siblingZone) {
+                const entryId = getSeamlessEntryItem(siblingZone, direction, focusedItemId ?? undefined);
+                if (entryId) {
+                    logger.debug("NAVIGATION", `Seamless transition to zone: ${siblingZone.id}, entry: ${entryId}`);
+                    return {
+                        ...ctx,
+                        currentZoneId: siblingZone.id,
+                        behavior: siblingZone.behavior,
+                        items: siblingZone.items,
+                        targetId: entryId,
+                    };
+                }
+            }
         }
 
         // Check trap

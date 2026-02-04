@@ -9,7 +9,6 @@ import { ContextProvider } from "@os/core/context";
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import TodoPage from "./pages/TodoPage";
 import SettingsPage from "./pages/SettingsPage";
-import ShowcasePage from "./pages/ShowcasePage";
 import FocusShowcasePage from "./pages/FocusShowcasePage";
 import BuilderPage from "./pages/BuilderPage";
 import DocsPage from "./pages/DocsPage";
@@ -81,7 +80,6 @@ export default function App() {
                 </div>
               }
             />
-            <Route path="/showcase" element={<ShowcasePage />} />
             <Route path="/builder" element={<BuilderPage />} />
             <Route path="/focus-showcase" element={<FocusShowcasePage />} />
             <Route path="/docs/*" element={<DocsPage />} />

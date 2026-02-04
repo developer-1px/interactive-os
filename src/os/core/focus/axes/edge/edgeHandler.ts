@@ -25,7 +25,9 @@ export function shouldTrapAtEdge(
 
 /**
  * Edge wrap logic for lists
- * Returns the wrapped index when hitting boundaries
+ * Returns:
+ * - wrapped index for "loop"
+ * - boundary index for "stop"  
  */
 export function wrapIndex(
     currentIndex: number,
@@ -35,11 +37,13 @@ export function wrapIndex(
     if (itemCount === 0) return -1;
 
     if (currentIndex < 0) {
-        return edge === "loop" ? itemCount - 1 : 0;
+        if (edge === "loop") return itemCount - 1;
+        return 0; // stop
     }
 
     if (currentIndex >= itemCount) {
-        return edge === "loop" ? 0 : itemCount - 1;
+        if (edge === "loop") return 0;
+        return itemCount - 1; // stop
     }
 
     return currentIndex;

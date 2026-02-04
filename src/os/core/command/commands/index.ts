@@ -10,13 +10,13 @@ export { Focus, Navigate, Tab, TabPrev, ExitZone, defineOSCommand } from "./navi
 // Clipboard & History
 export { Undo, Redo, Copy, Cut, Paste } from "./clipboard";
 
-// Shell
-export { ToggleInspector } from "./shell";
+// Shell & Base Commands
+export { ToggleInspector, SetFocus, Patch } from "./shell";
 
 // Aggregate for auto-registration
 import { Focus, Navigate, Tab, TabPrev, ExitZone } from "./navigation";
 import { Undo, Redo, Copy, Cut, Paste } from "./clipboard";
-import { ToggleInspector } from "./shell";
+import { ToggleInspector, SetFocus, Patch } from "./shell";
 
 export const ALL_OS_COMMANDS = [
     Focus,
@@ -29,5 +29,7 @@ export const ALL_OS_COMMANDS = [
     Cut,
     Paste,
     ToggleInspector,
-    ExitZone
+    ExitZone,
+    SetFocus,
+    Patch,
 ];
