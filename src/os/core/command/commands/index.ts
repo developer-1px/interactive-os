@@ -13,10 +13,14 @@ export { Undo, Redo, Copy, Cut, Paste } from "./clipboard";
 // Shell & Base Commands
 export { ToggleInspector, SetFocus, Patch } from "./shell";
 
+// Field Editing
+export { FieldStartEdit, FieldCommit, FieldCancel } from "./field";
+
 // Aggregate for auto-registration
 import { Focus, Navigate, Tab, TabPrev, ExitZone } from "./navigation";
 import { Undo, Redo, Copy, Cut, Paste } from "./clipboard";
 import { ToggleInspector, SetFocus, Patch } from "./shell";
+import { FieldStartEdit, FieldCommit, FieldCancel } from "./field";
 
 export const ALL_OS_COMMANDS = [
     Focus,
@@ -32,4 +36,8 @@ export const ALL_OS_COMMANDS = [
     ExitZone,
     SetFocus,
     Patch,
+    FieldStartEdit,
+    FieldCommit,
+    FieldCancel,
 ];
+

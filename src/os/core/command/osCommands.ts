@@ -11,6 +11,11 @@ export const OS_COMMANDS = {
     TAB: "OS_TAB",
     TAB_PREV: "OS_TAB_PREV",
 
+    // --- Field Editing (The "Edit" Lifecycle) ---
+    FIELD_START_EDIT: "OS_FIELD_START_EDIT",
+    FIELD_COMMIT: "OS_FIELD_COMMIT",
+    FIELD_CANCEL: "OS_FIELD_CANCEL",
+
     // --- Clipboard (The "Data" Transfer) ---
     COPY: "OS_COPY",
     CUT: "OS_CUT",
@@ -41,6 +46,9 @@ export interface OSFocusPayload {
 export type OSCommand =
     | { type: typeof OS_COMMANDS.NAVIGATE; payload: OSNavigatePayload }
     | { type: typeof OS_COMMANDS.FOCUS; payload: OSFocusPayload }
+    | { type: typeof OS_COMMANDS.FIELD_START_EDIT; payload?: { fieldId?: string } }
+    | { type: typeof OS_COMMANDS.FIELD_COMMIT; payload?: { fieldId?: string } }
+    | { type: typeof OS_COMMANDS.FIELD_CANCEL; payload?: { fieldId?: string } }
     | { type: typeof OS_COMMANDS.UNDO; payload?: any }
     | { type: typeof OS_COMMANDS.REDO; payload?: any }
     | { type: typeof OS_COMMANDS.COPY; payload?: any }
@@ -48,3 +56,4 @@ export type OSCommand =
     | { type: typeof OS_COMMANDS.PASTE; payload?: any }
     | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: any }
     | { type: typeof OS_COMMANDS.EXIT; payload?: any };
+

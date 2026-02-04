@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Zone } from "@os/ui/Zone";
 import { Item } from "@os/ui/Item";
-import { Sliders, LayoutGrid, List, MessageSquare, Maximize } from "lucide-react";
+import { Field } from "@os/ui/Field";
+import { Sliders, LayoutGrid, List, MessageSquare, Maximize, Edit3 } from "lucide-react";
 import type { FocusDirection, FocusEdge, FocusTab, FocusEntry, FocusTarget } from "@os/core/focus/behavior/behaviorResolver";
 
 // --- Types ---
@@ -142,8 +143,9 @@ export default function FocusShowcasePage() {
                                     {...config}
                                     className={`
                                         w-full h-full p-2 gap-3 transition-all duration-300
-                                        ${config.direction === "h" || config.direction === "grid" ? "flex-row flex-wrap content-start" : "flex-col"}
-                                        ${config.direction === "grid" ? "grid grid-cols-2" : ""}
+                                        ${config.direction === "h" ? "flex flex-row overflow-x-auto items-center" : ""}
+                                        ${config.direction === "v" ? "flex flex-col" : ""}
+                                        ${config.direction === "grid" ? "grid grid-cols-2 content-start" : ""}
                                     `}
                                 >
                                     {["Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta"].map((name, i) => (
@@ -334,6 +336,16 @@ export default function FocusShowcasePage() {
                             </Zone>
                         </ScenarioCard>
 
+                        {/* Scenario: Deferred Field (Enter-to-Edit) */}
+                        <ScenarioCard
+                            title="Deferred Field"
+                            description="Enter-to-Edit pattern. Focus ≠ Edit."
+                            icon={<Edit3 size={18} className="text-orange-500" />}
+                            tags={['mode="deferred"', 'Enter→Edit', 'Escape→Cancel']}
+                        >
+                            <DeferredFieldDemo />
+                        </ScenarioCard>
+
                     </div>
                 </section>
 
@@ -363,8 +375,8 @@ export default function FocusShowcasePage() {
                                     <Item key={item} id={`loop-policy-${i}`}>
                                         {({ isFocused }) => (
                                             <div className={`px-3 py-2 rounded border transition-colors cursor-pointer ${isFocused
-                                                    ? 'bg-pink-50 border-pink-200 text-pink-700 font-medium'
-                                                    : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
+                                                ? 'bg-pink-50 border-pink-200 text-pink-700 font-medium'
+                                                : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
                                                 }`}>
                                                 {item}
                                             </div>
@@ -394,8 +406,8 @@ export default function FocusShowcasePage() {
                                     <Item key={item} id={`escape-policy-${i}`}>
                                         {({ isFocused }) => (
                                             <div className={`px-3 py-2 rounded border transition-colors cursor-pointer flex justify-between ${isFocused
-                                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700 font-medium'
-                                                    : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
+                                                ? 'bg-emerald-50 border-emerald-200 text-emerald-700 font-medium'
+                                                : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
                                                 }`}>
                                                 <span>{item}</span>
                                                 <span className="text-[10px] opacity-0 group-hover:opacity-100">→</span>
@@ -426,8 +438,8 @@ export default function FocusShowcasePage() {
                                     <Item key={item} id={`flow-policy-${i}`}>
                                         {({ isFocused }) => (
                                             <div className={`px-3 py-2 rounded border transition-colors cursor-pointer ${isFocused
-                                                    ? 'bg-blue-50 border-blue-200 text-blue-700 font-medium transform translate-x-1'
-                                                    : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
+                                                ? 'bg-blue-50 border-blue-200 text-blue-700 font-medium transform translate-x-1'
+                                                : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
                                                 }`}>
                                                 {item}
                                             </div>
@@ -626,5 +638,69 @@ function ScenarioCard({ title, description, icon, children, tags }: {
                 {children}
             </div>
         </div>
+    );
+}
+
+/**
+ * Demo component for Deferred Field mode.
+ * Demonstrates Enter-to-Edit and Escape-to-Cancel patterns.
+ */
+function DeferredFieldDemo() {
+    const [values, setValues] = useState({
+        title: "Click to focus, Enter to edit",
+        subtitle: "Type here, Escape to cancel",
+        description: "Or blur to commit changes"
+    });
+
+    const handleCommit = (key: string) => (text: string) => {
+        setValues(prev => ({ ...prev, [key]: text }));
+    };
+
+    return (
+        <Zone
+            id="deferred-field-demo"
+            direction="v"
+            className="space-y-3 bg-white p-4 rounded-lg border border-orange-100"
+        >
+            {/* Title Field */}
+            <div>
+                <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">Title</div>
+                <Item id="deferred-title" asChild>
+                    <Field
+                        name="deferred-title"
+                        mode="deferred"
+                        value={values.title}
+                        placeholder="Enter title..."
+                        commitCommand={{ type: "DEMO_COMMIT", payload: { field: "title" } }}
+                        className="w-full px-3 py-2 rounded border text-sm transition-all
+                            data-[focused=true]:border-orange-300 data-[focused=true]:bg-orange-50/50
+                            data-[editing=true]:border-orange-500 data-[editing=true]:bg-white data-[editing=true]:ring-2 data-[editing=true]:ring-orange-200"
+                    />
+                </Item>
+            </div>
+
+            {/* Subtitle Field */}
+            <div>
+                <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">Subtitle</div>
+                <Item id="deferred-subtitle" asChild>
+                    <Field
+                        name="deferred-subtitle"
+                        mode="deferred"
+                        value={values.subtitle}
+                        placeholder="Enter subtitle..."
+                        className="w-full px-3 py-2 rounded border text-sm transition-all
+                            data-[focused=true]:border-orange-300 data-[focused=true]:bg-orange-50/50
+                            data-[editing=true]:border-orange-500 data-[editing=true]:bg-white data-[editing=true]:ring-2 data-[editing=true]:ring-orange-200"
+                    />
+                </Item>
+            </div>
+
+            {/* Instructions */}
+            <div className="pt-2 text-[10px] text-slate-400 text-center border-t border-slate-100 mt-2 space-y-1">
+                <div><kbd className="px-1 py-0.5 bg-slate-100 rounded text-[9px]">↑↓</kbd> Navigate when not editing</div>
+                <div><kbd className="px-1 py-0.5 bg-slate-100 rounded text-[9px]">Enter</kbd> Start/Commit editing</div>
+                <div><kbd className="px-1 py-0.5 bg-slate-100 rounded text-[9px]">Esc</kbd> Cancel and restore</div>
+            </div>
+        </Zone>
     );
 }

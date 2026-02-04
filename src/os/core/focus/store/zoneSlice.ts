@@ -1,8 +1,10 @@
 import type { StateCreator } from "zustand";
 import type { FocusState, ZoneSlice } from "../focusTypes";
 import { computePath } from "../utils/pathUtils";
+import { executeRecovery } from "../axes/recovery/recoveryHandler";
+import { DEFAULT_RECOVERY_POLICY } from "../axes/recovery/recoveryTypes";
 
-export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set) => ({
+export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set, get) => ({
     activeZoneId: "sidebar",
     zoneRegistry: {},
     focusPath: [],
@@ -79,17 +81,57 @@ export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set
             return {};
         }),
 
-    removeItem: (zoneId, itemId) =>
-        set((state) => {
-            const zone = state.zoneRegistry[zoneId];
-            if (zone && zone.items) {
-                return {
-                    zoneRegistry: {
-                        ...state.zoneRegistry,
-                        [zoneId]: { ...zone, items: zone.items.filter((i) => i !== itemId) },
-                    },
-                };
+    removeItem: (zoneId, itemId) => {
+        const state = get();
+        const zone = state.zoneRegistry[zoneId];
+
+        if (!zone || !zone.items) {
+            return;
+        }
+
+        // Check if we're removing the currently focused item
+        const isRemovingFocused = state.focusedItemId === itemId;
+
+        // Calculate recovery target BEFORE removing (need original items list)
+        let recoveryTargetId: string | null = null;
+        if (isRemovingFocused && zone.items.length > 1) {
+            const direction = zone.behavior?.direction ?? "v";
+            const result = executeRecovery(
+                itemId,
+                zoneId,
+                zone.items,
+                direction,
+                DEFAULT_RECOVERY_POLICY
+            );
+            recoveryTargetId = result.targetId;
+        }
+
+        // Now update the state
+        set((s) => {
+            const z = s.zoneRegistry[zoneId];
+            if (!z || !z.items) return {};
+
+            const newState: Partial<FocusState> = {
+                zoneRegistry: {
+                    ...s.zoneRegistry,
+                    [zoneId]: { ...z, items: z.items.filter((i) => i !== itemId) },
+                },
+            };
+
+            // Apply recovery if we removed the focused item
+            if (isRemovingFocused && recoveryTargetId) {
+                newState.focusedItemId = recoveryTargetId;
+                // Trigger DOM focus after state update
+                requestAnimationFrame(() => {
+                    const el = document.getElementById(recoveryTargetId!);
+                    el?.focus();
+                });
+            } else if (isRemovingFocused) {
+                // No recovery target - clear focus
+                newState.focusedItemId = null;
             }
-            return {};
-        }),
+
+            return newState;
+        });
+    },
 });

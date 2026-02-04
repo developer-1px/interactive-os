@@ -27,6 +27,7 @@ export const checkValueEmpty = (value: string | undefined | null): boolean => {
 
 export interface FieldStyleParams {
     isActive: boolean;
+    isFocused: boolean;
     multiline: boolean;
     value: string;
     placeholder?: string;
@@ -42,13 +43,16 @@ export interface FieldStyleParams {
  */
 export const getFieldClasses = ({
     isActive,
+    isFocused,
     multiline,
     value,
     placeholder,
     customClassName = "",
 }: FieldStyleParams): string => {
     // Base styles
-    const baseStyles = isActive
+    // pointer-events-none only when NOT focused (allowing click to focus)
+    // Once focused, field should be interactive for clicks
+    const baseStyles = isFocused
         ? customClassName
         : `pointer-events-none truncate ${customClassName}`;
 

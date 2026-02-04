@@ -69,8 +69,8 @@ export function ListView() {
                         {/* DRAFT ITEM */}
                         <Item
                             id="DRAFT"
-                            className="group flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-white transition-all duration-200 relative overflow-hidden mb-6 shadow-sm
-                  data-[focused=true]:border-indigo-500 data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-500
+                            className="group flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-white transition-all duration-75 relative mb-6 shadow-sm
+                  data-[focused=true]:border-indigo-500 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-500/30
               "
                         >
                             <div className="w-5 h-5 rounded-md border-2 border-slate-300 border-dashed flex-shrink-0 opacity-50 text-indigo-500 sticky top-0 flex items-center justify-center">
@@ -86,7 +86,7 @@ export function ListView() {
                                 commitOnBlur={false}
                                 blurOnInactive={true}
                             />
-                            <div className="opacity-0 group-data-[focused=true]:opacity-100 transition-opacity">
+                            <div className="opacity-0 group-data-[focused=true]:opacity-100 transition-opacity duration-75">
                                 <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded border border-indigo-100 flex items-center gap-1">
                                     <CornerDownLeft size={10} /> ENTER
                                 </span>
@@ -100,15 +100,15 @@ export function ListView() {
                                 <Item
                                     key={todo.id}
                                     id={todo.id}
-                                    className={`group flex items-center gap-4 p-3.5 rounded-xl border transition-colors duration-200 relative
+                                    className={`group flex items-center gap-4 p-3.5 rounded-xl border transition-colors duration-75 relative
                       ${todo.completed ? "opacity-60 bg-slate-50 border-transparent" : "bg-white border-transparent hover:border-slate-200"}
-                      data-[focused=true]:border-indigo-400 data-[focused=true]:bg-indigo-50/10 data-[focused=true]:hover:border-indigo-400
+                      data-[focused=true]:border-indigo-400 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400/20 data-[focused=true]:bg-indigo-50/10 data-[focused=true]:hover:border-indigo-400
                       ${isEditing && "bg-indigo-50 border-indigo-200"}
                   `}
                                 >
                                     <Trigger command={ToggleTodo({ id: todo.id })}>
                                         <div
-                                            className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 cursor-pointer flex-shrink-0 ${todo.completed
+                                            className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-75 cursor-pointer flex-shrink-0 ${todo.completed
                                                 ? "bg-indigo-600 border-indigo-600 shadow-sm shadow-indigo-200"
                                                 : "border-slate-300 bg-white hover:border-indigo-400"
                                                 }`}
@@ -138,7 +138,7 @@ export function ListView() {
                                             />
                                         ) : (
                                             <span
-                                                className={`block truncate text-base transition-all duration-300 pointer-events-none ${todo.completed
+                                                className={`block truncate text-base transition-all duration-75 pointer-events-none ${todo.completed
                                                     ? "text-slate-400 line-through decoration-slate-300"
                                                     : "text-slate-700 font-medium"
                                                     }`}
@@ -149,7 +149,7 @@ export function ListView() {
                                     </div>
 
                                     {/* Action Hints */}
-                                    <div className="opacity-0 group-data-[focused=true]:opacity-100 group-hover:opacity-100 flex items-center gap-3 transition-opacity duration-200">
+                                    <div className="opacity-0 group-data-[focused=true]:opacity-100 group-hover:opacity-100 flex items-center gap-3 transition-opacity duration-75">
                                         {!isEditing && (
                                             <>
                                                 <Trigger

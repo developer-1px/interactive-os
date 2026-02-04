@@ -7,6 +7,7 @@ import type { PersistenceAdapter } from "@os/core/persistence/adapter";
 import { LocalStorageAdapter } from "@os/core/persistence/adapter";
 
 import { logger } from "@os/debug/logger";
+import { useCommandEventBus } from "@os/core/command/commandEventBus";
 
 export interface CommandGroup<S, P = any, K extends string = string> {
   id: string;
@@ -218,6 +219,11 @@ export function createCommandStore<
         const action = config?.onDispatch
           ? config.onDispatch(startAction)
           : startAction;
+
+        // Emit to component-level listeners FIRST
+        // This allows components like Field to react to commands for local state
+        // even if no store-level handler is registered
+        useCommandEventBus.getState().emit(action as any);
 
         const cmd = registry.get(action.type);
         if (!cmd) {
