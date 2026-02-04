@@ -1,8 +1,8 @@
-import { Zone } from "@os/ui/Zone";
-import { Item } from "@os/ui/Item";
-import { Field } from "@os/ui/Field";
-import { Trigger } from "@os/ui/Trigger";
-import { useEngine } from "@os/core/command/CommandContext";
+import { Zone } from "@os/primitives/Zone.tsx";
+import { Item } from "@os/primitives/Item.tsx";
+import { Field } from "@os/primitives/Field.tsx";
+import { Trigger } from "@os/primitives/Trigger.tsx";
+import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 import {
     AddTodo,
@@ -27,7 +27,7 @@ import {
 
 export function ListView() {
     const { state } = useEngine<AppState>();
-    if (!state) return null;
+    if (!state || !state.data) return null;
     const activeCategory = state.data.categories[state.ui.selectedCategoryId];
 
     const visibleTodoIds = state.data.todoOrder.filter(

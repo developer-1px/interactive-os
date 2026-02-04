@@ -1,4 +1,4 @@
-import type { ContextState } from "@os/core/context";
+import type { ContextState } from "@os/features/logic/LogicNode";
 
 // Ideally types for AppState would be imported here, but we use any for decoupling or import from model
 // import type { AppState } from "../model/types"; 

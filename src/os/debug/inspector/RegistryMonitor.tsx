@@ -1,9 +1,9 @@
 import { memo, useMemo } from "react";
-import { evalContext } from "@os/core/context";
+import { evalContext } from "@os/features/AntigravityOS";
 import { CommandRow } from "@os/debug/inspector/CommandRow";
 import type { ProcessedCommand } from "@os/debug/inspector/CommandRow";
-import type { CommandRegistry } from "@os/core/command/store";
-import { ZoneRegistry } from "@os/core/command/zoneRegistry";
+import type { CommandRegistry } from "@os/features/command/model/commandStore";
+import { ZoneRegistry } from "@os/features/jurisdiction/model/ZoneRegistry";
 
 // Zero-Base Jurisdiction Detection
 // Pure Logic: If ANY binding relies on a Zone Scope -> It is a Zone Command.
@@ -72,7 +72,7 @@ export const RegistryMonitor = memo(
             });
 
             // 2. Ingest Static Definitions from ZoneRegistry (defineCommand)
-            zoneRegistryMap.forEach((factories: import("@os/core/command/definition").CommandFactory<any, any>[], zoneId: string) => {
+            zoneRegistryMap.forEach((factories: import("@os/entities/CommandFactory").CommandFactory<any, any>[], zoneId: string) => {
                 factories.forEach(factory => {
                     // Check if already processed
                     const existing = processed.find(p => p.id === factory.id);

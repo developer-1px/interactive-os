@@ -3,7 +3,7 @@ import {
     GitGraph,
     TextCursorInput,
 } from "lucide-react";
-import { Kbd } from "@os/ui";
+import { Kbd } from "@os/features/AntigravityOS";
 
 export interface ProcessedCommand {
     id: string;

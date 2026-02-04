@@ -1,4 +1,4 @@
-import { useEngine } from "@os/core/command/CommandContext";
+import { useEngine } from "@os/features/command/ui/CommandContext";
 import { BoardView } from "@apps/todo/widgets/BoardView";
 import { ListView } from "@apps/todo/widgets/ListView";
 import type { AppState } from "@apps/todo/model/types";
@@ -9,7 +9,7 @@ import type { AppState } from "@apps/todo/model/types";
  */
 export function TodoPanel() {
     const { state } = useEngine<AppState>();
-    if (!state) return null;
+    if (!state || !state.ui) return null;
     const isBoard = state.ui.viewMode === "board";
 
     return isBoard ? <BoardView /> : <ListView />;

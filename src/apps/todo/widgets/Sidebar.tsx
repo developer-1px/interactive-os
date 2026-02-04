@@ -1,9 +1,9 @@
-import { Zone } from "@os/ui/Zone";
-import { Item } from "@os/ui/Item";
-import { Trigger } from "@os/ui/Trigger";
+import { Zone } from "@os/primitives/Zone.tsx";
+import { Item } from "@os/primitives/Item.tsx";
+import { Trigger } from "@os/primitives/Trigger.tsx";
 import { Kbd } from "@os/debug/components/Kbd";
-import { useFocusStore } from "@os/core/focus/focusStore";
-import { useEngine } from "@os/core/command/CommandContext";
+import { useFocusStore } from "@os/features/focus/model/focusStore";
+import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 import { SelectCategory } from "@apps/todo/features/commands/categories";
 import {
@@ -21,7 +21,7 @@ export function Sidebar() {
   const { state, dispatch } = useEngine<AppState>();
   const focusedItemId = useFocusStore((s) => s.focusedItemId);
 
-  if (!state) return null;
+  if (!state || !state.data) return null;
 
   const getIcon = (id: string) => {
     switch (id) {

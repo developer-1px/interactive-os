@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { FocusTarget } from "@apps/todo/model/types";
+import type { FocusTarget } from "@os/entities/FocusTarget";
 
 export const StateMonitor = memo(
     ({

@@ -4,7 +4,7 @@ import {
   Route,
   Outlet,
 } from "react-router-dom";
-import { ContextProvider } from "@os/core/context";
+import { ContextProvider } from "@os/features/AntigravityOS";
 
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import TodoPage from "./pages/TodoPage";
@@ -13,16 +13,14 @@ import FocusShowcasePage from "./pages/FocusShowcasePage";
 import BuilderPage from "./pages/BuilderPage";
 import DocsPage from "./pages/DocsPage";
 
-import { OS } from "@os/ui";
+import { OS } from "@os/features/AntigravityOS";
 import { TodoApp } from "@apps/todo/app";
 import { CommandInspector } from "@os/debug/Inspector";
-import { useEngine } from "@os/core/command/CommandContext";
-import { useFocusBridge } from "@os/core/focus/focusBridge";
+import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 
 // --- Internal Layout running inside OS.App ---
 function AppContent() {
-  useFocusBridge(); // Bidirectional focus sync
   const { state } = useEngine<AppState>();
   const isInspectorOpen = state?.ui?.isInspectorOpen;
 

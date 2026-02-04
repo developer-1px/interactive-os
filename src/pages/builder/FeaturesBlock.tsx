@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { OS } from "@os/ui";
-import { Field } from "@os/ui/Field";
+import { OS } from "@os/features/AntigravityOS";
+import { Field } from "@os/primitives/Field.tsx";
 import { Zap, Lock, Wand2, BarChart3 } from "lucide-react";
 
 /**

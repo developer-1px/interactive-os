@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { useFocusStore } from "@os/core/focus/focusStore";
-import { useContextService } from "@os/core/context";
+import { useFocusStore } from "@os/features/focus/model/focusStore";
+import { useContextService } from "@os/features/AntigravityOS";
 
 export const OSStateViewer = memo(() => {
     const focusState = useFocusStore();

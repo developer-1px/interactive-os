@@ -1,4 +1,4 @@
-import type { OSCommand } from "@os/core/command/osCommands";
+import type { OSCommand } from "@os/features/command/definitions/commandsShell";
 
 export * from "@apps/todo/model/appState";
 

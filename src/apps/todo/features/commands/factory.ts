@@ -1,5 +1,5 @@
 import type { AppState } from "@apps/todo/model/appState";
-import { createCommandFactory } from "@os/core/command/definition";
+import { createCommandFactory } from "@os/features/command/lib/createCommandFactory";
 
 // Generic Factory (Global)
 export const defineGlobalCommand = createCommandFactory<AppState>();

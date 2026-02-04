@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Zone } from "@os/ui/Zone";
-import { Item } from "@os/ui/Item";
-import { Field } from "@os/ui/Field";
+import { Zone } from "@os/primitives/Zone.tsx";
+import { Item } from "@os/primitives/Item.tsx";
+import { Field } from "@os/primitives/Field.tsx";
 import { Sliders, LayoutGrid, List, MessageSquare, Maximize, Edit3 } from "lucide-react";
-import type { FocusDirection, FocusEdge, FocusTab, FocusEntry, FocusTarget } from "@os/core/focus/behavior/behaviorResolver";
+import type { FocusDirection } from "@os/entities/FocusDirection";
+import type { FocusEdge } from "@os/entities/FocusEdge";
+import type { FocusTab } from "@os/entities/FocusTab";
+import type { FocusTarget } from "@os/entities/FocusTarget";
+import type { FocusEntry } from "@os/entities/FocusEntry";
 
 // --- Types ---
 type AxisConfig = {
@@ -646,15 +650,13 @@ function ScenarioCard({ title, description, icon, children, tags }: {
  * Demonstrates Enter-to-Edit and Escape-to-Cancel patterns.
  */
 function DeferredFieldDemo() {
-    const [values, setValues] = useState({
+    const [values] = useState({
         title: "Click to focus, Enter to edit",
         subtitle: "Type here, Escape to cancel",
         description: "Or blur to commit changes"
     });
 
-    const handleCommit = (key: string) => (text: string) => {
-        setValues(prev => ({ ...prev, [key]: text }));
-    };
+    // const handleCommit = ... (Removed unused)
 
     return (
         <Zone

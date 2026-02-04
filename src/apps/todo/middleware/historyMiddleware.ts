@@ -1,6 +1,6 @@
 import { produce } from "immer";
 import type { AppState, TodoCommand, HistoryEntry } from "@apps/todo/model/types";
-import { OS_COMMANDS } from "@os/core/command/osCommands";
+import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 
 const HISTORY_LIMIT = 50;
 

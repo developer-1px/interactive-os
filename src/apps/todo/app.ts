@@ -1,4 +1,4 @@
-import { defineApplication } from "@os/core/application/definition";
+import { defineApplication } from "@os/features/application/definition";
 import { INITIAL_STATE } from "@apps/todo/features/todo_details/persistence";
 
 import { TODO_KEYMAP } from "@apps/todo/features/todoKeys";

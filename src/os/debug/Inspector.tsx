@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useCommandEngine } from "@os/core/command/CommandContext";
+import { useCommandEngine } from "@os/features/command/ui/CommandContext";
 import { KeyMonitor } from "@os/debug/inspector/KeyMonitor";
 import { StateMonitor } from "@os/debug/inspector/StateMonitor";
 import { RegistryMonitor } from "@os/debug/inspector/RegistryMonitor";

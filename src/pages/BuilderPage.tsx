@@ -1,4 +1,4 @@
-import { OS } from "@os/ui";
+import { OS } from "@os/features/AntigravityOS";
 import {
     HeroBlock,
     FeaturesBlock,

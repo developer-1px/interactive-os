@@ -1,10 +1,10 @@
-import type { KeymapConfig } from "@os/core/input/keybinding";
-import { createLogicExpect, Rule } from "@os/core/logic/builder";
+import type { KeymapConfig } from "@os/features/input/lib/keybindingMatcher";
+import { createLogicExpect, Rule } from "@os/features/logic/lib/logicBuilder";
 import type { TodoContext } from "@apps/todo/logic/schema";
-import { OS } from "@os/core/context";
+import { OS } from "@os/features/AntigravityOS";
 
 // Command Imports (Direct References)
-import { OS_COMMANDS } from "@os/core/command/osCommands";
+import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { ToggleView } from "@apps/todo/features/commands/board";
 import {
   MoveCategoryUp,

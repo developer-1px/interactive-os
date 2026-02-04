@@ -41,12 +41,3 @@ export const SelectCategory = defineSidebarCommand({
     },
 });
 
-export const JumpToList = defineSidebarCommand({
-    id: "JUMP_TO_LIST",
-
-    run: (state) => ({
-        ...state,
-        effects: [...state.effects, { type: "FOCUS_ID", id: "DRAFT" }],
-    }),
-});
-

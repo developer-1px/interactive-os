@@ -1,6 +1,6 @@
 import { produce } from "immer";
 import { defineListCommand } from "@apps/todo/features/commands/factory";
-import { OS } from "@os/core/context";
+import { OS } from "@os/features/AntigravityOS";
 
 export const AddTodo = defineListCommand({
     id: "ADD_TODO",
@@ -25,30 +25,6 @@ export const AddTodo = defineListCommand({
             // Reset UI
             draft.ui.draft = "";
             draft.ui.editDraft = "";
-        }),
-});
-
-export const ImportTodos = defineListCommand({
-    id: "IMPORT_TODOS",
-    run: (state, payload: { items: any[] }) =>
-        produce(state, (draft) => {
-            if (
-                !payload.items ||
-                !Array.isArray(payload.items) ||
-                payload.items.length === 0
-            )
-                return;
-
-            payload.items.forEach((item, index) => {
-                const id = Date.now() + index;
-                draft.data.todos[id] = {
-                    id,
-                    text: typeof item === "string" ? item : item.text || "Untitled",
-                    completed: typeof item === "object" ? item.completed || false : false,
-                    categoryId: draft.ui.selectedCategoryId,
-                };
-                draft.data.todoOrder.push(id);
-            });
         }),
 });
 
