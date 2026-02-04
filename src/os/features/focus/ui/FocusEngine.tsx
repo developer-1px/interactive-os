@@ -5,7 +5,6 @@ import { executeNavigation } from "@os/features/focus/lib/focusOrchestrator";
 import { executeTabNavigation, type TabNavigationContext } from "@os/features/focus/axes/handlerTab";
 import { OS_COMMANDS, type OSNavigatePayload } from "@os/features/command/definitions/commandsShell";
 import { useFocusBridge } from "@os/features/focus/lib/focusBridge";
-import { logger } from "@os/app/debug/logger";
 
 /**
  * FocusEngine
@@ -47,8 +46,6 @@ export function FocusEngine() {
                 if (result.zoneId && result.zoneId !== activeZoneId) {
                     setActiveZone(result.zoneId);
                 }
-            } else if (result.shouldTrap) {
-                logger.debug("SYSTEM", "Navigation Trapped (Boundary reached)");
             }
         }
     };
