@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useEngine } from "@os/features/command/ui/CommandContext";
-import { useFocusStore } from "@os/features/focus/model/useFocusStore";
+import { useFocusStore } from "@os/features/focus/model/focusStore";
 import type { AppState } from "@apps/todo/model/types";
 
 /**

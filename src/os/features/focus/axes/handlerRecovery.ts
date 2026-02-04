@@ -154,7 +154,7 @@ function applyFallback(ctx: RecoveryContext): RecoveryResult {
  * Execute focus recovery for a removed item
  * This is the main entry point for the recovery system
  */
-export function executeRecovery(
+export function handlerRecovery(
     removedItemId: string,
     zoneId: string,
     items: string[],

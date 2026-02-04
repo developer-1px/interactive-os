@@ -33,7 +33,7 @@ function sortByVisualOrder(zones: ZoneMetadata[]): ZoneMetadata[] {
  * Find sibling zone in the given direction
  * Uses DOM position for spatial accuracy, with sequential fallback
  */
-export function findSiblingZone(ctx: SeamlessContext): ZoneMetadata | null {
+export function handlerSeamless(ctx: SeamlessContext): ZoneMetadata | null {
     const { currentZoneId, direction, zoneRegistry } = ctx;
     const currentZone = zoneRegistry[currentZoneId];
     if (!currentZone?.parentId) return null;

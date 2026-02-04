@@ -3,7 +3,7 @@ import type { AppDefinition } from "@os/features/application/defineApplication";
 import { createCommandStore, CommandRegistry } from "@os/features/command/model/createCommandStore";
 import { ALL_OS_COMMANDS } from "@os/features/command/definitions/osCommands";
 import { CommandContext, setGlobalEngine } from "@os/features/command/ui/CommandContext";
-import { useFocusStore } from "@os/features/focus/model/useFocusStore";
+import { useFocusStore } from "@os/features/focus/model/focusStore";
 import { InputEngine } from "@os/features/input/ui/InputEngine";
 import { FocusEngine } from "@os/features/focus/ui/FocusEngine";
 import { Zone } from "@os/app/export/primitives/Zone";

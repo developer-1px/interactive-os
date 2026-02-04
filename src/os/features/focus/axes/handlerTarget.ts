@@ -5,7 +5,7 @@ export type TargetMode = "real" | "virtual";
 /**
  * Applies focus to target based on mode
  */
-export function applyFocus(
+export function handlerTarget(
     targetId: string,
     mode: TargetMode,
     options?: { preventScroll?: boolean }

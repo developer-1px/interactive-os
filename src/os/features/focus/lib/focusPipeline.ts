@@ -11,7 +11,7 @@ export type AxisHandler = (ctx: NavContext) => NavContext | null;
  * Runs the navigation pipeline through all handlers.
  * Each handler can modify context or return null to halt.
  */
-export function runPipeline(
+export function focusPipeline(
     handlers: AxisHandler[],
     initialContext: NavContext
 ): NavResult | null {

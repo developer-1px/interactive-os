@@ -1,5 +1,5 @@
 import { OS } from "@os/features/AntigravityOS";
-import { useFocusStore } from "@os/features/focus/model/useFocusStore";
+import { useFocusStore } from "@os/features/focus/model/focusStore";
 import { logger } from "@os/app/debug/logger";
 
 /**

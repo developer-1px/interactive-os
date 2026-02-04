@@ -1,6 +1,6 @@
 // Roving Navigation Engine (1D: v/h)
 // Index-based navigation for lists with JIT spatial sorting
-import { wrapIndex } from "@os/features/focus/axes/wrapIndex";
+import { handlerEdge } from "@os/features/focus/axes/handlerEdge";
 import type { FocusBehavior } from "@os/entities/FocusBehavior";
 
 export type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
@@ -18,7 +18,7 @@ export interface NavigationContext {
  * Roving Navigation Engine
  * Index-based navigation for lists.
  */
-export function findNextRovingTarget(ctx: NavigationContext, behavior: FocusBehavior): string | null {
+export function navigationRoving(ctx: NavigationContext, behavior: FocusBehavior): string | null {
     const { currentId, items, direction } = ctx;
     const { edge } = behavior;
 
@@ -74,7 +74,7 @@ export function findNextRovingTarget(ctx: NavigationContext, behavior: FocusBeha
     }
 
     // Use Edge Handler for boundary wrapping
-    const wrappedIndex = wrapIndex(nextIndex, sortedItems.length, edge);
+    const wrappedIndex = handlerEdge(nextIndex, sortedItems.length, edge);
 
     // If index didn't change after wrapping (stop behavior at boundary), return current
     if (wrappedIndex === nextIndex && (nextIndex < 0 || nextIndex >= sortedItems.length)) {

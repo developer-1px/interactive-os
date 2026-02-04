@@ -10,7 +10,7 @@ export type EdgeBehavior = "loop" | "stop";
  * - wrapped index for "loop"
  * - boundary index for "stop"  
  */
-export function wrapIndex(
+export function handlerEdge(
     currentIndex: number,
     itemCount: number,
     edge: EdgeBehavior

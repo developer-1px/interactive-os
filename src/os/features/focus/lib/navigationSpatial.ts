@@ -16,7 +16,7 @@ export interface NavigationContext {
  * Spatial Navigation Engine
  * Physics-based navigation using DOM Rects.
  */
-export function findNextSpatialTarget(ctx: NavigationContext): string | null {
+export function navigationSpatial(ctx: NavigationContext): string | null {
     const { currentId, items, direction, stickyX, stickyY, itemRects } = ctx;
     if (!currentId) return items[0] || null;
 

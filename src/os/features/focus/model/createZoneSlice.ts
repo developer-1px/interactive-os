@@ -1,7 +1,7 @@
 import type { StateCreator } from "zustand";
 import type { ZoneSlice } from "@os/features/focus/model/focusTypes";
-import { computePath } from "@os/features/focus/lib/computePath";
-import { executeRecovery } from "@os/features/focus/axes/executeRecovery";
+import { computePath } from "@os/features/focus/lib/pathUtils";
+import { handlerRecovery } from "@os/features/focus/axes/handlerRecovery";
 import { DEFAULT_RECOVERY_POLICY } from "@os/features/focus/model/recoveryTypes";
 import type { FocusState } from "@os/features/focus/model/focusTypes";
 import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
@@ -98,7 +98,7 @@ export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set
         let recoveryTargetId: string | null = null;
         if (isRemovingFocused && zone.items.length > 1) {
             const direction = zone.behavior?.direction ?? "v";
-            const result = executeRecovery(
+            const result = handlerRecovery(
                 itemId,
                 zoneId,
                 zone.items,

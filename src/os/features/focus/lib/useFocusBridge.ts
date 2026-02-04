@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useFocusStore } from "@os/features/focus/model/useFocusStore";
-import { applyFocus } from "@os/features/focus/axes/applyFocus";
+import { useFocusStore } from "@os/features/focus/model/focusStore";
+import { handlerTarget } from "@os/features/focus/axes/handlerTarget";
 
 /**
  * useFocusBridge
@@ -12,7 +12,7 @@ import { applyFocus } from "@os/features/focus/axes/applyFocus";
  *   - Updates focusedItemId when browser focus changes to an Item
  * 
  * Virtual Focus → Browser Focus:
- *   - useEffect watches focusedItemId and calls applyFocus (via Target Axis Handler)
+ *   - useEffect watches focusedItemId and calls handlerTarget (via Target Axis Handler)
  * 
  * Usage: Call once at the root of your app (e.g., App.tsx or CommandProvider)
  */
@@ -80,7 +80,7 @@ export function useFocusBridge() {
 
         // Apply focus if not already focused
         if (document.activeElement !== el) {
-            applyFocus(focusedItemId, targetMode, { preventScroll: true });
+            handlerTarget(focusedItemId, targetMode, { preventScroll: true });
         }
 
         // Scroll into view if needed (only when out of viewport)

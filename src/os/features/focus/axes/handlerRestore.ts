@@ -1,7 +1,7 @@
 // Restore Axis: Focus restoration and spatial memory
 // Manages sticky anchors and focus history restoration
 
-import type { AxisHandler } from "@os/features/focus/lib/runPipeline";
+import type { AxisHandler } from "@os/features/focus/lib/focusPipeline";
 
 /**
  * Prepares sticky anchor for spatial navigation
@@ -48,7 +48,7 @@ function prepareStickyAnchor(
  * Restore Axis Handler for Pipeline
  * Prepares sticky anchor at the start of navigation
  */
-export const restoreAxis: AxisHandler = (ctx) => {
+export const handlerRestore: AxisHandler = (ctx) => {
     const anchor = prepareStickyAnchor(
         ctx.direction,
         ctx.focusedItemId,

@@ -1,8 +1,8 @@
 import { useCommandListener } from "@os/features/command/hooks/useCommandListener";
-import { resolveBehavior } from "@os/features/focus/lib/resolveBehavior";
-import { useFocusStore } from "@os/features/focus/model/useFocusStore";
+import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver";
+import { useFocusStore } from "@os/features/focus/model/focusStore";
 import { executeNavigation } from "@os/features/focus/lib/executeNavigation.ts";
-import { executeTabNavigation, type TabNavigationContext } from "@os/features/focus/axes/executeTabNavigation";
+import { handlerTab, type TabNavigationContext } from "@os/features/focus/axes/handlerTab";
 import { OS_COMMANDS, type OSNavigatePayload } from "@os/features/command/definitions/commandsShell";
 import { useFocusBridge } from "@os/features/focus/lib/useFocusBridge";
 
@@ -66,7 +66,7 @@ export function FocusEngine() {
             behavior: behavior
         };
 
-        const targetId = executeTabNavigation(ctx);
+        const targetId = handlerTab(ctx);
 
         if (targetId) {
             setFocus(targetId);

@@ -19,7 +19,7 @@ type Registry = Record<string, ZoneMetadata>;
 // Main Entry
 // ─────────────────────────────────────────────────────────────
 
-export function executeTabNavigation(ctx: TabNavigationContext): string | null {
+export function handlerTab(ctx: TabNavigationContext): string | null {
     switch (ctx.behavior.tab) {
         case "loop": return executeLoopNavigation(ctx);
         case "escape": return executeEscapeNavigation(ctx);

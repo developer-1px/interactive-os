@@ -9,7 +9,7 @@ import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusContext } from "@os/features/command/ui/CommandContext.tsx";
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
 import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts"; // [NEW] Registry
-import { useFocusStore } from "@os/features/focus/model/useFocusStore.ts";
+import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
 
 export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttributes<HTMLButtonElement> {
   id?: string;

@@ -2,13 +2,13 @@
 // Unified entry point for all direction navigation
 
 import { logger } from "@os/app/debug/logger";
-import type { AxisHandler } from "@os/features/focus/lib/runPipeline";
-import { resolveBehavior } from "@os/features/focus/lib/resolveBehavior";
-import { collectItemRects } from "@os/features/focus/lib/collectItemRects";
-import { resolvePivot, getBubblePath } from "@os/features/focus/lib/getBubblePath";
-import { findNextRovingTarget, type NavigationContext } from "@os/features/focus/lib/findNextRovingTarget";
-import { findNextSpatialTarget } from "@os/features/focus/lib/findNextSpatialTarget";
-import { findSiblingZone, getSeamlessEntryItem } from "@os/features/focus/axes/findSiblingZone";
+import type { AxisHandler } from "@os/features/focus/lib/focusPipeline";
+import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver";
+import { collectItemRects } from "@os/features/focus/lib/domUtils";
+import { resolvePivot, getBubblePath } from "@os/features/focus/lib/pivotUtils";
+import { navigationRoving, type NavigationContext } from "@os/features/focus/lib/navigationRoving";
+import { navigationSpatial } from "@os/features/focus/lib/navigationSpatial";
+import { handlerSeamless, getSeamlessEntryItem } from "@os/features/focus/axes/handlerSeamless";
 import type { FocusBehavior } from "@os/entities/FocusBehavior";
 
 /**
@@ -22,11 +22,11 @@ function findNextTarget(behavior: FocusBehavior, ctx: NavigationContext): string
         switch (behavior.direction) {
             case "v":
             case "h":
-                return findNextRovingTarget(ctx, behavior);
+                return navigationRoving(ctx, behavior);
             case "grid":
-                return findNextSpatialTarget(ctx);
+                return navigationSpatial(ctx);
             default:
-                return findNextSpatialTarget(ctx);
+                return navigationSpatial(ctx);
         }
     })();
 
@@ -43,7 +43,7 @@ function findNextTarget(behavior: FocusBehavior, ctx: NavigationContext): string
  * Direction Axis Handler for Pipeline
  * Traverses zones and finds navigation target
  */
-export const directionAxis: AxisHandler = (ctx) => {
+export const handlerDirection: AxisHandler = (ctx) => {
     const { direction, focusPath, zoneRegistry, focusedItemId, anchor } = ctx;
 
     const bubblePath = getBubblePath(focusPath);
@@ -75,7 +75,7 @@ export const directionAxis: AxisHandler = (ctx) => {
 
         // Seamless: allow cross-direction navigation to sibling zones
         if (behavior.seamless && !isMatchingDirection && behavior.direction !== "none") {
-            const siblingZone = findSiblingZone({
+            const siblingZone = handlerSeamless({
                 currentZoneId: zoneId,
                 direction,
                 zoneRegistry
@@ -125,7 +125,7 @@ export const directionAxis: AxisHandler = (ctx) => {
 
         // Seamless: attempt cross-zone navigation to sibling zone (same-direction edge case)
         if (behavior.seamless && !targetId) {
-            const siblingZone = findSiblingZone({
+            const siblingZone = handlerSeamless({
                 currentZoneId: zoneId,
                 direction,
                 zoneRegistry
