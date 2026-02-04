@@ -86,16 +86,25 @@ export const useFieldFocus = ({
                 innerRef.current.focus();
             }
 
-            // Restore Cursor specifically on Focus Gain
-            if (cursorRef.current !== null) {
+            // Restore Cursor on Focus Gain
+            // Use double RAF to ensure DOM content is synced first
+            // If no cursor position stored (null), place cursor at end of text
+            requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    if (innerRef.current && cursorRef.current !== null) {
+                    if (innerRef.current) {
                         try {
-                            setCaretPosition(innerRef.current, cursorRef.current);
+                            if (cursorRef.current !== null) {
+                                // Restore to saved position
+                                setCaretPosition(innerRef.current, cursorRef.current);
+                            } else {
+                                // No saved position - move to end
+                                const textLength = innerRef.current.innerText.length;
+                                setCaretPosition(innerRef.current, textLength);
+                            }
                         } catch (e) { }
                     }
                 });
-            }
+            });
         } else if (
             !isActive &&
             blurOnInactive &&

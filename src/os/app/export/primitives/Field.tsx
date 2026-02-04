@@ -223,7 +223,13 @@ export const Field = <T extends BaseCommand>({
       cursorRef.current = getCaretPosition(innerRef.current);
     }
 
-    onCommit?.(currentText);
+    // Callback-first: if onCommit is provided, use it as primary commit mechanism
+    if (onCommit) {
+      onCommit(currentText);
+      return; // Skip command dispatch when callback is provided
+    }
+
+    // Fallback to command dispatch
     const action = getCommitAction(currentText, commitCommand, name, updateType);
     if (action) {
       dispatch(action);
@@ -235,7 +241,13 @@ export const Field = <T extends BaseCommand>({
     setLocalValue(text);
     updateCursorContext();
 
-    onSync?.(text);
+    // Callback-first: if onSync is provided, use it as primary sync mechanism
+    if (onSync) {
+      onSync(text);
+      return; // Skip command dispatch when callback is provided
+    }
+
+    // Fallback to command dispatch
     const action = getSyncAction(text, syncCommand, name, updateType);
     if (action) {
       dispatch(action);
@@ -243,9 +255,10 @@ export const Field = <T extends BaseCommand>({
   };
 
   const handleFocus = () => {
-    // Guard circular focus
-    if (name && currentFocusId !== name) {
-      dispatch({ type: "SET_FOCUS", payload: { id: name } });
+    // Guard circular focus - use OS focus store directly
+    const setFocus = useFocusStore.getState().setFocus;
+    if (name && osFocusedItemId !== name) {
+      setFocus(name);
     }
 
     setFieldFocused(true);
@@ -342,14 +355,16 @@ export const Field = <T extends BaseCommand>({
     customClassName
   });
 
-  // Deferred mode: tabIndex=0 when focused (even if not editing)
-  // This allows the field to receive keyboard events for Enter-to-edit
+  // Deferred mode: tabIndex controlled by OS focus (roving tabindex pattern)
+  // Immediate mode: tabIndex=0 always so browser Tab works natively (for tab="flow" zones)
   const computedTabIndex = mode === "deferred"
     ? (isFocused ? 0 : -1)
-    : (isActive ? 0 : -1);
+    : 0;
 
   const baseProps = {
     ref: innerRef,
+    id: name, // Ensure the element has an id for DOMInterface
+    "data-item-id": name, // Essential for FocusBridge to detect native focus
     contentEditable: isContentEditable,
     suppressContentEditableWarning: true,
     role: "textbox",

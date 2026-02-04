@@ -4,6 +4,7 @@
 // - flow: Linear item traversal across all zones
 import type { FocusBehavior } from "@os/entities/FocusBehavior";
 import type { ZoneMetadata } from "@os/entities/ZoneMetadata";
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
 
 export interface TabNavigationContext {
     focusedItemId: string | null;
@@ -39,33 +40,108 @@ function executeLoopNavigation(ctx: TabNavigationContext): string | null {
 }
 
 // ─────────────────────────────────────────────────────────────
-// ESCAPE: Jump to next zone in DOM order
+// ESCAPE: Exit the current zone and land on the next/prev item in the global sequence
+// This fixes the issue where escaping a nested zone (like Toolbar) would skip sibling items (like Editor Field)
+// because it was previously looking for the "Next Zone" instead of "Next Item".
 // ─────────────────────────────────────────────────────────────
 
 function executeEscapeNavigation(ctx: TabNavigationContext): string | null {
-    const zones = sortByDOM(Object.values(ctx.registry), z => `[data-zone-id="${z.id}"]`);
-    const currentIdx = zones.findIndex(z => z.id === ctx.zoneId);
-    if (currentIdx === -1) return null;
+    // 1. Find the global root to build the complete document sequence
+    const rootId = findRoot(ctx.zoneId, ctx.registry);
+    if (!rootId) return null;
 
-    const dir = ctx.isShiftTab ? -1 : 1;
-    for (let i = 1; i < zones.length; i++) {
-        const nextZone = zones[(currentIdx + i * dir + zones.length) % zones.length];
-        const entry = resolveEntry(nextZone, ctx.isShiftTab, ctx.registry);
-        if (entry) return entry;
+    // 2. Build the full sequence of all addressable items
+    const globalSequence = buildSequence(rootId, ctx.registry);
+    if (globalSequence.length === 0) return null;
+
+    // 3. Identify the boundary of the current zone
+    // We need to know "where does this zone end?" to know where to jump to.
+    const zoneItems = buildSequence(ctx.zoneId, ctx.registry);
+    if (zoneItems.length === 0) {
+        // Edge case: empty zone. Fallback to finding zone in DOM and getting next element?
+        // Or finding the zone's position in global registry.
+        // For now, if empty, we can't really "escape" from an item context.
+        return null;
+    }
+
+    // 4. Determine the Exit Point
+    // Forward: Escape from the Last Item of the zone
+    // Backward: Escape from the First Item of the zone
+    const exitPointItem = ctx.isShiftTab ? zoneItems[0] : zoneItems[zoneItems.length - 1];
+
+    // 5. Find that exit point in the global sequence
+    const exitIndex = globalSequence.indexOf(exitPointItem);
+    if (exitIndex === -1) return null;
+
+    // 6. Navigate to the immediate next/prev item in the global flow
+    // This allows us to land on a sibling Field, Button, or the start of the next Zone
+    const targetIndex = exitIndex + (ctx.isShiftTab ? -1 : 1);
+
+    if (targetIndex >= 0 && targetIndex < globalSequence.length) {
+        const targetItemId = globalSequence[targetIndex];
+
+        // [NEW] Check if target belongs to a different zone with "restore" entry
+        // If so, redirect to that zone's lastFocusedId
+        const targetZone = findZoneForItem(targetItemId, ctx.registry);
+        if (targetZone && targetZone.id !== ctx.zoneId) {
+            if (targetZone.behavior?.entry === "restore" && targetZone.lastFocusedId) {
+                // Verify the lastFocusedId still exists in the zone's items
+                const zoneSequence = buildSequence(targetZone.id, ctx.registry);
+                if (zoneSequence.includes(targetZone.lastFocusedId)) {
+                    return targetZone.lastFocusedId;
+                }
+            }
+        }
+
+        return targetItemId;
+    }
+
+    return null; // End of document
+}
+
+/**
+ * Find which zone contains a specific item
+ */
+function findZoneForItem(itemId: string, reg: Registry): ZoneMetadata | null {
+    for (const zone of Object.values(reg)) {
+        if (zone.items?.includes(itemId)) {
+            return zone;
+        }
     }
     return null;
 }
 
+
 // ─────────────────────────────────────────────────────────────
-// FLOW: Linear traversal across entire tree
+// FLOW: Linear DFS traversal across ALL zones (OS controls)
+// No zone boundary - just next/prev item in global DFS order
 // ─────────────────────────────────────────────────────────────
 
 function executeFlowNavigation(ctx: TabNavigationContext): string | null {
+    // Find root zone and build global DFS sequence
     const rootId = findRoot(ctx.zoneId, ctx.registry);
     if (!rootId) return null;
-    const sequence = buildSequence(rootId, ctx.registry);
-    return navigateSequence(sequence, ctx.focusedItemId, ctx.isShiftTab, false, ctx.behavior.tabSkip);
+
+    const globalSequence = buildSequence(rootId, ctx.registry);
+    // Flow mode: no wrapping, just linear traversal
+    const targetItemId = navigateSequence(globalSequence, ctx.focusedItemId, ctx.isShiftTab, false, ctx.behavior.tabSkip);
+
+    if (!targetItemId) return null;
+
+    // [NEW] Check if target belongs to a different zone with "restore" entry
+    const targetZone = findZoneForItem(targetItemId, ctx.registry);
+    if (targetZone && targetZone.id !== ctx.zoneId) {
+        if (targetZone.behavior?.entry === "restore" && targetZone.lastFocusedId) {
+            const zoneSequence = buildSequence(targetZone.id, ctx.registry);
+            if (zoneSequence.includes(targetZone.lastFocusedId)) {
+                return targetZone.lastFocusedId;
+            }
+        }
+    }
+
+    return targetItemId;
 }
+
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
@@ -100,24 +176,13 @@ function buildSequence(zoneId: string, reg: Registry): string[] {
     const items = zone.items ? [...zone.items] : [];
     const children = sortByDOM(
         Object.values(reg).filter(z => z.parentId === zoneId),
-        z => `[data-zone-id="${z.id}"]`
+        z => z.id,
+        'zone'
     );
     children.forEach(c => items.push(...buildSequence(c.id, reg)));
 
-    return sortByDOM(items, id => `#${id}`);
-}
-
-function resolveEntry(zone: ZoneMetadata, reverse: boolean, reg: Registry): string | null {
-    const items = zone.items || [];
-    if (items.length > 0) {
-        if (reverse) return items[items.length - 1];
-        if (zone.behavior?.entry === "restore" && zone.lastFocusedId) return zone.lastFocusedId;
-        return items[0];
-    }
-    // Check child zones
-    const children = sortByDOM(Object.values(reg).filter(z => z.parentId === zone.id), z => `[data-zone-id="${z.id}"]`);
-    const target = reverse ? children[children.length - 1] : children[0];
-    return target ? resolveEntry(target, reverse, reg) : null;
+    // Sort items by DOM position using DOMInterface
+    return sortByDOM(items, id => id, 'item');
 }
 
 function findAncestor(id: string, reg: Registry, pred: (z: ZoneMetadata) => boolean): string | null {
@@ -136,11 +201,20 @@ function findRoot(id: string, reg: Registry): string | null {
     return cur.id;
 }
 
-function sortByDOM<T>(items: T[], selector: (item: T) => string): T[] {
+/**
+ * Sorts items based on their DOM position using DOMInterface registry.
+ * Faster and safer than querySelector.
+ */
+function sortByDOM<T>(items: T[], idGetter: (item: T) => string, type: 'zone' | 'item'): T[] {
     return [...items].sort((a, b) => {
-        const elA = document.querySelector(selector(a));
-        const elB = document.querySelector(selector(b));
+        const idA = idGetter(a);
+        const idB = idGetter(b);
+        // Direct lookup via Map - O(1)
+        const elA = type === 'zone' ? DOMInterface.getZone(idA) : DOMInterface.getItem(idA);
+        const elB = type === 'zone' ? DOMInterface.getZone(idB) : DOMInterface.getItem(idB);
+
         if (!elA || !elB) return 0;
+
         const pos = elA.compareDocumentPosition(elB);
         return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : pos & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
     });
@@ -148,6 +222,7 @@ function sortByDOM<T>(items: T[], selector: (item: T) => string): T[] {
 
 function isSkipped(id: string, policy?: "none" | "skip-disabled"): boolean {
     if (policy !== "skip-disabled") return false;
-    const el = document.getElementById(id);
+    // Use DOMInterface here as well for consistency
+    const el = DOMInterface.getItem(id);
     return el?.getAttribute("aria-disabled") === "true" || el?.hasAttribute("disabled") || false;
 }

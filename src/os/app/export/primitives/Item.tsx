@@ -8,6 +8,7 @@ import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts"; // [NEW] 
 interface ItemState {
   isFocused: boolean;
   isSelected: boolean;
+  isAnchor?: boolean; // [NEW] Optional to avoid breaking changes, but logic guarantees boolean
 }
 
 export interface ItemProps extends Omit<React.HTMLAttributes<HTMLElement>, "id" | "children"> {
@@ -41,6 +42,9 @@ export const Item = ({
   // --- 1. Store Projection (Read-Only Beacon) ---
   const focusedItemId = useFocusStore((s) => s.focusedItemId);
   const setFocus = useFocusStore((s) => s.setFocus);
+  // [NEW] Selectors for Anchor Logic
+  const zoneRegistry = useFocusStore((s) => s.zoneRegistry);
+  const focusPath = useFocusStore((s) => s.focusPath);
 
   const isFocused = focusedItemId === stringId;
 
@@ -93,11 +97,29 @@ export const Item = ({
     }
   }, [isFocused, stringId, index, payload, zoneId, setFocus]);
 
+  // [NEW] Anchor Calculation
+  // An item is an "anchor" if it was the last focused item in its zone,
+  // BUT the zone itself is not currently active (focus is elsewhere).
+  // This allows us to style "where focus will return to".
+  const isAnchor = useMemo(() => {
+    if (!zoneId || zoneId === "unknown") return false;
+    if (isFocused) return false; // Active focus overrides anchor
+
+    const zone = zoneRegistry[zoneId];
+    if (!zone || !zone.lastFocusedId) return false;
+
+    const isLastFocused = zone.lastFocusedId === stringId;
+    const isZoneInactive = !focusPath.includes(zoneId);
+
+    return isLastFocused && isZoneInactive;
+  }, [zoneId, stringId, isFocused, zoneRegistry, focusPath]);
+
   // --- 4. Render Props Calculation ---
   const itemState: ItemState = useMemo(() => ({
     isFocused,
-    isSelected: selected
-  }), [isFocused, selected]);
+    isSelected: selected,
+    isAnchor // [NEW]
+  }), [isFocused, selected, isAnchor]);
 
   const baseProps = {
     id: stringId,
@@ -111,7 +133,7 @@ export const Item = ({
     // Styling Hooks
     "data-focused": isFocused ? "true" : undefined,
     "data-selected": selected ? "true" : undefined,
-
+    "data-anchor": isAnchor ? "true" : undefined, // [NEW]
 
     // NO LOCAL HANDLERS (onMouseDown/onClick removed) - BUT ALLOWED IF PASSED EXPLICITLY
     // All interaction is handled by InputEngine via data-item-id, 

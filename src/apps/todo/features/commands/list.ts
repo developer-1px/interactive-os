@@ -160,10 +160,15 @@ export const SyncEditDraft = defineListCommand({
 export const CancelEdit = defineListCommand({
     id: "CANCEL_EDIT",
 
-    run: (state) => ({
-        ...state,
-        ui: { ...state.ui, editingId: null, editDraft: "" },
-    }),
+    run: (state) =>
+        produce(state, (draft) => {
+            if (state.ui.editingId) {
+                // Keep focus on the item after exiting edit mode
+                draft.effects.push({ type: "FOCUS_ID", id: state.ui.editingId as number });
+            }
+            draft.ui.editingId = null;
+            draft.ui.editDraft = "";
+        }),
 });
 
 export const UpdateTodoText = defineListCommand({
@@ -175,6 +180,8 @@ export const UpdateTodoText = defineListCommand({
             if (draft.data.todos[id]) {
                 draft.data.todos[id].text = state.ui.editDraft;
             }
+            // Keep focus on the item after exiting edit mode
+            draft.effects.push({ type: "FOCUS_ID", id });
             draft.ui.editingId = null;
             draft.ui.editDraft = "";
         }),

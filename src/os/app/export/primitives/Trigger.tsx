@@ -34,6 +34,10 @@ export const Trigger = <T extends BaseCommand>({
   const dispatch = customDispatch || contextDispatch;
   const triggerRef = useRef<HTMLButtonElement>(null);
 
+  // --- Focus State Tracking ---
+  const focusedItemId = useFocusStore((s) => s.focusedItemId);
+  const isFocused = id ? focusedItemId === id : false;
+
   // --- Context Awareness (Zone Registration) ---
   const focusContext = useContext(FocusContext);
   const zoneId = focusContext?.zoneId || "unknown";
@@ -66,18 +70,29 @@ export const Trigger = <T extends BaseCommand>({
     dispatch(command);
   };
 
+  // Base props for focus state
+  const baseProps = {
+    ref: triggerRef,
+    id,
+    "data-item-id": id, // Essential for FocusBridge to detect native focus
+    tabIndex: 0, // Always tabbable for browser Tab navigation (tab="flow")
+    onClick: handleClick,
+    className,
+    "data-focused": isFocused ? "true" : undefined,
+    "data-trigger-id": id,
+    ...rest
+  };
+
   if (asChild && isValidElement(children)) {
     const child = children as ReactElement<any>;
     return cloneElement(child, {
-      tabIndex: -1,
+      ...baseProps,
       className: `${child.props.className || ""} ${className || ""}`.trim(),
       onClick: (e: ReactMouseEvent) => {
         child.props.onClick?.(e);
         handleClick(e);
       },
-      ...rest // Pass rest props to child? Maybe risky if clashes. Usually asChild means we only merge events/refs/class.
-      // For now, let's keep it simple: className merging is critical.
     });
   }
-  return <button ref={triggerRef} id={id} tabIndex={-1} onClick={handleClick} className={className} {...rest}>{children}</button>;
+  return <button {...baseProps}>{children}</button>;
 };

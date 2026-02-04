@@ -17,6 +17,19 @@ const LayerColors: Record<LogLayer, string> = {
 };
 
 class AntigravityLogger {
+  private enabled = false;
+
+  constructor() {
+    // Expose for runtime debugging
+    if (typeof window !== "undefined") {
+      (window as any).AntigravityLogger = this;
+    }
+  }
+
+  setEnabled(value: boolean) {
+    this.enabled = value;
+  }
+
   private getBadge(layer: LogLayer) {
     return [
       `%c ${layer} `,
@@ -25,18 +38,19 @@ class AntigravityLogger {
   }
 
   debug(layer: LogLayer, message: string, ...args: any[]) {
-    if (!IS_DEV) return;
+    if (!IS_DEV || !this.enabled) return;
     const [badge, style] = this.getBadge(layer);
     console.log(`${badge} %c${message}`, style, "color: #94a3b8;", ...args);
   }
 
   warn(layer: LogLayer, message: string, ...args: any[]) {
-    if (!IS_DEV) return;
+    if (!IS_DEV || !this.enabled) return;
     const [badge, style] = this.getBadge(layer);
     console.warn(`${badge} %c${message}`, style, "font-weight: bold;", ...args);
   }
 
   error(layer: LogLayer, message: string, ...args: any[]) {
+    // Errors are always logged
     const [badge, style] = this.getBadge(layer);
     console.error(
       `${badge} %c${message}`,
@@ -47,7 +61,7 @@ class AntigravityLogger {
   }
 
   group(layer: LogLayer, label: string) {
-    if (!IS_DEV) return;
+    if (!IS_DEV || !this.enabled) return;
     const [badge, style] = this.getBadge(layer);
     console.groupCollapsed(
       `${badge} %c${label}`,
@@ -57,7 +71,7 @@ class AntigravityLogger {
   }
 
   groupEnd() {
-    if (!IS_DEV) return;
+    if (!IS_DEV || !this.enabled) return;
     console.groupEnd();
   }
 
@@ -65,7 +79,7 @@ class AntigravityLogger {
    * Special trace for Command Execution
    */
   traceCommand(id: string, payload: unknown, prevState: unknown, nextState: unknown) {
-    if (!IS_DEV) return;
+    if (!IS_DEV || !this.enabled) return;
     this.group("ENGINE", `Action: ${id}`);
     console.log("%cPayload:", "color: #f59e0b; font-weight: bold;", payload);
     console.log("%cPrev State:", "color: #94a3b8;", prevState);

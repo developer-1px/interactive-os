@@ -21,6 +21,12 @@ import {
   CancelEdit,
   UpdateTodoText,
 } from "@apps/todo/features/commands/list";
+import {
+  CopyTodo,
+  CutTodo,
+  PasteTodo,
+  DuplicateTodo,
+} from "@apps/todo/features/commands/clipboard";
 
 // 1. Strict Context Builders
 const Expect = createLogicExpect<TodoContext>();
@@ -110,6 +116,32 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
         args: { id: OS.FOCUS },
         when: Expect("isEditing").toBe(false),
       },
+
+      // Clipboard Operations (No Edit Guard - should work when not editing)
+      {
+        key: "Meta+C",
+        command: CopyTodo,
+        args: { id: OS.FOCUS },
+        when: Expect("isEditing").toBe(false),
+      },
+      {
+        key: "Meta+X",
+        command: CutTodo,
+        args: { id: OS.FOCUS },
+        when: Expect("isEditing").toBe(false),
+      },
+      {
+        key: "Meta+V",
+        command: PasteTodo,
+        args: { id: OS.FOCUS },
+        when: Expect("isEditing").toBe(false),
+      },
+      {
+        key: "Meta+D",
+        command: DuplicateTodo,
+        args: { id: OS.FOCUS },
+        when: Expect("isEditing").toBe(false),
+      },
     ],
     boardView: [
       // Item Actions (Shared)
@@ -128,6 +160,32 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
       {
         key: "Delete",
         command: DeleteTodo,
+        args: { id: OS.FOCUS },
+        when: Expect("isEditing").toBe(false),
+      },
+
+      // Clipboard Operations
+      {
+        key: "Meta+C",
+        command: CopyTodo,
+        args: { id: OS.FOCUS },
+        when: Expect("isEditing").toBe(false),
+      },
+      {
+        key: "Meta+X",
+        command: CutTodo,
+        args: { id: OS.FOCUS },
+        when: Expect("isEditing").toBe(false),
+      },
+      {
+        key: "Meta+V",
+        command: PasteTodo,
+        args: { id: OS.FOCUS },
+        when: Expect("isEditing").toBe(false),
+      },
+      {
+        key: "Meta+D",
+        command: DuplicateTodo,
         args: { id: OS.FOCUS },
         when: Expect("isEditing").toBe(false),
       },

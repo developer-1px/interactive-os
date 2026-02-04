@@ -18,6 +18,7 @@ export function FocusEngine() {
 
     const setFocus = useFocusStore((s) => s.setFocus);
     const setActiveZone = useFocusStore((s) => s.setActiveZone);
+    const setSpatialSticky = useFocusStore((s) => s.setSpatialSticky);
 
     const handleNavigation = (payload: OSNavigatePayload) => {
         const { activeZoneId, focusedItemId, focusPath, zoneRegistry, stickyX, stickyY, stickyIndex } = useFocusStore.getState();
@@ -36,16 +37,22 @@ export function FocusEngine() {
             stickyIndex,
             currentZoneId: activeZoneId,
             items: activeZone.items || [],
-            anchor: (stickyX !== null && stickyY !== null) ? { x: stickyX, y: stickyY } : undefined
+            anchor: (stickyX !== null || stickyY !== null) ? { x: stickyX, y: stickyY } : undefined
         });
 
         if (result) {
+            // First update focus (which resets sticky to null)
             if (result.targetId) {
                 setFocus(result.targetId);
                 // Seamlessly update active zone if crossing boundaries
                 if (result.zoneId && result.zoneId !== activeZoneId) {
                     setActiveZone(result.zoneId);
                 }
+            }
+
+            // Then set spatial sticky anchor (after reset)
+            if (result.stickyX !== undefined || result.stickyY !== undefined) {
+                setSpatialSticky(result.stickyX ?? null, result.stickyY ?? null);
             }
         }
     };

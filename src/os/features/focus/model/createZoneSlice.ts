@@ -1,10 +1,6 @@
 import type { StateCreator } from "zustand";
-import type { ZoneSlice } from "@os/features/focus/model/focusTypes";
+import type { ZoneSlice, FocusState } from "@os/features/focus/model/focusTypes";
 import { computePath } from "@os/features/focus/lib/pathUtils";
-import { handlerRecovery } from "@os/features/focus/axes/handlerRecovery";
-import { DEFAULT_RECOVERY_POLICY } from "@os/features/focus/model/recoveryTypes";
-import type { FocusState } from "@os/features/focus/model/focusTypes";
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
 
 export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set, get) => ({
     activeZoneId: "sidebar",
@@ -84,61 +80,16 @@ export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set
         }),
 
     removeItem: (zoneId, itemId) => {
-        const state = get();
-        const zone = state.zoneRegistry[zoneId];
-
-        if (!zone || !zone.items) {
-            return;
-        }
-
-        // Check if we're removing the currently focused item
-        const isRemovingFocused = state.focusedItemId === itemId;
-
-        // Calculate recovery target BEFORE removing (need original items list)
-        let recoveryTargetId: string | null = null;
-        if (isRemovingFocused && zone.items.length > 1) {
-            const direction = zone.behavior?.direction ?? "v";
-            const result = handlerRecovery(
-                itemId,
-                zoneId,
-                zone.items,
-                direction,
-                DEFAULT_RECOVERY_POLICY
-            );
-            recoveryTargetId = result.targetId;
-        }
-
-        // Now update the state
         set((s) => {
             const z = s.zoneRegistry[zoneId];
             if (!z || !z.items) return {};
 
-            const newState: Partial<FocusState> = {
+            return {
                 zoneRegistry: {
                     ...s.zoneRegistry,
                     [zoneId]: { ...z, items: z.items.filter((i) => i !== itemId) },
                 },
             };
-
-            // Apply recovery if we removed the focused item
-            if (isRemovingFocused && recoveryTargetId) {
-                newState.focusedItemId = recoveryTargetId;
-
-                // Trigger DOM focus after state update
-
-                // ... imports ...
-
-                // Trigger DOM focus after state update
-                requestAnimationFrame(() => {
-                    const el = DOMInterface.getItem(recoveryTargetId!);
-                    el?.focus();
-                });
-            } else if (isRemovingFocused) {
-                // No recovery target - clear focus
-                newState.focusedItemId = null;
-            }
-
-            return newState;
         });
     },
 });

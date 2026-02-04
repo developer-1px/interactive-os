@@ -41,6 +41,7 @@ export function ListView() {
                 id="listView"
                 area="listView"
                 role="listbox"
+                entry="restore"
             >
                 <div className="p-12 pb-6 max-w-3xl mx-auto w-full flex-1 flex flex-col z-10">
                     <header className="mb-8 flex items-end justify-between border-b border-slate-100 pb-6">

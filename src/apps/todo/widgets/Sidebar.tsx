@@ -41,6 +41,7 @@ export function Sidebar() {
       id="sidebar"
       area="nav"
       role="listbox" // Preset: Vertical, Loop, Selected Entry
+      entry="restore"
       style={{ flex: "none" }}
     >
       <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">

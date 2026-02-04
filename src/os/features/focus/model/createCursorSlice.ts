@@ -31,33 +31,44 @@ export const createCursorSlice: StateCreator<FocusState, [], [], CursorSlice> = 
                 }
             }
 
-            // Capture Physical Anchor if not already locked
-            let nextX = state.stickyX;
-            let nextY = state.stickyY;
-
-            // If focus is changed by something other than a locked navigation,
-            // or if we're just starting, we should capture the new physical position.
-            if (itemId) {
-                const el = document.getElementById(itemId);
-                if (el) {
-                    const rect = el.getBoundingClientRect();
-                    if (nextX === null) nextX = rect.left + rect.width / 2;
-                    if (nextY === null) nextY = rect.top + rect.height / 2;
-                }
-            }
-
+            // Reset sticky anchors - navigation will set correct values via setSpatialSticky
             const nextState: Partial<FocusState> = {
                 focusedItemId: itemId,
                 stickyIndex: nextStickyIndex,
-                stickyX: nextX,
-                stickyY: nextY,
+                stickyX: null,
+                stickyY: null,
                 activeObject: (object ||
                     (itemId ? { id: itemId, group: { id: targetZoneId } } : null)) as any,
             };
 
+            // [NEW] Update lastFocusedId for the PREVIOUS active zone
+            // Only if we are actually switching zones
+            if (targetZoneId && targetZoneId !== state.activeZoneId && state.activeZoneId && state.focusedItemId) {
+                const prevZoneId = state.activeZoneId;
+                const prevZone = state.zoneRegistry[prevZoneId];
+
+                // Only update if the previous item actually belonged to the previous zone
+                // (This prevents recording transient focus states or cross-zone oddities)
+                const wasItemInPrevZone = prevZone?.items?.includes(state.focusedItemId);
+
+                if (prevZone && wasItemInPrevZone) {
+                    // We can't just mutate zoneRegistry, need a new object reference
+                    nextState.zoneRegistry = {
+                        ...state.zoneRegistry,
+                        [prevZoneId]: {
+                            ...prevZone,
+                            lastFocusedId: state.focusedItemId,
+                        },
+                    };
+                }
+            }
+
             if (targetZoneId && targetZoneId !== state.activeZoneId) {
                 nextState.activeZoneId = targetZoneId;
-                nextState.focusPath = computePath(targetZoneId, state.zoneRegistry);
+                // If we also updated the registry above, computePath will use the new registry from nextState logic 
+                // but we need to pass the merged registry to computePath if we modified it
+                const registryToUse = nextState.zoneRegistry || state.zoneRegistry;
+                nextState.focusPath = computePath(targetZoneId, registryToUse);
             }
 
             return nextState as any; // Cast because partial update touches cross-slice state

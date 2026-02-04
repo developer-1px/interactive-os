@@ -13,7 +13,7 @@ interface Category {
     id: string;
     text: string;
 }
-interface Todo {
+export interface Todo {
     id: number;
     text: string;
     completed: boolean;

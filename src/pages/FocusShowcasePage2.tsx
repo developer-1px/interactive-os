@@ -135,25 +135,37 @@ export default function FocusShowcasePage2() {
 
                     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-lg shadow-slate-100/50 max-w-2xl">
                         <Zone
-                            id="editor-toolbar"
-                            direction="h"
-                            edge="loop"
-                            className="flex items-center gap-1 p-1.5 bg-slate-100 rounded-xl"
+                            id="editor-section"
+                            tab="flow"
+                            className="space-y-6"
                         >
-                            <ToolbarTrigger id="cmd-bold" icon={<Bold size={18} />} label="Bold" command={{ type: "FORMAT_BOLD", payload: {} }} />
-                            <ToolbarTrigger id="cmd-italic" icon={<Italic size={18} />} label="Italic" command={{ type: "FORMAT_ITALIC", payload: {} }} />
-                            <ToolbarTrigger id="cmd-underline" icon={<Underline size={18} />} label="Underline" command={{ type: "FORMAT_UNDERLINE", payload: {} }} />
+                            <Zone
+                                id="editor-toolbar"
+                                role="toolbar"
+                                direction="h"
+                                edge="loop"
+                                className="flex items-center gap-1 p-1.5 bg-slate-100 rounded-xl"
+                            >
+                                <ToolbarTrigger id="cmd-bold" icon={<Bold size={18} />} label="Bold" command={{ type: "FORMAT_BOLD", payload: {} }} />
+                                <ToolbarTrigger id="cmd-italic" icon={<Italic size={18} />} label="Italic" command={{ type: "FORMAT_ITALIC", payload: {} }} />
+                                <ToolbarTrigger id="cmd-underline" icon={<Underline size={18} />} label="Underline" command={{ type: "FORMAT_UNDERLINE", payload: {} }} />
 
-                            <div className="w-px h-6 bg-slate-300 mx-1" />
+                                <div className="w-px h-6 bg-slate-300 mx-1" />
 
-                            <ToolbarTrigger id="cmd-left" icon={<AlignLeft size={18} />} label="Align Left" command={{ type: "ALIGN_LEFT", payload: {} }} />
-                            <ToolbarTrigger id="cmd-center" icon={<AlignCenter size={18} />} label="Align Center" command={{ type: "ALIGN_CENTER", payload: {} }} />
-                            <ToolbarTrigger id="cmd-right" icon={<AlignRight size={18} />} label="Align Right" command={{ type: "ALIGN_RIGHT", payload: {} }} />
+                                <ToolbarTrigger id="cmd-left" icon={<AlignLeft size={18} />} label="Align Left" command={{ type: "ALIGN_LEFT", payload: {} }} />
+                                <ToolbarTrigger id="cmd-center" icon={<AlignCenter size={18} />} label="Align Center" command={{ type: "ALIGN_CENTER", payload: {} }} />
+                                <ToolbarTrigger id="cmd-right" icon={<AlignRight size={18} />} label="Align Right" command={{ type: "ALIGN_RIGHT", payload: {} }} />
+                            </Zone>
+
+                            <Field
+                                name="editor-content"
+                                mode="immediate"
+                                multiline
+                                value="The quick brown fox jumps over the lazy dog. Click or use keyboard on the toolbar above to trigger commands."
+                                placeholder="Start typing here..."
+                                className="p-6 bg-slate-50 border border-slate-100 rounded-lg text-slate-700 text-sm font-serif leading-relaxed min-h-[120px] outline-none transition-all focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 data-[focused=true]:border-indigo-300 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-100"
+                            />
                         </Zone>
-
-                        <div className="mt-6 p-6 bg-slate-50 border border-slate-100 rounded-lg text-slate-400 text-sm italic font-serif leading-relaxed">
-                            The quick brown fox jumps over the lazy dog. Click or use keyboard on the toolbar above to trigger commands.
-                        </div>
                     </div>
                 </section>
 
@@ -186,7 +198,9 @@ export default function FocusShowcasePage2() {
 
                         <Zone
                             id="profile-form"
+                            role="form"
                             direction="v"
+                            tab="flow"
                             className="p-8 space-y-6"
                         >
                             <FormField
@@ -301,12 +315,10 @@ function ToolbarTrigger({ id, icon, label, command }: { id: string; icon: React.
         <Trigger
             id={id}
             command={command}
-            className="group relative p-2 rounded-lg text-slate-500 hover:text-slate-900 outline-none transition-all focus:bg-white focus:text-indigo-600 focus:shadow-md focus:z-10"
+            className="group relative p-2 rounded-lg text-slate-500 hover:text-slate-900 outline-none transition-all data-[focused=true]:bg-white data-[focused=true]:text-indigo-600 data-[focused=true]:shadow-md data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-500"
         >
             {icon}
             <span className="sr-only">{label}</span>
-
-            {/* Tooltip on Focus/Hover usually, but keeping simple here */}
         </Trigger>
     );
 }
@@ -319,31 +331,18 @@ function FormField({ id, label, icon, placeholder, defaultValue }: { id: string;
             <div className="flex items-center gap-2 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
                 {icon} {label}
             </div>
-            <Item id={id} asChild>
-                <Field
-                    name={id}
-                    mode="deferred"
-                    value={val}
-                    placeholder={placeholder}
-                    className="
-                        w-full px-4 py-3 rounded-xl border text-sm font-medium outline-none transition-all
-                        data-[focused=true]:border-indigo-500 data-[focused=true]:bg-indigo-50/10 data-[focused=true]:shadow-lg data-[focused=true]:shadow-indigo-500/10
-                        data-[editing=true]:border-indigo-600 data-[editing=true]:bg-white data-[editing=true]:ring-4 data-[editing=true]:ring-indigo-100
-                        bg-slate-50 border-slate-200 text-slate-700 placeholder:text-slate-400
-                    "
-                    // Dummy commit handler that updates local state
-                    commitCommand={{ type: "UPDATE_FIELD", payload: { id } }}
-                // In a real app, the Field primitive would update the value prop via parent state, 
-                // but for this demo ensuring it feels responsive if we hook up internal state:
-                // Note: The Field primitive is controlled. We need to handle changes.
-                // However, `Field` primitive prop `value` is for display. Interactions emit events.
-                // For this pure UI showcase, we might not get full typing without `useField` hooks or similar,
-                // but `Field` primitive usually handles ContentEditable.
-                />
-            </Item>
-            <div className="mt-1.5 text-[10px] text-slate-300 pl-1">
-                Press Enter to edit • Esc to cancel
-            </div>
+            <Field
+                name={id}
+                mode="immediate"
+                value={val}
+                placeholder={placeholder}
+                className="
+                    w-full px-4 py-3 rounded-xl border text-sm font-medium outline-none transition-all
+                    bg-slate-50 border-slate-200 text-slate-700 placeholder:text-slate-400
+                    data-[focused=true]:border-indigo-500 data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-100
+                "
+            />
         </div>
     );
 }
+

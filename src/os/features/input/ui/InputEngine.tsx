@@ -96,7 +96,7 @@ export function InputEngine() {
 
                             if (binding.when && !evalContext(binding.when, evaluationCtx)) continue;
 
-                            // Success
+                            // Success - OS handles all commands including Tab (DFS-based navigation)
                             e.preventDefault();
                             e.stopPropagation();
                             logKey(e as any, currentActiveZoneId || "global", true);

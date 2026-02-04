@@ -40,6 +40,8 @@ function resolveEntry(
     }
 }
 
+import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
+
 /**
  * Entry Axis Handler for Pipeline
  * Resolves final target when entering nested zones
@@ -51,10 +53,30 @@ export const handlerEntry: AxisHandler = (ctx) => {
     }
 
     // Check if target is a zone entry point
-    const targetEl = document.getElementById(ctx.targetId);
-    const isZone = targetEl?.hasAttribute("data-zone-id");
-    const nestedZoneEl = isZone ? targetEl : targetEl?.querySelector("[data-zone-id]");
-    const targetZoneId = nestedZoneEl?.getAttribute("data-zone-id");
+    // Use DOMInterface to get the element (safe for numeric IDs)
+    const targetEl = DOMInterface.getItem(ctx.targetId) || DOMInterface.getZone(ctx.targetId);
+
+    // Check if target is a registered zone
+    // If targetId is in registry, it IS a zone.
+    const isZone = !!ctx.zoneRegistry[ctx.targetId];
+
+    let targetZoneId: string | null = null;
+
+    if (isZone) {
+        targetZoneId = ctx.targetId;
+    } else if (targetEl) {
+        // Check for nested zone within the target element
+        // Instead of querySelector, we check the registry for zones contained in this element
+        // This is safer and consistent with the registry pattern.
+        // Perf note: traversing zones is acceptable as zone count is usually low.
+        const nestedZone = Object.values(ctx.zoneRegistry).find(z => {
+            const zEl = DOMInterface.getZone(z.id);
+            return zEl && targetEl.contains(zEl) && targetEl !== zEl;
+        });
+        if (nestedZone) {
+            targetZoneId = nestedZone.id;
+        }
+    }
 
     // Resolve entry point
     const finalTargetId = resolveEntry(
@@ -65,8 +87,12 @@ export const handlerEntry: AxisHandler = (ctx) => {
     );
 
     // Find final zone
-    const finalEl = document.getElementById(finalTargetId);
-    const finalZoneId = finalEl?.closest("[data-zone-id]")?.getAttribute("data-zone-id");
+    // Instead of finalEl.closest(), find which zone owns the item
+    // This assumes items are unique to zones (which is the standard)
+    const finalZone = Object.values(ctx.zoneRegistry).find(z =>
+        z.items?.includes(finalTargetId)
+    );
+    const finalZoneId = finalZone?.id;
 
     return {
         ...ctx,
