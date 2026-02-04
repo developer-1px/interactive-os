@@ -5,7 +5,7 @@ import { ALL_OS_COMMANDS } from "@os/core/command/osRegistry";
 import { useCommandCenter } from "@os/core/command/useCommandCenter";
 import { CommandContext, setGlobalEngine } from "@os/core/command/CommandContext";
 import { useContextService } from "@os/core/context";
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
 import { InputEngine } from "@os/core/input/InputEngine";
 import { Zone } from "./Zone";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";

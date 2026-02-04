@@ -38,9 +38,7 @@ export function BoardView() {
             {/* Top-Level Board Zone: Spatial Navigation between Columns */}
             <OS.Zone
               id="board"
-              strategy="spatial"
-              preset="seamless"
-              layout="row"
+              role="tabs"
               area="boardView"
               className="gap-10"
             >
@@ -57,11 +55,7 @@ export function BoardView() {
                     id={`col-${categoryId}`}
                     focusable
                     payload={category}
-                    strategy="spatial"
-                    preset="seamless"
-                    integrated
-                    layout="column"
-                    allowedDirections={["UP", "DOWN", "LEFT", "RIGHT"]}
+                    role="listbox"
                     area="boardView"
                     className={`w-80 flex-shrink-0 flex flex-col max-h-full rounded-2xl bg-slate-50/50 border transition-colors duration-200 outline-none
                               ${activeColumn ? "border-indigo-200 bg-white" : "border-slate-100"}

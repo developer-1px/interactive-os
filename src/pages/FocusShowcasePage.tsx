@@ -3,7 +3,7 @@ import { Zone } from "@os/ui/Zone";
 import { Item } from "@os/ui/Item";
 import { Field } from "@os/ui/Field";
 import { Layers, MousePointerClick, Calendar, Type } from "lucide-react";
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
 
 /**
  * FocusShowcasePage
@@ -22,7 +22,7 @@ export default function FocusShowcasePage() {
     return (
         <div className="flex h-full bg-slate-50">
             {/* Sidebar Context */}
-            <Zone id="showcase-sidebar" layout="column" className="w-64 border-r border-slate-200 bg-white p-6">
+            <Zone id="showcase-sidebar" role="listbox" className="w-64 border-r border-slate-200 bg-white p-6">
                 <h2 className="text-xl font-bold text-slate-800 mb-6">Focus Lab</h2>
                 <div className="space-y-4">
                     <SectionLink title="Macro Flow" icon={<Layers size={18} />} active />
@@ -33,7 +33,7 @@ export default function FocusShowcasePage() {
 
             {/* Main Sandbox */}
             <div className="flex-1 flex flex-col h-full overflow-hidden">
-                <Zone id="showcase-main" layout="column" className="flex-1 overflow-y-auto p-12 custom-scrollbar">
+                <Zone id="showcase-main" role="listbox" className="flex-1 overflow-y-auto p-12 custom-scrollbar">
                     <div className="max-w-2xl mx-auto w-full space-y-12">
 
                         <header className="mb-8">

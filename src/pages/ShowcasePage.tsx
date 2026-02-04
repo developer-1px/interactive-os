@@ -36,8 +36,7 @@ export default function ShowcasePage() {
           </div>
           <OS.Zone
             id="roving-showcase"
-            strategy="roving"
-            layout="column"
+            role="menu"
             className="bg-white/5 rounded-3xl border border-white/10 p-4 space-y-2 overflow-hidden"
           >
             {["Identity", "Security", "Infrastructure", "Telemetry", "Audit Log"].map((label, i) => (
@@ -63,8 +62,7 @@ export default function ShowcasePage() {
           </div>
           <OS.Zone
             id="grid-showcase"
-            strategy="spatial"
-            layout="grid"
+            role="grid"
             className="grid grid-cols-3 gap-4"
           >
             {Array.from({ length: 9 }).map((_, i) => (
@@ -91,8 +89,7 @@ export default function ShowcasePage() {
 
           <OS.Zone
             id="builder-showcase"
-            strategy="spatial"
-            preset="seamless"
+            role="grid"
             className="relative bg-slate-900/50 rounded-[40px] border border-white/5 p-12 min-h-[600px] overflow-hidden"
           >
             {/* Header Section */}
@@ -203,8 +200,7 @@ export default function ShowcasePage() {
 
             <OS.Zone
               id="modal-zone"
-              strategy="spatial"
-              preset="modal"
+              role="dialog"
               className="absolute inset-x-12 inset-y-8 bg-slate-800 border-2 border-orange-500 rounded-2xl shadow-2xl p-6 flex flex-col justify-between"
             >
               <MockText variant="h2" className="text-white">Exit Confirmation</MockText>

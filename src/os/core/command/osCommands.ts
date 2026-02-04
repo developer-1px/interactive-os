@@ -8,6 +8,8 @@ export const OS_COMMANDS = {
     // --- Navigation (The "Physics" of Focus) ---
     NAVIGATE: "OS_NAVIGATE",
     FOCUS: "OS_FOCUS",
+    TAB: "OS_TAB",
+    TAB_PREV: "OS_TAB_PREV",
 
     // --- Clipboard (The "Data" Transfer) ---
     COPY: "OS_COPY",

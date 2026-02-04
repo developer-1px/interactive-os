@@ -1,9 +1,9 @@
 import { useRef, useLayoutEffect, useEffect, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import { FocusContext, CommandContext } from "@os/core/command/CommandContext";
-import { useFocusStore } from "@os/core/focus";
-import type { NavigationStrategy, InteractionPreset } from "@os/core/navigation";
+import { useFocusStore } from "@os/core/focus/focusStore";
 import { ZoneRegistry } from "@os/core/command/zoneRegistry";
+import { resolveBehavior, type FocusBehavior, type FocusDirection, type FocusEdge, type FocusTab, type FocusEntry } from "@os/core/focus/behavior/behaviorResolver";
 
 export interface ZoneProps {
   id: string;
@@ -12,11 +12,14 @@ export interface ZoneProps {
   // Metadata
   area?: string;
 
-  // Navigation Config
-  strategy?: NavigationStrategy; // default: 'spatial'
-  preset?: InteractionPreset;    // default: 'seamless'
-  layout?: "column" | "row" | "grid";
-  navMode?: "clamped" | "loop";
+  // Focus Behavior (6-Axis System)
+  role?: string;           // Auto-resolve from FOCUS_PRESETS
+  direction?: FocusDirection;
+  edge?: FocusEdge;
+  tab?: FocusTab;
+  entry?: FocusEntry;
+  restore?: boolean;
+
   focusable?: boolean;           // If true, this zone can also be focused as an item
   payload?: any;                 // Optional data for focusable zones
   integrated?: boolean;          // If true, nested items register with parent zone instead
@@ -42,10 +45,15 @@ export function Zone({
   id,
   children,
   area,
-  strategy = "spatial",
-  preset = "seamless",
-  layout = "column",
-  navMode = "clamped",
+
+  // 6-Axis Behavior
+  role,
+  direction,
+  edge,
+  tab,
+  entry,
+  restore,
+
   focusable = false,
   integrated = false,
   className,
@@ -103,37 +111,39 @@ export function Zone({
   // --- 1. Zone Registration (Lifecycle) ---
   const directionsKey = allowedDirections?.join(",") || "";
 
+  // [Role-Based] Resolve FocusBehavior
+  const behavior = useMemo(() => {
+    const overrides: Partial<FocusBehavior> = {
+      ...(direction && { direction }),
+      ...(edge && { edge }),
+      ...(tab && { tab }),
+      ...(entry && { entry }),
+      ...(restore !== undefined && { restore }),
+    };
+    return resolveBehavior(role, overrides);
+  }, [role, direction, edge, tab, entry, restore]);
+
   useEffect(() => {
     registerZone({
       id,
       parentId,
       area,
-      strategy,
-      layout,
-      preset,
-      navMode,
+      behavior,
       allowedDirections,
-      items: [], // Active Registration will populate this
+      items: [],
     } as any);
     return () => unregisterZone(id);
   }, [
     id,
     parentId,
     area,
-    strategy,
-    layout,
-    preset,
-    navMode,
+    behavior,
     directionsKey,
     registerZone,
     unregisterZone,
   ]);
 
-  // --- 3. Reactive Item Sync (DEPRECATED) ---
-  // Replaced by Active Registration in OS.Item
-  useLayoutEffect(() => {
-    return () => { };
-  }, [id]);
+
 
   // --- 4. Stable Context ---
   const focusContextValue = useMemo(() => ({
@@ -153,7 +163,8 @@ export function Zone({
         data-area={area}
         role="region"
         aria-label={area || id}
-        className={`outline-none h-full flex ${layout === "row" ? "flex-row" : "flex-col"} 
+        tabIndex={behavior.tab === "escape" && !parentId ? 0 : -1}
+        className={`outline-none h-full flex ${behavior.direction === "h" || behavior.direction === "grid" ? "flex-row" : "flex-col"} 
           ${isActive ? "grayscale-0" : "grayscale opacity-80"} 
           transition-all duration-200 ${className || ""}`}
         style={{

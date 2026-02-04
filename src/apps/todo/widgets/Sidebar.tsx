@@ -2,6 +2,7 @@ import { Zone } from "@os/ui/Zone";
 import { Item } from "@os/ui/Item";
 import { Trigger } from "@os/ui/Trigger";
 import { Kbd } from "@os/debug/components/Kbd";
+import { useFocusStore } from "@os/core/focus/focusStore";
 import { useEngine } from "@os/core/command/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 import { SelectCategory } from "@apps/todo/features/commands/categories";
@@ -17,7 +18,9 @@ import {
 } from "lucide-react";
 
 export function Sidebar() {
-  const { state } = useEngine<AppState>();
+  const { state, dispatch } = useEngine<AppState>();
+  const focusedItemId = useFocusStore((s) => s.focusedItemId);
+
   if (!state) return null;
 
   const getIcon = (id: string) => {
@@ -37,8 +40,7 @@ export function Sidebar() {
     <Zone
       id="sidebar"
       area="nav"
-      navMode="loop" // Example: Rolling Navigation for Sidebar
-      layout="column"
+      role="listbox" // Preset: Vertical, Loop, Selected Entry
       style={{ flex: "none" }}
     >
       <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">
@@ -63,25 +65,30 @@ export function Sidebar() {
               <Item
                 key={category.id}
                 id={category.id}
-                onPointerEnter={() => {
-                  useEngine().dispatch({
-                    type: "OS_FOCUS",
-                    payload: {
-                      id: category.id,
-                      sourceId: "sidebar"
-                    }
-                  });
-                }}
-                className={`group relative px-4 py-2.5 rounded-xl text-sm font-semibold outline-none ring-0 cursor-pointer transition-colors duration-200 overflow-hidden
-                                hover:bg-slate-100
-                                data-[active=true]:bg-indigo-50/50
-                                focus:bg-slate-100
-                                focus:outline-none focus:ring-0
-                                before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:bg-indigo-600 before:rounded-r-full before:opacity-0 data-[active=true]:before:opacity-100 before:transition-opacity
-                            `}
+                asChild
               >
-                <Trigger command={SelectCategory({ id: category.id })} asChild>
-                  <button type="button" className="flex items-center gap-3 w-full h-full outline-none ring-0 focus:outline-none focus:ring-0">
+                <Trigger
+                  command={SelectCategory({ id: category.id })}
+                  asChild
+                  onMouseMove={() => {
+                    if (focusedItemId !== category.id) {
+                      dispatch({
+                        type: "OS_FOCUS",
+                        payload: {
+                          id: category.id,
+                          sourceId: "sidebar"
+                        }
+                      });
+                    }
+                  }}
+                >
+                  <div
+                    className={`group relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold outline-none ring-0 cursor-pointer transition-colors duration-200 overflow-hidden
+                                hover:bg-slate-100
+                                data-[focused=true]:bg-indigo-50/50
+                                before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:bg-indigo-600 before:rounded-r-full before:opacity-0 data-[focused=true]:before:opacity-100 before:transition-opacity
+                            `}
+                  >
                     <span
                       className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
                     >
@@ -97,7 +104,7 @@ export function Sidebar() {
                     {state.ui.selectedCategoryId === category.id && (
                       <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-indigo-600" />
                     )}
-                  </button>
+                  </div>
                 </Trigger>
               </Item>
             );

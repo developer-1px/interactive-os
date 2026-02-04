@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
 import { useContextService } from "@os/core/context";
 
 export const OSStateViewer = memo(() => {

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
 import { useCommandEngine } from "@os/core/command/CommandContext";
 import { getCanonicalKey, normalizeKeyDefinition } from "@os/core/input/keybinding";
 import { evalContext } from "@os/core/context";

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useEngine } from "@os/core/command/CommandContext";
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
 import type { AppState } from "@apps/todo/model/types";
 
 /**
@@ -42,7 +42,7 @@ export function ClipboardManager() {
 
           e.clipboardData?.setData("text/plain", text);
           e.clipboardData?.setData("application/json", json);
-          // console.log('Copied Todo:', text);
+
         }
       }
       // 2. Copying a Category

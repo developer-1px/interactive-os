@@ -1,8 +1,5 @@
 import {
-  useState,
   useRef,
-  useEffect,
-  useLayoutEffect,
   isValidElement,
   cloneElement,
 } from "react";
@@ -14,10 +11,24 @@ import type {
   FormEvent,
 } from "react";
 import { useCommandEngine } from "@os/core/command/CommandContext";
-import { useContextService } from "@os/core/context";
-import { getCaretPosition, setCaretPosition } from "./fieldUtils";
+import { getCaretPosition } from "./fieldUtils";
 import type { BaseCommand } from "@os/ui/types";
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
+import type { FocusTarget } from "@os/core/focus/behavior/behaviorResolver";
+
+// Refactored Logic & Hooks
+import {
+  shouldActivateField,
+  getFieldClasses,
+  getCommitAction,
+  getSyncAction,
+} from "./fieldLogic";
+import {
+  useFieldState,
+  useFieldDOMSync,
+  useFieldFocus,
+  useFieldContext,
+} from "./useFieldHooks";
 
 export interface FieldProps<T extends BaseCommand>
   extends Omit<
@@ -38,6 +49,10 @@ export interface FieldProps<T extends BaseCommand>
   asChild?: boolean;
   dispatch?: (cmd: BaseCommand) => void;
   commitOnBlur?: boolean;
+
+  // Focus Behavior
+  target?: FocusTarget;
+  controls?: string; // ID of the Zone this field controls (virtual focus)
 }
 
 export const Field = <T extends BaseCommand>({
@@ -56,248 +71,152 @@ export const Field = <T extends BaseCommand>({
   commitOnBlur = true,
   blurOnInactive = false,
   dispatch: customDispatch,
+  target = "real",
+  controls,
   ...rest
 }: FieldProps<T> & { blurOnInactive?: boolean }) => {
+  // --- 1. Global Context & Store ---
   const { dispatch: contextDispatch, currentFocusId } = useCommandEngine();
-  const contextService = useContextService();
-  const updateContext = contextService?.updateContext || (() => { });
-
   const osFocusedItemId = useFocusStore((s) => s.focusedItemId);
-
   const dispatch = customDispatch || contextDispatch;
-  // Local value tracks the immediate DOM content
-  const [localValue, setLocalValue] = useState(value);
+
+  // --- 2. Refs & Local State ---
   const innerRef = useRef<HTMLElement>(null);
   const cursorRef = useRef<number | null>(null);
 
-  /* 
-    Refactored Field Primitive (ContentEditable):
-    - Unified Element (Span)
-    - Chips/Mention Ready
-  */
+  // Use Custom Hook for State
+  const { localValue, setLocalValue, isComposingRef } = useFieldState({ value });
 
-  const isActive =
-    active !== undefined
-      ? active
-      : (name !== undefined && String(name) === String(currentFocusId)) ||
-      (name !== undefined && String(name) === String(osFocusedItemId));
+  // Use Logic for Active State
+  const isActive = shouldActivateField(
+    active,
+    name,
+    currentFocusId,
+    osFocusedItemId
+  );
 
-  // Sync prop value to local state
-  useEffect(() => {
-    if (!isComposingRef.current && value !== localValue) {
-      setLocalValue(value);
-    }
-  }, [value]);
+  // --- 3. Custom Hooks for Side Effects ---
+  const { updateCursorContext, setFieldFocused } = useFieldContext(innerRef, cursorRef);
 
-  // Sync local state to DOM (Manual Control for ContentEditable)
-  useLayoutEffect(() => {
-    if (innerRef.current) {
-      // Always sync innerText to localValue
-      // We no longer rely on 'children' for placeholder text, so this is safe.
-      if (innerRef.current.innerText !== localValue) {
-        innerRef.current.innerText = localValue;
+  // Sync DOM with local React state
+  useFieldDOMSync({ innerRef, localValue, isActive, cursorRef });
 
-        // Restore cursor if active
-        if (isActive && cursorRef.current !== null) {
-          setCaretPosition(innerRef.current, cursorRef.current);
-        }
-      }
-    }
-  }, [localValue, isActive]);
+  // Manage Physical Focus
+  useFieldFocus({ innerRef, isActive, blurOnInactive, cursorRef });
 
-  // Auto-focus and Cursor Restoration
-  useEffect(() => {
-    if (isActive && innerRef.current) {
-      if (document.activeElement !== innerRef.current) {
-        innerRef.current.focus();
-      }
-
-      // Restore Cursor specifically on Focus Gain
-      if (cursorRef.current !== null) {
-        // We need a slight delay to ensure browser focus behavior settles
-        // especially if we are switching from inactive
-        requestAnimationFrame(() => {
-          if (innerRef.current && cursorRef.current !== null) {
-            try {
-              setCaretPosition(innerRef.current, cursorRef.current);
-            } catch (e) { }
-          }
-        });
-      }
-    } else if (!isActive && blurOnInactive && innerRef.current && document.activeElement === innerRef.current) {
-      innerRef.current.blur();
-    }
-  }, [isActive, blurOnInactive]);
+  // --- 4. Event Handlers ---
 
   const commitChange = (currentText: string) => {
     if (innerRef.current) {
       cursorRef.current = getCaretPosition(innerRef.current);
     }
 
-    if (commitCommand) {
-      dispatch({
-        ...commitCommand,
-        payload: { ...commitCommand.payload, text: currentText },
-      });
-      return;
+    const action = getCommitAction(currentText, commitCommand, name, updateType);
+    if (action) {
+      dispatch(action);
     }
-
-    if (name) dispatch({ type: "PATCH", payload: { [name]: currentText } });
-    else if (updateType) dispatch({ type: updateType, payload: { text: currentText } });
   };
-
-  const isComposingRef = useRef(false);
-
-  // --- Context Sensor Logic ---
-  const updateCursorContext = () => {
-    if (!innerRef.current) return;
-    const pos = getCaretPosition(innerRef.current);
-    const textLen = innerRef.current.innerText.length;
-
-    cursorRef.current = pos;
-
-    updateContext({
-      cursorAtStart: pos === 0,
-      cursorAtEnd: pos === textLen,
-    });
-  };
-
-  // FIX: Destructure className so it doesn't override our composed className when spreading otherProps
-  const { onKeyDown: externalKeyDown, className: customClassName, ...otherProps } = rest as any;
 
   const handleInput = (e: FormEvent<HTMLElement>) => {
     const text = (e.currentTarget as HTMLElement).innerText;
     setLocalValue(text);
     updateCursorContext();
 
-    if (syncCommand)
-      dispatch({
-        ...syncCommand,
-        payload: { ...syncCommand.payload, text },
-      });
-    else if (name) dispatch({ type: "PATCH", payload: { [name]: text } });
-    else if (updateType)
-      dispatch({ type: updateType, payload: { text } });
+    const action = getSyncAction(text, syncCommand, name, updateType);
+    if (action) {
+      dispatch(action);
+    }
   };
 
-  const styles = isActive
-    ? customClassName
-    : `pointer-events-none truncate ${customClassName || ""}`;
+  const handleFocus = () => {
+    // Guard circular focus
+    if (name && currentFocusId !== name) {
+      dispatch({ type: "SET_FOCUS", payload: { id: name } });
+    }
 
-  // Robust Placeholder using CSS pseudo-element
-  // We use the 'empty' state of localValue to toggle the class.
-  // ContentEditable often introduces a single newline/br when empty, so we check for that.
-  // NOTE: We do NOT use trim() here because ' ' should hide placeholder (native input behavior).
-  const isValueEmpty = !localValue || localValue === "\n";
-  const shouldShowPlaceholder = placeholder && isValueEmpty;
+    setFieldFocused(true);
+    requestAnimationFrame(updateCursorContext);
+  };
 
-  // Tailwind Arbitrary Value for content.
-  // We apply it as a class.
-  // CRITICAL FIX: Added 'top-0 left-0' to clamp it to the field.
-  // Removed 'empty:' prefix to rely strictly on our JS 'isValueEmpty' check.
-  const placeholderClasses = shouldShowPlaceholder
-    ? "before:content-[attr(data-placeholder)] before:text-slate-400 before:opacity-50 before:pointer-events-none before:absolute before:top-0 before:left-0 before:truncate before:w-full before:h-full"
-    : "";
+  const handleBlur = () => {
+    if (commitOnBlur) {
+      commitChange(localValue);
+    }
+    setFieldFocused(false);
+  };
 
-  // Multiline vs Singleline styling
-  // Single line needs 'whitespace-nowrap' or similar to prevent wrapping if user pastes?
-  // AND usually overflow handling.
-  // We add conditional classes.
-  const lineClasses = multiline ? "whitespace-pre-wrap break-words" : "whitespace-nowrap overflow-hidden";
-  const displayClasses = multiline ? "block" : "inline-block min-w-[1ch] max-w-full align-bottom";
+  const { onKeyDown: externalKeyDown, className: customClassName, ...otherProps } = rest as any;
+
+  const handleKeyDown = (e: ReactKeyboardEvent) => {
+    if (e.nativeEvent.isComposing || isComposingRef.current) {
+      // Stop propagation for all navigation keys during IME
+      if (["Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+        e.stopPropagation();
+      }
+      if (e.key === "Enter") e.preventDefault();
+      return;
+    }
+
+    // COMMIT Logic (Enter)
+    if (e.key === "Enter") {
+      if (!multiline) {
+        e.preventDefault();
+        commitChange(localValue);
+      } else {
+        e.stopPropagation();
+      }
+    }
+
+    // NAVIGATION Logic
+    if (!multiline && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+      // Allow bubbling for OS navigation
+    } else if (multiline && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+      e.stopPropagation();
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.stopPropagation();
+    }
+
+    if (externalKeyDown) externalKeyDown(e);
+  };
+
+  // --- 5. Rendering ---
+
+  const composeProps = getFieldClasses({
+    isActive,
+    multiline,
+    value: localValue,
+    placeholder,
+    customClassName
+  });
 
   const baseProps = {
     ref: innerRef,
     contentEditable: isActive,
     suppressContentEditableWarning: true,
     role: "textbox",
-    // aria-multiline for accessibility
     "aria-multiline": multiline,
     tabIndex: isActive ? 0 : -1,
-    // Add relative to host to anchor the absolute placeholder
-    className: `${placeholderClasses} ${styles} ${lineClasses} ${displayClasses} relative`.trim(),
+    className: composeProps,
     "data-placeholder": placeholder,
 
-    // Always null, content controlled by useLayoutEffect
-    children: null,
+    // Virtual Focus Attributes
+    "aria-controls": controls,
+    "aria-activedescendant": (target === "virtual" && controls && osFocusedItemId && osFocusedItemId !== name)
+      ? osFocusedItemId
+      : undefined,
 
-    onFocus: () => {
-      // Guard circular focus
-      if (name && currentFocusId !== name) {
-        dispatch({ type: "SET_FOCUS", payload: { id: name } });
-      }
 
-      if (!contextService?.context.isFieldFocused) {
-        updateContext({ isFieldFocused: true });
-      }
-      requestAnimationFrame(updateCursorContext);
-    },
+    children: null, // content controlled by useFieldDOMSync
+
+    onFocus: handleFocus,
     onCompositionStart: () => { isComposingRef.current = true; },
     onCompositionEnd: () => { isComposingRef.current = false; },
     onInput: handleInput,
     onSelect: updateCursorContext,
     onKeyUp: updateCursorContext,
     onClick: updateCursorContext,
-    onBlur: () => {
-      if (commitOnBlur) {
-        commitChange(localValue);
-      }
-      updateContext({
-        isFieldFocused: false,
-        cursorAtStart: false,
-        cursorAtEnd: false,
-      });
-    },
-    onKeyDown: (e: ReactKeyboardEvent) => {
-      if (e.nativeEvent.isComposing || isComposingRef.current) {
-        // Stop propagation for all navigation keys during IME to protect Zone navigation
-        if (["Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
-          e.stopPropagation();
-        }
-        if (e.key === "Enter") e.preventDefault();
-        return;
-      }
-
-      // COMMIT Logic (Enter)
-      if (e.key === "Enter") {
-        if (!multiline) {
-          e.preventDefault(); // Prevent newline in single-line mode
-          commitChange(localValue);
-        } else {
-          // Multiline: Allow default behavior (newline), OR Shift+Enter to commit?
-          // Standard: Enter = Newline. Cmd+Enter = Commit.
-          // User didn't specify, but usually we don't commit on plain Enter in textarea.
-          // However, we need to stop propagation if we consume it, else global "Enter" might trigger something.
-          e.stopPropagation();
-        }
-      }
-
-      // NAVIGATION Logic (ArrowUp / ArrowDown)
-      // If NOT multiline, we want standard OS focus navigation (Grid/List).
-      // We allow the event to bubble up to the OS Key Listener.
-      if (!multiline && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
-        // Explicitly do NOTHING here. Let it bubble.
-        // Typically, browser might move caret to start/end. 
-        // If we want to prevent caret movement and ONLY navigate, we might need preventDefault.
-        // But often "Best Effort" is: let it bubble.
-        // Warning: If OS listener works on "KeyDown", it will fire.
-        // If OS listener checks `e.defaultPrevented`, we are good.
-        // If browser default moves caret, it's fine as we are leaving the field anyway.
-      } else if (multiline && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
-        // In multiline, we usually want internal caret navigation.
-        // Be careful: if we are at top/bottom, should we bubble?
-        // Standard Textarea behavior: consume unless at edge.
-        // For now, let's stop propagation to keep focus inside the multiline field 
-        // until user explicitly exits (e.g. via Escape or Tab).
-        e.stopPropagation();
-      } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-        // Always trap Horizontal Arrows for Caret Movement (Single & Multi)
-        // Unless we want to implement "Cursor past end" logic later.
-        e.stopPropagation();
-      }
-
-      if (externalKeyDown) externalKeyDown(e);
-    },
+    onBlur: handleBlur,
+    onKeyDown: handleKeyDown,
     ...otherProps,
   };
 
@@ -313,6 +232,5 @@ export const Field = <T extends BaseCommand>({
     });
   }
 
-  // Unified Render
   return <span {...baseProps} />;
 };

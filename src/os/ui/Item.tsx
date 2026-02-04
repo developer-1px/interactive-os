@@ -1,6 +1,6 @@
 import { isValidElement, cloneElement, useContext, useLayoutEffect, useMemo, useRef } from "react";
 import type { ReactNode, ReactElement } from "react";
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
 import { FocusContext } from "@os/core/command/CommandContext";
 
 // --- Types ---
@@ -95,12 +95,12 @@ export const Item = ({
     // Accessibility (Virtual)
     role: "option",
     "aria-selected": isFocused,
-    tabIndex: -1, // The Black Hole
+    tabIndex: isFocused ? 0 : -1, // Roving tabindex pattern
 
     // Styling Hooks
     "data-focused": isFocused ? "true" : undefined,
     "data-selected": selected ? "true" : undefined,
-    "data-active": isFocused ? "true" : undefined, // Legacy compat
+
 
     // NO LOCAL HANDLERS (onMouseDown/onClick removed) - BUT ALLOWED IF PASSED EXPLICITLY
     // All interaction is handled by InputEngine via data-item-id, 

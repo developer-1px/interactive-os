@@ -1,6 +1,6 @@
 import { produce } from "immer";
 import type { AppState, TodoCommand, AppEffect } from "@apps/todo/model/types";
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
 
 
 export const navigationMiddleware = (
@@ -26,11 +26,11 @@ export const navigationMiddleware = (
   // --- IMMEDIATE: OS NAVIGATION HANDLING ---
   // Since the Reducer doesn't "know" about layout/DOM, we handle navigation logic here
   // by querying the OS Focus Store (which has the Registry & DOM references).
-  // by querying the OS Focus Store (which has the Registry & DOM references).
+
 
 
   // 2. Data Integrity Checks
-  // Removed: ensureFocusIntegrity logic migrated to OS level
+  // (Logic migrated to OS level)
 
   // 3. Clear Effects
   let nextState = rawNewState;
@@ -42,8 +42,7 @@ export const navigationMiddleware = (
 
 
 
-  // 5. History Recording
-  // Removed.
+
 
   return nextState;
 };

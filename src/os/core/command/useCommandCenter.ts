@@ -1,4 +1,4 @@
-import React, { useMemo, useLayoutEffect, useRef } from "react";
+import { useMemo, useLayoutEffect, useRef } from "react";
 
 import { useContextService, evalContext } from "@os/core/context";
 import { Trigger } from "@os/ui/Trigger";
@@ -7,7 +7,7 @@ import { Item } from "@os/ui/Item";
 import { Zone } from "@os/ui/Zone";
 import type { CommandRegistry, createCommandStore } from "@os/core/command/store";
 
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
 
 /**
  * useCommandCenter:

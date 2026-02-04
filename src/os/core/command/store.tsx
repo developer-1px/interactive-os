@@ -16,7 +16,7 @@ export interface CommandGroup<S, P = any, K extends string = string> {
 
 
 import { OS } from "@os/core/context";
-import { useFocusStore } from "@os/core/focus";
+import { useFocusStore } from "@os/core/focus/focusStore";
 
 
 export class CommandRegistry<S, K extends string = string> {
@@ -147,7 +147,6 @@ export class CommandRegistry<S, K extends string = string> {
         ...binding,
         command: commandId, // Normalize to string ID for internal consumption
         when: binding.when || cmd.when,
-        // Removed cmd.args fallback (deprecated)
         args: binding.args,
         allowInInput: binding.allowInInput, // Strict Separation: Binding owns the context!
       };

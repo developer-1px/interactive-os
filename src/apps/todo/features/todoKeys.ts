@@ -38,6 +38,10 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
     { key: "ArrowDown", command: OS_COMMANDS.NAVIGATE, args: { direction: "DOWN" }, allowInInput: true },
     { key: "ArrowLeft", command: OS_COMMANDS.NAVIGATE, args: { direction: "LEFT" } },
     { key: "ArrowRight", command: OS_COMMANDS.NAVIGATE, args: { direction: "RIGHT" } },
+
+    // Tab Navigation (Zone-aware)
+    { key: "Tab", command: OS_COMMANDS.TAB },
+    { key: "Shift+Tab", command: OS_COMMANDS.TAB_PREV },
   ],
   zones: {
     sidebar: [

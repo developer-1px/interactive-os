@@ -17,10 +17,12 @@ import { OS } from "@os/ui";
 import { TodoApp } from "@apps/todo/app";
 import { CommandInspector } from "@os/debug/Inspector";
 import { useEngine } from "@os/core/command/CommandContext";
+import { useFocusBridge } from "@os/core/focus/focusBridge";
 import type { AppState } from "@apps/todo/model/types";
 
 // --- Internal Layout running inside OS.App ---
 function AppContent() {
+  useFocusBridge(); // Bidirectional focus sync
   const { state } = useEngine<AppState>();
   const isInspectorOpen = state?.ui?.isInspectorOpen;
 

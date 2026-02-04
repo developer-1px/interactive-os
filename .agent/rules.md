@@ -69,3 +69,56 @@
 
 ### Uncertainty Principle
 - **Ask Before Implementing**: If you are unsure about a requirement or implementation detail, DO NOT implement it. Ask the user for clarification first.
+
+---
+
+## Decoupling & Pipeline Patterns
+
+### 1. No God Functions
+- **Anti-Pattern**: A single function that knows about and calls multiple independent subsystems sequentially.
+- **Bad Example**:
+  ```typescript
+  function executeNavigation(ctx) {
+      prepareStickyAnchor(...);   // restore axis
+      findNextTarget(...);         // direction axis
+      shouldTrapAtEdge(...);       // edge axis
+      resolveEntry(...);           // entry axis
+  }
+  ```
+- **Solution**: Use **Pipeline Pattern** - each handler only knows about itself and receives/returns a shared context.
+- **Good Example**:
+  ```typescript
+  const pipeline = [restoreAxis, directionAxis, edgeAxis, entryAxis];
+  const executeNavigation = (ctx) => runPipeline(pipeline, ctx);
+  ```
+
+### 2. File Split ≠ Decoupling
+- **Warning**: Splitting code into separate files does NOT automatically reduce coupling.
+- **True Decoupling Requires**:
+  1. Each module has a **single responsibility**
+  2. Modules communicate through **shared interfaces**, not direct function calls
+  3. Adding/removing a module should NOT require modifying the orchestrator
+
+### 3. Unified Context Over Multiple Interfaces
+- **Anti-Pattern**: Creating separate interface types for each subsystem (`RestoreContext`, `EntryContext`, `TabContext`, etc.)
+- **Problem**: Interface proliferation increases cognitive load and creates coupling
+- **Solution**: Use a **single unified context type** that flows through the pipeline
+- **Good Example**:
+  ```typescript
+  interface NavContext {
+      direction: Direction;
+      focusPath: string[];
+      targetId?: string;
+      shouldTrap?: boolean;
+      // ... all handlers can read/write
+  }
+  ```
+
+### 4. Handler Signature Consistency
+- **Rule**: All handlers in a pipeline MUST share the same signature.
+- **Pattern**: `type AxisHandler = (ctx: NavContext) => NavContext | null;`
+- **Benefits**:
+  - Handlers are interchangeable
+  - Order can be rearranged declaratively
+  - Easy to add/remove handlers without code changes
+
