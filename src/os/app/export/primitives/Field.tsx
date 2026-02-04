@@ -5,6 +5,7 @@ import {
   isValidElement,
   cloneElement,
   useLayoutEffect,
+  useContext,
 } from "react";
 import type {
   ReactNode,
@@ -13,7 +14,7 @@ import type {
   HTMLAttributes,
   FormEvent,
 } from "react";
-import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
+import { useCommandEngine, FocusContext } from "@os/features/command/ui/CommandContext.tsx";
 import { useCommandListener } from "@os/features/command/hooks/useCommandListener";
 import { OS_COMMANDS } from "@os/features/command/definitions/osCommands.ts";
 import { getCaretPosition } from "../../../features/input/ui/Field/getCaretPosition";
@@ -130,6 +131,19 @@ export const Field = <T extends BaseCommand>({
       if (name) DOMInterface.unregisterItem(name);
     };
   }, [name]);
+
+  // --- Zone Registration (like Item does) ---
+  const focusContext = useContext(FocusContext);
+  const zoneId = focusContext?.zoneId || "unknown";
+  const addItem = useFocusStore((s) => s.addItem);
+  const removeItem = useFocusStore((s) => s.removeItem);
+
+  useLayoutEffect(() => {
+    if (name && zoneId && zoneId !== "unknown") {
+      addItem(zoneId, name);
+      return () => removeItem(zoneId, name);
+    }
+  }, [name, zoneId, addItem, removeItem]);
 
   // Use Logic for Active State (is this field focused?)
   const isFocused = shouldActivateField(

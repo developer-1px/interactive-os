@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useRef, useLayoutEffect } from "react";
+import { cloneElement, isValidElement, useRef, useLayoutEffect, useContext } from "react";
 import type {
   ReactNode,
   ReactElement,
@@ -6,8 +6,10 @@ import type {
 } from "react";
 import { logger } from "@os/app/debug/logger.ts";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
+import { FocusContext } from "@os/features/command/ui/CommandContext.tsx";
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
 import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts"; // [NEW] Registry
+import { useFocusStore } from "@os/features/focus/model/useFocusStore.ts";
 
 export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttributes<HTMLButtonElement> {
   id?: string;
@@ -31,6 +33,20 @@ export const Trigger = <T extends BaseCommand>({
   const { dispatch: contextDispatch } = useCommandEngine();
   const dispatch = customDispatch || contextDispatch;
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // --- Context Awareness (Zone Registration) ---
+  const focusContext = useContext(FocusContext);
+  const zoneId = focusContext?.zoneId || "unknown";
+  const addItem = useFocusStore((s) => s.addItem);
+  const removeItem = useFocusStore((s) => s.removeItem);
+
+  // Zone Item Registration (like Item does)
+  useLayoutEffect(() => {
+    if (id && zoneId && zoneId !== "unknown") {
+      addItem(zoneId, id);
+      return () => removeItem(zoneId, id);
+    }
+  }, [id, zoneId, addItem, removeItem]);
 
   // [NEW] DOM Registry Registration
   useLayoutEffect(() => {
