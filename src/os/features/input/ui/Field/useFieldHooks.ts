@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import type { MutableRefObject } from "react";
 import { getCaretPosition, setCaretPosition } from "./fieldUtils";
-import { useContextService } from "@os/features/AntigravityOS";
 
 // --- Types ---
 interface UseFieldStateProps {
@@ -109,36 +108,23 @@ export const useFieldFocus = ({
 };
 
 /**
- * Manages the global context updates related to the field (e.g., cursor position).
+ * Manages cursor position tracking within the field.
+ * Returns helper functions for updating cursor context.
+ * (Simplified: No longer uses GlobalContext, just local refs)
  */
-export const useFieldContext = (innerRef: MutableRefObject<HTMLElement | null>, cursorRef: MutableRefObject<number | null>) => {
-    const contextService = useContextService();
-    const updateContext = contextService?.updateContext || (() => { });
-
+export const useFieldContext = (
+    innerRef: MutableRefObject<HTMLElement | null>,
+    cursorRef: MutableRefObject<number | null>
+) => {
     const updateCursorContext = () => {
         if (!innerRef.current) return;
         const pos = getCaretPosition(innerRef.current);
-        const textLen = innerRef.current.innerText.length;
-
         cursorRef.current = pos;
-
-        updateContext({
-            cursorAtStart: pos === 0,
-            cursorAtEnd: pos === textLen,
-        });
     };
 
-    const setFieldFocused = (isFocused: boolean) => {
-        if (contextService?.context.isFieldFocused !== isFocused) {
-            updateContext({ isFieldFocused: isFocused });
-        }
-        if (!isFocused) {
-            updateContext({
-                cursorAtStart: false,
-                cursorAtEnd: false,
-            });
-        }
+    const setFieldFocused = (_isFocused: boolean) => {
+        // No-op: Field focus is now tracked by useFocusStore
     };
 
-    return { updateCursorContext, setFieldFocused, contextService };
+    return { updateCursorContext, setFieldFocused };
 };

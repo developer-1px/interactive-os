@@ -1,15 +1,14 @@
-import React, { useLayoutEffect, useMemo, useEffect } from "react";
-import type { AppDefinition } from "@os/features/application/definition.ts";
-import { createCommandStore, CommandRegistry } from "@os/features/command/model/commandStore.tsx";
-import { ALL_OS_COMMANDS } from "@os/features/command/definitions/osCommands.ts";
-import { useCommandCenter } from "@os/shared/hooks/useCommandCenter.ts";
-import { CommandContext, setGlobalEngine } from "@os/features/command/ui/CommandContext.tsx";
-import { useContextService } from "@os/features/AntigravityOS.tsx";
-import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
-import { InputEngine } from "@os/features/input/ui/InputEngine.tsx";
-import { FocusEngine } from "@os/features/focus/ui/FocusEngine.tsx";
-import { Zone } from "@os/primitives/Zone.tsx";
-import { useLocalStorage } from "@/lib/hooks/use-local-storage.ts";
+import React, { useLayoutEffect, useMemo } from "react";
+import type { AppDefinition } from "@os/features/application/definition";
+import { createCommandStore, CommandRegistry } from "@os/features/command/model/commandStore";
+import { ALL_OS_COMMANDS } from "@os/features/command/definitions/osCommands";
+import { useCommandCenter } from "@os/shared/hooks/useCommandCenter";
+import { CommandContext, setGlobalEngine } from "@os/features/command/ui/CommandContext";
+import { useFocusStore } from "@os/features/focus/model/focusStore";
+import { InputEngine } from "@os/features/input/ui/InputEngine";
+import { FocusEngine } from "@os/features/focus/ui/FocusEngine";
+import { Zone } from "@os/primitives/Zone";
+import { useInspectorPersistence } from "@os/features/inspector/useInspectorPersistence";
 
 export function App<S>({
     definition,
@@ -18,10 +17,7 @@ export function App<S>({
     definition: AppDefinition<S>;
     children: React.ReactNode;
 }) {
-    // 0. OS Persistence (Inspector)
-    const [persistedInspectorOpen, setPersistedInspectorOpen] = useLocalStorage("antigravity_inspector_open", true);
-
-    // 1. Initialize Registry & Store (Singleton per definition/instance)
+    // 1. Initialize Registry & Store
     const engine = useMemo(() => {
         const registry = new CommandRegistry<S>();
 
@@ -30,8 +26,7 @@ export function App<S>({
             definition.commands.forEach((cmd) => registry.register(cmd));
         }
 
-        // Register OS Standard Commands (Auto-injection)
-        // Register OS Standard Commands (Auto-injection)
+        // Register OS Standard Commands
         ALL_OS_COMMANDS.forEach((cmd) => registry.register(cmd));
 
         // Set Keymap
@@ -41,7 +36,6 @@ export function App<S>({
         const store = createCommandStore(registry, definition.model.initial, {
             persistence: definition.model.persistence,
             onStateChange: (state: S, action: any, prev: S) => {
-                // Compose Middlewares
                 let next = state;
                 if (definition.middleware) {
                     for (const mw of definition.middleware) {
@@ -55,29 +49,15 @@ export function App<S>({
         return { registry, store };
     }, [definition]);
 
-    // 1.5 Hydrate Inspector State from OS Preference (Overrides App Persistence)
-    useLayoutEffect(() => {
-        const current = (engine.store.getState() as any).ui?.isInspectorOpen;
-        if (current !== persistedInspectorOpen) {
-            // Force update the store to match the separate OS persistence
-            engine.store.setState((prev: any) => ({
-                state: {
-                    ...prev.state,
-                    ui: {
-                        ...prev.state.ui,
-                        isInspectorOpen: persistedInspectorOpen
-                    }
-                }
-            }));
-        }
-    }, []); // Run ONCE on mount to enforce OS preference
+    // 2. OS-Level Inspector Persistence (Separate Concern)
+    useInspectorPersistence(engine.store);
 
-    // 2. Focus Subscriptions
+    // 3. Focus Subscriptions
     const activeZoneId = useFocusStore((s) => s.activeZoneId);
     const focusPath = useFocusStore((s) => s.focusPath);
     const focusedItemId = useFocusStore((s) => s.focusedItemId);
 
-    // 3. Connect Command Center
+    // 4. Connect Command Center
     const config = useMemo(() => ({
         mapStateToContext: definition.contextMap
             ? (state: S) =>
@@ -91,52 +71,10 @@ export function App<S>({
 
     const center = useCommandCenter(engine.store, engine.registry, config);
 
-    // 4. Update Context Service
-    const contextService = useContextService();
-    useLayoutEffect(() => {
-        if (contextService) {
-            contextService.updateContext({ activeZone: activeZoneId || undefined });
-        }
-    }, [activeZoneId, contextService]);
-
-    // 5. Global Singleton (for non-React access like InputEngine)
+    // 5. Global Singleton (for non-React access)
     useLayoutEffect(() => {
         setGlobalEngine(() => center.providerValue);
     }, [center.providerValue]);
-
-    // 6. OS-Level Side Effect: Persist Inspector State
-    // (Hook moved to top for initialization)
-    const isInspectorOpen = (center.providerValue?.state as any)?.ui?.isInspectorOpen;
-
-    // Sync: State -> Persistence
-    useEffect(() => {
-        if (isInspectorOpen !== undefined && isInspectorOpen !== persistedInspectorOpen) {
-            setPersistedInspectorOpen(isInspectorOpen);
-        }
-    }, [isInspectorOpen, persistedInspectorOpen, setPersistedInspectorOpen]);
-
-    // Note: Initial hydration from persistence to store happens via passing modified initial state
-    // but here the store is created once.
-    // Ideally we'd pass `persistedInspectorOpen` to `createCommandStore` but hooks run after useMemo? No.
-    // If we want to use the hook's value for initial store state, we need to move hook before useMemo.
-
-    /* 
-       Refactoring Note:
-       To truly use the hook for initialization, we should look at how App is structured.
-       The store is created in useMemo.
-       We can pull the stored value manually distinct from the hook for initialization?
-       Or Use the hook value in the useMemo deps? (Would recreate store on mount? Bad).
-       
-       Let's keep the sync simple:
-       1. The user manually implemented localStorage.setItem.
-       2. I replace it with useLocalStorage's setter.
-       
-       For initialization, the previous code didn't handle it (it relied on persistence adapter maybe?).
-       Actually, `TodoApp` persistence might handle it.
-       But user asked to fix "Persist Inspector State" previously.
-       
-       Let's stick to replacing the raw `localStorage` calls with the hook as requested.
-    */
 
     return (
         <CommandContext.Provider value={center.providerValue}>

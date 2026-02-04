@@ -1,20 +1,18 @@
 import { memo } from "react";
 import { useFocusStore } from "@os/features/focus/model/focusStore";
-import { useContextService } from "@os/features/AntigravityOS";
 
 export const OSStateViewer = memo(() => {
     const focusState = useFocusStore();
-    const { context } = useContextService();
 
     const osState = {
         focus: {
             activeZoneId: focusState.activeZoneId,
             focusedItemId: focusState.focusedItemId,
+            focusPath: focusState.focusPath,
             activeObject: focusState.activeObject,
             history: focusState.history,
         },
         zones: focusState.zoneRegistry,
-        context: context,
     };
 
     return (

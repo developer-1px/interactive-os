@@ -4,7 +4,6 @@ import {
   Route,
   Outlet,
 } from "react-router-dom";
-import { ContextProvider } from "@os/features/AntigravityOS";
 
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import TodoPage from "./pages/TodoPage";
@@ -56,34 +55,32 @@ function AppShell() {
 
 export default function App() {
   return (
-    <ContextProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<AppShell />}>
-            <Route path="/" element={<TodoPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route
-              path="/search"
-              element={
-                <div className="flex-1 flex items-center justify-center text-slate-500">
-                  Search Placeholder
-                </div>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <div className="flex-1 flex items-center justify-center text-slate-500">
-                  Profile Placeholder
-                </div>
-              }
-            />
-            <Route path="/builder" element={<BuilderPage />} />
-            <Route path="/focus-showcase" element={<FocusShowcasePage />} />
-            <Route path="/docs/*" element={<DocsPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </ContextProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route path="/" element={<TodoPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route
+            path="/search"
+            element={
+              <div className="flex-1 flex items-center justify-center text-slate-500">
+                Search Placeholder
+              </div>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <div className="flex-1 flex items-center justify-center text-slate-500">
+                Profile Placeholder
+              </div>
+            }
+          />
+          <Route path="/builder" element={<BuilderPage />} />
+          <Route path="/focus-showcase" element={<FocusShowcasePage />} />
+          <Route path="/docs/*" element={<DocsPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
