@@ -10,7 +10,7 @@ import { Trigger } from "@os/app/export/primitives/Trigger";
 import { Kbd } from "@os/shared/ui/Kbd";
 
 // Logic Evaluation
-export { evalContext } from "@os/features/logic/lib/logicEvaluator";
+export { evalContext } from "@os/features/logic/lib/evalContext";
 
 // OS Namespace - All primitives in one place
 export const OS = {

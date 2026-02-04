@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { defineSidebarCommand } from "@apps/todo/features/commands/factory";
+import { defineSidebarCommand } from "@apps/todo/features/commands/defineGlobalCommand";
 
 export const MoveCategoryUp = defineSidebarCommand({
     id: "MOVE_CATEGORY_UP",

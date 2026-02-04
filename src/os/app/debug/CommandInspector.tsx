@@ -6,7 +6,7 @@ import { RegistryMonitor } from "@os/app/debug/inspector/RegistryMonitor.tsx";
 import { EventStream } from "@os/app/debug/inspector/EventStream.tsx";
 import { DataStateViewer } from "@os/app/debug/inspector/DataStateViewer.tsx";
 import { OSStateViewer } from "@os/app/debug/inspector/OSStateViewer.tsx";
-import { useInputTelemetry } from "@os/app/debug/inputTelemetry.ts";
+import { useInputTelemetry } from "@os/app/debug/LoggedKey.ts";
 
 // --- Main Component ---
 

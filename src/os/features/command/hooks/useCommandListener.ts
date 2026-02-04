@@ -1,5 +1,5 @@
 import { useEffect, useRef, useLayoutEffect } from "react";
-import { useCommandEventBus } from "@os/features/command/lib/commandEventBus";
+import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
 import type { BaseCommand } from "@os/entities/BaseCommand";
 
 type CommandListener = {

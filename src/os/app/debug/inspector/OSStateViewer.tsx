@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
+import { useFocusStore } from "@os/features/focus/model/useFocusStore.ts";
 
 export const OSStateViewer = memo(() => {
     const focusState = useFocusStore();

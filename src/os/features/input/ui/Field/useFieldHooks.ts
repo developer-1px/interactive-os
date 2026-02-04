@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import type { MutableRefObject } from "react";
-import { getCaretPosition, setCaretPosition } from "./fieldUtils";
+import { getCaretPosition, setCaretPosition } from "./getCaretPosition";
 
 // --- Types ---
 interface UseFieldStateProps {

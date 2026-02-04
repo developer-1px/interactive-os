@@ -1,16 +1,16 @@
-import type { KeymapConfig } from "@os/features/input/lib/keybindingMatcher";
-import { createLogicExpect, Rule } from "@os/features/logic/lib/logicBuilder";
+import type { KeymapConfig } from "@os/features/input/lib/getCanonicalKey";
+import { createLogicExpect, Rule } from "@os/features/logic/lib/Rule";
 import type { TodoContext } from "@apps/todo/logic/schema";
 import { OS } from "@os/features/AntigravityOS";
 
 // Command Imports (Direct References)
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
-import { ToggleView } from "@apps/todo/features/commands/board";
+import { ToggleView } from "@apps/todo/features/commands/ToggleView";
 import {
   MoveCategoryUp,
   MoveCategoryDown,
   SelectCategory
-} from "@apps/todo/features/commands/categories";
+} from "@apps/todo/features/commands/MoveCategoryUp";
 import {
   AddTodo,
   ToggleTodo,

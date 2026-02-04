@@ -1,7 +1,7 @@
 import type { StateCreator } from "zustand";
 import type { ZoneSlice } from "@os/features/focus/model/focusTypes";
-import { computePath } from "@os/features/focus/lib/pathUtils";
-import { executeRecovery } from "@os/features/focus/axes/handlerRecovery";
+import { computePath } from "@os/features/focus/lib/computePath";
+import { executeRecovery } from "@os/features/focus/axes/executeRecovery";
 import { DEFAULT_RECOVERY_POLICY } from "@os/features/focus/model/recoveryTypes";
 import type { FocusState } from "@os/features/focus/model/focusTypes";
 import { DOMInterface } from "@os/features/focus/lib/DOMInterface";

@@ -1,6 +1,6 @@
 import { produce } from "immer";
 import type { AppState, TodoCommand, AppEffect } from "@apps/todo/model/types";
-import { useFocusStore } from "@os/features/focus/model/focusStore";
+import { useFocusStore } from "@os/features/focus/model/useFocusStore";
 
 
 export const navigationMiddleware = (

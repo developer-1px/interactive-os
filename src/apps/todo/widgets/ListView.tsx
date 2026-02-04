@@ -14,7 +14,7 @@ import {
     StartEdit,
     SyncDraft,
 } from "@apps/todo/features/commands/list";
-import { ToggleView } from "@apps/todo/features/commands/board";
+import { ToggleView } from "@apps/todo/features/commands/ToggleView";
 import {
     Plus,
     Check,

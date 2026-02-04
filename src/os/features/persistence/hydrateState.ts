@@ -1,6 +1,6 @@
 import { logger } from "@os/app/debug/logger";
-import type { PersistenceAdapter } from "@os/features/persistence/adapter";
-import { LocalStorageAdapter } from "@os/features/persistence/adapter";
+import type { PersistenceAdapter } from "@os/features/persistence/PersistenceAdapter";
+import { LocalStorageAdapter } from "@os/features/persistence/PersistenceAdapter";
 
 export interface PersistenceConfig {
     key: string;

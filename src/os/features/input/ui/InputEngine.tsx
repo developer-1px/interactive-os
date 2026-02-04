@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { useFocusStore } from "@os/features/focus/model/focusStore";
+import { useFocusStore } from "@os/features/focus/model/useFocusStore";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext";
-import { getCanonicalKey, normalizeKeyDefinition } from "@os/features/input/lib/keybindingMatcher";
+import { getCanonicalKey, normalizeKeyDefinition } from "@os/features/input/lib/getCanonicalKey";
 import { evalContext } from "@os/features/AntigravityOS";
-import { useInputTelemetry } from "@os/app/debug/inputTelemetry";
+import { useInputTelemetry } from "@os/app/debug/LoggedKey";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 
 /**

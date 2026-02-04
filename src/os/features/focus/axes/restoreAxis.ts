@@ -1,7 +1,7 @@
 // Restore Axis: Focus restoration and spatial memory
 // Manages sticky anchors and focus history restoration
 
-import type { AxisHandler } from "@os/features/focus/lib/focusPipeline";
+import type { AxisHandler } from "@os/features/focus/lib/runPipeline";
 
 /**
  * Prepares sticky anchor for spatial navigation

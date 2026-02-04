@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 import { evalContext } from "@os/features/AntigravityOS.tsx";
 import { CommandRow } from "@os/app/debug/inspector/CommandRow.tsx";
 import type { ProcessedCommand } from "@os/app/debug/inspector/CommandRow.tsx";
-import type { CommandRegistry } from "@os/features/command/model/commandStore.tsx";
+import type { CommandRegistry } from "@os/features/command/model/createCommandStore.tsx";
 import { ZoneRegistry } from "@os/features/jurisdiction/model/ZoneRegistry.ts";
 
 // Zero-Base Jurisdiction Detection

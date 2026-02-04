@@ -15,7 +15,7 @@ import DocsPage from "./pages/DocsPage";
 
 import { OS } from "@os/features/AntigravityOS";
 import { TodoApp } from "@apps/todo/app";
-import { CommandInspector } from "@os/app/debug/Inspector";
+import { CommandInspector } from "@os/app/debug/CommandInspector";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 

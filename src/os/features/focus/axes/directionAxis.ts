@@ -2,13 +2,13 @@
 // Unified entry point for all direction navigation
 
 import { logger } from "@os/app/debug/logger";
-import type { AxisHandler } from "@os/features/focus/lib/focusPipeline";
-import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver";
-import { collectItemRects } from "@os/features/focus/lib/domUtils";
-import { resolvePivot, getBubblePath } from "@os/features/focus/lib/pivotUtils";
-import { findNextRovingTarget, type NavigationContext } from "@os/features/focus/lib/navigationRoving";
-import { findNextSpatialTarget } from "@os/features/focus/lib/navigationSpatial";
-import { findSiblingZone, getSeamlessEntryItem } from "@os/features/focus/axes/handlerSeamless";
+import type { AxisHandler } from "@os/features/focus/lib/runPipeline";
+import { resolveBehavior } from "@os/features/focus/lib/resolveBehavior";
+import { collectItemRects } from "@os/features/focus/lib/collectItemRects";
+import { resolvePivot, getBubblePath } from "@os/features/focus/lib/getBubblePath";
+import { findNextRovingTarget, type NavigationContext } from "@os/features/focus/lib/findNextRovingTarget";
+import { findNextSpatialTarget } from "@os/features/focus/lib/findNextSpatialTarget";
+import { findSiblingZone, getSeamlessEntryItem } from "@os/features/focus/axes/findSiblingZone";
 import type { FocusBehavior } from "@os/entities/FocusBehavior";
 
 /**

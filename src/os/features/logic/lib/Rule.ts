@@ -1,5 +1,5 @@
 import type { LogicNode, ContextState } from "../LogicNode";
-import { evalContext } from "./logicEvaluator";
+import { evalContext } from "./evalContext";
 
 const wrap = (fn: (ctx: ContextState) => boolean, label: string): LogicNode =>
     Object.assign(fn, { toString: () => label });

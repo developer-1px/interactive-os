@@ -1,7 +1,7 @@
 import { OS } from "@os/features/AntigravityOS";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import { ToggleTodo } from "@apps/todo/features/commands/list";
-import { ToggleView } from "@apps/todo/features/commands/board";
+import { ToggleView } from "@apps/todo/features/commands/ToggleView";
 import { Check, List } from "lucide-react";
 import type { AppState } from "@apps/todo/model/types";
 

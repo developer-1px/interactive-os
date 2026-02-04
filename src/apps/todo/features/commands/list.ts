@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { defineListCommand } from "@apps/todo/features/commands/factory";
+import { defineListCommand } from "@apps/todo/features/commands/defineGlobalCommand";
 import { OS } from "@os/features/AntigravityOS";
 
 export const AddTodo = defineListCommand({

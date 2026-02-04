@@ -1,12 +1,12 @@
 import { create } from "zustand";
 
 import { logger } from "@os/app/debug/logger";
-import { useCommandEventBus } from "@os/features/command/lib/commandEventBus";
+import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
 
 // Modules
 import { CommandRegistry, type CommandGroup } from "@os/features/command/model/CommandRegistry";
 // Middleware is now injected via config!
-import { hydrateState, createPersister, type PersistenceConfig } from "@os/features/persistence/storePersistence";
+import { hydrateState, createPersister, type PersistenceConfig } from "@os/features/persistence/hydrateState";
 
 // Re-exports for consumers
 export { CommandRegistry, type CommandGroup };

@@ -1,18 +1,18 @@
 import React, { useLayoutEffect, useMemo } from "react";
-import type { AppDefinition } from "@os/features/application/definition";
-import { createCommandStore, CommandRegistry } from "@os/features/command/model/commandStore";
+import type { AppDefinition } from "@os/features/application/defineApplication";
+import { createCommandStore, CommandRegistry } from "@os/features/command/model/createCommandStore";
 import { ALL_OS_COMMANDS } from "@os/features/command/definitions/osCommands";
 import { CommandContext, setGlobalEngine } from "@os/features/command/ui/CommandContext";
-import { useFocusStore } from "@os/features/focus/model/focusStore";
+import { useFocusStore } from "@os/features/focus/model/useFocusStore";
 import { InputEngine } from "@os/features/input/ui/InputEngine";
 import { FocusEngine } from "@os/features/focus/ui/FocusEngine";
 import { Zone } from "@os/app/export/primitives/Zone";
 import { useInspectorPersistence } from "@os/features/inspector/useInspectorPersistence";
-import { evalContext } from "@os/features/logic/lib/logicEvaluator";
+import { evalContext } from "@os/features/logic/lib/evalContext";
 import type { ContextState } from "@os/features/logic/LogicNode";
 
 // Middleware
-import { resolveFocusMiddleware } from "@os/features/focus/bridge/commandMiddleware";
+import { resolveFocusMiddleware } from "@os/features/focus/bridge/resolveFocusMiddleware";
 
 export function App<S>({
     definition,

@@ -2,10 +2,10 @@ import { Zone } from "@os/app/export/primitives/Zone.tsx";
 import { Item } from "@os/app/export/primitives/Item.tsx";
 import { Trigger } from "@os/app/export/primitives/Trigger.tsx";
 import { Kbd } from "@os/app/debug/components/Kbd";
-import { useFocusStore } from "@os/features/focus/model/focusStore";
+import { useFocusStore } from "@os/features/focus/model/useFocusStore";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
-import { SelectCategory } from "@apps/todo/features/commands/categories";
+import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
 import {
   Inbox,
   Briefcase,

@@ -1,6 +1,6 @@
 import type { StateCreator } from "zustand";
 import type { CursorSlice } from "@os/features/focus/model/focusTypes";
-import { computePath } from "@os/features/focus/lib/pathUtils";
+import { computePath } from "@os/features/focus/lib/computePath";
 import type { FocusState } from "@os/features/focus/model/focusTypes";
 
 export const createCursorSlice: StateCreator<FocusState, [], [], CursorSlice> = (set) => ({

@@ -8,7 +8,7 @@ interface FocusContextValue {
 export const FocusContext = createContext<FocusContextValue | null>(null);
 
 import type { BaseCommand } from "@os/entities/BaseCommand";
-import type { CommandRegistry } from "@os/features/command/model/commandStore";
+import type { CommandRegistry } from "@os/features/command/model/createCommandStore";
 
 interface CommandContextValue<S = unknown> {
   dispatch: (cmd: BaseCommand) => void;

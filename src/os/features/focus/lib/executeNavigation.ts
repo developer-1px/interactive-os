@@ -1,9 +1,9 @@
 // Focus Navigation Orchestrator
 // Simplified pipeline-based navigation
-import { runPipeline, type AxisHandler } from "./focusPipeline";
-import { restoreAxis } from "@os/features/focus/axes/handlerRestore";
-import { directionAxis } from "@os/features/focus/axes/handlerDirection";
-import { entryAxis } from "@os/features/focus/axes/handlerEntry";
+import { runPipeline, type AxisHandler } from "./runPipeline";
+import { restoreAxis } from "@os/features/focus/axes/restoreAxis";
+import { directionAxis } from "@os/features/focus/axes/directionAxis";
+import { entryAxis } from "@os/features/focus/axes/entryAxis";
 import type { NavContext } from "@os/entities/NavContext";
 import type { NavResult } from "@os/entities/NavResult";
 

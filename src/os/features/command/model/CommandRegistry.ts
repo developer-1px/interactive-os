@@ -1,5 +1,5 @@
 import { logger } from "@os/app/debug/logger";
-import type { KeymapConfig } from "@os/features/input/lib/keybindingMatcher";
+import type { KeymapConfig } from "@os/features/input/lib/getCanonicalKey";
 import type { CommandDefinition } from "@os/entities/CommandDefinition";
 import type { KeybindingItem } from "@os/entities/KeybindingItem";
 

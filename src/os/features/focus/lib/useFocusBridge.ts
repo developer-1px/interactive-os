@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useFocusStore } from "@os/features/focus/model/focusStore";
-import { applyFocus } from "@os/features/focus/axes/handlerTarget";
+import { useFocusStore } from "@os/features/focus/model/useFocusStore";
+import { applyFocus } from "@os/features/focus/axes/applyFocus";
 
 /**
  * useFocusBridge
