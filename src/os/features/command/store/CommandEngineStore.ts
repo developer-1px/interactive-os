@@ -49,6 +49,9 @@ export interface CommandEngineState<S = any> {
     getActiveDispatch: () => ((cmd: BaseCommand) => void) | null;
     getActiveState: () => S | null;
     getActiveContextMap: () => ((state: S, focus: any) => any) | null;
+
+    // Unified keybinding getter
+    getAllKeybindings: () => any[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -113,6 +116,20 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
     getActiveContextMap: () => {
         const { activeAppId, appRegistries } = get();
         return activeAppId ? appRegistries.get(activeAppId)?.contextMap || null : null;
+    },
+
+    /**
+     * Get all keybindings from active app + OS (merged).
+     * App bindings listed first for priority.
+     */
+    getAllKeybindings: () => {
+        const { activeAppId, appRegistries, osRegistry } = get();
+        const appRegistry = activeAppId ? appRegistries.get(activeAppId)?.registry : null;
+
+        return [
+            ...(appRegistry?.getKeybindings() || []),
+            ...(osRegistry?.getKeybindings() || []),
+        ];
     },
 }));
 

@@ -4,9 +4,11 @@ import { useFocusRegistry, FocusRegistry } from "@os/features/focus/registry/Foc
 
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
 import { CommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
-import { getCanonicalKey, normalizeKeyDefinition } from "@os/features/input/lib/getCanonicalKey";
-import { evalContext } from "@os/features/AntigravityOS";
 import { useInputTelemetry } from "@os/app/debug/LoggedKey";
+
+// Pipeline Phases
+import { interceptKeyboard } from "@os/features/command/pipeline/1-intercept";
+import { resolveKeybinding, buildBubblePath, type KeybindingEntry } from "@os/features/command/pipeline/2-resolve";
 
 /**
  * [Hardware Layer] Input Engine
@@ -21,7 +23,6 @@ export function InputEngine() {
 
     // Direct store subscription
     const isInitialized = useCommandEngineStore(s => s.isInitialized);
-    const getActiveRegistry = useCommandEngineStore(s => s.getActiveRegistry);
     const getOSRegistry = useCommandEngineStore(s => s.getOSRegistry);
     const getActiveDispatch = useCommandEngineStore(s => s.getActiveDispatch);
     const getActiveState = useCommandEngineStore(s => s.getActiveState);
@@ -65,107 +66,58 @@ export function InputEngine() {
         if (!isInitialized) return;
 
         const handleGlobalKeyDown = (e: KeyboardEvent) => {
-            if (e.defaultPrevented) return;
-            if (e.isComposing) return;
+            // ═══════════════════════════════════════════════════════════
+            // Phase 1: INTERCEPT - Transform raw event to intent
+            // ═══════════════════════════════════════════════════════════
+            const intent = interceptKeyboard(e);
+            if (!intent) return;
 
-            // Input field detection
-            const target = e.target as HTMLElement;
-            const isInput = (
-                target instanceof HTMLInputElement ||
-                target instanceof HTMLTextAreaElement ||
-                target.isContentEditable
-            );
-
-            // Get registries at dispatch time
-            const appRegistry = getActiveRegistry();
-            const osRegistry = getOSRegistry();
-
-            // Collect all keybindings with source info: app first, then OS fallback
-            const allBindings = [
-                ...(appRegistry?.getKeybindings() || []).map((b: any) => ({ ...b, _source: 'app' })),
-                ...(osRegistry?.getKeybindings() || []).map((b: any) => ({ ...b, _source: 'os' })),
-            ];
-
+            // Get unified keybindings (app + OS merged)
+            const allBindings = useCommandEngineStore.getState().getAllKeybindings() as unknown as KeybindingEntry[];
             if (allBindings.length === 0) return;
 
-            const canonicalKey = getCanonicalKey(e);
+            // ═══════════════════════════════════════════════════════════
+            // Phase 2: RESOLVE - Match intent to keybinding
+            // ═══════════════════════════════════════════════════════════
+            const ctx = buildContext();
+            if (!ctx) return;
+
             const focusPath = FocusRegistry.getFocusPath();
-            const bubblePath = focusPath.length > 0 ? [...focusPath].reverse() : (activeGroupId ? [activeGroupId] : []);
-            bubblePath.push("global");
+            const bubblePath = buildBubblePath(focusPath, activeGroupId);
 
-            let handled = false;
-            const keyMatches = allBindings.filter((b: any) => normalizeKeyDefinition(b.key) === canonicalKey);
+            const resolved = resolveKeybinding(intent, allBindings, ctx, bubblePath);
+            if (!resolved) return;
 
-            if (keyMatches.length > 0) {
-                const ctx = buildContext();
+            // ═══════════════════════════════════════════════════════════
+            // Phase 3+: EXECUTE - Prevent default and dispatch
+            // ═══════════════════════════════════════════════════════════
+            e.preventDefault();
+            e.stopPropagation();
+            logKey(e as any, activeGroupId || "global", true);
 
-                for (const layerId of bubblePath) {
-                    if (handled) break;
+            const { binding, resolvedArgs } = resolved;
 
-                    const isGlobal = layerId === "global";
-                    const layerBindings = keyMatches.filter((b: any) => {
-                        if (isGlobal) return !b.groupId;
-                        return b.groupId === layerId;
-                    });
+            // Execute: Prioritize App dispatch for commands that exist in both registries
+            // (e.g., OS_NAVIGATE keybinding should still dispatch to App to update state)
+            const appDispatch = getActiveDispatch();
+            const osReg = getOSRegistry();
 
-                    for (const binding of layerBindings) {
-                        const evaluationCtx = { ...ctx, isInput };
-
-                        if (isInput && !binding.allowInInput) continue;
-                        if (binding.when && !evalContext(binding.when, evaluationCtx)) continue;
-
-                        e.preventDefault();
-                        e.stopPropagation();
-                        logKey(e as any, activeGroupId || "global", true);
-
-                        // Resolve OS.FOCUS in args before dispatch
-                        const resolveArgs = (args: any) => {
-                            if (!args || typeof args !== 'object') return args;
-                            const resolved: Record<string, any> = {};
-                            for (const [key, value] of Object.entries(args)) {
-                                if (value === "OS.FOCUS") {
-                                    resolved[key] = evaluationCtx.focusedItemId;
-                                } else {
-                                    resolved[key] = value;
-                                }
-                            }
-                            return resolved;
-                        };
-                        const resolvedArgs = resolveArgs(binding.args);
-
-                        // Dispatch Logic: Prioritize App Context
-                        const appDispatch = getActiveDispatch();
-                        const appReg = getActiveRegistry();
-                        const osReg = getOSRegistry();
-
-                        // Even if keybinding came from OS layer (e.g. Arrow keys),
-                        // if the active App handles this command, we should dispatch to the App.
-                        const existsInApp = appReg?.get(binding.command);
-
-                        if (existsInApp) {
-                            appDispatch?.({ type: binding.command, payload: resolvedArgs });
-                            // Log to global telemetry for Inspector
-                            CommandTelemetryStore.log(binding.command, resolvedArgs, 'app');
-                        }
-                        // If not in App, try OS execution (e.g. global inspector toggle)
-                        else if (osReg?.get(binding.command)) {
-                            const osCommand = osReg.get(binding.command);
-                            // Note: OS commands run with empty state unless they access external stores (like InspectorStore)
-                            osCommand?.run({}, resolvedArgs);
-                            // Log to global telemetry for Inspector
-                            CommandTelemetryStore.log(binding.command, resolvedArgs, 'os');
-                        }
-
-                        handled = true;
-                        break;
-                    }
-                }
+            // Try app dispatch first (most commands should go here)
+            if (appDispatch) {
+                appDispatch({ type: binding.command, payload: resolvedArgs });
+                CommandTelemetryStore.log(binding.command, resolvedArgs, 'app');
+            }
+            // Fallback: OS-only commands (e.g., toggle inspector)
+            else if (osReg?.get(binding.command)) {
+                const osCommand = osReg.get(binding.command);
+                osCommand?.run({}, resolvedArgs);
+                CommandTelemetryStore.log(binding.command, resolvedArgs, 'os');
             }
         };
 
         window.addEventListener("keydown", handleGlobalKeyDown);
         return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-    }, [isInitialized, activeGroupId, getActiveRegistry, getOSRegistry, getActiveDispatch, logKey, buildContext]);
+    }, [isInitialized, activeGroupId, getActiveDispatch, getOSRegistry, logKey, buildContext]);
 
     return null;
 }
