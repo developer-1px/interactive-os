@@ -3,19 +3,22 @@ import { useEffect, useCallback } from "react";
 import { useFocusRegistry, FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
-import { CommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { useInputTelemetry } from "@os/app/debug/LoggedKey";
 
 // Pipeline Phases
-import { interceptKeyboard } from "@os/features/command/pipeline/1-intercept";
-import { resolveKeybinding, buildBubblePath, type KeybindingEntry } from "@os/features/command/pipeline/2-resolve";
+import { interceptKeyboard } from "@os/features/command/pipeline/1-intercept/interceptKeyboard";
+import { resolveKeybinding, buildBubblePath, type KeybindingEntry } from "@os/features/command/pipeline/2-resolve/resolveKeybinding";
+import { dispatchCommand } from "@os/features/command/pipeline/3-dispatch/dispatchCommand";
+import { runCommandEffects } from "@os/features/command/pipeline/4-effect/commandEffects";
 
 /**
  * [Hardware Layer] Input Engine
  *
- * Lookup-based keybinding resolution:
- * 1. First check active app registry
- * 2. Fall back to OS registry
+ * PIPELINE ARCHITECTURE:
+ * 1. INTERCEPT: Transform raw event -> Intent
+ * 2. RESOLVE: Match Intent -> ResolvedBinding
+ * 3. DISPATCH: Execute ResolvedBinding -> ExecutionResult
+ * 4. EFFECT: Handle Telemetry/Feedback
  */
 export function InputEngine() {
     // --- Global Focus State (direct Zustand subscription) ---
@@ -67,7 +70,7 @@ export function InputEngine() {
 
         const handleGlobalKeyDown = (e: KeyboardEvent) => {
             // ═══════════════════════════════════════════════════════════
-            // Phase 1: INTERCEPT - Transform raw event to intent
+            // Phase 1: INTERCEPT
             // ═══════════════════════════════════════════════════════════
             const intent = interceptKeyboard(e);
             if (!intent) return;
@@ -77,7 +80,7 @@ export function InputEngine() {
             if (allBindings.length === 0) return;
 
             // ═══════════════════════════════════════════════════════════
-            // Phase 2: RESOLVE - Match intent to keybinding
+            // Phase 2: RESOLVE
             // ═══════════════════════════════════════════════════════════
             const ctx = buildContext();
             if (!ctx) return;
@@ -85,34 +88,28 @@ export function InputEngine() {
             const focusPath = FocusRegistry.getFocusPath();
             const bubblePath = buildBubblePath(focusPath, activeGroupId);
 
-            const resolved = resolveKeybinding(intent, allBindings, ctx, bubblePath);
-            if (!resolved) return;
+            const resolution = resolveKeybinding(intent, allBindings, ctx, bubblePath);
+            if (!resolution) return;
 
-            // ═══════════════════════════════════════════════════════════
-            // Phase 3+: EXECUTE - Prevent default and dispatch
-            // ═══════════════════════════════════════════════════════════
+            // Prevent default if we have a resolution
             e.preventDefault();
             e.stopPropagation();
             logKey(e as any, activeGroupId || "global", true);
 
-            const { binding, resolvedArgs } = resolved;
+            // ═══════════════════════════════════════════════════════════
+            // Phase 3: DISPATCH
+            // ═══════════════════════════════════════════════════════════
+            const dispatchContext = {
+                appDispatch: getActiveDispatch(),
+                osRegistry: getOSRegistry()
+            };
 
-            // Execute: Prioritize App dispatch for commands that exist in both registries
-            // (e.g., OS_NAVIGATE keybinding should still dispatch to App to update state)
-            const appDispatch = getActiveDispatch();
-            const osReg = getOSRegistry();
+            const result = dispatchCommand(resolution, dispatchContext);
 
-            // Try app dispatch first (most commands should go here)
-            if (appDispatch) {
-                appDispatch({ type: binding.command, payload: resolvedArgs });
-                CommandTelemetryStore.log(binding.command, resolvedArgs, 'app');
-            }
-            // Fallback: OS-only commands (e.g., toggle inspector)
-            else if (osReg?.get(binding.command)) {
-                const osCommand = osReg.get(binding.command);
-                osCommand?.run({}, resolvedArgs);
-                CommandTelemetryStore.log(binding.command, resolvedArgs, 'os');
-            }
+            // ═══════════════════════════════════════════════════════════
+            // Phase 4: EFFECT
+            // ═══════════════════════════════════════════════════════════
+            runCommandEffects(result, resolution);
         };
 
         window.addEventListener("keydown", handleGlobalKeyDown);

@@ -29,13 +29,10 @@ export const createItemsSlice: StateCreator<ItemsSlice> = (set) => ({
         const newItems = state.items.filter((id: string) => id !== itemId);
         const updates: Record<string, any> = { items: newItems };
 
-        // Focus recovery: if removed item was focused, move to next/prev
-        if (state.focusedItemId === itemId) {
-            const removedIndex = state.items.indexOf(itemId);
-            const nextItem = newItems[removedIndex] || newItems[removedIndex - 1] || null;
-            updates.focusedItemId = nextItem;
-            if (nextItem) updates.lastFocusedId = nextItem;
-        }
+        // NOTE: We intentionally do NOT change focusedItemId here.
+        // React re-renders can cause temporary unmount/remount cycles.
+        // If the item is actually gone, FocusSync will handle the stale focus
+        // when it tries to focus a non-existent element.
 
         // Selection cleanup: remove from selection if present
         if (state.selection?.includes(itemId)) {

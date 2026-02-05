@@ -18,8 +18,8 @@ const LayerColors: Record<LogLayer, string> = {
 };
 
 class AntigravityLogger {
-  private enabled = false;
-  private enabledLayers: Set<LogLayer> = new Set();
+  private enabled = IS_DEV;
+  private enabledLayers: Set<LogLayer> = new Set(['FOCUS']);
   private timers: Map<string, number> = new Map();
 
   constructor() {

@@ -45,7 +45,7 @@ export function NCPServicesBlock() {
                         value={title}
                         onCommit={(val: string) => setTitle(val)}
                         className={`
-                            text-3xl font-bold text-slate-900 leading-tight whitespace-pre-wrap
+                            text-3xl font-bold text-slate-900 leading-tight whitespace-pre-wrap tracking-tight
                             data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 rounded p-2 -m-2
                         `}
                     />
@@ -53,8 +53,9 @@ export function NCPServicesBlock() {
                     <OS.Item id="ncp-service-all">
                         {({ isFocused }: { isFocused: boolean }) => (
                             <button className={`
-                                px-6 py-3 rounded-full bg-slate-800 text-white text-sm font-bold transition-all
-                                ${isFocused ? 'scale-105 ring-4 ring-slate-300' : 'hover:bg-slate-700'}
+                                px-6 py-3 rounded-full bg-slate-900 text-white text-sm font-bold transition-all
+                                shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 hover:-translate-y-0.5
+                                ${isFocused ? 'scale-105 ring-4 ring-slate-300' : 'hover:bg-slate-800'}
                             `}>
                                 서비스 전체보기
                             </button>
@@ -68,25 +69,42 @@ export function NCPServicesBlock() {
                     role=""
                     tab={{ behavior: 'flow' }}
                     navigate={{ seamless: true }}
-                    className="flex gap-6 items-center mb-12 border-b border-slate-200 pb-8 overflow-x-auto"
+                    className="flex flex-row gap-6 items-center mb-12 border-b border-slate-200 pb-8 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,transparent,black_2%,black_98%,transparent)]"
                 >
                     {tabs.map((tab, i) => (
                         <OS.Item key={tab.label} id={`tab-${i}`}>
                             {({ isFocused }: { isFocused: boolean }) => (
                                 <div className={`
-                                    flex flex-col items-center gap-3 cursor-pointer group transition-all
-                                    ${tab.active ? 'text-blue-600' : 'text-slate-500'}
-                                    ${isFocused ? 'scale-110' : ''}
+                                    flex flex-col items-start justify-between p-5 min-w-[160px] h-[160px] rounded-3xl cursor-pointer group transition-all relative shrink-0 border
+                                    ${tab.active
+                                        ? 'bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/30 ring-4 ring-blue-600/10'
+                                        : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1'
+                                    }
+                                    ${isFocused ? 'scale-105 ring-4 ring-blue-500/20' : ''}
                                 `}>
                                     <div className={`
-                                        w-16 h-16 rounded-2xl flex items-center justify-center transition-all bg-white shadow-sm border
-                                        ${tab.active ? 'border-blue-200 bg-blue-50' : 'border-slate-100 group-hover:border-slate-300'}
-                                        ${isFocused ? 'ring-2 ring-blue-400 border-blue-400' : ''}
+                                        w-12 h-12 rounded-2xl flex items-center justify-center transition-all
+                                        ${tab.active
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600'
+                                        }
                                     `}>
-                                        <tab.icon size={28} strokeWidth={1.5} />
+                                        <tab.icon size={24} strokeWidth={2} />
                                     </div>
-                                    <span className="text-xs font-bold tracking-tight">{tab.label}</span>
-                                    {tab.active && <div className="h-1 w-full bg-blue-600 absolute bottom-[-33px]" />}
+
+                                    <div className="flex flex-col gap-1">
+                                        <span className={`text-lg font-bold tracking-tight ${tab.active ? 'text-white' : 'text-slate-900'}`}>
+                                            {tab.label}
+                                        </span>
+                                        <span className={`text-[11px] font-medium uppercase tracking-wider ${tab.active ? 'text-blue-200' : 'text-slate-400'}`}>
+                                            Service
+                                        </span>
+                                    </div>
+
+                                    {/* Active decorative blob */}
+                                    {tab.active && (
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                                    )}
                                 </div>
                             )}
                         </OS.Item>
@@ -101,13 +119,22 @@ export function NCPServicesBlock() {
                         role=""
                         tab={{ behavior: 'flow' }}
                         navigate={{ seamless: true }}
-                        className="lg:w-1/4 min-h-[400px] bg-blue-900 rounded-3xl p-10 text-white flex flex-col justify-between overflow-hidden relative shadow-xl"
+                        className="lg:w-1/4 min-h-[400px] bg-gradient-to-br from-[#0F172A] to-[#1E293B] rounded-3xl p-10 text-white flex flex-col justify-between overflow-hidden relative shadow-2xl shadow-blue-900/20 group"
                     >
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                        {/* Dynamic Background Effects */}
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/30 transition-colors duration-700" />
+                        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 group-hover:bg-cyan-400/20 transition-colors duration-700" />
 
-                        <h3 className="text-2xl font-bold relative z-10">Featured</h3>
-                        <div className="relative z-10 h-32 w-32 bg-gradient-to-tr from-cyan-400 to-blue-600 rounded-full blur-2xl opacity-60 self-center" />
+                        <div className="relative z-10">
+                            <span className="inline-block px-3 py-1 rounded-full bg-white/10 text-white/90 text-[10px] font-bold tracking-wider mb-4 border border-white/10 backdrop-blur-md">
+                                RECOMMEND
+                            </span>
+                            <h3 className="text-3xl font-bold tracking-tight leading-tight">
+                                Featured<br />Service
+                            </h3>
+                        </div>
+
+                        <div className="relative z-10 h-32 w-32 bg-gradient-to-tr from-cyan-400 to-blue-600 rounded-full blur-2xl opacity-80 self-end shadow-lg shadow-cyan-500/50 animate-pulse duration-[3000ms]" />
                     </OS.Zone>
 
                     {/* Service List Grid */}
@@ -123,20 +150,23 @@ export function NCPServicesBlock() {
                         </div>
 
                         {featuredServices.map((service, index) => (
-                            <div key={index} className="flex gap-4 group">
+                            <div key={index} className="flex gap-5 group/item cursor-pointer p-4 -m-4 rounded-2xl hover:bg-slate-50 transition-all duration-300">
                                 <OS.Item id={`service-icon-${index}`}>
                                     {({ isFocused }: { isFocused: boolean }) => (
                                         <div className={`
-                                            w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-slate-100
-                                            ${isFocused ? 'bg-slate-900 text-white ring-2 ring-slate-300' : 'bg-slate-50 text-slate-600'}
+                                            w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-300
+                                            ${isFocused
+                                                ? 'bg-slate-900 text-white ring-2 ring-slate-300 scale-110 shadow-lg'
+                                                : 'bg-white text-slate-600 border-slate-100 shadow-sm group-hover/item:border-blue-200 group-hover/item:shadow-blue-100 group-hover/item:scale-110'
+                                            }
                                         `}>
-                                            <service.icon size={20} />
+                                            <service.icon size={22} className="group-hover/item:text-blue-600 transition-colors" />
                                         </div>
                                     )}
                                 </OS.Item>
 
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1.5">
                                         {/* Field self-registers */}
                                         <Field
                                             name={`service-title-${index}`}
@@ -148,12 +178,12 @@ export function NCPServicesBlock() {
                                                 setFeaturedServices(newServices);
                                             }}
                                             className={`
-                                                font-bold text-slate-900
+                                                font-bold text-slate-900 text-lg tracking-tight
                                                 data-[focused=true]:bg-slate-100 data-[focused=true]:ring-1 data-[focused=true]:ring-slate-300 rounded px-1 -mx-1
                                             `}
                                         />
                                         {service.badge && (
-                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider">
+                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider border border-green-200">
                                                 {service.badge}
                                             </span>
                                         )}
@@ -169,7 +199,7 @@ export function NCPServicesBlock() {
                                             setFeaturedServices(newServices);
                                         }}
                                         className={`
-                                            text-sm text-slate-500 leading-relaxed block
+                                            text-sm text-slate-500 leading-relaxed block group-hover/item:text-slate-600 transition-colors
                                             data-[focused=true]:bg-slate-100 data-[focused=true]:ring-1 data-[focused=true]:ring-slate-300 rounded px-1 -mx-1
                                         `}
                                     />

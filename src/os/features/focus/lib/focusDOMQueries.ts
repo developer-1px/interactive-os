@@ -4,7 +4,7 @@
  */
 
 export const findFocusableItem = (el: HTMLElement) =>
-    el.closest('[tabindex]') as HTMLElement | null;
+    el.closest('[data-item-id]') as HTMLElement | null;
 
 export const findZone = (el: HTMLElement) =>
     el.closest('[data-focus-group]') as HTMLElement | null;

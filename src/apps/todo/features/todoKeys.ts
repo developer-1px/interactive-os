@@ -44,10 +44,10 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
   ],
   zones: {
     sidebar: [
-      { key: "Meta+ArrowUp", command: MoveCategoryUp },
-      { key: "Meta+ArrowDown", command: MoveCategoryDown },
-      { key: "Enter", command: SelectCategory, args: { id: OS.FOCUS } },
-      { key: "Space", command: SelectCategory, args: { id: OS.FOCUS } },
+      { key: "Meta+ArrowUp", command: MoveCategoryUp, when: Expect("activeZone").toBe("sidebar") },
+      { key: "Meta+ArrowDown", command: MoveCategoryDown, when: Expect("activeZone").toBe("sidebar") },
+      { key: "Enter", command: SelectCategory, args: { id: OS.FOCUS }, when: Expect("activeZone").toBe("sidebar") },
+      { key: "Space", command: SelectCategory, args: { id: OS.FOCUS }, when: Expect("activeZone").toBe("sidebar") },
     ],
 
     listView: [
@@ -56,14 +56,17 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
 
       // Structure - Reorder Items (Meta + Arrow)
       // Note: Meta+Arrows are reserved for "Move Item", not "Navigate Focus"
-      { key: "Meta+ArrowUp", command: MoveItemUp, args: { focusId: OS.FOCUS } },
-      { key: "Meta+ArrowDown", command: MoveItemDown, args: { focusId: OS.FOCUS } },
+      { key: "Meta+ArrowUp", command: MoveItemUp, args: { focusId: OS.FOCUS }, when: Expect("activeZone").toBe("listView") },
+      { key: "Meta+ArrowDown", command: MoveItemDown, args: { focusId: OS.FOCUS }, when: Expect("activeZone").toBe("listView") },
 
       // Creation (Strict Draft Guard)
       {
         key: "Enter",
         command: AddTodo,
-        when: Expect("isDraftFocused").toBe(true),
+        when: Rule.and(
+          Expect("activeZone").toBe("listView"),
+          Expect("isDraftFocused").toBe(true),
+        ),
         allowInInput: true,
       },
 
@@ -73,6 +76,7 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
         command: StartEdit,
         args: { id: OS.FOCUS },
         when: Rule.and(
+          Expect("activeZone").toBe("listView"),
           Expect("isEditing").toBe(false),
           Expect("isDraftFocused").toBe(false),
         ),
@@ -80,13 +84,19 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
       {
         key: "Enter",
         command: UpdateTodoText,
-        when: Expect("isEditing").toBe(true),
+        when: Rule.and(
+          Expect("activeZone").toBe("listView"),
+          Expect("isEditing").toBe(true),
+        ),
         allowInInput: true,
       },
       {
         key: "Escape",
         command: CancelEdit,
-        when: Expect("isEditing").toBe(true),
+        when: Rule.and(
+          Expect("activeZone").toBe("listView"),
+          Expect("isEditing").toBe(true),
+        ),
         allowInInput: true,
       },
 
@@ -95,19 +105,19 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
         key: "Backspace",
         command: DeleteTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Delete",
         command: DeleteTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Space",
         command: ToggleTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
       },
 
       // Clipboard Operations (No Edit Guard - should work when not editing)
@@ -115,25 +125,25 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
         key: "Meta+C",
         command: CopyTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Meta+X",
         command: CutTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Meta+V",
         command: PasteTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Meta+D",
         command: DuplicateTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
       },
     ],
     boardView: [
@@ -142,19 +152,19 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
         key: "Space",
         command: ToggleTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Backspace",
         command: DeleteTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Delete",
         command: DeleteTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
       },
 
       // Clipboard Operations
@@ -162,25 +172,25 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
         key: "Meta+C",
         command: CopyTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Meta+X",
         command: CutTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Meta+V",
         command: PasteTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
       },
       {
         key: "Meta+D",
         command: DuplicateTodo,
         args: { id: OS.FOCUS },
-        when: Expect("isEditing").toBe(false),
+        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
       },
     ],
   },

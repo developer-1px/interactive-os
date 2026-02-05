@@ -199,11 +199,9 @@ export const Field = forwardRef<HTMLElement, FieldProps<any> & { blurOnInactive?
   };
 
   const handleFocus = () => {
-    const setFocus = store.getState().setFocus;
-    if (name && osFocusedItemId !== name) {
-      setFocus(name);
-    }
-
+    // NOTE: Focus state is managed by FocusIntent via the OS pipeline.
+    // Field is wrapped in FocusItem which handles registration.
+    // We only need to update local field state here.
     setFieldFocused(true);
     requestAnimationFrame(updateCursorContext);
   };
