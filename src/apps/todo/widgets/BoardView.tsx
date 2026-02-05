@@ -39,7 +39,7 @@ export function BoardView() {
             <OS.Zone
               id="board"
               role="tabs"
-              area="boardView"
+              data-area="boardView"
               className="gap-10"
             >
               {categoryOrder.map((categoryId) => {
@@ -53,8 +53,8 @@ export function BoardView() {
                   <OS.Zone
                     key={categoryId}
                     id={`col-${categoryId}`}
-                    focusable
-                    payload={category}
+                    // focusable removed
+                    // payload removed
                     role="listbox"
                     area="boardView"
                     className={`w-80 flex-shrink-0 flex flex-col max-h-full rounded-2xl bg-slate-50/50 border transition-colors duration-200 outline-none

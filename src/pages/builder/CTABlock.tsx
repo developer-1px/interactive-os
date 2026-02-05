@@ -20,8 +20,8 @@ export function CTABlock() {
         <OS.Zone
             id="cta-block"
             role="grid"
-            tab="flow"
-            seamless
+            tab={{ behavior: 'flow' }}
+            navigate={{ seamless: true }}
             className="relative bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 py-32 px-8 overflow-hidden"
         >
             {/* Decorative Elements */}

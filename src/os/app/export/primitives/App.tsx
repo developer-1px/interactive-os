@@ -1,25 +1,42 @@
-import React, { useLayoutEffect, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
 import type { AppDefinition } from "@os/features/application/defineApplication";
 import { createCommandStore, CommandRegistry } from "@os/features/command/model/createCommandStore";
 import { ALL_OS_COMMANDS } from "@os/features/command/definitions/osCommands";
 import { CommandContext, setGlobalEngine } from "@os/features/command/ui/CommandContext";
-import { useFocusStore } from "@os/features/focus/store/focusStore";
 import { InputEngine } from "@os/features/input/ui/InputEngine";
-import { FocusEngine } from "@os/features/focus/inspector/FocusEngine";
+import { FocusCommandHandler } from "@os/features/focusZone/pipeline/2-parse/FocusCommandHandler";
+import { GlobalFocusSensor } from "@os/features/focusZone/pipeline/1-intercept/GlobalFocusSensor";
+import { GlobalFocusProjector } from "@os/features/focusZone/pipeline/5-project/GlobalFocusProjector";
+import { useGlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
 import { Zone } from "@os/app/export/primitives/Zone";
 import { useInspectorPersistence } from "@os/features/inspector/useInspectorPersistence";
 import { evalContext } from "@os/features/logic/lib/evalContext";
 import type { ContextState } from "@os/features/logic/LogicNode";
 
-// Middleware
-import { resolveFocusMiddleware } from "@os/features/focus/pipeline/3-resolve/middleware";
+// ═══════════════════════════════════════════════════════════════════
+// App Config Context
+// ═══════════════════════════════════════════════════════════════════
+
+export interface AppConfig {
+    isAppShell: boolean;
+}
+
+export const AppContext = createContext<AppConfig>({ isAppShell: true });
+export const useAppConfig = () => useContext(AppContext);
+
+// ═══════════════════════════════════════════════════════════════════
+// App Component
+// ═══════════════════════════════════════════════════════════════════
 
 export function App<S>({
     definition,
-    children
+    children,
+    isAppShell = false
 }: {
     definition: AppDefinition<S>;
     children: React.ReactNode;
+    isAppShell?: boolean;
 }) {
     // 1. Initialize Registry & Store
     const engine = useMemo(() => {
@@ -33,7 +50,6 @@ export function App<S>({
 
         const store = createCommandStore(registry, definition.model.initial, {
             persistence: definition.model.persistence,
-            middleware: [resolveFocusMiddleware],
             onStateChange: (state: S, action: any, prev: S) => {
                 let next = state;
                 if (definition.middleware) {
@@ -51,11 +67,28 @@ export function App<S>({
     // 2. Inspector Persistence
     useInspectorPersistence(engine.store);
 
-    // 3. Focus State
-    const activeZoneId = useFocusStore((s) => s.activeZoneId);
-    const focusPath = useFocusStore((s) => s.focusPath);
-    const focusedItemId = useFocusStore((s) => s.focusedItemId);
-    const zoneRegistry = useFocusStore((s) => s.zoneRegistry);
+    // 3. Focus State (Global Registry)
+    const activeZoneId = useGlobalZoneRegistry((s) => s.activeZoneId);
+    const zones = useGlobalZoneRegistry((s) => s.zones);
+
+    const focusPath = useGlobalZoneRegistry(
+        useShallow((s) => {
+            if (!s.activeZoneId) return [];
+            const path: string[] = [];
+            let currentId: string | null = s.activeZoneId;
+            while (currentId) {
+                path.unshift(currentId);
+                const entry = s.zones.get(currentId);
+                currentId = entry?.parentId || null;
+                if (path.length > 100) break;
+            }
+            return path;
+        })
+    );
+
+    // FocusedItemId: derive from active zone store
+    const activeZoneStore = activeZoneId ? zones.get(activeZoneId)?.store : null;
+    const focusedItemId = activeZoneStore?.getState().focusedItemId ?? null;
 
     // 4. App State
     const { state, dispatch } = engine.store();
@@ -84,17 +117,13 @@ export function App<S>({
     const keybindings = useMemo(() => engine.registry.getKeybindings(), [engine.registry]);
     const activeKeybindingMap = useMemo(() => {
         const res = new Map<string, boolean>();
-        const activeArea = activeZoneId ? zoneRegistry[activeZoneId]?.area : undefined;
-
         keybindings.forEach((kb) => {
             const isLogicEnabled = evalContext(kb.when, context);
-            const isScopeEnabled = !kb.zoneId ||
-                focusPath.includes(kb.zoneId) ||
-                (activeArea && activeArea === kb.zoneId);
+            const isScopeEnabled = !kb.zoneId || focusPath.includes(kb.zoneId);
             res.set(kb.key, !!(isLogicEnabled && isScopeEnabled));
         });
         return res;
-    }, [keybindings, context, zoneRegistry, activeZoneId, focusPath]);
+    }, [keybindings, context, focusPath]);
 
     // 7. Provider Value
     const providerValue = useMemo(() => ({
@@ -111,13 +140,31 @@ export function App<S>({
         setGlobalEngine(() => providerValue);
     }, [providerValue]);
 
+    // 9. Body class for AppShell mode
+    useEffect(() => {
+        if (isAppShell) {
+            document.body.classList.add('app-shell');
+        } else {
+            document.body.classList.remove('app-shell');
+        }
+        return () => document.body.classList.remove('app-shell');
+    }, [isAppShell]);
+
+    const zoneClassName = isAppShell
+        ? "h-full flex flex-col overflow-hidden"
+        : "min-h-full flex flex-col";
+
     return (
-        <CommandContext.Provider value={providerValue}>
-            <InputEngine />
-            <FocusEngine />
-            <Zone id={definition.id} area={definition.id} className="h-full flex flex-col">
-                {children}
-            </Zone>
-        </CommandContext.Provider>
+        <AppContext.Provider value={{ isAppShell }}>
+            <CommandContext.Provider value={providerValue}>
+                <InputEngine />
+                <FocusCommandHandler />
+                <GlobalFocusSensor />
+                <GlobalFocusProjector />
+                <Zone id={definition.id} area={definition.id} className={zoneClassName}>
+                    {children}
+                </Zone>
+            </CommandContext.Provider>
+        </AppContext.Provider>
     );
 }

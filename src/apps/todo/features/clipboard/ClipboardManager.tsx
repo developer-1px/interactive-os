@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useEngine } from "@os/features/command/ui/CommandContext";
-import { useFocusStore } from "@os/features/focus/store/focusStore";
+import { GlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
 import type { AppState } from "@apps/todo/model/types";
 
 /**
@@ -28,7 +28,8 @@ export function ClipboardManager() {
       if (!currentState) return;
 
       // Get Focus from OS Store
-      const focusId = useFocusStore.getState().focusedItemId;
+      const activeZoneStore = GlobalZoneRegistry.getActiveZone();
+      const focusId = activeZoneStore ? activeZoneStore.getState().focusedItemId : null;
       const { todos, categories } = currentState.data;
 
       // 1. Copying a Todo Item

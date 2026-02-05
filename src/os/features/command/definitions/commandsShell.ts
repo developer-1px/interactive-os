@@ -11,6 +11,17 @@ export const OS_COMMANDS = {
     TAB: "OS_TAB",
     TAB_PREV: "OS_TAB_PREV",
 
+    // --- Selection (The "Selection" of Items) ---
+    SELECT: "OS_SELECT",
+    SELECT_ALL: "OS_SELECT_ALL",
+    DESELECT_ALL: "OS_DESELECT_ALL",
+
+    // --- Activation (The "Action" Trigger) ---
+    ACTIVATE: "OS_ACTIVATE",
+
+    // --- Dismissal (The "Escape" Trigger) ---
+    DISMISS: "OS_DISMISS",
+
     // --- Field Editing (The "Edit" Lifecycle) ---
     FIELD_START_EDIT: "OS_FIELD_START_EDIT",
     FIELD_COMMIT: "OS_FIELD_COMMIT",
@@ -38,14 +49,34 @@ export interface OSNavigatePayload {
     targetId?: string | null; // If known by Physics engine
 }
 
+
 export interface OSFocusPayload {
     id: string | null;
     sourceId?: string | null;
 }
 
+export interface OSSelectPayload {
+    /** 선택할 아이템 ID (없으면 현재 포커스된 아이템) */
+    targetId?: string;
+    /** 선택 모드: toggle(Ctrl), range(Shift), replace(기본) */
+    mode?: 'toggle' | 'range' | 'replace';
+}
+
+export interface OSActivatePayload {
+    /** 활성화할 아이템 ID (없으면 현재 포커스된 아이템) */
+    targetId?: string;
+}
+
 export type OSCommand =
     | { type: typeof OS_COMMANDS.NAVIGATE; payload: OSNavigatePayload }
     | { type: typeof OS_COMMANDS.FOCUS; payload: OSFocusPayload }
+    | { type: typeof OS_COMMANDS.TAB; payload?: void }
+    | { type: typeof OS_COMMANDS.TAB_PREV; payload?: void }
+    | { type: typeof OS_COMMANDS.SELECT; payload?: OSSelectPayload }
+    | { type: typeof OS_COMMANDS.SELECT_ALL; payload?: void }
+    | { type: typeof OS_COMMANDS.DESELECT_ALL; payload?: void }
+    | { type: typeof OS_COMMANDS.ACTIVATE; payload?: OSActivatePayload }
+    | { type: typeof OS_COMMANDS.DISMISS; payload?: void }
     | { type: typeof OS_COMMANDS.FIELD_START_EDIT; payload?: { fieldId?: string } }
     | { type: typeof OS_COMMANDS.FIELD_COMMIT; payload?: { fieldId?: string } }
     | { type: typeof OS_COMMANDS.FIELD_CANCEL; payload?: { fieldId?: string } }

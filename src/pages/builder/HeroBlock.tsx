@@ -19,8 +19,8 @@ export function HeroBlock() {
         <OS.Zone
             id="hero-block"
             role="grid"
-            tab="flow"
-            seamless
+            tab={{ behavior: 'flow' }}
+            navigate={{ seamless: true }}
             className="relative bg-white text-slate-900 overflow-hidden"
         >
             {/* Subtle Grid Background */}

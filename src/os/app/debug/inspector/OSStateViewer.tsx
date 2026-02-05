@@ -1,19 +1,39 @@
-import { memo } from "react";
-import { useFocusStore } from "@os/features/focus/store/focusStore.ts";
+import { memo, useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { useGlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
 
 export const OSStateViewer = memo(() => {
-    const focusState = useFocusStore();
+    const activeZoneId = useGlobalZoneRegistry((s) => s.activeZoneId);
+    const zones = useGlobalZoneRegistry((s) => s.zones);
 
-    const osState = {
+    // Compute focusPath inline to avoid unstable method call
+    const focusPath = useGlobalZoneRegistry(
+        useShallow((s) => {
+            if (!s.activeZoneId) return [];
+            const path: string[] = [];
+            let currentId: string | null = s.activeZoneId;
+            while (currentId) {
+                path.unshift(currentId);
+                const entry = s.zones.get(currentId);
+                currentId = entry?.parentId || null;
+                if (path.length > 100) break;
+            }
+            return path;
+        })
+    );
+
+    // Get focusedItemId from active zone's store (outside of selector)
+    const activeZoneStore = activeZoneId ? zones.get(activeZoneId)?.store : null;
+    const focusedItemId = activeZoneStore?.getState().focusedItemId ?? null;
+
+    const osState = useMemo(() => ({
         focus: {
-            activeZoneId: focusState.activeZoneId,
-            focusedItemId: focusState.focusedItemId,
-            focusPath: focusState.focusPath,
-            activeObject: focusState.activeObject,
-            history: focusState.history,
+            activeZoneId,
+            focusedItemId,
+            focusPath,
         },
-        zones: focusState.zoneRegistry,
-    };
+        zones: Object.fromEntries(zones),
+    }), [activeZoneId, focusedItemId, focusPath, zones]);
 
     return (
         <div className="h-full flex flex-col bg-[#ffffff]">

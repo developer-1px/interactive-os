@@ -24,6 +24,18 @@ const OS_NAV_COMMANDS: CommandDefinition<any, any>[] = [
     { id: "OS_TAB_PREV", run: (state) => state }
 ];
 
+// --- Selection ---
+const OS_SELECTION_COMMANDS: CommandDefinition<any, any>[] = [
+    { id: SHELL_COMMANDS.SELECT, run: (state) => state },
+    { id: SHELL_COMMANDS.SELECT_ALL, run: (state) => state },
+    { id: SHELL_COMMANDS.DESELECT_ALL, run: (state) => state }
+];
+
+// --- Activation ---
+const OS_ACTIVATION_COMMANDS: CommandDefinition<any, any>[] = [
+    { id: SHELL_COMMANDS.ACTIVATE, run: (state) => state }
+];
+
 // --- Focus & Shell ---
 const OS_SHELL_COMMANDS: CommandDefinition<any, any>[] = [
     { id: SHELL_COMMANDS.FOCUS, run: (state) => state },
@@ -46,5 +58,7 @@ export const ALL_OS_COMMANDS = [
     ...OS_CLIPBOARD_COMMANDS,
     ...OS_FIELD_COMMANDS,
     ...OS_NAV_COMMANDS,
+    ...OS_SELECTION_COMMANDS,
+    ...OS_ACTIVATION_COMMANDS,
     ...OS_SHELL_COMMANDS
 ];

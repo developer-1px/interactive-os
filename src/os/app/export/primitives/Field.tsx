@@ -5,7 +5,6 @@ import {
   isValidElement,
   cloneElement,
   useLayoutEffect,
-  useContext,
 } from "react";
 import type {
   ReactNode,
@@ -14,12 +13,14 @@ import type {
   HTMLAttributes,
   FormEvent,
 } from "react";
-import { useCommandEngine, FocusContext } from "@os/features/command/ui/CommandContext.tsx";
+import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { useCommandListener } from "@os/features/command/hooks/useCommandListener";
 import { OS_COMMANDS } from "@os/features/command/definitions/osCommands.ts";
 import { getCaretPosition } from "../../../features/input/ui/Field/getCaretPosition";
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
-import { useFocusStore } from "@os/features/focus/store/focusStore.ts";
+// [NEW] Local Store & Global Registry
+import { useFocusZoneStore, useFocusZoneContext } from "@os/features/focusZone/primitives/FocusZone";
+// import { useGlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
 import type { FocusTarget } from "@os/entities/FocusTarget.ts";
 
 // Refactored Logic & Hooks
@@ -35,7 +36,7 @@ import {
   useFieldFocus,
   useFieldContext,
 } from "../../../features/input/ui/Field/useFieldHooks.ts";
-import { DOMInterface } from "@os/features/focus/registry/DOMInterface.ts"; // [NEW] Registry
+import { DOMInterface } from "@os/features/focusZone/registry/DOMInterface.ts";
 
 /** 
  * Field mode determines when editing is activated:
@@ -103,7 +104,9 @@ export const Field = <T extends BaseCommand>({
 }: FieldProps<T> & { blurOnInactive?: boolean }) => {
   // --- 1. Global Context & Store ---
   const { dispatch: contextDispatch, currentFocusId } = useCommandEngine();
-  const osFocusedItemId = useFocusStore((s) => s.focusedItemId);
+  // Get store instance
+  const store = useFocusZoneStore();
+  const osFocusedItemId = store(s => s.focusedItemId);
   const dispatch = customDispatch || contextDispatch;
 
   // --- 2. Refs & Local State ---
@@ -122,26 +125,28 @@ export const Field = <T extends BaseCommand>({
   const { localValue, setLocalValue, isComposingRef } = useFieldState({ value });
   localValueRef.current = localValue;
 
+  // Zone context is needed before DOM registration
+  const focusContext = useFocusZoneContext();
+  const zoneId = focusContext?.zoneId || "unknown";
+
   // [NEW] DOM Registry Registration
   useLayoutEffect(() => {
     if (name && innerRef.current) {
-      DOMInterface.registerItem(name, innerRef.current);
+      DOMInterface.registerItem(name, zoneId, innerRef.current);
     }
     return () => {
       if (name) DOMInterface.unregisterItem(name);
     };
-  }, [name]);
+  }, [name, zoneId]);
 
   // --- Zone Registration (like Item does) ---
-  const focusContext = useContext(FocusContext);
-  const zoneId = focusContext?.zoneId || "unknown";
-  const addItem = useFocusStore((s) => s.addItem);
-  const removeItem = useFocusStore((s) => s.removeItem);
+  const addItem = store((s) => s.addItem);
+  const removeItem = store((s) => s.removeItem);
 
   useLayoutEffect(() => {
-    if (name && zoneId && zoneId !== "unknown") {
-      addItem(zoneId, name);
-      return () => removeItem(zoneId, name);
+    if (name && addItem && zoneId && zoneId !== "unknown") {
+      addItem(name); // Just name (id)
+      return () => { if (removeItem) removeItem(name); }
     }
   }, [name, zoneId, addItem, removeItem]);
 
@@ -256,7 +261,7 @@ export const Field = <T extends BaseCommand>({
 
   const handleFocus = () => {
     // Guard circular focus - use OS focus store directly
-    const setFocus = useFocusStore.getState().setFocus;
+    const setFocus = store.getState().setFocus;
     if (name && osFocusedItemId !== name) {
       setFocus(name);
     }

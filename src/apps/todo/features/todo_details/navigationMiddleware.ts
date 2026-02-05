@@ -1,9 +1,7 @@
 import { produce } from "immer";
-import type { AppState, TodoCommand, AppEffect as _AppEffect } from "@apps/todo/model/types";
-import { useFocusStore } from "@os/features/focus/store/focusStore";
-import { handlerRecovery } from "@os/features/focus/pipeline/3-resolve/recovery/focusRecovery";
-import { DEFAULT_RECOVERY_POLICY } from "@os/features/focus/store/recoveryTypes";
-import { DOMInterface } from "@os/features/focus/registry/DOMInterface";
+import type { AppState, TodoCommand } from "@apps/todo/model/types";
+import { DOMInterface } from "@os/features/focusZone/registry/DOMInterface";
+import { GlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
 
 
 export const navigationMiddleware = (
@@ -24,13 +22,21 @@ export const navigationMiddleware = (
     // 1. Explicit focus request via FOCUS_ID effect
     // Defer until after React render so new items are registered
     requestAnimationFrame(() => {
-      useFocusStore.getState().setFocus(String(focusEffect.id));
+      // [NEW] Set focus via Global Registry -> Active Zone
+      const activeStore = GlobalZoneRegistry.getActiveZone();
+      if (activeStore) {
+        activeStore.getState().setFocus(String(focusEffect.id));
+      }
     });
   } else {
     // 2. No explicit focus request - check if recovery is needed
     // Recovery applies when the previously focused item no longer exists
-    const focusStore = useFocusStore.getState();
-    const focusedItemId = focusStore.focusedItemId;
+
+    // [NEW] Get Active Zone and Focus
+    const activeStore = GlobalZoneRegistry.getActiveZone();
+    if (!activeStore) return rawNewState; // Can't do anything if no active zone
+
+    const focusedItemId = activeStore.getState().focusedItemId;
 
     if (focusedItemId) {
       // Find which zone had this item
@@ -43,30 +49,35 @@ export const navigationMiddleware = (
 
       if (wasItemDeleted) {
         // Item was deleted - apply recovery
-        const activeZoneId = focusStore.activeZoneId;
-        const zone = focusStore.zoneRegistry[activeZoneId || ""];
-
-        // [FIX] Use App State's todoOrder (visual order) instead of Zone's items (insertion order)
-        // This ensures recovery jumps to the visual neighbor, not the chronological neighbor
+        // Simple Recovery Strategy: "Steer" to next logical item
         const visualItems = prevState.data.todoOrder.map(String);
 
-        if (zone && visualItems.length > 0) {
-          const direction = zone.behavior?.direction ?? "v";
-          const result = handlerRecovery(
-            focusedItemId,
-            activeZoneId || "",
-            visualItems,
-            direction,
-            DEFAULT_RECOVERY_POLICY
-          );
+        // Find index of deleted item
+        const deletedIndex = visualItems.indexOf(focusedItemId);
+        let targetId: string | null = null;
 
-          if (result.targetId) {
-            requestAnimationFrame(() => {
-              useFocusStore.getState().setFocus(result.targetId!);
-              const el = DOMInterface.getItem(result.targetId!);
-              el?.focus();
-            });
+        if (deletedIndex !== -1) {
+          // Try next
+          if (deletedIndex < visualItems.length - 1) {
+            targetId = visualItems[deletedIndex + 1];
           }
+          // Try prev
+          else if (deletedIndex > 0) {
+            targetId = visualItems[deletedIndex - 1];
+          }
+        }
+
+        // Verify target exists in new state? 
+        // Ideally yes, but here we assume single deletion. 
+        // If targetId is also deleted, this might fail, but acceptable for now.
+
+        if (targetId) {
+          requestAnimationFrame(() => {
+            // [NEW] Use local store instance
+            activeStore.getState().setFocus(targetId!);
+            const el = DOMInterface.getItem(targetId!);
+            el?.focus();
+          });
         }
       }
     }

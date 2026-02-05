@@ -1,14 +1,15 @@
-import { isValidElement, cloneElement, useContext, useLayoutEffect, useMemo, useRef } from "react";
+import { isValidElement, cloneElement, useLayoutEffect, useMemo, useRef, useCallback } from "react";
 import type { ReactNode, ReactElement } from "react";
-import { useFocusStore } from "@os/features/focus/store/focusStore.ts";
-import { FocusContext } from "@os/features/command/ui/CommandContext.tsx";
-import { DOMInterface } from "@os/features/focus/registry/DOMInterface.ts"; // [NEW] Registry
+// [NEW] Local Store & Global Registry
+import { useFocusZoneStore, useFocusZoneContext } from "@os/features/focusZone/primitives/FocusZone";
+import { useGlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
+import { DOMInterface } from "@os/features/focusZone/registry/DOMInterface";
 
 // --- Types ---
 interface ItemState {
   isFocused: boolean;
   isSelected: boolean;
-  isAnchor?: boolean; // [NEW] Optional to avoid breaking changes, but logic guarantees boolean
+  isAnchor?: boolean;
 }
 
 export interface ItemProps extends Omit<React.HTMLAttributes<HTMLElement>, "id" | "children"> {
@@ -39,105 +40,74 @@ export const Item = ({
 }: ItemProps) => {
   const stringId = String(id);
 
-  // --- 1. Store Projection (Read-Only Beacon) ---
-  const focusedItemId = useFocusStore((s) => s.focusedItemId);
-  const setFocus = useFocusStore((s) => s.setFocus);
-  // [NEW] Selectors for Anchor Logic
-  const zoneRegistry = useFocusStore((s) => s.zoneRegistry);
-  const focusPath = useFocusStore((s) => s.focusPath);
+  // --- 1. Store Access (Local Zone) ---
+  const store = useFocusZoneStore();
+  const focusedItemId = store((s) => s.focusedItemId);
+  const addItem = store((s) => s.addItem);
+  const removeItem = store((s) => s.removeItem);
+
+  // Anchor Logic Dependencies
+  const context = useFocusZoneContext();
+  const zoneId = context?.zoneId || "unknown";
+
+  const activeZoneId = useGlobalZoneRegistry(s => s.activeZoneId);
+  const isZoneActive = activeZoneId === zoneId;
 
   const isFocused = focusedItemId === stringId;
 
   const itemRef = useRef<HTMLElement>(null);
 
-  // [NEW] DOM Registry
-  useLayoutEffect(() => {
-    if (itemRef.current) {
-      DOMInterface.registerItem(stringId, itemRef.current);
+  // Callback ref for merging with child refs
+  const setItemRef = useCallback((el: HTMLElement | null) => {
+    (itemRef as any).current = el;
+    if (el) {
+      DOMInterface.registerItem(stringId, zoneId, el);
     }
+  }, [stringId, zoneId]);
+
+  // Cleanup on unmount
+  useLayoutEffect(() => {
     return () => DOMInterface.unregisterItem(stringId);
   }, [stringId]);
 
-  // --- 2. Context Awareness ---
-  const focusContext = useContext(FocusContext);
-  const zoneId = focusContext?.zoneId || "unknown";
-
-  // --- 3. Payload Beacon (Write on Activate) ---
-  // When WE become the focused item, we are responsible for telling the store 
-  // "Here is the data you are looking at". 
-  // This removes the need for the Store to hunt for data.
-  // --- 0. Active Registration (Self-Report) ---
-  const addItem = useFocusStore((s) => s.addItem);
-  const removeItem = useFocusStore((s) => s.removeItem);
-
+  // --- 2. Item Registration ---
   useLayoutEffect(() => {
-    if (zoneId && zoneId !== "unknown") {
-      addItem(zoneId, stringId);
-      return () => removeItem(zoneId, stringId);
+    if (addItem) {
+      addItem(stringId);
     }
-  }, [zoneId, stringId, addItem, removeItem]);
+    return () => {
+      if (removeItem) removeItem(stringId);
+    };
+  }, [stringId, addItem, removeItem]);
 
-  // --- 3. Payload Beacon (Write on Activate) ---
-  const prevPayloadRef = useRef<any>(null);
-
-  useLayoutEffect(() => {
-    if (isFocused) {
-      // JSON-based equality check for simple payloads (safer than deep-equal lib here)
-      const isPayloadEqual = JSON.stringify(payload) === JSON.stringify(prevPayloadRef.current);
-
-      if (!isPayloadEqual) {
-        prevPayloadRef.current = payload;
-        setFocus(stringId, {
-          id: stringId,
-          index,
-          payload,
-          group: { id: zoneId }
-        });
+  // --- 3. Anchor Calculation ---
+  const isAnchor = useMemo(() => {
+    if (store.getState().focusedItemId === stringId) {
+      if (!isZoneActive) {
+        return true;
       }
     }
-  }, [isFocused, stringId, index, payload, zoneId, setFocus]);
-
-  // [NEW] Anchor Calculation
-  // An item is an "anchor" if it was the last focused item in its zone,
-  // BUT the zone itself is not currently active (focus is elsewhere).
-  // This allows us to style "where focus will return to".
-  const isAnchor = useMemo(() => {
-    if (!zoneId || zoneId === "unknown") return false;
-    if (isFocused) return false; // Active focus overrides anchor
-
-    const zone = zoneRegistry[zoneId];
-    if (!zone || !zone.lastFocusedId) return false;
-
-    const isLastFocused = zone.lastFocusedId === stringId;
-    const isZoneInactive = !focusPath.includes(zoneId);
-
-    return isLastFocused && isZoneInactive;
-  }, [zoneId, stringId, isFocused, zoneRegistry, focusPath]);
+    return false;
+  }, [stringId, isZoneActive, isFocused]);
 
   // --- 4. Render Props Calculation ---
   const itemState: ItemState = useMemo(() => ({
-    isFocused,
+    isFocused: isFocused && isZoneActive,
     isSelected: selected,
-    isAnchor // [NEW]
-  }), [isFocused, selected, isAnchor]);
+    isAnchor
+  }), [isFocused, isZoneActive, selected, isAnchor]);
+
+  const visualFocused = isFocused && isZoneActive;
 
   const baseProps = {
     id: stringId,
-    "data-item-id": stringId, // Essential for Zone MutationObserver & Global Mouse Sink
-
-    // Accessibility (Virtual)
+    "data-item-id": stringId,
     role: "option",
-    "aria-selected": isFocused,
-    tabIndex: isFocused ? 0 : -1, // Roving tabindex pattern
-
-    // Styling Hooks
-    "data-focused": isFocused ? "true" : undefined,
+    "aria-selected": visualFocused,
+    tabIndex: visualFocused ? 0 : -1,
+    "data-focused": visualFocused ? "true" : undefined,
     "data-selected": selected ? "true" : undefined,
-    "data-anchor": isAnchor ? "true" : undefined, // [NEW]
-
-    // NO LOCAL HANDLERS (onMouseDown/onClick removed) - BUT ALLOWED IF PASSED EXPLICITLY
-    // All interaction is handled by InputEngine via data-item-id, 
-    // but we allow ...rest for special cases like "Focus Follows Mouse".
+    "data-anchor": isAnchor ? "true" : undefined,
     ...rest
   };
 
@@ -147,8 +117,8 @@ export const Item = ({
     if (isValidElement(rendered)) {
       const element = rendered as ReactElement<any>;
       return cloneElement(element, {
+        ref: setItemRef,
         ...baseProps,
-        // Merge ClassNames intelligently
         className: `${element.props.className || ""} ${className || ""}`.trim()
       } as any);
     }
@@ -159,6 +129,7 @@ export const Item = ({
   if (asChild && isValidElement(children)) {
     const child = children as ReactElement<any>;
     return cloneElement(child, {
+      ref: setItemRef,
       ...baseProps,
       className: `${child.props.className || ""} ${className || ""}`.trim()
     });
@@ -167,7 +138,7 @@ export const Item = ({
   // --- Strategy C: Wrapper (Default) ---
   return (
     <div
-      ref={itemRef as any}
+      ref={setItemRef as any}
       {...baseProps}
       className={`outline-none ${className || ""}`.trim()}
     >

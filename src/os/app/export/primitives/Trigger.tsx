@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useRef, useLayoutEffect, useContext } from "react";
+import { cloneElement, isValidElement, useRef, useLayoutEffect } from "react";
 import type {
   ReactNode,
   ReactElement,
@@ -6,10 +6,11 @@ import type {
 } from "react";
 import { logger } from "@os/app/debug/logger.ts";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
-import { FocusContext } from "@os/features/command/ui/CommandContext.tsx";
+
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
-import { DOMInterface } from "@os/features/focus/registry/DOMInterface.ts"; // [NEW] Registry
-import { useFocusStore } from "@os/features/focus/store/focusStore.ts";
+// [NEW] Local Store & Global Registry
+import { useFocusZoneStore, useFocusZoneContext } from "@os/features/focusZone/primitives/FocusZone";
+import { DOMInterface } from "@os/features/focusZone/registry/DOMInterface.ts";
 
 export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttributes<HTMLButtonElement> {
   id?: string;
@@ -35,32 +36,33 @@ export const Trigger = <T extends BaseCommand>({
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   // --- Focus State Tracking ---
-  const focusedItemId = useFocusStore((s) => s.focusedItemId);
+  const store = useFocusZoneStore();
+  const focusedItemId = store((s) => s.focusedItemId);
   const isFocused = id ? focusedItemId === id : false;
 
   // --- Context Awareness (Zone Registration) ---
-  const focusContext = useContext(FocusContext);
+  const focusContext = useFocusZoneContext();
   const zoneId = focusContext?.zoneId || "unknown";
-  const addItem = useFocusStore((s) => s.addItem);
-  const removeItem = useFocusStore((s) => s.removeItem);
+  const addItem = store((s) => s.addItem);
+  const removeItem = store((s) => s.removeItem);
 
   // Zone Item Registration (like Item does)
   useLayoutEffect(() => {
-    if (id && zoneId && zoneId !== "unknown") {
-      addItem(zoneId, id);
-      return () => removeItem(zoneId, id);
+    if (id && addItem && zoneId && zoneId !== "unknown") {
+      addItem(id);
+      return () => { if (removeItem) removeItem(id); }
     }
   }, [id, zoneId, addItem, removeItem]);
 
   // [NEW] DOM Registry Registration
   useLayoutEffect(() => {
     if (id && triggerRef.current) {
-      DOMInterface.registerItem(id, triggerRef.current);
+      DOMInterface.registerItem(id, zoneId, triggerRef.current);
     }
     return () => {
       if (id) DOMInterface.unregisterItem(id);
     };
-  }, [id]);
+  }, [id, zoneId]);
 
   const handleClick = (e: ReactMouseEvent) => {
     if (!allowPropagation) {

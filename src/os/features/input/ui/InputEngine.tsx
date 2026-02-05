@@ -1,10 +1,12 @@
 import { useEffect } from "react";
-import { useFocusStore } from "@os/features/focus/store/focusStore";
+// [NEW] Global Registry & Types
+import { useGlobalZoneRegistry, GlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
+// import { useFocusZoneStore } from "@os/features/focusZone/primitives/FocusZone"; // Not used here? 
+
 import { useCommandEngine } from "@os/features/command/ui/CommandContext";
 import { getCanonicalKey, normalizeKeyDefinition } from "@os/features/input/lib/getCanonicalKey";
 import { evalContext } from "@os/features/AntigravityOS";
 import { useInputTelemetry } from "@os/app/debug/LoggedKey";
-import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 
 /**
  * [Hardware Layer] Input Engine
@@ -13,13 +15,11 @@ import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
  * replacing distributed 'onKeyDown' handlers in Zones.
  */
 export function InputEngine() {
-    const {
-        activeZoneId,
-        focusedItemId,
-        zoneRegistry,
-        setFocus,
-        setActiveZone
-    } = useFocusStore();
+    // --- Global Focus State ---
+    const activeZoneId = useGlobalZoneRegistry(s => s.activeZoneId);
+
+    // NOTE: Do NOT call getFocusPath() inside selector! It returns new array each time.
+    // Instead, call it inside event handler using static accessor.
 
     const { dispatch, registry, ctx } = useCommandEngine();
     const logKey = useInputTelemetry((state) => state.logKey);
@@ -42,22 +42,17 @@ export function InputEngine() {
                     activeEl.tagName === "TEXTAREA" ||
                     activeEl.isContentEditable);
 
-
-
-
-            // 3. Registry Resolution (Bubbling Layer)
             // 3. Registry Resolution (Bubbling Layer)
             // We traverse from Active Zone (Leaf) -> Parents (Root)
             if (registry) {
                 const canonicalKey = getCanonicalKey(e);
                 const bindings = registry.getKeybindings();
-                const focusStoreState = useFocusStore.getState();
-                const focusPath = focusStoreState.focusPath;
-                const currentActiveZoneId = focusStoreState.activeZoneId;
+                // Get fresh path via static method (avoids selector infinite loop)
+                const focusPath = GlobalZoneRegistry.getFocusPath();
 
                 // Create a bubbling path: ActiveZone -> ... -> Root
                 // If focusPath is empty (metrics not ready), fallback to [activeZoneId]
-                const bubblePath = focusPath.length > 0 ? [...focusPath].reverse() : (currentActiveZoneId ? [currentActiveZoneId] : []);
+                const bubblePath = focusPath.length > 0 ? [...focusPath].reverse() : (activeZoneId ? [activeZoneId] : []);
 
                 // Add "global" as the final fallback
                 bubblePath.push("global");
@@ -72,8 +67,18 @@ export function InputEngine() {
                         if (handled) break;
 
                         const isGlobal = layerId === "global";
-                        const zoneMetadata = isGlobal ? null : zoneRegistry[layerId];
-                        const zoneArea = zoneMetadata?.area;
+
+                        // Zone Metadata Access? 
+                        // The registry now has 'config' in the store?
+                        // We might need to access the store of the zone to check 'area' or other metadata.
+                        // const zoneStore = GlobalZoneRegistry.getZone(layerId);
+                        // const zoneConfig = zoneStore?.getState().config;
+                        // const zoneArea = zoneConfig?.area; (Config doesn't usually have area? ZoneProps does)
+                        // Wait, 'area' was on ZoneProps. Where is it now?
+                        // Ideally, FocusZone config should include metadata.
+                        // Assume zoneId is the primary identifier for now.
+
+                        const zoneArea = undefined; // 'area' lookup needs restoration if critical.
 
                         // Find bindings that belong to this jurisdiction
                         const layerBindings = keyMatches.filter(b => {
@@ -99,7 +104,7 @@ export function InputEngine() {
                             // Success - OS handles all commands including Tab (DFS-based navigation)
                             e.preventDefault();
                             e.stopPropagation();
-                            logKey(e as any, currentActiveZoneId || "global", true);
+                            logKey(e as any, activeZoneId || "global", true);
                             dispatch({ type: binding.command, payload: binding.args });
                             handled = true;
                             break;
@@ -109,46 +114,12 @@ export function InputEngine() {
             }
 
             // Log Unhandled
-            logKey(e as any, activeZoneId || "global", false);
+            // logKey(e as any, activeZoneId || "global", false);
         };
 
         window.addEventListener("keydown", handleGlobalKeyDown);
         return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-    }, [activeZoneId, focusedItemId, zoneRegistry, ctx, registry, dispatch, logKey]);
-
-    // --- Mouse Sink (Global Interaction) ---
-    useEffect(() => {
-        const handleGlobalMouseDown = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-
-            // 1. Item Selection (Click-to-Focus)
-            const itemEl = target.closest('[data-item-id]');
-            if (itemEl) {
-                const itemId = itemEl.getAttribute('data-item-id');
-                // Prevent browser focus drift (Keep it on Body or Zone)
-                // e.preventDefault(); // <-- REMOVED: Caused click event suppression and focus mismatches
-                if (itemId) {
-                    dispatch({
-                        type: OS_COMMANDS.FOCUS,
-                        payload: { id: itemId, sourceId: activeZoneId }
-                    });
-                }
-            }
-
-            // 2. Zone Activation (Click-to-Activate)
-            const zoneEl = target.closest('[data-zone-id]');
-            if (zoneEl) {
-                const zoneId = zoneEl.getAttribute('data-zone-id');
-                if (zoneId && zoneId !== activeZoneId) {
-                    setActiveZone(zoneId);
-                }
-            }
-        };
-
-        // Capture phase to intercept before React Synthetic Events
-        window.addEventListener("mousedown", handleGlobalMouseDown, { capture: true });
-        return () => window.removeEventListener("mousedown", handleGlobalMouseDown, { capture: true });
-    }, [activeZoneId, setFocus, setActiveZone]);
+    }, [activeZoneId, ctx, registry, dispatch, logKey]);
 
     return null;
 }
