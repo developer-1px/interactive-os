@@ -41,7 +41,22 @@ export interface SpatialSlice {
     setSpatialSticky: (x: number | null, y: number | null) => void;
 }
 
+export interface SelectionSlice {
+    // State
+    selection: string[];
+    selectionAnchor: string | null;
+
+    // Actions
+    setSelection: (ids: string[]) => void;
+    addToSelection: (id: string) => void;
+    removeFromSelection: (id: string) => void;
+    toggleSelection: (id: string) => void;
+    setSelectionAnchor: (id: string | null) => void;
+    clearSelection: () => void;
+}
+
 // --- Combined State ---
 
-export type FocusState = ZoneSlice & CursorSlice & SpatialSlice;
+export type FocusState = ZoneSlice & CursorSlice & SpatialSlice & SelectionSlice;
+
 
