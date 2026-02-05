@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useEngine } from "@os/features/command/ui/CommandContext";
-import { GlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
+import { FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 import type { AppState } from "@apps/todo/model/types";
 
 /**
@@ -28,7 +28,7 @@ export function ClipboardManager() {
       if (!currentState) return;
 
       // Get Focus from OS Store
-      const activeZoneStore = GlobalZoneRegistry.getActiveZone();
+      const activeZoneStore = FocusRegistry.getActiveZone();
       const focusId = activeZoneStore ? activeZoneStore.getState().focusedItemId : null;
       const { todos, categories } = currentState.data;
 

@@ -1,13 +1,13 @@
 /**
  * FocusItem - Pure Projection Focusable Item
  * 
- * Automatically registers with parent FocusZone's store and DOM registry.
+ * Automatically registers with parent FocusGroup's store and DOM registry.
  * Uses reactive store subscription for performant UI updates.
  * 
  * NOTE: This is a PROJECTION-ONLY component.
  * - Does NOT handle events (click, keydown)
  * - Only reflects state (tabIndex, data-*, aria-*)
- * - Event handling is done by GlobalFocusSensor
+ * - Event handling is done by FocusSensor
  */
 
 import {
@@ -18,9 +18,9 @@ import {
 } from 'react';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
-import { useFocusZoneContext } from './FocusZone';
-import { useGlobalZoneRegistry } from '../registry/GlobalZoneRegistry';
-import { DOMInterface } from '../registry/DOMInterface';
+import { useFocusGroupContext } from './FocusGroup';
+import { useFocusRegistry } from '../registry/FocusRegistry';
+import { DOMRegistry } from '../registry/DOMRegistry';
 
 // ═══════════════════════════════════════════════════════════════════
 // Props
@@ -63,10 +63,10 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
     role,
 }, ref) {
     const itemRef = useRef<HTMLElement>(null);
-    const ctx = useFocusZoneContext();
+    const ctx = useFocusGroupContext();
 
     if (!ctx) {
-        throw new Error('FocusItem must be used within a FocusZone');
+        throw new Error('FocusItem must be used within a FocusGroup');
     }
 
     const { zoneId, store } = ctx;
@@ -76,19 +76,19 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
         const el = itemRef.current;
         if (el) {
             // Register item to both registries
-            DOMInterface.registerItem(id, zoneId, el);
+            DOMRegistry.registerItem(id, zoneId, el);
             store.getState().addItem(id);
         }
 
         return () => {
             // Cleanup
-            DOMInterface.unregisterItem(id);
+            DOMRegistry.unregisterItem(id);
             store.getState().removeItem(id);
         };
     }, [id, zoneId, store]);
 
     // --- Reactive State Subscription ---
-    const activeZoneId = useGlobalZoneRegistry((s) => s.activeZoneId);
+    const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
     const isZoneActive = activeZoneId === zoneId;
 
     const { isFocused, isSelected } = useStore(

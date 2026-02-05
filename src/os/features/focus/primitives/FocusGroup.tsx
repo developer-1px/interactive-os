@@ -1,8 +1,8 @@
 /**
- * FocusZone - Scoped Focus Container Primitive
+ * FocusGroup - Scoped Focus Container Primitive
  * 
  * Focus/Selection/Activation container with isolated store.
- * Each FocusZone manages its own state independently.
+ * Each FocusGroup manages its own state independently.
  */
 
 import {
@@ -15,14 +15,14 @@ import {
     type ComponentProps,
 } from 'react';
 import {
-    createFocusZoneStore,
-    type FocusZoneStore,
-} from '../store/focusZoneStore';
+    createFocusGroupStore,
+    type FocusGroupStore,
+} from '../store/focusGroupStore';
 import { resolveRole } from '../registry/roleRegistry';
-import { DOMInterface } from '../registry/DOMInterface';
-import { GlobalZoneRegistry } from '../registry/GlobalZoneRegistry';
+import { DOMRegistry } from '../registry/DOMRegistry';
+import { FocusRegistry } from '../registry/FocusRegistry';
 import type {
-    FocusZoneConfig,
+    FocusGroupConfig,
     NavigateConfig,
     TabConfig,
     SelectConfig,
@@ -35,22 +35,22 @@ import type {
 // Context
 // ═══════════════════════════════════════════════════════════════════
 
-interface FocusZoneContextValue {
+interface FocusGroupContextValue {
     zoneId: string;
-    store: FocusZoneStore;
-    config: FocusZoneConfig;
+    store: FocusGroupStore;
+    config: FocusGroupConfig;
 }
 
-const FocusZoneContext = createContext<FocusZoneContextValue | null>(null);
+const FocusGroupContext = createContext<FocusGroupContextValue | null>(null);
 
-export function useFocusZoneContext() {
-    return useContext(FocusZoneContext);
+export function useFocusGroupContext() {
+    return useContext(FocusGroupContext);
 }
 
-export function useFocusZoneStore() {
-    const ctx = useContext(FocusZoneContext);
+export function useFocusGroupStore() {
+    const ctx = useContext(FocusGroupContext);
     if (!ctx) {
-        throw new Error('useFocusZoneStore must be used within a FocusZone');
+        throw new Error('useFocusGroupStore must be used within a FocusGroup');
     }
     return ctx.store;
 }
@@ -59,7 +59,7 @@ export function useFocusZoneStore() {
 // Props
 // ═══════════════════════════════════════════════════════════════════
 
-export interface FocusZoneProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | 'style' | 'className' | 'onSelect'> {
+export interface FocusGroupProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | 'style' | 'className' | 'onSelect'> {
     /** Zone ID (optional, auto-generated if not provided) */
     id?: string;
 
@@ -110,7 +110,7 @@ function generateZoneId() {
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
-export function FocusZone({
+export function FocusGroup({
     id: propId,
     role,
     navigate,
@@ -124,14 +124,14 @@ export function FocusZone({
     className,
     style,
     ...rest
-}: FocusZoneProps) {
+}: FocusGroupProps) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     // --- Stable ID ---
     const zoneId = useMemo(() => propId || generateZoneId(), [propId]);
 
     // --- Scoped Store (Created once per zone) ---
-    const store = useMemo(() => createFocusZoneStore(zoneId), [zoneId]);
+    const store = useMemo(() => createFocusGroupStore(zoneId), [zoneId]);
 
     // --- Resolve Configuration ---
     const config = useMemo(() => {
@@ -139,24 +139,24 @@ export function FocusZone({
     }, [role, navigate, tab, select, activate, dismiss, project]);
 
     // --- Parent Context ---
-    const parentContext = useContext(FocusZoneContext);
+    const parentContext = useContext(FocusGroupContext);
     const parentId = parentContext?.zoneId || null;
 
     // --- DOM Registry & Global Store Registry ---
     useLayoutEffect(() => {
         if (containerRef.current) {
-            DOMInterface.registerZone(zoneId, containerRef.current);
+            DOMRegistry.registerZone(zoneId, containerRef.current);
             // Register with Global Registry for OS Commands (include config)
-            GlobalZoneRegistry.register(zoneId, store, parentId, config, onActivate);
+            FocusRegistry.register(zoneId, store, parentId, config, onActivate);
         }
         return () => {
-            DOMInterface.unregisterZone(zoneId);
-            GlobalZoneRegistry.unregister(zoneId);
+            DOMRegistry.unregisterZone(zoneId);
+            FocusRegistry.unregister(zoneId);
         };
     }, [zoneId, store, parentId, config]);
 
     // --- Context Value ---
-    const contextValue = useMemo<FocusZoneContextValue>(() => ({
+    const contextValue = useMemo<FocusGroupContextValue>(() => ({
         zoneId,
         store,
         config,
@@ -171,7 +171,7 @@ export function FocusZone({
 
     // --- Render ---
     return (
-        <FocusZoneContext.Provider value={contextValue}>
+        <FocusGroupContext.Provider value={contextValue}>
             <div
                 ref={containerRef}
                 id={zoneId}
@@ -189,9 +189,9 @@ export function FocusZone({
             >
                 {children}
             </div>
-        </FocusZoneContext.Provider>
+        </FocusGroupContext.Provider>
     );
 }
 
-FocusZone.displayName = 'FocusZone';
+FocusGroup.displayName = 'FocusGroup';
 

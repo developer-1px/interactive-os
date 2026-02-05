@@ -1,7 +1,7 @@
 import { produce } from "immer";
 import type { AppState, TodoCommand } from "@apps/todo/model/types";
-import { DOMInterface } from "@os/features/focusZone/registry/DOMInterface";
-import { GlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
+import { DOMRegistry } from "@os/features/focus/registry/DOMRegistry";
+import { FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 
 
 export const navigationMiddleware = (
@@ -23,7 +23,7 @@ export const navigationMiddleware = (
     // Defer until after React render so new items are registered
     requestAnimationFrame(() => {
       // [NEW] Set focus via Global Registry -> Active Zone
-      const activeStore = GlobalZoneRegistry.getActiveZone();
+      const activeStore = FocusRegistry.getActiveZone();
       if (activeStore) {
         activeStore.getState().setFocus(String(focusEffect.id));
       }
@@ -33,7 +33,7 @@ export const navigationMiddleware = (
     // Recovery applies when the previously focused item no longer exists
 
     // [NEW] Get Active Zone and Focus
-    const activeStore = GlobalZoneRegistry.getActiveZone();
+    const activeStore = FocusRegistry.getActiveZone();
     if (!activeStore) return rawNewState; // Can't do anything if no active zone
 
     const focusedItemId = activeStore.getState().focusedItemId;
@@ -75,7 +75,7 @@ export const navigationMiddleware = (
           requestAnimationFrame(() => {
             // [NEW] Use local store instance
             activeStore.getState().setFocus(targetId!);
-            const el = DOMInterface.getItem(targetId!);
+            const el = DOMRegistry.getItem(targetId!);
             el?.focus();
           });
         }

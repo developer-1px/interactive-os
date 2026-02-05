@@ -9,8 +9,8 @@ import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
 // [NEW] Local Store & Global Registry
-import { useFocusZoneStore, useFocusZoneContext } from "@os/features/focusZone/primitives/FocusZone";
-import { DOMInterface } from "@os/features/focusZone/registry/DOMInterface.ts";
+import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/primitives/FocusGroup";
+import { DOMRegistry } from "@os/features/focus/registry/DOMRegistry.ts";
 
 export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttributes<HTMLButtonElement> {
   id?: string;
@@ -36,12 +36,12 @@ export const Trigger = <T extends BaseCommand>({
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   // --- Focus State Tracking ---
-  const store = useFocusZoneStore();
+  const store = useFocusGroupStore();
   const focusedItemId = store((s) => s.focusedItemId);
   const isFocused = id ? focusedItemId === id : false;
 
   // --- Context Awareness (Zone Registration) ---
-  const focusContext = useFocusZoneContext();
+  const focusContext = useFocusGroupContext();
   const zoneId = focusContext?.zoneId || "unknown";
   const addItem = store((s) => s.addItem);
   const removeItem = store((s) => s.removeItem);
@@ -57,10 +57,10 @@ export const Trigger = <T extends BaseCommand>({
   // [NEW] DOM Registry Registration
   useLayoutEffect(() => {
     if (id && triggerRef.current) {
-      DOMInterface.registerItem(id, zoneId, triggerRef.current);
+      DOMRegistry.registerItem(id, zoneId, triggerRef.current);
     }
     return () => {
-      if (id) DOMInterface.unregisterItem(id);
+      if (id) DOMRegistry.unregisterItem(id);
     };
   }, [id, zoneId]);
 

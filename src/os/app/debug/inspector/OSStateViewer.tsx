@@ -1,13 +1,13 @@
 import { memo, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { useGlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
+import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 
 export const OSStateViewer = memo(() => {
-    const activeZoneId = useGlobalZoneRegistry((s) => s.activeZoneId);
-    const zones = useGlobalZoneRegistry((s) => s.zones);
+    const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
+    const zones = useFocusRegistry((s) => s.zones);
 
     // Compute focusPath inline to avoid unstable method call
-    const focusPath = useGlobalZoneRegistry(
+    const focusPath = useFocusRegistry(
         useShallow((s) => {
             if (!s.activeZoneId) return [];
             const path: string[] = [];

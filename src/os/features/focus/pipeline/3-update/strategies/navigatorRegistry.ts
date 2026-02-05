@@ -1,5 +1,5 @@
 import type { Direction, NavigateConfig, FocusNode } from '../../../types';
-import { DOMInterface } from '../../../registry/DOMInterface';
+import { DOMRegistry } from '../../../registry/DOMRegistry';
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -58,7 +58,7 @@ export const resolveLinear: NavigationStrategy = (currentIndex, direction, items
 export const resolveSpatial: NavigationStrategy = (currentId, direction, items, _config, spatial) => {
     if (!currentId) return { targetId: null, stickyX: null, stickyY: null };
 
-    const currentEl = DOMInterface.getItem(currentId);
+    const currentEl = DOMRegistry.getItem(currentId);
     if (!currentEl) {
         return { targetId: currentId, stickyX: null, stickyY: null };
     }
@@ -69,7 +69,7 @@ export const resolveSpatial: NavigationStrategy = (currentId, direction, items, 
     // Build node list with rects
     for (const id of items) {
         if (id === currentId) continue;
-        const el = DOMInterface.getItem(id);
+        const el = DOMRegistry.getItem(id);
         if (!el) continue;
         nodes.push({ id, element: el, rect: el.getBoundingClientRect() });
     }

@@ -2,7 +2,7 @@ import { Zone } from "@os/app/export/primitives/Zone.tsx";
 import { Item } from "@os/app/export/primitives/Item.tsx";
 import { Trigger } from "@os/app/export/primitives/Trigger.tsx";
 import { Kbd } from "@os/app/debug/components/Kbd";
-import { useFocusZoneStore } from "@os/features/focusZone/primitives/FocusZone"; // [NEW] Local Hook
+import { useFocusGroupStore } from "@os/features/focus/primitives/FocusGroup"; // [NEW] Local Hook
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
@@ -34,7 +34,7 @@ export function Sidebar() {
 function SidebarContent() {
   const { state, dispatch } = useEngine<AppState>();
   // Now we can use the local store hook because we are inside the Zone context
-  const store = useFocusZoneStore();
+  const store = useFocusGroupStore();
   const focusedItemId = store((s) => s.focusedItemId);
 
   if (!state || !state.data) return null;

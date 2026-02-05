@@ -1,9 +1,9 @@
 import { isValidElement, cloneElement, useLayoutEffect, useMemo, useRef, useCallback } from "react";
 import type { ReactNode, ReactElement } from "react";
 // [NEW] Local Store & Global Registry
-import { useFocusZoneStore, useFocusZoneContext } from "@os/features/focusZone/primitives/FocusZone";
-import { useGlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
-import { DOMInterface } from "@os/features/focusZone/registry/DOMInterface";
+import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/primitives/FocusGroup";
+import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { DOMRegistry } from "@os/features/focus/registry/DOMRegistry";
 
 // --- Types ---
 interface ItemState {
@@ -41,16 +41,16 @@ export const Item = ({
   const stringId = String(id);
 
   // --- 1. Store Access (Local Zone) ---
-  const store = useFocusZoneStore();
+  const store = useFocusGroupStore();
   const focusedItemId = store((s) => s.focusedItemId);
   const addItem = store((s) => s.addItem);
   const removeItem = store((s) => s.removeItem);
 
   // Anchor Logic Dependencies
-  const context = useFocusZoneContext();
+  const context = useFocusGroupContext();
   const zoneId = context?.zoneId || "unknown";
 
-  const activeZoneId = useGlobalZoneRegistry(s => s.activeZoneId);
+  const activeZoneId = useFocusRegistry(s => s.activeZoneId);
   const isZoneActive = activeZoneId === zoneId;
 
   const isFocused = focusedItemId === stringId;
@@ -61,13 +61,13 @@ export const Item = ({
   const setItemRef = useCallback((el: HTMLElement | null) => {
     (itemRef as any).current = el;
     if (el) {
-      DOMInterface.registerItem(stringId, zoneId, el);
+      DOMRegistry.registerItem(stringId, zoneId, el);
     }
   }, [stringId, zoneId]);
 
   // Cleanup on unmount
   useLayoutEffect(() => {
-    return () => DOMInterface.unregisterItem(stringId);
+    return () => DOMRegistry.unregisterItem(stringId);
   }, [stringId]);
 
   // --- 2. Item Registration ---

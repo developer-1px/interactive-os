@@ -1,5 +1,5 @@
 /**
- * FocusZone Core Types
+ * FocusGroup Core Types
  * 
  * Zero-based reconstruction following FSD naming standards.
  * All types use proper naming conventions.
@@ -113,7 +113,7 @@ export interface ProjectConfig {
 // Resolved Configuration (Complete)
 // ═══════════════════════════════════════════════════════════════════
 
-export interface FocusZoneConfig {
+export interface FocusGroupConfig {
     navigate: NavigateConfig;
     tab: TabConfig;
     select: SelectConfig;
@@ -162,7 +162,7 @@ export const DEFAULT_PROJECT: ProjectConfig = {
     autoFocus: false,
 };
 
-export const DEFAULT_CONFIG: FocusZoneConfig = {
+export const DEFAULT_CONFIG: FocusGroupConfig = {
     navigate: DEFAULT_NAVIGATE,
     tab: DEFAULT_TAB,
     select: DEFAULT_SELECT,

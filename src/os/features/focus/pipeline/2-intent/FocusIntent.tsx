@@ -1,5 +1,5 @@
 /**
- * FocusCommandHandler - Global Focus Command Handler
+ * FocusIntent - Global Focus Command Handler
  * 
  * Single source of truth for handling all focus-related OS commands.
  * 
@@ -9,20 +9,20 @@
 
 import { useCommandListener } from '../../../command/hooks/useCommandListener';
 import { OS_COMMANDS, type OSNavigatePayload, type OSSelectPayload, type OSActivatePayload } from '../../../command/definitions/commandsShell';
-import { GlobalZoneRegistry } from '../../registry/GlobalZoneRegistry';
-import { resolveNavigate } from '../3-resolve/resolveNavigate';
-import { resolveTab } from '../3-resolve/resolveTab';
-import { resolveSelect } from '../3-resolve/resolveSelect';
-import { resolveActivate } from '../3-resolve/resolveActivate';
+import { FocusRegistry } from '../../registry/FocusRegistry';
+import { updateNavigate } from '../3-update/updateNavigate';
+import { updateTab } from '../3-update/updateTab';
+import { updateSelect } from '../3-update/updateSelect';
+import { updateActivate } from '../3-update/updateActivate';
 import { commitAll } from '../4-commit/commitFocus';
-import { ZoneOrchestrator } from '../ZoneOrchestrator';
+import { FocusOrchestrator } from '../../lib/FocusOrchestrator.ts';
 
 // ═══════════════════════════════════════════════════════════════════
 // Command Handlers
 // ═══════════════════════════════════════════════════════════════════
 
 function handleNavigate(payload: unknown) {
-    const entry = GlobalZoneRegistry.getActiveZoneEntry();
+    const entry = FocusRegistry.getActiveZoneEntry();
     if (!entry || !entry.config) return;
 
     const { store } = entry;
@@ -31,7 +31,7 @@ function handleNavigate(payload: unknown) {
     const { direction } = payload as OSNavigatePayload;
     const dir = direction.toLowerCase() as 'up' | 'down' | 'left' | 'right';
 
-    const result = resolveNavigate(
+    const result = updateNavigate(
         state.focusedItemId,
         dir,
         state.items,
@@ -55,14 +55,14 @@ function handleNavigate(payload: unknown) {
 }
 
 function handleTab(direction: 'forward' | 'backward') {
-    const entry = GlobalZoneRegistry.getActiveZoneEntry();
+    const entry = FocusRegistry.getActiveZoneEntry();
     if (!entry || !entry.config) return;
 
     const { store } = entry;
     const config = entry.config;
     const state = store.getState();
 
-    const result = resolveTab(
+    const result = updateTab(
         state.focusedItemId,
         direction,
         state.items,
@@ -72,12 +72,12 @@ function handleTab(direction: 'forward' | 'backward') {
     if (result.action === 'trap' && result.targetId) {
         commitAll(store, { targetId: result.targetId });
     } else if (result.action === 'escape' || result.action === 'flow') {
-        ZoneOrchestrator.traverseZone(state.zoneId, direction, config);
+        FocusOrchestrator.traverseZone(state.zoneId, direction, config);
     }
 }
 
 function handleSelect(payload: unknown) {
-    const entry = GlobalZoneRegistry.getActiveZoneEntry();
+    const entry = FocusRegistry.getActiveZoneEntry();
     if (!entry || !entry.config) return;
 
     const { store } = entry;
@@ -87,7 +87,7 @@ function handleSelect(payload: unknown) {
 
     const resolveMode = (mode === 'replace' || !mode) ? 'single' : mode;
 
-    const result = resolveSelect(
+    const result = updateSelect(
         targetId ?? state.focusedItemId ?? undefined,
         state.selection,
         state.selectionAnchor,
@@ -105,7 +105,7 @@ function handleSelect(payload: unknown) {
 }
 
 function handleActivate(payload: unknown) {
-    const entry = GlobalZoneRegistry.getActiveZoneEntry();
+    const entry = FocusRegistry.getActiveZoneEntry();
     if (!entry || !entry.config) return;
 
     const { store, config, onActivate } = entry;
@@ -114,7 +114,7 @@ function handleActivate(payload: unknown) {
 
     const idToActivate = targetId ?? state.focusedItemId;
 
-    const result = resolveActivate(
+    const result = updateActivate(
         idToActivate,
         'enter',
         config.activate
@@ -137,7 +137,7 @@ function handleFocus(payload: unknown) {
     const { id, zoneId } = payload as { id: string, zoneId: string };
     if (!id || !zoneId) return;
 
-    const entry = GlobalZoneRegistry.getZoneEntry(zoneId);
+    const entry = FocusRegistry.getZoneEntry(zoneId);
     if (!entry || !entry.config) return;
 
     const { store } = entry;
@@ -147,7 +147,7 @@ function handleFocus(payload: unknown) {
     // 1. Resolve: Check if change is needed
     if (state.focusedItemId === id) {
         // Even if same item, ensure zone is active
-        GlobalZoneRegistry.setActiveZone(zoneId);
+        FocusRegistry.setActiveZone(zoneId);
         return;
     }
 
@@ -163,11 +163,11 @@ function handleFocus(payload: unknown) {
     }
 
     // 4. Orchestration: Set as active zone
-    GlobalZoneRegistry.setActiveZone(zoneId);
+    FocusRegistry.setActiveZone(zoneId);
 }
 
 function handleDismiss() {
-    const entry = GlobalZoneRegistry.getActiveZoneEntry();
+    const entry = FocusRegistry.getActiveZoneEntry();
     if (!entry || !entry.config) return;
 
     const { store } = entry;
@@ -187,7 +187,7 @@ function handleDismiss() {
 // Main Component
 // ═══════════════════════════════════════════════════════════════════
 
-export function FocusCommandHandler() {
+export function FocusIntent() {
     useCommandListener([
         { command: OS_COMMANDS.NAVIGATE, handler: handleNavigate },
         { command: OS_COMMANDS.TAB, handler: () => handleTab('forward') },

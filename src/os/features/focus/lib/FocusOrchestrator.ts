@@ -1,14 +1,14 @@
 /**
- * ZoneOrchestrator - Cross-Zone Navigation Manager
+ * FocusOrchestrator - Cross-Zone Navigation Manager
  * 
  * Logic for moving focus between zones (Tab flow, Escape).
- * Encapsulates GlobalZoneRegistry interactions.
+ * Encapsulates FocusRegistry interactions.
  */
 
-import { GlobalZoneRegistry } from '../registry/GlobalZoneRegistry';
-import { resolveEntry } from './3-resolve/resolveEntry';
+import { FocusRegistry } from '../registry/FocusRegistry.ts';
+import { updateEntry } from '../pipeline/3-update/updateEntry.ts';
 
-export const ZoneOrchestrator = {
+export const FocusOrchestrator = {
     /**
      * Move focus to the next/previous sibling zone.
      */
@@ -17,23 +17,23 @@ export const ZoneOrchestrator = {
         direction: 'forward' | 'backward',
         fallbackConfig?: any // Optional config to use if target zone is missing one
     ): boolean => {
-        const nextZoneId = GlobalZoneRegistry.getSiblingZone(direction);
+        const nextZoneId = FocusRegistry.getSiblingZone(direction);
 
         if (!nextZoneId) {
-            console.warn('[ZoneOrchestrator] No sibling zone found for', { currentZoneId, direction });
+            console.warn('[FocusOrchestrator] No sibling zone found for', { currentZoneId, direction });
             return false;
         }
 
-        const nextZoneEntry = GlobalZoneRegistry.getZoneEntry(nextZoneId);
+        const nextZoneEntry = FocusRegistry.getZoneEntry(nextZoneId);
         if (!nextZoneEntry || !nextZoneEntry.store) {
-            console.warn('[ZoneOrchestrator] Target zone entry invalid', { nextZoneId });
+            console.warn('[FocusOrchestrator] Target zone entry invalid', { nextZoneId });
             return false;
         }
 
         const { store: nextZoneStore, config: nextZoneConfig } = nextZoneEntry;
 
         // 1. Activate the target zone
-        GlobalZoneRegistry.setActiveZone(nextZoneId);
+        FocusRegistry.setActiveZone(nextZoneId);
 
         // 2. Determine entry item
         const nextState = nextZoneStore.getState();
@@ -44,12 +44,12 @@ export const ZoneOrchestrator = {
             // We assume 'navigate' config is what controls entry, 
             // but actually 'entry' is a top-level or navigate-level property depending on types.
             // Let's assume passed config has access to it.
-            // Actually, resolveEntry takes NavigateConfig.
+            // Actually, updateEntry takes NavigateConfig.
 
             const entryConfig = nextZoneConfig?.navigate || fallbackConfig?.navigate;
 
             if (entryConfig) {
-                const targetItem = resolveEntry(items, entryConfig, {
+                const targetItem = updateEntry(items, entryConfig, {
                     lastFocusedId: nextState.lastFocusedId,
                     selection: nextState.selection,
                 });

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 // [NEW] Global Registry & Types
-import { useGlobalZoneRegistry, GlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
-// import { useFocusZoneStore } from "@os/features/focusZone/primitives/FocusZone"; // Not used here? 
+import { useFocusRegistry, FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+// import { useFocusGroupStore } from "@os/features/focusGroup/primitives/FocusGroup"; // Not used here? 
 
 import { useCommandEngine } from "@os/features/command/ui/CommandContext";
 import { getCanonicalKey, normalizeKeyDefinition } from "@os/features/input/lib/getCanonicalKey";
@@ -16,7 +16,7 @@ import { useInputTelemetry } from "@os/app/debug/LoggedKey";
  */
 export function InputEngine() {
     // --- Global Focus State ---
-    const activeZoneId = useGlobalZoneRegistry(s => s.activeZoneId);
+    const activeZoneId = useFocusRegistry(s => s.activeZoneId);
 
     // NOTE: Do NOT call getFocusPath() inside selector! It returns new array each time.
     // Instead, call it inside event handler using static accessor.
@@ -48,7 +48,7 @@ export function InputEngine() {
                 const canonicalKey = getCanonicalKey(e);
                 const bindings = registry.getKeybindings();
                 // Get fresh path via static method (avoids selector infinite loop)
-                const focusPath = GlobalZoneRegistry.getFocusPath();
+                const focusPath = FocusRegistry.getFocusPath();
 
                 // Create a bubbling path: ActiveZone -> ... -> Root
                 // If focusPath is empty (metrics not ready), fallback to [activeZoneId]
@@ -71,11 +71,11 @@ export function InputEngine() {
                         // Zone Metadata Access? 
                         // The registry now has 'config' in the store?
                         // We might need to access the store of the zone to check 'area' or other metadata.
-                        // const zoneStore = GlobalZoneRegistry.getZone(layerId);
+                        // const zoneStore = FocusRegistry.getZone(layerId);
                         // const zoneConfig = zoneStore?.getState().config;
                         // const zoneArea = zoneConfig?.area; (Config doesn't usually have area? ZoneProps does)
                         // Wait, 'area' was on ZoneProps. Where is it now?
-                        // Ideally, FocusZone config should include metadata.
+                        // Ideally, FocusGroup config should include metadata.
                         // Assume zoneId is the primary identifier for now.
 
                         const zoneArea = undefined; // 'area' lookup needs restoration if critical.

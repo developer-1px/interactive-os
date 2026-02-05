@@ -1,10 +1,10 @@
 /**
- * GlobalFocusSensor - Global DOM Focus Event Interceptor
+ * FocusSensor - Global DOM Focus Event Interceptor
  * Pipeline Phase 1: INTERCEPT
  * 
  * Responsibility: Capture DOM events and dispatch intents (FOCUS, SELECT).
  * Pure interceptor without local state or deduplication logic.
- * Logic is handled in the Resolve phase (FocusCommandHandler).
+ * Logic is handled in the Resolve phase (FocusIntent).
  */
 
 import { useEffect } from 'react';
@@ -12,7 +12,7 @@ import { useCommandEngine } from '../../../command/ui/CommandContext';
 import { OS_COMMANDS } from '../../../command/definitions/commandsShell';
 import { findFocusableItem, resolveFocusTarget } from '../../lib/focusDOMQueries';
 
-export function GlobalFocusSensor() {
+export function FocusSensor() {
     const { dispatch } = useCommandEngine();
 
     useEffect(() => {

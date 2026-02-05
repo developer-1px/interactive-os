@@ -1,26 +1,26 @@
 /**
- * GlobalFocusProjector - Global Focus Side-Effect Layer
+ * FocusSync - Global Focus Side-Effect Layer
  * Pipeline Phase 5: PROJECT
  * 
- * Responsibility: Synchronize the FocusZone state to the physical DOM (document.activeElement).
+ * Responsibility: Synchronize the FocusGroup state to the physical DOM (document.activeElement).
  * Listens to the active zone and its store to perform el.focus().
  */
 
 import { useEffect, useRef } from 'react';
 import { useStore } from 'zustand';
-import { useGlobalZoneRegistry } from '../../registry/GlobalZoneRegistry';
-import { DOMInterface } from '../../registry/DOMInterface';
+import { useFocusRegistry } from '../../registry/FocusRegistry';
+import { DOMRegistry } from '../../registry/DOMRegistry';
 
-export function GlobalFocusProjector() {
+export function FocusSync() {
     // 1. Listen to which zone is active
-    const activeZoneId = useGlobalZoneRegistry((s) => s.activeZoneId);
-    const getFocusPath = useGlobalZoneRegistry((s) => s.getFocusPath);
+    const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
+    const getFocusPath = useFocusRegistry((s) => s.getFocusPath);
 
     const lastPathRef = useRef<string[]>([]);
 
     // --- A. Focus Path Attribute Projection (aria-current) ---
     // Imperatively update the aria-current attribute on all zones in the focus path.
-    // This removes the need for FocusZone to re-render on focus changes.
+    // This removes the need for FocusGroup to re-render on focus changes.
     useEffect(() => {
         const nextPath = getFocusPath();
         const prevPath = lastPathRef.current;
@@ -28,14 +28,14 @@ export function GlobalFocusProjector() {
         // 1. Clear old path
         prevPath.forEach(id => {
             if (!nextPath.includes(id)) {
-                const el = DOMInterface.getZone(id);
+                const el = DOMRegistry.getZone(id);
                 if (el) el.removeAttribute('aria-current');
             }
         });
 
         // 2. Set new path
         nextPath.forEach(id => {
-            const el = DOMInterface.getZone(id);
+            const el = DOMRegistry.getZone(id);
             if (el) el.setAttribute('aria-current', 'true');
         });
 
@@ -43,7 +43,7 @@ export function GlobalFocusProjector() {
     }, [activeZoneId, getFocusPath]);
 
     // --- B. Physical Focus Projection (document.activeElement) ---
-    const zones = useGlobalZoneRegistry((s) => s.zones);
+    const zones = useFocusRegistry((s) => s.zones);
 
     // 2. Identify the active store
     const activeEntry = activeZoneId ? zones.get(activeZoneId) : null;
@@ -66,7 +66,7 @@ function ActiveZoneProjector({ zoneId, store }: { zoneId: string; store: any }) 
         if (focusedItemId === lastFocusedRef.current) return;
 
         // 4. Physical Projection
-        const targetEl = DOMInterface.getItem(focusedItemId);
+        const targetEl = DOMRegistry.getItem(focusedItemId);
         const currentActive = document.activeElement;
 
         if (targetEl && currentActive !== targetEl) {

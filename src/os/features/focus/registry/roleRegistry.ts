@@ -5,7 +5,7 @@
  */
 
 import type {
-    FocusZoneConfig,
+    FocusGroupConfig,
     NavigateConfig,
     TabConfig,
     SelectConfig,
@@ -30,7 +30,7 @@ type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
-export type RolePreset = DeepPartial<FocusZoneConfig>;
+export type RolePreset = DeepPartial<FocusGroupConfig>;
 
 // ═══════════════════════════════════════════════════════════════════
 // Built-in Role Presets
@@ -113,7 +113,7 @@ export function resolveRole(
         dismiss?: Partial<DismissConfig>;
         project?: Partial<ProjectConfig>;
     } = {}
-): FocusZoneConfig {
+): FocusGroupConfig {
     const basePreset = role ? (rolePresets[role] || {}) : {};
 
     return {

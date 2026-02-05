@@ -1,20 +1,20 @@
 /**
- * Zone - Facade for FocusZone
+ * Zone - Facade for FocusGroup
  * 
  * Simple re-export that provides FocusContext for legacy consumers.
- * All focus behavior is delegated to FocusZone.
+ * All focus behavior is delegated to FocusGroup.
  */
 
 import { useContext, useMemo, createContext } from "react";
 import { FocusContext } from "@os/features/command/ui/CommandContext";
-import { FocusZone, type FocusZoneProps } from "@os/features/focusZone/primitives/FocusZone";
-import { useGlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
+import { FocusGroup, type FocusGroupProps } from "@os/features/focus/primitives/FocusGroup";
+import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
-// Zone Props (extends FocusZone)
+// Zone Props (extends FocusGroup)
 // ═══════════════════════════════════════════════════════════════════
 
-export interface ZoneProps extends FocusZoneProps {
+export interface ZoneProps extends FocusGroupProps {
   /** Area identifier for scoped commands */
   area?: string;
 }
@@ -37,12 +37,12 @@ export const useZoneFocusGroup = () => useContext(ZoneFocusGroupContext);
 export function Zone({
   id,
   children,
-  ...focusZoneProps
+  ...focusGroupProps
 }: ZoneProps) {
   const zoneId = id ?? "zone";
 
   // Active state for FocusContext
-  const activeZoneId = useGlobalZoneRegistry(s => s.activeZoneId);
+  const activeZoneId = useFocusRegistry(s => s.activeZoneId);
   const isActive = activeZoneId === zoneId;
 
   const focusContextValue = useMemo(() => ({
@@ -52,9 +52,9 @@ export function Zone({
 
   return (
     <FocusContext.Provider value={focusContextValue}>
-      <FocusZone id={zoneId} {...focusZoneProps}>
+      <FocusGroup id={zoneId} {...focusGroupProps}>
         {children}
-      </FocusZone>
+      </FocusGroup>
     </FocusContext.Provider>
   );
 }

@@ -1,20 +1,20 @@
 import type { Direction, NavigateConfig } from '../../types';
 import { resolveWithStrategy, type NavigateResult } from './strategies/navigatorRegistry';
-import { resolveEntry } from './resolveEntry';
+import { updateEntry } from './updateEntry';
 
 // ═══════════════════════════════════════════════════════════════════
 // Main Resolver
 // ═══════════════════════════════════════════════════════════════════
 
-export function resolveNavigate(
+export function updateNavigate(
     currentId: string | null,
     direction: Direction,
     items: string[],
     config: NavigateConfig,
     spatial: { stickyX: number | null; stickyY: number | null }
 ): NavigateResult {
-    console.log('[resolveNavigate] START', { currentId, direction, itemCount: items.length });
-    console.log('[resolveNavigate] items:', items);
+    console.log('[updateNavigate] START', { currentId, direction, itemCount: items.length });
+    console.log('[updateNavigate] items:', items);
     if (items.length === 0) {
         return { targetId: null, stickyX: null, stickyY: null };
     }
@@ -23,7 +23,7 @@ export function resolveNavigate(
     if (!currentId) {
         // Entry logic remains here for now or could be moved to strategy?
         // Ideally strategy handles it if config.entry is strategy-aware, but for now we keep it simple.
-        const entryId = resolveEntry(items, config);
+        const entryId = updateEntry(items, config);
         return { targetId: entryId, stickyX: null, stickyY: null };
     }
 

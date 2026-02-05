@@ -5,10 +5,10 @@ import { createCommandStore, CommandRegistry } from "@os/features/command/model/
 import { ALL_OS_COMMANDS } from "@os/features/command/definitions/osCommands";
 import { CommandContext, setGlobalEngine } from "@os/features/command/ui/CommandContext";
 import { InputEngine } from "@os/features/input/ui/InputEngine";
-import { FocusCommandHandler } from "@os/features/focusZone/pipeline/2-parse/FocusCommandHandler";
-import { GlobalFocusSensor } from "@os/features/focusZone/pipeline/1-intercept/GlobalFocusSensor";
-import { GlobalFocusProjector } from "@os/features/focusZone/pipeline/5-project/GlobalFocusProjector";
-import { useGlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
+import { FocusIntent } from "@os/features/focus/pipeline/2-intent/FocusIntent";
+import { FocusSensor } from "@os/features/focus/pipeline/1-sense/FocusSensor";
+import { FocusSync } from "@os/features/focus/pipeline/5-sync/FocusSync";
+import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 import { Zone } from "@os/app/export/primitives/Zone";
 import { useInspectorPersistence } from "@os/features/inspector/useInspectorPersistence";
 import { evalContext } from "@os/features/logic/lib/evalContext";
@@ -68,10 +68,10 @@ export function App<S>({
     useInspectorPersistence(engine.store);
 
     // 3. Focus State (Global Registry)
-    const activeZoneId = useGlobalZoneRegistry((s) => s.activeZoneId);
-    const zones = useGlobalZoneRegistry((s) => s.zones);
+    const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
+    const zones = useFocusRegistry((s) => s.zones);
 
-    const focusPath = useGlobalZoneRegistry(
+    const focusPath = useFocusRegistry(
         useShallow((s) => {
             if (!s.activeZoneId) return [];
             const path: string[] = [];
@@ -158,9 +158,9 @@ export function App<S>({
         <AppContext.Provider value={{ isAppShell }}>
             <CommandContext.Provider value={providerValue}>
                 <InputEngine />
-                <FocusCommandHandler />
-                <GlobalFocusSensor />
-                <GlobalFocusProjector />
+                <FocusIntent />
+                <FocusSensor />
+                <FocusSync />
                 <Zone id={definition.id} area={definition.id} className={zoneClassName}>
                     {children}
                 </Zone>

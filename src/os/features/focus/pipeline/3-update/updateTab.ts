@@ -1,5 +1,5 @@
 /**
- * resolveTab - Tab key behavior logic
+ * updateTab - Tab key behavior logic
  * 
  * Phase 3: RESOLVE (Tab)
  * Handles trap/escape/flow behaviors.
@@ -20,7 +20,7 @@ export interface TabResult {
 // Main Resolver
 // ═══════════════════════════════════════════════════════════════════
 
-export function resolveTab(
+export function updateTab(
     currentId: string | null,
     direction: TabDirection,
     items: string[],

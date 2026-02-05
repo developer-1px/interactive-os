@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import type { FocusZoneStore } from '../store/focusZoneStore';
-import type { FocusZoneConfig } from '../types';
+import type { FocusGroupStore } from '../store/focusGroupStore';
+import type { FocusGroupConfig } from '../types';
 
 interface ZoneEntry {
-    store: FocusZoneStore;
+    store: FocusGroupStore;
     parentId: string | null;
-    config?: FocusZoneConfig;
+    config?: FocusGroupConfig;
     onActivate?: (itemId: string) => void;
 }
 
@@ -15,18 +15,18 @@ interface GlobalRegistryState {
 }
 
 interface GlobalRegistryActions {
-    register: (id: string, store: FocusZoneStore, parentId?: string | null, config?: FocusZoneConfig, onActivate?: (itemId: string) => void) => void;
+    register: (id: string, store: FocusGroupStore, parentId?: string | null, config?: FocusGroupConfig, onActivate?: (itemId: string) => void) => void;
     unregister: (id: string) => void;
     setActiveZone: (id: string) => void;
-    getZone: (id: string) => FocusZoneStore | undefined;
+    getZone: (id: string) => FocusGroupStore | undefined;
     getZoneEntry: (id: string) => ZoneEntry | undefined;
-    getActiveZone: () => FocusZoneStore | undefined;
+    getActiveZone: () => FocusGroupStore | undefined;
     getFocusPath: () => string[];
     getSiblingZone: (direction: 'forward' | 'backward') => string | null;
 }
 
 // Global singleton store for Zone Registry
-export const useGlobalZoneRegistry = create<GlobalRegistryState & GlobalRegistryActions>((set, get) => ({
+export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActions>((set, get) => ({
     zones: new Map(),
     activeZoneId: null,
 
@@ -105,7 +105,7 @@ export const useGlobalZoneRegistry = create<GlobalRegistryState & GlobalRegistry
         const sortByDOMOrder = (ids: string[]): string[] => {
             const elements = ids
                 .map(id => {
-                    // Try DOMInterface first, fallback to getElementById
+                    // Try DOMRegistry first, fallback to getElementById
                     const el = document.querySelector(`[data-focus-zone="${id}"]`) as HTMLElement | null;
                     return el ? { id, el } : null;
                 })
@@ -135,20 +135,20 @@ export const useGlobalZoneRegistry = create<GlobalRegistryState & GlobalRegistry
 }));
 
 // Non-hook access for Event Handlers / Commands
-export const GlobalZoneRegistry = {
-    get: () => useGlobalZoneRegistry.getState(),
-    register: (id: string, store: FocusZoneStore, parentId?: string | null, config?: FocusZoneConfig, onActivate?: (itemId: string) => void) =>
-        useGlobalZoneRegistry.getState().register(id, store, parentId, config, onActivate),
-    unregister: (id: string) => useGlobalZoneRegistry.getState().unregister(id),
-    setActiveZone: (id: string) => useGlobalZoneRegistry.getState().setActiveZone(id),
-    getZone: (id: string) => useGlobalZoneRegistry.getState().getZone(id),
-    getZoneEntry: (id: string) => useGlobalZoneRegistry.getState().getZoneEntry(id),
-    getActiveZone: () => useGlobalZoneRegistry.getState().getActiveZone(),
+export const FocusRegistry = {
+    get: () => useFocusRegistry.getState(),
+    register: (id: string, store: FocusGroupStore, parentId?: string | null, config?: FocusGroupConfig, onActivate?: (itemId: string) => void) =>
+        useFocusRegistry.getState().register(id, store, parentId, config, onActivate),
+    unregister: (id: string) => useFocusRegistry.getState().unregister(id),
+    setActiveZone: (id: string) => useFocusRegistry.getState().setActiveZone(id),
+    getZone: (id: string) => useFocusRegistry.getState().getZone(id),
+    getZoneEntry: (id: string) => useFocusRegistry.getState().getZoneEntry(id),
+    getActiveZone: () => useFocusRegistry.getState().getActiveZone(),
     getActiveZoneEntry: () => {
-        const state = useGlobalZoneRegistry.getState();
+        const state = useFocusRegistry.getState();
         if (!state.activeZoneId) return undefined;
         return state.zones.get(state.activeZoneId);
     },
-    getFocusPath: () => useGlobalZoneRegistry.getState().getFocusPath(),
-    getSiblingZone: (direction: 'forward' | 'backward') => useGlobalZoneRegistry.getState().getSiblingZone(direction),
+    getFocusPath: () => useFocusRegistry.getState().getFocusPath(),
+    getSiblingZone: (direction: 'forward' | 'backward') => useFocusRegistry.getState().getSiblingZone(direction),
 };

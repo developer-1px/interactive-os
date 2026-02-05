@@ -1,15 +1,15 @@
 /**
- * FocusZone Showcase Page
+ * FocusGroup Showcase Page
  * 
- * Demonstrates the new FocusZone primitives with proper pipeline architecture.
+ * Demonstrates the new FocusGroup primitives with proper pipeline architecture.
  */
 
-import { FocusZone } from '@os/features/focusZone/primitives/FocusZone';
-import { FocusItem } from '@os/features/focusZone/primitives/FocusItem';
+import { FocusGroup } from '@os/features/focus/primitives/FocusGroup';
+import { FocusItem } from '@os/features/focus/primitives/FocusItem';
 import { useState, useCallback, useLayoutEffect } from 'react';
 import { useCommandEventBus } from '@os/features/command/lib/useCommandEventBus';
 import { OS_COMMANDS } from '@os/features/command/definitions/commandsShell';
-import { GlobalZoneRegistry } from '@os/features/focusZone/registry/GlobalZoneRegistry';
+import { FocusRegistry } from '@os/features/focus/registry/FocusRegistry';
 
 // ═══════════════════════════════════════════════════════════════════
 // Validation Logic
@@ -124,12 +124,12 @@ function useRuntimeVerification() {
             el.dispatchEvent(new MouseEvent('click', eventInit));
             el.focus();
 
-            // Activate the parent FocusZone (required for command dispatch to work)
+            // Activate the parent FocusGroup (required for command dispatch to work)
             const zoneEl = el.closest('[data-focus-zone]');
             if (zoneEl) {
                 const zoneId = zoneEl.getAttribute('data-focus-zone');
                 if (zoneId) {
-                    GlobalZoneRegistry.setActiveZone(zoneId);
+                    FocusRegistry.setActiveZone(zoneId);
                 }
             }
         }
@@ -509,9 +509,9 @@ function useRuntimeVerification() {
             // Test 22: Auto Focus Zone Configured
             // ═══════════════════════════════════════════════════════════════
             updateTest(21, 'running', []);
-            const autoFocusZone = document.querySelector('#auto-focus-zone');
-            logs[21].push(`Auto focus zone exists: ${!!autoFocusZone}`);
-            assert(!!autoFocusZone, 'Auto focus zone configured', logs[21]);
+            const autoFocusGroup = document.querySelector('#auto-focus-zone');
+            logs[21].push(`Auto focus zone exists: ${!!autoFocusGroup}`);
+            assert(!!autoFocusGroup, 'Auto focus zone configured', logs[21]);
             updateTest(21, 'pass', logs[21]);
 
         } catch (e) {
@@ -534,12 +534,12 @@ function TestRunner() {
         // Wait for registry to hydrate
         // Wait for registry to hydrate
         const timer = setTimeout(() => {
-            import('@os/features/focusZone/registry/GlobalZoneRegistry').then(({ GlobalZoneRegistry }) => {
+            import('@os/features/focus/registry/FocusRegistry').then(({ FocusRegistry }) => {
                 // Default to first list
                 const defaultZone = 'vertical-list';
-                GlobalZoneRegistry.setActiveZone(defaultZone);
+                FocusRegistry.setActiveZone(defaultZone);
 
-                const zoneStore = GlobalZoneRegistry.getZone(defaultZone);
+                const zoneStore = FocusRegistry.getZone(defaultZone);
                 if (zoneStore) {
                     const state = zoneStore.getState();
                     if (state.items.length > 0 && !state.focusedItemId) {
@@ -600,14 +600,14 @@ function TestRunner() {
 export function FocusShowcasePage3() {
     return (
         <div className="min-h-screen bg-zinc-950 text-white p-8 pb-32">
-            <h1 className="text-3xl font-bold mb-2">FocusZone Showcase</h1>
+            <h1 className="text-3xl font-bold mb-2">FocusGroup Showcase</h1>
             <p className="text-zinc-400 mb-8">Zero-based reconstruction with proper naming conventions</p>
 
             <div className="grid grid-cols-3 gap-8">
                 {/* Vertical List */}
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-4">Vertical List</h2>
-                    <FocusZone
+                    <FocusGroup
                         id="vertical-list"
                         role="listbox"
                         navigate={{ orientation: 'vertical', loop: true }}
@@ -624,13 +624,13 @@ export function FocusShowcasePage3() {
                                 {fruit}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
 
                 {/* Horizontal Toolbar */}
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-4">Horizontal Toolbar</h2>
-                    <FocusZone
+                    <FocusGroup
                         id="toolbar"
                         role="toolbar"
                         navigate={{ orientation: 'horizontal' }}
@@ -646,13 +646,13 @@ export function FocusShowcasePage3() {
                                 {action}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
 
                 {/* Grid with Multiple Selection */}
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-4">Grid Multi-Select</h2>
-                    <FocusZone
+                    <FocusGroup
                         id="grid"
                         role="grid"
                         navigate={{ orientation: 'both' }}
@@ -669,13 +669,13 @@ export function FocusShowcasePage3() {
                                 {i + 1}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
 
                 {/* Menu with Trap */}
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-4">Menu (Tab Trap)</h2>
-                    <FocusZone
+                    <FocusGroup
                         id="menu"
                         role="menu"
                         navigate={{ orientation: 'vertical', loop: true }}
@@ -693,13 +693,13 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
 
                 {/* Radio Group */}
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-4">Radio Group</h2>
-                    <FocusZone
+                    <FocusGroup
                         id="radio-group"
                         role="radiogroup"
                         navigate={{ orientation: 'vertical', loop: true }}
@@ -719,13 +719,13 @@ export function FocusShowcasePage3() {
                                 </span>
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
 
                 {/* Tab List */}
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-4">Tab List</h2>
-                    <FocusZone
+                    <FocusGroup
                         id="tabs"
                         role="tablist"
                         navigate={{ orientation: 'horizontal', loop: true }}
@@ -742,7 +742,7 @@ export function FocusShowcasePage3() {
                                 {tab}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
             </div>
 
@@ -755,7 +755,7 @@ export function FocusShowcasePage3() {
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Dismiss (Escape)</h2>
                     <p className="text-xs text-zinc-500 mb-4">dismiss.escape = 'deselect'</p>
-                    <FocusZone
+                    <FocusGroup
                         id="dismiss-zone"
                         role="listbox"
                         navigate={{ orientation: 'vertical' }}
@@ -773,14 +773,14 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
 
                 {/* Entry Restore */}
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Entry Restore</h2>
                     <p className="text-xs text-zinc-500 mb-4">navigate.entry = 'restore'</p>
-                    <FocusZone
+                    <FocusGroup
                         id="entry-restore-zone"
                         role="listbox"
                         navigate={{ orientation: 'vertical', entry: 'restore' }}
@@ -798,14 +798,14 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
 
                 {/* Tab Flow */}
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Tab Flow</h2>
                     <p className="text-xs text-zinc-500 mb-4">tab.behavior = 'flow'</p>
-                    <FocusZone
+                    <FocusGroup
                         id="tab-flow-zone"
                         role="toolbar"
                         navigate={{ orientation: 'horizontal' }}
@@ -822,14 +822,14 @@ export function FocusShowcasePage3() {
                                 {action}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
 
                 {/* Typeahead (if supported) */}
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Typeahead</h2>
                     <p className="text-xs text-zinc-500 mb-4">navigate.typeahead = true</p>
-                    <FocusZone
+                    <FocusGroup
                         id="typeahead-zone"
                         role="listbox"
                         navigate={{ orientation: 'vertical', typeahead: true }}
@@ -846,7 +846,7 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                 </div>
             </div>
 
@@ -860,7 +860,7 @@ export function FocusShowcasePage3() {
                     <h2 className="text-lg font-semibold mb-2">Seamless Navigation</h2>
                     <p className="text-xs text-zinc-500 mb-4">navigate.seamless = true</p>
                     <div className="flex gap-4">
-                        <FocusZone
+                        <FocusGroup
                             id="seamless-left"
                             role="listbox"
                             navigate={{ orientation: 'vertical', seamless: true }}
@@ -877,8 +877,8 @@ export function FocusShowcasePage3() {
                                     {item}
                                 </FocusItem>
                             ))}
-                        </FocusZone>
-                        <FocusZone
+                        </FocusGroup>
+                        <FocusGroup
                             id="seamless-right"
                             role="listbox"
                             navigate={{ orientation: 'vertical', seamless: true }}
@@ -895,7 +895,7 @@ export function FocusShowcasePage3() {
                                     {item}
                                 </FocusItem>
                             ))}
-                        </FocusZone>
+                        </FocusGroup>
                     </div>
                     <p className="text-xs text-zinc-600 mt-2">→ to switch columns</p>
                 </div>
@@ -904,7 +904,7 @@ export function FocusShowcasePage3() {
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Entry Last</h2>
                     <p className="text-xs text-zinc-500 mb-4">navigate.entry = 'last'</p>
-                    <FocusZone
+                    <FocusGroup
                         id="entry-last-zone"
                         role="listbox"
                         navigate={{ orientation: 'vertical', entry: 'last' }}
@@ -921,7 +921,7 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                     <p className="text-xs text-zinc-600 mt-2">Tab into → focuses 'Bottom'</p>
                 </div>
 
@@ -929,7 +929,7 @@ export function FocusShowcasePage3() {
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Auto Activate</h2>
                     <p className="text-xs text-zinc-500 mb-4">activate.mode = 'automatic'</p>
-                    <FocusZone
+                    <FocusGroup
                         id="auto-activate-zone"
                         role="listbox"
                         navigate={{ orientation: 'vertical' }}
@@ -948,7 +948,7 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                     <p className="text-xs text-zinc-600 mt-2">Select triggers onActivate</p>
                 </div>
 
@@ -956,7 +956,7 @@ export function FocusShowcasePage3() {
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Dismiss Close</h2>
                     <p className="text-xs text-zinc-500 mb-4">dismiss.escape = 'close'</p>
-                    <FocusZone
+                    <FocusGroup
                         id="dismiss-close-zone"
                         role="menu"
                         navigate={{ orientation: 'vertical' }}
@@ -973,7 +973,7 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                     <p className="text-xs text-zinc-600 mt-2">Esc/outside click → close</p>
                 </div>
 
@@ -981,7 +981,7 @@ export function FocusShowcasePage3() {
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Recovery</h2>
                     <p className="text-xs text-zinc-500 mb-4">navigate.recovery = 'next'</p>
-                    <FocusZone
+                    <FocusGroup
                         id="recovery-zone"
                         role="listbox"
                         navigate={{ orientation: 'vertical', recovery: 'next' }}
@@ -998,7 +998,7 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                     <p className="text-xs text-zinc-600 mt-2">Delete → focus next</p>
                 </div>
 
@@ -1006,7 +1006,7 @@ export function FocusShowcasePage3() {
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Virtual Focus</h2>
                     <p className="text-xs text-zinc-500 mb-4">project.virtualFocus = true</p>
-                    <FocusZone
+                    <FocusGroup
                         id="virtual-focus-zone"
                         role="listbox"
                         navigate={{ orientation: 'vertical' }}
@@ -1024,7 +1024,7 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                     <p className="text-xs text-zinc-600 mt-2">No DOM focus, visual only</p>
                 </div>
 
@@ -1032,7 +1032,7 @@ export function FocusShowcasePage3() {
                 <div className="bg-zinc-900 rounded-xl p-6">
                     <h2 className="text-lg font-semibold mb-2">Auto Focus</h2>
                     <p className="text-xs text-zinc-500 mb-4">project.autoFocus = true</p>
-                    <FocusZone
+                    <FocusGroup
                         id="auto-focus-zone"
                         role="listbox"
                         navigate={{ orientation: 'vertical' }}
@@ -1050,7 +1050,7 @@ export function FocusShowcasePage3() {
                                 {item}
                             </FocusItem>
                         ))}
-                    </FocusZone>
+                    </FocusGroup>
                     <p className="text-xs text-zinc-600 mt-2">First item auto-focused</p>
                 </div>
             </div>

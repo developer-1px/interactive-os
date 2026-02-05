@@ -1,7 +1,7 @@
 /**
- * FocusZone Store Factory
+ * FocusGroup Store Factory
  * 
- * Creates scoped store instances for each FocusZone.
+ * Creates scoped store instances for each FocusGroup.
  * Each zone has isolated state - no global store pollution.
  */
 
@@ -15,7 +15,7 @@ import { createItemsSlice, type ItemsSlice } from './slices/items';
 // Combined State Type
 // ═══════════════════════════════════════════════════════════════════
 
-export type FocusZoneState = CursorSlice & SpatialSlice & SelectionSlice & ItemsSlice & {
+export type FocusGroupState = CursorSlice & SpatialSlice & SelectionSlice & ItemsSlice & {
     zoneId: string;
 };
 
@@ -23,10 +23,10 @@ export type FocusZoneState = CursorSlice & SpatialSlice & SelectionSlice & Items
 // Store Factory
 // ═══════════════════════════════════════════════════════════════════
 
-export type FocusZoneStore = ReturnType<typeof createFocusZoneStore>;
+export type FocusGroupStore = ReturnType<typeof createFocusGroupStore>;
 
-export function createFocusZoneStore(zoneId: string) {
-    return create<FocusZoneState>()((...a) => ({
+export function createFocusGroupStore(zoneId: string) {
+    return create<FocusGroupState>()((...a) => ({
         zoneId,
         debugId: Math.random().toString(36).slice(2, 7),
         ...createCursorSlice(...a),

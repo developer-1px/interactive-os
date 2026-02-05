@@ -1,5 +1,5 @@
 /**
- * DOMInterface - Registry-First DOM Access
+ * DOMRegistry - Registry-First DOM Access
  * 
  * All DOM element access goes through this registry.
  * No querySelector calls in focus logic.
@@ -17,7 +17,7 @@ const itemToZone = new Map<string, string>();
 // Public Interface
 // ═══════════════════════════════════════════════════════════════════
 
-export const DOMInterface = {
+export const DOMRegistry = {
     // --- Zone Registration ---
     registerZone(zoneId: string, element: HTMLElement): void {
         zoneElements.set(zoneId, element);

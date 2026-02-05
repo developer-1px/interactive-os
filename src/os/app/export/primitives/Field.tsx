@@ -19,8 +19,8 @@ import { OS_COMMANDS } from "@os/features/command/definitions/osCommands.ts";
 import { getCaretPosition } from "../../../features/input/ui/Field/getCaretPosition";
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
 // [NEW] Local Store & Global Registry
-import { useFocusZoneStore, useFocusZoneContext } from "@os/features/focusZone/primitives/FocusZone";
-// import { useGlobalZoneRegistry } from "@os/features/focusZone/registry/GlobalZoneRegistry";
+import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/primitives/FocusGroup";
+// import { useFocusRegistry } from "@os/features/focusGroup/registry/FocusRegistry";
 import type { FocusTarget } from "@os/entities/FocusTarget.ts";
 
 // Refactored Logic & Hooks
@@ -36,7 +36,7 @@ import {
   useFieldFocus,
   useFieldContext,
 } from "../../../features/input/ui/Field/useFieldHooks.ts";
-import { DOMInterface } from "@os/features/focusZone/registry/DOMInterface.ts";
+import { DOMRegistry } from "@os/features/focus/registry/DOMRegistry.ts";
 
 /** 
  * Field mode determines when editing is activated:
@@ -105,7 +105,7 @@ export const Field = <T extends BaseCommand>({
   // --- 1. Global Context & Store ---
   const { dispatch: contextDispatch, currentFocusId } = useCommandEngine();
   // Get store instance
-  const store = useFocusZoneStore();
+  const store = useFocusGroupStore();
   const osFocusedItemId = store(s => s.focusedItemId);
   const dispatch = customDispatch || contextDispatch;
 
@@ -126,16 +126,16 @@ export const Field = <T extends BaseCommand>({
   localValueRef.current = localValue;
 
   // Zone context is needed before DOM registration
-  const focusContext = useFocusZoneContext();
+  const focusContext = useFocusGroupContext();
   const zoneId = focusContext?.zoneId || "unknown";
 
   // [NEW] DOM Registry Registration
   useLayoutEffect(() => {
     if (name && innerRef.current) {
-      DOMInterface.registerItem(name, zoneId, innerRef.current);
+      DOMRegistry.registerItem(name, zoneId, innerRef.current);
     }
     return () => {
-      if (name) DOMInterface.unregisterItem(name);
+      if (name) DOMRegistry.unregisterItem(name);
     };
   }, [name, zoneId]);
 
@@ -368,7 +368,7 @@ export const Field = <T extends BaseCommand>({
 
   const baseProps = {
     ref: innerRef,
-    id: name, // Ensure the element has an id for DOMInterface
+    id: name, // Ensure the element has an id for DOMRegistry
     "data-item-id": name, // Essential for FocusBridge to detect native focus
     contentEditable: isContentEditable,
     suppressContentEditableWarning: true,

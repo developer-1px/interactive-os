@@ -10,7 +10,7 @@
  * NO external side effects - only mutates the store parameter.
  */
 
-import type { FocusZoneStore } from '../../store/focusZoneStore';
+import type { FocusGroupStore } from '../../store/focusGroupStore';
 
 export interface CommitPayload {
     targetId?: string | null;
@@ -25,7 +25,7 @@ export interface CommitPayload {
  * All resolved changes must pass through here.
  * Pure store mutation - no external dependencies.
  */
-export function commitAll(store: FocusZoneStore, payload: CommitPayload): void {
+export function commitAll(store: FocusGroupStore, payload: CommitPayload): void {
     const state = store.getState();
     const { targetId, stickyX, stickyY, selection, anchor } = payload;
 
