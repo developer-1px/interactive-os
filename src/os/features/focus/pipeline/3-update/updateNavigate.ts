@@ -13,8 +13,6 @@ export function updateNavigate(
     config: NavigateConfig,
     spatial: { stickyX: number | null; stickyY: number | null }
 ): NavigateResult {
-    console.log('[updateNavigate] START', { currentId, direction, itemCount: items.length });
-    console.log('[updateNavigate] items:', items);
     if (items.length === 0) {
         return { targetId: null, stickyX: null, stickyY: null };
     }

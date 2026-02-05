@@ -3,6 +3,7 @@
 
 // UI Primitives
 import { App } from "@os/app/export/primitives/App";
+import { Root } from "@os/app/export/primitives/Root";
 import { Zone } from "@os/app/export/primitives/Zone";
 import { Item } from "@os/app/export/primitives/Item";
 import { Field } from "@os/app/export/primitives/Field";
@@ -14,6 +15,7 @@ export { evalContext } from "@os/features/logic/lib/evalContext";
 
 // OS Namespace - All primitives in one place
 export const OS = {
+  Root,
   App,
   Zone,
   Item,
@@ -26,4 +28,4 @@ export const OS = {
 } as const;
 
 // Re-export individual components for direct imports
-export { App, Zone, Item, Field, Trigger, Kbd };
+export { Root, App, Zone, Item, Field, Trigger, Kbd };

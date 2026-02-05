@@ -9,73 +9,78 @@
 // Registry Maps
 // ═══════════════════════════════════════════════════════════════════
 
-const zoneElements = new Map<string, HTMLElement>();
+const groupElements = new Map<string, HTMLElement>();
 const itemElements = new Map<string, HTMLElement>();
-const itemToZone = new Map<string, string>();
+const itemToGroup = new Map<string, string>();
 
 // ═══════════════════════════════════════════════════════════════════
 // Public Interface
 // ═══════════════════════════════════════════════════════════════════
 
 export const DOMRegistry = {
-    // --- Zone Registration ---
-    registerZone(zoneId: string, element: HTMLElement): void {
-        zoneElements.set(zoneId, element);
+    // --- Group Registration ---
+    registerGroup(groupId: string, element: HTMLElement): void {
+        groupElements.set(groupId, element);
     },
 
-    unregisterZone(zoneId: string): void {
-        zoneElements.delete(zoneId);
-        // Clean up items belonging to this zone
-        for (const [itemId, zone] of itemToZone.entries()) {
-            if (zone === zoneId) {
+    unregisterGroup(groupId: string): void {
+        groupElements.delete(groupId);
+        // Clean up items belonging to this group
+        for (const [itemId, group] of itemToGroup.entries()) {
+            if (group === groupId) {
                 itemElements.delete(itemId);
-                itemToZone.delete(itemId);
+                itemToGroup.delete(itemId);
             }
         }
     },
 
+    getGroup(groupId: string): HTMLElement | undefined {
+        return groupElements.get(groupId);
+    },
+
+    /** @deprecated Use getGroup */
     getZone(zoneId: string): HTMLElement | undefined {
-        return zoneElements.get(zoneId);
+        return groupElements.get(zoneId);
     },
 
     // --- Item Registration ---
-    registerItem(itemId: string, zoneId: string, element: HTMLElement): void {
+    registerItem(itemId: string, groupId: string, element: HTMLElement): void {
         itemElements.set(itemId, element);
-        itemToZone.set(itemId, zoneId);
+        itemToGroup.set(itemId, groupId);
     },
 
     unregisterItem(itemId: string): void {
         itemElements.delete(itemId);
-        itemToZone.delete(itemId);
+        itemToGroup.delete(itemId);
     },
 
     getItem(itemId: string): HTMLElement | undefined {
         return itemElements.get(itemId);
     },
 
-    getItemZone(itemId: string): string | undefined {
-        return itemToZone.get(itemId);
+    getItemGroup(itemId: string): string | undefined {
+        return itemToGroup.get(itemId);
     },
 
     // --- Queries ---
-    getZoneItems(zoneId: string): string[] {
+    getGroupItems(groupId: string): string[] {
         const items: string[] = [];
-        for (const [itemId, zone] of itemToZone.entries()) {
-            if (zone === zoneId) {
+        for (const [itemId, group] of itemToGroup.entries()) {
+            if (group === groupId) {
                 items.push(itemId);
             }
         }
         return items;
     },
 
-    getAllZones(): string[] {
-        return Array.from(zoneElements.keys());
+    getAllGroups(): string[] {
+        return Array.from(groupElements.keys());
     },
 
     // --- Debugging ---
-    __debug(): { zones: number; items: number } {
+    __debug(): { groups: number; items: number } {
         return {
-            zones: zoneElements.size,
+            groups: groupElements.size,
             items: itemElements.size,
         };
     },

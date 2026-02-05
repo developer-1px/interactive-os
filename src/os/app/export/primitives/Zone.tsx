@@ -1,60 +1,23 @@
 /**
  * Zone - Facade for FocusGroup
  * 
- * Simple re-export that provides FocusContext for legacy consumers.
- * All focus behavior is delegated to FocusGroup.
+ * Provides a dedicated wrapper for FocusGroup to allow for future 
+ * Zone-specific functionality and facade logic.
  */
 
-import { useContext, useMemo, createContext } from "react";
-import { FocusContext } from "@os/features/command/ui/CommandContext";
-import { FocusGroup, type FocusGroupProps } from "@os/features/focus/primitives/FocusGroup";
-import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
-
-// ═══════════════════════════════════════════════════════════════════
-// Zone Props (extends FocusGroup)
-// ═══════════════════════════════════════════════════════════════════
+import { FocusGroup, type FocusGroupProps } from '@os/features/focus/primitives/FocusGroup';
 
 export interface ZoneProps extends FocusGroupProps {
-  /** Area identifier for scoped commands */
-  area?: string;
+    /** Area identifier for scoped commands (maps to id if provided) */
+    area?: string;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Zone Context (for legacy consumers)
-// ═══════════════════════════════════════════════════════════════════
+export function Zone({ area, id, ...props }: ZoneProps) {
+    // Use id if present, otherwise fallback to area for legacy support
+    const effectiveId = id || area;
 
-export interface ZoneFocusGroupContextValue {
-  zoneId: string;
+    return <FocusGroup id={effectiveId} {...props} />;
 }
 
-export const ZoneFocusGroupContext = createContext<ZoneFocusGroupContextValue | null>(null);
-export const useZoneFocusGroup = () => useContext(ZoneFocusGroupContext);
-
-// ═══════════════════════════════════════════════════════════════════
-// Zone Component
-// ═══════════════════════════════════════════════════════════════════
-
-export function Zone({
-  id,
-  children,
-  ...focusGroupProps
-}: ZoneProps) {
-  const zoneId = id ?? "zone";
-
-  // Active state for FocusContext
-  const activeZoneId = useFocusRegistry(s => s.activeZoneId);
-  const isActive = activeZoneId === zoneId;
-
-  const focusContextValue = useMemo(() => ({
-    zoneId,
-    isActive
-  }), [zoneId, isActive]);
-
-  return (
-    <FocusContext.Provider value={focusContextValue}>
-      <FocusGroup id={zoneId} {...focusGroupProps}>
-        {children}
-      </FocusGroup>
-    </FocusContext.Provider>
-  );
-}
+// Re-export standard focus hooks and types for convenience
+export * from '@os/features/focus/primitives/FocusGroup';

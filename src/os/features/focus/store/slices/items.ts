@@ -18,7 +18,6 @@ export const createItemsSlice: StateCreator<ItemsSlice> = (set) => ({
     items: [],
 
     addItem: (itemId) => set((state: any) => {
-        console.log(`[ItemsSlice] addItem ${itemId}`, { count: state.items.length + 1, storeId: state.debugId });
         return {
             items: state.items.includes(itemId)
                 ? state.items
@@ -27,7 +26,6 @@ export const createItemsSlice: StateCreator<ItemsSlice> = (set) => ({
     }),
 
     removeItem: (itemId) => set((state: any) => {
-        console.log(`[ItemsSlice] removeItem ${itemId}`, { remaining: state.items.length - 1 });
         const newItems = state.items.filter((id: string) => id !== itemId);
         const updates: Record<string, any> = { items: newItems };
 

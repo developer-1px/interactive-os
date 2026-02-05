@@ -1,4 +1,4 @@
-import { ZoneRegistry } from "../../jurisdiction/model/ZoneRegistry";
+import { GroupRegistry } from "../../jurisdiction/model/GroupRegistry";
 import type { CommandDefinition } from "@os/entities/CommandDefinition";
 import type { CommandFactory } from "@os/entities/CommandFactory";
 
@@ -6,8 +6,8 @@ import type { CommandFactory } from "@os/entities/CommandFactory";
  * createCommandFactory:
  * Creates a strongly typed `defineCommand` helper for a specific State type.
  */
-// Zone-Aware Command Factory
-export function createCommandFactory<S, Z extends string = string>(zoneId?: Z) {
+// Group-Aware Command Factory
+export function createCommandFactory<S, G extends string = string>(groupId?: G) {
   return function defineCommand<P, K extends string = string>(
     def: CommandDefinition<S, P, K>
   ): CommandFactory<S, P, K> {
@@ -31,12 +31,12 @@ export function createCommandFactory<S, Z extends string = string>(zoneId?: Z) {
     factory.when = def.when;
     factory.log = def.log;
 
-    // Zone Awareness
-    factory.zoneId = zoneId;
+    // Group Awareness
+    factory.groupId = groupId;
 
-    // Auto-Register to Zone Registry (Discovery)
-    if (zoneId) {
-      ZoneRegistry.register(zoneId, factory);
+    // Auto-Register to Group Registry (Discovery)
+    if (groupId) {
+      GroupRegistry.register(groupId, factory);
     }
 
     return factory;

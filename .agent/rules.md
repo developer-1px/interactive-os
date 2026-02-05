@@ -36,7 +36,7 @@
 | `create` | Factory function | `createCommandFactory.ts` → `createCommandFactory()` |
 | `commands*` | Command definitions group | `commandsNavigation.ts`, `commandsClipboard.ts` |
 | `handler*` | Handler group | `handlerDirection.ts`, `handlerEdge.ts` |
-| `slice*` | State slice group | `sliceCursor.ts`, `sliceZone.ts` |
+| `slice*` | State slice group | `cursor.ts`, `items.ts` |
 | `navigation*` | Navigation logic group | `navigationRoving.ts`, `navigationSpatial.ts` |
 
 ### No Abbreviations
@@ -67,7 +67,7 @@
 - **Example**:
   ```
   entities/
-  ├── ZoneMetadata.ts      # interface ZoneMetadata
+  ├── GroupMetadata.ts     # interface GroupMetadata
   ├── NavContext.ts        # interface NavContext
   ├── CommandDefinition.ts # interface CommandDefinition
   └── Direction.ts         # type Direction

@@ -14,6 +14,9 @@ import {
     useRef,
     useLayoutEffect,
     forwardRef,
+    isValidElement,
+    cloneElement,
+    type ReactElement,
     type ReactNode,
 } from 'react';
 import { useStore } from 'zustand';
@@ -21,6 +24,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useFocusGroupContext } from './FocusGroup';
 import { useFocusRegistry } from '../registry/FocusRegistry';
 import { DOMRegistry } from '../registry/DOMRegistry';
+import { twMerge } from 'tailwind-merge';
 
 // ═══════════════════════════════════════════════════════════════════
 // Props
@@ -42,11 +46,33 @@ export interface FocusItemProps {
     /** Container style */
     style?: React.CSSProperties;
 
-    /** Custom element type */
-    as?: 'div' | 'li' | 'button' | 'a';
+    /** Custom element type (ignored if asChild is true) */
+    as?: 'div' | 'li' | 'button' | 'a' | 'span';
+
+    /** Render as child (cloneElement) */
+    asChild?: boolean;
 
     /** ARIA role override */
     role?: string;
+
+    /** Additional props to pass through */
+    [key: string]: any;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Utils
+// ═══════════════════════════════════════════════════════════════════
+
+function setRef<T>(ref: React.Ref<T> | undefined, value: T) {
+    if (typeof ref === 'function') {
+        ref(value);
+    } else if (ref !== null && ref !== undefined) {
+        (ref as React.MutableRefObject<T>).current = value;
+    }
+}
+
+function composeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
+    return (node: T) => refs.forEach((ref) => setRef(ref, node));
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -60,9 +86,11 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
     className,
     style,
     as: Element = 'div',
+    asChild = false,
     role,
+    ...rest
 }, ref) {
-    const itemRef = useRef<HTMLElement>(null);
+    const internalRef = useRef<HTMLElement>(null);
     const ctx = useFocusGroupContext();
 
     if (!ctx) {
@@ -73,7 +101,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
 
     // --- Registration ---
     useLayoutEffect(() => {
-        const el = itemRef.current;
+        const el = internalRef.current;
         if (el) {
             // Register item to both registries
             DOMRegistry.registerItem(id, zoneId, el);
@@ -102,30 +130,44 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
     const visualFocused = isFocused && isZoneActive;
     const isAnchor = isFocused && !isZoneActive;
 
-    // --- Render ---
+    // --- Props Calculation ---
+    const computedProps = {
+        id: id,
+        role: role || 'option',
+        'data-item-id': id,
+        'data-anchor': isAnchor ? 'true' : undefined,
+        'data-focused': visualFocused ? 'true' : undefined,
+        'aria-current': visualFocused ? 'true' : undefined,
+        'aria-selected': isSelected || undefined,
+        'aria-disabled': disabled || undefined,
+        tabIndex: visualFocused ? 0 : -1,
+        // Basic focus styles (can be overridden by className)
+        className: twMerge(
+            `outline-none cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`,
+            className
+        ),
+        style,
+        ...rest
+    };
+
+    // --- Render Strategy: asChild ---
+    if (asChild && isValidElement(children)) {
+        const child = children as ReactElement<any>;
+        return cloneElement(child, {
+            ...computedProps,
+            ref: composeRefs(internalRef, ref, (child as any).ref),
+            className: twMerge(child.props.className, computedProps.className),
+            style: { ...child.props.style, ...style },
+            // Don't overwrite child's ID if we want to enforce ours? 
+            // Usually we want OUR id.
+        });
+    }
+
+    // --- Render Strategy: Wrapper ---
     return (
         <Element
-            ref={(node: HTMLElement | null) => {
-                (itemRef as any).current = node;
-                if (typeof ref === 'function') ref(node);
-                else if (ref) (ref as any).current = node;
-            }}
-            id={id}
-            data-anchor={isAnchor ? 'true' : undefined}
-            role={role || 'option'}
-            aria-current={visualFocused ? 'true' : undefined}
-            aria-selected={isSelected || undefined}
-            aria-disabled={disabled || undefined}
-            tabIndex={visualFocused ? 0 : -1}
-            className={`
-                outline-none cursor-pointer
-                focus:outline-none 
-                focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 focus-visible:ring-offset-white
-                dark:focus-visible:ring-blue-400 dark:focus-visible:ring-offset-gray-900
-                ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-                ${className || ''}
-            `}
-            style={style}
+            ref={composeRefs(internalRef, ref)}
+            {...computedProps}
         >
             {children}
         </Element>

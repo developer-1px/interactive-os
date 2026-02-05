@@ -1,9 +1,11 @@
-import { OS } from "@os/features/AntigravityOS";
+
+import { Zone } from "@os/app/export/primitives/Zone";
+import { Trigger } from "@os/app/export/primitives/Trigger";
 import { useEngine } from "@os/features/command/ui/CommandContext";
-import { ToggleTodo } from "@apps/todo/features/commands/list";
 import { ToggleView } from "@apps/todo/features/commands/ToggleView";
-import { Check, List } from "lucide-react";
+import { List } from "lucide-react";
 import type { AppState } from "@apps/todo/model/types";
+import { TaskItem } from "./TaskItem";
 
 export function BoardView() {
   const { state } = useEngine<AppState>();
@@ -13,114 +15,98 @@ export function BoardView() {
   const activeCategory = categories[selectedCategoryId];
 
   return (
-    <div className="flex-1 flex flex-col h-full relative bg-white overflow-hidden">
-      <div className="p-12 pb-6 max-w-[1600px] mx-auto w-full flex-1 flex flex-col z-10">
-        <header className="mb-8 flex items-end justify-between border-b border-slate-100 pb-6">
+    <div className="flex-1 flex flex-col h-full relative bg-slate-50 overflow-hidden font-sans">
+
+      {/* Header */}
+      <div className="px-8 pt-8 pb-4 flex-none border-b border-slate-200/60 bg-white z-20">
+        <header className="flex items-end justify-between max-w-[1800px] mx-auto w-full">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-1">
-              Tasks
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
+              Board
             </h2>
             <p className="text-slate-500 font-medium text-sm">
-              {activeCategory?.text || "Inbox"}
+              {activeCategory?.text || "All Projects"}
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <OS.Trigger command={ToggleView({})} asChild>
-              <button className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+            <Trigger command={ToggleView({})} asChild>
+              <button
+                className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50/50 transition-all shadow-sm"
+                title="Switch to List View"
+              >
                 <List size={18} />
               </button>
-            </OS.Trigger>
+            </Trigger>
           </div>
         </header>
+      </div>
 
-        <div className="flex-1 overflow-hidden -mx-12 px-12 pb-12">
-          <div className="flex-1 overflow-x-auto custom-scrollbar bg-white h-full">
-            {/* Top-Level Board Zone: Spatial Navigation between Columns */}
-            <OS.Zone
-              id="board"
-              role="tabs"
-              data-area="boardView"
-              className="gap-10"
-            >
-              {categoryOrder.map((categoryId) => {
-                const category = categories[categoryId];
-                const activeColumn = selectedCategoryId === categoryId;
-                const categoryTodos = todoOrder
-                  .filter((id) => todos[id]?.categoryId === categoryId)
-                  .map((id) => todos[id]);
+      {/* Board Scroll Area */}
+      <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar bg-slate-50">
+        <div className="h-full min-w-max p-8">
+          {/* Top-Level Board FocusGroup: Spatial Navigation between Columns */}
+          <Zone
+            id="board"
+            role="group"
+            navigate={{ entry: 'restore', orientation: 'horizontal' }}
+            className="flex gap-8 h-full"
+          >
+            {categoryOrder.map((categoryId) => {
+              const category = categories[categoryId];
+              const activeColumn = selectedCategoryId === categoryId;
+              const categoryTodos = todoOrder
+                .filter((id) => todos[id]?.categoryId === categoryId)
+                .map((id) => todos[id]);
 
-                return (
-                  <OS.Zone
-                    key={categoryId}
-                    id={`col-${categoryId}`}
-                    // focusable removed
-                    // payload removed
-                    role="listbox"
-                    area="boardView"
-                    className={`w-80 flex-shrink-0 flex flex-col max-h-full rounded-2xl bg-slate-50/50 border transition-colors duration-200 outline-none
-                              ${activeColumn ? "border-indigo-200 bg-white" : "border-slate-100"}
-                          `}
-                  >
-                    {/* Column Header */}
-                    <div className="p-5 border-b border-slate-100 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors rounded-t-2xl">
-                      <h3 className={`font-black text-xs uppercase tracking-widest ${activeColumn ? "text-indigo-600" : "text-slate-400"}`}>
-                        {category.text}
-                      </h3>
-                      <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-                        {categoryTodos.length}
-                      </span>
-                    </div>
+              return (
+                <Zone
+                  key={categoryId}
+                  id={`col-${categoryId}`}
+                  role="listbox"
+                  navigate={{ orientation: 'vertical', entry: 'restore' }}
+                  className={`
+                        w-80 flex-shrink-0 flex flex-col max-h-full rounded-2xl bg-slate-100/50 border transition-all duration-300 outline-none
+                        ${activeColumn ? "border-indigo-200 bg-white shadow-xl shadow-indigo-100/50 ring-1 ring-indigo-500/10" : "border-slate-200/60 hover:border-slate-300"}
+                    `}
+                // When column receives focus, we might want to set it as active category?
+                // Logic for that is usually side-effect based, but FocusZone doesn't do it automatically.
+                >
+                  <div className={`
+                        p-4 border-b flex justify-between items-center rounded-t-2xl transition-colors
+                        ${activeColumn ? "border-indigo-100 bg-indigo-50/50" : "border-slate-100 bg-slate-50"}
+                    `}>
+                    <h3 className={`font-bold text-xs uppercase tracking-wider ${activeColumn ? "text-indigo-700" : "text-slate-500"}`}>
+                      {category.text}
+                    </h3>
+                    <span className={`
+                        text-[10px] font-bold px-2.5 py-1 rounded-md
+                        ${activeColumn ? "bg-indigo-100 text-indigo-700" : "bg-white border border-slate-200 text-slate-400"}
+                      `}>
+                      {categoryTodos.length}
+                    </span>
+                  </div>
 
-                    {/* Card List */}
-                    <div className="p-4 space-y-3 flex-1 overflow-y-auto custom-scrollbar min-h-[100px]">
-                      {categoryTodos.map((todo) => {
-                        const isCompleted = todo.completed;
-                        return (
-                          <OS.Item
-                            key={todo.id}
-                            id={todo.id}
-                            payload={todo}
-                            className="outline-none"
-                          >
-                            {({ isFocused, isSelected }) => (
-                              <div
-                                className={`group flex flex-col gap-2 p-4 rounded-xl border transition-colors duration-200 relative bg-white
-                                  ${isFocused ? "border-indigo-500 ring-2 ring-indigo-200" : "border-slate-100 hover:border-indigo-100"}
-                                  ${isSelected ? "bg-indigo-50" : ""}
-                                `}
-                              >
-                                <div className="flex items-start gap-3">
-                                  <OS.Trigger
-                                    command={ToggleTodo({ id: todo.id })}
-                                    className={`w-5 h-5 mt-0.5 rounded-lg border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 
-                                          ${isCompleted ? "bg-indigo-600 border-indigo-600 shadow-sm shadow-indigo-200" : "border-slate-300 bg-slate-50 hover:border-indigo-400"}`}
-                                  >
-                                    {isCompleted && <Check size={12} className="text-white" strokeWidth={4} />}
-                                  </OS.Trigger>
+                  {/* Card List */}
+                  <div className="p-3 space-y-3 flex-1 overflow-y-auto custom-scrollbar min-h-[100px]">
+                    {categoryTodos.map((todo) => (
+                      <TaskItem
+                        key={todo.id}
+                        todo={todo}
+                        isEditing={state.ui.editingId === todo.id}
+                        editDraft={state.ui.editDraft}
+                      />
+                    ))}
 
-                                  <OS.Field
-                                    value={todo.text}
-                                    name={`todo-${todo.id}`}
-                                    active={false}
-                                    className={`text-[14px] font-medium leading-relaxed flex-1 bg-transparent border-none p-0 focus:ring-0 ${isCompleted ? "text-slate-400 line-through" : "text-slate-700 font-semibold"}`}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </OS.Item>
-                        );
-                      })}
-                      {categoryTodos.length === 0 && (
-                        <div className="h-24 flex flex-col items-center justify-center text-slate-300 gap-2 border-2 border-dashed border-slate-100 rounded-2xl">
-                          <span className="text-[10px] font-black uppercase tracking-widest">Empty Space</span>
-                        </div>
-                      )}
-                    </div>
-                  </OS.Zone>
-                );
-              })}
-            </OS.Zone>
-          </div>
+                    {categoryTodos.length === 0 && (
+                      <div className="h-32 flex flex-col items-center justify-center text-slate-300 gap-2 border-2 border-dashed border-slate-200/50 rounded-xl bg-slate-50/30">
+                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">No Items</span>
+                      </div>
+                    )}
+                  </div>
+                </Zone>
+              );
+            })}
+          </Zone>
         </div>
       </div>
     </div>

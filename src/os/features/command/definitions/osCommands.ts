@@ -1,5 +1,6 @@
 import type { CommandDefinition } from "@os/entities/CommandDefinition";
 import { OS_COMMANDS as SHELL_COMMANDS } from "@os/features/command/definitions/commandsShell";
+import { InspectorStore } from "@os/features/inspector/InspectorStore";
 
 export const OS_COMMANDS = SHELL_COMMANDS;
 
@@ -41,13 +42,12 @@ const OS_SHELL_COMMANDS: CommandDefinition<any, any>[] = [
     { id: SHELL_COMMANDS.FOCUS, run: (state) => state },
     {
         id: SHELL_COMMANDS.TOGGLE_INSPECTOR,
-        run: (state) => ({
-            ...state,
-            ui: {
-                ...state.ui,
-                isInspectorOpen: !state.ui?.isInspectorOpen
-            }
-        })
+        run: (state) => {
+            // Side effect: toggle global Inspector store
+            InspectorStore.toggle();
+            console.log('[OS Command] Inspector toggled:', InspectorStore.isOpen());
+            return state;
+        }
     },
     { id: SHELL_COMMANDS.EXIT, run: (state) => state },
     { id: SHELL_COMMANDS.UNDO, run: (state) => state },

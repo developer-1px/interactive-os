@@ -5,7 +5,7 @@
 
 const IS_DEV = import.meta.env.DEV;
 
-type LogLayer = "ENGINE" | "KEYMAP" | "CONTEXT" | "PRIMITIVE" | "SYSTEM" | "NAVIGATION";
+type LogLayer = "ENGINE" | "KEYMAP" | "CONTEXT" | "PRIMITIVE" | "SYSTEM" | "NAVIGATION" | "FOCUS";
 
 const LayerColors: Record<LogLayer, string> = {
   ENGINE: "#6366f1", // Indigo
@@ -14,10 +14,13 @@ const LayerColors: Record<LogLayer, string> = {
   PRIMITIVE: "#f59e0b", // Amber
   SYSTEM: "#64748b", // Slate
   NAVIGATION: "#3b82f6", // Blue
+  FOCUS: "#8b5cf6", // Violet
 };
 
 class AntigravityLogger {
   private enabled = false;
+  private enabledLayers: Set<LogLayer> = new Set();
+  private timers: Map<string, number> = new Map();
 
   constructor() {
     // Expose for runtime debugging
@@ -30,6 +33,24 @@ class AntigravityLogger {
     this.enabled = value;
   }
 
+  /** Enable specific layer(s) for logging */
+  enableLayer(...layers: LogLayer[]) {
+    layers.forEach(l => this.enabledLayers.add(l));
+    this.enabled = true;
+  }
+
+  /** Disable specific layer(s) */
+  disableLayer(...layers: LogLayer[]) {
+    layers.forEach(l => this.enabledLayers.delete(l));
+  }
+
+  /** Check if layer is enabled */
+  private isLayerEnabled(layer: LogLayer): boolean {
+    if (!IS_DEV || !this.enabled) return false;
+    if (this.enabledLayers.size === 0) return true;
+    return this.enabledLayers.has(layer);
+  }
+
   private getBadge(layer: LogLayer) {
     return [
       `%c ${layer} `,
@@ -38,36 +59,26 @@ class AntigravityLogger {
   }
 
   debug(layer: LogLayer, message: string, ...args: any[]) {
-    if (!IS_DEV || !this.enabled) return;
+    if (!this.isLayerEnabled(layer)) return;
     const [badge, style] = this.getBadge(layer);
     console.log(`${badge} %c${message}`, style, "color: #94a3b8;", ...args);
   }
 
   warn(layer: LogLayer, message: string, ...args: any[]) {
-    if (!IS_DEV || !this.enabled) return;
+    if (!this.isLayerEnabled(layer)) return;
     const [badge, style] = this.getBadge(layer);
     console.warn(`${badge} %c${message}`, style, "font-weight: bold;", ...args);
   }
 
   error(layer: LogLayer, message: string, ...args: any[]) {
-    // Errors are always logged
     const [badge, style] = this.getBadge(layer);
-    console.error(
-      `${badge} %c${message}`,
-      style,
-      "font-weight: bold;",
-      ...args,
-    );
+    console.error(`${badge} %c${message}`, style, "font-weight: bold;", ...args);
   }
 
   group(layer: LogLayer, label: string) {
-    if (!IS_DEV || !this.enabled) return;
+    if (!this.isLayerEnabled(layer)) return;
     const [badge, style] = this.getBadge(layer);
-    console.groupCollapsed(
-      `${badge} %c${label}`,
-      style,
-      "font-weight: bold; color: white;",
-    );
+    console.groupCollapsed(`${badge} %c${label}`, style, "font-weight: bold; color: white;");
   }
 
   groupEnd() {
@@ -75,11 +86,26 @@ class AntigravityLogger {
     console.groupEnd();
   }
 
-  /**
-   * Special trace for Command Execution
-   */
-  traceCommand(id: string, payload: unknown, prevState: unknown, nextState: unknown) {
+  /** Start timing for performance measurement */
+  time(label: string) {
     if (!IS_DEV || !this.enabled) return;
+    this.timers.set(label, performance.now());
+  }
+
+  /** End timing and log result */
+  timeEnd(layer: LogLayer, label: string) {
+    if (!this.isLayerEnabled(layer)) return;
+    const start = this.timers.get(label);
+    if (start === undefined) return;
+    const duration = performance.now() - start;
+    this.timers.delete(label);
+    const [badge, style] = this.getBadge(layer);
+    console.log(`${badge} %c${label}: ${duration.toFixed(2)}ms`, style, "color: #10b981;");
+  }
+
+  /** Trace command execution */
+  traceCommand(id: string, payload: unknown, prevState: unknown, nextState: unknown) {
+    if (!this.isLayerEnabled("ENGINE")) return;
     this.group("ENGINE", `Action: ${id}`);
     console.log("%cPayload:", "color: #f59e0b; font-weight: bold;", payload);
     console.log("%cPrev State:", "color: #94a3b8;", prevState);

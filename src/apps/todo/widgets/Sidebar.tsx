@@ -10,7 +10,6 @@ import {
   Inbox,
   Briefcase,
   User,
-  Layout,
   MoveUp,
   MoveDown,
   CornerDownLeft,
@@ -54,12 +53,12 @@ function SidebarContent() {
 
   return (
     <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">
-      <div className="p-8 pb-4 z-10">
-        <h1 className="font-black text-slate-900 text-xl tracking-tight flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-200">
-            <Layout size={16} className="text-white" />
+      <div className="p-6 pb-2 z-10">
+        <h1 className="font-bold text-slate-900 text-lg tracking-tight flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+            <div className="w-4 h-4 rounded bg-gradient-to-br from-indigo-500 to-indigo-600" />
           </div>
-          <span className="opacity-90">Todo App</span>
+          <span className="opacity-100">Todo</span>
         </h1>
       </div>
 
@@ -93,11 +92,12 @@ function SidebarContent() {
                 }}
               >
                 <div
-                  className={`group relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold outline-none ring-0 cursor-pointer transition-colors duration-200 overflow-hidden
-                                hover:bg-slate-100
-                                data-[focused=true]:bg-indigo-50/50
-                                before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:bg-indigo-600 before:rounded-r-full before:opacity-0 data-[focused=true]:before:opacity-100 before:transition-opacity
-                            `}
+                  className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
+                                  hover:bg-slate-100/80
+                                  data-[focused=true]:bg-indigo-50
+                                  data-[focused=true]:ring-1
+                                  data-[focused=true]:ring-indigo-200
+                              `}
                 >
                   <span
                     className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
@@ -105,14 +105,14 @@ function SidebarContent() {
                     {getIcon(category.id)}
                   </span>
                   <span
-                    className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-slate-900 font-bold" : "text-slate-500 group-hover:text-slate-800"}`}
+                    className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-slate-900 font-semibold" : "text-slate-600 group-hover:text-slate-900"}`}
                   >
                     {category.text}
                   </span>
 
                   {/* Selection Indicator */}
                   {state.ui.selectedCategoryId === category.id && (
-                    <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-indigo-600" />
+                    <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
                   )}
                 </div>
               </Trigger>
@@ -127,27 +127,29 @@ function SidebarContent() {
             Navigation
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500 font-mono">
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200">
-              <MoveUp size={10} />
-            </Kbd>
-            <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200">
-              <MoveDown size={10} />
-            </Kbd>
+        <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-[10px] text-slate-500 font-medium">
+          <div className="flex items-center gap-2 text-slate-400">
+            <div className="flex gap-0.5">
+              <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200 shadow-sm">
+                <MoveUp size={10} />
+              </Kbd>
+              <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200 shadow-sm">
+                <MoveDown size={10} />
+              </Kbd>
+            </div>
             <span>Nav</span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200 shadow-sm">
               <CornerDownLeft size={10} />
             </Kbd>
             <span>Select</span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200">
+          <div className="flex items-center gap-2 text-slate-400 col-span-2">
+            <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200 shadow-sm">
               <ArrowRight size={10} />
             </Kbd>
-            <span>Focus</span>
+            <span>Enter List</span>
           </div>
         </div>
       </div>

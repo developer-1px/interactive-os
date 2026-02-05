@@ -14,5 +14,5 @@ export interface CommandFactory<S, P, K extends string = string> {
   run: (state: S, payload: P) => S;
   when?: string | LogicNode;
   log?: boolean;
-  zoneId?: string;
+  groupId?: string;
 }

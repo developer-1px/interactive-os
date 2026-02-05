@@ -167,34 +167,3 @@ export const DuplicateTodo = defineListCommand({
     },
 });
 
-/**
- * ImportTodos: Bulk import from external paste
- * Used by OS ClipboardManager for handling text/plain pastes
- */
-export const ImportTodos = defineListCommand({
-    id: "IMPORT_TODOS",
-    run: (state, payload: { items: any[] }) => {
-        if (!payload.items || !Array.isArray(payload.items) || payload.items.length === 0) {
-            return state;
-        }
-
-        return produce(state, (draft) => {
-            const baseTime = Date.now();
-            payload.items.forEach((item, idx) => {
-                const newId = baseTime + idx;
-                const newTodo = {
-                    id: newId,
-                    text: typeof item === "string" ? item : (item.text || "Untitled"),
-                    completed: typeof item === "object" ? (item.completed || false) : false,
-                    categoryId: draft.ui.selectedCategoryId,
-                };
-
-                draft.data.todos[newId] = newTodo;
-                draft.data.todoOrder.push(newId);
-            });
-        });
-    },
-});
-
-// Helper to check if we have clipboard data (for paste validation)
-export const hasClipboardData = () => clipboardData !== null;

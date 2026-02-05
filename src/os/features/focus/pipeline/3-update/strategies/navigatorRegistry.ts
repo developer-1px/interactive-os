@@ -23,7 +23,7 @@ export type NavigationStrategy = (
 // Default Strategies
 // ═══════════════════════════════════════════════════════════════════
 
-export const resolveLinear: NavigationStrategy = (currentIndex, direction, items, config) => {
+const resolveLinear: NavigationStrategy = (currentIndex, direction, items, config) => {
     // Note: currentIndex is passed as ID in the signature, so we need to find index
     // But the signature says currentId: string | null.
     // Let's fix the implementation to match the signature.
@@ -55,7 +55,7 @@ export const resolveLinear: NavigationStrategy = (currentIndex, direction, items
     };
 };
 
-export const resolveSpatial: NavigationStrategy = (currentId, direction, items, _config, spatial) => {
+const resolveSpatial: NavigationStrategy = (currentId, direction, items, _config, spatial) => {
     if (!currentId) return { targetId: null, stickyX: null, stickyY: null };
 
     const currentEl = DOMRegistry.getItem(currentId);
@@ -144,17 +144,13 @@ export const resolveSpatial: NavigationStrategy = (currentId, direction, items, 
 
 const strategies = new Map<string, NavigationStrategy>();
 
-export function registerNavigationStrategy(name: string, strategy: NavigationStrategy): void {
+function registerNavigationStrategy(name: string, strategy: NavigationStrategy): void {
     strategies.set(name, strategy);
 }
 
 // Register Defaults
 registerNavigationStrategy('linear', resolveLinear);
 registerNavigationStrategy('spatial', resolveSpatial);
-
-export function getNavigationStrategy(name: string): NavigationStrategy | undefined {
-    return strategies.get(name);
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // Resolver Facade

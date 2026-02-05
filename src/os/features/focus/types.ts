@@ -44,14 +44,14 @@ export interface FocusNode {
 export interface PipelineContext {
     // Source
     readonly sourceId: string | null;
-    readonly sourceZoneId: string | null;
+    readonly sourceGroupId: string | null;
 
     // Intent
     readonly intent: FocusIntent;
 
     // Resolution
     targetId: string | null;
-    targetZoneId: string | null;
+    targetGroupId: string | null;
 
     // Spatial Memory
     stickyX: number | null;

@@ -1,8 +1,8 @@
 # FocusGroup / FocusItem Architecture
 
-> **Version**: v7.37+  
+> **Version**: v7.48+  
 > **Date**: 2026-02-05  
-> **Location**: `src/os/features/focusZone/`
+> **Location**: `src/os/features/focus/`
 
 ---
 
@@ -25,23 +25,22 @@ FocusGroup/FocusItem은 Antigravity Interaction OS의 핵심 포커스 관리 �
 ## 2. 디렉토리 구조
 
 ```
-src/os/features/focusZone/
+src/os/features/focus/
 ├── primitives/           # React 컴포넌트
-│   ├── FocusGroup.tsx    # 포커스 컨테이너 (Zone)
+│   ├── FocusGroup.tsx    # 포커스 컨테이너 (Group)
 │   └── FocusItem.tsx     # 포커스 가능 아이템
 ├── pipeline/             # 5-Phase 처리 파이프라인
-│   ├── 1-intercept/      # DOM 이벤트 캡처
-│   ├── 2-parse/          # Intent 해석 및 Command 핸들링
-│   ├── 3-resolve/        # 로직 계산 (Navigate, Tab, Select, etc.)
+│   ├── 1-sense/          # DOM 이벤트 캡처 (Sensor)
+│   ├── 2-intent/         # Intent 해석 및 Command 핸들링
+│   ├── 3-update/         # 로직 업데이트 (Navigate, Tab, Select, etc.)
 │   ├── 4-commit/         # 상태 커밋
-│   ├── 5-project/        # DOM 동기화 (el.focus())
-│   └── ZoneOrchestrator.ts  # Zone 간 탐색
+│   └── 5-sync/           # DOM 동기화 (el.focus())
 ├── registry/             # 전역 레지스트리
-│   ├── GlobalZoneRegistry.ts  # Zone 등록/활성화 관리
-│   ├── DOMInterface.ts        # DOM 요소 레지스트리
-│   └── roleRegistry.ts        # ARIA Role Preset 정의
+│   ├── FocusRegistry.ts  # Group 등록/활성화 관리
+│   ├── DOMRegistry.ts    # DOM 요소 레지스트리
+│   └── roleRegistry.ts   # ARIA Role Preset 정의
 ├── store/                # Zustand Store
-│   ├── focusZoneStore.ts # Store Factory
+│   ├── focusGroupStore.ts # Store Factory
 │   └── slices/           # State Slices (cursor, spatial, selection, items)
 ├── lib/                  # 유틸리티
 └── types.ts              # 타입 정의
@@ -70,7 +69,7 @@ interface FocusGroupConfig {
 interface NavigateConfig {
     orientation: 'horizontal' | 'vertical' | 'both';
     loop: boolean;           // 끝에서 처음으로 순환
-    seamless: boolean;       // Zone 간 공간 이동
+    seamless: boolean;       // Group 간 공간 이동
     typeahead: boolean;      // 타이핑으로 검색
     entry: 'first' | 'last' | 'restore' | 'selected';
     recovery: 'next' | 'prev' | 'nearest';
@@ -82,14 +81,14 @@ interface NavigateConfig {
 ```typescript
 interface TabConfig {
     behavior: 'trap' | 'escape' | 'flow';
-    restoreFocus: boolean;   // Zone 복귀 시 마지막 위치 복원
+    restoreFocus: boolean;   // Group 복귀 시 마지막 위치 복원
 }
 ```
 
 | 값 | 동작 |
 |:---|:----|
-| `trap` | Zone 내부에서 Tab 순환 (모달 등) |
-| `escape` | Tab으로 다음 Zone으로 이동 |
+| `trap` | Group 내부에서 Tab 순환 (모달 등) |
+| `escape` | Tab으로 다음 Group으로 이동 |
 | `flow` | 표준 Tab 흐름 유지 |
 
 ### 3.4. SelectConfig
@@ -158,30 +157,30 @@ interface ProjectConfig {
 
 ```
 ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
-│ 1.INTERCEPT │ → │  2.PARSE    │ → │  3.RESOLVE  │ → │  4.COMMIT   │ → │  5.PROJECT  │
-│ (Sensor)    │   │ (Handler)   │   │ (Logic)     │   │ (Store)     │   │ (DOM)       │
+│   1.SENSE   │ → │   2.INTENT  │ → │   3.UPDATE  │ → │   4.COMMIT  │ → │   5.SYNC    │
+│  (Sensor)   │   │  (Handler)  │   │   (Logic)   │   │   (Store)   │   │    (DOM)    │
 └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘
      ↑ DOM Event       ↑ Command        ↑ Pure Fn        ↑ Mutation        ↑ el.focus()
 ```
 
-### Phase 1: INTERCEPT (`GlobalFocusSensor`)
+### Phase 1: SENSE (`GlobalFocusSensor`)
 
 - DOM 이벤트 캡처 (`focusin`, `mousedown`)
 - OS Command로 변환 (`OS_FOCUS`, `OS_SELECT`)
 
-### Phase 2: PARSE (`FocusCommandHandler`)
+### Phase 2: INTENT (`FocusCommandHandler`)
 
 - Command 수신 및 핸들러 라우팅
-- GlobalZoneRegistry에서 활성 Zone 조회
+- FocusRegistry에서 활성 Group 조회
 
-### Phase 3: RESOLVE (`3-resolve/`)
+### Phase 3: UPDATE (`3-update/`)
 
 순수 함수로 다음 상태 계산:
-- `resolveNavigate.ts` - 방향키 탐색
-- `resolveTab.ts` - Tab 동작 결정
-- `resolveSelect.ts` - 선택 상태 계산
-- `resolveActivate.ts` - 활성화 조건 확인
-- `resolveEntry.ts` - Zone 진입 시 초기 포커스
+- `updateNavigate.ts` - 방향키 탐색
+- `updateTab.ts` - Tab 동작 결정
+- `updateSelect.ts` - 선택 상태 계산
+- `updateActivate.ts` - 활성화 조건 확인
+- `updateEntry.ts` - Group 진입 시 초기 포커스
 
 ### Phase 4: COMMIT (`commitFocus.ts`)
 
@@ -197,41 +196,41 @@ commitAll(store, {
 - **단일 커밋 포인트**: 모든 상태 변경은 여기를 통과
 - 순수 Store 뮤테이션, 외부 사이드이펙트 없음
 
-### Phase 5: PROJECT (`GlobalFocusProjector`)
+### Phase 5: SYNC (`GlobalFocusProjector`)
 
 - `focusedItemId` 변경 감지
-- `DOMInterface.getItem(id).focus()` 호출
+- `DOMRegistry.getItem(id).focus()` 호출
 - `aria-current` 속성 동기화
 
 ---
 
 ## 6. Registry 시스템
 
-### 6.1. GlobalZoneRegistry
+### 6.1. FocusRegistry
 
 ```typescript
-// Zone 등록 (FocusGroup 마운트 시 자동)
-GlobalZoneRegistry.register(zoneId, store, parentId, config, onActivate);
+// Group 등록 (FocusGroup 마운트 시 자동)
+FocusRegistry.register(groupId, store, parentId, config, onActivate);
 
-// 활성 Zone 관리
-GlobalZoneRegistry.setActiveZone(zoneId);
-GlobalZoneRegistry.getActiveZoneEntry();
+// 활성 Group 관리
+FocusRegistry.setActiveGroup(groupId);
+FocusRegistry.getActiveGroupEntry();
 
-// Zone 간 탐색
-GlobalZoneRegistry.getSiblingZone('forward');
-GlobalZoneRegistry.getFocusPath();  // 중첩 Zone 경로
+// Group 간 탐색
+FocusRegistry.getSiblingGroup('forward');
+FocusRegistry.getFocusPath();  // 중첩 Group 경로
 ```
 
-### 6.2. DOMInterface
+### 6.2. DOMRegistry
 
 ```typescript
-// Zone/Item DOM 요소 레지스트리
-DOMInterface.registerZone(zoneId, element);
-DOMInterface.registerItem(itemId, zoneId, element);
+// Group/Item DOM 요소 레지스트리
+DOMRegistry.registerGroup(groupId, element);
+DOMRegistry.registerItem(itemId, groupId, element);
 
 // 조회
-DOMInterface.getZone(zoneId): HTMLElement;
-DOMInterface.getItem(itemId): HTMLElement;
+DOMRegistry.getGroup(groupId): HTMLElement;
+DOMRegistry.getItem(itemId): HTMLElement;
 ```
 
 ---
@@ -242,7 +241,7 @@ DOMInterface.getItem(itemId): HTMLElement;
 
 ```typescript
 // 각 FocusGroup은 독립적인 store 생성
-const store = createFocusGroupStore(zoneId);
+const store = createFocusGroupStore(groupId);
 ```
 
 ### State Slices
@@ -261,7 +260,7 @@ const store = createFocusGroupStore(zoneId);
 ### 기본 사용
 
 ```tsx
-import { FocusGroup, FocusItem } from '@os/features/focusZone/primitives';
+import { FocusGroup, FocusItem } from '@os/features/focus/primitives';
 
 function TodoList() {
     return (
@@ -281,7 +280,7 @@ function TodoList() {
 }
 ```
 
-### 중첩 Zone
+### 중첩 Group
 
 ```tsx
 <FocusGroup id="sidebar" role="tree">
@@ -312,8 +311,8 @@ function TodoList() {
 
 | 상태 | ARIA 속성 |
 |:-----|:----------|
-| 현재 포커스 (활성 Zone) | `aria-current="true"`, `tabIndex="0"` |
-| 포커스 앵커 (비활성 Zone) | `data-anchor="true"`, `tabIndex="-1"` |
+| 현재 포커스 (활성 Group) | `aria-current="true"`, `tabIndex="0"` |
+| 포커스 앵커 (비활성 Group) | `data-anchor="true"`, `tabIndex="-1"` |
 | 선택됨 | `aria-selected="true"` |
 | 비활성화 | `aria-disabled="true"` |
 
@@ -322,7 +321,7 @@ function TodoList() {
 ```html
 <div 
     id="todo-list"
-    data-focus-zone="todo-list"
+    data-focus-group="todo-list"
     aria-orientation="vertical"
     aria-multiselectable="true"  <!-- select.mode === 'multiple' -->
     role="listbox"
@@ -348,4 +347,4 @@ function TodoList() {
 
 ---
 
-*Reference: FocusGroup System v7.37+ (2026-02-05)*
+*Reference: FocusGroup System v7.48+ (2026-02-05)*

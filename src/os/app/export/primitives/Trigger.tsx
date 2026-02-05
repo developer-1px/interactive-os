@@ -1,16 +1,9 @@
-import { cloneElement, isValidElement, useRef, useLayoutEffect } from "react";
-import type {
-  ReactNode,
-  ReactElement,
-  MouseEvent as ReactMouseEvent,
-} from "react";
+import { cloneElement, isValidElement, forwardRef } from "react";
+import type { ReactNode, ReactElement, MouseEvent as ReactMouseEvent } from "react";
 import { logger } from "@os/app/debug/logger.ts";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
-
+import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
-// [NEW] Local Store & Global Registry
-import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/primitives/FocusGroup";
-import { DOMRegistry } from "@os/features/focus/registry/DOMRegistry.ts";
 
 export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttributes<HTMLButtonElement> {
   id?: string;
@@ -21,7 +14,7 @@ export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttribute
   allowPropagation?: boolean;
 }
 
-export const Trigger = <T extends BaseCommand>({
+export const Trigger = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(({
   id,
   command,
   children,
@@ -29,40 +22,11 @@ export const Trigger = <T extends BaseCommand>({
   dispatch: customDispatch,
   allowPropagation = false,
   className,
+  onClick,
   ...rest
-}: TriggerProps<T>) => {
+}, ref) => {
   const { dispatch: contextDispatch } = useCommandEngine();
   const dispatch = customDispatch || contextDispatch;
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  // --- Focus State Tracking ---
-  const store = useFocusGroupStore();
-  const focusedItemId = store((s) => s.focusedItemId);
-  const isFocused = id ? focusedItemId === id : false;
-
-  // --- Context Awareness (Zone Registration) ---
-  const focusContext = useFocusGroupContext();
-  const zoneId = focusContext?.zoneId || "unknown";
-  const addItem = store((s) => s.addItem);
-  const removeItem = store((s) => s.removeItem);
-
-  // Zone Item Registration (like Item does)
-  useLayoutEffect(() => {
-    if (id && addItem && zoneId && zoneId !== "unknown") {
-      addItem(id);
-      return () => { if (removeItem) removeItem(id); }
-    }
-  }, [id, zoneId, addItem, removeItem]);
-
-  // [NEW] DOM Registry Registration
-  useLayoutEffect(() => {
-    if (id && triggerRef.current) {
-      DOMRegistry.registerItem(id, zoneId, triggerRef.current);
-    }
-    return () => {
-      if (id) DOMRegistry.unregisterItem(id);
-    };
-  }, [id, zoneId]);
 
   const handleClick = (e: ReactMouseEvent) => {
     if (!allowPropagation) {
@@ -70,25 +34,39 @@ export const Trigger = <T extends BaseCommand>({
     }
     logger.debug("PRIMITIVE", `Trigger Clicked: [${command.type}]`);
     dispatch(command);
+    onClick?.(e as any);
   };
 
-  // Base props for focus state
   const baseProps = {
-    ref: triggerRef,
-    id,
-    "data-item-id": id, // Essential for FocusBridge to detect native focus
-    tabIndex: 0, // Always tabbable for browser Tab navigation (tab="flow")
     onClick: handleClick,
     className,
-    "data-focused": isFocused ? "true" : undefined,
     "data-trigger-id": id,
     ...rest
   };
 
+  // Logic: Trigger *is* a FocusItem if an ID is provided.
+  // If no ID, it's just a dumb trigger? 
+  // Existing Trigger code did registration if ID was present.
+
+  if (id) {
+    return (
+      <FocusItem
+        id={id}
+        asChild={true} // Triggers almost always wrap a button/element
+        ref={ref}
+        {...baseProps}
+      >
+        {asChild && isValidElement(children) ? children : <button>{children}</button>}
+      </FocusItem>
+    );
+  }
+
+  // Fallback for non-spec triggers (should happen less often in FocusGroup model)
   if (asChild && isValidElement(children)) {
     const child = children as ReactElement<any>;
     return cloneElement(child, {
       ...baseProps,
+      ref,
       className: `${child.props.className || ""} ${className || ""}`.trim(),
       onClick: (e: ReactMouseEvent) => {
         child.props.onClick?.(e);
@@ -96,5 +74,12 @@ export const Trigger = <T extends BaseCommand>({
       },
     });
   }
-  return <button {...baseProps}>{children}</button>;
-};
+
+  return (
+    <button ref={ref} {...baseProps}>
+      {children}
+    </button>
+  );
+});
+
+Trigger.displayName = "Trigger";

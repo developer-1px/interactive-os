@@ -1,170 +1,75 @@
-import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo } from "react";
-import { useShallow } from "zustand/react/shallow";
+/**
+ * App - Application Shell
+ * Registers its own commands to CommandEngineStore.
+ * Must be used inside OS.Root.
+ */
+
+import React, { useEffect, useMemo } from "react";
 import type { AppDefinition } from "@os/features/application/defineApplication";
-import { createCommandStore, CommandRegistry } from "@os/features/command/model/createCommandStore";
-import { ALL_OS_COMMANDS } from "@os/features/command/definitions/osCommands";
-import { CommandContext, setGlobalEngine } from "@os/features/command/ui/CommandContext";
-import { InputEngine } from "@os/features/input/ui/InputEngine";
-import { FocusIntent } from "@os/features/focus/pipeline/2-intent/FocusIntent";
-import { FocusSensor } from "@os/features/focus/pipeline/1-sense/FocusSensor";
-import { FocusSync } from "@os/features/focus/pipeline/5-sync/FocusSync";
-import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { createEngine } from "@os/features/command/model/createEngine";
+import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
 import { Zone } from "@os/app/export/primitives/Zone";
 import { useInspectorPersistence } from "@os/features/inspector/useInspectorPersistence";
-import { evalContext } from "@os/features/logic/lib/evalContext";
-import type { ContextState } from "@os/features/logic/LogicNode";
 
-// ═══════════════════════════════════════════════════════════════════
-// App Config Context
-// ═══════════════════════════════════════════════════════════════════
-
-export interface AppConfig {
-    isAppShell: boolean;
-}
-
-export const AppContext = createContext<AppConfig>({ isAppShell: true });
-export const useAppConfig = () => useContext(AppContext);
-
-// ═══════════════════════════════════════════════════════════════════
-// App Component
-// ═══════════════════════════════════════════════════════════════════
+// Default minimal app for pages that don't need custom keybindings
+const DEFAULT_APP: AppDefinition<{ ui: { isInspectorOpen: boolean } }> = {
+    id: "os-shell",
+    name: "OS Shell",
+    model: { initial: { ui: { isInspectorOpen: false } } },
+    keymap: [],
+};
 
 export function App<S>({
     definition,
     children,
     isAppShell = false
 }: {
-    definition: AppDefinition<S>;
+    definition?: AppDefinition<S>;
     children: React.ReactNode;
     isAppShell?: boolean;
 }) {
-    // 1. Initialize Registry & Store
-    const engine = useMemo(() => {
-        const registry = new CommandRegistry<S>();
+    const appDef = (definition ?? DEFAULT_APP) as AppDefinition<S>;
 
-        if (definition.commands) {
-            definition.commands.forEach((cmd) => registry.register(cmd));
-        }
-        ALL_OS_COMMANDS.forEach((cmd) => registry.register(cmd));
-        registry.setKeymap(definition.keymap);
-
-        const store = createCommandStore(registry, definition.model.initial, {
-            persistence: definition.model.persistence,
-            onStateChange: (state: S, action: any, prev: S) => {
-                let next = state;
-                if (definition.middleware) {
-                    for (const mw of definition.middleware) {
-                        next = mw(next, action, prev);
-                    }
-                }
-                return next;
-            }
-        });
-
-        return { registry, store };
-    }, [definition]);
-
-    // 2. Inspector Persistence
+    // 1. Engine (once per app)
+    const engine = useMemo(() => createEngine(appDef), [appDef]);
     useInspectorPersistence(engine.store);
 
-    // 3. Focus State (Global Registry)
-    const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
-    const zones = useFocusRegistry((s) => s.zones);
-
-    const focusPath = useFocusRegistry(
-        useShallow((s) => {
-            if (!s.activeZoneId) return [];
-            const path: string[] = [];
-            let currentId: string | null = s.activeZoneId;
-            while (currentId) {
-                path.unshift(currentId);
-                const entry = s.zones.get(currentId);
-                currentId = entry?.parentId || null;
-                if (path.length > 100) break;
-            }
-            return path;
-        })
-    );
-
-    // FocusedItemId: derive from active zone store
-    const activeZoneStore = activeZoneId ? zones.get(activeZoneId)?.store : null;
-    const focusedItemId = activeZoneStore?.getState().focusedItemId ?? null;
-
-    // 4. App State
+    // 2. State
     const { state, dispatch } = engine.store();
 
-    // 5. Build Context for Logic Evaluation
-    const context: ContextState = useMemo(() => {
-        const baseContext: ContextState = {
-            activeZone: activeZoneId ?? undefined,
-            focusPath,
-            focusedItemId,
-        };
-        if (definition.contextMap) {
-            return {
-                ...baseContext,
-                ...definition.contextMap(state, {
-                    activeZoneId: activeZoneId || null,
-                    focusPath,
-                    focusedItemId: focusedItemId || null,
-                })
-            };
-        }
-        return baseContext;
-    }, [activeZoneId, focusPath, focusedItemId, state, definition]);
+    // 3. Register with CommandEngineStore
+    const { registerApp, updateAppState, isInitialized } = useCommandEngineStore();
 
-    // 6. Active Keybinding Map
-    const keybindings = useMemo(() => engine.registry.getKeybindings(), [engine.registry]);
-    const activeKeybindingMap = useMemo(() => {
-        const res = new Map<string, boolean>();
-        keybindings.forEach((kb) => {
-            const isLogicEnabled = evalContext(kb.when, context);
-            const isScopeEnabled = !kb.zoneId || focusPath.includes(kb.zoneId);
-            res.set(kb.key, !!(isLogicEnabled && isScopeEnabled));
-        });
-        return res;
-    }, [keybindings, context, focusPath]);
-
-    // 7. Provider Value
-    const providerValue = useMemo(() => ({
-        dispatch,
-        activeZone: activeZoneId,
-        registry: engine.registry,
-        ctx: context,
-        state,
-        activeKeybindingMap,
-    }), [dispatch, activeZoneId, engine.registry, context, state, activeKeybindingMap]);
-
-    // 8. Global Singleton
-    useLayoutEffect(() => {
-        setGlobalEngine(() => providerValue);
-    }, [providerValue]);
-
-    // 9. Body class for AppShell mode
     useEffect(() => {
-        if (isAppShell) {
-            document.body.classList.add('app-shell');
-        } else {
-            document.body.classList.remove('app-shell');
+        if (!isInitialized) return;
+
+        registerApp({
+            appId: appDef.id,
+            registry: engine.registry,
+            dispatch,
+            state,
+            contextMap: appDef.contextMap,
+        });
+
+        // No unregister needed - next registerApp will overwrite
+    }, [appDef.id, isInitialized]);
+
+    // 4. Update state when it changes
+    useEffect(() => {
+        if (isInitialized) {
+            updateAppState(appDef.id, state);
         }
+    }, [state, isInitialized, appDef.id]);
+
+    // 5. Body class for app shell mode
+    useEffect(() => {
+        document.body.classList.toggle('app-shell', isAppShell);
         return () => document.body.classList.remove('app-shell');
     }, [isAppShell]);
 
-    const zoneClassName = isAppShell
-        ? "h-full flex flex-col overflow-hidden"
-        : "min-h-full flex flex-col";
-
     return (
-        <AppContext.Provider value={{ isAppShell }}>
-            <CommandContext.Provider value={providerValue}>
-                <InputEngine />
-                <FocusIntent />
-                <FocusSensor />
-                <FocusSync />
-                <Zone id={definition.id} area={definition.id} className={zoneClassName}>
-                    {children}
-                </Zone>
-            </CommandContext.Provider>
-        </AppContext.Provider>
+        <Zone id={appDef.id} area={appDef.id} className={isAppShell ? "h-full flex flex-col overflow-hidden" : "min-h-full flex flex-col"}>
+            {isInitialized ? children : null}
+        </Zone>
     );
 }

@@ -1,9 +1,13 @@
-import { isValidElement, cloneElement, useLayoutEffect, useMemo, useRef, useCallback } from "react";
-import type { ReactNode, ReactElement } from "react";
-// [NEW] Local Store & Global Registry
+import {
+  isValidElement,
+  useMemo,
+  forwardRef,
+  type ReactNode,
+} from "react";
 import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/primitives/FocusGroup";
+import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
-import { DOMRegistry } from "@os/features/focus/registry/DOMRegistry";
+import { useStore } from "zustand";
 
 // --- Types ---
 interface ItemState {
@@ -28,7 +32,7 @@ export interface ItemProps extends Omit<React.HTMLAttributes<HTMLElement>, "id" 
   selected?: boolean;
 }
 
-export const Item = ({
+export const Item = forwardRef<HTMLElement, ItemProps>(({
   id,
   children,
   asChild,
@@ -37,112 +41,49 @@ export const Item = ({
   index = 0,
   selected = false,
   ...rest
-}: ItemProps) => {
+}, ref) => {
   const stringId = String(id);
 
-  // --- 1. Store Access (Local Zone) ---
+  // --- Store Access (for Render Props) ---
   const store = useFocusGroupStore();
-  const focusedItemId = store((s) => s.focusedItemId);
-  const addItem = store((s) => s.addItem);
-  const removeItem = store((s) => s.removeItem);
-
-  // Anchor Logic Dependencies
   const context = useFocusGroupContext();
-  const zoneId = context?.zoneId || "unknown";
+  const groupId = context?.groupId || "unknown";
 
-  const activeZoneId = useFocusRegistry(s => s.activeZoneId);
-  const isZoneActive = activeZoneId === zoneId;
+  // Using Zustand Selector for granular updates
+  const focusedItemId = useStore(store, (s) => s.focusedItemId);
+  const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
 
+  const isActive = activeGroupId === groupId;
   const isFocused = focusedItemId === stringId;
 
-  const itemRef = useRef<HTMLElement>(null);
+  // Anchor Logic
+  const isAnchor = isFocused && !isActive;
 
-  // Callback ref for merging with child refs
-  const setItemRef = useCallback((el: HTMLElement | null) => {
-    (itemRef as any).current = el;
-    if (el) {
-      DOMRegistry.registerItem(stringId, zoneId, el);
-    }
-  }, [stringId, zoneId]);
-
-  // Cleanup on unmount
-  useLayoutEffect(() => {
-    return () => DOMRegistry.unregisterItem(stringId);
-  }, [stringId]);
-
-  // --- 2. Item Registration ---
-  useLayoutEffect(() => {
-    if (addItem) {
-      addItem(stringId);
-    }
-    return () => {
-      if (removeItem) removeItem(stringId);
-    };
-  }, [stringId, addItem, removeItem]);
-
-  // --- 3. Anchor Calculation ---
-  const isAnchor = useMemo(() => {
-    if (store.getState().focusedItemId === stringId) {
-      if (!isZoneActive) {
-        return true;
-      }
-    }
-    return false;
-  }, [stringId, isZoneActive, isFocused]);
-
-  // --- 4. Render Props Calculation ---
+  // State for Render Props
   const itemState: ItemState = useMemo(() => ({
-    isFocused: isFocused && isZoneActive,
+    isFocused: isFocused && isActive,
     isSelected: selected,
     isAnchor
-  }), [isFocused, isZoneActive, selected, isAnchor]);
+  }), [isFocused, isActive, selected, isAnchor]);
 
-  const visualFocused = isFocused && isZoneActive;
-
-  const baseProps = {
-    id: stringId,
-    "data-item-id": stringId,
-    role: "option",
-    "aria-selected": visualFocused,
-    tabIndex: visualFocused ? 0 : -1,
-    "data-focused": visualFocused ? "true" : undefined,
-    "data-selected": selected ? "true" : undefined,
-    "data-anchor": isAnchor ? "true" : undefined,
-    ...rest
-  };
-
-  // --- Strategy A: Function as Child ---
+  // Resolve Children
+  let resolvedChildren = children;
   if (typeof children === "function") {
-    const rendered = children(itemState);
-    if (isValidElement(rendered)) {
-      const element = rendered as ReactElement<any>;
-      return cloneElement(element, {
-        ref: setItemRef,
-        ...baseProps,
-        className: `${element.props.className || ""} ${className || ""}`.trim()
-      } as any);
-    }
-    return <>{rendered}</>;
+    resolvedChildren = children(itemState);
   }
 
-  // --- Strategy B: asChild (Radix style) ---
-  if (asChild && isValidElement(children)) {
-    const child = children as ReactElement<any>;
-    return cloneElement(child, {
-      ref: setItemRef,
-      ...baseProps,
-      className: `${child.props.className || ""} ${className || ""}`.trim()
-    });
-  }
-
-  // --- Strategy C: Wrapper (Default) ---
   return (
-    <div
-      ref={setItemRef as any}
-      {...baseProps}
-      className={`outline-none ${className || ""}`.trim()}
+    <FocusItem
+      id={stringId}
+      ref={ref}
+      asChild={asChild || (typeof children === "function" && isValidElement(resolvedChildren))}
+      className={className}
+      data-selected={selected ? "true" : undefined}
+      {...rest}
     >
-      {children}
-    </div>
+      {resolvedChildren}
+    </FocusItem>
   );
-};
+});
+
+Item.displayName = "Item";

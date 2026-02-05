@@ -8,53 +8,77 @@
  */
 
 import { useEffect } from 'react';
-import { useCommandEngine } from '../../../command/ui/CommandContext';
+import { useCommandEngineStore } from '@os/features/command/store/CommandEngineStore';
 import { OS_COMMANDS } from '../../../command/definitions/commandsShell';
 import { findFocusableItem, resolveFocusTarget } from '../../lib/focusDOMQueries';
+import { logger } from '@os/app/debug/logger';
+
+// Singleton: only first instance registers global listeners
+let isMounted = false;
 
 export function FocusSensor() {
-    const { dispatch } = useCommandEngine();
+    const isInitialized = useCommandEngineStore(s => s.isInitialized);
 
     useEffect(() => {
+        // Singleton + initialization guard
+        if (isMounted || !isInitialized) return;
+        isMounted = true;
+
         const onEvent = (e: Event) => {
+            logger.time('P1:Sense');
+            logger.debug('FOCUS', `[P1:Sense] Event: ${e.type}`);
             const item = findFocusableItem(e.target as HTMLElement);
-            if (!item) return;
+            if (!item) {
+                logger.debug('FOCUS', '[P1:Sense] No focusable item found');
+                return;
+            }
 
             const target = resolveFocusTarget(item);
-            if (!target) return;
+            if (!target) {
+                logger.debug('FOCUS', '[P1:Sense] No target resolved');
+                return;
+            }
+            logger.debug('FOCUS', '[P1:Sense] Target:', target);
 
             const isMouse = e instanceof MouseEvent;
+            // Get dispatch at event time (not render time)
+            const dispatch = useCommandEngineStore.getState().getActiveDispatch();
 
             if (isMouse && e.type === 'mousedown') {
                 const me = e as MouseEvent;
 
                 // --- Selection Logic (Click with Modifiers) ---
                 if (me.shiftKey) {
-                    me.preventDefault(); // Prevent text selection
-                    dispatch({
+                    me.preventDefault();
+                    logger.debug('FOCUS', '[P1:Sense] Dispatch SELECT range');
+                    dispatch?.({
                         type: OS_COMMANDS.SELECT,
                         payload: { targetId: target.itemId, mode: 'range', zoneId: target.zoneId }
                     });
                 } else if (me.ctrlKey || me.metaKey) {
                     me.preventDefault();
-                    dispatch({
+                    logger.debug('FOCUS', '[P1:Sense] Dispatch SELECT toggle');
+                    dispatch?.({
                         type: OS_COMMANDS.SELECT,
                         payload: { targetId: target.itemId, mode: 'toggle', zoneId: target.zoneId }
                     });
                 } else {
                     // Standard Click -> Focus intent
-                    dispatch({
+                    logger.debug('FOCUS', '[P1:Sense] Dispatch FOCUS');
+                    dispatch?.({
                         type: OS_COMMANDS.FOCUS,
                         payload: { id: target.itemId, zoneId: target.zoneId }
                     });
                 }
             } else if (e.type === 'focusin') {
                 // Focus arrival (keyboard or follow-up to click)
-                dispatch({
+                logger.debug('FOCUS', '[P1:Sense] Dispatch FOCUS (focusin)');
+                dispatch?.({
                     type: OS_COMMANDS.FOCUS,
                     payload: { id: target.itemId, zoneId: target.zoneId }
                 });
             }
+            logger.timeEnd('FOCUS', 'P1:Sense');
         };
 
         // Capture phase for mousedown to handle it before most other handlers
@@ -62,10 +86,11 @@ export function FocusSensor() {
         document.addEventListener('mousedown', onEvent, { capture: true });
 
         return () => {
+            isMounted = false;
             document.removeEventListener('focusin', onEvent);
             document.removeEventListener('mousedown', onEvent, { capture: true });
         };
-    }, [dispatch]);
+    }, [isInitialized]);
 
     return null;
 }

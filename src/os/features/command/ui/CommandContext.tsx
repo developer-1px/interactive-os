@@ -1,49 +1,48 @@
-import { createContext, useContext } from "react";
+/**
+ * CommandContext - Bridge Hooks
+ * 
+ * These hooks provide access to the command engine via Zustand store.
+ * Simplified: Each hook looks up active app data at call time.
+ */
 
-// --- 0. Context for Focus Zones ---
-interface FocusContextValue {
-  zoneId: string;
-  isActive: boolean;
-}
-export const FocusContext = createContext<FocusContextValue | null>(null);
-
-import type { BaseCommand } from "@os/entities/BaseCommand";
+import { useCommandEngineStore, useDispatch, useRegistry, useAppState, useContextMap } from "@os/features/command/store/CommandEngineStore";
 import type { CommandRegistry } from "@os/features/command/model/createCommandStore";
 
-interface CommandContextValue<S = unknown> {
-  dispatch: (cmd: BaseCommand) => void;
-  currentFocusId?: string | number | null;
-  activeZone?: string | null;
-  registry?: CommandRegistry<S, any>;
-  ctx?: any;
-  state?: S; // Expose full state for advanced consumers (like MockBrains)
-  activeKeybindingMap?: Map<string, boolean>;
+// ═══════════════════════════════════════════════════════════════════
+// Main Hooks
+// ═══════════════════════════════════════════════════════════════════
+
+interface CommandEngineValue<S = any> {
+  dispatch: (cmd: any) => void;
+  registry: CommandRegistry<S, any> | null;
+  state: S;
 }
 
-export const CommandContext = createContext<CommandContextValue<any> | null>(null);
+/**
+ * Hook for app components to access command engine.
+ * Returns { state, dispatch, registry } from active app.
+ */
+export function useEngine<S = any>(): CommandEngineValue<S> & { isInitialized: boolean } {
+  const dispatch = useDispatch();
+  const registry = useRegistry<S>();
+  const state = useAppState<S>();
+  const isInitialized = useCommandEngineStore(s => s.isInitialized);
 
-export const useEngine = <S = any>() => {
-  const ctx = useContext(CommandContext);
-  if (!ctx) throw new Error("useEngine must be used within an OS.App");
-  return ctx as CommandContextValue<S>;
-};
+  return {
+    dispatch,
+    registry,
+    state,
+    isInitialized,
+  };
+}
 
-// --- Bridge Pattern for Provider-less Usage ---
-let globalEngineHelper: (() => CommandContextValue<any>) | null = null;
+/**
+ * Alias for backward compatibility
+ */
+export const useCommandEngine = useEngine;
 
-export const setGlobalEngine = (hook: () => CommandContextValue<any>) => {
-  globalEngineHelper = hook;
-};
+// ═══════════════════════════════════════════════════════════════════
+// Re-exports for convenience
+// ═══════════════════════════════════════════════════════════════════
 
-export const useCommandEngine = <S = unknown>() => {
-  const context = useContext(CommandContext);
-  if (context) return context as unknown as CommandContextValue<S>;
-
-  if (globalEngineHelper) {
-    return globalEngineHelper() as unknown as CommandContextValue<S>;
-  }
-
-  throw new Error(
-    "Command Engine not initialized. Wrap in Provider or call setGlobalEngine().",
-  );
-};
+export { useDispatch, useRegistry, useAppState, useContextMap };

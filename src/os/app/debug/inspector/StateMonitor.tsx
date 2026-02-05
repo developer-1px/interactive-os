@@ -1,5 +1,4 @@
 import { memo } from "react";
-import type { FocusTarget } from "@os/entities/FocusTarget.ts";
 
 export const StateMonitor = memo(
     ({
@@ -9,7 +8,7 @@ export const StateMonitor = memo(
         physicalZone,
         isInputActive,
     }: {
-        focusId: FocusTarget;
+        focusId?: string | number | null;
         activeZone: string;
         focusPath?: string[];
         physicalZone: string;

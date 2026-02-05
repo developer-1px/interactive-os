@@ -36,6 +36,8 @@ import type {
 // ═══════════════════════════════════════════════════════════════════
 
 interface FocusGroupContextValue {
+    groupId: string;
+    /** @deprecated Use groupId */
     zoneId: string;
     store: FocusGroupStore;
     config: FocusGroupConfig;
@@ -60,8 +62,11 @@ export function useFocusGroupStore() {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface FocusGroupProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | 'style' | 'className' | 'onSelect'> {
-    /** Zone ID (optional, auto-generated if not provided) */
+    /** Group ID (optional, auto-generated if not provided) */
     id?: string;
+
+    /** Area identifier for scoped commands (deprecated - use id) */
+    area?: string;
 
     /** ARIA role preset */
     role?: string;
@@ -101,9 +106,9 @@ export interface FocusGroupProps extends Omit<ComponentProps<'div'>, 'id' | 'rol
 // ID Generator
 // ═══════════════════════════════════════════════════════════════════
 
-let zoneIdCounter = 0;
-function generateZoneId() {
-    return `focus-zone-${++zoneIdCounter}`;
+let groupIdCounter = 0;
+function generateGroupId() {
+    return `focus-group-${++groupIdCounter}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -128,10 +133,10 @@ export function FocusGroup({
     const containerRef = useRef<HTMLDivElement>(null);
 
     // --- Stable ID ---
-    const zoneId = useMemo(() => propId || generateZoneId(), [propId]);
+    const groupId = useMemo(() => propId || generateGroupId(), [propId]);
 
-    // --- Scoped Store (Created once per zone) ---
-    const store = useMemo(() => createFocusGroupStore(zoneId), [zoneId]);
+    // --- Scoped Store (Created once per group) ---
+    const store = useMemo(() => createFocusGroupStore(groupId), [groupId]);
 
     // --- Resolve Configuration ---
     const config = useMemo(() => {
@@ -140,27 +145,28 @@ export function FocusGroup({
 
     // --- Parent Context ---
     const parentContext = useContext(FocusGroupContext);
-    const parentId = parentContext?.zoneId || null;
+    const parentId = parentContext?.groupId || null;
 
     // --- DOM Registry & Global Store Registry ---
     useLayoutEffect(() => {
         if (containerRef.current) {
-            DOMRegistry.registerZone(zoneId, containerRef.current);
+            DOMRegistry.registerGroup(groupId, containerRef.current);
             // Register with Global Registry for OS Commands (include config)
-            FocusRegistry.register(zoneId, store, parentId, config, onActivate);
+            FocusRegistry.register(groupId, store, parentId, config, onActivate);
         }
         return () => {
-            DOMRegistry.unregisterZone(zoneId);
-            FocusRegistry.unregister(zoneId);
+            DOMRegistry.unregisterGroup(groupId);
+            FocusRegistry.unregister(groupId);
         };
-    }, [zoneId, store, parentId, config]);
+    }, [groupId, store, parentId, config]);
 
     // --- Context Value ---
     const contextValue = useMemo<FocusGroupContextValue>(() => ({
-        zoneId,
+        groupId,
+        zoneId: groupId,
         store,
         config,
-    }), [zoneId, store, config]);
+    }), [groupId, store, config]);
 
     // --- Orientation Class ---
     const orientationClass = config.navigate.orientation === 'horizontal'
@@ -174,8 +180,8 @@ export function FocusGroup({
         <FocusGroupContext.Provider value={contextValue}>
             <div
                 ref={containerRef}
-                id={zoneId}
-                data-focus-zone={zoneId}
+                id={groupId}
+                data-focus-group={groupId}
                 aria-orientation={
                     config.navigate.orientation === 'horizontal' ? 'horizontal' :
                         config.navigate.orientation === 'vertical' ? 'vertical' : undefined

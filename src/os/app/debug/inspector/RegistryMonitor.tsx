@@ -3,10 +3,10 @@ import { evalContext } from "@os/features/AntigravityOS.tsx";
 import { CommandRow } from "@os/app/debug/inspector/CommandRow.tsx";
 import type { ProcessedCommand } from "@os/app/debug/inspector/CommandRow.tsx";
 import type { CommandRegistry } from "@os/features/command/model/createCommandStore.tsx";
-import { ZoneRegistry } from "@os/features/jurisdiction/model/ZoneRegistry.ts";
+import { GroupRegistry } from "@os/features/jurisdiction/model/GroupRegistry.ts";
 
 // Zero-Base Jurisdiction Detection
-// Pure Logic: If ANY binding relies on a Zone Scope -> It is a Zone Command.
+// Pure Logic: If ANY binding relies on a Group Scope -> It is a Group Command.
 export const RegistryMonitor = memo(
     ({
         ctx,
@@ -27,11 +27,11 @@ export const RegistryMonitor = memo(
     }) => {
 
         const registryData = useMemo(() => {
-            if (!registry || !ctx) return { groupedZones: {}, globalCommands: [] };
+            if (!registry || !ctx) return { groupedGroups: {}, globalCommands: [] };
 
             const bindings = registry.getKeybindings();
             const commands = registry.getAll();
-            const zoneRegistryMap = ZoneRegistry.getAll();
+            const groupRegistryMap = GroupRegistry.getAll();
 
             // 1. Process Bound Commands
             const processed: ProcessedCommand[] = commands.map(cmd => {
@@ -41,19 +41,19 @@ export const RegistryMonitor = memo(
                 const activeKeys: string[] = [];
                 let allowInInput = false;
                 let boundArgs: any = null;
-                const targetZones = new Set<string>();
+                const targetGroups = new Set<string>();
 
                 cmdBindings.forEach(b => {
                     const isBindingActive = b.when ? evalContext(b.when, ctx) : true;
                     if (isBindingActive) {
-                        // Deduplicate keys (e.g. same key used in multiple zones for the same command)
+                        // Deduplicate keys (e.g. same key used in multiple groups for the same command)
                         if (!activeKeys.includes(b.key)) {
                             activeKeys.push(b.key);
                         }
                         if (b.allowInInput) allowInInput = true;
                         if (b.args) boundArgs = b.args;
                     }
-                    if (b.zoneId) targetZones.add(b.zoneId);
+                    if (b.groupId) targetGroups.add(b.groupId);
                 });
 
                 return {
@@ -66,25 +66,25 @@ export const RegistryMonitor = memo(
                     when: typeof cmd.when === 'string' ? cmd.when : cmd.when?.toString(),
                     isLogicEnabled,
                     currentPayload: boundArgs,
-                    jurisdiction: targetZones.size > 0 ? 'ZONE' : 'GLOBAL',
-                    zoneIds: Array.from(targetZones)
-                } as ProcessedCommand & { zoneIds: string[] };
+                    jurisdiction: targetGroups.size > 0 ? 'GROUP' : 'GLOBAL',
+                    groupIds: Array.from(targetGroups)
+                } as ProcessedCommand & { groupIds: string[] };
             });
 
-            // 2. Ingest Static Definitions from ZoneRegistry (defineCommand)
-            zoneRegistryMap.forEach((factories: import("@os/entities/CommandFactory.ts").CommandFactory<any, any>[], zoneId: string) => {
+            // 2. Ingest Static Definitions from GroupRegistry (defineCommand)
+            groupRegistryMap.forEach((factories: import("@os/entities/CommandFactory.ts").CommandFactory<any, any>[], groupId: string) => {
                 factories.forEach(factory => {
                     // Check if already processed
                     const existing = processed.find(p => p.id === factory.id);
                     if (existing) {
-                        // Tag with Zone if not already
+                        // Tag with Group if not already
                         const e = existing as any;
-                        if (!e.zoneIds.includes(zoneId)) {
-                            e.zoneIds.push(zoneId);
-                            // If it was Global (no binding zone), promote to ZONE?
+                        if (!e.groupIds.includes(groupId)) {
+                            e.groupIds.push(groupId);
+                            // If it was Global (no binding group), promote to GROUP?
                             // A command can be globally bound but locally defined.
-                            // We trust defineCommand zoneId as a source of jurisdiction.
-                            if (existing.jurisdiction === 'GLOBAL') existing.jurisdiction = 'ZONE';
+                            // We trust defineCommand groupId as a source of jurisdiction.
+                            if (existing.jurisdiction === 'GLOBAL') existing.jurisdiction = 'GROUP';
                         }
                         return;
                     }
@@ -101,9 +101,9 @@ export const RegistryMonitor = memo(
                         when: typeof factory.when === 'string' ? factory.when : factory.when?.toString(),
                         isLogicEnabled,
                         currentPayload: null,
-                        jurisdiction: 'ZONE',
-                        zoneIds: [zoneId]
-                    } as ProcessedCommand & { zoneIds: string[] });
+                        jurisdiction: 'GROUP',
+                        groupIds: [groupId]
+                    } as ProcessedCommand & { groupIds: string[] });
                 });
             });
 
@@ -115,15 +115,15 @@ export const RegistryMonitor = memo(
                 return a.id.localeCompare(b.id);
             };
 
-            const groupedZones: Record<string, ProcessedCommand[]> = {};
+            const groupedGroups: Record<string, ProcessedCommand[]> = {};
             const globalCommands: ProcessedCommand[] = [];
 
             processed.forEach(cmd => {
-                const zIds = (cmd as any).zoneIds;
-                if (zIds && zIds.length > 0) {
-                    zIds.forEach((zId: string) => {
-                        if (!groupedZones[zId]) groupedZones[zId] = [];
-                        groupedZones[zId].push(cmd);
+                const gIds = (cmd as any).groupIds;
+                if (gIds && gIds.length > 0) {
+                    gIds.forEach((gId: string) => {
+                        if (!groupedGroups[gId]) groupedGroups[gId] = [];
+                        groupedGroups[gId].push(cmd);
                     });
                 } else {
                     globalCommands.push(cmd);
@@ -131,13 +131,13 @@ export const RegistryMonitor = memo(
             });
 
             return {
-                groupedZones,
+                groupedGroups,
                 globalCommands: globalCommands.sort(sorter)
             };
         }, [ctx, registry]);
 
         const focusPath = ctx?.focusPath || [];
-        const activeZoneId = ctx?.activeZone;
+        const activeGroupId = ctx?.activeGroup;
 
         const renderCommandList = (commands: ProcessedCommand[]) => (
             commands.map((cmd) => {
@@ -162,33 +162,33 @@ export const RegistryMonitor = memo(
 
         return (
             <div className="flex flex-col">
-                {/* Hierarchical Zone Commands */}
-                {focusPath.map((zId: string, idx: number) => {
-                    const zoneCommands = registryData.groupedZones[zId] || [];
-                    const isLeaf = zId === activeZoneId;
+                {/* Hierarchical Group Commands */}
+                {focusPath.map((gId: string, idx: number) => {
+                    const groupCommands = registryData.groupedGroups[gId] || [];
+                    const isLeaf = gId === activeGroupId;
 
-                    // Optimization: If it's a root/middle zone with NO commands, we might skip it to save space,
-                    // BUT for the LEAF zone (the one the user mentioned), we should show it even if empty.
-                    if (zoneCommands.length === 0 && !isLeaf) return null;
+                    // Optimization: If it's a root/middle group with NO commands, we might skip it to save space,
+                    // BUT for the LEAF group (the one the user mentioned), we should show it even if empty.
+                    if (groupCommands.length === 0 && !isLeaf) return null;
 
                     return (
-                        <section key={zId} className="border-b border-[#f0f0f0]">
+                        <section key={gId} className="border-b border-[#f0f0f0]">
                             <div className="flex items-center justify-between px-3 py-1 bg-[#f8f8f8] border-b border-[#f0f0f0]">
                                 <h3 className="text-[8px] font-black text-[#666666] flex items-center gap-2 uppercase tracking-[0.2em]">
                                     <div className={`w-0.5 h-2 ${isLeaf ? 'bg-[#4ec9b0]' : 'bg-[#cccccc]'} opacity-80`} />
-                                    {isLeaf ? "Active Zone" : `Parent [${idx}]`}
+                                    {isLeaf ? "Active Group" : `Parent [${idx}]`}
                                 </h3>
                                 <span className={`text-[7px] font-mono truncate max-w-[150px] uppercase font-bold ${isLeaf ? "text-[#007acc]" : "text-[#999999]"}`}>
-                                    {zId}
+                                    {gId}
                                 </span>
                             </div>
                             <div className="flex flex-col bg-[#ffffff] min-h-[10px]">
-                                {zoneCommands.length === 0 ? (
+                                {groupCommands.length === 0 ? (
                                     <div className="px-3 py-2 text-[7px] text-[#cccccc] italic leading-none">
                                         No specific commands.
                                     </div>
                                 ) : (
-                                    renderCommandList(zoneCommands.sort((a, b) => a.id.localeCompare(b.id)))
+                                    renderCommandList(groupCommands.sort((a, b) => a.id.localeCompare(b.id)))
                                 )}
                             </div>
                         </section>

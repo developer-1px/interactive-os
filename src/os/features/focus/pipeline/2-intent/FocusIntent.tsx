@@ -16,17 +16,23 @@ import { updateSelect } from '../3-update/updateSelect';
 import { updateActivate } from '../3-update/updateActivate';
 import { commitAll } from '../4-commit/commitFocus';
 import { FocusOrchestrator } from '../../lib/FocusOrchestrator.ts';
+import { logger } from '@os/app/debug/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Command Handlers
 // ═══════════════════════════════════════════════════════════════════
 
 function handleNavigate(payload: unknown) {
+    logger.time('P2:Navigate');
+    logger.debug('FOCUS', '[P2:Intent] NAVIGATE', payload);
     const entry = FocusRegistry.getActiveZoneEntry();
-    if (!entry || !entry.config) return;
+    if (!entry || !entry.config) {
+        logger.debug('FOCUS', '[P2:Intent] NAVIGATE - No active zone');
+        return;
+    }
 
     const { store } = entry;
-    const config = entry.config; // Explicit capture for type safety
+    const config = entry.config;
     const state = store.getState();
     const { direction } = payload as OSNavigatePayload;
     const dir = direction.toLowerCase() as 'up' | 'down' | 'left' | 'right';
@@ -52,6 +58,7 @@ function handleNavigate(payload: unknown) {
             anchor: result.targetId,
         });
     }
+    logger.timeEnd('FOCUS', 'P2:Navigate');
 }
 
 function handleTab(direction: 'forward' | 'backward') {
@@ -131,14 +138,22 @@ function handleActivate(payload: unknown) {
 }
 
 /**
- * handleFocus - Pipeline Phase 3 (Resolve) entry point for FOCUS intent
+ * handleFocus - Pipeline Phase 2 (Intent) entry point for FOCUS command
  */
 function handleFocus(payload: unknown) {
+    logger.time('P2:Focus');
+    logger.debug('FOCUS', '[P2:Intent] FOCUS', payload);
     const { id, zoneId } = payload as { id: string, zoneId: string };
-    if (!id || !zoneId) return;
+    if (!id || !zoneId) {
+        logger.debug('FOCUS', '[P2:Intent] FOCUS - Missing id or zoneId');
+        return;
+    }
 
     const entry = FocusRegistry.getZoneEntry(zoneId);
-    if (!entry || !entry.config) return;
+    if (!entry || !entry.config) {
+        logger.debug('FOCUS', '[P2:Intent] FOCUS - Zone not found:', zoneId);
+        return;
+    }
 
     const { store } = entry;
     const config = entry.config;
@@ -146,12 +161,13 @@ function handleFocus(payload: unknown) {
 
     // 1. Resolve: Check if change is needed
     if (state.focusedItemId === id) {
-        // Even if same item, ensure zone is active
         FocusRegistry.setActiveZone(zoneId);
+        logger.timeEnd('FOCUS', 'P2:Focus');
         return;
     }
 
     // 2. Commit: Update store
+    logger.debug('FOCUS', '[P2:Intent] FOCUS - Committing:', id);
     commitAll(store, { targetId: id });
 
     // 3. Selection: Follow-focus if configured
@@ -164,6 +180,7 @@ function handleFocus(payload: unknown) {
 
     // 4. Orchestration: Set as active zone
     FocusRegistry.setActiveZone(zoneId);
+    logger.timeEnd('FOCUS', 'P2:Focus');
 }
 
 function handleDismiss() {

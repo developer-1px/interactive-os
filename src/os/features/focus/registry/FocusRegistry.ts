@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { FocusGroupStore } from '../store/focusGroupStore';
 import type { FocusGroupConfig } from '../types';
 
-interface ZoneEntry {
+interface GroupEntry {
     store: FocusGroupStore;
     parentId: string | null;
     config?: FocusGroupConfig;
@@ -10,90 +10,112 @@ interface ZoneEntry {
 }
 
 interface GlobalRegistryState {
-    zones: Map<string, ZoneEntry>;
+    groups: Map<string, GroupEntry>;
+    activeGroupId: string | null;
+
+    // Zone Compatibility Aliases (deprecated - use group versions)
+    /** @deprecated Use groups */
+    zones: Map<string, GroupEntry>;
+    /** @deprecated Use activeGroupId */
     activeZoneId: string | null;
 }
 
 interface GlobalRegistryActions {
     register: (id: string, store: FocusGroupStore, parentId?: string | null, config?: FocusGroupConfig, onActivate?: (itemId: string) => void) => void;
     unregister: (id: string) => void;
-    setActiveZone: (id: string) => void;
-    getZone: (id: string) => FocusGroupStore | undefined;
-    getZoneEntry: (id: string) => ZoneEntry | undefined;
-    getActiveZone: () => FocusGroupStore | undefined;
+    setActiveGroup: (id: string) => void;
+    getGroup: (id: string) => FocusGroupStore | undefined;
+    getGroupEntry: (id: string) => GroupEntry | undefined;
+    getActiveGroup: () => FocusGroupStore | undefined;
     getFocusPath: () => string[];
-    getSiblingZone: (direction: 'forward' | 'backward') => string | null;
+    getSiblingGroup: (direction: 'forward' | 'backward') => string | null;
 }
 
-// Global singleton store for Zone Registry
+// Global singleton store for Group Registry
 export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActions>((set, get) => ({
+    groups: new Map(),
+    activeGroupId: null,
+
+    // Zone compatibility aliases (updated together with groups/activeGroupId)
     zones: new Map(),
     activeZoneId: null,
 
     register: (id, store, parentId = null, config, onActivate) => {
         set((state) => {
-            const newZones = new Map(state.zones);
-            newZones.set(id, { store, parentId, config, onActivate });
-            return { zones: newZones };
+            const newGroups = new Map(state.groups);
+            newGroups.set(id, { store, parentId, config, onActivate });
+            return { groups: newGroups, zones: newGroups };
         });
     },
 
     unregister: (id) => {
+        const wasActive = get().activeGroupId === id;
         set((state) => {
-            const newZones = new Map(state.zones);
-            newZones.delete(id);
-            const newActiveId = state.activeZoneId === id ? null : state.activeZoneId;
-            return { zones: newZones, activeZoneId: newActiveId };
+            const newGroups = new Map(state.groups);
+            newGroups.delete(id);
+            // DON'T reset activeGroupId here - defer to allow for Strict Mode remount
+            return { groups: newGroups, zones: newGroups };
         });
-    },
 
-    setActiveZone: (id) => {
-        const zone = get().zones.get(id);
-        if (zone) {
-            set({ activeZoneId: id });
+        // If this was the active group, defer the check to allow React Strict Mode remount
+        if (wasActive) {
+            queueMicrotask(() => {
+                const currentState = get();
+                // Only reset if group is still not registered after microtask
+                if (!currentState.groups.has(id) && currentState.activeGroupId === id) {
+                    set({ activeGroupId: null, activeZoneId: null });
+                }
+            });
         }
     },
 
-    getZone: (id) => {
-        return get().zones.get(id)?.store;
+    setActiveGroup: (id) => {
+        const group = get().groups.get(id);
+        if (group) {
+            set({ activeGroupId: id, activeZoneId: id });
+        }
     },
 
-    getZoneEntry: (id) => {
-        return get().zones.get(id);
+    getGroup: (id) => {
+        return get().groups.get(id)?.store;
     },
 
-    getActiveZone: () => {
-        const { activeZoneId, zones } = get();
-        if (!activeZoneId) return undefined;
-        return zones.get(activeZoneId)?.store;
+    getGroupEntry: (id) => {
+        return get().groups.get(id);
+    },
+
+    getActiveGroup: () => {
+        const { activeGroupId, groups } = get();
+        if (!activeGroupId) return undefined;
+        return groups.get(activeGroupId)?.store;
     },
 
     getFocusPath: () => {
-        const { activeZoneId, zones } = get();
-        if (!activeZoneId) return [];
+        const { activeGroupId, groups } = get();
+        if (!activeGroupId) return [];
 
         const path: string[] = [];
-        let currentId: string | null = activeZoneId;
+        let currentId: string | null = activeGroupId;
 
         while (currentId) {
             path.unshift(currentId);
-            const entry = zones.get(currentId);
+            const entry = groups.get(currentId);
             currentId = entry?.parentId || null;
             if (path.length > 100) break;
         }
         return path;
     },
 
-    getSiblingZone: (direction) => {
-        const { activeZoneId, zones } = get();
-        if (!activeZoneId) return null;
+    getSiblingGroup: (direction) => {
+        const { activeGroupId, groups } = get();
+        if (!activeGroupId) return null;
 
-        const currentEntry = zones.get(activeZoneId);
+        const currentEntry = groups.get(activeGroupId);
         if (!currentEntry) return null;
 
-        // Find sibling zones (same parent)
+        // Find sibling groups (same parent)
         const siblings: string[] = [];
-        for (const [id, entry] of zones.entries()) {
+        for (const [id, entry] of groups.entries()) {
             if (entry.parentId === currentEntry.parentId) {
                 siblings.push(id);
             }
@@ -106,7 +128,7 @@ export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActio
             const elements = ids
                 .map(id => {
                     // Try DOMRegistry first, fallback to getElementById
-                    const el = document.querySelector(`[data-focus-zone="${id}"]`) as HTMLElement | null;
+                    const el = document.querySelector(`[data-focus-group="${id}"]`) as HTMLElement | null;
                     return el ? { id, el } : null;
                 })
                 .filter((x): x is { id: string; el: HTMLElement } => x !== null)
@@ -120,7 +142,7 @@ export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActio
         };
 
         const sortedSiblings = sortByDOMOrder(siblings);
-        const currentIndex = sortedSiblings.indexOf(activeZoneId);
+        const currentIndex = sortedSiblings.indexOf(activeGroupId);
         if (currentIndex === -1) return null;
 
         const delta = direction === 'forward' ? 1 : -1;
@@ -140,15 +162,36 @@ export const FocusRegistry = {
     register: (id: string, store: FocusGroupStore, parentId?: string | null, config?: FocusGroupConfig, onActivate?: (itemId: string) => void) =>
         useFocusRegistry.getState().register(id, store, parentId, config, onActivate),
     unregister: (id: string) => useFocusRegistry.getState().unregister(id),
-    setActiveZone: (id: string) => useFocusRegistry.getState().setActiveZone(id),
-    getZone: (id: string) => useFocusRegistry.getState().getZone(id),
-    getZoneEntry: (id: string) => useFocusRegistry.getState().getZoneEntry(id),
-    getActiveZone: () => useFocusRegistry.getState().getActiveZone(),
-    getActiveZoneEntry: () => {
+    setActiveGroup: (id: string) => useFocusRegistry.getState().setActiveGroup(id),
+    getGroup: (id: string) => useFocusRegistry.getState().getGroup(id),
+    getGroupEntry: (id: string) => useFocusRegistry.getState().getGroupEntry(id),
+    getActiveGroup: () => useFocusRegistry.getState().getActiveGroup(),
+    getActiveGroupEntry: () => {
         const state = useFocusRegistry.getState();
-        if (!state.activeZoneId) return undefined;
-        return state.zones.get(state.activeZoneId);
+        if (!state.activeGroupId) return undefined;
+        return state.groups.get(state.activeGroupId);
     },
     getFocusPath: () => useFocusRegistry.getState().getFocusPath(),
-    getSiblingZone: (direction: 'forward' | 'backward') => useFocusRegistry.getState().getSiblingZone(direction),
+    getSiblingGroup: (direction: 'forward' | 'backward') => useFocusRegistry.getState().getSiblingGroup(direction),
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Zone Compatibility Aliases (deprecated - use Group versions)
+    // ═══════════════════════════════════════════════════════════════════
+    /** @deprecated Use setActiveGroup */
+    setActiveZone: (id: string) => useFocusRegistry.getState().setActiveGroup(id),
+    /** @deprecated Use getGroupEntry */
+    getZoneEntry: (id: string) => useFocusRegistry.getState().getGroupEntry(id),
+    /** @deprecated Use getActiveGroupEntry */
+    getActiveZoneEntry: () => {
+        const state = useFocusRegistry.getState();
+        if (!state.activeGroupId) return undefined;
+        return state.groups.get(state.activeGroupId);
+    },
+    /** @deprecated Use getSiblingGroup */
+    getSiblingZone: (direction: 'forward' | 'backward') => useFocusRegistry.getState().getSiblingGroup(direction),
+    /** @deprecated Use getGroup */
+    getZone: (id: string) => useFocusRegistry.getState().getGroup(id),
+    /** @deprecated Use getActiveGroup */
+    getActiveZone: () => useFocusRegistry.getState().getActiveGroup(),
 };
+

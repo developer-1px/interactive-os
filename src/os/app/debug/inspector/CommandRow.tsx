@@ -15,7 +15,7 @@ export interface ProcessedCommand {
     when?: string;
     isLogicEnabled: boolean;
     currentPayload?: any;
-    jurisdiction?: "ZONE" | "GLOBAL";
+    jurisdiction?: "GROUP" | "GLOBAL";
 }
 
 export const CommandRow = memo(

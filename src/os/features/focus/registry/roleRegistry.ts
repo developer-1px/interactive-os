@@ -91,17 +91,6 @@ const rolePresets: Record<string, RolePreset> = {
     },
 };
 
-// ═══════════════════════════════════════════════════════════════════
-// Registry API
-// ═══════════════════════════════════════════════════════════════════
-
-export function getRolePreset(role: string): RolePreset | undefined {
-    return rolePresets[role];
-}
-
-export function registerRole(role: string, preset: RolePreset): void {
-    rolePresets[role] = preset;
-}
 
 export function resolveRole(
     role: string | undefined,

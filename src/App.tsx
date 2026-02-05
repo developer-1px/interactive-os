@@ -8,7 +8,8 @@ import {
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import TodoPage from "./pages/TodoPage";
 import SettingsPage from "./pages/SettingsPage";
-import FocusShowcasePage from "./pages/FocusShowcasePage3";
+import FocusShowcasePage from "./pages/focus-showcase";
+import AriaShowcasePage from "./pages/aria-showcase";
 import BuilderPage from "./pages/BuilderPage";
 import DocsPage from "./pages/DocsPage";
 
@@ -19,17 +20,15 @@ import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 
 // --- Internal Layout running inside OS.App ---
-import { useAppConfig } from "@os/app/export/primitives/App";
 
-function AppContent() {
+function AppContent({ isAppShell }: { isAppShell: boolean }) {
   const { state } = useEngine<AppState>();
-  const { isAppShell } = useAppConfig();
   const isInspectorOpen = state?.ui?.isInspectorOpen;
 
   // AppShell = Fixed viewport (no scroll), Body = Scrollable
   const rootClass = isAppShell
-    ? "h-screen w-screen bg-[#0a0a0a] flex overflow-hidden font-sans text-slate-900 select-none"
-    : "min-h-screen w-screen bg-[#0a0a0a] flex font-sans text-slate-900 select-none overflow-auto";
+    ? "h-screen w-screen bg-[#0a0a0a] flex overflow-hidden font-sans text-slate-900"
+    : "min-h-screen w-screen bg-[#0a0a0a] flex font-sans text-slate-900 overflow-auto";
 
   const mainClass = isAppShell
     ? "flex-1 flex min-w-0 h-full relative bg-white overflow-hidden"
@@ -58,11 +57,20 @@ function AppContent() {
   );
 }
 
-// --- App Shell (Bootstrapper) ---
-function AppShell() {
+// --- Todo App Shell (with full keybindings) ---
+function TodoAppShell() {
   return (
     <OS.App definition={TodoApp} isAppShell>
-      <AppContent />
+      <AppContent isAppShell={true} />
+    </OS.App>
+  );
+}
+
+// --- Minimal Shell (no app-specific keybindings) ---
+function MinimalShell() {
+  return (
+    <OS.App isAppShell>
+      <AppContent isAppShell={true} />
     </OS.App>
   );
 }
@@ -70,31 +78,40 @@ function AppShell() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<AppShell />}>
-          <Route path="/" element={<TodoPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route
-            path="/search"
-            element={
-              <div className="flex-1 flex items-center justify-center text-slate-500">
-                Search Placeholder
-              </div>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <div className="flex-1 flex items-center justify-center text-slate-500">
-                Profile Placeholder
-              </div>
-            }
-          />
-          <Route path="/builder" element={<BuilderPage />} />
-          <Route path="/focus-showcase" element={<FocusShowcasePage />} />
-          <Route path="/docs/*" element={<DocsPage />} />
-        </Route>
-      </Routes>
+      {/* OS.Root: Global infrastructure (InputEngine, FocusSensor, etc.) */}
+      <OS.Root>
+        <Routes>
+          {/* Todo App routes - with full TodoApp keybindings */}
+          <Route element={<TodoAppShell />}>
+            <Route path="/" element={<TodoPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route
+              path="/search"
+              element={
+                <div className="flex-1 flex items-center justify-center text-slate-500">
+                  Search Placeholder
+                </div>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <div className="flex-1 flex items-center justify-center text-slate-500">
+                  Profile Placeholder
+                </div>
+              }
+            />
+          </Route>
+
+          {/* Standalone pages - no TodoApp keybindings */}
+          <Route element={<MinimalShell />}>
+            <Route path="/builder" element={<BuilderPage />} />
+            <Route path="/focus-showcase" element={<FocusShowcasePage />} />
+            <Route path="/aria-showcase" element={<AriaShowcasePage />} />
+            <Route path="/docs/*" element={<DocsPage />} />
+          </Route>
+        </Routes>
+      </OS.Root>
     </BrowserRouter>
   );
 }

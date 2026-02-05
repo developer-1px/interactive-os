@@ -7,10 +7,10 @@ export const findFocusableItem = (el: HTMLElement) =>
     el.closest('[tabindex]') as HTMLElement | null;
 
 export const findZone = (el: HTMLElement) =>
-    el.closest('[data-focus-zone]') as HTMLElement | null;
+    el.closest('[data-focus-group]') as HTMLElement | null;
 
 export const getZoneId = (el: HTMLElement) =>
-    el.getAttribute('data-focus-zone');
+    el.getAttribute('data-focus-group');
 
 export interface FocusTarget {
     itemId: string;

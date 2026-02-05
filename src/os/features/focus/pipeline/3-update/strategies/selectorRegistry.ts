@@ -29,7 +29,7 @@ export type SelectStrategy = (
 // Default Strategies
 // ═══════════════════════════════════════════════════════════════════
 
-export const resolveSingle: SelectStrategy = (targetId, currentSelection) => {
+const resolveSingle: SelectStrategy = (targetId, currentSelection) => {
     if (!targetId) return { changed: false, selection: currentSelection, anchor: null };
 
     // If already selected and single, no change (unless toggle behavior is desired?)
@@ -45,7 +45,7 @@ export const resolveSingle: SelectStrategy = (targetId, currentSelection) => {
     };
 };
 
-export const resolveToggle: SelectStrategy = (targetId, currentSelection, currentAnchor) => {
+const resolveToggle: SelectStrategy = (targetId, currentSelection, currentAnchor) => {
     if (!targetId) return { changed: false, selection: currentSelection, anchor: currentAnchor };
 
     const isSelected = currentSelection.includes(targetId);
@@ -64,7 +64,7 @@ export const resolveToggle: SelectStrategy = (targetId, currentSelection, curren
     };
 };
 
-export const resolveRange: SelectStrategy = (targetId, currentSelection, currentAnchor, items) => {
+const resolveRange: SelectStrategy = (targetId, currentSelection, currentAnchor, items) => {
     if (!targetId) return { changed: false, selection: currentSelection, anchor: currentAnchor };
 
     const anchor = currentAnchor || targetId;
@@ -89,7 +89,7 @@ export const resolveRange: SelectStrategy = (targetId, currentSelection, current
     };
 };
 
-export const resolveAll: SelectStrategy = (_target, _curr, _anchor, items) => {
+const resolveAll: SelectStrategy = (_target, _curr, _anchor, items) => {
     return {
         changed: true,
         selection: [...items],
@@ -97,7 +97,7 @@ export const resolveAll: SelectStrategy = (_target, _curr, _anchor, items) => {
     };
 };
 
-export const resolveNone: SelectStrategy = (_target, currentSelection, currentAnchor) => {
+const resolveNone: SelectStrategy = (_target, currentSelection, currentAnchor) => {
     if (currentSelection.length === 0) return { changed: false, selection: [], anchor: currentAnchor };
     return {
         changed: true,
@@ -113,7 +113,7 @@ export const resolveNone: SelectStrategy = (_target, currentSelection, currentAn
 
 const strategies = new Map<string, SelectStrategy>();
 
-export function registerSelectionStrategy(name: string, strategy: SelectStrategy): void {
+function registerSelectionStrategy(name: string, strategy: SelectStrategy): void {
     strategies.set(name, strategy);
 }
 
@@ -125,12 +125,7 @@ registerSelectionStrategy('all', resolveAll);
 registerSelectionStrategy('none', resolveNone);
 registerSelectionStrategy('multiple', resolveSingle); // Fallback for multiple without modifiers
 
-export function getSelectionStrategy(name: string): SelectStrategy | undefined {
-    return strategies.get(name);
-}
-
 // ═══════════════════════════════════════════════════════════════════
-// Facade
 // ═══════════════════════════════════════════════════════════════════
 
 export function resolveWithSelectionStrategy(

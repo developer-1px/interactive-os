@@ -139,15 +139,6 @@ export const StartEdit = defineListCommand({
         }),
 });
 
-export const SyncDraft = defineListCommand({
-    id: "SYNC_DRAFT",
-    log: false,
-    run: (state, payload: { text: string }) => ({
-        ...state,
-        ui: { ...state.ui, draft: payload.text },
-    }),
-});
-
 export const SyncEditDraft = defineListCommand({
     id: "SYNC_EDIT_DRAFT",
     log: false,
