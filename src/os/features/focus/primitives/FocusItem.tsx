@@ -12,7 +12,8 @@
 
 import {
     useRef,
-    useLayoutEffect,
+    useCallback,
+    useMemo,
     forwardRef,
     isValidElement,
     cloneElement,
@@ -99,20 +100,22 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
 
     const { zoneId, store } = ctx;
 
-    // --- Registration ---
-    useLayoutEffect(() => {
-        const el = internalRef.current;
-        if (el) {
-            // Register item to both registries
-            DOMRegistry.registerItem(id, zoneId, el);
-            store.getState().addItem(id);
-        }
+    // --- Registration (Callback Ref Pattern) ---
+    // This ensures registration happens exactly when the DOM node is available,
+    // handling React 18 Strict Mode mount/unmount/mount cycles correctly.
+    const registerCallback = useCallback((node: HTMLElement | null) => {
+        // Update internal ref for debugging/access
+        internalRef.current = node;
 
-        return () => {
-            // Cleanup
+        if (node) {
+            // Mount / Update
+            DOMRegistry.registerItem(id, zoneId, node);
+            store.getState().addItem(id);
+        } else {
+            // Unmount
             DOMRegistry.unregisterItem(id);
             store.getState().removeItem(id);
-        };
+        }
     }, [id, zoneId, store]);
 
     // --- Reactive State Subscription ---
@@ -131,42 +134,57 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
     const isAnchor = isFocused && !isZoneActive;
 
     // --- Props Calculation ---
+    // Allow tabIndex override from props (Field primitive needs tabIndex=0 for navigation)
+    const { tabIndex: propTabIndex, ...otherRest } = rest as { tabIndex?: number;[key: string]: any };
+
     const computedProps = {
         id: id,
         role: role || 'option',
         'data-item-id': id,
         'data-anchor': isAnchor ? 'true' : undefined,
         'data-focused': visualFocused ? 'true' : undefined,
+        'data-selected': isSelected ? 'true' : undefined,
         'aria-current': visualFocused ? 'true' : undefined,
         'aria-selected': isSelected || undefined,
         'aria-disabled': disabled || undefined,
-        tabIndex: visualFocused ? 0 : -1,
+        // Use prop tabIndex if provided, otherwise use visualFocused logic
+        tabIndex: propTabIndex !== undefined ? propTabIndex : (visualFocused ? 0 : -1),
         // Basic focus styles (can be overridden by className)
         className: twMerge(
             `outline-none cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`,
             className
         ),
         style,
-        ...rest
+        ...otherRest
     };
 
+    // --- Ref Composition ---
+    // 1. Identify child ref if needed
+    const childElement = asChild && isValidElement(children) ? (children as ReactElement<any>) : null;
+    const childRef = childElement ? (childElement as any).ref : null;
+
+    // 2. Create stable composed ref
+    const finalRef = useMemo(() => {
+        if (childRef) {
+            return composeRefs(registerCallback, ref, childRef);
+        }
+        return composeRefs(registerCallback, ref);
+    }, [registerCallback, ref, childRef]);
+
     // --- Render Strategy: asChild ---
-    if (asChild && isValidElement(children)) {
-        const child = children as ReactElement<any>;
-        return cloneElement(child, {
+    if (childElement) {
+        return cloneElement(childElement, {
             ...computedProps,
-            ref: composeRefs(internalRef, ref, (child as any).ref),
-            className: twMerge(child.props.className, computedProps.className),
-            style: { ...child.props.style, ...style },
-            // Don't overwrite child's ID if we want to enforce ours? 
-            // Usually we want OUR id.
+            ref: finalRef, // Stable Ref
+            className: twMerge(childElement.props.className, computedProps.className),
+            style: { ...childElement.props.style, ...style },
         });
     }
 
     // --- Render Strategy: Wrapper ---
     return (
         <Element
-            ref={composeRefs(internalRef, ref)}
+            ref={finalRef} // Stable Ref
             {...computedProps}
         >
             {children}

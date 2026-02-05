@@ -3,8 +3,8 @@ import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { Trigger } from "@os/app/export/primitives/Trigger";
 import { Field } from "@os/app/export/primitives/Field";
-import { TestBox, useTestState } from "../shared/TestLayout";
-import { click, assert, wait } from "../shared/testUtils";
+import { TestBox, useTestState } from "../../shared/TestLayout";
+import { click, assert, wait } from "../../shared/testUtils";
 
 export function AriaInteractionTest() {
     const { status, setStatus, logs, addLog, clearLogs } = useTestState();
@@ -77,14 +77,16 @@ export function AriaInteractionTest() {
                 {/* 1. Trigger Section */}
                 <div className="border p-2 rounded bg-gray-50">
                     <div className="text-[10px] font-mono text-gray-500 mb-2 uppercase">Trigger (Button)</div>
-                    <Trigger
-                        id="aria-test-trigger-btn"
-                        command={mockCommand}
-                        dispatch={handleTriggerDispatch}
-                        className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm"
-                    >
-                        Click Me ({actionCount})
-                    </Trigger>
+                    <FocusGroup id="aria-trigger-group" tab={{ behavior: 'flow' }}>
+                        <Trigger
+                            id="aria-test-trigger-btn"
+                            command={mockCommand}
+                            dispatch={handleTriggerDispatch}
+                            className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm data-[focused=true]:ring-2 ring-blue-500"
+                        >
+                            Click Me ({actionCount})
+                        </Trigger>
+                    </FocusGroup>
                 </div>
 
                 {/* 2. Selection Section */}
@@ -113,12 +115,14 @@ export function AriaInteractionTest() {
                 {/* 3. Field Section */}
                 <div className="border p-2 rounded bg-gray-50">
                     <div className="text-[10px] font-mono text-gray-500 mb-2 uppercase">Field (Input)</div>
-                    <Field
-                        name="aria-test-field-input"
-                        value=""
-                        placeholder="Focus me..."
-                        className="w-full px-2 py-1 bg-white border border-gray-300 rounded text-sm focus:outline-none data-[focused=true]:border-blue-500 data-[focused=true]:ring-1 ring-blue-500"
-                    />
+                    <FocusGroup id="aria-field-group" tab={{ behavior: 'flow' }}>
+                        <Field
+                            name="aria-test-field-input"
+                            value=""
+                            placeholder="Focus me..."
+                            className="w-full px-2 py-1 bg-white border border-gray-300 rounded text-sm focus:outline-none data-[focused=true]:border-blue-500 data-[focused=true]:ring-1 ring-blue-500"
+                        />
+                    </FocusGroup>
                 </div>
             </div>
         </TestBox>

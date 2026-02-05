@@ -40,7 +40,7 @@ export function mapStateToContext(
         viewMode: ui.viewMode,
 
         // --- NEW: Atomic logic properties ---
-        isDraftFocused: focusedItemId === "todo-draft",
+        isDraftFocused: focusedItemId === "DRAFT",
         hasDraft: ui.draft.length > 0,
         focusIndex,
         maxIndex,

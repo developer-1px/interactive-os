@@ -63,11 +63,20 @@ export function FocusSensor() {
                         payload: { targetId: target.itemId, mode: 'toggle', zoneId: target.zoneId }
                     });
                 } else {
-                    // Standard Click -> Focus intent
-                    logger.debug('FOCUS', '[P1:Sense] Dispatch FOCUS');
+                    // Standard Click -> Focus intent AND Select intent
+                    // Clicking implies selecting the item (usually 'replace' mode, clearing others)
+                    logger.debug('FOCUS', '[P1:Sense] Dispatch FOCUS + SELECT');
+
+                    // 1. Move Focus
                     dispatch?.({
                         type: OS_COMMANDS.FOCUS,
                         payload: { id: target.itemId, zoneId: target.zoneId }
+                    });
+
+                    // 2. Update Selection
+                    dispatch?.({
+                        type: OS_COMMANDS.SELECT,
+                        payload: { targetId: target.itemId, mode: 'replace', zoneId: target.zoneId }
                     });
                 }
             } else if (e.type === 'focusin') {

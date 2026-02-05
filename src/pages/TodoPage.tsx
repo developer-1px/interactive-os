@@ -5,7 +5,7 @@ import { ClipboardManager } from "@apps/todo/features/clipboard/ClipboardManager
 
 export default function TodoPage() {
   return (
-    <Zone id="main" area="main" role="toolbar">
+    <Zone id="main" area="main" role="toolbar" className="h-full">
       <ClipboardManager />
 
       {/* 1. Category Navigation (Isolated Component) */}

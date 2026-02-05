@@ -1,4 +1,4 @@
-import { TestGrid } from "./shared/TestLayout";
+import { TestGrid } from "../shared/TestLayout";
 import { NavigateTest } from "./tests/NavigateTest";
 import { SelectTest } from "./tests/SelectTest";
 import { TabTest } from "./tests/TabTest";

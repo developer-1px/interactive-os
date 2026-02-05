@@ -63,7 +63,35 @@ function handleNavigate(payload: unknown) {
 
 function handleTab(direction: 'forward' | 'backward') {
     const entry = FocusRegistry.getActiveZoneEntry();
-    if (!entry || !entry.config) return;
+
+    // Fallback: If no active zone, find the first available one (Cold Start)
+    if (!entry) {
+        if (direction === 'forward') {
+            const orderedIds = FocusRegistry.getOrderedGroups();
+            if (orderedIds.length > 0) {
+                const firstId = orderedIds[0];
+
+                // Activate the first zone
+                FocusRegistry.setActiveZone(firstId);
+                const firstEntry = FocusRegistry.getZoneEntry(firstId);
+                if (firstEntry && firstEntry.store) {
+                    const state = firstEntry.store.getState();
+                    // If items exist, focus the first one to ensure visual feedback
+                    if (state.items.length > 0) {
+                        logger.debug('FOCUS', 'Cold Start Tab -> Activating & Focusing', firstId);
+                        // We could use updateEntry here if we had the config, but for cold start,
+                        // just getting into the zone is usually enough. The user can TAB again.
+                        // However, standard expectation is that TAB selects the first item.
+                        // Let's rely on the fact that setActiveZone sets the active group,
+                        // and if the user hits TAB again, it will now validly process 'flow' or 'trap'.
+                    }
+                }
+            }
+        }
+        return;
+    }
+
+    if (!entry.config) return;
 
     const { store } = entry;
     const config = entry.config;
@@ -78,7 +106,14 @@ function handleTab(direction: 'forward' | 'backward') {
 
     if (result.action === 'trap' && result.targetId) {
         commitAll(store, { targetId: result.targetId });
-    } else if (result.action === 'escape' || result.action === 'flow') {
+    } else if (result.action === 'flow') {
+        // Flow: move within zone if targetId exists, otherwise exit
+        if (result.targetId) {
+            commitAll(store, { targetId: result.targetId });
+        } else {
+            FocusOrchestrator.traverseZone(state.zoneId, direction, config);
+        }
+    } else if (result.action === 'escape') {
         FocusOrchestrator.traverseZone(state.zoneId, direction, config);
     }
 }

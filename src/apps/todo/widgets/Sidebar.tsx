@@ -24,6 +24,7 @@ export function Sidebar() {
       role="listbox"
       navigate={{ entry: "restore" }}
       style={{ flex: "none" }}
+      className="h-full"
     >
       <SidebarContent />
     </Zone>

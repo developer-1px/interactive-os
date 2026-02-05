@@ -24,4 +24,9 @@ export const GroupRegistry = {
     getAll: () => {
         return new Map(groupCommandMap);
     },
+
+    get: (groupId: string, commandId: string) => {
+        const commands = groupCommandMap.get(groupId);
+        return commands?.find(c => c.id === commandId);
+    },
 };

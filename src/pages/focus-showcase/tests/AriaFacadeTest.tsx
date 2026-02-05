@@ -1,7 +1,7 @@
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { TestBox, useTestState } from "../shared/TestLayout";
-import { click, navigate, assert, wait } from "../shared/testUtils";
+import { TestBox, useTestState } from "../../shared/TestLayout";
+import { click, navigate, assert, wait } from "../../shared/testUtils";
 
 export function AriaFacadeTest() {
     const { status, setStatus, logs, addLog, clearLogs } = useTestState();

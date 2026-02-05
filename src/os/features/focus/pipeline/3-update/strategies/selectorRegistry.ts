@@ -45,7 +45,7 @@ const resolveSingle: SelectStrategy = (targetId, currentSelection) => {
     };
 };
 
-const resolveToggle: SelectStrategy = (targetId, currentSelection, currentAnchor) => {
+const resolveToggle: SelectStrategy = (targetId, currentSelection, currentAnchor, _items, config) => {
     if (!targetId) return { changed: false, selection: currentSelection, anchor: currentAnchor };
 
     const isSelected = currentSelection.includes(targetId);
@@ -53,6 +53,10 @@ const resolveToggle: SelectStrategy = (targetId, currentSelection, currentAnchor
 
     if (isSelected) {
         newSelection = currentSelection.filter(id => id !== targetId);
+        // Respect disallowEmpty: prevent deselecting the last item
+        if (config.disallowEmpty && newSelection.length === 0) {
+            return { changed: false, selection: currentSelection, anchor: currentAnchor };
+        }
     } else {
         newSelection = [...currentSelection, targetId];
     }
@@ -119,6 +123,7 @@ function registerSelectionStrategy(name: string, strategy: SelectStrategy): void
 
 // Register Defaults
 registerSelectionStrategy('single', resolveSingle);
+registerSelectionStrategy('replace', resolveSingle); // Standard click replaces selection
 registerSelectionStrategy('toggle', resolveToggle);
 registerSelectionStrategy('range', resolveRange);
 registerSelectionStrategy('all', resolveAll);

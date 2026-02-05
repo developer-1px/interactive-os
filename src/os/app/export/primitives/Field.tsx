@@ -283,9 +283,8 @@ export const Field = forwardRef<HTMLElement, FieldProps<any> & { blurOnInactive?
     customClassName
   });
 
-  const computedTabIndex = mode === "deferred"
-    ? (isFocused ? 0 : -1)
-    : 0;
+  // All Fields should be tab-navigable; focus state is managed by OS, not browser tabIndex
+  const computedTabIndex = 0;
 
   const baseProps = {
     // ID is required for FocusItem registration

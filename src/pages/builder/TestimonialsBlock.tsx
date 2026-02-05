@@ -99,7 +99,9 @@ export function TestimonialsBlock() {
                             <OS.Zone
                                 key={t.id}
                                 id={`zone-${t.id}`}
-                                // integrated removed
+                                role=""
+                                tab={{ behavior: 'flow' }}
+                                navigate={{ seamless: true }}
                                 className={`
                   relative rounded-2xl p-6 transition-all duration-300
                   bg-slate-50 border border-slate-200

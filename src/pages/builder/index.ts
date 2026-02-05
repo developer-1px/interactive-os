@@ -1,5 +1,8 @@
-export { HeroBlock } from "./HeroBlock";
-export { FeaturesBlock } from "./FeaturesBlock";
-export { TestimonialsBlock } from "./TestimonialsBlock";
-export { CTABlock } from "./CTABlock";
-export { EditorToolbar } from "./EditorToolbar";
+export * from './HeroBlock';
+export * from './FeaturesBlock';
+export * from './TestimonialsBlock';
+export * from './CTABlock';
+export * from './EditorToolbar';
+export * from './NCPHeroBlock';
+export * from './NCPNewsBlock';
+export * from './NCPServicesBlock';

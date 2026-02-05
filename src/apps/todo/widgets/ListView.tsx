@@ -1,13 +1,16 @@
 /**
- * ListView Test - Pure Primitives Only
+ * ListView - Premium Todo List Implementation
  * 
- * Testing if FocusGroup > FocusItem works without facades.
+ * Uses TaskItem components with full ZIFT pattern (Zone-Item-Field-Trigger).
  */
 
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
-import { FocusItem } from "@os/features/focus/primitives/FocusItem";
+import { Field } from "@os/app/export/primitives/Field";
 import { useEngine } from "@os/features/command/ui/CommandContext";
+import { TaskItem } from "@apps/todo/widgets/TaskItem";
+import { AddTodo, SyncDraft } from "@apps/todo/features/commands/list";
 import type { AppState } from "@apps/todo/model/types";
+import { Plus } from "lucide-react";
 
 export function ListView() {
     const { state } = useEngine<AppState>();
@@ -17,6 +20,11 @@ export function ListView() {
         (id) => state.data.todos[id]?.categoryId === state.ui.selectedCategoryId,
     );
     const visibleTodos = visibleTodoIds.map((id) => state.data.todos[id]);
+
+    // Edit state
+    const editingId = state.ui.editingId;
+    const editDraft = state.ui.editDraft ?? "";
+    const draft = state.ui.draft ?? "";
 
     return (
         <div className="flex-1 flex flex-col h-full relative bg-white overflow-hidden font-sans">
@@ -36,70 +44,33 @@ export function ListView() {
                     </header>
 
                     <div className="flex-1 overflow-y-auto space-y-2">
-                        {/* Draft Item */}
-                        <FocusItem
-                            id="DRAFT"
-                            className="group flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 transition-all cursor-text text-slate-500 hover:text-indigo-600"
-                        >
-                            <span className="text-sm font-medium">Add a new task...</span>
-                        </FocusItem>
+                        {/* Draft Item - Field itself is a FocusItem with name="DRAFT" */}
+                        <div className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20">
+                            <div className="text-slate-400 group-has-[[data-focused=true]]:text-indigo-500 transition-colors">
+                                <Plus size={18} strokeWidth={2.5} />
+                            </div>
+                            <Field
+                                name="DRAFT"
+                                value={draft}
+                                active={true}
+                                syncCommand={SyncDraft({ text: "" })}
+                                commitCommand={AddTodo({})}
+                                className="flex-1 bg-transparent outline-none text-slate-700 text-[15px] font-medium placeholder:text-slate-400"
+                                placeholder="Add a new task..."
+                            />
+                        </div>
 
                         <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent my-4" />
 
                         {/* Task Items */}
                         <div className="space-y-2.5">
                             {visibleTodos.map((todo) => (
-                                <FocusItem
+                                <TaskItem
                                     key={todo.id}
-                                    id={String(todo.id)}
-                                    // Note: Visuals are handled by TaskItem, but FocusItem wraps it? 
-                                    // Wait, ListView uses FocusItem directly but wrapped content? 
-                                    // Actually, ListView implementation in step 22 shows it maps visibleTodos to FocusItem with inline content.
-                                    // But Reference says TaskItem encapsulates ZIFT.
-                                    // Let's check ListView again. Step 22 shows it effectively inlining the content basically recreating TaskItem simplified?
-                                    // Wait, line 50 in Step 22: visibleTodos.map... FocusItem...
-                                    // This seems to be a "Primitive Test" version as stated in the comment.
-                                    // The plan said "Remove Primitive Test text".
-                                    // Should I use TaskItem here instead?
-                                    // The Ref Implementation Overview (Step 12) says "ListView... Renders visibleTodos as a list of <TaskItem> components."
-                                    // But Step 22 content shows it using inline FocusItem.
-                                    // This matches "Primitive Test" description.
-                                    // I should probably switch to using TaskItem if I want "Premium Design" or at least style this inline version to match TaskItem.
-                                    // Given the goal is "Refine Design", I should probably use the TaskItem component if available and meant to be used, OR make this inline version look good.
-                                    // Since TaskItem.tsx exists and is used in BoardView, I should probably use it here too for consistency?
-                                    // But `ListView.tsx` explicitly says "Primitive Test - Pure Primitives Only".
-                                    // If I just style it to look good, I maintain the "Primitive Test" nature but make it look like a real app.
-                                    // Let's stick to styling for now, but I will import TaskItem if I can. 
-                                    // Actually, let's look at TaskItem again. It wraps Item. FocusItem is an alias or primitive? 
-                                    // FocusItem is from @os/features/focus/primitives/FocusItem. TaskItem uses Item from export/primitives/Item.
-                                    // They are likely compatible.
-                                    // However, simpler is to just use TaskItem.
-                                    // But `ListView` in step 22 is explicitly a test of "FocusGroup > FocusItem without facades".
-                                    // I will stick to improving the styles in-place to respect the "Primitive Test" architectural goal, but make it LOOK premium.
-
-                                    className={`
-                                        group flex items-center gap-4 p-4 rounded-xl border transition-all duration-200
-                                        ${todo.completed
-                                            ? "bg-slate-50 border-transparent opacity-60"
-                                            : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md"
-                                        }
-                                        outline-none
-                                        data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-500 data-[focused=true]:border-indigo-500 data-[focused=true]:z-10
-                                    `}
-                                >
-                                    {/* Checkbox */}
-                                    <div className={`
-                                        w-5 h-5 rounded-full border-[1.5px] flex items-center justify-center transition-colors
-                                        ${todo.completed ? "bg-indigo-600 border-indigo-600" : "border-slate-300 group-hover:border-indigo-400"}
-                                    `}>
-                                        {todo.completed && <span className="text-white text-[10px] font-bold">✓</span>}
-                                    </div>
-
-                                    {/* Text */}
-                                    <span className={`text-[15px] ${todo.completed ? "line-through text-slate-400 decoration-slate-300" : "text-slate-700 font-medium"}`}>
-                                        {todo.text}
-                                    </span>
-                                </FocusItem>
+                                    todo={todo}
+                                    isEditing={editingId === todo.id}
+                                    editDraft={editDraft}
+                                />
                             ))}
                         </div>
 

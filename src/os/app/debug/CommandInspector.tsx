@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { useInspectorStore } from "@os/features/inspector/InspectorStore"; // [NEW] Subscription
+import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { evalContext } from "@os/features/logic/lib/evalContext";
 import { KeyMonitor } from "@os/app/debug/inspector/KeyMonitor.tsx";
 import { StateMonitor } from "@os/app/debug/inspector/StateMonitor.tsx";
@@ -13,9 +15,14 @@ import { useInputTelemetry } from "@os/app/debug/LoggedKey.ts";
 
 // --- Main Component ---
 
+// --- Main Component ---
+
 export function CommandInspector() {
   const contextValue = useCommandEngine() as any;
   const { state, registry, contextMap } = contextValue;
+
+  // v7.50: Use global InspectorStore for tab state
+  const activeTab = useInspectorStore(s => s.activeTab);
 
   // --- Direct Zustand subscriptions (no React Context middleman) ---
   const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
@@ -74,13 +81,6 @@ export function CommandInspector() {
   // --- UI State ---
   const [physicalZone, setPhysicalZone] = useState<string | null>("NONE");
   const [isInputActive, setIsInputActive] = useState(false);
-  const [activeTab, setActiveTab] = useState<"DATA" | "OS">(() => {
-    return (localStorage.getItem("antigravity_inspector_tab") as "DATA" | "OS") || "DATA";
-  });
-
-  useEffect(() => {
-    localStorage.setItem("antigravity_inspector_tab", activeTab);
-  }, [activeTab]);
 
   // Optimize Context for Registry
   const registryContext = useMemo(() => {
@@ -89,10 +89,12 @@ export function CommandInspector() {
     return stablePart;
   }, [ctx]);
 
-  const historyCount = state?.history?.past?.length || 0;
-  const lastEntry = historyCount > 0 ? state.history.past[historyCount - 1] : null;
-  const lastCommandId = lastEntry ? lastEntry.command.type : null;
-  const lastPayload = lastEntry && "payload" in lastEntry.command ? lastEntry.command.payload : null;
+  // Global telemetry for RegistryMonitor flash pattern
+  const telemetryEntries = useCommandTelemetryStore(s => s.entries);
+  const historyCount = telemetryEntries.length;
+  const lastEntry = historyCount > 0 ? telemetryEntries[historyCount - 1] : null;
+  const lastCommandId = lastEntry ? lastEntry.command : null;
+  const lastPayload = lastEntry?.payload ?? null;
   const currentFocusId = focusedItemId;
   const rawKeys = useInputTelemetry((s) => s.logs);
 
@@ -127,120 +129,93 @@ export function CommandInspector() {
     };
   }, []);
 
-  if (!state) return <div className="p-4 text-white">Inspector Waiting for Engine...</div>;
+  if (!state) return <div className="p-4 text-slate-500 text-xs">Inspector Waiting for Engine...</div>;
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'REGISTRY':
+        return (
+          <div className="flex-1 flex flex-col overflow-hidden bg-white">
+            <KeyMonitor rawKeys={rawKeys} />
+            <StateMonitor
+              focusId={currentFocusId ?? undefined}
+              activeZone={(ctx as any)?.activeZone}
+              focusPath={(ctx as any)?.focusPath}
+              physicalZone={physicalZone || "NONE"}
+              isInputActive={isInputActive}
+            />
+            <RegistryMonitor
+              ctx={registryContext}
+              registry={registry}
+              activeKeybindingMap={activeKeybindingMap}
+              isInputActive={isInputActive}
+              lastCommandId={lastCommandId}
+              lastPayload={lastPayload}
+              historyCount={historyCount}
+            />
+          </div>
+        );
+      case 'STATE':
+        return (
+          <div className="flex-1 flex flex-col overflow-hidden bg-white">
+            {/* Panel 1: History (min 3 visible) */}
+            <div className="shrink-0 max-h-[270px] overflow-y-auto">
+              <EventStream />
+            </div>
+            {/* Panel 2: Data State */}
+            <div className="flex-1 overflow-hidden border-t border-[#e5e5e5]">
+              <DataStateViewer state={state.data} />
+            </div>
+          </div>
+        );
+      case 'EVENTS':
+        return (
+          <div className="flex-1 flex flex-col overflow-hidden bg-white">
+            <EventStream />
+          </div>
+        );
+      case 'SETTINGS':
+        return (
+          <div className="flex-1 flex flex-col overflow-hidden bg-white p-4">
+            <div className="text-xs font-bold text-slate-500 mb-2">OS SETTINGS</div>
+            <OSStateViewer />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="w-full h-full bg-[#ffffff] flex flex-col shadow-2xl overflow-hidden font-sans z-50 text-[#333333] border-l border-[#e5e5e5]">
+    <div className="w-full h-full bg-[#ffffff] flex flex-col overflow-hidden font-sans text-[#333333]">
       {/* Header */}
-      <div className="h-6 px-3 border-b border-[#e5e5e5] bg-[#f8f8f8] flex items-center justify-between flex-shrink-0">
+      <div className="h-9 px-3 border-b border-[#e5e5e5] bg-[#f8f8f8] flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
           <div
-            className={`w-1 h-1 rounded-full transition-all duration-500 ${isInputActive ? "bg-[#f48771] shadow-[0_0_8px_#f48771]" : "bg-[#007acc] shadow-[0_0_8px_#007acc]"}`}
+            className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${isInputActive ? "bg-[#f48771] shadow-[0_0_8px_#f48771]" : "bg-[#007acc] shadow-[0_0_8px_#007acc]"}`}
           />
-          <span className="text-[9px] font-black tracking-widest text-[#999] uppercase italic leading-none">
-            {isInputActive ? "Signal Lock" : "Antigravity Inspector"}
+          <span className="text-[10px] font-bold tracking-wide text-[#666] uppercase">
+            {activeTab} MONITOR
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="px-1 py-0.5 rounded bg-[#ffffff] text-[7px] text-[#aaaaaa] font-mono leading-none border border-[#e5e5e5]">
-            v3.5
+          <div className="px-1.5 py-0.5 rounded bg-[#ffffff] text-[8px] text-[#aaaaaa] font-mono leading-none border border-[#e5e5e5]">
+            v7.50
           </div>
         </div>
       </div>
 
-
+      {/* Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Column: Logic & Telemetry */}
-        <div className="w-1/2 flex flex-col overflow-auto border-r border-[#e5e5e5] bg-[#ffffff] custom-scrollbar">
-          <KeyMonitor rawKeys={rawKeys} />
-          <StateMonitor
-            focusId={currentFocusId ?? undefined}
-            activeZone={(ctx as any)?.activeZone}
-            focusPath={(ctx as any)?.focusPath}
-            physicalZone={physicalZone || "NONE"}
-            isInputActive={isInputActive}
-          />
-          <RegistryMonitor
-            ctx={registryContext}
-            registry={registry}
-            activeKeybindingMap={activeKeybindingMap}
-            isInputActive={isInputActive}
-            lastCommandId={lastCommandId}
-            lastPayload={lastPayload}
-            historyCount={historyCount}
-          />
-        </div>
-
-        {/* Right Column: Split Layout */}
-        <div className="w-1/2 flex flex-col overflow-hidden bg-[#fafafa]">
-
-          {/* Top: Fixed Event Stream (approx 3 items) */}
-          <div className="h-[95px] flex-shrink-0 border-b border-[#e5e5e5] bg-[#ffffff] overflow-hidden flex flex-col">
-            <EventStream history={state.history?.past || []} />
-          </div>
-
-          {/* Bottom: Tabs */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Tab Header */}
-            <div className="flex items-center bg-[#f3f3f3] h-6 border-b border-[#e5e5e5] flex-shrink-0">
-              <button
-                onClick={() => setActiveTab("DATA")}
-                className={`h-full px-3 text-[9px] font-black uppercase tracking-widest transition-colors relative ${activeTab === "DATA"
-                  ? "text-[#007acc] bg-[#ffffff] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-[#007acc]"
-                  : "text-[#999999] hover:text-[#666666] hover:bg-[#ececec]"
-                  }`}
-              >
-                Data
-              </button>
-              <button
-                onClick={() => setActiveTab("OS")}
-                className={`h-full px-3 text-[10px] font-black uppercase tracking-widest transition-colors relative ${activeTab === "OS"
-                  ? "text-[#4ec9b0] bg-[#ffffff] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#4ec9b0]"
-                  : "text-[#999999] hover:text-[#666666] hover:bg-[#ececec]"
-                  }`}
-              >
-                OS
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-hidden relative">
-              {activeTab === "DATA" ? (
-                <DataStateViewer state={state.data} />
-              ) : (
-                <OSStateViewer />
-              )}
-            </div>
-          </div>
-        </div>
+        {renderContent()}
       </div>
 
-      {/* Sticky Footer Status */}
-      <div className="h-4 px-3 border-t border-[#e5e5e5] bg-[#f3f3f3] flex items-center justify-between flex-shrink-0 text-[#999]">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[7px] font-black opacity-50 uppercase tracking-widest">
-              STATE
-            </span>
-            <span className="text-[9px] uppercase font-bold text-[#666]">
-              Live
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 border-l border-[#e5e5e5] pl-4">
-            <span className="text-[8px] font-black opacity-50 uppercase tracking-widest">
-              BUFFER
-            </span>
-            <span className="text-[9px] uppercase font-bold text-[#007acc]">
-              Locked
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[8px] font-black opacity-50 uppercase tracking-widest">
-            ENGINE
-          </span>
-          <span className="text-[9px] uppercase font-mono font-black text-[#4ec9b0]">
-            V8-ZUSTAND
-          </span>
+      {/* Footer */}
+      <div className="h-6 px-3 border-t border-[#e5e5e5] bg-[#f8f8f8] flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-2 text-[9px] text-slate-400 font-mono">
+          <span>{physicalZone}</span>
+          <span className="text-slate-300">|</span>
+          <span className={isInputActive ? 'text-red-400' : 'text-slate-400'}>{isInputActive ? 'INPUT_LOCK' : 'NAV_MODE'}</span>
         </div>
       </div>
     </div>

@@ -43,6 +43,9 @@ export function useOSCore() {
             { key: "Tab", command: "OS_TAB", allowInInput: true },
             { key: "Shift+Tab", command: "OS_TAB_PREV", allowInInput: true },
 
+            // Selection (Delegated to App)
+            { key: "Space", command: OS_COMMANDS.SELECT, args: { mode: 'toggle' } },
+
             // Actions (Delegated to App)
             { key: "Enter", command: OS_COMMANDS.ACTIVATE },
             { key: "Escape", command: OS_COMMANDS.EXIT, allowInInput: true },

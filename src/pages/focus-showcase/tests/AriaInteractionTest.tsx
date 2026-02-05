@@ -3,8 +3,8 @@ import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { Trigger } from "@os/app/export/primitives/Trigger";
 import { Field } from "@os/app/export/primitives/Field";
-import { TestBox, useTestState } from "../shared/TestLayout";
-import { click, assert, wait } from "../shared/testUtils";
+import { TestBox, useTestState } from "../../shared/TestLayout";
+import { click, assert, wait } from "../../shared/testUtils";
 
 export function AriaInteractionTest() {
     const { status, setStatus, logs, addLog, clearLogs } = useTestState();

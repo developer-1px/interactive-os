@@ -29,6 +29,7 @@ interface GlobalRegistryActions {
     getActiveGroup: () => FocusGroupStore | undefined;
     getFocusPath: () => string[];
     getSiblingGroup: (direction: 'forward' | 'backward') => string | null;
+    getOrderedGroups: () => string[];
 }
 
 // Global singleton store for Group Registry
@@ -121,7 +122,7 @@ export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActio
             }
         }
 
-        if (siblings.length < 2) return null;
+        if (siblings.length === 0) return null;
 
         // Sort by DOM order using dynamic import to avoid circular deps
         const sortByDOMOrder = (ids: string[]): string[] => {
@@ -153,6 +154,28 @@ export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActio
         if (nextIndex >= sortedSiblings.length) nextIndex = 0;
 
         return sortedSiblings[nextIndex] ?? null;
+    },
+
+    getOrderedGroups: () => {
+        const { groups } = get();
+        const ids = Array.from(groups.keys());
+
+        // Dynamic import to avoid circular deps
+        // DOM sort logic duplicated from getSiblingGroup for now - could be extracted
+        const elements = ids
+            .map(id => {
+                const el = document.querySelector(`[data-focus-group="${id}"]`) as HTMLElement | null;
+                return el ? { id, el } : null;
+            })
+            .filter((x): x is { id: string; el: HTMLElement } => x !== null)
+            .sort((a, b) => {
+                const pos = a.el.compareDocumentPosition(b.el);
+                if (pos & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+                if (pos & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+                return 0;
+            });
+
+        return elements.map(x => x.id);
     }
 }));
 
@@ -193,5 +216,7 @@ export const FocusRegistry = {
     getZone: (id: string) => useFocusRegistry.getState().getGroup(id),
     /** @deprecated Use getActiveGroup */
     getActiveZone: () => useFocusRegistry.getState().getActiveGroup(),
+
+    getOrderedGroups: () => useFocusRegistry.getState().getOrderedGroups(),
 };
 

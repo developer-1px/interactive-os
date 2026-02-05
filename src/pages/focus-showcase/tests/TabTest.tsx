@@ -1,7 +1,7 @@
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { TestBox, useTestState } from "../shared/TestLayout";
-import { click, tab, assert, wait } from "../shared/testUtils";
+import { TestBox, useTestState } from "../../shared/TestLayout";
+import { click, tab, assert, wait } from "../../shared/testUtils";
 
 export function TabTest() {
     const { status, setStatus, logs, addLog, clearLogs } = useTestState();
@@ -39,7 +39,7 @@ export function TabTest() {
                 <strong>Tab Behavior</strong> controls how the Tab key interacts with the group.
             </p>
             <ul className="list-disc list-inside space-y-1 text-gray-500">
-                <li><code className="text-gray-700 bg-gray-100 px-1 rounded">behavior: 'continue'</code> (Default): Tab exits the item and focuses the next interactive element.</li>
+                <li><code className="text-gray-700 bg-gray-100 px-1 rounded">behavior: 'escape'</code> (Default): Tab exits the zone immediately and focuses the next interactive element.</li>
                 <li><code className="text-gray-700 bg-gray-100 px-1 rounded">behavior: 'trap'</code>: Tab cycles focus *within* the group. Used for Modals/Menus.</li>
                 <li><code className="text-gray-700 bg-gray-100 px-1 rounded">behavior: 'flow'</code>: Tab moves to the next item in the group, then exits at end.</li>
             </ul>
@@ -49,6 +49,21 @@ export function TabTest() {
     return (
         <TestBox title="Tab Interaction" status={status} logs={logs} onRun={runTest} description={description}>
             <div className="flex flex-col gap-6">
+                {/* Escape (Default) */}
+                <div className="space-y-2">
+                    <div className="text-[10px] font-mono text-gray-500 uppercase">Escape (Default)</div>
+                    <div className="p-4 bg-gray-50 rounded border border-gray-200">
+                        <FocusGroup id="tab-escape" role="listbox" navigate={{ orientation: 'vertical' }} tab={{ behavior: 'escape' }} className="flex flex-col gap-1 w-32">
+                            {['Option A', 'Option B', 'Option C'].map((item, i) => (
+                                <FocusItem key={item} id={`tab-escape-${i}`} role="option" className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-amber-100 aria-[current=true]:text-amber-700 text-sm transition-all border border-transparent aria-[current=true]:border-amber-300">
+                                    {item}
+                                </FocusItem>
+                            ))}
+                        </FocusGroup>
+                        <div className="mt-2 text-[10px] text-gray-500">Tab exits zone immediately.</div>
+                    </div>
+                </div>
+
                 {/* Trap */}
                 <div className="space-y-2">
                     <div className="text-[10px] font-mono text-gray-500 uppercase">Trap (Menu/Modal)</div>

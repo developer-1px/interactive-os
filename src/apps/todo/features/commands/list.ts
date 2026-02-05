@@ -4,28 +4,39 @@ import { OS } from "@os/features/AntigravityOS";
 
 export const AddTodo = defineListCommand({
     id: "ADD_TODO",
-    run: (state) =>
+    run: (state, payload?: { text?: string }) =>
         produce(state, (draft) => {
-            const text = draft.ui.draft;
-            if (!text || !text.trim()) return;
+            // Use payload.text (from Field) or fallback to state.ui.draft (from keymap)
+            const text = payload?.text ?? draft.ui.draft;
+            if (text && text.trim()) {
+                const newId = Date.now();
+                const newTodo = {
+                    id: newId,
+                    text: text.trim(),
+                    completed: false,
+                    categoryId: draft.ui.selectedCategoryId,
+                };
 
-            const newId = Date.now();
-            const newTodo = {
-                id: newId,
-                text: text.trim(),
-                completed: false,
-                categoryId: draft.ui.selectedCategoryId,
-            };
+                // Add to Entity Map
+                draft.data.todos[newId] = newTodo;
+                // Add to Order Array
+                draft.data.todoOrder.push(newId);
 
-            // Add to Entity Map
-            draft.data.todos[newId] = newTodo;
-            // Add to Order Array
-            draft.data.todoOrder.push(newId);
-
-            // Reset UI
-            draft.ui.draft = "";
-            draft.ui.editDraft = "";
+                // Reset UI
+                draft.ui.draft = "";
+                draft.ui.editDraft = "";
+            }
         }),
+});
+
+
+export const SyncDraft = defineListCommand({
+    id: "SYNC_DRAFT",
+    log: false,
+    run: (state, payload: { text: string }) => ({
+        ...state,
+        ui: { ...state.ui, draft: payload.text },
+    }),
 });
 
 export const ToggleTodo = defineListCommand({

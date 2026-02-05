@@ -15,15 +15,14 @@ import DocsPage from "./pages/DocsPage";
 
 import { OS } from "@os/features/AntigravityOS";
 import { TodoApp } from "@apps/todo/app";
-import { CommandInspector } from "@os/app/debug/CommandInspector";
-import { useEngine } from "@os/features/command/ui/CommandContext";
-import type { AppState } from "@apps/todo/model/types";
+import { InspectorShell } from "@os/app/debug/InspectorShell";
+import { useInspectorStore } from "@os/features/inspector/InspectorStore";
 
 // --- Internal Layout running inside OS.App ---
 
 function AppContent({ isAppShell }: { isAppShell: boolean }) {
-  const { state } = useEngine<AppState>();
-  const isInspectorOpen = state?.ui?.isInspectorOpen;
+  // v7.50: Use independent InspectorStore (Zustand) instead of app state
+  const isInspectorOpen = useInspectorStore((s) => s.isOpen);
 
   // AppShell = Fixed viewport (no scroll), Body = Scrollable
   const rootClass = isAppShell
@@ -49,8 +48,8 @@ function AppContent({ isAppShell }: { isAppShell: boolean }) {
 
       {/* Inspector (Separated from OS Core) */}
       {isInspectorOpen && (
-        <aside className="h-full w-[600px] flex-shrink-0 overflow-hidden border-l border-white/10 shadow-2xl sticky top-0">
-          <CommandInspector />
+        <aside className="h-full flex-shrink-0 sticky top-0 z-50">
+          <InspectorShell />
         </aside>
       )}
     </div>

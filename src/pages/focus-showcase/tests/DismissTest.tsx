@@ -1,7 +1,7 @@
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { TestBox, useTestState } from "../shared/TestLayout";
-import { click, press, assert, wait } from "../shared/testUtils";
+import { TestBox, useTestState } from "../../shared/TestLayout";
+import { click, press, assert, wait } from "../../shared/testUtils";
 
 export function DismissTest() {
     const { status, setStatus, logs, addLog, clearLogs } = useTestState();

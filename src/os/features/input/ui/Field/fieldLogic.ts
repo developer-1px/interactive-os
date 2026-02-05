@@ -49,12 +49,10 @@ export const getFieldClasses = ({
     placeholder,
     customClassName = "",
 }: FieldStyleParams): string => {
-    // Base styles
-    // pointer-events-none only when NOT focused (allowing click to focus)
-    // Once focused, field should be interactive for clicks
+    // Base styles - never use pointer-events-none as it blocks click-to-focus
     const baseStyles = isFocused
         ? customClassName
-        : `pointer-events-none truncate ${customClassName}`;
+        : `truncate ${customClassName}`;
 
     // Placeholder logic
     const isEmpty = checkValueEmpty(value);

@@ -30,12 +30,12 @@ export function updateTab(
         case 'trap':
             return resolveTrap(currentId, direction, items);
 
-        case 'escape':
-            return { action: 'escape', targetId: null };
-
         case 'flow':
+            return resolveFlow(currentId, direction, items);
+
+        case 'escape':
         default:
-            return { action: 'flow', targetId: null };
+            return { action: 'escape', targetId: null };
     }
 }
 
@@ -76,6 +76,46 @@ function resolveTrap(
 
     return {
         action: 'trap',
+        targetId: items[nextIndex],
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Flow Behavior (Navigate within zone, exit at boundaries)
+// ═══════════════════════════════════════════════════════════════════
+
+function resolveFlow(
+    currentId: string | null,
+    direction: TabDirection,
+    items: string[]
+): TabResult {
+    if (items.length === 0) {
+        return { action: 'flow', targetId: null };
+    }
+
+    if (!currentId) {
+        // No current focus - enter at appropriate end
+        return {
+            action: 'flow',
+            targetId: direction === 'forward' ? items[0] : items[items.length - 1],
+        };
+    }
+
+    const currentIndex = items.indexOf(currentId);
+    if (currentIndex === -1) {
+        return { action: 'flow', targetId: items[0] };
+    }
+
+    const delta = direction === 'forward' ? 1 : -1;
+    const nextIndex = currentIndex + delta;
+
+    // Exit at boundaries (no loop)
+    if (nextIndex < 0 || nextIndex >= items.length) {
+        return { action: 'flow', targetId: null };
+    }
+
+    return {
+        action: 'flow',
         targetId: items[nextIndex],
     };
 }

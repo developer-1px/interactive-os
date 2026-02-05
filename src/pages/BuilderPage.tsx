@@ -1,9 +1,8 @@
 import { OS } from "@os/features/AntigravityOS";
 import {
-    HeroBlock,
-    FeaturesBlock,
-    TestimonialsBlock,
-    CTABlock,
+    NCPHeroBlock,
+    NCPNewsBlock,
+    NCPServicesBlock,
     EditorToolbar,
 } from "./builder";
 
@@ -28,11 +27,10 @@ export default function BuilderPage() {
             >
                 {/* Page Being Edited */}
                 <div className="max-w-5xl mx-auto my-6">
-                    <div className="rounded-xl overflow-hidden shadow-2xl ring-1 ring-slate-200 bg-white">
-                        <HeroBlock />
-                        <FeaturesBlock />
-                        <TestimonialsBlock />
-                        <CTABlock />
+                    <div className="rounded-xl overflow-hidden shadow-2xl ring-1 ring-slate-200 bg-white min-h-screen">
+                        <NCPHeroBlock />
+                        <NCPNewsBlock />
+                        <NCPServicesBlock />
                     </div>
                 </div>
             </OS.Zone>

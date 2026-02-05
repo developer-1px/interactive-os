@@ -3,6 +3,7 @@ import { useEffect, useCallback } from "react";
 import { useFocusRegistry, FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
+import { CommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { getCanonicalKey, normalizeKeyDefinition } from "@os/features/input/lib/getCanonicalKey";
 import { evalContext } from "@os/features/AntigravityOS";
 import { useInputTelemetry } from "@os/app/debug/LoggedKey";
@@ -117,6 +118,21 @@ export function InputEngine() {
                         e.stopPropagation();
                         logKey(e as any, activeGroupId || "global", true);
 
+                        // Resolve OS.FOCUS in args before dispatch
+                        const resolveArgs = (args: any) => {
+                            if (!args || typeof args !== 'object') return args;
+                            const resolved: Record<string, any> = {};
+                            for (const [key, value] of Object.entries(args)) {
+                                if (value === "OS.FOCUS") {
+                                    resolved[key] = evaluationCtx.focusedItemId;
+                                } else {
+                                    resolved[key] = value;
+                                }
+                            }
+                            return resolved;
+                        };
+                        const resolvedArgs = resolveArgs(binding.args);
+
                         // Dispatch Logic: Prioritize App Context
                         const appDispatch = getActiveDispatch();
                         const appReg = getActiveRegistry();
@@ -127,13 +143,17 @@ export function InputEngine() {
                         const existsInApp = appReg?.get(binding.command);
 
                         if (existsInApp) {
-                            appDispatch?.({ type: binding.command, payload: binding.args });
+                            appDispatch?.({ type: binding.command, payload: resolvedArgs });
+                            // Log to global telemetry for Inspector
+                            CommandTelemetryStore.log(binding.command, resolvedArgs, 'app');
                         }
                         // If not in App, try OS execution (e.g. global inspector toggle)
                         else if (osReg?.get(binding.command)) {
                             const osCommand = osReg.get(binding.command);
                             // Note: OS commands run with empty state unless they access external stores (like InspectorStore)
-                            osCommand?.run({}, binding.args);
+                            osCommand?.run({}, resolvedArgs);
+                            // Log to global telemetry for Inspector
+                            CommandTelemetryStore.log(binding.command, resolvedArgs, 'os');
                         }
 
                         handled = true;

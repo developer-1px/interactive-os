@@ -64,13 +64,16 @@ const resolveSpatial: NavigationStrategy = (currentId, direction, items, _config
     }
 
     const currentRect = currentEl.getBoundingClientRect();
+
     const nodes: FocusNode[] = [];
 
     // Build node list with rects
     for (const id of items) {
         if (id === currentId) continue;
         const el = DOMRegistry.getItem(id);
-        if (!el) continue;
+        if (!el) {
+            continue;
+        }
         nodes.push({ id, element: el, rect: el.getBoundingClientRect() });
     }
 
@@ -81,16 +84,23 @@ const resolveSpatial: NavigationStrategy = (currentId, direction, items, _config
         const verticalOverlap = node.rect.bottom > currentRect.top && node.rect.top < currentRect.bottom;
         const horizontalOverlap = node.rect.right > currentRect.left && node.rect.left < currentRect.right;
 
+        let result = false;
         switch (direction) {
             case 'up':
-                return node.rect.bottom <= currentRect.top + 10 && horizontalOverlap;
+                result = node.rect.bottom <= currentRect.top + 10 && horizontalOverlap;
+                break;
             case 'down':
-                return node.rect.top >= currentRect.bottom - 10 && horizontalOverlap;
+                result = node.rect.top >= currentRect.bottom - 10 && horizontalOverlap;
+                break;
             case 'left':
-                return node.rect.right <= currentRect.left + 10 && verticalOverlap;
+                result = node.rect.right <= currentRect.left + 10 && verticalOverlap;
+                break;
             case 'right':
-                return node.rect.left >= currentRect.right - 10 && verticalOverlap;
+                result = node.rect.left >= currentRect.right - 10 && verticalOverlap;
+                break;
         }
+
+        return result;
     });
 
     if (candidates.length === 0) {

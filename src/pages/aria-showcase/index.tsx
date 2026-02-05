@@ -105,10 +105,10 @@ export function AriaShowcasePage() {
                             { id: 'all', label: 'All notifications' },
                             { id: 'mentions', label: 'Mentions only' },
                             { id: 'none', label: 'None' },
-                        ].map((opt, i) => (
-                            <FocusItem key={opt.id} id={`radio-${opt.id}`} role="radio" aria-checked={i === 0} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 aria-[current=true]:ring-2 ring-indigo-300">
-                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${i === 0 ? 'border-indigo-500' : 'border-gray-300'}`}>
-                                    {i === 0 && <div className="w-2 h-2 rounded-full bg-indigo-500" />}
+                        ].map((opt) => (
+                            <FocusItem key={opt.id} id={`radio-${opt.id}`} role="radio" className="group flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 data-[focused=true]:ring-2 ring-indigo-300">
+                                <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center border-gray-300 group-aria-[selected=true]:border-indigo-500">
+                                    <div className="w-2 h-2 rounded-full bg-indigo-500 opacity-0 group-aria-[selected=true]:opacity-100" />
                                 </div>
                                 <span className="text-sm">{opt.label}</span>
                             </FocusItem>

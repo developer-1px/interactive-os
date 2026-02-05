@@ -1,10 +1,19 @@
 import { memo, useMemo } from "react";
-import type { HistoryEntry } from "@apps/todo/model/types.ts";
+import { useCommandTelemetryStore, type TelemetryEntry } from "@os/features/command/store/CommandTelemetryStore";
 
-export const EventStream = memo(({ history }: { history: HistoryEntry[] }) => {
+/**
+ * EventStream - Global Command Telemetry Display
+ * 
+ * Shows ALL dispatched commands (App + OS) from the global CommandTelemetryStore.
+ * v7.50: Switched from app-specific history to OS-level telemetry for full visibility.
+ */
+export const EventStream = memo(() => {
+    // Subscribe to global telemetry
+    const entries = useCommandTelemetryStore(s => s.entries);
+
     const recentHistory = useMemo(
-        () => [...history].reverse().slice(0, 10),
-        [history],
+        () => [...entries].reverse().slice(0, 10),
+        [entries],
     );
 
     return (
@@ -14,19 +23,29 @@ export const EventStream = memo(({ history }: { history: HistoryEntry[] }) => {
                     <div className="w-0.5 h-2 bg-[#ce9178] opacity-50" />
                     History
                 </h3>
+                <span className="text-[7px] text-[#aaaaaa] font-mono">
+                    {entries.length} events
+                </span>
             </div>
             <div className="flex flex-col bg-[#ffffff]">
-                {recentHistory.map((entry, i) => {
-                    const payload = "payload" in entry.command ? entry.command.payload : {};
+                {recentHistory.map((entry: TelemetryEntry) => {
+                    const payload = entry.payload || {};
                     const payloadKeys = payload ? Object.keys(payload) : [];
                     const keyCount = payloadKeys.length;
 
                     return (
-                        <div key={i} className="group border-b border-[#f0f0f0] px-3 py-1.5 hover:bg-[#fcfcfc] transition-colors">
+                        <div key={entry.id} className="group border-b border-[#f0f0f0] px-3 py-1.5 hover:bg-[#fcfcfc] transition-colors">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[8px] font-black text-[#666666] uppercase tracking-widest leading-none">
-                                        {entry.command.type}
+                                        {entry.command}
+                                    </span>
+                                    {/* Source badge: app=blue, os=teal */}
+                                    <span className={`px-1 py-0.5 rounded-[2px] text-[6px] font-bold leading-none ${entry.source === 'os'
+                                            ? 'bg-[#e6f7f5] text-[#4ec9b0]'
+                                            : 'bg-[#e6f0ff] text-[#007acc]'
+                                        }`}>
+                                        {entry.source.toUpperCase()}
                                     </span>
                                     {keyCount > 0 && (
                                         <span className="px-1 py-0.5 rounded-[2px] bg-[#f0f0f0] text-[6px] font-bold text-[#999] leading-none">
@@ -35,7 +54,7 @@ export const EventStream = memo(({ history }: { history: HistoryEntry[] }) => {
                                     )}
                                 </div>
                                 <span className="text-[7px] text-[#cccccc] font-mono leading-none">
-                                    #{history.length - i}
+                                    #{entry.id}
                                 </span>
                             </div>
                             <div className="text-[7px] text-[#aaaaaa] font-mono truncate mt-1 uppercase tracking-tighter">

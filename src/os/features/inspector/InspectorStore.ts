@@ -8,18 +8,39 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type InspectorTab = 'REGISTRY' | 'STATE' | 'EVENTS' | 'SETTINGS';
+
 interface InspectorState {
     isOpen: boolean;
+    activeTab: InspectorTab;
+    isPanelExpanded: boolean;
+
     toggle: () => void;
     setOpen: (isOpen: boolean) => void;
+    setActiveTab: (tab: InspectorTab) => void;
+    togglePanel: () => void;
+    setPanelExpanded: (isExpanded: boolean) => void;
 }
 
 export const useInspectorStore = create<InspectorState>()(
     persist(
         (set) => ({
             isOpen: false,
+            activeTab: 'STATE',
+            isPanelExpanded: true,
+
             toggle: () => set((state) => ({ isOpen: !state.isOpen })),
             setOpen: (isOpen) => set({ isOpen }),
+            setActiveTab: (tab) => set((state) => {
+                if (state.activeTab === tab) {
+                    // Toggle panel if clicking same tab
+                    return { isPanelExpanded: !state.isPanelExpanded };
+                }
+                // Switch tab and ensure panel is open
+                return { activeTab: tab, isPanelExpanded: true };
+            }),
+            togglePanel: () => set((state) => ({ isPanelExpanded: !state.isPanelExpanded })),
+            setPanelExpanded: (isExpanded) => set({ isPanelExpanded: isExpanded }),
         }),
         {
             name: 'antigravity_inspector',
@@ -31,4 +52,6 @@ export const useInspectorStore = create<InspectorState>()(
 export const InspectorStore = {
     toggle: () => useInspectorStore.getState().toggle(),
     isOpen: () => useInspectorStore.getState().isOpen,
+    setActiveTab: (tab: InspectorTab) => useInspectorStore.getState().setActiveTab(tab),
+    togglePanel: () => useInspectorStore.getState().togglePanel(),
 };
