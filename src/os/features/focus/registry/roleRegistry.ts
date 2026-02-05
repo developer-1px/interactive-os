@@ -10,7 +10,7 @@ import type { FocusGroupProps } from "@os/entities/FocusGroupProps";
 // ═══════════════════════════════════════════════════════════════════
 // Registry
 // ═══════════════════════════════════════════════════════════════════
-const roleRegistry = new Map<string, Partial<FocusGroupProps>>();
+export const roleRegistry = new Map<string, Partial<FocusGroupProps>>();
 
 // ═══════════════════════════════════════════════════════════════════
 // API

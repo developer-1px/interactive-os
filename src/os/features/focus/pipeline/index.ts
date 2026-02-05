@@ -10,22 +10,22 @@
  */
 
 // Phase exports
-export * from './intercept';
-export * from './parse';
-export * from './resolve';
-export * from './commit';
-export * from './project';
+export * from './1-intercept';
+export * from './2-parse';
+export * from './3-resolve';
+export * from './4-commit';
+export * from './5-project';
 
 // ═══════════════════════════════════════════════════════════════════
 // Pipeline Orchestrator
 // ═══════════════════════════════════════════════════════════════════
 
 import type { KeyboardEvent } from 'react';
-import { interceptKeyboard, shouldIntercept } from './intercept';
-import { parseIntent } from './parse';
-import { resolveTarget, type FocusState, type ZoneConfig } from './resolve';
-import { commitToStore } from './commit';
-import { projectToDOM } from './project';
+import { interceptKeyboard, shouldIntercept } from './1-intercept';
+import { parseIntent } from './2-parse';
+import { resolveTarget, type FocusState, type ZoneConfig } from './3-resolve';
+import { commitToStore } from './4-commit';
+import { projectToDOM } from './5-project';
 
 export interface PipelineContext {
     state: FocusState;

@@ -44,7 +44,7 @@ export function Focusable({
     children,
     asChild = false,
 }: FocusableProps) {
-    const elementRef = useRef<HTMLElement>(null);
+    const elementRef = useRef<HTMLDivElement>(null);
 
     // --- Store ---
     const focusedItemId = useFocusStore((s) => s.focusedItemId);

@@ -5,14 +5,14 @@ import { ALL_OS_COMMANDS } from "@os/features/command/definitions/osCommands";
 import { CommandContext, setGlobalEngine } from "@os/features/command/ui/CommandContext";
 import { useFocusStore } from "@os/features/focus/store/focusStore";
 import { InputEngine } from "@os/features/input/ui/InputEngine";
-import { FocusEngine } from "@os/features/focus/ui/FocusEngine";
+import { FocusEngine } from "@os/features/focus/inspector/FocusEngine";
 import { Zone } from "@os/app/export/primitives/Zone";
 import { useInspectorPersistence } from "@os/features/inspector/useInspectorPersistence";
 import { evalContext } from "@os/features/logic/lib/evalContext";
 import type { ContextState } from "@os/features/logic/LogicNode";
 
 // Middleware
-import { resolveFocusMiddleware } from "@os/features/focus/bridge/resolveFocusMiddleware";
+import { resolveFocusMiddleware } from "@os/features/focus/pipeline/3-resolve/middleware";
 
 export function App<S>({
     definition,

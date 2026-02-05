@@ -5,7 +5,7 @@
  * Pure function: (state, intent) → targetState
  */
 
-import type { ParsedIntent, NavigateDirection } from './parse';
+import type { ParsedIntent, NavigateDirection } from '../2-parse';
 
 // ═══════════════════════════════════════════════════════════════════
 // State Types

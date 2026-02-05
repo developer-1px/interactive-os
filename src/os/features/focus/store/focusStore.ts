@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { createZoneSlice } from "@os/features/focus/model/createZoneSlice";
-import { createCursorSlice } from "@os/features/focus/model/createCursorSlice";
-import { createSpatialSlice } from "@os/features/focus/model/createSpatialSlice";
-import { createSelectionSlice } from "@os/features/focus/model/createSelectionSlice";
-import type { FocusState } from "@os/features/focus/model/focusTypes";
+import { createZoneSlice } from "@os/features/focus/store/slices/zone";
+import { createCursorSlice } from "@os/features/focus/store/slices/cursor";
+import { createSpatialSlice } from "@os/features/focus/store/slices/spatial";
+import { createSelectionSlice } from "@os/features/focus/store/slices/selection";
+import type { FocusState } from "@os/features/focus/store/types";
 
 
 

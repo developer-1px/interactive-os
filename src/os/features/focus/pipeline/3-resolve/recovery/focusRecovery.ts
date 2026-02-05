@@ -5,8 +5,8 @@ import type {
     RecoveryResult,
     RecoveryPolicy,
     SiblingPolicy,
-} from "@os/features/focus/model/recoveryTypes";
-import { DEFAULT_RECOVERY_POLICY } from "@os/features/focus/model/recoveryTypes";
+} from "@os/features/focus/store/recoveryTypes";
+import { DEFAULT_RECOVERY_POLICY } from "@os/features/focus/store/recoveryTypes";
 import type { FocusDirection } from "@os/entities/FocusDirection";
 
 /**

@@ -5,7 +5,7 @@
  * Translates raw events into semantic intents
  */
 
-import type { InterceptedEvent } from './intercept';
+import type { InterceptedEvent } from '../1-intercept';
 
 // ═══════════════════════════════════════════════════════════════════
 // Intent Types

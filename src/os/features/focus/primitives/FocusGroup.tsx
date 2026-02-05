@@ -89,8 +89,8 @@ export function FocusGroup({
     children,
     className,
     style,
-    asChild = false,
-}: FocusGroupProps) {
+    // Note: asChild is accepted but not currently implemented
+}: Omit<FocusGroupProps, 'asChild'> & { asChild?: boolean }) {
     const groupId = useMemo(() => propId || generateGroupId(), [propId]);
     const containerRef = useRef<HTMLDivElement>(null);
 

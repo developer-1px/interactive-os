@@ -1,7 +1,7 @@
 import type { StateCreator } from "zustand";
-import type { CursorSlice } from "@os/features/focus/model/focusTypes";
+import type { CursorSlice } from "@os/features/focus/store/types";
 import { computePath } from "@os/features/focus/registry/pathUtils";
-import type { FocusState } from "@os/features/focus/model/focusTypes";
+import type { FocusState } from "@os/features/focus/store/types";
 
 export const createCursorSlice: StateCreator<FocusState, [], [], CursorSlice> = (set) => ({
     focusedItemId: null,

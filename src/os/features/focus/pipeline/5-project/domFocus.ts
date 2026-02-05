@@ -5,7 +5,7 @@
  */
 
 import { DOMInterface } from '@os/features/focus/registry/DOMInterface';
-import type { CommitResult } from './commit';
+import type { CommitResult } from '../4-commit';
 
 // ═══════════════════════════════════════════════════════════════════
 // Project Options
