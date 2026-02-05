@@ -2,13 +2,13 @@
 // Unified entry point for all direction navigation
 
 import { logger } from "@os/app/debug/logger";
-import type { AxisHandler } from "@os/features/focus/lib/focusPipeline";
-import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver";
-import { collectItemRects } from "@os/features/focus/lib/domUtils";
-import { resolvePivot, getBubblePath } from "@os/features/focus/lib/pivotUtils";
-import { navigationRoving, type NavigationContext } from "@os/features/focus/lib/navigationRoving";
-import { navigationSpatial } from "@os/features/focus/lib/navigationSpatial";
-import { handlerSeamless, getSeamlessEntryItem } from "@os/features/focus/axes/handlerSeamless";
+import type { AxisHandler } from "@os/features/focus/pipeline/focusPipeline";
+import { resolveBehavior } from "@os/features/focus/registry/behaviorResolver";
+import { collectItemRects } from "@os/features/focus/registry/domUtils";
+import { resolvePivot, getBubblePath } from "@os/features/focus/registry/pivotUtils";
+import { navigationRoving, type NavigationContext } from "@os/features/focus/pipeline/3-resolve/navigate/rovingUtils";
+import { navigationSpatial } from "@os/features/focus/pipeline/3-resolve/navigate/spatial";
+import { handlerSeamless, getSeamlessEntryItem } from "@os/features/focus/pipeline/3-resolve/navigate/seamless";
 import type { FocusBehavior } from "@os/entities/FocusBehavior";
 
 /**

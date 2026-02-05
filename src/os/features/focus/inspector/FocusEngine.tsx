@@ -1,10 +1,10 @@
 import { useCommandListener } from "@os/features/command/hooks/useCommandListener";
-import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver";
-import { useFocusStore } from "@os/features/focus/model/focusStore";
-import { executeNavigation } from "@os/features/focus/lib/executeNavigation.ts";
-import { handlerTab, type TabNavigationContext } from "@os/features/focus/axes/handlerTab";
+import { resolveBehavior } from "@os/features/focus/registry/behaviorResolver";
+import { useFocusStore } from "@os/features/focus/store/focusStore";
+import { executeNavigation } from "@os/features/focus/pipeline/executeNavigation.ts";
+import { handlerTab, type TabNavigationContext } from "@os/features/focus/pipeline/3-resolve/tab/tabStrategy";
 import { OS_COMMANDS, type OSNavigatePayload } from "@os/features/command/definitions/commandsShell";
-import { useFocusBridge } from "@os/features/focus/lib/useFocusBridge";
+import { useFocusBridge } from "@os/features/focus/pipeline/useFocusBridge";
 
 /**
  * FocusEngine

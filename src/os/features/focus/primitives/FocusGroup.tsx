@@ -7,9 +7,9 @@
 
 import { createContext, useContext, useMemo, useRef, useLayoutEffect } from "react";
 import type { ReactNode } from "react";
-import { resolveRole, type ResolvedFocusGroup } from "@os/features/focus/lib/resolveRole.ts";
+import { resolveRole, type ResolvedFocusGroup } from "@os/features/focus/registry/resolveRole.ts";
 import type { NavigateConfig, TabConfig, SelectConfig, ActivateConfig, DismissConfig, ProjectConfig } from "@os/entities/FocusGroupProps.ts";
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts";
+import { DOMInterface } from "@os/features/focus/registry/DOMInterface.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Context

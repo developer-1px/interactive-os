@@ -7,9 +7,9 @@
 
 import { useRef, useContext, useLayoutEffect, cloneElement, isValidElement } from "react";
 import type { ReactElement, ReactNode } from "react";
-import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
+import { useFocusStore } from "@os/features/focus/store/focusStore.ts";
 import { FocusContext } from "@os/features/command/ui/CommandContext.tsx";
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts";
+import { DOMInterface } from "@os/features/focus/registry/DOMInterface.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types

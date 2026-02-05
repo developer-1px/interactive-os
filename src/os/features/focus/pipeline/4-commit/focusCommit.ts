@@ -5,7 +5,7 @@
  */
 
 import type { ResolvedTarget } from './resolve';
-import { useFocusStore } from '@os/features/focus/model/focusStore';
+import { useFocusStore } from '@os/features/focus/store/focusStore';
 
 // ═══════════════════════════════════════════════════════════════════
 // Commit Result

@@ -1,16 +1,30 @@
 import { useRef, useLayoutEffect, useEffect, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import { FocusContext, CommandContext } from "@os/features/command/ui/CommandContext.tsx";
-import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
+import { useFocusStore } from "@os/features/focus/store/focusStore.ts";
 import { ZoneRegistry } from "@os/features/jurisdiction/model/ZoneRegistry.ts";
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts";
+import { DOMInterface } from "@os/features/focus/registry/DOMInterface.ts";
 
 // [NEW] Pipeline-based imports
-import { resolveRole } from "@os/features/focus/lib/resolveRole.ts";
+import { resolveRole, type ResolvedFocusGroup } from "@os/features/focus/registry/resolveRole.ts";
 import type { NavigateConfig, TabConfig, SelectConfig, ActivateConfig, DismissConfig, ProjectConfig } from "@os/entities/FocusGroupProps.ts";
 
+// [NEW] FocusGroup Context for downstream consumption
+import { createContext } from "react";
+
+export interface ZoneFocusGroupContextValue {
+  zoneId: string;
+  resolved: ResolvedFocusGroup & { _legacyBehavior: any };
+}
+
+export const ZoneFocusGroupContext = createContext<ZoneFocusGroupContextValue | null>(null);
+
+export function useZoneFocusGroup() {
+  return useContext(ZoneFocusGroupContext);
+}
+
 // [LEGACY] 하위 호환성을 위한 import (deprecated)
-import { resolveBehavior } from "@os/features/focus/lib/behaviorResolver.ts";
+import { resolveBehavior } from "@os/features/focus/registry/behaviorResolver.ts";
 import type { FocusBehavior } from "@os/entities/FocusBehavior.ts";
 import type { FocusDirection } from "@os/entities/FocusDirection.ts";
 import type { FocusEdge } from "@os/entities/FocusEdge.ts";

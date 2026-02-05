@@ -1,4 +1,4 @@
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
+import { DOMInterface } from "@os/features/focus/registry/DOMInterface";
 
 export const collectItemRects = (items: string[]): Record<string, DOMRect> => {
   const rects: Record<string, DOMRect> = {};

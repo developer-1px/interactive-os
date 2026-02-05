@@ -4,7 +4,7 @@
  * DOM reflection - applies visual changes based on committed state
  */
 
-import { DOMInterface } from '@os/features/focus/lib/DOMInterface';
+import { DOMInterface } from '@os/features/focus/registry/DOMInterface';
 import type { CommitResult } from './commit';
 
 // ═══════════════════════════════════════════════════════════════════

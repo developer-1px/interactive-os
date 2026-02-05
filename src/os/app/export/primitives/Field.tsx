@@ -19,7 +19,7 @@ import { useCommandListener } from "@os/features/command/hooks/useCommandListene
 import { OS_COMMANDS } from "@os/features/command/definitions/osCommands.ts";
 import { getCaretPosition } from "../../../features/input/ui/Field/getCaretPosition";
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
-import { useFocusStore } from "@os/features/focus/model/focusStore.ts";
+import { useFocusStore } from "@os/features/focus/store/focusStore.ts";
 import type { FocusTarget } from "@os/entities/FocusTarget.ts";
 
 // Refactored Logic & Hooks
@@ -35,7 +35,7 @@ import {
   useFieldFocus,
   useFieldContext,
 } from "../../../features/input/ui/Field/useFieldHooks.ts";
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface.ts"; // [NEW] Registry
+import { DOMInterface } from "@os/features/focus/registry/DOMInterface.ts"; // [NEW] Registry
 
 /** 
  * Field mode determines when editing is activated:

@@ -1,9 +1,9 @@
 import { produce } from "immer";
 import type { AppState, TodoCommand, AppEffect } from "@apps/todo/model/types";
-import { useFocusStore } from "@os/features/focus/model/focusStore";
-import { handlerRecovery } from "@os/features/focus/axes/handlerRecovery";
+import { useFocusStore } from "@os/features/focus/store/focusStore";
+import { handlerRecovery } from "@os/features/focus/pipeline/3-resolve/recovery/focusRecovery";
 import { DEFAULT_RECOVERY_POLICY } from "@os/features/focus/model/recoveryTypes";
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
+import { DOMInterface } from "@os/features/focus/registry/DOMInterface";
 
 
 export const navigationMiddleware = (

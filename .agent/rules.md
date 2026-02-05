@@ -174,3 +174,57 @@
   - Order can be rearranged declaratively
   - Easy to add/remove handlers without code changes
 
+---
+
+## AI-Native Architecture (AI 친화적 설계)
+
+### 핵심 철학
+> **"AI가 실수해도 구조가 잡아주고, 깨져도 빠르게 복구할 수 있는 시스템"**
+
+AI 에이전트가 코드를 생성/수정할 때 **완벽한 원샷을 기대하지 않는다**. 대신 다음 4가지 속성으로 복원력을 확보한다:
+
+| 속성 | 의미 |
+|------|------|
+| **관찰 가능성** (Observability) | 모든 파이프라인 단계가 명시적 → 로그/트레이싱 용이 |
+| **검증 가능성** (Verifiability) | 각 단계가 순수 함수 → 입출력만 테스트하면 됨 |
+| **재현 가능성** (Reproducibility) | 불변 상태 + 액션 로그 → 정확히 같은 상태 재현 |
+| **복구 가능성** (Recoverability) | 스냅샷 기반 → 언제든 이전 상태로 롤백 |
+
+### 1. 요구사항의 불변 (Invariant Requirements)
+- **Requirements are Invariants**: "Enter 키 → 저장", "ArrowDown → 다음 아이템"과 같은 요구사항은 변하지 않는다.
+- **Pre-register Commands**: 커맨드를 미리 등록해두면 AI가 "어떤 동작들이 가능한지" 명확히 파악한다.
+- **Schema Stability**: 데이터 스키마는 왠만해서는 불변에 가깝다. zod/TypeScript로 미리 정의한다.
+
+### 2. 선언적 정의 (Declarative Definitions)
+- **Keymap = 선언**: 키 → 커맨드 매핑을 선언적으로 정의한다.
+- **Registry = 목록**: 모든 Command, Schema, Rule을 한 곳에 등록한다.
+- **부수효과 분리**: 코어 로직에서 Side Effect를 완전히 격리한다.
+
+### 3. Pure Functions Only
+- **AI generates pure functions**: AI가 작성하는 코드는 `(state, action) => state` 형태의 순수 함수여야 한다.
+- **타입 = 제약**: 타입이 맞으면 OK. 타입이 곧 규칙이다.
+- **No implicit state**: 전역 상태나 암묵적 의존성 금지.
+
+### 4. 코드 = 테스트 (Self-Verifying Code)
+- **타입이 곧 명세**: `Make Illegal States Unrepresentable` 원칙을 따른다.
+- **스키마가 곧 검증기**: zod 스키마로 런타임 검증을 코드에 내장한다.
+- **불변식(Invariant) 내장**: Reducer에서 상태 불변식을 직접 체크한다.
+
+```typescript
+// 예시: 코드 자체가 테스트
+function reducer(state: State, action: Action): State {
+  const next = actualLogic(state, action);
+  
+  // 불변식 체크 (코드 = 테스트)
+  invariant(next.focusedId === null || state.items.some(i => i.id === next.focusedId),
+    "Focused item must exist in items");
+  
+  return next;
+}
+```
+
+### 5. AI 작업 분리 원칙
+- **AI는 React + TypeScript를 가장 잘 한다**: 그 강점을 활용한다.
+- **순수 함수만 작성하게 하라**: Side Effect, 외부 의존성은 구조가 처리한다.
+- **구조가 검증한다**: AI가 틀려도 타입/스키마/불변식이 잡아준다.
+

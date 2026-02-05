@@ -1,6 +1,6 @@
 // Roving Navigation Engine (1D: v/h)
 // Index-based navigation for lists with JIT spatial sorting
-import { handlerEdge } from "@os/features/focus/axes/handlerEdge";
+import { handlerEdge } from "@os/features/focus/pipeline/3-resolve/navigate/edge";
 import type { FocusBehavior } from "@os/entities/FocusBehavior";
 
 export type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";

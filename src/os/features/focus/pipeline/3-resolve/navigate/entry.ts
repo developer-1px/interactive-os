@@ -1,6 +1,6 @@
 // Entry Axis: Zone entry point resolution
 // Determines which item to focus when entering a new zone
-import type { AxisHandler } from "@os/features/focus/lib/focusPipeline";
+import type { AxisHandler } from "@os/features/focus/pipeline/focusPipeline";
 import type { ZoneMetadata } from "@os/entities/ZoneMetadata";
 
 /**
@@ -40,7 +40,7 @@ function resolveEntry(
     }
 }
 
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
+import { DOMInterface } from "@os/features/focus/registry/DOMInterface";
 
 /**
  * Entry Axis Handler for Pipeline

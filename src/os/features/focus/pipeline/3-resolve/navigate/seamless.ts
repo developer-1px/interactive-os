@@ -3,7 +3,7 @@
 import type { Direction } from "@os/entities/Direction";
 import type { ZoneMetadata } from "@os/entities/ZoneMetadata";
 
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
+import { DOMInterface } from "@os/features/focus/registry/DOMInterface";
 
 interface SeamlessContext {
     currentZoneId: string;

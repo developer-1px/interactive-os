@@ -1,6 +1,6 @@
 import type { StateCreator } from "zustand";
 import type { ZoneSlice, FocusState } from "@os/features/focus/model/focusTypes";
-import { computePath } from "@os/features/focus/lib/pathUtils";
+import { computePath } from "@os/features/focus/registry/pathUtils";
 
 export const createZoneSlice: StateCreator<FocusState, [], [], ZoneSlice> = (set, get) => ({
     activeZoneId: "sidebar",

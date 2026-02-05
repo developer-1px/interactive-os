@@ -4,7 +4,7 @@
 // - flow: Linear item traversal across all zones
 import type { FocusBehavior } from "@os/entities/FocusBehavior";
 import type { ZoneMetadata } from "@os/entities/ZoneMetadata";
-import { DOMInterface } from "@os/features/focus/lib/DOMInterface";
+import { DOMInterface } from "@os/features/focus/registry/DOMInterface";
 
 export interface TabNavigationContext {
     focusedItemId: string | null;
