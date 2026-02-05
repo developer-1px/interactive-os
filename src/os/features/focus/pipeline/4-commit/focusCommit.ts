@@ -4,7 +4,7 @@
  * Store update - applies resolved target to the store
  */
 
-import type { ResolvedTarget } from '../3-resolve';
+import type { ResolvedTarget } from '../3-resolve/resolve';
 import { useFocusStore } from '@os/features/focus/store/focusStore';
 
 // ═══════════════════════════════════════════════════════════════════
