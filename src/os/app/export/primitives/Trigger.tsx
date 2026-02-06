@@ -7,7 +7,7 @@ import type { BaseCommand } from "@os/entities/BaseCommand.ts";
 
 export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttributes<HTMLButtonElement> {
   id?: string;
-  command: T;
+  onPress: T;
   children: ReactNode;
   asChild?: boolean;
   dispatch?: (cmd: T) => void;
@@ -16,7 +16,7 @@ export interface TriggerProps<T extends BaseCommand> extends React.HTMLAttribute
 
 export const Trigger = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(({
   id,
-  command,
+  onPress,
   children,
   asChild,
   dispatch: customDispatch,
@@ -32,8 +32,8 @@ export const Trigger = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
     if (!allowPropagation) {
       e.stopPropagation();
     }
-    logger.debug("PRIMITIVE", `Trigger Clicked: [${command.type}]`);
-    dispatch(command);
+    logger.debug("PRIMITIVE", `Trigger Clicked: [${onPress.type}]`);
+    dispatch(onPress);
     onClick?.(e as any);
   };
 

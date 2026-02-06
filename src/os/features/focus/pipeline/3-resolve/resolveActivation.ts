@@ -1,5 +1,5 @@
 /**
- * updateActivate - Activation logic
+ * resolveActivation - Activation logic
  * 
  * Phase 3: RESOLVE (Activate)
  * Determines if and what should be activated.
@@ -20,7 +20,7 @@ export interface ActivateResult {
 // Main Resolver
 // ═══════════════════════════════════════════════════════════════════
 
-export function updateActivate(
+export function resolveActivation(
     targetId: string | null,
     trigger: 'enter' | 'space' | 'click' | 'focus',
     config: ActivateConfig

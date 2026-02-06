@@ -32,8 +32,8 @@ export function ListView() {
             <Zone
                 id="listView"
                 role="listbox"
-                bindSelectCommand={ToggleTodo({ id: OS.FOCUS })}
-                bindActivateCommand={StartEdit({ id: OS.FOCUS })}
+                onSelect={ToggleTodo({ id: OS.FOCUS })}
+                onAction={StartEdit({ id: OS.FOCUS })}
                 className="flex flex-col h-full"
             >
                 <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full z-10 p-8 sm:p-12 pb-6">
@@ -54,8 +54,8 @@ export function ListView() {
                             <Field
                                 name="DRAFT"
                                 value={draft}
-                                syncCommand={SyncDraft({ text: "" })}
-                                commitCommand={AddTodo({})}
+                                onChange={SyncDraft({ text: "" })}
+                                onSubmit={AddTodo({})}
                                 className="flex-1 bg-transparent outline-none text-slate-700 text-[15px] font-medium placeholder:text-slate-400"
                                 placeholder="Add a new task..."
                             />

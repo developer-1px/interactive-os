@@ -5,9 +5,9 @@ export interface FieldConfig {
     name: string;
     mode?: 'immediate' | 'deferred';  // immediate = always editing, deferred = needs Enter to edit
     multiline?: boolean;
-    commitCommand?: BaseCommand;
-    syncCommand?: BaseCommand;
-    cancelCommand?: BaseCommand;
+    onSubmit?: BaseCommand;
+    onChange?: BaseCommand;
+    onCancel?: BaseCommand;
     updateType?: string; // Legacy support
     onCommit?: (value: string) => void; // Local callback support
 }

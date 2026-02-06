@@ -50,7 +50,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
             </div>
 
             {/* Checkbox Trigger */}
-            <Trigger command={ToggleTodo({ id: todo.id })}>
+            <Trigger onPress={ToggleTodo({ id: todo.id })}>
                 <div
                     className={`
                         w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all duration-200 cursor-pointer flex-shrink-0
@@ -75,9 +75,9 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                         name="EDIT"
                         value={editDraft}
                         autoFocus
-                        syncCommand={SyncEditDraft({ text: "" })}
-                        commitCommand={UpdateTodoText({})}
-                        cancelCommand={CancelEdit({})}
+                        onChange={SyncEditDraft({ text: "" })}
+                        onSubmit={UpdateTodoText({})}
+                        onCancel={CancelEdit({})}
                         className="w-full bg-transparent outline-none text-slate-900 text-[15px] font-medium leading-relaxed placeholder:text-slate-400"
                         placeholder="What needs to be done?"
                         blurOnInactive={true}
@@ -114,12 +114,12 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                     </div>
                 ) : (
                     <>
-                        <Trigger command={StartEdit({ id: todo.id })} asChild>
+                        <Trigger onPress={StartEdit({ id: todo.id })} asChild>
                             <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title="Edit (Enter)">
                                 <CornerDownLeft size={14} />
                             </button>
                         </Trigger>
-                        <Trigger command={DeleteTodo({ id: todo.id })} asChild>
+                        <Trigger onPress={DeleteTodo({ id: todo.id })} asChild>
                             <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
                                 <Trash2 size={14} />
                             </button>

@@ -1,12 +1,12 @@
 import type { Direction, NavigateConfig } from '../../types';
 import { resolveWithStrategy, type NavigateResult } from './strategies/navigatorRegistry';
-import { updateEntry } from './updateEntry';
+import { resolveEntry } from './resolveEntry';
 
 // ═══════════════════════════════════════════════════════════════════
 // Main Resolver
 // ═══════════════════════════════════════════════════════════════════
 
-export function updateNavigate(
+export function resolveNavigate(
     currentId: string | null,
     direction: Direction,
     items: string[],
@@ -21,7 +21,7 @@ export function updateNavigate(
     if (!currentId) {
         // Entry logic remains here for now or could be moved to strategy?
         // Ideally strategy handles it if config.entry is strategy-aware, but for now we keep it simple.
-        const entryId = updateEntry(items, config);
+        const entryId = resolveEntry(items, config);
         return { targetId: entryId, stickyX: null, stickyY: null };
     }
 

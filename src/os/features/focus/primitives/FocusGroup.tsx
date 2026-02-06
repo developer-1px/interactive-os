@@ -77,10 +77,10 @@ export interface FocusGroupProps extends Omit<ComponentProps<'div'>, 'id' | 'rol
     project?: Partial<ProjectConfig>;
 
     /** Command dispatched on item activation (Enter key) */
-    bindActivateCommand?: BaseCommand;
+    onAction?: BaseCommand;
 
     /** Command dispatched on item selection (Space key) */
-    bindSelectCommand?: BaseCommand;
+    onSelect?: BaseCommand;
 
     /** Children */
     children: ReactNode;
@@ -114,8 +114,8 @@ export function FocusGroup({
     activate,
     dismiss,
     project,
-    bindActivateCommand,
-    bindSelectCommand,
+    onAction,
+    onSelect,
     children,
     className,
     style,
@@ -146,12 +146,12 @@ export function FocusGroup({
                 store,
                 config,
                 parentId,
-                activateCommand: bindActivateCommand,
-                selectCommand: bindSelectCommand,
+                activateCommand: onAction,
+                selectCommand: onSelect,
             });
         }
         // No cleanup needed - WeakMap auto-GC when element is removed
-    }, [store, config, parentId, bindActivateCommand, bindSelectCommand]);
+    }, [store, config, parentId, onAction, onSelect]);
 
     // --- Context Value ---
     const contextValue = useMemo<FocusGroupContextValue>(() => ({

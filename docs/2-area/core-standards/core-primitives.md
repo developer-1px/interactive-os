@@ -182,16 +182,10 @@ function TodoItem({ todo }) {
         placeholder="할 일을 입력하세요..."
         
         // 타이핑마다 호출 (debounced 권장)
-        syncCommand={{ 
-          type: "UPDATE_DRAFT", 
-          payload: { id: todo.id } 
-        }}
+        onChange={UpdateDraft({ id: todo.id })}
         
         // Enter/Blur시 호출
-        commitCommand={{ 
-          type: "SAVE_TODO", 
-          payload: { id: todo.id } 
-        }}
+        onSubmit={SaveTodo({ id: todo.id })}
       />
     </Item>
   );
@@ -206,9 +200,9 @@ function TodoItem({ todo }) {
 | `name` | `string` | - | 포커스 추적용 ID |
 | `placeholder` | `string` | - | 빈 상태 힌트 |
 | `multiline` | `boolean` | `false` | 멀티라인 모드 |
-| `syncCommand` | `Command` | - | 입력마다 dispatch |
-| `commitCommand` | `Command` | - | Enter/Blur시 dispatch |
-| `cancelCommand` | `Command` | - | Escape시 dispatch |
+| `onChange` | `Command` | - | 입력마다 dispatch |
+| `onSubmit` | `Command` | - | Enter/Blur시 dispatch |
+| `onCancel` | `Command` | - | Escape시 dispatch |
 | `commitOnBlur` | `boolean` | `true` | Blur시 자동 커밋 |
 
 ### 동작 흐름
@@ -218,9 +212,9 @@ function TodoItem({ todo }) {
 │  User Types: "안녕"                              │
 ├─────────────────────────────────────────────────┤
 │  1. IME 조합 시작 (ㅎ → 하 → 한...)              │
-│  2. IME 조합 완료 → syncCommand dispatch        │
+│  2. IME 조합 완료 → onChange dispatch        │
 │  3. User presses Enter                          │
-│  4. commitCommand dispatch                      │
+│  4. onSubmit dispatch                           │
 │  5. Engine 처리 → State 업데이트 → Field re-render│
 └─────────────────────────────────────────────────┘
 ```
@@ -254,13 +248,13 @@ function TodoItem({ todo }) {
       <span>{todo.text}</span>
       
       {/* 간단한 버튼 */}
-      <Trigger command={{ type: "TOGGLE_TODO", payload: { id: todo.id } }}>
+      <Trigger onPress={ToggleTodo({ id: todo.id })}>
         <button>✓</button>
       </Trigger>
       
       {/* asChild로 기존 컴포넌트 활용 */}
       <Trigger 
-        command={{ type: "DELETE_TODO", payload: { id: todo.id } }}
+        onPress={DeleteTodo({ id: todo.id })}
         asChild
       >
         <IconButton icon="trash" />
@@ -274,7 +268,7 @@ function TodoItem({ todo }) {
 
 | Prop | Type | Default | 설명 |
 |------|------|---------|------|
-| `command` | `Command` | (필수) | 클릭 시 dispatch할 커맨드 |
+| `onPress` | `Command` | (필수) | 클릭 시 dispatch할 커맨드 |
 | `children` | `ReactNode` | - | 버튼 내용 |
 | `asChild` | `boolean` | `false` | 자식 요소에 이벤트 위임 |
 | `allowPropagation` | `boolean` | `false` | 이벤트 버블링 허용 |
@@ -286,12 +280,12 @@ function TodoItem({ todo }) {
 { key: "Delete", command: "DELETE_TODO" }
 
 // 버튼 클릭
-<Trigger command={{ type: "DELETE_TODO", payload }}>
+<Trigger onPress={DeleteTodo({ id })}>
   <button>Delete</button>
 </Trigger>
 
 // 컨텍스트 메뉴
-<MenuItem command={{ type: "DELETE_TODO", payload }}>
+<MenuItem onPress={DeleteTodo({ id })}>
   삭제
 </MenuItem>
 
@@ -312,7 +306,7 @@ function TodoItem({ todo }) {
         <div className={`flex gap-2 p-2 ${isFocused ? "bg-blue-50" : ""}`}>
           
           {/* 체크박스 */}
-          <Trigger command={{ type: "TOGGLE_TODO", payload: { id: todo.id } }}>
+          <Trigger onPress={ToggleTodo({ id: todo.id })}>
             <button>{todo.done ? "☑" : "☐"}</button>
           </Trigger>
           
@@ -321,14 +315,11 @@ function TodoItem({ todo }) {
             name={todo.id}
             value={todo.text}
             active={isFocused}
-            commitCommand={{ 
-              type: "UPDATE_TODO", 
-              payload: { id: todo.id } 
-            }}
+            onSubmit={UpdateTodo({ id: todo.id })}
           />
           
           {/* 삭제 버튼 */}
-          <Trigger command={{ type: "DELETE_TODO", payload: { id: todo.id } }}>
+          <Trigger onPress={DeleteTodo({ id: todo.id })}>
             <button>🗑</button>
           </Trigger>
           

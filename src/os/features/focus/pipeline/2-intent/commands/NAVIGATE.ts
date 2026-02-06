@@ -4,10 +4,8 @@
 
 import type { OSCommand, OSContext, OSResult } from '../../core/osCommand';
 import type { OSNavigatePayload } from '../../../../command/definitions/commandsShell';
-import { updateNavigate } from '../../3-update/updateNavigate';
-import { updateZoneSpatial } from '../../3-update/updateZoneSpatial';
-import { FocusData } from '../../../lib/focusData';
-import { DOM } from '../../../lib/dom';
+import { resolveNavigate } from '../../3-resolve/resolveNavigate';
+import { resolveZoneSpatial } from '../../3-resolve/resolveZoneSpatial';
 
 type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -22,8 +20,7 @@ function handleTreeExpansion(
     const activeId = ctx.focusedItemId;
     if (!activeId || (dir !== 'left' && dir !== 'right')) return null;
 
-    const activeItemEl = document.getElementById(activeId);
-    const role = activeItemEl?.getAttribute('role');
+    const role = ctx.dom.queries.getItemRole(activeId);
     const isExpandable = role === 'treeitem' || role === 'button';
 
     if (!isExpandable) return null;
@@ -44,16 +41,9 @@ function handleSeamlessNavigation(
     ctx: OSContext,
     dir: Direction
 ): OSResult | null {
-    const spatialQuery = {
-        getItemRect: (id: string) => ctx.dom.itemRects.get(id),
-        getGroupRect: (id: string) => DOM.getGroupRect(id),
-        getAllGroupRects: () => DOM.getAllGroupRects(),
-        getGroupEntry: (id: string) => FocusData.getById(id),
-    };
-
-    const spatialResult = updateZoneSpatial(
+    const spatialResult = resolveZoneSpatial(
         ctx.zoneId, dir, ctx.focusedItemId,
-        spatialQuery
+        ctx.dom.queries
     );
 
     if (spatialResult) {
@@ -109,7 +99,7 @@ export const NAVIGATE: OSCommand<OSNavigatePayload> = {
         if (expansionResult) return expansionResult;
 
         // 2. Normal Navigation
-        const navResult = updateNavigate(
+        const navResult = resolveNavigate(
             ctx.focusedItemId,
             dir,
             ctx.dom.items,

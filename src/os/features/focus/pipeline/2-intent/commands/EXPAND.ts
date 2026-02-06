@@ -3,51 +3,24 @@
  */
 
 import type { OSCommand, OSContext } from '../../core/osCommand';
-
-// ═══════════════════════════════════════════════════════════════════
-// Expansion Action Handlers
-// ═══════════════════════════════════════════════════════════════════
-
-function handleExpand(ctx: OSContext, itemId: string): string[] {
-    return ctx.expandedItems.includes(itemId)
-        ? ctx.expandedItems
-        : [...ctx.expandedItems, itemId];
-}
-
-function handleCollapse(ctx: OSContext, itemId: string): string[] {
-    return ctx.expandedItems.filter(id => id !== itemId);
-}
-
-function handleToggle(ctx: OSContext, itemId: string): string[] {
-    return ctx.expandedItems.includes(itemId)
-        ? handleCollapse(ctx, itemId)
-        : handleExpand(ctx, itemId);
-}
+import { resolveExpansion, type ExpandAction } from '../../3-resolve/resolveExpansion';
 
 // ═══════════════════════════════════════════════════════════════════
 // EXPAND Command
 // ═══════════════════════════════════════════════════════════════════
 
-export const EXPAND: OSCommand<{ itemId?: string; action?: 'toggle' | 'expand' | 'collapse' }> = {
+export const EXPAND: OSCommand<{ itemId?: string; action?: ExpandAction }> = {
     run: (ctx, payload) => {
-        const itemId = payload?.itemId ?? ctx.focusedItemId;
-        if (!itemId) return null;
+        const targetId = payload?.itemId ?? ctx.focusedItemId;
+        if (!targetId) return null;
 
         const action = payload?.action ?? 'toggle';
-        let newExpanded: string[];
 
-        switch (action) {
-            case 'expand':
-                newExpanded = handleExpand(ctx, itemId);
-                break;
-            case 'collapse':
-                newExpanded = handleCollapse(ctx, itemId);
-                break;
-            case 'toggle':
-            default:
-                newExpanded = handleToggle(ctx, itemId);
-        }
+        const result = resolveExpansion(ctx.expandedItems, targetId, action);
 
-        return { state: { expandedItems: newExpanded } };
+        if (!result.changed) return null;
+
+        return { state: { expandedItems: result.expandedItems } };
     }
 };
+

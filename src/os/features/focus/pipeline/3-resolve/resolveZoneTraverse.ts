@@ -1,5 +1,5 @@
 /**
- * updateZoneTraverse - Calculate next zone for Tab navigation
+ * resolveZoneTraverse - Calculate next zone for Tab navigation
  * 
  * Pipeline Phase 3: UPDATE
  * Pure function - no side effects, no state mutations.
@@ -7,7 +7,7 @@
  */
 
 import type { NavigateConfig } from '../../types';
-import { updateEntry } from './updateEntry';
+import { resolveEntry } from './resolveEntry';
 
 export interface ZoneTraverseContext {
     /** Get sibling zone in direction */
@@ -36,7 +36,7 @@ export interface ZoneTraverseResult {
  * @param context - Registry access functions (injected for testability)
  * @returns Result with target zone/item, or null if no valid target
  */
-export function updateZoneTraverse(
+export function resolveZoneTraverse(
     direction: 'forward' | 'backward',
     fallbackConfig: { navigate?: NavigateConfig } | undefined,
     context: ZoneTraverseContext
@@ -71,7 +71,7 @@ export function updateZoneTraverse(
     const entryConfig = nextConfig?.navigate || fallbackConfig?.navigate;
 
     if (entryConfig) {
-        const targetItem = updateEntry(items, entryConfig, {
+        const targetItem = resolveEntry(items, entryConfig, {
             lastFocusedId: nextState.lastFocusedId,
             selection: nextState.selection,
         });

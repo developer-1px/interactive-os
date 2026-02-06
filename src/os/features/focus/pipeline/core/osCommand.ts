@@ -16,6 +16,16 @@ import type { FocusGroupStore } from '../../store/focusGroupStore';
 // Context (모든 Read)
 // ═══════════════════════════════════════════════════════════════════
 
+/**
+ * Lazy DOM Queries - Dependency Injection interface
+ */
+export interface DOMQueries {
+    getItemRole(id: string): string | null;
+    getGroupRect(id: string): DOMRect | undefined;
+    getAllGroupRects(): Map<string, DOMRect>;
+    getGroupEntry(id: string): any | undefined;
+}
+
 export interface OSContext {
     // Identity
     zoneId: string;
@@ -43,6 +53,7 @@ export interface OSContext {
         items: string[];
         itemRects: Map<string, DOMRect>;
         siblingZones: { prev: string | null; next: string | null };
+        queries: DOMQueries;
     };
 
     // Bound Commands
@@ -87,6 +98,12 @@ export function buildContext(overrideZoneId?: string): OSContext | null {
                 prev: FocusData.getSiblingZone('backward'),
                 next: FocusData.getSiblingZone('forward'),
             },
+            queries: {
+                getItemRole: (id) => DOM.getItem(id)?.getAttribute('role') ?? null,
+                getGroupRect: (id) => DOM.getGroupRect(id),
+                getAllGroupRects: () => DOM.getAllGroupRects(),
+                getGroupEntry: (id) => FocusData.getById(id),
+            }
         },
 
         // Bound Commands
@@ -97,9 +114,9 @@ export function buildContext(overrideZoneId?: string): OSContext | null {
 
 function collectItemRects(zoneEl: HTMLElement): Map<string, DOMRect> {
     const rects = new Map<string, DOMRect>();
-    const items = zoneEl.querySelectorAll('[data-focus-item]');
+    const items = zoneEl.querySelectorAll('[data-item-id]');
     items.forEach(item => {
-        const id = item.id;
+        const id = item.getAttribute('data-item-id');
         if (id) rects.set(id, item.getBoundingClientRect());
     });
     return rects;

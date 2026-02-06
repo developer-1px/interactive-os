@@ -108,7 +108,7 @@ export function AriaInteractionTest() {
                     <div className="text-[10px] font-mono text-gray-500 mb-2 uppercase">Trigger (Button)</div>
                     <Trigger
                         id="test-trigger-btn"
-                        command={mockCommand}
+                        onPress={mockCommand}
                         dispatch={handleTriggerDispatch}
                         className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm"
                     >

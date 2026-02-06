@@ -1,5 +1,5 @@
 /**
- * updateRecovery - Focus recovery when item is removed
+ * resolveRecovery - Focus recovery when item is removed
  * 
  * Pipeline Phase 3: UPDATE (pure function)
  * 
@@ -23,7 +23,7 @@ export interface RecoveryResult {
  * @param strategy - Recovery strategy
  * @returns The new focus target
  */
-export function updateRecovery(
+export function resolveRecovery(
     removedId: string,
     focusedId: string | null,
     items: string[],

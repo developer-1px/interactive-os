@@ -1,12 +1,12 @@
 /**
- * updateEntry - Zone Entry Logic
+ * resolveEntry - Zone Entry Logic
  * 
  * Determines which item to focus when entering a zone.
  */
 
 import type { NavigateConfig } from '../../types';
 
-export function updateEntry(
+export function resolveEntry(
     items: string[],
     config: NavigateConfig,
     context?: {

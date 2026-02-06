@@ -87,9 +87,9 @@ export const TodoList = ({ todos }) => {
         <Item id={todo.id} key={todo.id}>
            <Field 
               value={todo.text} 
-              commitCommand={AddTodo} // Enter 키 입력 시 저장
+              onSubmit={AddTodo({})} // Enter 키 입력 시 저장
            />
-           <Trigger command={DeleteTodo}>
+           <Trigger onPress={DeleteTodo({})}>
               <button>삭제</button>
            </Trigger>
         </Item>

@@ -1,5 +1,5 @@
 /**
- * updateZoneSpatial - Calculate next zone for seamless arrow navigation
+ * resolveZoneSpatial - Calculate next zone for seamless arrow navigation
  * 
  * Pipeline Phase 3: UPDATE
  * Pure function - no side effects, no state mutations.
@@ -38,7 +38,7 @@ export interface ZoneSpatialResult {
  * @param context - DOM access functions (injected for testability)
  * @returns Result with target zone/item, or null if no valid target
  */
-export function updateZoneSpatial(
+export function resolveZoneSpatial(
     currentGroupId: string,
     direction: 'up' | 'down' | 'left' | 'right',
     currentItemId: string | null,

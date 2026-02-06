@@ -89,13 +89,13 @@ export interface FieldProps<T extends BaseCommand>
   name?: string;
   placeholder?: string;
   multiline?: boolean;
-  commitCommand?: T;
-  syncCommand?: BaseCommand;
-  cancelCommand?: BaseCommand;
+  onSubmit?: T;
+  onChange?: BaseCommand;
+  onCancel?: BaseCommand;
   updateType?: string;
   onCommit?: (value: string) => void;
   onSync?: (value: string) => void;
-  onCancel?: () => void;
+  onCancelCallback?: () => void;
   mode?: FieldMode;
   target?: FocusTarget;
   controls?: string;
@@ -117,9 +117,9 @@ export const Field = forwardRef<HTMLElement, FieldProps<any>>(({
   name,
   placeholder,
   multiline = false,
-  commitCommand,
-  syncCommand,
-  cancelCommand,
+  onSubmit,
+  onChange,
+  onCancel,
   updateType,
   onCommit,
   mode = "immediate",
@@ -151,15 +151,15 @@ export const Field = forwardRef<HTMLElement, FieldProps<any>>(({
       name,
       mode,
       multiline,
-      commitCommand,
-      syncCommand,
-      cancelCommand,
+      onSubmit,
+      onChange,
+      onCancel,
       updateType,
       onCommit
     };
     FieldRegistry.register(name, config);
     return () => FieldRegistry.unregister(name);
-  }, [name, mode, multiline, commitCommand, syncCommand, cancelCommand, updateType, onCommit]);
+  }, [name, mode, multiline, onSubmit, onChange, onCancel, updateType, onCommit]);
 
 
   // --- State Subscription ---

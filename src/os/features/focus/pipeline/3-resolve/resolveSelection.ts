@@ -1,5 +1,5 @@
 /**
- * updateSelect - Selection Logic
+ * resolveSelection - Selection Logic
  * 
  * Phase 3: RESOLVE (Select)
  * Pure function delegating to registered selection strategies.
@@ -8,7 +8,7 @@
 import type { SelectConfig } from '../../types';
 import { resolveWithSelectionStrategy, type SelectResult } from './strategies/selectorRegistry';
 
-export function updateSelect(
+export function resolveSelection(
     targetId: string | undefined, // undefined for 'none' or 'all' if not checking items
     currentSelection: string[],
     currentAnchor: string | null,

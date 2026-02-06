@@ -26,7 +26,8 @@ export function Sidebar() {
         navigate: { entry: "restore" },
         select: { followFocus: true }
       }}
-      bindSelectCommand={SelectCategory({})}
+      onAction={SelectCategory({})}
+      // onSelect={SelectCategory({})} // Space is handled by onAction alias if needed, or separate command
       style={{ flex: "none" }}
       className="h-full"
     >
