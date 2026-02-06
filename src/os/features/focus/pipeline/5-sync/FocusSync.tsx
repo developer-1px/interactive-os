@@ -73,11 +73,12 @@ function ActiveZoneProjector({ zoneId, store }: { zoneId: string; store: any }) 
     const focusedItemId = useStore(store, (s: any) => s.focusedItemId);
     const lastFocusedRef = useRef<string | null>(null);
 
-
+    // Reset ref when zone changes to prevent cross-zone interference
+    useEffect(() => {
+        lastFocusedRef.current = null;
+    }, [zoneId]);
 
     useEffect(() => {
-
-
         if (!focusedItemId) return;
         if (focusedItemId === lastFocusedRef.current) return;
 

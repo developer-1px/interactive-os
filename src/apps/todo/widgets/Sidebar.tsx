@@ -2,7 +2,6 @@ import { Zone } from "@os/app/export/primitives/Zone.tsx";
 import { Item } from "@os/app/export/primitives/Item.tsx";
 import { Trigger } from "@os/app/export/primitives/Trigger.tsx";
 import { Kbd } from "@os/app/debug/components/Kbd";
-import { useFocusGroupStore } from "@os/features/focus/primitives/FocusGroup"; // [NEW] Local Hook
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import type { AppState } from "@apps/todo/model/types";
 import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
@@ -37,10 +36,7 @@ export function Sidebar() {
 }
 
 function SidebarContent() {
-  const { state, dispatch } = useEngine<AppState>();
-  // Now we can use the local store hook because we are inside the Zone context
-  const store = useFocusGroupStore();
-  const focusedItemId = store((s) => s.focusedItemId);
+  const { state } = useEngine<AppState>();
 
   if (!state || !state.data) return null;
 
@@ -83,19 +79,8 @@ function SidebarContent() {
               asChild
             >
               <Trigger
-                command={SelectCategory({ id: category.id })}
+                onPress={SelectCategory({ id: category.id })}
                 asChild
-                onMouseMove={() => {
-                  if (focusedItemId !== category.id) {
-                    dispatch({
-                      type: "OS_FOCUS",
-                      payload: {
-                        id: category.id,
-                        sourceId: "sidebar"
-                      }
-                    });
-                  }
-                }}
               >
                 <div
                   className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden

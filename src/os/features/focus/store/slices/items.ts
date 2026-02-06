@@ -29,15 +29,15 @@ export const createItemsSlice: StateCreator<ItemsSlice> = (set) => ({
         const newItems = state.items.filter((id: string) => id !== itemId);
         const updates: Record<string, any> = { items: newItems };
 
-        // Focus Recovery: if the focused item is being removed, move focus to adjacent item
-        if (state.focusedItemId === itemId && newItems.length > 0) {
-            const oldIndex = state.items.indexOf(itemId);
-            // Prefer next item, fall back to previous
-            const newIndex = Math.min(oldIndex, newItems.length - 1);
-            updates.focusedItemId = newItems[newIndex];
-        } else if (state.focusedItemId === itemId) {
-            updates.focusedItemId = null;
-        }
+        // DEBUG: Comment out focus recovery
+        // if (state.focusedItemId === itemId && newItems.length > 0) {
+        //     const oldIndex = state.items.indexOf(itemId);
+        //     // Prefer next item, fall back to previous
+        //     const newIndex = Math.min(oldIndex, newItems.length - 1);
+        //     updates.focusedItemId = newItems[newIndex];
+        // } else if (state.focusedItemId === itemId) {
+        //     updates.focusedItemId = null;
+        // }
 
         // Selection cleanup: remove from selection if present
         if (state.selection?.includes(itemId)) {
