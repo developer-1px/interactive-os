@@ -91,8 +91,8 @@ export function resolveKeybinding(
         for (const binding of layerBindings) {
             const evaluationCtx = { ...context, isInput: isFromInput };
 
-            // Skip if in input and not allowed
-            if (isFromInput && !binding.allowInInput) continue;
+            // Note: allowInInput check removed - classifyKeyboard already determines
+            // if a key from Field context should route to COMMAND vs FIELD.
 
             // Evaluate 'when' clause
             if (binding.when && !evalContext(binding.when, evaluationCtx)) continue;

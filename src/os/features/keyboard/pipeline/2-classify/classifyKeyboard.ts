@@ -48,7 +48,8 @@ export function classifyKeyboard(intent: KeyboardIntent): KeyboardCategory {
                     if (multiline) {
                         return 'FIELD';  // Cursor movement in multiline
                     }
-                    // single-line: fall through to COMMAND for zone navigation
+                    // single-line: route to COMMAND for zone navigation
+                    // (skip FIELD_KEYS check below)
                 }
                 // ArrowLeft/Right: always Field (cursor movement)
                 else if (canonicalKey === 'ArrowLeft' || canonicalKey === 'ArrowRight') {

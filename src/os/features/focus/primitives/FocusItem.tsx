@@ -143,6 +143,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
     const computedProps = {
         id: id,
         role: effectiveRole,
+        'data-focus-item': true,
         'data-item-id': id,
         'data-anchor': isAnchor ? 'true' : undefined,
         'data-focused': visualFocused ? 'true' : undefined,
