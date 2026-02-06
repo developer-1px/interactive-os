@@ -89,6 +89,18 @@ const rolePresets: Record<string, RolePreset> = {
         activate: { mode: 'manual' },
         tab: { behavior: 'escape' },
     },
+
+    // Builder Block - Visual page builder blocks
+    builderBlock: {
+        navigate: { seamless: true },
+        tab: { behavior: 'flow' },
+    },
+
+    // Application - Full spatial navigation (TV/Game console style)
+    application: {
+        navigate: { orientation: 'both', seamless: true },
+        tab: { behavior: 'flow' },
+    },
 };
 
 

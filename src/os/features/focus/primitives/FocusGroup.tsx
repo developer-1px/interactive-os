@@ -9,11 +9,13 @@ import {
     createContext,
     useContext,
     useLayoutEffect,
+    useEffect,
     useMemo,
     useRef,
     type ReactNode,
     type ComponentProps,
 } from 'react';
+import { useStore } from 'zustand';
 import {
     createFocusGroupStore,
     type FocusGroupStore,
@@ -21,6 +23,8 @@ import {
 import { resolveRole } from '../registry/roleRegistry';
 import { DOMRegistry } from '../registry/DOMRegistry';
 import { FocusRegistry } from '../registry/FocusRegistry';
+import { updateRecovery } from '../pipeline/3-update/updateRecovery';
+import { commitAll } from '../pipeline/4-commit/commitFocus';
 import type {
     FocusGroupConfig,
     NavigateConfig,
@@ -159,6 +163,36 @@ export function FocusGroup({
             FocusRegistry.unregister(groupId);
         };
     }, [groupId, store, parentId, config]);
+
+    // --- Focus Recovery (OS-level) ---
+    // When an item is removed from the zone, check if it was focused.
+    // If so, automatically move focus to the next/prev item based on config.
+    const items = useStore(store, (s) => s.items);
+    const focusedItemId = useStore(store, (s) => s.focusedItemId);
+    const prevItemsRef = useRef<string[]>([]);
+
+    useEffect(() => {
+        const prevItems = prevItemsRef.current;
+
+        // Find removed items
+        const removedItems = prevItems.filter(id => !items.includes(id));
+
+        if (removedItems.length > 0 && focusedItemId && removedItems.includes(focusedItemId)) {
+            // The focused item was removed - trigger recovery
+            const result = updateRecovery(
+                focusedItemId,
+                focusedItemId,
+                prevItems,
+                config.navigate.recovery
+            );
+
+            if (result.changed) {
+                commitAll(store, { targetId: result.targetId });
+            }
+        }
+
+        prevItemsRef.current = items;
+    }, [items, focusedItemId, store, config.navigate.recovery]);
 
     // --- Context Value ---
     const contextValue = useMemo<FocusGroupContextValue>(() => ({

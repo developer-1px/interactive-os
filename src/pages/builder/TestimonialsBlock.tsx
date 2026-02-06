@@ -52,9 +52,7 @@ export function TestimonialsBlock() {
     return (
         <OS.Zone
             id="testimonials-block"
-            role="grid"
-            tab={{ behavior: 'flow' }}
-            navigate={{ seamless: true }}
+            role="builderBlock"
             className="bg-white py-24 px-8"
         >
             <div className="max-w-5xl mx-auto">
@@ -99,9 +97,7 @@ export function TestimonialsBlock() {
                             <OS.Zone
                                 key={t.id}
                                 id={`zone-${t.id}`}
-                                role=""
-                                tab={{ behavior: 'flow' }}
-                                navigate={{ seamless: true }}
+                                role="builderBlock"
                                 className={`
                   relative rounded-2xl p-6 transition-all duration-300
                   bg-slate-50 border border-slate-200

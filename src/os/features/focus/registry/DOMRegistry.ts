@@ -77,6 +77,20 @@ export const DOMRegistry = {
         return Array.from(groupElements.keys());
     },
 
+    // --- Spatial Helpers ---
+    getGroupRect(groupId: string): DOMRect | undefined {
+        const el = groupElements.get(groupId);
+        return el?.getBoundingClientRect();
+    },
+
+    getAllGroupRects(): Map<string, DOMRect> {
+        const result = new Map<string, DOMRect>();
+        for (const [id, el] of groupElements) {
+            result.set(id, el.getBoundingClientRect());
+        }
+        return result;
+    },
+
     // --- Debugging ---
     __debug(): { groups: number; items: number } {
         return {

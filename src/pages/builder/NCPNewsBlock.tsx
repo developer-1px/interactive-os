@@ -36,9 +36,7 @@ export function NCPNewsBlock() {
     return (
         <OS.Zone
             id="ncp-news"
-            role=""
-            tab={{ behavior: 'flow' }}
-            navigate={{ seamless: true }}
+            role="builderBlock"
             className="py-20 px-4 bg-white"
         >
             <div className="max-w-[1200px] mx-auto">
@@ -78,9 +76,7 @@ export function NCPNewsBlock() {
                         <OS.Zone
                             key={card.id}
                             id={`card-${card.id}`}
-                            role=""
-                            tab={{ behavior: 'flow' }}
-                            navigate={{ seamless: true }}
+                            role="builderBlock"
                             className="aspect-[4/5] rounded-[2rem] p-10 flex flex-col justify-between text-white relative overflow-hidden group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
                             style={card.style}
                         >

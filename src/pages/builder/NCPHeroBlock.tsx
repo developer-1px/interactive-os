@@ -13,9 +13,7 @@ export function NCPHeroBlock() {
     return (
         <OS.Zone
             id="ncp-hero"
-            role=""
-            tab={{ behavior: 'flow' }}
-            navigate={{ seamless: true }}
+            role="builderBlock"
             className="relative h-[600px] flex flex-col items-center justify-center text-center overflow-hidden bg-[#8e9eab]"
             style={{
                 background: `radial-gradient(circle at 80% 50%, #03c75a 0%, #3a4b5a 40%, #525f6b 100%)`

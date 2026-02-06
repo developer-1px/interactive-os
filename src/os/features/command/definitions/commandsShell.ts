@@ -26,6 +26,8 @@ export const OS_COMMANDS = {
     FIELD_START_EDIT: "OS_FIELD_START_EDIT",
     FIELD_COMMIT: "OS_FIELD_COMMIT",
     FIELD_CANCEL: "OS_FIELD_CANCEL",
+    FIELD_SYNC: "OS_FIELD_SYNC",
+    FIELD_BLUR: "OS_FIELD_BLUR",
 
     // --- Clipboard (The "Data" Transfer) ---
     COPY: "OS_COPY",

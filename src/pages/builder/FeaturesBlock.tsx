@@ -31,9 +31,7 @@ export function FeaturesBlock() {
     return (
         <OS.Zone
             id="features-block"
-            role="grid"
-            tab={{ behavior: 'flow' }}
-            navigate={{ seamless: true }}
+            role="builderBlock"
             className="bg-slate-50 py-24 px-8"
         >
             <div className="max-w-5xl mx-auto">
@@ -75,9 +73,7 @@ export function FeaturesBlock() {
                     {/* Large Card - Spans 7 columns */}
                     <OS.Zone
                         id="feature-main-zone"
-                        role=""
-                        tab={{ behavior: 'flow' }}
-                        navigate={{ seamless: true }}
+                        role="builderBlock"
                         className="col-span-12 md:col-span-7 flex flex-col"
                     >
                         <div className="relative h-[320px] rounded-2xl p-8 overflow-hidden bg-gradient-to-br from-violet-100 via-violet-50 to-white border border-violet-200">
@@ -116,7 +112,7 @@ export function FeaturesBlock() {
 
                     {/* Stacked Cards - Right Column */}
                     <div className="col-span-12 md:col-span-5 flex flex-col gap-4">
-                        <OS.Zone id="feature-speed-zone" role="" tab={{ behavior: 'flow' }} navigate={{ seamless: true }} className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200">
+                        <OS.Zone id="feature-speed-zone" role="builderBlock" className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200">
                             <div className="flex items-start justify-between h-full">
                                 <div className="flex flex-col items-start pr-12">
                                     <OS.Item id="feature-speed-title" asChild>
@@ -150,7 +146,7 @@ export function FeaturesBlock() {
                             </div>
                         </OS.Zone>
 
-                        <OS.Zone id="feature-security-zone" role="" tab={{ behavior: 'flow' }} navigate={{ seamless: true }} className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200">
+                        <OS.Zone id="feature-security-zone" role="builderBlock" className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200">
                             <div className="flex items-start justify-between h-full">
                                 <div className="flex flex-col items-start pr-12">
                                     <OS.Item id="feature-security-title" asChild>
@@ -186,7 +182,7 @@ export function FeaturesBlock() {
                     </div>
 
                     {/* Bottom Row - Nested Zones */}
-                    <OS.Zone id="feature-analytics-zone" role="" tab={{ behavior: 'flow' }} navigate={{ seamless: true }} className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0">
+                    <OS.Zone id="feature-analytics-zone" role="builderBlock" className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0">
                         <div className="flex items-center gap-4 h-full">
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
                                 <BarChart3 size={24} className="text-blue-600" />
@@ -222,7 +218,7 @@ export function FeaturesBlock() {
 
                     </OS.Zone>
 
-                    <OS.Zone id="feature-collab-zone" role="" tab={{ behavior: 'flow' }} navigate={{ seamless: true }} className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0">
+                    <OS.Zone id="feature-collab-zone" role="builderBlock" className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0">
 
                         <div className="flex items-center gap-4 h-full">
                             <div className="flex -space-x-2 shrink-0">

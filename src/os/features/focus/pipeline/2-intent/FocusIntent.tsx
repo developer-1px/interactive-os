@@ -45,6 +45,21 @@ function handleNavigate(payload: unknown) {
         { stickyX: state.stickyX, stickyY: state.stickyY }
     );
 
+    // Seamless: If at boundary (same ID returned) and seamless enabled, try cross-zone
+    if (config.navigate.seamless && result.targetId === state.focusedItemId) {
+        logger.debug('FOCUS', '[P2:Intent] NAVIGATE - Boundary hit, trying seamless');
+        const transferred = FocusOrchestrator.traverseZoneSpatial(
+            state.zoneId,
+            dir,
+            state.focusedItemId
+        );
+        if (transferred) {
+            logger.debug('FOCUS', '[P2:Intent] NAVIGATE - Seamless transfer successful');
+            logger.timeEnd('FOCUS', 'P2:Navigate');
+            return;
+        }
+    }
+
     commitAll(store, {
         targetId: result.targetId,
         stickyX: result.stickyX,

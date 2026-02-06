@@ -29,9 +29,7 @@ export function NCPServicesBlock() {
     return (
         <OS.Zone
             id="ncp-services"
-            role=""
-            tab={{ behavior: 'flow' }}
-            navigate={{ seamless: true }}
+            role="builderBlock"
             className="py-24 px-4 bg-slate-50"
         >
             <div className="max-w-[1200px] mx-auto">
@@ -66,9 +64,7 @@ export function NCPServicesBlock() {
                 {/* Tabs */}
                 <OS.Zone
                     id="ncp-service-tabs"
-                    role=""
-                    tab={{ behavior: 'flow' }}
-                    navigate={{ seamless: true }}
+                    role="builderBlock"
                     className="flex flex-row gap-6 items-center mb-12 border-b border-slate-200 pb-8 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,transparent,black_2%,black_98%,transparent)]"
                 >
                     {tabs.map((tab, i) => (
@@ -116,9 +112,7 @@ export function NCPServicesBlock() {
                     {/* Featured Card */}
                     <OS.Zone
                         id="ncp-featured-card"
-                        role=""
-                        tab={{ behavior: 'flow' }}
-                        navigate={{ seamless: true }}
+                        role="builderBlock"
                         className="lg:w-1/4 min-h-[400px] bg-gradient-to-br from-[#0F172A] to-[#1E293B] rounded-3xl p-10 text-white flex flex-col justify-between overflow-hidden relative shadow-2xl shadow-blue-900/20 group"
                     >
                         {/* Dynamic Background Effects */}
@@ -140,9 +134,7 @@ export function NCPServicesBlock() {
                     {/* Service List Grid */}
                     <OS.Zone
                         id="ncp-service-list"
-                        role=""
-                        tab={{ behavior: 'flow' }}
-                        navigate={{ seamless: true }}
+                        role="builderBlock"
                         className="lg:w-3/4 bg-white rounded-3xl p-8 shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10"
                     >
                         <div className="col-span-2 mb-2">

@@ -228,3 +228,73 @@ function reducer(state: State, action: Action): State {
 - **순수 함수만 작성하게 하라**: Side Effect, 외부 의존성은 구조가 처리한다.
 - **구조가 검증한다**: AI가 틀려도 타입/스키마/불변식이 잡아준다.
 
+---
+
+## Focus System Rules (포커스 시스템 규칙)
+
+### 핵심 원칙: Single Entry Point
+> **"모든 포커스 변경은 반드시 단일 Pipeline을 통과해야 한다"**
+
+```
+[유일한 정규 경로]
+FocusSensor → OS_COMMANDS.FOCUS → FocusIntent → commitFocus → FocusSync
+     ↑                                                              ↓
+  (DOM Event)                                              (el.focus())
+```
+
+### 🚫 금지 사항 (STRICTLY PROHIBITED)
+
+| 금지 패턴 | 이유 | 대안 |
+|-----------|------|------|
+| `store.setFocus()` 직접 호출 | Pipeline 우회 | `dispatch(OS_COMMANDS.FOCUS, { id, zoneId })` |
+| `store.setState({ focusedItemId })` | commitFocus 우회 | `commitAll(store, { targetId })` |
+| `el.focus()` 직접 호출 (FocusSync 외) | DOM 동기화 충돌 | FocusSync에만 DOM focus 위임 |
+| `isProgrammaticFocus` 조작 | Race condition 유발 | Pipeline 내부에서만 관리 |
+
+### ✅ 올바른 포커스 변경 방법
+
+```typescript
+// ✅ GOOD: OS Command 사용
+dispatch({
+    type: OS_COMMANDS.FOCUS,
+    payload: { id: targetId, zoneId: zoneId }
+});
+
+// ✅ GOOD: Pipeline 내부에서 commitAll 사용
+commitAll(store, { targetId: newItemId });
+
+// ❌ BAD: 직접 store 조작
+store.getState().setFocus(itemId);        // NEVER DO THIS
+store.setState({ focusedItemId: itemId }); // NEVER DO THIS
+
+// ❌ BAD: 직접 DOM focus
+element.focus();  // Only FocusSync may call this
+```
+
+### Focus Pipeline 단계별 책임
+
+| Phase | 파일 | 책임 |
+|-------|------|------|
+| **1. SENSE** | `FocusSensor.tsx` | DOM 이벤트 캡처 → Command dispatch |
+| **2. INTENT** | `FocusIntent.tsx` | Command 처리 → 상태 변경 결정 |
+| **3. UPDATE** | `update*.ts` | 순수 함수로 다음 상태 계산 |
+| **4. COMMIT** | `commitFocus.ts` | Store에 상태 반영 (유일한 mutation 지점) |
+| **5. SYNC** | `FocusSync.tsx` | Store → DOM 동기화 (유일한 el.focus() 지점) |
+
+### App 레벨에서 포커스 제어가 필요한 경우
+
+App 레벨(예: `navigationMiddleware`)에서 포커스를 변경해야 하는 경우:
+
+```typescript
+// ✅ GOOD: Effect를 통해 OS에 위임
+return produce(state, draft => {
+    draft.effects.push({ 
+        type: 'FOCUS_REQUEST',  // OS가 처리할 effect
+        targetId: newItemId 
+    });
+});
+
+// 또는 dispatch를 통해 직접 요청
+dispatch({ type: OS_COMMANDS.FOCUS, payload: { id, zoneId } });
+```
+
