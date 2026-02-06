@@ -6,7 +6,7 @@ import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus"
 // Modules
 import { CommandRegistry, type CommandGroup } from "@os/features/command/model/CommandRegistry";
 import { GroupRegistry } from "@os/features/jurisdiction/model/GroupRegistry";
-import { FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { FocusData } from "@os/features/focus/lib/focusData";
 
 // Middleware is now injected via config!
 import { hydrateState, createPersister, type PersistenceConfig } from "@os/features/persistence/hydrateState";
@@ -62,7 +62,7 @@ export function createCommandStore<S, A extends { type: string; payload?: any }>
 
         // If not in global flat registry, try hierarchical resolution
         if (!cmd) {
-          const focusPath = FocusRegistry.getFocusPath();
+          const focusPath = FocusData.getFocusPath();
           // Start from specific (deepest) to generic (root)
           const bubblePath = [...focusPath].reverse();
 

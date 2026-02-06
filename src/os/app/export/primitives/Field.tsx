@@ -2,6 +2,7 @@ import {
   useRef,
   forwardRef,
   useEffect,
+  useSyncExternalStore,
 } from "react";
 import type {
   HTMLAttributes,
@@ -9,7 +10,7 @@ import type {
 import type { BaseCommand } from "@os/entities/BaseCommand.ts";
 import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { FocusData } from "@os/features/focus/lib/focusData";
 import type { FocusTarget } from "@os/entities/FocusTarget.ts";
 import { FieldRegistry, useFieldRegistry, type FieldConfig } from "@os/features/keyboard/registry/FieldRegistry";
 import {
@@ -129,7 +130,11 @@ export const Field = forwardRef<HTMLElement, FieldProps<any>>(({
 }, ref) => {
   const store = useFocusGroupStore();
   const context = useFocusGroupContext();
-  const activeGroupId = useFocusRegistry(s => s.activeGroupId);
+  const activeGroupId = useSyncExternalStore(
+    FocusData.subscribeActiveZone,
+    () => FocusData.getActiveZoneId(),
+    () => null
+  );
   const osFocusedItemId = store(s => s.focusedItemId);
   const groupId = context?.groupId || "unknown";
 

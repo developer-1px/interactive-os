@@ -54,7 +54,6 @@ export function ListView() {
                             <Field
                                 name="DRAFT"
                                 value={draft}
-                                active={true}
                                 syncCommand={SyncDraft({ text: "" })}
                                 commitCommand={AddTodo({})}
                                 className="flex-1 bg-transparent outline-none text-slate-700 text-[15px] font-medium placeholder:text-slate-400"

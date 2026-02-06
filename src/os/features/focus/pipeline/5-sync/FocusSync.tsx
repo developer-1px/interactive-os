@@ -6,18 +6,26 @@
  * Listens to the active zone and its store to perform el.focus().
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { useStore } from 'zustand';
-import { useFocusRegistry } from '../../registry/FocusRegistry';
-import { DOMRegistry } from '../../registry/DOMRegistry';
+import { FocusData } from '../../lib/focusData';
+import { DOM } from '../../lib/dom';
 
 // Global flag: FocusSensor should ignore focusin events when this is true
 export let isProgrammaticFocus = false;
 
+// Hook to subscribe to FocusData.activeZoneId
+function useActiveZoneId(): string | null {
+    return useSyncExternalStore(
+        FocusData.subscribeActiveZone,
+        () => FocusData.getActiveZoneId(),
+        () => null // SSR fallback
+    );
+}
+
 export function FocusSync() {
     // 1. Listen to which zone is active
-    const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
-    const getFocusPath = useFocusRegistry((s) => s.getFocusPath);
+    const activeZoneId = useActiveZoneId();
 
     const lastPathRef = useRef<string[]>([]);
 
@@ -25,38 +33,36 @@ export function FocusSync() {
     // Imperatively update the aria-current attribute on all zones in the focus path.
     // This removes the need for FocusGroup to re-render on focus changes.
     useEffect(() => {
-        const nextPath = getFocusPath();
+        const nextPath = FocusData.getFocusPath();
         const prevPath = lastPathRef.current;
 
         // 1. Clear old path
         prevPath.forEach(id => {
             if (!nextPath.includes(id)) {
-                const el = DOMRegistry.getGroup(id);
+                const el = DOM.getGroup(id);
                 if (el) el.removeAttribute('aria-current');
             }
         });
 
         // 2. Set new path
         nextPath.forEach(id => {
-            const el = DOMRegistry.getGroup(id);
+            const el = DOM.getGroup(id);
             if (el) el.setAttribute('aria-current', 'true');
         });
 
         lastPathRef.current = nextPath;
-    }, [activeGroupId, getFocusPath]);
+    }, [activeZoneId]);
 
     // --- B. Physical Focus Projection (document.activeElement) ---
-    const groups = useFocusRegistry((s) => s.groups);
-
     // 2. Identify the active store
-    const activeEntry = activeGroupId ? groups.get(activeGroupId) : null;
-    const activeStore = activeEntry?.store;
+    const activeData = activeZoneId ? FocusData.getById(activeZoneId) : null;
+    const activeStore = activeData?.store;
 
     // Use a sub-component or a custom hook that subscribes to the specific store
     // so we don't re-render the whole projector on every focus change in any zone.
-    if (!activeGroupId || !activeStore) return null;
+    if (!activeZoneId || !activeStore) return null;
 
-    return <ActiveZoneProjector zoneId={activeGroupId} store={activeStore} />;
+    return <ActiveZoneProjector zoneId={activeZoneId} store={activeStore} />;
 }
 
 function ActiveZoneProjector({ zoneId, store }: { zoneId: string; store: any }) {
@@ -73,7 +79,7 @@ function ActiveZoneProjector({ zoneId, store }: { zoneId: string; store: any }) 
         if (focusedItemId === lastFocusedRef.current) return;
 
         // 4. Physical Projection
-        const targetEl = DOMRegistry.getItem(focusedItemId);
+        const targetEl = DOM.getItem(focusedItemId);
         const currentActive = document.activeElement;
 
         // Stale focus detection: if element doesn't exist, it was actually removed

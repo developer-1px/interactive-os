@@ -1,0 +1,129 @@
+/**
+ * NAVIGATE Command - Arrow key navigation
+ */
+
+import type { OSCommand, OSContext, OSResult } from '../../core/osCommand';
+import type { OSNavigatePayload } from '../../../../command/definitions/commandsShell';
+import { updateNavigate } from '../../3-update/updateNavigate';
+import { updateZoneSpatial } from '../../3-update/updateZoneSpatial';
+import { FocusData } from '../../../lib/focusData';
+import { DOM } from '../../../lib/dom';
+
+type Direction = 'up' | 'down' | 'left' | 'right';
+
+// ═══════════════════════════════════════════════════════════════════
+// Helper Functions
+// ═══════════════════════════════════════════════════════════════════
+
+function handleTreeExpansion(
+    ctx: OSContext,
+    dir: Direction
+): OSResult | null {
+    const activeId = ctx.focusedItemId;
+    if (!activeId || (dir !== 'left' && dir !== 'right')) return null;
+
+    const activeItemEl = document.getElementById(activeId);
+    const role = activeItemEl?.getAttribute('role');
+    const isExpandable = role === 'treeitem' || role === 'button';
+
+    if (!isExpandable) return null;
+
+    const isExpanded = ctx.expandedItems.includes(activeId);
+
+    if (dir === 'right' && !isExpanded) {
+        return { state: { expandedItems: [...ctx.expandedItems, activeId] } };
+    }
+    if (dir === 'left' && isExpanded) {
+        return { state: { expandedItems: ctx.expandedItems.filter(id => id !== activeId) } };
+    }
+
+    return null;
+}
+
+function handleSeamlessNavigation(
+    ctx: OSContext,
+    dir: Direction
+): OSResult | null {
+    const spatialQuery = {
+        getItemRect: (id: string) => ctx.dom.itemRects.get(id),
+        getGroupRect: (id: string) => DOM.getGroupRect(id),
+        getAllGroupRects: () => DOM.getAllGroupRects(),
+        getGroupEntry: (id: string) => FocusData.getById(id),
+    };
+
+    const spatialResult = updateZoneSpatial(
+        ctx.zoneId, dir, ctx.focusedItemId,
+        spatialQuery
+    );
+
+    if (spatialResult) {
+        return {
+            state: { focusedItemId: spatialResult.targetItemId },
+            activeZoneId: spatialResult.targetGroupId,
+            domEffects: spatialResult.targetItemId
+                ? [{ type: 'FOCUS', targetId: spatialResult.targetItemId }]
+                : [],
+        };
+    }
+
+    return null;
+}
+
+function buildNavigateResult(
+    ctx: OSContext,
+    targetId: string | null,
+    stickyX: number | null,
+    stickyY: number | null
+): OSResult {
+    const result: OSResult = {
+        state: {
+            focusedItemId: targetId,
+            stickyX,
+            stickyY,
+        },
+    };
+
+    // Follow focus selection
+    if (ctx.config.select.followFocus && ctx.config.select.mode !== 'none' && targetId) {
+        result.state!.selection = [targetId];
+        result.state!.selectionAnchor = targetId;
+
+        if (ctx.selectCommand) {
+            result.dispatch = ctx.selectCommand;
+        }
+    }
+
+    return result;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NAVIGATE Command
+// ═══════════════════════════════════════════════════════════════════
+
+export const NAVIGATE: OSCommand<OSNavigatePayload> = {
+    run: (ctx, payload) => {
+        const dir = payload.direction.toLowerCase() as Direction;
+
+        // 1. Tree Expansion/Collapse
+        const expansionResult = handleTreeExpansion(ctx, dir);
+        if (expansionResult) return expansionResult;
+
+        // 2. Normal Navigation
+        const navResult = updateNavigate(
+            ctx.focusedItemId,
+            dir,
+            ctx.dom.items,
+            ctx.config.navigate,
+            { stickyX: ctx.stickyX, stickyY: ctx.stickyY }
+        );
+
+        // 3. Seamless Navigation (cross-zone)
+        if (ctx.config.navigate.seamless && navResult.targetId === ctx.focusedItemId) {
+            const seamlessResult = handleSeamlessNavigation(ctx, dir);
+            if (seamlessResult) return seamlessResult;
+        }
+
+        // 4. Build Result
+        return buildNavigateResult(ctx, navResult.targetId, navResult.stickyX, navResult.stickyY);
+    }
+};

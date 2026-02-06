@@ -2,7 +2,7 @@ import { produce } from "immer";
 import type { AppState, TodoCommand } from "@apps/todo/model/types";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
-import { FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { FocusData } from "@os/features/focus/lib/focusData";
 
 
 export const navigationMiddleware = (
@@ -22,7 +22,7 @@ export const navigationMiddleware = (
     // Defer until after React render so new items are registered
     requestAnimationFrame(() => {
       const dispatch = useCommandEngineStore.getState().getActiveDispatch();
-      const activeGroupId = FocusRegistry.get().activeGroupId;
+      const activeGroupId = FocusData.getActiveZoneId();
 
       if (dispatch && activeGroupId) {
         dispatch({

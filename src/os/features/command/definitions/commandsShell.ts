@@ -62,6 +62,8 @@ export interface OSSelectPayload {
     targetId?: string;
     /** 선택 모드: toggle(Ctrl), range(Shift), replace(기본) */
     mode?: 'toggle' | 'range' | 'replace';
+    /** explicit user action (Space key) vs auto-selection (click followFocus) */
+    isExplicitAction?: boolean;
 }
 
 export interface OSActivatePayload {

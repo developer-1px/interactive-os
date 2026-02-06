@@ -42,20 +42,27 @@ export const SyncDraft = defineListCommand({
 // React + zustand + immer
 export const ToggleTodo = defineListCommand({
     id: "TOGGLE_TODO",
-    run: (state, payload: { id: number | string | typeof OS.FOCUS }) =>
-        produce(state, (draft) => {
-            // Handle string ID from focus system (OS passes string, we need number)
+    run: (state, payload: { id: number | string | typeof OS.FOCUS }) => {
+        console.log('[TOGGLE_TODO] Handler called with payload:', payload);
+        return produce(state, (draft) => {
             const rawId = payload.id;
             const targetId = typeof rawId === 'string' ? parseInt(rawId, 10) : rawId as number;
+            console.log('[TOGGLE_TODO] rawId:', rawId, 'targetId:', targetId);
 
             // Validate ID (must be valid number)
-            if (!targetId || isNaN(targetId)) return;
+            if (!targetId || isNaN(targetId)) {
+                console.error('[TOGGLE_TODO] Invalid ID:', targetId);
+                return;
+            }
 
             const todo = draft.data.todos[targetId];
+            console.log('[TOGGLE_TODO] Found todo:', !!todo, 'for ID:', targetId);
             if (todo) {
                 todo.completed = !todo.completed;
+                console.log('[TOGGLE_TODO] Toggled to:', todo.completed);
             }
-        }),
+        });
+    }
 });
 
 export const DeleteTodo = defineListCommand({

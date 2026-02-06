@@ -1,7 +1,7 @@
 import { useCommandListener } from "@os/features/command/hooks/useCommandListener";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { FieldRegistry } from "../registry/FieldRegistry";
-import { FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { FocusData } from "@os/features/focus/lib/focusData";
 
 export const KeyboardIntent = () => {
     useCommandListener([
@@ -11,11 +11,11 @@ export const KeyboardIntent = () => {
                 const p = payload as any;
                 let targetId = p?.fieldId;
 
-                // Auto-resolve from FocusRegistry if not specified
+                // Auto-resolve from FocusData if not specified
                 if (!targetId) {
-                    const activeGroup = FocusRegistry.getActiveGroupEntry();
-                    if (activeGroup?.store) {
-                        targetId = activeGroup.store.getState().focusedItemId;
+                    const activeZone = FocusData.getActiveZone();
+                    if (activeZone?.store) {
+                        targetId = activeZone.store.getState().focusedItemId;
                     }
                 }
 

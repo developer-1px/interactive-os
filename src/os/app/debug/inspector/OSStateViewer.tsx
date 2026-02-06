@@ -1,30 +1,22 @@
-import { memo, useMemo } from "react";
-import { useShallow } from "zustand/react/shallow";
-import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { memo, useMemo, useSyncExternalStore } from "react";
+import { FocusData } from "@os/features/focus/lib/focusData";
 
 export const OSStateViewer = memo(() => {
-    const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
-    const groups = useFocusRegistry((s) => s.groups);
-
-    // Compute focusPath inline to avoid unstable method call
-    const focusPath = useFocusRegistry(
-        useShallow((s) => {
-            if (!s.activeGroupId) return [];
-            const path: string[] = [];
-            let currentId: string | null = s.activeGroupId;
-            while (currentId) {
-                path.unshift(currentId);
-                const entry = s.groups.get(currentId);
-                currentId = entry?.parentId || null;
-                if (path.length > 100) break;
-            }
-            return path;
-        })
+    const activeGroupId = useSyncExternalStore(
+        FocusData.subscribeActiveZone,
+        () => FocusData.getActiveZoneId(),
+        () => null
     );
 
-    // Get focusedItemId from active zone's store (outside of selector)
-    const activeGroupStore = activeGroupId ? groups.get(activeGroupId)?.store : null;
-    const focusedItemId = activeGroupStore?.getState().focusedItemId ?? null;
+    // Compute focusPath from FocusData
+    const focusPath = useMemo(() => FocusData.getFocusPath(), [activeGroupId]);
+
+    // Get focusedItemId from active zone's store
+    const activeZoneData = activeGroupId ? FocusData.getById(activeGroupId) : null;
+    const focusedItemId = activeZoneData?.store?.getState().focusedItemId ?? null;
+
+    // Get all zone IDs from DOM
+    const zoneIds = useMemo(() => FocusData.getOrderedZones(), [activeGroupId]);
 
     const osState = useMemo(() => ({
         focus: {
@@ -32,8 +24,8 @@ export const OSStateViewer = memo(() => {
             focusedItemId,
             focusPath,
         },
-        groups: Object.fromEntries(groups),
-    }), [activeGroupId, focusedItemId, focusPath, groups]);
+        zones: zoneIds,
+    }), [activeGroupId, focusedItemId, focusPath, zoneIds]);
 
     return (
         <div className="h-full flex flex-col bg-[#ffffff]">

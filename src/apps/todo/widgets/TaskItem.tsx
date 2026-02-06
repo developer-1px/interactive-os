@@ -74,7 +74,6 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                     <Field
                         name="EDIT"
                         value={editDraft}
-                        active={true}
                         autoFocus
                         syncCommand={SyncEditDraft({ text: "" })}
                         commitCommand={UpdateTodoText({})}

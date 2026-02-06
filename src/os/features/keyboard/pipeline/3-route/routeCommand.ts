@@ -5,7 +5,7 @@
  */
 
 import { useCommandEngineStore } from '@os/features/command/store/CommandEngineStore';
-import { FocusRegistry } from '@os/features/focus/registry/FocusRegistry';
+import { FocusData } from '@os/features/focus/lib/focusData';
 import { resolveKeybinding, buildBubblePath, type KeybindingEntry } from '@os/features/command/pipeline/2-resolve/resolveKeybinding';
 import { dispatchCommand } from '@os/features/command/pipeline/3-dispatch/dispatchCommand';
 import { runCommandEffects } from '@os/features/command/pipeline/4-effect/commandEffects';
@@ -23,11 +23,10 @@ export function routeCommand(intent: KeyboardIntent): boolean {
     if (allBindings.length === 0) return false;
 
     // Build context
-    const focusPath = FocusRegistry.getFocusPath();
-    const groups = FocusRegistry.get().groups;
-    const activeGroupId = FocusRegistry.get().activeGroupId;
-    const activeGroupStore = activeGroupId ? groups.get(activeGroupId)?.store : null;
-    const focusedItemId = activeGroupStore?.getState().focusedItemId ?? null;
+    const focusPath = FocusData.getFocusPath();
+    const activeGroupId = FocusData.getActiveZoneId();
+    const activeZone = activeGroupId ? FocusData.getById(activeGroupId) : null;
+    const focusedItemId = activeZone?.store?.getState().focusedItemId ?? null;
 
     const context = {
         activeGroup: activeGroupId ?? undefined,

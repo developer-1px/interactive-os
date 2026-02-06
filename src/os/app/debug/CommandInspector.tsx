@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useSyncExternalStore } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
-import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { FocusData } from "@os/features/focus/lib/focusData";
 import { useInspectorStore } from "@os/features/inspector/InspectorStore"; // [NEW] Subscription
 import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { evalContext } from "@os/features/logic/lib/evalContext";
@@ -24,27 +24,17 @@ export function CommandInspector() {
   // v7.50: Use global InspectorStore for tab state
   const activeTab = useInspectorStore(s => s.activeTab);
 
-  // --- Direct Zustand subscriptions (no React Context middleman) ---
-  const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
-  const groups = useFocusRegistry((s) => s.groups);
-
-  const focusPath = useFocusRegistry(
-    useShallow((s) => {
-      if (!s.activeGroupId) return [];
-      const path: string[] = [];
-      let currentId: string | null = s.activeGroupId;
-      while (currentId) {
-        path.unshift(currentId);
-        const entry = s.groups.get(currentId);
-        currentId = entry?.parentId || null;
-        if (path.length > 100) break;
-      }
-      return path;
-    })
+  // --- Direct FocusData subscriptions ---
+  const activeGroupId = useSyncExternalStore(
+    FocusData.subscribeActiveZone,
+    () => FocusData.getActiveZoneId(),
+    () => null
   );
 
-  const activeGroupStore = activeGroupId ? groups.get(activeGroupId)?.store : null;
-  const focusedItemId = activeGroupStore?.getState().focusedItemId ?? null;
+  const focusPath = useMemo(() => FocusData.getFocusPath(), [activeGroupId]);
+
+  const activeZoneData = activeGroupId ? FocusData.getById(activeGroupId) : null;
+  const focusedItemId = activeZoneData?.store?.getState().focusedItemId ?? null;
 
   // Build ctx on-demand
   const ctx = useMemo(() => {

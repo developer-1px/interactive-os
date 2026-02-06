@@ -18,7 +18,8 @@ function flattenKeymap<T>(keymap: KeybindingItem<T>[] | KeymapConfig<T>): Keybin
     if (keymap.global) result.push(...keymap.global);
     if (keymap.zones) {
         Object.entries(keymap.zones).forEach(([zoneId, bindings]) => {
-            (bindings as KeybindingItem<T>[]).forEach(b => result.push({ ...b, zoneId }));
+            // Set both zoneId and groupId (aliases) for compatibility with resolveKeybinding
+            (bindings as KeybindingItem<T>[]).forEach(b => result.push({ ...b, zoneId, groupId: zoneId }));
         });
     }
     return result;

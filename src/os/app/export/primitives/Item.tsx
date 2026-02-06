@@ -2,11 +2,12 @@ import {
   isValidElement,
   useMemo,
   forwardRef,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { FocusData } from "@os/features/focus/lib/focusData";
 import { useStore } from "zustand";
 
 // --- Types ---
@@ -51,7 +52,11 @@ export const Item = forwardRef<HTMLElement, ItemProps>(({
 
   // Using Zustand Selector for granular updates
   const focusedItemId = useStore(store, (s) => s.focusedItemId);
-  const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
+  const activeGroupId = useSyncExternalStore(
+    FocusData.subscribeActiveZone,
+    () => FocusData.getActiveZoneId(),
+    () => null
+  );
 
   const isActive = activeGroupId === groupId;
   const isFocused = focusedItemId === stringId;

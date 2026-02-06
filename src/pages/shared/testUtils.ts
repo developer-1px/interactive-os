@@ -1,6 +1,6 @@
 import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
-import { FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
+import { FocusData } from "@os/features/focus/lib/focusData";
 
 export const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -52,7 +52,7 @@ export const click = (selector: string, modifiers: { ctrl?: boolean, shift?: boo
     }
 
     // Check if zone exists in registry
-    const groupEntry = FocusRegistry.getGroupEntry(zoneId);
+    const groupEntry = FocusData.getById(zoneId);
     console.log(`[testUtils] click: group entry exists=${!!groupEntry}`);
 
     // Dispatch OS_FOCUS command - this properly activates the zone through the pipeline

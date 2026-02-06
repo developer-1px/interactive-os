@@ -1,31 +1,18 @@
-/**
- * FocusGroup - Scoped Focus Container Primitive
- * 
- * Focus/Selection/Activation container with isolated store.
- * Each FocusGroup manages its own state independently.
- */
-
 import {
     createContext,
     useContext,
     useLayoutEffect,
-    useEffect,
     useMemo,
-    useRef,
     type ReactNode,
     type ComponentProps,
 } from 'react';
-import { useStore } from 'zustand';
 import {
     createFocusGroupStore,
     type FocusGroupStore,
 } from '../store/focusGroupStore';
 import { resolveRole } from '../registry/roleRegistry';
-import { DOMRegistry } from '../registry/DOMRegistry';
-import { FocusRegistry } from '../registry/FocusRegistry';
+import { FocusData } from '../lib/focusData';
 import type { BaseCommand } from '@os/entities/BaseCommand';
-import { updateRecovery } from '../pipeline/3-update/updateRecovery';
-import { commitAll } from '../pipeline/4-commit/commitFocus';
 import type {
     FocusGroupConfig,
     NavigateConfig,
@@ -134,8 +121,6 @@ export function FocusGroup({
     style,
     ...rest
 }: FocusGroupProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-
     // --- Stable ID ---
     const groupId = useMemo(() => propId || generateGroupId(), [propId]);
 
@@ -151,51 +136,22 @@ export function FocusGroup({
     const parentContext = useContext(FocusGroupContext);
     const parentId = parentContext?.groupId || null;
 
-    // --- DOM Registry & Global Store Registry ---
+    // --- Container Ref for FocusData ---
+    const containerRef = useMemo(() => ({ current: null as HTMLDivElement | null }), []);
+
+    // --- FocusData Registration (WeakMap) ---
     useLayoutEffect(() => {
         if (containerRef.current) {
-            DOMRegistry.registerGroup(groupId, containerRef.current);
-            // Register with Global Registry for OS Commands (include config and bindings)
-            FocusRegistry.register(groupId, store, parentId, config, {
-                bindActivateCommand,
-                bindSelectCommand,
+            FocusData.set(containerRef.current, {
+                store,
+                config,
+                parentId,
+                activateCommand: bindActivateCommand,
+                selectCommand: bindSelectCommand,
             });
         }
-        return () => {
-            DOMRegistry.unregisterGroup(groupId);
-            FocusRegistry.unregister(groupId);
-        };
-    }, [groupId, store, parentId, config, bindActivateCommand, bindSelectCommand]);
-
-    // --- Focus Recovery (OS-level) ---
-    // When an item is removed from the zone, check if it was focused.
-    // If so, automatically move focus to the next/prev item based on config.
-    const items = useStore(store, (s) => s.items);
-    const focusedItemId = useStore(store, (s) => s.focusedItemId);
-    const prevItemsRef = useRef<string[]>([]);
-
-    useEffect(() => {
-        const prevItems = prevItemsRef.current;
-
-        // Find removed items
-        const removedItems = prevItems.filter(id => !items.includes(id));
-
-        if (removedItems.length > 0 && focusedItemId && removedItems.includes(focusedItemId)) {
-            // The focused item was removed - trigger recovery
-            const result = updateRecovery(
-                focusedItemId,
-                focusedItemId,
-                prevItems,
-                config.navigate.recovery
-            );
-
-            if (result.changed) {
-                commitAll(store, { targetId: result.targetId });
-            }
-        }
-
-        prevItemsRef.current = items;
-    }, [items, focusedItemId, store, config.navigate.recovery]);
+        // No cleanup needed - WeakMap auto-GC when element is removed
+    }, [store, config, parentId, bindActivateCommand, bindSelectCommand]);
 
     // --- Context Value ---
     const contextValue = useMemo<FocusGroupContextValue>(() => ({
@@ -215,7 +171,7 @@ export function FocusGroup({
     return (
         <FocusGroupContext.Provider value={contextValue}>
             <div
-                ref={containerRef}
+                ref={(el) => { containerRef.current = el; }}
                 id={groupId}
                 data-focus-group={groupId}
                 aria-orientation={
@@ -225,6 +181,10 @@ export function FocusGroup({
                 aria-multiselectable={config.select.mode === 'multiple' || undefined}
                 role={role || 'group'}
                 tabIndex={-1}
+                onFocusCapture={() => {
+                    // Set this zone as active when any child receives focus
+                    FocusData.setActiveZone(groupId);
+                }}
                 className={`outline-none ${orientationClass} ${className || ''}`}
                 style={style}
                 {...rest}
@@ -236,4 +196,3 @@ export function FocusGroup({
 }
 
 FocusGroup.displayName = 'FocusGroup';
-

@@ -14,6 +14,7 @@ import {
     useRef,
     useCallback,
     useMemo,
+    useSyncExternalStore,
     forwardRef,
     isValidElement,
     cloneElement,
@@ -23,8 +24,7 @@ import {
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { useFocusGroupContext } from './FocusGroup';
-import { useFocusRegistry } from '../registry/FocusRegistry';
-import { DOMRegistry } from '../registry/DOMRegistry';
+import { FocusData } from '../lib/focusData';
 import { twMerge } from 'tailwind-merge';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -101,25 +101,23 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
     const { groupId, store } = ctx;
 
     // --- Registration (Callback Ref Pattern) ---
-    // This ensures registration happens exactly when the DOM node is available,
-    // handling React 18 Strict Mode mount/unmount/mount cycles correctly.
+    // Store registration only (DOM access via getElementById)
     const registerCallback = useCallback((node: HTMLElement | null) => {
-        // Update internal ref for debugging/access
         internalRef.current = node;
 
         if (node) {
-            // Mount / Update
-            DOMRegistry.registerItem(id, groupId, node);
             store.getState().addItem(id);
         } else {
-            // Unmount
-            DOMRegistry.unregisterItem(id);
             store.getState().removeItem(id);
         }
-    }, [id, groupId, store]);
+    }, [id, store]);
 
     // --- Reactive State Subscription ---
-    const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
+    const activeGroupId = useSyncExternalStore(
+        FocusData.subscribeActiveZone,
+        () => FocusData.getActiveZoneId(),
+        () => null
+    );
     const isGroupActive = activeGroupId === groupId;
 
     const { isFocused, isSelected, isExpanded } = useStore(

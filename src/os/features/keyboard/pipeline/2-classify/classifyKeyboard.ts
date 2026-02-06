@@ -71,13 +71,20 @@ export function classifyKeyboard(intent: KeyboardIntent): KeyboardCategory {
         }
     }
 
-    // --- Priority 2: Command (Keybinding) ---
+    // --- Priority 2: Native Browser Shortcuts (Copy/Paste/Cut/Select All) ---
+    // Always allow these to pass through for native browser handling
+    const NATIVE_SHORTCUTS = ['Meta-c', 'Meta-v', 'Meta-x', 'Meta-a', 'Ctrl-c', 'Ctrl-v', 'Ctrl-x', 'Ctrl-a'];
+    if (NATIVE_SHORTCUTS.includes(canonicalKey)) {
+        return 'PASSTHRU';
+    }
+
+    // --- Priority 3: Command (Keybinding) ---
     // All navigation keys are registered as keybindings in useOSCore
     if (hasKeybinding(canonicalKey)) {
         return 'COMMAND';
     }
 
-    // --- Priority 3: Passthrough ---
+    // --- Priority 4: Passthrough ---
     return 'PASSTHRU';
 }
 

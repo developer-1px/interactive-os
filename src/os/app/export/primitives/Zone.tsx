@@ -38,8 +38,6 @@ export interface ZoneProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | '
     role?: string;
     /** Advanced config overrides (use sparingly) */
     options?: ZoneOptions;
-    /** @deprecated Use bindActivateCommand */
-    onActivate?: (itemId: string) => void;
     /** Command dispatched on item activation (Enter key) */
     bindActivateCommand?: BaseCommand;
     /** Command dispatched on item selection (Space key) */
@@ -48,7 +46,7 @@ export interface ZoneProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | '
     children: ReactNode;
 }
 
-export function Zone({ area, id, role, options, onActivate, bindActivateCommand, bindSelectCommand, children, ...props }: ZoneProps) {
+export function Zone({ area, id, role, options, bindActivateCommand, bindSelectCommand, children, ...props }: ZoneProps) {
     // Use id if present, otherwise fallback to area for legacy support
     const effectiveId = id || area;
 
@@ -62,7 +60,6 @@ export function Zone({ area, id, role, options, onActivate, bindActivateCommand,
             activate={options?.activate}
             dismiss={options?.dismiss}
             project={options?.project}
-            onActivate={onActivate}
             bindActivateCommand={bindActivateCommand}
             bindSelectCommand={bindSelectCommand}
             {...props}

@@ -56,7 +56,6 @@ export function ActivateTest() {
                         navigate={{ orientation: 'vertical' }}
                         select={{ mode: 'single', followFocus: true }}
                         activate={{ mode: 'automatic' }}
-                        onActivate={(id) => console.log('[Test] Auto Activated:', id)}
                         className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
                     >
                         {['Preview A', 'Preview B'].map(item => (
@@ -76,7 +75,6 @@ export function ActivateTest() {
                         role="listbox"
                         navigate={{ orientation: 'vertical' }}
                         activate={{ mode: 'manual' }}
-                        onActivate={(id) => console.log('[Test] Manual Activated:', id)}
                         className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
                     >
                         {['File 1', 'File 2'].map(item => (
