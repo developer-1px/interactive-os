@@ -617,7 +617,6 @@ function AccordionContent() {
                         id={item.id}
                         as="button"
                         role="button"
-                        aria-expanded={isExpanded(item.id)}
                         aria-controls={`${item.id}-panel`}
                         onClick={() => toggleExpanded(item.id)}
                         className="

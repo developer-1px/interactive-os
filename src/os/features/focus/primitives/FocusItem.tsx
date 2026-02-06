@@ -138,9 +138,13 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
     // Allow tabIndex override from props (Field primitive needs tabIndex=0 for navigation)
     const { tabIndex: propTabIndex, ...otherRest } = rest as { tabIndex?: number;[key: string]: any };
 
+    // Determine if this item supports expansion based on role
+    const effectiveRole = role || 'option';
+    const supportsExpansion = effectiveRole === 'treeitem' || effectiveRole === 'button';
+
     const computedProps = {
         id: id,
-        role: role || 'option',
+        role: effectiveRole,
         'data-item-id': id,
         'data-anchor': isAnchor ? 'true' : undefined,
         'data-focused': visualFocused ? 'true' : undefined,
@@ -148,7 +152,8 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
         'data-expanded': isExpanded ? 'true' : undefined,
         'aria-current': visualFocused ? 'true' : undefined,
         'aria-selected': isSelected || undefined,
-        'aria-expanded': isExpanded || undefined,
+        // Auto-project aria-expanded for expandable roles (treeitem, button)
+        'aria-expanded': supportsExpansion ? isExpanded : undefined,
         'aria-disabled': disabled || undefined,
         // Use prop tabIndex if provided, otherwise use visualFocused logic
         tabIndex: propTabIndex !== undefined ? propTabIndex : (visualFocused ? 0 : -1),

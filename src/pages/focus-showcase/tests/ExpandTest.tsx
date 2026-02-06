@@ -2,6 +2,7 @@ import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { TestBox, useTestState } from "../../shared/TestLayout";
 import { click, navigate, assert, wait } from "../../shared/testUtils";
+import { useFocusExpansion } from "@os/features/focus/hooks/useFocusExpansion";
 
 export function ExpandTest() {
     const { status, setStatus, logs, addLog, clearLogs } = useTestState();
@@ -77,13 +78,6 @@ export function ExpandTest() {
         </div>
     );
 
-    // Tree data structure
-    const treeData = [
-        { id: 'tree-parent-1', label: 'Documents', children: ['doc-1', 'doc-2'] },
-        { id: 'tree-parent-2', label: 'Images', children: ['img-1'] },
-        { id: 'tree-leaf', label: 'readme.txt', children: [] },
-    ];
-
     return (
         <TestBox title="Expand / Collapse" status={status} logs={logs} onRun={runTest} description={description}>
             <div className="space-y-2">
@@ -94,38 +88,54 @@ export function ExpandTest() {
                     navigate={{ orientation: 'vertical' }}
                     className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200"
                 >
-                    {treeData.map(item => (
-                        <div key={item.id} className="flex flex-col">
-                            <FocusItem
-                                id={item.id}
-                                role="treeitem"
-                                aria-expanded={item.children.length > 0 ? false : undefined}
-                                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-sky-100 aria-[current=true]:text-sky-700 text-sm transition-all flex items-center gap-2 group"
-                            >
-                                {item.children.length > 0 ? (
-                                    <span className="w-4 h-4 flex items-center justify-center text-gray-400 group-aria-[expanded=true]:rotate-90 transition-transform">
-                                        ▶
-                                    </span>
-                                ) : (
-                                    <span className="w-4 h-4 flex items-center justify-center text-gray-300">•</span>
-                                )}
-                                <span>{item.label}</span>
-                            </FocusItem>
-                            {/* Children placeholder - shown when expanded */}
-                            {item.children.length > 0 && (
-                                <div className="ml-6 hidden group-aria-[expanded=true]:block">
-                                    {item.children.map(childId => (
-                                        <div key={childId} className="text-xs text-gray-400 py-0.5 pl-2">
-                                            └ {childId}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                    <TreeItems />
                 </FocusGroup>
                 <div className="text-[10px] text-gray-500">Use Arrow keys to expand/collapse.</div>
             </div>
         </TestBox>
+    );
+}
+
+function TreeItems() {
+    const { isExpanded } = useFocusExpansion();
+
+    // Tree data structure
+    const treeData = [
+        { id: 'tree-parent-1', label: 'Documents', children: ['doc-1', 'doc-2'] },
+        { id: 'tree-parent-2', label: 'Images', children: ['img-1'] },
+        { id: 'tree-leaf', label: 'readme.txt', children: [] },
+    ];
+
+    return (
+        <>
+            {treeData.map(item => (
+                <div key={item.id} className="flex flex-col">
+                    <FocusItem
+                        id={item.id}
+                        role="treeitem"
+                        className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-sky-100 aria-[current=true]:text-sky-700 text-sm transition-all flex items-center gap-2 group"
+                    >
+                        {item.children.length > 0 ? (
+                            <span className="w-4 h-4 flex items-center justify-center text-gray-400 group-aria-[expanded=true]:rotate-90 transition-transform">
+                                ▶
+                            </span>
+                        ) : (
+                            <span className="w-4 h-4 flex items-center justify-center text-gray-300">•</span>
+                        )}
+                        <span>{item.label}</span>
+                    </FocusItem>
+                    {/* Children - shown when expanded */}
+                    {item.children.length > 0 && isExpanded(item.id) && (
+                        <div className="ml-6">
+                            {item.children.map(childId => (
+                                <div key={childId} className="text-xs text-gray-400 py-0.5 pl-2">
+                                    └ {childId}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ))}
+        </>
     );
 }
