@@ -104,7 +104,7 @@ export const MoveItemUp = defineListCommand({
     id: "MOVE_ITEM_UP",
     run: (state, payload: { focusId: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
-            const focusId = payload.focusId as number;
+            const focusId = Number(payload.focusId);
 
             if (!focusId || isNaN(focusId)) return;
 
@@ -136,7 +136,7 @@ export const MoveItemDown = defineListCommand({
     id: "MOVE_ITEM_DOWN",
     run: (state, payload: { focusId: number | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
-            const focusId = payload.focusId as number;
+            const focusId = Number(payload.focusId);
             if (!focusId || isNaN(focusId)) return;
 
             const visibleIds = state.data.todoOrder.filter(

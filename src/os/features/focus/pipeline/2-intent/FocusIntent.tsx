@@ -30,6 +30,12 @@ export function FocusIntent() {
                 runOS(TAB, (payload ?? {}) as { direction?: 'forward' | 'backward' });
             }
         },
+        {
+            command: OS_COMMANDS.TAB_PREV,
+            handler: () => {
+                runOS(TAB, { direction: 'backward' });
+            }
+        },
         // --- Select ---
         {
             command: OS_COMMANDS.SELECT,
