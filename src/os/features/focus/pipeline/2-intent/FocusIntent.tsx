@@ -7,7 +7,7 @@
 
 import { useCommandListener } from '../../../command/hooks/useCommandListener';
 import { OS_COMMANDS, type OSNavigatePayload } from '../../../command/definitions/commandsShell';
-import { NAVIGATE, TAB, SELECT, ACTIVATE, FOCUS, DISMISS } from './commands';
+import { NAVIGATE, TAB, SELECT, ACTIVATE, FOCUS, DISMISS, COPY, CUT, PASTE, TOGGLE, DELETE, UNDO, REDO } from './commands';
 import { runOS } from '../core/osCommand';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -34,7 +34,8 @@ export function FocusIntent() {
         {
             command: OS_COMMANDS.SELECT,
             handler: ({ payload }) => {
-                runOS(SELECT, (payload ?? {}) as { targetId?: string; zoneId?: string });
+                const selectPayload = (payload ?? {}) as { targetId?: string; zoneId?: string };
+                runOS(SELECT, selectPayload, selectPayload.zoneId);
             }
         },
         // --- Activate ---
@@ -58,9 +59,54 @@ export function FocusIntent() {
                 runOS(DISMISS, {});
             }
         },
+        // --- Clipboard ---
+        {
+            command: OS_COMMANDS.COPY,
+            handler: ({ payload }) => {
+                runOS(COPY, (payload ?? {}) as { targetId?: string });
+            }
+        },
+        {
+            command: OS_COMMANDS.CUT,
+            handler: ({ payload }) => {
+                runOS(CUT, (payload ?? {}) as { targetId?: string });
+            }
+        },
+        {
+            command: OS_COMMANDS.PASTE,
+            handler: ({ payload }) => {
+                runOS(PASTE, (payload ?? {}) as { targetId?: string });
+            }
+        },
+        {
+            command: OS_COMMANDS.TOGGLE,
+            handler: ({ payload }) => {
+                runOS(TOGGLE, (payload ?? {}) as { targetId?: string });
+            }
+        },
+        // --- Editing ---
+        {
+            command: OS_COMMANDS.DELETE,
+            handler: ({ payload }) => {
+                runOS(DELETE, (payload ?? {}) as { targetId?: string });
+            }
+        },
+        {
+            command: OS_COMMANDS.UNDO,
+            handler: () => {
+                runOS(UNDO, undefined);
+            }
+        },
+        {
+            command: OS_COMMANDS.REDO,
+            handler: () => {
+                runOS(REDO, undefined);
+            }
+        },
     ]);
 
     return null;
 }
 
 FocusIntent.displayName = 'FocusIntent';
+

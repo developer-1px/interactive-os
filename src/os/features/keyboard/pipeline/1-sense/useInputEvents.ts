@@ -48,9 +48,8 @@ const onInput = (e: Event) => {
     const fieldId = resolveFieldId(target);
     if (!fieldId || !isFieldTarget(fieldId)) return;
 
-    const field = FieldRegistry.getField(fieldId);
-    if (!field?.config.syncCommand) return;
-
+    // Always dispatch FIELD_SYNC to update localValue
+    // FIELD_SYNC will only dispatch app command if onChange is configured
     const text = target.innerText;
     const dispatch = useCommandEngineStore.getState().getActiveDispatch();
 

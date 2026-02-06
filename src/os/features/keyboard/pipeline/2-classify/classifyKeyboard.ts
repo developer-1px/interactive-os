@@ -36,13 +36,13 @@ export function classifyKeyboard(intent: KeyboardIntent): KeyboardCategory {
     if (isFromField && fieldId) {
         const fieldEntry = FieldRegistry.getField(fieldId);
         if (fieldEntry) {
-            const isEditing = fieldEntry.state.isEditing;
             const mode = fieldEntry.config.mode ?? 'immediate';
+            // immediate mode: always editing when focused
+            // deferred mode: only editing when isEditing flag is true
+            const isEditing = mode === 'immediate' || fieldEntry.state.isEditing;
+            const multiline = fieldEntry.config.multiline ?? false;
 
-            // Only handle as FIELD when actually editing
             if (isEditing) {
-                const multiline = fieldEntry.config.multiline ?? false;
-
                 // ArrowUp/Down: only trap in multiline fields
                 if (canonicalKey === 'ArrowUp' || canonicalKey === 'ArrowDown') {
                     if (multiline) {
@@ -58,14 +58,14 @@ export function classifyKeyboard(intent: KeyboardIntent): KeyboardCategory {
                 else if (FIELD_KEYS.has(canonicalKey)) {
                     return 'FIELD';
                 }
-                // Single character input
+                // Single character input (no modifier)
                 if (canonicalKey.length === 1 && !hasModifier(canonicalKey)) {
                     return 'FIELD';
                 }
             }
 
             // Deferred mode, not editing: Enter starts edit
-            if (mode === 'deferred' && !isEditing && canonicalKey === 'Enter') {
+            if (mode === 'deferred' && !fieldEntry.state.isEditing && canonicalKey === 'Enter') {
                 return 'FIELD';
             }
         }

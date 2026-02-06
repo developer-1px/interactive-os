@@ -42,11 +42,25 @@ export interface ZoneProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | '
     onAction?: BaseCommand;
     /** Command dispatched on item selection (Space key) */
     onSelect?: BaseCommand;
+    /** Command dispatched on copy (Cmd+C) */
+    onCopy?: BaseCommand;
+    /** Command dispatched on cut (Cmd+X) */
+    onCut?: BaseCommand;
+    /** Command dispatched on paste (Cmd+V) */
+    onPaste?: BaseCommand;
+    /** Command dispatched on toggle (Space) - for checkboxes, multi-select */
+    onToggle?: BaseCommand;
+    /** Command dispatched on delete (Backspace/Delete) */
+    onDelete?: BaseCommand;
+    /** Command dispatched on undo (Cmd+Z) */
+    onUndo?: BaseCommand;
+    /** Command dispatched on redo (Cmd+Shift+Z) */
+    onRedo?: BaseCommand;
     /** Children */
     children: ReactNode;
 }
 
-export function Zone({ area, id, role, options, onAction, onSelect, children, ...props }: ZoneProps) {
+export function Zone({ area, id, role, options, onAction, onSelect, onToggle, onCopy, onCut, onPaste, onDelete, onUndo, onRedo, children, ...props }: ZoneProps) {
     // Use id if present, otherwise fallback to area for legacy support
     const effectiveId = id || area;
 
@@ -62,6 +76,13 @@ export function Zone({ area, id, role, options, onAction, onSelect, children, ..
             project={options?.project}
             onAction={onAction}
             onSelect={onSelect}
+            onToggle={onToggle}
+            onCopy={onCopy}
+            onCut={onCut}
+            onPaste={onPaste}
+            onDelete={onDelete}
+            onUndo={onUndo}
+            onRedo={onRedo}
             {...props}
         >
             {children}

@@ -105,6 +105,10 @@ export function runKeyboard<P>(
 
     // 6. Dispatch App Command
     if (result.dispatch) {
-        useCommandEventBus.getState().emit(result.dispatch);
+        // Use app dispatch to run reducers, not the event bus
+        import('@os/features/command/store/CommandEngineStore').then(({ useCommandEngineStore }) => {
+            const dispatch = useCommandEngineStore.getState().getActiveDispatch();
+            dispatch?.(result.dispatch!);
+        });
     }
 }

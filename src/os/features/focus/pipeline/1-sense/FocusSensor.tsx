@@ -15,18 +15,41 @@ import { isProgrammaticFocus } from '../5-sync/FocusSync';
 let isMounted = false;
 
 function sense(e: Event) {
-    const item = findFocusableItem(e.target as HTMLElement);
+    const target = e.target as HTMLElement;
+
+    // --- Label Recognition (ZIFTL Extension) ---
+    // If clicked inside a Label, redirect focus to the target Field
+    const label = target.closest('[data-label]') as HTMLElement | null;
+    if (label && e.type === 'mousedown') {
+        // Explicit target via data-for, or auto-detect first Field inside
+        const targetId = label.getAttribute('data-for');
+        const targetField = targetId
+            ? document.getElementById(targetId)
+            : label.querySelector('[role="textbox"]') as HTMLElement | null;
+
+        if (targetField) {
+            e.preventDefault();
+            targetField.focus();
+            return;
+        }
+    }
+
+    // --- Standard Focus Detection ---
+    const item = findFocusableItem(target);
     if (!item) return;
 
-    const target = resolveFocusTarget(item);
-    if (!target) return;
+    const focusTarget = resolveFocusTarget(item);
+    if (!focusTarget) return;
 
-    const { itemId, groupId } = target;
+    const { itemId, groupId } = focusTarget;
     const dispatch = useCommandEngineStore.getState().getActiveDispatch();
     if (!dispatch) return;
 
-    // MouseDown → FOCUS + SELECT
+    // MouseDown → FOCUS + SELECT (always FOCUS first to ensure activeZone is set)
     if (e instanceof MouseEvent && e.type === 'mousedown') {
+        // Always set focus first
+        dispatch({ type: OS_COMMANDS.FOCUS, payload: { id: itemId, zoneId: groupId } });
+
         if (e.shiftKey) {
             e.preventDefault();
             dispatch({ type: OS_COMMANDS.SELECT, payload: { targetId: itemId, mode: 'range', zoneId: groupId } });
@@ -37,7 +60,6 @@ function sense(e: Event) {
             dispatch({ type: OS_COMMANDS.SELECT, payload: { targetId: itemId, mode: 'toggle', zoneId: groupId } });
             return;
         }
-        dispatch({ type: OS_COMMANDS.FOCUS, payload: { id: itemId, zoneId: groupId } });
         dispatch({ type: OS_COMMANDS.SELECT, payload: { targetId: itemId, mode: 'replace', zoneId: groupId } });
         return;
     }

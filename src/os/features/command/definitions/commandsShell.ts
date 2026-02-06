@@ -34,6 +34,10 @@ export const OS_COMMANDS = {
     CUT: "OS_CUT",
     PASTE: "OS_PASTE",
 
+    // --- Editing (The "Modification" Actions) ---
+    TOGGLE: "OS_TOGGLE",  // Space - checkbox/multi-select toggle
+    DELETE: "OS_DELETE",
+
     // --- History (The "Time" Control) ---
     UNDO: "OS_UNDO",
     REDO: "OS_REDO",
@@ -89,6 +93,7 @@ export type OSCommand =
     | { type: typeof OS_COMMANDS.COPY; payload?: any }
     | { type: typeof OS_COMMANDS.CUT; payload?: any }
     | { type: typeof OS_COMMANDS.PASTE; payload?: any }
+    | { type: typeof OS_COMMANDS.DELETE; payload?: any }
     | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: any }
     | { type: typeof OS_COMMANDS.EXIT; payload?: any };
 

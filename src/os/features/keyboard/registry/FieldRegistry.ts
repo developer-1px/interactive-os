@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import type { BaseCommand } from '@os/entities/BaseCommand';
+import type { BaseCommand, FieldCommandFactory } from '@os/entities/BaseCommand';
 
 export interface FieldConfig {
     name: string;
     mode?: 'immediate' | 'deferred';  // immediate = always editing, deferred = needs Enter to edit
     multiline?: boolean;
-    onSubmit?: BaseCommand;
-    onChange?: BaseCommand;
+    onSubmit?: FieldCommandFactory;   // Field injects { text: currentValue }
+    onChange?: FieldCommandFactory;   // Field injects { text: currentValue }
     onCancel?: BaseCommand;
     updateType?: string; // Legacy support
     onCommit?: (value: string) => void; // Local callback support

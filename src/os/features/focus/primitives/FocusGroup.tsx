@@ -82,6 +82,27 @@ export interface FocusGroupProps extends Omit<ComponentProps<'div'>, 'id' | 'rol
     /** Command dispatched on item selection (Space key) */
     onSelect?: BaseCommand;
 
+    /** Command dispatched on copy (Cmd+C) */
+    onCopy?: BaseCommand;
+
+    /** Command dispatched on cut (Cmd+X) */
+    onCut?: BaseCommand;
+
+    /** Command dispatched on paste (Cmd+V) */
+    onPaste?: BaseCommand;
+
+    /** Command dispatched on toggle (Space) - for checkboxes, multi-select */
+    onToggle?: BaseCommand;
+
+    /** Command dispatched on delete (Backspace/Delete) */
+    onDelete?: BaseCommand;
+
+    /** Command dispatched on undo (Cmd+Z) */
+    onUndo?: BaseCommand;
+
+    /** Command dispatched on redo (Cmd+Shift+Z) */
+    onRedo?: BaseCommand;
+
     /** Children */
     children: ReactNode;
 
@@ -116,6 +137,13 @@ export function FocusGroup({
     project,
     onAction,
     onSelect,
+    onCopy,
+    onCut,
+    onPaste,
+    onToggle,
+    onDelete,
+    onUndo,
+    onRedo,
     children,
     className,
     style,
@@ -148,10 +176,17 @@ export function FocusGroup({
                 parentId,
                 activateCommand: onAction,
                 selectCommand: onSelect,
+                copyCommand: onCopy,
+                cutCommand: onCut,
+                pasteCommand: onPaste,
+                deleteCommand: onDelete,
+                toggleCommand: onToggle,
+                undoCommand: onUndo,
+                redoCommand: onRedo,
             });
         }
         // No cleanup needed - WeakMap auto-GC when element is removed
-    }, [store, config, parentId, onAction, onSelect]);
+    }, [store, config, parentId, onAction, onSelect, onCopy, onCut, onPaste, onToggle, onDelete, onUndo, onRedo]);
 
     // --- Context Value ---
     const contextValue = useMemo<FocusGroupContextValue>(() => ({

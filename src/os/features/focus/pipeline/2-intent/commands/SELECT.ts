@@ -56,24 +56,25 @@ function handleRangeSelect(
 // SELECT Command
 // ═══════════════════════════════════════════════════════════════════
 
-export const SELECT: OSCommand<{ targetId?: string; mode?: 'single' | 'toggle' | 'range'; zoneId?: string }> = {
+export const SELECT: OSCommand<{ targetId?: string; mode?: 'single' | 'replace' | 'toggle' | 'range'; zoneId?: string }> = {
     run: (ctx, payload) => {
         const targetId = payload?.targetId ?? ctx.focusedItemId;
         if (!targetId) return null;
 
-        const mode = payload?.mode ?? 'toggle';
+        const mode = payload?.mode ?? 'single';
         let selectionResult: { selection: string[]; anchor: string | null };
 
         switch (mode) {
             case 'single':
+            case 'replace':  // Alias for single
                 selectionResult = handleSingleSelect(targetId);
                 break;
             case 'range':
                 selectionResult = handleRangeSelect(ctx, targetId);
                 break;
             case 'toggle':
-            default:
                 selectionResult = handleToggleSelect(ctx, targetId);
+                break;
         }
 
         const result: OSResult = {

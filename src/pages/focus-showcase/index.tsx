@@ -8,6 +8,7 @@ import { AutofocusTest } from "./tests/AutofocusTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";
 import { AriaInteractionTest } from "./tests/AriaInteractionTest";
 import { ExpandTest } from "./tests/ExpandTest";
+import { FocusStackTest } from "./tests/FocusStackTest";
 
 export function FocusShowcasePage() {
     const runAllTests = async () => {
@@ -50,6 +51,7 @@ export function FocusShowcasePage() {
                 <AriaFacadeTest />
                 <AriaInteractionTest />
                 <ExpandTest />
+                <FocusStackTest />
             </TestGrid>
         </div>
     );

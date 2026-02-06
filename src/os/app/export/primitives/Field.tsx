@@ -2,19 +2,19 @@ import {
   useRef,
   forwardRef,
   useEffect,
+  useLayoutEffect,
   useSyncExternalStore,
 } from "react";
 import type {
   HTMLAttributes,
 } from "react";
-import type { BaseCommand } from "@os/entities/BaseCommand.ts";
+import type { BaseCommand, FieldCommandFactory } from "@os/entities/BaseCommand.ts";
 import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import type { FocusTarget } from "@os/entities/FocusTarget.ts";
 import { FieldRegistry, useFieldRegistry, type FieldConfig } from "@os/features/keyboard/registry/FieldRegistry";
 import {
-  useFieldDOMSync,
   useFieldFocus,
 } from "@os/features/keyboard/ui/Field/useFieldHooks";
 
@@ -80,7 +80,7 @@ const getFieldClasses = ({
 
 export type FieldMode = "immediate" | "deferred";
 
-export interface FieldProps<T extends BaseCommand>
+export interface FieldProps
   extends Omit<
     HTMLAttributes<HTMLElement>,
     "onChange" | "onBlur" | "onFocus"
@@ -89,8 +89,8 @@ export interface FieldProps<T extends BaseCommand>
   name?: string;
   placeholder?: string;
   multiline?: boolean;
-  onSubmit?: T;
-  onChange?: BaseCommand;
+  onSubmit?: FieldCommandFactory;   // Field injects { text: currentValue }
+  onChange?: FieldCommandFactory;   // Field injects { text: currentValue }
   onCancel?: BaseCommand;
   updateType?: string;
   onCommit?: (value: string) => void;
@@ -112,7 +112,7 @@ export interface FieldProps<T extends BaseCommand>
  * 
  * NO event handlers - all logic in InputSensor + InputIntent.
  */
-export const Field = forwardRef<HTMLElement, FieldProps<any>>(({
+export const Field = forwardRef<HTMLElement, FieldProps>(({
   value,
   name,
   placeholder,
@@ -180,8 +180,26 @@ export const Field = forwardRef<HTMLElement, FieldProps<any>>(({
   const isContentEditable = mode === "deferred" ? (isFocused && isEditing) : isFocused;
   const isActive = isContentEditable;
 
-  // --- DOM Sync (controlled by hooks) ---
-  useFieldDOMSync({ innerRef, localValue, isActive, cursorRef });
+  // --- Initial Value (set once on mount via ref) ---
+  // contentEditable manages its own DOM, we only set initial value
+  const initialValueRef = useRef(value);
+  const hasInitialized = useRef(false);
+
+  useLayoutEffect(() => {
+    if (innerRef.current && !hasInitialized.current) {
+      innerRef.current.innerText = initialValueRef.current;
+      hasInitialized.current = true;
+    }
+  }, []);
+
+  // Reset when value prop becomes empty (e.g., after submit)
+  const prevValueRef = useRef(value);
+  useLayoutEffect(() => {
+    if (innerRef.current && prevValueRef.current !== value && value === '') {
+      innerRef.current.innerText = '';
+    }
+    prevValueRef.current = value;
+  }, [value]);
 
   const shouldHaveDOMFocus = mode === "deferred" ? isFocused : isActive;
   useFieldFocus({ innerRef, isActive: shouldHaveDOMFocus, blurOnInactive, cursorRef });

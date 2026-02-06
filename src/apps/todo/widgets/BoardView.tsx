@@ -3,6 +3,9 @@ import { Zone } from "@os/app/export/primitives/Zone";
 import { Trigger } from "@os/app/export/primitives/Trigger";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import { ToggleView } from "@apps/todo/features/commands/ToggleView";
+import { ToggleTodo, StartEdit, DeleteTodo } from "@apps/todo/features/commands/list";
+import { CopyTodo, CutTodo, PasteTodo } from "@apps/todo/features/commands/clipboard";
+import { OS } from "@os/features/AntigravityOS";
 import { List } from "lucide-react";
 import type { AppState } from "@apps/todo/model/types";
 import { TaskItem } from "./TaskItem";
@@ -64,6 +67,15 @@ export function BoardView() {
                   id={`col-${categoryId}`}
                   role="listbox"
                   navigate={{ orientation: 'vertical', entry: 'restore' }}
+                  // ARIA Standard Commands
+                  onSelect={ToggleTodo({ id: OS.FOCUS })}
+                  onAction={StartEdit({ id: OS.FOCUS })}
+                  // Clipboard Commands (Muscle Memory)
+                  onCopy={CopyTodo({ id: OS.FOCUS })}
+                  onCut={CutTodo({ id: OS.FOCUS })}
+                  onPaste={PasteTodo({ id: OS.FOCUS })}
+                  // Editing Commands (Muscle Memory)
+                  onDelete={DeleteTodo({ id: OS.FOCUS })}
                   className={`
                         w-80 flex-shrink-0 flex flex-col max-h-full rounded-2xl bg-slate-100/50 border transition-all duration-300 outline-none
                         ${activeColumn ? "border-indigo-200 bg-white shadow-xl shadow-indigo-100/50 ring-1 ring-indigo-500/10" : "border-slate-200/60 hover:border-slate-300"}

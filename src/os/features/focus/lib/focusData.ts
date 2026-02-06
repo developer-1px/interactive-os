@@ -14,8 +14,18 @@ export interface ZoneData {
     store: FocusGroupStore;
     config: FocusGroupConfig;
     parentId: string | null;
+    // ARIA Standard Commands
     activateCommand?: BaseCommand;
     selectCommand?: BaseCommand;
+    toggleCommand?: BaseCommand;  // Space - checkbox/multi-select toggle
+    // Clipboard Commands (Muscle Memory)
+    copyCommand?: BaseCommand;
+    cutCommand?: BaseCommand;
+    pasteCommand?: BaseCommand;
+    // Editing Commands (Muscle Memory)
+    deleteCommand?: BaseCommand;
+    undoCommand?: BaseCommand;
+    redoCommand?: BaseCommand;
 }
 
 const zoneDataMap = new WeakMap<HTMLElement, ZoneData>();
@@ -23,6 +33,24 @@ const zoneDataMap = new WeakMap<HTMLElement, ZoneData>();
 // Active zone tracking (글로벌 상태)
 let activeZoneId: string | null = null;
 const activeZoneListeners = new Set<() => void>();
+
+// ═══════════════════════════════════════════════════════════════════
+// Focus Stack - Modal/Dialog Focus Restoration
+// ═══════════════════════════════════════════════════════════════════
+
+export interface FocusStackEntry {
+    zoneId: string;
+    itemId: string | null;
+    /** Optional: Zone ID that triggered the push (for debugging) */
+    triggeredBy?: string;
+}
+
+/** 
+ * Global focus stack for modal/dialog focus restoration.
+ * Push when opening overlay, pop when closing to restore previous focus.
+ */
+const focusStack: FocusStackEntry[] = [];
+const focusStackListeners = new Set<() => void>();
 
 export const FocusData = {
     /**
@@ -153,4 +181,110 @@ export const FocusData = {
             .map(el => el.id)
             .filter(Boolean);
     },
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Focus Stack API - Modal/Dialog Focus Restoration
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Push current focus state onto the stack.
+     * Call this BEFORE opening a modal/dialog.
+     * @param triggeredBy - Optional ID of the zone that's being opened (for debugging)
+     */
+    pushFocusStack(triggeredBy?: string): void {
+        const currentZoneId = activeZoneId;
+        const currentData = currentZoneId ? this.getById(currentZoneId) : null;
+        const currentItemId = currentData?.store.getState().focusedItemId ?? null;
+
+        const entry: FocusStackEntry = {
+            zoneId: currentZoneId ?? '',
+            itemId: currentItemId,
+            triggeredBy,
+        };
+
+        focusStack.push(entry);
+        focusStackListeners.forEach(fn => fn());
+
+        console.log('[FocusStack] PUSH:', entry, 'depth:', focusStack.length);
+    },
+
+    /**
+     * Pop the top entry from the focus stack.
+     * Call this AFTER closing a modal/dialog.
+     * @returns The popped entry, or null if stack is empty
+     */
+    popFocusStack(): FocusStackEntry | null {
+        const entry = focusStack.pop() ?? null;
+        focusStackListeners.forEach(fn => fn());
+
+        console.log('[FocusStack] POP:', entry, 'depth:', focusStack.length);
+        return entry;
+    },
+
+    /**
+     * Peek at the top entry without removing it.
+     */
+    peekFocusStack(): FocusStackEntry | null {
+        return focusStack[focusStack.length - 1] ?? null;
+    },
+
+    /**
+     * Get current stack depth.
+     */
+    getFocusStackDepth(): number {
+        return focusStack.length;
+    },
+
+    /**
+     * Subscribe to focus stack changes.
+     */
+    subscribeFocusStack(listener: () => void): () => void {
+        focusStackListeners.add(listener);
+        return () => focusStackListeners.delete(listener);
+    },
+
+    /**
+     * Clear the entire focus stack.
+     * Use with caution - typically only for app reset.
+     */
+    clearFocusStack(): void {
+        focusStack.length = 0;
+        focusStackListeners.forEach(fn => fn());
+        console.log('[FocusStack] CLEAR');
+    },
+
+    /**
+     * Pop and restore focus to the previous state.
+     * This is a convenience method that pops and dispatches FOCUS command.
+     * @returns true if focus was restored, false if stack was empty
+     */
+    popAndRestoreFocus(): boolean {
+        const entry = this.popFocusStack();
+        if (!entry || !entry.zoneId) return false;
+
+        // Delay restoration to allow current overlay to unmount
+        setTimeout(() => {
+            if (entry.itemId) {
+                // Restore to specific item
+                const targetEl = document.getElementById(entry.itemId);
+                if (targetEl) {
+                    targetEl.focus();
+                    console.log('[FocusStack] RESTORE to:', entry.itemId);
+                }
+            } else if (entry.zoneId) {
+                // Restore to zone (first focusable item)
+                const zoneEl = document.getElementById(entry.zoneId);
+                if (zoneEl) {
+                    const firstItem = zoneEl.querySelector('[data-item-id]') as HTMLElement;
+                    if (firstItem) {
+                        firstItem.focus();
+                        console.log('[FocusStack] RESTORE to zone first item:', firstItem.id);
+                    }
+                }
+            }
+        }, 50);
+
+        return true;
+    },
 };
+

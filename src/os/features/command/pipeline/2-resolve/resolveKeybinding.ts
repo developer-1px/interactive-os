@@ -13,6 +13,8 @@
 import type { KeyboardIntent } from '../1-intercept';
 import { normalizeKeyDefinition } from '@os/features/keyboard/lib/getCanonicalKey';
 import { evalContext } from '@os/features/AntigravityOS';
+import { FocusData } from '@os/features/focus/lib/focusData';
+import { OS_COMMANDS } from '@os/features/command/definitions/commandsShell';
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -95,7 +97,10 @@ export function resolveKeybinding(
             // Evaluate 'when' clause
             if (binding.when && !evalContext(binding.when, evaluationCtx)) continue;
 
-            // Step 4: Resolve special args (OS.FOCUS etc.)
+            // Step 4: Check Zone binding for passthrough commands
+            if (!hasZoneBinding(binding.command)) continue;
+
+            // Step 5: Resolve special args (OS.FOCUS etc.)
             const resolvedArgs = resolveArgs(binding.args, evaluationCtx);
 
             return {
@@ -133,6 +138,34 @@ function resolveArgs(
     }
 
     return resolved;
+}
+
+/**
+ * Check if Zone has a binding for passthrough commands.
+ * For clipboard/editing commands, we check if the active Zone has the corresponding prop.
+ * If not, the keybinding should not match so browser default can take over.
+ * 
+ * Returns true for non-passthrough commands (always match).
+ */
+function hasZoneBinding(commandId: string): boolean {
+    // Only check passthrough commands
+    // Note: TOGGLE is NOT here because Space's browser default is scroll, not a useful action
+    const PASSTHROUGH_COMMANDS: Record<string, keyof ReturnType<typeof FocusData.getActiveZone>> = {
+        [OS_COMMANDS.COPY]: 'copyCommand',
+        [OS_COMMANDS.CUT]: 'cutCommand',
+        [OS_COMMANDS.PASTE]: 'pasteCommand',
+        [OS_COMMANDS.DELETE]: 'deleteCommand',
+        [OS_COMMANDS.UNDO]: 'undoCommand',
+        [OS_COMMANDS.REDO]: 'redoCommand',
+    };
+
+    const bindingKey = PASSTHROUGH_COMMANDS[commandId];
+    if (!bindingKey) return true; // Not a passthrough command, always match
+
+    const zone = FocusData.getActiveZone();
+    if (!zone) return false; // No active zone, don't match
+
+    return !!zone[bindingKey];
 }
 
 // ═══════════════════════════════════════════════════════════════════

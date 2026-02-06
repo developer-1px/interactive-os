@@ -75,8 +75,8 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                         name="EDIT"
                         value={editDraft}
                         autoFocus
-                        onChange={SyncEditDraft({ text: "" })}
-                        onSubmit={UpdateTodoText({})}
+                        onChange={SyncEditDraft}
+                        onSubmit={UpdateTodoText}
                         onCancel={CancelEdit({})}
                         className="w-full bg-transparent outline-none text-slate-900 text-[15px] font-medium leading-relaxed placeholder:text-slate-400"
                         placeholder="What needs to be done?"

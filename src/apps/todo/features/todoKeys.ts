@@ -4,6 +4,9 @@ import type { TodoContext } from "@apps/todo/logic/schema";
 import { OS } from "@os/features/AntigravityOS";
 
 // Command Imports (Direct References)
+// Note: Commands now handled by OS + Zone props:
+// - ToggleTodo, DeleteTodo, StartEdit (via onSelect, onAction, onDelete)
+// - CopyTodo, CutTodo, PasteTodo (via onCopy, onCut, onPaste)
 
 import { ToggleView } from "@apps/todo/features/commands/ToggleView";
 import {
@@ -13,20 +16,13 @@ import {
 } from "@apps/todo/features/commands/MoveCategoryUp";
 import {
   AddTodo,
-  ToggleTodo,
-  DeleteTodo,
   MoveItemUp,
   MoveItemDown,
   StartEdit,
   CancelEdit,
   UpdateTodoText,
 } from "@apps/todo/features/commands/list";
-import {
-  CopyTodo,
-  CutTodo,
-  PasteTodo,
-  DuplicateTodo,
-} from "@apps/todo/features/commands/clipboard";
+import { DuplicateTodo } from "@apps/todo/features/commands/clipboard";
 
 // 1. Strict Context Builders
 const Expect = createLogicExpect<TodoContext>();
@@ -100,45 +96,14 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
         allowInInput: true,
       },
 
-      // Deletion & Toggle (No Edit Guard)
-      {
-        key: "Backspace",
-        command: DeleteTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
-      },
-      {
-        key: "Delete",
-        command: DeleteTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
-      },
-      {
-        key: "Space",
-        command: ToggleTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
-      },
+      // Space/Enter - handled by Zone's onSelect/onAction
+      // Note: Space/Enter still go through keymap to dispatch OS_SELECT/OS_ACTIVATE,
+      // which then trigger Zone's bound commands. This is the expected flow.
 
-      // Clipboard Operations (No Edit Guard - should work when not editing)
-      {
-        key: "Meta+C",
-        command: CopyTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
-      },
-      {
-        key: "Meta+X",
-        command: CutTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
-      },
-      {
-        key: "Meta+V",
-        command: PasteTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
-      },
+      // Backspace/Delete/Clipboard - NOW HANDLED BY OS + Zone props
+      // The OS dispatches OS_DELETE/OS_COPY/etc, which FocusIntent routes to Zone's onDelete/onCopy/etc.
+      // We keep Meta+D (Duplicate) here as it's not yet an OS-level standard.
+
       {
         key: "Meta+D",
         command: DuplicateTodo,
@@ -147,45 +112,9 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
       },
     ],
     boardView: [
-      // Item Actions (Shared)
-      {
-        key: "Space",
-        command: ToggleTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
-      },
-      {
-        key: "Backspace",
-        command: DeleteTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
-      },
-      {
-        key: "Delete",
-        command: DeleteTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
-      },
-
-      // Clipboard Operations
-      {
-        key: "Meta+C",
-        command: CopyTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
-      },
-      {
-        key: "Meta+X",
-        command: CutTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
-      },
-      {
-        key: "Meta+V",
-        command: PasteTodo,
-        args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
-      },
+      // Space/Enter - handled by Zone's onSelect/onAction when BoardView is updated
+      // Backspace/Delete/Clipboard - handled by OS + Zone props when BoardView is updated
+      // For now, keeping Meta+D (Duplicate) as it's not yet an OS-level standard.
       {
         key: "Meta+D",
         command: DuplicateTodo,

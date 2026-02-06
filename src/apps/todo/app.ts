@@ -13,11 +13,10 @@ export const TodoApp = defineApplication<AppState, TodoCommandId>({
     model: {
         initial: INITIAL_STATE,
         persistence: {
-            key: "todo-app-v5", // Upgraded to v5 for the new smarter-merge store
+            key: "todo-app-v5",
             debounceMs: 250,
         },
     },
-    // commands: Removed (Zero-Config Discovery),
     keymap: TODO_KEYMAP,
     middleware: [navigationMiddleware, historyMiddleware],
     contextMap: (state, env) =>

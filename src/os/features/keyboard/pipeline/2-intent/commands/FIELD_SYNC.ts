@@ -3,10 +3,12 @@
  * 
  * Updates field value and dispatches sync command if configured.
  * Used for real-time sync during typing.
+ * 
+ * The onChange command is a CommandFactory that expects { text: string }.
+ * Field automatically invokes it with the current text value.
  */
 
 import type { KeyboardCommand, KeyboardContext, KeyboardResult } from '../../core/keyboardCommand';
-import type { BaseCommand } from '@os/entities/BaseCommand';
 
 export interface FieldSyncPayload {
     fieldId?: string;
@@ -24,16 +26,10 @@ export const FIELD_SYNC: KeyboardCommand<FieldSyncPayload> = {
             },
         };
 
-        // Dispatch sync command if configured
-        if (config.onChange) {
-            const syncPayload = { ...config.onChange.payload, text };
-            // Preserve _def (non-enumerable) for Zero-Config Discovery
-            const cmd = Object.assign(
-                Object.create(Object.getPrototypeOf(config.onChange)),
-                config.onChange,
-                { payload: syncPayload }
-            );
-            result.dispatch = cmd as BaseCommand;
+        // Dispatch onChange command if configured
+        if (config.onChange && typeof config.onChange === 'function') {
+            const cmd = config.onChange({ text });
+            result.dispatch = cmd;
         }
 
         return result;

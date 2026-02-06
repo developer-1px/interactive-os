@@ -41,9 +41,13 @@ export const useFieldState = ({ value }: UseFieldStateProps) => {
 };
 
 /**
- * Synchronizes the local React state value to the DOM `innerText`.
- * Critical for ContentEditable components to behave like controlled inputs.
- * Also restores the cursor position after updates.
+ * Synchronizes the value prop to the DOM `innerText`.
+ * 
+ * SIMPLE RULE: Only sync when NOT active (not focused/editing).
+ * contentEditable manages its own DOM during editing.
+ * Sync happens only on:
+ * - Mount (initial value)
+ * - Blur (when isActive becomes false)
  */
 export const useFieldDOMSync = ({
     innerRef,
@@ -51,23 +55,25 @@ export const useFieldDOMSync = ({
     isActive,
     cursorRef,
 }: UseFieldDOMSyncProps) => {
+    // Sync on mount
     useLayoutEffect(() => {
         if (innerRef.current) {
-            // Always sync innerText to localValue
-            if (innerRef.current.innerText !== localValue) {
-                innerRef.current.innerText = localValue;
-
-                // Restore cursor if active
-                if (isActive && cursorRef.current !== null) {
-                    try {
-                        setCaretPosition(innerRef.current, cursorRef.current);
-                    } catch (e) {
-                        // Ignore caret errors during rapid updates
-                    }
-                }
-            }
+            innerRef.current.innerText = localValue;
         }
-    }, [localValue, isActive, innerRef, cursorRef]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Sync on blur only
+    useLayoutEffect(() => {
+        if (!innerRef.current) return;
+
+        // Skip sync while active - let contentEditable manage DOM
+        if (isActive) return;
+
+        // Sync when not active (blur)
+        if (innerRef.current.innerText !== localValue) {
+            innerRef.current.innerText = localValue;
+        }
+    }, [localValue, isActive, innerRef]);
 };
 
 /**

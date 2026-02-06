@@ -97,6 +97,14 @@ function ActiveZoneProjector({ zoneId, store }: { zoneId: string; store: any }) 
             // Set flag to prevent FocusSensor from re-processing
             isProgrammaticFocus = true;
             targetEl.focus({ preventScroll: true });
+
+            // Scroll into view with minimal disruption
+            targetEl.scrollIntoView({
+                block: 'nearest',
+                inline: 'nearest',
+                behavior: 'smooth'
+            });
+
             // Reset flag after a short delay to ensure all focusin events have fired
             setTimeout(() => {
                 isProgrammaticFocus = false;

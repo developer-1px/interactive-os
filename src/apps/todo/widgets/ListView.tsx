@@ -6,9 +6,11 @@
 
 import { Zone } from "@os/app/export/primitives/Zone";
 import { Field } from "@os/app/export/primitives/Field";
+import { Label } from "@os/app/export/primitives/Label";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { AddTodo, SyncDraft, ToggleTodo, StartEdit } from "@apps/todo/features/commands/list";
+import { AddTodo, SyncDraft, ToggleTodo, StartEdit, DeleteTodo } from "@apps/todo/features/commands/list";
+import { CopyTodo, CutTodo, PasteTodo } from "@apps/todo/features/commands/clipboard";
 import { OS } from "@os/features/AntigravityOS";
 import type { AppState } from "@apps/todo/model/types";
 import { Plus } from "lucide-react";
@@ -32,8 +34,15 @@ export function ListView() {
             <Zone
                 id="listView"
                 role="listbox"
-                onSelect={ToggleTodo({ id: OS.FOCUS })}
+                // ARIA Standard Commands
+                onToggle={ToggleTodo({ id: OS.FOCUS })}
                 onAction={StartEdit({ id: OS.FOCUS })}
+                // Clipboard Commands (Muscle Memory)
+                onCopy={CopyTodo({ id: OS.FOCUS })}
+                onCut={CutTodo({ id: OS.FOCUS })}
+                onPaste={PasteTodo({ id: OS.FOCUS })}
+                // Editing Commands (Muscle Memory)
+                onDelete={DeleteTodo({ id: OS.FOCUS })}
                 className="flex flex-col h-full"
             >
                 <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full z-10 p-8 sm:p-12 pb-6">
@@ -46,20 +55,20 @@ export function ListView() {
                     </header>
 
                     <div className="flex-1 overflow-y-auto space-y-2 px-2 custom-scrollbar">
-                        {/* Draft Item - Field itself is a FocusItem with name="DRAFT" */}
-                        <div className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20">
+                        {/* Draft Item - Label expands hit area to entire box */}
+                        <Label className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20">
                             <div className="text-slate-400 group-has-[[data-focused=true]]:text-indigo-500 transition-colors">
                                 <Plus size={18} strokeWidth={2.5} />
                             </div>
                             <Field
                                 name="DRAFT"
                                 value={draft}
-                                onChange={SyncDraft({ text: "" })}
-                                onSubmit={AddTodo({})}
+                                onChange={SyncDraft}
+                                onSubmit={AddTodo}
                                 className="flex-1 bg-transparent outline-none text-slate-700 text-[15px] font-medium placeholder:text-slate-400"
                                 placeholder="Add a new task..."
                             />
-                        </div>
+                        </Label>
 
                         <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent my-4" />
 

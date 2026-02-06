@@ -43,15 +43,26 @@ export function useOSCore() {
             { key: "Tab", command: "OS_TAB", allowInInput: true },
             { key: "Shift+Tab", command: "OS_TAB_PREV", allowInInput: true },
 
-            // Selection (Delegated to App)
-            { key: "Space", command: OS_COMMANDS.SELECT, args: { mode: 'toggle' } },
+            // Note: Space key is handled as TOGGLE passthrough (not SELECT)
 
             // Actions (Delegated to App)
             { key: "Enter", command: OS_COMMANDS.ACTIVATE },
             { key: "Escape", command: OS_COMMANDS.EXIT, allowInInput: true },
 
-            // Editing (Delegated to App)
+            // Field Editing (Delegated to App)
             { key: "Meta+Enter", command: OS_COMMANDS.FIELD_COMMIT, allowInInput: true },
+
+            // Clipboard (Passthrough - only matches when Zone has binding)
+            { key: "Meta+C", command: OS_COMMANDS.COPY },
+            { key: "Meta+X", command: OS_COMMANDS.CUT },
+            { key: "Meta+V", command: OS_COMMANDS.PASTE },
+
+            // Editing (Passthrough - only matches when Zone has binding)
+            { key: "Space", command: OS_COMMANDS.TOGGLE },
+            { key: "Backspace", command: OS_COMMANDS.DELETE },
+            { key: "Delete", command: OS_COMMANDS.DELETE },
+            { key: "Meta+Z", command: OS_COMMANDS.UNDO },
+            { key: "Meta+Shift+Z", command: OS_COMMANDS.REDO },
         ]);
 
         return registry;

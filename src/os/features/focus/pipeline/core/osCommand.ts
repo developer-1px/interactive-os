@@ -59,6 +59,15 @@ export interface OSContext {
     // Bound Commands
     activateCommand?: any;
     selectCommand?: any;
+    toggleCommand?: any;  // Space - checkbox/multi-select toggle
+    // Clipboard Commands
+    copyCommand?: any;
+    cutCommand?: any;
+    pasteCommand?: any;
+    // Editing Commands
+    deleteCommand?: any;
+    undoCommand?: any;
+    redoCommand?: any;
 }
 
 export function buildContext(overrideZoneId?: string): OSContext | null {
@@ -109,6 +118,13 @@ export function buildContext(overrideZoneId?: string): OSContext | null {
         // Bound Commands
         activateCommand: data.activateCommand,
         selectCommand: data.selectCommand,
+        toggleCommand: data.toggleCommand,
+        copyCommand: data.copyCommand,
+        cutCommand: data.cutCommand,
+        pasteCommand: data.pasteCommand,
+        deleteCommand: data.deleteCommand,
+        undoCommand: data.undoCommand,
+        redoCommand: data.redoCommand,
     };
 }
 
@@ -164,14 +180,18 @@ export interface OSCommand<P = any> {
 // Executor (Apply Result)
 // ═══════════════════════════════════════════════════════════════════
 
-export function runOS<P>(command: OSCommand<P>, payload: P, overrideZoneId?: string): void {
+/**
+ * Execute an OS command and apply its result.
+ * Returns true if the command was actually handled, false if it should passthrough.
+ */
+export function runOS<P>(command: OSCommand<P>, payload: P, overrideZoneId?: string): boolean {
     // 1. Read
     const ctx = buildContext(overrideZoneId);
-    if (!ctx) return;
+    if (!ctx) return false;
 
     // 2. Pure
     const result = command.run(ctx, payload);
-    if (!result) return;
+    if (!result) return false;
 
     // 3. State Write
     if (result.state) {
@@ -192,11 +212,14 @@ export function runOS<P>(command: OSCommand<P>, payload: P, overrideZoneId?: str
 
     // 6. App Command
     if (result.dispatch) {
-        // Import dispatch function dynamically to avoid circular deps
-        import('@os/features/command/lib/useCommandEventBus').then(({ useCommandEventBus }) => {
-            useCommandEventBus.getState().emit(result.dispatch);
+        // Use app dispatch to run reducers, not the event bus
+        import('@os/features/command/store/CommandEngineStore').then(({ useCommandEngineStore }) => {
+            const dispatch = useCommandEngineStore.getState().getActiveDispatch();
+            dispatch?.(result.dispatch);
         });
     }
+
+    return true;
 }
 
 function executeDOMEffect(effect: DOMEffect): void {
