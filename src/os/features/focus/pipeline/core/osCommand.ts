@@ -114,6 +114,7 @@ export function buildContext(overrideZoneId?: string): OSContext | null {
                 getGroupRect: (id) => DOM.getGroupRect(id),
                 getAllGroupRects: () => DOM.getAllGroupRects(),
                 getGroupEntry: (id) => FocusData.getById(id),
+                getGroupItems: (id) => DOM.getGroupItems(id),
             }
         },
 

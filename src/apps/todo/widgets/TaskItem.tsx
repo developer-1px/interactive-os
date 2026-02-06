@@ -29,7 +29,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
         <Item
             id={String(todo.id)}
             className={`
-                group relative flex items-start gap-3 p-4 rounded-xl border transition-all duration-200
+                group relative flex items-start gap-3 p-4 rounded-xl border transition-colors transition-shadow
                 ${isCompleted
                     ? "bg-slate-50 border-transparent opacity-60"
                     : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md"
@@ -43,7 +43,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
         >
             {/* Drag Handle (Visual Only for now) */}
             <div className={`
-                mt-1 -ml-1 text-slate-300 cursor-grab active:cursor-grabbing transition-opacity duration-200
+                mt-1 -ml-1 text-slate-300 cursor-grab active:cursor-grabbing transition-opacity
                 ${isHovered ? "opacity-100" : "opacity-0"}
             `}>
                 <GripVertical size={16} />
@@ -53,7 +53,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
             <Trigger onPress={ToggleTodo({ id: todo.id })}>
                 <div
                     className={`
-                        w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all duration-200 cursor-pointer flex-shrink-0
+                        w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
                         ${isCompleted
                             ? "bg-indigo-600 border-indigo-600 scale-100"
                             : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
@@ -62,7 +62,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                 >
                     <Check
                         size={12}
-                        className={`text-white transition-transform duration-200 ${isCompleted ? "scale-100" : "scale-0"}`}
+                        className={`text-white transition-transform ${isCompleted ? "scale-100" : "scale-0"}`}
                         strokeWidth={3}
                     />
                 </div>
@@ -85,7 +85,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                 ) : (
                     <span
                         className={`
-                            block text-[15px] leading-relaxed transition-all duration-200 select-none
+                            block text-[15px] leading-relaxed transition-all select-none
                             ${isCompleted
                                 ? "text-slate-400 line-through decoration-slate-300"
                                 : "text-slate-700 font-medium"
@@ -104,7 +104,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
 
             {/* Quick Actions */}
             <div className={`
-                flex items-center gap-1 transition-all duration-200
+                flex items-center gap-1 transition-all
                 ${isEditing || isHovered || isCompleted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"}
             `}>
                 {isEditing ? (

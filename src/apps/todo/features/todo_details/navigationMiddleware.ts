@@ -13,24 +13,28 @@ export const navigationMiddleware = (
   const effects = [...(rawNewState.effects || [])];
 
   // --- FOCUS_ID Effect Handling ---
-  // Dispatch OS Command instead of directly manipulating store
   const focusEffect = effects.find(
     (e): e is { type: "FOCUS_ID"; id: string | number } => e.type === "FOCUS_ID"
   );
 
   if (focusEffect && focusEffect.id !== null) {
-    // Defer until after React render so new items are registered
-    requestAnimationFrame(() => {
-      const dispatch = useCommandEngineStore.getState().getActiveDispatch();
-      const activeGroupId = FocusData.getActiveZoneId();
+    const targetId = String(focusEffect.id);
+    const activeGroupId = FocusData.getActiveZoneId();
 
-      if (dispatch && activeGroupId) {
-        dispatch({
-          type: OS_COMMANDS.FOCUS,
-          payload: { id: String(focusEffect.id), zoneId: activeGroupId }
-        });
+    // Synchronous store + DOM update to prevent flicker
+    if (activeGroupId) {
+      const data = FocusData.getById(activeGroupId);
+      if (data) {
+        // Update store state immediately
+        data.store.setState({ focusedItemId: targetId });
+
+        // Focus DOM element
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          targetEl.focus({ preventScroll: true });
+        }
       }
-    });
+    }
   }
 
   // NOTE: Recovery logic (when focused item is deleted) is now handled

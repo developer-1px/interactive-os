@@ -43,23 +43,18 @@ export const SyncDraft = defineListCommand({
 export const ToggleTodo = defineListCommand({
     id: "TOGGLE_TODO",
     run: (state, payload: { id: number | string | typeof OS.FOCUS }) => {
-        console.log('[TOGGLE_TODO] Handler called with payload:', payload);
         return produce(state, (draft) => {
             const rawId = payload.id;
             const targetId = typeof rawId === 'string' ? parseInt(rawId, 10) : rawId as number;
-            console.log('[TOGGLE_TODO] rawId:', rawId, 'targetId:', targetId);
 
             // Validate ID (must be valid number)
             if (!targetId || isNaN(targetId)) {
-                console.error('[TOGGLE_TODO] Invalid ID:', targetId);
                 return;
             }
 
             const todo = draft.data.todos[targetId];
-            console.log('[TOGGLE_TODO] Found todo:', !!todo, 'for ID:', targetId);
             if (todo) {
                 todo.completed = !todo.completed;
-                console.log('[TOGGLE_TODO] Toggled to:', todo.completed);
             }
         });
     }
@@ -73,12 +68,34 @@ export const DeleteTodo = defineListCommand({
 
             if (!targetId || isNaN(targetId)) return;
 
+            // Calculate recovery target BEFORE delete
+            const visibleIds = state.data.todoOrder.filter(
+                (id) => state.data.todos[id]?.categoryId === state.ui.selectedCategoryId
+            );
+            const numericTargetId = Number(targetId);
+            const currentIdx = visibleIds.indexOf(numericTargetId);
+
+            // Prefer next, fallback to prev
+            let recoveryId: number | null = null;
+            if (currentIdx !== -1 && visibleIds.length > 1) {
+                if (currentIdx < visibleIds.length - 1) {
+                    recoveryId = visibleIds[currentIdx + 1];
+                } else {
+                    recoveryId = visibleIds[currentIdx - 1];
+                }
+            }
+
             // Delete from Map
             delete draft.data.todos[targetId];
             // Remove from Order
             const index = draft.data.todoOrder.indexOf(targetId);
             if (index !== -1) {
                 draft.data.todoOrder.splice(index, 1);
+            }
+
+            // Focus recovery
+            if (recoveryId !== null) {
+                draft.effects.push({ type: "FOCUS_ID", id: recoveryId });
             }
         }),
 });

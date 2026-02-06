@@ -1,5 +1,8 @@
 /**
  * DELETE Command - Backspace/Delete key
+ * 
+ * Simply dispatches the Zone's deleteCommand.
+ * Focus recovery is the APP's responsibility after delete.
  */
 
 import type { OSCommand } from '../../core/osCommand';

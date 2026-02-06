@@ -15,8 +15,10 @@ export interface ZoneSpatialContext {
     getAllGroupRects: () => Map<string, DOMRect>;
     /** Get zone entry by ID */
     getGroupEntry: (id: string) => {
-        store: { getState: () => { items: string[] } };
+        store: any;
     } | undefined;
+    /** Get DOM-based items for a zone */
+    getGroupItems: (id: string) => string[];
 }
 
 export interface ZoneSpatialResult {
@@ -120,8 +122,9 @@ export function resolveZoneSpatial(
     if (!targetEntry?.store) return null;
 
     const targetStore = targetEntry.store;
-    const targetState = targetStore.getState();
-    const targetItems = targetState.items;
+
+    // Use DOM-based items instead of store items
+    const targetItems = context.getGroupItems(targetGroupId);
 
     // 5. Empty zone
     if (targetItems.length === 0) {

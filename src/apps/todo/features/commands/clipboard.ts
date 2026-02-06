@@ -95,7 +95,6 @@ export const PasteTodo = defineListCommand({
     run: (state, payload: { id?: number | typeof OS.FOCUS }) => {
         if (!clipboardData) return state;
 
-        const focusId = payload.id as number | undefined;
         const sourceTodo = clipboardData.todo;
 
         return produce(state, (draft) => {
@@ -111,8 +110,10 @@ export const PasteTodo = defineListCommand({
             draft.data.todos[newId] = newTodo;
 
             // Insert after focused item, or at end if no focus
-            if (focusId && !isNaN(focusId)) {
-                const focusIndex = draft.data.todoOrder.indexOf(focusId);
+            // focusId comes as string from OS.FOCUS resolution, convert to number
+            const numericFocusId = typeof payload.id === 'string' ? Number(payload.id) : payload.id;
+            if (numericFocusId && !isNaN(numericFocusId)) {
+                const focusIndex = draft.data.todoOrder.indexOf(numericFocusId);
                 if (focusIndex !== -1) {
                     draft.data.todoOrder.splice(focusIndex + 1, 0, newId);
                 } else {

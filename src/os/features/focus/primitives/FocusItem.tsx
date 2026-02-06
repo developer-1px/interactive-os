@@ -11,8 +11,6 @@
  */
 
 import {
-    useRef,
-    useCallback,
     useMemo,
     useSyncExternalStore,
     forwardRef,
@@ -91,7 +89,6 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
     role,
     ...rest
 }, ref) {
-    const internalRef = useRef<HTMLElement>(null);
     const ctx = useFocusGroupContext();
 
     if (!ctx) {
@@ -100,25 +97,12 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
 
     const { groupId, store } = ctx;
 
-    // --- Registration (Callback Ref Pattern) ---
-    // Store registration only (DOM access via getElementById)
-    const registerCallback = useCallback((node: HTMLElement | null) => {
-        internalRef.current = node;
-
-        if (node) {
-            store.getState().addItem(id);
-        } else {
-            store.getState().removeItem(id);
-        }
-    }, [id, store]);
-
-    // --- Reactive State Subscription ---
+    // --- State Subscriptions ---
     const activeGroupId = useSyncExternalStore(
         FocusData.subscribeActiveZone,
         () => FocusData.getActiveZoneId(),
         () => null
     );
-    const isGroupActive = activeGroupId === groupId;
 
     const { isFocused, isSelected, isExpanded } = useStore(
         store,
@@ -129,71 +113,57 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
         }))
     );
 
+    // --- Computed State ---
+    const isGroupActive = activeGroupId === groupId;
     const visualFocused = isFocused && isGroupActive;
     const isAnchor = isFocused && !isGroupActive;
+    const effectiveRole = role || 'option';
+    const isExpandable = ['treeitem', 'button'].includes(effectiveRole);
 
-    // --- Props Calculation ---
-    // Allow tabIndex override from props (Field primitive needs tabIndex=0 for navigation)
+    // --- Prop Consolidation ---
     const { tabIndex: propTabIndex, ...otherRest } = rest as { tabIndex?: number;[key: string]: any };
 
-    // Determine if this item supports expansion based on role
-    const effectiveRole = role || 'option';
-    const supportsExpansion = effectiveRole === 'treeitem' || effectiveRole === 'button';
-
-    const computedProps = {
-        id: id,
+    const sharedProps = {
+        id,
         role: effectiveRole,
+        tabIndex: propTabIndex ?? (visualFocused ? 0 : -1),
+        'aria-current': visualFocused || undefined,
+        'aria-selected': isSelected || undefined,
+        'aria-expanded': isExpandable ? isExpanded : undefined,
+        'aria-disabled': disabled || undefined,
         'data-focus-item': true,
         'data-item-id': id,
-        'data-anchor': isAnchor ? 'true' : undefined,
-        'data-focused': visualFocused ? 'true' : undefined,
-        'data-selected': isSelected ? 'true' : undefined,
-        'data-expanded': isExpanded ? 'true' : undefined,
-        'aria-current': visualFocused ? 'true' : undefined,
-        'aria-selected': isSelected || undefined,
-        // Auto-project aria-expanded for expandable roles (treeitem, button)
-        'aria-expanded': supportsExpansion ? isExpanded : undefined,
-        'aria-disabled': disabled || undefined,
-        // Use prop tabIndex if provided, otherwise use visualFocused logic
-        tabIndex: propTabIndex !== undefined ? propTabIndex : (visualFocused ? 0 : -1),
-        // Basic focus styles (can be overridden by className)
+        'data-anchor': isAnchor || undefined,
+        'data-focused': visualFocused || undefined,
+        'data-selected': isSelected || undefined,
+        'data-expanded': isExpanded || undefined,
         className: twMerge(
-            `outline-none cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`,
+            'outline-none cursor-pointer',
+            disabled && 'opacity-50 cursor-not-allowed',
             className
         ),
         style,
         ...otherRest
     };
 
-    // --- Ref Composition ---
-    // 1. Identify child ref if needed
+    // --- Ref Handling ---
     const childElement = asChild && isValidElement(children) ? (children as ReactElement<any>) : null;
-    const childRef = childElement ? (childElement as any).ref : null;
+    const combinedRef = useMemo(() =>
+        composeRefs(ref, (childElement as any)?.ref)
+        , [ref, (childElement as any)?.ref]);
 
-    // 2. Create stable composed ref
-    const finalRef = useMemo(() => {
-        if (childRef) {
-            return composeRefs(registerCallback, ref, childRef);
-        }
-        return composeRefs(registerCallback, ref);
-    }, [registerCallback, ref, childRef]);
-
-    // --- Render Strategy: asChild ---
+    // --- Rendering ---
     if (childElement) {
         return cloneElement(childElement, {
-            ...computedProps,
-            ref: finalRef, // Stable Ref
-            className: twMerge(childElement.props.className, computedProps.className),
+            ...sharedProps,
+            ref: combinedRef,
+            className: twMerge(childElement.props.className, sharedProps.className),
             style: { ...childElement.props.style, ...style },
         });
     }
 
-    // --- Render Strategy: Wrapper ---
     return (
-        <Element
-            ref={finalRef} // Stable Ref
-            {...computedProps}
-        >
+        <Element ref={combinedRef} {...sharedProps}>
             {children}
         </Element>
     );

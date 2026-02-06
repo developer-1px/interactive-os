@@ -14,9 +14,11 @@ export interface ZoneTraverseContext {
     getSiblingGroupId: (direction: 'forward' | 'backward') => string | null;
     /** Get zone entry by ID */
     getGroupEntry: (id: string) => {
-        store: { getState: () => { items: string[]; lastFocusedId: string | null; selection: string[] } };
+        store: { getState: () => { lastFocusedId: string | null; selection: string[] } };
         config?: { navigate?: NavigateConfig };
     } | undefined;
+    /** Get DOM-based items for a zone */
+    getGroupItems: (id: string) => string[];
 }
 
 export interface ZoneTraverseResult {
@@ -55,7 +57,9 @@ export function resolveZoneTraverse(
 
     const { store: nextStore, config: nextConfig } = nextEntry;
     const nextState = nextStore.getState();
-    const items = nextState.items;
+
+    // Use DOM-based items instead of store items
+    const items = context.getGroupItems(nextGroupId);
 
     // 3. Calculate entry item
     if (items.length === 0) {
