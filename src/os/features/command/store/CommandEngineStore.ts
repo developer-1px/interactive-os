@@ -171,8 +171,7 @@ export const CommandEngineStore = {
     dispatch: (cmd: BaseCommand) => {
         const dispatch = useCommandEngineStore.getState().getActiveDispatch();
         if (dispatch) {
-            // Log OS-level commands to telemetry
-            CommandTelemetryStore.log(cmd.type || 'UNKNOWN', cmd.payload, 'os');
+            // Telemetry is handled by commandEffects.ts to avoid duplicate logging
             dispatch(cmd);
         }
     },

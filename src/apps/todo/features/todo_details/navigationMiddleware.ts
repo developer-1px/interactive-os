@@ -22,12 +22,12 @@ export const navigationMiddleware = (
     // Defer until after React render so new items are registered
     requestAnimationFrame(() => {
       const dispatch = useCommandEngineStore.getState().getActiveDispatch();
-      const activeZoneId = FocusRegistry.get().activeZoneId;
+      const activeGroupId = FocusRegistry.get().activeGroupId;
 
-      if (dispatch && activeZoneId) {
+      if (dispatch && activeGroupId) {
         dispatch({
           type: OS_COMMANDS.FOCUS,
-          payload: { id: String(focusEffect.id), zoneId: activeZoneId }
+          payload: { id: String(focusEffect.id), zoneId: activeGroupId }
         });
       }
     });

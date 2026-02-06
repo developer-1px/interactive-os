@@ -3,18 +3,18 @@ import { useShallow } from "zustand/react/shallow";
 import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 
 export const OSStateViewer = memo(() => {
-    const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
-    const zones = useFocusRegistry((s) => s.zones);
+    const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
+    const groups = useFocusRegistry((s) => s.groups);
 
     // Compute focusPath inline to avoid unstable method call
     const focusPath = useFocusRegistry(
         useShallow((s) => {
-            if (!s.activeZoneId) return [];
+            if (!s.activeGroupId) return [];
             const path: string[] = [];
-            let currentId: string | null = s.activeZoneId;
+            let currentId: string | null = s.activeGroupId;
             while (currentId) {
                 path.unshift(currentId);
-                const entry = s.zones.get(currentId);
+                const entry = s.groups.get(currentId);
                 currentId = entry?.parentId || null;
                 if (path.length > 100) break;
             }
@@ -23,17 +23,17 @@ export const OSStateViewer = memo(() => {
     );
 
     // Get focusedItemId from active zone's store (outside of selector)
-    const activeZoneStore = activeZoneId ? zones.get(activeZoneId)?.store : null;
-    const focusedItemId = activeZoneStore?.getState().focusedItemId ?? null;
+    const activeGroupStore = activeGroupId ? groups.get(activeGroupId)?.store : null;
+    const focusedItemId = activeGroupStore?.getState().focusedItemId ?? null;
 
     const osState = useMemo(() => ({
         focus: {
-            activeZoneId,
+            activeGroupId,
             focusedItemId,
             focusPath,
         },
-        zones: Object.fromEntries(zones),
-    }), [activeZoneId, focusedItemId, focusPath, zones]);
+        groups: Object.fromEntries(groups),
+    }), [activeGroupId, focusedItemId, focusPath, groups]);
 
     return (
         <div className="h-full flex flex-col bg-[#ffffff]">

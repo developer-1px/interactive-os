@@ -98,7 +98,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
         throw new Error('FocusItem must be used within a FocusGroup');
     }
 
-    const { zoneId, store } = ctx;
+    const { groupId, store } = ctx;
 
     // --- Registration (Callback Ref Pattern) ---
     // This ensures registration happens exactly when the DOM node is available,
@@ -109,29 +109,30 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
 
         if (node) {
             // Mount / Update
-            DOMRegistry.registerItem(id, zoneId, node);
+            DOMRegistry.registerItem(id, groupId, node);
             store.getState().addItem(id);
         } else {
             // Unmount
             DOMRegistry.unregisterItem(id);
             store.getState().removeItem(id);
         }
-    }, [id, zoneId, store]);
+    }, [id, groupId, store]);
 
     // --- Reactive State Subscription ---
-    const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
-    const isZoneActive = activeZoneId === zoneId;
+    const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
+    const isGroupActive = activeGroupId === groupId;
 
-    const { isFocused, isSelected } = useStore(
+    const { isFocused, isSelected, isExpanded } = useStore(
         store,
         useShallow((state) => ({
             isFocused: state.focusedItemId === id,
             isSelected: state.selection.includes(id),
+            isExpanded: state.expandedItems.includes(id),
         }))
     );
 
-    const visualFocused = isFocused && isZoneActive;
-    const isAnchor = isFocused && !isZoneActive;
+    const visualFocused = isFocused && isGroupActive;
+    const isAnchor = isFocused && !isGroupActive;
 
     // --- Props Calculation ---
     // Allow tabIndex override from props (Field primitive needs tabIndex=0 for navigation)
@@ -144,8 +145,10 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusI
         'data-anchor': isAnchor ? 'true' : undefined,
         'data-focused': visualFocused ? 'true' : undefined,
         'data-selected': isSelected ? 'true' : undefined,
+        'data-expanded': isExpanded ? 'true' : undefined,
         'aria-current': visualFocused ? 'true' : undefined,
         'aria-selected': isSelected || undefined,
+        'aria-expanded': isExpanded || undefined,
         'aria-disabled': disabled || undefined,
         // Use prop tabIndex if provided, otherwise use visualFocused logic
         tabIndex: propTabIndex !== undefined ? propTabIndex : (visualFocused ? 0 : -1),

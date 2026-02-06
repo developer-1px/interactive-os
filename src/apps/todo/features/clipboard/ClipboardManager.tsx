@@ -28,8 +28,8 @@ export function ClipboardManager() {
       if (!currentState) return;
 
       // Get Focus from OS Store
-      const activeZoneStore = FocusRegistry.getActiveZone();
-      const focusId = activeZoneStore ? activeZoneStore.getState().focusedItemId : null;
+      const activeGroupStore = FocusRegistry.getActiveGroup();
+      const focusId = activeGroupStore ? activeGroupStore.getState().focusedItemId : null;
       const { todos, categories } = currentState.data;
 
       // 1. Copying a Todo Item

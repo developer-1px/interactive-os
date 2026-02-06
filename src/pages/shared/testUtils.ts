@@ -52,8 +52,8 @@ export const click = (selector: string, modifiers: { ctrl?: boolean, shift?: boo
     }
 
     // Check if zone exists in registry
-    const zoneEntry = FocusRegistry.getZoneEntry(zoneId);
-    console.log(`[testUtils] click: zone entry exists=${!!zoneEntry}`);
+    const groupEntry = FocusRegistry.getGroupEntry(zoneId);
+    console.log(`[testUtils] click: group entry exists=${!!groupEntry}`);
 
     // Dispatch OS_FOCUS command - this properly activates the zone through the pipeline
     dispatch({

@@ -23,6 +23,7 @@ import {
 import { resolveRole } from '../registry/roleRegistry';
 import { DOMRegistry } from '../registry/DOMRegistry';
 import { FocusRegistry } from '../registry/FocusRegistry';
+import type { BaseCommand } from '@os/entities/BaseCommand';
 import { updateRecovery } from '../pipeline/3-update/updateRecovery';
 import { commitAll } from '../pipeline/4-commit/commitFocus';
 import type {
@@ -41,8 +42,6 @@ import type {
 
 interface FocusGroupContextValue {
     groupId: string;
-    /** @deprecated Use groupId */
-    zoneId: string;
     store: FocusGroupStore;
     config: FocusGroupConfig;
 }
@@ -69,9 +68,6 @@ export interface FocusGroupProps extends Omit<ComponentProps<'div'>, 'id' | 'rol
     /** Group ID (optional, auto-generated if not provided) */
     id?: string;
 
-    /** Area identifier for scoped commands (deprecated - use id) */
-    area?: string;
-
     /** ARIA role preset */
     role?: string;
 
@@ -93,8 +89,11 @@ export interface FocusGroupProps extends Omit<ComponentProps<'div'>, 'id' | 'rol
     /** Project configuration */
     project?: Partial<ProjectConfig>;
 
-    /** Activation callback */
-    onActivate?: (itemId: string) => void;
+    /** Command dispatched on item activation (Enter key) */
+    bindActivateCommand?: BaseCommand;
+
+    /** Command dispatched on item selection (Space key) */
+    bindSelectCommand?: BaseCommand;
 
     /** Children */
     children: ReactNode;
@@ -128,7 +127,8 @@ export function FocusGroup({
     activate,
     dismiss,
     project,
-    onActivate,
+    bindActivateCommand,
+    bindSelectCommand,
     children,
     className,
     style,
@@ -155,14 +155,17 @@ export function FocusGroup({
     useLayoutEffect(() => {
         if (containerRef.current) {
             DOMRegistry.registerGroup(groupId, containerRef.current);
-            // Register with Global Registry for OS Commands (include config)
-            FocusRegistry.register(groupId, store, parentId, config, onActivate);
+            // Register with Global Registry for OS Commands (include config and bindings)
+            FocusRegistry.register(groupId, store, parentId, config, {
+                bindActivateCommand,
+                bindSelectCommand,
+            });
         }
         return () => {
             DOMRegistry.unregisterGroup(groupId);
             FocusRegistry.unregister(groupId);
         };
-    }, [groupId, store, parentId, config]);
+    }, [groupId, store, parentId, config, bindActivateCommand, bindSelectCommand]);
 
     // --- Focus Recovery (OS-level) ---
     // When an item is removed from the zone, check if it was focused.
@@ -197,7 +200,6 @@ export function FocusGroup({
     // --- Context Value ---
     const contextValue = useMemo<FocusGroupContextValue>(() => ({
         groupId,
-        zoneId: groupId,
         store,
         config,
     }), [groupId, store, config]);

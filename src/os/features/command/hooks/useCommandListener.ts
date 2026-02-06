@@ -1,12 +1,18 @@
 import { useEffect, useRef, useLayoutEffect } from "react";
 import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
+import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
 import type { BaseCommand } from "@os/entities/BaseCommand";
+
+type CommandHandlerContext = {
+    payload: unknown;
+    dispatch: (cmd: BaseCommand) => void;
+};
 
 type CommandListener = {
     /** Command type to listen for */
     command: string;
     /** Handler called when command is dispatched */
-    handler: (payload: unknown) => void;
+    handler: (context: CommandHandlerContext) => void;
     /** Optional: Only respond if this condition is true */
     when?: () => boolean;
 };
@@ -20,7 +26,7 @@ type CommandListener = {
  * 
  * @example
  * useCommandListener([
- *   { command: "OS_FIELD_START_EDIT", handler: () => setIsEditing(true), when: () => isFocused }
+ *   { command: "OS_FIELD_START_EDIT", handler: ({ payload, dispatch }) => ... }
  * ]);
  */
 export function useCommandListener(listeners: CommandListener[]) {
@@ -37,11 +43,16 @@ export function useCommandListener(listeners: CommandListener[]) {
 
     useEffect(() => {
         const handler = (cmd: BaseCommand) => {
+            const dispatch = useCommandEngineStore.getState().getActiveDispatch();
+
             for (const listener of listenersRef.current) {
                 if (cmd.type === listener.command) {
                     // Check 'when' condition if provided
                     if (!listener.when || listener.when()) {
-                        listener.handler(cmd.payload);
+                        listener.handler({
+                            payload: cmd.payload,
+                            dispatch: dispatch || (() => { })
+                        });
                     }
                 }
             }

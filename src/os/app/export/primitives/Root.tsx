@@ -1,15 +1,13 @@
 /**
  * OS.Root - Global OS Infrastructure Shell
  * 
- * Mounts global singletons (InputEngine, FocusSensor, FocusIntent, FocusSync)
+ * Mounts global singletons (KeyboardSensor, FocusSensor, FocusIntent, FocusSync)
  * exactly once. All App components register their commands to extend
  * the global registry without owning infrastructure.
  */
 
 import React from "react";
-import { InputEngine } from "@os/features/input/ui/InputEngine";
-import { InputIntent } from "@os/features/input/intent/InputIntent";
-import { InputSensor } from "@os/features/input/pipeline/1-sense/InputSensor";
+import { KeyboardSensor, KeyboardIntent } from "@os/features/keyboard";
 import { FocusIntent } from "@os/features/focus/pipeline/2-intent/FocusIntent";
 import { FocusSensor } from "@os/features/focus/pipeline/1-sense/FocusSensor";
 import { FocusSync } from "@os/features/focus/pipeline/5-sync/FocusSync";
@@ -30,11 +28,11 @@ export function Root({ children }: RootProps) {
     return (
         <>
             {/* Global Infrastructure (Singletons) */}
-            <InputEngine />
-            <InputSensor />
-            <InputIntent />
-            <FocusIntent />
+            <KeyboardSensor />
+            <KeyboardIntent />
+
             <FocusSensor />
+            <FocusIntent />
             <FocusSync />
 
             {/* Child Apps */}
@@ -44,3 +42,4 @@ export function Root({ children }: RootProps) {
 }
 
 Root.displayName = 'OS.Root';
+

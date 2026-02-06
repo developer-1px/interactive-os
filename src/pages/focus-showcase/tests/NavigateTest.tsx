@@ -69,7 +69,7 @@ export function NavigateTest() {
             <ul className="list-disc list-inside space-y-1 text-gray-500">
                 <li><code className="text-gray-700 bg-gray-100 px-1 rounded">orientation</code>: 'vertical' | 'horizontal' | 'both'</li>
                 <li><code className="text-gray-700 bg-gray-100 px-1 rounded">loop</code>: Wraps focus from start to end (and vice-versa).</li>
-                <li><code className="text-gray-700 bg-gray-100 px-1 rounded">wrapping</code>: In 'both' mode, wraps to next row/column.</li>
+                <li><code className="text-gray-700 bg-gray-100 px-1 rounded">seamless</code>: Cross-zone navigation at boundaries.</li>
             </ul>
         </div>
     );
@@ -111,6 +111,28 @@ export function NavigateTest() {
                             </FocusItem>
                         ))}
                     </FocusGroup>
+                </div>
+
+                {/* Seamless Cross-Zone */}
+                <div className="space-y-2">
+                    <div className="text-[10px] font-mono text-gray-500 uppercase">Seamless Cross-Zone</div>
+                    <div className="flex gap-2">
+                        <FocusGroup id="nav-seamless-a" role="toolbar" navigate={{ orientation: 'horizontal', seamless: true }} className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1">
+                            {['A1', 'A2'].map(item => (
+                                <FocusItem key={item} id={`nav-sm-${item.toLowerCase()}`} role="button" className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-rose-100 aria-[current=true]:text-rose-700 text-sm border border-transparent aria-[current=true]:border-rose-300">
+                                    {item}
+                                </FocusItem>
+                            ))}
+                        </FocusGroup>
+                        <FocusGroup id="nav-seamless-b" role="toolbar" navigate={{ orientation: 'horizontal', seamless: true }} className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1">
+                            {['B1', 'B2'].map(item => (
+                                <FocusItem key={item} id={`nav-sm-${item.toLowerCase()}`} role="button" className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-cyan-100 aria-[current=true]:text-cyan-700 text-sm border border-transparent aria-[current=true]:border-cyan-300">
+                                    {item}
+                                </FocusItem>
+                            ))}
+                        </FocusGroup>
+                    </div>
+                    <div className="text-[10px] text-gray-500">Arrow Right from A2 → B1 (cross-zone)</div>
                 </div>
             </div>
         </TestBox>

@@ -18,7 +18,7 @@ import { logger } from '@os/app/debug/logger';
 let isMounted = false;
 
 // Track last processed target to prevent duplicate focus events
-let lastProcessedTarget: { itemId: string; zoneId: string; timestamp: number } | null = null;
+let lastProcessedTarget: { itemId: string; groupId: string; timestamp: number } | null = null;
 const DEDUP_WINDOW_MS = 50; // Ignore duplicate events within 50ms
 
 export function FocusSensor() {
@@ -59,7 +59,7 @@ export function FocusSensor() {
                 // Track this as processed (for dedup against focusin)
                 lastProcessedTarget = {
                     itemId: target.itemId,
-                    zoneId: target.zoneId,
+                    groupId: target.groupId,
                     timestamp: Date.now()
                 };
 
@@ -69,14 +69,14 @@ export function FocusSensor() {
                     logger.debug('FOCUS', '[P1:Sense] Dispatch SELECT range');
                     dispatch?.({
                         type: OS_COMMANDS.SELECT,
-                        payload: { targetId: target.itemId, mode: 'range', zoneId: target.zoneId }
+                        payload: { targetId: target.itemId, mode: 'range', zoneId: target.groupId }
                     });
                 } else if (me.ctrlKey || me.metaKey) {
                     me.preventDefault();
                     logger.debug('FOCUS', '[P1:Sense] Dispatch SELECT toggle');
                     dispatch?.({
                         type: OS_COMMANDS.SELECT,
-                        payload: { targetId: target.itemId, mode: 'toggle', zoneId: target.zoneId }
+                        payload: { targetId: target.itemId, mode: 'toggle', zoneId: target.groupId }
                     });
                 } else {
                     // Standard Click -> Focus intent AND Select intent
@@ -85,13 +85,13 @@ export function FocusSensor() {
                     // 1. Move Focus
                     dispatch?.({
                         type: OS_COMMANDS.FOCUS,
-                        payload: { id: target.itemId, zoneId: target.zoneId }
+                        payload: { id: target.itemId, zoneId: target.groupId }
                     });
 
                     // 2. Update Selection
                     dispatch?.({
                         type: OS_COMMANDS.SELECT,
-                        payload: { targetId: target.itemId, mode: 'replace', zoneId: target.zoneId }
+                        payload: { targetId: target.itemId, mode: 'replace', zoneId: target.groupId }
                     });
                 }
             } else if (e.type === 'focusin') {
@@ -105,7 +105,7 @@ export function FocusSensor() {
                 const now = Date.now();
                 if (lastProcessedTarget &&
                     lastProcessedTarget.itemId === target.itemId &&
-                    lastProcessedTarget.zoneId === target.zoneId &&
+                    lastProcessedTarget.groupId === target.groupId &&
                     (now - lastProcessedTarget.timestamp) < DEDUP_WINDOW_MS
                 ) {
                     logger.debug('FOCUS', '[P1:Sense] Skipping duplicate focusin (already processed via mousedown)');
@@ -116,7 +116,7 @@ export function FocusSensor() {
                 logger.debug('FOCUS', '[P1:Sense] Dispatch FOCUS (focusin)', target);
                 dispatch?.({
                     type: OS_COMMANDS.FOCUS,
-                    payload: { id: target.itemId, zoneId: target.zoneId }
+                    payload: { id: target.itemId, zoneId: target.groupId }
                 });
             }
         };

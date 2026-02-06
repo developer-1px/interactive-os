@@ -1,8 +1,8 @@
 /**
  * DOMRegistry - Registry-First DOM Access
  * 
- * All DOM element access goes through this registry.
- * No querySelector calls in focus logic.
+ * Minimal registry for DOM element access.
+ * Uses DOM queries as source of truth for item ordering.
  */
 
 // ═══════════════════════════════════════════════════════════════════
@@ -11,7 +11,6 @@
 
 const groupElements = new Map<string, HTMLElement>();
 const itemElements = new Map<string, HTMLElement>();
-const itemToGroup = new Map<string, string>();
 
 // ═══════════════════════════════════════════════════════════════════
 // Public Interface
@@ -25,52 +24,39 @@ export const DOMRegistry = {
 
     unregisterGroup(groupId: string): void {
         groupElements.delete(groupId);
-        // Clean up items belonging to this group
-        for (const [itemId, group] of itemToGroup.entries()) {
-            if (group === groupId) {
-                itemElements.delete(itemId);
-                itemToGroup.delete(itemId);
-            }
-        }
     },
 
     getGroup(groupId: string): HTMLElement | undefined {
         return groupElements.get(groupId);
     },
 
-    /** @deprecated Use getGroup */
-    getZone(zoneId: string): HTMLElement | undefined {
-        return groupElements.get(zoneId);
-    },
-
     // --- Item Registration ---
     registerItem(itemId: string, groupId: string, element: HTMLElement): void {
         itemElements.set(itemId, element);
-        itemToGroup.set(itemId, groupId);
     },
 
     unregisterItem(itemId: string): void {
         itemElements.delete(itemId);
-        itemToGroup.delete(itemId);
     },
 
     getItem(itemId: string): HTMLElement | undefined {
         return itemElements.get(itemId);
     },
 
-    getItemGroup(itemId: string): string | undefined {
-        return itemToGroup.get(itemId);
-    },
-
     // --- Queries ---
+    /**
+     * Get all items in a group, ordered by their actual DOM position.
+     * DOM is the source of truth for item order.
+     */
     getGroupItems(groupId: string): string[] {
-        const items: string[] = [];
-        for (const [itemId, group] of itemToGroup.entries()) {
-            if (group === groupId) {
-                items.push(itemId);
-            }
-        }
-        return items;
+        const container = groupElements.get(groupId);
+        if (!container) return [];
+
+        // Query DOM directly for items in visual order
+        const elements = container.querySelectorAll('[data-item-id]');
+        return Array.from(elements)
+            .map(el => el.getAttribute('data-item-id'))
+            .filter((id): id is string => id !== null);
     },
 
     getAllGroups(): string[] {

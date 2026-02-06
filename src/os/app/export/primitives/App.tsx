@@ -8,7 +8,6 @@ import React, { useEffect, useMemo } from "react";
 import type { AppDefinition } from "@os/features/application/defineApplication";
 import { createEngine } from "@os/features/command/model/createEngine";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
-import { CommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { Zone } from "@os/app/export/primitives/Zone";
 import { useInspectorPersistence } from "@os/features/inspector/useInspectorPersistence";
 
@@ -41,29 +40,19 @@ export function App<S>({
     // 3. Register with CommandEngineStore
     const { registerApp, updateAppState, isInitialized } = useCommandEngineStore();
 
-    // Wrap dispatch with telemetry logging
-    const telemetryDispatch = useMemo(() => {
-        return (cmd: any) => {
-            // Log to global telemetry before execution
-            CommandTelemetryStore.log(cmd.type || 'UNKNOWN', cmd.payload, 'app');
-            // Execute original dispatch
-            dispatch(cmd);
-        };
-    }, [dispatch]);
-
     useEffect(() => {
         if (!isInitialized) return;
 
         registerApp({
             appId: appDef.id,
             registry: engine.registry,
-            dispatch: telemetryDispatch,
+            dispatch,
             state,
             contextMap: appDef.contextMap,
         });
 
         // No unregister needed - next registerApp will overwrite
-    }, [appDef.id, isInitialized, telemetryDispatch]);
+    }, [appDef.id, isInitialized, dispatch]);
 
     // 4. Update state when it changes
     useEffect(() => {

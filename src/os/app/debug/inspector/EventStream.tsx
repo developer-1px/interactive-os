@@ -34,7 +34,10 @@ export const EventStream = memo(() => {
                     const keyCount = payloadKeys.length;
 
                     return (
-                        <div key={entry.id} className="group border-b border-[#f0f0f0] px-3 py-1.5 hover:bg-[#fcfcfc] transition-colors">
+                        <div
+                            key={entry.id}
+                            className="group border-b border-[#f0f0f0] px-3 py-1.5 hover:bg-[#fcfcfc] transition-colors animate-flash-command"
+                        >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[8px] font-black text-[#666666] uppercase tracking-widest leading-none">
@@ -42,8 +45,8 @@ export const EventStream = memo(() => {
                                     </span>
                                     {/* Source badge: app=blue, os=teal */}
                                     <span className={`px-1 py-0.5 rounded-[2px] text-[6px] font-bold leading-none ${entry.source === 'os'
-                                            ? 'bg-[#e6f7f5] text-[#4ec9b0]'
-                                            : 'bg-[#e6f0ff] text-[#007acc]'
+                                        ? 'bg-[#e6f7f5] text-[#4ec9b0]'
+                                        : 'bg-[#e6f0ff] text-[#007acc]'
                                         }`}>
                                         {entry.source.toUpperCase()}
                                     </span>

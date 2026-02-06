@@ -32,7 +32,7 @@ export function GlobalNav() {
             key={item.id}
             to={item.path}
             className={({ isActive }) => `
-                            relative w-10 h-10 flex items-center justify-center text-slate-400 transition-all duration-200 rounded-xl
+                            relative w-8 h-8 flex items-center justify-center text-slate-400 transition-all duration-200 rounded-lg
                             hover:text-slate-600 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-slate-200
                             ${isActive ? "text-indigo-600 bg-white shadow-md ring-1 ring-indigo-100 z-10" : ""}
                         `}
@@ -40,9 +40,9 @@ export function GlobalNav() {
           >
             {({ isActive }) => (
               <>
-                <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} className="transition-transform duration-200" />
+                <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} className="transition-transform duration-200" />
                 {isActive && (
-                  <div className="absolute inset-0 rounded-xl ring-2 ring-indigo-500/10 pointer-events-none" />
+                  <div className="absolute inset-0 rounded-lg ring-2 ring-indigo-500/10 pointer-events-none" />
                 )}
               </>
             )}
@@ -59,7 +59,7 @@ export function GlobalNav() {
             key={item.id}
             to={item.path}
             className={({ isActive }) => `
-                            relative w-10 h-10 flex items-center justify-center text-slate-400 transition-all duration-200 rounded-xl
+                            relative w-8 h-8 flex items-center justify-center text-slate-400 transition-all duration-200 rounded-lg
                             hover:text-slate-600 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-slate-200
                             ${isActive ? "text-indigo-600 bg-white shadow-md ring-1 ring-indigo-100" : ""}
                         `}
@@ -68,7 +68,7 @@ export function GlobalNav() {
           >
             {({ isActive }) => (
               <>
-                <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
               </>
             )}
           </NavLink>

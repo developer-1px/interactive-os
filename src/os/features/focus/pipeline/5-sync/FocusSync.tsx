@@ -16,7 +16,7 @@ export let isProgrammaticFocus = false;
 
 export function FocusSync() {
     // 1. Listen to which zone is active
-    const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
+    const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
     const getFocusPath = useFocusRegistry((s) => s.getFocusPath);
 
     const lastPathRef = useRef<string[]>([]);
@@ -31,32 +31,32 @@ export function FocusSync() {
         // 1. Clear old path
         prevPath.forEach(id => {
             if (!nextPath.includes(id)) {
-                const el = DOMRegistry.getZone(id);
+                const el = DOMRegistry.getGroup(id);
                 if (el) el.removeAttribute('aria-current');
             }
         });
 
         // 2. Set new path
         nextPath.forEach(id => {
-            const el = DOMRegistry.getZone(id);
+            const el = DOMRegistry.getGroup(id);
             if (el) el.setAttribute('aria-current', 'true');
         });
 
         lastPathRef.current = nextPath;
-    }, [activeZoneId, getFocusPath]);
+    }, [activeGroupId, getFocusPath]);
 
     // --- B. Physical Focus Projection (document.activeElement) ---
-    const zones = useFocusRegistry((s) => s.zones);
+    const groups = useFocusRegistry((s) => s.groups);
 
     // 2. Identify the active store
-    const activeEntry = activeZoneId ? zones.get(activeZoneId) : null;
+    const activeEntry = activeGroupId ? groups.get(activeGroupId) : null;
     const activeStore = activeEntry?.store;
 
     // Use a sub-component or a custom hook that subscribes to the specific store
     // so we don't re-render the whole projector on every focus change in any zone.
-    if (!activeZoneId || !activeStore) return null;
+    if (!activeGroupId || !activeStore) return null;
 
-    return <ActiveZoneProjector zoneId={activeZoneId} store={activeStore} />;
+    return <ActiveZoneProjector zoneId={activeGroupId} store={activeStore} />;
 }
 
 function ActiveZoneProjector({ zoneId, store }: { zoneId: string; store: any }) {

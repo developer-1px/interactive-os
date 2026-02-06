@@ -22,7 +22,11 @@ export function Sidebar() {
       id="sidebar"
       area="nav"
       role="listbox"
-      navigate={{ entry: "restore" }}
+      options={{
+        navigate: { entry: "restore" },
+        select: { followFocus: true }
+      }}
+      bindSelectCommand={SelectCategory({})}
       style={{ flex: "none" }}
       className="h-full"
     >

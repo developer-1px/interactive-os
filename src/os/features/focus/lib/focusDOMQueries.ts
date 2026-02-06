@@ -15,7 +15,7 @@ export const getZoneId = (el: HTMLElement) =>
 export interface FocusTarget {
     itemId: string;
     itemEl: HTMLElement;
-    zoneId: string;
+    groupId: string;
 }
 
 export function resolveFocusTarget(target: HTMLElement): FocusTarget | null {
@@ -23,8 +23,8 @@ export function resolveFocusTarget(target: HTMLElement): FocusTarget | null {
     if (!itemEl?.id) return null;
 
     const zoneEl = findZone(itemEl);
-    const zoneId = zoneEl ? getZoneId(zoneEl) : null;
-    if (!zoneId) return null;
+    const groupId = zoneEl ? getZoneId(zoneEl) : null;
+    if (!groupId) return null;
 
-    return { itemId: itemEl.id, itemEl, zoneId };
+    return { itemId: itemEl.id, itemEl, groupId };
 }

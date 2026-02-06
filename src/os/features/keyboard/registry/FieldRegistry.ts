@@ -3,6 +3,8 @@ import type { BaseCommand } from '@os/entities/BaseCommand';
 
 export interface FieldConfig {
     name: string;
+    mode?: 'immediate' | 'deferred';  // immediate = always editing, deferred = needs Enter to edit
+    multiline?: boolean;
     commitCommand?: BaseCommand;
     syncCommand?: BaseCommand;
     cancelCommand?: BaseCommand;
@@ -15,10 +17,11 @@ export interface FieldState {
     localValue: string;
 }
 
-interface FieldEntry {
+export interface FieldEntry {
     config: FieldConfig;
     state: FieldState;
 }
+
 
 interface FieldRegistryState {
     fields: Map<string, FieldEntry>;

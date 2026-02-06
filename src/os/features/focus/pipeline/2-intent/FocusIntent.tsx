@@ -1,253 +1,352 @@
 /**
- * FocusIntent - Global Focus Command Handler
+ * FocusIntent - OS Focus Command Handler
  * 
  * Single source of truth for handling all focus-related OS commands.
  * 
- * Pipeline Phase 2: PARSE / ORCHESTRATE
- * Processes commands into resolved state changes.
+ * Architecture: Pure Function + Commit Separation
+ * - resolve*() = Intent Layer (pure functions returning StateChange)
+ * - handle*() = Orchestration Layer (context lookup + intent + effect)
+ * - applyChange() = Effect Helper (commit, telemetry, dispatch)
  */
 
 import { useCommandListener } from '../../../command/hooks/useCommandListener';
 import { OS_COMMANDS, type OSNavigatePayload, type OSSelectPayload, type OSActivatePayload } from '../../../command/definitions/commandsShell';
-import { FocusRegistry } from '../../registry/FocusRegistry';
+import { FocusRegistry, type GroupEntry } from '../../registry/FocusRegistry';
 import { updateNavigate } from '../3-update/updateNavigate';
 import { updateTab } from '../3-update/updateTab';
 import { updateSelect } from '../3-update/updateSelect';
 import { updateActivate } from '../3-update/updateActivate';
-import { commitAll } from '../4-commit/commitFocus';
-import { FocusOrchestrator } from '../../lib/FocusOrchestrator.ts';
+import { updateExpand } from '../3-update/updateExpand';
+import { updateZoneTraverse } from '../3-update/updateZoneTraverse';
+import { updateZoneSpatial } from '../3-update/updateZoneSpatial';
+import { DOMRegistry } from '../../registry/DOMRegistry';
+import { applyChange, type StateChange } from '../6-effect/focusEffects';
 import { logger } from '@os/app/debug/logger';
+import type { FocusGroupStore } from '../../store/focusGroupStore';
+import type { FocusGroupConfig } from '../../types';
 
 // ═══════════════════════════════════════════════════════════════════
-// Command Handlers
+// Types
+// ═══════════════════════════════════════════════════════════════════
+
+interface FocusContext {
+    entry: GroupEntry;
+    store: FocusGroupStore;
+    config: FocusGroupConfig;
+    state: ReturnType<FocusGroupStore['getState']>;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════════════════════════════
+
+function getActiveContext(): FocusContext | null {
+    const entry = FocusRegistry.getActiveGroupEntry();
+    if (!entry?.config) return null;
+    return {
+        entry,
+        store: entry.store,
+        config: entry.config,
+        state: entry.store.getState(),
+    };
+}
+
+function getContextForZone(zoneId: string): FocusContext | null {
+    const entry = FocusRegistry.getGroupEntry(zoneId);
+    if (!entry?.config) return null;
+    return {
+        entry,
+        store: entry.store,
+        config: entry.config,
+        state: entry.store.getState(),
+    };
+}
+
+function withFollowFocus(
+    change: StateChange,
+    targetId: string | null | undefined,
+    config: FocusGroupConfig,
+    entry: GroupEntry
+): StateChange {
+    if (!config.select.followFocus || !targetId) return change;
+
+    return {
+        ...change,
+        selection: [targetId],
+        anchor: targetId,
+        telemetry: { command: OS_COMMANDS.SELECT, payload: { targetId, mode: 'followFocus' } },
+        bindCommand: entry.bindSelectCommand
+            ? { type: entry.bindSelectCommand.type, payload: { ...entry.bindSelectCommand.payload, id: targetId } }
+            : undefined,
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Pure Resolvers
+// ═══════════════════════════════════════════════════════════════════
+
+function resolveNavigate(ctx: FocusContext, payload: OSNavigatePayload): StateChange | null {
+    const dir = payload.direction.toLowerCase() as 'up' | 'down' | 'left' | 'right';
+    const activeId = ctx.state.focusedItemId;
+
+    // Tree Expansion/Collapse
+    if (activeId && (dir === 'left' || dir === 'right')) {
+        const item = DOMRegistry.getItem(activeId);
+        const role = item?.getAttribute('role');
+        const isExpandable = role === 'treeitem' || role === 'button';
+
+        if (isExpandable) {
+            const isExpanded = ctx.state.expandedItems.includes(activeId);
+            if (dir === 'right' && !isExpanded) {
+                const res = updateExpand(ctx.store, activeId, 'expand');
+                if (res.changed) return null; // Handled by expand
+            }
+            if (dir === 'left' && isExpanded) {
+                const res = updateExpand(ctx.store, activeId, 'collapse');
+                if (res.changed) return null; // Handled by collapse
+            }
+        }
+    }
+
+    // Use live DOM order (source of truth)
+    const liveItems = DOMRegistry.getGroupItems(ctx.state.groupId);
+
+    const result = updateNavigate(
+        ctx.state.focusedItemId,
+        dir,
+        liveItems,
+        ctx.config.navigate,
+        { stickyX: ctx.state.stickyX, stickyY: ctx.state.stickyY }
+    );
+
+    // Seamless navigation
+    if (ctx.config.navigate.seamless && result.targetId === ctx.state.focusedItemId) {
+        const spatialResult = updateZoneSpatial(
+            ctx.state.groupId, dir, ctx.state.focusedItemId,
+            {
+                getItemRect: (id) => DOMRegistry.getItem(id)?.getBoundingClientRect(),
+                getGroupRect: (id) => DOMRegistry.getGroupRect(id),
+                getAllGroupRects: () => DOMRegistry.getAllGroupRects(),
+                getGroupEntry: (id) => FocusRegistry.getGroupEntry(id),
+            }
+        );
+
+        if (spatialResult) {
+            return {
+                targetId: spatialResult.targetItemId,
+                store: spatialResult.targetStore,
+                activeGroupId: spatialResult.targetGroupId,
+            };
+        }
+    }
+
+    const change: StateChange = {
+        targetId: result.targetId,
+        stickyX: result.stickyX,
+        stickyY: result.stickyY,
+    };
+
+    return withFollowFocus(change, result.targetId, ctx.config, ctx.entry);
+}
+
+function resolveTab(ctx: FocusContext, direction: 'forward' | 'backward'): StateChange | null {
+    // Use live DOM order (source of truth)
+    const liveItems = DOMRegistry.getGroupItems(ctx.state.groupId);
+
+    const result = updateTab(
+        ctx.state.focusedItemId,
+        direction,
+        liveItems,
+        ctx.config.tab
+    );
+
+    if (result.action === 'trap' && result.targetId) {
+        return { targetId: result.targetId };
+    }
+
+    if ((result.action === 'flow' && !result.targetId) || result.action === 'escape') {
+        const traverseResult = updateZoneTraverse(direction, ctx.config, {
+            getSiblingGroupId: (dir) => FocusRegistry.getSiblingGroup(dir),
+            getGroupEntry: (id) => FocusRegistry.getGroupEntry(id),
+        });
+
+        if (traverseResult) {
+            const targetEntry = FocusRegistry.getGroupEntry(traverseResult.targetGroupId);
+            let change: StateChange = {
+                targetId: traverseResult.targetItemId,
+                store: traverseResult.targetStore,
+                activeGroupId: traverseResult.targetGroupId,
+            };
+
+            if (targetEntry?.config) {
+                change = withFollowFocus(change, traverseResult.targetItemId, targetEntry.config, targetEntry);
+            }
+            return change;
+        }
+        return null;
+    }
+
+    if (result.action === 'flow' && result.targetId) {
+        return { targetId: result.targetId };
+    }
+
+    return null;
+}
+
+function resolveSelect(ctx: FocusContext, payload: OSSelectPayload): StateChange | null {
+    const { mode, targetId } = payload;
+    const resolvedTargetId = targetId ?? ctx.state.focusedItemId ?? undefined;
+    const resolveMode = (mode === 'replace' || !mode) ? 'single' : mode;
+
+    // Use live DOM order (source of truth)
+    const liveItems = DOMRegistry.getGroupItems(ctx.state.groupId);
+
+    const result = updateSelect(
+        resolvedTargetId,
+        ctx.state.selection,
+        ctx.state.selectionAnchor,
+        liveItems,
+        ctx.config.select,
+        resolveMode as any
+    );
+
+    const change: StateChange = {};
+
+    if (result.changed) {
+        change.selection = result.selection;
+        change.anchor = result.anchor;
+    }
+
+    if (ctx.entry.bindSelectCommand && resolvedTargetId) {
+        change.bindCommand = {
+            type: ctx.entry.bindSelectCommand.type,
+            payload: { ...ctx.entry.bindSelectCommand.payload, id: resolvedTargetId },
+        };
+    }
+
+    return Object.keys(change).length > 0 ? change : null;
+}
+
+function resolveActivate(ctx: FocusContext, payload: OSActivatePayload): StateChange | null {
+    const { targetId } = payload || {};
+    const idToActivate = targetId ?? ctx.state.focusedItemId;
+
+    const result = updateActivate(idToActivate, 'enter', ctx.config.activate);
+
+    if (!result.shouldActivate || !result.targetId) return null;
+
+    const change: StateChange = {
+        selection: [result.targetId],
+        anchor: result.targetId,
+    };
+
+    if (ctx.entry.bindActivateCommand) {
+        change.bindCommand = {
+            type: ctx.entry.bindActivateCommand.type,
+            payload: { ...ctx.entry.bindActivateCommand.payload, id: result.targetId },
+        };
+    }
+
+    return change;
+}
+
+function resolveFocus(ctx: FocusContext, id: string, zoneId: string): StateChange | null {
+    if (ctx.state.focusedItemId === id) {
+        return { activeGroupId: zoneId };
+    }
+
+    const change: StateChange = {
+        targetId: id,
+        activeGroupId: zoneId,
+    };
+
+    if (ctx.config.select.followFocus && ctx.config.select.mode !== 'none') {
+        change.selection = [id];
+        change.anchor = id;
+    }
+
+    return change;
+}
+
+function resolveDismiss(ctx: FocusContext): StateChange | null {
+    if (ctx.config.dismiss.escape === 'close') {
+        return { targetId: null };
+    }
+    if (ctx.config.dismiss.escape === 'deselect' && ctx.state.selection.length > 0) {
+        return { selection: [], anchor: null };
+    }
+    return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Command Handlers (Orchestration Layer)
 // ═══════════════════════════════════════════════════════════════════
 
 function handleNavigate(payload: unknown) {
     logger.time('P2:Navigate');
-    logger.debug('FOCUS', '[P2:Intent] NAVIGATE', payload);
-    const entry = FocusRegistry.getActiveZoneEntry();
-    if (!entry || !entry.config) {
-        logger.debug('FOCUS', '[P2:Intent] NAVIGATE - No active zone');
-        return;
-    }
+    const ctx = getActiveContext();
+    if (!ctx) return logger.timeEnd('FOCUS', 'P2:Navigate');
 
-    const { store } = entry;
-    const config = entry.config;
-    const state = store.getState();
-    const { direction } = payload as OSNavigatePayload;
-    const dir = direction.toLowerCase() as 'up' | 'down' | 'left' | 'right';
+    const change = resolveNavigate(ctx, payload as OSNavigatePayload);
+    if (change) applyChange(change, ctx.store);
 
-    const result = updateNavigate(
-        state.focusedItemId,
-        dir,
-        state.items,
-        config.navigate,
-        { stickyX: state.stickyX, stickyY: state.stickyY }
-    );
-
-    // Seamless: If at boundary (same ID returned) and seamless enabled, try cross-zone
-    if (config.navigate.seamless && result.targetId === state.focusedItemId) {
-        logger.debug('FOCUS', '[P2:Intent] NAVIGATE - Boundary hit, trying seamless');
-        const transferred = FocusOrchestrator.traverseZoneSpatial(
-            state.zoneId,
-            dir,
-            state.focusedItemId
-        );
-        if (transferred) {
-            logger.debug('FOCUS', '[P2:Intent] NAVIGATE - Seamless transfer successful');
-            logger.timeEnd('FOCUS', 'P2:Navigate');
-            return;
-        }
-    }
-
-    commitAll(store, {
-        targetId: result.targetId,
-        stickyX: result.stickyX,
-        stickyY: result.stickyY,
-    });
-
-    // Follow-focus selection
-    if (config.select.followFocus && result.targetId) {
-        commitAll(store, {
-            selection: [result.targetId],
-            anchor: result.targetId,
-        });
-    }
     logger.timeEnd('FOCUS', 'P2:Navigate');
 }
 
 function handleTab(direction: 'forward' | 'backward') {
-    const entry = FocusRegistry.getActiveZoneEntry();
+    const ctx = getActiveContext();
 
-    // Fallback: If no active zone, find the first available one (Cold Start)
-    if (!entry) {
+    // Cold Start
+    if (!ctx) {
         if (direction === 'forward') {
             const orderedIds = FocusRegistry.getOrderedGroups();
             if (orderedIds.length > 0) {
-                const firstId = orderedIds[0];
-
-                // Activate the first zone
-                FocusRegistry.setActiveZone(firstId);
-                const firstEntry = FocusRegistry.getZoneEntry(firstId);
-                if (firstEntry && firstEntry.store) {
-                    const state = firstEntry.store.getState();
-                    // If items exist, focus the first one to ensure visual feedback
-                    if (state.items.length > 0) {
-                        logger.debug('FOCUS', 'Cold Start Tab -> Activating & Focusing', firstId);
-                        // We could use updateEntry here if we had the config, but for cold start,
-                        // just getting into the zone is usually enough. The user can TAB again.
-                        // However, standard expectation is that TAB selects the first item.
-                        // Let's rely on the fact that setActiveZone sets the active group,
-                        // and if the user hits TAB again, it will now validly process 'flow' or 'trap'.
-                    }
-                }
+                FocusRegistry.setActiveGroup(orderedIds[0]);
             }
         }
         return;
     }
 
-    if (!entry.config) return;
-
-    const { store } = entry;
-    const config = entry.config;
-    const state = store.getState();
-
-    const result = updateTab(
-        state.focusedItemId,
-        direction,
-        state.items,
-        config.tab
-    );
-
-    if (result.action === 'trap' && result.targetId) {
-        commitAll(store, { targetId: result.targetId });
-    } else if (result.action === 'flow') {
-        // Flow: move within zone if targetId exists, otherwise exit
-        if (result.targetId) {
-            commitAll(store, { targetId: result.targetId });
-        } else {
-            FocusOrchestrator.traverseZone(state.zoneId, direction, config);
-        }
-    } else if (result.action === 'escape') {
-        FocusOrchestrator.traverseZone(state.zoneId, direction, config);
-    }
+    const change = resolveTab(ctx, direction);
+    if (change) applyChange(change, ctx.store);
 }
 
 function handleSelect(payload: unknown) {
-    const entry = FocusRegistry.getActiveZoneEntry();
-    if (!entry || !entry.config) return;
+    const ctx = getActiveContext();
+    if (!ctx) return;
 
-    const { store } = entry;
-    const config = entry.config;
-    const state = store.getState();
-    const { mode, targetId } = payload as OSSelectPayload;
-
-    const resolveMode = (mode === 'replace' || !mode) ? 'single' : mode;
-
-    const result = updateSelect(
-        targetId ?? state.focusedItemId ?? undefined,
-        state.selection,
-        state.selectionAnchor,
-        state.items,
-        config.select,
-        resolveMode as any
-    );
-
-    if (result.changed) {
-        commitAll(store, {
-            selection: result.selection,
-            anchor: result.anchor,
-        });
-    }
+    const change = resolveSelect(ctx, payload as OSSelectPayload);
+    if (change) applyChange(change, ctx.store);
 }
 
 function handleActivate(payload: unknown) {
-    const entry = FocusRegistry.getActiveZoneEntry();
-    if (!entry || !entry.config) return;
+    const ctx = getActiveContext();
+    if (!ctx) return;
 
-    const { store, config, onActivate } = entry;
-    const state = store.getState();
-    const { targetId } = (payload as OSActivatePayload) || {};
-
-    const idToActivate = targetId ?? state.focusedItemId;
-
-    const result = updateActivate(
-        idToActivate,
-        'enter',
-        config.activate
-    );
-
-    if (result.shouldActivate && result.targetId) {
-        onActivate?.(result.targetId);
-
-        commitAll(store, {
-            selection: [result.targetId],
-            anchor: result.targetId,
-        });
-    }
+    const change = resolveActivate(ctx, payload as OSActivatePayload);
+    if (change) applyChange(change, ctx.store);
 }
 
-/**
- * handleFocus - Pipeline Phase 2 (Intent) entry point for FOCUS command
- */
 function handleFocus(payload: unknown) {
     logger.time('P2:Focus');
-    logger.debug('FOCUS', '[P2:Intent] FOCUS', payload);
-    const { id, zoneId } = payload as { id: string, zoneId: string };
-    if (!id || !zoneId) {
-        logger.debug('FOCUS', '[P2:Intent] FOCUS - Missing id or zoneId');
-        return;
-    }
+    const { id, zoneId } = payload as { id: string; zoneId: string };
+    if (!id || !zoneId) return logger.timeEnd('FOCUS', 'P2:Focus');
 
-    const entry = FocusRegistry.getZoneEntry(zoneId);
-    if (!entry || !entry.config) {
-        logger.debug('FOCUS', '[P2:Intent] FOCUS - Zone not found:', zoneId);
-        return;
-    }
+    const ctx = getContextForZone(zoneId);
+    if (!ctx) return logger.timeEnd('FOCUS', 'P2:Focus');
 
-    const { store } = entry;
-    const config = entry.config;
-    const state = store.getState();
+    const change = resolveFocus(ctx, id, zoneId);
+    if (change) applyChange(change, ctx.store);
 
-    // 1. Resolve: Check if change is needed
-    if (state.focusedItemId === id) {
-        FocusRegistry.setActiveZone(zoneId);
-        logger.timeEnd('FOCUS', 'P2:Focus');
-        return;
-    }
-
-    // 2. Commit: Update store
-    logger.debug('FOCUS', '[P2:Intent] FOCUS - Committing:', id);
-    commitAll(store, { targetId: id });
-
-    // 3. Selection: Follow-focus if configured
-    if (config.select.followFocus && config.select.mode !== 'none') {
-        commitAll(store, {
-            selection: [id],
-            anchor: id,
-        });
-    }
-
-    // 4. Orchestration: Set as active zone
-    FocusRegistry.setActiveZone(zoneId);
     logger.timeEnd('FOCUS', 'P2:Focus');
 }
 
 function handleDismiss() {
-    const entry = FocusRegistry.getActiveZoneEntry();
-    if (!entry || !entry.config) return;
+    const ctx = getActiveContext();
+    if (!ctx) return;
 
-    const { store } = entry;
-    const config = entry.config;
-    const state = store.getState();
-
-    if (config.dismiss.escape === 'close') {
-        commitAll(store, { targetId: null });
-    } else if (config.dismiss.escape === 'deselect') {
-        if (state.selection.length > 0) {
-            commitAll(store, { selection: [], anchor: null });
-        }
-    }
+    const change = resolveDismiss(ctx);
+    if (change) applyChange(change, ctx.store);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -256,13 +355,13 @@ function handleDismiss() {
 
 export function FocusIntent() {
     useCommandListener([
-        { command: OS_COMMANDS.NAVIGATE, handler: handleNavigate },
+        { command: OS_COMMANDS.NAVIGATE, handler: ({ payload }) => handleNavigate(payload) },
         { command: OS_COMMANDS.TAB, handler: () => handleTab('forward') },
         { command: OS_COMMANDS.TAB_PREV, handler: () => handleTab('backward') },
-        { command: OS_COMMANDS.SELECT, handler: handleSelect },
-        { command: OS_COMMANDS.ACTIVATE, handler: handleActivate },
-        { command: OS_COMMANDS.FOCUS, handler: handleFocus },
-        { command: OS_COMMANDS.DISMISS, handler: handleDismiss },
+        { command: OS_COMMANDS.SELECT, handler: ({ payload }) => handleSelect(payload) },
+        { command: OS_COMMANDS.ACTIVATE, handler: ({ payload }) => handleActivate(payload) },
+        { command: OS_COMMANDS.FOCUS, handler: ({ payload }) => handleFocus(payload) },
+        { command: OS_COMMANDS.DISMISS, handler: () => handleDismiss() },
     ]);
 
     return null;

@@ -39,14 +39,16 @@ export const SyncDraft = defineListCommand({
     }),
 });
 
+// React + zustand + immer
 export const ToggleTodo = defineListCommand({
     id: "TOGGLE_TODO",
-    run: (state, payload: { id: number | typeof OS.FOCUS }) =>
+    run: (state, payload: { id: number | string | typeof OS.FOCUS }) =>
         produce(state, (draft) => {
-            // Middleware guarantees payload.id is number (resolved from OS.FOCUS)
-            const targetId = payload.id as number;
+            // Handle string ID from focus system (OS passes string, we need number)
+            const rawId = payload.id;
+            const targetId = typeof rawId === 'string' ? parseInt(rawId, 10) : rawId as number;
 
-            // Validate ID (must be number)
+            // Validate ID (must be valid number)
             if (!targetId || isNaN(targetId)) return;
 
             const todo = draft.data.todos[targetId];

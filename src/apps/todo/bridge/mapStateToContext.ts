@@ -9,14 +9,14 @@ import type { ContextState } from "@os/features/logic/LogicNode";
  */
 export function mapStateToContext(
     state: any,
-    activeZoneId?: string | null,
+    activeGroupId?: string | null,
     focusPath?: string[],
     focusedItemId?: string | null
 ): ContextState {
     if (!state || !state.ui) return {};
 
     const { ui } = state;
-    const currentZone = activeZoneId || ui.activeZone || "todoList";
+    const currentZone = activeGroupId || ui.activeZone || "todoList";
 
     return {
         activeZone: currentZone,

@@ -11,11 +11,11 @@ import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/pri
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { useFocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 import type { FocusTarget } from "@os/entities/FocusTarget.ts";
-import { FieldRegistry, useFieldRegistry, type FieldConfig } from "../../../features/input/registry/FieldRegistry";
+import { FieldRegistry, useFieldRegistry, type FieldConfig } from "@os/features/keyboard/registry/FieldRegistry";
 import {
   useFieldDOMSync,
   useFieldFocus,
-} from "../../../features/input/ui/Field/useFieldHooks.ts";
+} from "@os/features/keyboard/ui/Field/useFieldHooks";
 
 /**
  * Checks if the value is effectively empty for placeholder display.
@@ -144,6 +144,8 @@ export const Field = forwardRef<HTMLElement, FieldProps<any>>(({
     if (!name) return;
     const config: FieldConfig = {
       name,
+      mode,
+      multiline,
       commitCommand,
       syncCommand,
       cancelCommand,
@@ -152,7 +154,8 @@ export const Field = forwardRef<HTMLElement, FieldProps<any>>(({
     };
     FieldRegistry.register(name, config);
     return () => FieldRegistry.unregister(name);
-  }, [name, commitCommand, syncCommand, cancelCommand, updateType, onCommit]);
+  }, [name, mode, multiline, commitCommand, syncCommand, cancelCommand, updateType, onCommit]);
+
 
   // --- State Subscription ---
   const fieldData = useFieldRegistry(s => s.fields.get(fieldId));

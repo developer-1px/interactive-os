@@ -3,12 +3,13 @@ import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { FieldRegistry } from "../registry/FieldRegistry";
 import { FocusRegistry } from "@os/features/focus/registry/FocusRegistry";
 
-export const InputIntent = () => {
+export const KeyboardIntent = () => {
     useCommandListener([
         {
             command: OS_COMMANDS.FIELD_START_EDIT,
             handler: ({ payload }) => {
-                let targetId = payload?.fieldId;
+                const p = payload as any;
+                let targetId = p?.fieldId;
 
                 // Auto-resolve from FocusRegistry if not specified
                 if (!targetId) {
@@ -77,7 +78,9 @@ export const InputIntent = () => {
         {
             command: OS_COMMANDS.FIELD_SYNC,
             handler: ({ payload, dispatch }) => {
-                const { fieldId, text } = payload || {};
+                const p = payload as any;
+                const { fieldId, text } = p || {};
+                console.log('[FIELD_SYNC] payload:', { fieldId, text });
                 if (!fieldId || text === undefined) return;
 
                 // Update Registry
@@ -85,16 +88,29 @@ export const InputIntent = () => {
 
                 // Dispatch Sync Command if configured
                 const field = FieldRegistry.getField(fieldId);
+                console.log('[FIELD_SYNC] field:', field);
+                console.log('[FIELD_SYNC] syncCommand:', field?.config.syncCommand);
                 if (field?.config.syncCommand) {
                     const syncPayload = { ...field.config.syncCommand.payload, text };
-                    dispatch({ ...field.config.syncCommand, payload: syncPayload });
+                    // Preserve _def (non-enumerable) for Zero-Config Discovery
+                    const cmd = Object.assign(
+                        Object.create(Object.getPrototypeOf(field.config.syncCommand)),
+                        field.config.syncCommand,
+                        { payload: syncPayload }
+                    );
+                    console.log('[FIELD_SYNC] dispatch function:', dispatch);
+                    console.log('[FIELD_SYNC] dispatching:', cmd);
+                    console.log('[FIELD_SYNC] cmd._def:', (cmd as any)._def);
+                    dispatch(cmd);
+                    console.log('[FIELD_SYNC] dispatch called');
                 }
             }
         },
         {
             command: OS_COMMANDS.FIELD_BLUR,
             handler: ({ payload, dispatch }) => {
-                const { fieldId } = payload || {};
+                const p = payload as any;
+                const { fieldId } = p || {};
                 if (!fieldId) return;
 
                 const field = FieldRegistry.getField(fieldId);

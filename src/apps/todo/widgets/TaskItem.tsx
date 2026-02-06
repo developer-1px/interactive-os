@@ -29,7 +29,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
         <Item
             id={String(todo.id)}
             className={`
-                group relative flex items-start gap-3 p-3 rounded-xl border transition-all duration-200
+                group relative flex items-start gap-3 p-4 rounded-xl border transition-all duration-200
                 ${isCompleted
                     ? "bg-slate-50 border-transparent opacity-60"
                     : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md"
@@ -130,7 +130,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
             </div>
 
             {/* Active Indicator Bar */}
-            <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-indigo-500 rounded-r-full opacity-0 data-[focused=true]:opacity-100 transition-opacity" />
+            <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-r-full opacity-0 data-[focused=true]:opacity-100 transition-opacity" />
         </Item>
     );
 }

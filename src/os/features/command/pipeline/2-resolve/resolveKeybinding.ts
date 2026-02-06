@@ -11,7 +11,7 @@
  */
 
 import type { KeyboardIntent } from '../1-intercept';
-import { normalizeKeyDefinition } from '@os/features/input/lib/getCanonicalKey';
+import { normalizeKeyDefinition } from '@os/features/keyboard/lib/getCanonicalKey';
 import { evalContext } from '@os/features/AntigravityOS';
 
 // ═══════════════════════════════════════════════════════════════════

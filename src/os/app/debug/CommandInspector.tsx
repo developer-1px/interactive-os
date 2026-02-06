@@ -25,17 +25,17 @@ export function CommandInspector() {
   const activeTab = useInspectorStore(s => s.activeTab);
 
   // --- Direct Zustand subscriptions (no React Context middleman) ---
-  const activeZoneId = useFocusRegistry((s) => s.activeZoneId);
-  const zones = useFocusRegistry((s) => s.zones);
+  const activeGroupId = useFocusRegistry((s) => s.activeGroupId);
+  const groups = useFocusRegistry((s) => s.groups);
 
   const focusPath = useFocusRegistry(
     useShallow((s) => {
-      if (!s.activeZoneId) return [];
+      if (!s.activeGroupId) return [];
       const path: string[] = [];
-      let currentId: string | null = s.activeZoneId;
+      let currentId: string | null = s.activeGroupId;
       while (currentId) {
         path.unshift(currentId);
-        const entry = s.zones.get(currentId);
+        const entry = s.groups.get(currentId);
         currentId = entry?.parentId || null;
         if (path.length > 100) break;
       }
@@ -43,13 +43,13 @@ export function CommandInspector() {
     })
   );
 
-  const activeZoneStore = activeZoneId ? zones.get(activeZoneId)?.store : null;
-  const focusedItemId = activeZoneStore?.getState().focusedItemId ?? null;
+  const activeGroupStore = activeGroupId ? groups.get(activeGroupId)?.store : null;
+  const focusedItemId = activeGroupStore?.getState().focusedItemId ?? null;
 
   // Build ctx on-demand
   const ctx = useMemo(() => {
     const baseContext = {
-      activeZone: activeZoneId ?? undefined,
+      activeZone: activeGroupId ?? undefined,
       focusPath,
       focusedItemId,
     };
@@ -57,14 +57,14 @@ export function CommandInspector() {
       return {
         ...baseContext,
         ...contextMap(state, {
-          activeZoneId: activeZoneId || null,
+          activeGroupId: activeGroupId || null,
           focusPath,
           focusedItemId: focusedItemId || null,
         })
       };
     }
     return baseContext;
-  }, [activeZoneId, focusPath, focusedItemId, state, contextMap]);
+  }, [activeGroupId, focusPath, focusedItemId, state, contextMap]);
 
   // Build activeKeybindingMap on-demand
   const keybindings = useMemo(() => registry?.getKeybindings() || [], [registry]);

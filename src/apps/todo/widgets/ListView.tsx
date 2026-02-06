@@ -4,11 +4,12 @@
  * Uses TaskItem components with full ZIFT pattern (Zone-Item-Field-Trigger).
  */
 
-import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
+import { Zone } from "@os/app/export/primitives/Zone";
 import { Field } from "@os/app/export/primitives/Field";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { AddTodo, SyncDraft } from "@apps/todo/features/commands/list";
+import { AddTodo, SyncDraft, ToggleTodo, StartEdit } from "@apps/todo/features/commands/list";
+import { OS } from "@os/features/AntigravityOS";
 import type { AppState } from "@apps/todo/model/types";
 import { Plus } from "lucide-react";
 
@@ -28,10 +29,11 @@ export function ListView() {
 
     return (
         <div className="flex-1 flex flex-col h-full relative bg-white overflow-hidden font-sans">
-            <FocusGroup
+            <Zone
                 id="listView"
                 role="listbox"
-                navigate={{ entry: 'restore', orientation: 'vertical' }}
+                bindSelectCommand={ToggleTodo({ id: OS.FOCUS })}
+                bindActivateCommand={StartEdit({ id: OS.FOCUS })}
                 className="flex flex-col h-full"
             >
                 <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full z-10 p-8 sm:p-12 pb-6">
@@ -43,7 +45,7 @@ export function ListView() {
                         <p className="text-slate-500 text-sm font-medium">Manage your daily priorities</p>
                     </header>
 
-                    <div className="flex-1 overflow-y-auto space-y-2">
+                    <div className="flex-1 overflow-y-auto space-y-2 px-2 custom-scrollbar">
                         {/* Draft Item - Field itself is a FocusItem with name="DRAFT" */}
                         <div className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20">
                             <div className="text-slate-400 group-has-[[data-focused=true]]:text-indigo-500 transition-colors">
@@ -85,7 +87,7 @@ export function ListView() {
                         )}
                     </div>
                 </div>
-            </FocusGroup>
+            </Zone>
         </div>
     );
 }

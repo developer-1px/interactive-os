@@ -1,4 +1,4 @@
-import type { KeymapConfig } from "@os/features/input/lib/getCanonicalKey";
+import type { KeymapConfig } from "@os/features/keyboard/lib/getCanonicalKey";
 import { createLogicExpect, Rule } from "@os/features/logic/lib/Rule";
 import type { TodoContext } from "@apps/todo/logic/schema";
 import { OS } from "@os/features/AntigravityOS";

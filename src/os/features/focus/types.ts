@@ -24,7 +24,8 @@ export type FocusIntent =
     | { type: 'ACTIVATE'; targetId?: string; trigger: 'enter' | 'space' | 'click' | 'focus' }
     | { type: 'DISMISS'; reason: 'escape' | 'outsideClick' }
     | { type: 'FOCUS'; targetId: string; source?: 'pointer' | 'manual' | 'auto' }
-    | { type: 'POINTER'; subtype: 'enter' | 'leave' | 'down' | 'up'; targetId: string };
+    | { type: 'POINTER'; subtype: 'enter' | 'leave' | 'down' | 'up'; targetId: string }
+    | { type: 'EXPAND'; action: 'toggle' | 'expand' | 'collapse'; targetId?: string };
 
 // ═══════════════════════════════════════════════════════════════════
 // FocusNode - DOM-aware item descriptor

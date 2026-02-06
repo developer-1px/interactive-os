@@ -21,5 +21,5 @@ export const TodoApp = defineApplication<AppState, TodoCommandId>({
     keymap: TODO_KEYMAP,
     middleware: [navigationMiddleware, historyMiddleware],
     contextMap: (state, env) =>
-        mapStateToContext(state, env.activeZoneId, env.focusPath, env.focusedItemId),
+        mapStateToContext(state, env.activeGroupId, env.focusPath, env.focusedItemId),
 });

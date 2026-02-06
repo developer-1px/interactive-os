@@ -45,7 +45,7 @@ export function DismissTest() {
             <ul className="list-disc list-inside space-y-1 text-gray-500">
                 <li><code className="text-gray-700 bg-gray-100 px-1 rounded">escape: 'deselect'</code>: Clears the current selection.</li>
                 <li><code className="text-gray-700 bg-gray-100 px-1 rounded">escape: 'close'</code>: Fires <code className="text-xs">onDismiss</code> (closes menu/modal).</li>
-                <li><code className="text-gray-700 bg-gray-100 px-1 rounded">escape: 'refocus'</code>: Returns focus to the previous zone.</li>
+                <li><code className="text-gray-700 bg-gray-100 px-1 rounded">escape: 'none'</code>: Escape key does nothing.</li>
                 <li><code className="text-gray-700 bg-gray-100 px-1 rounded">outsideClick: 'close'</code>: Dismisses when clicking outside.</li>
             </ul>
         </div>
@@ -91,6 +91,26 @@ export function DismissTest() {
                         ))}
                     </FocusGroup>
                     <div className="text-[10px] text-gray-500">Press Escape to trigger onDismiss (console).</div>
+                </div>
+
+                {/* Outside Click */}
+                <div className="space-y-2">
+                    <div className="text-[10px] font-mono text-gray-500 uppercase">Outside Click = Close</div>
+                    <FocusGroup
+                        id="dis-outside"
+                        role="listbox"
+                        navigate={{ orientation: 'vertical' }}
+                        select={{ mode: 'single' }}
+                        dismiss={{ outsideClick: 'close' }}
+                        className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
+                    >
+                        {['Outside 1', 'Outside 2'].map(item => (
+                            <FocusItem key={item} id={`dis-out-${item.split(' ')[1]}`} role="option" className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[selected=true]:bg-amber-100 aria-[selected=true]:text-amber-700 text-sm transition-all border border-transparent aria-[selected=true]:border-amber-300">
+                                {item}
+                            </FocusItem>
+                        ))}
+                    </FocusGroup>
+                    <div className="text-[10px] text-gray-500">Select an item, then click outside to dismiss.</div>
                 </div>
             </div>
         </TestBox>

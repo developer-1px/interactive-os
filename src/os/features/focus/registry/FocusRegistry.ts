@@ -1,27 +1,34 @@
 import { create } from 'zustand';
 import type { FocusGroupStore } from '../store/focusGroupStore';
 import type { FocusGroupConfig } from '../types';
+import type { BaseCommand } from '@os/entities/BaseCommand';
 
 interface GroupEntry {
     store: FocusGroupStore;
     parentId: string | null;
     config?: FocusGroupConfig;
-    onActivate?: (itemId: string) => void;
+    /** Command dispatched on item activation (Enter key) */
+    bindActivateCommand?: BaseCommand;
+    /** Command dispatched on item selection (Space key) */
+    bindSelectCommand?: BaseCommand;
 }
 
 interface GlobalRegistryState {
     groups: Map<string, GroupEntry>;
     activeGroupId: string | null;
-
-    // Zone Compatibility Aliases (deprecated - use group versions)
-    /** @deprecated Use groups */
-    zones: Map<string, GroupEntry>;
-    /** @deprecated Use activeGroupId */
-    activeZoneId: string | null;
 }
 
 interface GlobalRegistryActions {
-    register: (id: string, store: FocusGroupStore, parentId?: string | null, config?: FocusGroupConfig, onActivate?: (itemId: string) => void) => void;
+    register: (
+        id: string,
+        store: FocusGroupStore,
+        parentId?: string | null,
+        config?: FocusGroupConfig,
+        bindings?: {
+            bindActivateCommand?: BaseCommand;
+            bindSelectCommand?: BaseCommand;
+        }
+    ) => void;
     unregister: (id: string) => void;
     setActiveGroup: (id: string) => void;
     getGroup: (id: string) => FocusGroupStore | undefined;
@@ -37,15 +44,17 @@ export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActio
     groups: new Map(),
     activeGroupId: null,
 
-    // Zone compatibility aliases (updated together with groups/activeGroupId)
-    zones: new Map(),
-    activeZoneId: null,
-
-    register: (id, store, parentId = null, config, onActivate) => {
+    register: (id, store, parentId = null, config, bindings) => {
         set((state) => {
             const newGroups = new Map(state.groups);
-            newGroups.set(id, { store, parentId, config, onActivate });
-            return { groups: newGroups, zones: newGroups };
+            newGroups.set(id, {
+                store,
+                parentId,
+                config,
+                bindActivateCommand: bindings?.bindActivateCommand,
+                bindSelectCommand: bindings?.bindSelectCommand,
+            });
+            return { groups: newGroups };
         });
     },
 
@@ -55,7 +64,7 @@ export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActio
             const newGroups = new Map(state.groups);
             newGroups.delete(id);
             // DON'T reset activeGroupId here - defer to allow for Strict Mode remount
-            return { groups: newGroups, zones: newGroups };
+            return { groups: newGroups };
         });
 
         // If this was the active group, defer the check to allow React Strict Mode remount
@@ -64,7 +73,7 @@ export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActio
                 const currentState = get();
                 // Only reset if group is still not registered after microtask
                 if (!currentState.groups.has(id) && currentState.activeGroupId === id) {
-                    set({ activeGroupId: null, activeZoneId: null });
+                    set({ activeGroupId: null });
                 }
             });
         }
@@ -73,7 +82,7 @@ export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActio
     setActiveGroup: (id) => {
         const group = get().groups.get(id);
         if (group) {
-            set({ activeGroupId: id, activeZoneId: id });
+            set({ activeGroupId: id });
         }
     },
 
@@ -182,8 +191,16 @@ export const useFocusRegistry = create<GlobalRegistryState & GlobalRegistryActio
 // Non-hook access for Event Handlers / Commands
 export const FocusRegistry = {
     get: () => useFocusRegistry.getState(),
-    register: (id: string, store: FocusGroupStore, parentId?: string | null, config?: FocusGroupConfig, onActivate?: (itemId: string) => void) =>
-        useFocusRegistry.getState().register(id, store, parentId, config, onActivate),
+    register: (
+        id: string,
+        store: FocusGroupStore,
+        parentId?: string | null,
+        config?: FocusGroupConfig,
+        bindings?: {
+            bindActivateCommand?: BaseCommand;
+            bindSelectCommand?: BaseCommand;
+        }
+    ) => useFocusRegistry.getState().register(id, store, parentId, config, bindings),
     unregister: (id: string) => useFocusRegistry.getState().unregister(id),
     setActiveGroup: (id: string) => useFocusRegistry.getState().setActiveGroup(id),
     getGroup: (id: string) => useFocusRegistry.getState().getGroup(id),
@@ -196,26 +213,6 @@ export const FocusRegistry = {
     },
     getFocusPath: () => useFocusRegistry.getState().getFocusPath(),
     getSiblingGroup: (direction: 'forward' | 'backward') => useFocusRegistry.getState().getSiblingGroup(direction),
-
-    // ═══════════════════════════════════════════════════════════════════
-    // Zone Compatibility Aliases (deprecated - use Group versions)
-    // ═══════════════════════════════════════════════════════════════════
-    /** @deprecated Use setActiveGroup */
-    setActiveZone: (id: string) => useFocusRegistry.getState().setActiveGroup(id),
-    /** @deprecated Use getGroupEntry */
-    getZoneEntry: (id: string) => useFocusRegistry.getState().getGroupEntry(id),
-    /** @deprecated Use getActiveGroupEntry */
-    getActiveZoneEntry: () => {
-        const state = useFocusRegistry.getState();
-        if (!state.activeGroupId) return undefined;
-        return state.groups.get(state.activeGroupId);
-    },
-    /** @deprecated Use getSiblingGroup */
-    getSiblingZone: (direction: 'forward' | 'backward') => useFocusRegistry.getState().getSiblingGroup(direction),
-    /** @deprecated Use getGroup */
-    getZone: (id: string) => useFocusRegistry.getState().getGroup(id),
-    /** @deprecated Use getActiveGroup */
-    getActiveZone: () => useFocusRegistry.getState().getActiveGroup(),
 
     getOrderedGroups: () => useFocusRegistry.getState().getOrderedGroups(),
 };

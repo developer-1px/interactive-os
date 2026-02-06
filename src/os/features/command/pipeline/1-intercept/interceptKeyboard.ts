@@ -10,7 +10,7 @@
  * It only interprets the raw event and extracts relevant metadata.
  */
 
-import { getCanonicalKey } from '@os/features/input/lib/getCanonicalKey';
+import { getCanonicalKey } from '@os/features/keyboard/lib/getCanonicalKey';
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
