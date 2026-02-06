@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { useCommandEngineStore } from '@os/features/command/store/CommandEngineStore';
 import { OS_COMMANDS } from '../../../command/definitions/commandsShell';
 import { findFocusableItem, resolveFocusTarget } from '../../lib/focusDOMQueries';
-import { isProgrammaticFocus } from '../5-sync/FocusSync';
+import { isProgrammaticFocus, setProgrammaticFocus } from '../5-sync/FocusSync';
 
 let isMounted = false;
 
@@ -27,9 +27,21 @@ function sense(e: Event) {
             ? document.getElementById(targetId)
             : label.querySelector('[role="textbox"]') as HTMLElement | null;
 
+
         if (targetField) {
             e.preventDefault();
+
+            // Dispatch FOCUS command FIRST to update store state before DOM focus
+            const fieldTarget = resolveFocusTarget(targetField as HTMLElement);
+            if (fieldTarget) {
+                const dispatch = useCommandEngineStore.getState().getActiveDispatch();
+                dispatch?.({ type: OS_COMMANDS.FOCUS, payload: { id: fieldTarget.itemId, zoneId: fieldTarget.groupId } });
+            }
+
+            // Then perform DOM focus (mark as programmatic to prevent FocusSync interference)
+            setProgrammaticFocus(true);
             targetField.focus();
+            setTimeout(() => setProgrammaticFocus(false), 100);
             return;
         }
     }

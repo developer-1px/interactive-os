@@ -13,6 +13,9 @@ import { DOM } from '../../lib/dom';
 
 // Global flag: FocusSensor should ignore focusin events when this is true
 export let isProgrammaticFocus = false;
+export function setProgrammaticFocus(value: boolean) {
+    isProgrammaticFocus = value;
+}
 
 // Hook to subscribe to FocusData.activeZoneId
 function useActiveZoneId(): string | null {
