@@ -21,6 +21,7 @@ import type { FocusGroupStore } from '../../store/focusGroupStore';
  */
 export interface DOMQueries {
     getItemRole(id: string): string | null;
+    getItemRect(id: string): DOMRect | undefined;
     getGroupRect(id: string): DOMRect | undefined;
     getAllGroupRects(): Map<string, DOMRect>;
     getGroupEntry(id: string): any | undefined;
@@ -109,6 +110,7 @@ export function buildContext(overrideZoneId?: string): OSContext | null {
             },
             queries: {
                 getItemRole: (id) => DOM.getItem(id)?.getAttribute('role') ?? null,
+                getItemRect: (id) => DOM.getItem(id)?.getBoundingClientRect(),
                 getGroupRect: (id) => DOM.getGroupRect(id),
                 getAllGroupRects: () => DOM.getAllGroupRects(),
                 getGroupEntry: (id) => FocusData.getById(id),

@@ -188,6 +188,23 @@ export function FocusGroup({
         // No cleanup needed - WeakMap auto-GC when element is removed
     }, [store, config, parentId, onAction, onSelect, onCopy, onCut, onPaste, onToggle, onDelete, onUndo, onRedo]);
 
+    // --- Auto-Focus for Dialog/Modal or explicit autoFocus ---
+    useLayoutEffect(() => {
+        const shouldAutoFocus = config.project?.autoFocus || role === 'dialog' || role === 'alertdialog';
+        if (!shouldAutoFocus) return;
+        if (!containerRef.current) return;
+
+        // Find first focusable item in the group
+        const firstItem = containerRef.current.querySelector('[data-focus-item]') as HTMLElement;
+        if (firstItem) {
+            // Use requestAnimationFrame to ensure DOM is ready
+            requestAnimationFrame(() => {
+                firstItem.focus();
+                store.setState({ focusedItemId: firstItem.id });
+            });
+        }
+    }, [role, store, config.project?.autoFocus]);
+
     // --- Context Value ---
     const contextValue = useMemo<FocusGroupContextValue>(() => ({
         groupId,
