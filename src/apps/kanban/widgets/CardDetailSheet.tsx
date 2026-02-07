@@ -121,10 +121,11 @@ export function CardDetailSheet() {
                   <button
                     className={`
                                         px-3 py-1.5 rounded-lg text-xs font-bold transition-all border
-                                        ${card.priority === value
-                        ? "bg-white shadow-sm border-slate-300 ring-2 ring-offset-1"
-                        : "border-slate-200 hover:bg-slate-50"
-                      }
+                                        ${
+                                          card.priority === value
+                                            ? "bg-white shadow-sm border-slate-300 ring-2 ring-offset-1"
+                                            : "border-slate-200 hover:bg-slate-50"
+                                        }
                                     `}
                     style={{
                       color,
@@ -157,10 +158,11 @@ export function CardDetailSheet() {
                     <button
                       className={`
                                             px-3 py-1.5 rounded-lg text-xs font-bold transition-all border
-                                            ${isActive
-                          ? "ring-2 ring-offset-1 shadow-sm"
-                          : "opacity-50 hover:opacity-80"
-                        }
+                                            ${
+                                              isActive
+                                                ? "ring-2 ring-offset-1 shadow-sm"
+                                                : "opacity-50 hover:opacity-80"
+                                            }
                                         `}
                       style={{
                         color: label.color,

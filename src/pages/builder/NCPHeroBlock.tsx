@@ -62,10 +62,11 @@ export function NCPHeroBlock() {
             <button
               className={`
                                 inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-slate-900 font-bold text-lg transition-all duration-300
-                                ${isFocused
-                  ? "scale-110 shadow-[0_0_30px_rgba(255,255,255,0.4)] ring-4 ring-white/30"
-                  : "hover:scale-105 hover:shadow-lg"
-                }
+                                ${
+                                  isFocused
+                                    ? "scale-110 shadow-[0_0_30px_rgba(255,255,255,0.4)] ring-4 ring-white/30"
+                                    : "hover:scale-105 hover:shadow-lg"
+                                }
                             `}
             >
               {values.cta}
@@ -135,4 +136,3 @@ export function NCPHeroBlock() {
     </OS.Zone>
   );
 }
-

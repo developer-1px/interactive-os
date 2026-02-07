@@ -8,27 +8,27 @@
  * so these must come through OS keybindings.
  */
 
+import { dispatchToZone } from "@os/features/action/dispatchToZone";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { useCommandListener } from "@os/features/command/hooks/useCommandListener";
-import { dispatchToZone } from "@os/features/action/dispatchToZone";
 
 export function HistoryIntent() {
-    useCommandListener([
-        {
-            command: OS_COMMANDS.UNDO,
-            handler: () => {
-                dispatchToZone("undoCommand");
-            },
-        },
-        {
-            command: OS_COMMANDS.REDO,
-            handler: () => {
-                dispatchToZone("redoCommand");
-            },
-        },
-    ]);
+  useCommandListener([
+    {
+      command: OS_COMMANDS.UNDO,
+      handler: () => {
+        dispatchToZone("undoCommand");
+      },
+    },
+    {
+      command: OS_COMMANDS.REDO,
+      handler: () => {
+        dispatchToZone("redoCommand");
+      },
+    },
+  ]);
 
-    return null;
+  return null;
 }
 
 HistoryIntent.displayName = "HistoryIntent";

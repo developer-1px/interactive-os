@@ -5,10 +5,10 @@
  * Inspector open/close state. Pages register routes via useTestBotRoutes().
  */
 
-import { testBot } from "./testBot";
-import type { TestBot } from "../entities/TestBot";
-import type { SuiteResult } from "../entities/SuiteResult";
 import { create } from "zustand";
+import type { SuiteResult } from "../entities/SuiteResult";
+import type { TestBot } from "../entities/TestBot";
+import { testBot } from "./testBot";
 
 // ═══════════════════════════════════════════════════════════════════
 // Constants
@@ -23,11 +23,11 @@ export const DEFAULT_SPEED = 2.0;
 export type RouteDefiner = (bot: TestBot) => void;
 
 interface TestBotState {
-    bot: TestBot;
-    routeDefiners: Map<string, RouteDefiner>;
-    suites: SuiteResult[];
-    isRunning: boolean;
-    currentSuiteIndex: number;
+  bot: TestBot;
+  routeDefiners: Map<string, RouteDefiner>;
+  suites: SuiteResult[];
+  isRunning: boolean;
+  currentSuiteIndex: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -35,11 +35,11 @@ interface TestBotState {
 // ═══════════════════════════════════════════════════════════════════
 
 export const useTestBotStore = create<TestBotState>(() => ({
-    bot: testBot({ speed: DEFAULT_SPEED }),
-    routeDefiners: new Map(),
-    suites: [],
-    isRunning: false,
-    currentSuiteIndex: -1,
+  bot: testBot({ speed: DEFAULT_SPEED }),
+  routeDefiners: new Map(),
+  suites: [],
+  isRunning: false,
+  currentSuiteIndex: -1,
 }));
 
 // ═══════════════════════════════════════════════════════════════════
@@ -48,26 +48,26 @@ export const useTestBotStore = create<TestBotState>(() => ({
 
 /** Rebuild bot from all registered route definers */
 export function rebuildBot(definers: Map<string, RouteDefiner>): TestBot {
-    const newBot = testBot({ speed: DEFAULT_SPEED });
-    definers.forEach((fn) => fn(newBot));
-    return newBot;
+  const newBot = testBot({ speed: DEFAULT_SPEED });
+  definers.forEach((fn) => fn(newBot));
+  return newBot;
 }
 
 /** Replace current bot and reset state */
 export function swapBot(definers: Map<string, RouteDefiner>) {
-    const { bot } = useTestBotStore.getState();
-    bot.destroy();
-    const newBot = rebuildBot(definers);
+  const { bot } = useTestBotStore.getState();
+  bot.destroy();
+  const newBot = rebuildBot(definers);
 
-    useTestBotStore.setState({
-        routeDefiners: definers,
-        bot: newBot,
-        suites: [],
-        isRunning: false,
-        currentSuiteIndex: -1,
-    });
+  useTestBotStore.setState({
+    routeDefiners: definers,
+    bot: newBot,
+    suites: [],
+    isRunning: false,
+    currentSuiteIndex: -1,
+  });
 
-    newBot.dryRun().then((plan) => {
-        useTestBotStore.setState({ suites: plan });
-    });
+  newBot.dryRun().then((plan) => {
+    useTestBotStore.setState({ suites: plan });
+  });
 }

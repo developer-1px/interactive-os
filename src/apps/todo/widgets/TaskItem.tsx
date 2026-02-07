@@ -35,10 +35,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
       id={String(todo.id)}
       className={`
                 group relative flex items-start gap-3 p-4 rounded-xl border transition-colors transition-shadow
-                ${isCompleted
-          ? "bg-slate-50 border-transparent opacity-60"
-          : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md"
-        }
+                ${
+                  isCompleted
+                    ? "bg-slate-50 border-transparent opacity-60"
+                    : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md"
+                }
                 outline-none
                 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-500 data-[focused=true]:border-transparent data-[focused=true]:z-10
                 data-[selected=true]:bg-indigo-50 data-[selected=true]:border-indigo-200 data-[selected=true]:shadow-sm
@@ -62,10 +63,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
         <div
           className={`
                         w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
-                        ${isCompleted
-              ? "bg-indigo-600 border-indigo-600 scale-100"
-              : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
-            }
+                        ${
+                          isCompleted
+                            ? "bg-indigo-600 border-indigo-600 scale-100"
+                            : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
+                        }
                     `}
         >
           <Check
@@ -94,10 +96,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
           <span
             className={`
                             block text-[15px] leading-relaxed transition-all select-none
-                            ${isCompleted
-                ? "text-slate-400 line-through decoration-slate-300"
-                : "text-slate-700 font-medium"
-              }
+                            ${
+                              isCompleted
+                                ? "text-slate-400 line-through decoration-slate-300"
+                                : "text-slate-700 font-medium"
+                            }
                         `}
           >
             {todo.text}

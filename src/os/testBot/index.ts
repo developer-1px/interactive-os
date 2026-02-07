@@ -2,12 +2,23 @@
 // TestBot — Public API
 // ═══════════════════════════════════════════════════════════════════
 
+export type { BotCursor, BubbleVariant } from "./entities/BotCursor";
+export type { StepResult } from "./entities/StepResult";
+export type {
+  OnProgress,
+  OnStep,
+  SuiteResult,
+  SuiteStatus,
+} from "./entities/SuiteResult";
+export type {
+  ElementQuery,
+  Expectations,
+  KeyModifiers,
+  Selector,
+  TestActions,
+} from "./entities/TestActions";
 // Entities
 export type { TestBot } from "./entities/TestBot";
-export type { TestActions, Expectations, KeyModifiers } from "./entities/TestActions";
-export type { StepResult } from "./entities/StepResult";
-export type { SuiteResult, SuiteStatus, OnProgress, OnStep } from "./entities/SuiteResult";
-export type { BotCursor, BubbleVariant } from "./entities/BotCursor";
 
 // Features (public API)
 export { TestBotActions } from "./features/TestBotActions";

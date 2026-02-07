@@ -10,9 +10,9 @@
 
 import { ClipboardIntent } from "@os/features/clipboard/ClipboardIntent";
 import { ClipboardSensor } from "@os/features/clipboard/ClipboardSensor";
+import { useFocusRecovery } from "@os/features/focus/hooks/useFocusRecovery";
 import { FocusSensor } from "@os/features/focus/pipeline/1-sense/FocusSensor";
 import { FocusIntent } from "@os/features/focus/pipeline/2-intent/FocusIntent";
-import { useFocusRecovery } from "@os/features/focus/hooks/useFocusRecovery";
 import { HistoryIntent } from "@os/features/history/HistoryIntent";
 import { KeyboardIntent, KeyboardSensor } from "@os/features/keyboard";
 import type React from "react";

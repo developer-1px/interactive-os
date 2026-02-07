@@ -40,10 +40,13 @@ function resolvePayload(payload: any, focusedItemId: string | null): any {
  * Middleware that resolves OS.FOCUS in action payloads.
  * PRE middleware: transforms action before command execution.
  */
-export const resolveFocusMiddleware: Middleware<any, {
-  type: string;
-  payload?: any;
-}> = (next) => (state, action) => {
+export const resolveFocusMiddleware: Middleware<
+  any,
+  {
+    type: string;
+    payload?: any;
+  }
+> = (next) => (state, action) => {
   if (!action.payload) return next(state, action);
 
   const zone = FocusData.getActiveZone();

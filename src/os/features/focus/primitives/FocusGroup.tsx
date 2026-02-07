@@ -7,8 +7,8 @@ import {
   useLayoutEffect,
   useMemo,
 } from "react";
-import { FocusData } from "../lib/focusData";
 import { useIsFocusedGroup } from "../hooks/useIsFocusedGroup";
+import { FocusData } from "../lib/focusData";
 import { resolveRole, type ZoneRole } from "../registry/roleRegistry";
 import {
   type FocusGroupStore,
@@ -292,7 +292,7 @@ export function FocusGroup({
         // This prevents race conditions and cyclic dependencies.
         className={className || undefined}
         data-orientation={orientation}
-        style={{ outline: 'none', ...style }}
+        style={{ outline: "none", ...style }}
         {...rest}
       >
         {children}

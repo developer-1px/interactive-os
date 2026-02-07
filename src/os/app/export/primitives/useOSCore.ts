@@ -103,7 +103,6 @@ export function useOSCore() {
       // Clipboard — handled by ClipboardSensor via native DOM events
       // (⌘C/⌘X/⌘V fire browser copy/cut/paste events, no keybinding needed)
 
-
       // Selection
       { key: "Meta+A", command: OS_COMMANDS.SELECT_ALL },
 

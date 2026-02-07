@@ -9,33 +9,33 @@
  * (e.g., TestBot, menu buttons).
  */
 
+import { dispatchToZone } from "@os/features/action/dispatchToZone";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { useCommandListener } from "@os/features/command/hooks/useCommandListener";
-import { dispatchToZone } from "@os/features/action/dispatchToZone";
 
 export function ClipboardIntent() {
-    useCommandListener([
-        {
-            command: OS_COMMANDS.COPY,
-            handler: () => {
-                dispatchToZone("copyCommand");
-            },
-        },
-        {
-            command: OS_COMMANDS.CUT,
-            handler: () => {
-                dispatchToZone("cutCommand");
-            },
-        },
-        {
-            command: OS_COMMANDS.PASTE,
-            handler: () => {
-                dispatchToZone("pasteCommand");
-            },
-        },
-    ]);
+  useCommandListener([
+    {
+      command: OS_COMMANDS.COPY,
+      handler: () => {
+        dispatchToZone("copyCommand");
+      },
+    },
+    {
+      command: OS_COMMANDS.CUT,
+      handler: () => {
+        dispatchToZone("cutCommand");
+      },
+    },
+    {
+      command: OS_COMMANDS.PASTE,
+      handler: () => {
+        dispatchToZone("pasteCommand");
+      },
+    },
+  ]);
 
-    return null;
+  return null;
 }
 
 ClipboardIntent.displayName = "ClipboardIntent";

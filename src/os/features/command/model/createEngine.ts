@@ -16,10 +16,7 @@ import {
   CommandRegistry,
   createCommandStore,
 } from "@os/features/command/model/createCommandStore";
-import {
-  navigationMiddleware,
-  historyMiddleware,
-} from "@os/middleware";
+import { historyMiddleware, navigationMiddleware } from "@os/middleware";
 
 export function createEngine<S>(definition: AppDefinition<S>) {
   const registry = new CommandRegistry<S>();
@@ -30,13 +27,12 @@ export function createEngine<S>(definition: AppDefinition<S>) {
   const store = createCommandStore(registry, definition.model.initial, {
     persistence: definition.model.persistence,
     middleware: [
-      resolveFocusMiddleware,   // PRE: resolve OS.FOCUS
-      navigationMiddleware,     // POST: effects → zone state
-      historyMiddleware,        // POST: undo/redo recording
-      ...(definition.middleware || []),  // App custom
+      resolveFocusMiddleware, // PRE: resolve OS.FOCUS
+      navigationMiddleware, // POST: effects → zone state
+      historyMiddleware, // POST: undo/redo recording
+      ...(definition.middleware || []), // App custom
     ],
   });
 
   return { registry, store };
 }
-

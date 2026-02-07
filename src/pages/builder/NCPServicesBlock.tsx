@@ -126,20 +126,22 @@ export function NCPServicesBlock() {
                 <div
                   className={`
                                     flex flex-col items-start justify-between p-5 min-w-[160px] h-[160px] rounded-3xl cursor-pointer group transition-all relative shrink-0 border
-                                    ${tab.active
-                      ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/30 ring-4 ring-blue-600/10"
-                      : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
-                    }
+                                    ${
+                                      tab.active
+                                        ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/30 ring-4 ring-blue-600/10"
+                                        : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
+                                    }
                                     ${isFocused ? "scale-105 ring-4 ring-blue-500/20" : ""}
                                 `}
                 >
                   <div
                     className={`
                                         w-12 h-12 rounded-2xl flex items-center justify-center transition-all
-                                        ${tab.active
-                        ? "bg-white/20 text-white"
-                        : "bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600"
-                      }
+                                        ${
+                                          tab.active
+                                            ? "bg-white/20 text-white"
+                                            : "bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600"
+                                        }
                                     `}
                   >
                     <tab.icon size={24} strokeWidth={2} />
@@ -240,10 +242,11 @@ export function NCPServicesBlock() {
                     <div
                       className={`
                                             w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-300
-                                            ${isFocused
-                          ? "bg-slate-900 text-white ring-2 ring-slate-300 scale-110 shadow-lg"
-                          : "bg-white text-slate-600 border-slate-100 shadow-sm group-hover/item:border-blue-200 group-hover/item:shadow-blue-100 group-hover/item:scale-110"
-                        }
+                                            ${
+                                              isFocused
+                                                ? "bg-slate-900 text-white ring-2 ring-slate-300 scale-110 shadow-lg"
+                                                : "bg-white text-slate-600 border-slate-100 shadow-sm group-hover/item:border-blue-200 group-hover/item:shadow-blue-100 group-hover/item:scale-110"
+                                            }
                                         `}
                     >
                       <service.icon

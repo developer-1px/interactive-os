@@ -9,9 +9,7 @@ import { CommandEngineStore } from "@os/features/command/store/CommandEngineStor
 import type { ResolvedBinding } from "../2-resolve/resolveKeybinding";
 import type { ExecutionResult } from "../types";
 
-export function dispatchCommand(
-  resolution: ResolvedBinding,
-): ExecutionResult {
+export function dispatchCommand(resolution: ResolvedBinding): ExecutionResult {
   const { binding, resolvedArgs } = resolution;
 
   const commandId = binding.command;

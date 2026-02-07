@@ -8,6 +8,7 @@ import { DuplicateCard } from "@apps/kanban/features/commands/clipboard";
 import { CloseActionMenu } from "@apps/kanban/features/commands/menu";
 import type { KanbanState, Priority } from "@apps/kanban/model/appState";
 import { Trigger } from "@os/app/export/primitives/Trigger";
+import type { BaseCommand } from "@os/entities/BaseCommand";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import {
   ArrowRight,
@@ -18,7 +19,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { BaseCommand } from "@os/entities/BaseCommand";
 
 interface MenuItem {
   id: string;
@@ -52,61 +52,61 @@ export function CardActionMenu() {
   // Build menu items
   const menuItems: MenuItem[] = card
     ? [
-      {
-        id: "priority",
-        label: "Set Priority",
-        icon: Flame,
-        submenu: (
-          ["urgent", "high", "medium", "low", "none"] as Priority[]
-        ).map((p) => ({
-          id: p,
-          label: p.charAt(0).toUpperCase() + p.slice(1),
-          color:
-            p === "urgent"
-              ? "#ef4444"
-              : p === "high"
-                ? "#f97316"
-                : p === "medium"
-                  ? "#eab308"
-                  : p === "low"
-                    ? "#3b82f6"
-                    : "#94a3b8",
-          active: card.priority === p,
-          command: SetPriority({ id: card.id, priority: p }),
-        })),
-      },
-      {
-        id: "labels",
-        label: "Toggle Label",
-        icon: Tag,
-        submenu: Object.values(state!.data.labels).map((label) => ({
-          id: label.id,
-          label: label.name,
-          color: label.color,
-          active: card.labels.includes(label.id),
-          command: ToggleLabel({ id: card.id, labelId: label.id }),
-        })),
-      },
-      {
-        id: "move-right",
-        label: "Move Right",
-        icon: ArrowRight,
-        command: MoveCardToColumn({ id: card.id, direction: "right" }),
-      },
-      {
-        id: "duplicate",
-        label: "Duplicate",
-        icon: Copy,
-        command: DuplicateCard({ id: card.id }),
-      },
-      {
-        id: "delete",
-        label: "Delete",
-        icon: Trash2,
-        danger: true,
-        command: DeleteCard({ id: card.id }),
-      },
-    ]
+        {
+          id: "priority",
+          label: "Set Priority",
+          icon: Flame,
+          submenu: (
+            ["urgent", "high", "medium", "low", "none"] as Priority[]
+          ).map((p) => ({
+            id: p,
+            label: p.charAt(0).toUpperCase() + p.slice(1),
+            color:
+              p === "urgent"
+                ? "#ef4444"
+                : p === "high"
+                  ? "#f97316"
+                  : p === "medium"
+                    ? "#eab308"
+                    : p === "low"
+                      ? "#3b82f6"
+                      : "#94a3b8",
+            active: card.priority === p,
+            command: SetPriority({ id: card.id, priority: p }),
+          })),
+        },
+        {
+          id: "labels",
+          label: "Toggle Label",
+          icon: Tag,
+          submenu: Object.values(state!.data.labels).map((label) => ({
+            id: label.id,
+            label: label.name,
+            color: label.color,
+            active: card.labels.includes(label.id),
+            command: ToggleLabel({ id: card.id, labelId: label.id }),
+          })),
+        },
+        {
+          id: "move-right",
+          label: "Move Right",
+          icon: ArrowRight,
+          command: MoveCardToColumn({ id: card.id, direction: "right" }),
+        },
+        {
+          id: "duplicate",
+          label: "Duplicate",
+          icon: Copy,
+          command: DuplicateCard({ id: card.id }),
+        },
+        {
+          id: "delete",
+          label: "Delete",
+          icon: Trash2,
+          danger: true,
+          command: DeleteCard({ id: card.id }),
+        },
+      ]
     : [];
 
   // Helper: dispatch a command and close
@@ -167,7 +167,15 @@ export function CardActionMenu() {
     document.addEventListener("keydown", handleKeyDown, true);
     // eslint-disable-next-line pipeline/no-imperative-handler -- cleanup
     return () => document.removeEventListener("keydown", handleKeyDown, true);
-  }, [cardId, focusedIdx, openSubmenu, subFocusIdx, menuItems, close, dispatchAndClose]);
+  }, [
+    cardId,
+    focusedIdx,
+    openSubmenu,
+    subFocusIdx,
+    menuItems,
+    close,
+    dispatchAndClose,
+  ]);
 
   // Auto-focus menu on open
   useEffect(() => {
@@ -219,12 +227,13 @@ export function CardActionMenu() {
                 <button
                   className={`
                                 w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium transition-colors text-left
-                                ${focusedIdx === idx && !openSubmenu
-                      ? "bg-indigo-50 text-indigo-700"
-                      : item.danger
-                        ? "text-red-500 hover:bg-red-50"
-                        : "text-slate-600 hover:bg-slate-50"
-                    }
+                                ${
+                                  focusedIdx === idx && !openSubmenu
+                                    ? "bg-indigo-50 text-indigo-700"
+                                    : item.danger
+                                      ? "text-red-500 hover:bg-red-50"
+                                      : "text-slate-600 hover:bg-slate-50"
+                                }
                             `}
                   onMouseEnter={() => setFocusedIdx(idx)}
                 >
@@ -250,10 +259,11 @@ export function CardActionMenu() {
                       <button
                         className={`
                                             w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium transition-colors text-left
-                                            ${subFocusIdx === sIdx
-                            ? "bg-indigo-50 text-indigo-700"
-                            : "text-slate-600 hover:bg-slate-50"
-                          }
+                                            ${
+                                              subFocusIdx === sIdx
+                                                ? "bg-indigo-50 text-indigo-700"
+                                                : "text-slate-600 hover:bg-slate-50"
+                                            }
                                         `}
                         onMouseEnter={() => setSubFocusIdx(sIdx)}
                       >

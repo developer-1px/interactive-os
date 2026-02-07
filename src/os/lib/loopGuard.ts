@@ -25,46 +25,46 @@
  *   }
  */
 export function createReentrantGuard(name: string, maxDepth: number = 8) {
-    let depth = 0;
-    let warned = false;
+  let depth = 0;
+  let warned = false;
 
-    return {
-        /** Try to enter the guarded section. Returns false if max depth exceeded. */
-        enter(): boolean {
-            depth++;
-            if (depth > maxDepth) {
-                if (!warned) {
-                    warned = true;
-                    console.error(
-                        `[LoopGuard] ⛔ "${name}" exceeded max reentrant depth (${maxDepth}). ` +
-                        `This is likely an infinite loop. Current depth: ${depth}. Breaking out.`
-                    );
-                    // Log stack trace for debugging
-                    console.trace(`[LoopGuard] "${name}" stack trace:`);
-                }
-                depth--;
-                return false;
-            }
-            warned = false;
-            return true;
-        },
+  return {
+    /** Try to enter the guarded section. Returns false if max depth exceeded. */
+    enter(): boolean {
+      depth++;
+      if (depth > maxDepth) {
+        if (!warned) {
+          warned = true;
+          console.error(
+            `[LoopGuard] ⛔ "${name}" exceeded max reentrant depth (${maxDepth}). ` +
+              `This is likely an infinite loop. Current depth: ${depth}. Breaking out.`,
+          );
+          // Log stack trace for debugging
+          console.trace(`[LoopGuard] "${name}" stack trace:`);
+        }
+        depth--;
+        return false;
+      }
+      warned = false;
+      return true;
+    },
 
-        /** Exit the guarded section. */
-        exit(): void {
-            depth = Math.max(0, depth - 1);
-        },
+    /** Exit the guarded section. */
+    exit(): void {
+      depth = Math.max(0, depth - 1);
+    },
 
-        /** Get current depth (for debugging). */
-        getDepth(): number {
-            return depth;
-        },
+    /** Get current depth (for debugging). */
+    getDepth(): number {
+      return depth;
+    },
 
-        /** Reset the guard state (for testing). */
-        reset(): void {
-            depth = 0;
-            warned = false;
-        },
-    };
+    /** Reset the guard state (for testing). */
+    reset(): void {
+      depth = 0;
+      warned = false;
+    },
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -83,54 +83,54 @@ export function createReentrantGuard(name: string, maxDepth: number = 8) {
  *   }
  */
 export function createFrequencyGuard(name: string, maxPerFrame: number = 50) {
-    let count = 0;
-    let frameId: number | null = null;
-    let warned = false;
+  let count = 0;
+  let frameId: number | null = null;
+  let warned = false;
 
-    function resetOnNextFrame() {
-        if (frameId === null) {
-            frameId = requestAnimationFrame(() => {
-                count = 0;
-                frameId = null;
-                warned = false;
-            });
-        }
+  function resetOnNextFrame() {
+    if (frameId === null) {
+      frameId = requestAnimationFrame(() => {
+        count = 0;
+        frameId = null;
+        warned = false;
+      });
     }
+  }
 
-    return {
-        /** Check if the call is within limits. Returns false if rate limited. */
-        check(): boolean {
-            count++;
-            resetOnNextFrame();
+  return {
+    /** Check if the call is within limits. Returns false if rate limited. */
+    check(): boolean {
+      count++;
+      resetOnNextFrame();
 
-            if (count > maxPerFrame) {
-                if (!warned) {
-                    warned = true;
-                    console.error(
-                        `[LoopGuard] ⛔ "${name}" exceeded ${maxPerFrame} calls/frame. ` +
-                        `Likely an infinite loop. Throttling until next frame.`
-                    );
-                }
-                return false;
-            }
-            return true;
-        },
+      if (count > maxPerFrame) {
+        if (!warned) {
+          warned = true;
+          console.error(
+            `[LoopGuard] ⛔ "${name}" exceeded ${maxPerFrame} calls/frame. ` +
+              `Likely an infinite loop. Throttling until next frame.`,
+          );
+        }
+        return false;
+      }
+      return true;
+    },
 
-        /** Get call count in current frame (for debugging). */
-        getCount(): number {
-            return count;
-        },
+    /** Get call count in current frame (for debugging). */
+    getCount(): number {
+      return count;
+    },
 
-        /** Reset (for testing). */
-        reset(): void {
-            count = 0;
-            warned = false;
-            if (frameId !== null) {
-                cancelAnimationFrame(frameId);
-                frameId = null;
-            }
-        },
-    };
+    /** Reset (for testing). */
+    reset(): void {
+      count = 0;
+      warned = false;
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      }
+    },
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════

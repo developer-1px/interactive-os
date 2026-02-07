@@ -3,7 +3,6 @@ import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { TestBox } from "../../shared/TestLayout";
 
 export function AutofocusTest() {
-
   const description = (
     <div className="space-y-2">
       <p>
@@ -40,10 +39,7 @@ export function AutofocusTest() {
   );
 
   return (
-    <TestBox
-      title="Entry & AutoFocus"
-      description={description}
-    >
+    <TestBox title="Entry & AutoFocus" description={description}>
       <div className="flex flex-col gap-6">
         {/* Auto Focus */}
         <div className="space-y-2">

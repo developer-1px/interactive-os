@@ -127,10 +127,7 @@ export function FocusStackTest() {
   const scrollItems = Array.from({ length: 15 }, (_, i) => `Item ${i + 1}`);
 
   return (
-    <TestBox
-      title="Focus Stack / Scroll"
-      description={description}
-    >
+    <TestBox title="Focus Stack / Scroll" description={description}>
       <div className="flex flex-col gap-4">
         {/* Base List */}
         <div className="space-y-1">

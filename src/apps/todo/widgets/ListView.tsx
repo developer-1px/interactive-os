@@ -9,10 +9,7 @@ import {
   CutTodo,
   PasteTodo,
 } from "@apps/todo/features/commands/clipboard";
-import {
-  UndoCommand,
-  RedoCommand,
-} from "@apps/todo/features/commands/history";
+import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import {
   AddTodo,
   DeleteTodo,

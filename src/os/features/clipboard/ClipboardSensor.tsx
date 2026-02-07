@@ -9,53 +9,53 @@
  * when the user presses ⌘C, ⌘X, ⌘V.
  */
 
-import { useEffect } from "react";
 import { dispatchToZone } from "@os/features/action/dispatchToZone";
+import { useEffect } from "react";
 
 function isInputActive(): boolean {
-    const el = document.activeElement;
-    return (
-        el instanceof HTMLInputElement ||
-        el instanceof HTMLTextAreaElement ||
-        (el as HTMLElement)?.isContentEditable
-    );
+  const el = document.activeElement;
+  return (
+    el instanceof HTMLInputElement ||
+    el instanceof HTMLTextAreaElement ||
+    (el as HTMLElement)?.isContentEditable
+  );
 }
 
 export function ClipboardSensor() {
-    useEffect(() => {
-        const handleCopy = (e: ClipboardEvent) => {
-            if (isInputActive()) return;
-            if (dispatchToZone("copyCommand")) {
-                e.preventDefault();
-            }
-        };
+  useEffect(() => {
+    const handleCopy = (e: ClipboardEvent) => {
+      if (isInputActive()) return;
+      if (dispatchToZone("copyCommand")) {
+        e.preventDefault();
+      }
+    };
 
-        const handleCut = (e: ClipboardEvent) => {
-            if (isInputActive()) return;
-            if (dispatchToZone("cutCommand")) {
-                e.preventDefault();
-            }
-        };
+    const handleCut = (e: ClipboardEvent) => {
+      if (isInputActive()) return;
+      if (dispatchToZone("cutCommand")) {
+        e.preventDefault();
+      }
+    };
 
-        const handlePaste = (e: ClipboardEvent) => {
-            if (isInputActive()) return;
-            if (dispatchToZone("pasteCommand")) {
-                e.preventDefault();
-            }
-        };
+    const handlePaste = (e: ClipboardEvent) => {
+      if (isInputActive()) return;
+      if (dispatchToZone("pasteCommand")) {
+        e.preventDefault();
+      }
+    };
 
-        window.addEventListener("copy", handleCopy);
-        window.addEventListener("cut", handleCut);
-        window.addEventListener("paste", handlePaste);
+    window.addEventListener("copy", handleCopy);
+    window.addEventListener("cut", handleCut);
+    window.addEventListener("paste", handlePaste);
 
-        return () => {
-            window.removeEventListener("copy", handleCopy);
-            window.removeEventListener("cut", handleCut);
-            window.removeEventListener("paste", handlePaste);
-        };
-    }, []);
+    return () => {
+      window.removeEventListener("copy", handleCopy);
+      window.removeEventListener("cut", handleCut);
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, []);
 
-    return null;
+  return null;
 }
 
 ClipboardSensor.displayName = "ClipboardSensor";

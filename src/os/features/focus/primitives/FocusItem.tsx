@@ -199,7 +199,9 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       return cloneElement(childElement, {
         ...sharedProps,
         ref: combinedRef,
-        className: [childElement.props.className, sharedProps.className].filter(Boolean).join(' '),
+        className: [childElement.props.className, sharedProps.className]
+          .filter(Boolean)
+          .join(" "),
         style: { ...childElement.props.style, ...style },
       });
     }

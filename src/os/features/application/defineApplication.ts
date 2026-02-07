@@ -15,7 +15,10 @@ export interface AppDefinition<S, K extends string = string> {
       debounceMs?: number;
     };
   };
-  middleware?: import("@os/features/command/model/createCommandStore").Middleware<S, any>[];
+  middleware?: import("@os/features/command/model/createCommandStore").Middleware<
+    S,
+    any
+  >[];
   contextMap?: (state: S, env: any) => any;
 }
 

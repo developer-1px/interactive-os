@@ -40,10 +40,7 @@ export function AriaInteractionTest() {
   };
 
   return (
-    <TestBox
-      title="ARIA Interactions"
-      description={description}
-    >
+    <TestBox title="ARIA Interactions" description={description}>
       <div className="flex flex-col gap-4">
         {/* 1. Trigger Section */}
         <div className="border p-2 rounded bg-gray-50">

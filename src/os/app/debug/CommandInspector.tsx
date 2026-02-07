@@ -9,8 +9,8 @@ import { useCommandTelemetryStore } from "@os/features/command/store/CommandTele
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import { useInspectorStore } from "@os/features/inspector/InspectorStore";
-import { TestBotPanel } from "@os/testBot";
 import { evalContext } from "@os/features/logic/lib/evalContext";
+import { TestBotPanel } from "@os/testBot";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 // --- Main Component ---

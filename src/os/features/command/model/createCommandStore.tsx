@@ -1,14 +1,13 @@
 import { logger } from "@os/app/debug/logger";
 import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
-import { dispatchGuard } from "@os/lib/loopGuard";
-import { InspectorLog } from "@os/features/inspector/InspectorLogStore";
-import { consumeCurrentInput } from "@os/features/focus/pipeline/core/osCommand";
 // Modules
 import {
   type CommandGroup,
   CommandRegistry,
 } from "@os/features/command/model/CommandRegistry";
 import { FocusData } from "@os/features/focus/lib/focusData";
+import { consumeCurrentInput } from "@os/features/focus/pipeline/core/osCommand";
+import { InspectorLog } from "@os/features/inspector/InspectorLogStore";
 import { GroupRegistry } from "@os/features/jurisdiction/model/GroupRegistry";
 // Middleware is now injected via config!
 import {
@@ -16,6 +15,7 @@ import {
   hydrateState,
   type PersistenceConfig,
 } from "@os/features/persistence/hydrateState";
+import { dispatchGuard } from "@os/lib/loopGuard";
 import { create } from "zustand";
 
 // Re-exports for consumers
@@ -96,12 +96,7 @@ export function createCommandStore<
 
             // 4. Logging
             if (cmd.log !== false) {
-              logger.traceCommand(
-                act.type,
-                act.payload,
-                state,
-                nextState,
-              );
+              logger.traceCommand(act.type, act.payload, state, nextState);
             }
 
             return nextState;
@@ -110,7 +105,7 @@ export function createCommandStore<
           // ── Middleware Pipeline Composition ──
           const pipeline = (config?.middleware || []).reduceRight(
             (next, mw) => mw(next),
-            coreDispatch
+            coreDispatch,
           );
 
           // ── Execute Pipeline ──

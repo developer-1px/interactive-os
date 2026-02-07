@@ -4,7 +4,6 @@ import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { TestBox } from "../../shared/TestLayout";
 
 export function ExpandTest() {
-
   const description = (
     <div className="space-y-2">
       <p>
@@ -41,10 +40,7 @@ export function ExpandTest() {
   );
 
   return (
-    <TestBox
-      title="Expand / Collapse"
-      description={description}
-    >
+    <TestBox title="Expand / Collapse" description={description}>
       <div className="space-y-2">
         <div className="text-[10px] font-mono text-gray-500 uppercase">
           Tree Widget

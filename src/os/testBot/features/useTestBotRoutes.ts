@@ -15,12 +15,12 @@ import type { TestBot } from "../entities/TestBot";
 import { TestBotActions } from "./TestBotActions";
 
 export function useTestBotRoutes(
-    pageId: string,
-    definer: (bot: TestBot) => void,
+  pageId: string,
+  definer: (bot: TestBot) => void,
 ) {
-    useEffect(() => {
-        TestBotActions.register(pageId, definer);
-        return () => TestBotActions.unregister(pageId);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pageId]);
+  useEffect(() => {
+    TestBotActions.register(pageId, definer);
+    return () => TestBotActions.unregister(pageId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageId]);
 }

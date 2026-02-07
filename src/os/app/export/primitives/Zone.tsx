@@ -79,7 +79,6 @@ export function Zone({
   children,
   ...props
 }: ZoneProps) {
-
   return (
     <FocusGroup
       id={id}

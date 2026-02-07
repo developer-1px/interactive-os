@@ -9,10 +9,7 @@ import type {
 } from "@apps/kanban/model/appState";
 import { Field } from "@os/app/export/primitives/Field";
 import { Item } from "@os/app/export/primitives/Item";
-import {
-  Calendar,
-  Check,
-} from "lucide-react";
+import { Calendar, Check } from "lucide-react";
 
 interface KanbanCardProps {
   card: KanbanCardType;
@@ -22,8 +19,6 @@ interface KanbanCardProps {
   isSelected?: boolean;
 }
 
-
-
 export function KanbanCard({
   card,
   isEditing,
@@ -31,7 +26,6 @@ export function KanbanCard({
   labels,
   isSelected,
 }: KanbanCardProps) {
-
   const cardLabels = card.labels.map((lid) => labels[lid]).filter(Boolean);
 
   const isOverdue = card.dueDate && new Date(card.dueDate) < new Date();
@@ -41,12 +35,13 @@ export function KanbanCard({
       id={card.id}
       className={`
                 group relative rounded-lg transition-all duration-200 cursor-pointer overflow-visible
-                ${isEditing
-          ? "bg-kanban-surface ring-2 ring-brand ring-offset-1 shadow-float z-20"
-          : isSelected
-            ? "bg-brand/5 ring-1 ring-brand/40 shadow-sm"
-            : "bg-kanban-surface shadow-card hover:shadow-card-hover hover:-translate-y-[1px]"
-        }
+                ${
+                  isEditing
+                    ? "bg-kanban-surface ring-2 ring-brand ring-offset-1 shadow-float z-20"
+                    : isSelected
+                      ? "bg-brand/5 ring-1 ring-brand/40 shadow-sm"
+                      : "bg-kanban-surface shadow-card hover:shadow-card-hover hover:-translate-y-[1px]"
+                }
                 outline-none
                 data-[focused=true]:ring-2 data-[focused=true]:ring-brand data-[focused=true]:ring-offset-1 data-[focused=true]:z-10
             `}

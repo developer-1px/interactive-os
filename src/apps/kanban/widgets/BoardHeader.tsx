@@ -29,11 +29,11 @@ const PRIORITIES: {
   icon: any;
   color: string;
 }[] = [
-    { value: "urgent", label: "Urgent", icon: Flame, color: "#ef4444" },
-    { value: "high", label: "High", icon: ArrowUp, color: "#f97316" },
-    { value: "medium", label: "Medium", icon: Minus, color: "#eab308" },
-    { value: "low", label: "Low", icon: ArrowDown, color: "#3b82f6" },
-  ];
+  { value: "urgent", label: "Urgent", icon: Flame, color: "#ef4444" },
+  { value: "high", label: "High", icon: ArrowUp, color: "#f97316" },
+  { value: "medium", label: "Medium", icon: Minus, color: "#eab308" },
+  { value: "low", label: "Low", icon: ArrowDown, color: "#3b82f6" },
+];
 
 export function BoardHeader({ state }: BoardHeaderProps) {
   const { dispatch } = useEngine();
@@ -114,10 +114,11 @@ export function BoardHeader({ state }: BoardHeaderProps) {
               <button
                 className={`
                                 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border
-                                ${state.ui.priorityFilter === value
-                    ? "bg-white shadow-sm border-slate-300 text-slate-700"
-                    : "border-transparent text-slate-400 hover:text-slate-500 hover:bg-slate-50"
-                  }
+                                ${
+                                  state.ui.priorityFilter === value
+                                    ? "bg-white shadow-sm border-slate-300 text-slate-700"
+                                    : "border-transparent text-slate-400 hover:text-slate-500 hover:bg-slate-50"
+                                }
                             `}
               >
                 <Icon size={10} style={{ color }} />
@@ -139,10 +140,11 @@ export function BoardHeader({ state }: BoardHeaderProps) {
               <button
                 className={`
                                 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border
-                                ${state.ui.labelFilter === label.id
-                    ? "bg-white shadow-sm border-slate-300"
-                    : "border-transparent hover:bg-slate-50"
-                  }
+                                ${
+                                  state.ui.labelFilter === label.id
+                                    ? "bg-white shadow-sm border-slate-300"
+                                    : "border-transparent hover:bg-slate-50"
+                                }
                             `}
                 style={{ color: label.color }}
               >

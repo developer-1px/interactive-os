@@ -10,16 +10,16 @@
 // ═══════════════════════════════════════════════════════════════════
 
 export interface HistoryEntry {
-    command: { type: string; payload?: any };
-    timestamp: number;
-    snapshot?: any;
-    /** Captured focusedItemId for focus restoration on undo */
-    focusedItemId?: string | null;
+  command: { type: string; payload?: any };
+  timestamp: number;
+  snapshot?: any;
+  /** Captured focusedItemId for focus restoration on undo */
+  focusedItemId?: string | null;
 }
 
 export interface HistoryState {
-    past: HistoryEntry[];
-    future: HistoryEntry[];
+  past: HistoryEntry[];
+  future: HistoryEntry[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -32,10 +32,10 @@ export interface HistoryState {
  * Apps that include `history` get undo/redo history recording.
  */
 export interface OSManagedState {
-    effects?: { type: string;[key: string]: any }[];
-    history?: HistoryState;
-    data?: any;
-    ui?: any;
+  effects?: { type: string; [key: string]: any }[];
+  history?: HistoryState;
+  data?: any;
+  ui?: any;
 }
 
 /**

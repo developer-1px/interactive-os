@@ -1,8 +1,7 @@
+import { useTodoBotRoutes } from "@apps/todo/tests/TodoBot";
 import { Sidebar } from "@apps/todo/widgets/Sidebar";
 import { TodoPanel } from "@apps/todo/widgets/TodoPanel";
 import { Zone } from "@os/app/export/primitives/Zone.tsx";
-
-import { useTodoBotRoutes } from "@apps/todo/tests/TodoBot";
 
 export default function TodoPage() {
   // TestBot scenarios for clipboard operations
@@ -10,8 +9,6 @@ export default function TodoPage() {
 
   return (
     <Zone id="main" role="toolbar" className="h-full flex">
-
-
       {/* 1. Category Navigation (Isolated Component) */}
       <Sidebar />
 
@@ -20,4 +17,3 @@ export default function TodoPage() {
     </Zone>
   );
 }
-

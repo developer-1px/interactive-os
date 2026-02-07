@@ -1,5 +1,5 @@
 import { mapStateToContext } from "@apps/todo/bridge/mapStateToContext";
-import { UndoCommand, RedoCommand } from "@apps/todo/features/commands/history";
+import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import { INITIAL_STATE } from "@apps/todo/features/todo_details/persistence";
 import { TODO_KEYMAP } from "@apps/todo/features/todoKeys";
 import type { AppState, TodoCommandId } from "@apps/todo/model/types";
@@ -26,4 +26,3 @@ export const TodoApp = defineApplication<AppState, TodoCommandId>({
       env.focusedItemId,
     ),
 });
-

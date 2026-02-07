@@ -7,9 +7,9 @@ export function useOS(): OS {
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
-    // @ts-ignore - userAgentData is not yet in TS Navigator type
     const platform =
-      (window.navigator as any)?.userAgentData?.platform || window.navigator.platform;
+      (window.navigator as any)?.userAgentData?.platform ||
+      window.navigator.platform;
     const macos = /Mac|iPhone|iPod|iPad/i.test(platform);
     const windows = /Win/i.test(platform);
     const linux = /Linux/i.test(platform);

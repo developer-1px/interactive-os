@@ -465,10 +465,11 @@ export function AriaShowcasePage() {
                 className={`
                                   w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
                                   flex items-center gap-2 transition-all
-                                  ${isComboInvalid
-                    ? "border-red-300 bg-red-50 text-red-700"
-                    : "border-gray-200 hover:border-gray-300"
-                  }
+                                  ${
+                                    isComboInvalid
+                                      ? "border-red-300 bg-red-50 text-red-700"
+                                      : "border-gray-200 hover:border-gray-300"
+                                  }
                                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
                                   aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
                               `}
@@ -623,12 +624,19 @@ export function AriaShowcasePage() {
                 <div className="p-5">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                      <Icon name="alert-triangle" size={20} className="text-red-600" />
+                      <Icon
+                        name="alert-triangle"
+                        size={20}
+                        className="text-red-600"
+                      />
                     </div>
-                    <h3 className="font-bold text-gray-800">Delete permanently?</h3>
+                    <h3 className="font-bold text-gray-800">
+                      Delete permanently?
+                    </h3>
                   </div>
                   <p id="alert-desc" className="text-sm text-gray-500 mb-4">
-                    This action cannot be undone. The item will be permanently removed.
+                    This action cannot be undone. The item will be permanently
+                    removed.
                   </p>
                   <div className="flex gap-2">
                     <FocusItem
@@ -669,9 +677,24 @@ export function AriaShowcasePage() {
             className="space-y-2"
           >
             {[
-              { id: "feed-1", author: "Alice", time: "2m ago", text: "Shipped the new focus pipeline! 🚀" },
-              { id: "feed-2", author: "Bob", time: "15m ago", text: "Fixed the grid navigation edge case." },
-              { id: "feed-3", author: "Carol", time: "1h ago", text: "Added ARIA role presets for all composite widgets." },
+              {
+                id: "feed-1",
+                author: "Alice",
+                time: "2m ago",
+                text: "Shipped the new focus pipeline! 🚀",
+              },
+              {
+                id: "feed-2",
+                author: "Bob",
+                time: "15m ago",
+                text: "Fixed the grid navigation edge case.",
+              },
+              {
+                id: "feed-3",
+                author: "Carol",
+                time: "1h ago",
+                text: "Added ARIA role presets for all composite widgets.",
+              },
             ].map((post) => (
               <FocusItem
                 key={post.id}
@@ -688,8 +711,12 @@ export function AriaShowcasePage() {
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
                     {post.author[0]}
                   </div>
-                  <span className="text-sm font-medium text-gray-700">{post.author}</span>
-                  <span className="text-xs text-gray-400 ml-auto">{post.time}</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    {post.author}
+                  </span>
+                  <span className="text-xs text-gray-400 ml-auto">
+                    {post.time}
+                  </span>
                 </div>
                 <p className="text-sm text-gray-600 pl-8">{post.text}</p>
               </FocusItem>
@@ -697,7 +724,7 @@ export function AriaShowcasePage() {
           </FocusGroup>
         </AriaCard>
       </div>
-    </div >
+    </div>
   );
 }
 
@@ -952,9 +979,10 @@ function DisclosureContent() {
           className="mt-2 px-4 py-3 text-sm text-gray-600 bg-indigo-50 rounded-lg border border-indigo-100"
         >
           <p>
-            The <strong>disclosure</strong> pattern is the simplest expand/collapse:
-            a single trigger toggles visibility of a single panel.
-            Unlike accordion, disclosures are independent — multiple can be open simultaneously.
+            The <strong>disclosure</strong> pattern is the simplest
+            expand/collapse: a single trigger toggles visibility of a single
+            panel. Unlike accordion, disclosures are independent — multiple can
+            be open simultaneously.
           </p>
         </div>
       )}

@@ -3,7 +3,6 @@ import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { TestBox } from "../../shared/TestLayout";
 
 export function AriaFacadeTest() {
-
   const description = (
     <div className="space-y-2">
       <p>
@@ -32,10 +31,7 @@ export function AriaFacadeTest() {
   );
 
   return (
-    <TestBox
-      title="ARIA Standard Facade"
-      description={description}
-    >
+    <TestBox title="ARIA Standard Facade" description={description}>
       <div className="flex flex-col gap-6">
         {/* 1. Tabs Pattern */}
         <div className="space-y-2">

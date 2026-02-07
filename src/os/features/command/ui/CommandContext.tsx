@@ -18,7 +18,7 @@ export function useDispatch() {
   const dispatch = activeAppId
     ? appRegistries.get(activeAppId)?.dispatch
     : null;
-  return dispatch ?? (() => { });
+  return dispatch ?? (() => {});
 }
 
 export function useAppState<S>() {

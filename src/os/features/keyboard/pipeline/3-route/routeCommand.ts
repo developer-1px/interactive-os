@@ -44,9 +44,9 @@ export function routeCommand(intent: KeyboardIntent): boolean {
   const fullContext =
     contextMap && state !== undefined
       ? {
-        ...context,
-        ...contextMap(state, { activeGroupId, focusPath, focusedItemId }),
-      }
+          ...context,
+          ...contextMap(state, { activeGroupId, focusPath, focusedItemId }),
+        }
       : context;
 
   const bubblePath = buildBubblePath(focusPath, activeGroupId);

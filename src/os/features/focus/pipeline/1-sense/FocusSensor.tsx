@@ -17,7 +17,10 @@ import {
   findFocusableItem,
   resolveFocusTarget,
 } from "../../lib/focusDOMQueries";
-import { isOSCommandRunning, setCurrentInput } from "../../pipeline/core/osCommand";
+import {
+  isOSCommandRunning,
+  setCurrentInput,
+} from "../../pipeline/core/osCommand";
 
 let isMounted = false;
 
@@ -175,7 +178,9 @@ export function FocusSensor() {
 
     return () => {
       isMounted = false;
-      document.removeEventListener("mousedown", senseMouseDown, { capture: true });
+      document.removeEventListener("mousedown", senseMouseDown, {
+        capture: true,
+      });
       document.removeEventListener("focusin", senseFocusIn, { capture: true });
       document.removeEventListener("focusin", trackFocus);
       observer.disconnect();

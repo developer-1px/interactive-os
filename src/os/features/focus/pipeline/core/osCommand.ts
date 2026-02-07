@@ -7,9 +7,9 @@
  * - OSResult: State 변경 + DOM Effect
  */
 
+import { InspectorLog } from "../../../inspector/InspectorLogStore";
 import { DOM } from "../../lib/dom";
 import { FocusData } from "../../lib/focusData";
-import { InspectorLog } from "../../../inspector/InspectorLogStore";
 import type { FocusGroupStore } from "../../store/focusGroupStore";
 import type { FocusGroupConfig } from "../../types";
 
@@ -237,7 +237,12 @@ function logInput(event: Event): void {
         target: target.id || target.tagName.toLowerCase(),
         position: { x: event.clientX, y: event.clientY },
         button: event.button,
-        modifiers: { shift: event.shiftKey, ctrl: event.ctrlKey, meta: event.metaKey, alt: event.altKey },
+        modifiers: {
+          shift: event.shiftKey,
+          ctrl: event.ctrlKey,
+          meta: event.metaKey,
+          alt: event.altKey,
+        },
       },
       icon: "cursor",
       source: "user",
@@ -249,7 +254,12 @@ function logInput(event: Event): void {
       title: event.key,
       details: {
         code: event.code,
-        modifiers: { shift: event.shiftKey, ctrl: event.ctrlKey, meta: event.metaKey, alt: event.altKey },
+        modifiers: {
+          shift: event.shiftKey,
+          ctrl: event.ctrlKey,
+          meta: event.metaKey,
+          alt: event.altKey,
+        },
       },
       icon: "keyboard",
       source: "user",
@@ -338,7 +348,11 @@ export function runOS<P>(
         InspectorLog.log({
           type: "STATE",
           title: `Focus → ${result.state.focusedItemId ?? "(none)"}`,
-          details: { zoneId: ctx.zoneId, from: ctx.focusedItemId, to: result.state.focusedItemId },
+          details: {
+            zoneId: ctx.zoneId,
+            from: ctx.focusedItemId,
+            to: result.state.focusedItemId,
+          },
           icon: "eye",
           source: "os",
         });
@@ -352,7 +366,11 @@ export function runOS<P>(
         InspectorLog.log({
           type: "STATE",
           title: `Selection (${result.state.selection.length})`,
-          details: { zoneId: ctx.zoneId, from: ctx.selection, to: result.state.selection },
+          details: {
+            zoneId: ctx.zoneId,
+            from: ctx.selection,
+            to: result.state.selection,
+          },
           icon: "cpu",
           source: "os",
         });

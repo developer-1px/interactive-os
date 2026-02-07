@@ -83,14 +83,22 @@ const childRoleMap: Partial<Record<ZoneRole, string>> = {
 };
 
 /** Roles where items should use `aria-checked` instead of `aria-selected` */
-const CHECKED_ROLES = new Set(["radio", "menuitemradio", "menuitemcheckbox", "checkbox", "switch"]);
+const CHECKED_ROLES = new Set([
+  "radio",
+  "menuitemradio",
+  "menuitemcheckbox",
+  "checkbox",
+  "switch",
+]);
 
 /** Roles where items can be expanded/collapsed */
 const EXPANDABLE_ROLES = new Set(["treeitem", "button", "menuitem"]);
 
 /** Get the default child role for a Zone role */
 export function getChildRole(zoneRole?: ZoneRole | string): string {
-  return (zoneRole ? childRoleMap[zoneRole as ZoneRole] : undefined) || "option";
+  return (
+    (zoneRole ? childRoleMap[zoneRole as ZoneRole] : undefined) || "option"
+  );
 }
 
 /** Check if a role uses aria-checked (vs aria-selected) */
@@ -125,7 +133,12 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // Spec: vertical, no wrap, selection follows focus in single-select,
   //       entry to selected item, typeahead recommended
   listbox: {
-    navigate: { orientation: "vertical", loop: false, typeahead: true, entry: "selected" },
+    navigate: {
+      orientation: "vertical",
+      loop: false,
+      typeahead: true,
+      entry: "selected",
+    },
     select: { mode: "single", followFocus: true },
     tab: { behavior: "escape" },
   },
@@ -203,7 +216,12 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // Spec: vertical, no wrap, selection explicit (Enter/Space),
   //       typeahead recommended, entry to selected node
   tree: {
-    navigate: { orientation: "vertical", loop: false, typeahead: true, entry: "selected" },
+    navigate: {
+      orientation: "vertical",
+      loop: false,
+      typeahead: true,
+      entry: "selected",
+    },
     select: { mode: "single", followFocus: false },
     activate: { mode: "manual" },
     tab: { behavior: "escape" },
@@ -320,4 +338,3 @@ export function resolveRole(
     },
   };
 }
-

@@ -8,7 +8,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type InspectorTab = "REGISTRY" | "STATE" | "EVENTS" | "SETTINGS" | "TESTBOT";
+export type InspectorTab =
+  | "REGISTRY"
+  | "STATE"
+  | "EVENTS"
+  | "SETTINGS"
+  | "TESTBOT";
 
 interface InspectorState {
   isOpen: boolean;

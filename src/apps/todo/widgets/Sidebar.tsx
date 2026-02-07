@@ -1,8 +1,5 @@
+import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
-import {
-  UndoCommand,
-  RedoCommand,
-} from "@apps/todo/features/commands/history";
 import type { AppState } from "@apps/todo/model/types";
 import { Kbd } from "@os/app/debug/components/Kbd";
 import { Item } from "@os/app/export/primitives/Item.tsx";

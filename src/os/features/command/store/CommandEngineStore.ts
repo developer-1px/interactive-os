@@ -57,9 +57,24 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
     set({ osRegistry: registry, isInitialized: true });
   },
 
-  registerApp: ({ appId, registry, dispatch, state, getState, setState, contextMap }) => {
+  registerApp: ({
+    appId,
+    registry,
+    dispatch,
+    state,
+    getState,
+    setState,
+    contextMap,
+  }) => {
     const newMap = new Map(get().appRegistries);
-    newMap.set(appId, { registry, dispatch, state, getState, setState, contextMap });
+    newMap.set(appId, {
+      registry,
+      dispatch,
+      state,
+      getState,
+      setState,
+      contextMap,
+    });
     set({ appRegistries: newMap, activeAppId: appId });
   },
 
@@ -130,7 +145,9 @@ export const CommandEngineStore = {
     if (dispatch) {
       dispatch(cmd);
     } else {
-      console.warn(`[CommandEngine] Command dropped (no active app): ${cmd.type}`);
+      console.warn(
+        `[CommandEngine] Command dropped (no active app): ${cmd.type}`,
+      );
     }
   },
 

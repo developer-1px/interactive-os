@@ -8,6 +8,7 @@
  */
 
 import {
+  Activity,
   // Status
   AlertCircle,
   AlertTriangle,
@@ -38,6 +39,7 @@ import {
   Columns,
   Copy,
   CornerDownLeft,
+  Cpu,
   Database,
   ExternalLink,
   // Misc
@@ -62,6 +64,7 @@ import {
   Home,
   Info,
   Italic,
+  Keyboard,
   Layers,
   LayoutGrid,
   LayoutList,
@@ -96,6 +99,7 @@ import {
   Star,
   Strikethrough,
   Tag,
+  Terminal,
   Trash2,
   Underline,
   Undo2,
@@ -109,10 +113,6 @@ import {
   X,
   XCircle,
   Zap,
-  Activity,
-  Cpu,
-  Keyboard,
-  Terminal,
 } from "lucide-react";
 import { type ComponentPropsWithoutRef, forwardRef } from "react";
 

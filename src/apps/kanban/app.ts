@@ -24,4 +24,3 @@ export const KanbanApp = defineApplication<KanbanState, KanbanCommandId>({
       env.focusedItemId,
     ),
 });
-
