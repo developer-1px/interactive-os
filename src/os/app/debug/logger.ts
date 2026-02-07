@@ -5,7 +5,15 @@
 
 const IS_DEV = import.meta.env.DEV;
 
-type LogLayer = "ENGINE" | "KEYMAP" | "CONTEXT" | "PRIMITIVE" | "SYSTEM" | "NAVIGATION" | "FOCUS" | "KEYBOARD";
+type LogLayer =
+  | "ENGINE"
+  | "KEYMAP"
+  | "CONTEXT"
+  | "PRIMITIVE"
+  | "SYSTEM"
+  | "NAVIGATION"
+  | "FOCUS"
+  | "KEYBOARD";
 
 const LayerColors: Record<LogLayer, string> = {
   ENGINE: "#6366f1", // Indigo
@@ -20,7 +28,7 @@ const LayerColors: Record<LogLayer, string> = {
 
 class AntigravityLogger {
   private enabled = IS_DEV;
-  private enabledLayers: Set<LogLayer> = new Set(['FOCUS']);
+  private enabledLayers: Set<LogLayer> = new Set(["FOCUS"]);
   private timers: Map<string, number> = new Map();
 
   constructor() {
@@ -36,13 +44,13 @@ class AntigravityLogger {
 
   /** Enable specific layer(s) for logging */
   enableLayer(...layers: LogLayer[]) {
-    layers.forEach(l => this.enabledLayers.add(l));
+    layers.forEach((l) => this.enabledLayers.add(l));
     this.enabled = true;
   }
 
   /** Disable specific layer(s) */
   disableLayer(...layers: LogLayer[]) {
-    layers.forEach(l => this.enabledLayers.delete(l));
+    layers.forEach((l) => this.enabledLayers.delete(l));
   }
 
   /** Check if layer is enabled */
@@ -73,13 +81,22 @@ class AntigravityLogger {
 
   error(layer: LogLayer, message: string, ...args: any[]) {
     const [badge, style] = this.getBadge(layer);
-    console.error(`${badge} %c${message}`, style, "font-weight: bold;", ...args);
+    console.error(
+      `${badge} %c${message}`,
+      style,
+      "font-weight: bold;",
+      ...args,
+    );
   }
 
   group(layer: LogLayer, label: string) {
     if (!this.isLayerEnabled(layer)) return;
     const [badge, style] = this.getBadge(layer);
-    console.groupCollapsed(`${badge} %c${label}`, style, "font-weight: bold; color: white;");
+    console.groupCollapsed(
+      `${badge} %c${label}`,
+      style,
+      "font-weight: bold; color: white;",
+    );
   }
 
   groupEnd() {
@@ -101,11 +118,20 @@ class AntigravityLogger {
     const duration = performance.now() - start;
     this.timers.delete(label);
     const [badge, style] = this.getBadge(layer);
-    console.log(`${badge} %c${label}: ${duration.toFixed(2)}ms`, style, "color: #10b981;");
+    console.log(
+      `${badge} %c${label}: ${duration.toFixed(2)}ms`,
+      style,
+      "color: #10b981;",
+    );
   }
 
   /** Trace command execution */
-  traceCommand(id: string, payload: unknown, prevState: unknown, nextState: unknown) {
+  traceCommand(
+    id: string,
+    payload: unknown,
+    prevState: unknown,
+    nextState: unknown,
+  ) {
     if (!this.isLayerEnabled("ENGINE")) return;
     this.group("ENGINE", `Action: ${id}`);
     console.log("%cPayload:", "color: #f59e0b; font-weight: bold;", payload);

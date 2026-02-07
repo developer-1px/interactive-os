@@ -1,16 +1,16 @@
-import { useEngine } from "@os/features/command/ui/CommandContext";
+import type { AppState } from "@apps/todo/model/types";
 import { BoardView } from "@apps/todo/widgets/BoardView";
 import { ListView } from "@apps/todo/widgets/ListView";
-import type { AppState } from "@apps/todo/model/types";
+import { useEngine } from "@os/features/command/ui/CommandContext";
 
 /**
  * TodoPanel: Switching container for List/Board views.
  * The 'main' Zone is now provided by TodoAppShell for global consistency.
  */
 export function TodoPanel() {
-    const { state } = useEngine<AppState>();
-    if (!state || !state.ui) return null;
-    const isBoard = state.ui.viewMode === "board";
+  const { state } = useEngine<AppState>();
+  if (!state || !state.ui) return null;
+  const isBoard = state.ui.viewMode === "board";
 
-    return isBoard ? <BoardView /> : <ListView />;
+  return isBoard ? <BoardView /> : <ListView />;
 }

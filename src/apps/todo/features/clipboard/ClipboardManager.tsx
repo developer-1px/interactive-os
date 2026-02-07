@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import type { AppState } from "@apps/todo/model/types";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import type { AppState } from "@apps/todo/model/types";
+import { useEffect, useRef } from "react";
 
 /**
  * ClipboardManager
@@ -29,11 +29,14 @@ export function ClipboardManager() {
 
       // Get Focus from OS Store
       const activeZone = FocusData.getActiveZone();
-      const focusId = activeZone ? activeZone.store.getState().focusedItemId : null;
+      const focusId = activeZone
+        ? activeZone.store.getState().focusedItemId
+        : null;
       const { todos, categories } = currentState.data;
 
       // 1. Copying a Todo Item
-      if (typeof focusId !== "object" && !isNaN(Number(focusId))) { // Check if numeric ID (Todo)
+      if (typeof focusId !== "object" && !isNaN(Number(focusId))) {
+        // Check if numeric ID (Todo)
         const todoId = Number(focusId);
         const todo = todos[todoId];
         if (todo) {
@@ -43,7 +46,6 @@ export function ClipboardManager() {
 
           e.clipboardData?.setData("text/plain", text);
           e.clipboardData?.setData("application/json", json);
-
         }
       }
       // 2. Copying a Category

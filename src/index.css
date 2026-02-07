@@ -3,103 +3,117 @@
 * {
   outline-width: 0 !important;
   outline-offset: 0 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scroll margin for focus navigation - breathing room when scrolling into view */
+/* Scroll margin */
 [data-item-id] {
   scroll-margin-block: 10vh;
-  /* Vertical: 10% of viewport height */
   scroll-margin-inline: 5vw;
-  /* Horizontal: 5% of viewport width */
+}
+
+@theme {
+  /* Premium Semantic Colors */
+  --color-kanban-bg: #fdfdfd;
+  --color-kanban-surface: #ffffff;
+  --color-column-bg: transparent;
+
+  --color-brand: #5e6ad2;
+  --color-brand-light: #eff1fa;
+  --color-brand-dark: #4338ca;
+
+  /* Premium Shadows (Linear/Raycast style) */
+  --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.06);
+  --shadow-float: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 8px 24px -6px rgba(0, 0, 0, 0.12);
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Animations */
+  --animate-flash-command: flash-command 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+  --animate-slide-in-right: slide-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-in: scale-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes flash-command {
+    0% {
+      background-color: rgba(94, 106, 210, 0.1);
+    }
+
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      transform: scale(0.96);
+      opacity: 0;
+    }
+
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      transform: translateX(-50%) translateY(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  }
 }
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light;
   color: #1a1a1a;
-  background-color: #ffffff;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-kanban-bg);
+  letter-spacing: -0.015em;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #000;
 }
 
-/* Fixed viewport mode (no scroll) - applied via JS when isAppShell=true */
-body.app-shell {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+/* Premium Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-/* Custom Animation for Command Inspector */
-@keyframes flash-command {
-  0% {
-    background-color: rgba(0, 122, 204, 0.15);
-    box-shadow: inset 0 0 10px rgba(0, 122, 204, 0.1);
-  }
-
-  100% {
-    background-color: transparent;
-    box-shadow: none;
-  }
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.animate-flash-command {
-  animation: flash-command 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 3px;
 }
 
-/* Kanban Animations */
-@keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes scale-in {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes slide-up {
-  from {
-    transform: translateX(-50%) translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.animate-scale-in {
-  animation: scale-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.animate-slide-up {
-  animation: slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
 }

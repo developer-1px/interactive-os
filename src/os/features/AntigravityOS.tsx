@@ -3,11 +3,11 @@
 
 // UI Primitives
 import { App } from "@os/app/export/primitives/App";
-import { Root } from "@os/app/export/primitives/Root";
-import { Zone } from "@os/app/export/primitives/Zone";
-import { Item } from "@os/app/export/primitives/Item";
 import { Field } from "@os/app/export/primitives/Field";
+import { Item } from "@os/app/export/primitives/Item";
+import { Root } from "@os/app/export/primitives/Root";
 import { Trigger } from "@os/app/export/primitives/Trigger";
+import { Zone } from "@os/app/export/primitives/Zone";
 import { Kbd } from "@os/shared/ui/Kbd";
 
 // Logic Evaluation

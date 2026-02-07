@@ -1,22 +1,28 @@
+import type {
+  BaseCommand,
+  FieldCommandFactory,
+} from "@os/entities/BaseCommand.ts";
+import type { FocusTarget } from "@os/entities/FocusTarget.ts";
+import { FocusData } from "@os/features/focus/lib/focusData";
 import {
-  useRef,
+  useFocusGroupContext,
+  useFocusGroupStore,
+} from "@os/features/focus/primitives/FocusGroup";
+import { FocusItem } from "@os/features/focus/primitives/FocusItem";
+import {
+  type FieldConfig,
+  FieldRegistry,
+  useFieldRegistry,
+} from "@os/features/keyboard/registry/FieldRegistry";
+import { useFieldFocus } from "@os/features/keyboard/ui/Field/useFieldHooks";
+import type { HTMLAttributes } from "react";
+import {
   forwardRef,
   useEffect,
   useLayoutEffect,
+  useRef,
   useSyncExternalStore,
 } from "react";
-import type {
-  HTMLAttributes,
-} from "react";
-import type { BaseCommand, FieldCommandFactory } from "@os/entities/BaseCommand.ts";
-import { useFocusGroupStore, useFocusGroupContext } from "@os/features/focus/primitives/FocusGroup";
-import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { FocusData } from "@os/features/focus/lib/focusData";
-import type { FocusTarget } from "@os/entities/FocusTarget.ts";
-import { FieldRegistry, useFieldRegistry, type FieldConfig } from "@os/features/keyboard/registry/FieldRegistry";
-import {
-  useFieldFocus,
-} from "@os/features/keyboard/ui/Field/useFieldHooks";
 
 /**
  * Checks if the value is effectively empty for placeholder display.
@@ -36,7 +42,7 @@ interface FieldStyleParams {
 
 /**
  * Composes the Tailwind classes for the field.
- * 
+ *
  * Visual States:
  * - Default: No special styling
  * - Focused (Selected): Ring outline indicating selection
@@ -89,8 +95,8 @@ export interface FieldProps
   name?: string;
   placeholder?: string;
   multiline?: boolean;
-  onSubmit?: FieldCommandFactory;   // Field injects { text: currentValue }
-  onChange?: FieldCommandFactory;   // Field injects { text: currentValue }
+  onSubmit?: FieldCommandFactory; // Field injects { text: currentValue }
+  onChange?: FieldCommandFactory; // Field injects { text: currentValue }
   onCancel?: BaseCommand;
   updateType?: string;
   onCommit?: (value: string) => void;
@@ -104,50 +110,66 @@ export interface FieldProps
 
 /**
  * Field - Pure Projection Primitive
- * 
+ *
  * A passive text input component that:
  * - Registers with FieldRegistry for state management
  * - Subscribes to registry state for rendering
  * - Delegates all event handling to InputSensor (pipeline)
- * 
+ *
  * NO event handlers - all logic in InputSensor + InputIntent.
  */
-export const Field = forwardRef<HTMLElement, FieldProps>(({
-  value,
-  name,
-  placeholder,
-  multiline = false,
-  onSubmit,
-  onChange,
-  onCancel,
-  updateType,
-  onCommit,
-  mode = "immediate",
-  target = "real",
-  controls,
-  blurOnInactive = false,
-  ...rest
-}, ref) => {
-  const store = useFocusGroupStore();
-  const context = useFocusGroupContext();
-  const activeGroupId = useSyncExternalStore(
-    FocusData.subscribeActiveZone,
-    () => FocusData.getActiveZoneId(),
-    () => null
-  );
-  const osFocusedItemId = store(s => s.focusedItemId);
-  const groupId = context?.groupId || "unknown";
+export const Field = forwardRef<HTMLElement, FieldProps>(
+  (
+    {
+      value,
+      name,
+      placeholder,
+      multiline = false,
+      onSubmit,
+      onChange,
+      onCancel,
+      updateType,
+      onCommit,
+      mode = "immediate",
+      target = "real",
+      controls,
+      blurOnInactive = false,
+      ...rest
+    },
+    ref,
+  ) => {
+    const store = useFocusGroupStore();
+    const context = useFocusGroupContext();
+    const activeGroupId = useSyncExternalStore(
+      FocusData.subscribeActiveZone,
+      () => FocusData.getActiveZoneId(),
+      () => null,
+    );
+    const osFocusedItemId = store((s) => s.focusedItemId);
+    const groupId = context?.groupId || "unknown";
 
-  const innerRef = useRef<HTMLElement>(null);
-  const cursorRef = useRef<number | null>(null);
+    const innerRef = useRef<HTMLElement>(null);
+    const cursorRef = useRef<number | null>(null);
 
-  // --- Identity ---
-  const fieldId = name || "unknown-field";
+    // --- Identity ---
+    const fieldId = name || "unknown-field";
 
-  // --- Registry Binding ---
-  useEffect(() => {
-    if (!name) return;
-    const config: FieldConfig = {
+    // --- Registry Binding ---
+    useEffect(() => {
+      if (!name) return;
+      const config: FieldConfig = {
+        name,
+        mode,
+        multiline,
+        onSubmit,
+        onChange,
+        onCancel,
+        updateType,
+        onCommit,
+      };
+      FieldRegistry.register(name, config);
+      return () => FieldRegistry.unregister(name);
+    }, [
       name,
       mode,
       multiline,
@@ -155,101 +177,104 @@ export const Field = forwardRef<HTMLElement, FieldProps>(({
       onChange,
       onCancel,
       updateType,
-      onCommit
+      onCommit,
+    ]);
+
+    // --- State Subscription ---
+    const fieldData = useFieldRegistry((s) => s.fields.get(fieldId));
+    const isEditing = fieldData?.state.isEditing ?? false;
+    const localValue = fieldData?.state.localValue ?? value;
+
+    // Sync prop value to registry when NOT editing
+    useEffect(() => {
+      if (!isEditing && value !== fieldData?.state.localValue) {
+        FieldRegistry.updateValue(fieldId, value);
+      }
+    }, [value, isEditing, fieldId, fieldData?.state.localValue]);
+
+    // --- Focus Computation ---
+    const isSystemActive = activeGroupId === groupId;
+    const isFocused = isSystemActive && osFocusedItemId === fieldId;
+    const isContentEditable =
+      mode === "deferred" ? isFocused && isEditing : isFocused;
+    const isActive = isContentEditable;
+
+    // --- Initial Value (set once on mount via ref) ---
+    // contentEditable manages its own DOM, we only set initial value
+    const initialValueRef = useRef(value);
+    const hasInitialized = useRef(false);
+
+    useLayoutEffect(() => {
+      if (innerRef.current && !hasInitialized.current) {
+        innerRef.current.innerText = initialValueRef.current;
+        hasInitialized.current = true;
+      }
+    }, []);
+
+    // Reset when value prop becomes empty (e.g., after submit)
+    const prevValueRef = useRef(value);
+    useLayoutEffect(() => {
+      if (innerRef.current && prevValueRef.current !== value && value === "") {
+        innerRef.current.innerText = "";
+      }
+      prevValueRef.current = value;
+    }, [value]);
+
+    const shouldHaveDOMFocus = mode === "deferred" ? isFocused : isActive;
+    useFieldFocus({
+      innerRef,
+      isActive: shouldHaveDOMFocus,
+      blurOnInactive,
+      cursorRef,
+    });
+
+    // --- Styling ---
+    const { className: customClassName, ...otherProps } = rest as any;
+    const composeProps = getFieldClasses({
+      isFocused,
+      isEditing,
+      multiline,
+      value: localValue,
+      placeholder,
+      customClassName,
+    });
+
+    // --- Base Props (Projection Only) ---
+    const baseProps = {
+      id: fieldId,
+      contentEditable: isContentEditable,
+      suppressContentEditableWarning: true,
+      role: "textbox",
+      "aria-multiline": multiline,
+      tabIndex: 0,
+      className: composeProps,
+      "data-placeholder": placeholder,
+      "data-mode": mode,
+      "data-editing":
+        mode === "deferred" ? (isEditing ? "true" : undefined) : undefined,
+      "data-focused": isFocused ? "true" : undefined,
+      "aria-controls": controls,
+      "aria-activedescendant":
+        target === "virtual" &&
+        controls &&
+        osFocusedItemId &&
+        osFocusedItemId !== name
+          ? osFocusedItemId
+          : undefined,
+      children: null, // Managed by useFieldDOMSync
+      ...otherProps,
     };
-    FieldRegistry.register(name, config);
-    return () => FieldRegistry.unregister(name);
-  }, [name, mode, multiline, onSubmit, onChange, onCancel, updateType, onCommit]);
 
+    const setInnerRef = (node: HTMLElement | null) => {
+      (innerRef as any).current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) (ref as any).current = node;
+    };
 
-  // --- State Subscription ---
-  const fieldData = useFieldRegistry(s => s.fields.get(fieldId));
-  const isEditing = fieldData?.state.isEditing ?? false;
-  const localValue = fieldData?.state.localValue ?? value;
-
-  // Sync prop value to registry when NOT editing
-  useEffect(() => {
-    if (!isEditing && value !== fieldData?.state.localValue) {
-      FieldRegistry.updateValue(fieldId, value);
-    }
-  }, [value, isEditing, fieldId, fieldData?.state.localValue]);
-
-  // --- Focus Computation ---
-  const isSystemActive = activeGroupId === groupId;
-  const isFocused = isSystemActive && osFocusedItemId === fieldId;
-  const isContentEditable = mode === "deferred" ? (isFocused && isEditing) : isFocused;
-  const isActive = isContentEditable;
-
-  // --- Initial Value (set once on mount via ref) ---
-  // contentEditable manages its own DOM, we only set initial value
-  const initialValueRef = useRef(value);
-  const hasInitialized = useRef(false);
-
-  useLayoutEffect(() => {
-    if (innerRef.current && !hasInitialized.current) {
-      innerRef.current.innerText = initialValueRef.current;
-      hasInitialized.current = true;
-    }
-  }, []);
-
-  // Reset when value prop becomes empty (e.g., after submit)
-  const prevValueRef = useRef(value);
-  useLayoutEffect(() => {
-    if (innerRef.current && prevValueRef.current !== value && value === '') {
-      innerRef.current.innerText = '';
-    }
-    prevValueRef.current = value;
-  }, [value]);
-
-  const shouldHaveDOMFocus = mode === "deferred" ? isFocused : isActive;
-  useFieldFocus({ innerRef, isActive: shouldHaveDOMFocus, blurOnInactive, cursorRef });
-
-  // --- Styling ---
-  const { className: customClassName, ...otherProps } = rest as any;
-  const composeProps = getFieldClasses({
-    isFocused,
-    isEditing,
-    multiline,
-    value: localValue,
-    placeholder,
-    customClassName
-  });
-
-  // --- Base Props (Projection Only) ---
-  const baseProps = {
-    id: fieldId,
-    contentEditable: isContentEditable,
-    suppressContentEditableWarning: true,
-    role: "textbox",
-    "aria-multiline": multiline,
-    tabIndex: 0,
-    className: composeProps,
-    "data-placeholder": placeholder,
-    "data-mode": mode,
-    "data-editing": mode === "deferred" ? (isEditing ? "true" : undefined) : undefined,
-    "data-focused": isFocused ? "true" : undefined,
-    "aria-controls": controls,
-    "aria-activedescendant": (target === "virtual" && controls && osFocusedItemId && osFocusedItemId !== name)
-      ? osFocusedItemId
-      : undefined,
-    children: null, // Managed by useFieldDOMSync
-    ...otherProps,
-  };
-
-  const setInnerRef = (node: HTMLElement | null) => {
-    (innerRef as any).current = node;
-    if (typeof ref === "function") ref(node);
-    else if (ref) (ref as any).current = node;
-  };
-
-  return (
-    <FocusItem
-      id={fieldId}
-      as="span"
-      ref={setInnerRef}
-      {...baseProps}
-    />
-  );
-});
+    return (
+      <FocusItem id={fieldId} as="span" ref={setInnerRef} {...baseProps} />
+    );
+  },
+);
 
 Field.displayName = "Field";

@@ -6,18 +6,18 @@ export interface PersistenceAdapter {
 export const LocalStorageAdapter: PersistenceAdapter = {
   save: (key, data) => {
     try {
-        localStorage.setItem(key, JSON.stringify(data));
+      localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
-        console.error("Persistence Save Failed", e);
+      console.error("Persistence Save Failed", e);
     }
   },
   load: (key) => {
     try {
-        const item = localStorage.getItem(key);
-        return item ? JSON.parse(item) : null;
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
     } catch (e) {
-        console.error("Persistence Load Failed", e);
-        return null;
+      console.error("Persistence Load Failed", e);
+      return null;
     }
-  }
+  },
 };

@@ -6,14 +6,14 @@
  * Single entry point for all input into the OS.
  */
 
-import { useKeyboardEvents } from './useKeyboardEvents';
-import { useInputEvents } from './useInputEvents';
+import { useInputEvents } from "./useInputEvents";
+import { useKeyboardEvents } from "./useKeyboardEvents";
 
 // Re-export for backward compatibility
-export { isComposing } from './useKeyboardEvents';
+export { isComposing } from "./useKeyboardEvents";
 
 export function KeyboardSensor() {
-    useKeyboardEvents();
-    useInputEvents();
-    return null;
+  useKeyboardEvents();
+  useInputEvents();
+  return null;
 }

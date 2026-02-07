@@ -1,16 +1,16 @@
-import { useState, useEffect, useMemo, useSyncExternalStore } from "react";
+import { DataStateViewer } from "@os/app/debug/inspector/DataStateViewer.tsx";
+import { EventStream } from "@os/app/debug/inspector/EventStream.tsx";
+import { KeyMonitor } from "@os/app/debug/inspector/KeyMonitor.tsx";
+import { OSStateViewer } from "@os/app/debug/inspector/OSStateViewer.tsx";
+import { RegistryMonitor } from "@os/app/debug/inspector/RegistryMonitor.tsx";
+import { StateMonitor } from "@os/app/debug/inspector/StateMonitor.tsx";
+import { useInputTelemetry } from "@os/app/debug/LoggedKey.ts";
+import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import { useInspectorStore } from "@os/features/inspector/InspectorStore"; // [NEW] Subscription
-import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { evalContext } from "@os/features/logic/lib/evalContext";
-import { KeyMonitor } from "@os/app/debug/inspector/KeyMonitor.tsx";
-import { StateMonitor } from "@os/app/debug/inspector/StateMonitor.tsx";
-import { RegistryMonitor } from "@os/app/debug/inspector/RegistryMonitor.tsx";
-import { EventStream } from "@os/app/debug/inspector/EventStream.tsx";
-import { DataStateViewer } from "@os/app/debug/inspector/DataStateViewer.tsx";
-import { OSStateViewer } from "@os/app/debug/inspector/OSStateViewer.tsx";
-import { useInputTelemetry } from "@os/app/debug/LoggedKey.ts";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 // --- Main Component ---
 
@@ -21,18 +21,20 @@ export function CommandInspector() {
   const { state, registry, contextMap } = contextValue;
 
   // v7.50: Use global InspectorStore for tab state
-  const activeTab = useInspectorStore(s => s.activeTab);
+  const activeTab = useInspectorStore((s) => s.activeTab);
 
   // --- Direct FocusData subscriptions ---
   const activeGroupId = useSyncExternalStore(
     FocusData.subscribeActiveZone,
     () => FocusData.getActiveZoneId(),
-    () => null
+    () => null,
   );
 
   const focusPath = useMemo(() => FocusData.getFocusPath(), [activeGroupId]);
 
-  const activeZoneData = activeGroupId ? FocusData.getById(activeGroupId) : null;
+  const activeZoneData = activeGroupId
+    ? FocusData.getById(activeGroupId)
+    : null;
   const focusedItemId = activeZoneData?.store?.getState().focusedItemId ?? null;
 
   // Build ctx on-demand
@@ -49,14 +51,17 @@ export function CommandInspector() {
           activeGroupId: activeGroupId || null,
           focusPath,
           focusedItemId: focusedItemId || null,
-        })
+        }),
       };
     }
     return baseContext;
   }, [activeGroupId, focusPath, focusedItemId, state, contextMap]);
 
   // Build activeKeybindingMap on-demand
-  const keybindings = useMemo(() => registry?.getKeybindings() || [], [registry]);
+  const keybindings = useMemo(
+    () => registry?.getKeybindings() || [],
+    [registry],
+  );
   const activeKeybindingMap = useMemo(() => {
     const res = new Map<string, boolean>();
     keybindings.forEach((kb: any) => {
@@ -79,9 +84,10 @@ export function CommandInspector() {
   }, [ctx]);
 
   // Global telemetry for RegistryMonitor flash pattern
-  const telemetryEntries = useCommandTelemetryStore(s => s.entries);
+  const telemetryEntries = useCommandTelemetryStore((s) => s.entries);
   const historyCount = telemetryEntries.length;
-  const lastEntry = historyCount > 0 ? telemetryEntries[historyCount - 1] : null;
+  const lastEntry =
+    historyCount > 0 ? telemetryEntries[historyCount - 1] : null;
   const lastCommandId = lastEntry ? lastEntry.command : null;
   const lastPayload = lastEntry?.payload ?? null;
   const currentFocusId = focusedItemId;
@@ -118,11 +124,16 @@ export function CommandInspector() {
     };
   }, []);
 
-  if (!state) return <div className="p-4 text-slate-500 text-xs">Inspector Waiting for Engine...</div>;
+  if (!state)
+    return (
+      <div className="p-4 text-slate-500 text-xs">
+        Inspector Waiting for Engine...
+      </div>
+    );
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'REGISTRY':
+      case "REGISTRY":
         return (
           <div className="flex-1 flex flex-col overflow-hidden bg-white">
             <KeyMonitor rawKeys={rawKeys} />
@@ -144,7 +155,7 @@ export function CommandInspector() {
             />
           </div>
         );
-      case 'STATE':
+      case "STATE":
         return (
           <div className="flex-1 flex flex-col overflow-hidden bg-white">
             {/* Panel 1: History (min 3 visible) */}
@@ -157,16 +168,18 @@ export function CommandInspector() {
             </div>
           </div>
         );
-      case 'EVENTS':
+      case "EVENTS":
         return (
           <div className="flex-1 flex flex-col overflow-hidden bg-white">
             <EventStream />
           </div>
         );
-      case 'SETTINGS':
+      case "SETTINGS":
         return (
           <div className="flex-1 flex flex-col overflow-hidden bg-white p-4">
-            <div className="text-xs font-bold text-slate-500 mb-2">OS SETTINGS</div>
+            <div className="text-xs font-bold text-slate-500 mb-2">
+              OS SETTINGS
+            </div>
             <OSStateViewer />
           </div>
         );
@@ -195,19 +208,18 @@ export function CommandInspector() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {renderContent()}
-      </div>
+      <div className="flex-1 flex overflow-hidden">{renderContent()}</div>
 
       {/* Footer */}
       <div className="h-6 px-3 border-t border-[#e5e5e5] bg-[#f8f8f8] flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2 text-[9px] text-slate-400 font-mono">
           <span>{physicalZone}</span>
           <span className="text-slate-300">|</span>
-          <span className={isInputActive ? 'text-red-400' : 'text-slate-400'}>{isInputActive ? 'INPUT_LOCK' : 'NAV_MODE'}</span>
+          <span className={isInputActive ? "text-red-400" : "text-slate-400"}>
+            {isInputActive ? "INPUT_LOCK" : "NAV_MODE"}
+          </span>
         </div>
       </div>
     </div>
   );
 }
-

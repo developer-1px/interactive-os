@@ -1,10 +1,10 @@
-import { Zone } from "@os/app/export/primitives/Zone";
 import { KanbanPanel } from "@apps/kanban/widgets/KanbanPanel";
+import { Zone } from "@os/app/export/primitives/Zone";
 
 export default function KanbanPage() {
-    return (
-        <Zone id="kanban-main" area="main" role="toolbar" className="h-full">
-            <KanbanPanel />
-        </Zone>
-    );
+  return (
+    <Zone id="kanban-main" area="main" role="toolbar" className="h-full">
+      <KanbanPanel />
+    </Zone>
+  );
 }

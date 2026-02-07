@@ -1,36 +1,42 @@
-
+import {
+  CancelEdit,
+  DeleteTodo,
+  StartEdit,
+  SyncEditDraft,
+  ToggleTodo,
+  UpdateTodoText,
+} from "@apps/todo/features/commands/list";
+import type { Todo } from "@apps/todo/model/types";
+import { Field } from "@os/app/export/primitives/Field";
 import { Item } from "@os/app/export/primitives/Item";
 import { Trigger } from "@os/app/export/primitives/Trigger";
-import { Field } from "@os/app/export/primitives/Field";
 import {
-    ToggleTodo,
-    StartEdit,
-    DeleteTodo,
-    SyncEditDraft,
-    UpdateTodoText,
-    CancelEdit
-} from "@apps/todo/features/commands/list";
-import { Check, CornerDownLeft, Trash2, Loader2, GripVertical } from "lucide-react";
-import type { Todo } from "@apps/todo/model/types";
+  Check,
+  CornerDownLeft,
+  GripVertical,
+  Loader2,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 
 interface TaskItemProps {
-    todo: Todo;
-    isEditing: boolean;
-    editDraft: string;
-    onActivate?: () => void;
+  todo: Todo;
+  isEditing: boolean;
+  editDraft: string;
+  onActivate?: () => void;
 }
 
 export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
-    const isCompleted = todo.completed;
-    const [isHovered, setIsHovered] = useState(false);
+  const isCompleted = todo.completed;
+  const [isHovered, setIsHovered] = useState(false);
 
-    return (
-        <Item
-            id={String(todo.id)}
-            className={`
+  return (
+    <Item
+      id={String(todo.id)}
+      className={`
                 group relative flex items-start gap-3 p-4 rounded-xl border transition-colors transition-shadow
-                ${isCompleted
+                ${
+                  isCompleted
                     ? "bg-slate-50 border-transparent opacity-60"
                     : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md"
                 }
@@ -38,98 +44,110 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-500 data-[focused=true]:border-transparent data-[focused=true]:z-10
                 ${isEditing ? "bg-indigo-50/50 border-indigo-200 ring-2 ring-indigo-500/20" : ""}
             `}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            {/* Drag Handle (Visual Only for now) */}
-            <div className={`
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Drag Handle (Visual Only for now) */}
+      <div
+        className={`
                 mt-1 -ml-1 text-slate-300 cursor-grab active:cursor-grabbing transition-opacity
                 ${isHovered ? "opacity-100" : "opacity-0"}
-            `}>
-                <GripVertical size={16} />
-            </div>
+            `}
+      >
+        <GripVertical size={16} />
+      </div>
 
-            {/* Checkbox Trigger */}
-            <Trigger onPress={ToggleTodo({ id: todo.id })}>
-                <div
-                    className={`
+      {/* Checkbox Trigger */}
+      <Trigger onPress={ToggleTodo({ id: todo.id })}>
+        <div
+          className={`
                         w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
-                        ${isCompleted
+                        ${
+                          isCompleted
                             ? "bg-indigo-600 border-indigo-600 scale-100"
                             : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
                         }
                     `}
-                >
-                    <Check
-                        size={12}
-                        className={`text-white transition-transform ${isCompleted ? "scale-100" : "scale-0"}`}
-                        strokeWidth={3}
-                    />
-                </div>
-            </Trigger>
+        >
+          <Check
+            size={12}
+            className={`text-white transition-transform ${isCompleted ? "scale-100" : "scale-0"}`}
+            strokeWidth={3}
+          />
+        </div>
+      </Trigger>
 
-            {/* Content Area */}
-            <div className="flex-1 min-w-0 pt-0.5">
-                {isEditing ? (
-                    <Field
-                        name="EDIT"
-                        value={editDraft}
-                        autoFocus
-                        onChange={SyncEditDraft}
-                        onSubmit={UpdateTodoText}
-                        onCancel={CancelEdit({})}
-                        className="w-full bg-transparent outline-none text-slate-900 text-[15px] font-medium leading-relaxed placeholder:text-slate-400"
-                        placeholder="What needs to be done?"
-                        blurOnInactive={true}
-                    />
-                ) : (
-                    <span
-                        className={`
+      {/* Content Area */}
+      <div className="flex-1 min-w-0 pt-0.5">
+        {isEditing ? (
+          <Field
+            name="EDIT"
+            value={editDraft}
+            autoFocus
+            onChange={SyncEditDraft}
+            onSubmit={UpdateTodoText}
+            onCancel={CancelEdit({})}
+            className="w-full bg-transparent outline-none text-slate-900 text-[15px] font-medium leading-relaxed placeholder:text-slate-400"
+            placeholder="What needs to be done?"
+            blurOnInactive={true}
+          />
+        ) : (
+          <span
+            className={`
                             block text-[15px] leading-relaxed transition-all select-none
-                            ${isCompleted
+                            ${
+                              isCompleted
                                 ? "text-slate-400 line-through decoration-slate-300"
                                 : "text-slate-700 font-medium"
                             }
                         `}
-                    >
-                        {todo.text}
-                    </span>
-                )}
+          >
+            {todo.text}
+          </span>
+        )}
 
-                {/* Metadata Row (Tags, Dates - Future proofing) */}
-                {!isEditing && (
-                    <div className="h-0 group-hover:h-auto overflow-hidden transition-all" />
-                )}
-            </div>
+        {/* Metadata Row (Tags, Dates - Future proofing) */}
+        {!isEditing && (
+          <div className="h-0 group-hover:h-auto overflow-hidden transition-all" />
+        )}
+      </div>
 
-            {/* Quick Actions */}
-            <div className={`
+      {/* Quick Actions */}
+      <div
+        className={`
                 flex items-center gap-1 transition-all
                 ${isEditing || isHovered || isCompleted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"}
-            `}>
-                {isEditing ? (
-                    <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">
-                        <Loader2 size={12} className="animate-spin" />
-                        <span>Saving...</span>
-                    </div>
-                ) : (
-                    <>
-                        <Trigger onPress={StartEdit({ id: todo.id })} asChild>
-                            <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title="Edit (Enter)">
-                                <CornerDownLeft size={14} />
-                            </button>
-                        </Trigger>
-                        <Trigger onPress={DeleteTodo({ id: todo.id })} asChild>
-                            <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                                <Trash2 size={14} />
-                            </button>
-                        </Trigger>
-                    </>
-                )}
-            </div>
+            `}
+      >
+        {isEditing ? (
+          <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">
+            <Loader2 size={12} className="animate-spin" />
+            <span>Saving...</span>
+          </div>
+        ) : (
+          <>
+            <Trigger onPress={StartEdit({ id: todo.id })} asChild>
+              <button
+                className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Edit (Enter)"
+              >
+                <CornerDownLeft size={14} />
+              </button>
+            </Trigger>
+            <Trigger onPress={DeleteTodo({ id: todo.id })} asChild>
+              <button
+                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                title="Delete"
+              >
+                <Trash2 size={14} />
+              </button>
+            </Trigger>
+          </>
+        )}
+      </div>
 
-            {/* Active Indicator Bar */}
-            <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-r-full opacity-0 data-[focused=true]:opacity-100 transition-opacity" />
-        </Item>
-    );
+      {/* Active Indicator Bar */}
+      <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-r-full opacity-0 data-[focused=true]:opacity-100 transition-opacity" />
+    </Item>
+  );
 }

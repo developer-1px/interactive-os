@@ -2,88 +2,95 @@
  * NAVIGATE Command - Arrow key navigation
  */
 
-import type { OSCommand, OSContext, OSResult } from '../../core/osCommand';
-import type { OSNavigatePayload } from '../../../../command/definitions/commandsShell';
-import { resolveNavigate } from '../../3-resolve/resolveNavigate';
-import { resolveZoneSpatial } from '../../3-resolve/resolveZoneSpatial';
+import type { OSNavigatePayload } from "../../../../command/definitions/commandsShell";
+import { resolveNavigate } from "../../3-resolve/resolveNavigate";
+import { resolveZoneSpatial } from "../../3-resolve/resolveZoneSpatial";
+import type { OSCommand, OSContext, OSResult } from "../../core/osCommand";
 
-type Direction = 'up' | 'down' | 'left' | 'right';
+type Direction = "up" | "down" | "left" | "right";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helper Functions
 // ═══════════════════════════════════════════════════════════════════
 
-function handleTreeExpansion(
-    ctx: OSContext,
-    dir: Direction
-): OSResult | null {
-    const activeId = ctx.focusedItemId;
-    if (!activeId || (dir !== 'left' && dir !== 'right')) return null;
+function handleTreeExpansion(ctx: OSContext, dir: Direction): OSResult | null {
+  const activeId = ctx.focusedItemId;
+  if (!activeId || (dir !== "left" && dir !== "right")) return null;
 
-    const role = ctx.dom.queries.getItemRole(activeId);
-    const isExpandable = role === 'treeitem' || role === 'button';
+  const role = ctx.dom.queries.getItemRole(activeId);
+  const isExpandable = role === "treeitem" || role === "button";
 
-    if (!isExpandable) return null;
+  if (!isExpandable) return null;
 
-    const isExpanded = ctx.expandedItems.includes(activeId);
+  const isExpanded = ctx.expandedItems.includes(activeId);
 
-    if (dir === 'right' && !isExpanded) {
-        return { state: { expandedItems: [...ctx.expandedItems, activeId] } };
-    }
-    if (dir === 'left' && isExpanded) {
-        return { state: { expandedItems: ctx.expandedItems.filter(id => id !== activeId) } };
-    }
+  if (dir === "right" && !isExpanded) {
+    return { state: { expandedItems: [...ctx.expandedItems, activeId] } };
+  }
+  if (dir === "left" && isExpanded) {
+    return {
+      state: {
+        expandedItems: ctx.expandedItems.filter((id) => id !== activeId),
+      },
+    };
+  }
 
-    return null;
+  return null;
 }
 
 function handleSeamlessNavigation(
-    ctx: OSContext,
-    dir: Direction
+  ctx: OSContext,
+  dir: Direction,
 ): OSResult | null {
-    const spatialResult = resolveZoneSpatial(
-        ctx.zoneId, dir, ctx.focusedItemId,
-        ctx.dom.queries
-    );
+  const spatialResult = resolveZoneSpatial(
+    ctx.zoneId,
+    dir,
+    ctx.focusedItemId,
+    ctx.dom.queries,
+  );
 
-    if (spatialResult) {
-        return {
-            state: { focusedItemId: spatialResult.targetItemId },
-            activeZoneId: spatialResult.targetGroupId,
-            domEffects: spatialResult.targetItemId
-                ? [{ type: 'FOCUS', targetId: spatialResult.targetItemId }]
-                : [],
-        };
-    }
+  if (spatialResult) {
+    return {
+      state: { focusedItemId: spatialResult.targetItemId },
+      activeZoneId: spatialResult.targetGroupId,
+      domEffects: spatialResult.targetItemId
+        ? [{ type: "FOCUS", targetId: spatialResult.targetItemId }]
+        : [],
+    };
+  }
 
-    return null;
+  return null;
 }
 
 function buildNavigateResult(
-    ctx: OSContext,
-    targetId: string | null,
-    stickyX: number | null,
-    stickyY: number | null
+  ctx: OSContext,
+  targetId: string | null,
+  stickyX: number | null,
+  stickyY: number | null,
 ): OSResult {
-    const result: OSResult = {
-        state: {
-            focusedItemId: targetId,
-            stickyX,
-            stickyY,
-        },
-    };
+  const result: OSResult = {
+    state: {
+      focusedItemId: targetId,
+      stickyX,
+      stickyY,
+    },
+  };
 
-    // Follow focus selection
-    if (ctx.config.select.followFocus && ctx.config.select.mode !== 'none' && targetId) {
-        result.state!.selection = [targetId];
-        result.state!.selectionAnchor = targetId;
+  // Follow focus selection
+  if (
+    ctx.config.select.followFocus &&
+    ctx.config.select.mode !== "none" &&
+    targetId
+  ) {
+    result.state!.selection = [targetId];
+    result.state!.selectionAnchor = targetId;
 
-        if (ctx.selectCommand) {
-            result.dispatch = ctx.selectCommand;
-        }
+    if (ctx.selectCommand) {
+      result.dispatch = ctx.selectCommand;
     }
+  }
 
-    return result;
+  return result;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -91,29 +98,37 @@ function buildNavigateResult(
 // ═══════════════════════════════════════════════════════════════════
 
 export const NAVIGATE: OSCommand<OSNavigatePayload> = {
-    run: (ctx, payload) => {
-        const dir = payload.direction.toLowerCase() as Direction;
+  run: (ctx, payload) => {
+    const dir = payload.direction.toLowerCase() as Direction;
 
-        // 1. Tree Expansion/Collapse
-        const expansionResult = handleTreeExpansion(ctx, dir);
-        if (expansionResult) return expansionResult;
+    // 1. Tree Expansion/Collapse
+    const expansionResult = handleTreeExpansion(ctx, dir);
+    if (expansionResult) return expansionResult;
 
-        // 2. Normal Navigation
-        const navResult = resolveNavigate(
-            ctx.focusedItemId,
-            dir,
-            ctx.dom.items,
-            ctx.config.navigate,
-            { stickyX: ctx.stickyX, stickyY: ctx.stickyY }
-        );
+    // 2. Normal Navigation
+    const navResult = resolveNavigate(
+      ctx.focusedItemId,
+      dir,
+      ctx.dom.items,
+      ctx.config.navigate,
+      { stickyX: ctx.stickyX, stickyY: ctx.stickyY },
+    );
 
-        // 3. Seamless Navigation (cross-zone)
-        if (ctx.config.navigate.seamless && navResult.targetId === ctx.focusedItemId) {
-            const seamlessResult = handleSeamlessNavigation(ctx, dir);
-            if (seamlessResult) return seamlessResult;
-        }
-
-        // 4. Build Result
-        return buildNavigateResult(ctx, navResult.targetId, navResult.stickyX, navResult.stickyY);
+    // 3. Seamless Navigation (cross-zone)
+    if (
+      ctx.config.navigate.seamless &&
+      navResult.targetId === ctx.focusedItemId
+    ) {
+      const seamlessResult = handleSeamlessNavigation(ctx, dir);
+      if (seamlessResult) return seamlessResult;
     }
+
+    // 4. Build Result
+    return buildNavigateResult(
+      ctx,
+      navResult.targetId,
+      navResult.stickyX,
+      navResult.stickyY,
+    );
+  },
 };

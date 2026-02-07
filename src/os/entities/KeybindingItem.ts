@@ -9,5 +9,5 @@ export interface KeybindingItem<T = string> {
   preventDefault?: boolean;
   allowInInput?: boolean;
   groupId?: string; // Metadata: Which group did this come from?
-  zoneId?: string;  // Legacy alias for groupId
+  zoneId?: string; // Legacy alias for groupId
 }

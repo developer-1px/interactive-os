@@ -1,22 +1,32 @@
-import { NavLink } from "react-router-dom";
 import {
+  Accessibility,
+  Book,
+  Columns,
   Layout,
+  MousePointer2,
+  Package,
   Settings,
   User,
-  Package,
-  Book,
-  MousePointer2,
-  Accessibility,
-  Columns,
 } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 export function GlobalNav() {
   const navItems = [
     { id: "todo", icon: Package, path: "/", label: "Todo" },
     { id: "kanban", icon: Columns, path: "/kanban", label: "Kanban" },
     { id: "builder", icon: Layout, path: "/builder", label: "Web Builder" },
-    { id: "focus-showcase", icon: MousePointer2, path: "/focus-showcase", label: "Focus Lab" },
-    { id: "aria-showcase", icon: Accessibility, path: "/aria-showcase", label: "ARIA Showcase" },
+    {
+      id: "focus-showcase",
+      icon: MousePointer2,
+      path: "/focus-showcase",
+      label: "Focus Lab",
+    },
+    {
+      id: "aria-showcase",
+      icon: Accessibility,
+      path: "/aria-showcase",
+      label: "ARIA Showcase",
+    },
   ];
 
   const bottomItems = [
@@ -42,7 +52,11 @@ export function GlobalNav() {
           >
             {({ isActive }) => (
               <>
-                <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} className="transition-transform duration-200" />
+                <item.icon
+                  size={18}
+                  strokeWidth={isActive ? 2.5 : 2}
+                  className="transition-transform duration-200"
+                />
                 {isActive && (
                   <div className="absolute inset-0 rounded-lg ring-2 ring-indigo-500/10 pointer-events-none" />
                 )}

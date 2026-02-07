@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkBreaks from "remark-breaks";
-import { useParams, NavLink, useNavigate } from "react-router-dom";
-import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import clsx from "clsx";
+import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
+import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 
 // Load all markdown files from the docs directory
 const modules = import.meta.glob("../../docs/**/*.md", {
@@ -16,8 +16,8 @@ const modules = import.meta.glob("../../docs/**/*.md", {
 function cleanLabel(label: string) {
   return label
     .replace(/^(\d{4}-\d{2}-\d{2}_)/, "") // Remove YYYY-MM-DD_
-    .replace(/^[0-9]+_/, "")              // Remove leading numbers like 01_ or 1-
-    .replace(/_/g, " ")                   // Replace underscores with spaces
+    .replace(/^[0-9]+_/, "") // Remove leading numbers like 01_ or 1-
+    .replace(/_/g, " ") // Replace underscores with spaces
     .trim();
 }
 
@@ -70,10 +70,12 @@ const NavigationItem = ({ file }: { file: DocFile }) => {
         )
       }
     >
-      <div className={clsx(
-        "w-1.5 h-1.5 rounded-full mr-3 transition-all duration-300",
-        "bg-slate-200 group-hover:bg-indigo-300 group-[.active]:bg-indigo-500 group-[.active]:scale-125"
-      )} />
+      <div
+        className={clsx(
+          "w-1.5 h-1.5 rounded-full mr-3 transition-all duration-300",
+          "bg-slate-200 group-hover:bg-indigo-300 group-[.active]:bg-indigo-500 group-[.active]:scale-125",
+        )}
+      />
       <span className="truncate">{file.name}</span>
     </NavLink>
   );
@@ -94,13 +96,22 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
     />
   ),
   h3: (props) => (
-    <h3 className="text-lg font-bold text-slate-800 mt-8 mb-3.5 tracking-tight max-w-2xl" {...props} />
+    <h3
+      className="text-lg font-bold text-slate-800 mt-8 mb-3.5 tracking-tight max-w-2xl"
+      {...props}
+    />
   ),
   h4: (props) => (
-    <h4 className="text-[15px] font-bold text-slate-800 mt-6 mb-3 tracking-tight max-w-2xl" {...props} />
+    <h4
+      className="text-[15px] font-bold text-slate-800 mt-6 mb-3 tracking-tight max-w-2xl"
+      {...props}
+    />
   ),
   p: (props) => (
-    <p className="text-slate-600 leading-[1.65] mb-4 text-[14px] font-normal max-w-2xl" {...props} />
+    <p
+      className="text-slate-600 leading-[1.65] mb-4 text-[14px] font-normal max-w-2xl"
+      {...props}
+    />
   ),
   ul: (props) => (
     <ul
@@ -115,9 +126,7 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
     />
   ),
   li: (props) => <li className="pl-2" {...props} />,
-  strong: (props) => (
-    <strong className="font-bold text-slate-900" {...props} />
-  ),
+  strong: (props) => <strong className="font-bold text-slate-900" {...props} />,
   a: (props) => (
     <a
       className="text-indigo-600 font-medium hover:text-indigo-700 transition-all border-b border-indigo-200 hover:border-indigo-500 pb-0.5"
@@ -130,9 +139,7 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
       {...props}
     />
   ),
-  hr: (props) => (
-    <hr className="border-slate-100 my-8 max-w-2xl" {...props} />
-  ),
+  hr: (props) => <hr className="border-slate-100 my-8 max-w-2xl" {...props} />,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   code: ({ className, children, ...props }: any) => {
     return (
@@ -177,10 +184,16 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
     <thead className="bg-slate-50/80 border-b border-slate-200" {...props} />
   ),
   th: (props) => (
-    <th className="px-5 py-3 text-left font-bold text-slate-900 uppercase tracking-wider text-[10px]" {...props} />
+    <th
+      className="px-5 py-3 text-left font-bold text-slate-900 uppercase tracking-wider text-[10px]"
+      {...props}
+    />
   ),
   td: (props) => (
-    <td className="px-5 py-3 border-b border-slate-100 text-slate-600" {...props} />
+    <td
+      className="px-5 py-3 border-b border-slate-100 text-slate-600"
+      {...props}
+    />
   ),
 };
 
@@ -194,15 +207,18 @@ export default function DocsPage() {
 
   // Create a flattened list of all files in the same order as navigation
   const allFiles = useMemo(() => {
-    const sortedSections = Object.entries(sections).sort(([a], [b]) => a.localeCompare(b));
+    const sortedSections = Object.entries(sections).sort(([a], [b]) =>
+      a.localeCompare(b),
+    );
     return sortedSections.flatMap(([, files]) =>
-      files.sort((a, b) => a.name.localeCompare(b.name))
+      files.sort((a, b) => a.name.localeCompare(b.name)),
     );
   }, [sections]);
 
-  const currentIndex = allFiles.findIndex(f => f.path === splat);
+  const currentIndex = allFiles.findIndex((f) => f.path === splat);
   const prevFile = currentIndex > 0 ? allFiles[currentIndex - 1] : null;
-  const nextFile = currentIndex < allFiles.length - 1 ? allFiles[currentIndex + 1] : null;
+  const nextFile =
+    currentIndex < allFiles.length - 1 ? allFiles[currentIndex + 1] : null;
 
   useEffect(() => {
     if (!splat) {
@@ -243,9 +259,13 @@ export default function DocsPage() {
         <div className="px-6 py-8 flex flex-col gap-1">
           <div className="flex items-center gap-2.5 mb-1.5">
             <div className="w-2 h-5 bg-indigo-600 rounded-full"></div>
-            <h1 className="text-lg font-black tracking-tight text-slate-900">HANDBOOK</h1>
+            <h1 className="text-lg font-black tracking-tight text-slate-900">
+              HANDBOOK
+            </h1>
           </div>
-          <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">System Intelligence OS</p>
+          <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+            System Intelligence OS
+          </p>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 pb-10 custom-scrollbar space-y-6">
@@ -296,10 +316,12 @@ export default function DocsPage() {
               <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full max-w-4xl">
                 {/* Document Metadata Header */}
                 <div className="flex items-center gap-2 mb-8 border-b border-slate-50 pb-6">
-                  <span className="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded text-[10px] font-black uppercase tracking-widest">Reference</span>
+                  <span className="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded text-[10px] font-black uppercase tracking-widest">
+                    Reference
+                  </span>
                   <div className="w-1 h-1 rounded-full bg-slate-200" />
                   <span className="text-xs font-semibold text-slate-400 capitalize tracking-wide">
-                    {splat?.split('/').map(cleanLabel).join(' / ')}
+                    {splat?.split("/").map(cleanLabel).join(" / ")}
                   </span>
                 </div>
 
@@ -329,7 +351,9 @@ export default function DocsPage() {
                         </span>
                       </div>
                     </NavLink>
-                  ) : <div className="flex-1" />}
+                  ) : (
+                    <div className="flex-1" />
+                  )}
 
                   {nextFile ? (
                     <NavLink
@@ -346,7 +370,9 @@ export default function DocsPage() {
                         </span>
                       </div>
                     </NavLink>
-                  ) : <div className="flex-1" />}
+                  ) : (
+                    <div className="flex-1" />
+                  )}
                 </div>
 
                 {/* Footer Spacer */}

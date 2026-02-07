@@ -1,7 +1,6 @@
-import { produce } from "immer";
 import type { AppState, TodoCommand } from "@apps/todo/model/types";
 import { FocusData } from "@os/features/focus/lib/focusData";
-
+import { produce } from "immer";
 
 export const navigationMiddleware = (
   rawNewState: AppState,
@@ -12,7 +11,8 @@ export const navigationMiddleware = (
 
   // --- FOCUS_ID Effect Handling ---
   const focusEffect = effects.find(
-    (e): e is { type: "FOCUS_ID"; id: string | number } => e.type === "FOCUS_ID"
+    (e): e is { type: "FOCUS_ID"; id: string | number } =>
+      e.type === "FOCUS_ID",
   );
 
   if (focusEffect && focusEffect.id !== null) {
@@ -49,4 +49,3 @@ export const navigationMiddleware = (
 
   return nextState;
 };
-

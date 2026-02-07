@@ -1,7 +1,7 @@
+import { ClipboardManager } from "@apps/todo/features/clipboard/ClipboardManager";
 import { Sidebar } from "@apps/todo/widgets/Sidebar";
 import { TodoPanel } from "@apps/todo/widgets/TodoPanel";
 import { Zone } from "@os/app/export/primitives/Zone.tsx";
-import { ClipboardManager } from "@apps/todo/features/clipboard/ClipboardManager";
 
 export default function TodoPage() {
   return (

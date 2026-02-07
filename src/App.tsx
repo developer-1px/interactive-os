@@ -1,24 +1,17 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Outlet,
-} from "react-router-dom";
-
+import { KanbanApp } from "@apps/kanban/app";
+import { TodoApp } from "@apps/todo/app";
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
-import TodoPage from "./pages/TodoPage";
-import KanbanPage from "./pages/KanbanPage";
-import SettingsPage from "./pages/SettingsPage";
-import FocusShowcasePage from "./pages/focus-showcase";
+import { InspectorShell } from "@os/app/debug/InspectorShell";
+import { OS } from "@os/features/AntigravityOS";
+import { useInspectorStore } from "@os/features/inspector/InspectorStore";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import AriaShowcasePage from "./pages/aria-showcase";
 import BuilderPage from "./pages/BuilderPage";
 import DocsPage from "./pages/DocsPage";
-
-import { OS } from "@os/features/AntigravityOS";
-import { TodoApp } from "@apps/todo/app";
-import { KanbanApp } from "@apps/kanban/app";
-import { InspectorShell } from "@os/app/debug/InspectorShell";
-import { useInspectorStore } from "@os/features/inspector/InspectorStore";
+import FocusShowcasePage from "./pages/focus-showcase";
+import KanbanPage from "./pages/KanbanPage";
+import SettingsPage from "./pages/SettingsPage";
+import TodoPage from "./pages/TodoPage";
 
 // --- Internal Layout running inside OS.App ---
 
@@ -43,7 +36,11 @@ function AppContent({ isAppShell }: { isAppShell: boolean }) {
       {/* Main App Container */}
       <div className={mainClass}>
         {/* Route Content - Scrollable when AppShell */}
-        <div className={isAppShell ? "flex-1 overflow-y-auto overflow-x-hidden" : "flex-1"}>
+        <div
+          className={
+            isAppShell ? "flex-1 overflow-y-auto overflow-x-hidden" : "flex-1"
+          }
+        >
           <Outlet />
         </div>
       </div>

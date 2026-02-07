@@ -6,14 +6,17 @@
  * This is the main orchestrator for keyboard input: sense → classify → route.
  */
 
-import { useCommandEngineStore } from '@os/features/command/store/CommandEngineStore';
-import { getCanonicalKey } from '@os/features/keyboard/lib/getCanonicalKey';
-import { FieldRegistry } from '@os/features/keyboard/registry/FieldRegistry';
-import { classifyKeyboard } from '@os/features/keyboard/pipeline/2-classify/classifyKeyboard';
-import { routeKeyboard } from '@os/features/keyboard/pipeline/3-route/routeKeyboard';
-import { logger } from '@os/app/debug/logger';
-import { useSingletonEventListeners, type EventListenerConfig } from '@os/shared/hooks/useEventListeners';
-import type { KeyboardIntent } from '@os/features/keyboard/types';
+import { logger } from "@os/app/debug/logger";
+import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
+import { getCanonicalKey } from "@os/features/keyboard/lib/getCanonicalKey";
+import { classifyKeyboard } from "@os/features/keyboard/pipeline/2-classify/classifyKeyboard";
+import { routeKeyboard } from "@os/features/keyboard/pipeline/3-route/routeKeyboard";
+import { FieldRegistry } from "@os/features/keyboard/registry/FieldRegistry";
+import type { KeyboardIntent } from "@os/features/keyboard/types";
+import {
+  type EventListenerConfig,
+  useSingletonEventListeners,
+} from "@os/shared/hooks/useEventListeners";
 
 // Track composition state globally (exported for other modules)
 export let isComposing = false;
@@ -22,27 +25,27 @@ export let isComposing = false;
  * Resolve field ID from a DOM element
  */
 function resolveFieldId(element: HTMLElement): string | null {
-    if (element.getAttribute('role') === 'textbox' && element.id) {
-        return element.id;
-    }
-    const parent = element.closest('[role="textbox"]') as HTMLElement | null;
-    return parent?.id || null;
+  if (element.getAttribute("role") === "textbox" && element.id) {
+    return element.id;
+  }
+  const parent = element.closest('[role="textbox"]') as HTMLElement | null;
+  return parent?.id || null;
 }
 
 /**
  * Check if target is within a registered Field that should be treated as an input.
  */
 function isFieldTarget(fieldId: string | null): boolean {
-    if (!fieldId) return false;
-    const fieldEntry = FieldRegistry.getField(fieldId);
-    if (!fieldEntry) return false;
+  if (!fieldId) return false;
+  const fieldEntry = FieldRegistry.getField(fieldId);
+  if (!fieldEntry) return false;
 
-    const mode = fieldEntry.config.mode ?? 'immediate';
-    if (mode === 'deferred' && !fieldEntry.state.isEditing) {
-        return false;
-    }
+  const mode = fieldEntry.config.mode ?? "immediate";
+  if (mode === "deferred" && !fieldEntry.state.isEditing) {
+    return false;
+  }
 
-    return true;
+  return true;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -50,54 +53,54 @@ function isFieldTarget(fieldId: string | null): boolean {
 // ═══════════════════════════════════════════════════════════════
 
 const onCompositionStart = () => {
-    isComposing = true;
-    logger.debug('KEYBOARD', '[P1:Keyboard] Composition started');
+  isComposing = true;
+  logger.debug("KEYBOARD", "[P1:Keyboard] Composition started");
 };
 
 const onCompositionEnd = () => {
-    isComposing = false;
-    logger.debug('KEYBOARD', '[P1:Keyboard] Composition ended');
+  isComposing = false;
+  logger.debug("KEYBOARD", "[P1:Keyboard] Composition ended");
 };
 
 /**
  * Main keyboard orchestrator: sense → classify → route
  */
 const onKeyDown = (e: Event) => {
-    const ke = e as KeyboardEvent;
-    if (ke.defaultPrevented) return;
+  const ke = e as KeyboardEvent;
+  if (ke.defaultPrevented) return;
 
-    const target = ke.target as HTMLElement;
-    if (!target) return;
+  const target = ke.target as HTMLElement;
+  if (!target) return;
 
-    // ─── SENSE: Build Intent ───
-    const fieldId = resolveFieldId(target);
-    const isFromField = isFieldTarget(fieldId);
-    const canonicalKey = getCanonicalKey(ke);
+  // ─── SENSE: Build Intent ───
+  const fieldId = resolveFieldId(target);
+  const isFromField = isFieldTarget(fieldId);
+  const canonicalKey = getCanonicalKey(ke);
 
-    const intent: KeyboardIntent = {
-        canonicalKey,
-        isFromField,
-        isComposing: isComposing || ke.isComposing,
-        target,
-        fieldId,
-        originalEvent: ke,
-    };
+  const intent: KeyboardIntent = {
+    canonicalKey,
+    isFromField,
+    isComposing: isComposing || ke.isComposing,
+    target,
+    fieldId,
+    originalEvent: ke,
+  };
 
-    logger.debug('KEYBOARD', '[P1:Keyboard] Intent:', {
-        key: canonicalKey,
-        isFromField,
-        isComposing: intent.isComposing,
-        fieldId
-    });
+  logger.debug("KEYBOARD", "[P1:Keyboard] Intent:", {
+    key: canonicalKey,
+    isFromField,
+    isComposing: intent.isComposing,
+    fieldId,
+  });
 
-    // ─── CLASSIFY → ROUTE ───
-    const category = classifyKeyboard(intent);
-    const handled = routeKeyboard(intent, category);
+  // ─── CLASSIFY → ROUTE ───
+  const category = classifyKeyboard(intent);
+  const handled = routeKeyboard(intent, category);
 
-    if (handled) {
-        ke.preventDefault();
-        ke.stopPropagation();
-    }
+  if (handled) {
+    ke.preventDefault();
+    ke.stopPropagation();
+  }
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -105,16 +108,30 @@ const onKeyDown = (e: Event) => {
 // ═══════════════════════════════════════════════════════════════
 
 const KEYBOARD_LISTENERS: EventListenerConfig[] = [
-    { target: 'document', event: 'compositionstart', handler: onCompositionStart, options: { capture: true } },
-    { target: 'document', event: 'compositionend', handler: onCompositionEnd, options: { capture: true } },
-    { target: 'window', event: 'keydown', handler: onKeyDown },
+  {
+    target: "document",
+    event: "compositionstart",
+    handler: onCompositionStart,
+    options: { capture: true },
+  },
+  {
+    target: "document",
+    event: "compositionend",
+    handler: onCompositionEnd,
+    options: { capture: true },
+  },
+  { target: "window", event: "keydown", handler: onKeyDown },
 ];
 
 /**
  * Custom hook for global keyboard event handling (singleton)
  */
 export function useKeyboardEvents() {
-    const isInitialized = useCommandEngineStore(s => s.isInitialized);
+  const isInitialized = useCommandEngineStore((s) => s.isInitialized);
 
-    useSingletonEventListeners('keyboard-sensor', KEYBOARD_LISTENERS, isInitialized);
+  useSingletonEventListeners(
+    "keyboard-sensor",
+    KEYBOARD_LISTENERS,
+    isInitialized,
+  );
 }

@@ -1,28 +1,28 @@
-import type { KeymapConfig } from "@os/features/keyboard/lib/getCanonicalKey";
-import { createLogicExpect, Rule } from "@os/features/logic/lib/Rule";
 import type { TodoContext } from "@apps/todo/logic/schema";
 import { OS } from "@os/features/AntigravityOS";
+import type { KeymapConfig } from "@os/features/keyboard/lib/getCanonicalKey";
+import { createLogicExpect, Rule } from "@os/features/logic/lib/Rule";
 
 // Command Imports (Direct References)
 // Note: Commands now handled by OS + Zone props:
 // - ToggleTodo, DeleteTodo, StartEdit (via onSelect, onAction, onDelete)
 // - CopyTodo, CutTodo, PasteTodo (via onCopy, onCut, onPaste)
 
-import { ToggleView } from "@apps/todo/features/commands/ToggleView";
-import {
-  MoveCategoryUp,
-  MoveCategoryDown,
-  SelectCategory
-} from "@apps/todo/features/commands/MoveCategoryUp";
+import { DuplicateTodo } from "@apps/todo/features/commands/clipboard";
 import {
   AddTodo,
-  MoveItemUp,
-  MoveItemDown,
-  StartEdit,
   CancelEdit,
+  MoveItemDown,
+  MoveItemUp,
+  StartEdit,
   UpdateTodoText,
 } from "@apps/todo/features/commands/list";
-import { DuplicateTodo } from "@apps/todo/features/commands/clipboard";
+import {
+  MoveCategoryDown,
+  MoveCategoryUp,
+  SelectCategory,
+} from "@apps/todo/features/commands/MoveCategoryUp";
+import { ToggleView } from "@apps/todo/features/commands/ToggleView";
 
 // 1. Strict Context Builders
 const Expect = createLogicExpect<TodoContext>();
@@ -40,20 +40,47 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
   ],
   zones: {
     sidebar: [
-      { key: "Meta+ArrowUp", command: MoveCategoryUp, when: Expect("activeZone").toBe("sidebar") },
-      { key: "Meta+ArrowDown", command: MoveCategoryDown, when: Expect("activeZone").toBe("sidebar") },
-      { key: "Enter", command: SelectCategory, args: { id: OS.FOCUS }, when: Expect("activeZone").toBe("sidebar") },
-      { key: "Space", command: SelectCategory, args: { id: OS.FOCUS }, when: Expect("activeZone").toBe("sidebar") },
+      {
+        key: "Meta+ArrowUp",
+        command: MoveCategoryUp,
+        when: Expect("activeZone").toBe("sidebar"),
+      },
+      {
+        key: "Meta+ArrowDown",
+        command: MoveCategoryDown,
+        when: Expect("activeZone").toBe("sidebar"),
+      },
+      {
+        key: "Enter",
+        command: SelectCategory,
+        args: { id: OS.FOCUS },
+        when: Expect("activeZone").toBe("sidebar"),
+      },
+      {
+        key: "Space",
+        command: SelectCategory,
+        args: { id: OS.FOCUS },
+        when: Expect("activeZone").toBe("sidebar"),
+      },
     ],
 
     listView: [
       // General Navigation
 
-
       // Structure - Reorder Items (Meta + Arrow)
       // Note: Meta+Arrows are reserved for "Move Item", not "Navigate Focus"
-      { key: "Meta+ArrowUp", command: MoveItemUp, args: { focusId: OS.FOCUS }, when: Expect("activeZone").toBe("listView") },
-      { key: "Meta+ArrowDown", command: MoveItemDown, args: { focusId: OS.FOCUS }, when: Expect("activeZone").toBe("listView") },
+      {
+        key: "Meta+ArrowUp",
+        command: MoveItemUp,
+        args: { focusId: OS.FOCUS },
+        when: Expect("activeZone").toBe("listView"),
+      },
+      {
+        key: "Meta+ArrowDown",
+        command: MoveItemDown,
+        args: { focusId: OS.FOCUS },
+        when: Expect("activeZone").toBe("listView"),
+      },
 
       // Creation (Strict Draft Guard)
       {
@@ -108,7 +135,10 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
         key: "Meta+D",
         command: DuplicateTodo,
         args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("listView"), Expect("isEditing").toBe(false)),
+        when: Rule.and(
+          Expect("activeZone").toBe("listView"),
+          Expect("isEditing").toBe(false),
+        ),
       },
     ],
     boardView: [
@@ -119,7 +149,10 @@ export const TODO_KEYMAP: KeymapConfig<any> = {
         key: "Meta+D",
         command: DuplicateTodo,
         args: { id: OS.FOCUS },
-        when: Rule.and(Expect("activeZone").toBe("boardView"), Expect("isEditing").toBe(false)),
+        when: Rule.and(
+          Expect("activeZone").toBe("boardView"),
+          Expect("isEditing").toBe(false),
+        ),
       },
     ],
   },

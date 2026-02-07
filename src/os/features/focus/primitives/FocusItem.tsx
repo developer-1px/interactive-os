@@ -1,9 +1,9 @@
 /**
  * FocusItem - Pure Projection Focusable Item
- * 
+ *
  * Automatically registers with parent FocusGroup's store and DOM registry.
  * Uses reactive store subscription for performant UI updates.
- * 
+ *
  * NOTE: This is a PROJECTION-ONLY component.
  * - Does NOT handle events (click, keydown)
  * - Only reflects state (tabIndex, data-*, aria-*)
@@ -11,51 +11,51 @@
  */
 
 import {
-    useMemo,
-    useSyncExternalStore,
-    forwardRef,
-    isValidElement,
-    cloneElement,
-    type ReactElement,
-    type ReactNode,
-} from 'react';
-import { useStore } from 'zustand';
-import { useShallow } from 'zustand/react/shallow';
-import { useFocusGroupContext } from './FocusGroup';
-import { FocusData } from '../lib/focusData';
-import { twMerge } from 'tailwind-merge';
+  cloneElement,
+  forwardRef,
+  isValidElement,
+  type ReactElement,
+  type ReactNode,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
+import { twMerge } from "tailwind-merge";
+import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import { FocusData } from "../lib/focusData";
+import { useFocusGroupContext } from "./FocusGroup";
 
 // ═══════════════════════════════════════════════════════════════════
 // Props
 // ═══════════════════════════════════════════════════════════════════
 
 export interface FocusItemProps {
-    /** Item ID (required) */
-    id: string;
+  /** Item ID (required) */
+  id: string;
 
-    /** Whether item is disabled */
-    disabled?: boolean;
+  /** Whether item is disabled */
+  disabled?: boolean;
 
-    /** Children */
-    children: ReactNode;
+  /** Children */
+  children: ReactNode;
 
-    /** Container className */
-    className?: string;
+  /** Container className */
+  className?: string;
 
-    /** Container style */
-    style?: React.CSSProperties;
+  /** Container style */
+  style?: React.CSSProperties;
 
-    /** Custom element type (ignored if asChild is true) */
-    as?: 'div' | 'li' | 'button' | 'a' | 'span';
+  /** Custom element type (ignored if asChild is true) */
+  as?: "div" | "li" | "button" | "a" | "span";
 
-    /** Render as child (cloneElement) */
-    asChild?: boolean;
+  /** Render as child (cloneElement) */
+  asChild?: boolean;
 
-    /** ARIA role override */
-    role?: string;
+  /** ARIA role override */
+  role?: string;
 
-    /** Additional props to pass through */
-    [key: string]: any;
+  /** Additional props to pass through */
+  [key: string]: any;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -63,110 +63,122 @@ export interface FocusItemProps {
 // ═══════════════════════════════════════════════════════════════════
 
 function setRef<T>(ref: React.Ref<T> | undefined, value: T) {
-    if (typeof ref === 'function') {
-        ref(value);
-    } else if (ref !== null && ref !== undefined) {
-        (ref as React.MutableRefObject<T>).current = value;
-    }
+  if (typeof ref === "function") {
+    ref(value);
+  } else if (ref !== null && ref !== undefined) {
+    (ref as React.MutableRefObject<T>).current = value;
+  }
 }
 
 function composeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
-    return (node: T) => refs.forEach((ref) => setRef(ref, node));
+  return (node: T) => refs.forEach((ref) => setRef(ref, node));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
-export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(function FocusItem({
-    id,
-    disabled = false,
-    children,
-    className,
-    style,
-    as: Element = 'div',
-    asChild = false,
-    role,
-    ...rest
-}, ref) {
+export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
+  function FocusItem(
+    {
+      id,
+      disabled = false,
+      children,
+      className,
+      style,
+      as: Element = "div",
+      asChild = false,
+      role,
+      ...rest
+    },
+    ref,
+  ) {
     const ctx = useFocusGroupContext();
 
     if (!ctx) {
-        throw new Error('FocusItem must be used within a FocusGroup');
+      throw new Error("FocusItem must be used within a FocusGroup");
     }
 
     const { groupId, store } = ctx;
 
     // --- State Subscriptions ---
     const activeGroupId = useSyncExternalStore(
-        FocusData.subscribeActiveZone,
-        () => FocusData.getActiveZoneId(),
-        () => null
+      FocusData.subscribeActiveZone,
+      () => FocusData.getActiveZoneId(),
+      () => null,
     );
 
     const { isFocused, isSelected, isExpanded } = useStore(
-        store,
-        useShallow((state) => ({
-            isFocused: state.focusedItemId === id,
-            isSelected: state.selection.includes(id),
-            isExpanded: state.expandedItems.includes(id),
-        }))
+      store,
+      useShallow((state) => ({
+        isFocused: state.focusedItemId === id,
+        isSelected: state.selection.includes(id),
+        isExpanded: state.expandedItems.includes(id),
+      })),
     );
 
     // --- Computed State ---
     const isGroupActive = activeGroupId === groupId;
     const visualFocused = isFocused && isGroupActive;
     const isAnchor = isFocused && !isGroupActive;
-    const effectiveRole = role || 'option';
-    const isExpandable = ['treeitem', 'button'].includes(effectiveRole);
+    const effectiveRole = role || "option";
+    const isExpandable = ["treeitem", "button"].includes(effectiveRole);
 
     // --- Prop Consolidation ---
-    const { tabIndex: propTabIndex, ...otherRest } = rest as { tabIndex?: number;[key: string]: any };
+    const { tabIndex: propTabIndex, ...otherRest } = rest as {
+      tabIndex?: number;
+      [key: string]: any;
+    };
 
     const sharedProps = {
-        id,
-        role: effectiveRole,
-        tabIndex: propTabIndex ?? (visualFocused ? 0 : -1),
-        'aria-current': visualFocused || undefined,
-        'aria-selected': isSelected || undefined,
-        'aria-expanded': isExpandable ? isExpanded : undefined,
-        'aria-disabled': disabled || undefined,
-        'data-focus-item': true,
-        'data-item-id': id,
-        'data-anchor': isAnchor || undefined,
-        'data-focused': visualFocused || undefined,
-        'data-selected': isSelected || undefined,
-        'data-expanded': isExpanded || undefined,
-        className: twMerge(
-            'outline-none cursor-pointer',
-            disabled && 'opacity-50 cursor-not-allowed',
-            className
-        ),
-        style,
-        ...otherRest
+      id,
+      role: effectiveRole,
+      tabIndex: propTabIndex ?? (visualFocused ? 0 : -1),
+      "aria-current": visualFocused || undefined,
+      "aria-selected": isSelected || undefined,
+      "aria-expanded": isExpandable ? isExpanded : undefined,
+      "aria-disabled": disabled || undefined,
+      "data-focus-item": true,
+      "data-item-id": id,
+      "data-anchor": isAnchor || undefined,
+      "data-focused": visualFocused || undefined,
+      "data-selected": isSelected || undefined,
+      "data-expanded": isExpanded || undefined,
+      className: twMerge(
+        "outline-none cursor-pointer",
+        disabled && "opacity-50 cursor-not-allowed",
+        className,
+      ),
+      style,
+      ...otherRest,
     };
 
     // --- Ref Handling ---
-    const childElement = asChild && isValidElement(children) ? (children as ReactElement<any>) : null;
-    const combinedRef = useMemo(() =>
-        composeRefs(ref, (childElement as any)?.ref)
-        , [ref, (childElement as any)?.ref]);
+    const childElement =
+      asChild && isValidElement(children)
+        ? (children as ReactElement<any>)
+        : null;
+    const combinedRef = useMemo(
+      () => composeRefs(ref, (childElement as any)?.ref),
+      [ref, (childElement as any)?.ref],
+    );
 
     // --- Rendering ---
     if (childElement) {
-        return cloneElement(childElement, {
-            ...sharedProps,
-            ref: combinedRef,
-            className: twMerge(childElement.props.className, sharedProps.className),
-            style: { ...childElement.props.style, ...style },
-        });
+      return cloneElement(childElement, {
+        ...sharedProps,
+        ref: combinedRef,
+        className: twMerge(childElement.props.className, sharedProps.className),
+        style: { ...childElement.props.style, ...style },
+      });
     }
 
     return (
-        <Element ref={combinedRef} {...sharedProps}>
-            {children}
-        </Element>
+      <Element ref={combinedRef} {...sharedProps}>
+        {children}
+      </Element>
     );
-});
+  },
+);
 
-FocusItem.displayName = 'FocusItem';
+FocusItem.displayName = "FocusItem";

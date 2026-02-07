@@ -1,24 +1,24 @@
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import type { MutableRefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { getCaretPosition, setCaretPosition } from "./getCaretPosition";
 
 // --- Types ---
 interface UseFieldStateProps {
-    value: string;
+  value: string;
 }
 
 interface UseFieldDOMSyncProps {
-    innerRef: MutableRefObject<HTMLElement | null>;
-    localValue: string;
-    isActive: boolean;
-    cursorRef: MutableRefObject<number | null>;
+  innerRef: MutableRefObject<HTMLElement | null>;
+  localValue: string;
+  isActive: boolean;
+  cursorRef: MutableRefObject<number | null>;
 }
 
 interface UseFieldFocusProps {
-    innerRef: MutableRefObject<HTMLElement | null>;
-    isActive: boolean;
-    blurOnInactive: boolean;
-    cursorRef: MutableRefObject<number | null>;
+  innerRef: MutableRefObject<HTMLElement | null>;
+  isActive: boolean;
+  blurOnInactive: boolean;
+  cursorRef: MutableRefObject<number | null>;
 }
 
 // --- Hooks ---
@@ -28,21 +28,21 @@ interface UseFieldFocusProps {
  * only when not composing.
  */
 export const useFieldState = ({ value }: UseFieldStateProps) => {
-    const [localValue, setLocalValue] = useState(value);
-    const isComposingRef = useRef(false);
+  const [localValue, setLocalValue] = useState(value);
+  const isComposingRef = useRef(false);
 
-    useEffect(() => {
-        if (!isComposingRef.current && value !== localValue) {
-            setLocalValue(value);
-        }
-    }, [value]);
+  useEffect(() => {
+    if (!isComposingRef.current && value !== localValue) {
+      setLocalValue(value);
+    }
+  }, [value]);
 
-    return { localValue, setLocalValue, isComposingRef };
+  return { localValue, setLocalValue, isComposingRef };
 };
 
 /**
  * Synchronizes the value prop to the DOM `innerText`.
- * 
+ *
  * SIMPLE RULE: Only sync when NOT active (not focused/editing).
  * contentEditable manages its own DOM during editing.
  * Sync happens only on:
@@ -50,30 +50,30 @@ export const useFieldState = ({ value }: UseFieldStateProps) => {
  * - Blur (when isActive becomes false)
  */
 export const useFieldDOMSync = ({
-    innerRef,
-    localValue,
-    isActive,
-    cursorRef: _cursorRef,
+  innerRef,
+  localValue,
+  isActive,
+  cursorRef: _cursorRef,
 }: UseFieldDOMSyncProps) => {
-    // Sync on mount
-    useLayoutEffect(() => {
-        if (innerRef.current) {
-            innerRef.current.innerText = localValue;
-        }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Sync on mount
+  useLayoutEffect(() => {
+    if (innerRef.current) {
+      innerRef.current.innerText = localValue;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Sync on blur only
-    useLayoutEffect(() => {
-        if (!innerRef.current) return;
+  // Sync on blur only
+  useLayoutEffect(() => {
+    if (!innerRef.current) return;
 
-        // Skip sync while active - let contentEditable manage DOM
-        if (isActive) return;
+    // Skip sync while active - let contentEditable manage DOM
+    if (isActive) return;
 
-        // Sync when not active (blur)
-        if (innerRef.current.innerText !== localValue) {
-            innerRef.current.innerText = localValue;
-        }
-    }, [localValue, isActive, innerRef]);
+    // Sync when not active (blur)
+    if (innerRef.current.innerText !== localValue) {
+      innerRef.current.innerText = localValue;
+    }
+  }, [localValue, isActive, innerRef]);
 };
 
 /**
@@ -81,45 +81,45 @@ export const useFieldDOMSync = ({
  * Also handles cursor restoration on focus gain.
  */
 export const useFieldFocus = ({
-    innerRef,
-    isActive,
-    blurOnInactive,
-    cursorRef,
+  innerRef,
+  isActive,
+  blurOnInactive,
+  cursorRef,
 }: UseFieldFocusProps) => {
-    useEffect(() => {
-        if (isActive && innerRef.current) {
-            if (document.activeElement !== innerRef.current) {
-                innerRef.current.focus();
-            }
+  useEffect(() => {
+    if (isActive && innerRef.current) {
+      if (document.activeElement !== innerRef.current) {
+        innerRef.current.focus();
+      }
 
-            // Restore Cursor on Focus Gain
-            // Use double RAF to ensure DOM content is synced first
-            // If no cursor position stored (null), place cursor at end of text
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    if (innerRef.current) {
-                        try {
-                            if (cursorRef.current !== null) {
-                                // Restore to saved position
-                                setCaretPosition(innerRef.current, cursorRef.current);
-                            } else {
-                                // No saved position - move to end
-                                const textLength = innerRef.current.innerText.length;
-                                setCaretPosition(innerRef.current, textLength);
-                            }
-                        } catch (e) { }
-                    }
-                });
-            });
-        } else if (
-            !isActive &&
-            blurOnInactive &&
-            innerRef.current &&
-            document.activeElement === innerRef.current
-        ) {
-            innerRef.current.blur();
-        }
-    }, [isActive, blurOnInactive, innerRef, cursorRef]);
+      // Restore Cursor on Focus Gain
+      // Use double RAF to ensure DOM content is synced first
+      // If no cursor position stored (null), place cursor at end of text
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (innerRef.current) {
+            try {
+              if (cursorRef.current !== null) {
+                // Restore to saved position
+                setCaretPosition(innerRef.current, cursorRef.current);
+              } else {
+                // No saved position - move to end
+                const textLength = innerRef.current.innerText.length;
+                setCaretPosition(innerRef.current, textLength);
+              }
+            } catch (e) {}
+          }
+        });
+      });
+    } else if (
+      !isActive &&
+      blurOnInactive &&
+      innerRef.current &&
+      document.activeElement === innerRef.current
+    ) {
+      innerRef.current.blur();
+    }
+  }, [isActive, blurOnInactive, innerRef, cursorRef]);
 };
 
 /**
@@ -128,18 +128,18 @@ export const useFieldFocus = ({
  * (Simplified: No longer uses GlobalContext, just local refs)
  */
 export const useFieldContext = (
-    innerRef: MutableRefObject<HTMLElement | null>,
-    cursorRef: MutableRefObject<number | null>
+  innerRef: MutableRefObject<HTMLElement | null>,
+  cursorRef: MutableRefObject<number | null>,
 ) => {
-    const updateCursorContext = () => {
-        if (!innerRef.current) return;
-        const pos = getCaretPosition(innerRef.current);
-        cursorRef.current = pos;
-    };
+  const updateCursorContext = () => {
+    if (!innerRef.current) return;
+    const pos = getCaretPosition(innerRef.current);
+    cursorRef.current = pos;
+  };
 
-    const setFieldFocused = (_isFocused: boolean) => {
-        // No-op: Field focus is now tracked by useFocusStore
-    };
+  const setFieldFocused = (_isFocused: boolean) => {
+    // No-op: Field focus is now tracked by useFocusStore
+  };
 
-    return { updateCursorContext, setFieldFocused };
+  return { updateCursorContext, setFieldFocused };
 };

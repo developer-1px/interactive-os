@@ -10,24 +10,24 @@
  * It only interprets the raw event and extracts relevant metadata.
  */
 
-import { getCanonicalKey } from '@os/features/keyboard/lib/getCanonicalKey';
+import { getCanonicalKey } from "@os/features/keyboard/lib/getCanonicalKey";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════
 
 export interface KeyboardIntent {
-    /** Normalized key string (e.g., "cmd+k", "ctrl+enter") */
-    canonicalKey: string;
+  /** Normalized key string (e.g., "cmd+k", "ctrl+enter") */
+  canonicalKey: string;
 
-    /** Whether the event originated from an input field */
-    isFromInput: boolean;
+  /** Whether the event originated from an input field */
+  isFromInput: boolean;
 
-    /** The target element that received the event */
-    target: HTMLElement;
+  /** The target element that received the event */
+  target: HTMLElement;
 
-    /** Raw event for edge cases */
-    originalEvent: KeyboardEvent;
+  /** Raw event for edge cases */
+  originalEvent: KeyboardEvent;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -43,28 +43,28 @@ export interface KeyboardIntent {
  * @returns KeyboardIntent or null if event should be skipped
  */
 export function interceptKeyboard(event: KeyboardEvent): KeyboardIntent | null {
-    // Skip already-handled events
-    if (event.defaultPrevented) return null;
+  // Skip already-handled events
+  if (event.defaultPrevented) return null;
 
-    // Skip IME composition (e.g., Korean, Japanese input)
-    if (event.isComposing) return null;
+  // Skip IME composition (e.g., Korean, Japanese input)
+  if (event.isComposing) return null;
 
-    // Extract target element
-    const target = event.target as HTMLElement;
-    if (!target) return null;
+  // Extract target element
+  const target = event.target as HTMLElement;
+  if (!target) return null;
 
-    // Detect input field context
-    const isFromInput = isInputElement(target);
+  // Detect input field context
+  const isFromInput = isInputElement(target);
 
-    // Normalize key to canonical form
-    const canonicalKey = getCanonicalKey(event);
+  // Normalize key to canonical form
+  const canonicalKey = getCanonicalKey(event);
 
-    return {
-        canonicalKey,
-        isFromInput,
-        target,
-        originalEvent: event,
-    };
+  return {
+    canonicalKey,
+    isFromInput,
+    target,
+    originalEvent: event,
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -75,9 +75,9 @@ export function interceptKeyboard(event: KeyboardEvent): KeyboardIntent | null {
  * Check if the target element is an input-like element.
  */
 function isInputElement(target: HTMLElement): boolean {
-    return (
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target.isContentEditable
-    );
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target.isContentEditable
+  );
 }

@@ -8,25 +8,25 @@ import type { CommandFactory } from "@os/entities/CommandFactory";
 const groupCommandMap = new Map<string, CommandFactory<any, any>[]>();
 
 export const GroupRegistry = {
-    register: (groupId: string, factory: CommandFactory<any, any>) => {
-        const hidden = groupCommandMap.get(groupId) || [];
-        // Prevent duplicates (HMR safety)
-        if (!hidden.find((c) => c.id === factory.id)) {
-            hidden.push(factory);
-            groupCommandMap.set(groupId, hidden);
-        }
-    },
+  register: (groupId: string, factory: CommandFactory<any, any>) => {
+    const hidden = groupCommandMap.get(groupId) || [];
+    // Prevent duplicates (HMR safety)
+    if (!hidden.find((c) => c.id === factory.id)) {
+      hidden.push(factory);
+      groupCommandMap.set(groupId, hidden);
+    }
+  },
 
-    getCommands: (groupId: string) => {
-        return groupCommandMap.get(groupId) || [];
-    },
+  getCommands: (groupId: string) => {
+    return groupCommandMap.get(groupId) || [];
+  },
 
-    getAll: () => {
-        return new Map(groupCommandMap);
-    },
+  getAll: () => {
+    return new Map(groupCommandMap);
+  },
 
-    get: (groupId: string, commandId: string) => {
-        const commands = groupCommandMap.get(groupId);
-        return commands?.find(c => c.id === commandId);
-    },
+  get: (groupId: string, commandId: string) => {
+    const commands = groupCommandMap.get(groupId);
+    return commands?.find((c) => c.id === commandId);
+  },
 };

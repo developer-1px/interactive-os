@@ -1,15 +1,19 @@
-import { create } from "zustand";
-
 import { logger } from "@os/app/debug/logger";
 import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
-
 // Modules
-import { CommandRegistry, type CommandGroup } from "@os/features/command/model/CommandRegistry";
-import { GroupRegistry } from "@os/features/jurisdiction/model/GroupRegistry";
+import {
+  type CommandGroup,
+  CommandRegistry,
+} from "@os/features/command/model/CommandRegistry";
 import { FocusData } from "@os/features/focus/lib/focusData";
-
+import { GroupRegistry } from "@os/features/jurisdiction/model/GroupRegistry";
 // Middleware is now injected via config!
-import { hydrateState, createPersister, type PersistenceConfig } from "@os/features/persistence/hydrateState";
+import {
+  createPersister,
+  hydrateState,
+  type PersistenceConfig,
+} from "@os/features/persistence/hydrateState";
+import { create } from "zustand";
 
 // Re-exports for consumers
 export { CommandRegistry, type CommandGroup };
@@ -21,13 +25,16 @@ export interface CommandStoreState<S, A> {
 
 export type Middleware<A> = (action: A) => A;
 
-export function createCommandStore<S, A extends { type: string; payload?: any }>(
+export function createCommandStore<
+  S,
+  A extends { type: string; payload?: any },
+>(
   registry: CommandRegistry<S, any>,
   initialState: S,
   config?: {
     onStateChange?: (state: S, action: A, prevState: S) => S;
     onDispatch?: (action: A) => A; // Legacy single interceptor
-    middleware?: Middleware<A>[];  // New Middleware Chain
+    middleware?: Middleware<A>[]; // New Middleware Chain
     persistence?: PersistenceConfig;
   },
 ) {
@@ -88,7 +95,12 @@ export function createCommandStore<S, A extends { type: string; payload?: any }>
 
         // 6. Logging
         if (cmd.log !== false) {
-          logger.traceCommand(action.type, action.payload, prev.state, finalState);
+          logger.traceCommand(
+            action.type,
+            action.payload,
+            prev.state,
+            finalState,
+          );
         }
 
         // 7. Persistence (Side Effect)

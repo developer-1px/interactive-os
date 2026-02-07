@@ -1,7 +1,7 @@
+import { type ClassValue, clsx } from "clsx";
 import { memo } from "react";
-import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { useOS, type OS } from "@/lib/hooks/use-os.ts";
+import { type OS, useOS } from "@/lib/hooks/use-os.ts";
 
 // Utility for merging tailwind classes safely
 function cn(...inputs: ClassValue[]) {
@@ -80,7 +80,13 @@ const SYMBOLS: Record<OS, Record<string, string>> = {
 };
 
 export const Kbd = memo(
-  ({ children, keys, className, variant = "default", size = "sm" }: KbdProps) => {
+  ({
+    children,
+    keys,
+    className,
+    variant = "default",
+    size = "sm",
+  }: KbdProps) => {
     const os = useOS();
     const baseStyles =
       "inline-flex items-center justify-center rounded font-mono font-black border select-none transition-all duration-200 shrink-0";
@@ -104,9 +110,12 @@ export const Kbd = memo(
       // We also check if the key in lowercase matches a known key for robustness
       const normalizedKey = key.trim();
       // Capitalize first letter for lookup if needed
-      const lookupKey = normalizedKey.charAt(0).toUpperCase() + normalizedKey.slice(1);
+      const lookupKey =
+        normalizedKey.charAt(0).toUpperCase() + normalizedKey.slice(1);
 
-      return SYMBOLS[os][lookupKey] || (SYMBOLS[os][key] ? SYMBOLS[os][key] : key);
+      return (
+        SYMBOLS[os][lookupKey] || (SYMBOLS[os][key] ? SYMBOLS[os][key] : key)
+      );
     };
 
     // If 'keys' prop is provided, render mapped keys mapping
@@ -129,7 +138,7 @@ export const Kbd = memo(
     // If child is a string and looks like it might be a key name, we could try to map it,
     // but for safety, let's just render what is passed unless it's strictly a string child
     let content = children;
-    if (typeof children === 'string') {
+    if (typeof children === "string") {
       content = renderKey(children);
     }
 

@@ -1,15 +1,17 @@
-import { GroupRegistry } from "../../jurisdiction/model/GroupRegistry";
 import type { CommandDefinition } from "@os/entities/CommandDefinition";
 import type { CommandFactory } from "@os/entities/CommandFactory";
+import { GroupRegistry } from "../../jurisdiction/model/GroupRegistry";
 
 /**
  * createCommandFactory:
  * Creates a strongly typed `defineCommand` helper for a specific State type.
  */
 // Group-Aware Command Factory
-export function createCommandFactory<S, G extends string = string>(groupId?: G) {
+export function createCommandFactory<S, G extends string = string>(
+  groupId?: G,
+) {
   return function defineCommand<P, K extends string = string>(
-    def: CommandDefinition<S, P, K>
+    def: CommandDefinition<S, P, K>,
   ): CommandFactory<S, P, K> {
     const factory = ((payload: P) => {
       const action = {

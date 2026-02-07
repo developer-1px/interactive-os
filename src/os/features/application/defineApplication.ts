@@ -13,12 +13,14 @@ export interface AppDefinition<S, K extends string = string> {
       key: string;
       adapter?: any;
       debounceMs?: number;
-    }
+    };
   };
   middleware?: ((state: S, action: any, prev: S) => S)[];
   contextMap?: (state: S, env: any) => any;
 }
 
-export function defineApplication<S, K extends string = string>(config: AppDefinition<S, K>): AppDefinition<S, K> {
+export function defineApplication<S, K extends string = string>(
+  config: AppDefinition<S, K>,
+): AppDefinition<S, K> {
   return config;
 }

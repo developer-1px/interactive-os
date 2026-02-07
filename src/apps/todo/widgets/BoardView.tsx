@@ -1,13 +1,20 @@
-
-import { Zone } from "@os/app/export/primitives/Zone";
-import { Trigger } from "@os/app/export/primitives/Trigger";
-import { useEngine } from "@os/features/command/ui/CommandContext";
+import {
+  CopyTodo,
+  CutTodo,
+  PasteTodo,
+} from "@apps/todo/features/commands/clipboard";
+import {
+  DeleteTodo,
+  StartEdit,
+  ToggleTodo,
+} from "@apps/todo/features/commands/list";
 import { ToggleView } from "@apps/todo/features/commands/ToggleView";
-import { ToggleTodo, StartEdit, DeleteTodo } from "@apps/todo/features/commands/list";
-import { CopyTodo, CutTodo, PasteTodo } from "@apps/todo/features/commands/clipboard";
-import { OS } from "@os/features/AntigravityOS";
-import { List } from "lucide-react";
 import type { AppState } from "@apps/todo/model/types";
+import { Trigger } from "@os/app/export/primitives/Trigger";
+import { Zone } from "@os/app/export/primitives/Zone";
+import { OS } from "@os/features/AntigravityOS";
+import { useEngine } from "@os/features/command/ui/CommandContext";
+import { List } from "lucide-react";
 import { TaskItem } from "./TaskItem";
 
 export function BoardView() {
@@ -19,7 +26,6 @@ export function BoardView() {
 
   return (
     <div className="flex-1 flex flex-col h-full relative bg-slate-50 overflow-hidden font-sans">
-
       {/* Header */}
       <div className="px-8 pt-8 pb-4 flex-none border-b border-slate-200/60 bg-white z-20">
         <header className="flex items-end justify-between max-w-[1800px] mx-auto w-full">
@@ -51,7 +57,9 @@ export function BoardView() {
           <Zone
             id="board"
             role="group"
-            options={{ navigate: { entry: 'restore', orientation: 'horizontal' } }}
+            options={{
+              navigate: { entry: "restore", orientation: "horizontal" },
+            }}
             className="flex gap-8 h-full"
           >
             {categoryOrder.map((categoryId) => {
@@ -66,7 +74,9 @@ export function BoardView() {
                   key={categoryId}
                   id={`col-${categoryId}`}
                   role="listbox"
-                  options={{ navigate: { orientation: 'vertical', entry: 'restore' } }}
+                  options={{
+                    navigate: { orientation: "vertical", entry: "restore" },
+                  }}
                   // ARIA Standard Commands
                   onSelect={ToggleTodo({ id: OS.FOCUS })}
                   onAction={StartEdit({ id: OS.FOCUS })}
@@ -80,20 +90,26 @@ export function BoardView() {
                         w-80 flex-shrink-0 flex flex-col max-h-full rounded-2xl bg-slate-100/50 border transition-all duration-300 outline-none
                         ${activeColumn ? "border-indigo-200 bg-white shadow-xl shadow-indigo-100/50 ring-1 ring-indigo-500/10" : "border-slate-200/60 hover:border-slate-300"}
                     `}
-                // When column receives focus, we might want to set it as active category?
-                // Logic for that is usually side-effect based, but FocusZone doesn't do it automatically.
+                  // When column receives focus, we might want to set it as active category?
+                  // Logic for that is usually side-effect based, but FocusZone doesn't do it automatically.
                 >
-                  <div className={`
+                  <div
+                    className={`
                         p-4 border-b flex justify-between items-center rounded-t-2xl transition-colors
                         ${activeColumn ? "border-indigo-100 bg-indigo-50/50" : "border-slate-100 bg-slate-50"}
-                    `}>
-                    <h3 className={`font-bold text-xs uppercase tracking-wider ${activeColumn ? "text-indigo-700" : "text-slate-500"}`}>
+                    `}
+                  >
+                    <h3
+                      className={`font-bold text-xs uppercase tracking-wider ${activeColumn ? "text-indigo-700" : "text-slate-500"}`}
+                    >
                       {category.text}
                     </h3>
-                    <span className={`
+                    <span
+                      className={`
                         text-[10px] font-bold px-2.5 py-1 rounded-md
                         ${activeColumn ? "bg-indigo-100 text-indigo-700" : "bg-white border border-slate-200 text-slate-400"}
-                      `}>
+                      `}
+                    >
                       {categoryTodos.length}
                     </span>
                   </div>
@@ -111,7 +127,9 @@ export function BoardView() {
 
                     {categoryTodos.length === 0 && (
                       <div className="h-32 flex flex-col items-center justify-center text-slate-300 gap-2 border-2 border-dashed border-slate-200/50 rounded-xl bg-slate-50/30">
-                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">No Items</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                          No Items
+                        </span>
                       </div>
                     )}
                   </div>

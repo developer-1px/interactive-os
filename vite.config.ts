@@ -1,8 +1,8 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { inspectorPlugin } from "./vite-plugins/inspector";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 import inspectorBabelPlugin from "./vite-plugins/babel-inspector";
+import { inspectorPlugin } from "./vite-plugins/inspector";
 
 // https://vite.dev/config/
 export default defineConfig({

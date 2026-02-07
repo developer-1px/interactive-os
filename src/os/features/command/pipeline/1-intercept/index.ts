@@ -4,4 +4,4 @@
  * Transforms raw DOM events into structured intents.
  */
 
-export { interceptKeyboard, type KeyboardIntent } from './interceptKeyboard';
+export { interceptKeyboard, type KeyboardIntent } from "./interceptKeyboard";

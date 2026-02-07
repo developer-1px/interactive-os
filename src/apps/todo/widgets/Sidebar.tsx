@@ -1,18 +1,18 @@
-import { Zone } from "@os/app/export/primitives/Zone.tsx";
+import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
+import type { AppState } from "@apps/todo/model/types";
+import { Kbd } from "@os/app/debug/components/Kbd";
 import { Item } from "@os/app/export/primitives/Item.tsx";
 import { Trigger } from "@os/app/export/primitives/Trigger.tsx";
-import { Kbd } from "@os/app/debug/components/Kbd";
+import { Zone } from "@os/app/export/primitives/Zone.tsx";
 import { useEngine } from "@os/features/command/ui/CommandContext";
-import type { AppState } from "@apps/todo/model/types";
-import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
 import {
-  Inbox,
-  Briefcase,
-  User,
-  MoveUp,
-  MoveDown,
-  CornerDownLeft,
   ArrowRight,
+  Briefcase,
+  CornerDownLeft,
+  Inbox,
+  MoveDown,
+  MoveUp,
+  User,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -23,7 +23,7 @@ export function Sidebar() {
       role="listbox"
       options={{
         navigate: { entry: "restore" },
-        select: { followFocus: true }
+        select: { followFocus: true },
       }}
       onAction={SelectCategory({})}
       // onSelect={SelectCategory({})} // Space is handled by onAction alias if needed, or separate command
@@ -73,15 +73,8 @@ function SidebarContent() {
           if (!category) return null;
 
           return (
-            <Item
-              key={category.id}
-              id={category.id}
-              asChild
-            >
-              <Trigger
-                onPress={SelectCategory({ id: category.id })}
-                asChild
-              >
+            <Item key={category.id} id={category.id} asChild>
+              <Trigger onPress={SelectCategory({ id: category.id })} asChild>
                 <div
                   className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
                                   hover:bg-slate-100/80
@@ -121,23 +114,39 @@ function SidebarContent() {
         <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-[10px] text-slate-500 font-medium">
           <div className="flex items-center gap-2 text-slate-400">
             <div className="flex gap-0.5">
-              <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200 shadow-sm">
+              <Kbd
+                size="xs"
+                variant="ghost"
+                className="bg-white border border-slate-200 shadow-sm"
+              >
                 <MoveUp size={10} />
               </Kbd>
-              <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200 shadow-sm">
+              <Kbd
+                size="xs"
+                variant="ghost"
+                className="bg-white border border-slate-200 shadow-sm"
+              >
                 <MoveDown size={10} />
               </Kbd>
             </div>
             <span>Nav</span>
           </div>
           <div className="flex items-center gap-2 text-slate-400">
-            <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200 shadow-sm">
+            <Kbd
+              size="xs"
+              variant="ghost"
+              className="bg-white border border-slate-200 shadow-sm"
+            >
               <CornerDownLeft size={10} />
             </Kbd>
             <span>Select</span>
           </div>
           <div className="flex items-center gap-2 text-slate-400 col-span-2">
-            <Kbd size="xs" variant="ghost" className="bg-white border border-slate-200 shadow-sm">
+            <Kbd
+              size="xs"
+              variant="ghost"
+              className="bg-white border border-slate-200 shadow-sm"
+            >
               <ArrowRight size={10} />
             </Kbd>
             <span>Enter List</span>

@@ -5,9 +5,9 @@
  */
 
 export {
-    resolveKeybinding,
-    buildBubblePath,
-    type KeybindingEntry,
-    type ResolveContext,
-    type ResolvedBinding,
-} from './resolveKeybinding';
+  buildBubblePath,
+  type KeybindingEntry,
+  type ResolveContext,
+  type ResolvedBinding,
+  resolveKeybinding,
+} from "./resolveKeybinding";
