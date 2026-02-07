@@ -7,11 +7,13 @@ import {
   Book,
   MousePointer2,
   Accessibility,
+  Columns,
 } from "lucide-react";
 
 export function GlobalNav() {
   const navItems = [
     { id: "todo", icon: Package, path: "/", label: "Todo" },
+    { id: "kanban", icon: Columns, path: "/kanban", label: "Kanban" },
     { id: "builder", icon: Layout, path: "/builder", label: "Web Builder" },
     { id: "focus-showcase", icon: MousePointer2, path: "/focus-showcase", label: "Focus Lab" },
     { id: "aria-showcase", icon: Accessibility, path: "/aria-showcase", label: "ARIA Showcase" },

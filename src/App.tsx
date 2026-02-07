@@ -7,6 +7,7 @@ import {
 
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import TodoPage from "./pages/TodoPage";
+import KanbanPage from "./pages/KanbanPage";
 import SettingsPage from "./pages/SettingsPage";
 import FocusShowcasePage from "./pages/focus-showcase";
 import AriaShowcasePage from "./pages/aria-showcase";
@@ -15,6 +16,7 @@ import DocsPage from "./pages/DocsPage";
 
 import { OS } from "@os/features/AntigravityOS";
 import { TodoApp } from "@apps/todo/app";
+import { KanbanApp } from "@apps/kanban/app";
 import { InspectorShell } from "@os/app/debug/InspectorShell";
 import { useInspectorStore } from "@os/features/inspector/InspectorStore";
 
@@ -65,6 +67,15 @@ function TodoAppShell() {
   );
 }
 
+// --- Kanban App Shell (with kanban keybindings) ---
+function KanbanAppShell() {
+  return (
+    <OS.App definition={KanbanApp} isAppShell>
+      <AppContent isAppShell={true} />
+    </OS.App>
+  );
+}
+
 // --- Minimal Shell (no app-specific keybindings) ---
 function MinimalShell() {
   return (
@@ -100,6 +111,11 @@ export default function App() {
                 </div>
               }
             />
+          </Route>
+
+          {/* Kanban App routes - with KanbanApp keybindings */}
+          <Route element={<KanbanAppShell />}>
+            <Route path="/kanban" element={<KanbanPage />} />
           </Route>
 
           {/* Standalone pages - no TodoApp keybindings */}
