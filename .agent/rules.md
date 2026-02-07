@@ -69,3 +69,42 @@ React Aria, W3C ARIA Practices, 브라우저 API 등 검증된 해법을 커스�
 - **불확실하면 묻는다**: 요구사항이나 구현 방법이 불확실하면 구현하지 말고 먼저 질문한다.
 - **직접 경로 import**: 기본은 직접 경로 import. Feature의 public API entry point만 `index.ts` 허용.
 - **레이어 의존성**: `src/os/features/` (OS) → `src/apps/` (앱) → `src/pages/` (페이지). 하위 레이어는 상위를 import하지 않는다.
+
+## TestBot 사용법
+
+> **테스트 실행/수집은 항상 `window.__TESTBOT__` 글로벌 API를 사용한다.**
+
+브라우저에서 TestBot 테스트를 실행할 때, UI 버튼을 수동으로 클릭하지 않는다. 대신 브라우저 JavaScript 실행을 통해 글로벌 API를 호출한다.
+
+```js
+// 전체 테스트 실행
+window.__TESTBOT__.runAll()
+
+// 실행 완료 대기 (polling)
+window.__TESTBOT__.isRunning()  // false가 될 때까지 대기
+
+// 구조화된 결과 수집 (JSON)
+JSON.stringify(window.__TESTBOT__.getResults(), null, 2)
+
+// 실패만 조회 (이름 + 실패 단계 + 에러 메시지)
+window.__TESTBOT__.getFailures()
+
+// 한줄 요약: "PASS: 8 / FAIL: 4 / TOTAL: 12"
+window.__TESTBOT__.summary()
+
+// 실패한 스위트만 재실행
+window.__TESTBOT__.rerunFailed()
+
+// 개별 스위트 실행
+window.__TESTBOT__.runSuite(0)          // 인덱스로
+window.__TESTBOT__.runByName("테스트명")  // 이름으로
+
+// 등록된 스위트 목록
+window.__TESTBOT__.listSuites()
+```
+
+- `runAll()`은 async — 호출 후 `isRunning()`으로 완료를 확인한다.
+- `getResults()`는 `{ summary, suites[] }` 구조의 전체 JSON을 반환한다.
+- **`getFailures()`는 실패한 스위트만 `{ name, failedStep }` 형태로 반환한다.**
+- **`summary()`는 한줄 문자열로 pass/fail/total 수를 반환한다.**
+- **`rerunFailed()`는 직전에 실패한 스위트만 순차적으로 재실행한다.**
