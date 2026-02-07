@@ -8,7 +8,8 @@ import { useInputTelemetry } from "@os/app/debug/LoggedKey.ts";
 import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { useInspectorStore } from "@os/features/inspector/InspectorStore"; // [NEW] Subscription
+import { useInspectorStore } from "@os/features/inspector/InspectorStore";
+import { TestBotInspectorPanel } from "@os/features/inspector/TestBotInspectorPanel";
 import { evalContext } from "@os/features/logic/lib/evalContext";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
@@ -183,6 +184,8 @@ export function CommandInspector() {
             <OSStateViewer />
           </div>
         );
+      case "TESTBOT":
+        return <TestBotInspectorPanel />;
       default:
         return null;
     }

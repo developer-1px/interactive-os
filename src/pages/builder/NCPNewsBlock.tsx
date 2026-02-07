@@ -1,6 +1,6 @@
 import { Field } from "@os/app/export/primitives/Field.tsx";
 import { OS } from "@os/features/AntigravityOS";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 export function NCPNewsBlock() {
@@ -125,15 +125,21 @@ export function NCPNewsBlock() {
               </div>
 
               <div className="relative z-10">
-                <OS.Item id={`${card.id}-link`}>
-                  {({ isFocused }: { isFocused: boolean }) => (
-                    <div
-                      className={`flex items-center gap-2 text-sm font-semibold ${isFocused ? "underline decoration-2 underline-offset-4" : ""}`}
-                    >
-                      자세히 보기 <ArrowRight size={14} />
-                    </div>
-                  )}
-                </OS.Item>
+                <Field
+                  name={`${card.id}-link`}
+                  mode="deferred"
+                  value={card.link}
+                  onCommit={(val: string) => {
+                    const newCards = [...cards];
+                    newCards[index].link = val;
+                    setCards(newCards);
+                  }}
+                  className={`
+                    text-sm font-semibold text-white
+                    data-[focused=true]:underline data-[focused=true]:decoration-2 data-[focused=true]:underline-offset-4
+                    data-[focused=true]:bg-white/10 rounded px-2 -mx-2
+                  `}
+                />
               </div>
             </OS.Zone>
           ))}

@@ -6,9 +6,11 @@
 import { useFocusExpansion } from "@os/features/focus/hooks/useFocusExpansion";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
+import { useTestBotRoutes } from "@os/features/inspector/useTestBotRoutes";
 import { useState } from "react";
 import { Icon } from "@/lib/Icon";
 import { AriaInteractionTest } from "./tests/AriaInteractionTest";
+import { defineAriaRoutes } from "./tests/ShowcaseBot";
 
 export function AriaShowcasePage() {
   // State management for interactive examples
@@ -26,6 +28,11 @@ export function AriaShowcasePage() {
   const [gridSelection, setGridSelection] = useState<Record<string, boolean>>(
     {},
   );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+
+  // Register TestBot routes for this page (available in Inspector)
+  useTestBotRoutes("aria-showcase", defineAriaRoutes);
 
   const toggleTool = (id: string) => {
     setPressedTools((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -71,7 +78,7 @@ export function AriaShowcasePage() {
             <FocusGroup
               id="demo-tablist"
               role="tablist"
-              navigate={{ orientation: "horizontal" }}
+              navigate={{ orientation: "horizontal", loop: true }}
               aria-label="Account settings"
               className="flex bg-gray-100 border-b border-gray-200"
             >
@@ -321,7 +328,7 @@ export function AriaShowcasePage() {
           <FocusGroup
             id="demo-toolbar"
             role="toolbar"
-            navigate={{ orientation: "horizontal" }}
+            navigate={{ orientation: "horizontal", loop: true }}
             aria-label="Text formatting"
             className="flex gap-1 p-2 bg-gray-100 rounded-lg border border-gray-200"
           >
@@ -453,40 +460,45 @@ export function AriaShowcasePage() {
                 */}
         <AriaCard title="Combobox" ariaRole="combobox">
           <div className="relative">
-            <FocusItem
-              id="combo-trigger"
-              role="combobox"
-              aria-expanded={isComboOpen}
-              aria-invalid={isComboInvalid}
-              aria-controls="combo-listbox"
-              aria-autocomplete="list"
-              onClick={() => setIsComboOpen(!isComboOpen)}
-              className={`
-                                w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
-                                flex items-center gap-2 transition-all
-                                ${
-                                  isComboInvalid
-                                    ? "border-red-300 bg-red-50 text-red-700"
-                                    : "border-gray-200 hover:border-gray-300"
-                                }
-                                data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
-                                aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
-                            `}
+            <FocusGroup
+              id="combo-wrapper"
+              navigate={{ orientation: "vertical" }}
+              className="w-full"
             >
-              <Icon
-                name="search"
-                size={16}
-                className={isComboInvalid ? "text-red-400" : "text-gray-400"}
-              />
-              <span className="flex-1 text-left">
-                {isComboInvalid ? "Invalid selection" : "Select a fruit..."}
-              </span>
-              <Icon
-                name={isComboOpen ? "chevron-up" : "chevron-down"}
-                size={16}
-                className={isComboInvalid ? "text-red-400" : "text-gray-400"}
-              />
-            </FocusItem>
+              <FocusItem
+                id="combo-trigger"
+                role="combobox"
+                aria-expanded={isComboOpen}
+                aria-invalid={isComboInvalid}
+                aria-controls="combo-listbox"
+                aria-autocomplete="list"
+                onClick={() => setIsComboOpen(!isComboOpen)}
+                className={`
+                                  w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
+                                  flex items-center gap-2 transition-all
+                                  ${isComboInvalid
+                    ? "border-red-300 bg-red-50 text-red-700"
+                    : "border-gray-200 hover:border-gray-300"
+                  }
+                                  data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
+                                  aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
+                              `}
+              >
+                <Icon
+                  name="search"
+                  size={16}
+                  className={isComboInvalid ? "text-red-400" : "text-gray-400"}
+                />
+                <span className="flex-1 text-left">
+                  {isComboInvalid ? "Invalid selection" : "Select a fruit..."}
+                </span>
+                <Icon
+                  name={isComboOpen ? "chevron-up" : "chevron-down"}
+                  size={16}
+                  className={isComboInvalid ? "text-red-400" : "text-gray-400"}
+                />
+              </FocusItem>
+            </FocusGroup>
 
             <div className="flex items-center gap-2 mt-3">
               <label className="text-xs text-gray-500 flex items-center gap-1.5 cursor-pointer">
@@ -535,10 +547,10 @@ export function AriaShowcasePage() {
         </AriaCard>
 
         {/* 10. Accordion */}
-        <AriaCard title="Accordion" ariaRole="region">
+        <AriaCard title="Accordion" ariaRole="accordion">
           <FocusGroup
             id="demo-accordion"
-            role="region"
+            role="accordion"
             navigate={{ orientation: "vertical" }}
             aria-label="FAQ"
             className="w-full bg-white border border-gray-200 rounded-lg overflow-hidden"
@@ -546,8 +558,157 @@ export function AriaShowcasePage() {
             <AccordionContent />
           </FocusGroup>
         </AriaCard>
+
+        {/* 11. Dialog */}
+        <AriaCard title="Dialog" ariaRole="dialog">
+          <button
+            id="btn-dialog-trigger"
+            onClick={() => setIsDialogOpen(true)}
+            className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Open Dialog
+          </button>
+          {isDialogOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+              <FocusGroup
+                id="demo-dialog"
+                role="dialog"
+                aria-label="Example dialog"
+                aria-modal="true"
+                className="bg-white rounded-xl shadow-2xl w-80 p-0 overflow-hidden border border-gray-200"
+              >
+                <div className="px-5 py-4 border-b border-gray-100">
+                  <h3 className="font-bold text-gray-800">Dialog Title</h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Focus is trapped inside. Press Escape to close.
+                  </p>
+                </div>
+                <div className="p-5 space-y-2">
+                  <FocusItem
+                    id="dialog-btn-1"
+                    as="button"
+                    className="w-full px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400"
+                  >
+                    Focusable Item 1
+                  </FocusItem>
+                  <FocusItem
+                    id="dialog-btn-2"
+                    as="button"
+                    className="w-full px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400"
+                  >
+                    Focusable Item 2
+                  </FocusItem>
+                  <FocusItem
+                    id="dialog-btn-close"
+                    as="button"
+                    onClick={() => setIsDialogOpen(false)}
+                    className="w-full px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-300 data-[focused=true]:ring-offset-1"
+                  >
+                    Close Dialog
+                  </FocusItem>
+                </div>
+              </FocusGroup>
+            </div>
+          )}
+        </AriaCard>
+
+        {/* 12. Alert Dialog */}
+        <AriaCard title="Alert Dialog" ariaRole="alertdialog">
+          <button
+            id="btn-alert-trigger"
+            onClick={() => setIsAlertDialogOpen(true)}
+            className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Delete Item
+          </button>
+          {isAlertDialogOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+              <FocusGroup
+                id="demo-alertdialog"
+                role="alertdialog"
+                aria-label="Confirm deletion"
+                aria-modal="true"
+                aria-describedby="alert-desc"
+                className="bg-white rounded-xl shadow-2xl w-80 overflow-hidden border border-red-200"
+              >
+                <div className="p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                      <Icon name="alert-triangle" size={20} className="text-red-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-800">Delete permanently?</h3>
+                  </div>
+                  <p id="alert-desc" className="text-sm text-gray-500 mb-4">
+                    This action cannot be undone. The item will be permanently removed.
+                  </p>
+                  <div className="flex gap-2">
+                    <FocusItem
+                      id="alert-cancel"
+                      as="button"
+                      onClick={() => setIsAlertDialogOpen(false)}
+                      className="flex-1 px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-gray-400"
+                    >
+                      Cancel
+                    </FocusItem>
+                    <FocusItem
+                      id="alert-confirm"
+                      as="button"
+                      onClick={() => setIsAlertDialogOpen(false)}
+                      className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 data-[focused=true]:ring-2 data-[focused=true]:ring-red-300 data-[focused=true]:ring-offset-1"
+                    >
+                      Delete
+                    </FocusItem>
+                  </div>
+                </div>
+              </FocusGroup>
+            </div>
+          )}
+        </AriaCard>
+
+        {/* 13. Disclosure */}
+        <AriaCard title="Disclosure" ariaRole="disclosure">
+          <DisclosureContent />
+        </AriaCard>
+
+        {/* 14. Feed */}
+        <AriaCard title="Feed" ariaRole="feed">
+          <FocusGroup
+            id="demo-feed"
+            role="feed"
+            navigate={{ orientation: "vertical" }}
+            aria-label="Recent updates"
+            className="space-y-2"
+          >
+            {[
+              { id: "feed-1", author: "Alice", time: "2m ago", text: "Shipped the new focus pipeline! 🚀" },
+              { id: "feed-2", author: "Bob", time: "15m ago", text: "Fixed the grid navigation edge case." },
+              { id: "feed-3", author: "Carol", time: "1h ago", text: "Added ARIA role presets for all composite widgets." },
+            ].map((post) => (
+              <FocusItem
+                key={post.id}
+                id={post.id}
+                role="article"
+                aria-label={`Post by ${post.author}`}
+                className="
+                  p-3 rounded-lg border border-gray-200 bg-white
+                  hover:border-gray-300 transition-colors
+                  data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-300 data-[focused=true]:border-indigo-300
+                "
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                    {post.author[0]}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">{post.author}</span>
+                  <span className="text-xs text-gray-400 ml-auto">{post.time}</span>
+                </div>
+                <p className="text-sm text-gray-600 pl-8">{post.text}</p>
+              </FocusItem>
+            ))}
+          </FocusGroup>
+        </AriaCard>
       </div>
-    </div>
+    </div >
   );
 }
 
@@ -767,6 +928,47 @@ function AccordionContent() {
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function DisclosureContent() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="w-full">
+      <button
+        aria-expanded={isOpen}
+        aria-controls="disclosure-panel"
+        onClick={() => setIsOpen(!isOpen)}
+        className="
+          w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700
+          bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors
+          focus:outline-none focus:ring-2 focus:ring-indigo-300
+        "
+      >
+        <div className="flex items-center gap-2">
+          <Icon name="info" size={16} className="text-indigo-500" />
+          <span>Show additional details</span>
+        </div>
+        <Icon
+          name={isOpen ? "chevron-up" : "chevron-down"}
+          size={16}
+          className="text-gray-400"
+        />
+      </button>
+      {isOpen && (
+        <div
+          id="disclosure-panel"
+          className="mt-2 px-4 py-3 text-sm text-gray-600 bg-indigo-50 rounded-lg border border-indigo-100"
+        >
+          <p>
+            The <strong>disclosure</strong> pattern is the simplest expand/collapse:
+            a single trigger toggles visibility of a single panel.
+            Unlike accordion, disclosures are independent — multiple can be open simultaneously.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

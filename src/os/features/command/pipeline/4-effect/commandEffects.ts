@@ -20,6 +20,17 @@ export function runCommandEffects(
       resolution.resolvedArgs,
       result.handlerType as "app" | "os",
     );
+
+    // Inspector Stream
+    import("../../store/../../../features/inspector/InspectorLogStore").then(({ InspectorLog }) => {
+      InspectorLog.log({
+        type: "COMMAND",
+        title: result.commandId,
+        details: resolution.resolvedArgs,
+        icon: "zap",
+        source: result.handlerType as string,
+      });
+    });
   } else {
     // Optional: Log failures?
     console.warn(

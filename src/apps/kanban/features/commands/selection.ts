@@ -34,7 +34,27 @@ export const DeselectAll = defineKanbanCommand({
   id: "KANBAN_DESELECT_ALL",
   run: (state) => ({
     ...state,
-    ui: { ...state.ui, selectedCardIds: [] },
+    ui: { ...state.ui, selectedCardIds: [], bulkMenuOpen: null },
+  }),
+});
+
+export const ToggleBulkMenu = defineKanbanCommand({
+  id: "KANBAN_TOGGLE_BULK_MENU",
+  run: (state, payload: { menu: "move" | "priority" }) => ({
+    ...state,
+    ui: {
+      ...state.ui,
+      bulkMenuOpen:
+        state.ui.bulkMenuOpen === payload.menu ? null : payload.menu,
+    },
+  }),
+});
+
+export const CloseBulkMenu = defineKanbanCommand({
+  id: "KANBAN_CLOSE_BULK_MENU",
+  run: (state) => ({
+    ...state,
+    ui: { ...state.ui, bulkMenuOpen: null },
   }),
 });
 
@@ -53,6 +73,7 @@ export const BulkDeleteCards = defineKanbanCommand({
         }
       }
       draft.ui.selectedCardIds = [];
+      draft.ui.bulkMenuOpen = null;
     }),
 });
 
@@ -79,6 +100,7 @@ export const BulkMoveCards = defineKanbanCommand({
         card.columnId = payload.targetColumnId;
       }
       draft.ui.selectedCardIds = [];
+      draft.ui.bulkMenuOpen = null;
     }),
 });
 
@@ -94,5 +116,6 @@ export const BulkSetPriority = defineKanbanCommand({
         if (card) card.priority = payload.priority;
       }
       draft.ui.selectedCardIds = [];
+      draft.ui.bulkMenuOpen = null;
     }),
 });

@@ -72,7 +72,6 @@ export function App<S>({
   return (
     <Zone
       id={appDef.id}
-      area={appDef.id}
       className={
         isAppShell
           ? "h-full flex flex-col overflow-hidden"

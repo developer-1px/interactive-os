@@ -11,6 +11,7 @@ import { DOM } from "../../lib/dom";
 import { FocusData } from "../../lib/focusData";
 import type { FocusGroupStore } from "../../store/focusGroupStore";
 import type { FocusGroupConfig } from "../../types";
+import { setProgrammaticFocus } from "../5-sync/FocusSync";
 
 // ═══════════════════════════════════════════════════════════════════
 // Context (모든 Read)
@@ -189,75 +190,108 @@ export interface OSCommand<P = any> {
  * Execute an OS command and apply its result.
  * Returns true if the command was actually handled, false if it should passthrough.
  */
+// Re-entrance guard: prevents infinite loops from
+// runOS → el.focus() → focusin → dispatch → runOS cycles
+let _isRunning = false;
+let _callCount = 0;
+let _callResetTimer: ReturnType<typeof setTimeout> | null = null;
+
 export function runOS<P>(
   command: OSCommand<P>,
   payload: P,
   overrideZoneId?: string,
 ): boolean {
+  // Loop detection: if called more than 20 times in 500ms, something is wrong
+  _callCount++;
+  if (!_callResetTimer) {
+    _callResetTimer = setTimeout(() => { _callCount = 0; _callResetTimer = null; }, 500);
+  }
+  if (_callCount > 20) {
+    console.error("[runOS] 🔴 Excessive calls detected!", _callCount, "payload:", payload);
+    return false;
+  }
+
+  // Re-entrance guard
+  if (_isRunning) {
+    console.warn("[runOS] ⚠️ Re-entrance blocked, payload:", payload);
+    return false;
+  }
+
   // 1. Read
   const ctx = buildContext(overrideZoneId);
   if (!ctx) return false;
 
-  // 2. Pure
-  const result = command.run(ctx, payload);
-  if (!result) return false;
+  _isRunning = true;
+  try {
+    // 2. Pure
+    const result = command.run(ctx, payload);
+    if (!result) return false;
 
-  // 3. State Write
-  if (result.state) {
-    // Auto-compute recovery target when focus changes
-    if (result.state.focusedItemId) {
-      const newFocusId = result.state.focusedItemId;
-      const items = ctx.dom.items;
-      const strategy = ctx.config.navigate.recovery; // default is 'next'
-      const idx = items.indexOf(newFocusId);
+    // 3. State Write
+    if (result.state) {
+      // Auto-compute recovery target when focus changes
+      if (result.state.focusedItemId) {
+        const newFocusId = result.state.focusedItemId;
+        const items = ctx.dom.items;
+        const strategy = ctx.config.navigate.recovery; // default is 'next'
+        const idx = items.indexOf(newFocusId);
 
-      if (idx !== -1) {
-        const next = items[idx + 1] ?? null;
-        const prev = items[idx - 1] ?? null;
+        if (idx !== -1) {
+          const next = items[idx + 1] ?? null;
+          const prev = items[idx - 1] ?? null;
 
-        // Pre-compute recovery target based on strategy
-        result.state.recoveryTargetId =
-          strategy === "prev"
-            ? (prev ?? next)
-            : strategy === "nearest"
-              ? (next ?? prev)
-              : (next ?? prev); // default 'next'
+          // Pre-compute recovery target based on strategy
+          result.state.recoveryTargetId =
+            strategy === "prev"
+              ? (prev ?? next)
+              : strategy === "nearest"
+                ? (next ?? prev)
+                : (next ?? prev); // default 'next'
+        }
+      }
+      ctx.store.setState(result.state);
+    }
+
+    // 4. Active Zone
+    if (result.activeZoneId !== undefined) {
+      FocusData.setActiveZone(result.activeZoneId);
+    }
+
+    // 5. DOM Effects
+    if (result.domEffects) {
+      for (const effect of result.domEffects) {
+        executeDOMEffect(effect);
       }
     }
-    ctx.store.setState(result.state);
-  }
 
-  // 4. Active Zone
-  if (result.activeZoneId !== undefined) {
-    FocusData.setActiveZone(result.activeZoneId);
-  }
-
-  // 5. DOM Effects
-  if (result.domEffects) {
-    for (const effect of result.domEffects) {
-      executeDOMEffect(effect);
+    // 6. App Command
+    if (result.dispatch) {
+      // Use app dispatch to run reducers, not the event bus
+      import("@os/features/command/store/CommandEngineStore").then(
+        ({ useCommandEngineStore }) => {
+          const dispatch = useCommandEngineStore.getState().getActiveDispatch();
+          dispatch?.(result.dispatch);
+        },
+      );
     }
-  }
 
-  // 6. App Command
-  if (result.dispatch) {
-    // Use app dispatch to run reducers, not the event bus
-    import("@os/features/command/store/CommandEngineStore").then(
-      ({ useCommandEngineStore }) => {
-        const dispatch = useCommandEngineStore.getState().getActiveDispatch();
-        dispatch?.(result.dispatch);
-      },
-    );
+    return true;
+  } finally {
+    _isRunning = false;
   }
-
-  return true;
 }
 
 function executeDOMEffect(effect: DOMEffect): void {
   switch (effect.type) {
     case "FOCUS": {
       const el = DOM.getItem(effect.targetId);
-      el?.focus();
+      if (el) {
+        // Prevent FocusSensor from re-dispatching FOCUS on the
+        // resulting focusin event — same pattern as FocusSync.
+        setProgrammaticFocus(true);
+        el.focus();
+        setTimeout(() => setProgrammaticFocus(false), 100);
+      }
       break;
     }
     case "SCROLL_INTO_VIEW": {

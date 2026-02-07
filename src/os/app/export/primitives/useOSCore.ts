@@ -61,6 +61,28 @@ export function useOSCore() {
         args: { direction: "RIGHT" },
       },
 
+      // Shift+Arrow: Navigate + Range Select
+      {
+        key: "Shift+ArrowUp",
+        command: OS_COMMANDS.NAVIGATE,
+        args: { direction: "UP", select: "range" },
+      },
+      {
+        key: "Shift+ArrowDown",
+        command: OS_COMMANDS.NAVIGATE,
+        args: { direction: "DOWN", select: "range" },
+      },
+      {
+        key: "Shift+ArrowLeft",
+        command: OS_COMMANDS.NAVIGATE,
+        args: { direction: "LEFT", select: "range" },
+      },
+      {
+        key: "Shift+ArrowRight",
+        command: OS_COMMANDS.NAVIGATE,
+        args: { direction: "RIGHT", select: "range" },
+      },
+
       // Tab Navigation (Delegated to App)
       { key: "Tab", command: "OS_TAB", allowInInput: true },
       { key: "Shift+Tab", command: "OS_TAB_PREV", allowInInput: true },
@@ -82,6 +104,9 @@ export function useOSCore() {
       { key: "Meta+C", command: OS_COMMANDS.COPY },
       { key: "Meta+X", command: OS_COMMANDS.CUT },
       { key: "Meta+V", command: OS_COMMANDS.PASTE },
+
+      // Selection
+      { key: "Meta+A", command: OS_COMMANDS.SELECT_ALL },
 
       // Editing (Passthrough - only matches when Zone has binding)
       { key: "Space", command: OS_COMMANDS.TOGGLE },

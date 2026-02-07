@@ -7,6 +7,7 @@
  */
 
 import type { BaseCommand } from "@os/entities/BaseCommand";
+import { activeZoneGuard } from "@os/lib/loopGuard";
 import type { FocusGroupStore } from "../store/focusGroupStore";
 import type { FocusGroupConfig } from "../types";
 
@@ -82,6 +83,8 @@ export const FocusData = {
    */
   setActiveZone(zoneId: string | null): void {
     if (activeZoneId !== zoneId) {
+      // ── Loop Guard: prevent zone flip-flop ──
+      if (!activeZoneGuard.check()) return;
       activeZoneId = zoneId;
       activeZoneListeners.forEach((fn) => fn());
     }

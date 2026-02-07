@@ -1,27 +1,17 @@
 import {
   CancelEditCard,
-  DeleteCard,
-  StartEditCard,
   SyncEditDraft,
   UpdateCardText,
 } from "@apps/kanban/features/commands/card";
 import type {
   KanbanCard as KanbanCardType,
   KanbanLabel,
-  Priority,
 } from "@apps/kanban/model/appState";
 import { Field } from "@os/app/export/primitives/Field";
 import { Item } from "@os/app/export/primitives/Item";
-import { Trigger } from "@os/app/export/primitives/Trigger";
 import {
-  ArrowDown,
-  ArrowUp,
   Calendar,
   Check,
-  CornerDownLeft,
-  Flame,
-  Minus,
-  Trash2,
 } from "lucide-react";
 
 interface KanbanCardProps {
@@ -32,36 +22,7 @@ interface KanbanCardProps {
   isSelected?: boolean;
 }
 
-const PRIORITY_CONFIG: Record<
-  Priority,
-  { icon: any; color: string; bg: string; label: string }
-> = {
-  urgent: {
-    icon: Flame,
-    color: "text-red-500",
-    bg: "bg-red-50 border-red-200",
-    label: "Urgent",
-  },
-  high: {
-    icon: ArrowUp,
-    color: "text-orange-500",
-    bg: "bg-orange-50 border-orange-200",
-    label: "High",
-  },
-  medium: {
-    icon: Minus,
-    color: "text-yellow-500",
-    bg: "bg-yellow-50 border-yellow-200",
-    label: "Medium",
-  },
-  low: {
-    icon: ArrowDown,
-    color: "text-blue-400",
-    bg: "bg-blue-50 border-blue-200",
-    label: "Low",
-  },
-  none: { icon: null, color: "", bg: "", label: "" },
-};
+
 
 export function KanbanCard({
   card,
@@ -70,8 +31,6 @@ export function KanbanCard({
   labels,
   isSelected,
 }: KanbanCardProps) {
-  const priorityCfg = PRIORITY_CONFIG[card.priority];
-  const PriorityIcon = priorityCfg.icon;
 
   const cardLabels = card.labels.map((lid) => labels[lid]).filter(Boolean);
 
@@ -82,13 +41,12 @@ export function KanbanCard({
       id={card.id}
       className={`
                 group relative rounded-lg transition-all duration-200 cursor-pointer overflow-visible
-                ${
-                  isEditing
-                    ? "bg-kanban-surface ring-2 ring-brand ring-offset-1 shadow-float z-20"
-                    : isSelected
-                      ? "bg-brand/5 ring-1 ring-brand/40 shadow-sm"
-                      : "bg-kanban-surface shadow-card hover:shadow-card-hover hover:-translate-y-[1px]"
-                }
+                ${isEditing
+          ? "bg-kanban-surface ring-2 ring-brand ring-offset-1 shadow-float z-20"
+          : isSelected
+            ? "bg-brand/5 ring-1 ring-brand/40 shadow-sm"
+            : "bg-kanban-surface shadow-card hover:shadow-card-hover hover:-translate-y-[1px]"
+        }
                 outline-none
                 data-[focused=true]:ring-2 data-[focused=true]:ring-brand data-[focused=true]:ring-offset-1 data-[focused=true]:z-10
             `}

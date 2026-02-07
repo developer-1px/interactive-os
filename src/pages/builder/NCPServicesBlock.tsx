@@ -17,6 +17,15 @@ export function NCPServicesBlock() {
     "고객이 원하는 클라우드 환경 구축을 위한\n다양한 서비스를 제공합니다",
   );
 
+  const [featuredCardValues, setFeaturedCardValues] = useState({
+    recommend: "RECOMMEND",
+    title: "Featured\nService",
+  });
+
+  const [serviceSubheader, setServiceSubheader] = useState(
+    "네이버클라우드의 주요 서비스를 사용해보세요",
+  );
+
   // Tab Icons Mock
   const tabs = [
     { icon: Star, label: "Featured", active: true },
@@ -108,6 +117,7 @@ export function NCPServicesBlock() {
         <OS.Zone
           id="ncp-service-tabs"
           role="builderBlock"
+          options={{ navigate: { orientation: "horizontal" } }}
           className="flex flex-row gap-6 items-center mb-12 border-b border-slate-200 pb-8 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,transparent,black_2%,black_98%,transparent)]"
         >
           {tabs.map((tab, i) => (
@@ -116,22 +126,20 @@ export function NCPServicesBlock() {
                 <div
                   className={`
                                     flex flex-col items-start justify-between p-5 min-w-[160px] h-[160px] rounded-3xl cursor-pointer group transition-all relative shrink-0 border
-                                    ${
-                                      tab.active
-                                        ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/30 ring-4 ring-blue-600/10"
-                                        : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
-                                    }
+                                    ${tab.active
+                      ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/30 ring-4 ring-blue-600/10"
+                      : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
+                    }
                                     ${isFocused ? "scale-105 ring-4 ring-blue-500/20" : ""}
                                 `}
                 >
                   <div
                     className={`
                                         w-12 h-12 rounded-2xl flex items-center justify-center transition-all
-                                        ${
-                                          tab.active
-                                            ? "bg-white/20 text-white"
-                                            : "bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600"
-                                        }
+                                        ${tab.active
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600"
+                      }
                                     `}
                   >
                     <tab.icon size={24} strokeWidth={2} />
@@ -173,14 +181,31 @@ export function NCPServicesBlock() {
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 group-hover:bg-cyan-400/20 transition-colors duration-700" />
 
             <div className="relative z-10">
-              <span className="inline-block px-3 py-1 rounded-full bg-white/10 text-white/90 text-[10px] font-bold tracking-wider mb-4 border border-white/10 backdrop-blur-md">
-                RECOMMEND
-              </span>
-              <h3 className="text-3xl font-bold tracking-tight leading-tight">
-                Featured
-                <br />
-                Service
-              </h3>
+              <Field
+                name="ncp-featured-recommend"
+                mode="deferred"
+                value={featuredCardValues.recommend}
+                onCommit={(val: string) =>
+                  setFeaturedCardValues((prev) => ({ ...prev, recommend: val }))
+                }
+                className={`
+                  inline-block px-3 py-1 rounded-full bg-white/10 text-white/90 text-[10px] font-bold tracking-wider mb-4 border border-white/10 backdrop-blur-md
+                  data-[focused=true]:bg-white/30 data-[focused=true]:ring-1 data-[focused=true]:ring-white/50
+                `}
+              />
+              <Field
+                name="ncp-featured-title"
+                mode="deferred"
+                multiline
+                value={featuredCardValues.title}
+                onCommit={(val: string) =>
+                  setFeaturedCardValues((prev) => ({ ...prev, title: val }))
+                }
+                className={`
+                  block text-3xl font-bold tracking-tight leading-tight text-white whitespace-pre-wrap
+                  data-[focused=true]:bg-white/10 data-[focused=true]:ring-1 data-[focused=true]:ring-white/50 rounded p-1 -m-1
+                `}
+              />
             </div>
 
             <div className="relative z-10 h-32 w-32 bg-gradient-to-tr from-cyan-400 to-blue-600 rounded-full blur-2xl opacity-80 self-end shadow-lg shadow-cyan-500/50 animate-pulse duration-[3000ms]" />
@@ -193,9 +218,16 @@ export function NCPServicesBlock() {
             className="lg:w-3/4 bg-white rounded-3xl p-8 shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10"
           >
             <div className="col-span-2 mb-2">
-              <h4 className="text-sm font-bold text-slate-500">
-                네이버클라우드의 주요 서비스를 사용해보세요
-              </h4>
+              <Field
+                name="ncp-service-subheader"
+                mode="deferred"
+                value={serviceSubheader}
+                onCommit={(val: string) => setServiceSubheader(val)}
+                className={`
+                  text-sm font-bold text-slate-500
+                  data-[focused=true]:bg-slate-100 data-[focused=true]:ring-1 data-[focused=true]:ring-slate-300 rounded px-1 -mx-1
+                `}
+              />
             </div>
 
             {featuredServices.map((service, index) => (
@@ -208,11 +240,10 @@ export function NCPServicesBlock() {
                     <div
                       className={`
                                             w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-300
-                                            ${
-                                              isFocused
-                                                ? "bg-slate-900 text-white ring-2 ring-slate-300 scale-110 shadow-lg"
-                                                : "bg-white text-slate-600 border-slate-100 shadow-sm group-hover/item:border-blue-200 group-hover/item:shadow-blue-100 group-hover/item:scale-110"
-                                            }
+                                            ${isFocused
+                          ? "bg-slate-900 text-white ring-2 ring-slate-300 scale-110 shadow-lg"
+                          : "bg-white text-slate-600 border-slate-100 shadow-sm group-hover/item:border-blue-200 group-hover/item:shadow-blue-100 group-hover/item:scale-110"
+                        }
                                         `}
                     >
                       <service.icon
@@ -241,9 +272,20 @@ export function NCPServicesBlock() {
                                             `}
                     />
                     {service.badge && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider border border-green-200">
-                        {service.badge}
-                      </span>
+                      <Field
+                        name={`service-badge-${index}`}
+                        mode="deferred"
+                        value={service.badge}
+                        onCommit={(val: string) => {
+                          const newServices = [...featuredServices];
+                          newServices[index].badge = val;
+                          setFeaturedServices(newServices);
+                        }}
+                        className={`
+                          px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider border border-green-200
+                          data-[focused=true]:ring-2 data-[focused=true]:ring-green-400 data-[focused=true]:scale-110
+                        `}
+                      />
                     )}
                   </div>
                   <Field

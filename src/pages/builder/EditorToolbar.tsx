@@ -14,7 +14,13 @@ import {
  *
  * Light Theme Editor Toolbar - Clean professional design
  */
-export function EditorToolbar() {
+export function EditorToolbar({
+  onToggleTest,
+  testActive,
+}: {
+  onToggleTest?: () => void;
+  testActive?: boolean;
+}) {
   return (
     <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm">
       <div className="flex items-center justify-between px-4 py-2">
@@ -51,6 +57,17 @@ export function EditorToolbar() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
+          {onToggleTest && (
+            <button
+              onClick={onToggleTest}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all rounded-md ${testActive
+                  ? "bg-amber-100 text-amber-700 ring-1 ring-amber-300"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                }`}
+            >
+              🧪 Test
+            </button>
+          )}
           <button className="flex items-center gap-2 px-3 py-1.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors">
             <Eye size={15} />
             Preview
@@ -75,10 +92,9 @@ function ToolButton({
     <button
       className={`
         w-8 h-8 rounded-md flex items-center justify-center transition-all
-        ${
-          active
-            ? "bg-white text-slate-800 shadow-sm"
-            : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+        ${active
+          ? "bg-white text-slate-800 shadow-sm"
+          : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
         }
       `}
     >
@@ -100,10 +116,9 @@ function DeviceButton({
     <button
       className={`
         flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all
-        ${
-          active
-            ? "bg-white text-slate-800 shadow-sm"
-            : "text-slate-400 hover:text-slate-600"
+        ${active
+          ? "bg-white text-slate-800 shadow-sm"
+          : "text-slate-400 hover:text-slate-600"
         }
       `}
     >

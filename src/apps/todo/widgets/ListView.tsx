@@ -10,6 +10,10 @@ import {
   PasteTodo,
 } from "@apps/todo/features/commands/clipboard";
 import {
+  UndoCommand,
+  RedoCommand,
+} from "@apps/todo/features/commands/history";
+import {
   AddTodo,
   DeleteTodo,
   StartEdit,
@@ -53,6 +57,9 @@ export function ListView() {
         onPaste={PasteTodo({ id: OS.FOCUS })}
         // Editing Commands (Muscle Memory)
         onDelete={DeleteTodo({ id: OS.FOCUS })}
+        // History Commands (Temporal Control)
+        onUndo={UndoCommand({})}
+        onRedo={RedoCommand({})}
         className="flex flex-col h-full"
       >
         <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full z-10 p-8 sm:p-12 pb-6">

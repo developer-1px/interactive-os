@@ -90,11 +90,15 @@ export function ClipboardManager() {
       }
     };
 
+    // eslint-disable-next-line pipeline/no-imperative-handler -- OS bridge: native clipboard API requires addEventListener for copy/paste interception
     window.addEventListener("copy", handleCopy);
+    // eslint-disable-next-line pipeline/no-imperative-handler -- OS bridge: native clipboard API
     window.addEventListener("paste", handlePaste);
 
     return () => {
+      // eslint-disable-next-line pipeline/no-imperative-handler -- cleanup for above
       window.removeEventListener("copy", handleCopy);
+      // eslint-disable-next-line pipeline/no-imperative-handler -- cleanup for above
       window.removeEventListener("paste", handlePaste);
     };
   }, [dispatch]); // dispatch is stable

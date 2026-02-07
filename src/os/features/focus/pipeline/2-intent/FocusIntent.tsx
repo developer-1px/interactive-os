@@ -23,6 +23,7 @@ import {
   RECOVER,
   REDO,
   SELECT,
+  SELECT_ALL,
   TAB,
   TOGGLE,
   UNDO,
@@ -63,6 +64,13 @@ export function FocusIntent() {
           zoneId?: string;
         };
         runOS(SELECT, selectPayload, selectPayload.zoneId);
+      },
+    },
+    // --- Select All ---
+    {
+      command: OS_COMMANDS.SELECT_ALL,
+      handler: () => {
+        runOS(SELECT_ALL, undefined);
       },
     },
     // --- Activate ---

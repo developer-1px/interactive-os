@@ -54,6 +54,8 @@ export interface OSNavigatePayload {
   direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
   sourceId: string | null;
   targetId?: string | null; // If known by Physics engine
+  /** When set, NAVIGATE will also update selection after moving focus */
+  select?: "range" | "toggle";
 }
 
 export interface OSFocusPayload {
@@ -86,9 +88,9 @@ export type OSCommand =
   | { type: typeof OS_COMMANDS.ACTIVATE; payload?: OSActivatePayload }
   | { type: typeof OS_COMMANDS.DISMISS; payload?: void }
   | {
-      type: typeof OS_COMMANDS.FIELD_START_EDIT;
-      payload?: { fieldId?: string };
-    }
+    type: typeof OS_COMMANDS.FIELD_START_EDIT;
+    payload?: { fieldId?: string };
+  }
   | { type: typeof OS_COMMANDS.FIELD_COMMIT; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.FIELD_CANCEL; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.UNDO; payload?: any }

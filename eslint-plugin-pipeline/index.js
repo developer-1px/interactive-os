@@ -123,18 +123,38 @@ const noDirectCommit = {
 // ZIFT 프리미티브의 시맨틱 props는 네이티브 DOM 핸들러가 아니므로 예외 처리
 const ZIFT_ALLOWED_PROPS = {
   Trigger: new Set(["onPress"]),
-  Field: new Set(["onChange", "onSubmit", "onCancel"]),
+  Field: new Set([
+    "onChange",
+    "onSubmit",
+    "onCancel",
+    "onCommit",
+    "onSync",
+    "onCancelCallback",
+  ]),
   Zone: new Set([
     "onAction",
     "onToggle",
     "onSelect",
     "onDelete",
     "onCopy",
+    "onCut",
     "onPaste",
     "onUndo",
     "onRedo",
   ]),
+  Item: new Set([]),
 };
+
+// ─── Visual Handler Allowlist ───────────────────────────────────────
+// 순수 시각적 효과(hover, pointer)를 위한 핸들러는 OS 상태에 영향 없음
+const VISUAL_HANDLER_ALLOWLIST = new Set([
+  "onMouseEnter",
+  "onMouseLeave",
+  "onMouseOver",
+  "onMouseOut",
+  "onPointerEnter",
+  "onPointerLeave",
+]);
 
 /** @type {import('eslint').Rule.RuleModule} */
 const noHandlerInApp = {
@@ -162,6 +182,9 @@ const noHandlerInApp = {
         if (!attrName.startsWith("on") || attrName.length < 3) return;
         // 세 번째 글자가 대문자인 경우만 (React 이벤트 핸들러 컨벤션: onClick, onSubmit 등)
         if (attrName[2] !== attrName[2].toUpperCase()) return;
+
+        // 순수 시각적 핸들러는 ZIFT 위반 아님
+        if (VISUAL_HANDLER_ALLOWLIST.has(attrName)) return;
 
         // 부모 JSX 요소의 컴포넌트 이름 확인
         const jsxElement = node.parent;
@@ -193,10 +216,78 @@ const noHandlerInApp = {
   },
 };
 
+// ─── No Imperative Handler ──────────────────────────────────────────
+// DOM 직접 접근을 통한 이벤트 핸들러 등록을 감지
+// addEventListener, ref.current.addEventListener 등
+
+/** @type {import('eslint').Rule.RuleModule} */
+const noImperativeHandler = {
+  meta: {
+    type: "problem",
+    docs: {
+      description:
+        "Disallow imperative DOM event registration (addEventListener) in app components",
+      recommended: true,
+    },
+    messages: {
+      noAddEventListener:
+        "Direct addEventListener('{{event}}') violates ZIFT Passive Projection. " +
+        "Route through the Interaction OS pipeline instead.",
+      noRemoveEventListener:
+        "removeEventListener detected — paired with a forbidden addEventListener.",
+    },
+    schema: [],
+  },
+  create(context) {
+    return {
+      CallExpression(node) {
+        const callee = node.callee;
+        let methodName = null;
+
+        // ── Pattern 1: object.addEventListener(...) ──
+        // document.addEventListener, window.addEventListener,
+        // ref.current.addEventListener, el.addEventListener
+        if (
+          callee.type === "MemberExpression" &&
+          callee.property?.type === "Identifier"
+        ) {
+          methodName = callee.property.name;
+        }
+
+        // ── Pattern 2: standalone addEventListener (rare but possible) ──
+        if (callee.type === "Identifier") {
+          methodName = callee.name;
+        }
+
+        if (methodName === "addEventListener") {
+          // 이벤트 이름 추출 (첫 번째 인자)
+          const eventArg = node.arguments[0];
+          const eventName =
+            eventArg?.type === "Literal" ? String(eventArg.value) : "unknown";
+
+          context.report({
+            node,
+            messageId: "noAddEventListener",
+            data: { event: eventName },
+          });
+        }
+
+        if (methodName === "removeEventListener") {
+          context.report({
+            node,
+            messageId: "noRemoveEventListener",
+          });
+        }
+      },
+    };
+  },
+};
+
 export default {
   rules: {
     "no-pipeline-bypass": noPipelineBypass,
     "no-direct-commit": noDirectCommit,
     "no-handler-in-app": noHandlerInApp,
+    "no-imperative-handler": noImperativeHandler,
   },
 };

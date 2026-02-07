@@ -35,6 +35,7 @@ export default defineConfig([
     },
     rules: {
       "pipeline/no-handler-in-app": "warn",
+      "pipeline/no-imperative-handler": "warn",
     },
   },
 ]);

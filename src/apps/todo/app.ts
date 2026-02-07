@@ -1,8 +1,7 @@
 import { mapStateToContext } from "@apps/todo/bridge/mapStateToContext";
-import { navigationMiddleware } from "@apps/todo/features/todo_details/navigationMiddleware";
+import { UndoCommand, RedoCommand } from "@apps/todo/features/commands/history";
 import { INITIAL_STATE } from "@apps/todo/features/todo_details/persistence";
 import { TODO_KEYMAP } from "@apps/todo/features/todoKeys";
-import { historyMiddleware } from "@apps/todo/middleware/historyMiddleware";
 import type { AppState, TodoCommandId } from "@apps/todo/model/types";
 import { defineApplication } from "@os/features/application/defineApplication";
 
@@ -16,8 +15,9 @@ export const TodoApp = defineApplication<AppState, TodoCommandId>({
       debounceMs: 250,
     },
   },
+  commands: [UndoCommand, RedoCommand],
   keymap: TODO_KEYMAP,
-  middleware: [navigationMiddleware, historyMiddleware],
+  // middleware removed — OS provides navigation + history built-in
   contextMap: (state, env) =>
     mapStateToContext(
       state,
@@ -26,3 +26,4 @@ export const TodoApp = defineApplication<AppState, TodoCommandId>({
       env.focusedItemId,
     ),
 });
+

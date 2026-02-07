@@ -10,6 +10,7 @@ import {
   UpdateCardTitle,
 } from "@apps/kanban/features/commands/detail";
 import type { KanbanState, Priority } from "@apps/kanban/model/appState";
+import { Trigger } from "@os/app/export/primitives/Trigger";
 import { Zone } from "@os/app/export/primitives/Zone";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import { AlertTriangle, Calendar, Clock, Tag, User, X } from "lucide-react";
@@ -34,10 +35,9 @@ export function CardDetailSheet() {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-white/60 backdrop-blur-[1px] transition-opacity"
-        onClick={() => dispatch(CloseCardDetail({}))}
-      />
+      <Trigger onPress={CloseCardDetail({})} asChild>
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] transition-opacity" />
+      </Trigger>
 
       {/* Sheet Panel */}
       <Zone
@@ -50,22 +50,24 @@ export function CardDetailSheet() {
           <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
             Card Detail
           </h2>
-          <button
-            onClick={() => dispatch(CloseCardDetail({}))}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            tabIndex={0}
-          >
-            <X size={16} />
-          </button>
+          <Trigger onPress={CloseCardDetail({})} asChild>
+            <button
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              tabIndex={0}
+            >
+              <X size={16} />
+            </button>
+          </Trigger>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
-          {/* Title */}
+          {/* Title — native input: Field uses contentEditable, not suitable for controlled <input> */}
           <div>
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 block">
               Title
             </label>
+            {/* eslint-disable pipeline/no-handler-in-app -- Native <input> requires onChange */}
             <input
               value={card.title}
               onChange={(e) =>
@@ -76,13 +78,15 @@ export function CardDetailSheet() {
               className="w-full text-lg font-bold text-slate-900 bg-transparent outline-none border-b-2 border-transparent focus:border-indigo-400 pb-1 transition-colors"
               tabIndex={0}
             />
+            {/* eslint-enable pipeline/no-handler-in-app */}
           </div>
 
-          {/* Description */}
+          {/* Description — native textarea */}
           <div>
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 block">
               Description
             </label>
+            {/* eslint-disable pipeline/no-handler-in-app -- Native <textarea> requires onChange */}
             <textarea
               value={card.description}
               onChange={(e) =>
@@ -98,6 +102,7 @@ export function CardDetailSheet() {
               className="w-full text-sm text-slate-700 bg-slate-50 rounded-lg border border-slate-200 p-3 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/10 placeholder:text-slate-300 resize-none transition-all"
               tabIndex={0}
             />
+            {/* eslint-enable pipeline/no-handler-in-app */}
           </div>
 
           {/* Priority */}
@@ -107,27 +112,29 @@ export function CardDetailSheet() {
             </label>
             <div className="flex flex-wrap gap-2">
               {PRIORITIES.map(({ value, label, color }) => (
-                <button
+                <Trigger
                   key={value}
-                  onClick={() =>
-                    dispatch(SetPriority({ id: card.id, priority: value }))
-                  }
-                  className={`
-                                        px-3 py-1.5 rounded-lg text-xs font-bold transition-all border
-                                        ${
-                                          card.priority === value
-                                            ? "bg-white shadow-sm border-slate-300 ring-2 ring-offset-1"
-                                            : "border-slate-200 hover:bg-slate-50"
-                                        }
-                                    `}
-                  style={{
-                    color,
-                    ...(card.priority === value ? { ringColor: color } : {}),
-                  }}
-                  tabIndex={0}
+                  onPress={SetPriority({ id: card.id, priority: value })}
+                  asChild
+                  allowPropagation
                 >
-                  {label}
-                </button>
+                  <button
+                    className={`
+                                        px-3 py-1.5 rounded-lg text-xs font-bold transition-all border
+                                        ${card.priority === value
+                        ? "bg-white shadow-sm border-slate-300 ring-2 ring-offset-1"
+                        : "border-slate-200 hover:bg-slate-50"
+                      }
+                                    `}
+                    style={{
+                      color,
+                      ...(card.priority === value ? { ringColor: color } : {}),
+                    }}
+                    tabIndex={0}
+                  >
+                    {label}
+                  </button>
+                </Trigger>
               ))}
             </div>
           </div>
@@ -141,39 +148,42 @@ export function CardDetailSheet() {
               {allLabels.map((label) => {
                 const isActive = card.labels.includes(label.id);
                 return (
-                  <button
+                  <Trigger
                     key={label.id}
-                    onClick={() =>
-                      dispatch(ToggleLabel({ id: card.id, labelId: label.id }))
-                    }
-                    className={`
-                                            px-3 py-1.5 rounded-lg text-xs font-bold transition-all border
-                                            ${
-                                              isActive
-                                                ? "ring-2 ring-offset-1 shadow-sm"
-                                                : "opacity-50 hover:opacity-80"
-                                            }
-                                        `}
-                    style={{
-                      color: label.color,
-                      backgroundColor: `${label.color}12`,
-                      borderColor: `${label.color}30`,
-                      ...(isActive ? { ringColor: label.color } : {}),
-                    }}
-                    tabIndex={0}
+                    onPress={ToggleLabel({ id: card.id, labelId: label.id })}
+                    asChild
+                    allowPropagation
                   >
-                    {label.name}
-                  </button>
+                    <button
+                      className={`
+                                            px-3 py-1.5 rounded-lg text-xs font-bold transition-all border
+                                            ${isActive
+                          ? "ring-2 ring-offset-1 shadow-sm"
+                          : "opacity-50 hover:opacity-80"
+                        }
+                                        `}
+                      style={{
+                        color: label.color,
+                        backgroundColor: `${label.color}12`,
+                        borderColor: `${label.color}30`,
+                        ...(isActive ? { ringColor: label.color } : {}),
+                      }}
+                      tabIndex={0}
+                    >
+                      {label.name}
+                    </button>
+                  </Trigger>
                 );
               })}
             </div>
           </div>
 
-          {/* Assignee */}
+          {/* Assignee — native input */}
           <div>
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-1.5">
               <User size={10} /> Assignee
             </label>
+            {/* eslint-disable pipeline/no-handler-in-app -- Native <input> requires onChange */}
             <input
               value={card.assignee || ""}
               onChange={(e) =>
@@ -188,13 +198,15 @@ export function CardDetailSheet() {
               className="w-full text-sm text-slate-700 bg-slate-50 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/10 placeholder:text-slate-300 transition-all"
               tabIndex={0}
             />
+            {/* eslint-enable pipeline/no-handler-in-app */}
           </div>
 
-          {/* Due Date */}
+          {/* Due Date — native date input */}
           <div>
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-1.5">
               <Calendar size={10} /> Due Date
             </label>
+            {/* eslint-disable pipeline/no-handler-in-app -- Native date input requires onChange */}
             <input
               type="date"
               value={card.dueDate || ""}
@@ -206,6 +218,7 @@ export function CardDetailSheet() {
               className="w-full text-sm text-slate-700 bg-slate-50 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/10 transition-all"
               tabIndex={0}
             />
+            {/* eslint-enable pipeline/no-handler-in-app */}
           </div>
 
           {/* Metadata */}

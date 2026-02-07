@@ -47,11 +47,10 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
     <div
       className={`
                 w-[300px] flex-shrink-0 flex flex-col max-h-full transition-all duration-300
-                ${
-                  column.collapsed
-                    ? "w-10 cursor-pointer items-center py-4 bg-slate-50/50 hover:bg-slate-100 rounded-xl"
-                    : "bg-transparent"
-                }
+                ${column.collapsed
+          ? "w-10 cursor-pointer items-center py-4 bg-slate-50/50 hover:bg-slate-100 rounded-xl"
+          : "bg-transparent"
+        }
                 ${state.ui.editingColumnId === column.id ? "ring-2 ring-brand ring-offset-2 rounded-xl" : ""}
             `}
     >
@@ -80,6 +79,7 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
         />
 
         {isEditing ? (
+          /* eslint-disable pipeline/no-handler-in-app -- Native <input> for column title edit: onChange/onKeyDown/onBlur required */
           <input
             autoFocus
             value={state.ui.columnEditDraft}
@@ -95,7 +95,9 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
             }}
             className="flex-1 text-xs font-bold uppercase tracking-wider bg-transparent outline-none border-b-2 border-indigo-400 text-slate-700 py-0.5"
           />
+          /* eslint-enable pipeline/no-handler-in-app */
         ) : (
+          /* eslint-disable pipeline/no-handler-in-app -- onDoubleClick triggers inline edit; no ZIFT double-click intent */
           <h3
             className="flex-1 font-bold text-xs uppercase tracking-wider text-slate-500 truncate"
             onDoubleClick={() => {
@@ -104,6 +106,7 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
           >
             {column.title}
           </h3>
+          /* eslint-enable pipeline/no-handler-in-app */
         )}
 
         {/* Card Count + WIP */}
@@ -112,13 +115,12 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
           <span
             className={`
                             text-[10px] font-bold px-2 py-0.5 rounded-md
-                            ${
-                              isOverWip
-                                ? "bg-red-100 text-red-600 border border-red-200"
-                                : isAtWip
-                                  ? "bg-amber-100 text-amber-600 border border-amber-200"
-                                  : "bg-white border border-slate-200 text-slate-400"
-                            }
+                            ${isOverWip
+                ? "bg-red-100 text-red-600 border border-red-200"
+                : isAtWip
+                  ? "bg-amber-100 text-amber-600 border border-amber-200"
+                  : "bg-white border border-slate-200 text-slate-400"
+              }
                         `}
           >
             {cards.length}
@@ -169,11 +171,10 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
               id={`DRAFT-${column.id}`}
               className={`
                                 rounded-xl border-2 border-dashed transition-all outline-none
-                                ${
-                                  draftText
-                                    ? "border-indigo-300 bg-indigo-50/30"
-                                    : "border-slate-200/60 hover:border-slate-300 bg-transparent"
-                                }
+                                ${draftText
+                  ? "border-indigo-300 bg-indigo-50/30"
+                  : "border-slate-200/60 hover:border-slate-300 bg-transparent"
+                }
                                 data-[focused=true]:border-indigo-400 data-[focused=true]:bg-indigo-50/50 data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-500/20
                             `}
             >

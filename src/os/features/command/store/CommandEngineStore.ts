@@ -89,6 +89,17 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
   updateAppState: (appId, state) => {
     const entry = get().appRegistries.get(appId);
     if (entry) {
+      // Log State Change
+      import("@os/features/inspector/InspectorLogStore").then(({ InspectorLog }) => {
+        InspectorLog.log({
+          type: "STATE",
+          title: `State Update: ${appId}`,
+          details: state, // Warning: This might be large
+          icon: "cpu",
+          source: "app",
+        });
+      });
+
       const newMap = new Map(get().appRegistries);
       newMap.set(appId, { ...entry, state });
       set({ appRegistries: newMap });
@@ -150,7 +161,7 @@ export function useDispatch() {
   const dispatch = activeAppId
     ? appRegistries.get(activeAppId)?.dispatch
     : null;
-  return dispatch ?? (() => {});
+  return dispatch ?? (() => { });
 }
 
 export function useAppState<S>() {
@@ -183,7 +194,24 @@ export const CommandEngineStore = {
     const dispatch = useCommandEngineStore.getState().getActiveDispatch();
     if (dispatch) {
       // Telemetry is handled by commandEffects.ts to avoid duplicate logging
+      // BUT for the unified stream, we log here or rely on the effect.
+      // Let's log the "Dispatch" event here for immediate feedback.
+      import("@os/features/inspector/InspectorLogStore").then(({ InspectorLog }) => {
+        InspectorLog.log({
+          type: "COMMAND",
+          title: cmd.type,
+          details: cmd,
+          icon: "terminal", // or 'cpu'
+          source: "app",
+        });
+      });
+
       dispatch(cmd);
+
+      // Log State after dispatch (rudimentary, ideally we'd diff)
+      // We can't easily get the *new* state here synchronously if dispatch is async or batched
+      // But for now, let's just log that a command happened.
     }
   },
 };
+

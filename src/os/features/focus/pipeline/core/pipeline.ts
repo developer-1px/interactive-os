@@ -69,6 +69,17 @@ export function runPipeline(
       result.telemetry.payload,
       "os",
     );
+
+    // Inspector Stream
+    import("../../../inspector/InspectorLogStore").then(({ InspectorLog }) => {
+      InspectorLog.log({
+        type: "COMMAND",
+        title: result.telemetry!.command,
+        details: result.telemetry!.payload,
+        icon: "terminal",
+        source: "os",
+      });
+    });
   }
 
   // 4. Dispatch bound app command

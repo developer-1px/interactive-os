@@ -8,6 +8,10 @@ export function NCPHeroBlock() {
     headline: "네이버웍스 AI스튜디오 출시",
     subtext: "우리 회사를 가장 잘 이해하는, 일 잘하는 AI 영입하세요.",
     cta: "30일 무료체험",
+    brand: "NAVER CLOUD PLATFORM",
+    login: "로그인",
+    signup: "회원가입",
+    languages: "Languages ▾",
   });
 
   return (
@@ -58,11 +62,10 @@ export function NCPHeroBlock() {
             <button
               className={`
                                 inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-slate-900 font-bold text-lg transition-all duration-300
-                                ${
-                                  isFocused
-                                    ? "scale-110 shadow-[0_0_30px_rgba(255,255,255,0.4)] ring-4 ring-white/30"
-                                    : "hover:scale-105 hover:shadow-lg"
-                                }
+                                ${isFocused
+                  ? "scale-110 shadow-[0_0_30px_rgba(255,255,255,0.4)] ring-4 ring-white/30"
+                  : "hover:scale-105 hover:shadow-lg"
+                }
                             `}
             >
               {values.cta}
@@ -72,15 +75,64 @@ export function NCPHeroBlock() {
         </OS.Item>
       </div>
 
-      {/* Top Bar Placeholder */}
-      <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center text-xs text-white/60 font-medium">
-        <span>NAVER CLOUD PLATFORM</span>
+      {/* Top Bar - All editable Fields */}
+      <OS.Zone
+        id="ncp-hero-nav"
+        role="builderBlock"
+        className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center text-xs text-white/60 font-medium z-20"
+      >
+        <Field
+          name="ncp-hero-brand"
+          mode="deferred"
+          value={values.brand}
+          onCommit={(val: string) =>
+            setValues((prev) => ({ ...prev, brand: val }))
+          }
+          className={`
+            text-xs text-white/60 font-medium
+            data-[focused=true]:bg-white/20 data-[focused=true]:text-white data-[focused=true]:ring-1 data-[focused=true]:ring-white/40 rounded px-2 -mx-2
+          `}
+        />
         <div className="flex gap-4">
-          <span>로그인</span>
-          <span>회원가입</span>
-          <span>Languages ▾</span>
+          <Field
+            name="ncp-hero-login"
+            mode="deferred"
+            value={values.login}
+            onCommit={(val: string) =>
+              setValues((prev) => ({ ...prev, login: val }))
+            }
+            className={`
+              text-xs text-white/60 font-medium
+              data-[focused=true]:bg-white/20 data-[focused=true]:text-white data-[focused=true]:ring-1 data-[focused=true]:ring-white/40 rounded px-2 -mx-2
+            `}
+          />
+          <Field
+            name="ncp-hero-signup"
+            mode="deferred"
+            value={values.signup}
+            onCommit={(val: string) =>
+              setValues((prev) => ({ ...prev, signup: val }))
+            }
+            className={`
+              text-xs text-white/60 font-medium
+              data-[focused=true]:bg-white/20 data-[focused=true]:text-white data-[focused=true]:ring-1 data-[focused=true]:ring-white/40 rounded px-2 -mx-2
+            `}
+          />
+          <Field
+            name="ncp-hero-languages"
+            mode="deferred"
+            value={values.languages}
+            onCommit={(val: string) =>
+              setValues((prev) => ({ ...prev, languages: val }))
+            }
+            className={`
+              text-xs text-white/60 font-medium
+              data-[focused=true]:bg-white/20 data-[focused=true]:text-white data-[focused=true]:ring-1 data-[focused=true]:ring-white/40 rounded px-2 -mx-2
+            `}
+          />
         </div>
-      </div>
+      </OS.Zone>
     </OS.Zone>
   );
 }
+

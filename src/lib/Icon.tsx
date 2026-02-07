@@ -38,7 +38,6 @@ import {
   Columns,
   Copy,
   CornerDownLeft,
-  Cpu,
   Database,
   ExternalLink,
   // Misc
@@ -110,6 +109,10 @@ import {
   X,
   XCircle,
   Zap,
+  Activity,
+  Cpu,
+  Keyboard,
+  Terminal,
 } from "lucide-react";
 import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
@@ -219,7 +222,6 @@ const icons = {
   layers: Layers,
   globe: Globe,
   brain: Brain,
-  cpu: Cpu,
   monitor: Monitor,
   smartphone: Smartphone,
   cursor: MousePointer2,
@@ -228,6 +230,10 @@ const icons = {
   undo: Undo2,
   redo: Redo2,
   enter: CornerDownLeft,
+  keyboard: Keyboard,
+  terminal: Terminal,
+  cpu: Cpu,
+  activity: Activity,
 } as const;
 
 export type IconName = keyof typeof icons;

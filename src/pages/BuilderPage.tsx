@@ -5,6 +5,7 @@ import {
   NCPNewsBlock,
   NCPServicesBlock,
 } from "./builder";
+import { useSpatialTestRoutes } from "./builder/SpatialTest";
 
 /**
  * BuilderPage
@@ -12,6 +13,8 @@ import {
  * Visual CMS / Web Builder 데모 - Light Theme
  */
 export default function BuilderPage() {
+  useSpatialTestRoutes();
+
   return (
     <div className="flex-1 h-full flex flex-col bg-slate-100 overflow-hidden">
       {/* Editor Toolbar */}
@@ -20,8 +23,7 @@ export default function BuilderPage() {
       {/* Canvas Area */}
       <OS.Zone
         id="builder-canvas"
-        role="listbox"
-        options={{ tab: { behavior: "escape" }, navigate: { seamless: true } }}
+        role="builderBlock"
         className="flex-1 overflow-y-auto custom-scrollbar"
       >
         {/* Page Being Edited */}
@@ -36,3 +38,4 @@ export default function BuilderPage() {
     </div>
   );
 }
+

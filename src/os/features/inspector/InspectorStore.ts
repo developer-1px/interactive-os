@@ -8,7 +8,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type InspectorTab = "REGISTRY" | "STATE" | "EVENTS" | "SETTINGS";
+export type InspectorTab = "REGISTRY" | "STATE" | "EVENTS" | "SETTINGS" | "TESTBOT";
 
 interface InspectorState {
   isOpen: boolean;
@@ -54,6 +54,7 @@ export const useInspectorStore = create<InspectorState>()(
 export const InspectorStore = {
   toggle: () => useInspectorStore.getState().toggle(),
   isOpen: () => useInspectorStore.getState().isOpen,
+  setOpen: (isOpen: boolean) => useInspectorStore.getState().setOpen(isOpen),
   setActiveTab: (tab: InspectorTab) =>
     useInspectorStore.getState().setActiveTab(tab),
   togglePanel: () => useInspectorStore.getState().togglePanel(),

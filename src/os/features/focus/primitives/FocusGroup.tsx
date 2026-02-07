@@ -8,7 +8,7 @@ import {
   useMemo,
 } from "react";
 import { FocusData } from "../lib/focusData";
-import { resolveRole } from "../registry/roleRegistry";
+import { resolveRole, type ZoneRole } from "../registry/roleRegistry";
 import {
   createFocusGroupStore,
   type FocusGroupStore,
@@ -31,6 +31,7 @@ interface FocusGroupContextValue {
   groupId: string;
   store: FocusGroupStore;
   config: FocusGroupConfig;
+  zoneRole?: ZoneRole;
 }
 
 const FocusGroupContext = createContext<FocusGroupContextValue | null>(null);
@@ -68,7 +69,7 @@ export interface FocusGroupProps
   id?: string;
 
   /** ARIA role preset */
-  role?: string;
+  role?: ZoneRole;
 
   /** Navigate configuration */
   navigate?: Partial<NavigateConfig>;
@@ -249,8 +250,9 @@ export function FocusGroup({
       groupId,
       store,
       config,
+      zoneRole: role,
     }),
-    [groupId, store, config],
+    [groupId, store, config, role],
   );
 
   // --- Orientation Class ---

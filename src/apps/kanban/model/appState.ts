@@ -73,6 +73,7 @@ export interface UIState {
   detailCardId: string | null; // Card detail sheet
   actionMenuCardId: string | null; // Action menu
   selectedCardIds: string[]; // Multi-selection
+  bulkMenuOpen: "move" | "priority" | null; // Bulk action dropdown
 }
 
 export interface HistoryState {

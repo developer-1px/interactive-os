@@ -23,6 +23,11 @@ import { twMerge } from "tailwind-merge";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { FocusData } from "../lib/focusData";
+import {
+  getChildRole,
+  isCheckedRole,
+  isExpandableRole,
+} from "../registry/roleRegistry";
 import { useFocusGroupContext } from "./FocusGroup";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -51,7 +56,7 @@ export interface FocusItemProps {
   /** Render as child (cloneElement) */
   asChild?: boolean;
 
-  /** ARIA role override */
+  /** ARIA role override (auto-resolved from parent Zone role if not set) */
   role?: string;
 
   /** Additional props to pass through */
@@ -99,7 +104,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       throw new Error("FocusItem must be used within a FocusGroup");
     }
 
-    const { groupId, store } = ctx;
+    const { groupId, store, zoneRole } = ctx;
 
     // --- State Subscriptions ---
     const activeGroupId = useSyncExternalStore(
@@ -121,8 +126,11 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     const isGroupActive = activeGroupId === groupId;
     const visualFocused = isFocused && isGroupActive;
     const isAnchor = isFocused && !isGroupActive;
-    const effectiveRole = role || "option";
-    const isExpandable = ["treeitem", "button"].includes(effectiveRole);
+
+    // Auto-resolve child role from parent Zone role (e.g., listbox → option)
+    const effectiveRole = role || getChildRole(zoneRole);
+    const useChecked = isCheckedRole(effectiveRole);
+    const expandable = isExpandableRole(effectiveRole);
 
     // --- Prop Consolidation ---
     const { tabIndex: propTabIndex, ...otherRest } = rest as {
@@ -135,8 +143,13 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       role: effectiveRole,
       tabIndex: propTabIndex ?? (visualFocused ? 0 : -1),
       "aria-current": visualFocused || undefined,
-      "aria-selected": isSelected || undefined,
-      "aria-expanded": isExpandable ? isExpanded : undefined,
+
+      // Selection state: aria-checked for radio/checkbox, aria-selected for rest
+      ...(useChecked
+        ? { "aria-checked": isSelected || undefined }
+        : { "aria-selected": isSelected || undefined }),
+
+      "aria-expanded": expandable ? isExpanded : undefined,
       "aria-disabled": disabled || undefined,
       "data-focus-item": true,
       "data-item-id": id,

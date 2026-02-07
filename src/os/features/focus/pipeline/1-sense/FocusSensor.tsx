@@ -7,6 +7,7 @@
  */
 
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
+import { sensorGuard } from "@os/lib/loopGuard";
 import { useEffect } from "react";
 import { OS_COMMANDS } from "../../../command/definitions/commandsShell";
 import {
@@ -18,6 +19,9 @@ import { isProgrammaticFocus, setProgrammaticFocus } from "../5-sync/FocusSync";
 let isMounted = false;
 
 function sense(e: Event) {
+  // ── Loop Guard: prevent event storm ──
+  if (!sensorGuard.check()) return;
+
   const target = e.target as HTMLElement;
 
   // --- Label Recognition (ZIFTL Extension) ---
@@ -122,13 +126,29 @@ export function FocusSensor() {
     if (isMounted || !isInitialized) return;
     isMounted = true;
 
+    // --- Inspector Logging ---
+    const handleKeyDown = (e: KeyboardEvent) => {
+      import("@os/features/inspector/InspectorLogStore").then(({ InspectorLog }) => {
+        InspectorLog.log({
+          type: "INPUT",
+          title: e.key,
+          details: { code: e.code, modifiers: { shift: e.shiftKey, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey } },
+          icon: "keyboard",
+          source: "user",
+        });
+      });
+    };
+
     document.addEventListener("focusin", sense);
     document.addEventListener("mousedown", sense, { capture: true });
+    // Capture phase to ensuring logging before application prevents default
+    document.addEventListener("keydown", handleKeyDown, { capture: true });
 
     return () => {
       isMounted = false;
       document.removeEventListener("focusin", sense);
       document.removeEventListener("mousedown", sense, { capture: true });
+      document.removeEventListener("keydown", handleKeyDown, { capture: true });
     };
   }, [isInitialized]);
 

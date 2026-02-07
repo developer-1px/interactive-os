@@ -1,83 +1,100 @@
-import {
-  type TelemetryEntry,
-  useCommandTelemetryStore,
-} from "@os/features/command/store/CommandTelemetryStore";
-import { memo, useMemo } from "react";
+import { Icon } from "@/lib/Icon";
+import { type LogEntry, useInspectorLogStore } from "@os/features/inspector/InspectorLogStore";
+import { useEffect, useRef } from "react";
 
 /**
- * EventStream - Global Command Telemetry Display
+ * EventStream - Unified Inspector Stream
  *
- * Shows ALL dispatched commands (App + OS) from the global CommandTelemetryStore.
- * v7.50: Switched from app-specific history to OS-level telemetry for full visibility.
+ * Light theme, Claude-style clean layout.
  */
-export const EventStream = memo(() => {
-  // Subscribe to global telemetry
-  const entries = useCommandTelemetryStore((s) => s.entries);
+export const EventStream = () => {
+  const logs = useInspectorLogStore((s) => s.logs);
+  const clear = useInspectorLogStore((s) => s.clear);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const recentHistory = useMemo(
-    () => [...entries].reverse().slice(0, 10),
-    [entries],
-  );
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs[0]?.id]);
 
   return (
-    <section className="bg-[#ffffff]">
-      <div className="flex items-center justify-between px-3 py-1 bg-[#f8f8f8] border-b border-[#e5e5e5]">
-        <h3 className="text-[8px] font-black text-[#999999] flex items-center gap-2 uppercase tracking-[0.2em]">
-          <div className="w-0.5 h-2 bg-[#ce9178] opacity-50" />
-          History
+    <div className="flex-1 flex flex-col h-full bg-white text-[#333] font-mono text-[10px]">
+      {/* Header */}
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#f8f8f8] border-b border-[#e5e5e5]">
+        <h3 className="font-bold uppercase tracking-wider text-[#999] text-[9px] flex items-center gap-2">
+          <Icon name="activity" size={10} className="text-[#999]" />
+          Stream
         </h3>
-        <span className="text-[7px] text-[#aaaaaa] font-mono">
-          {entries.length} events
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] text-[#aaa]">{logs.length}</span>
+          <button
+            onClick={clear}
+            className="hover:text-[#333] text-[#bbb] transition-colors"
+            title="Clear"
+          >
+            <Icon name="trash" size={10} />
+          </button>
+        </div>
       </div>
-      <div className="flex flex-col bg-[#ffffff]">
-        {recentHistory.map((entry: TelemetryEntry) => {
-          const payload = entry.payload || {};
-          const payloadKeys = payload ? Object.keys(payload) : [];
-          const keyCount = payloadKeys.length;
 
-          return (
-            <div
-              key={entry.id}
-              className="group border-b border-[#f0f0f0] px-3 py-1.5 hover:bg-[#fcfcfc] transition-colors animate-flash-command"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-[8px] font-black text-[#666666] uppercase tracking-widest leading-none">
-                    {entry.command}
-                  </span>
-                  {/* Source badge: app=blue, os=teal */}
-                  <span
-                    className={`px-1 py-0.5 rounded-[2px] text-[6px] font-bold leading-none ${
-                      entry.source === "os"
-                        ? "bg-[#e6f7f5] text-[#4ec9b0]"
-                        : "bg-[#e6f0ff] text-[#007acc]"
-                    }`}
-                  >
-                    {entry.source.toUpperCase()}
-                  </span>
-                  {keyCount > 0 && (
-                    <span className="px-1 py-0.5 rounded-[2px] bg-[#f0f0f0] text-[6px] font-bold text-[#999] leading-none">
-                      {keyCount} P
-                    </span>
-                  )}
-                </div>
-                <span className="text-[7px] text-[#cccccc] font-mono leading-none">
-                  #{entry.id}
-                </span>
-              </div>
-              <div className="text-[7px] text-[#aaaaaa] font-mono truncate mt-1 uppercase tracking-tighter">
-                {JSON.stringify(payload)}
-              </div>
-            </div>
-          );
-        })}
-        {recentHistory.length === 0 && (
-          <div className="p-4 text-[8px] text-[#eeeeee] font-black tracking-[0.4em] text-center font-mono uppercase">
-            Idle
+      {/* Stream */}
+      <div className="flex-1 overflow-y-auto px-2 py-1.5 space-y-0.5">
+        {logs.length === 0 && (
+          <div className="text-center text-[#ccc] mt-10 text-[9px]">
+            No events yet
+          </div>
+        )}
+        {[...logs].reverse().map((log) => (
+          <LogItem key={log.id} log={log} />
+        ))}
+        <div ref={bottomRef} />
+      </div>
+    </div>
+  );
+};
+
+const TYPE_STYLES: Record<string, { icon: string; color: string; bg: string; border: string }> = {
+  INPUT: { icon: "text-[#16a085]", color: "text-[#16a085]", bg: "bg-[#f0faf8]", border: "border-[#e0f2ef]" },
+  COMMAND: { icon: "text-[#2980b9]", color: "text-[#2980b9]", bg: "bg-[#f0f6fc]", border: "border-[#dce8f5]" },
+  STATE: { icon: "text-[#d4820a]", color: "text-[#d4820a]", bg: "bg-[#fef9f0]", border: "border-[#f5eacc]" },
+  EFFECT: { icon: "text-[#8e44ad]", color: "text-[#8e44ad]", bg: "bg-[#f9f0fc]", border: "border-[#ecdff5]" },
+};
+
+const DEFAULT_STYLE = { icon: "text-[#999]", color: "text-[#666]", bg: "bg-white", border: "border-[#eee]" };
+
+const LogItem = ({ log }: { log: LogEntry }) => {
+  const s = TYPE_STYLES[log.type] || DEFAULT_STYLE;
+
+  return (
+    <div className={`flex items-start gap-2 px-2 py-1 rounded-md border ${s.bg} ${s.border}`}>
+      {/* Icon */}
+      <div className={`mt-0.5 ${s.icon}`}>
+        <Icon name={log.icon || "activity"} size={11} />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className={`font-bold text-[8px] uppercase tracking-wide ${s.color}`}>
+            {log.type}
+          </span>
+          <span className="text-[#333] font-semibold text-[10px] truncate">
+            {log.title}
+          </span>
+          <span className="ml-auto text-[7px] text-[#bbb] tabular-nums shrink-0">
+            {new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+          </span>
+        </div>
+
+        {log.details && (
+          <div className="text-[9px] text-[#999] truncate mt-0.5">
+            {typeof log.details === "object" ? (
+              log.type === "INPUT"
+                ? `code: ${log.details.code}`
+                : JSON.stringify(log.details).slice(0, 80) + (JSON.stringify(log.details).length > 80 ? "…" : "")
+            ) : String(log.details)}
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
-});
+};

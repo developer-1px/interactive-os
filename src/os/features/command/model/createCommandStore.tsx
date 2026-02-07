@@ -1,5 +1,6 @@
 import { logger } from "@os/app/debug/logger";
 import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
+import { dispatchGuard } from "@os/lib/loopGuard";
 // Modules
 import {
   type CommandGroup,
@@ -46,67 +47,73 @@ export function createCommandStore<
     state: startState,
     dispatch: (startAction) =>
       set((prev) => {
-        let action = startAction;
+        // ── Loop Guard: prevent recursive dispatch ──
+        if (!dispatchGuard.enter()) return prev;
+        try {
+          let action = startAction;
 
-        // 1. Legacy Interceptor
-        if (config?.onDispatch) {
-          action = config.onDispatch(action);
-        }
-
-        // 2. Middleware Chain
-        if (config?.middleware) {
-          for (const mw of config.middleware) {
-            action = mw(action);
+          // 1. Legacy Interceptor
+          if (config?.onDispatch) {
+            action = config.onDispatch(action);
           }
-        }
 
-        // 3. Emit Event
-        useCommandEventBus.getState().emit(action as any);
-
-        // 4. Hierarchical Command Lookup
-        // Strategy: Bubble up from focused zone -> parents -> global
-        let cmd = registry.get(action.type);
-
-        // If not in global flat registry, try hierarchical resolution
-        if (!cmd) {
-          const focusPath = FocusData.getFocusPath();
-          // Start from specific (deepest) to generic (root)
-          const bubblePath = [...focusPath].reverse();
-
-          for (const groupId of bubblePath) {
-            const zoneCmd = GroupRegistry.get(groupId, action.type);
-            if (zoneCmd) {
-              cmd = zoneCmd as any;
-              break;
+          // 2. Middleware Chain
+          if (config?.middleware) {
+            for (const mw of config.middleware) {
+              action = mw(action);
             }
           }
+
+          // 3. Emit Event
+          useCommandEventBus.getState().emit(action as any);
+
+          // 4. Hierarchical Command Lookup
+          // Strategy: Bubble up from focused zone -> parents -> global
+          let cmd = registry.get(action.type);
+
+          // If not in global flat registry, try hierarchical resolution
+          if (!cmd) {
+            const focusPath = FocusData.getFocusPath();
+            // Start from specific (deepest) to generic (root)
+            const bubblePath = [...focusPath].reverse();
+
+            for (const groupId of bubblePath) {
+              const zoneCmd = GroupRegistry.get(groupId, action.type);
+              if (zoneCmd) {
+                cmd = zoneCmd as any;
+                break;
+              }
+            }
+          }
+
+          if (!cmd) {
+            logger.warn("ENGINE", `Unknown command: ${action.type}`);
+            return prev;
+          }
+
+          // 5. Execution
+          const nextState = cmd.run(prev.state, action.payload);
+          const finalState = config?.onStateChange
+            ? config.onStateChange(nextState, action, prev.state)
+            : nextState;
+
+          // 6. Logging
+          if (cmd.log !== false) {
+            logger.traceCommand(
+              action.type,
+              action.payload,
+              prev.state,
+              finalState,
+            );
+          }
+
+          // 7. Persistence (Side Effect)
+          persist(finalState);
+
+          return { state: finalState };
+        } finally {
+          dispatchGuard.exit();
         }
-
-        if (!cmd) {
-          logger.warn("ENGINE", `Unknown command: ${action.type}`);
-          return prev;
-        }
-
-        // 5. Execution
-        const nextState = cmd.run(prev.state, action.payload);
-        const finalState = config?.onStateChange
-          ? config.onStateChange(nextState, action, prev.state)
-          : nextState;
-
-        // 6. Logging
-        if (cmd.log !== false) {
-          logger.traceCommand(
-            action.type,
-            action.payload,
-            prev.state,
-            finalState,
-          );
-        }
-
-        // 7. Persistence (Side Effect)
-        persist(finalState);
-
-        return { state: finalState };
       }),
   }));
 }

@@ -3,7 +3,7 @@ import { Zone } from "@os/app/export/primitives/Zone";
 
 export default function KanbanPage() {
   return (
-    <Zone id="kanban-main" area="main" role="toolbar" className="h-full">
+    <Zone id="kanban-main" role="toolbar" className="h-full">
       <KanbanPanel />
     </Zone>
   );

@@ -1,3 +1,5 @@
+import { InspectorStore } from "@os/features/inspector/InspectorStore";
+import { TestBotActions } from "@os/features/inspector/TestBotStore";
 import { TestGrid } from "../shared/TestLayout";
 import { ActivateTest } from "./tests/ActivateTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";
@@ -5,21 +7,19 @@ import { AriaInteractionTest } from "./tests/AriaInteractionTest";
 import { AutofocusTest } from "./tests/AutofocusTest";
 import { DismissTest } from "./tests/DismissTest";
 import { ExpandTest } from "./tests/ExpandTest";
+import { useFocusShowcaseRoutes } from "./tests/FocusShowcaseBot";
 import { FocusStackTest } from "./tests/FocusStackTest";
 import { NavigateTest } from "./tests/NavigateTest";
 import { SelectTest } from "./tests/SelectTest";
 import { TabTest } from "./tests/TabTest";
 
 export function FocusShowcasePage() {
-  const runAllTests = async () => {
-    // Trigger click on all RUN buttons sequentially
-    const buttons = document.querySelectorAll("[data-test-run]");
-    for (const btn of buttons) {
-      if (btn instanceof HTMLButtonElement) {
-        btn.click();
-        await new Promise((r) => setTimeout(r, 1000)); // Wait for each test
-      }
-    }
+  useFocusShowcaseRoutes();
+
+  const runAllTests = () => {
+    InspectorStore.setOpen(true);
+    InspectorStore.setActiveTab("TESTBOT");
+    TestBotActions.runAll();
   };
 
   return (
@@ -34,12 +34,14 @@ export function FocusShowcasePage() {
             Sync pipeline.
           </p>
         </div>
-        <button
-          onClick={runAllTests}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-lg shadow-purple-500/20 transition-all hover:shadow-purple-500/40"
-        >
-          ▶ Run All Tests
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={runAllTests}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-lg shadow-purple-500/20 transition-all hover:shadow-purple-500/40"
+          >
+            ▶ Run All Tests (Inspector)
+          </button>
+        </div>
       </header>
 
       <TestGrid>

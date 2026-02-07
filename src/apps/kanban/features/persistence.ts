@@ -206,6 +206,7 @@ export const INITIAL_STATE: KanbanState = {
     detailCardId: null,
     actionMenuCardId: null,
     selectedCardIds: [],
+    bulkMenuOpen: null,
   },
   effects: [],
   history: {

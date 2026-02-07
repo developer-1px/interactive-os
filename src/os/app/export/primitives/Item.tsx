@@ -69,17 +69,24 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
     const isActive = activeGroupId === groupId;
     const isFocused = focusedItemId === stringId;
 
+    // Selection from store (OS-level selection via Shift+Arrow, Cmd+A)
+    const storeSelection = useStore(store, (s) => s.selection);
+    const isStoreSelected = storeSelection?.includes(stringId) ?? false;
+
     // Anchor Logic
     const isAnchor = isFocused && !isActive;
+
+    // Combined selection: prop OR store
+    const isSelected = selected || isStoreSelected;
 
     // State for Render Props
     const itemState: ItemState = useMemo(
       () => ({
         isFocused: isFocused && isActive,
-        isSelected: selected,
+        isSelected,
         isAnchor,
       }),
-      [isFocused, isActive, selected, isAnchor],
+      [isFocused, isActive, isSelected, isAnchor],
     );
 
     // Resolve Children
@@ -97,7 +104,7 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
           (typeof children === "function" && isValidElement(resolvedChildren))
         }
         className={className}
-        data-selected={selected ? "true" : undefined}
+        data-selected={isSelected ? "true" : undefined}
         {...rest}
       >
         {resolvedChildren}

@@ -46,6 +46,7 @@ export const useCommandEventBus = create<CommandEventBusState>((set, get) => ({
 
   emit: (cmd) => {
     const { _listeners } = get();
+    console.debug("[EventBus] emit:", cmd.type, "listeners:", _listeners.size);
     _listeners.forEach((listener) => {
       try {
         listener(cmd);

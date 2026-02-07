@@ -8,6 +8,7 @@
 
 import type { BaseCommand } from "@os/entities/BaseCommand";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
+import type { ZoneRole } from "@os/features/focus/registry/roleRegistry";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -36,10 +37,8 @@ export interface ZoneProps
   > {
   /** Unique identifier for the zone */
   id?: string;
-  /** @deprecated Use id instead */
-  area?: string;
   /** ARIA role preset that determines all navigation/tab/select behavior */
-  role?: string;
+  role?: ZoneRole;
   /** Advanced config overrides (use sparingly) */
   options?: ZoneOptions;
   /** Command dispatched on item activation (Enter key) */
@@ -65,7 +64,6 @@ export interface ZoneProps
 }
 
 export function Zone({
-  area,
   id,
   role,
   options,
@@ -81,12 +79,10 @@ export function Zone({
   children,
   ...props
 }: ZoneProps) {
-  // Use id if present, otherwise fallback to area for legacy support
-  const effectiveId = id || area;
 
   return (
     <FocusGroup
-      id={effectiveId}
+      id={id}
       role={role}
       navigate={options?.navigate}
       tab={options?.tab}

@@ -67,6 +67,7 @@ function buildNavigateResult(
   targetId: string | null,
   stickyX: number | null,
   stickyY: number | null,
+  selectMode?: "range" | "toggle",
 ): OSResult {
   const result: OSResult = {
     state: {
@@ -76,7 +77,28 @@ function buildNavigateResult(
     },
   };
 
-  // Follow focus selection
+  // Shift+Arrow: Range selection from anchor to new target
+  if (selectMode === "range" && targetId) {
+    const anchor = ctx.selectionAnchor || ctx.focusedItemId || targetId;
+    const items = ctx.dom.items;
+    const anchorIdx = items.indexOf(anchor);
+    const targetIdx = items.indexOf(targetId);
+
+    if (anchorIdx !== -1 && targetIdx !== -1) {
+      const start = Math.min(anchorIdx, targetIdx);
+      const end = Math.max(anchorIdx, targetIdx);
+      result.state!.selection = items.slice(start, end + 1);
+      result.state!.selectionAnchor = anchor; // Anchor stays fixed
+    }
+
+    if (ctx.selectCommand) {
+      result.dispatch = ctx.selectCommand;
+    }
+
+    return result;
+  }
+
+  // Follow focus selection (default)
   if (
     ctx.config.select.followFocus &&
     ctx.config.select.mode !== "none" &&
@@ -129,6 +151,7 @@ export const NAVIGATE: OSCommand<OSNavigatePayload> = {
       navResult.targetId,
       navResult.stickyX,
       navResult.stickyY,
+      payload.select,
     );
   },
 };

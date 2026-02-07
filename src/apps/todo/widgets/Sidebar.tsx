@@ -1,4 +1,8 @@
 import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
+import {
+  UndoCommand,
+  RedoCommand,
+} from "@apps/todo/features/commands/history";
 import type { AppState } from "@apps/todo/model/types";
 import { Kbd } from "@os/app/debug/components/Kbd";
 import { Item } from "@os/app/export/primitives/Item.tsx";
@@ -19,13 +23,13 @@ export function Sidebar() {
   return (
     <Zone
       id="sidebar"
-      area="nav"
       role="listbox"
       options={{
         navigate: { entry: "restore" },
-        select: { followFocus: true },
       }}
       onAction={SelectCategory({})}
+      onUndo={UndoCommand({})}
+      onRedo={RedoCommand({})}
       // onSelect={SelectCategory({})} // Space is handled by onAction alias if needed, or separate command
       style={{ flex: "none" }}
       className="h-full"

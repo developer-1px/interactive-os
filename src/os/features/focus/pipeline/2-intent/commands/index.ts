@@ -20,6 +20,7 @@ export { PASTE } from "./PASTE";
 export { RECOVER } from "./RECOVER";
 export { REDO } from "./REDO";
 export { SELECT } from "./SELECT";
+export { SELECT_ALL } from "./SELECT_ALL";
 export { TAB } from "./TAB";
 // Editing Commands
 export { TOGGLE } from "./TOGGLE";
