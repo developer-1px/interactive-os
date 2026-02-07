@@ -31,6 +31,71 @@ export function getElementCenter(el: Element) {
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }
 
+/**
+ * Capture useful debugging context when an error occurs.
+ * Reports active element and parent HTML structure.
+ */
+function captureFailureContext(): string {
+    const active = document.activeElement;
+    let context = "\n\n[Failure Context]";
+
+    if (active) {
+        const id = active.id ? `#${active.id}` : "";
+        const cls = active.className ? `.${active.className.split(" ").join(".")}` : "";
+        context += `\n→ Active Element: <${active.tagName.toLowerCase()}${id}${cls}>`;
+        if (active.textContent) {
+            const text = active.textContent.slice(0, 50).trim().replace(/\s+/g, " ");
+            context += ` "${text}${active.textContent.length > 50 ? "..." : ""}"`;
+        }
+    } else {
+        context += "\n→ Active Element: (none)";
+    }
+
+    // Capture surrounding HTML of the active element or body if nothing active
+    const target = active || document.body;
+    if (target) {
+        // Simple outerHTML snippet
+        const html = target.outerHTML;
+        const snippet = html.length > 300 ? html.slice(0, 300) + "..." : html;
+        context += `\n→ Target Snippet: ${snippet}`;
+    }
+
+    return context;
+}
+
+/**
+ * Helper to generate a unique selector for an element.
+ * 1. ID
+ * 2. Data attributes
+ * 3. Tag + nth-of-type fallback
+ */
+function getUniqueSelector(el: Element): string {
+    if (el.id) return `#${el.id}`;
+
+    // Try data attributes common in this app
+    const testId = el.getAttribute("data-testid");
+    if (testId) return `[data-testid="${testId}"]`;
+
+    // Fallback path generation
+    const path: string[] = [];
+    let current: Element | null = el;
+    while (current && current !== document.body) {
+        let qs = current.tagName.toLowerCase();
+
+        // Add classes if unique in parent
+        if (current.className) {
+            const cls = `.${current.className.split(" ").join(".")}`;
+            if (current.parentElement?.querySelectorAll(qs + cls).length === 1) {
+                qs += cls;
+            }
+        }
+
+        path.unshift(qs);
+        current = current.parentElement;
+    }
+    return path.join(" > ");
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // Factory
 // ═══════════════════════════════════════════════════════════════════
@@ -54,6 +119,32 @@ export function createActions(steps: StepResult[], ctx: ActionContext): TestActi
     };
 
     // ─────────────────────────────────────────────────────────────────
+    // Semantic Selectors (LLM Helpers)
+    // ─────────────────────────────────────────────────────────────────
+
+    const getByText = async (text: string): Promise<string> => {
+        // Simple inefficient text search for now
+        // In real impl, use TreeWalker or XPath for better performance
+        const elements = Array.from(document.querySelectorAll("*"));
+        const match = elements.find(el =>
+            el.children.length === 0 && el.textContent?.trim() === text
+        );
+
+        if (!match) throw new BotError(`Element with text "${text}" not found`);
+        return getUniqueSelector(match);
+    };
+
+    const getByRole = async (role: string, name?: string): Promise<string> => {
+        const selector = name
+            ? `[role="${role}"][aria-label="${name}"], [role="${role}"][name="${name}"]`
+            : `[role="${role}"]`;
+
+        const el = document.querySelector(selector);
+        if (!el) throw new BotError(`Element with role="${role}"${name ? ` name="${name}"` : ""} not found`);
+        return getUniqueSelector(el);
+    };
+
+    // ─────────────────────────────────────────────────────────────────
     // Click
     // ─────────────────────────────────────────────────────────────────
 
@@ -62,7 +153,13 @@ export function createActions(steps: StepResult[], ctx: ActionContext): TestActi
 
         const el = document.querySelector(selector);
         if (!el) {
-            steps.push({ action: "click", detail: selector, passed: false, error: `Element not found: ${selector}` });
+            const context = captureFailureContext();
+            steps.push({
+                action: "click",
+                detail: selector,
+                passed: false,
+                error: `Element not found: ${selector}${context}`
+            });
             emitStep();
             throw new BotError(`Element not found: ${selector}`);
         }
@@ -144,7 +241,13 @@ export function createActions(steps: StepResult[], ctx: ActionContext): TestActi
     const assertStep = (action: string, detail: string, passed: boolean, errorMsg?: string) => {
         stepCounter++;
         cursor.showStatus(passed ? "pass" : "fail");
-        steps.push({ action, detail, passed, error: passed ? undefined : errorMsg });
+
+        let finalError = errorMsg;
+        if (!passed && errorMsg) {
+            finalError += captureFailureContext();
+        }
+
+        steps.push({ action, detail, passed, error: passed ? undefined : finalError });
         emitStep();
         if (!passed) throw new BotError(errorMsg!);
     };
@@ -195,7 +298,7 @@ export function createActions(steps: StepResult[], ctx: ActionContext): TestActi
         },
     });
 
-    return { click, press, expect, wait: (ms: number) => wait(ms) };
+    return { click, press, expect, getByText, getByRole, wait: (ms: number) => wait(ms) };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -217,6 +320,8 @@ export function createMockActions(steps: StepResult[]): TestActions {
         click: async (selector) => { steps.push({ action: "click", detail: selector, passed: true }); },
         press: async (key, modifiers) => { steps.push({ action: "press", detail: formatModLabel(key, modifiers), passed: true }); },
         wait: async () => { },
+        getByText: async (text) => `[text="${text}"]`,
+        getByRole: async (role, name) => `[role="${role}"]${name ? `[name="${name}"]` : ""}`,
         expect: (selector) => ({
             focused: async () => { steps.push({ action: "expect.focused", detail: selector, passed: true }); },
             toHaveAttr: async (attr, value) => { steps.push({ action: "expect.attr", detail: `${selector} [${attr}="${value}"]`, passed: true }); },

@@ -250,7 +250,8 @@ export function FocusGroup({
         store.setState({ focusedItemId: firstItem.id });
       });
     }
-  }, [role, store, config.project?.autoFocus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount - global autoFocusClaimed prevents duplicates
 
   // --- Context Value ---
   const contextValue = useMemo<FocusGroupContextValue>(
@@ -286,9 +287,23 @@ export function FocusGroup({
         aria-multiselectable={config.select.mode === "multiple" || undefined}
         role={role || "group"}
         tabIndex={-1}
-        onFocusCapture={() => {
-          // Set this zone as active when any child receives focus
-          FocusData.setActiveZone(groupId);
+        onFocus={(e) => {
+          const target = e.target as HTMLElement;
+          const nearestGroup = target.closest('[data-focus-group]');
+
+          // Only handle if this is the nearest FocusGroup (not nested)
+          if (nearestGroup !== e.currentTarget) return;
+
+          // Only activate zone if focus is entering from outside (React Aria pattern)
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            FocusData.setActiveZone(groupId);
+          }
+        }}
+        onBlur={(e) => {
+          // Deactivate zone if focus is leaving to outside
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            FocusData.setActiveZone(null);
+          }
         }}
         className={className || undefined}
         data-orientation={orientation}

@@ -17,5 +17,11 @@ export interface TestActions {
     click(selector: string): Promise<void>;
     press(key: string, modifiers?: KeyModifiers): Promise<void>;
     wait(ms: number): Promise<void>;
+    /** Find element by verify visible text. Returns a unique selector for the element. */
+    getByText(text: string): Promise<string>;
+
+    /** Find element by ARIA role and optional name. Returns a unique selector. */
+    getByRole(role: string, name?: string): Promise<string>;
+
     expect(selector: string): Expectations;
 }

@@ -8,6 +8,7 @@ export const OS_COMMANDS = {
   // --- Navigation (The "Physics" of Focus) ---
   NAVIGATE: "OS_NAVIGATE",
   FOCUS: "OS_FOCUS",
+  SYNC_FOCUS: "OS_SYNC_FOCUS",
   RECOVER: "OS_RECOVER",
   TAB: "OS_TAB",
   TAB_PREV: "OS_TAB_PREV",
@@ -102,3 +103,4 @@ export type OSCommand =
   | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: any }
   | { type: typeof OS_COMMANDS.RECOVER; payload?: any }
 
+export const SYNC_FOCUS = 'OS_SYNC_FOCUS';

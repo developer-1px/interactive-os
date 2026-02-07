@@ -20,4 +20,5 @@ export { RECOVER } from "./RECOVER";
 export { SELECT } from "./SELECT";
 export { SELECT_ALL } from "./SELECT_ALL";
 export { TAB } from "./TAB";
+export { SYNC_FOCUS } from "./SYNC_FOCUS";
 export { TOGGLE } from "./TOGGLE";

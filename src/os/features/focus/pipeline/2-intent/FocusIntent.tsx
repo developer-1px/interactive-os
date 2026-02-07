@@ -21,6 +21,7 @@ import {
   RECOVER,
   SELECT,
   SELECT_ALL,
+  SYNC_FOCUS,
   TAB,
   TOGGLE,
 } from "./commands";
@@ -85,6 +86,13 @@ export function FocusIntent() {
       },
     },
     // --- Recover ---
+    {
+      command: OS_COMMANDS.SYNC_FOCUS,
+      handler: ({ payload }) => {
+        const p = payload as { id: string; zoneId: string };
+        runOS(SYNC_FOCUS, p, p.zoneId);
+      },
+    },
     {
       command: OS_COMMANDS.RECOVER,
       handler: () => {

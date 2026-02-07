@@ -63,17 +63,6 @@ function sense(e: Event) {
   // --- Standard Focus Detection ---
   const item = findFocusableItem(target);
 
-  // --- Focus Loss Detection (OS Recovery) ---
-  // If focus drops to body, try to recover
-  if (
-    !item &&
-    e.type === "focusin" &&
-    target === document.body
-  ) {
-    CommandEngineStore.dispatch({ type: OS_COMMANDS.RECOVER });
-    return;
-  }
-
   if (!item) return;
 
   const focusTarget = resolveFocusTarget(item);
@@ -111,13 +100,9 @@ function sense(e: Event) {
     return;
   }
 
-  // FocusIn → FOCUS
-  if (e.type === "focusin") {
-    CommandEngineStore.dispatch({
-      type: OS_COMMANDS.FOCUS,
-      payload: { id: itemId, zoneId: groupId },
-    });
-  }
+  // FocusIn → RECOVER only (focus loss to body)
+  // Normal focusin is already handled by mousedown/keyboard pipeline.
+  // Dispatching OS_FOCUS here would create duplicate commands.
 }
 
 export function FocusSensor() {
@@ -158,36 +143,47 @@ export function FocusSensor() {
       });
     };
 
-    const handleFocusIn = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
-      if (isInsideInspector(target)) return;
-      InspectorLog.log({
-        type: "INPUT",
-        title: "focusin",
-        details: {
-          target: target.id || target.tagName.toLowerCase(),
-          targetType: target.getAttribute("role") || target.nodeName,
-        },
-        icon: "eye",
-        source: "browser",
-      });
-    };
+
 
     // 순서 중요: INPUT 로그를 먼저 기록한 후 sense(dispatch)가 실행되어야
     // COMMAND 로그가 올바른 INPUT 그룹에 포함된다.
     document.addEventListener("mousedown", handleMouseDown, { capture: true });
     document.addEventListener("mousedown", sense, { capture: true });
-    document.addEventListener("focusin", handleFocusIn);
-    document.addEventListener("focusin", sense);
     document.addEventListener("keydown", handleKeyDown, { capture: true });
+
+    // --- Focus Recovery via MutationObserver ---
+    // Detects when a focused element is removed from DOM (e.g. list item deletion).
+    // Unlike focusin-on-body, this doesn't false-trigger on intentional blur (empty space click).
+    let lastFocusedElement: Element | null = null;
+
+    // Track the currently focused element
+    const trackFocus = () => {
+      if (document.activeElement && document.activeElement !== document.body) {
+        lastFocusedElement = document.activeElement;
+      }
+    };
+    document.addEventListener("focusin", trackFocus);
+
+    const observer = new MutationObserver(() => {
+      // If focus fell to body AND the previously focused element is no longer in DOM
+      if (
+        document.activeElement === document.body &&
+        lastFocusedElement &&
+        !document.body.contains(lastFocusedElement)
+      ) {
+        lastFocusedElement = null;
+        CommandEngineStore.dispatch({ type: OS_COMMANDS.RECOVER });
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       isMounted = false;
       document.removeEventListener("mousedown", handleMouseDown, { capture: true });
       document.removeEventListener("mousedown", sense, { capture: true });
-      document.removeEventListener("focusin", handleFocusIn);
-      document.removeEventListener("focusin", sense);
       document.removeEventListener("keydown", handleKeyDown, { capture: true });
+      document.removeEventListener("focusin", trackFocus);
+      observer.disconnect();
     };
   }, [isInitialized]);
 

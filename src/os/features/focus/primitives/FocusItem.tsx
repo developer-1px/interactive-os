@@ -144,27 +144,6 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
           });
         }
       }
-
-      return () => {
-        // Recovery Logic: If I was focused but I'm unmounting...
-        if (visualFocused) {
-          // Check if I'm actually gone from the store (deleted)
-          // We need direct store access to check current state
-          const state = store.getState();
-          // Note: state.items comes from spatial slice which tracks items via DOM registry.
-          // If unmount happens, the registry update might be async or sync depending on implementation.
-          // But usually unmount happens first.
-
-          // Actually, if I am unmounting, I am definitely leaving the DOM.
-          // The question is whether I was *supposed* to be focused.
-          // If store.focusedItemId is still ME, then I am disappearing while focused -> RECOVER.
-          if (state.focusedItemId === id) {
-            queueMicrotask(() => {
-              CommandEngineStore.dispatch({ type: OS_COMMANDS.RECOVER });
-            });
-          }
-        }
-      };
     }, [visualFocused, id, store]);
     const isAnchor = isFocused && !isGroupActive;
 
