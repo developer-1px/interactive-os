@@ -436,7 +436,7 @@ function defineTests(bot: TestBot) {
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
-import { useTestBotRoutes } from "@os/testBot/useTestBotRoutes";
+import { useTestBotRoutes } from "@os/testBot";
 
 export function useFocusShowcaseRoutes() {
     useTestBotRoutes("focus-showcase", defineTests);

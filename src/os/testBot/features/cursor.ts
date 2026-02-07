@@ -9,6 +9,11 @@
  * - Visual ripple on click
  */
 
+import type { BotCursor, BubbleVariant } from "../entities/BotCursor";
+
+// Re-export for consumers that import from this module
+export type { BotCursor, BubbleVariant } from "../entities/BotCursor";
+
 // ═══════════════════════════════════════════════════════════════════
 // Styles
 // ═══════════════════════════════════════════════════════════════════
@@ -137,7 +142,7 @@ const STYLES = `
 
   /* ── Ripple ─────────────────────────────────────────────────────── */
   .testbot-ripple {
-    position: absolute; /* Changed to absolute to be relative to fixed container or body if needed, but fixed logic in ripple fn overrides this */
+    position: absolute;
     z-index: 99998;
     pointer-events: none;
     width: 32px; height: 32px;
@@ -168,11 +173,11 @@ const STYLES = `
 
 let stylesInjected = false;
 function injectStyles() {
-  if (stylesInjected) return;
-  const s = document.createElement("style");
-  s.textContent = STYLES;
-  document.head.appendChild(s);
-  stylesInjected = true;
+    if (stylesInjected) return;
+    const s = document.createElement("style");
+    s.textContent = STYLES;
+    document.head.appendChild(s);
+    stylesInjected = true;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -196,215 +201,183 @@ const ICON_EXCLAMATION = `<svg width="14" height="14" viewBox="0 0 24 24" fill="
 const ICON_CLICK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>`;
 
 // ═══════════════════════════════════════════════════════════════════
-// Cursor Interface
-// ═══════════════════════════════════════════════════════════════════
-
-export type BubbleVariant = 'default' | 'click' | 'success' | 'error';
-
-export interface BotCursor {
-  moveTo(x: number, y: number, durationMs: number): Promise<void>;
-  trackElement(el: Element | null): void;
-  ripple(): void;
-  /** Show a bubble (Keycap style) above the cursor */
-  showBubble(label: string, variant?: BubbleVariant): void;
-  /** Show a side label (Left) for Pass/Fail status */
-  showStatus(type: 'pass' | 'fail'): void;
-  /** Show an indicator for off-screen element */
-  showOffScreenPtr(targetX: number, targetY: number): void;
-  hideOffScreenPtr(): void;
-  /** Clear all current bubbles (e.g. on click) */
-  clearBubbles(): void;
-  destroy(): void;
-  getPosition(): { x: number; y: number };
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // Factory
 // ═══════════════════════════════════════════════════════════════════
 
 export function createCursor(): BotCursor {
-  injectStyles();
+    injectStyles();
 
-  // ...(variables)...
-  let x = window.innerWidth / 2;
-  let y = window.innerHeight / 2;
-  let trackedEl: Element | null = null;
-  let destroyed = false;
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+    let trackedEl: Element | null = null;
+    let destroyed = false;
 
-  // ── DOM: Cursor ──────────────────────────────────────────────────
-  const cursorEl = document.createElement("div");
-  cursorEl.className = "testbot-cursor";
+    // ── DOM: Cursor ──────────────────────────────────────────────────
+    const cursorEl = document.createElement("div");
+    cursorEl.className = "testbot-cursor";
 
-  const spotlight = document.createElement("div");
-  spotlight.className = "testbot-spotlight";
-  cursorEl.appendChild(spotlight);
+    const spotlight = document.createElement("div");
+    spotlight.className = "testbot-spotlight";
+    cursorEl.appendChild(spotlight);
 
-  const svgWrap = document.createElement("div");
-  svgWrap.className = "testbot-cursor-svg";
-  svgWrap.style.cssText = "width:100%;height:100%;transition:transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);";
-  svgWrap.innerHTML = CURSOR_SVG;
-  cursorEl.appendChild(svgWrap);
+    const svgWrap = document.createElement("div");
+    svgWrap.className = "testbot-cursor-svg";
+    svgWrap.style.cssText = "width:100%;height:100%;transition:transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);";
+    svgWrap.innerHTML = CURSOR_SVG;
+    cursorEl.appendChild(svgWrap);
 
-  // Unified Bubble Tray (Horizontal)
-  const bubbleTray = document.createElement("div");
-  bubbleTray.className = "testbot-bubble-tray";
-  cursorEl.appendChild(bubbleTray);
+    // Unified Bubble Tray (Horizontal)
+    const bubbleTray = document.createElement("div");
+    bubbleTray.className = "testbot-bubble-tray";
+    cursorEl.appendChild(bubbleTray);
 
-  cursorEl.style.left = `${x}px`;
-  cursorEl.style.top = `${y}px`;
-  document.body.appendChild(cursorEl);
+    cursorEl.style.left = `${x}px`;
+    cursorEl.style.top = `${y}px`;
+    document.body.appendChild(cursorEl);
 
-  // ... (element tracking code) ...
-  let trackDebounce: ReturnType<typeof setTimeout> | null = null;
+    // ── Element Tracking ─────────────────────────────────────────────
+    let trackDebounce: ReturnType<typeof setTimeout> | null = null;
 
-  const retrack = () => {
-    if (!trackedEl || destroyed) return;
-    if (trackDebounce) clearTimeout(trackDebounce);
-    trackDebounce = setTimeout(() => {
-      if (!trackedEl || destroyed) return;
-      const rect = trackedEl.getBoundingClientRect();
-      const nx = rect.left + rect.width / 2;
-      const ny = rect.top + rect.height / 2;
+    const retrack = () => {
+        if (!trackedEl || destroyed) return;
+        if (trackDebounce) clearTimeout(trackDebounce);
+        trackDebounce = setTimeout(() => {
+            if (!trackedEl || destroyed) return;
+            const rect = trackedEl.getBoundingClientRect();
+            const nx = rect.left + rect.width / 2;
+            const ny = rect.top + rect.height / 2;
 
-      if (Math.abs(nx - x) > 2 || Math.abs(ny - y) > 2) {
+            if (Math.abs(nx - x) > 2 || Math.abs(ny - y) > 2) {
+                cursorEl.style.transitionDuration = "300ms";
+                cursorEl.style.left = `${nx}px`;
+                cursorEl.style.top = `${ny}px`;
+                x = nx;
+                y = ny;
+            }
+        }, 250);
+    };
+
+    document.addEventListener("scroll", retrack, { passive: true, capture: true });
+    window.addEventListener("resize", retrack, { passive: true });
+
+    const observer = new MutationObserver(retrack);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+    // ── Methods ──────────────────────────────────────────────────────
+
+    const moveTo = (targetX: number, targetY: number, durationMs: number): Promise<void> =>
+        new Promise((resolve) => {
+            cursorEl.style.transitionDuration = `${durationMs}ms`;
+            cursorEl.style.left = `${targetX}px`;
+            cursorEl.style.top = `${targetY}px`;
+            x = targetX;
+            y = targetY;
+            setTimeout(resolve, durationMs + 20);
+        });
+
+    const trackElement = (el: Element | null) => {
+        trackedEl = el;
+    };
+
+    const ripple = () => {
+        const r = document.createElement("div");
+        r.className = "testbot-ripple";
+        r.style.position = "fixed";
+        r.style.left = `${x}px`;
+        r.style.top = `${y}px`;
+        document.body.appendChild(r);
+        setTimeout(() => r.remove(), 600);
+    };
+
+    const showBubble = (label: string, variant: BubbleVariant = 'default') => {
+        const bubble = document.createElement("div");
+        bubble.className = `testbot-bubble variant-${variant}`;
+
+        // Icon mapping
+        let content = label;
+        if (label === 'Click') content = `${ICON_CLICK}<span style="margin-left:4px">Click</span>`;
+        if (label === 'Check') content = ICON_CHECK;
+        if (label === 'Error') content = ICON_EXCLAMATION;
+
+        bubble.innerHTML = content;
+        bubbleTray.appendChild(bubble);
+
+        // Remove after 1.5s
+        setTimeout(() => {
+            bubble.style.opacity = '0';
+            bubble.style.transform = 'translateY(-10px)';
+            setTimeout(() => bubble.remove(), 300);
+        }, 1500);
+
+        // Limit visible bubbles to 3
+        while (bubbleTray.children.length > 3) bubbleTray.firstElementChild?.remove();
+    };
+
+    const showStatus = (type: 'pass' | 'fail') => {
+        const label = document.createElement("div");
+        label.className = `testbot-status-label ${type}`;
+        label.textContent = type === 'pass' ? "PASS!" : "FAIL!";
+        cursorEl.appendChild(label);
+        setTimeout(() => label.remove(), 1500);
+    };
+
+    const showOffScreenPtr = (tx: number, ty: number) => {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const padding = 40;
+
+        let cx = Math.max(padding, Math.min(w - padding, tx));
+        let cy = Math.max(padding, Math.min(h - padding, ty));
+
+        let rotation = 0;
+        if (ty > h) { rotation = 0; cy = h - padding; }
+        else if (ty < 0) { rotation = 180; cy = padding; }
+        else if (tx > w) { rotation = -90; cx = w - padding; }
+        else if (tx < 0) { rotation = 90; cx = padding; }
+
         cursorEl.style.transitionDuration = "300ms";
-        cursorEl.style.left = `${nx}px`;
-        cursorEl.style.top = `${ny}px`;
-        x = nx;
-        y = ny;
-      }
-    }, 250);
-  };
+        cursorEl.style.left = `${cx}px`;
+        cursorEl.style.top = `${cy}px`;
+        x = cx;
+        y = cy;
 
-  document.addEventListener("scroll", retrack, { passive: true, capture: true });
-  window.addEventListener("resize", retrack, { passive: true });
+        cursorEl.classList.add('off-screen');
+        svgWrap.innerHTML = ARROW_SVG;
+        svgWrap.style.transform = `rotate(${rotation}deg)`;
+    };
 
-  const observer = new MutationObserver(retrack);
-  observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    const hideOffScreenPtr = () => {
+        if (cursorEl.classList.contains('off-screen')) {
+            cursorEl.classList.remove('off-screen');
+            svgWrap.innerHTML = CURSOR_SVG;
+            svgWrap.style.transform = 'none';
+        }
+    };
 
-  // ── Methods ──────────────────────────────────────────────────────
+    const clearBubbles = () => {
+        bubbleTray.innerHTML = '';
+    };
 
-  const moveTo = (targetX: number, targetY: number, durationMs: number): Promise<void> =>
-    new Promise((resolve) => {
-      cursorEl.style.transitionDuration = `${durationMs}ms`;
-      cursorEl.style.left = `${targetX}px`;
-      cursorEl.style.top = `${targetY}px`;
-      x = targetX;
-      y = targetY;
-      setTimeout(resolve, durationMs + 20);
-    });
+    const destroy = () => {
+        destroyed = true;
+        hideOffScreenPtr();
+        cursorEl.remove();
+        document.removeEventListener("scroll", retrack);
+        window.removeEventListener("resize", retrack);
+        observer.disconnect();
+        if (trackDebounce) clearTimeout(trackDebounce);
+    };
 
-  const trackElement = (el: Element | null) => {
-
-    trackedEl = el;
-  };
-
-  const ripple = () => {
-    const r = document.createElement("div");
-    r.className = "testbot-ripple";
-    r.style.position = "fixed";
-    r.style.left = `${x}px`;
-    r.style.top = `${y}px`;
-    document.body.appendChild(r);
-    setTimeout(() => r.remove(), 600);
-  };
-
-  const showBubble = (label: string, variant: BubbleVariant = 'default') => {
-    const bubble = document.createElement("div");
-    bubble.className = `testbot-bubble variant-${variant}`;
-
-    // Icon mapping
-    let content = label;
-    if (label === 'Click') content = `${ICON_CLICK}<span style="margin-left:4px">Click</span>`;
-    if (label === 'Check') content = ICON_CHECK;
-    if (label === 'Error') content = ICON_EXCLAMATION;
-
-    bubble.innerHTML = content;
-    bubbleTray.appendChild(bubble);
-
-    // Remove after 1.5s (very snappy)
-    setTimeout(() => {
-      bubble.style.opacity = '0';
-      bubble.style.transform = 'translateY(-10px)';
-      setTimeout(() => bubble.remove(), 300);
-    }, 1500);
-
-    // Limit visible bubbles to 3 (focus on recent action feeling)
-    while (bubbleTray.children.length > 3) bubbleTray.firstElementChild?.remove();
-  };
-
-  const showStatus = (type: 'pass' | 'fail') => {
-    const label = document.createElement("div");
-    label.className = `testbot-status-label ${type}`;
-    label.textContent = type === 'pass' ? "PASS!" : "FAIL!";
-    cursorEl.appendChild(label);
-    setTimeout(() => label.remove(), 1500);
-  };
-
-
-
-  const showOffScreenPtr = (tx: number, ty: number) => {
-    // Calculate edge position
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const padding = 40;
-
-    // Clamp coordinates to screen edges
-    let cx = Math.max(padding, Math.min(w - padding, tx));
-    let cy = Math.max(padding, Math.min(h - padding, ty));
-
-    // Determine rotation (Arrow default is DOWN)
-    let rotation = 0;
-    if (ty > h) { rotation = 0; cy = h - padding; } // Target below -> Point Down
-    else if (ty < 0) { rotation = 180; cy = padding; } // Target above -> Point Up
-    else if (tx > w) { rotation = -90; cx = w - padding; } // Target right -> Point Right
-    else if (tx < 0) { rotation = 90; cx = padding; } // Target left -> Point Left
-
-    // Move cursor to edge
-    cursorEl.style.transitionDuration = "300ms";
-    cursorEl.style.left = `${cx}px`;
-    cursorEl.style.top = `${cy}px`;
-    x = cx;
-    y = cy;
-
-    // Morph to Arrow
-    cursorEl.classList.add('off-screen');
-    svgWrap.innerHTML = ARROW_SVG;
-    svgWrap.style.transform = `rotate(${rotation}deg)`;
-  };
-
-  const hideOffScreenPtr = () => {
-    if (cursorEl.classList.contains('off-screen')) {
-      cursorEl.classList.remove('off-screen');
-      svgWrap.innerHTML = CURSOR_SVG;
-      svgWrap.style.transform = 'none';
-    }
-  };
-
-  const clearBubbles = () => {
-    bubbleTray.innerHTML = '';
-  };
-
-  const destroy = () => {
-    destroyed = true;
-    hideOffScreenPtr();
-    cursorEl.remove();
-    document.removeEventListener("scroll", retrack);
-    window.removeEventListener("resize", retrack);
-    observer.disconnect();
-    if (trackDebounce) clearTimeout(trackDebounce);
-  };
-
-  return {
-    moveTo,
-    trackElement,
-    ripple,
-    showBubble,
-    showStatus,
-    showOffScreenPtr,
-    hideOffScreenPtr,
-    clearBubbles,
-    destroy,
-    getPosition: () => ({ x, y }),
-  };
+    return {
+        moveTo,
+        trackElement,
+        ripple,
+        showBubble,
+        showStatus,
+        showOffScreenPtr,
+        hideOffScreenPtr,
+        clearBubbles,
+        destroy,
+        getPosition: () => ({ x, y }),
+    };
 }

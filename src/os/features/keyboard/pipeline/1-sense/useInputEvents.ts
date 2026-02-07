@@ -48,6 +48,7 @@ function isFieldTarget(fieldId: string | null): boolean {
 
 const onInput = (e: Event) => {
   const target = e.target as HTMLElement;
+  if (target.closest("[data-inspector]")) return;
   const fieldId = resolveFieldId(target);
   if (!fieldId || !isFieldTarget(fieldId)) return;
 
@@ -69,6 +70,7 @@ const onInput = (e: Event) => {
 
 const onBlur = (e: Event) => {
   const target = e.target as HTMLElement;
+  if (target.closest("[data-inspector]")) return;
   const fieldId = resolveFieldId(target);
   if (!fieldId || !isFieldTarget(fieldId)) return;
 

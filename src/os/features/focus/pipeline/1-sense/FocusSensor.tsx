@@ -18,11 +18,19 @@ import {
 
 let isMounted = false;
 
+/** Check if event target is inside the Inspector panel */
+function isInsideInspector(target: HTMLElement): boolean {
+  return !!target.closest("[data-inspector]");
+}
+
 function sense(e: Event) {
+  // ── Inspector Guard: skip events from inspector panel ──
+  const target = e.target as HTMLElement;
+  if (isInsideInspector(target)) return;
+
   // ── Loop Guard: prevent event storm ──
   if (!sensorGuard.check()) return;
 
-  const target = e.target as HTMLElement;
 
   // --- Label Recognition (ZIFTL Extension) ---
   // If clicked inside a Label, redirect focus to the target Field
@@ -121,6 +129,7 @@ export function FocusSensor() {
 
     // --- Inspector Logging ---
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isInsideInspector(e.target as HTMLElement)) return;
       InspectorLog.log({
         type: "INPUT",
         title: e.key,
@@ -133,6 +142,7 @@ export function FocusSensor() {
 
     const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
+      if (isInsideInspector(target)) return;
       InspectorLog.log({
         type: "INPUT",
         title: "mousedown",
@@ -150,6 +160,7 @@ export function FocusSensor() {
 
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
+      if (isInsideInspector(target)) return;
       InspectorLog.log({
         type: "INPUT",
         title: "focusin",

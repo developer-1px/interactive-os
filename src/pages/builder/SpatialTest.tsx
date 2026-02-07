@@ -136,7 +136,7 @@ function defineRoutes(bot: TestBot) {
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
-import { useTestBotRoutes } from "@os/testBot/useTestBotRoutes";
+import { useTestBotRoutes } from "@os/testBot";
 
 export function useSpatialTestRoutes() {
     useTestBotRoutes("builder-spatial", defineRoutes);

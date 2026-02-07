@@ -5,11 +5,31 @@
  * Each action dispatches real browser events and records step results.
  */
 
-import type { BotCursor } from "./cursor";
-import type { StepResult, TestActions, OnStep } from "./types";
-import { BotError, KEY_LABELS, wait, getElementCenter } from "./types";
+import type { BotCursor } from "../entities/BotCursor";
+import type { StepResult } from "../entities/StepResult";
+import type { TestActions } from "../entities/TestActions";
+import type { OnStep } from "../entities/SuiteResult";
 
-import { activeZoneGuard, sensorGuard, dispatchGuard } from "../lib/loopGuard";
+// ═══════════════════════════════════════════════════════════════════
+// Constants & Helpers
+// ═══════════════════════════════════════════════════════════════════
+
+export const KEY_LABELS: Record<string, string> = {
+    ArrowUp: "↑", ArrowDown: "↓", ArrowLeft: "←", ArrowRight: "→",
+    Tab: "⇥ Tab", Enter: "↵ Enter", Escape: "Esc",
+    " ": "Space", Backspace: "⌫", Delete: "Del",
+};
+
+export class BotError extends Error {
+    constructor(message: string) { super(message); this.name = "BotError"; }
+}
+
+export const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+export function getElementCenter(el: Element) {
+    const rect = el.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // Factory
@@ -33,19 +53,12 @@ export function createActions(steps: StepResult[], ctx: ActionContext): TestActi
         ctx.onStep?.(ctx.suiteIndex, steps[steps.length - 1]);
     };
 
-    const resetGuards = () => {
-        activeZoneGuard.reset();
-        sensorGuard.reset();
-        dispatchGuard.reset();
-    };
-
     // ─────────────────────────────────────────────────────────────────
     // Click
     // ─────────────────────────────────────────────────────────────────
 
     const click = async (selector: string) => {
         stepCounter++;
-        resetGuards();
 
         const el = document.querySelector(selector);
         if (!el) {
@@ -54,7 +67,7 @@ export function createActions(steps: StepResult[], ctx: ActionContext): TestActi
             throw new BotError(`Element not found: ${selector}`);
         }
 
-        cursor.hideOffScreenPtr(); // Clear any previous indicator
+        cursor.hideOffScreenPtr();
         const { x, y } = getElementCenter(el);
         const rect = el.getBoundingClientRect();
         const outOfView = rect.top < 0 || rect.bottom > window.innerHeight || rect.left < 0 || rect.right > window.innerWidth;
@@ -62,7 +75,7 @@ export function createActions(steps: StepResult[], ctx: ActionContext): TestActi
         await cursor.moveTo(x, y, moveTime());
         cursor.trackElement(el);
         cursor.clearBubbles();
-        cursor.showBubble("Click", "click"); // New explicit Click feedback
+        cursor.showBubble("Click", "click");
         cursor.ripple();
 
         const eventOpts: MouseEventInit = { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0 };
@@ -76,7 +89,6 @@ export function createActions(steps: StepResult[], ctx: ActionContext): TestActi
         el.dispatchEvent(new MouseEvent("mouseup", eventOpts));
         el.dispatchEvent(new MouseEvent("click", eventOpts));
 
-        // If element was out of viewport, OS focus pipeline scrolls it in — wait and reposition cursor
         if (outOfView) {
             await wait(300 / speed);
             const newPos = getElementCenter(el);
@@ -101,7 +113,6 @@ export function createActions(steps: StepResult[], ctx: ActionContext): TestActi
 
     const press = async (key: string, modifiers?: { shift?: boolean; ctrl?: boolean; alt?: boolean; meta?: boolean }) => {
         stepCounter++;
-        resetGuards();
 
         const label = KEY_LABELS[key] ?? key;
         const modLabel = [

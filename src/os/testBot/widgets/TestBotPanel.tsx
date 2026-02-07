@@ -5,14 +5,16 @@
  */
 
 import { useState } from "react";
-import { TestBotActions, useTestBotStore } from "./TestBotStore";
+import { useTestBotStore } from "../features/TestBotStore";
+import { TestBotActions } from "../features/TestBotActions";
 import {
-    Check, X, RefreshCw, ChevronDown, Play, Square, Copy,
-    MousePointerClick, Keyboard, Eye, AlertTriangle,
+    Check, X, RefreshCw, ChevronDown, Play, Square,
 } from "lucide-react";
+import { SuiteDetails } from "./SuiteDetails";
+import { CopyLogButton } from "./CopyLogButton";
 
 // ═══════════════════════════════════════════════════════════════════
-// Components
+// Component
 // ═══════════════════════════════════════════════════════════════════
 
 export function TestBotPanel() {
@@ -129,7 +131,6 @@ export function TestBotPanel() {
                             <div onClick={() => toggleSuite(suite.name)}
                                 className="group/suite flex items-center px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
                                 <div className="mr-3 shrink-0 transition-transform duration-300">
-                                    {/* Play/Status Button (Left) */}
                                     {isPending ? (
                                         <button onClick={(e) => { e.stopPropagation(); TestBotActions.runSuite(si); }}
                                             data-testbot-run={si}
@@ -148,14 +149,12 @@ export function TestBotPanel() {
                                                 <RefreshCw size={16} className="text-amber-500 animate-spin" />
                                             ) : (
                                                 <>
-                                                    {/* Status Icon (Visible by default, hidden on hover) */}
                                                     <div className="absolute inset-0 flex items-center justify-center transition-opacity opacity-100 group-hover/icon:opacity-0">
                                                         {suite.passed ?
                                                             <Check size={16} className="text-emerald-500" strokeWidth={2.5} /> :
                                                             <X size={16} className="text-red-500" strokeWidth={2.5} />
                                                         }
                                                     </div>
-                                                    {/* Play Icon (Hidden by default, visible on hover) */}
                                                     <div className="absolute inset-0 flex items-center justify-center transition-opacity opacity-0 group-hover/icon:opacity-100 text-blue-500">
                                                         <Play size={16} fill="currentColor" />
                                                     </div>
@@ -216,148 +215,4 @@ export function TestBotPanel() {
             </div>
         </div>
     );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Step Details
-// ═══════════════════════════════════════════════════════════════════
-
-const FLASH_STYLE = `
-@keyframes flash-bg {
-    0% { background-color: rgba(59, 130, 246, 0.2); }
-    100% { background-color: transparent; }
-}
-.animate-flash {
-    animation: flash-bg 1s ease-out forwards;
-}
-`;
-
-function StepIcon({ step, isActive }: { step: any; isActive: boolean }) {
-    if (isActive) return <div className="w-3 h-3 flex items-center justify-center bg-white rounded-full ring-2 ring-blue-500 z-10 relative"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" /></div>;
-    // Background white or container color to cover the timeline line
-    const bgWrap = "bg-white z-10 relative rounded-full";
-    if (step.action === 'error' || step.error) return <AlertTriangle size={14} className={`text-red-500 ${bgWrap}`} />;
-    if (step.action === 'click') return <MousePointerClick size={14} className={`text-blue-500 ${bgWrap}`} />;
-    if (step.action === 'press') return <Keyboard size={14} className={`text-slate-500 ${bgWrap}`} />;
-    if (step.action.startsWith('expect')) return <Eye size={14} className={`${step.passed ? "text-emerald-500" : "text-slate-400"} ${bgWrap}`} />;
-    return <div className={`w-2 h-2 rounded-full bg-slate-200 ${bgWrap}`} />;
-}
-
-function SuiteDetails({ steps, isRunning, activeStepIndex }: { steps: any[]; isRunning?: boolean; activeStepIndex?: number }) {
-    if (!steps || steps.length === 0) return null;
-
-    return (
-        <div className="relative pb-2">
-            <style>{FLASH_STYLE}</style>
-
-            {/* Timeline Line: Precisely centered under suite icon (12px padding + 12px center of w-6 = 24px) */}
-            <div className="absolute left-[24px] top-[-8px] bottom-6 w-px bg-slate-200 z-0" />
-
-            {steps.map((step, i) => {
-                const isActive = isRunning && i === activeStepIndex;
-                const isPending = isRunning && activeStepIndex !== undefined && i > activeStepIndex;
-                const isExpect = step.action.startsWith('expect');
-                const isLast = i === steps.length - 1;
-
-                return (
-                    <div
-                        key={i}
-                        ref={(el) => { if (isActive && el) el.scrollIntoView({ behavior: "smooth", block: "center" }); }}
-                        data-testbot-step={i}
-                        data-testbot-action={step.action}
-                        data-testbot-step-result={step.passed ? "pass" : step.error ? "fail" : "pending"}
-                        className={`group flex items-start pl-3 pr-2 py-1.5 transition-colors relative ${isActive ? "bg-blue-50/50" :
-                            isPending ? "opacity-50" :
-                                "hover:bg-slate-50"
-                            } ${isLast && !isPending && !isActive ? "animate-flash" : ""}`}
-                    >
-                        {/* Icon (Centered on timeline) */}
-                        <div className="shrink-0 w-6 flex justify-center mr-2 pt-0.5">
-                            <StepIcon step={step} isActive={!!isActive} />
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0 text-[11px] leading-relaxed pt-0.5">
-                            <div className="flex items-baseline gap-1.5">
-                                {/* Compact Step Number: More prominent */}
-                                <span className={`font-mono text-[9px] select-none font-bold ${isActive ? "text-blue-600" : "text-slate-500"}`}>
-                                    #{i + 1}
-                                </span>
-
-                                <span className={`font-semibold tracking-wide uppercase text-[9px] ${isActive ? "text-blue-700" :
-                                    step.action === 'click' ? "text-blue-600" :
-                                        step.action === 'press' ? "text-slate-500" :
-                                            isExpect ? (isPending ? "text-slate-400" : step.passed ? "text-emerald-600" : "text-red-600") :
-                                                "text-slate-500"
-                                    }`}>
-                                    {isExpect ? "Expect" : step.action}
-                                </span>
-
-                                <span className={`font-mono truncate ${isActive ? "text-blue-900" :
-                                    isPending ? "text-slate-400" :
-                                        step.passed ? "text-slate-700" : "text-red-700 font-medium"
-                                    }`}>
-                                    {isExpect ? step.detail.replace(/^(Expect )/, '') : step.detail}
-                                </span>
-                            </div>
-
-                            {step.error && (
-                                <div data-testbot-error className="mt-1 px-2 py-1.5 bg-red-50/50 text-red-600 rounded border border-red-100/50 font-mono text-[10px] break-all">
-                                    {step.error}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
-    );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Copy Log Button & Logic
-// ═══════════════════════════════════════════════════════════════════
-
-function CopyLogButton({ suite }: { suite: any }) {
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        const log = generateSuiteLog(suite);
-        navigator.clipboard.writeText(log).then(() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        });
-    };
-
-    return (
-        <button onClick={handleCopy}
-            className={`shrink-0 p-1.5 rounded-full transition-all duration-200 ${copied
-                ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200"
-                : "text-slate-300 hover:text-blue-500 hover:bg-blue-50"
-                }`}
-            title="Copy Scenario Log"
-        >
-            {copied ? <Check size={14} strokeWidth={2.5} /> : <Copy size={14} />}
-        </button>
-    );
-}
-
-function generateSuiteLog(suite: any): string {
-    const status = suite.passed ? "PASS" : "FAIL";
-    const steps = suite.steps.map((s: any, i: number) => {
-        const icon = s.error ? "❌" : s.passed ? "✅" : "⬜";
-        const action = s.action.toUpperCase();
-        const detail = s.detail;
-        const error = s.error ? `\n   Error: ${s.error}` : "";
-        return `${i + 1}. ${icon} [${action}] ${detail}${error}`;
-    }).join("\n");
-
-    return `## Test Scenario: ${suite.name}
-Status: ${status}
-Steps: ${suite.steps.length}
-
-### Execution Log
-${steps}
-`;
 }

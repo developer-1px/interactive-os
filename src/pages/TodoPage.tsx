@@ -2,7 +2,7 @@ import { Sidebar } from "@apps/todo/widgets/Sidebar";
 import { TodoPanel } from "@apps/todo/widgets/TodoPanel";
 import { Zone } from "@os/app/export/primitives/Zone.tsx";
 import { CommandEngineStore } from "@os/features/command/store/CommandEngineStore";
-import { useTestBotRoutes } from "@os/testBot/useTestBotRoutes";
+import { useTestBotRoutes } from "@os/testBot";
 
 export default function TodoPage() {
   // TestBot scenarios for clipboard operations

@@ -11,8 +11,8 @@
  */
 
 import { useEffect } from "react";
-import type { TestBot } from "./testBot";
-import { TestBotActions } from "./TestBotStore";
+import type { TestBot } from "../entities/TestBot";
+import { TestBotActions } from "./TestBotActions";
 
 export function useTestBotRoutes(
     pageId: string,

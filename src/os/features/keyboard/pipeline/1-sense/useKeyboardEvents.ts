@@ -72,6 +72,9 @@ const onKeyDown = (e: Event) => {
   const target = ke.target as HTMLElement;
   if (!target) return;
 
+  // ── Inspector Guard: skip events from inspector panel ──
+  if (target.closest("[data-inspector]")) return;
+
   // ─── SENSE: Build Intent ───
   const fieldId = resolveFieldId(target);
   const isFromField = isFieldTarget(fieldId);

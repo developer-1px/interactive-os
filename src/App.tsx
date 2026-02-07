@@ -47,7 +47,7 @@ function AppContent({ isAppShell }: { isAppShell: boolean }) {
 
       {/* Inspector (Separated from OS Core) */}
       {isInspectorOpen && (
-        <aside className="h-full flex-shrink-0 sticky top-0 z-50">
+        <aside className="h-full flex-shrink-0 sticky top-0 z-50" data-inspector>
           <InspectorShell />
         </aside>
       )}

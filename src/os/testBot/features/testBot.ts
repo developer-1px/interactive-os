@@ -6,10 +6,13 @@
  */
 
 import { createCursor } from "./cursor";
-import { createActions, createMockActions } from "./actions";
-import type { TestBot, TestActions, SuiteResult, StepResult, OnProgress, OnStep } from "./types";
-import { wait } from "./types";
+import { createActions, createMockActions, wait } from "./actions";
+import type { TestBot } from "../entities/TestBot";
+import type { TestActions } from "../entities/TestActions";
+import type { StepResult } from "../entities/StepResult";
+import type { SuiteResult, OnProgress, OnStep } from "../entities/SuiteResult";
 
+// Re-export entities for backward compatibility
 export type { TestBot, TestActions, SuiteResult, StepResult, OnProgress, OnStep };
 
 export function testBot(opts?: { speed?: number }): TestBot {

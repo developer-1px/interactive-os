@@ -121,6 +121,42 @@ export const EventStream = () => {
             Page {pageNumber}
           </span>
           <button
+            onClick={() => {
+              // Format logs in LLM-friendly format
+              const formatted = transactionGroups.map((group, i) => {
+                const lines: string[] = [];
+                const groupNum = i + 1;
+
+                // Header
+                if (Array.isArray(group.input)) {
+                  const keys = group.input.map(inp => inp.title).join(' ');
+                  lines.push(`[${groupNum}] INPUT: Type "${keys}"`);
+                } else if (group.input.title === "System") {
+                  lines.push(`[${groupNum}] SYSTEM`);
+                } else {
+                  const inputType = group.input.inputSource === "mouse" ? "Click" : "Key";
+                  lines.push(`[${groupNum}] INPUT: ${inputType} "${group.input.title}"`);
+                }
+
+                // Children
+                group.children.forEach(child => {
+                  const details = child.details
+                    ? (typeof child.details === 'object' ? JSON.stringify(child.details) : String(child.details))
+                    : '';
+                  lines.push(`  → ${child.type}: ${child.title}${details ? ` ${details}` : ''}`);
+                });
+
+                return lines.join('\n');
+              }).join('\n\n');
+
+              navigator.clipboard.writeText(formatted);
+            }}
+            className="hover:text-[#1a73e8] text-[#9aa0a6] transition-colors p-1 rounded hover:bg-black/5"
+            title="Copy Logs"
+          >
+            <Icon name="copy" size={12} />
+          </button>
+          <button
             onClick={clear}
             className="hover:text-[#d93025] text-[#9aa0a6] transition-colors p-1 rounded hover:bg-black/5"
             title="Clear Stream"

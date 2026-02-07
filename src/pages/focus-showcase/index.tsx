@@ -1,5 +1,5 @@
 import { InspectorStore } from "@os/features/inspector/InspectorStore";
-import { TestBotActions } from "@os/testBot/TestBotStore";
+import { TestBotActions } from "@os/testBot";
 import { TestGrid } from "../shared/TestLayout";
 import { ActivateTest } from "./tests/ActivateTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";

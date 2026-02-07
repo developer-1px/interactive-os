@@ -6,7 +6,7 @@
 import { useFocusExpansion } from "@os/features/focus/hooks/useFocusExpansion";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { useTestBotRoutes } from "@os/testBot/useTestBotRoutes";
+import { useTestBotRoutes } from "@os/testBot";
 import { useState } from "react";
 import { Icon } from "@/lib/Icon";
 import { defineAriaRoutes } from "./tests";
