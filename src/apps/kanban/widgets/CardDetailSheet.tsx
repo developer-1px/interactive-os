@@ -13,10 +13,6 @@ import {
     User,
     Tag,
     AlertTriangle,
-    Flame,
-    ArrowUp,
-    ArrowDown,
-    Minus,
     Clock,
 } from "lucide-react";
 import type { KanbanState, Priority } from "@apps/kanban/model/appState";
@@ -36,9 +32,6 @@ export function CardDetailSheet() {
     const card = state.data.cards[state.ui.detailCardId];
     if (!card) return null;
 
-    const cardLabels = card.labels
-        .map((lid) => state.data.labels[lid])
-        .filter(Boolean);
 
     const allLabels = Object.values(state.data.labels);
 

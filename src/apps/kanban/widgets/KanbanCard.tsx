@@ -8,7 +8,7 @@ import {
     UpdateCardText,
     CancelEditCard,
 } from "@apps/kanban/features/commands/card";
-import { Check, CornerDownLeft, Trash2, Calendar, User, AlertTriangle, Flame, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { Check, CornerDownLeft, Trash2, Calendar, Flame, ArrowUp, ArrowDown, Minus } from "lucide-react";
 import type { KanbanCard as KanbanCardType, KanbanLabel, Priority } from "@apps/kanban/model/appState";
 
 interface KanbanCardProps {

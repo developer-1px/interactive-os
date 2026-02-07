@@ -9,7 +9,6 @@
  */
 
 import { FieldRegistry, type FieldEntry, type FieldConfig, type FieldState } from '../../registry/FieldRegistry';
-import { useCommandEventBus } from '@os/features/command/lib/useCommandEventBus';
 import type { BaseCommand } from '@os/entities/BaseCommand';
 
 // ═══════════════════════════════════════════════════════════════════

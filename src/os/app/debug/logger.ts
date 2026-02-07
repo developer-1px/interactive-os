@@ -5,7 +5,7 @@
 
 const IS_DEV = import.meta.env.DEV;
 
-type LogLayer = "ENGINE" | "KEYMAP" | "CONTEXT" | "PRIMITIVE" | "SYSTEM" | "NAVIGATION" | "FOCUS";
+type LogLayer = "ENGINE" | "KEYMAP" | "CONTEXT" | "PRIMITIVE" | "SYSTEM" | "NAVIGATION" | "FOCUS" | "KEYBOARD";
 
 const LayerColors: Record<LogLayer, string> = {
   ENGINE: "#6366f1", // Indigo
@@ -15,6 +15,7 @@ const LayerColors: Record<LogLayer, string> = {
   SYSTEM: "#64748b", // Slate
   NAVIGATION: "#3b82f6", // Blue
   FOCUS: "#8b5cf6", // Violet
+  KEYBOARD: "#f97316", // Orange
 };
 
 class AntigravityLogger {

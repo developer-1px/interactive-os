@@ -10,7 +10,6 @@
 import { create } from 'zustand';
 import type { BaseCommand } from "@os/entities/BaseCommand";
 import type { CommandRegistry } from "@os/features/command/model/createCommandStore";
-import { CommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 
 // ═══════════════════════════════════════════════════════════════════
 // Store Interface

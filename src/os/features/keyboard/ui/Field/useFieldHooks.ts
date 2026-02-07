@@ -53,7 +53,7 @@ export const useFieldDOMSync = ({
     innerRef,
     localValue,
     isActive,
-    cursorRef,
+    cursorRef: _cursorRef,
 }: UseFieldDOMSyncProps) => {
     // Sync on mount
     useLayoutEffect(() => {

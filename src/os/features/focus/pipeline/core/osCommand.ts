@@ -25,6 +25,7 @@ export interface DOMQueries {
     getGroupRect(id: string): DOMRect | undefined;
     getAllGroupRects(): Map<string, DOMRect>;
     getGroupEntry(id: string): any | undefined;
+    getGroupItems(id: string): string[];
 }
 
 export interface OSContext {

@@ -16,17 +16,13 @@ import {
     CancelEditColumn,
     SyncColumnDraft,
     ToggleColumnCollapse,
-    DeleteColumn,
 } from "@apps/kanban/features/commands/column";
 import { CopyCard, CutCard, PasteCard } from "@apps/kanban/features/commands/clipboard";
 import { KanbanCard } from "./KanbanCard";
 import {
     ChevronDown,
     ChevronRight,
-    MoreHorizontal,
     Plus,
-    Trash2,
-    Edit3,
     AlertCircle,
 } from "lucide-react";
 import type { KanbanColumn, KanbanCard as CardType, KanbanState } from "@apps/kanban/model/appState";
@@ -142,7 +138,7 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
                     <Zone
                         id={`col-${column.id}`}
                         role="listbox"
-                        navigate={{ orientation: "vertical", entry: "restore" }}
+                        options={{ navigate: { orientation: "vertical", entry: "restore" } }}
                         onAction={StartEditCard({ id: OS.FOCUS })}
                         onDelete={DeleteCard({ id: OS.FOCUS })}
                         onCopy={CopyCard({ id: OS.FOCUS })}
@@ -178,8 +174,8 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
                                 <Field
                                     name={`DRAFT-${column.id}`}
                                     value={draftText}
-                                    onChange={SyncDraft}
-                                    onSubmit={AddCard({ columnId: column.id })}
+                                    onChange={((p: any) => SyncDraft({ columnId: column.id, text: p.text })) as any}
+                                    onSubmit={((p: any) => AddCard({ columnId: column.id, text: p.text })) as any}
                                     className="flex-1 bg-transparent outline-none text-sm text-slate-600 placeholder:text-slate-300 font-medium"
                                     placeholder="Add a card..."
                                 />

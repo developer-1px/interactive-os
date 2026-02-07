@@ -150,7 +150,7 @@ function resolveArgs(
 function hasZoneBinding(commandId: string): boolean {
     // Only check passthrough commands
     // Note: TOGGLE is NOT here because Space's browser default is scroll, not a useful action
-    const PASSTHROUGH_COMMANDS: Record<string, keyof ReturnType<typeof FocusData.getActiveZone>> = {
+    const PASSTHROUGH_COMMANDS: Record<string, string> = {
         [OS_COMMANDS.COPY]: 'copyCommand',
         [OS_COMMANDS.CUT]: 'cutCommand',
         [OS_COMMANDS.PASTE]: 'pasteCommand',
@@ -165,7 +165,7 @@ function hasZoneBinding(commandId: string): boolean {
     const zone = FocusData.getActiveZone();
     if (!zone) return false; // No active zone, don't match
 
-    return !!zone[bindingKey];
+    return !!(zone as any)[bindingKey];
 }
 
 // ═══════════════════════════════════════════════════════════════════

@@ -51,7 +51,7 @@ export function useFocusGroupStore() {
 // Props
 // ═══════════════════════════════════════════════════════════════════
 
-export interface FocusGroupProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | 'style' | 'className' | 'onSelect'> {
+export interface FocusGroupProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | 'style' | 'className' | 'onSelect' | 'onCopy' | 'onCut' | 'onPaste' | 'onToggle'> {
     /** Group ID (optional, auto-generated if not provided) */
     id?: string;
 

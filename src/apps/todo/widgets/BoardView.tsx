@@ -51,7 +51,7 @@ export function BoardView() {
           <Zone
             id="board"
             role="group"
-            navigate={{ entry: 'restore', orientation: 'horizontal' }}
+            options={{ navigate: { entry: 'restore', orientation: 'horizontal' } }}
             className="flex gap-8 h-full"
           >
             {categoryOrder.map((categoryId) => {
@@ -66,7 +66,7 @@ export function BoardView() {
                   key={categoryId}
                   id={`col-${categoryId}`}
                   role="listbox"
-                  navigate={{ orientation: 'vertical', entry: 'restore' }}
+                  options={{ navigate: { orientation: 'vertical', entry: 'restore' } }}
                   // ARIA Standard Commands
                   onSelect={ToggleTodo({ id: OS.FOCUS })}
                   onAction={StartEdit({ id: OS.FOCUS })}

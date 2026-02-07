@@ -9,9 +9,6 @@ import {
     Copy,
     ArrowRight,
     Flame,
-    ArrowUp,
-    ArrowDown,
-    Minus,
     Tag,
     ChevronRight,
 } from "lucide-react";

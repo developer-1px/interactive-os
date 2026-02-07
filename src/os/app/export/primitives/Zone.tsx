@@ -29,7 +29,7 @@ export interface ZoneOptions {
 }
 
 // Zone only exposes role-based configuration - no manual config overrides
-export interface ZoneProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | 'onSelect'> {
+export interface ZoneProps extends Omit<ComponentProps<'div'>, 'id' | 'role' | 'onSelect' | 'onCopy' | 'onCut' | 'onPaste' | 'onToggle'> {
     /** Unique identifier for the zone */
     id?: string;
     /** @deprecated Use id instead */

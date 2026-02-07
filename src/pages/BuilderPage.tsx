@@ -21,8 +21,7 @@ export default function BuilderPage() {
             <OS.Zone
                 id="builder-canvas"
                 role="listbox"
-                tab={{ behavior: 'escape' }}
-                navigate={{ seamless: true }}
+                options={{ tab: { behavior: 'escape' }, navigate: { seamless: true } }}
                 className="flex-1 overflow-y-auto custom-scrollbar"
             >
                 {/* Page Being Edited */}

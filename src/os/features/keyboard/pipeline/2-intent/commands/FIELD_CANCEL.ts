@@ -21,8 +21,8 @@ export const FIELD_CANCEL: KeyboardCommand<FieldCancelPayload> = {
         };
 
         // Dispatch cancel command if configured
-        if (config.cancelCommand) {
-            result.dispatch = config.cancelCommand;
+        if (config.onCancel) {
+            result.dispatch = config.onCancel;
         }
 
         return result;

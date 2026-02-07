@@ -83,7 +83,7 @@ export type FieldMode = "immediate" | "deferred";
 export interface FieldProps
   extends Omit<
     HTMLAttributes<HTMLElement>,
-    "onChange" | "onBlur" | "onFocus"
+    "onChange" | "onBlur" | "onFocus" | "onSubmit"
   > {
   value: string;
   name?: string;

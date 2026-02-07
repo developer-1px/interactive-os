@@ -1,5 +1,5 @@
 import React, { forwardRef, cloneElement, isValidElement } from "react";
-import type { ReactElement, MouseEvent as ReactMouseEvent } from "react";
+import type { ReactElement } from "react";
 
 export interface LabelProps extends React.HTMLAttributes<HTMLDivElement> {
     /**

@@ -33,8 +33,7 @@ export const FIELD_BLUR: KeyboardCommand<FieldBlurPayload> = {
 
         // Dispatch commit command
         if (config.onSubmit) {
-            const payload = { ...config.onSubmit.payload, text: localValue };
-            result.dispatch = { ...config.onSubmit, payload } as BaseCommand;
+            result.dispatch = config.onSubmit({ text: localValue }) as BaseCommand;
         } else if (config.updateType) {
             result.dispatch = { type: config.updateType, payload: { text: localValue } } as BaseCommand;
         } else if (config.name) {

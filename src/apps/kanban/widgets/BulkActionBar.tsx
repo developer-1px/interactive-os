@@ -1,6 +1,6 @@
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import { DeselectAll, BulkDeleteCards, BulkMoveCards, BulkSetPriority } from "@apps/kanban/features/commands/selection";
-import { Trash2, ArrowRight, X, Flame, ArrowUp, Minus, ArrowDown } from "lucide-react";
+import { Trash2, ArrowRight, X, Flame } from "lucide-react";
 import type { KanbanState, Priority } from "@apps/kanban/model/appState";
 import { useState } from "react";
 

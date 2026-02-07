@@ -4,7 +4,6 @@ import { OS } from "@os/features/AntigravityOS";
 
 import { AddColumn } from "@apps/kanban/features/commands/column";
 import {
-    AddCard,
     StartEditCard,
     CancelEditCard,
     UpdateCardText,
@@ -12,12 +11,11 @@ import {
     MoveCardDown,
     MoveCardToColumn,
 } from "@apps/kanban/features/commands/card";
-import { DuplicateCard, CopyCard, CutCard, PasteCard } from "@apps/kanban/features/commands/clipboard";
+import { DuplicateCard } from "@apps/kanban/features/commands/clipboard";
 import { Undo, Redo } from "@apps/kanban/features/commands/history";
 import { OpenCardDetail, CloseCardDetail } from "@apps/kanban/features/commands/detail";
 import { OpenActionMenu, CloseActionMenu } from "@apps/kanban/features/commands/menu";
 import { ToggleCardSelection, DeselectAll } from "@apps/kanban/features/commands/selection";
-import { DeleteCard } from "@apps/kanban/features/commands/card";
 
 interface KanbanContext {
     activeZone: string | null;

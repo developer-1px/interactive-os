@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useSyncExternalStore } from "react";
-import { useShallow } from "zustand/react/shallow";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import { useInspectorStore } from "@os/features/inspector/InspectorStore"; // [NEW] Subscription

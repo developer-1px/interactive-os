@@ -1,7 +1,5 @@
 import { produce } from "immer";
 import type { AppState, TodoCommand } from "@apps/todo/model/types";
-import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
-import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { FocusData } from "@os/features/focus/lib/focusData";
 
 

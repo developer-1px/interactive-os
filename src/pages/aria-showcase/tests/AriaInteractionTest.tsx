@@ -80,7 +80,7 @@ export function AriaInteractionTest() {
                     <FocusGroup id="aria-trigger-group" tab={{ behavior: 'flow' }}>
                         <Trigger
                             id="aria-test-trigger-btn"
-                            command={mockCommand}
+                            onPress={mockCommand}
                             dispatch={handleTriggerDispatch}
                             className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm data-[focused=true]:ring-2 ring-blue-500"
                         >

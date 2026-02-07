@@ -11,7 +11,7 @@ export function KanbanPanel() {
     const { state } = useEngine<KanbanState>();
     if (!state) return null;
 
-    const { columnOrder, columns, cards, cardOrder, labels } = state.data;
+    const { columnOrder, columns, cards, cardOrder } = state.data;
     const { searchQuery, priorityFilter, labelFilter } = state.ui;
 
     // Filter cards
@@ -39,7 +39,7 @@ export function KanbanPanel() {
                     <Zone
                         id="kanban-board"
                         role="group"
-                        navigate={{ entry: "restore", orientation: "horizontal" }}
+                        options={{ navigate: { entry: "restore", orientation: "horizontal" } }}
                         className="flex gap-5 h-full"
                     >
                         {columnOrder.map((colId) => {

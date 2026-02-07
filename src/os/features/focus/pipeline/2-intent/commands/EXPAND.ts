@@ -2,7 +2,7 @@
  * EXPAND Command - Expand/collapse tree items
  */
 
-import type { OSCommand, OSContext } from '../../core/osCommand';
+import type { OSCommand } from '../../core/osCommand';
 import { resolveExpansion, type ExpandAction } from '../../3-resolve/resolveExpansion';
 
 // ═══════════════════════════════════════════════════════════════════
