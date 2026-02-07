@@ -91,7 +91,7 @@ export function useOSCore() {
 
       // Actions (Delegated to App)
       { key: "Enter", command: OS_COMMANDS.ACTIVATE },
-      { key: "Escape", command: OS_COMMANDS.EXIT, allowInInput: true },
+      { key: "Escape", command: OS_COMMANDS.ESCAPE, allowInInput: true },
 
       // Field Editing (Delegated to App)
       {
@@ -100,10 +100,9 @@ export function useOSCore() {
         allowInInput: true,
       },
 
-      // Clipboard (Passthrough - only matches when Zone has binding)
-      { key: "Meta+C", command: OS_COMMANDS.COPY },
-      { key: "Meta+X", command: OS_COMMANDS.CUT },
-      { key: "Meta+V", command: OS_COMMANDS.PASTE },
+      // Clipboard — handled by ClipboardSensor via native DOM events
+      // (⌘C/⌘X/⌘V fire browser copy/cut/paste events, no keybinding needed)
+
 
       // Selection
       { key: "Meta+A", command: OS_COMMANDS.SELECT_ALL },

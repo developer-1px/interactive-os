@@ -106,9 +106,9 @@ export const MoveItemUp = defineListCommand({
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx],
-        draft.data.todoOrder[globalTargetIdx],
-      ];
+          draft.data.todoOrder[globalSwapIdx],
+          draft.data.todoOrder[globalTargetIdx],
+        ];
     }),
 });
 
@@ -137,9 +137,9 @@ export const MoveItemDown = defineListCommand({
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx],
-        draft.data.todoOrder[globalTargetIdx],
-      ];
+          draft.data.todoOrder[globalSwapIdx],
+          draft.data.todoOrder[globalTargetIdx],
+        ];
     }),
 });
 

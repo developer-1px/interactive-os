@@ -1,45 +1,8 @@
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { TestBox, useTestState } from "../../shared/TestLayout";
-import { assert, click, press, wait } from "../../shared/testUtils";
+import { TestBox } from "../../shared/TestLayout";
 
 export function DismissTest() {
-  const { status, setStatus, logs, addLog, clearLogs } = useTestState();
-
-  const runTest = async () => {
-    setStatus("running");
-    clearLogs();
-    const localLogs: string[] = [];
-
-    try {
-      // Test 1: Deselect via Escape
-      click("#dis-esc-1");
-      await wait(200);
-      const isSelected =
-        document.querySelector("#dis-esc-1")?.getAttribute("aria-selected") ===
-        "true";
-      assert(isSelected, "Item Selected after click", localLogs);
-
-      press("Escape");
-      await wait(200);
-      const isDeselected =
-        document.querySelector("#dis-esc-1")?.getAttribute("aria-selected") !==
-        "true";
-      assert(isDeselected, "Escape Deselects", localLogs);
-
-      // Test 2: Close (Menu)
-      click("#dis-close-1");
-      await wait(20);
-      localLogs.push("→ Pressing Escape in Menu");
-
-      setStatus("pass");
-    } catch (e: any) {
-      localLogs.push(`❌ ${e.message}`);
-      setStatus("fail");
-    } finally {
-      localLogs.forEach(addLog);
-    }
-  };
 
   const description = (
     <div className="space-y-2">
@@ -80,9 +43,6 @@ export function DismissTest() {
   return (
     <TestBox
       title="Dismiss / Escape"
-      status={status}
-      logs={logs}
-      onRun={runTest}
       description={description}
     >
       <div className="flex flex-col gap-6">
@@ -104,7 +64,7 @@ export function DismissTest() {
                 key={item}
                 id={`dis-esc-${item.split(" ")[1]}`}
                 role="option"
-                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[selected=true]:bg-indigo-100 aria-[selected=true]:text-indigo-700 text-sm transition-all border border-transparent aria-[selected=true]:border-indigo-300"
+                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[selected=true]:bg-indigo-100 aria-[selected=true]:text-indigo-700 text-sm border border-transparent aria-[selected=true]:border-indigo-300"
               >
                 {item}
               </FocusItem>
@@ -132,7 +92,7 @@ export function DismissTest() {
                 key={item}
                 id={`dis-close-${item.split(" ")[2]}`}
                 role="menuitem"
-                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-violet-100 aria-[current=true]:text-violet-700 text-sm transition-all border border-transparent aria-[current=true]:border-violet-300"
+                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-violet-100 aria-[current=true]:text-violet-700 text-sm border border-transparent aria-[current=true]:border-violet-300"
               >
                 {item}
               </FocusItem>
@@ -161,7 +121,7 @@ export function DismissTest() {
                 key={item}
                 id={`dis-out-${item.split(" ")[1]}`}
                 role="option"
-                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[selected=true]:bg-amber-100 aria-[selected=true]:text-amber-700 text-sm transition-all border border-transparent aria-[selected=true]:border-amber-300"
+                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[selected=true]:bg-amber-100 aria-[selected=true]:text-amber-700 text-sm border border-transparent aria-[selected=true]:border-amber-300"
               >
                 {item}
               </FocusItem>

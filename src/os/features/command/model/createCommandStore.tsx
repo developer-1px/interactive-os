@@ -24,7 +24,9 @@ export interface CommandStoreState<S, A> {
   dispatch: (action: A) => void;
 }
 
-export type Middleware<A> = (action: A) => A;
+// Redux-style middleware with next pattern
+export type Next<S, A> = (state: S, action: A) => S;
+export type Middleware<S, A> = (next: Next<S, A>) => Next<S, A>;
 
 export function createCommandStore<
   S,
@@ -33,9 +35,7 @@ export function createCommandStore<
   registry: CommandRegistry<S, any>,
   initialState: S,
   config?: {
-    onStateChange?: (state: S, action: A, prevState: S) => S;
-    onDispatch?: (action: A) => A; // Legacy single interceptor
-    middleware?: Middleware<A>[]; // New Middleware Chain
+    middleware?: Middleware<S, A>[];
     persistence?: PersistenceConfig;
   },
 ) {
@@ -45,69 +45,64 @@ export function createCommandStore<
 
   return create<CommandStoreState<S, A>>((set) => ({
     state: startState,
-    dispatch: (startAction) =>
+    dispatch: (action) =>
       set((prev) => {
         // ── Loop Guard: prevent recursive dispatch ──
         if (!dispatchGuard.enter()) return prev;
         try {
-          let action = startAction;
+          // ── Core Dispatch: Registry Lookup + Command Execution ──
+          const coreDispatch: Next<S, A> = (state, act) => {
+            // 1. Emit to event bus
+            useCommandEventBus.getState().emit(act as any);
 
-          // 1. Legacy Interceptor
-          if (config?.onDispatch) {
-            action = config.onDispatch(action);
-          }
+            // 2. Hierarchical Command Lookup
+            let cmd = registry.get(act.type);
 
-          // 2. Middleware Chain
-          if (config?.middleware) {
-            for (const mw of config.middleware) {
-              action = mw(action);
-            }
-          }
+            // If not in global flat registry, try hierarchical resolution
+            if (!cmd) {
+              const focusPath = FocusData.getFocusPath();
+              const bubblePath = [...focusPath].reverse();
 
-          // 3. Emit Event
-          useCommandEventBus.getState().emit(action as any);
-
-          // 4. Hierarchical Command Lookup
-          // Strategy: Bubble up from focused zone -> parents -> global
-          let cmd = registry.get(action.type);
-
-          // If not in global flat registry, try hierarchical resolution
-          if (!cmd) {
-            const focusPath = FocusData.getFocusPath();
-            // Start from specific (deepest) to generic (root)
-            const bubblePath = [...focusPath].reverse();
-
-            for (const groupId of bubblePath) {
-              const zoneCmd = GroupRegistry.get(groupId, action.type);
-              if (zoneCmd) {
-                cmd = zoneCmd as any;
-                break;
+              for (const groupId of bubblePath) {
+                const zoneCmd = GroupRegistry.get(groupId, act.type);
+                if (zoneCmd) {
+                  cmd = zoneCmd as any;
+                  break;
+                }
               }
             }
-          }
 
-          if (!cmd) {
-            logger.warn("ENGINE", `Unknown command: ${action.type}`);
-            return prev;
-          }
+            if (!cmd) {
+              logger.warn("ENGINE", `Unknown command: ${act.type}`);
+              return state;
+            }
 
-          // 5. Execution
-          const nextState = cmd.run(prev.state, action.payload);
-          const finalState = config?.onStateChange
-            ? config.onStateChange(nextState, action, prev.state)
-            : nextState;
+            // 3. Execute command
+            const nextState = cmd.run(state, act.payload);
 
-          // 6. Logging
-          if (cmd.log !== false) {
-            logger.traceCommand(
-              action.type,
-              action.payload,
-              prev.state,
-              finalState,
-            );
-          }
+            // 4. Logging
+            if (cmd.log !== false) {
+              logger.traceCommand(
+                act.type,
+                act.payload,
+                state,
+                nextState,
+              );
+            }
 
-          // 7. Persistence (Side Effect)
+            return nextState;
+          };
+
+          // ── Middleware Pipeline Composition ──
+          const pipeline = (config?.middleware || []).reduceRight(
+            (next, mw) => mw(next),
+            coreDispatch
+          );
+
+          // ── Execute Pipeline ──
+          const finalState = pipeline(prev.state, action);
+
+          // ── Persistence (Side Effect) ──
           persist(finalState);
 
           return { state: finalState };

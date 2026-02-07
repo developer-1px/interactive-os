@@ -138,10 +138,10 @@ export function createFrequencyGuard(name: string, maxPerFrame: number = 50) {
 // ═══════════════════════════════════════════════════════════════════
 
 /** Guard for command dispatch — prevents recursive dispatch loops */
-export const dispatchGuard = createReentrantGuard("command.dispatch", 8);
+export const dispatchGuard = createReentrantGuard("command.dispatch", 10);
 
 /** Guard for focus sensor events — prevents event storm */
-export const sensorGuard = createFrequencyGuard("focus.sensor", 100);
+export const sensorGuard = createFrequencyGuard("focus.sensor", 200);
 
 /** Guard for active zone changes — prevents zone flip-flop */
-export const activeZoneGuard = createFrequencyGuard("focus.activeZone", 30);
+export const activeZoneGuard = createFrequencyGuard("focus.activeZone", 50);

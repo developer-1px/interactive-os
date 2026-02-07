@@ -33,10 +33,12 @@ export function ListView() {
   const { state } = useEngine<AppState>();
   if (!state || !state.data) return null;
 
-  const visibleTodoIds = state.data.todoOrder.filter(
-    (id) => state.data.todos[id]?.categoryId === state.ui.selectedCategoryId,
+  const todoOrder = state.data.todoOrder ?? [];
+  const todos = state.data.todos ?? {};
+  const visibleTodoIds = todoOrder.filter(
+    (id) => todos[id]?.categoryId === state.ui.selectedCategoryId,
   );
-  const visibleTodos = visibleTodoIds.map((id) => state.data.todos[id]);
+  const visibleTodos = visibleTodoIds.map((id) => todos[id]).filter(Boolean);
 
   // Edit state
   const editingId = state.ui.editingId;

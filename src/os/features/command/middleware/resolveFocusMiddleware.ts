@@ -37,21 +37,22 @@ function resolvePayload(payload: any, focusedItemId: string | null): any {
 }
 
 /**
- * Middleware that resolves OS.FOCUS in action payloads
+ * Middleware that resolves OS.FOCUS in action payloads.
+ * PRE middleware: transforms action before command execution.
  */
-export const resolveFocusMiddleware: Middleware<{
+export const resolveFocusMiddleware: Middleware<any, {
   type: string;
   payload?: any;
-}> = (action) => {
-  if (!action.payload) return action;
+}> = (next) => (state, action) => {
+  if (!action.payload) return next(state, action);
 
   const zone = FocusData.getActiveZone();
   const focusedItemId = zone?.store.getState().focusedItemId ?? null;
 
   const resolvedPayload = resolvePayload(action.payload, focusedItemId);
 
-  return {
+  return next(state, {
     ...action,
     payload: resolvedPayload,
-  };
+  });
 };

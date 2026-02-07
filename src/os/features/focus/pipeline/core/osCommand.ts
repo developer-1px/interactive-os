@@ -11,7 +11,7 @@ import { DOM } from "../../lib/dom";
 import { FocusData } from "../../lib/focusData";
 import type { FocusGroupStore } from "../../store/focusGroupStore";
 import type { FocusGroupConfig } from "../../types";
-import { setProgrammaticFocus } from "../5-sync/FocusSync";
+
 
 // ═══════════════════════════════════════════════════════════════════
 // Context (모든 Read)
@@ -201,12 +201,12 @@ export function runOS<P>(
   payload: P,
   overrideZoneId?: string,
 ): boolean {
-  // Loop detection: if called more than 20 times in 500ms, something is wrong
+  // Loop detection: if called more than 50 times in 500ms, something is wrong
   _callCount++;
   if (!_callResetTimer) {
     _callResetTimer = setTimeout(() => { _callCount = 0; _callResetTimer = null; }, 500);
   }
-  if (_callCount > 20) {
+  if (_callCount > 50) {
     console.error("[runOS] 🔴 Excessive calls detected!", _callCount, "payload:", payload);
     return false;
   }
@@ -286,16 +286,13 @@ function executeDOMEffect(effect: DOMEffect): void {
     case "FOCUS": {
       const el = DOM.getItem(effect.targetId);
       if (el) {
-        // Prevent FocusSensor from re-dispatching FOCUS on the
-        // resulting focusin event — same pattern as FocusSync.
-        setProgrammaticFocus(true);
         el.focus();
-        setTimeout(() => setProgrammaticFocus(false), 100);
       }
       break;
     }
     case "SCROLL_INTO_VIEW": {
       const el = DOM.getItem(effect.targetId);
+      if (el) console.log('[osCommand] scrollIntoView:', effect.targetId, el);
       el?.scrollIntoView({ block: "nearest", inline: "nearest" });
       break;
     }

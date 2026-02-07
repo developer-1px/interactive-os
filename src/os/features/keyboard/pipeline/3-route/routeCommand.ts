@@ -12,7 +12,6 @@ import {
   resolveKeybinding,
 } from "@os/features/command/pipeline/2-resolve/resolveKeybinding";
 import { dispatchCommand } from "@os/features/command/pipeline/3-dispatch/dispatchCommand";
-import { runCommandEffects } from "@os/features/command/pipeline/4-effect/commandEffects";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import type { KeyboardIntent } from "../../types";
@@ -44,9 +43,9 @@ export function routeCommand(intent: KeyboardIntent): boolean {
   const fullContext =
     contextMap && state !== undefined
       ? {
-          ...context,
-          ...contextMap(state, { activeGroupId, focusPath, focusedItemId }),
-        }
+        ...context,
+        ...contextMap(state, { activeGroupId, focusPath, focusedItemId }),
+      }
       : context;
 
   const bubblePath = buildBubblePath(focusPath, activeGroupId);
@@ -73,13 +72,7 @@ export function routeCommand(intent: KeyboardIntent): boolean {
   );
 
   // Dispatch
-  const dispatchContext = {
-    appDispatch: store.getActiveDispatch(),
-    osRegistry: store.getOSRegistry(),
-  };
-
-  const result = dispatchCommand(resolution, dispatchContext);
-  runCommandEffects(result, resolution);
+  const result = dispatchCommand(resolution);
 
   // Telemetry
   useInputTelemetry

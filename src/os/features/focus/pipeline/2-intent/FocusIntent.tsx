@@ -1,8 +1,9 @@
 /**
  * FocusIntent - OS Focus Command Router
  *
- * Single entry point for all focus-related OS commands.
- * Routes commands to pure OS commands via runOS.
+ * Routes focus-related OS commands to pure OS commands via runOS.
+ * Clipboard (COPY/CUT/PASTE) → ClipboardIntent
+ * History (UNDO/REDO) → HistoryIntent
  */
 
 import {
@@ -13,20 +14,15 @@ import { useCommandListener } from "../../../command/hooks/useCommandListener";
 import { runOS } from "../core/osCommand";
 import {
   ACTIVATE,
-  COPY,
-  CUT,
   DELETE,
-  DISMISS,
+  ESCAPE,
   FOCUS,
   NAVIGATE,
-  PASTE,
   RECOVER,
-  REDO,
   SELECT,
   SELECT_ALL,
   TAB,
   TOGGLE,
-  UNDO,
 } from "./commands";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -84,7 +80,8 @@ export function FocusIntent() {
     {
       command: OS_COMMANDS.FOCUS,
       handler: ({ payload }) => {
-        runOS(FOCUS, payload as { id: string; zoneId: string });
+        const p = payload as { id: string; zoneId: string };
+        runOS(FOCUS, p, p.zoneId);
       },
     },
     // --- Recover ---
@@ -94,55 +91,24 @@ export function FocusIntent() {
         runOS(RECOVER, {});
       },
     },
-    // --- Dismiss ---
+    // --- Escape ---
     {
-      command: OS_COMMANDS.DISMISS,
+      command: OS_COMMANDS.ESCAPE,
       handler: () => {
-        runOS(DISMISS, {});
+        runOS(ESCAPE, {});
       },
     },
-    // --- Clipboard ---
-    {
-      command: OS_COMMANDS.COPY,
-      handler: ({ payload }) => {
-        runOS(COPY, (payload ?? {}) as { targetId?: string });
-      },
-    },
-    {
-      command: OS_COMMANDS.CUT,
-      handler: ({ payload }) => {
-        runOS(CUT, (payload ?? {}) as { targetId?: string });
-      },
-    },
-    {
-      command: OS_COMMANDS.PASTE,
-      handler: ({ payload }) => {
-        runOS(PASTE, (payload ?? {}) as { targetId?: string });
-      },
-    },
+    // --- Editing (TOGGLE + DELETE remain here due to selection coupling) ---
     {
       command: OS_COMMANDS.TOGGLE,
       handler: ({ payload }) => {
         runOS(TOGGLE, (payload ?? {}) as { targetId?: string });
       },
     },
-    // --- Editing ---
     {
       command: OS_COMMANDS.DELETE,
       handler: ({ payload }) => {
         runOS(DELETE, (payload ?? {}) as { targetId?: string });
-      },
-    },
-    {
-      command: OS_COMMANDS.UNDO,
-      handler: () => {
-        runOS(UNDO, undefined);
-      },
-    },
-    {
-      command: OS_COMMANDS.REDO,
-      handler: () => {
-        runOS(REDO, undefined);
       },
     },
   ]);

@@ -50,6 +50,8 @@ export function App<S>({
       registry: engine.registry,
       dispatch,
       state,
+      getState: () => engine.store.getState().state,
+      setState: (newState) => engine.store.setState({ state: newState }),
       contextMap: appDef.contextMap,
     });
 

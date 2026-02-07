@@ -8,10 +8,11 @@ import {
   useMemo,
 } from "react";
 import { FocusData } from "../lib/focusData";
+import { useIsFocusedGroup } from "../hooks/useIsFocusedGroup";
 import { resolveRole, type ZoneRole } from "../registry/roleRegistry";
 import {
-  createFocusGroupStore,
   type FocusGroupStore,
+  useFocusGroupStoreInstance,
 } from "../store/focusGroupStore";
 import type {
   ActivateConfig,
@@ -135,6 +136,9 @@ function generateGroupId() {
   return `focus-group-${++groupIdCounter}`;
 }
 
+// W3C: Only the first autoFocus group in DOM order should receive focus
+let autoFocusClaimed = false;
+
 // ═══════════════════════════════════════════════════════════════════
 // Component
 // ═══════════════════════════════════════════════════════════════════
@@ -165,8 +169,8 @@ export function FocusGroup({
   // --- Stable ID ---
   const groupId = useMemo(() => propId || generateGroupId(), [propId]);
 
-  // --- Scoped Store (Created once per group) ---
-  const store = useMemo(() => createFocusGroupStore(groupId), [groupId]);
+  // --- Scoped Store (Persistent across Remounts) ---
+  const store = useFocusGroupStoreInstance(groupId);
 
   // --- Resolve Configuration ---
   const config = useMemo(() => {
@@ -225,10 +229,13 @@ export function FocusGroup({
   ]);
 
   // --- Auto-Focus for Dialog/Modal or explicit autoFocus ---
+  // W3C spec: only the first autofocus element in DOM order receives focus.
+  // Dialog/alertdialog always gets focus (modal override).
   useLayoutEffect(() => {
-    const shouldAutoFocus =
-      config.project?.autoFocus || role === "dialog" || role === "alertdialog";
+    const isModal = role === "dialog" || role === "alertdialog";
+    const shouldAutoFocus = config.project?.autoFocus || isModal;
     if (!shouldAutoFocus) return;
+    if (!isModal && autoFocusClaimed) return; // W3C: first wins
     if (!containerRef.current) return;
 
     // Find first focusable item in the group
@@ -236,9 +243,10 @@ export function FocusGroup({
       "[data-focus-item]",
     ) as HTMLElement;
     if (firstItem) {
+      if (!isModal) autoFocusClaimed = true;
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
-        firstItem.focus();
+        firstItem.focus({ preventScroll: true });
         store.setState({ focusedItemId: firstItem.id });
       });
     }
@@ -255,13 +263,8 @@ export function FocusGroup({
     [groupId, store, config, role],
   );
 
-  // --- Orientation Class ---
-  const orientationClass =
-    config.navigate.orientation === "horizontal"
-      ? "flex flex-row"
-      : config.navigate.orientation === "both"
-        ? "flex flex-row flex-wrap"
-        : "flex flex-col";
+  // --- Orientation (data attribute for external styling) ---
+  const orientation = config.navigate.orientation;
 
   // --- Render ---
   return (
@@ -272,6 +275,7 @@ export function FocusGroup({
         }}
         id={groupId}
         data-focus-group={groupId}
+        aria-current={useIsFocusedGroup(groupId) ? "true" : undefined}
         aria-orientation={
           config.navigate.orientation === "horizontal"
             ? "horizontal"
@@ -286,8 +290,9 @@ export function FocusGroup({
           // Set this zone as active when any child receives focus
           FocusData.setActiveZone(groupId);
         }}
-        className={`outline-none ${orientationClass} ${className || ""}`}
-        style={style}
+        className={className || undefined}
+        data-orientation={orientation}
+        style={{ outline: 'none', ...style }}
         {...rest}
       >
         {children}

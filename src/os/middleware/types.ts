@@ -39,10 +39,8 @@ export interface OSManagedState {
 }
 
 /**
- * OS middleware signature — generic over any state shape.
+ * OS middleware signature — Redux-style next pattern.
+ * Middleware can execute logic before next() (PRE) and after next() (POST).
  */
-export type OSMiddleware = <S>(
-    nextState: S,
-    action: { type: string; payload?: any },
-    prevState: S,
-) => S;
+export type Next<S, A> = (state: S, action: A) => S;
+export type OSMiddleware<S = any, A = any> = (next: Next<S, A>) => Next<S, A>;

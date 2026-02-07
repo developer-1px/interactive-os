@@ -16,10 +16,13 @@ import {
   isValidElement,
   type ReactElement,
   type ReactNode,
+  useEffect,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useSyncExternalStore,
 } from "react";
-import { twMerge } from "tailwind-merge";
+
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { FocusData } from "../lib/focusData";
@@ -29,6 +32,8 @@ import {
   isExpandableRole,
 } from "../registry/roleRegistry";
 import { useFocusGroupContext } from "./FocusGroup";
+import { CommandEngineStore } from "../../command/store/CommandEngineStore";
+import { OS_COMMANDS } from "../../command/definitions/commandsShell";
 
 // ═══════════════════════════════════════════════════════════════════
 // Props
@@ -125,6 +130,42 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     // --- Computed State ---
     const isGroupActive = activeGroupId === groupId;
     const visualFocused = isFocused && isGroupActive;
+
+    // --- Focus Effect: apply .focus() when this item becomes focused ---
+    const internalRef = useRef<HTMLElement>(null);
+    useLayoutEffect(() => {
+      if (visualFocused && internalRef.current) {
+        // Only focus if not already the active element
+        if (document.activeElement !== internalRef.current) {
+          internalRef.current.focus({ preventScroll: true });
+          internalRef.current.scrollIntoView({
+            block: "nearest",
+            inline: "nearest",
+          });
+        }
+      }
+
+      return () => {
+        // Recovery Logic: If I was focused but I'm unmounting...
+        if (visualFocused) {
+          // Check if I'm actually gone from the store (deleted)
+          // We need direct store access to check current state
+          const state = store.getState();
+          // Note: state.items comes from spatial slice which tracks items via DOM registry.
+          // If unmount happens, the registry update might be async or sync depending on implementation.
+          // But usually unmount happens first.
+
+          // Actually, if I am unmounting, I am definitely leaving the DOM.
+          // The question is whether I was *supposed* to be focused.
+          // If store.focusedItemId is still ME, then I am disappearing while focused -> RECOVER.
+          if (state.focusedItemId === id) {
+            queueMicrotask(() => {
+              CommandEngineStore.dispatch({ type: OS_COMMANDS.RECOVER });
+            });
+          }
+        }
+      };
+    }, [visualFocused, id, store]);
     const isAnchor = isFocused && !isGroupActive;
 
     // Auto-resolve child role from parent Zone role (e.g., listbox → option)
@@ -157,12 +198,13 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       "data-focused": visualFocused || undefined,
       "data-selected": isSelected || undefined,
       "data-expanded": isExpanded || undefined,
-      className: twMerge(
-        "outline-none cursor-pointer",
-        disabled && "opacity-50 cursor-not-allowed",
-        className,
-      ),
-      style,
+      className: className || undefined,
+      style: {
+        outline: "none",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.5 : undefined,
+        ...style,
+      },
       ...otherRest,
     };
 
@@ -172,7 +214,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
         ? (children as ReactElement<any>)
         : null;
     const combinedRef = useMemo(
-      () => composeRefs(ref, (childElement as any)?.ref),
+      () => composeRefs(ref, internalRef, (childElement as any)?.ref),
       [ref, (childElement as any)?.ref],
     );
 
@@ -181,7 +223,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       return cloneElement(childElement, {
         ...sharedProps,
         ref: combinedRef,
-        className: twMerge(childElement.props.className, sharedProps.className),
+        className: [childElement.props.className, sharedProps.className].filter(Boolean).join(' '),
         style: { ...childElement.props.style, ...style },
       });
     }

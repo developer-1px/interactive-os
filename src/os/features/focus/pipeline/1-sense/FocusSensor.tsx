@@ -6,7 +6,8 @@
  * 순수함수/로직 처리는 FocusIntent에서 담당
  */
 
-import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
+import { useCommandEngineStore, CommandEngineStore } from "@os/features/command/store/CommandEngineStore";
+import { InspectorLog } from "@os/features/inspector/InspectorLogStore";
 import { sensorGuard } from "@os/lib/loopGuard";
 import { useEffect } from "react";
 import { OS_COMMANDS } from "../../../command/definitions/commandsShell";
@@ -14,7 +15,6 @@ import {
   findFocusableItem,
   resolveFocusTarget,
 } from "../../lib/focusDOMQueries";
-import { isProgrammaticFocus, setProgrammaticFocus } from "../5-sync/FocusSync";
 
 let isMounted = false;
 
@@ -40,33 +40,29 @@ function sense(e: Event) {
       // Dispatch FOCUS command FIRST to update store state before DOM focus
       const fieldTarget = resolveFocusTarget(targetField as HTMLElement);
       if (fieldTarget) {
-        const dispatch = useCommandEngineStore.getState().getActiveDispatch();
-        dispatch?.({
+        CommandEngineStore.dispatch({
           type: OS_COMMANDS.FOCUS,
           payload: { id: fieldTarget.itemId, zoneId: fieldTarget.groupId },
         });
       }
 
-      // Then perform DOM focus (mark as programmatic to prevent FocusSync interference)
-      setProgrammaticFocus(true);
+      // Then perform DOM focus
       targetField.focus();
-      setTimeout(() => setProgrammaticFocus(false), 100);
       return;
     }
   }
 
   // --- Standard Focus Detection ---
   const item = findFocusableItem(target);
+
   // --- Focus Loss Detection (OS Recovery) ---
-  // If focus drops to body (and not programmatic), try to recover
+  // If focus drops to body, try to recover
   if (
     !item &&
     e.type === "focusin" &&
-    target === document.body &&
-    !isProgrammaticFocus
+    target === document.body
   ) {
-    const dispatch = useCommandEngineStore.getState().getActiveDispatch();
-    dispatch?.({ type: OS_COMMANDS.RECOVER });
+    CommandEngineStore.dispatch({ type: OS_COMMANDS.RECOVER });
     return;
   }
 
@@ -76,20 +72,17 @@ function sense(e: Event) {
   if (!focusTarget) return;
 
   const { itemId, groupId } = focusTarget;
-  const dispatch = useCommandEngineStore.getState().getActiveDispatch();
-  if (!dispatch) return;
-
   // MouseDown → FOCUS + SELECT (always FOCUS first to ensure activeZone is set)
   if (e instanceof MouseEvent && e.type === "mousedown") {
     // Always set focus first
-    dispatch({
+    CommandEngineStore.dispatch({
       type: OS_COMMANDS.FOCUS,
       payload: { id: itemId, zoneId: groupId },
     });
 
     if (e.shiftKey) {
       e.preventDefault();
-      dispatch({
+      CommandEngineStore.dispatch({
         type: OS_COMMANDS.SELECT,
         payload: { targetId: itemId, mode: "range", zoneId: groupId },
       });
@@ -97,13 +90,13 @@ function sense(e: Event) {
     }
     if (e.metaKey || e.ctrlKey) {
       e.preventDefault();
-      dispatch({
+      CommandEngineStore.dispatch({
         type: OS_COMMANDS.SELECT,
         payload: { targetId: itemId, mode: "toggle", zoneId: groupId },
       });
       return;
     }
-    dispatch({
+    CommandEngineStore.dispatch({
       type: OS_COMMANDS.SELECT,
       payload: { targetId: itemId, mode: "replace", zoneId: groupId },
     });
@@ -111,8 +104,8 @@ function sense(e: Event) {
   }
 
   // FocusIn → FOCUS
-  if (e.type === "focusin" && !isProgrammaticFocus) {
-    dispatch({
+  if (e.type === "focusin") {
+    CommandEngineStore.dispatch({
       type: OS_COMMANDS.FOCUS,
       payload: { id: itemId, zoneId: groupId },
     });
@@ -128,26 +121,61 @@ export function FocusSensor() {
 
     // --- Inspector Logging ---
     const handleKeyDown = (e: KeyboardEvent) => {
-      import("@os/features/inspector/InspectorLogStore").then(({ InspectorLog }) => {
-        InspectorLog.log({
-          type: "INPUT",
-          title: e.key,
-          details: { code: e.code, modifiers: { shift: e.shiftKey, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey } },
-          icon: "keyboard",
-          source: "user",
-        });
+      InspectorLog.log({
+        type: "INPUT",
+        title: e.key,
+        details: { code: e.code, modifiers: { shift: e.shiftKey, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey } },
+        icon: "keyboard",
+        source: "user",
+        inputSource: "keyboard",
       });
     };
 
-    document.addEventListener("focusin", sense);
+    const handleMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      InspectorLog.log({
+        type: "INPUT",
+        title: "mousedown",
+        details: {
+          target: target.id || target.tagName.toLowerCase(),
+          position: { x: e.clientX, y: e.clientY },
+          button: e.button,
+          modifiers: { shift: e.shiftKey, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey },
+        },
+        icon: "cursor",
+        source: "user",
+        inputSource: "mouse",
+      });
+    };
+
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      InspectorLog.log({
+        type: "INPUT",
+        title: "focusin",
+        details: {
+          target: target.id || target.tagName.toLowerCase(),
+          targetType: target.getAttribute("role") || target.nodeName,
+        },
+        icon: "eye",
+        source: "browser",
+      });
+    };
+
+    // 순서 중요: INPUT 로그를 먼저 기록한 후 sense(dispatch)가 실행되어야
+    // COMMAND 로그가 올바른 INPUT 그룹에 포함된다.
+    document.addEventListener("mousedown", handleMouseDown, { capture: true });
     document.addEventListener("mousedown", sense, { capture: true });
-    // Capture phase to ensuring logging before application prevents default
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusin", sense);
     document.addEventListener("keydown", handleKeyDown, { capture: true });
 
     return () => {
       isMounted = false;
-      document.removeEventListener("focusin", sense);
+      document.removeEventListener("mousedown", handleMouseDown, { capture: true });
       document.removeEventListener("mousedown", sense, { capture: true });
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusin", sense);
       document.removeEventListener("keydown", handleKeyDown, { capture: true });
     };
   }, [isInitialized]);

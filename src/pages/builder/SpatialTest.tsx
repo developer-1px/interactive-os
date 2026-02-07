@@ -6,13 +6,13 @@
  * eliminating internal API coupling and infinite loop risks.
  */
 
-import { testBot } from "@os/lib/testBot";
+import type { TestBot } from "@os/testBot";
 
 // ═══════════════════════════════════════════════════════════════════
 // Test Definitions
 // ═══════════════════════════════════════════════════════════════════
 
-function defineRoutes(bot: ReturnType<typeof testBot>) {
+function defineRoutes(bot: TestBot) {
     // --- NCP Hero Block: Internal vertical flow ---
     bot.describe("Hero 수직 흐름", async (t) => {
         await t.click("#ncp-hero-title");
@@ -136,7 +136,7 @@ function defineRoutes(bot: ReturnType<typeof testBot>) {
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
-import { useTestBotRoutes } from "@os/features/inspector/useTestBotRoutes";
+import { useTestBotRoutes } from "@os/testBot/useTestBotRoutes";
 
 export function useSpatialTestRoutes() {
     useTestBotRoutes("builder-spatial", defineRoutes);

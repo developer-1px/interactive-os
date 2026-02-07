@@ -2,8 +2,7 @@ import { FocusData } from "@os/features/focus/lib/focusData";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { useEffect, useRef, useState } from "react";
-import { TestBox, useTestState } from "../../shared/TestLayout";
-import { assert, click, press, wait } from "../../shared/testUtils";
+import { TestBox } from "../../shared/TestLayout";
 
 /**
  * FocusStackTest - Modal/Dialog Focus Stack & Scroll Sync
@@ -92,159 +91,12 @@ function Modal({ id, isOpen, onClose, title, children }: ModalProps) {
 // ═══════════════════════════════════════════════════════════════════
 
 export function FocusStackTest() {
-  const { status, setStatus, logs, addLog, clearLogs } = useTestState();
-
   // Modal state
   const [modal1Open, setModal1Open] = useState(false);
   const [modal2Open, setModal2Open] = useState(false);
 
   // Scroll test ref
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const runTest = async () => {
-    setStatus("running");
-    clearLogs();
-    const localLogs: string[] = [];
-
-    // Clear any stale stack entries from previous test runs
-    FocusData.clearFocusStack();
-
-    try {
-      // ─────────────────────────────────────────────────────────
-      // Test 1: Basic Focus Stack (Single Modal)
-      // ─────────────────────────────────────────────────────────
-      localLogs.push("→ Test 1: Single Modal Focus Restoration");
-
-      // Focus an item in the base list
-      click("#fs-base-2");
-      await wait(100);
-
-      const baseFocused = document.activeElement?.id === "fs-base-2";
-      assert(baseFocused, "Base item focused before modal", localLogs);
-
-      // Check stack is empty before opening modal
-      const stackDepthBefore = FocusData.getFocusStackDepth();
-      localLogs.push(`  Stack depth before modal: ${stackDepthBefore}`);
-
-      // Open modal
-      setModal1Open(true);
-      await wait(150);
-
-      // Check stack has one entry after opening modal
-      const stackDepthAfterOpen = FocusData.getFocusStackDepth();
-      localLogs.push(`  Stack depth after open: ${stackDepthAfterOpen}`);
-
-      // Focus first item in modal
-      click("#fs-modal1-1");
-      await wait(100);
-
-      const modalFocused = document.activeElement?.id === "fs-modal1-1";
-      assert(modalFocused, "Modal item focused", localLogs);
-
-      // Close modal via ESC
-      press("Escape");
-      await wait(150);
-
-      // Check focus restored to base
-      const restoredFocus = document.activeElement?.id === "fs-base-2";
-      assert(restoredFocus, "Focus restored after modal close", localLogs);
-
-      // Check stack is empty after closing
-      const stackDepthAfterClose = FocusData.getFocusStackDepth();
-      localLogs.push(`  Stack depth after close: ${stackDepthAfterClose}`);
-
-      // ─────────────────────────────────────────────────────────
-      // Test 2: Nested Modals (Dialog → SubDialog)
-      // ─────────────────────────────────────────────────────────
-      localLogs.push("→ Test 2: Nested Modal Focus Stack");
-
-      // Focus base item
-      click("#fs-base-3");
-      await wait(100);
-
-      // Open first modal
-      setModal1Open(true);
-      await wait(150);
-      click("#fs-modal1-2");
-      await wait(100);
-
-      const stackAfterFirst = FocusData.getFocusStackDepth();
-      localLogs.push(`  Stack after first modal: ${stackAfterFirst}`);
-
-      // Open second modal from first
-      setModal2Open(true);
-      await wait(150);
-      click("#fs-modal2-1");
-      await wait(100);
-
-      const stackAfterSecond = FocusData.getFocusStackDepth();
-      localLogs.push(`  Stack after second modal: ${stackAfterSecond}`);
-
-      const nestedFocused = document.activeElement?.id === "fs-modal2-1";
-      assert(nestedFocused, "Nested modal item focused", localLogs);
-
-      // Close second modal
-      setModal2Open(false);
-      FocusData.popAndRestoreFocus();
-      await wait(150);
-
-      // Should restore to first modal's focused item
-      const firstModalRestored = document.activeElement?.id === "fs-modal1-2";
-      assert(firstModalRestored, "First modal focus restored", localLogs);
-
-      // Close first modal
-      setModal1Open(false);
-      FocusData.popAndRestoreFocus();
-      await wait(150);
-
-      // Should restore to base
-      const baseRestored = document.activeElement?.id === "fs-base-3";
-      assert(baseRestored, "Base focus restored after nested close", localLogs);
-
-      // ─────────────────────────────────────────────────────────
-      // Test 3: Scroll Sync
-      // ─────────────────────────────────────────────────────────
-      localLogs.push("→ Test 3: Scroll Sync on Focus");
-
-      // Scroll container to top
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTop = 0;
-      }
-      await wait(50);
-
-      // Focus last item (should scroll into view)
-      click("#fs-scroll-10");
-      await wait(300); // Wait for smooth scroll
-
-      const scrolledItem = document.getElementById("fs-scroll-10");
-      const container = scrollContainerRef.current;
-
-      if (container && scrolledItem) {
-        const containerRect = container.getBoundingClientRect();
-        const itemRect = scrolledItem.getBoundingClientRect();
-
-        // Check if item is visible in container
-        const isVisible =
-          itemRect.top >= containerRect.top &&
-          itemRect.bottom <= containerRect.bottom;
-
-        assert(isVisible, "Item scrolled into view", localLogs);
-      } else {
-        localLogs.push("⚠️ Scroll container or item not found");
-      }
-
-      setStatus("pass");
-    } catch (e: any) {
-      localLogs.push(`❌ ${e.message}`);
-      setStatus("fail");
-    } finally {
-      // Cleanup
-      setModal1Open(false);
-      setModal2Open(false);
-      FocusData.clearFocusStack();
-      localLogs.forEach(addLog);
-    }
-  };
 
   const description = (
     <div className="space-y-2">
@@ -277,9 +129,6 @@ export function FocusStackTest() {
   return (
     <TestBox
       title="Focus Stack / Scroll"
-      status={status}
-      logs={logs}
-      onRun={runTest}
       description={description}
     >
       <div className="flex flex-col gap-4">
@@ -300,12 +149,13 @@ export function FocusStackTest() {
                 key={item}
                 id={`fs-base-${i + 1}`}
                 role="option"
-                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-blue-100 aria-[current=true]:text-blue-700 text-sm transition-all"
+                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-blue-100 aria-[current=true]:text-blue-700 text-sm"
               >
                 {item}
                 {i === 0 && (
                   <button
                     type="button"
+                    id="fs-open-modal"
                     onClick={() => setModal1Open(true)}
                     className="ml-2 text-xs text-blue-500 hover:underline"
                   >
@@ -337,7 +187,7 @@ export function FocusStackTest() {
                   key={item}
                   id={`fs-scroll-${i + 1}`}
                   role="option"
-                  className="px-2 py-1 rounded hover:bg-gray-100 aria-[current=true]:bg-emerald-100 aria-[current=true]:text-emerald-700 text-xs transition-all shrink-0"
+                  className="px-2 py-1 rounded hover:bg-gray-100 aria-[current=true]:bg-emerald-100 aria-[current=true]:text-emerald-700 text-xs shrink-0"
                 >
                   {item}
                 </FocusItem>
@@ -369,7 +219,7 @@ export function FocusStackTest() {
               key={item}
               id={`fs-modal1-${i + 1}`}
               role="menuitem"
-              className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-violet-100 aria-[current=true]:text-violet-700 text-sm transition-all"
+              className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-violet-100 aria-[current=true]:text-violet-700 text-sm"
             >
               {item}
               {i === 1 && (
@@ -405,7 +255,7 @@ export function FocusStackTest() {
               key={item}
               id={`fs-modal2-${i + 1}`}
               role="menuitem"
-              className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-pink-100 aria-[current=true]:text-pink-700 text-sm transition-all"
+              className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-pink-100 aria-[current=true]:text-pink-700 text-sm"
             >
               {item}
             </FocusItem>

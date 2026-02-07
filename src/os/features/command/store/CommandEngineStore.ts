@@ -1,60 +1,51 @@
 /**
- * CommandEngineStore - Global Zustand Store for Command Engine
+ * CommandEngineStore - 앱 라우터
  *
- * Simple lookup-based architecture:
- * - OS.Root registers osRegistry
- * - Each App registers its own registry to appRegistries Map
- * - InputEngine looks up: activeApp registry → osRegistry fallback
+ * 책임:
+ * 1. 앱 등록/조회 — 어떤 앱이 있고, 지금 어떤 앱이 활성인지 관리
+ * 2. 커맨드 라우팅 — 들어온 커맨드를 활성 앱의 dispatch로 전달
  */
 
 import type { BaseCommand } from "@os/entities/BaseCommand";
 import type { CommandRegistry } from "@os/features/command/model/createCommandStore";
+import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
+import { InspectorLog } from "@os/features/inspector/InspectorLogStore";
 import { create } from "zustand";
 
 // ═══════════════════════════════════════════════════════════════════
-// Store Interface
+// Types
 // ═══════════════════════════════════════════════════════════════════
 
 interface AppEntry<S = any> {
   registry: CommandRegistry<S, any>;
   dispatch: (cmd: BaseCommand) => void;
   state: S;
+  getState: () => S;
+  setState: (state: S) => void;
   contextMap?: (state: S, focus: any) => any;
 }
 
 export interface CommandEngineState<S = any> {
-  // OS-level registry (always available)
   osRegistry: CommandRegistry<S, any> | null;
-
-  // Per-app registries (keyed by appId)
   appRegistries: Map<string, AppEntry<S>>;
-
-  // Currently active app
   activeAppId: string | null;
-
-  // Initialization flag
   isInitialized: boolean;
 
   // Actions
   initializeOS: (registry: CommandRegistry<S, any>) => void;
   registerApp: (params: AppEntry<S> & { appId: string }) => void;
   unregisterApp: (appId: string) => void;
-  setActiveApp: (appId: string) => void;
   updateAppState: (appId: string, state: S) => void;
 
-  // Getters for InputEngine
-  getActiveRegistry: () => CommandRegistry<S, any> | null;
-  getOSRegistry: () => CommandRegistry<S, any> | null;
+  // Getters
   getActiveDispatch: () => ((cmd: BaseCommand) => void) | null;
   getActiveState: () => S | null;
   getActiveContextMap: () => ((state: S, focus: any) => any) | null;
-
-  // Unified keybinding getter
   getAllKeybindings: () => any[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Store Instance
+// Store
 // ═══════════════════════════════════════════════════════════════════
 
 export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
@@ -64,14 +55,12 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
   isInitialized: false,
 
   initializeOS: (registry) => {
-    console.log("[CommandEngineStore] OS initialized");
     set({ osRegistry: registry, isInitialized: true });
   },
 
-  registerApp: ({ appId, registry, dispatch, state, contextMap }) => {
-    console.log("[CommandEngineStore] App registered:", appId);
+  registerApp: ({ appId, registry, dispatch, state, getState, setState, contextMap }) => {
     const newMap = new Map(get().appRegistries);
-    newMap.set(appId, { registry, dispatch, state, contextMap });
+    newMap.set(appId, { registry, dispatch, state, getState, setState, contextMap });
     set({ appRegistries: newMap, activeAppId: appId });
   },
 
@@ -82,22 +71,15 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
     set({ appRegistries: newMap, activeAppId: newActiveId });
   },
 
-  setActiveApp: (appId) => {
-    set({ activeAppId: appId });
-  },
-
   updateAppState: (appId, state) => {
     const entry = get().appRegistries.get(appId);
     if (entry) {
-      // Log State Change
-      import("@os/features/inspector/InspectorLogStore").then(({ InspectorLog }) => {
-        InspectorLog.log({
-          type: "STATE",
-          title: `State Update: ${appId}`,
-          details: state, // Warning: This might be large
-          icon: "cpu",
-          source: "app",
-        });
+      InspectorLog.log({
+        type: "STATE",
+        title: `State Update: ${appId}`,
+        details: state,
+        icon: "cpu",
+        source: "app",
       });
 
       const newMap = new Map(get().appRegistries);
@@ -105,15 +87,6 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
       set({ appRegistries: newMap });
     }
   },
-
-  getActiveRegistry: () => {
-    const { activeAppId, appRegistries } = get();
-    return activeAppId
-      ? appRegistries.get(activeAppId)?.registry || null
-      : null;
-  },
-
-  getOSRegistry: () => get().osRegistry,
 
   getActiveDispatch: () => {
     const { activeAppId, appRegistries } = get();
@@ -134,10 +107,6 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
       : null;
   },
 
-  /**
-   * Get all keybindings from active app + OS (merged).
-   * App bindings listed first for priority.
-   */
   getAllKeybindings: () => {
     const { activeAppId, appRegistries, osRegistry } = get();
     const appRegistry = activeAppId
@@ -152,66 +121,56 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
 }));
 
 // ═══════════════════════════════════════════════════════════════════
-// Convenience Hooks
-// ═══════════════════════════════════════════════════════════════════
-
-export function useDispatch() {
-  const activeAppId = useCommandEngineStore((s) => s.activeAppId);
-  const appRegistries = useCommandEngineStore((s) => s.appRegistries);
-  const dispatch = activeAppId
-    ? appRegistries.get(activeAppId)?.dispatch
-    : null;
-  return dispatch ?? (() => { });
-}
-
-export function useAppState<S>() {
-  const activeAppId = useCommandEngineStore((s) => s.activeAppId);
-  const appRegistries = useCommandEngineStore((s) => s.appRegistries);
-  return (activeAppId ? appRegistries.get(activeAppId)?.state : null) as S;
-}
-
-export function useRegistry<S = any>() {
-  const activeAppId = useCommandEngineStore((s) => s.activeAppId);
-  const appRegistries = useCommandEngineStore((s) => s.appRegistries);
-  return (
-    activeAppId ? appRegistries.get(activeAppId)?.registry : null
-  ) as CommandRegistry<S, any>;
-}
-
-export function useContextMap() {
-  const activeAppId = useCommandEngineStore((s) => s.activeAppId);
-  const appRegistries = useCommandEngineStore((s) => s.appRegistries);
-  return activeAppId ? appRegistries.get(activeAppId)?.contextMap : null;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Static Accessors
+// Static API — 비-React 컨텍스트에서 커맨드 실행
 // ═══════════════════════════════════════════════════════════════════
 
 export const CommandEngineStore = {
-  get: () => useCommandEngineStore.getState(),
+  /** App 커맨드 실행 — 활성 앱의 dispatch로 라우팅 */
   dispatch: (cmd: BaseCommand) => {
     const dispatch = useCommandEngineStore.getState().getActiveDispatch();
     if (dispatch) {
-      // Telemetry is handled by commandEffects.ts to avoid duplicate logging
-      // BUT for the unified stream, we log here or rely on the effect.
-      // Let's log the "Dispatch" event here for immediate feedback.
-      import("@os/features/inspector/InspectorLogStore").then(({ InspectorLog }) => {
-        InspectorLog.log({
-          type: "COMMAND",
-          title: cmd.type,
-          details: cmd,
-          icon: "terminal", // or 'cpu'
-          source: "app",
-        });
+      InspectorLog.log({
+        type: "COMMAND",
+        title: cmd.type,
+        details: cmd,
+        icon: "terminal",
+        source: "app",
       });
-
       dispatch(cmd);
+    } else {
+      InspectorLog.log({
+        type: "SYSTEM",
+        title: `⚠ Command Dropped: ${cmd.type}`,
+        details: { reason: "No active app dispatch", cmd },
+        icon: "alert-triangle",
+        source: "os",
+      });
+    }
+  },
 
-      // Log State after dispatch (rudimentary, ideally we'd diff)
-      // We can't easily get the *new* state here synchronously if dispatch is async or batched
-      // But for now, let's just log that a command happened.
+  /** OS 커맨드 실행 — EventBus 경유 (ClipboardIntent, HistoryIntent 등) */
+  dispatchOS: (cmd: BaseCommand) => {
+    InspectorLog.log({
+      type: "COMMAND",
+      title: cmd.type,
+      details: cmd,
+      icon: "terminal",
+      source: "os",
+    });
+    useCommandEventBus.getState().emit(cmd);
+  },
+
+  /** 앱 상태 스냅샷 (TestBot용) */
+  getAppState: <S>(appId: string): S | null => {
+    const entry = useCommandEngineStore.getState().appRegistries.get(appId);
+    return entry ? entry.getState() : null;
+  },
+
+  /** 앱 상태 복원 (TestBot용) */
+  setAppState: <S>(appId: string, state: S): void => {
+    const entry = useCommandEngineStore.getState().appRegistries.get(appId);
+    if (entry) {
+      entry.setState(state);
     }
   },
 };
-

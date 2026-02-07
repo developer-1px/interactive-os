@@ -72,8 +72,8 @@ function SidebarContent() {
         <div className="text-[10px] font-black tracking-widest text-slate-400 uppercase px-4 mb-2">
           Categories
         </div>
-        {state.data.categoryOrder.map((categoryId) => {
-          const category = state.data.categories[categoryId];
+        {(state.data.categoryOrder ?? []).map((categoryId) => {
+          const category = (state.data.categories ?? {})[categoryId];
           if (!category) return null;
 
           return (

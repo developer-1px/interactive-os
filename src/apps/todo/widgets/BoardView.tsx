@@ -24,7 +24,7 @@ import { TaskItem } from "./TaskItem";
 export function BoardView() {
   const { state } = useEngine<AppState>();
   if (!state) return null;
-  const { categoryOrder, categories, todos, todoOrder } = state.data;
+  const { categoryOrder = [], categories = {}, todos = {}, todoOrder = [] } = state.data ?? {};
   const { selectedCategoryId } = state.ui;
   const activeCategory = categories[selectedCategoryId];
 

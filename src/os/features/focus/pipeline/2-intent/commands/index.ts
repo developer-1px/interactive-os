@@ -5,23 +5,19 @@
  * - Takes OSContext (read snapshot)
  * - Returns OSResult (state + effects)
  * - No side effects
+ *
+ * Note: Clipboard (COPY/CUT/PASTE) → @os/features/clipboard/
+ *       History (UNDO/REDO) → @os/features/history/
  */
 
 export { ACTIVATE } from "./ACTIVATE";
-// Clipboard Commands
-export { COPY } from "./COPY";
-export { CUT } from "./CUT";
 export { DELETE } from "./DELETE";
-export { DISMISS } from "./DISMISS";
+export { ESCAPE } from "./ESCAPE";
 export { EXPAND } from "./EXPAND";
 export { FOCUS } from "./FOCUS";
 export { NAVIGATE } from "./NAVIGATE";
-export { PASTE } from "./PASTE";
 export { RECOVER } from "./RECOVER";
-export { REDO } from "./REDO";
 export { SELECT } from "./SELECT";
 export { SELECT_ALL } from "./SELECT_ALL";
 export { TAB } from "./TAB";
-// Editing Commands
 export { TOGGLE } from "./TOGGLE";
-export { UNDO } from "./UNDO";

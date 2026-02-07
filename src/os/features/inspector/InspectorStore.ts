@@ -58,4 +58,6 @@ export const InspectorStore = {
   setActiveTab: (tab: InspectorTab) =>
     useInspectorStore.getState().setActiveTab(tab),
   togglePanel: () => useInspectorStore.getState().togglePanel(),
+  setPanelExpanded: (isExpanded: boolean) =>
+    useInspectorStore.getState().setPanelExpanded(isExpanded),
 };

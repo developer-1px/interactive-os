@@ -1,42 +1,8 @@
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { TestBox, useTestState } from "../../shared/TestLayout";
-import { assert, click, tab, wait } from "../../shared/testUtils";
+import { TestBox } from "../../shared/TestLayout";
 
 export function TabTest() {
-  const { status, setStatus, logs, addLog, clearLogs } = useTestState();
-
-  const runTest = async () => {
-    setStatus("running");
-    clearLogs();
-    const localLogs: string[] = [];
-
-    try {
-      // Test 1: Trap
-      click("#tab-trap-1");
-      await wait(20);
-      tab();
-      await wait(20);
-      assert(
-        document.getElementById("tab-trap")?.contains(document.activeElement) ??
-          false,
-        "Focus stays inside Trap Zone",
-        localLogs,
-      );
-
-      // Test 2: Flow
-      click("#tab-flow-1");
-      await wait(20);
-      localLogs.push("✅ Flow configuration valid");
-
-      setStatus("pass");
-    } catch (e: any) {
-      localLogs.push(`❌ ${e.message}`);
-      setStatus("fail");
-    } finally {
-      localLogs.forEach(addLog);
-    }
-  };
 
   const description = (
     <div className="space-y-2">
@@ -71,9 +37,6 @@ export function TabTest() {
   return (
     <TestBox
       title="Tab Interaction"
-      status={status}
-      logs={logs}
-      onRun={runTest}
       description={description}
     >
       <div className="flex flex-col gap-6">
@@ -95,7 +58,7 @@ export function TabTest() {
                   key={item}
                   id={`tab-escape-${i}`}
                   role="option"
-                  className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-amber-100 aria-[current=true]:text-amber-700 text-sm transition-all border border-transparent aria-[current=true]:border-amber-300"
+                  className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-amber-100 aria-[current=true]:text-amber-700 text-sm border border-transparent aria-[current=true]:border-amber-300"
                 >
                   {item}
                 </FocusItem>
@@ -125,7 +88,7 @@ export function TabTest() {
                   key={item}
                   id={`tab-trap-${i}`}
                   role="menuitem"
-                  className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-indigo-100 aria-[current=true]:text-indigo-700 text-sm transition-all border border-transparent aria-[current=true]:border-indigo-300"
+                  className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-indigo-100 aria-[current=true]:text-indigo-700 text-sm border border-transparent aria-[current=true]:border-indigo-300"
                 >
                   {item}
                 </FocusItem>
@@ -155,7 +118,7 @@ export function TabTest() {
                   key={item}
                   id={`tab-flow-${i}`}
                   role="button"
-                  className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-teal-100 aria-[current=true]:text-teal-700 text-sm transition-all border border-transparent aria-[current=true]:border-teal-300"
+                  className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-teal-100 aria-[current=true]:text-teal-700 text-sm border border-transparent aria-[current=true]:border-teal-300"
                 >
                   {item}
                 </FocusItem>

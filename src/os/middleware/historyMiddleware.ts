@@ -14,14 +14,10 @@
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import { produce } from "immer";
-import type { HistoryEntry, HistoryState } from "./types";
+import type { Middleware } from "@os/features/command/model/createCommandStore";
+import type { HistoryEntry } from "./types";
 
 const HISTORY_LIMIT = 50;
-
-interface WithHistory {
-    history?: HistoryState;
-    data?: any;
-}
 
 // OS commands that are no-op passthrough — never record
 const OS_PASSTHROUGH: Set<string> = new Set([
@@ -33,9 +29,8 @@ const OS_PASSTHROUGH: Set<string> = new Set([
     OS_COMMANDS.TAB,
     OS_COMMANDS.TAB_PREV,
     OS_COMMANDS.ACTIVATE,
-    OS_COMMANDS.EXIT,
+    OS_COMMANDS.ESCAPE,
     OS_COMMANDS.RECOVER,
-    OS_COMMANDS.DISMISS,
     OS_COMMANDS.TOGGLE_INSPECTOR,
     OS_COMMANDS.COPY,
     OS_COMMANDS.CUT,
@@ -49,11 +44,16 @@ const OS_PASSTHROUGH: Set<string> = new Set([
 // App-level commands that manage history themselves
 const HISTORY_SELF_MANAGED = new Set(["UNDO", "REDO"]);
 
-export const historyMiddleware = <S extends WithHistory>(
-    nextState: S,
-    action: { type: string; payload?: any; _def?: { log?: boolean } },
-    prevState: S,
-): S => {
+export const historyMiddleware: Middleware<any, any> = (next) => (state, action) => {
+    // Capture focus BEFORE command execution (so we get the pre-command focus)
+    const activeZone = FocusData.getActiveZone();
+    const previousFocusId =
+        activeZone?.store?.getState().focusedItemId ?? null;
+
+    // Execute command (POST middleware)
+    const nextState = next(state, action);
+    const prevState = state;
+
     // No history field = app doesn't use undo/redo
     if (!nextState.history && !prevState.history) return nextState;
 
@@ -71,11 +71,6 @@ export const historyMiddleware = <S extends WithHistory>(
         return nextState;
     }
 
-    // Capture current focus for restoration on undo
-    const activeZone = FocusData.getActiveZone();
-    const focusedItemId =
-        activeZone?.store?.getState().focusedItemId ?? null;
-
     return produce(nextState, (draft: any) => {
         if (!draft.history) {
             draft.history = { past: [], future: [] };
@@ -85,7 +80,7 @@ export const historyMiddleware = <S extends WithHistory>(
             command: { type: action.type, payload: action.payload },
             timestamp: Date.now(),
             snapshot: (({ history, ...rest }: any) => rest)(prevState),
-            focusedItemId,
+            focusedItemId: previousFocusId,
         };
 
         draft.history.past.push(entry);
@@ -96,5 +91,5 @@ export const historyMiddleware = <S extends WithHistory>(
 
         // New action branch → clear redo future
         draft.history.future = [];
-    }) as S;
+    });
 };

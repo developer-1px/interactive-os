@@ -2,7 +2,7 @@
  * OS Navigation Middleware (Built-in)
  *
  * Consumes `effects` array from app state:
- * - FOCUS_ID: sets focus to a specific item (cross-zone capable)
+ * - FOCUS_ID: sets focusedItemId in zone store (React handles actual .focus())
  * - SCROLL_INTO_VIEW: scrolls element into view
  *
  * After processing, clears the effects queue.
@@ -11,6 +11,7 @@
 
 import { FocusData } from "@os/features/focus/lib/focusData";
 import { produce } from "immer";
+import type { Middleware } from "@os/features/command/model/createCommandStore";
 
 interface EffectLike {
     type: string;
@@ -21,62 +22,30 @@ interface WithEffects {
     effects?: EffectLike[];
 }
 
-export const navigationMiddleware = <S extends WithEffects>(
-    nextState: S,
-    _action: { type: string; payload?: any },
-    _prevState: S,
-): S => {
-    const effects = nextState.effects;
+export const navigationMiddleware: Middleware<any, any> = (next) => (state, action) => {
+    // Execute command first (POST middleware)
+    const nextState = next(state, action);
+
+    const effects = (nextState as WithEffects).effects;
     if (!effects || effects.length === 0) return nextState;
 
     // --- FOCUS_ID Effect ---
     const focusEffect = effects.find(
-        (e): e is { type: "FOCUS_ID"; id: string | number } =>
+        (e): e is { type: "FOCUS_ID"; id: string | number; zoneId?: string } =>
             e.type === "FOCUS_ID",
     );
 
     if (focusEffect && focusEffect.id != null) {
         const targetId = String(focusEffect.id);
-        const targetEl = document.getElementById(targetId);
 
-        if (targetEl) {
-            const activeGroupId = FocusData.getActiveZoneId();
-            let resolved = false;
+        // Determine which zone to update
+        const zoneId = focusEffect.zoneId || FocusData.getActiveZoneId();
 
-            // 1st: Check if target is in the current active zone
-            if (activeGroupId) {
-                const data = FocusData.getById(activeGroupId);
-                if (data) {
-                    const zoneEl = document.getElementById(activeGroupId);
-                    if (zoneEl && zoneEl.contains(targetEl)) {
-                        data.store.setState({ focusedItemId: targetId });
-                        targetEl.focus({ preventScroll: false });
-                        resolved = true;
-                    }
-                }
-            }
-
-            // 2nd: Cross-zone teleport — scan all zones
-            if (!resolved) {
-                const allZoneIds = FocusData.getOrderedZones();
-                for (const zoneId of allZoneIds) {
-                    const zoneEl = document.getElementById(zoneId);
-                    if (zoneEl && zoneEl.contains(targetEl)) {
-                        const data = FocusData.getById(zoneId);
-                        if (data) {
-                            FocusData.setActiveZone(zoneId);
-                            data.store.setState({ focusedItemId: targetId });
-                            targetEl.focus({ preventScroll: false });
-                            resolved = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // 3rd: Raw DOM fallback
-            if (!resolved) {
-                targetEl.focus({ preventScroll: false });
+        if (zoneId) {
+            const zoneData = FocusData.getById(zoneId);
+            if (zoneData) {
+                // Only set state — React (FocusItem useEffect) will handle .focus()
+                zoneData.store.setState({ focusedItemId: targetId });
             }
         }
     }
@@ -88,14 +57,17 @@ export const navigationMiddleware = <S extends WithEffects>(
     );
 
     if (scrollEffect && scrollEffect.id != null) {
-        const el = document.getElementById(String(scrollEffect.id));
-        if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
+        // Defer to next frame so React has rendered
+        requestAnimationFrame(() => {
+            const el = document.getElementById(String(scrollEffect.id));
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+        });
     }
 
     // Clear effects queue
     return produce(nextState, (draft: any) => {
         draft.effects = [];
-    }) as S;
+    });
 };

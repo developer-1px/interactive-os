@@ -1,74 +1,9 @@
 import { useFocusExpansion } from "@os/features/focus/hooks/useFocusExpansion";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { TestBox, useTestState } from "../../shared/TestLayout";
-import { assert, click, navigate, wait } from "../../shared/testUtils";
+import { TestBox } from "../../shared/TestLayout";
 
 export function ExpandTest() {
-  const { status, setStatus, logs, addLog, clearLogs } = useTestState();
-
-  const runTest = async () => {
-    setStatus("running");
-    clearLogs();
-    const localLogs: string[] = [];
-
-    try {
-      // Test 1: Expand via ArrowRight
-      click("#tree-parent-1");
-      await wait(100);
-      assert(
-        document
-          .querySelector("#tree-parent-1")
-          ?.getAttribute("aria-current") === "true",
-        "Parent 1 focused",
-        localLogs,
-      );
-
-      navigate("RIGHT");
-      await wait(100);
-      assert(
-        document
-          .querySelector("#tree-parent-1")
-          ?.getAttribute("aria-expanded") === "true",
-        "ArrowRight expands tree item",
-        localLogs,
-      );
-
-      // Test 2: Collapse via ArrowLeft
-      navigate("LEFT");
-      await wait(100);
-      assert(
-        document
-          .querySelector("#tree-parent-1")
-          ?.getAttribute("aria-expanded") !== "true",
-        "ArrowLeft collapses tree item",
-        localLogs,
-      );
-
-      // Test 3: Toggle via Enter
-      click("#tree-parent-2");
-      await wait(100);
-
-      // Simulate Enter key for toggle
-      const event = new KeyboardEvent("keydown", {
-        key: "Enter",
-        code: "Enter",
-        bubbles: true,
-        cancelable: true,
-      });
-      document.activeElement?.dispatchEvent(event);
-      await wait(100);
-
-      localLogs.push("→ Enter key toggles expansion");
-
-      setStatus("pass");
-    } catch (e: any) {
-      localLogs.push(`❌ ${e.message}`);
-      setStatus("fail");
-    } finally {
-      localLogs.forEach(addLog);
-    }
-  };
 
   const description = (
     <div className="space-y-2">
@@ -108,9 +43,6 @@ export function ExpandTest() {
   return (
     <TestBox
       title="Expand / Collapse"
-      status={status}
-      logs={logs}
-      onRun={runTest}
       description={description}
     >
       <div className="space-y-2">
@@ -150,10 +82,10 @@ function TreeItems() {
           <FocusItem
             id={item.id}
             role="treeitem"
-            className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-sky-100 aria-[current=true]:text-sky-700 text-sm transition-all flex items-center gap-2 group"
+            className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-sky-100 aria-[current=true]:text-sky-700 text-sm flex items-center gap-2 group"
           >
             {item.children.length > 0 ? (
-              <span className="w-4 h-4 flex items-center justify-center text-gray-400 group-aria-[expanded=true]:rotate-90 transition-transform">
+              <span className="w-4 h-4 flex items-center justify-center text-gray-400 group-aria-[expanded=true]:rotate-90">
                 ▶
               </span>
             ) : (

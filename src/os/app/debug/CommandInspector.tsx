@@ -9,7 +9,7 @@ import { useCommandTelemetryStore } from "@os/features/command/store/CommandTele
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import { useInspectorStore } from "@os/features/inspector/InspectorStore";
-import { TestBotInspectorPanel } from "@os/features/inspector/TestBotInspectorPanel";
+import { TestBotPanel } from "@os/testBot";
 import { evalContext } from "@os/features/logic/lib/evalContext";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
@@ -185,7 +185,7 @@ export function CommandInspector() {
           </div>
         );
       case "TESTBOT":
-        return <TestBotInspectorPanel />;
+        return <TestBotPanel />;
       default:
         return null;
     }

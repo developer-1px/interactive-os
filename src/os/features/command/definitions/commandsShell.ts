@@ -20,8 +20,8 @@ export const OS_COMMANDS = {
   // --- Activation (The "Action" Trigger) ---
   ACTIVATE: "OS_ACTIVATE",
 
-  // --- Dismissal (The "Escape" Trigger) ---
-  DISMISS: "OS_DISMISS",
+  // --- Escape (Context-aware: deselect, close, or none) ---
+  ESCAPE: "OS_ESCAPE",
 
   // --- Field Editing (The "Edit" Lifecycle) ---
   FIELD_START_EDIT: "OS_FIELD_START_EDIT",
@@ -45,7 +45,7 @@ export const OS_COMMANDS = {
 
   // --- Window/Shell (The "Desktop" Layer) ---
   TOGGLE_INSPECTOR: "OS_TOGGLE_INSPECTOR",
-  EXIT: "OS_EXIT",
+
 } as const;
 
 export type OSCommandType = (typeof OS_COMMANDS)[keyof typeof OS_COMMANDS];
@@ -86,7 +86,7 @@ export type OSCommand =
   | { type: typeof OS_COMMANDS.SELECT_ALL; payload?: void }
   | { type: typeof OS_COMMANDS.DESELECT_ALL; payload?: void }
   | { type: typeof OS_COMMANDS.ACTIVATE; payload?: OSActivatePayload }
-  | { type: typeof OS_COMMANDS.DISMISS; payload?: void }
+  | { type: typeof OS_COMMANDS.ESCAPE; payload?: void }
   | {
     type: typeof OS_COMMANDS.FIELD_START_EDIT;
     payload?: { fieldId?: string };
@@ -101,4 +101,4 @@ export type OSCommand =
   | { type: typeof OS_COMMANDS.DELETE; payload?: any }
   | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: any }
   | { type: typeof OS_COMMANDS.RECOVER; payload?: any }
-  | { type: typeof OS_COMMANDS.EXIT; payload?: any };
+

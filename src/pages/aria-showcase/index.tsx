@@ -6,11 +6,10 @@
 import { useFocusExpansion } from "@os/features/focus/hooks/useFocusExpansion";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { useTestBotRoutes } from "@os/features/inspector/useTestBotRoutes";
+import { useTestBotRoutes } from "@os/testBot/useTestBotRoutes";
 import { useState } from "react";
 import { Icon } from "@/lib/Icon";
-import { AriaInteractionTest } from "./tests/AriaInteractionTest";
-import { defineAriaRoutes } from "./tests/ShowcaseBot";
+import { defineAriaRoutes } from "./tests";
 
 export function AriaShowcasePage() {
   // State management for interactive examples
@@ -55,16 +54,6 @@ export function AriaShowcasePage() {
           interactive states.
         </p>
       </header>
-
-      {/* Test Section */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">
-          Interaction Tests
-        </h2>
-        <div className="max-w-md">
-          <AriaInteractionTest />
-        </div>
-      </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* 1. Tabs */}

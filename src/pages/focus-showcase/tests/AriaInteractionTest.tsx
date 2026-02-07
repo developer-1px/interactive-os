@@ -3,91 +3,10 @@ import { Trigger } from "@os/app/export/primitives/Trigger";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { useState } from "react";
-import { TestBox, useTestState } from "../../shared/TestLayout";
-import { assert, click, wait } from "../../shared/testUtils";
+import { TestBox } from "../../shared/TestLayout";
 
 export function AriaInteractionTest() {
-  const { status, setStatus, logs, addLog, clearLogs } = useTestState();
   const [actionCount, setActionCount] = useState(0);
-
-  const runTest = async () => {
-    setStatus("running");
-    clearLogs();
-    const localLogs: string[] = [];
-
-    try {
-      // ═══════════════════════════════════════════════════════════════
-      // 1. TRIGGER Action Test
-      // ═══════════════════════════════════════════════════════════════
-      localLogs.push("→ Testing Trigger Action...");
-
-      // Click the trigger
-      // NOTE: Trigger primitive listens to React/DOM onClick.
-      // testUtils.click() simulates OS commands (FOCUS/SELECT) which doesn't fire onClick.
-      // We must simulate a real user interaction here.
-      const btn = document.getElementById("test-trigger-btn");
-      if (btn) {
-        btn.click();
-      } else {
-        throw new Error("Trigger button not found");
-      }
-      await wait(100);
-
-      // Verify action occurred (state update)
-      // Note: We need to access the updated state.
-      // Since click() is async simulation, we wait a bit.
-      const triggerBtn = document.getElementById("test-trigger-btn");
-      assert(
-        triggerBtn?.getAttribute("data-clicked") === "true",
-        "Trigger dispatched command",
-        localLogs,
-      );
-
-      // ═══════════════════════════════════════════════════════════════
-      // 2. SELECTION Test (Zone + Item)
-      // ═══════════════════════════════════════════════════════════════
-      localLogs.push("→ Testing Selection...");
-
-      // Click Item 2
-      click("#test-select-2");
-      await wait(100);
-
-      const item2 = document.getElementById("test-select-2");
-      assert(
-        item2?.getAttribute("aria-selected") === "true",
-        "Item 2 selected",
-        localLogs,
-      );
-      assert(
-        item2?.getAttribute("aria-current") === "true",
-        "Item 2 focused",
-        localLogs,
-      );
-
-      // ═══════════════════════════════════════════════════════════════
-      // 3. FIELD Input Test
-      // ═══════════════════════════════════════════════════════════════
-      localLogs.push("→ Testing Field Focus...");
-
-      // Click Field
-      click("#test-field-input");
-      await wait(100);
-
-      const field = document.getElementById("test-field-input");
-      assert(
-        field?.getAttribute("data-focused") === "true",
-        "Field is focused",
-        localLogs,
-      );
-
-      setStatus("pass");
-    } catch (e: any) {
-      localLogs.push(`❌ ${e.message}`);
-      setStatus("fail");
-    } finally {
-      localLogs.forEach(addLog);
-    }
-  };
 
   const description = (
     <div className="space-y-2">
@@ -123,9 +42,6 @@ export function AriaInteractionTest() {
   return (
     <TestBox
       title="ARIA Interactions"
-      status={status}
-      logs={logs}
-      onRun={runTest}
       description={description}
     >
       <div className="flex flex-col gap-4">

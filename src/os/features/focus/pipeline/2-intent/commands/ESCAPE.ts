@@ -1,44 +1,49 @@
 /**
- * DISMISS Command - Escape key dismiss
+ * ESCAPE Command - Handles Escape key press
+ *
+ * Behavior determined by Zone's dismiss config:
+ * - "deselect": Clear current selection
+ * - "close": Blur/close the zone
+ * - "none": No action
  */
 
 import type { OSCommand, OSContext, OSResult } from "../../core/osCommand";
 
 // ═══════════════════════════════════════════════════════════════════
-// Dismiss Action Handlers
+// Escape Action Handlers
 // ═══════════════════════════════════════════════════════════════════
 
 function handleDeselect(ctx: OSContext): OSResult | null {
-  if (ctx.selection.length === 0) return null;
+    if (ctx.selection.length === 0) return null;
 
-  return {
-    state: {
-      selection: [],
-      selectionAnchor: null,
-    },
-  };
+    return {
+        state: {
+            selection: [],
+            selectionAnchor: null,
+        },
+    };
 }
 
 function handleClose(): OSResult {
-  return {
-    state: { focusedItemId: null },
-    domEffects: [{ type: "BLUR" }],
-  };
+    return {
+        state: { focusedItemId: null },
+        domEffects: [{ type: "BLUR" }],
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// DISMISS Command
+// ESCAPE Command
 // ═══════════════════════════════════════════════════════════════════
 
-export const DISMISS: OSCommand<{}> = {
-  run: (ctx, _payload) => {
-    switch (ctx.config.dismiss.escape) {
-      case "deselect":
-        return handleDeselect(ctx);
-      case "close":
-        return handleClose();
-      default:
-        return null;
-    }
-  },
+export const ESCAPE: OSCommand<{}> = {
+    run: (ctx, _payload) => {
+        switch (ctx.config.dismiss.escape) {
+            case "deselect":
+                return handleDeselect(ctx);
+            case "close":
+                return handleClose();
+            default:
+                return null;
+        }
+    },
 };

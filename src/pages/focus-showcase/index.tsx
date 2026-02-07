@@ -1,5 +1,5 @@
 import { InspectorStore } from "@os/features/inspector/InspectorStore";
-import { TestBotActions } from "@os/features/inspector/TestBotStore";
+import { TestBotActions } from "@os/testBot/TestBotStore";
 import { TestGrid } from "../shared/TestLayout";
 import { ActivateTest } from "./tests/ActivateTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";
@@ -19,6 +19,7 @@ export function FocusShowcasePage() {
   const runAllTests = () => {
     InspectorStore.setOpen(true);
     InspectorStore.setActiveTab("TESTBOT");
+    InspectorStore.setPanelExpanded(true);
     TestBotActions.runAll();
   };
 
@@ -37,7 +38,7 @@ export function FocusShowcasePage() {
         <div className="flex gap-3">
           <button
             onClick={runAllTests}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-lg shadow-purple-500/20 transition-all hover:shadow-purple-500/40"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40"
           >
             ▶ Run All Tests (Inspector)
           </button>
@@ -45,12 +46,12 @@ export function FocusShowcasePage() {
       </header>
 
       <TestGrid>
+        <AutofocusTest />
         <NavigateTest />
         <SelectTest />
         <TabTest />
         <ActivateTest />
         <DismissTest />
-        <AutofocusTest />
         <AriaFacadeTest />
         <AriaInteractionTest />
         <ExpandTest />

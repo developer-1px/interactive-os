@@ -33,7 +33,19 @@ export function commitAll(
   const { targetId, stickyX, stickyY, selection, anchor } = payload;
 
   if (targetId !== undefined && targetId !== state.focusedItemId) {
+    const prev = state.focusedItemId;
     state.setFocus(targetId);
+
+    // Inspector Stream
+    import("../../../inspector/InspectorLogStore").then(({ InspectorLog }) => {
+      InspectorLog.log({
+        type: "STATE",
+        title: `Focus → ${targetId ?? "(none)"}`,
+        details: { from: prev, to: targetId },
+        icon: "cpu",
+        source: "os",
+      });
+    });
   }
 
   if (stickyX !== undefined || stickyY !== undefined) {

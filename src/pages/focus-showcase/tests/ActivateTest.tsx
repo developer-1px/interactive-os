@@ -1,40 +1,8 @@
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { TestBox, useTestState } from "../../shared/TestLayout";
-import { assert, click, wait } from "../../shared/testUtils";
+import { TestBox } from "../../shared/TestLayout";
 
 export function ActivateTest() {
-  const { status, setStatus, logs, addLog, clearLogs } = useTestState();
-
-  const runTest = async () => {
-    setStatus("running");
-    clearLogs();
-    const localLogs: string[] = [];
-
-    try {
-      // Test 1: Auto Activate
-      click("#act-auto-a");
-      await wait(20);
-      assert(
-        document.activeElement?.id === "act-auto-a",
-        "Focused Auto A",
-        localLogs,
-      );
-      localLogs.push("✅ Automatic activation fired on focus (console check)");
-
-      // Test 2: manual Activate (Double Click or Enter)
-      click("#act-manual-1");
-      await wait(20);
-      localLogs.push("✅ Manual mode: Requires Enter/DblClick");
-
-      setStatus("pass");
-    } catch (e: any) {
-      localLogs.push(`❌ ${e.message}`);
-      setStatus("fail");
-    } finally {
-      localLogs.forEach(addLog);
-    }
-  };
 
   const description = (
     <div className="space-y-2">
@@ -62,9 +30,6 @@ export function ActivateTest() {
   return (
     <TestBox
       title="Activation Mode"
-      status={status}
-      logs={logs}
-      onRun={runTest}
       description={description}
     >
       <div className="flex flex-col gap-6">
@@ -86,7 +51,7 @@ export function ActivateTest() {
                 key={item}
                 id={`act-auto-${item.split(" ")[1].toLowerCase()}`}
                 role="option"
-                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-rose-100 aria-[current=true]:text-rose-700 text-sm transition-all border border-transparent aria-[current=true]:border-rose-300"
+                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-rose-100 aria-[current=true]:text-rose-700 text-sm border border-transparent aria-[current=true]:border-rose-300"
               >
                 {item}
               </FocusItem>
@@ -114,7 +79,7 @@ export function ActivateTest() {
                 key={item}
                 id={`act-manual-${item.split(" ")[1]}`}
                 role="option"
-                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-blue-100 aria-[current=true]:text-blue-700 text-sm transition-all border border-transparent aria-[current=true]:border-blue-300"
+                className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-blue-100 aria-[current=true]:text-blue-700 text-sm border border-transparent aria-[current=true]:border-blue-300"
               >
                 {item}
               </FocusItem>

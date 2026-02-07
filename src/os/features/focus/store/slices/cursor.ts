@@ -20,10 +20,12 @@ export const createCursorSlice: StateCreator<CursorSlice> = (set) => ({
   recoveryTargetId: null,
 
   setFocus: (itemId) =>
-    set((state) => ({
-      focusedItemId: itemId,
-      lastFocusedId: itemId ?? state.lastFocusedId,
-      // Reset recovery target on manual focus - it will be recomputed by OS if needed
-      recoveryTargetId: null,
-    })),
+    set((state) => {
+      if (state.focusedItemId === itemId) return state;
+      return {
+        focusedItemId: itemId,
+        lastFocusedId: itemId ?? state.lastFocusedId,
+        recoveryTargetId: null,
+      };
+    }),
 });

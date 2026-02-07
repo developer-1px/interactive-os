@@ -2,8 +2,11 @@
  * createEngine - Command Engine Factory
  * Creates a CommandRegistry and Store from an AppDefinition.
  *
- * OS built-in middleware (navigation, history) are auto-applied
- * before any app-specific middleware.
+ * OS built-in middleware are auto-applied in order:
+ * 1. resolveFocusMiddleware (PRE: OS.FOCUS resolution)
+ * 2. navigationMiddleware (POST: effects → zone state)
+ * 3. historyMiddleware (POST: undo/redo recording)
+ * 4. App custom middleware (if any)
  */
 
 import type { AppDefinition } from "@os/features/application/defineApplication";
@@ -24,25 +27,14 @@ export function createEngine<S>(definition: AppDefinition<S>) {
   ALL_OS_COMMANDS.forEach((cmd) => registry.register(cmd));
   registry.setKeymap(definition.keymap);
 
-  // OS built-in middleware chain (runs before app middleware)
-  const osStateMiddleware = [navigationMiddleware, historyMiddleware];
-
   const store = createCommandStore(registry, definition.model.initial, {
     persistence: definition.model.persistence,
-    // OS-level middleware for all apps
-    middleware: [resolveFocusMiddleware],
-    onStateChange: (state: S, action: any, prev: S) => {
-      // 1. OS built-in middleware (navigation → history)
-      let s = state;
-      for (const mw of osStateMiddleware) {
-        s = (mw as any)(s, action, prev);
-      }
-      // 2. App-specific middleware (custom)
-      if (definition.middleware) {
-        s = definition.middleware.reduce((acc, mw) => mw(acc, action, prev), s);
-      }
-      return s;
-    },
+    middleware: [
+      resolveFocusMiddleware,   // PRE: resolve OS.FOCUS
+      navigationMiddleware,     // POST: effects → zone state
+      historyMiddleware,        // POST: undo/redo recording
+      ...(definition.middleware || []),  // App custom
+    ],
   });
 
   return { registry, store };

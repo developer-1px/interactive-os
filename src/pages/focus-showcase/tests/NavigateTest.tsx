@@ -1,69 +1,8 @@
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { TestBox, useTestState } from "../../shared/TestLayout";
-import { assert, click, navigate, wait } from "../../shared/testUtils";
+import { TestBox } from "../../shared/TestLayout";
 
 export function NavigateTest() {
-  const { status, setStatus, logs, addLog, clearLogs } = useTestState();
-
-  const runTest = async () => {
-    setStatus("running");
-    clearLogs();
-    const localLogs: string[] = [];
-
-    try {
-      // Test 1: Vertical List (Loop)
-      click("#nav-apple");
-      await wait(100);
-      navigate("UP");
-      await wait(100);
-      assert(
-        document.querySelector("#nav-cherry")?.getAttribute("aria-current") ===
-          "true",
-        "Vertical Loop UP -> Cherry",
-        localLogs,
-      );
-
-      // Test 2: Horizontal Toolbar (No Loop)
-      click("#nav-bold");
-      await wait(100);
-      navigate("LEFT");
-      await wait(100);
-      assert(
-        document.querySelector("#nav-bold")?.getAttribute("aria-current") ===
-          "true",
-        "Horizontal No-Loop LEFT -> Blocked",
-        localLogs,
-      );
-
-      // Test 3: Grid Spatial
-      click("#nav-cell-0");
-      await wait(100);
-      navigate("RIGHT");
-      await wait(100);
-      assert(
-        document.querySelector("#nav-cell-1")?.getAttribute("aria-current") ===
-          "true",
-        "2D Spatial RIGHT",
-        localLogs,
-      );
-      navigate("DOWN");
-      await wait(100);
-      assert(
-        document.querySelector("#nav-cell-4")?.getAttribute("aria-current") ===
-          "true",
-        "2D Spatial DOWN",
-        localLogs,
-      );
-
-      setStatus("pass");
-    } catch (e: any) {
-      localLogs.push(`❌ ${e.message}`);
-      setStatus("fail");
-    } finally {
-      localLogs.forEach(addLog);
-    }
-  };
 
   const description = (
     <div className="space-y-2">
@@ -95,9 +34,6 @@ export function NavigateTest() {
   return (
     <TestBox
       title="Directional Navigation"
-      status={status}
-      logs={logs}
-      onRun={runTest}
       description={description}
     >
       <div className="flex flex-col gap-6">

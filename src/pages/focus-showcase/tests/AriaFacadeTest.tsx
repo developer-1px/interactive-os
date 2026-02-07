@@ -1,91 +1,8 @@
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { TestBox, useTestState } from "../../shared/TestLayout";
-import { assert, click, navigate, wait } from "../../shared/testUtils";
+import { TestBox } from "../../shared/TestLayout";
 
 export function AriaFacadeTest() {
-  const { status, setStatus, logs, addLog, clearLogs } = useTestState();
-
-  const runTest = async () => {
-    setStatus("running");
-    clearLogs();
-    const localLogs: string[] = [];
-
-    try {
-      // Test 1: Tabs ARIA Verification
-      click("#aria-tab-1");
-      await wait(100);
-
-      const tab1 = document.getElementById("aria-tab-1");
-      assert(
-        tab1?.getAttribute("role") === "tab",
-        "Tab 1 has correct role",
-        localLogs,
-      );
-      assert(
-        tab1?.getAttribute("aria-selected") === "true",
-        "Tab 1 is selected (simulated)",
-        localLogs,
-      );
-      assert(
-        tab1?.getAttribute("aria-controls") === "panel-1",
-        "Tab 1 controls correct panel",
-        localLogs,
-      );
-      assert(
-        tab1?.getAttribute("aria-current") === "true",
-        "Tab 1 is focused initially",
-        localLogs,
-      );
-
-      navigate("RIGHT");
-      await wait(100);
-      const tab2 = document.getElementById("aria-tab-2");
-      assert(
-        tab2?.getAttribute("aria-current") === "true",
-        "Tab 2 is focused",
-        localLogs,
-      );
-
-      // Test 2: Radiogroup Verification
-      click("#aria-radio-b");
-      await wait(100);
-
-      navigate("DOWN");
-      await wait(100);
-      const radioC = document.getElementById("aria-radio-c");
-      assert(
-        radioC?.getAttribute("role") === "radio",
-        "Radio C has correct role",
-        localLogs,
-      );
-      assert(
-        radioC?.getAttribute("aria-checked") === "false",
-        "Radio C is visually unchecked",
-        localLogs,
-      );
-
-      // Test 3: Listbox Facade
-      const listbox = document.getElementById("aria-listbox");
-      assert(
-        listbox?.getAttribute("role") === "listbox",
-        'FocusGroup passes through role="listbox"',
-        localLogs,
-      );
-      assert(
-        listbox?.getAttribute("aria-orientation") === "vertical",
-        "FocusGroup maps orientation to aria-orientation",
-        localLogs,
-      );
-
-      setStatus("pass");
-    } catch (e: any) {
-      localLogs.push(`❌ ${e.message}`);
-      setStatus("fail");
-    } finally {
-      localLogs.forEach(addLog);
-    }
-  };
 
   const description = (
     <div className="space-y-2">
@@ -117,9 +34,6 @@ export function AriaFacadeTest() {
   return (
     <TestBox
       title="ARIA Standard Facade"
-      status={status}
-      logs={logs}
-      onRun={runTest}
       description={description}
     >
       <div className="flex flex-col gap-6">

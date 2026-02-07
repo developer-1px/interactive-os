@@ -9,8 +9,9 @@ import { useEngine } from "@os/features/command/ui/CommandContext";
  */
 export function TodoPanel() {
   const { state } = useEngine<AppState>();
-  if (!state || !state.ui) return null;
-  const isBoard = state.ui.viewMode === "board";
 
+  if (!state || !state.ui) return null;
+
+  const isBoard = state.ui.viewMode === "board";
   return isBoard ? <BoardView /> : <ListView />;
 }

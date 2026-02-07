@@ -59,6 +59,12 @@ export const FocusData = {
    */
   set(el: HTMLElement, data: ZoneData): void {
     zoneDataMap.set(el, data);
+
+    // If we are updating the active zone (e.g. remount or config change),
+    // notify listeners so they refresh their data reference (store).
+    if (activeZoneId && el.id === activeZoneId) {
+      activeZoneListeners.forEach((fn) => fn());
+    }
   },
 
   /**
@@ -85,8 +91,20 @@ export const FocusData = {
     if (activeZoneId !== zoneId) {
       // ── Loop Guard: prevent zone flip-flop ──
       if (!activeZoneGuard.check()) return;
+      const prev = activeZoneId;
       activeZoneId = zoneId;
       activeZoneListeners.forEach((fn) => fn());
+
+      // Inspector Stream
+      import("../../inspector/InspectorLogStore").then(({ InspectorLog }) => {
+        InspectorLog.log({
+          type: "STATE",
+          title: `Zone → ${zoneId ?? "(none)"}`,
+          details: { from: prev, to: zoneId },
+          icon: "cpu",
+          source: "os",
+        });
+      });
     }
   },
 
@@ -208,7 +226,16 @@ export const FocusData = {
     focusStack.push(entry);
     focusStackListeners.forEach((fn) => fn());
 
-    console.log("[FocusStack] PUSH:", entry, "depth:", focusStack.length);
+    // Inspector Stream
+    import("../../inspector/InspectorLogStore").then(({ InspectorLog }) => {
+      InspectorLog.log({
+        type: "STATE",
+        title: `FocusStack PUSH (depth: ${focusStack.length})`,
+        details: entry,
+        icon: "cpu",
+        source: "os",
+      });
+    });
   },
 
   /**
@@ -220,7 +247,16 @@ export const FocusData = {
     const entry = focusStack.pop() ?? null;
     focusStackListeners.forEach((fn) => fn());
 
-    console.log("[FocusStack] POP:", entry, "depth:", focusStack.length);
+    // Inspector Stream
+    import("../../inspector/InspectorLogStore").then(({ InspectorLog }) => {
+      InspectorLog.log({
+        type: "STATE",
+        title: `FocusStack POP (depth: ${focusStack.length})`,
+        details: entry,
+        icon: "cpu",
+        source: "os",
+      });
+    });
     return entry;
   },
 

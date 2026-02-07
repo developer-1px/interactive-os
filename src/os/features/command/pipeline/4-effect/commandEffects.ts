@@ -2,7 +2,7 @@
  * Phase 4: EFFECT
  *
  * Responsibility: Handle post-execution side effects (Telemetry, UI Feedback).
- * This ensures observability and consistency.
+ * Note: COMMAND logging is handled centrally by CommandEngineStore.dispatch().
  */
 
 import { CommandTelemetryStore } from "../../store/CommandTelemetryStore";
@@ -20,19 +20,7 @@ export function runCommandEffects(
       resolution.resolvedArgs,
       result.handlerType as "app" | "os",
     );
-
-    // Inspector Stream
-    import("../../store/../../../features/inspector/InspectorLogStore").then(({ InspectorLog }) => {
-      InspectorLog.log({
-        type: "COMMAND",
-        title: result.commandId,
-        details: resolution.resolvedArgs,
-        icon: "zap",
-        source: result.handlerType as string,
-      });
-    });
   } else {
-    // Optional: Log failures?
     console.warn(
       `[CommandPipeline] Failed to dispatch ${result.commandId}:`,
       result.error,
