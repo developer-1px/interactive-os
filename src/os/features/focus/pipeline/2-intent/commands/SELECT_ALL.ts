@@ -6,15 +6,15 @@
 import type { OSCommand } from "../../core/osCommand";
 
 export const SELECT_ALL: OSCommand<void> = {
-    run: (ctx) => {
-        const items = ctx.dom.items;
-        if (!items.length) return null;
+  run: (ctx) => {
+    const items = ctx.dom.items;
+    if (!items.length) return null;
 
-        return {
-            state: {
-                selection: [...items],
-                selectionAnchor: ctx.selectionAnchor || items[0],
-            },
-        };
-    },
+    return {
+      state: {
+        selection: [...items],
+        selectionAnchor: ctx.selectionAnchor || items[0],
+      },
+    };
+  },
 };

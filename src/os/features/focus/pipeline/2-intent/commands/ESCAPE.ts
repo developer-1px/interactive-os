@@ -14,21 +14,21 @@ import type { OSCommand, OSContext, OSResult } from "../../core/osCommand";
 // ═══════════════════════════════════════════════════════════════════
 
 function handleDeselect(ctx: OSContext): OSResult | null {
-    if (ctx.selection.length === 0) return null;
+  if (ctx.selection.length === 0) return null;
 
-    return {
-        state: {
-            selection: [],
-            selectionAnchor: null,
-        },
-    };
+  return {
+    state: {
+      selection: [],
+      selectionAnchor: null,
+    },
+  };
 }
 
 function handleClose(): OSResult {
-    return {
-        state: { focusedItemId: null },
-        domEffects: [{ type: "BLUR" }],
-    };
+  return {
+    state: { focusedItemId: null },
+    domEffects: [{ type: "BLUR" }],
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -36,14 +36,14 @@ function handleClose(): OSResult {
 // ═══════════════════════════════════════════════════════════════════
 
 export const ESCAPE: OSCommand<{}> = {
-    run: (ctx, _payload) => {
-        switch (ctx.config.dismiss.escape) {
-            case "deselect":
-                return handleDeselect(ctx);
-            case "close":
-                return handleClose();
-            default:
-                return null;
-        }
-    },
+  run: (ctx, _payload) => {
+    switch (ctx.config.dismiss.escape) {
+      case "deselect":
+        return handleDeselect(ctx);
+      case "close":
+        return handleClose();
+      default:
+        return null;
+    }
+  },
 };

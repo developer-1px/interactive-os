@@ -287,24 +287,9 @@ export function FocusGroup({
         aria-multiselectable={config.select.mode === "multiple" || undefined}
         role={role || "group"}
         tabIndex={-1}
-        onFocus={(e) => {
-          const target = e.target as HTMLElement;
-          const nearestGroup = target.closest('[data-focus-group]');
-
-          // Only handle if this is the nearest FocusGroup (not nested)
-          if (nearestGroup !== e.currentTarget) return;
-
-          // Only activate zone if focus is entering from outside (React Aria pattern)
-          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-            FocusData.setActiveZone(groupId);
-          }
-        }}
-        onBlur={(e) => {
-          // Deactivate zone if focus is leaving to outside
-          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-            FocusData.setActiveZone(null);
-          }
-        }}
+        // onFocus & onBlur removed:
+        // Zone activation is now handled by FocusSensor (focusin -> SYNC_FOCUS -> setActiveZone)
+        // This prevents race conditions and cyclic dependencies.
         className={className || undefined}
         data-orientation={orientation}
         style={{ outline: 'none', ...style }}

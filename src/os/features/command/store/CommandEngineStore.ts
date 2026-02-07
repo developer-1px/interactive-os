@@ -8,7 +8,6 @@
 
 import type { BaseCommand } from "@os/entities/BaseCommand";
 import type { CommandRegistry } from "@os/features/command/model/createCommandStore";
-import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
 import { InspectorLog } from "@os/features/inspector/InspectorLogStore";
 import { create } from "zustand";
 
@@ -125,39 +124,14 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
 // ═══════════════════════════════════════════════════════════════════
 
 export const CommandEngineStore = {
-  /** App 커맨드 실행 — 활성 앱의 dispatch로 라우팅 */
+  /** 커맨드 실행 — 활성 앱의 dispatch로 라우팅 (유일한 진입점) */
   dispatch: (cmd: BaseCommand) => {
     const dispatch = useCommandEngineStore.getState().getActiveDispatch();
     if (dispatch) {
-      InspectorLog.log({
-        type: "COMMAND",
-        title: cmd.type,
-        details: cmd,
-        icon: "terminal",
-        source: "app",
-      });
       dispatch(cmd);
     } else {
-      InspectorLog.log({
-        type: "SYSTEM",
-        title: `⚠ Command Dropped: ${cmd.type}`,
-        details: { reason: "No active app dispatch", cmd },
-        icon: "alert-triangle",
-        source: "os",
-      });
+      console.warn(`[CommandEngine] Command dropped (no active app): ${cmd.type}`);
     }
-  },
-
-  /** OS 커맨드 실행 — EventBus 경유 (ClipboardIntent, HistoryIntent 등) */
-  dispatchOS: (cmd: BaseCommand) => {
-    InspectorLog.log({
-      type: "COMMAND",
-      title: cmd.type,
-      details: cmd,
-      icon: "terminal",
-      source: "os",
-    });
-    useCommandEventBus.getState().emit(cmd);
   },
 
   /** 앱 상태 스냅샷 (TestBot용) */

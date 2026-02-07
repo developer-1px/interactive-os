@@ -14,6 +14,7 @@ import {
 import { dispatchCommand } from "@os/features/command/pipeline/3-dispatch/dispatchCommand";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
 import { FocusData } from "@os/features/focus/lib/focusData";
+import { setCurrentInput } from "@os/features/focus/pipeline/core/osCommand";
 import type { KeyboardIntent } from "../../types";
 
 /**
@@ -71,8 +72,9 @@ export function routeCommand(intent: KeyboardIntent): boolean {
     resolution.binding.command,
   );
 
-  // Dispatch
-  const result = dispatchCommand(resolution);
+  // Dispatch (set ambient context for auto INPUT logging in runOS)
+  if (intent.originalEvent) setCurrentInput(intent.originalEvent as Event);
+  dispatchCommand(resolution);
 
   // Telemetry
   useInputTelemetry

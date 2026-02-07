@@ -16,7 +16,6 @@ import {
   isValidElement,
   type ReactElement,
   type ReactNode,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -32,8 +31,6 @@ import {
   isExpandableRole,
 } from "../registry/roleRegistry";
 import { useFocusGroupContext } from "./FocusGroup";
-import { CommandEngineStore } from "../../command/store/CommandEngineStore";
-import { OS_COMMANDS } from "../../command/definitions/commandsShell";
 
 // ═══════════════════════════════════════════════════════════════════
 // Props

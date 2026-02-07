@@ -1,6 +1,8 @@
 import { logger } from "@os/app/debug/logger";
 import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
 import { dispatchGuard } from "@os/lib/loopGuard";
+import { InspectorLog } from "@os/features/inspector/InspectorLogStore";
+import { consumeCurrentInput } from "@os/features/focus/pipeline/core/osCommand";
 // Modules
 import {
   type CommandGroup,
@@ -52,7 +54,19 @@ export function createCommandStore<
         try {
           // ── Core Dispatch: Registry Lookup + Command Execution ──
           const coreDispatch: Next<S, A> = (state, act) => {
-            // 1. Emit to event bus
+            // ① INPUT logging (consume ambient context)
+            consumeCurrentInput();
+
+            // ② COMMAND logging
+            InspectorLog.log({
+              type: "COMMAND",
+              title: act.type,
+              details: act,
+              icon: "terminal",
+              source: "os",
+            });
+
+            // ③ Emit to event bus (OS handlers like FocusIntent)
             useCommandEventBus.getState().emit(act as any);
 
             // 2. Hierarchical Command Lookup

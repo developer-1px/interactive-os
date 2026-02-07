@@ -46,7 +46,6 @@ export const OS_COMMANDS = {
 
   // --- Window/Shell (The "Desktop" Layer) ---
   TOGGLE_INSPECTOR: "OS_TOGGLE_INSPECTOR",
-
 } as const;
 
 export type OSCommandType = (typeof OS_COMMANDS)[keyof typeof OS_COMMANDS];
@@ -89,9 +88,9 @@ export type OSCommand =
   | { type: typeof OS_COMMANDS.ACTIVATE; payload?: OSActivatePayload }
   | { type: typeof OS_COMMANDS.ESCAPE; payload?: void }
   | {
-    type: typeof OS_COMMANDS.FIELD_START_EDIT;
-    payload?: { fieldId?: string };
-  }
+      type: typeof OS_COMMANDS.FIELD_START_EDIT;
+      payload?: { fieldId?: string };
+    }
   | { type: typeof OS_COMMANDS.FIELD_COMMIT; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.FIELD_CANCEL; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.UNDO; payload?: any }
@@ -101,6 +100,4 @@ export type OSCommand =
   | { type: typeof OS_COMMANDS.PASTE; payload?: any }
   | { type: typeof OS_COMMANDS.DELETE; payload?: any }
   | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: any }
-  | { type: typeof OS_COMMANDS.RECOVER; payload?: any }
-
-export const SYNC_FOCUS = 'OS_SYNC_FOCUS';
+  | { type: typeof OS_COMMANDS.RECOVER; payload?: any };

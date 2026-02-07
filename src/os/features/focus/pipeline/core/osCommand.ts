@@ -9,9 +9,9 @@
 
 import { DOM } from "../../lib/dom";
 import { FocusData } from "../../lib/focusData";
+import { InspectorLog } from "../../../inspector/InspectorLogStore";
 import type { FocusGroupStore } from "../../store/focusGroupStore";
 import type { FocusGroupConfig } from "../../types";
-
 
 // ═══════════════════════════════════════════════════════════════════
 // Context (모든 Read)
@@ -196,6 +196,77 @@ let _isRunning = false;
 let _callCount = 0;
 let _callResetTimer: ReturnType<typeof setTimeout> | null = null;
 
+export function isOSCommandRunning(): boolean {
+  return _isRunning;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Ambient Context — Input Event for auto-logging
+// ═══════════════════════════════════════════════════════════════════
+
+let _currentInput: Event | null = null;
+
+/**
+ * Set the current input event before dispatching a command.
+ * runOS will consume it once for INPUT logging.
+ * Works because dispatch → eventBus → handler → runOS is all synchronous.
+ */
+export function setCurrentInput(event: Event): void {
+  _currentInput = event;
+}
+
+/**
+ * Consume and log the current input event.
+ * Called by coreDispatch to guarantee INPUT → COMMAND ordering.
+ */
+export function consumeCurrentInput(): void {
+  if (_currentInput) {
+    logInput(_currentInput);
+    _currentInput = null;
+  }
+}
+
+function logInput(event: Event): void {
+  const target = event.target as HTMLElement;
+
+  if (event instanceof MouseEvent && event.type === "mousedown") {
+    InspectorLog.log({
+      type: "INPUT",
+      title: "mousedown",
+      details: {
+        target: target.id || target.tagName.toLowerCase(),
+        position: { x: event.clientX, y: event.clientY },
+        button: event.button,
+        modifiers: { shift: event.shiftKey, ctrl: event.ctrlKey, meta: event.metaKey, alt: event.altKey },
+      },
+      icon: "cursor",
+      source: "user",
+      inputSource: "mouse",
+    });
+  } else if (event instanceof KeyboardEvent && event.type === "keydown") {
+    InspectorLog.log({
+      type: "INPUT",
+      title: event.key,
+      details: {
+        code: event.code,
+        modifiers: { shift: event.shiftKey, ctrl: event.ctrlKey, meta: event.metaKey, alt: event.altKey },
+      },
+      icon: "keyboard",
+      source: "user",
+      inputSource: "keyboard",
+    });
+  } else if (event.type === "focusin") {
+    InspectorLog.log({
+      type: "INPUT",
+      title: "focusin",
+      details: {
+        target: target.id || target.tagName.toLowerCase(),
+      },
+      icon: "eye",
+      source: "user",
+    });
+  }
+}
 export function runOS<P>(
   command: OSCommand<P>,
   payload: P,
@@ -204,10 +275,18 @@ export function runOS<P>(
   // Loop detection: if called more than 50 times in 500ms, something is wrong
   _callCount++;
   if (!_callResetTimer) {
-    _callResetTimer = setTimeout(() => { _callCount = 0; _callResetTimer = null; }, 500);
+    _callResetTimer = setTimeout(() => {
+      _callCount = 0;
+      _callResetTimer = null;
+    }, 500);
   }
   if (_callCount > 50) {
-    console.error("[runOS] 🔴 Excessive calls detected!", _callCount, "payload:", payload);
+    console.error(
+      "[runOS] 🔴 Excessive calls detected!",
+      _callCount,
+      "payload:",
+      payload,
+    );
     return false;
   }
 
@@ -249,6 +328,36 @@ export function runOS<P>(
                 : (next ?? prev); // default 'next'
         }
       }
+
+      // --- Auto STATE Logging ---
+      // Focus Change
+      if (
+        result.state.focusedItemId !== undefined &&
+        result.state.focusedItemId !== ctx.focusedItemId
+      ) {
+        InspectorLog.log({
+          type: "STATE",
+          title: `Focus → ${result.state.focusedItemId ?? "(none)"}`,
+          details: { zoneId: ctx.zoneId, from: ctx.focusedItemId, to: result.state.focusedItemId },
+          icon: "eye",
+          source: "os",
+        });
+      }
+
+      // Selection Change
+      if (
+        result.state.selection !== undefined &&
+        JSON.stringify(result.state.selection) !== JSON.stringify(ctx.selection)
+      ) {
+        InspectorLog.log({
+          type: "STATE",
+          title: `Selection (${result.state.selection.length})`,
+          details: { zoneId: ctx.zoneId, from: ctx.selection, to: result.state.selection },
+          icon: "cpu",
+          source: "os",
+        });
+      }
+
       ctx.store.setState(result.state);
     }
 
@@ -292,7 +401,7 @@ function executeDOMEffect(effect: DOMEffect): void {
     }
     case "SCROLL_INTO_VIEW": {
       const el = DOM.getItem(effect.targetId);
-      if (el) console.log('[osCommand] scrollIntoView:', effect.targetId, el);
+      if (el) console.log("[osCommand] scrollIntoView:", effect.targetId, el);
       el?.scrollIntoView({ block: "nearest", inline: "nearest" });
       break;
     }

@@ -49,7 +49,7 @@ const OS_SHELL_COMMANDS: CommandDefinition<any, any>[] = [
       return state;
     },
   },
-  { id: SHELL_COMMANDS.EXIT, run: (state) => state },
+  { id: SHELL_COMMANDS.ESCAPE, run: (state) => state },
   { id: SHELL_COMMANDS.UNDO, run: (state) => state },
   { id: SHELL_COMMANDS.REDO, run: (state) => state },
 ];

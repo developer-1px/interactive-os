@@ -8,14 +8,14 @@
 import type { OSCommand, OSResult } from "../../core/osCommand";
 
 export const SYNC_FOCUS: OSCommand<{ id: string; zoneId: string }> = {
-    run: (_ctx, payload) => {
-        // Only update state, NO DOM effects
-        const result: OSResult = {
-            state: { focusedItemId: payload.id },
-            activeZoneId: payload.zoneId,
-            // No domEffects!
-        };
+  run: (_ctx, payload) => {
+    // Only update state, NO DOM effects
+    const result: OSResult = {
+      state: { focusedItemId: payload.id },
+      activeZoneId: payload.zoneId,
+      // No domEffects!
+    };
 
-        return result;
-    },
+    return result;
+  },
 };

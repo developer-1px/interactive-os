@@ -1,6 +1,6 @@
 import { Icon } from "@/lib/Icon";
 import { type LogEntry, useInspectorLogStore } from "@os/features/inspector/InspectorLogStore";
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 
 /**
  * EventStream - Unified Inspector Stream
