@@ -426,47 +426,103 @@ export function runOS<P>(
 }
 
 function executeDOMEffect(effect: DOMEffect): void {
+  const records: Array<{
+    action: string;
+    targetId: string | null;
+    executed: boolean;
+    reason?: string;
+  }> = [];
+
   switch (effect.type) {
     case "FOCUS": {
       const el = DOM.getItem(effect.targetId);
       if (el) {
         el.focus({ preventScroll: true });
-        // Auto-scroll only for non-mouse input (mouse clicks are already visible)
-        if (_lastInputSource !== "mouse") {
+        records.push({
+          action: "focus",
+          targetId: effect.targetId,
+          executed: true,
+        });
+
+        // Auto-scroll only for non-mouse input
+        const shouldScroll = _lastInputSource !== "mouse";
+        if (shouldScroll) {
           el.scrollIntoView({ block: "nearest", inline: "nearest" });
         }
+        records.push({
+          action: "scrollIntoView",
+          targetId: effect.targetId,
+          executed: shouldScroll,
+          reason: shouldScroll ? undefined : "mouse_input",
+        });
+      } else {
+        records.push({
+          action: "focus",
+          targetId: effect.targetId,
+          executed: false,
+          reason: "element_not_found",
+        });
       }
       break;
     }
     case "SCROLL_INTO_VIEW": {
       const el = DOM.getItem(effect.targetId);
-      if (_lastInputSource !== "mouse") {
-        el?.scrollIntoView({ block: "nearest", inline: "nearest" });
+      const shouldScroll = _lastInputSource !== "mouse";
+      if (shouldScroll && el) {
+        el.scrollIntoView({ block: "nearest", inline: "nearest" });
       }
+      records.push({
+        action: "scrollIntoView",
+        targetId: effect.targetId,
+        executed: shouldScroll && !!el,
+        reason: !shouldScroll
+          ? "mouse_input"
+          : !el
+            ? "element_not_found"
+            : undefined,
+      });
       break;
     }
     case "BLUR": {
       (document.activeElement as HTMLElement)?.blur();
+      records.push({ action: "blur", targetId: null, executed: true });
       break;
     }
     case "CLICK": {
       const el = DOM.getItem(effect.targetId);
       if (el) {
         el.click();
+        records.push({
+          action: "click",
+          targetId: effect.targetId,
+          executed: true,
+        });
+      } else {
+        records.push({
+          action: "click",
+          targetId: effect.targetId,
+          executed: false,
+          reason: "element_not_found",
+        });
       }
       break;
     }
   }
 
-  // --- EFFECT Logging ---
-  InspectorLog.log({
-    type: "EFFECT",
-    title: effect.type,
-    details: {
-      targetId: "targetId" in effect ? effect.targetId : undefined,
-      inputSource: _lastInputSource,
-    },
-    icon: effect.type === "FOCUS" ? "eye" : "cpu",
-    source: "os",
-  });
+  // --- EFFECT Logging (one log per record) ---
+  for (const record of records) {
+    InspectorLog.log({
+      type: "EFFECT",
+      title: effect.type,
+      details: {
+        action: record.action,
+        targetId: record.targetId,
+        executed: record.executed,
+        reason: record.reason,
+        inputSource: _lastInputSource,
+      },
+      icon: record.executed ? "eye" : "eye-off",
+      source: "os",
+    });
+  }
 }
