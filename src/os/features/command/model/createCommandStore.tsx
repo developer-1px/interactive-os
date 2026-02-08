@@ -6,8 +6,13 @@ import {
   CommandRegistry,
 } from "@os/features/command/model/CommandRegistry";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { consumeCurrentInput } from "@os/features/focus/pipeline/core/osCommand";
-import { InspectorLog } from "@os/features/inspector/InspectorLogStore";
+import {
+  consumeInputInfo,
+  consumeCollectedEffects,
+} from "@os/features/focus/pipeline/core/osCommand";
+import { TransactionLog } from "@os/features/inspector/InspectorLogStore";
+import { computeDiff } from "@os/schema";
+import { buildCurrentSnapshot } from "@os/features/focus/schema/analyzer";
 import { GroupRegistry } from "@os/features/jurisdiction/model/GroupRegistry";
 // Middleware is now injected via config!
 import {
@@ -52,21 +57,14 @@ export function createCommandStore<
         // ── Loop Guard: prevent recursive dispatch ──
         if (!dispatchGuard.enter()) return prev;
         try {
+          // ── Transaction Boundary ──
+          // ① Capture input info + before snapshot
+          const inputInfo = consumeInputInfo();
+          const beforeSnapshot = buildCurrentSnapshot();
+
           // ── Core Dispatch: Registry Lookup + Command Execution ──
           const coreDispatch: Next<S, A> = (state, act) => {
-            // ① INPUT logging (consume ambient context)
-            consumeCurrentInput();
-
-            // ② COMMAND logging
-            InspectorLog.log({
-              type: "COMMAND",
-              title: act.type,
-              details: act,
-              icon: "terminal",
-              source: "os",
-            });
-
-            // ③ Emit to event bus (OS handlers like FocusIntent)
+            // ① Emit to event bus (OS handlers like FocusIntent → runOS)
             useCommandEventBus.getState().emit(act as any);
 
             // 2. Hierarchical Command Lookup
@@ -110,6 +108,21 @@ export function createCommandStore<
 
           // ── Execute Pipeline ──
           const finalState = pipeline(prev.state, action);
+
+          // ── Transaction Commit ──
+          // ② Capture after snapshot with collected effects
+          const effects = consumeCollectedEffects();
+          const afterSnapshot = buildCurrentSnapshot(effects);
+
+          // ③ Compute diff + record transaction
+          const diff = computeDiff(beforeSnapshot, afterSnapshot);
+
+          TransactionLog.add({
+            input: inputInfo,
+            command: { type: action.type, payload: action.payload },
+            snapshot: afterSnapshot,
+            diff,
+          });
 
           // ── Persistence (Side Effect) ──
           persist(finalState);

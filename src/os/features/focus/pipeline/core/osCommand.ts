@@ -7,7 +7,8 @@
  * - OSResult: State 변경 + DOM Effect
  */
 
-import { InspectorLog } from "../../../inspector/InspectorLogStore";
+import { createFocusEffect } from "@os/schema";
+import type { EffectRecord, InputSource as SchemaInputSource, TransactionInput } from "@os/schema";
 import { DOM } from "../../lib/dom";
 import { FocusData } from "../../lib/focusData";
 import type { FocusGroupStore } from "../../store/focusGroupStore";
@@ -204,7 +205,7 @@ export function isOSCommandRunning(): boolean {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Ambient Context — Input Event for auto-logging
+// Ambient Context — Input Tracking + Effect Collection
 // ═══════════════════════════════════════════════════════════════════
 
 let _currentInput: Event | null = null;
@@ -212,87 +213,55 @@ let _currentInput: Event | null = null;
 export type InputSource = "mouse" | "keyboard" | "programmatic";
 let _lastInputSource: InputSource = "programmatic";
 
+/** Collected effects during runOS execution */
+let _collectedEffects: EffectRecord[] = [];
+
+/** Pending input info for transaction building */
+let _pendingInput: TransactionInput | null = null;
+
 /**
  * Set the current input event before dispatching a command.
- * runOS will consume it once for INPUT logging.
- * Works because dispatch → eventBus → handler → runOS is all synchronous.
+ * Captures input info for transaction building.
  */
 export function setCurrentInput(event: Event): void {
   _currentInput = event;
-  // Classify input source for downstream consumers (e.g. scrollIntoView guard)
   if (event instanceof MouseEvent) {
     _lastInputSource = "mouse";
+    _pendingInput = { source: "mouse", raw: event.type };
   } else if (event instanceof KeyboardEvent) {
     _lastInputSource = "keyboard";
+    _pendingInput = { source: "keyboard", raw: event.key };
+  } else {
+    _pendingInput = { source: "programmatic", raw: event.type };
   }
 }
 
-/** Get the last input source. Used by executeDOMEffect to skip scrollIntoView on mouse input. */
+/** Get the last input source. */
 export function getLastInputSource(): InputSource {
   return _lastInputSource;
 }
 
-/**
- * Consume and log the current input event.
- * Called by coreDispatch to guarantee INPUT → COMMAND ordering.
- */
-export function consumeCurrentInput(): void {
-  if (_currentInput) {
-    logInput(_currentInput);
-    _currentInput = null;
-  }
+/** Consume input info for transaction building. Returns input and clears it. */
+export function consumeInputInfo(): TransactionInput {
+  const info = _pendingInput ?? { source: "programmatic" as const, raw: "system" };
+  _pendingInput = null;
+  _currentInput = null;
+  return info;
 }
 
-function logInput(event: Event): void {
-  const target = event.target as HTMLElement;
+/** Get collected effects and reset. Called after runOS completes. */
+export function consumeCollectedEffects(): EffectRecord[] {
+  const effects = _collectedEffects;
+  _collectedEffects = [];
+  return effects;
+}
 
-  if (event instanceof MouseEvent && event.type === "mousedown") {
-    InspectorLog.log({
-      type: "INPUT",
-      title: "mousedown",
-      details: {
-        target: target.id || target.tagName.toLowerCase(),
-        position: { x: event.clientX, y: event.clientY },
-        button: event.button,
-        modifiers: {
-          shift: event.shiftKey,
-          ctrl: event.ctrlKey,
-          meta: event.metaKey,
-          alt: event.altKey,
-        },
-      },
-      icon: "cursor",
-      source: "user",
-      inputSource: "mouse",
-    });
-  } else if (event instanceof KeyboardEvent && event.type === "keydown") {
-    InspectorLog.log({
-      type: "INPUT",
-      title: event.key,
-      details: {
-        code: event.code,
-        modifiers: {
-          shift: event.shiftKey,
-          ctrl: event.ctrlKey,
-          meta: event.metaKey,
-          alt: event.altKey,
-        },
-      },
-      icon: "keyboard",
-      source: "user",
-      inputSource: "keyboard",
-    });
-  } else if (event.type === "focusin") {
-    InspectorLog.log({
-      type: "INPUT",
-      title: "focusin",
-      details: {
-        target: target.id || target.tagName.toLowerCase(),
-      },
-      icon: "eye",
-      source: "user",
-    });
-  }
+/**
+ * @deprecated Use consumeInputInfo() instead.
+ * Kept for backward compat during migration.
+ */
+export function consumeCurrentInput(): void {
+  _currentInput = null;
 }
 export function runOS<P>(
   command: OSCommand<P>,
@@ -356,42 +325,7 @@ export function runOS<P>(
         }
       }
 
-      // --- Auto STATE Logging ---
-      // Focus Change
-      if (
-        result.state.focusedItemId !== undefined &&
-        result.state.focusedItemId !== ctx.focusedItemId
-      ) {
-        InspectorLog.log({
-          type: "STATE",
-          title: `Focus → ${result.state.focusedItemId ?? "(none)"}`,
-          details: {
-            zoneId: ctx.zoneId,
-            from: ctx.focusedItemId,
-            to: result.state.focusedItemId,
-          },
-          icon: "eye",
-          source: "os",
-        });
-      }
-
-      // Selection Change
-      if (
-        result.state.selection !== undefined &&
-        JSON.stringify(result.state.selection) !== JSON.stringify(ctx.selection)
-      ) {
-        InspectorLog.log({
-          type: "STATE",
-          title: `Selection (${result.state.selection.length})`,
-          details: {
-            zoneId: ctx.zoneId,
-            from: ctx.selection,
-            to: result.state.selection,
-          },
-          icon: "cpu",
-          source: "os",
-        });
-      }
+      // STATE logging removed — captured by Transaction snapshot + diff
 
       ctx.store.setState(result.state);
     }
@@ -426,42 +360,31 @@ export function runOS<P>(
 }
 
 function executeDOMEffect(effect: DOMEffect): void {
-  const records: Array<{
-    action: string;
-    targetId: string | null;
-    executed: boolean;
-    reason?: string;
-  }> = [];
-
   switch (effect.type) {
     case "FOCUS": {
       const el = DOM.getItem(effect.targetId);
       if (el) {
         el.focus({ preventScroll: true });
-        records.push({
-          action: "focus",
-          targetId: effect.targetId,
-          executed: true,
-        });
+        _collectedEffects.push(
+          createFocusEffect("focus", effect.targetId, true),
+        );
 
-        // Auto-scroll only for non-mouse input
         const shouldScroll = _lastInputSource !== "mouse";
         if (shouldScroll) {
           el.scrollIntoView({ block: "nearest", inline: "nearest" });
         }
-        records.push({
-          action: "scrollIntoView",
-          targetId: effect.targetId,
-          executed: shouldScroll,
-          reason: shouldScroll ? undefined : "mouse_input",
-        });
+        _collectedEffects.push(
+          createFocusEffect(
+            "scrollIntoView",
+            effect.targetId,
+            shouldScroll,
+            shouldScroll ? undefined : "mouse_input",
+          ),
+        );
       } else {
-        records.push({
-          action: "focus",
-          targetId: effect.targetId,
-          executed: false,
-          reason: "element_not_found",
-        });
+        _collectedEffects.push(
+          createFocusEffect("focus", effect.targetId, false, "element_not_found"),
+        );
       }
       break;
     }
@@ -471,58 +394,34 @@ function executeDOMEffect(effect: DOMEffect): void {
       if (shouldScroll && el) {
         el.scrollIntoView({ block: "nearest", inline: "nearest" });
       }
-      records.push({
-        action: "scrollIntoView",
-        targetId: effect.targetId,
-        executed: shouldScroll && !!el,
-        reason: !shouldScroll
-          ? "mouse_input"
-          : !el
-            ? "element_not_found"
-            : undefined,
-      });
+      _collectedEffects.push(
+        createFocusEffect(
+          "scrollIntoView",
+          effect.targetId,
+          shouldScroll && !!el,
+          !shouldScroll ? "mouse_input" : !el ? "element_not_found" : undefined,
+        ),
+      );
       break;
     }
     case "BLUR": {
       (document.activeElement as HTMLElement)?.blur();
-      records.push({ action: "blur", targetId: null, executed: true });
+      _collectedEffects.push(createFocusEffect("blur", null, true));
       break;
     }
     case "CLICK": {
       const el = DOM.getItem(effect.targetId);
       if (el) {
         el.click();
-        records.push({
-          action: "click",
-          targetId: effect.targetId,
-          executed: true,
-        });
+        _collectedEffects.push(
+          createFocusEffect("click", effect.targetId, true),
+        );
       } else {
-        records.push({
-          action: "click",
-          targetId: effect.targetId,
-          executed: false,
-          reason: "element_not_found",
-        });
+        _collectedEffects.push(
+          createFocusEffect("click", effect.targetId, false, "element_not_found"),
+        );
       }
       break;
     }
-  }
-
-  // --- EFFECT Logging (one log per record) ---
-  for (const record of records) {
-    InspectorLog.log({
-      type: "EFFECT",
-      title: effect.type,
-      details: {
-        action: record.action,
-        targetId: record.targetId,
-        executed: record.executed,
-        reason: record.reason,
-        inputSource: _lastInputSource,
-      },
-      icon: record.executed ? "eye" : "eye-off",
-      source: "os",
-    });
   }
 }

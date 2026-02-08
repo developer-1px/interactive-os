@@ -8,7 +8,7 @@
 
 import type { BaseCommand } from "@os/entities/BaseCommand";
 import type { CommandRegistry } from "@os/features/command/model/createCommandStore";
-import { InspectorLog } from "@os/features/inspector/InspectorLogStore";
+
 import { create } from "zustand";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -88,13 +88,7 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
   updateAppState: (appId, state) => {
     const entry = get().appRegistries.get(appId);
     if (entry) {
-      InspectorLog.log({
-        type: "STATE",
-        title: `State Update: ${appId}`,
-        details: state,
-        icon: "cpu",
-        source: "app",
-      });
+      // App state changes are captured by Transaction snapshot diff
 
       const newMap = new Map(get().appRegistries);
       newMap.set(appId, { ...entry, state });

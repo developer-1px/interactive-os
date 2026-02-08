@@ -93,22 +93,11 @@ export const FocusData = {
     if (activeZoneId !== zoneId) {
       // ── Loop Guard: prevent zone flip-flop ──
       if (!activeZoneGuard.check()) return;
-      const prev = activeZoneId;
       activeZoneId = zoneId;
       activeZoneListeners.forEach((fn) => {
         fn();
       });
-
-      // Inspector Stream
-      import("../../inspector/InspectorLogStore").then(({ InspectorLog }) => {
-        InspectorLog.log({
-          type: "STATE",
-          title: `Zone → ${zoneId ?? "(none)"}`,
-          details: { from: prev, to: zoneId },
-          icon: "cpu",
-          source: "os",
-        });
-      });
+      // Zone changes are captured by Transaction snapshot diff
     }
   },
 
@@ -231,17 +220,7 @@ export const FocusData = {
     focusStackListeners.forEach((fn) => {
       fn();
     });
-
-    // Inspector Stream
-    import("../../inspector/InspectorLogStore").then(({ InspectorLog }) => {
-      InspectorLog.log({
-        type: "STATE",
-        title: `FocusStack PUSH (depth: ${focusStack.length})`,
-        details: entry,
-        icon: "cpu",
-        source: "os",
-      });
-    });
+    // Stack changes are captured by Transaction snapshot diff
   },
 
   /**
@@ -254,17 +233,7 @@ export const FocusData = {
     focusStackListeners.forEach((fn) => {
       fn();
     });
-
-    // Inspector Stream
-    import("../../inspector/InspectorLogStore").then(({ InspectorLog }) => {
-      InspectorLog.log({
-        type: "STATE",
-        title: `FocusStack POP (depth: ${focusStack.length})`,
-        details: entry,
-        icon: "cpu",
-        source: "os",
-      });
-    });
+    // Stack changes are captured by Transaction snapshot diff
     return entry;
   },
 
@@ -316,13 +285,13 @@ export const FocusData = {
       const targetItemId = entry.itemId
         ? entry.itemId
         : (() => {
-            // Fallback: first focusable item in zone
-            const zoneEl = document.getElementById(entry.zoneId);
-            const firstItem = zoneEl?.querySelector(
-              "[data-item-id]",
-            ) as HTMLElement | null;
-            return firstItem?.id ?? null;
-          })();
+          // Fallback: first focusable item in zone
+          const zoneEl = document.getElementById(entry.zoneId);
+          const firstItem = zoneEl?.querySelector(
+            "[data-item-id]",
+          ) as HTMLElement | null;
+          return firstItem?.id ?? null;
+        })();
 
       if (!targetItemId) return;
 
