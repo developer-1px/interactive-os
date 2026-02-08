@@ -77,6 +77,7 @@ const SidebarItem = ({
     return (
       <div className="flex flex-col select-none">
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={clsx(
             "flex items-center gap-1.5 px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded-md transition-colors",

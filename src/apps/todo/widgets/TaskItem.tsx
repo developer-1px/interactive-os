@@ -129,6 +129,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
           <>
             <Trigger onPress={StartEdit({ id: todo.id })} asChild>
               <button
+                type="button"
                 className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
                 title="Edit (Enter)"
               >
@@ -137,6 +138,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
             </Trigger>
             <Trigger onPress={DeleteTodo({ id: todo.id })} asChild>
               <button
+                type="button"
                 className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 title="Delete"
               >

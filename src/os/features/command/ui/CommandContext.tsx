@@ -7,6 +7,7 @@
 
 import type { CommandRegistry } from "@os/features/command/model/createCommandStore";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
+import { useAppEngineContext } from "./AppEngineContext";
 
 // ═══════════════════════════════════════════════════════════════════
 // Individual Hooks
@@ -47,20 +48,23 @@ interface CommandEngineValue<S = any> {
 
 /**
  * 앱 컴포넌트에서 커맨드 엔진에 접근하기 위한 통합 Hook.
- * { state, dispatch, registry }를 반환.
+ * Scoped context (OS.App 내부)를 우선 사용하고, 없으면 global store fallback.
  */
 export function useEngine<S = any>(): CommandEngineValue<S> & {
   isInitialized: boolean;
 } {
-  const dispatch = useDispatch();
-  const registry = useRegistry<S>();
-  const state = useAppState<S>();
+  // Always call all hooks unconditionally (Rules of Hooks)
+  const ctx = useAppEngineContext<S>();
   const isInitialized = useCommandEngineStore((s) => s.isInitialized);
+  const globalDispatch = useDispatch();
+  const globalRegistry = useRegistry<S>();
+  const globalState = useAppState<S>();
 
+  // Prefer scoped context when inside an OS.App
   return {
-    dispatch,
-    registry,
-    state,
+    dispatch: ctx?.dispatch ?? globalDispatch,
+    registry: ctx?.registry ?? globalRegistry,
+    state: ctx?.state ?? globalState,
     isInitialized,
   };
 }

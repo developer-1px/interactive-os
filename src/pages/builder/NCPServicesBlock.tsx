@@ -109,6 +109,7 @@ export function NCPServicesBlock() {
               <OS.Item key={tab.label} id={`tab-${i}`}>
                 {({ isFocused }: { isFocused: boolean }) => (
                   <button
+                    type="button"
                     className={`
                             flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap
                             ${

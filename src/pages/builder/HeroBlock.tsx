@@ -98,6 +98,7 @@ export function HeroBlock() {
           <OS.Item id="hero-cta-primary">
             {({ isFocused }: { isFocused: boolean }) => (
               <button
+                type="button"
                 className={`
                   px-7 py-3.5 rounded-xl font-medium text-[15px] transition-all duration-300
                   ${
@@ -115,6 +116,7 @@ export function HeroBlock() {
           <OS.Item id="hero-cta-secondary">
             {({ isFocused }: { isFocused: boolean }) => (
               <button
+                type="button"
                 className={`
                   px-7 py-3.5 rounded-xl font-medium text-[15px] transition-all duration-300 border
                   ${

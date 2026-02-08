@@ -61,7 +61,11 @@ export function BoardHeader({ state }: BoardHeaderProps) {
         <div className="flex items-center gap-3">
           {/* Add Column */}
           <Trigger onPress={AddColumn({})} asChild>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 active:scale-[0.97]">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 active:scale-[0.97]"
+            >
+              type="button"
               <Plus size={14} strokeWidth={3} />
               <span>Column</span>
             </button>
@@ -94,7 +98,11 @@ export function BoardHeader({ state }: BoardHeaderProps) {
               asChild
               allowPropagation
             >
-              <button className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
+              <button
+                type="button"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"
+              >
+                type="button"
                 <X size={12} />
               </button>
             </Trigger>
@@ -112,6 +120,7 @@ export function BoardHeader({ state }: BoardHeaderProps) {
               allowPropagation
             >
               <button
+                type="button"
                 className={`
                                 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border
                                 ${
@@ -138,6 +147,7 @@ export function BoardHeader({ state }: BoardHeaderProps) {
               allowPropagation
             >
               <button
+                type="button"
                 className={`
                                 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border
                                 ${
@@ -157,7 +167,11 @@ export function BoardHeader({ state }: BoardHeaderProps) {
         {/* Clear Filters */}
         {hasFilters && (
           <Trigger onPress={ClearFilters({})} asChild allowPropagation>
-            <button className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+            <button
+              type="button"
+              className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              type="button"
               <X size={10} />
               Clear
             </button>

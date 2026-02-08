@@ -52,6 +52,7 @@ export function CardDetailSheet() {
           </h2>
           <Trigger onPress={CloseCardDetail({})} asChild>
             <button
+              type="button"
               className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
               tabIndex={0}
             >
@@ -119,6 +120,7 @@ export function CardDetailSheet() {
                   allowPropagation
                 >
                   <button
+                    type="button"
                     className={`
                                         px-3 py-1.5 rounded-lg text-xs font-bold transition-all border
                                         ${
@@ -156,6 +158,7 @@ export function CardDetailSheet() {
                     allowPropagation
                   >
                     <button
+                      type="button"
                       className={`
                                             px-3 py-1.5 rounded-lg text-xs font-bold transition-all border
                                             ${

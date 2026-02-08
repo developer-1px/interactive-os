@@ -5,6 +5,7 @@
  */
 
 import { Zone } from "@os/app/export/primitives/Zone";
+import { AppEngineProvider } from "@os/features/command/ui/AppEngineContext";
 import type { AppDefinition } from "@os/features/application/defineApplication";
 import { createEngine } from "@os/features/command/model/createEngine";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
@@ -39,7 +40,7 @@ export function App<S>({
   const { state, dispatch } = engine.store();
 
   // 3. Register with CommandEngineStore
-  const { registerApp, updateAppState, isInitialized } =
+  const { registerApp, unregisterApp, updateAppState, isInitialized } =
     useCommandEngineStore();
 
   useEffect(() => {
@@ -55,7 +56,7 @@ export function App<S>({
       contextMap: appDef.contextMap,
     });
 
-    // No unregister needed - next registerApp will overwrite
+    return () => unregisterApp(appDef.id);
   }, [
     appDef.id,
     isInitialized,
@@ -81,16 +82,23 @@ export function App<S>({
     return () => document.body.classList.remove("app-shell");
   }, [isAppShell]);
 
+  const contextValue = useMemo(
+    () => ({ appId: appDef.id, state, dispatch, registry: engine.registry }),
+    [appDef.id, state, dispatch, engine.registry],
+  );
+
   return (
-    <Zone
-      id={appDef.id}
-      className={
-        isAppShell
-          ? "h-full flex flex-col overflow-hidden"
-          : "min-h-full flex flex-col"
-      }
-    >
-      {isInitialized ? children : null}
-    </Zone>
+    <AppEngineProvider value={contextValue}>
+      <Zone
+        id={appDef.id}
+        className={
+          isAppShell
+            ? "h-full flex flex-col overflow-hidden"
+            : "min-h-full flex flex-col"
+        }
+      >
+        {isInitialized ? children : null}
+      </Zone>
+    </AppEngineProvider>
   );
 }

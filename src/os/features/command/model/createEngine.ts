@@ -20,8 +20,12 @@ import { historyMiddleware, navigationMiddleware } from "@os/middleware";
 
 export function createEngine<S>(definition: AppDefinition<S>) {
   const registry = new CommandRegistry<S>();
-  definition.commands?.forEach((cmd) => registry.register(cmd));
-  ALL_OS_COMMANDS.forEach((cmd) => registry.register(cmd));
+  definition.commands?.forEach((cmd) => {
+    registry.register(cmd);
+  });
+  ALL_OS_COMMANDS.forEach((cmd) => {
+    registry.register(cmd);
+  });
   registry.setKeymap(definition.keymap);
 
   const store = createCommandStore(registry, definition.model.initial, {

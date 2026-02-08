@@ -44,13 +44,17 @@ class AntigravityLogger {
 
   /** Enable specific layer(s) for logging */
   enableLayer(...layers: LogLayer[]) {
-    layers.forEach((l) => this.enabledLayers.add(l));
+    layers.forEach((l) => {
+      this.enabledLayers.add(l);
+    });
     this.enabled = true;
   }
 
   /** Disable specific layer(s) */
   disableLayer(...layers: LogLayer[]) {
-    layers.forEach((l) => this.enabledLayers.delete(l));
+    layers.forEach((l) => {
+      this.enabledLayers.delete(l);
+    });
   }
 
   /** Check if layer is enabled */

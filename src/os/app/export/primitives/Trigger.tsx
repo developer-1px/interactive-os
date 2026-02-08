@@ -68,7 +68,7 @@ export const Trigger = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
           {asChild && isValidElement(children) ? (
             children
           ) : (
-            <button>{children}</button>
+            <button type="button">{children}</button>
           )}
         </FocusItem>
       );
@@ -89,7 +89,7 @@ export const Trigger = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
     }
 
     return (
-      <button ref={ref} {...baseProps}>
+      <button type="button" ref={ref} {...baseProps}>
         {children}
       </button>
     );

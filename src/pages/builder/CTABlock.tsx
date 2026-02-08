@@ -70,6 +70,7 @@ export function CTABlock() {
         <OS.Item id="cta-button">
           {({ isFocused }: { isFocused: boolean }) => (
             <button
+              type="button"
               className={`
                 inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300
                 ${

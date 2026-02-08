@@ -17,6 +17,7 @@ export function InspectorActivityBar() {
     <div className="w-[32px] h-full bg-[#f8f8f8] flex flex-col items-center py-1.5 border-l border-[#e5e5e5]">
       {tabs.map((tab) => (
         <button
+          type="button"
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
           className={`w-6 h-6 mb-1 rounded flex items-center justify-center transition-all ${

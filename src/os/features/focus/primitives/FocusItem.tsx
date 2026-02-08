@@ -78,7 +78,10 @@ function setRef<T>(ref: React.Ref<T> | undefined, value: T) {
 }
 
 function composeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
-  return (node: T) => refs.forEach((ref) => setRef(ref, node));
+  return (node: T) =>
+    refs.forEach((ref) => {
+      setRef(ref, node);
+    });
 }
 
 // ═══════════════════════════════════════════════════════════════════

@@ -938,6 +938,7 @@ function DialogDemo({
   return (
     <>
       <button
+        type="button"
         ref={triggerRef}
         id="btn-dialog-trigger"
         onClick={onOpen}
@@ -1031,6 +1032,7 @@ function AlertDialogDemo({
   return (
     <>
       <button
+        type="button"
         ref={triggerRef}
         id="btn-alert-trigger"
         onClick={onOpen}

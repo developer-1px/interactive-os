@@ -64,7 +64,11 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
       >
         {/* Collapse Toggle */}
         <Trigger onPress={ToggleColumnCollapse({ id: column.id })} asChild>
-          <button className="text-slate-400 hover:text-slate-600 transition-colors p-0.5 -ml-0.5">
+          <button
+            type="button"
+            className="text-slate-400 hover:text-slate-600 transition-colors p-0.5 -ml-0.5"
+          >
+            type="button"
             {column.collapsed ? (
               <ChevronRight size={14} />
             ) : (

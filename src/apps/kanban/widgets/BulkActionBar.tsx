@@ -42,7 +42,11 @@ export function BulkActionBar() {
             asChild
             allowPropagation
           >
-            <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
+            >
+              type="button"
               <ArrowRight size={12} />
               Move to
             </button>
@@ -56,7 +60,11 @@ export function BulkActionBar() {
                   asChild
                   allowPropagation
                 >
-                  <button className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium hover:bg-slate-50 text-left transition-colors">
+                  <button
+                    type="button"
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium hover:bg-slate-50 text-left transition-colors"
+                  >
+                    type="button"
                     <div
                       className="w-2.5 h-2.5 rounded-full"
                       style={{ backgroundColor: col.color }}
@@ -76,7 +84,11 @@ export function BulkActionBar() {
             asChild
             allowPropagation
           >
-            <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
+            >
+              type="button"
               <Flame size={12} />
               Priority
             </button>
@@ -91,7 +103,11 @@ export function BulkActionBar() {
                     asChild
                     allowPropagation
                   >
-                    <button className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium hover:bg-slate-50 text-left transition-colors capitalize">
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium hover:bg-slate-50 text-left transition-colors capitalize"
+                    >
+                      type="button"
                       <div
                         className="w-2.5 h-2.5 rounded-full"
                         style={{
@@ -118,7 +134,11 @@ export function BulkActionBar() {
 
         {/* Delete */}
         <Trigger onPress={BulkDeleteCards({})} asChild>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600/20 text-red-300 hover:bg-red-600/40 transition-colors">
+          <button
+            type="button"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600/20 text-red-300 hover:bg-red-600/40 transition-colors"
+          >
+            type="button"
             <Trash2 size={12} />
             Delete
           </button>
@@ -129,6 +149,7 @@ export function BulkActionBar() {
         {/* Deselect */}
         <Trigger onPress={DeselectAll({})} asChild>
           <button
+            type="button"
             className="p-1.5 text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-slate-700"
             title="Deselect All (Escape)"
           >

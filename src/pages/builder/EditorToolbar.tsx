@@ -59,6 +59,7 @@ export function EditorToolbar({
         <div className="flex items-center gap-2">
           {onToggleTest && (
             <button
+              type="button"
               onClick={onToggleTest}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all rounded-md ${
                 testActive
@@ -69,12 +70,19 @@ export function EditorToolbar({
               🧪 Test
             </button>
           )}
-          <button className="flex items-center gap-2 px-3 py-1.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors">
+          <button
+            type="button"
+            className="flex items-center gap-2 px-3 py-1.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors"
+          >
+            type="button"
             <Eye size={15} />
             Preview
           </button>
-          <button className="px-4 py-1.5 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 transition-colors shadow-sm">
-            Publish
+          <button
+            type="button"
+            className="px-4 py-1.5 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 transition-colors shadow-sm"
+          >
+            type="button" Publish
           </button>
         </div>
       </div>
@@ -91,6 +99,7 @@ function ToolButton({
 }) {
   return (
     <button
+      type="button"
       className={`
         w-8 h-8 rounded-md flex items-center justify-center transition-all
         ${
@@ -116,6 +125,7 @@ function DeviceButton({
 }) {
   return (
     <button
+      type="button"
       className={`
         flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all
         ${

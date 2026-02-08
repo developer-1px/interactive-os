@@ -74,6 +74,7 @@ function Modal({ id, isOpen, onClose, title, children }: ModalProps) {
         <div className="bg-gray-100 px-4 py-2 flex items-center justify-between border-b">
           <span className="font-semibold text-sm text-gray-700">{title}</span>
           <button
+            type="button"
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 text-lg leading-none"
           >

@@ -61,6 +61,7 @@ export function NCPNewsBlock() {
           <OS.Item id="ncp-news-all">
             {({ isFocused }: { isFocused: boolean }) => (
               <button
+                type="button"
                 className={`
                         text-sm font-bold border-b border-slate-300 pb-1 hover:border-slate-900 transition-colors
                         ${isFocused ? "border-slate-900 scale-105 origin-right ring-2 ring-slate-100 rounded px-2" : "text-slate-500 hover:text-slate-900"}

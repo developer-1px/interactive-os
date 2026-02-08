@@ -73,6 +73,7 @@ export function NCPHeroBlock() {
           <OS.Item id="ncp-hero-cta">
             {({ isFocused }: { isFocused: boolean }) => (
               <button
+                type="button"
                 className={`
                     group inline-flex items-center gap-3 px-10 py-5 rounded-full text-lg font-bold transition-all duration-300
                     bg-slate-900 text-white shadow-xl shadow-slate-900/10
@@ -146,6 +147,7 @@ export function NCPHeroBlock() {
           <OS.Item id="nav-login">
             {({ isFocused }: { isFocused: boolean }) => (
               <button
+                type="button"
                 className={`hover:text-slate-900 transition-colors ${isFocused ? "underline text-slate-900" : ""}`}
               >
                 로그인
@@ -155,6 +157,7 @@ export function NCPHeroBlock() {
           <OS.Item id="nav-signup">
             {({ isFocused }: { isFocused: boolean }) => (
               <button
+                type="button"
                 className={`px-4 py-2 rounded-full border border-slate-200 hover:border-slate-800 hover:text-slate-900 transition-all ${isFocused ? "ring-2 ring-slate-800" : ""}`}
               >
                 회원가입

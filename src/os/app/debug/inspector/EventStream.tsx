@@ -141,6 +141,7 @@ export const EventStream = () => {
             Page {pageNumber}
           </span>
           <button
+            type="button"
             onClick={() => {
               // Format logs in LLM-friendly format
               const formatted = transactionGroups
@@ -186,6 +187,7 @@ export const EventStream = () => {
             <Icon name="copy" size={12} />
           </button>
           <button
+            type="button"
             onClick={clear}
             className="hover:text-[#d93025] text-[#9aa0a6] transition-colors p-1 rounded hover:bg-black/5"
             title="Clear Stream"

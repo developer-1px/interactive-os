@@ -265,6 +265,7 @@ export default function DocsPage() {
                 />
                 <p className="text-xl font-medium text-slate-400">{error}</p>
                 <button
+                  type="button"
                   onClick={() => navigate("/docs")}
                   className="mt-8 px-6 py-2 bg-slate-100 text-slate-600 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors shadow-sm"
                 >

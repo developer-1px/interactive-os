@@ -21,9 +21,9 @@ function flattenKeymap<T>(
   if (keymap.zones) {
     Object.entries(keymap.zones).forEach(([zoneId, bindings]) => {
       // Set both zoneId and groupId (aliases) for compatibility with resolveKeybinding
-      (bindings as KeybindingItem<T>[]).forEach((b) =>
-        result.push({ ...b, zoneId, groupId: zoneId }),
-      );
+      (bindings as KeybindingItem<T>[]).forEach((b) => {
+        result.push({ ...b, zoneId, groupId: zoneId });
+      });
     });
   }
   return result;

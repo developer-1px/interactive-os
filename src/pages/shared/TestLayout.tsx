@@ -20,6 +20,7 @@ export function TestBox({ title, children, description }: TestBoxProps) {
         </div>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => setShowDocs(!showDocs)}
             className={`text-[10px] px-2 py-0.5 rounded border ${
               showDocs

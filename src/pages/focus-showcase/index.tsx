@@ -37,6 +37,7 @@ export function FocusShowcasePage() {
         </div>
         <div className="flex gap-3">
           <button
+            type="button"
             onClick={runAllTests}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40"
           >
