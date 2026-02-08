@@ -58,7 +58,7 @@ function tryHandleLabelClick(e: MouseEvent): boolean {
       payload: { id: fieldTarget.itemId, zoneId: fieldTarget.groupId },
     });
   }
-  targetField.focus();
+  // focus() is handled by FOCUS domEffect — no direct call needed
   return true;
 }
 

@@ -136,15 +136,12 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
 
     // --- Focus Effect: apply .focus() when this item becomes focused ---
     const internalRef = useRef<HTMLElement>(null);
+    // Pure projection: only sync DOM focus state.
+    // Scroll is handled declaratively by OS DOMEffect (FOCUS effect auto-scrolls).
     useLayoutEffect(() => {
       if (visualFocused && internalRef.current) {
-        // Only focus if not already the active element
         if (document.activeElement !== internalRef.current) {
           internalRef.current.focus({ preventScroll: true });
-          internalRef.current.scrollIntoView({
-            block: "nearest",
-            inline: "nearest",
-          });
         }
       }
     }, [visualFocused]);

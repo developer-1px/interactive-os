@@ -27,6 +27,7 @@ export interface DOMQueries {
   getAllGroupRects(): Map<string, DOMRect>;
   getGroupEntry(id: string): any | undefined;
   getGroupItems(id: string): string[];
+  getGroupParentId(id: string): string | null;
 }
 
 export interface OSContext {
@@ -117,6 +118,7 @@ export function buildContext(overrideZoneId?: string): OSContext | null {
         getAllGroupRects: () => DOM.getAllGroupRects(),
         getGroupEntry: (id) => FocusData.getById(id),
         getGroupItems: (id) => DOM.getGroupItems(id),
+        getGroupParentId: (id) => FocusData.getById(id)?.parentId ?? null,
       },
     },
 
@@ -207,6 +209,9 @@ export function isOSCommandRunning(): boolean {
 
 let _currentInput: Event | null = null;
 
+export type InputSource = "mouse" | "keyboard" | "programmatic";
+let _lastInputSource: InputSource = "programmatic";
+
 /**
  * Set the current input event before dispatching a command.
  * runOS will consume it once for INPUT logging.
@@ -214,6 +219,17 @@ let _currentInput: Event | null = null;
  */
 export function setCurrentInput(event: Event): void {
   _currentInput = event;
+  // Classify input source for downstream consumers (e.g. scrollIntoView guard)
+  if (event instanceof MouseEvent) {
+    _lastInputSource = "mouse";
+  } else if (event instanceof KeyboardEvent) {
+    _lastInputSource = "keyboard";
+  }
+}
+
+/** Get the last input source. Used by executeDOMEffect to skip scrollIntoView on mouse input. */
+export function getLastInputSource(): InputSource {
+  return _lastInputSource;
 }
 
 /**
@@ -414,14 +430,19 @@ function executeDOMEffect(effect: DOMEffect): void {
     case "FOCUS": {
       const el = DOM.getItem(effect.targetId);
       if (el) {
-        el.focus();
+        el.focus({ preventScroll: true });
+        // Auto-scroll only for non-mouse input (mouse clicks are already visible)
+        if (_lastInputSource !== "mouse") {
+          el.scrollIntoView({ block: "nearest", inline: "nearest" });
+        }
       }
       break;
     }
     case "SCROLL_INTO_VIEW": {
       const el = DOM.getItem(effect.targetId);
-      if (el) console.log("[osCommand] scrollIntoView:", effect.targetId, el);
-      el?.scrollIntoView({ block: "nearest", inline: "nearest" });
+      if (_lastInputSource !== "mouse") {
+        el?.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
       break;
     }
     case "BLUR": {
@@ -436,4 +457,16 @@ function executeDOMEffect(effect: DOMEffect): void {
       break;
     }
   }
+
+  // --- EFFECT Logging ---
+  InspectorLog.log({
+    type: "EFFECT",
+    title: effect.type,
+    details: {
+      targetId: "targetId" in effect ? effect.targetId : undefined,
+      inputSource: _lastInputSource,
+    },
+    icon: effect.type === "FOCUS" ? "eye" : "cpu",
+    source: "os",
+  });
 }

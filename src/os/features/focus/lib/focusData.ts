@@ -313,29 +313,32 @@ export const FocusData = {
 
     // Delay restoration to allow current overlay to unmount
     setTimeout(() => {
-      if (entry.itemId) {
-        // Restore to specific item
-        const targetEl = document.getElementById(entry.itemId);
-        if (targetEl) {
-          targetEl.focus();
-          console.log("[FocusStack] RESTORE to:", entry.itemId);
-        }
-      } else if (entry.zoneId) {
-        // Restore to zone (first focusable item)
-        const zoneEl = document.getElementById(entry.zoneId);
-        if (zoneEl) {
-          const firstItem = zoneEl.querySelector(
-            "[data-item-id]",
-          ) as HTMLElement;
-          if (firstItem) {
-            firstItem.focus();
-            console.log(
-              "[FocusStack] RESTORE to zone first item:",
-              firstItem.id,
-            );
-          }
-        }
-      }
+      const targetItemId = entry.itemId
+        ? entry.itemId
+        : (() => {
+            // Fallback: first focusable item in zone
+            const zoneEl = document.getElementById(entry.zoneId);
+            const firstItem = zoneEl?.querySelector(
+              "[data-item-id]",
+            ) as HTMLElement | null;
+            return firstItem?.id ?? null;
+          })();
+
+      if (!targetItemId) return;
+
+      // Dispatch through OS command pipeline (effect system handles focus + scroll + log)
+      import("../../command/store/CommandEngineStore").then(
+        ({ CommandEngineStore }) => {
+          import("../../command/definitions/commandsShell").then(
+            ({ OS_COMMANDS }) => {
+              CommandEngineStore.dispatch({
+                type: OS_COMMANDS.FOCUS,
+                payload: { id: targetItemId, zoneId: entry.zoneId },
+              });
+            },
+          );
+        },
+      );
     }, 50);
 
     return true;
