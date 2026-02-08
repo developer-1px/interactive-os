@@ -57,17 +57,9 @@ export function App<S>({
     });
 
     return () => unregisterApp(appDef.id);
-  }, [
-    appDef.id,
-    isInitialized,
-    dispatch,
-    appDef.contextMap,
-    engine.registry,
-    engine.store.getState,
-    engine.store.setState,
-    registerApp,
-    state,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Registration lifecycle only.
+    // `state` is intentionally excluded: state sync is handled by updateAppState effect.
+  }, [appDef.id, isInitialized, dispatch]);
 
   // 4. Update state when it changes
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { FocusData } from "@os/features/focus/lib/focusData";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TestBox } from "../../shared/TestLayout";
 
 /**
@@ -30,6 +30,13 @@ interface ModalProps {
 function Modal({ id, isOpen, onClose, title, children }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
+  // Restore focus when closing (using FocusData API)
+  const handleClose = useCallback(() => {
+    onClose();
+    // Use FocusData.popAndRestoreFocus() to restore previous focus
+    FocusData.popAndRestoreFocus();
+  }, [onClose]);
+
   // Push focus stack when opening (using FocusData API)
   useEffect(() => {
     if (isOpen) {
@@ -52,13 +59,6 @@ function Modal({ id, isOpen, onClose, title, children }: ModalProps) {
     document.addEventListener("keydown", handleKeyDown, true);
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [isOpen, handleClose]);
-
-  // Restore focus when closing (using FocusData API)
-  const handleClose = () => {
-    onClose();
-    // Use FocusData.popAndRestoreFocus() to restore previous focus
-    FocusData.popAndRestoreFocus();
-  };
 
   if (!isOpen) return null;
 
