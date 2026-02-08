@@ -6,7 +6,7 @@ import { FocusData } from "../lib/focusData";
  * Returns true if the provided groupId is in the current focus path.
  */
 export function useIsFocusedGroup(groupId: string): boolean {
-  const activeZoneId = useSyncExternalStore(
+  const _activeZoneId = useSyncExternalStore(
     FocusData.subscribeActiveZone,
     () => FocusData.getActiveZoneId(),
     () => null,
@@ -19,7 +19,7 @@ export function useIsFocusedGroup(groupId: string): boolean {
   useLayoutEffect(() => {
     const path = FocusData.getFocusPath();
     setIsInPath(path.includes(groupId));
-  }, [activeZoneId, groupId]);
+  }, [groupId]);
 
   return isInPath;
 }

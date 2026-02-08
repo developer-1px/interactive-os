@@ -9,7 +9,7 @@ import { ColumnView } from "./ColumnView";
 
 export function KanbanPanel() {
   const { state } = useEngine<KanbanState>();
-  if (!state) return null;
+  if (!state?.data?.board) return null;
 
   const { columns = {}, cards = {}, cardOrder = {} } = state.data;
   const columnOrder = state.data.columnOrder ?? Object.keys(columns);

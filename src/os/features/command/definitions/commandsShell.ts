@@ -51,7 +51,7 @@ export const OS_COMMANDS = {
 export type OSCommandType = (typeof OS_COMMANDS)[keyof typeof OS_COMMANDS];
 
 export interface OSNavigatePayload {
-  direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
+  direction: "UP" | "DOWN" | "LEFT" | "RIGHT" | "HOME" | "END";
   sourceId: string | null;
   targetId?: string | null; // If known by Physics engine
   /** When set, NAVIGATE will also update selection after moving focus */
@@ -80,13 +80,13 @@ export interface OSActivatePayload {
 export type OSCommand =
   | { type: typeof OS_COMMANDS.NAVIGATE; payload: OSNavigatePayload }
   | { type: typeof OS_COMMANDS.FOCUS; payload: OSFocusPayload }
-  | { type: typeof OS_COMMANDS.TAB; payload?: void }
-  | { type: typeof OS_COMMANDS.TAB_PREV; payload?: void }
+  | { type: typeof OS_COMMANDS.TAB; payload?: undefined }
+  | { type: typeof OS_COMMANDS.TAB_PREV; payload?: undefined }
   | { type: typeof OS_COMMANDS.SELECT; payload?: OSSelectPayload }
-  | { type: typeof OS_COMMANDS.SELECT_ALL; payload?: void }
-  | { type: typeof OS_COMMANDS.DESELECT_ALL; payload?: void }
+  | { type: typeof OS_COMMANDS.SELECT_ALL; payload?: undefined }
+  | { type: typeof OS_COMMANDS.DESELECT_ALL; payload?: undefined }
   | { type: typeof OS_COMMANDS.ACTIVATE; payload?: OSActivatePayload }
-  | { type: typeof OS_COMMANDS.ESCAPE; payload?: void }
+  | { type: typeof OS_COMMANDS.ESCAPE; payload?: undefined }
   | {
       type: typeof OS_COMMANDS.FIELD_START_EDIT;
       payload?: { fieldId?: string };

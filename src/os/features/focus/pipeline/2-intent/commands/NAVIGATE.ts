@@ -18,7 +18,7 @@ function handleTreeExpansion(ctx: OSContext, dir: Direction): OSResult | null {
   if (!activeId || (dir !== "left" && dir !== "right")) return null;
 
   const role = ctx.dom.queries.getItemRole(activeId);
-  const isExpandable = role === "treeitem" || role === "button";
+  const isExpandable = role === "treeitem";
 
   if (!isExpandable) return null;
 
@@ -122,6 +122,16 @@ function buildNavigateResult(
 export const NAVIGATE: OSCommand<OSNavigatePayload> = {
   run: (ctx, payload) => {
     const dir = payload.direction.toLowerCase() as Direction;
+
+    // 0. Home/End — jump to first/last item (W3C APG)
+    if (dir === ("home" as string)) {
+      const firstItem = ctx.dom.items[0] || null;
+      return buildNavigateResult(ctx, firstItem, null, null);
+    }
+    if (dir === ("end" as string)) {
+      const lastItem = ctx.dom.items[ctx.dom.items.length - 1] || null;
+      return buildNavigateResult(ctx, lastItem, null, null);
+    }
 
     // 1. Tree Expansion/Collapse
     const expansionResult = handleTreeExpansion(ctx, dir);

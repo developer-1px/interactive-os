@@ -34,7 +34,7 @@ export function useInspectorPersistence(store: InspectorStore) {
         },
       }));
     }
-  }, []); // Run ONCE on mount
+  }, [persistedOpen, store.getState, store.setState]); // Run ONCE on mount
 
   // Sync: store → localStorage (on change)
   useEffect(() => {

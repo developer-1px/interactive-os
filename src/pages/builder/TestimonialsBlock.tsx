@@ -71,11 +71,7 @@ export function TestimonialsBlock() {
   };
 
   return (
-    <OS.Zone
-      id="testimonials-block"
-      role="builderBlock"
-      className="bg-white py-24 px-8"
-    >
+    <OS.Zone id="testimonials-block" className="bg-white py-24 px-8">
       <div className="max-w-5xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -122,7 +118,6 @@ export function TestimonialsBlock() {
               <OS.Zone
                 key={t.id}
                 id={`zone-${t.id}`}
-                role="builderBlock"
                 className={`
                   relative rounded-2xl p-6 transition-all duration-300
                   bg-slate-50 border border-slate-200

@@ -32,7 +32,7 @@ export const FIELD_BLUR: KeyboardCommand<FieldBlurPayload> = {
 
     // Local callback
     if (config.onCommit) {
-      result.callback = () => config.onCommit!(localValue);
+      result.callback = () => config.onCommit?.(localValue);
     }
 
     // Dispatch commit command

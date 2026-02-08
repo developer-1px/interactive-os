@@ -7,21 +7,29 @@ import { useFocusExpansion } from "@os/features/focus/hooks/useFocusExpansion";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
 import { useTestBotRoutes } from "@os/testBot";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/lib/Icon";
 import { defineAriaRoutes } from "./tests";
 
 export function AriaShowcasePage() {
+  // Register TestBot routes; resetKey forces re-mount before each test run
+  const resetKey = useTestBotRoutes("aria-showcase", defineAriaRoutes);
+
+  return <AriaShowcaseContent key={resetKey} />;
+}
+
+function AriaShowcaseContent() {
   // State management for interactive examples
   const [selectedTab, setSelectedTab] = useState("tab-account");
   const [menuChecked, setMenuChecked] = useState<Record<string, boolean>>({
     "menu-ruler": true,
+    "menu-grid": false,
   });
   const [pressedTools, setPressedTools] = useState<Record<string, boolean>>({
     bold: true,
   });
   // expandedTreeNodes removed - now using store-driven expansion
-  const [isComboOpen, setIsComboOpen] = useState(true);
+  const [isComboOpen, setIsComboOpen] = useState(false);
   const [isComboInvalid, setIsComboInvalid] = useState(false);
   const [radioValue, setRadioValue] = useState("all");
   const [gridSelection, setGridSelection] = useState<Record<string, boolean>>(
@@ -29,9 +37,6 @@ export function AriaShowcasePage() {
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
-
-  // Register TestBot routes for this page (available in Inspector)
-  useTestBotRoutes("aria-showcase", defineAriaRoutes);
 
   const toggleTool = (id: string) => {
     setPressedTools((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -55,7 +60,7 @@ export function AriaShowcasePage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-0 auto-rows-[auto_1fr]">
         {/* 1. Tabs */}
         {/* 
                     ARIA States: 
@@ -75,7 +80,6 @@ export function AriaShowcasePage() {
                 id="tab-account"
                 role="tab"
                 as="button"
-                aria-selected={selectedTab === "tab-account"}
                 aria-controls="panel-account"
                 onClick={() => setSelectedTab("tab-account")}
                 className="
@@ -91,7 +95,6 @@ export function AriaShowcasePage() {
                 id="tab-security"
                 role="tab"
                 as="button"
-                aria-selected={selectedTab === "tab-security"}
                 aria-controls="panel-security"
                 onClick={() => setSelectedTab("tab-security")}
                 className="
@@ -106,8 +109,8 @@ export function AriaShowcasePage() {
               <FocusItem
                 id="tab-disabled"
                 role="tab"
-                aria-selected="false"
                 aria-disabled="true"
+                disabled
                 className="
                                     px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-300 cursor-not-allowed
                                     aria-disabled:opacity-50
@@ -540,7 +543,6 @@ export function AriaShowcasePage() {
         <AriaCard title="Accordion" ariaRole="accordion">
           <FocusGroup
             id="demo-accordion"
-            role="accordion"
             navigate={{ orientation: "vertical" }}
             aria-label="FAQ"
             className="w-full bg-white border border-gray-200 rounded-lg overflow-hidden"
@@ -551,115 +553,20 @@ export function AriaShowcasePage() {
 
         {/* 11. Dialog */}
         <AriaCard title="Dialog" ariaRole="dialog">
-          <button
-            id="btn-dialog-trigger"
-            onClick={() => setIsDialogOpen(true)}
-            className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            Open Dialog
-          </button>
-          {isDialogOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-              <FocusGroup
-                id="demo-dialog"
-                role="dialog"
-                aria-label="Example dialog"
-                aria-modal="true"
-                className="bg-white rounded-xl shadow-2xl w-80 p-0 overflow-hidden border border-gray-200"
-              >
-                <div className="px-5 py-4 border-b border-gray-100">
-                  <h3 className="font-bold text-gray-800">Dialog Title</h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Focus is trapped inside. Press Escape to close.
-                  </p>
-                </div>
-                <div className="p-5 space-y-2">
-                  <FocusItem
-                    id="dialog-btn-1"
-                    as="button"
-                    className="w-full px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400"
-                  >
-                    Focusable Item 1
-                  </FocusItem>
-                  <FocusItem
-                    id="dialog-btn-2"
-                    as="button"
-                    className="w-full px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400"
-                  >
-                    Focusable Item 2
-                  </FocusItem>
-                  <FocusItem
-                    id="dialog-btn-close"
-                    as="button"
-                    onClick={() => setIsDialogOpen(false)}
-                    className="w-full px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-300 data-[focused=true]:ring-offset-1"
-                  >
-                    Close Dialog
-                  </FocusItem>
-                </div>
-              </FocusGroup>
-            </div>
-          )}
+          <DialogDemo
+            isOpen={isDialogOpen}
+            onOpen={() => setIsDialogOpen(true)}
+            onClose={() => setIsDialogOpen(false)}
+          />
         </AriaCard>
 
         {/* 12. Alert Dialog */}
         <AriaCard title="Alert Dialog" ariaRole="alertdialog">
-          <button
-            id="btn-alert-trigger"
-            onClick={() => setIsAlertDialogOpen(true)}
-            className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Delete Item
-          </button>
-          {isAlertDialogOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-              <FocusGroup
-                id="demo-alertdialog"
-                role="alertdialog"
-                aria-label="Confirm deletion"
-                aria-modal="true"
-                aria-describedby="alert-desc"
-                className="bg-white rounded-xl shadow-2xl w-80 overflow-hidden border border-red-200"
-              >
-                <div className="p-5">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                      <Icon
-                        name="alert-triangle"
-                        size={20}
-                        className="text-red-600"
-                      />
-                    </div>
-                    <h3 className="font-bold text-gray-800">
-                      Delete permanently?
-                    </h3>
-                  </div>
-                  <p id="alert-desc" className="text-sm text-gray-500 mb-4">
-                    This action cannot be undone. The item will be permanently
-                    removed.
-                  </p>
-                  <div className="flex gap-2">
-                    <FocusItem
-                      id="alert-cancel"
-                      as="button"
-                      onClick={() => setIsAlertDialogOpen(false)}
-                      className="flex-1 px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-gray-400"
-                    >
-                      Cancel
-                    </FocusItem>
-                    <FocusItem
-                      id="alert-confirm"
-                      as="button"
-                      onClick={() => setIsAlertDialogOpen(false)}
-                      className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 data-[focused=true]:ring-2 data-[focused=true]:ring-red-300 data-[focused=true]:ring-offset-1"
-                    >
-                      Delete
-                    </FocusItem>
-                  </div>
-                </div>
-              </FocusGroup>
-            </div>
-          )}
+          <AlertDialogDemo
+            isOpen={isAlertDialogOpen}
+            onOpen={() => setIsAlertDialogOpen(true)}
+            onClose={() => setIsAlertDialogOpen(false)}
+          />
         </AriaCard>
 
         {/* 13. Disclosure */}
@@ -738,14 +645,14 @@ function AriaCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm grid grid-rows-subgrid row-span-2 mb-6">
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between rounded-t-xl">
         <h3 className="font-bold text-sm text-gray-700">{title}</h3>
         <code className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">
           role="{ariaRole}"
         </code>
       </div>
-      <div className="p-4 flex-1">{children}</div>
+      <div className="p-4 rounded-b-xl">{children}</div>
     </div>
   );
 }
@@ -854,23 +761,21 @@ function TreeContent() {
       </FocusItem>
 
       {isExpanded("tree-public") && (
-        <>
-          <FocusItem
-            id="tree-favicon"
-            role="treeitem"
-            aria-level={2}
-            className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 data-[focused=true]:bg-indigo-50 rounded flex items-center gap-2"
-          >
-            <span className="w-3 flex-shrink-0" />
-            {/* chevron placeholder */}
-            <Icon
-              name="file-image"
-              size={16}
-              className="text-green-500 flex-shrink-0"
-            />
-            <span>favicon.ico</span>
-          </FocusItem>
-        </>
+        <FocusItem
+          id="tree-favicon"
+          role="treeitem"
+          aria-level={2}
+          className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 data-[focused=true]:bg-indigo-50 rounded flex items-center gap-2"
+        >
+          <span className="w-3 flex-shrink-0" />
+          {/* chevron placeholder */}
+          <Icon
+            name="file-image"
+            size={16}
+            className="text-green-500 flex-shrink-0"
+          />
+          <span>favicon.ico</span>
+        </FocusItem>
       )}
     </>
   );
@@ -953,26 +858,31 @@ function DisclosureContent() {
 
   return (
     <div className="w-full">
-      <button
-        aria-expanded={isOpen}
-        aria-controls="disclosure-panel"
-        onClick={() => setIsOpen(!isOpen)}
-        className="
-          w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700
-          bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors
-          focus:outline-none focus:ring-2 focus:ring-indigo-300
-        "
-      >
-        <div className="flex items-center gap-2">
-          <Icon name="info" size={16} className="text-indigo-500" />
-          <span>Show additional details</span>
-        </div>
-        <Icon
-          name={isOpen ? "chevron-up" : "chevron-down"}
-          size={16}
-          className="text-gray-400"
-        />
-      </button>
+      <FocusGroup id="demo-disclosure" role="group" aria-label="Disclosure">
+        <FocusItem
+          id="disclosure-trigger"
+          as="button"
+          role="button"
+          aria-expanded={isOpen}
+          aria-controls="disclosure-panel"
+          onClick={() => setIsOpen(!isOpen)}
+          className="
+            w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700
+            bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors
+            data-[focused=true]:outline-none data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-300
+          "
+        >
+          <div className="flex items-center gap-2">
+            <Icon name="info" size={16} className="text-indigo-500" />
+            <span>Show additional details</span>
+          </div>
+          <Icon
+            name={isOpen ? "chevron-up" : "chevron-down"}
+            size={16}
+            className="text-gray-400"
+          />
+        </FocusItem>
+      </FocusGroup>
       {isOpen && (
         <div
           id="disclosure-panel"
@@ -987,6 +897,195 @@ function DisclosureContent() {
         </div>
       )}
     </div>
+  );
+}
+
+function DialogDemo({
+  isOpen,
+  onOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+}) {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+
+  // Synchronous focus restore: focus trigger BEFORE closing dialog
+  const handleClose = () => {
+    triggerRef.current?.focus();
+    onClose();
+  };
+
+  // Escape key handler on the overlay
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleClose();
+      }
+    };
+    // Capture phase to intercept before OS keyboard system
+    document.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown, { capture: true });
+    };
+  }, [isOpen, handleClose]);
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        id="btn-dialog-trigger"
+        onClick={onOpen}
+        className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+      >
+        Open Dialog
+      </button>
+      {isOpen && (
+        <div
+          ref={overlayRef}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        >
+          <FocusGroup
+            id="demo-dialog"
+            role="dialog"
+            aria-label="Example dialog"
+            aria-modal="true"
+            className="bg-white rounded-xl shadow-2xl w-80 p-0 overflow-hidden border border-gray-200"
+          >
+            <div className="px-5 py-4 border-b border-gray-100">
+              <h3 className="font-bold text-gray-800">Dialog Title</h3>
+              <p className="text-xs text-gray-500 mt-1">
+                Focus is trapped inside. Press Escape to close.
+              </p>
+            </div>
+            <div className="p-5 space-y-2">
+              <FocusItem
+                id="dialog-btn-1"
+                as="button"
+                className="w-full px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400"
+              >
+                Focusable Item 1
+              </FocusItem>
+              <FocusItem
+                id="dialog-btn-2"
+                as="button"
+                className="w-full px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400"
+              >
+                Focusable Item 2
+              </FocusItem>
+              <FocusItem
+                id="dialog-btn-close"
+                as="button"
+                onClick={handleClose}
+                className="w-full px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-300 data-[focused=true]:ring-offset-1"
+              >
+                Close Dialog
+              </FocusItem>
+            </div>
+          </FocusGroup>
+        </div>
+      )}
+    </>
+  );
+}
+
+function AlertDialogDemo({
+  isOpen,
+  onOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+}) {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  // Synchronous focus restore: focus trigger BEFORE closing dialog
+  const handleClose = () => {
+    // Focus the trigger immediately, while dialog is still mounted
+    triggerRef.current?.focus();
+    onClose();
+  };
+
+  // Escape key handler
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleClose();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown, { capture: true });
+    };
+  }, [isOpen, handleClose]);
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        id="btn-alert-trigger"
+        onClick={onOpen}
+        className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+      >
+        Delete Item
+      </button>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <FocusGroup
+            id="demo-alertdialog"
+            role="alertdialog"
+            aria-label="Confirm deletion"
+            aria-modal="true"
+            aria-describedby="alert-desc"
+            className="bg-white rounded-xl shadow-2xl w-80 overflow-hidden border border-red-200"
+          >
+            <div className="p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <Icon
+                    name="alert-triangle"
+                    size={20}
+                    className="text-red-600"
+                  />
+                </div>
+                <h3 className="font-bold text-gray-800">Delete permanently?</h3>
+              </div>
+              <p id="alert-desc" className="text-sm text-gray-500 mb-4">
+                This action cannot be undone. The item will be permanently
+                removed.
+              </p>
+              <div className="flex gap-2">
+                <FocusItem
+                  id="alert-cancel"
+                  as="button"
+                  onClick={handleClose}
+                  className="flex-1 px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-gray-400"
+                >
+                  Cancel
+                </FocusItem>
+                <FocusItem
+                  id="alert-confirm"
+                  as="button"
+                  onClick={handleClose}
+                  className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 data-[focused=true]:ring-2 data-[focused=true]:ring-red-300 data-[focused=true]:ring-offset-1"
+                >
+                  Delete
+                </FocusItem>
+              </div>
+            </div>
+          </FocusGroup>
+        </div>
+      )}
+    </>
   );
 }
 

@@ -8,7 +8,7 @@ export const AddTodo = defineListCommand({
     produce(state, (draft) => {
       // Use payload.text (from Field) or fallback to state.ui.draft (from keymap)
       const text = payload?.text ?? draft.ui.draft;
-      if (text && text.trim()) {
+      if (text?.trim()) {
         const newId = Date.now();
         const newTodo = {
           id: newId,
@@ -48,7 +48,7 @@ export const ToggleTodo = defineListCommand({
         typeof rawId === "string" ? parseInt(rawId, 10) : (rawId as number);
 
       // Validate ID (must be valid number)
-      if (!targetId || isNaN(targetId)) {
+      if (!targetId || Number.isNaN(targetId)) {
         return;
       }
 
@@ -66,7 +66,7 @@ export const DeleteTodo = defineListCommand({
     produce(state, (draft) => {
       const targetId = payload.id as number;
 
-      if (!targetId || isNaN(targetId)) return;
+      if (!targetId || Number.isNaN(targetId)) return;
 
       const numericTargetId = Number(targetId);
 
@@ -86,7 +86,7 @@ export const MoveItemUp = defineListCommand({
     produce(state, (draft) => {
       const focusId = Number(payload.focusId);
 
-      if (!focusId || isNaN(focusId)) return;
+      if (!focusId || Number.isNaN(focusId)) return;
 
       const visibleIds = state.data.todoOrder.filter(
         (id) =>
@@ -117,7 +117,7 @@ export const MoveItemDown = defineListCommand({
   run: (state, payload: { focusId: number | typeof OS.FOCUS }) =>
     produce(state, (draft) => {
       const focusId = Number(payload.focusId);
-      if (!focusId || isNaN(focusId)) return;
+      if (!focusId || Number.isNaN(focusId)) return;
 
       const visibleIds = state.data.todoOrder.filter(
         (id) =>
@@ -148,7 +148,7 @@ export const StartEdit = defineListCommand({
   run: (state, payload: { id: number | typeof OS.FOCUS }) =>
     produce(state, (draft) => {
       const targetId = payload.id as number;
-      if (!targetId || isNaN(targetId)) return;
+      if (!targetId || Number.isNaN(targetId)) return;
 
       const todo = draft.data.todos[targetId];
       draft.ui.editingId = targetId;

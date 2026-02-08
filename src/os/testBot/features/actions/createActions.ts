@@ -75,7 +75,15 @@ export function createActions(
   // Click (CSS string or { text, role } query)
   // ─────────────────────────────────────────────────────────────────
 
-  const click = async (target: Selector) => {
+  const click = async (
+    target: Selector,
+    modifiers?: {
+      shift?: boolean;
+      ctrl?: boolean;
+      alt?: boolean;
+      meta?: boolean;
+    },
+  ) => {
     const label = selectorLabel(target);
 
     const el = resolveElement(target);
@@ -103,7 +111,14 @@ export function createActions(
     await cursor.moveTo(x, y, moveTime());
     cursor.trackElement(el);
     cursor.clearBubbles();
-    cursor.showBubble("Click", "click");
+    const modLabel = modifiers
+      ? `${[
+          modifiers.ctrl ? "Ctrl+" : "",
+          modifiers.shift ? "Shift+" : "",
+          modifiers.meta ? "⌘+" : "",
+        ].join("")}Click`
+      : "Click";
+    cursor.showBubble(modLabel, "click");
     cursor.ripple();
 
     const eventOpts: MouseEventInit = {
@@ -112,6 +127,10 @@ export function createActions(
       clientX: x,
       clientY: y,
       button: 0,
+      shiftKey: modifiers?.shift,
+      ctrlKey: modifiers?.ctrl,
+      altKey: modifiers?.alt,
+      metaKey: modifiers?.meta,
     };
     el.dispatchEvent(new MouseEvent("mousedown", eventOpts));
 
@@ -232,8 +251,9 @@ export function createActions(
     detail: string,
     passed: boolean,
     errorMsg?: string,
+    selector?: string,
   ) => {
-    cursor.showStatus(passed ? "pass" : "fail");
+    cursor.showStatus(passed ? "pass" : "fail", selector);
 
     let finalError = errorMsg;
     if (!passed && errorMsg) {
@@ -266,6 +286,7 @@ export function createActions(
         selector,
         passed,
         `Expected ${selector} focused, got ${activeId ? `#${activeId}` : (activeEl?.tagName ?? "(none)")}`,
+        selector,
       );
     },
 
@@ -278,6 +299,7 @@ export function createActions(
         `${selector} [${attr}="${value}"]`,
         actual === value,
         `Expected ${attr}="${value}", got "${actual}"`,
+        selector,
       );
     },
 
@@ -290,6 +312,7 @@ export function createActions(
         `${selector} [${attr}≠"${value}"]`,
         actual !== value,
         `Expected ${attr} to NOT be "${value}", but it was`,
+        selector,
       );
     },
 
@@ -301,6 +324,7 @@ export function createActions(
         selector,
         passed,
         `Expected ${selector} to exist in DOM`,
+        selector,
       );
     },
 
@@ -312,6 +336,7 @@ export function createActions(
         selector,
         passed,
         `Expected ${selector} to NOT exist in DOM`,
+        selector,
       );
     },
 
@@ -327,6 +352,7 @@ export function createActions(
         `${selector} value="${value}"`,
         actual === value,
         `Expected value="${value}", got "${actual}"`,
+        selector,
       );
     },
 
@@ -339,6 +365,7 @@ export function createActions(
         `${selector} text="${text}"`,
         actual === text,
         `Expected text="${text}", got "${actual}"`,
+        selector,
       );
     },
 
@@ -358,6 +385,7 @@ export function createActions(
         selector,
         visible,
         `Expected ${selector} to be visible`,
+        selector,
       );
     },
 
@@ -374,6 +402,7 @@ export function createActions(
         selector,
         disabled,
         `Expected ${selector} to be disabled`,
+        selector,
       );
     },
 
@@ -385,6 +414,7 @@ export function createActions(
         `${selector} ×${n}`,
         count === n,
         `Expected ${n} elements matching ${selector}, got ${count}`,
+        selector,
       );
     },
   });

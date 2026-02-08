@@ -82,7 +82,6 @@ export function ColumnView({ column, cards, state }: ColumnViewProps) {
         {isEditing ? (
           /* eslint-disable pipeline/no-handler-in-app -- Native <input> for column title edit: onChange/onKeyDown/onBlur required */
           <input
-            autoFocus
             value={state.ui.columnEditDraft}
             onChange={(e) => {
               dispatch(SyncColumnDraft({ text: e.target.value }));

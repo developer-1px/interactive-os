@@ -94,13 +94,16 @@ function TreeItems() {
           {/* Children - shown when expanded */}
           {item.children.length > 0 && isExpanded(item.id) && (
             <div className="ml-6">
-              {item.children.map((childId) => (
-                <div
+              {item.children.map((childId, childIdx) => (
+                <FocusItem
                   key={childId}
-                  className="text-xs text-gray-400 py-0.5 pl-2"
+                  id={`tree-child-${treeData.indexOf(item) + 1}-${childIdx + 1}`}
+                  role="treeitem"
+                  className="px-3 py-1 rounded hover:bg-gray-100 aria-[current=true]:bg-sky-50 aria-[current=true]:text-sky-600 text-xs flex items-center gap-2"
                 >
-                  └ {childId}
-                </div>
+                  <span className="text-gray-300">└</span>
+                  <span>{childId}</span>
+                </FocusItem>
               ))}
             </div>
           )}

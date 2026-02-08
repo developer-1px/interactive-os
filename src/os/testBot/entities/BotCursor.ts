@@ -6,13 +6,15 @@ export interface BotCursor {
   ripple(): void;
   /** Show a bubble (Keycap style) above the cursor */
   showBubble(label: string, variant?: BubbleVariant): void;
-  /** Show a side label (Left) for Pass/Fail status */
-  showStatus(type: "pass" | "fail"): void;
+  /** Show a stamp on the target element (Pass/Fail) */
+  showStatus(type: "pass" | "fail", selector?: string): void;
   /** Show an indicator for off-screen element */
   showOffScreenPtr(targetX: number, targetY: number): void;
   hideOffScreenPtr(): void;
   /** Clear all current bubbles (e.g. on click) */
   clearBubbles(): void;
+  /** Clear all status stamps */
+  clearStamps(): void;
   destroy(): void;
   getPosition(): { x: number; y: number };
 }

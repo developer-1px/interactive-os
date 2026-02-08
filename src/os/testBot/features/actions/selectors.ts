@@ -29,7 +29,7 @@ export function getUniqueSelector(el: Element): string {
     const parent = current.parentElement;
     if (parent) {
       const siblings = Array.from(parent.children).filter(
-        (c) => c.tagName === current!.tagName,
+        (c) => c.tagName === current?.tagName,
       );
       if (siblings.length > 1) {
         const idx = siblings.indexOf(current) + 1;

@@ -37,6 +37,18 @@ export function resolveNavigate(
   const isVertical = direction === "up" || direction === "down";
   const isHorizontal = direction === "left" || direction === "right";
 
+  // Home/End bypass orientation check (work in any orientation)
+  if (direction === "home" || direction === "end") {
+    return resolveWithStrategy(
+      config.orientation,
+      currentId,
+      direction,
+      items,
+      config,
+      spatial,
+    );
+  }
+
   if (config.orientation === "horizontal" && isVertical) {
     return {
       targetId: currentId,

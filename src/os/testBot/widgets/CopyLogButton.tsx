@@ -49,6 +49,7 @@ export function CopyLogButton({ suite }: { suite: SuiteResult }) {
 
   return (
     <button
+      type="button"
       onClick={handleCopy}
       className={`shrink-0 p-1.5 rounded-full transition-all duration-200 ${
         copied

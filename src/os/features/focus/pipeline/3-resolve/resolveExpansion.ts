@@ -37,7 +37,6 @@ export function resolveExpansion(
     case "collapse":
       shouldBeExpanded = false;
       break;
-    case "toggle":
     default:
       shouldBeExpanded = !isCurrentlyExpanded;
       break;

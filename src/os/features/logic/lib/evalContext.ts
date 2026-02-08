@@ -17,10 +17,10 @@ const _compile = (expr: string): ((ctx: ContextState) => boolean) => {
           ? false
           : v === "null"
             ? null
-            : !isNaN(Number(v))
+            : !Number.isNaN(Number(v))
               ? Number(v)
               : v.replace(/['"]/g, "");
-    return (c) => c[k] == val;
+    return (c) => c[k] === val;
   }
   return (c) => !!c[expr];
 };
@@ -32,5 +32,5 @@ export function evalContext(
   if (!expr) return true;
   if (typeof expr === "function") return expr(ctx);
   if (!cache.has(expr)) cache.set(expr, _compile(expr));
-  return cache.get(expr)!(ctx);
+  return cache.get(expr)?.(ctx);
 }

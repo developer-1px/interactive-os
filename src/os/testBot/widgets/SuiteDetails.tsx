@@ -3,6 +3,7 @@
  */
 
 import { AlertTriangle, Eye, Keyboard, MousePointerClick } from "lucide-react";
+import { useEffect, useRef } from "react";
 import type { StepResult } from "../entities/StepResult";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -62,6 +63,17 @@ export function SuiteDetails({
   isRunning?: boolean;
   activeStepIndex?: number;
 }) {
+  const activeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isRunning && activeRef.current) {
+      activeRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [isRunning]);
+
   if (!steps || steps.length === 0) return null;
 
   return (
@@ -80,17 +92,14 @@ export function SuiteDetails({
 
         return (
           <div
-            key={i}
-            ref={(el) => {
-              if (isActive && el)
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
-            }}
+            key={`${i}-${step.action}`}
+            ref={isActive ? activeRef : null}
             data-testbot-step={i}
             data-testbot-action={step.action}
             data-testbot-step-result={
               step.passed ? "pass" : step.error ? "fail" : "pending"
             }
-            className={`group flex items-start pl-3 pr-2 py-1.5 transition-colors relative ${
+            className={`group flex items-center pl-3 pr-2 py-1.5 transition-colors relative ${
               isActive
                 ? "bg-blue-50/50"
                 : isPending
@@ -113,19 +122,19 @@ export function SuiteDetails({
                 </span>
 
                 <span
-                  className={`font-semibold tracking-wide uppercase text-[9px] ${
+                  className={`font-extrabold tracking-tighter uppercase text-[10px] ${
                     isActive
                       ? "text-blue-700"
                       : step.action === "click"
-                        ? "text-blue-600"
+                        ? "text-blue-700 bg-blue-50 px-1 rounded"
                         : step.action === "press"
-                          ? "text-slate-500"
+                          ? "text-slate-600"
                           : isExpect
                             ? isPending
                               ? "text-slate-400"
                               : step.passed
-                                ? "text-emerald-600"
-                                : "text-red-600"
+                                ? "text-emerald-700"
+                                : "text-red-700"
                             : "text-slate-500"
                   }`}
                 >
@@ -143,9 +152,15 @@ export function SuiteDetails({
                           : "text-red-700 font-medium"
                   }`}
                 >
-                  {isExpect
-                    ? step.detail.replace(/^(Expect )/, "")
-                    : step.detail}
+                  {isExpect ? (
+                    step.detail.replace(/^(Expect )/, "")
+                  ) : step.action === "press" ? (
+                    <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 bg-white border border-slate-200 border-b-[3px] border-b-slate-300 rounded-[4px] text-[10px] font-sans text-slate-600 font-bold uppercase mx-0.5 select-none transition-transform active:border-b-0 active:translate-y-[3px]">
+                      {step.detail}
+                    </kbd>
+                  ) : (
+                    step.detail
+                  )}
                 </span>
               </div>
 

@@ -31,7 +31,7 @@ export const FIELD_COMMIT: KeyboardCommand<FieldCommitPayload> = {
 
     // Local callback
     if (config.onCommit) {
-      result.callback = () => config.onCommit!(localValue);
+      result.callback = () => config.onCommit?.(localValue);
     }
 
     // Dispatch onSubmit command

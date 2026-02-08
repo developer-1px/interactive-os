@@ -9,7 +9,7 @@ export const OSStateViewer = memo(() => {
   );
 
   // Compute focusPath from FocusData
-  const focusPath = useMemo(() => FocusData.getFocusPath(), [activeGroupId]);
+  const focusPath = useMemo(() => FocusData.getFocusPath(), []);
 
   // Get focusedItemId from active zone's store
   const activeZoneData = activeGroupId
@@ -18,7 +18,7 @@ export const OSStateViewer = memo(() => {
   const focusedItemId = activeZoneData?.store?.getState().focusedItemId ?? null;
 
   // Get all zone IDs from DOM
-  const zoneIds = useMemo(() => FocusData.getOrderedZones(), [activeGroupId]);
+  const zoneIds = useMemo(() => FocusData.getOrderedZones(), []);
 
   const osState = useMemo(
     () => ({

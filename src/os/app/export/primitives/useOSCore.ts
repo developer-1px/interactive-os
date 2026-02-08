@@ -83,6 +83,31 @@ export function useOSCore() {
         args: { direction: "RIGHT", select: "range" },
       },
 
+      // Home/End: First/Last Item (W3C APG)
+      // macOS: Cmd+↑/↓ normalized to Home/End by getCanonicalKey
+      {
+        key: "Home",
+        command: OS_COMMANDS.NAVIGATE,
+        args: { direction: "HOME" },
+      },
+      {
+        key: "End",
+        command: OS_COMMANDS.NAVIGATE,
+        args: { direction: "END" },
+      },
+      // Shift+Home/End: Range select to first/last (W3C APG)
+      // macOS: Cmd+Shift+↑/↓ normalized to Shift+Home/End
+      {
+        key: "Shift+Home",
+        command: OS_COMMANDS.NAVIGATE,
+        args: { direction: "HOME", select: "range" },
+      },
+      {
+        key: "Shift+End",
+        command: OS_COMMANDS.NAVIGATE,
+        args: { direction: "END", select: "range" },
+      },
+
       // Tab Navigation (Delegated to App)
       { key: "Tab", command: "OS_TAB", allowInInput: true },
       { key: "Shift+Tab", command: "OS_TAB_PREV", allowInInput: true },

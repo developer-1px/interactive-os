@@ -23,7 +23,6 @@ export default function BuilderPage() {
       {/* Canvas Area */}
       <OS.Zone
         id="builder-canvas"
-        role="builderBlock"
         className="flex-1 overflow-y-auto custom-scrollbar"
       >
         {/* Page Being Edited */}

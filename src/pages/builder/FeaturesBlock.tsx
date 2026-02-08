@@ -31,11 +31,7 @@ export function FeaturesBlock() {
   });
 
   return (
-    <OS.Zone
-      id="features-block"
-      role="builderBlock"
-      className="bg-slate-50 py-24 px-8"
-    >
+    <OS.Zone id="features-block" className="bg-slate-50 py-24 px-8">
       <div className="max-w-5xl mx-auto">
         {/* Section Header - Items directly in the grid zone */}
         <div className="text-center mb-16">
@@ -79,7 +75,6 @@ export function FeaturesBlock() {
           {/* Large Card - Spans 7 columns */}
           <OS.Zone
             id="feature-main-zone"
-            role="builderBlock"
             className="col-span-12 md:col-span-7 flex flex-col"
           >
             <div className="relative h-[320px] rounded-2xl p-8 overflow-hidden bg-gradient-to-br from-violet-100 via-violet-50 to-white border border-violet-200">
@@ -124,7 +119,6 @@ export function FeaturesBlock() {
           <div className="col-span-12 md:col-span-5 flex flex-col gap-4">
             <OS.Zone
               id="feature-speed-zone"
-              role="builderBlock"
               className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200"
             >
               <div className="flex items-start justify-between h-full">
@@ -166,7 +160,6 @@ export function FeaturesBlock() {
 
             <OS.Zone
               id="feature-security-zone"
-              role="builderBlock"
               className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200"
             >
               <div className="flex items-start justify-between h-full">
@@ -210,7 +203,6 @@ export function FeaturesBlock() {
           {/* Bottom Row - Nested Zones */}
           <OS.Zone
             id="feature-analytics-zone"
-            role="builderBlock"
             className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0"
           >
             <div className="flex items-center gap-4 h-full">
@@ -253,7 +245,6 @@ export function FeaturesBlock() {
 
           <OS.Zone
             id="feature-collab-zone"
-            role="builderBlock"
             className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0"
           >
             <div className="flex items-center gap-4 h-full">

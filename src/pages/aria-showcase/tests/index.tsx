@@ -14,6 +14,7 @@ import {
   defineFeedTests,
   defineMenubarTests,
 } from "./ComplexPatternsTest";
+import { defineDisclosureTests } from "./DisclosureTest";
 import { defineGridTests } from "./GridTest";
 import { defineListboxTests } from "./ListboxTest";
 import { defineMenuTests } from "./MenuTest";
@@ -36,5 +37,6 @@ export function defineAriaRoutes(bot: TestBot) {
   defineAccordionTests(bot);
   defineDialogTests(bot);
   defineAlertDialogTests(bot);
+  defineDisclosureTests(bot); // NEW: Disclosure pattern
   defineFeedTests(bot);
 }

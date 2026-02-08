@@ -190,6 +190,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       Tab re-enters at last focused control
   toolbar: {
     navigate: { orientation: "horizontal", loop: true, entry: "restore" },
+    select: { mode: "none" },
     tab: { behavior: "escape" },
   },
 
@@ -285,7 +286,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
 
   // ─── Builder Block (custom — visual page builder) ───
   builderBlock: {
-    navigate: { seamless: true },
+    navigate: { orientation: "both", seamless: true },
     tab: { behavior: "flow" },
   },
 

@@ -42,6 +42,18 @@ const resolveLinear: NavigationStrategy = (
   const idx = items.indexOf(currentId);
   if (idx === -1) return { targetId: items[0], stickyX: null, stickyY: null };
 
+  // W3C APG: Home/End jump to first/last
+  if (direction === "home") {
+    return { targetId: items[0], stickyX: null, stickyY: null };
+  }
+  if (direction === "end") {
+    return {
+      targetId: items[items.length - 1],
+      stickyX: null,
+      stickyY: null,
+    };
+  }
+
   const isForward = direction === "down" || direction === "right";
   const delta = isForward ? 1 : -1;
   let nextIndex = idx + delta;
@@ -114,6 +126,8 @@ const resolveSpatial: NavigationStrategy = (
         return node.rect.right <= currentRect.left;
       case "right":
         return node.rect.left >= currentRect.right;
+      default:
+        return false;
     }
   };
 
@@ -184,6 +198,8 @@ const resolveSpatial: NavigationStrategy = (
       case "right":
         distance = node.rect.left - currentRect.right;
         break;
+      default:
+        distance = Infinity;
     }
 
     // Secondary: Alignment with anchor (perpendicular axis)

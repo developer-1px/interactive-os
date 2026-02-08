@@ -172,6 +172,7 @@ export interface OSResult {
 export type DOMEffect =
   | { type: "FOCUS"; targetId: string }
   | { type: "SCROLL_INTO_VIEW"; targetId: string }
+  | { type: "CLICK"; targetId: string }
   | { type: "BLUR" };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -425,6 +426,13 @@ function executeDOMEffect(effect: DOMEffect): void {
     }
     case "BLUR": {
       (document.activeElement as HTMLElement)?.blur();
+      break;
+    }
+    case "CLICK": {
+      const el = DOM.getItem(effect.targetId);
+      if (el) {
+        el.click();
+      }
       break;
     }
   }

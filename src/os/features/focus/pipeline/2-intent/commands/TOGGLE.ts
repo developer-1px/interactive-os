@@ -13,9 +13,28 @@ export const TOGGLE: OSCommand<{ targetId?: string }> = {
     const targetId = payload?.targetId ?? ctx.focusedItemId;
     if (!targetId) return null;
 
+    // W3C APG: Space toggles expand/collapse for expandable items (treeitem, menuitem)
+    const role = ctx.dom.queries.getItemRole(targetId);
+    const isExpandable = role === "treeitem" || role === "menuitem";
+    const isExpanded = ctx.expandedItems.includes(targetId);
+
+    if (isExpandable) {
+      return {
+        state: {
+          expandedItems: isExpanded
+            ? ctx.expandedItems.filter((id) => id !== targetId)
+            : [...ctx.expandedItems, targetId],
+        },
+        dispatch: ctx.toggleCommand,
+      };
+    }
+
     // Priority 1: App-defined toggle command (checkbox, etc.)
     if (ctx.toggleCommand) {
-      return { dispatch: ctx.toggleCommand };
+      return {
+        domEffects: [{ type: "CLICK", targetId }],
+        dispatch: ctx.toggleCommand,
+      };
     }
 
     // Priority 2: OS selection toggle (multi-select fallback)
@@ -29,6 +48,7 @@ export const TOGGLE: OSCommand<{ targetId?: string }> = {
         selection: newSelection,
         selectionAnchor: isSelected ? ctx.selectionAnchor : targetId,
       },
+      domEffects: [{ type: "CLICK", targetId }],
     };
 
     // Notify app of selection change if selectCommand exists

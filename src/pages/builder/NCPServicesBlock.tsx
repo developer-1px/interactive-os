@@ -1,6 +1,7 @@
 import { Field } from "@os/app/export/primitives/Field.tsx";
 import { OS } from "@os/features/AntigravityOS";
 import {
+  ArrowRight,
   Box,
   Brain,
   Cpu,
@@ -13,304 +14,188 @@ import {
 import { useState } from "react";
 
 export function NCPServicesBlock() {
-  const [title, setTitle] = useState(
-    "고객이 원하는 클라우드 환경 구축을 위한\n다양한 서비스를 제공합니다",
-  );
+  const [title, setTitle] = useState("비즈니스에 최적화된\n클라우드 서비스");
 
-  const [featuredCardValues, setFeaturedCardValues] = useState({
-    recommend: "RECOMMEND",
-    title: "Featured\nService",
-  });
-
-  const [serviceSubheader, setServiceSubheader] = useState(
-    "네이버클라우드의 주요 서비스를 사용해보세요",
-  );
-
-  // Tab Icons Mock
-  const tabs = [
+  const [tabs] = useState([
     { icon: Star, label: "Featured", active: true },
     { icon: Brain, label: "AI Services" },
     { icon: Cpu, label: "Compute" },
     { icon: Database, label: "Storage" },
     { icon: Server, label: "Database" },
-    { icon: Box, label: "Hybrid & Private" },
-    { icon: Layers, label: "Application" },
-  ];
+    { icon: Box, label: "Hybrid" },
+    { icon: Layers, label: "Network" },
+  ]);
 
   const [featuredServices, setFeaturedServices] = useState([
     {
       icon: Server,
+      color: "text-blue-600 bg-blue-50",
       title: "Server",
-      badge: "Update",
-      desc: "클라우드 상에서 서버를 생성하고 운영할 수 있는 서비스",
+      badge: "UPDATED",
+      desc: "고성능 클라우드 서버 인프라를 \n몇 번의 클릭으로 구축하세요.",
     },
     {
       icon: Database,
+      color: "text-purple-600 bg-purple-50",
       title: "Cloud DB for Cache",
-      badge: "Update",
-      desc: "인메모리 캐시를 클라우드 상에서 간편하게 구축하고 안정적으로 운영하는 서비스",
+      badge: "NEW",
+      desc: "Valkey 기반의 완전 관리형 \n인메모리 캐시 서비스.",
     },
     {
       icon: Brain,
+      color: "text-green-600 bg-green-50",
       title: "CLOVA Speech",
       badge: "",
-      desc: "음성을 텍스트로 바꿔주며 긴 문장 받아쓰기, 자막 생성 등 다양한 음성 인식 서비스에 활용할 수 있습니다.",
+      desc: "비즈니스 환경에 특화된 \n최고 수준의 음성 인식 기술.",
     },
     {
       icon: Layers,
+      color: "text-orange-600 bg-orange-50",
       title: "Data Stream",
-      badge: "Update",
-      desc: "완전 관리형 시계열 데이터 플랫폼",
+      badge: "",
+      desc: "대용량 데이터의 실시간 수집과 \n처리를 위한 파이프라인.",
     },
     {
       icon: Globe,
-      title: "Papago Translation",
+      color: "text-cyan-600 bg-cyan-50",
+      title: "Global CDN",
       badge: "",
-      desc: "입력된 텍스트를 파파고의 번역 엔진을 통해 번역하는 기계 번역 서비스",
+      desc: "전 세계 사용자에게 빠르고 \n안정적인 콘텐츠 전송.",
     },
     {
       icon: Box,
-      title: "CLOVA Studio",
+      color: "text-indigo-600 bg-indigo-50",
+      title: "Kubernetes",
       badge: "",
-      desc: "비즈니스에 최적화된 하이퍼스케일 AI 개발 도구",
+      desc: "컨테이너화된 애플리케이션의 \n자동화된 배포 및 관리.",
     },
   ]);
 
   return (
     <OS.Zone
       id="ncp-services"
-      role="builderBlock"
-      className="py-24 px-4 bg-slate-50"
+      className="py-24 px-6 bg-[#F8F9FA] border-t border-slate-200"
     >
-      <div className="max-w-[1200px] mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-start mb-16">
-          {/* Field self-registers as FocusItem */}
-          <Field
-            name="ncp-service-title"
-            mode="deferred"
-            multiline
-            value={title}
-            onCommit={(val: string) => setTitle(val)}
-            className={`
-                            text-3xl font-bold text-slate-900 leading-tight whitespace-pre-wrap tracking-tight
-                            data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 rounded p-2 -m-2
-                        `}
-          />
+      <div className="max-w-7xl mx-auto">
+        {/* Header & Controls */}
+        <div className="flex flex-col lg:flex-row justify-between items-end mb-12 gap-8">
+          <div className="max-w-xl">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+              <span className="text-blue-600 font-bold text-xs tracking-widest uppercase">
+                Service Category
+              </span>
+            </div>
+            <Field
+              name="ncp-service-title"
+              mode="deferred"
+              multiline
+              value={title}
+              onCommit={(val: string) => setTitle(val)}
+              className={`
+                        text-3xl md:text-4xl font-bold text-slate-900 leading-tight tracking-tight
+                        data-[focused=true]:bg-white rounded-lg p-2 -m-2
+                    `}
+            />
+          </div>
 
-          <OS.Item id="ncp-service-all">
-            {({ isFocused }: { isFocused: boolean }) => (
-              <button
-                className={`
-                                px-6 py-3 rounded-full bg-slate-900 text-white text-sm font-bold transition-all
-                                shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 hover:-translate-y-0.5
-                                ${isFocused ? "scale-105 ring-4 ring-slate-300" : "hover:bg-slate-800"}
-                            `}
-              >
-                서비스 전체보기
-              </button>
-            )}
-          </OS.Item>
-        </div>
-
-        {/* Tabs */}
-        <OS.Zone
-          id="ncp-service-tabs"
-          role="builderBlock"
-          options={{ navigate: { orientation: "horizontal" } }}
-          className="flex flex-row gap-6 items-center mb-12 border-b border-slate-200 pb-8 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,transparent,black_2%,black_98%,transparent)]"
-        >
-          {tabs.map((tab, i) => (
-            <OS.Item key={tab.label} id={`tab-${i}`}>
-              {({ isFocused }: { isFocused: boolean }) => (
-                <div
-                  className={`
-                                    flex flex-col items-start justify-between p-5 min-w-[160px] h-[160px] rounded-3xl cursor-pointer group transition-all relative shrink-0 border
-                                    ${
-                                      tab.active
-                                        ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/30 ring-4 ring-blue-600/10"
-                                        : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
-                                    }
-                                    ${isFocused ? "scale-105 ring-4 ring-blue-500/20" : ""}
-                                `}
-                >
-                  <div
+          {/* Segmented Control Tabs */}
+          <OS.Zone
+            id="ncp-service-tabs"
+            options={{ navigate: { orientation: "horizontal" } }}
+            className="flex items-center bg-slate-200/50 p-1.5 rounded-xl overflow-x-auto max-w-full"
+          >
+            {tabs.map((tab, i) => (
+              <OS.Item key={tab.label} id={`tab-${i}`}>
+                {({ isFocused }: { isFocused: boolean }) => (
+                  <button
                     className={`
-                                        w-12 h-12 rounded-2xl flex items-center justify-center transition-all
-                                        ${
-                                          tab.active
-                                            ? "bg-white/20 text-white"
-                                            : "bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600"
-                                        }
-                                    `}
+                            flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap
+                            ${
+                              tab.active
+                                ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
+                                : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                            }
+                            ${isFocused ? "bg-white ring-2 ring-slate-300 z-10" : ""}
+                      `}
                   >
-                    <tab.icon size={24} strokeWidth={2} />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <span
-                      className={`text-lg font-bold tracking-tight ${tab.active ? "text-white" : "text-slate-900"}`}
-                    >
-                      {tab.label}
-                    </span>
-                    <span
-                      className={`text-[11px] font-medium uppercase tracking-wider ${tab.active ? "text-blue-200" : "text-slate-400"}`}
-                    >
-                      Service
-                    </span>
-                  </div>
-
-                  {/* Active decorative blob */}
-                  {tab.active && (
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  )}
-                </div>
-              )}
-            </OS.Item>
-          ))}
-        </OS.Zone>
-
-        {/* Main Content */}
-        <div className="flex flex-col lg:flex-row gap-6 items-stretch">
-          {/* Featured Card */}
-          <OS.Zone
-            id="ncp-featured-card"
-            role="builderBlock"
-            className="lg:w-1/4 min-h-[400px] bg-gradient-to-br from-[#0F172A] to-[#1E293B] rounded-3xl p-10 text-white flex flex-col justify-between overflow-hidden relative shadow-2xl shadow-blue-900/20 group"
-          >
-            {/* Dynamic Background Effects */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/30 transition-colors duration-700" />
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 group-hover:bg-cyan-400/20 transition-colors duration-700" />
-
-            <div className="relative z-10">
-              <Field
-                name="ncp-featured-recommend"
-                mode="deferred"
-                value={featuredCardValues.recommend}
-                onCommit={(val: string) =>
-                  setFeaturedCardValues((prev) => ({ ...prev, recommend: val }))
-                }
-                className={`
-                  inline-block px-3 py-1 rounded-full bg-white/10 text-white/90 text-[10px] font-bold tracking-wider mb-4 border border-white/10 backdrop-blur-md
-                  data-[focused=true]:bg-white/30 data-[focused=true]:ring-1 data-[focused=true]:ring-white/50
-                `}
-              />
-              <Field
-                name="ncp-featured-title"
-                mode="deferred"
-                multiline
-                value={featuredCardValues.title}
-                onCommit={(val: string) =>
-                  setFeaturedCardValues((prev) => ({ ...prev, title: val }))
-                }
-                className={`
-                  block text-3xl font-bold tracking-tight leading-tight text-white whitespace-pre-wrap
-                  data-[focused=true]:bg-white/10 data-[focused=true]:ring-1 data-[focused=true]:ring-white/50 rounded p-1 -m-1
-                `}
-              />
-            </div>
-
-            <div className="relative z-10 h-32 w-32 bg-gradient-to-tr from-cyan-400 to-blue-600 rounded-full blur-2xl opacity-80 self-end shadow-lg shadow-cyan-500/50 animate-pulse duration-[3000ms]" />
-          </OS.Zone>
-
-          {/* Service List Grid */}
-          <OS.Zone
-            id="ncp-service-list"
-            role="builderBlock"
-            className="lg:w-3/4 bg-white rounded-3xl p-8 shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10"
-          >
-            <div className="col-span-2 mb-2">
-              <Field
-                name="ncp-service-subheader"
-                mode="deferred"
-                value={serviceSubheader}
-                onCommit={(val: string) => setServiceSubheader(val)}
-                className={`
-                  text-sm font-bold text-slate-500
-                  data-[focused=true]:bg-slate-100 data-[focused=true]:ring-1 data-[focused=true]:ring-slate-300 rounded px-1 -mx-1
-                `}
-              />
-            </div>
-
-            {featuredServices.map((service, index) => (
-              <div
-                key={index}
-                className="flex gap-5 group/item cursor-pointer p-4 -m-4 rounded-2xl hover:bg-slate-50 transition-all duration-300"
-              >
-                <OS.Item id={`service-icon-${index}`}>
-                  {({ isFocused }: { isFocused: boolean }) => (
-                    <div
-                      className={`
-                                            w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-300
-                                            ${
-                                              isFocused
-                                                ? "bg-slate-900 text-white ring-2 ring-slate-300 scale-110 shadow-lg"
-                                                : "bg-white text-slate-600 border-slate-100 shadow-sm group-hover/item:border-blue-200 group-hover/item:shadow-blue-100 group-hover/item:scale-110"
-                                            }
-                                        `}
-                    >
-                      <service.icon
-                        size={22}
-                        className="group-hover/item:text-blue-600 transition-colors"
-                      />
-                    </div>
-                  )}
-                </OS.Item>
-
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    {/* Field self-registers */}
-                    <Field
-                      name={`service-title-${index}`}
-                      mode="deferred"
-                      value={service.title}
-                      onCommit={(val: string) => {
-                        const newServices = [...featuredServices];
-                        newServices[index].title = val;
-                        setFeaturedServices(newServices);
-                      }}
-                      className={`
-                                                font-bold text-slate-900 text-lg tracking-tight
-                                                data-[focused=true]:bg-slate-100 data-[focused=true]:ring-1 data-[focused=true]:ring-slate-300 rounded px-1 -mx-1
-                                            `}
+                    <tab.icon
+                      size={16}
+                      className={tab.active ? "text-blue-600" : ""}
                     />
-                    {service.badge && (
-                      <Field
-                        name={`service-badge-${index}`}
-                        mode="deferred"
-                        value={service.badge}
-                        onCommit={(val: string) => {
-                          const newServices = [...featuredServices];
-                          newServices[index].badge = val;
-                          setFeaturedServices(newServices);
-                        }}
-                        className={`
-                          px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider border border-green-200
-                          data-[focused=true]:ring-2 data-[focused=true]:ring-green-400 data-[focused=true]:scale-110
-                        `}
-                      />
-                    )}
-                  </div>
-                  <Field
-                    name={`service-desc-${index}`}
-                    mode="deferred"
-                    multiline
-                    value={service.desc}
-                    onCommit={(val: string) => {
-                      const newServices = [...featuredServices];
-                      newServices[index].desc = val;
-                      setFeaturedServices(newServices);
-                    }}
-                    className={`
-                                            text-sm text-slate-500 leading-relaxed block group-hover/item:text-slate-600 transition-colors
-                                            data-[focused=true]:bg-slate-100 data-[focused=true]:ring-1 data-[focused=true]:ring-slate-300 rounded px-1 -mx-1
-                                        `}
-                  />
-                </div>
-              </div>
+                    {tab.label}
+                  </button>
+                )}
+              </OS.Item>
             ))}
           </OS.Zone>
         </div>
+
+        {/* Service Grid */}
+        <OS.Zone
+          id="ncp-service-list"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {featuredServices.map((service, index) => (
+            <div
+              key={index}
+              className="group bg-white rounded-2xl p-8 border border-slate-200 transition-all duration-300 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 cursor-pointer"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${service.color}`}
+                >
+                  <service.icon size={24} strokeWidth={2} />
+                </div>
+                {service.badge && (
+                  <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
+                    {service.badge}
+                  </span>
+                )}
+              </div>
+
+              <Field
+                name={`service-title-${index}`}
+                mode="deferred"
+                value={service.title}
+                onCommit={(val: string) => {
+                  const newServices = [...featuredServices];
+                  newServices[index].title = val;
+                  setFeaturedServices(newServices);
+                }}
+                className={`text-lg font-bold text-slate-900 mb-2 block`}
+              />
+
+              <Field
+                name={`service-desc-${index}`}
+                mode="deferred"
+                multiline
+                value={service.desc}
+                onCommit={(val: string) => {
+                  const newServices = [...featuredServices];
+                  newServices[index].desc = val;
+                  setFeaturedServices(newServices);
+                }}
+                className={`text-sm text-slate-500 leading-relaxed block min-h-[40px]`}
+              />
+
+              <div className="mt-6 flex items-center text-blue-600 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                <span>Details</span>
+                <ArrowRight size={16} className="ml-1" />
+              </div>
+            </div>
+          ))}
+
+          {/* "View All" Card */}
+          <div className="rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-8 text-center hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer group">
+            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4 group-hover:bg-slate-200 group-hover:text-slate-600 py-10 transition-colors">
+              <ArrowRight size={24} />
+            </div>
+            <span className="text-slate-500 font-bold text-sm">
+              서비스 전체보기
+            </span>
+          </div>
+        </OS.Zone>
       </div>
     </OS.Zone>
   );

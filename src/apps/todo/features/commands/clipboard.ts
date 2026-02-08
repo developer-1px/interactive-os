@@ -24,7 +24,7 @@ export const CopyTodo = defineListCommand({
   id: "COPY_TODO",
   run: (state, payload: { id: number | typeof OS.FOCUS }) => {
     const targetId = payload.id as number;
-    if (!targetId || isNaN(targetId)) return state;
+    if (!targetId || Number.isNaN(targetId)) return state;
 
     const todo = state.data.todos[targetId];
     if (!todo) return state;
@@ -60,7 +60,7 @@ export const CutTodo = defineListCommand({
   id: "CUT_TODO",
   run: (state, payload: { id: number | typeof OS.FOCUS }) => {
     const targetId = payload.id as number;
-    if (!targetId || isNaN(targetId)) return state;
+    if (!targetId || Number.isNaN(targetId)) return state;
 
     const todo = state.data.todos[targetId];
     if (!todo) return state;
@@ -121,7 +121,7 @@ export const PasteTodo = defineListCommand({
       // focusId comes as string from OS.FOCUS resolution, convert to number
       const numericFocusId =
         typeof payload.id === "string" ? Number(payload.id) : payload.id;
-      if (numericFocusId && !isNaN(numericFocusId)) {
+      if (numericFocusId && !Number.isNaN(numericFocusId)) {
         const focusIndex = draft.data.todoOrder.indexOf(numericFocusId);
         if (focusIndex !== -1) {
           draft.data.todoOrder.splice(focusIndex + 1, 0, newId);
@@ -146,7 +146,7 @@ export const DuplicateTodo = defineListCommand({
   id: "DUPLICATE_TODO",
   run: (state, payload: { id: number | typeof OS.FOCUS }) => {
     const targetId = payload.id as number;
-    if (!targetId || isNaN(targetId)) return state;
+    if (!targetId || Number.isNaN(targetId)) return state;
 
     const todo = state.data.todos[targetId];
     if (!todo) return state;

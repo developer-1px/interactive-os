@@ -56,14 +56,24 @@ export function App<S>({
     });
 
     // No unregister needed - next registerApp will overwrite
-  }, [appDef.id, isInitialized, dispatch]);
+  }, [
+    appDef.id,
+    isInitialized,
+    dispatch,
+    appDef.contextMap,
+    engine.registry,
+    engine.store.getState,
+    engine.store.setState,
+    registerApp,
+    state,
+  ]);
 
   // 4. Update state when it changes
   useEffect(() => {
     if (isInitialized) {
       updateAppState(appDef.id, state);
     }
-  }, [state, isInitialized, appDef.id]);
+  }, [state, isInitialized, appDef.id, updateAppState]);
 
   // 5. Body class for app shell mode
   useEffect(() => {

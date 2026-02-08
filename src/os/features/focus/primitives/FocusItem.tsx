@@ -106,7 +106,10 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       throw new Error("FocusItem must be used within a FocusGroup");
     }
 
-    const { groupId, store, zoneRole } = ctx;
+    const { groupId, store, zoneRole, config } = ctx;
+
+    // --- Derived: is this group selectable? ---
+    const isSelectableGroup = config.select.mode !== "none";
 
     // --- State Subscriptions ---
     const activeGroupId = useSyncExternalStore(
@@ -141,7 +144,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
           });
         }
       }
-    }, [visualFocused, id, store]);
+    }, [visualFocused]);
     const isAnchor = isFocused && !isGroupActive;
 
     // Auto-resolve child role from parent Zone role (e.g., listbox → option)
@@ -162,9 +165,10 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       "aria-current": visualFocused || undefined,
 
       // Selection state: aria-checked for radio/checkbox, aria-selected for rest
+      // W3C: selectable items MUST have explicit "true" or "false"
       ...(useChecked
-        ? { "aria-checked": isSelected || undefined }
-        : { "aria-selected": isSelected || undefined }),
+        ? { "aria-checked": isSelectableGroup ? isSelected : undefined }
+        : { "aria-selected": isSelectableGroup ? isSelected : undefined }),
 
       "aria-expanded": expandable ? isExpanded : undefined,
       "aria-disabled": disabled || undefined,

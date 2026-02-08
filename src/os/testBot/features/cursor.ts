@@ -35,104 +35,112 @@ const STYLES = `
 
   .testbot-spotlight {
     position: absolute;
-    width: 80px; height: 80px;
-    background: radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%);
+    width: 60px; height: 60px;
+    background: radial-gradient(circle, rgba(59,130,246,0.4) 0%, rgba(59,130,246,0) 70%);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
     z-index: -1;
+    mix-blend-mode: screen;
+    filter: blur(4px);
   }
 
-  /* ── Status Label (Side: Left) ──────────────────────────────────── */
-  .testbot-status-label {
+  /* ── Status Stamps (Footprints) ─────────────────────────────────── */
+  .testbot-stamp {
     position: absolute;
-    right: 36px; /* Left of cursor */
-    top: 6px;
-    font-family: 'SF Pro Rounded', 'Nunito', sans-serif;
+    z-index: 99990; /* Below cursor/bubbles but above content */
+    pointer-events: none;
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 11px;
     font-weight: 800;
-    letter-spacing: 0.5px;
-    padding: 2px 6px;
-    border-radius: 4px;
+    letter-spacing: 0.05em;
+    padding: 3px 8px;
+    border-radius: 6px;
     white-space: nowrap;
-    opacity: 0;
-    transform: translateX(10px);
-    animation: testbot-status-pop 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    border: 2px solid;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform-origin: center center;
+    animation: testbot-stamp-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 
-  .testbot-status-label.pass {
-    color: #15803d; 
-    background: rgba(220, 252, 231, 0.9);
-    border: 1px solid rgba(134, 239, 172, 0.5);
-    box-shadow: 0 2px 4px rgba(21, 128, 61, 0.1);
+  .testbot-stamp.pass {
+    color: #15803d;
+    background: #dcfce7; /* Green-100 */
+    border-color: #16a34a; /* Green-600 */
+    transform: rotate(-5deg); /* Playful tilt */
   }
 
-  .testbot-status-label.fail {
-    color: #b91c1c;
-    background: rgba(254, 226, 226, 0.9);
-    border: 1px solid rgba(252, 165, 165, 0.5);
-    box-shadow: 0 2px 4px rgba(185, 28, 28, 0.1);
+  .testbot-stamp.fail {
+    color: #991b1b;
+    background: #fee2e2; /* Red-100 */
+    border-color: #dc2626; /* Red-600 */
+    transform: rotate(5deg);
+    z-index: 99991; /* Fail on top */
   }
 
-  @keyframes testbot-status-pop {
-    0% { opacity: 0; transform: translateX(10px) scale(0.8); }
-    15% { opacity: 1; transform: translateX(0) scale(1.1); }
-    30% { transform: translateX(0) scale(1); }
-    80% { opacity: 1; transform: translateX(0); }
-    100% { opacity: 0; transform: translateX(-5px); }
+  @keyframes testbot-stamp-pop {
+    0% { opacity: 0; transform: scale(1.5) rotate(0deg); }
+    100% { opacity: 1; transform: scale(1) rotate(var(--rotation)); }
   }
 
   /* ── Unified Bubble Tray (Horizontal) ───────────────────────────── */
   .testbot-bubble-tray {
     position: absolute;
-    left: 16px;
-    bottom: 32px; /* Above cursor */
+    left: 20px;
+    bottom: 34px; /* Above cursor */
     display: flex;
     flex-direction: row; /* Left to Right */
     flex-wrap: nowrap;
-    align-items: flex-end;
-    gap: 4px;
+    align-items: center;
+    gap: 6px;
     pointer-events: none;
     z-index: 99999;
   }
-
+  
   .testbot-bubble {
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 4px 10px;
-    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    min-width: 24px;
+    height: 24px;
+    padding: 0 4px;
+    background: #ffffff;
     border: 1px solid #cbd5e1;
     border-bottom: 3px solid #94a3b8;
     border-radius: 6px;
-    color: #1e293b;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 13px;
+    color: #334155;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
     font-weight: 700;
     white-space: nowrap;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
-    animation: testbot-bubble-pop 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transform-origin: center bottom;
+    animation: testbot-bubble-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 
   /* Bubble Variants */
   .testbot-bubble.variant-click {
-    background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
-    border-color: #93c5fd;
-    border-bottom-color: #60a5fa;
-    color: #1e40af;
+    min-width: auto;
+    height: 28px;
+    padding: 0 10px;
+    background: #2563eb;
+    border: 1px solid #1d4ed8;
+    border-bottom: 3px solid #1e3a8a;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
   }
   .testbot-bubble.variant-success {
-    background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
+    background: #dcfce7;
     border-color: #86efac;
-    border-bottom-color: #4ade80;
+    border-bottom-color: #22c55e;
     color: #15803d;
   }
   .testbot-bubble.variant-error {
-    background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%);
-    border-color: #fca5a5;
-    border-bottom-color: #f87171;
-    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+    border-bottom-color: rgba(239, 68, 68, 0.4);
+    color: #dc2626;
   }
 
   @keyframes testbot-bubble-pop {
@@ -140,21 +148,26 @@ const STYLES = `
     100% { transform: translateY(0) scale(1); opacity: 1; }
   }
 
+  @keyframes testbot-stamp-fadeout {
+    0% { opacity: 1; transform: scale(1) rotate(var(--rotation)); }
+    100% { opacity: 0; transform: scale(0.9) rotate(var(--rotation)); }
+  }
+
   /* ── Ripple ─────────────────────────────────────────────────────── */
   .testbot-ripple {
     position: absolute;
     z-index: 99998;
     pointer-events: none;
-    width: 32px; height: 32px;
+    width: 44px; height: 44px;
     border-radius: 50%;
-    border: 2px solid rgba(59,130,246,0.8);
-    background: rgba(59,130,246,0.15);
-    transform: translate(-50%, -50%) scale(0);
-    animation: testbot-ripple-anim 0.45s ease-out forwards;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.6) 0%, transparent 75%);
+    border: 2px solid rgba(37, 99, 235, 0.5);
+    transform: translate(-50%,-50%) scale(0);
+    animation: testbot-ripple-anim 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
   }
   @keyframes testbot-ripple-anim {
-    0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
-    100% { transform: translate(-50%,-50%) scale(3); opacity: 0; }
+    0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.8; }
+    100% { transform: translate(-50%,-50%) scale(2.5); opacity: 0; }
   }
 
   /* ── Off-screen State ───────────────────────────────────────────── */
@@ -162,7 +175,7 @@ const STYLES = `
     color: #3b82f6;
     filter: drop-shadow(0 2px 4px rgba(59,130,246,0.3));
     transform-origin: center;
-    animation: testbot-ptr-pulse 1.5s infinite;
+    animation: testbot-ptr-pulse 0.5s infinite;
   }
   
   /* Hide spotlight when off-screen to reduce clutter */
@@ -186,8 +199,8 @@ function injectStyles() {
 
 const CURSOR_SVG = `
 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M6 3L19.5 13.5L12.5 14.5L9 22L6 3Z" fill="black"/>
-  <path d="M6 3L19.5 13.5L12.5 14.5L9 22L6 3Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M5.5 3.21V20.8L10.07 15.35H18.59L5.5 3.21Z" fill="black"/>
+  <path d="M5.5 3.21V20.8L10.07 15.35H18.59L5.5 3.21Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
 </svg>`;
 
 const ARROW_SVG = `
@@ -327,12 +340,55 @@ export function createCursor(): BotCursor {
       bubbleTray.firstElementChild?.remove();
   };
 
-  const showStatus = (type: "pass" | "fail") => {
-    const label = document.createElement("div");
-    label.className = `testbot-status-label ${type}`;
-    label.textContent = type === "pass" ? "PASS!" : "FAIL!";
-    cursorEl.appendChild(label);
-    setTimeout(() => label.remove(), 1500);
+  const showStatus = (type: "pass" | "fail", selector?: string) => {
+    // 1. Determine Position
+    let stampX = x; // Fallback to cursor pos
+    let stampY = y;
+
+    if (selector) {
+      const el = document.querySelector(selector);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        // Center of element (viewport coordinates)
+        stampX = rect.left + rect.width / 2;
+        stampY = rect.top + rect.height / 2;
+      }
+    }
+
+    // 2. Create Stamp
+    const stamp = document.createElement("div");
+    stamp.className = `testbot-stamp ${type}`;
+    stamp.textContent = type === "pass" ? "PASS!" : "FAIL!";
+
+    // Random rotation for natural stamp look
+    const rotation = Math.random() * 10 - 5 + (type === "fail" ? 5 : -5);
+    stamp.style.setProperty("--rotation", `${rotation}deg`);
+
+    // Position: FIXED relative to viewport
+    // (User requested this approach for now due to limitations with absolute/child method)
+    stamp.style.position = "fixed";
+    stamp.style.left = `${stampX}px`;
+    stamp.style.top = `${stampY}px`;
+
+    // Center alignment
+    stamp.style.marginLeft = "-20px";
+    stamp.style.marginTop = "-12px";
+
+    document.body.appendChild(stamp);
+
+    // 3. Lifecycle
+    if (type === "pass") {
+      // Fade out PASS stamps using keyframe animation for reliability
+      setTimeout(() => {
+        // Apply animation class or inline style for keyframe
+        stamp.style.animation = "testbot-stamp-fadeout 1.5s linear forwards";
+        setTimeout(() => stamp.remove(), 1500);
+      }, 1000); // Visible for 1s
+    } else {
+      // FAIL stamps stay forever (until destroyed or manually cleared)
+      // Optional: Add a close button or clear on re-run?
+      // For now, let's keep them as requested.
+    }
   };
 
   const showOffScreenPtr = (tx: number, ty: number) => {
@@ -381,10 +437,17 @@ export function createCursor(): BotCursor {
     bubbleTray.innerHTML = "";
   };
 
+  const clearStamps = () => {
+    document.querySelectorAll(".testbot-stamp").forEach((el) => {
+      el.remove();
+    });
+  };
+
   const destroy = () => {
     destroyed = true;
     hideOffScreenPtr();
     cursorEl.remove();
+    clearStamps();
     document.removeEventListener("scroll", retrack);
     window.removeEventListener("resize", retrack);
     observer.disconnect();
@@ -400,6 +463,7 @@ export function createCursor(): BotCursor {
     showOffScreenPtr,
     hideOffScreenPtr,
     clearBubbles,
+    clearStamps,
     destroy,
     getPosition: () => ({ x, y }),
   };

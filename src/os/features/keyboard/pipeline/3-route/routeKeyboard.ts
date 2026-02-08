@@ -40,8 +40,6 @@ export function routeKeyboard(
 
     case "FIELD":
       return routeField(intent);
-
-    case "PASSTHRU":
     default:
       return false;
   }

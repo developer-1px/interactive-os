@@ -226,6 +226,7 @@ export function FocusGroup({
     onDelete,
     onUndo,
     onRedo,
+    containerRef.current,
   ]);
 
   // --- Auto-Focus for Dialog/Modal or explicit autoFocus ---
@@ -251,7 +252,7 @@ export function FocusGroup({
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount - global autoFocusClaimed prevents duplicates
+  }, [config.project?.autoFocus, containerRef.current, role, store.setState]); // Only run on mount - global autoFocusClaimed prevents duplicates
 
   // --- Context Value ---
   const contextValue = useMemo<FocusGroupContextValue>(

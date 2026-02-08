@@ -31,7 +31,7 @@ export function CommandInspector() {
     () => null,
   );
 
-  const focusPath = useMemo(() => FocusData.getFocusPath(), [activeGroupId]);
+  const focusPath = useMemo(() => FocusData.getFocusPath(), []);
 
   const activeZoneData = activeGroupId
     ? FocusData.getById(activeGroupId)

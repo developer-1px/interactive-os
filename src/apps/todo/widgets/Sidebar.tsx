@@ -70,7 +70,7 @@ function SidebarContent() {
           Categories
         </div>
         {(state.data.categoryOrder ?? []).map((categoryId) => {
-          const category = (state.data.categories ?? {})[categoryId];
+          const category = state.data.categories?.[categoryId];
           if (!category) return null;
 
           return (

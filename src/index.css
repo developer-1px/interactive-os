@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 * {
-  outline-width: 0 !important;
-  outline-offset: 0 !important;
+  outline-width: 0;
+  outline-offset: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

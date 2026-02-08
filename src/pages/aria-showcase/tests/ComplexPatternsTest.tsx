@@ -37,8 +37,9 @@ export function defineComboboxTests(bot: TestBot) {
   });
 
   bot.describe("Combobox: Listbox Navigation", async (t) => {
-    await t.click("#combo-trigger");
-    await t.press("ArrowDown");
+    // Combobox is already open from previous test
+    // Click first option to focus into the listbox
+    await t.click("#combo-opt-0");
     await t.expect("#combo-opt-0").focused();
 
     await t.press("ArrowDown");

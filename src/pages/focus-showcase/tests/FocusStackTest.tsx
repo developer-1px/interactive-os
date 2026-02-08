@@ -51,7 +51,7 @@ function Modal({ id, isOpen, onClose, title, children }: ModalProps) {
 
     document.addEventListener("keydown", handleKeyDown, true);
     return () => document.removeEventListener("keydown", handleKeyDown, true);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   // Restore focus when closing (using FocusData API)
   const handleClose = () => {
@@ -206,7 +206,7 @@ export function FocusStackTest() {
       >
         <FocusGroup
           id="fs-modal1"
-          role="menu"
+          role="dialog"
           navigate={{ orientation: "vertical" }}
           project={{ autoFocus: true }}
           className="flex flex-col gap-1"
@@ -242,7 +242,7 @@ export function FocusStackTest() {
       >
         <FocusGroup
           id="fs-modal2"
-          role="menu"
+          role="dialog"
           navigate={{ orientation: "vertical" }}
           project={{ autoFocus: true }}
           className="flex flex-col gap-1"

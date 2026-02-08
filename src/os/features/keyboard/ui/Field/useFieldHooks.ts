@@ -35,7 +35,7 @@ export const useFieldState = ({ value }: UseFieldStateProps) => {
     if (!isComposingRef.current && value !== localValue) {
       setLocalValue(value);
     }
-  }, [value]);
+  }, [value, localValue]);
 
   return { localValue, setLocalValue, isComposingRef };
 };
@@ -60,7 +60,7 @@ export const useFieldDOMSync = ({
     if (innerRef.current) {
       innerRef.current.innerText = localValue;
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [innerRef.current, localValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync on blur only
   useLayoutEffect(() => {
@@ -107,7 +107,7 @@ export const useFieldFocus = ({
                 const textLength = innerRef.current.innerText.length;
                 setCaretPosition(innerRef.current, textLength);
               }
-            } catch (e) {}
+            } catch (_e) {}
           }
         });
       });

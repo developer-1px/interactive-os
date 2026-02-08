@@ -47,33 +47,34 @@ export function defineMenuTests(bot: TestBot) {
   // Verifies: menuitemcheckbox aria-checked state
   // ─────────────────────────────────────────────────────────────
   bot.describe("Menu: Checkbox Toggle", async (t) => {
-    // 1. Navigate to Ruler checkbox
+    // State: ruler starts as true from initialization
+    // Click toggles the state, so clicking ruler → true→false
+
+    // 1. Navigate to Ruler checkbox (click also toggles)
     await t.click("#menu-ruler");
     await t.expect("#menu-ruler").focused();
-
-    // 2. Check initial state (should be checked by default)
-    await t.expect("#menu-ruler").toHaveAttr("aria-checked", "true");
-
-    // 3. Press Space/Enter to toggle
-    await t.press("Enter");
     await t.expect("#menu-ruler").toHaveAttr("aria-checked", "false");
 
-    // 4. Toggle again
-    await t.press("Enter");
+    // 2. Press Space to toggle back on
+    await t.press("Space");
     await t.expect("#menu-ruler").toHaveAttr("aria-checked", "true");
 
-    // 5. Navigate to Grid checkbox
+    // 3. Press Space to toggle off again
+    await t.press("Space");
+    await t.expect("#menu-ruler").toHaveAttr("aria-checked", "false");
+
+    // 4. Navigate to Grid checkbox (initially unchecked)
     await t.press("ArrowDown");
     await t.expect("#menu-grid").focused();
     await t.expect("#menu-grid").toHaveAttr("aria-checked", "false");
 
-    // 6. Toggle Grid checkbox
-    await t.press("Enter");
+    // 5. Toggle Grid checkbox on
+    await t.press("Space");
     await t.expect("#menu-grid").toHaveAttr("aria-checked", "true");
 
-    // 7. Verify Ruler checkbox state unchanged
+    // 6. Verify Ruler checkbox state unchanged
     await t.press("ArrowUp");
-    await t.expect("#menu-ruler").toHaveAttr("aria-checked", "true");
+    await t.expect("#menu-ruler").toHaveAttr("aria-checked", "false");
   });
 
   // ─────────────────────────────────────────────────────────────

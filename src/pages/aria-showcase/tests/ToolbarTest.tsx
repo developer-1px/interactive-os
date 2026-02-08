@@ -77,27 +77,32 @@ export function defineToolbarTests(bot: TestBot) {
   // Verifies: Click toggles aria-pressed state
   // ─────────────────────────────────────────────────────────────
   bot.describe("Toolbar: Click Toggle", async (t) => {
-    // 1. Click Bold (initially pressed)
-    await t.click("#tool-bold");
-    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "true");
+    // State after previous test: bold=true, italic=true
+    // Each click focuses AND toggles
 
-    // 2. Click again to toggle off
+    // 1. Click Bold → toggles from true→false
     await t.click("#tool-bold");
     await t.expect("#tool-bold").toHaveAttr("aria-pressed", "false");
 
-    // 3. Click Italic to toggle on
+    // 2. Click Bold again → toggles from false→true
+    await t.click("#tool-bold");
+    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "true");
+
+    // 3. Click Italic → toggles from true→false
     await t.click("#tool-italic");
     await t.expect("#tool-italic").toHaveAttr("aria-pressed", "false");
 
+    // 4. Click Italic again → toggles from false→true
     await t.click("#tool-italic");
     await t.expect("#tool-italic").toHaveAttr("aria-pressed", "true");
 
-    // 4. Click Underline
-    await t.click("#tool-underline");
-    await t.expect("#tool-underline").toHaveAttr("aria-pressed", "false");
-
+    // 5. Click Underline → toggles from false→true
     await t.click("#tool-underline");
     await t.expect("#tool-underline").toHaveAttr("aria-pressed", "true");
+
+    // 6. Click Underline again → toggles from true→false
+    await t.click("#tool-underline");
+    await t.expect("#tool-underline").toHaveAttr("aria-pressed", "false");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -148,24 +153,29 @@ export function defineToolbarTests(bot: TestBot) {
   // Verifies: Multiple buttons can be pressed simultaneously
   // ─────────────────────────────────────────────────────────────
   bot.describe("Toolbar: Multiple Toggles", async (t) => {
-    // 1. Toggle Bold on
-    await t.click("#tool-bold");
-    await t.press("Enter");
-    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "true");
+    // After tests 1-5:
+    //   bold:      1 click (test1) + 1 click (test2) + 2 Enter (test2) + 2 click (test3) = even → true (initial)
+    //   italic:    1 Enter (test2) + 2 click (test3) = odd from false → true
+    //   underline: 2 click (test3) + 1 click (test5) = odd from false → true
+    //   strike:    1 click (test4) = odd from false → true
+    // Ergo: all are true at this point
 
-    // 2. Toggle Italic on
+    // 1. Focus Italic via Arrow (no click to avoid toggle)
+    await t.click("#tool-bold"); // bold: true→false
     await t.press("ArrowRight");
-    await t.press("Enter");
-    await t.expect("#tool-italic").toHaveAttr("aria-pressed", "true");
+    await t.expect("#tool-italic").focused();
 
-    // 3. Toggle Underline on
-    await t.press("ArrowRight");
+    // 2. Italic is true, Enter → false
     await t.press("Enter");
-    await t.expect("#tool-underline").toHaveAttr("aria-pressed", "true");
+    await t.expect("#tool-italic").toHaveAttr("aria-pressed", "false");
 
-    // 4. Verify all three are pressed
-    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "true");
-    await t.expect("#tool-italic").toHaveAttr("aria-pressed", "true");
-    await t.expect("#tool-underline").toHaveAttr("aria-pressed", "true");
+    // 3. Navigate to Strike
+    await t.press("ArrowRight"); // underline
+    await t.press("ArrowRight"); // strike
+    await t.expect("#tool-strike").focused();
+
+    // 4. Strike is true, Enter → false
+    await t.press("Enter");
+    await t.expect("#tool-strike").toHaveAttr("aria-pressed", "false");
   });
 }

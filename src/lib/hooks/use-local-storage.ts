@@ -43,7 +43,7 @@ export function useLocalStorage<T>(
       if (e.key === key && e.newValue) {
         try {
           setStoredValue(JSON.parse(e.newValue));
-        } catch (e) {
+        } catch (_e) {
           // ignore parse error only
         }
       }

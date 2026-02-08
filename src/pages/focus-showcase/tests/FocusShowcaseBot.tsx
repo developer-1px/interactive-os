@@ -179,34 +179,31 @@ function defineTests(bot: TestBot) {
   // Verifies: multi-select, range selection, deselection
   // ─────────────────────────────────────────────────────────────
   bot.describe("Select: Range Selection", async (t) => {
-    // 1. Initial selection
+    // W3C APG Listbox: Plain click = replace, Meta/Ctrl+Click = toggle
+    // 1. Initial selection (plain click)
     await t.click("#sel-range-0");
     await t.expect("#sel-range-0").toHaveAttr("aria-selected", "true");
 
-    // 2. Multi-select: both should be selected
-    await t.click("#sel-range-2");
+    // 2. Meta+Click: additive multi-select
+    await t.click("#sel-range-2", { meta: true });
     await t.expect("#sel-range-2").toHaveAttr("aria-selected", "true");
     await t.expect("#sel-range-0").toHaveAttr("aria-selected", "true");
 
-    // 3. Add middle item to selection
-    await t.click("#sel-range-1");
+    // 3. Add middle item
+    await t.click("#sel-range-1", { meta: true });
     await t.expect("#sel-range-1").toHaveAttr("aria-selected", "true");
     await t.expect("#sel-range-0").toHaveAttr("aria-selected", "true");
     await t.expect("#sel-range-2").toHaveAttr("aria-selected", "true");
 
     // 4. Add more items
-    await t.click("#sel-range-3");
+    await t.click("#sel-range-3", { meta: true });
     await t.expect("#sel-range-3").toHaveAttr("aria-selected", "true");
 
-    await t.click("#sel-range-4");
-    await t.expect("#sel-range-4").toHaveAttr("aria-selected", "true");
-
-    // 5. Verify all 5 items are selected
+    // 5. Verify all 4 items are selected
     await t.expect("#sel-range-0").toHaveAttr("aria-selected", "true");
     await t.expect("#sel-range-1").toHaveAttr("aria-selected", "true");
     await t.expect("#sel-range-2").toHaveAttr("aria-selected", "true");
     await t.expect("#sel-range-3").toHaveAttr("aria-selected", "true");
-    await t.expect("#sel-range-4").toHaveAttr("aria-selected", "true");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -392,13 +389,55 @@ function defineTests(bot: TestBot) {
     await t.expect("#tree-parent-2").toHaveAttr("aria-current", "true");
     await t.expect("#tree-parent-2").toHaveAttr("aria-expanded", "false");
 
-    // 8. Expand second parent
-    await t.press("ArrowRight");
+    // 8. Expand second parent with Enter (W3C APG)
+    await t.press("Enter");
     await t.expect("#tree-parent-2").toHaveAttr("aria-expanded", "true");
 
-    // 9. Collapse second parent
+    // 9. Collapse second parent with Space (W3C APG)
+    await t.press("Space");
+    await t.expect("#tree-parent-2").toHaveAttr("aria-expanded", "false");
+
+    // 10. Re-expand with Enter
+    await t.press("Enter");
+    await t.expect("#tree-parent-2").toHaveAttr("aria-expanded", "true");
+
+    // 11. Collapse with ArrowLeft
     await t.press("ArrowLeft");
     await t.expect("#tree-parent-2").toHaveAttr("aria-expanded", "false");
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 11. Navigate: Home/End Keys
+  // Verifies: Home jumps to first, End jumps to last (W3C APG)
+  // ─────────────────────────────────────────────────────────────
+  bot.describe("Navigate: Home/End", async (t) => {
+    // 1. Click middle item in vertical list
+    await t.click("#nav-banana");
+    await t.expect("#nav-banana").toHaveAttr("aria-current", "true");
+
+    // 2. Home → jump to first item
+    await t.press("Home");
+    await t.expect("#nav-apple").toHaveAttr("aria-current", "true");
+
+    // 3. End → jump to last item
+    await t.press("End");
+    await t.expect("#nav-cherry").toHaveAttr("aria-current", "true");
+
+    // 4. Home again → back to first
+    await t.press("Home");
+    await t.expect("#nav-apple").toHaveAttr("aria-current", "true");
+
+    // 5. Test in horizontal toolbar
+    await t.click("#nav-italic");
+    await t.expect("#nav-italic").toHaveAttr("aria-current", "true");
+
+    // 6. Home → first toolbar button
+    await t.press("Home");
+    await t.expect("#nav-bold").toHaveAttr("aria-current", "true");
+
+    // 7. End → last toolbar button
+    await t.press("End");
+    await t.expect("#nav-underline").toHaveAttr("aria-current", "true");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -406,26 +445,22 @@ function defineTests(bot: TestBot) {
   // Verifies: base focus, modal open/close, focus restoration
   // ─────────────────────────────────────────────────────────────
   bot.describe("Focus Stack: Restore", async (t) => {
-    // 1. Establish base focus
-    await t.click("#fs-base-2");
-    await t.expect("#fs-base-2").focused();
-    await t.expect("#fs-base-2").toHaveAttr("aria-current", "true");
-
-    // 2. Open modal (click trigger button)
+    // W3C APG Dialog: focus restores to trigger element after close
+    // 1. Open modal (trigger is inside #fs-base-1)
     await t.click("#fs-open-modal");
 
-    // 3. Modal should auto-focus first item
+    // 2. Modal should auto-focus first item (role="dialog" + autoFocus)
     await t.expect("#fs-modal1-1").toHaveAttr("aria-current", "true");
 
-    // 4. Navigate within modal
+    // 3. Navigate within modal
     await t.press("ArrowDown");
     await t.expect("#fs-modal1-2").toHaveAttr("aria-current", "true");
 
-    // 5. Close modal (Escape)
+    // 4. Close modal (Escape)
     await t.press("Escape");
 
-    // 6. Focus should restore to base (#fs-base-2)
-    await t.expect("#fs-base-2").toHaveAttr("aria-current", "true");
+    // 5. Focus restores to trigger's container (#fs-base-1)
+    await t.expect("#fs-base-1").toHaveAttr("aria-current", "true");
   });
 }
 

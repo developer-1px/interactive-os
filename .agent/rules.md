@@ -64,6 +64,14 @@ React Aria, W3C ARIA Practices, 브라우저 API 등 검증된 해법을 커스�
 - **재현 가능**: 불변 상태 + 액션 로그 → 동일 상태 재현.
 - **복구 가능**: 스냅샷 기반 → 이전 상태 롤백.
 
+### 8. W3C 표준 절대 준수
+> **"W3C WAI-ARIA가 정의한 것은 우리의 원칙이다. 예외 없음."**
+
+- Roles, States, Properties, 키보드 인터랙션 패턴, 포커스 관리 — 모두 [W3C WAI-ARIA](https://www.w3.org/TR/wai-aria-1.2/) 및 [APG](https://www.w3.org/WAI/ARIA/apg/)가 공식 정의한 표준을 따른다.
+- 구현 판단 기준은 "다른 앱은 어떻게 하지?"가 아니라 **"W3C 스펙에 뭐라고 되어 있지?"**이다.
+- `roleRegistry.ts`의 preset, `classifyKeyboard.ts`의 intent 변환, TestBot 테스트 케이스 모두 W3C 스펙에서 직접 도출한다.
+- 상세 참조: `docs/2-area/03-aria-compliance/`
+
 ## 에이전트 규칙
 
 - **불확실하면 묻는다**: 요구사항이나 구현 방법이 불확실하면 구현하지 말고 먼저 질문한다.

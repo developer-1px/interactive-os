@@ -79,7 +79,7 @@ export function CardActionMenu() {
           id: "labels",
           label: "Toggle Label",
           icon: Tag,
-          submenu: Object.values(state!.data.labels).map((label) => ({
+          submenu: Object.values(state?.data.labels).map((label) => ({
             id: label.id,
             label: label.name,
             color: label.color,

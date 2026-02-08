@@ -178,19 +178,19 @@ export function defineGridTests(bot: TestBot) {
   // Verifies: Home jumps to first cell, End jumps to last
   // ─────────────────────────────────────────────────────────────
   bot.describe("Grid: Home/End Navigation", async (t) => {
-    // 1. Start at middle cell
+    // 1. Start at middle cell (cell-5, row 2)
     await t.click("#cell-5");
     await t.expect("#cell-5").focused();
 
-    // 2. Home → First cell
+    // 2. Home → First cell in grid (cell-0)
     await t.press("Home");
     await t.expect("#cell-0").focused();
 
-    // 3. End → Last cell
+    // 3. End → Last cell in grid (cell-11)
     await t.press("End");
     await t.expect("#cell-11").focused();
 
-    // 4. Home again
+    // 4. Home again → back to first
     await t.press("Home");
     await t.expect("#cell-0").focused();
   });

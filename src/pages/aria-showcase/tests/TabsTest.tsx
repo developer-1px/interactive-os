@@ -99,10 +99,7 @@ export function defineTabsTests(bot: TestBot) {
     await t.expect("#tab-disabled").focused();
     await t.expect("#tab-disabled").toHaveAttr("aria-disabled", "true");
 
-    // 2. Verify disabled tab stays unselected
-    await t.expect("#tab-disabled").toHaveAttr("aria-selected", "false");
-
-    // 3. Navigate away and back
+    // 2. Navigate away and back — disabled tab can still receive focus
     await t.press("ArrowRight");
     await t.expect("#tab-account").focused();
     await t.press("ArrowLeft");

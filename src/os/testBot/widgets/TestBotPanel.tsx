@@ -5,7 +5,7 @@
  */
 
 import { Check, ChevronDown, Play, RefreshCw, Square, X } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { TestBotActions } from "../features/TestBotActions";
 import { useTestBotStore } from "../features/TestBotStore";
 import { CopyLogButton } from "./CopyLogButton";
@@ -36,10 +36,17 @@ export function TestBotPanel() {
   const failCount = doneSuites.filter((s) => !s.passed).length;
   const isFinished = !isRunning && doneSuites.length > 0;
 
-  const activeSuiteRef = (el: HTMLDivElement | null) => {
-    if (el && isRunning)
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
+  const activeSuiteRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      // Only scroll if this specific suite is running.
+      // We can rely on the fact that this ref is only attached to the running suite
+      // (conditionally in the render loop below) or check the data attribute.
+      if (el && isRunning) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    },
+    [isRunning], // Re-run ref callback when suite changes or run state changes
+  );
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-slate-50 font-sans">
@@ -61,6 +68,7 @@ export function TestBotPanel() {
 
           {isRunning ? (
             <button
+              type="button"
               onClick={TestBotActions.stop}
               className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-md text-xs font-semibold transition-all shadow-sm"
             >
@@ -68,6 +76,7 @@ export function TestBotPanel() {
             </button>
           ) : (
             <button
+              type="button"
               onClick={TestBotActions.runAll}
               disabled={routeCount === 0}
               data-testbot-run-all
@@ -137,7 +146,7 @@ export function TestBotPanel() {
 
           return (
             <div
-              key={si}
+              key={suite.name}
               ref={isRunningSuite ? activeSuiteRef : null}
               data-testbot-suite={suite.name}
               data-testbot-index={si}
@@ -160,13 +169,15 @@ export function TestBotPanel() {
               }`}
             >
               {/* Suite Header */}
-              <div
+              <button
+                type="button"
                 onClick={() => toggleSuite(suite.name)}
-                className="group/suite flex items-center px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
+                className="group/suite w-full flex items-center px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors text-left"
               >
                 <div className="mr-3 shrink-0 transition-transform duration-300">
                   {isPending ? (
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         TestBotActions.runSuite(si);
@@ -179,6 +190,7 @@ export function TestBotPanel() {
                     </button>
                   ) : (
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         TestBotActions.runSuite(si);
@@ -244,7 +256,7 @@ export function TestBotPanel() {
                   size={14}
                   className={`text-slate-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                 />
-              </div>
+              </button>
 
               {/* Details (Expanded) */}
               {isExpanded && (

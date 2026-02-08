@@ -30,7 +30,7 @@ export interface Expectations {
 
 export interface TestActions {
   /** Click an element by CSS selector or semantic query */
-  click(target: Selector): Promise<void>;
+  click(target: Selector, modifiers?: KeyModifiers): Promise<void>;
   press(key: string, modifiers?: KeyModifiers): Promise<void>;
   /** Type text character-by-character into the focused element */
   type(text: string): Promise<void>;

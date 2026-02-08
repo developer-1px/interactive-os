@@ -73,7 +73,7 @@ export function useFocusGroupStoreInstance(groupId: string) {
   useEffect(() => {
     // Component Did Mount: Ensure no pending cleanup
     const entry = storeCache.get(groupId);
-    if (entry && entry.cleanup) {
+    if (entry?.cleanup) {
       clearTimeout(entry.cleanup);
       entry.cleanup = null;
     }
