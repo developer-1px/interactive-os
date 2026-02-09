@@ -13,7 +13,7 @@ import {
   initKernel,
   resetKernel,
   state,
-} from "../index.ts";
+} from "../internal.ts";
 
 // ── Setup ──
 

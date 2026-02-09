@@ -14,7 +14,7 @@ import {
   initKernel,
   state,
   travelTo,
-} from "../index.ts";
+} from "../internal.ts";
 
 // ── Types ──
 

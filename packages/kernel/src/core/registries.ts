@@ -32,16 +32,3 @@ export function clearAllRegistries(): void {
   scopedEffects.clear();
   scopedMiddleware.clear();
 }
-
-// ─── Internal Lookups ───
-
-export function getScopedCommand(
-  type: string,
-  scope: string,
-): InternalCommandHandler | undefined {
-  return scopedCommands.get(scope)?.get(type);
-}
-
-export function getScopedMiddleware(scope: string): Middleware[] | undefined {
-  return scopedMiddleware.get(scope);
-}

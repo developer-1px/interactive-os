@@ -15,7 +15,7 @@ import {
   resetState,
   type StateDiff,
   state,
-} from "../index.ts";
+} from "../internal.ts";
 
 // ── Setup ──
 

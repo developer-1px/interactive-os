@@ -1,5 +1,8 @@
 /**
- * @kernel — Type-safe command dispatch with scoped bubbling.
+ * @kernel — Public API
+ *
+ * Minimal surface for external consumers.
+ * For test / internal use, import from "./internal.ts" instead.
  *
  * Core API:
  *   createKernel     → Group (root)
@@ -10,48 +13,17 @@
  *   Group.dispatch       → void
  */
 
-// ─── Context ───
-export { defineContext } from "./core/context.ts";
-// ─── State / Store ───
-export type { Store } from "./core/createStore.ts";
-export { getState, resetState } from "./core/createStore.ts";
 // ─── Dispatch ───
-// ─── Middleware ───
-export { dispatch, registerMiddleware as use } from "./core/pipeline.ts";
-// ─── Types ───
-export type {
-  Command,
-  CommandFactory,
-  ContextToken,
-  EffectFields,
-  EffectToken,
-  InjectResult,
-  Middleware,
-  MiddlewareContext,
-  ScopeToken,
-  StateMarker,
-  TypedContext,
-  TypedEffectMap,
-} from "./core/tokens.ts";
-export { GLOBAL } from "./core/tokens.ts";
+export { dispatch } from "./core/pipeline.ts";
 // ─── Inspector ───
-export type { StateDiff, Transaction } from "./core/transaction.ts";
+export type { Transaction } from "./core/transaction.ts";
 export {
   clearTransactions,
-  getLastTransaction,
   getTransactions,
-  recordTransaction,
   travelTo,
 } from "./core/transaction.ts";
 // ─── Entry Point ───
-export {
-  createKernel,
-  defineScope,
-  initKernel,
-  resetKernel,
-  state,
-} from "./createKernel.ts";
+export { createKernel, initKernel, state } from "./createKernel.ts";
 
 // ─── React ───
 export { useComputed } from "./react/useComputed.ts";
-export { useDispatch } from "./react/useDispatch.ts";

@@ -14,7 +14,7 @@ import {
   type InjectResult,
   state,
   type TypedContext,
-} from "../index.ts";
+} from "../internal.ts";
 
 // ── Setup ──
 
