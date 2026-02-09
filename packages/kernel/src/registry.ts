@@ -1,20 +1,20 @@
 /**
  * registry — defineHandler, defineCommand, defineEffect
  *
- * Three registries that map event types to their processors.
+ * Three registries that map command types to their processors.
  * All registration happens at startup. Lookup happens at dispatch time.
  */
 
 // ─── Types ───
 
-export type Event = {
+export type Command = {
     type: string;
     payload?: unknown;
 };
 
 export type EffectMap = {
     db?: unknown;
-    dispatch?: Event | Event[];
+    dispatch?: Command | Command[];
     [key: string]: unknown;
 };
 

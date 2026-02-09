@@ -1,7 +1,7 @@
 /**
- * dispatch — Kernel's single entry point for all events.
+ * dispatch — Kernel's single entry point for all commands.
  *
- * Event → Queue → Process:
+ * Command → Queue → Process:
  *   1. Look up handler or command
  *   2. Execute (pure function)
  *   3. Run effects
@@ -11,7 +11,7 @@
  */
 
 import type { Store } from "./createStore.ts";
-import type { Event, EffectMap, Context } from "./registry.ts";
+import type { Command, EffectMap, Context } from "./registry.ts";
 import { getHandler, getCommand, getEffect } from "./registry.ts";
 
 // ─── Transaction Log ───
@@ -19,7 +19,7 @@ import { getHandler, getCommand, getEffect } from "./registry.ts";
 export type Transaction = {
     id: number;
     timestamp: number;
-    event: Event;
+    command: Command;
     handlerType: "handler" | "command" | "unknown";
     effects: EffectMap | null;
     changes: unknown;
@@ -30,9 +30,9 @@ export type Transaction = {
 const transactions: Transaction[] = [];
 let nextTransactionId = 0;
 
-// ─── Event Queue (re-entrance safe) ───
+// ─── Command Queue (re-entrance safe) ───
 
-let queue: Event[] = [];
+let queue: Command[] = [];
 let processing = false;
 
 // ─── Core ───
@@ -50,25 +50,25 @@ export function bindStore<DB>(store: Store<DB>): void {
 /**
  * dispatch — the single entry point.
  */
-export function dispatch(event: Event): void {
-    queue.push(event);
+export function dispatch(cmd: Command): void {
+    queue.push(cmd);
 
     if (processing) return; // queue will be drained by outer loop
 
     processing = true;
     while (queue.length > 0) {
         const next = queue.shift()!;
-        processEvent(next);
+        processCommand(next);
     }
     processing = false;
 }
 
-function processEvent(event: Event): void {
+function processCommand(cmd: Command): void {
     if (!activeStore) {
         throw new Error("[kernel] No store bound. Call initKernel() first.");
     }
 
-    const { type, payload } = event;
+    const { type, payload } = cmd;
     const dbBefore = activeStore.getState();
 
     // 1. Resolve handler type
@@ -101,7 +101,7 @@ function processEvent(event: Event): void {
     const transaction: Transaction = {
         id: nextTransactionId++,
         timestamp: Date.now(),
-        event,
+        command: cmd,
         handlerType,
         effects: effectMap,
         changes: computeChanges(dbBefore, dbAfter),
@@ -125,10 +125,10 @@ function executeEffects(effectMap: EffectMap): void {
         }
 
         if (key === "dispatch") {
-            // Built-in: re-dispatch (goes to queue, processed after current event)
-            const events = Array.isArray(value) ? value : [value];
-            for (const e of events as Event[]) {
-                dispatch(e);
+            // Built-in: re-dispatch (goes to queue, processed after current command)
+            const cmds = Array.isArray(value) ? value : [value];
+            for (const c of cmds as Command[]) {
+                dispatch(c);
             }
             continue;
         }

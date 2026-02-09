@@ -257,7 +257,7 @@ function TransactionPanel({ forceUpdate }: { forceUpdate: () => void }) {
                 </button>
             </h3>
             {txs.length === 0 ? (
-                <p style={emptyStyle}>Dispatch some events to see transactions</p>
+                <p style={emptyStyle}>Dispatch some commands to see transactions</p>
             ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 400, overflowY: "auto" }}>
                     {[...txs].reverse().map((tx) => (
@@ -271,11 +271,11 @@ function TransactionPanel({ forceUpdate }: { forceUpdate: () => void }) {
                             }}
                         >
                             <span style={txIdStyle}>#{tx.id}</span>
-                            <span style={txTypeStyle}>{tx.event.type}</span>
+                            <span style={txTypeStyle}>{tx.command.type}</span>
                             <span style={txHandlerStyle}>{tx.handlerType}</span>
-                            {tx.event.payload !== undefined && (
+                            {tx.command.payload !== undefined && (
                                 <span style={txPayloadStyle}>
-                                    {JSON.stringify(tx.event.payload).slice(0, 30)}
+                                    {JSON.stringify(tx.command.payload).slice(0, 30)}
                                 </span>
                             )}
                             {tx.effects && (

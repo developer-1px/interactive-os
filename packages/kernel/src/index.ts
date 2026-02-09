@@ -25,7 +25,7 @@ export type { Store } from "./createStore.ts";
 // ── Registry ──
 export { defineHandler, defineCommand, defineEffect } from "./registry.ts";
 export type {
-    Event,
+    Command,
     EffectMap,
     HandlerFn,
     CommandFn,

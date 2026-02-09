@@ -95,7 +95,7 @@ const txs = getTransactions();
 assert(txs.length === 5, `${txs.length} transactions recorded`);
 
 const lastTx = getLastTransaction()!;
-assert(lastTx.event.type === "increment-and-notify", `last event: "${lastTx.event.type}"`);
+assert(lastTx.command.type === "increment-and-notify", `last command: "${lastTx.command.type}"`);
 assert(lastTx.handlerType === "command", `handler type: "${lastTx.handlerType}"`);
 assert(lastTx.effects !== null, "effects recorded in transaction");
 assert((lastTx.dbBefore as TestDB).count === 2, "dbBefore.count = 2");
@@ -110,8 +110,8 @@ assert(store.getState().count === 3, "travel to tx 2 → count = 3");
 
 console.log("\n─── Re-entrance (dispatch inside effect) ───");
 clearTransactions();
-defineEffect("re-dispatch", (event) => {
-    dispatch(event as { type: string; payload?: unknown });
+defineEffect("re-dispatch", (cmd) => {
+    dispatch(cmd as { type: string; payload?: unknown });
 });
 
 defineHandler("set-count", (db: TestDB, payload) => ({
@@ -129,12 +129,12 @@ assert(store.getState().count === 1, "re-entrance: reset(0) then increment(1) �
 
 const reTxs = getTransactions();
 assert(reTxs.length === 2, `re-entrance created ${reTxs.length} transactions`);
-assert(reTxs[0].event.type === "reset-then-increment", "tx 0: reset-then-increment");
-assert(reTxs[1].event.type === "increment", "tx 1: increment (from re-dispatch)");
+assert(reTxs[0].command.type === "reset-then-increment", "tx 0: reset-then-increment");
+assert(reTxs[1].command.type === "increment", "tx 1: increment (from re-dispatch)");
 
 console.log("\n─── Unknown handler warning ───");
 dispatch({ type: "nonexistent" }); // Should warn but not crash
-assert(true, "unknown event type did not crash");
+assert(true, "unknown command type did not crash");
 
 // ── Summary ──
 
