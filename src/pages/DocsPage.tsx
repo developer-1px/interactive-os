@@ -3,9 +3,11 @@ import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
+import rehypeHighlight from "rehype-highlight";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { cleanLabel, type DocItem, DocsSidebar } from "./docs/DocsSidebar";
+import "./docs/codeTheme.css";
 
 // Load all markdown files from the docs directory
 const modules = import.meta.glob("../../docs/**/*.md", {
@@ -142,12 +144,17 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
   hr: (props) => <hr className="border-slate-100 my-8 max-w-2xl" {...props} />,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   code: ({ className, children, ...props }: any) => {
+    const isBlock = className?.includes("hljs") || className?.includes("language-");
+    if (isBlock) {
+      return (
+        <code className={clsx("hljs", className)} {...props}>
+          {children}
+        </code>
+      );
+    }
     return (
       <code
-        className={clsx(
-          "bg-slate-100 text-indigo-600 px-1.5 py-0.5 rounded-md text-[0.85em] font-mono font-medium border border-slate-200/50",
-          className,
-        )}
+        className="bg-slate-100 text-indigo-600 px-1.5 py-0.5 rounded-md text-[0.85em] font-mono font-medium border border-slate-200/50"
         {...props}
       >
         {children}
@@ -155,26 +162,31 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
     );
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pre: ({ children, ...props }: any) => (
-    <div className="rounded-xl overflow-hidden my-8 border border-slate-200 bg-[#fbfcfd] shadow-sm relative group max-w-4xl">
-      <div className="flex items-center px-4 py-2 border-b border-slate-100 bg-slate-50/50 justify-between">
-        <div className="flex gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
-          <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
-          <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+  pre: ({ children, ...props }: any) => {
+    const codeChild = children?.props;
+    const langClass = codeChild?.className ?? "";
+    const lang = langClass.replace(/language-/, "").replace(/hljs/, "").trim();
+    return (
+      <div className="rounded-xl overflow-hidden my-8 border border-slate-200 bg-[#fbfcfd] shadow-sm relative group max-w-4xl">
+        <div className="flex items-center px-4 py-2 border-b border-slate-100 bg-slate-50/50 justify-between">
+          <div className="flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+            <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+            <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+          </div>
+          <div className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+            {lang || "code"}
+          </div>
         </div>
-        <div className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
-          Snippet
-        </div>
+        <pre
+          className="p-5 overflow-x-auto text-[12px] font-mono leading-relaxed [&>code]:bg-transparent [&>code]:p-0 [&>code]:rounded-none [&>code]:border-none"
+          {...props}
+        >
+          {children}
+        </pre>
       </div>
-      <pre
-        className="p-5 overflow-x-auto text-[12px] text-slate-700 font-mono leading-relaxed [&>code]:bg-transparent [&>code]:text-inherit [&>code]:p-0 [&>code]:rounded-none [&>code]:border-none"
-        {...props}
-      >
-        {children}
-      </pre>
-    </div>
-  ),
+    );
+  },
   table: (props) => (
     <div className="my-8 overflow-x-auto max-w-4xl border border-slate-200 rounded-lg">
       <table className="w-full border-collapse text-[13px]" {...props} />
@@ -296,6 +308,7 @@ export default function DocsPage() {
                 <div className="docs-content max-w-3xl">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkBreaks]}
+                    rehypePlugins={[rehypeHighlight]}
                     components={MarkdownComponents}
                   >
                     {content}

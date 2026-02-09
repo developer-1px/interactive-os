@@ -9,7 +9,7 @@
  */
 
 import { dispatchToZone } from "../../core/dispatchToZone.ts";
-import { OS_COMMANDS } from "../../schema/commands.ts";
+import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
 import { useCommandListener } from "@os/features/command/hooks/useCommandListener.ts";
 
 export function HistoryIntent() {

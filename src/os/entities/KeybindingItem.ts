@@ -1,4 +1,4 @@
 /**
- * [PROXY] Re-exports from canonical location: @/os-new/schema/entities/KeybindingItem.ts
+ * [PROXY] Re-exports from canonical location: @/os-new/schema/keyboard/KeybindingItem.ts
  */
-export type { KeybindingItem } from "@/os-new/schema/entities/KeybindingItem";
+export type { KeybindingItem } from "@/os-new/schema/keyboard/KeybindingItem";

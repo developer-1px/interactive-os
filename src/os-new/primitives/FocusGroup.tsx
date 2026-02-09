@@ -1,4 +1,4 @@
-import type { BaseCommand } from "../schema/entities/BaseCommand.ts";
+import type { BaseCommand } from "../schema/command/BaseCommand.ts";
 import {
   type ComponentProps,
   createContext,

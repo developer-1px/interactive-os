@@ -32,5 +32,5 @@ export function evalContext(
   if (!expr) return true;
   if (typeof expr === "function") return expr(ctx);
   if (!cache.has(expr)) cache.set(expr, _compile(expr));
-  return cache.get(expr)?.(ctx);
+  return cache.get(expr)?.(ctx) ?? true;
 }

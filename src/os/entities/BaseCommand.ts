@@ -1,4 +1,4 @@
 /**
- * [PROXY] Re-exports from canonical location: @/os-new/schema/entities/BaseCommand.ts
+ * [PROXY] Re-exports from canonical location: @/os-new/schema/command/BaseCommand.ts
  */
-export type { BaseCommand, FieldCommandFactory } from "@/os-new/schema/entities/BaseCommand";
+export type { BaseCommand, FieldCommandFactory } from "@/os-new/schema/command/BaseCommand";

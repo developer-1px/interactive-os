@@ -7,7 +7,7 @@
  * Field automatically invokes it with the current text value.
  */
 
-import type { BaseCommand } from "../../schema/entities/BaseCommand.ts";
+import type { BaseCommand } from "../../schema/command/BaseCommand.ts";
 import type {
   KeyboardCommand,
   KeyboardContext,

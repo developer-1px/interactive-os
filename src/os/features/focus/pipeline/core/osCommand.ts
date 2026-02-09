@@ -8,7 +8,7 @@
  */
 
 import { createFocusEffect } from "@os/schema";
-import type { EffectRecord, InputSource as SchemaInputSource, TransactionInput } from "@os/schema";
+import type { EffectRecord, TransactionInput } from "@os/schema";
 import { DOM } from "../../lib/dom";
 import { FocusData } from "../../lib/focusData";
 import type { FocusGroupStore } from "../../store/focusGroupStore";
@@ -210,7 +210,7 @@ export function isOSCommandRunning(): boolean {
 // Ambient Context — Input Tracking + Effect Collection
 // ═══════════════════════════════════════════════════════════════════
 
-let _currentInput: Event | null = null;
+export let _currentInput: Event | null = null;
 
 export type InputSource = "mouse" | "keyboard" | "programmatic";
 let _lastInputSource: InputSource = "programmatic";

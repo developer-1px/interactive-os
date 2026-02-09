@@ -49,7 +49,7 @@ interface FieldStyleParams {
  * - Editing (Active): Blue ring + blue tint background indicating input mode
  */
 const getFieldClasses = ({
-  isFocused,
+  isFocused: _isFocused,
   isEditing,
   multiline,
   value,

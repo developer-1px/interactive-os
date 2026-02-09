@@ -6,7 +6,6 @@
  */
 
 import { forwardRef, type HTMLAttributes } from "react";
-import { Slot } from "@os/lib/Slot";
 import { type BuilderLevel } from "./Builder";
 
 // Re-use the same createBuilderComponent pattern internally

@@ -5,7 +5,7 @@
  * Updates state but DOES NOT trigger DOM focus (prevent loop).
  */
 
-import type { OSCommand, OSResult } from "../../schema/osTypes.ts";
+import type { OSCommand, OSResult } from "@os/features/focus/pipeline/core/osCommand.ts";
 
 export const SYNC_FOCUS: OSCommand<{ id: string; zoneId: string }> = {
   run: (_ctx, payload) => {

@@ -6,7 +6,7 @@ import {
   type ExpandAction,
   resolveExpansion,
 } from "./resolveExpansion.ts";
-import type { OSCommand } from "../../schema/osTypes.ts";
+import type { OSCommand } from "@os/features/focus/pipeline/core/osCommand.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // EXPAND Command

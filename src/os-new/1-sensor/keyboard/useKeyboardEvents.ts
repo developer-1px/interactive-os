@@ -12,7 +12,7 @@ import { getCanonicalKey } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
 import { classifyKeyboard } from "@/os-new/1-sensor/keyboard/classifyKeyboard.ts";
 import { routeKeyboard } from "@os/features/keyboard/pipeline/3-route/routeKeyboard.ts";
 import { FieldRegistry } from "../../3-store/FieldRegistry.ts";
-import type { KeyboardIntent } from "./types.ts";
+import type { KeyboardIntent } from "./keyboardTypes.ts";
 import {
   type EventListenerConfig,
   useSingletonEventListeners,

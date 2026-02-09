@@ -1,10 +1,5 @@
 import {
-    AlignCenter,
-    AlignLeft,
-    AlignRight,
-    Bold,
     Image as ImageIcon,
-    Italic,
     Layout,
     Link as LinkIcon,
     MousePointer2,
@@ -124,13 +119,13 @@ export function PropertiesPanel({
     );
 }
 
-function TabButton({ type, active, onClick, icon, label }: any) {
+function TabButton({ active, onClick, icon, label }: any) {
     return (
         <button
             onClick={onClick}
             className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${active
-                    ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
-                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
+                ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
+                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
                 }`}
             title={label}
         >
@@ -227,8 +222,8 @@ function IconProperties() {
                         <div
                             key={i}
                             className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 ${i === 1
-                                    ? "border-violet-500 bg-violet-50 text-violet-600"
-                                    : "border-slate-200 text-slate-400"
+                                ? "border-violet-500 bg-violet-50 text-violet-600"
+                                : "border-slate-200 text-slate-400"
                                 }`}
                         >
                             <Square size={20} />
@@ -366,34 +361,6 @@ function TextInput({ label, value }: { label: string; value: string }) {
     );
 }
 
-function NumberInput({
-    label,
-    value,
-    unit,
-}: {
-    label: string;
-    value: number;
-    unit?: string;
-}) {
-    return (
-        <div className="flex flex-col gap-1">
-            <label className="text-xs text-slate-600 font-medium">{label}</label>
-            <div className="relative">
-                <input
-                    type="number"
-                    defaultValue={value}
-                    className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
-                />
-                {unit && (
-                    <span className="absolute right-2 top-1.5 text-xs text-slate-400 pointer-events-none">
-                        {unit}
-                    </span>
-                )}
-            </div>
-        </div>
-    );
-}
-
 function Select({ label, value }: { label: string; value: string }) {
     return (
         <div className="flex flex-col gap-1">
@@ -419,41 +386,5 @@ function Select({ label, value }: { label: string; value: string }) {
                 </div>
             </div>
         </div>
-    );
-}
-
-function ColorPicker({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="flex items-center justify-between">
-            <label className="text-xs text-slate-600 font-medium">{label}</label>
-            <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400 font-mono uppercase">
-                    {value}
-                </span>
-                <div
-                    className="w-6 h-6 rounded border border-slate-200 shadow-sm"
-                    style={{ backgroundColor: value }}
-                />
-            </div>
-        </div>
-    );
-}
-
-function IconButton({
-    icon,
-    active,
-}: {
-    icon: React.ReactNode;
-    active?: boolean;
-}) {
-    return (
-        <button
-            className={`p-1.5 rounded transition-colors ${active
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-400 hover:text-slate-700 hover:bg-slate-200/50"
-                }`}
-        >
-            {icon}
-        </button>
     );
 }

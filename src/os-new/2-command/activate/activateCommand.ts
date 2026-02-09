@@ -2,7 +2,7 @@
  * ACTIVATE Command - Enter key activation
  */
 
-import type { OSCommand } from "../../schema/osTypes.ts";
+import type { OSCommand } from "@os/features/focus/pipeline/core/osCommand.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // ACTIVATE Command

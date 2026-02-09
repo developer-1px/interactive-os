@@ -5,7 +5,7 @@
  * Routes commands to pure Keyboard commands via runKeyboard.
  */
 
-import { OS_COMMANDS } from "../../schema/commands.ts";
+import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
 import { useCommandListener } from "@os/features/command/hooks/useCommandListener.ts";
 import { FocusData } from "@os/features/focus/lib/focusData.ts";
 import {

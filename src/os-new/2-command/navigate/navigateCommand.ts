@@ -13,6 +13,7 @@ import {
 } from "./focusFinder.ts";
 import { resolveNavigate } from "./resolve.ts";
 import { resolveZoneSpatial } from "./zoneSpatial.ts";
+import type { OSCommand, OSContext, OSResult } from "@os/features/focus/pipeline/core/osCommand.ts";
 
 type Direction = "up" | "down" | "left" | "right";
 

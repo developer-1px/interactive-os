@@ -3,7 +3,7 @@
  * Selects all items in the active zone.
  */
 
-import type { OSCommand } from "../../schema/osTypes.ts";
+import type { OSCommand } from "@os/features/focus/pipeline/core/osCommand.ts";
 
 export const SELECT_ALL: OSCommand<void> = {
   run: (ctx) => {

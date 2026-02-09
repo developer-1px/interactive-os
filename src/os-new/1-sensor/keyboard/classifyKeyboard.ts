@@ -12,7 +12,7 @@
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore.ts";
 import { normalizeKeyDefinition } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
 import { FieldRegistry } from "../../3-store/FieldRegistry.ts";
-import type { KeyboardCategory, KeyboardIntent } from "./types.ts";
+import type { KeyboardCategory, KeyboardIntent } from "./keyboardTypes.ts";
 
 // Keys that Fields handle internally when editing
 const FIELD_KEYS = new Set([

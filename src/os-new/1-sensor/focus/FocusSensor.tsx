@@ -12,7 +12,7 @@ import {
 } from "@os/features/command/store/CommandEngineStore.ts";
 import { sensorGuard } from "../../lib/loopGuard.ts";
 import { useEffect } from "react";
-import { OS_COMMANDS } from "../../schema/commands.ts";
+import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
 import {
   findFocusableItem,
   resolveFocusTarget,

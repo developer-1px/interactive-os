@@ -1,0 +1,127 @@
+/* Code syntax highlighting — slate/indigo theme */
+
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  color: #334155; /* slate-700 */
+}
+
+code.hljs {
+  padding: 0;
+}
+
+/* Keywords: if, const, return, export, import, function, type, interface */
+.hljs-keyword,
+.hljs-selector-tag {
+  color: #7c3aed; /* violet-600 */
+  font-weight: 500;
+}
+
+/* Built-in types: string, number, boolean, void, null, undefined */
+.hljs-built_in,
+.hljs-type {
+  color: #0891b2; /* cyan-600 */
+}
+
+/* Strings */
+.hljs-string,
+.hljs-template-variable,
+.hljs-addition {
+  color: #059669; /* emerald-600 */
+}
+
+/* Numbers */
+.hljs-number,
+.hljs-literal {
+  color: #d97706; /* amber-600 */
+}
+
+/* Comments */
+.hljs-comment,
+.hljs-quote {
+  color: #94a3b8; /* slate-400 */
+  font-style: italic;
+}
+
+/* Function/method names */
+.hljs-title,
+.hljs-title.function_ {
+  color: #4f46e5; /* indigo-600 */
+  font-weight: 500;
+}
+
+/* Class names, type names */
+.hljs-title.class_,
+.hljs-title.class_.inherited__ {
+  color: #0891b2; /* cyan-600 */
+  font-weight: 500;
+}
+
+/* Variables, parameters */
+.hljs-variable,
+.hljs-params {
+  color: #334155; /* slate-700 */
+}
+
+/* Properties, attributes */
+.hljs-attr,
+.hljs-attribute {
+  color: #6366f1; /* indigo-500 */
+}
+
+/* Punctuation, operators */
+.hljs-punctuation,
+.hljs-operator {
+  color: #64748b; /* slate-500 */
+}
+
+/* Tags (HTML/JSX) */
+.hljs-name,
+.hljs-tag {
+  color: #dc2626; /* red-600 */
+}
+
+/* Regex */
+.hljs-regexp {
+  color: #ea580c; /* orange-600 */
+}
+
+/* Symbols, special */
+.hljs-symbol,
+.hljs-bullet {
+  color: #7c3aed; /* violet-600 */
+}
+
+/* Meta, decorators */
+.hljs-meta,
+.hljs-meta .hljs-keyword {
+  color: #9333ea; /* purple-600 */
+}
+
+/* Deletion (diff) */
+.hljs-deletion {
+  color: #dc2626; /* red-600 */
+  background-color: #fef2f2; /* red-50 */
+}
+
+/* Addition (diff) */
+.hljs-addition {
+  color: #059669; /* emerald-600 */
+  background-color: #f0fdf4; /* green-50 */
+}
+
+/* Section headers */
+.hljs-section {
+  color: #4f46e5; /* indigo-600 */
+  font-weight: 700;
+}
+
+/* Template strings interpolation */
+.hljs-subst {
+  color: #334155; /* slate-700 */
+}
+
+/* Selection inside code */
+pre code.hljs ::selection {
+  background-color: #e0e7ff; /* indigo-100 */
+}

@@ -7,7 +7,7 @@
  */
 
 import { logger } from "../../lib/logger.ts";
-import { OS_COMMANDS } from "../../schema/commands.ts";
+import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore.ts";
 import { FieldRegistry } from "../../3-store/FieldRegistry.ts";
 import {

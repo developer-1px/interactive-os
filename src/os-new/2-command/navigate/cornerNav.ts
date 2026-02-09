@@ -5,7 +5,8 @@
  * No DOM access.
  */
 
-import type { Direction, NavigateConfig } from "../../schema/focusTypes.ts";
+import type { Direction } from "../../schema/focus/FocusDirection.ts";
+import type { NavigateConfig } from "../../schema/focus/config/FocusNavigateConfig.ts";
 import type { NavigateResult, NavigationStrategy } from "./strategies.ts";
 
 // ═══════════════════════════════════════════════════════════════════

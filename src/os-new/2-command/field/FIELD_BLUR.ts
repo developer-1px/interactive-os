@@ -4,7 +4,7 @@
  * Handles blur event. If field was editing, commits and exits.
  */
 
-import type { BaseCommand } from "../../schema/entities/BaseCommand.ts";
+import type { BaseCommand } from "../../schema/command/BaseCommand.ts";
 import type {
   KeyboardCommand,
   KeyboardContext,

@@ -7,7 +7,7 @@
  * Pure function — reads only from ctx, no store access.
  */
 
-import type { OSCommand } from "../../schema/osTypes.ts";
+import type { OSCommand } from "@os/features/focus/pipeline/core/osCommand.ts";
 
 export const RECOVER: OSCommand = {
   run: (ctx) => {

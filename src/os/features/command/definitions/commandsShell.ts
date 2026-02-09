@@ -1,12 +1,14 @@
 /**
- * [PROXY] Re-exports from canonical location: @os/new/schema/commands.ts
+ * [PROXY] Re-exports from canonical location: @/os-new/schema/command/
  */
 export {
   OS_COMMANDS,
   type OSCommandType,
-  type OSNavigatePayload,
-  type OSFocusPayload,
-  type OSSelectPayload,
-  type OSActivatePayload,
-  type OSCommand,
-} from "@/os-new/schema/commands";
+} from "@/os-new/schema/command/OSCommands";
+export type {
+  OSNavigatePayload,
+  OSFocusPayload,
+  OSSelectPayload,
+  OSActivatePayload,
+  OSCommandUnion as OSCommand,
+} from "@/os-new/schema/command/OSCommandPayload";
