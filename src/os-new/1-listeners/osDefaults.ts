@@ -116,18 +116,5 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 // Expansion
 // ═══════════════════════════════════════════════════════════════════
-
-Keybindings.registerAll([
-  {
-    key: "ArrowRight",
-    command: EXPAND,
-    args: [{ expanded: true }],
-    when: "navigating",
-  },
-  {
-    key: "ArrowLeft",
-    command: EXPAND,
-    args: [{ expanded: false }],
-    when: "navigating",
-  },
-]);
+// ArrowRight/ArrowLeft expand/collapse is handled inline by NAVIGATE
+// (W3C tree pattern). No separate keybindings needed.

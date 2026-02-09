@@ -11,8 +11,10 @@
 import { produce } from "immer";
 import { resolveNavigate } from "../2-command/navigate/resolve";
 import { DOM_ITEMS, DOM_RECTS, ZONE_CONFIG } from "../2-contexts";
+import { ZoneRegistry } from "../2-contexts/zoneRegistry";
 import { kernel } from "../kernel";
 import { ensureZone } from "../state/utils";
+import { EXPAND } from "./expand";
 
 type Direction = "up" | "down" | "left" | "right" | "home" | "end";
 
@@ -36,6 +38,37 @@ export const NAVIGATE = kernel.defineCommand(
     const config = ctx.inject(ZONE_CONFIG);
 
     if (items.length === 0) return;
+
+    // W3C Tree Pattern: ArrowRight/ArrowLeft handle expand/collapse
+    // Only applies to tree/treegrid roles — not toolbars or other zones.
+    const zoneEntry = ZoneRegistry.get(activeZoneId);
+    const isTreeRole =
+      zoneEntry?.role === "tree" || zoneEntry?.role === "treegrid";
+
+    if (
+      isTreeRole &&
+      (payload.direction === "right" || payload.direction === "left")
+    ) {
+      const focusedId = zone.focusedItemId;
+      if (focusedId) {
+        const isExpanded = zone.expandedItems.includes(focusedId);
+        const focusedEl = document.getElementById(focusedId);
+        const isExpandable = focusedEl?.hasAttribute("aria-expanded") ?? false;
+
+        if (isExpandable) {
+          if (payload.direction === "right" && !isExpanded) {
+            return {
+              dispatch: EXPAND({ action: "expand", itemId: focusedId }),
+            };
+          }
+          if (payload.direction === "left" && isExpanded) {
+            return {
+              dispatch: EXPAND({ action: "collapse", itemId: focusedId }),
+            };
+          }
+        }
+      }
+    }
 
     // Delegate to existing pure resolver
     const navResult = resolveNavigate(

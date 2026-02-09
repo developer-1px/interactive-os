@@ -4,13 +4,16 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
 } from "react";
+import { ZoneRegistry } from "../2-contexts/zoneRegistry.ts";
 import {
   type FocusGroupStore,
   useFocusGroupStoreInstance,
 } from "../3-store/focusGroupStore.ts";
+import { kernel } from "../kernel.ts";
 import { resolveRole, type ZoneRole } from "../registry/roleRegistry.ts";
 import type {
   ActivateConfig,
@@ -228,6 +231,60 @@ export function FocusGroup({
     onRedo,
     containerRef.current,
   ]);
+
+  // --- ZoneRegistry Registration (Kernel Pipeline) ---
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    ZoneRegistry.register(groupId, {
+      config,
+      element: containerRef.current,
+      role,
+      parentId,
+    });
+    return () => {
+      ZoneRegistry.unregister(groupId);
+    };
+  }, [groupId, config, role, parentId, containerRef.current]);
+
+  // --- Kernel → Zustand Bridge ---
+  // Subscribe to kernel state changes and sync to Zustand store + FocusData
+  // so existing FocusItem rendering works without modification.
+  useEffect(() => {
+    return kernel.subscribe(() => {
+      const kState = kernel.getState();
+      const zone = kState.os.focus.zones[groupId];
+      if (!zone) return;
+
+      // Sync focusedItemId
+      const currentStore = store.getState();
+      if (currentStore.focusedItemId !== zone.focusedItemId) {
+        store.setState({ focusedItemId: zone.focusedItemId });
+      }
+
+      // Sync selection
+      const selChanged =
+        currentStore.selection.length !== zone.selection.length ||
+        currentStore.selection.some((id, i) => zone.selection[i] !== id);
+      if (selChanged) {
+        store.setState({ selection: zone.selection });
+      }
+
+      // Sync expandedItems
+      const expChanged =
+        currentStore.expandedItems.length !== zone.expandedItems.length ||
+        currentStore.expandedItems.some(
+          (id, i) => zone.expandedItems[i] !== id,
+        );
+      if (expChanged) {
+        store.setState({ expandedItems: zone.expandedItems });
+      }
+
+      // Sync activeZoneId to FocusData
+      if (FocusData.getActiveZoneId() !== kState.os.focus.activeZoneId) {
+        FocusData.setActiveZone(kState.os.focus.activeZoneId);
+      }
+    });
+  }, [groupId, store]);
 
   // --- Auto-Focus for Dialog/Modal or explicit autoFocus ---
   // W3C spec: only the first autofocus element in DOM order receives focus.

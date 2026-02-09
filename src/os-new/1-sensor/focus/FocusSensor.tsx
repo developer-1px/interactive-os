@@ -1,28 +1,37 @@
 /**
- * FocusSensor - DOM Event → OS Command 변환기
+ * FocusSensor - DOM Event → Kernel Command 변환기
  * Pipeline Phase 1: SENSE
  *
- * 책임: DOM 이벤트를 감지하고 OS Command로 변환하여 dispatch
+ * 책임: DOM 이벤트를 감지하고 Kernel Command로 변환하여 dispatch
  * 구조: 이벤트 타입별 전용 핸들러 (senseMouseDown, senseFocusIn)
+ *
+ * v2: Migrated from CommandEngineStore to kernel.dispatch
  */
 
-import {
-  CommandEngineStore,
-  useCommandEngineStore,
-} from "@os/features/command/store/CommandEngineStore.ts";
-import {
-  isOSCommandRunning,
-  setCurrentInput,
-} from "@os/features/focus/pipeline/core/osCommand.ts";
 import { useEffect } from "react";
+import { FOCUS, RECOVER, SELECT, SYNC_FOCUS } from "../../3-commands";
+import { kernel } from "../../kernel";
 import {
   findFocusableItem,
   resolveFocusTarget,
 } from "../../lib/focusDOMQueries.ts";
 import { sensorGuard } from "../../lib/loopGuard.ts";
-import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
 
 let isMounted = false;
+
+// ═══════════════════════════════════════════════════════════════════
+// Re-entrance Guard
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Tracks whether the kernel is executing a command that may trigger
+ * DOM focus events (el.focus()). Prevents focusin → SYNC_FOCUS loop.
+ */
+let isDispatching = false;
+
+export function setDispatching(value: boolean) {
+  isDispatching = value;
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // Guards (공통)
@@ -53,12 +62,12 @@ function tryHandleLabelClick(e: MouseEvent): boolean {
   e.preventDefault();
   const fieldTarget = resolveFocusTarget(targetField);
   if (fieldTarget) {
-    CommandEngineStore.dispatch({
-      type: OS_COMMANDS.FOCUS,
-      payload: { id: fieldTarget.itemId, zoneId: fieldTarget.groupId },
-    });
+    isDispatching = true;
+    kernel.dispatch(
+      FOCUS({ zoneId: fieldTarget.groupId, itemId: fieldTarget.itemId }),
+    );
+    isDispatching = false;
   }
-  // focus() is handled by FOCUS domEffect — no direct call needed
   return true;
 }
 
@@ -66,24 +75,15 @@ function tryHandleLabelClick(e: MouseEvent): boolean {
 // SELECT Dispatch (Modifier → Mode 번역)
 // ═══════════════════════════════════════════════════════════════════
 
-function dispatchSelectCommand(e: MouseEvent, itemId: string, groupId: string) {
+function dispatchSelectCommand(e: MouseEvent, itemId: string) {
   if (e.shiftKey) {
     e.preventDefault();
-    CommandEngineStore.dispatch({
-      type: OS_COMMANDS.SELECT,
-      payload: { targetId: itemId, mode: "range", zoneId: groupId },
-    });
+    kernel.dispatch(SELECT({ targetId: itemId, mode: "range" }));
   } else if (e.metaKey || e.ctrlKey) {
     e.preventDefault();
-    CommandEngineStore.dispatch({
-      type: OS_COMMANDS.SELECT,
-      payload: { targetId: itemId, mode: "toggle", zoneId: groupId },
-    });
+    kernel.dispatch(SELECT({ targetId: itemId, mode: "toggle" }));
   } else {
-    CommandEngineStore.dispatch({
-      type: OS_COMMANDS.SELECT,
-      payload: { targetId: itemId, mode: "replace", zoneId: groupId },
-    });
+    kernel.dispatch(SELECT({ targetId: itemId, mode: "replace" }));
   }
 }
 
@@ -107,36 +107,28 @@ function senseMouseDown(e: Event) {
 
   const { itemId, groupId } = target;
 
-  // Ambient context → runOS auto-logs INPUT
-  setCurrentInput(e);
-
   // Always FOCUS first (ensures activeZone is set)
-  CommandEngineStore.dispatch({
-    type: OS_COMMANDS.FOCUS,
-    payload: { id: itemId, zoneId: groupId },
-  });
+  isDispatching = true;
+  kernel.dispatch(FOCUS({ zoneId: groupId, itemId }));
+  isDispatching = false;
 
   // Then SELECT based on modifiers
-  dispatchSelectCommand(me, itemId, groupId);
+  dispatchSelectCommand(me, itemId);
 }
 
 /** FocusIn → SYNC_FOCUS (state sync only, no DOM effects) */
 function senseFocusIn(e: Event) {
   if (shouldIgnoreEvent(e)) return;
 
-  // Re-entrance guard: prevents focusin from OS command's el.focus()
-  if (isOSCommandRunning()) return;
+  // Re-entrance guard: prevents focusin from kernel's el.focus() effect
+  if (isDispatching) return;
 
   const item = findFocusableItem(e.target as HTMLElement);
   if (!item) return;
   const target = resolveFocusTarget(item);
   if (!target) return;
 
-  setCurrentInput(e);
-  CommandEngineStore.dispatch({
-    type: OS_COMMANDS.SYNC_FOCUS,
-    payload: { id: target.itemId, zoneId: target.groupId },
-  });
+  kernel.dispatch(SYNC_FOCUS({ id: target.itemId, zoneId: target.groupId }));
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -144,10 +136,8 @@ function senseFocusIn(e: Event) {
 // ═══════════════════════════════════════════════════════════════════
 
 export function FocusSensor() {
-  const isInitialized = useCommandEngineStore((s) => s.isInitialized);
-
   useEffect(() => {
-    if (isMounted || !isInitialized) return;
+    if (isMounted) return;
     isMounted = true;
 
     // Register event handlers
@@ -171,7 +161,7 @@ export function FocusSensor() {
         !document.body.contains(lastFocusedElement)
       ) {
         lastFocusedElement = null;
-        CommandEngineStore.dispatch({ type: OS_COMMANDS.RECOVER });
+        kernel.dispatch(RECOVER());
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });
@@ -185,7 +175,7 @@ export function FocusSensor() {
       document.removeEventListener("focusin", trackFocus);
       observer.disconnect();
     };
-  }, [isInitialized]);
+  }, []);
 
   return null;
 }
