@@ -1,18 +1,11 @@
 import { defineContext as _defineContext, resolveContext } from "./context.ts";
-import { dispatch } from "./dispatch.ts";
-import type {
-  InternalCommandHandler,
-  InternalEffectHandler,
-  Middleware,
-  MiddlewareContext,
-} from "./internal-types.ts";
-import { registerMiddleware } from "./middleware.ts";
+import { getActiveStore } from "./createStore.ts";
+import { dispatch, registerMiddleware } from "./pipeline.ts";
 import {
   scopedCommands,
   scopedEffects,
   scopedInterceptors,
 } from "./registries.ts";
-import { getActiveStore } from "./store.ts";
 import {
   type Command,
   type CommandFactory,
@@ -20,6 +13,10 @@ import {
   type EffectToken,
   GLOBAL,
   type InjectResult,
+  type InternalCommandHandler,
+  type InternalEffectHandler,
+  type Middleware,
+  type MiddlewareContext,
   type ScopeToken,
   type TypedContext,
   type TypedEffectMap,

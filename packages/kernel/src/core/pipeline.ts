@@ -1,17 +1,53 @@
-import { dispatch } from "./dispatch.ts";
-import type {
-  InternalEffectHandler,
-  MiddlewareContext,
-} from "./internal-types.ts";
+/**
+ * pipeline — Dispatch queue, command processing, effect execution, and middleware registration.
+ */
+
+import { getActiveStore } from "./createStore.ts";
 import {
   scopedCommands,
   scopedEffects,
   scopedInterceptors,
   scopedMiddleware,
 } from "./registries.ts";
-import { getActiveStore } from "./store.ts";
+import type {
+  InternalEffectHandler,
+  Middleware,
+  MiddlewareContext,
+} from "./tokens.ts";
 import { type Command, GLOBAL, type ScopeToken } from "./tokens.ts";
 import { recordTransaction } from "./transaction.ts";
+
+// ─── Dispatch Queue ───
+
+const queue: Command[] = [];
+let processing = false;
+
+/**
+ * dispatch — the single entry point.
+ * Accepts a typed Command (created by CommandFactory).
+ */
+export function dispatch(
+  cmd: Command<string, any>,
+  options?: { scope?: ScopeToken[] },
+): void {
+  // Attach scope to command for processing
+  const enriched = options?.scope ? { ...cmd, scope: options.scope } : cmd;
+  queue.push(enriched as Command);
+
+  if (processing) return;
+
+  processing = true;
+  try {
+    while (queue.length > 0) {
+      const next = queue.shift()!;
+      processCommand(next, next.scope);
+    }
+  } finally {
+    processing = false;
+  }
+}
+
+// ─── Command Processing ───
 
 export function processCommand(cmd: Command, bubblePath?: ScopeToken[]): void {
   const store = getActiveStore();
@@ -113,6 +149,8 @@ export function processCommand(cmd: Command, bubblePath?: ScopeToken[]): void {
   );
 }
 
+// ─── Effect Execution ───
+
 export function executeEffects(
   effectMap: Record<string, unknown>,
   store: { setState: (fn: (s: unknown) => unknown) => void },
@@ -154,5 +192,25 @@ export function executeEffects(
     } else {
       console.warn(`[kernel] Unknown effect "${key}" in EffectMap`);
     }
+  }
+}
+
+// ─── Middleware Registration ───
+
+export function registerMiddleware(middleware: Middleware): void {
+  const mwScope = (middleware.scope as string) ?? (GLOBAL as string);
+
+  if (!scopedMiddleware.has(mwScope)) {
+    scopedMiddleware.set(mwScope, []);
+  }
+
+  const list = scopedMiddleware.get(mwScope)!;
+
+  // Dedup by id within scope
+  const existing = list.findIndex((m) => m.id === middleware.id);
+  if (existing !== -1) {
+    list[existing] = middleware;
+  } else {
+    list.push(middleware);
   }
 }

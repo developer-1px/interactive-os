@@ -5,7 +5,7 @@
  * Provides time-travel and inspection capabilities.
  */
 
-import { getActiveStore } from "./store.ts";
+import { getActiveStore } from "./createStore.ts";
 import type { Command } from "./tokens.ts";
 
 // ─── Types ───

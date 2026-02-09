@@ -2,7 +2,7 @@ import type {
   InternalCommandHandler,
   InternalEffectHandler,
   Middleware,
-} from "./internal-types.ts";
+} from "./tokens.ts";
 
 // ─── Registries ───
 

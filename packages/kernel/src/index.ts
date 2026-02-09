@@ -10,36 +10,77 @@
  *   Group.dispatch       → void
  */
 
-// ─── Entry Point ───
-export { createKernel, defineScope, state } from "./createKernel.ts";
-
-// ─── API Methods ───
-export { defineContext } from "./defineContext.ts";
-export { dispatch } from "./dispatch.ts";
-export type { StateDiff, Transaction } from "./inspect.ts";
+// ─── Context ───
+export { clearContextProviders, defineContext } from "./core/context.ts";
+// ─── State / Store ───
+export type { Store } from "./core/createStore.ts";
+export {
+  bindStore,
+  createStore,
+  getActiveStore,
+  getState,
+  resetState,
+  unbindStore,
+} from "./core/createStore.ts";
+// ─── Dispatch ───
+// ─── Middleware ───
+export { dispatch, registerMiddleware as use } from "./core/pipeline.ts";
+// ─── Types ───
+export type {
+  Command,
+  CommandFactory,
+  ContextToken,
+  EffectFields,
+  EffectToken,
+  InjectResult,
+  Middleware,
+  MiddlewareContext,
+  ScopeToken,
+  StateMarker,
+  TypedContext,
+  TypedEffectMap,
+} from "./core/tokens.ts";
+export { GLOBAL } from "./core/tokens.ts";
 // ─── Inspector ───
+export type { StateDiff, Transaction } from "./core/transaction.ts";
 export {
   clearTransactions,
   getLastTransaction,
   getTransactions,
   recordTransaction,
   travelTo,
-} from "./inspect.ts";
+} from "./core/transaction.ts";
+// ─── Entry Point ───
+export { createKernel, defineScope, state } from "./createKernel.ts";
+
 // ─── React ───
 export { useComputed } from "./react/useComputed.ts";
 export { useDispatch } from "./react/useDispatch.ts";
-export type { Store } from "./store.ts";
-// ─── State / Store ───
-export {
-  bindStore,
-  createStore,
-  getActiveStore,
-  getState,
-  initKernel,
-  resetKernel,
-  resetState,
-  unbindStore,
-} from "./store.ts";
-// ─── Types ───
-export * from "./types.ts";
-export { use } from "./use.ts";
+
+// ─── Convenience ───
+import { clearContextProviders } from "./core/context.ts";
+import {
+  bindStore as _bindStore,
+  createStore as _createStore,
+} from "./core/createStore.ts";
+import { clearAllRegistries } from "./core/registries.ts";
+import { clearTransactions } from "./core/transaction.ts";
+
+/** Convenience: create store + bind in one call. */
+export function initKernel<S>(
+  initialState: S,
+): import("./core/createStore.ts").Store<S> {
+  const store = _createStore(initialState);
+  _bindStore(store);
+  return store;
+}
+
+/**
+ * resetKernel — Clear all registries, contexts, transactions, and unbind store.
+ * Used for testing.
+ */
+export function resetKernel(): void {
+  clearAllRegistries();
+  clearContextProviders();
+  clearTransactions();
+}

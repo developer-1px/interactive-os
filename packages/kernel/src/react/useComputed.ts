@@ -9,7 +9,7 @@
  */
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
-import { getActiveStore } from "../store.ts";
+import { getActiveStore } from "../core/createStore.ts";
 
 export function useComputed<T>(selector: (state: unknown) => T): T {
   const store = getActiveStore();
