@@ -9,40 +9,40 @@ import type { InputSource } from "../effect/EffectRecord.ts";
 import type { OSState } from "./OSState.ts";
 
 export interface Transaction {
-    id: number;
-    timestamp: number;
+  id: number;
+  timestamp: number;
 
-    // ── Cause: 원인 ──
+  // ── Cause: 원인 ──
 
-    /** 입력 정보 */
-    input: TransactionInput;
+  /** 입력 정보 */
+  input: TransactionInput;
 
-    /** 실행된 커맨드 (없으면 null) */
-    command: TransactionCommand | null;
+  /** 실행된 커맨드 (없으면 null) */
+  command: TransactionCommand | null;
 
-    // ── Result: 결과 ──
+  // ── Result: 결과 ──
 
-    /** 실행 후 전체 상태 스냅샷 */
-    snapshot: OSState;
+  /** 실행 후 전체 상태 스냅샷 */
+  snapshot: OSState;
 
-    /** 이전 스냅샷과의 차이 */
-    diff: StateDiff[];
+  /** 이전 스냅샷과의 차이 */
+  diff: StateDiff[];
 }
 
 export interface TransactionInput {
-    source: InputSource;
-    /** 사람이 읽을 수 있는 입력 설명 (e.g. "ArrowDown", "mousedown") */
-    raw: string;
+  source: InputSource;
+  /** 사람이 읽을 수 있는 입력 설명 (e.g. "ArrowDown", "mousedown") */
+  raw: string;
 }
 
 export interface TransactionCommand {
-    type: string;
-    payload?: unknown;
+  type: string;
+  payload?: unknown;
 }
 
 export interface StateDiff {
-    /** dot-path (e.g. "focus.zone.focusedItemId") */
-    path: string;
-    from: unknown;
-    to: unknown;
+  /** dot-path (e.g. "focus.zone.focusedItemId") */
+  path: string;
+  from: unknown;
+  to: unknown;
 }

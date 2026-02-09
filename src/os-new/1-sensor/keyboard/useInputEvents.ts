@@ -6,10 +6,10 @@
  * Dispatches FIELD_SYNC and FIELD_BLUR commands directly.
  */
 
-import { logger } from "../../lib/logger.ts";
-import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore.ts";
 import { FieldRegistry } from "../../3-store/FieldRegistry.ts";
+import { logger } from "../../lib/logger.ts";
+import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
 import {
   type EventListenerConfig,
   useSingletonEventListeners,

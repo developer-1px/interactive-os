@@ -38,7 +38,7 @@ React/FE 생태계에서 **이미 검증된 네이밍 패턴**을 사용한다.
 | re-frame | 제안 이름 | 역할 | 시그니처 |
 |---|---|---|---|
 | `dispatch` | **`dispatch`** | 이벤트 발행 (단일 진입점) | `dispatch(event: Event): void` |
-| `reg-event-db` | **`defineHandler`** | 순수 상태 변환 핸들러 등록 | `defineHandler(id, (state, payload) => state)` |
+| `reg-event-db` | ~~`defineHandler`~~ → **`defineCommand`** | ~~순수 상태 변환 핸들러 등록~~ → `defineCommand`로 통일 (D8) | `defineCommand`와 동일 시그니처 사용 |
 | `reg-event-fx` | **`defineCommand`** | 이펙트 반환 핸들러 등록 | `defineCommand(id, (ctx, payload) => EffectMap)` |
 | `reg-fx` | **`defineEffect`** | 이펙트 실행기 등록 | `defineEffect(id, (value) => void)` |
 | `reg-cofx` | **`defineContext`** | 컨텍스트 제공자 등록 | `defineContext(id, () => value)` |
@@ -98,10 +98,10 @@ regEventDb("set-active-zone", (db, zoneId) => {
   return { ...db, focus: { ...db.focus, activeZoneId: zoneId } };
 });
 
-// ✅ 제안
-defineHandler("set-active-zone", (state, zoneId) => {
-  return { ...state, focus: { ...state.focus, activeZoneId: zoneId } };
-});
+// ✅ 확정 — defineCommand로 통일 (D8: defineHandler 도입하지 않음)
+defineCommand("set-active-zone", (ctx) => (zoneId) => ({
+  state: { ...ctx.state, focus: { ...ctx.state.focus, activeZoneId: zoneId } },
+}));
 ```
 
 ### 3.3 이펙트 등록
@@ -178,7 +178,7 @@ use(transaction);  // 글로벌 등록
 
 ```typescript
 // ── 프레임워크 셋업 ──
-import { dispatch, defineHandler, defineCommand, defineEffect, defineContext, defineComputed, inject, use } from "@os/core";
+import { dispatch, defineCommand, defineEffect, defineContext, defineComputed, inject, use } from "@os/core";
 
 // ── React 바인딩 ──
 import { useComputed, useDispatch } from "@os/react";
@@ -190,8 +190,10 @@ import { getState, resetState } from "@os/core";
 ### 등록 (앱 초기화 시)
 
 ```typescript
-// 상태만 바꾸는 핸들러
-defineHandler("set-theme", (state, theme) => ({ ...state, theme }));
+// 상태만 바꾸는 핸들러도 defineCommand 사용 (D8)
+defineCommand("set-theme", (ctx) => (theme) => ({
+  state: { ...ctx.state, theme },
+}));
 
 // 이펙트까지 반환하는 커맨드
 defineCommand("navigate", [inject("dom-items"), inject("zone-config")], (ctx, payload) => ({
@@ -246,13 +248,11 @@ function FocusItem({ id }: { id: string }) {
 | `handleCommand` | ❌ | 핸들러 자체와 혼동 |
 | `onCommand` | ❌ | 이벤트 리스너 느낌. 컴포넌트 prop 같음 |
 
-### `defineHandler` vs 대안
+### ~~`defineHandler`~~ — 도입하지 않음 (D8)
 
-| 후보 | 채택 | 이유 |
-|---|---|---|
-| `defineHandler` | ✅ | `(state, payload) => state` — "상태 핸들러". Redux reducer와 동일 역할 |
-| `defineReducer` | ❌ | 개념은 맞지만 Redux의 `switch/case` 패턴을 연상시킴 |
-| `defineEvent` | ❌ | 이벤트 자체를 정의하는 건지 핸들러를 정의하는 건지 모호 |
+> **결정: `defineCommand`로 통일.** `defineHandler`는 `defineCommand`의 sugar로 계획했으나,
+> API 선택지를 줄이는 것이 LLM 친화적이라는 원칙에 따라 도입하지 않음.
+> 상태만 변경하는 핸들러도 `defineCommand`의 curried form으로 작성한다.
 
 ### `defineEffect` vs 대안
 
@@ -315,7 +315,7 @@ function FocusItem({ id }: { id: string }) {
 ┌─────────────────────────────────────────────────────┐
 │  define*  →  등록 (앱 초기화 시 한 번)                 │
 │                                                     │
-│  defineHandler(id, fn)     상태만 바꾸는 순수 핸들러    │
+│  (defineHandler 없음)      defineCommand로 통일 (D8)   │
 │  defineCommand(id, fn)     이펙트를 선언하는 커맨드     │
 │  defineEffect(id, fn)      이펙트 실행기               │
 │  defineContext(id, fn)      읽기 컨텍스트 제공자        │

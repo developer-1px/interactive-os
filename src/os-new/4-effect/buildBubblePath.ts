@@ -10,16 +10,16 @@
  * Reverses the focus path (deepest first) and appends 'global'.
  */
 export function buildBubblePath(
-    focusPath: string[],
-    fallbackGroupId?: string | null,
+  focusPath: string[],
+  fallbackGroupId?: string | null,
 ): string[] {
-    const path =
-        focusPath.length > 0
-            ? [...focusPath].reverse()
-            : fallbackGroupId
-                ? [fallbackGroupId]
-                : [];
+  const path =
+    focusPath.length > 0
+      ? [...focusPath].reverse()
+      : fallbackGroupId
+        ? [fallbackGroupId]
+        : [];
 
-    path.push("global");
-    return path;
+  path.push("global");
+  return path;
 }

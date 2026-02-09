@@ -6,7 +6,10 @@
  * 2. Otherwise → toggle OS selection (multi-select)
  */
 
-import type { OSCommand, OSResult } from "@os/features/focus/pipeline/core/osCommand.ts";
+import type {
+  OSCommand,
+  OSResult,
+} from "@os/features/focus/pipeline/core/osCommand.ts";
 
 export const TOGGLE: OSCommand<{ targetId?: string }> = {
   run: (ctx, payload) => {

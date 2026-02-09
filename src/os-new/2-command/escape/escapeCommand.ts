@@ -7,7 +7,11 @@
  * - "none": No action
  */
 
-import type { OSCommand, OSContext, OSResult } from "@os/features/focus/pipeline/core/osCommand.ts";
+import type {
+  OSCommand,
+  OSContext,
+  OSResult,
+} from "@os/features/focus/pipeline/core/osCommand.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Escape Action Handlers

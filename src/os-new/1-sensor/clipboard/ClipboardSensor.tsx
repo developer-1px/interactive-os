@@ -9,8 +9,8 @@
  * when the user presses ⌘C, ⌘X, ⌘V.
  */
 
-import { dispatchToZone } from "../../core/dispatchToZone.ts";
 import { useEffect } from "react";
+import { dispatchToZone } from "../../core/dispatchToZone.ts";
 
 function isInputActive(): boolean {
   const el = document.activeElement;

@@ -7,8 +7,8 @@
 export type ExpandAction = "toggle" | "expand" | "collapse";
 
 export interface ExpandResult {
-    expandedItems: string[];
-    changed: boolean;
+  expandedItems: string[];
+  changed: boolean;
 }
 
 /**
@@ -21,35 +21,35 @@ export interface ExpandResult {
  * @returns New expanded items list and whether it changed
  */
 export function resolveExpansion(
-    expandedItems: string[],
-    targetId: string,
-    action: ExpandAction,
+  expandedItems: string[],
+  targetId: string,
+  action: ExpandAction,
 ): ExpandResult {
-    const isCurrentlyExpanded = expandedItems.includes(targetId);
+  const isCurrentlyExpanded = expandedItems.includes(targetId);
 
-    let shouldBeExpanded: boolean;
+  let shouldBeExpanded: boolean;
 
-    switch (action) {
-        case "expand":
-            shouldBeExpanded = true;
-            break;
-        case "collapse":
-            shouldBeExpanded = false;
-            break;
-        default:
-            shouldBeExpanded = !isCurrentlyExpanded;
-            break;
-    }
+  switch (action) {
+    case "expand":
+      shouldBeExpanded = true;
+      break;
+    case "collapse":
+      shouldBeExpanded = false;
+      break;
+    default:
+      shouldBeExpanded = !isCurrentlyExpanded;
+      break;
+  }
 
-    // No change needed
-    if (shouldBeExpanded === isCurrentlyExpanded) {
-        return { expandedItems, changed: false };
-    }
+  // No change needed
+  if (shouldBeExpanded === isCurrentlyExpanded) {
+    return { expandedItems, changed: false };
+  }
 
-    // Calculate new list
-    const newExpandedItems = shouldBeExpanded
-        ? [...expandedItems, targetId]
-        : expandedItems.filter((id) => id !== targetId);
+  // Calculate new list
+  const newExpandedItems = shouldBeExpanded
+    ? [...expandedItems, targetId]
+    : expandedItems.filter((id) => id !== targetId);
 
-    return { expandedItems: newExpandedItems, changed: true };
+  return { expandedItems: newExpandedItems, changed: true };
 }

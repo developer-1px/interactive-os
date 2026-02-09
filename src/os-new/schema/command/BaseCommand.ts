@@ -1,7 +1,7 @@
 // Generic command type that primitives can work with
 export interface BaseCommand {
-    type: string;
-    payload?: any;
+  type: string;
+  payload?: any;
 }
 
 /**
@@ -9,4 +9,4 @@ export interface BaseCommand {
  * Field will automatically inject { text: currentValue } when invoking.
  */
 export type FieldCommandFactory<P extends { text: string } = { text: string }> =
-    ((payload: P) => BaseCommand) & { id: string; _def?: any };
+  ((payload: P) => BaseCommand) & { id: string; _def?: any };

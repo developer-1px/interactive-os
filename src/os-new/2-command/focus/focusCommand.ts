@@ -2,7 +2,11 @@
  * FOCUS Command - Programmatic focus
  */
 
-import type { OSCommand, OSContext, OSResult } from "@os/features/focus/pipeline/core/osCommand.ts";
+import type {
+  OSCommand,
+  OSContext,
+  OSResult,
+} from "@os/features/focus/pipeline/core/osCommand.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helper Functions

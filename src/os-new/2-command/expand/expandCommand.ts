@@ -2,11 +2,8 @@
  * EXPAND Command - Expand/collapse tree items
  */
 
-import {
-  type ExpandAction,
-  resolveExpansion,
-} from "./resolveExpansion.ts";
 import type { OSCommand } from "@os/features/focus/pipeline/core/osCommand.ts";
+import { type ExpandAction, resolveExpansion } from "./resolveExpansion.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // EXPAND Command

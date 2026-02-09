@@ -1,12 +1,12 @@
-import { useLayoutEffect, useState, useSyncExternalStore } from "react";
 import { FocusData } from "@os/features/focus/lib/focusData.ts";
+import { useLayoutEffect, useState, useSyncExternalStore } from "react";
 
 /**
  * Hook to subscribe to the global focus path.
  * Returns true if the provided groupId is in the current focus path.
  */
 export function useIsFocusedGroup(groupId: string): boolean {
-  const activeZoneId = useSyncExternalStore(
+  const _activeZoneId = useSyncExternalStore(
     FocusData.subscribeActiveZone,
     () => FocusData.getActiveZoneId(),
     () => null,
@@ -19,7 +19,7 @@ export function useIsFocusedGroup(groupId: string): boolean {
   useLayoutEffect(() => {
     const path = FocusData.getFocusPath();
     setIsInPath(path.includes(groupId));
-  }, [groupId, activeZoneId]);
+  }, [groupId]);
 
   return isInPath;
 }

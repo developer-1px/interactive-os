@@ -22,7 +22,8 @@
 | D2 | **ZoneState ≠ ZoneSnapshot** — 공존 | 런타임 상태와 직렬화 스냅샷은 용도가 다르다 |
 | D3 | 상태 트리 루트 = **State** | `DB` (re-frame), `OSState` (레거시) 모두 대체 |
 | D4 | Middleware = **re-frame `{ id, before, after }`** | 패턴 전환 (Redux 스타일에서) |
-| D5 | Handler = **통일** (별도 타입명 불필요) | `defineHandler`는 sugar. 내부적으로 Handler로 wrap |
+| D5 | Handler = **통일** (별도 타입명 불필요) | `defineHandler`는 sugar로 계획했으나 **도입하지 않음** (D8) |
+| D8 | **`defineHandler` 도입하지 않음** | `defineCommand`로 통일. LLM 친화적 API = 선택지 최소화 |
 | D6 | 센서/파이프라인 타입 = **glossary 범위** | 내부 타입도 네이밍 일관성 필요 |
 | D7 | Zone 상태 모델 = **Record (전체 보관)** | `zones: Record<string, ZoneState>` |
 
@@ -167,7 +168,7 @@ src/
 | 이름 | 역할 | 시그니처 |
 |---|---|---|
 | `dispatch` | 커맨드 발행 | `(cmd: Command) → void` |
-| `defineHandler` | 순수 상태 핸들러 등록 (sugar) | `(id, (state, payload) → state) → void` |
+| ~~`defineHandler`~~ | ~~순수 상태 핸들러 등록 (sugar)~~ → **도입하지 않음 (D8)**. `defineCommand`로 통일 | — |
 | `defineCommand` | 이펙트 반환 핸들러 등록 | `(id, (ctx, payload) → EffectMap) → void` |
 | `defineEffect` | Effect executor 등록 | `(id, (value) → void) → void` |
 | `defineContext` | Context provider 등록 | `(id, () → value) → void` |
@@ -182,8 +183,8 @@ src/
 | `getState` | 상태 트리 스냅샷 읽기 | `() → State` |
 | `resetState` | 상태 트리 초기화 | `(state) → void` |
 
-> `defineHandler`는 `defineCommand`의 sugar다. 내부적으로 `(state, payload) => state`를
-> `(ctx, payload) => ({ state: fn(ctx.state, payload) })`로 wrap한다. (D5)
+> ~~`defineHandler`는 `defineCommand`의 sugar로 계획했으나~~ **도입하지 않음 (D8)**.
+> `defineCommand` 하나로 통일한다. LLM 친화적 API = 명시적이고 선택지가 적을수록 좋다.
 
 ### 5.3 타입 (Type) — Kernel / OS 공통
 
@@ -469,7 +470,7 @@ interface FocusState {
 |---|---|---|
 | `app-db` | **State** (D3) | 전체 상태 트리 |
 | `reg-event-fx` | `defineCommand` | 함수명 |
-| `reg-event-db` | `defineHandler` | 함수명 (sugar) |
+| `reg-event-db` | ~~`defineHandler`~~ → `defineCommand` | 도입하지 않음 (D8). `defineCommand`로 통일 |
 | `reg-fx` | `defineEffect` | 함수명 |
 | `reg-cofx` | `defineContext` | 함수명 |
 | `inject-cofx` | `inject` | 함수명 |
@@ -648,7 +649,7 @@ Phase 5: 개념어 통일 (주석, 문서)
 | 11.2 | ZoneSnapshot ≠ ZoneState 오분류 | 공존 모델로 변경 | D2 |
 | 11.3 | 03 문서 `Event` vs 06 문서 `Command` | Command 확정, 03 수정 예정 | D1 |
 | 11.4 | Middleware 형태 모순 | re-frame 형태 확정, Phase 3으로 분리 | D4 |
-| 11.5 | Handler 타입 이중 정의 | Handler 통일, defineHandler는 sugar | D5 |
+| 11.5 | Handler 타입 이중 정의 | Handler 통일, ~~defineHandler는 sugar~~ → **도입하지 않음** | D5, D8 |
 | 11.6 | inject() 반환 타입 Interceptor | Middleware로 통일, 05 문서 수정 예정 | D4 |
 | 11.7 | 누락된 센서/파이프라인 타입 | Section 5.4~5.8에 추가 | D6 |
 | 11.8 | FocusState.zone 단수 vs zones Record | Record 모델 확정 | D7 |

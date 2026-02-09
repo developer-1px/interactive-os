@@ -10,6 +10,7 @@
  * - Event handling is done by FocusSensor
  */
 
+import { FocusData } from "@os/features/focus/lib/focusData.ts";
 import {
   cloneElement,
   forwardRef,
@@ -21,10 +22,8 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
-
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
-import { FocusData } from "@os/features/focus/lib/focusData.ts";
 import {
   getChildRole,
   isCheckedRole,

@@ -1,4 +1,4 @@
-import type { BaseCommand } from "../schema/command/BaseCommand.ts";
+import { FocusData } from "@os/features/focus/lib/focusData.ts";
 import {
   type ComponentProps,
   createContext,
@@ -7,13 +7,11 @@ import {
   useLayoutEffect,
   useMemo,
 } from "react";
-import { useIsFocusedGroup } from "./hooks/useIsFocusedGroup.ts";
-import { FocusData } from "@os/features/focus/lib/focusData.ts";
-import { resolveRole, type ZoneRole } from "../registry/roleRegistry.ts";
 import {
   type FocusGroupStore,
   useFocusGroupStoreInstance,
 } from "../3-store/focusGroupStore.ts";
+import { resolveRole, type ZoneRole } from "../registry/roleRegistry.ts";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -23,6 +21,8 @@ import type {
   SelectConfig,
   TabConfig,
 } from "../schema";
+import type { BaseCommand } from "../schema/command/BaseCommand.ts";
+import { useIsFocusedGroup } from "./hooks/useIsFocusedGroup.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Context
@@ -271,6 +271,7 @@ export function FocusGroup({
   // --- Render ---
   return (
     <FocusGroupContext.Provider value={contextValue}>
+      {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is dynamic (listbox/toolbar/grid) */}
       <div
         ref={(el) => {
           containerRef.current = el;

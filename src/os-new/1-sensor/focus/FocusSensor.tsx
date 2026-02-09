@@ -10,17 +10,17 @@ import {
   CommandEngineStore,
   useCommandEngineStore,
 } from "@os/features/command/store/CommandEngineStore.ts";
-import { sensorGuard } from "../../lib/loopGuard.ts";
-import { useEffect } from "react";
-import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
-import {
-  findFocusableItem,
-  resolveFocusTarget,
-} from "../../lib/focusDOMQueries.ts";
 import {
   isOSCommandRunning,
   setCurrentInput,
 } from "@os/features/focus/pipeline/core/osCommand.ts";
+import { useEffect } from "react";
+import {
+  findFocusableItem,
+  resolveFocusTarget,
+} from "../../lib/focusDOMQueries.ts";
+import { sensorGuard } from "../../lib/loopGuard.ts";
+import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
 
 let isMounted = false;
 

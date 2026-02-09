@@ -53,7 +53,7 @@ send({ type: "TODO_TOGGLE", payload: { id: "todo-1" } });
 type Handler<P = unknown> = (ctx: Context, payload: P) => EffectMap | null;
 ```
 
-`defineHandler`의 `(state, payload) => state`도 내부적으로 이 형태로 wrap된다.
+~~`defineHandler`는 계획했으나 도입하지 않음 (D8).~~ `defineCommand` 하나로 통일한다.
 
 ### 1.4 CommandDef — 커맨드 등록 단위
 
@@ -184,20 +184,22 @@ interface OSContext {
 }
 ```
 
-### 1.7 defineHandler — 순수 상태 핸들러 등록
+### ~~1.7 defineHandler~~ — 도입하지 않음 (D8)
+
+> **결정:** `defineHandler`는 `defineCommand`의 sugar로 계획했으나, **도입하지 않음**.
+> 상태만 변경하는 핸들러도 `defineCommand`로 작성한다.
+>
+> **근거:** LLM 친화적 API = 명시적이고 선택지가 적을수록 좋다.
+> API가 2개 있으면 "이 케이스는 handler? command?" 판단이 필요하고,
+> 나중에 effect 추가 시 `defineHandler` → `defineCommand` 리팩터링이 강제된다.
 
 ```typescript
-/* (제안) */
-function defineHandler<P = unknown>(
-  id: string,
-  handler: (state: OSState, payload: P) => OSState,
-): void;
-```
+// ❌ defineHandler (도입하지 않음)
+defineHandler("set-theme", (state, theme) => ({ ...state, theme }));
 
-sugar. 내부적으로:
-```typescript
-defineCommand(id, (ctx, payload) => ({
-  state: handler(ctx.state, payload),
+// ✅ defineCommand 하나로 통일
+defineCommand("set-theme", (ctx) => (theme) => ({
+  state: { ...ctx.state, theme },
 }));
 ```
 

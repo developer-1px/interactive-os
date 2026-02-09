@@ -6,17 +6,17 @@
  * This is the main orchestrator for keyboard input: sense → classify → route.
  */
 
-import { logger } from "../../lib/logger.ts";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore.ts";
-import { getCanonicalKey } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
-import { classifyKeyboard } from "@/os-new/1-sensor/keyboard/classifyKeyboard.ts";
 import { routeKeyboard } from "@os/features/keyboard/pipeline/3-route/routeKeyboard.ts";
+import { classifyKeyboard } from "@/os-new/1-sensor/keyboard/classifyKeyboard.ts";
+import { getCanonicalKey } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
 import { FieldRegistry } from "../../3-store/FieldRegistry.ts";
-import type { KeyboardIntent } from "./keyboardTypes.ts";
+import { logger } from "../../lib/logger.ts";
 import {
   type EventListenerConfig,
   useSingletonEventListeners,
 } from "../../shared/hooks/useEventListeners.ts";
+import type { KeyboardIntent } from "./keyboardTypes.ts";
 
 // Track composition state globally (exported for other modules)
 export let isComposing = false;

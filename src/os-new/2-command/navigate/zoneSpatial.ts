@@ -12,9 +12,9 @@
  */
 
 import {
-  findBestCandidate,
   type FocusCandidate,
   type FocusDirection,
+  findBestCandidate,
 } from "./focusFinder.ts";
 
 export interface ZoneSpatialContext {
@@ -27,8 +27,8 @@ export interface ZoneSpatialContext {
   /** Get zone entry by ID */
   getGroupEntry: (id: string) =>
     | {
-      store: any;
-    }
+        store: any;
+      }
     | undefined;
   /** Get DOM-based items for a zone */
   getGroupItems: (id: string) => string[];
@@ -132,11 +132,7 @@ export function resolveZoneSpatial(
     return { targetGroupId, targetItemId: targetItems[0], targetStore };
   }
 
-  const bestItem = findBestCandidate(
-    currentRect,
-    direction,
-    itemCandidates,
-  );
+  const bestItem = findBestCandidate(currentRect, direction, itemCandidates);
 
   return {
     targetGroupId,
@@ -144,4 +140,3 @@ export function resolveZoneSpatial(
     targetStore,
   };
 }
-

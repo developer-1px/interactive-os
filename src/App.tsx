@@ -5,6 +5,7 @@ import { InspectorShell } from "@os/app/debug/InspectorShell";
 import { OS } from "@os/features/AntigravityOS";
 import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
+import { OSKernelDemo } from "./os-new/spike/OSKernelDemo";
 import { SpikeDemo } from "./os-new/spike/SpikeDemo";
 import AriaShowcasePage from "./pages/aria-showcase";
 import BuilderPage from "./pages/BuilderPage";
@@ -128,6 +129,7 @@ export default function App() {
             <Route path="/docs/*" element={<DocsPage />} />
             <Route path="/kernel-lab" element={<KernelLabPage />} />
             <Route path="/spike-demo" element={<SpikeDemo />} />
+            <Route path="/os-kernel-demo" element={<OSKernelDemo />} />
           </Route>
         </Routes>
       </OS.Root>

@@ -1,7 +1,7 @@
 export interface ActivateConfig {
-    mode: "manual" | "automatic";
+  mode: "manual" | "automatic";
 }
 
 export const DEFAULT_ACTIVATE: ActivateConfig = {
-    mode: "manual",
+  mode: "manual",
 };

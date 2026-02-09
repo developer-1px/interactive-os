@@ -1,5 +1,5 @@
-import type { ContextState, LogicNode } from "./LogicNode.ts";
 import { evalContext } from "./evalContext.ts";
+import type { ContextState, LogicNode } from "./LogicNode.ts";
 
 const wrap = (fn: (ctx: ContextState) => boolean, label: string): LogicNode =>
   Object.assign(fn, { toString: () => label });
@@ -45,5 +45,5 @@ export const Rule = {
 
 export const createLogicExpect =
   <T>() =>
-    (k: keyof T & string) =>
-      Expect<T>(k);
+  (k: keyof T & string) =>
+    Expect<T>(k);

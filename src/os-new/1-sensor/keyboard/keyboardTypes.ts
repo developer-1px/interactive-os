@@ -7,11 +7,12 @@
  *   - KeyboardResolution.ts
  *   - KeyboardExecutionResult.ts
  */
-export type { KeyboardIntent } from "./KeyboardIntent.ts";
+
 export type { KeyboardCategory } from "./KeyboardCategory.ts";
+export type { KeyboardExecutionResult } from "./KeyboardExecutionResult.ts";
+export type { KeyboardIntent } from "./KeyboardIntent.ts";
 export type {
   CommandResolution,
   FieldResolution,
   KeyboardResolution,
 } from "./KeyboardResolution.ts";
-export type { KeyboardExecutionResult } from "./KeyboardExecutionResult.ts";

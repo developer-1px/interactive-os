@@ -9,8 +9,14 @@
 
 import { create } from "zustand";
 import { type CursorSlice, createCursorSlice } from "./slices/cursor.ts";
-import { createExpansionSlice, type ExpansionSlice } from "./slices/expansion.ts";
-import { createSelectionSlice, type SelectionSlice } from "./slices/selection.ts";
+import {
+  createExpansionSlice,
+  type ExpansionSlice,
+} from "./slices/expansion.ts";
+import {
+  createSelectionSlice,
+  type SelectionSlice,
+} from "./slices/selection.ts";
 import { createSpatialSlice, type SpatialSlice } from "./slices/spatial.ts";
 
 // ═══════════════════════════════════════════════════════════════════

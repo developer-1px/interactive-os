@@ -1,8 +1,8 @@
+import { create } from "zustand";
 import type {
   BaseCommand,
   FieldCommandFactory,
 } from "../schema/command/BaseCommand.ts";
-import { create } from "zustand";
 
 export interface FieldConfig {
   name: string;

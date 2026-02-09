@@ -9,26 +9,26 @@ import { useCommandEngineStore } from "@os/features/command/store/CommandEngineS
 import { FocusData } from "@os/features/focus/lib/focusData.ts";
 
 type ZoneCommandKey =
-    | "copyCommand"
-    | "cutCommand"
-    | "pasteCommand"
-    | "undoCommand"
-    | "redoCommand";
+  | "copyCommand"
+  | "cutCommand"
+  | "pasteCommand"
+  | "undoCommand"
+  | "redoCommand";
 
 /**
  * Dispatch the active Zone's bound command to the app.
  * @returns true if dispatched, false if no active zone or no bound command.
  */
 export function dispatchToZone(commandKey: ZoneCommandKey): boolean {
-    const data = FocusData.getActiveZone();
-    if (!data) return false;
+  const data = FocusData.getActiveZone();
+  if (!data) return false;
 
-    const command = data[commandKey];
-    if (!command) return false;
+  const command = data[commandKey];
+  if (!command) return false;
 
-    const dispatch = useCommandEngineStore.getState().getActiveDispatch();
-    if (!dispatch) return false;
+  const dispatch = useCommandEngineStore.getState().getActiveDispatch();
+  if (!dispatch) return false;
 
-    dispatch(command);
-    return true;
+  dispatch(command);
+  return true;
 }

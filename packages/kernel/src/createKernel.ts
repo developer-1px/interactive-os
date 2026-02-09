@@ -69,16 +69,15 @@ export function createKernel<S>(initialState: S) {
 
   // ─── Registries (closure) ───
 
-  const scopedCommands = new Map<
-    string,
-    Map<string, InternalCommandHandler>
-  >();
+  const scopedCommands = new Map<string, Map<string, InternalCommandHandler>>();
   const scopedInterceptors = new Map<string, Map<string, Middleware[]>>();
-  const scopedEffects = new Map<
-    string,
-    Map<string, InternalEffectHandler>
-  >();
+  const scopedEffects = new Map<string, Map<string, InternalEffectHandler>>();
   const scopedMiddleware = new Map<string, Middleware[]>();
+
+  // ─── Scope Tree (closure) ───
+  // Records parent-child relationships from group() nesting.
+  // Enables automatic bubble path expansion in dispatch().
+  const parentMap = new Map<string, string>();
 
   // ─── Context Providers (closure) ───
 
@@ -156,11 +155,34 @@ export function createKernel<S>(initialState: S) {
   const queue: Command[] = [];
   let processing = false;
 
+  // Build full bubble path by walking parentMap upward.
+  function buildBubblePath(startScope: string): ScopeToken[] {
+    const path: string[] = [startScope];
+    let current = startScope;
+    while (parentMap.has(current)) {
+      current = parentMap.get(current)!;
+      path.push(current);
+    }
+    if (path[path.length - 1] !== (GLOBAL as string)) {
+      path.push(GLOBAL as string);
+    }
+    return path as ScopeToken[];
+  }
+
   function dispatch(
     cmd: Command<string, any>,
     options?: { scope?: ScopeToken[] },
   ): void {
-    const enriched = options?.scope ? { ...cmd, scope: options.scope } : cmd;
+    let enriched = options?.scope ? { ...cmd, scope: options.scope } : cmd;
+
+    // Auto-expand single scope via parentMap
+    if (enriched.scope?.length === 1) {
+      const startScope = enriched.scope[0] as string;
+      if (parentMap.has(startScope)) {
+        enriched = { ...enriched, scope: buildBubblePath(startScope) };
+      }
+    }
+
     queue.push(enriched as Command);
 
     if (processing) return;
@@ -226,7 +248,12 @@ export function createKernel<S>(initialState: S) {
       }
 
       // 4. Execute handler
-      const ctx = { state: mwCtx.state, ...mwCtx.injected };
+      const injectedMap = mwCtx.injected;
+      const ctx = {
+        state: mwCtx.state,
+        ...injectedMap,
+        inject: (token: { __id: string }) => injectedMap[token.__id],
+      };
       const handlerResult = handler(ctx)(mwCtx.command.payload);
 
       // 5. After-middleware (reverse order)
@@ -350,8 +377,21 @@ export function createKernel<S>(initialState: S) {
     return {
       defineCommand: ((
         type: string,
-        handler: InternalCommandHandler,
+        handlerOrTokens: InternalCommandHandler | ContextToken[],
+        handlerArg?: InternalCommandHandler,
       ): CommandFactory<string, any> => {
+        // Support 3-argument form: (type, tokens, handler)
+        let handler: InternalCommandHandler;
+        let perCommandTokens: ContextToken[];
+
+        if (Array.isArray(handlerOrTokens)) {
+          handler = handlerArg!;
+          perCommandTokens = handlerOrTokens;
+        } else {
+          handler = handlerOrTokens;
+          perCommandTokens = [];
+        }
+
         // Register in scoped map
         if (!scopedCommands.has(scope)) {
           scopedCommands.set(scope, new Map());
@@ -361,13 +401,15 @@ export function createKernel<S>(initialState: S) {
         // HMR-safe: silent overwrite on re-registration
         scopeMap.set(type, handler);
 
-        // Register inject interceptor for this command (if tokens exist)
-        if (injectTokens.length > 0) {
+        // Register inject interceptor for this command
+        // Merge group-level tokens with per-command tokens
+        const allTokens = [...injectTokens, ...perCommandTokens];
+        if (allTokens.length > 0) {
           const injectMw: Middleware = {
             id: `inject:${scope}:${type}`,
             before: (ctx: MiddlewareContext): MiddlewareContext => {
               const injected = { ...ctx.injected };
-              for (const token of injectTokens) {
+              for (const token of allTokens) {
                 const id = (token as ContextToken).__id;
                 injected[id] = resolveContext(id);
               }
@@ -378,7 +420,7 @@ export function createKernel<S>(initialState: S) {
           if (!scopedInterceptors.has(scope)) {
             scopedInterceptors.set(scope, new Map());
           }
-          scopedInterceptors.get(scope)!.set(type, [injectMw]);
+          scopedInterceptors.get(scope)?.set(type, [injectMw]);
         }
 
         // Return CommandFactory
@@ -387,9 +429,7 @@ export function createKernel<S>(initialState: S) {
             type,
             payload,
             scope:
-              scope !== (GLOBAL as string)
-                ? [scope as ScopeToken]
-                : undefined,
+              scope !== (GLOBAL as string) ? [scope as ScopeToken] : undefined,
           }) as unknown as Command<string, any>;
 
         (factory as unknown as { commandType: string }).commandType = type;
@@ -399,13 +439,27 @@ export function createKernel<S>(initialState: S) {
         // No payload
         <T extends string>(
           type: T,
-          handler: (ctx: Ctx) => () => EffMap | void,
+          handler: (ctx: Ctx) => () => EffMap | undefined,
         ): CommandFactory<T, void>;
 
         // With payload
         <T extends string, P>(
           type: T,
-          handler: (ctx: Ctx) => (payload: P) => EffMap | void,
+          handler: (ctx: Ctx) => (payload: P) => EffMap | undefined,
+        ): CommandFactory<T, P>;
+
+        // With per-command inject tokens (no payload)
+        <T extends string>(
+          type: T,
+          tokens: ContextToken[],
+          handler: (ctx: any) => () => EffMap | undefined,
+        ): CommandFactory<T, void>;
+
+        // With per-command inject tokens (with payload)
+        <T extends string, P>(
+          type: T,
+          tokens: ContextToken[],
+          handler: (ctx: any) => (payload: P) => EffMap | undefined,
         ): CommandFactory<T, P>;
       },
 
@@ -416,7 +470,7 @@ export function createKernel<S>(initialState: S) {
         if (!scopedEffects.has(scope)) {
           scopedEffects.set(scope, new Map());
         }
-        scopedEffects.get(scope)!.set(type, handler as InternalEffectHandler);
+        scopedEffects.get(scope)?.set(type, handler as InternalEffectHandler);
         return type as EffectToken<T, V>;
       },
 
@@ -428,6 +482,12 @@ export function createKernel<S>(initialState: S) {
       }) {
         const childScope = config.scope ? (config.scope as string) : scope;
         const childTokens = (config.inject ?? []) as NewTokens;
+
+        // Record parent-child relationship in scope tree
+        if (childScope !== scope) {
+          parentMap.set(childScope, scope);
+        }
+
         return createGroup<E, NewTokens>(childScope, childTokens);
       },
 
@@ -483,5 +543,13 @@ export function createKernel<S>(initialState: S) {
     getLastTransaction,
     clearTransactions,
     travelTo,
+
+    // Scope Tree
+    getScopePath(scope: ScopeToken): ScopeToken[] {
+      return buildBubblePath(scope as string);
+    },
+    getScopeParent(scope: ScopeToken): ScopeToken | null {
+      return (parentMap.get(scope as string) as ScopeToken) ?? null;
+    },
   };
 }

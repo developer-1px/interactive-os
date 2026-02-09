@@ -6,23 +6,23 @@
  */
 
 export interface ZoneSnapshot {
-    id: string;
-    focusedItemId: string | null;
-    selection: string[];
-    selectionAnchor: string | null;
-    expandedItems: string[];
-    stickyX: number | null;
-    stickyY: number | null;
-    recoveryTargetId: string | null;
+  id: string;
+  focusedItemId: string | null;
+  selection: string[];
+  selectionAnchor: string | null;
+  expandedItems: string[];
+  stickyX: number | null;
+  stickyY: number | null;
+  recoveryTargetId: string | null;
 }
 
 export interface FocusState {
-    /** 현재 활성 Zone ID */
-    activeZoneId: string | null;
+  /** 현재 활성 Zone ID */
+  activeZoneId: string | null;
 
-    /** 활성 Zone의 상태 스냅샷 */
-    zone: ZoneSnapshot | null;
+  /** 활성 Zone의 상태 스냅샷 */
+  zone: ZoneSnapshot | null;
 
-    /** Focus Stack 깊이 */
-    focusStackDepth: number;
+  /** Focus Stack 깊이 */
+  focusStackDepth: number;
 }

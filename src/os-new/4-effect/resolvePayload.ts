@@ -12,22 +12,25 @@ const OS_FOCUS_SENTINEL = "OS.FOCUS";
 /**
  * Recursively resolve OS.FOCUS in payload
  */
-export function resolvePayload(payload: any, focusedItemId: string | null): any {
-    if (payload === OS_FOCUS_SENTINEL) {
-        return focusedItemId;
-    }
+export function resolvePayload(
+  payload: any,
+  focusedItemId: string | null,
+): any {
+  if (payload === OS_FOCUS_SENTINEL) {
+    return focusedItemId;
+  }
 
-    if (payload === null || typeof payload !== "object") {
-        return payload;
-    }
+  if (payload === null || typeof payload !== "object") {
+    return payload;
+  }
 
-    if (Array.isArray(payload)) {
-        return payload.map((item) => resolvePayload(item, focusedItemId));
-    }
+  if (Array.isArray(payload)) {
+    return payload.map((item) => resolvePayload(item, focusedItemId));
+  }
 
-    const resolved: Record<string, any> = {};
-    for (const [key, value] of Object.entries(payload)) {
-        resolved[key] = resolvePayload(value, focusedItemId);
-    }
-    return resolved;
+  const resolved: Record<string, any> = {};
+  for (const [key, value] of Object.entries(payload)) {
+    resolved[key] = resolvePayload(value, focusedItemId);
+  }
+  return resolved;
 }

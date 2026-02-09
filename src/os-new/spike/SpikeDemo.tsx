@@ -24,7 +24,6 @@ function Item({ id, label }: { id: string; label: string }) {
   return (
     <div
       data-item-id={id}
-      tabIndex={0}
       style={{
         padding: "12px 20px",
         margin: "4px 0",

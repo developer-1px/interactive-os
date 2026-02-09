@@ -8,13 +8,13 @@
  * - KeyboardResult: State changes + dispatch actions
  */
 
-import type { BaseCommand } from "../schema/command/BaseCommand.ts";
 import {
   type FieldConfig,
   type FieldEntry,
   FieldRegistry,
   type FieldState,
 } from "../3-store/FieldRegistry";
+import type { BaseCommand } from "../schema/command/BaseCommand.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Context (All Reads)

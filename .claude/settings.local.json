@@ -6,7 +6,11 @@
       "Bash(npx tsc:*)",
       "Bash(git -C /Users/user/Desktop/interactive-os mv \"docs/0-inbox/16-[docs]_Kernel_Area_Overview_Draft.md\" \"docs/2-area/06-kernel/00-overview.md\")",
       "Bash(timeout 15 npm run dev:*)",
-      "Bash(npx --yes vite:*)"
+      "Bash(npx --yes vite:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(xargs:*)"
     ]
   }
 }
