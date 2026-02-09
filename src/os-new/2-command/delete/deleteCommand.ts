@@ -5,7 +5,7 @@
  * Focus recovery is the APP's responsibility after delete.
  */
 
-import type { OSCommand } from "../../schema/types.ts";
+import type { OSCommand } from "../../schema/osTypes.ts";
 
 export const DELETE: OSCommand<{ targetId?: string }> = {
   run: (ctx, payload) => {

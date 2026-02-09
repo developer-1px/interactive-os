@@ -8,4 +8,4 @@ export type {
   FieldResolution,
   KeyboardResolution,
   KeyboardExecutionResult,
-} from "@/os-new/1-sensor/keyboard/types";
+} from "@/os-new/1-sensor/keyboard/keyboardTypes";

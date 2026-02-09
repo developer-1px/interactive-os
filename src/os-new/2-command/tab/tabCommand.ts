@@ -4,7 +4,7 @@
  * Pure function — reads only from ctx (no FocusData/DOM direct access).
  */
 
-import type { OSCommand, OSContext, OSResult } from "../../schema/types.ts";
+import type { OSCommand, OSContext, OSResult } from "../../schema/osTypes.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Behavior: trap — cycle within zone (dialog)

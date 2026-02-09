@@ -7,7 +7,7 @@
  * Pure function — reads only from ctx, no store access.
  */
 
-import type { OSCommand } from "../../schema/types.ts";
+import type { OSCommand } from "../../schema/osTypes.ts";
 
 export const RECOVER: OSCommand = {
   run: (ctx) => {

@@ -12,17 +12,17 @@ import {
 } from "../../../command/definitions/commandsShell";
 import { useCommandListener } from "../../../command/hooks/useCommandListener";
 import { runOS } from "../core/osCommand";
-import { ACTIVATE } from "@/os-new/2-command/activate/command.ts";
-import { DELETE } from "@/os-new/2-command/delete/command.ts";
-import { ESCAPE } from "@/os-new/2-command/escape/command.ts";
-import { FOCUS } from "@/os-new/2-command/focus/command.ts";
-import { NAVIGATE } from "@/os-new/2-command/navigate/command.ts";
+import { ACTIVATE } from "@/os-new/2-command/activate/activateCommand.ts";
+import { DELETE } from "@/os-new/2-command/delete/deleteCommand.ts";
+import { ESCAPE } from "@/os-new/2-command/escape/escapeCommand.ts";
+import { FOCUS } from "@/os-new/2-command/focus/focusCommand.ts";
+import { NAVIGATE } from "@/os-new/2-command/navigate/navigateCommand.ts";
 import { RECOVER } from "@/os-new/2-command/focus/RECOVER.ts";
-import { SELECT } from "@/os-new/2-command/select/command.ts";
+import { SELECT } from "@/os-new/2-command/select/selectCommand.ts";
 import { SELECT_ALL } from "@/os-new/2-command/select/all.ts";
 import { SYNC_FOCUS } from "@/os-new/2-command/focus/sync.ts";
-import { TAB } from "@/os-new/2-command/tab/command.ts";
-import { TOGGLE } from "@/os-new/2-command/toggle/command.ts";
+import { TAB } from "@/os-new/2-command/tab/tabCommand.ts";
+import { TOGGLE } from "@/os-new/2-command/toggle/toggleCommand.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Component

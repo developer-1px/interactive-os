@@ -2,7 +2,7 @@
  * SELECT Command - Space key selection
  */
 
-import type { OSCommand, OSContext, OSResult } from "../../schema/types.ts";
+import type { OSCommand, OSContext, OSResult } from "../../schema/osTypes.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Selection Mode Handlers

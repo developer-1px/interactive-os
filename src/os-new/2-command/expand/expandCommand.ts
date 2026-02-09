@@ -6,7 +6,7 @@ import {
   type ExpandAction,
   resolveExpansion,
 } from "./resolveExpansion.ts";
-import type { OSCommand } from "../../schema/types.ts";
+import type { OSCommand } from "../../schema/osTypes.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // EXPAND Command

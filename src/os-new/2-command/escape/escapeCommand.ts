@@ -7,7 +7,7 @@
  * - "none": No action
  */
 
-import type { OSCommand, OSContext, OSResult } from "../../schema/types.ts";
+import type { OSCommand, OSContext, OSResult } from "../../schema/osTypes.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Escape Action Handlers
