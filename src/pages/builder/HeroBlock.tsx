@@ -17,7 +17,7 @@ export function HeroBlock() {
   });
 
   return (
-    <OS.Zone
+    <OS.Item
       id="hero-block"
       className="relative bg-white text-slate-900 overflow-hidden"
     >
@@ -101,10 +101,9 @@ export function HeroBlock() {
                 type="button"
                 className={`
                   px-7 py-3.5 rounded-xl font-medium text-[15px] transition-all duration-300
-                  ${
-                    isFocused
-                      ? "bg-violet-600 text-white scale-105 shadow-xl shadow-violet-500/40"
-                      : "bg-slate-900 text-white hover:bg-slate-800"
+                  ${isFocused
+                    ? "bg-violet-600 text-white scale-105 shadow-xl shadow-violet-500/40"
+                    : "bg-slate-900 text-white hover:bg-slate-800"
                   }
                 `}
               >
@@ -119,10 +118,9 @@ export function HeroBlock() {
                 type="button"
                 className={`
                   px-7 py-3.5 rounded-xl font-medium text-[15px] transition-all duration-300 border
-                  ${
-                    isFocused
-                      ? "bg-violet-50 border-violet-500 text-violet-700 scale-105"
-                      : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                  ${isFocused
+                    ? "bg-violet-50 border-violet-500 text-violet-700 scale-105"
+                    : "border-slate-300 text-slate-600 hover:bg-slate-50"
                   }
                 `}
               >
@@ -155,6 +153,6 @@ export function HeroBlock() {
           </div>
         </div>
       </div>
-    </OS.Zone>
+    </OS.Item>
   );
 }

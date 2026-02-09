@@ -7,7 +7,7 @@
  * 2. buildSnapshotFromLogs() — EventStream 로그를 순차 재생하여 재구성
  */
 
-import type { LogEntry } from "@os/features/inspector/InspectorLogStore";
+import type { LogEntry } from "@os/inspector/InspectorLogStore";
 import {
   createFocusEffect,
   type EffectRecord,

@@ -1,7 +1,7 @@
 import {
   useTransactionLogStore,
   TransactionLog,
-} from "@os/features/inspector/InspectorLogStore";
+} from "@os/inspector/InspectorLogStore";
 import type { Transaction, StateDiff, EffectRecord } from "@os/schema";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Icon } from "@/lib/Icon";

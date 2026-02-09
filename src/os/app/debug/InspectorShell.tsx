@@ -1,6 +1,6 @@
 import { CommandInspector } from "@os/app/debug/CommandInspector";
 import { InspectorActivityBar } from "@os/app/debug/InspectorActivityBar";
-import { useInspectorStore } from "@os/features/inspector/InspectorStore";
+import { useInspectorStore } from "@os/inspector/InspectorStore";
 
 export function InspectorShell() {
   const isPanelExpanded = useInspectorStore((s) => s.isPanelExpanded);

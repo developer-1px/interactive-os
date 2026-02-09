@@ -56,10 +56,6 @@ const getFieldClasses = ({
   placeholder,
   customClassName = "",
 }: FieldStyleParams): string => {
-  const baseStyles = isFocused
-    ? customClassName
-    : `truncate ${customClassName}`;
-
   const isEmpty = checkValueEmpty(value);
   const shouldShowPlaceholder = placeholder && isEmpty;
   const placeholderClasses = shouldShowPlaceholder
@@ -70,10 +66,6 @@ const getFieldClasses = ({
     ? "whitespace-pre-wrap break-words"
     : "whitespace-nowrap overflow-hidden";
 
-  const displayClasses = multiline
-    ? "block"
-    : "inline-block min-w-[1ch] max-w-full align-bottom";
-
   // --- State Visual Distinction ---
   // Editing: Blue ring + blue tint background (clearly "input mode")
   // Focused: Default focus ring (from FocusItem or custom)
@@ -81,7 +73,9 @@ const getFieldClasses = ({
     ? "ring-2 ring-blue-500 bg-blue-500/10 rounded-sm"
     : "";
 
-  return `${placeholderClasses} ${baseStyles} ${lineClasses} ${displayClasses} ${stateClasses} relative min-h-[1lh]`.trim();
+  // User's customClassName comes LAST to allow full control over display, sizing, etc.
+  // Field only provides: placeholder, whitespace handling, state feedback, and min-height
+  return `${placeholderClasses} ${lineClasses} ${stateClasses} relative min-h-[1lh] ${customClassName}`.trim();
 };
 
 export type FieldMode = "immediate" | "deferred";
@@ -106,6 +100,7 @@ export interface FieldProps
   target?: FocusTarget;
   controls?: string;
   blurOnInactive?: boolean;
+  as?: "span" | "div";
 }
 
 /**
@@ -134,6 +129,7 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
       target = "real",
       controls,
       blurOnInactive = false,
+      as = "span",
       ...rest
     },
     ref,
@@ -256,9 +252,9 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
       "aria-controls": controls,
       "aria-activedescendant":
         target === "virtual" &&
-        controls &&
-        osFocusedItemId &&
-        osFocusedItemId !== name
+          controls &&
+          osFocusedItemId &&
+          osFocusedItemId !== name
           ? osFocusedItemId
           : undefined,
       children: null, // Managed by useFieldDOMSync
@@ -272,7 +268,7 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
     };
 
     return (
-      <FocusItem id={fieldId} as="span" ref={setInnerRef} {...baseProps} />
+      <FocusItem id={fieldId} as={as} ref={setInnerRef} {...baseProps} />
     );
   },
 );

@@ -1,4 +1,4 @@
-import { useInspectorStore } from "@os/features/inspector/InspectorStore";
+import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { Activity, Bug, Database, Keyboard, Settings } from "lucide-react";
 
 export function InspectorActivityBar() {

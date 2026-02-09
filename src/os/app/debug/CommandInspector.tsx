@@ -8,7 +8,7 @@ import { useInputTelemetry } from "@os/app/debug/LoggedKey.ts";
 import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { useInspectorStore } from "@os/features/inspector/InspectorStore";
+import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { evalContext } from "@os/features/logic/lib/evalContext";
 import { TestBotPanel } from "@os/testBot";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";

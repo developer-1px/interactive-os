@@ -71,7 +71,7 @@ export function TestimonialsBlock() {
   };
 
   return (
-    <OS.Zone id="testimonials-block" className="bg-white py-24 px-8">
+    <OS.Item id="testimonials-block" className="bg-white py-24 px-8">
       <div className="max-w-5xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -115,7 +115,7 @@ export function TestimonialsBlock() {
           {testimonials.map((t, index) => {
             const colors = colorMap[t.color];
             return (
-              <OS.Zone
+              <OS.Item
                 key={t.id}
                 id={`zone-${t.id}`}
                 className={`
@@ -204,11 +204,11 @@ export function TestimonialsBlock() {
                     </OS.Item>
                   </div>
                 </div>
-              </OS.Zone>
+              </OS.Item>
             );
           })}
         </div>
       </div>
-    </OS.Zone>
+    </OS.Item>
   );
 }

@@ -21,16 +21,38 @@ export const DOM = {
   },
 
   /**
-   * Get all item IDs in a group, in DOM order
+   * Get all item IDs in a group, in DOM order.
+   * Scoped: stops at nested zone boundaries (data-focus-group).
    */
   getGroupItems(groupId: string): string[] {
     const container = document.getElementById(groupId);
     if (!container) return [];
 
-    const elements = container.querySelectorAll("[data-item-id]");
-    return Array.from(elements)
-      .map((el) => el.getAttribute("data-item-id"))
-      .filter((id): id is string => id !== null);
+    const items: string[] = [];
+    const walker = document.createTreeWalker(
+      container,
+      NodeFilter.SHOW_ELEMENT,
+      {
+        acceptNode(node) {
+          const el = node as HTMLElement;
+          // Stop traversal at nested zone boundaries (but not self)
+          if (el !== container && el.hasAttribute("data-focus-group")) {
+            return NodeFilter.FILTER_REJECT; // Skip entire subtree
+          }
+          if (el.hasAttribute("data-item-id")) {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+          return NodeFilter.FILTER_SKIP;
+        },
+      },
+    );
+    while (walker.nextNode()) {
+      const id = (walker.currentNode as HTMLElement).getAttribute(
+        "data-item-id",
+      );
+      if (id) items.push(id);
+    }
+    return items;
   },
 
   /**

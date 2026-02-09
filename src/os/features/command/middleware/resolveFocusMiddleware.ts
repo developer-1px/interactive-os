@@ -10,31 +10,7 @@
 
 import type { Middleware } from "@os/features/command/model/createCommandStore";
 import { FocusData } from "@os/features/focus/lib/focusData";
-
-const OS_FOCUS_SENTINEL = "OS.FOCUS";
-
-/**
- * Recursively resolve OS.FOCUS in payload
- */
-function resolvePayload(payload: any, focusedItemId: string | null): any {
-  if (payload === OS_FOCUS_SENTINEL) {
-    return focusedItemId;
-  }
-
-  if (payload === null || typeof payload !== "object") {
-    return payload;
-  }
-
-  if (Array.isArray(payload)) {
-    return payload.map((item) => resolvePayload(item, focusedItemId));
-  }
-
-  const resolved: Record<string, any> = {};
-  for (const [key, value] of Object.entries(payload)) {
-    resolved[key] = resolvePayload(value, focusedItemId);
-  }
-  return resolved;
-}
+import { resolvePayload } from "@os/new/4-effect/resolvePayload";
 
 /**
  * Middleware that resolves OS.FOCUS in action payloads.

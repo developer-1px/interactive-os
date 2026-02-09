@@ -13,8 +13,8 @@
 import { evalContext } from "@os/features/AntigravityOS";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { normalizeKeyDefinition } from "@os/features/keyboard/lib/getCanonicalKey";
-import type { KeyboardIntent } from "../1-intercept";
+import { normalizeKeyDefinition } from "@os/new/1-sensor/keyboard/getCanonicalKey.ts";
+import type { KeyboardIntent } from "../../../../new/1-sensor/keyboard";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -169,24 +169,7 @@ function hasZoneBinding(commandId: string): boolean {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Utility: Build Bubble Path
+// Utility: Build Bubble Path (re-exported from canonical location)
 // ═══════════════════════════════════════════════════════════════════
 
-/**
- * Build the bubble path from focus path.
- * Reverses the focus path (deepest first) and appends 'global'.
- */
-export function buildBubblePath(
-  focusPath: string[],
-  fallbackGroupId?: string | null,
-): string[] {
-  const path =
-    focusPath.length > 0
-      ? [...focusPath].reverse()
-      : fallbackGroupId
-        ? [fallbackGroupId]
-        : [];
-
-  path.push("global");
-  return path;
-}
+export { buildBubblePath } from "@os/new/4-effect/buildBubblePath";

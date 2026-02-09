@@ -10,7 +10,7 @@ import {
   consumeInputInfo,
   consumeCollectedEffects,
 } from "@os/features/focus/pipeline/core/osCommand";
-import { TransactionLog } from "@os/features/inspector/InspectorLogStore";
+import { TransactionLog } from "@os/inspector/InspectorLogStore";
 import { computeDiff } from "@os/schema";
 import { buildCurrentSnapshot } from "@os/features/focus/schema/analyzer";
 import { GroupRegistry } from "@os/features/jurisdiction/model/GroupRegistry";

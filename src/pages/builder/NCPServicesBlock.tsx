@@ -1,5 +1,5 @@
+import { Builder } from "@os/app/export/primitives/Builder.tsx";
 import { Field } from "@os/app/export/primitives/Field.tsx";
-import { OS } from "@os/features/AntigravityOS";
 import {
   ArrowRight,
   Box,
@@ -72,132 +72,157 @@ export function NCPServicesBlock() {
   ]);
 
   return (
-    <OS.Zone
-      id="ncp-services"
-      className="py-24 px-6 bg-[#F8F9FA] border-t border-slate-200"
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* Header & Controls */}
-        <div className="flex flex-col lg:flex-row justify-between items-end mb-12 gap-8">
-          <div className="max-w-xl">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-              <span className="text-blue-600 font-bold text-xs tracking-widest uppercase">
-                Service Category
-              </span>
+    <Builder.Section asChild id="ncp-services">
+      <div className="py-24 px-6 bg-[#F8F9FA] border-t border-slate-200">
+        <div className="max-w-7xl mx-auto">
+          {/* Header & Controls */}
+          <div className="flex flex-col lg:flex-row justify-between items-end mb-12 gap-8">
+            <div className="max-w-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                <Builder.Item asChild id="ncp-service-category">
+                  <Field
+                    name="ncp-service-category"
+                    mode="deferred"
+                    value="Service Category"
+                    className="text-blue-600 font-bold text-xs tracking-widest uppercase"
+                  />
+                </Builder.Item>
+              </div>
+              <Builder.Item asChild id="ncp-service-title">
+                <Field
+                  name="ncp-service-title"
+                  mode="deferred"
+                  multiline
+                  value={title}
+                  onCommit={(val: string) => setTitle(val)}
+                  className={`
+                    text-3xl md:text-4xl font-bold text-slate-900 leading-tight tracking-tight
+                    data-[focused=true]:bg-white rounded-lg p-2 -m-2
+                  `}
+                />
+              </Builder.Item>
             </div>
-            <Field
-              name="ncp-service-title"
-              mode="deferred"
-              multiline
-              value={title}
-              onCommit={(val: string) => setTitle(val)}
-              className={`
-                        text-3xl md:text-4xl font-bold text-slate-900 leading-tight tracking-tight
-                        data-[focused=true]:bg-white rounded-lg p-2 -m-2
-                    `}
-            />
-          </div>
 
-          {/* Segmented Control Tabs */}
-          <OS.Zone
-            id="ncp-service-tabs"
-            options={{ navigate: { orientation: "horizontal" } }}
-            className="flex items-center bg-slate-200/50 p-1.5 rounded-xl overflow-x-auto max-w-full"
-          >
-            {tabs.map((tab, i) => (
-              <OS.Item key={tab.label} id={`tab-${i}`}>
-                {({ isFocused }: { isFocused: boolean }) => (
-                  <button
-                    type="button"
+            {/* Segmented Control Tabs */}
+            <div className="flex items-center bg-slate-200/50 p-1.5 rounded-xl overflow-x-auto max-w-full">
+              {tabs.map((tab, i) => (
+                <Builder.Item asChild key={tab.label} id={`tab-${i}`}>
+                  <Builder.Button
+                    id={`tab-btn-${i}`}
+                    variant={tab.active ? "primary" : "ghost"}
                     className={`
-                            flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap
-                            ${
-                              tab.active
-                                ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
-                                : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-                            }
-                            ${isFocused ? "bg-white ring-2 ring-slate-300 z-10" : ""}
-                      `}
+                      flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap
+                      ${tab.active
+                        ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
+                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                      }
+                      data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 data-[focused=true]:z-10
+                    `}
                   >
                     <tab.icon
                       size={16}
                       className={tab.active ? "text-blue-600" : ""}
                     />
                     {tab.label}
-                  </button>
-                )}
-              </OS.Item>
-            ))}
-          </OS.Zone>
-        </div>
-
-        {/* Service Grid */}
-        <OS.Zone
-          id="ncp-service-list"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {featuredServices.map((service, index) => (
-            <div
-              key={index}
-              className="group bg-white rounded-2xl p-8 border border-slate-200 transition-all duration-300 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 cursor-pointer"
-            >
-              <div className="flex justify-between items-start mb-6">
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${service.color}`}
-                >
-                  <service.icon size={24} strokeWidth={2} />
-                </div>
-                {service.badge && (
-                  <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
-                    {service.badge}
-                  </span>
-                )}
-              </div>
-
-              <Field
-                name={`service-title-${index}`}
-                mode="deferred"
-                value={service.title}
-                onCommit={(val: string) => {
-                  const newServices = [...featuredServices];
-                  newServices[index].title = val;
-                  setFeaturedServices(newServices);
-                }}
-                className={`text-lg font-bold text-slate-900 mb-2 block`}
-              />
-
-              <Field
-                name={`service-desc-${index}`}
-                mode="deferred"
-                multiline
-                value={service.desc}
-                onCommit={(val: string) => {
-                  const newServices = [...featuredServices];
-                  newServices[index].desc = val;
-                  setFeaturedServices(newServices);
-                }}
-                className={`text-sm text-slate-500 leading-relaxed block min-h-[40px]`}
-              />
-
-              <div className="mt-6 flex items-center text-blue-600 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
-                <span>Details</span>
-                <ArrowRight size={16} className="ml-1" />
-              </div>
+                  </Builder.Button>
+                </Builder.Item>
+              ))}
             </div>
-          ))}
-
-          {/* "View All" Card */}
-          <div className="rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-8 text-center hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer group">
-            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4 group-hover:bg-slate-200 group-hover:text-slate-600 py-10 transition-colors">
-              <ArrowRight size={24} />
-            </div>
-            <span className="text-slate-500 font-bold text-sm">
-              서비스 전체보기
-            </span>
           </div>
-        </OS.Zone>
+
+          {/* Service Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredServices.map((service, index) => (
+              <Builder.Group
+                asChild
+                key={service.title}
+                id={`service-card-${index}`}
+              >
+                <div className="group bg-white rounded-2xl p-8 border border-slate-200 transition-all duration-300 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 cursor-pointer data-[focused=true]:ring-4 data-[focused=true]:ring-blue-500 data-[focused=true]:border-blue-500">
+                  <div className="flex justify-between items-start mb-6">
+                    <Builder.Item asChild id={`service-icon-${index}`}>
+                      <Builder.Icon
+                        id={`service-icon-inner-${index}`}
+                        icon={service.icon}
+                        size={24}
+                        strokeWidth={2}
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center ${service.color} data-[focused=true]:ring-2 data-[focused=true]:ring-slate-400`}
+                      />
+                    </Builder.Item>
+                    {service.badge && (
+                      <Builder.Item asChild id={`service-badge-${index}`}>
+                        <Builder.Badge
+                          id={`service-badge-inner-${index}`}
+                          variant="default"
+                          className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider data-[focused=true]:ring-2 data-[focused=true]:ring-slate-400"
+                        >
+                          {service.badge}
+                        </Builder.Badge>
+                      </Builder.Item>
+                    )}
+                  </div>
+
+                  <Builder.Item asChild id={`service-title-${index}`}>
+                    <Field
+                      name={`service-title-${index}`}
+                      mode="deferred"
+                      value={service.title}
+                      onCommit={(val: string) => {
+                        const newServices = [...featuredServices];
+                        newServices[index].title = val;
+                        setFeaturedServices(newServices);
+                      }}
+                      className={`text-lg font-bold text-slate-900 mb-2 block`}
+                    />
+                  </Builder.Item>
+
+                  <Builder.Item asChild id={`service-desc-${index}`}>
+                    <Field
+                      name={`service-desc-${index}`}
+                      mode="deferred"
+                      multiline
+                      value={service.desc}
+                      onCommit={(val: string) => {
+                        const newServices = [...featuredServices];
+                        newServices[index].desc = val;
+                        setFeaturedServices(newServices);
+                      }}
+                      className={`text-sm text-slate-500 leading-relaxed block min-h-[40px]`}
+                    />
+                  </Builder.Item>
+
+                  <Builder.Item asChild id={`service-details-${index}`}>
+                    <Builder.Link
+                      id={`service-details-link-${index}`}
+                      href="#"
+                      className="mt-6 flex items-center text-blue-600 text-sm font-bold opacity-0 group-hover:opacity-100 data-[focused=true]:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 data-[focused=true]:translate-x-0 duration-300 data-[focused=true]:ring-2 data-[focused=true]:ring-blue-300 data-[focused=true]:rounded"
+                    >
+                      <span>Details</span>
+                      <ArrowRight size={16} className="ml-1" />
+                    </Builder.Link>
+                  </Builder.Item>
+                </div>
+              </Builder.Group>
+            ))}
+
+            {/* "View All" Card */}
+            <Builder.Group asChild id="service-view-all">
+              <div className="rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-8 text-center hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer group data-[focused=true]:ring-2 data-[focused=true]:ring-slate-400 data-[focused=true]:border-slate-400">
+                <Builder.Icon
+                  id="service-view-all-icon"
+                  icon={ArrowRight}
+                  size={24}
+                  className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4 group-hover:bg-slate-200 group-hover:text-slate-600 py-10 transition-colors"
+                />
+                <span className="text-slate-500 font-bold text-sm">
+                  서비스 전체보기
+                </span>
+              </div>
+            </Builder.Group>
+          </div>
+        </div>
       </div>
-    </OS.Zone>
+    </Builder.Section>
   );
 }

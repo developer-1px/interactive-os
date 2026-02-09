@@ -8,12 +8,12 @@
  * - History: Intent (keybinding-based undo/redo)
  */
 
-import { ClipboardIntent } from "@os/features/clipboard/ClipboardIntent";
-import { ClipboardSensor } from "@os/features/clipboard/ClipboardSensor";
+import { ClipboardIntent } from "@os/new/1-sensor/clipboard/ClipboardIntent.tsx";
+import { ClipboardSensor } from "@os/new/1-sensor/clipboard/ClipboardSensor.tsx";
 import { useFocusRecovery } from "@os/features/focus/hooks/useFocusRecovery";
-import { FocusSensor } from "@os/features/focus/pipeline/1-sense/FocusSensor";
+import { FocusSensor } from "@os/new/1-sensor/focus/FocusSensor.tsx";
 import { FocusIntent } from "@os/features/focus/pipeline/2-intent/FocusIntent";
-import { HistoryIntent } from "@os/features/history/HistoryIntent";
+import { HistoryIntent } from "@os/new/1-sensor/history/HistoryIntent.tsx";
 import { KeyboardIntent, KeyboardSensor } from "@os/features/keyboard";
 import type React from "react";
 import { useOSCore } from "./useOSCore";

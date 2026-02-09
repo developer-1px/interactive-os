@@ -9,7 +9,7 @@ import { AppEngineProvider } from "@os/features/command/ui/AppEngineContext";
 import type { AppDefinition } from "@os/features/application/defineApplication";
 import { createEngine } from "@os/features/command/model/createEngine";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
-import { useInspectorPersistence } from "@os/features/inspector/useInspectorPersistence";
+import { useInspectorPersistence } from "@os/inspector/useInspectorPersistence";
 import type React from "react";
 import { useEffect, useMemo } from "react";
 

@@ -5,12 +5,12 @@
  */
 
 // Intent Handler
-export { KeyboardIntent } from "./intent/KeyboardIntent";
+export { KeyboardIntent } from "../../new/1-sensor/keyboard/KeyboardIntent.tsx";
 // Utilities
-export { getCanonicalKey, normalizeKeyDefinition } from "./lib/getCanonicalKey";
+export { getCanonicalKey, normalizeKeyDefinition } from "../../new/1-sensor/keyboard/getCanonicalKey.ts";
 // Pipeline
-export { KeyboardSensor } from "./pipeline/1-sense/KeyboardSensor";
-export { classifyKeyboard } from "./pipeline/2-classify/classifyKeyboard";
+export { KeyboardSensor } from "../../new/1-sensor/keyboard/KeyboardSensor.tsx";
+export { classifyKeyboard } from "../../new/1-sensor/keyboard/classifyKeyboard.ts";
 export { routeKeyboard } from "./pipeline/3-route/routeKeyboard";
 // Registry
 export { FieldRegistry } from "./registry/FieldRegistry";

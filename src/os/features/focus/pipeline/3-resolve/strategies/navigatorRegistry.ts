@@ -1,5 +1,7 @@
 import { DOM } from "../../../lib/dom";
-import type { Direction, FocusNode, NavigateConfig } from "../../../types";
+import type { Direction, NavigateConfig } from "../../../types";
+import { resolveCorner } from "../cornerNav";
+import { findBestCandidate, type FocusCandidate } from "../focusFinder";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -73,13 +75,12 @@ const resolveLinear: NavigationStrategy = (
 };
 
 /**
- * TV-Style Spatial Navigation (2-Phase Projection Algorithm)
+ * Android FocusFinder-style Spatial Navigation
  *
- * Based on W3C CSS Spatial Navigation spec and Android TV FocusFinder.
- * Uses projection zones instead of overlap-based filtering.
- *
- * Phase 1: Find candidates within the "projection zone" (visually aligned)
- * Phase 2: Fallback to any candidate in the target direction
+ * 100% port of Android's FocusFinder algorithm:
+ * - isCandidate: partial overlap allowed (not strict boundary)
+ * - beamBeats: beam-aligned candidates strongly preferred
+ * - getWeightedDistanceFor: 13 * major² + minor² scoring
  */
 const resolveSpatial: NavigationStrategy = (
   currentId,
@@ -96,76 +97,29 @@ const resolveSpatial: NavigationStrategy = (
   }
 
   const currentRect = currentEl.getBoundingClientRect();
-  const currentCenterX = (currentRect.left + currentRect.right) / 2;
-  const currentCenterY = (currentRect.top + currentRect.bottom) / 2;
 
-  // Use sticky position for alignment, or current center
-  const anchorX = spatial.stickyX ?? currentCenterX;
-  const anchorY = spatial.stickyY ?? currentCenterY;
-
-  const nodes: FocusNode[] = [];
-
-  // Build node list with rects
+  // Build candidate list
+  const candidates: FocusCandidate[] = [];
   for (const id of items) {
     if (id === currentId) continue;
     const el = DOM.getItem(id);
     if (!el) continue;
-    nodes.push({ id, element: el, rect: el.getBoundingClientRect() });
+    candidates.push({ id, rect: el.getBoundingClientRect() });
   }
 
-  // ═══════════════════════════════════════════════════════════════════
-  // Helper: Check if node is in target direction
-  // ═══════════════════════════════════════════════════════════════════
-  const isInDirection = (node: FocusNode): boolean => {
-    switch (direction) {
-      case "up":
-        return node.rect.bottom <= currentRect.top;
-      case "down":
-        return node.rect.top >= currentRect.bottom;
-      case "left":
-        return node.rect.right <= currentRect.left;
-      case "right":
-        return node.rect.left >= currentRect.right;
-      default:
-        return false;
-    }
-  };
+  if (candidates.length === 0) {
+    return { targetId: currentId, stickyX: null, stickyY: null };
+  }
 
-  // ═══════════════════════════════════════════════════════════════════
-  // Helper: Check if node is in projection zone (extended alignment)
-  // ═══════════════════════════════════════════════════════════════════
-  const isInProjectionZone = (node: FocusNode): boolean => {
-    if (!isInDirection(node)) return false;
+  // home/end are not spatial directions
+  if (direction === "home" || direction === "end") {
+    return { targetId: currentId, stickyX: null, stickyY: null };
+  }
 
-    // Projection zone: extend current element's bounds into target direction
-    // A node is in projection zone if it overlaps with the extended bounds
-    if (direction === "up" || direction === "down") {
-      // Vertical movement: check horizontal overlap with current element
-      return (
-        node.rect.right > currentRect.left && node.rect.left < currentRect.right
-      );
-    } else {
-      // Horizontal movement: check vertical overlap with current element
-      return (
-        node.rect.bottom > currentRect.top && node.rect.top < currentRect.bottom
-      );
-    }
-  };
+  // Use Android FocusFinder to find best candidate
+  const best = findBestCandidate(currentRect, direction, candidates);
 
-  // ═══════════════════════════════════════════════════════════════════
-  // 2-Phase Candidate Selection
-  // ═══════════════════════════════════════════════════════════════════
-
-  // Phase 1: Candidates in projection zone (visually aligned)
-  const projectionCandidates = nodes.filter(isInProjectionZone);
-
-  // Phase 2: Fallback to any candidate in target direction
-  const directionCandidates =
-    projectionCandidates.length > 0
-      ? projectionCandidates
-      : nodes.filter(isInDirection);
-
-  if (directionCandidates.length === 0) {
+  if (!best) {
     return {
       targetId: currentId,
       stickyX: spatial.stickyX,
@@ -173,51 +127,12 @@ const resolveSpatial: NavigationStrategy = (
     };
   }
 
-  // ═══════════════════════════════════════════════════════════════════
-  // Scoring: Distance-primary, Alignment-secondary
-  // ═══════════════════════════════════════════════════════════════════
-  let best = directionCandidates[0];
-  let bestScore = Infinity;
-
-  for (const node of directionCandidates) {
-    const nodeCenterX = (node.rect.left + node.rect.right) / 2;
-    const nodeCenterY = (node.rect.top + node.rect.bottom) / 2;
-
-    // Primary: Distance along movement axis
-    let distance: number;
-    switch (direction) {
-      case "up":
-        distance = currentRect.top - node.rect.bottom;
-        break;
-      case "down":
-        distance = node.rect.top - currentRect.bottom;
-        break;
-      case "left":
-        distance = currentRect.left - node.rect.right;
-        break;
-      case "right":
-        distance = node.rect.left - currentRect.right;
-        break;
-      default:
-        distance = Infinity;
-    }
-
-    // Secondary: Alignment with anchor (perpendicular axis)
-    const alignment =
-      direction === "up" || direction === "down"
-        ? Math.abs(nodeCenterX - anchorX)
-        : Math.abs(nodeCenterY - anchorY);
-
-    // TV-style scoring: distance is primary, alignment is tie-breaker
-    const score = distance + alignment * 0.3;
-
-    if (score < bestScore) {
-      bestScore = score;
-      best = node;
-    }
-  }
-
   // Update sticky based on movement direction
+  const currentCenterX = (currentRect.left + currentRect.right) / 2;
+  const currentCenterY = (currentRect.top + currentRect.bottom) / 2;
+  const anchorX = spatial.stickyX ?? currentCenterX;
+  const anchorY = spatial.stickyY ?? currentCenterY;
+
   const newStickyX =
     direction === "up" || direction === "down" ? anchorX : null;
   const newStickyY =
@@ -229,6 +144,7 @@ const resolveSpatial: NavigationStrategy = (
     stickyY: newStickyY,
   };
 };
+
 
 // ═══════════════════════════════════════════════════════════════════
 // Registry
@@ -246,6 +162,7 @@ function registerNavigationStrategy(
 // Register Defaults
 registerNavigationStrategy("linear", resolveLinear);
 registerNavigationStrategy("spatial", resolveSpatial);
+registerNavigationStrategy("corner", resolveCorner);
 
 // ═══════════════════════════════════════════════════════════════════
 // Resolver Facade
@@ -268,6 +185,8 @@ export function resolveWithStrategy(
       strategy = strategies.get("linear");
     } else if (orientation === "both") {
       strategy = strategies.get("spatial");
+    } else if (orientation === "corner") {
+      strategy = strategies.get("corner");
     }
   }
 

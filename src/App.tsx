@@ -3,7 +3,7 @@ import { TodoApp } from "@apps/todo/app";
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import { InspectorShell } from "@os/app/debug/InspectorShell";
 import { OS } from "@os/features/AntigravityOS";
-import { useInspectorStore } from "@os/features/inspector/InspectorStore";
+import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import AriaShowcasePage from "./pages/aria-showcase";
 import BuilderPage from "./pages/BuilderPage";

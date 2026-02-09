@@ -31,7 +31,7 @@ export function FeaturesBlock() {
   });
 
   return (
-    <OS.Zone id="features-block" className="bg-slate-50 py-24 px-8">
+    <OS.Item id="features-block" className="bg-slate-50 py-24 px-8">
       <div className="max-w-5xl mx-auto">
         {/* Section Header - Items directly in the grid zone */}
         <div className="text-center mb-16">
@@ -73,7 +73,7 @@ export function FeaturesBlock() {
         {/* Bento Grid - Nested Zones */}
         <div className="grid grid-cols-12 gap-4">
           {/* Large Card - Spans 7 columns */}
-          <OS.Zone
+          <OS.Item
             id="feature-main-zone"
             className="col-span-12 md:col-span-7 flex flex-col"
           >
@@ -113,11 +113,11 @@ export function FeaturesBlock() {
                 </OS.Item>
               </div>
             </div>
-          </OS.Zone>
+          </OS.Item>
 
           {/* Stacked Cards - Right Column */}
           <div className="col-span-12 md:col-span-5 flex flex-col gap-4">
-            <OS.Zone
+            <OS.Item
               id="feature-speed-zone"
               className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200"
             >
@@ -156,9 +156,9 @@ export function FeaturesBlock() {
                   <Zap size={20} className="text-amber-600" />
                 </div>
               </div>
-            </OS.Zone>
+            </OS.Item>
 
-            <OS.Zone
+            <OS.Item
               id="feature-security-zone"
               className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200"
             >
@@ -197,11 +197,11 @@ export function FeaturesBlock() {
                   <Lock size={20} className="text-emerald-600" />
                 </div>
               </div>
-            </OS.Zone>
+            </OS.Item>
           </div>
 
           {/* Bottom Row - Nested Zones */}
-          <OS.Zone
+          <OS.Item
             id="feature-analytics-zone"
             className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0"
           >
@@ -241,9 +241,9 @@ export function FeaturesBlock() {
                 </OS.Item>
               </div>
             </div>
-          </OS.Zone>
+          </OS.Item>
 
-          <OS.Zone
+          <OS.Item
             id="feature-collab-zone"
             className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0"
           >
@@ -289,9 +289,9 @@ export function FeaturesBlock() {
                 </OS.Item>
               </div>
             </div>
-          </OS.Zone>
+          </OS.Item>
         </div>
       </div>
-    </OS.Zone>
+    </OS.Item>
   );
 }

@@ -42,6 +42,7 @@ export interface OSContext {
   expandedItems: string[];
   stickyX: number | null;
   stickyY: number | null;
+  recoveryTargetId: string | null;
 
   // Zone Config
   config: FocusGroupConfig;
@@ -95,6 +96,7 @@ export function buildContext(overrideZoneId?: string): OSContext | null {
     expandedItems: state.expandedItems,
     stickyX: state.stickyX ?? null,
     stickyY: state.stickyY ?? null,
+    recoveryTargetId: state.recoveryTargetId ?? null,
 
     // Config
     config: data.config,
@@ -256,13 +258,7 @@ export function consumeCollectedEffects(): EffectRecord[] {
   return effects;
 }
 
-/**
- * @deprecated Use consumeInputInfo() instead.
- * Kept for backward compat during migration.
- */
-export function consumeCurrentInput(): void {
-  _currentInput = null;
-}
+
 export function runOS<P>(
   command: OSCommand<P>,
   payload: P,

@@ -6,3 +6,5 @@ export * from "./NCPHeroBlock";
 export * from "./NCPNewsBlock";
 export * from "./NCPServicesBlock";
 export * from "./TestimonialsBlock";
+export * from "./PropertiesPanel";
+export * from "./NCPFooterBlock";

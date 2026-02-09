@@ -17,7 +17,7 @@ export function CTABlock() {
   });
 
   return (
-    <OS.Zone
+    <OS.Item
       id="cta-block"
       className="relative bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 py-32 px-8 overflow-hidden"
     >
@@ -73,10 +73,9 @@ export function CTABlock() {
               type="button"
               className={`
                 inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300
-                ${
-                  isFocused
-                    ? "bg-white text-violet-700 scale-110 shadow-2xl"
-                    : "bg-white text-violet-700 hover:shadow-xl"
+                ${isFocused
+                  ? "bg-white text-violet-700 scale-110 shadow-2xl"
+                  : "bg-white text-violet-700 hover:shadow-xl"
                 }
               `}
             >
@@ -105,6 +104,6 @@ export function CTABlock() {
           </OS.Item>
         </div>
       </div>
-    </OS.Zone>
+    </OS.Item>
   );
 }

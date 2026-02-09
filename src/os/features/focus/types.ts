@@ -11,7 +11,7 @@
 
 export type Direction = "up" | "down" | "left" | "right" | "home" | "end";
 export type TabDirection = "forward" | "backward";
-export type Orientation = "horizontal" | "vertical" | "both";
+export type Orientation = "horizontal" | "vertical" | "both" | "corner";
 
 // ═══════════════════════════════════════════════════════════════════
 // FocusIntent - Output of 2-parse phase
@@ -21,27 +21,27 @@ export type FocusIntent =
   | { type: "NAVIGATE"; direction: Direction }
   | { type: "TAB"; direction: TabDirection }
   | {
-      type: "SELECT";
-      mode: "single" | "toggle" | "range" | "all" | "none";
-      targetId?: string;
-    }
+    type: "SELECT";
+    mode: "single" | "toggle" | "range" | "all" | "none";
+    targetId?: string;
+  }
   | {
-      type: "ACTIVATE";
-      targetId?: string;
-      trigger: "enter" | "space" | "click" | "focus";
-    }
+    type: "ACTIVATE";
+    targetId?: string;
+    trigger: "enter" | "space" | "click" | "focus";
+  }
   | { type: "DISMISS"; reason: "escape" | "outsideClick" }
   | { type: "FOCUS"; targetId: string; source?: "pointer" | "manual" | "auto" }
   | {
-      type: "POINTER";
-      subtype: "enter" | "leave" | "down" | "up";
-      targetId: string;
-    }
+    type: "POINTER";
+    subtype: "enter" | "leave" | "down" | "up";
+    targetId: string;
+  }
   | {
-      type: "EXPAND";
-      action: "toggle" | "expand" | "collapse";
-      targetId?: string;
-    };
+    type: "EXPAND";
+    action: "toggle" | "expand" | "collapse";
+    targetId?: string;
+  };
 
 // ═══════════════════════════════════════════════════════════════════
 // FocusNode - DOM-aware item descriptor
@@ -153,7 +153,7 @@ export const DEFAULT_NAVIGATE: NavigateConfig = {
 };
 
 export const DEFAULT_TAB: TabConfig = {
-  behavior: "escape",
+  behavior: "flow",
   restoreFocus: false,
 };
 

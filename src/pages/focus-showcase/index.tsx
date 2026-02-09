@@ -1,4 +1,4 @@
-import { InspectorStore } from "@os/features/inspector/InspectorStore";
+import { InspectorStore } from "@os/inspector/InspectorStore";
 import { TestBotActions } from "@os/testBot";
 import { TestGrid } from "../shared/TestLayout";
 import { ActivateTest } from "./tests/ActivateTest";

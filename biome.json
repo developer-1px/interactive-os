@@ -29,7 +29,7 @@
         }
       },
       "performance": {
-        "noBarrelFile": "warn",
+        "noBarrelFile": "off",
         "noReExportAll": "warn"
       }
     }
@@ -39,21 +39,6 @@
       "quoteStyle": "double"
     }
   },
-  "overrides": [
-    {
-      "includes": [
-        "**/testBot/index.ts"
-      ],
-      "linter": {
-        "rules": {
-          "performance": {
-            "noBarrelFile": "off",
-            "noReExportAll": "off"
-          }
-        }
-      }
-    }
-  ],
   "assist": {
     "enabled": true,
     "actions": {

@@ -4,7 +4,7 @@
  * Defines the artifacts that flow between the 4 phases of the command pipeline.
  */
 
-import type { KeyboardIntent } from "./1-intercept/interceptKeyboard";
+import type { KeyboardIntent } from "../../../new/1-sensor/keyboard/interceptKeyboard.ts";
 import type { ResolvedBinding } from "./2-resolve/resolveKeybinding";
 
 // Phase 1 Output

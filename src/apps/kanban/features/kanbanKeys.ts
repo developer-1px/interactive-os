@@ -22,7 +22,7 @@ import {
   ToggleCardSelection,
 } from "@apps/kanban/features/commands/selection";
 import { OS } from "@os/features/AntigravityOS";
-import type { KeymapConfig } from "@os/features/keyboard/lib/getCanonicalKey";
+import type { KeymapConfig } from "@os/new/1-sensor/keyboard/getCanonicalKey.ts";
 import { createLogicExpect, Rule } from "@os/features/logic/lib/Rule";
 
 interface KanbanContext {
