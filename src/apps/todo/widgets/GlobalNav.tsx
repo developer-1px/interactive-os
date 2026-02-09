@@ -2,6 +2,7 @@ import {
   Accessibility,
   Book,
   Columns,
+  Cpu,
   Layout,
   MousePointer2,
   Package,
@@ -26,6 +27,12 @@ export function GlobalNav() {
       icon: Accessibility,
       path: "/aria-showcase",
       label: "ARIA Showcase",
+    },
+    {
+      id: "kernel-lab",
+      icon: Cpu,
+      path: "/kernel-lab",
+      label: "Kernel Lab",
     },
   ];
 

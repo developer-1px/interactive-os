@@ -10,6 +10,7 @@ import BuilderPage from "./pages/BuilderPage";
 import DocsPage from "./pages/DocsPage";
 import FocusShowcasePage from "./pages/focus-showcase";
 import KanbanPage from "./pages/KanbanPage";
+import KernelLabPage from "./pages/KernelLabPage";
 import SettingsPage from "./pages/SettingsPage";
 import TodoPage from "./pages/TodoPage";
 
@@ -124,6 +125,7 @@ export default function App() {
             <Route path="/focus-showcase" element={<FocusShowcasePage />} />
             <Route path="/aria-showcase" element={<AriaShowcasePage />} />
             <Route path="/docs/*" element={<DocsPage />} />
+            <Route path="/kernel-lab" element={<KernelLabPage />} />
           </Route>
         </Routes>
       </OS.Root>

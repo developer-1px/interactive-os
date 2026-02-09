@@ -15,7 +15,6 @@ import {
     getLastTransaction,
     travelTo,
     clearTransactions,
-    clearAllRegistries,
 } from "../index.ts";
 
 // ── Setup ──
@@ -143,4 +142,6 @@ console.log(`\n${"─".repeat(40)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
 console.log(`${"─".repeat(40)}\n`);
 
-if (failed > 0) process.exit(1);
+if (failed > 0) {
+    throw new Error(`${failed} tests failed`);
+}
