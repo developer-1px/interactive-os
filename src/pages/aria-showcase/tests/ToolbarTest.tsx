@@ -14,32 +14,32 @@ export function defineToolbarTests(bot: TestBot) {
   bot.describe("Toolbar: Horizontal Navigation", async (t) => {
     // 1. Initial focus on Bold button
     await t.click("#tool-bold");
-    await t.expect("#tool-bold").focused();
+    await t.expect("#tool-bold").toBeFocused();
 
     // 2. ArrowRight → Italic
     await t.press("ArrowRight");
-    await t.expect("#tool-italic").focused();
+    await t.expect("#tool-italic").toBeFocused();
 
     // 3. ArrowRight → Underline
     await t.press("ArrowRight");
-    await t.expect("#tool-underline").focused();
+    await t.expect("#tool-underline").toBeFocused();
 
     // 4. ArrowRight → Strikethrough
     await t.press("ArrowRight");
-    await t.expect("#tool-strike").focused();
+    await t.expect("#tool-strike").toBeFocused();
 
     // 5. ArrowRight → Disabled button
     await t.press("ArrowRight");
-    await t.expect("#tool-disabled").focused();
-    await t.expect("#tool-disabled").toHaveAttr("aria-disabled", "true");
+    await t.expect("#tool-disabled").toBeFocused();
+    await t.expect("#tool-disabled").toHaveAttribute("aria-disabled", "true");
 
     // 6. ArrowRight → Loop back to Bold
     await t.press("ArrowRight");
-    await t.expect("#tool-bold").focused();
+    await t.expect("#tool-bold").toBeFocused();
 
     // 7. ArrowLeft → Reverse to Disabled
     await t.press("ArrowLeft");
-    await t.expect("#tool-disabled").focused();
+    await t.expect("#tool-disabled").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -49,27 +49,27 @@ export function defineToolbarTests(bot: TestBot) {
   bot.describe("Toolbar: Toggle Buttons", async (t) => {
     // 1. Bold button (initially pressed)
     await t.click("#tool-bold");
-    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "true");
+    await t.expect("#tool-bold").toHaveAttribute("aria-pressed", "true");
 
     // 2. Toggle Bold off
     await t.press("Enter");
-    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "false");
+    await t.expect("#tool-bold").toHaveAttribute("aria-pressed", "false");
 
     // 3. Toggle Bold on again
     await t.press("Enter");
-    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "true");
+    await t.expect("#tool-bold").toHaveAttribute("aria-pressed", "true");
 
     // 4. Navigate to Italic and toggle
     await t.press("ArrowRight");
-    await t.expect("#tool-italic").focused();
-    await t.expect("#tool-italic").toHaveAttr("aria-pressed", "false");
+    await t.expect("#tool-italic").toBeFocused();
+    await t.expect("#tool-italic").toHaveAttribute("aria-pressed", "false");
 
     await t.press("Enter");
-    await t.expect("#tool-italic").toHaveAttr("aria-pressed", "true");
+    await t.expect("#tool-italic").toHaveAttribute("aria-pressed", "true");
 
     // 5. Verify Bold state unchanged
     await t.press("ArrowLeft");
-    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "true");
+    await t.expect("#tool-bold").toHaveAttribute("aria-pressed", "true");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -82,27 +82,27 @@ export function defineToolbarTests(bot: TestBot) {
 
     // 1. Click Bold → toggles from true→false
     await t.click("#tool-bold");
-    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "false");
+    await t.expect("#tool-bold").toHaveAttribute("aria-pressed", "false");
 
     // 2. Click Bold again → toggles from false→true
     await t.click("#tool-bold");
-    await t.expect("#tool-bold").toHaveAttr("aria-pressed", "true");
+    await t.expect("#tool-bold").toHaveAttribute("aria-pressed", "true");
 
     // 3. Click Italic → toggles from true→false
     await t.click("#tool-italic");
-    await t.expect("#tool-italic").toHaveAttr("aria-pressed", "false");
+    await t.expect("#tool-italic").toHaveAttribute("aria-pressed", "false");
 
     // 4. Click Italic again → toggles from false→true
     await t.click("#tool-italic");
-    await t.expect("#tool-italic").toHaveAttr("aria-pressed", "true");
+    await t.expect("#tool-italic").toHaveAttribute("aria-pressed", "true");
 
     // 5. Click Underline → toggles from false→true
     await t.click("#tool-underline");
-    await t.expect("#tool-underline").toHaveAttr("aria-pressed", "true");
+    await t.expect("#tool-underline").toHaveAttribute("aria-pressed", "true");
 
     // 6. Click Underline again → toggles from true→false
     await t.click("#tool-underline");
-    await t.expect("#tool-underline").toHaveAttr("aria-pressed", "false");
+    await t.expect("#tool-underline").toHaveAttribute("aria-pressed", "false");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -113,17 +113,17 @@ export function defineToolbarTests(bot: TestBot) {
     // 1. Navigate to disabled button
     await t.click("#tool-strike");
     await t.press("ArrowRight");
-    await t.expect("#tool-disabled").focused();
-    await t.expect("#tool-disabled").toHaveAttr("aria-disabled", "true");
+    await t.expect("#tool-disabled").toBeFocused();
+    await t.expect("#tool-disabled").toHaveAttribute("aria-disabled", "true");
 
     // 2. Try to toggle (should not work)
     await t.press("Enter");
-    await t.expect("#tool-disabled").toHaveAttr("aria-disabled", "true");
+    await t.expect("#tool-disabled").toHaveAttribute("aria-disabled", "true");
 
     // 3. Click disabled button
     await t.click("#tool-disabled");
-    await t.expect("#tool-disabled").focused();
-    await t.expect("#tool-disabled").toHaveAttr("aria-disabled", "true");
+    await t.expect("#tool-disabled").toBeFocused();
+    await t.expect("#tool-disabled").toHaveAttribute("aria-disabled", "true");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -133,19 +133,19 @@ export function defineToolbarTests(bot: TestBot) {
   bot.describe("Toolbar: Home/End Navigation", async (t) => {
     // 1. Start at middle button
     await t.click("#tool-underline");
-    await t.expect("#tool-underline").focused();
+    await t.expect("#tool-underline").toBeFocused();
 
     // 2. Home → First button
     await t.press("Home");
-    await t.expect("#tool-bold").focused();
+    await t.expect("#tool-bold").toBeFocused();
 
     // 3. End → Last button
     await t.press("End");
-    await t.expect("#tool-disabled").focused();
+    await t.expect("#tool-disabled").toBeFocused();
 
     // 4. Home again
     await t.press("Home");
-    await t.expect("#tool-bold").focused();
+    await t.expect("#tool-bold").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -163,19 +163,19 @@ export function defineToolbarTests(bot: TestBot) {
     // 1. Focus Italic via Arrow (no click to avoid toggle)
     await t.click("#tool-bold"); // bold: true→false
     await t.press("ArrowRight");
-    await t.expect("#tool-italic").focused();
+    await t.expect("#tool-italic").toBeFocused();
 
     // 2. Italic is true, Enter → false
     await t.press("Enter");
-    await t.expect("#tool-italic").toHaveAttr("aria-pressed", "false");
+    await t.expect("#tool-italic").toHaveAttribute("aria-pressed", "false");
 
     // 3. Navigate to Strike
     await t.press("ArrowRight"); // underline
     await t.press("ArrowRight"); // strike
-    await t.expect("#tool-strike").focused();
+    await t.expect("#tool-strike").toBeFocused();
 
     // 4. Strike is true, Enter → false
     await t.press("Enter");
-    await t.expect("#tool-strike").toHaveAttr("aria-pressed", "false");
+    await t.expect("#tool-strike").toHaveAttribute("aria-pressed", "false");
   });
 }

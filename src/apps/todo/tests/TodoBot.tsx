@@ -56,14 +56,14 @@ function defineTests(bot: TestBot) {
     try {
       // 1. Click draft field → gains focus
       await t.click("input[name='DRAFT']");
-      await t.expect("input[name='DRAFT']").focused();
+      await t.expect("input[name='DRAFT']").toBeFocused();
 
       // 2. Type text into draft
       await type(t, "Hello World");
       await t.wait(100);
 
       // 3. Draft field should still be focused
-      await t.expect("input[name='DRAFT']").focused();
+      await t.expect("input[name='DRAFT']").toBeFocused();
     } finally {
       restore(s);
     }
@@ -220,7 +220,7 @@ function defineTests(bot: TestBot) {
       await t.wait(200);
 
       // 4. Edit field should appear and be focused
-      await t.expect("input[name='EDIT']").focused();
+      await t.expect("input[name='EDIT']").toBeFocused();
     } finally {
       restore(s);
     }

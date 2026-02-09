@@ -51,10 +51,17 @@ export function createActions(
 
   const getByText = async (text: string): Promise<string> => {
     const el = findByText(text);
-    if (!el)
-      throw new BotError(
-        `Element with text "${text}" not found${captureFailureContext()}`,
-      );
+    if (!el) {
+      const error = `Element with text "${text}" not found${captureFailureContext()}`;
+      steps.push({
+        action: "query",
+        detail: `getByText("${text}")`,
+        passed: false,
+        error,
+      });
+      emitStep();
+      throw new BotError(error);
+    }
     return getUniqueSelector(el);
   };
 
@@ -64,10 +71,13 @@ export function createActions(
 
   const getByRole = async (role: string, name?: string): Promise<string> => {
     const el = findByRole(role, name);
-    if (!el)
-      throw new BotError(
-        `Element with role="${role}"${name ? ` name="${name}"` : ""} not found${captureFailureContext()}`,
-      );
+    if (!el) {
+      const label = `getByRole("${role}"${name ? `, "${name}"` : ""})`;
+      const error = `Element with role="${role}"${name ? ` name="${name}"` : ""} not found${captureFailureContext()}`;
+      steps.push({ action: "query", detail: label, passed: false, error });
+      emitStep();
+      throw new BotError(error);
+    }
     return getUniqueSelector(el);
   };
 
@@ -271,7 +281,7 @@ export function createActions(
   };
 
   const expect = (selector: string) => ({
-    focused: async () => {
+    toBeFocused: async () => {
       await wait(60);
       const el = document.querySelector(selector);
       const activeEl = document.activeElement;
@@ -290,7 +300,7 @@ export function createActions(
       );
     },
 
-    toHaveAttr: async (attr: string, value: string) => {
+    toHaveAttribute: async (attr: string, value: string) => {
       await wait(150);
       const el = document.querySelector(selector);
       const actual = el?.getAttribute(attr);
@@ -303,7 +313,7 @@ export function createActions(
       );
     },
 
-    toNotHaveAttr: async (attr: string, value: string) => {
+    toNotHaveAttribute: async (attr: string, value: string) => {
       await wait(150);
       const el = document.querySelector(selector);
       const actual = el?.getAttribute(attr);

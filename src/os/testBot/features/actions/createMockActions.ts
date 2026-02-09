@@ -54,21 +54,21 @@ export function createMockActions(steps: StepResult[]): TestActions {
     getByRole: async (role, name) =>
       `[role="${role}"]${name ? `[name="${name}"]` : ""}`,
     expect: (selector) => ({
-      focused: async () => {
+      toBeFocused: async () => {
         steps.push({
           action: "expect.focused",
           detail: selector,
           passed: true,
         });
       },
-      toHaveAttr: async (attr, value) => {
+      toHaveAttribute: async (attr, value) => {
         steps.push({
           action: "expect.attr",
           detail: `${selector} [${attr}="${value}"]`,
           passed: true,
         });
       },
-      toNotHaveAttr: async (attr, value) => {
+      toNotHaveAttribute: async (attr, value) => {
         steps.push({
           action: "expect.not_attr",
           detail: `${selector} [${attr}≠"${value}"]`,

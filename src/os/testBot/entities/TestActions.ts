@@ -16,9 +16,9 @@ export interface ElementQuery {
 export type Selector = string | ElementQuery;
 
 export interface Expectations {
-  focused(): Promise<void>;
-  toHaveAttr(attr: string, value: string): Promise<void>;
-  toNotHaveAttr(attr: string, value: string): Promise<void>;
+  toBeFocused(): Promise<void>;
+  toHaveAttribute(attr: string, value: string): Promise<void>;
+  toNotHaveAttribute(attr: string, value: string): Promise<void>;
   toExist(): Promise<void>;
   toNotExist(): Promise<void>;
   toHaveValue(value: string): Promise<void>;

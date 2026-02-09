@@ -61,12 +61,9 @@ console.log("─── before middleware ───");
 
 const beforeLog: string[] = [];
 
-const INCREMENT = kernel.defineCommand(
-  "INCREMENT",
-  (ctx: { state: TestState }) => ({
-    state: { ...ctx.state, count: ctx.state.count + 1 },
-  }),
-);
+const INCREMENT = kernel.defineCommand("INCREMENT", (ctx) => () => ({
+  state: { ...ctx.state, count: ctx.state.count + 1 },
+}));
 
 kernel.use({
   id: "logger",
@@ -92,17 +89,14 @@ assert(store.getState().count === 1, "handler still executed");
 // --- Test 2: Before can transform command ---
 console.log("\n─── command transformation ───");
 
-void kernel.defineCommand("ALIASED", (ctx: { state: TestState }) => ({
+void kernel.defineCommand("ALIASED", (ctx) => () => ({
   state: { ...ctx.state, count: 999 },
 }));
 
 // Register a "source" command that will be aliased
-const ALIAS_ME = kernel.defineCommand(
-  "ALIAS_ME",
-  (ctx: { state: TestState }) => ({
-    state: ctx.state, // noop — middleware will transform
-  }),
-);
+const ALIAS_ME = kernel.defineCommand("ALIAS_ME", (ctx) => () => ({
+  state: ctx.state, // noop — middleware will transform
+}));
 
 kernel.use({
   id: "aliaser",
@@ -124,7 +118,7 @@ assert(
 // --- Test 3: After can modify effects ---
 console.log("\n─── effect modification ───");
 
-const SHOUT = kernel.defineCommand("SHOUT", (ctx: { state: TestState }) => ({
+const SHOUT = kernel.defineCommand("SHOUT", (ctx) => () => ({
   state: { ...ctx.state, count: 42 },
   [NOTIFY]: "hello",
 }));
@@ -160,12 +154,9 @@ clearAllRegistries();
 const orderLog: string[] = [];
 
 // Re-register INCREMENT after clear
-const INCREMENT2 = kernel.defineCommand(
-  "INCREMENT",
-  (ctx: { state: TestState }) => ({
-    state: { ...ctx.state, count: ctx.state.count + 1 },
-  }),
-);
+const INCREMENT2 = kernel.defineCommand("INCREMENT", (ctx) => () => ({
+  state: { ...ctx.state, count: ctx.state.count + 1 },
+}));
 
 kernel.use({
   id: "mw-A",
@@ -219,12 +210,9 @@ console.log("\n─── middleware dedup ───");
 clearAllRegistries();
 const dedupLog: string[] = [];
 
-const INCREMENT3 = kernel.defineCommand(
-  "INCREMENT",
-  (ctx: { state: TestState }) => ({
-    state: { ...ctx.state, count: ctx.state.count + 1 },
-  }),
-);
+const INCREMENT3 = kernel.defineCommand("INCREMENT", (ctx) => () => ({
+  state: { ...ctx.state, count: ctx.state.count + 1 },
+}));
 
 kernel.use({
   id: "dedup-test",
@@ -254,16 +242,13 @@ console.log("\n─── transaction records transformed command ───");
 clearTransactions();
 clearAllRegistries();
 
-void kernel.defineCommand("ALIASED", (ctx: { state: TestState }) => ({
+void kernel.defineCommand("ALIASED", (ctx) => () => ({
   state: { ...ctx.state, count: 777 },
 }));
 
-const ORIGINAL = kernel.defineCommand(
-  "ORIGINAL",
-  (ctx: { state: TestState }) => ({
-    state: ctx.state,
-  }),
-);
+const ORIGINAL = kernel.defineCommand("ORIGINAL", (ctx) => () => ({
+  state: ctx.state,
+}));
 
 kernel.use({
   id: "transform-test",

@@ -23,13 +23,11 @@ interface TestState {
   lastEffect: string | null;
 }
 
-// ── Effects ──
-
-const effectLog: string[] = [];
-
 // ── Kernel ──
 
 const kernel = createKernel({ state: state<TestState>(), effects: {} });
+
+const effectLog: string[] = [];
 
 const NOTIFY = kernel.defineEffect("NOTIFY", (message: string) => {
   effectLog.push(message);
@@ -38,7 +36,7 @@ const NOTIFY = kernel.defineEffect("NOTIFY", (message: string) => {
 const RE_DISPATCH = kernel.defineEffect(
   "RE_DISPATCH",
   (cmd: { type: string; payload?: unknown }) => {
-    dispatch(cmd as any); // re-dispatch uses raw command internally
+    dispatch(cmd as any);
   },
 );
 
@@ -48,38 +46,29 @@ const store = initKernel<TestState>({ count: 0, lastEffect: null });
 
 // ── Commands ──
 
-const INCREMENT = kernel.defineCommand(
-  "INCREMENT",
-  (ctx: { state: TestState }) => ({
-    state: { ...ctx.state, count: ctx.state.count + 1 },
-  }),
-);
+const INCREMENT = kernel.defineCommand("INCREMENT", (ctx) => () => ({
+  state: { ...ctx.state, count: ctx.state.count + 1 },
+}));
 
-const DECREMENT = kernel.defineCommand(
-  "DECREMENT",
-  (ctx: { state: TestState }) => ({
-    state: { ...ctx.state, count: ctx.state.count - 1 },
-  }),
-);
+const DECREMENT = kernel.defineCommand("DECREMENT", (ctx) => () => ({
+  state: { ...ctx.state, count: ctx.state.count - 1 },
+}));
 
 const INCREMENT_AND_NOTIFY = kernel.defineCommand(
   "INCREMENT_AND_NOTIFY",
-  (ctx: { state: TestState }) => ({
+  (ctx) => () => ({
     state: { ...ctx.state, count: ctx.state.count + 1, lastEffect: "notified" },
     [NOTIFY]: `count is now ${ctx.state.count + 1}`,
   }),
 );
 
-void kernel.defineCommand(
-  "SET_COUNT",
-  (ctx: { state: TestState }, payload: number) => ({
-    state: { ...ctx.state, count: payload },
-  }),
-);
+void kernel.defineCommand("SET_COUNT", (ctx) => (payload: number) => ({
+  state: { ...ctx.state, count: payload },
+}));
 
 const RESET_THEN_INCREMENT = kernel.defineCommand(
   "RESET_THEN_INCREMENT",
-  (ctx: { state: TestState }) => ({
+  (ctx) => () => ({
     state: { ...ctx.state, count: 0 },
     [RE_DISPATCH]: INCREMENT(),
   }),

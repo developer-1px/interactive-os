@@ -347,21 +347,100 @@ function defineKeybinding(binding: KeybindingItem): void {
 
 ---
 
-## 6. 결론
+## 6. 결론 — defineKeybinding은 OS다
 
-> 이 문서는 결론을 내리지 않는다. 양측 논거를 정리한 것이다.
+### 확정: Kernel은 입력 소스를 모른다
 
-**Kernel 쪽이 강한 논거:**
-- `define*` 가족의 일관성
-- scope-aware keybinding이 Kernel scope의 자연스러운 확장
-- App이 Kernel에 직접 접근하는 것이 레이어 규칙에 부합
+`defineKeybinding`을 Kernel에 넣으면, 같은 논리로 다른 입력 소스도 넣어야 한다:
 
-**OS 쪽이 강한 논거:**
-- Kernel의 "입력 무지(input-agnostic)" 순수성 보존
-- `when` 조건의 OS 컨텍스트 의존
-- key normalization의 플랫폼 특수성
-- "Command가 어디서 왔는지 모른다"는 깨끗한 경계
+```
+defineKeybinding({ key: "Enter", command: "ACTIVATE" });        // 키보드
+defineMouseBinding({ click: "double", command: "ACTIVATE" });    // 마우스
+defineGestureBinding({ gesture: "swipe-right", command: "NAVIGATE" }); // 제스처
+defineFocusBinding({ event: "focus-in", command: "ZONE_ENTER" }); // 포커스
+```
 
-**제3의 방법이 강한 논거:**
-- 관심사를 깨끗하게 분리 가능
-- 하지만 YAGNI 위험 + 학습 비용
+**모든 입력 소스마다 `define*Binding`을 Kernel에 추가하는가?**
+그러면 Kernel은 "범용 이벤트 엔진"이 아니라 "입력 장치 카탈로그"가 된다.
+
+Kernel의 경계는 명확하다:
+
+```
+┌──────────────────────────────────────────────────┐
+│  OS Layer — 입력을 안다                            │
+│                                                  │
+│  KeyboardSensor → "Enter" → dispatch(ACTIVATE)   │
+│  MouseSensor    → click   → dispatch(ACTIVATE)   │
+│  FocusSensor    → focus   → dispatch(ZONE_ENTER) │
+│                                                  │
+│  모든 센서가 각자의 입력을 Command로 번역한다.      │
+│  defineKeybinding은 키보드 센서의 번역 규칙이다.    │
+├──────────────────────────────────────────────────┤
+│  Kernel Layer — Command만 안다                    │
+│                                                  │
+│  dispatch(command)                               │
+│    → scope bubbling                              │
+│    → handler resolution                          │
+│    → effects execution                           │
+│                                                  │
+│  "누가 보냈는지"는 관심 밖이다.                     │
+└──────────────────────────────────────────────────┘
+```
+
+### 결정 근거
+
+| 기준 | 판단 |
+|---|---|
+| **Kernel 순수성** | Kernel은 `Command`만 받는다. 입력 장치를 모른다. 이것이 Kernel의 핵심 가치다. |
+| **일관성** | 키보드만 Kernel에 넣고 마우스/포커스는 OS에 두면 비대칭이다. 모든 센서를 OS에 두는 것이 대칭적이다. |
+| **`when` 조건** | `isEditing`, `focusPath`, `activeZone` — 전부 OS 상태다. Kernel에서 평가하면 Kernel→OS 역방향 의존이 생긴다. |
+| **key normalization** | `Cmd+↑ → Home` 같은 플랫폼 지식은 OS의 책임이다. |
+| **YAGNI** | 범용 `defineMapping`(제3의 방법)은 키보드 외에 실제 사용처가 없다. 불필요한 추상화. |
+
+### 확정 API 배치
+
+```
+Kernel API (packages/kernel/):
+  dispatch, defineCommand, defineHandler, defineEffect,
+  defineContext, inject, use,
+  defineScope, removeScope, setActiveScope, buildBubblePath,
+  getState, resetState,
+  defineComputed, useComputed, useDispatch
+
+OS API (src/os-new/):
+  defineKeybinding        ← 키보드 입력 → 커맨드 매핑
+  resolveKeybinding       ← 키 이벤트 → 커맨드 해석
+  getCanonicalKey         ← 플랫폼별 키 정규화
+  classifyKeyboard        ← 입력 분류 (COMMAND/FIELD/PASSTHRU)
+```
+
+### 10 문서 업데이트 사항
+
+10-[kernel] Scope & Bubbling 제안서의 열린 질문 Q3:
+
+> "Scope별 keybinding이 필요한가?"
+
+→ **scope-specific keybinding은 OS가 관리한다.**
+OS의 `resolveKeybinding()`이 `buildBubblePath()`(Kernel 제공)를 사용하여 scope 계층을 순회하되,
+키바인딩 테이블의 등록/해석/정규화는 전부 OS 책임이다.
+
+```typescript
+// OS 내부 구현
+function resolveKeybinding(canonicalKey: string, context: ResolveContext): Command | null {
+  const bubblePath = buildBubblePath(getActiveScope());  // ← Kernel API 사용
+
+  for (const scope of bubblePath) {
+    const binding = keybindingTable.match(canonicalKey, scope, context);
+    if (binding && evaluateWhen(binding.when, context)) {
+      return { type: binding.command, payload: binding.args };
+    }
+  }
+  return null;
+}
+
+// 해석된 Command는 Kernel에게 넘긴다
+const command = resolveKeybinding("Enter", context);
+if (command) dispatch(command);  // ← Kernel API
+```
+
+**OS가 Kernel의 scope 인프라를 사용하되, 입력 해석은 OS가 소유한다.**

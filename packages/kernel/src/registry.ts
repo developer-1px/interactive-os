@@ -30,8 +30,8 @@ import { GLOBAL } from "./tokens.ts";
 
 // ─── Internal Types ───
 
-/** Internal command handler (untyped — typing is enforced at registration) */
-type InternalCommandHandler = (ctx: any, payload?: any) => any;
+/** Internal command handler (curried: ctx → payload → effects) */
+type InternalCommandHandler = (ctx: any) => (payload?: any) => any;
 
 /** Internal effect handler (untyped) */
 type InternalEffectHandler = (value: any) => void;
@@ -174,13 +174,13 @@ function createGroup<
       // No payload
       <T extends string>(
         type: T,
-        handler: (ctx: Ctx) => EffMap | void,
+        handler: (ctx: Ctx) => () => EffMap | void,
       ): CommandFactory<T, void>;
 
       // With payload
       <T extends string, P>(
         type: T,
-        handler: (ctx: Ctx, payload: P) => EffMap | void,
+        handler: (ctx: Ctx) => (payload: P) => EffMap | void,
       ): CommandFactory<T, P>;
     },
 
@@ -351,7 +351,7 @@ function processCommand(cmd: Command, bubblePath?: ScopeToken[]): void {
 
     // 4. Execute handler
     const ctx = { state: mwCtx.state, ...mwCtx.injected };
-    const handlerResult = handler(ctx, mwCtx.command.payload);
+    const handlerResult = handler(ctx)(mwCtx.command.payload);
 
     // 5. Scope after-middleware
     mwCtx.effects = handlerResult as Record<string, unknown> | null;

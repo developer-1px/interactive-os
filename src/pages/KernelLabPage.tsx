@@ -54,7 +54,7 @@ export function resetKernelLab() {
   effectLog.length = 0;
 }
 
-const INCREMENT = kernel.defineCommand("INCREMENT", (ctx) => ({
+const INCREMENT = kernel.defineCommand("INCREMENT", (ctx) => () => ({
   state: {
     ...ctx.state,
     count: ctx.state.count + 1,
@@ -62,7 +62,7 @@ const INCREMENT = kernel.defineCommand("INCREMENT", (ctx) => ({
   },
 }));
 
-const DECREMENT = kernel.defineCommand("DECREMENT", (ctx) => ({
+const DECREMENT = kernel.defineCommand("DECREMENT", (ctx) => () => ({
   state: {
     ...ctx.state,
     count: ctx.state.count - 1,
@@ -70,13 +70,14 @@ const DECREMENT = kernel.defineCommand("DECREMENT", (ctx) => ({
   },
 }));
 
-const RESET = kernel.defineCommand("RESET", () => ({
+const RESET = kernel.defineCommand("RESET", () => () => ({
   state: { ...INITIAL, items: [], lastAction: "RESET" },
 }));
 
 const ADD_ITEM = kernel.defineCommand(
   "ADD_ITEM",
-  (ctx: { readonly state: DemoState }, payload: string) => ({
+  (ctx) => (payload: string) => ({
+    // ctx auto-typed as { readonly state: DemoState }
     state: {
       ...ctx.state,
       items: [...ctx.state.items, payload],
@@ -85,17 +86,20 @@ const ADD_ITEM = kernel.defineCommand(
   }),
 );
 
-const REMOVE_LAST_ITEM = kernel.defineCommand("REMOVE_LAST_ITEM", (ctx) => ({
-  state: {
-    ...ctx.state,
-    items: ctx.state.items.slice(0, -1),
-    lastAction: "REMOVE_LAST_ITEM",
-  },
-}));
+const REMOVE_LAST_ITEM = kernel.defineCommand(
+  "REMOVE_LAST_ITEM",
+  (ctx) => () => ({
+    state: {
+      ...ctx.state,
+      items: ctx.state.items.slice(0, -1),
+      lastAction: "REMOVE_LAST_ITEM",
+    },
+  }),
+);
 
 const INCREMENT_AND_NOTIFY = kernel.defineCommand(
   "INCREMENT_AND_NOTIFY",
-  (ctx) => {
+  (ctx) => () => {
     const s = ctx.state;
     return {
       state: { ...s, count: s.count + 1, lastAction: "INCREMENT_AND_NOTIFY" },
@@ -104,7 +108,7 @@ const INCREMENT_AND_NOTIFY = kernel.defineCommand(
   },
 );
 
-const BATCH_ADD = kernel.defineCommand("BATCH_ADD", (ctx) => {
+const BATCH_ADD = kernel.defineCommand("BATCH_ADD", (ctx) => () => {
   const s = ctx.state;
   const timestamp = new Date().toLocaleTimeString();
   return {

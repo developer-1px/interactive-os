@@ -25,8 +25,18 @@ export type {
 export function testBot(opts?: { speed?: number }): TestBot {
   const speed = opts?.speed ?? 1;
   const suites: { name: string; fn: (t: TestActions) => Promise<void> }[] = [];
+  const beforeEachHooks: ((t: TestActions) => Promise<void>)[] = [];
+  const afterEachHooks: ((t: TestActions) => Promise<void>)[] = [];
   let cursor: ReturnType<typeof createCursor> | null = null;
   let aborted = false;
+
+  const beforeEach = (fn: (t: TestActions) => Promise<void>) => {
+    beforeEachHooks.push(fn);
+  };
+
+  const afterEach = (fn: (t: TestActions) => Promise<void>) => {
+    afterEachHooks.push(fn);
+  };
 
   const describe = (name: string, fn: (t: TestActions) => Promise<void>) => {
     suites.push({ name, fn });
@@ -66,6 +76,11 @@ export function testBot(opts?: { speed?: number }): TestBot {
     });
 
     try {
+      // Run beforeEach hooks
+      for (const hook of beforeEachHooks) {
+        await hook(actions);
+      }
+
       await suite.fn(actions);
     } catch (e) {
       if (!(e instanceof Error) || e.name !== "BotError") {
@@ -76,6 +91,15 @@ export function testBot(opts?: { speed?: number }): TestBot {
           error: String(e),
         });
         onStep?.(suiteIndex, steps[steps.length - 1]);
+      }
+    } finally {
+      // Run afterEach hooks (always, even on failure)
+      try {
+        for (const hook of afterEachHooks) {
+          await hook(actions);
+        }
+      } catch {
+        // afterEach errors are non-fatal
       }
     }
 
@@ -132,5 +156,5 @@ export function testBot(opts?: { speed?: number }): TestBot {
     cursor = null;
   };
 
-  return { describe, runAll, runSuite, dryRun, destroy };
+  return { beforeEach, afterEach, describe, runAll, runSuite, dryRun, destroy };
 }

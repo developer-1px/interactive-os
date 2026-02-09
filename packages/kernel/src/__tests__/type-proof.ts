@@ -36,18 +36,19 @@ void TRACK;
 
 // ── Proof 1: ctx.state is auto-typed as AppState ──
 
-const INCREMENT = kernel.defineCommand("INCREMENT", (ctx) => ({
+const INCREMENT = kernel.defineCommand("INCREMENT", (ctx) => () => ({
   state: { ...ctx.state, count: ctx.state.count + 1 },
   //                      ^^^^^   auto-typed as AppState
 }));
 
 void INCREMENT;
 
-// ── Proof 2: payload type is enforced ──
+// ── Proof 2: payload type is enforced — ctx ALSO auto-typed (Context-First Curried) ──
 
 const SET_COUNT = kernel.defineCommand(
   "SET_COUNT",
-  (ctx: { readonly state: AppState }, payload: number) => ({
+  (ctx) => (payload: number) => ({
+    // ^^^ ctx auto-typed as AppState! No manual annotation needed.
     state: { ...ctx.state, count: payload },
   }),
 );
@@ -56,7 +57,7 @@ void SET_COUNT;
 
 // ── Proof 3: EffectMap keys are auto-typed ──
 
-const NOTIFY_CMD = kernel.defineCommand("NOTIFY_CMD", (ctx) => ({
+const NOTIFY_CMD = kernel.defineCommand("NOTIFY_CMD", (ctx) => () => ({
   state: ctx.state,
   NOTIFY: `count is ${ctx.state.count}`,
   // ^^^^^  auto-typed as string (from NOTIFY effect)
@@ -74,7 +75,7 @@ const USER_INFO = defineContext("USER_INFO", () => ({
 
 const injectedGroup = kernel.group({ inject: [NOW, USER_INFO] });
 
-const USE_CONTEXT = injectedGroup.defineCommand("USE_CONTEXT", (ctx) => {
+const USE_CONTEXT = injectedGroup.defineCommand("USE_CONTEXT", (ctx) => () => {
   // ctx.NOW is auto-typed as number
   const timestamp: number = ctx.NOW;
   // ctx["USER_INFO"] is auto-typed
@@ -97,7 +98,7 @@ void USE_CONTEXT;
 
 const singleGroup = kernel.group({ inject: [NOW] });
 
-const USE_SINGLE = singleGroup.defineCommand("USE_SINGLE", (ctx) => {
+const USE_SINGLE = singleGroup.defineCommand("USE_SINGLE", (ctx) => () => {
   const n: number = ctx.NOW;
   void n;
   return { state: ctx.state };
@@ -117,7 +118,7 @@ void _p6;
 
 // ── Proof 7: ctx without inject has only state ──
 
-const NO_INJECT = kernel.defineCommand("NO_INJECT", (ctx) => {
+const NO_INJECT = kernel.defineCommand("NO_INJECT", (ctx) => () => {
   const _count: number = ctx.state.count;
   void _count;
   return { state: ctx.state };
@@ -133,14 +134,22 @@ type _Proof8 = TypedContext<AppState, { NOW: number }>;
 const _p8: _Proof8 = { state: { count: 0, name: "" }, NOW: 1 };
 void _p8;
 
-// ── Proof 9: group() returns same interface with inject types ──
+// ── Proof 9: Curried payload handler — ctx auto-inferred ──
 
-const nested = kernel.group({ inject: [NOW] });
-const _CMD = nested.defineCommand("NESTED_CMD", (ctx) => {
-  const _n: number = ctx.NOW;
-  void _n;
-  return { state: ctx.state };
-});
-void _CMD;
+const CURRIED = kernel.defineCommand(
+  "CURRIED",
+  (ctx) => (payload: { x: number; y: string }) => {
+    // Both payload AND ctx are fully typed — zero annotations on ctx!
+    const _x: number = payload.x;
+    const _y: string = payload.y;
+    const _count: number = ctx.state.count;
+    void _x;
+    void _y;
+    void _count;
+    return { state: ctx.state };
+  },
+);
+
+void CURRIED;
 
 console.log("✅ All type proofs compile successfully");

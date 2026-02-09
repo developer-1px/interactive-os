@@ -46,20 +46,20 @@ function defineRoutes(bot: TestBot) {
   // ─────────────────────────────────────────────────────────────
   bot.describe("Hero 수직 흐름", async (t) => {
     await t.click("#ncp-hero-title");
-    await t.expect("#ncp-hero-title").focused();
+    await t.expect("#ncp-hero-title").toBeFocused();
 
     await t.press("ArrowDown");
-    await t.expect("#ncp-hero-sub").focused();
+    await t.expect("#ncp-hero-sub").toBeFocused();
 
     await t.press("ArrowDown");
-    await t.expect("#ncp-hero-cta").focused();
+    await t.expect("#ncp-hero-cta").toBeFocused();
 
     // Verify reverse
     await t.press("ArrowUp");
-    await t.expect("#ncp-hero-sub").focused();
+    await t.expect("#ncp-hero-sub").toBeFocused();
 
     await t.press("ArrowUp");
-    await t.expect("#ncp-hero-title").focused();
+    await t.expect("#ncp-hero-title").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -68,17 +68,17 @@ function defineRoutes(bot: TestBot) {
   // ─────────────────────────────────────────────────────────────
   bot.describe("Hero Nav 수평", async (t) => {
     await t.click("#ncp-hero-brand");
-    await t.expect("#ncp-hero-brand").focused();
+    await t.expect("#ncp-hero-brand").toBeFocused();
 
     await t.press("ArrowRight");
-    await t.expect("#nav-login").focused();
+    await t.expect("#nav-login").toBeFocused();
 
     await t.press("ArrowRight");
-    await t.expect("#nav-signup").focused();
+    await t.expect("#nav-signup").toBeFocused();
 
     // Reverse
     await t.press("ArrowLeft");
-    await t.expect("#nav-login").focused();
+    await t.expect("#nav-login").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -87,11 +87,11 @@ function defineRoutes(bot: TestBot) {
   // ─────────────────────────────────────────────────────────────
   bot.describe("Hero → News 크로스존", async (t) => {
     await t.click("#ncp-hero-cta");
-    await t.expect("#ncp-hero-cta").focused();
+    await t.expect("#ncp-hero-cta").toBeFocused();
 
     // Down from CTA (last item in hero) should seamless-jump to News
     await t.press("ArrowDown");
-    await t.expect("#ncp-news-title").focused();
+    await t.expect("#ncp-news-title").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -100,15 +100,15 @@ function defineRoutes(bot: TestBot) {
   // ─────────────────────────────────────────────────────────────
   bot.describe("News 제목 행 수평", async (t) => {
     await t.click("#ncp-news-title");
-    await t.expect("#ncp-news-title").focused();
+    await t.expect("#ncp-news-title").toBeFocused();
 
     // Right → "전체 뉴스 보기" button (ncp-news-all)
     await t.press("ArrowRight");
-    await t.expect("#ncp-news-all").focused();
+    await t.expect("#ncp-news-all").toBeFocused();
 
     // Left → back to title
     await t.press("ArrowLeft");
-    await t.expect("#ncp-news-title").focused();
+    await t.expect("#ncp-news-title").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -117,20 +117,20 @@ function defineRoutes(bot: TestBot) {
   // ─────────────────────────────────────────────────────────────
   bot.describe("Services 탭 수평", async (t) => {
     await t.click("#tab-0");
-    await t.expect("#tab-0").focused();
+    await t.expect("#tab-0").toBeFocused();
 
     await t.press("ArrowRight");
-    await t.expect("#tab-1").focused();
+    await t.expect("#tab-1").toBeFocused();
 
     await t.press("ArrowRight");
-    await t.expect("#tab-2").focused();
+    await t.expect("#tab-2").toBeFocused();
 
     // Left
     await t.press("ArrowLeft");
-    await t.expect("#tab-1").focused();
+    await t.expect("#tab-1").toBeFocused();
 
     await t.press("ArrowLeft");
-    await t.expect("#tab-0").focused();
+    await t.expect("#tab-0").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -139,11 +139,11 @@ function defineRoutes(bot: TestBot) {
   // ─────────────────────────────────────────────────────────────
   bot.describe("Services 탭 → 서비스 카드", async (t) => {
     await t.click("#tab-0");
-    await t.expect("#tab-0").focused();
+    await t.expect("#tab-0").toBeFocused();
 
     // Down from tabs → should enter service-list zone
     await t.press("ArrowDown");
-    await t.expect("#service-title-0").focused();
+    await t.expect("#service-title-0").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -152,15 +152,15 @@ function defineRoutes(bot: TestBot) {
   // ─────────────────────────────────────────────────────────────
   bot.describe("Services 서비스 카드 내부", async (t) => {
     await t.click("#service-title-0");
-    await t.expect("#service-title-0").focused();
+    await t.expect("#service-title-0").toBeFocused();
 
     // Down → desc
     await t.press("ArrowDown");
-    await t.expect("#service-desc-0").focused();
+    await t.expect("#service-desc-0").toBeFocused();
 
     // Up → back to title
     await t.press("ArrowUp");
-    await t.expect("#service-title-0").focused();
+    await t.expect("#service-title-0").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -169,18 +169,18 @@ function defineRoutes(bot: TestBot) {
   // ─────────────────────────────────────────────────────────────
   bot.describe("Services 서비스 카드 수평", async (t) => {
     await t.click("#service-title-0");
-    await t.expect("#service-title-0").focused();
+    await t.expect("#service-title-0").toBeFocused();
 
     // Right → next card's title (spatial alignment)
     await t.press("ArrowRight");
-    await t.expect("#service-title-1").focused();
+    await t.expect("#service-title-1").toBeFocused();
 
     await t.press("ArrowRight");
-    await t.expect("#service-title-2").focused();
+    await t.expect("#service-title-2").toBeFocused();
 
     // Left → back
     await t.press("ArrowLeft");
-    await t.expect("#service-title-1").focused();
+    await t.expect("#service-title-1").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -189,11 +189,11 @@ function defineRoutes(bot: TestBot) {
   // ─────────────────────────────────────────────────────────────
   bot.describe("News → Services 크로스존", async (t) => {
     await t.click("#ncp-news-all");
-    await t.expect("#ncp-news-all").focused();
+    await t.expect("#ncp-news-all").toBeFocused();
 
     // Down from news "view all" → should enter services zone
     await t.press("ArrowDown");
-    await t.expect("#ncp-service-title").focused();
+    await t.expect("#ncp-service-title").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -203,25 +203,25 @@ function defineRoutes(bot: TestBot) {
   bot.describe("전체 페이지 수직 스윕", async (t) => {
     // Hero zone
     await t.click("#ncp-hero-title");
-    await t.expect("#ncp-hero-title").focused();
+    await t.expect("#ncp-hero-title").toBeFocused();
 
     await t.press("ArrowDown");
-    await t.expect("#ncp-hero-sub").focused();
+    await t.expect("#ncp-hero-sub").toBeFocused();
 
     await t.press("ArrowDown");
-    await t.expect("#ncp-hero-cta").focused();
+    await t.expect("#ncp-hero-cta").toBeFocused();
 
     // Seamless: Hero → News
     await t.press("ArrowDown");
-    await t.expect("#ncp-news-title").focused();
+    await t.expect("#ncp-news-title").toBeFocused();
 
     // Continue down through news
     await t.press("ArrowDown");
-    await t.expect("#ncp-news-all").focused();
+    await t.expect("#ncp-news-all").toBeFocused();
 
     // Seamless: News → Services
     await t.press("ArrowDown");
-    await t.expect("#ncp-service-title").focused();
+    await t.expect("#ncp-service-title").toBeFocused();
   });
 }
 

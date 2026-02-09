@@ -52,7 +52,7 @@ export function findByText(text: string): Element | null {
   let bestSize = Infinity;
 
   for (const el of all) {
-    if (el.textContent?.trim() === text) {
+    if (el.textContent?.includes(text)) {
       const size = el.querySelectorAll("*").length;
       if (size < bestSize) {
         best = el;
@@ -67,7 +67,7 @@ export function findAllByText(text: string): Element[] {
   const all = document.querySelectorAll("*");
   const results: Element[] = [];
   for (const el of all) {
-    if (el.children.length === 0 && el.textContent?.trim() === text) {
+    if (el.children.length === 0 && el.textContent?.includes(text)) {
       results.push(el);
     }
   }

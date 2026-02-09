@@ -14,35 +14,35 @@ export function defineListboxTests(bot: TestBot) {
   bot.describe("Listbox: Vertical Navigation", async (t) => {
     // 1. Initial focus on first option (Wade Cooper)
     await t.click("#user-0");
-    await t.expect("#user-0").focused();
-    await t.expect("#user-0").toHaveAttr("aria-selected", "true");
+    await t.expect("#user-0").toBeFocused();
+    await t.expect("#user-0").toHaveAttribute("aria-selected", "true");
 
     // 2. ArrowDown → Arlene Mccoy
     await t.press("ArrowDown");
-    await t.expect("#user-1").focused();
-    await t.expect("#user-1").toHaveAttr("aria-selected", "true");
-    await t.expect("#user-0").toHaveAttr("aria-selected", "false");
+    await t.expect("#user-1").toBeFocused();
+    await t.expect("#user-1").toHaveAttribute("aria-selected", "true");
+    await t.expect("#user-0").toHaveAttribute("aria-selected", "false");
 
     // 3. ArrowDown → Devon Webb
     await t.press("ArrowDown");
-    await t.expect("#user-2").focused();
-    await t.expect("#user-2").toHaveAttr("aria-selected", "true");
+    await t.expect("#user-2").toBeFocused();
+    await t.expect("#user-2").toHaveAttribute("aria-selected", "true");
 
     // 4. ArrowDown → Tom Cook
     await t.press("ArrowDown");
-    await t.expect("#user-3").focused();
+    await t.expect("#user-3").toBeFocused();
 
     // 5. ArrowDown → Tanya Fox
     await t.press("ArrowDown");
-    await t.expect("#user-4").focused();
+    await t.expect("#user-4").toBeFocused();
 
     // 6. ArrowUp → Tom Cook
     await t.press("ArrowUp");
-    await t.expect("#user-3").focused();
+    await t.expect("#user-3").toBeFocused();
 
     // 7. ArrowUp → Devon Webb
     await t.press("ArrowUp");
-    await t.expect("#user-2").focused();
+    await t.expect("#user-2").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -52,21 +52,21 @@ export function defineListboxTests(bot: TestBot) {
   bot.describe("Listbox: Home/End Navigation", async (t) => {
     // 1. Start at middle option
     await t.click("#user-2");
-    await t.expect("#user-2").focused();
+    await t.expect("#user-2").toBeFocused();
 
     // 2. Home → First option
     await t.press("Home");
-    await t.expect("#user-0").focused();
-    await t.expect("#user-0").toHaveAttr("aria-selected", "true");
+    await t.expect("#user-0").toBeFocused();
+    await t.expect("#user-0").toHaveAttribute("aria-selected", "true");
 
     // 3. End → Last option
     await t.press("End");
-    await t.expect("#user-4").focused();
-    await t.expect("#user-4").toHaveAttr("aria-selected", "true");
+    await t.expect("#user-4").toBeFocused();
+    await t.expect("#user-4").toHaveAttribute("aria-selected", "true");
 
     // 4. Home again
     await t.press("Home");
-    await t.expect("#user-0").focused();
+    await t.expect("#user-0").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -76,20 +76,20 @@ export function defineListboxTests(bot: TestBot) {
   bot.describe("Listbox: Click Selection", async (t) => {
     // 1. Click first option
     await t.click("#user-0");
-    await t.expect("#user-0").focused();
-    await t.expect("#user-0").toHaveAttr("aria-selected", "true");
+    await t.expect("#user-0").toBeFocused();
+    await t.expect("#user-0").toHaveAttribute("aria-selected", "true");
 
     // 2. Click third option
     await t.click("#user-2");
-    await t.expect("#user-2").focused();
-    await t.expect("#user-2").toHaveAttr("aria-selected", "true");
-    await t.expect("#user-0").toHaveAttr("aria-selected", "false");
+    await t.expect("#user-2").toBeFocused();
+    await t.expect("#user-2").toHaveAttribute("aria-selected", "true");
+    await t.expect("#user-0").toHaveAttribute("aria-selected", "false");
 
     // 3. Click last option
     await t.click("#user-4");
-    await t.expect("#user-4").focused();
-    await t.expect("#user-4").toHaveAttr("aria-selected", "true");
-    await t.expect("#user-2").toHaveAttr("aria-selected", "false");
+    await t.expect("#user-4").toBeFocused();
+    await t.expect("#user-4").toHaveAttribute("aria-selected", "true");
+    await t.expect("#user-2").toHaveAttribute("aria-selected", "false");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -99,33 +99,33 @@ export function defineListboxTests(bot: TestBot) {
   bot.describe("Listbox: Sequential Traversal", async (t) => {
     // 1. Start at first option
     await t.click("#user-0");
-    await t.expect("#user-0").focused();
+    await t.expect("#user-0").toBeFocused();
 
     // 2. Navigate through all options
     await t.press("ArrowDown");
-    await t.expect("#user-1").focused();
+    await t.expect("#user-1").toBeFocused();
 
     await t.press("ArrowDown");
-    await t.expect("#user-2").focused();
+    await t.expect("#user-2").toBeFocused();
 
     await t.press("ArrowDown");
-    await t.expect("#user-3").focused();
+    await t.expect("#user-3").toBeFocused();
 
     await t.press("ArrowDown");
-    await t.expect("#user-4").focused();
+    await t.expect("#user-4").toBeFocused();
 
     // 3. Navigate back through all options
     await t.press("ArrowUp");
-    await t.expect("#user-3").focused();
+    await t.expect("#user-3").toBeFocused();
 
     await t.press("ArrowUp");
-    await t.expect("#user-2").focused();
+    await t.expect("#user-2").toBeFocused();
 
     await t.press("ArrowUp");
-    await t.expect("#user-1").focused();
+    await t.expect("#user-1").toBeFocused();
 
     await t.press("ArrowUp");
-    await t.expect("#user-0").focused();
+    await t.expect("#user-0").toBeFocused();
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -135,25 +135,25 @@ export function defineListboxTests(bot: TestBot) {
   bot.describe("Listbox: Selection Follows Focus", async (t) => {
     // 1. Start at first option
     await t.click("#user-0");
-    await t.expect("#user-0").toHaveAttr("aria-selected", "true");
+    await t.expect("#user-0").toHaveAttribute("aria-selected", "true");
 
     // 2. Move focus → selection follows
     await t.press("ArrowDown");
-    await t.expect("#user-1").toHaveAttr("aria-selected", "true");
-    await t.expect("#user-0").toHaveAttr("aria-selected", "false");
+    await t.expect("#user-1").toHaveAttribute("aria-selected", "true");
+    await t.expect("#user-0").toHaveAttribute("aria-selected", "false");
 
     await t.press("ArrowDown");
-    await t.expect("#user-2").toHaveAttr("aria-selected", "true");
-    await t.expect("#user-1").toHaveAttr("aria-selected", "false");
+    await t.expect("#user-2").toHaveAttribute("aria-selected", "true");
+    await t.expect("#user-1").toHaveAttribute("aria-selected", "false");
 
     // 3. Jump to end
     await t.press("End");
-    await t.expect("#user-4").toHaveAttr("aria-selected", "true");
-    await t.expect("#user-2").toHaveAttr("aria-selected", "false");
+    await t.expect("#user-4").toHaveAttribute("aria-selected", "true");
+    await t.expect("#user-2").toHaveAttribute("aria-selected", "false");
 
     // 4. Jump to start
     await t.press("Home");
-    await t.expect("#user-0").toHaveAttr("aria-selected", "true");
-    await t.expect("#user-4").toHaveAttr("aria-selected", "false");
+    await t.expect("#user-0").toHaveAttribute("aria-selected", "true");
+    await t.expect("#user-4").toHaveAttribute("aria-selected", "false");
   });
 }

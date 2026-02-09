@@ -14,32 +14,32 @@ export function defineRadiogroupTests(bot: TestBot) {
   bot.describe("Radiogroup: Vertical Navigation", async (t) => {
     // 1. Initial focus on first radio (All notifications)
     await t.click("#radio-all");
-    await t.expect("#radio-all").focused();
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "true");
+    await t.expect("#radio-all").toBeFocused();
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "true");
 
     // 2. ArrowDown → Mentions only
     await t.press("ArrowDown");
-    await t.expect("#radio-mentions").focused();
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-mentions").toBeFocused();
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "false");
 
     // 3. ArrowDown → None
     await t.press("ArrowDown");
-    await t.expect("#radio-none").focused();
-    await t.expect("#radio-none").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-none").toBeFocused();
+    await t.expect("#radio-none").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "false");
 
     // 4. ArrowUp → Mentions only
     await t.press("ArrowUp");
-    await t.expect("#radio-mentions").focused();
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-none").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-mentions").toBeFocused();
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-none").toHaveAttribute("aria-checked", "false");
 
     // 5. ArrowUp → All notifications
     await t.press("ArrowUp");
-    await t.expect("#radio-all").focused();
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-all").toBeFocused();
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "false");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -49,20 +49,20 @@ export function defineRadiogroupTests(bot: TestBot) {
   bot.describe("Radiogroup: Click Selection", async (t) => {
     // 1. Click first radio
     await t.click("#radio-all");
-    await t.expect("#radio-all").focused();
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "true");
+    await t.expect("#radio-all").toBeFocused();
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "true");
 
     // 2. Click third radio
     await t.click("#radio-none");
-    await t.expect("#radio-none").focused();
-    await t.expect("#radio-none").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-none").toBeFocused();
+    await t.expect("#radio-none").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "false");
 
     // 3. Click second radio
     await t.click("#radio-mentions");
-    await t.expect("#radio-mentions").focused();
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-none").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-mentions").toBeFocused();
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-none").toHaveAttribute("aria-checked", "false");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -72,21 +72,21 @@ export function defineRadiogroupTests(bot: TestBot) {
   bot.describe("Radiogroup: Selection Follows Focus", async (t) => {
     // 1. Start at first radio
     await t.click("#radio-all");
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "true");
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "true");
 
     // 2. Move focus → selection follows immediately
     await t.press("ArrowDown");
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "false");
 
     await t.press("ArrowDown");
-    await t.expect("#radio-none").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-none").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "false");
 
     // 3. Move back up
     await t.press("ArrowUp");
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-none").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-none").toHaveAttribute("aria-checked", "false");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -96,21 +96,21 @@ export function defineRadiogroupTests(bot: TestBot) {
   bot.describe("Radiogroup: Single Selection", async (t) => {
     // 1. Select first radio
     await t.click("#radio-all");
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "false");
-    await t.expect("#radio-none").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "false");
+    await t.expect("#radio-none").toHaveAttribute("aria-checked", "false");
 
     // 2. Select second radio → first deselects
     await t.click("#radio-mentions");
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "false");
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "true");
-    await t.expect("#radio-none").toHaveAttr("aria-checked", "false");
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "false");
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "true");
+    await t.expect("#radio-none").toHaveAttribute("aria-checked", "false");
 
     // 3. Select third radio → second deselects
     await t.click("#radio-none");
-    await t.expect("#radio-all").toHaveAttr("aria-checked", "false");
-    await t.expect("#radio-mentions").toHaveAttr("aria-checked", "false");
-    await t.expect("#radio-none").toHaveAttr("aria-checked", "true");
+    await t.expect("#radio-all").toHaveAttribute("aria-checked", "false");
+    await t.expect("#radio-mentions").toHaveAttribute("aria-checked", "false");
+    await t.expect("#radio-none").toHaveAttribute("aria-checked", "true");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -120,20 +120,20 @@ export function defineRadiogroupTests(bot: TestBot) {
   bot.describe("Radiogroup: Sequential Traversal", async (t) => {
     // 1. Start at first radio
     await t.click("#radio-all");
-    await t.expect("#radio-all").focused();
+    await t.expect("#radio-all").toBeFocused();
 
     // 2. Navigate down through all radios
     await t.press("ArrowDown");
-    await t.expect("#radio-mentions").focused();
+    await t.expect("#radio-mentions").toBeFocused();
 
     await t.press("ArrowDown");
-    await t.expect("#radio-none").focused();
+    await t.expect("#radio-none").toBeFocused();
 
     // 3. Navigate back up
     await t.press("ArrowUp");
-    await t.expect("#radio-mentions").focused();
+    await t.expect("#radio-mentions").toBeFocused();
 
     await t.press("ArrowUp");
-    await t.expect("#radio-all").focused();
+    await t.expect("#radio-all").toBeFocused();
   });
 }

@@ -55,28 +55,28 @@ function assert(condition: boolean, label: string) {
 
 const SET_COUNT = kernel.defineCommand(
   "SET_COUNT",
-  (ctx: { state: TestState }, payload: number) => ({
+  (ctx) => (payload: number) => ({
     state: { ...ctx.state, count: payload },
   }),
 );
 
 const SET_USER_NAME = kernel.defineCommand(
   "SET_USER_NAME",
-  (ctx: { state: TestState }, payload: string) => ({
+  (ctx) => (payload: string) => ({
     state: { ...ctx.state, user: { ...ctx.state.user, name: payload } },
   }),
 );
 
 const ADD_ITEM = kernel.defineCommand(
   "ADD_ITEM",
-  (ctx: { state: TestState }, payload: string) => ({
+  (ctx) => (payload: string) => ({
     state: { ...ctx.state, items: [...ctx.state.items, payload] },
   }),
 );
 
 const SET_NESTED_X = kernel.defineCommand(
   "SET_NESTED_X",
-  (ctx: { state: TestState }, payload: number) => ({
+  (ctx) => (payload: number) => ({
     state: {
       ...ctx.state,
       meta: {
@@ -87,7 +87,7 @@ const SET_NESTED_X = kernel.defineCommand(
   }),
 );
 
-const NOOP = kernel.defineCommand("NOOP", (ctx: { state: TestState }) => ({
+const NOOP = kernel.defineCommand("NOOP", (ctx) => () => ({
   state: ctx.state,
 }));
 

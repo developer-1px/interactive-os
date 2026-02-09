@@ -60,8 +60,7 @@ const NOW = defineContext("NOW", () => Date.now());
 
 const g1 = kernel.group({ inject: [NOW] });
 
-const USE_TIME = g1.defineCommand("USE_TIME", (ctx) => ({
-  // C1 PROOF: ctx.NOW is auto-typed as number (not unknown)
+const USE_TIME = g1.defineCommand("USE_TIME", (ctx) => () => ({
   state: { result: typeof ctx.NOW },
 }));
 
@@ -81,8 +80,7 @@ const CONFIG = defineContext("CONFIG", () => ({ theme: "dark" }));
 
 const g2 = kernel.group({ inject: [USER, CONFIG] });
 
-const READ_CONTEXT = g2.defineCommand("READ_CONTEXT", (ctx) => ({
-  // C1 PROOF: ctx.USER and ctx.CONFIG are auto-typed
+const READ_CONTEXT = g2.defineCommand("READ_CONTEXT", (ctx) => () => ({
   state: {
     result: {
       userName: ctx.USER.name,
@@ -109,8 +107,7 @@ const COUNTER = defineContext("COUNTER", () => {
 
 const g3 = kernel.group({ inject: [COUNTER] });
 
-const READ_COUNTER = g3.defineCommand("READ_COUNTER", (ctx) => ({
-  // C1 PROOF: ctx.COUNTER is auto-typed as number
+const READ_COUNTER = g3.defineCommand("READ_COUNTER", (ctx) => () => ({
   state: { result: ctx.COUNTER },
 }));
 
@@ -136,7 +133,7 @@ const NONEXISTENT = defineContext("NONEXISTENT", () => undefined as never);
 
 const g4 = kernel.group({ inject: [NONEXISTENT] });
 
-const USE_MISSING = g4.defineCommand("USE_MISSING", (ctx) => ({
+const USE_MISSING = g4.defineCommand("USE_MISSING", (ctx) => () => ({
   state: { result: ctx.NONEXISTENT ?? "undefined" },
 }));
 
@@ -159,13 +156,11 @@ const EXPENSIVE = defineContext("EXPENSIVE", () => {
 
 const gExpensive = kernel.group({ inject: [EXPENSIVE] });
 
-const NEEDS_CTX = gExpensive.defineCommand("NEEDS_CTX", (ctx) => ({
-  // C1 PROOF: ctx.EXPENSIVE is auto-typed as string
+const NEEDS_CTX = gExpensive.defineCommand("NEEDS_CTX", (ctx) => () => ({
   state: { result: ctx.EXPENSIVE },
 }));
 
-const NO_CTX = kernel.defineCommand("NO_CTX", (ctx) => ({
-  // H4 PROOF: ctx.state is auto-typed as TestState
+const NO_CTX = kernel.defineCommand("NO_CTX", (ctx) => () => ({
   state: { result: ctx.state.result ?? "no-injection" },
 }));
 
@@ -193,16 +188,17 @@ const SNAPSHOT = defineContext("SNAPSHOT", () => "external-data");
 
 const g6 = kernel.group({ inject: [SNAPSHOT] });
 
-const USE_STATE_CONTEXT = g6.defineCommand("USE_STATE_CONTEXT", (ctx) => ({
-  state: {
-    result: {
-      // H4 PROOF: ctx.state auto-typed as TestState
-      state: ctx.state,
-      // C1 PROOF: ctx.SNAPSHOT auto-typed as string
-      snapshot: ctx.SNAPSHOT,
+const USE_STATE_CONTEXT = g6.defineCommand(
+  "USE_STATE_CONTEXT",
+  (ctx) => () => ({
+    state: {
+      result: {
+        state: ctx.state,
+        snapshot: ctx.SNAPSHOT,
+      },
     },
-  },
-}));
+  }),
+);
 
 dispatch(USE_STATE_CONTEXT());
 const r5 = store.getState().result as any;
@@ -219,7 +215,7 @@ assert(
 console.log("\n─── resetKernel ───");
 
 defineContext("TEMP", () => "x");
-const TEMP_CMD = kernel.defineCommand("TEMP_CMD", (_ctx) => ({
+const TEMP_CMD = kernel.defineCommand("TEMP_CMD", (_ctx) => () => ({
   state: { result: "y" },
 }));
 
@@ -240,7 +236,7 @@ console.log("\n─── transaction cap ───");
 
 reset();
 
-const NOOP = kernel.defineCommand("NOOP", (_ctx) => ({
+const NOOP = kernel.defineCommand("NOOP", (_ctx) => () => ({
   state: { result: "x" },
 }));
 

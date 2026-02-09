@@ -17,16 +17,22 @@ export function defineDisclosureTests(bot: TestBot) {
   bot.describe("Disclosure: Click Toggle", async (t) => {
     // 1. Click to expand
     await t.click("#disclosure-trigger");
-    await t.expect("#disclosure-trigger").focused();
-    await t.expect("#disclosure-trigger").toHaveAttr("aria-expanded", "true");
+    await t.expect("#disclosure-trigger").toBeFocused();
+    await t
+      .expect("#disclosure-trigger")
+      .toHaveAttribute("aria-expanded", "true");
 
     // 2. Click again to collapse
     await t.click("#disclosure-trigger");
-    await t.expect("#disclosure-trigger").toHaveAttr("aria-expanded", "false");
+    await t
+      .expect("#disclosure-trigger")
+      .toHaveAttribute("aria-expanded", "false");
 
     // 3. Expand again
     await t.click("#disclosure-trigger");
-    await t.expect("#disclosure-trigger").toHaveAttr("aria-expanded", "true");
+    await t
+      .expect("#disclosure-trigger")
+      .toHaveAttribute("aria-expanded", "true");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -37,15 +43,21 @@ export function defineDisclosureTests(bot: TestBot) {
     // State from previous test: isOpen=true
     // 1. Click toggles: true→false
     await t.click("#disclosure-trigger");
-    await t.expect("#disclosure-trigger").toHaveAttr("aria-expanded", "false");
+    await t
+      .expect("#disclosure-trigger")
+      .toHaveAttribute("aria-expanded", "false");
 
     // 2. Enter toggles: false→true
     await t.press("Enter");
-    await t.expect("#disclosure-trigger").toHaveAttr("aria-expanded", "true");
+    await t
+      .expect("#disclosure-trigger")
+      .toHaveAttribute("aria-expanded", "true");
 
     // 3. Enter toggles: true→false
     await t.press("Enter");
-    await t.expect("#disclosure-trigger").toHaveAttr("aria-expanded", "false");
+    await t
+      .expect("#disclosure-trigger")
+      .toHaveAttribute("aria-expanded", "false");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -56,15 +68,21 @@ export function defineDisclosureTests(bot: TestBot) {
     // State from previous test: isOpen=false
     // 1. Click toggles: false→true
     await t.click("#disclosure-trigger");
-    await t.expect("#disclosure-trigger").toHaveAttr("aria-expanded", "true");
+    await t
+      .expect("#disclosure-trigger")
+      .toHaveAttribute("aria-expanded", "true");
 
     // 2. Space toggles: true→false
     await t.press("Space");
-    await t.expect("#disclosure-trigger").toHaveAttr("aria-expanded", "false");
+    await t
+      .expect("#disclosure-trigger")
+      .toHaveAttribute("aria-expanded", "false");
 
     // 3. Space toggles: false→true
     await t.press("Space");
-    await t.expect("#disclosure-trigger").toHaveAttr("aria-expanded", "true");
+    await t
+      .expect("#disclosure-trigger")
+      .toHaveAttribute("aria-expanded", "true");
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -74,18 +92,18 @@ export function defineDisclosureTests(bot: TestBot) {
   bot.describe("Disclosure: Focus Retention", async (t) => {
     // 1. Click to focus
     await t.click("#disclosure-trigger");
-    await t.expect("#disclosure-trigger").focused();
+    await t.expect("#disclosure-trigger").toBeFocused();
 
     // 2. Toggle with Enter, verify focus retained
     await t.press("Enter");
-    await t.expect("#disclosure-trigger").focused();
+    await t.expect("#disclosure-trigger").toBeFocused();
 
     // 3. Toggle with Space, verify focus retained
     await t.press("Space");
-    await t.expect("#disclosure-trigger").focused();
+    await t.expect("#disclosure-trigger").toBeFocused();
 
     // 4. Click toggle, verify focus retained
     await t.click("#disclosure-trigger");
-    await t.expect("#disclosure-trigger").focused();
+    await t.expect("#disclosure-trigger").toBeFocused();
   });
 }
