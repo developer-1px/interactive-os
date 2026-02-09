@@ -100,7 +100,9 @@ function processCommand(cmd: Command): void {
     } else if (command) {
         // ── defineCommand path: (ctx, payload) → EffectMap ──
         mwCtx.handlerType = "command";
-        const ctx: Context = { db: mwCtx.db };
+        // Build context: db + all injected values from middleware
+        const { command: _c, db: _d, handlerType: _h, effects: _e, ...injected } = mwCtx;
+        const ctx: Context = { db: mwCtx.db, ...injected };
         mwCtx.effects = command(ctx, payload);
     } else {
         console.warn(`[kernel] No handler or command registered for "${type}"`);

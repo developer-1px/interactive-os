@@ -42,6 +42,9 @@ export type {
 export { use } from "./middleware.ts";
 export type { Middleware, MiddlewareCtx } from "./middleware.ts";
 
+// ── Context ──
+export { defineContext, inject } from "./context.ts";
+
 // ── Dispatch ──
 export { dispatch, bindStore } from "./dispatch.ts";
 export type { Transaction } from "./dispatch.ts";
@@ -61,6 +64,7 @@ export {
 // ── Testing utilities ──
 export { clearAllRegistries } from "./registry.ts";
 export { clearMiddlewares } from "./middleware.ts";
+export { clearContextProviders } from "./context.ts";
 
 // ── Convenience: create + bind in one call ──
 import { createStore, type Store } from "./createStore.ts";
