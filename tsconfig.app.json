@@ -3,15 +3,9 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": [
-      "vite/client"
-    ],
+    "types": ["vite/client"],
     "skipLibCheck": true,
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -27,27 +21,18 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
     "baseUrl": ".",
     "paths": {
-      "@kernel": [
-        "./packages/kernel/src/index.ts"
-      ],
-      "@kernel/*": [
-        "./packages/kernel/src/*"
-      ],
-      "@os/*": [
-        "./src/os/*"
-      ],
-      "@apps/*": [
-        "./src/apps/*"
-      ],
-      "@/*": [
-        "./src/*"
-      ]
+      "@kernel": ["./packages/kernel/src/index.ts"],
+      "@kernel/*": ["./packages/kernel/src/*"],
+      "@os/*": ["./src/os/*"],
+      "@apps/*": ["./src/apps/*"],
+      "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "src",
-    "packages/kernel/src"
-  ]
+  "include": ["src", "packages/kernel/src"]
 }
