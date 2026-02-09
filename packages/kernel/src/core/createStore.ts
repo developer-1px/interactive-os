@@ -13,42 +13,37 @@ export interface Store<S> {
   subscribe(listener: Listener): () => void;
 }
 
+let activeStore: Store<unknown> | null = null;
+
 export function createStore<S>(initialState: S): Store<S> {
   let state = initialState;
   const listeners = new Set<Listener>();
 
-  return {
+  const store = {
     getState() {
       return state;
     },
 
-    setState(updater) {
+    setState(updater: (prev: S) => S) {
       state = updater(state);
       for (const listener of listeners) {
         listener();
       }
     },
 
-    subscribe(listener) {
+    subscribe(listener: Listener) {
       listeners.add(listener);
       return () => {
         listeners.delete(listener);
       };
     },
   };
+
+  activeStore = store as Store<unknown>;
+  return store;
 }
 
 // ─── Store Binding (merged from store.ts) ───
-
-let activeStore: Store<unknown> | null = null;
-
-/**
- * bindStore — connect the dispatch pipeline to a store.
- * Must be called once before any dispatch.
- */
-export function bindStore<S>(store: Store<S>): void {
-  activeStore = store as Store<unknown>;
-}
 
 export function getActiveStore(): Store<unknown> | null {
   return activeStore;

@@ -1,10 +1,5 @@
 import { clearContextProviders } from "./core/context.ts";
-import {
-  bindStore,
-  createStore,
-  type Store,
-  unbindStore,
-} from "./core/createStore.ts";
+import { createStore, type Store, unbindStore } from "./core/createStore.ts";
 import { createGroup } from "./core/group.ts";
 import { clearAllRegistries } from "./core/registries.ts";
 import {
@@ -52,7 +47,6 @@ export function state<S>(): StateMarker<S> {
 /** Convenience: create store + bind in one call. */
 export function initKernel<S>(initialState: S): Store<S> {
   const store = createStore(initialState);
-  bindStore(store);
   return store;
 }
 
