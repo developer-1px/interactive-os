@@ -110,14 +110,14 @@ export function processCommand(cmd: Command, bubblePath?: ScopeToken[]): void {
     if (interceptors) {
       for (let i = interceptors.length - 1; i >= 0; i--) {
         if (interceptors[i].after) {
-          mwCtx = interceptors[i].after!(mwCtx);
+          mwCtx = interceptors[i].after?.(mwCtx) ?? mwCtx;
         }
       }
     }
     if (scopeMws) {
       for (let i = scopeMws.length - 1; i >= 0; i--) {
         if (scopeMws[i].after) {
-          mwCtx = scopeMws[i].after!(mwCtx);
+          mwCtx = scopeMws[i].after?.(mwCtx) ?? mwCtx;
         }
       }
     }

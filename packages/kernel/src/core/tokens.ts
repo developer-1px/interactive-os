@@ -48,7 +48,7 @@ export type Command<Type extends string = string, Payload = void> = {
 export type CommandFactory<Type extends string = string, Payload = void> = {
   /** Creates a typed Command object. */
   (
-    ...args: [Payload] extends [void]
+    ...args: [Payload] extends [undefined]
       ? []
       : undefined extends Payload
         ? [payload?: Payload]

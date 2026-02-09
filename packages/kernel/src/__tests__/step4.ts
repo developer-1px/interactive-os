@@ -11,10 +11,10 @@ import {
   getLastTransaction,
   getState,
   initKernel,
+  resetKernel,
   resetState,
   type StateDiff,
   state,
-  unbindStore,
 } from "../index.ts";
 
 // ── Setup ──
@@ -193,7 +193,7 @@ assert(
 // --- Test 8: getState/resetState throw after unbindStore ---
 console.log("\n─── getState/resetState after unbindStore ───");
 
-unbindStore();
+resetKernel();
 let threwOnGetState = false;
 try {
   getState();
