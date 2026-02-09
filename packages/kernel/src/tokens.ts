@@ -48,16 +48,12 @@ export type Command<Type extends string = string, Payload = void> = {
 export type CommandFactory<Type extends string = string, Payload = void> = {
   /** Creates a typed Command object. */
   (
+    // biome-ignore lint/suspicious/noConfusingVoidType: void is used for conditional type matching
     ...args: [Payload] extends [void] ? [] : [payload: Payload]
   ): Command<Type, Payload>;
   /** The command type string (for debugging/inspection). */
   readonly commandType: Type;
 };
-
-/** Infer payload type from a handler function. void if no second param. */
-export type InferPayload<H> = H extends (ctx: any, payload: infer P) => any
-  ? P
-  : void;
 
 // ─── Scope constants ───
 
