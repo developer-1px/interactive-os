@@ -1,12 +1,4 @@
-// Generic command type that primitives can work with
-export interface BaseCommand {
-  type: string;
-  payload?: any;
-}
-
 /**
- * Command factory for Field props (onChange, onSubmit).
- * Field will automatically inject { text: currentValue } when invoking.
+ * [PROXY] Re-exports from canonical location: @/os-new/schema/entities/BaseCommand.ts
  */
-export type FieldCommandFactory<P extends { text: string } = { text: string }> =
-  ((payload: P) => BaseCommand) & { id: string; _def?: any };
+export type { BaseCommand, FieldCommandFactory } from "@/os-new/schema/entities/BaseCommand";

@@ -24,7 +24,7 @@ import {
   SYNC_FOCUS,
   TAB,
   TOGGLE,
-} from "../../../../new/2-command/focus";
+} from "@/os-new/2-command/focus";
 
 // ═══════════════════════════════════════════════════════════════════
 // Component

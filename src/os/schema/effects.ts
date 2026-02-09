@@ -6,5 +6,5 @@ export type {
   EffectRecord,
   EffectSource,
   FocusEffectAction,
-} from "../new/schema/effects";
-export { createFocusEffect } from "../new/schema/effects";
+} from "@/os-new/schema/effects";
+export { createFocusEffect } from "@/os-new/schema/effects";

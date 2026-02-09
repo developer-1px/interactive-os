@@ -1,7 +1,7 @@
 import { logger } from "@os/app/debug/logger";
 import type { CommandDefinition } from "@os/entities/CommandDefinition";
 import type { KeybindingItem } from "@os/entities/KeybindingItem";
-import type { KeymapConfig } from "@os/new/1-sensor/keyboard/getCanonicalKey.ts";
+import type { KeymapConfig } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
 
 export interface CommandGroup<S, P = unknown, K extends string = string> {
   id: string;

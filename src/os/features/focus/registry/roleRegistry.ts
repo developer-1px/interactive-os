@@ -8,4 +8,4 @@ export {
   getChildRole,
   isCheckedRole,
   isExpandableRole,
-} from "../../../new/registry/roleRegistry";
+} from "@/os-new/registry/roleRegistry";

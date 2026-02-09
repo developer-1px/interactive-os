@@ -13,8 +13,8 @@
 import { evalContext } from "@os/features/AntigravityOS";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { normalizeKeyDefinition } from "@os/new/1-sensor/keyboard/getCanonicalKey.ts";
-import type { KeyboardIntent } from "../../../../new/1-sensor/keyboard";
+import { normalizeKeyDefinition } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
+import type { KeyboardIntent } from "@/os-new/1-sensor/keyboard";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -172,4 +172,4 @@ function hasZoneBinding(commandId: string): boolean {
 // Utility: Build Bubble Path (re-exported from canonical location)
 // ═══════════════════════════════════════════════════════════════════
 
-export { buildBubblePath } from "@os/new/4-effect/buildBubblePath";
+export { buildBubblePath } from "@/os-new/4-effect/buildBubblePath";

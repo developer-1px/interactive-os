@@ -9,4 +9,4 @@ export {
   type OSSelectPayload,
   type OSActivatePayload,
   type OSCommand,
-} from "../../../new/schema/commands";
+} from "@/os-new/schema/commands";

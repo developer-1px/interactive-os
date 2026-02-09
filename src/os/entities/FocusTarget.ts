@@ -1,2 +1,4 @@
-// Moved from src/os/core/focus/behavior/behaviorTypes.ts
-export type FocusTarget = "real" | "virtual";
+/**
+ * [PROXY] Re-exports from canonical location: @/os-new/schema/entities/FocusTarget.ts
+ */
+export type { FocusTarget } from "@/os-new/schema/entities/FocusTarget";

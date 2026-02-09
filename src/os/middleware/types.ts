@@ -7,4 +7,4 @@ export type {
   OSManagedState,
   Next,
   OSMiddleware,
-} from "../../new/4-effect/middlewareTypes";
+} from "@/os-new/4-effect/middlewareTypes";

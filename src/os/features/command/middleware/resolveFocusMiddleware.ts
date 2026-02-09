@@ -10,7 +10,7 @@
 
 import type { Middleware } from "@os/features/command/model/createCommandStore";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { resolvePayload } from "@os/new/4-effect/resolvePayload";
+import { resolvePayload } from "@/os-new/4-effect/resolvePayload";
 
 /**
  * Middleware that resolves OS.FOCUS in action payloads.
