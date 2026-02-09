@@ -51,36 +51,14 @@ export {
   travelTo,
 } from "./core/transaction.ts";
 // ─── Entry Point ───
-export { createKernel, defineScope, state } from "./createKernel.ts";
+export {
+  createKernel,
+  defineScope,
+  initKernel,
+  resetKernel,
+  state,
+} from "./createKernel.ts";
 
 // ─── React ───
 export { useComputed } from "./react/useComputed.ts";
 export { useDispatch } from "./react/useDispatch.ts";
-
-// ─── Convenience ───
-import { clearContextProviders } from "./core/context.ts";
-import {
-  bindStore as _bindStore,
-  createStore as _createStore,
-} from "./core/createStore.ts";
-import { clearAllRegistries } from "./core/registries.ts";
-import { clearTransactions } from "./core/transaction.ts";
-
-/** Convenience: create store + bind in one call. */
-export function initKernel<S>(
-  initialState: S,
-): import("./core/createStore.ts").Store<S> {
-  const store = _createStore(initialState);
-  _bindStore(store);
-  return store;
-}
-
-/**
- * resetKernel — Clear all registries, contexts, transactions, and unbind store.
- * Used for testing.
- */
-export function resetKernel(): void {
-  clearAllRegistries();
-  clearContextProviders();
-  clearTransactions();
-}

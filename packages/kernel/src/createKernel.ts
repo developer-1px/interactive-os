@@ -1,10 +1,19 @@
+import { clearContextProviders } from "./core/context.ts";
+import {
+  bindStore,
+  createStore,
+  type Store,
+  unbindStore,
+} from "./core/createStore.ts";
 import { createGroup } from "./core/group.ts";
+import { clearAllRegistries } from "./core/registries.ts";
 import {
   type EffectToken,
   GLOBAL,
   type ScopeToken,
   type StateMarker,
 } from "./core/tokens.ts";
+import { clearTransactions } from "./core/transaction.ts";
 
 /**
  * Create a Kernel instance — returns the root Group.
@@ -38,4 +47,22 @@ export function defineScope<Id extends string>(id: Id): ScopeToken<Id> {
 /** Create a phantom state type marker. No runtime cost. */
 export function state<S>(): StateMarker<S> {
   return {} as StateMarker<S>;
+}
+
+/** Convenience: create store + bind in one call. */
+export function initKernel<S>(initialState: S): Store<S> {
+  const store = createStore(initialState);
+  bindStore(store);
+  return store;
+}
+
+/**
+ * resetKernel — Clear all registries, contexts, transactions, and unbind store.
+ * Used for testing.
+ */
+export function resetKernel(): void {
+  clearAllRegistries();
+  clearContextProviders();
+  clearTransactions();
+  unbindStore();
 }
