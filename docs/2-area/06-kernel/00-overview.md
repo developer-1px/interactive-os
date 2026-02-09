@@ -267,6 +267,7 @@ defineCommand("NAVIGATE", (ctx) => {
 ```typescript
 type Middleware = {          // ✅ 구현됨
   id: string;
+  scope?: ScopeToken;
   before?: (ctx: MiddlewareContext) => MiddlewareContext;
   after?: (ctx: MiddlewareContext) => MiddlewareContext;
 };
