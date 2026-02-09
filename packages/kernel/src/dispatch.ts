@@ -13,6 +13,8 @@
 import type { Store } from "./createStore.ts";
 import type { Command, EffectMap, Context } from "./registry.ts";
 import { getHandler, getCommand, getEffect } from "./registry.ts";
+import type { MiddlewareCtx } from "./middleware.ts";
+import { runBeforeChain, runAfterChain } from "./middleware.ts";
 
 // ─── Transaction Log ───
 
@@ -47,6 +49,10 @@ export function bindStore<DB>(store: Store<DB>): void {
     activeStore = store as Store<unknown>;
 }
 
+export function getActiveStore(): Store<unknown> | null {
+    return activeStore;
+}
+
 /**
  * dispatch — the single entry point.
  */
@@ -68,42 +74,55 @@ function processCommand(cmd: Command): void {
         throw new Error("[kernel] No store bound. Call initKernel() first.");
     }
 
-    const { type, payload } = cmd;
     const dbBefore = activeStore.getState();
 
-    // 1. Resolve handler type
+    // 1. Build middleware context
+    let mwCtx: MiddlewareCtx = {
+        command: cmd,
+        db: dbBefore,
+        handlerType: "unknown",
+        effects: null,
+    };
+
+    // 2. Run before chain
+    mwCtx = runBeforeChain(mwCtx);
+
+    // 3. Resolve and execute handler/command
+    const { type, payload } = mwCtx.command;
     const handler = getHandler(type);
     const command = getCommand(type);
 
-    let handlerType: Transaction["handlerType"] = "unknown";
-    let effectMap: EffectMap | null = null;
-
     if (handler) {
         // ── defineHandler path: (db, payload) → db ──
-        handlerType = "handler";
-        const nextDb = handler(dbBefore, payload);
+        mwCtx.handlerType = "handler";
+        const nextDb = handler(mwCtx.db, payload);
         activeStore.setState(() => nextDb);
     } else if (command) {
         // ── defineCommand path: (ctx, payload) → EffectMap ──
-        handlerType = "command";
-        const ctx: Context = { db: dbBefore };
-        effectMap = command(ctx, payload);
-
-        // Execute effects
-        executeEffects(effectMap);
+        mwCtx.handlerType = "command";
+        const ctx: Context = { db: mwCtx.db };
+        mwCtx.effects = command(ctx, payload);
     } else {
         console.warn(`[kernel] No handler or command registered for "${type}"`);
     }
 
+    // 4. Run after chain (reverse order)
+    mwCtx = runAfterChain(mwCtx);
+
+    // 5. Execute effects (after middleware may have modified them)
+    if (mwCtx.effects) {
+        executeEffects(mwCtx.effects);
+    }
+
     const dbAfter = activeStore.getState();
 
-    // 2. Record transaction (always)
+    // 6. Record transaction (always)
     const transaction: Transaction = {
         id: nextTransactionId++,
         timestamp: Date.now(),
-        command: cmd,
-        handlerType,
-        effects: effectMap,
+        command: mwCtx.command,
+        handlerType: mwCtx.handlerType,
+        effects: mwCtx.effects,
         changes: computeChanges(dbBefore, dbAfter),
         dbBefore,
         dbAfter,

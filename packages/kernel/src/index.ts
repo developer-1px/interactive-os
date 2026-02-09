@@ -1,16 +1,21 @@
 /**
  * @kernel — UI Application Kernel
  *
- * A minimal, 0-dependency event processing engine.
+ * A minimal, 0-dependency command processing engine.
  * Inspired by re-frame's architecture: dispatch → pure handler → effects as data.
  *
  * Core API:
  *   createStore(initial)       — create the single state tree
- *   initKernel(store)          — bind kernel to store
- *   dispatch(event)            — single entry point for all events
+ *   initKernel(initial)        — create store + bind in one call
+ *   dispatch(cmd)              — single entry point for all commands
  *   defineHandler(id, fn)      — register pure state transformer
  *   defineCommand(id, fn)      — register command with effects
  *   defineEffect(id, fn)       — register side-effect executor
+ *   use(middleware)             — register global middleware
+ *
+ * React:
+ *   useComputed(selector)      — subscribe to derived state
+ *   useDispatch()              — get stable dispatch reference
  *
  * Inspector:
  *   getTransactions()          — full transaction log
@@ -33,9 +38,17 @@ export type {
     Context,
 } from "./registry.ts";
 
+// ── Middleware ──
+export { use } from "./middleware.ts";
+export type { Middleware, MiddlewareCtx } from "./middleware.ts";
+
 // ── Dispatch ──
 export { dispatch, bindStore } from "./dispatch.ts";
 export type { Transaction } from "./dispatch.ts";
+
+// ── React ──
+export { useComputed } from "./react/useComputed.ts";
+export { useDispatch } from "./react/useDispatch.ts";
 
 // ── Inspector ──
 export {
@@ -47,6 +60,7 @@ export {
 
 // ── Testing utilities ──
 export { clearAllRegistries } from "./registry.ts";
+export { clearMiddlewares } from "./middleware.ts";
 
 // ── Convenience: create + bind in one call ──
 import { createStore, type Store } from "./createStore.ts";
