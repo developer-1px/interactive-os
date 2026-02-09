@@ -23,7 +23,7 @@ Effect as Data, 순수 커맨드 함수, 미들웨어 파이프라인, 트랜잭
 | `app-db` (단일 상태) | ⚠️ 파편화 (focusData + Zone별 스토어 + CommandEngine) | 단일 상태 트리 |
 | `reg-event-fx` (이벤트 핸들러 등록) | ⚠️ 하드코딩된 커맨드 맵 | 선언적 레지스트리 |
 | `reg-fx` (이펙트 핸들러 등록) | ❌ `executeDOMEffect` 하드코딩 | 플러그인 이펙트 시스템 |
-| `inject-cofx` (코이펙트 주입) | ⚠️ `buildContext` 과잉 수집 | lazy cofx 주입 |
+| `inject-cofx` (코이펙트 주입) | ⚠️ `buildContext` 과잉 수집 | lazy ctx 주입 (`inject`) |
 | Interceptors (인터셉터 체인) | ✅ 미들웨어 존재 | 인터셉터 데이터로 전환 |
 | Subscriptions (구독 그래프) | ❌ ad-hoc selector | 계층적 구독 시스템 |
 | `dispatch` (단일 진입점) | ⚠️ 3개 경로 (KeyboardSensor, FocusSensor, 프로그래밍) | 단일 dispatch 큐 |
@@ -38,7 +38,7 @@ re-frame의 Six Dominoes를 React + Zustand 환경에 맞게 재해석한다.
 
 ```
 Domino 1: dispatch(event)           ← 단일 진입점
-Domino 2: event-fx handler          ← 순수함수, cofx → fx 맵
+Domino 2: event handler              ← 순수함수, ctx → EffectMap
 Domino 3: fx executor               ← 등록된 이펙트 핸들러 실행
 Domino 4: subscription              ← 파생 상태 쿼리
 Domino 5: view                      ← React 컴포넌트
@@ -48,7 +48,7 @@ Domino 6: DOM                       ← 브라우저 렌더링
 ### 2.2 핵심 규칙
 
 1. **`db`는 하나** — 모든 상태는 하나의 Zustand 스토어에 있다.
-2. **이벤트 핸들러는 순수** — `(cofx, payload) → fx-map`. 부수효과 없음.
+2. **이벤트 핸들러는 순수** — `(ctx, payload) → EffectMap`. 부수효과 없음.
 3. **이펙트는 데이터** — `{ db: nextState, focus: targetId, scroll: targetId }`. 실행은 프레임워크가.
 4. **코이펙트는 선언적 주입** — 핸들러가 필요한 것만 명시. 프레임워크가 수집.
 5. **구독은 계층적** — Layer 2 구독은 Layer 3 구독을 조합. 불필요한 재계산 없음.
@@ -94,11 +94,11 @@ function processQueue(): void {
 ```typescript
 // ── 제안: 선언적 핸들러 등록 ──
 
-// 핸들러 등록
-regEventFx("NAVIGATE", (cofx, payload) => {
-  const { db, dom } = cofx;
+// 커맨드 등록
+defineCommand("NAVIGATE", (ctx, payload) => {
+  const { db } = ctx;
   const zone = db.zones.get(db.activeZoneId);
-  const nextId = resolveNavigation(zone, dom, payload.direction);
+  const nextId = resolveNavigation(zone, ctx["dom-items"], payload.direction);
 
   return {
     db: updateZone(db, db.activeZoneId, { focusedItemId: nextId }),
@@ -107,8 +107,8 @@ regEventFx("NAVIGATE", (cofx, payload) => {
   };
 });
 
-regEventFx("ACTIVATE", (cofx, payload) => {
-  const { db } = cofx;
+defineCommand("ACTIVATE", (ctx, payload) => {
+  const { db } = ctx;
   const targetId = payload.targetId ?? db.zones.get(db.activeZoneId)?.focusedItemId;
 
   return {
@@ -117,8 +117,8 @@ regEventFx("ACTIVATE", (cofx, payload) => {
 });
 
 // 앱 커맨드도 같은 방식
-regEventFx("todo/toggle-done", (cofx, payload) => {
-  const { db } = cofx;
+defineCommand("todo/toggle-done", (ctx, payload) => {
+  const { db } = ctx;
   return {
     db: toggleTodoDone(db, payload.id),
   };
@@ -127,8 +127,8 @@ regEventFx("todo/toggle-done", (cofx, payload) => {
 
 **핵심:**
 - OS 커맨드와 앱 커맨드가 **같은 레지스트리, 같은 형태**
-- 반환값은 **fx-map** (이펙트 맵). `{ db, focus, scroll, dispatch, ... }`
-- 핸들러는 `cofx` (읽기 전용 컨텍스트)만 받음. 스토어 직접 접근 불가.
+- 반환값은 **EffectMap** (이펙트 맵). `{ db, focus, scroll, dispatch, ... }`
+- 핸들러는 `ctx` (읽기 전용 컨텍스트)만 받음. 스토어 직접 접근 불가.
 
 ### 3.3 Domino 3: `reg-fx` — 플러그인 이펙트 시스템
 
@@ -138,34 +138,34 @@ regEventFx("todo/toggle-done", (cofx, payload) => {
 // ── 제안: 이펙트 핸들러를 플러그인으로 등록 ──
 
 // 내장 이펙트
-regFx("db", (newDb) => {
+defineEffect("db", (newDb) => {
   store.setState({ db: newDb });
 });
 
-regFx("focus", (targetId) => {
+defineEffect("focus", (targetId) => {
   const el = document.getElementById(targetId);
   el?.focus({ preventScroll: true });
 });
 
-regFx("scroll", (targetId) => {
+defineEffect("scroll", (targetId) => {
   const el = document.getElementById(targetId);
   el?.scrollIntoView({ block: "nearest", inline: "nearest" });
 });
 
-regFx("dispatch", (event) => {
+defineEffect("dispatch", (event) => {
   dispatch(event);  // 재귀 dispatch (큐에 추가)
 });
 
 // 사용자 정의 이펙트 (확장 가능!)
-regFx("toast", (message) => {
+defineEffect("toast", (message) => {
   showToast(message);
 });
 
-regFx("clipboard", (text) => {
+defineEffect("clipboard", (text) => {
   navigator.clipboard.writeText(text);
 });
 
-regFx("http", async ({ url, method, onSuccess, onFailure }) => {
+defineEffect("http", async ({ url, method, onSuccess, onFailure }) => {
   try {
     const res = await fetch(url, { method });
     const data = await res.json();
@@ -180,57 +180,57 @@ regFx("http", async ({ url, method, onSuccess, onFailure }) => {
 - `executeDOMEffect`의 switch문 제거
 - 앱이 자체 이펙트 등록 가능 (toast, http, analytics 등)
 - 각 이펙트 핸들러를 독립적으로 테스트/모킹 가능
-- 트랜잭션 로그에 fx-map만 기록하면 완벽한 리플레이
+- 트랜잭션 로그에 EffectMap만 기록하면 완벽한 리플레이
 
-### 3.4 `inject-cofx` — 선언적 코이펙트 주입
+### 3.4 `inject` — 선언적 컨텍스트 주입
 
 현재 문제: `buildContext()`가 매 커맨드마다 DOM rect, focus path, items 등 전부 수집. 대부분 사용 안 됨.
 
 ```typescript
-// ── 제안: 필요한 cofx만 선언 ──
+// ── 제안: 필요한 ctx만 선언 ──
 
-// 기본 cofx는 항상 주입
+// 기본 ctx는 항상 주입
 // - db: 현재 상태 (비용 0, 메모리 참조)
 
 // DOM 관련은 필요할 때만
-regCofx("dom-items", () => {
+defineContext("dom-items", () => {
   const zoneId = store.getState().db.activeZoneId;
   const el = document.getElementById(zoneId);
   return el ? Array.from(el.querySelectorAll("[data-focus-item]")).map(e => e.id) : [];
 });
 
-regCofx("dom-rects", () => {
-  const items = getCofx("dom-items");
+defineContext("dom-rects", () => {
+  const items = resolveContext("dom-items");
   return new Map(items.map(id => [id, document.getElementById(id)!.getBoundingClientRect()]));
 });
 
-regCofx("zone-config", () => {
+defineContext("zone-config", () => {
   const zoneId = store.getState().db.activeZoneId;
   return zoneRegistry.get(zoneId)?.config;
 });
 
 // 핸들러에서 선언적으로 요청
-regEventFx(
+defineCommand(
   "NAVIGATE",
-  [injectCofx("dom-items"), injectCofx("dom-rects"), injectCofx("zone-config")],
-  (cofx, payload) => {
-    // cofx.db는 항상 있음
-    // cofx["dom-items"], cofx["dom-rects"], cofx["zone-config"]는 주입됨
+  [inject("dom-items"), inject("dom-rects"), inject("zone-config")],
+  (ctx, payload) => {
+    // ctx.db는 항상 있음
+    // ctx["dom-items"], ctx["dom-rects"], ctx["zone-config"]는 주입됨
     // 불필요한 DOM 쿼리 없음
   }
 );
 
 // ACTIVATE는 DOM 쿼리 불필요
-regEventFx("ACTIVATE", (cofx, payload) => {
-  // cofx.db만 사용
-  return { dispatch: { type: "app/onAction", payload: { id: cofx.db.focusedItemId } } };
+defineCommand("ACTIVATE", (ctx, payload) => {
+  // ctx.db만 사용
+  return { dispatch: { type: "app/onAction", payload: { id: ctx.db.focusedItemId } } };
 });
 ```
 
 **이점:**
 - `buildContext()`의 30+필드 과잉 수집 → 핸들러가 필요한 것만 선언
 - DOM 쿼리 비용이 실제 필요한 커맨드에서만 발생
-- 테스트 시 cofx를 직접 주입 → DOM 없이 순수 테스트
+- 테스트 시 ctx를 직접 주입 → DOM 없이 순수 테스트
 
 ### 3.5 인터셉터 체인 — 미들웨어의 데이터화
 
@@ -271,17 +271,17 @@ const loggingInterceptor: Interceptor = {
 };
 
 // 글로벌 인터셉터 (모든 이벤트에 적용)
-regGlobalInterceptor(transactionInterceptor);
+use(transactionInterceptor);
 
 // 개발 환경에서만
 if (import.meta.env.DEV) {
-  regGlobalInterceptor(loggingInterceptor);
+  use(loggingInterceptor);
 }
 
-// 특정 이벤트에 추가 인터셉터
-regEventFx(
+// 특정 이벤트에 추가 미들웨어
+defineCommand(
   "NAVIGATE",
-  [injectCofx("dom-items"), stickyCoordInterceptor],
+  [inject("dom-items"), stickyCoordMiddleware],
   handler
 );
 ```
@@ -296,43 +296,43 @@ regEventFx(
 현재 문제: 컴포넌트가 ad-hoc으로 `store.getState().focusedItemId === id` 비교. 캐싱 없음.
 
 ```typescript
-// ── 제안: Layer 2/3 구독 ──
+// ── 제안: Layer 2/3 파생 상태 ──
 
 // Layer 2: db에서 직접 추출 (단순)
-regSub("active-zone-id", (db) => db.activeZoneId);
+defineComputed("active-zone-id", (db) => db.activeZoneId);
 
-regSub("zone-state", (db, [_, zoneId]) => db.zones.get(zoneId));
+defineComputed("zone-state", (db, [_, zoneId]) => db.zones.get(zoneId));
 
-regSub("focused-item", (db, [_, zoneId]) => db.zones.get(zoneId)?.focusedItemId);
+defineComputed("focused-item", (db, [_, zoneId]) => db.zones.get(zoneId)?.focusedItemId);
 
-// Layer 3: 다른 구독을 조합 (파생)
-regSub(
+// Layer 3: 다른 computed를 조합 (파생의 파생)
+defineComputed(
   "is-focused",
-  // 입력 구독
-  (args) => [subscribe(["focused-item", args[1]])],
+  // 입력 computed
+  (args) => [["focused-item", args[1]]],
   // 계산
   ([focusedItemId], [_, _zoneId, itemId]) => focusedItemId === itemId
 );
 
-regSub(
+defineComputed(
   "is-selected",
-  (args) => [subscribe(["zone-state", args[1]])],
+  (args) => [["zone-state", args[1]]],
   ([zone], [_, _zoneId, itemId]) => zone?.selection.includes(itemId) ?? false
 );
 
 // 컴포넌트에서 사용
 function FocusItem({ id }: { id: string }) {
   const { groupId } = useFocusGroupContext();
-  const isFocused = useSubscription(["is-focused", groupId, id]);
-  const isSelected = useSubscription(["is-selected", groupId, id]);
+  const isFocused = useComputed(["is-focused", groupId, id]);
+  const isSelected = useComputed(["is-selected", groupId, id]);
   // ...
 }
 ```
 
 **이점:**
-- 같은 구독을 여러 컴포넌트가 공유 → 한 번만 계산
+- 같은 computed를 여러 컴포넌트가 공유 → 한 번만 계산
 - Layer 3은 Layer 2가 바뀔 때만 재계산 → 불필요한 리렌더 방지
-- 구독 그래프를 DevTools에서 시각화 가능
+- computed 그래프를 DevTools에서 시각화 가능
 
 ---
 
@@ -423,9 +423,9 @@ KeyboardEvent
   → dispatch({ type: "NAVIGATE", payload: { direction: "up" } })  ← 단일 진입점
     │
     ├─ [Interceptor: before] transaction snapshot
-    ├─ [Interceptor: before] inject cofx (dom-items, zone-config)
+    ├─ [Middleware: before] inject ctx (dom-items, zone-config)
     │
-    ├─ handler(cofx, payload) → fx-map  ← 순수함수
+    ├─ handler(ctx, payload) → EffectMap  ← 순수함수
     │   { db: nextDb, focus: "item-3", scroll: "item-3" }
     │
     ├─ [Interceptor: after] transaction record
@@ -448,26 +448,26 @@ KeyboardEvent
 dispatch(event: { type: string; payload?: unknown }): void
 
 // ── 핸들러 등록 ──
-regEventDb(id: string, handler: (db, payload) => db): void
-regEventFx(id: string, handler: (cofx, payload) => FxMap): void
-regEventFx(id: string, interceptors: Interceptor[], handler): void
+defineHandler(id: string, handler: (db, payload) => db): void
+defineCommand(id: string, handler: (ctx, payload) => EffectMap): void
+defineCommand(id: string, interceptors: Middleware[], handler): void
 
 // ── 이펙트 등록 ──
-regFx(id: string, handler: (value: unknown) => void): void
+defineEffect(id: string, handler: (value: unknown) => void): void
 
-// ── 코이펙트 등록 ──
-regCofx(id: string, handler: (cofx: Cofx) => unknown): void
-injectCofx(id: string): Interceptor
+// ── 컨텍스트 등록 ──
+defineContext(id: string, handler: () => unknown): void
+inject(id: string): Middleware
 
-// ── 인터셉터 ──
-regGlobalInterceptor(interceptor: Interceptor): void
+// ── 미들웨어 ──
+use(middleware: Middleware): void
 
-// ── 구독 ──
-regSub(id: string, extractor: (db, args) => unknown): void
-regSub(id: string, inputFn: (args) => Sub[], computeFn: (inputs, args) => unknown): void
+// ── 파생 상태 ──
+defineComputed(id: string, extractor: (db, args) => unknown): void
+defineComputed(id: string, inputFn: (args) => Computed[], computeFn: (inputs, args) => unknown): void
 
 // ── React 바인딩 ──
-useSubscription(query: [string, ...unknown[]]): unknown
+useComputed(query: [string, ...unknown[]]): unknown
 useDispatch(): (event: OSEvent) => void
 
 // ── 스토어 ──
@@ -484,16 +484,16 @@ resetDb(db: DB): void
 ### Phase A: 코어 프레임워크 구현 (신규)
 
 1. `dispatch` + 이벤트 큐 (re-entrance safe)
-2. `regEventFx` + 핸들러 레지스트리
-3. `regFx` + 이펙트 실행기
-4. `regCofx` + 코이펙트 주입
-5. 인터셉터 체인
+2. `defineCommand` + 핸들러 레지스트리
+3. `defineEffect` + 이펙트 실행기
+4. `defineContext` + 컨텍스트 주입
+5. 미들웨어 체인
 
 ### Phase B: 기존 커맨드 마이그레이션
 
-1. OS 커맨드 (`NAVIGATE`, `SELECT`, `ACTIVATE` 등)를 `regEventFx`로 등록
-2. `executeDOMEffect` → `regFx("focus")`, `regFx("scroll")` 등으로 분리
-3. `buildContext` → `regCofx("dom-items")` 등으로 분리
+1. OS 커맨드 (`NAVIGATE`, `SELECT`, `ACTIVATE` 등)를 `defineCommand`로 등록
+2. `executeDOMEffect` → `defineEffect("focus")`, `defineEffect("scroll")` 등으로 분리
+3. `buildContext` → `defineContext("dom-items")` 등으로 분리
 
 ### Phase C: 상태 통합
 
@@ -503,7 +503,7 @@ resetDb(db: DB): void
 
 ### Phase D: 구독 시스템
 
-1. 기존 ad-hoc selector → `regSub` + `useSubscription`
+1. 기존 ad-hoc selector → `defineComputed` + `useComputed`
 2. FocusItem 리렌더 최적화 검증
 
 ---
@@ -528,11 +528,11 @@ re-frame의 모든 것을 가져오지 않는다. 우리에게 필요 없는 것
 |---|---|---|
 | 상태 저장소 | 3+ (focusData, ZoneStore×N, CommandEngine) | 1 (db) |
 | dispatch → result 단계 | 10+ (sensor→classify→route→engine→bus→intent→runOS→build→run→effect) | 6 (sensor→classify→resolve→dispatch→handler→fx) |
-| 이벤트 핸들러 등록 | 하드코딩 맵 | `regEventFx` 선언적 |
-| 이펙트 실행 | switch문 4 case | 플러그인 `regFx` (무제한 확장) |
+| 이벤트 핸들러 등록 | 하드코딩 맵 | `defineCommand` 선언적 |
+| 이펙트 실행 | switch문 4 case | 플러그인 `defineEffect` (무제한 확장) |
 | 컨텍스트 수집 | 매번 30+필드 전부 | 핸들러가 필요한 것만 선언 |
-| 테스트 | DOM 필요 (buildContext) | cofx 주입으로 순수 단위 테스트 |
-| 구독 최적화 | ad-hoc selector | 계층적 캐시 구독 |
+| 테스트 | DOM 필요 (buildContext) | ctx 주입으로 순수 단위 테스트 |
+| 구독 최적화 | ad-hoc selector | `defineComputed` 계층적 캐시 |
 | 코어 라이브러리 크기 | interactive-os에 결합 | ~500 LOC 독립 추출 가능 |
 
 ---
@@ -553,13 +553,13 @@ re-frame의 모든 것을 가져오지 않는다. 우리에게 필요 없는 것
    → 안: `db.app.[appId]` 네임스페이스로 격리하되 같은 스토어.
 
 4. **비동기 이펙트 (http, timer) 처리는?**
-   → `regFx("http", ...)` 안에서 `dispatch`로 결과 이벤트 발행.
+   → `defineEffect("http", ...)` 안에서 `dispatch`로 결과 이벤트 발행.
    → re-frame 동일 패턴. 별도 saga/thunk 불필요.
 
 5. **기존 미들웨어 (history, navigation, persistence)는?**
    → 인터셉터로 전환. `before`/`after` 페어로 자연스럽게 매핑.
-   → historyMiddleware → `historyInterceptor { before: snapshot, after: push }`
-   → navigationMiddleware → `regFx("focus")` + `regFx("scroll")`로 대체.
+   → historyMiddleware → `{ id: "history", before: snapshot, after: push }`
+   → navigationMiddleware → `defineEffect("focus")` + `defineEffect("scroll")`로 대체.
 
 ---
 
@@ -571,10 +571,10 @@ re-frame이 증명한 것: **작은 프레임워크 + 올바른 추상화 = 거�
 부족한 것은 **그것을 프레임워크 레벨의 프리미티브로 격상**하는 것이다.
 
 - `dispatch` → 단일 큐 (re-entrance safe)
-- `regEventFx` → 선언적 핸들러 (OS/앱 구분 없음)
-- `regFx` → 플러그인 이펙트 (확장 가능)
-- `regCofx` → 선언적 컨텍스트 (lazy, 테스트 가능)
-- `regSub` → 계층적 구독 (캐시, 리렌더 최적화)
+- `defineCommand` → 선언적 핸들러 (OS/앱 구분 없음)
+- `defineEffect` → 플러그인 이펙트 (확장 가능)
+- `defineContext` → 선언적 컨텍스트 (lazy, 테스트 가능)
+- `defineComputed` → 계층적 파생 상태 (캐시, 리렌더 최적화)
 
 이 5개가 코어 라이브러리의 전부다. **~500 LOC. 0 dependencies.**
 나머지(NAVIGATE, SELECT, FocusGroup, FocusItem)는 이 프리미티브 위에 선언적으로 작성된다.

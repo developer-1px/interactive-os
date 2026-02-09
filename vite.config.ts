@@ -17,6 +17,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      "@kernel": "/packages/kernel/src",
       "@os": "/src/os",
       "@apps": "/src/apps",
       "@": "/src",

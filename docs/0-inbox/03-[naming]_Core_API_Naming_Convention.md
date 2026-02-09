@@ -208,9 +208,9 @@ defineEffect("scroll", (id) => document.getElementById(id)?.scrollIntoView({ blo
 defineContext("dom-items", () => queryDOMItems(getDb().focus.activeZoneId));
 defineContext("zone-config", () => getZoneConfig(getDb().focus.activeZoneId));
 
-// 파생 쿼리
-defineQuery("focused-item", (db, [_, zoneId]) => db.focus.zones[zoneId]?.focusedItemId);
-defineQuery("is-focused", (db, [_, zoneId, itemId]) => db.focus.zones[zoneId]?.focusedItemId === itemId);
+// 파생 상태
+defineComputed("focused-item", (db, [_, zoneId]) => db.focus.zones[zoneId]?.focusedItemId);
+defineComputed("is-focused", (db, [_, zoneId, itemId]) => db.focus.zones[zoneId]?.focusedItemId === itemId);
 
 // 글로벌 미들웨어
 use(transactionMiddleware);
@@ -225,7 +225,7 @@ dispatch({ type: "navigate", payload: { direction: "down" } });
 
 // 컴포넌트에서
 function FocusItem({ id }: { id: string }) {
-  const isFocused = useQuery(["is-focused", groupId, id]);
+  const isFocused = useComputed(["is-focused", groupId, id]);
   const send = useDispatch();
 
   return <li data-focused={isFocused} onMouseDown={() => send({ type: "focus", payload: { id } })} />;
@@ -272,14 +272,15 @@ function FocusItem({ id }: { id: string }) {
 | `defineCofx` | ❌ | Clojure 용어 |
 | `defineInput` | ❌ | form input과 혼동 |
 
-### `defineQuery` + `useQuery` vs 대안
+### `defineComputed` + `useComputed` vs 대안
 
 | 후보 | 채택 | 이유 |
 |---|---|---|
-| `defineQuery` + `useQuery` | ✅ | TanStack Query와 동일 패턴. FE 개발자 모두 익숙 |
+| `defineComputed` + `useComputed` | ✅ | "계산된 파생 상태"라는 의미 정확. 캐싱 뉘앙스 내포. React 생태계에서 이름 충돌 없음 |
+| `defineQuery` + `useQuery` | ❌ | TanStack Query와 이름 충돌. 같은 프로젝트에서 공존 불가 |
 | `defineSelector` + `useSelector` | ❌ | Redux 패턴이지만 "구독 + 캐시 + 계층" 의미가 약함 |
+| `defineDerived` + `useDerived` | ❌ | Svelte 패턴. 의미는 맞으나 인지도가 낮음 |
 | `defineSub` + `useSubscription` | ❌ | re-frame 직역. FE에서 낯섦 |
-| `defineComputed` + `useComputed` | ❌ | Vue 패턴. React 진영에서 어색 |
 
 ### `inject` vs 대안
 
@@ -318,7 +319,7 @@ function FocusItem({ id }: { id: string }) {
 │  defineCommand(id, fn)     이펙트를 선언하는 커맨드     │
 │  defineEffect(id, fn)      이펙트 실행기               │
 │  defineContext(id, fn)      읽기 컨텍스트 제공자        │
-│  defineQuery(id, fn)        파생 상태 쿼리             │
+│  defineComputed(id, fn)     파생 상태 (캐시/구독)       │
 ├─────────────────────────────────────────────────────┤
 │  런타임                                               │
 │                                                     │
@@ -328,7 +329,7 @@ function FocusItem({ id }: { id: string }) {
 ├─────────────────────────────────────────────────────┤
 │  React 훅                                            │
 │                                                     │
-│  useQuery([id, ...args])   구독 (자동 캐시/최적화)     │
-│  useDispatch()             dispatch 함수 획득          │
+│  useComputed([id, ...args])  파생 상태 구독            │
+│  useDispatch()               dispatch 함수 획득        │
 └─────────────────────────────────────────────────────┘
 ```

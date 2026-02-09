@@ -69,12 +69,12 @@ re-frame(2015)은 LLM을 위해 만들어진 게 아니다.
 
 ```typescript
 // 이 함수를 "작성해줘"라고 하면 LLM은 거의 완벽하게 만든다.
-// 왜? 입력(cofx, payload)과 출력(fx-map)이 타입으로 명확하기 때문.
+// 왜? 입력(ctx, payload)과 출력(EffectMap)이 타입으로 명확하기 때문.
 
-regEventFx("NAVIGATE", (cofx, payload) => {
-  const { db } = cofx;
+defineCommand("NAVIGATE", (ctx, payload) => {
+  const { db } = ctx;
   const zone = db.focus.zones[db.focus.activeZoneId];
-  const items = cofx["dom-items"];
+  const items = ctx["dom-items"];
   const nextId = findNext(items, zone.focusedItemId, payload.direction);
 
   return {
@@ -88,8 +88,8 @@ regEventFx("NAVIGATE", (cofx, payload) => {
 ```
 
 LLM에게 이 작업을 시키려면 필요한 것:
-1. `cofx`의 타입 정의 (무엇을 읽을 수 있는가)
-2. 반환하는 fx-map의 타입 정의 (무엇을 선언할 수 있는가)
+1. `ctx`의 타입 정의 (무엇을 읽을 수 있는가)
+2. 반환하는 EffectMap의 타입 정의 (무엇을 선언할 수 있는가)
 3. 기존 핸들러 예시 1~2개
 
 **3개의 정보만으로 새로운 커맨드를 완벽하게 생성할 수 있다.**
@@ -128,14 +128,14 @@ function handleNavigate(direction: string) {
 
 ```typescript
 // 안전: LLM이 이런 코드를 만들면 — 틀려도 부수효과 없음
-regEventFx("NAVIGATE", (cofx, payload) => {
-  const nextId = findNext(cofx["dom-items"], cofx.db.focusedItemId, payload.direction);
-  return { db: setFocused(cofx.db, nextId), focus: nextId, scroll: nextId };
+defineCommand("NAVIGATE", (ctx, payload) => {
+  const nextId = findNext(ctx["dom-items"], ctx.db.focusedItemId, payload.direction);
+  return { db: setFocused(ctx.db, nextId), focus: nextId, scroll: nextId };
 });
 // 반환값이 데이터일 뿐이므로:
 // - 틀리면 타입 에러 (컴파일 단계에서 차단)
 // - 실행해봐도 fx executor가 검증 (알 수 없는 이펙트 키 경고)
-// - 테스트로 즉시 확인 (cofx 주입 → fx-map 비교)
+// - 테스트로 즉시 확인 (ctx 주입 → EffectMap 비교)
 ```
 
 > **LLM이 만든 코드가 틀렸을 때의 폭발 반경(blast radius)이 완전히 다르다.**
@@ -155,7 +155,7 @@ LLM 에이전트에게 "새 기능 추가"를 시키는 시나리오:
 → 3. commandMap에 등록
 → 4. resolveKeybinding에 바인딩 추가
 → 5. executeDOMEffect에 새 effect 추가 (필요하면)
-→ 6. buildContext에 새 cofx 추가 (필요하면)
+→ 6. buildContext에 새 ctx 추가 (필요하면)
 → 기존 파일 4~6개 수정. 하나라도 빠지면 런타임 에러.
 ```
 
@@ -163,7 +163,7 @@ LLM 에이전트에게 "새 기능 추가"를 시키는 시나리오:
 ```
 "DRAG_START 커맨드를 추가해줘"
 → 1. dragStart.ts 파일 생성
-→ 2. regEventFx("DRAG_START", handler) 작성
+→ 2. defineCommand("DRAG_START", handler) 작성
 → 3. 끝.
 ```
 
@@ -239,20 +239,20 @@ LLM은 이 로그만 보고:
 
 **재현 스크립트를 작성할 필요가 없다. 로그 자체가 재현이다.**
 
-### 3.6 cofx 주입 → DOM 없이 테스트 가능 → CI에서 LLM이 검증
+### 3.6 ctx 주입 → DOM 없이 테스트 가능 → CI에서 LLM이 검증
 
 LLM 에이전트가 코드를 작성한 뒤 **스스로 테스트를 돌려 검증**하는 시대다.
 
 ```typescript
 // LLM이 작성한 테스트 — DOM 불필요, 브라우저 불필요
 test("NAVIGATE down moves to next item", () => {
-  const cofx = {
+  const ctx = {
     db: { focus: { activeZoneId: "list", zones: { list: { focusedItemId: "item-1" } } } },
     "dom-items": ["item-1", "item-2", "item-3"],
     "zone-config": { navigate: { orientation: "vertical", loop: false } },
   };
 
-  const fx = handleNavigate(cofx, { direction: "down" });
+  const fx = handleNavigate(ctx, { direction: "down" });
 
   expect(fx.db.focus.zones.list.focusedItemId).toBe("item-2");
   expect(fx.focus).toBe("item-2");
@@ -266,9 +266,9 @@ test("NAVIGATE down moves to next item", () => {
 - LLM이 DOM fixture를 정확하게 만들기 어려움
 - CI가 느리고 불안정
 
-cofx 주입 패턴에서는:
+ctx 주입 패턴에서는:
 - **순수 JavaScript 객체만으로 테스트**
-- LLM이 cofx를 만들고, fx-map을 검증
+- LLM이 ctx를 만들고, EffectMap을 검증
 - 0.1ms에 100개 케이스 실행
 - CI에서 LLM이 자신의 코드를 즉시 검증 가능
 
@@ -282,13 +282,13 @@ cofx 주입 패턴에서는:
 
 | # | 원칙 | 근거 | 우리의 적용 |
 |---|---|---|---|
-| 1 | **함수는 순수하게** | LLM은 `(input) → output`을 가장 정확하게 작성한다 | `regEventFx` 핸들러 |
-| 2 | **부수효과는 데이터로** | LLM이 만든 코드의 폭발 반경을 제한한다 | fx-map 반환 |
+| 1 | **함수는 순수하게** | LLM은 `(input) → output`을 가장 정확하게 작성한다 | `defineCommand` 핸들러 |
+| 2 | **부수효과는 데이터로** | LLM이 만든 코드의 폭발 반경을 제한한다 | EffectMap 반환 |
 | 3 | **상태는 한 곳에** | LLM이 시스템 상태를 즉시 파악할 수 있다 | 단일 `db` |
-| 4 | **기능 추가는 파일 추가로** | 기존 코드 수정 없이 확장한다 (회귀 버그 0) | `regEventFx`, `regFx` 레지스트리 |
+| 4 | **기능 추가는 파일 추가로** | 기존 코드 수정 없이 확장한다 (회귀 버그 0) | `defineCommand`, `defineEffect` 레지스트리 |
 | 5 | **모든 변경은 기록** | 버그 리포트 = 재현 스크립트 | 트랜잭션 로그 |
 | 6 | **타입이 곧 문서** | LLM은 타입 정의를 읽고 올바른 코드를 유추한다 | 엄격한 TypeScript |
-| 7 | **테스트는 DOM 없이** | LLM이 작성한 코드를 즉시 검증할 수 있다 | cofx 주입 |
+| 7 | **테스트는 DOM 없이** | LLM이 작성한 코드를 즉시 검증할 수 있다 | ctx 주입 |
 | 8 | **간접층은 최소로** | LLM의 컨텍스트 윈도우는 유한하다 | dispatch → handler → fx (3단계) |
 | 9 | **관례보다 구조** | LLM은 암묵적 규칙을 모른다. 구조가 강제해야 한다 | 파이프라인, 레지스트리 |
 | 10 | **작은 파일, 단일 책임** | LLM은 200줄 파일을 완벽히 이해한다. 2000줄은 못 한다 | 200줄 상한 |
@@ -325,26 +325,26 @@ cofx 주입 패턴에서는:
 2. 새 파일 작성:
 
    // dragHandlers.ts
-   regEventFx("DRAG_START", (cofx, { itemId }) => ({
-     db: assocIn(cofx.db, ["drag", "activeItem"], itemId),
+   defineCommand("DRAG_START", (ctx, { itemId }) => ({
+     db: assocIn(ctx.db, ["drag", "activeItem"], itemId),
      "drag-image": itemId,
    }));
 
-   regEventFx("DRAG_OVER", (cofx, { targetId }) => ({
-     db: assocIn(cofx.db, ["drag", "overTarget"], targetId),
+   defineCommand("DRAG_OVER", (ctx, { targetId }) => ({
+     db: assocIn(ctx.db, ["drag", "overTarget"], targetId),
      "drop-indicator": targetId,
    }));
 
-   regEventFx("DROP", (cofx, { targetId }) => ({
-     db: reorderItem(cofx.db, cofx.db.drag.activeItem, targetId),
+   defineCommand("DROP", (ctx, { targetId }) => ({
+     db: reorderItem(ctx.db, ctx.db.drag.activeItem, targetId),
      dispatch: { type: "app/items-reordered" },
    }));
 
 3. 새 파일 작성:
 
    // dragEffects.ts
-   regFx("drag-image", (itemId) => { ... });
-   regFx("drop-indicator", (targetId) => { ... });
+   defineEffect("drag-image", (itemId) => { ... });
+   defineEffect("drop-indicator", (targetId) => { ... });
 
 4. 새 파일 작성:
 
@@ -375,7 +375,7 @@ re-frame 스타일 아키텍처가 사람에게도 좋은 이유:
 
 3. **코드 리뷰**: 핸들러가 순수함수이므로 PR의 diff만 보고 "입력 대비 출력이 맞는지" 판단 가능. 부수효과 추적 불필요.
 
-4. **테스트 작성**: cofx를 만들고 fx-map을 비교. DOM 셋업 코드 0줄.
+4. **테스트 작성**: ctx를 만들고 EffectMap을 비교. DOM 셋업 코드 0줄.
 
 **LLM에게 좋은 구조는 사람에게도 좋은 구조다.**
 명시적이고, 추적 가능하고, 테스트 가능한 코드는 누가 읽든 이해하기 쉽다.
