@@ -1,7 +1,9 @@
 import { dispatch } from "./dispatch.ts";
+import type {
+  InternalEffectHandler,
+  MiddlewareContext,
+} from "./internal-types.ts";
 import {
-  type InternalEffectHandler,
-  type MiddlewareContext,
   scopedCommands,
   scopedEffects,
   scopedInterceptors,

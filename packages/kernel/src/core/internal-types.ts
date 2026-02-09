@@ -1,4 +1,4 @@
-import type { Command, ContextToken, ScopeToken } from "./tokens.ts";
+import type { Command, ScopeToken } from "./tokens.ts";
 
 /** Internal command handler (curried: ctx → payload → effects) */
 export type InternalCommandHandler = (ctx: any) => (payload?: any) => any;

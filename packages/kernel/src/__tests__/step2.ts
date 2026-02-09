@@ -6,13 +6,12 @@
  */
 
 import {
-  clearAllRegistries,
-  clearTransactions,
   createKernel,
   dispatch,
   GLOBAL,
   getTransactions,
   initKernel,
+  resetKernel,
   state,
 } from "../index.ts";
 
@@ -150,7 +149,7 @@ assert(
 // --- Test 4: Multiple middlewares — order ---
 console.log("\n─── middleware order ───");
 
-clearAllRegistries();
+resetKernel();
 const orderLog: string[] = [];
 
 // Re-register INCREMENT after clear
@@ -207,7 +206,7 @@ assert(
 // --- Test 5: Middleware dedup by id ---
 console.log("\n─── middleware dedup ───");
 
-clearAllRegistries();
+resetKernel();
 const dedupLog: string[] = [];
 
 const INCREMENT3 = kernel.defineCommand("INCREMENT", (ctx) => () => ({
@@ -239,8 +238,7 @@ assert(dedupLog[0] === "v2", `dedup: latest version ran: "${dedupLog[0]}"`);
 // --- Test 6: Transaction log records middleware-modified command ---
 console.log("\n─── transaction records transformed command ───");
 
-clearTransactions();
-clearAllRegistries();
+resetKernel();
 
 void kernel.defineCommand("ALIASED", (ctx) => () => ({
   state: { ...ctx.state, count: 777 },
