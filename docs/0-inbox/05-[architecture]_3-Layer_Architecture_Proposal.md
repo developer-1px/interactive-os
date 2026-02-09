@@ -95,7 +95,7 @@ defineContext("dom-items", () => queryItems(activeZoneId))
 defineContext("dom-rects", () => queryRects(domItems))
 defineContext("zone-config", () => zoneRegistry.get(activeZoneId))
 
-defineComputed("focused-item", (db, [_, zoneId]) => ...)
+defineComputed("focused-item", (state, [_, zoneId]) => ...)
 defineComputed("is-focused", ...)
 defineComputed("is-selected", ...)
 
@@ -119,11 +119,11 @@ defineScope(zoneId, { parent: parentZoneId })
 ```typescript
 // App이 Kernel 위에 등록하는 것
 defineCommand("TODO_TOGGLE_DONE", (ctx, { id }) => {
-  return { db: toggleDone(ctx.db, id) };
+  return { state: toggleDone(ctx.state, id) };
 })
 
 defineCommand("TODO_DELETE", (ctx, { id }) => {
-  return { db: deleteTodo(ctx.db, id), focus: recoveryId };
+  return { state: deleteTodo(ctx.state, id), focus: recoveryId };
 })
 
 // App이 OS primitive에 바인딩하는 것
@@ -138,9 +138,9 @@ defineCommand("TODO_DELETE", (ctx, { id }) => {
 
 ```
 ┌───────────────────────────────────────────────────┐
-│  Kernel DB (단일 상태 트리)                         │
+│  Kernel State (단일 상태 트리)                        │
 │                                                   │
-│  db.os ──────────────────────────────────────────  │
+│  state.os ─────────────────────────────────────── │
 │  │  focus:                                        │
 │  │    activeZoneId: "todo-list"                    │
 │  │    focusStack: [{ zoneId, itemId }]            │
@@ -150,7 +150,7 @@ defineCommand("TODO_DELETE", (ctx, { id }) => {
 │  │  input:                                        │
 │  │    source: "keyboard"                          │
 │  │                                                │
-│  db.app ─────────────────────────────────────────  │
+│  state.app ────────────────────────────────────── │
 │  │  activeAppId: "todo"                           │
 │  │  todo:                                         │
 │  │    data: { todos, todoOrder }                  │
@@ -161,7 +161,7 @@ defineCommand("TODO_DELETE", (ctx, { id }) => {
 │  │    ui: { editingCardId }                       │
 │  │    history: { past, future }                   │
 │  │                                                │
-│  db.scopes ──────────────────────────────────────  │
+│  state.scopes ─────────────────────────────────── │
 │  │  "todo-list": { parent: null, handlers: {...}} │
 │  │  "kanban-board": { parent: null }              │
 │  │  "kanban-col-1": { parent: "kanban-board" }    │
@@ -170,14 +170,14 @@ defineCommand("TODO_DELETE", (ctx, { id }) => {
 ```
 
 **핵심 원칙:**
-- `db.os`는 App 데이터를 절대 포함하지 않는다
-- `db.app`은 Focus 상태를 절대 포함하지 않는다
-- `db.scopes`는 Kernel이 관리하는 스코프 계층 (Zone = Scope)
+- `state.os`는 App 데이터를 절대 포함하지 않는다
+- `state.app`은 Focus 상태를 절대 포함하지 않는다
+- `state.scopes`는 Kernel이 관리하는 스코프 계층 (Zone = Scope)
 - 하나의 Zustand 스토어, 하지만 **namespace로 격리**
 
-### 2.2 왜 하나의 DB인가
+### 2.2 왜 하나의 State인가
 
-| 분리 스토어 (현재) | 통합 DB (제안) |
+| 분리 스토어 (현재) | 통합 State (제안) |
 |---|---|
 | FocusData(전역변수) + Zone스토어×N + CommandEngine | 하나의 Zustand 스토어 |
 | 스냅샷 불가능 (분산) | 트랜잭션 로그에 전체 상태 기록 가능 |
@@ -187,7 +187,7 @@ defineCommand("TODO_DELETE", (ctx, { id }) => {
 
 **리렌더 우려 해소:**
 Zone A가 변경되어도 Zone B가 리렌더되지 않는다.
-`useComputed(["is-focused", "zone-b", "item-1"])`는 `db.os.focus.zones["zone-b"]`만 참조하므로.
+`useComputed(["is-focused", "zone-b", "item-1"])`는 `state.os.focus.zones["zone-b"]`만 참조하므로.
 Zustand의 selector 비교가 이를 보장한다.
 
 ---
@@ -220,13 +220,13 @@ defineEffect("analytics", (event) => mixpanel.track(event));
 
 // 둘 다 같은 EffectMap으로 선언
 defineCommand("NAVIGATE", (ctx, payload) => ({
-  db: nextDb,
+  state: nextState,
   focus: "item-3",    // ← OS effect
   scroll: "item-3",   // ← OS effect
 }));
 
 defineCommand("TODO_ADD", (ctx, payload) => ({
-  db: nextDb,
+  state: nextState,
   focus: newItemId,    // ← OS effect (앱이 OS effect도 쓸 수 있다!)
   toast: "Added!",     // ← App effect
 }));
@@ -240,21 +240,21 @@ defineCommand("TODO_ADD", (ctx, payload) => ({
 
 ```typescript
 function executeFx(effectMap: EffectMap): void {
-  // 1. db는 항상 먼저 (상태 업데이트)
-  if ("db" in effectMap) {
-    fxRegistry.get("db")!(effectMap.db);
+  // 1. state는 항상 먼저 (상태 업데이트)
+  if ("state" in effectMap) {
+    fxRegistry.get("state")!(effectMap.state);
   }
 
   // 2. 나머지 effect는 등록 순서대로
   for (const [key, value] of Object.entries(effectMap)) {
-    if (key === "db") continue;
+    if (key === "state") continue;
     const executor = fxRegistry.get(key);
     if (executor) executor(value);
   }
 }
 ```
 
-**`db`가 먼저인 이유:**
+**`state`가 먼저인 이유:**
 다른 effect(focus, scroll)가 실행될 때 새 상태가 이미 반영되어 있어야 한다.
 React가 새 아이템을 렌더한 후에 그 아이템으로 focus를 이동하는 식.
 
@@ -619,7 +619,7 @@ User: ArrowDown in todo-list
   ▼
 [Handler Execution]
   NAVIGATE.run(ctx, { direction: "down" })
-  → { db: nextDb, focus: "item-2", scroll: "item-2" }
+  → { state: nextState, focus: "item-2", scroll: "item-2" }
   │
   ▼
 [Middleware: after]
@@ -627,7 +627,7 @@ User: ArrowDown in todo-list
   │
   ▼
 [Effect Execution]
-  fx("db") → store.setState(nextDb)
+  fx("state") → store.setState(nextState)
   fx("focus") → document.getElementById("item-2").focus()
   fx("scroll") → document.getElementById("item-2").scrollIntoView()
 ```
@@ -661,7 +661,7 @@ User: Enter in kanban-card-list (onAction={EditCard} 바인딩됨)
     │
     ▼
   [Kernel] dispatch({ type: "EDIT_CARD", payload: { id: "card-3" } })
-    → __global__ → App EDIT_CARD handler → { db: nextDb, focus: "card-3-input" }
+    → __global__ → App EDIT_CARD handler → { state: nextState, focus: "card-3-input" }
   │
   ▼
 [OS의 기본 ACTIVATE는 실행되지 않음]
@@ -687,14 +687,14 @@ User: Delete in todo-list
 [Handler]
   TODO_DELETE.run(ctx, { id: "todo-5" })
   → {
-      db: deleteTodo(ctx.db, "todo-5"),  // 상태에서 제거
+      state: deleteTodo(ctx.state, "todo-5"),  // 상태에서 제거
       focus: "todo-6",                    // ← OS effect! 다음 아이템으로 포커스
       toast: "Deleted",                   // ← App effect
     }
   │
   ▼
 [Effect Execution]
-  fx("db") → 상태 업데이트
+  fx("state") → 상태 업데이트
   fx("focus") → todo-6에 포커스
   fx("toast") → 토스트 표시
 ```
@@ -712,7 +712,7 @@ User: Delete in todo-list
 dispatch(event: { type: string; payload?: unknown }): void
 
 // ── Handler Registration ──
-defineHandler(id: string, handler: (db: DB, payload: any) => DB): void
+defineHandler(id: string, handler: (state: State, payload: any) => State): void
 defineCommand(id: string, handler: (ctx: Ctx, payload: any) => EffectMap): void
 defineCommand(id: string, interceptors: Interceptor[], handler): void
 defineCommand(id: string, options: { scope: string }, handler): void
@@ -736,15 +736,15 @@ defineKeybinding(binding: { key: string; command: string; args?: any; scope?: st
 resolveKeybinding(key: string, context: ResolveContext): { command: string; args: any } | null
 
 // ── Computed (Subscriptions) ──
-defineComputed(id: string, extractor: (db: DB, args: any[]) => unknown): void
+defineComputed(id: string, extractor: (state: State, args: any[]) => unknown): void
 useComputed(query: [string, ...unknown[]]): unknown
 
 // ── Middleware ──
 use(middleware: Middleware): void
 
 // ── Store ──
-getDb(): DB
-resetDb(db: DB): void
+getState(): State
+resetState(state: State): void
 
 // ── React Binding ──
 useDispatch(): (event: Event) => void
@@ -762,7 +762,7 @@ kernel/
 ├── keybinding.ts        // key → command resolution
 ├── computed.ts          // subscription graph + caching
 ├── middleware.ts        // interceptor chain (before/after)
-├── store.ts             // Zustand store wrapper (getDb/resetDb)
+├── store.ts             // Zustand store wrapper (getState/resetState)
 └── index.ts             // public API exports
 ```
 
@@ -829,7 +829,7 @@ OS를 거칠 필요가 없다. Kernel에 직접 등록한다.
 | `roleRegistry` | Zone role → config 매핑 |
 | `classifyKeyboard` | 키 입력 분류 (COMMAND vs FIELD) |
 | `useKeyboardEvents` | 키보드 센서 |
-| `focusGroupStore` slices | Zone별 상태 (→ `db.os.focus.zones`로 이동) |
+| `focusGroupStore` slices | Zone별 상태 (→ `state.os.focus.zones`로 이동) |
 
 ### 10.3 현재 → App으로 유지
 
@@ -875,15 +875,15 @@ OS를 거칠 필요가 없다. Kernel에 직접 등록한다.
 1. 앱 커맨드를 defineCommand로 등록
 2. AppCommand의 scoped handler 등록 (Zone onAction → defineScopedHandler)
 3. App effect를 defineEffect로 등록
-4. App state를 db.app에 통합
+4. App state를 state.app에 통합
 ```
 
 ### Phase 4: 상태 통합
 
 ```
-1. FocusData + Zone스토어×N → db.os.focus
-2. CommandEngineStore → db.app (또는 Kernel registry)
-3. WeakMap 기반 zone data → db.scopes + zone registry
+1. FocusData + Zone스토어×N → state.os.focus
+2. CommandEngineStore → state.app (또는 Kernel registry)
+3. WeakMap 기반 zone data → state.scopes + zone registry
 4. defineComputed + useComputed 도입
 ```
 
@@ -896,18 +896,18 @@ OS를 거칠 필요가 없다. Kernel에 직접 등록한다.
 현재: 모든 keybinding이 global이고, Zone binding(onAction 등)으로 커맨드를 오버라이드.
 제안: 대부분의 경우 이 모델이면 충분하다. scope keybinding은 Phase 2 이후에 필요하면 추가.
 
-### Q2: App state를 db에 넣을 것인가, 별도 스토어로 둘 것인가?
+### Q2: App state를 state에 넣을 것인가, 별도 스토어로 둘 것인가?
 
-**옵션 A: db.app에 통합**
+**옵션 A: state.app에 통합**
 - 장점: 하나의 스냅샷으로 전체 상태 캡처. 리플레이 완전.
-- 단점: 앱 독립성 약화. 앱 교체 시 db 구조 변경.
+- 단점: 앱 독립성 약화. 앱 교체 시 state 구조 변경.
 
 **옵션 B: 앱별 별도 스토어, Kernel은 dispatch만 라우팅**
 - 장점: 앱 독립성 최대. 현재 구조 유지.
 - 단점: 트랜잭션 로그에 앱 상태 포함 어려움.
 
 **현재 추천: 옵션 B에서 시작, 필요하면 A로 전환.**
-01 제안서에서 제기한 "단일 db" 이상은 유지하되, 실용적으로 앱 스토어를 먼저 분리.
+01 제안서에서 제기한 "단일 state" 이상은 유지하되, 실용적으로 앱 스토어를 먼저 분리.
 
 ### Q3: bubble: true (계속 전파)가 실제로 필요한가?
 

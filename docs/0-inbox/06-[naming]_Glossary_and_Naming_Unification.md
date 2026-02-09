@@ -20,7 +20,7 @@
 |---|---|---|
 | D1 | 디스패치 데이터 = **Command** (Event ❌) | DOM `Event`와 이름 충돌. `useQuery` 사례와 동일 |
 | D2 | **ZoneState ≠ ZoneSnapshot** — 공존 | 런타임 상태와 직렬화 스냅샷은 용도가 다르다 |
-| D3 | 상태 트리 루트 = **보류** (DB vs OSState) | 구조 설계와 연동. 추후 결정 |
+| D3 | 상태 트리 루트 = **State** | `DB` (re-frame), `OSState` (레거시) 모두 대체 |
 | D4 | Middleware = **re-frame `{ id, before, after }`** | 패턴 전환 (Redux 스타일에서) |
 | D5 | Handler = **통일** (별도 타입명 불필요) | `defineHandler`는 sugar. 내부적으로 Handler로 wrap |
 | D6 | 센서/파이프라인 타입 = **glossary 범위** | 내부 타입도 네이밍 일관성 필요 |
@@ -114,7 +114,7 @@ src/
 | 핸들러 읽기 컨텍스트 | `ctx` | `OSContext` | `cofx`, `Context` | **Context** |
 | 핸들러 전후 훅 | `Middleware` (Redux) | `OSMiddleware` (Redux) | `Interceptor`, `Middleware` | **Middleware** `{ id, before, after }` (D4) |
 | 파생 상태 | (없음) | (없음) | `Subscription`, `Computed` | **Computed** |
-| 전체 상태 트리 | — | `OSState` | `db`, `DB`, `Store` | **보류** (D3) |
+| 전체 상태 트리 | — | `OSState` | `db`, `DB`, `Store` | **State** (D3) |
 | Zone 런타임 상태 | — | `FocusGroupState` | `ZoneState` | **ZoneState** (D2) |
 | Zone 직렬화 스냅샷 | — | `ZoneSnapshot` | — | **ZoneSnapshot** (D2) |
 | Zone별 설정 | — | `FocusGroupConfig` | `ZoneConfig` | **ZoneConfig** |
@@ -148,7 +148,7 @@ src/
 | **scope** | Kernel 버블링 계층 단위. zone은 scope의 OS 활용. | layer, level |
 | **command** | 디스패치되는 데이터 `{ type, payload }` | event (DOMEvent 충돌), action (Redux) |
 | **handler** | 커맨드 처리 순수함수. 시그니처 통일: `(ctx, payload) → EffectMap` | — |
-| **effect map** | 핸들러 반환 이펙트 선언 `{ db, focus, scroll, ... }` | result, fx-map |
+| **effect map** | 핸들러 반환 이펙트 선언 `{ state, focus, scroll, ... }` | result, fx-map |
 | **DOM effect** | 실제 DOM 조작 `{ type: "FOCUS", targetId }` | — |
 | **effect executor** | DOM effect 실행 함수. `defineEffect`로 등록. | effect handler (handler와 혼동) |
 | **context** | 핸들러가 받는 읽기 전용 데이터 | cofx, coeffects |
@@ -167,11 +167,11 @@ src/
 | 이름 | 역할 | 시그니처 |
 |---|---|---|
 | `dispatch` | 커맨드 발행 | `(cmd: Command) → void` |
-| `defineHandler` | 순수 상태 핸들러 등록 (sugar) | `(id, (db, payload) → db) → void` |
+| `defineHandler` | 순수 상태 핸들러 등록 (sugar) | `(id, (state, payload) → state) → void` |
 | `defineCommand` | 이펙트 반환 핸들러 등록 | `(id, (ctx, payload) → EffectMap) → void` |
 | `defineEffect` | Effect executor 등록 | `(id, (value) → void) → void` |
 | `defineContext` | Context provider 등록 | `(id, () → value) → void` |
-| `defineComputed` | 파생 상태 등록 | `(id, (db, args) → value) → void` |
+| `defineComputed` | 파생 상태 등록 | `(id, (state, args) → value) → void` |
 | `inject` | 핸들러에 context 주입 | `(id) → Middleware` |
 | `use` | 글로벌 middleware 등록 | `(middleware) → void` |
 | `defineScope` | Scope 등록 (버블링 노드) | `(id, { parent? }) → void` |
@@ -179,11 +179,11 @@ src/
 | `defineKeybinding` | 키 → 커맨드 매핑 | `({ key, command, ... }) → void` |
 | `useComputed` | React 훅: 파생 상태 구독 | `([id, ...args]) → T` |
 | `useDispatch` | React 훅: dispatch 획득 | `() → (cmd) → void` |
-| `getDb` | 상태 트리 스냅샷 읽기 | `() → DB` |
-| `resetDb` | 상태 트리 초기화 | `(db) → void` |
+| `getState` | 상태 트리 스냅샷 읽기 | `() → State` |
+| `resetState` | 상태 트리 초기화 | `(state) → void` |
 
-> `defineHandler`는 `defineCommand`의 sugar다. 내부적으로 `(db, payload) => db`를
-> `(ctx, payload) => ({ db: fn(ctx.db, payload) })`로 wrap한다. (D5)
+> `defineHandler`는 `defineCommand`의 sugar다. 내부적으로 `(state, payload) => state`를
+> `(ctx, payload) => ({ state: fn(ctx.state, payload) })`로 wrap한다. (D5)
 
 ### 5.3 타입 (Type) — Kernel / OS 공통
 
@@ -194,10 +194,10 @@ src/
 | `Command` | `{ type: string; payload?: unknown }` | `BaseCommand` | rename |
 | `CommandDef<P>` | `{ id: string; run: Handler<P>; log?: boolean }` | `OSCommand<P>` (신규), `CommandFactory` (레거시) | rename |
 | `Handler<P>` | `(ctx: Context, payload: P) → EffectMap \| null` | `OSCommand.run` | rename |
-| `EffectMap` | `{ db?, focus?, scroll?, dispatch?, ... }` | `OSResult` (구조 다름) | rename + 구조 변경 |
+| `EffectMap` | `{ state?, focus?, scroll?, dispatch?, ... }` | `OSResult` (구조 다름) | rename + 구조 변경 |
 | `DOMEffect` | `{ type: "FOCUS"\|"SCROLL_INTO_VIEW"\|"CLICK"\|"BLUR"; targetId? }` | `DOMEffect` | 유지 |
 | `EffectRecord` | `{ source, action, targetId, executed, reason }` | `EffectRecord` | 유지 |
-| `Context` | `{ db; [injectedKey]: unknown }` | `OSContext` (레거시) | (제안) |
+| `Context` | `{ state; [injectedKey]: unknown }` | `OSContext` (레거시) | (제안) |
 | `Middleware` | `{ id: string; before?; after? }` | — (현재 Redux 스타일) | (제안) — D4 |
 | `ZoneState` | `{ focusedItemId, selection, ... }` (런타임) | `FocusGroupState` | rename |
 | `ZoneSnapshot` | `{ id, focusedItemId, selection, ... }` (직렬화) | `ZoneSnapshot` | 유지 |
@@ -400,7 +400,6 @@ interface FocusState {
 |---|---|---|
 | `ctx` | Context | 핸들러 파라미터 |
 | `cmd` | Command | 변수명 |
-| `db` | Database (상태 트리) | `getDb()`, `ctx.db` |
 | `id` | Identifier | 모든 곳 |
 | `ref` | Reference | React ref |
 | `props` | Properties | React props |
@@ -412,6 +411,7 @@ interface FocusState {
 
 | ❌ 약어 | 대신 사용 |
 |---|---|
+| `db` | `state` |
 | `fx` | `effect` 또는 `effectMap` |
 | `cofx` | `ctx` |
 | `mw` | `middleware` |
@@ -467,7 +467,7 @@ interface FocusState {
 
 | re-frame | 확정 | 비고 |
 |---|---|---|
-| `app-db` | **보류** (D3) | 전체 상태 트리 |
+| `app-db` | **State** (D3) | 전체 상태 트리 |
 | `reg-event-fx` | `defineCommand` | 함수명 |
 | `reg-event-db` | `defineHandler` | 함수명 (sugar) |
 | `reg-fx` | `defineEffect` | 함수명 |
@@ -531,7 +531,7 @@ interface FocusState {
 | `Event` (데이터 타입, 03 문서) | **Command** (D1) | **03 문서 수정 필요** |
 | `Interceptor` (05 문서 Section 8) | **Middleware** (D4) | **05 문서 수정 필요** |
 | `Scope` (Kernel 계층, 05 문서) | **Scope** | 유지 (제안) |
-| `DB` (01/05 문서) | **보류** (D3) | 구조 설계와 연동 |
+| `DB` (01/05 문서) | **State** (D3) | 용어 통일 |
 | 나머지 (`defineCommand`, `EffectMap`, `Computed` 등) | 동일 | — |
 
 ---
@@ -565,7 +565,7 @@ interface OSResult {
 
 // 제안 문서
 type EffectMap = {
-  db?: DB;
+  state?: State;
   focus?: string;
   scroll?: string;
   dispatch?: Command;
@@ -657,7 +657,7 @@ Phase 5: 개념어 통일 (주석, 문서)
 
 | # | 발견 | 상태 |
 |---|---|---|
-| D3 | 상태 트리 루트 타입: DB vs OSState | **보류** |
+| D3 | 상태 트리 루트 타입 | **확정: State** |
 | — | `FocusGroupStore`가 OSContext.store로 노출됨 | 마이그레이션 시 Context 재설계로 해결 |
 | — | os-new 커맨드가 레거시 OSContext를 import | 마이그레이션 시 해결 |
 
@@ -665,10 +665,10 @@ Phase 5: 개념어 통일 (주석, 문서)
 
 ## 12. 열린 질문 — 남은 결정
 
-### Q1. 상태 트리 루트 타입: DB vs OSState? (D3 — 보류)
+### Q1. 상태 트리 루트 타입: DB vs OSState? (D3 — ✅ 확정: State)
 
-- `DB`: re-frame 관용어. 짧고 개념적. 01/05/06 문서가 사용.
-- `OSState`: 현재 코드. "이것은 OS 상태다"는 의미 명확.
-- **연관 결정:** 이름을 바꾸면 구조도 바뀌나? (`OSState` → `DB = { os, app, scopes }`)
+- ~~`DB`: re-frame 관용어. 짧고 개념적.~~ → re-frame 내부 용어. FE에서 혼란 유발.
+- ~~`OSState`: 현재 코드.~~ → OS 전용 뉘앙스. Kernel은 OS를 모른다.
+- **`State`**: 범용적이고 명확. Kernel/OS/App 모든 레이어에서 자연스럽다.
 
-→ 구조 설계 확정 후 결정.
+→ **확정.** `getState()`, `resetState()`, `ctx.state`, EffectMap의 `state` 키로 통일.

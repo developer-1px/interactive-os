@@ -53,7 +53,7 @@ send({ type: "TODO_TOGGLE", payload: { id: "todo-1" } });
 type Handler<P = unknown> = (ctx: Context, payload: P) => EffectMap | null;
 ```
 
-`defineHandler`의 `(db, payload) => db`도 내부적으로 이 형태로 wrap된다.
+`defineHandler`의 `(state, payload) => state`도 내부적으로 이 형태로 wrap된다.
 
 ### 1.4 CommandDef — 커맨드 등록 단위
 
@@ -72,7 +72,7 @@ interface CommandDef<P = unknown> {
 /* (제안) — 현재: OSResult (os/) — 구조 다름 */
 interface EffectMap {
   /** 상태 업데이트. 항상 먼저 실행. */
-  db?: unknown;
+  state?: unknown;
 
   /** DOM 포커스 이동 */
   focus?: string;
@@ -120,7 +120,7 @@ interface OSResult {
 }
 
 // OSResult는 상태(state)와 이펙트(domEffects)가 혼합.
-// EffectMap은 모든 것이 이펙트 선언. db 업데이트도 이펙트.
+// EffectMap은 모든 것이 이펙트 선언. state 업데이트도 이펙트.
 ```
 
 ### 1.6 Context — 핸들러 읽기 컨텍스트
@@ -129,7 +129,7 @@ interface OSResult {
 /* (제안) — 현재: OSContext (os/) */
 interface Context {
   /** 현재 상태 트리 (읽기 전용) */
-  db: OSState;   /* 이름 보류 (D3) */
+  state: OSState;   /* 이름 보류 (D3) */
 
   /** inject()로 주입된 값 */
   [injectedKey: string]: unknown;
@@ -190,14 +190,14 @@ interface OSContext {
 /* (제안) */
 function defineHandler<P = unknown>(
   id: string,
-  handler: (db: OSState, payload: P) => OSState,
+  handler: (state: OSState, payload: P) => OSState,
 ): void;
 ```
 
 sugar. 내부적으로:
 ```typescript
 defineCommand(id, (ctx, payload) => ({
-  db: handler(ctx.db, payload),
+  state: handler(ctx.state, payload),
 }));
 ```
 
@@ -266,13 +266,13 @@ function inject(id: string): Middleware;
 
 ```typescript
 defineContext("dom-items", () => {
-  const zoneId = getDb().focus.activeZoneId;
+  const zoneId = getState().focus.activeZoneId;
   const el = document.getElementById(zoneId!);
   return el ? Array.from(el.querySelectorAll("[data-focus-item]")).map(e => e.id) : [];
 });
 
 defineContext("zone-config", () => {
-  const zoneId = getDb().focus.activeZoneId;
+  const zoneId = getState().focus.activeZoneId;
   return zoneRegistry.get(zoneId!)?.config;
 });
 
@@ -325,7 +325,7 @@ interface MiddlewareContext {
   command: Command;
   coeffects: Record<string, unknown>;   /* inject된 값 */
   effects: EffectMap | null;            /* after에서만 사용 */
-  db: OSState;
+  state: OSState;
 }
 
 function use(middleware: Middleware): void;
@@ -335,11 +335,11 @@ function use(middleware: Middleware): void;
 const transactionMiddleware: Middleware = {
   id: "transaction",
   before: (ctx) => {
-    return { ...ctx, coeffects: { ...ctx.coeffects, snapshotBefore: getDb() } };
+    return { ...ctx, coeffects: { ...ctx.coeffects, snapshotBefore: getState() } };
   },
   after: (ctx) => {
     const before = ctx.coeffects.snapshotBefore as OSState;
-    const after = getDb();
+    const after = getState();
     TransactionLog.add({ command: ctx.command, diff: computeDiff(before, after) });
     return ctx;
   },
@@ -354,19 +354,19 @@ use(transactionMiddleware);
 /* (제안) */
 function defineComputed<T>(
   id: string,
-  extractor: (db: OSState, args: unknown[]) => T,
+  extractor: (state: OSState, args: unknown[]) => T,
 ): void;
 
 function useComputed<T>(query: [string, ...unknown[]]): T;
 ```
 
 ```typescript
-defineComputed("focused-item", (db, [_, zoneId]) =>
-  db.focus.zones[zoneId as string]?.focusedItemId ?? null
+defineComputed("focused-item", (state, [_, zoneId]) =>
+  state.focus.zones[zoneId as string]?.focusedItemId ?? null
 );
 
-defineComputed("is-focused", (db, [_, zoneId, itemId]) =>
-  db.focus.zones[zoneId as string]?.focusedItemId === itemId
+defineComputed("is-focused", (state, [_, zoneId, itemId]) =>
+  state.focus.zones[zoneId as string]?.focusedItemId === itemId
 );
 
 // 컴포넌트에서
@@ -411,8 +411,8 @@ interface KeybindingItem<T = string> {
 
 ```typescript
 /* (제안) */
-function getDb(): OSState;   /* 이름 보류 (D3) */
-function resetDb(db: OSState): void;
+function getState(): OSState;   /* 이름 보류 (D3) */
+function resetState(state: OSState): void;
 function useDispatch(): (cmd: Command) => void;
 ```
 

@@ -13,7 +13,7 @@
  *   }, [inject("dom-items")]);         // <-- per-command, not global
  */
 
-import type { Middleware, MiddlewareCtx } from "./middleware.ts";
+import type { Middleware, MiddlewareContext } from "./middleware.ts";
 
 // ─── Types ───
 
@@ -37,7 +37,7 @@ export function defineContext(id: string, provider: ContextProvider): void {
  * inject — create a per-command interceptor that resolves context providers.
  *
  * Returns a Middleware. Does NOT auto-register globally.
- * Pass to defineCommand/defineHandler as an interceptor:
+ * Pass to defineCommand as an interceptor:
  *   defineCommand("my-cmd", fn, [inject("dom-items")])
  */
 export function inject(...ids: string[]): Middleware {
@@ -45,7 +45,7 @@ export function inject(...ids: string[]): Middleware {
 
   return {
     id: middlewareId,
-    before: (ctx: MiddlewareCtx): MiddlewareCtx => {
+    before: (ctx: MiddlewareContext): MiddlewareContext => {
       const injected = { ...ctx.injected };
 
       for (const id of ids) {

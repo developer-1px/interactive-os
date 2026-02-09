@@ -4,7 +4,9 @@
 
 - **파일명 = Export명**: 파일명은 메인 export와 일치. 컴포넌트는 PascalCase, hooks/함수는 camelCase.
 - **접두어 그룹핑**: 관련 파일은 공통 개념을 접두어로 묶어 알파벳 정렬 시 그룹화. (`commandsClipboard.ts`, `commandsNavigation.ts`)
-- **약어 금지**: `ctx`, `cmd`, `id`, `ref`, `props`, `e` 외에는 약어 금지. 풀네임 사용.
+- **콜백/프로세서 타입 = `*Handler`**: 콜백이나 내부 처리 함수 타입은 `*Fn`이 아니라 `*Handler`로 통일. (`CommandHandler`, `EffectHandler`, `ContextProvider`)
+- **인터페이스/타입 약어 금지**: 인터페이스와 타입 이름에 약어를 쓰지 않는다. `MiddlewareContext` (O), `MiddlewareCtx` (X).
+- **변수명 약어 허용 범위**: `ctx`, `cmd`, `id`, `ref`, `props`, `e`만 허용. 그 외 약어 금지. 풀네임 사용.
 - **이벤트 기반 커맨드명**: OS 커맨드는 행동이 아닌 이벤트로 명명. `OS_ESCAPE` (O), `OS_DISMISS` (X).
 - **하나의 개념 = 하나의 이름**: 같은 개념에 다른 이름을 만들지 않는다. 파일명, 폴더명, 타입, 변수 모두 동일. `UserProfile`, `UserProfileData`, `UserProfileInfo` 중 하나만 쓴다.
 

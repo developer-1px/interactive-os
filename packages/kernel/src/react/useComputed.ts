@@ -9,9 +9,9 @@
  */
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
-import { getActiveStore } from "../dispatch.ts";
+import { getActiveStore } from "../store.ts";
 
-export function useComputed<T>(selector: (db: unknown) => T): T {
+export function useComputed<T>(selector: (state: unknown) => T): T {
   const store = getActiveStore();
   if (!store) {
     throw new Error("[kernel] useComputed called before initKernel()");

@@ -7,33 +7,33 @@
 
 export type Listener = () => void;
 
-export interface Store<DB> {
-    getState(): DB;
-    setState(updater: (prev: DB) => DB): void;
-    subscribe(listener: Listener): () => void;
+export interface Store<S> {
+  getState(): S;
+  setState(updater: (prev: S) => S): void;
+  subscribe(listener: Listener): () => void;
 }
 
-export function createStore<DB>(initialState: DB): Store<DB> {
-    let state = initialState;
-    const listeners = new Set<Listener>();
+export function createStore<S>(initialState: S): Store<S> {
+  let state = initialState;
+  const listeners = new Set<Listener>();
 
-    return {
-        getState() {
-            return state;
-        },
+  return {
+    getState() {
+      return state;
+    },
 
-        setState(updater) {
-            state = updater(state);
-            for (const listener of listeners) {
-                listener();
-            }
-        },
+    setState(updater) {
+      state = updater(state);
+      for (const listener of listeners) {
+        listener();
+      }
+    },
 
-        subscribe(listener) {
-            listeners.add(listener);
-            return () => {
-                listeners.delete(listener);
-            };
-        },
-    };
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
 }

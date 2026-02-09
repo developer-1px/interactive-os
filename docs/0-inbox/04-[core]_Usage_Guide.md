@@ -412,15 +412,15 @@ defineComputed   — 파생 상태 (캐시/구독)
 
 ```typescript
 defineCommand("NAVIGATE", [inject("dom-items"), inject("zone-config")], (ctx, payload) => {
-  const { db } = ctx;
+  const { state } = ctx;
   const items = ctx["dom-items"] as string[];
   const config = ctx["zone-config"] as FocusGroupConfig;
-  const zone = db.focus.zones[db.focus.activeZoneId!];
+  const zone = state.focus.zones[state.focus.activeZoneId!];
 
   const nextId = resolveNavigation(items, zone.focusedItemId, payload.direction, config);
 
   return {
-    db: updateZone(db, db.focus.activeZoneId!, { focusedItemId: nextId }),
+    state: updateZone(state, state.focus.activeZoneId!, { focusedItemId: nextId }),
     focus: nextId,
     scroll: nextId,
   };
@@ -431,13 +431,13 @@ defineCommand("NAVIGATE", [inject("dom-items"), inject("zone-config")], (ctx, pa
 - `ctx`는 읽기 전용. 직접 변이 금지.
 - 반환값은 `EffectMap`. 부수효과를 **데이터로 선언**한다.
 - DOM 접근은 `inject`로 선언한 컨텍스트에서만.
-- 스토어 직접 접근 금지. `ctx.db`만 읽는다.
+- 스토어 직접 접근 금지. `ctx.state`만 읽는다.
 
 ### EffectMap 키
 
 ```typescript
 return {
-  db: nextDb,                // 상태 업데이트
+  state: nextState,           // 상태 업데이트
   focus: "item-3",           // element.focus()
   scroll: "item-3",          // element.scrollIntoView()
   dispatch: { type, payload }, // 다른 이벤트 큐에 추가
@@ -483,7 +483,7 @@ DOM 쿼리처럼 비용이 드는 데이터를 **필요한 커맨드에서만** 
 
 ```typescript
 defineContext("dom-items", () => {
-  const zoneId = getDb().focus.activeZoneId;
+  const zoneId = getState().focus.activeZoneId;
   if (!zoneId) return [];
   const el = document.getElementById(zoneId);
   return Array.from(el?.querySelectorAll("[data-focus-item]") ?? []).map(e => e.id);
@@ -495,22 +495,22 @@ defineContext("dom-rects", () => {
 });
 
 defineContext("zone-config", () => {
-  const zoneId = getDb().focus.activeZoneId;
+  const zoneId = getState().focus.activeZoneId;
   return zoneRegistry.get(zoneId)?.config ?? defaultConfig;
 });
 ```
 
 `NAVIGATE`는 `[inject("dom-items"), inject("dom-rects")]`가 필요하지만,
-`ACTIVATE`는 `ctx.db`만 읽으면 된다. 불필요한 DOM 쿼리를 하지 않는다.
+`ACTIVATE`는 `ctx.state`만 읽으면 된다. 불필요한 DOM 쿼리를 하지 않는다.
 
 ## 11. defineComputed — 파생 상태
 
 Primitive 내부에서 구독하는 캐싱된 파생 상태.
 
 ```typescript
-// Layer 2: db에서 직접 추출
-defineComputed("focused-item", (db, [_, zoneId]) =>
-  db.focus.zones[zoneId]?.focusedItemId
+// Layer 2: state에서 직접 추출
+defineComputed("focused-item", (state, [_, zoneId]) =>
+  state.focus.zones[zoneId]?.focusedItemId
 );
 
 // Layer 3: 다른 computed를 조합
@@ -582,11 +582,11 @@ function DragSensor({ children }) {
 
 // 커맨드 등록
 defineCommand("DRAG_START", (ctx, { itemId }) => ({
-  db: assocIn(ctx.db, ["drag", "activeItem"], itemId),
+  state: assocIn(ctx.state, ["drag", "activeItem"], itemId),
 }));
 
 defineCommand("DROP", (ctx, { targetId }) => ({
-  db: reorderItem(ctx.db, ctx.db.drag.activeItem, targetId),
+  state: reorderItem(ctx.state, ctx.state.drag.activeItem, targetId),
   dispatch: { type: "app/items-reordered" },
 }));
 ```
@@ -602,7 +602,7 @@ defineCommand("DROP", (ctx, { targetId }) => ({
 ```typescript
 test("NAVIGATE down moves to next item", () => {
   const ctx = {
-    db: {
+    state: {
       focus: {
         activeZoneId: "list",
         zones: { list: { focusedItemId: "item-1" } },
@@ -614,7 +614,7 @@ test("NAVIGATE down moves to next item", () => {
 
   const fx = commands.get("NAVIGATE")!(ctx, { direction: "down" });
 
-  expect(fx.db.focus.zones.list.focusedItemId).toBe("item-2");
+  expect(fx.state.focus.zones.list.focusedItemId).toBe("item-2");
   expect(fx.focus).toBe("item-2");
 });
 ```
@@ -654,7 +654,7 @@ test("focus effect calls element.focus()", () => {
 │    ├─ inject("dom-items", "zone-config")         │
 │    ├─ defineCommand handler → EffectMap           │
 │    ├─ middleware (after)                          │
-│    ├─ defineEffect("db")     → store.setState    │
+│    ├─ defineEffect("state")  → store.setState    │
 │    ├─ defineEffect("focus")  → el.focus()        │
 │    └─ defineEffect("scroll") → el.scrollIntoView │
 │                                                  │

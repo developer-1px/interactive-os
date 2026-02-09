@@ -17,11 +17,11 @@ import {
 
 // ── Setup ──
 
-interface TestDB {
+interface TestState {
   result: unknown;
 }
 
-const store = initKernel<TestDB>({ result: null });
+const store = initKernel<TestState>({ result: null });
 
 // ── Test helpers ──
 
@@ -54,10 +54,10 @@ reset();
 
 defineContext("now", () => Date.now());
 
-defineCommand<TestDB>(
+defineCommand<TestState>(
   "use-time",
   (ctx) => ({
-    db: { result: typeof ctx["now"] },
+    state: { result: typeof ctx["now"] },
   }),
   [inject("now")],
 ); // ← per-command interceptor
@@ -76,10 +76,10 @@ reset();
 defineContext("user", () => ({ name: "Alice", role: "admin" }));
 defineContext("config", () => ({ theme: "dark" }));
 
-defineCommand<TestDB>(
+defineCommand<TestState>(
   "read-context",
   (ctx) => ({
-    db: {
+    state: {
       result: {
         userName: (ctx["user"] as any)?.name,
         theme: (ctx["config"] as any)?.theme,
@@ -105,10 +105,10 @@ defineContext("counter", () => {
   return callCount;
 });
 
-defineCommand<TestDB>(
+defineCommand<TestState>(
   "read-counter",
   (ctx) => ({
-    db: { result: ctx["counter"] },
+    state: { result: ctx["counter"] },
   }),
   [inject("counter")],
 );
@@ -131,10 +131,10 @@ console.log("\n─── missing context warning ───");
 
 reset();
 
-defineCommand<TestDB>(
+defineCommand<TestState>(
   "use-missing",
   (ctx) => ({
-    db: { result: ctx["nonexistent"] ?? "undefined" },
+    state: { result: ctx["nonexistent"] ?? "undefined" },
   }),
   [inject("nonexistent")],
 );
@@ -157,16 +157,16 @@ defineContext("expensive", () => {
 });
 
 // Only "needs-ctx" gets inject, "no-ctx" does NOT
-defineCommand<TestDB>(
+defineCommand<TestState>(
   "needs-ctx",
   (ctx) => ({
-    db: { result: ctx["expensive"] },
+    state: { result: ctx["expensive"] },
   }),
   [inject("expensive")],
 );
 
-defineCommand<TestDB>("no-ctx", () => ({
-  db: { result: "no-injection" },
+defineCommand<TestState>("no-ctx", () => ({
+  state: { result: "no-injection" },
 }));
 
 dispatch({ type: "no-ctx" });
@@ -182,37 +182,37 @@ assert(
 );
 assert(store.getState().result === "expensive-data", "injected value correct");
 
-// --- Test 6: Context with db access in command ---
-console.log("\n─── context + db in command handler ───");
+// --- Test 6: Context with state access in command ---
+console.log("\n─── context + state in command handler ───");
 
 reset();
 
 store.setState(() => ({ result: "hello" }));
 
-defineContext("dbSnapshot", () => "external-data");
+defineContext("snapshot", () => "external-data");
 
-defineCommand<TestDB>(
-  "use-db-context",
+defineCommand<TestState>(
+  "use-state-context",
   (ctx) => ({
-    db: {
+    state: {
       result: {
-        db: ctx.db,
-        snapshot: ctx["dbSnapshot"],
+        state: ctx.state,
+        snapshot: ctx["snapshot"],
       },
     },
   }),
-  [inject("dbSnapshot")],
+  [inject("snapshot")],
 );
 
-dispatch({ type: "use-db-context" });
+dispatch({ type: "use-state-context" });
 const r5 = store.getState().result as any;
 assert(
   r5.snapshot === "external-data",
   `injected external data: "${r5.snapshot}"`,
 );
 assert(
-  (r5.db as any).result === "hello",
-  `db available in ctx: "${(r5.db as any).result}"`,
+  (r5.state as any).result === "hello",
+  `state available in ctx: "${(r5.state as any).result}"`,
 );
 
 // --- Test 7: resetKernel clears everything ---
@@ -220,22 +220,26 @@ console.log("\n─── resetKernel ───");
 
 // Register some stuff
 defineContext("temp", () => "x");
-defineCommand<TestDB>("temp-cmd", () => ({ db: { result: "y" } }));
+defineCommand<TestState>("temp-cmd", () => ({ state: { result: "y" } }));
 
 dispatch({ type: "temp-cmd" });
+assert(store.getState().result === "y", "temp-cmd executed → result = 'y'");
 
 resetKernel();
 
-// After reset, dispatching should warn (no handler)
-dispatch({ type: "temp-cmd" }); // will warn, no-op
-assert(store.getState().result === "y", "state unchanged after reset dispatch");
+// After reset, store is preserved but registries are cleared → warn, no-op
+dispatch({ type: "temp-cmd" }); // warns "No handler or command registered"
+assert(
+  store.getState().result === "y",
+  "state unchanged after reset (registry cleared, store preserved)",
+);
 
 // --- Test 8: Transaction cap ---
 console.log("\n─── transaction cap ───");
 
 reset();
 
-defineCommand<TestDB>("noop", () => ({ db: { result: "x" } }));
+defineCommand<TestState>("noop", () => ({ state: { result: "x" } }));
 
 // Dispatch 210 times (cap is 200)
 for (let i = 0; i < 210; i++) {

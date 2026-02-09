@@ -8,12 +8,15 @@
  *   createStore(initial)       — create the single state tree
  *   initKernel(initial)        — create store + bind in one call
  *   dispatch(cmd)              — single entry point for all commands
- *   defineHandler(id, fn, i?)  — register pure state transformer (optional interceptors)
- *   defineCommand(id, fn, i?)  — register command with effects (optional interceptors)
+ *   defineCommand(id, fn, i?)  — register command (optional interceptors)
  *   defineEffect(id, fn)       — register side-effect executor
  *   use(middleware)             — register global middleware
  *   defineContext(id, fn)       — register context provider
  *   inject(...ids)              — create per-command injection interceptor
+ *
+ * Store:
+ *   getState()                 — read current state tree
+ *   resetState(state)          — replace entire state tree
  *
  * React:
  *   useComputed(selector)      — subscribe to derived state
@@ -27,59 +30,69 @@
 
 // ── Context ──
 export { clearContextProviders, defineContext, inject } from "./context.ts";
-export type { Store } from "./createStore.ts";
+
 // ── Store ──
+export type { Store } from "./createStore.ts";
 export { createStore } from "./createStore.ts";
-export type { Transaction } from "./dispatch.ts";
 // ── Dispatch ──
-// ── Inspector ──
-export {
-  bindStore,
-  clearTransactions,
-  dispatch,
-  getLastTransaction,
-  getTransactions,
-  travelTo,
-} from "./dispatch.ts";
-export type { Middleware, MiddlewareCtx } from "./middleware.ts";
+export { dispatch } from "./dispatch.ts";
 // ── Middleware ──
+export type { Middleware, MiddlewareContext } from "./middleware.ts";
 export { clearMiddlewares, use } from "./middleware.ts";
 // ── React ──
 export { useComputed } from "./react/useComputed.ts";
 export { useDispatch } from "./react/useDispatch.ts";
+// ── Registry ──
 export type {
   Command,
-  CommandFn,
+  CommandHandler,
   Context,
-  EffectFn,
+  EffectHandler,
   EffectMap,
-  HandlerFn,
 } from "./registry.ts";
-// ── Registry ──
-// ── Testing utilities ──
 export {
   clearAllRegistries,
   defineCommand,
   defineEffect,
-  defineHandler,
 } from "./registry.ts";
+export {
+  bindStore,
+  getState,
+  resetState,
+  unbindStore,
+} from "./store.ts";
+// ── Transaction / Inspector ──
+export type { StateDiff, Transaction } from "./transaction.ts";
+export {
+  clearTransactions,
+  getLastTransaction,
+  getTransactions,
+  travelTo,
+} from "./transaction.ts";
 
-import { clearContextProviders } from "./context.ts";
 // ── Convenience ──
+import { clearContextProviders } from "./context.ts";
 import { createStore, type Store } from "./createStore.ts";
-import { bindStore, clearTransactions } from "./dispatch.ts";
 import { clearMiddlewares } from "./middleware.ts";
 import { clearAllRegistries } from "./registry.ts";
+import { bindStore, getActiveStore, resetState } from "./store.ts";
+import { clearTransactions } from "./transaction.ts";
 
-export function initKernel<DB>(initialState: DB): Store<DB> {
+export function initKernel<S>(initialState: S): Store<S> {
+  const existing = getActiveStore();
+  if (existing) {
+    resetState(initialState);
+    return existing as Store<S>;
+  }
   const store = createStore(initialState);
   bindStore(store);
   return store;
 }
 
 /**
- * resetKernel — clear everything: registries, middleware, context, transactions.
- * Use for testing or full teardown.
+ * resetKernel — clear registries, middleware, context, transactions.
+ * Store binding is preserved so React subscriptions (useComputed) stay valid.
+ * Use unbindStore() separately for full teardown.
  */
 export function resetKernel(): void {
   clearAllRegistries();

@@ -47,9 +47,9 @@ Domino 6: DOM                       ← 브라우저 렌더링
 
 ### 2.2 핵심 규칙
 
-1. **`db`는 하나** — 모든 상태는 하나의 Zustand 스토어에 있다.
+1. **`state`는 하나** — 모든 상태는 하나의 Zustand 스토어에 있다.
 2. **이벤트 핸들러는 순수** — `(ctx, payload) → EffectMap`. 부수효과 없음.
-3. **이펙트는 데이터** — `{ db: nextState, focus: targetId, scroll: targetId }`. 실행은 프레임워크가.
+3. **이펙트는 데이터** — `{ state: nextState, focus: targetId, scroll: targetId }`. 실행은 프레임워크가.
 4. **코이펙트는 선언적 주입** — 핸들러가 필요한 것만 명시. 프레임워크가 수집.
 5. **구독은 계층적** — Layer 2 구독은 Layer 3 구독을 조합. 불필요한 재계산 없음.
 
@@ -96,20 +96,20 @@ function processQueue(): void {
 
 // 커맨드 등록
 defineCommand("NAVIGATE", (ctx, payload) => {
-  const { db } = ctx;
-  const zone = db.zones.get(db.activeZoneId);
+  const { state } = ctx;
+  const zone = state.zones.get(state.activeZoneId);
   const nextId = resolveNavigation(zone, ctx["dom-items"], payload.direction);
 
   return {
-    db: updateZone(db, db.activeZoneId, { focusedItemId: nextId }),
+    state: updateZone(state, state.activeZoneId, { focusedItemId: nextId }),
     focus: nextId,
     scroll: nextId,
   };
 });
 
 defineCommand("ACTIVATE", (ctx, payload) => {
-  const { db } = ctx;
-  const targetId = payload.targetId ?? db.zones.get(db.activeZoneId)?.focusedItemId;
+  const { state } = ctx;
+  const targetId = payload.targetId ?? state.zones.get(state.activeZoneId)?.focusedItemId;
 
   return {
     dispatch: { type: "app/onAction", payload: { id: targetId } },
@@ -118,16 +118,16 @@ defineCommand("ACTIVATE", (ctx, payload) => {
 
 // 앱 커맨드도 같은 방식
 defineCommand("todo/toggle-done", (ctx, payload) => {
-  const { db } = ctx;
+  const { state } = ctx;
   return {
-    db: toggleTodoDone(db, payload.id),
+    state: toggleTodoDone(state, payload.id),
   };
 });
 ```
 
 **핵심:**
 - OS 커맨드와 앱 커맨드가 **같은 레지스트리, 같은 형태**
-- 반환값은 **EffectMap** (이펙트 맵). `{ db, focus, scroll, dispatch, ... }`
+- 반환값은 **EffectMap** (이펙트 맵). `{ state, focus, scroll, dispatch, ... }`
 - 핸들러는 `ctx` (읽기 전용 컨텍스트)만 받음. 스토어 직접 접근 불가.
 
 ### 3.3 Domino 3: `reg-fx` — 플러그인 이펙트 시스템
@@ -138,8 +138,8 @@ defineCommand("todo/toggle-done", (ctx, payload) => {
 // ── 제안: 이펙트 핸들러를 플러그인으로 등록 ──
 
 // 내장 이펙트
-defineEffect("db", (newDb) => {
-  store.setState({ db: newDb });
+defineEffect("state", (newState) => {
+  store.setState({ state: newState });
 });
 
 defineEffect("focus", (targetId) => {
@@ -190,11 +190,11 @@ defineEffect("http", async ({ url, method, onSuccess, onFailure }) => {
 // ── 제안: 필요한 ctx만 선언 ──
 
 // 기본 ctx는 항상 주입
-// - db: 현재 상태 (비용 0, 메모리 참조)
+// - state: 현재 상태 (비용 0, 메모리 참조)
 
 // DOM 관련은 필요할 때만
 defineContext("dom-items", () => {
-  const zoneId = store.getState().db.activeZoneId;
+  const zoneId = store.getState().state.activeZoneId;
   const el = document.getElementById(zoneId);
   return el ? Array.from(el.querySelectorAll("[data-focus-item]")).map(e => e.id) : [];
 });
@@ -205,7 +205,7 @@ defineContext("dom-rects", () => {
 });
 
 defineContext("zone-config", () => {
-  const zoneId = store.getState().db.activeZoneId;
+  const zoneId = store.getState().state.activeZoneId;
   return zoneRegistry.get(zoneId)?.config;
 });
 
@@ -214,7 +214,7 @@ defineCommand(
   "NAVIGATE",
   [inject("dom-items"), inject("dom-rects"), inject("zone-config")],
   (ctx, payload) => {
-    // ctx.db는 항상 있음
+    // ctx.state는 항상 있음
     // ctx["dom-items"], ctx["dom-rects"], ctx["zone-config"]는 주입됨
     // 불필요한 DOM 쿼리 없음
   }
@@ -222,8 +222,8 @@ defineCommand(
 
 // ACTIVATE는 DOM 쿼리 불필요
 defineCommand("ACTIVATE", (ctx, payload) => {
-  // ctx.db만 사용
-  return { dispatch: { type: "app/onAction", payload: { id: ctx.db.focusedItemId } } };
+  // ctx.state만 사용
+  return { dispatch: { type: "app/onAction", payload: { id: ctx.state.focusedItemId } } };
 });
 ```
 
@@ -298,12 +298,12 @@ defineCommand(
 ```typescript
 // ── 제안: Layer 2/3 파생 상태 ──
 
-// Layer 2: db에서 직접 추출 (단순)
-defineComputed("active-zone-id", (db) => db.activeZoneId);
+// Layer 2: state에서 직접 추출 (단순)
+defineComputed("active-zone-id", (state) => state.activeZoneId);
 
-defineComputed("zone-state", (db, [_, zoneId]) => db.zones.get(zoneId));
+defineComputed("zone-state", (state, [_, zoneId]) => state.zones.get(zoneId));
 
-defineComputed("focused-item", (db, [_, zoneId]) => db.zones.get(zoneId)?.focusedItemId);
+defineComputed("focused-item", (state, [_, zoneId]) => state.zones.get(zoneId)?.focusedItemId);
 
 // Layer 3: 다른 computed를 조합 (파생의 파생)
 defineComputed(
@@ -336,7 +336,7 @@ function FocusItem({ id }: { id: string }) {
 
 ---
 
-## 4. 단일 상태 트리 (`app-db`)
+## 4. 단일 상태 트리 (State)
 
 현재 3곳에 분산된 상태를 하나로:
 
@@ -347,7 +347,7 @@ function FocusItem({ id }: { id: string }) {
 └── CommandEngineStore (앱 라우터) → activeAppId, registries
 
 제안:
-└── db (단일 Zustand 스토어)
+└── state (단일 Zustand 스토어)
     ├── focus
     │   ├── activeZoneId: string | null
     │   ├── focusStack: FocusStackEntry[]
@@ -366,7 +366,7 @@ function FocusItem({ id }: { id: string }) {
 ```
 
 ```typescript
-interface DB {
+interface State {
   focus: {
     activeZoneId: string | null;
     focusStack: FocusStackEntry[];
@@ -426,11 +426,11 @@ KeyboardEvent
     ├─ [Middleware: before] inject ctx (dom-items, zone-config)
     │
     ├─ handler(ctx, payload) → EffectMap  ← 순수함수
-    │   { db: nextDb, focus: "item-3", scroll: "item-3" }
+    │   { state: nextState, focus: "item-3", scroll: "item-3" }
     │
     ├─ [Interceptor: after] transaction record
     │
-    ├─ [FX: db]     → store.setState(nextDb)
+    ├─ [FX: state]  → store.setState(nextState)
     ├─ [FX: focus]  → el.focus()
     └─ [FX: scroll] → el.scrollIntoView()
 ```
@@ -448,7 +448,7 @@ KeyboardEvent
 dispatch(event: { type: string; payload?: unknown }): void
 
 // ── 핸들러 등록 ──
-defineHandler(id: string, handler: (db, payload) => db): void
+defineHandler(id: string, handler: (state, payload) => state): void
 defineCommand(id: string, handler: (ctx, payload) => EffectMap): void
 defineCommand(id: string, interceptors: Middleware[], handler): void
 
@@ -463,7 +463,7 @@ inject(id: string): Middleware
 use(middleware: Middleware): void
 
 // ── 파생 상태 ──
-defineComputed(id: string, extractor: (db, args) => unknown): void
+defineComputed(id: string, extractor: (state, args) => unknown): void
 defineComputed(id: string, inputFn: (args) => Computed[], computeFn: (inputs, args) => unknown): void
 
 // ── React 바인딩 ──
@@ -471,8 +471,8 @@ useComputed(query: [string, ...unknown[]]): unknown
 useDispatch(): (event: OSEvent) => void
 
 // ── 스토어 ──
-getDb(): DB
-resetDb(db: DB): void
+getState(): State
+resetState(state: State): void
 ```
 
 **크기 추정: ~500 LOC** (이펙트 핸들러, 구독 엔진, 인터셉터 체인, 큐)
@@ -497,9 +497,9 @@ resetDb(db: DB): void
 
 ### Phase C: 상태 통합
 
-1. FocusData + Zone 스토어 → 단일 `db`
-2. CommandEngineStore → `db.app` 통합
-3. WeakMap (zone config, bound commands) → `db.focus.zones` + zone registry
+1. FocusData + Zone 스토어 → 단일 `state`
+2. CommandEngineStore → `state.app` 통합
+3. WeakMap (zone config, bound commands) → `state.focus.zones` + zone registry
 
 ### Phase D: 구독 시스템
 
@@ -526,7 +526,7 @@ re-frame의 모든 것을 가져오지 않는다. 우리에게 필요 없는 것
 
 | 지표 | 현재 | 제안 후 |
 |---|---|---|
-| 상태 저장소 | 3+ (focusData, ZoneStore×N, CommandEngine) | 1 (db) |
+| 상태 저장소 | 3+ (focusData, ZoneStore×N, CommandEngine) | 1 (state) |
 | dispatch → result 단계 | 10+ (sensor→classify→route→engine→bus→intent→runOS→build→run→effect) | 6 (sensor→classify→resolve→dispatch→handler→fx) |
 | 이벤트 핸들러 등록 | 하드코딩 맵 | `defineCommand` 선언적 |
 | 이펙트 실행 | switch문 4 case | 플러그인 `defineEffect` (무제한 확장) |
@@ -539,18 +539,18 @@ re-frame의 모든 것을 가져오지 않는다. 우리에게 필요 없는 것
 
 ## 10. 열린 질문
 
-1. **Zone별 스토어 → 단일 `db`에서 리렌더 성능은?**
+1. **Zone별 스토어 → 단일 `state`에서 리렌더 성능은?**
    → Zone A 변경 시 Zone B 컴포넌트가 리렌더되지 않는가?
    → 구독 시스템의 selector 정밀도에 달려 있음. 검증 필요.
 
-2. **WeakMap 기반 zone registry를 `db`로 옮기면 GC는?**
+2. **WeakMap 기반 zone registry를 `state`로 옮기면 GC는?**
    → Zone 언마운트 시 명시적 cleanup 이벤트 필요.
    → WeakMap의 자동 GC 이점을 잃는 대신 디버깅 가능성 확보.
 
-3. **앱 상태도 `db`에 넣을 것인가?**
+3. **앱 상태도 `state`에 넣을 것인가?**
    → re-frame은 yes (app-db 하나).
    → 하지만 앱별 상태 격리가 필요한 경우 (멀티 앱 환경) 별도 검토.
-   → 안: `db.app.[appId]` 네임스페이스로 격리하되 같은 스토어.
+   → 안: `state.app.[appId]` 네임스페이스로 격리하되 같은 스토어.
 
 4. **비동기 이펙트 (http, timer) 처리는?**
    → `defineEffect("http", ...)` 안에서 `dispatch`로 결과 이벤트 발행.

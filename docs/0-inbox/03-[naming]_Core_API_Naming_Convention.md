@@ -38,12 +38,12 @@ React/FE 생태계에서 **이미 검증된 네이밍 패턴**을 사용한다.
 | re-frame | 제안 이름 | 역할 | 시그니처 |
 |---|---|---|---|
 | `dispatch` | **`dispatch`** | 이벤트 발행 (단일 진입점) | `dispatch(event: Event): void` |
-| `reg-event-db` | **`defineHandler`** | 순수 상태 변환 핸들러 등록 | `defineHandler(id, (db, payload) => db)` |
+| `reg-event-db` | **`defineHandler`** | 순수 상태 변환 핸들러 등록 | `defineHandler(id, (state, payload) => state)` |
 | `reg-event-fx` | **`defineCommand`** | 이펙트 반환 핸들러 등록 | `defineCommand(id, (ctx, payload) => EffectMap)` |
 | `reg-fx` | **`defineEffect`** | 이펙트 실행기 등록 | `defineEffect(id, (value) => void)` |
 | `reg-cofx` | **`defineContext`** | 컨텍스트 제공자 등록 | `defineContext(id, () => value)` |
 | `inject-cofx` | **`inject`** | 핸들러에 컨텍스트 주입 선언 | `inject(id): Interceptor` |
-| `reg-sub` | **`defineComputed`** | 파생 상태 등록 | `defineComputed(id, (db, args) => value)` |
+| `reg-sub` | **`defineComputed`** | 파생 상태 등록 | `defineComputed(id, (state, args) => value)` |
 | `subscribe` | **`useComputed`** | React 훅: 파생 상태 구독 | `useComputed([id, ...args]): T` |
 | interceptor | **`middleware`** | before/after 훅 | `{ id, before?, after? }` |
 | `reg-global-interceptor` | **`use` (global)** | 글로벌 미들웨어 등록 | `use(middleware)` |
@@ -52,7 +52,7 @@ React/FE 생태계에서 **이미 검증된 네이밍 패턴**을 사용한다.
 
 | re-frame | 제안 이름 | 설명 |
 |---|---|---|
-| `app-db` | **`Store`** / **`db`** | 단일 상태 트리 |
+| `app-db` | **`Store`** / **`state`** | 단일 상태 트리 |
 | `coeffects` | **`Context`** / **`ctx`** | 핸들러가 읽는 읽기 전용 컨텍스트 |
 | `effects map` | **`EffectMap`** | 핸들러가 반환하는 이펙트 선언 |
 | `event` | **`Event`** | `{ type: string, payload?: unknown }` |
@@ -63,7 +63,7 @@ React/FE 생태계에서 **이미 검증된 네이밍 패턴**을 사용한다.
 
 | re-frame | 제안 이름 | 설명 |
 |---|---|---|
-| `:db` | **`"db"`** | 상태 업데이트 (동일) |
+| `:db` | **`"state"`** | 상태 업데이트 |
 | `:dispatch` | **`"dispatch"`** | 이벤트 재발행 (동일) |
 | `:dispatch-later` | **`"defer"`** | 지연 이벤트 발행 |
 | `:fx` | **`"batch"`** | 복수 이펙트 일괄 실행 |
@@ -86,7 +86,7 @@ regEventFx("navigate", [injectCofx("dom-items")], (cofx, payload) => {
 
 // ✅ 제안 (FE 관용구)
 defineCommand("navigate", [inject("dom-items")], (ctx, payload) => {
-  return { db: nextDb, focus: "item-3" };
+  return { state: nextState, focus: "item-3" };
 });
 ```
 
@@ -99,8 +99,8 @@ regEventDb("set-active-zone", (db, zoneId) => {
 });
 
 // ✅ 제안
-defineHandler("set-active-zone", (db, zoneId) => {
-  return { ...db, focus: { ...db.focus, activeZoneId: zoneId } };
+defineHandler("set-active-zone", (state, zoneId) => {
+  return { ...state, focus: { ...state.focus, activeZoneId: zoneId } };
 });
 ```
 
@@ -130,7 +130,7 @@ regEventFx("navigate", [injectCofx("dom-items")], (cofx, payload) => { ... });
 
 // ✅ 제안
 defineContext("dom-items", () => {
-  return queryItems(getDb().focus.activeZoneId);
+  return queryItems(getState().focus.activeZoneId);
 });
 
 defineCommand("navigate", [inject("dom-items")], (ctx, payload) => { ... });
@@ -146,7 +146,7 @@ regSub("focused-item", (db, [_, zoneId]) => db.focus.zones[zoneId]?.focusedItemI
 const focusedId = useSubscription(["focused-item", zoneId]);
 
 // ✅ 제안
-defineComputed("focused-item", (db, [_, zoneId]) => db.focus.zones[zoneId]?.focusedItemId);
+defineComputed("focused-item", (state, [_, zoneId]) => state.focus.zones[zoneId]?.focusedItemId);
 
 // 컴포넌트에서
 const focusedId = useComputed(["focused-item", zoneId]);
@@ -184,18 +184,18 @@ import { dispatch, defineHandler, defineCommand, defineEffect, defineContext, de
 import { useComputed, useDispatch } from "@os/react";
 
 // ── 스토어 접근 ──
-import { getDb, resetDb } from "@os/core";
+import { getState, resetState } from "@os/core";
 ```
 
 ### 등록 (앱 초기화 시)
 
 ```typescript
 // 상태만 바꾸는 핸들러
-defineHandler("set-theme", (db, theme) => ({ ...db, theme }));
+defineHandler("set-theme", (state, theme) => ({ ...state, theme }));
 
 // 이펙트까지 반환하는 커맨드
 defineCommand("navigate", [inject("dom-items"), inject("zone-config")], (ctx, payload) => ({
-  db: moveFocus(ctx.db, payload.direction),
+  state: moveFocus(ctx.state, payload.direction),
   focus: nextItemId,
   scroll: nextItemId,
 }));
@@ -205,12 +205,12 @@ defineEffect("focus", (id) => document.getElementById(id)?.focus());
 defineEffect("scroll", (id) => document.getElementById(id)?.scrollIntoView({ block: "nearest" }));
 
 // 컨텍스트 제공자
-defineContext("dom-items", () => queryDOMItems(getDb().focus.activeZoneId));
-defineContext("zone-config", () => getZoneConfig(getDb().focus.activeZoneId));
+defineContext("dom-items", () => queryDOMItems(getState().focus.activeZoneId));
+defineContext("zone-config", () => getZoneConfig(getState().focus.activeZoneId));
 
 // 파생 상태
-defineComputed("focused-item", (db, [_, zoneId]) => db.focus.zones[zoneId]?.focusedItemId);
-defineComputed("is-focused", (db, [_, zoneId, itemId]) => db.focus.zones[zoneId]?.focusedItemId === itemId);
+defineComputed("focused-item", (state, [_, zoneId]) => state.focus.zones[zoneId]?.focusedItemId);
+defineComputed("is-focused", (state, [_, zoneId, itemId]) => state.focus.zones[zoneId]?.focusedItemId === itemId);
 
 // 글로벌 미들웨어
 use(transactionMiddleware);
@@ -250,7 +250,7 @@ function FocusItem({ id }: { id: string }) {
 
 | 후보 | 채택 | 이유 |
 |---|---|---|
-| `defineHandler` | ✅ | `(db, payload) => db` — "상태 핸들러". Redux reducer와 동일 역할 |
+| `defineHandler` | ✅ | `(state, payload) => state` — "상태 핸들러". Redux reducer와 동일 역할 |
 | `defineReducer` | ❌ | 개념은 맞지만 Redux의 `switch/case` 패턴을 연상시킴 |
 | `defineEvent` | ❌ | 이벤트 자체를 정의하는 건지 핸들러를 정의하는 건지 모호 |
 

@@ -1,7 +1,7 @@
 /**
  * Kernel Lab — Interactive demo page for the kernel engine.
  *
- * Demonstrates: dispatch, defineHandler, defineCommand, defineEffect,
+ * Demonstrates: dispatch, defineCommand, defineEffect,
  * transaction log with time-travel.
  */
 
@@ -9,7 +9,6 @@ import {
   clearTransactions,
   defineCommand,
   defineEffect,
-  defineHandler,
   getTransactions,
   initKernel,
   resetKernel,
@@ -21,15 +20,15 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useKernelLabBotRoutes } from "./tests/KernelLabBot";
 
-// ─── DB Schema ───
+// ─── State Schema ───
 
-interface DemoDB {
+interface DemoState {
   count: number;
   items: string[];
   lastAction: string;
 }
 
-const INITIAL: DemoDB = {
+const INITIAL: DemoState = {
   count: 0,
   items: [],
   lastAction: "(none)",
@@ -43,57 +42,63 @@ function setupKernel() {
   resetKernel();
   effectLog.length = 0;
 
-  initKernel<DemoDB>({ ...INITIAL, items: [] });
+  initKernel<DemoState>({ ...INITIAL, items: [] });
 
-  // ── Handlers (pure state only) ──
+  // ── Commands ──
 
-  defineHandler<DemoDB>("increment", (db) => ({
-    ...db,
-    count: db.count + 1,
-    lastAction: "increment",
+  defineCommand<DemoState>("increment", (ctx) => ({
+    state: {
+      ...ctx.state,
+      count: ctx.state.count + 1,
+      lastAction: "increment",
+    },
   }));
 
-  defineHandler<DemoDB>("decrement", (db) => ({
-    ...db,
-    count: db.count - 1,
-    lastAction: "decrement",
+  defineCommand<DemoState>("decrement", (ctx) => ({
+    state: {
+      ...ctx.state,
+      count: ctx.state.count - 1,
+      lastAction: "decrement",
+    },
   }));
 
-  defineHandler<DemoDB>("reset", () => ({
-    ...INITIAL,
-    items: [],
-    lastAction: "reset",
+  defineCommand<DemoState>("reset", () => ({
+    state: { ...INITIAL, items: [], lastAction: "reset" },
   }));
 
-  defineHandler<DemoDB>("add-item", (db, payload) => ({
-    ...db,
-    items: [...db.items, payload as string],
-    lastAction: `add-item: "${payload}"`,
+  defineCommand<DemoState>("add-item", (ctx, payload) => ({
+    state: {
+      ...ctx.state,
+      items: [...ctx.state.items, payload as string],
+      lastAction: `add-item: "${payload}"`,
+    },
   }));
 
-  defineHandler<DemoDB>("remove-last-item", (db) => ({
-    ...db,
-    items: db.items.slice(0, -1),
-    lastAction: "remove-last-item",
+  defineCommand<DemoState>("remove-last-item", (ctx) => ({
+    state: {
+      ...ctx.state,
+      items: ctx.state.items.slice(0, -1),
+      lastAction: "remove-last-item",
+    },
   }));
 
-  // ── Commands (with effects) ──
+  // ── Commands with effects ──
 
-  defineCommand<DemoDB>("increment-and-notify", (ctx) => {
-    const db = ctx.db;
+  defineCommand<DemoState>("increment-and-notify", (ctx) => {
+    const s = ctx.state;
     return {
-      db: { ...db, count: db.count + 1, lastAction: "increment-and-notify" },
-      notify: `Count is now ${db.count + 1}`,
+      state: { ...s, count: s.count + 1, lastAction: "increment-and-notify" },
+      notify: `Count is now ${s.count + 1}`,
     };
   });
 
-  defineCommand<DemoDB>("batch-add", (ctx) => {
-    const db = ctx.db;
+  defineCommand<DemoState>("batch-add", (ctx) => {
+    const s = ctx.state;
     const timestamp = new Date().toLocaleTimeString();
     return {
-      db: {
-        ...db,
-        items: [...db.items, `Item @ ${timestamp}`],
+      state: {
+        ...s,
+        items: [...s.items, `Item @ ${timestamp}`],
         lastAction: "batch-add",
       },
       notify: `Added item at ${timestamp}`,
@@ -110,11 +115,11 @@ function setupKernel() {
 
 // ─── Components ───
 
-function StatePanel({ db }: { db: DemoDB }) {
+function StatePanel({ state }: { state: DemoState }) {
   return (
     <div style={panelStyle}>
-      <h3 style={headingStyle}>📦 State (db)</h3>
-      <pre style={preStyle}>{JSON.stringify(db, null, 2)}</pre>
+      <h3 style={headingStyle}>📦 State</h3>
+      <pre style={preStyle}>{JSON.stringify(state, null, 2)}</pre>
     </div>
   );
 }
@@ -124,7 +129,9 @@ function ControlPanel() {
   const d = useDispatch();
 
   const send = (type: string, payload?: unknown) => {
+    console.log("[KernelLabPage] send called:", { type, payload });
     d({ type, payload });
+    console.log("[KernelLabPage] dispatch called");
   };
 
   return (
@@ -132,12 +139,15 @@ function ControlPanel() {
       <h3 style={headingStyle}>🎮 Dispatch</h3>
 
       <div style={sectionStyle}>
-        <h4 style={subheadingStyle}>defineHandler</h4>
+        <h4 style={subheadingStyle}>State-only</h4>
         <div style={buttonRowStyle}>
           <button
             type="button"
             style={btnStyle}
-            onClick={() => send("increment")}
+            onClick={() => {
+              console.log("[KernelLabPage] Increment button clicked!");
+              send("increment");
+            }}
           >
             + Increment
           </button>
@@ -328,20 +338,20 @@ export default function KernelLabPage() {
     setupKernel();
   }, [resetKey]);
 
-  const db = useComputed((state) => state as DemoDB);
+  const state = useComputed((s) => s as DemoState);
 
   return (
     <div key={resetKey} style={pageStyle}>
       <div style={headerStyle}>
         <h1 style={titleStyle}>⚛️ Kernel Lab</h1>
         <p style={subtitleStyle}>
-          dispatch → handler/command → middleware → effect → transaction log
+          dispatch → command → middleware → effect → transaction log
         </p>
       </div>
 
       <div style={gridStyle}>
         <div style={columnStyle}>
-          <StatePanel db={db} />
+          <StatePanel state={state} />
           <ControlPanel />
           <EffectLogPanel />
         </div>

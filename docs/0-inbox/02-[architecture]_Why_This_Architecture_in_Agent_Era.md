@@ -72,14 +72,14 @@ re-frame(2015)은 LLM을 위해 만들어진 게 아니다.
 // 왜? 입력(ctx, payload)과 출력(EffectMap)이 타입으로 명확하기 때문.
 
 defineCommand("NAVIGATE", (ctx, payload) => {
-  const { db } = ctx;
-  const zone = db.focus.zones[db.focus.activeZoneId];
+  const { state } = ctx;
+  const zone = state.focus.zones[state.focus.activeZoneId];
   const items = ctx["dom-items"];
   const nextId = findNext(items, zone.focusedItemId, payload.direction);
 
   return {
-    db: { ...db, focus: { ...db.focus, zones: { ...db.focus.zones,
-      [db.focus.activeZoneId]: { ...zone, focusedItemId: nextId }
+    state: { ...state, focus: { ...state.focus, zones: { ...state.focus.zones,
+      [state.focus.activeZoneId]: { ...zone, focusedItemId: nextId }
     }}},
     focus: nextId,
     scroll: nextId,
@@ -129,8 +129,8 @@ function handleNavigate(direction: string) {
 ```typescript
 // 안전: LLM이 이런 코드를 만들면 — 틀려도 부수효과 없음
 defineCommand("NAVIGATE", (ctx, payload) => {
-  const nextId = findNext(ctx["dom-items"], ctx.db.focusedItemId, payload.direction);
-  return { db: setFocused(ctx.db, nextId), focus: nextId, scroll: nextId };
+  const nextId = findNext(ctx["dom-items"], ctx.state.focusedItemId, payload.direction);
+  return { state: setFocused(ctx.state, nextId), focus: nextId, scroll: nextId };
 });
 // 반환값이 데이터일 뿐이므로:
 // - 틀리면 타입 에러 (컴파일 단계에서 차단)
@@ -177,7 +177,7 @@ LLM 에이전트가 가장 안전하게 작업할 수 있는 구조다.
 
 ```typescript
 // LLM에게 "현재 상태를 보여줘"
-console.log(JSON.stringify(getDb(), null, 2));
+console.log(JSON.stringify(getState(), null, 2));
 ```
 
 ```json
@@ -247,14 +247,14 @@ LLM 에이전트가 코드를 작성한 뒤 **스스로 테스트를 돌려 검�
 // LLM이 작성한 테스트 — DOM 불필요, 브라우저 불필요
 test("NAVIGATE down moves to next item", () => {
   const ctx = {
-    db: { focus: { activeZoneId: "list", zones: { list: { focusedItemId: "item-1" } } } },
+    state: { focus: { activeZoneId: "list", zones: { list: { focusedItemId: "item-1" } } } },
     "dom-items": ["item-1", "item-2", "item-3"],
     "zone-config": { navigate: { orientation: "vertical", loop: false } },
   };
 
   const fx = handleNavigate(ctx, { direction: "down" });
 
-  expect(fx.db.focus.zones.list.focusedItemId).toBe("item-2");
+  expect(fx.state.focus.zones.list.focusedItemId).toBe("item-2");
   expect(fx.focus).toBe("item-2");
   expect(fx.scroll).toBe("item-2");
 });
@@ -284,7 +284,7 @@ ctx 주입 패턴에서는:
 |---|---|---|---|
 | 1 | **함수는 순수하게** | LLM은 `(input) → output`을 가장 정확하게 작성한다 | `defineCommand` 핸들러 |
 | 2 | **부수효과는 데이터로** | LLM이 만든 코드의 폭발 반경을 제한한다 | EffectMap 반환 |
-| 3 | **상태는 한 곳에** | LLM이 시스템 상태를 즉시 파악할 수 있다 | 단일 `db` |
+| 3 | **상태는 한 곳에** | LLM이 시스템 상태를 즉시 파악할 수 있다 | 단일 `state` |
 | 4 | **기능 추가는 파일 추가로** | 기존 코드 수정 없이 확장한다 (회귀 버그 0) | `defineCommand`, `defineEffect` 레지스트리 |
 | 5 | **모든 변경은 기록** | 버그 리포트 = 재현 스크립트 | 트랜잭션 로그 |
 | 6 | **타입이 곧 문서** | LLM은 타입 정의를 읽고 올바른 코드를 유추한다 | 엄격한 TypeScript |
@@ -326,17 +326,17 @@ ctx 주입 패턴에서는:
 
    // dragHandlers.ts
    defineCommand("DRAG_START", (ctx, { itemId }) => ({
-     db: assocIn(ctx.db, ["drag", "activeItem"], itemId),
+     state: assocIn(ctx.state, ["drag", "activeItem"], itemId),
      "drag-image": itemId,
    }));
 
    defineCommand("DRAG_OVER", (ctx, { targetId }) => ({
-     db: assocIn(ctx.db, ["drag", "overTarget"], targetId),
+     state: assocIn(ctx.state, ["drag", "overTarget"], targetId),
      "drop-indicator": targetId,
    }));
 
    defineCommand("DROP", (ctx, { targetId }) => ({
-     db: reorderItem(ctx.db, ctx.db.drag.activeItem, targetId),
+     state: reorderItem(ctx.state, ctx.state.drag.activeItem, targetId),
      dispatch: { type: "app/items-reordered" },
    }));
 
