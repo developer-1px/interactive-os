@@ -1,65 +1,47 @@
 /**
- * context — Context providers & injection.
+ * context — Context providers.
  *
- * defineContext(id, provider) — register a lazy context provider.
- * inject(...ids) — returns a Middleware (NOT auto-registered).
- *                  Pass it to defineCommand's interceptor list.
+ * defineContext(id, provider) — register a lazy context provider. Returns ContextToken.
  *
- * Usage:
- *   defineContext("dom-items", () => queryDOMItems());
+ * @example
+ *   const NOW = defineContext("NOW", () => Date.now());
  *
- *   defineCommand("focus/move", (ctx) => {
- *     const items = ctx["dom-items"];  // injected by interceptor
- *   }, [inject("dom-items")]);         // <-- per-command, not global
+ *   // Use via group inject:
+ *   const { defineCommand } = kernel.group({ inject: [NOW] });
+ *   defineCommand("USE_TIME", (ctx) => {
+ *     ctx.NOW;  // auto-typed as number
+ *   });
  */
 
-import type { Middleware, MiddlewareContext } from "./middleware.ts";
-
-// ─── Types ───
-
-export type ContextProvider = () => unknown;
+import type { ContextToken } from "./tokens.ts";
 
 // ─── Registry ───
 
-const contextProviders = new Map<string, ContextProvider>();
+const contextProviders = new Map<string, () => unknown>();
 
 /**
- * defineContext — register a context provider.
+ * defineContext — register a context provider. Returns a ContextToken.
  *
- * The provider is a function that returns a value.
- * It will be called lazily when the inject() interceptor runs.
+ * The provider is called lazily when the group's inject middleware runs.
  */
-export function defineContext(id: string, provider: ContextProvider): void {
+export function defineContext<Id extends string, V>(
+  id: Id,
+  provider: () => V,
+): ContextToken<Id, V> {
   contextProviders.set(id, provider);
+  return { __id: id } as ContextToken<Id, V>;
 }
 
 /**
- * inject — create a per-command interceptor that resolves context providers.
- *
- * Returns a Middleware. Does NOT auto-register globally.
- * Pass to defineCommand as an interceptor:
- *   defineCommand("my-cmd", fn, [inject("dom-items")])
+ * resolveContext — resolve a context provider by ID. Used by group inject.
  */
-export function inject(...ids: string[]): Middleware {
-  const middlewareId = `inject:${ids.join(",")}`;
-
-  return {
-    id: middlewareId,
-    before: (ctx: MiddlewareContext): MiddlewareContext => {
-      const injected = { ...ctx.injected };
-
-      for (const id of ids) {
-        const provider = contextProviders.get(id);
-        if (provider) {
-          injected[id] = provider();
-        } else {
-          console.warn(`[kernel] No context provider registered for "${id}"`);
-        }
-      }
-
-      return { ...ctx, injected };
-    },
-  };
+export function resolveContext(id: string): unknown {
+  const provider = contextProviders.get(id);
+  if (provider) {
+    return provider();
+  }
+  console.warn(`[kernel] No context provider registered for "${id}"`);
+  return undefined;
 }
 
 // ─── Testing ───

@@ -6,13 +6,14 @@
  */
 
 import {
-  defineCommand,
+  createKernel,
   dispatch,
   getLastTransaction,
   getState,
   initKernel,
   resetState,
   type StateDiff,
+  state,
   unbindStore,
 } from "../index.ts";
 
@@ -32,7 +33,8 @@ const INITIAL: TestState = {
   meta: { tags: ["foo"], nested: { x: 1, y: 2 } },
 };
 
-initKernel<TestState>({ ...INITIAL, items: [...INITIAL.items] });
+void initKernel<TestState>({ ...INITIAL, items: [...INITIAL.items] });
+const kernel = createKernel({ state: state<TestState>(), effects: {} });
 
 // ── Test helpers ──
 
@@ -49,6 +51,46 @@ function assert(condition: boolean, label: string) {
   }
 }
 
+// ── Commands ──
+
+const SET_COUNT = kernel.defineCommand(
+  "SET_COUNT",
+  (ctx: { state: TestState }, payload: number) => ({
+    state: { ...ctx.state, count: payload },
+  }),
+);
+
+const SET_USER_NAME = kernel.defineCommand(
+  "SET_USER_NAME",
+  (ctx: { state: TestState }, payload: string) => ({
+    state: { ...ctx.state, user: { ...ctx.state.user, name: payload } },
+  }),
+);
+
+const ADD_ITEM = kernel.defineCommand(
+  "ADD_ITEM",
+  (ctx: { state: TestState }, payload: string) => ({
+    state: { ...ctx.state, items: [...ctx.state.items, payload] },
+  }),
+);
+
+const SET_NESTED_X = kernel.defineCommand(
+  "SET_NESTED_X",
+  (ctx: { state: TestState }, payload: number) => ({
+    state: {
+      ...ctx.state,
+      meta: {
+        ...ctx.state.meta,
+        nested: { ...ctx.state.meta.nested, x: payload },
+      },
+    },
+  }),
+);
+
+const NOOP = kernel.defineCommand("NOOP", (ctx: { state: TestState }) => ({
+  state: ctx.state,
+}));
+
 // ── Tests ──
 
 console.log("\n🔬 Kernel Step 4 — computeChanges + getState / resetState\n");
@@ -56,11 +98,7 @@ console.log("\n🔬 Kernel Step 4 — computeChanges + getState / resetState\n")
 // --- Test 1: Simple scalar change ---
 console.log("─── scalar change ───");
 
-defineCommand<TestState>("set-count", (ctx, payload) => ({
-  state: { ...ctx.state, count: payload as number },
-}));
-
-dispatch({ type: "set-count", payload: 42 });
+dispatch(SET_COUNT(42));
 const tx1 = getLastTransaction()!;
 const changes1 = tx1.changes as StateDiff[];
 assert(Array.isArray(changes1), "changes is an array");
@@ -74,11 +112,7 @@ assert(countDiff?.to === 42, `count.to = ${countDiff?.to}`);
 // --- Test 2: Nested object change ---
 console.log("\n─── nested object change ───");
 
-defineCommand<TestState>("set-user-name", (ctx, payload) => ({
-  state: { ...ctx.state, user: { ...ctx.state.user, name: payload as string } },
-}));
-
-dispatch({ type: "set-user-name", payload: "Bob" });
+dispatch(SET_USER_NAME("Bob"));
 const tx2 = getLastTransaction()!;
 const changes2 = tx2.changes as StateDiff[];
 
@@ -94,11 +128,7 @@ assert(ageDiff === undefined, "user.age not in diff (unchanged)");
 // --- Test 3: Array change ---
 console.log("\n─── array change ───");
 
-defineCommand<TestState>("add-item", (ctx, payload) => ({
-  state: { ...ctx.state, items: [...ctx.state.items, payload as string] },
-}));
-
-dispatch({ type: "add-item", payload: "d" });
+dispatch(ADD_ITEM("d"));
 const tx3 = getLastTransaction()!;
 const changes3 = tx3.changes as StateDiff[];
 
@@ -110,17 +140,7 @@ assert(itemDiff?.to === "d", `items[3].to = "d"`);
 // --- Test 4: Deep nested change ---
 console.log("\n─── deep nested change ───");
 
-defineCommand<TestState>("set-nested-x", (ctx, payload) => ({
-  state: {
-    ...ctx.state,
-    meta: {
-      ...ctx.state.meta,
-      nested: { ...ctx.state.meta.nested, x: payload as number },
-    },
-  },
-}));
-
-dispatch({ type: "set-nested-x", payload: 99 });
+dispatch(SET_NESTED_X(99));
 const tx4 = getLastTransaction()!;
 const changes4 = tx4.changes as StateDiff[];
 
@@ -136,9 +156,7 @@ assert(nestedYDiff === undefined, "meta.nested.y not in diff (unchanged)");
 // --- Test 5: No change → empty diffs ---
 console.log("\n─── no change → empty diffs ───");
 
-defineCommand<TestState>("noop", (ctx) => ({ state: ctx.state }));
-
-dispatch({ type: "noop" });
+dispatch(NOOP());
 const tx5 = getLastTransaction()!;
 const changes5 = tx5.changes as StateDiff[];
 assert(changes5.length === 0, `no changes: ${changes5.length} diffs`);

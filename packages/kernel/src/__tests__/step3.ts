@@ -1,18 +1,21 @@
 /**
- * Kernel Step 3 Verification — Context & Inject (per-command)
+ * Kernel Step 3 Verification — Context & Group Inject
  *
  * Run: npx tsx packages/kernel/src/__tests__/step3.ts
- * Tests: defineContext, inject (per-command interceptor), context in command handlers.
+ * Tests: defineContext → ContextToken, group({ inject }) for per-group context injection.
+ *
+ * C1 FIX PROOF: All handlers use auto-inferred ctx.
+ * No manual type annotations on ctx — types propagate from group inject.
  */
 
 import {
-  defineCommand,
+  createKernel,
   defineContext,
   dispatch,
   getTransactions,
   initKernel,
-  inject,
   resetKernel,
+  state,
 } from "../index.ts";
 
 // ── Setup ──
@@ -22,6 +25,7 @@ interface TestState {
 }
 
 const store = initKernel<TestState>({ result: null });
+const kernel = createKernel({ state: state<TestState>(), effects: {} });
 
 // ── Test helpers ──
 
@@ -45,24 +49,23 @@ function reset() {
 
 // ── Tests ──
 
-console.log("\n🔬 Kernel Step 3 — Context & Inject (per-command)\n");
+console.log("\n🔬 Kernel Step 3 — Context & Group Inject\n");
 
-// --- Test 1: defineContext + inject (per-command) ---
-console.log("─── defineContext + inject ───");
+// --- Test 1: defineContext + group inject ---
+console.log("─── defineContext + group inject ───");
 
 reset();
 
-defineContext("now", () => Date.now());
+const NOW = defineContext("NOW", () => Date.now());
 
-defineCommand<TestState>(
-  "use-time",
-  (ctx) => ({
-    state: { result: typeof ctx["now"] },
-  }),
-  [inject("now")],
-); // ← per-command interceptor
+const g1 = kernel.group({ inject: [NOW] });
 
-dispatch({ type: "use-time" });
+const USE_TIME = g1.defineCommand("USE_TIME", (ctx) => ({
+  // C1 PROOF: ctx.NOW is auto-typed as number (not unknown)
+  state: { result: typeof ctx.NOW },
+}));
+
+dispatch(USE_TIME());
 assert(
   store.getState().result === "number",
   `injected "now" is number: ${store.getState().result}`,
@@ -73,26 +76,25 @@ console.log("\n─── multiple contexts ───");
 
 reset();
 
-defineContext("user", () => ({ name: "Alice", role: "admin" }));
-defineContext("config", () => ({ theme: "dark" }));
+const USER = defineContext("USER", () => ({ name: "Alice", role: "admin" }));
+const CONFIG = defineContext("CONFIG", () => ({ theme: "dark" }));
 
-defineCommand<TestState>(
-  "read-context",
-  (ctx) => ({
-    state: {
-      result: {
-        userName: (ctx["user"] as any)?.name,
-        theme: (ctx["config"] as any)?.theme,
-      },
+const g2 = kernel.group({ inject: [USER, CONFIG] });
+
+const READ_CONTEXT = g2.defineCommand("READ_CONTEXT", (ctx) => ({
+  // C1 PROOF: ctx.USER and ctx.CONFIG are auto-typed
+  state: {
+    result: {
+      userName: ctx.USER.name,
+      theme: ctx.CONFIG.theme,
     },
-  }),
-  [inject("user", "config")],
-); // ← multiple in one inject
+  },
+}));
 
-dispatch({ type: "read-context" });
+dispatch(READ_CONTEXT());
 const r2 = store.getState().result as any;
-assert(r2.userName === "Alice", `ctx["user"].name = "${r2.userName}"`);
-assert(r2.theme === "dark", `ctx["config"].theme = "${r2.theme}"`);
+assert(r2.userName === "Alice", `ctx.user.name = "${r2.userName}"`);
+assert(r2.theme === "dark", `ctx.config.theme = "${r2.theme}"`);
 
 // --- Test 3: Context is lazy (called per dispatch) ---
 console.log("\n─── lazy evaluation ───");
@@ -100,26 +102,25 @@ console.log("\n─── lazy evaluation ───");
 reset();
 
 let callCount = 0;
-defineContext("counter", () => {
+const COUNTER = defineContext("COUNTER", () => {
   callCount++;
   return callCount;
 });
 
-defineCommand<TestState>(
-  "read-counter",
-  (ctx) => ({
-    state: { result: ctx["counter"] },
-  }),
-  [inject("counter")],
-);
+const g3 = kernel.group({ inject: [COUNTER] });
 
-dispatch({ type: "read-counter" });
+const READ_COUNTER = g3.defineCommand("READ_COUNTER", (ctx) => ({
+  // C1 PROOF: ctx.COUNTER is auto-typed as number
+  state: { result: ctx.COUNTER },
+}));
+
+dispatch(READ_COUNTER());
 assert(
   store.getState().result === 1,
   `1st dispatch: counter = ${store.getState().result}`,
 );
 
-dispatch({ type: "read-counter" });
+dispatch(READ_COUNTER());
 assert(
   store.getState().result === 2,
   `2nd dispatch: counter = ${store.getState().result}`,
@@ -131,54 +132,53 @@ console.log("\n─── missing context warning ───");
 
 reset();
 
-defineCommand<TestState>(
-  "use-missing",
-  (ctx) => ({
-    state: { result: ctx["nonexistent"] ?? "undefined" },
-  }),
-  [inject("nonexistent")],
-);
+const NONEXISTENT = defineContext("NONEXISTENT", () => undefined as never);
 
-dispatch({ type: "use-missing" });
+const g4 = kernel.group({ inject: [NONEXISTENT] });
+
+const USE_MISSING = g4.defineCommand("USE_MISSING", (ctx) => ({
+  state: { result: ctx.NONEXISTENT ?? "undefined" },
+}));
+
+dispatch(USE_MISSING());
 assert(
   store.getState().result === "undefined",
   "missing context returns undefined",
 );
 
-// --- Test 5: inject is per-command (not global) ---
-console.log("\n─── inject is per-command only ───");
+// --- Test 5: inject is per-group (not global) ---
+console.log("\n─── inject is per-group only ───");
 
 reset();
 
 let providerCalls = 0;
-defineContext("expensive", () => {
+const EXPENSIVE = defineContext("EXPENSIVE", () => {
   providerCalls++;
   return "expensive-data";
 });
 
-// Only "needs-ctx" gets inject, "no-ctx" does NOT
-defineCommand<TestState>(
-  "needs-ctx",
-  (ctx) => ({
-    state: { result: ctx["expensive"] },
-  }),
-  [inject("expensive")],
-);
+const gExpensive = kernel.group({ inject: [EXPENSIVE] });
 
-defineCommand<TestState>("no-ctx", () => ({
-  state: { result: "no-injection" },
+const NEEDS_CTX = gExpensive.defineCommand("NEEDS_CTX", (ctx) => ({
+  // C1 PROOF: ctx.EXPENSIVE is auto-typed as string
+  state: { result: ctx.EXPENSIVE },
 }));
 
-dispatch({ type: "no-ctx" });
+const NO_CTX = kernel.defineCommand("NO_CTX", (ctx) => ({
+  // H4 PROOF: ctx.state is auto-typed as TestState
+  state: { result: ctx.state.result ?? "no-injection" },
+}));
+
+dispatch(NO_CTX());
 assert(
   providerCalls === 0,
-  `dispatch("no-ctx"): provider NOT called (${providerCalls})`,
+  `dispatch(NO_CTX): provider NOT called (${providerCalls})`,
 );
 
-dispatch({ type: "needs-ctx" });
+dispatch(NEEDS_CTX());
 assert(
   providerCalls === 1,
-  `dispatch("needs-ctx"): provider called once (${providerCalls})`,
+  `dispatch(NEEDS_CTX): provider called once (${providerCalls})`,
 );
 assert(store.getState().result === "expensive-data", "injected value correct");
 
@@ -189,22 +189,22 @@ reset();
 
 store.setState(() => ({ result: "hello" }));
 
-defineContext("snapshot", () => "external-data");
+const SNAPSHOT = defineContext("SNAPSHOT", () => "external-data");
 
-defineCommand<TestState>(
-  "use-state-context",
-  (ctx) => ({
-    state: {
-      result: {
-        state: ctx.state,
-        snapshot: ctx["snapshot"],
-      },
+const g6 = kernel.group({ inject: [SNAPSHOT] });
+
+const USE_STATE_CONTEXT = g6.defineCommand("USE_STATE_CONTEXT", (ctx) => ({
+  state: {
+    result: {
+      // H4 PROOF: ctx.state auto-typed as TestState
+      state: ctx.state,
+      // C1 PROOF: ctx.SNAPSHOT auto-typed as string
+      snapshot: ctx.SNAPSHOT,
     },
-  }),
-  [inject("snapshot")],
-);
+  },
+}));
 
-dispatch({ type: "use-state-context" });
+dispatch(USE_STATE_CONTEXT());
 const r5 = store.getState().result as any;
 assert(
   r5.snapshot === "external-data",
@@ -218,17 +218,18 @@ assert(
 // --- Test 7: resetKernel clears everything ---
 console.log("\n─── resetKernel ───");
 
-// Register some stuff
-defineContext("temp", () => "x");
-defineCommand<TestState>("temp-cmd", () => ({ state: { result: "y" } }));
+defineContext("TEMP", () => "x");
+const TEMP_CMD = kernel.defineCommand("TEMP_CMD", (_ctx) => ({
+  state: { result: "y" },
+}));
 
-dispatch({ type: "temp-cmd" });
+dispatch(TEMP_CMD());
 assert(store.getState().result === "y", "temp-cmd executed → result = 'y'");
 
 resetKernel();
 
 // After reset, store is preserved but registries are cleared → warn, no-op
-dispatch({ type: "temp-cmd" }); // warns "No handler or command registered"
+dispatch({ type: "TEMP_CMD", payload: undefined } as any);
 assert(
   store.getState().result === "y",
   "state unchanged after reset (registry cleared, store preserved)",
@@ -239,11 +240,13 @@ console.log("\n─── transaction cap ───");
 
 reset();
 
-defineCommand<TestState>("noop", () => ({ state: { result: "x" } }));
+const NOOP = kernel.defineCommand("NOOP", (_ctx) => ({
+  state: { result: "x" },
+}));
 
 // Dispatch 210 times (cap is 200)
 for (let i = 0; i < 210; i++) {
-  dispatch({ type: "noop" });
+  dispatch(NOOP());
 }
 
 const txs = getTransactions();

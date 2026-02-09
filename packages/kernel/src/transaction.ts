@@ -1,12 +1,12 @@
 /**
  * transaction — Transaction log, Inspector API, and state diff.
  *
- * Records every dispatch as a Transaction (command, effects, state diff).
+ * Records every dispatch as a Transaction with scope information.
  * Provides time-travel and inspection capabilities.
  */
 
-import type { Command, EffectMap } from "./registry.ts";
 import { getActiveStore } from "./store.ts";
+import type { Command } from "./tokens.ts";
 
 // ─── Types ───
 
@@ -20,8 +20,9 @@ export type Transaction = {
   id: number;
   timestamp: number;
   command: Command;
-  handlerType: "handler" | "command" | "unknown";
-  effects: EffectMap | null;
+  handlerScope: string;
+  bubblePath: string[];
+  effects: Record<string, unknown> | null;
   changes: StateDiff[];
   stateBefore: unknown;
   stateAfter: unknown;
@@ -35,21 +36,21 @@ let nextTransactionId = 0;
 
 /**
  * recordTransaction — append a transaction entry to the log.
- *
- * Called by dispatch after command processing completes.
  */
 export function recordTransaction(
   command: Command,
-  handlerType: "handler" | "command" | "unknown",
-  effects: EffectMap | null,
+  handlerScope: string,
+  effects: Record<string, unknown> | null,
   stateBefore: unknown,
   stateAfter: unknown,
+  bubblePath: string[],
 ): void {
   const transaction: Transaction = {
     id: nextTransactionId++,
     timestamp: Date.now(),
     command,
-    handlerType,
+    handlerScope,
+    bubblePath,
     effects,
     changes: computeChanges(stateBefore, stateAfter),
     stateBefore,
@@ -58,7 +59,6 @@ export function recordTransaction(
 
   transactions.push(transaction);
 
-  // Cap transaction log
   if (transactions.length > MAX_TRANSACTIONS) {
     transactions.splice(0, transactions.length - MAX_TRANSACTIONS);
   }
@@ -92,13 +92,6 @@ export function clearTransactions(): void {
 
 // ─── State Diff ───
 
-/**
- * computeChanges — shallow-then-recurse diff between two state trees.
- *
- * Returns an array of { path, from, to } entries for each leaf that changed.
- * Handles plain objects and arrays. Stops at non-object leaves.
- * Max depth 10 to prevent infinite recursion on circular references.
- */
 function computeChanges(before: unknown, after: unknown): StateDiff[] {
   if (before === after) return [];
 

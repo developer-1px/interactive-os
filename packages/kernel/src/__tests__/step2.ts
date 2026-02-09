@@ -2,18 +2,18 @@
  * Kernel Step 2 Verification — Middleware
  *
  * Run: npx tsx packages/kernel/src/__tests__/step2.ts
- * Tests: use(), before/after chain, command transformation, effect modification.
+ * Tests: kernel.use(), before/after chain, command transformation, effect modification.
  */
 
 import {
-  clearMiddlewares,
+  clearAllRegistries,
   clearTransactions,
-  defineCommand,
-  defineEffect,
+  createKernel,
   dispatch,
+  GLOBAL,
   getTransactions,
   initKernel,
-  use,
+  state,
 } from "../index.ts";
 
 // ── Setup ──
@@ -24,6 +24,18 @@ interface TestState {
 }
 
 const store = initKernel<TestState>({ count: 0, log: [] });
+
+// ── Kernel ──
+
+const kernel = createKernel({ state: state<TestState>(), effects: {} });
+
+// ── Effects ──
+
+const NOTIFY = kernel.defineEffect("NOTIFY", (msg: string) => {
+  effectLog.push(msg);
+});
+
+const effectLog: string[] = [];
 
 // ── Test helpers ──
 
@@ -49,12 +61,16 @@ console.log("─── before middleware ───");
 
 const beforeLog: string[] = [];
 
-defineCommand<TestState>("increment", (ctx) => ({
-  state: { ...ctx.state, count: ctx.state.count + 1 },
-}));
+const INCREMENT = kernel.defineCommand(
+  "INCREMENT",
+  (ctx: { state: TestState }) => ({
+    state: { ...ctx.state, count: ctx.state.count + 1 },
+  }),
+);
 
-use({
+kernel.use({
   id: "logger",
+  scope: GLOBAL,
   before: (ctx) => {
     beforeLog.push(`before:${ctx.command.type}`);
     return ctx;
@@ -65,32 +81,41 @@ use({
   },
 });
 
-dispatch({ type: "increment" });
+dispatch(INCREMENT());
 assert(
-  beforeLog[0] === "before:increment",
+  beforeLog[0] === "before:INCREMENT",
   `before hook ran: "${beforeLog[0]}"`,
 );
-assert(beforeLog[1] === "after:increment", `after hook ran: "${beforeLog[1]}"`);
+assert(beforeLog[1] === "after:INCREMENT", `after hook ran: "${beforeLog[1]}"`);
 assert(store.getState().count === 1, "handler still executed");
 
 // --- Test 2: Before can transform command ---
 console.log("\n─── command transformation ───");
 
-defineCommand<TestState>("aliased", (ctx) => ({
+void kernel.defineCommand("ALIASED", (ctx: { state: TestState }) => ({
   state: { ...ctx.state, count: 999 },
 }));
 
-use({
+// Register a "source" command that will be aliased
+const ALIAS_ME = kernel.defineCommand(
+  "ALIAS_ME",
+  (ctx: { state: TestState }) => ({
+    state: ctx.state, // noop — middleware will transform
+  }),
+);
+
+kernel.use({
   id: "aliaser",
+  scope: GLOBAL,
   before: (ctx) => {
-    if (ctx.command.type === "alias-me") {
-      return { ...ctx, command: { type: "aliased" } };
+    if (ctx.command.type === "ALIAS_ME") {
+      return { ...ctx, command: { ...ctx.command, type: "ALIASED" } };
     }
     return ctx;
   },
 });
 
-dispatch({ type: "alias-me" });
+dispatch(ALIAS_ME());
 assert(
   store.getState().count === 999,
   "aliased command executed → count = 999",
@@ -99,26 +124,21 @@ assert(
 // --- Test 3: After can modify effects ---
 console.log("\n─── effect modification ───");
 
-const effectLog: string[] = [];
-
-defineEffect("notify", (msg) => {
-  effectLog.push(msg as string);
-});
-
-defineCommand<TestState>("shout", (ctx) => ({
+const SHOUT = kernel.defineCommand("SHOUT", (ctx: { state: TestState }) => ({
   state: { ...ctx.state, count: 42 },
-  notify: "hello",
+  [NOTIFY]: "hello",
 }));
 
-use({
+kernel.use({
   id: "uppercaser",
+  scope: GLOBAL,
   after: (ctx) => {
-    if (ctx.effects?.notify) {
+    if (ctx.effects?.NOTIFY) {
       return {
         ...ctx,
         effects: {
           ...ctx.effects,
-          notify: (ctx.effects.notify as string).toUpperCase(),
+          NOTIFY: (ctx.effects.NOTIFY as string).toUpperCase(),
         },
       };
     }
@@ -126,7 +146,7 @@ use({
   },
 });
 
-dispatch({ type: "shout" });
+dispatch(SHOUT());
 assert(store.getState().count === 42, "command executed → count = 42");
 assert(
   effectLog[effectLog.length - 1] === "HELLO",
@@ -136,11 +156,20 @@ assert(
 // --- Test 4: Multiple middlewares — order ---
 console.log("\n─── middleware order ───");
 
-clearMiddlewares();
+clearAllRegistries();
 const orderLog: string[] = [];
 
-use({
+// Re-register INCREMENT after clear
+const INCREMENT2 = kernel.defineCommand(
+  "INCREMENT",
+  (ctx: { state: TestState }) => ({
+    state: { ...ctx.state, count: ctx.state.count + 1 },
+  }),
+);
+
+kernel.use({
   id: "mw-A",
+  scope: GLOBAL,
   before: (ctx) => {
     orderLog.push("A:before");
     return ctx;
@@ -151,8 +180,9 @@ use({
   },
 });
 
-use({
+kernel.use({
   id: "mw-B",
+  scope: GLOBAL,
   before: (ctx) => {
     orderLog.push("B:before");
     return ctx;
@@ -163,8 +193,9 @@ use({
   },
 });
 
-use({
+kernel.use({
   id: "mw-C",
+  scope: GLOBAL,
   before: (ctx) => {
     orderLog.push("C:before");
     return ctx;
@@ -175,7 +206,7 @@ use({
   },
 });
 
-dispatch({ type: "increment" });
+dispatch(INCREMENT2());
 assert(
   orderLog.join(" → ") ===
     "A:before → B:before → C:before → C:after → B:after → A:after",
@@ -185,26 +216,35 @@ assert(
 // --- Test 5: Middleware dedup by id ---
 console.log("\n─── middleware dedup ───");
 
-clearMiddlewares();
+clearAllRegistries();
 const dedupLog: string[] = [];
 
-use({
+const INCREMENT3 = kernel.defineCommand(
+  "INCREMENT",
+  (ctx: { state: TestState }) => ({
+    state: { ...ctx.state, count: ctx.state.count + 1 },
+  }),
+);
+
+kernel.use({
   id: "dedup-test",
+  scope: GLOBAL,
   before: (ctx) => {
     dedupLog.push("v1");
     return ctx;
   },
 });
 
-use({
+kernel.use({
   id: "dedup-test",
+  scope: GLOBAL,
   before: (ctx) => {
     dedupLog.push("v2");
     return ctx;
   },
 });
 
-dispatch({ type: "increment" });
+dispatch(INCREMENT3());
 assert(dedupLog.length === 1, `dedup: ran ${dedupLog.length} time(s)`);
 assert(dedupLog[0] === "v2", `dedup: latest version ran: "${dedupLog[0]}"`);
 
@@ -212,22 +252,34 @@ assert(dedupLog[0] === "v2", `dedup: latest version ran: "${dedupLog[0]}"`);
 console.log("\n─── transaction records transformed command ───");
 
 clearTransactions();
-clearMiddlewares();
+clearAllRegistries();
 
-use({
+void kernel.defineCommand("ALIASED", (ctx: { state: TestState }) => ({
+  state: { ...ctx.state, count: 777 },
+}));
+
+const ORIGINAL = kernel.defineCommand(
+  "ORIGINAL",
+  (ctx: { state: TestState }) => ({
+    state: ctx.state,
+  }),
+);
+
+kernel.use({
   id: "transform-test",
+  scope: GLOBAL,
   before: (ctx) => {
-    if (ctx.command.type === "original") {
-      return { ...ctx, command: { type: "aliased" } };
+    if (ctx.command.type === "ORIGINAL") {
+      return { ...ctx, command: { ...ctx.command, type: "ALIASED" } };
     }
     return ctx;
   },
 });
 
-dispatch({ type: "original" });
+dispatch(ORIGINAL());
 const txs = getTransactions();
 assert(
-  txs[0].command.type === "aliased",
+  txs[0].command.type === "ALIASED",
   `transaction recorded transformed type: "${txs[0].command.type}"`,
 );
 

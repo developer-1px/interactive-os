@@ -1,21 +1,20 @@
 /**
  * Kernel Lab — Interactive demo page for the kernel engine.
  *
- * Demonstrates: dispatch, defineCommand, defineEffect,
+ * Demonstrates: dispatch, createKernel, defineCommand, defineEffect,
  * transaction log with time-travel.
  */
 
 import {
   clearTransactions,
-  defineCommand,
-  defineEffect,
+  createKernel,
+  dispatch,
   getTransactions,
   initKernel,
-  resetKernel,
+  state,
   type Transaction,
   travelTo,
   useComputed,
-  useDispatch,
 } from "@kernel";
 import { useEffect, useRef, useState } from "react";
 import { useKernelLabBotRoutes } from "./tests/KernelLabBot";
@@ -34,84 +33,94 @@ const INITIAL: DemoState = {
   lastAction: "(none)",
 };
 
-// ─── Kernel Setup (module-level singleton) ───
+// ─── Effects ───
 
 const effectLog: string[] = [];
 
-function setupKernel() {
-  resetKernel();
+// ── Kernel (module-level, registered once) ──
+
+const kernel = createKernel({ state: state<DemoState>(), effects: {} });
+
+// ── Effects ──
+
+const NOTIFY = kernel.defineEffect("NOTIFY", (message: string) => {
+  effectLog.push(message);
+});
+
+/** Full kernel reset — state + transactions + effect log */
+export function resetKernelLab() {
+  kernel.reset(INITIAL);
+  clearTransactions();
   effectLog.length = 0;
-
-  initKernel<DemoState>({ ...INITIAL, items: [] });
-
-  // ── Commands ──
-
-  defineCommand<DemoState>("increment", (ctx) => ({
-    state: {
-      ...ctx.state,
-      count: ctx.state.count + 1,
-      lastAction: "increment",
-    },
-  }));
-
-  defineCommand<DemoState>("decrement", (ctx) => ({
-    state: {
-      ...ctx.state,
-      count: ctx.state.count - 1,
-      lastAction: "decrement",
-    },
-  }));
-
-  defineCommand<DemoState>("reset", () => ({
-    state: { ...INITIAL, items: [], lastAction: "reset" },
-  }));
-
-  defineCommand<DemoState>("add-item", (ctx, payload) => ({
-    state: {
-      ...ctx.state,
-      items: [...ctx.state.items, payload as string],
-      lastAction: `add-item: "${payload}"`,
-    },
-  }));
-
-  defineCommand<DemoState>("remove-last-item", (ctx) => ({
-    state: {
-      ...ctx.state,
-      items: ctx.state.items.slice(0, -1),
-      lastAction: "remove-last-item",
-    },
-  }));
-
-  // ── Commands with effects ──
-
-  defineCommand<DemoState>("increment-and-notify", (ctx) => {
-    const s = ctx.state;
-    return {
-      state: { ...s, count: s.count + 1, lastAction: "increment-and-notify" },
-      notify: `Count is now ${s.count + 1}`,
-    };
-  });
-
-  defineCommand<DemoState>("batch-add", (ctx) => {
-    const s = ctx.state;
-    const timestamp = new Date().toLocaleTimeString();
-    return {
-      state: {
-        ...s,
-        items: [...s.items, `Item @ ${timestamp}`],
-        lastAction: "batch-add",
-      },
-      notify: `Added item at ${timestamp}`,
-      dispatch: { type: "increment" },
-    };
-  });
-
-  // ── Effects ──
-
-  defineEffect("notify", (message) => {
-    effectLog.push(message as string);
-  });
 }
+
+const INCREMENT = kernel.defineCommand("INCREMENT", (ctx) => ({
+  state: {
+    ...ctx.state,
+    count: ctx.state.count + 1,
+    lastAction: "INCREMENT",
+  },
+}));
+
+const DECREMENT = kernel.defineCommand("DECREMENT", (ctx) => ({
+  state: {
+    ...ctx.state,
+    count: ctx.state.count - 1,
+    lastAction: "DECREMENT",
+  },
+}));
+
+const RESET = kernel.defineCommand("RESET", () => ({
+  state: { ...INITIAL, items: [], lastAction: "RESET" },
+}));
+
+const ADD_ITEM = kernel.defineCommand(
+  "ADD_ITEM",
+  (ctx: { readonly state: DemoState }, payload: string) => ({
+    state: {
+      ...ctx.state,
+      items: [...ctx.state.items, payload],
+      lastAction: `ADD_ITEM: "${payload}"`,
+    },
+  }),
+);
+
+const REMOVE_LAST_ITEM = kernel.defineCommand("REMOVE_LAST_ITEM", (ctx) => ({
+  state: {
+    ...ctx.state,
+    items: ctx.state.items.slice(0, -1),
+    lastAction: "REMOVE_LAST_ITEM",
+  },
+}));
+
+const INCREMENT_AND_NOTIFY = kernel.defineCommand(
+  "INCREMENT_AND_NOTIFY",
+  (ctx) => {
+    const s = ctx.state;
+    return {
+      state: { ...s, count: s.count + 1, lastAction: "INCREMENT_AND_NOTIFY" },
+      [NOTIFY]: `Count is now ${s.count + 1}`,
+    };
+  },
+);
+
+const BATCH_ADD = kernel.defineCommand("BATCH_ADD", (ctx) => {
+  const s = ctx.state;
+  const timestamp = new Date().toLocaleTimeString();
+  return {
+    state: {
+      ...s,
+      items: [...s.items, `Item @ ${timestamp}`],
+      lastAction: "BATCH_ADD",
+    },
+    [NOTIFY]: `Added item at ${timestamp}`,
+    dispatch: INCREMENT(),
+  };
+});
+
+// ─── Init (module-level, runs once on import) ───
+
+initKernel<DemoState>(INITIAL);
 
 // ─── Components ───
 
@@ -126,13 +135,6 @@ function StatePanel({ state }: { state: DemoState }) {
 
 function ControlPanel() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const d = useDispatch();
-
-  const send = (type: string, payload?: unknown) => {
-    console.log("[KernelLabPage] send called:", { type, payload });
-    d({ type, payload });
-    console.log("[KernelLabPage] dispatch called");
-  };
 
   return (
     <div style={panelStyle}>
@@ -144,24 +146,21 @@ function ControlPanel() {
           <button
             type="button"
             style={btnStyle}
-            onClick={() => {
-              console.log("[KernelLabPage] Increment button clicked!");
-              send("increment");
-            }}
+            onClick={() => dispatch(INCREMENT())}
           >
             + Increment
           </button>
           <button
             type="button"
             style={btnStyle}
-            onClick={() => send("decrement")}
+            onClick={() => dispatch(DECREMENT())}
           >
             − Decrement
           </button>
           <button
             type="button"
             style={{ ...btnStyle, ...dangerStyle }}
-            onClick={() => send("reset")}
+            onClick={() => dispatch(RESET())}
           >
             ↺ Reset
           </button>
@@ -173,7 +172,7 @@ function ControlPanel() {
             placeholder="Item name..."
             onKeyDown={(e) => {
               if (e.key === "Enter" && inputRef.current?.value) {
-                send("add-item", inputRef.current.value);
+                dispatch(ADD_ITEM(inputRef.current.value));
                 inputRef.current.value = "";
               }
             }}
@@ -183,7 +182,7 @@ function ControlPanel() {
             style={btnStyle}
             onClick={() => {
               if (inputRef.current?.value) {
-                send("add-item", inputRef.current.value);
+                dispatch(ADD_ITEM(inputRef.current.value));
                 inputRef.current.value = "";
               }
             }}
@@ -193,7 +192,7 @@ function ControlPanel() {
           <button
             type="button"
             style={btnStyle}
-            onClick={() => send("remove-last-item")}
+            onClick={() => dispatch(REMOVE_LAST_ITEM())}
           >
             − Remove
           </button>
@@ -206,14 +205,14 @@ function ControlPanel() {
           <button
             type="button"
             style={{ ...btnStyle, ...accentStyle }}
-            onClick={() => send("increment-and-notify")}
+            onClick={() => dispatch(INCREMENT_AND_NOTIFY())}
           >
             ⚡ Increment + Notify
           </button>
           <button
             type="button"
             style={{ ...btnStyle, ...accentStyle }}
-            onClick={() => send("batch-add")}
+            onClick={() => dispatch(BATCH_ADD())}
           >
             ⚡ Batch Add (effect + re-dispatch)
           </button>
@@ -303,7 +302,7 @@ function TransactionPanel() {
             >
               <span style={txIdStyle}>#{tx.id}</span>
               <span style={txTypeStyle}>{tx.command.type}</span>
-              <span style={txHandlerStyle}>{tx.handlerType}</span>
+              <span style={txHandlerStyle}>{tx.handlerScope}</span>
               {tx.command.payload !== undefined && (
                 <span style={txPayloadStyle}>
                   {JSON.stringify(tx.command.payload).slice(0, 30)}
@@ -325,17 +324,15 @@ function TransactionPanel() {
   );
 }
 
-setupKernel(); // Module-level init (runs before React mounts)
-
 // ─── Main Page ───
 
 export default function KernelLabPage() {
   const resetKey = useKernelLabBotRoutes();
 
-  // Re-initialize when TestBot resets (resetKey changes)
+  // Reset state only — registries stay intact (idempotent, Strict Mode safe)
   // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey is intentional trigger
   useEffect(() => {
-    setupKernel();
+    resetKernelLab();
   }, [resetKey]);
 
   const state = useComputed((s) => s as DemoState);
@@ -523,7 +520,7 @@ const txRowStyle: React.CSSProperties = {
   background: "white",
   cursor: "pointer",
   fontSize: 12,
-  textAlign: "left",
+  textAlign: "left" as const,
   width: "100%",
   transition: "all 0.15s",
 };

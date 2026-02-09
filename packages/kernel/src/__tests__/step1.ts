@@ -1,56 +1,89 @@
 /**
- * Kernel Step 1 Verification
+ * Kernel Step 1 Verification — Type-Strict API
  *
  * Run: npx tsx packages/kernel/src/__tests__/step1.ts
- * Tests the full dispatch → handler/command → effect → transaction loop.
+ * Tests the full dispatch → command → effect → transaction loop.
  */
 
 import {
   clearTransactions,
-  defineCommand,
-  defineEffect,
+  createKernel,
   dispatch,
   getLastTransaction,
   getTransactions,
   initKernel,
+  state,
   travelTo,
 } from "../index.ts";
 
-// ── Setup ──
+// ── Types ──
 
 interface TestState {
   count: number;
   lastEffect: string | null;
 }
 
-const store = initKernel<TestState>({ count: 0, lastEffect: null });
+// ── Effects ──
 
-// Track effect execution
 const effectLog: string[] = [];
 
-// ── Register ──
+// ── Kernel ──
 
-defineCommand("increment", (ctx) => {
-  const s = ctx.state as TestState;
-  return { state: { ...s, count: s.count + 1 } };
+const kernel = createKernel({ state: state<TestState>(), effects: {} });
+
+const NOTIFY = kernel.defineEffect("NOTIFY", (message: string) => {
+  effectLog.push(message);
 });
 
-defineCommand("decrement", (ctx) => {
-  const s = ctx.state as TestState;
-  return { state: { ...s, count: s.count - 1 } };
-});
+const RE_DISPATCH = kernel.defineEffect(
+  "RE_DISPATCH",
+  (cmd: { type: string; payload?: unknown }) => {
+    dispatch(cmd as any); // re-dispatch uses raw command internally
+  },
+);
 
-defineCommand("increment-and-notify", (ctx) => {
-  const s = ctx.state as TestState;
-  return {
-    state: { ...s, count: s.count + 1, lastEffect: "notified" },
-    notify: `count is now ${s.count + 1}`,
-  };
-});
+// ── Store ──
 
-defineEffect("notify", (message) => {
-  effectLog.push(message as string);
-});
+const store = initKernel<TestState>({ count: 0, lastEffect: null });
+
+// ── Commands ──
+
+const INCREMENT = kernel.defineCommand(
+  "INCREMENT",
+  (ctx: { state: TestState }) => ({
+    state: { ...ctx.state, count: ctx.state.count + 1 },
+  }),
+);
+
+const DECREMENT = kernel.defineCommand(
+  "DECREMENT",
+  (ctx: { state: TestState }) => ({
+    state: { ...ctx.state, count: ctx.state.count - 1 },
+  }),
+);
+
+const INCREMENT_AND_NOTIFY = kernel.defineCommand(
+  "INCREMENT_AND_NOTIFY",
+  (ctx: { state: TestState }) => ({
+    state: { ...ctx.state, count: ctx.state.count + 1, lastEffect: "notified" },
+    [NOTIFY]: `count is now ${ctx.state.count + 1}`,
+  }),
+);
+
+void kernel.defineCommand(
+  "SET_COUNT",
+  (ctx: { state: TestState }, payload: number) => ({
+    state: { ...ctx.state, count: payload },
+  }),
+);
+
+const RESET_THEN_INCREMENT = kernel.defineCommand(
+  "RESET_THEN_INCREMENT",
+  (ctx: { state: TestState }) => ({
+    state: { ...ctx.state, count: 0 },
+    [RE_DISPATCH]: INCREMENT(),
+  }),
+);
 
 // ── Test helpers ──
 
@@ -72,18 +105,18 @@ function assert(condition: boolean, label: string) {
 console.log("\n🔬 Kernel Step 1 — Dispatch Loop\n");
 
 console.log("─── defineCommand ───");
-dispatch({ type: "increment" });
+dispatch(INCREMENT());
 assert(store.getState().count === 1, "increment → count = 1");
 
-dispatch({ type: "increment" });
-dispatch({ type: "increment" });
+dispatch(INCREMENT());
+dispatch(INCREMENT());
 assert(store.getState().count === 3, "3x increment → count = 3");
 
-dispatch({ type: "decrement" });
+dispatch(DECREMENT());
 assert(store.getState().count === 2, "decrement → count = 2");
 
 console.log("\n─── defineCommand + defineEffect ───");
-dispatch({ type: "increment-and-notify" });
+dispatch(INCREMENT_AND_NOTIFY());
 assert(store.getState().count === 3, "command → count = 3");
 assert(
   store.getState().lastEffect === "notified",
@@ -98,12 +131,12 @@ assert(txs.length === 5, `${txs.length} transactions recorded`);
 
 const lastTx = getLastTransaction()!;
 assert(
-  lastTx.command.type === "increment-and-notify",
+  lastTx.command.type === "INCREMENT_AND_NOTIFY",
   `last command: "${lastTx.command.type}"`,
 );
 assert(
-  lastTx.handlerType === "command",
-  `handler type: "${lastTx.handlerType}"`,
+  lastTx.handlerScope === "GLOBAL",
+  `handler scope: "${lastTx.handlerScope}"`,
 );
 assert(lastTx.effects !== null, "effects recorded in transaction");
 assert((lastTx.stateBefore as TestState).count === 2, "stateBefore.count = 2");
@@ -118,21 +151,8 @@ assert(store.getState().count === 3, "travel to tx 2 → count = 3");
 
 console.log("\n─── Re-entrance (dispatch inside effect) ───");
 clearTransactions();
-defineEffect("re-dispatch", (cmd) => {
-  dispatch(cmd as { type: string; payload?: unknown });
-});
 
-defineCommand("set-count", (ctx, payload) => {
-  const s = ctx.state as TestState;
-  return { state: { ...s, count: payload as number } };
-});
-
-defineCommand("reset-then-increment", (ctx) => ({
-  state: { ...(ctx.state as TestState), count: 0 },
-  "re-dispatch": { type: "increment" },
-}));
-
-dispatch({ type: "reset-then-increment" });
+dispatch(RESET_THEN_INCREMENT());
 assert(
   store.getState().count === 1,
   "re-entrance: reset(0) then increment(1) → count = 1",
@@ -141,16 +161,16 @@ assert(
 const reTxs = getTransactions();
 assert(reTxs.length === 2, `re-entrance created ${reTxs.length} transactions`);
 assert(
-  reTxs[0].command.type === "reset-then-increment",
-  "tx 0: reset-then-increment",
+  reTxs[0].command.type === "RESET_THEN_INCREMENT",
+  "tx 0: RESET_THEN_INCREMENT",
 );
 assert(
-  reTxs[1].command.type === "increment",
-  "tx 1: increment (from re-dispatch)",
+  reTxs[1].command.type === "INCREMENT",
+  "tx 1: INCREMENT (from re-dispatch)",
 );
 
 console.log("\n─── Unknown command warning ───");
-dispatch({ type: "nonexistent" }); // Should warn but not crash
+dispatch({ type: "nonexistent", payload: undefined } as any); // intentional raw dispatch for testing
 assert(true, "unknown command type did not crash");
 
 // ── Summary ──
