@@ -303,7 +303,7 @@ function TransactionPanel() {
                 <span style={txFxStyle}>
                   fx:{" "}
                   {Object.keys(tx.effects)
-                    .filter((k) => tx.effects![k] !== undefined)
+                    .filter((k) => tx.effects?.[k] !== undefined)
                     .join(", ")}
                 </span>
               )}
@@ -315,14 +315,18 @@ function TransactionPanel() {
   );
 }
 
+setupKernel(); // Module-level init (runs before React mounts)
+
 // ─── Main Page ───
 
 export default function KernelLabPage() {
   const resetKey = useKernelLabBotRoutes();
 
+  // Re-initialize when TestBot resets (resetKey changes)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey is intentional trigger
   useEffect(() => {
     setupKernel();
-  }, []);
+  }, [resetKey]);
 
   const db = useComputed((state) => state as DemoDB);
 
