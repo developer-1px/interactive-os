@@ -2,39 +2,47 @@
  * dispatch — Kernel's single entry point for all commands.
  *
  * Command → Queue → Process:
- *   1. Look up handler or command
- *   2. Execute (pure function)
- *   3. Run effects
- *   4. Record transaction (always)
+ *   1. Build middleware context
+ *   2. Run before chain (global + per-command)
+ *   3. Execute handler/command
+ *   4. Run after chain (per-command + global, reverse)
+ *   5. Execute effects
+ *   6. Record transaction
  *
  * Re-entrance safe via queue.
  */
 
 import type { Store } from "./createStore.ts";
-import type { Command, EffectMap, Context } from "./registry.ts";
-import { getHandler, getCommand, getEffect } from "./registry.ts";
 import type { MiddlewareCtx } from "./middleware.ts";
-import { runBeforeChain, runAfterChain } from "./middleware.ts";
+import { runAfterChain, runBeforeChain } from "./middleware.ts";
+import type { Command, Context, EffectMap } from "./registry.ts";
+import {
+  getCommand,
+  getEffect,
+  getHandler,
+  getInterceptors,
+} from "./registry.ts";
 
 // ─── Transaction Log ───
 
 export type Transaction = {
-    id: number;
-    timestamp: number;
-    command: Command;
-    handlerType: "handler" | "command" | "unknown";
-    effects: EffectMap | null;
-    changes: unknown;
-    dbBefore: unknown;
-    dbAfter: unknown;
+  id: number;
+  timestamp: number;
+  command: Command;
+  handlerType: "handler" | "command" | "unknown";
+  effects: EffectMap | null;
+  changes: unknown;
+  dbBefore: unknown;
+  dbAfter: unknown;
 };
 
+const MAX_TRANSACTIONS = 200;
 const transactions: Transaction[] = [];
 let nextTransactionId = 0;
 
 // ─── Command Queue (re-entrance safe) ───
 
-let queue: Command[] = [];
+const queue: Command[] = [];
 let processing = false;
 
 // ─── Core ───
@@ -46,151 +54,163 @@ let activeStore: Store<unknown> | null = null;
  * Must be called once before any dispatch.
  */
 export function bindStore<DB>(store: Store<DB>): void {
-    activeStore = store as Store<unknown>;
+  activeStore = store as Store<unknown>;
 }
 
 export function getActiveStore(): Store<unknown> | null {
-    return activeStore;
+  return activeStore;
 }
 
 /**
  * dispatch — the single entry point.
  */
 export function dispatch(cmd: Command): void {
-    queue.push(cmd);
+  queue.push(cmd);
 
-    if (processing) return; // queue will be drained by outer loop
+  if (processing) return; // queue will be drained by outer loop
 
-    processing = true;
-    while (queue.length > 0) {
-        const next = queue.shift()!;
-        processCommand(next);
-    }
-    processing = false;
+  processing = true;
+  while (queue.length > 0) {
+    const next = queue.shift()!;
+    processCommand(next);
+  }
+  processing = false;
 }
 
 function processCommand(cmd: Command): void {
-    if (!activeStore) {
-        throw new Error("[kernel] No store bound. Call initKernel() first.");
-    }
+  if (!activeStore) {
+    throw new Error("[kernel] No store bound. Call initKernel() first.");
+  }
 
-    const dbBefore = activeStore.getState();
+  const dbBefore = activeStore.getState();
 
-    // 1. Build middleware context
-    let mwCtx: MiddlewareCtx = {
-        command: cmd,
-        db: dbBefore,
-        handlerType: "unknown",
-        effects: null,
-    };
+  // 1. Build middleware context
+  let mwCtx: MiddlewareCtx = {
+    command: cmd,
+    db: dbBefore,
+    handlerType: "unknown",
+    effects: null,
+    injected: {},
+  };
 
-    // 2. Run before chain
-    mwCtx = runBeforeChain(mwCtx);
+  // 2. Get per-command interceptors
+  const { type, payload } = cmd;
+  const perCommand = getInterceptors(type);
 
-    // 3. Resolve and execute handler/command
-    const { type, payload } = mwCtx.command;
-    const handler = getHandler(type);
-    const command = getCommand(type);
+  // 3. Run before chain (global + per-command)
+  mwCtx = runBeforeChain(mwCtx, perCommand);
 
-    if (handler) {
-        // ── defineHandler path: (db, payload) → db ──
-        mwCtx.handlerType = "handler";
-        const nextDb = handler(mwCtx.db, payload);
-        activeStore.setState(() => nextDb);
-    } else if (command) {
-        // ── defineCommand path: (ctx, payload) → EffectMap ──
-        mwCtx.handlerType = "command";
-        // Build context: db + all injected values from middleware
-        const { command: _c, db: _d, handlerType: _h, effects: _e, ...injected } = mwCtx;
-        const ctx: Context = { db: mwCtx.db, ...injected };
-        mwCtx.effects = command(ctx, payload);
-    } else {
-        console.warn(`[kernel] No handler or command registered for "${type}"`);
-    }
+  // 4. Resolve and execute handler/command (using possibly-transformed command)
+  const resolvedType = mwCtx.command.type;
+  const resolvedPayload = mwCtx.command.payload ?? payload;
+  const handler = getHandler(resolvedType);
+  const command = getCommand(resolvedType);
 
-    // 4. Run after chain (reverse order)
-    mwCtx = runAfterChain(mwCtx);
+  if (handler) {
+    // ── defineHandler path: (db, payload) → db ──
+    mwCtx.handlerType = "handler";
+    const nextDb = handler(mwCtx.db, resolvedPayload);
+    activeStore.setState(() => nextDb);
+    mwCtx.db = nextDb; // Keep mwCtx.db fresh for after chain
+  } else if (command) {
+    // ── defineCommand path: (ctx, payload) → EffectMap ──
+    mwCtx.handlerType = "command";
+    const ctx: Context = { db: mwCtx.db, ...mwCtx.injected };
+    mwCtx.effects = command(ctx, resolvedPayload);
+  } else {
+    console.warn(
+      `[kernel] No handler or command registered for "${resolvedType}"`,
+    );
+  }
 
-    // 5. Execute effects (after middleware may have modified them)
-    if (mwCtx.effects) {
-        executeEffects(mwCtx.effects);
-    }
+  // 5. Run after chain (per-command + global, reverse order)
+  mwCtx = runAfterChain(mwCtx, perCommand);
 
-    const dbAfter = activeStore.getState();
+  // 6. Execute effects (after middleware may have modified them)
+  if (mwCtx.effects) {
+    executeEffects(mwCtx.effects);
+  }
 
-    // 6. Record transaction (always)
-    const transaction: Transaction = {
-        id: nextTransactionId++,
-        timestamp: Date.now(),
-        command: mwCtx.command,
-        handlerType: mwCtx.handlerType,
-        effects: mwCtx.effects,
-        changes: computeChanges(dbBefore, dbAfter),
-        dbBefore,
-        dbAfter,
-    };
+  const dbAfter = activeStore.getState();
 
-    transactions.push(transaction);
+  // 7. Record transaction (always, with cap)
+  const transaction: Transaction = {
+    id: nextTransactionId++,
+    timestamp: Date.now(),
+    command: mwCtx.command,
+    handlerType: mwCtx.handlerType,
+    effects: mwCtx.effects,
+    changes: computeChanges(dbBefore, dbAfter),
+    dbBefore,
+    dbAfter,
+  };
+
+  transactions.push(transaction);
+
+  // Cap transaction log
+  if (transactions.length > MAX_TRANSACTIONS) {
+    transactions.splice(0, transactions.length - MAX_TRANSACTIONS);
+  }
 }
 
 function executeEffects(effectMap: EffectMap): void {
-    if (!activeStore) return;
+  if (!activeStore) return;
 
-    for (const [key, value] of Object.entries(effectMap)) {
-        if (value === undefined) continue;
+  for (const [key, value] of Object.entries(effectMap)) {
+    if (value === undefined) continue;
 
-        if (key === "db") {
-            // Built-in: state update
-            activeStore.setState(() => value);
-            continue;
-        }
-
-        if (key === "dispatch") {
-            // Built-in: re-dispatch (goes to queue, processed after current command)
-            const cmds = Array.isArray(value) ? value : [value];
-            for (const c of cmds as Command[]) {
-                dispatch(c);
-            }
-            continue;
-        }
-
-        // Custom effects — look up registry
-        const effectFn = getEffect(key);
-        if (effectFn) {
-            effectFn(value);
-        } else {
-            console.warn(`[kernel] Unknown effect "${key}" in EffectMap`);
-        }
+    if (key === "db") {
+      // Built-in: state update
+      activeStore.setState(() => value);
+      continue;
     }
+
+    if (key === "dispatch") {
+      // Built-in: re-dispatch (goes to queue, processed after current command)
+      const cmds = Array.isArray(value) ? value : [value];
+      for (const c of cmds as Command[]) {
+        dispatch(c);
+      }
+      continue;
+    }
+
+    // Custom effects — look up registry
+    const effectFn = getEffect(key);
+    if (effectFn) {
+      effectFn(value);
+    } else {
+      console.warn(`[kernel] Unknown effect "${key}" in EffectMap`);
+    }
+  }
 }
 
 function computeChanges(before: unknown, after: unknown): unknown {
-    // Abstract — will be replaced by Immer patches later
-    if (before === after) return null;
-    return { changed: true };
+  // Abstract — will be replaced by Immer patches later
+  if (before === after) return null;
+  return { changed: true };
 }
 
 // ─── Inspector API ───
 
 export function getTransactions(): readonly Transaction[] {
-    return transactions;
+  return transactions;
 }
 
 export function getLastTransaction(): Transaction | undefined {
-    return transactions[transactions.length - 1];
+  return transactions[transactions.length - 1];
 }
 
 export function travelTo(transactionId: number): void {
-    const tx = transactions.find((t) => t.id === transactionId);
-    if (!tx) {
-        console.warn(`[kernel] Transaction ${transactionId} not found`);
-        return;
-    }
-    if (!activeStore) return;
-    activeStore.setState(() => tx.dbAfter);
+  const tx = transactions.find((t) => t.id === transactionId);
+  if (!tx) {
+    console.warn(`[kernel] Transaction ${transactionId} not found`);
+    return;
+  }
+  if (!activeStore) return;
+  activeStore.setState(() => tx.dbAfter);
 }
 
 export function clearTransactions(): void {
-    transactions.length = 0;
-    nextTransactionId = 0;
+  transactions.length = 0;
+  nextTransactionId = 0;
 }
