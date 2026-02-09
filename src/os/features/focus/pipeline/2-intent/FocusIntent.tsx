@@ -12,19 +12,17 @@ import {
 } from "../../../command/definitions/commandsShell";
 import { useCommandListener } from "../../../command/hooks/useCommandListener";
 import { runOS } from "../core/osCommand";
-import {
-  ACTIVATE,
-  DELETE,
-  ESCAPE,
-  FOCUS,
-  NAVIGATE,
-  RECOVER,
-  SELECT,
-  SELECT_ALL,
-  SYNC_FOCUS,
-  TAB,
-  TOGGLE,
-} from "@/os-new/2-command/focus";
+import { ACTIVATE } from "@/os-new/2-command/activate/command.ts";
+import { DELETE } from "@/os-new/2-command/delete/command.ts";
+import { ESCAPE } from "@/os-new/2-command/escape/command.ts";
+import { FOCUS } from "@/os-new/2-command/focus/command.ts";
+import { NAVIGATE } from "@/os-new/2-command/navigate/command.ts";
+import { RECOVER } from "@/os-new/2-command/focus/RECOVER.ts";
+import { SELECT } from "@/os-new/2-command/select/command.ts";
+import { SELECT_ALL } from "@/os-new/2-command/select/all.ts";
+import { SYNC_FOCUS } from "@/os-new/2-command/focus/sync.ts";
+import { TAB } from "@/os-new/2-command/tab/command.ts";
+import { TOGGLE } from "@/os-new/2-command/toggle/command.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Component

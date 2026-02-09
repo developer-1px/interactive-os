@@ -14,7 +14,7 @@ import { evalContext } from "@os/features/AntigravityOS";
 import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import { normalizeKeyDefinition } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
-import type { KeyboardIntent } from "@/os-new/1-sensor/keyboard";
+import type { KeyboardIntent } from "@/os-new/1-sensor/keyboard/interceptKeyboard.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types

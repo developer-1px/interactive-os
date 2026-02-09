@@ -4,7 +4,7 @@
  * Determines which item to focus when entering a zone.
  */
 
-import type { NavigateConfig } from "../../schema";
+import type { NavigateConfig } from "../../schema/focusTypes.ts";
 
 export function resolveEntry(
   items: string[],

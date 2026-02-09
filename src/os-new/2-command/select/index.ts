@@ -1,2 +1,0 @@
-// select barrel export
-export {};

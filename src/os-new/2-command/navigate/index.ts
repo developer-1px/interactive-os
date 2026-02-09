@@ -1,2 +1,0 @@
-// navigate barrel export
-export {};

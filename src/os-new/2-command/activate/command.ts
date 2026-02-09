@@ -2,7 +2,7 @@
  * ACTIVATE Command - Enter key activation
  */
 
-import type { OSCommand } from "../../schema";
+import type { OSCommand } from "../../schema/types.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // ACTIVATE Command

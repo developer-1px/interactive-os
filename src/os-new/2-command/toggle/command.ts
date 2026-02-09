@@ -6,7 +6,7 @@
  * 2. Otherwise → toggle OS selection (multi-select)
  */
 
-import type { OSCommand, OSResult } from "../../schema";
+import type { OSCommand, OSResult } from "../../schema/types.ts";
 
 export const TOGGLE: OSCommand<{ targetId?: string }> = {
   run: (ctx, payload) => {

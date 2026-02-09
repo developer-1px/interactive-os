@@ -2,7 +2,7 @@
  * FOCUS Command - Programmatic focus
  */
 
-import type { OSCommand, OSContext, OSResult } from "../../schema";
+import type { OSCommand, OSContext, OSResult } from "../../schema/types.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helper Functions

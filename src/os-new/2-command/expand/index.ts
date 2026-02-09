@@ -1,2 +1,0 @@
-// expand barrel export
-export {};

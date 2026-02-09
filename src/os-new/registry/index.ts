@@ -1,2 +1,0 @@
-// registry barrel export
-export {};

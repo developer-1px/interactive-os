@@ -1,2 +1,0 @@
-// clipboard barrel export
-export {};

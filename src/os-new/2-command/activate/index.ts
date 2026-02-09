@@ -1,2 +1,0 @@
-// activate barrel export
-export {};

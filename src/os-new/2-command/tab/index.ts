@@ -1,2 +1,0 @@
-// tab barrel export
-export {};

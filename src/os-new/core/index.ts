@@ -1,2 +1,0 @@
-// core barrel export
-export {};
