@@ -5,82 +5,26 @@
  * Kernel State 기반. DOM 무관.
  */
 
-import {
-  createKernel,
-  dispatch,
-  initKernel,
-  state,
-  useComputed,
-} from "@kernel";
+import { KernelPanel } from "@os/app/debug/inspector/KernelPanel.tsx";
+import { InspectorRegistry } from "@os/inspector/InspectorRegistry.ts";
 import { useEffect } from "react";
-
-// ─── State ───
-
-interface OSState {
-  focusedIndex: number;
-  items: string[];
-}
-
-const INITIAL: OSState = { focusedIndex: 0, items: [] };
-
-// ─── Kernel ───
-
-const kernel = createKernel({ state: state<OSState>() });
-
-// ─── Commands ───
-
-const REGISTER_ITEM = kernel.defineCommand(
-  "REGISTER_ITEM",
-  (ctx) => (itemId: string) => {
-    if (ctx.state.items.includes(itemId)) return; // 중복 방지
-    return {
-      state: {
-        ...ctx.state,
-        items: [...ctx.state.items, itemId],
-      },
-    };
-  },
-);
-
-const FOCUS_NEXT = kernel.defineCommand("FOCUS_NEXT", (ctx) => () => {
-  const { items, focusedIndex } = ctx.state;
-  if (items.length === 0) return;
-  return {
-    state: {
-      ...ctx.state,
-      focusedIndex: (focusedIndex + 1) % items.length,
-    },
-  };
-});
-
-const FOCUS_PREV = kernel.defineCommand("FOCUS_PREV", (ctx) => () => {
-  const { items, focusedIndex } = ctx.state;
-  if (items.length === 0) return;
-  return {
-    state: {
-      ...ctx.state,
-      focusedIndex: (focusedIndex - 1 + items.length) % items.length,
-    },
-  };
-});
-
-// ─── Init ───
-
-initKernel<OSState>(INITIAL);
+import * as K from "./SpikeKernel";
 
 // ─── Components ───
 
 function Item({ id, label }: { id: string; label: string }) {
   // Mount 시 자동 등록
   useEffect(() => {
-    dispatch(REGISTER_ITEM(id));
+    K.kernel.dispatch(K.REGISTER_ITEM(id));
   }, [id]);
 
   // 포커스 상태 구독
-  const isFocused = useComputed((s: OSState) => s.items[s.focusedIndex] === id);
+  const isFocused = K.kernel.useComputed((s) => s.items[s.focusedIndex] === id);
 
   return (
     <div
+      data-item-id={id}
+      tabIndex={0}
       style={{
         padding: "12px 20px",
         margin: "4px 0",
@@ -93,6 +37,7 @@ function Item({ id, label }: { id: string; label: string }) {
         display: "flex",
         alignItems: "center",
         gap: 8,
+        outline: "none",
       }}
     >
       {isFocused && <span>▸</span>}
@@ -108,9 +53,9 @@ function KeyboardListener() {
         e.preventDefault();
         e.stopPropagation();
         if (e.shiftKey) {
-          dispatch(FOCUS_PREV());
+          K.kernel.dispatch(K.FOCUS_PREV());
         } else {
-          dispatch(FOCUS_NEXT());
+          K.kernel.dispatch(K.FOCUS_NEXT());
         }
       }
     };
@@ -123,9 +68,9 @@ function KeyboardListener() {
 }
 
 function FocusIndicator() {
-  const focusedIndex = useComputed((s: OSState) => s.focusedIndex);
-  const itemCount = useComputed((s: OSState) => s.items.length);
-  const focusedId = useComputed((s: OSState) => s.items[s.focusedIndex] ?? "—");
+  const focusedIndex = K.kernel.useComputed((s) => s.focusedIndex);
+  const itemCount = K.kernel.useComputed((s) => s.items.length);
+  const focusedId = K.kernel.useComputed((s) => s.items[s.focusedIndex] ?? "—");
 
   return (
     <div
@@ -146,6 +91,15 @@ function FocusIndicator() {
 }
 
 export function SpikeDemo() {
+  // Register Spike Kernel Inspector Panel
+  useEffect(() => {
+    return InspectorRegistry.register(
+      "SPIKE",
+      "Spike Demo",
+      <KernelPanel kernel={K.kernel} />,
+    );
+  }, []);
+
   return (
     <div
       style={{

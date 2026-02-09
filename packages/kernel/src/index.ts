@@ -2,28 +2,29 @@
  * @kernel — Public API
  *
  * Minimal surface for external consumers.
- * For test / internal use, import from "./internal.ts" instead.
  *
  * Core API:
- *   createKernel     → Group (root)
- *   Group.group()    → Group (child, with scope + inject)
- *   Group.defineCommand  → CommandFactory
- *   Group.defineEffect   → EffectToken
- *   Group.defineContext   → ContextToken
- *   Group.dispatch       → void
+ *   createKernel(initialState) → Kernel instance
+ *   kernel.defineCommand       → CommandFactory
+ *   kernel.defineEffect        → EffectToken
+ *   kernel.defineContext        → ContextToken
+ *   kernel.dispatch             → void
+ *   kernel.useComputed          → T (React hook)
+ *   kernel.group()              → child Group
  */
 
-// ─── Dispatch ───
-export { dispatch } from "./core/pipeline.ts";
-// ─── Inspector ───
-export type { Transaction } from "./core/transaction.ts";
-export {
-  clearTransactions,
-  getTransactions,
-  travelTo,
-} from "./core/transaction.ts";
 // ─── Entry Point ───
-export { createKernel, initKernel, state } from "./createKernel.ts";
+export { createKernel, defineScope } from "./createKernel.ts";
 
-// ─── React ───
-export { useComputed } from "./react/useComputed.ts";
+// ─── Types ───
+export type { Transaction, StateDiff } from "./core/transaction.ts";
+export type {
+  Command,
+  CommandFactory,
+  ContextToken,
+  EffectToken,
+  ScopeToken,
+  Middleware,
+  MiddlewareContext,
+} from "./core/tokens.ts";
+export { GLOBAL } from "./core/tokens.ts";

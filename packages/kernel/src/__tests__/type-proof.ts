@@ -1,5 +1,5 @@
 /**
- * Type Proof — Compile-time verification of Kernel v2 type inference.
+ * Type Proof — Compile-time verification of Kernel type inference.
  *
  * This file should compile with zero errors if the type system is correct.
  * It has NO runtime behavior — only type-level assertions.
@@ -10,9 +10,7 @@
 import {
   type ContextToken,
   createKernel,
-  defineContext,
   type InjectResult,
-  state,
   type TypedContext,
 } from "../internal.ts";
 
@@ -23,12 +21,12 @@ interface AppState {
   name: string;
 }
 
-const kernel = createKernel({ state: state<AppState>(), effects: {} });
+const kernel = createKernel<AppState>({ count: 0, name: "" });
 
-const NOTIFY = kernel.defineEffect("NOTIFY", (_msg: string) => {});
+const NOTIFY = kernel.defineEffect("NOTIFY", (_msg: string) => { });
 const TRACK = kernel.defineEffect(
   "TRACK",
-  (_event: { name: string; ts: number }) => {},
+  (_event: { name: string; ts: number }) => { },
 );
 
 void NOTIFY;
@@ -67,8 +65,8 @@ void NOTIFY_CMD;
 
 // ── Proof 4: Context injection via group({ inject }) ──
 
-const NOW = defineContext("NOW", (): number => Date.now());
-const USER_INFO = defineContext("USER_INFO", () => ({
+const NOW = kernel.defineContext("NOW", (): number => Date.now());
+const USER_INFO = kernel.defineContext("USER_INFO", () => ({
   name: "Alice",
   role: "admin" as const,
 }));

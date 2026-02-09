@@ -5,17 +5,9 @@
  * transaction log with time-travel.
  */
 
-import {
-  clearTransactions,
-  createKernel,
-  dispatch,
-  getTransactions,
-  initKernel,
-  state,
-  type Transaction,
-  travelTo,
-  useComputed,
-} from "@kernel";
+import { createKernel, type Transaction } from "@kernel";
+import { KernelPanel } from "@os/app/debug/inspector/KernelPanel.tsx";
+import { InspectorRegistry } from "@os/inspector/InspectorRegistry.ts";
 import { useEffect, useRef, useState } from "react";
 import { useKernelLabBotRoutes } from "./tests/KernelLabBot";
 
@@ -39,7 +31,7 @@ const effectLog: string[] = [];
 
 // ── Kernel (module-level, registered once) ──
 
-const kernel = createKernel({ state: state<DemoState>(), effects: {} });
+const kernel = createKernel<DemoState>(INITIAL);
 
 // ── Effects ──
 
@@ -50,7 +42,6 @@ const NOTIFY = kernel.defineEffect("NOTIFY", (message: string) => {
 /** Full kernel reset — state + transactions + effect log */
 export function resetKernelLab() {
   kernel.reset(INITIAL);
-  clearTransactions();
   effectLog.length = 0;
 }
 
@@ -77,7 +68,6 @@ const RESET = kernel.defineCommand("RESET", () => () => ({
 const ADD_ITEM = kernel.defineCommand(
   "ADD_ITEM",
   (ctx) => (payload: string) => ({
-    // ctx auto-typed as { readonly state: DemoState }
     state: {
       ...ctx.state,
       items: [...ctx.state.items, payload],
@@ -122,10 +112,6 @@ const BATCH_ADD = kernel.defineCommand("BATCH_ADD", (ctx) => () => {
   };
 });
 
-// ─── Init (module-level, runs once on import) ───
-
-initKernel<DemoState>(INITIAL);
-
 // ─── Components ───
 
 function StatePanel({ state }: { state: DemoState }) {
@@ -150,21 +136,21 @@ function ControlPanel() {
           <button
             type="button"
             style={btnStyle}
-            onClick={() => dispatch(INCREMENT())}
+            onClick={() => kernel.dispatch(INCREMENT())}
           >
             + Increment
           </button>
           <button
             type="button"
             style={btnStyle}
-            onClick={() => dispatch(DECREMENT())}
+            onClick={() => kernel.dispatch(DECREMENT())}
           >
             − Decrement
           </button>
           <button
             type="button"
             style={{ ...btnStyle, ...dangerStyle }}
-            onClick={() => dispatch(RESET())}
+            onClick={() => kernel.dispatch(RESET())}
           >
             ↺ Reset
           </button>
@@ -176,7 +162,7 @@ function ControlPanel() {
             placeholder="Item name..."
             onKeyDown={(e) => {
               if (e.key === "Enter" && inputRef.current?.value) {
-                dispatch(ADD_ITEM(inputRef.current.value));
+                kernel.dispatch(ADD_ITEM(inputRef.current.value));
                 inputRef.current.value = "";
               }
             }}
@@ -186,7 +172,7 @@ function ControlPanel() {
             style={btnStyle}
             onClick={() => {
               if (inputRef.current?.value) {
-                dispatch(ADD_ITEM(inputRef.current.value));
+                kernel.dispatch(ADD_ITEM(inputRef.current.value));
                 inputRef.current.value = "";
               }
             }}
@@ -196,7 +182,7 @@ function ControlPanel() {
           <button
             type="button"
             style={btnStyle}
-            onClick={() => dispatch(REMOVE_LAST_ITEM())}
+            onClick={() => kernel.dispatch(REMOVE_LAST_ITEM())}
           >
             − Remove
           </button>
@@ -209,14 +195,14 @@ function ControlPanel() {
           <button
             type="button"
             style={{ ...btnStyle, ...accentStyle }}
-            onClick={() => dispatch(INCREMENT_AND_NOTIFY())}
+            onClick={() => kernel.dispatch(INCREMENT_AND_NOTIFY())}
           >
             ⚡ Increment + Notify
           </button>
           <button
             type="button"
             style={{ ...btnStyle, ...accentStyle }}
-            onClick={() => dispatch(BATCH_ADD())}
+            onClick={() => kernel.dispatch(BATCH_ADD())}
           >
             ⚡ Batch Add (effect + re-dispatch)
           </button>
@@ -259,11 +245,11 @@ function EffectLogPanel() {
 }
 
 function TransactionPanel() {
-  const txs = getTransactions();
+  const txs = kernel.getTransactions();
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const handleTravel = (tx: Transaction) => {
-    travelTo(tx.id);
+    kernel.travelTo(tx.id);
     setSelectedId(tx.id);
   };
 
@@ -275,7 +261,7 @@ function TransactionPanel() {
           type="button"
           style={{ ...btnSmallStyle, marginLeft: 8 }}
           onClick={() => {
-            clearTransactions();
+            kernel.clearTransactions();
             setSelectedId(null);
           }}
         >
@@ -335,11 +321,22 @@ export default function KernelLabPage() {
 
   // Reset state only — registries stay intact (idempotent, Strict Mode safe)
   // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey is intentional trigger
+  // Reset state only — registries stay intact (idempotent, Strict Mode safe)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey is intentional trigger
   useEffect(() => {
     resetKernelLab();
   }, [resetKey]);
 
-  const state = useComputed((s) => s as DemoState);
+  // Register Kernel Inspector Panel
+  useEffect(() => {
+    return InspectorRegistry.register(
+      "KERNEL",
+      "Kernel Lab",
+      <KernelPanel kernel={kernel} />,
+    );
+  }, []);
+
+  const state = kernel.useComputed((s) => s);
 
   return (
     <div key={resetKey} style={pageStyle}>

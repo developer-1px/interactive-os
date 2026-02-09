@@ -1,12 +1,9 @@
 /**
- * transaction — Transaction log, Inspector API, and state diff.
+ * transaction — Transaction types and pure state-diff utility.
  *
- * Records every dispatch as a Transaction with scope information.
- * Provides time-travel and inspection capabilities.
+ * All stateful transaction log management lives in createKernel closures.
+ * This file only exports types and the pure computeChanges function.
  */
-
-import { getActiveStore } from "./createStore.ts";
-import type { Command } from "./tokens.ts";
 
 // ─── Types ───
 
@@ -19,7 +16,7 @@ export type StateDiff = {
 export type Transaction = {
   id: number;
   timestamp: number;
-  command: Command;
+  command: { type: string; payload: unknown };
   handlerScope: string;
   bubblePath: string[];
   effects: Record<string, unknown> | null;
@@ -28,94 +25,9 @@ export type Transaction = {
   stateAfter: unknown;
 };
 
-// ─── HMR-safe Transaction Log (globalThis 기반) ───
+// ─── State Diff (pure function) ───
 
-const TX_KEY = "__kernel_transactions__";
-const TX_ID_KEY = "__kernel_tx_next_id__";
-
-const MAX_TRANSACTIONS = 200;
-
-function getTransactionLog(): Transaction[] {
-  const g = globalThis as Record<string, unknown>;
-  if (!g[TX_KEY]) g[TX_KEY] = [];
-  return g[TX_KEY] as Transaction[];
-}
-
-function getNextId(): number {
-  const g = globalThis as Record<string, unknown>;
-  if (g[TX_ID_KEY] === undefined) g[TX_ID_KEY] = 0;
-  return g[TX_ID_KEY] as number;
-}
-
-function setNextId(id: number): void {
-  (globalThis as Record<string, unknown>)[TX_ID_KEY] = id;
-}
-
-/**
- * recordTransaction — append a transaction entry to the log.
- */
-export function recordTransaction(
-  command: Command,
-  handlerScope: string,
-  effects: Record<string, unknown> | null,
-  stateBefore: unknown,
-  stateAfter: unknown,
-  bubblePath: string[],
-): void {
-  const transactions = getTransactionLog();
-  const id = getNextId();
-  setNextId(id + 1);
-
-  const transaction: Transaction = {
-    id,
-    timestamp: Date.now(),
-    command,
-    handlerScope,
-    bubblePath,
-    effects,
-    changes: computeChanges(stateBefore, stateAfter),
-    stateBefore,
-    stateAfter,
-  };
-
-  transactions.push(transaction);
-
-  if (transactions.length > MAX_TRANSACTIONS) {
-    transactions.splice(0, transactions.length - MAX_TRANSACTIONS);
-  }
-}
-
-// ─── Inspector API ───
-
-export function getTransactions(): readonly Transaction[] {
-  return getTransactionLog();
-}
-
-export function getLastTransaction(): Transaction | undefined {
-  const transactions = getTransactionLog();
-  return transactions[transactions.length - 1];
-}
-
-export function travelTo(transactionId: number): void {
-  const tx = getTransactionLog().find((t) => t.id === transactionId);
-  if (!tx) {
-    console.warn(`[kernel] Transaction ${transactionId} not found`);
-    return;
-  }
-  const store = getActiveStore();
-  if (!store) return;
-  store.setState(() => tx.stateAfter);
-}
-
-export function clearTransactions(): void {
-  const transactions = getTransactionLog();
-  transactions.length = 0;
-  setNextId(0);
-}
-
-// ─── State Diff ───
-
-function computeChanges(before: unknown, after: unknown): StateDiff[] {
+export function computeChanges(before: unknown, after: unknown): StateDiff[] {
   if (before === after) return [];
 
   const diffs: StateDiff[] = [];

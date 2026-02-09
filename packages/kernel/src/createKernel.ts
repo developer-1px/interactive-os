@@ -1,88 +1,487 @@
-import { clearContextProviders } from "./core/context.ts";
-import { createStore, type Store, unbindStore } from "./core/createStore.ts";
-import { createGroup } from "./core/group.ts";
-import { clearAllRegistries } from "./core/registries.ts";
+/**
+ * createKernel — Zustand-style closure-based kernel factory.
+ *
+ * Each call creates a fully independent kernel instance.
+ * No globalThis. No singletons. HMR-safe via module separation.
+ *
+ * @example
+ *   const kernel = createKernel<AppState>({ count: 0 });
+ *   const INC = kernel.defineCommand("INC", ctx => () => ({
+ *     state: { ...ctx.state, count: ctx.state.count + 1 }
+ *   }));
+ *   kernel.dispatch(INC());
+ */
+
+import { useCallback, useRef, useSyncExternalStore } from "react";
 import {
+  type Command,
+  type CommandFactory,
+  type ContextToken,
   type EffectToken,
   GLOBAL,
+  type InjectResult,
+  type InternalCommandHandler,
+  type InternalEffectHandler,
+  type Middleware,
+  type MiddlewareContext,
   type ScopeToken,
-  type StateMarker,
+  type TypedContext,
+  type TypedEffectMap,
 } from "./core/tokens.ts";
-import { clearTransactions } from "./core/transaction.ts";
+import { computeChanges, type Transaction } from "./core/transaction.ts";
 
-// HMR-safe: globalThis에 저장하여 모듈 재실행에도 유지
-const GROUP_KEY = "__kernel_group__";
+type Listener = () => void;
 
-/**
- * Create a Kernel instance — returns the root Group.
- *
- * HMR-safe: 이미 생성된 Group이 있으면 캐시된 인스턴스를 반환.
- *
- * @example
- *   const kernel = createKernel({ state: state<AppState>(), effects: { NOTIFY } });
- */
-export function createKernel<
-  E extends Record<string, EffectToken> = Record<string, never>,
-  S = unknown,
->(_config: { state?: StateMarker<S>; effects?: E }) {
-  const cached = (globalThis as Record<string, unknown>)[GROUP_KEY];
-  if (cached) return cached as ReturnType<typeof createGroup<S, E, []>>;
-  const group = createGroup<S, E, []>(GLOBAL as string, []);
-  (globalThis as Record<string, unknown>)[GROUP_KEY] = group;
-  return group;
-}
+const MAX_TRANSACTIONS = 200;
 
-/**
- * Create a ScopeToken. No tree management — Kernel doesn't know about DOM.
- *
- * @example
- *   const CARD_LIST = defineScope("CARD_LIST");
- */
+/** Create a ScopeToken. No tree management — Kernel doesn't know about DOM. */
 export function defineScope<Id extends string>(id: Id): ScopeToken<Id> {
   return id as ScopeToken<Id>;
 }
 
-/** Create a phantom state type marker. No runtime cost. */
-export function state<S>(): StateMarker<S> {
-  return {} as StateMarker<S>;
-}
-
 /**
- * Convenience: create store + bind in one call.
+ * Create a Kernel instance — returns the root Group + store + inspector API.
  *
- * HMR-safe: Store가 이미 존재하면 기존 Store를 반환 (상태 보존).
- * State shape이 변경된 경우 (다른 앱으로 전환) initialState로 리셋.
+ * Zustand-style: each call creates an independent instance.
+ * All state (store, registries, transactions) lives in closures.
  */
-export function initKernel<S>(initialState: S): Store<S> {
-  const store = createStore(initialState);
+export function createKernel<S>(initialState: S) {
+  // ─── Store (closure) ───
 
-  // Shape validation: schema 변경 감지 시 리셋
-  const current = store.getState() as Record<string, unknown>;
-  const initial = initialState as Record<string, unknown>;
-  if (
-    current !== null &&
-    initial !== null &&
-    typeof current === "object" &&
-    typeof initial === "object"
-  ) {
-    const currentKeys = Object.keys(current).sort().join(",");
-    const initialKeys = Object.keys(initial).sort().join(",");
-    if (currentKeys !== initialKeys) {
-      store.setState(() => initialState as unknown as S);
+  let state: S = initialState;
+  const listeners = new Set<Listener>();
+
+  function getState(): S {
+    return state;
+  }
+
+  function setState(updater: (prev: S) => S): void {
+    state = updater(state);
+    for (const listener of listeners) {
+      listener();
     }
   }
 
-  return store;
-}
+  function subscribe(listener: Listener): () => void {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  }
 
-/**
- * resetKernel — Clear all registries, contexts, transactions, cache, and unbind store.
- * Used for testing.
- */
-export function resetKernel(): void {
-  clearAllRegistries();
-  clearContextProviders();
-  clearTransactions();
-  unbindStore();
-  (globalThis as Record<string, unknown>)[GROUP_KEY] = null;
+  // ─── Registries (closure) ───
+
+  const scopedCommands = new Map<
+    string,
+    Map<string, InternalCommandHandler>
+  >();
+  const scopedInterceptors = new Map<string, Map<string, Middleware[]>>();
+  const scopedEffects = new Map<
+    string,
+    Map<string, InternalEffectHandler>
+  >();
+  const scopedMiddleware = new Map<string, Middleware[]>();
+
+  // ─── Context Providers (closure) ───
+
+  const contextProviders = new Map<string, () => unknown>();
+
+  function defineContext<Id extends string, V>(
+    id: Id,
+    provider: () => V,
+  ): ContextToken<Id, V> {
+    contextProviders.set(id, provider);
+    return { __id: id } as ContextToken<Id, V>;
+  }
+
+  function resolveContext(id: string): unknown {
+    const provider = contextProviders.get(id);
+    if (provider) return provider();
+    console.warn(`[kernel] No context provider registered for "${id}"`);
+    return undefined;
+  }
+
+  // ─── Transaction Log (closure) ───
+
+  const transactions: Transaction[] = [];
+  let txNextId = 0;
+
+  function recordTransaction(
+    command: Command,
+    handlerScope: string,
+    effects: Record<string, unknown> | null,
+    stateBefore: unknown,
+    stateAfter: unknown,
+    bubblePath: string[],
+  ): void {
+    const id = txNextId++;
+    transactions.push({
+      id,
+      timestamp: Date.now(),
+      command,
+      handlerScope,
+      bubblePath,
+      effects,
+      changes: computeChanges(stateBefore, stateAfter),
+      stateBefore,
+      stateAfter,
+    });
+    if (transactions.length > MAX_TRANSACTIONS) {
+      transactions.splice(0, transactions.length - MAX_TRANSACTIONS);
+    }
+  }
+
+  function getTransactions(): readonly Transaction[] {
+    return transactions;
+  }
+
+  function getLastTransaction(): Transaction | undefined {
+    return transactions[transactions.length - 1];
+  }
+
+  function travelTo(transactionId: number): void {
+    const tx = transactions.find((t) => t.id === transactionId);
+    if (!tx) {
+      console.warn(`[kernel] Transaction ${transactionId} not found`);
+      return;
+    }
+    setState(() => tx.stateAfter as S);
+  }
+
+  function clearTransactions(): void {
+    transactions.length = 0;
+    txNextId = 0;
+  }
+
+  // ─── Dispatch Queue (closure) ───
+
+  const queue: Command[] = [];
+  let processing = false;
+
+  function dispatch(
+    cmd: Command<string, any>,
+    options?: { scope?: ScopeToken[] },
+  ): void {
+    const enriched = options?.scope ? { ...cmd, scope: options.scope } : cmd;
+    queue.push(enriched as Command);
+
+    if (processing) return;
+
+    processing = true;
+    try {
+      while (queue.length > 0) {
+        const next = queue.shift()!;
+        processCommand(next, next.scope);
+      }
+    } finally {
+      processing = false;
+    }
+  }
+
+  // ─── Command Processing ───
+
+  function processCommand(cmd: Command, bubblePath?: ScopeToken[]): void {
+    const stateBefore = state;
+    const path: string[] = bubblePath
+      ? (bubblePath as unknown as string[])
+      : [GLOBAL as string];
+
+    let result: Record<string, unknown> | null = null;
+    let handlerScope = "unknown";
+    let resolvedCommand: Command = cmd;
+
+    for (const currentScope of path) {
+      // 1. Scope before-middleware
+      let mwCtx: MiddlewareContext = {
+        command: cmd,
+        state: state as unknown,
+        handlerScope: currentScope,
+        effects: null,
+        injected: {},
+      };
+
+      const scopeMws = scopedMiddleware.get(currentScope);
+      if (scopeMws) {
+        for (const mw of scopeMws) {
+          if (mw.before) {
+            mwCtx = mw.before(mwCtx);
+          }
+        }
+      }
+
+      // 2. Handler lookup at this scope
+      const resolvedType = mwCtx.command.type;
+      const scopeMap = scopedCommands.get(currentScope);
+      const handler = scopeMap?.get(resolvedType);
+
+      if (!handler) continue;
+
+      // 3. Per-command interceptors (inject middleware)
+      const interceptorsMap = scopedInterceptors.get(currentScope);
+      const interceptors = interceptorsMap?.get(resolvedType);
+      if (interceptors) {
+        for (const ic of interceptors) {
+          if (ic.before) {
+            mwCtx = ic.before(mwCtx);
+          }
+        }
+      }
+
+      // 4. Execute handler
+      const ctx = { state: mwCtx.state, ...mwCtx.injected };
+      const handlerResult = handler(ctx)(mwCtx.command.payload);
+
+      // 5. After-middleware (reverse order)
+      mwCtx.effects = handlerResult as Record<string, unknown> | null;
+      if (interceptors) {
+        for (let i = interceptors.length - 1; i >= 0; i--) {
+          if (interceptors[i].after) {
+            mwCtx = interceptors[i].after?.(mwCtx) ?? mwCtx;
+          }
+        }
+      }
+      if (scopeMws) {
+        for (let i = scopeMws.length - 1; i >= 0; i--) {
+          if (scopeMws[i].after) {
+            mwCtx = scopeMws[i].after?.(mwCtx) ?? mwCtx;
+          }
+        }
+      }
+
+      result = mwCtx.effects;
+      resolvedCommand = mwCtx.command;
+
+      // 6. Bubble or stop
+      if (result === null) continue; // handler returned null → bubble
+      handlerScope = currentScope;
+      break; // handled → stop
+    }
+
+    // 7. Execute effects
+    if (result) {
+      executeEffects(result, path);
+    }
+
+    const stateAfter = state;
+
+    // 8. Record transaction
+    recordTransaction(
+      resolvedCommand,
+      handlerScope,
+      result,
+      stateBefore,
+      stateAfter,
+      path,
+    );
+  }
+
+  // ─── Effect Execution ───
+
+  function executeEffects(
+    effectMap: Record<string, unknown>,
+    scopePath: string[],
+  ): void {
+    for (const [key, value] of Object.entries(effectMap)) {
+      if (value === undefined) continue;
+
+      if (key === "state") {
+        setState(() => value as S);
+        continue;
+      }
+
+      if (key === "dispatch") {
+        const cmds = Array.isArray(value) ? value : [value];
+        for (const c of cmds as Command[]) {
+          dispatch(c);
+        }
+        continue;
+      }
+
+      // Custom effects — resolve through scope chain (bubble)
+      let effectHandler: InternalEffectHandler | undefined;
+      for (const effectScope of scopePath) {
+        effectHandler = scopedEffects.get(effectScope)?.get(key);
+        if (effectHandler) break;
+      }
+      // Fallback to GLOBAL
+      if (!effectHandler) {
+        effectHandler = scopedEffects.get(GLOBAL as string)?.get(key);
+      }
+
+      if (effectHandler) {
+        try {
+          effectHandler(value);
+        } catch (err) {
+          console.error(`[kernel] Effect "${key}" threw:`, err);
+        }
+      } else {
+        console.warn(`[kernel] Unknown effect "${key}" in EffectMap`);
+      }
+    }
+  }
+
+  // ─── Middleware Registration ───
+
+  function registerMiddleware(middleware: Middleware): void {
+    const mwScope = (middleware.scope as string) ?? (GLOBAL as string);
+
+    if (!scopedMiddleware.has(mwScope)) {
+      scopedMiddleware.set(mwScope, []);
+    }
+
+    const list = scopedMiddleware.get(mwScope)!;
+
+    // Dedup by id within scope
+    const existing = list.findIndex((m) => m.id === middleware.id);
+    if (existing !== -1) {
+      list[existing] = middleware;
+    } else {
+      list.push(middleware);
+    }
+  }
+
+  // ─── Group Factory ───
+
+  function createGroup<
+    E extends Record<string, EffectToken>,
+    Tokens extends ContextToken[],
+  >(scope: string, injectTokens: Tokens) {
+    type Ctx = TypedContext<S, InjectResult<Tokens>>;
+    type EffMap = TypedEffectMap<S, E>;
+
+    return {
+      defineCommand: ((
+        type: string,
+        handler: InternalCommandHandler,
+      ): CommandFactory<string, any> => {
+        // Register in scoped map
+        if (!scopedCommands.has(scope)) {
+          scopedCommands.set(scope, new Map());
+        }
+        const scopeMap = scopedCommands.get(scope)!;
+
+        // HMR-safe: silent overwrite on re-registration
+        scopeMap.set(type, handler);
+
+        // Register inject interceptor for this command (if tokens exist)
+        if (injectTokens.length > 0) {
+          const injectMw: Middleware = {
+            id: `inject:${scope}:${type}`,
+            before: (ctx: MiddlewareContext): MiddlewareContext => {
+              const injected = { ...ctx.injected };
+              for (const token of injectTokens) {
+                const id = (token as ContextToken).__id;
+                injected[id] = resolveContext(id);
+              }
+              return { ...ctx, injected };
+            },
+          };
+
+          if (!scopedInterceptors.has(scope)) {
+            scopedInterceptors.set(scope, new Map());
+          }
+          scopedInterceptors.get(scope)!.set(type, [injectMw]);
+        }
+
+        // Return CommandFactory
+        const factory = (payload?: unknown) =>
+          ({
+            type,
+            payload,
+            scope:
+              scope !== (GLOBAL as string)
+                ? [scope as ScopeToken]
+                : undefined,
+          }) as unknown as Command<string, any>;
+
+        (factory as unknown as { commandType: string }).commandType = type;
+
+        return factory as unknown as CommandFactory<string, any>;
+      }) as {
+        // No payload
+        <T extends string>(
+          type: T,
+          handler: (ctx: Ctx) => () => EffMap | void,
+        ): CommandFactory<T, void>;
+
+        // With payload
+        <T extends string, P>(
+          type: T,
+          handler: (ctx: Ctx) => (payload: P) => EffMap | void,
+        ): CommandFactory<T, P>;
+      },
+
+      defineEffect<T extends string, V>(
+        type: T,
+        handler: (value: V) => void,
+      ): EffectToken<T, V> {
+        if (!scopedEffects.has(scope)) {
+          scopedEffects.set(scope, new Map());
+        }
+        scopedEffects.get(scope)!.set(type, handler as InternalEffectHandler);
+        return type as EffectToken<T, V>;
+      },
+
+      defineContext,
+
+      group<NewTokens extends ContextToken[] = []>(config: {
+        scope?: ScopeToken;
+        inject?: [...NewTokens];
+      }) {
+        const childScope = config.scope ? (config.scope as string) : scope;
+        const childTokens = (config.inject ?? []) as NewTokens;
+        return createGroup<E, NewTokens>(childScope, childTokens);
+      },
+
+      use: registerMiddleware,
+
+      dispatch,
+
+      reset(newInitialState: S): void {
+        setState(() => newInitialState);
+        clearTransactions();
+      },
+    };
+  }
+
+  // ─── Root Group ───
+
+  const root = createGroup<Record<string, EffectToken>, []>(
+    GLOBAL as string,
+    [],
+  );
+
+  // ─── useComputed (React Hook) ───
+
+  function useComputed<T>(selector: (state: S) => T): T {
+    const selectorRef = useRef(selector);
+    selectorRef.current = selector;
+
+    const getSnapshot = useCallback(
+      () => selectorRef.current(getState()),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [],
+    );
+
+    return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  }
+
+  // ─── Return Kernel Instance ───
+
+  return {
+    // Group API (root)
+    ...root,
+
+    // Store
+    getState,
+    setState,
+    subscribe,
+
+    // React
+    useComputed,
+
+    // Inspector
+    getTransactions,
+    getLastTransaction,
+    clearTransactions,
+    travelTo,
+  };
 }

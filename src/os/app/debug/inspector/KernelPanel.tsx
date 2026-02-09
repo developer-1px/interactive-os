@@ -1,35 +1,38 @@
 /**
  * KernelPanel — Kernel State + Transaction Log for OS Inspector
  *
- * Displays live Kernel state (via useComputed) and transaction history
- * with time-travel support (via travelTo).
+ * Accepts a kernel instance prop. If not provided, shows a placeholder.
  */
 
-import {
-  clearTransactions,
-  getTransactions,
-  type Transaction,
-  travelTo,
-  useComputed,
-} from "@kernel";
+import type { createKernel } from "@kernel";
 import { useEffect, useRef, useState } from "react";
+
+type AnyKernel = ReturnType<typeof createKernel>;
 
 // ─── Main Panel ───
 
-export function KernelPanel() {
+export function KernelPanel({ kernel }: { kernel?: AnyKernel }) {
+  if (!kernel) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-[11px] text-[#aaa] italic">
+        No kernel instance connected
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-white">
-      <TransactionSection />
+      <TransactionSection kernel={kernel} />
       <div className="border-t border-[#e5e5e5]" />
-      <StateSection />
+      <StateSection kernel={kernel} />
     </div>
   );
 }
 
 // ─── State Section ───
 
-function StateSection() {
-  const state = useComputed((s) => s);
+function StateSection({ kernel }: { kernel: AnyKernel }) {
+  const state = kernel.useComputed((s) => s);
 
   return (
     <div className="flex-1 overflow-y-auto p-3">
@@ -45,15 +48,15 @@ function StateSection() {
 
 // ─── Transaction Section ───
 
-function TransactionSection() {
+function TransactionSection({ kernel }: { kernel: AnyKernel }) {
   const [, refresh] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // useComputed triggers re-render on state change → transactions also update
-  useComputed((s) => s);
+  kernel.useComputed((s) => s);
 
-  const txs = getTransactions();
+  const txs = kernel.getTransactions();
 
   // Auto-scroll to bottom on new transactions
   // biome-ignore lint/correctness/useExhaustiveDependencies: txs.length is intentional trigger
@@ -62,13 +65,13 @@ function TransactionSection() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [txs.length]);
 
-  const handleTravel = (tx: Transaction) => {
-    travelTo(tx.id);
+  const handleTravel = (tx: { id: number }) => {
+    kernel.travelTo(tx.id);
     setSelectedId(tx.id);
   };
 
   const handleClear = () => {
-    clearTransactions();
+    kernel.clearTransactions();
     setSelectedId(null);
     refresh((n) => n + 1);
   };
@@ -104,11 +107,10 @@ function TransactionSection() {
               key={tx.id}
               type="button"
               onClick={() => handleTravel(tx)}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded text-left text-[11px] font-mono transition-all w-full ${
-                selectedId === tx.id
+              className={`flex items-center gap-1.5 px-2 py-1 rounded text-left text-[11px] font-mono transition-all w-full ${selectedId === tx.id
                   ? "bg-[#e8f0fe] border border-[#4285f4] text-[#1a73e8]"
                   : "bg-[#fafafa] border border-transparent hover:bg-[#f0f0f0] text-[#555]"
-              }`}
+                }`}
             >
               <span className="text-[9px] text-[#aaa] min-w-[18px]">
                 #{tx.id}

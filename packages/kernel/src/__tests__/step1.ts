@@ -5,16 +5,7 @@
  * Tests the full dispatch → command → effect → transaction loop.
  */
 
-import {
-  clearTransactions,
-  createKernel,
-  dispatch,
-  getLastTransaction,
-  getTransactions,
-  initKernel,
-  state,
-  travelTo,
-} from "../internal.ts";
+import { createKernel } from "../internal.ts";
 
 // ── Types ──
 
@@ -25,7 +16,7 @@ interface TestState {
 
 // ── Kernel ──
 
-const kernel = createKernel({ state: state<TestState>(), effects: {} });
+const kernel = createKernel<TestState>({ count: 0, lastEffect: null });
 
 const effectLog: string[] = [];
 
@@ -36,13 +27,9 @@ const NOTIFY = kernel.defineEffect("NOTIFY", (message: string) => {
 const RE_DISPATCH = kernel.defineEffect(
   "RE_DISPATCH",
   (cmd: { type: string; payload?: unknown }) => {
-    dispatch(cmd as any);
+    kernel.dispatch(cmd as any);
   },
 );
-
-// ── Store ──
-
-const store = initKernel<TestState>({ count: 0, lastEffect: null });
 
 // ── Commands ──
 
@@ -94,31 +81,31 @@ function assert(condition: boolean, label: string) {
 console.log("\n🔬 Kernel Step 1 — Dispatch Loop\n");
 
 console.log("─── defineCommand ───");
-dispatch(INCREMENT());
-assert(store.getState().count === 1, "increment → count = 1");
+kernel.dispatch(INCREMENT());
+assert(kernel.getState().count === 1, "increment → count = 1");
 
-dispatch(INCREMENT());
-dispatch(INCREMENT());
-assert(store.getState().count === 3, "3x increment → count = 3");
+kernel.dispatch(INCREMENT());
+kernel.dispatch(INCREMENT());
+assert(kernel.getState().count === 3, "3x increment → count = 3");
 
-dispatch(DECREMENT());
-assert(store.getState().count === 2, "decrement → count = 2");
+kernel.dispatch(DECREMENT());
+assert(kernel.getState().count === 2, "decrement → count = 2");
 
 console.log("\n─── defineCommand + defineEffect ───");
-dispatch(INCREMENT_AND_NOTIFY());
-assert(store.getState().count === 3, "command → count = 3");
+kernel.dispatch(INCREMENT_AND_NOTIFY());
+assert(kernel.getState().count === 3, "command → count = 3");
 assert(
-  store.getState().lastEffect === "notified",
+  kernel.getState().lastEffect === "notified",
   "command → lastEffect = 'notified'",
 );
 assert(effectLog.length === 1, "effect executed once");
 assert(effectLog[0] === "count is now 3", `effect received: "${effectLog[0]}"`);
 
 console.log("\n─── Transaction Log ───");
-const txs = getTransactions();
+const txs = kernel.getTransactions();
 assert(txs.length === 5, `${txs.length} transactions recorded`);
 
-const lastTx = getLastTransaction()!;
+const lastTx = kernel.getLastTransaction()!;
 assert(
   lastTx.command.type === "INCREMENT_AND_NOTIFY",
   `last command: "${lastTx.command.type}"`,
@@ -132,22 +119,22 @@ assert((lastTx.stateBefore as TestState).count === 2, "stateBefore.count = 2");
 assert((lastTx.stateAfter as TestState).count === 3, "stateAfter.count = 3");
 
 console.log("\n─── Time Travel ───");
-travelTo(0); // After first increment
-assert(store.getState().count === 1, "travel to tx 0 → count = 1");
+kernel.travelTo(0); // After first increment
+assert(kernel.getState().count === 1, "travel to tx 0 → count = 1");
 
-travelTo(2); // after 3rd increment
-assert(store.getState().count === 3, "travel to tx 2 → count = 3");
+kernel.travelTo(2); // after 3rd increment
+assert(kernel.getState().count === 3, "travel to tx 2 → count = 3");
 
 console.log("\n─── Re-entrance (dispatch inside effect) ───");
-clearTransactions();
+kernel.clearTransactions();
 
-dispatch(RESET_THEN_INCREMENT());
+kernel.dispatch(RESET_THEN_INCREMENT());
 assert(
-  store.getState().count === 1,
+  kernel.getState().count === 1,
   "re-entrance: reset(0) then increment(1) → count = 1",
 );
 
-const reTxs = getTransactions();
+const reTxs = kernel.getTransactions();
 assert(reTxs.length === 2, `re-entrance created ${reTxs.length} transactions`);
 assert(
   reTxs[0].command.type === "RESET_THEN_INCREMENT",
@@ -159,7 +146,7 @@ assert(
 );
 
 console.log("\n─── Unknown command warning ───");
-dispatch({ type: "nonexistent", payload: undefined } as any); // intentional raw dispatch for testing
+kernel.dispatch({ type: "nonexistent", payload: undefined } as any);
 assert(true, "unknown command type did not crash");
 
 // ── Summary ──

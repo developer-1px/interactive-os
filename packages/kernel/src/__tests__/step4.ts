@@ -1,21 +1,11 @@
 /**
- * Kernel Step 4 Verification — computeChanges (deep diff) + getState / resetState
+ * Kernel Step 4 Verification — computeChanges (deep diff) + getState / setState
  *
  * Run: npx tsx packages/kernel/src/__tests__/step4.ts
- * Tests: StateDiff generation, getState, resetState.
+ * Tests: StateDiff generation, getState, setState.
  */
 
-import {
-  createKernel,
-  dispatch,
-  getLastTransaction,
-  getState,
-  initKernel,
-  resetKernel,
-  resetState,
-  type StateDiff,
-  state,
-} from "../internal.ts";
+import { createKernel, type StateDiff } from "../internal.ts";
 
 // ── Setup ──
 
@@ -33,8 +23,10 @@ const INITIAL: TestState = {
   meta: { tags: ["foo"], nested: { x: 1, y: 2 } },
 };
 
-void initKernel<TestState>({ ...INITIAL, items: [...INITIAL.items] });
-const kernel = createKernel({ state: state<TestState>(), effects: {} });
+const kernel = createKernel<TestState>({
+  ...INITIAL,
+  items: [...INITIAL.items],
+});
 
 // ── Test helpers ──
 
@@ -93,13 +85,13 @@ const NOOP = kernel.defineCommand("NOOP", (ctx) => () => ({
 
 // ── Tests ──
 
-console.log("\n🔬 Kernel Step 4 — computeChanges + getState / resetState\n");
+console.log("\n🔬 Kernel Step 4 — computeChanges + getState / setState\n");
 
 // --- Test 1: Simple scalar change ---
 console.log("─── scalar change ───");
 
-dispatch(SET_COUNT(42));
-const tx1 = getLastTransaction()!;
+kernel.dispatch(SET_COUNT(42));
+const tx1 = kernel.getLastTransaction()!;
 const changes1 = tx1.changes as StateDiff[];
 assert(Array.isArray(changes1), "changes is an array");
 assert(changes1.length > 0, `has ${changes1.length} diff(s)`);
@@ -112,8 +104,8 @@ assert(countDiff?.to === 42, `count.to = ${countDiff?.to}`);
 // --- Test 2: Nested object change ---
 console.log("\n─── nested object change ───");
 
-dispatch(SET_USER_NAME("Bob"));
-const tx2 = getLastTransaction()!;
+kernel.dispatch(SET_USER_NAME("Bob"));
+const tx2 = kernel.getLastTransaction()!;
 const changes2 = tx2.changes as StateDiff[];
 
 const nameDiff = changes2.find((d) => d.path === "user.name");
@@ -128,8 +120,8 @@ assert(ageDiff === undefined, "user.age not in diff (unchanged)");
 // --- Test 3: Array change ---
 console.log("\n─── array change ───");
 
-dispatch(ADD_ITEM("d"));
-const tx3 = getLastTransaction()!;
+kernel.dispatch(ADD_ITEM("d"));
+const tx3 = kernel.getLastTransaction()!;
 const changes3 = tx3.changes as StateDiff[];
 
 const itemDiff = changes3.find((d) => d.path === "items[3]");
@@ -140,8 +132,8 @@ assert(itemDiff?.to === "d", `items[3].to = "d"`);
 // --- Test 4: Deep nested change ---
 console.log("\n─── deep nested change ───");
 
-dispatch(SET_NESTED_X(99));
-const tx4 = getLastTransaction()!;
+kernel.dispatch(SET_NESTED_X(99));
+const tx4 = kernel.getLastTransaction()!;
 const changes4 = tx4.changes as StateDiff[];
 
 const nestedXDiff = changes4.find((d) => d.path === "meta.nested.x");
@@ -156,59 +148,52 @@ assert(nestedYDiff === undefined, "meta.nested.y not in diff (unchanged)");
 // --- Test 5: No change → empty diffs ---
 console.log("\n─── no change → empty diffs ───");
 
-dispatch(NOOP());
-const tx5 = getLastTransaction()!;
+kernel.dispatch(NOOP());
+const tx5 = kernel.getLastTransaction()!;
 const changes5 = tx5.changes as StateDiff[];
 assert(changes5.length === 0, `no changes: ${changes5.length} diffs`);
 
 // --- Test 6: getState ---
 console.log("\n─── getState ───");
 
-const s = getState<TestState>();
+const s = kernel.getState();
 assert(s.count === 42, `getState().count = ${s.count}`);
 assert(s.user.name === "Bob", `getState().user.name = "${s.user.name}"`);
 assert(s.items.length === 4, `getState().items.length = ${s.items.length}`);
 
-// --- Test 7: resetState ---
-console.log("\n─── resetState ───");
+// --- Test 7: setState ---
+console.log("\n─── setState ───");
 
-resetState<TestState>({
+kernel.setState(() => ({
   count: 0,
   user: { name: "Reset", age: 1 },
   items: [],
   meta: { tags: [], nested: { x: 0, y: 0 } },
-});
+}));
 
-const afterReset = getState<TestState>();
-assert(afterReset.count === 0, `resetState → count = ${afterReset.count}`);
+const afterReset = kernel.getState();
+assert(afterReset.count === 0, `setState → count = ${afterReset.count}`);
 assert(
   afterReset.user.name === "Reset",
-  `resetState → user.name = "${afterReset.user.name}"`,
+  `setState → user.name = "${afterReset.user.name}"`,
 );
 assert(
   afterReset.items.length === 0,
-  `resetState → items.length = ${afterReset.items.length}`,
+  `setState → items.length = ${afterReset.items.length}`,
 );
 
-// --- Test 8: getState/resetState throw after unbindStore ---
-console.log("\n─── getState/resetState after unbindStore ───");
+// --- Test 8: Independent kernels don't share state ---
+console.log("\n─── independent kernels ───");
 
-resetKernel();
-let threwOnGetState = false;
-try {
-  getState();
-} catch {
-  threwOnGetState = true;
-}
-assert(threwOnGetState, "getState() throws when no store bound");
+const k1 = createKernel<{ value: number }>({ value: 1 });
+const k2 = createKernel<{ value: number }>({ value: 2 });
 
-let threwOnResetState = false;
-try {
-  resetState({ x: 1 });
-} catch {
-  threwOnResetState = true;
-}
-assert(threwOnResetState, "resetState() throws when no store bound");
+assert(k1.getState().value === 1, "k1.value = 1");
+assert(k2.getState().value === 2, "k2.value = 2");
+
+k1.setState(() => ({ value: 99 }));
+assert(k1.getState().value === 99, "k1.value = 99 after setState");
+assert(k2.getState().value === 2, "k2.value still 2 (independent)");
 
 // ── Summary ──
 
