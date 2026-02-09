@@ -110,3 +110,8 @@ export type TypedContext<
     readonly state: S;
   } & Readonly<Injected>
 >;
+
+// ─── Phantom State Marker ───
+
+/** Phantom type marker for state type inference in createKernel. */
+export type StateMarker<S> = { readonly __stateType?: S };

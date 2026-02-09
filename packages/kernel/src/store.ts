@@ -1,57 +1,38 @@
 /**
- * store — Kernel ↔ Store binding layer.
- *
- * Connects the kernel's dispatch pipeline to a Zustand-compatible store.
- * Single binding point: one store per kernel instance.
+ * store — Kernel ↔ Store binding layer and init helper.
  */
+export type { Store } from "./core/createStore.ts";
+export { createStore } from "./core/createStore.ts";
+export {
+  bindStore,
+  getActiveStore,
+  getState,
+  resetState,
+  unbindStore,
+} from "./core/store.ts";
 
-import type { Store } from "./createStore.ts";
+import { clearContextProviders } from "./core/context.ts";
+import { createStore as _createStore } from "./core/createStore.ts";
+import { clearAllRegistries } from "./core/registries.ts";
+import { bindStore as _bindStore } from "./core/store.ts";
+import { clearTransactions } from "./core/transaction.ts";
 
-// ─── Core ───
-
-let activeStore: Store<unknown> | null = null;
-
-/**
- * bindStore — connect the dispatch pipeline to a store.
- * Must be called once before any dispatch.
- */
-export function bindStore<S>(store: Store<S>): void {
-  activeStore = store as Store<unknown>;
-}
-
-export function getActiveStore(): Store<unknown> | null {
-  return activeStore;
-}
-
-/**
- * getState — read the current state tree.
- *
- * Use in defineContext providers or outside React components.
- * Inside React, prefer useComputed(selector) instead.
- */
-export function getState<S = unknown>(): S {
-  if (!activeStore) {
-    throw new Error("[kernel] No store bound. Call initKernel() first.");
-  }
-  return activeStore.getState() as S;
+/** Convenience: create store + bind in one call. */
+export function initKernel<S>(
+  initialState: S,
+): import("./core/createStore.ts").Store<S> {
+  const store = _createStore(initialState);
+  _bindStore(store);
+  return store;
 }
 
 /**
- * resetState — replace the entire state tree.
- *
- * Use for testing or full state reset. Triggers all subscribers.
+ * resetKernel — Clear all registries, contexts, transactions, and unbind store.
+ * Used for testing.
  */
-export function resetState<S>(nextState: S): void {
-  if (!activeStore) {
-    throw new Error("[kernel] No store bound. Call initKernel() first.");
-  }
-  activeStore.setState(() => nextState as unknown);
-}
-
-/**
- * unbindStore — disconnect dispatch from the store.
- * Used for full teardown (testing only).
- */
-export function unbindStore(): void {
-  activeStore = null;
+export function resetKernel(): void {
+  clearAllRegistries();
+  clearContextProviders();
+  clearTransactions();
+  // unbindStore(); // Optional, but clearAllRegistries clears commands/effects.
 }

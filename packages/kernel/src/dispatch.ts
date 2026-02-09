@@ -1,8 +1,5 @@
 /**
- * dispatch.ts — Re-export for backward compatibility.
- *
- * Dispatch is now part of registry.ts to avoid circular dependencies.
- * This file re-exports for any existing imports.
+ * dispatch — the single entry point.
+ * Accepts a typed Command (created by CommandFactory).
  */
-
-export { dispatch } from "./registry.ts";
+export { dispatch } from "./core/dispatch.ts";

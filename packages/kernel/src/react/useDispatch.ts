@@ -7,7 +7,7 @@
 
 import { useCallback } from "react";
 import { dispatch } from "../dispatch.ts";
-import type { Command } from "../tokens.ts";
+import type { Command } from "../types.ts";
 
 export function useDispatch(): (cmd: Command<string, unknown>) => void {
   return useCallback((cmd: Command<string, unknown>) => dispatch(cmd), []);
