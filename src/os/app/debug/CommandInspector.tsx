@@ -1,5 +1,6 @@
 import { DataStateViewer } from "@os/app/debug/inspector/DataStateViewer.tsx";
 import { EventStream } from "@os/app/debug/inspector/EventStream.tsx";
+import { KernelPanel } from "@os/app/debug/inspector/KernelPanel.tsx";
 import { KeyMonitor } from "@os/app/debug/inspector/KeyMonitor.tsx";
 import { OSStateViewer } from "@os/app/debug/inspector/OSStateViewer.tsx";
 import { RegistryMonitor } from "@os/app/debug/inspector/RegistryMonitor.tsx";
@@ -8,8 +9,8 @@ import { useInputTelemetry } from "@os/app/debug/LoggedKey.ts";
 import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { evalContext } from "@os/features/logic/lib/evalContext";
+import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { TestBotPanel } from "@os/testBot";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
@@ -186,6 +187,8 @@ export function CommandInspector() {
         );
       case "TESTBOT":
         return <TestBotPanel />;
+      case "KERNEL":
+        return <KernelPanel />;
       default:
         return null;
     }

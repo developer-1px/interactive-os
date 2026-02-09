@@ -28,11 +28,28 @@ export type Transaction = {
   stateAfter: unknown;
 };
 
-// ─── Transaction Log ───
+// ─── HMR-safe Transaction Log (globalThis 기반) ───
+
+const TX_KEY = "__kernel_transactions__";
+const TX_ID_KEY = "__kernel_tx_next_id__";
 
 const MAX_TRANSACTIONS = 200;
-const transactions: Transaction[] = [];
-let nextTransactionId = 0;
+
+function getTransactionLog(): Transaction[] {
+  const g = globalThis as Record<string, unknown>;
+  if (!g[TX_KEY]) g[TX_KEY] = [];
+  return g[TX_KEY] as Transaction[];
+}
+
+function getNextId(): number {
+  const g = globalThis as Record<string, unknown>;
+  if (g[TX_ID_KEY] === undefined) g[TX_ID_KEY] = 0;
+  return g[TX_ID_KEY] as number;
+}
+
+function setNextId(id: number): void {
+  (globalThis as Record<string, unknown>)[TX_ID_KEY] = id;
+}
 
 /**
  * recordTransaction — append a transaction entry to the log.
@@ -45,8 +62,12 @@ export function recordTransaction(
   stateAfter: unknown,
   bubblePath: string[],
 ): void {
+  const transactions = getTransactionLog();
+  const id = getNextId();
+  setNextId(id + 1);
+
   const transaction: Transaction = {
-    id: nextTransactionId++,
+    id,
     timestamp: Date.now(),
     command,
     handlerScope,
@@ -67,15 +88,16 @@ export function recordTransaction(
 // ─── Inspector API ───
 
 export function getTransactions(): readonly Transaction[] {
-  return transactions;
+  return getTransactionLog();
 }
 
 export function getLastTransaction(): Transaction | undefined {
+  const transactions = getTransactionLog();
   return transactions[transactions.length - 1];
 }
 
 export function travelTo(transactionId: number): void {
-  const tx = transactions.find((t) => t.id === transactionId);
+  const tx = getTransactionLog().find((t) => t.id === transactionId);
   if (!tx) {
     console.warn(`[kernel] Transaction ${transactionId} not found`);
     return;
@@ -86,8 +108,9 @@ export function travelTo(transactionId: number): void {
 }
 
 export function clearTransactions(): void {
+  const transactions = getTransactionLog();
   transactions.length = 0;
-  nextTransactionId = 0;
+  setNextId(0);
 }
 
 // ─── State Diff ───

@@ -15,9 +15,17 @@
 
 import type { ContextToken } from "./tokens.ts";
 
-// ─── Registry ───
+// ─── HMR-safe Registry (globalThis 기반) ───
 
-const contextProviders = new Map<string, () => unknown>();
+const CTX_KEY = "__kernel_context_providers__";
+
+function getProviders(): Map<string, () => unknown> {
+  const g = globalThis as Record<string, unknown>;
+  if (!g[CTX_KEY]) g[CTX_KEY] = new Map<string, () => unknown>();
+  return g[CTX_KEY] as Map<string, () => unknown>;
+}
+
+const contextProviders = getProviders();
 
 /**
  * defineContext — register a context provider. Returns a ContextToken.

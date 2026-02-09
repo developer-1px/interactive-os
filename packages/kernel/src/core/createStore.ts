@@ -13,9 +13,28 @@ export interface Store<S> {
   subscribe(listener: Listener): () => void;
 }
 
-let activeStore: Store<unknown> | null = null;
+// HMR-safe: globalThis에 저장하여 모듈 재실행에도 유지
+const STORE_KEY = "__kernel_store__";
+
+function getStoreSingleton(): Store<unknown> | null {
+  return (
+    ((globalThis as Record<string, unknown>)[
+      STORE_KEY
+    ] as Store<unknown> | null) ?? null
+  );
+}
+
+function setStoreSingleton(store: Store<unknown> | null): void {
+  (globalThis as Record<string, unknown>)[STORE_KEY] = store;
+}
 
 export function createStore<S>(initialState: S): Store<S> {
+  // HMR-safe: 이미 Store가 존재하면 재생성하지 않음 (상태 보존)
+  const existing = getStoreSingleton();
+  if (existing) {
+    return existing as Store<S>;
+  }
+
   let state = initialState;
   const listeners = new Set<Listener>();
 
@@ -39,14 +58,14 @@ export function createStore<S>(initialState: S): Store<S> {
     },
   };
 
-  activeStore = store as Store<unknown>;
+  setStoreSingleton(store as Store<unknown>);
   return store;
 }
 
 // ─── Store Binding (merged from store.ts) ───
 
 export function getActiveStore(): Store<unknown> | null {
-  return activeStore;
+  return getStoreSingleton();
 }
 
 /**
@@ -56,10 +75,11 @@ export function getActiveStore(): Store<unknown> | null {
  * Inside React, prefer useComputed(selector) instead.
  */
 export function getState<S = unknown>(): S {
-  if (!activeStore) {
+  const store = getStoreSingleton();
+  if (!store) {
     throw new Error("[kernel] No store bound. Call initKernel() first.");
   }
-  return activeStore.getState() as S;
+  return store.getState() as S;
 }
 
 /**
@@ -68,10 +88,11 @@ export function getState<S = unknown>(): S {
  * Use for testing or full state reset. Triggers all subscribers.
  */
 export function resetState<S>(nextState: S): void {
-  if (!activeStore) {
+  const store = getStoreSingleton();
+  if (!store) {
     throw new Error("[kernel] No store bound. Call initKernel() first.");
   }
-  activeStore.setState(() => nextState as unknown);
+  store.setState(() => nextState as unknown);
 }
 
 /**
@@ -79,5 +100,5 @@ export function resetState<S>(nextState: S): void {
  * Used for full teardown (testing only).
  */
 export function unbindStore(): void {
-  activeStore = null;
+  setStoreSingleton(null);
 }

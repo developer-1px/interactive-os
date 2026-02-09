@@ -1,5 +1,5 @@
 import { useInspectorStore } from "@os/inspector/InspectorStore";
-import { Activity, Bug, Database, Keyboard, Settings } from "lucide-react";
+import { Activity, Bug, Cpu, Database, Keyboard, Settings } from "lucide-react";
 
 export function InspectorActivityBar() {
   const activeTab = useInspectorStore((s) => s.activeTab);
@@ -10,6 +10,7 @@ export function InspectorActivityBar() {
     { id: "STATE", icon: Database, label: "State" },
     { id: "EVENTS", icon: Activity, label: "Events" },
     { id: "TESTBOT", icon: Bug, label: "TestBot" },
+    { id: "KERNEL", icon: Cpu, label: "Kernel" },
     { id: "SETTINGS", icon: Settings, label: "Settings" },
   ] as const;
 

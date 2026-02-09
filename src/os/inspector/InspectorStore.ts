@@ -13,7 +13,8 @@ export type InspectorTab =
   | "STATE"
   | "EVENTS"
   | "SETTINGS"
-  | "TESTBOT";
+  | "TESTBOT"
+  | "KERNEL";
 
 interface InspectorState {
   isOpen: boolean;

@@ -45,11 +45,7 @@ export function createGroup<
       }
       const scopeMap = scopedCommands.get(scope)!;
 
-      if (scopeMap.has(type)) {
-        console.warn(
-          `[kernel] command "${type}" at scope "${scope}" is being overwritten`,
-        );
-      }
+      // HMR-safe: 동일 커맨드 재등록은 silent overwrite
       scopeMap.set(type, handler);
 
       // Register inject interceptor for this command (if tokens exist)

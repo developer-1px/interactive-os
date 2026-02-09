@@ -25,6 +25,8 @@ export { defineContext } from "./core/context.ts";
 export type { Store } from "./core/createStore.ts";
 // State helpers
 export { getState, resetState } from "./core/createStore.ts";
+// Group (for advanced usage)
+export type { Group } from "./core/group.ts";
 
 // Dispatch / Middleware
 export { registerMiddleware as use } from "./core/pipeline.ts";
