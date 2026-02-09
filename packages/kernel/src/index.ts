@@ -11,17 +11,10 @@
  */
 
 // ─── Context ───
-export { clearContextProviders, defineContext } from "./core/context.ts";
+export { defineContext } from "./core/context.ts";
 // ─── State / Store ───
 export type { Store } from "./core/createStore.ts";
-export {
-  bindStore,
-  createStore,
-  getActiveStore,
-  getState,
-  resetState,
-  unbindStore,
-} from "./core/createStore.ts";
+export { getState, resetState } from "./core/createStore.ts";
 // ─── Dispatch ───
 // ─── Middleware ───
 export { dispatch, registerMiddleware as use } from "./core/pipeline.ts";
