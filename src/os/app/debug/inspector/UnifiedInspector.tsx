@@ -11,14 +11,16 @@ import {
   ArrowRightLeft,
   Check,
   ChevronDown,
-  Command,
   Database,
+  Eye,
   GitBranch,
   Hash,
+  Keyboard,
   Layers,
   MousePointer2,
+  MousePointerClick,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // ─── Types ───
 
@@ -31,7 +33,7 @@ export type PipelineStep = {
 export interface InspectorEvent {
   id: string;
   time: string;
-  input: { type: "KEYBOARD" | "MOUSE"; raw: string };
+  input: { type: "KEYBOARD" | "MOUSE" | "FOCUS"; raw: string; elementId?: string };
   command: { type: string; payload?: unknown } | null;
   pipeline: PipelineStep[];
   diffs: Array<{ path: string; from: string; to: string }>;
@@ -50,6 +52,31 @@ export interface InspectorEvent {
   };
 }
 
+// ─── Highlighting ───
+
+function highlightElement(id: string | undefined, active: boolean) {
+  if (!id) return;
+  const el =
+    document.querySelector(`[data-id="${id}"]`) ||
+    document.querySelector(`[data-zone-id="${id}"]`) ||
+    document.getElementById(id);
+
+  if (el && el instanceof HTMLElement) {
+    if (active) {
+      el.dataset.inspectorHighlight = "true";
+      el.style.outline = "2px solid #f06595";
+      el.style.outlineOffset = "2px";
+      el.style.boxShadow = "0 0 0 4px rgba(240, 101, 149, 0.3)";
+      el.style.transition = "all 0.2s";
+    } else {
+      delete el.dataset.inspectorHighlight;
+      el.style.outline = "";
+      el.style.outlineOffset = "";
+      el.style.boxShadow = "";
+    }
+  }
+}
+
 // ─── Component ───
 
 export function UnifiedInspector({ events }: { events: InspectorEvent[] }) {
@@ -58,14 +85,14 @@ export function UnifiedInspector({ events }: { events: InspectorEvent[] }) {
   // Auto-expand new events (optional, maybe just the latest)
   useEffect(() => {
     if (events.length > 0) {
-      const lastId = events[events.length - 1].id;
+      const _lastId = events[events.length - 1].id;
       setExpandedIds((prev) => {
         const next = new Set(prev);
         // next.add(lastId); // Auto-expand latest? Maybe too noisy.
         return next;
       });
     }
-  }, [events.length]);
+  }, [events.length, events[events.length - 1]?.id]);
 
   const toggle = (id: string) => {
     const next = new Set(expandedIds);
@@ -76,7 +103,7 @@ export function UnifiedInspector({ events }: { events: InspectorEvent[] }) {
   return (
     <div className="flex flex-col w-full h-full bg-white text-[#333] font-sans text-[10px] select-none">
       <div className="h-8 px-3 border-b border-[#e8e8e8] bg-white flex items-center shrink-0 sticky top-0 z-20">
-        <Layers size={13} className="text-[#007acc] mr-2" />
+        <Layers size={14} className="text-[#007acc] mr-2" />
         <span className="font-bold text-[#555]">Trace Log</span>
         <span className="ml-2 text-[#999] text-[9px]">
           ({events.length} events)
@@ -120,9 +147,15 @@ function TimelineNode({
   const isNoOp = evt.pipeline[0]?.status === "fail"; // Optional chaining just in case
   const icon =
     evt.input.type === "MOUSE" ? (
-      <MousePointer2 size={10} />
+      evt.input.raw === "Click" ? (
+        <MousePointerClick size={12} className="text-blue-500" />
+      ) : (
+        <MousePointer2 size={12} className="text-blue-500" />
+      )
+    ) : evt.input.type === "FOCUS" ? (
+      <Eye size={12} className="text-emerald-500" />
     ) : (
-      <Command size={10} />
+      <Keyboard size={12} className="text-slate-500" />
     );
 
   return (
@@ -138,10 +171,8 @@ function TimelineNode({
         }}
         className="flex items-center gap-2 px-2 py-2 cursor-pointer bg-transparent border-none text-left w-full"
       >
-        {/* Icon */}
-        <div
-          className={`w-5 h-5 shrink-0 rounded-full border flex items-center justify-center bg-white shadow-sm ${isFail ? "text-[#e53e3e] border-[#fecaca]" : "text-[#64748b] border-[#e2e8f0]"}`}
-        >
+        {/* Icon (Fixed width container for alignment) */}
+        <div className="w-3.5 flex justify-center shrink-0">
           {icon}
         </div>
 
@@ -154,6 +185,18 @@ function TimelineNode({
         >
           {evt.input.raw}
         </span>
+
+        {/* Element ID Badge (with highlight interaction) */}
+        {evt.input.elementId && (
+          <span
+            className="px-1 py-px rounded bg-[#fff0f6] text-[#c2255c] text-[9px] font-mono border border-[#ffdeeb] cursor-help max-w-[80px] truncate"
+            title={`Element ID: ${evt.input.elementId}`}
+            onMouseEnter={() => highlightElement(evt.input.elementId!, true)}
+            onMouseLeave={() => highlightElement(evt.input.elementId!, false)}
+          >
+            {evt.input.elementId}
+          </span>
+        )}
 
         {/* Command Badge */}
         {evt.command && !isFail && (

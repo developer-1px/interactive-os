@@ -110,6 +110,7 @@ export function createKernel<S>(initialState: S) {
     stateBefore: unknown,
     stateAfter: unknown,
     bubblePath: string[],
+    meta?: Record<string, unknown>,
   ): void {
     const id = txNextId++;
     transactions.push({
@@ -122,6 +123,7 @@ export function createKernel<S>(initialState: S) {
       changes: computeChanges(stateBefore, stateAfter),
       stateBefore,
       stateAfter,
+      meta,
     });
     if (transactions.length > MAX_TRANSACTIONS) {
       transactions.splice(0, transactions.length - MAX_TRANSACTIONS);
@@ -152,7 +154,7 @@ export function createKernel<S>(initialState: S) {
 
   // ─── Dispatch Queue (closure) ───
 
-  const queue: Command[] = [];
+  const queue: Array<{ cmd: Command; meta?: Record<string, unknown> }> = [];
   let processing = false;
 
   // Build full bubble path by walking parentMap upward.
@@ -171,7 +173,7 @@ export function createKernel<S>(initialState: S) {
 
   function dispatch(
     cmd: Command<string, any>,
-    options?: { scope?: ScopeToken[] },
+    options?: { scope?: ScopeToken[]; meta?: Record<string, unknown> },
   ): void {
     let enriched = options?.scope ? { ...cmd, scope: options.scope } : cmd;
 
@@ -183,7 +185,7 @@ export function createKernel<S>(initialState: S) {
       }
     }
 
-    queue.push(enriched as Command);
+    queue.push({ cmd: enriched as Command, meta: options?.meta });
 
     if (processing) return;
 
@@ -191,7 +193,7 @@ export function createKernel<S>(initialState: S) {
     try {
       while (queue.length > 0) {
         const next = queue.shift()!;
-        processCommand(next, next.scope);
+        processCommand(next.cmd, next.cmd.scope, next.meta);
       }
     } finally {
       processing = false;
@@ -200,7 +202,7 @@ export function createKernel<S>(initialState: S) {
 
   // ─── Command Processing ───
 
-  function processCommand(cmd: Command, bubblePath?: ScopeToken[]): void {
+  function processCommand(cmd: Command, bubblePath?: ScopeToken[], meta?: Record<string, unknown>): void {
     const stateBefore = state;
     const path: string[] = bubblePath
       ? (bubblePath as unknown as string[])
@@ -297,6 +299,7 @@ export function createKernel<S>(initialState: S) {
       stateBefore,
       stateAfter,
       path,
+      meta,
     );
   }
 

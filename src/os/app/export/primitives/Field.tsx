@@ -1,19 +1,4 @@
-import type {
-  BaseCommand,
-  FieldCommandFactory,
-} from "@/os-new/schema/command/BaseCommand";
-import type { FocusTarget } from "@/os-new/schema/focus/FocusTarget";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import {
-  useFocusGroupContext,
-  useFocusGroupStore,
-} from "@/os-new/primitives/FocusGroup";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
-import {
-  type FieldConfig,
-  FieldRegistry,
-  useFieldRegistry,
-} from "@/os-new/3-store/FieldRegistry";
 import { useFieldFocus } from "@os/features/keyboard/ui/Field/useFieldHooks";
 import type { HTMLAttributes } from "react";
 import {
@@ -23,6 +8,21 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
+import {
+  type FieldConfig,
+  FieldRegistry,
+  useFieldRegistry,
+} from "@/os-new/3-store/FieldRegistry";
+import {
+  useFocusGroupContext,
+  useFocusGroupStore,
+} from "@/os-new/primitives/FocusGroup";
+import { FocusItem } from "@/os-new/primitives/FocusItem";
+import type {
+  BaseCommand,
+  FieldCommandFactory,
+} from "@/os-new/schema/command/BaseCommand";
+import type { FocusTarget } from "@/os-new/schema/focus/FocusTarget";
 
 /**
  * Checks if the value is effectively empty for placeholder display.
@@ -252,9 +252,9 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
       "aria-controls": controls,
       "aria-activedescendant":
         target === "virtual" &&
-          controls &&
-          osFocusedItemId &&
-          osFocusedItemId !== name
+        controls &&
+        osFocusedItemId &&
+        osFocusedItemId !== name
           ? osFocusedItemId
           : undefined,
       children: null, // Managed by useFieldDOMSync
@@ -267,9 +267,7 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
       else if (ref) (ref as any).current = node;
     };
 
-    return (
-      <FocusItem id={fieldId} as={as} ref={setInnerRef} {...baseProps} />
-    );
+    return <FocusItem id={fieldId} as={as} ref={setInnerRef} {...baseProps} />;
   },
 );
 

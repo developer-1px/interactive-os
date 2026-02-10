@@ -1,6 +1,7 @@
 import { DataStateViewer } from "@os/app/debug/inspector/DataStateViewer.tsx";
 import { ElementPanel } from "@os/app/debug/inspector/ElementPanel.tsx";
 import { EventStream } from "@os/app/debug/inspector/EventStream.tsx";
+import { InspectorAdapter } from "@os/app/debug/inspector/InspectorAdapter.tsx";
 import { KeyMonitor } from "@os/app/debug/inspector/KeyMonitor.tsx";
 import { OSStateViewer } from "@os/app/debug/inspector/OSStateViewer.tsx";
 import { RegistryMonitor } from "@os/app/debug/inspector/RegistryMonitor.tsx";
@@ -9,12 +10,11 @@ import { useInputTelemetry } from "@os/app/debug/LoggedKey.ts";
 import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { evalContext } from "@/os-new/core/logic/evalContext";
 import { InspectorRegistry } from "@os/inspector/InspectorRegistry.ts";
 import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { TestBotPanel } from "@os/testBot";
-import { InspectorAdapter } from "@os/app/debug/inspector/InspectorAdapter.tsx";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { evalContext } from "@/os-new/core/logic/evalContext";
 
 // --- Main Component ---
 
@@ -136,7 +136,7 @@ export function CommandInspector() {
         "UNIFIED",
         "Vision",
         <InspectorAdapter />,
-        999 // Order at the end
+        999, // Order at the end
       );
     }
   }, []);
@@ -185,12 +185,6 @@ export function CommandInspector() {
             <div className="flex-1 overflow-hidden border-t border-[#e5e5e5]">
               <DataStateViewer state={state.data} />
             </div>
-          </div>
-        );
-      case "EVENTS":
-        return (
-          <div className="flex-1 flex flex-col overflow-hidden bg-white">
-            <EventStream />
           </div>
         );
       case "SETTINGS":

@@ -9,7 +9,6 @@
 
 import { ACTIVATE } from "../3-commands/activate";
 import { ESCAPE } from "../3-commands/escape";
-import { EXPAND } from "../3-commands/expand";
 import { NAVIGATE } from "../3-commands/navigate";
 import { SELECT } from "../3-commands/select";
 import { TAB } from "../3-commands/tab";

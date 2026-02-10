@@ -1,8 +1,8 @@
 import {
-  useTransactionLogStore,
   TransactionLog,
+  useTransactionLogStore,
 } from "@os/inspector/InspectorLogStore";
-import type { Transaction, StateDiff, EffectRecord } from "@os/schema";
+import type { EffectRecord, StateDiff, Transaction } from "@os/schema";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Icon } from "@/lib/Icon";
 
@@ -173,10 +173,11 @@ const TransactionRow = ({
           )}
           {hasEffects && (
             <span
-              className={`px-1 py-0.5 rounded text-[8px] font-bold ${effectsSkipped > 0
+              className={`px-1 py-0.5 rounded text-[8px] font-bold ${
+                effectsSkipped > 0
                   ? "bg-[#fce8e6] text-[#d93025]"
                   : "bg-[#e6f4ea] text-[#188038]"
-                }`}
+              }`}
             >
               fx{effectsExecuted}
               {effectsSkipped > 0 && `/${effectsSkipped}`}
@@ -331,7 +332,12 @@ function formatForLLM(transactions: Transaction[]): string {
   return transactions
     .map((txn) => {
       const lines: string[] = [];
-      const icon = txn.input.source === "mouse" ? "🖱" : txn.input.source === "keyboard" ? "⌨" : "⚙";
+      const icon =
+        txn.input.source === "mouse"
+          ? "🖱"
+          : txn.input.source === "keyboard"
+            ? "⌨"
+            : "⚙";
 
       // Header
       lines.push(
@@ -341,7 +347,9 @@ function formatForLLM(transactions: Transaction[]): string {
       // Diff
       if (txn.diff.length > 0) {
         for (const d of txn.diff) {
-          lines.push(`   diff: ${d.path}: ${formatValue(d.from)} → ${formatValue(d.to)}`);
+          lines.push(
+            `   diff: ${d.path}: ${formatValue(d.from)} → ${formatValue(d.to)}`,
+          );
         }
       }
 

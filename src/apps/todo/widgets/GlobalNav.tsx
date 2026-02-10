@@ -9,7 +9,7 @@ import {
   Settings,
   User,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 
 export function GlobalNav() {
   const navItems = [
@@ -42,19 +42,24 @@ export function GlobalNav() {
     { id: "user", icon: User, path: "/profile", label: "Profile" },
   ];
 
+  const commonClass =
+    "relative w-8 h-8 flex items-center justify-center transition-all duration-200 rounded-lg";
+  const inactiveClass =
+    "text-slate-400 hover:text-slate-600 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-slate-200";
+  const activeClass =
+    "text-indigo-600 bg-white shadow-md ring-1 ring-indigo-100 z-10";
+
   return (
     <div className="w-10 h-screen flex flex-col items-center py-3 bg-[#F8FAFC] border-r border-slate-200 z-50 flex-shrink-0">
       {/* Top Navigation */}
       <nav className="flex flex-col gap-3 w-full items-center px-2">
         {navItems.map((item) => (
-          <NavLink
+          <Link
             key={item.id}
             to={item.path}
-            className={({ isActive }) => `
-                            relative w-8 h-8 flex items-center justify-center text-slate-400 transition-all duration-200 rounded-lg
-                            hover:text-slate-600 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-slate-200
-                            ${isActive ? "text-indigo-600 bg-white shadow-md ring-1 ring-indigo-100 z-10" : ""}
-                        `}
+            className={commonClass}
+            inactiveProps={{ className: inactiveClass }}
+            activeProps={{ className: activeClass }}
             title={item.label}
           >
             {({ isActive }) => (
@@ -69,7 +74,7 @@ export function GlobalNav() {
                 )}
               </>
             )}
-          </NavLink>
+          </Link>
         ))}
       </nav>
 
@@ -78,14 +83,12 @@ export function GlobalNav() {
       {/* Bottom Actions */}
       <div className="flex flex-col gap-3 w-full items-center mb-4 px-2">
         {bottomItems.map((item) => (
-          <NavLink
+          <Link
             key={item.id}
             to={item.path}
-            className={({ isActive }) => `
-                            relative w-8 h-8 flex items-center justify-center text-slate-400 transition-all duration-200 rounded-lg
-                            hover:text-slate-600 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-slate-200
-                            ${isActive ? "text-indigo-600 bg-white shadow-md ring-1 ring-indigo-100" : ""}
-                        `}
+            className={commonClass}
+            inactiveProps={{ className: inactiveClass }}
+            activeProps={{ className: activeClass }}
             tabIndex={-1}
             title={item.label}
           >
@@ -94,7 +97,7 @@ export function GlobalNav() {
                 <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
               </>
             )}
-          </NavLink>
+          </Link>
         ))}
       </div>
     </div>

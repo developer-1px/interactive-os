@@ -1,7 +1,7 @@
-import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
 import { useEffect, useLayoutEffect, useRef } from "react";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 
 type CommandHandlerContext = {
   payload: unknown;

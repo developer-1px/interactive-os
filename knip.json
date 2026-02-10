@@ -1,6 +1,4 @@
 {
-    "$schema": "https://unpkg.com/knip@latest/schema.json",
-    "ignore": [
-        "packages/surface/**"
-    ]
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "ignore": ["packages/surface/**"]
 }

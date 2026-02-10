@@ -1,12 +1,12 @@
-import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
 import type {
   ReactElement,
   MouseEvent as ReactMouseEvent,
   ReactNode,
 } from "react";
 import { cloneElement, forwardRef, isValidElement } from "react";
+import { FocusItem } from "@/os-new/primitives/FocusItem";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 
 export interface TriggerProps<T extends BaseCommand>
   extends React.HTMLAttributes<HTMLButtonElement> {

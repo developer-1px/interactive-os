@@ -5,6 +5,7 @@ export interface LoggedKey {
   code: string;
   zoneId: string;
   target: string;
+  elementId?: string;
   timestamp: number;
   handled: boolean;
 }
@@ -28,6 +29,11 @@ export const useInputTelemetry = create<InputTelemetryState>((set) => ({
           code: e.code,
           zoneId,
           target: (e.target as HTMLElement).tagName || "UNKNOWN",
+          elementId:
+            (e.target as HTMLElement).getAttribute("data-id") ||
+            (e.target as HTMLElement).getAttribute("data-zone-id") ||
+            (e.target as HTMLElement).id ||
+            undefined,
           timestamp: Date.now(),
           handled,
         },

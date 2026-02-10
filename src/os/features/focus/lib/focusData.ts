@@ -6,8 +6,8 @@
  * - 등록/해제 코드 불필요
  */
 
-import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import { activeZoneGuard } from "@/os-new/lib/loopGuard";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import type { FocusGroupStore } from "../store/focusGroupStore";
 import type { FocusGroupConfig } from "../types";
 
@@ -285,13 +285,13 @@ export const FocusData = {
       const targetItemId = entry.itemId
         ? entry.itemId
         : (() => {
-          // Fallback: first focusable item in zone
-          const zoneEl = document.getElementById(entry.zoneId);
-          const firstItem = zoneEl?.querySelector(
-            "[data-item-id]",
-          ) as HTMLElement | null;
-          return firstItem?.id ?? null;
-        })();
+            // Fallback: first focusable item in zone
+            const zoneEl = document.getElementById(entry.zoneId);
+            const firstItem = zoneEl?.querySelector(
+              "[data-item-id]",
+            ) as HTMLElement | null;
+            return firstItem?.id ?? null;
+          })();
 
       if (!targetItemId) return;
 

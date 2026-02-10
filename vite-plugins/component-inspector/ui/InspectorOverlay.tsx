@@ -70,7 +70,8 @@ const Box = ({
 
 export const InspectorOverlay: React.FC<{
   activeElement: HTMLElement | null;
-}> = ({ activeElement }) => {
+  locked?: boolean;
+}> = ({ activeElement, locked }) => {
   const [targetBox, setTargetBox] = useState<BoxModel | null>(null);
   const [targetName, setTargetName] = useState<string>("");
   const [fileInfo, setFileInfo] = useState<string | null>(null);
@@ -124,7 +125,7 @@ export const InspectorOverlay: React.FC<{
             height: maxBottom - minTop,
             x: minLeft,
             y: minTop,
-            toJSON: () => {},
+            toJSON: () => { },
           } as any;
         }
       }
@@ -152,7 +153,7 @@ export const InspectorOverlay: React.FC<{
             const verticalOverlap = Math.max(
               0,
               Math.min(current.bottom, next.bottom) -
-                Math.max(current.top, next.top),
+              Math.max(current.top, next.top),
             );
             if (
               verticalOverlap > 0 &&
@@ -170,7 +171,7 @@ export const InspectorOverlay: React.FC<{
             const horizontalOverlap = Math.max(
               0,
               Math.min(current.right, next.right) -
-                Math.max(current.left, next.left),
+              Math.max(current.left, next.left),
             );
             if (
               horizontalOverlap > 0 &&
@@ -377,6 +378,7 @@ export const InspectorOverlay: React.FC<{
         height={height}
         bg={COLORS.border}
         borderRadius={targetBox.borderRadius}
+        border={locked ? "2px solid #EF4444" : undefined}
       />
 
       {/* Padding Box */}
@@ -402,23 +404,22 @@ export const InspectorOverlay: React.FC<{
       )}
 
       {/* Gaps */}
-      {gaps &&
-        gaps.map((g, i) => (
-          <div
-            key={`gap-${i}`}
-            style={{
-              position: "absolute",
-              top: g.top,
-              left: g.left,
-              width: g.width,
-              height: g.height,
-              backgroundColor: COLORS.gap,
-              backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.2) 2px, rgba(255,255,255,0.2) 4px)`,
-              pointerEvents: "none",
-              zIndex: 10005,
-            }}
-          />
-        ))}
+      {gaps?.map((g, i) => (
+        <div
+          key={`gap-${i}`}
+          style={{
+            position: "absolute",
+            top: g.top,
+            left: g.left,
+            width: g.width,
+            height: g.height,
+            backgroundColor: COLORS.gap,
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.2) 2px, rgba(255,255,255,0.2) 4px)`,
+            pointerEvents: "none",
+            zIndex: 10005,
+          }}
+        />
+      ))}
 
       {/* Tooltip */}
       <div
@@ -443,41 +444,71 @@ export const InspectorOverlay: React.FC<{
           gap: "4px",
           zIndex: 100001,
           backdropFilter: "blur(8px)",
-          border: "1px solid rgba(255,255,255,0.1)",
+          border: locked
+            ? "1px solid #EF4444"
+            : "1px solid rgba(255,255,255,0.1)",
           whiteSpace: "nowrap",
           pointerEvents: "none",
         }}
       >
-        {fileInfo && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "#60A5FA",
-              fontWeight: 600,
-              fontSize: "11px",
-              opacity: 0.9,
-            }}
-          >
-            <span>{fileInfo}</span>
-            {loc !== undefined && (
-              <span
-                style={{
-                  color: loc > 200 ? "#EF4444" : "#94A3B8",
-                  fontSize: "10px",
-                  fontWeight: loc > 200 ? 700 : 400,
-                  background:
-                    loc > 200 ? "rgba(239, 68, 68, 0.1)" : "transparent",
-                  padding: loc > 200 ? "1px 4px" : "0",
-                  borderRadius: "4px",
-                }}
-              >
-                ({loc} lines) {loc > 200 ? "⚠️" : ""}
-              </span>
-            )}
-          </div>
-        )}
+        {/* Header Row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "8px",
+          }}
+        >
+          {fileInfo && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#60A5FA",
+                fontWeight: 600,
+                fontSize: "11px",
+                opacity: 0.9,
+              }}
+            >
+              <span>{fileInfo}</span>
+              {loc !== undefined && (
+                <span
+                  style={{
+                    color: loc > 200 ? "#EF4444" : "#94A3B8",
+                    fontSize: "10px",
+                    fontWeight: loc > 200 ? 700 : 400,
+                    background:
+                      loc > 200 ? "rgba(239, 68, 68, 0.1)" : "transparent",
+                    padding: loc > 200 ? "1px 4px" : "0",
+                    borderRadius: "4px",
+                  }}
+                >
+                  ({loc} lines) {loc > 200 ? "⚠️" : ""}
+                </span>
+              )}
+            </div>
+          )}
+          {locked && (
+            <span
+              style={{
+                color: "#EF4444",
+                fontWeight: 700,
+                fontSize: "10px",
+                background: "rgba(239, 68, 68, 0.15)",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              🔒 LOCKED
+            </span>
+          )}
+        </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {targetName && (
@@ -628,7 +659,7 @@ export const InspectorOverlay: React.FC<{
   );
 };
 
-function getFileInfo(element: HTMLElement): string | null {
+function _getFileInfo(element: HTMLElement): string | null {
   const source = getDebugSource(element);
   if (!source) return null;
   return `${source.fileName}:${source.lineNumber}`;

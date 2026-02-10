@@ -5,8 +5,8 @@
  * 시간여행 디버깅과 LLM 분석을 위한 구조.
  */
 
-import { create } from "zustand";
 import type { Transaction } from "@os/schema";
+import { create } from "zustand";
 
 // ═══════════════════════════════════════════════════════════════════
 // Store
@@ -113,6 +113,6 @@ export const useInspectorLogStore = {
   getState: () => ({
     logs: [] as LogEntry[],
     clear: TransactionLog.clear,
-    addLog: (_entry: any) => { },
+    addLog: (_entry: any) => {},
   }),
 };

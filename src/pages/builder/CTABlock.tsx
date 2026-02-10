@@ -73,9 +73,10 @@ export function CTABlock() {
               type="button"
               className={`
                 inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300
-                ${isFocused
-                  ? "bg-white text-violet-700 scale-110 shadow-2xl"
-                  : "bg-white text-violet-700 hover:shadow-xl"
+                ${
+                  isFocused
+                    ? "bg-white text-violet-700 scale-110 shadow-2xl"
+                    : "bg-white text-violet-700 hover:shadow-xl"
                 }
               `}
             >

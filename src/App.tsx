@@ -13,9 +13,9 @@ import DocsPage from "./pages/DocsPage";
 import FocusShowcasePage from "./pages/focus-showcase";
 import KanbanPage from "./pages/KanbanPage";
 import KernelLabPage from "./pages/KernelLabPage";
+import PlaywrightRunnerPage from "./pages/PlaywrightRunnerPage";
 import SettingsPage from "./pages/SettingsPage";
 import TodoPage from "./pages/TodoPage";
-import PlaywrightRunnerPage from "./pages/PlaywrightRunnerPage";
 
 // --- Internal Layout running inside OS.App ---
 
@@ -131,7 +131,10 @@ export default function App() {
             <Route path="/kernel-lab" element={<KernelLabPage />} />
             <Route path="/spike-demo" element={<SpikeDemo />} />
             <Route path="/os-kernel-demo" element={<OSKernelDemo />} />
-            <Route path="/playwright-runner" element={<PlaywrightRunnerPage />} />
+            <Route
+              path="/playwright-runner"
+              element={<PlaywrightRunnerPage />}
+            />
           </Route>
         </Routes>
       </OS.Root>

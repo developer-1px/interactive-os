@@ -20,45 +20,51 @@ import type { Plugin } from "vite";
  *   }
  */
 export function specWrapperPlugin(): Plugin {
-    return {
-        name: "spec-wrapper",
-        enforce: "pre",
+  return {
+    name: "spec-wrapper",
+    enforce: "pre",
 
-        transform(code, id) {
-            if (!id.endsWith(".spec.ts")) return null;
+    transform(code, id) {
+      if (!id.endsWith(".spec.ts")) return null;
 
-            // Extract relative path from project root for context tagging
-            // e.g. "/Users/.../e2e/aria-showcase/tabs.spec.ts" → "e2e/aria-showcase/tabs.spec.ts"
-            const e2eIndex = id.indexOf("e2e/");
-            const relativePath = e2eIndex >= 0 ? id.slice(e2eIndex) : id;
+      // Extract relative path from project root for context tagging
+      // e.g. "/Users/.../e2e/aria-showcase/tabs.spec.ts" → "e2e/aria-showcase/tabs.spec.ts"
+      const e2eIndex = id.indexOf("e2e/");
+      const relativePath = e2eIndex >= 0 ? id.slice(e2eIndex) : id;
 
-            const lines = code.split("\n");
-            const importLines: string[] = [];
-            const bodyLines: string[] = [];
+      const lines = code.split("\n");
+      const importLines: string[] = [];
+      const bodyLines: string[] = [];
 
-            let inImports = true;
-            for (const line of lines) {
-                // Collect all import lines (including multi-line)
-                if (inImports && (line.startsWith("import ") || line.trim() === "" || line.startsWith("//")) && bodyLines.length === 0) {
-                    importLines.push(line);
-                } else {
-                    inImports = false;
-                    bodyLines.push(line);
-                }
-            }
+      let inImports = true;
+      for (const line of lines) {
+        // Collect all import lines (including multi-line)
+        if (
+          inImports &&
+          (line.startsWith("import ") ||
+            line.trim() === "" ||
+            line.startsWith("//")) &&
+          bodyLines.length === 0
+        ) {
+          importLines.push(line);
+        } else {
+          inImports = false;
+          bodyLines.push(line);
+        }
+      }
 
-            const transformed = [
-                ...importLines,
-                `import { setLoadingContext as __setCtx__ } from "@/os/testBot/playwright/registry";`,
-                `export default function __runSpec__() {`,
-                `  __setCtx__(${JSON.stringify(relativePath)});`,
-                ...bodyLines.map((l) => `  ${l}`),
-                `  __setCtx__(null);`,
-                `}`,
-                `__runSpec__.sourceFile = ${JSON.stringify(relativePath)};`,
-            ].join("\n");
+      const transformed = [
+        ...importLines,
+        `import { setLoadingContext as __setCtx__ } from "@/os/testBot/playwright/registry";`,
+        `export default function __runSpec__() {`,
+        `  __setCtx__(${JSON.stringify(relativePath)});`,
+        ...bodyLines.map((l) => `  ${l}`),
+        `  __setCtx__(null);`,
+        `}`,
+        `__runSpec__.sourceFile = ${JSON.stringify(relativePath)};`,
+      ].join("\n");
 
-            return { code: transformed, map: null };
-        },
-    };
+      return { code: transformed, map: null };
+    },
+  };
 }

@@ -11,7 +11,6 @@ import { useTestBotStore } from "../features/TestBotStore";
 import { CopyLogButton } from "./CopyLogButton";
 import { SuiteDetails } from "./SuiteDetails";
 
-
 // ═══════════════════════════════════════════════════════════════════
 // Component
 // ═══════════════════════════════════════════════════════════════════
@@ -24,7 +23,6 @@ export function TestBotPanel() {
 
   // Register E2E Routes globally when panel is mounted
   // This ensures they persist across page navigations during test runs
-
 
   const [expandedSuites, setExpandedSuites] = useState<Set<string>>(new Set());
 
@@ -163,14 +161,15 @@ export function TestBotPanel() {
                     : "fail"
                   : undefined
               }
-              className={`bg-white rounded-lg border shadow-sm transition-all overflow-hidden mb-3 ${isRunningSuite
-                ? "border-blue-400 ring-4 ring-blue-50/50 shadow-md scale-[1.02]"
-                : isPending
-                  ? "border-slate-200 border-dashed opacity-60"
-                  : suite.passed
-                    ? "border-slate-200 opacity-80"
-                    : "border-red-200 ring-1 ring-red-50"
-                }`}
+              className={`bg-white rounded-lg border shadow-sm transition-all overflow-hidden mb-3 ${
+                isRunningSuite
+                  ? "border-blue-400 ring-4 ring-blue-50/50 shadow-md scale-[1.02]"
+                  : isPending
+                    ? "border-slate-200 border-dashed opacity-60"
+                    : suite.passed
+                      ? "border-slate-200 opacity-80"
+                      : "border-red-200 ring-1 ring-red-50"
+              }`}
             >
               {/* Suite Header */}
               <div
@@ -236,14 +235,15 @@ export function TestBotPanel() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3
-                    className={`text-xs font-semibold truncate transition-colors ${isRunningSuite
-                      ? "text-blue-700"
-                      : isPending
-                        ? "text-slate-500"
-                        : suite.passed
-                          ? "text-slate-700"
-                          : "text-red-700"
-                      }`}
+                    className={`text-xs font-semibold truncate transition-colors ${
+                      isRunningSuite
+                        ? "text-blue-700"
+                        : isPending
+                          ? "text-slate-500"
+                          : suite.passed
+                            ? "text-slate-700"
+                            : "text-red-700"
+                    }`}
                   >
                     {suite.name}
                   </h3>

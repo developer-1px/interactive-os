@@ -5,10 +5,10 @@
  */
 
 import { Zone } from "@os/app/export/primitives/Zone";
-import { AppEngineProvider } from "@os/features/command/ui/AppEngineContext";
 import type { AppDefinition } from "@os/features/application/defineApplication";
 import { createEngine } from "@os/features/command/model/createEngine";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
+import { AppEngineProvider } from "@os/features/command/ui/AppEngineContext";
 import { useInspectorPersistence } from "@os/inspector/useInspectorPersistence";
 import type React from "react";
 import { useEffect, useMemo } from "react";
@@ -59,7 +59,18 @@ export function App<S>({
     return () => unregisterApp(appDef.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Registration lifecycle only.
     // `state` is intentionally excluded: state sync is handled by updateAppState effect.
-  }, [appDef.id, isInitialized, dispatch]);
+  }, [
+    appDef.id,
+    isInitialized,
+    dispatch,
+    appDef.contextMap,
+    engine.registry,
+    engine.store.getState,
+    engine.store.setState,
+    registerApp,
+    state,
+    unregisterApp,
+  ]);
 
   // 4. Update state when it changes
   useEffect(() => {

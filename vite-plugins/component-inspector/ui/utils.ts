@@ -1,6 +1,4 @@
-export function getDebugSource(
-  el: HTMLElement | null,
-): {
+export function getDebugSource(el: HTMLElement | null): {
   fileName: string;
   lineNumber: number;
   columnNumber: number;

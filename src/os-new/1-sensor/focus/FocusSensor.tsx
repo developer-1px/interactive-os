@@ -65,6 +65,7 @@ function tryHandleLabelClick(e: MouseEvent): boolean {
     isDispatching = true;
     kernel.dispatch(
       FOCUS({ zoneId: fieldTarget.groupId, itemId: fieldTarget.itemId }),
+      { meta: { input: { type: "MOUSE", key: "Click", elementId: fieldTarget.itemId } } },
     );
     isDispatching = false;
   }
@@ -76,14 +77,15 @@ function tryHandleLabelClick(e: MouseEvent): boolean {
 // ═══════════════════════════════════════════════════════════════════
 
 function dispatchSelectCommand(e: MouseEvent, itemId: string) {
+  const mouseMeta = { meta: { input: { type: "MOUSE", key: "Click", elementId: itemId } } };
   if (e.shiftKey) {
     e.preventDefault();
-    kernel.dispatch(SELECT({ targetId: itemId, mode: "range" }));
+    kernel.dispatch(SELECT({ targetId: itemId, mode: "range" }), mouseMeta);
   } else if (e.metaKey || e.ctrlKey) {
     e.preventDefault();
-    kernel.dispatch(SELECT({ targetId: itemId, mode: "toggle" }));
+    kernel.dispatch(SELECT({ targetId: itemId, mode: "toggle" }), mouseMeta);
   } else {
-    kernel.dispatch(SELECT({ targetId: itemId, mode: "replace" }));
+    kernel.dispatch(SELECT({ targetId: itemId, mode: "replace" }), mouseMeta);
   }
 }
 
@@ -109,7 +111,10 @@ function senseMouseDown(e: Event) {
 
   // Always FOCUS first (ensures activeZone is set)
   isDispatching = true;
-  kernel.dispatch(FOCUS({ zoneId: groupId, itemId }));
+  kernel.dispatch(
+    FOCUS({ zoneId: groupId, itemId }),
+    { meta: { input: { type: "MOUSE", key: "Click", elementId: itemId } } },
+  );
   isDispatching = false;
 
   // Then SELECT based on modifiers
@@ -128,7 +133,10 @@ function senseFocusIn(e: Event) {
   const target = resolveFocusTarget(item);
   if (!target) return;
 
-  kernel.dispatch(SYNC_FOCUS({ id: target.itemId, zoneId: target.groupId }));
+  kernel.dispatch(
+    SYNC_FOCUS({ id: target.itemId, zoneId: target.groupId }),
+    { meta: { input: { type: "FOCUS", key: "FocusIn", elementId: target.itemId } } },
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -161,7 +169,7 @@ export function FocusSensor() {
         !document.body.contains(lastFocusedElement)
       ) {
         lastFocusedElement = null;
-        kernel.dispatch(RECOVER());
+        kernel.dispatch(RECOVER(), { meta: { input: { type: "FOCUS", key: "Recovery" } } });
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });

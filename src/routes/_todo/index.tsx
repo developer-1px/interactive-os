@@ -1,0 +1,13 @@
+import { Package } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import TodoPage from "../../pages/TodoPage";
+
+export const Route = createFileRoute("/_todo/")({
+    component: TodoPage,
+    staticData: {
+        title: "Todo",
+        icon: Package,
+        location: "global-nav",
+        order: 1,
+    },
+});

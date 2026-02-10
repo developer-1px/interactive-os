@@ -20,8 +20,6 @@
  */
 
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
-import { composeRefs, Slot } from "@/os-new/shared/Slot";
 import {
   forwardRef,
   type ReactElement,
@@ -31,6 +29,8 @@ import {
 } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
+import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
+import { composeRefs, Slot } from "@/os-new/shared/Slot";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types

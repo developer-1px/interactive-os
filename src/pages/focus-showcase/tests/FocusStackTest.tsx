@@ -1,7 +1,7 @@
 import { FocusData } from "@os/features/focus/lib/focusData";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FocusGroup } from "@/os-new/primitives/FocusGroup";
 import { FocusItem } from "@/os-new/primitives/FocusItem";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { TestBox } from "../../shared/TestLayout";
 
 /**

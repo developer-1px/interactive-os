@@ -11,10 +11,10 @@
  * - data-change detection: only records when state.data changed
  */
 
-import { OS_COMMANDS } from "@/os-new/schema/command/OSCommands";
 import type { Middleware } from "@os/features/command/model/createCommandStore";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import { produce } from "immer";
+import { OS_COMMANDS } from "@/os-new/schema/command/OSCommands";
 import type { HistoryEntry } from "./types";
 
 const HISTORY_LIMIT = 50;

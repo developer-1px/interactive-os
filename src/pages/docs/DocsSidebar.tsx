@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@tanstack/react-router";
 
 // Types for our tree structure
 export interface DocItem {
@@ -32,9 +32,9 @@ const SidebarItem = ({
   level?: number;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const location = useLocation();
+  const { pathname } = useLocation();
 
-  item.type === "file" && location.pathname === `/docs/${item.path}`;
+  item.type === "file" && pathname === `/docs/${item.path}`;
 
   // Auto-expand if a child is active
   useEffect(() => {
@@ -43,7 +43,7 @@ const SidebarItem = ({
         return children.some(
           (child) =>
             (child.type === "file" &&
-              location.pathname === `/docs/${child.path}`) ||
+              pathname === `/docs/${child.path}`) ||
             (child.type === "folder" &&
               child.children &&
               hasActiveChild(child.children)),
@@ -53,7 +53,7 @@ const SidebarItem = ({
         setIsOpen(true);
       }
     }
-  }, [location.pathname, item]);
+  }, [pathname, item]);
 
   // Folder render
   if (item.type === "folder") {
@@ -103,27 +103,19 @@ const SidebarItem = ({
 
   // File render
   return (
-    <NavLink
+    <Link
       to={`/docs/${item.path}`}
-      className={({ isActive }) =>
-        clsx(
-          "flex items-center gap-1.5 px-3 py-1 text-[13.5px] rounded-md transition-all duration-200 border border-transparent",
-          isActive
-            ? "bg-slate-100 text-slate-900 font-medium"
-            : "text-slate-500 hover:text-slate-900 hover:bg-slate-50",
-        )
-      }
+      className={clsx(
+        "flex items-center gap-1.5 px-3 py-1 text-[13.5px] rounded-md transition-all duration-200 border border-transparent",
+        pathname === `/docs/${item.path}`
+          ? "bg-slate-100 text-slate-900 font-medium"
+          : "text-slate-500 hover:text-slate-900 hover:bg-slate-50",
+      )}
       style={{ paddingLeft: `${level * 12 + 12}px` }}
     >
-      {/* Alignment spacer to match folder icon width */}
-      <span className="w-[14px] flex justify-center opacity-50">
-        {/* Optional: We could put a file icon here if we wanted, e.g. <FileText size={12} /> */}
-        {/* For now, just a spacer or a dot for active? Let's stick to simple spacer for alignment. 
-                   Actually, let's put a small dot if it's a file? No, user wants clean. 
-                   Empty spacer is best for "Notion-like". */}
-      </span>
+      <span className="w-[14px] flex justify-center opacity-50" />
       <span className="truncate">{cleanLabel(item.name)}</span>
-    </NavLink>
+    </Link>
   );
 };
 

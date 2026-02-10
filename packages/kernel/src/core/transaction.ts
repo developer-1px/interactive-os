@@ -23,6 +23,7 @@ export type Transaction = {
   changes: StateDiff[];
   stateBefore: unknown;
   stateAfter: unknown;
+  meta?: Record<string, unknown>;
 };
 
 // ─── State Diff (pure function) ───

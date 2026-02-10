@@ -7,8 +7,8 @@
  * - OSResult: State 변경 + DOM Effect
  */
 
-import { createFocusEffect } from "@os/schema";
 import type { EffectRecord, TransactionInput } from "@os/schema";
+import { createFocusEffect } from "@os/schema";
 import { DOM } from "@/os-new/lib/dom";
 import { FocusData } from "../../lib/focusData";
 import type { FocusGroupStore } from "../../store/focusGroupStore";
@@ -245,7 +245,10 @@ export function getLastInputSource(): InputSource {
 
 /** Consume input info for transaction building. Returns input and clears it. */
 export function consumeInputInfo(): TransactionInput {
-  const info = _pendingInput ?? { source: "programmatic" as const, raw: "system" };
+  const info = _pendingInput ?? {
+    source: "programmatic" as const,
+    raw: "system",
+  };
   _pendingInput = null;
   _currentInput = null;
   return info;
@@ -257,7 +260,6 @@ export function consumeCollectedEffects(): EffectRecord[] {
   _collectedEffects = [];
   return effects;
 }
-
 
 export function runOS<P>(
   command: OSCommand<P>,
@@ -379,7 +381,12 @@ function executeDOMEffect(effect: DOMEffect): void {
         );
       } else {
         _collectedEffects.push(
-          createFocusEffect("focus", effect.targetId, false, "element_not_found"),
+          createFocusEffect(
+            "focus",
+            effect.targetId,
+            false,
+            "element_not_found",
+          ),
         );
       }
       break;
@@ -414,7 +421,12 @@ function executeDOMEffect(effect: DOMEffect): void {
         );
       } else {
         _collectedEffects.push(
-          createFocusEffect("click", effect.targetId, false, "element_not_found"),
+          createFocusEffect(
+            "click",
+            effect.targetId,
+            false,
+            "element_not_found",
+          ),
         );
       }
       break;

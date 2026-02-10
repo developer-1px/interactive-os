@@ -109,11 +109,7 @@ export const DebugManager: React.FC = () => {
       if ((e.metaKey || e.ctrlKey) && e.key === "ArrowUp") {
         e.preventDefault();
         const current = lockedElement || hoveredElement;
-        if (
-          current &&
-          current.parentElement &&
-          current.parentElement !== document.body
-        ) {
+        if (current?.parentElement && current.parentElement !== document.body) {
           const parent = current.parentElement;
           setTraversalHistory((prev) => [...prev, current]);
           setLockedElement(parent);
@@ -143,7 +139,13 @@ export const DebugManager: React.FC = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isInspectorActive, lockedElement, hoveredElement, traversalHistory]);
+  }, [
+    isInspectorActive,
+    lockedElement,
+    hoveredElement,
+    traversalHistory,
+    copyElementSource,
+  ]);
 
   // Manage Body Class and Click Interception
   useEffect(() => {
@@ -159,11 +161,22 @@ export const DebugManager: React.FC = () => {
       e.preventDefault();
       e.stopPropagation();
 
-      // Lock the hovered element
+      // If we clicked a valid element (that is currently hovered)
       if (hoveredElement) {
-        setLockedElement(hoveredElement);
-        setTraversalHistory([]); // Clear traversal history on fresh click
-        copyElementSource(hoveredElement);
+        // Toggle lock if clicking the same element
+        if (lockedElement === hoveredElement) {
+          setLockedElement(null);
+          setToastMessage("Unlocked");
+        } else {
+          // Lock new element
+          setLockedElement(hoveredElement);
+          setTraversalHistory([]); // Clear traversal history on fresh click
+          copyElementSource(hoveredElement);
+        }
+      } else {
+        // Clicked outside or on overlay -> Unlock
+        setLockedElement(null);
+        setToastMessage("Unlocked");
       }
     };
 
@@ -174,7 +187,7 @@ export const DebugManager: React.FC = () => {
     return () => {
       window.removeEventListener("click", handleClick, true);
     };
-  }, [isInspectorActive, hoveredElement]);
+  }, [isInspectorActive, hoveredElement, lockedElement, copyElementSource]);
 
   // Toast Auto-dismiss
   useEffect(() => {
@@ -249,7 +262,7 @@ export const DebugManager: React.FC = () => {
             }}
           />
         ))}
-      {(isInspectorActive || lockedElement) && (
+      {isInspectorActive && !lockedElement && (
         <InspectorOverlay activeElement={activeElement} />
       )}
       {toastMessage && (

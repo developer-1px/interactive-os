@@ -1,4 +1,5 @@
 import tailwindcss from "@tailwindcss/vite";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import inspectorBabelPlugin from "./vite-plugins/babel-inspector";
@@ -8,6 +9,7 @@ import { specWrapperPlugin } from "./vite-plugins/spec-wrapper";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    TanStackRouterVite(),
     specWrapperPlugin(),
     react({
       babel: {

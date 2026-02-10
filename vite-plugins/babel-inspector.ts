@@ -1,5 +1,5 @@
 // @ts-nocheck
-import path from "path";
+import path from "node:path";
 
 export default function inspectorBabelPlugin({ types: t }: any) {
   return {

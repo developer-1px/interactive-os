@@ -69,11 +69,7 @@ export function StampOverlay() {
   if (stamps.length === 0) return null;
 
   return createPortal(
-    <>
-      {stamps.map((stamp) => (
-        <StampItem key={stamp.id} stamp={stamp} />
-      ))}
-    </>,
+    stamps.map((stamp) => <StampItem key={stamp.id} stamp={stamp} />),
     document.body,
   );
 }

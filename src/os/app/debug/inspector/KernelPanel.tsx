@@ -107,10 +107,11 @@ function TransactionSection({ kernel }: { kernel: AnyKernel }) {
               key={tx.id}
               type="button"
               onClick={() => handleTravel(tx)}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded text-left text-[11px] font-mono transition-all w-full ${selectedId === tx.id
+              className={`flex items-center gap-1.5 px-2 py-1 rounded text-left text-[11px] font-mono transition-all w-full ${
+                selectedId === tx.id
                   ? "bg-[#e8f0fe] border border-[#4285f4] text-[#1a73e8]"
                   : "bg-[#fafafa] border border-transparent hover:bg-[#f0f0f0] text-[#555]"
-                }`}
+              }`}
             >
               <span className="text-[9px] text-[#aaa] min-w-[18px]">
                 #{tx.id}

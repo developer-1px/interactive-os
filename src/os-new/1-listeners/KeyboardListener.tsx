@@ -42,7 +42,20 @@ export function KeyboardListener() {
       const command = binding.command(...args);
 
       // Just dispatch — kernel handles scope bubbling via static tree
-      kernel.dispatch(command);
+      kernel.dispatch(command, {
+        meta: {
+          input: {
+            type: "KEYBOARD",
+            key: e.key,
+            code: canonicalKey,
+            elementId:
+              target.getAttribute("data-id") ||
+              target.getAttribute("data-zone-id") ||
+              target.id ||
+              undefined,
+          },
+        },
+      });
 
       e.preventDefault();
       e.stopPropagation();

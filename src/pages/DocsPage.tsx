@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { NavLink, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import rehypeHighlight from "rehype-highlight";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
@@ -144,7 +144,8 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
   hr: (props) => <hr className="border-slate-100 my-8 max-w-2xl" {...props} />,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   code: ({ className, children, ...props }: any) => {
-    const isBlock = className?.includes("hljs") || className?.includes("language-");
+    const isBlock =
+      className?.includes("hljs") || className?.includes("language-");
     if (isBlock) {
       return (
         <code className={clsx("hljs", className)} {...props}>
@@ -165,7 +166,10 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
   pre: ({ children, ...props }: any) => {
     const codeChild = children?.props;
     const langClass = codeChild?.className ?? "";
-    const lang = langClass.replace(/language-/, "").replace(/hljs/, "").trim();
+    const lang = langClass
+      .replace(/language-/, "")
+      .replace(/hljs/, "")
+      .trim();
     return (
       <div className="rounded-xl overflow-hidden my-8 border border-slate-200 bg-[#fbfcfd] shadow-sm relative group max-w-4xl">
         <div className="flex items-center px-4 py-2 border-b border-slate-100 bg-slate-50/50 justify-between">
@@ -210,7 +214,8 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
 };
 
 export default function DocsPage() {
-  const { "*": splat } = useParams();
+  const location = useLocation();
+  const splat = location.pathname.replace(/^\/docs\/?/, "") || undefined;
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
@@ -227,7 +232,7 @@ export default function DocsPage() {
     if (!splat) {
       const firstFile = allFiles[0];
       if (firstFile) {
-        navigate(`/docs/${firstFile.path}`, { replace: true });
+        navigate({ to: `/docs/${firstFile.path}`, replace: true });
       }
       return;
     }
@@ -278,7 +283,7 @@ export default function DocsPage() {
                 <p className="text-xl font-medium text-slate-400">{error}</p>
                 <button
                   type="button"
-                  onClick={() => navigate("/docs")}
+                  onClick={() => navigate({ to: "/docs" })}
                   className="mt-8 px-6 py-2 bg-slate-100 text-slate-600 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors shadow-sm"
                 >
                   Return to Home
@@ -318,7 +323,7 @@ export default function DocsPage() {
                 {/* Navigation Buttons */}
                 <div className="mt-20 pt-8 border-t border-slate-100 flex items-center justify-between gap-4 max-w-3xl">
                   {prevFile ? (
-                    <NavLink
+                    <Link
                       to={`/docs/${prevFile.path}`}
                       className="group flex flex-col items-start gap-1"
                     >
@@ -329,13 +334,13 @@ export default function DocsPage() {
                       <span className="text-base font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
                         {cleanLabel(prevFile.name)}
                       </span>
-                    </NavLink>
+                    </Link>
                   ) : (
                     <div />
                   )}
 
                   {nextFile ? (
-                    <NavLink
+                    <Link
                       to={`/docs/${nextFile.path}`}
                       className="group flex flex-col items-end gap-1 text-right"
                     >
@@ -346,7 +351,7 @@ export default function DocsPage() {
                       <span className="text-base font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
                         {cleanLabel(nextFile.name)}
                       </span>
-                    </NavLink>
+                    </Link>
                   ) : (
                     <div />
                   )}

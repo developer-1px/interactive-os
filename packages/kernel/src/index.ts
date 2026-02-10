@@ -13,18 +13,17 @@
  *   kernel.group()              → child Group
  */
 
-// ─── Entry Point ───
-export { createKernel, defineScope } from "./createKernel.ts";
-
-// ─── Types ───
-export type { Transaction, StateDiff } from "./core/transaction.ts";
 export type {
   Command,
   CommandFactory,
   ContextToken,
   EffectToken,
-  ScopeToken,
   Middleware,
   MiddlewareContext,
+  ScopeToken,
 } from "./core/tokens.ts";
 export { GLOBAL } from "./core/tokens.ts";
+// ─── Types ───
+export type { StateDiff, Transaction } from "./core/transaction.ts";
+// ─── Entry Point ───
+export { createKernel, defineScope } from "./createKernel.ts";

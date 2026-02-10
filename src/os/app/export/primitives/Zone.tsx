@@ -6,9 +6,6 @@
  * Use `options` for advanced per-instance overrides when needed.
  */
 
-import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
-import { FocusGroup } from "@/os-new/primitives/FocusGroup";
-import type { ZoneRole } from "@/os-new/registry/roleRegistry";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -18,6 +15,9 @@ import type {
   TabConfig,
 } from "@os/features/focus/types";
 import type { ComponentProps, ReactNode } from "react";
+import { FocusGroup } from "@/os-new/primitives/FocusGroup";
+import type { ZoneRole } from "@/os-new/registry/roleRegistry";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 
 /** Advanced configuration overrides - use sparingly, prefer role presets */
 export interface ZoneOptions {

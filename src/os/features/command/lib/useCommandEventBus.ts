@@ -1,5 +1,5 @@
-import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import { create } from "zustand";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 
 type CommandHandler = (cmd: BaseCommand) => void;
 

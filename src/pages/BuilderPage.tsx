@@ -2,6 +2,9 @@ import { OS } from "@os/features/AntigravityOS";
 import { FocusDebugOverlay } from "@os/features/focus/ui/FocusDebugOverlay";
 import { usePlaywrightSpecs } from "@os/testBot/playwright/loader";
 import { useState } from "react";
+// Playwright spec
+// @ts-expect-error
+import runBuilderSpatial from "../../e2e/builder/builder-spatial.spec.ts";
 import {
   EditorToolbar,
   NCPFooterBlock,
@@ -12,10 +15,6 @@ import {
   type PropertyType,
   type ViewportMode,
 } from "./builder";
-
-// Playwright spec
-// @ts-ignore
-import runBuilderSpatial from "../../e2e/builder/builder-spatial.spec.ts";
 
 /**
  * BuilderPage
@@ -33,7 +32,6 @@ export default function BuilderPage() {
         return { width: "375px", height: "100%" }; // Mobile preset
       case "tablet":
         return { width: "768px", height: "100%" }; // Tablet preset
-      case "desktop":
       default:
         return { width: "100%", height: "100%" }; // Full width
     }

@@ -10,34 +10,37 @@ import { expect, test } from "@playwright/test";
  */
 
 const routes = [
-    "/",
-    "/settings",
-    "/kanban",
-    "/builder",
-    "/focus-showcase",
-    "/aria-showcase",
-    "/docs",
-    "/kernel-lab",
-    "/spike-demo",
-    "/os-kernel-demo",
-    "/playwright-runner",
+  "/",
+  "/settings",
+  "/kanban",
+  "/builder",
+  "/focus-showcase",
+  "/aria-showcase",
+  "/docs",
+  "/kernel-lab",
+  "/spike-demo",
+  "/os-kernel-demo",
+  "/playwright-runner",
 ];
 
 for (const route of routes) {
-    test(`Smoke: ${route} renders without error`, async ({ page }) => {
-        const errors: string[] = [];
-        page.on("pageerror", (err) => errors.push(err.message));
+  test(`Smoke: ${route} renders without error`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (err) => errors.push(err.message));
 
-        await page.goto(route);
+    await page.goto(route);
 
-        // React가 마운트될 때까지 대기 (#root에 자식 요소가 생길 때까지)
-        await page.waitForFunction(
-            () => document.querySelector("#root")?.children.length! > 0,
-            null,
-            { timeout: 10000 },
-        );
+    // React가 마운트될 때까지 대기 (#root에 자식 요소가 생길 때까지)
+    await page.waitForFunction(
+      () => document.querySelector("#root")?.children.length! > 0,
+      null,
+      { timeout: 10000 },
+    );
 
-        // 런타임 에러 없는지 확인
-        expect(errors, `${route} had runtime errors:\n${errors.join("\n")}`).toEqual([]);
-    });
+    // 런타임 에러 없는지 확인
+    expect(
+      errors,
+      `${route} had runtime errors:\n${errors.join("\n")}`,
+    ).toEqual([]);
+  });
 }

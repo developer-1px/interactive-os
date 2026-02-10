@@ -1,10 +1,5 @@
 import { FocusData } from "@os/features/focus/lib/focusData";
 import {
-  useFocusGroupContext,
-  useFocusGroupStore,
-} from "@/os-new/primitives/FocusGroup";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
-import {
   forwardRef,
   isValidElement,
   type ReactNode,
@@ -12,6 +7,11 @@ import {
   useSyncExternalStore,
 } from "react";
 import { useStore } from "zustand";
+import {
+  useFocusGroupContext,
+  useFocusGroupStore,
+} from "@/os-new/primitives/FocusGroup";
+import { FocusItem } from "@/os-new/primitives/FocusItem";
 
 // --- Types ---
 interface ItemState {

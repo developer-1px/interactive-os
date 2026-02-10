@@ -12,25 +12,25 @@ import { expect } from "./shim";
 // ── test function ──────────────────────────────────────────────
 
 export const test = (name: string, fn: Function) => {
-    pushTest(name, fn);
+  pushTest(name, fn);
 };
 
 test.describe = (name: string, fn: Function) => {
-    pushDescribe(name, fn);
+  pushDescribe(name, fn);
 };
 
 test.beforeEach = (fn: Function) => {
-    pushBeforeEach(fn);
+  pushBeforeEach(fn);
 };
 
 test.step = async (name: string, fn: Function) => {
-    console.log(`[Step] ${name}`);
-    await fn();
+  console.log(`[Step] ${name}`);
+  await fn();
 };
 
-test.use = () => { };
-test.skip = () => { };
-test.only = () => { };
+test.use = () => {};
+test.skip = () => {};
+test.only = () => {};
 
 // ── re-exports ─────────────────────────────────────────────────
 

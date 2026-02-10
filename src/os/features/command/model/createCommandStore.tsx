@@ -1,4 +1,3 @@
-import { logger } from "@/os-new/lib/logger";
 import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
 // Modules
 import {
@@ -7,11 +6,9 @@ import {
 } from "@os/features/command/model/CommandRegistry";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import {
-  consumeInputInfo,
   consumeCollectedEffects,
+  consumeInputInfo,
 } from "@os/features/focus/pipeline/core/osCommand";
-import { TransactionLog } from "@os/inspector/InspectorLogStore";
-import { computeDiff } from "@os/schema";
 import { buildCurrentSnapshot } from "@os/features/focus/schema/analyzer";
 import { GroupRegistry } from "@os/features/jurisdiction/model/GroupRegistry";
 // Middleware is now injected via config!
@@ -20,8 +17,11 @@ import {
   hydrateState,
   type PersistenceConfig,
 } from "@os/features/persistence/hydrateState";
-import { dispatchGuard } from "@/os-new/lib/loopGuard";
+import { TransactionLog } from "@os/inspector/InspectorLogStore";
+import { computeDiff } from "@os/schema";
 import { create } from "zustand";
+import { logger } from "@/os-new/lib/logger";
+import { dispatchGuard } from "@/os-new/lib/loopGuard";
 
 // Re-exports for consumers
 export { CommandRegistry, type CommandGroup };
