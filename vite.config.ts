@@ -2,6 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import inspectorBabelPlugin from "./vite-plugins/babel-inspector";
+import { inspectorPlugin } from "./vite-plugins/inspector";
 import { specWrapperPlugin } from "./vite-plugins/spec-wrapper";
 
 // https://vite.dev/config/
@@ -14,6 +15,7 @@ export default defineConfig({
       },
     }),
     tailwindcss(),
+    inspectorPlugin(),
   ],
   resolve: {
     alias: {
