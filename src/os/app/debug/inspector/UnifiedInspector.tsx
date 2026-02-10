@@ -1,5 +1,5 @@
 /**
- * UnifiedInspectorMock — Unified Sections (Refined v10)
+ * UnifiedInspector — Unified Sections (Refined v10)
  *
  * All detail sections (Pipeline, State, Effects, Kernel) use the SAME
  * visual pattern: [Section Label] → [Uniform Row List]
@@ -18,17 +18,17 @@ import {
   Layers,
   MousePointer2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // ─── Types ───
 
-type PipelineStep = {
+export type PipelineStep = {
   name: string;
   status: "pass" | "fail" | "skip";
   detail?: string;
 };
 
-interface MockEvent {
+export interface InspectorEvent {
   id: string;
   time: string;
   input: { type: "KEYBOARD" | "MOUSE"; raw: string };
@@ -50,110 +50,22 @@ interface MockEvent {
   };
 }
 
-// ─── Mock Data ───
-
-const MOCK_EVENTS: MockEvent[] = [
-  {
-    id: "tx-1042",
-    time: "10:42:05.120",
-    input: { type: "KEYBOARD", raw: "ArrowDown" },
-    command: { type: "NAVIGATE", payload: { direction: "DOWN" } },
-    pipeline: [
-      { name: "MATCH", status: "pass", detail: "NAVIGATE" },
-      { name: "WHEN", status: "pass", detail: "zone:main-list" },
-      { name: "EXEC", status: "pass" },
-    ],
-    diffs: [
-      { path: "focus.activeId", from: "item-1", to: "item-2" },
-      { path: "focus.selection", from: "[1]", to: "[2]" },
-    ],
-    effects: [
-      {
-        source: "focus",
-        action: "scrollIntoView",
-        targetId: "item-2",
-        ok: true,
-      },
-      { source: "focus", action: "focus", targetId: "item-2", ok: true },
-    ],
-    kernel: {
-      handlerScope: "zone:main-list",
-      bubblePath: ["item-1", "zone:main-list", "GLOBAL"],
-      middleware: [{ name: "logger", duration: 0.2 }],
-    },
-    snapshot: { "focus.activeZone": "main-list", "focus.activeId": "item-2" },
-  },
-  {
-    id: "tx-1043",
-    time: "10:42:06.340",
-    input: { type: "KEYBOARD", raw: "KeyA" },
-    command: null,
-    pipeline: [
-      { name: "MATCH", status: "fail", detail: "No binding" },
-      { name: "WHEN", status: "skip" },
-      { name: "EXEC", status: "skip" },
-    ],
-    diffs: [],
-    effects: [],
-  },
-  {
-    id: "tx-1044",
-    time: "10:42:07.800",
-    input: { type: "KEYBOARD", raw: "Enter" },
-    command: { type: "OPEN_ITEM", payload: {} },
-    pipeline: [
-      { name: "MATCH", status: "pass", detail: "OPEN_ITEM" },
-      { name: "WHEN", status: "fail", detail: "isEditing (blocked)" },
-      { name: "EXEC", status: "skip" },
-    ],
-    diffs: [],
-    effects: [],
-    kernel: {
-      handlerScope: "descendant:item-2",
-      bubblePath: ["item-2", "zone:main-list", "GLOBAL"],
-      middleware: [],
-    },
-    snapshot: { "focus.activeZone": "main-list", "focus.activeId": "item-2" },
-  },
-  {
-    id: "tx-1045",
-    time: "10:42:09.100",
-    input: { type: "MOUSE", raw: "Click(btn-save)" },
-    command: { type: "SAVE_DRAFT", payload: { force: true } },
-    pipeline: [
-      { name: "MATCH", status: "pass", detail: "SAVE_DRAFT" },
-      { name: "WHEN", status: "pass" },
-      { name: "EXEC", status: "pass" },
-    ],
-    diffs: [
-      { path: "data.draft.saved", from: "false", to: "true" },
-      { path: "data.draft.savedAt", from: "null", to: "T10:42:09" },
-    ],
-    effects: [
-      { source: "os", action: "toast", targetId: null, ok: true },
-      {
-        source: "os",
-        action: "analytics.track",
-        targetId: null,
-        ok: false,
-        reason: "Offline",
-      },
-    ],
-    kernel: {
-      handlerScope: "GLOBAL",
-      bubblePath: ["btn-save", "toolbar", "GLOBAL"],
-      middleware: [{ name: "analytics", duration: 1.5 }],
-    },
-    snapshot: { "data.draft.saved": true, "data.draft.savedAt": "10:42:09" },
-  },
-];
-
 // ─── Component ───
 
-export function UnifiedInspectorMock() {
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(
-    new Set(["tx-1042"]),
-  );
+export function UnifiedInspector({ events }: { events: InspectorEvent[] }) {
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  // Auto-expand new events (optional, maybe just the latest)
+  useEffect(() => {
+    if (events.length > 0) {
+      const lastId = events[events.length - 1].id;
+      setExpandedIds((prev) => {
+        const next = new Set(prev);
+        // next.add(lastId); // Auto-expand latest? Maybe too noisy.
+        return next;
+      });
+    }
+  }, [events.length]);
 
   const toggle = (id: string) => {
     const next = new Set(expandedIds);
@@ -166,17 +78,26 @@ export function UnifiedInspectorMock() {
       <div className="h-8 px-3 border-b border-[#e8e8e8] bg-white flex items-center shrink-0 sticky top-0 z-20">
         <Layers size={13} className="text-[#007acc] mr-2" />
         <span className="font-bold text-[#555]">Trace Log</span>
+        <span className="ml-2 text-[#999] text-[9px]">
+          ({events.length} events)
+        </span>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {MOCK_EVENTS.map((evt, i) => (
-          <TimelineNode
-            key={evt.id}
-            evt={evt}
-            index={i + 1}
-            expanded={expandedIds.has(evt.id)}
-            onToggle={() => toggle(evt.id)}
-          />
-        ))}
+        {events.length === 0 ? (
+          <div className="p-4 text-center text-[#999] italic">
+            No events captured yet.
+          </div>
+        ) : (
+          events.map((evt, i) => (
+            <TimelineNode
+              key={evt.id}
+              evt={evt}
+              index={i + 1}
+              expanded={expandedIds.has(evt.id)}
+              onToggle={() => toggle(evt.id)}
+            />
+          ))
+        )}
       </div>
     </div>
   );
@@ -190,13 +111,13 @@ function TimelineNode({
   expanded,
   onToggle,
 }: {
-  evt: MockEvent;
+  evt: InspectorEvent;
   index: number;
   expanded: boolean;
   onToggle: () => void;
 }) {
   const isFail = evt.pipeline.some((s) => s.status === "fail");
-  const isNoOp = evt.pipeline[0].status === "fail";
+  const isNoOp = evt.pipeline[0]?.status === "fail"; // Optional chaining just in case
   const icon =
     evt.input.type === "MOUSE" ? (
       <MousePointer2 size={10} />
@@ -251,27 +172,29 @@ function TimelineNode({
       {expanded && (
         <div className="flex flex-col gap-2 pl-9 pr-2 pb-3">
           {/* ── Pipeline ── */}
-          <Section title="Pipeline">
-            {evt.pipeline.map((step) => (
-              <Row key={step.name}>
-                <span
-                  className={`inline-block w-1 h-1 rounded-full shrink-0 ${step.status === "pass" ? "bg-[#22c55e]" : step.status === "fail" ? "bg-[#ef4444]" : "bg-[#d1d5db]"}`}
-                />
-                <span
-                  className={`font-mono font-bold w-10 shrink-0 ${step.status === "pass" ? "text-[#475569]" : step.status === "fail" ? "text-[#dc2626]" : "text-[#94a3b8]"}`}
-                >
-                  {step.name}
-                </span>
-                {step.detail && (
+          {evt.pipeline.length > 0 && (
+            <Section title="Pipeline">
+              {evt.pipeline.map((step) => (
+                <Row key={step.name}>
                   <span
-                    className={`truncate ${step.status === "fail" ? "text-[#ef4444] font-bold" : "text-[#64748b]"}`}
+                    className={`inline-block w-1 h-1 rounded-full shrink-0 ${step.status === "pass" ? "bg-[#22c55e]" : step.status === "fail" ? "bg-[#ef4444]" : "bg-[#d1d5db]"}`}
+                  />
+                  <span
+                    className={`font-mono font-bold w-10 shrink-0 ${step.status === "pass" ? "text-[#475569]" : step.status === "fail" ? "text-[#dc2626]" : "text-[#94a3b8]"}`}
                   >
-                    {step.detail}
+                    {step.name}
                   </span>
-                )}
-              </Row>
-            ))}
-          </Section>
+                  {step.detail && (
+                    <span
+                      className={`truncate ${step.status === "fail" ? "text-[#ef4444] font-bold" : "text-[#64748b]"}`}
+                    >
+                      {step.detail}
+                    </span>
+                  )}
+                </Row>
+              ))}
+            </Section>
+          )}
 
           {/* ── State ── */}
           {!isNoOp && evt.diffs.length > 0 && (
@@ -290,10 +213,12 @@ function TimelineNode({
                   </span>
                   <span className="ml-auto flex items-center gap-1 shrink-0 font-mono">
                     <span className="text-[#ef4444] line-through opacity-60">
-                      {d.from}
+                      {String(d.from)}
                     </span>
                     <span className="text-[#cbd5e1]">→</span>
-                    <span className="text-[#16a34a] font-bold">{d.to}</span>
+                    <span className="text-[#16a34a] font-bold">
+                      {String(d.to)}
+                    </span>
                   </span>
                 </Row>
               ))}
@@ -303,8 +228,8 @@ function TimelineNode({
           {/* ── Effects ── */}
           {!isNoOp && evt.effects.length > 0 && (
             <Section title="Effects">
-              {evt.effects.map((eff) => (
-                <Row key={`${eff.source}-${eff.action}-${eff.targetId}`}>
+              {evt.effects.map((eff, idx) => (
+                <Row key={`${eff.source}-${eff.action}-${idx}`}>
                   {eff.ok ? (
                     <Check size={9} className="text-[#16a34a] shrink-0" />
                   ) : (

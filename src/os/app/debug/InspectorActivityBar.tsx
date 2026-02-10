@@ -1,7 +1,7 @@
 import { InspectorRegistry } from "@os/inspector/InspectorRegistry.ts";
 import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { useSyncExternalStore } from "react";
-import { Activity, Bug, Cpu, Database, Keyboard, Settings } from "lucide-react";
+import { Activity, Bug, Cpu, Crosshair, Database, Keyboard, Settings } from "lucide-react";
 
 export function InspectorActivityBar() {
   const activeTab = useInspectorStore((s) => s.activeTab);
@@ -15,6 +15,7 @@ export function InspectorActivityBar() {
   );
 
   const staticTabs = [
+    { id: "ELEMENT", icon: Crosshair, label: "Element" },
     { id: "REGISTRY", icon: Keyboard, label: "Keymap" },
     { id: "STATE", icon: Database, label: "State" },
     { id: "EVENTS", icon: Activity, label: "Events" },

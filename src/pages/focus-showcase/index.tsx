@@ -14,6 +14,7 @@ import { SelectTest } from "./tests/SelectTest";
 import { TabTest } from "./tests/TabTest";
 
 // Playwright spec
+// @ts-ignore
 import runFocusShowcase from "../../../e2e/focus-showcase/focus-showcase.spec.ts";
 
 export function FocusShowcasePage() {

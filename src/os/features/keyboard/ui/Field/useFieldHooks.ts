@@ -1,6 +1,6 @@
 import type { MutableRefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { getCaretPosition, setCaretPosition } from "./getCaretPosition";
+import { getCaretPosition, setCaretPosition } from "@/os-new/lib/getCaretPosition";
 
 // --- Types ---
 interface UseFieldStateProps {
@@ -107,7 +107,7 @@ export const useFieldFocus = ({
                 const textLength = innerRef.current.innerText.length;
                 setCaretPosition(innerRef.current, textLength);
               }
-            } catch (_e) {}
+            } catch (_e) { }
           }
         });
       });

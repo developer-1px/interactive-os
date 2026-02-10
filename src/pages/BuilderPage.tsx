@@ -14,6 +14,7 @@ import {
 } from "./builder";
 
 // Playwright spec
+// @ts-ignore
 import runBuilderSpatial from "../../e2e/builder/builder-spatial.spec.ts";
 
 /**

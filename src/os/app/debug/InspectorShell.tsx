@@ -1,6 +1,7 @@
 import { CommandInspector } from "@os/app/debug/CommandInspector";
 import { InspectorActivityBar } from "@os/app/debug/InspectorActivityBar";
 import { useInspectorStore } from "@os/inspector/InspectorStore";
+import { CursorOverlay } from "@os/testBot/widgets/CursorOverlay";
 import { StampOverlay } from "@os/testBot/widgets/StampOverlay";
 import { useCallback, useRef, useState } from "react";
 
@@ -70,6 +71,9 @@ export function InspectorShell() {
 
       {/* Position-tracked PASS/FAIL stamps (portal to body) */}
       <StampOverlay />
+
+      {/* TestBot virtual cursor (portal to body) */}
+      <CursorOverlay />
     </div>
   );
 }

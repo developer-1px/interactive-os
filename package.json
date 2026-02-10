@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:e2e": "chmod +x scripts/dev-e2e.sh && ./scripts/dev-e2e.sh",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:biome": "biome lint .",

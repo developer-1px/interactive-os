@@ -6,6 +6,12 @@
  */
 
 import { create } from "zustand";
+import type { BubbleVariant } from "../entities/BotCursor";
+import type {
+  CursorBubble,
+  CursorRipple,
+  CursorState,
+} from "../entities/CursorState";
 import type { Stamp } from "../entities/Stamp";
 import type { SuiteResult } from "../entities/SuiteResult";
 import type { TestBot } from "../entities/TestBot";
@@ -26,12 +32,13 @@ export type RouteDefiner = (bot: TestBot) => void;
 interface TestBotState {
   bot: TestBot;
   routeDefiners: Map<string, RouteDefiner>;
-  activePageId: string | null; // Track which page is currently active
+  activePageId: string | null;
   suites: SuiteResult[];
   stamps: Stamp[];
+  cursorState: CursorState | null;
   isRunning: boolean;
   currentSuiteIndex: number;
-  resetKey: number; // Incremented before each run to force page re-mount
+  resetKey: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -44,6 +51,7 @@ export const useTestBotStore = create<TestBotState>(() => ({
   activePageId: null,
   suites: [],
   stamps: [],
+  cursorState: null,
   isRunning: false,
   currentSuiteIndex: -1,
   resetKey: 0,
@@ -167,4 +175,112 @@ export function updateStampPositions() {
   });
 
   if (changed) useTestBotStore.setState({ stamps: next });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Cursor Actions
+// ═══════════════════════════════════════════════════════════════════
+
+let bubbleCounter = 0;
+let rippleCounter = 0;
+
+export function showCursor() {
+  const cur = useTestBotStore.getState().cursorState;
+  if (cur) {
+    useTestBotStore.setState({ cursorState: { ...cur, visible: true } });
+  } else {
+    useTestBotStore.setState({
+      cursorState: {
+        visible: true,
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+        transitionMs: 300,
+        offScreen: false,
+        offScreenRotation: 0,
+        bubbles: [],
+        ripples: [],
+        trackedEl: null,
+      },
+    });
+  }
+}
+
+export function hideCursor() {
+  useTestBotStore.setState({ cursorState: null });
+}
+
+export function setCursorState(partial: Partial<CursorState>) {
+  const cur = useTestBotStore.getState().cursorState;
+  if (!cur) return;
+  useTestBotStore.setState({ cursorState: { ...cur, ...partial } });
+}
+
+export function addCursorBubble(label: string, variant: BubbleVariant) {
+  const cur = useTestBotStore.getState().cursorState;
+  if (!cur) return;
+  const bubble: CursorBubble = {
+    id: `bubble-${++bubbleCounter}`,
+    label,
+    variant,
+    createdAt: Date.now(),
+  };
+  const next = [...cur.bubbles, bubble];
+  // Cap at 3 visible bubbles
+  const capped = next.length > 3 ? next.slice(next.length - 3) : next;
+  useTestBotStore.setState({ cursorState: { ...cur, bubbles: capped } });
+}
+
+export function removeCursorBubble(id: string) {
+  const cur = useTestBotStore.getState().cursorState;
+  if (!cur) return;
+  useTestBotStore.setState({
+    cursorState: { ...cur, bubbles: cur.bubbles.filter((b) => b.id !== id) },
+  });
+}
+
+export function clearCursorBubbles() {
+  const cur = useTestBotStore.getState().cursorState;
+  if (!cur) return;
+  useTestBotStore.setState({ cursorState: { ...cur, bubbles: [] } });
+}
+
+export function addCursorRipple(x: number, y: number) {
+  const cur = useTestBotStore.getState().cursorState;
+  if (!cur) return;
+  const ripple: CursorRipple = {
+    id: `ripple-${++rippleCounter}`,
+    x,
+    y,
+    createdAt: Date.now(),
+  };
+  useTestBotStore.setState({
+    cursorState: { ...cur, ripples: [...cur.ripples, ripple] },
+  });
+}
+
+export function removeCursorRipple(id: string) {
+  const cur = useTestBotStore.getState().cursorState;
+  if (!cur) return;
+  useTestBotStore.setState({
+    cursorState: { ...cur, ripples: cur.ripples.filter((r) => r.id !== id) },
+  });
+}
+
+/** Update cursor position from tracked element */
+export function updateCursorFromTrackedEl() {
+  const cur = useTestBotStore.getState().cursorState;
+  if (!cur?.trackedEl || !cur.visible) return;
+
+  const el = cur.trackedEl;
+  if (!el.isConnected) return;
+
+  const rect = el.getBoundingClientRect();
+  const nx = rect.left + rect.width / 2;
+  const ny = rect.top + rect.height / 2;
+
+  if (Math.abs(nx - cur.x) > 2 || Math.abs(ny - cur.y) > 2) {
+    useTestBotStore.setState({
+      cursorState: { ...cur, x: nx, y: ny, transitionMs: 300 },
+    });
+  }
 }

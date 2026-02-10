@@ -1,4 +1,3 @@
-import { logger } from "@os/app/debug/logger.ts";
 import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusItem } from "@/os-new/primitives/FocusItem";
@@ -41,7 +40,6 @@ export const Trigger = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
       if (!allowPropagation) {
         e.stopPropagation();
       }
-      logger.debug("PRIMITIVE", `Trigger Clicked: [${onPress.type}]`);
       dispatch(onPress);
       onClick?.(e as any);
     };

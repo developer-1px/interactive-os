@@ -13,7 +13,7 @@ import { evalContext } from "@/os-new/core/logic/evalContext";
 import { InspectorRegistry } from "@os/inspector/InspectorRegistry.ts";
 import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { TestBotPanel } from "@os/testBot";
-import { UnifiedInspectorMock } from "@os/app/debug/inspector/UnifiedInspectorMock.tsx";
+import { InspectorAdapter } from "@os/app/debug/inspector/InspectorAdapter.tsx";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 // --- Main Component ---
@@ -135,7 +135,7 @@ export function CommandInspector() {
       InspectorRegistry.register(
         "UNIFIED",
         "Vision",
-        <UnifiedInspectorMock />,
+        <InspectorAdapter />,
         999 // Order at the end
       );
     }

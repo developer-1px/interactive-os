@@ -8,16 +8,27 @@
 import { usePlaywrightSpecs } from "@os/testBot/playwright/loader";
 
 // Import all specs — Vite plugin wraps them in functions
+// @ts-ignore
 import runBuilderSpatial from "../../e2e/builder/builder-spatial.spec.ts";
+// @ts-ignore
 import runComplexPatterns from "../../e2e/aria-showcase/complex-patterns.spec.ts";
+// @ts-ignore
 import runDisclosure from "../../e2e/aria-showcase/disclosure.spec.ts";
+// @ts-ignore
 import runFocusShowcase from "../../e2e/focus-showcase/focus-showcase.spec.ts";
+// @ts-ignore
 import runGrid from "../../e2e/aria-showcase/grid.spec.ts";
+// @ts-ignore
 import runListbox from "../../e2e/aria-showcase/listbox.spec.ts";
+// @ts-ignore
 import runMenu from "../../e2e/aria-showcase/menu.spec.ts";
+// @ts-ignore
 import runRadiogroup from "../../e2e/aria-showcase/radiogroup.spec.ts";
+// @ts-ignore
 import runTabs from "../../e2e/aria-showcase/tabs.spec.ts";
+// @ts-ignore
 import runToolbar from "../../e2e/aria-showcase/toolbar.spec.ts";
+// @ts-ignore
 import runTree from "../../e2e/aria-showcase/tree.spec.ts";
 
 export default function PlaywrightRunnerPage() {

@@ -6,7 +6,7 @@
 
 import { useCallback } from "react";
 import { useStore } from "zustand";
-import { useFocusGroupContext } from "../primitives/FocusGroup";
+import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
 
 export function useFocusExpansion() {
   const ctx = useFocusGroupContext();

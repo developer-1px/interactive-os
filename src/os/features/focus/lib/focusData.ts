@@ -298,7 +298,7 @@ export const FocusData = {
       // Dispatch through OS command pipeline (effect system handles focus + scroll + log)
       import("../../command/store/CommandEngineStore").then(
         ({ CommandEngineStore }) => {
-          import("../../command/definitions/commandsShell").then(
+          import("../../command/definitions/osCommands").then(
             ({ OS_COMMANDS }) => {
               CommandEngineStore.dispatch({
                 type: OS_COMMANDS.FOCUS,

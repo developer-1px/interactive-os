@@ -9,7 +9,7 @@
 
 import { createFocusEffect } from "@os/schema";
 import type { EffectRecord, TransactionInput } from "@os/schema";
-import { DOM } from "../../lib/dom";
+import { DOM } from "@/os-new/lib/dom";
 import { FocusData } from "../../lib/focusData";
 import type { FocusGroupStore } from "../../store/focusGroupStore";
 import type { FocusGroupConfig } from "../../types";

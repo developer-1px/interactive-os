@@ -212,6 +212,23 @@ export const DebugManager: React.FC = () => {
 
   const activeElement = lockedElement || hoveredElement;
 
+  // ── Bridge to Inspector Panel via CustomEvent ──
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("inspector:element-selected", {
+        detail: { element: activeElement },
+      }),
+    );
+  }, [activeElement]);
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("inspector:active-changed", {
+        detail: { active: isInspectorActive },
+      }),
+    );
+  }, [isInspectorActive]);
+
   return (
     <>
       {/* OS Component Outlines */}

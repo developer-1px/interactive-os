@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 export type { BotCursor, BubbleVariant } from "./entities/BotCursor";
+export type { CursorState } from "./entities/CursorState";
 export type { Stamp } from "./entities/Stamp";
 export type { StepResult } from "./entities/StepResult";
 export type {
@@ -25,6 +26,7 @@ export type { TestBot } from "./entities/TestBot";
 export { TestBotActions } from "./features/TestBotActions";
 export { useTestBotStore } from "./features/TestBotStore";
 export { useTestBotRoutes } from "./features/useTestBotRoutes";
+export { CursorOverlay } from "./widgets/CursorOverlay";
 export { StampOverlay } from "./widgets/StampOverlay";
 // Widgets
 export { TestBotPanel } from "./widgets/TestBotPanel";
