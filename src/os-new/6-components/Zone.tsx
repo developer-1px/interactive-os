@@ -139,18 +139,23 @@ export function Zone({
   );
 
   // --- Resolve Configuration ---
-  const config = useMemo(
-    () =>
-      resolveRole(role, {
-        navigate,
-        tab,
-        select,
-        activate,
-        dismiss,
-        project,
-      }),
-    [role, navigate, tab, select, activate, dismiss, project],
-  );
+  const config = useMemo(() => {
+    const filteredOverrides: {
+      navigate?: Partial<NavigateConfig>;
+      tab?: Partial<TabConfig>;
+      select?: Partial<SelectConfig>;
+      activate?: Partial<ActivateConfig>;
+      dismiss?: Partial<DismissConfig>;
+      project?: Partial<ProjectConfig>;
+    } = {};
+    if (navigate !== undefined) filteredOverrides.navigate = navigate;
+    if (tab !== undefined) filteredOverrides.tab = tab;
+    if (select !== undefined) filteredOverrides.select = select;
+    if (activate !== undefined) filteredOverrides.activate = activate;
+    if (dismiss !== undefined) filteredOverrides.dismiss = dismiss;
+    if (project !== undefined) filteredOverrides.project = project;
+    return resolveRole(role, filteredOverrides);
+  }, [role, navigate, tab, select, activate, dismiss, project]);
 
   // --- Container Ref ---
   const containerRef = useRef<HTMLDivElement>(null);
@@ -165,7 +170,7 @@ export function Zone({
       ZoneRegistry.register(zoneId, {
         config,
         element: containerRef.current,
-        role,
+        ...(role !== undefined ? { role } : {}),
         parentId: null, // TODO: read from parent ZoneContext
       });
     }
@@ -181,7 +186,12 @@ export function Zone({
 
   // --- Context Value ---
   const contextValue = useMemo<ZoneContextValue>(
-    () => ({ zoneId, config, role, scope }),
+    () => ({
+      zoneId,
+      config,
+      ...(role !== undefined ? { role } : {}),
+      scope,
+    }),
     [zoneId, config, role, scope],
   );
 

@@ -9,7 +9,9 @@ const _compile = (expr: string): ((ctx: ContextState) => boolean) => {
     return (c) => expr.split("&&").every((p) => _compile(p.trim())(c));
   if (expr.startsWith("!")) return (c) => !_compile(expr.slice(1).trim())(c);
   if (expr.includes("==")) {
-    const [k, v] = expr.split("==").map((s) => s.trim());
+    const parts = expr.split("==").map((s) => s.trim());
+    const k = parts[0] ?? "";
+    const v = parts[1] ?? "";
     const val =
       v === "true"
         ? true

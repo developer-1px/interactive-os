@@ -9,6 +9,7 @@
 
 import { ACTIVATE } from "../3-commands/activate";
 import { ESCAPE } from "../3-commands/escape";
+import { FIELD_CANCEL, FIELD_COMMIT, FIELD_START_EDIT } from "../3-commands/field";
 import { NAVIGATE } from "../3-commands/navigate";
 import { SELECT } from "../3-commands/select";
 import { TAB } from "../3-commands/tab";
@@ -110,6 +111,19 @@ Keybindings.registerAll([
     args: [{ mode: "toggle" }],
     when: "navigating",
   },
+]);
+
+// ═══════════════════════════════════════════════════════════════════
+// Field Editing
+// ═══════════════════════════════════════════════════════════════════
+// Enter (editing) → commit and exit editing mode
+// Escape (editing) → cancel and exit editing mode
+// F2 (navigating) → start editing (standard OS pattern, avoids Enter conflict with ACTIVATE)
+
+Keybindings.registerAll([
+  { key: "Enter", command: FIELD_COMMIT, when: "editing" },
+  { key: "Escape", command: FIELD_CANCEL, when: "editing" },
+  { key: "F2", command: FIELD_START_EDIT, when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════

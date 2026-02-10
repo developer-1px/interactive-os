@@ -80,6 +80,25 @@ React Aria, W3C ARIA Practices, 브라우저 API 등 검증된 해법을 커스�
 - **직접 경로 import**: 기본은 직접 경로 import. Feature의 public API entry point만 `index.ts` 허용.
 - **레이어 의존성**: `src/os/features/` (OS) → `src/apps/` (앱) → `src/pages/` (페이지). 하위 레이어는 상위를 import하지 않는다.
 
+### 파일 이동/삭제 시 필수 체크리스트
+
+> **파일을 이동하거나 삭제할 때 아래를 반드시 수행한다. 하나라도 빠뜨리면 런타임 크래시가 발생한다.**
+
+1. **참조 검색**: 이동/삭제 대상 파일명과 경로를 `grep -rn` 으로 프로젝트 전체에서 검색. 검색 범위에 반드시 포함할 것:
+   - `src/` (소스 코드)
+   - `e2e/` (테스트)
+   - `vite-plugins/` (Vite 플러그인 — 경로 하드코딩 주의)
+   - `vite.config.ts`, `tsconfig.*.json`, `playwright.config.ts` (인프라 설정)
+
+2. **동반 자산 확인**: `.tsx`/`.ts` 파일을 이동할 때, 같은 디렉토리의 동반 파일도 함께 이동:
+   - `.css`, `.module.css` (스타일)
+   - `.json`, `.svg`, `.png` (정적 자산)
+   - 상대경로 `import "./Something.css"` 가 깨지지 않는지 확인
+
+3. **import 경로 변경은 파일 이동과 동시에**: 경로만 바꾸고 파일 안 옮기거나, 파일만 옮기고 참조 안 고치면 안 된다. 반드시 atomic하게.
+
+4. **스모크 테스트**: 파일 이동/삭제 작업 후에는 `tsc` 만으로 끝내지 않는다. **`npx playwright test e2e/smoke.spec.ts` 까지 실행**하여 런타임 정상 확인. (`tsc`는 CSS import, Vite 플러그인 경로, dead code 참조를 체크하지 않는다.)
+
 ## TestBot 사용법
 
 > **테스트 실행/수집은 항상 `window.__TESTBOT__` 글로벌 API를 사용한다.**

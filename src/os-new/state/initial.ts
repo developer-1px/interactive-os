@@ -6,6 +6,10 @@ export const initialZoneState: ZoneState = {
   lastFocusedId: null,
   recoveryTargetId: null,
 
+  // Field
+  editingItemId: null,
+  fieldEvent: null,
+
   // Spatial
   stickyX: null,
   stickyY: null,

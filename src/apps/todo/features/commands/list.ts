@@ -97,7 +97,7 @@ export const MoveItemUp = defineListCommand({
       if (visualIdx <= 0) return;
 
       const targetId = focusId;
-      const swapId = visibleIds[visualIdx - 1];
+      const swapId = visibleIds[visualIdx - 1]!;
 
       const globalTargetIdx = draft.data.todoOrder.indexOf(targetId);
       const globalSwapIdx = draft.data.todoOrder.indexOf(swapId);
@@ -106,9 +106,9 @@ export const MoveItemUp = defineListCommand({
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx],
-        draft.data.todoOrder[globalTargetIdx],
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
 });
 
@@ -128,7 +128,7 @@ export const MoveItemDown = defineListCommand({
       if (visualIdx === -1 || visualIdx >= visibleIds.length - 1) return;
 
       const targetId = focusId;
-      const swapId = visibleIds[visualIdx + 1];
+      const swapId = visibleIds[visualIdx + 1]!;
 
       const globalTargetIdx = draft.data.todoOrder.indexOf(targetId);
       const globalSwapIdx = draft.data.todoOrder.indexOf(swapId);
@@ -137,9 +137,9 @@ export const MoveItemDown = defineListCommand({
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx],
-        draft.data.todoOrder[globalTargetIdx],
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
 });
 

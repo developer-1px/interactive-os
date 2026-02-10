@@ -8,6 +8,9 @@
  * - Does NOT handle events (click, keydown)
  * - Only reflects state (tabIndex, data-*, aria-*)
  * - Event handling is done by FocusSensor
+ *
+ * @deprecated FocusItem은 Zustand 기반 Legacy 컴포넌트입니다.
+ * 새 코드에서는 `6-components/Item.tsx` (Kernel 기반)를 사용하세요.
  */
 
 import { FocusData } from "@os/features/focus/lib/focusData.ts";

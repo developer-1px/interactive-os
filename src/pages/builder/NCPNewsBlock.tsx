@@ -1,4 +1,4 @@
-import { Builder } from "@os/app/export/primitives/Builder.tsx";
+import { Builder } from "@/apps/builder/primitives/Builder";
 import { Field } from "@os/app/export/primitives/Field.tsx";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
@@ -33,6 +33,10 @@ export function NCPNewsBlock() {
       image: null,
     },
   ]);
+
+  const card0 = cards[0]!;
+  const card1 = cards[1]!;
+  const card2 = cards[2]!;
 
   return (
     <Builder.Section asChild id="ncp-news">
@@ -79,57 +83,57 @@ export function NCPNewsBlock() {
           {/* Bento Grid layout */}
           <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
             {/* Main Feature Card (Large, Image based) */}
-            <Builder.Group asChild id={`card-${cards[0].id}`}>
+            <Builder.Group asChild id={`card-${card0.id}`}>
               <div className="md:col-span-2 md:row-span-2 relative rounded-3xl overflow-hidden group bg-slate-50 data-[focused=true]:ring-4 data-[focused=true]:ring-blue-500">
                 <div
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${cards[0].image})` }}
+                  style={{ backgroundImage: `url(${card0.image})` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
 
                 <div className="absolute bottom-0 left-0 p-10 text-white w-full">
                   <div className="flex justify-between items-end">
                     <div>
-                      <Builder.Item asChild id={`${cards[0].id}-tag`}>
+                      <Builder.Item asChild id={`${card0.id}-tag`}>
                         <Builder.Badge
-                          id={`${cards[0].id}-tag-badge`}
+                          id={`${card0.id}-tag-badge`}
                           variant="default"
                           className="inline-block px-3 py-1 bg-white/10 backdrop-blur-md rounded border border-white/20 text-xs font-bold tracking-wider mb-4 data-[focused=true]:ring-2 data-[focused=true]:ring-white/50"
                         >
-                          {cards[0].tag}
+                          {card0.tag}
                         </Builder.Badge>
                       </Builder.Item>
-                      <Builder.Item asChild id={`${cards[0].id}-title`}>
+                      <Builder.Item asChild id={`${card0.id}-title`}>
                         <Field
-                          name={`${cards[0].id}-title`}
+                          name={`${card0.id}-title`}
                           mode="deferred"
                           multiline
-                          value={cards[0].title}
+                          value={card0.title}
                           onCommit={(val) => {
                             const newCards = [...cards];
-                            newCards[0].title = val;
+                            newCards[0]!.title = val;
                             setCards(newCards);
                           }}
                           className="text-3xl md:text-4xl font-bold leading-tight mb-4 block text-white"
                         />
                       </Builder.Item>
-                      <Builder.Item asChild id={`${cards[0].id}-desc`}>
+                      <Builder.Item asChild id={`${card0.id}-desc`}>
                         <Field
-                          name={`${cards[0].id}-desc`}
+                          name={`${card0.id}-desc`}
                           mode="deferred"
-                          value={cards[0].desc}
+                          value={card0.desc}
                           onCommit={(val: string) => {
                             const newCards = [...cards];
-                            newCards[0].desc = val;
+                            newCards[0]!.desc = val;
                             setCards(newCards);
                           }}
                           className="text-white/80 max-w-lg leading-relaxed mb-6 block"
                         />
                       </Builder.Item>
                     </div>
-                    <Builder.Item asChild id={`${cards[0].id}-link`}>
+                    <Builder.Item asChild id={`${card0.id}-link`}>
                       <Builder.Icon
-                        id={`${cards[0].id}-link-icon`}
+                        id={`${card0.id}-link-icon`}
                         icon={ArrowRight}
                         size={24}
                         className="w-12 h-12 rounded-full bg-white text-slate-900 flex items-center justify-center opacity-0 group-hover:opacity-100 data-[focused=true]:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 data-[focused=true]:ring-2 data-[focused=true]:ring-blue-400"
@@ -141,27 +145,27 @@ export function NCPNewsBlock() {
             </Builder.Group>
 
             {/* Secondary Card 1 (Top Right) */}
-            <Builder.Group asChild id={`card-${cards[1].id}`}>
+            <Builder.Group asChild id={`card-${card1.id}`}>
               <div className="md:col-span-1 md:row-span-1 bg-slate-50 rounded-3xl p-8 flex flex-col justify-between group border border-slate-100 hover:border-slate-300 hover:shadow-lg transition-all duration-300 data-[focused=true]:ring-4 data-[focused=true]:ring-blue-500">
                 <div>
-                  <Builder.Item asChild id={`${cards[1].id}-tag`}>
+                  <Builder.Item asChild id={`${card1.id}-tag`}>
                     <Builder.Badge
-                      id={`${cards[1].id}-tag-badge`}
+                      id={`${card1.id}-tag-badge`}
                       variant="default"
                       className="text-xs font-bold text-slate-400 tracking-wider mb-2 block data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 data-[focused=true]:rounded"
                     >
-                      {cards[1].tag}
+                      {card1.tag}
                     </Builder.Badge>
                   </Builder.Item>
-                  <Builder.Item asChild id={`${cards[1].id}-title`}>
+                  <Builder.Item asChild id={`${card1.id}-title`}>
                     <Field
-                      name={`${cards[1].id}-title`}
+                      name={`${card1.id}-title`}
                       mode="deferred"
                       multiline
-                      value={cards[1].title}
+                      value={card1.title}
                       onCommit={(val) => {
                         const newCards = [...cards];
-                        newCards[1].title = val;
+                        newCards[1]!.title = val;
                         setCards(newCards);
                       }}
                       className="text-xl font-bold text-slate-900 leading-snug mb-3 block"
@@ -169,22 +173,22 @@ export function NCPNewsBlock() {
                   </Builder.Item>
                 </div>
                 <div className="flex justify-between items-end border-t border-slate-200 pt-6 mt-4">
-                  <Builder.Item asChild id={`${cards[1].id}-date`}>
+                  <Builder.Item asChild id={`${card1.id}-date`}>
                     <Field
-                      name={`${cards[1].id}-date`}
+                      name={`${card1.id}-date`}
                       mode="deferred"
-                      value={cards[1].date}
+                      value={card1.date}
                       onCommit={(val: string) => {
                         const newCards = [...cards];
-                        newCards[1].date = val;
+                        newCards[1]!.date = val;
                         setCards(newCards);
                       }}
                       className="text-sm text-slate-400"
                     />
                   </Builder.Item>
-                  <Builder.Item asChild id={`${cards[1].id}-link`}>
+                  <Builder.Item asChild id={`${card1.id}-link`}>
                     <Builder.Icon
-                      id={`${cards[1].id}-link-icon`}
+                      id={`${card1.id}-link-icon`}
                       icon={ArrowRight}
                       size={18}
                       iconClassName="text-slate-300 group-hover:text-slate-900 transition-colors"
@@ -196,30 +200,30 @@ export function NCPNewsBlock() {
             </Builder.Group>
 
             {/* Secondary Card 2 (Bottom Right) */}
-            <Builder.Group asChild id={`card-${cards[2].id}`}>
+            <Builder.Group asChild id={`card-${card2.id}`}>
               <div className="md:col-span-1 md:row-span-1 bg-white rounded-3xl p-8 flex flex-col justify-between group border border-slate-200 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-50 transition-all duration-300 relative overflow-hidden data-[focused=true]:ring-4 data-[focused=true]:ring-blue-500">
                 {/* Decorative blob for variety */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 <div className="relative z-10">
-                  <Builder.Item asChild id={`${cards[2].id}-tag`}>
+                  <Builder.Item asChild id={`${card2.id}-tag`}>
                     <Builder.Badge
-                      id={`${cards[2].id}-tag-badge`}
+                      id={`${card2.id}-tag-badge`}
                       variant="info"
                       className="text-xs font-bold text-blue-600 tracking-wider mb-2 block data-[focused=true]:ring-2 data-[focused=true]:ring-blue-300 data-[focused=true]:rounded"
                     >
-                      {cards[2].tag}
+                      {card2.tag}
                     </Builder.Badge>
                   </Builder.Item>
-                  <Builder.Item asChild id={`${cards[2].id}-title`}>
+                  <Builder.Item asChild id={`${card2.id}-title`}>
                     <Field
-                      name={`${cards[2].id}-title`}
+                      name={`${card2.id}-title`}
                       mode="deferred"
                       multiline
-                      value={cards[2].title}
+                      value={card2.title}
                       onCommit={(val) => {
                         const newCards = [...cards];
-                        newCards[2].title = val;
+                        newCards[2]!.title = val;
                         setCards(newCards);
                       }}
                       className="text-xl font-bold text-slate-900 leading-snug mb-3 block"
@@ -227,22 +231,22 @@ export function NCPNewsBlock() {
                   </Builder.Item>
                 </div>
                 <div className="relative z-10 flex justify-between items-end">
-                  <Builder.Item asChild id={`${cards[2].id}-date`}>
+                  <Builder.Item asChild id={`${card2.id}-date`}>
                     <Field
-                      name={`${cards[2].id}-date`}
+                      name={`${card2.id}-date`}
                       mode="deferred"
-                      value={cards[2].date}
+                      value={card2.date}
                       onCommit={(val: string) => {
                         const newCards = [...cards];
-                        newCards[2].date = val;
+                        newCards[2]!.date = val;
                         setCards(newCards);
                       }}
                       className="text-sm text-slate-400"
                     />
                   </Builder.Item>
-                  <Builder.Item asChild id={`${cards[2].id}-link`}>
+                  <Builder.Item asChild id={`${card2.id}-link`}>
                     <Builder.Icon
-                      id={`${cards[2].id}-link-icon`}
+                      id={`${card2.id}-link-icon`}
                       icon={ArrowRight}
                       size={18}
                       iconClassName="text-slate-300 group-hover:text-blue-600 transition-colors"

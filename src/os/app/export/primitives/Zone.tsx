@@ -13,7 +13,7 @@ import type {
   ProjectConfig,
   SelectConfig,
   TabConfig,
-} from "@os/features/focus/types";
+} from "@/os-new/schema";
 import type { ComponentProps, ReactNode } from "react";
 import { FocusGroup } from "@/os-new/primitives/FocusGroup";
 import type { ZoneRole } from "@/os-new/registry/roleRegistry";
@@ -77,27 +77,31 @@ export function Zone({
   onUndo,
   onRedo,
   children,
+  className,
+  style,
   ...props
 }: ZoneProps) {
   return (
     <FocusGroup
-      id={id}
-      role={role}
-      navigate={options?.navigate}
-      tab={options?.tab}
-      select={options?.select}
-      activate={options?.activate}
-      dismiss={options?.dismiss}
-      project={options?.project}
-      onAction={onAction}
-      onSelect={onSelect}
-      onToggle={onToggle}
-      onCopy={onCopy}
-      onCut={onCut}
-      onPaste={onPaste}
-      onDelete={onDelete}
-      onUndo={onUndo}
-      onRedo={onRedo}
+      {...(id !== undefined ? { id } : {})}
+      {...(role !== undefined ? { role } : {})}
+      {...(options?.navigate !== undefined ? { navigate: options.navigate } : {})}
+      {...(options?.tab !== undefined ? { tab: options.tab } : {})}
+      {...(options?.select !== undefined ? { select: options.select } : {})}
+      {...(options?.activate !== undefined ? { activate: options.activate } : {})}
+      {...(options?.dismiss !== undefined ? { dismiss: options.dismiss } : {})}
+      {...(options?.project !== undefined ? { project: options.project } : {})}
+      {...(onAction !== undefined ? { onAction } : {})}
+      {...(onSelect !== undefined ? { onSelect } : {})}
+      {...(onToggle !== undefined ? { onToggle } : {})}
+      {...(onCopy !== undefined ? { onCopy } : {})}
+      {...(onCut !== undefined ? { onCut } : {})}
+      {...(onPaste !== undefined ? { onPaste } : {})}
+      {...(onDelete !== undefined ? { onDelete } : {})}
+      {...(onUndo !== undefined ? { onUndo } : {})}
+      {...(onRedo !== undefined ? { onRedo } : {})}
+      {...(className !== undefined ? { className } : {})}
+      {...(style !== undefined ? { style } : {})}
       {...props}
     >
       {children}

@@ -12,7 +12,7 @@ import type { Plugin } from "vite";
  *
  * After:
  *   import { test, expect } from "@playwright/test";
- *   import { setLoadingContext as __setCtx__ } from "@/os/testBot/playwright/registry";
+ *   import { setLoadingContext as __setCtx__ } from "@inspector/testbot/playwright/registry";
  *   export default function __runSpec__() {
  *     __setCtx__("e2e/aria-showcase/tabs.spec.ts");
  *     test.describe("Tabs", () => { ... });
@@ -55,7 +55,7 @@ export function specWrapperPlugin(): Plugin {
 
       const transformed = [
         ...importLines,
-        `import { setLoadingContext as __setCtx__ } from "@/os/testBot/playwright/registry";`,
+        `import { setLoadingContext as __setCtx__ } from "@inspector/testbot/playwright/registry";`,
         `export default function __runSpec__() {`,
         `  __setCtx__(${JSON.stringify(relativePath)});`,
         ...bodyLines.map((l) => `  ${l}`),

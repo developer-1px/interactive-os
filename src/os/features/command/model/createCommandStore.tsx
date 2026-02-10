@@ -17,7 +17,7 @@ import {
   hydrateState,
   type PersistenceConfig,
 } from "@os/features/persistence/hydrateState";
-import { TransactionLog } from "@os/inspector/InspectorLogStore";
+import { TransactionLog } from "@inspector/stores/InspectorLogStore";
 import { computeDiff } from "@os/schema";
 import { create } from "zustand";
 import { logger } from "@/os-new/lib/logger";

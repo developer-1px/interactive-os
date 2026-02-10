@@ -43,13 +43,14 @@ export const TAB = kernel.defineCommand(
       if (nextIndex < 0) nextIndex = items.length - 1;
       else if (nextIndex >= items.length) nextIndex = 0;
 
-      const targetId = items[nextIndex];
+      const targetId = items[nextIndex] ?? null;
+      if (!targetId) return;
       return {
-        state: produce(ctx.state, (draft) => {
+        state: produce(ctx.state, (draft: any) => {
           const z = ensureZone(draft.os, activeZoneId);
           z.focusedItemId = targetId;
           z.lastFocusedId = targetId;
-        }),
+        }) as typeof ctx.state,
         focus: targetId,
       };
     }
@@ -63,13 +64,14 @@ export const TAB = kernel.defineCommand(
       const nextIndex = currentIndex + delta;
 
       if (nextIndex >= 0 && nextIndex < items.length) {
-        const targetId = items[nextIndex];
+        const targetId = items[nextIndex] ?? null;
+        if (!targetId) return;
         return {
-          state: produce(ctx.state, (draft) => {
+          state: produce(ctx.state, (draft: any) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.focusedItemId = targetId;
             z.lastFocusedId = targetId;
-          }),
+          }) as typeof ctx.state,
           focus: targetId,
         };
       }

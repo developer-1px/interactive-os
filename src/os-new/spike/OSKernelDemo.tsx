@@ -10,8 +10,8 @@
  *   6. Component:  <Zone> + <Item> re-render
  */
 
-import { KernelPanel } from "@os/app/debug/inspector/KernelPanel";
-import { InspectorRegistry } from "@os/inspector/InspectorRegistry";
+import { KernelPanel } from "@inspector/panels/KernelPanel";
+import { InspectorRegistry } from "@inspector/stores/InspectorRegistry";
 import { produce } from "immer";
 import { useEffect } from "react";
 import { KeyboardListener } from "../1-listeners/KeyboardListener";

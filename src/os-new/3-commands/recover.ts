@@ -41,11 +41,11 @@ export const RECOVER = kernel.defineCommand(
     if (!targetId) return;
 
     return {
-      state: produce(ctx.state, (draft) => {
+      state: produce(ctx.state, (draft: any) => {
         const z = ensureZone(draft.os, activeZoneId);
         z.focusedItemId = targetId;
         z.lastFocusedId = targetId;
-      }),
+      }) as typeof ctx.state,
       focus: targetId,
     };
   },

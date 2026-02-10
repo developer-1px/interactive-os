@@ -55,7 +55,7 @@ export function KanbanPanel() {
               const colCardIds = cardOrder[colId] || [];
               const colCards = colCardIds
                 .map((cid) => cards[cid])
-                .filter(Boolean)
+                .filter((c): c is KanbanCard => !!c)
                 .filter(filterCard);
 
               return (

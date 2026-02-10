@@ -28,19 +28,19 @@ export const ESCAPE = kernel.defineCommand(
       case "deselect": {
         if (zone.selection.length === 0) return;
         return {
-          state: produce(ctx.state, (draft) => {
+          state: produce(ctx.state, (draft: any) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.selection = [];
             z.selectionAnchor = null;
-          }),
+          }) as typeof ctx.state,
         };
       }
       case "close": {
         return {
-          state: produce(ctx.state, (draft) => {
+          state: produce(ctx.state, (draft: any) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.focusedItemId = null;
-          }),
+          }) as typeof ctx.state,
           blur: true,
         };
       }

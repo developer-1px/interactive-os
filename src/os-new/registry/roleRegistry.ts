@@ -318,24 +318,24 @@ export function resolveRole(
     navigate: {
       ...DEFAULT_NAVIGATE,
       ...basePreset.navigate,
-      ...overrides.navigate,
+      ...(overrides.navigate ?? {}),
     },
-    tab: { ...DEFAULT_TAB, ...basePreset.tab, ...overrides.tab },
-    select: { ...DEFAULT_SELECT, ...basePreset.select, ...overrides.select },
+    tab: { ...DEFAULT_TAB, ...basePreset.tab, ...(overrides.tab ?? {}) },
+    select: { ...DEFAULT_SELECT, ...basePreset.select, ...(overrides.select ?? {}) },
     activate: {
       ...DEFAULT_ACTIVATE,
       ...basePreset.activate,
-      ...overrides.activate,
+      ...(overrides.activate ?? {}),
     },
     dismiss: {
       ...DEFAULT_DISMISS,
       ...basePreset.dismiss,
-      ...overrides.dismiss,
+      ...(overrides.dismiss ?? {}),
     },
     project: {
       ...DEFAULT_PROJECT,
       ...basePreset.project,
-      ...overrides.project,
+      ...(overrides.project ?? {}),
     },
   };
 }

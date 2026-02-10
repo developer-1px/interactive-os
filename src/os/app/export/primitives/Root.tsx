@@ -11,10 +11,10 @@
 import { useFocusRecovery } from "@os/features/focus/hooks/useFocusRecovery";
 import type React from "react";
 import { KeyboardListener } from "@/os-new/1-listeners/KeyboardListener.tsx";
-import { ClipboardIntent } from "@/os-new/1-sensor/clipboard/ClipboardIntent.tsx";
-import { ClipboardSensor } from "@/os-new/1-sensor/clipboard/ClipboardSensor.tsx";
-import { FocusSensor } from "@/os-new/1-sensor/focus/FocusSensor.tsx";
-import { HistoryIntent } from "@/os-new/1-sensor/history/HistoryIntent.tsx";
+import { ClipboardIntent } from "@/os-new/1-listeners/clipboard/ClipboardIntent.tsx";
+import { ClipboardSensor } from "@/os-new/1-listeners/clipboard/ClipboardSensor.tsx";
+import { FocusSensor } from "@/os-new/1-listeners/focus/FocusSensor.tsx";
+import { HistoryIntent } from "@/os-new/1-listeners/history/HistoryIntent.tsx";
 import { useOSCore } from "./useOSCore";
 
 // Register kernel effects and contexts (side-effect imports)

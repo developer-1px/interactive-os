@@ -15,7 +15,7 @@
  */
 
 import { CommandEngineStore } from "@os/features/command/store/CommandEngineStore";
-import { type TestActions, type TestBot, useTestBotRoutes } from "@os/testBot";
+import { type TestActions, type TestBot, useTestBotRoutes } from "@inspector/testbot";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers

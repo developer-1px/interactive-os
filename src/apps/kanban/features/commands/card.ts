@@ -28,7 +28,7 @@ export const AddCard = defineBoardCommand({
       if (!draft.data.cardOrder[payload.columnId]) {
         draft.data.cardOrder[payload.columnId] = [];
       }
-      draft.data.cardOrder[payload.columnId].push(newId);
+      draft.data.cardOrder[payload.columnId]!.push(newId);
       draft.ui.drafts[payload.columnId] = "";
     }),
 });
@@ -49,7 +49,7 @@ export const DeleteCard = defineBoardCommand({
       let recoveryId: string | null = null;
       if (idx !== -1 && colCards.length > 1) {
         recoveryId =
-          idx < colCards.length - 1 ? colCards[idx + 1] : colCards[idx - 1];
+          idx < colCards.length - 1 ? colCards[idx + 1]! : colCards[idx - 1]!;
       }
 
       // Delete
@@ -148,7 +148,7 @@ export const MoveCardUp = defineBoardCommand({
       const idx = order.indexOf(targetId);
       if (idx <= 0) return;
 
-      [order[idx], order[idx - 1]] = [order[idx - 1], order[idx]];
+      [order[idx], order[idx - 1]] = [order[idx - 1]!, order[idx]!];
     }),
 });
 
@@ -166,7 +166,7 @@ export const MoveCardDown = defineBoardCommand({
       const idx = order.indexOf(targetId);
       if (idx === -1 || idx >= order.length - 1) return;
 
-      [order[idx], order[idx + 1]] = [order[idx + 1], order[idx]];
+      [order[idx], order[idx + 1]] = [order[idx + 1]!, order[idx]!];
     }),
 });
 
@@ -191,7 +191,7 @@ export const MoveCardToColumn = defineBoardCommand({
 
       if (nextColIdx < 0 || nextColIdx >= colOrder.length) return;
 
-      const nextColumnId = colOrder[nextColIdx];
+      const nextColumnId = colOrder[nextColIdx]!;
 
       // Remove from current column
       const srcOrder = draft.data.cardOrder[card.columnId];
@@ -204,10 +204,10 @@ export const MoveCardToColumn = defineBoardCommand({
       if (!draft.data.cardOrder[nextColumnId]) {
         draft.data.cardOrder[nextColumnId] = [];
       }
-      draft.data.cardOrder[nextColumnId].push(targetId);
+      draft.data.cardOrder[nextColumnId]!.push(targetId);
 
       // Update card reference
-      card.columnId = nextColumnId;
+      card.columnId = nextColumnId!;
 
       // Focus the card after move
       draft.effects.push({ type: "FOCUS_ID", id: targetId });

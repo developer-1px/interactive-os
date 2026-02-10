@@ -17,7 +17,7 @@ export const AddColumn = defineKanbanCommand({
         "#06b6d4",
         "#3b82f6",
       ];
-      const color = colors[draft.data.columnOrder.length % colors.length];
+      const color = colors[draft.data.columnOrder.length % colors.length]!;
 
       draft.data.columns[newId] = {
         id: newId,
@@ -105,8 +105,8 @@ export const MoveColumnLeft = defineKanbanCommand({
       const idx = draft.data.columnOrder.indexOf(payload.id);
       if (idx <= 0) return;
       [draft.data.columnOrder[idx], draft.data.columnOrder[idx - 1]] = [
-        draft.data.columnOrder[idx - 1],
-        draft.data.columnOrder[idx],
+        draft.data.columnOrder[idx - 1]!,
+        draft.data.columnOrder[idx]!,
       ];
     }),
 });
@@ -118,8 +118,8 @@ export const MoveColumnRight = defineKanbanCommand({
       const idx = draft.data.columnOrder.indexOf(payload.id);
       if (idx === -1 || idx >= draft.data.columnOrder.length - 1) return;
       [draft.data.columnOrder[idx], draft.data.columnOrder[idx + 1]] = [
-        draft.data.columnOrder[idx + 1],
-        draft.data.columnOrder[idx],
+        draft.data.columnOrder[idx + 1]!,
+        draft.data.columnOrder[idx]!,
       ];
     }),
 });

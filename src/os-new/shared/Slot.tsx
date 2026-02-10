@@ -51,17 +51,17 @@ export function mergeProps(
   const merged: Record<string, any> = { ...slotProps, ...childProps };
 
   // className: concatenate
-  if (slotProps.className || childProps.className) {
-    merged.className =
-      [slotProps.className, childProps.className].filter(Boolean).join(" ") ||
+  if (slotProps['className'] || childProps['className']) {
+    merged['className'] =
+      [slotProps['className'], childProps['className']].filter(Boolean).join(" ") ||
       undefined;
   }
 
   // style: merge objects (child overrides slot)
-  if (slotProps.style || childProps.style) {
-    merged.style = {
-      ...(slotProps.style as CSSProperties),
-      ...(childProps.style as CSSProperties),
+  if (slotProps['style'] || childProps['style']) {
+    merged['style'] = {
+      ...(slotProps['style'] as CSSProperties),
+      ...(childProps['style'] as CSSProperties),
     };
   }
 

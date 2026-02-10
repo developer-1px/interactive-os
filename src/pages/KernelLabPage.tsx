@@ -6,8 +6,8 @@
  */
 
 import { createKernel, type Transaction } from "@kernel";
-import { KernelPanel } from "@os/app/debug/inspector/KernelPanel.tsx";
-import { InspectorRegistry } from "@os/inspector/InspectorRegistry.ts";
+import { KernelPanel } from "@inspector/panels/KernelPanel.tsx";
+import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useEffect, useRef, useState } from "react";
 import { useKernelLabBotRoutes } from "./tests/KernelLabBot";
 

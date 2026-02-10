@@ -1,34 +1,33 @@
 ---
-description: Process docs/0-inbox items and organize them into PARA structure (1-project, 2-area, 3-resource, 4-archive). Includes automatic grouping and archiving rules.
+description: Implement Standard PARA Method (Projects, Areas, Resources, Archives). Move completed projects to archive without merging, and clear the inbox based on actionability.
 ---
 
-1. **Scan Inbox**:
-   - Run `list_dir` on `docs/0-inbox` to identify files needing organization.
-   - If the inbox is empty, notify the user and exit.
+1. **Inbox Review & Clear**
+   - **Scan**: List files in `docs/0-inbox`.
+   - **Analyze**: Read each file/folder to understand its context.
+   - **Propose Moves**:
+     - **Project (`docs/1-project`)**: Has a specific goal AND a deadline. (e.g., "App Launch", "Refactor Auth")
+     - **Area (`docs/2-area`)**: Has a standard to maintain indefinitely. (e.g., "DevOps", "Health", "Finances")
+     - **Resource (`docs/3-resource`)**: Topic of ongoing interest or utility. (e.g., "React Patterns", "Design Assets")
+     - **Archive (`docs/4-archive`)**: Completed projects or inactive items.
+   - **Action**: Move items to their respective folders. Do NOT merge files; keep them intact.
 
-2. **Analyze Content**:
-   - For each file, use `view_file` to understand its context and identify its primary topic/category.
-   - **Classification Guide (PARA Method)**:
-     - **1-project (`docs/1-project`)**: Active goals with a deadline.
-     - **2-area (`docs/2-area`)**: Ongoing responsibilities.
-     - **3-resource (`docs/3-resource`)**: Reference materials or topics of interest.
-     - **4-archive (`docs/4-archive`)**: Completed or inactive items.
+2. **Project Review (Active -> Archive)**
+   - **Scan**: List items in `docs/1-project`.
+   - **Check Status**: Ask the user or identify projects that are "Completed" or "Inactive".
+   - **Archive**: Move completed project folders (as is) to `docs/4-archive/[YYYY]/[ProjectName]`.
+     - Create the year folder (e.g., `docs/4-archive/2026`) if it doesn't exist.
+     - This preserves the project context entirely ("Cold Storage").
 
-3. **Organizational Rules**:
-   - **Subfolder Requirement**: If a category (Project, Area, Resource) contains more than **3 files** at its root level, you MUST create subfolders based on topics and move the files into them.
-   - **Consolidation & Archiving**: If any folder within the PARA categories (1, 2, 3) contains more than **7 files**, you MUST:
-     1. Merge the contents of all files in that folder into a single "Consolidated" document (e.g., `[Folder_Name]_Consolidated.md`).
-     2. Move this consolidated document to a relevant sub-path in `docs/4-archive/`.
-     3. Delete the original folder and its contents.
+3. **Area & Resource Maintenance**
+   - **Scan**: List items in `docs/2-area` and `docs/3-resource`.
+   - **Promote/Demote**:
+     - If an Area/Resource has become a specific Project (has a deadline), move to `docs/1-project`.
+     - If no longer relevant, move to `docs/4-archive/[YYYY]/[ItemName]`.
 
-4. **Propose Plan**:
-   - Create a mapped list of proposed moves and maintenance actions (merges/deletions).
-   - Example:
-     - `file_A.md` -> `docs/1-project/todo-engine-refactor/` (New folder since files > 3)
-     - Merge `docs/3-resource/analysis/*` (8 files) -> `docs/4-archive/analysis_consolidated_2024.md`
-   - **User Confirmation**: Present this plan and ask for confirmation before execution.
-
-5. **Execute**:
-   - Use `run_command` or file tools to move, merge, and delete files.
-   - **Create Directories**: Use `mkdir -p` for new subfolders.
-   - Report the final status to the user.
+4. **Execution**
+   - Present a summary of all moves.
+   - Upon confirmation, execute filesystem commands (`mv`).
+   - Ensure the structure remains clean:
+     - `docs/1-project` contains only *active* projects.
+     - `docs/4-archive` contains the history, organized by year.

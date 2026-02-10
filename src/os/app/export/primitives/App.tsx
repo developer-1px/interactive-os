@@ -9,7 +9,7 @@ import type { AppDefinition } from "@os/features/application/defineApplication";
 import { createEngine } from "@os/features/command/model/createEngine";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";
 import { AppEngineProvider } from "@os/features/command/ui/AppEngineContext";
-import { useInspectorPersistence } from "@os/inspector/useInspectorPersistence";
+import { useInspectorPersistence } from "@inspector/stores/useInspectorPersistence";
 import type React from "react";
 import { useEffect, useMemo } from "react";
 
@@ -53,7 +53,9 @@ export function App<S>({
       state,
       getState: () => engine.store.getState().state,
       setState: (newState) => engine.store.setState({ state: newState }),
-      contextMap: appDef.contextMap,
+      ...(appDef.contextMap !== undefined
+        ? { contextMap: appDef.contextMap }
+        : {}),
     });
 
     return () => unregisterApp(appDef.id);
@@ -79,11 +81,7 @@ export function App<S>({
     }
   }, [state, isInitialized, appDef.id, updateAppState]);
 
-  // 5. Body class for app shell mode
-  useEffect(() => {
-    document.body.classList.toggle("app-shell", isAppShell);
-    return () => document.body.classList.remove("app-shell");
-  }, [isAppShell]);
+
 
   const contextValue = useMemo(
     () => ({ appId: appDef.id, state, dispatch, registry: engine.registry }),

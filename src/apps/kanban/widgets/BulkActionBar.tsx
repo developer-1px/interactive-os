@@ -20,7 +20,7 @@ export function BulkActionBar() {
 
   const columns = state.data.columnOrder
     .map((id) => state.data.columns[id])
-    .filter(Boolean);
+    .filter((c): c is NonNullable<typeof c> => !!c);
 
   const showMoveMenu = state.ui.bulkMenuOpen === "move";
   const showPriorityMenu = state.ui.bulkMenuOpen === "priority";

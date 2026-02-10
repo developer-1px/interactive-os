@@ -1,6 +1,6 @@
-import { InspectorStore } from "@os/inspector/InspectorStore";
-import { TestBotActions } from "@os/testBot";
-import { usePlaywrightSpecs } from "@os/testBot/playwright/loader";
+import { InspectorStore } from "@inspector/stores/InspectorStore";
+import { TestBotActions } from "@inspector/testbot";
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 // Playwright spec
 // @ts-expect-error
 import runFocusShowcase from "../../../e2e/focus-showcase/focus-showcase.spec.ts";

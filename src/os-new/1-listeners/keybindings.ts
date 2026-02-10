@@ -94,7 +94,7 @@ export const Keybindings = {
    * Check if any keybinding exists for a canonical key.
    */
   has(key: string): boolean {
-    return bindings.has(key) && bindings.get(key)?.length > 0;
+    return bindings.has(key) && (bindings.get(key)?.length ?? 0) > 0;
   },
 
   /** Clear all bindings (for testing). */

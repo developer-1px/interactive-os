@@ -30,11 +30,11 @@ export function createCommandFactory<S, G extends string = string>(
     // Attach properties
     factory.id = def.id;
     factory.run = def.run;
-    factory.when = def.when;
-    factory.log = def.log;
+    if (def.when !== undefined) factory.when = def.when;
+    if (def.log !== undefined) factory.log = def.log;
 
     // Group Awareness
-    factory.groupId = groupId;
+    if (groupId !== undefined) factory.groupId = groupId;
 
     // Auto-Register to Group Registry (Discovery)
     if (groupId) {

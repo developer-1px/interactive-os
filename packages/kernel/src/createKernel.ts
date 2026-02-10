@@ -123,7 +123,7 @@ export function createKernel<S>(initialState: S) {
       changes: computeChanges(stateBefore, stateAfter),
       stateBefore,
       stateAfter,
-      meta,
+      ...(meta !== undefined ? { meta } : {}),
     });
     if (transactions.length > MAX_TRANSACTIONS) {
       transactions.splice(0, transactions.length - MAX_TRANSACTIONS);
@@ -185,7 +185,7 @@ export function createKernel<S>(initialState: S) {
       }
     }
 
-    queue.push({ cmd: enriched as Command, meta: options?.meta });
+    queue.push({ cmd: enriched as Command, ...(options?.meta !== undefined ? { meta: options.meta } : {}) });
 
     if (processing) return;
 
@@ -266,15 +266,17 @@ export function createKernel<S>(initialState: S) {
       mwCtx.effects = handlerResult as Record<string, unknown> | null;
       if (interceptors) {
         for (let i = interceptors.length - 1; i >= 0; i--) {
-          if (interceptors[i].after) {
-            mwCtx = interceptors[i].after?.(mwCtx) ?? mwCtx;
+          const ic = interceptors[i];
+          if (ic?.after) {
+            mwCtx = ic.after(mwCtx) ?? mwCtx;
           }
         }
       }
       if (scopeMws) {
         for (let i = scopeMws.length - 1; i >= 0; i--) {
-          if (scopeMws[i].after) {
-            mwCtx = scopeMws[i].after?.(mwCtx) ?? mwCtx;
+          const mw = scopeMws[i];
+          if (mw?.after) {
+            mwCtx = mw.after(mwCtx) ?? mwCtx;
           }
         }
       }

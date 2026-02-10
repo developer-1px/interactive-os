@@ -13,6 +13,10 @@ export interface ZoneState {
   lastFocusedId: string | null;
   recoveryTargetId: string | null;
 
+  // Field Slice
+  editingItemId: string | null;
+  fieldEvent: { type: "commit" | "cancel"; id: string; tick: number } | null;
+
   // Spatial Slice
   stickyX: number | null;
   stickyY: number | null;

@@ -21,7 +21,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@playwright/test": "/src/os/testBot/playwright/index.ts",
+      "@playwright/test": "/src/inspector/testbot/playwright/index.ts",
+      "@inspector": "/src/inspector",
       "@kernel": "/packages/kernel/src",
       "@os": "/src/os",
       "@apps": "/src/apps",

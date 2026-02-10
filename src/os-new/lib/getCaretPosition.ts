@@ -37,7 +37,8 @@ export const setCaretPosition = (element: HTMLElement, position: number) => {
       currentPos += len;
     } else {
       for (let i = 0; i < node.childNodes.length; i++) {
-        if (traverse(node.childNodes[i])) return true;
+        const child = node.childNodes[i];
+        if (child && traverse(child)) return true;
       }
     }
     return false;

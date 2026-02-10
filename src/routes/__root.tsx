@@ -1,9 +1,12 @@
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
-import { InspectorShell } from "@os/app/debug/InspectorShell";
+import { InspectorShell } from "@inspector/shell/InspectorShell";
 import { OS } from "@os/features/AntigravityOS";
-import { useInspectorStore } from "@os/inspector/InspectorStore";
+import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 // import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+
+// Inspector registers its own command + keybinding via OS API (plugin model)
+import "@inspector/register";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -21,7 +24,7 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const isInspectorOpen = useInspectorStore((s) => s.isOpen);
+  const isInspectorOpen = useInspectorStore((s: { isOpen: boolean }) => s.isOpen);
 
   return (
     <OS.Root>

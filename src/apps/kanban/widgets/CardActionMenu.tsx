@@ -52,61 +52,61 @@ export function CardActionMenu() {
   // Build menu items
   const menuItems: MenuItem[] = card
     ? [
-        {
-          id: "priority",
-          label: "Set Priority",
-          icon: Flame,
-          submenu: (
-            ["urgent", "high", "medium", "low", "none"] as Priority[]
-          ).map((p) => ({
-            id: p,
-            label: p.charAt(0).toUpperCase() + p.slice(1),
-            color:
-              p === "urgent"
-                ? "#ef4444"
-                : p === "high"
-                  ? "#f97316"
-                  : p === "medium"
-                    ? "#eab308"
-                    : p === "low"
-                      ? "#3b82f6"
-                      : "#94a3b8",
-            active: card.priority === p,
-            command: SetPriority({ id: card.id, priority: p }),
-          })),
-        },
-        {
-          id: "labels",
-          label: "Toggle Label",
-          icon: Tag,
-          submenu: Object.values(state?.data.labels).map((label) => ({
-            id: label.id,
-            label: label.name,
-            color: label.color,
-            active: card.labels.includes(label.id),
-            command: ToggleLabel({ id: card.id, labelId: label.id }),
-          })),
-        },
-        {
-          id: "move-right",
-          label: "Move Right",
-          icon: ArrowRight,
-          command: MoveCardToColumn({ id: card.id, direction: "right" }),
-        },
-        {
-          id: "duplicate",
-          label: "Duplicate",
-          icon: Copy,
-          command: DuplicateCard({ id: card.id }),
-        },
-        {
-          id: "delete",
-          label: "Delete",
-          icon: Trash2,
-          danger: true,
-          command: DeleteCard({ id: card.id }),
-        },
-      ]
+      {
+        id: "priority",
+        label: "Set Priority",
+        icon: Flame,
+        submenu: (
+          ["urgent", "high", "medium", "low", "none"] as Priority[]
+        ).map((p) => ({
+          id: p,
+          label: p.charAt(0).toUpperCase() + p.slice(1),
+          color:
+            p === "urgent"
+              ? "#ef4444"
+              : p === "high"
+                ? "#f97316"
+                : p === "medium"
+                  ? "#eab308"
+                  : p === "low"
+                    ? "#3b82f6"
+                    : "#94a3b8",
+          active: card.priority === p,
+          command: SetPriority({ id: card.id, priority: p }),
+        })),
+      },
+      {
+        id: "labels",
+        label: "Toggle Label",
+        icon: Tag,
+        submenu: Object.values(state?.data.labels).map((label) => ({
+          id: label.id,
+          label: label.name,
+          color: label.color,
+          active: card.labels.includes(label.id),
+          command: ToggleLabel({ id: card.id, labelId: label.id }),
+        })),
+      },
+      {
+        id: "move-right",
+        label: "Move Right",
+        icon: ArrowRight,
+        command: MoveCardToColumn({ id: card.id, direction: "right" }),
+      },
+      {
+        id: "duplicate",
+        label: "Duplicate",
+        icon: Copy,
+        command: DuplicateCard({ id: card.id }),
+      },
+      {
+        id: "delete",
+        label: "Delete",
+        icon: Trash2,
+        danger: true,
+        command: DeleteCard({ id: card.id }),
+      },
+    ]
     : [];
 
   // Helper: dispatch a command and close
@@ -134,7 +134,8 @@ export function CardActionMenu() {
           setSubFocusIdx((i) => Math.max(i - 1, 0));
         } else if (e.key === "Enter") {
           e.preventDefault();
-          dispatchAndClose(sub[subFocusIdx]?.command);
+          const subCmd = sub[subFocusIdx]?.command;
+          if (subCmd) dispatchAndClose(subCmd);
         } else if (e.key === "Escape" || e.key === "ArrowLeft") {
           e.preventDefault();
           setOpenSubmenu(null);
@@ -228,13 +229,12 @@ export function CardActionMenu() {
                   type="button"
                   className={`
                                 w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium transition-colors text-left
-                                ${
-                                  focusedIdx === idx && !openSubmenu
-                                    ? "bg-indigo-50 text-indigo-700"
-                                    : item.danger
-                                      ? "text-red-500 hover:bg-red-50"
-                                      : "text-slate-600 hover:bg-slate-50"
-                                }
+                                ${focusedIdx === idx && !openSubmenu
+                      ? "bg-indigo-50 text-indigo-700"
+                      : item.danger
+                        ? "text-red-500 hover:bg-red-50"
+                        : "text-slate-600 hover:bg-slate-50"
+                    }
                             `}
                   onMouseEnter={() => setFocusedIdx(idx)}
                 >
@@ -261,11 +261,10 @@ export function CardActionMenu() {
                         type="button"
                         className={`
                                             w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium transition-colors text-left
-                                            ${
-                                              subFocusIdx === sIdx
-                                                ? "bg-indigo-50 text-indigo-700"
-                                                : "text-slate-600 hover:bg-slate-50"
-                                            }
+                                            ${subFocusIdx === sIdx
+                            ? "bg-indigo-50 text-indigo-700"
+                            : "text-slate-600 hover:bg-slate-50"
+                          }
                                         `}
                         onMouseEnter={() => setSubFocusIdx(sIdx)}
                       >

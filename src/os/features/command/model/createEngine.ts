@@ -29,7 +29,9 @@ export function createEngine<S>(definition: AppDefinition<S>) {
   registry.setKeymap(definition.keymap);
 
   const store = createCommandStore(registry, definition.model.initial, {
-    persistence: definition.model.persistence,
+    ...(definition.model.persistence !== undefined
+      ? { persistence: definition.model.persistence }
+      : {}),
     middleware: [
       resolveFocusMiddleware, // PRE: resolve OS.FOCUS
       navigationMiddleware, // POST: effects → zone state

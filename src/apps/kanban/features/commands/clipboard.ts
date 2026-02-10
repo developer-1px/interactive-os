@@ -42,7 +42,7 @@ export const CutCard = defineBoardCommand({
 
     clipboardData = { card: { ...card }, isCut: true };
 
-    navigator.clipboard.writeText(card.title).catch(() => {});
+    navigator.clipboard.writeText(card.title).catch(() => { });
 
     return produce(state, (draft) => {
       delete draft.data.cards[targetId];
@@ -97,14 +97,16 @@ export const PasteCard = defineBoardCommand({
         state.data.cards[focusedId]?.columnId === targetColumnId
       ) {
         const order = draft.data.cardOrder[targetColumnId];
-        const idx = order.indexOf(focusedId);
-        if (idx !== -1) {
-          order.splice(idx + 1, 0, newId);
-        } else {
-          order.push(newId);
+        if (order) {
+          const idx = order.indexOf(focusedId);
+          if (idx !== -1) {
+            order.splice(idx + 1, 0, newId);
+          } else {
+            order.push(newId);
+          }
         }
       } else {
-        draft.data.cardOrder[targetColumnId].push(newId);
+        draft.data.cardOrder[targetColumnId]?.push(newId);
       }
 
       draft.effects.push({ type: "FOCUS_ID", id: newId });

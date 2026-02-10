@@ -7,6 +7,7 @@ import rehypeHighlight from "rehype-highlight";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { cleanLabel, type DocItem, DocsSidebar } from "./docs/DocsSidebar";
+import { MermaidBlock } from "./docs/MermaidBlock";
 import "./docs/codeTheme.css";
 
 // Load all markdown files from the docs directory
@@ -170,6 +171,16 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
       .replace(/language-/, "")
       .replace(/hljs/, "")
       .trim();
+
+    // Mermaid block: render as diagram
+    if (lang === "mermaid" || langClass.includes("language-mermaid")) {
+      const code =
+        typeof codeChild?.children === "string"
+          ? codeChild.children
+          : String(codeChild?.children ?? "");
+      return <MermaidBlock code={code} />;
+    }
+
     return (
       <div className="rounded-xl overflow-hidden my-8 border border-slate-200 bg-[#fbfcfd] shadow-sm relative group max-w-4xl">
         <div className="flex items-center px-4 py-2 border-b border-slate-100 bg-slate-50/50 justify-between">

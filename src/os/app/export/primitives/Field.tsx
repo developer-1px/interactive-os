@@ -12,7 +12,7 @@ import {
   type FieldConfig,
   FieldRegistry,
   useFieldRegistry,
-} from "@/os-new/3-store/FieldRegistry";
+} from "@/os-new/store/FieldRegistry";
 import {
   useFocusGroupContext,
   useFocusGroupStore,
@@ -157,11 +157,11 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
         name,
         mode,
         multiline,
-        onSubmit,
-        onChange,
-        onCancel,
-        updateType,
-        onCommit,
+        ...(onSubmit !== undefined ? { onSubmit } : {}),
+        ...(onChange !== undefined ? { onChange } : {}),
+        ...(onCancel !== undefined ? { onCancel } : {}),
+        ...(updateType !== undefined ? { updateType } : {}),
+        ...(onCommit !== undefined ? { onCommit } : {}),
       };
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
@@ -231,7 +231,7 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
       isEditing,
       multiline,
       value: localValue,
-      placeholder,
+      ...(placeholder !== undefined ? { placeholder } : {}),
       customClassName,
     });
 
@@ -252,9 +252,9 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
       "aria-controls": controls,
       "aria-activedescendant":
         target === "virtual" &&
-        controls &&
-        osFocusedItemId &&
-        osFocusedItemId !== name
+          controls &&
+          osFocusedItemId &&
+          osFocusedItemId !== name
           ? osFocusedItemId
           : undefined,
       children: null, // Managed by useFieldDOMSync

@@ -9,7 +9,7 @@
  * 5. React Hooks (useComputed, useDispatch)
  */
 
-import { type TestActions, type TestBot, useTestBotRoutes } from "@os/testBot";
+import { type TestActions, type TestBot, useTestBotRoutes } from "@inspector/testbot";
 import { resetKernelLab } from "../KernelLabPage";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -257,7 +257,7 @@ function defineTests(bot: TestBot) {
     // 3. Click clear button in Transaction panel
     const clearBtns = await t.getAllByText("Clear");
     // Should have 2 clear buttons (Effect Log + Transaction Log)
-    await t.click(clearBtns[clearBtns.length - 1]); // Last clear = Transaction
+    await t.click(clearBtns[clearBtns.length - 1]!); // Last clear = Transaction
     await t.wait(100);
 
     // 4. Verify transactions are gone
@@ -292,7 +292,7 @@ function defineTests(bot: TestBot) {
 
     // 2. Click clear in Effect Log panel
     const clearBtns = await t.getAllByText("Clear");
-    await t.click(clearBtns[0]); // Effect panel's clear
+    await t.click(clearBtns[0]!); // Effect panel's clear
     await t.wait(100);
 
     // 3. Verify empty state

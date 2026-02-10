@@ -11,8 +11,8 @@ import type { EffectRecord, TransactionInput } from "@os/schema";
 import { createFocusEffect } from "@os/schema";
 import { DOM } from "@/os-new/lib/dom";
 import { FocusData } from "../../lib/focusData";
-import type { FocusGroupStore } from "../../store/focusGroupStore";
-import type { FocusGroupConfig } from "../../types";
+import type { FocusGroupStore } from "@/os-new/store/focusGroupStore";
+import type { FocusGroupConfig } from "@/os-new/schema/focus/config/FocusGroupConfig";
 
 // ═══════════════════════════════════════════════════════════════════
 // Context (모든 Read)

@@ -5,7 +5,7 @@
  * For per-component mounting, use `usePlaywrightSpec` in individual pages.
  */
 
-import { usePlaywrightSpecs } from "@os/testBot/playwright/loader";
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 // @ts-expect-error
 import runComplexPatterns from "../../e2e/aria-showcase/complex-patterns.spec.ts";
 // @ts-expect-error

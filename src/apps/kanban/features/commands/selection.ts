@@ -96,7 +96,7 @@ export const BulkMoveCards = defineKanbanCommand({
         if (!draft.data.cardOrder[payload.targetColumnId]) {
           draft.data.cardOrder[payload.targetColumnId] = [];
         }
-        draft.data.cardOrder[payload.targetColumnId].push(cardId);
+        draft.data.cardOrder[payload.targetColumnId]!.push(cardId);
         card.columnId = payload.targetColumnId;
       }
       draft.ui.selectedCardIds = [];

@@ -1,4 +1,4 @@
-import { Builder } from "@os/app/export/primitives/Builder.tsx";
+import { Builder } from "@/apps/builder/primitives/Builder";
 import { Field } from "@os/app/export/primitives/Field.tsx";
 import {
   ArrowRight,
@@ -113,10 +113,9 @@ export function NCPServicesBlock() {
                     variant={tab.active ? "primary" : "ghost"}
                     className={`
                       flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap
-                      ${
-                        tab.active
-                          ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
-                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                      ${tab.active
+                        ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
+                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
                       }
                       data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 data-[focused=true]:z-10
                     `}
@@ -171,7 +170,7 @@ export function NCPServicesBlock() {
                       value={service.title}
                       onCommit={(val: string) => {
                         const newServices = [...featuredServices];
-                        newServices[index].title = val;
+                        newServices[index]!.title = val;
                         setFeaturedServices(newServices);
                       }}
                       className={`text-lg font-bold text-slate-900 mb-2 block`}
@@ -186,7 +185,7 @@ export function NCPServicesBlock() {
                       value={service.desc}
                       onCommit={(val: string) => {
                         const newServices = [...featuredServices];
-                        newServices[index].desc = val;
+                        newServices[index]!.desc = val;
                         setFeaturedServices(newServices);
                       }}
                       className={`text-sm text-slate-500 leading-relaxed block min-h-[40px]`}

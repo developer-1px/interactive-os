@@ -1,4 +1,4 @@
-import { Builder } from "@os/app/export/primitives/Builder.tsx";
+import { Builder } from "@/apps/builder/primitives/Builder";
 import { Field } from "@os/app/export/primitives/Field.tsx";
 import {
   Github,

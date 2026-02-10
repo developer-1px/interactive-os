@@ -7,7 +7,7 @@
  * 2. buildSnapshotFromLogs() — EventStream 로그를 순차 재생하여 재구성
  */
 
-import type { LogEntry } from "@os/inspector/InspectorLogStore";
+import type { LogEntry } from "@inspector/stores/InspectorLogStore";
 import {
   createFocusEffect,
   type EffectRecord,
@@ -177,7 +177,7 @@ function updateFocus(
 
 function extractDepth(title: string): number | null {
   const match = title.match(/depth:\s*(\d+)/);
-  return match ? Number.parseInt(match[1], 10) : null;
+  return match?.[1] !== undefined ? Number.parseInt(match[1], 10) : null;
 }
 
 const EMPTY_ZONE: ZoneSnapshot = {

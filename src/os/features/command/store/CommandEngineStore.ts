@@ -72,7 +72,7 @@ export const useCommandEngineStore = create<CommandEngineState>((set, get) => ({
       state,
       getState,
       setState,
-      contextMap,
+      ...(contextMap ? { contextMap } : {}),
     });
     set({ appRegistries: newMap, activeAppId: appId });
   },

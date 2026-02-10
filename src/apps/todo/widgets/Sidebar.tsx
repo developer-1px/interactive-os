@@ -1,7 +1,7 @@
 import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
 import type { AppState } from "@apps/todo/model/types";
-import { Kbd } from "@os/app/debug/components/Kbd";
+import { Kbd } from "@inspector/shell/components/Kbd";
 import { Item } from "@os/app/export/primitives/Item.tsx";
 import { Trigger } from "@os/app/export/primitives/Trigger.tsx";
 import { Zone } from "@os/app/export/primitives/Zone.tsx";

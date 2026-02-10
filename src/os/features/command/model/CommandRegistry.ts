@@ -1,5 +1,5 @@
 import type { CommandDefinition } from "@os/entities/CommandDefinition";
-import type { KeymapConfig } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
+import type { KeymapConfig } from "@/os-new/lib/getCanonicalKey.ts";
 import { logger } from "@/os-new/lib/logger";
 import type { KeybindingItem } from "@/os-new/schema/keyboard/KeybindingItem";
 
@@ -50,7 +50,10 @@ export class CommandRegistry<S, K extends string = string> {
           ? `(${group.when}) && (${cmd.when})`
           : group.when
         : cmd.when;
-      this.register({ ...cmd, when: combinedWhen });
+      this.register({
+        ...cmd,
+        ...(combinedWhen !== undefined ? { when: combinedWhen } : {}),
+      });
     });
   }
 
@@ -101,12 +104,13 @@ export class CommandRegistry<S, K extends string = string> {
       }
 
       const cmd = this.get(commandId as K);
+      const resolvedWhen = binding.when || cmd?.when;
       return {
         ...binding,
         command: commandId,
-        when: binding.when || cmd?.when,
+        ...(resolvedWhen !== undefined ? { when: resolvedWhen } : {}),
         args: binding.args,
-        allowInInput: binding.allowInInput,
+        ...(binding.allowInInput !== undefined ? { allowInInput: binding.allowInInput } : {}),
       };
     });
   }

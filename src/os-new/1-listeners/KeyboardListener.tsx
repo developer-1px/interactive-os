@@ -9,7 +9,7 @@
  */
 
 import { useEffect } from "react";
-import { getCanonicalKey } from "../1-sensor/keyboard/getCanonicalKey";
+import { getCanonicalKey } from "../lib/getCanonicalKey";
 import { kernel } from "../kernel";
 import { Keybindings, type KeyResolveContext } from "./keybindings";
 

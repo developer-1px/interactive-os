@@ -31,7 +31,7 @@ export const SELECT = kernel.defineCommand(
     const mode = payload.mode ?? "single";
 
     return {
-      state: produce(ctx.state, (draft) => {
+      state: produce(ctx.state, (draft: any) => {
         const z = ensureZone(draft.os, activeZoneId);
 
         switch (mode) {
@@ -63,7 +63,7 @@ export const SELECT = kernel.defineCommand(
             break;
           }
         }
-      }),
+      }) as typeof ctx.state,
     };
   },
 );

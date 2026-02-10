@@ -113,7 +113,7 @@ export function TestimonialsBlock() {
         {/* Testimonial Cards - Nested Zones */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((t, index) => {
-            const colors = colorMap[t.color];
+            const colors = colorMap[t.color]!;
             return (
               <OS.Item
                 key={t.id}

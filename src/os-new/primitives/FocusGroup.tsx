@@ -1,3 +1,7 @@
+/**
+ * @deprecated FocusGroup은 Zustand 기반 Legacy 컴포넌트입니다.
+ * 새 코드에서는 `6-components/Zone.tsx` (Kernel 기반)를 사용하세요.
+ */
 import { FocusData } from "@os/features/focus/lib/focusData.ts";
 import {
   type ComponentProps,
@@ -12,7 +16,7 @@ import { ZoneRegistry } from "../2-contexts/zoneRegistry.ts";
 import {
   type FocusGroupStore,
   useFocusGroupStoreInstance,
-} from "../3-store/focusGroupStore.ts";
+} from "../store/focusGroupStore.ts";
 import { kernel } from "../kernel.ts";
 import { resolveRole, type ZoneRole } from "../registry/roleRegistry.ts";
 import type {
@@ -177,14 +181,21 @@ export function FocusGroup({
 
   // --- Resolve Configuration ---
   const config = useMemo(() => {
-    return resolveRole(role, {
-      navigate,
-      tab,
-      select,
-      activate,
-      dismiss,
-      project,
-    });
+    const filteredOverrides: {
+      navigate?: Partial<NavigateConfig>;
+      tab?: Partial<TabConfig>;
+      select?: Partial<SelectConfig>;
+      activate?: Partial<ActivateConfig>;
+      dismiss?: Partial<DismissConfig>;
+      project?: Partial<ProjectConfig>;
+    } = {};
+    if (navigate !== undefined) filteredOverrides.navigate = navigate;
+    if (tab !== undefined) filteredOverrides.tab = tab;
+    if (select !== undefined) filteredOverrides.select = select;
+    if (activate !== undefined) filteredOverrides.activate = activate;
+    if (dismiss !== undefined) filteredOverrides.dismiss = dismiss;
+    if (project !== undefined) filteredOverrides.project = project;
+    return resolveRole(role, filteredOverrides);
   }, [role, navigate, tab, select, activate, dismiss, project]);
 
   // --- Parent Context ---
@@ -204,15 +215,15 @@ export function FocusGroup({
         store,
         config,
         parentId,
-        activateCommand: onAction,
-        selectCommand: onSelect,
-        copyCommand: onCopy,
-        cutCommand: onCut,
-        pasteCommand: onPaste,
-        deleteCommand: onDelete,
-        toggleCommand: onToggle,
-        undoCommand: onUndo,
-        redoCommand: onRedo,
+        ...(onAction !== undefined ? { activateCommand: onAction } : {}),
+        ...(onSelect !== undefined ? { selectCommand: onSelect } : {}),
+        ...(onCopy !== undefined ? { copyCommand: onCopy } : {}),
+        ...(onCut !== undefined ? { cutCommand: onCut } : {}),
+        ...(onPaste !== undefined ? { pasteCommand: onPaste } : {}),
+        ...(onDelete !== undefined ? { deleteCommand: onDelete } : {}),
+        ...(onToggle !== undefined ? { toggleCommand: onToggle } : {}),
+        ...(onUndo !== undefined ? { undoCommand: onUndo } : {}),
+        ...(onRedo !== undefined ? { redoCommand: onRedo } : {}),
       });
     }
     // No cleanup needed - WeakMap auto-GC when element is removed
@@ -238,7 +249,7 @@ export function FocusGroup({
     ZoneRegistry.register(groupId, {
       config,
       element: containerRef.current,
-      role,
+      ...(role !== undefined ? { role } : {}),
       parentId,
     });
     return () => {
@@ -317,7 +328,7 @@ export function FocusGroup({
       groupId,
       store,
       config,
-      zoneRole: role,
+      ...(role !== undefined ? { zoneRole: role } : {}),
     }),
     [groupId, store, config, role],
   );

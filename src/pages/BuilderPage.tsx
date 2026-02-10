@@ -1,6 +1,6 @@
 import { OS } from "@os/features/AntigravityOS";
 import { FocusDebugOverlay } from "@os/features/focus/ui/FocusDebugOverlay";
-import { usePlaywrightSpecs } from "@os/testBot/playwright/loader";
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { useState } from "react";
 // Playwright spec
 // @ts-expect-error

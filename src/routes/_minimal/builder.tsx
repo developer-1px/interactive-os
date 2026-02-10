@@ -9,5 +9,6 @@ export const Route = createFileRoute("/_minimal/builder")({
     icon: Layout,
     location: "global-nav",
     order: 3,
+    isAppShell: true,
   },
 });

@@ -35,7 +35,7 @@ export function ListView() {
   const visibleTodoIds = todoOrder.filter(
     (id) => todos[id]?.categoryId === state.ui.selectedCategoryId,
   );
-  const visibleTodos = visibleTodoIds.map((id) => todos[id]).filter(Boolean);
+  const visibleTodos = visibleTodoIds.map((id) => todos[id]).filter((t): t is NonNullable<typeof t> => !!t);
 
   // Edit state
   const editingId = state.ui.editingId;

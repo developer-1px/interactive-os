@@ -1,5 +1,5 @@
 import type { CommandDefinition } from "@os/entities/CommandDefinition";
-import type { KeymapConfig } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
+import type { KeymapConfig } from "@/os-new/lib/getCanonicalKey.ts";
 import type { KeybindingItem } from "@/os-new/schema/keyboard/KeybindingItem";
 
 export interface AppDefinition<S, K extends string = string> {
