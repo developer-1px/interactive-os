@@ -1,8 +1,8 @@
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import rehypeHighlight from "rehype-highlight";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
@@ -39,7 +39,7 @@ function buildDocTree(paths: string[]): DocItem[] {
           name: part,
           path: isFile ? relativePath : parts.slice(0, index + 1).join("/"),
           type: isFile ? "file" : "folder",
-          children: isFile ? undefined : [],
+          ...(isFile ? {} : { children: [] }),
         };
         currentLevel.push(newItem);
         if (!isFile) {
@@ -324,7 +324,7 @@ export default function DocsPage() {
                 <div className="mt-20 pt-8 border-t border-slate-100 flex items-center justify-between gap-4 max-w-3xl">
                   {prevFile ? (
                     <Link
-                      to={`/docs/${prevFile.path}`}
+                      to={`/docs/${prevFile.path}` as string}
                       className="group flex flex-col items-start gap-1"
                     >
                       <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
@@ -341,7 +341,7 @@ export default function DocsPage() {
 
                   {nextFile ? (
                     <Link
-                      to={`/docs/${nextFile.path}`}
+                      to={`/docs/${nextFile.path}` as string}
                       className="group flex flex-col items-end gap-1 text-right"
                     >
                       <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">

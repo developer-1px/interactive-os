@@ -101,6 +101,48 @@ body {
   min-height: 100vh;
 }
 
+/* ── AppShell vs PageShell ─────────────────────────────────
+ * OS.App toggles body.app-shell via classList.
+ * AppShell = fixed viewport, internal scroll (app-like)
+ * PageShell = natural document flow (page-like)
+ */
+.app-viewport {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  font-family: var(--font-sans);
+  color: #1a1a1a;
+  background: #0a0a0a;
+}
+
+body.app-shell .app-viewport {
+  height: 100vh;
+  min-height: auto;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  position: relative;
+  background: white;
+}
+
+body.app-shell .app-main {
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1;
+}
+
+body.app-shell .app-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* Premium Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

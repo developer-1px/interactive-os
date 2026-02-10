@@ -33,7 +33,11 @@ export type PipelineStep = {
 export interface InspectorEvent {
   id: string;
   time: string;
-  input: { type: "KEYBOARD" | "MOUSE" | "FOCUS"; raw: string; elementId?: string };
+  input: {
+    type: "KEYBOARD" | "MOUSE" | "FOCUS";
+    raw: string;
+    elementId?: string;
+  };
   command: { type: string; payload?: unknown } | null;
   pipeline: PipelineStep[];
   diffs: Array<{ path: string; from: string; to: string }>;
@@ -172,9 +176,7 @@ function TimelineNode({
         className="flex items-center gap-2 px-2 py-2 cursor-pointer bg-transparent border-none text-left w-full"
       >
         {/* Icon (Fixed width container for alignment) */}
-        <div className="w-3.5 flex justify-center shrink-0">
-          {icon}
-        </div>
+        <div className="w-3.5 flex justify-center shrink-0">{icon}</div>
 
         {/* #Number + Input */}
         <span className="font-mono text-[9px] text-[#a0aec0] font-bold select-none">

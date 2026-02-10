@@ -202,7 +202,11 @@ export function createKernel<S>(initialState: S) {
 
   // ─── Command Processing ───
 
-  function processCommand(cmd: Command, bubblePath?: ScopeToken[], meta?: Record<string, unknown>): void {
+  function processCommand(
+    cmd: Command,
+    bubblePath?: ScopeToken[],
+    meta?: Record<string, unknown>,
+  ): void {
     const stateBefore = state;
     const path: string[] = bubblePath
       ? (bubblePath as unknown as string[])

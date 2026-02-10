@@ -125,7 +125,7 @@ export const InspectorOverlay: React.FC<{
             height: maxBottom - minTop,
             x: minLeft,
             y: minTop,
-            toJSON: () => { },
+            toJSON: () => {},
           } as any;
         }
       }
@@ -153,7 +153,7 @@ export const InspectorOverlay: React.FC<{
             const verticalOverlap = Math.max(
               0,
               Math.min(current.bottom, next.bottom) -
-              Math.max(current.top, next.top),
+                Math.max(current.top, next.top),
             );
             if (
               verticalOverlap > 0 &&
@@ -171,7 +171,7 @@ export const InspectorOverlay: React.FC<{
             const horizontalOverlap = Math.max(
               0,
               Math.min(current.right, next.right) -
-              Math.max(current.left, next.left),
+                Math.max(current.left, next.left),
             );
             if (
               horizontalOverlap > 0 &&

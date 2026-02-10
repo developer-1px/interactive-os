@@ -1,7 +1,7 @@
+import { Link, useLocation } from "@tanstack/react-router";
 import clsx from "clsx";
 import { ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "@tanstack/react-router";
 
 // Types for our tree structure
 export interface DocItem {
@@ -42,8 +42,7 @@ const SidebarItem = ({
       const hasActiveChild = (children: DocItem[]): boolean => {
         return children.some(
           (child) =>
-            (child.type === "file" &&
-              pathname === `/docs/${child.path}`) ||
+            (child.type === "file" && pathname === `/docs/${child.path}`) ||
             (child.type === "folder" &&
               child.children &&
               hasActiveChild(child.children)),
@@ -104,7 +103,7 @@ const SidebarItem = ({
   // File render
   return (
     <Link
-      to={`/docs/${item.path}`}
+      to={`/docs/${item.path}` as string}
       className={clsx(
         "flex items-center gap-1.5 px-3 py-1 text-[13.5px] rounded-md transition-all duration-200 border border-transparent",
         pathname === `/docs/${item.path}`

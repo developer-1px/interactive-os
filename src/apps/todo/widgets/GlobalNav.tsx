@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
   Accessibility,
   Book,
@@ -9,7 +10,6 @@ import {
   Settings,
   User,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 
 export function GlobalNav() {
   const navItems = [

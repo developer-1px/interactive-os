@@ -10,6 +10,15 @@ export default function inspectorBabelPlugin({ types: t }: any) {
           !state.filename.includes("node_modules") &&
           jsxPath.node.loc
         ) {
+          // Skip if already has inspector attributes (prevents duplicate warnings)
+          const hasInspectorAttr = jsxPath.node.attributes.some(
+            (attr: any) =>
+              t.isJSXAttribute(attr) &&
+              (attr.name.name === "data-inspector-line" ||
+                attr.name.name === "data-inspector-loc"),
+          );
+          if (hasInspectorAttr) return;
+
           const { line, column } = jsxPath.node.loc.start;
           const relativePath = path.relative(process.cwd(), state.filename);
           const fileVal = `${relativePath}:${line}:${column + 1}`;
