@@ -2,7 +2,7 @@
 
 > 날짜: 2026-02-10
 > 태그: testbot, direction, llm, playwright, visual-verification
-> 상태: 제안
+> 상태: 확정
 
 ---
 
@@ -155,9 +155,25 @@ TestBot = LLM이 쓴 테스트의 시각적 검증 도구 (Visual Verifier)
 
 ---
 
-## 6. 워크플로우
+## 6. "앱 내부 실행"의 고유 가치
 
-### 6.1 개발 시
+TestBot과 Playwright의 근본 차이는 커서 시각화가 아니다. **TestBot은 앱의 실제 React 트리 안에서 실행된다.**
+
+| | Playwright | TestBot |
+|---|---|---|
+| 실행 위치 | 외부 (CDP/WebSocket) | **앱 내부 (같은 메모리 공간)** |
+| 상태 접근 | DOM만 관찰 | **Zustand 스토어, Kernel 트랜잭션 로그 직접 접근** |
+| Inspector 통합 | 불가 | **포커스 상태, ARIA 트리, 트랜잭션 히스토리를 실시간으로 같이 표시** |
+| React 동기화 | 비동기만 가능 | **flushSync / batch update와 타이밍 일치** |
+| 시각적 피드백 | headless (없음) | **커서 이동, 클릭 리플, 키캡 버블, ✅/❌ 스탬프** |
+
+이것은 Playwright가 **구조적으로 할 수 없는 영역**이다. TestBot의 진짜 moat은 "커서가 보인다"가 아니라 "앱 내부에서 돌아간다"이다.
+
+---
+
+## 7. 워크플로우
+
+### 7.1 개발 시
 
 ```
 1. 사람: "Listbox 컴포넌트의 키보드 네비게이션 테스트 작성해줘"
@@ -171,7 +187,9 @@ TestBot = LLM이 쓴 테스트의 시각적 검증 도구 (Visual Verifier)
 7. 같은 시나리오가 CI Playwright에도 등록됨
 ```
 
-### 6.2 코드 리뷰 시
+> **스코핑**: 테스트 수가 많아지면 매번 전부 보는 것은 비현실적. 시각 검증은 **새로 추가된 테스트**와 **실패한 테스트**에 집중.
+
+### 7.2 코드 리뷰 시 ★ 킬러 유스케이스
 
 ```
 1. PR에 새 컴포넌트 추가됨
@@ -181,7 +199,7 @@ TestBot = LLM이 쓴 테스트의 시각적 검증 도구 (Visual Verifier)
    - 코드를 한 줄씩 읽는 것보다 빠르다
 ```
 
-### 6.3 온보딩 시
+### 7.3 온보딩 시 ★ 킬러 유스케이스
 
 ```
 1. 신규 팀원: "이 컴포넌트가 어떻게 동작해?"
@@ -191,28 +209,7 @@ TestBot = LLM이 쓴 테스트의 시각적 검증 도구 (Visual Verifier)
 
 ---
 
-## 7. 이 방향에서 Testing Library 도입의 의미
-
-Testing Library를 내부에 쓰면:
-
-| | 효과 |
-|---|---|
-| 쿼리 | `screen.getByRole()` — Playwright의 `page.getByRole()`과 1:1 |
-| 이벤트 | `user.click()` — Playwright의 `.click()`과 1:1 |
-| 대기 | `waitFor()` — Playwright의 auto-wait와 동일한 역할 |
-| 어설션 | jest-dom 매처 — Playwright의 `expect()` 매처와 1:1 |
-
-**Testing Library가 곧 "브라우저 안의 Playwright"가 된다.** API가 거의 동일하므로, TestActions 어댑터가 얇아진다.
-
-```
-Playwright (CI)       = page.getByRole + page.keyboard + expect
-TestBot (앱 내)       = screen.getByRole + user.keyboard + waitFor + expect
-                        + 커서 시각화
-```
-
----
-
-## 8. TestBot이 하는 것 / 하지 않는 것 (재정의)
+## 8. TestBot이 하는 것 / 하지 않는 것
 
 ### 한다
 
@@ -220,23 +217,37 @@ TestBot (앱 내)       = screen.getByRole + user.keyboard + waitFor + expect
 |---|---|
 | Playwright 호환 TestActions 인터페이스 | LLM이 한 번 쓰면 양쪽에서 실행 |
 | 시각적 커서 + 스탬프 + 리플 | 사람이 눈으로 검증하는 핵심 도구 |
-| Inspector 패널 통합 | 앱 안에서 즉시 확인 |
+| Inspector 패널 통합 | 앱 안에서 상태까지 확인 — Playwright가 못 하는 영역 |
 | `window.__TESTBOT__` API | LLM 에이전트 피드백 루프 |
-| @testing-library/dom + user-event 내부 사용 | 검증된 쿼리/이벤트 엔진 |
+| 자체 셀렉터 엔진 (selectors.ts) | Playwright 시맨틱에 맞춰 직접 구현 |
 
 ### 하지 않는다
 
 | | 이유 |
 |---|---|
-| 자체 쿼리 엔진 | Testing Library가 더 정확 |
-| 자체 이벤트 시뮬레이션 | user-event가 더 현실적 |
+| @testing-library/dom 의존 | substring/exact 매칭 차이로 래핑 비용 발생 — selectors.ts 직접 수정이 더 가벼움 |
 | CI 실행 | Playwright의 영역 |
 | headless 모드 | 시각적 시연이 존재 이유 |
 | 자체 API 설계 | Playwright 호환이 LLM 친화적 |
 
 ---
 
-## 9. 요약
+## 9. 네이밍: "TestBot" 유지
+
+검토 결과, TestBot이라는 이름은 **what**(테스트를 실행)을 설명하지 **why**(시각적으로 올바름을 확인)를 설명하지 않는다.
+
+검토한 대안: PlayBot (Playboy 연상), Playback (직관성 부족), PlayRunner, StageBot, ShowRunner.
+
+**결론: TestBot 유지.**
+
+- 이미 코드베이스 전체에 정착 (`@os/testBot`, `useTestBotRoutes`, `window.__TESTBOT__`)
+- "Test"가 틀린 건 아니다 — 실제로 테스트 코드를 실행하는 건 맞음
+- 리네이밍 비용 > 이름 정확성에서 얻는 이익
+- 의의는 부제로 보완: **"TestBot — Playwright 테스트를 앱 안에서 시각 재생하는 도구"**
+
+---
+
+## 10. 요약
 
 ```
 LLM이 테스트를 잘 쓴다.

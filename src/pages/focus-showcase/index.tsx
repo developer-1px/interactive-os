@@ -1,5 +1,6 @@
 import { InspectorStore } from "@os/inspector/InspectorStore";
 import { TestBotActions } from "@os/testBot";
+import { usePlaywrightSpecs } from "@os/testBot/playwright/loader";
 import { TestGrid } from "../shared/TestLayout";
 import { ActivateTest } from "./tests/ActivateTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";
@@ -7,14 +8,16 @@ import { AriaInteractionTest } from "./tests/AriaInteractionTest";
 import { AutofocusTest } from "./tests/AutofocusTest";
 import { DismissTest } from "./tests/DismissTest";
 import { ExpandTest } from "./tests/ExpandTest";
-import { useFocusShowcaseRoutes } from "./tests/FocusShowcaseBot";
 import { FocusStackTest } from "./tests/FocusStackTest";
 import { NavigateTest } from "./tests/NavigateTest";
 import { SelectTest } from "./tests/SelectTest";
 import { TabTest } from "./tests/TabTest";
 
+// Playwright spec
+import runFocusShowcase from "../../../e2e/focus-showcase/focus-showcase.spec.ts";
+
 export function FocusShowcasePage() {
-  useFocusShowcaseRoutes();
+  usePlaywrightSpecs("pw-focus-showcase", [runFocusShowcase]);
 
   const runAllTests = () => {
     InspectorStore.setOpen(true);

@@ -1,5 +1,6 @@
 import { OS } from "@os/features/AntigravityOS";
 import { FocusDebugOverlay } from "@os/features/focus/ui/FocusDebugOverlay";
+import { usePlaywrightSpecs } from "@os/testBot/playwright/loader";
 import { useState } from "react";
 import {
   EditorToolbar,
@@ -11,7 +12,9 @@ import {
   type PropertyType,
   type ViewportMode,
 } from "./builder";
-import { useSpatialTestRoutes } from "./builder/SpatialTest";
+
+// Playwright spec
+import runBuilderSpatial from "../../e2e/builder/builder-spatial.spec.ts";
 
 /**
  * BuilderPage
@@ -19,7 +22,7 @@ import { useSpatialTestRoutes } from "./builder/SpatialTest";
  * Visual CMS / Web Builder 데모 - Light Theme
  */
 export default function BuilderPage() {
-  useSpatialTestRoutes();
+  usePlaywrightSpecs("pw-builder-spatial", [runBuilderSpatial]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
   const [selectedType, setSelectedType] = useState<PropertyType>("text"); // Default to text for demo
 

@@ -6,16 +6,36 @@
 import { useFocusExpansion } from "@os/features/focus/hooks/useFocusExpansion";
 import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
 import { FocusItem } from "@os/features/focus/primitives/FocusItem";
-import { useTestBotRoutes } from "@os/testBot";
+import { usePlaywrightSpecs } from "@os/testBot/playwright/loader";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/lib/Icon";
-import { defineAriaRoutes } from "./tests";
+
+// Playwright specs — Vite plugin wraps these in functions
+import runComplexPatterns from "../../../e2e/aria-showcase/complex-patterns.spec.ts";
+import runDisclosure from "../../../e2e/aria-showcase/disclosure.spec.ts";
+import runGrid from "../../../e2e/aria-showcase/grid.spec.ts";
+import runListbox from "../../../e2e/aria-showcase/listbox.spec.ts";
+import runMenu from "../../../e2e/aria-showcase/menu.spec.ts";
+import runRadiogroup from "../../../e2e/aria-showcase/radiogroup.spec.ts";
+import runTabs from "../../../e2e/aria-showcase/tabs.spec.ts";
+import runToolbar from "../../../e2e/aria-showcase/toolbar.spec.ts";
+import runTree from "../../../e2e/aria-showcase/tree.spec.ts";
 
 export function AriaShowcasePage() {
-  // Register TestBot routes; resetKey forces re-mount before each test run
-  const resetKey = useTestBotRoutes("aria-showcase", defineAriaRoutes);
+  // Register Playwright specs as TestBot suites under "aria-showcase" ID
+  usePlaywrightSpecs("aria-showcase", [
+    runTabs,
+    runMenu,
+    runDisclosure,
+    runGrid,
+    runListbox,
+    runRadiogroup,
+    runToolbar,
+    runTree,
+    runComplexPatterns,
+  ]);
 
-  return <AriaShowcaseContent key={resetKey} />;
+  return <AriaShowcaseContent />;
 }
 
 function AriaShowcaseContent() {
@@ -468,11 +488,10 @@ function AriaShowcaseContent() {
                 className={`
                                   w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
                                   flex items-center gap-2 transition-all
-                                  ${
-                                    isComboInvalid
-                                      ? "border-red-300 bg-red-50 text-red-700"
-                                      : "border-gray-200 hover:border-gray-300"
-                                  }
+                                  ${isComboInvalid
+                    ? "border-red-300 bg-red-50 text-red-700"
+                    : "border-gray-200 hover:border-gray-300"
+                  }
                                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
                                   aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
                               `}

@@ -12,6 +12,7 @@ import { evalContext } from "@os/features/logic/lib/evalContext";
 import { InspectorRegistry } from "@os/inspector/InspectorRegistry.ts";
 import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { TestBotPanel } from "@os/testBot";
+import { UnifiedInspectorMock } from "@os/app/debug/inspector/UnifiedInspectorMock.tsx";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 // --- Main Component ---
@@ -124,6 +125,19 @@ export function CommandInspector() {
       document.removeEventListener("focusin", trackFocus);
       document.removeEventListener("focusout", trackFocus);
     };
+  }, []);
+
+  // --- Temporary: Register Unified Mock ---
+  useEffect(() => {
+    // Only register if not already there to prevent dupes/flicker
+    if (!InspectorRegistry.getPanel("UNIFIED")) {
+      InspectorRegistry.register(
+        "UNIFIED",
+        "Vision",
+        <UnifiedInspectorMock />,
+        999 // Order at the end
+      );
+    }
   }, []);
 
   if (!state)
