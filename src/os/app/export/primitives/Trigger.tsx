@@ -1,7 +1,7 @@
 import { logger } from "@os/app/debug/logger.ts";
-import type { BaseCommand } from "@os/entities/BaseCommand.ts";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
-import { FocusItem } from "@os/features/focus/primitives/FocusItem";
+import { FocusItem } from "@/os-new/primitives/FocusItem";
 import type {
   ReactElement,
   MouseEvent as ReactMouseEvent,

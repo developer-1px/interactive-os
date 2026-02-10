@@ -8,7 +8,7 @@ import { DuplicateCard } from "@apps/kanban/features/commands/clipboard";
 import { CloseActionMenu } from "@apps/kanban/features/commands/menu";
 import type { KanbanState, Priority } from "@apps/kanban/model/appState";
 import { Trigger } from "@os/app/export/primitives/Trigger";
-import type { BaseCommand } from "@os/entities/BaseCommand";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import { useEngine } from "@os/features/command/ui/CommandContext";
 import {
   ArrowRight,

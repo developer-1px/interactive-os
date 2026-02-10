@@ -11,7 +11,7 @@ import { Zone } from "@os/app/export/primitives/Zone";
 import { Kbd } from "@os/shared/ui/Kbd";
 
 // Logic Evaluation
-export { evalContext } from "@os/features/logic/lib/evalContext";
+export { evalContext } from "@/os-new/core/logic/evalContext";
 
 // OS Namespace - All primitives in one place
 export const OS = {

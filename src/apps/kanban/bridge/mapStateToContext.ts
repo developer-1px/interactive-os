@@ -1,4 +1,4 @@
-import type { ContextState } from "@os/features/logic/LogicNode";
+import type { ContextState } from "@/os-new/core/logic/LogicNode";
 
 export function mapStateToContext(
   state: any,

@@ -6,9 +6,9 @@
  * Use `options` for advanced per-instance overrides when needed.
  */
 
-import type { BaseCommand } from "@os/entities/BaseCommand";
-import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
-import type { ZoneRole } from "@os/features/focus/registry/roleRegistry";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
+import { FocusGroup } from "@/os-new/primitives/FocusGroup";
+import type { ZoneRole } from "@/os-new/registry/roleRegistry";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -106,4 +106,4 @@ export function Zone({
 }
 
 // Re-export standard focus hooks and types for convenience
-export * from "@os/features/focus/primitives/FocusGroup";
+export * from "@/os-new/primitives/FocusGroup";

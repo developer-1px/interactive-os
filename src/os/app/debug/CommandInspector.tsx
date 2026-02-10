@@ -1,4 +1,5 @@
 import { DataStateViewer } from "@os/app/debug/inspector/DataStateViewer.tsx";
+import { ElementPanel } from "@os/app/debug/inspector/ElementPanel.tsx";
 import { EventStream } from "@os/app/debug/inspector/EventStream.tsx";
 import { KeyMonitor } from "@os/app/debug/inspector/KeyMonitor.tsx";
 import { OSStateViewer } from "@os/app/debug/inspector/OSStateViewer.tsx";
@@ -8,7 +9,7 @@ import { useInputTelemetry } from "@os/app/debug/LoggedKey.ts";
 import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
 import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
 import { FocusData } from "@os/features/focus/lib/focusData";
-import { evalContext } from "@os/features/logic/lib/evalContext";
+import { evalContext } from "@/os-new/core/logic/evalContext";
 import { InspectorRegistry } from "@os/inspector/InspectorRegistry.ts";
 import { useInspectorStore } from "@os/inspector/InspectorStore";
 import { TestBotPanel } from "@os/testBot";
@@ -149,6 +150,8 @@ export function CommandInspector() {
 
   const renderContent = () => {
     switch (activeTab) {
+      case "ELEMENT":
+        return <ElementPanel />;
       case "REGISTRY":
         return (
           <div className="flex-1 flex flex-col overflow-hidden bg-white">

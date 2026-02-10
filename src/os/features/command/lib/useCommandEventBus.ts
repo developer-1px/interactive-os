@@ -1,4 +1,4 @@
-import type { BaseCommand } from "@os/entities/BaseCommand";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import { create } from "zustand";
 
 type CommandHandler = (cmd: BaseCommand) => void;

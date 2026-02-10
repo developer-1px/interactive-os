@@ -1,4 +1,4 @@
-import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
+import { OS_COMMANDS } from "@/os-new/schema/command/OSCommands";
 import { CommandEngineStore } from "@os/features/command/store/CommandEngineStore";
 import { useEffect, useSyncExternalStore } from "react";
 import { FocusData } from "../lib/focusData";

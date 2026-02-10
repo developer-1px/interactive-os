@@ -6,8 +6,8 @@
  * - 등록/해제 코드 불필요
  */
 
-import type { BaseCommand } from "@os/entities/BaseCommand";
-import { activeZoneGuard } from "@os/lib/loopGuard";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
+import { activeZoneGuard } from "@/os-new/lib/loopGuard";
 import type { FocusGroupStore } from "../store/focusGroupStore";
 import type { FocusGroupConfig } from "../types";
 

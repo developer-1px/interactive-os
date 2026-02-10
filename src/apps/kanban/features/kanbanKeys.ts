@@ -23,7 +23,7 @@ import {
 } from "@apps/kanban/features/commands/selection";
 import { OS } from "@os/features/AntigravityOS";
 import type { KeymapConfig } from "@/os-new/1-sensor/keyboard/getCanonicalKey.ts";
-import { createLogicExpect, Rule } from "@os/features/logic/lib/Rule";
+import { createLogicExpect, Rule } from "@/os-new/core/logic/Rule";
 
 interface KanbanContext {
   activeZone: string | null;

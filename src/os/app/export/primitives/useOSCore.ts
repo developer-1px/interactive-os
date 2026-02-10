@@ -5,7 +5,7 @@
  * Called once by OS.Root.
  */
 
-import { OS_COMMANDS } from "@os/features/command/definitions/commandsShell";
+import { OS_COMMANDS } from "@/os-new/schema/command/OSCommands";
 import { ALL_OS_COMMANDS as OS_IMPL } from "@os/features/command/definitions/osCommands";
 import { CommandRegistry } from "@os/features/command/model/createCommandStore";
 import { useCommandEngineStore } from "@os/features/command/store/CommandEngineStore";

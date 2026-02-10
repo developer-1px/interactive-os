@@ -1,4 +1,4 @@
-import { logger } from "@os/app/debug/logger";
+import { logger } from "@/os-new/lib/logger";
 import { useCommandEventBus } from "@os/features/command/lib/useCommandEventBus";
 // Modules
 import {
@@ -20,7 +20,7 @@ import {
   hydrateState,
   type PersistenceConfig,
 } from "@os/features/persistence/hydrateState";
-import { dispatchGuard } from "@os/lib/loopGuard";
+import { dispatchGuard } from "@/os-new/lib/loopGuard";
 import { create } from "zustand";
 
 // Re-exports for consumers

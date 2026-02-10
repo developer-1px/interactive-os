@@ -2,8 +2,8 @@ import { FocusData } from "@os/features/focus/lib/focusData";
 import {
   useFocusGroupContext,
   useFocusGroupStore,
-} from "@os/features/focus/primitives/FocusGroup";
-import { FocusItem } from "@os/features/focus/primitives/FocusItem";
+} from "@/os-new/primitives/FocusGroup";
+import { FocusItem } from "@/os-new/primitives/FocusItem";
 import {
   forwardRef,
   isValidElement,

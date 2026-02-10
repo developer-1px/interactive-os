@@ -1,5 +1,5 @@
-import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
-import { FocusItem } from "@os/features/focus/primitives/FocusItem";
+import { FocusGroup } from "@/os-new/primitives/FocusGroup";
+import { FocusItem } from "@/os-new/primitives/FocusItem";
 import { TestBox } from "../../shared/TestLayout";
 
 export function ActivateTest() {

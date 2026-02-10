@@ -6,7 +6,7 @@
  * 2. 커맨드 라우팅 — 들어온 커맨드를 활성 앱의 dispatch로 전달
  */
 
-import type { BaseCommand } from "@os/entities/BaseCommand";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
 import type { CommandRegistry } from "@os/features/command/model/createCommandStore";
 
 import { create } from "zustand";

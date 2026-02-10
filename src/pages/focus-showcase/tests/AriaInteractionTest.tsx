@@ -1,7 +1,7 @@
 import { Field } from "@os/app/export/primitives/Field";
 import { Trigger } from "@os/app/export/primitives/Trigger";
-import { FocusGroup } from "@os/features/focus/primitives/FocusGroup";
-import { FocusItem } from "@os/features/focus/primitives/FocusItem";
+import { FocusGroup } from "@/os-new/primitives/FocusGroup";
+import { FocusItem } from "@/os-new/primitives/FocusItem";
 import { useState } from "react";
 import { TestBox } from "../../shared/TestLayout";
 

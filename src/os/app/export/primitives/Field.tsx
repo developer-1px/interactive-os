@@ -1,19 +1,19 @@
 import type {
   BaseCommand,
   FieldCommandFactory,
-} from "@os/entities/BaseCommand.ts";
-import type { FocusTarget } from "@os/entities/FocusTarget.ts";
+} from "@/os-new/schema/command/BaseCommand";
+import type { FocusTarget } from "@/os-new/schema/focus/FocusTarget";
 import { FocusData } from "@os/features/focus/lib/focusData";
 import {
   useFocusGroupContext,
   useFocusGroupStore,
-} from "@os/features/focus/primitives/FocusGroup";
-import { FocusItem } from "@os/features/focus/primitives/FocusItem";
+} from "@/os-new/primitives/FocusGroup";
+import { FocusItem } from "@/os-new/primitives/FocusItem";
 import {
   type FieldConfig,
   FieldRegistry,
   useFieldRegistry,
-} from "@os/features/keyboard/registry/FieldRegistry";
+} from "@/os-new/3-store/FieldRegistry";
 import { useFieldFocus } from "@os/features/keyboard/ui/Field/useFieldHooks";
 import type { HTMLAttributes } from "react";
 import {

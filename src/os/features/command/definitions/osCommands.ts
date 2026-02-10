@@ -1,5 +1,5 @@
 import type { CommandDefinition } from "@os/entities/CommandDefinition";
-import { OS_COMMANDS as SHELL_COMMANDS } from "@os/features/command/definitions/commandsShell";
+import { OS_COMMANDS as SHELL_COMMANDS } from "@/os-new/schema/command/OSCommands";
 import { InspectorStore } from "@os/inspector/InspectorStore";
 
 export const OS_COMMANDS = SHELL_COMMANDS;
