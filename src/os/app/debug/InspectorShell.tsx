@@ -1,6 +1,7 @@
 import { CommandInspector } from "@os/app/debug/CommandInspector";
 import { InspectorActivityBar } from "@os/app/debug/InspectorActivityBar";
 import { useInspectorStore } from "@os/inspector/InspectorStore";
+import { StampOverlay } from "@os/testBot/widgets/StampOverlay";
 import { useCallback, useRef, useState } from "react";
 
 const MIN_WIDTH = 260;
@@ -22,7 +23,10 @@ export function InspectorShell() {
       const onMove = (ev: PointerEvent) => {
         // Panel is on the right side, so dragging left = wider
         const delta = startX - ev.clientX;
-        const next = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + delta));
+        const next = Math.min(
+          MAX_WIDTH,
+          Math.max(MIN_WIDTH, startWidth + delta),
+        );
         setWidth(next);
       };
 
@@ -63,6 +67,9 @@ export function InspectorShell() {
 
       {/* Always Visible Activity Bar */}
       <InspectorActivityBar />
+
+      {/* Position-tracked PASS/FAIL stamps (portal to body) */}
+      <StampOverlay />
     </div>
   );
 }

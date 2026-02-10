@@ -263,7 +263,8 @@ export function createActions(
     errorMsg?: string,
     selector?: string,
   ) => {
-    cursor.showStatus(passed ? "pass" : "fail", selector);
+    const el = selector ? document.querySelector(selector) : null;
+    cursor.showStatus(passed ? "pass" : "fail", selector, el ?? undefined);
 
     let finalError = errorMsg;
     if (!passed && errorMsg) {

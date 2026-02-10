@@ -10,6 +10,7 @@
  */
 
 import type { BotCursor, BubbleVariant } from "../entities/BotCursor";
+import { addStamp, clearAllStamps } from "./TestBotStore";
 
 // Re-export for consumers that import from this module
 export type { BotCursor, BubbleVariant } from "../entities/BotCursor";
@@ -45,43 +46,7 @@ const STYLES = `
     filter: blur(4px);
   }
 
-  /* ── Status Stamps (Footprints) ─────────────────────────────────── */
-  .testbot-stamp {
-    position: absolute;
-    z-index: 99990; /* Below cursor/bubbles but above content */
-    pointer-events: none;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    padding: 3px 8px;
-    border-radius: 6px;
-    white-space: nowrap;
-    border: 2px solid;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    transform-origin: center center;
-    animation: testbot-stamp-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  }
-
-  .testbot-stamp.pass {
-    color: #15803d;
-    background: #dcfce7; /* Green-100 */
-    border-color: #16a34a; /* Green-600 */
-    transform: rotate(-5deg); /* Playful tilt */
-  }
-
-  .testbot-stamp.fail {
-    color: #991b1b;
-    background: #fee2e2; /* Red-100 */
-    border-color: #dc2626; /* Red-600 */
-    transform: rotate(5deg);
-    z-index: 99991; /* Fail on top */
-  }
-
-  @keyframes testbot-stamp-pop {
-    0% { opacity: 0; transform: scale(1.5) rotate(0deg); }
-    100% { opacity: 1; transform: scale(1) rotate(var(--rotation)); }
-  }
+  /* Stamp styles are in StampOverlay.css (React-managed) */
 
   /* ── Unified Bubble Tray (Horizontal) ───────────────────────────── */
   .testbot-bubble-tray {
@@ -148,10 +113,7 @@ const STYLES = `
     100% { transform: translateY(0) scale(1); opacity: 1; }
   }
 
-  @keyframes testbot-stamp-fadeout {
-    0% { opacity: 1; transform: scale(1) rotate(var(--rotation)); }
-    100% { opacity: 0; transform: scale(0.9) rotate(var(--rotation)); }
-  }
+  /* Stamp fadeout is in StampOverlay.css (React-managed) */
 
   /* ── Ripple ─────────────────────────────────────────────────────── */
   .testbot-ripple {
@@ -340,55 +302,15 @@ export function createCursor(): BotCursor {
       bubbleTray.firstElementChild?.remove();
   };
 
-  const showStatus = (type: "pass" | "fail", selector?: string) => {
-    // 1. Determine Position
-    let stampX = x; // Fallback to cursor pos
-    let stampY = y;
-
-    if (selector) {
-      const el = document.querySelector(selector);
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        // Center of element (viewport coordinates)
-        stampX = rect.left + rect.width / 2;
-        stampY = rect.top + rect.height / 2;
-      }
-    }
-
-    // 2. Create Stamp
-    const stamp = document.createElement("div");
-    stamp.className = `testbot-stamp ${type}`;
-    stamp.textContent = type === "pass" ? "PASS!" : "FAIL!";
-
-    // Random rotation for natural stamp look
-    const rotation = Math.random() * 10 - 5 + (type === "fail" ? 5 : -5);
-    stamp.style.setProperty("--rotation", `${rotation}deg`);
-
-    // Position: FIXED relative to viewport
-    // (User requested this approach for now due to limitations with absolute/child method)
-    stamp.style.position = "fixed";
-    stamp.style.left = `${stampX}px`;
-    stamp.style.top = `${stampY}px`;
-
-    // Center alignment
-    stamp.style.marginLeft = "-20px";
-    stamp.style.marginTop = "-12px";
-
-    document.body.appendChild(stamp);
-
-    // 3. Lifecycle
-    if (type === "pass") {
-      // Fade out PASS stamps using keyframe animation for reliability
-      setTimeout(() => {
-        // Apply animation class or inline style for keyframe
-        stamp.style.animation = "testbot-stamp-fadeout 1.5s linear forwards";
-        setTimeout(() => stamp.remove(), 1500);
-      }, 1000); // Visible for 1s
-    } else {
-      // FAIL stamps stay forever (until destroyed or manually cleared)
-      // Optional: Add a close button or clear on re-run?
-      // For now, let's keep them as requested.
-    }
+  const showStatus = (
+    type: "pass" | "fail",
+    selector?: string,
+    el?: Element,
+  ) => {
+    // Resolve element: prefer passed ref, fallback to selector query
+    const targetEl = el ?? (selector ? document.querySelector(selector) : null);
+    if (!targetEl) return; // No element to stamp
+    addStamp(type, targetEl, selector ?? "");
   };
 
   const showOffScreenPtr = (tx: number, ty: number) => {
@@ -438,9 +360,7 @@ export function createCursor(): BotCursor {
   };
 
   const clearStamps = () => {
-    document.querySelectorAll(".testbot-stamp").forEach((el) => {
-      el.remove();
-    });
+    clearAllStamps();
   };
 
   const destroy = () => {

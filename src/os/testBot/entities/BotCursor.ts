@@ -7,7 +7,7 @@ export interface BotCursor {
   /** Show a bubble (Keycap style) above the cursor */
   showBubble(label: string, variant?: BubbleVariant): void;
   /** Show a stamp on the target element (Pass/Fail) */
-  showStatus(type: "pass" | "fail", selector?: string): void;
+  showStatus(type: "pass" | "fail", selector?: string, el?: Element): void;
   /** Show an indicator for off-screen element */
   showOffScreenPtr(targetX: number, targetY: number): void;
   hideOffScreenPtr(): void;

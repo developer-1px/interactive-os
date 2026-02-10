@@ -8,10 +8,13 @@
 
 import {
   AlertTriangle,
+  ArrowRightLeft,
   Check,
   ChevronDown,
   Command,
   Database,
+  GitBranch,
+  Hash,
   Layers,
   MousePointer2,
 } from "lucide-react";
@@ -203,174 +206,153 @@ function TimelineNode({
 
   return (
     <div
-      className={`flex border-b border-[#f0f0f0] ${expanded ? "bg-white" : "hover:bg-[#fafafa]"}`}
+      className={`flex flex-col border-b border-[#f0f0f0] ${expanded ? "bg-white" : "hover:bg-[#fafafa]"}`}
     >
-      {/* Gutter */}
+      {/* Header Row (Icon + Number + Text — all middle-aligned) */}
       <button
         type="button"
         onClick={onToggle}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") onToggle();
         }}
-        className="w-10 shrink-0 flex flex-col items-center pt-2 cursor-pointer select-none gap-0.5 bg-transparent border-none p-0"
+        className="flex items-center gap-2 px-2 py-2 cursor-pointer bg-transparent border-none text-left w-full"
       >
+        {/* Icon */}
         <div
-          className={`w-5 h-5 rounded-full border flex items-center justify-center bg-white shadow-sm ${isFail ? "text-[#e53e3e] border-[#fecaca]" : "text-[#64748b] border-[#e2e8f0]"}`}
+          className={`w-5 h-5 shrink-0 rounded-full border flex items-center justify-center bg-white shadow-sm ${isFail ? "text-[#e53e3e] border-[#fecaca]" : "text-[#64748b] border-[#e2e8f0]"}`}
         >
           {icon}
         </div>
-        <span className="text-[8px] font-mono text-[#b0b8c4] leading-none">
-          {index}
+
+        {/* #Number + Input */}
+        <span className="font-mono text-[9px] text-[#a0aec0] font-bold select-none">
+          #{index}
+        </span>
+        <span
+          className={`font-bold text-[11px] truncate ${isFail ? "text-[#dc2626]" : "text-[#1e293b]"}`}
+        >
+          {evt.input.raw}
+        </span>
+
+        {/* Command Badge */}
+        {evt.command && !isFail && (
+          <span className="px-1 py-px rounded bg-[#eff6ff] text-[#2563eb] text-[9px] font-semibold border border-[#bfdbfe]">
+            {evt.command.type}
+          </span>
+        )}
+
+        {/* Time */}
+        <span className="ml-auto text-[9px] text-[#cbd5e1] font-mono tabular-nums shrink-0">
+          {evt.time.split(".")[0]}
         </span>
       </button>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0 py-1.5 pr-2">
-        {/* Header */}
-        <button
-          type="button"
-          onClick={onToggle}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") onToggle();
-          }}
-          className="flex items-baseline gap-1.5 cursor-pointer leading-tight bg-transparent border-none p-0 text-left w-full"
-        >
-          <span
-            className={`font-bold text-[11px] ${isFail ? "text-[#dc2626]" : "text-[#1e293b]"}`}
-          >
-            {evt.input.raw}
-          </span>
-          {evt.command && !isFail && (
-            <span className="px-1 py-px rounded bg-[#eff6ff] text-[#2563eb] text-[9px] font-semibold border border-[#bfdbfe]">
-              {evt.command.type}
-            </span>
-          )}
-          <span className="ml-auto text-[9px] text-[#cbd5e1] font-mono tabular-nums">
-            {evt.time.split(".")[0]}
-          </span>
-        </button>
-
-        {/* Collapsed Summary */}
-        {!expanded && (
-          <div className="flex items-center gap-1 mt-1 text-[9px] text-[#94a3b8]">
-            {evt.pipeline.map((s) => (
-              <span key={s.name} className="flex items-center gap-0.5">
+      {/* Expanded */}
+      {expanded && (
+        <div className="flex flex-col gap-2 pl-9 pr-2 pb-3">
+          {/* ── Pipeline ── */}
+          <Section title="Pipeline">
+            {evt.pipeline.map((step) => (
+              <Row key={step.name}>
                 <span
-                  className={`inline-block w-1 h-1 rounded-full ${s.status === "pass" ? "bg-[#22c55e]" : s.status === "fail" ? "bg-[#ef4444]" : "bg-[#d1d5db]"}`}
+                  className={`inline-block w-1 h-1 rounded-full shrink-0 ${step.status === "pass" ? "bg-[#22c55e]" : step.status === "fail" ? "bg-[#ef4444]" : "bg-[#d1d5db]"}`}
                 />
                 <span
-                  className={
-                    s.status === "fail" ? "text-[#dc2626] font-bold" : ""
-                  }
+                  className={`font-mono font-bold w-10 shrink-0 ${step.status === "pass" ? "text-[#475569]" : step.status === "fail" ? "text-[#dc2626]" : "text-[#94a3b8]"}`}
                 >
-                  {s.name}
+                  {step.name}
                 </span>
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Expanded */}
-        {expanded && (
-          <div className="mt-2 flex flex-col gap-0">
-            {/* ── Pipeline ── */}
-            <Section title="Pipeline">
-              {evt.pipeline.map((step) => (
-                <Row key={step.name}>
+                {step.detail && (
                   <span
-                    className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${step.status === "pass" ? "bg-[#22c55e]" : step.status === "fail" ? "bg-[#ef4444]" : "bg-[#d1d5db]"}`}
+                    className={`truncate ${step.status === "fail" ? "text-[#ef4444] font-bold" : "text-[#64748b]"}`}
+                  >
+                    {step.detail}
+                  </span>
+                )}
+              </Row>
+            ))}
+          </Section>
+
+          {/* ── State ── */}
+          {!isNoOp && evt.diffs.length > 0 && (
+            <Section title="State">
+              {evt.diffs.map((d) => (
+                <Row key={d.path}>
+                  <ArrowRightLeft
+                    size={9}
+                    className="text-[#94a3b8] shrink-0"
                   />
                   <span
-                    className={`font-mono font-bold w-10 shrink-0 ${step.status === "pass" ? "text-[#475569]" : step.status === "fail" ? "text-[#dc2626]" : "text-[#94a3b8]"}`}
+                    className="text-[#475569] font-mono truncate"
+                    title={d.path}
                   >
-                    {step.name}
+                    {d.path}
                   </span>
-                  {step.detail && (
-                    <span
-                      className={`truncate ${step.status === "fail" ? "text-[#ef4444] font-bold" : "text-[#64748b]"}`}
-                    >
-                      {step.detail}
+                  <span className="ml-auto flex items-center gap-1 shrink-0 font-mono">
+                    <span className="text-[#ef4444] line-through opacity-60">
+                      {d.from}
+                    </span>
+                    <span className="text-[#cbd5e1]">→</span>
+                    <span className="text-[#16a34a] font-bold">{d.to}</span>
+                  </span>
+                </Row>
+              ))}
+            </Section>
+          )}
+
+          {/* ── Effects ── */}
+          {!isNoOp && evt.effects.length > 0 && (
+            <Section title="Effects">
+              {evt.effects.map((eff) => (
+                <Row key={`${eff.source}-${eff.action}-${eff.targetId}`}>
+                  {eff.ok ? (
+                    <Check size={9} className="text-[#16a34a] shrink-0" />
+                  ) : (
+                    <AlertTriangle
+                      size={9}
+                      className="text-[#ef4444] shrink-0"
+                    />
+                  )}
+                  <span className="font-mono text-[#334155]">
+                    {eff.action}
+                    <span className="text-[#94a3b8]">
+                      ({eff.targetId || "global"})
+                    </span>
+                  </span>
+                  {!eff.ok && (
+                    <span className="text-[#dc2626] italic ml-auto shrink-0">
+                      — {eff.reason}
                     </span>
                   )}
                 </Row>
               ))}
             </Section>
+          )}
 
-            {/* ── State ── */}
-            {!isNoOp && evt.diffs.length > 0 && (
-              <Section title="State">
-                {evt.diffs.map((d) => (
-                  <Row key={d.path}>
-                    <span
-                      className="text-[#475569] font-mono truncate"
-                      title={d.path}
-                    >
-                      {d.path}
-                    </span>
-                    <span className="ml-auto flex items-center gap-1 shrink-0 font-mono">
-                      <span className="text-[#ef4444] line-through opacity-60">
-                        {d.from}
-                      </span>
-                      <span className="text-[#cbd5e1]">→</span>
-                      <span className="text-[#16a34a] font-bold">{d.to}</span>
-                    </span>
-                  </Row>
-                ))}
-              </Section>
-            )}
+          {/* ── Kernel ── */}
+          {!isNoOp && evt.kernel && (
+            <Section title="Kernel">
+              <Row>
+                <Hash size={9} className="text-[#94a3b8] shrink-0" />
+                <span className="text-[#94a3b8] shrink-0">handler</span>
+                <span className="font-mono text-[#2563eb] font-bold">
+                  {evt.kernel.handlerScope}
+                </span>
+              </Row>
+              <Row>
+                <GitBranch size={9} className="text-[#94a3b8] shrink-0" />
+                <span className="text-[#94a3b8] shrink-0">path</span>
+                <span className="text-[#475569]">
+                  {evt.kernel.bubblePath.join(" › ")}
+                </span>
+              </Row>
+            </Section>
+          )}
 
-            {/* ── Effects ── */}
-            {!isNoOp && evt.effects.length > 0 && (
-              <Section title="Effects">
-                {evt.effects.map((eff) => (
-                  <Row key={`${eff.source}-${eff.action}-${eff.targetId}`}>
-                    {eff.ok ? (
-                      <Check size={9} className="text-[#16a34a] shrink-0" />
-                    ) : (
-                      <AlertTriangle
-                        size={9}
-                        className="text-[#ef4444] shrink-0"
-                      />
-                    )}
-                    <span className="font-mono text-[#334155]">
-                      {eff.action}
-                      <span className="text-[#94a3b8]">
-                        ({eff.targetId || "global"})
-                      </span>
-                    </span>
-                    {!eff.ok && (
-                      <span className="text-[#dc2626] italic ml-auto shrink-0">
-                        — {eff.reason}
-                      </span>
-                    )}
-                  </Row>
-                ))}
-              </Section>
-            )}
-
-            {/* ── Kernel ── */}
-            {!isNoOp && evt.kernel && (
-              <Section title="Kernel">
-                <Row>
-                  <span className="text-[#94a3b8] shrink-0">handler</span>
-                  <span className="font-mono text-[#2563eb] font-bold">
-                    {evt.kernel.handlerScope}
-                  </span>
-                </Row>
-                <Row>
-                  <span className="text-[#94a3b8] shrink-0">path</span>
-                  <span className="text-[#475569]">
-                    {evt.kernel.bubblePath.join(" › ")}
-                  </span>
-                </Row>
-              </Section>
-            )}
-
-            {/* ── Snapshot ── */}
-            {evt.snapshot && <RawDataToggle data={evt.snapshot} />}
-          </div>
-        )}
-      </div>
+          {/* ── Snapshot ── */}
+          {evt.snapshot && <RawDataToggle data={evt.snapshot} />}
+        </div>
+      )}
     </div>
   );
 }
@@ -386,7 +368,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-t border-[#f1f5f9] pt-1.5 pb-1 mt-1 first:border-0 first:mt-0 first:pt-0">
+    <div>
       <div className="text-[8px] font-bold uppercase tracking-wider text-[#94a3b8] mb-1">
         {title}
       </div>
@@ -409,7 +391,7 @@ function Row({ children }: { children: React.ReactNode }) {
 function RawDataToggle({ data }: { data: Record<string, unknown> }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-t border-[#f1f5f9] pt-1.5 mt-1">
+    <div>
       <button
         type="button"
         onClick={() => setOpen(!open)}
