@@ -11,12 +11,10 @@
 
 import type { AppDefinition } from "@os/core/application/defineApplication";
 import { ALL_OS_COMMANDS } from "@os/core/command/definitions/osCommands";
-import { resolveFocusMiddleware } from "@os/core/command/middleware/resolveFocusMiddleware";
 import {
   CommandRegistry,
   createCommandStore,
 } from "@os/core/command/model/createCommandStore";
-import { historyMiddleware, navigationMiddleware } from "@os/middleware";
 
 export function createEngine<S>(definition: AppDefinition<S>) {
   const registry = new CommandRegistry<S>();
@@ -33,9 +31,6 @@ export function createEngine<S>(definition: AppDefinition<S>) {
       ? { persistence: definition.model.persistence }
       : {}),
     middleware: [
-      resolveFocusMiddleware, // PRE: resolve OS.FOCUS
-      navigationMiddleware, // POST: effects → zone state
-      historyMiddleware, // POST: undo/redo recording
       ...(definition.middleware || []), // App custom
     ],
   });

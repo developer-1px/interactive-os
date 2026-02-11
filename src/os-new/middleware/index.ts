@@ -7,11 +7,4 @@
  * Execution order: navigation → history → app middleware
  */
 
-export { historyMiddleware } from "./historyMiddleware";
-export { navigationMiddleware } from "./navigationMiddleware";
-export type {
-  HistoryEntry,
-  HistoryState,
-  OSManagedState,
-  OSMiddleware,
-} from "./types";
+export { historyKernelMiddleware } from "./historyKernelMiddleware";
