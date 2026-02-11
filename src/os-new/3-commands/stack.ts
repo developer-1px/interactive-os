@@ -8,7 +8,7 @@
 import { produce } from "immer";
 import { kernel } from "../kernel";
 import { ensureZone } from "../state/utils";
-import { logger } from "../lib/logger";
+
 
 // ═══════════════════════════════════════════════════════════════════
 // PUSH
@@ -31,11 +31,7 @@ export const STACK_PUSH = kernel.defineCommand(
         ? (ctx.state.os.focus.zones[currentZoneId]?.focusedItemId ?? null)
         : null;
 
-      logger.debug("FOCUS", "[STACK_PUSH]", {
-        currentZoneId,
-        currentItemId,
-        triggeredBy: payload.triggeredBy,
-      });
+
 
       return {
         state: produce(ctx.state, (draft) => {
@@ -57,14 +53,14 @@ export const STACK_PUSH = kernel.defineCommand(
 
 export const STACK_POP = kernel.defineCommand("OS_STACK_POP", (ctx) => () => {
   const stack = ctx.state.os.focus.focusStack;
-  logger.debug("FOCUS", "[STACK_POP] depth:", stack.length);
+
 
   if (stack.length === 0) return;
 
   // Peek to get the target state
   const entry = stack[stack.length - 1];
   if (!entry) return;
-  logger.debug("FOCUS", "[STACK_POP] restoring:", entry);
+
 
   if (!entry.zoneId) {
     // Invalid entry, just pop and do nothing

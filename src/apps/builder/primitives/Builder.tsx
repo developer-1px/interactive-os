@@ -22,7 +22,7 @@
 import { forwardRef, type ReactElement, useLayoutEffect, useRef } from "react";
 import { kernel } from "@/os-new/kernel";
 import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
-import { composeRefs, Slot } from "@/os-new/shared/Slot";
+import { composeRefs, Slot } from "./Slot";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types

@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
     getCaretPosition,
     setCaretPosition,
-} from "@/os-new/lib/getCaretPosition";
+} from "./getCaretPosition";
 
 // --- Types ---
 interface UseFieldStateProps {

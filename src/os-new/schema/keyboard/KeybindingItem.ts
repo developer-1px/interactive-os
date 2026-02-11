@@ -1,4 +1,4 @@
-import type { LogicNode } from "../../lib/logic/LogicNode";
+import type { LogicNode } from "../logic/LogicNode";
 
 export interface KeybindingItem<T = string> {
   key: string;

@@ -12,7 +12,7 @@ import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotPanel } from "@inspector/testbot";
 import { todoSlice } from "@apps/todo/app";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { kernel } from "@/os-new/kernel";
 
 // --- Main Component ---

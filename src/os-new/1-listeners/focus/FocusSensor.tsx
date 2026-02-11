@@ -14,8 +14,8 @@ import { kernel } from "../../kernel";
 import {
   findFocusableItem,
   resolveFocusTarget,
-} from "../../lib/focusDOMQueries.ts";
-import { sensorGuard } from "../../lib/loopGuard.ts";
+} from "./focusDOMQueries";
+import { sensorGuard } from "./loopGuard";
 
 let isMounted = false;
 

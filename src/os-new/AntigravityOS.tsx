@@ -9,10 +9,10 @@ import { Modal } from "@os/6-components/Modal";
 import { Root } from "@os/6-components/Root";
 import { Trigger } from "@os/6-components/Trigger";
 import { Zone } from "@os/6-components/Zone";
-import { Kbd } from "@os/shared/ui/Kbd";
+import { Kbd } from "@/os-new/6-components/Kbd";
 
 // Logic Evaluation
-export { evalContext } from "@/os-new/lib/logic/evalContext";
+export { evalContext } from "@/os-new/schema/logic/evalContext";
 
 // OS Namespace - All primitives in one place
 export const OS = {

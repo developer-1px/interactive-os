@@ -1,6 +1,6 @@
 import type { TodoContext } from "@apps/todo/logic/schema";
 import { OS } from "@os/AntigravityOS";
-import { createLogicExpect, Rule } from "@/os-new/lib/logic/Rule";
+import { createLogicExpect, Rule } from "@/os-new/schema/logic/Rule";
 import type { KeymapConfig } from "@/os-new/lib/getCanonicalKey.ts";
 
 // Command Imports (Direct References)
