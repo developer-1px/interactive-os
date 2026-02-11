@@ -88,8 +88,17 @@ export function registerAppSlice<S>(
         apps: { ...prev.apps, [appId]: startState },
     }));
 
-    // 3. Create scoped group for app commands
-    const appGroup = kernel.group({ scope });
+    // 3. Create scoped group with state lens (ownership isolation)
+    const appGroup = kernel.group({
+        scope,
+        stateSlice: {
+            get: (full: AppState) => full.apps[appId] as S,
+            set: (full: AppState, slice: unknown) => ({
+                ...full,
+                apps: { ...full.apps, [appId]: slice },
+            }),
+        },
+    });
 
     // 4. Context token for commands to read app state
     const AppStateToken = appGroup.defineContext(

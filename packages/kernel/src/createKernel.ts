@@ -79,6 +79,15 @@ export function createKernel<S>(initialState: S) {
   // Enables automatic bubble path expansion in dispatch().
   const parentMap = new Map<string, string>();
 
+  // ─── State Lens (closure) ───
+  // Per-scope get/set for state isolation (ownership scoping).
+  // If a scope has a lens, its handlers see only the scoped slice.
+  type StateLens = {
+    get: (full: S) => unknown;
+    set: (full: S, slice: unknown) => S;
+  };
+  const scopeStateLens = new Map<string, StateLens>();
+
   // ─── Context Providers (closure) ───
 
   const contextProviders = new Map<string, () => unknown>();
@@ -257,9 +266,12 @@ export function createKernel<S>(initialState: S) {
       }
 
       // 4. Execute handler
+      //    State lens: scope with a registered lens sees only its slice
+      const lens = scopeStateLens.get(currentScope);
+      const scopedState = lens ? lens.get(mwCtx.state as S) : mwCtx.state;
       const injectedMap = mwCtx.injected;
       const ctx = {
-        state: mwCtx.state,
+        state: scopedState,
         ...injectedMap,
         inject: (token: { __id: string }) => injectedMap[token.__id],
       };
@@ -293,9 +305,9 @@ export function createKernel<S>(initialState: S) {
       break; // handled → stop
     }
 
-    // 7. Execute effects
+    // 7. Execute effects (pass handlerScope for state lens merging)
     if (result) {
-      executeEffects(result, path);
+      executeEffects(result, path, handlerScope);
     }
 
     const stateAfter = state;
@@ -317,12 +329,21 @@ export function createKernel<S>(initialState: S) {
   function executeEffects(
     effectMap: Record<string, unknown>,
     scopePath: string[],
+    handlerScope?: string,
   ): void {
     for (const [key, value] of Object.entries(effectMap)) {
       if (value === undefined) continue;
 
       if (key === "state") {
-        setState(() => value as S);
+        // State lens: scoped handlers return only their slice → merge back
+        const lens = handlerScope
+          ? scopeStateLens.get(handlerScope)
+          : undefined;
+        if (lens) {
+          setState((prev) => lens.set(prev, value));
+        } else {
+          setState(() => value as S);
+        }
         continue;
       }
 
@@ -491,6 +512,11 @@ export function createKernel<S>(initialState: S) {
       group<NewTokens extends ContextToken[] = []>(config: {
         scope?: ScopeToken;
         inject?: [...NewTokens];
+        /** State lens for scope isolation. Handlers see only the scoped slice. */
+        stateSlice?: {
+          get: (full: S) => unknown;
+          set: (full: S, slice: unknown) => S;
+        };
       }) {
         const childScope = config.scope ? (config.scope as string) : scope;
         const childTokens = (config.inject ?? []) as NewTokens;
@@ -498,6 +524,11 @@ export function createKernel<S>(initialState: S) {
         // Record parent-child relationship in scope tree
         if (childScope !== scope) {
           parentMap.set(childScope, scope);
+        }
+
+        // Register state lens for this scope
+        if (config.stateSlice) {
+          scopeStateLens.set(childScope, config.stateSlice);
         }
 
         return createGroup<E, NewTokens>(childScope, childTokens);
