@@ -7,7 +7,7 @@
  * NOTE: This is a PROJECTION-ONLY component.
  * - Does NOT handle events (click, keydown)
  * - Only reflects state (tabIndex, data-*, aria-*)
- * - Event handling is done by FocusSensor
+ * - Event handling is done by FocusListener
  */
 
 import {

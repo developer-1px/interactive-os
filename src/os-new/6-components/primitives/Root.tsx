@@ -1,20 +1,16 @@
 /**
  * OS.Root - Global OS Infrastructure Shell
  *
- * Mounts global singletons for each pipeline:
- * - Keyboard: Sensor → Intent
- * - Focus: Sensor → Intent → Sync
- * - Clipboard: Sensor (DOM events) + Intent (programmatic)
- * - History: Intent (keybinding-based undo/redo)
+ * Mounts global listener singletons for the OS pipeline:
+ * - KeyboardListener: keydown → keybinding resolve → kernel.dispatch
+ * - FocusListener: mousedown + focusin + MutationObserver → FOCUS/SYNC_FOCUS/RECOVER
+ * - ClipboardListener: native copy/cut/paste → Zone command routing
  */
 
-// Focus recovery is handled by FocusSensor's MutationObserver (RECOVER command)
 import type React from "react";
-import { ClipboardIntent } from "@os/1-listeners/clipboard/ClipboardIntent.tsx";
-import { ClipboardSensor } from "@os/1-listeners/clipboard/ClipboardSensor.tsx";
-import { FocusSensor } from "@os/1-listeners/focus/FocusSensor.tsx";
-import { HistoryIntent } from "@os/1-listeners/history/HistoryIntent.tsx";
-import { KeyboardListener } from "@os/1-listeners/KeyboardListener.tsx";
+import { ClipboardListener } from "@os/1-listeners/ClipboardListener";
+import { FocusListener } from "@os/1-listeners/FocusListener";
+import { KeyboardListener } from "@os/1-listeners/KeyboardListener";
 
 // Register kernel effects and contexts (side-effect imports)
 import "@os/4-effects";
@@ -29,28 +25,15 @@ export interface RootProps {
  * Initializes global infrastructure and OS-level commands.
  */
 export function Root({ children }: RootProps) {
-  // OS-level Focus Recovery
-  // Focus recovery handled by FocusSensor MutationObserver
-
   return (
     <>
-      {/* Keyboard Pipeline (Kernel) */}
       <KeyboardListener />
-
-      {/* Focus Pipeline */}
-      <FocusSensor />
-
-      {/* Clipboard Pipeline (DOM events + programmatic) */}
-      <ClipboardSensor />
-      <ClipboardIntent />
-
-      {/* History Pipeline (keybinding-based) */}
-      <HistoryIntent />
-
-      {/* Child Apps */}
+      <FocusListener />
+      <ClipboardListener />
       {children}
     </>
   );
 }
 
 Root.displayName = "OS.Root";
+

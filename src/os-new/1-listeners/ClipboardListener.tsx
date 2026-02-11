@@ -1,5 +1,5 @@
 /**
- * ClipboardSensor - Browser Native Clipboard Event Handler
+ * ClipboardListener - Browser Native Clipboard Event Handler
  *
  * Catches native `copy`, `cut`, `paste` DOM events and routes them
  * to the active Zone's bound commands. This replaces per-app
@@ -21,7 +21,7 @@ function isInputActive(): boolean {
   );
 }
 
-export function ClipboardSensor() {
+export function ClipboardListener() {
   useEffect(() => {
     const handleCopy = (e: ClipboardEvent) => {
       if (isInputActive()) return;
@@ -58,4 +58,4 @@ export function ClipboardSensor() {
   return null;
 }
 
-ClipboardSensor.displayName = "ClipboardSensor";
+ClipboardListener.displayName = "ClipboardListener";

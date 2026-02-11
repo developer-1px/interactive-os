@@ -29,7 +29,7 @@ export function TodoToolbar() {
         <div className="flex px-4 py-3 bg-white border-b border-slate-200 justify-between items-center sticky top-0 z-10">
             {/* Left: View Toggle */}
             <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-                <Trigger onPress={ToggleView({})}>
+                <Trigger onPress={ToggleView()}>
                     <button
                         className={`
               p-1.5 rounded-md transition-all flex items-center justify-center
@@ -40,7 +40,7 @@ export function TodoToolbar() {
                         <List size={16} />
                     </button>
                 </Trigger>
-                <Trigger onPress={ToggleView({})}>
+                <Trigger onPress={ToggleView()}>
                     <button
                         className={`
               p-1.5 rounded-md transition-all flex items-center justify-center

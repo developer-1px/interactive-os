@@ -8,7 +8,7 @@
  * Side-effect import: `import "@inspector/register"`
  */
 
-import { Keybindings } from "@/os-new/1-listeners/keybindings";
+import { Keybindings } from "@/os-new/keymaps/keybindings";
 import { kernel } from "@/os-new/kernel";
 import { InspectorStore } from "./stores/InspectorStore";
 

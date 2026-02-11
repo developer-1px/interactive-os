@@ -60,6 +60,8 @@ export type CommandFactory<Type extends string = string, Payload = void> = {
   ): Command<Type, Payload>;
   /** The command type string (for debugging/inspection). */
   readonly commandType: Type;
+  /** Alias for commandType — matches FieldCommandFactory interface. */
+  readonly id: string;
 };
 
 // ─── Scope constants ───

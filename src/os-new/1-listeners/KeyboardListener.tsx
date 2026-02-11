@@ -11,10 +11,10 @@
 import { useEffect } from "react";
 import { kernel } from "../kernel";
 import { getCanonicalKey } from "./getCanonicalKey";
-import { Keybindings, type KeyResolveContext } from "./keybindings";
+import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
 
 // Ensure OS defaults are registered
-import "./osDefaults";
+import "@os/keymaps/osDefaults";
 
 export function KeyboardListener() {
   useEffect(() => {

@@ -172,7 +172,7 @@ export const UpdateTodoText = todoSlice.group.defineCommand(
   "UPDATE_TODO_TEXT",
   [],
   (ctx: { state: AppState }) =>
-    (_payload?: { text: string }) => ({
+    (_payload: { text: string }) => ({
       state: produce(ctx.state, (draft) => {
         if (!ctx.state.ui.editingId) return;
         const id = ctx.state.ui.editingId as number;

@@ -19,7 +19,7 @@ import {
   type TestBot,
   useTestBotRoutes,
 } from "@inspector/testbot";
-import { dispatchToZone } from "@/os-new/1-listeners/clipboard/dispatchToZone";
+import { dispatchToZone } from "@/os-new/1-listeners/dispatchToZone";
 import { kernel } from "@/os-new/kernel";
 
 // ═══════════════════════════════════════════════════════════════════

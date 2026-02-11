@@ -1,16 +1,16 @@
 /**
- * FocusSensor - DOM Event → Kernel Command 변환기
+ * FocusListener - DOM Event → Kernel Command 변환기
  * Pipeline Phase 1: SENSE
  *
  * 책임: DOM 이벤트를 감지하고 Kernel Command로 변환하여 dispatch
  * 구조: 이벤트 타입별 전용 핸들러 (senseMouseDown, senseFocusIn)
  *
- * v2: Migrated from CommandEngineStore to kernel.dispatch
+ * Handles: mousedown (pointer focus), focusin (DOM sync), MutationObserver (recovery)
  */
 
 import { useEffect } from "react";
-import { FOCUS, RECOVER, SELECT, SYNC_FOCUS } from "../../3-commands";
-import { kernel } from "../../kernel";
+import { FOCUS, RECOVER, SELECT, SYNC_FOCUS } from "@os/3-commands";
+import { kernel } from "@os/kernel";
 import {
   findFocusableItem,
   resolveFocusTarget,
@@ -158,7 +158,7 @@ function senseFocusIn(e: Event) {
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
-export function FocusSensor() {
+export function FocusListener() {
   useEffect(() => {
     if (isMounted) return;
     isMounted = true;

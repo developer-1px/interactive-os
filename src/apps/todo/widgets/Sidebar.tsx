@@ -23,7 +23,7 @@ export function Sidebar() {
       options={{
         navigate: { entry: "restore" },
       }}
-      onAction={SelectCategory({ id: undefined })}
+      onAction={SelectCategory({})}
       onUndo={UndoCommand()}
       onRedo={RedoCommand()}
       // onSelect={SelectCategory({})} // Space is handled by onAction alias if needed, or separate command

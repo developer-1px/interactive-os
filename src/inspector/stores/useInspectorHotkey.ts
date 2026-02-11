@@ -10,7 +10,7 @@
  */
 
 import { useEffect } from "react";
-import { Keybindings } from "@/os-new/1-listeners/keybindings";
+import { Keybindings } from "@/os-new/keymaps/keybindings";
 import { kernel } from "@/os-new/kernel";
 import { InspectorStore } from "./InspectorStore";
 

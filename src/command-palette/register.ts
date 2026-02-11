@@ -7,7 +7,7 @@
  * Side-effect import: `import "@/command-palette/register"`
  */
 
-import { Keybindings } from "@/os-new/1-listeners/keybindings";
+import { Keybindings } from "@/os-new/keymaps/keybindings";
 import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@/os-new/3-commands";
 import { kernel } from "@/os-new/kernel";
 

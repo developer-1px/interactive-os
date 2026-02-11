@@ -24,11 +24,11 @@ import {
   type InjectResult,
   type InternalCommandHandler,
   type InternalEffectHandler,
+  type AnyCommand,
   type Middleware,
   type MiddlewareContext,
   type ScopeToken,
   type TypedContext,
-  type TypedEffectMap,
 } from "./core/tokens.ts";
 import { computeChanges, type Transaction } from "./core/transaction.ts";
 
@@ -407,7 +407,9 @@ export function createKernel<S>(initialState: S) {
     Tokens extends ContextToken[],
   >(scope: string, injectTokens: Tokens) {
     type Ctx = TypedContext<S, InjectResult<Tokens>>;
-    type EffMap = TypedEffectMap<S, E>;
+    // Loose return type: allows scoped state types (e.g., Todo's AppState ≠ kernel AppState)
+    // The runtime stateSlice lens handles proper state mapping regardless
+    type HandlerReturn = { state?: unknown; dispatch?: AnyCommand | AnyCommand[] } & Record<string, unknown>;
 
     return {
       defineCommand: ((
@@ -475,27 +477,27 @@ export function createKernel<S>(initialState: S) {
         // No payload
         <T extends string>(
           type: T,
-          handler: (ctx: Ctx) => () => EffMap | undefined,
+          handler: (ctx: Ctx) => () => HandlerReturn | undefined,
         ): CommandFactory<T, void>;
 
         // With payload
         <T extends string, P>(
           type: T,
-          handler: (ctx: Ctx) => (payload: P) => EffMap | undefined,
+          handler: (ctx: Ctx) => (payload: P) => HandlerReturn | undefined,
         ): CommandFactory<T, P>;
 
         // With per-command inject tokens (no payload)
         <T extends string>(
           type: T,
           tokens: ContextToken[],
-          handler: (ctx: any) => () => EffMap | undefined,
+          handler: (ctx: any) => () => HandlerReturn | undefined,
         ): CommandFactory<T, void>;
 
         // With per-command inject tokens (with payload)
         <T extends string, P>(
           type: T,
           tokens: ContextToken[],
-          handler: (ctx: any) => (payload: P) => EffMap | undefined,
+          handler: (ctx: any) => (payload: P) => HandlerReturn | undefined,
         ): CommandFactory<T, P>;
       },
 
