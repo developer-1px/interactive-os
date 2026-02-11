@@ -33,7 +33,7 @@ Toulmin 논증 모델의 Warrant를 누적해가며, 논리의 빈틈을 통찰�
 
 ## 종료 시 산출물
 
-종료 시그널을 받으면 2개의 문서를 `docs/0-inbox`에 작성한다:
+종료 시그널을 받으면 2개의 문서를 `docs/11-discussions`에 작성한다:
 
 ### 문서 1: `[DATE]_Discussion_Conclusion.md`
 - 완결된 **Why** / **Intent** / **Warrant** 전체 구조
