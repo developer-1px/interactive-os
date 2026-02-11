@@ -7,4 +7,4 @@
  * Execution order: navigation → history → app middleware
  */
 
-export { historyKernelMiddleware } from "./historyKernelMiddleware";
+export { createHistoryMiddleware } from "./historyKernelMiddleware";

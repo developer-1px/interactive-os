@@ -10,7 +10,6 @@
  */
 
 import type { AppDefinition } from "@os/core/application/defineApplication";
-import { ALL_OS_COMMANDS } from "@os/core/command/definitions/osCommands";
 import {
   CommandRegistry,
   createCommandStore,
@@ -19,9 +18,6 @@ import {
 export function createEngine<S>(definition: AppDefinition<S>) {
   const registry = new CommandRegistry<S>();
   definition.commands?.forEach((cmd) => {
-    registry.register(cmd);
-  });
-  ALL_OS_COMMANDS.forEach((cmd) => {
     registry.register(cmd);
   });
   registry.setKeymap(definition.keymap);
