@@ -15,10 +15,13 @@ import type { OSState } from "./state/OSState";
 
 export interface AppState {
   os: OSState;
+  /** Per-app isolated state. Key = appId, value = app-specific state. */
+  apps: Record<string, unknown>;
 }
 
 export const initialAppState: AppState = {
   os: initialOSState,
+  apps: {},
 };
 
 // ═══════════════════════════════════════════════════════════════════

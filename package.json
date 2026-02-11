@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "docs": "vite --config vite.docs.config.ts",
     "dev:e2e": "chmod +x scripts/dev-e2e.sh && ./scripts/dev-e2e.sh",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
