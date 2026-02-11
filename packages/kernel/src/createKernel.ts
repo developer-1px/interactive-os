@@ -4,6 +4,8 @@
  * Each call creates a fully independent kernel instance.
  * No globalThis. No singletons. HMR-safe via module separation.
  *
+ * @frozen 2026-02-11 — Reviewed and locked. Do not modify without design review.
+ *
  * @example
  *   const kernel = createKernel<AppState>({ count: 0 });
  *   const INC = kernel.defineCommand("INC", ctx => () => ({
