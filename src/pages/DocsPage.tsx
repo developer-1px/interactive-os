@@ -26,6 +26,7 @@ function buildDocTree(paths: string[]): DocItem[] {
 
     let currentLevel = root;
 
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: tree building logic
     parts.forEach((part, index) => {
       const isFile = index === parts.length - 1;
       const existingItem = currentLevel.find((item) => item.name === part);
@@ -43,8 +44,8 @@ function buildDocTree(paths: string[]): DocItem[] {
           ...(isFile ? {} : { children: [] }),
         };
         currentLevel.push(newItem);
-        if (!isFile) {
-          currentLevel = newItem.children!;
+        if (!isFile && newItem.children) {
+          currentLevel = newItem.children;
         }
       }
     });
@@ -55,8 +56,8 @@ function buildDocTree(paths: string[]): DocItem[] {
     items.sort((a, b) => {
       if (a.type === b.type) {
         return isInbox
-          ? b.name.localeCompare(a.name)
-          : a.name.localeCompare(b.name);
+          ? b.name.localeCompare(a.name, undefined, { numeric: true })
+          : a.name.localeCompare(b.name, undefined, { numeric: true });
       }
       return a.type === "folder" ? -1 : 1;
     });
@@ -86,7 +87,7 @@ function flattenTree(items: DocItem[]): DocItem[] {
 }
 
 // ... MarkdownComponents ...
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: ReactMarkdown component props
 const MarkdownComponents: Record<string, React.FC<any>> = {
   h1: (props) => (
     <h1
@@ -145,7 +146,7 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
     />
   ),
   hr: (props) => <hr className="border-slate-100 my-8 max-w-2xl" {...props} />,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: ReactMarkdown component props
   code: ({ className, children, ...props }: any) => {
     const isBlock =
       className?.includes("hljs") || className?.includes("language-");
@@ -165,7 +166,7 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
       </code>
     );
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: ReactMarkdown component props
   pre: ({ children, ...props }: any) => {
     const codeChild = children?.props;
     const langClass = codeChild?.className ?? "";
@@ -307,7 +308,7 @@ export default function DocsPage() {
                 {/* Document Metadata Header */}
                 <div className="flex items-center gap-2 mb-10 border-b border-slate-50 pb-6">
                   {splat?.split("/").map((part, i, arr) => (
-                    <div key={i} className="flex items-center gap-2">
+                    <div key={part} className="flex items-center gap-2">
                       {i > 0 && <span className="text-slate-300">/</span>}
                       <span
                         className={clsx(
