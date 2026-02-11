@@ -102,6 +102,38 @@ const ADD_TODO = todoGroup.defineCommand(
         }),
 );
 
+// ─── Gap 3: App Effects via defineEffect (replaces state.effects[]) ───
+
+const effectLog: string[] = [];
+
+const focusId = todoGroup.defineEffect("focusId", (id: string) => {
+    effectLog.push(`focus:${id}`);
+});
+
+const scrollIntoView = todoGroup.defineEffect("scrollIntoView", (id: string) => {
+    effectLog.push(`scroll:${id}`);
+});
+
+const ADD_TODO_WITH_EFFECTS = todoGroup.defineCommand(
+    "ADD_TODO_FX",
+    (ctx: { state: TodoState }) =>
+        (payload: { text: string }) => {
+            const newId = `todo-${ctx.state.todos.length + 1}`;
+            return {
+                state: {
+                    ...ctx.state,
+                    todos: [
+                        ...ctx.state.todos,
+                        { id: newId, text: payload.text, done: false },
+                    ],
+                },
+                // Effects returned directly — no state.effects[] array needed
+                [focusId]: newId,
+                [scrollIntoView]: newId,
+            };
+        },
+);
+
 // ─── Run Tests ───
 
 let passed = 0;
@@ -159,6 +191,18 @@ assert(
     afterToggle2.os === afterToggle.os,
     "OS state reference identity preserved (no mutation)",
 );
+
+// Test 6: App effects via defineEffect (Gap 3)
+console.log("\nTest 6: App effects via defineEffect — replaces state.effects[]");
+effectLog.length = 0;
+kernel.dispatch(ADD_TODO_WITH_EFFECTS({ text: "Effect task" }));
+const afterFx = kernel.getState();
+const todoStateFx = afterFx.apps.todo as TodoState;
+assert(todoStateFx.todos.length === 4, "4 todos after ADD_TODO_FX");
+assert(todoStateFx.todos[3].text === "Effect task", "new todo text correct");
+assert(effectLog.includes("focus:todo-4"), "focusId effect fired with correct id");
+assert(effectLog.includes("scroll:todo-4"), "scrollIntoView effect fired with correct id");
+assert(effectLog.length === 2, "exactly 2 effects fired");
 
 console.log(`\n📊 Results: ${passed} passed, ${failed} failed\n`);
 
