@@ -14,12 +14,12 @@ import type { AppState } from "@apps/todo/model/types";
 import { Trigger } from "@os/6-components/Trigger";
 import { Zone } from "@os/6-components/Zone";
 import { OS } from "@os/AntigravityOS";
-import { useEngine } from "@os/6-components/App";
+import { todoSlice } from "@apps/todo/app";
 import { List } from "lucide-react";
 import { TaskItem } from "./TaskItem";
 
 export function BoardView() {
-  const { state } = useEngine<AppState>();
+  const state = todoSlice.useComputed((s) => s);
   if (!state) return null;
   const {
     categoryOrder = [],
@@ -87,23 +87,23 @@ export function BoardView() {
                     navigate: { orientation: "vertical", entry: "restore" },
                   }}
                   // ARIA Standard Commands
-                  onSelect={ToggleTodo({ id: OS.FOCUS })}
-                  onAction={StartEdit({ id: OS.FOCUS })}
+                  onSelect={ToggleTodo({ id: OS.FOCUS as any })}
+                  onAction={StartEdit({ id: OS.FOCUS as any })}
                   // Clipboard Commands (Muscle Memory)
-                  onCopy={CopyTodo({ id: OS.FOCUS })}
-                  onCut={CutTodo({ id: OS.FOCUS })}
-                  onPaste={PasteTodo({ id: OS.FOCUS })}
+                  onCopy={CopyTodo({ id: OS.FOCUS as any })}
+                  onCut={CutTodo({ id: OS.FOCUS as any })}
+                  onPaste={PasteTodo({ id: OS.FOCUS as any })}
                   // Editing Commands (Muscle Memory)
-                  onDelete={DeleteTodo({ id: OS.FOCUS })}
+                  onDelete={DeleteTodo({ id: OS.FOCUS as any })}
                   // History Commands (Temporal Control)
-                  onUndo={UndoCommand({})}
-                  onRedo={RedoCommand({})}
+                  onUndo={UndoCommand()}
+                  onRedo={RedoCommand()}
                   className={`
                         w-80 flex-shrink-0 flex flex-col max-h-full rounded-2xl bg-slate-100/50 border transition-all duration-300 outline-none
                         ${activeColumn ? "border-indigo-200 bg-white shadow-xl shadow-indigo-100/50 ring-1 ring-indigo-500/10" : "border-slate-200/60 hover:border-slate-300"}
                     `}
-                  // When column receives focus, we might want to set it as active category?
-                  // Logic for that is usually side-effect based, but FocusZone doesn't do it automatically.
+                // When column receives focus, we might want to set it as active category?
+                // Logic for that is usually side-effect based, but FocusZone doesn't do it automatically.
                 >
                   <div
                     className={`

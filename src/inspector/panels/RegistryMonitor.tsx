@@ -1,8 +1,7 @@
 import type { ProcessedCommand } from "@inspector/panels/CommandRow.tsx";
 import { CommandRow } from "@inspector/panels/CommandRow.tsx";
 import { evalContext } from "@os/AntigravityOS";
-import type { CommandRegistry } from "@os/core/command/model/createCommandStore";
-import { GroupRegistry } from "@os/core/jurisdiction/model/GroupRegistry";
+import { GroupRegistry } from "@/os-new/store/GroupRegistry";
 import { memo, useMemo } from "react";
 
 // Zero-Base Jurisdiction Detection
@@ -10,7 +9,6 @@ import { memo, useMemo } from "react";
 export const RegistryMonitor = memo(
   ({
     ctx,
-    registry,
     activeKeybindingMap,
     isInputActive,
     lastCommandId,
@@ -18,7 +16,6 @@ export const RegistryMonitor = memo(
     historyCount,
   }: {
     ctx: any;
-    registry: CommandRegistry<any, any>;
     activeKeybindingMap: Map<string, boolean>;
     isInputActive: boolean;
     lastCommandId: string | null;
@@ -26,53 +23,12 @@ export const RegistryMonitor = memo(
     historyCount: number;
   }) => {
     const registryData = useMemo(() => {
-      if (!registry || !ctx) return { groupedGroups: {}, globalCommands: [] };
+      if (!ctx) return { groupedGroups: {}, globalCommands: [] };
 
-      const bindings = registry.getKeybindings();
-      const commands = registry.getAll();
       const groupRegistryMap = GroupRegistry.getAll();
+      const processed: ProcessedCommand[] = [];
 
-      // 1. Process Bound Commands
-      const processed: ProcessedCommand[] = commands.map((cmd) => {
-        const cmdBindings = bindings.filter((b) => b.command === cmd.id);
-        const isLogicEnabled = cmd.when ? evalContext(cmd.when, ctx) : true;
-
-        const activeKeys: string[] = [];
-        let allowInInput = false;
-        let boundArgs: any = null;
-        const targetGroups = new Set<string>();
-
-        cmdBindings.forEach((b) => {
-          const isBindingActive = b.when ? evalContext(b.when, ctx) : true;
-          if (isBindingActive) {
-            // Deduplicate keys (e.g. same key used in multiple groups for the same command)
-            if (!activeKeys.includes(b.key)) {
-              activeKeys.push(b.key);
-            }
-            if (b.allowInInput) allowInInput = true;
-            if (b.args) boundArgs = b.args;
-          }
-          if (b.groupId) targetGroups.add(b.groupId);
-        });
-
-        return {
-          id: cmd.id,
-          label: (cmd as any).label || cmd.id,
-          kb: activeKeys,
-          enabled:
-            isLogicEnabled &&
-            (cmdBindings.length === 0 || activeKeys.length > 0),
-          allowInInput,
-          log: cmd.log,
-          when: typeof cmd.when === "string" ? cmd.when : cmd.when?.toString(),
-          isLogicEnabled,
-          currentPayload: boundArgs,
-          jurisdiction: targetGroups.size > 0 ? "GROUP" : "GLOBAL",
-          groupIds: Array.from(targetGroups),
-        } as ProcessedCommand & { groupIds: string[] };
-      });
-
-      // 2. Ingest Static Definitions from GroupRegistry (defineCommand)
+      // Ingest from GroupRegistry (kernel-native defineCommand)
       groupRegistryMap.forEach(
         (
           factories: import("@os/schema/command/CommandFactory.ts").CommandFactory<
@@ -82,30 +38,22 @@ export const RegistryMonitor = memo(
           groupId: string,
         ) => {
           factories.forEach((factory) => {
-            // Check if already processed
             const existing = processed.find((p) => p.id === factory.id);
             if (existing) {
-              // Tag with Group if not already
               const e = existing as any;
               if (!e.groupIds.includes(groupId)) {
                 e.groupIds.push(groupId);
-                // If it was Global (no binding group), promote to GROUP?
-                // A command can be globally bound but locally defined.
-                // We trust defineCommand groupId as a source of jurisdiction.
-                if (existing.jurisdiction === "GLOBAL")
-                  existing.jurisdiction = "GROUP";
               }
               return;
             }
 
-            // Add new Definition-only Entry
             const isLogicEnabled = factory.when
               ? evalContext(factory.when, ctx)
               : true;
             processed.push({
               id: factory.id,
               label: factory.id,
-              kb: [], // No binding
+              kb: [],
               enabled: isLogicEnabled,
               allowInInput: false,
               log: factory.log,
@@ -149,7 +97,7 @@ export const RegistryMonitor = memo(
         groupedGroups,
         globalCommands: globalCommands.sort(sorter),
       };
-    }, [ctx, registry]);
+    }, [ctx]);
 
     const focusPath = ctx?.focusPath || [];
     const activeGroupId = ctx?.activeGroup;

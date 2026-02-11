@@ -2,7 +2,6 @@
 // Re-exports all OS primitives and utilities
 
 // UI Primitives
-import { App } from "@os/6-components/App";
 import { Dialog } from "@os/6-components/Dialog";
 import { Field } from "@os/6-components/Field";
 import { Item } from "@os/6-components/Item";
@@ -13,12 +12,11 @@ import { Zone } from "@os/6-components/Zone";
 import { Kbd } from "@os/shared/ui/Kbd";
 
 // Logic Evaluation
-export { evalContext } from "@/os-new/core/logic/evalContext";
+export { evalContext } from "@/os-new/lib/logic/evalContext";
 
 // OS Namespace - All primitives in one place
 export const OS = {
   Root,
-  App,
   Zone,
   Item,
   Field,
@@ -31,6 +29,5 @@ export const OS = {
   SELECTION: "OS.SELECTION",
 } as const;
 
-// Re-export individual components for direct imports
-export { Root, App, Zone, Item, Field, Trigger, Modal, Dialog, Kbd };
+export { Root, Zone, Item, Field, Trigger, Modal, Dialog, Kbd };
 

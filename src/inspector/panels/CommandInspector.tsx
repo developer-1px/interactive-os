@@ -10,71 +10,40 @@ import { StateMonitor } from "@inspector/panels/StateMonitor.tsx";
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotPanel } from "@inspector/testbot";
-import { useCommandTelemetryStore } from "@os/core/command/store/CommandTelemetryStore";
-import { useCommandEngine } from "@os/6-components/App";
-import { FocusData } from "@os/core/focus/lib/focusData";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { evalContext } from "@/os-new/core/logic/evalContext";
+import { todoSlice } from "@apps/todo/app";
 
-// --- Main Component ---
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { kernel } from "@/os-new/kernel";
 
 // --- Main Component ---
 
 export function CommandInspector() {
-  const contextValue = useCommandEngine() as any;
-  const { state, registry, contextMap } = contextValue;
+  const state = todoSlice.getState() as any;
 
   // v7.50: Use global InspectorStore for tab state
   const activeTab = useInspectorStore((s) => s.activeTab);
 
-  // --- Direct FocusData subscriptions ---
-  const activeGroupId = useSyncExternalStore(
-    FocusData.subscribeActiveZone,
-    () => FocusData.getActiveZoneId(),
-    () => null,
+  // --- Kernel state subscriptions ---
+  const activeGroupId = kernel.useComputed(
+    (s) => s.os.focus.activeZoneId,
   );
 
-  const focusPath = useMemo(() => FocusData.getFocusPath(), []);
-
-  const activeZoneData = activeGroupId
-    ? FocusData.getById(activeGroupId)
-    : null;
-  const focusedItemId = activeZoneData?.store?.getState().focusedItemId ?? null;
-
-  // Build ctx on-demand
-  const ctx = useMemo(() => {
-    const baseContext = {
-      activeZone: activeGroupId ?? undefined,
-      focusPath,
-      focusedItemId,
-    };
-    if (contextMap && state !== undefined) {
-      return {
-        ...baseContext,
-        ...contextMap(state, {
-          activeGroupId: activeGroupId || null,
-          focusPath,
-          focusedItemId: focusedItemId || null,
-        }),
-      };
-    }
-    return baseContext;
-  }, [activeGroupId, focusPath, focusedItemId, state, contextMap]);
-
-  // Build activeKeybindingMap on-demand
-  const keybindings = useMemo(
-    () => registry?.getKeybindings() || [],
-    [registry],
+  const focusedItemId = kernel.useComputed(
+    (s) => {
+      const zoneId = s.os.focus.activeZoneId;
+      return zoneId ? s.os.focus.zones[zoneId]?.focusedItemId ?? null : null;
+    },
   );
-  const activeKeybindingMap = useMemo(() => {
-    const res = new Map<string, boolean>();
-    keybindings.forEach((kb: any) => {
-      const isLogicEnabled = evalContext(kb.when, ctx);
-      const isScopeEnabled = !kb.zoneId || focusPath.includes(kb.zoneId);
-      res.set(kb.key, !!(isLogicEnabled && isScopeEnabled));
-    });
-    return res;
-  }, [keybindings, ctx, focusPath]);
+
+  // Build ctx on-demand (simplified — no contextMap)
+  const ctx = useMemo(() => ({
+    activeZone: activeGroupId ?? undefined,
+    focusPath: [] as string[],
+    focusedItemId,
+  }), [activeGroupId, focusedItemId]);
+
+  // Keybinding map — empty for now (was powered by legacy CommandRegistry)
+  const activeKeybindingMap = useMemo(() => new Map<string, boolean>(), []);
 
   // --- UI State ---
   const [physicalZone, setPhysicalZone] = useState<string | null>("NONE");
@@ -83,17 +52,15 @@ export function CommandInspector() {
   // Optimize Context for Registry
   const registryContext = useMemo(() => {
     if (!ctx) return {};
-    const { editDraft, draft, ...stablePart } = ctx as any;
-    return stablePart;
+    return ctx;
   }, [ctx]);
 
-  // Global telemetry for RegistryMonitor flash pattern
-  const telemetryEntries = useCommandTelemetryStore((s) => s.entries);
-  const historyCount = telemetryEntries.length;
-  const lastEntry =
-    historyCount > 0 ? telemetryEntries[historyCount - 1] : null;
-  const lastCommandId = lastEntry ? lastEntry.command : null;
-  const lastPayload = lastEntry?.payload ?? null;
+  // Telemetry from kernel transactions
+  const transactions = kernel.getTransactions();
+  const historyCount = transactions.length;
+  const lastEntry = historyCount > 0 ? transactions[historyCount - 1] : null;
+  const lastCommandId = lastEntry ? lastEntry.command?.type : null;
+  const lastPayload = lastEntry?.command?.payload ?? null;
   const currentFocusId = focusedItemId;
   const rawKeys = useInputTelemetry((s) => s.logs);
 
@@ -103,7 +70,6 @@ export function CommandInspector() {
       const zone = el ? el.closest("[data-zone-id]") : null;
       setPhysicalZone(zone ? zone.getAttribute("data-zone-id") : "NONE");
 
-      // Detect native input focus
       if (
         el &&
         (el.tagName === "INPUT" ||
@@ -117,9 +83,7 @@ export function CommandInspector() {
     };
 
     document.addEventListener("focusin", trackFocus);
-    document.addEventListener("focusout", trackFocus); // Also track blur/focusout
-
-    // Initial check
+    document.addEventListener("focusout", trackFocus);
     trackFocus();
 
     return () => {
@@ -130,7 +94,6 @@ export function CommandInspector() {
 
   // --- Temporary: Register Unified Mock ---
   useEffect(() => {
-    // Only register if not already there to prevent dupes/flicker
     if (!InspectorRegistry.getPanel("UNIFIED")) {
       InspectorRegistry.register("UNIFIED", "Vision", <InspectorAdapter />);
     }
@@ -160,7 +123,6 @@ export function CommandInspector() {
             />
             <RegistryMonitor
               ctx={registryContext}
-              registry={registry}
               activeKeybindingMap={activeKeybindingMap}
               isInputActive={isInputActive}
               lastCommandId={lastCommandId}

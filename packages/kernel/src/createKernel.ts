@@ -468,6 +468,7 @@ export function createKernel<S>(initialState: S) {
           }) as unknown as Command<string, any>;
 
         (factory as unknown as { commandType: string }).commandType = type;
+        (factory as unknown as { id: string }).id = type;
 
         return factory as unknown as CommandFactory<string, any>;
       }) as {

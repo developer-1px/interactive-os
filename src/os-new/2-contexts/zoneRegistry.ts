@@ -20,6 +20,12 @@ export interface ZoneEntry {
   parentId: string | null;
   /** Command dispatched on ESC when dismiss.escape is "close" */
   onDismiss?: AnyCommand;
+  // Command bindings (Zone-level delegation for clipboard/history)
+  onCopy?: any;
+  onCut?: any;
+  onPaste?: any;
+  onUndo?: any;
+  onRedo?: any;
 }
 
 const registry = new Map<string, ZoneEntry>();

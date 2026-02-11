@@ -1,11 +1,10 @@
 import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
-import type { AppState } from "@apps/todo/model/types";
 import { Kbd } from "@inspector/shell/components/Kbd";
 import { Item } from "@os/6-components/Item";
 import { Trigger } from "@os/6-components/Trigger";
 import { Zone } from "@os/6-components/Zone";
-import { useEngine } from "@os/6-components/App";
+import { todoSlice } from "@apps/todo/app";
 import {
   ArrowRight,
   Briefcase,
@@ -24,9 +23,9 @@ export function Sidebar() {
       options={{
         navigate: { entry: "restore" },
       }}
-      onAction={SelectCategory({})}
-      onUndo={UndoCommand({})}
-      onRedo={RedoCommand({})}
+      onAction={SelectCategory({ id: undefined })}
+      onUndo={UndoCommand()}
+      onRedo={RedoCommand()}
       // onSelect={SelectCategory({})} // Space is handled by onAction alias if needed, or separate command
       style={{ flex: "none" }}
       className="h-full"
@@ -37,7 +36,7 @@ export function Sidebar() {
 }
 
 function SidebarContent() {
-  const { state } = useEngine<AppState>();
+  const state = todoSlice.useComputed((s) => s);
 
   if (!state || !state.data) return null;
 

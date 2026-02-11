@@ -1,6 +1,5 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { OS } from "@os/AntigravityOS";
-import { FocusDebugOverlay } from "@os/core/focus/ui/FocusDebugOverlay";
 import { useState } from "react";
 // Playwright spec
 // @ts-expect-error
@@ -55,8 +54,7 @@ export default function BuilderPage() {
             tab: { behavior: "trap" },
           }}
         >
-          {/* Focus Debug Overlay — inside scroll container */}
-          <FocusDebugOverlay />
+          {/* Focus Debug Overlay removed (was FocusData-dependent) */}
 
           {/* Page Being Edited - Centered Canvas */}
           <div className="min-h-full flex justify-center py-8 px-4 transition-all duration-300 ease-in-out">

@@ -1,36 +1,29 @@
-import { FocusData } from "@os/core/focus/lib/focusData";
-import { memo, useMemo, useSyncExternalStore } from "react";
+import { kernel } from "@/os-new/kernel";
+import { ZoneRegistry } from "@/os-new/2-contexts/zoneRegistry";
+import { memo } from "react";
 
 export const OSStateViewer = memo(() => {
-  const activeGroupId = useSyncExternalStore(
-    FocusData.subscribeActiveZone,
-    () => FocusData.getActiveZoneId(),
-    () => null,
+  const activeGroupId = kernel.useComputed(
+    (s) => s.os.focus.activeZoneId,
   );
 
-  // Compute focusPath from FocusData
-  const focusPath = useMemo(() => FocusData.getFocusPath(), []);
-
-  // Get focusedItemId from active zone's store
-  const activeZoneData = activeGroupId
-    ? FocusData.getById(activeGroupId)
-    : null;
-  const focusedItemId = activeZoneData?.store?.getState().focusedItemId ?? null;
-
-  // Get all zone IDs from DOM
-  const zoneIds = useMemo(() => FocusData.getOrderedZones(), []);
-
-  const osState = useMemo(
-    () => ({
-      focus: {
-        activeGroupId,
-        focusedItemId,
-        focusPath,
-      },
-      zones: zoneIds,
-    }),
-    [activeGroupId, focusedItemId, focusPath, zoneIds],
+  const focusedItemId = kernel.useComputed(
+    (s) => {
+      const zoneId = s.os.focus.activeZoneId;
+      return zoneId ? s.os.focus.zones[zoneId]?.focusedItemId ?? null : null;
+    },
   );
+
+  // Get all zone IDs from ZoneRegistry
+  const zoneIds = Array.from(ZoneRegistry.keys());
+
+  const osState = {
+    focus: {
+      activeGroupId,
+      focusedItemId,
+    },
+    zones: zoneIds,
+  };
 
   return (
     <div className="h-full flex flex-col bg-[#ffffff]">

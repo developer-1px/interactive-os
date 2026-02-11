@@ -10,7 +10,7 @@
  */
 
 import { useEffect } from "react";
-import { dispatchToZone } from "../../core/dispatchToZone.ts";
+import { dispatchToZone } from "../../lib/dispatchToZone";
 
 function isInputActive(): boolean {
   const el = document.activeElement;

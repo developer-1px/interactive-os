@@ -726,3 +726,4 @@ Kernel은 순수한 커맨드 처리 엔진이다. OS가 다음을 담당한다:
 ## 📚 관련 리소스
 
 - [State Isolation Patterns](../../3-resource/08-state-isolation-patterns.md) — Redux, Zustand, re-frame, Elm, XState, OS 프로세스의 state 격리 패턴 비교. 커널의 scope state isolation 설계 참고자료.
+- [Nominal Typing Patterns](../../3-resource/09-nominal-typing-patterns.md) — TypeScript의 구조적 타이핑 한계를 극복하는 Branded Types, Phantom Types 기법과 `AnyCommand` 설계 배경.

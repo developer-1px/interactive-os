@@ -17,17 +17,16 @@ import {
   SyncDraft,
   ToggleTodo,
 } from "@apps/todo/features/commands/list";
-import type { AppState } from "@apps/todo/model/types";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
 import { Field } from "@os/6-components/Field";
 import { Label } from "@os/6-components/Label";
 import { Zone } from "@os/6-components/Zone";
 import { OS } from "@os/AntigravityOS";
-import { useEngine } from "@os/6-components/App";
+import { todoSlice } from "@apps/todo/app";
 import { Plus } from "lucide-react";
 
 export function ListView() {
-  const { state } = useEngine<AppState>();
+  const state = todoSlice.useComputed((s) => s);
   if (!state || !state.data) return null;
 
   const todoOrder = state.data.todoOrder ?? [];
@@ -50,17 +49,17 @@ export function ListView() {
         id="listView"
         role="listbox"
         // ARIA Standard Commands
-        onToggle={ToggleTodo({ id: OS.FOCUS })}
-        onAction={StartEdit({ id: OS.FOCUS })}
+        onToggle={ToggleTodo({ id: OS.FOCUS as any })}
+        onAction={StartEdit({ id: OS.FOCUS as any })}
         // Clipboard Commands (Muscle Memory)
-        onCopy={CopyTodo({ id: OS.FOCUS })}
-        onCut={CutTodo({ id: OS.FOCUS })}
-        onPaste={PasteTodo({ id: OS.FOCUS })}
+        onCopy={CopyTodo({ id: OS.FOCUS as any })}
+        onCut={CutTodo({ id: OS.FOCUS as any })}
+        onPaste={PasteTodo({ id: OS.FOCUS as any })}
         // Editing Commands (Muscle Memory)
-        onDelete={DeleteTodo({ id: OS.FOCUS })}
+        onDelete={DeleteTodo({ id: OS.FOCUS as any })}
         // History Commands (Temporal Control)
-        onUndo={UndoCommand({})}
-        onRedo={RedoCommand({})}
+        onUndo={UndoCommand()}
+        onRedo={RedoCommand()}
         className="flex flex-col h-full"
       >
         <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full z-10 p-8 sm:p-12 pb-6">

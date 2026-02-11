@@ -1,12 +1,17 @@
-import { defineGlobalCommand } from "@apps/todo/features/commands/defineGlobalCommand";
+import { todoSlice } from "@apps/todo/app";
+import type { AppState } from "@apps/todo/model/appState";
 
-export const ToggleView = defineGlobalCommand({
-  id: "TOGGLE_VIEW",
-  run: (state) => ({
-    ...state,
-    ui: {
-      ...state.ui,
-      viewMode: state.ui.viewMode === "board" ? "list" : "board",
-    },
-  }),
-});
+export const ToggleView = todoSlice.group.defineCommand(
+  "TOGGLE_VIEW",
+  [],
+  (ctx: { state: AppState }) =>
+    () => ({
+      state: {
+        ...ctx.state,
+        ui: {
+          ...ctx.state.ui,
+          viewMode: ctx.state.ui.viewMode === "board" ? "list" : "board",
+        },
+      },
+    }),
+);

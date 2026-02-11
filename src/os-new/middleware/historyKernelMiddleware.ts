@@ -13,7 +13,7 @@
  */
 
 import type { Middleware, ScopeToken } from "@kernel/core/tokens";
-import { FocusData } from "@os/core/focus/lib/focusData";
+
 import { produce } from "immer";
 import type { AppState } from "@os/kernel";
 import type { HistoryEntry } from "./HistoryState";
@@ -64,9 +64,11 @@ export function createHistoryMiddleware(
 
         before(ctx) {
             // Capture focus BEFORE command execution (for focus restoration on undo)
-            const activeZone = FocusData.getActiveZone();
-            const focusedItemId =
-                activeZone?.store?.getState().focusedItemId ?? null;
+            const osState = (ctx.state as AppState).os;
+            const activeZoneId = osState?.focus?.activeZoneId;
+            const focusedItemId = activeZoneId
+                ? osState.focus.zones[activeZoneId]?.focusedItemId ?? null
+                : null;
 
             // Capture app state BEFORE command
             const appState = (ctx.state as AppState).apps[appId];

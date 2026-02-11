@@ -1,4 +1,4 @@
-import { useFieldFocus } from "@os/core/keyboard/ui/Field/useFieldHooks";
+import { useFieldFocus } from "@/os-new/5-hooks/useFieldHooks";
 import type { HTMLAttributes } from "react";
 import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
 import { kernel } from "@/os-new/kernel";
@@ -240,9 +240,9 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
       "aria-controls": controls,
       "aria-activedescendant":
         target === "virtual" &&
-        controls &&
-        osFocusedItemId &&
-        osFocusedItemId !== name
+          controls &&
+          osFocusedItemId &&
+          osFocusedItemId !== name
           ? osFocusedItemId
           : undefined,
       children: null, // Managed by useFieldDOMSync

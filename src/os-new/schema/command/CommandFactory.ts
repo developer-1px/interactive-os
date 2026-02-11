@@ -1,4 +1,4 @@
-import type { LogicNode } from "@/os-new/core/logic/LogicNode";
+import type { LogicNode } from "@/os-new/lib/logic/LogicNode";
 
 // Moved from src/os/core/command/definition.ts
 export interface CommandFactory<S, P, K extends string = string> {

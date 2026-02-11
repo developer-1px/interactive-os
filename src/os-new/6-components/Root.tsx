@@ -8,7 +8,7 @@
  * - History: Intent (keybinding-based undo/redo)
  */
 
-import { useFocusRecovery } from "@os/core/focus/hooks/useFocusRecovery";
+// Focus recovery is handled by FocusSensor's MutationObserver (RECOVER command)
 import type React from "react";
 import { ClipboardIntent } from "@/os-new/1-listeners/clipboard/ClipboardIntent.tsx";
 import { ClipboardSensor } from "@/os-new/1-listeners/clipboard/ClipboardSensor.tsx";
@@ -30,7 +30,7 @@ export interface RootProps {
  */
 export function Root({ children }: RootProps) {
   // OS-level Focus Recovery
-  useFocusRecovery();
+  // Focus recovery handled by FocusSensor MutationObserver
 
   return (
     <>

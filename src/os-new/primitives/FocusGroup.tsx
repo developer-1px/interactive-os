@@ -244,6 +244,11 @@ export function FocusGroup({
         ...(role !== undefined ? { role } : {}),
         parentId,
         ...(onDismiss !== undefined ? { onDismiss } : {}),
+        ...(_onCopy !== undefined ? { onCopy: _onCopy } : {}),
+        ...(_onCut !== undefined ? { onCut: _onCut } : {}),
+        ...(_onPaste !== undefined ? { onPaste: _onPaste } : {}),
+        ...(_onUndo !== undefined ? { onUndo: _onUndo } : {}),
+        ...(_onRedo !== undefined ? { onRedo: _onRedo } : {}),
       });
     }
 

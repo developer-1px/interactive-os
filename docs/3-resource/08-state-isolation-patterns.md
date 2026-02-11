@@ -8,13 +8,14 @@ last-reviewed: 2026-02-12
 
 ## 왜 이 주제인가
 
-현재 interactive-os 커널의 가장 뜨거운 문제는 **state visibility 격리**다.
+interactive-os 커널은 **state isolation을 이미 해결했다.** 그 과정의 기록이다.
 
-- inbox `Kernel_Scope_Isolation.md` — `ctx.state`가 전체 커널 state를 노출하는 문제 발견
-- inbox `Kernel_App_Migration_Gaps.md` — Gap 1: 앱 커맨드가 전체 `AppState`를 알아야 하는 ergonomics 저하
-- 최근 커밋 `f2ada95` — kernel state lens (ownership isolation) 구현 시작
+- inbox `Kernel_Scope_Isolation.md` — `ctx.state`가 전체 커널 state를 노출하는 문제를 발견
+- inbox `Kernel_App_Migration_Gaps.md` — Gap 1: 앱 커맨드가 전체 `AppState`를 알아야 하는 ergonomics 저하를 진단
+- 커밋 `f2ada95` — kernel `StateLens` 구현
+- 커밋 `7eb8db3` — **kernel 프리징** (`@frozen 2026-02-11`)
 
-**scope가 command routing과 effect routing은 격리하지만 state는 격리하지 않는다** — 이 한 줄이 현재 커널의 정체점이다. 이 문서는 다른 시스템들이 같은 문제를 어떻게 해결했는지 깊이 있게 살펴본다.
+문제 발견 → 설계 → 구현 → 프리징까지 완료된 상태다. 이 문서는 다른 시스템들이 같은 문제를 어떻게 해결했는지 비교하고, 우리 커널이 **어디에 위치하는지** 평가한다.
 
 ---
 
@@ -237,31 +238,58 @@ const appMachine = createMachine({
 
 ---
 
-## 우리 커널에 적용 — 현재 vs. 목표
+## 우리 커널의 현재 구현
 
-| 축 | 현재 | 목표 (접근법 A+C) | 대응 패턴 |
+커널(`@frozen 2026-02-11`) + `registerAppSlice`로 3축 격리가 **이미 달성**되어 있다.
+
+| 축 | 구현 | 코드 위치 | 대응 패턴 |
 |---|---|---|---|
-| Visibility | `ctx.state` = 전체 커널 state | scope=GLOBAL → 전체, scope=app → 자기 slice만 | Redux `combineReducers` |
-| Mutation | `{ state: newState }` → 전체 교체 | scope=app → 자기 slice만 교체, 커널이 자동 병합 | Elm `Cmd.map` |
-| Communication | 없음 (직접 접근) | `defineContext`로 OS 정보 명시적 주입 | re-frame `inject-cofx` |
+| Visibility | `StateLens.get` → 핸들러는 자기 slice만 `ctx.state`로 받음 | `createKernel.ts` L272-273 | Redux `combineReducers` |
+| Mutation | `StateLens.set` → 반환된 state를 커널이 자동 병합 | `createKernel.ts` L344-345 | Elm `Cmd.map` |
+| Communication | `defineContext` → OS 정보를 명시적으로 inject | `appSlice.ts` L104-107 | re-frame `inject-cofx` |
+
+### 커널 코어 (`createKernel.ts` — frozen)
 
 ```typescript
-// 목표 상태: 앱 커맨드
-appGroup.defineCommand("ADD_TODO", (ctx) => (payload) => {
-  // ctx.state = TodoAppState (자기 slice만!)
-  // ctx.state.os → 존재하지 않음 (타입 에러)
-  return {
-    state: produce(ctx.state, draft => { draft.items.push(payload); })
-    // → 커널이 자동으로 { ...fullState, apps: { ...apps, todo: newState } } 변환
-  };
-});
+// L87-91: State Lens 타입
+type StateLens = {
+  get: (full: S) => unknown;    // 전체 → slice 추출
+  set: (full: S, slice: unknown) => S;  // slice → 전체에 합성
+};
+const scopeStateLens = new Map<string, StateLens>();
 
-// OS 정보가 필요할 때: defineContext 주입
-appGroup.defineCommand("CONTEXT_AWARE_CMD", [FocusInfo], (ctx) => () => {
-  const focus = ctx.inject(FocusInfo);  // 읽기 전용, 타입 안전
-  // ctx.state에는 여전히 OS state 없음
+// L272-273: 핸들러에 scoped state 전달
+const lens = scopeStateLens.get(currentScope);
+const scopedState = lens ? lens.get(mwCtx.state as S) : mwCtx.state;
+
+// L339-348: 반환값 자동 병합
+if (key === "state") {
+  const lens = handlerScope ? scopeStateLens.get(handlerScope) : undefined;
+  if (lens) {
+    setState((prev) => lens.set(prev, value));  // slice만 병합
+  } else {
+    setState(() => value as S);                  // GLOBAL → 전체 교체
+  }
+}
+```
+
+### 앱 레이어 (`registerAppSlice` — appSlice.ts)
+
+```typescript
+// L91-101: group 생성 시 stateSlice 자동 연결
+const appGroup = kernel.group({
+  scope,
+  stateSlice: {
+    get: (full: AppState) => full.apps[appId] as S,
+    set: (full: AppState, slice: unknown) => ({
+      ...full,
+      apps: { ...full.apps, [appId]: slice },
+    }),
+  },
 });
 ```
+
+**앱 개발자가 해야 할 일:** `registerAppSlice("todo", { initialState })`만 호출하면 격리가 자동 적용된다. 커널 변경 불필요.
 
 ---
 
@@ -269,21 +297,22 @@ appGroup.defineCommand("CONTEXT_AWARE_CMD", [FocusInfo], (ctx) => () => {
 
 ### ✅ Do
 
-| 원칙 | 구체적 방법 |
+| 원칙 | 우리 커널에서의 구현 |
 |---|---|
-| **State view는 좁게** | 핸들러에 전체 state 대신 자기 scope state만 전달 |
-| **자동 병합** | 반환된 state를 커널이 올바른 위치에 합성 (Elm `Cmd.map` 패턴) |
-| **Cross-scope는 명시적으로** | `defineContext`로 필요한 외부 정보만 inject |
-| **GLOBAL scope는 예외 허용** | OS 커맨드는 전체 state가 필요. scope=GLOBAL일 때만 전체 노출 |
+| **State view는 좁게** | `StateLens.get` — 핸들러는 자기 slice만 `ctx.state`로 받음 (구현 완료) |
+| **자동 병합** | `StateLens.set` — 커널이 반환값을 올바른 위치에 합성 (구현 완료) |
+| **Cross-scope는 명시적으로** | `defineContext` + `inject` — 필요한 외부 정보만 주입 (구현 완료) |
+| **GLOBAL scope는 예외 허용** | lens 없는 scope → 전체 state 노출 (OS 커맨드용, 의도적 설계) |
+| **앱 등록은 팩토리 사용** | `registerAppSlice`가 lens + context + persistence를 한 번에 설정 |
 
 ### ❌ Don't
 
-| Anti-Pattern | 왜 위험한가 |
-|---|---|
-| 앱 핸들러에 전체 state 전달 | 앱이 OS 내부 구현에 coupling → OS 리팩토링 불가 |
-| `...ctx.state`로 수동 병합 | 필드 누락 시 OS state 소멸 (실제 inbox에 기록된 위험) |
-| Selector로 격리 대체 | 읽기만 제한. 쓰기 경로는 여전히 열려 있음 |
-| "신뢰 기반" 격리 | 관행에 의존하는 격리는 팀 규모에 비례해 실패함 |
+| Anti-Pattern | 왜 위험한가 | 우리 커널에서의 방어 |
+|---|---|---|
+| 앱 핸들러에 전체 state 전달 | 앱이 OS 내부 구현에 coupling | `StateLens.get`이 구조적으로 차단 |
+| `...ctx.state`로 수동 병합 | 필드 누락 시 OS state 소멸 | `StateLens.set`이 자동 병합 |
+| Selector로 격리 대체 | 읽기만 제한, 쓰기는 열림 | lens가 읽기+쓰기 모두 격리 |
+| "신뢰 기반" 격리 | 관행은 팀 규모에 비례해 실패 | 커널 인프라가 강제 (관행 불필요) |
 
 ---
 

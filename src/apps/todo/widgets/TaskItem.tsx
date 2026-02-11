@@ -1,6 +1,8 @@
 import {
   CancelEdit,
   DeleteTodo,
+  MoveItemDown,
+  MoveItemUp,
   StartEdit,
   SyncEditDraft,
   ToggleTodo,
@@ -11,6 +13,8 @@ import { Field } from "@os/6-components/Field";
 import { Item } from "@os/6-components/Item";
 import { Trigger } from "@os/6-components/Trigger";
 import {
+  ArrowDown,
+  ArrowUp,
   Check,
   CornerDownLeft,
   GripVertical,
@@ -34,16 +38,15 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
     <Item
       id={String(todo.id)}
       className={`
-                group relative flex items-start gap-3 p-4 rounded-xl border transition-colors transition-shadow
-                ${
-                  isCompleted
-                    ? "bg-slate-50 border-transparent opacity-60"
-                    : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md"
-                }
+                group relative flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-200
+                ${isCompleted
+          ? "bg-slate-50/50 border-transparent opacity-60 hover:opacity-100"
+          : "bg-white border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"
+        }
                 outline-none
-                data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-500 data-[focused=true]:border-transparent data-[focused=true]:z-10
-                data-[selected=true]:bg-indigo-50 data-[selected=true]:border-indigo-200 data-[selected=true]:shadow-sm
-                ${isEditing ? "bg-indigo-50/50 border-indigo-200 ring-2 ring-indigo-500/20" : ""}
+                data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-500/50 data-[focused=true]:border-indigo-300 data-[focused=true]:z-10
+                data-[selected=true]:bg-indigo-50/80 data-[selected=true]:border-indigo-200 data-[selected=true]:shadow-sm
+                ${isEditing ? "bg-white ring-2 ring-indigo-500 border-transparent shadow-lg z-20" : ""}
             `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -63,11 +66,10 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
         <div
           className={`
                         w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
-                        ${
-                          isCompleted
-                            ? "bg-indigo-600 border-indigo-600 scale-100"
-                            : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
-                        }
+                        ${isCompleted
+              ? "bg-indigo-600 border-indigo-600 scale-100"
+              : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
+            }
                     `}
         >
           <Check
@@ -87,7 +89,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
             autoFocus
             onChange={SyncEditDraft}
             onSubmit={UpdateTodoText}
-            onCancel={CancelEdit({})}
+            onCancel={CancelEdit()}
             className="w-full bg-transparent outline-none text-slate-900 text-[15px] font-medium leading-relaxed placeholder:text-slate-400"
             placeholder="What needs to be done?"
             blurOnInactive={true}
@@ -96,11 +98,10 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
           <span
             className={`
                             block text-[15px] leading-relaxed transition-all select-none
-                            ${
-                              isCompleted
-                                ? "text-slate-400 line-through decoration-slate-300"
-                                : "text-slate-700 font-medium"
-                            }
+                            ${isCompleted
+                ? "text-slate-400 line-through decoration-slate-300"
+                : "text-slate-700 font-medium"
+              }
                         `}
           >
             {todo.text}
@@ -136,10 +137,34 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                 <CornerDownLeft size={14} />
               </button>
             </Trigger>
+
+            <div className="w-px h-3 bg-slate-200 mx-1" />
+
+            <Trigger onPress={MoveItemUp({ focusId: todo.id })} asChild>
+              <button
+                type="button"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Move Up (Cmd+Up)"
+              >
+                <ArrowUp size={14} />
+              </button>
+            </Trigger>
+            <Trigger onPress={MoveItemDown({ focusId: todo.id })} asChild>
+              <button
+                type="button"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Move Down (Cmd+Down)"
+              >
+                <ArrowDown size={14} />
+              </button>
+            </Trigger>
+
+            <div className="w-px h-3 bg-slate-200 mx-1" />
+
             <Trigger onPress={DeleteTodo({ id: todo.id })} asChild>
               <button
                 type="button"
-                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                 title="Delete"
               >
                 <Trash2 size={14} />
