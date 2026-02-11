@@ -1,25 +1,11 @@
-import { FocusData } from "@os/features/focus/lib/focusData.ts";
-import { useLayoutEffect, useState, useSyncExternalStore } from "react";
-
 /**
- * Hook to subscribe to the global focus path.
- * Returns true if the provided groupId is in the current focus path.
+ * useIsFocusedGroup — kernel-based hook.
+ *
+ * Returns true if the provided groupId matches the current active zone.
  */
+
+import { kernel } from "@/os-new/kernel";
+
 export function useIsFocusedGroup(groupId: string): boolean {
-  const activeZoneId = useSyncExternalStore(
-    FocusData.subscribeActiveZone,
-    () => FocusData.getActiveZoneId(),
-    () => null,
-  );
-
-  const [isInPath, setIsInPath] = useState(false);
-
-  // We use useLayoutEffect to ensure aria-current updates before paint
-  // when the active zone changes.
-  useLayoutEffect(() => {
-    const path = FocusData.getFocusPath();
-    setIsInPath(path.includes(groupId));
-  }, [groupId, activeZoneId]);
-
-  return isInPath;
+  return kernel.useComputed((state) => state.os.focus.activeZoneId === groupId);
 }

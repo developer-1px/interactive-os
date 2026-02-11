@@ -5,12 +5,9 @@
  */
 
 import { produce } from "immer";
-import {
-  type ExpandAction,
-  resolveExpansion,
-} from "./resolveExpansion";
 import { kernel } from "../../kernel";
 import { ensureZone } from "../../state/utils";
+import { type ExpandAction, resolveExpansion } from "./resolveExpansion";
 
 interface ExpandPayload {
   itemId?: string;

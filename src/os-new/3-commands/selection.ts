@@ -15,7 +15,10 @@ export const SELECTION_SET = kernel.defineCommand(
     state: produce(ctx.state, (draft: any) => {
       const zone = ensureZone(draft.os, payload.zoneId);
       zone.selection = payload.ids;
-      zone.selectionAnchor = payload.ids.length > 0 ? (payload.ids[payload.ids.length - 1] ?? null) : null;
+      zone.selectionAnchor =
+        payload.ids.length > 0
+          ? (payload.ids[payload.ids.length - 1] ?? null)
+          : null;
     }) as typeof ctx.state,
   }),
 );

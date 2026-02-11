@@ -1,139 +1,262 @@
-/**
- * Field — Kernel-based text input component (zero-dependency).
- * 
- * Replaces legacy os/app/export/primitives/Field.tsx.
- * Uses Kernel State (ZoneState.editingItemId).
- * Manages DOM directly via ref to avoid React contentEditable issues.
- */
-
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useFieldFocus } from "@os/core/keyboard/ui/Field/useFieldHooks";
+import type { HTMLAttributes } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
+import { kernel } from "@/os-new/kernel";
+import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
+import { FocusItem } from "@/os-new/primitives/FocusItem";
+import type {
+  BaseCommand,
+  FieldCommandFactory,
+} from "@/os-new/schema/command/BaseCommand";
+import type { FocusTarget } from "@/os-new/schema/focus/FocusTarget";
 import {
-    FIELD_COMMIT,
-    FIELD_START_EDIT,
-} from "../3-commands/field";
-import { useEditing } from "../5-hooks/useEditing";
-import { kernel } from "../kernel";
-import { Item, type ItemProps } from "./Item";
-import { useZoneContext } from "./ZoneContext";
+  type FieldConfig,
+  FieldRegistry,
+  useFieldRegistry,
+} from "@/os-new/store/FieldRegistry";
 
-export interface FieldProps extends Omit<ItemProps, "children" | "onChange" | "id"> {
-    id: string;
-    value: string;
-    mode?: "immediate" | "deferred";
-    placeholder?: string;
-    multiline?: boolean;
+/**
+ * Checks if the value is effectively empty for placeholder display.
+ */
+const checkValueEmpty = (value: string | undefined | null): boolean => {
+  return !value || value === "\n";
+};
 
-    // Callbacks
-    onCommit?: (value: string) => void;
-    onChange?: (value: string) => void; // Real-time change
-
-    // Style overrides
-    className?: string; // Additional className
+interface FieldStyleParams {
+  isFocused: boolean;
+  isEditing: boolean;
+  multiline: boolean;
+  value: string;
+  placeholder?: string;
+  customClassName?: string;
 }
 
-export function Field({
-    id,
-    value,
-    mode = "immediate",
-    placeholder,
-    multiline = false,
-    onCommit,
-    onChange,
-    className,
-    ...rest
-}: FieldProps) {
-    const { zoneId } = useZoneContext();
-    const isEditing = useEditing(zoneId, id);
-    const internalRef = useRef<HTMLElement>(null);
+/**
+ * Composes the Tailwind classes for the field.
+ *
+ * Visual States:
+ * - Default: No special styling
+ * - Focused (Selected): Ring outline indicating selection
+ * - Editing (Active): Blue ring + blue tint background indicating input mode
+ */
+const getFieldClasses = ({
+  isFocused: _isFocused,
+  isEditing,
+  multiline,
+  value,
+  placeholder,
+  customClassName = "",
+}: FieldStyleParams): string => {
+  const isEmpty = checkValueEmpty(value);
+  const shouldShowPlaceholder = placeholder && isEmpty;
+  const placeholderClasses = shouldShowPlaceholder
+    ? "before:content-[attr(data-placeholder)] before:text-slate-400 before:opacity-50 before:pointer-events-none before:absolute before:top-0 before:left-0 before:truncate before:w-full before:h-full"
+    : "";
 
-    // Sync prop -> DOM (only when NOT editing)
-    useLayoutEffect(() => {
-        if (!isEditing && internalRef.current) {
-            // Avoid resetting cursor if value is effectively same (though usually we are not editing)
-            if (internalRef.current.innerText !== value) {
-                internalRef.current.innerText = value;
-            }
-        }
-    }, [value, isEditing]);
+  const lineClasses = multiline
+    ? "whitespace-pre-wrap break-words"
+    : "whitespace-nowrap overflow-hidden";
 
-    // Handle Commit/Cancel signals from Kernel
-    const lastEventRef = useRef<{ type: string; id: string; tick: number } | null>(null);
+  // --- State Visual Distinction ---
+  // Editing: Blue ring + blue tint background (clearly "input mode")
+  // Focused: Default focus ring (from FocusItem or custom)
+  const stateClasses = isEditing
+    ? "ring-2 ring-blue-500 bg-blue-500/10 rounded-sm"
+    : "";
 
-    useEffect(() => {
-        return kernel.subscribe(() => {
-            const state = kernel.getState();
-            const event = state.os.focus.zones[zoneId]?.fieldEvent;
+  // User's customClassName comes LAST to allow full control over display, sizing, etc.
+  // Field only provides: placeholder, whitespace handling, state feedback, and min-height
+  return `${placeholderClasses} ${lineClasses} ${stateClasses} relative min-h-[1lh] ${customClassName}`.trim();
+};
 
-            // Check if a new event occurred for this field
-            if (event && event !== lastEventRef.current && event.id === id) {
-                lastEventRef.current = event;
-                if (event.type === "commit") {
-                    onCommit?.(internalRef.current?.innerText || "");
-                } else if (event.type === "cancel") {
-                    // Revert to original prop value
-                    if (internalRef.current) {
-                        internalRef.current.innerText = value;
-                    }
-                }
-            }
-        });
-    }, [id, zoneId, value, onCommit]);
+export type FieldMode = "immediate" | "deferred";
 
-    // Update logic (Propagate changes)
-    const handleInput = (e: React.FormEvent<HTMLElement>) => {
-        onChange?.(e.currentTarget.innerText);
-    };
+export interface FieldProps
+  extends Omit<
+    HTMLAttributes<HTMLElement>,
+    "onChange" | "onBlur" | "onFocus" | "onSubmit"
+  > {
+  value: string;
+  name?: string;
+  placeholder?: string;
+  multiline?: boolean;
+  onSubmit?: FieldCommandFactory; // Field injects { text: currentValue }
+  onChange?: FieldCommandFactory; // Field injects { text: currentValue }
+  onCancel?: BaseCommand;
+  updateType?: string;
+  onCommit?: (value: string) => void;
+  onSync?: (value: string) => void;
+  onCancelCallback?: () => void;
+  mode?: FieldMode;
+  target?: FocusTarget;
+  controls?: string;
+  blurOnInactive?: boolean;
+  as?: "span" | "div";
+}
 
-    // Focus handler: Auto-start editing in immediate mode
-    const handleFocus = () => {
-        if (mode === "immediate" && !isEditing) {
-            kernel.dispatch(FIELD_START_EDIT());
-        }
-    };
-
-    // Click handler: Start editing (triggers for Enter key via ACTIVATE->click)
-    const handleClick = () => {
-        if (!isEditing) {
-            kernel.dispatch(FIELD_START_EDIT());
-        }
-    };
-
-    // Blur handler: Auto-commit if editing
-    const handleBlur = () => {
-        if (isEditing) {
-            kernel.dispatch(FIELD_COMMIT());
-        }
-    };
-
-    const Component = multiline ? "div" : "span";
-
-    return (
-        <Item
-            id={id}
-            asChild
-            {...rest}
-        >
-            <Component
-                role="textbox"
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onFocus={handleFocus}
-                onClick={handleClick}
-                onBlur={handleBlur}
-                onInput={handleInput}
-                className={className}
-                data-placeholder={(!isEditing && !value) ? placeholder : undefined}
-                style={{
-                    minHeight: "1lh",
-                    display: "inline-block",
-                    cursor: isEditing ? "text" : "default",
-                    outline: "none",
-                    whiteSpace: multiline ? "pre-wrap" : "nowrap",
-                    overflow: multiline ? undefined : "hidden",
-                    ...(rest as any).style
-                }}
-            // No children managed by React to prevent cursor jumps
-            />
-        </Item>
+/**
+ * Field - Pure Projection Primitive
+ *
+ * A passive text input component that:
+ * - Registers with FieldRegistry for state management
+ * - Subscribes to registry state for rendering
+ * - Delegates all event handling to InputSensor (pipeline)
+ *
+ * NO event handlers - all logic in InputSensor + InputIntent.
+ */
+export const Field = forwardRef<HTMLElement, FieldProps>(
+  (
+    {
+      value,
+      name,
+      placeholder,
+      multiline = false,
+      onSubmit,
+      onChange,
+      onCancel,
+      updateType,
+      onCommit,
+      mode = "immediate",
+      target = "real",
+      controls,
+      blurOnInactive = false,
+      as = "span",
+      ...rest
+    },
+    ref,
+  ) => {
+    const context = useFocusGroupContext();
+    const zoneId = context?.zoneId || "unknown";
+    const activeZoneId = kernel.useComputed((s) => s.os.focus.activeZoneId);
+    const osFocusedItemId = kernel.useComputed(
+      (s) => s.os.focus.zones[zoneId]?.focusedItemId ?? null,
     );
-}
+
+    const innerRef = useRef<HTMLElement>(null);
+    const cursorRef = useRef<number | null>(null);
+
+    // --- Identity ---
+    const fieldId = name || "unknown-field";
+
+    // --- Registry Binding ---
+    useEffect(() => {
+      if (!name) return;
+      const config: FieldConfig = {
+        name,
+        mode,
+        multiline,
+        ...(onSubmit !== undefined ? { onSubmit } : {}),
+        ...(onChange !== undefined ? { onChange } : {}),
+        ...(onCancel !== undefined ? { onCancel } : {}),
+        ...(updateType !== undefined ? { updateType } : {}),
+        ...(onCommit !== undefined ? { onCommit } : {}),
+      };
+      FieldRegistry.register(name, config);
+      return () => FieldRegistry.unregister(name);
+    }, [
+      name,
+      mode,
+      multiline,
+      onSubmit,
+      onChange,
+      onCancel,
+      updateType,
+      onCommit,
+    ]);
+
+    // --- State Subscription ---
+    const fieldData = useFieldRegistry((s) => s.fields.get(fieldId));
+    const isEditing = fieldData?.state.isEditing ?? false;
+    const localValue = fieldData?.state.localValue ?? value;
+
+    // Sync prop value to registry when NOT editing
+    useEffect(() => {
+      if (!isEditing && value !== fieldData?.state.localValue) {
+        FieldRegistry.updateValue(fieldId, value);
+      }
+    }, [value, isEditing, fieldId, fieldData?.state.localValue]);
+
+    // --- Focus Computation ---
+    const isSystemActive = activeZoneId === zoneId;
+    const isFocused = isSystemActive && osFocusedItemId === fieldId;
+    const isContentEditable =
+      mode === "deferred" ? isFocused && isEditing : isFocused;
+    const isActive = isContentEditable;
+
+    // --- Initial Value (set once on mount via ref) ---
+    // contentEditable manages its own DOM, we only set initial value
+    const initialValueRef = useRef(value);
+    const hasInitialized = useRef(false);
+
+    useLayoutEffect(() => {
+      if (innerRef.current && !hasInitialized.current) {
+        innerRef.current.innerText = initialValueRef.current;
+        hasInitialized.current = true;
+      }
+    }, []);
+
+    // Reset when value prop becomes empty (e.g., after submit)
+    const prevValueRef = useRef(value);
+    useLayoutEffect(() => {
+      if (innerRef.current && prevValueRef.current !== value && value === "") {
+        innerRef.current.innerText = "";
+      }
+      prevValueRef.current = value;
+    }, [value]);
+
+    const shouldHaveDOMFocus = mode === "deferred" ? isFocused : isActive;
+    useFieldFocus({
+      innerRef,
+      isActive: shouldHaveDOMFocus,
+      blurOnInactive,
+      cursorRef,
+    });
+
+    // --- Styling ---
+    const { className: customClassName, ...otherProps } = rest as any;
+    const composeProps = getFieldClasses({
+      isFocused,
+      isEditing,
+      multiline,
+      value: localValue,
+      ...(placeholder !== undefined ? { placeholder } : {}),
+      customClassName,
+    });
+
+    // --- Base Props (Projection Only) ---
+    const baseProps = {
+      id: fieldId,
+      contentEditable: isContentEditable,
+      suppressContentEditableWarning: true,
+      role: "textbox",
+      "aria-multiline": multiline,
+      tabIndex: 0,
+      className: composeProps,
+      "data-placeholder": placeholder,
+      "data-mode": mode,
+      "data-editing":
+        mode === "deferred" ? (isEditing ? "true" : undefined) : undefined,
+      "data-focused": isFocused ? "true" : undefined,
+      "aria-controls": controls,
+      "aria-activedescendant":
+        target === "virtual" &&
+        controls &&
+        osFocusedItemId &&
+        osFocusedItemId !== name
+          ? osFocusedItemId
+          : undefined,
+      children: null, // Managed by useFieldDOMSync
+      ...otherProps,
+    };
+
+    const setInnerRef = (node: HTMLElement | null) => {
+      (innerRef as any).current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) (ref as any).current = node;
+    };
+
+    return <FocusItem id={fieldId} as={as} ref={setInnerRef} {...baseProps} />;
+  },
+);
+
+Field.displayName = "Field";

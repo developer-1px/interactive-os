@@ -9,12 +9,12 @@
  */
 
 import { produce } from "immer";
-import { resolveNavigate } from "./resolve";
 import { DOM_ITEMS, DOM_RECTS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 import { EXPAND } from "../expand";
+import { resolveNavigate } from "./resolve";
 
 type Direction = "up" | "down" | "left" | "right" | "home" | "end";
 
@@ -63,7 +63,10 @@ export const NAVIGATE = kernel.defineCommand(
           }
           if (payload.direction === "left" && isExpanded) {
             return {
-              dispatch: EXPAND({ action: "collapse", itemId: focusedId }) as any,
+              dispatch: EXPAND({
+                action: "collapse",
+                itemId: focusedId,
+              }) as any,
             };
           }
         }

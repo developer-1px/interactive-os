@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import {
   Accessibility,
   Book,
-  Columns,
   Cpu,
   Layout,
   MousePointer2,
@@ -14,25 +13,24 @@ import {
 export function GlobalNav() {
   const navItems = [
     { id: "todo", icon: Package, path: "/", label: "Todo" },
-    { id: "kanban", icon: Columns, path: "/kanban", label: "Kanban" },
     { id: "builder", icon: Layout, path: "/builder", label: "Web Builder" },
     {
-      id: "focus-showcase",
+      id: "focus-playground",
       icon: MousePointer2,
-      path: "/focus-showcase",
-      label: "Focus Lab",
+      path: "/playground/focus",
+      label: "Focus Playground",
     },
     {
-      id: "aria-showcase",
+      id: "aria-playground",
       icon: Accessibility,
-      path: "/aria-showcase",
-      label: "ARIA Showcase",
+      path: "/playground/aria",
+      label: "ARIA Playground",
     },
     {
-      id: "kernel-lab",
+      id: "kernel-playground",
       icon: Cpu,
-      path: "/kernel-lab",
-      label: "Kernel Lab",
+      path: "/playground/kernel",
+      label: "Kernel Playground",
     },
   ];
 

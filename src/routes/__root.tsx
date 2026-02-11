@@ -1,12 +1,14 @@
 import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import { InspectorShell } from "@inspector/shell/InspectorShell";
-import { OS } from "@os/features/AntigravityOS";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
+import { OS } from "@os/AntigravityOS";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
-// import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { CommandPalette } from "@/command-palette/CommandPalette";
 
-// Inspector registers its own command + keybinding via OS API (plugin model)
+// Plugin registrations (side-effect imports)
 import "@inspector/register";
+import "@/command-palette/register";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -24,7 +26,9 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const isInspectorOpen = useInspectorStore((s: { isOpen: boolean }) => s.isOpen);
+  const isInspectorOpen = useInspectorStore(
+    (s: { isOpen: boolean }) => s.isOpen,
+  );
 
   return (
     <OS.Root>
@@ -49,7 +53,10 @@ function RootComponent() {
           </aside>
         )}
 
-        {/* <TanStackRouterDevtools /> */}
+        {/* Command Palette (⌘K) */}
+        <CommandPalette />
+
+        <TanStackRouterDevtools />
       </div>
     </OS.Root>
   );

@@ -14,8 +14,12 @@
  * 10. Category Selection
  */
 
-import { CommandEngineStore } from "@os/features/command/store/CommandEngineStore";
-import { type TestActions, type TestBot, useTestBotRoutes } from "@inspector/testbot";
+import {
+  type TestActions,
+  type TestBot,
+  useTestBotRoutes,
+} from "@inspector/testbot";
+import { CommandEngineStore } from "@os/core/command/store/CommandEngineStore";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers

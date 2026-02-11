@@ -24,7 +24,7 @@ export default defineConfig({
       "@playwright/test": "/src/inspector/testbot/playwright/index.ts",
       "@inspector": "/src/inspector",
       "@kernel": "/packages/kernel/src",
-      "@os": "/src/os",
+      "@os": "/src/os-new",
       "@apps": "/src/apps",
       "@": "/src",
     },

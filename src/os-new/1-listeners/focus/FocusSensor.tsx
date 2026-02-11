@@ -86,12 +86,21 @@ function dispatchSelectCommand(e: MouseEvent, itemId: string) {
   };
   if (e.shiftKey) {
     e.preventDefault();
-    kernel.dispatch(SELECT({ targetId: itemId, mode: "range" } as any), mouseMeta);
+    kernel.dispatch(
+      SELECT({ targetId: itemId, mode: "range" } as any),
+      mouseMeta,
+    );
   } else if (e.metaKey || e.ctrlKey) {
     e.preventDefault();
-    kernel.dispatch(SELECT({ targetId: itemId, mode: "toggle" } as any), mouseMeta);
+    kernel.dispatch(
+      SELECT({ targetId: itemId, mode: "toggle" } as any),
+      mouseMeta,
+    );
   } else {
-    kernel.dispatch(SELECT({ targetId: itemId, mode: "replace" } as any), mouseMeta);
+    kernel.dispatch(
+      SELECT({ targetId: itemId, mode: "replace" } as any),
+      mouseMeta,
+    );
   }
 }
 

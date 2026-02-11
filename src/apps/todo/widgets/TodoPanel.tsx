@@ -1,7 +1,7 @@
 import type { AppState } from "@apps/todo/model/types";
 import { BoardView } from "@apps/todo/widgets/BoardView";
 import { ListView } from "@apps/todo/widgets/ListView";
-import { useEngine } from "@os/features/command/ui/CommandContext";
+import { useEngine } from "@os/core/command/ui/CommandContext";
 
 /**
  * TodoPanel: Switching container for List/Board views.

@@ -25,6 +25,10 @@ export const initialZoneState: ZoneState = {
 export const initialOSState: OSState = {
   focus: {
     activeZoneId: null,
+    focusStack: [],
     zones: {},
+  },
+  overlays: {
+    stack: [],
   },
 };

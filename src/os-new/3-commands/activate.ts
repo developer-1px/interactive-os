@@ -2,15 +2,12 @@
  * OS_ACTIVATE Command — Enter key activation (kernel version)
  *
  * Behavior:
- * - If treeitem/menuitem: toggle expansion (via OS_EXPAND dispatch)
+ * - If treeitem/menuitem with aria-expanded: toggle expansion (via OS_EXPAND dispatch)
  * - Otherwise: trigger CLICK effect on focused element
- *
- * Note: DOM role checking is deferred to scoped handler phase.
- * For now, the command simply triggers a click effect.
- * Apps can override this via scoped handlers in Phase 5.
  */
 
 import { kernel } from "../kernel";
+import { EXPAND } from "./expand";
 
 export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
@@ -18,6 +15,14 @@ export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
 
   const zone = ctx.state.os.focus.zones[activeZoneId];
   if (!zone?.focusedItemId) return;
+
+  // W3C Tree Pattern: Enter/Space toggles expansion for expandable items
+  const focusedEl = document.getElementById(zone.focusedItemId);
+  if (focusedEl?.hasAttribute("aria-expanded")) {
+    return {
+      dispatch: EXPAND({ action: "toggle", itemId: zone.focusedItemId }) as any,
+    };
+  }
 
   return {
     click: zone.focusedItemId,

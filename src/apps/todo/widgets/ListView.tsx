@@ -19,11 +19,11 @@ import {
 } from "@apps/todo/features/commands/list";
 import type { AppState } from "@apps/todo/model/types";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { Field } from "@os/app/export/primitives/Field";
-import { Label } from "@os/app/export/primitives/Label";
-import { Zone } from "@os/app/export/primitives/Zone";
-import { OS } from "@os/features/AntigravityOS";
-import { useEngine } from "@os/features/command/ui/CommandContext";
+import { Field } from "@os/6-components/Field";
+import { Label } from "@os/6-components/Label";
+import { Zone } from "@os/6-components/Zone";
+import { OS } from "@os/AntigravityOS";
+import { useEngine } from "@os/core/command/ui/CommandContext";
 import { Plus } from "lucide-react";
 
 export function ListView() {
@@ -35,7 +35,9 @@ export function ListView() {
   const visibleTodoIds = todoOrder.filter(
     (id) => todos[id]?.categoryId === state.ui.selectedCategoryId,
   );
-  const visibleTodos = visibleTodoIds.map((id) => todos[id]).filter((t): t is NonNullable<typeof t> => !!t);
+  const visibleTodos = visibleTodoIds
+    .map((id) => todos[id])
+    .filter((t): t is NonNullable<typeof t> => !!t);
 
   // Edit state
   const editingId = state.ui.editingId;

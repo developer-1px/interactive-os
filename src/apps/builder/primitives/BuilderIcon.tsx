@@ -51,7 +51,11 @@ export const BuilderIcon = forwardRef<HTMLDivElement, BuilderIconProps>(
         style={style}
         {...rest}
       >
-        <Icon size={size} {...(strokeWidth != null ? { strokeWidth } : {})} {...(iconClassName ? { className: iconClassName } : {})} />
+        <Icon
+          size={size}
+          {...(strokeWidth != null ? { strokeWidth } : {})}
+          {...(iconClassName ? { className: iconClassName } : {})}
+        />
       </div>
     );
   },

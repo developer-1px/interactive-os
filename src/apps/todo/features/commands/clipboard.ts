@@ -1,6 +1,6 @@
 import { defineListCommand } from "@apps/todo/features/commands/defineGlobalCommand";
 import type { Todo } from "@apps/todo/model/appState";
-import type { OS } from "@os/features/AntigravityOS";
+import type { OS } from "@os/AntigravityOS";
 import { produce } from "immer";
 
 /**

@@ -23,5 +23,7 @@ export {
   SELECTION_SET,
   SELECTION_TOGGLE,
 } from "./selection";
+export { STACK_POP, STACK_PUSH } from "./stack";
 export { SYNC_FOCUS } from "./syncFocus";
 export { TAB } from "./tab";
+export { OVERLAY_OPEN, OVERLAY_CLOSE } from "./overlay";

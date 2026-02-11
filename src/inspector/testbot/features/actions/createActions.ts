@@ -123,10 +123,10 @@ export function createActions(
     cursor.clearBubbles();
     const modLabel = modifiers
       ? `${[
-        modifiers.ctrl ? "Ctrl+" : "",
-        modifiers.shift ? "Shift+" : "",
-        modifiers.meta ? "⌘+" : "",
-      ].join("")}Click`
+          modifiers.ctrl ? "Ctrl+" : "",
+          modifiers.shift ? "Shift+" : "",
+          modifiers.meta ? "⌘+" : "",
+        ].join("")}Click`
       : "Click";
     cursor.showBubble(modLabel, "click");
     cursor.ripple();

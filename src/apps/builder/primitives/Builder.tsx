@@ -19,16 +19,8 @@
  *   </Builder.Section>
  */
 
-import { FocusData } from "@os/features/focus/lib/focusData";
-import {
-  forwardRef,
-  type ReactElement,
-  useLayoutEffect,
-  useRef,
-  useSyncExternalStore,
-} from "react";
-import { useStore } from "zustand";
-import { useShallow } from "zustand/react/shallow";
+import { forwardRef, type ReactElement, useLayoutEffect, useRef } from "react";
+import { kernel } from "@/os-new/kernel";
 import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
 import { composeRefs, Slot } from "@/os-new/shared/Slot";
 
@@ -57,32 +49,26 @@ function createBuilderComponent(level: BuilderLevel, displayName: string) {
     id,
     innerRef,
     combinedRef,
-    groupId,
-    store,
+    zoneId,
     children,
   }: {
     id: string;
     innerRef: React.RefObject<HTMLElement | null>;
     combinedRef: (node: any) => void;
-    groupId: string;
-    store: any;
+    zoneId: string;
     children: ReactElement;
   }) {
-    const activeGroupId = useSyncExternalStore(
-      FocusData.subscribeActiveZone,
-      () => FocusData.getActiveZoneId(),
-      () => null,
+    const activeZoneId = kernel.useComputed((s) => s.os.focus.activeZoneId);
+
+    const isFocused = kernel.useComputed(
+      (s) => s.os.focus.zones[zoneId]?.focusedItemId === id,
     );
 
-    const { isFocused, isSelected } = useStore(
-      store,
-      useShallow((state: any) => ({
-        isFocused: state.focusedItemId === id,
-        isSelected: state.selection.includes(id),
-      })),
+    const isSelected = kernel.useComputed(
+      (s) => s.os.focus.zones[zoneId]?.selection.includes(id) ?? false,
     );
 
-    const isGroupActive = activeGroupId === groupId;
+    const isGroupActive = activeZoneId === zoneId;
     const visualFocused = isFocused && isGroupActive;
     const isAnchor = isFocused && !isGroupActive;
 
@@ -138,8 +124,7 @@ function createBuilderComponent(level: BuilderLevel, displayName: string) {
           id={id}
           innerRef={internalRef}
           combinedRef={combinedRef}
-          groupId={ctx.groupId}
-          store={ctx.store}
+          zoneId={ctx.zoneId}
         >
           {children}
         </BuilderFocusItem>

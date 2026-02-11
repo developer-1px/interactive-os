@@ -11,21 +11,20 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TodoRouteImport } from './routes/_todo'
 import { Route as MinimalRouteImport } from './routes/_minimal'
-import { Route as KanbanRouteImport } from './routes/_kanban'
 import { Route as TodoIndexRouteImport } from './routes/_todo/index'
 import { Route as TodoSettingsRouteImport } from './routes/_todo/settings'
 import { Route as TodoSearchRouteImport } from './routes/_todo/search'
 import { Route as TodoProfileRouteImport } from './routes/_todo/profile'
-import { Route as MinimalSpikeDemoRouteImport } from './routes/_minimal/spike-demo'
-import { Route as MinimalPlaywrightRunnerRouteImport } from './routes/_minimal/playwright-runner'
-import { Route as MinimalOsKernelDemoRouteImport } from './routes/_minimal/os-kernel-demo'
-import { Route as MinimalKernelLabRouteImport } from './routes/_minimal/kernel-lab'
-import { Route as MinimalFocusShowcaseRouteImport } from './routes/_minimal/focus-showcase'
 import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
-import { Route as MinimalAriaShowcaseRouteImport } from './routes/_minimal/aria-showcase'
-import { Route as KanbanKanbanRouteImport } from './routes/_kanban/kanban'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
+import { Route as MinimalPlaygroundSpikeRouteImport } from './routes/_minimal/playground.spike'
+import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/playground.radix'
+import { Route as MinimalPlaygroundPlaywrightRouteImport } from './routes/_minimal/playground.playwright'
+import { Route as MinimalPlaygroundOsKernelRouteImport } from './routes/_minimal/playground.os-kernel'
+import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
+import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
+import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
 import { Route as MinimalDocsSplatRouteImport } from './routes/_minimal/docs/$'
 
 const TodoRoute = TodoRouteImport.update({
@@ -34,10 +33,6 @@ const TodoRoute = TodoRouteImport.update({
 } as any)
 const MinimalRoute = MinimalRouteImport.update({
   id: '/_minimal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KanbanRoute = KanbanRouteImport.update({
-  id: '/_kanban',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TodoIndexRoute = TodoIndexRouteImport.update({
@@ -60,31 +55,6 @@ const TodoProfileRoute = TodoProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => TodoRoute,
 } as any)
-const MinimalSpikeDemoRoute = MinimalSpikeDemoRouteImport.update({
-  id: '/spike-demo',
-  path: '/spike-demo',
-  getParentRoute: () => MinimalRoute,
-} as any)
-const MinimalPlaywrightRunnerRoute = MinimalPlaywrightRunnerRouteImport.update({
-  id: '/playwright-runner',
-  path: '/playwright-runner',
-  getParentRoute: () => MinimalRoute,
-} as any)
-const MinimalOsKernelDemoRoute = MinimalOsKernelDemoRouteImport.update({
-  id: '/os-kernel-demo',
-  path: '/os-kernel-demo',
-  getParentRoute: () => MinimalRoute,
-} as any)
-const MinimalKernelLabRoute = MinimalKernelLabRouteImport.update({
-  id: '/kernel-lab',
-  path: '/kernel-lab',
-  getParentRoute: () => MinimalRoute,
-} as any)
-const MinimalFocusShowcaseRoute = MinimalFocusShowcaseRouteImport.update({
-  id: '/focus-showcase',
-  path: '/focus-showcase',
-  getParentRoute: () => MinimalRoute,
-} as any)
 const MinimalDocsRoute = MinimalDocsRouteImport.update({
   id: '/docs',
   path: '/docs',
@@ -95,20 +65,47 @@ const MinimalBuilderRoute = MinimalBuilderRouteImport.update({
   path: '/builder',
   getParentRoute: () => MinimalRoute,
 } as any)
-const MinimalAriaShowcaseRoute = MinimalAriaShowcaseRouteImport.update({
-  id: '/aria-showcase',
-  path: '/aria-showcase',
-  getParentRoute: () => MinimalRoute,
-} as any)
-const KanbanKanbanRoute = KanbanKanbanRouteImport.update({
-  id: '/kanban',
-  path: '/kanban',
-  getParentRoute: () => KanbanRoute,
-} as any)
 const MinimalDocsIndexRoute = MinimalDocsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MinimalDocsRoute,
+} as any)
+const MinimalPlaygroundSpikeRoute = MinimalPlaygroundSpikeRouteImport.update({
+  id: '/playground/spike',
+  path: '/playground/spike',
+  getParentRoute: () => MinimalRoute,
+} as any)
+const MinimalPlaygroundRadixRoute = MinimalPlaygroundRadixRouteImport.update({
+  id: '/playground/radix',
+  path: '/playground/radix',
+  getParentRoute: () => MinimalRoute,
+} as any)
+const MinimalPlaygroundPlaywrightRoute =
+  MinimalPlaygroundPlaywrightRouteImport.update({
+    id: '/playground/playwright',
+    path: '/playground/playwright',
+    getParentRoute: () => MinimalRoute,
+  } as any)
+const MinimalPlaygroundOsKernelRoute =
+  MinimalPlaygroundOsKernelRouteImport.update({
+    id: '/playground/os-kernel',
+    path: '/playground/os-kernel',
+    getParentRoute: () => MinimalRoute,
+  } as any)
+const MinimalPlaygroundKernelRoute = MinimalPlaygroundKernelRouteImport.update({
+  id: '/playground/kernel',
+  path: '/playground/kernel',
+  getParentRoute: () => MinimalRoute,
+} as any)
+const MinimalPlaygroundFocusRoute = MinimalPlaygroundFocusRouteImport.update({
+  id: '/playground/focus',
+  path: '/playground/focus',
+  getParentRoute: () => MinimalRoute,
+} as any)
+const MinimalPlaygroundAriaRoute = MinimalPlaygroundAriaRouteImport.update({
+  id: '/playground/aria',
+  path: '/playground/aria',
+  getParentRoute: () => MinimalRoute,
 } as any)
 const MinimalDocsSplatRoute = MinimalDocsSplatRouteImport.update({
   id: '/$',
@@ -118,116 +115,113 @@ const MinimalDocsSplatRoute = MinimalDocsSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof TodoIndexRoute
-  '/kanban': typeof KanbanKanbanRoute
-  '/aria-showcase': typeof MinimalAriaShowcaseRoute
   '/builder': typeof MinimalBuilderRoute
   '/docs': typeof MinimalDocsRouteWithChildren
-  '/focus-showcase': typeof MinimalFocusShowcaseRoute
-  '/kernel-lab': typeof MinimalKernelLabRoute
-  '/os-kernel-demo': typeof MinimalOsKernelDemoRoute
-  '/playwright-runner': typeof MinimalPlaywrightRunnerRoute
-  '/spike-demo': typeof MinimalSpikeDemoRoute
   '/profile': typeof TodoProfileRoute
   '/search': typeof TodoSearchRoute
   '/settings': typeof TodoSettingsRoute
   '/docs/$': typeof MinimalDocsSplatRoute
+  '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/focus': typeof MinimalPlaygroundFocusRoute
+  '/playground/kernel': typeof MinimalPlaygroundKernelRoute
+  '/playground/os-kernel': typeof MinimalPlaygroundOsKernelRoute
+  '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
+  '/playground/radix': typeof MinimalPlaygroundRadixRoute
+  '/playground/spike': typeof MinimalPlaygroundSpikeRoute
   '/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof TodoIndexRoute
-  '/kanban': typeof KanbanKanbanRoute
-  '/aria-showcase': typeof MinimalAriaShowcaseRoute
   '/builder': typeof MinimalBuilderRoute
-  '/focus-showcase': typeof MinimalFocusShowcaseRoute
-  '/kernel-lab': typeof MinimalKernelLabRoute
-  '/os-kernel-demo': typeof MinimalOsKernelDemoRoute
-  '/playwright-runner': typeof MinimalPlaywrightRunnerRoute
-  '/spike-demo': typeof MinimalSpikeDemoRoute
   '/profile': typeof TodoProfileRoute
   '/search': typeof TodoSearchRoute
   '/settings': typeof TodoSettingsRoute
   '/docs/$': typeof MinimalDocsSplatRoute
+  '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/focus': typeof MinimalPlaygroundFocusRoute
+  '/playground/kernel': typeof MinimalPlaygroundKernelRoute
+  '/playground/os-kernel': typeof MinimalPlaygroundOsKernelRoute
+  '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
+  '/playground/radix': typeof MinimalPlaygroundRadixRoute
+  '/playground/spike': typeof MinimalPlaygroundSpikeRoute
   '/docs': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_kanban': typeof KanbanRouteWithChildren
   '/_minimal': typeof MinimalRouteWithChildren
   '/_todo': typeof TodoRouteWithChildren
-  '/_kanban/kanban': typeof KanbanKanbanRoute
-  '/_minimal/aria-showcase': typeof MinimalAriaShowcaseRoute
   '/_minimal/builder': typeof MinimalBuilderRoute
   '/_minimal/docs': typeof MinimalDocsRouteWithChildren
-  '/_minimal/focus-showcase': typeof MinimalFocusShowcaseRoute
-  '/_minimal/kernel-lab': typeof MinimalKernelLabRoute
-  '/_minimal/os-kernel-demo': typeof MinimalOsKernelDemoRoute
-  '/_minimal/playwright-runner': typeof MinimalPlaywrightRunnerRoute
-  '/_minimal/spike-demo': typeof MinimalSpikeDemoRoute
   '/_todo/profile': typeof TodoProfileRoute
   '/_todo/search': typeof TodoSearchRoute
   '/_todo/settings': typeof TodoSettingsRoute
   '/_todo/': typeof TodoIndexRoute
   '/_minimal/docs/$': typeof MinimalDocsSplatRoute
+  '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
+  '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
+  '/_minimal/playground/os-kernel': typeof MinimalPlaygroundOsKernelRoute
+  '/_minimal/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
+  '/_minimal/playground/radix': typeof MinimalPlaygroundRadixRoute
+  '/_minimal/playground/spike': typeof MinimalPlaygroundSpikeRoute
   '/_minimal/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/kanban'
-    | '/aria-showcase'
     | '/builder'
     | '/docs'
-    | '/focus-showcase'
-    | '/kernel-lab'
-    | '/os-kernel-demo'
-    | '/playwright-runner'
-    | '/spike-demo'
     | '/profile'
     | '/search'
     | '/settings'
     | '/docs/$'
+    | '/playground/aria'
+    | '/playground/focus'
+    | '/playground/kernel'
+    | '/playground/os-kernel'
+    | '/playground/playwright'
+    | '/playground/radix'
+    | '/playground/spike'
     | '/docs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/kanban'
-    | '/aria-showcase'
     | '/builder'
-    | '/focus-showcase'
-    | '/kernel-lab'
-    | '/os-kernel-demo'
-    | '/playwright-runner'
-    | '/spike-demo'
     | '/profile'
     | '/search'
     | '/settings'
     | '/docs/$'
+    | '/playground/aria'
+    | '/playground/focus'
+    | '/playground/kernel'
+    | '/playground/os-kernel'
+    | '/playground/playwright'
+    | '/playground/radix'
+    | '/playground/spike'
     | '/docs'
   id:
     | '__root__'
-    | '/_kanban'
     | '/_minimal'
     | '/_todo'
-    | '/_kanban/kanban'
-    | '/_minimal/aria-showcase'
     | '/_minimal/builder'
     | '/_minimal/docs'
-    | '/_minimal/focus-showcase'
-    | '/_minimal/kernel-lab'
-    | '/_minimal/os-kernel-demo'
-    | '/_minimal/playwright-runner'
-    | '/_minimal/spike-demo'
     | '/_todo/profile'
     | '/_todo/search'
     | '/_todo/settings'
     | '/_todo/'
     | '/_minimal/docs/$'
+    | '/_minimal/playground/aria'
+    | '/_minimal/playground/focus'
+    | '/_minimal/playground/kernel'
+    | '/_minimal/playground/os-kernel'
+    | '/_minimal/playground/playwright'
+    | '/_minimal/playground/radix'
+    | '/_minimal/playground/spike'
     | '/_minimal/docs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  KanbanRoute: typeof KanbanRouteWithChildren
   MinimalRoute: typeof MinimalRouteWithChildren
   TodoRoute: typeof TodoRouteWithChildren
 }
@@ -246,13 +240,6 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof MinimalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_kanban': {
-      id: '/_kanban'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof KanbanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_todo/': {
@@ -283,41 +270,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TodoProfileRouteImport
       parentRoute: typeof TodoRoute
     }
-    '/_minimal/spike-demo': {
-      id: '/_minimal/spike-demo'
-      path: '/spike-demo'
-      fullPath: '/spike-demo'
-      preLoaderRoute: typeof MinimalSpikeDemoRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/playwright-runner': {
-      id: '/_minimal/playwright-runner'
-      path: '/playwright-runner'
-      fullPath: '/playwright-runner'
-      preLoaderRoute: typeof MinimalPlaywrightRunnerRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/os-kernel-demo': {
-      id: '/_minimal/os-kernel-demo'
-      path: '/os-kernel-demo'
-      fullPath: '/os-kernel-demo'
-      preLoaderRoute: typeof MinimalOsKernelDemoRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/kernel-lab': {
-      id: '/_minimal/kernel-lab'
-      path: '/kernel-lab'
-      fullPath: '/kernel-lab'
-      preLoaderRoute: typeof MinimalKernelLabRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/focus-showcase': {
-      id: '/_minimal/focus-showcase'
-      path: '/focus-showcase'
-      fullPath: '/focus-showcase'
-      preLoaderRoute: typeof MinimalFocusShowcaseRouteImport
-      parentRoute: typeof MinimalRoute
-    }
     '/_minimal/docs': {
       id: '/_minimal/docs'
       path: '/docs'
@@ -332,26 +284,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalBuilderRouteImport
       parentRoute: typeof MinimalRoute
     }
-    '/_minimal/aria-showcase': {
-      id: '/_minimal/aria-showcase'
-      path: '/aria-showcase'
-      fullPath: '/aria-showcase'
-      preLoaderRoute: typeof MinimalAriaShowcaseRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_kanban/kanban': {
-      id: '/_kanban/kanban'
-      path: '/kanban'
-      fullPath: '/kanban'
-      preLoaderRoute: typeof KanbanKanbanRouteImport
-      parentRoute: typeof KanbanRoute
-    }
     '/_minimal/docs/': {
       id: '/_minimal/docs/'
       path: '/'
       fullPath: '/docs/'
       preLoaderRoute: typeof MinimalDocsIndexRouteImport
       parentRoute: typeof MinimalDocsRoute
+    }
+    '/_minimal/playground/spike': {
+      id: '/_minimal/playground/spike'
+      path: '/playground/spike'
+      fullPath: '/playground/spike'
+      preLoaderRoute: typeof MinimalPlaygroundSpikeRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/radix': {
+      id: '/_minimal/playground/radix'
+      path: '/playground/radix'
+      fullPath: '/playground/radix'
+      preLoaderRoute: typeof MinimalPlaygroundRadixRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/playwright': {
+      id: '/_minimal/playground/playwright'
+      path: '/playground/playwright'
+      fullPath: '/playground/playwright'
+      preLoaderRoute: typeof MinimalPlaygroundPlaywrightRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/os-kernel': {
+      id: '/_minimal/playground/os-kernel'
+      path: '/playground/os-kernel'
+      fullPath: '/playground/os-kernel'
+      preLoaderRoute: typeof MinimalPlaygroundOsKernelRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/kernel': {
+      id: '/_minimal/playground/kernel'
+      path: '/playground/kernel'
+      fullPath: '/playground/kernel'
+      preLoaderRoute: typeof MinimalPlaygroundKernelRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/focus': {
+      id: '/_minimal/playground/focus'
+      path: '/playground/focus'
+      fullPath: '/playground/focus'
+      preLoaderRoute: typeof MinimalPlaygroundFocusRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/aria': {
+      id: '/_minimal/playground/aria'
+      path: '/playground/aria'
+      fullPath: '/playground/aria'
+      preLoaderRoute: typeof MinimalPlaygroundAriaRouteImport
+      parentRoute: typeof MinimalRoute
     }
     '/_minimal/docs/$': {
       id: '/_minimal/docs/$'
@@ -362,17 +349,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface KanbanRouteChildren {
-  KanbanKanbanRoute: typeof KanbanKanbanRoute
-}
-
-const KanbanRouteChildren: KanbanRouteChildren = {
-  KanbanKanbanRoute: KanbanKanbanRoute,
-}
-
-const KanbanRouteWithChildren =
-  KanbanRoute._addFileChildren(KanbanRouteChildren)
 
 interface MinimalDocsRouteChildren {
   MinimalDocsSplatRoute: typeof MinimalDocsSplatRoute
@@ -389,25 +365,27 @@ const MinimalDocsRouteWithChildren = MinimalDocsRoute._addFileChildren(
 )
 
 interface MinimalRouteChildren {
-  MinimalAriaShowcaseRoute: typeof MinimalAriaShowcaseRoute
   MinimalBuilderRoute: typeof MinimalBuilderRoute
   MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
-  MinimalFocusShowcaseRoute: typeof MinimalFocusShowcaseRoute
-  MinimalKernelLabRoute: typeof MinimalKernelLabRoute
-  MinimalOsKernelDemoRoute: typeof MinimalOsKernelDemoRoute
-  MinimalPlaywrightRunnerRoute: typeof MinimalPlaywrightRunnerRoute
-  MinimalSpikeDemoRoute: typeof MinimalSpikeDemoRoute
+  MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
+  MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
+  MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
+  MinimalPlaygroundOsKernelRoute: typeof MinimalPlaygroundOsKernelRoute
+  MinimalPlaygroundPlaywrightRoute: typeof MinimalPlaygroundPlaywrightRoute
+  MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute
+  MinimalPlaygroundSpikeRoute: typeof MinimalPlaygroundSpikeRoute
 }
 
 const MinimalRouteChildren: MinimalRouteChildren = {
-  MinimalAriaShowcaseRoute: MinimalAriaShowcaseRoute,
   MinimalBuilderRoute: MinimalBuilderRoute,
   MinimalDocsRoute: MinimalDocsRouteWithChildren,
-  MinimalFocusShowcaseRoute: MinimalFocusShowcaseRoute,
-  MinimalKernelLabRoute: MinimalKernelLabRoute,
-  MinimalOsKernelDemoRoute: MinimalOsKernelDemoRoute,
-  MinimalPlaywrightRunnerRoute: MinimalPlaywrightRunnerRoute,
-  MinimalSpikeDemoRoute: MinimalSpikeDemoRoute,
+  MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
+  MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,
+  MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
+  MinimalPlaygroundOsKernelRoute: MinimalPlaygroundOsKernelRoute,
+  MinimalPlaygroundPlaywrightRoute: MinimalPlaygroundPlaywrightRoute,
+  MinimalPlaygroundRadixRoute: MinimalPlaygroundRadixRoute,
+  MinimalPlaygroundSpikeRoute: MinimalPlaygroundSpikeRoute,
 }
 
 const MinimalRouteWithChildren =
@@ -430,7 +408,6 @@ const TodoRouteChildren: TodoRouteChildren = {
 const TodoRouteWithChildren = TodoRoute._addFileChildren(TodoRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  KanbanRoute: KanbanRouteWithChildren,
   MinimalRoute: MinimalRouteWithChildren,
   TodoRoute: TodoRouteWithChildren,
 }

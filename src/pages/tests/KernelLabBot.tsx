@@ -9,7 +9,11 @@
  * 5. React Hooks (useComputed, useDispatch)
  */
 
-import { type TestActions, type TestBot, useTestBotRoutes } from "@inspector/testbot";
+import {
+  type TestActions,
+  type TestBot,
+  useTestBotRoutes,
+} from "@inspector/testbot";
 import { resetKernelLab } from "../KernelLabPage";
 
 // ═══════════════════════════════════════════════════════════════════

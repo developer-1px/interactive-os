@@ -1,8 +1,8 @@
 import type { ProcessedCommand } from "@inspector/panels/CommandRow.tsx";
 import { CommandRow } from "@inspector/panels/CommandRow.tsx";
-import { evalContext } from "@os/features/AntigravityOS.tsx";
-import type { CommandRegistry } from "@os/features/command/model/createCommandStore.tsx";
-import { GroupRegistry } from "@os/features/jurisdiction/model/GroupRegistry.ts";
+import { evalContext } from "@os/AntigravityOS.tsx";
+import type { CommandRegistry } from "@os/core/command/model/createCommandStore.tsx";
+import { GroupRegistry } from "@os/core/jurisdiction/model/GroupRegistry.ts";
 import { memo, useMemo } from "react";
 
 // Zero-Base Jurisdiction Detection
@@ -75,7 +75,7 @@ export const RegistryMonitor = memo(
       // 2. Ingest Static Definitions from GroupRegistry (defineCommand)
       groupRegistryMap.forEach(
         (
-          factories: import("@os/entities/CommandFactory.ts").CommandFactory<
+          factories: import("@os/schema/command/CommandFactory.ts").CommandFactory<
             any,
             any
           >[],

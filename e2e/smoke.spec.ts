@@ -14,13 +14,14 @@ const routes = [
   "/settings",
   "/kanban",
   "/builder",
-  "/focus-showcase",
-  "/aria-showcase",
+  "/playground/focus",
+  "/playground/aria",
   "/docs",
-  "/kernel-lab",
-  "/spike-demo",
-  "/os-kernel-demo",
-  "/playwright-runner",
+  "/playground/kernel",
+  "/playground/spike",
+  "/playground/os-kernel",
+  "/playground/playwright",
+  "/playground/radix",
 ];
 
 for (const route of routes) {

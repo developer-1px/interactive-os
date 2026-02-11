@@ -1,5 +1,4 @@
-import { Builder } from "@/apps/builder/primitives/Builder";
-import { Field } from "@os/app/export/primitives/Field.tsx";
+import { Field } from "@os/6-components/Field.tsx";
 import {
   ArrowRight,
   Box,
@@ -12,6 +11,7 @@ import {
   Star,
 } from "lucide-react";
 import { useState } from "react";
+import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPServicesBlock() {
   const [title, setTitle] = useState("비즈니스에 최적화된\n클라우드 서비스");
@@ -113,9 +113,10 @@ export function NCPServicesBlock() {
                     variant={tab.active ? "primary" : "ghost"}
                     className={`
                       flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap
-                      ${tab.active
-                        ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
-                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                      ${
+                        tab.active
+                          ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
+                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
                       }
                       data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 data-[focused=true]:z-10
                     `}

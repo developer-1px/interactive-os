@@ -1,19 +1,15 @@
 /**
  * FocusItem - Pure Projection Focusable Item
  *
- * Automatically registers with parent FocusGroup's store and DOM registry.
- * Uses reactive store subscription for performant UI updates.
+ * Automatically registers with parent FocusGroup's context.
+ * Uses Kernel state via kernel.useComputed for performant UI updates.
  *
  * NOTE: This is a PROJECTION-ONLY component.
  * - Does NOT handle events (click, keydown)
  * - Only reflects state (tabIndex, data-*, aria-*)
  * - Event handling is done by FocusSensor
- *
- * @deprecated FocusItem은 Zustand 기반 Legacy 컴포넌트입니다.
- * 새 코드에서는 `6-components/Item.tsx` (Kernel 기반)를 사용하세요.
  */
 
-import { FocusData } from "@os/features/focus/lib/focusData.ts";
 import {
   cloneElement,
   forwardRef,
@@ -23,10 +19,8 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
-  useSyncExternalStore,
 } from "react";
-import { useStore } from "zustand";
-import { useShallow } from "zustand/react/shallow";
+import { kernel } from "@/os-new/kernel";
 import {
   getChildRole,
   isCheckedRole,
@@ -111,35 +105,35 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       throw new Error("FocusItem must be used within a FocusGroup");
     }
 
-    const { groupId, store, zoneRole, config } = ctx;
+    const { zoneId, zoneRole, config } = ctx;
 
     // --- Derived: is this group selectable? ---
     const isSelectableGroup = config.select.mode !== "none";
 
-    // --- State Subscriptions ---
-    const activeGroupId = useSyncExternalStore(
-      FocusData.subscribeActiveZone,
-      () => FocusData.getActiveZoneId(),
-      () => null,
+    // --- State Subscriptions (Kernel Direct) ---
+    const activeGroupId = kernel.useComputed(
+      (state) => state.os.focus.activeZoneId,
     );
 
-    const { isFocused, isSelected, isExpanded } = useStore(
-      store,
-      useShallow((state) => ({
-        isFocused: state.focusedItemId === id,
-        isSelected: state.selection.includes(id),
-        isExpanded: state.expandedItems.includes(id),
-      })),
+    const isFocused = kernel.useComputed(
+      (state) => state.os.focus.zones[zoneId]?.focusedItemId === id,
+    );
+
+    const isSelected = kernel.useComputed(
+      (state) => state.os.focus.zones[zoneId]?.selection.includes(id) ?? false,
+    );
+
+    const isExpanded = kernel.useComputed(
+      (state) =>
+        state.os.focus.zones[zoneId]?.expandedItems.includes(id) ?? false,
     );
 
     // --- Computed State ---
-    const isGroupActive = activeGroupId === groupId;
+    const isGroupActive = activeGroupId === zoneId;
     const visualFocused = isFocused && isGroupActive;
 
     // --- Focus Effect: apply .focus() when this item becomes focused ---
     const internalRef = useRef<HTMLElement>(null);
-    // Pure projection: only sync DOM focus state.
-    // Scroll is handled declaratively by OS DOMEffect (FOCUS effect auto-scrolls).
     useLayoutEffect(() => {
       if (visualFocused && internalRef.current) {
         if (document.activeElement !== internalRef.current) {

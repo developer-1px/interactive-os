@@ -18,25 +18,25 @@ import { InspectorStore } from "./InspectorStore";
 
 // 1. Define effect handler
 kernel.defineEffect("toggleInspector", () => {
-    InspectorStore.toggle();
+  InspectorStore.toggle();
 });
 
 // 2. Define command (returns effect map)
 const TOGGLE_INSPECTOR = kernel.defineCommand(
-    "TOGGLE_INSPECTOR",
-    (_ctx) => () => ({ toggleInspector: true }),
+  "TOGGLE_INSPECTOR",
+  (_ctx) => () => ({ toggleInspector: true }),
 );
 
 // ─── React Hook ───
 
 export function useInspectorHotkey() {
-    useEffect(() => {
-        // Register keybinding: Meta+I → TOGGLE_INSPECTOR
-        const unregister = Keybindings.register({
-            key: "Meta+i",
-            command: TOGGLE_INSPECTOR,
-        });
+  useEffect(() => {
+    // Register keybinding: Meta+I → TOGGLE_INSPECTOR
+    const unregister = Keybindings.register({
+      key: "Meta+i",
+      command: TOGGLE_INSPECTOR,
+    });
 
-        return unregister;
-    }, []);
+    return unregister;
+  }, []);
 }

@@ -22,7 +22,9 @@ export function InspectorAdapter() {
   // Map transactions to InspectorEvents
   const events = transactions.map((tx) => {
     // Read input info from tx.meta (provided by OS at dispatch time)
-    const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.["input"] as
+    const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.[
+      "input"
+    ] as
       | { type?: string; key?: string; code?: string; elementId?: string }
       | undefined;
 
@@ -81,7 +83,9 @@ export function InspectorAdapter() {
         raw:
           inputMeta?.key ??
           ((tx.command.payload as any)?.key || tx.command.type),
-        ...(inputMeta?.elementId != null ? { elementId: inputMeta.elementId } : {}),
+        ...(inputMeta?.elementId != null
+          ? { elementId: inputMeta.elementId }
+          : {}),
       },
       command: {
         type: tx.command.type,

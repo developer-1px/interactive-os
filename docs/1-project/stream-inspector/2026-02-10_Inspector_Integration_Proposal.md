@@ -87,4 +87,10 @@ OS 패널을 단순한 탭 나열이 아닌, **데이터 흐름(Pipeline)** 형�
 
 ## 5. 결론
 
-기존의 6-Domino 기반 OS Inspector는 "비즈니스 로직"을, Kernel Inspector는 "실행 엔진"을 대변합니다. 이 둘을 **상호 보완적인 관계**로 정의하고, `InspectorRegistry`를 통해 유연하게 결합한다면 100% 관찰 가능한 시스템을 구축할 수 있습니다.
+기존의 6-Domino 기반 OS Inspector는 "비즈니스 로직"을, Kernel Inspector는 "실행 엔진"을 대변합니다. 이 둘을 **상호 보완적인 관계**로 정의하고, `InspectorRegistry`라이브러리를 통해 유연하게 결합한다면 100% 관찰 가능한 시스템을 구축할 수 있습니다.
+
+## 6. Reference
+
+- [Time Travel Debugging & Inspector Architecture](file:///Users/user/Desktop/interactive-os/docs/3-resource/state-management-inspector.md)
+- [DevTools 레퍼런스 카탈로그](file:///Users/user/Desktop/interactive-os/docs/3-resource/devtools-reference-catalog.md)
+- [FE Inspector 분류학](file:///Users/user/Desktop/interactive-os/docs/3-resource/fe-inspector-taxonomy.md)

@@ -42,10 +42,12 @@ const resolveLinear: NavigationStrategy = (
   items,
   config,
 ) => {
-  if (!currentId) return { targetId: items[0] ?? null, stickyX: null, stickyY: null };
+  if (!currentId)
+    return { targetId: items[0] ?? null, stickyX: null, stickyY: null };
 
   const idx = items.indexOf(currentId);
-  if (idx === -1) return { targetId: items[0] ?? null, stickyX: null, stickyY: null };
+  if (idx === -1)
+    return { targetId: items[0] ?? null, stickyX: null, stickyY: null };
 
   if (direction === "home") {
     return { targetId: items[0] ?? null, stickyX: null, stickyY: null };

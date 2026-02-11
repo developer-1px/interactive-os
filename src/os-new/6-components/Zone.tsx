@@ -1,33 +1,14 @@
 /**
- * Zone — Kernel-based focus zone (replaces FocusGroup).
+ * Zone - Facade for FocusGroup
  *
- * On mount:
- *   1. Resolve config from role + overrides (reuses resolveRole)
- *   2. Register in ZoneRegistry (for context providers)
- *   3. Dispatch OS_FOCUS to initialize zone state
- *
- * On unmount:
- *   Unregister from ZoneRegistry
- *
- * Rendering:
- *   - Provides ZoneContext (zoneId + config) to children
- *   - Renders a div with ARIA attributes
- *   - No Zustand, no FocusData, no global variables
+ * Provides a simplified wrapper for FocusGroup.
+ * Configuration is primarily determined by the `role` prop.
+ * Use `options` for advanced per-instance overrides when needed.
  */
 
-import { defineScope, type ScopeToken } from "@kernel";
-import { produce } from "immer";
-import {
-  type ComponentProps,
-  type ReactNode,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
-import { ZoneRegistry } from "../2-contexts/zoneRegistry";
-import { useActiveZone } from "../5-hooks/useActiveZone";
-import { kernel } from "../kernel";
-import { resolveRole, type ZoneRole } from "../registry/roleRegistry";
+import type { ComponentProps, ReactNode } from "react";
+import { FocusGroup } from "@/os-new/primitives/FocusGroup";
+import type { ZoneRole } from "@/os-new/registry/roleRegistry";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -35,197 +16,107 @@ import type {
   ProjectConfig,
   SelectConfig,
   TabConfig,
-} from "../schema";
-import { initialZoneState } from "../state/initial";
-import { ZoneContext, type ZoneContextValue } from "./ZoneContext";
+} from "@/os-new/schema";
+import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
+import type { AnyCommand } from "@kernel";
 
-// ═══════════════════════════════════════════════════════════════════
-// ID Generator
-// ═══════════════════════════════════════════════════════════════════
-
-let zoneIdCounter = 0;
-function generateZoneId() {
-  return `zone-${++zoneIdCounter}`;
+/** Advanced configuration overrides - use sparingly, prefer role presets */
+export interface ZoneOptions {
+  navigate?: Partial<NavigateConfig>;
+  tab?: Partial<TabConfig>;
+  select?: Partial<SelectConfig>;
+  activate?: Partial<ActivateConfig>;
+  dismiss?: Partial<DismissConfig>;
+  project?: Partial<ProjectConfig>;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Props
-// ═══════════════════════════════════════════════════════════════════
-
+// Zone only exposes role-based configuration - no manual config overrides
 export interface ZoneProps
   extends Omit<
     ComponentProps<"div">,
-    "id" | "role" | "style" | "className" | "onSelect"
+    "id" | "role" | "onSelect" | "onCopy" | "onCut" | "onPaste" | "onToggle"
   > {
-  /** Zone ID (auto-generated if not provided) */
+  /** Unique identifier for the zone */
   id?: string;
-
-  /** ARIA role preset (resolves config automatically) */
+  /** ARIA role preset that determines all navigation/tab/select behavior */
   role?: ZoneRole;
-
-  /** Navigation config overrides */
-  navigate?: Partial<NavigateConfig>;
-
-  /** Tab config overrides */
-  tab?: Partial<TabConfig>;
-
-  /** Select config overrides */
-  select?: Partial<SelectConfig>;
-
-  /** Activate config overrides */
-  activate?: Partial<ActivateConfig>;
-
-  /** Dismiss config overrides */
-  dismiss?: Partial<DismissConfig>;
-
-  /** Project config overrides */
-  project?: Partial<ProjectConfig>;
-
-  /** Kernel scope (for scoped command handlers). Defaults to zoneId. */
-  scope?: ScopeToken;
-
+  /** Advanced config overrides (use sparingly) */
+  options?: ZoneOptions;
+  /** Command dispatched on item activation (Enter key) */
+  onAction?: BaseCommand;
+  /** Command dispatched on item selection (Space key) */
+  onSelect?: BaseCommand;
+  /** Command dispatched on copy (Cmd+C) */
+  onCopy?: BaseCommand;
+  /** Command dispatched on cut (Cmd+X) */
+  onCut?: BaseCommand;
+  /** Command dispatched on paste (Cmd+V) */
+  onPaste?: BaseCommand;
+  /** Command dispatched on toggle (Space) - for checkboxes, multi-select */
+  onToggle?: BaseCommand;
+  /** Command dispatched on delete (Backspace/Delete) */
+  onDelete?: BaseCommand;
+  /** Command dispatched on undo (Cmd+Z) */
+  onUndo?: BaseCommand;
+  /** Command dispatched on redo (Cmd+Shift+Z) */
+  onRedo?: BaseCommand;
+  /** Command dispatched when the zone is dismissed (ESC key) */
+  onDismiss?: AnyCommand;
   /** Children */
   children: ReactNode;
-
-  /** Container className */
-  className?: string;
-
-  /** Container style */
-  style?: React.CSSProperties;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Init command (module-scoped, lightweight)
-// ═══════════════════════════════════════════════════════════════════
-
-const INIT_ZONE = kernel.defineCommand(
-  "ZONE_INIT",
-  (ctx) => (zoneId: string) => {
-    if (ctx.state.os.focus.zones[zoneId]) return; // already init
-    return {
-      state: produce(ctx.state, (draft) => {
-        draft.os.focus.zones[zoneId] = { ...initialZoneState };
-      }),
-    };
-  },
-);
-
-// ═══════════════════════════════════════════════════════════════════
-// Component
-// ═══════════════════════════════════════════════════════════════════
-
 export function Zone({
-  id: propId,
+  id,
   role,
-  navigate,
-  tab,
-  select,
-  activate,
-  dismiss,
-  project,
-  scope: propScope,
+  options,
+  onAction,
+  onSelect,
+  onToggle,
+  onCopy,
+  onCut,
+  onPaste,
+  onDelete,
+  onUndo,
+  onRedo,
+  onDismiss,
   children,
   className,
   style,
-  ...rest
+  ...props
 }: ZoneProps) {
-  // --- Stable ID ---
-  const zoneId = useMemo(() => propId || generateZoneId(), [propId]);
-
-  // --- Scope Token (defaults to zoneId) ---
-  const scope = useMemo(
-    () => propScope ?? defineScope(zoneId),
-    [propScope, zoneId],
-  );
-
-  // --- Resolve Configuration ---
-  const config = useMemo(() => {
-    const filteredOverrides: {
-      navigate?: Partial<NavigateConfig>;
-      tab?: Partial<TabConfig>;
-      select?: Partial<SelectConfig>;
-      activate?: Partial<ActivateConfig>;
-      dismiss?: Partial<DismissConfig>;
-      project?: Partial<ProjectConfig>;
-    } = {};
-    if (navigate !== undefined) filteredOverrides.navigate = navigate;
-    if (tab !== undefined) filteredOverrides.tab = tab;
-    if (select !== undefined) filteredOverrides.select = select;
-    if (activate !== undefined) filteredOverrides.activate = activate;
-    if (dismiss !== undefined) filteredOverrides.dismiss = dismiss;
-    if (project !== undefined) filteredOverrides.project = project;
-    return resolveRole(role, filteredOverrides);
-  }, [role, navigate, tab, select, activate, dismiss, project]);
-
-  // --- Container Ref ---
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // --- Register in ZoneRegistry + init kernel state ---
-  useLayoutEffect(() => {
-    // Init kernel state for this zone
-    kernel.dispatch(INIT_ZONE(zoneId));
-
-    // Register in ZoneRegistry (for context providers)
-    if (containerRef.current) {
-      ZoneRegistry.register(zoneId, {
-        config,
-        element: containerRef.current,
-        ...(role !== undefined ? { role } : {}),
-        parentId: null, // TODO: read from parent ZoneContext
-      });
-    }
-
-    return () => {
-      ZoneRegistry.unregister(zoneId);
-    };
-  }, [zoneId, config, role]);
-
-  // --- Is Active ---
-  const activeZoneId = useActiveZone();
-  const isActive = activeZoneId === zoneId;
-
-  // --- Context Value ---
-  const contextValue = useMemo<ZoneContextValue>(
-    () => ({
-      zoneId,
-      config,
-      ...(role !== undefined ? { role } : {}),
-      scope,
-    }),
-    [zoneId, config, role, scope],
-  );
-
-  // --- Orientation ---
-  const orientation = config.navigate.orientation;
-
-  // --- Render ---
   return (
-    <ZoneContext.Provider value={contextValue}>
-      {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is dynamic (listbox/toolbar/grid) */}
-      <div
-        ref={containerRef}
-        id={zoneId}
-        data-zone={zoneId}
-        aria-current={isActive ? "true" : undefined}
-        aria-orientation={
-          orientation === "horizontal"
-            ? "horizontal"
-            : orientation === "vertical"
-              ? "vertical"
-              : undefined
-        }
-        aria-multiselectable={config.select.mode === "multiple" || undefined}
-        role={role || "group"}
-        tabIndex={-1}
-        className={className || undefined}
-        data-orientation={orientation}
-        style={{ outline: "none", ...style }}
-        {...rest}
-      >
-        {children}
-      </div>
-    </ZoneContext.Provider>
+    <FocusGroup
+      {...(id !== undefined ? { id } : {})}
+      {...(role !== undefined ? { role } : {})}
+      {...(options?.navigate !== undefined
+        ? { navigate: options.navigate }
+        : {})}
+      {...(options?.tab !== undefined ? { tab: options.tab } : {})}
+      {...(options?.select !== undefined ? { select: options.select } : {})}
+      {...(options?.activate !== undefined
+        ? { activate: options.activate }
+        : {})}
+      {...(options?.dismiss !== undefined ? { dismiss: options.dismiss } : {})}
+      {...(options?.project !== undefined ? { project: options.project } : {})}
+      {...(onAction !== undefined ? { onAction } : {})}
+      {...(onSelect !== undefined ? { onSelect } : {})}
+      {...(onToggle !== undefined ? { onToggle } : {})}
+      {...(onCopy !== undefined ? { onCopy } : {})}
+      {...(onCut !== undefined ? { onCut } : {})}
+      {...(onPaste !== undefined ? { onPaste } : {})}
+      {...(onDelete !== undefined ? { onDelete } : {})}
+      {...(onUndo !== undefined ? { onUndo } : {})}
+      {...(onRedo !== undefined ? { onRedo } : {})}
+      {...(onDismiss !== undefined ? { onDismiss } : {})}
+      {...(className !== undefined ? { className } : {})}
+      {...(style !== undefined ? { style } : {})}
+      {...props}
+    >
+      {children}
+    </FocusGroup>
   );
 }
 
-Zone.displayName = "Zone";
+// Re-export context hooks for convenience
+export { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";

@@ -1,5 +1,5 @@
-import { Field } from "@os/app/export/primitives/Field";
-import { Trigger } from "@os/app/export/primitives/Trigger";
+import { Field } from "@os/6-components/Field";
+import { Trigger } from "@os/6-components/Trigger";
 import { useState } from "react";
 import { FocusGroup } from "@/os-new/primitives/FocusGroup";
 import { FocusItem } from "@/os-new/primitives/FocusItem";

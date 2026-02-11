@@ -7,9 +7,9 @@ import {
   UpdateTodoText,
 } from "@apps/todo/features/commands/list";
 import type { Todo } from "@apps/todo/model/types";
-import { Field } from "@os/app/export/primitives/Field";
-import { Item } from "@os/app/export/primitives/Item";
-import { Trigger } from "@os/app/export/primitives/Trigger";
+import { Field } from "@os/6-components/Field";
+import { Item } from "@os/6-components/Item";
+import { Trigger } from "@os/6-components/Trigger";
 import {
   Check,
   CornerDownLeft,

@@ -17,22 +17,25 @@
 
 요구사항을 받으면 해당 컴포넌트에서 ad-hoc으로 구현하지 않는다. Focus, Selection, Navigation 등은 모두 OS 레벨 커맨드로 설계하여 시스템 전체에서 일관되게 동작하게 한다.
 
-### 2. Sensor = 번역기
+### 2. Listener = 번역기
 > **"무슨 일이 일어났는지만 전달하고, 어떻게 처리할지는 관여하지 않는다"**
 
-- Sensor는 DOM 이벤트를 OS Command로 번역만 한다.
-- 상황별 분기는 커맨드 핸들러가 config를 보고 결정한다 — 정보가 있는 곳에서 판단한다.
+- Listener는 DOM 이벤트를 Kernel Command로 번역만 한다.
+- 키보드 이벤트 → `Keybindings.resolve()` → `kernel.dispatch(command)`.
+- Listener는 상태를 갖지 않으며, 판단·분기·부수효과를 수행하지 않는다.
 
-### 3. 순수 함수 파이프라인
-> **"모든 상태 변경은 단일 파이프라인을 통과한다"**
+### 3. Kernel 파이프라인
+> **"모든 상태 변경은 Kernel의 단일 파이프라인을 통과한다"**
 
 ```
-DOM Event → Sensor → OS Command → Intent → runOS(순수함수) → State + DOM Effects
+DOM Event → Listener → Keybindings → kernel.dispatch(Command)
+→ Command Handler (순수함수) → State Mutation + EffectMap
+→ defineEffect (부수효과 실행) → Transaction 기록
 ```
 
-- 커맨드는 순수 함수: `(ctx, payload) → OSResult | null`
-- Store 직접 조작 금지, `el.focus()` 직접 호출 금지.
-- DOM Effect는 OSResult의 `domEffects` 배열로만 선언한다.
+- Command Handler: `(ctx) => (payload) => EffectMap | void` — 순수하게 상태를 변경하고 필요한 Effect를 선언한다.
+- Side-effect는 `defineEffect`로 등록된 핸들러에서 실행한다.
+- 모든 dispatch는 Transaction으로 기록되어 Inspector에서 추적 가능하다.
 
 ### 4. 설정 주도 (Config-Driven)
 > **"동일한 커맨드가 Zone의 config에 따라 다르게 동작한다"**
@@ -61,9 +64,9 @@ React Aria, W3C ARIA Practices, 브라우저 API 등 검증된 해법을 커스�
 ### 7. AI 친화적 설계
 > **"AI가 실수해도 구조가 잡아주고, 깨져도 빠르게 복구할 수 있는 시스템"**
 
-- **관찰 가능**: 모든 파이프라인 단계가 명시적 → 로그/트레이싱 용이.
+- **관찰 가능**: 모든 파이프라인 단계가 Transaction으로 기록 → Inspector에서 실시간 추적.
 - **검증 가능**: 순수 함수 → 입출력만 테스트.
-- **재현 가능**: 불변 상태 + 액션 로그 → 동일 상태 재현.
+- **재현 가능**: 불변 상태 + Transaction 로그 → 동일 상태 재현.
 - **복구 가능**: 스냅샷 기반 → 이전 상태 롤백.
 
 ### 8. W3C 표준 절대 준수
@@ -71,14 +74,22 @@ React Aria, W3C ARIA Practices, 브라우저 API 등 검증된 해법을 커스�
 
 - Roles, States, Properties, 키보드 인터랙션 패턴, 포커스 관리 — 모두 [W3C WAI-ARIA](https://www.w3.org/TR/wai-aria-1.2/) 및 [APG](https://www.w3.org/WAI/ARIA/apg/)가 공식 정의한 표준을 따른다.
 - 구현 판단 기준은 "다른 앱은 어떻게 하지?"가 아니라 **"W3C 스펙에 뭐라고 되어 있지?"**이다.
-- `roleRegistry.ts`의 preset, `classifyKeyboard.ts`의 intent 변환, TestBot 테스트 케이스 모두 W3C 스펙에서 직접 도출한다.
-- 상세 참조: `docs/2-area/03-aria-compliance/`
+- `roleRegistry.ts`의 preset, TestBot 테스트 케이스 모두 W3C 스펙에서 직접 도출한다.
+
+### 9. React와 외부 스토어의 경계를 의식하라
+> **"외부 상태를 React에 연결할 때, React의 비교 방식을 항상 먼저 생각하라"**
+
+- `useSyncExternalStore`의 `getSnapshot`은 **참조 안정성(referential stability)**을 보장해야 한다. 매 호출마다 새 객체/배열을 반환하면 무한 루프.
+- zustand `persist` 미들웨어 사용 시, `partialize`로 함수는 제외하고 값만 저장한다.
+- 외부 스토어(Map, Set, Registry 등)를 React에 연결할 때는 반드시 **캐시된 스냅샷 패턴**을 사용한다.
 
 ## 에이전트 규칙
 
 - **불확실하면 묻는다**: 요구사항이나 구현 방법이 불확실하면 구현하지 말고 먼저 질문한다.
 - **직접 경로 import**: 기본은 직접 경로 import. Feature의 public API entry point만 `index.ts` 허용.
-- **레이어 의존성**: `src/os/features/` (OS) → `src/apps/` (앱) → `src/pages/` (페이지). 하위 레이어는 상위를 import하지 않는다.
+- **레이어 의존성**: `src/os/` (OS) → `src/apps/` (앱) → `src/pages/` (페이지). `src/inspector/`는 OS에 의존하되 OS와 강결합하지 않는 플러그인. 하위 레이어는 상위를 import하지 않는다.
+- **커밋 자주하기**: 하나의 논리적 단계가 완료될 때마다 커밋한다. 여러 작업을 하나의 거대한 커밋에 담지 않는다. (예: 파일 복원 → 커밋, import 리매핑 → 커밋, 스토어 수정 → 커밋). `--no-verify` 사용 시에도 단계별 커밋 원칙을 지킨다.
+- **빌드 통과 ≠ 안전**: `tsc` + `npm run build` 통과 후에도 반드시 `npx playwright test e2e/smoke.spec.ts`로 런타임을 검증한다. 특히 alias 변경, 파일 이동 후에는 Vite 캐시(`node_modules/.vite`) 삭제 + dev server 재시작까지 수행.
 
 ### 파일 이동/삭제 시 필수 체크리스트
 
@@ -97,7 +108,7 @@ React Aria, W3C ARIA Practices, 브라우저 API 등 검증된 해법을 커스�
 
 3. **import 경로 변경은 파일 이동과 동시에**: 경로만 바꾸고 파일 안 옮기거나, 파일만 옮기고 참조 안 고치면 안 된다. 반드시 atomic하게.
 
-4. **스모크 테스트**: 파일 이동/삭제 작업 후에는 `tsc` 만으로 끝내지 않는다. **`npx playwright test e2e/smoke.spec.ts` 까지 실행**하여 런타임 정상 확인. (`tsc`는 CSS import, Vite 플러그인 경로, dead code 참조를 체크하지 않는다.)
+4. **스모크 테스트**: 파일 이동/삭제 작업 후에는 `tsc` 만으로 끝내지 않는다. **`npx playwright test e2e/smoke.spec.ts` 까지 실행**하여 런타임 정상 확인.
 
 ## TestBot 사용법
 

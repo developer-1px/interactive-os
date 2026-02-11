@@ -1,4 +1,4 @@
-import { useFocusExpansion } from "@os/features/focus/hooks/useFocusExpansion";
+import { useFocusExpansion } from "@os/core/focus/hooks/useFocusExpansion";
 import { FocusGroup } from "@/os-new/primitives/FocusGroup";
 import { FocusItem } from "@/os-new/primitives/FocusItem";
 import { TestBox } from "../../shared/TestLayout";

@@ -11,12 +11,15 @@
 
 import type { ZoneRole } from "../registry/roleRegistry";
 import type { FocusGroupConfig } from "../schema/focus/config/FocusGroupConfig";
+import type { AnyCommand } from "@kernel";
 
 export interface ZoneEntry {
   config: FocusGroupConfig;
   element: HTMLElement;
   role?: ZoneRole;
   parentId: string | null;
+  /** Command dispatched on ESC when dismiss.escape is "close" */
+  onDismiss?: AnyCommand;
 }
 
 const registry = new Map<string, ZoneEntry>();

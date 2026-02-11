@@ -3,7 +3,7 @@ import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import { INITIAL_STATE } from "@apps/todo/features/todo_details/persistence";
 import { TODO_KEYMAP } from "@apps/todo/features/todoKeys";
 import type { AppState, TodoCommandId } from "@apps/todo/model/types";
-import { defineApplication } from "@os/features/application/defineApplication";
+import { defineApplication } from "@os/core/application/defineApplication";
 
 export const TodoApp = defineApplication<AppState, TodoCommandId>({
   id: "todo",

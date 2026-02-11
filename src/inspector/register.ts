@@ -17,17 +17,17 @@ import { InspectorStore } from "./stores/InspectorStore";
 // No kernel state mutation needed.
 
 export const TOGGLE_INSPECTOR = kernel.defineCommand(
-    "TOGGLE_INSPECTOR",
-    (_ctx) => () => {
-        InspectorStore.toggle();
-        return undefined;
-    },
+  "TOGGLE_INSPECTOR",
+  (_ctx) => () => {
+    InspectorStore.toggle();
+    return undefined;
+  },
 );
 
 // ── Keybinding ───────────────────────────────────────────────────
 // No `when` → always active, regardless of editing/navigating state.
 
 Keybindings.register({
-    key: "Meta+I",
-    command: TOGGLE_INSPECTOR,
+  key: "Meta+I",
+  command: TOGGLE_INSPECTOR,
 });

@@ -8,6 +8,7 @@ import { produce } from "immer";
 import { DOM_ITEMS, ZONE_CONFIG } from "../2-contexts";
 import { kernel } from "../kernel";
 import { ensureZone } from "../state/utils";
+import { EXPAND } from "./expand";
 
 interface SelectPayload {
   targetId?: string;
@@ -26,6 +27,17 @@ export const SELECT = kernel.defineCommand(
 
     const targetId = payload.targetId ?? zone.focusedItemId;
     if (!targetId) return;
+
+    // W3C Tree Pattern: Space toggles expansion for expandable items
+    // Only applies for keyboard-triggered SELECT (no explicit targetId)
+    if (!payload.targetId) {
+      const targetEl = document.getElementById(targetId);
+      if (targetEl?.hasAttribute("aria-expanded")) {
+        return {
+          dispatch: EXPAND({ action: "toggle", itemId: targetId }) as any,
+        };
+      }
+    }
 
     const items: string[] = ctx.inject(DOM_ITEMS);
     const mode = payload.mode ?? "single";

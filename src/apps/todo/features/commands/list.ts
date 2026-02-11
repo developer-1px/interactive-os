@@ -1,5 +1,5 @@
 import { defineListCommand } from "@apps/todo/features/commands/defineGlobalCommand";
-import type { OS } from "@os/features/AntigravityOS";
+import type { OS } from "@os/AntigravityOS";
 import { produce } from "immer";
 
 export const AddTodo = defineListCommand({
@@ -106,9 +106,9 @@ export const MoveItemUp = defineListCommand({
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+        draft.data.todoOrder[globalSwapIdx]!,
+        draft.data.todoOrder[globalTargetIdx]!,
+      ];
     }),
 });
 
@@ -137,9 +137,9 @@ export const MoveItemDown = defineListCommand({
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+        draft.data.todoOrder[globalSwapIdx]!,
+        draft.data.todoOrder[globalTargetIdx]!,
+      ];
     }),
 });
 

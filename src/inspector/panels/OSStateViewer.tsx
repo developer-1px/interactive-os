@@ -1,4 +1,4 @@
-import { FocusData } from "@os/features/focus/lib/focusData";
+import { FocusData } from "@os/core/focus/lib/focusData";
 import { memo, useMemo, useSyncExternalStore } from "react";
 
 export const OSStateViewer = memo(() => {

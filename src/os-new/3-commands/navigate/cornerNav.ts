@@ -168,13 +168,18 @@ export const resolveCorner: NavigationStrategy = (
   _config: NavigateConfig,
   spatial,
 ): NavigateResult => {
-  if (!currentId) return { targetId: items[0] ?? null, stickyX: null, stickyY: null };
+  if (!currentId)
+    return { targetId: items[0] ?? null, stickyX: null, stickyY: null };
 
   if (direction === "home") {
     return { targetId: items[0] ?? null, stickyX: null, stickyY: null };
   }
   if (direction === "end") {
-    return { targetId: items[items.length - 1] ?? null, stickyX: null, stickyY: null };
+    return {
+      targetId: items[items.length - 1] ?? null,
+      stickyX: null,
+      stickyY: null,
+    };
   }
 
   const itemRects = spatial.itemRects;

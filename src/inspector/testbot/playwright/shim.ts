@@ -18,6 +18,12 @@ export interface Page {
   locator(selector: string): Locator;
   getByRole(role: string, options?: { name?: string }): Locator;
   getByText(text: string): Locator;
+  on(event: string, handler: (...args: any[]) => void): void;
+  waitForFunction(
+    fn: (...args: any[]) => any,
+    arg?: any,
+    options?: { timeout?: number },
+  ): Promise<void>;
   keyboard: {
     press(key: string): Promise<void>;
     type(text: string): Promise<void>;
@@ -32,12 +38,23 @@ export class ShimPage implements Page {
   }
 
   async goto(url: string) {
-    // In TestBot, we assume the route is already mounted via useTestBotRoutes
-    // But if we need to support navigation, we could interpret this.
-    // For now, no-op or log.
     console.log(
       `[Playwright Shim] page.goto("${url}") called. TestBot assumes route is active.`,
     );
+  }
+
+  // No-op: browser-side TestBot doesn't need Playwright event hooks
+  on(_event: string, _handler: (...args: any[]) => void) {
+    // Silently ignore page.on("pageerror") / page.on("console") etc.
+  }
+
+  // No-op: content is already rendered in-browser
+  async waitForFunction(
+    _fn: (...args: any[]) => any,
+    _arg?: any,
+    _options?: { timeout?: number },
+  ) {
+    // Silently ignore — TestBot doesn't need to wait for render
   }
 
   async click(selector: string, options?: { modifiers?: string[] }) {
@@ -82,10 +99,7 @@ export interface Locator {
 export class ShimLocator implements Locator {
   t: TestActions;
   selector: Selector;
-  constructor(
-    t: TestActions,
-    selector: Selector,
-  ) {
+  constructor(t: TestActions, selector: Selector) {
     this.t = t;
     this.selector = selector;
   }
@@ -139,7 +153,7 @@ export const expect = (locatorOrPage: Locator | Page) => {
 
     return {
       resolves: {
-        toBe: () => { }, // stub
+        toBe: () => {}, // stub
       },
       toBeFocused: async () => {
         await t.expect(selector as string).toBeFocused();

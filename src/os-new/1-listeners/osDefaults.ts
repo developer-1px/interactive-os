@@ -9,7 +9,11 @@
 
 import { ACTIVATE } from "../3-commands/activate";
 import { ESCAPE } from "../3-commands/escape";
-import { FIELD_CANCEL, FIELD_COMMIT, FIELD_START_EDIT } from "../3-commands/field";
+import {
+  FIELD_CANCEL,
+  FIELD_COMMIT,
+  FIELD_START_EDIT,
+} from "../3-commands/field";
 import { NAVIGATE } from "../3-commands/navigate";
 import { SELECT } from "../3-commands/select";
 import { TAB } from "../3-commands/tab";

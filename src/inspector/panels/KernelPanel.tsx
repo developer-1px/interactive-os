@@ -4,10 +4,10 @@
  * Accepts a kernel instance prop. If not provided, shows a placeholder.
  */
 
-import type { createKernel } from "@kernel";
+// import type { createKernel } from "@kernel";
 import { useEffect, useRef, useState } from "react";
 
-type AnyKernel = ReturnType<typeof createKernel>;
+type AnyKernel = any;
 
 // ─── Main Panel ───
 
@@ -32,7 +32,7 @@ export function KernelPanel({ kernel }: { kernel?: AnyKernel }) {
 // ─── State Section ───
 
 function StateSection({ kernel }: { kernel: AnyKernel }) {
-  const state = kernel.useComputed((s) => s);
+  const state = kernel.useComputed((s: any) => s);
 
   return (
     <div className="flex-1 overflow-y-auto p-3">
@@ -54,7 +54,7 @@ function TransactionSection({ kernel }: { kernel: AnyKernel }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // useComputed triggers re-render on state change → transactions also update
-  kernel.useComputed((s) => s);
+  kernel.useComputed((s: any) => s);
 
   const txs = kernel.getTransactions();
 
@@ -102,7 +102,7 @@ function TransactionSection({ kernel }: { kernel: AnyKernel }) {
           ref={scrollRef}
           className="flex-1 overflow-y-auto flex flex-col gap-0.5"
         >
-          {txs.map((tx) => (
+          {txs.map((tx: any) => (
             <button
               key={tx.id}
               type="button"

@@ -237,17 +237,17 @@ function BoxModelDiagram({
   const { paddingTop, paddingRight, paddingBottom, paddingLeft } = boxModel;
   const contentW = Math.round(
     boxModel.width -
-    paddingLeft -
-    paddingRight -
-    boxModel.borderLeft -
-    boxModel.borderRight,
+      paddingLeft -
+      paddingRight -
+      boxModel.borderLeft -
+      boxModel.borderRight,
   );
   const contentH = Math.round(
     boxModel.height -
-    paddingTop -
-    paddingBottom -
-    boxModel.borderTop -
-    boxModel.borderBottom,
+      paddingTop -
+      paddingBottom -
+      boxModel.borderTop -
+      boxModel.borderBottom,
   );
 
   const cellStyle = (bg: string): React.CSSProperties => ({

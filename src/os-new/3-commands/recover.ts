@@ -9,11 +9,13 @@ import { produce } from "immer";
 import { DOM_ITEMS } from "../2-contexts";
 import { kernel } from "../kernel";
 import { ensureZone } from "../state/utils";
+import { logger } from "../lib/logger";
 
 export const RECOVER = kernel.defineCommand(
   "OS_RECOVER",
   [DOM_ITEMS],
   (ctx) => () => {
+    logger.debug("FOCUS", "[RECOVER] Executing...");
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 

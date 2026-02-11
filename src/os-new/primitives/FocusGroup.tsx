@@ -1,8 +1,19 @@
 /**
- * @deprecated FocusGroup은 Zustand 기반 Legacy 컴포넌트입니다.
- * 새 코드에서는 `6-components/Zone.tsx` (Kernel 기반)를 사용하세요.
+ * FocusGroup — Kernel-based focus zone primitive.
+ *
+ * On mount:
+ *   1. Resolve config from role + overrides (reuses resolveRole)
+ *   2. Register in ZoneRegistry (for context providers)
+ *   3. Dispatch ZONE_INIT to initialize zone state in kernel
+ *
+ * On unmount:
+ *   Unregister from ZoneRegistry
+ *
+ * Context provides { zoneId, config, role?, scope } — same shape as ZoneContext.
+ * No Zustand, no FocusData, no global mutable state.
  */
-import { FocusData } from "@os/features/focus/lib/focusData.ts";
+import { defineScope, type ScopeToken, type AnyCommand } from "@kernel";
+import { produce } from "immer";
 import {
   type ComponentProps,
   createContext,
@@ -11,12 +22,11 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
 } from "react";
 import { ZoneRegistry } from "../2-contexts/zoneRegistry.ts";
-import {
-  type FocusGroupStore,
-  useFocusGroupStoreInstance,
-} from "../store/focusGroupStore.ts";
+import { FOCUS } from "../3-commands/focus.ts";
+import { STACK_POP, STACK_PUSH } from "../3-commands/stack.ts";
 import { kernel } from "../kernel.ts";
 import { resolveRole, type ZoneRole } from "../registry/roleRegistry.ts";
 import type {
@@ -29,31 +39,23 @@ import type {
   TabConfig,
 } from "../schema";
 import type { BaseCommand } from "../schema/command/BaseCommand.ts";
-import { useIsFocusedGroup } from "./hooks/useIsFocusedGroup.ts";
+import { initialZoneState } from "../state/initial.ts";
 
 // ═══════════════════════════════════════════════════════════════════
-// Context
+// Context (same shape as ZoneContextValue)
 // ═══════════════════════════════════════════════════════════════════
 
-interface FocusGroupContextValue {
-  groupId: string;
-  store: FocusGroupStore;
+export interface FocusGroupContextValue {
+  zoneId: string;
   config: FocusGroupConfig;
   zoneRole?: ZoneRole;
+  scope: ScopeToken;
 }
 
 const FocusGroupContext = createContext<FocusGroupContextValue | null>(null);
 
 export function useFocusGroupContext() {
   return useContext(FocusGroupContext);
-}
-
-export function useFocusGroupStore() {
-  const ctx = useContext(FocusGroupContext);
-  if (!ctx) {
-    throw new Error("useFocusGroupStore must be used within a FocusGroup");
-  }
-  return ctx.store;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -124,6 +126,12 @@ export interface FocusGroupProps
   /** Command dispatched on redo (Cmd+Shift+Z) */
   onRedo?: BaseCommand;
 
+  /** Kernel scope (for scoped command handlers). Defaults to groupId. */
+  scope?: ScopeToken;
+
+  /** Command dispatched when zone is dismissed (ESC with dismiss.escape: "close") */
+  onDismiss?: AnyCommand;
+
   /** Children */
   children: ReactNode;
 
@@ -143,8 +151,21 @@ function generateGroupId() {
   return `focus-group-${++groupIdCounter}`;
 }
 
-// W3C: Only the first autoFocus group in DOM order should receive focus
-let autoFocusClaimed = false;
+// ═══════════════════════════════════════════════════════════════════
+// Init command (module-scoped, lightweight)
+// ═══════════════════════════════════════════════════════════════════
+
+const INIT_ZONE = kernel.defineCommand(
+  "FOCUS_GROUP_INIT",
+  (ctx) => (zoneId: string) => {
+    if (ctx.state.os.focus.zones[zoneId]) return; // already init
+    return {
+      state: produce(ctx.state, (draft) => {
+        draft.os.focus.zones[zoneId] = { ...initialZoneState };
+      }),
+    };
+  },
+);
 
 // ═══════════════════════════════════════════════════════════════════
 // Component
@@ -159,15 +180,17 @@ export function FocusGroup({
   activate,
   dismiss,
   project,
-  onAction,
-  onSelect,
-  onCopy,
-  onCut,
-  onPaste,
-  onToggle,
-  onDelete,
-  onUndo,
-  onRedo,
+  scope: propScope,
+  onAction: _onAction,
+  onSelect: _onSelect,
+  onCopy: _onCopy,
+  onCut: _onCut,
+  onPaste: _onPaste,
+  onToggle: _onToggle,
+  onDelete: _onDelete,
+  onUndo: _onUndo,
+  onRedo: _onRedo,
+  onDismiss,
   children,
   className,
   style,
@@ -176,8 +199,11 @@ export function FocusGroup({
   // --- Stable ID ---
   const groupId = useMemo(() => propId || generateGroupId(), [propId]);
 
-  // --- Scoped Store (Persistent across Remounts) ---
-  const store = useFocusGroupStoreInstance(groupId);
+  // --- Scope Token (defaults to groupId) ---
+  const scope = useMemo(
+    () => propScope ?? defineScope(groupId),
+    [propScope, groupId],
+  );
 
   // --- Resolve Configuration ---
   const config = useMemo(() => {
@@ -200,137 +226,76 @@ export function FocusGroup({
 
   // --- Parent Context ---
   const parentContext = useContext(FocusGroupContext);
-  const parentId = parentContext?.groupId || null;
+  const parentId = parentContext?.zoneId || null;
 
-  // --- Container Ref for FocusData ---
-  const containerRef = useMemo(
-    () => ({ current: null as HTMLDivElement | null }),
-    [],
-  );
+  // --- Container Ref ---
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // --- FocusData Registration (WeakMap) ---
+  // --- Register in ZoneRegistry + init kernel state ---
   useLayoutEffect(() => {
+    // Init kernel state for this zone
+    kernel.dispatch(INIT_ZONE(groupId));
+
+    // Register in ZoneRegistry (for context providers)
     if (containerRef.current) {
-      FocusData.set(containerRef.current, {
-        store,
+      ZoneRegistry.register(groupId, {
         config,
+        element: containerRef.current,
+        ...(role !== undefined ? { role } : {}),
         parentId,
-        ...(onAction !== undefined ? { activateCommand: onAction } : {}),
-        ...(onSelect !== undefined ? { selectCommand: onSelect } : {}),
-        ...(onCopy !== undefined ? { copyCommand: onCopy } : {}),
-        ...(onCut !== undefined ? { cutCommand: onCut } : {}),
-        ...(onPaste !== undefined ? { pasteCommand: onPaste } : {}),
-        ...(onDelete !== undefined ? { deleteCommand: onDelete } : {}),
-        ...(onToggle !== undefined ? { toggleCommand: onToggle } : {}),
-        ...(onUndo !== undefined ? { undoCommand: onUndo } : {}),
-        ...(onRedo !== undefined ? { redoCommand: onRedo } : {}),
+        ...(onDismiss !== undefined ? { onDismiss } : {}),
       });
     }
-    // No cleanup needed - WeakMap auto-GC when element is removed
-  }, [
-    store,
-    config,
-    parentId,
-    onAction,
-    onSelect,
-    onCopy,
-    onCut,
-    onPaste,
-    onToggle,
-    onDelete,
-    onUndo,
-    onRedo,
-    containerRef.current,
-  ]);
 
-  // --- ZoneRegistry Registration (Kernel Pipeline) ---
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-    ZoneRegistry.register(groupId, {
-      config,
-      element: containerRef.current,
-      ...(role !== undefined ? { role } : {}),
-      parentId,
-    });
     return () => {
       ZoneRegistry.unregister(groupId);
     };
-  }, [groupId, config, role, parentId, containerRef.current]);
+  }, [groupId, config, role, parentId, onDismiss]);
 
-  // --- Kernel → Zustand Bridge ---
-  // Subscribe to kernel state changes and sync to Zustand store + FocusData
-  // so existing FocusItem rendering works without modification.
+  // --- AutoFocus: focus first item on mount when config.project.autoFocus ---
   useEffect(() => {
-    return kernel.subscribe(() => {
-      const kState = kernel.getState();
-      const zone = kState.os.focus.zones[groupId];
-      if (!zone) return;
-
-      // Sync focusedItemId
-      const currentStore = store.getState();
-      if (currentStore.focusedItemId !== zone.focusedItemId) {
-        store.setState({ focusedItemId: zone.focusedItemId });
-      }
-
-      // Sync selection
-      const selChanged =
-        currentStore.selection.length !== zone.selection.length ||
-        currentStore.selection.some((id, i) => zone.selection[i] !== id);
-      if (selChanged) {
-        store.setState({ selection: zone.selection });
-      }
-
-      // Sync expandedItems
-      const expChanged =
-        currentStore.expandedItems.length !== zone.expandedItems.length ||
-        currentStore.expandedItems.some(
-          (id, i) => zone.expandedItems[i] !== id,
-        );
-      if (expChanged) {
-        store.setState({ expandedItems: zone.expandedItems });
-      }
-
-      // Sync activeZoneId to FocusData
-      if (FocusData.getActiveZoneId() !== kState.os.focus.activeZoneId) {
-        FocusData.setActiveZone(kState.os.focus.activeZoneId);
-      }
-    });
-  }, [groupId, store]);
-
-  // --- Auto-Focus for Dialog/Modal or explicit autoFocus ---
-  // W3C spec: only the first autofocus element in DOM order receives focus.
-  // Dialog/alertdialog always gets focus (modal override).
-  useLayoutEffect(() => {
-    const isModal = role === "dialog" || role === "alertdialog";
-    const shouldAutoFocus = config.project?.autoFocus || isModal;
-    if (!shouldAutoFocus) return;
-    if (!isModal && autoFocusClaimed) return; // W3C: first wins
+    if (!config.project.autoFocus) return;
     if (!containerRef.current) return;
 
-    // Find first focusable item in the group
-    const firstItem = containerRef.current.querySelector(
-      "[data-focus-item]",
-    ) as HTMLElement;
-    if (firstItem) {
-      if (!isModal) autoFocusClaimed = true;
-      // Use requestAnimationFrame to ensure DOM is ready
-      requestAnimationFrame(() => {
-        firstItem.focus({ preventScroll: true });
-        store.setState({ focusedItemId: firstItem.id });
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.project?.autoFocus, containerRef.current, role, store.setState]); // Only run on mount - global autoFocusClaimed prevents duplicates
+    // Wait one frame for children to render
+    const raf = requestAnimationFrame(() => {
+      const firstItem =
+        containerRef.current?.querySelector<HTMLElement>("[data-focus-item]");
+      if (firstItem) {
+        const itemId = firstItem.getAttribute("data-item-id") || firstItem.id;
+        if (itemId) {
+          kernel.dispatch(FOCUS({ zoneId: groupId, itemId }));
+        }
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [groupId, config.project.autoFocus]);
+
+  // --- Auto Focus Stack for dialog/alertdialog ---
+  // When autoFocus is true, push focus stack on mount and pop on unmount
+  useEffect(() => {
+    if (!config.project.autoFocus) return;
+    kernel.dispatch(STACK_PUSH());
+    return () => {
+      kernel.dispatch(STACK_POP());
+    };
+  }, [groupId, config.project.autoFocus]);
+
+
+
+  // --- Is Active ---
+  const activeZoneId = kernel.useComputed((s) => s.os.focus.activeZoneId);
+  const isActive = activeZoneId === groupId;
 
   // --- Context Value ---
   const contextValue = useMemo<FocusGroupContextValue>(
     () => ({
-      groupId,
-      store,
+      zoneId: groupId,
       config,
       ...(role !== undefined ? { zoneRole: role } : {}),
+      scope,
     }),
-    [groupId, store, config, role],
+    [groupId, config, role, scope],
   );
 
   // --- Orientation (data attribute for external styling) ---
@@ -341,12 +306,10 @@ export function FocusGroup({
     <FocusGroupContext.Provider value={contextValue}>
       {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is dynamic (listbox/toolbar/grid) */}
       <div
-        ref={(el) => {
-          containerRef.current = el;
-        }}
+        ref={containerRef}
         id={groupId}
         data-focus-group={groupId}
-        aria-current={useIsFocusedGroup(groupId) ? "true" : undefined}
+        aria-current={isActive ? "true" : undefined}
         aria-orientation={
           config.navigate.orientation === "horizontal"
             ? "horizontal"
@@ -357,9 +320,6 @@ export function FocusGroup({
         aria-multiselectable={config.select.mode === "multiple" || undefined}
         role={role || "group"}
         tabIndex={-1}
-        // onFocus & onBlur removed:
-        // Zone activation is now handled by FocusSensor (focusin -> SYNC_FOCUS -> setActiveZone)
-        // This prevents race conditions and cyclic dependencies.
         className={className || undefined}
         data-orientation={orientation}
         style={{ outline: "none", ...style }}

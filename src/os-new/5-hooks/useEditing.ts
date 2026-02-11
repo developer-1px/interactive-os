@@ -5,7 +5,7 @@
 import { kernel } from "../kernel";
 
 export function useEditing(zoneId: string, itemId: string): boolean {
-    return kernel.useComputed(
-        (s) => s.os.focus.zones[zoneId]?.editingItemId === itemId,
-    );
+  return kernel.useComputed(
+    (s) => s.os.focus.zones[zoneId]?.editingItemId === itemId,
+  );
 }

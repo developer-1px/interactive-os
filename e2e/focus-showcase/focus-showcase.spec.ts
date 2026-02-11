@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Focus Showcase", () => {
   test.beforeEach(async ({ page }) => {
+    page.on("console", (msg) => console.log(`[Browser] ${msg.text()}`));
     await page.goto("/focus-showcase");
   });
 

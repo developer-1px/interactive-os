@@ -9,6 +9,7 @@
 
 import { produce } from "immer";
 import { ZONE_CONFIG } from "../2-contexts";
+import { ZoneRegistry } from "../2-contexts/zoneRegistry";
 import { kernel } from "../kernel";
 import { ensureZone } from "../state/utils";
 
@@ -36,12 +37,17 @@ export const ESCAPE = kernel.defineCommand(
         };
       }
       case "close": {
+        // Dispatch onDismiss command if registered on this zone
+        const zoneEntry = ZoneRegistry.get(activeZoneId);
+        const dismissCommand = zoneEntry?.onDismiss;
+
         return {
           state: produce(ctx.state, (draft: any) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.focusedItemId = null;
           }) as typeof ctx.state,
           blur: true,
+          ...(dismissCommand ? { dispatch: dismissCommand } : {}),
         };
       }
       default:

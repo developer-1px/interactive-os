@@ -1,7 +1,7 @@
-import { Builder } from "@/apps/builder/primitives/Builder";
-import { Field } from "@os/app/export/primitives/Field.tsx";
+import { Field } from "@os/6-components/Field.tsx";
 import { ArrowRight, Globe } from "lucide-react";
 import { useState } from "react";
+import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPHeroBlock() {
   const [values, setValues] = useState({

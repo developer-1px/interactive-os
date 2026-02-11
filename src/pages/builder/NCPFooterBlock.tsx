@@ -1,5 +1,4 @@
-import { Builder } from "@/apps/builder/primitives/Builder";
-import { Field } from "@os/app/export/primitives/Field.tsx";
+import { Field } from "@os/6-components/Field.tsx";
 import {
   Github,
   Globe,
@@ -9,6 +8,7 @@ import {
   Youtube,
 } from "lucide-react";
 import { useState } from "react";
+import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPFooterBlock() {
   const [brand, setBrand] = useState("NAVER CLOUD");

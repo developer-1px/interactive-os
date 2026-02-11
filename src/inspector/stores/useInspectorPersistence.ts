@@ -7,5 +7,5 @@
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useInspectorPersistence(_store: any): void {
-    // no-op stub
+  // no-op stub
 }

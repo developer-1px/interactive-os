@@ -5,9 +5,9 @@
  * transaction log with time-travel.
  */
 
-import { createKernel, type Transaction } from "@kernel";
 import { KernelPanel } from "@inspector/panels/KernelPanel.tsx";
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
+import { createKernel, type Transaction } from "@kernel";
 import { useEffect, useRef, useState } from "react";
 import { useKernelLabBotRoutes } from "./tests/KernelLabBot";
 

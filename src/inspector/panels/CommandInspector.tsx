@@ -3,16 +3,16 @@ import { ElementPanel } from "@inspector/panels/ElementPanel.tsx";
 import { EventStream } from "@inspector/panels/EventStream.tsx";
 import { InspectorAdapter } from "@inspector/panels/InspectorAdapter.tsx";
 import { KeyMonitor } from "@inspector/panels/KeyMonitor.tsx";
+import { useInputTelemetry } from "@inspector/panels/LoggedKey.ts";
 import { OSStateViewer } from "@inspector/panels/OSStateViewer.tsx";
 import { RegistryMonitor } from "@inspector/panels/RegistryMonitor.tsx";
 import { StateMonitor } from "@inspector/panels/StateMonitor.tsx";
-import { useInputTelemetry } from "@inspector/panels/LoggedKey.ts";
-import { useCommandTelemetryStore } from "@os/features/command/store/CommandTelemetryStore";
-import { useCommandEngine } from "@os/features/command/ui/CommandContext.tsx";
-import { FocusData } from "@os/features/focus/lib/focusData";
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotPanel } from "@inspector/testbot";
+import { useCommandTelemetryStore } from "@os/core/command/store/CommandTelemetryStore";
+import { useCommandEngine } from "@os/core/command/ui/CommandContext.tsx";
+import { FocusData } from "@os/core/focus/lib/focusData";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { evalContext } from "@/os-new/core/logic/evalContext";
 
@@ -132,11 +132,7 @@ export function CommandInspector() {
   useEffect(() => {
     // Only register if not already there to prevent dupes/flicker
     if (!InspectorRegistry.getPanel("UNIFIED")) {
-      InspectorRegistry.register(
-        "UNIFIED",
-        "Vision",
-        <InspectorAdapter />,
-      );
+      InspectorRegistry.register("UNIFIED", "Vision", <InspectorAdapter />);
     }
   }, []);
 

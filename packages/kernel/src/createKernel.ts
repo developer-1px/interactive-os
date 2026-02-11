@@ -185,7 +185,10 @@ export function createKernel<S>(initialState: S) {
       }
     }
 
-    queue.push({ cmd: enriched as Command, ...(options?.meta !== undefined ? { meta: options.meta } : {}) });
+    queue.push({
+      cmd: enriched as Command,
+      ...(options?.meta !== undefined ? { meta: options.meta } : {}),
+    });
 
     if (processing) return;
 

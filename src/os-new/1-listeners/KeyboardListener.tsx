@@ -9,8 +9,8 @@
  */
 
 import { useEffect } from "react";
-import { getCanonicalKey } from "../lib/getCanonicalKey";
 import { kernel } from "../kernel";
+import { getCanonicalKey } from "../lib/getCanonicalKey";
 import { Keybindings, type KeyResolveContext } from "./keybindings";
 
 // Ensure OS defaults are registered

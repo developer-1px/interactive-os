@@ -1,7 +1,7 @@
-import { Builder } from "@/apps/builder/primitives/Builder";
-import { Field } from "@os/app/export/primitives/Field.tsx";
+import { Field } from "@os/6-components/Field.tsx";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPNewsBlock() {
   const [title, setTitle] = useState("네이버클라우드의\n새로운 소식");

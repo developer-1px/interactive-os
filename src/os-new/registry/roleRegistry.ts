@@ -321,7 +321,11 @@ export function resolveRole(
       ...(overrides.navigate ?? {}),
     },
     tab: { ...DEFAULT_TAB, ...basePreset.tab, ...(overrides.tab ?? {}) },
-    select: { ...DEFAULT_SELECT, ...basePreset.select, ...(overrides.select ?? {}) },
+    select: {
+      ...DEFAULT_SELECT,
+      ...basePreset.select,
+      ...(overrides.select ?? {}),
+    },
     activate: {
       ...DEFAULT_ACTIVATE,
       ...basePreset.activate,

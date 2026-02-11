@@ -3,8 +3,8 @@
  * Demonstrates standard ARIA patterns using FocusGroup facade.
  */
 
-import { useFocusExpansion } from "@os/features/focus/hooks/useFocusExpansion";
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
+import { useFocusExpansion } from "@os/core/focus/hooks/useFocusExpansion";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/lib/Icon";
 import { FocusGroup } from "@/os-new/primitives/FocusGroup";
@@ -497,10 +497,11 @@ function AriaShowcaseContent() {
                 className={`
                                   w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
                                   flex items-center gap-2 transition-all
-                                  ${isComboInvalid
-                    ? "border-red-300 bg-red-50 text-red-700"
-                    : "border-gray-200 hover:border-gray-300"
-                  }
+                                  ${
+                                    isComboInvalid
+                                      ? "border-red-300 bg-red-50 text-red-700"
+                                      : "border-gray-200 hover:border-gray-300"
+                                  }
                                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
                                   aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
                               `}

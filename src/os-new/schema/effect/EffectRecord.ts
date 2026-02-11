@@ -28,5 +28,11 @@ export function createFocusEffect(
   executed: boolean,
   reason?: string,
 ): EffectRecord {
-  return { source: "focus", action, targetId, executed, ...(reason !== undefined ? { reason } : {}) };
+  return {
+    source: "focus",
+    action,
+    targetId,
+    executed,
+    ...(reason !== undefined ? { reason } : {}),
+  };
 }
