@@ -19,7 +19,7 @@ description: Analyzes the user request and saves a formal report to docs/0-inbox
    - Ensure this directory exists. If not, create it.
 
 4. **Save Report**
-   - Generate a filename using the current date and topic: `YYYY-MM-DD_[Short_Topic].md`.
+    - Generate a filename using the current date, time, and topic: `YYYY-MM-DD_HHMM_[Short_Topic].md` (e.g. `2026-02-11_1615_Modal_Design.md`).
    - Write the drafted content to this file using `write_to_file`.
    - **Important**: Do NOT overwrite existing files unless explicitly instructed. If a file exists, append a version number or timestamp.
 

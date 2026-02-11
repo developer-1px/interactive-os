@@ -50,17 +50,19 @@ function buildDocTree(paths: string[]): DocItem[] {
     });
   });
 
-  // Sort function: Folders first, then files. Alphabetical within groups.
-  const sortItems = (items: DocItem[]) => {
+  const sortItems = (items: DocItem[], parentName?: string) => {
+    const isInbox = parentName?.includes("inbox");
     items.sort((a, b) => {
       if (a.type === b.type) {
-        return a.name.localeCompare(b.name);
+        return isInbox
+          ? b.name.localeCompare(a.name)
+          : a.name.localeCompare(b.name);
       }
       return a.type === "folder" ? -1 : 1;
     });
     items.forEach((item) => {
       if (item.children) {
-        sortItems(item.children);
+        sortItems(item.children, item.name);
       }
     });
   };
