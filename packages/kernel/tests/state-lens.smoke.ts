@@ -25,31 +25,36 @@ type AppState = {
     apps: Record<string, unknown>;
 };
 
-// ─── Setup ───
+// ─── Setup: Kernel starts with NO app state ───
 
 const kernel = createKernel<AppState>({
     os: { focus: { activeZoneId: "list", focusedItemId: "todo-1" } },
-    apps: {
-        todo: {
-            todos: [
-                { id: "todo-1", text: "Buy milk", done: false },
-                { id: "todo-2", text: "Walk dog", done: false },
-            ],
-        } satisfies TodoState,
-    },
+    apps: {}, // ← apps 비어있음. 커널은 앱을 모름.
 });
+
+// ─── App Registration (mirrors registerAppSlice) ───
 
 const todoScope = defineScope("todo");
 
-// ─── Context: Focus info (replaces OS.FOCUS placeholder) ───
+// 1. 앱이 자기 state를 등록 (런타임에 동적으로)
+const todoInitial: TodoState = {
+    todos: [
+        { id: "todo-1", text: "Buy milk", done: false },
+        { id: "todo-2", text: "Walk dog", done: false },
+    ],
+};
+kernel.setState((prev) => ({
+    ...prev,
+    apps: { ...prev.apps, todo: todoInitial },
+}));
 
+// 2. Context: Focus info (replaces OS.FOCUS placeholder)
 const FocusInfo = kernel.defineContext("focus-info", () => ({
     focusedItemId: kernel.getState().os.focus.focusedItemId,
     activeZoneId: kernel.getState().os.focus.activeZoneId,
 }));
 
-// ─── App Group with State Lens ───
-
+// 3. Scoped group with state lens (앱은 자기 slice만 봄)
 const todoGroup = kernel.group({
     scope: todoScope,
     inject: [FocusInfo],
