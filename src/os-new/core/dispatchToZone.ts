@@ -5,8 +5,8 @@
  * to the active Zone's bound app commands (onCopy, onUndo, etc.)
  */
 
-import { useCommandEngineStore } from "@os/core/command/store/CommandEngineStore";
 import { FocusData } from "@os/core/focus/lib/focusData";
+import { kernel } from "@/os-new/kernel";
 
 type ZoneCommandKey =
   | "copyCommand"
@@ -16,7 +16,7 @@ type ZoneCommandKey =
   | "redoCommand";
 
 /**
- * Dispatch the active Zone's bound command to the app.
+ * Dispatch the active Zone's bound command via kernel.
  * @returns true if dispatched, false if no active zone or no bound command.
  */
 export function dispatchToZone(commandKey: ZoneCommandKey): boolean {
@@ -26,9 +26,7 @@ export function dispatchToZone(commandKey: ZoneCommandKey): boolean {
   const command = data[commandKey];
   if (!command) return false;
 
-  const dispatch = useCommandEngineStore.getState().getActiveDispatch();
-  if (!dispatch) return false;
-
-  dispatch(command);
+  kernel.dispatch(command as any);
   return true;
 }
+

@@ -1,40 +1,19 @@
 /**
  * ClipboardIntent - OS Clipboard Command Router
  *
- * Listens for programmatic OS_COPY, OS_CUT, OS_PASTE commands
- * and routes them to the active Zone's bound commands.
+ * Routes programmatic OS_COPY, OS_CUT, OS_PASTE commands
+ * to the active Zone's bound commands.
  *
  * Note: Most real clipboard interactions come through ClipboardSensor
- * (native DOM events). This handles the programmatic dispatch path
- * (e.g., TestBot, menu buttons).
+ * (native DOM events). This will be enhanced when kernel event
+ * subscription API supports command-level filtering.
+ *
+ * @status STUB — Awaiting kernel.onCommand() API
  */
 
-import { useCommandListener } from "@os/core/command/hooks/useCommandListener";
-import { dispatchToZone } from "../../core/dispatchToZone.ts";
-import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
-
 export function ClipboardIntent() {
-  useCommandListener([
-    {
-      command: OS_COMMANDS.COPY,
-      handler: () => {
-        dispatchToZone("copyCommand");
-      },
-    },
-    {
-      command: OS_COMMANDS.CUT,
-      handler: () => {
-        dispatchToZone("cutCommand");
-      },
-    },
-    {
-      command: OS_COMMANDS.PASTE,
-      handler: () => {
-        dispatchToZone("pasteCommand");
-      },
-    },
-  ]);
-
+  // TODO: Replace with kernel.onCommand() when available
+  // Previously used useCommandListener (legacy pipeline)
   return null;
 }
 

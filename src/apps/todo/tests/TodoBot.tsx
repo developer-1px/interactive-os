@@ -19,7 +19,8 @@ import {
   type TestBot,
   useTestBotRoutes,
 } from "@inspector/testbot";
-import { CommandEngineStore } from "@os/core/command/store/CommandEngineStore";
+import { dispatchToZone } from "@/os-new/core/dispatchToZone";
+import { kernel } from "@/os-new/kernel";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
@@ -35,16 +36,16 @@ async function type(t: TestActions, text: string) {
 
 /** Snapshot & restore helper for state isolation */
 function snapshot() {
-  return CommandEngineStore.getAppState("todo");
+  return kernel.getState();
 }
 function restore(s: any) {
-  if (s) CommandEngineStore.setAppState("todo", s);
+  if (s) kernel.setState(() => s);
 }
 
 /** OS-level clipboard dispatch (TestBot can't trigger native events) */
-const osCopy = () => CommandEngineStore.dispatch({ type: "OS_COPY" });
-const osCut = () => CommandEngineStore.dispatch({ type: "OS_CUT" });
-const osPaste = () => CommandEngineStore.dispatch({ type: "OS_PASTE" });
+const osCopy = () => dispatchToZone("copyCommand");
+const osCut = () => dispatchToZone("cutCommand");
+const osPaste = () => dispatchToZone("pasteCommand");
 
 // ═══════════════════════════════════════════════════════════════════
 // Test Definitions

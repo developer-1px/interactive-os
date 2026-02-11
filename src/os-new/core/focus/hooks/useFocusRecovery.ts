@@ -1,4 +1,4 @@
-import { CommandEngineStore } from "@os/core/command/store/CommandEngineStore";
+import { kernel } from "@/os-new/kernel";
 import { useEffect, useSyncExternalStore } from "react";
 import { OS_COMMANDS } from "@/os-new/schema/command/OSCommands";
 import { FocusData } from "../lib/focusData";
@@ -32,7 +32,7 @@ export function useFocusRecovery() {
       const timer = setTimeout(() => {
         // Re-check state before dispatching
         if (!activeData.store.getState().focusedItemId) {
-          CommandEngineStore.dispatch({ type: OS_COMMANDS.RECOVER });
+          kernel.dispatch({ type: OS_COMMANDS.RECOVER } as any);
         }
       }, 50);
 

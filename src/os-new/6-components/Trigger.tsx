@@ -13,7 +13,7 @@
  *   Layer 2 (Radix Interface): Dialog, Menu, etc. (thin wrappers)
  */
 
-import { useCommandEngine } from "@os/core/command/ui/CommandContext";
+import { kernel } from "@/os-new/kernel";
 import type {
   ReactElement,
   MouseEvent as ReactMouseEvent,
@@ -31,7 +31,6 @@ import {
 } from "react";
 import { FocusItem } from "@/os-new/primitives/FocusItem";
 import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
-import { kernel } from "@/os-new/kernel";
 import { OVERLAY_OPEN, OVERLAY_CLOSE } from "@/os-new/3-commands/overlay";
 import type { OverlayEntry } from "@/os-new/state/OSState";
 
@@ -101,8 +100,7 @@ const TriggerBase = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
     },
     ref,
   ) => {
-    const { dispatch: contextDispatch } = useCommandEngine();
-    const dispatch = customDispatch || contextDispatch;
+    const dispatch = customDispatch || ((cmd: BaseCommand) => kernel.dispatch(cmd as any));
 
     // Use explicit overlayId if provided, otherwise auto-generate
     const overlayId = useMemo(
@@ -359,7 +357,7 @@ function TriggerDismiss({
   ...rest
 }: TriggerDismissProps) {
   const overlayCtx = useOverlayContext();
-  const { dispatch } = useCommandEngine();
+  const dispatch = (cmd: BaseCommand) => kernel.dispatch(cmd as any);
 
   const handleClick = (e: ReactMouseEvent) => {
     e.stopPropagation();

@@ -15,7 +15,6 @@ import { ClipboardSensor } from "@/os-new/1-listeners/clipboard/ClipboardSensor.
 import { FocusSensor } from "@/os-new/1-listeners/focus/FocusSensor.tsx";
 import { HistoryIntent } from "@/os-new/1-listeners/history/HistoryIntent.tsx";
 import { KeyboardListener } from "@/os-new/1-listeners/KeyboardListener.tsx";
-import { useOSCore } from "./useOSCore";
 
 // Register kernel effects and contexts (side-effect imports)
 import "@/os-new/4-effects";
@@ -30,9 +29,6 @@ export interface RootProps {
  * Initializes global infrastructure and OS-level commands.
  */
 export function Root({ children }: RootProps) {
-  // Initialize OS Core (registers OS commands to global registry)
-  useOSCore();
-
   // OS-level Focus Recovery
   useFocusRecovery();
 

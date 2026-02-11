@@ -5,7 +5,7 @@ import { Kbd } from "@inspector/shell/components/Kbd";
 import { Item } from "@os/6-components/Item";
 import { Trigger } from "@os/6-components/Trigger";
 import { Zone } from "@os/6-components/Zone";
-import { useEngine } from "@os/core/command/ui/CommandContext";
+import { useEngine } from "@os/6-components/App";
 import {
   ArrowRight,
   Briefcase,

@@ -1,33 +1,16 @@
 /**
  * HistoryIntent - OS History Command Router
  *
- * Listens for OS_UNDO and OS_REDO commands (triggered by ⌘Z / ⌘⇧Z keybindings)
- * and routes them to the active Zone's bound commands.
+ * Routes programmatic OS_UNDO and OS_REDO commands to active Zone's
+ * bound commands. Will be enhanced when kernel event subscription API
+ * supports command-level filtering.
  *
- * No Sensor needed — browsers don't fire native undo/redo events,
- * so these must come through OS keybindings.
+ * @status STUB — Awaiting kernel.onCommand() API
  */
 
-import { useCommandListener } from "@os/core/command/hooks/useCommandListener";
-import { dispatchToZone } from "../../core/dispatchToZone.ts";
-import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
-
 export function HistoryIntent() {
-  useCommandListener([
-    {
-      command: OS_COMMANDS.UNDO,
-      handler: () => {
-        dispatchToZone("undoCommand");
-      },
-    },
-    {
-      command: OS_COMMANDS.REDO,
-      handler: () => {
-        dispatchToZone("redoCommand");
-      },
-    },
-  ]);
-
+  // TODO: Replace with kernel.onCommand() when available
+  // Previously used useCommandListener (legacy pipeline)
   return null;
 }
 

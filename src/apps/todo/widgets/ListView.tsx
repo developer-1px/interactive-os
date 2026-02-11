@@ -23,7 +23,7 @@ import { Field } from "@os/6-components/Field";
 import { Label } from "@os/6-components/Label";
 import { Zone } from "@os/6-components/Zone";
 import { OS } from "@os/AntigravityOS";
-import { useEngine } from "@os/core/command/ui/CommandContext";
+import { useEngine } from "@os/6-components/App";
 import { Plus } from "lucide-react";
 
 export function ListView() {

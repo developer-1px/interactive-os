@@ -720,3 +720,9 @@ Kernel은 순수한 커맨드 처리 엔진이다. OS가 다음을 담당한다:
 | **OS 이펙트** | FOCUS, SCROLL, BLUR 등록 | `group.defineEffect()` |
 | **OS 컨텍스트** | DOM_ITEMS, ZONE_CONFIG 등록 | `defineContext()` + `group({ inject })` |
 | **파생 상태** | focused-item, is-focused | `useComputed()` |
+
+---
+
+## 📚 관련 리소스
+
+- [State Isolation Patterns](../../3-resource/08-state-isolation-patterns.md) — Redux, Zustand, re-frame, Elm, XState, OS 프로세스의 state 격리 패턴 비교. 커널의 scope state isolation 설계 참고자료.

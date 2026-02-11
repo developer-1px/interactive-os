@@ -14,7 +14,7 @@ import type { AppState } from "@apps/todo/model/types";
 import { Trigger } from "@os/6-components/Trigger";
 import { Zone } from "@os/6-components/Zone";
 import { OS } from "@os/AntigravityOS";
-import { useEngine } from "@os/core/command/ui/CommandContext";
+import { useEngine } from "@os/6-components/App";
 import { List } from "lucide-react";
 import { TaskItem } from "./TaskItem";
 
