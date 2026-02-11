@@ -18,10 +18,8 @@ import { Route as TodoProfileRouteImport } from './routes/_todo/profile'
 import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
-import { Route as MinimalPlaygroundSpikeRouteImport } from './routes/_minimal/playground.spike'
 import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/playground.radix'
 import { Route as MinimalPlaygroundPlaywrightRouteImport } from './routes/_minimal/playground.playwright'
-import { Route as MinimalPlaygroundOsKernelRouteImport } from './routes/_minimal/playground.os-kernel'
 import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
 import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
@@ -70,11 +68,6 @@ const MinimalDocsIndexRoute = MinimalDocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MinimalDocsRoute,
 } as any)
-const MinimalPlaygroundSpikeRoute = MinimalPlaygroundSpikeRouteImport.update({
-  id: '/playground/spike',
-  path: '/playground/spike',
-  getParentRoute: () => MinimalRoute,
-} as any)
 const MinimalPlaygroundRadixRoute = MinimalPlaygroundRadixRouteImport.update({
   id: '/playground/radix',
   path: '/playground/radix',
@@ -84,12 +77,6 @@ const MinimalPlaygroundPlaywrightRoute =
   MinimalPlaygroundPlaywrightRouteImport.update({
     id: '/playground/playwright',
     path: '/playground/playwright',
-    getParentRoute: () => MinimalRoute,
-  } as any)
-const MinimalPlaygroundOsKernelRoute =
-  MinimalPlaygroundOsKernelRouteImport.update({
-    id: '/playground/os-kernel',
-    path: '/playground/os-kernel',
     getParentRoute: () => MinimalRoute,
   } as any)
 const MinimalPlaygroundKernelRoute = MinimalPlaygroundKernelRouteImport.update({
@@ -124,10 +111,8 @@ export interface FileRoutesByFullPath {
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
-  '/playground/os-kernel': typeof MinimalPlaygroundOsKernelRoute
   '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
-  '/playground/spike': typeof MinimalPlaygroundSpikeRoute
   '/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -140,10 +125,8 @@ export interface FileRoutesByTo {
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
-  '/playground/os-kernel': typeof MinimalPlaygroundOsKernelRoute
   '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
-  '/playground/spike': typeof MinimalPlaygroundSpikeRoute
   '/docs': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesById {
@@ -160,10 +143,8 @@ export interface FileRoutesById {
   '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
-  '/_minimal/playground/os-kernel': typeof MinimalPlaygroundOsKernelRoute
   '/_minimal/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
   '/_minimal/playground/radix': typeof MinimalPlaygroundRadixRoute
-  '/_minimal/playground/spike': typeof MinimalPlaygroundSpikeRoute
   '/_minimal/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRouteTypes {
@@ -179,10 +160,8 @@ export interface FileRouteTypes {
     | '/playground/aria'
     | '/playground/focus'
     | '/playground/kernel'
-    | '/playground/os-kernel'
     | '/playground/playwright'
     | '/playground/radix'
-    | '/playground/spike'
     | '/docs/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -195,10 +174,8 @@ export interface FileRouteTypes {
     | '/playground/aria'
     | '/playground/focus'
     | '/playground/kernel'
-    | '/playground/os-kernel'
     | '/playground/playwright'
     | '/playground/radix'
-    | '/playground/spike'
     | '/docs'
   id:
     | '__root__'
@@ -214,10 +191,8 @@ export interface FileRouteTypes {
     | '/_minimal/playground/aria'
     | '/_minimal/playground/focus'
     | '/_minimal/playground/kernel'
-    | '/_minimal/playground/os-kernel'
     | '/_minimal/playground/playwright'
     | '/_minimal/playground/radix'
-    | '/_minimal/playground/spike'
     | '/_minimal/docs/'
   fileRoutesById: FileRoutesById
 }
@@ -291,13 +266,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalDocsIndexRouteImport
       parentRoute: typeof MinimalDocsRoute
     }
-    '/_minimal/playground/spike': {
-      id: '/_minimal/playground/spike'
-      path: '/playground/spike'
-      fullPath: '/playground/spike'
-      preLoaderRoute: typeof MinimalPlaygroundSpikeRouteImport
-      parentRoute: typeof MinimalRoute
-    }
     '/_minimal/playground/radix': {
       id: '/_minimal/playground/radix'
       path: '/playground/radix'
@@ -310,13 +278,6 @@ declare module '@tanstack/react-router' {
       path: '/playground/playwright'
       fullPath: '/playground/playwright'
       preLoaderRoute: typeof MinimalPlaygroundPlaywrightRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/playground/os-kernel': {
-      id: '/_minimal/playground/os-kernel'
-      path: '/playground/os-kernel'
-      fullPath: '/playground/os-kernel'
-      preLoaderRoute: typeof MinimalPlaygroundOsKernelRouteImport
       parentRoute: typeof MinimalRoute
     }
     '/_minimal/playground/kernel': {
@@ -370,10 +331,8 @@ interface MinimalRouteChildren {
   MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
   MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
-  MinimalPlaygroundOsKernelRoute: typeof MinimalPlaygroundOsKernelRoute
   MinimalPlaygroundPlaywrightRoute: typeof MinimalPlaygroundPlaywrightRoute
   MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute
-  MinimalPlaygroundSpikeRoute: typeof MinimalPlaygroundSpikeRoute
 }
 
 const MinimalRouteChildren: MinimalRouteChildren = {
@@ -382,10 +341,8 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,
   MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
-  MinimalPlaygroundOsKernelRoute: MinimalPlaygroundOsKernelRoute,
   MinimalPlaygroundPlaywrightRoute: MinimalPlaygroundPlaywrightRoute,
   MinimalPlaygroundRadixRoute: MinimalPlaygroundRadixRoute,
-  MinimalPlaygroundSpikeRoute: MinimalPlaygroundSpikeRoute,
 }
 
 const MinimalRouteWithChildren =
