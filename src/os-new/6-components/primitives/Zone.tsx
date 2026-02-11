@@ -7,8 +7,8 @@
  */
 
 import type { ComponentProps, ReactNode } from "react";
-import { FocusGroup } from "@/os-new/primitives/FocusGroup";
-import type { ZoneRole } from "@/os-new/registry/roleRegistry";
+import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import type { ZoneRole } from "@os/registry/roleRegistry.ts";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -16,8 +16,8 @@ import type {
   ProjectConfig,
   SelectConfig,
   TabConfig,
-} from "@/os-new/schema";
-import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
+} from "@os/schema";
+import type { BaseCommand } from "@os/schema/command/BaseCommand.ts";
 import type { AnyCommand } from "@kernel";
 
 /** Advanced configuration overrides - use sparingly, prefer role presets */
@@ -119,4 +119,4 @@ export function Zone({
 }
 
 // Re-export context hooks for convenience
-export { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
+export { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";

@@ -7,8 +7,8 @@ import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { useFocusExpansion } from "@/os-new/5-hooks/useFocusExpansion";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/lib/Icon";
-import { FocusGroup } from "@/os-new/primitives/FocusGroup";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
+import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 
 // Playwright specs — Vite plugin wraps these in functions
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime

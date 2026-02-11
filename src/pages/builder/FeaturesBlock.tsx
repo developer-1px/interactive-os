@@ -1,4 +1,4 @@
-import { Field } from "@os/6-components/Field";
+import { Field } from "@os/6-components/primitives/Field.tsx";
 import { OS } from "@os/AntigravityOS";
 import { BarChart3, Lock, Wand2, Zap } from "lucide-react";
 import { useState } from "react";

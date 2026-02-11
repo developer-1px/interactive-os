@@ -1,4 +1,4 @@
-import { Field } from "@os/6-components/Field";
+import { Field } from "@os/6-components/primitives/Field.tsx";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Builder } from "@/apps/builder/primitives/Builder";

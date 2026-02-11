@@ -11,8 +11,8 @@ import {
 } from "@apps/todo/features/commands/list";
 import { ToggleView } from "@apps/todo/features/commands/ToggleView";
 import type { AppState } from "@apps/todo/model/types";
-import { Trigger } from "@os/6-components/Trigger";
-import { Zone } from "@os/6-components/Zone";
+import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { OS } from "@os/AntigravityOS";
 import { todoSlice } from "@apps/todo/app";
 import { List } from "lucide-react";

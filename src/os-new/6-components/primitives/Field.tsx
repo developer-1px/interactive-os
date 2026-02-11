@@ -1,19 +1,19 @@
-import { useFieldFocus } from "@/os-new/5-hooks/useFieldHooks";
+import { useFieldFocus } from "@os/5-hooks/useFieldHooks.ts";
 import type { HTMLAttributes } from "react";
 import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
-import { kernel } from "@/os-new/kernel";
-import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
+import { kernel } from "@os/kernel.ts";
+import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
+import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import type {
   BaseCommand,
   FieldCommandFactory,
-} from "@/os-new/schema/command/BaseCommand";
-import type { FocusTarget } from "@/os-new/schema/focus/FocusTarget";
+} from "@os/schema/command/BaseCommand.ts";
+import type { FocusTarget } from "@os/schema/focus/FocusTarget.ts";
 import {
   type FieldConfig,
   FieldRegistry,
   useFieldRegistry,
-} from "@/os-new/store/FieldRegistry";
+} from "./FieldRegistry";
 
 /**
  * Checks if the value is effectively empty for placeholder display.

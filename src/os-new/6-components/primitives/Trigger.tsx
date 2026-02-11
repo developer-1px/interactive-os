@@ -13,7 +13,7 @@
  *   Layer 2 (Radix Interface): Dialog, Menu, etc. (thin wrappers)
  */
 
-import { kernel } from "@/os-new/kernel";
+import { kernel } from "@os/kernel.ts";
 import type {
   ReactElement,
   MouseEvent as ReactMouseEvent,
@@ -29,10 +29,10 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
-import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
-import { OVERLAY_OPEN, OVERLAY_CLOSE } from "@/os-new/3-commands/overlay";
-import type { OverlayEntry } from "@/os-new/state/OSState";
+import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import type { BaseCommand } from "@os/schema/command/BaseCommand.ts";
+import { OVERLAY_OPEN, OVERLAY_CLOSE } from "@os/3-commands/overlay.ts";
+import type { OverlayEntry } from "@os/state/OSState.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Overlay Context (shared between Portal and Dismiss)

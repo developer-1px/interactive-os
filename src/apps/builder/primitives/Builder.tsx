@@ -21,7 +21,7 @@
 
 import { forwardRef, type ReactElement, useLayoutEffect, useRef } from "react";
 import { kernel } from "@/os-new/kernel";
-import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
+import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { composeRefs, Slot } from "./Slot";
 
 // ═══════════════════════════════════════════════════════════════════

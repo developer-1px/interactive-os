@@ -1,5 +1,5 @@
-import { FocusGroup } from "@/os-new/primitives/FocusGroup";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
+import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function DismissTest() {

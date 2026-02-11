@@ -2,7 +2,7 @@ import { todoSlice } from "@apps/todo/app";
 import { UndoCommand, RedoCommand } from "@apps/todo/features/commands/history";
 import { ClearCompleted } from "@apps/todo/features/commands/list";
 import { ToggleView } from "@apps/todo/features/commands/ToggleView";
-import { Trigger } from "@os/6-components/Trigger";
+import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
 import {
     LayoutGrid,
     List,

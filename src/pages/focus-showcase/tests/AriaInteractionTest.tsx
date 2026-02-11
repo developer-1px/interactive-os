@@ -1,8 +1,8 @@
-import { Field } from "@os/6-components/Field";
-import { Trigger } from "@os/6-components/Trigger";
+import { Field } from "@os/6-components/primitives/Field.tsx";
+import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
 import { useState } from "react";
-import { FocusGroup } from "@/os-new/primitives/FocusGroup";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
+import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function AriaInteractionTest() {

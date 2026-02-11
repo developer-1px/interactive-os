@@ -1,8 +1,8 @@
 import { useRef } from "react";
-import { Dialog } from "@/os-new/6-components/Dialog";
-import { FocusGroup } from "@/os-new/primitives/FocusGroup";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
-import { Item } from "@/os-new/6-components/Item";
+import { Dialog } from "@os/6-components/radox/Dialog.tsx";
+import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 // ═══════════════════════════════════════════════════════════════════

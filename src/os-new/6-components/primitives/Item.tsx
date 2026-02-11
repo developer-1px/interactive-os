@@ -1,7 +1,7 @@
 import { forwardRef, isValidElement, type ReactNode, useMemo } from "react";
-import { kernel } from "@/os-new/kernel";
-import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
+import { kernel } from "@os/kernel.ts";
+import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
+import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 
 // --- Types ---
 interface ItemState {

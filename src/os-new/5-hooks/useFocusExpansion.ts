@@ -8,7 +8,7 @@
 import { useCallback } from "react";
 import { EXPAND } from "@/os-new/3-commands/expand";
 import { kernel } from "@/os-new/kernel";
-import { useFocusGroupContext } from "@/os-new/primitives/FocusGroup";
+import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 
 export function useFocusExpansion() {
   const ctx = useFocusGroupContext();

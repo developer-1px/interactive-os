@@ -9,9 +9,9 @@ import {
   UpdateTodoText,
 } from "@apps/todo/features/commands/list";
 import type { Todo } from "@apps/todo/model/types";
-import { Field } from "@os/6-components/Field";
-import { Item } from "@os/6-components/Item";
-import { Trigger } from "@os/6-components/Trigger";
+import { Field } from "@os/6-components/primitives/Field.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
 import {
   ArrowDown,
   ArrowUp,

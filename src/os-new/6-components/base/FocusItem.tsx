@@ -20,12 +20,12 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { kernel } from "@/os-new/kernel";
+import { kernel } from "@os/kernel.ts";
 import {
   getChildRole,
   isCheckedRole,
   isExpandableRole,
-} from "../registry/roleRegistry.ts";
+} from "../../registry/roleRegistry.ts";
 import { useFocusGroupContext } from "./FocusGroup.tsx";
 
 // ═══════════════════════════════════════════════════════════════════

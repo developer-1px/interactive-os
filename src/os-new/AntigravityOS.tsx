@@ -2,13 +2,13 @@
 // Re-exports all OS primitives and utilities
 
 // UI Primitives
-import { Dialog } from "@os/6-components/Dialog";
-import { Field } from "@os/6-components/Field";
-import { Item } from "@os/6-components/Item";
-import { Modal } from "@os/6-components/Modal";
-import { Root } from "@os/6-components/Root";
-import { Trigger } from "@os/6-components/Trigger";
-import { Zone } from "@os/6-components/Zone";
+import { Dialog } from "@os/6-components/radox/Dialog.tsx";
+import { Field } from "@os/6-components/primitives/Field.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Modal } from "@os/6-components/radox/Modal.tsx";
+import { Root } from "@os/6-components/primitives/Root.tsx";
+import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { Kbd } from "@/os-new/6-components/Kbd";
 
 // Logic Evaluation

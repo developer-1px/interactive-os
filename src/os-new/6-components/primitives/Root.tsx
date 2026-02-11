@@ -10,15 +10,15 @@
 
 // Focus recovery is handled by FocusSensor's MutationObserver (RECOVER command)
 import type React from "react";
-import { ClipboardIntent } from "@/os-new/1-listeners/clipboard/ClipboardIntent.tsx";
-import { ClipboardSensor } from "@/os-new/1-listeners/clipboard/ClipboardSensor.tsx";
-import { FocusSensor } from "@/os-new/1-listeners/focus/FocusSensor.tsx";
-import { HistoryIntent } from "@/os-new/1-listeners/history/HistoryIntent.tsx";
-import { KeyboardListener } from "@/os-new/1-listeners/KeyboardListener.tsx";
+import { ClipboardIntent } from "@os/1-listeners/clipboard/ClipboardIntent.tsx";
+import { ClipboardSensor } from "@os/1-listeners/clipboard/ClipboardSensor.tsx";
+import { FocusSensor } from "@os/1-listeners/focus/FocusSensor.tsx";
+import { HistoryIntent } from "@os/1-listeners/history/HistoryIntent.tsx";
+import { KeyboardListener } from "@os/1-listeners/KeyboardListener.tsx";
 
 // Register kernel effects and contexts (side-effect imports)
-import "@/os-new/4-effects";
-import "@/os-new/2-contexts";
+import "@os/4-effects";
+import "@os/2-contexts";
 
 export interface RootProps {
   children: React.ReactNode;

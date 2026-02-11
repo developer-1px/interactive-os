@@ -1,9 +1,9 @@
 import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { Item } from "@os/6-components/Item";
-import { Trigger } from "@os/6-components/Trigger";
-import { Zone } from "@os/6-components/Zone";
+import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { todoSlice } from "@apps/todo/app";
 import {
   ArrowRight,

@@ -24,11 +24,11 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { ZoneRegistry } from "../2-contexts/zoneRegistry.ts";
-import { FOCUS } from "../3-commands/focus.ts";
-import { STACK_POP, STACK_PUSH } from "../3-commands/stack.ts";
-import { kernel } from "../kernel.ts";
-import { resolveRole, type ZoneRole } from "../registry/roleRegistry.ts";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
+import { FOCUS } from "../../3-commands/focus.ts";
+import { STACK_POP, STACK_PUSH } from "../../3-commands/stack.ts";
+import { kernel } from "../../kernel.ts";
+import { resolveRole, type ZoneRole } from "../../registry/roleRegistry.ts";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -37,9 +37,9 @@ import type {
   ProjectConfig,
   SelectConfig,
   TabConfig,
-} from "../schema";
-import type { BaseCommand } from "../schema/command/BaseCommand.ts";
-import { initialZoneState } from "../state/initial.ts";
+} from "../../schema";
+import type { BaseCommand } from "../../schema/command/BaseCommand.ts";
+import { initialZoneState } from "../../state/initial.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Context (same shape as ZoneContextValue)

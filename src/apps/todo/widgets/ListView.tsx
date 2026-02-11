@@ -18,9 +18,9 @@ import {
   ToggleTodo,
 } from "@apps/todo/features/commands/list";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { Field } from "@os/6-components/Field";
-import { Label } from "@os/6-components/Label";
-import { Zone } from "@os/6-components/Zone";
+import { Field } from "@os/6-components/primitives/Field.tsx";
+import { Label } from "@os/6-components/primitives/Label.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { OS } from "@os/AntigravityOS";
 import { todoSlice } from "@apps/todo/app";
 import { Plus } from "lucide-react";

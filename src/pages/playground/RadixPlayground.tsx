@@ -7,10 +7,10 @@
  *  3. Dialog with actions
  */
 
-import { Dialog } from "@/os-new/6-components/Dialog";
-import { Item } from "@/os-new/6-components/Item";
-import { FocusGroup } from "@/os-new/primitives/FocusGroup";
-import { FocusItem } from "@/os-new/primitives/FocusItem";
+import { Dialog } from "@os/6-components/radox/Dialog.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
+import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { useRadixPlaygroundBotRoutes } from "./RadixPlaygroundBot";
 
 export function RadixPlayground() {

@@ -26,10 +26,10 @@ import {
     type ReactNode,
     isValidElement,
 } from "react";
-import { Trigger, useOverlayContext } from "./Trigger";
-import { Zone } from "./Zone";
-import { OVERLAY_CLOSE } from "@/os-new/3-commands/overlay";
-import type { BaseCommand } from "@/os-new/schema/command/BaseCommand";
+import { Trigger, useOverlayContext } from "../primitives/Trigger.tsx";
+import { Zone } from "../primitives/Zone.tsx";
+import { OVERLAY_CLOSE } from "@os/3-commands/overlay.ts";
+import type { BaseCommand } from "@os/schema/command/BaseCommand.ts";
 
 // ═══════════════════════════════════════════════════════════════════
 // DialogZone — Zone wrapper that connects dismiss to OVERLAY_CLOSE
