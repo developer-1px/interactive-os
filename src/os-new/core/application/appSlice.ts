@@ -202,27 +202,26 @@ function hydrateState<S>(initialState: S, storageKey: string): S {
         }
 
         // Shallow merge with deep merge for data/ui (schema evolution safety)
+        const init = initialState as Record<string, unknown>;
+        const load = loaded as Record<string, unknown>;
+
         return {
             ...initialState,
             ...loaded,
             data:
-                (initialState as Record<string, unknown>).data &&
-                    (loaded as Record<string, unknown>).data
+                init["data"] && load["data"]
                     ? {
-                        ...(initialState as Record<string, unknown>).data,
-                        ...(loaded as Record<string, unknown>).data,
+                        ...(init["data"] as Record<string, unknown>),
+                        ...(load["data"] as Record<string, unknown>),
                     }
-                    : (loaded as Record<string, unknown>).data ||
-                    (initialState as Record<string, unknown>).data,
+                    : load["data"] || init["data"],
             ui:
-                (initialState as Record<string, unknown>).ui &&
-                    (loaded as Record<string, unknown>).ui
+                init["ui"] && load["ui"]
                     ? {
-                        ...(initialState as Record<string, unknown>).ui,
-                        ...(loaded as Record<string, unknown>).ui,
+                        ...(init["ui"] as Record<string, unknown>),
+                        ...(load["ui"] as Record<string, unknown>),
                     }
-                    : (loaded as Record<string, unknown>).ui ||
-                    (initialState as Record<string, unknown>).ui,
+                    : load["ui"] || init["ui"],
         };
     } catch {
         return initialState;

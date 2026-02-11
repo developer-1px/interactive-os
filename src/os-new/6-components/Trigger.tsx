@@ -13,7 +13,7 @@
  *   Layer 2 (Radix Interface): Dialog, Menu, etc. (thin wrappers)
  */
 
-import { useCommandEngine } from "@os/core/command/ui/CommandContext.tsx";
+import { useCommandEngine } from "@os/core/command/ui/CommandContext";
 import type {
   ReactElement,
   MouseEvent as ReactMouseEvent,

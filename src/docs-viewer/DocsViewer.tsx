@@ -240,7 +240,8 @@ export function DocsViewer() {
   // Auto-select first file on mount
   useEffect(() => {
     if (!activePath && allFiles.length > 0) {
-      setActivePath(allFiles[0].path);
+      const first = allFiles[0];
+      if (first) setActivePath(first.path);
     }
   }, [activePath, allFiles]);
 

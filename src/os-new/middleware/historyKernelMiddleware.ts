@@ -88,7 +88,7 @@ export function createHistoryMiddleware(
             if (OS_PASSTHROUGH.has(commandType)) return ctx;
             if (HISTORY_SELF_MANAGED.has(commandType)) return ctx;
 
-            const prevAppState = ctx.injected._historyBefore as
+            const prevAppState = ctx.injected["_historyBefore"] as
                 | Record<string, unknown>
                 | undefined;
             const nextAppState = (ctx.state as AppState).apps[appId] as
@@ -98,33 +98,33 @@ export function createHistoryMiddleware(
             if (!prevAppState || !nextAppState) return ctx;
 
             // Skip if no history field in app state
-            if (!nextAppState.history && !prevAppState.history) return ctx;
+            if (!nextAppState["history"] && !prevAppState["history"]) return ctx;
 
             // Skip if data hasn't changed
             if (
-                prevAppState.data !== undefined &&
-                prevAppState.data === nextAppState.data
+                prevAppState["data"] !== undefined &&
+                prevAppState["data"] === nextAppState["data"]
             ) {
                 return ctx;
             }
 
             // Record snapshot
-            const previousFocusId = ctx.injected._historyFocusId as
+            const previousFocusId = ctx.injected["_historyFocusId"] as
                 | string
                 | null;
 
             const updatedAppState = produce(
                 nextAppState,
                 (draft: Record<string, unknown>) => {
-                    if (!draft.history) {
-                        draft.history = { past: [], future: [] };
+                    if (!draft["history"]) {
+                        draft["history"] = { past: [], future: [] };
                     }
 
-                    const history = draft.history as {
+                    const history = draft["history"] as {
                         past: HistoryEntry[];
                         future: HistoryEntry[];
                     };
-                    const { history: _h, ...prevWithoutHistory } = prevAppState;
+                    const { ["history"]: _h, ...prevWithoutHistory } = prevAppState;
 
                     history.past.push({
                         command: {

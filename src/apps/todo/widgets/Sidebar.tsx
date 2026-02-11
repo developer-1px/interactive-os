@@ -2,9 +2,9 @@ import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
 import type { AppState } from "@apps/todo/model/types";
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { Item } from "@os/6-components/Item.tsx";
-import { Trigger } from "@os/6-components/Trigger.tsx";
-import { Zone } from "@os/6-components/Zone.tsx";
+import { Item } from "@os/6-components/Item";
+import { Trigger } from "@os/6-components/Trigger";
+import { Zone } from "@os/6-components/Zone";
 import { useEngine } from "@os/core/command/ui/CommandContext";
 import {
   ArrowRight,

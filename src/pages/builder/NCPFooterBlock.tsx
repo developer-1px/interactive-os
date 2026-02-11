@@ -1,4 +1,4 @@
-import { Field } from "@os/6-components/Field.tsx";
+import { Field } from "@os/6-components/Field";
 import {
   Github,
   Globe,

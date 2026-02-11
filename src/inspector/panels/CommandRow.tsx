@@ -1,4 +1,4 @@
-import { Kbd } from "@os/AntigravityOS.tsx";
+import { Kbd } from "@os/AntigravityOS";
 import { GitGraph, TextCursorInput } from "lucide-react";
 import { memo } from "react";
 

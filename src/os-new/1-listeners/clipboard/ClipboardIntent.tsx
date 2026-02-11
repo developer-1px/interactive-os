@@ -9,7 +9,7 @@
  * (e.g., TestBot, menu buttons).
  */
 
-import { useCommandListener } from "@os/core/command/hooks/useCommandListener.ts";
+import { useCommandListener } from "@os/core/command/hooks/useCommandListener";
 import { dispatchToZone } from "../../core/dispatchToZone.ts";
 import { OS_COMMANDS } from "../../schema/command/OSCommands.ts";
 

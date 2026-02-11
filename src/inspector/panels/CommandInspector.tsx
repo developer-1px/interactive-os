@@ -11,7 +11,7 @@ import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotPanel } from "@inspector/testbot";
 import { useCommandTelemetryStore } from "@os/core/command/store/CommandTelemetryStore";
-import { useCommandEngine } from "@os/core/command/ui/CommandContext.tsx";
+import { useCommandEngine } from "@os/core/command/ui/CommandContext";
 import { FocusData } from "@os/core/focus/lib/focusData";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { evalContext } from "@/os-new/core/logic/evalContext";

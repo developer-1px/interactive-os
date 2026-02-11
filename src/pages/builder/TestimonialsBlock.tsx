@@ -1,4 +1,4 @@
-import { Field } from "@os/6-components/Field.tsx";
+import { Field } from "@os/6-components/Field";
 import { OS } from "@os/AntigravityOS";
 import { Star } from "lucide-react";
 import { useState } from "react";

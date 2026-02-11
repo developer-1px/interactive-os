@@ -5,8 +5,8 @@
  * to the active Zone's bound app commands (onCopy, onUndo, etc.)
  */
 
-import { useCommandEngineStore } from "@os/core/command/store/CommandEngineStore.ts";
-import { FocusData } from "@os/core/focus/lib/focusData.ts";
+import { useCommandEngineStore } from "@os/core/command/store/CommandEngineStore";
+import { FocusData } from "@os/core/focus/lib/focusData";
 
 type ZoneCommandKey =
   | "copyCommand"
