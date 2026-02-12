@@ -1,12 +1,13 @@
-import { useTodoBotRoutes } from "@apps/todo/tests/TodoBot";
-import "@apps/todo/tests/e2e-harness"; // Exposes __todo on window for Playwright
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { Sidebar } from "@apps/todo/widgets/Sidebar";
 import { TodoPanel } from "@apps/todo/widgets/TodoPanel";
 import { OS } from "@os/AntigravityOS";
+// Playwright spec — vite-plugin shim transforms for browser replay
+// @ts-expect-error
+import runTodoSpec from "../../e2e/todo/todo.spec.ts";
 
 export default function TodoPage() {
-  // TestBot scenarios for clipboard operations
-  useTodoBotRoutes();
+  usePlaywrightSpecs("pw-todo", [runTodoSpec]);
 
   return (
     <OS.Zone id="main" role="toolbar" className="h-full flex">
