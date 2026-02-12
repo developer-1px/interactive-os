@@ -19,6 +19,21 @@ export default defineConfig({
     tailwindcss(),
     inspectorPlugin(),
   ],
+  optimizeDeps: {
+    esbuildOptions: {
+      plugins: [
+        {
+          name: "exclude-spec-files",
+          setup(build) {
+            build.onResolve({ filter: /\.spec\.ts$/ }, (args) => ({
+              path: args.path,
+              external: true,
+            }));
+          },
+        },
+      ],
+    },
+  },
   resolve: {
     alias: {
       "@playwright/test": "/src/inspector/testbot/playwright/index.ts",
