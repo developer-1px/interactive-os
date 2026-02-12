@@ -1,0 +1,9 @@
+import { createFileRoute } from '@tanstack/react-router'
+
+export const Route = createFileRoute('/_minimal/playground/tests')({
+  component: RouteComponent,
+})
+
+function RouteComponent() {
+  return <div>Hello "/_minimal/playground/tests"!</div>
+}

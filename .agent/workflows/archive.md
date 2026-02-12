@@ -49,7 +49,7 @@ git branch archive/legacy-docs || true
 | zustand useStore | kernel.subscribe / kernel.getState | 2026-02-13 | design-doc-v1.md |
 ```
 
-### 4. 퇴출 — main에서 제거
+### 4. 퇴출 — main에서 tombstone으로 교체
 
 사용자 확인 후 실행한다:
 
@@ -59,10 +59,24 @@ git checkout archive/legacy-docs
 git checkout main -- <퇴출 대상 파일들>
 git add . && git commit -m "archive: preserve docs before removal from main"
 git checkout main
+```
 
-# 2. main에서 삭제
-git rm <퇴출 대상 파일들>
-git commit -m "archive: remove superseded docs (see archive/legacy-docs branch)"
+각 파일의 내용을 **tombstone**(한줄평)으로 교체한다. 완전 삭제가 아닌 마커를 남긴다:
+
+```markdown
+# ⚠️ ARCHIVED
+
+> 이 문서는 superseded되었습니다. [퇴출 사유 한줄평]
+>
+> - **현행**: [현행 대체 패턴 간략 설명]
+> - **원본 보관**: `git show archive/legacy-docs:docs/path/to/file.md`
+> - **참고**: `docs/MIGRATION_MAP.md`
+```
+
+```bash
+# 2. tombstone으로 교체된 파일들 커밋
+git add <퇴출 대상 파일들>
+git commit -m "archive: replace superseded docs with tombstones"
 ```
 
 ### 5. 보고 — 결과 요약

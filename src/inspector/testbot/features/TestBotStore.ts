@@ -100,6 +100,18 @@ export function useTestBotStore<T>(selector: (s: TestBotState) => T): T {
 useTestBotStore.getState = getState;
 useTestBotStore.setState = setState;
 
+// Compat: Zustand-style subscribe(listener) where listener receives (state, prevState)
+useTestBotStore.subscribe = (
+  listener: (state: TestBotState, prev: TestBotState) => void,
+) => {
+  let prev = getState();
+  return subscribe(() => {
+    const next = getState();
+    listener(next, prev);
+    prev = next;
+  });
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════
