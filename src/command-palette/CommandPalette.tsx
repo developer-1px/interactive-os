@@ -7,9 +7,9 @@
 
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { OVERLAY_CLOSE } from "@/os-new/3-commands";
-import { OS } from "@/os-new/AntigravityOS";
-import { kernel } from "@/os-new/kernel";
+import { OVERLAY_CLOSE } from "@/os/3-commands";
+import { OS } from "@/os/AntigravityOS";
+import { kernel } from "@/os/kernel";
 import { type FuzzyMatchResult, fuzzyMatch } from "./fuzzyMatch";
 import { type RouteEntry, useRouteList } from "./useRouteList";
 
@@ -161,7 +161,9 @@ export function CommandPalette() {
           className="max-h-[380px] overflow-y-auto p-2 scroll-py-2 custom-scrollbar"
         >
           {filteredRoutes.length === 0 ? (
-            <div className="py-8 text-center text-sm text-zinc-500">No matching routes</div>
+            <div className="py-8 text-center text-sm text-zinc-500">
+              No matching routes
+            </div>
           ) : (
             filteredRoutes.map((route) => (
               <OS.Item key={route.path} id={route.path}>
@@ -195,19 +197,23 @@ export function CommandPalette() {
                         indices={route.labelMatch.matchedIndices}
                       />
                     </span>
-                    <span className={`
+                    <span
+                      className={`
                       text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right transition-colors
                       ${isFocused ? "text-zinc-500" : "text-zinc-400"}
-                    `}>
+                    `}
+                    >
                       <HighlightedText
                         text={route.path}
                         indices={route.pathMatch.matchedIndices}
                       />
                     </span>
-                    <div className={`
+                    <div
+                      className={`
                       w-[36px] flex justify-end transition-opacity duration-100
                       ${isFocused ? "opacity-100" : "opacity-0"}
-                    `}>
+                    `}
+                    >
                       <OS.Kbd
                         shortcut="Enter"
                         className="shrink-0 text-[10px] text-zinc-500 bg-white px-1.5 py-0.5 rounded border border-zinc-200 font-mono shadow-sm"
@@ -223,16 +229,28 @@ export function CommandPalette() {
         {/* Footer Hints */}
         <div className="flex items-center gap-4 px-4 py-2 bg-zinc-50 border-t border-zinc-100 text-[11px] text-zinc-500 select-none">
           <span className="flex items-center gap-1.5">
-            <OS.Kbd shortcut="Up" className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center" />
-            <OS.Kbd shortcut="Down" className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center" />
+            <OS.Kbd
+              shortcut="Up"
+              className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+            />
+            <OS.Kbd
+              shortcut="Down"
+              className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+            />
             navigate
           </span>
           <span className="flex items-center gap-1.5">
-            <OS.Kbd shortcut="Enter" className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center" />
+            <OS.Kbd
+              shortcut="Enter"
+              className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+            />
             go
           </span>
           <span className="flex items-center gap-1.5">
-            <OS.Kbd shortcut="Esc" className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center" />
+            <OS.Kbd
+              shortcut="Esc"
+              className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+            />
             close
           </span>
         </div>
@@ -262,7 +280,10 @@ function HighlightedText({
       if (current) {
         parts.push(
           inMatch ? (
-            <mark key={`m-${i}`} className="text-blue-600 bg-transparent font-semibold p-0">
+            <mark
+              key={`m-${i}`}
+              className="text-blue-600 bg-transparent font-semibold p-0"
+            >
               {current}
             </mark>
           ) : (
@@ -278,7 +299,10 @@ function HighlightedText({
   if (current) {
     parts.push(
       inMatch ? (
-        <mark key={`m-${text.length}`} className="text-blue-600 bg-transparent font-semibold p-0">
+        <mark
+          key={`m-${text.length}`}
+          className="text-blue-600 bg-transparent font-semibold p-0"
+        >
           {current}
         </mark>
       ) : (

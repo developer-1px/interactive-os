@@ -3,14 +3,14 @@
  *
  * Communication flow:
  *   DebugManager (vite-plugins/) --CustomEvent--> this store (src/)
- *   ElementPanel reads from this store via Zustand hook.
+ *   ElementPanel reads from this store via vanilla hook.
  *
  * CustomEvent protocol:
  *   "inspector:element-selected"  → detail: { element: HTMLElement | null }
  *   "inspector:active-changed"    → detail: { active: boolean }
  */
 
-import { create } from "zustand";
+import { useSyncExternalStore } from "react";
 
 // ─── Types ───
 
@@ -267,9 +267,9 @@ function deriveAll(el: HTMLElement | null) {
   };
 }
 
-// ─── Store ───
+// ─── Vanilla Store ───
 
-export const useInspectedElementStore = create<InspectedElementState>()(() => ({
+const DEFAULT_STATE: InspectedElementState = {
   element: null,
   isInspectorActive: false,
   source: null,
@@ -280,14 +280,55 @@ export const useInspectedElementStore = create<InspectedElementState>()(() => ({
   fiberProps: [],
   tagName: "",
   primitiveName: "",
-}));
+};
+
+let state: InspectedElementState = { ...DEFAULT_STATE };
+
+const listeners = new Set<() => void>();
+
+function emit() {
+  listeners.forEach((fn) => fn());
+}
+
+function subscribe(fn: () => void) {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
+
+function getSnapshot() {
+  return state;
+}
+
+// ─── React Hook ───
+// Consumer uses no-arg: useInspectedElementStore() → full state
+
+export function useInspectedElementStore(): InspectedElementState;
+export function useInspectedElementStore<T>(
+  selector: (s: InspectedElementState) => T,
+): T;
+export function useInspectedElementStore<T>(
+  selector?: (s: InspectedElementState) => T,
+): T | InspectedElementState {
+  const sel = selector ?? ((s: InspectedElementState) => s as unknown as T);
+  return useSyncExternalStore(
+    subscribe,
+    () => sel(getSnapshot()),
+    () => sel(getSnapshot()),
+  );
+}
+
+// ─── Actions ───
 
 function setElement(el: HTMLElement | null) {
-  useInspectedElementStore.setState({ element: el, ...deriveAll(el) });
+  state = { ...state, element: el, ...deriveAll(el) };
+  emit();
 }
 
 function setInspectorActive(active: boolean) {
-  useInspectedElementStore.setState({ isInspectorActive: active });
+  state = { ...state, isInspectorActive: active };
+  emit();
   if (!active) setElement(null);
 }
 

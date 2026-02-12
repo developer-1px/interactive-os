@@ -1,6 +1,6 @@
 import { INITIAL_STATE } from "@apps/todo/features/todo_details/persistence";
 import type { AppState } from "@apps/todo/model/types";
-import { registerAppSlice } from "@/os-new/appSlice";
+import { registerAppSlice } from "@/os/appSlice";
 
 /**
  * todoSlice — Kernel-native Todo app state registration.

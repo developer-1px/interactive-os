@@ -1,8 +1,8 @@
-import { useRef } from "react";
-import { Dialog } from "@os/6-components/radox/Dialog.tsx";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Dialog } from "@os/6-components/radox/Dialog.tsx";
+import { useRef } from "react";
 import { TestBox } from "../../shared/TestLayout";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -101,16 +101,18 @@ export function FocusStackTest() {
                                 title="Sub-Modal"
                                 zoneClassName="flex flex-col gap-1 p-4"
                               >
-                                {["Sub Item 1", "Sub Item 2"].map((sItem, si) => (
-                                  <Item
-                                    key={sItem}
-                                    id={`fs-modal2-${si + 1}`}
-                                    role="menuitem"
-                                    className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-pink-100 aria-[current=true]:text-pink-700 text-sm"
-                                  >
-                                    {sItem}
-                                  </Item>
-                                ))}
+                                {["Sub Item 1", "Sub Item 2"].map(
+                                  (sItem, si) => (
+                                    <Item
+                                      key={sItem}
+                                      id={`fs-modal2-${si + 1}`}
+                                      role="menuitem"
+                                      className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-pink-100 aria-[current=true]:text-pink-700 text-sm"
+                                    >
+                                      {sItem}
+                                    </Item>
+                                  ),
+                                )}
                                 <Dialog.Close className="mt-2 px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100">
                                   Close Sub-Modal
                                 </Dialog.Close>

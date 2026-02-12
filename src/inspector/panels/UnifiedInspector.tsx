@@ -40,9 +40,9 @@ export type PipelineStep = {
 
 /** Infer 6-domino pipeline from a kernel Transaction. Pure function. */
 export function inferPipeline(tx: Transaction): PipelineStep[] {
-  const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.["input"] as
-    | { type?: string; key?: string; code?: string }
-    | undefined;
+  const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.[
+    "input"
+  ] as { type?: string; key?: string; code?: string } | undefined;
 
   const hasInput = !!inputMeta;
   const hasCommand = !!tx.command?.type;
@@ -101,8 +101,13 @@ function getInputType(
   return "KEYBOARD";
 }
 
-function getInputRaw(tx: Transaction, meta: { key?: string } | undefined): string {
-  return meta?.key ?? (tx.command?.payload as any)?.key ?? tx.command?.type ?? "";
+function getInputRaw(
+  tx: Transaction,
+  meta: { key?: string } | undefined,
+): string {
+  return (
+    meta?.key ?? (tx.command?.payload as any)?.key ?? tx.command?.type ?? ""
+  );
 }
 
 function formatTime(timestamp: number): string {

@@ -1,7 +1,7 @@
+import { GroupRegistry } from "@inspector/GroupRegistry";
 import type { ProcessedCommand } from "@inspector/panels/CommandRow.tsx";
 import { CommandRow } from "@inspector/panels/CommandRow.tsx";
 import { evalContext } from "@os/AntigravityOS";
-import { GroupRegistry } from "@inspector/GroupRegistry";
 import { memo, useMemo } from "react";
 
 // Zero-Base Jurisdiction Detection

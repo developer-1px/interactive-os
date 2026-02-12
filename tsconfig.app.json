@@ -31,7 +31,7 @@
       "@kernel/*": ["./packages/kernel/src/*"],
       "@inspector": ["./src/inspector/index.ts"],
       "@inspector/*": ["./src/inspector/*"],
-      "@os/*": ["./src/os-new/*"],
+      "@os/*": ["./src/os/*"],
       "@apps/*": ["./src/apps/*"],
       "@/*": ["./src/*"]
     }

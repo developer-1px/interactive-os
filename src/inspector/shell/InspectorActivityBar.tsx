@@ -1,12 +1,6 @@
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
-import {
-  Bug,
-  Cpu,
-  Crosshair,
-  Database,
-  Keyboard,
-} from "lucide-react";
+import { Bug, Cpu, Crosshair, Database, Keyboard } from "lucide-react";
 import { useSyncExternalStore } from "react";
 
 export function InspectorActivityBar() {
@@ -45,10 +39,11 @@ export function InspectorActivityBar() {
           type="button"
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
-          className={`w-6 h-6 mb-1 rounded flex items-center justify-center transition-all ${activeTab === tab.id
-            ? "bg-white text-[#007acc] shadow-sm border border-[#e0e0e0]"
-            : "text-[#999] hover:text-[#666] hover:bg-white/50"
-            }`}
+          className={`w-6 h-6 mb-1 rounded flex items-center justify-center transition-all ${
+            activeTab === tab.id
+              ? "bg-white text-[#007acc] shadow-sm border border-[#e0e0e0]"
+              : "text-[#999] hover:text-[#666] hover:bg-white/50"
+          }`}
           title={tab.label}
         >
           <tab.icon size={14} strokeWidth={1.5} />

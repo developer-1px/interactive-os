@@ -1,6 +1,6 @@
-import { useFocusExpansion } from "@/os-new/5-hooks/useFocusExpansion";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
 import { TestBox } from "../../shared/TestLayout";
 
 export function ExpandTest() {

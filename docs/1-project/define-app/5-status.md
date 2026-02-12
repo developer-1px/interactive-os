@@ -30,3 +30,7 @@
 | 2026-02-13 01:49 | Zone binding 디스커션 완료 | `defineApp + createWidget` 아키텍처 결정 |
 | 2026-02-13 02:10 | 프로젝트 시작 | PRD/KPI/Proposal 작성 |
 | 2026-02-13 02:20 | Phase 1 완료 | `defineApp.ts` + `todo/v3/app.ts` + 19/19 unit tests |
+
+## 📚 관련 리소스
+
+- [12-headless-ui-patterns.md](../../3-resource/12-headless-ui-patterns.md) — 업계 Headless UI 패턴(Radix, React Aria 등)과 우리 커널의 비교

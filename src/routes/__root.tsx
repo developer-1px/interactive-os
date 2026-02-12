@@ -2,8 +2,13 @@ import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import { InspectorShell } from "@inspector/shell/InspectorShell";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { OS } from "@os/AntigravityOS";
-import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import {
+  createRootRoute,
+  Link,
+  Outlet,
+  useRouterState,
+} from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { CommandPalette } from "@/command-palette/CommandPalette";
 
 // Plugin registrations (side-effect imports)
@@ -35,8 +40,10 @@ function RootComponent() {
     select: (s) => {
       const matches = s.matches;
       for (let i = matches.length - 1; i >= 0; i--) {
-        const sd = matches[i]?.staticData as Record<string, unknown> | undefined;
-        if (sd?.['isAppShell']) return true;
+        const sd = matches[i]?.staticData as
+          | Record<string, unknown>
+          | undefined;
+        if (sd?.["isAppShell"]) return true;
       }
       return false;
     },
@@ -73,4 +80,3 @@ function RootComponent() {
     </OS.Root>
   );
 }
-

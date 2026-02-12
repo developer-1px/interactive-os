@@ -39,7 +39,7 @@ export default defineConfig({
       "@playwright/test": "/src/inspector/testbot/playwright/index.ts",
       "@inspector": "/src/inspector",
       "@kernel": "/packages/kernel/src",
-      "@os": "/src/os-new",
+      "@os": "/src/os",
       "@apps": "/src/apps",
       "@": "/src",
     },

@@ -142,7 +142,7 @@ export class ShimPage implements Page {
   async goto(_url: string) {
     // Reset all app slices to initial state + OS state (focus, zones)
     // Preserves kernel command/effect registries and React tree.
-    const { resetAllAppSlices } = await import("@/os-new/appSlice");
+    const { resetAllAppSlices } = await import("@/os/appSlice");
     resetAllAppSlices();
     // Wait for React re-render
     await new Promise((r) => setTimeout(r, 200));

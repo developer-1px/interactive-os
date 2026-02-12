@@ -1,7 +1,7 @@
 import { todoSlice } from "@apps/todo/app";
 import type { AppState, Todo } from "@apps/todo/model/appState";
-import { FOCUS } from "@/os-new/3-commands/focus/focus";
 import { produce } from "immer";
+import { FOCUS } from "@/os/3-commands/focus/focus";
 
 /**
  * Clipboard Commands for Todo App
@@ -33,10 +33,10 @@ export const CopyTodo = todoSlice.group.defineCommand(
           }),
         ])
         .catch(() => {
-          navigator.clipboard.writeText(todo.text).catch(() => { });
+          navigator.clipboard.writeText(todo.text).catch(() => {});
         });
     } catch {
-      navigator.clipboard?.writeText(todo.text)?.catch?.(() => { });
+      navigator.clipboard?.writeText(todo.text)?.catch?.(() => {});
     }
 
     return { state: ctx.state };
@@ -67,10 +67,10 @@ export const CutTodo = todoSlice.group.defineCommand(
           }),
         ])
         .catch(() => {
-          navigator.clipboard.writeText(todo.text).catch(() => { });
+          navigator.clipboard.writeText(todo.text).catch(() => {});
         });
     } catch {
-      navigator.clipboard?.writeText(todo.text)?.catch?.(() => { });
+      navigator.clipboard?.writeText(todo.text)?.catch?.(() => {});
     }
 
     return {

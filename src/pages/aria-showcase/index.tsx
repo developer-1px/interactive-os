@@ -4,12 +4,12 @@
  */
 
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
-import { useFocusExpansion } from "@/os-new/5-hooks/useFocusExpansion";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { kernel } from "@os/kernel.ts";
-import { Icon } from "@/lib/Icon";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { kernel } from "@os/kernel.ts";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Icon } from "@/lib/Icon";
+import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
 
 // Playwright specs — Vite plugin wraps these in functions
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
@@ -206,7 +206,9 @@ function AriaShowcaseContent() {
                             "
             >
               <span>Show Ruler</span>
-              <span className="text-indigo-600 opacity-0 group-data-[selected=true]:opacity-100 transition-opacity">✓</span>
+              <span className="text-indigo-600 opacity-0 group-data-[selected=true]:opacity-100 transition-opacity">
+                ✓
+              </span>
             </FocusItem>
             <FocusItem
               id="menu-grid"
@@ -219,7 +221,9 @@ function AriaShowcaseContent() {
                             "
             >
               <span>Show Grid</span>
-              <span className="text-indigo-600 opacity-0 group-data-[selected=true]:opacity-100 transition-opacity">✓</span>
+              <span className="text-indigo-600 opacity-0 group-data-[selected=true]:opacity-100 transition-opacity">
+                ✓
+              </span>
             </FocusItem>
 
             <div role="separator" className="my-1 border-t border-gray-200" />
@@ -482,10 +486,11 @@ function AriaShowcaseContent() {
                 className={`
                                   w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
                                   flex items-center gap-2 transition-all
-                                  ${isComboInvalid
-                    ? "border-red-300 bg-red-50 text-red-700"
-                    : "border-gray-200 hover:border-gray-300"
-                  }
+                                  ${
+                                    isComboInvalid
+                                      ? "border-red-300 bg-red-50 text-red-700"
+                                      : "border-gray-200 hover:border-gray-300"
+                                  }
                                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
                                   aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
                               `}
@@ -874,7 +879,11 @@ function DisclosureContent() {
 
   return (
     <div className="w-full">
-      <FocusGroup id="demo-disclosure" role="disclosure" aria-label="Disclosure">
+      <FocusGroup
+        id="demo-disclosure"
+        role="disclosure"
+        aria-label="Disclosure"
+      >
         <FocusItem
           id="disclosure-trigger"
           as="button"
@@ -964,9 +973,7 @@ function DialogDemo({
         Open Dialog
       </button>
       {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <FocusGroup
             id="demo-dialog"
             role="dialog"

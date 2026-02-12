@@ -1,6 +1,8 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { OS } from "@os/AntigravityOS";
 import { useEffect, useState } from "react";
+import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
+import { kernel } from "@/os/kernel";
 // Playwright spec
 // @ts-expect-error
 import runBuilderSpatial from "../../e2e/builder/builder-spatial.spec.ts";
@@ -14,8 +16,6 @@ import {
   type PropertyType,
   type ViewportMode,
 } from "./builder";
-import { kernel } from "@/os-new/kernel";
-import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
 
 /**
  * BuilderPage
@@ -57,7 +57,10 @@ export default function BuilderPage() {
       type = "button";
     } else if (el.querySelector("svg")) {
       type = "icon";
-    } else if (el.hasAttribute("data-os-field") || el.querySelector("[data-os-field]")) {
+    } else if (
+      el.hasAttribute("data-os-field") ||
+      el.querySelector("[data-os-field]")
+    ) {
       // OS.Field usually has this attribute
       type = "text";
     }
@@ -105,8 +108,6 @@ export default function BuilderPage() {
             >
               {/* Content Container */}
               <div className="flex-1 bg-white relative group/canvas">
-
-
                 <NCPHeroBlock />
                 <NCPNewsBlock />
                 <NCPServicesBlock />

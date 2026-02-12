@@ -8,7 +8,7 @@ import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotPanel } from "@inspector/testbot";
 
 import { useEffect, useMemo, useState } from "react";
-import { kernel } from "@/os-new/kernel";
+import { kernel } from "@/os/kernel";
 
 // --- Main Component ---
 
@@ -17,23 +17,22 @@ export function CommandInspector() {
   const activeTab = useInspectorStore((s) => s.activeTab);
 
   // --- Kernel state subscriptions ---
-  const activeGroupId = kernel.useComputed(
-    (s) => s.os.focus.activeZoneId,
-  );
+  const activeGroupId = kernel.useComputed((s) => s.os.focus.activeZoneId);
 
-  const focusedItemId = kernel.useComputed(
-    (s) => {
-      const zoneId = s.os.focus.activeZoneId;
-      return zoneId ? s.os.focus.zones[zoneId]?.focusedItemId ?? null : null;
-    },
-  );
+  const focusedItemId = kernel.useComputed((s) => {
+    const zoneId = s.os.focus.activeZoneId;
+    return zoneId ? (s.os.focus.zones[zoneId]?.focusedItemId ?? null) : null;
+  });
 
   // Build ctx on-demand (simplified — no contextMap)
-  const ctx = useMemo(() => ({
-    activeZone: activeGroupId ?? undefined,
-    focusPath: [] as string[],
-    focusedItemId,
-  }), [activeGroupId, focusedItemId]);
+  const ctx = useMemo(
+    () => ({
+      activeZone: activeGroupId ?? undefined,
+      focusPath: [] as string[],
+      focusedItemId,
+    }),
+    [activeGroupId, focusedItemId],
+  );
 
   // Keybinding map — empty for now (was powered by legacy CommandRegistry)
   const activeKeybindingMap = useMemo(() => new Map<string, boolean>(), []);

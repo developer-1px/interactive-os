@@ -33,7 +33,11 @@ function isWordBoundary(target: string, i: number): boolean {
   if ("/- _.".includes(prev)) return true;
 
   // camelCase: lowercase → uppercase (e.g. "useRouteList" → R, L)
-  if (prev === prev.toLowerCase() && curr === curr.toUpperCase() && curr !== curr.toLowerCase()) {
+  if (
+    prev === prev.toLowerCase() &&
+    curr === curr.toUpperCase() &&
+    curr !== curr.toLowerCase()
+  ) {
     return true;
   }
 

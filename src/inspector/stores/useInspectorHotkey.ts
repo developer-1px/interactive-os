@@ -10,8 +10,8 @@
  */
 
 import { useEffect } from "react";
-import { Keybindings } from "@/os-new/keymaps/keybindings";
-import { kernel } from "@/os-new/kernel";
+import { kernel } from "@/os/kernel";
+import { Keybindings } from "@/os/keymaps/keybindings";
 import { InspectorStore } from "./InspectorStore";
 
 // ─── Kernel Registration (module scope, singleton) ───

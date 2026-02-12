@@ -6,7 +6,7 @@
  */
 
 import { UnifiedInspector } from "@inspector/panels/UnifiedInspector.tsx";
-import { kernel } from "@/os-new/kernel.ts";
+import { kernel } from "@/os/kernel.ts";
 
 export function InspectorAdapter() {
   // Subscribe to kernel changes to trigger re-renders
@@ -14,5 +14,10 @@ export function InspectorAdapter() {
   const transactions = kernel.getTransactions();
   const storeState = kernel.getState();
 
-  return <UnifiedInspector transactions={[...transactions]} storeState={storeState} />;
+  return (
+    <UnifiedInspector
+      transactions={[...transactions]}
+      storeState={storeState}
+    />
+  );
 }

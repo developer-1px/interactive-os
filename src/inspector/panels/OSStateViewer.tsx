@@ -1,18 +1,14 @@
-import { kernel } from "@/os-new/kernel";
-import { ZoneRegistry } from "@/os-new/2-contexts/zoneRegistry";
 import { memo } from "react";
+import { ZoneRegistry } from "@/os/2-contexts/zoneRegistry";
+import { kernel } from "@/os/kernel";
 
 export const OSStateViewer = memo(() => {
-  const activeGroupId = kernel.useComputed(
-    (s) => s.os.focus.activeZoneId,
-  );
+  const activeGroupId = kernel.useComputed((s) => s.os.focus.activeZoneId);
 
-  const focusedItemId = kernel.useComputed(
-    (s) => {
-      const zoneId = s.os.focus.activeZoneId;
-      return zoneId ? s.os.focus.zones[zoneId]?.focusedItemId ?? null : null;
-    },
-  );
+  const focusedItemId = kernel.useComputed((s) => {
+    const zoneId = s.os.focus.activeZoneId;
+    return zoneId ? (s.os.focus.zones[zoneId]?.focusedItemId ?? null) : null;
+  });
 
   // Get all zone IDs from ZoneRegistry
   const zoneIds = Array.from(ZoneRegistry.keys());

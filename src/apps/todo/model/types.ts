@@ -1,4 +1,4 @@
-import type { OSCommandUnion as OSCommand } from "@/os-new/schema/command/OSCommandPayload";
+import type { OSCommandUnion as OSCommand } from "@/os/schema/command/OSCommandPayload";
 
 export * from "@apps/todo/model/appState";
 

@@ -1,6 +1,6 @@
-import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { Sidebar } from "@apps/todo/widgets/Sidebar";
 import { TodoPanel } from "@apps/todo/widgets/TodoPanel";
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { OS } from "@os/AntigravityOS";
 // Playwright spec — vite-plugin shim transforms for browser replay
 // @ts-expect-error

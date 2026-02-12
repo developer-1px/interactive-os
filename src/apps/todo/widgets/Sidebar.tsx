@@ -1,3 +1,4 @@
+import { todoSlice } from "@apps/todo/app";
 import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import {
   MoveCategoryDown,
@@ -6,7 +7,6 @@ import {
 } from "@apps/todo/features/commands/MoveCategoryUp";
 import { Kbd } from "@inspector/shell/components/Kbd";
 import { OS } from "@os/AntigravityOS";
-import { todoSlice } from "@apps/todo/app";
 import {
   ArrowRight,
   Briefcase,

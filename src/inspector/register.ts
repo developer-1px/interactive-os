@@ -8,8 +8,8 @@
  * Side-effect import: `import "@inspector/register"`
  */
 
-import { Keybindings } from "@/os-new/keymaps/keybindings";
-import { kernel } from "@/os-new/kernel";
+import { kernel } from "@/os/kernel";
+import { Keybindings } from "@/os/keymaps/keybindings";
 import { InspectorStore } from "./stores/InspectorStore";
 
 // ── Command ──────────────────────────────────────────────────────

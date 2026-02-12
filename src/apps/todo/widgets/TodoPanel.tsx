@@ -1,7 +1,7 @@
+import { todoSlice } from "@apps/todo/app";
 import { BoardView } from "@apps/todo/widgets/BoardView";
 import { ListView } from "@apps/todo/widgets/ListView";
 import { TodoToolbar } from "@apps/todo/widgets/TodoToolbar";
-import { todoSlice } from "@apps/todo/app";
 
 /**
  * TodoPanel: Switching container for List/Board views.

@@ -5,7 +5,7 @@
  * Inspector open/close state. Pages register routes via useTestBotRoutes().
  */
 
-import { create } from "zustand";
+import { useSyncExternalStore } from "react";
 import type { BubbleVariant } from "../entities/BotCursor";
 import type {
   CursorBubble,
@@ -42,10 +42,10 @@ interface TestBotState {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Store
+// Vanilla Store
 // ═══════════════════════════════════════════════════════════════════
 
-export const useTestBotStore = create<TestBotState>(() => ({
+let state: TestBotState = {
   bot: testBot({ speed: DEFAULT_SPEED }),
   routeDefiners: new Map(),
   activePageId: null,
@@ -55,7 +55,50 @@ export const useTestBotStore = create<TestBotState>(() => ({
   isRunning: false,
   currentSuiteIndex: -1,
   resetKey: 0,
-}));
+};
+
+const listeners = new Set<() => void>();
+
+function emit() {
+  listeners.forEach((fn) => fn());
+}
+
+function subscribe(fn: () => void) {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
+
+function getSnapshot() {
+  return state;
+}
+
+function setState(
+  partial: Partial<TestBotState> | ((s: TestBotState) => Partial<TestBotState>),
+) {
+  const next = typeof partial === "function" ? partial(state) : partial;
+  state = { ...state, ...next };
+  emit();
+}
+
+function getState() {
+  return state;
+}
+
+// ─── React Hook ───
+
+export function useTestBotStore<T>(selector: (s: TestBotState) => T): T {
+  return useSyncExternalStore(
+    subscribe,
+    () => selector(getSnapshot()),
+    () => selector(getSnapshot()),
+  );
+}
+
+// Compat: static getState/setState for action functions
+useTestBotStore.getState = getState;
+useTestBotStore.setState = setState;
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
@@ -84,10 +127,10 @@ export function rebuildBot(
 
 /** Set the active page and rebuild bot to show only that page's tests */
 export function setActivePage(pageId: string | null) {
-  const { routeDefiners } = useTestBotStore.getState();
+  const { routeDefiners } = getState();
   const newBot = rebuildBot(routeDefiners, pageId);
 
-  useTestBotStore.setState({
+  setState({
     activePageId: pageId,
     bot: newBot,
     suites: [],
@@ -96,17 +139,17 @@ export function setActivePage(pageId: string | null) {
   });
 
   newBot.dryRun().then((plan) => {
-    useTestBotStore.setState({ suites: plan });
+    setState({ suites: plan });
   });
 }
 
 /** Replace current bot and reset state */
 export function swapBot(definers: Map<string, RouteDefiner>) {
-  const { bot, activePageId } = useTestBotStore.getState();
+  const { bot, activePageId } = getState();
   bot.destroy();
   const newBot = rebuildBot(definers, activePageId);
 
-  useTestBotStore.setState({
+  setState({
     routeDefiners: definers,
     bot: newBot,
     suites: [],
@@ -115,7 +158,7 @@ export function swapBot(definers: Map<string, RouteDefiner>) {
   });
 
   newBot.dryRun().then((plan) => {
-    useTestBotStore.setState({ suites: plan });
+    setState({ suites: plan });
   });
 }
 
@@ -137,21 +180,21 @@ export function addStamp(type: "pass" | "fail", el: Element, selector: string) {
     rotation: Math.random() * 10 - 5 + (type === "fail" ? 5 : -5),
     createdAt: Date.now(),
   };
-  useTestBotStore.setState((s) => ({ stamps: [...s.stamps, stamp] }));
+  setState((s) => ({ stamps: [...s.stamps, stamp] }));
 }
 
 export function removeStamp(id: string) {
-  useTestBotStore.setState((s) => ({
+  setState((s) => ({
     stamps: s.stamps.filter((st) => st.id !== id),
   }));
 }
 
 export function clearAllStamps() {
-  useTestBotStore.setState({ stamps: [] });
+  setState({ stamps: [] });
 }
 
 export function updateStampPositions() {
-  const { stamps } = useTestBotStore.getState();
+  const { stamps } = getState();
   if (stamps.length === 0) return;
 
   let changed = false;
@@ -174,7 +217,7 @@ export function updateStampPositions() {
     return stamp.el !== el ? { ...stamp, el } : stamp;
   });
 
-  if (changed) useTestBotStore.setState({ stamps: next });
+  if (changed) setState({ stamps: next });
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -185,11 +228,11 @@ let bubbleCounter = 0;
 let rippleCounter = 0;
 
 export function showCursor() {
-  const cur = useTestBotStore.getState().cursorState;
+  const cur = getState().cursorState;
   if (cur) {
-    useTestBotStore.setState({ cursorState: { ...cur, visible: true } });
+    setState({ cursorState: { ...cur, visible: true } });
   } else {
-    useTestBotStore.setState({
+    setState({
       cursorState: {
         visible: true,
         x: window.innerWidth / 2,
@@ -206,17 +249,17 @@ export function showCursor() {
 }
 
 export function hideCursor() {
-  useTestBotStore.setState({ cursorState: null });
+  setState({ cursorState: null });
 }
 
 export function setCursorState(partial: Partial<CursorState>) {
-  const cur = useTestBotStore.getState().cursorState;
+  const cur = getState().cursorState;
   if (!cur) return;
-  useTestBotStore.setState({ cursorState: { ...cur, ...partial } });
+  setState({ cursorState: { ...cur, ...partial } });
 }
 
 export function addCursorBubble(label: string, variant: BubbleVariant) {
-  const cur = useTestBotStore.getState().cursorState;
+  const cur = getState().cursorState;
   if (!cur) return;
   const bubble: CursorBubble = {
     id: `bubble-${++bubbleCounter}`,
@@ -227,25 +270,25 @@ export function addCursorBubble(label: string, variant: BubbleVariant) {
   const next = [...cur.bubbles, bubble];
   // Cap at 3 visible bubbles
   const capped = next.length > 3 ? next.slice(next.length - 3) : next;
-  useTestBotStore.setState({ cursorState: { ...cur, bubbles: capped } });
+  setState({ cursorState: { ...cur, bubbles: capped } });
 }
 
 export function removeCursorBubble(id: string) {
-  const cur = useTestBotStore.getState().cursorState;
+  const cur = getState().cursorState;
   if (!cur) return;
-  useTestBotStore.setState({
+  setState({
     cursorState: { ...cur, bubbles: cur.bubbles.filter((b) => b.id !== id) },
   });
 }
 
 export function clearCursorBubbles() {
-  const cur = useTestBotStore.getState().cursorState;
+  const cur = getState().cursorState;
   if (!cur) return;
-  useTestBotStore.setState({ cursorState: { ...cur, bubbles: [] } });
+  setState({ cursorState: { ...cur, bubbles: [] } });
 }
 
 export function addCursorRipple(x: number, y: number) {
-  const cur = useTestBotStore.getState().cursorState;
+  const cur = getState().cursorState;
   if (!cur) return;
   const ripple: CursorRipple = {
     id: `ripple-${++rippleCounter}`,
@@ -253,22 +296,22 @@ export function addCursorRipple(x: number, y: number) {
     y,
     createdAt: Date.now(),
   };
-  useTestBotStore.setState({
+  setState({
     cursorState: { ...cur, ripples: [...cur.ripples, ripple] },
   });
 }
 
 export function removeCursorRipple(id: string) {
-  const cur = useTestBotStore.getState().cursorState;
+  const cur = getState().cursorState;
   if (!cur) return;
-  useTestBotStore.setState({
+  setState({
     cursorState: { ...cur, ripples: cur.ripples.filter((r) => r.id !== id) },
   });
 }
 
 /** Update cursor position from tracked element */
 export function updateCursorFromTrackedEl() {
-  const cur = useTestBotStore.getState().cursorState;
+  const cur = getState().cursorState;
   if (!cur?.trackedEl || !cur.visible) return;
 
   const el = cur.trackedEl;
@@ -279,7 +322,7 @@ export function updateCursorFromTrackedEl() {
   const ny = rect.top + rect.height / 2;
 
   if (Math.abs(nx - cur.x) > 2 || Math.abs(ny - cur.y) > 2) {
-    useTestBotStore.setState({
+    setState({
       cursorState: { ...cur, x: nx, y: ny, transitionMs: 300 },
     });
   }

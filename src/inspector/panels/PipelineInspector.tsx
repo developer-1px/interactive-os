@@ -7,8 +7,8 @@
  * Transaction을 직접 받는다. 중간 타입 없음.
  */
 
-import type { Transaction, StateDiff } from "@os/schema";
-import { useLayoutEffect, useRef, useState, useMemo, useCallback } from "react";
+import type { StateDiff, Transaction } from "@os/schema";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/lib/Icon";
 
 // ─── Pipeline Step ───
@@ -22,9 +22,9 @@ export type PipelineStep = {
 
 /** Infer 6-domino pipeline from a kernel Transaction. Pure function. */
 export function inferPipeline(tx: Transaction): PipelineStep[] {
-  const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.["input"] as
-    | { type?: string; key?: string; code?: string }
-    | undefined;
+  const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.[
+    "input"
+  ] as { type?: string; key?: string; code?: string } | undefined;
 
   const hasInput = !!inputMeta;
   const hasCommand = !!tx.command?.type;
@@ -69,7 +69,11 @@ export function inferPipeline(tx: Transaction): PipelineStep[] {
 
 // ─── Main Component ───
 
-export function PipelineInspector({ transactions }: { transactions: Transaction[] }) {
+export function PipelineInspector({
+  transactions,
+}: {
+  transactions: Transaction[];
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const prevLenRef = useRef(0);
@@ -107,11 +111,16 @@ export function PipelineInspector({ transactions }: { transactions: Transaction[
       </div>
 
       {/* Stream */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto px-2 py-2 space-y-1"
+      >
         {transactions.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-[#d1d5db] gap-3">
             <Icon name="terminal" size={28} className="opacity-30" />
-            <span className="text-[11px] font-sans">Interact to see the pipeline</span>
+            <span className="text-[11px] font-sans">
+              Interact to see the pipeline
+            </span>
           </div>
         )}
 
@@ -134,9 +143,24 @@ export function PipelineInspector({ transactions }: { transactions: Transaction[
 // ─── Pipeline Row ───
 
 const STATUS_COLOR = {
-  pass: { dot: "bg-emerald-400", text: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
-  fail: { dot: "bg-red-400", text: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
-  skip: { dot: "bg-gray-300", text: "text-gray-400", bg: "bg-gray-50", border: "border-gray-200" },
+  pass: {
+    dot: "bg-emerald-400",
+    text: "text-emerald-700",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+  },
+  fail: {
+    dot: "bg-red-400",
+    text: "text-red-600",
+    bg: "bg-red-50",
+    border: "border-red-200",
+  },
+  skip: {
+    dot: "bg-gray-300",
+    text: "text-gray-400",
+    bg: "bg-gray-50",
+    border: "border-gray-200",
+  },
 } as const;
 
 function PipelineRow({
@@ -149,18 +173,23 @@ function PipelineRow({
   onToggle: (id: number) => void;
 }) {
   const pipeline = useMemo(() => inferPipeline(tx), [tx]);
-  const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.["input"] as
-    | { type?: string; key?: string; code?: string }
-    | undefined;
+  const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.[
+    "input"
+  ] as { type?: string; key?: string; code?: string } | undefined;
 
   const isMouse = inputMeta?.type === "MOUSE";
   const isKeyboard = inputMeta?.type !== "MOUSE" && inputMeta?.type !== "FOCUS";
   const isFail = pipeline.some((s) => s.status === "fail");
-  const lastPassIdx = pipeline.reduce((acc, s, i) => (s.status === "pass" ? i : acc), -1);
+  const lastPassIdx = pipeline.reduce(
+    (acc, s, i) => (s.status === "pass" ? i : acc),
+    -1,
+  );
 
   const inputLabel = inputMeta?.key ?? tx.command?.type ?? "—";
   const inputIcon = isMouse ? "mouse-pointer" : "keyboard";
-  const accentColor = isFail ? "border-red-300 bg-red-50/50" : "border-[#e5e7eb] bg-white";
+  const accentColor = isFail
+    ? "border-red-300 bg-red-50/50"
+    : "border-[#e5e7eb] bg-white";
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-1 duration-150">
@@ -176,11 +205,15 @@ function PipelineRow({
             {tx.id}
           </span>
 
-          <div className={`shrink-0 ${isMouse ? "text-orange-500" : isKeyboard ? "text-indigo-500" : "text-emerald-500"}`}>
+          <div
+            className={`shrink-0 ${isMouse ? "text-orange-500" : isKeyboard ? "text-indigo-500" : "text-emerald-500"}`}
+          >
             <Icon name={inputIcon as any} size={12} />
           </div>
 
-          <span className={`font-bold text-[11px] ${isFail ? "text-red-600" : "text-[#1e293b]"}`}>
+          <span
+            className={`font-bold text-[11px] ${isFail ? "text-red-600" : "text-[#1e293b]"}`}
+          >
             {inputLabel}
           </span>
 
@@ -220,8 +253,9 @@ function PipelineRow({
               <div key={step.name} className="flex items-center">
                 {/* Step chip */}
                 <div
-                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-semibold border transition-all ${colors.bg} ${colors.border} ${colors.text} ${isActive ? "shadow-xs" : ""
-                    }`}
+                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-semibold border transition-all ${colors.bg} ${colors.border} ${colors.text} ${
+                    isActive ? "shadow-xs" : ""
+                  }`}
                   title={step.detail || step.name}
                 >
                   <span className={`w-1 h-1 rounded-full ${colors.dot}`} />
@@ -231,8 +265,13 @@ function PipelineRow({
                 {/* Arrow connector (except last) */}
                 {i < pipeline.length - 1 && (
                   <span
-                    className={`mx-0.5 text-[8px] ${isStopped ? "text-red-300" : i <= lastPassIdx ? "text-emerald-300" : "text-gray-200"
-                      }`}
+                    className={`mx-0.5 text-[8px] ${
+                      isStopped
+                        ? "text-red-300"
+                        : i <= lastPassIdx
+                          ? "text-emerald-300"
+                          : "text-gray-200"
+                    }`}
                   >
                     →
                   </span>
@@ -284,7 +323,13 @@ function PipelineRow({
 
 // ─── Building Blocks ───
 
-function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
+function DetailSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <div className="text-[8px] font-bold uppercase tracking-wider text-[#9ca3af] mb-1">
@@ -297,11 +342,21 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
   );
 }
 
-function DetailRow({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function DetailRow({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
   return (
     <div className="flex items-center gap-1.5 px-2 py-1 text-[9px] bg-white hover:bg-[#fafafa] transition-colors">
       <span className="text-[#9ca3af] shrink-0">{label}</span>
-      <span className={`font-mono ${accent ? "text-indigo-600 font-bold" : "text-[#475569]"} truncate`}>
+      <span
+        className={`font-mono ${accent ? "text-indigo-600 font-bold" : "text-[#475569]"} truncate`}
+      >
         {value}
       </span>
     </div>

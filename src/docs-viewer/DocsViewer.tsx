@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { DocsSidebar } from "./DocsSidebar";
-import { MarkdownRenderer } from "./MarkdownRenderer";
 import {
   buildDocTree,
   cleanLabel,
@@ -10,16 +9,14 @@ import {
   flattenTree,
   loadDocContent,
 } from "./docsUtils";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 
 export function DocsViewer() {
   const [activePath, setActivePath] = useState<string | undefined>(undefined);
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
-  const docTree = useMemo(
-    () => buildDocTree(Object.keys(docsModules)),
-    [],
-  );
+  const docTree = useMemo(() => buildDocTree(Object.keys(docsModules)), []);
   const allFiles = useMemo(() => flattenTree(docTree), [docTree]);
 
   const currentIndex = allFiles.findIndex((f) => f.path === activePath);

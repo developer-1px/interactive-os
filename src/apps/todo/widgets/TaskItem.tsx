@@ -39,10 +39,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
       aria-checked={isCompleted}
       className={`
                 group relative flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-200
-                ${isCompleted
-          ? "bg-slate-50/50 border-transparent opacity-60 hover:opacity-100"
-          : "bg-white border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"
-        }
+                ${
+                  isCompleted
+                    ? "bg-slate-50/50 border-transparent opacity-60 hover:opacity-100"
+                    : "bg-white border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"
+                }
                 outline-none
                 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-500/50 data-[focused=true]:border-indigo-300 data-[focused=true]:z-10
                 data-[selected=true]:bg-indigo-50/80 data-[selected=true]:border-indigo-200 data-[selected=true]:shadow-sm
@@ -66,10 +67,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
         <div
           className={`
                         w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
-                        ${isCompleted
-              ? "bg-indigo-600 border-indigo-600 scale-100"
-              : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
-            }
+                        ${
+                          isCompleted
+                            ? "bg-indigo-600 border-indigo-600 scale-100"
+                            : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
+                        }
                     `}
         >
           <Check
@@ -98,10 +100,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
           <span
             className={`
                             block text-[15px] leading-relaxed transition-all select-none
-                            ${isCompleted
-                ? "text-slate-400 line-through decoration-slate-300"
-                : "text-slate-700 font-medium"
-              }
+                            ${
+                              isCompleted
+                                ? "text-slate-400 line-through decoration-slate-300"
+                                : "text-slate-700 font-medium"
+                            }
                         `}
           >
             {todo.text}

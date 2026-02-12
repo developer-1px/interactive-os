@@ -48,7 +48,7 @@ export function createMockActions(steps: StepResult[]): TestActions {
     type: async (text) => {
       steps.push({ action: "type", detail: `"${text}"`, passed: true });
     },
-    wait: async () => { },
+    wait: async () => {},
     getByText: async (text) => `[text="${text}"]`,
     getAllByText: async (text) => [`[text="${text}"]`],
     getByRole: async (role, name) =>

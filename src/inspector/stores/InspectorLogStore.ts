@@ -6,10 +6,10 @@
  */
 
 import type { Transaction } from "@os/schema";
-import { create } from "zustand";
+import { useSyncExternalStore } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
-// Store
+// Types
 // ═══════════════════════════════════════════════════════════════════
 
 interface TransactionLogState {
@@ -20,64 +20,96 @@ interface TransactionLogState {
 
   /** 새 트랜잭션 추가 시 증가 — EventStream auto-scroll trigger */
   scrollTrigger: number;
-
-  // Actions
-  add: (txn: Omit<Transaction, "id" | "timestamp">) => void;
-  clear: () => void;
 }
 
 const MAX_TRANSACTIONS = 200;
 const PAGE_SIZE = 100;
 
-export const useTransactionLogStore = create<TransactionLogState>((set) => ({
+// ═══════════════════════════════════════════════════════════════════
+// Vanilla Store
+// ═══════════════════════════════════════════════════════════════════
+
+let state: TransactionLogState = {
   transactions: [],
   nextId: 1,
   pageNumber: 1,
   scrollTrigger: 0,
+};
 
-  add: (txn) =>
-    set((state) => {
-      const newTxn: Transaction = {
-        ...txn,
-        id: state.nextId,
-        timestamp: Date.now(),
-      };
+const listeners = new Set<() => void>();
 
-      let transactions = [...state.transactions, newTxn];
-      let pageNumber = state.pageNumber;
+function emit() {
+  listeners.forEach((fn) => fn());
+}
 
-      // Page rotation: when exceeding PAGE_SIZE, start new page
-      if (transactions.length > MAX_TRANSACTIONS) {
-        transactions = transactions.slice(-PAGE_SIZE);
-        pageNumber++;
-      }
+function subscribe(fn: () => void) {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
 
-      return {
-        transactions,
-        nextId: state.nextId + 1,
-        pageNumber,
-        scrollTrigger: state.scrollTrigger + 1,
-      };
-    }),
+function getSnapshot() {
+  return state;
+}
 
-  clear: () =>
-    set({
-      transactions: [],
-      nextId: 1,
-      pageNumber: 1,
-      scrollTrigger: 0,
-    }),
-}));
+function add(txn: Omit<Transaction, "id" | "timestamp">) {
+  const newTxn: Transaction = {
+    ...txn,
+    id: state.nextId,
+    timestamp: Date.now(),
+  };
+
+  let transactions = [...state.transactions, newTxn];
+  let pageNumber = state.pageNumber;
+
+  // Page rotation: when exceeding PAGE_SIZE, start new page
+  if (transactions.length > MAX_TRANSACTIONS) {
+    transactions = transactions.slice(-PAGE_SIZE);
+    pageNumber++;
+  }
+
+  state = {
+    transactions,
+    nextId: state.nextId + 1,
+    pageNumber,
+    scrollTrigger: state.scrollTrigger + 1,
+  };
+  emit();
+}
+
+function clear() {
+  state = {
+    transactions: [],
+    nextId: 1,
+    pageNumber: 1,
+    scrollTrigger: 0,
+  };
+  emit();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// React Hook
+// ═══════════════════════════════════════════════════════════════════
+
+export function useTransactionLogStore<T>(
+  selector: (s: TransactionLogState) => T,
+): T {
+  return useSyncExternalStore(
+    subscribe,
+    () => selector(getSnapshot()),
+    () => selector(getSnapshot()),
+  );
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // Static API — 비-React 컨텍스트에서 사용
 // ═══════════════════════════════════════════════════════════════════
 
 export const TransactionLog = {
-  add: (txn: Omit<Transaction, "id" | "timestamp">) =>
-    useTransactionLogStore.getState().add(txn),
-  clear: () => useTransactionLogStore.getState().clear(),
-  getAll: () => useTransactionLogStore.getState().transactions,
+  add: (txn: Omit<Transaction, "id" | "timestamp">) => add(txn),
+  clear: () => clear(),
+  getAll: () => getSnapshot().transactions,
 };
 
 // ═══════════════════════════════════════════════════════════════════

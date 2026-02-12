@@ -1,3 +1,4 @@
+import { todoSlice } from "@apps/todo/app";
 import {
   CopyTodo,
   CutTodo,
@@ -11,7 +12,6 @@ import {
 } from "@apps/todo/features/commands/list";
 import { ToggleView } from "@apps/todo/features/commands/ToggleView";
 import { OS } from "@os/AntigravityOS";
-import { todoSlice } from "@apps/todo/app";
 import { List } from "lucide-react";
 import { TaskItem } from "./TaskItem";
 
@@ -99,8 +99,8 @@ export function BoardView() {
                         w-80 flex-shrink-0 flex flex-col max-h-full rounded-2xl bg-slate-100/50 border transition-all duration-300 outline-none
                         ${activeColumn ? "border-indigo-200 bg-white shadow-xl shadow-indigo-100/50 ring-1 ring-indigo-500/10" : "border-slate-200/60 hover:border-slate-300"}
                     `}
-                // When column receives focus, we might want to set it as active category?
-                // Logic for that is usually side-effect based, but FocusZone doesn't do it automatically.
+                  // When column receives focus, we might want to set it as active category?
+                  // Logic for that is usually side-effect based, but FocusZone doesn't do it automatically.
                 >
                   <div
                     className={`

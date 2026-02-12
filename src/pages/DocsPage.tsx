@@ -3,7 +3,6 @@ import clsx from "clsx";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { DocsSidebar } from "../docs-viewer/DocsSidebar";
-import { MarkdownRenderer } from "../docs-viewer/MarkdownRenderer";
 import {
   buildDocTree,
   cleanLabel,
@@ -11,6 +10,7 @@ import {
   flattenTree,
   loadDocContent,
 } from "../docs-viewer/docsUtils";
+import { MarkdownRenderer } from "../docs-viewer/MarkdownRenderer";
 
 export default function DocsPage() {
   const location = useLocation();
@@ -18,10 +18,7 @@ export default function DocsPage() {
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
-  const docTree = useMemo(
-    () => buildDocTree(Object.keys(docsModules)),
-    [],
-  );
+  const docTree = useMemo(() => buildDocTree(Object.keys(docsModules)), []);
   const allFiles = useMemo(() => flattenTree(docTree), [docTree]);
   const navigate = useNavigate();
 
@@ -58,11 +55,7 @@ export default function DocsPage() {
   return (
     <div className="flex h-screen w-full bg-white text-slate-900 overflow-hidden font-sans selection:bg-indigo-100 selection:text-indigo-900">
       {/* Sidebar */}
-      <DocsSidebar
-        items={docTree}
-        activePath={splat}
-        onSelect={handleSelect}
-      />
+      <DocsSidebar items={docTree} activePath={splat} onSelect={handleSelect} />
 
       {/* Main Content */}
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">

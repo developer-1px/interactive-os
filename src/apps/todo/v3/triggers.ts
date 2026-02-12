@@ -18,7 +18,9 @@ import { TodoApp, TodoList, TodoToolbar } from "@apps/todo/v3/app";
 export const DeleteButton = TodoApp.createTrigger(TodoList.commands.deleteTodo);
 
 /** Duplicate a todo item. */
-export const DuplicateButton = TodoApp.createTrigger(TodoList.commands.duplicateTodo);
+export const DuplicateButton = TodoApp.createTrigger(
+  TodoList.commands.duplicateTodo,
+);
 
 /** Toggle a todo item's completion. */
 export const ToggleButton = TodoApp.createTrigger(TodoList.commands.toggleTodo);
@@ -44,6 +46,6 @@ export const EditButton = TodoApp.createTrigger(TodoList.commands.startEdit);
  *   </ClearDialog.Root>
  */
 export const ClearDialog = TodoApp.createTrigger({
-    id: "todo-clear-dialog",
-    confirm: TodoToolbar.commands.clearCompleted,
+  id: "todo-clear-dialog",
+  confirm: TodoToolbar.commands.clearCompleted,
 });

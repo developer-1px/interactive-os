@@ -23,261 +23,259 @@ const SIDEBAR = '[role="listbox"]#sidebar';
 
 /** Get the focused item in listView (excluding DRAFT) */
 const focusedTodoItem = (listview: string) =>
-    `${listview} [data-focused="true"]:not(#DRAFT)`;
+  `${listview} [data-focused="true"]:not(#DRAFT)`;
 
 test.describe("Todo App", () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto("/");
-        await page.waitForSelector(DRAFT, { timeout: 15000 });
-    });
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+    await page.waitForSelector(DRAFT, { timeout: 15000 });
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 1. Creation — Type in draft + Enter
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 1. Creation — Type in draft + Enter
+  // ─────────────────────────────────────────────────────────────
 
-    test("Create todo via draft input", async ({ page }) => {
-        const draft = page.locator(DRAFT);
-        await draft.click();
-        await page.keyboard.type("Buy milk");
-        await page.keyboard.press("Enter");
+  test("Create todo via draft input", async ({ page }) => {
+    const draft = page.locator(DRAFT);
+    await draft.click();
+    await page.keyboard.type("Buy milk");
+    await page.keyboard.press("Enter");
 
-        // New item should appear
-        await expect(page.getByText("Buy milk")).toBeVisible();
-    });
+    // New item should appear
+    await expect(page.getByText("Buy milk")).toBeVisible();
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 2. Click todo item to focus
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 2. Click todo item to focus
+  // ─────────────────────────────────────────────────────────────
 
-    test("Clicking a todo item focuses it", async ({ page }) => {
-        await page.getByText("Complete Interaction OS docs").click();
+  test("Clicking a todo item focuses it", async ({ page }) => {
+    await page.getByText("Complete Interaction OS docs").click();
 
-        const focused = page.locator(focusedTodoItem(LISTVIEW));
-        await expect(focused).toHaveCount(1);
-        await expect(focused).toContainText("Complete Interaction OS docs");
-    });
+    const focused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(focused).toHaveCount(1);
+    await expect(focused).toContainText("Complete Interaction OS docs");
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 3. Toggle — Space to check/uncheck
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 3. Toggle — Space to check/uncheck
+  // ─────────────────────────────────────────────────────────────
 
-    test("Space toggles todo completion", async ({ page }) => {
-        // Click on the todo item to focus it
-        await page.getByText("Complete Interaction OS docs").click();
+  test("Space toggles todo completion", async ({ page }) => {
+    // Click on the todo item to focus it
+    await page.getByText("Complete Interaction OS docs").click();
 
-        const focused = page.locator(focusedTodoItem(LISTVIEW));
-        await expect(focused).toContainText("Complete Interaction OS docs");
+    const focused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(focused).toContainText("Complete Interaction OS docs");
 
-        // Toggle: should become completed (line-through)
-        await page.keyboard.press("Space");
-        await expect(focused.locator("span.line-through")).toHaveCount(1);
+    // Toggle: should become completed (line-through)
+    await page.keyboard.press("Space");
+    await expect(focused.locator("span.line-through")).toHaveCount(1);
 
-        // Toggle back: should remove line-through
-        await page.keyboard.press("Space");
-        await expect(focused.locator("span.line-through")).toHaveCount(0);
-    });
+    // Toggle back: should remove line-through
+    await page.keyboard.press("Space");
+    await expect(focused.locator("span.line-through")).toHaveCount(0);
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 4. Edit — Enter to start, type, Enter to save
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 4. Edit — Enter to start, type, Enter to save
+  // ─────────────────────────────────────────────────────────────
 
-    test("Edit todo: Enter → type → Enter saves", async ({ page }) => {
-        // Click on the todo item to focus it
-        await page.getByText("Complete Interaction OS docs").click();
+  test("Edit todo: Enter → type → Enter saves", async ({ page }) => {
+    // Click on the todo item to focus it
+    await page.getByText("Complete Interaction OS docs").click();
 
-        // Enter edit mode (Enter = ACTIVATE = onAction = StartEdit)
-        await page.keyboard.press("Enter");
+    // Enter edit mode (Enter = ACTIVATE = onAction = StartEdit)
+    await page.keyboard.press("Enter");
 
-        // Edit field should appear
-        const editField = page.locator("#EDIT");
-        await expect(editField).toBeVisible();
+    // Edit field should appear
+    const editField = page.locator("#EDIT");
+    await expect(editField).toBeVisible();
 
-        // Select all and type new text
-        await page.keyboard.press("Meta+a");
-        await page.keyboard.type("Updated docs task");
-        await page.keyboard.press("Enter");
+    // Select all and type new text
+    await page.keyboard.press("Meta+a");
+    await page.keyboard.type("Updated docs task");
+    await page.keyboard.press("Enter");
 
-        // Should save the new text
-        await expect(page.getByText("Updated docs task")).toBeVisible();
-        await expect(page.getByText("Complete Interaction OS docs")).toHaveCount(0);
-    });
+    // Should save the new text
+    await expect(page.getByText("Updated docs task")).toBeVisible();
+    await expect(page.getByText("Complete Interaction OS docs")).toHaveCount(0);
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 5. Edit — Enter to start, type, Escape to cancel
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 5. Edit — Enter to start, type, Escape to cancel
+  // ─────────────────────────────────────────────────────────────
 
-    test("Edit todo: Enter → type → Escape cancels", async ({ page }) => {
-        await page.getByText("Complete Interaction OS docs").click();
+  test("Edit todo: Enter → type → Escape cancels", async ({ page }) => {
+    await page.getByText("Complete Interaction OS docs").click();
 
-        await page.keyboard.press("Enter");
+    await page.keyboard.press("Enter");
 
-        const editField = page.locator("#EDIT");
-        await expect(editField).toBeVisible();
+    const editField = page.locator("#EDIT");
+    await expect(editField).toBeVisible();
 
-        await page.keyboard.press("Meta+a");
-        await page.keyboard.type("This should be discarded");
-        await page.keyboard.press("Escape");
+    await page.keyboard.press("Meta+a");
+    await page.keyboard.type("This should be discarded");
+    await page.keyboard.press("Escape");
 
-        // Original text should remain
-        await expect(page.getByText("Complete Interaction OS docs")).toBeVisible();
-        await expect(page.getByText("This should be discarded")).toHaveCount(0);
-    });
+    // Original text should remain
+    await expect(page.getByText("Complete Interaction OS docs")).toBeVisible();
+    await expect(page.getByText("This should be discarded")).toHaveCount(0);
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 6. Delete — Backspace removes item
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 6. Delete — Backspace removes item
+  // ─────────────────────────────────────────────────────────────
 
-    test("Backspace deletes focused todo", async ({ page }) => {
-        // Create a second item first
-        const draft = page.locator(DRAFT);
-        await draft.click();
-        await page.keyboard.type("Temporary task");
-        await page.keyboard.press("Enter");
-        await expect(page.getByText("Temporary task")).toBeVisible();
+  test("Backspace deletes focused todo", async ({ page }) => {
+    // Create a second item first
+    const draft = page.locator(DRAFT);
+    await draft.click();
+    await page.keyboard.type("Temporary task");
+    await page.keyboard.press("Enter");
+    await expect(page.getByText("Temporary task")).toBeVisible();
 
-        // Click on the item to focus it
-        await page.getByText("Temporary task").click();
-        const focused = page.locator(focusedTodoItem(LISTVIEW));
-        await expect(focused).toContainText("Temporary task");
+    // Click on the item to focus it
+    await page.getByText("Temporary task").click();
+    const focused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(focused).toContainText("Temporary task");
 
-        // Delete it
-        await page.keyboard.press("Backspace");
+    // Delete it
+    await page.keyboard.press("Backspace");
 
-        // Item should be gone
-        await expect(page.getByText("Temporary task")).toHaveCount(0);
-    });
+    // Item should be gone
+    await expect(page.getByText("Temporary task")).toHaveCount(0);
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 7. Reorder — Meta+Arrow moves items
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 7. Reorder — Meta+Arrow moves items
+  // ─────────────────────────────────────────────────────────────
 
-    test("Meta+Arrow reorders items", async ({ page }) => {
-        // Create a second item
-        const draft = page.locator(DRAFT);
-        await draft.click();
-        await page.keyboard.type("Second task");
-        await page.keyboard.press("Enter");
-        await expect(page.getByText("Second task")).toBeVisible();
+  test("Meta+Arrow reorders items", async ({ page }) => {
+    // Create a second item
+    const draft = page.locator(DRAFT);
+    await draft.click();
+    await page.keyboard.type("Second task");
+    await page.keyboard.press("Enter");
+    await expect(page.getByText("Second task")).toBeVisible();
 
-        // Click the second item to focus it
-        await page.getByText("Second task").click();
-        const focused = page.locator(focusedTodoItem(LISTVIEW));
-        await expect(focused).toContainText("Second task");
+    // Click the second item to focus it
+    await page.getByText("Second task").click();
+    const focused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(focused).toContainText("Second task");
 
-        // Move it up
-        await page.keyboard.press("Meta+ArrowUp");
+    // Move it up
+    await page.keyboard.press("Meta+ArrowUp");
 
-        // Verify order changed
-        const items = page.locator(`${LISTVIEW} [data-item-id]:not(#DRAFT)`);
-        const texts = await items.allTextContents();
-        const secondIdx = texts.findIndex((t) => t.includes("Second task"));
-        const firstIdx = texts.findIndex((t) =>
-            t.includes("Complete Interaction OS docs"),
-        );
-        expect(secondIdx).toBeLessThan(firstIdx);
-    });
+    // Verify order changed
+    const items = page.locator(`${LISTVIEW} [data-item-id]:not(#DRAFT)`);
+    const texts = await items.allTextContents();
+    const secondIdx = texts.findIndex((t) => t.includes("Second task"));
+    const firstIdx = texts.findIndex((t) =>
+      t.includes("Complete Interaction OS docs"),
+    );
+    expect(secondIdx).toBeLessThan(firstIdx);
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 8. Arrow navigation between todo items
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 8. Arrow navigation between todo items
+  // ─────────────────────────────────────────────────────────────
 
-    test("Arrow navigation between todo items", async ({ page }) => {
-        // Create a second item
-        const draft = page.locator(DRAFT);
-        await draft.click();
-        await page.keyboard.type("Second task");
-        await page.keyboard.press("Enter");
+  test("Arrow navigation between todo items", async ({ page }) => {
+    // Create a second item
+    const draft = page.locator(DRAFT);
+    await draft.click();
+    await page.keyboard.type("Second task");
+    await page.keyboard.press("Enter");
 
-        // Click first item to focus it
-        await page.getByText("Complete Interaction OS docs").click();
-        const focused = page.locator(focusedTodoItem(LISTVIEW));
-        await expect(focused).toContainText("Complete Interaction OS docs");
+    // Click first item to focus it
+    await page.getByText("Complete Interaction OS docs").click();
+    const focused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(focused).toContainText("Complete Interaction OS docs");
 
-        // ArrowDown should move to second item
-        await page.keyboard.press("ArrowDown");
-        await expect(focused).toContainText("Second task");
+    // ArrowDown should move to second item
+    await page.keyboard.press("ArrowDown");
+    await expect(focused).toContainText("Second task");
 
-        // ArrowUp should move back
-        await page.keyboard.press("ArrowUp");
-        await expect(focused).toContainText("Complete Interaction OS docs");
-    });
+    // ArrowUp should move back
+    await page.keyboard.press("ArrowUp");
+    await expect(focused).toContainText("Complete Interaction OS docs");
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 9. Clipboard — Meta+C / Meta+V
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 9. Clipboard — Meta+C / Meta+V
+  // ─────────────────────────────────────────────────────────────
 
-    test("Meta+C then Meta+V duplicates item", async ({ page }) => {
-        // Click the item to focus it
-        await page.getByText("Complete Interaction OS docs").click();
-        const focused = page.locator(focusedTodoItem(LISTVIEW));
-        await expect(focused).toContainText("Complete Interaction OS docs");
+  test("Meta+C then Meta+V duplicates item", async ({ page }) => {
+    // Click the item to focus it
+    await page.getByText("Complete Interaction OS docs").click();
+    const focused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(focused).toContainText("Complete Interaction OS docs");
 
-        // Copy then Paste
-        await page.keyboard.press("Meta+c");
-        await page.keyboard.press("Meta+v");
+    // Copy then Paste
+    await page.keyboard.press("Meta+c");
+    await page.keyboard.press("Meta+v");
 
-        // Should now have two items with the same text
-        const items = page.getByText("Complete Interaction OS docs");
-        await expect(items).toHaveCount(2);
-    });
+    // Should now have two items with the same text
+    const items = page.getByText("Complete Interaction OS docs");
+    await expect(items).toHaveCount(2);
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 10. Sidebar — Click to switch category
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 10. Sidebar — Click to switch category
+  // ─────────────────────────────────────────────────────────────
 
-    test("Click sidebar category switches list", async ({ page }) => {
-        // Initially showing Inbox content
-        await expect(page.getByText("Complete Interaction OS docs")).toBeVisible();
+  test("Click sidebar category switches list", async ({ page }) => {
+    // Initially showing Inbox content
+    await expect(page.getByText("Complete Interaction OS docs")).toBeVisible();
 
-        // Click "Work" category
-        await page.locator("#cat_work").click();
+    // Click "Work" category
+    await page.locator("#cat_work").click();
 
-        // Should show Work todos
-        await expect(page.getByText("Review Red Team feedback")).toBeVisible();
-        await expect(page.getByText("Plan next iteration")).toBeVisible();
+    // Should show Work todos
+    await expect(page.getByText("Review Red Team feedback")).toBeVisible();
+    await expect(page.getByText("Plan next iteration")).toBeVisible();
 
-        // Inbox todo should not be visible
-        await expect(page.getByText("Complete Interaction OS docs")).toHaveCount(0);
-    });
+    // Inbox todo should not be visible
+    await expect(page.getByText("Complete Interaction OS docs")).toHaveCount(0);
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 11. Sidebar — Keyboard category selection
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 11. Sidebar — Keyboard category selection
+  // ─────────────────────────────────────────────────────────────
 
-    test("Sidebar keyboard navigation and selection", async ({ page }) => {
-        // Click sidebar item to activate
-        await page.locator("#cat_inbox").click();
+  test("Sidebar keyboard navigation and selection", async ({ page }) => {
+    // Click sidebar item to activate
+    await page.locator("#cat_inbox").click();
 
-        // Navigate down to "Work"
-        await page.keyboard.press("ArrowDown");
-        const focusedCat = page.locator(
-            `${SIDEBAR} [data-focused="true"]`,
-        );
-        await expect(focusedCat).toContainText("Work");
+    // Navigate down to "Work"
+    await page.keyboard.press("ArrowDown");
+    const focusedCat = page.locator(`${SIDEBAR} [data-focused="true"]`);
+    await expect(focusedCat).toContainText("Work");
 
-        // Press Enter to select
-        await page.keyboard.press("Enter");
+    // Press Enter to select
+    await page.keyboard.press("Enter");
 
-        // Work todos should appear
-        await expect(page.getByText("Review Red Team feedback")).toBeVisible();
-    });
+    // Work todos should appear
+    await expect(page.getByText("Review Red Team feedback")).toBeVisible();
+  });
 
-    // ─────────────────────────────────────────────────────────────
-    // 12. Sidebar — Meta+Arrow reorders categories
-    // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 12. Sidebar — Meta+Arrow reorders categories
+  // ─────────────────────────────────────────────────────────────
 
-    test("Sidebar Meta+Arrow reorders categories", async ({ page }) => {
-        // Click sidebar "Inbox" to activate and focus
-        await page.locator("#cat_inbox").click();
+  test("Sidebar Meta+Arrow reorders categories", async ({ page }) => {
+    // Click sidebar "Inbox" to activate and focus
+    await page.locator("#cat_inbox").click();
 
-        // Move Inbox down
-        await page.keyboard.press("Meta+ArrowDown");
+    // Move Inbox down
+    await page.keyboard.press("Meta+ArrowDown");
 
-        // Verify order: Work should now be first
-        const categories = page.locator(`${SIDEBAR} [data-item-id]`);
-        const texts = await categories.allTextContents();
-        const inboxIdx = texts.findIndex((t) => t.includes("Inbox"));
-        const workIdx = texts.findIndex((t) => t.includes("Work"));
-        expect(workIdx).toBeLessThan(inboxIdx);
-    });
+    // Verify order: Work should now be first
+    const categories = page.locator(`${SIDEBAR} [data-item-id]`);
+    const texts = await categories.allTextContents();
+    const inboxIdx = texts.findIndex((t) => t.includes("Inbox"));
+    const workIdx = texts.findIndex((t) => t.includes("Work"));
+    expect(workIdx).toBeLessThan(inboxIdx);
+  });
 });

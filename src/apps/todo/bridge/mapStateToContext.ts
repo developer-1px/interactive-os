@@ -1,4 +1,4 @@
-import type { ContextState } from "@/os-new/schema/logic/LogicNode";
+import type { ContextState } from "@/os/schema/logic/LogicNode";
 
 // Ideally types for AppState would be imported here, but we use any for decoupling or import from model
 // import type { AppState } from "../model/types";

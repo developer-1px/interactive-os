@@ -4,7 +4,7 @@ import "./docs-viewer.css";
 import { DocsViewer } from "./DocsViewer";
 
 createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-        <DocsViewer />
-    </StrictMode>,
+  <StrictMode>
+    <DocsViewer />
+  </StrictMode>,
 );

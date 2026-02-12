@@ -4,6 +4,7 @@
  * Uses TaskItem components with full ZIFT pattern (Zone-Item-Field-Trigger).
  */
 
+import { todoSlice } from "@apps/todo/app";
 import {
   CopyTodo,
   CutTodo,
@@ -21,7 +22,6 @@ import {
 } from "@apps/todo/features/commands/list";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
 import { OS } from "@os/AntigravityOS";
-import { todoSlice } from "@apps/todo/app";
 import { Plus } from "lucide-react";
 
 export function ListView() {
