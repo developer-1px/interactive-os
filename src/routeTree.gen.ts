@@ -21,7 +21,6 @@ import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/ind
 import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/playground.radix'
 import { Route as MinimalPlaygroundPlaywrightRouteImport } from './routes/_minimal/playground.playwright'
 import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
-import { Route as MinimalPlaygroundHeadlessRouteImport } from './routes/_minimal/playground.headless'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
 import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
 import { Route as MinimalDocsSplatRouteImport } from './routes/_minimal/docs/$'
@@ -85,12 +84,6 @@ const MinimalPlaygroundKernelRoute = MinimalPlaygroundKernelRouteImport.update({
   path: '/playground/kernel',
   getParentRoute: () => MinimalRoute,
 } as any)
-const MinimalPlaygroundHeadlessRoute =
-  MinimalPlaygroundHeadlessRouteImport.update({
-    id: '/playground/headless',
-    path: '/playground/headless',
-    getParentRoute: () => MinimalRoute,
-  } as any)
 const MinimalPlaygroundFocusRoute = MinimalPlaygroundFocusRouteImport.update({
   id: '/playground/focus',
   path: '/playground/focus',
@@ -117,7 +110,6 @@ export interface FileRoutesByFullPath {
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
-  '/playground/headless': typeof MinimalPlaygroundHeadlessRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
@@ -132,7 +124,6 @@ export interface FileRoutesByTo {
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
-  '/playground/headless': typeof MinimalPlaygroundHeadlessRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
@@ -151,7 +142,6 @@ export interface FileRoutesById {
   '/_minimal/docs/$': typeof MinimalDocsSplatRoute
   '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
-  '/_minimal/playground/headless': typeof MinimalPlaygroundHeadlessRoute
   '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/_minimal/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
   '/_minimal/playground/radix': typeof MinimalPlaygroundRadixRoute
@@ -169,7 +159,6 @@ export interface FileRouteTypes {
     | '/docs/$'
     | '/playground/aria'
     | '/playground/focus'
-    | '/playground/headless'
     | '/playground/kernel'
     | '/playground/playwright'
     | '/playground/radix'
@@ -184,7 +173,6 @@ export interface FileRouteTypes {
     | '/docs/$'
     | '/playground/aria'
     | '/playground/focus'
-    | '/playground/headless'
     | '/playground/kernel'
     | '/playground/playwright'
     | '/playground/radix'
@@ -202,7 +190,6 @@ export interface FileRouteTypes {
     | '/_minimal/docs/$'
     | '/_minimal/playground/aria'
     | '/_minimal/playground/focus'
-    | '/_minimal/playground/headless'
     | '/_minimal/playground/kernel'
     | '/_minimal/playground/playwright'
     | '/_minimal/playground/radix'
@@ -300,13 +287,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalPlaygroundKernelRouteImport
       parentRoute: typeof MinimalRoute
     }
-    '/_minimal/playground/headless': {
-      id: '/_minimal/playground/headless'
-      path: '/playground/headless'
-      fullPath: '/playground/headless'
-      preLoaderRoute: typeof MinimalPlaygroundHeadlessRouteImport
-      parentRoute: typeof MinimalRoute
-    }
     '/_minimal/playground/focus': {
       id: '/_minimal/playground/focus'
       path: '/playground/focus'
@@ -350,7 +330,6 @@ interface MinimalRouteChildren {
   MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
   MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
-  MinimalPlaygroundHeadlessRoute: typeof MinimalPlaygroundHeadlessRoute
   MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
   MinimalPlaygroundPlaywrightRoute: typeof MinimalPlaygroundPlaywrightRoute
   MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute
@@ -361,7 +340,6 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalDocsRoute: MinimalDocsRouteWithChildren,
   MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,
-  MinimalPlaygroundHeadlessRoute: MinimalPlaygroundHeadlessRoute,
   MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
   MinimalPlaygroundPlaywrightRoute: MinimalPlaygroundPlaywrightRoute,
   MinimalPlaygroundRadixRoute: MinimalPlaygroundRadixRoute,
