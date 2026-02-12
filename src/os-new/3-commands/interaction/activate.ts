@@ -3,11 +3,14 @@
  *
  * Behavior:
  * - If treeitem/menuitem with aria-expanded: toggle expansion (via OS_EXPAND dispatch)
+ * - If zone has onAction: dispatch onAction with resolved focus ID
  * - Otherwise: trigger CLICK effect on focused element
  */
 
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
 import { EXPAND } from "../expand";
+import { resolveFocusId } from "../utils/resolveFocusId";
 
 export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
@@ -24,6 +27,15 @@ export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
     };
   }
 
+  // Zone callback: dispatch onAction if registered
+  const entry = ZoneRegistry.get(activeZoneId);
+  if (entry?.onAction) {
+    return {
+      dispatch: resolveFocusId(entry.onAction, zone.focusedItemId),
+    };
+  }
+
+  // Fallback: programmatic click
   return {
     click: zone.focusedItemId,
   };

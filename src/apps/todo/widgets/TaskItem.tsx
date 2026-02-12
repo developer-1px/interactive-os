@@ -35,6 +35,8 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
   return (
     <OS.Item
       id={String(todo.id)}
+      role="checkbox"
+      aria-checked={isCompleted}
       className={`
                 group relative flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-200
                 ${isCompleted

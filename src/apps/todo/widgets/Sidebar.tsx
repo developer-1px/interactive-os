@@ -1,5 +1,9 @@
 import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
-import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
+import {
+  MoveCategoryDown,
+  MoveCategoryUp,
+  SelectCategory,
+} from "@apps/todo/features/commands/MoveCategoryUp";
 import { Kbd } from "@inspector/shell/components/Kbd";
 import { OS } from "@os/AntigravityOS";
 import { todoSlice } from "@apps/todo/app";
@@ -22,9 +26,10 @@ export function Sidebar() {
         navigate: { entry: "restore" },
       }}
       onAction={SelectCategory({})}
+      onMoveUp={MoveCategoryUp()}
+      onMoveDown={MoveCategoryDown()}
       onUndo={UndoCommand()}
       onRedo={RedoCommand()}
-      // onSelect={SelectCategory({})} // Space is handled by onAction alias if needed, or separate command
       style={{ flex: "none" }}
       className="h-full"
     >

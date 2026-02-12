@@ -33,7 +33,7 @@ export interface ZoneOptions {
 export interface ZoneProps
   extends Omit<
     ComponentProps<"div">,
-    "id" | "role" | "onSelect" | "onCopy" | "onCut" | "onPaste" | "onToggle"
+    "id" | "role" | "onSelect" | "onCopy" | "onCut" | "onPaste" | "onCheck"
   > {
   /** Unique identifier for the zone */
   id?: string;
@@ -51,10 +51,14 @@ export interface ZoneProps
   onCut?: BaseCommand;
   /** Command dispatched on paste (Cmd+V) */
   onPaste?: BaseCommand;
-  /** Command dispatched on toggle (Space) - for checkboxes, multi-select */
-  onToggle?: BaseCommand;
+  /** Command dispatched on check (Space) - for aria-checked state */
+  onCheck?: BaseCommand;
   /** Command dispatched on delete (Backspace/Delete) */
   onDelete?: BaseCommand;
+  /** Command dispatched on move up (Meta+ArrowUp) */
+  onMoveUp?: BaseCommand;
+  /** Command dispatched on move down (Meta+ArrowDown) */
+  onMoveDown?: BaseCommand;
   /** Command dispatched on undo (Cmd+Z) */
   onUndo?: BaseCommand;
   /** Command dispatched on redo (Cmd+Shift+Z) */
@@ -71,11 +75,13 @@ export function Zone({
   options,
   onAction,
   onSelect,
-  onToggle,
+  onCheck,
   onCopy,
   onCut,
   onPaste,
   onDelete,
+  onMoveUp,
+  onMoveDown,
   onUndo,
   onRedo,
   onDismiss,
@@ -100,11 +106,13 @@ export function Zone({
       {...(options?.project !== undefined ? { project: options.project } : {})}
       {...(onAction !== undefined ? { onAction } : {})}
       {...(onSelect !== undefined ? { onSelect } : {})}
-      {...(onToggle !== undefined ? { onToggle } : {})}
+      {...(onCheck !== undefined ? { onCheck } : {})}
       {...(onCopy !== undefined ? { onCopy } : {})}
       {...(onCut !== undefined ? { onCut } : {})}
       {...(onPaste !== undefined ? { onPaste } : {})}
       {...(onDelete !== undefined ? { onDelete } : {})}
+      {...(onMoveUp !== undefined ? { onMoveUp } : {})}
+      {...(onMoveDown !== undefined ? { onMoveDown } : {})}
       {...(onUndo !== undefined ? { onUndo } : {})}
       {...(onRedo !== undefined ? { onRedo } : {})}
       {...(onDismiss !== undefined ? { onDismiss } : {})}

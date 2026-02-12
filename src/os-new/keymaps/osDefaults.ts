@@ -7,7 +7,7 @@
  * These map directly to commands from 3-commands/.
  */
 
-import { ACTIVATE, ESCAPE, TAB } from "@os/3-commands/interaction";
+import { ACTIVATE, ESCAPE, TAB, OS_DELETE, OS_MOVE_UP, OS_MOVE_DOWN } from "@os/3-commands/interaction";
 import {
   FIELD_CANCEL,
   FIELD_COMMIT,
@@ -15,6 +15,7 @@ import {
 } from "@os/3-commands/field/field";
 import { NAVIGATE } from "@os/3-commands/navigate";
 import { SELECT } from "@os/3-commands/selection";
+import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
 import { Keybindings } from "./keybindings";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -116,6 +117,34 @@ Keybindings.registerAll([
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
+// Delete
+// ═══════════════════════════════════════════════════════════════════
+
+Keybindings.registerAll([
+  { key: "Backspace", command: OS_DELETE, when: "navigating" },
+  { key: "Delete", command: OS_DELETE, when: "navigating" },
+]);
+
+// ═══════════════════════════════════════════════════════════════════
+// Move (Reorder)
+// ═══════════════════════════════════════════════════════════════════
+
+Keybindings.registerAll([
+  { key: "Meta+ArrowUp", command: OS_MOVE_UP, when: "navigating" },
+  { key: "Meta+ArrowDown", command: OS_MOVE_DOWN, when: "navigating" },
+]);
+
+// ═══════════════════════════════════════════════════════════════════
+// Clipboard
+// ═══════════════════════════════════════════════════════════════════
+
+Keybindings.registerAll([
+  { key: "Meta+C", command: OS_COPY, when: "navigating" },
+  { key: "Meta+X", command: OS_CUT, when: "navigating" },
+  { key: "Meta+V", command: OS_PASTE, when: "navigating" },
+]);
+
+// ═══════════════════════════════════════════════════════════════════
 // Field Editing
 // ═══════════════════════════════════════════════════════════════════
 // Enter (editing) → commit and exit editing mode
@@ -133,3 +162,4 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 // ArrowRight/ArrowLeft expand/collapse is handled inline by NAVIGATE
 // (W3C tree pattern). No separate keybindings needed.
+

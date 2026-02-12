@@ -13,6 +13,8 @@ import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import {
   AddTodo,
   DeleteTodo,
+  MoveItemDown,
+  MoveItemUp,
   StartEdit,
   SyncDraft,
   ToggleTodo,
@@ -46,7 +48,7 @@ export function ListView() {
         id="listView"
         role="listbox"
         // ARIA Standard Commands
-        onToggle={ToggleTodo({ id: OS.FOCUS as any })}
+        onCheck={ToggleTodo({ id: OS.FOCUS as any })}
         onAction={StartEdit({ id: OS.FOCUS as any })}
         // Clipboard Commands (Muscle Memory)
         onCopy={CopyTodo({ id: OS.FOCUS as any })}
@@ -54,6 +56,9 @@ export function ListView() {
         onPaste={PasteTodo({ id: OS.FOCUS as any })}
         // Editing Commands (Muscle Memory)
         onDelete={DeleteTodo({ id: OS.FOCUS as any })}
+        // Reorder Commands (Meta+Arrow)
+        onMoveUp={MoveItemUp({ focusId: OS.FOCUS as any })}
+        onMoveDown={MoveItemDown({ focusId: OS.FOCUS as any })}
         // History Commands (Temporal Control)
         onUndo={UndoCommand()}
         onRedo={RedoCommand()}

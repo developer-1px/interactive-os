@@ -19,6 +19,10 @@ export interface Page {
   getByRole(role: string, options?: { name?: string }): Locator;
   getByText(text: string): Locator;
   on(event: string, handler: (...args: any[]) => void): void;
+  waitForSelector(
+    selector: string,
+    options?: { timeout?: number },
+  ): Promise<void>;
   waitForFunction(
     fn: (...args: any[]) => any,
     arg?: any,
@@ -46,6 +50,19 @@ export class ShimPage implements Page {
   // No-op: browser-side TestBot doesn't need Playwright event hooks
   on(_event: string, _handler: (...args: any[]) => void) {
     // Silently ignore page.on("pageerror") / page.on("console") etc.
+  }
+
+  async waitForSelector(selector: string, options?: { timeout?: number }) {
+    const timeout = options?.timeout ?? 5000;
+    const start = Date.now();
+    while (!document.querySelector(selector)) {
+      if (Date.now() - start > timeout) {
+        throw new Error(
+          `waitForSelector("${selector}") timed out after ${timeout}ms`,
+        );
+      }
+      await new Promise((r) => setTimeout(r, 100));
+    }
   }
 
   // No-op: content is already rendered in-browser
@@ -93,6 +110,8 @@ export interface Locator {
   click(options?: { modifiers?: string[] }): Promise<void>;
   fill(value: string): Promise<void>;
   press(key: string): Promise<void>;
+  locator(subSelector: string): Locator;
+  allTextContents(): Promise<string[]>;
   selector: Selector;
 }
 
@@ -133,27 +152,37 @@ export class ShimLocator implements Locator {
     await this.t.click(this.selector);
     await this.t.press(key);
   }
+
+  locator(subSelector: string): ShimLocator {
+    const compound =
+      typeof this.selector === "string"
+        ? `${this.selector} ${subSelector}`
+        : subSelector;
+    return new ShimLocator(this.t, compound);
+  }
+
+  async allTextContents(): Promise<string[]> {
+    if (typeof this.selector !== "string") return [];
+    const els = document.querySelectorAll(this.selector);
+    return Array.from(els).map((el) => el.textContent ?? "");
+  }
 }
 
-export const expect = (locatorOrPage: Locator | Page) => {
-  // If passed a Locator
-  if (locatorOrPage instanceof ShimLocator) {
-    const selector = locatorOrPage.selector;
-    // We need access to `t` (TestActions)
-    // Trick: ShimLocator holds `t`.
-    // But `expect` is imported independently in specs.
-    // Spec: `import { expect } from '@playwright/test'`
-    // Usage: `await expect(locator).toBeFocused()`
+// Duck-type check: ShimLocator has both `selector` and `t` properties.
+// We avoid `instanceof` because Vite HMR can create duplicate module
+// instances, causing `instanceof ShimLocator` to fail across boundaries.
+const isLocator = (v: any): v is ShimLocator =>
+  v != null && "selector" in v && "t" in v;
 
-    // Problem: `expect` function needs `t` to execute assertions.
-    // But `expect` is stateless import.
-    // Solution: ShimLocator MUST expose `t` publicly or we attach it.
-    // We'll trust ShimLocator has it.
-    const t = (locatorOrPage as any).t as TestActions;
+export const expect = (locatorOrPage: Locator | Page | any) => {
+  // If passed a Locator (duck-typed)
+  if (isLocator(locatorOrPage)) {
+    const selector = locatorOrPage.selector;
+    const t = locatorOrPage.t as TestActions;
 
     return {
       resolves: {
-        toBe: () => {}, // stub
+        toBe: () => { }, // stub
       },
       toBeFocused: async () => {
         await t.expect(selector as string).toBeFocused();
@@ -166,6 +195,17 @@ export const expect = (locatorOrPage: Locator | Page) => {
       },
       toHaveText: async (text: string) => {
         await t.expect(selector as string).toHaveText(text);
+      },
+      toContainText: async (text: string) => {
+        const sel = selector as string;
+        const el = document.querySelector(sel);
+        const actual = el?.textContent ?? "";
+        const passed = actual.includes(text);
+        if (!passed) {
+          throw new Error(
+            `Expected "${sel}" to contain text "${text}", got "${actual}"`,
+          );
+        }
       },
       toBeVisible: async () => {
         await t.expect(selector as string).toBeVisible();
@@ -181,8 +221,6 @@ export const expect = (locatorOrPage: Locator | Page) => {
           await t.expect(selector as string).toNotHaveAttribute(name, value);
         },
         toBeFocused: async () => {
-          // Missing in TestActions?
-          // Throw warning or implement via wait
           console.warn(
             "expect(..).not.toBeFocused() is not fully implemented in TestBot.",
           );
@@ -191,11 +229,24 @@ export const expect = (locatorOrPage: Locator | Page) => {
     };
   }
 
-  // Basic expect(value).toBe(expected) support if needed
+  // Primitive expect: expect(value).toBe / toBeLessThan / toBeGreaterThan
+  const primitiveValue = locatorOrPage as any;
   return {
     toBe: (expected: any) => {
-      if (locatorOrPage !== expected)
-        throw new Error(`Expected ${expected}, got ${locatorOrPage}`);
+      if (primitiveValue !== expected)
+        throw new Error(`Expected ${expected}, got ${primitiveValue}`);
+    },
+    toBeLessThan: (expected: number) => {
+      if (!(primitiveValue < expected))
+        throw new Error(
+          `Expected ${primitiveValue} to be less than ${expected}`,
+        );
+    },
+    toBeGreaterThan: (expected: number) => {
+      if (!(primitiveValue > expected))
+        throw new Error(
+          `Expected ${primitiveValue} to be greater than ${expected}`,
+        );
     },
   };
 };

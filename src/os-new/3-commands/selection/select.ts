@@ -1,7 +1,9 @@
 /**
- * OS_SELECT Command — Space key selection (kernel version)
+ * OS_SELECT Command — aria-selected state management (kernel version)
  *
  * Supports single, toggle, range, and replace modes.
+ * Pure selection only — does NOT trigger app callbacks.
+ * For aria-checked toggling, use OS_CHECK instead.
  */
 
 import { produce } from "immer";
@@ -55,7 +57,7 @@ export const SELECT = kernel.defineCommand(
 
           case "toggle":
             if (z.selection.includes(targetId)) {
-              z.selection = z.selection.filter((id) => id !== targetId);
+              z.selection = z.selection.filter((id: string) => id !== targetId);
             } else {
               z.selection.push(targetId);
               z.selectionAnchor = targetId;

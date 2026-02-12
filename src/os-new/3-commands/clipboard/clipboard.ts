@@ -10,33 +10,40 @@
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
+import { resolveFocusId } from "../utils/resolveFocusId";
 
 export const OS_COPY = kernel.defineCommand("OS_COPY", (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 
+    const zone = ctx.state.os.focus.zones[activeZoneId];
     const entry = ZoneRegistry.get(activeZoneId);
     if (!entry?.onCopy) return;
 
-    return { dispatch: entry.onCopy };
+    const focusedItemId = zone?.focusedItemId;
+    return { dispatch: focusedItemId ? resolveFocusId(entry.onCopy, focusedItemId) : entry.onCopy };
 });
 
 export const OS_CUT = kernel.defineCommand("OS_CUT", (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 
+    const zone = ctx.state.os.focus.zones[activeZoneId];
     const entry = ZoneRegistry.get(activeZoneId);
     if (!entry?.onCut) return;
 
-    return { dispatch: entry.onCut };
+    const focusedItemId = zone?.focusedItemId;
+    return { dispatch: focusedItemId ? resolveFocusId(entry.onCut, focusedItemId) : entry.onCut };
 });
 
 export const OS_PASTE = kernel.defineCommand("OS_PASTE", (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 
+    const zone = ctx.state.os.focus.zones[activeZoneId];
     const entry = ZoneRegistry.get(activeZoneId);
     if (!entry?.onPaste) return;
 
-    return { dispatch: entry.onPaste };
+    const focusedItemId = zone?.focusedItemId;
+    return { dispatch: focusedItemId ? resolveFocusId(entry.onPaste, focusedItemId) : entry.onPaste };
 });

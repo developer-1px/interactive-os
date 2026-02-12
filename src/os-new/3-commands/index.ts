@@ -8,7 +8,10 @@
 export { FOCUS, SYNC_FOCUS, RECOVER, STACK_PUSH, STACK_POP } from "./focus";
 // Interaction
 export { ACTIVATE } from "./interaction";
+export { OS_CHECK } from "./interaction";
+export { OS_DELETE } from "./interaction";
 export { ESCAPE } from "./interaction";
+export { OS_MOVE_UP, OS_MOVE_DOWN } from "./interaction";
 export { TAB } from "./interaction";
 // Selection
 export {

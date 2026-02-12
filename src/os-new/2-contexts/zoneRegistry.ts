@@ -20,7 +20,13 @@ export interface ZoneEntry {
   parentId: string | null;
   /** Command dispatched on ESC when dismiss.escape is "close" */
   onDismiss?: BaseCommand;
-  // Command bindings (Zone-level delegation for clipboard/history)
+  // Command bindings (Zone-level delegation)
+  onAction?: BaseCommand;
+  onSelect?: BaseCommand;
+  onCheck?: BaseCommand;
+  onDelete?: BaseCommand;
+  onMoveUp?: BaseCommand;
+  onMoveDown?: BaseCommand;
   onCopy?: BaseCommand;
   onCut?: BaseCommand;
   onPaste?: BaseCommand;

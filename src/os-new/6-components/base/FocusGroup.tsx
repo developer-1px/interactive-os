@@ -72,7 +72,7 @@ export interface FocusGroupProps
     | "onCopy"
     | "onCut"
     | "onPaste"
-    | "onToggle"
+    | "onCheck"
   > {
   /** Group ID (optional, auto-generated if not provided) */
   id?: string;
@@ -113,11 +113,17 @@ export interface FocusGroupProps
   /** Command dispatched on paste (Cmd+V) */
   onPaste?: BaseCommand;
 
-  /** Command dispatched on toggle (Space) - for checkboxes, multi-select */
-  onToggle?: BaseCommand;
+  /** Command dispatched on check (Space) - for aria-checked state */
+  onCheck?: BaseCommand;
 
   /** Command dispatched on delete (Backspace/Delete) */
   onDelete?: BaseCommand;
+
+  /** Command dispatched on move up (Meta+ArrowUp) */
+  onMoveUp?: BaseCommand;
+
+  /** Command dispatched on move down (Meta+ArrowDown) */
+  onMoveDown?: BaseCommand;
 
   /** Command dispatched on undo (Cmd+Z) */
   onUndo?: BaseCommand;
@@ -185,8 +191,10 @@ export function FocusGroup({
   onCopy: _onCopy,
   onCut: _onCut,
   onPaste: _onPaste,
-  onToggle: _onToggle,
+  onCheck: _onCheck,
   onDelete: _onDelete,
+  onMoveUp: _onMoveUp,
+  onMoveDown: _onMoveDown,
   onUndo: _onUndo,
   onRedo: _onRedo,
   onDismiss,
@@ -243,6 +251,12 @@ export function FocusGroup({
         ...(role !== undefined ? { role } : {}),
         parentId,
         ...(onDismiss !== undefined ? { onDismiss } : {}),
+        ...(_onAction !== undefined ? { onAction: _onAction } : {}),
+        ...(_onSelect !== undefined ? { onSelect: _onSelect } : {}),
+        ...(_onCheck !== undefined ? { onCheck: _onCheck } : {}),
+        ...(_onDelete !== undefined ? { onDelete: _onDelete } : {}),
+        ...(_onMoveUp !== undefined ? { onMoveUp: _onMoveUp } : {}),
+        ...(_onMoveDown !== undefined ? { onMoveDown: _onMoveDown } : {}),
         ...(_onCopy !== undefined ? { onCopy: _onCopy } : {}),
         ...(_onCut !== undefined ? { onCut: _onCut } : {}),
         ...(_onPaste !== undefined ? { onPaste: _onPaste } : {}),

@@ -151,7 +151,8 @@ function senseMouseDown(e: Event) {
   });
   isDispatching = false;
 
-  // Then SELECT based on modifiers
+  // Then SELECT for visual selection (click = navigate + select, never CHECK)
+  // CHECK is keyboard-only (Space key) — matches W3C APG pattern
   dispatchSelectCommand(me, itemId);
 
   // For expandable items (aria-expanded present), toggle expansion on click
