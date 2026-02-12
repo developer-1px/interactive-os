@@ -10,7 +10,7 @@
 
 import { useEffect } from "react";
 import { kernel } from "../kernel";
-import { getCanonicalKey } from "./getCanonicalKey";
+import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
 import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
 
 // Ensure OS defaults are registered

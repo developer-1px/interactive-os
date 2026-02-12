@@ -14,7 +14,7 @@
  */
 
 export type {
-  AnyCommand,
+  BaseCommand,
   Command,
   CommandFactory,
   ContextToken,

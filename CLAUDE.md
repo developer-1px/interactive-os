@@ -46,35 +46,39 @@ Note: Vite also aliases `@playwright/test` → `src/os/testBot/playwright/index.
 ### Data Flow Pipeline
 
 ```
-DOM Event → Sensor (1-sensor) → OS Command (2-command) → runOS() pure function
-→ Store Update (3-store, Zustand+Immer) → DOM Effects (4-effect)
+DOM Event → Listener (1-listeners) → Keybindings → kernel.dispatch(Command)
+→ Command Handler (pure function) → State Mutation + EffectMap
+→ defineEffect (side-effect execution) → Transaction 기록
 ```
 
-All state changes flow through this single pipeline. No direct store manipulation or `el.focus()` calls.
+All state changes flow through Kernel's single pipeline. Listeners only translate DOM events to OS commands — they never resolve zones, read registries, or perform routing. The Kernel handles all command routing and zone resolution.
 
 ### Source Structure
 
 ```
 src/
 ├── os-new/              # Canonical OS implementation (active development)
-│   ├── 1-sensor/        # Input translation (keyboard, focus, clipboard, history)
-│   ├── 2-command/       # Command handlers (OS_ACTIVATE, OS_NAVIGATE, OS_SELECT, etc.)
-│   ├── 3-store/         # Zustand stores and slices (cursor, expansion, selection, spatial)
-│   ├── 4-effect/        # DOM effect builders and middleware
-│   ├── core/            # Logic engine (LogicNode, Rule, evalContext)
-│   ├── primitives/      # React primitives (FocusGroup, FocusItem, hooks)
-│   ├── schema/          # Type definitions (OSState, commands, focus, transaction)
-│   ├── registry/        # Role-based zone registry
-│   ├── spike/           # Experimental kernel integration demos
-│   └── lib/             # OS utilities
-├── os/                  # Legacy OS features (being migrated to os-new)
-│   ├── app/debug/       # Inspector UI (Cmd+D toggle)
-│   ├── inspector/       # InspectorStore (Zustand + localStorage persist)
-│   └── testBot/         # In-browser test framework
-├── apps/                # Applications (kanban/, todo/)
+│   ├── 1-listeners/     # Input translation (keyboard, focus, clipboard)
+│   ├── 2-contexts/      # Zone registry, context providers
+│   ├── 3-commands/      # Kernel command handlers (OS_ACTIVATE, OS_NAVIGATE, OS_COPY, etc.)
+│   ├── 4-effects/       # defineEffect handlers
+│   ├── 5-hooks/         # Shared React hooks
+│   ├── 6-components/    # UI primitives (Zone, Item, Field, Trigger, Modal, Dialog)
+│   ├── keymaps/         # Key→command bindings (osDefaults.ts)
+│   ├── middleware/      # Kernel middleware (history, persistence)
+│   ├── registry/        # Role-based zone registry (roleRegistry.ts)
+│   ├── schema/          # Type definitions (commands, effects, focus, state)
+│   ├── state/           # Initial state definitions
+│   ├── kernel.ts        # Kernel singleton
+│   ├── appSlice.ts      # App slice registration factory
+│   └── AntigravityOS.tsx # Facade re-export (OS.Zone, OS.Item, etc.)
+├── apps/                # Applications (todo/, builder/)
+├── inspector/           # Inspector UI (Cmd+D toggle), Zustand stores
 ├── pages/               # Route pages
-├── packages/kernel/     # Standalone kernel package (Group API)
 └── lib/                 # Generic utilities
+packages/
+├── kernel/              # Standalone kernel package (Group API)
+└── surface/             # Styling and layout utilities
 ```
 
 ### Layer Dependency (strict one-way)

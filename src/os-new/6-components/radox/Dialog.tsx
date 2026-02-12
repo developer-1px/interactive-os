@@ -29,7 +29,7 @@ import {
 import { Trigger, useOverlayContext } from "../primitives/Trigger.tsx";
 import { Zone } from "../primitives/Zone.tsx";
 import { OVERLAY_CLOSE } from "@os/3-commands/overlay.ts";
-import type { BaseCommand } from "@os/schema/command/BaseCommand.ts";
+import type { BaseCommand } from "@kernel";
 
 // ═══════════════════════════════════════════════════════════════════
 // DialogZone — Zone wrapper that connects dismiss to OVERLAY_CLOSE

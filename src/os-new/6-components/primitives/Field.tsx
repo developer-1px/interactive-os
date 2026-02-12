@@ -4,10 +4,8 @@ import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
 import { kernel } from "@os/kernel.ts";
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import type {
-  BaseCommand,
-  FieldCommandFactory,
-} from "@os/schema/command/BaseCommand.ts";
+import type { BaseCommand } from "@kernel";
+import type { FieldCommandFactory } from "@os/schema/command/BaseCommand.ts";
 import type { FocusTarget } from "@os/schema/focus/FocusTarget.ts";
 import {
   type FieldConfig,

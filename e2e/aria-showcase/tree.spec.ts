@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Tree", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/aria-showcase");
+    await page.goto("/playground/aria");
   });
 
   test("Expand/Collapse", async ({ page }) => {
@@ -60,18 +60,19 @@ test.describe("Tree", () => {
   });
 
   test("Click Interaction", async ({ page }) => {
+    // Click 1: focuses + expands tree-src (toggle: false→true)
     await page.locator("#tree-src").click();
     await expect(page.locator("#tree-src")).toBeFocused();
-
-    await page.locator("#tree-src").click();
     await expect(page.locator("#tree-src")).toHaveAttribute(
       "aria-expanded",
       "true",
     );
 
+    // Click child: child focused, parent stays expanded
     await page.locator("#tree-components").click();
     await expect(page.locator("#tree-components")).toBeFocused();
 
+    // Click parent again: toggles expansion (true→false)
     await page.locator("#tree-src").click();
     await expect(page.locator("#tree-src")).toHaveAttribute(
       "aria-expanded",

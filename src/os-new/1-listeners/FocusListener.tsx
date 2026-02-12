@@ -9,13 +9,33 @@
  */
 
 import { useEffect } from "react";
-import { FOCUS, RECOVER, SELECT, SYNC_FOCUS } from "@os/3-commands";
+import { EXPAND, FOCUS, RECOVER, SELECT, SYNC_FOCUS } from "@os/3-commands";
 import { kernel } from "@os/kernel";
-import {
-  findFocusableItem,
-  resolveFocusTarget,
-} from "./focusDOMQueries";
-import { sensorGuard } from "./loopGuard";
+import { sensorGuard } from "../lib/loopGuard";
+
+// ═══════════════════════════════════════════════════════════════════
+// DOM Query Utilities (FocusListener-private)
+// ═══════════════════════════════════════════════════════════════════
+
+const findFocusableItem = (el: HTMLElement) =>
+  el.closest("[data-item-id]") as HTMLElement | null;
+
+interface FocusTargetInfo {
+  itemId: string;
+  itemEl: HTMLElement;
+  groupId: string;
+}
+
+function resolveFocusTarget(target: HTMLElement): FocusTargetInfo | null {
+  const itemEl = findFocusableItem(target);
+  if (!itemEl?.id) return null;
+
+  const zoneEl = itemEl.closest("[data-focus-group]") as HTMLElement | null;
+  const groupId = zoneEl?.getAttribute("data-focus-group") ?? null;
+  if (!groupId) return null;
+
+  return { itemId: itemEl.id, itemEl, groupId };
+}
 
 let isMounted = false;
 
@@ -108,7 +128,7 @@ function dispatchSelectCommand(e: MouseEvent, itemId: string) {
 // Event Handlers
 // ═══════════════════════════════════════════════════════════════════
 
-/** MouseDown → FOCUS + SELECT */
+/** MouseDown → FOCUS + SELECT (+ EXPAND for expandable items) */
 function senseMouseDown(e: Event) {
   if (shouldIgnoreEvent(e)) return;
   const me = e as MouseEvent;
@@ -133,6 +153,12 @@ function senseMouseDown(e: Event) {
 
   // Then SELECT based on modifiers
   dispatchSelectCommand(me, itemId);
+
+  // For expandable items (aria-expanded present), toggle expansion on click
+  const targetEl = document.getElementById(itemId) ?? item;
+  if (targetEl.hasAttribute("aria-expanded")) {
+    kernel.dispatch(EXPAND({ itemId, action: "toggle" }));
+  }
 }
 
 /** FocusIn → SYNC_FOCUS (state sync only, no DOM effects) */

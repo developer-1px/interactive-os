@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
-import { type DocItem, cleanLabel } from "../pages/docs/DocsSidebar";
+import { type DocItem, cleanLabel } from "./docsUtils";
 
-interface DocsSidebarStandaloneProps {
+interface DocsSidebarProps {
     items: DocItem[];
     activePath: string | undefined;
     onSelect: (path: string) => void;
@@ -12,11 +12,13 @@ interface DocsSidebarStandaloneProps {
 const SidebarItem = ({
     item,
     level = 0,
+    index,
     activePath,
     onSelect,
 }: {
     item: DocItem;
     level?: number;
+    index?: number;
     activePath: string | undefined;
     onSelect: (path: string) => void;
 }) => {
@@ -49,11 +51,12 @@ const SidebarItem = ({
                         {cleanLabel(item.name)}
                     </h3>
                     <div className="flex flex-col">
-                        {item.children?.map((child) => (
+                        {item.children?.map((child, i) => (
                             <SidebarItem
                                 key={child.path}
                                 item={child}
                                 level={level + 1}
+                                index={child.type === "file" ? i + 1 : undefined}
                                 activePath={activePath}
                                 onSelect={onSelect}
                             />
@@ -81,11 +84,12 @@ const SidebarItem = ({
                 </button>
                 {isOpen && (
                     <div className="flex flex-col">
-                        {item.children?.map((child) => (
+                        {item.children?.map((child, i) => (
                             <SidebarItem
                                 key={child.path}
                                 item={child}
                                 level={level + 1}
+                                index={child.type === "file" ? i + 1 : undefined}
                                 activePath={activePath}
                                 onSelect={onSelect}
                             />
@@ -98,6 +102,8 @@ const SidebarItem = ({
 
     // File render
     const isActive = item.path === activePath;
+    const label = index != null ? `${index}. ${cleanLabel(item.name)}` : cleanLabel(item.name);
+
     return (
         <button
             type="button"
@@ -112,16 +118,12 @@ const SidebarItem = ({
             style={{ paddingLeft: `${level * 12 + 12}px` }}
         >
             <span className="w-[14px] flex justify-center opacity-50" />
-            <span className="truncate">{cleanLabel(item.name)}</span>
+            <span className="truncate">{label}</span>
         </button>
     );
 };
 
-export function DocsSidebarStandalone({
-    items,
-    activePath,
-    onSelect,
-}: DocsSidebarStandaloneProps) {
+export function DocsSidebar({ items, activePath, onSelect }: DocsSidebarProps) {
     return (
         <div className="w-72 border-r border-slate-100 flex flex-col bg-[#FBFBFB] h-full">
             <div className="px-5 py-5 flex items-center gap-2 mb-2">

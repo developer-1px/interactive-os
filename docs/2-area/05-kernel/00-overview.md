@@ -727,3 +727,5 @@ Kernel은 순수한 커맨드 처리 엔진이다. OS가 다음을 담당한다:
 
 - [State Isolation Patterns](../../3-resource/08-state-isolation-patterns.md) — Redux, Zustand, re-frame, Elm, XState, OS 프로세스의 state 격리 패턴 비교. 커널의 scope state isolation 설계 참고자료.
 - [Nominal Typing Patterns](../../3-resource/09-nominal-typing-patterns.md) — TypeScript의 구조적 타이핑 한계를 극복하는 Branded Types, Phantom Types 기법과 `AnyCommand` 설계 배경.
+- [Server State 혁명](../../3-resource/10-server-state-revolution.md) — Redux → TanStack Query의 Server State 분리 역사와 re-frame의 "Effect as Data" 철학이 걸어온 길. 커널의 EffectMap 설계 참고자료.
+- [re-frame Flows 딥다이브](../../3-resource/11-re-frame-flows-deep-dive.md) — Flows의 내부 동작, 4가지 라이프사이클 전이, 레이어링, TanStack Query 편의 기능 비교. 커널의 파생 상태 설계 참고자료.

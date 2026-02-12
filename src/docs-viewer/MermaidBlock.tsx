@@ -8,14 +8,13 @@ mermaid.initialize({
   fontFamily: "ui-sans-serif, system-ui, sans-serif",
 });
 
-let idCounter = 0;
-
 export function MermaidBlock({ code }: { code: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const idRef = useRef(`mermaid-${crypto.randomUUID()}`);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = `mermaid-${idCounter++}`;
+    const id = idRef.current;
 
     let cancelled = false;
     mermaid

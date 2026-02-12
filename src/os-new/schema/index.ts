@@ -6,10 +6,8 @@
  */
 
 // ── Command domain ──
-export type {
-  BaseCommand,
-  FieldCommandFactory,
-} from "./command/BaseCommand.ts";
+export type { BaseCommand } from "@kernel";
+export type { FieldCommandFactory } from "./command/BaseCommand.ts";
 export type {
   OSActivatePayload,
   OSCommandUnion,

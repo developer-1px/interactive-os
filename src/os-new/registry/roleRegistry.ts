@@ -92,7 +92,7 @@ const CHECKED_ROLES = new Set([
 ]);
 
 /** Roles where items can be expanded/collapsed */
-const EXPANDABLE_ROLES = new Set(["treeitem", "button", "menuitem"]);
+const EXPANDABLE_ROLES = new Set(["treeitem", "menuitem"]);
 
 /** Get the default child role for a Zone role */
 export function getChildRole(zoneRole?: ZoneRole | string): string {

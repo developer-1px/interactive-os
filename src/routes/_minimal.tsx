@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_minimal")({
 
 function MinimalLayout() {
   return (
-    <OS.Zone id="os-shell" className="h-full flex flex-col overflow-hidden">
+    <OS.Zone id="os-shell" className="h-full flex flex-col">
       <Outlet />
     </OS.Zone>
   );

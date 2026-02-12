@@ -102,9 +102,9 @@ body {
 
 /* ── 3-Column Fixed Layout ─────────────────────────────────
  * Always: GlobalNav | app-content (scrollable) | Inspector
- * Scroll is controlled per-route by OS.App Zone className:
- *   isAppShell  → h-full overflow-hidden (app fills viewport)
- *   default     → min-h-full (content flows, .app-content scrolls)
+ * Scroll is controlled per-route via staticData.isAppShell:
+ *   isAppShell  → .app-shell (h-full, no scroll — app fills viewport)
+ *   default     → overflow-y: auto (page-style scrollable content)
  */
 .app-viewport {
   height: 100vh;
@@ -130,6 +130,13 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* App-shell mode: content fills viewport, no scroll on container */
+.app-content.app-shell {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Premium Scrollbar */

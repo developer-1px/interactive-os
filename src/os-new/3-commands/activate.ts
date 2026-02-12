@@ -20,7 +20,7 @@ export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
   const focusedEl = document.getElementById(zone.focusedItemId);
   if (focusedEl?.hasAttribute("aria-expanded")) {
     return {
-      dispatch: EXPAND({ action: "toggle", itemId: zone.focusedItemId }) as any,
+      dispatch: EXPAND({ action: "toggle", itemId: zone.focusedItemId }),
     };
   }
 

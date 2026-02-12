@@ -30,7 +30,7 @@ import {
   useRef,
 } from "react";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import type { BaseCommand } from "@os/schema/command/BaseCommand.ts";
+import type { BaseCommand } from "@kernel";
 import { OVERLAY_OPEN, OVERLAY_CLOSE } from "@os/3-commands/overlay.ts";
 import type { OverlayEntry } from "@os/state/OSState.ts";
 

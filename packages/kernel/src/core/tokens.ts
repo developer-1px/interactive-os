@@ -44,9 +44,16 @@ export type Command<Type extends string = string, Payload = void> = {
   readonly [__commandBrand]: true;
 };
 
-/** Any command regardless of payload type. For generic storage/dispatch. */
-// biome-ignore lint/suspicious/noExplicitAny: intentional type-level wildcard
-export type AnyCommand = Command<string, any>;
+/**
+ * Generic command interface for storage and dispatch.
+ * Any Command<T,P> is naturally assignable to this (structural subtype).
+ * Used where the concrete command type is unknown (e.g., EffectMap.dispatch, ZoneEntry).
+ */
+export interface BaseCommand {
+  readonly type: string;
+  readonly payload?: unknown;
+  readonly scope?: ScopeToken[];
+}
 
 /** Factory function that creates a typed Command. */
 export type CommandFactory<Type extends string = string, Payload = void> = {
@@ -92,7 +99,7 @@ export type EffectFields<E extends Record<string, EffectToken>> = {
  */
 export type TypedEffectMap<S, E extends Record<string, EffectToken>> = {
   state?: S;
-  dispatch?: AnyCommand | AnyCommand[];
+  dispatch?: BaseCommand | BaseCommand[];
 } & EffectFields<E>;
 
 /**

@@ -11,7 +11,7 @@
 
 import type { ZoneRole } from "../registry/roleRegistry";
 import type { FocusGroupConfig } from "../schema/focus/config/FocusGroupConfig";
-import type { AnyCommand } from "@kernel";
+import type { BaseCommand } from "@kernel";
 
 export interface ZoneEntry {
   config: FocusGroupConfig;
@@ -19,13 +19,13 @@ export interface ZoneEntry {
   role?: ZoneRole;
   parentId: string | null;
   /** Command dispatched on ESC when dismiss.escape is "close" */
-  onDismiss?: AnyCommand;
+  onDismiss?: BaseCommand;
   // Command bindings (Zone-level delegation for clipboard/history)
-  onCopy?: any;
-  onCut?: any;
-  onPaste?: any;
-  onUndo?: any;
-  onRedo?: any;
+  onCopy?: BaseCommand;
+  onCut?: BaseCommand;
+  onPaste?: BaseCommand;
+  onUndo?: BaseCommand;
+  onRedo?: BaseCommand;
 }
 
 const registry = new Map<string, ZoneEntry>();

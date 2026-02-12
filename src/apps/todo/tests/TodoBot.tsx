@@ -19,8 +19,8 @@ import {
   type TestBot,
   useTestBotRoutes,
 } from "@inspector/testbot";
-import { dispatchToZone } from "@/os-new/1-listeners/dispatchToZone";
 import { kernel } from "@/os-new/kernel";
+import { OS_COPY, OS_CUT, OS_PASTE } from "@/os-new/3-commands/clipboard";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
@@ -43,9 +43,9 @@ function restore(s: any) {
 }
 
 /** OS-level clipboard dispatch (TestBot can't trigger native events) */
-const osCopy = () => dispatchToZone("copyCommand");
-const osCut = () => dispatchToZone("cutCommand");
-const osPaste = () => dispatchToZone("pasteCommand");
+const osCopy = () => kernel.dispatch(OS_COPY());
+const osCut = () => kernel.dispatch(OS_CUT());
+const osPaste = () => kernel.dispatch(OS_PASTE());
 
 // ═══════════════════════════════════════════════════════════════════
 // Test Definitions

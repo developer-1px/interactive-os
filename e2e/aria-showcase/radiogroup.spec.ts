@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Radiogroup", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/aria-showcase");
+    await page.goto("/playground/aria");
   });
 
   test("Vertical Navigation", async ({ page }) => {

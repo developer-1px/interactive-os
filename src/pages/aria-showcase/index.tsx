@@ -5,7 +5,8 @@
 
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { useFocusExpansion } from "@/os-new/5-hooks/useFocusExpansion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { kernel } from "@os/kernel.ts";
 import { Icon } from "@/lib/Icon";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
@@ -50,10 +51,7 @@ export function AriaShowcasePage() {
 function AriaShowcaseContent() {
   // State management for interactive examples
   const [selectedTab, setSelectedTab] = useState("tab-account");
-  const [menuChecked, setMenuChecked] = useState<Record<string, boolean>>({
-    "menu-ruler": true,
-    "menu-grid": false,
-  });
+  // menuChecked removed — menu checkboxes now use kernel selection
   const [pressedTools, setPressedTools] = useState<Record<string, boolean>>({
     bold: true,
   });
@@ -175,6 +173,7 @@ function AriaShowcaseContent() {
             id="demo-menu"
             role="menu"
             navigate={{ orientation: "vertical", loop: true }}
+            select={{ mode: "multiple", toggle: true }}
             tab={{ behavior: "trap" }}
             aria-label="File actions"
             className="w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1"
@@ -200,42 +199,27 @@ function AriaShowcaseContent() {
               id="menu-ruler"
               role="menuitemcheckbox"
               as="button"
-              aria-checked={menuChecked["menu-ruler"]}
-              onClick={() =>
-                setMenuChecked((p) => ({
-                  ...p,
-                  "menu-ruler": !p["menu-ruler"],
-                }))
-              }
               className="
-                                w-full px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 
+                                group w-full px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 
                                 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none
                                 cursor-pointer
                             "
             >
               <span>Show Ruler</span>
-              {menuChecked["menu-ruler"] && (
-                <span className="text-indigo-600 font-bold">✓</span>
-              )}
+              <span className="text-indigo-600 opacity-0 group-data-[selected=true]:opacity-100 transition-opacity">✓</span>
             </FocusItem>
             <FocusItem
               id="menu-grid"
               role="menuitemcheckbox"
               as="button"
-              aria-checked={menuChecked["menu-grid"]}
-              onClick={() =>
-                setMenuChecked((p) => ({ ...p, "menu-grid": !p["menu-grid"] }))
-              }
               className="
-                                w-full px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 
+                                group w-full px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 
                                 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none
                                 cursor-pointer
                             "
             >
               <span>Show Grid</span>
-              {menuChecked["menu-grid"] && (
-                <span className="text-indigo-600 font-bold">✓</span>
-              )}
+              <span className="text-indigo-600 opacity-0 group-data-[selected=true]:opacity-100 transition-opacity">✓</span>
             </FocusItem>
 
             <div role="separator" className="my-1 border-t border-gray-200" />
@@ -243,6 +227,7 @@ function AriaShowcaseContent() {
             <FocusItem
               id="menu-disabled"
               role="menuitem"
+              disabled
               aria-disabled="true"
               className="px-4 py-2 text-sm text-gray-300 aria-disabled:cursor-not-allowed data-[focused=true]:bg-gray-50 data-[focused=true]:outline-none"
             >
@@ -686,7 +671,7 @@ function AriaCard({
 }
 
 function TreeContent() {
-  const { isExpanded, toggleExpanded } = useFocusExpansion();
+  const { isExpanded } = useFocusExpansion();
 
   return (
     <>
@@ -694,7 +679,6 @@ function TreeContent() {
         id="tree-src"
         role="treeitem"
         aria-level={1}
-        onClick={() => toggleExpanded("tree-src")}
         className="
                     group px-2 py-1 text-sm rounded flex items-center gap-2 cursor-pointer
                     hover:bg-gray-50
@@ -768,7 +752,6 @@ function TreeContent() {
         id="tree-public"
         role="treeitem"
         aria-level={1}
-        onClick={() => toggleExpanded("tree-public")}
         className="
                     group px-2 py-1 text-sm rounded flex items-center gap-2 cursor-pointer
                     hover:bg-gray-50
@@ -810,7 +793,7 @@ function TreeContent() {
 }
 
 function AccordionContent() {
-  const { isExpanded, toggleExpanded } = useFocusExpansion();
+  const { isExpanded } = useFocusExpansion();
 
   const items = [
     {
@@ -847,8 +830,8 @@ function AccordionContent() {
             id={item.id}
             as="button"
             role="button"
+            aria-expanded={isExpanded(item.id)}
             aria-controls={`${item.id}-panel`}
-            onClick={() => toggleExpanded(item.id)}
             className="
                             w-full px-4 py-3.5 flex items-center gap-3 text-left text-sm
                             hover:bg-gray-50 transition-colors
@@ -882,18 +865,22 @@ function AccordionContent() {
 }
 
 function DisclosureContent() {
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpen = kernel.useComputed(
+    (state) =>
+      state.os.focus.zones["demo-disclosure"]?.expandedItems?.includes(
+        "disclosure-trigger",
+      ) ?? false,
+  );
 
   return (
     <div className="w-full">
-      <FocusGroup id="demo-disclosure" role="group" aria-label="Disclosure">
+      <FocusGroup id="demo-disclosure" role="disclosure" aria-label="Disclosure">
         <FocusItem
           id="disclosure-trigger"
           as="button"
           role="button"
           aria-expanded={isOpen}
           aria-controls="disclosure-panel"
-          onClick={() => setIsOpen(!isOpen)}
           className="
             w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700
             bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors
@@ -938,30 +925,32 @@ function DialogDemo({
   onClose: () => void;
 }) {
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const overlayRef = useRef<HTMLDivElement | null>(null);
 
-  // Synchronous focus restore: focus trigger BEFORE closing dialog
-  const handleClose = () => {
-    triggerRef.current?.focus();
+  const handleClose = useCallback(() => {
     onClose();
-  };
+    // Defer focus restore to after dialog unmount to prevent RECOVER from stealing it
+    // Double-rAF to ensure we run AFTER React unmount and synchronous useLayoutEffect cleanup (STACK_POP)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        triggerRef.current?.focus();
+      });
+    });
+  }, [onClose]);
 
-  // Escape key handler on the overlay
+  // Observe kernel dismiss: when dialog zone becomes inactive after being open,
+  // close the dialog and restore focus to trigger.
+  const dialogActive = kernel.useComputed(
+    (state) => state.os.focus.activeZoneId === "demo-dialog",
+  );
+  const wasActiveRef = useRef(false);
   useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-        handleClose();
-      }
-    };
-    // Capture phase to intercept before OS keyboard system
-    document.addEventListener("keydown", handleKeyDown, { capture: true });
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown, { capture: true });
-    };
-  }, [isOpen, handleClose]);
+    if (dialogActive) {
+      wasActiveRef.current = true;
+    } else if (wasActiveRef.current && isOpen) {
+      wasActiveRef.current = false;
+      handleClose();
+    }
+  }, [dialogActive, isOpen, handleClose]);
 
   return (
     <>
@@ -976,7 +965,6 @@ function DialogDemo({
       </button>
       {isOpen && (
         <div
-          ref={overlayRef}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
         >
           <FocusGroup
@@ -1034,28 +1022,31 @@ function AlertDialogDemo({
 }) {
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-  // Synchronous focus restore: focus trigger BEFORE closing dialog
-  const handleClose = () => {
-    // Focus the trigger immediately, while dialog is still mounted
-    triggerRef.current?.focus();
+  const handleClose = useCallback(() => {
     onClose();
-  };
+    // Defer focus restore to after dialog unmount to prevent RECOVER from stealing it
+    // Double-rAF to ensure we run AFTER React unmount and synchronous useLayoutEffect cleanup (STACK_POP)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        triggerRef.current?.focus();
+      });
+    });
+  }, [onClose]);
 
-  // Escape key handler
+  // Observe kernel dismiss: when alertdialog zone becomes inactive after being open,
+  // close the dialog and restore focus to trigger.
+  const alertActive = kernel.useComputed(
+    (state) => state.os.focus.activeZoneId === "demo-alertdialog",
+  );
+  const wasActiveRef = useRef(false);
   useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-        handleClose();
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown, { capture: true });
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown, { capture: true });
-    };
-  }, [isOpen, handleClose]);
+    if (alertActive) {
+      wasActiveRef.current = true;
+    } else if (wasActiveRef.current && isOpen) {
+      wasActiveRef.current = false;
+      handleClose();
+    }
+  }, [alertActive, isOpen, handleClose]);
 
   return (
     <>

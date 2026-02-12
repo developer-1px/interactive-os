@@ -1,16 +1,17 @@
 /**
  * ClipboardListener - Browser Native Clipboard Event Handler
  *
- * Catches native `copy`, `cut`, `paste` DOM events and routes them
- * to the active Zone's bound commands. This replaces per-app
- * ClipboardManager components with OS-level handling.
+ * Catches native `copy`, `cut`, `paste` DOM events and dispatches
+ * OS-level clipboard commands. The kernel handles zone resolution
+ * and app command delegation — same pattern as KeyboardListener → NAVIGATE.
  *
  * No keybindings needed — the browser fires these events natively
  * when the user presses ⌘C, ⌘X, ⌘V.
  */
 
 import { useEffect } from "react";
-import { dispatchToZone } from "./dispatchToZone";
+import { kernel } from "../kernel";
+import { OS_COPY, OS_CUT, OS_PASTE } from "../3-commands/clipboard";
 
 function isInputActive(): boolean {
   const el = document.activeElement;
@@ -25,23 +26,20 @@ export function ClipboardListener() {
   useEffect(() => {
     const handleCopy = (e: ClipboardEvent) => {
       if (isInputActive()) return;
-      if (dispatchToZone("copyCommand")) {
-        e.preventDefault();
-      }
+      kernel.dispatch(OS_COPY());
+      e.preventDefault();
     };
 
     const handleCut = (e: ClipboardEvent) => {
       if (isInputActive()) return;
-      if (dispatchToZone("cutCommand")) {
-        e.preventDefault();
-      }
+      kernel.dispatch(OS_CUT());
+      e.preventDefault();
     };
 
     const handlePaste = (e: ClipboardEvent) => {
       if (isInputActive()) return;
-      if (dispatchToZone("pasteCommand")) {
-        e.preventDefault();
-      }
+      kernel.dispatch(OS_PASTE());
+      e.preventDefault();
     };
 
     window.addEventListener("copy", handleCopy);

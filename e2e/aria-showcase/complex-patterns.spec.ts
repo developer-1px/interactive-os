@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Complex Patterns", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/aria-showcase");
+    await page.goto("/playground/aria");
   });
 
   // ═══════════════════════════════════════════════════════════════

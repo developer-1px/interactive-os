@@ -12,7 +12,7 @@
  * Context provides { zoneId, config, role?, scope } — same shape as ZoneContext.
  * No Zustand, no FocusData, no global mutable state.
  */
-import { defineScope, type ScopeToken, type AnyCommand } from "@kernel";
+import { defineScope, type ScopeToken, type BaseCommand } from "@kernel";
 import { produce } from "immer";
 import {
   type ComponentProps,
@@ -38,7 +38,7 @@ import type {
   SelectConfig,
   TabConfig,
 } from "../../schema";
-import type { BaseCommand } from "../../schema/command/BaseCommand.ts";
+
 import { initialZoneState } from "../../state/initial.ts";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -130,7 +130,7 @@ export interface FocusGroupProps
   scope?: ScopeToken;
 
   /** Command dispatched when zone is dismissed (ESC with dismiss.escape: "close") */
-  onDismiss?: AnyCommand;
+  onDismiss?: BaseCommand;
 
   /** Children */
   children: ReactNode;
@@ -278,7 +278,9 @@ export function FocusGroup({
 
   // --- Auto Focus Stack for dialog/alertdialog ---
   // When autoFocus is true, push focus stack on mount and pop on unmount
-  useEffect(() => {
+  // --- Auto Focus Stack for dialog/alertdialog ---
+  // When autoFocus is true, push focus stack on mount and pop on unmount
+  useLayoutEffect(() => {
     if (!config.project.autoFocus) return;
     kernel.dispatch(STACK_PUSH());
     return () => {

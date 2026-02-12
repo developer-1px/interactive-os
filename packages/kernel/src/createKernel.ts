@@ -24,7 +24,7 @@ import {
   type InjectResult,
   type InternalCommandHandler,
   type InternalEffectHandler,
-  type AnyCommand,
+  type BaseCommand,
   type Middleware,
   type MiddlewareContext,
   type ScopeToken,
@@ -183,7 +183,7 @@ export function createKernel<S>(initialState: S) {
   }
 
   function dispatch(
-    cmd: Command<string, any>,
+    cmd: BaseCommand,
     options?: { scope?: ScopeToken[]; meta?: Record<string, unknown> },
   ): void {
     let enriched = options?.scope ? { ...cmd, scope: options.scope } : cmd;
@@ -409,7 +409,7 @@ export function createKernel<S>(initialState: S) {
     type Ctx = TypedContext<S, InjectResult<Tokens>>;
     // Loose return type: allows scoped state types (e.g., Todo's AppState ≠ kernel AppState)
     // The runtime stateSlice lens handles proper state mapping regardless
-    type HandlerReturn = { state?: unknown; dispatch?: AnyCommand | AnyCommand[] } & Record<string, unknown>;
+    type HandlerReturn = { state?: unknown; dispatch?: BaseCommand | BaseCommand[] } & Record<string, unknown>;
 
     return {
       defineCommand: ((

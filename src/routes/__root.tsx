@@ -2,7 +2,7 @@ import { GlobalNav } from "@apps/todo/widgets/GlobalNav";
 import { InspectorShell } from "@inspector/shell/InspectorShell";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { OS } from "@os/AntigravityOS";
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { CommandPalette } from "@/command-palette/CommandPalette";
 
@@ -30,6 +30,18 @@ function RootComponent() {
     (s: { isOpen: boolean }) => s.isOpen,
   );
 
+  // Read isAppShell from the deepest matched route's staticData
+  const isAppShell = useRouterState({
+    select: (s) => {
+      const matches = s.matches;
+      for (let i = matches.length - 1; i >= 0; i--) {
+        const sd = matches[i].staticData as Record<string, unknown> | undefined;
+        if (sd?.isAppShell) return true;
+      }
+      return false;
+    },
+  });
+
   return (
     <OS.Root>
       <div className="app-viewport">
@@ -38,7 +50,7 @@ function RootComponent() {
 
         {/* Main App Container */}
         <div className="app-main">
-          <div className="app-content">
+          <div className={isAppShell ? "app-content app-shell" : "app-content"}>
             <Outlet />
           </div>
         </div>
@@ -61,3 +73,4 @@ function RootComponent() {
     </OS.Root>
   );
 }
+

@@ -34,7 +34,7 @@ export const SELECT = kernel.defineCommand(
       const targetEl = document.getElementById(targetId);
       if (targetEl?.hasAttribute("aria-expanded")) {
         return {
-          dispatch: EXPAND({ action: "toggle", itemId: targetId }) as any,
+          dispatch: EXPAND({ action: "toggle", itemId: targetId }),
         };
       }
     }

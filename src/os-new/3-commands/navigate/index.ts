@@ -58,7 +58,7 @@ export const NAVIGATE = kernel.defineCommand(
         if (isExpandable) {
           if (payload.direction === "right" && !isExpanded) {
             return {
-              dispatch: EXPAND({ action: "expand", itemId: focusedId }) as any,
+              dispatch: EXPAND({ action: "expand", itemId: focusedId }),
             };
           }
           if (payload.direction === "left" && isExpanded) {
@@ -66,7 +66,7 @@ export const NAVIGATE = kernel.defineCommand(
               dispatch: EXPAND({
                 action: "collapse",
                 itemId: focusedId,
-              }) as any,
+              }),
             };
           }
         }

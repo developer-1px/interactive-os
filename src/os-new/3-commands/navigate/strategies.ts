@@ -113,8 +113,15 @@ const resolveSpatial: NavigationStrategy = (
     return { targetId: currentId, stickyX: null, stickyY: null };
   }
 
-  if (direction === "home" || direction === "end") {
-    return { targetId: currentId, stickyX: null, stickyY: null };
+  if (direction === "home") {
+    return { targetId: items[0] ?? currentId, stickyX: null, stickyY: null };
+  }
+  if (direction === "end") {
+    return {
+      targetId: items[items.length - 1] ?? currentId,
+      stickyX: null,
+      stickyY: null,
+    };
   }
 
   const best = findBestCandidate(currentRect, direction, candidates);

@@ -45,8 +45,9 @@ export const ESCAPE = kernel.defineCommand(
           state: produce(ctx.state, (draft: any) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.focusedItemId = null;
+            // Clear active zone so components can detect dismiss
+            draft.os.focus.activeZoneId = null;
           }) as typeof ctx.state,
-          blur: true,
           ...(dismissCommand ? { dispatch: dismissCommand } : {}),
         };
       }

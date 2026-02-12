@@ -17,8 +17,7 @@ import type {
   SelectConfig,
   TabConfig,
 } from "@os/schema";
-import type { BaseCommand } from "@os/schema/command/BaseCommand.ts";
-import type { AnyCommand } from "@kernel";
+import type { BaseCommand } from "@kernel";
 
 /** Advanced configuration overrides - use sparingly, prefer role presets */
 export interface ZoneOptions {
@@ -61,7 +60,7 @@ export interface ZoneProps
   /** Command dispatched on redo (Cmd+Shift+Z) */
   onRedo?: BaseCommand;
   /** Command dispatched when the zone is dismissed (ESC key) */
-  onDismiss?: AnyCommand;
+  onDismiss?: BaseCommand;
   /** Children */
   children: ReactNode;
 }
