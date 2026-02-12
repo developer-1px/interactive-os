@@ -25,7 +25,7 @@ export function Sidebar() {
       options={{
         navigate: { entry: "restore" },
       }}
-      onAction={SelectCategory({})}
+      onAction={SelectCategory({ id: OS.FOCUS as any })}
       onMoveUp={MoveCategoryUp()}
       onMoveDown={MoveCategoryDown()}
       onUndo={UndoCommand()}

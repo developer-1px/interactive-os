@@ -1,6 +1,7 @@
 import { todoSlice } from "@apps/todo/app";
 import type { AppState } from "@apps/todo/model/appState";
 import { produce } from "immer";
+import { FIELD_START_EDIT } from "@os/3-commands/field/field";
 
 export const AddTodo = todoSlice.group.defineCommand(
   "ADD_TODO",
@@ -135,6 +136,7 @@ export const StartEdit = todoSlice.group.defineCommand(
         draft.ui.editingId = targetId;
         draft.ui.editDraft = draft.data.todos[targetId]?.text || "";
       }),
+      dispatch: FIELD_START_EDIT(),
     }),
 );
 
@@ -172,12 +174,13 @@ export const UpdateTodoText = todoSlice.group.defineCommand(
   "UPDATE_TODO_TEXT",
   [],
   (ctx: { state: AppState }) =>
-    (_payload: { text: string }) => ({
+    (payload: { text: string }) => ({
       state: produce(ctx.state, (draft) => {
         if (!ctx.state.ui.editingId) return;
         const id = ctx.state.ui.editingId as number;
         if (draft.data.todos[id]) {
-          draft.data.todos[id].text = ctx.state.ui.editDraft;
+          // Use payload.text from FIELD_COMMIT (DOM read) — editDraft may be stale
+          draft.data.todos[id].text = payload.text || ctx.state.ui.editDraft;
         }
         draft.effects.push({ type: "FOCUS_ID", id });
         draft.ui.editingId = null;

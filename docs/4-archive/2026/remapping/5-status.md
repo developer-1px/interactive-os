@@ -32,9 +32,9 @@
 
 ## 진행 기록
 
-| 날짜 | 이벤트 |
-|------|--------|
-| 2026-02-12 | Discussion 완료 (Journey + Conclusion) |
-| 2026-02-13 | 프로젝트 전환 (PRD, KPI, Proposal 작성) |
-| 2026-02-13 | 제안서 승인, 구현 시작 |
-| 2026-02-13 | K1-K6 구현 완료, 빌드/테스트 통과 |
+| 날짜 | 이벤트 | 커밋 | changelog |
+|------|--------|------|-----------|
+| 2026-02-12 | Discussion 완료 | — | Journey + Conclusion 작성 |
+| 2026-02-13 | 프로젝트 전환 | — | PRD, KPI, Proposal 작성 |
+| 2026-02-13 | 제안서 승인, 구현 시작 | — | — |
+| 2026-02-13 | K1-K6 구현 완료 | `a082bb3` | `tokens.ts` fallback 훅, `createKernel.ts` resolveFallback API, `macFallbackMiddleware.ts` 신규, `KeyboardListener.tsx` 2-pass 제거 |

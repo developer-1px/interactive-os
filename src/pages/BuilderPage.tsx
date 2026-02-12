@@ -1,6 +1,6 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { OS } from "@os/AntigravityOS";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // Playwright spec
 // @ts-expect-error
 import runBuilderSpatial from "../../e2e/builder/builder-spatial.spec.ts";
@@ -14,6 +14,8 @@ import {
   type PropertyType,
   type ViewportMode,
 } from "./builder";
+import { kernel } from "@/os-new/kernel";
+import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
 
 /**
  * BuilderPage
@@ -23,7 +25,45 @@ import {
 export default function BuilderPage() {
   usePlaywrightSpecs("pw-builder-spatial", [runBuilderSpatial]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
-  const [selectedType, _setSelectedType] = useState<PropertyType>("text"); // TODO: derive from kernel selection
+
+  // Derive selection from kernel focus
+  const focusedId = kernel.useComputed((state) => state.os.focus.focused);
+  const [selectedType, setSelectedType] = useState<PropertyType>("text");
+
+  useEffect(() => {
+    if (!focusedId) return;
+
+    // Small delay to ensure DOM is updated if focus changed rapidly
+    // But usually sync is fine.
+    const el = document.getElementById(focusedId);
+    if (!el) return;
+
+    let type: PropertyType = "text"; // Default fallback
+
+    // 1. Check explicit builder type
+    if (el.dataset.builderType) {
+      type = el.dataset.builderType as PropertyType;
+    }
+    // 2. Infer from explicit level
+    else if (el.dataset.level === "section") {
+      type = "section";
+    }
+    // 3. Infer from DOM tags/structure
+    else if (el.tagName === "IMG" || el.querySelector("img")) {
+      type = "image";
+    } else if (el.tagName === "A" || el.closest("a")) {
+      type = "link";
+    } else if (el.tagName === "BUTTON" || el.closest("button")) {
+      type = "button";
+    } else if (el.querySelector("svg")) {
+      type = "icon";
+    } else if (el.hasAttribute("data-os-field") || el.querySelector("[data-os-field]")) {
+      // OS.Field usually has this attribute
+      type = "text";
+    }
+
+    setSelectedType(type);
+  }, [focusedId]);
 
   const getViewportStyle = () => {
     switch (viewport) {
@@ -54,7 +94,8 @@ export default function BuilderPage() {
             tab: { behavior: "trap" },
           }}
         >
-          {/* Focus Debug Overlay removed (was FocusData-dependent) */}
+          {/* Focus Debug Overlay — inside scroll container */}
+          <FocusDebugOverlay />
 
           {/* Page Being Edited - Centered Canvas */}
           <div className="min-h-full flex justify-center py-8 px-4 transition-all duration-300 ease-in-out">

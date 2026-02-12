@@ -12,31 +12,32 @@ const isMac =
 
 // macOS: Cmd+Arrow → Home/End normalization map
 // Mac keyboards lack physical Home/End keys, so Cmd+↑/↓ is the platform convention.
+// Used as FALLBACK in KeyboardListener (not applied in getCanonicalKey itself).
 const MAC_KEY_NORMALIZATION: Record<string, string> = {
   "Meta+ArrowUp": "Home",
   "Meta+ArrowDown": "End",
 };
 
 /**
+ * Returns a Mac-normalized key if applicable, or null if no normalization needed.
+ * Used as fallback when the raw canonical key doesn't match any keybinding.
+ */
+export function getMacFallbackKey(canonicalKey: string): string | null {
+  if (!isMac) return null;
+  return MAC_KEY_NORMALIZATION[canonicalKey] ?? null;
+}
+
+/**
  * Normalizes a keyboard event into a canonical string format matching our definitions.
  * Format: [Meta+][Ctrl+][Alt+][Shift+]Key
  * Example: "Meta+ArrowUp", "Shift+Enter", "k"
  *
- * macOS normalization: Cmd+↑/↓ → Home/End (platform convention).
- * This allows downstream pipeline to treat Home/End uniformly across platforms.
+ * Returns the raw canonical key WITHOUT platform-specific normalization.
+ * Platform normalization (e.g., Cmd+↑ → Home) is handled as a fallback
+ * in KeyboardListener, NOT here. This ensures specific bindings (e.g., OS_MOVE_UP
+ * on Meta+ArrowUp) take priority over normalized ones (Home).
  */
 export function getCanonicalKey(e: KeyboardEvent): string {
-  // ── macOS: Normalize Cmd+Arrow → Home/End ──
-  // Must run before modifier extraction to strip Meta from the result.
-  if (isMac && e.metaKey && !e.ctrlKey && !e.altKey) {
-    const rawKey =
-      e.key === "ArrowUp" || e.key === "ArrowDown" ? `Meta+${e.key}` : null;
-    if (rawKey && MAC_KEY_NORMALIZATION[rawKey]) {
-      const normalized = MAC_KEY_NORMALIZATION[rawKey];
-      // Preserve Shift for range selection (Cmd+Shift+↑ → Shift+Home)
-      return e.shiftKey ? `Shift+${normalized}` : normalized;
-    }
-  }
 
   const modifiers: string[] = [];
 

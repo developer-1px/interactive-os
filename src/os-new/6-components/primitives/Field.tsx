@@ -177,8 +177,16 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     // --- Focus Computation ---
     const isSystemActive = activeZoneId === zoneId;
     const isFocused = isSystemActive && osFocusedItemId === fieldId;
+
+    // For inline editing: Field might be a child of the focused item (e.g., "EDIT" inside todo "1")
+    // In that case, isFocused is false but the zone's editingItemId is set
+    const osEditingItemId = kernel.useComputed(
+      (s) => s.os.focus.zones[zoneId]?.editingItemId ?? null,
+    );
+    const isParentEditing = isSystemActive && osEditingItemId !== null && osFocusedItemId === osEditingItemId;
+
     const isContentEditable =
-      mode === "deferred" ? isFocused && isEditing : isFocused;
+      mode === "deferred" ? (isFocused && isEditing) || isParentEditing : isFocused || isParentEditing;
     const isActive = isContentEditable;
 
     // --- Initial Value (set once on mount via ref) ---

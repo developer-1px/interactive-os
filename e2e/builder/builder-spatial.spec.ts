@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Builder Spatial Navigation", () => {
   test.beforeEach(async ({ page }) => {
+    page.on("console", (msg) => console.log(`[Browser] ${msg.text()}`));
     await page.goto("/builder");
   });
 
@@ -73,11 +74,13 @@ test.describe("Builder Spatial Navigation", () => {
   });
 
   test("Services 탭 → 서비스 카드", async ({ page }) => {
-    await page.locator("#tab-0").click();
-    await expect(page.locator("#tab-0")).toBeFocused();
+    // Navigate from Header Title (Left) -> Card 0 (Left)
+    await page.locator("#ncp-service-title").click();
+    await expect(page.locator("#ncp-service-title")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#service-title-0")).toBeFocused();
+    // Should land on first card's first item (Icon or Badge)
+    await expect(page.locator("#service-icon-0")).toBeFocused();
   });
 
   test("Services 서비스 카드 내부", async ({ page }) => {
@@ -106,14 +109,48 @@ test.describe("Builder Spatial Navigation", () => {
   });
 
   test("News → Services 크로스존", async ({ page }) => {
-    await page.locator("#ncp-news-all").click();
-    await expect(page.locator("#ncp-news-all")).toBeFocused();
+    // News Title (Left) -> Services Category (Left)
+    await page.locator("#ncp-news-title").click();
+    await expect(page.locator("#ncp-news-title")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#ncp-service-title")).toBeFocused();
+    // Should skip container and hit first item in News Grid (Card 0 Tag)
+    await expect(page.locator("#news-1-tag")).toBeFocused();
+
+    // We want to test Cross Zone, so let's go from Bottom of News -> Top of Services
+    // But simplified: Just test from Services Category Back Up?
+    // Or just test adjacent items.
+
+    // Let's test News Bottom -> Services Top
+    // News Card 0 (Left) -> Services Title (Left)
+    // Actually News Card 0 is tall.
+    // Let's just click News Title and go Down multiple times?
+
+    // Re-evaluating: The test wanted "News -> Services".
+    // News is above Services.
+    // Let's use the layout:
+    // News Section
+    //   Header (Title, Link)
+    //   Grid
+    //     Card 0 (Left, Tall)
+    // Services Section
+    //   Header (Category, Title) (Left)
+
+    // If we are at News Card 0 (bottom of it), Down -> Services Header.
+    await page.locator("#news-1-desc").click(); // Bottom of Card 0
+    await expect(page.locator("#news-1-desc")).toBeFocused();
+
+    await page.keyboard.press("ArrowDown");
+    // Should hit Service Category or Title
+    // Category is small, might be missed if alignment is off?
+    // But it is above Title.
+    // Let's expect one or the other, or check coverage.
+    // Based on layout, Category is #ncp-service-category.
+    await expect(page.locator("#ncp-service-category")).toBeFocused();
   });
 
   test("전체 페이지 수직 스윕", async ({ page }) => {
+    // Left-side sweep
     await page.locator("#ncp-hero-title").click();
     await expect(page.locator("#ncp-hero-title")).toBeFocused();
 
@@ -127,7 +164,19 @@ test.describe("Builder Spatial Navigation", () => {
     await expect(page.locator("#ncp-news-title")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#ncp-news-all")).toBeFocused();
+    // News Title -> News Card 1 Tag (Left column)
+    await expect(page.locator("#news-1-tag")).toBeFocused();
+
+    // Continue down through News Card 1
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#news-1-title")).toBeFocused();
+
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#news-1-desc")).toBeFocused();
+
+    // From News Card 1 Desc -> Services Category
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#ncp-service-category")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#ncp-service-title")).toBeFocused();

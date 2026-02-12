@@ -18,6 +18,8 @@ import { Route as TodoProfileRouteImport } from './routes/_todo/profile'
 import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
+import { Route as MinimalPlaygroundTodoV3RouteImport } from './routes/_minimal/playground.todo-v3'
+import { Route as MinimalPlaygroundTodoV2RouteImport } from './routes/_minimal/playground.todo-v2'
 import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/playground.radix'
 import { Route as MinimalPlaygroundPlaywrightRouteImport } from './routes/_minimal/playground.playwright'
 import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
@@ -68,6 +70,16 @@ const MinimalDocsIndexRoute = MinimalDocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MinimalDocsRoute,
 } as any)
+const MinimalPlaygroundTodoV3Route = MinimalPlaygroundTodoV3RouteImport.update({
+  id: '/playground/todo-v3',
+  path: '/playground/todo-v3',
+  getParentRoute: () => MinimalRoute,
+} as any)
+const MinimalPlaygroundTodoV2Route = MinimalPlaygroundTodoV2RouteImport.update({
+  id: '/playground/todo-v2',
+  path: '/playground/todo-v2',
+  getParentRoute: () => MinimalRoute,
+} as any)
 const MinimalPlaygroundRadixRoute = MinimalPlaygroundRadixRouteImport.update({
   id: '/playground/radix',
   path: '/playground/radix',
@@ -113,6 +125,8 @@ export interface FileRoutesByFullPath {
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
+  '/playground/todo-v2': typeof MinimalPlaygroundTodoV2Route
+  '/playground/todo-v3': typeof MinimalPlaygroundTodoV3Route
   '/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -127,6 +141,8 @@ export interface FileRoutesByTo {
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
+  '/playground/todo-v2': typeof MinimalPlaygroundTodoV2Route
+  '/playground/todo-v3': typeof MinimalPlaygroundTodoV3Route
   '/docs': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesById {
@@ -145,6 +161,8 @@ export interface FileRoutesById {
   '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/_minimal/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
   '/_minimal/playground/radix': typeof MinimalPlaygroundRadixRoute
+  '/_minimal/playground/todo-v2': typeof MinimalPlaygroundTodoV2Route
+  '/_minimal/playground/todo-v3': typeof MinimalPlaygroundTodoV3Route
   '/_minimal/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRouteTypes {
@@ -162,6 +180,8 @@ export interface FileRouteTypes {
     | '/playground/kernel'
     | '/playground/playwright'
     | '/playground/radix'
+    | '/playground/todo-v2'
+    | '/playground/todo-v3'
     | '/docs/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -176,6 +196,8 @@ export interface FileRouteTypes {
     | '/playground/kernel'
     | '/playground/playwright'
     | '/playground/radix'
+    | '/playground/todo-v2'
+    | '/playground/todo-v3'
     | '/docs'
   id:
     | '__root__'
@@ -193,6 +215,8 @@ export interface FileRouteTypes {
     | '/_minimal/playground/kernel'
     | '/_minimal/playground/playwright'
     | '/_minimal/playground/radix'
+    | '/_minimal/playground/todo-v2'
+    | '/_minimal/playground/todo-v3'
     | '/_minimal/docs/'
   fileRoutesById: FileRoutesById
 }
@@ -266,6 +290,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalDocsIndexRouteImport
       parentRoute: typeof MinimalDocsRoute
     }
+    '/_minimal/playground/todo-v3': {
+      id: '/_minimal/playground/todo-v3'
+      path: '/playground/todo-v3'
+      fullPath: '/playground/todo-v3'
+      preLoaderRoute: typeof MinimalPlaygroundTodoV3RouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/todo-v2': {
+      id: '/_minimal/playground/todo-v2'
+      path: '/playground/todo-v2'
+      fullPath: '/playground/todo-v2'
+      preLoaderRoute: typeof MinimalPlaygroundTodoV2RouteImport
+      parentRoute: typeof MinimalRoute
+    }
     '/_minimal/playground/radix': {
       id: '/_minimal/playground/radix'
       path: '/playground/radix'
@@ -333,6 +371,8 @@ interface MinimalRouteChildren {
   MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
   MinimalPlaygroundPlaywrightRoute: typeof MinimalPlaygroundPlaywrightRoute
   MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute
+  MinimalPlaygroundTodoV2Route: typeof MinimalPlaygroundTodoV2Route
+  MinimalPlaygroundTodoV3Route: typeof MinimalPlaygroundTodoV3Route
 }
 
 const MinimalRouteChildren: MinimalRouteChildren = {
@@ -343,6 +383,8 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
   MinimalPlaygroundPlaywrightRoute: MinimalPlaygroundPlaywrightRoute,
   MinimalPlaygroundRadixRoute: MinimalPlaygroundRadixRoute,
+  MinimalPlaygroundTodoV2Route: MinimalPlaygroundTodoV2Route,
+  MinimalPlaygroundTodoV3Route: MinimalPlaygroundTodoV3Route,
 }
 
 const MinimalRouteWithChildren =

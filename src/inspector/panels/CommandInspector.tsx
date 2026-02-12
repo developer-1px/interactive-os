@@ -1,16 +1,11 @@
-import { DataStateViewer } from "@inspector/panels/DataStateViewer.tsx";
 import { ElementPanel } from "@inspector/panels/ElementPanel.tsx";
-import { EventStream } from "@inspector/panels/EventStream.tsx";
 import { InspectorAdapter } from "@inspector/panels/InspectorAdapter.tsx";
 import { KeyMonitor } from "@inspector/panels/KeyMonitor.tsx";
 import { useInputTelemetry } from "@inspector/panels/LoggedKey.ts";
-import { OSStateViewer } from "@inspector/panels/OSStateViewer.tsx";
 import { RegistryMonitor } from "@inspector/panels/RegistryMonitor.tsx";
-import { StateMonitor } from "@inspector/panels/StateMonitor.tsx";
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotPanel } from "@inspector/testbot";
-import { todoSlice } from "@apps/todo/app";
 
 import { useEffect, useMemo, useState } from "react";
 import { kernel } from "@/os-new/kernel";
@@ -18,8 +13,6 @@ import { kernel } from "@/os-new/kernel";
 // --- Main Component ---
 
 export function CommandInspector() {
-  const state = todoSlice.getState() as any;
-
   // v7.50: Use global InspectorStore for tab state
   const activeTab = useInspectorStore((s) => s.activeTab);
 
@@ -92,20 +85,6 @@ export function CommandInspector() {
     };
   }, []);
 
-  // --- Temporary: Register Unified Mock ---
-  useEffect(() => {
-    if (!InspectorRegistry.getPanel("UNIFIED")) {
-      InspectorRegistry.register("UNIFIED", "Vision", <InspectorAdapter />);
-    }
-  }, []);
-
-  if (!state)
-    return (
-      <div className="p-4 text-slate-500 text-xs">
-        Inspector Waiting for Engine...
-      </div>
-    );
-
   const renderContent = () => {
     switch (activeTab) {
       case "ELEMENT":
@@ -114,13 +93,6 @@ export function CommandInspector() {
         return (
           <div className="flex-1 flex flex-col overflow-hidden bg-white">
             <KeyMonitor rawKeys={rawKeys} />
-            <StateMonitor
-              focusId={currentFocusId ?? null}
-              activeZone={(ctx as any)?.activeZone ?? ""}
-              focusPath={(ctx as any)?.focusPath}
-              physicalZone={physicalZone || "NONE"}
-              isInputActive={isInputActive}
-            />
             <RegistryMonitor
               ctx={registryContext}
               activeKeybindingMap={activeKeybindingMap}
@@ -132,27 +104,7 @@ export function CommandInspector() {
           </div>
         );
       case "STATE":
-        return (
-          <div className="flex-1 flex flex-col overflow-hidden bg-white">
-            {/* Panel 1: History (min 3 visible) */}
-            <div className="shrink-0 max-h-[270px] overflow-y-auto">
-              <EventStream />
-            </div>
-            {/* Panel 2: Data State */}
-            <div className="flex-1 overflow-hidden border-t border-[#e5e5e5]">
-              <DataStateViewer state={state.data} />
-            </div>
-          </div>
-        );
-      case "SETTINGS":
-        return (
-          <div className="flex-1 flex flex-col overflow-hidden bg-white p-4">
-            <div className="text-xs font-bold text-slate-500 mb-2">
-              OS SETTINGS
-            </div>
-            <OSStateViewer />
-          </div>
-        );
+        return <InspectorAdapter />;
       case "TESTBOT":
         return <TestBotPanel />;
       default: {

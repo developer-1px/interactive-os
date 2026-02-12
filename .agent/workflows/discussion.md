@@ -35,11 +35,11 @@ Toulmin 논증 모델의 Warrant를 누적해가며, 논리의 빈틈을 통찰�
 
 종료 시그널을 받으면 2개의 문서를 `docs/11-discussions`에 작성한다:
 
-### 문서 1: `[DATE]_Discussion_Conclusion.md`
+### 문서 1: `YYYY-MMDD-HHmm_Discussion_Conclusion.md`
 - 완결된 **Why** / **Intent** / **Warrant** 전체 구조
 - 마지막에 **한 줄 요약**: 이 모든 논증을 1문장으로 압축
 
-### 문서 2: `[DATE]_Discussion_Journey.md`
+### 문서 2: `YYYY-MMDD-HHmm_Discussion_Journey.md`
 - **대화록 형식**으로 작성 — 주고받는 흐름이 보여야 한다
 - 원문을 최대한 그대로 인용하되, 모든 대화를 쓰지 않고 **맥락이 이해되는 수준으로 압축**
 - 형식: `**🧑 사용자**: ...` / `**🤖 AI**: ...` 로 턴을 구분

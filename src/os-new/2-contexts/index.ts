@@ -21,17 +21,20 @@ import { ZoneRegistry } from "./zoneRegistry";
 
 export const DOM_ITEMS = kernel.defineContext("dom-items", (): string[] => {
   const zoneId = kernel.getState().os.focus.activeZoneId;
+  console.log("[DOM_ITEMS] Active zone:", zoneId);
   if (!zoneId) return [];
 
   const entry = ZoneRegistry.get(zoneId);
+  console.log("[DOM_ITEMS] Zone entry:", entry);
   if (!entry?.element) return [];
 
   const items: string[] = [];
-  const els = entry.element.querySelectorAll("[data-item-id]");
+  const els = entry.element.querySelectorAll("[data-item-id]:not([data-nav-skip='true'])");
   els.forEach((el) => {
     const id = el.getAttribute("data-item-id");
     if (id) items.push(id);
   });
+  console.log("[DOM_ITEMS] Found items:", items.length, items);
   return items;
 });
 
@@ -49,7 +52,7 @@ export const DOM_RECTS = kernel.defineContext(
     if (!entry?.element) return new Map();
 
     const rects = new Map<string, DOMRect>();
-    const els = entry.element.querySelectorAll("[data-item-id]");
+    const els = entry.element.querySelectorAll("[data-item-id]:not([data-nav-skip='true'])");
     els.forEach((el) => {
       const id = el.getAttribute("data-item-id");
       if (id) rects.set(id, el.getBoundingClientRect());

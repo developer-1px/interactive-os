@@ -197,7 +197,25 @@ export const resolveCorner: NavigationStrategy = (
   for (const id of items) {
     const rect = itemRects.get(id);
     if (!rect) continue;
-    candidates.push({ id, rect: toRect(rect) });
+
+    // Filter out candidates that strictly contain the current item
+    // This prevents focus from getting stuck on a parent container
+    const r = toRect(rect);
+    if (currentRect) {
+      const contains =
+        r.left <= currentRect.left &&
+        r.right >= currentRect.right &&
+        r.top <= currentRect.top &&
+        r.bottom >= currentRect.bottom;
+
+      // Allow if it's the same item (though excluded by id check later usually)
+      // But purely for containment: if it strictly contains (is larger), ignore.
+      // If exact match in distinct id, might be overlay.
+      // For now, assume containment implies hierarchy.
+      if (contains && id !== currentId) continue;
+    }
+
+    candidates.push({ id, rect: r });
   }
 
   if (candidates.length <= 1) {
@@ -218,6 +236,19 @@ export const resolveCorner: NavigationStrategy = (
     rows.length,
     cols.length,
   );
+
+  console.log("[CORNER] Resolve:", {
+    current: currentId,
+    direction,
+    candidates: candidates.length,
+    currentRect: currentRect ? toRect(currentRect) : null,
+    targetId: target?.id,
+    gridSize: { rows: rows.length, cols: cols.length },
+    currentEntry: {
+      cols: [currentEntry.startCol, currentEntry.endCol],
+      rows: [currentEntry.startRow, currentEntry.endRow]
+    }
+  });
 
   return {
     targetId: target?.id ?? currentId,

@@ -1,5 +1,6 @@
 import { todoSlice } from "@apps/todo/app";
 import type { AppState, Todo } from "@apps/todo/model/appState";
+import { FOCUS } from "@/os-new/3-commands/focus/focus";
 import { produce } from "immer";
 
 /**
@@ -32,10 +33,10 @@ export const CopyTodo = todoSlice.group.defineCommand(
           }),
         ])
         .catch(() => {
-          navigator.clipboard.writeText(todo.text).catch(() => {});
+          navigator.clipboard.writeText(todo.text).catch(() => { });
         });
     } catch {
-      navigator.clipboard?.writeText(todo.text)?.catch?.(() => {});
+      navigator.clipboard?.writeText(todo.text)?.catch?.(() => { });
     }
 
     return { state: ctx.state };
@@ -66,10 +67,10 @@ export const CutTodo = todoSlice.group.defineCommand(
           }),
         ])
         .catch(() => {
-          navigator.clipboard.writeText(todo.text).catch(() => {});
+          navigator.clipboard.writeText(todo.text).catch(() => { });
         });
     } catch {
-      navigator.clipboard?.writeText(todo.text)?.catch?.(() => {});
+      navigator.clipboard?.writeText(todo.text)?.catch?.(() => { });
     }
 
     return {
@@ -89,10 +90,10 @@ export const PasteTodo = todoSlice.group.defineCommand(
     if (!clipboardData) return { state: ctx.state };
 
     const sourceTodo = clipboardData.todo;
+    const newId = Date.now();
 
     return {
       state: produce(ctx.state, (draft) => {
-        const newId = Date.now();
         draft.data.todos[newId] = {
           id: newId,
           text: sourceTodo.text,
@@ -111,9 +112,8 @@ export const PasteTodo = todoSlice.group.defineCommand(
         } else {
           draft.data.todoOrder.push(newId);
         }
-
-        draft.effects.push({ type: "FOCUS_ID", id: newId });
       }),
+      dispatch: FOCUS({ zoneId: "listView", itemId: String(newId) }),
     };
   },
 );
@@ -128,9 +128,10 @@ export const DuplicateTodo = todoSlice.group.defineCommand(
     const todo = ctx.state.data.todos[targetId];
     if (!todo) return { state: ctx.state };
 
+    const newId = Date.now();
+
     return {
       state: produce(ctx.state, (draft) => {
-        const newId = Date.now();
         draft.data.todos[newId] = {
           id: newId,
           text: todo.text,
@@ -144,9 +145,8 @@ export const DuplicateTodo = todoSlice.group.defineCommand(
         } else {
           draft.data.todoOrder.push(newId);
         }
-
-        draft.effects.push({ type: "FOCUS_ID", id: newId });
       }),
+      dispatch: FOCUS({ zoneId: "listView", itemId: String(newId) }),
     };
   },
 );
