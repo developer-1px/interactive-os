@@ -13,7 +13,7 @@ import { matchesName, matchesRole } from "./implicitRoles";
 // ═══════════════════════════════════════════════════════════════════
 
 export function getUniqueSelector(el: Element): string {
-  if (el.id) return `#${el.id}`;
+  if (el.id) return `[id="${el.id}"]`;
 
   const testId = el.getAttribute("data-testid");
   if (testId) return `[data-testid="${testId}"]`;
@@ -23,7 +23,7 @@ export function getUniqueSelector(el: Element): string {
   while (current && current !== document.body) {
     let qs = current.tagName.toLowerCase();
     if (current.id) {
-      path.unshift(`#${current.id}`);
+      path.unshift(`[id="${current.id}"]`);
       break;
     }
     const parent = current.parentElement;
@@ -46,12 +46,20 @@ export function getUniqueSelector(el: Element): string {
 // Element Finders
 // ═══════════════════════════════════════════════════════════════════
 
+/** Exclude elements rendered inside the TestBot panel (step details, results) */
+function isInsideTestBotUI(el: Element): boolean {
+  return !!el.closest(
+    "[data-testbot-suite], [data-testbot-results], [data-testbot-step]",
+  );
+}
+
 export function findByText(text: string): Element | null {
   const all = document.querySelectorAll("*");
   let best: Element | null = null;
   let bestSize = Infinity;
 
   for (const el of all) {
+    if (isInsideTestBotUI(el)) continue;
     if (el.textContent?.includes(text)) {
       const size = el.querySelectorAll("*").length;
       if (size < bestSize) {
@@ -67,6 +75,7 @@ export function findAllByText(text: string): Element[] {
   const all = document.querySelectorAll("*");
   const results: Element[] = [];
   for (const el of all) {
+    if (isInsideTestBotUI(el)) continue;
     if (el.children.length === 0 && el.textContent?.includes(text)) {
       results.push(el);
     }

@@ -123,10 +123,10 @@ export function createActions(
     cursor.clearBubbles();
     const modLabel = modifiers
       ? `${[
-        modifiers.ctrl ? "Ctrl+" : "",
-        modifiers.shift ? "Shift+" : "",
-        modifiers.meta ? "⌘+" : "",
-      ].join("")}Click`
+          modifiers.ctrl ? "Ctrl+" : "",
+          modifiers.shift ? "Shift+" : "",
+          modifiers.meta ? "⌘+" : "",
+        ].join("")}Click`
       : "Click";
     cursor.showBubble(modLabel, "click");
     cursor.ripple();
@@ -210,6 +210,23 @@ export function createActions(
     target.dispatchEvent(new KeyboardEvent("keydown", eventInit));
     target.dispatchEvent(new KeyboardEvent("keyup", eventInit));
 
+    // Polyfill native browser actions that synthetic events can't trigger
+    if (modifiers?.meta && key.toLowerCase() === "a") {
+      // Meta+a → select all content
+      if (target instanceof HTMLElement && target.isContentEditable) {
+        const range = document.createRange();
+        range.selectNodeContents(target);
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+      } else if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement
+      ) {
+        target.select();
+      }
+    }
+
     steps.push({ action: "press", detail: modLabel, passed: true });
     emitStep();
     await wait(pauseTime());
@@ -242,6 +259,9 @@ export function createActions(
       ) {
         target.value += char;
         target.dispatchEvent(new Event("input", { bubbles: true }));
+      } else if (target instanceof HTMLElement && target.isContentEditable) {
+        // contenteditable (e.g. OS.Field) — use execCommand for proper insertion
+        document.execCommand("insertText", false, char);
       }
 
       await wait(20 / speed);
