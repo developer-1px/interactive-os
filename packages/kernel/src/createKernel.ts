@@ -16,6 +16,7 @@
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
 import {
+  type BaseCommand,
   type Command,
   type CommandFactory,
   type ContextToken,
@@ -24,7 +25,6 @@ import {
   type InjectResult,
   type InternalCommandHandler,
   type InternalEffectHandler,
-  type BaseCommand,
   type Middleware,
   type MiddlewareContext,
   type ScopeToken,
@@ -400,6 +400,33 @@ export function createKernel<S>(initialState: S) {
     }
   }
 
+  // ─── Fallback Resolution ───
+
+  /**
+   * resolveFallback — Side channel for listener miss → middleware fallback.
+   *
+   * Iterates GLOBAL middleware fallback hooks with the native Event.
+   * If a middleware returns a Command, dispatches it and returns true.
+   * Does NOT record its own transaction (dispatch handles that).
+   *
+   * Pattern: keyboard/mouse/clipboard — listener resolves first,
+   * misses delegate to kernel middleware via this API.
+   */
+  function resolveFallback(event: Event): boolean {
+    const globalMws = scopedMiddleware.get(GLOBAL as string);
+    if (!globalMws) return false;
+
+    for (const mw of globalMws) {
+      if (!mw.fallback) continue;
+      const command = mw.fallback(event);
+      if (command) {
+        dispatch(command);
+        return true;
+      }
+    }
+    return false;
+  }
+
   // ─── Group Factory ───
 
   function createGroup<
@@ -409,7 +436,10 @@ export function createKernel<S>(initialState: S) {
     type Ctx = TypedContext<S, InjectResult<Tokens>>;
     // Loose return type: allows scoped state types (e.g., Todo's AppState ≠ kernel AppState)
     // The runtime stateSlice lens handles proper state mapping regardless
-    type HandlerReturn = { state?: unknown; dispatch?: BaseCommand | BaseCommand[] } & Record<string, unknown>;
+    type HandlerReturn = {
+      state?: unknown;
+      dispatch?: BaseCommand | BaseCommand[];
+    } & Record<string, unknown>;
 
     return {
       defineCommand: ((
@@ -599,5 +629,8 @@ export function createKernel<S>(initialState: S) {
     getScopeParent(scope: ScopeToken): ScopeToken | null {
       return (parentMap.get(scope as string) as ScopeToken) ?? null;
     },
+
+    // Fallback
+    resolveFallback,
   };
 }

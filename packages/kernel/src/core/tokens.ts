@@ -62,8 +62,8 @@ export type CommandFactory<Type extends string = string, Payload = void> = {
     ...args: [Payload] extends [undefined]
       ? []
       : undefined extends Payload
-      ? [payload?: Payload]
-      : [payload: Payload]
+        ? [payload?: Payload]
+        : [payload: Payload]
   ): Command<Type, Payload>;
   /** The command type string (for debugging/inspection). */
   readonly commandType: Type;
@@ -89,8 +89,8 @@ type Prettify<T> = { [K in keyof T]: T[K] } & {};
  */
 export type EffectFields<E extends Record<string, EffectToken>> = {
   [K in keyof E as E[K] extends EffectToken<infer T, unknown>
-  ? T
-  : never]?: E[K] extends EffectToken<string, infer V> ? V : never;
+    ? T
+    : never]?: E[K] extends EffectToken<string, infer V> ? V : never;
 };
 
 /**
@@ -109,9 +109,9 @@ export type TypedEffectMap<S, E extends Record<string, EffectToken>> = {
  * → `{ NOW: number; USER: User }`
  */
 export type InjectResult<T extends ContextToken[]> = Prettify<{
-  [K in T[number]as K["__id"]]: K extends ContextToken<string, infer V>
-  ? V
-  : never;
+  [K in T[number] as K["__id"]]: K extends ContextToken<string, infer V>
+    ? V
+    : never;
 }>;
 
 /** Context passed to command handlers. state + injected values. */
@@ -152,4 +152,7 @@ export type Middleware = {
   scope?: ScopeToken;
   before?: (ctx: MiddlewareContext) => MiddlewareContext;
   after?: (ctx: MiddlewareContext) => MiddlewareContext;
+  /** Fallback hook — called by resolveFallback(event) when a listener misses.
+   *  Return a Command to handle, or null to pass to the next middleware. */
+  fallback?: (event: Event) => BaseCommand | null;
 };

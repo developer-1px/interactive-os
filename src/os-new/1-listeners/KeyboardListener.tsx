@@ -8,14 +8,19 @@
  * via parentMap. Global commands go directly to GLOBAL.
  */
 
-import { useEffect } from "react";
-import { kernel } from "../kernel";
+import { OS_CHECK } from "@os/3-commands/interaction";
 import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
 import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
-import { OS_CHECK } from "@os/3-commands/interaction";
+import { useEffect } from "react";
+import { kernel } from "../kernel";
 
 // Ensure OS defaults are registered
 import "@os/keymaps/osDefaults";
+
+// Register Mac fallback middleware (side-effect)
+import { macFallbackMiddleware } from "@os/keymaps/macFallbackMiddleware";
+
+kernel.use(macFallbackMiddleware);
 
 export function KeyboardListener() {
   useEffect(() => {
@@ -36,12 +41,12 @@ export function KeyboardListener() {
 
       const context: KeyResolveContext = { isEditing };
 
-      const binding = Keybindings.resolve(canonicalKey, context);
-
       // Smart Listener: Space on checkbox/switch → CHECK instead of SELECT
       if (canonicalKey === "Space" && !isEditing) {
         const focusedEl = document.activeElement as HTMLElement | null;
-        const itemEl = focusedEl?.closest?.("[data-item-id]") as HTMLElement | null;
+        const itemEl = focusedEl?.closest?.(
+          "[data-item-id]",
+        ) as HTMLElement | null;
         const role = itemEl?.getAttribute("role");
         if (role === "checkbox" || role === "switch") {
           const itemId = itemEl?.id;
@@ -63,7 +68,18 @@ export function KeyboardListener() {
         }
       }
 
-      if (!binding) return;
+      // Resolve keybinding for the canonical key
+      const binding = Keybindings.resolve(canonicalKey, context);
+
+      if (!binding) {
+        // No keybinding found — try kernel middleware fallback
+        const handled = kernel.resolveFallback(e);
+        if (handled) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        return;
+      }
 
       const args = binding.args ?? [];
       const command = binding.command(...args);
