@@ -20,7 +20,7 @@ import {
   useTestBotRoutes,
 } from "@inspector/testbot";
 import { kernel } from "@/os-new/kernel";
-import { OS_COPY, OS_CUT, OS_PASTE } from "@/os-new/3-commands/clipboard";
+import { OS_COPY, OS_CUT, OS_PASTE } from "@/os-new/3-commands/clipboard/clipboard";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers

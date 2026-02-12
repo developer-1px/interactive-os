@@ -163,6 +163,31 @@ function createPersistenceMiddleware(
     let saveTimeout: ReturnType<typeof setTimeout> | null = null;
     let lastSaved: unknown = undefined;
 
+    /**
+     * Cancel any pending debounced save.
+     * Called when external setState() changes the state directly (e.g., test restore).
+     */
+    function cancelPendingSave() {
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+            saveTimeout = null;
+        }
+    }
+
+    /**
+     * Detect external setState() (not via dispatch) by subscribing.
+     * When state changes outside middleware, cancel pending saves
+     * to prevent stale closure data from overwriting the restored state.
+     */
+    kernel.subscribe(() => {
+        const currentAppState = (kernel.getState() as AppState).apps[appId];
+        if (currentAppState !== lastSaved && saveTimeout) {
+            // State changed externally — cancel pending stale save
+            cancelPendingSave();
+            lastSaved = currentAppState;
+        }
+    });
+
     return {
         id: `persistence:${appId}`,
         scope,
@@ -173,10 +198,13 @@ function createPersistenceMiddleware(
             if (appState === lastSaved) return ctx;
             lastSaved = appState;
 
-            if (saveTimeout) clearTimeout(saveTimeout);
+            cancelPendingSave();
             saveTimeout = setTimeout(() => {
                 try {
-                    localStorage.setItem(key, JSON.stringify(appState));
+                    // Read fresh state at save time (not closure-captured state)
+                    const freshState = (kernel.getState() as AppState).apps[appId];
+                    localStorage.setItem(key, JSON.stringify(freshState));
+                    lastSaved = freshState;
                 } catch {
                     // localStorage full or unavailable
                 }

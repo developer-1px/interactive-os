@@ -18,9 +18,6 @@ import {
   ToggleTodo,
 } from "@apps/todo/features/commands/list";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { Field } from "@os/6-components/primitives/Field.tsx";
-import { Label } from "@os/6-components/primitives/Label.tsx";
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { OS } from "@os/AntigravityOS";
 import { todoSlice } from "@apps/todo/app";
 import { Plus } from "lucide-react";
@@ -45,7 +42,7 @@ export function ListView() {
 
   return (
     <div className="flex-1 flex flex-col h-full relative bg-white overflow-hidden font-sans">
-      <Zone
+      <OS.Zone
         id="listView"
         role="listbox"
         // ARIA Standard Commands
@@ -75,11 +72,11 @@ export function ListView() {
 
           <div className="flex-1 overflow-y-auto space-y-2 px-2 custom-scrollbar">
             {/* Draft Item - Label expands hit area to entire box */}
-            <Label className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20">
+            <OS.Field.Label className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20">
               <div className="text-slate-400 group-has-[[data-focused=true]]:text-indigo-500 transition-colors">
                 <Plus size={18} strokeWidth={2.5} />
               </div>
-              <Field
+              <OS.Field
                 name="DRAFT"
                 value={draft}
                 onChange={SyncDraft}
@@ -87,7 +84,7 @@ export function ListView() {
                 className="flex-1 bg-transparent outline-none text-slate-700 text-[15px] font-medium placeholder:text-slate-400"
                 placeholder="Add a new task..."
               />
-            </Label>
+            </OS.Field.Label>
 
             <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent my-4" />
 
@@ -118,7 +115,7 @@ export function ListView() {
             )}
           </div>
         </div>
-      </Zone>
+      </OS.Zone>
     </div>
   );
 }

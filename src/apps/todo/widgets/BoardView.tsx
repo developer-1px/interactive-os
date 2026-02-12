@@ -10,8 +10,6 @@ import {
   ToggleTodo,
 } from "@apps/todo/features/commands/list";
 import { ToggleView } from "@apps/todo/features/commands/ToggleView";
-import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { OS } from "@os/AntigravityOS";
 import { todoSlice } from "@apps/todo/app";
 import { List } from "lucide-react";
@@ -43,7 +41,7 @@ export function BoardView() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <Trigger onPress={ToggleView()} asChild>
+            <OS.Trigger onPress={ToggleView()}>
               <button
                 type="button"
                 className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50/50 transition-all shadow-sm"
@@ -51,7 +49,7 @@ export function BoardView() {
               >
                 <List size={18} />
               </button>
-            </Trigger>
+            </OS.Trigger>
           </div>
         </header>
       </div>
@@ -60,7 +58,7 @@ export function BoardView() {
       <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar bg-slate-50">
         <div className="h-full min-w-max p-8">
           {/* Top-Level Board FocusGroup: Spatial Navigation between Columns */}
-          <Zone
+          <OS.Zone
             id="board"
             role="group"
             options={{
@@ -78,7 +76,7 @@ export function BoardView() {
                 .filter((t): t is NonNullable<typeof t> => !!t);
 
               return (
-                <Zone
+                <OS.Zone
                   key={categoryId}
                   id={`col-${categoryId}`}
                   role="listbox"
@@ -144,10 +142,10 @@ export function BoardView() {
                       </div>
                     )}
                   </div>
-                </Zone>
+                </OS.Zone>
               );
             })}
-          </Zone>
+          </OS.Zone>
         </div>
       </div>
     </div>

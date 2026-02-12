@@ -8,9 +8,9 @@
  */
 
 import { produce } from "immer";
-import { DOM_ITEMS, ZONE_CONFIG } from "../2-contexts";
-import { kernel } from "../kernel";
-import { ensureZone } from "../state/utils";
+import { DOM_ITEMS, ZONE_CONFIG } from "../../2-contexts";
+import { kernel } from "../../kernel";
+import { ensureZone } from "../../state/utils";
 
 interface TabPayload {
   direction?: "forward" | "backward";

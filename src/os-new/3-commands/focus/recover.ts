@@ -6,9 +6,9 @@
  */
 
 import { produce } from "immer";
-import { DOM_ITEMS } from "../2-contexts";
-import { kernel } from "../kernel";
-import { ensureZone } from "../state/utils";
+import { DOM_ITEMS } from "../../2-contexts";
+import { kernel } from "../../kernel";
+import { ensureZone } from "../../state/utils";
 
 
 export const RECOVER = kernel.defineCommand(

@@ -2,7 +2,7 @@ import { todoSlice } from "@apps/todo/app";
 import { UndoCommand, RedoCommand } from "@apps/todo/features/commands/history";
 import { ClearCompleted } from "@apps/todo/features/commands/list";
 import { ToggleView } from "@apps/todo/features/commands/ToggleView";
-import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
+import { OS } from "@os/AntigravityOS";
 import {
     LayoutGrid,
     List,
@@ -29,7 +29,7 @@ export function TodoToolbar() {
         <div className="flex px-4 py-3 bg-white border-b border-slate-200 justify-between items-center sticky top-0 z-10">
             {/* Left: View Toggle */}
             <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-                <Trigger onPress={ToggleView()}>
+                <OS.Trigger onPress={ToggleView()}>
                     <button
                         className={`
               p-1.5 rounded-md transition-all flex items-center justify-center
@@ -39,8 +39,8 @@ export function TodoToolbar() {
                     >
                         <List size={16} />
                     </button>
-                </Trigger>
-                <Trigger onPress={ToggleView()}>
+                </OS.Trigger>
+                <OS.Trigger onPress={ToggleView()}>
                     <button
                         className={`
               p-1.5 rounded-md transition-all flex items-center justify-center
@@ -50,14 +50,14 @@ export function TodoToolbar() {
                     >
                         <LayoutGrid size={16} />
                     </button>
-                </Trigger>
+                </OS.Trigger>
             </div>
 
             {/* Right: Actions */}
             <div className="flex items-center gap-3">
                 {/* Undo / Redo */}
                 <div className="flex items-center bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                    <Trigger onPress={UndoCommand()}>
+                    <OS.Trigger onPress={UndoCommand()}>
                         <button
                             disabled={!hasHistoryPast}
                             className="px-3 py-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-colors border-r border-slate-100"
@@ -65,8 +65,8 @@ export function TodoToolbar() {
                         >
                             <RotateCcw size={14} />
                         </button>
-                    </Trigger>
-                    <Trigger onPress={RedoCommand()}>
+                    </OS.Trigger>
+                    <OS.Trigger onPress={RedoCommand()}>
                         <button
                             disabled={!hasHistoryFuture}
                             className="px-3 py-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
@@ -74,12 +74,12 @@ export function TodoToolbar() {
                         >
                             <RotateCw size={14} />
                         </button>
-                    </Trigger>
+                    </OS.Trigger>
                 </div>
 
                 {/* Clear Completed */}
                 {completedCount > 0 && (
-                    <Trigger onPress={ClearCompleted()}>
+                    <OS.Trigger onPress={ClearCompleted()}>
                         <button
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100"
                             title="Clear Completed Tasks"
@@ -87,7 +87,7 @@ export function TodoToolbar() {
                             <Trash2 size={14} />
                             <span className="hidden sm:inline">Clear {completedCount}</span>
                         </button>
-                    </Trigger>
+                    </OS.Trigger>
                 )}
             </div>
         </div>

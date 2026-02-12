@@ -18,7 +18,7 @@ const SidebarItem = ({
 }: {
     item: DocItem;
     level?: number;
-    index?: number;
+    index?: number | undefined;
     activePath: string | undefined;
     onSelect: (path: string) => void;
 }) => {

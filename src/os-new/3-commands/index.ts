@@ -4,28 +4,32 @@
  * All kernel-based OS commands.
  */
 
-// Activation
-export { ACTIVATE } from "./activate";
-export { ESCAPE } from "./escape";
-// Expansion
-export { EXPAND } from "./expand";
 // Focus
-export { FOCUS } from "./focus";
-// Navigation
-export { NAVIGATE } from "./navigate";
-export { RECOVER } from "./recover";
+export { FOCUS, SYNC_FOCUS, RECOVER, STACK_PUSH, STACK_POP } from "./focus";
+// Interaction
+export { ACTIVATE } from "./interaction";
+export { ESCAPE } from "./interaction";
+export { TAB } from "./interaction";
 // Selection
-export { SELECT } from "./select";
 export {
+  SELECT,
   SELECTION_ADD,
   SELECTION_CLEAR,
   SELECTION_REMOVE,
   SELECTION_SET,
   SELECTION_TOGGLE,
 } from "./selection";
-export { STACK_POP, STACK_PUSH } from "./stack";
-export { SYNC_FOCUS } from "./syncFocus";
-export { TAB } from "./tab";
-export { OVERLAY_OPEN, OVERLAY_CLOSE } from "./overlay";
+// Expansion
+export { EXPAND } from "./expand";
+// Navigation
+export { NAVIGATE } from "./navigate";
+// Overlay
+export { OVERLAY_OPEN, OVERLAY_CLOSE } from "./overlay/overlay";
+// Field
+export {
+  FIELD_START_EDIT,
+  FIELD_COMMIT,
+  FIELD_CANCEL,
+} from "./field/field";
 // Clipboard
-export { OS_COPY, OS_CUT, OS_PASTE } from "./clipboard";
+export { OS_COPY, OS_CUT, OS_PASTE } from "./clipboard/clipboard";

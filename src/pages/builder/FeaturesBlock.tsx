@@ -1,4 +1,3 @@
-import { Field } from "@os/6-components/primitives/Field.tsx";
 import { OS } from "@os/AntigravityOS";
 import { BarChart3, Lock, Wand2, Zap } from "lucide-react";
 import { useState } from "react";
@@ -37,7 +36,7 @@ export function FeaturesBlock() {
         <div className="text-center mb-16">
           <div className="mb-4">
             <OS.Item id="features-eyebrow" asChild>
-              <Field
+              <OS.Field
                 name="features-eyebrow"
                 mode="deferred"
                 value={values.eyebrow}
@@ -53,7 +52,7 @@ export function FeaturesBlock() {
           </div>
           <div>
             <OS.Item id="features-title" asChild>
-              <Field
+              <OS.Field
                 name="features-title"
                 mode="deferred"
                 value={values.title}
@@ -83,7 +82,7 @@ export function FeaturesBlock() {
               </div>
               <div className="absolute bottom-8 left-8 right-8 flex flex-col items-start">
                 <OS.Item id="feature-main-title" asChild>
-                  <Field
+                  <OS.Field
                     name="feature-main-title"
                     mode="deferred"
                     value={values.mainTitle}
@@ -97,7 +96,7 @@ export function FeaturesBlock() {
                   />
                 </OS.Item>
                 <OS.Item id="feature-main-desc" asChild>
-                  <Field
+                  <OS.Field
                     name="feature-main-desc"
                     mode="deferred"
                     multiline
@@ -124,7 +123,7 @@ export function FeaturesBlock() {
               <div className="flex items-start justify-between h-full">
                 <div className="flex flex-col items-start pr-12">
                   <OS.Item id="feature-speed-title" asChild>
-                    <Field
+                    <OS.Field
                       name="feature-speed-title"
                       mode="deferred"
                       value={values.speedTitle}
@@ -138,7 +137,7 @@ export function FeaturesBlock() {
                     />
                   </OS.Item>
                   <OS.Item id="feature-speed-desc" asChild>
-                    <Field
+                    <OS.Field
                       name="feature-speed-desc"
                       mode="deferred"
                       value={values.speedDesc}
@@ -165,7 +164,7 @@ export function FeaturesBlock() {
               <div className="flex items-start justify-between h-full">
                 <div className="flex flex-col items-start pr-12">
                   <OS.Item id="feature-security-title" asChild>
-                    <Field
+                    <OS.Field
                       name="feature-security-title"
                       mode="deferred"
                       value={values.securityTitle}
@@ -179,7 +178,7 @@ export function FeaturesBlock() {
                     />
                   </OS.Item>
                   <OS.Item id="feature-security-desc" asChild>
-                    <Field
+                    <OS.Field
                       name="feature-security-desc"
                       mode="deferred"
                       value={values.securityDesc}
@@ -211,7 +210,7 @@ export function FeaturesBlock() {
               </div>
               <div className="flex flex-col items-start">
                 <OS.Item id="feature-analytics-title" asChild>
-                  <Field
+                  <OS.Field
                     name="feature-analytics-title"
                     mode="deferred"
                     value={values.analyticsTitle}
@@ -225,7 +224,7 @@ export function FeaturesBlock() {
                   />
                 </OS.Item>
                 <OS.Item id="feature-analytics-desc" asChild>
-                  <Field
+                  <OS.Field
                     name="feature-analytics-desc"
                     mode="deferred"
                     multiline
@@ -260,7 +259,7 @@ export function FeaturesBlock() {
               </div>
               <div className="flex flex-col items-start">
                 <OS.Item id="feature-collab-title" asChild>
-                  <Field
+                  <OS.Field
                     name="feature-collab-title"
                     mode="deferred"
                     value={values.collabTitle}
@@ -274,7 +273,7 @@ export function FeaturesBlock() {
                   />
                 </OS.Item>
                 <OS.Item id="feature-collab-desc" asChild>
-                  <Field
+                  <OS.Field
                     name="feature-collab-desc"
                     mode="deferred"
                     value={values.collabDesc}

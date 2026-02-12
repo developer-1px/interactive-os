@@ -43,22 +43,15 @@ export function testBot(opts?: { speed?: number }): TestBot {
   };
 
   const dryRun = async (): Promise<SuiteResult[]> => {
-    const results: SuiteResult[] = [];
-    for (const suite of suites) {
-      const steps: StepResult[] = [];
-      try {
-        await suite.fn(createMockActions(steps));
-      } catch {
-        steps.push({ action: "error", detail: "Dry run error", passed: false });
-      }
-      results.push({
-        name: suite.name,
-        steps,
-        passed: false,
-        status: "planned",
-      });
-    }
-    return results;
+    // Only collect suite metadata — never execute test bodies.
+    // Test bodies contain real kernel dispatches (e.g., AddTodo) that
+    // would cause unintended side effects (duplicate state, auto-execution).
+    return suites.map((suite) => ({
+      name: suite.name,
+      steps: [],
+      passed: false,
+      status: "planned" as const,
+    }));
   };
 
   /** Execute a single suite, returns its result */

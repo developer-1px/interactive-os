@@ -1,15 +1,15 @@
 export type AppEffect =
   | { type: "FOCUS_ID"; id: string | number }
   | {
-      type: "NAVIGATE";
-      direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
-      targetZone?: string;
-    }
+    type: "NAVIGATE";
+    direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
+    targetZone?: string;
+  }
   | { type: "SCROLL_INTO_VIEW"; id: string | number };
 
 type FocusTarget = "DRAFT" | number | string | null;
 
-interface Category {
+export interface Category {
   id: string;
   text: string;
 }

@@ -1,5 +1,3 @@
-import type React from "react";
-
 // Types for tree structure
 export interface DocItem {
     name: string;

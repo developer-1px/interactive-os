@@ -8,10 +8,10 @@
  */
 
 import { produce } from "immer";
-import { ZONE_CONFIG } from "../2-contexts";
-import { ZoneRegistry } from "../2-contexts/zoneRegistry";
-import { kernel } from "../kernel";
-import { ensureZone } from "../state/utils";
+import { ZONE_CONFIG } from "../../2-contexts";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { kernel } from "../../kernel";
+import { ensureZone } from "../../state/utils";
 
 export const ESCAPE = kernel.defineCommand(
   "OS_ESCAPE",

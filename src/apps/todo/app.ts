@@ -10,9 +10,14 @@ import { registerAppSlice } from "@/os-new/appSlice";
  */
 export const todoSlice = registerAppSlice<AppState>("todo", {
   initialState: INITIAL_STATE,
-  persistence: {
-    key: "todo-app-v5",
-    debounceMs: 250,
-  },
+  // persistence: {
+  //   key: "todo-app-v5",
+  //   debounceMs: 250,
+  // },
   history: true,
 });
+
+// Dev/Test: Expose for Playwright E2E
+if (import.meta.env.DEV) {
+  (window as any).__todoSlice = todoSlice;
+}

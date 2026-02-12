@@ -25,8 +25,7 @@ import {
   useRef,
 } from "react";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
-import { FOCUS } from "../../3-commands/focus.ts";
-import { STACK_POP, STACK_PUSH } from "../../3-commands/stack.ts";
+import { FOCUS, STACK_POP, STACK_PUSH } from "../../3-commands/focus";
 import { kernel } from "../../kernel.ts";
 import { resolveRole, type ZoneRole } from "../../registry/roleRegistry.ts";
 import type {

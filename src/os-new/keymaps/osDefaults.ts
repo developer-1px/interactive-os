@@ -7,16 +7,14 @@
  * These map directly to commands from 3-commands/.
  */
 
-import { ACTIVATE } from "@os/3-commands/activate";
-import { ESCAPE } from "@os/3-commands/escape";
+import { ACTIVATE, ESCAPE, TAB } from "@os/3-commands/interaction";
 import {
   FIELD_CANCEL,
   FIELD_COMMIT,
   FIELD_START_EDIT,
-} from "@os/3-commands/field";
+} from "@os/3-commands/field/field";
 import { NAVIGATE } from "@os/3-commands/navigate";
-import { SELECT } from "@os/3-commands/select";
-import { TAB } from "@os/3-commands/tab";
+import { SELECT } from "@os/3-commands/selection";
 import { Keybindings } from "./keybindings";
 
 // ═══════════════════════════════════════════════════════════════════

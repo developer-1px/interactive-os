@@ -1,4 +1,3 @@
-import { Field } from "@os/6-components/primitives/Field.tsx";
 import { OS } from "@os/AntigravityOS";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
@@ -29,7 +28,7 @@ export function CTABlock() {
         {/* Headline */}
         <div className="mb-6">
           <OS.Item id="cta-headline" asChild>
-            <Field
+            <OS.Field
               name="cta-headline"
               mode="deferred"
               value={values.headline}
@@ -49,7 +48,7 @@ export function CTABlock() {
         {/* Subtext */}
         <div className="mb-10">
           <OS.Item id="cta-subtext" asChild>
-            <Field
+            <OS.Field
               name="cta-subtext"
               mode="deferred"
               value={values.subtext}
@@ -89,7 +88,7 @@ export function CTABlock() {
         {/* Footer Note */}
         <div className="mt-8">
           <OS.Item id="cta-footer" asChild>
-            <Field
+            <OS.Field
               name="cta-footer"
               mode="deferred"
               value={values.footer}

@@ -1,4 +1,3 @@
-import { Field } from "@os/6-components/primitives/Field.tsx";
 import { OS } from "@os/AntigravityOS";
 import { Star } from "lucide-react";
 import { useState } from "react";
@@ -77,7 +76,7 @@ export function TestimonialsBlock() {
         <div className="text-center mb-16">
           <div className="mb-4">
             <OS.Item id="testimonials-eyebrow" asChild>
-              <Field
+              <OS.Field
                 name="testimonials-eyebrow"
                 mode="deferred"
                 value={header.eyebrow}
@@ -93,7 +92,7 @@ export function TestimonialsBlock() {
           </div>
           <div>
             <OS.Item id="testimonials-title" asChild>
-              <Field
+              <OS.Field
                 name="testimonials-title"
                 mode="deferred"
                 value={header.title}
@@ -138,7 +137,7 @@ export function TestimonialsBlock() {
                 {/* Quote */}
                 <div className="mb-6 h-full flex flex-col items-start min-h-[80px]">
                   <OS.Item id={`${t.id}-quote`} asChild>
-                    <Field
+                    <OS.Field
                       name={`${t.id}-quote`}
                       mode="deferred"
                       multiline
@@ -167,7 +166,7 @@ export function TestimonialsBlock() {
                   </div>
                   <div className="flex flex-col items-start min-w-0">
                     <OS.Item id={`${t.id}-name`} asChild>
-                      <Field
+                      <OS.Field
                         name={`${t.id}-name`}
                         mode="deferred"
                         value={t.name}
@@ -185,7 +184,7 @@ export function TestimonialsBlock() {
                       />
                     </OS.Item>
                     <OS.Item id={`${t.id}-role`} asChild>
-                      <Field
+                      <OS.Field
                         name={`${t.id}-role`}
                         mode="deferred"
                         value={t.role}

@@ -10,8 +10,8 @@
  */
 
 import { produce } from "immer";
-import { kernel } from "../kernel";
-import type { OverlayEntry } from "../state/OSState";
+import { kernel } from "../../kernel";
+import type { OverlayEntry } from "../../state/OSState";
 
 // ═══════════════════════════════════════════════════════════════════
 // OPEN

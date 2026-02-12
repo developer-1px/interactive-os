@@ -29,3 +29,11 @@ export const initialAppState: AppState = {
 // ═══════════════════════════════════════════════════════════════════
 
 export const kernel = createKernel<AppState>(initialAppState);
+
+// ═══════════════════════════════════════════════════════════════════
+// Dev/Test: Expose kernel on window for Playwright E2E
+// ═══════════════════════════════════════════════════════════════════
+
+if (import.meta.env.DEV) {
+  (window as any).__kernel = kernel;
+}

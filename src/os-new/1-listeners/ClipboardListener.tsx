@@ -11,7 +11,7 @@
 
 import { useEffect } from "react";
 import { kernel } from "../kernel";
-import { OS_COPY, OS_CUT, OS_PASTE } from "../3-commands/clipboard";
+import { OS_COPY, OS_CUT, OS_PASTE } from "../3-commands/clipboard/clipboard";
 
 function isInputActive(): boolean {
   const el = document.activeElement;

@@ -9,9 +9,7 @@ import {
   UpdateTodoText,
 } from "@apps/todo/features/commands/list";
 import type { Todo } from "@apps/todo/model/types";
-import { Field } from "@os/6-components/primitives/Field.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
-import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
+import { OS } from "@os/AntigravityOS";
 import {
   ArrowDown,
   ArrowUp,
@@ -35,7 +33,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <Item
+    <OS.Item
       id={String(todo.id)}
       className={`
                 group relative flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-200
@@ -62,7 +60,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
       </div>
 
       {/* Checkbox Trigger */}
-      <Trigger onPress={ToggleTodo({ id: todo.id })}>
+      <OS.Trigger onPress={ToggleTodo({ id: todo.id })}>
         <div
           className={`
                         w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
@@ -78,12 +76,12 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
             strokeWidth={3}
           />
         </div>
-      </Trigger>
+      </OS.Trigger>
 
       {/* Content Area */}
       <div className="flex-1 min-w-0 pt-0.5">
         {isEditing ? (
-          <Field
+          <OS.Field
             name="EDIT"
             value={editDraft}
             autoFocus
@@ -128,7 +126,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
           </div>
         ) : (
           <>
-            <Trigger onPress={StartEdit({ id: todo.id })} asChild>
+            <OS.Trigger onPress={StartEdit({ id: todo.id })}>
               <button
                 type="button"
                 className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
@@ -136,11 +134,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
               >
                 <CornerDownLeft size={14} />
               </button>
-            </Trigger>
+            </OS.Trigger>
 
             <div className="w-px h-3 bg-slate-200 mx-1" />
 
-            <Trigger onPress={MoveItemUp({ focusId: todo.id })} asChild>
+            <OS.Trigger onPress={MoveItemUp({ focusId: todo.id })}>
               <button
                 type="button"
                 className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
@@ -148,8 +146,8 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
               >
                 <ArrowUp size={14} />
               </button>
-            </Trigger>
-            <Trigger onPress={MoveItemDown({ focusId: todo.id })} asChild>
+            </OS.Trigger>
+            <OS.Trigger onPress={MoveItemDown({ focusId: todo.id })}>
               <button
                 type="button"
                 className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
@@ -157,11 +155,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
               >
                 <ArrowDown size={14} />
               </button>
-            </Trigger>
+            </OS.Trigger>
 
             <div className="w-px h-3 bg-slate-200 mx-1" />
 
-            <Trigger onPress={DeleteTodo({ id: todo.id })} asChild>
+            <OS.Trigger onPress={DeleteTodo({ id: todo.id })}>
               <button
                 type="button"
                 className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -169,13 +167,13 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
               >
                 <Trash2 size={14} />
               </button>
-            </Trigger>
+            </OS.Trigger>
           </>
         )}
       </div>
 
       {/* Active Indicator Bar */}
       <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-r-full opacity-0 data-[focused=true]:opacity-100 transition-opacity" />
-    </Item>
+    </OS.Item>
   );
 }

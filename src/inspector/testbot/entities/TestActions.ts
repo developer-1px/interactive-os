@@ -43,4 +43,7 @@ export interface TestActions {
   getAllByText(text: string): Promise<string[]>;
 
   expect(selector: string): Expectations;
+
+  /** Headless assertion — pass/fail with a message (no DOM needed). */
+  assert(condition: boolean, message: string): Promise<void>;
 }

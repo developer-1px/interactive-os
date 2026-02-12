@@ -23,7 +23,7 @@ import {
 export default function BuilderPage() {
   usePlaywrightSpecs("pw-builder-spatial", [runBuilderSpatial]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
-  const [selectedType, setSelectedType] = useState<PropertyType>("text"); // Default to text for demo
+  const [selectedType, _setSelectedType] = useState<PropertyType>("text"); // TODO: derive from kernel selection
 
   const getViewportStyle = () => {
     switch (viewport) {
@@ -64,33 +64,7 @@ export default function BuilderPage() {
             >
               {/* Content Container */}
               <div className="flex-1 bg-white relative group/canvas">
-                {/* Mock Click Handlers for Demo */}
-                <div className="absolute inset-0 z-10 pointer-events-none">
-                  {/* Hero Text Click Zone */}
-                  <div
-                    className="absolute top-32 left-10 w-1/2 h-32 cursor-pointer pointer-events-auto hover:ring-2 hover:ring-violet-500/50 transition-all"
-                    onClick={() => setSelectedType("text")}
-                    title="Select Text"
-                  />
-                  {/* Button Click Zone */}
-                  <div
-                    className="absolute top-72 left-10 w-40 h-12 cursor-pointer pointer-events-auto hover:ring-2 hover:ring-emerald-500/50 transition-all"
-                    onClick={() => setSelectedType("button")}
-                    title="Select Button"
-                  />
-                  {/* Image Click Zone */}
-                  <div
-                    className="absolute top-20 right-10 w-1/3 h-96 cursor-pointer pointer-events-auto hover:ring-2 hover:ring-blue-500/50 transition-all"
-                    onClick={() => setSelectedType("image")}
-                    title="Select Image"
-                  />
-                  {/* Section Click Zone (Bottom) */}
-                  <div
-                    className="absolute bottom-0 left-0 w-full h-20 cursor-pointer pointer-events-auto hover:ring-2 hover:ring-amber-500/50 transition-all"
-                    onClick={() => setSelectedType("section")}
-                    title="Select Section"
-                  />
-                </div>
+
 
                 <NCPHeroBlock />
                 <NCPNewsBlock />

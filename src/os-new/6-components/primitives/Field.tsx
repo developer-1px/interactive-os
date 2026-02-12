@@ -102,7 +102,7 @@ export interface FieldProps
  *
  * NO event handlers - all logic in InputSensor + InputIntent.
  */
-export const Field = forwardRef<HTMLElement, FieldProps>(
+const FieldBase = forwardRef<HTMLElement, FieldProps>(
   (
     {
       value,
@@ -257,4 +257,11 @@ export const Field = forwardRef<HTMLElement, FieldProps>(
   },
 );
 
-Field.displayName = "Field";
+FieldBase.displayName = "Field";
+
+import { Label } from "./Label";
+
+// Namespace merge — attach Label as Field.Label (same pattern as Trigger.Portal)
+export const Field = Object.assign(FieldBase, {
+  Label,
+});

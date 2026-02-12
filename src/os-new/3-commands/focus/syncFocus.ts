@@ -6,8 +6,8 @@
  */
 
 import { produce } from "immer";
-import { kernel } from "../kernel";
-import { ensureZone } from "../state/utils";
+import { kernel } from "../../kernel";
+import { ensureZone } from "../../state/utils";
 
 interface SyncFocusPayload {
   id: string;

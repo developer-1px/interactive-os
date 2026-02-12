@@ -1,8 +1,10 @@
 /**
  * Builder — Invisible annotation layer for CMS/Web Builder
  *
- * Builder components NEVER create DOM nodes. They use Slot internally,
- * merging props (data-level, focus state) into the child element.
+ * Delegates all focus behavior to OS.Item (official OS facade).
+ * Builder components add only builder-specific annotations:
+ *   - data-level: "section" | "group" | "item"
+ *   - data-builder-id: unique builder element ID
  *
  * Three levels:
  *   Builder.Section  → data-level="section"  (Hero, News, Services)
@@ -19,10 +21,8 @@
  *   </Builder.Section>
  */
 
-import { forwardRef, type ReactElement, useLayoutEffect, useRef } from "react";
-import { kernel } from "@/os-new/kernel";
-import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
-import { composeRefs, Slot } from "./Slot";
+import { forwardRef, type ReactElement } from "react";
+import { OS } from "@os/AntigravityOS";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -44,90 +44,18 @@ interface BuilderComponentProps {
 // ═══════════════════════════════════════════════════════════════════
 
 function createBuilderComponent(level: BuilderLevel, displayName: string) {
-  /** Inner component — only rendered inside a FocusGroup (hooks are safe here) */
-  function BuilderFocusItem({
-    id,
-    innerRef,
-    combinedRef,
-    zoneId,
-    children,
-  }: {
-    id: string;
-    innerRef: React.RefObject<HTMLElement | null>;
-    combinedRef: (node: any) => void;
-    zoneId: string;
-    children: ReactElement;
-  }) {
-    const activeZoneId = kernel.useComputed((s) => s.os.focus.activeZoneId);
-
-    const isFocused = kernel.useComputed(
-      (s) => s.os.focus.zones[zoneId]?.focusedItemId === id,
-    );
-
-    const isSelected = kernel.useComputed(
-      (s) => s.os.focus.zones[zoneId]?.selection.includes(id) ?? false,
-    );
-
-    const isGroupActive = activeZoneId === zoneId;
-    const visualFocused = isFocused && isGroupActive;
-    const isAnchor = isFocused && !isGroupActive;
-
-    useLayoutEffect(() => {
-      if (visualFocused && innerRef.current) {
-        if (document.activeElement !== innerRef.current) {
-          innerRef.current.focus({ preventScroll: true });
-        }
-      }
-    }, [visualFocused, innerRef]);
-
-    return (
-      <Slot
-        ref={combinedRef}
-        id={id}
-        tabIndex={visualFocused ? 0 : -1}
-        data-level={level}
-        data-builder-id={id}
-        data-focus-item={true}
-        data-item-id={id}
-        data-anchor={isAnchor || undefined}
-        data-focused={visualFocused || undefined}
-        data-selected={isSelected || undefined}
-        style={{ outline: "none" }}
-      >
-        {children}
-      </Slot>
-    );
-  }
-
   const Component = forwardRef<HTMLElement, BuilderComponentProps>(
     function BuilderComponent({ id, children }, ref) {
-      const ctx = useFocusGroupContext();
-      const internalRef = useRef<HTMLElement>(null);
-      const combinedRef = composeRefs(ref, internalRef);
-
-      // Outside FocusGroup — just annotate with data attributes
-      if (!ctx) {
-        return (
-          <Slot
-            ref={combinedRef}
-            id={id}
-            data-level={level}
-            data-builder-id={id}
-          >
-            {children}
-          </Slot>
-        );
-      }
-
       return (
-        <BuilderFocusItem
+        <OS.Item
           id={id}
-          innerRef={internalRef}
-          combinedRef={combinedRef}
-          zoneId={ctx.zoneId}
+          asChild
+          ref={ref}
+          data-level={level}
+          data-builder-id={id}
         >
           {children}
-        </BuilderFocusItem>
+        </OS.Item>
       );
     },
   );

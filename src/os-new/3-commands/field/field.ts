@@ -10,7 +10,7 @@
  */
 
 import { produce } from "immer";
-import { kernel } from "../kernel";
+import { kernel } from "../../kernel";
 
 // ═══════════════════════════════════════════════════════════════════
 // FIELD_START_EDIT

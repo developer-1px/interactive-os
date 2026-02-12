@@ -8,8 +8,8 @@
  * Zone binding: <OS.Zone onCopy={TODO_COPY()} onCut={TODO_CUT()} onPaste={TODO_PASTE()}>
  */
 
-import { ZoneRegistry } from "../2-contexts/zoneRegistry";
-import { kernel } from "../kernel";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { kernel } from "../../kernel";
 
 export const OS_COPY = kernel.defineCommand("OS_COPY", (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;

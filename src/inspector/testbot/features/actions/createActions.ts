@@ -123,10 +123,10 @@ export function createActions(
     cursor.clearBubbles();
     const modLabel = modifiers
       ? `${[
-          modifiers.ctrl ? "Ctrl+" : "",
-          modifiers.shift ? "Shift+" : "",
-          modifiers.meta ? "⌘+" : "",
-        ].join("")}Click`
+        modifiers.ctrl ? "Ctrl+" : "",
+        modifiers.shift ? "Shift+" : "",
+        modifiers.meta ? "⌘+" : "",
+      ].join("")}Click`
       : "Click";
     cursor.showBubble(modLabel, "click");
     cursor.ripple();
@@ -430,11 +430,16 @@ export function createActions(
     },
   });
 
+  const assert = async (condition: boolean, message: string) => {
+    assertStep("assert", message, condition, `Assertion failed: ${message}`);
+  };
+
   return {
     click,
     press,
     type: typeText,
     expect,
+    assert,
     getByText,
     getAllByText,
     getByRole,

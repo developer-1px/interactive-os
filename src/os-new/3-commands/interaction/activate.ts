@@ -6,8 +6,8 @@
  * - Otherwise: trigger CLICK effect on focused element
  */
 
-import { kernel } from "../kernel";
-import { EXPAND } from "./expand";
+import { kernel } from "../../kernel";
+import { EXPAND } from "../expand";
 
 export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;

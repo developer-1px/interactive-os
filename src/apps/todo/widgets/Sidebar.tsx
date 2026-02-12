@@ -1,9 +1,7 @@
 import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import { SelectCategory } from "@apps/todo/features/commands/MoveCategoryUp";
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { Item } from "@os/6-components/primitives/Item.tsx";
-import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
+import { OS } from "@os/AntigravityOS";
 import { todoSlice } from "@apps/todo/app";
 import {
   ArrowRight,
@@ -17,7 +15,7 @@ import {
 
 export function Sidebar() {
   return (
-    <Zone
+    <OS.Zone
       id="sidebar"
       role="listbox"
       options={{
@@ -31,7 +29,7 @@ export function Sidebar() {
       className="h-full"
     >
       <SidebarContent />
-    </Zone>
+    </OS.Zone>
   );
 }
 
@@ -73,8 +71,8 @@ function SidebarContent() {
           if (!category) return null;
 
           return (
-            <Item key={category.id} id={category.id} asChild>
-              <Trigger onPress={SelectCategory({ id: category.id })} asChild>
+            <OS.Item key={category.id} id={category.id} asChild>
+              <OS.Trigger onPress={SelectCategory({ id: category.id })}>
                 <div
                   className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
                                   hover:bg-slate-100/80
@@ -99,8 +97,8 @@ function SidebarContent() {
                     <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
                   )}
                 </div>
-              </Trigger>
-            </Item>
+              </OS.Trigger>
+            </OS.Item>
           );
         })}
       </div>

@@ -31,7 +31,7 @@ import {
 } from "react";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import type { BaseCommand } from "@kernel";
-import { OVERLAY_OPEN, OVERLAY_CLOSE } from "@os/3-commands/overlay.ts";
+import { OVERLAY_OPEN, OVERLAY_CLOSE } from "@os/3-commands/overlay/overlay";
 import type { OverlayEntry } from "@os/state/OSState.ts";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -56,11 +56,10 @@ export function useOverlayContext() {
 type OverlayRole = OverlayEntry["type"];
 
 export interface TriggerProps<T extends BaseCommand>
-  extends React.HTMLAttributes<HTMLButtonElement> {
+  extends React.HTMLAttributes<HTMLElement> {
   id?: string;
   onPress?: T;
   children: ReactNode;
-  asChild?: boolean;
   dispatch?: (cmd: T) => void;
   allowPropagation?: boolean;
 
@@ -81,15 +80,18 @@ function generateOverlayId() {
 
 // ═══════════════════════════════════════════════════════════════════
 // Base Trigger Component
+//
+// Trigger always merges its click handler into the child element
+// (asChild-by-default). It never renders its own <button>.
+// The consumer must provide a clickable element as the child.
 // ═══════════════════════════════════════════════════════════════════
 
-const TriggerBase = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
+const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
   (
     {
       id,
       onPress,
       children,
-      asChild,
       dispatch: customDispatch,
       allowPropagation = false,
       className,
@@ -162,7 +164,8 @@ const TriggerBase = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
         </OverlayContext.Provider>
       ) : null;
 
-    // Logic: Trigger *is* a FocusItem if an ID is provided.
+    // ── Merge into child element ──────────────────────────────────
+    // Trigger *is* a FocusItem if an ID is provided.
     if (id) {
       return (
         <>
@@ -172,10 +175,10 @@ const TriggerBase = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
             ref={ref}
             {...baseProps}
           >
-            {asChild && isValidElement(triggerContent) ? (
+            {isValidElement(triggerContent) ? (
               triggerContent
             ) : (
-              <button type="button">{triggerContent}</button>
+              <span>{triggerContent}</span>
             )}
           </FocusItem>
           {portalWithContext}
@@ -183,15 +186,15 @@ const TriggerBase = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
       );
     }
 
-    // Fallback for non-ID triggers
-    if (asChild && isValidElement(triggerContent)) {
+    // Default: merge click handler into child element (asChild-by-default)
+    if (isValidElement(triggerContent)) {
       const child = triggerContent as ReactElement<any>;
       return (
         <>
           {cloneElement(child, {
             ...baseProps,
             ref,
-            className: `${child.props.className || ""} ${className || ""}`.trim(),
+            className: [child.props.className, className].filter(Boolean).join(" ") || undefined,
             onClick: (e: ReactMouseEvent) => {
               child.props.onClick?.(e);
               handleClick(e);
@@ -202,25 +205,12 @@ const TriggerBase = forwardRef<HTMLButtonElement, TriggerProps<BaseCommand>>(
       );
     }
 
-    // When overlayRole is set, Trigger is a container (not a button).
-    // The actual click target is inside Dialog.Trigger / children.
-    // Rendering as <button> would cause nested <button> violations.
-    if (overlayRole) {
-      return (
-        <>
-          <div ref={ref as any} {...(baseProps as any)}>
-            {triggerContent}
-          </div>
-          {portalWithContext}
-        </>
-      );
-    }
-
+    // Fallback: multiple children or non-element children — wrap in span
     return (
       <>
-        <button type="button" ref={ref} {...baseProps}>
+        <span ref={ref as any} {...(baseProps as any)}>
           {triggerContent}
-        </button>
+        </span>
         {portalWithContext}
       </>
     );

@@ -1,4 +1,3 @@
-import { Field } from "@os/6-components/primitives/Field.tsx";
 import { OS } from "@os/AntigravityOS";
 import { useState } from "react";
 
@@ -39,7 +38,7 @@ export function HeroBlock() {
         {/* Announcement Badge */}
         <div className="mb-8">
           <OS.Item id="hero-badge" asChild>
-            <Field
+            <OS.Field
               name="hero-badge"
               mode="deferred"
               value={values.badge}
@@ -58,7 +57,7 @@ export function HeroBlock() {
 
         {/* Main Headline */}
         <OS.Item id="hero-headline" asChild>
-          <Field
+          <OS.Field
             name="hero-headline"
             mode="deferred"
             value={values.headline}
@@ -76,7 +75,7 @@ export function HeroBlock() {
 
         {/* Subheadline */}
         <OS.Item id="hero-subheadline" asChild>
-          <Field
+          <OS.Field
             name="hero-subheadline"
             mode="deferred"
             multiline

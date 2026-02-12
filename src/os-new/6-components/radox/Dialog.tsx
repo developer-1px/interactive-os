@@ -28,7 +28,7 @@ import {
 } from "react";
 import { Trigger, useOverlayContext } from "../primitives/Trigger.tsx";
 import { Zone } from "../primitives/Zone.tsx";
-import { OVERLAY_CLOSE } from "@os/3-commands/overlay.ts";
+import { OVERLAY_CLOSE } from "@os/3-commands/overlay/overlay";
 import type { BaseCommand } from "@kernel";
 
 // ═══════════════════════════════════════════════════════════════════
