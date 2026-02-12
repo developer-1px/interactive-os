@@ -5,13 +5,17 @@
  * OS-level clipboard commands. The kernel handles zone resolution
  * and app command delegation — same pattern as KeyboardListener → NAVIGATE.
  *
- * No keybindings needed — the browser fires these events natively
- * when the user presses ⌘C, ⌘X, ⌘V.
+ * KEY DESIGN DECISION:
+ *   Only overrides native clipboard when the active zone explicitly
+ *   provides the relevant callback (onCopy/onCut/onPaste).
+ *   Otherwise, native browser clipboard behavior is preserved.
+ *   This allows normal text selection + copy on pages without clipboard overrides.
  */
 
 import { useEffect } from "react";
-import { kernel } from "../kernel";
+import { ZoneRegistry } from "../2-contexts/zoneRegistry";
 import { OS_COPY, OS_CUT, OS_PASTE } from "../3-commands/clipboard/clipboard";
+import { kernel } from "../kernel";
 
 function isInputActive(): boolean {
   const el = document.activeElement;
@@ -22,22 +26,36 @@ function isInputActive(): boolean {
   );
 }
 
+/**
+ * Check if the active zone has a specific clipboard callback.
+ * Returns true only when: activeZoneId exists AND zone has the callback.
+ */
+function canZoneHandle(callback: "onCopy" | "onCut" | "onPaste"): boolean {
+  const { activeZoneId } = kernel.getState().os.focus;
+  if (!activeZoneId) return false;
+  const entry = ZoneRegistry.get(activeZoneId);
+  return !!entry?.[callback];
+}
+
 export function ClipboardListener() {
   useEffect(() => {
     const handleCopy = (e: ClipboardEvent) => {
       if (isInputActive()) return;
+      if (!canZoneHandle("onCopy")) return; // native copy preserved
       kernel.dispatch(OS_COPY());
       e.preventDefault();
     };
 
     const handleCut = (e: ClipboardEvent) => {
       if (isInputActive()) return;
+      if (!canZoneHandle("onCut")) return; // native cut preserved
       kernel.dispatch(OS_CUT());
       e.preventDefault();
     };
 
     const handlePaste = (e: ClipboardEvent) => {
       if (isInputActive()) return;
+      if (!canZoneHandle("onPaste")) return; // native paste preserved
       kernel.dispatch(OS_PASTE());
       e.preventDefault();
     };

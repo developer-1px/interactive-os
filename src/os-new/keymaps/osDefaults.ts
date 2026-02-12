@@ -7,15 +7,21 @@
  * These map directly to commands from 3-commands/.
  */
 
-import { ACTIVATE, ESCAPE, TAB, OS_DELETE, OS_MOVE_UP, OS_MOVE_DOWN } from "@os/3-commands/interaction";
 import {
   FIELD_CANCEL,
   FIELD_COMMIT,
   FIELD_START_EDIT,
 } from "@os/3-commands/field/field";
+import {
+  ACTIVATE,
+  ESCAPE,
+  OS_DELETE,
+  OS_MOVE_DOWN,
+  OS_MOVE_UP,
+  TAB,
+} from "@os/3-commands/interaction";
 import { NAVIGATE } from "@os/3-commands/navigate";
 import { SELECT } from "@os/3-commands/selection";
-import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
 import { Keybindings } from "./keybindings";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -135,14 +141,11 @@ Keybindings.registerAll([
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
-// Clipboard
+// Clipboard — handled by ClipboardListener (native copy/cut/paste events)
+// NOT registered as keybindings to preserve native clipboard behavior.
+// ClipboardListener checks zone state and only overrides when app
+// explicitly provides onCopy/onCut/onPaste callbacks.
 // ═══════════════════════════════════════════════════════════════════
-
-Keybindings.registerAll([
-  { key: "Meta+C", command: OS_COPY, when: "navigating" },
-  { key: "Meta+X", command: OS_CUT, when: "navigating" },
-  { key: "Meta+V", command: OS_PASTE, when: "navigating" },
-]);
 
 // ═══════════════════════════════════════════════════════════════════
 // Field Editing
@@ -162,4 +165,3 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 // ArrowRight/ArrowLeft expand/collapse is handled inline by NAVIGATE
 // (W3C tree pattern). No separate keybindings needed.
-

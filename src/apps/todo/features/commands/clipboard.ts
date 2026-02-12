@@ -1,6 +1,5 @@
 import { todoSlice } from "@apps/todo/app";
-import type { AppState } from "@apps/todo/model/appState";
-import type { Todo } from "@apps/todo/model/appState";
+import type { AppState, Todo } from "@apps/todo/model/appState";
 import { produce } from "immer";
 
 /**
@@ -12,16 +11,16 @@ let clipboardData: { todo: Todo; isCut: boolean } | null = null;
 export const CopyTodo = todoSlice.group.defineCommand(
   "COPY_TODO",
   [],
-  (ctx: { state: AppState }) =>
-    (payload: { id: number | string }) => {
-      const targetId = Number(payload.id);
-      if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
+  (ctx: { state: AppState }) => (payload: { id: number | string }) => {
+    const targetId = Number(payload.id);
+    if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
 
-      const todo = ctx.state.data.todos[targetId];
-      if (!todo) return { state: ctx.state };
+    const todo = ctx.state.data.todos[targetId];
+    if (!todo) return { state: ctx.state };
 
-      clipboardData = { todo: { ...todo }, isCut: false };
+    clipboardData = { todo: { ...todo }, isCut: false };
 
+    try {
       const jsonData = JSON.stringify(todo);
       navigator.clipboard
         .write([
@@ -33,26 +32,29 @@ export const CopyTodo = todoSlice.group.defineCommand(
           }),
         ])
         .catch(() => {
-          navigator.clipboard.writeText(todo.text);
+          navigator.clipboard.writeText(todo.text).catch(() => {});
         });
+    } catch {
+      navigator.clipboard?.writeText(todo.text)?.catch?.(() => {});
+    }
 
-      return { state: ctx.state };
-    },
+    return { state: ctx.state };
+  },
 );
 
 export const CutTodo = todoSlice.group.defineCommand(
   "CUT_TODO",
   [],
-  (ctx: { state: AppState }) =>
-    (payload: { id: number | string }) => {
-      const targetId = Number(payload.id);
-      if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
+  (ctx: { state: AppState }) => (payload: { id: number | string }) => {
+    const targetId = Number(payload.id);
+    if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
 
-      const todo = ctx.state.data.todos[targetId];
-      if (!todo) return { state: ctx.state };
+    const todo = ctx.state.data.todos[targetId];
+    if (!todo) return { state: ctx.state };
 
-      clipboardData = { todo: { ...todo }, isCut: true };
+    clipboardData = { todo: { ...todo }, isCut: true };
 
+    try {
       const jsonData = JSON.stringify(todo);
       navigator.clipboard
         .write([
@@ -64,87 +66,87 @@ export const CutTodo = todoSlice.group.defineCommand(
           }),
         ])
         .catch(() => {
-          navigator.clipboard.writeText(todo.text);
+          navigator.clipboard.writeText(todo.text).catch(() => {});
         });
+    } catch {
+      navigator.clipboard?.writeText(todo.text)?.catch?.(() => {});
+    }
 
-      return {
-        state: produce(ctx.state, (draft) => {
-          delete draft.data.todos[targetId];
-          const index = draft.data.todoOrder.indexOf(targetId);
-          if (index !== -1) draft.data.todoOrder.splice(index, 1);
-        }),
-      };
-    },
+    return {
+      state: produce(ctx.state, (draft) => {
+        delete draft.data.todos[targetId];
+        const index = draft.data.todoOrder.indexOf(targetId);
+        if (index !== -1) draft.data.todoOrder.splice(index, 1);
+      }),
+    };
+  },
 );
 
 export const PasteTodo = todoSlice.group.defineCommand(
   "PASTE_TODO",
   [],
-  (ctx: { state: AppState }) =>
-    (payload: { id?: number | string }) => {
-      if (!clipboardData) return { state: ctx.state };
+  (ctx: { state: AppState }) => (payload: { id?: number | string }) => {
+    if (!clipboardData) return { state: ctx.state };
 
-      const sourceTodo = clipboardData.todo;
+    const sourceTodo = clipboardData.todo;
 
-      return {
-        state: produce(ctx.state, (draft) => {
-          const newId = Date.now();
-          draft.data.todos[newId] = {
-            id: newId,
-            text: sourceTodo.text,
-            completed: sourceTodo.completed,
-            categoryId: draft.ui.selectedCategoryId,
-          };
+    return {
+      state: produce(ctx.state, (draft) => {
+        const newId = Date.now();
+        draft.data.todos[newId] = {
+          id: newId,
+          text: sourceTodo.text,
+          completed: sourceTodo.completed,
+          categoryId: draft.ui.selectedCategoryId,
+        };
 
-          const numericFocusId = payload.id ? Number(payload.id) : undefined;
-          if (numericFocusId && !Number.isNaN(numericFocusId)) {
-            const focusIndex =
-              draft.data.todoOrder.indexOf(numericFocusId);
-            if (focusIndex !== -1) {
-              draft.data.todoOrder.splice(focusIndex + 1, 0, newId);
-            } else {
-              draft.data.todoOrder.push(newId);
-            }
+        const numericFocusId = payload.id ? Number(payload.id) : undefined;
+        if (numericFocusId && !Number.isNaN(numericFocusId)) {
+          const focusIndex = draft.data.todoOrder.indexOf(numericFocusId);
+          if (focusIndex !== -1) {
+            draft.data.todoOrder.splice(focusIndex + 1, 0, newId);
           } else {
             draft.data.todoOrder.push(newId);
           }
+        } else {
+          draft.data.todoOrder.push(newId);
+        }
 
-          draft.effects.push({ type: "FOCUS_ID", id: newId });
-        }),
-      };
-    },
+        draft.effects.push({ type: "FOCUS_ID", id: newId });
+      }),
+    };
+  },
 );
 
 export const DuplicateTodo = todoSlice.group.defineCommand(
   "DUPLICATE_TODO",
   [],
-  (ctx: { state: AppState }) =>
-    (payload: { id: number | string }) => {
-      const targetId = Number(payload.id);
-      if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
+  (ctx: { state: AppState }) => (payload: { id: number | string }) => {
+    const targetId = Number(payload.id);
+    if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
 
-      const todo = ctx.state.data.todos[targetId];
-      if (!todo) return { state: ctx.state };
+    const todo = ctx.state.data.todos[targetId];
+    if (!todo) return { state: ctx.state };
 
-      return {
-        state: produce(ctx.state, (draft) => {
-          const newId = Date.now();
-          draft.data.todos[newId] = {
-            id: newId,
-            text: todo.text,
-            completed: todo.completed,
-            categoryId: todo.categoryId,
-          };
+    return {
+      state: produce(ctx.state, (draft) => {
+        const newId = Date.now();
+        draft.data.todos[newId] = {
+          id: newId,
+          text: todo.text,
+          completed: todo.completed,
+          categoryId: todo.categoryId,
+        };
 
-          const originalIndex = draft.data.todoOrder.indexOf(targetId);
-          if (originalIndex !== -1) {
-            draft.data.todoOrder.splice(originalIndex + 1, 0, newId);
-          } else {
-            draft.data.todoOrder.push(newId);
-          }
+        const originalIndex = draft.data.todoOrder.indexOf(targetId);
+        if (originalIndex !== -1) {
+          draft.data.todoOrder.splice(originalIndex + 1, 0, newId);
+        } else {
+          draft.data.todoOrder.push(newId);
+        }
 
-          draft.effects.push({ type: "FOCUS_ID", id: newId });
-        }),
-      };
-    },
+        draft.effects.push({ type: "FOCUS_ID", id: newId });
+      }),
+    };
+  },
 );
