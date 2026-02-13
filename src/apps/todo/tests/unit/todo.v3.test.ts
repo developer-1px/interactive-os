@@ -179,6 +179,24 @@ describe("defineApp + createWidget", () => {
       expect(app.state.data.todoOrder[lastIdx - 1]).toBe(secondLast);
       expect(app.state.data.todoOrder[lastIdx]).toBe(thirdLast);
     });
+
+    test("moveItemUp at top is no-op", () => {
+      const app = createApp();
+      const topId = app.state.data.todoOrder[0]!;
+      const beforeOrder = [...app.state.data.todoOrder];
+      app.dispatch.moveItemUp({ focusId: topId });
+      expect(app.state.data.todoOrder).toEqual(beforeOrder);
+    });
+  });
+
+  describe("Draft (from TodoDraft widget)", () => {
+    test("syncDraft updates draft text", () => {
+      const app = createApp();
+      app.dispatch.syncDraft({ text: "Hello" });
+      expect(app.state.ui.draft).toBe("Hello");
+      app.dispatch.syncDraft({ text: "" });
+      expect(app.state.ui.draft).toBe("");
+    });
   });
 
   describe("Category (from TodoSidebar widget)", () => {
@@ -186,6 +204,22 @@ describe("defineApp + createWidget", () => {
       const app = createApp();
       app.dispatch.selectCategory({ id: "cat_work" });
       expect(app.state.ui.selectedCategoryId).toBe("cat_work");
+    });
+
+    test("moveCategoryUp/Down reorders", () => {
+      const app = createApp();
+      app.dispatch.selectCategory({ id: "cat_work" });
+      const beforeOrder = [...app.state.data.categoryOrder];
+      const workIdxBefore = beforeOrder.indexOf("cat_work");
+
+      app.dispatch.moveCategoryUp({});
+      const afterOrder = [...app.state.data.categoryOrder];
+      const workIdxAfter = afterOrder.indexOf("cat_work");
+      expect(workIdxAfter).toBeLessThan(workIdxBefore);
+
+      app.dispatch.moveCategoryDown({});
+      const restored = [...app.state.data.categoryOrder];
+      expect(restored).toEqual(beforeOrder);
     });
   });
 
@@ -198,6 +232,64 @@ describe("defineApp + createWidget", () => {
       const lastId = ids[ids.length - 1]!;
       app.dispatch.duplicateTodo({ id: lastId });
       expect(Object.keys(app.state.data.todos).length).toBe(before + 1);
+    });
+
+    test("copyTodo stores todo in state.ui.clipboard", () => {
+      const app = createApp();
+      app.dispatch.addTodo({ text: "Copy me" });
+      const ids = Object.keys(app.state.data.todos).map(Number);
+      const lastId = ids[ids.length - 1]!;
+      app.dispatch.copyTodo({ id: lastId });
+      expect(app.state.ui.clipboard).not.toBeNull();
+      expect(app.state.ui.clipboard!.todo.text).toBe("Copy me");
+      expect(app.state.ui.clipboard!.isCut).toBe(false);
+    });
+
+    test("copyTodo → pasteTodo creates duplicate", () => {
+      const app = createApp();
+      app.dispatch.addTodo({ text: "Round trip" });
+      const before = Object.keys(app.state.data.todos).length;
+      const ids = Object.keys(app.state.data.todos).map(Number);
+      const lastId = ids[ids.length - 1]!;
+      app.dispatch.copyTodo({ id: lastId });
+      app.dispatch.pasteTodo({});
+      expect(Object.keys(app.state.data.todos).length).toBe(before + 1);
+      const todos = Object.values(app.state.data.todos);
+      expect(todos.filter((t) => t.text === "Round trip").length).toBe(2);
+    });
+
+    test("cutTodo removes original and stores in clipboard", () => {
+      const app = createApp();
+      app.dispatch.addTodo({ text: "Cut me" });
+      const before = Object.keys(app.state.data.todos).length;
+      const ids = Object.keys(app.state.data.todos).map(Number);
+      const lastId = ids[ids.length - 1]!;
+      app.dispatch.cutTodo({ id: lastId });
+      expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
+      expect(app.state.ui.clipboard).not.toBeNull();
+      expect(app.state.ui.clipboard!.todo.text).toBe("Cut me");
+      expect(app.state.ui.clipboard!.isCut).toBe(true);
+    });
+
+    test("cutTodo → pasteTodo restores item", () => {
+      const app = createApp();
+      app.dispatch.addTodo({ text: "Move me" });
+      const before = Object.keys(app.state.data.todos).length;
+      const ids = Object.keys(app.state.data.todos).map(Number);
+      const lastId = ids[ids.length - 1]!;
+      app.dispatch.cutTodo({ id: lastId });
+      expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
+      app.dispatch.pasteTodo({});
+      expect(Object.keys(app.state.data.todos).length).toBe(before);
+      const todos = Object.values(app.state.data.todos);
+      expect(todos.some((t) => t.text === "Move me")).toBe(true);
+    });
+
+    test("pasteTodo without clipboard is no-op", () => {
+      const app = createApp();
+      const before = Object.keys(app.state.data.todos).length;
+      app.dispatch.pasteTodo({});
+      expect(Object.keys(app.state.data.todos).length).toBe(before);
     });
   });
 
@@ -244,6 +336,30 @@ describe("defineApp + createWidget", () => {
       expect(Object.keys(app.state.data.todos).length).toBe(initialCount + 1);
       app.reset();
       expect(Object.keys(app.state.data.todos).length).toBe(initialCount);
+    });
+  });
+
+  describe("Command when guard", () => {
+    test("cancelEdit.when returns false when not editing", () => {
+      const app = createApp();
+      const cancelEdit = app.commands.cancelEdit;
+      expect((cancelEdit as any).when).not.toBeNull();
+      expect((cancelEdit as any).when(app.state)).toBe(false);
+    });
+
+    test("cancelEdit.when returns true when editing", () => {
+      const app = createApp();
+      app.dispatch.addTodo({ text: "Edit me" });
+      const ids = Object.keys(app.state.data.todos).map(Number);
+      app.dispatch.startEdit({ id: ids[ids.length - 1]! });
+      const cancelEdit = app.commands.cancelEdit;
+      expect((cancelEdit as any).when(app.state)).toBe(true);
+    });
+
+    test("toggleTodo.when is null (always executable)", () => {
+      const app = createApp();
+      const toggleTodo = app.commands.toggleTodo;
+      expect((toggleTodo as any).when).toBeNull();
     });
   });
 });

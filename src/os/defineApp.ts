@@ -30,6 +30,7 @@
 import { createKernel, defineScope } from "@kernel";
 import type { CommandFactory } from "@kernel/core/tokens";
 import { OS } from "@os/AntigravityOS";
+import { Keybindings as KeybindingsRegistry } from "@os/keymaps/keybindings";
 import React, { type ReactNode } from "react";
 import { registerAppSlice } from "./appSlice";
 
@@ -43,17 +44,32 @@ type CommandHandler<S, P> = (ctx: {
   state: S;
 }) => (payload: P) => HandlerReturn<S>;
 
+/** Options for define.command — co-located metadata */
+interface CommandOptions<S> {
+  /** State predicate: command is executable only when this returns true.
+   *  Consumed by Trigger (disabled), Keybindings (ignore), CommandPalette (grayed out). */
+  when?: (state: S) => boolean;
+}
+
+/** Extended CommandFactory with `when` guard metadata */
+type AppCommandFactory<S, P = void> = CommandFactory<string, P> & {
+  /** State predicate for executability. null = always executable. */
+  when: ((state: S) => boolean) | null;
+};
+
 interface WidgetDefine<S> {
   command<P = void>(
     type: string,
     deps: any[],
     handler: CommandHandler<S, P>,
-  ): CommandFactory<string, P>;
+    options?: CommandOptions<S>,
+  ): AppCommandFactory<S, P>;
 
   command<P = void>(
     type: string,
     handler: CommandHandler<S, P>,
-  ): CommandFactory<string, P>;
+    options?: CommandOptions<S>,
+  ): AppCommandFactory<S, P>;
 }
 
 type SelectorMap<S> = Record<string, (state: S, ...args: any[]) => any>;
@@ -80,11 +96,23 @@ interface FieldDeclaration {
   onCancel?: CommandFactory<any, any>;
 }
 
+// App-level keybinding declaration
+interface KeybindingDeclaration {
+  /** Canonical key string (e.g. "Meta+D", "Meta+Shift+V") */
+  key: string;
+  /** Command factory to invoke */
+  command: CommandFactory<any, any>;
+  /** Context guard (default: "navigating") */
+  when?: "editing" | "navigating";
+}
+
 // Widget factory return type
 interface WidgetConfig<C extends Record<string, CommandFactory<any, any>>> {
   commands: C;
   zone?: ZoneDeclaration;
   field?: FieldDeclaration;
+  /** App-specific keybindings — registered on mount, unregistered on unmount */
+  keybindings?: KeybindingDeclaration[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -110,6 +138,8 @@ interface Widget<_S, C extends Record<string, CommandFactory<any, any>>> {
     autoFocus?: boolean;
     blurOnInactive?: boolean;
   }>;
+  /** Keybinding registration — for widgets without Zone */
+  Keybindings: React.FC<{ children?: ReactNode }>;
   /** Command factories */
   commands: C;
 }
@@ -126,6 +156,7 @@ interface AppInstance<
   readonly state: S;
   dispatch: { [K in keyof AllC]: (payload?: any) => void };
   select: { [K in keyof Sel]: (...args: any[]) => ReturnType<Sel[K]> };
+  commands: AllC;
   reset(): void;
 }
 
@@ -167,10 +198,29 @@ export function defineApp<
     // Build define API delegating to slice.group
     const widgetDefine: WidgetDefine<S> = {
       command(type: string, ...args: any[]) {
-        // Support both (type, deps, handler) and (type, handler)
-        const deps = args.length === 2 ? args[0] : [];
-        const handler = args.length === 2 ? args[1] : args[0];
-        return slice.group.defineCommand(type, deps, handler as any);
+        // Support: (type, deps, handler, options?) and (type, handler, options?)
+        let deps: any[];
+        let handler: any;
+        let options: CommandOptions<S> | undefined;
+
+        if (args.length >= 2 && Array.isArray(args[0])) {
+          // (type, deps, handler, options?)
+          deps = args[0];
+          handler = args[1];
+          options = args[2];
+        } else {
+          // (type, handler, options?)
+          deps = [];
+          handler = args[0];
+          options = args[1];
+        }
+
+        const factory = slice.group.defineCommand(type, deps, handler as any);
+
+        // Attach `when` metadata to factory
+        (factory as any).when = options?.when ?? null;
+
+        return factory as any;
       },
     };
 
@@ -224,6 +274,19 @@ export function defineApp<
         }
       }
 
+      // Zone auto-registers keybindings (inline)
+      // Widgets without Zone use standalone Keybindings component instead
+      React.useEffect(() => {
+        if (!config.keybindings || config.keybindings.length === 0) return;
+        const bindings = config.keybindings.map((kb) => ({
+          key: kb.key,
+          command: kb.command,
+          args: [{ id: "OS.FOCUS" }],
+          when: kb.when ?? ("navigating" as const),
+        }));
+        return KeybindingsRegistry.registerAll(bindings);
+      }, []);
+
       return React.createElement(OS.Zone, zoneProps as any, children);
     };
     ZoneComponent.displayName = `${appId}.${widgetName}.Zone`;
@@ -267,10 +330,31 @@ export function defineApp<
     };
     FieldComponent.displayName = `${appId}.${widgetName}.Field`;
 
+    // ── Build Keybindings component ──
+    // Registers app keybindings on mount, unregisters on unmount.
+    // Zone includes this automatically. Use standalone for widgets without Zone.
+    const KeybindingsComponent: React.FC<{ children?: ReactNode }> = ({
+      children,
+    }) => {
+      React.useEffect(() => {
+        if (!config.keybindings || config.keybindings.length === 0) return;
+        const bindings = config.keybindings.map((kb) => ({
+          key: kb.key,
+          command: kb.command,
+          args: [{ id: "OS.FOCUS" }],
+          when: kb.when ?? ("navigating" as const),
+        }));
+        return KeybindingsRegistry.registerAll(bindings);
+      }, []);
+      return React.createElement(React.Fragment, null, children);
+    };
+    KeybindingsComponent.displayName = `${appId}.${widgetName}.Keybindings`;
+
     return {
       Zone: ZoneComponent,
       Item: ItemComponent,
       Field: FieldComponent,
+      Keybindings: KeybindingsComponent,
       commands: config.commands,
     };
   }
@@ -472,9 +556,23 @@ export function defineApp<
       // Re-run all widget factories against test kernel
       const testDefine: WidgetDefine<S> = {
         command(type: string, ...args: any[]) {
-          const deps = args.length === 2 ? args[0] : [];
-          const handler = args.length === 2 ? args[1] : args[0];
-          return group.defineCommand(type, deps, handler as any);
+          let deps: any[];
+          let handler: any;
+          let options: CommandOptions<S> | undefined;
+
+          if (args.length >= 2 && Array.isArray(args[0])) {
+            deps = args[0];
+            handler = args[1];
+            options = args[2];
+          } else {
+            deps = [];
+            handler = args[0];
+            options = args[1];
+          }
+
+          const factory = group.defineCommand(type, deps, handler as any);
+          (factory as any).when = options?.when ?? null;
+          return factory as any;
         },
       };
 
@@ -511,6 +609,7 @@ export function defineApp<
         },
         dispatch: dispatch as any,
         select: select as any,
+        commands: testCommands as any,
         reset() {
           testKernel.setState(() => ({
             os: {},

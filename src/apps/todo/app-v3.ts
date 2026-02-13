@@ -25,11 +25,7 @@ import { produce } from "immer";
 import { FOCUS } from "@/os/3-commands/focus/focus";
 import { defineApp } from "@/os/defineApp";
 
-// ═══════════════════════════════════════════════════════════════════
-// Clipboard state (module-local, shared across widgets)
-// ═══════════════════════════════════════════════════════════════════
-
-let clipboardData: { todo: Todo; isCut: boolean } | null = null;
+// Clipboard state now lives in AppState.ui.clipboard (no module-level mutable)
 
 // ═══════════════════════════════════════════════════════════════════
 // App definition
@@ -186,25 +182,12 @@ export const TodoList = TodoApp.createWidget("list", (define) => {
       if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
       const todo = ctx.state.data.todos[targetId];
       if (!todo) return { state: ctx.state };
-      clipboardData = { todo: { ...todo }, isCut: false };
-      try {
-        const jsonData = JSON.stringify(todo);
-        navigator.clipboard
-          .write([
-            new ClipboardItem({
-              "text/plain": new Blob([todo.text], { type: "text/plain" }),
-              "application/json": new Blob([jsonData], {
-                type: "application/json",
-              }),
-            }),
-          ])
-          .catch(() => {
-            navigator.clipboard.writeText(todo.text).catch(() => {});
-          });
-      } catch {
-        navigator.clipboard?.writeText(todo.text)?.catch?.(() => {});
-      }
-      return { state: ctx.state };
+      return {
+        state: produce(ctx.state, (draft) => {
+          draft.ui.clipboard = { todo: { ...todo }, isCut: false };
+        }),
+        clipboardWrite: { text: todo.text, json: JSON.stringify(todo) },
+      };
     },
   );
 
@@ -216,30 +199,14 @@ export const TodoList = TodoApp.createWidget("list", (define) => {
       if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
       const todo = ctx.state.data.todos[targetId];
       if (!todo) return { state: ctx.state };
-      clipboardData = { todo: { ...todo }, isCut: true };
-      try {
-        const jsonData = JSON.stringify(todo);
-        navigator.clipboard
-          .write([
-            new ClipboardItem({
-              "text/plain": new Blob([todo.text], { type: "text/plain" }),
-              "application/json": new Blob([jsonData], {
-                type: "application/json",
-              }),
-            }),
-          ])
-          .catch(() => {
-            navigator.clipboard.writeText(todo.text).catch(() => {});
-          });
-      } catch {
-        navigator.clipboard?.writeText(todo.text)?.catch?.(() => {});
-      }
       return {
         state: produce(ctx.state, (draft) => {
+          draft.ui.clipboard = { todo: { ...todo }, isCut: true };
           delete draft.data.todos[targetId];
           const index = draft.data.todoOrder.indexOf(targetId);
           if (index !== -1) draft.data.todoOrder.splice(index, 1);
         }),
+        clipboardWrite: { text: todo.text, json: JSON.stringify(todo) },
       };
     },
   );
@@ -248,8 +215,9 @@ export const TodoList = TodoApp.createWidget("list", (define) => {
     "pasteTodo",
     [],
     (ctx: { state: AppState }) => (payload: { id?: number | string }) => {
-      if (!clipboardData) return { state: ctx.state };
-      const sourceTodo = clipboardData.todo;
+      const clip = ctx.state.ui.clipboard;
+      if (!clip) return { state: ctx.state };
+      const sourceTodo = clip.todo;
       const newId = Date.now();
       return {
         state: produce(ctx.state, (draft) => {
@@ -368,6 +336,7 @@ export const TodoList = TodoApp.createWidget("list", (define) => {
       onUndo: undoCommand,
       onRedo: redoCommand,
     },
+    keybindings: [{ key: "Meta+D", command: duplicateTodo }],
   };
 });
 
@@ -517,6 +486,7 @@ export const TodoEdit = TodoApp.createWidget("edit", (define) => {
         draft.ui.editDraft = "";
       }),
     }),
+    { when: (state) => state.ui.editingId != null },
   );
 
   return {
@@ -567,5 +537,6 @@ export const TodoToolbar = TodoApp.createWidget("toolbar", (define) => {
 
   return {
     commands: { toggleView, clearCompleted },
+    keybindings: [{ key: "Meta+Shift+V", command: toggleView }],
   };
 });
