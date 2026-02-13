@@ -6,7 +6,7 @@ last-reviewed: 2026-02-10
 
 > 10년간의 라우팅 전쟁: 설정 파일에서 타입 안전 URL 상태 관리까지.
 >
-> 🔗 **관련**: [라우터의 개념적 진화사](./06-router-conceptual-evolution.md) | [TanStack Router Philosophy](./00-guides/tanstack-router-philosophy.md) | [TanStack Router MECE 분해](./07-tanstack-router-mece.md)
+> 🔗 **관련**: [라우터의 개념적 진화사](./06-router-conceptual-evolution.md) | [TanStack Router Philosophy](../00-guides/tanstack-router-philosophy.md) | [TanStack Router MECE 분해](./07-tanstack-router-mece.md)
 
 ## 왜 이 주제인가
 
@@ -101,7 +101,7 @@ export async function action({ request }) {
 
 ## 2. TanStack Router — 타입 안전의 끝판왕
 
-> 이미 [별도 문서](./tanstack-router-philosophy.md)에서 심층 분석. 여기선 비교 관점으로.
+> 이미 [별도 문서](../00-guides/tanstack-router-philosophy.md)에서 심층 분석. 여기선 비교 관점으로.
 
 - **창시자**: Tanner Linsley (TanStack Query 제작자)
 - **핵심 차별점**: **100% 타입 추론** — 라우트 경로, params, search params 모두 컴파일 타임 검증.

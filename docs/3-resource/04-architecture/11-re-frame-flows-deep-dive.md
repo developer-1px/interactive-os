@@ -8,7 +8,7 @@ last-reviewed: 2026-02-12
 
 ## 왜 이 주제인가
 
-이전 리소스 ([10-server-state-revolution.md](file:///Users/user/Desktop/interactive-os/docs/3-resource/10-server-state-revolution.md))에서 Flows의 존재를 소개했지만, 실제 API와 동작 방식은 다루지 못했다. 우리 커널의 파생 상태 설계(`useComputed`, Selector 계획)에 Flows의 구체적 메커니즘이 직접적 참고가 된다. 또한 "TanStack Query 같은 편리함을 re-frame은 어떻게 제공하는가?"라는 질문에 대한 체계적 답변이 필요하다.
+이전 리소스 ([10-server-state-revolution.md](./10-server-state-revolution.md))에서 Flows의 존재를 소개했지만, 실제 API와 동작 방식은 다루지 못했다. 우리 커널의 파생 상태 설계(`useComputed`, Selector 계획)에 Flows의 구체적 메커니즘이 직접적 참고가 된다. 또한 "TanStack Query 같은 편리함을 re-frame은 어떻게 제공하는가?"라는 질문에 대한 체계적 답변이 필요하다.
 
 ## Background / Context
 

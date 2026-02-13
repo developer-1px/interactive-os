@@ -8,7 +8,7 @@ last-reviewed: 2026-02-12
 
 ## 왜 이 주제인가
 
-우리 interactive-os 커널은 re-frame의 Six Dominoes와 "Effect as Data" 철학을 참조 아키텍처로 삼고 있다 ([04-re-frame-guide.md](file:///Users/user/Desktop/interactive-os/docs/3-resource/04-re-frame-guide.md)). JavaScript 생태계에서 "Server State vs Client State" 분리가 대세가 된 지금, re-frame은 이 문제를 어떻게 바라보는지, 그리고 우리 커널 설계에 어떤 시사점을 주는지 이해할 필요가 있다.
+우리 interactive-os 커널은 re-frame의 Six Dominoes와 "Effect as Data" 철학을 참조 아키텍처로 삼고 있다 ([04-re-frame-guide.md](./04-re-frame-guide.md)). JavaScript 생태계에서 "Server State vs Client State" 분리가 대세가 된 지금, re-frame은 이 문제를 어떻게 바라보는지, 그리고 우리 커널 설계에 어떤 시사점을 주는지 이해할 필요가 있다.
 
 ## Background / Context
 
