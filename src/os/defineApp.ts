@@ -431,6 +431,11 @@ export function defineApp<
       return slice.getState();
     },
 
+    /** Production: update state directly (for callback-based handlers like onCommit) */
+    setState(updater: (prev: S) => S) {
+      slice.setState(updater);
+    },
+
     /** All registered commands across all widgets */
     get commands() {
       return allCommands;

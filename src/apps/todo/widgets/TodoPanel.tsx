@@ -1,24 +1,21 @@
-import { todoSlice } from "@apps/todo/app";
-import { BoardView } from "@apps/todo/widgets/BoardView";
-import { ListView } from "@apps/todo/widgets/ListView";
-import { TodoToolbar } from "@apps/todo/widgets/TodoToolbar";
-
 /**
- * TodoPanel: Switching container for List/Board views.
- * The 'main' Zone is now provided by TodoAppShell for global consistency.
+ * TodoPanel — defineApp/createWidget version.
  */
+
+import { TodoApp } from "@apps/todo/app-v3";
+import { ListView } from "@apps/todo/widgets/ListView";
+import { TodoToolbarView } from "@apps/todo/widgets/TodoToolbar";
+
 export function TodoPanel() {
-  const state = todoSlice.useComputed((s) => s);
+  const ui = TodoApp.useComputed((s) => s?.ui);
 
-  if (!state || !state.ui) return null;
-
-  const isBoard = state.ui.viewMode === "board";
+  if (!ui) return null;
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-50">
-      <TodoToolbar />
+      <TodoToolbarView />
       <div className="flex-1 overflow-hidden relative">
-        {isBoard ? <BoardView /> : <ListView />}
+        <ListView />
       </div>
     </div>
   );

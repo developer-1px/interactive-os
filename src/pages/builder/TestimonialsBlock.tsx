@@ -1,6 +1,6 @@
 import { OS } from "@os/AntigravityOS";
 import { Star } from "lucide-react";
-import { useState } from "react";
+import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 
 /**
  * TestimonialsBlock
@@ -10,40 +10,25 @@ import { useState } from "react";
  *   - Card (Nested Zone) -> Title, Quote, Role (Items)
  */
 export function TestimonialsBlock() {
-  const [header, setHeader] = useState({
-    eyebrow: "TESTIMONIALS",
-    title: "Loved by thousands.",
-  });
+  const fields = BuilderApp.useComputed((s) => s.data.fields);
 
-  const [testimonials, setTestimonials] = useState([
+  const testimonials = [
     {
       id: "testimonial-1",
-      name: "Sarah Chen",
-      role: "Head of Growth, Acme",
-      quote:
-        "We cut our landing page development time by 80%. The AI suggestions are scarily good.",
       avatar: "SC",
       color: "violet",
     },
     {
       id: "testimonial-2",
-      name: "Marcus Johnson",
-      role: "Founder, Startup",
-      quote:
-        "Finally, a builder that doesn't feel like a compromise. It's fast, beautiful, and my team actually uses it.",
       avatar: "MJ",
       color: "blue",
     },
     {
       id: "testimonial-3",
-      name: "Emily Park",
-      role: "Design Lead, Agency",
-      quote:
-        "The attention to detail is incredible. Every interaction feels polished.",
       avatar: "EP",
       color: "emerald",
     },
-  ]);
+  ];
 
   const colorMap: Record<
     string,
@@ -79,9 +64,9 @@ export function TestimonialsBlock() {
               <OS.Field
                 name="testimonials-eyebrow"
                 mode="deferred"
-                value={header.eyebrow}
+                value={fields["testimonials-eyebrow"] ?? ""}
                 onCommit={(val: string) =>
-                  setHeader((prev) => ({ ...prev, eyebrow: val }))
+                  builderUpdateField("testimonials-eyebrow", val)
                 }
                 className={`
                                     inline-block transition-all px-2 py-1 rounded-md text-[13px] text-emerald-600 font-semibold tracking-[0.2em]
@@ -95,9 +80,9 @@ export function TestimonialsBlock() {
               <OS.Field
                 name="testimonials-title"
                 mode="deferred"
-                value={header.title}
+                value={fields["testimonials-title"] ?? ""}
                 onCommit={(val: string) =>
-                  setHeader((prev) => ({ ...prev, title: val }))
+                  builderUpdateField("testimonials-title", val)
                 }
                 className={`
                                     inline-block transition-all duration-300 rounded-xl p-3 -mx-3
@@ -111,7 +96,7 @@ export function TestimonialsBlock() {
 
         {/* Testimonial Cards - Nested Zones */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {testimonials.map((t, index) => {
+          {testimonials.map((t) => {
             const colors = colorMap[t.color]!;
             return (
               <OS.Item
@@ -141,13 +126,9 @@ export function TestimonialsBlock() {
                       name={`${t.id}-quote`}
                       mode="deferred"
                       multiline
-                      value={t.quote}
+                      value={fields[`${t.id}-quote`] ?? ""}
                       onCommit={(val: string) =>
-                        setTestimonials((prev) =>
-                          prev.map((item, i) =>
-                            i === index ? { ...item, quote: val } : item,
-                          ),
-                        )
+                        builderUpdateField(`${t.id}-quote`, val)
                       }
                       className={`
                                                 text-slate-600 leading-relaxed p-1 -m-1 rounded w-full
@@ -169,13 +150,9 @@ export function TestimonialsBlock() {
                       <OS.Field
                         name={`${t.id}-name`}
                         mode="deferred"
-                        value={t.name}
+                        value={fields[`${t.id}-name`] ?? ""}
                         onCommit={(val: string) =>
-                          setTestimonials((prev) =>
-                            prev.map((item, i) =>
-                              i === index ? { ...item, name: val } : item,
-                            ),
-                          )
+                          builderUpdateField(`${t.id}-name`, val)
                         }
                         className={`
                                                     font-medium text-slate-900 text-sm px-1 -mx-1 rounded inline-block truncate w-full
@@ -187,13 +164,9 @@ export function TestimonialsBlock() {
                       <OS.Field
                         name={`${t.id}-role`}
                         mode="deferred"
-                        value={t.role}
+                        value={fields[`${t.id}-role`] ?? ""}
                         onCommit={(val: string) =>
-                          setTestimonials((prev) =>
-                            prev.map((item, i) =>
-                              i === index ? { ...item, role: val } : item,
-                            ),
-                          )
+                          builderUpdateField(`${t.id}-role`, val)
                         }
                         className={`
                                                     text-xs text-slate-500 px-1 -mx-1 rounded inline-block truncate w-full

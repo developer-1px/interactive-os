@@ -20,7 +20,8 @@ export default defineConfig({
     },
   ],
   server: {
-    port: 4174,
+    port: 4444,
+    strictPort: true,
   },
   build: {
     rollupOptions: {

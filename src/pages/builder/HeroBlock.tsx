@@ -1,5 +1,5 @@
 import { OS } from "@os/AntigravityOS";
-import { useState } from "react";
+import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 
 /**
  * HeroBlock
@@ -8,12 +8,7 @@ import { useState } from "react";
  * Focus Verification Mode: All text elements are focusable Items
  */
 export function HeroBlock() {
-  const [values, setValues] = useState({
-    badge: "NEW — Now with AI-powered layouts",
-    headline: "Build websites that convert.",
-    subheadline:
-      "The visual builder for teams who ship fast. No code required, just drag, drop, and publish.",
-  });
+  const fields = BuilderApp.useComputed((s) => s.data.fields);
 
   return (
     <OS.Item
@@ -41,9 +36,9 @@ export function HeroBlock() {
             <OS.Field
               name="hero-badge"
               mode="deferred"
-              value={values.badge}
+              value={fields["hero-badge"] ?? ""}
               onCommit={(val: string) =>
-                setValues((prev) => ({ ...prev, badge: val }))
+                builderUpdateField("hero-badge", val)
               }
               className={`
                                 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-300 cursor-default
@@ -60,9 +55,9 @@ export function HeroBlock() {
           <OS.Field
             name="hero-headline"
             mode="deferred"
-            value={values.headline}
+            value={fields["hero-headline"] ?? ""}
             onCommit={(val: string) =>
-              setValues((prev) => ({ ...prev, headline: val }))
+              builderUpdateField("hero-headline", val)
             }
             className={`
                             mb-6 transition-all duration-300 rounded-2xl p-4 -mx-4 cursor-default
@@ -79,9 +74,9 @@ export function HeroBlock() {
             name="hero-subheadline"
             mode="deferred"
             multiline
-            value={values.subheadline}
+            value={fields["hero-subheadline"] ?? ""}
             onCommit={(val: string) =>
-              setValues((prev) => ({ ...prev, subheadline: val }))
+              builderUpdateField("hero-subheadline", val)
             }
             className={`
                             mb-12 max-w-xl mx-auto transition-all duration-300 rounded-xl p-3 -mx-3 cursor-default
@@ -100,10 +95,9 @@ export function HeroBlock() {
                 type="button"
                 className={`
                   px-7 py-3.5 rounded-xl font-medium text-[15px] transition-all duration-300
-                  ${
-                    isFocused
-                      ? "bg-violet-600 text-white scale-105 shadow-xl shadow-violet-500/40"
-                      : "bg-slate-900 text-white hover:bg-slate-800"
+                  ${isFocused
+                    ? "bg-violet-600 text-white scale-105 shadow-xl shadow-violet-500/40"
+                    : "bg-slate-900 text-white hover:bg-slate-800"
                   }
                 `}
               >
@@ -118,10 +112,9 @@ export function HeroBlock() {
                 type="button"
                 className={`
                   px-7 py-3.5 rounded-xl font-medium text-[15px] transition-all duration-300 border
-                  ${
-                    isFocused
-                      ? "bg-violet-50 border-violet-500 text-violet-700 scale-105"
-                      : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                  ${isFocused
+                    ? "bg-violet-50 border-violet-500 text-violet-700 scale-105"
+                    : "border-slate-300 text-slate-600 hover:bg-slate-50"
                   }
                 `}
               >

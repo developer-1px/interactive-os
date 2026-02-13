@@ -7,13 +7,14 @@ import {
   Twitter,
   Youtube,
 } from "lucide-react";
-import { useState } from "react";
+import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPFooterBlock() {
-  const [brand, setBrand] = useState("NAVER CLOUD");
+  const fields = BuilderApp.useComputed((s) => s.data.fields);
 
-  const [columns] = useState([
+  // Structural data (non-editable via OS.Field)
+  const columns = [
     {
       title: "Products",
       links: [
@@ -44,22 +45,22 @@ export function NCPFooterBlock() {
         { label: "Status", href: "#" },
       ],
     },
-  ]);
+  ];
 
-  const [socials] = useState([
+  const socials = [
     { icon: Youtube, label: "Youtube", href: "#" },
     { icon: Linkedin, label: "LinkedIn", href: "#" },
     { icon: Github, label: "GitHub", href: "#" },
     { icon: Twitter, label: "Twitter", href: "#" },
     { icon: Instagram, label: "Instagram", href: "#" },
-  ]);
+  ];
 
-  const [bottomLinks] = useState([
+  const bottomLinks = [
     "개인정보처리방침",
     "이용약관",
     "서비스 수준 협약 (SLA)",
     "청소년보호정책",
-  ]);
+  ];
 
   return (
     <Builder.Section asChild id="ncp-footer">
@@ -72,8 +73,10 @@ export function NCPFooterBlock() {
                 <OS.Field
                   name="footer-brand"
                   mode="deferred"
-                  value={brand}
-                  onCommit={(val: string) => setBrand(val)}
+                  value={fields["footer-brand"] ?? ""}
+                  onCommit={(val: string) =>
+                    builderUpdateField("footer-brand", val)
+                  }
                   className="font-black text-2xl tracking-tighter text-white mb-6 block w-fit data-[focused=true]:bg-slate-800 data-[focused=true]:ring-2 data-[focused=true]:ring-slate-600 rounded px-2 -mx-2"
                 />
               </Builder.Item>

@@ -11,6 +11,7 @@ import {
   loadDocContent,
 } from "../docs-viewer/docsUtils";
 import { MarkdownRenderer } from "../docs-viewer/MarkdownRenderer";
+import { DocsDashboard } from "../docs-viewer/DocsDashboard";
 
 export default function DocsPage() {
   const location = useLocation();
@@ -27,12 +28,10 @@ export default function DocsPage() {
   const nextFile =
     currentIndex < allFiles.length - 1 ? allFiles[currentIndex + 1] : null;
 
+
   useEffect(() => {
     if (!splat) {
-      const firstFile = allFiles[0];
-      if (firstFile) {
-        navigate({ to: `/docs/${firstFile.path}`, replace: true });
-      }
+      // No more auto-redirect! We show the dashboard instead.
       return;
     }
 
@@ -48,9 +47,16 @@ export default function DocsPage() {
       });
   }, [splat, navigate, allFiles]);
 
+  // Reset scroll on file change
+  useEffect(() => {
+    const el = document.querySelector("[data-docs-scroll]");
+    el?.scrollTo(0, 0);
+  }, [splat]);
+
   const handleSelect = (path: string) => {
     navigate({ to: `/docs/${path}` });
   };
+
 
   return (
     <div className="flex h-screen w-full bg-white text-slate-900 overflow-hidden font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -59,7 +65,10 @@ export default function DocsPage() {
 
       {/* Main Content */}
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">
-        <div className="flex-1 overflow-y-auto relative z-10 custom-scrollbar pt-6">
+        <div
+          data-docs-scroll
+          className="flex-1 overflow-y-auto relative z-10 custom-scrollbar pt-6"
+        >
           <div className="px-12 py-12 lg:px-16 w-full max-w-5xl mx-auto">
             {error ? (
               <div className="flex flex-col items-center justify-center py-40 text-slate-300">
@@ -79,32 +88,39 @@ export default function DocsPage() {
               </div>
             ) : (
               <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
-                {/* Document Metadata Header */}
-                <div className="flex items-center gap-2 mb-10 border-b border-slate-50 pb-6">
-                  {splat?.split("/").map((part, i, arr) => (
-                    <div key={part} className="flex items-center gap-2">
-                      {i > 0 && <span className="text-slate-300">/</span>}
-                      <span
-                        className={clsx(
-                          "text-sm font-medium",
-                          i === arr.length - 1
-                            ? "text-slate-900"
-                            : "text-slate-400",
-                        )}
-                      >
-                        {cleanLabel(part)}
-                      </span>
+                {/* Dashboard or Doc Content */}
+                {!splat ? (
+                  <DocsDashboard allFiles={allFiles} onSelect={handleSelect} />
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 mb-10 border-b border-slate-50 pb-6">
+                      {splat?.split("/").map((part, i, arr) => (
+                        <div key={part} className="flex items-center gap-2">
+                          {i > 0 && <span className="text-slate-300">/</span>}
+                          <span
+                            className={clsx(
+                              "text-sm font-medium",
+                              i === arr.length - 1
+                                ? "text-slate-900"
+                                : "text-slate-400",
+                            )}
+                          >
+                            {cleanLabel(part)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
 
-                <MarkdownRenderer content={content} />
+                    <MarkdownRenderer content={content} />
+                  </>
+                )}
 
                 {/* Navigation Buttons */}
                 <div className="mt-20 pt-8 border-t border-slate-100 flex items-center justify-between gap-4 max-w-3xl">
                   {prevFile ? (
                     <Link
                       to={`/docs/${prevFile.path}` as string}
+                      data-docs-nav-prev
                       className="group flex flex-col items-start gap-1"
                     >
                       <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
@@ -122,6 +138,7 @@ export default function DocsPage() {
                   {nextFile ? (
                     <Link
                       to={`/docs/${nextFile.path}` as string}
+                      data-docs-nav-next
                       className="group flex flex-col items-end gap-1 text-right"
                     >
                       <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">

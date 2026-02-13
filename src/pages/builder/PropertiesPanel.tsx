@@ -6,39 +6,24 @@ import {
   Square,
   Type,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-
-export type PropertyType =
-  | "text"
-  | "image"
-  | "icon"
-  | "link"
-  | "button"
-  | "section"
-  | null;
+import {
+  BuilderApp,
+  builderUpdateField,
+  type PropertyType,
+} from "@/apps/builder/app";
 
 /**
  * PropertiesPanel
  *
  * Visual CMS / Web Builder - Right Sidebar
- * Mock implementation for design purposes.
+ * Reads selected element and field data from BuilderApp state.
+ * Writes field changes via builderUpdateField (same command as canvas inline editing).
  */
-export function PropertiesPanel({
-  selectedType,
-}: {
-  selectedType: PropertyType;
-}) {
-  // Local state to override prop for mock tab navigation
-  const [activeType, setActiveType] = useState<PropertyType>(
-    selectedType || "text",
-  );
+export function PropertiesPanel() {
+  const selectedId = BuilderApp.useComputed((s) => s.ui.selectedId);
+  const selectedType = BuilderApp.useComputed((s) => s.ui.selectedType);
 
-  // Sync prop changes if they occur (from canvas clicks)
-  useEffect(() => {
-    if (selectedType) setActiveType(selectedType);
-  }, [selectedType]);
-
-  if (!activeType) {
+  if (!selectedId || !selectedType) {
     return (
       <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col items-center justify-center p-6 text-slate-400">
         <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
@@ -51,41 +36,35 @@ export function PropertiesPanel({
 
   return (
     <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col shadow-xl z-20">
-      {/* Mock Tabs Header */}
+      {/* Tabs Header */}
       <div className="px-2 py-2 border-b border-slate-100 flex items-center justify-around bg-slate-50/50">
         <TabButton
-          active={activeType === "text"}
-          onClick={() => setActiveType("text")}
+          active={selectedType === "text"}
           icon={<Type size={14} />}
           label="Text"
         />
         <TabButton
-          active={activeType === "image"}
-          onClick={() => setActiveType("image")}
+          active={selectedType === "image"}
           icon={<ImageIcon size={14} />}
           label="Img"
         />
         <TabButton
-          active={activeType === "icon"}
-          onClick={() => setActiveType("icon")}
+          active={selectedType === "icon"}
           icon={<Square size={14} />}
           label="Icon"
         />
         <TabButton
-          active={activeType === "link"}
-          onClick={() => setActiveType("link")}
+          active={selectedType === "link"}
           icon={<LinkIcon size={14} />}
           label="Link"
         />
         <TabButton
-          active={activeType === "button"}
-          onClick={() => setActiveType("button")}
+          active={selectedType === "button"}
           icon={<MousePointer2 size={14} />}
           label="Btn"
         />
         <TabButton
-          active={activeType === "section"}
-          onClick={() => setActiveType("section")}
+          active={selectedType === "section"}
           icon={<Layout size={14} />}
           label="Sect"
         />
@@ -94,45 +73,59 @@ export function PropertiesPanel({
       {/* Header Title */}
       <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-2 bg-white">
         <div className="p-1.5 bg-slate-100 rounded text-slate-500">
-          {getIconForType(activeType)}
+          {getIconForType(selectedType)}
         </div>
         <div>
           <h2 className="font-semibold text-slate-800 text-sm capitalize">
-            {activeType} Properties
+            {selectedType} Properties
           </h2>
-          <p className="text-[10px] text-slate-400 font-medium">
-            Visual CMS Mode
+          <p className="text-[10px] text-slate-400 font-medium truncate max-w-[180px]">
+            {selectedId}
           </p>
         </div>
       </div>
 
       {/* Form Content */}
       <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
-        {activeType === "text" && <TextProperties />}
-        {activeType === "image" && <ImageProperties />}
-        {activeType === "icon" && <IconProperties />}
-        {activeType === "link" && <LinkProperties />}
-        {activeType === "button" && <ButtonProperties />}
-        {activeType === "section" && <SectionProperties />}
+        {selectedType === "text" && (
+          <TextProperties fieldName={selectedId} />
+        )}
+        {selectedType === "image" && <ImageProperties />}
+        {selectedType === "icon" && <IconProperties />}
+        {selectedType === "link" && (
+          <LinkProperties fieldName={selectedId} />
+        )}
+        {selectedType === "button" && (
+          <ButtonProperties fieldName={selectedId} />
+        )}
+        {selectedType === "section" && (
+          <SectionProperties fieldName={selectedId} />
+        )}
       </div>
     </div>
   );
 }
 
-function TabButton({ active, onClick, icon, label }: any) {
+function TabButton({
+  active,
+  icon,
+  label,
+}: {
+  active: boolean;
+  icon: React.ReactNode;
+  label: string;
+}) {
   return (
-    <button
-      onClick={onClick}
-      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${
-        active
+    <div
+      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${active
           ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
-          : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
-      }`}
+          : "text-slate-400"
+        }`}
       title={label}
     >
       {icon}
       <span className="text-[9px] font-medium">{label}</span>
-    </button>
+    </div>
   );
 }
 
@@ -156,19 +149,24 @@ function getIconForType(type: PropertyType) {
 }
 
 /* -------------------------------------------------------------------------------------------------
- * Mock Forms - Visual CMS Mode (Content Only)
+ * Live-Bound Forms — reads/writes BuilderApp state
  * ------------------------------------------------------------------------------------------------- */
 
-function TextProperties() {
+function TextProperties({ fieldName }: { fieldName: string }) {
+  const value = BuilderApp.useComputed(
+    (s) => s.data.fields[fieldName] ?? "",
+  );
+
   return (
     <div className="space-y-6">
       <FormGroup label="Content">
         <textarea
           className="w-full p-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 min-h-[80px] resize-y"
-          defaultValue="Experience the future of web building."
+          value={value}
+          onChange={(e) => builderUpdateField(fieldName, e.target.value)}
         />
         <p className="text-[10px] text-slate-400 mt-1.5">
-          Edit the text content directly independently of style.
+          Edit the text content. Changes apply to canvas in real-time.
         </p>
       </FormGroup>
 
@@ -222,11 +220,10 @@ function IconProperties() {
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 ${
-                i === 1
+              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 ${i === 1
                   ? "border-violet-500 bg-violet-50 text-violet-600"
                   : "border-slate-200 text-slate-400"
-              }`}
+                }`}
             >
               <Square size={20} />
             </div>
@@ -244,9 +241,21 @@ function IconProperties() {
   );
 }
 
-function LinkProperties() {
+function LinkProperties({ fieldName }: { fieldName: string }) {
+  const value = BuilderApp.useComputed(
+    (s) => s.data.fields[fieldName] ?? "",
+  );
+
   return (
     <div className="space-y-6">
+      <FormGroup label="Link Text">
+        <textarea
+          className="w-full p-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 min-h-[40px] resize-y"
+          value={value}
+          onChange={(e) => builderUpdateField(fieldName, e.target.value)}
+        />
+      </FormGroup>
+
       <FormGroup label="Destination">
         <Select label="Link Type" value="External URL" />
         <div className="mt-2">
@@ -275,11 +284,20 @@ function LinkProperties() {
   );
 }
 
-function ButtonProperties() {
+function ButtonProperties({ fieldName }: { fieldName: string }) {
+  const value = BuilderApp.useComputed(
+    (s) => s.data.fields[fieldName] ?? "",
+  );
+
   return (
     <div className="space-y-6">
-      <FormGroup label="Button Text">
-        <TextInput label="Label" value="Get Started" />
+      <FormGroup label="Button Label">
+        <input
+          type="text"
+          className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+          value={value}
+          onChange={(e) => builderUpdateField(fieldName, e.target.value)}
+        />
       </FormGroup>
 
       <FormGroup label="Destination">
@@ -306,15 +324,15 @@ function ButtonProperties() {
   );
 }
 
-function SectionProperties() {
+function SectionProperties({ fieldName }: { fieldName: string }) {
   return (
     <div className="space-y-6">
       <FormGroup label="Section Identity">
-        <TextInput label="Section Name" value="Hero Section" />
+        <TextInput label="Section Name" value={fieldName} />
         <div className="mt-3">
-          <TextInput label="ID (Anchor)" value="hero" />
+          <TextInput label="ID (Anchor)" value={fieldName} />
           <p className="text-[10px] text-slate-400 mt-1">
-            Used for anchor links (e.g. #hero).
+            Used for anchor links (e.g. #{fieldName}).
           </p>
         </div>
       </FormGroup>
@@ -390,3 +408,5 @@ function Select({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+export type { PropertyType };

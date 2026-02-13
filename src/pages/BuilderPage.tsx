@@ -2,6 +2,10 @@ import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { OS } from "@os/AntigravityOS";
 import { useEffect, useState } from "react";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
+import {
+  BuilderApp,
+  type PropertyType,
+} from "@/apps/builder/app";
 import { kernel } from "@/os/kernel";
 // Playwright spec
 // @ts-expect-error
@@ -13,7 +17,6 @@ import {
   NCPNewsBlock,
   NCPServicesBlock,
   PropertiesPanel,
-  type PropertyType,
   type ViewportMode,
 } from "./builder";
 
@@ -21,31 +24,39 @@ import {
  * BuilderPage
  *
  * Visual CMS / Web Builder 데모 - Light Theme
+ * Kernel focus → BuilderApp.selectElement 동기화
  */
 export default function BuilderPage() {
   usePlaywrightSpecs("pw-builder-spatial", [runBuilderSpatial]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
 
-  // Derive selection from kernel focus
-  const focusedId = kernel.useComputed((state) => state.os.focus.focused);
-  const [selectedType, setSelectedType] = useState<PropertyType>("text");
+  // Derive selection from kernel focus → sync to BuilderApp
+  const focusedId = kernel.useComputed((state) => {
+    const zoneId = state.os.focus.activeZoneId;
+    if (!zoneId) return null;
+    return state.os.focus.zones[zoneId]?.focusedItemId ?? null;
+  });
 
   useEffect(() => {
-    if (!focusedId) return;
+    if (!focusedId) {
+      BuilderApp.setState((prev) => ({
+        ...prev,
+        ui: { ...prev.ui, selectedId: null, selectedType: null },
+      }));
+      return;
+    }
 
-    // Small delay to ensure DOM is updated if focus changed rapidly
-    // But usually sync is fine.
     const el = document.getElementById(focusedId);
     if (!el) return;
 
     let type: PropertyType = "text"; // Default fallback
 
     // 1. Check explicit builder type
-    if (el.dataset.builderType) {
-      type = el.dataset.builderType as PropertyType;
+    if (el.dataset["builderType"]) {
+      type = el.dataset["builderType"] as PropertyType;
     }
     // 2. Infer from explicit level
-    else if (el.dataset.level === "section") {
+    else if (el.dataset["level"] === "section") {
       type = "section";
     }
     // 3. Infer from DOM tags/structure
@@ -61,11 +72,13 @@ export default function BuilderPage() {
       el.hasAttribute("data-os-field") ||
       el.querySelector("[data-os-field]")
     ) {
-      // OS.Field usually has this attribute
       type = "text";
     }
 
-    setSelectedType(type);
+    BuilderApp.setState((prev) => ({
+      ...prev,
+      ui: { ...prev.ui, selectedId: focusedId, selectedType: type },
+    }));
   }, [focusedId]);
 
   const getViewportStyle = () => {
@@ -117,8 +130,8 @@ export default function BuilderPage() {
           </div>
         </OS.Zone>
 
-        {/* Properties Panel (Fixed Right) */}
-        <PropertiesPanel selectedType={selectedType} />
+        {/* Properties Panel (Fixed Right) — reads state from BuilderApp */}
+        <PropertiesPanel />
       </div>
     </div>
   );

@@ -34,6 +34,10 @@ export default defineConfig({
       ],
     },
   },
+  server: {
+    port: 5555,
+    strictPort: true,
+  },
   resolve: {
     alias: {
       "@playwright/test": "/src/inspector/testbot/playwright/index.ts",

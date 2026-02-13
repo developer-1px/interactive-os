@@ -33,16 +33,45 @@ Toulmin 논증 모델의 Warrant를 누적해가며, 논리의 빈틈을 통찰�
 
 ## 종료 시 산출물
 
-종료 시그널을 받으면 2개의 문서를 `docs/11-discussions`에 작성한다:
+종료 시그널을 받으면 **3단계 프로세스**로 1개의 통합 문서를 `docs/11-discussions`에 작성한다:
 
-### 문서 1: `YYYY-MMDD-HHmm_Discussion_Conclusion.md`
+### Step 1: Conclusion 작성 (임시)
 - 완결된 **Why** / **Intent** / **Warrant** 전체 구조
 - 마지막에 **한 줄 요약**: 이 모든 논증을 1문장으로 압축
+- 임시 파일명: `temp-conclusion.md`
 
-### 문서 2: `YYYY-MMDD-HHmm_Discussion_Journey.md`
+### Step 2: Journey 작성 (임시)
 - **대화록 형식**으로 작성 — 주고받는 흐름이 보여야 한다
 - 원문을 최대한 그대로 인용하되, 모든 대화를 쓰지 않고 **맥락이 이해되는 수준으로 압축**
 - 형식: `**🧑 사용자**: ...` / `**🤖 AI**: ...` 로 턴을 구분
 - 전환점마다 `---` 구분선으로 단락 분리
 - 코드 블록, 다이어그램 등은 논의 흐름에 필요한 만큼 포함
 - 마지막에 **한 줄 요약**으로 마무리
+- 임시 파일명: `temp-journey.md`
+
+### Step 3: 통합 및 정리
+1. Journey와 Conclusion을 하나의 파일로 병합:
+   ```
+   Journey (상단)
+   ---
+   Conclusion (하단)
+   ```
+2. **최종 파일명**: `YYYY-MMDD-HHmm-{topic-slug}.md`
+   - `{topic-slug}`: 논의 주제를 2~3단어로 요약한 kebab-case (예: `discussion-archiving`, `headless-ui-pattern`)
+   - **주제 slug는 필수** — 파일명만으로 내용을 알 수 있어야 함
+3. 임시 파일 2개 삭제
+
+### 디스커션의 운명
+
+생성된 디스커션은 두 가지 운명 중 하나를 갖는다:
+
+**A) 프로젝트 승격** (via `/project` workflow)
+- `11-discussions/` → `1-project/[name]/0-discussion.md`로 **이동(move)**
+- 복사가 아님 — 원본 제거, 중복 없음
+- 프로젝트 종료 시 `4-archive/YYYY/[name]/`으로 함께 이동
+
+**B) 독립 에세이로 잔류**
+- `11-discussions/`에 영구 보관
+- 블로그 포스트의 성격 — 독립적인 사고 기록
+
+이를 통해 `11-discussions/`는 **자가 정리(self-pruning)** 된다.

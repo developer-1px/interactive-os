@@ -1,38 +1,22 @@
 import { OS } from "@os/AntigravityOS";
 import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPNewsBlock() {
-  const [title, setTitle] = useState("네이버클라우드의\n새로운 소식");
+  const fields = BuilderApp.useComputed((s) => s.data.fields);
 
-  const [cards, setCards] = useState([
+  // Structural data (non-editable via OS.Field)
+  const cards = [
     {
       id: "news-1",
       tag: "SERVICE",
-      title: "Cloud DB for Cache\nRedis 호환성 강화",
-      desc: "Valkey 기반의 인메모리 캐시 서비스를 이제 클라우드에서 만나보세요.",
-      date: "2024.03.15",
       image:
         "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop",
     },
-    {
-      id: "news-2",
-      tag: "PRESS",
-      title: "하이퍼클로바X\n기업용 솔루션 공개",
-      desc: "업무 생산성을 혁신하는 AI 도구.",
-      date: "2024.03.10",
-      image: null,
-    },
-    {
-      id: "news-3",
-      tag: "EVENT",
-      title: "AI RUSH 2024\n개발자 컨퍼런스",
-      desc: "지금 바로 등록하세요.",
-      date: "2024.03.01",
-      image: null,
-    },
-  ]);
+    { id: "news-2", tag: "PRESS", image: null },
+    { id: "news-3", tag: "EVENT", image: null },
+  ];
 
   const card0 = cards[0]!;
   const card1 = cards[1]!;
@@ -57,8 +41,10 @@ export function NCPNewsBlock() {
                   name="ncp-news-title"
                   mode="deferred"
                   multiline
-                  value={title}
-                  onCommit={(val: string) => setTitle(val)}
+                  value={fields["ncp-news-title"] ?? ""}
+                  onCommit={(val: string) =>
+                    builderUpdateField("ncp-news-title", val)
+                  }
                   className={`
                      text-4xl md:text-5xl font-bold text-slate-900 leading-tight tracking-tight
                      data-[focused=true]:bg-slate-50 rounded-lg p-2 -m-2
@@ -108,12 +94,10 @@ export function NCPNewsBlock() {
                           name={`${card0.id}-title`}
                           mode="deferred"
                           multiline
-                          value={card0.title}
-                          onCommit={(val) => {
-                            const newCards = [...cards];
-                            newCards[0]!.title = val;
-                            setCards(newCards);
-                          }}
+                          value={fields[`${card0.id}-title`] ?? ""}
+                          onCommit={(val: string) =>
+                            builderUpdateField(`${card0.id}-title`, val)
+                          }
                           className="text-3xl md:text-4xl font-bold leading-tight mb-4 block text-white"
                         />
                       </Builder.Item>
@@ -121,12 +105,10 @@ export function NCPNewsBlock() {
                         <OS.Field
                           name={`${card0.id}-desc`}
                           mode="deferred"
-                          value={card0.desc}
-                          onCommit={(val: string) => {
-                            const newCards = [...cards];
-                            newCards[0]!.desc = val;
-                            setCards(newCards);
-                          }}
+                          value={fields[`${card0.id}-desc`] ?? ""}
+                          onCommit={(val: string) =>
+                            builderUpdateField(`${card0.id}-desc`, val)
+                          }
                           className="text-white/80 max-w-lg leading-relaxed mb-6 block"
                         />
                       </Builder.Item>
@@ -162,12 +144,10 @@ export function NCPNewsBlock() {
                       name={`${card1.id}-title`}
                       mode="deferred"
                       multiline
-                      value={card1.title}
-                      onCommit={(val) => {
-                        const newCards = [...cards];
-                        newCards[1]!.title = val;
-                        setCards(newCards);
-                      }}
+                      value={fields[`${card1.id}-title`] ?? ""}
+                      onCommit={(val: string) =>
+                        builderUpdateField(`${card1.id}-title`, val)
+                      }
                       className="text-xl font-bold text-slate-900 leading-snug mb-3 block"
                     />
                   </Builder.Item>
@@ -177,12 +157,10 @@ export function NCPNewsBlock() {
                     <OS.Field
                       name={`${card1.id}-date`}
                       mode="deferred"
-                      value={card1.date}
-                      onCommit={(val: string) => {
-                        const newCards = [...cards];
-                        newCards[1]!.date = val;
-                        setCards(newCards);
-                      }}
+                      value={fields[`${card1.id}-date`] ?? ""}
+                      onCommit={(val: string) =>
+                        builderUpdateField(`${card1.id}-date`, val)
+                      }
                       className="text-sm text-slate-400"
                     />
                   </Builder.Item>
@@ -220,12 +198,10 @@ export function NCPNewsBlock() {
                       name={`${card2.id}-title`}
                       mode="deferred"
                       multiline
-                      value={card2.title}
-                      onCommit={(val) => {
-                        const newCards = [...cards];
-                        newCards[2]!.title = val;
-                        setCards(newCards);
-                      }}
+                      value={fields[`${card2.id}-title`] ?? ""}
+                      onCommit={(val: string) =>
+                        builderUpdateField(`${card2.id}-title`, val)
+                      }
                       className="text-xl font-bold text-slate-900 leading-snug mb-3 block"
                     />
                   </Builder.Item>
@@ -235,12 +211,10 @@ export function NCPNewsBlock() {
                     <OS.Field
                       name={`${card2.id}-date`}
                       mode="deferred"
-                      value={card2.date}
-                      onCommit={(val: string) => {
-                        const newCards = [...cards];
-                        newCards[2]!.date = val;
-                        setCards(newCards);
-                      }}
+                      value={fields[`${card2.id}-date`] ?? ""}
+                      onCommit={(val: string) =>
+                        builderUpdateField(`${card2.id}-date`, val)
+                      }
                       className="text-sm text-slate-400"
                     />
                   </Builder.Item>

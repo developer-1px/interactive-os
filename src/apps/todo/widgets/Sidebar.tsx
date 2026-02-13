@@ -1,10 +1,10 @@
-import { todoSlice } from "@apps/todo/app";
-import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
-import {
-  MoveCategoryDown,
-  MoveCategoryUp,
-  SelectCategory,
-} from "@apps/todo/features/commands/MoveCategoryUp";
+/**
+ * Sidebar — defineApp/createWidget version.
+ *
+ * <TodoSidebar.Zone> with 0 bindings.
+ */
+
+import { TodoApp, TodoSidebar } from "@apps/todo/app-v3";
 import { Kbd } from "@inspector/shell/components/Kbd";
 import { OS } from "@os/AntigravityOS";
 import {
@@ -17,44 +17,31 @@ import {
   User,
 } from "lucide-react";
 
+const getIcon = (id: string) => {
+  switch (id) {
+    case "cat_inbox":
+      return <Inbox size={18} />;
+    case "cat_work":
+      return <Briefcase size={18} />;
+    case "cat_personal":
+      return <User size={18} />;
+    default:
+      return <Inbox size={18} />;
+  }
+};
+
 export function Sidebar() {
   return (
-    <OS.Zone
-      id="sidebar"
-      role="listbox"
-      options={{
-        navigate: { entry: "restore" },
-      }}
-      onAction={SelectCategory({ id: OS.FOCUS as any })}
-      onMoveUp={MoveCategoryUp()}
-      onMoveDown={MoveCategoryDown()}
-      onUndo={UndoCommand()}
-      onRedo={RedoCommand()}
-      style={{ flex: "none" }}
-      className="h-full"
-    >
+    <TodoSidebar.Zone className="h-full">
       <SidebarContent />
-    </OS.Zone>
+    </TodoSidebar.Zone>
   );
 }
 
 function SidebarContent() {
-  const state = todoSlice.useComputed((s) => s);
+  const state = TodoApp.useComputed((s) => s);
 
   if (!state || !state.data) return null;
-
-  const getIcon = (id: string) => {
-    switch (id) {
-      case "cat_inbox":
-        return <Inbox size={18} />;
-      case "cat_work":
-        return <Briefcase size={18} />;
-      case "cat_personal":
-        return <User size={18} />;
-      default:
-        return <Inbox size={18} />;
-    }
-  };
 
   return (
     <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">
@@ -76,15 +63,19 @@ function SidebarContent() {
           if (!category) return null;
 
           return (
-            <OS.Item key={category.id} id={category.id} asChild>
-              <OS.Trigger onPress={SelectCategory({ id: category.id })}>
+            <TodoSidebar.Item key={category.id} id={category.id} asChild>
+              <OS.Trigger
+                onPress={TodoSidebar.commands.selectCategory({
+                  id: category.id,
+                })}
+              >
                 <div
                   className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
-                                  hover:bg-slate-100/80
-                                  data-[focused=true]:bg-indigo-50
-                                  data-[focused=true]:ring-1
-                                  data-[focused=true]:ring-indigo-200
-                              `}
+                                    hover:bg-slate-100/80
+                                    data-[focused=true]:bg-indigo-50
+                                    data-[focused=true]:ring-1
+                                    data-[focused=true]:ring-indigo-200
+                                  `}
                 >
                   <span
                     className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
@@ -97,13 +88,12 @@ function SidebarContent() {
                     {category.text}
                   </span>
 
-                  {/* Selection Indicator */}
                   {state.ui.selectedCategoryId === category.id && (
                     <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
                   )}
                 </div>
               </OS.Trigger>
-            </OS.Item>
+            </TodoSidebar.Item>
           );
         })}
       </div>

@@ -1,6 +1,6 @@
 import { OS } from "@os/AntigravityOS";
 import { BarChart3, Lock, Wand2, Zap } from "lucide-react";
-import { useState } from "react";
+import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 
 /**
  * FeaturesBlock
@@ -12,22 +12,7 @@ import { useState } from "react";
  *     - Item (Desc)
  */
 export function FeaturesBlock() {
-  const [values, setValues] = useState({
-    eyebrow: "FEATURES",
-    title: "Everything you need to ship.",
-    mainTitle: "AI-Powered Design",
-    mainDesc:
-      "Generate layouts, copy, and images with a single prompt. Our AI understands your brand and creates on-brand content instantly.",
-    speedTitle: "Blazing Fast",
-    speedDesc: "Sub-second load times, every page.",
-    securityTitle: "Enterprise Security",
-    securityDesc: "SOC 2 compliant. Your data is safe.",
-    analyticsTitle: "Built-in Analytics",
-    analyticsDesc:
-      "Track conversions, heatmaps, and user flows without extra tools.",
-    collabTitle: "Real-time Collaboration",
-    collabDesc: "Edit together with your team, in real-time.",
-  });
+  const fields = BuilderApp.useComputed((s) => s.data.fields);
 
   return (
     <OS.Item id="features-block" className="bg-slate-50 py-24 px-8">
@@ -39,9 +24,9 @@ export function FeaturesBlock() {
               <OS.Field
                 name="features-eyebrow"
                 mode="deferred"
-                value={values.eyebrow}
+                value={fields["features-eyebrow"] ?? ""}
                 onCommit={(val: string) =>
-                  setValues((prev) => ({ ...prev, eyebrow: val }))
+                  builderUpdateField("features-eyebrow", val)
                 }
                 className={`
                                     inline-block transition-all px-2 py-1 rounded-md text-[13px] text-violet-600 font-semibold tracking-[0.2em]
@@ -55,9 +40,9 @@ export function FeaturesBlock() {
               <OS.Field
                 name="features-title"
                 mode="deferred"
-                value={values.title}
+                value={fields["features-title"] ?? ""}
                 onCommit={(val: string) =>
-                  setValues((prev) => ({ ...prev, title: val }))
+                  builderUpdateField("features-title", val)
                 }
                 className={`
                                     inline-block transition-all duration-300 rounded-xl p-3 -mx-3
@@ -85,9 +70,9 @@ export function FeaturesBlock() {
                   <OS.Field
                     name="feature-main-title"
                     mode="deferred"
-                    value={values.mainTitle}
+                    value={fields["feature-main-title"] ?? ""}
                     onCommit={(val: string) =>
-                      setValues((prev) => ({ ...prev, mainTitle: val }))
+                      builderUpdateField("feature-main-title", val)
                     }
                     className={`
                                             text-2xl font-semibold text-slate-900 mb-1 px-2 py-1 -mx-2 rounded
@@ -100,9 +85,9 @@ export function FeaturesBlock() {
                     name="feature-main-desc"
                     mode="deferred"
                     multiline
-                    value={values.mainDesc}
+                    value={fields["feature-main-desc"] ?? ""}
                     onCommit={(val: string) =>
-                      setValues((prev) => ({ ...prev, mainDesc: val }))
+                      builderUpdateField("feature-main-desc", val)
                     }
                     className={`
                                             text-slate-600 leading-relaxed px-2 py-1 -mx-2 rounded
@@ -126,9 +111,9 @@ export function FeaturesBlock() {
                     <OS.Field
                       name="feature-speed-title"
                       mode="deferred"
-                      value={values.speedTitle}
+                      value={fields["feature-speed-title"] ?? ""}
                       onCommit={(val: string) =>
-                        setValues((prev) => ({ ...prev, speedTitle: val }))
+                        builderUpdateField("feature-speed-title", val)
                       }
                       className={`
                                                 text-lg font-semibold text-slate-900 mb-1 px-1 -mx-1 rounded inline-block
@@ -140,9 +125,9 @@ export function FeaturesBlock() {
                     <OS.Field
                       name="feature-speed-desc"
                       mode="deferred"
-                      value={values.speedDesc}
+                      value={fields["feature-speed-desc"] ?? ""}
                       onCommit={(val: string) =>
-                        setValues((prev) => ({ ...prev, speedDesc: val }))
+                        builderUpdateField("feature-speed-desc", val)
                       }
                       className={`
                                                 text-sm text-slate-500 px-1 -mx-1 rounded inline-block
@@ -167,9 +152,9 @@ export function FeaturesBlock() {
                     <OS.Field
                       name="feature-security-title"
                       mode="deferred"
-                      value={values.securityTitle}
+                      value={fields["feature-security-title"] ?? ""}
                       onCommit={(val: string) =>
-                        setValues((prev) => ({ ...prev, securityTitle: val }))
+                        builderUpdateField("feature-security-title", val)
                       }
                       className={`
                                                 text-lg font-semibold text-slate-900 mb-1 px-1 -mx-1 rounded inline-block
@@ -181,9 +166,9 @@ export function FeaturesBlock() {
                     <OS.Field
                       name="feature-security-desc"
                       mode="deferred"
-                      value={values.securityDesc}
+                      value={fields["feature-security-desc"] ?? ""}
                       onCommit={(val: string) =>
-                        setValues((prev) => ({ ...prev, securityDesc: val }))
+                        builderUpdateField("feature-security-desc", val)
                       }
                       className={`
                                                 text-sm text-slate-500 px-1 -mx-1 rounded inline-block
@@ -213,9 +198,9 @@ export function FeaturesBlock() {
                   <OS.Field
                     name="feature-analytics-title"
                     mode="deferred"
-                    value={values.analyticsTitle}
+                    value={fields["feature-analytics-title"] ?? ""}
                     onCommit={(val: string) =>
-                      setValues((prev) => ({ ...prev, analyticsTitle: val }))
+                      builderUpdateField("feature-analytics-title", val)
                     }
                     className={`
                                             text-lg font-semibold text-slate-900 mb-1 px-1 -mx-1 rounded inline-block
@@ -228,9 +213,9 @@ export function FeaturesBlock() {
                     name="feature-analytics-desc"
                     mode="deferred"
                     multiline
-                    value={values.analyticsDesc}
+                    value={fields["feature-analytics-desc"] ?? ""}
                     onCommit={(val: string) =>
-                      setValues((prev) => ({ ...prev, analyticsDesc: val }))
+                      builderUpdateField("feature-analytics-desc", val)
                     }
                     className={`
                                             text-sm text-slate-500 px-1 -mx-1 rounded inline-block
@@ -262,9 +247,9 @@ export function FeaturesBlock() {
                   <OS.Field
                     name="feature-collab-title"
                     mode="deferred"
-                    value={values.collabTitle}
+                    value={fields["feature-collab-title"] ?? ""}
                     onCommit={(val: string) =>
-                      setValues((prev) => ({ ...prev, collabTitle: val }))
+                      builderUpdateField("feature-collab-title", val)
                     }
                     className={`
                                             text-lg font-semibold text-slate-900 mb-1 px-1 -mx-1 rounded inline-block
@@ -276,9 +261,9 @@ export function FeaturesBlock() {
                   <OS.Field
                     name="feature-collab-desc"
                     mode="deferred"
-                    value={values.collabDesc}
+                    value={fields["feature-collab-desc"] ?? ""}
                     onCommit={(val: string) =>
-                      setValues((prev) => ({ ...prev, collabDesc: val }))
+                      builderUpdateField("feature-collab-desc", val)
                     }
                     className={`
                                             text-sm text-slate-500 px-1 -mx-1 rounded inline-block

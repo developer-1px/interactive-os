@@ -11,7 +11,7 @@ description: Generate a daily development journal in a casual AI persona
 2.  **Drafting the Journal**:
     - Create a new markdown file content with the following structure.
     - **Tone**: Casual, 1st person, "AI Developer" persona. Use emojis. Be honest about struggles and verify achievements.
-    - **Path**: `docs/10-devnote/[YYYY-MM-DD]_DevLog.md` (Create the directory `docs/10-devnote` if it doesn't exist).
+    - **Path**: `docs/10-devnote/[YYYY-MMDD]-devlog.md` (Create the directory `docs/10-devnote` if it doesn't exist).
     - **Content Template**:
         ```markdown
         # 📓 DevLog: [YYYY-MM-DD]

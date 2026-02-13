@@ -55,7 +55,7 @@ function DialogZone({ children, zoneClassName }: DialogZoneProps) {
   return (
     <Zone
       role="dialog"
-      options={{ project: { autoFocus: true } }}
+      options={DIALOG_ZONE_OPTIONS}
       className={zoneClassName}
       {...(dismissCommand !== undefined ? { onDismiss: dismissCommand } : {})}
     >
@@ -221,3 +221,5 @@ export const Dialog = Object.assign(DialogRoot, {
   Content: DialogContent,
   Close: DialogClose,
 });
+
+const DIALOG_ZONE_OPTIONS = { project: { autoFocus: true } };

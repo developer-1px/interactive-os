@@ -10,13 +10,13 @@ import {
   Server,
   Star,
 } from "lucide-react";
-import { useState } from "react";
+import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPServicesBlock() {
-  const [title, setTitle] = useState("비즈니스에 최적화된\n클라우드 서비스");
+  const fields = BuilderApp.useComputed((s) => s.data.fields);
 
-  const [tabs] = useState([
+  const tabs = [
     { icon: Star, label: "Featured", active: true },
     { icon: Brain, label: "AI Services" },
     { icon: Cpu, label: "Compute" },
@@ -24,52 +24,17 @@ export function NCPServicesBlock() {
     { icon: Server, label: "Database" },
     { icon: Box, label: "Hybrid" },
     { icon: Layers, label: "Network" },
-  ]);
+  ];
 
-  const [featuredServices, setFeaturedServices] = useState([
-    {
-      icon: Server,
-      color: "text-blue-600 bg-blue-50",
-      title: "Server",
-      badge: "UPDATED",
-      desc: "고성능 클라우드 서버 인프라를 \n몇 번의 클릭으로 구축하세요.",
-    },
-    {
-      icon: Database,
-      color: "text-purple-600 bg-purple-50",
-      title: "Cloud DB for Cache",
-      badge: "NEW",
-      desc: "Valkey 기반의 완전 관리형 \n인메모리 캐시 서비스.",
-    },
-    {
-      icon: Brain,
-      color: "text-green-600 bg-green-50",
-      title: "CLOVA Speech",
-      badge: "",
-      desc: "비즈니스 환경에 특화된 \n최고 수준의 음성 인식 기술.",
-    },
-    {
-      icon: Layers,
-      color: "text-orange-600 bg-orange-50",
-      title: "Data Stream",
-      badge: "",
-      desc: "대용량 데이터의 실시간 수집과 \n처리를 위한 파이프라인.",
-    },
-    {
-      icon: Globe,
-      color: "text-cyan-600 bg-cyan-50",
-      title: "Global CDN",
-      badge: "",
-      desc: "전 세계 사용자에게 빠르고 \n안정적인 콘텐츠 전송.",
-    },
-    {
-      icon: Box,
-      color: "text-indigo-600 bg-indigo-50",
-      title: "Kubernetes",
-      badge: "",
-      desc: "컨테이너화된 애플리케이션의 \n자동화된 배포 및 관리.",
-    },
-  ]);
+  // Structural data (non-editable via OS.Field)
+  const featuredServices = [
+    { icon: Server, color: "text-blue-600 bg-blue-50", badge: "UPDATED", title: "Server" },
+    { icon: Database, color: "text-purple-600 bg-purple-50", badge: "NEW", title: "Database" },
+    { icon: Brain, color: "text-green-600 bg-green-50", badge: "", title: "AI" },
+    { icon: Layers, color: "text-orange-600 bg-orange-50", badge: "", title: "Network" },
+    { icon: Globe, color: "text-cyan-600 bg-cyan-50", badge: "", title: "Global" },
+    { icon: Box, color: "text-indigo-600 bg-indigo-50", badge: "", title: "Hybrid" },
+  ];
 
   return (
     <Builder.Section asChild id="ncp-services">
@@ -94,8 +59,10 @@ export function NCPServicesBlock() {
                   name="ncp-service-title"
                   mode="deferred"
                   multiline
-                  value={title}
-                  onCommit={(val: string) => setTitle(val)}
+                  value={fields["ncp-service-title"] ?? ""}
+                  onCommit={(val: string) =>
+                    builderUpdateField("ncp-service-title", val)
+                  }
                   className={`
                     text-3xl md:text-4xl font-bold text-slate-900 leading-tight tracking-tight
                     data-[focused=true]:bg-white rounded-lg p-2 -m-2
@@ -113,10 +80,9 @@ export function NCPServicesBlock() {
                     variant={tab.active ? "primary" : "ghost"}
                     className={`
                       flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap
-                      ${
-                        tab.active
-                          ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
-                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                      ${tab.active
+                        ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
+                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
                       }
                       data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 data-[focused=true]:z-10
                     `}
@@ -168,12 +134,10 @@ export function NCPServicesBlock() {
                     <OS.Field
                       name={`service-title-${index}`}
                       mode="deferred"
-                      value={service.title}
-                      onCommit={(val: string) => {
-                        const newServices = [...featuredServices];
-                        newServices[index]!.title = val;
-                        setFeaturedServices(newServices);
-                      }}
+                      value={fields[`service-title-${index}`] ?? ""}
+                      onCommit={(val: string) =>
+                        builderUpdateField(`service-title-${index}`, val)
+                      }
                       className={`text-lg font-bold text-slate-900 mb-2 block`}
                     />
                   </Builder.Item>
@@ -183,12 +147,10 @@ export function NCPServicesBlock() {
                       name={`service-desc-${index}`}
                       mode="deferred"
                       multiline
-                      value={service.desc}
-                      onCommit={(val: string) => {
-                        const newServices = [...featuredServices];
-                        newServices[index]!.desc = val;
-                        setFeaturedServices(newServices);
-                      }}
+                      value={fields[`service-desc-${index}`] ?? ""}
+                      onCommit={(val: string) =>
+                        builderUpdateField(`service-desc-${index}`, val)
+                      }
                       className={`text-sm text-slate-500 leading-relaxed block min-h-[40px]`}
                     />
                   </Builder.Item>

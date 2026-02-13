@@ -10,11 +10,11 @@ export default function TodoPage() {
   usePlaywrightSpecs("pw-todo", [runTodoSpec]);
 
   return (
-    <OS.Zone id="main" role="toolbar" className="h-full flex">
-      {/* 1. Category Navigation (Isolated Component) */}
+    <OS.Zone id="main" role="application" className="h-full flex">
+      {/* 1. Category Navigation */}
       <Sidebar />
 
-      {/* 2. Main Work Area (Isolated Component) */}
+      {/* 2. Main Work Area */}
       <TodoPanel />
     </OS.Zone>
   );

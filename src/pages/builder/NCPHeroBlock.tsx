@@ -1,16 +1,10 @@
 import { OS } from "@os/AntigravityOS";
 import { ArrowRight, Globe } from "lucide-react";
-import { useState } from "react";
+import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPHeroBlock() {
-  const [values, setValues] = useState({
-    headline: "AI 시대를 위한\n가장 완벽한 플랫폼",
-    subtext:
-      "네이버클라우드의 기술력으로 완성된\n하이퍼스케일 AI 스튜디오를 경험하세요.",
-    cta: "무료로 시작하기",
-    brand: "NAVER CLOUD",
-  });
+  const fields = BuilderApp.useComputed((s) => s.data.fields);
 
   return (
     <Builder.Section asChild id="ncp-hero">
@@ -53,9 +47,9 @@ export function NCPHeroBlock() {
                 name="ncp-hero-title"
                 mode="deferred"
                 multiline
-                value={values.headline}
+                value={fields["ncp-hero-title"] ?? ""}
                 onCommit={(val: string) =>
-                  setValues((prev) => ({ ...prev, headline: val }))
+                  builderUpdateField("ncp-hero-title", val)
                 }
                 className={`
                     block text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter mb-8 -ml-1
@@ -69,9 +63,9 @@ export function NCPHeroBlock() {
                 name="ncp-hero-sub"
                 mode="deferred"
                 multiline
-                value={values.subtext}
+                value={fields["ncp-hero-sub"] ?? ""}
                 onCommit={(val: string) =>
-                  setValues((prev) => ({ ...prev, subtext: val }))
+                  builderUpdateField("ncp-hero-sub", val)
                 }
                 className={`
                     block text-xl lg:text-2xl text-slate-500 font-medium leading-relaxed mb-12 max-w-lg
@@ -91,7 +85,7 @@ export function NCPHeroBlock() {
                     hover:bg-[#03C75A] hover:shadow-green-500/30 hover:-translate-y-1
                 `}
               >
-                {values.cta}
+                {fields["ncp-hero-cta"] ?? "무료로 시작하기"}
                 <ArrowRight
                   size={20}
                   className="group-hover:translate-x-1 transition-transform"
@@ -157,9 +151,9 @@ export function NCPHeroBlock() {
             <OS.Field
               name="ncp-hero-brand"
               mode="deferred"
-              value={values.brand}
+              value={fields["ncp-hero-brand"] ?? ""}
               onCommit={(val: string) =>
-                setValues((prev) => ({ ...prev, brand: val }))
+                builderUpdateField("ncp-hero-brand", val)
               }
               className={`
                 font-black tracking-tighter text-lg text-slate-900

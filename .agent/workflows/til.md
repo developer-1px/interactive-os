@@ -6,12 +6,12 @@ description: Generate a TIL (Today I Learned) document summarizing technical lea
     - Get the current date (YYYY-MM-DD).
     - Run `git log --since="midnight" --stat --no-merges` to see today's work.
     - Recall technical learnings, debugging insights, and architectural discoveries from the conversation history.
-    - Check if a DevLog exists for the day (`docs/10-devnote/[YYYY-MM-DD]_DevLog.md`) and reference its "Discoveries & Insights" section.
+    - Check if a DevLog exists for the day (`docs/10-devnote/[YYYY-MMDD]-devlog.md`) and reference its "Discoveries & Insights" section.
 
 2.  **Drafting the TIL**:
     - Create a new markdown file with the following structure.
     - **Tone**: Technical, concise, code-heavy. Each item should be a self-contained micro-lesson that future-you can reference.
-    - **Path**: `docs/10-devnote/[YYYY-MM-DD]_TIL.md`
+    - **Path**: `docs/10-devnote/[YYYY-MMDD]-til.md`
     - **Items**: Extract 3~6 concrete technical learnings. Each should have:
       - A one-line title describing the insight
       - Before/after code example (❌/✅) when applicable

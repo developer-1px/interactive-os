@@ -10,6 +10,10 @@ import { useCallback } from "react";
 import { EXPAND } from "@/os/3-commands/expand";
 import { kernel } from "@/os/kernel";
 
+// Stable empty array reference to avoid infinite re-render in useSyncExternalStore.
+// `?? []` inside a selector creates a new reference per call → referential inequality → re-render loop.
+const EMPTY: readonly string[] = [];
+
 export function useFocusExpansion() {
   const ctx = useFocusGroupContext();
 
@@ -21,7 +25,7 @@ export function useFocusExpansion() {
 
   // Subscribe to expandedItems for reactive use
   const expandedItems = kernel.useComputed(
-    (s) => s.os.focus.zones[zoneId]?.expandedItems ?? [],
+    (s) => s.os.focus.zones[zoneId]?.expandedItems ?? EMPTY,
   );
 
   const toggleExpanded = useCallback((id: string) => {

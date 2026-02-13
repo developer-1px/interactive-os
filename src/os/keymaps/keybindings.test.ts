@@ -14,7 +14,7 @@ import { Keybindings } from "./keybindings";
 // Side-effect import: registers all OS default keybindings
 import "./osDefaults";
 
-import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
+
 import {
   FIELD_CANCEL,
   FIELD_COMMIT,
@@ -27,7 +27,6 @@ import {
   OS_DELETE,
   OS_MOVE_DOWN,
   OS_MOVE_UP,
-  TAB,
 } from "@os/3-commands/interaction";
 import { NAVIGATE } from "@os/3-commands/navigate";
 import { SELECT } from "@os/3-commands/selection";
@@ -80,22 +79,21 @@ describe("Keybinding Resolution", () => {
       expect(result!.command).toBe(OS_MOVE_DOWN);
     });
 
-    it("Meta+C → OS_COPY", () => {
+    // Clipboard: Meta+C/X/V are NOT registered as keybindings
+    // to preserve native browser clipboard behavior.
+    it("Meta+C → null (native clipboard preserved)", () => {
       const result = Keybindings.resolve("Meta+C", ctx);
-      expect(result).not.toBeNull();
-      expect(result!.command).toBe(OS_COPY);
+      expect(result).toBeNull();
     });
 
-    it("Meta+X → OS_CUT", () => {
+    it("Meta+X → null (native clipboard preserved)", () => {
       const result = Keybindings.resolve("Meta+X", ctx);
-      expect(result).not.toBeNull();
-      expect(result!.command).toBe(OS_CUT);
+      expect(result).toBeNull();
     });
 
-    it("Meta+V → OS_PASTE", () => {
+    it("Meta+V → null (native clipboard preserved)", () => {
       const result = Keybindings.resolve("Meta+V", ctx);
-      expect(result).not.toBeNull();
-      expect(result!.command).toBe(OS_PASTE);
+      expect(result).toBeNull();
     });
 
     it("ArrowDown → NAVIGATE", () => {

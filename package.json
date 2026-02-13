@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite & vite --config vite.docs.config.ts",
+    "dev:app": "vite",
     "docs": "vite --config vite.docs.config.ts",
     "dev:e2e": "chmod +x scripts/dev-e2e.sh && ./scripts/dev-e2e.sh",
     "build": "tsc -b && vite build",

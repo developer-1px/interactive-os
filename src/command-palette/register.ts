@@ -43,3 +43,37 @@ Keybindings.register({
   key: "Meta+K",
   command: TOGGLE_COMMAND_PALETTE,
 });
+
+// ── Shift+Shift Double-Tap (IntelliJ "Search Everywhere") ────────
+
+let lastShiftUp = 0;
+
+if (typeof window !== "undefined") {
+  window.addEventListener("keyup", (e) => {
+    if (e.key !== "Shift" || e.metaKey || e.ctrlKey || e.altKey) {
+      lastShiftUp = 0;
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastShiftUp < 300) {
+      lastShiftUp = 0;
+      // Only open if not already open
+      const state = kernel.getState();
+      const isOpen = state.os.overlays.stack.some(
+        (entry) => entry.id === "command-palette",
+      );
+      if (!isOpen) {
+        kernel.dispatch(
+          OVERLAY_OPEN({
+            id: "command-palette",
+            type: "dialog",
+            // biome-ignore lint/suspicious/noExplicitAny: command dispatch type compatibility
+          }) as any,
+        );
+      }
+    } else {
+      lastShiftUp = now;
+    }
+  });
+}

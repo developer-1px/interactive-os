@@ -18,13 +18,13 @@ import { Route as TodoProfileRouteImport } from './routes/_todo/profile'
 import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
-import { Route as MinimalPlaygroundTodoV3RouteImport } from './routes/_minimal/playground.todo-v3'
-import { Route as MinimalPlaygroundTodoV2RouteImport } from './routes/_minimal/playground.todo-v2'
 import { Route as MinimalPlaygroundTestsRouteImport } from './routes/_minimal/playground.tests'
 import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/playground.radix'
+import { Route as MinimalPlaygroundProjectsRouteImport } from './routes/_minimal/playground.projects'
 import { Route as MinimalPlaygroundPlaywrightRouteImport } from './routes/_minimal/playground.playwright'
 import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
+import { Route as MinimalPlaygroundDesignSecondBrainRouteImport } from './routes/_minimal/playground/design-second-brain'
 import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
 import { Route as MinimalDocsSplatRouteImport } from './routes/_minimal/docs/$'
 
@@ -71,16 +71,6 @@ const MinimalDocsIndexRoute = MinimalDocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MinimalDocsRoute,
 } as any)
-const MinimalPlaygroundTodoV3Route = MinimalPlaygroundTodoV3RouteImport.update({
-  id: '/playground/todo-v3',
-  path: '/playground/todo-v3',
-  getParentRoute: () => MinimalRoute,
-} as any)
-const MinimalPlaygroundTodoV2Route = MinimalPlaygroundTodoV2RouteImport.update({
-  id: '/playground/todo-v2',
-  path: '/playground/todo-v2',
-  getParentRoute: () => MinimalRoute,
-} as any)
 const MinimalPlaygroundTestsRoute = MinimalPlaygroundTestsRouteImport.update({
   id: '/playground/tests',
   path: '/playground/tests',
@@ -91,6 +81,12 @@ const MinimalPlaygroundRadixRoute = MinimalPlaygroundRadixRouteImport.update({
   path: '/playground/radix',
   getParentRoute: () => MinimalRoute,
 } as any)
+const MinimalPlaygroundProjectsRoute =
+  MinimalPlaygroundProjectsRouteImport.update({
+    id: '/playground/projects',
+    path: '/playground/projects',
+    getParentRoute: () => MinimalRoute,
+  } as any)
 const MinimalPlaygroundPlaywrightRoute =
   MinimalPlaygroundPlaywrightRouteImport.update({
     id: '/playground/playwright',
@@ -107,6 +103,12 @@ const MinimalPlaygroundFocusRoute = MinimalPlaygroundFocusRouteImport.update({
   path: '/playground/focus',
   getParentRoute: () => MinimalRoute,
 } as any)
+const MinimalPlaygroundDesignSecondBrainRoute =
+  MinimalPlaygroundDesignSecondBrainRouteImport.update({
+    id: '/playground/design-second-brain',
+    path: '/playground/design-second-brain',
+    getParentRoute: () => MinimalRoute,
+  } as any)
 const MinimalPlaygroundAriaRoute = MinimalPlaygroundAriaRouteImport.update({
   id: '/playground/aria',
   path: '/playground/aria',
@@ -127,13 +129,13 @@ export interface FileRoutesByFullPath {
   '/settings': typeof TodoSettingsRoute
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/design-second-brain': typeof MinimalPlaygroundDesignSecondBrainRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
+  '/playground/projects': typeof MinimalPlaygroundProjectsRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
   '/playground/tests': typeof MinimalPlaygroundTestsRoute
-  '/playground/todo-v2': typeof MinimalPlaygroundTodoV2Route
-  '/playground/todo-v3': typeof MinimalPlaygroundTodoV3Route
   '/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -144,13 +146,13 @@ export interface FileRoutesByTo {
   '/settings': typeof TodoSettingsRoute
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/design-second-brain': typeof MinimalPlaygroundDesignSecondBrainRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
+  '/playground/projects': typeof MinimalPlaygroundProjectsRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
   '/playground/tests': typeof MinimalPlaygroundTestsRoute
-  '/playground/todo-v2': typeof MinimalPlaygroundTodoV2Route
-  '/playground/todo-v3': typeof MinimalPlaygroundTodoV3Route
   '/docs': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesById {
@@ -165,13 +167,13 @@ export interface FileRoutesById {
   '/_todo/': typeof TodoIndexRoute
   '/_minimal/docs/$': typeof MinimalDocsSplatRoute
   '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/_minimal/playground/design-second-brain': typeof MinimalPlaygroundDesignSecondBrainRoute
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/_minimal/playground/playwright': typeof MinimalPlaygroundPlaywrightRoute
+  '/_minimal/playground/projects': typeof MinimalPlaygroundProjectsRoute
   '/_minimal/playground/radix': typeof MinimalPlaygroundRadixRoute
   '/_minimal/playground/tests': typeof MinimalPlaygroundTestsRoute
-  '/_minimal/playground/todo-v2': typeof MinimalPlaygroundTodoV2Route
-  '/_minimal/playground/todo-v3': typeof MinimalPlaygroundTodoV3Route
   '/_minimal/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRouteTypes {
@@ -185,13 +187,13 @@ export interface FileRouteTypes {
     | '/settings'
     | '/docs/$'
     | '/playground/aria'
+    | '/playground/design-second-brain'
     | '/playground/focus'
     | '/playground/kernel'
     | '/playground/playwright'
+    | '/playground/projects'
     | '/playground/radix'
     | '/playground/tests'
-    | '/playground/todo-v2'
-    | '/playground/todo-v3'
     | '/docs/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -202,13 +204,13 @@ export interface FileRouteTypes {
     | '/settings'
     | '/docs/$'
     | '/playground/aria'
+    | '/playground/design-second-brain'
     | '/playground/focus'
     | '/playground/kernel'
     | '/playground/playwright'
+    | '/playground/projects'
     | '/playground/radix'
     | '/playground/tests'
-    | '/playground/todo-v2'
-    | '/playground/todo-v3'
     | '/docs'
   id:
     | '__root__'
@@ -222,13 +224,13 @@ export interface FileRouteTypes {
     | '/_todo/'
     | '/_minimal/docs/$'
     | '/_minimal/playground/aria'
+    | '/_minimal/playground/design-second-brain'
     | '/_minimal/playground/focus'
     | '/_minimal/playground/kernel'
     | '/_minimal/playground/playwright'
+    | '/_minimal/playground/projects'
     | '/_minimal/playground/radix'
     | '/_minimal/playground/tests'
-    | '/_minimal/playground/todo-v2'
-    | '/_minimal/playground/todo-v3'
     | '/_minimal/docs/'
   fileRoutesById: FileRoutesById
 }
@@ -302,20 +304,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalDocsIndexRouteImport
       parentRoute: typeof MinimalDocsRoute
     }
-    '/_minimal/playground/todo-v3': {
-      id: '/_minimal/playground/todo-v3'
-      path: '/playground/todo-v3'
-      fullPath: '/playground/todo-v3'
-      preLoaderRoute: typeof MinimalPlaygroundTodoV3RouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/playground/todo-v2': {
-      id: '/_minimal/playground/todo-v2'
-      path: '/playground/todo-v2'
-      fullPath: '/playground/todo-v2'
-      preLoaderRoute: typeof MinimalPlaygroundTodoV2RouteImport
-      parentRoute: typeof MinimalRoute
-    }
     '/_minimal/playground/tests': {
       id: '/_minimal/playground/tests'
       path: '/playground/tests'
@@ -328,6 +316,13 @@ declare module '@tanstack/react-router' {
       path: '/playground/radix'
       fullPath: '/playground/radix'
       preLoaderRoute: typeof MinimalPlaygroundRadixRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/projects': {
+      id: '/_minimal/playground/projects'
+      path: '/playground/projects'
+      fullPath: '/playground/projects'
+      preLoaderRoute: typeof MinimalPlaygroundProjectsRouteImport
       parentRoute: typeof MinimalRoute
     }
     '/_minimal/playground/playwright': {
@@ -349,6 +344,13 @@ declare module '@tanstack/react-router' {
       path: '/playground/focus'
       fullPath: '/playground/focus'
       preLoaderRoute: typeof MinimalPlaygroundFocusRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/design-second-brain': {
+      id: '/_minimal/playground/design-second-brain'
+      path: '/playground/design-second-brain'
+      fullPath: '/playground/design-second-brain'
+      preLoaderRoute: typeof MinimalPlaygroundDesignSecondBrainRouteImport
       parentRoute: typeof MinimalRoute
     }
     '/_minimal/playground/aria': {
@@ -386,26 +388,27 @@ interface MinimalRouteChildren {
   MinimalBuilderRoute: typeof MinimalBuilderRoute
   MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
   MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
+  MinimalPlaygroundDesignSecondBrainRoute: typeof MinimalPlaygroundDesignSecondBrainRoute
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
   MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
   MinimalPlaygroundPlaywrightRoute: typeof MinimalPlaygroundPlaywrightRoute
+  MinimalPlaygroundProjectsRoute: typeof MinimalPlaygroundProjectsRoute
   MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute
   MinimalPlaygroundTestsRoute: typeof MinimalPlaygroundTestsRoute
-  MinimalPlaygroundTodoV2Route: typeof MinimalPlaygroundTodoV2Route
-  MinimalPlaygroundTodoV3Route: typeof MinimalPlaygroundTodoV3Route
 }
 
 const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalBuilderRoute: MinimalBuilderRoute,
   MinimalDocsRoute: MinimalDocsRouteWithChildren,
   MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
+  MinimalPlaygroundDesignSecondBrainRoute:
+    MinimalPlaygroundDesignSecondBrainRoute,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,
   MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
   MinimalPlaygroundPlaywrightRoute: MinimalPlaygroundPlaywrightRoute,
+  MinimalPlaygroundProjectsRoute: MinimalPlaygroundProjectsRoute,
   MinimalPlaygroundRadixRoute: MinimalPlaygroundRadixRoute,
   MinimalPlaygroundTestsRoute: MinimalPlaygroundTestsRoute,
-  MinimalPlaygroundTodoV2Route: MinimalPlaygroundTodoV2Route,
-  MinimalPlaygroundTodoV3Route: MinimalPlaygroundTodoV3Route,
 }
 
 const MinimalRouteWithChildren =

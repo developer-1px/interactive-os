@@ -5,7 +5,7 @@
  * All widget commands are accessible through app.dispatch.
  */
 
-import { TodoApp } from "@apps/todo/v3/app";
+import { TodoApp } from "@apps/todo/app-v3";
 import { describe, expect, test, vi } from "vitest";
 
 let now = 1000;
