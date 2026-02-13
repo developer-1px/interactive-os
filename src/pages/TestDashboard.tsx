@@ -27,6 +27,9 @@ import {
     PlayCircle,
     Check,
     Split,
+    Play,
+    RotateCw,
+    AlertCircle,
 } from "lucide-react";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -69,15 +72,19 @@ interface ProjectGroup {
 // Test Parser (Regex-based Static Analysis)
 // ═══════════════════════════════════════════════════════════════════
 
+type TestStatus = "idle" | "running" | "pass" | "fail";
+
 interface SuiteNode {
     type: "suite";
     name: string;
     children: (SuiteNode | TestNode)[];
+    status?: TestStatus; // Mock status
 }
 
 interface TestNode {
     type: "test";
     name: string;
+    status?: TestStatus; // Mock status
 }
 
 function parseTestStructure(code: string): SuiteNode[] {
@@ -102,7 +109,7 @@ function parseTestStructure(code: string): SuiteNode[] {
         const descMatch = trimmed.match(/^describe\s*\(\s*["'`)(](.*?)["'`)]/);
         if (descMatch) {
             const name = descMatch[1];
-            const newNode: SuiteNode = { type: "suite", name, children: [] };
+            const newNode: SuiteNode = { type: "suite", name, children: [], status: "idle" };
 
             // Find parent: closest suite with strictly less indentation
             while (suiteStack.length > 1 && suiteStack[suiteStack.length - 1].indent >= indent) {
@@ -118,7 +125,7 @@ function parseTestStructure(code: string): SuiteNode[] {
         const testMatch = trimmed.match(/^(it|test)\s*\(\s*["'`)(](.*?)["'`)]/);
         if (testMatch) {
             const name = testMatch[2];
-            const newNode: TestNode = { type: "test", name };
+            const newNode: TestNode = { type: "test", name, status: "idle" };
 
             // Find parent: closest suite with strictly less indentation
             while (suiteStack.length > 1 && suiteStack[suiteStack.length - 1].indent >= indent) {
@@ -211,25 +218,55 @@ function HealthIcon({ group, size = 16 }: { group: ProjectGroup, size?: number }
     return <XCircle size={size} className="text-red-500" />;
 }
 
-function SuiteNodeRenderer({ node, depth = 0 }: { node: SuiteNode | TestNode, depth?: number }) {
+function StatusIcon({ status }: { status: TestStatus }) {
+    switch (status) {
+        case "running":
+            return <RotateCw size={14} className="text-blue-500 animate-spin" />;
+        case "pass":
+            return <CheckCircle2 size={14} className="text-emerald-500" />;
+        case "fail":
+            return <XCircle size={14} className="text-red-500" />;
+        default:
+            return <PlayCircle size={14} className="text-stone-300 hover:text-stone-500 transition-colors" />;
+    }
+}
+
+function SuiteNodeRenderer({ node, depth = 0, onRun }: { node: SuiteNode | TestNode, depth?: number, onRun: (node: SuiteNode | TestNode) => void }) {
+    const status = node.status || "idle";
+
     if (node.type === "test") {
         return (
-            <div className="flex items-center gap-2 py-1 text-sm text-stone-600 font-medium hover:text-stone-900 transition-colors cursor-default" style={{ paddingLeft: depth * 16 }}>
-                <PlayCircle size={14} className="text-violet-400 flex-shrink-0" />
-                <span className="truncate">{node.name}</span>
+            <div className="group flex items-center justify-between py-1 text-sm rounded-md hover:bg-stone-50 pr-2 transition-colors" style={{ paddingLeft: depth * 16 }}>
+                <div className="flex items-center gap-2 overflow-hidden">
+                    <button onClick={() => onRun(node)} disabled={status === 'running'}>
+                        <StatusIcon status={status} />
+                    </button>
+                    <span className={`truncate ${status === 'fail' ? 'text-red-600' : status === 'pass' ? 'text-stone-400' : 'text-stone-600'}`}>
+                        {node.name}
+                    </span>
+                </div>
+                {status === 'fail' && <span className="text-[10px] text-red-500 font-bold px-1.5 py-0.5 bg-red-50 rounded">FAIL</span>}
+                {status === 'pass' && <span className="text-[10px] text-emerald-500 font-bold px-1.5 py-0.5 bg-emerald-50 rounded">PASS</span>}
             </div>
         );
     }
 
     return (
         <div className="mb-1">
-            <div className="flex items-center gap-2 py-1 text-sm font-bold text-stone-800" style={{ paddingLeft: depth * 16 }}>
-                <BoxSelect size={14} className="text-stone-400 flex-shrink-0" />
-                <span className="truncate">{node.name}</span>
+            <div className="group flex items-center justify-between py-1 text-sm font-bold text-stone-800 rounded-md hover:bg-stone-50 pr-2 transition-colors" style={{ paddingLeft: depth * 16 }}>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => onRun(node)} disabled={status === 'running'}>
+                        {status === 'running' ? <RotateCw size={14} className="text-blue-500 animate-spin" /> :
+                            status === 'pass' ? <CheckCircle2 size={14} className="text-emerald-500" /> :
+                                status === 'fail' ? <XCircle size={14} className="text-red-500" /> :
+                                    <BoxSelect size={14} className="text-stone-400 group-hover:text-stone-600 transition-colors" />}
+                    </button>
+                    <span className="truncate">{node.name}</span>
+                </div>
             </div>
             <div>
                 {node.children.map((child, i) => (
-                    <SuiteNodeRenderer key={i} node={child} depth={depth + 1} />
+                    <SuiteNodeRenderer key={i} node={child} depth={depth + 1} onRun={onRun} />
                 ))}
             </div>
         </div>
@@ -247,6 +284,10 @@ export function TestDashboard() {
     const [selectedFile, setSelectedFile] = useState<TestFile | null>(null);
     const [code, setCode] = useState<string>("");
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+
+    // Mock State for Test Execution
+    const [testResults, setTestResults] = useState<Record<string, TestStatus>>({});
+    const [running, setRunning] = useState(false);
 
     // Group projects by category
     const categorizedGroups = useMemo(() => {
@@ -282,12 +323,68 @@ export function TestDashboard() {
             selectedFile.loader().then((mod) => {
                 setCode(typeof mod === 'string' ? mod : mod.default || "");
             });
+            // Reset mocks when file changes
+            setTestResults({});
         } else {
             setCode("");
         }
     }, [selectedFile]);
 
-    const structure = useMemo(() => parseTestStructure(code), [code]);
+    const structure = useMemo(() => {
+        const nodes = parseTestStructure(code);
+        // Apply mock status
+        const applyStatus = (nodes: (SuiteNode | TestNode)[]) => {
+            nodes.forEach(node => {
+                if (testResults[node.name]) {
+                    node.status = testResults[node.name];
+                }
+                if (node.type === 'suite' && node.children) {
+                    applyStatus(node.children);
+                }
+            });
+        }
+        applyStatus(nodes);
+        return nodes;
+    }, [code, testResults]);
+
+    // Mock Runner Logic
+    const runTest = (name: string) => {
+        setTestResults(prev => ({ ...prev, [name]: 'running' }));
+        setTimeout(() => {
+            setTestResults(prev => ({
+                ...prev,
+                [name]: Math.random() > 0.3 ? 'pass' : 'fail'
+            }));
+        }, 600 + Math.random() * 1000);
+    };
+
+    const runAll = () => {
+        setRunning(true);
+        const allNames: string[] = [];
+        const collectNames = (nodes: (SuiteNode | TestNode)[]) => {
+            nodes.forEach(node => {
+                allNames.push(node.name);
+                if (node.type === 'suite') collectNames(node.children);
+            });
+        }
+        collectNames(structure);
+
+        // Set all to running
+        const runningState = allNames.reduce((acc, name) => ({ ...acc, [name]: 'running' as TestStatus }), {});
+        setTestResults(runningState);
+
+        // Settle one by one
+        allNames.forEach((name, i) => {
+            setTimeout(() => {
+                setTestResults(prev => ({
+                    ...prev,
+                    [name]: Math.random() > 0.2 ? 'pass' : 'fail'
+                }));
+                if (i === allNames.length - 1) setRunning(false);
+            }, 800 + i * 200);
+        });
+    };
+
 
     return (
         <div className="flex h-full bg-stone-50 overflow-hidden">
@@ -417,17 +514,34 @@ export function TestDashboard() {
                         <div className="flex-1 flex flex-row overflow-hidden">
                             {/* Left: Suite Visualization (40%) */}
                             <div className="w-[40%] flex flex-col border-r border-stone-200 bg-white overflow-hidden">
-                                <div className="px-4 py-2 border-b border-stone-100 bg-stone-50/50 flex items-center gap-2">
-                                    <div className="p-1 bg-emerald-50 rounded text-emerald-600">
-                                        <Check size={14} />
+                                <div className="px-4 py-2 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className={`p-1 rounded ${running ? "bg-blue-100 text-blue-600 animate-pulse" : "bg-emerald-50 text-emerald-600"}`}>
+                                            <Check size={14} />
+                                        </div>
+                                        <span className="text-xs font-bold text-stone-600 uppercase tracking-wide">Test Plan</span>
                                     </div>
-                                    <span className="text-xs font-bold text-stone-600 uppercase tracking-wide">Test Plan</span>
+                                    <button
+                                        onClick={runAll}
+                                        disabled={running}
+                                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide transition-all shadow-sm ${running
+                                                ? "bg-stone-100 text-stone-400 cursor-wait"
+                                                : "bg-stone-900 text-white hover:bg-stone-700 hover:scale-105 active:scale-95"
+                                            }`}
+                                    >
+                                        {running ? <RotateCw size={10} className="animate-spin" /> : <Play size={10} fill="currentColor" />}
+                                        Run All
+                                    </button>
                                 </div>
                                 <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
                                     {structure.length > 0 ? (
                                         <div className="space-y-4">
                                             {structure.map((node, i) => (
-                                                <SuiteNodeRenderer key={i} node={node} />
+                                                <SuiteNodeRenderer
+                                                    key={i}
+                                                    node={node}
+                                                    onRun={(n) => runTest(n.name)}
+                                                />
                                             ))}
                                         </div>
                                     ) : (

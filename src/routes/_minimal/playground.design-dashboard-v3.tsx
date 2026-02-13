@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
     Activity,
     Book,
@@ -11,8 +11,9 @@ import {
     Plus,
     Search,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { cleanLabel } from "../../docs-viewer/docsUtils";
+import { useEffect, useMemo, useState } from "react";
+import { cleanLabel, buildDocTree, docsModules } from "../../docs-viewer/docsUtils";
+import { DocsSidebar } from "../../docs-viewer/DocsSidebar";
 
 export const Route = createFileRoute("/_minimal/playground/design-dashboard-v3")({
     component: DashboardV4,
@@ -22,13 +23,6 @@ export const Route = createFileRoute("/_minimal/playground/design-dashboard-v3")
         location: "global-nav",
         order: 99,
     },
-});
-
-// --- Data Fetching & Types ---
-
-const docsModules = import.meta.glob("../../../docs/**/*.md", {
-    query: "?raw",
-    import: "default",
 });
 
 interface ProjectStatus {
@@ -54,7 +48,6 @@ function useDashboardData() {
             // 1. Identify Projects & Areas
             const projectPaths = allPaths.filter(p => p.includes("/1-project/"));
             const areaPaths = allPaths.filter(p => p.includes("/2-area/"));
-            const resourcePaths = allPaths.filter(p => p.includes("/3-resource/"));
 
             // 2. Parse Areas (Directories)
             const areaMap = new Set<string>();
@@ -71,7 +64,6 @@ function useDashboardData() {
             setAreas(loadedAreas);
 
             // 3. Find Active Project (Look for 2-STATUS.md)
-            // Prioritize 'os-core-refactoring' if exists
             const statusFile = projectPaths.find(p => p.includes("os-core-refactoring/2-STATUS.md"))
                 || projectPaths.find(p => p.includes("/2-STATUS.md"));
 
@@ -155,11 +147,7 @@ function parseStatusMarkdown(markdown: string) {
         lastUpdated,
         recentLog,
         phase,
-        statusBreakdown: [
-            { layer: "Kernel", state: "done" as const, note: "Core Logic" },
-            { layer: "UI", state: "process" as const, note: "Visuals" },
-            { layer: "Docs", state: "todo" as const, note: "Documentation" }
-        ]
+        statusBreakdown: []
     };
 }
 
@@ -208,7 +196,7 @@ function ProjectPulse({ project }: { project: ProjectStatus }) {
                         <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                         <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Active Focus</span>
                     </div>
-                    <h2 className="text-xl font-serif font-bold text-stone-900">
+                    <h2 className="text-xl font-bold text-stone-900">
                         {project.title}
                     </h2>
                     <div className="flex items-center gap-2 mt-1 text-xs text-stone-500">
@@ -248,11 +236,11 @@ function JournalEntry({ item }: { item: { type: string; title: string; path: str
                     }`}>
                     {item.type}
                 </span>
-                <span className="text-xs text-stone-400 font-serif italic">
+                <span className="text-xs text-stone-400 italic">
                     {item.time}
                 </span>
             </div>
-            <h3 className="text-lg font-serif font-bold text-stone-900 mb-1 group-hover:text-blue-700 transition-colors cursor-pointer truncate">
+            <h3 className="text-lg font-bold text-stone-900 mb-1 group-hover:text-blue-700 transition-colors cursor-pointer truncate">
                 {item.title}
             </h3>
             <div className="flex items-center gap-2 text-xs text-stone-400 font-mono truncate">
@@ -267,7 +255,7 @@ function AreaItem({ area }: { area: { id: string; title: string; subtitle: strin
     return (
         <div className="flex items-center gap-3 p-2 rounded-md hover:bg-stone-100 cursor-pointer transition-colors group">
             <div className="w-8 h-10 bg-stone-200 rounded-sm shadow-sm flex items-center justify-center border-l-2 border-stone-300 group-hover:bg-white transition-colors">
-                <span className="font-serif font-bold text-stone-500 text-xs">{area.id.substring(0, 2)}</span>
+                <span className="font-bold text-stone-500 text-xs">{area.id.substring(0, 2)}</span>
             </div>
             <div>
                 <div className="text-sm font-bold text-stone-800 leading-tight">{area.title}</div>
@@ -277,107 +265,127 @@ function AreaItem({ area }: { area: { id: string; title: string; subtitle: strin
     );
 }
 
+const inbox = [
+    { id: "i1", text: "Review Dashboard Design" },
+    { id: "i2", text: "Check core refactoring status" },
+];
+const todos = [
+    { id: "t1", text: "Fix import analysis bug", done: false, project: "Dev" },
+];
+
 function DashboardV4() {
     const { activeProject, areas, feed, loading } = useDashboardData();
+    const navigate = useNavigate();
+
+    // Sidebar Data
+    const docTree = useMemo(() => buildDocTree(Object.keys(docsModules)), []);
 
     if (loading) return <div className="flex items-center justify-center min-h-screen text-stone-400">Loading Dashboard...</div>;
 
     return (
-        <div className="min-h-screen bg-[#F5F5F4] text-stone-800 font-sans selection:bg-stone-200 overflow-y-auto">
-            {/* Top Navigation / Branding */}
-            <div className="border-b border-stone-200 bg-white sticky top-0 z-10">
-                <div className="max-w-[1600px] mx-auto px-6 h-14 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-stone-900">
-                        <Book className="text-stone-900" size={20} />
-                        <span className="font-serif font-bold text-lg tracking-tight">Interactive OS</span>
-                        <span className="text-stone-300 mx-2 text-sm">/</span>
-                        <span className="text-sm font-medium text-stone-500">The Almanac</span>
-                    </div>
+        <div className="flex h-screen bg-[#F5F5F4] overflow-hidden font-sans selection:bg-stone-200">
+            {/* Sidebar */}
+            <DocsSidebar items={docTree} activePath={undefined} onSelect={(path) => navigate({ to: `/docs/${path}` })} />
 
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center bg-stone-100 px-3 py-1.5 rounded-full border border-stone-200 w-64">
-                            <Search size={14} className="text-stone-400 mr-2" />
-                            <input type="text" placeholder="Search knowledge base..." className="bg-transparent border-none outline-none text-xs w-full" />
-                            <span className="text-[9px] font-bold text-stone-400 border border-stone-200 px-1 rounded bg-white">⌘K</span>
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                {/* Top Navigation / Branding */}
+                <div className="border-b border-stone-200 bg-white z-10 flex-shrink-0">
+                    <div className="max-w-[1600px] mx-auto px-6 h-14 flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-stone-900">
+                            <Book className="text-stone-900" size={20} />
+                            <span className="font-bold text-lg tracking-tight">Interactive OS</span>
+                            <span className="text-stone-300 mx-2 text-sm">/</span>
+                            <span className="text-sm font-medium text-stone-500">The Almanac</span>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center bg-stone-100 px-3 py-1.5 rounded-full border border-stone-200 w-64">
+                                <Search size={14} className="text-stone-400 mr-2" />
+                                <input type="text" placeholder="Search knowledge base..." className="bg-transparent border-none outline-none text-xs w-full" />
+                                <span className="text-[9px] font-bold text-stone-400 border border-stone-200 px-1 rounded bg-white">⌘K</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="max-w-[1600px] mx-auto px-6 py-8 grid grid-cols-12 gap-8">
+                {/* Scrollable Dashboard Content */}
+                <div className="flex-1 overflow-y-auto">
+                    <div className="max-w-[1600px] mx-auto px-6 py-8 grid grid-cols-12 gap-8">
 
-                {/* 1. Left Pane: The Desk (25%) */}
-                <div className="col-span-3 space-y-8">
-                    {/* Inbox */}
-                    <section>
-                        <SectionHeader title="Inbox" icon={Inbox} action={<Plus size={14} className="text-stone-400 hover:text-stone-900 cursor-pointer" />} />
-                        <AlmanacCard>
-                            <div className="p-1">
-                                <InboxItem text="Review Dashboard Design" />
-                                <InboxItem text="Check core refactoring status" />
-                            </div>
-                            <div className="px-3 py-2 bg-stone-50 border-t border-stone-100">
-                                <input type="text" placeholder="Capture a thought..." className="w-full bg-transparent text-sm outline-none placeholder:text-stone-400" />
-                            </div>
-                        </AlmanacCard>
-                    </section>
+                        {/* 1. Left Pane: The Desk (25%) */}
+                        <div className="col-span-3 space-y-8">
+                            {/* Inbox */}
+                            <section>
+                                <SectionHeader title="Inbox" icon={Inbox} action={<Plus size={14} className="text-stone-400 hover:text-stone-900 cursor-pointer" />} />
+                                <AlmanacCard>
+                                    <div className="p-1">
+                                        {inbox.map(item => <InboxItem key={item.id} text={item.text} />)}
+                                    </div>
+                                    <div className="px-3 py-2 bg-stone-50 border-t border-stone-100">
+                                        <input type="text" placeholder="Capture a thought..." className="w-full bg-transparent text-sm outline-none placeholder:text-stone-400" />
+                                    </div>
+                                </AlmanacCard>
+                            </section>
 
-                    {/* Today's Focus */}
-                    <section>
-                        <SectionHeader title="Active Tasks" icon={ListTodo} />
-                        <AlmanacCard>
-                            <div className="p-3 text-sm text-stone-500 text-center">
-                                No active tasks in queue.
-                            </div>
-                        </AlmanacCard>
-                    </section>
-                </div>
-
-                {/* 2. Center Pane: The Journal (50%) */}
-                <div className="col-span-6 space-y-8">
-
-                    {/* Active Project Pulse */}
-                    <section>
-                        <SectionHeader title="Active Project Pulse" icon={Activity} />
-                        {activeProject && <ProjectPulse project={activeProject} />}
-                    </section>
-
-                    {/* The Feed */}
-                    <section>
-                        <div className="flex items-end justify-between mb-4 border-b-2 border-stone-900 pb-2">
-                            <h2 className="text-2xl font-serif font-bold text-stone-900">The Stream</h2>
-                            <div className="flex gap-4 text-sm font-medium text-stone-500">
-                                <button className="text-stone-900 hover:text-stone-900">All</button>
-                                <button className="hover:text-stone-900">Proposals</button>
-                            </div>
+                            {/* Today's Focus */}
+                            <section>
+                                <SectionHeader title="Active Tasks" icon={ListTodo} />
+                                <AlmanacCard>
+                                    <div className="p-3 text-sm text-stone-500 text-center">
+                                        No active tasks in queue.
+                                    </div>
+                                </AlmanacCard>
+                            </section>
                         </div>
-                        <div className="space-y-2">
-                            {feed.map(item => <JournalEntry key={item.id} item={item} />)}
+
+                        {/* 2. Center Pane: The Journal (50%) */}
+                        <div className="col-span-6 space-y-8">
+
+                            {/* Active Project Pulse */}
+                            <section>
+                                <SectionHeader title="Active Project Pulse" icon={Activity} />
+                                {activeProject && <ProjectPulse project={activeProject} />}
+                            </section>
+
+                            {/* The Feed */}
+                            <section>
+                                <div className="flex items-end justify-between mb-4 border-b-2 border-stone-900 pb-2">
+                                    <h2 className="text-2xl font-bold text-stone-900">The Stream</h2>
+                                    <div className="flex gap-4 text-sm font-medium text-stone-500">
+                                        <button className="text-stone-900 hover:text-stone-900">All</button>
+                                        <button className="hover:text-stone-900">Proposals</button>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    {feed.map(item => <JournalEntry key={item.id} item={item} />)}
+                                </div>
+                            </section>
                         </div>
-                    </section>
-                </div>
 
-                {/* 3. Right Pane: The Library (25%) */}
-                <div className="col-span-3 space-y-8">
-                    {/* Areas */}
-                    <section>
-                        <SectionHeader title="Knowledge Base" icon={Book} />
-                        <div className="space-y-2">
-                            {areas.map(area => <AreaItem key={area.id} area={area} />)}
+                        {/* 3. Right Pane: The Library (25%) */}
+                        <div className="col-span-3 space-y-8">
+                            {/* Areas */}
+                            <section>
+                                <SectionHeader title="Knowledge Base" icon={Book} />
+                                <div className="space-y-2">
+                                    {areas.map(area => <AreaItem key={area.id} area={area} />)}
+                                </div>
+                            </section>
+
+                            {/* Resources */}
+                            <section>
+                                <SectionHeader title="Reference" icon={Library} />
+                                <AlmanacCard className="p-3">
+                                    <div className="text-sm text-stone-500">
+                                        Scanning for resources...
+                                    </div>
+                                </AlmanacCard>
+                            </section>
                         </div>
-                    </section>
 
-                    {/* Resources */}
-                    <section>
-                        <SectionHeader title="Reference" icon={Library} />
-                        <AlmanacCard className="p-3">
-                            <div className="text-sm text-stone-500">
-                                Scanning for resources...
-                            </div>
-                        </AlmanacCard>
-                    </section>
+                    </div>
                 </div>
-
             </div>
         </div>
     );
