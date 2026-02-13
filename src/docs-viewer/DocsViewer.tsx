@@ -12,7 +12,13 @@ import {
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
 export function DocsViewer() {
-  const [activePath, setActivePath] = useState<string | undefined>(undefined);
+  // Hash-based routing: URL ↔ selected doc sync
+  const getPathFromHash = () => {
+    const hash = window.location.hash.replace(/^#\/?/, "");
+    return hash || undefined;
+  };
+
+  const [activePath, setActivePath] = useState<string | undefined>(getPathFromHash);
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
@@ -24,11 +30,23 @@ export function DocsViewer() {
   const nextFile =
     currentIndex < allFiles.length - 1 ? allFiles[currentIndex + 1] : null;
 
-  // Auto-select first file on mount
+  // Sync hash → state on popstate (back/forward)
+  useEffect(() => {
+    const onHashChange = () => {
+      setActivePath(getPathFromHash());
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  // Auto-select first file on mount if no hash
   useEffect(() => {
     if (!activePath && allFiles.length > 0) {
       const first = allFiles[0];
-      if (first) setActivePath(first.path);
+      if (first) {
+        window.location.hash = `#/${first.path}`;
+        setActivePath(first.path);
+      }
     }
   }, [activePath, allFiles]);
 
@@ -48,6 +66,7 @@ export function DocsViewer() {
   }, [activePath]);
 
   const handleSelect = (path: string) => {
+    window.location.hash = `#/${path}`;
     setActivePath(path);
   };
 
