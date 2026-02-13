@@ -206,14 +206,14 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       }
     }, []);
 
-    // Reset when value prop becomes empty (e.g., after submit)
+    // Sync value prop → DOM when not editing (enables panel → preview binding)
     const prevValueRef = useRef(value);
     useLayoutEffect(() => {
-      if (innerRef.current && prevValueRef.current !== value && value === "") {
-        innerRef.current.innerText = "";
+      if (innerRef.current && prevValueRef.current !== value && !isEditing) {
+        innerRef.current.innerText = value;
       }
       prevValueRef.current = value;
-    }, [value]);
+    }, [value, isEditing]);
 
     const shouldHaveDOMFocus = mode === "deferred" ? isFocused : isActive;
     useFieldFocus({
@@ -251,9 +251,9 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       "aria-controls": controls,
       "aria-activedescendant":
         target === "virtual" &&
-        controls &&
-        osFocusedItemId &&
-        osFocusedItemId !== name
+          controls &&
+          osFocusedItemId &&
+          osFocusedItemId !== name
           ? osFocusedItemId
           : undefined,
       children: null, // Managed by useFieldDOMSync

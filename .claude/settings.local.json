@@ -11,7 +11,9 @@
       "Bash(wc:*)",
       "Bash(grep:*)",
       "Bash(xargs:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(sort:*)",
+      "Bash(kill:*)"
     ]
   }
 }

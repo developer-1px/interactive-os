@@ -10,11 +10,10 @@
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { NAVIGATE } from "@os/3-commands/navigate";
 import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
 import { kernel } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 // ═════════════════════════════════════════════════════════════════════
 // Helpers
@@ -43,14 +42,20 @@ function setupFocus(zoneId: string, focusedItemId: string) {
     }));
 }
 
-function registerZone(
+/**
+ * Helper: Register a zone mock
+ */
+function _registerZone(
     id: string,
     callbacks: Partial<{
+        // biome-ignore lint/suspicious/noExplicitAny: mock callback
         onAction: any;
+        // biome-ignore lint/suspicious/noExplicitAny: mock callback
         onDismiss: any;
     }>,
 ) {
     ZoneRegistry.register(id, {
+        // biome-ignore lint/suspicious/noExplicitAny: mock config
         config: {} as any,
         element: document.createElement("div"),
         parentId: null,
@@ -83,7 +88,7 @@ describe("Command Palette — overlay lifecycle", () => {
             (e) => e.id === "command-palette",
         );
         expect(entry).toBeDefined();
-        expect(entry!.type).toBe("dialog");
+        expect(entry?.type).toBe("dialog");
     });
 
     it("closes overlay and removes from stack", () => {

@@ -9,10 +9,10 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { Keybindings } from "./keybindings";
+import { Keybindings } from "../../keybindings";
 
 // Side-effect import: registers all OS default keybindings
-import "./osDefaults";
+import "../../osDefaults";
 
 
 import {

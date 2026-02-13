@@ -3,7 +3,7 @@ import { TestBotActions } from "@inspector/testbot";
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 // Playwright spec
 // @ts-expect-error
-import runFocusShowcase from "../../../e2e/focus-showcase/focus-showcase.spec.ts";
+import runFocusShowcase from "./tests/e2e/focus-showcase.spec.ts";
 import { TestGrid } from "../shared/TestLayout";
 import { ActivateTest } from "./tests/ActivateTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";

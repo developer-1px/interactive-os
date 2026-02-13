@@ -143,14 +143,22 @@ export interface DialogTriggerProps {
  *
  * The opening behavior is handled by the parent Dialog (Trigger role="dialog").
  * Clicking any descendant bubbles up to the Trigger's click handler.
+ *
+ * NOTE: Rest props are forwarded to the rendered element because the parent
+ * Trigger uses cloneElement to inject onClick for overlay opening.
  */
-function DialogTrigger({ children, asChild, className }: DialogTriggerProps) {
+function DialogTrigger({
+  children,
+  asChild,
+  className,
+  ...rest
+}: DialogTriggerProps & Record<string, any>) {
   if (asChild) {
     return <>{children}</>;
   }
 
   return (
-    <span className={className} data-dialog-trigger="">
+    <span className={className} data-dialog-trigger="" {...rest}>
       {children}
     </span>
   );

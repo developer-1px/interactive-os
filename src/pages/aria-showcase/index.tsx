@@ -13,23 +13,23 @@ import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
 
 // Playwright specs — Vite plugin wraps these in functions
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runComplexPatterns from "../../../e2e/aria-showcase/complex-patterns.spec.ts";
+import runComplexPatterns from "./tests/e2e/complex-patterns.spec.ts";
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runDisclosure from "../../../e2e/aria-showcase/disclosure.spec.ts";
+import runDisclosure from "./tests/e2e/disclosure.spec.ts";
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runGrid from "../../../e2e/aria-showcase/grid.spec.ts";
+import runGrid from "./tests/e2e/grid.spec.ts";
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runListbox from "../../../e2e/aria-showcase/listbox.spec.ts";
+import runListbox from "./tests/e2e/listbox.spec.ts";
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runMenu from "../../../e2e/aria-showcase/menu.spec.ts";
+import runMenu from "./tests/e2e/menu.spec.ts";
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runRadiogroup from "../../../e2e/aria-showcase/radiogroup.spec.ts";
+import runRadiogroup from "./tests/e2e/radiogroup.spec.ts";
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runTabs from "../../../e2e/aria-showcase/tabs.spec.ts";
+import runTabs from "./tests/e2e/tabs.spec.ts";
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runToolbar from "../../../e2e/aria-showcase/toolbar.spec.ts";
+import runToolbar from "./tests/e2e/toolbar.spec.ts";
 // @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runTree from "../../../e2e/aria-showcase/tree.spec.ts";
+import runTree from "./tests/e2e/tree.spec.ts";
 
 export function AriaShowcasePage() {
   // Register Playwright specs as TestBot suites under "aria-showcase" ID
@@ -486,11 +486,10 @@ function AriaShowcaseContent() {
                 className={`
                                   w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
                                   flex items-center gap-2 transition-all
-                                  ${
-                                    isComboInvalid
-                                      ? "border-red-300 bg-red-50 text-red-700"
-                                      : "border-gray-200 hover:border-gray-300"
-                                  }
+                                  ${isComboInvalid
+                    ? "border-red-300 bg-red-50 text-red-700"
+                    : "border-gray-200 hover:border-gray-300"
+                  }
                                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
                                   aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
                               `}

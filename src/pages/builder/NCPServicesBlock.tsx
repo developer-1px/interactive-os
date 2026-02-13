@@ -49,7 +49,10 @@ export function NCPServicesBlock() {
                   <OS.Field
                     name="ncp-service-category"
                     mode="deferred"
-                    value="Service Category"
+                    value={fields["ncp-service-category"] ?? ""}
+                    onCommit={(val: string) =>
+                      builderUpdateField("ncp-service-category", val)
+                    }
                     className="text-blue-600 font-bold text-xs tracking-widest uppercase"
                   />
                 </Builder.Item>

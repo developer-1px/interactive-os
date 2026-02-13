@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Search } from "lucide-react";
 
 export const Route = createFileRoute("/_todo/search")({
   component: () => (
@@ -6,4 +7,10 @@ export const Route = createFileRoute("/_todo/search")({
       Search Placeholder
     </div>
   ),
+  staticData: {
+    title: "Search",
+    icon: Search,
+    location: "global-nav-bottom",
+    order: 0,
+  },
 });

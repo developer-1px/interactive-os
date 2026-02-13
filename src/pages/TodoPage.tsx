@@ -4,7 +4,7 @@ import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { OS } from "@os/AntigravityOS";
 // Playwright spec — vite-plugin shim transforms for browser replay
 // @ts-expect-error
-import runTodoSpec from "../../e2e/todo/todo.spec.ts";
+import runTodoSpec from "../apps/todo/tests/e2e/todo.spec.ts";
 
 export default function TodoPage() {
   usePlaywrightSpecs("pw-todo", [runTodoSpec]);

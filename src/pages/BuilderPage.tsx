@@ -9,7 +9,7 @@ import {
 import { kernel } from "@/os/kernel";
 // Playwright spec
 // @ts-expect-error
-import runBuilderSpatial from "../../e2e/builder/builder-spatial.spec.ts";
+import runBuilderSpatial from "../apps/builder/tests/e2e/builder-spatial.spec.ts";
 import {
   EditorToolbar,
   NCPFooterBlock,

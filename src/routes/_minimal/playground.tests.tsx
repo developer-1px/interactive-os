@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TestTube2 } from "lucide-react";
+import { TestDashboard } from "@/pages/TestDashboard";
 
 export const Route = createFileRoute("/_minimal/playground/tests")({
-  component: RouteComponent,
+  component: TestDashboard,
+  staticData: {
+    title: "Tests",
+    icon: TestTube2,
+    location: "global-nav",
+    order: 10,
+  },
 });
-
-function RouteComponent() {
-  return <div>Hello "/_minimal/playground/tests"!</div>;
-}

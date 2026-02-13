@@ -86,7 +86,10 @@ export function NCPFooterBlock() {
                   name="footer-desc"
                   mode="deferred"
                   multiline
-                  value="네이버클라우드는 기업의 비즈니스 혁신을 위한\n최적의 클라우드 서비스를 제공합니다."
+                  value={fields["footer-desc"] ?? ""}
+                  onCommit={(val: string) =>
+                    builderUpdateField("footer-desc", val)
+                  }
                   className="text-slate-500 text-sm leading-relaxed max-w-sm mb-6 block data-[focused=true]:bg-slate-800 rounded p-2 -ml-2"
                 />
               </Builder.Item>
@@ -190,7 +193,10 @@ export function NCPFooterBlock() {
               <OS.Field
                 name="footer-copyright"
                 mode="deferred"
-                value={`© ${new Date().getFullYear()} NAVER Cloud Corp. All rights reserved.`}
+                value={fields["footer-copyright"] ?? ""}
+                onCommit={(val: string) =>
+                  builderUpdateField("footer-copyright", val)
+                }
                 className="text-xs text-slate-600 font-medium data-[focused=true]:text-slate-400"
               />
             </Builder.Item>

@@ -50,16 +50,16 @@ Toulmin 논증 모델의 Warrant를 누적해가며, 논리의 빈틈을 통찰�
 - 임시 파일명: `temp-journey.md`
 
 ### Step 3: 통합 및 정리
-1. Journey와 Conclusion을 하나의 파일로 병합:
-   ```
-   Journey (상단)
-   ---
-   Conclusion (하단)
+1. Journey와 Conclusion을 **기계적으로 concat**한다. 절대 내용을 다시 작성하지 않는다:
+   ```bash
+   cat temp-journey.md > final.md
+   echo "\n---\n" >> final.md
+   cat temp-conclusion.md >> final.md
+   rm temp-journey.md temp-conclusion.md
    ```
 2. **최종 파일명**: `YYYY-MMDD-HHmm-{topic-slug}.md`
    - `{topic-slug}`: 논의 주제를 2~3단어로 요약한 kebab-case (예: `discussion-archiving`, `headless-ui-pattern`)
    - **주제 slug는 필수** — 파일명만으로 내용을 알 수 있어야 함
-3. 임시 파일 2개 삭제
 
 ### 디스커션의 운명
 

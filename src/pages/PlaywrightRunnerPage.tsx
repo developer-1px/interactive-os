@@ -7,30 +7,30 @@
 
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 // @ts-expect-error
-import runComplexPatterns from "../../e2e/aria-showcase/complex-patterns.spec.ts";
+import runComplexPatterns from "./aria-showcase/tests/e2e/complex-patterns.spec.ts";
 // @ts-expect-error
-import runDisclosure from "../../e2e/aria-showcase/disclosure.spec.ts";
+import runDisclosure from "./aria-showcase/tests/e2e/disclosure.spec.ts";
 // @ts-expect-error
-import runGrid from "../../e2e/aria-showcase/grid.spec.ts";
+import runGrid from "./aria-showcase/tests/e2e/grid.spec.ts";
 // @ts-expect-error
-import runListbox from "../../e2e/aria-showcase/listbox.spec.ts";
+import runListbox from "./aria-showcase/tests/e2e/listbox.spec.ts";
 // @ts-expect-error
-import runMenu from "../../e2e/aria-showcase/menu.spec.ts";
+import runMenu from "./aria-showcase/tests/e2e/menu.spec.ts";
 // @ts-expect-error
-import runRadiogroup from "../../e2e/aria-showcase/radiogroup.spec.ts";
+import runRadiogroup from "./aria-showcase/tests/e2e/radiogroup.spec.ts";
 // @ts-expect-error
-import runTabs from "../../e2e/aria-showcase/tabs.spec.ts";
+import runTabs from "./aria-showcase/tests/e2e/tabs.spec.ts";
 // @ts-expect-error
-import runToolbar from "../../e2e/aria-showcase/toolbar.spec.ts";
+import runToolbar from "./aria-showcase/tests/e2e/toolbar.spec.ts";
 // @ts-expect-error
-import runTree from "../../e2e/aria-showcase/tree.spec.ts";
+import runTree from "./aria-showcase/tests/e2e/tree.spec.ts";
 // Import all specs — Vite plugin wraps them in functions
 // @ts-expect-error
-import runBuilderSpatial from "../../e2e/builder/builder-spatial.spec.ts";
+import runBuilderSpatial from "../apps/builder/tests/e2e/builder-spatial.spec.ts";
 // @ts-expect-error
-import runFocusShowcase from "../../e2e/focus-showcase/focus-showcase.spec.ts";
+import runFocusShowcase from "./focus-showcase/tests/e2e/focus-showcase.spec.ts";
 // @ts-expect-error
-import runTodo from "../../e2e/todo/todo.spec.ts";
+import runTodo from "../apps/todo/tests/e2e/todo.spec.ts";
 
 export default function PlaywrightRunnerPage() {
   // Register all specs

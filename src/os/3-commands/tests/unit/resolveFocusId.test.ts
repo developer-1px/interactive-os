@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { resolveFocusId } from "./resolveFocusId";
+import { resolveFocusId } from "../../utils/resolveFocusId";
 
 // Helper: 가짜 Command 생성
 const makeCommand = (type: string, payload?: Record<string, any>) => ({

@@ -33,7 +33,10 @@ for (const route of routes) {
 
     // React가 마운트될 때까지 대기 (#root에 자식 요소가 생길 때까지)
     await page.waitForFunction(
-      () => document.querySelector("#root")?.children.length! > 0,
+      () => {
+        const root = document.querySelector("#root");
+        return root && root.children.length > 0;
+      },
       null,
       { timeout: 10000 },
     );

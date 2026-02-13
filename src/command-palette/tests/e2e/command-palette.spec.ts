@@ -14,7 +14,10 @@ test.describe("E2E: Command Palette", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto("/");
         await page.waitForFunction(
-            () => document.querySelector("#root")?.children.length! > 0,
+            () => {
+                const root = document.querySelector("#root");
+                return root && root.children.length > 0;
+            },
             null,
             { timeout: 10000 },
         );

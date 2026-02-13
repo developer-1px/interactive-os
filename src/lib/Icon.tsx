@@ -8,7 +8,22 @@
  */
 
 import {
+  Accessibility,
   Activity,
+  // ... imports
+  Book,
+  // ...
+  Component,
+  // ...
+  FlaskConical,
+  // ...
+  Layout,
+  // ...
+  Package,
+  // ...
+  TestTube2,
+  // ...
+
   // Status
   AlertCircle,
   AlertTriangle,
@@ -120,7 +135,16 @@ import { type ComponentPropsWithoutRef, forwardRef } from "react";
  * Icon name registry
  * Add new icons here as needed
  */
-const icons = {
+export const icons = {
+  // App Specific
+  accessibility: Accessibility,
+  book: Book,
+  component: Component,
+  flask: FlaskConical,
+  layout: Layout,
+  package: Package,
+  "test-tube": TestTube2,
+
   // File/Folder
   folder: Folder,
   "folder-open": FolderOpen,
@@ -237,6 +261,9 @@ const icons = {
 } as const;
 
 export type IconName = keyof typeof icons;
+
+/** All registered icon names — used by matchIconName for fuzzy search */
+export const iconNames: IconName[] = Object.keys(icons) as IconName[];
 
 export interface IconProps
   extends Omit<ComponentPropsWithoutRef<"svg">, "ref"> {

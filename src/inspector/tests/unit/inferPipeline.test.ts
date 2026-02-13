@@ -98,6 +98,7 @@ describe("inferPipeline", () => {
   });
 
   it("null changes: does not throw", () => {
+    // biome-ignore lint/suspicious/noExplicitAny: testing runtime null safety
     const tx = makeTx({ changes: null as any });
     expect(() => inferPipeline(tx)).not.toThrow();
     const statuses = stepStatuses(inferPipeline(tx));
@@ -119,8 +120,9 @@ describe("inferPipeline", () => {
       ],
     });
     const steps = inferPipeline(tx);
-    const stateStep = steps.find((s) => s.name === "State")!;
-    expect(stateStep.detail).toBe("Δ2");
+    const stateStep = steps.find((s) => s.name === "State");
+    expect(stateStep).toBeDefined();
+    expect(stateStep?.detail).toBe("Δ2");
   });
 
   it("detail shows effect count", () => {
@@ -128,8 +130,9 @@ describe("inferPipeline", () => {
       effects: { scroll: true, focus: true, announce: true },
     });
     const steps = inferPipeline(tx);
-    const effectStep = steps.find((s) => s.name === "Effect")!;
-    expect(effectStep.detail).toBe("3 fx");
+    const effectStep = steps.find((s) => s.name === "Effect");
+    expect(effectStep).toBeDefined();
+    expect(effectStep?.detail).toBe("3 fx");
   });
 
   it("detail shows input key", () => {

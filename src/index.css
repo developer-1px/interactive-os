@@ -207,3 +207,54 @@ dialog.os-modal .os-modal-content {
     opacity: 1;
   }
 }
+
+/* ── Nav Tooltip (instant, CSS-only) ────────────────────── */
+.nav-item[data-tooltip] {
+  position: relative;
+}
+
+.nav-item[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%) scale(0.95);
+  padding: 4px 10px;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s, transform 0.1s;
+  z-index: 9999;
+  letter-spacing: 0;
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Arrow */
+.nav-item[data-tooltip]::before {
+  content: "";
+  position: absolute;
+  left: calc(100% + 5px);
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: #1e293b;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+  z-index: 9999;
+}
+
+.nav-item[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+.nav-item[data-tooltip]:hover::before {
+  opacity: 1;
+}

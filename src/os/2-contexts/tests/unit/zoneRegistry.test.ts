@@ -6,8 +6,8 @@
  */
 
 import { afterEach, describe, expect, it } from "vitest";
-import type { ZoneEntry } from "./zoneRegistry";
-import { ZoneRegistry } from "./zoneRegistry";
+import type { ZoneEntry } from "../../zoneRegistry";
+import { ZoneRegistry } from "../../zoneRegistry";
 
 const mockEntry = (overrides: Partial<ZoneEntry> = {}): ZoneEntry => ({
   config: {} as any,

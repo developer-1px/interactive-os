@@ -25,6 +25,8 @@ import { Route as MinimalPlaygroundPlaywrightRouteImport } from './routes/_minim
 import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
 import { Route as MinimalPlaygroundDesignSecondBrainRouteImport } from './routes/_minimal/playground/design-second-brain'
+import { Route as MinimalPlaygroundDesignDesktopDashboardRouteImport } from './routes/_minimal/playground.design-desktop-dashboard'
+import { Route as MinimalPlaygroundDesignDashboardV3RouteImport } from './routes/_minimal/playground.design-dashboard-v3'
 import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
 import { Route as MinimalDocsSplatRouteImport } from './routes/_minimal/docs/$'
 
@@ -109,6 +111,18 @@ const MinimalPlaygroundDesignSecondBrainRoute =
     path: '/playground/design-second-brain',
     getParentRoute: () => MinimalRoute,
   } as any)
+const MinimalPlaygroundDesignDesktopDashboardRoute =
+  MinimalPlaygroundDesignDesktopDashboardRouteImport.update({
+    id: '/playground/design-desktop-dashboard',
+    path: '/playground/design-desktop-dashboard',
+    getParentRoute: () => MinimalRoute,
+  } as any)
+const MinimalPlaygroundDesignDashboardV3Route =
+  MinimalPlaygroundDesignDashboardV3RouteImport.update({
+    id: '/playground/design-dashboard-v3',
+    path: '/playground/design-dashboard-v3',
+    getParentRoute: () => MinimalRoute,
+  } as any)
 const MinimalPlaygroundAriaRoute = MinimalPlaygroundAriaRouteImport.update({
   id: '/playground/aria',
   path: '/playground/aria',
@@ -129,6 +143,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof TodoSettingsRoute
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
+  '/playground/design-desktop-dashboard': typeof MinimalPlaygroundDesignDesktopDashboardRoute
   '/playground/design-second-brain': typeof MinimalPlaygroundDesignSecondBrainRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
@@ -146,6 +162,8 @@ export interface FileRoutesByTo {
   '/settings': typeof TodoSettingsRoute
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
+  '/playground/design-desktop-dashboard': typeof MinimalPlaygroundDesignDesktopDashboardRoute
   '/playground/design-second-brain': typeof MinimalPlaygroundDesignSecondBrainRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
@@ -167,6 +185,8 @@ export interface FileRoutesById {
   '/_todo/': typeof TodoIndexRoute
   '/_minimal/docs/$': typeof MinimalDocsSplatRoute
   '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/_minimal/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
+  '/_minimal/playground/design-desktop-dashboard': typeof MinimalPlaygroundDesignDesktopDashboardRoute
   '/_minimal/playground/design-second-brain': typeof MinimalPlaygroundDesignSecondBrainRoute
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
@@ -187,6 +207,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/docs/$'
     | '/playground/aria'
+    | '/playground/design-dashboard-v3'
+    | '/playground/design-desktop-dashboard'
     | '/playground/design-second-brain'
     | '/playground/focus'
     | '/playground/kernel'
@@ -204,6 +226,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/docs/$'
     | '/playground/aria'
+    | '/playground/design-dashboard-v3'
+    | '/playground/design-desktop-dashboard'
     | '/playground/design-second-brain'
     | '/playground/focus'
     | '/playground/kernel'
@@ -224,6 +248,8 @@ export interface FileRouteTypes {
     | '/_todo/'
     | '/_minimal/docs/$'
     | '/_minimal/playground/aria'
+    | '/_minimal/playground/design-dashboard-v3'
+    | '/_minimal/playground/design-desktop-dashboard'
     | '/_minimal/playground/design-second-brain'
     | '/_minimal/playground/focus'
     | '/_minimal/playground/kernel'
@@ -353,6 +379,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalPlaygroundDesignSecondBrainRouteImport
       parentRoute: typeof MinimalRoute
     }
+    '/_minimal/playground/design-desktop-dashboard': {
+      id: '/_minimal/playground/design-desktop-dashboard'
+      path: '/playground/design-desktop-dashboard'
+      fullPath: '/playground/design-desktop-dashboard'
+      preLoaderRoute: typeof MinimalPlaygroundDesignDesktopDashboardRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/design-dashboard-v3': {
+      id: '/_minimal/playground/design-dashboard-v3'
+      path: '/playground/design-dashboard-v3'
+      fullPath: '/playground/design-dashboard-v3'
+      preLoaderRoute: typeof MinimalPlaygroundDesignDashboardV3RouteImport
+      parentRoute: typeof MinimalRoute
+    }
     '/_minimal/playground/aria': {
       id: '/_minimal/playground/aria'
       path: '/playground/aria'
@@ -388,6 +428,8 @@ interface MinimalRouteChildren {
   MinimalBuilderRoute: typeof MinimalBuilderRoute
   MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
   MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
+  MinimalPlaygroundDesignDashboardV3Route: typeof MinimalPlaygroundDesignDashboardV3Route
+  MinimalPlaygroundDesignDesktopDashboardRoute: typeof MinimalPlaygroundDesignDesktopDashboardRoute
   MinimalPlaygroundDesignSecondBrainRoute: typeof MinimalPlaygroundDesignSecondBrainRoute
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
   MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
@@ -401,6 +443,10 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalBuilderRoute: MinimalBuilderRoute,
   MinimalDocsRoute: MinimalDocsRouteWithChildren,
   MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
+  MinimalPlaygroundDesignDashboardV3Route:
+    MinimalPlaygroundDesignDashboardV3Route,
+  MinimalPlaygroundDesignDesktopDashboardRoute:
+    MinimalPlaygroundDesignDesktopDashboardRoute,
   MinimalPlaygroundDesignSecondBrainRoute:
     MinimalPlaygroundDesignSecondBrainRoute,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,

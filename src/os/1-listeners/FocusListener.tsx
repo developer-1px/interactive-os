@@ -8,7 +8,7 @@
  * Handles: mousedown (pointer focus), focusin (DOM sync), MutationObserver (recovery)
  */
 
-import { EXPAND, FOCUS, RECOVER, SELECT, SYNC_FOCUS } from "@os/3-commands";
+import { FOCUS, RECOVER, SELECT, SYNC_FOCUS } from "@os/3-commands";
 import { kernel } from "@os/kernel";
 import { useEffect } from "react";
 import { sensorGuard } from "../lib/loopGuard";
@@ -107,17 +107,20 @@ function dispatchSelectCommand(e: MouseEvent, itemId: string) {
   if (e.shiftKey) {
     e.preventDefault();
     kernel.dispatch(
+      // biome-ignore lint/suspicious/noExplicitAny: action type definition needs fix
       SELECT({ targetId: itemId, mode: "range" } as any),
       mouseMeta,
     );
   } else if (e.metaKey || e.ctrlKey) {
     e.preventDefault();
     kernel.dispatch(
+      // biome-ignore lint/suspicious/noExplicitAny: action type definition needs fix
       SELECT({ targetId: itemId, mode: "toggle" } as any),
       mouseMeta,
     );
   } else {
     kernel.dispatch(
+      // biome-ignore lint/suspicious/noExplicitAny: action type definition needs fix
       SELECT({ targetId: itemId, mode: "replace" } as any),
       mouseMeta,
     );
@@ -128,7 +131,7 @@ function dispatchSelectCommand(e: MouseEvent, itemId: string) {
 // Event Handlers
 // ═══════════════════════════════════════════════════════════════════
 
-/** MouseDown → FOCUS + SELECT (+ EXPAND for expandable items) */
+/** MouseDown → FOCUS + SELECT */
 function senseMouseDown(e: Event) {
   if (shouldIgnoreEvent(e)) return;
   const me = e as MouseEvent;
@@ -155,11 +158,8 @@ function senseMouseDown(e: Event) {
   // CHECK is keyboard-only (Space key) — matches W3C APG pattern
   dispatchSelectCommand(me, itemId);
 
-  // For expandable items (aria-expanded present), toggle expansion on click
-  const targetEl = document.getElementById(itemId) ?? item;
-  if (targetEl.hasAttribute("aria-expanded")) {
-    kernel.dispatch(EXPAND({ itemId, action: "toggle" }));
-  }
+  // W3C APG: click = focus + select only.
+  // Expand/collapse is handled by ArrowRight/Left/Enter/Space (navigate command).
 }
 
 /** FocusIn → SYNC_FOCUS (state sync only, no DOM effects) */

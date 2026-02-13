@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
     ArrowRight,
     BookOpen,
+    Brain,
     Calendar,
     CheckCircle2,
     Clock,
@@ -259,4 +260,10 @@ export default function DesignSecondBrain() {
 
 export const Route = createFileRoute("/_minimal/playground/design-second-brain")({
     component: DesignSecondBrain,
+    staticData: {
+        title: "Second Brain",
+        icon: Brain,
+        location: "global-nav",
+        order: 11,
+    },
 });

@@ -277,6 +277,7 @@ export function FocusGroup({
 
     // Wait one frame for children to render
     const raf = requestAnimationFrame(() => {
+      if (!containerRef.current) return;
       const firstItem =
         containerRef.current?.querySelector<HTMLElement>("[data-focus-item]");
       if (firstItem) {

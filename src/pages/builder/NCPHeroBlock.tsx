@@ -119,7 +119,10 @@ export function NCPHeroBlock() {
                     <OS.Field
                       name="ncp-hero-portal-title"
                       mode="deferred"
-                      value="Global Scale"
+                      value={fields["ncp-hero-portal-title"] ?? ""}
+                      onCommit={(val: string) =>
+                        builderUpdateField("ncp-hero-portal-title", val)
+                      }
                       as="div"
                       multiline
                       className="text-2xl font-bold text-slate-800 mb-2 block"
@@ -129,7 +132,10 @@ export function NCPHeroBlock() {
                     <OS.Field
                       name="ncp-hero-portal-subtitle"
                       mode="deferred"
-                      value="Hyper-connected infrastructure"
+                      value={fields["ncp-hero-portal-subtitle"] ?? ""}
+                      onCommit={(val: string) =>
+                        builderUpdateField("ncp-hero-portal-subtitle", val)
+                      }
                       as="div"
                       multiline
                       className="text-slate-400 block"
