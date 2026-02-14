@@ -3,7 +3,7 @@
 | 항목 | 상태 |
 |------|------|
 | 시작일 | 2026-02-13 |
-| 현재 Phase | **Phase 2: v5 설계 확정 + PoC 검증 완료** |
+| 현재 Phase | **Phase 3: Production 전환 진행 중** |
 | 선행 프로젝트 | [create-module](../create-module/) (Phase 1 완료) |
 
 ## 진행 상황
@@ -34,12 +34,15 @@
 - [x] 코드 우아함 리뷰 — ⭐⭐⭐⭐⭐
 - [x] v5 Design Specification 작성 (`6-v5-design.md`)
 
-### Phase 3 (Production 전환, 다음)
+### Phase 3 (Production 전환, **진행 중**)
 
-- [ ] P0: `createZone` → `kernel.group` 통합 (scope 버블링 증명)
-- [ ] P1: 기존 `defineApp.ts` (v3)를 v5 API로 교체
-- [ ] P1: Todo v3 앱을 v5 API로 마이그레이션
-- [ ] P2: Builder 앱 v5 마이그레이션
+- [x] P0: kernel when guard 구현 (W26/W33 — `processCommand` 체크)
+- [x] P0: `createZone` → `kernel.group` 통합 (scope 버블링)
+- [x] P1: `defineApp.ts` v5 재작성 (branded types, flat handler, when guard)
+- [x] P1: v3 compat layer — createWidget, useComputed lambda, dialog pattern
+- [x] P1: 140/140 테스트 통과 (Todo v3 30개 포함)
+- [ ] P2: Builder 앱 v5 네이티브 마이그레이션
+- [ ] P2: Todo 앱 v5 네이티브 마이그레이션 (compat → native)
 - [ ] P2: lint rule — 앱 코드 getState() 경고
 - [ ] E2E 테스트 통과 확인
 - [ ] KPI 측정 (최종)
@@ -57,6 +60,8 @@
 | 2026-02-14 17:14 | Red/Blue 합의 | W20' 수정, 합의표 10개 항목 |
 | 2026-02-14 17:25 | v5 최종본 | 26 assertions, ⭐⭐⭐⭐⭐ |
 | 2026-02-14 17:27 | 커밋 + 프로젝트 격상 | Phase 2 완료 |
+| 2026-02-14 17:37 | kernel when guard | `scopedWhenGuards` + `processCommand` 체크 |
+| 2026-02-14 17:44 | defineApp v5 production | v3 compat layer, 140/140 tests |
 
 ## 📚 관련 리소스
 
@@ -64,3 +69,5 @@
 - [v5 Design Spec](./6-v5-design.md) — 확정된 Entity Tree + Warrants + API
 - [Red Team Report](../../0-inbox/2026-02-14_defineApp-v5_RedTeam.md) — 8개 공격 분석
 - [Divide Report](../../0-inbox/2026-0214-1704-divide-v5-redteam.md) — Known/Open 분류
+- [when guard discussion](../../11-discussions/2026-0214-1734-when-guard-kernel.md) — kernel 단일 파이프라인 결정
+
