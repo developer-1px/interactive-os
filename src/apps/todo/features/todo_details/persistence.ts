@@ -43,6 +43,7 @@ export const INITIAL_STATE: AppState = {
     editDraft: "",
     viewMode: "list",
     isInspectorOpen: true,
+    clipboard: null,
   },
   effects: [],
   history: {
