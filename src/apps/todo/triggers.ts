@@ -1,5 +1,5 @@
 /**
- * Todo v3 Triggers — createTrigger usage examples.
+ * Todo v5 Triggers — createTrigger usage examples.
  *
  * Simple triggers: headless button wrappers (OS.Trigger hidden)
  * Compound trigger: Dialog with Trigger/Portal/Content/Dismiss/Confirm

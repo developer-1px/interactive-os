@@ -1,5 +1,5 @@
 /**
- * Sidebar — defineApp/createWidget version.
+ * Sidebar — v5 native (createZone + bind).
  *
  * <TodoSidebar.Zone> with 0 bindings.
  */

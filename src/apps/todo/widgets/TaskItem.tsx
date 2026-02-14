@@ -1,5 +1,5 @@
 /**
- * TaskItem — defineApp/createWidget version.
+ * TaskItem — v5 native (createZone + bind).
  *
  * Uses TodoList.Item (maps to OS.Item).
  * Still uses OS.Trigger for mouse-based actions — Zone handles keyboard.

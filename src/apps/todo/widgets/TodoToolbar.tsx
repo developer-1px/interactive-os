@@ -1,5 +1,5 @@
 /**
- * TodoToolbar — defineApp/createWidget/createTrigger version.
+ * TodoToolbar — v5 native (createTrigger + zone.bind).
  *
  * Simple triggers + ClearDialog compound — zero OS import.
  */

@@ -1,7 +1,7 @@
 /**
- * ListView — defineApp/createWidget version.
+ * ListView — v5 native (createZone + bind).
  *
- * <TodoList.Zone> with 0 bindings — all from createWidget declaration.
+ * <TodoList.Zone> with 0 bindings — all from zone.bind declaration.
  */
 
 import { TodoApp, TodoDraft, TodoList } from "@apps/todo/app";

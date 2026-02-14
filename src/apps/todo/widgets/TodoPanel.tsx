@@ -1,5 +1,5 @@
 /**
- * TodoPanel — defineApp/createWidget version.
+ * TodoPanel — v5 native layout.
  */
 
 import { TodoApp } from "@apps/todo/app";
