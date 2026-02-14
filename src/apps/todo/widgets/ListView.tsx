@@ -4,7 +4,7 @@
  * <TodoList.Zone> with 0 bindings — all from createWidget declaration.
  */
 
-import { TodoApp, TodoDraft, TodoList } from "@apps/todo/app-v3";
+import { TodoApp, TodoDraft, TodoList } from "@apps/todo/app";
 import { selectVisibleTodos } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
 import { OS } from "@os/AntigravityOS";

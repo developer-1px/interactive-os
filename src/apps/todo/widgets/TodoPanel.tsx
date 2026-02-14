@@ -2,7 +2,7 @@
  * TodoPanel — defineApp/createWidget version.
  */
 
-import { TodoApp } from "@apps/todo/app-v3";
+import { TodoApp } from "@apps/todo/app";
 import { ListView } from "@apps/todo/widgets/ListView";
 import { TodoToolbarView } from "@apps/todo/widgets/TodoToolbar";
 

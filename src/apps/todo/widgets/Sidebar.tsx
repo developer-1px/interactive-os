@@ -4,7 +4,7 @@
  * <TodoSidebar.Zone> with 0 bindings.
  */
 
-import { TodoApp, TodoSidebar } from "@apps/todo/app-v3";
+import { TodoApp, TodoSidebar } from "@apps/todo/app";
 import { Kbd } from "@inspector/shell/components/Kbd";
 import { OS } from "@os/AntigravityOS";
 import {

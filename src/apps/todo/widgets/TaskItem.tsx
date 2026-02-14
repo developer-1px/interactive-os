@@ -6,7 +6,7 @@
  */
 
 import type { Todo } from "@apps/todo/model/types";
-import { TodoEdit, TodoList } from "@apps/todo/app-v3";
+import { TodoEdit, TodoList } from "@apps/todo/app";
 import { OS } from "@os/AntigravityOS";
 import {
   ArrowDown,

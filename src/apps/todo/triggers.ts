@@ -8,7 +8,7 @@
  * completing the "React knows nothing about OS" promise.
  */
 
-import { TodoApp, TodoList, TodoToolbar } from "@apps/todo/app-v3";
+import { TodoApp, TodoList, TodoToolbar } from "@apps/todo/app";
 
 // ═══════════════════════════════════════════════════════════════════
 // Simple Triggers — headless button components

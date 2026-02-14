@@ -4,7 +4,7 @@
  * Simple triggers + ClearDialog compound — zero OS import.
  */
 
-import { TodoApp, TodoList, TodoToolbar } from "@apps/todo/app-v3";
+import { TodoApp, TodoList, TodoToolbar } from "@apps/todo/app";
 import { ClearDialog } from "@apps/todo/triggers";
 import {
   AlertTriangle,

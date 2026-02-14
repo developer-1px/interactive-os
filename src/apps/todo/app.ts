@@ -533,3 +533,60 @@ export const TodoToolbarUI = toolbarZone.bind({
   role: "toolbar",
   keybindings: [{ key: "Meta+Shift+V", command: toggleView }],
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// v3 Compat Aliases — widget imports use these names
+// Allows: import { TodoList, TodoSidebar } from "@apps/todo/app"
+// ═══════════════════════════════════════════════════════════════════
+
+export const TodoList = {
+  ...TodoListUI,
+  commands: {
+    toggleTodo,
+    deleteTodo,
+    startEdit,
+    moveItemUp,
+    moveItemDown,
+    duplicateTodo,
+    copyTodo,
+    cutTodo,
+    pasteTodo,
+    undoCommand,
+    redoCommand,
+  },
+};
+
+export const TodoSidebar = {
+  ...TodoSidebarUI,
+  commands: {
+    selectCategory,
+    moveCategoryUp,
+    moveCategoryDown,
+  },
+};
+
+export const TodoDraft = {
+  ...TodoDraftUI,
+  commands: {
+    syncDraft,
+    addTodo,
+  },
+};
+
+export const TodoEdit = {
+  ...TodoEditUI,
+  commands: {
+    syncEditDraft,
+    updateTodoText,
+    cancelEdit,
+  },
+};
+
+export const TodoToolbar = {
+  ...TodoToolbarUI,
+  commands: {
+    toggleView,
+    clearCompleted,
+  },
+};
+
