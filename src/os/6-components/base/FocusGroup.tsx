@@ -173,6 +173,56 @@ const INIT_ZONE = kernel.defineCommand(
 );
 
 // ═══════════════════════════════════════════════════════════════════
+// ZoneRegistry Entry Builder
+// ═══════════════════════════════════════════════════════════════════
+
+function setIfDefined(
+  entry: Record<string, unknown>,
+  key: string,
+  value: unknown,
+) {
+  if (value !== undefined) entry[key] = value;
+}
+
+function buildZoneEntry(
+  config: FocusGroupConfig,
+  element: HTMLDivElement,
+  props: {
+    role?: ZoneRole;
+    parentId: string | null;
+    onDismiss?: BaseCommand;
+    onAction?: BaseCommand;
+    onSelect?: BaseCommand;
+    onCheck?: BaseCommand;
+    onDelete?: BaseCommand;
+    onMoveUp?: BaseCommand;
+    onMoveDown?: BaseCommand;
+    onCopy?: BaseCommand;
+    onCut?: BaseCommand;
+    onPaste?: BaseCommand;
+    onUndo?: BaseCommand;
+    onRedo?: BaseCommand;
+  },
+): Record<string, unknown> {
+  const entry: Record<string, unknown> = { config, element };
+  setIfDefined(entry, "role", props.role);
+  if (props.parentId != null) entry.parentId = props.parentId;
+  setIfDefined(entry, "onDismiss", props.onDismiss);
+  setIfDefined(entry, "onAction", props.onAction);
+  setIfDefined(entry, "onSelect", props.onSelect);
+  setIfDefined(entry, "onCheck", props.onCheck);
+  setIfDefined(entry, "onDelete", props.onDelete);
+  setIfDefined(entry, "onMoveUp", props.onMoveUp);
+  setIfDefined(entry, "onMoveDown", props.onMoveDown);
+  setIfDefined(entry, "onCopy", props.onCopy);
+  setIfDefined(entry, "onCut", props.onCut);
+  setIfDefined(entry, "onPaste", props.onPaste);
+  setIfDefined(entry, "onUndo", props.onUndo);
+  setIfDefined(entry, "onRedo", props.onRedo);
+  return entry;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
@@ -245,30 +295,48 @@ export function FocusGroup({
 
     // Register in ZoneRegistry (for context providers)
     if (containerRef.current) {
-      ZoneRegistry.register(groupId, {
-        config,
-        element: containerRef.current,
-        ...(role !== undefined ? { role } : {}),
-        parentId,
-        ...(onDismiss !== undefined ? { onDismiss } : {}),
-        ...(_onAction !== undefined ? { onAction: _onAction } : {}),
-        ...(_onSelect !== undefined ? { onSelect: _onSelect } : {}),
-        ...(_onCheck !== undefined ? { onCheck: _onCheck } : {}),
-        ...(_onDelete !== undefined ? { onDelete: _onDelete } : {}),
-        ...(_onMoveUp !== undefined ? { onMoveUp: _onMoveUp } : {}),
-        ...(_onMoveDown !== undefined ? { onMoveDown: _onMoveDown } : {}),
-        ...(_onCopy !== undefined ? { onCopy: _onCopy } : {}),
-        ...(_onCut !== undefined ? { onCut: _onCut } : {}),
-        ...(_onPaste !== undefined ? { onPaste: _onPaste } : {}),
-        ...(_onUndo !== undefined ? { onUndo: _onUndo } : {}),
-        ...(_onRedo !== undefined ? { onRedo: _onRedo } : {}),
-      });
+      ZoneRegistry.register(
+        groupId,
+        buildZoneEntry(config, containerRef.current, {
+          role,
+          parentId,
+          onDismiss,
+          onAction: _onAction,
+          onSelect: _onSelect,
+          onCheck: _onCheck,
+          onDelete: _onDelete,
+          onMoveUp: _onMoveUp,
+          onMoveDown: _onMoveDown,
+          onCopy: _onCopy,
+          onCut: _onCut,
+          onPaste: _onPaste,
+          onUndo: _onUndo,
+          onRedo: _onRedo,
+        }),
+      );
     }
 
     return () => {
       ZoneRegistry.unregister(groupId);
     };
-  }, [groupId, config, role, parentId, onDismiss]);
+  }, [
+    groupId,
+    config,
+    role,
+    parentId,
+    onDismiss,
+    _onAction,
+    _onSelect,
+    _onCheck,
+    _onDelete,
+    _onMoveUp,
+    _onMoveDown,
+    _onCopy,
+    _onCut,
+    _onPaste,
+    _onUndo,
+    _onRedo,
+  ]);
 
   // --- AutoFocus: focus first item on mount when config.project.autoFocus ---
   useEffect(() => {
@@ -292,15 +360,13 @@ export function FocusGroup({
 
   // --- Auto Focus Stack for dialog/alertdialog ---
   // When autoFocus is true, push focus stack on mount and pop on unmount
-  // --- Auto Focus Stack for dialog/alertdialog ---
-  // When autoFocus is true, push focus stack on mount and pop on unmount
   useLayoutEffect(() => {
     if (!config.project.autoFocus) return;
     kernel.dispatch(STACK_PUSH());
     return () => {
       kernel.dispatch(STACK_POP());
     };
-  }, [groupId, config.project.autoFocus]);
+  }, [config.project.autoFocus]);
 
   // --- Is Active ---
   const activeZoneId = kernel.useComputed((s) => s.os.focus.activeZoneId);
