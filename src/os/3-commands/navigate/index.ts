@@ -37,12 +37,6 @@ export const NAVIGATE = kernel.defineCommand(
     const itemRects: Map<string, DOMRect> = ctx.inject(DOM_RECTS);
     const config = ctx.inject(ZONE_CONFIG);
 
-    console.log("[NAVIGATE] Injected:", {
-      items: items.length,
-      rects: itemRects.size,
-      config,
-    });
-
     if (items.length === 0) return;
 
     // W3C Tree Pattern: ArrowRight/ArrowLeft handle expand/collapse

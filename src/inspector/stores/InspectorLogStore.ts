@@ -39,7 +39,7 @@ let state: TransactionLogState = {
 const listeners = new Set<() => void>();
 
 function emit() {
-  listeners.forEach((fn) => fn());
+  for (const fn of listeners) fn();
 }
 
 function subscribe(fn: () => void) {
@@ -110,41 +110,4 @@ export const TransactionLog = {
   add: (txn: Omit<Transaction, "id" | "timestamp">) => add(txn),
   clear: () => clear(),
   getAll: () => getSnapshot().transactions,
-};
-
-// ═══════════════════════════════════════════════════════════════════
-// Legacy Compat — 기존 InspectorLog.log() 호출자를 위한 no-op
-// 완전 마이그레이션 후 제거
-// ═══════════════════════════════════════════════════════════════════
-
-/** @deprecated Use TransactionLog.add() instead */
-export type LogType = "INPUT" | "COMMAND" | "STATE" | "EFFECT";
-
-/** @deprecated Use Transaction instead */
-export interface LogEntry {
-  id: number;
-  type: LogType;
-  title: string;
-  details?: any;
-  timestamp: number;
-  icon?: string;
-  inputSource?: "keyboard" | "mouse";
-  source?: string;
-}
-
-/** @deprecated — Individual log calls will be removed. Use TransactionLog. */
-export const InspectorLog = {
-  log: (_entry: Omit<LogEntry, "id" | "timestamp">) => {
-    // no-op: individual logs are replaced by transactions
-  },
-  clear: () => TransactionLog.clear(),
-};
-
-/** @deprecated Use useTransactionLogStore instead */
-export const useInspectorLogStore = {
-  getState: () => ({
-    logs: [] as LogEntry[],
-    clear: TransactionLog.clear,
-    addLog: (_entry: any) => {},
-  }),
 };

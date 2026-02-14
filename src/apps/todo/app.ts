@@ -26,8 +26,8 @@ import {
   selectVisibleTodos,
 } from "@apps/todo/selectors";
 import { produce } from "immer";
-import { FOCUS } from "@/os/3-commands/focus/focus";
 import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
+import { FOCUS } from "@/os/3-commands/focus/focus";
 import { defineApp } from "@/os/defineApp";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -66,11 +66,17 @@ export const hasClipboard = TodoApp.condition(
 // Selectors
 // ═══════════════════════════════════════════════════════════════════
 
-export const visibleTodos = TodoApp.selector("visibleTodos", selectVisibleTodos);
+export const visibleTodos = TodoApp.selector(
+  "visibleTodos",
+  selectVisibleTodos,
+);
 export const categories = TodoApp.selector("categories", selectCategories);
 export const stats = TodoApp.selector("stats", selectStats);
 export const editingTodo = TodoApp.selector("editingTodo", selectEditingTodo);
-export const todosByCategory = TodoApp.selector("todosByCategory", selectTodosByCategory);
+export const todosByCategory = TodoApp.selector(
+  "todosByCategory",
+  selectTodosByCategory,
+);
 
 // ═══════════════════════════════════════════════════════════════════
 // TodoList Zone — listbox with CRUD, clipboard, ordering
@@ -83,9 +89,7 @@ export const toggleTodo = listZone.command(
   (ctx, payload: { id: number | string }) => ({
     state: produce(ctx.state, (draft) => {
       const targetId =
-        typeof payload.id === "string"
-          ? parseInt(payload.id, 10)
-          : payload.id;
+        typeof payload.id === "string" ? parseInt(payload.id, 10) : payload.id;
       if (!targetId || Number.isNaN(targetId)) return;
       const todo = draft.data.todos[targetId];
       if (todo) todo.completed = !todo.completed;
@@ -140,9 +144,9 @@ export const moveItemUp = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+        draft.data.todoOrder[globalSwapIdx]!,
+        draft.data.todoOrder[globalTargetIdx]!,
+      ];
     }),
   }),
 );
@@ -167,9 +171,9 @@ export const moveItemDown = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+        draft.data.todoOrder[globalSwapIdx]!,
+        draft.data.todoOrder[globalTargetIdx]!,
+      ];
     }),
   }),
 );
@@ -271,8 +275,8 @@ export const pasteTodo = listZone.command(
 export const undoCommand = listZone.command(
   "undo",
   (ctx) => {
-    if (!ctx.state.history?.past?.length) return { state: ctx.state };
-    const entry = ctx.state.history.past[ctx.state.history.past.length - 1]!;
+    // when: canUndo guarantees past.length > 0
+    const entry = ctx.state.history.past.at(-1)!;
     const focusTarget = entry.focusedItemId
       ? String(entry.focusedItemId)
       : undefined;
@@ -285,8 +289,7 @@ export const undoCommand = listZone.command(
           timestamp: Date.now(),
           snapshot: currentWithoutHistory,
         });
-        const popped =
-          ctx.state.history.past[ctx.state.history.past.length - 1]!;
+        const popped = ctx.state.history.past.at(-2);
         if (popped?.snapshot) {
           const snapshot = popped.snapshot;
           if (snapshot.data) draft.data = snapshot.data;
@@ -304,9 +307,8 @@ export const undoCommand = listZone.command(
 export const redoCommand = listZone.command(
   "redo",
   (ctx) => {
-    if (!ctx.state.history?.future?.length) return { state: ctx.state };
-    const entry =
-      ctx.state.history.future[ctx.state.history.future.length - 1]!;
+    // when: canRedo guarantees future.length > 0
+    const entry = ctx.state.history.future.at(-1)!;
     const focusTarget = entry.focusedItemId
       ? String(entry.focusedItemId)
       : undefined;
@@ -361,28 +363,24 @@ export const selectCategory = sidebarZone.command(
     const id = payload?.id;
     if (!id || typeof id !== "string") return { state: ctx.state };
     return {
-      state: {
-        ...ctx.state,
-        ui: { ...ctx.state.ui, selectedCategoryId: id },
-      },
+      state: produce(ctx.state, (draft) => {
+        draft.ui.selectedCategoryId = id;
+      }),
     };
   },
 );
 
-export const moveCategoryUp = sidebarZone.command(
-  "moveCategoryUp",
-  (ctx) => ({
-    state: produce(ctx.state, (draft) => {
-      const id = ctx.state.ui.selectedCategoryId;
-      const idx = draft.data.categoryOrder.indexOf(id);
-      if (idx > 0) {
-        const prev = draft.data.categoryOrder[idx - 1]!;
-        draft.data.categoryOrder[idx - 1] = id;
-        draft.data.categoryOrder[idx] = prev;
-      }
-    }),
+export const moveCategoryUp = sidebarZone.command("moveCategoryUp", (ctx) => ({
+  state: produce(ctx.state, (draft) => {
+    const id = ctx.state.ui.selectedCategoryId;
+    const idx = draft.data.categoryOrder.indexOf(id);
+    if (idx > 0) {
+      const prev = draft.data.categoryOrder[idx - 1]!;
+      draft.data.categoryOrder[idx - 1] = id;
+      draft.data.categoryOrder[idx] = prev;
+    }
   }),
-);
+}));
 
 export const moveCategoryDown = sidebarZone.command(
   "moveCategoryDown",
@@ -415,7 +413,9 @@ const draftZone = TodoApp.createZone("draft");
 export const syncDraft = draftZone.command(
   "syncDraft",
   (ctx, payload: { text: string }) => ({
-    state: { ...ctx.state, ui: { ...ctx.state.ui, draft: payload.text } },
+    state: produce(ctx.state, (draft) => {
+      draft.ui.draft = payload.text;
+    }),
   }),
 );
 
@@ -457,10 +457,9 @@ const editZone = TodoApp.createZone("edit");
 export const syncEditDraft = editZone.command(
   "syncEditDraft",
   (ctx, payload: { text: string }) => ({
-    state: {
-      ...ctx.state,
-      ui: { ...ctx.state.ui, editDraft: payload.text },
-    },
+    state: produce(ctx.state, (draft) => {
+      draft.ui.editDraft = payload.text;
+    }),
   }),
 );
 
@@ -505,34 +504,24 @@ export const TodoEditUI = editZone.bind({
 
 const toolbarZone = TodoApp.createZone("toolbar");
 
-export const toggleView = toolbarZone.command(
-  "toggleView",
-  (ctx) => ({
-    state: {
-      ...ctx.state,
-      ui: {
-        ...ctx.state.ui,
-        viewMode: ctx.state.ui.viewMode === "board" ? "list" : "board",
-      },
-    },
+export const toggleView = toolbarZone.command("toggleView", (ctx) => ({
+  state: produce(ctx.state, (draft) => {
+    draft.ui.viewMode = ctx.state.ui.viewMode === "board" ? "list" : "board";
   }),
-);
+}));
 
-export const clearCompleted = toolbarZone.command(
-  "clearCompleted",
-  (ctx) => ({
-    state: produce(ctx.state, (draft) => {
-      const completedIds = Object.values(draft.data.todos)
-        .filter((t) => t.completed)
-        .map((t) => t.id);
-      completedIds.forEach((id) => {
-        delete draft.data.todos[id];
-        const idx = draft.data.todoOrder.indexOf(id);
-        if (idx !== -1) draft.data.todoOrder.splice(idx, 1);
-      });
-    }),
+export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => ({
+  state: produce(ctx.state, (draft) => {
+    const completedIds = Object.values(draft.data.todos)
+      .filter((t) => t.completed)
+      .map((t) => t.id);
+    completedIds.forEach((id) => {
+      delete draft.data.todos[id];
+      const idx = draft.data.todoOrder.indexOf(id);
+      if (idx !== -1) draft.data.todoOrder.splice(idx, 1);
+    });
   }),
-);
+}));
 
 export const TodoToolbarUI = toolbarZone.bind({
   role: "toolbar",
@@ -594,4 +583,3 @@ export const TodoToolbar = {
     clearCompleted,
   },
 };
-

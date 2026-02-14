@@ -237,19 +237,6 @@ export const resolveCorner: NavigationStrategy = (
     cols.length,
   );
 
-  console.log("[CORNER] Resolve:", {
-    current: currentId,
-    direction,
-    candidates: candidates.length,
-    currentRect: currentRect ? toRect(currentRect) : null,
-    targetId: target?.id,
-    gridSize: { rows: rows.length, cols: cols.length },
-    currentEntry: {
-      cols: [currentEntry.startCol, currentEntry.endCol],
-      rows: [currentEntry.startRow, currentEntry.endRow],
-    },
-  });
-
   return {
     targetId: target?.id ?? currentId,
     stickyX: null,

@@ -21,11 +21,9 @@ import { ZoneRegistry } from "./zoneRegistry";
 
 export const DOM_ITEMS = kernel.defineContext("dom-items", (): string[] => {
   const zoneId = kernel.getState().os.focus.activeZoneId;
-  console.log("[DOM_ITEMS] Active zone:", zoneId);
   if (!zoneId) return [];
 
   const entry = ZoneRegistry.get(zoneId);
-  console.log("[DOM_ITEMS] Zone entry:", entry);
   if (!entry?.element) return [];
 
   const items: string[] = [];
@@ -36,7 +34,6 @@ export const DOM_ITEMS = kernel.defineContext("dom-items", (): string[] => {
     const id = el.getAttribute("data-item-id");
     if (id) items.push(id);
   });
-  console.log("[DOM_ITEMS] Found items:", items.length, items);
   return items;
 });
 

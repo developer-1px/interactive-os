@@ -7,9 +7,17 @@ import {
   Outlet,
   useRouterState,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import React from "react";
 import { CommandPalette } from "@/command-palette/CommandPalette";
 import { GlobalNav } from "@/components/GlobalNav";
+
+const TanStackRouterDevtools = import.meta.env.DEV
+  ? React.lazy(() =>
+      import("@tanstack/router-devtools").then((m) => ({
+        default: m.TanStackRouterDevtools,
+      })),
+    )
+  : () => null;
 
 // Plugin registrations (side-effect imports)
 import "@inspector/register";
