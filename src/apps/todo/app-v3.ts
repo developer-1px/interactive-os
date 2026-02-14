@@ -1,4 +1,8 @@
 /**
+ * @deprecated Use app.ts (v5 native) instead.
+ * This file is kept only for todo.v3.test.ts backward compat tests.
+ * Production code now imports from @apps/todo/app.
+ *
  * Todo App v3 — defineApp + createWidget based.
  *
  * App owns state. Each widget declares its Zone + commands.
@@ -111,9 +115,9 @@ export const TodoList = TodoApp.createWidget("list", (define) => {
           draft.data.todoOrder[globalTargetIdx],
           draft.data.todoOrder[globalSwapIdx],
         ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+            draft.data.todoOrder[globalSwapIdx]!,
+            draft.data.todoOrder[globalTargetIdx]!,
+          ];
       }),
     }),
   );
@@ -139,9 +143,9 @@ export const TodoList = TodoApp.createWidget("list", (define) => {
           draft.data.todoOrder[globalTargetIdx],
           draft.data.todoOrder[globalSwapIdx],
         ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+            draft.data.todoOrder[globalSwapIdx]!,
+            draft.data.todoOrder[globalTargetIdx]!,
+          ];
       }),
     }),
   );
