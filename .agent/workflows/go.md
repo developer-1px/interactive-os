@@ -20,7 +20,7 @@ description: 자율 실행 에이전트 루프. Known은 실행, Open은 보고�
    - **Known** (정답이 있는 것) → 바로 실행. 멈추지 않는다.
    - **LLM이 잘 아는 것** → /resources 등으로 답을 찾아서 실행.
    - **Constrained** (선택지가 있는 것) → 최선의 선택지를 고르고 실행. 근거를 기록.
-   - 실행 중 /fix (smoke/type/build)로 주기적 검증.
+   - 실행 중 `/verify`로 주기적 검증 (type → unit → e2e → build).
 
 3. **멈춤 — 의사결정 필요**
    - **Open** (정답이 없는 것) → /inbox로 보고서 작성.

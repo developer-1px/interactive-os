@@ -15,9 +15,8 @@ description: 코드 정리, lazy 주석 제거, lint/타입 무결성 확인 후
     - Run `npx knip` to detect unused exports, unused dependencies, and orphan files.
     - Review the output and remove or re-export any genuinely unused items.
     - If a reported item is intentionally used (e.g. side-effect imports, global registrations), add it to `knip.json` ignoreExports or entry config.
-4. **Build Verification**:
-    - // turbo
-    - Run `npm run build` to perform a final production-ready build check.
+4. **검증 게이트**
+   - `/verify` 워크플로우를 실행한다 (type → unit → e2e → build).
 5. **Completion Report**:
     - Summarize the changes made.
     - Confirm that the code is now refined and ready for commit.

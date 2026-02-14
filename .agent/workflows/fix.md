@@ -32,31 +32,23 @@ description: LLM 산출물의 well-formedness를 intent-preserving하게 보장�
 
 ### 절차
 
-1. **정적 검증**
-   - `npx tsc --noEmit` 실행 → 에러 목록 수집
+1. **검증 게이트 실행**
+   - `/verify` 워크플로우를 실행한다 (type → unit → e2e → build).
 
-2. **빌드 검증**
-   - `npm run build` 실행 → 에러 목록 수집
-
-3. **런타임 검증 — Playwright Smoke Test**
-   - `npx playwright test src/tests/e2e/smoke.spec.ts` 실행
-   - smoke.spec.ts는 `routeTree.gen.ts`의 `FileRoutesByFullPath`에서 라우트를 자동 추출
-   - 각 라우트를 방문하여 `pageerror` 이벤트로 React 마운트 시 런타임 에러를 캡처
-
-4. **에러 분류**
+2. **에러 분류**
    - 수집된 에러가 **well-formedness 에러**(malformed)인지 판단한다.
    - well-formedness: import 해석 실패, undefined 참조, 중복 선언, 오타 등
    - correctness: 로직 오류, 설계 결함, 비즈니스 로직 버그 등
 
-5. **Intent-preserving 수정**
+3. **Intent-preserving 수정**
    - well-formedness 에러만 수정한다.
-   - 수정 후 1~3단계를 재실행하여 확인한다 (루프).
+   - 수정 후 `/verify`를 재실행하여 확인한다 (루프).
 
-6. **범위 밖 에러 보고**
+4. **범위 밖 에러 보고**
    - Form으로 고칠 수 없는 에러(correctness 문제)가 남으면:
    - "이 에러는 well-formedness 범위 밖입니다. `/issue`로 등록하세요." 보고하고 멈춘다.
 
-7. **완료**
+5. **완료**
    - 모든 검증 통과 시: `✅ well-formedness 확인 완료` 보고.
 
 ### 호출 관계

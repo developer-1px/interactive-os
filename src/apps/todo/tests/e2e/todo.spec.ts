@@ -18,7 +18,7 @@ import { expect, test } from "@playwright/test";
  */
 
 const DRAFT = '[data-placeholder="Add a new task..."]';
-const LISTVIEW = '[role="listbox"]#listView';
+const LISTVIEW = '[role="listbox"]#list';
 const SIDEBAR = '[role="listbox"]#sidebar';
 
 /** Get the focused item in listView (excluding DRAFT) */
