@@ -26,7 +26,7 @@
  */
 
 import { createKernel, defineScope } from "@kernel";
-import type { CommandFactory, ScopeToken } from "@kernel/core/tokens";
+import type { BaseCommand, CommandFactory, ScopeToken } from "@kernel/core/tokens";
 import { OS } from "@os/AntigravityOS";
 import { Keybindings as KeybindingsRegistry } from "@os/keymaps/keybindings";
 import React, { type ReactNode } from "react";
@@ -62,7 +62,7 @@ export type Selector<S, T> = {
 // ═══════════════════════════════════════════════════════════════════
 
 type CommandContext<S> = { readonly state: S };
-type HandlerResult<S> = { state: S; dispatch?: any } | void;
+type HandlerResult<S> = { state: S; dispatch?: BaseCommand | BaseCommand[] } | void;
 
 /** Flat handler: (ctx, payload) => result */
 type FlatHandler<S, P> = (ctx: CommandContext<S>, payload: P) => HandlerResult<S>;
@@ -73,27 +73,27 @@ type FlatHandler<S, P> = (ctx: CommandContext<S>, payload: P) => HandlerResult<S
 
 interface ZoneBindings {
   role: string;
-  onCheck?: CommandFactory<any, any>;
-  onAction?: CommandFactory<any, any>;
-  onDelete?: CommandFactory<any, any>;
-  onCopy?: CommandFactory<any, any>;
-  onCut?: CommandFactory<any, any>;
-  onPaste?: CommandFactory<any, any>;
-  onMoveUp?: CommandFactory<any, any>;
-  onMoveDown?: CommandFactory<any, any>;
-  onUndo?: CommandFactory<any, any>;
-  onRedo?: CommandFactory<any, any>;
+  onCheck?: CommandFactory<string, any>;
+  onAction?: CommandFactory<string, any>;
+  onDelete?: CommandFactory<string, any>;
+  onCopy?: CommandFactory<string, any>;
+  onCut?: CommandFactory<string, any>;
+  onPaste?: CommandFactory<string, any>;
+  onMoveUp?: CommandFactory<string, any>;
+  onMoveDown?: CommandFactory<string, any>;
+  onUndo?: CommandFactory<string, any>;
+  onRedo?: CommandFactory<string, any>;
 }
 
 interface FieldBindings {
-  onChange?: CommandFactory<any, any>;
-  onSubmit?: CommandFactory<any, any>;
-  onCancel?: CommandFactory<any, any>;
+  onChange?: CommandFactory<string, any>;
+  onSubmit?: CommandFactory<string, any>;
+  onCancel?: CommandFactory<string, any>;
 }
 
 interface KeybindingEntry<S> {
   key: string;
-  command: CommandFactory<any, any>;
+  command: CommandFactory<string, any>;
   when?: Condition<S>;
 }
 
@@ -147,7 +147,7 @@ export interface ZoneHandle<S> {
 
 export interface TestInstance<S> {
   readonly state: S;
-  dispatch(command: any): boolean;
+  dispatch(command: BaseCommand): boolean;
   reset(): void;
   evaluate(condition: Condition<S>): boolean;
   select<T>(selector: Selector<S, T>): T;
