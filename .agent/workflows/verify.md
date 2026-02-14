@@ -11,6 +11,10 @@ description: 코드 변경 후 반드시 실행하는 4단계 검증 게이트. 
 
 // turbo-all
 
+0. **환경 확인**
+   - `/ready` 워크플로우를 실행한다 (App 5555 + Docs 4444 health check & 복구).
+   - 두 서버 모두 정상 응답할 때까지 다음 단계로 진행하지 않는다.
+
 1. **Type Check**
    - `npx tsc --noEmit`
    - 0 errors 확인.
@@ -21,6 +25,7 @@ description: 코드 변경 후 반드시 실행하는 4단계 검증 게이트. 
 
 3. **E2E Test**
    - `npx playwright test`
+   - 30초 이상 출력 없이 멈추면 dev 서버 상태를 재확인한다 (Step 0).
    - 전체 통과 확인. 실패 시 원인 분석.
    - E2E 실패가 코드 변경의 파급이면 수정한다.
    - E2E 실패가 기존 문제면 명시적으로 보고한다.

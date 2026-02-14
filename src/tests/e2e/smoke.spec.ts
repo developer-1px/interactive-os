@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 /**
@@ -14,7 +15,8 @@ import { expect, test } from "@playwright/test";
  */
 
 // routeTree.gen.ts에서 fullPath 목록을 자동 추출
-const genFilePath = path.resolve(__dirname, "../routeTree.gen.ts");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const genFilePath = path.resolve(__dirname, "../../routeTree.gen.ts");
 const genFile = fs.readFileSync(genFilePath, "utf-8");
 const fullPathBlock = genFile.match(
   /interface FileRoutesByFullPath \{([\s\S]*?)\}/,

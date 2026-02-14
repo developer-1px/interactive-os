@@ -21,6 +21,7 @@ description: LLM 산출물의 well-formedness를 intent-preserving하게 보장�
 - undefined 참조를 올바른 참조로 수정
 - 누락된 파일 생성 (빈 stub)
 - 오타 수정 (변수명, 함수명)
+- **lazy 주석으로 생략된 코드 복원** (`// ... remains the same ...` 등)
 
 ❌ 금지 (Logic/Design 수정):
 - 함수 호출을 다른 함수로 교체
@@ -32,23 +33,28 @@ description: LLM 산출물의 well-formedness를 intent-preserving하게 보장�
 
 ### 절차
 
-1. **검증 게이트 실행**
+1. **Lazy 주석 사전 탐지**
+   - `grep -rn "// \.\.\." src/ --include="*.ts" --include="*.tsx"` 로 lazy 주석 스캔.
+   - 발견되면 git history에서 원본을 복원한다.
+   - 이 패턴은 tsc/build를 통과하지만 런타임에서 크래시하므로 정적 검증만으로는 잡히지 않는다.
+
+2. **검증 게이트 실행**
    - `/verify` 워크플로우를 실행한다 (type → unit → e2e → build).
 
-2. **에러 분류**
+3. **에러 분류**
    - 수집된 에러가 **well-formedness 에러**(malformed)인지 판단한다.
    - well-formedness: import 해석 실패, undefined 참조, 중복 선언, 오타 등
    - correctness: 로직 오류, 설계 결함, 비즈니스 로직 버그 등
 
-3. **Intent-preserving 수정**
+4. **Intent-preserving 수정**
    - well-formedness 에러만 수정한다.
    - 수정 후 `/verify`를 재실행하여 확인한다 (루프).
 
-4. **범위 밖 에러 보고**
+5. **범위 밖 에러 보고**
    - Form으로 고칠 수 없는 에러(correctness 문제)가 남으면:
    - "이 에러는 well-formedness 범위 밖입니다. `/issue`로 등록하세요." 보고하고 멈춘다.
 
-5. **완료**
+6. **완료**
    - 모든 검증 통과 시: `✅ well-formedness 확인 완료` 보고.
 
 ### 호출 관계
