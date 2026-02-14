@@ -23,7 +23,8 @@ Phase 3: DESIGN
   ──[Gate: 사용자 승인]──
 
 Phase 4: EXECUTION
-  /tdd → /divide → /review → /fix → /cleanup
+  ┌─ /tdd → /divide → /review → /fix → /cleanup → /changelog ─┐
+  └──────────────── 반복 (작업 단위마다) ────────────────────────┘
   ──[Gate: smoke ✅ / type ✅ / build ✅]──
 
 Phase 5: CLOSING
@@ -147,9 +148,16 @@ docs/1-project/[프로젝트명]/
 - Lazy comment 제거, 타입/린트 정리, 미사용 코드 제거.
 - 빌드 최종 확인.
 
+### Step 16: 중간 커밋 — `/changelog`
+
+- 작업 단위가 완료될 때마다 `/changelog`를 호출한다.
+- 코드 커밋 + 프로젝트 changelog 갱신 + status 갱신을 한 번에 수행한다.
+- 모든 작업이 끝나지 않았으면 Step 11로 돌아가 다음 작업 단위를 시작한다.
+
 #### Gate Check
 - smoke ✅ / type ✅ / build ✅ 모두 통과하는가?
-  - ✅ → Phase 5 진행
+  - ✅ + 남은 작업 없음 → Phase 5 진행
+  - ✅ + 남은 작업 있음 → Step 11로 돌아가 반복
   - ❌ → Step 11로 돌아가 수정
 
 ---
