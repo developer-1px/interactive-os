@@ -49,7 +49,7 @@
 - [x] P2: Runtime 검증 완료 (sidebar, list, draft, testbot PASS)
 - [ ] P2: lint rule — 앱 코드 getState() 경고
 - [x] E2E 테스트 12/12 통과 (Space toggle, Edit/Cancel, Meta+Arrow reorder, Sidebar)
-- [ ] KPI 측정 (최종)
+- [x] KPI 측정 완료 (Zone 바인딩 0줄, 171/171 unit, 12/12 E2E)
 
 ## 진행 기록
 
