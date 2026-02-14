@@ -75,6 +75,11 @@ export function createKernel<S>(initialState: S) {
   const scopedInterceptors = new Map<string, Map<string, Middleware[]>>();
   const scopedEffects = new Map<string, Map<string, InternalEffectHandler>>();
   const scopedMiddleware = new Map<string, Middleware[]>();
+  // when guard registry: scope → type → (state) => boolean
+  const scopedWhenGuards = new Map<
+    string,
+    Map<string, (state: unknown) => boolean>
+  >();
 
   // ─── Scope Tree (closure) ───
   // Records parent-child relationships from group() nesting.
@@ -255,6 +260,15 @@ export function createKernel<S>(initialState: S) {
       const handler = scopeMap?.get(resolvedType);
 
       if (!handler) continue;
+
+      // 2.5. when guard — dispatch guard (W26/W33)
+      const whenMap = scopedWhenGuards.get(currentScope);
+      const whenGuard = whenMap?.get(resolvedType);
+      if (whenGuard) {
+        const guardLens = scopeStateLens.get(currentScope);
+        const guardState = guardLens ? guardLens.get(state) : state;
+        if (!whenGuard(guardState)) continue; // guard failed → bubble up
+      }
 
       // 3. Per-command interceptors (inject middleware)
       const interceptorsMap = scopedInterceptors.get(currentScope);
@@ -446,17 +460,24 @@ export function createKernel<S>(initialState: S) {
         type: string,
         handlerOrTokens: InternalCommandHandler | ContextToken[],
         handlerArg?: InternalCommandHandler,
+        optionsArg?: { when?: (state: unknown) => boolean },
       ): CommandFactory<string, any> => {
         // Support 3-argument form: (type, tokens, handler)
         let handler: InternalCommandHandler;
         let perCommandTokens: ContextToken[];
+        let whenOptions: { when?: (state: unknown) => boolean } | undefined;
 
         if (Array.isArray(handlerOrTokens)) {
           handler = handlerArg!;
           perCommandTokens = handlerOrTokens;
+          whenOptions = optionsArg;
         } else {
           handler = handlerOrTokens;
           perCommandTokens = [];
+          // When no tokens: (type, handler, options?)
+          whenOptions = handlerArg as unknown as
+            | { when?: (state: unknown) => boolean }
+            | undefined;
         }
 
         // Register in scoped map
@@ -467,6 +488,14 @@ export function createKernel<S>(initialState: S) {
 
         // HMR-safe: silent overwrite on re-registration
         scopeMap.set(type, handler);
+
+        // Register when guard (W26/W33)
+        if (whenOptions?.when) {
+          if (!scopedWhenGuards.has(scope)) {
+            scopedWhenGuards.set(scope, new Map());
+          }
+          scopedWhenGuards.get(scope)!.set(type, whenOptions.when);
+        }
 
         // Register inject interceptor for this command
         // Merge group-level tokens with per-command tokens
