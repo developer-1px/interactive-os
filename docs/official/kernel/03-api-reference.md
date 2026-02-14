@@ -328,4 +328,4 @@ const GLOBAL: ScopeToken<"GLOBAL">
 
 ## Next
 
-→ [Dispatch Pipeline](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/04-dispatch-pipeline.md) — Deep dive into command processing.
+→ [Dispatch Pipeline](./04-dispatch-pipeline.md) — Deep dive into command processing.

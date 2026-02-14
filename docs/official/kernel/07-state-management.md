@@ -283,4 +283,4 @@ kernel.travelTo(txId);
 
 ## Next
 
-→ [Patterns & Recipes](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/08-patterns.md) — Best practices and common patterns.
+→ [Patterns & Recipes](./08-patterns.md) — Best practices and common patterns.

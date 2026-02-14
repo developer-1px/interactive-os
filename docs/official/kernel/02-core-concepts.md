@@ -380,4 +380,4 @@ kernel.reset({ count: 0 }); // also clears transaction log
 
 ## Next
 
-→ [API Reference](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/03-api-reference.md) — Complete API documentation with signatures and types.
+→ [API Reference](./03-api-reference.md) — Complete API documentation with signatures and types.

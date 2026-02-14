@@ -179,4 +179,4 @@ kernel.dispatch(TOGGLE(kernel.getState().todos[0].id));
 
 ## Next
 
-→ [Core Concepts](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/02-core-concepts.md) — Understand Commands, Effects, Context, and Scope in depth.
+→ [Core Concepts](./02-core-concepts.md) — Understand Commands, Effects, Context, and Scope in depth.

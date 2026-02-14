@@ -211,4 +211,4 @@ Scoped middleware only executes when the pipeline is **evaluating that scope**. 
 
 ## Next
 
-→ [State Management](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/07-state-management.md) — State, Store, and State Lens for scope isolation.
+→ [State Management](./07-state-management.md) — State, Store, and State Lens for scope isolation.

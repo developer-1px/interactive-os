@@ -192,4 +192,4 @@ This is a **side channel** separate from normal dispatch — it handles the "lis
 
 ## Next
 
-→ [Type System](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/05-type-system.md) — Token types and compile-time safety.
+→ [Type System](./05-type-system.md) — Token types and compile-time safety.

@@ -108,12 +108,12 @@ packages/kernel/src/
 
 | Guide | Description |
 |---|---|
-| [Getting Started](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/01-getting-started.md) | Installation and first kernel |
-| [Core Concepts](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/02-core-concepts.md) | Commands, Effects, Context, Scope |
-| [API Reference](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/03-api-reference.md) | Complete API documentation |
-| [Dispatch Pipeline](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/04-dispatch-pipeline.md) | Command processing deep dive |
-| [Type System](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/05-type-system.md) | Tokens and type safety |
-| [Middleware](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/06-middleware.md) | Before/after hooks |
-| [State Management](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/07-state-management.md) | State, Store, State Lens |
-| [Patterns & Recipes](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/08-patterns.md) | Best practices |
-| [Glossary](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/09-glossary.md) | Terminology & design decisions |
+| [Getting Started](./01-getting-started.md) | Installation and first kernel |
+| [Core Concepts](./02-core-concepts.md) | Commands, Effects, Context, Scope |
+| [API Reference](./03-api-reference.md) | Complete API documentation |
+| [Dispatch Pipeline](./04-dispatch-pipeline.md) | Command processing deep dive |
+| [Type System](./05-type-system.md) | Tokens and type safety |
+| [Middleware](./06-middleware.md) | Before/after hooks |
+| [State Management](./07-state-management.md) | State, Store, State Lens |
+| [Patterns & Recipes](./08-patterns.md) | Best practices |
+| [Glossary](./09-glossary.md) | Terminology & design decisions |

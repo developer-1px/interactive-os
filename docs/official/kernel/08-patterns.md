@@ -291,4 +291,4 @@ kernel.defineCommand("GOOD", (ctx) => () => ({
 
 ## Next
 
-→ [Glossary](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/09-glossary.md) — Terminology and design decisions.
+→ [Glossary](./09-glossary.md) — Terminology and design decisions.

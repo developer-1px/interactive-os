@@ -258,4 +258,4 @@ dispatch(SET_COUNT(42));
 
 ## Next
 
-→ [Middleware](file:///Users/user/Desktop/interactive-os/docs/2-area/05-kernel/06-middleware.md) — Complete middleware guide.
+→ [Middleware](./06-middleware.md) — Complete middleware guide.
