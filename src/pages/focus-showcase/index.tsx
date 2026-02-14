@@ -1,9 +1,5 @@
 import { InspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotActions } from "@inspector/testbot";
-import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
-// Playwright spec
-// @ts-expect-error
-import runFocusShowcase from "./tests/e2e/focus-showcase.spec.ts";
 import { TestGrid } from "../shared/TestLayout";
 import { ActivateTest } from "./tests/ActivateTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";
@@ -17,8 +13,6 @@ import { SelectTest } from "./tests/SelectTest";
 import { TabTest } from "./tests/TabTest";
 
 export function FocusShowcasePage() {
-  usePlaywrightSpecs("pw-focus-showcase", [runFocusShowcase]);
-
   const runAllTests = () => {
     InspectorStore.setOpen(true);
     InspectorStore.setActiveTab("TESTBOT");

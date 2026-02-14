@@ -1,4 +1,3 @@
-import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { OS } from "@os/AntigravityOS";
 import { useEffect, useState } from "react";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
@@ -7,9 +6,6 @@ import {
   type PropertyType,
 } from "@/apps/builder/app";
 import { kernel } from "@/os/kernel";
-// Playwright spec
-// @ts-expect-error
-import runBuilderSpatial from "../apps/builder/tests/e2e/builder-spatial.spec.ts";
 import {
   EditorToolbar,
   NCPFooterBlock,
@@ -27,7 +23,6 @@ import {
  * Kernel focus → BuilderApp.selectElement 동기화
  */
 export default function BuilderPage() {
-  usePlaywrightSpecs("pw-builder-spatial", [runBuilderSpatial]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
 
   // Derive selection from kernel focus → sync to BuilderApp

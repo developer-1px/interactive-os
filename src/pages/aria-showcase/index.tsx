@@ -3,7 +3,6 @@
  * Demonstrates standard ARIA patterns using FocusGroup facade.
  */
 
-import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { kernel } from "@os/kernel.ts";
@@ -11,40 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/lib/Icon";
 import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
 
-// Playwright specs — Vite plugin wraps these in functions
-// @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runComplexPatterns from "./tests/e2e/complex-patterns.spec.ts";
-// @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runDisclosure from "./tests/e2e/disclosure.spec.ts";
-// @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runGrid from "./tests/e2e/grid.spec.ts";
-// @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runListbox from "./tests/e2e/listbox.spec.ts";
-// @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runMenu from "./tests/e2e/menu.spec.ts";
-// @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runRadiogroup from "./tests/e2e/radiogroup.spec.ts";
-// @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runTabs from "./tests/e2e/tabs.spec.ts";
-// @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runToolbar from "./tests/e2e/toolbar.spec.ts";
-// @ts-expect-error Vite spec-wrapper plugin provides default export at runtime
-import runTree from "./tests/e2e/tree.spec.ts";
-
 export function AriaShowcasePage() {
-  // Register Playwright specs as TestBot suites under "aria-showcase" ID
-  usePlaywrightSpecs("aria-showcase", [
-    runTabs,
-    runMenu,
-    runDisclosure,
-    runGrid,
-    runListbox,
-    runRadiogroup,
-    runToolbar,
-    runTree,
-    runComplexPatterns,
-  ]);
-
   return <AriaShowcaseContent />;
 }
 
