@@ -60,7 +60,9 @@ let state: TestBotState = {
 const listeners = new Set<() => void>();
 
 function emit() {
-  listeners.forEach((fn) => fn());
+  listeners.forEach((fn) => {
+    fn();
+  });
 }
 
 function subscribe(fn: () => void) {
@@ -254,6 +256,7 @@ export function showCursor() {
         offScreenRotation: 0,
         bubbles: [],
         ripples: [],
+        activeKeys: [],
         trackedEl: null,
       },
     });
@@ -318,6 +321,36 @@ export function removeCursorRipple(id: string) {
   if (!cur) return;
   setState({
     cursorState: { ...cur, ripples: cur.ripples.filter((r) => r.id !== id) },
+  });
+}
+
+let keyCounter = 0;
+
+export function addCursorKey(key: string) {
+  const cur = getState().cursorState;
+  if (!cur) return;
+  const keyPress = {
+    id: `key-${++keyCounter}`,
+    key,
+    createdAt: Date.now(),
+  };
+  setState({
+    cursorState: { ...cur, activeKeys: [...cur.activeKeys, keyPress] },
+  });
+
+  setTimeout(() => {
+    removeCursorKey(keyPress.id);
+  }, 2000);
+}
+
+export function removeCursorKey(id: string) {
+  const cur = getState().cursorState;
+  if (!cur) return;
+  setState({
+    cursorState: {
+      ...cur,
+      activeKeys: cur.activeKeys.filter((k) => k.id !== id),
+    },
   });
 }
 

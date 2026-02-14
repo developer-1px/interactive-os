@@ -197,6 +197,7 @@ export function createActions(
       ].join("") + label;
 
     cursor.showBubble(modLabel, "default");
+    cursor.pressKey(modLabel);
     const target = document.activeElement || document.body;
     const eventInit: KeyboardEventInit = {
       key,
@@ -243,6 +244,7 @@ export function createActions(
     );
 
     for (const char of text) {
+      cursor.pressKey(char);
       const key = char === " " ? " " : char;
       const target = document.activeElement || document.body;
       const eventInit: KeyboardEventInit = {

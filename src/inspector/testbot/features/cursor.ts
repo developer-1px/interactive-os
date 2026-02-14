@@ -8,6 +8,7 @@
 import type { BotCursor, BubbleVariant } from "../entities/BotCursor";
 import {
   addCursorBubble,
+  addCursorKey,
   addCursorRipple,
   addStamp,
   clearAllStamps,
@@ -54,6 +55,10 @@ export function createCursor(): BotCursor {
 
   const showBubble = (label: string, variant: BubbleVariant = "default") => {
     addCursorBubble(label, variant);
+  };
+
+  const pressKey = (key: string) => {
+    addCursorKey(key);
   };
 
   const showStatus = (
@@ -130,6 +135,7 @@ export function createCursor(): BotCursor {
     trackElement,
     ripple,
     showBubble,
+    pressKey,
     showStatus,
     showOffScreenPtr,
     hideOffScreenPtr,

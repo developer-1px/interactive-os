@@ -22,10 +22,15 @@ description: HTML + TailwindCSS로 디자인 프로토타입만 만든다. 프�
    - 라우트: `/playground/design-{slug}` (TanStack Router flat route)
    - 컴포넌트를 잘게 분리하되 **한 파일 안에** 모두 정의
    - TailwindCSS + mock 데이터로 실제 사용감 재현
+   - TailwindCSS + mock 데이터로 실제 사용감 재현
    - 외부 의존성 최소 (lucide-react 정도만 허용)
+   - 복잡한 SVG/상수는 파일 하단이나 별도 변수로 분리하여 가독성 유지
 
 4. **라우트 등록**: `/routes` workflow로 GlobalNav에 등록한다.
 
 5. **브라우저 확인**: 등록된 라우트를 열어 시각적으로 확인한다.
 
 6. **리뷰 요청**: 경로와 스크린샷을 제출, 피드백 반복한다.
+
+7. **이관(Handover)**:
+   - 디자인이 확정되면, `/refactor` 또는 `/go`를 사용하여 프로덕션 코드로 이관할 계획을 세운다.

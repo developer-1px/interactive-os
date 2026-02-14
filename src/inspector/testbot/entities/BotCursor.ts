@@ -6,6 +6,8 @@ export interface BotCursor {
   ripple(): void;
   /** Show a bubble (Keycap style) above the cursor */
   showBubble(label: string, variant?: BubbleVariant): void;
+  /** Show a key press in the HUD */
+  pressKey(key: string): void;
   /** Show a stamp on the target element (Pass/Fail) */
   showStatus(type: "pass" | "fail", selector?: string, el?: Element): void;
   /** Show an indicator for off-screen element */

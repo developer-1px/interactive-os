@@ -14,6 +14,12 @@ export interface CursorRipple {
   createdAt: number;
 }
 
+export interface KeyPress {
+  id: string;
+  key: string;
+  createdAt: number;
+}
+
 export interface CursorState {
   visible: boolean;
   x: number;
@@ -23,6 +29,7 @@ export interface CursorState {
   offScreenRotation: number;
   bubbles: CursorBubble[];
   ripples: CursorRipple[];
+  activeKeys: KeyPress[];
   trackedEl: Element | null;
 }
 
@@ -36,6 +43,7 @@ export function createInitialCursorState(): CursorState {
     offScreenRotation: 0,
     bubbles: [],
     ripples: [],
+    activeKeys: [],
     trackedEl: null,
   };
 }
