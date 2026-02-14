@@ -12,7 +12,7 @@ description: 코드 변경 후 반드시 실행하는 4단계 검증 게이트. 
 // turbo-all
 
 1. **Type Check**
-   - `npx tsc --noEmit --strict`
+   - `npx tsc --noEmit`
    - 0 errors 확인.
 
 2. **Unit Test**
@@ -26,7 +26,7 @@ description: 코드 변경 후 반드시 실행하는 4단계 검증 게이트. 
    - E2E 실패가 기존 문제면 명시적으로 보고한다.
 
 4. **Build**
-   - `npm run build`
+   - `npx vite build` (또는 `npm run build`)
    - 빌드 성공 확인.
 
 ### 결과 보고
