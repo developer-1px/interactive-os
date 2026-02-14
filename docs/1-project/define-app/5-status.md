@@ -41,8 +41,11 @@
 - [x] P1: `defineApp.ts` v5 재작성 (branded types, flat handler, when guard)
 - [x] P1: v3 compat layer — createWidget, useComputed lambda, dialog pattern
 - [x] P1: 140/140 테스트 통과 (Todo v3 30개 포함)
-- [ ] P2: Builder 앱 v5 네이티브 마이그레이션
-- [ ] P2: Todo 앱 v5 네이티브 마이그레이션 (compat → native)
+- [x] P1: Todo v5 네이티브 app.ts + 31 tests (branded Condition/Selector + when guard)
+- [x] P1: PoC 파일 정리 (v4/v5 삭제 → production 통합 완료)
+- [x] **171/171 테스트 통과, 0 타입 에러**
+- [ ] P2: Builder 앱 v5 네이티브 마이그레이션 (현재 compat layer로 동작)
+- [ ] P2: Todo widget import를 app.ts로 전환 (현재 app-v3.ts compat)
 - [ ] P2: lint rule — 앱 코드 getState() 경고
 - [ ] E2E 테스트 통과 확인
 - [ ] KPI 측정 (최종)
