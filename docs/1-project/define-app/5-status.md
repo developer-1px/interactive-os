@@ -48,7 +48,7 @@
 - [x] P2: Todo widget import를 app.ts로 전환 (v3 compat alias로 API 동일 유지)
 - [x] P2: Runtime 검증 완료 (sidebar, list, draft, testbot PASS)
 - [ ] P2: lint rule — 앱 코드 getState() 경고
-- [ ] E2E 테스트 통과 확인
+- [x] E2E 테스트 12/12 통과 (Space toggle, Edit/Cancel, Meta+Arrow reorder, Sidebar)
 - [ ] KPI 측정 (최종)
 
 ## 진행 기록
@@ -66,6 +66,7 @@
 | 2026-02-14 17:27 | 커밋 + 프로젝트 격상 | Phase 2 완료 |
 | 2026-02-14 17:37 | kernel when guard | `scopedWhenGuards` + `processCommand` 체크 |
 | 2026-02-14 17:44 | defineApp v5 production | v3 compat layer, 140/140 tests |
+| 2026-02-14 19:35 | E2E 전체 통과 | 12/12 E2E, 171/171 unit. Space→CHECK 분리, FIELD_START_EDIT 연결, onCancel factory→command 변환, payload key 통일 (`focusId`→`id`) |
 
 ## 📚 관련 리소스
 

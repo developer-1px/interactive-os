@@ -114,24 +114,24 @@ describe("CHECK → onCheck pipeline", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// SELECT — pure aria-selected (does NOT trigger app callbacks)
+// SELECT — pure aria-selected state (does NOT dispatch onCheck)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("SELECT — pure selection (no app callbacks)", () => {
+describe("SELECT — pure selection (no onCheck delegation)", () => {
   it("does NOT dispatch onCheck on SELECT", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
       onCheck: mockToggle({ id: "OS.FOCUS" }),
     });
 
+    // SELECT only updates selection state, does not trigger app callbacks
     kernel.dispatch(SELECT({ mode: "toggle" }));
 
-    // OS selection should be applied
     const zone = kernel.getState().os.focus.zones["testZone"];
     expect(zone?.selection).toContain("item-1");
   });
 
-  it("falls back to OS selection when no callbacks registered", () => {
+  it("toggles selection when no callbacks registered", () => {
     setupFocus("plainZone", "item-1");
     registerZone("plainZone", {});
 

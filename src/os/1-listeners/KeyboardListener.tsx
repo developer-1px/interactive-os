@@ -9,6 +9,7 @@
  */
 
 import { OS_CHECK } from "@os/3-commands/interaction";
+import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
 import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
 import { useEffect } from "react";
@@ -48,6 +49,8 @@ export function KeyboardListener() {
           "[data-item-id]",
         ) as HTMLElement | null;
         const role = itemEl?.getAttribute("role");
+
+        // Case 1: Explicit checkbox/switch role → always CHECK
         if (role === "checkbox" || role === "switch") {
           const itemId = itemEl?.id;
           if (itemId) {
@@ -64,6 +67,33 @@ export function KeyboardListener() {
             e.preventDefault();
             e.stopPropagation();
             return;
+          }
+        }
+
+        // Case 2: Active zone has onCheck registered → CHECK (app semantics)
+        // W3C APG: click = select, Space = check
+        const focusState = kernel.getState().os?.focus;
+        const activeZoneId = focusState?.activeZoneId;
+        if (activeZoneId) {
+          const entry = ZoneRegistry.get(activeZoneId);
+          if (entry?.onCheck) {
+            const zone = focusState?.zones?.[activeZoneId];
+            const targetId = zone?.focusedItemId;
+            if (targetId) {
+              kernel.dispatch(OS_CHECK({ targetId }), {
+                meta: {
+                  input: {
+                    type: "KEYBOARD",
+                    key: e.key,
+                    code: canonicalKey,
+                    elementId: targetId,
+                  },
+                },
+              });
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+            }
           }
         }
       }

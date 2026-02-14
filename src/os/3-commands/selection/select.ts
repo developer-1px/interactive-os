@@ -41,6 +41,7 @@ export const SELECT = kernel.defineCommand(
       }
     }
 
+
     const items: string[] = ctx.inject(DOM_ITEMS);
     const mode = payload.mode ?? "single";
 

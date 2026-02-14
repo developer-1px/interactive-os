@@ -590,9 +590,12 @@ export function createKernel<S>(initialState: S) {
           parentMap.set(childScope, scope);
         }
 
-        // Register state lens for this scope
+        // Register state lens for this scope (inherit parent lens if not provided)
         if (config.stateSlice) {
           scopeStateLens.set(childScope, config.stateSlice);
+        } else if (childScope !== scope && scopeStateLens.has(scope)) {
+          // Inherit parent's state lens so zone commands see the same slice
+          scopeStateLens.set(childScope, scopeStateLens.get(scope)!);
         }
 
         return createGroup<E, NewTokens>(childScope, childTokens);

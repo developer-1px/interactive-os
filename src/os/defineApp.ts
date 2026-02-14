@@ -393,8 +393,12 @@ export function defineApp<S>(
               fieldProps["onChange"] = config.field.onChange;
             if (config.field.onSubmit)
               fieldProps["onSubmit"] = config.field.onSubmit;
-            if (config.field.onCancel)
-              fieldProps["onCancel"] = config.field.onCancel;
+            if (config.field.onCancel) {
+              // onCancel may be a CommandFactory (function) or a BaseCommand (object)
+              const cancel = config.field.onCancel;
+              fieldProps["onCancel"] =
+                typeof cancel === "function" ? cancel() : cancel;
+            }
           }
 
           return React.createElement(OS.Field, fieldProps as any);

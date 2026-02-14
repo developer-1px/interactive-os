@@ -244,7 +244,7 @@ describe("Todo v5 — defineApp native", () => {
             const lastIdx = order.length - 1;
             const secondLast = order[lastIdx]!;
             const thirdLast = order[lastIdx - 1]!;
-            app.dispatch(moveItemUp({ focusId: secondLast }));
+            app.dispatch(moveItemUp({ id: secondLast }));
             expect(app.state.data.todoOrder[lastIdx - 1]).toBe(secondLast);
             expect(app.state.data.todoOrder[lastIdx]).toBe(thirdLast);
         });
@@ -257,7 +257,7 @@ describe("Todo v5 — defineApp native", () => {
             const lastIdx = order.length - 1;
             const secondLast = order[lastIdx]!;
             const thirdLast = order[lastIdx - 1]!;
-            app.dispatch(moveItemDown({ focusId: thirdLast }));
+            app.dispatch(moveItemDown({ id: thirdLast }));
             expect(app.state.data.todoOrder[lastIdx - 1]).toBe(secondLast);
             expect(app.state.data.todoOrder[lastIdx]).toBe(thirdLast);
         });
@@ -266,7 +266,7 @@ describe("Todo v5 — defineApp native", () => {
             const app = createApp();
             const topId = app.state.data.todoOrder[0]!;
             const beforeOrder = [...app.state.data.todoOrder];
-            app.dispatch(moveItemUp({ focusId: topId }));
+            app.dispatch(moveItemUp({ id: topId }));
             expect(app.state.data.todoOrder).toEqual(beforeOrder);
         });
     });

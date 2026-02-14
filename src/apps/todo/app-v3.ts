@@ -97,9 +97,9 @@ export const TodoList = TodoApp.createWidget("list", (define) => {
   const moveItemUp = define.command(
     "moveItemUp",
     [],
-    (ctx: { state: AppState }) => (payload: { focusId: number | string }) => ({
+    (ctx: { state: AppState }) => (payload: { id: number | string }) => ({
       state: produce(ctx.state, (draft) => {
-        const focusId = Number(payload.focusId);
+        const focusId = Number(payload.id);
         if (!focusId || Number.isNaN(focusId)) return;
         const visibleIds = ctx.state.data.todoOrder.filter(
           (id) =>
@@ -125,9 +125,9 @@ export const TodoList = TodoApp.createWidget("list", (define) => {
   const moveItemDown = define.command(
     "moveItemDown",
     [],
-    (ctx: { state: AppState }) => (payload: { focusId: number | string }) => ({
+    (ctx: { state: AppState }) => (payload: { id: number | string }) => ({
       state: produce(ctx.state, (draft) => {
-        const focusId = Number(payload.focusId);
+        const focusId = Number(payload.id);
         if (!focusId || Number.isNaN(focusId)) return;
         const visibleIds = ctx.state.data.todoOrder.filter(
           (id) =>

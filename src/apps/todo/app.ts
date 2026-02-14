@@ -27,6 +27,7 @@ import {
 } from "@apps/todo/selectors";
 import { produce } from "immer";
 import { FOCUS } from "@/os/3-commands/focus/focus";
+import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { defineApp } from "@/os/defineApp";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -114,14 +115,16 @@ export const startEdit = listZone.command(
       draft.ui.editingId = targetId;
       draft.ui.editDraft = draft.data.todos[targetId]?.text || "";
     }),
+    // Also set OS-level editingItemId so Field auto-focuses
+    dispatch: FIELD_START_EDIT(),
   }),
 );
 
 export const moveItemUp = listZone.command(
   "moveItemUp",
-  (ctx, payload: { focusId: number | string }) => ({
+  (ctx, payload: { id: number | string }) => ({
     state: produce(ctx.state, (draft) => {
-      const focusId = Number(payload.focusId);
+      const focusId = Number(payload.id);
       if (!focusId || Number.isNaN(focusId)) return;
       const visibleIds = ctx.state.data.todoOrder.filter(
         (id) =>
@@ -146,9 +149,9 @@ export const moveItemUp = listZone.command(
 
 export const moveItemDown = listZone.command(
   "moveItemDown",
-  (ctx, payload: { focusId: number | string }) => ({
+  (ctx, payload: { id: number | string }) => ({
     state: produce(ctx.state, (draft) => {
-      const focusId = Number(payload.focusId);
+      const focusId = Number(payload.id);
       if (!focusId || Number.isNaN(focusId)) return;
       const visibleIds = ctx.state.data.todoOrder.filter(
         (id) =>
@@ -399,6 +402,8 @@ export const moveCategoryDown = sidebarZone.command(
 export const TodoSidebarUI = sidebarZone.bind({
   role: "listbox",
   onAction: selectCategory,
+  onMoveUp: moveCategoryUp,
+  onMoveDown: moveCategoryDown,
 });
 
 // ═══════════════════════════════════════════════════════════════════
