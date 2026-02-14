@@ -26,18 +26,19 @@ import "./CursorOverlay.css";
 
 const CursorSvg = () => (
   <svg
-    width="32"
-    height="32"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     aria-hidden="true"
-    style={{ filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.1))" }}
+    style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
   >
+    <path d="M5.5 3.21V20.8L10.07 15.35H18.59L5.5 3.21Z" fill="black" />
     <path
-      d="M3.1 2.8C2.5 2.2 1.9 2.6 2.1 3.4L6.2 19.2C6.4 19.9 7.3 20.2 7.9 19.6L10.8 16.7L15.6 21.5C16.1 22.0 16.9 22.0 17.4 21.5L19.5 19.4C20.0 18.9 20.0 18.1 19.5 17.6L14.7 12.8L19.5 10.9C20.3 10.6 20.3 9.5 19.6 9.1L3.1 2.8Z"
-      fill="#4F46E5"
+      d="M5.5 3.21V20.8L10.07 15.35H18.59L5.5 3.21Z"
       stroke="white"
       strokeWidth="1.5"
+      strokeLinejoin="round"
     />
   </svg>
 );
