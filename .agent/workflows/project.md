@@ -23,7 +23,7 @@ Phase 3: DESIGN
   ──[Gate: 사용자 승인]──
 
 Phase 4: EXECUTION
-  /divide → /review → /test → /fix → /cleanup
+  /tdd → /divide → /review → /fix → /cleanup
   ──[Gate: smoke ✅ / type ✅ / build ✅]──
 
 Phase 5: CLOSING
@@ -119,22 +119,23 @@ docs/1-project/[프로젝트명]/
 
 ## Phase 4: EXECUTION (실행)
 
-### Step 11: 분해 & 수정 — `/divide`
+### Step 11: 테스트 먼저 — `/tdd`
 
-- 제안서의 작업 항목을 `/divide` 방식으로 분해한다.
+- 제안서의 작업 항목에 대해 `/tdd`를 실행한다.
+- 구현 전에 테스트를 먼저 작성한다. 테스트가 스펙이고, 통과가 증명이다.
+- `/tdd`는 내부적으로 `/test`를 호출하여 적절한 레벨의 테스트를 생성한다.
+
+### Step 12: 분해 & 구현 — `/divide`
+
+- 실패하는 테스트를 통과시키기 위해 `/divide` 방식으로 구현한다.
   - 🟢 **Known** (정답 있음) → AI가 바로 실행
   - 🟡 **Constrained** (선택지 있음) → AI가 트레이드오프를 제시, 사용자가 선택
   - 🔴 **Open** (의사결정 필요) → 사용자에게 질문
 
-### Step 12: 코드 리뷰 — `/review`
+### Step 13: 코드 리뷰 — `/review`
 
 - 수정된 코드가 프로젝트 철학, 네이밍, 구조 규칙을 위반하지 않는지 확인한다.
 - 🔴 위반 사항이 있으면 수정 후 재검증한다.
-
-### Step 13: 테스트 생성 — `/test`
-
-- 구현된 컴포넌트/페이지에 대해 테스트를 생성한다.
-- `{slice}/tests/` 안에 co-locate하여 3단계(unit/testbot/e2e) 전략을 따른다.
 
 ### Step 14: 검증 — `/fix`
 
