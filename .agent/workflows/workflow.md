@@ -1,5 +1,5 @@
 ---
-description: Create or update workflows interactively by gathering intent and rationale.
+description: 대화형으로 workflow를 생성하거나 수정한다.
 ---
 
 1. **Initialization**: Start the interaction by asking the user: "어떤 workflow를 만들까요?"

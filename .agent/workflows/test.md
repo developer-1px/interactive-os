@@ -1,5 +1,5 @@
 ---
-description: 3단계(Unit/Integration/E2E) 테스트 전략에 따라 테스트 코드를 작성한다. OS Dogfooding 철학을 준수하여 로직 검증은 Headless Kernel 위에서 수행한다.
+description: 3단계(Unit/TestBot/E2E) 테스트 전략에 따라 테스트 코드를 작성한다. OS Dogfooding 철학을 준수하여 로직 검증은 Headless Kernel 위에서 수행한다.
 ---
 
 1. **테스트 레벨 결정**
@@ -10,7 +10,7 @@ description: 3단계(Unit/Integration/E2E) 테스트 전략에 따라 테스트 
      - 런타임: **Vitest + Headless Kernel**
      - 목적: 특정 Command 실행 시 State Mutation이 정확한지 검증
 
-   - **Level 2: Integration (Command Flow)**
+   - **Level 2: TestBot (Command Flow)**
      - 대상: 여러 Command가 연쇄되는 시나리오 (Saga)
      - 런타임: **Vitest + Headless Kernel (Virtual User)**
      - 목적: UI 없이 커널 위에서 비즈니스 로직의 흐름(Flow) 검증
@@ -21,7 +21,7 @@ description: 3단계(Unit/Integration/E2E) 테스트 전략에 따라 테스트 
      - 목적: 실제 브라우저 환경에서 컴포넌트 마운트, 이벤트 바인딩, 시각적 피드백 검증
 
 2. **Level 1: Unit (Handler) 작성 가이드**
-   - 위치: `src/packages/kernel/tests/unit/[handler].test.ts` (또는 해당 패키지 `__tests__`)
+   - 위치: `{slice}/tests/unit/[handler].test.ts` (슬라이스 안에 co-locate)
    - 패턴:
      ```ts
      import { describe, it, expect } from "vitest";
@@ -40,8 +40,8 @@ description: 3단계(Unit/Integration/E2E) 테스트 전략에 따라 테스트 
      });
      ```
 
-3. **Level 2: Integration (Command Flow) 작성 가이드**
-   - 위치: `src/packages/kernel/tests/integration/[scenario].test.ts`
+3. **Level 2: TestBot (Command Flow) 작성 가이드**
+   - 위치: `{slice}/tests/testbot/[scenario].test.ts` (슬라이스 안에 co-locate)
    - 패턴:
      ```ts
      import { describe, it, expect } from "vitest";
@@ -63,7 +63,7 @@ description: 3단계(Unit/Integration/E2E) 테스트 전략에 따라 테스트 
      ```
 
 4. **Level 3: E2E (Playwright) 작성 가이드**
-   - 위치: `e2e/[category]/[name].spec.ts`
+   - 위치: `{slice}/tests/e2e/[name].spec.ts` (슬라이스 안에 co-locate)
    - 패턴:
      ```ts
      import { expect, test } from "@playwright/test";

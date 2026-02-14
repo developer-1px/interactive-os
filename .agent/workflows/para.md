@@ -1,5 +1,5 @@
 ---
-description: Implement Standard PARA Method (Projects, Areas, Resources, Archives). Move completed projects to archive without merging, and clear the inbox based on actionability.
+description: 표준 PARA 방법론(Projects, Areas, Resources, Archives)을 적용한다. 완료된 프로젝트는 아카이브로 이동하고, inbox는 실행 가능성 기준으로 정리한다.
 ---
 
 1. **Inbox Review & Clear**

@@ -1,5 +1,5 @@
 ---
-description: Add or update project rules and standards in .agent/rules.md. Use this when the user mentions /rules.
+description: .agent/rules.md에 프로젝트 규칙과 표준을 추가/수정한다.
 ---
 
 1. **Analyze Request**: Identify the specific rule, standard, or guideline the user wants to add or modify from their message.

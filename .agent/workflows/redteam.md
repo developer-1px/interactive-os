@@ -21,4 +21,4 @@ description: 레드팀/블루팀 토론 기반 설계 검증 보고서 작성
 - 결론 및 합의 가능한 중간안을 도출한다.
 
 ### 5. 보고서 저장
-- `docs/0-inbox/` 에 `{날짜}_{주제}_RedTeam.md` 형식으로 저장한다.
+- `docs/0-inbox/YYYY-MMDD-HHmm-[analysis]-{topic}-redteam.md` 형식으로 저장한다.

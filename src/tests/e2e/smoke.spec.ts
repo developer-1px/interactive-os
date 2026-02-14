@@ -1,30 +1,34 @@
+import fs from "node:fs";
+import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 /**
  * Smoke Test — 모든 라우트의 첫 화면이 에러 없이 렌더되는지 검증
  *
+ * 라우트 목록은 routeTree.gen.ts의 FileRoutesByFullPath에서 자동 추출.
+ * 라우트 추가/삭제 시 TanStack Router가 파일을 재생성하므로 수동 동기화 불필요.
+ *
  * 검증 항목:
  * - import 에러, 런타임 에러 (pageerror)
- * - 빈 화면 (body 콘텐츠 없음)
- * - 콘솔 에러 로그
+ * - 빈 화면 (#root 콘텐츠 없음)
  */
 
-const routes = [
-  "/",
-  "/settings",
-  "/kanban",
-  "/builder",
-  "/playground/focus",
-  "/playground/aria",
-  "/docs",
-  "/playground/kernel",
-  "/playground/spike",
-  "/playground/os-kernel",
-  "/playground/playwright",
-  "/playground/radix",
-];
+// routeTree.gen.ts에서 fullPath 목록을 자동 추출
+const genFilePath = path.resolve(__dirname, "../routeTree.gen.ts");
+const genFile = fs.readFileSync(genFilePath, "utf-8");
+const fullPathBlock = genFile.match(
+  /interface FileRoutesByFullPath \{([\s\S]*?)\}/,
+)?.[1];
+const allRoutes = [...(fullPathBlock?.matchAll(/'([^']+)'/g) ?? [])].map(
+  (m) => m[1],
+);
 
-for (const route of routes) {
+// splat($) 라우트, 중복 trailing slash 제외
+const smokeRoutes = allRoutes.filter(
+  (r) => !r.includes("$") && !r.endsWith("/"),
+);
+
+for (const route of smokeRoutes) {
   test(`Smoke: ${route} renders without error`, async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));

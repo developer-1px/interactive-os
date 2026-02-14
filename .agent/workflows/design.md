@@ -19,7 +19,7 @@ description: HTML + TailwindCSS로 디자인 프로토타입만 만든다. 프�
 2. **레퍼런스 리서치**: 웹 검색으로 관련 UI/UX 레퍼런스를 수집한다.
 
 3. **디자인 페이지 생성**: 단일 TSX 파일로 작성한다.
-   - 라우트: `/_minimal/playground/design-{slug}`
+   - 라우트: `/playground/design-{slug}` (TanStack Router flat route)
    - 컴포넌트를 잘게 분리하되 **한 파일 안에** 모두 정의
    - TailwindCSS + mock 데이터로 실제 사용감 재현
    - 외부 의존성 최소 (lucide-react 정도만 허용)

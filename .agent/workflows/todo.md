@@ -14,7 +14,7 @@ description: 최근 작업 정리(Changelog) + 마일스톤 제안(Now/Next/Late
    - 블로커 및 미해결 이슈 식별
 
 3. **리포트 생성**
-   - `docs/0-inbox/YYYY-MM-DD_TODO.md` 로 저장
+   - `docs/0-inbox/YYYY-MMDD-HHmm-[report]-todo.md` 로 저장
    - 포맷:
 
      ```markdown

@@ -133,8 +133,8 @@ docs/1-project/[프로젝트명]/
 
 ### Step 13: 테스트 생성 — `/test`
 
-- 구현된 컴포넌트/페이지에 대해 E2E 테스트를 생성한다.
-- Playwright spec으로 자동 생성하고 ShimPage에 등록한다.
+- 구현된 컴포넌트/페이지에 대해 테스트를 생성한다.
+- `{slice}/tests/` 안에 co-locate하여 3단계(unit/testbot/e2e) 전략을 따른다.
 
 ### Step 14: 검증 — `/fix`
 

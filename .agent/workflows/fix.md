@@ -1,71 +1,71 @@
 ---
-description: Automatically verify and fix build errors, type errors, and runtime errors using smoke tests.
+description: LLM 산출물의 well-formedness를 intent-preserving하게 보장하는 품질 게이트.
 ---
 
 // turbo-all
 
-## /fix — 이슈 기반 자동 수정 파이프라인
+## /fix — Well-formedness 검증 & 정정
+
+> **목적**: LLM이 "완료"라고 했지만 실제로 돌아가지 않는 malformed code를 고친다.
+> **범위**: Form(형태)만 고친다. Logic/Design(의도)은 건드리지 않는다.
+> **구분**: `/fix` = 형식 정정, `/issue` = 문제 해결. 이 둘은 다르다.
+
+### 핵심 제약: Intent-Preserving
+
+> 코드가 **하려는 것**(intent)은 보존하고, **표현**(form)만 고친다.
+
+✅ 허용 (Form 수정):
+- 빠진 import/export 추가
+- import 경로 오타 수정
+- 중복 import 제거
+- undefined 참조를 올바른 참조로 수정
+- 누락된 파일 생성 (빈 stub)
+- 오타 수정 (변수명, 함수명)
+
+❌ 금지 (Logic/Design 수정):
+- 함수 호출을 다른 함수로 교체
+- `as any` 타입 우회
+- 크래시 나는 컴포넌트 주석 처리/삭제
+- 함수 시그니처 변경
+- 조건 분기/로직 변경
+- import를 "빌드 통과 목적으로" 삭제
+
+### 절차
+
+1. **정적 검증**
+   - `npx tsc --noEmit` 실행 → 에러 목록 수집
+
+2. **빌드 검증**
+   - `npm run build` 실행 → 에러 목록 수집
+
+3. **런타임 검증 — Playwright Smoke Test**
+   - `npx playwright test src/tests/e2e/smoke.spec.ts` 실행
+   - smoke.spec.ts는 `routeTree.gen.ts`의 `FileRoutesByFullPath`에서 라우트를 자동 추출
+   - 각 라우트를 방문하여 `pageerror` 이벤트로 React 마운트 시 런타임 에러를 캡처
+
+4. **에러 분류**
+   - 수집된 에러가 **well-formedness 에러**(malformed)인지 판단한다.
+   - well-formedness: import 해석 실패, undefined 참조, 중복 선언, 오타 등
+   - correctness: 로직 오류, 설계 결함, 비즈니스 로직 버그 등
+
+5. **Intent-preserving 수정**
+   - well-formedness 에러만 수정한다.
+   - 수정 후 1~3단계를 재실행하여 확인한다 (루프).
+
+6. **범위 밖 에러 보고**
+   - Form으로 고칠 수 없는 에러(correctness 문제)가 남으면:
+   - "이 에러는 well-formedness 범위 밖입니다. `/issue`로 등록하세요." 보고하고 멈춘다.
+
+7. **완료**
+   - 모든 검증 통과 시: `✅ well-formedness 확인 완료` 보고.
+
+### 호출 관계
 
 ```
-이슈 등록(/issue §1) → Smoke Test로 실패 수집
-→ /divide로 자율 분해·수정 (의사결정 필요 전까지)
-→ 검증 (smoke → type → build)
-→ 이슈 종료(/issue §10)
+/issue → /fix (검증 게이트로 호출) ✅
+/project → /fix (구현 후 검증) ✅
+/refactor → /fix (변환 후 검증) ✅
+/poc → /fix (spike 후 검증) ✅
+/fix → /issue ❌ (금지 — /fix는 문제 해결하지 않는다)
+/fix → /divide ❌ (금지 — /fix는 분해하지 않는다)
 ```
-
-### 1. 이슈 등록
-
-- `/issue` workflow의 **§1 이슈 등록** + **§2 Triage**를 실행한다.
-- 사용자가 제공한 에러 메시지를 원문으로 기록한다.
-- 이슈 문서 위치: `docs/1-project/0-issue/YYYY-MM-DD_<슬러그>.md`
-
-### 2. Smoke Test (실패 수집)
-
-- Dev server가 실행 중인지 확인한다. 아니면 백그라운드로 시작: `npm run dev`
-- `npx playwright test e2e/smoke.spec.ts`를 실행하여 전체 라우트의 런타임 에러를 수집한다.
-- 실패한 라우트와 에러 메시지를 이슈 문서에 **Before 스냅샷**으로 기록한다.
-
-### 3. 자율 분해·수정 — `/divide` 실행
-
-- Smoke test 실패 + 사용자 보고 에러를 대상으로 `/divide`를 실행한다.
-- **핵심 원칙**: 의사결정이 필요하기 전까지 스스로 할 수 있는 것은 전부 푼다.
-  - 정답이 확실한 것 → 단위 테스트로 증명 → 수정
-  - 정답이 불확실한 것 → 분해하여 재시도
-  - 분해해도 모르겠는 것 → **그때 사용자에게 질문** (멈추지 말고 다른 것 먼저 계속 진행)
-- **안전 장치**: 수정 전에 반드시 테스트를 먼저 작성한다.
-  - 재현 테스트(failing test) → 수정 → 테스트 통과 확인
-  - 테스트 없이 코드를 수정하지 않는다.
-
-#### Gate Check
-- 수정한 모든 부분의 테스트가 **통과**하는가?
-  - ✅ → 다음 단계 진행
-  - ❌ → 통과할 때까지 수정 계속
-
-### 4. 검증 (시스템 안정성 확인)
-
-순서대로 실행한다:
-
-1. **Smoke Test**: `npx playwright test e2e/smoke.spec.ts` — 전체 라우트 정상 렌더링 확인
-2. **Type Verification**: `npx tsc --noEmit` — TypeScript 컴파일 에러 확인
-3. **Build Verification**: `npm run build` — 프로덕션 빌드 무결성 확인
-4. **Full E2E (Optional)**: 사이드이펙트가 의심되면 `npx playwright test` 전체 실행
-
-- 각 단계에서 에러 발견 시 → **§3으로 돌아가서** `/divide`로 수정 후 재검증.
-
-### 5. 이슈 종료
-
-- `/issue` workflow의 **§10 이슈 종료**를 실행한다.
-- 이슈 문서의 상태를 `closed`로 변경한다.
-- 해결 요약 + changelog를 문서 끝에 추가한다:
-  ```markdown
-  ## 해결 요약
-  - 원인: ...
-  - 수정: ... (변경 파일 목록)
-  - 검증: smoke ✅ / type ✅ / build ✅
-
-  ## Changelog
-  | 커밋 | 내용 |
-  |------|------|
-  | `해시` | 커밋 메시지 — 변경 파일 요약 |
-  ```
-- 사용자에게 **최종 안정성 리포트**를 보고한다.

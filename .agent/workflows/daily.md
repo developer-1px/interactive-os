@@ -1,11 +1,11 @@
 ---
-description: Generate a daily development journal in a casual AI persona
+description: AI 페르소나로 일일 개발 일지를 작성한다.
 ---
 
 1.  **Context Gathering**:
     - Get the current date (YYYY-MM-DD).
     - Run `git log --since="midnight" --stat --no-merges` to see today's work.
-    - Read `task.md` to check progress.
+    - `docs/1-project/` 하위의 진행 상태를 확인한다.
     - Recall the key events, struggles, and decisions of the day from the conversation history.
 
 2.  **Drafting the Journal**:

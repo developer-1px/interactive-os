@@ -34,7 +34,7 @@ description: 정답 유무를 기준으로 문제를 분해하고, 정답인 것
    - 나눈 조각을 다시 3단계로 돌린다 (재귀)
 6. **모르겠으면 질문** — 사용자에게 구체적으로 묻는다. 다 하려고 하지 않는다.
 7. **보고서 작성** — 최종 산출물. 뭘 나눴고, 뭘 실행했고, 뭐가 남았는지.
-   - `docs/0-inbox/YYYY-MMDD-HHmm-divide-<topic>.md` 에 저장
+   - `docs/0-inbox/YYYY-MMDD-HHmm-[report]-divide-{topic}.md` 에 저장
 
 ### 핵심
 

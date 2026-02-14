@@ -1,5 +1,5 @@
 ---
-description: Refine code, remove lazy comments, and verify lint/type integrity before committing.
+description: 코드 정리, lazy 주석 제거, lint/타입 무결성 확인 후 커밋 준비한다.
 ---
 
 1. **Lazy Comment Audit**:

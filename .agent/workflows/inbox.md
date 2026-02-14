@@ -1,5 +1,5 @@
 ---
-description: Analyzes the user request and saves a formal report to docs/0-inbox
+description: 사용자 요청을 분석하여 정형화된 보고서를 docs/0-inbox에 저장한다.
 ---
 
 1. **Analyze User Request**

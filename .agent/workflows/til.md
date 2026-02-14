@@ -1,5 +1,5 @@
 ---
-description: Generate a TIL (Today I Learned) document summarizing technical learnings
+description: 기술적 배움을 정리한 TIL(Today I Learned) 문서를 생성한다.
 ---
 
 1.  **Context Gathering**:

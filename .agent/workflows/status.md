@@ -14,7 +14,7 @@ description: PARA 문서(1-project, 2-area) 기반으로 RAG + Kanban 스타일�
    - 필요 시 코드베이스와 대조하여 실제 구현 여부를 확인한다.
 
 3. **Generate Status Report**:
-   - `docs/0-inbox/YYYY-MM-DD_Project_Status_Report.md`에 리포트를 저장한다.
+   - `docs/0-inbox/YYYY-MMDD-HHmm-[report]-project-status.md`에 리포트를 저장한다.
    - **RAG + Kanban 하이브리드 형식**:
      - **프로젝트 현황 테이블**: 프로젝트명 | RAG 상태(🟢🟡🔴) | Done | In Progress | Todo | 진척률(%) | 비고
      - **블로커 (🔴)**: 즉시 조치가 필요한 항목
