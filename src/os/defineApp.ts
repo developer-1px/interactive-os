@@ -519,15 +519,31 @@ export function defineApp<S>(
             const currentState = testKernel.getState().apps[appId] as S;
             if (!entry.when.evaluate(currentState)) return false;
           }
-          testKernel.dispatch(command);
+          // Redirect to test scope — zone commands carry production scope
+          // (e.g., ['todo-v5:list']) but test kernel uses single test scope
+          const normalizedCmd = {
+            ...command,
+            scope: [testScope],
+          };
+          testKernel.dispatch(normalizedCmd);
           return true;
         },
         // v3 style: dispatch.addTodo({...})
         dispatchProxy,
       ),
 
-      // v3 style: select.visibleTodos()
-      select: selectProxy as any,
+      // Dual: v5 select(brandedSelector) + v3 select.visibleTodos()
+      select: Object.assign(
+        (selectorOrBranded: any) => {
+          // v5 style: select(brandedSelector)
+          if (selectorOrBranded && __selectorBrand in selectorOrBranded) {
+            const currentState = testKernel.getState().apps[appId] as S;
+            return selectorOrBranded.select(currentState);
+          }
+          return undefined;
+        },
+        selectProxy,
+      ) as any,
 
       // v3 style: commands.cancelEdit
       commands: commandsMap,
