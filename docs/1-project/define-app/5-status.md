@@ -45,7 +45,8 @@
 - [x] P1: PoC 파일 정리 (v4/v5 삭제 → production 통합 완료)
 - [x] **171/171 테스트 통과, 0 타입 에러**
 - [ ] P2: Builder 앱 v5 네이티브 마이그레이션 (현재 compat layer로 동작)
-- [ ] P2: Todo widget import를 app.ts로 전환 (현재 app-v3.ts compat)
+- [x] P2: Todo widget import를 app.ts로 전환 (v3 compat alias로 API 동일 유지)
+- [x] P2: Runtime 검증 완료 (sidebar, list, draft, testbot PASS)
 - [ ] P2: lint rule — 앱 코드 getState() 경고
 - [ ] E2E 테스트 통과 확인
 - [ ] KPI 측정 (최종)
