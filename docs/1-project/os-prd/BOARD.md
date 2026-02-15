@@ -1,12 +1,15 @@
 # BOARD — os-prd
 
 ## 🔴 Now
-- [ ] T5: QuickPick (OS Level Primitive) 구현
-    - [ ] T5a: `virtualFocus` 지원 (NAVIGATE 커맨드 및 Effect 수정)
-    - [ ] T5b: `QuickPick` 컴포넌트 조립 (Combobox Zone + Overlay)
-    - [ ] T5c: `CommandBar` (App Level) 예제 구현 및 검증
+
+(빈 — 다음 태스크 대기)
 
 ## ⏳ Done
+- [x] T5d: `CommandPalette` 리팩토링 → QuickPick 소비자로 전환 (02-15)
+- [x] T5: QuickPick (OS Level Primitive) 구현 (02-15)
+    - [x] T5a: `virtualFocus` 지원 (NAVIGATE/FOCUS) (02-15)
+    - [x] T5b: `QuickPick` 컴포넌트 조립 (02-15)
+    - [x] T5c: Showcase 구현 (02-15)
 - [x] T0: SPEC.md 초안 작성 — 코드 역추적으로 전체 인벤토리 (02-15)
 - [x] T1: Navigate unit tests — 35개 (orientation, loop, home/end, entry) (02-15)
 - [x] T2a: Field unit tests — 14개 (start/commit/cancel lifecycle) (02-15)
@@ -23,8 +26,10 @@
 - [x] Todo ID 마이그레이션: number → string + uid() (02-15)
 - [x] SPEC.md 갱신 — 전 Gap 해결(G1-G7), Coverage Map 완전 (02-15)
 
+## 💡 Ideas
+- T6: Kernel Test Utils (Context Mocking) — Unit Test 작성 효율화
+- SPEC.md를 코드에서 참조: 커맨드 파일 상단에 SPEC 섹션 번호 링크
+
 ## 📚 Resources
 - [Virtual Focus & aria-activedescendant](../../3-resource/04-architecture/2026-0215-virtual-focus-activedescendant.md) — T5a/T5b 구현 가이드
 
-## 💡 Ideas
-- SPEC.md를 코드에서 참조: 커맨드 파일 상단에 SPEC 섹션 번호 링크

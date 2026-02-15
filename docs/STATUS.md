@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-15 18:14
+> Last updated: 2026-02-15 22:59
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -74,6 +74,7 @@
 
 ## 📝 Recent Changes (2026-02-15)
 
+- ✅ `os-prd` T5d: CommandPalette → QuickPick OS primitive 리팩토링 완료
 - ✅ `/para` 세션 대청소 — `11-discussions/` 폴더 완전 폐지
   - 21개 문서 마이그레이션: 프로젝트 귀속 11, archive 5, resource 3, backlog 2
 - ✅ Stale 프로젝트 2개 아카이브 (builder-focus-navigation, builder-os-panel-binding)
