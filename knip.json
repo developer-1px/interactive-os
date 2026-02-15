@@ -1,4 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "ignore": ["packages/surface/**"]
+  "ignore": [
+    "packages/surface/**",
+    "scripts/move-docs.mjs",
+    "src/inspector/testbot/playwright/index.ts",
+    "src/docs-viewer/**",
+    "vite-plugins/component-inspector/ui/**"
+  ]
 }
