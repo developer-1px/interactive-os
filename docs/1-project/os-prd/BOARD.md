@@ -25,6 +25,7 @@
 - [x] T4g: Role Helpers (child/check/expand) — 31 tests (02-15)
 - [x] Todo ID 마이그레이션: number → string + uid() (02-15)
 - [x] SPEC.md 갱신 — 전 Gap 해결(G1-G7), Coverage Map 완전 (02-15)
+- [x] T6: Focus E2E MECE 강화 — 15→26개 테스트, SPEC 전 영역 커버 (02-15)
 
 ## 💡 Ideas
 - T6: Kernel Test Utils (Context Mocking) — Unit Test 작성 효율화

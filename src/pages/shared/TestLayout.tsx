@@ -4,9 +4,10 @@ interface TestBoxProps {
   title: string;
   children: React.ReactNode;
   description?: React.ReactNode;
+  spec?: string;
 }
 
-export function TestBox({ title, children, description }: TestBoxProps) {
+export function TestBox({ title, children, description, spec }: TestBoxProps) {
   const [showDocs, setShowDocs] = useState(true);
 
   return (
@@ -17,16 +18,20 @@ export function TestBox({ title, children, description }: TestBoxProps) {
           <h3 className="font-bold text-xs text-gray-700 uppercase tracking-wider">
             {title}
           </h3>
+          {spec && (
+            <span className="text-[9px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
+              {spec}
+            </span>
+          )}
         </div>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setShowDocs(!showDocs)}
-            className={`text-[10px] px-2 py-0.5 rounded border ${
-              showDocs
+            className={`text-[10px] px-2 py-0.5 rounded border ${showDocs
                 ? "text-gray-700 border-gray-300 bg-gray-100"
                 : "border-transparent text-gray-400"
-            }`}
+              }`}
           >
             Docs
           </button>

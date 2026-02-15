@@ -40,7 +40,7 @@ export function DismissTest() {
   );
 
   return (
-    <TestBox title="Dismiss / Escape" description={description}>
+    <TestBox title="Dismiss / Escape" spec="§3.5" description={description}>
       <div className="flex flex-col gap-6">
         {/* Deselect */}
         <div className="space-y-2">

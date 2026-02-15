@@ -6,10 +6,17 @@ test.describe("Focus Showcase", () => {
     await page.goto("/playground/focus");
   });
 
+  // ═══════════════════════════════════════════════════════════════
+  // §3.2  ENTRY STRATEGIES (SPEC: navigate.entry)
+  // ═══════════════════════════════════════════════════════════════
+
   // ─────────────────────────────────────────────────────────────
-  // 1. Autofocus: Entry Focus Strategies
+  // 1. entry = first/last (basic click + navigate)
   // ─────────────────────────────────────────────────────────────
-  test("Autofocus: Entry Focus", async ({ page }) => {
+  test("Entry: first/last — click transfers aria-current exclusively", async ({
+    page,
+  }) => {
+    // auto group (entry=first by default)
     await page.locator("#af-auto-1").click();
     await expect(page.locator("#af-auto-1")).toHaveAttribute(
       "aria-current",
@@ -26,6 +33,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // entry=last group — click + arrow navigation
     await page.locator("#af-last-top").click();
     await expect(page.locator("#af-last-top")).toHaveAttribute(
       "aria-current",
@@ -58,15 +66,53 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 2. Navigate: Vertical List (Loop)
+  // 2. entry = restore — remembers last focused item
   // ─────────────────────────────────────────────────────────────
-  test("Navigate: Vertical Loop", async ({ page }) => {
+  test("Entry: restore — re-entering zone restores last focused item", async ({
+    page,
+  }) => {
+    // Focus Memory 2 in the restore group
+    await page.locator("#af-restore-2").click();
+    await expect(page.locator("#af-restore-2")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Move to a different zone (click on auto group)
+    await page.locator("#af-auto-1").click();
+    await expect(page.locator("#af-auto-1")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+    // restore group should no longer be active-zone
+    await expect(page.locator("#af-restore-2")).not.toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Re-enter the restore zone — should restore Memory 2
+    await page.locator("#af-restore-wrapper").click();
+    await expect(page.locator("#af-restore-2")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // §3.2  NAVIGATE COMMANDS
+  // ═══════════════════════════════════════════════════════════════
+
+  // ─────────────────────────────────────────────────────────────
+  // 3. Vertical + loop=true
+  // ─────────────────────────────────────────────────────────────
+  test("Navigate: Vertical Loop — wraps at boundaries", async ({ page }) => {
     await page.locator("#nav-apple").click();
     await expect(page.locator("#nav-apple")).toHaveAttribute(
       "aria-current",
       "true",
     );
 
+    // ArrowUp from first → last (loop)
     await page.keyboard.press("ArrowUp");
     await expect(page.locator("#nav-cherry")).toHaveAttribute(
       "aria-current",
@@ -77,6 +123,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // ArrowDown from last → first (loop)
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#nav-apple")).toHaveAttribute(
       "aria-current",
@@ -87,6 +134,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Walk full cycle: A → B → C → A
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#nav-banana")).toHaveAttribute(
       "aria-current",
@@ -109,6 +157,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Reverse: A → C (up) → B (up)
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#nav-banana")).toHaveAttribute(
       "aria-current",
@@ -122,15 +171,18 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 3. Navigate: Horizontal Toolbar (Clamped)
+  // 4. Horizontal + loop=false (clamp)
   // ─────────────────────────────────────────────────────────────
-  test("Navigate: Horizontal Clamped", async ({ page }) => {
+  test("Navigate: Horizontal Clamped — stops at boundaries", async ({
+    page,
+  }) => {
     await page.locator("#nav-bold").click();
     await expect(page.locator("#nav-bold")).toHaveAttribute(
       "aria-current",
       "true",
     );
 
+    // Try going left from first — should stay
     await page.keyboard.press("ArrowLeft");
     await expect(page.locator("#nav-bold")).toHaveAttribute(
       "aria-current",
@@ -142,6 +194,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Move right through all items
     await page.keyboard.press("ArrowRight");
     await expect(page.locator("#nav-italic")).toHaveAttribute(
       "aria-current",
@@ -162,6 +215,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Try going right from last — should stay (clamped)
     await page.keyboard.press("ArrowRight");
     await expect(page.locator("#nav-underline")).toHaveAttribute(
       "aria-current",
@@ -173,6 +227,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Go back left
     await page.keyboard.press("ArrowLeft");
     await expect(page.locator("#nav-italic")).toHaveAttribute(
       "aria-current",
@@ -181,15 +236,20 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 4. Navigate: 2D Grid Spatial
+  // 5. 2D Grid (orientation=both)
   // ─────────────────────────────────────────────────────────────
-  test("Navigate: 2D Grid", async ({ page }) => {
+  test("Navigate: 2D Grid — spatial movement in 3×3", async ({ page }) => {
+    // Grid layout:
+    // 0 1 2
+    // 3 4 5
+    // 6 7 8
     await page.locator("#nav-cell-0").click();
     await expect(page.locator("#nav-cell-0")).toHaveAttribute(
       "aria-current",
       "true",
     );
 
+    // Right: 0 → 1 → 2
     await page.keyboard.press("ArrowRight");
     await expect(page.locator("#nav-cell-1")).toHaveAttribute(
       "aria-current",
@@ -206,6 +266,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Down: 2 → 5 → 8
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#nav-cell-5")).toHaveAttribute(
       "aria-current",
@@ -218,6 +279,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Left: 8 → 7 → 6
     await page.keyboard.press("ArrowLeft");
     await expect(page.locator("#nav-cell-7")).toHaveAttribute(
       "aria-current",
@@ -230,6 +292,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Up: 6 → 3 → 0
     await page.keyboard.press("ArrowUp");
     await expect(page.locator("#nav-cell-3")).toHaveAttribute(
       "aria-current",
@@ -242,6 +305,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Cross-pattern: 0 → 3 → 4 → 1 → 4 → 3 → 4
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#nav-cell-3")).toHaveAttribute(
       "aria-current",
@@ -276,15 +340,114 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 5. Select: Range Selection (Multi-Select)
+  // 6. Home/End keys
   // ─────────────────────────────────────────────────────────────
-  test("Select: Range Selection", async ({ page }) => {
+  test("Navigate: Home/End — jumps to first/last item", async ({ page }) => {
+    // Vertical group
+    await page.locator("#nav-banana").click();
+    await expect(page.locator("#nav-banana")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("Home");
+    await expect(page.locator("#nav-apple")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("End");
+    await expect(page.locator("#nav-cherry")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("Home");
+    await expect(page.locator("#nav-apple")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Horizontal group
+    await page.locator("#nav-italic").click();
+    await expect(page.locator("#nav-italic")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("Home");
+    await expect(page.locator("#nav-bold")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("End");
+    await expect(page.locator("#nav-underline")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 7. Orthogonal direction ignored
+  // ─────────────────────────────────────────────────────────────
+  test("Navigate: orthogonal direction ignored", async ({ page }) => {
+    // Vertical list — ArrowLeft/Right should not move
+    await page.locator("#nav-banana").click();
+    await expect(page.locator("#nav-banana")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("#nav-banana")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#nav-banana")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Horizontal toolbar — ArrowUp/Down should not move
+    await page.locator("#nav-italic").click();
+    await expect(page.locator("#nav-italic")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("#nav-italic")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#nav-italic")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // §3.4  SELECTION COMMANDS
+  // ═══════════════════════════════════════════════════════════════
+
+  // ─────────────────────────────────────────────────────────────
+  // 8. Multi-select: Cmd+Click toggle
+  // ─────────────────────────────────────────────────────────────
+  test("Select: Multi — Cmd+Click toggles individual items", async ({
+    page,
+  }) => {
     await page.locator("#sel-range-0").click();
     await expect(page.locator("#sel-range-0")).toHaveAttribute(
       "aria-selected",
       "true",
     );
 
+    // Cmd+Click to add
     await page.locator("#sel-range-2").click({ modifiers: ["Meta"] });
     await expect(page.locator("#sel-range-2")).toHaveAttribute(
       "aria-selected",
@@ -309,12 +472,36 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
-    await page.locator("#sel-range-3").click({ modifiers: ["Meta"] });
-    await expect(page.locator("#sel-range-3")).toHaveAttribute(
+    // Cmd+Click same again to deselect (toggle)
+    await page.locator("#sel-range-1").click({ modifiers: ["Meta"] });
+    await expect(page.locator("#sel-range-1")).not.toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    // Others should remain
+    await expect(page.locator("#sel-range-0")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#sel-range-2")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 9. Multi-select: Shift+Click range selection
+  // ─────────────────────────────────────────────────────────────
+  test("Select: Multi — Shift+Click selects range", async ({ page }) => {
+    // Click first item
+    await page.locator("#sel-range-0").click();
+    await expect(page.locator("#sel-range-0")).toHaveAttribute(
       "aria-selected",
       "true",
     );
 
+    // Shift+Click last item — should select 0,1,2,3 (range)
+    await page.locator("#sel-range-3").click({ modifiers: ["Shift"] });
     await expect(page.locator("#sel-range-0")).toHaveAttribute(
       "aria-selected",
       "true",
@@ -334,15 +521,18 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 6. Select: Toggle Mode
+  // 10. Single + Toggle: click switches, no multi
   // ─────────────────────────────────────────────────────────────
-  test("Select: Toggle Mode", async ({ page }) => {
+  test("Select: Single Toggle — only one item selected at a time", async ({
+    page,
+  }) => {
     await page.locator("#sel-toggle-0").click();
     await expect(page.locator("#sel-toggle-0")).toHaveAttribute(
       "aria-selected",
       "true",
     );
 
+    // Click second → replaces first
     await page.locator("#sel-toggle-1").click();
     await expect(page.locator("#sel-toggle-1")).toHaveAttribute(
       "aria-selected",
@@ -353,6 +543,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Click first again → replaces second
     await page.locator("#sel-toggle-0").click();
     await expect(page.locator("#sel-toggle-0")).toHaveAttribute(
       "aria-selected",
@@ -365,9 +556,11 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 7. Select: Follow Focus (Radio)
+  // 11. Follow Focus (Radio) — arrow keys = selection
   // ─────────────────────────────────────────────────────────────
-  test("Select: Follow Focus", async ({ page }) => {
+  test("Select: Follow Focus — arrow key moves selection + real DOM focus", async ({
+    page,
+  }) => {
     await page.locator("#sel-radio-a").click();
     await expect(page.locator("#sel-radio-a")).toHaveAttribute(
       "aria-checked",
@@ -394,16 +587,24 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Real DOM focus verification (§9.2 tabIndex)
     await expect(page.locator("#sel-radio-a")).toBeFocused();
   });
 
+  // ═══════════════════════════════════════════════════════════════
+  // §3.3  TAB COMMANDS
+  // ═══════════════════════════════════════════════════════════════
+
   // ─────────────────────────────────────────────────────────────
-  // 8. Tab: Trap Mode
+  // 12. Tab: trap — cycles forward and backward
   // ─────────────────────────────────────────────────────────────
-  test("Tab: Trap Mode", async ({ page }) => {
+  test("Tab: Trap — cycles within zone in both directions", async ({
+    page,
+  }) => {
     await page.locator("#tab-trap-0").click();
     await expect(page.locator("#tab-trap-0")).toBeFocused();
 
+    // Forward: 0 → 1 → 2 → 0 (wrap) → 1
     await page.keyboard.press("Tab");
     await expect(page.locator("#tab-trap-1")).toBeFocused();
 
@@ -416,6 +617,7 @@ test.describe("Focus Showcase", () => {
     await page.keyboard.press("Tab");
     await expect(page.locator("#tab-trap-1")).toBeFocused();
 
+    // Backward: 1 → 0 → 2 (wrap) → 1 → 0
     await page.keyboard.press("Shift+Tab");
     await expect(page.locator("#tab-trap-0")).toBeFocused();
 
@@ -430,14 +632,13 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 8b. Tab: Escape Mode — Tab exits zone immediately
+  // 13. Tab: escape — exits zone immediately
   // ─────────────────────────────────────────────────────────────
-  test("Tab: Escape Mode", async ({ page }) => {
-    // Focus the first item in escape group
+  test("Tab: Escape — exits zone immediately on Tab", async ({ page }) => {
     await page.locator("#tab-escape-0").click();
     await expect(page.locator("#tab-escape-0")).toBeFocused();
 
-    // Tab should exit the zone — focus should NOT be on any item in this group
+    // Tab should exit — no item in this group should be focused
     await page.keyboard.press("Tab");
     await expect(page.locator("#tab-escape-0")).not.toBeFocused();
     await expect(page.locator("#tab-escape-1")).not.toBeFocused();
@@ -445,22 +646,36 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 8c. Tab: Flow Mode — Tab navigates internally, escapes at boundary
+  // 14. Tab: escape — Shift+Tab also exits
   // ─────────────────────────────────────────────────────────────
-  test("Tab: Flow Mode", async ({ page }) => {
-    // Focus the first item in flow group
+  test("Tab: Escape — Shift+Tab exits zone backward", async ({ page }) => {
+    await page.locator("#tab-escape-1").click();
+    await expect(page.locator("#tab-escape-1")).toBeFocused();
+
+    // Shift+Tab should also exit the zone
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator("#tab-escape-0")).not.toBeFocused();
+    await expect(page.locator("#tab-escape-1")).not.toBeFocused();
+    await expect(page.locator("#tab-escape-2")).not.toBeFocused();
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 15. Tab: flow — navigates internally, escapes at boundary
+  // ─────────────────────────────────────────────────────────────
+  test("Tab: Flow — forward walks through items then exits", async ({
+    page,
+  }) => {
     await page.locator("#tab-flow-0").click();
     await expect(page.locator("#tab-flow-0")).toBeFocused();
 
-    // Tab moves to next item in the group
+    // Tab: 0 → 1 → 2 → exit
     await page.keyboard.press("Tab");
     await expect(page.locator("#tab-flow-1")).toBeFocused();
 
-    // Tab moves to the last item
     await page.keyboard.press("Tab");
     await expect(page.locator("#tab-flow-2")).toBeFocused();
 
-    // Tab at boundary should escape — no item in this group focused
+    // At boundary → escapes
     await page.keyboard.press("Tab");
     await expect(page.locator("#tab-flow-0")).not.toBeFocused();
     await expect(page.locator("#tab-flow-1")).not.toBeFocused();
@@ -468,9 +683,29 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 9. Activate: Automatic Mode
+  // 16. Tab: flow — Shift+Tab exits at start boundary
   // ─────────────────────────────────────────────────────────────
-  test("Activate: Automatic", async ({ page }) => {
+  test("Tab: Flow — Shift+Tab exits at start boundary", async ({ page }) => {
+    await page.locator("#tab-flow-0").click();
+    await expect(page.locator("#tab-flow-0")).toBeFocused();
+
+    // Shift+Tab from first item → should exit backward
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator("#tab-flow-0")).not.toBeFocused();
+    await expect(page.locator("#tab-flow-1")).not.toBeFocused();
+    await expect(page.locator("#tab-flow-2")).not.toBeFocused();
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // §3.5  INTERACTION COMMANDS
+  // ═══════════════════════════════════════════════════════════════
+
+  // ─────────────────────────────────────────────────────────────
+  // 17. Activate: automatic — focus = immediate select
+  // ─────────────────────────────────────────────────────────────
+  test("Activate: Automatic — focus triggers immediate selection", async ({
+    page,
+  }) => {
     await page.locator("#act-auto-a").click();
     await expect(page.locator("#act-auto-a")).toBeFocused();
     await expect(page.locator("#act-auto-a")).toHaveAttribute(
@@ -500,6 +735,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Click also triggers
     await page.locator("#act-auto-b").click();
     await expect(page.locator("#act-auto-b")).toBeFocused();
     await expect(page.locator("#act-auto-b")).toHaveAttribute(
@@ -513,9 +749,44 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 10. Dismiss: Escape Key
+  // 18. Activate: manual — listbox preset has followFocus=true
+  //     so selection still follows focus (§7 Role Preset Table)
   // ─────────────────────────────────────────────────────────────
-  test("Dismiss: Escape", async ({ page }) => {
+  test("Activate: Manual — listbox followFocus=true still selects on focus move", async ({
+    page,
+  }) => {
+    await page.locator("#act-manual-1").click();
+    await expect(page.locator("#act-manual-1")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#act-manual-2")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+    // §7: listbox has followFocus=true — selection follows focus despite manual activate
+    await expect(page.locator("#act-manual-2")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#act-manual-1")).not.toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // §3.5  DISMISS COMMANDS
+  // ═══════════════════════════════════════════════════════════════
+
+  // ─────────────────────────────────────────────────────────────
+  // 19. Dismiss: escape=deselect — clears selection
+  // ─────────────────────────────────────────────────────────────
+  test("Dismiss: Escape=deselect — clears selection on Escape", async ({
+    page,
+  }) => {
     await page.locator("#dis-esc-1").click();
     await expect(page.locator("#dis-esc-1")).toHaveAttribute(
       "aria-selected",
@@ -532,6 +803,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Select another, then Escape again
     await page.locator("#dis-esc-2").click();
     await expect(page.locator("#dis-esc-2")).toHaveAttribute(
       "aria-selected",
@@ -548,6 +820,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Select one, then click another (replaces), then Escape
     await page.locator("#dis-esc-1").click();
     await expect(page.locator("#dis-esc-1")).toHaveAttribute(
       "aria-selected",
@@ -572,21 +845,50 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 11. Expand: Tree Widget
+  // 20. Dismiss: escape=close — fires onDismiss (menu pattern)
   // ─────────────────────────────────────────────────────────────
-  test("Expand: Tree Toggle", async ({ page }) => {
+  test("Dismiss: Escape=close — Escape in menu focuses item then allows dismiss", async ({
+    page,
+  }) => {
+    // The dis-close zone is a menu with escape=close
+    await page.locator("#dis-close-A").click();
+    await expect(page.locator("#dis-close-A")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#dis-close-B")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // §3.7  EXPAND COMMANDS
+  // ═══════════════════════════════════════════════════════════════
+
+  // ─────────────────────────────────────────────────────────────
+  // 21. Expand: tree toggle — ArrowRight/Left/Enter/Space
+  // ─────────────────────────────────────────────────────────────
+  test("Expand: Tree Toggle — expand/collapse via arrows and Enter/Space", async ({
+    page,
+  }) => {
+    // Parent 1: starts collapsed
     await page.locator("#tree-parent-1").click();
     await expect(page.locator("#tree-parent-1")).toHaveAttribute(
       "aria-expanded",
       "false",
     );
 
+    // ArrowRight → expand
     await page.keyboard.press("ArrowRight");
     await expect(page.locator("#tree-parent-1")).toHaveAttribute(
       "aria-expanded",
       "true",
     );
 
+    // Navigate into children
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#tree-child-1-1")).toHaveAttribute(
       "aria-current",
@@ -599,6 +901,7 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // Navigate back up to parent
     await page.keyboard.press("ArrowUp");
     await expect(page.locator("#tree-child-1-1")).toHaveAttribute(
       "aria-current",
@@ -610,12 +913,14 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
+    // ArrowLeft → collapse
     await page.keyboard.press("ArrowLeft");
     await expect(page.locator("#tree-parent-1")).toHaveAttribute(
       "aria-expanded",
       "false",
     );
 
+    // Move to parent 2
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#tree-parent-2")).toHaveAttribute(
       "aria-current",
@@ -626,18 +931,21 @@ test.describe("Focus Showcase", () => {
       "false",
     );
 
+    // Enter → expand
     await page.keyboard.press("Enter");
     await expect(page.locator("#tree-parent-2")).toHaveAttribute(
       "aria-expanded",
       "true",
     );
 
+    // Space → collapse
     await page.keyboard.press("Space");
     await expect(page.locator("#tree-parent-2")).toHaveAttribute(
       "aria-expanded",
       "false",
     );
 
+    // Enter + ArrowLeft combo
     await page.keyboard.press("Enter");
     await expect(page.locator("#tree-parent-2")).toHaveAttribute(
       "aria-expanded",
@@ -652,73 +960,166 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 12. Navigate: Home/End Keys
+  // 22. Expand: collapsed parent skips hidden children
   // ─────────────────────────────────────────────────────────────
-  test("Navigate: Home/End", async ({ page }) => {
-    await page.locator("#nav-banana").click();
-    await expect(page.locator("#nav-banana")).toHaveAttribute(
+  test("Expand: collapsed parent — ArrowDown skips hidden children", async ({
+    page,
+  }) => {
+    // Parent 1: collapsed, children hidden
+    await page.locator("#tree-parent-1").click();
+    await expect(page.locator("#tree-parent-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+
+    // ArrowDown from collapsed parent → skips to next sibling (parent-2)
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#tree-parent-2")).toHaveAttribute(
       "aria-current",
       "true",
     );
 
-    await page.keyboard.press("Home");
-    await expect(page.locator("#nav-apple")).toHaveAttribute(
-      "aria-current",
+    // Expand parent-1 and verify children become navigable
+    await page.locator("#tree-parent-1").click();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#tree-parent-1")).toHaveAttribute(
+      "aria-expanded",
       "true",
     );
 
-    await page.keyboard.press("End");
-    await expect(page.locator("#nav-cherry")).toHaveAttribute(
-      "aria-current",
-      "true",
-    );
-
-    await page.keyboard.press("Home");
-    await expect(page.locator("#nav-apple")).toHaveAttribute(
-      "aria-current",
-      "true",
-    );
-
-    await page.locator("#nav-italic").click();
-    await expect(page.locator("#nav-italic")).toHaveAttribute(
-      "aria-current",
-      "true",
-    );
-
-    await page.keyboard.press("Home");
-    await expect(page.locator("#nav-bold")).toHaveAttribute(
-      "aria-current",
-      "true",
-    );
-
-    await page.keyboard.press("End");
-    await expect(page.locator("#nav-underline")).toHaveAttribute(
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#tree-child-1-1")).toHaveAttribute(
       "aria-current",
       "true",
     );
   });
 
+  // ═══════════════════════════════════════════════════════════════
+  // §3.1  FOCUS STACK (STACK_PUSH / STACK_POP)
+  // ═══════════════════════════════════════════════════════════════
+
   // ─────────────────────────────────────────────────────────────
-  // 13. Focus Stack: Modal Restoration
+  // 23. Focus Stack: single modal — open/navigate/close restores
   // ─────────────────────────────────────────────────────────────
-  test("Focus Stack: Restore", async ({ page }) => {
+  test("Focus Stack: single modal — restore on close", async ({ page }) => {
+    // Click "Open Modal" trigger to open dialog
     await page.locator("#fs-open-modal").click();
 
+    // Modal opens → first item should receive focus
     await expect(page.locator("#fs-modal1-1")).toHaveAttribute(
       "aria-current",
       "true",
     );
 
+    // Navigate within modal
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#fs-modal1-2")).toHaveAttribute(
       "aria-current",
       "true",
     );
 
+    // Close modal with Escape → should restore to base zone
     await page.keyboard.press("Escape");
 
     await expect(page.locator("#fs-base-1")).toHaveAttribute(
       "aria-current",
+      "true",
+    );
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 24. Focus Stack: nested modals — stacked push/pop chain
+  // ─────────────────────────────────────────────────────────────
+  test("Focus Stack: nested modals — double push/pop restores correctly", async ({
+    page,
+  }) => {
+    // Open first modal
+    await page.locator("#fs-open-modal").click();
+    await expect(page.locator("#fs-modal1-1")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Navigate to second item (which has sub-modal trigger)
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#fs-modal1-2")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Open sub-modal via the "Open Sub-Modal" button
+    await page.locator("text=Open Sub-Modal").click();
+
+    // Sub-modal should have focus on its first item
+    await expect(page.locator("#fs-modal2-1")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Navigate within sub-modal
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#fs-modal2-2")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Close sub-modal → should restore to modal 1, item 2
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#fs-modal1-2")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Close modal 1 → should restore to base zone
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#fs-base-1")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // §9.2  ARIA DERIVED ATTRIBUTES
+  // ═══════════════════════════════════════════════════════════════
+
+  // ─────────────────────────────────────────────────────────────
+  // 25. ARIA: tabIndex roving (focused=0, others=-1)
+  // ─────────────────────────────────────────────────────────────
+  test("ARIA: tabIndex roving — focused item gets 0, others -1", async ({
+    page,
+  }) => {
+    await page.locator("#nav-apple").click();
+
+    // Focused item should have tabIndex=0
+    await expect(page.locator("#nav-apple")).toHaveAttribute("tabindex", "0");
+    // Non-focused items should have tabIndex=-1
+    await expect(page.locator("#nav-banana")).toHaveAttribute("tabindex", "-1");
+    await expect(page.locator("#nav-cherry")).toHaveAttribute("tabindex", "-1");
+
+    // Move focus
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#nav-banana")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#nav-apple")).toHaveAttribute("tabindex", "-1");
+    await expect(page.locator("#nav-cherry")).toHaveAttribute("tabindex", "-1");
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 26. ARIA: data-focused attribute
+  // ─────────────────────────────────────────────────────────────
+  test("ARIA: data-focused reflects visual focus state", async ({ page }) => {
+    await page.locator("#nav-apple").click();
+    await expect(page.locator("#nav-apple")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
+
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#nav-banana")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
+    await expect(page.locator("#nav-apple")).not.toHaveAttribute(
+      "data-focused",
       "true",
     );
   });

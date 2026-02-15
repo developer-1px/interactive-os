@@ -40,7 +40,7 @@ export function ExpandTest() {
   );
 
   return (
-    <TestBox title="Expand / Collapse" description={description}>
+    <TestBox title="Expand / Collapse" spec="§3.7" description={description}>
       <div className="space-y-2">
         <div className="text-[10px] font-mono text-gray-500 uppercase">
           Tree Widget

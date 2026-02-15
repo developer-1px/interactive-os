@@ -31,7 +31,7 @@ export function NavigateTest() {
   );
 
   return (
-    <TestBox title="Directional Navigation" description={description}>
+    <TestBox title="Directional Navigation" spec="§3.2" description={description}>
       <div className="flex flex-col gap-6">
         {/* Vertical List with Loop */}
         <div className="space-y-2">

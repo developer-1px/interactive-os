@@ -31,7 +31,7 @@ export function AriaFacadeTest() {
   );
 
   return (
-    <TestBox title="ARIA Standard Facade" description={description}>
+    <TestBox title="ARIA Standard Facade" spec="§9" description={description}>
       <div className="flex flex-col gap-6">
         {/* 1. Tabs Pattern */}
         <div className="space-y-2">

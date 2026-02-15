@@ -34,7 +34,7 @@ export function TabTest() {
   );
 
   return (
-    <TestBox title="Tab Interaction" description={description}>
+    <TestBox title="Tab Interaction" spec="§3.3" description={description}>
       <div className="flex flex-col gap-6">
         {/* Escape (Default) */}
         <div className="space-y-2">

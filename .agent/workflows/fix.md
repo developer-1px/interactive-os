@@ -33,6 +33,11 @@ description: LLM 산출물의 well-formedness를 intent-preserving하게 보장�
 
 ### 절차
 
+0. **Git 상태 확인**
+   - `git diff --stat HEAD`로 working tree의 변경 파일을 확인한다.
+   - 큰 변경이 있는 파일은 반드시 최신 상태를 기준으로 작업한다.
+   - 구 버전 파일에 수정을 적용하면 의도치 않은 코드 손실이 발생한다.
+
 1. **Lazy 주석 사전 탐지**
    - `grep -rn "// \.\.\." src/ --include="*.ts" --include="*.tsx"` 로 lazy 주석 스캔.
    - 발견되면 git history에서 원본을 복원한다.

@@ -45,7 +45,7 @@ export function SelectTest() {
   );
 
   return (
-    <TestBox title="Selection Strategies" description={description}>
+    <TestBox title="Selection Strategies" spec="§3.4" description={description}>
       <div className="flex flex-col gap-6">
         {/* Multi-Select Grid */}
         <div className="space-y-2">

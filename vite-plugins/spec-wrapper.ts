@@ -27,6 +27,16 @@ export function specWrapperPlugin(): Plugin {
     transform(code, id) {
       if (!id.endsWith(".spec.ts")) return null;
 
+      // Skip specs that use Node.js APIs (e.g. smoke.spec.ts) — they are
+      // Playwright-only and cannot be bundled for the browser / TestBot.
+      // Return an empty module so the build graph doesn't choke on node: imports.
+      if (id.includes("smoke.spec.ts")) {
+        return {
+          code: "export default function __runSpec__() {}",
+          map: null,
+        };
+      }
+
       // Extract relative path from project root for context tagging
       // e.g. "/Users/.../e2e/aria-showcase/tabs.spec.ts" → "e2e/aria-showcase/tabs.spec.ts"
       const e2eIndex = id.indexOf("e2e/");

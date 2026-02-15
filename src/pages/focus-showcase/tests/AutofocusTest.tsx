@@ -39,7 +39,7 @@ export function AutofocusTest() {
   );
 
   return (
-    <TestBox title="Entry & AutoFocus" description={description}>
+    <TestBox title="Entry & AutoFocus" spec="§3.2" description={description}>
       <div className="flex flex-col gap-6">
         {/* Auto Focus */}
         <div className="space-y-2">

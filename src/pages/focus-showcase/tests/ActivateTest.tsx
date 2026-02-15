@@ -27,7 +27,7 @@ export function ActivateTest() {
   );
 
   return (
-    <TestBox title="Activation Mode" description={description}>
+    <TestBox title="Activation Mode" spec="§3.5" description={description}>
       <div className="flex flex-col gap-6">
         {/* Automatic */}
         <div className="space-y-2">

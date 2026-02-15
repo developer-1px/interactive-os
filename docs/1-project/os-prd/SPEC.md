@@ -373,24 +373,36 @@
 
 ## 11. Test Coverage Map
 
+> E2E: 26 tests (`focus-showcase.spec.ts`)
+> Unit: 다수 (`navigate`, `tab`, `escape`, `expand`, `stack`, `field`, `overlay`, `rolePresets`, `roleHelpers`, etc.)
+
 | Spec Area | E2E Tests | Unit Tests | Status |
 |-----------|-----------|------------|--------|
-| Autofocus (entry) | ✅ `focus-showcase` | ✅ `navigate.test` | ✅ |
+| Entry: first/last | ✅ | ✅ `navigate.test` | ✅ |
+| Entry: restore | ✅ | ✅ `navigate.test` | ✅ |
 | Navigate (vertical loop) | ✅ | ✅ `navigate.test` | ✅ |
 | Navigate (horizontal clamp) | ✅ | ✅ `navigate.test` | ✅ |
 | Navigate (2D grid) | ✅ | — | ⚠️ spatial은 DOM 필요 |
 | Navigate (Home/End) | ✅ | ✅ `navigate.test` | ✅ |
+| Navigate (orthogonal ignored) | ✅ | ✅ `navigate.test` | ✅ |
 | Navigate (typeahead) | — | ✅ `typeahead.test` | ✅ 구현 + 테스트 |
-| Select (range) | ✅ | ✅ | ✅ |
-| Select (toggle) | ✅ | ✅ | ✅ |
-| Select (followFocus/radio) | ✅ | — | ⚠️ E2E 충분 |
-| Tab (trap) | ✅ | ✅ `tab.test` | ✅ |
-| Tab (escape) | ✅ | ✅ `tab.test` | ✅ |
-| Tab (flow) | ✅ | ✅ `tab.test` | ✅ |
-| Activate (automatic) | ✅ | — | ⚠️ DOM 의존 |
-| Dismiss (escape) | ✅ | ✅ `escape.test` | ✅ |
-| Expand (tree) | ✅ | ✅ `expand.test` | ✅ |
-| Focus Stack (restore) | ✅ | ✅ `stack.test` | ✅ |
+| Select (Cmd+Click toggle) | ✅ | ✅ | ✅ |
+| Select (Shift+Click range) | ✅ | ✅ | ✅ |
+| Select (single toggle) | ✅ | ✅ | ✅ |
+| Select (followFocus/radio) | ✅ | — | ✅ E2E 충분 |
+| Tab (trap + Shift+Tab) | ✅ | ✅ `tab.test` | ✅ |
+| Tab (escape + Shift+Tab) | ✅ | ✅ `tab.test` | ✅ |
+| Tab (flow + Shift+Tab) | ✅ | ✅ `tab.test` | ✅ |
+| Activate (automatic) | ✅ | — | ✅ E2E 충분 |
+| Activate (manual + listbox preset) | ✅ | — | ✅ §7 preset 검증 |
+| Dismiss (escape=deselect) | ✅ | ✅ `escape.test` | ✅ |
+| Dismiss (escape=close) | ✅ | ✅ `escape.test` | ✅ |
+| Expand (tree toggle) | ✅ | ✅ `expand.test` | ✅ |
+| Expand (collapsed skip) | ✅ | ✅ `expand.test` | ✅ |
+| Focus Stack (single modal) | ✅ | ✅ `stack.test` | ✅ |
+| Focus Stack (nested modals) | ✅ | ✅ `stack.test` | ✅ |
+| ARIA: tabIndex roving | ✅ | — | ✅ E2E 충분 |
+| ARIA: data-focused | ✅ | — | ✅ E2E 충분 |
 | Clipboard (copy/cut/paste) | ✅ `dogfooding` | ✅ | ✅ |
 | Delete (single/multi) | ✅ `dogfooding` | ✅ | ✅ |
 | Undo/Redo | ✅ `dogfooding` | ✅ `history.test` | ✅ |
