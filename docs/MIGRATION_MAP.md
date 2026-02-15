@@ -24,3 +24,7 @@
 | `docs/3-resource/00-guides/00-developer-usage.md` | Zustand, CommandRegistry, 구 defineCommand API 기반 | Zustand 시절의 개발 온보딩 가이드 — kernel 도입으로 전면 무효 |
 | `docs/3-resource/00-guides/01-app-architecture-usage.md` | createCommandStore, useEngine, Immer 기반 | "Smart Core, Dumb App" 초기 구현 가이드 — 엔진 레이어 자체가 사라짐 |
 | `docs/3-resource/00-guides/02-debugging.md` | AntigravityLogger, 구 Inspector 구조 기반 | 커스텀 로거 시절의 디버깅 가이드 — Inspector 전면 재설계됨 |
+| `docs/1-project/os-elegance/*` (5 files) | 프로젝트 완료 — Shell UI, dead code 제거, Devtools 분리 등 모두 완료 | OS 시각적 완성도 프로젝트 — 2026-02-14 완료, retrospective 포함 |
+| `docs/1-project/focus-recovery/*` (6 files) | 프로젝트 완료 — FocusSync → FocusListener 전환 완료 | DOM 기반 포커스 복구 전략 — FocusListener 패턴으로 전면 교체됨 |
+| `docs/1-project/todo-v3-migration/*` (3 files) | 프로젝트 완료 — v3 승격, v1/v2 코드 완전 제거 | Todo 앱 통합 마이그레이션 — defineApp v5 기반으로 완료 |
+| `docs/1-project/todo-app/*` (7 files) | 프로젝트 완료 — todo-v3-migration에 흡수 | Todo 앱 초기 PRD/계획 문서들 — defineApp v5에 통합됨 |
