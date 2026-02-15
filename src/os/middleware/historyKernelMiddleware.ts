@@ -10,6 +10,7 @@
  * - Filters OS passthrough commands (no-op in app state)
  * - Detects `log: false` commands
  * - Data-change detection: only records when state.data changed
+ * - Transaction support: groupId for atomic undo/redo
  */
 
 import type { Middleware, ScopeToken } from "@kernel/core/tokens";
@@ -44,10 +45,46 @@ const OS_PASSTHROUGH = new Set([
   "OS_DELETE",
   "OS_UNDO",
   "OS_REDO",
+  "OS_SELECTION_CLEAR",
+  "OS_SELECTION_SET",
+  "OS_SELECTION_ADD",
 ]);
 
-// Commands that manage history themselves
-const HISTORY_SELF_MANAGED = new Set(["UNDO", "REDO"]);
+// Commands that manage history themselves (both capitalized and lowercase)
+const HISTORY_SELF_MANAGED = new Set(["UNDO", "REDO", "undo", "redo"]);
+
+// ═══════════════════════════════════════════════════════════════════
+// Transaction Support
+// ═══════════════════════════════════════════════════════════════════
+
+let activeGroupId: string | null = null;
+let transactionDepth = 0;
+
+/** Begin a transaction. Nested calls are flattened to the outermost group. */
+export function beginTransaction(): void {
+  transactionDepth++;
+  if (transactionDepth === 1) {
+    activeGroupId = `txn-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+}
+
+/** End a transaction. Only clears groupId when outermost transaction ends. */
+export function endTransaction(): void {
+  transactionDepth--;
+  if (transactionDepth <= 0) {
+    transactionDepth = 0;
+    activeGroupId = null;
+  }
+}
+
+/** Returns the current active group ID, or null if no transaction is active. */
+export function getActiveGroupId(): string | null {
+  return activeGroupId;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Middleware Factory
+// ═══════════════════════════════════════════════════════════════════
 
 /**
  * Creates a kernel before/after middleware that records undo/redo snapshots
@@ -89,41 +126,43 @@ export function createHistoryMiddleware(
       if (OS_PASSTHROUGH.has(commandType)) return ctx;
       if (HISTORY_SELF_MANAGED.has(commandType)) return ctx;
 
-      const prevAppState = ctx.injected["_historyBefore"] as
-        | Record<string, unknown>
-        | undefined;
-      const nextAppState = (ctx.state as AppState).apps[appId] as
+      const prevAppState = ctx.injected._historyBefore as
         | Record<string, unknown>
         | undefined;
 
-      if (!prevAppState || !nextAppState) return ctx;
+      // The handler's NEW state is in ctx.effects.state (scoped slice),
+      // NOT in ctx.state (which is still the pre-handler full kernel state).
+      const effectsState = (ctx.effects as Record<string, unknown> | null)
+        ?.state as Record<string, unknown> | undefined;
+
+      if (!prevAppState || !effectsState) return ctx;
 
       // Skip if no history field in app state
-      if (!nextAppState["history"] && !prevAppState["history"]) return ctx;
+      if (!effectsState.history && !prevAppState.history) return ctx;
 
       // Skip if data hasn't changed
       if (
-        prevAppState["data"] !== undefined &&
-        prevAppState["data"] === nextAppState["data"]
+        prevAppState.data !== undefined &&
+        prevAppState.data === effectsState.data
       ) {
         return ctx;
       }
 
       // Record snapshot
-      const previousFocusId = ctx.injected["_historyFocusId"] as string | null;
+      const previousFocusId = ctx.injected._historyFocusId as string | null;
 
       const updatedAppState = produce(
-        nextAppState,
+        effectsState,
         (draft: Record<string, unknown>) => {
-          if (!draft["history"]) {
-            draft["history"] = { past: [], future: [] };
+          if (!draft.history) {
+            draft.history = { past: [], future: [] };
           }
 
-          const history = draft["history"] as {
+          const history = draft.history as {
             past: HistoryEntry[];
             future: HistoryEntry[];
           };
-          const { ["history"]: _h, ...prevWithoutHistory } = prevAppState;
+          const { history: _h, ...prevWithoutHistory } = prevAppState;
 
           history.past.push({
             command: {
@@ -133,6 +172,7 @@ export function createHistoryMiddleware(
             timestamp: Date.now(),
             snapshot: prevWithoutHistory,
             focusedItemId: previousFocusId,
+            groupId: getActiveGroupId() ?? undefined,
           });
 
           if (history.past.length > HISTORY_LIMIT) {
@@ -144,15 +184,13 @@ export function createHistoryMiddleware(
         },
       );
 
-      // Update kernel state with the history-augmented app state
+      // Write the history-augmented state back to effects.state
+      // so the kernel applies it via executeEffects
       return {
         ...ctx,
-        state: {
-          ...(ctx.state as AppState),
-          apps: {
-            ...(ctx.state as AppState).apps,
-            [appId]: updatedAppState,
-          },
+        effects: {
+          ...(ctx.effects as Record<string, unknown>),
+          state: updatedAppState,
         },
       };
     },

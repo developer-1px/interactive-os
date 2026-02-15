@@ -329,7 +329,7 @@ describe("Todo v5 — defineApp native", () => {
             const lastId = ids[ids.length - 1]!;
             app.dispatch(copyTodo({ id: lastId }));
             expect(app.state.ui.clipboard).not.toBeNull();
-            expect(app.state.ui.clipboard!.todo.text).toBe("Copy me");
+            expect(app.state.ui.clipboard!.todos[0]!.text).toBe("Copy me");
             expect(app.state.ui.clipboard!.isCut).toBe(false);
         });
 
@@ -355,7 +355,7 @@ describe("Todo v5 — defineApp native", () => {
             app.dispatch(cutTodo({ id: lastId }));
             expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
             expect(app.state.ui.clipboard).not.toBeNull();
-            expect(app.state.ui.clipboard!.todo.text).toBe("Cut me");
+            expect(app.state.ui.clipboard!.todos[0]!.text).toBe("Cut me");
             expect(app.state.ui.clipboard!.isCut).toBe(true);
         });
 

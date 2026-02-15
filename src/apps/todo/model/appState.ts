@@ -56,7 +56,7 @@ export interface UIState {
   editDraft: string;
   viewMode: "list" | "board";
   isInspectorOpen: boolean;
-  clipboard: { todo: Todo; isCut: boolean } | null;
+  clipboard: { todos: Todo[]; isCut: boolean } | null;
 }
 
 export interface HistoryState {

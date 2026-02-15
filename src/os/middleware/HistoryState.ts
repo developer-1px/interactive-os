@@ -7,6 +7,8 @@ export interface HistoryEntry {
   snapshot?: any;
   /** Captured focusedItemId for focus restoration on undo */
   focusedItemId?: string | null;
+  /** Transaction group ID — entries with same groupId are undone/redone atomically */
+  groupId?: string;
 }
 
 /**

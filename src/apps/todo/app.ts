@@ -144,9 +144,9 @@ export const moveItemUp = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -171,9 +171,9 @@ export const moveItemDown = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -214,7 +214,7 @@ export const copyTodo = listZone.command(
     if (!todo) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
-        draft.ui.clipboard = { todo: { ...todo }, isCut: false };
+        draft.ui.clipboard = { todos: [{ ...todo }], isCut: false };
       }),
       clipboardWrite: { text: todo.text, json: JSON.stringify(todo) },
     };
@@ -230,7 +230,7 @@ export const cutTodo = listZone.command(
     if (!todo) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
-        draft.ui.clipboard = { todo: { ...todo }, isCut: true };
+        draft.ui.clipboard = { todos: [{ ...todo }], isCut: true };
         delete draft.data.todos[targetId];
         const index = draft.data.todoOrder.indexOf(targetId);
         if (index !== -1) draft.data.todoOrder.splice(index, 1);
@@ -244,30 +244,36 @@ export const pasteTodo = listZone.command(
   "pasteTodo",
   (ctx, payload: { id?: number | string }) => {
     const clip = ctx.state.ui.clipboard;
-    if (!clip) return { state: ctx.state };
-    const sourceTodo = clip.todo;
-    const newId = Date.now();
+    if (!clip || clip.todos.length === 0) return { state: ctx.state };
+
+    const baseTime = Date.now();
+    let lastNewId = baseTime;
     return {
       state: produce(ctx.state, (draft) => {
-        draft.data.todos[newId] = {
-          id: newId,
-          text: sourceTodo.text,
-          completed: sourceTodo.completed,
-          categoryId: draft.ui.selectedCategoryId,
-        };
-        const numericFocusId = payload.id ? Number(payload.id) : undefined;
-        if (numericFocusId && !Number.isNaN(numericFocusId)) {
-          const focusIndex = draft.data.todoOrder.indexOf(numericFocusId);
-          if (focusIndex !== -1) {
-            draft.data.todoOrder.splice(focusIndex + 1, 0, newId);
+        for (let i = 0; i < clip.todos.length; i++) {
+          const sourceTodo = clip.todos[i]!;
+          const newId = baseTime + i;
+          lastNewId = newId;
+          draft.data.todos[newId] = {
+            id: newId,
+            text: sourceTodo.text,
+            completed: sourceTodo.completed,
+            categoryId: draft.ui.selectedCategoryId,
+          };
+          const numericFocusId = payload.id ? Number(payload.id) : undefined;
+          if (numericFocusId && !Number.isNaN(numericFocusId)) {
+            const focusIndex = draft.data.todoOrder.indexOf(numericFocusId);
+            if (focusIndex !== -1) {
+              draft.data.todoOrder.splice(focusIndex + 1 + i, 0, newId);
+            } else {
+              draft.data.todoOrder.push(newId);
+            }
           } else {
             draft.data.todoOrder.push(newId);
           }
-        } else {
-          draft.data.todoOrder.push(newId);
         }
       }),
-      dispatch: FOCUS({ zoneId: "list", itemId: String(newId) }),
+      dispatch: FOCUS({ zoneId: "list", itemId: String(lastNewId) }),
     };
   },
 );
@@ -276,24 +282,51 @@ export const undoCommand = listZone.command(
   "undo",
   (ctx) => {
     // when: canUndo guarantees past.length > 0
-    const entry = ctx.state.history.past.at(-1)!;
-    const focusTarget = entry.focusedItemId
-      ? String(entry.focusedItemId)
+    const past = ctx.state.history.past;
+    const lastEntry = past.at(-1)!;
+    const groupId = lastEntry.groupId;
+
+    // Count consecutive entries with the same groupId from the end
+    let entriesToPop = 1;
+    if (groupId) {
+      entriesToPop = 0;
+      for (let i = past.length - 1; i >= 0; i--) {
+        if (past[i]!.groupId === groupId) {
+          entriesToPop++;
+        } else {
+          break;
+        }
+      }
+    }
+
+    // The snapshot to restore is from the EARLIEST entry being undone
+    const earliestUndoEntry = past[past.length - entriesToPop]!;
+    const restoreSnapshot = earliestUndoEntry.snapshot;
+
+    const focusTarget = lastEntry.focusedItemId
+      ? String(lastEntry.focusedItemId)
       : undefined;
+
     return {
       state: produce(ctx.state, (draft) => {
-        draft.history.past.pop();
+        // Save current state for redo
         const { history: _h, ...currentWithoutHistory } = ctx.state;
         draft.history.future.push({
           command: { type: "UNDO_SNAPSHOT" },
           timestamp: Date.now(),
           snapshot: currentWithoutHistory,
+          groupId,
         });
-        const popped = ctx.state.history.past.at(-2);
-        if (popped?.snapshot) {
-          const snapshot = popped.snapshot;
-          if (snapshot.data) draft.data = snapshot.data;
-          if (snapshot.ui) draft.ui = snapshot.ui;
+
+        // Pop all grouped entries
+        for (let i = 0; i < entriesToPop; i++) {
+          draft.history.past.pop();
+        }
+
+        // Restore from the earliest entry's snapshot
+        if (restoreSnapshot) {
+          if (restoreSnapshot.data) draft.data = restoreSnapshot.data;
+          if (restoreSnapshot.ui) draft.ui = restoreSnapshot.ui;
         }
       }),
       dispatch: focusTarget

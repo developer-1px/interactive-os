@@ -8,393 +8,393 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as MinimalRouteImport } from "./routes/_minimal";
-import { Route as MinimalBuilderRouteImport } from "./routes/_minimal/builder";
-import { Route as MinimalDocsRouteImport } from "./routes/_minimal/docs";
-import { Route as MinimalDocsSplatRouteImport } from "./routes/_minimal/docs/$";
-import { Route as MinimalDocsIndexRouteImport } from "./routes/_minimal/docs/index";
-import { Route as MinimalPlaygroundAriaRouteImport } from "./routes/_minimal/playground.aria";
-import { Route as MinimalPlaygroundDesignDashboardV3RouteImport } from "./routes/_minimal/playground.design-dashboard-v3";
-import { Route as MinimalPlaygroundFocusRouteImport } from "./routes/_minimal/playground.focus";
-import { Route as MinimalPlaygroundKernelRouteImport } from "./routes/_minimal/playground.kernel";
-import { Route as MinimalPlaygroundRadixRouteImport } from "./routes/_minimal/playground.radix";
-import { Route as MinimalPlaygroundTestsRouteImport } from "./routes/_minimal/playground.tests";
-import { Route as TodoRouteImport } from "./routes/_todo";
-import { Route as TodoIndexRouteImport } from "./routes/_todo/index";
-import { Route as TodoProfileRouteImport } from "./routes/_todo/profile";
-import { Route as TodoSearchRouteImport } from "./routes/_todo/search";
-import { Route as TodoSettingsRouteImport } from "./routes/_todo/settings";
-import { Route as PlaygroundDesignTestbotCursorRouteImport } from "./routes/playground/design-testbot-cursor";
-import { Route as PlaygroundPocRegistryMonitorRouteImport } from "./routes/playground/poc-registry-monitor";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as TodoRouteImport } from './routes/_todo'
+import { Route as MinimalRouteImport } from './routes/_minimal'
+import { Route as TodoIndexRouteImport } from './routes/_todo/index'
+import { Route as PlaygroundPocRegistryMonitorRouteImport } from './routes/playground/poc-registry-monitor'
+import { Route as PlaygroundDesignTestbotCursorRouteImport } from './routes/playground/design-testbot-cursor'
+import { Route as TodoSettingsRouteImport } from './routes/_todo/settings'
+import { Route as TodoSearchRouteImport } from './routes/_todo/search'
+import { Route as TodoProfileRouteImport } from './routes/_todo/profile'
+import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
+import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
+import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
+import { Route as MinimalPlaygroundTestsRouteImport } from './routes/_minimal/playground.tests'
+import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/playground.radix'
+import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
+import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
+import { Route as MinimalPlaygroundDesignDashboardV3RouteImport } from './routes/_minimal/playground.design-dashboard-v3'
+import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
+import { Route as MinimalDocsSplatRouteImport } from './routes/_minimal/docs/$'
 
 const TodoRoute = TodoRouteImport.update({
-  id: "/_todo",
+  id: '/_todo',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const MinimalRoute = MinimalRouteImport.update({
-  id: "/_minimal",
+  id: '/_minimal',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const TodoIndexRoute = TodoIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => TodoRoute,
-} as any);
+} as any)
 const PlaygroundPocRegistryMonitorRoute =
   PlaygroundPocRegistryMonitorRouteImport.update({
-    id: "/playground/poc-registry-monitor",
-    path: "/playground/poc-registry-monitor",
+    id: '/playground/poc-registry-monitor',
+    path: '/playground/poc-registry-monitor',
     getParentRoute: () => rootRouteImport,
-  } as any);
+  } as any)
 const PlaygroundDesignTestbotCursorRoute =
   PlaygroundDesignTestbotCursorRouteImport.update({
-    id: "/playground/design-testbot-cursor",
-    path: "/playground/design-testbot-cursor",
+    id: '/playground/design-testbot-cursor',
+    path: '/playground/design-testbot-cursor',
     getParentRoute: () => rootRouteImport,
-  } as any);
+  } as any)
 const TodoSettingsRoute = TodoSettingsRouteImport.update({
-  id: "/settings",
-  path: "/settings",
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => TodoRoute,
-} as any);
+} as any)
 const TodoSearchRoute = TodoSearchRouteImport.update({
-  id: "/search",
-  path: "/search",
+  id: '/search',
+  path: '/search',
   getParentRoute: () => TodoRoute,
-} as any);
+} as any)
 const TodoProfileRoute = TodoProfileRouteImport.update({
-  id: "/profile",
-  path: "/profile",
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => TodoRoute,
-} as any);
+} as any)
 const MinimalDocsRoute = MinimalDocsRouteImport.update({
-  id: "/docs",
-  path: "/docs",
+  id: '/docs',
+  path: '/docs',
   getParentRoute: () => MinimalRoute,
-} as any);
+} as any)
 const MinimalBuilderRoute = MinimalBuilderRouteImport.update({
-  id: "/builder",
-  path: "/builder",
+  id: '/builder',
+  path: '/builder',
   getParentRoute: () => MinimalRoute,
-} as any);
+} as any)
 const MinimalDocsIndexRoute = MinimalDocsIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => MinimalDocsRoute,
-} as any);
+} as any)
 const MinimalPlaygroundTestsRoute = MinimalPlaygroundTestsRouteImport.update({
-  id: "/playground/tests",
-  path: "/playground/tests",
+  id: '/playground/tests',
+  path: '/playground/tests',
   getParentRoute: () => MinimalRoute,
-} as any);
+} as any)
 const MinimalPlaygroundRadixRoute = MinimalPlaygroundRadixRouteImport.update({
-  id: "/playground/radix",
-  path: "/playground/radix",
+  id: '/playground/radix',
+  path: '/playground/radix',
   getParentRoute: () => MinimalRoute,
-} as any);
+} as any)
 const MinimalPlaygroundKernelRoute = MinimalPlaygroundKernelRouteImport.update({
-  id: "/playground/kernel",
-  path: "/playground/kernel",
+  id: '/playground/kernel',
+  path: '/playground/kernel',
   getParentRoute: () => MinimalRoute,
-} as any);
+} as any)
 const MinimalPlaygroundFocusRoute = MinimalPlaygroundFocusRouteImport.update({
-  id: "/playground/focus",
-  path: "/playground/focus",
+  id: '/playground/focus',
+  path: '/playground/focus',
   getParentRoute: () => MinimalRoute,
-} as any);
+} as any)
 const MinimalPlaygroundDesignDashboardV3Route =
   MinimalPlaygroundDesignDashboardV3RouteImport.update({
-    id: "/playground/design-dashboard-v3",
-    path: "/playground/design-dashboard-v3",
+    id: '/playground/design-dashboard-v3',
+    path: '/playground/design-dashboard-v3',
     getParentRoute: () => MinimalRoute,
-  } as any);
+  } as any)
 const MinimalPlaygroundAriaRoute = MinimalPlaygroundAriaRouteImport.update({
-  id: "/playground/aria",
-  path: "/playground/aria",
+  id: '/playground/aria',
+  path: '/playground/aria',
   getParentRoute: () => MinimalRoute,
-} as any);
+} as any)
 const MinimalDocsSplatRoute = MinimalDocsSplatRouteImport.update({
-  id: "/$",
-  path: "/$",
+  id: '/$',
+  path: '/$',
   getParentRoute: () => MinimalDocsRoute,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof TodoIndexRoute;
-  "/builder": typeof MinimalBuilderRoute;
-  "/docs": typeof MinimalDocsRouteWithChildren;
-  "/profile": typeof TodoProfileRoute;
-  "/search": typeof TodoSearchRoute;
-  "/settings": typeof TodoSettingsRoute;
-  "/playground/design-testbot-cursor": typeof PlaygroundDesignTestbotCursorRoute;
-  "/playground/poc-registry-monitor": typeof PlaygroundPocRegistryMonitorRoute;
-  "/docs/$": typeof MinimalDocsSplatRoute;
-  "/playground/aria": typeof MinimalPlaygroundAriaRoute;
-  "/playground/design-dashboard-v3": typeof MinimalPlaygroundDesignDashboardV3Route;
-  "/playground/focus": typeof MinimalPlaygroundFocusRoute;
-  "/playground/kernel": typeof MinimalPlaygroundKernelRoute;
-  "/playground/radix": typeof MinimalPlaygroundRadixRoute;
-  "/playground/tests": typeof MinimalPlaygroundTestsRoute;
-  "/docs/": typeof MinimalDocsIndexRoute;
+  '/': typeof TodoIndexRoute
+  '/builder': typeof MinimalBuilderRoute
+  '/docs': typeof MinimalDocsRouteWithChildren
+  '/profile': typeof TodoProfileRoute
+  '/search': typeof TodoSearchRoute
+  '/settings': typeof TodoSettingsRoute
+  '/playground/design-testbot-cursor': typeof PlaygroundDesignTestbotCursorRoute
+  '/playground/poc-registry-monitor': typeof PlaygroundPocRegistryMonitorRoute
+  '/docs/$': typeof MinimalDocsSplatRoute
+  '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
+  '/playground/focus': typeof MinimalPlaygroundFocusRoute
+  '/playground/kernel': typeof MinimalPlaygroundKernelRoute
+  '/playground/radix': typeof MinimalPlaygroundRadixRoute
+  '/playground/tests': typeof MinimalPlaygroundTestsRoute
+  '/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof TodoIndexRoute;
-  "/builder": typeof MinimalBuilderRoute;
-  "/profile": typeof TodoProfileRoute;
-  "/search": typeof TodoSearchRoute;
-  "/settings": typeof TodoSettingsRoute;
-  "/playground/design-testbot-cursor": typeof PlaygroundDesignTestbotCursorRoute;
-  "/playground/poc-registry-monitor": typeof PlaygroundPocRegistryMonitorRoute;
-  "/docs/$": typeof MinimalDocsSplatRoute;
-  "/playground/aria": typeof MinimalPlaygroundAriaRoute;
-  "/playground/design-dashboard-v3": typeof MinimalPlaygroundDesignDashboardV3Route;
-  "/playground/focus": typeof MinimalPlaygroundFocusRoute;
-  "/playground/kernel": typeof MinimalPlaygroundKernelRoute;
-  "/playground/radix": typeof MinimalPlaygroundRadixRoute;
-  "/playground/tests": typeof MinimalPlaygroundTestsRoute;
-  "/docs": typeof MinimalDocsIndexRoute;
+  '/': typeof TodoIndexRoute
+  '/builder': typeof MinimalBuilderRoute
+  '/profile': typeof TodoProfileRoute
+  '/search': typeof TodoSearchRoute
+  '/settings': typeof TodoSettingsRoute
+  '/playground/design-testbot-cursor': typeof PlaygroundDesignTestbotCursorRoute
+  '/playground/poc-registry-monitor': typeof PlaygroundPocRegistryMonitorRoute
+  '/docs/$': typeof MinimalDocsSplatRoute
+  '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
+  '/playground/focus': typeof MinimalPlaygroundFocusRoute
+  '/playground/kernel': typeof MinimalPlaygroundKernelRoute
+  '/playground/radix': typeof MinimalPlaygroundRadixRoute
+  '/playground/tests': typeof MinimalPlaygroundTestsRoute
+  '/docs': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/_minimal": typeof MinimalRouteWithChildren;
-  "/_todo": typeof TodoRouteWithChildren;
-  "/_minimal/builder": typeof MinimalBuilderRoute;
-  "/_minimal/docs": typeof MinimalDocsRouteWithChildren;
-  "/_todo/profile": typeof TodoProfileRoute;
-  "/_todo/search": typeof TodoSearchRoute;
-  "/_todo/settings": typeof TodoSettingsRoute;
-  "/playground/design-testbot-cursor": typeof PlaygroundDesignTestbotCursorRoute;
-  "/playground/poc-registry-monitor": typeof PlaygroundPocRegistryMonitorRoute;
-  "/_todo/": typeof TodoIndexRoute;
-  "/_minimal/docs/$": typeof MinimalDocsSplatRoute;
-  "/_minimal/playground/aria": typeof MinimalPlaygroundAriaRoute;
-  "/_minimal/playground/design-dashboard-v3": typeof MinimalPlaygroundDesignDashboardV3Route;
-  "/_minimal/playground/focus": typeof MinimalPlaygroundFocusRoute;
-  "/_minimal/playground/kernel": typeof MinimalPlaygroundKernelRoute;
-  "/_minimal/playground/radix": typeof MinimalPlaygroundRadixRoute;
-  "/_minimal/playground/tests": typeof MinimalPlaygroundTestsRoute;
-  "/_minimal/docs/": typeof MinimalDocsIndexRoute;
+  __root__: typeof rootRouteImport
+  '/_minimal': typeof MinimalRouteWithChildren
+  '/_todo': typeof TodoRouteWithChildren
+  '/_minimal/builder': typeof MinimalBuilderRoute
+  '/_minimal/docs': typeof MinimalDocsRouteWithChildren
+  '/_todo/profile': typeof TodoProfileRoute
+  '/_todo/search': typeof TodoSearchRoute
+  '/_todo/settings': typeof TodoSettingsRoute
+  '/playground/design-testbot-cursor': typeof PlaygroundDesignTestbotCursorRoute
+  '/playground/poc-registry-monitor': typeof PlaygroundPocRegistryMonitorRoute
+  '/_todo/': typeof TodoIndexRoute
+  '/_minimal/docs/$': typeof MinimalDocsSplatRoute
+  '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/_minimal/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
+  '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
+  '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
+  '/_minimal/playground/radix': typeof MinimalPlaygroundRadixRoute
+  '/_minimal/playground/tests': typeof MinimalPlaygroundTestsRoute
+  '/_minimal/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/builder"
-    | "/docs"
-    | "/profile"
-    | "/search"
-    | "/settings"
-    | "/playground/design-testbot-cursor"
-    | "/playground/poc-registry-monitor"
-    | "/docs/$"
-    | "/playground/aria"
-    | "/playground/design-dashboard-v3"
-    | "/playground/focus"
-    | "/playground/kernel"
-    | "/playground/radix"
-    | "/playground/tests"
-    | "/docs/";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/builder'
+    | '/docs'
+    | '/profile'
+    | '/search'
+    | '/settings'
+    | '/playground/design-testbot-cursor'
+    | '/playground/poc-registry-monitor'
+    | '/docs/$'
+    | '/playground/aria'
+    | '/playground/design-dashboard-v3'
+    | '/playground/focus'
+    | '/playground/kernel'
+    | '/playground/radix'
+    | '/playground/tests'
+    | '/docs/'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/builder"
-    | "/profile"
-    | "/search"
-    | "/settings"
-    | "/playground/design-testbot-cursor"
-    | "/playground/poc-registry-monitor"
-    | "/docs/$"
-    | "/playground/aria"
-    | "/playground/design-dashboard-v3"
-    | "/playground/focus"
-    | "/playground/kernel"
-    | "/playground/radix"
-    | "/playground/tests"
-    | "/docs";
+    | '/'
+    | '/builder'
+    | '/profile'
+    | '/search'
+    | '/settings'
+    | '/playground/design-testbot-cursor'
+    | '/playground/poc-registry-monitor'
+    | '/docs/$'
+    | '/playground/aria'
+    | '/playground/design-dashboard-v3'
+    | '/playground/focus'
+    | '/playground/kernel'
+    | '/playground/radix'
+    | '/playground/tests'
+    | '/docs'
   id:
-    | "__root__"
-    | "/_minimal"
-    | "/_todo"
-    | "/_minimal/builder"
-    | "/_minimal/docs"
-    | "/_todo/profile"
-    | "/_todo/search"
-    | "/_todo/settings"
-    | "/playground/design-testbot-cursor"
-    | "/playground/poc-registry-monitor"
-    | "/_todo/"
-    | "/_minimal/docs/$"
-    | "/_minimal/playground/aria"
-    | "/_minimal/playground/design-dashboard-v3"
-    | "/_minimal/playground/focus"
-    | "/_minimal/playground/kernel"
-    | "/_minimal/playground/radix"
-    | "/_minimal/playground/tests"
-    | "/_minimal/docs/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/_minimal'
+    | '/_todo'
+    | '/_minimal/builder'
+    | '/_minimal/docs'
+    | '/_todo/profile'
+    | '/_todo/search'
+    | '/_todo/settings'
+    | '/playground/design-testbot-cursor'
+    | '/playground/poc-registry-monitor'
+    | '/_todo/'
+    | '/_minimal/docs/$'
+    | '/_minimal/playground/aria'
+    | '/_minimal/playground/design-dashboard-v3'
+    | '/_minimal/playground/focus'
+    | '/_minimal/playground/kernel'
+    | '/_minimal/playground/radix'
+    | '/_minimal/playground/tests'
+    | '/_minimal/docs/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  MinimalRoute: typeof MinimalRouteWithChildren;
-  TodoRoute: typeof TodoRouteWithChildren;
-  PlaygroundDesignTestbotCursorRoute: typeof PlaygroundDesignTestbotCursorRoute;
-  PlaygroundPocRegistryMonitorRoute: typeof PlaygroundPocRegistryMonitorRoute;
+  MinimalRoute: typeof MinimalRouteWithChildren
+  TodoRoute: typeof TodoRouteWithChildren
+  PlaygroundDesignTestbotCursorRoute: typeof PlaygroundDesignTestbotCursorRoute
+  PlaygroundPocRegistryMonitorRoute: typeof PlaygroundPocRegistryMonitorRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/_todo": {
-      id: "/_todo";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof TodoRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_minimal": {
-      id: "/_minimal";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof MinimalRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_todo/": {
-      id: "/_todo/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof TodoIndexRouteImport;
-      parentRoute: typeof TodoRoute;
-    };
-    "/playground/poc-registry-monitor": {
-      id: "/playground/poc-registry-monitor";
-      path: "/playground/poc-registry-monitor";
-      fullPath: "/playground/poc-registry-monitor";
-      preLoaderRoute: typeof PlaygroundPocRegistryMonitorRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/playground/design-testbot-cursor": {
-      id: "/playground/design-testbot-cursor";
-      path: "/playground/design-testbot-cursor";
-      fullPath: "/playground/design-testbot-cursor";
-      preLoaderRoute: typeof PlaygroundDesignTestbotCursorRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_todo/settings": {
-      id: "/_todo/settings";
-      path: "/settings";
-      fullPath: "/settings";
-      preLoaderRoute: typeof TodoSettingsRouteImport;
-      parentRoute: typeof TodoRoute;
-    };
-    "/_todo/search": {
-      id: "/_todo/search";
-      path: "/search";
-      fullPath: "/search";
-      preLoaderRoute: typeof TodoSearchRouteImport;
-      parentRoute: typeof TodoRoute;
-    };
-    "/_todo/profile": {
-      id: "/_todo/profile";
-      path: "/profile";
-      fullPath: "/profile";
-      preLoaderRoute: typeof TodoProfileRouteImport;
-      parentRoute: typeof TodoRoute;
-    };
-    "/_minimal/docs": {
-      id: "/_minimal/docs";
-      path: "/docs";
-      fullPath: "/docs";
-      preLoaderRoute: typeof MinimalDocsRouteImport;
-      parentRoute: typeof MinimalRoute;
-    };
-    "/_minimal/builder": {
-      id: "/_minimal/builder";
-      path: "/builder";
-      fullPath: "/builder";
-      preLoaderRoute: typeof MinimalBuilderRouteImport;
-      parentRoute: typeof MinimalRoute;
-    };
-    "/_minimal/docs/": {
-      id: "/_minimal/docs/";
-      path: "/";
-      fullPath: "/docs/";
-      preLoaderRoute: typeof MinimalDocsIndexRouteImport;
-      parentRoute: typeof MinimalDocsRoute;
-    };
-    "/_minimal/playground/tests": {
-      id: "/_minimal/playground/tests";
-      path: "/playground/tests";
-      fullPath: "/playground/tests";
-      preLoaderRoute: typeof MinimalPlaygroundTestsRouteImport;
-      parentRoute: typeof MinimalRoute;
-    };
-    "/_minimal/playground/radix": {
-      id: "/_minimal/playground/radix";
-      path: "/playground/radix";
-      fullPath: "/playground/radix";
-      preLoaderRoute: typeof MinimalPlaygroundRadixRouteImport;
-      parentRoute: typeof MinimalRoute;
-    };
-    "/_minimal/playground/kernel": {
-      id: "/_minimal/playground/kernel";
-      path: "/playground/kernel";
-      fullPath: "/playground/kernel";
-      preLoaderRoute: typeof MinimalPlaygroundKernelRouteImport;
-      parentRoute: typeof MinimalRoute;
-    };
-    "/_minimal/playground/focus": {
-      id: "/_minimal/playground/focus";
-      path: "/playground/focus";
-      fullPath: "/playground/focus";
-      preLoaderRoute: typeof MinimalPlaygroundFocusRouteImport;
-      parentRoute: typeof MinimalRoute;
-    };
-    "/_minimal/playground/design-dashboard-v3": {
-      id: "/_minimal/playground/design-dashboard-v3";
-      path: "/playground/design-dashboard-v3";
-      fullPath: "/playground/design-dashboard-v3";
-      preLoaderRoute: typeof MinimalPlaygroundDesignDashboardV3RouteImport;
-      parentRoute: typeof MinimalRoute;
-    };
-    "/_minimal/playground/aria": {
-      id: "/_minimal/playground/aria";
-      path: "/playground/aria";
-      fullPath: "/playground/aria";
-      preLoaderRoute: typeof MinimalPlaygroundAriaRouteImport;
-      parentRoute: typeof MinimalRoute;
-    };
-    "/_minimal/docs/$": {
-      id: "/_minimal/docs/$";
-      path: "/$";
-      fullPath: "/docs/$";
-      preLoaderRoute: typeof MinimalDocsSplatRouteImport;
-      parentRoute: typeof MinimalDocsRoute;
-    };
+    '/_todo': {
+      id: '/_todo'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof TodoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_minimal': {
+      id: '/_minimal'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MinimalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_todo/': {
+      id: '/_todo/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof TodoIndexRouteImport
+      parentRoute: typeof TodoRoute
+    }
+    '/playground/poc-registry-monitor': {
+      id: '/playground/poc-registry-monitor'
+      path: '/playground/poc-registry-monitor'
+      fullPath: '/playground/poc-registry-monitor'
+      preLoaderRoute: typeof PlaygroundPocRegistryMonitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/playground/design-testbot-cursor': {
+      id: '/playground/design-testbot-cursor'
+      path: '/playground/design-testbot-cursor'
+      fullPath: '/playground/design-testbot-cursor'
+      preLoaderRoute: typeof PlaygroundDesignTestbotCursorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_todo/settings': {
+      id: '/_todo/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof TodoSettingsRouteImport
+      parentRoute: typeof TodoRoute
+    }
+    '/_todo/search': {
+      id: '/_todo/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof TodoSearchRouteImport
+      parentRoute: typeof TodoRoute
+    }
+    '/_todo/profile': {
+      id: '/_todo/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof TodoProfileRouteImport
+      parentRoute: typeof TodoRoute
+    }
+    '/_minimal/docs': {
+      id: '/_minimal/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof MinimalDocsRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/builder': {
+      id: '/_minimal/builder'
+      path: '/builder'
+      fullPath: '/builder'
+      preLoaderRoute: typeof MinimalBuilderRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/docs/': {
+      id: '/_minimal/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof MinimalDocsIndexRouteImport
+      parentRoute: typeof MinimalDocsRoute
+    }
+    '/_minimal/playground/tests': {
+      id: '/_minimal/playground/tests'
+      path: '/playground/tests'
+      fullPath: '/playground/tests'
+      preLoaderRoute: typeof MinimalPlaygroundTestsRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/radix': {
+      id: '/_minimal/playground/radix'
+      path: '/playground/radix'
+      fullPath: '/playground/radix'
+      preLoaderRoute: typeof MinimalPlaygroundRadixRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/kernel': {
+      id: '/_minimal/playground/kernel'
+      path: '/playground/kernel'
+      fullPath: '/playground/kernel'
+      preLoaderRoute: typeof MinimalPlaygroundKernelRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/focus': {
+      id: '/_minimal/playground/focus'
+      path: '/playground/focus'
+      fullPath: '/playground/focus'
+      preLoaderRoute: typeof MinimalPlaygroundFocusRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/design-dashboard-v3': {
+      id: '/_minimal/playground/design-dashboard-v3'
+      path: '/playground/design-dashboard-v3'
+      fullPath: '/playground/design-dashboard-v3'
+      preLoaderRoute: typeof MinimalPlaygroundDesignDashboardV3RouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/aria': {
+      id: '/_minimal/playground/aria'
+      path: '/playground/aria'
+      fullPath: '/playground/aria'
+      preLoaderRoute: typeof MinimalPlaygroundAriaRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/docs/$': {
+      id: '/_minimal/docs/$'
+      path: '/$'
+      fullPath: '/docs/$'
+      preLoaderRoute: typeof MinimalDocsSplatRouteImport
+      parentRoute: typeof MinimalDocsRoute
+    }
   }
 }
 
 interface MinimalDocsRouteChildren {
-  MinimalDocsSplatRoute: typeof MinimalDocsSplatRoute;
-  MinimalDocsIndexRoute: typeof MinimalDocsIndexRoute;
+  MinimalDocsSplatRoute: typeof MinimalDocsSplatRoute
+  MinimalDocsIndexRoute: typeof MinimalDocsIndexRoute
 }
 
 const MinimalDocsRouteChildren: MinimalDocsRouteChildren = {
   MinimalDocsSplatRoute: MinimalDocsSplatRoute,
   MinimalDocsIndexRoute: MinimalDocsIndexRoute,
-};
+}
 
 const MinimalDocsRouteWithChildren = MinimalDocsRoute._addFileChildren(
   MinimalDocsRouteChildren,
-);
+)
 
 interface MinimalRouteChildren {
-  MinimalBuilderRoute: typeof MinimalBuilderRoute;
-  MinimalDocsRoute: typeof MinimalDocsRouteWithChildren;
-  MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute;
-  MinimalPlaygroundDesignDashboardV3Route: typeof MinimalPlaygroundDesignDashboardV3Route;
-  MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute;
-  MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute;
-  MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute;
-  MinimalPlaygroundTestsRoute: typeof MinimalPlaygroundTestsRoute;
+  MinimalBuilderRoute: typeof MinimalBuilderRoute
+  MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
+  MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
+  MinimalPlaygroundDesignDashboardV3Route: typeof MinimalPlaygroundDesignDashboardV3Route
+  MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
+  MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
+  MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute
+  MinimalPlaygroundTestsRoute: typeof MinimalPlaygroundTestsRoute
 }
 
 const MinimalRouteChildren: MinimalRouteChildren = {
@@ -407,16 +407,16 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
   MinimalPlaygroundRadixRoute: MinimalPlaygroundRadixRoute,
   MinimalPlaygroundTestsRoute: MinimalPlaygroundTestsRoute,
-};
+}
 
 const MinimalRouteWithChildren =
-  MinimalRoute._addFileChildren(MinimalRouteChildren);
+  MinimalRoute._addFileChildren(MinimalRouteChildren)
 
 interface TodoRouteChildren {
-  TodoProfileRoute: typeof TodoProfileRoute;
-  TodoSearchRoute: typeof TodoSearchRoute;
-  TodoSettingsRoute: typeof TodoSettingsRoute;
-  TodoIndexRoute: typeof TodoIndexRoute;
+  TodoProfileRoute: typeof TodoProfileRoute
+  TodoSearchRoute: typeof TodoSearchRoute
+  TodoSettingsRoute: typeof TodoSettingsRoute
+  TodoIndexRoute: typeof TodoIndexRoute
 }
 
 const TodoRouteChildren: TodoRouteChildren = {
@@ -424,16 +424,16 @@ const TodoRouteChildren: TodoRouteChildren = {
   TodoSearchRoute: TodoSearchRoute,
   TodoSettingsRoute: TodoSettingsRoute,
   TodoIndexRoute: TodoIndexRoute,
-};
+}
 
-const TodoRouteWithChildren = TodoRoute._addFileChildren(TodoRouteChildren);
+const TodoRouteWithChildren = TodoRoute._addFileChildren(TodoRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   MinimalRoute: MinimalRouteWithChildren,
   TodoRoute: TodoRouteWithChildren,
   PlaygroundDesignTestbotCursorRoute: PlaygroundDesignTestbotCursorRoute,
   PlaygroundPocRegistryMonitorRoute: PlaygroundPocRegistryMonitorRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

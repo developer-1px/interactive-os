@@ -31,6 +31,11 @@ import { OS } from "@os/AntigravityOS";
 import { Keybindings as KeybindingsRegistry } from "@os/keymaps/keybindings";
 import React, { type ReactNode } from "react";
 import { registerAppSlice } from "./appSlice";
+import {
+  beginTransaction,
+  endTransaction,
+  createHistoryMiddleware,
+} from "./middleware/historyKernelMiddleware";
 
 // ═══════════════════════════════════════════════════════════════════
 // Brand Symbols
@@ -151,6 +156,7 @@ export interface TestInstance<S> {
   reset(): void;
   evaluate(condition: Condition<S>): boolean;
   select<T>(selector: Selector<S, T>): T;
+  transaction(fn: () => void): void;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -431,14 +437,21 @@ export function defineApp<S>(
 
   // ── create (test instance) ──
 
-  function create(overrides?: Partial<S>): TestInstance<S> {
+  function create(overrides?: Partial<S> | { history?: boolean }): TestInstance<S> {
     interface TestAppState {
       os: Record<string, never>;
       apps: Record<string, unknown>;
     }
 
-    const testState = overrides
-      ? { ...initialState, ...overrides }
+    // Separate test options from state overrides
+    const rawOverrides = overrides ?? {};
+    const enableHistory = 'history' in rawOverrides && rawOverrides.history === true;
+    const stateOverrides = enableHistory
+      ? (({ history: _h, ...rest }) => rest)(rawOverrides as Record<string, unknown>)
+      : rawOverrides;
+
+    const testState = Object.keys(stateOverrides).length > 0
+      ? { ...initialState, ...stateOverrides as Partial<S> }
       : initialState;
 
     const testKernel = createKernel<TestAppState>({
@@ -457,6 +470,12 @@ export function defineApp<S>(
         }),
       },
     });
+
+    // Register history middleware on test kernel when history is enabled
+    if (enableHistory) {
+      const historyMw = createHistoryMiddleware(appId, testScope);
+      testKernel.use(historyMw);
+    }
 
     // Re-register all commands on test kernel, collecting test factories
     const testFactories = new Map<string, CommandFactory<any, any>>();
@@ -562,6 +581,15 @@ export function defineApp<S>(
       evaluate(condition: Condition<S>): boolean {
         const currentState = testKernel.getState().apps[appId] as S;
         return condition.evaluate(currentState);
+      },
+
+      transaction(fn: () => void): void {
+        beginTransaction();
+        try {
+          fn();
+        } finally {
+          endTransaction();
+        }
       },
     } as any;
   }
