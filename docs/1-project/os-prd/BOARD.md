@@ -1,7 +1,7 @@
 # BOARD — os-prd
 
 ## 🔴 Now
-- [ ] T5: Overlay (G3) — 설계 필요 (Open)
+- [ ] T5: QuickPick 패키지 구현 (→ 별도 프로젝트로 분리 추천)
 
 ## ⏳ Done
 - [x] T0: SPEC.md 초안 작성 — 코드 역추적으로 전체 인벤토리 (02-15)
@@ -14,10 +14,11 @@
 - [x] T4b: Escape resolver 추출 + 5개 unit tests (02-15)
 - [x] T4c: Expand resolver 7개 unit tests (02-15)
 - [x] T4d: Focus Stack (STACK_PUSH/POP) 9개 unit tests (02-15)
+- [x] T4e: Overlay (OPEN/CLOSE) 9개 unit tests (02-15, G3 해결)
+- [x] T4f: Role Presets SPEC §7 검증 — 147 assertions (02-15)
+- [x] T4g: Role Helpers (child/check/expand) — 31 tests (02-15)
 - [x] Todo ID 마이그레이션: number → string + uid() (02-15)
-- [x] SPEC.md 갱신 — Coverage Map + Known Gaps 반영 (02-15)
+- [x] SPEC.md 갱신 — 전 Gap 해결(G1-G7), Coverage Map 완전 (02-15)
 
 ## 💡 Ideas
-- Unit test 생성기: SPEC.md의 Command Behavior Table에서 자동으로 test case 생성
-- Role Preset 검증: roleRegistry.ts의 preset이 SPEC 7번 표와 일치하는지 자동 검증
 - SPEC.md를 코드에서 참조: 커맨드 파일 상단에 SPEC 섹션 번호 링크
