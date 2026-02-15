@@ -379,6 +379,109 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(pasteTodo({}));
       expect(Object.keys(app.state.data.todos).length).toBe(before);
     });
+
+    // ── Multi-item clipboard (PRD Scenario 4: 벌크 작업) ──
+
+    test("single copy overwrites previous clipboard", () => {
+      const app = createApp();
+      app.dispatch(addTodo({ text: "First" }));
+      app.dispatch(addTodo({ text: "Second" }));
+      const ids = Object.keys(app.state.data.todos).map(Number);
+
+      // Copy first item
+      app.dispatch(copyTodo({ id: ids[ids.length - 2]! }));
+      expect(app.state.ui.clipboard!.todos.length).toBe(1);
+      expect(app.state.ui.clipboard!.todos[0]!.text).toBe("First");
+
+      // Copy second item — should overwrite, not append
+      app.dispatch(copyTodo({ id: ids[ids.length - 1]! }));
+      expect(app.state.ui.clipboard!.todos.length).toBe(1);
+      expect(app.state.ui.clipboard!.todos[0]!.text).toBe("Second");
+    });
+
+    test("multi-copy: copyTodo 3 items → clipboard has 3 todos", () => {
+      const app = createApp();
+      app.dispatch(addTodo({ text: "A" }));
+      app.dispatch(addTodo({ text: "B" }));
+      app.dispatch(addTodo({ text: "C" }));
+      const ids = Object.keys(app.state.data.todos).map(Number);
+      const lastThree = ids.slice(-3);
+
+      // Simulate OS_COPY: first item overwrites, subsequent append
+      lastThree.forEach((id, i) => {
+        app.dispatch(copyTodo({ id, _multi: i > 0 }));
+      });
+
+      expect(app.state.ui.clipboard).not.toBeNull();
+      expect(app.state.ui.clipboard!.todos.length).toBe(3);
+      expect(app.state.ui.clipboard!.todos.map((t) => t.text)).toEqual(
+        expect.arrayContaining(["A", "B", "C"]),
+      );
+    });
+
+    test("multi-copy → paste: all 3 items are pasted", () => {
+      const app = createApp();
+      app.dispatch(addTodo({ text: "A" }));
+      app.dispatch(addTodo({ text: "B" }));
+      app.dispatch(addTodo({ text: "C" }));
+      const ids = Object.keys(app.state.data.todos).map(Number);
+      const lastThree = ids.slice(-3);
+      const beforeCount = Object.keys(app.state.data.todos).length;
+
+      lastThree.forEach((id, i) => {
+        app.dispatch(copyTodo({ id, _multi: i > 0 }));
+      });
+      app.dispatch(pasteTodo({}));
+
+      // 3 original + 3 pasted = before + 3
+      expect(Object.keys(app.state.data.todos).length).toBe(beforeCount + 3);
+      const todos = Object.values(app.state.data.todos);
+      expect(todos.filter((t) => t.text === "A").length).toBe(2);
+      expect(todos.filter((t) => t.text === "B").length).toBe(2);
+      expect(todos.filter((t) => t.text === "C").length).toBe(2);
+    });
+
+    test("multi-cut: cutTodo 3 items → clipboard has 3, all removed", () => {
+      const app = createApp();
+      app.dispatch(addTodo({ text: "X" }));
+      app.dispatch(addTodo({ text: "Y" }));
+      app.dispatch(addTodo({ text: "Z" }));
+      const ids = Object.keys(app.state.data.todos).map(Number);
+      const lastThree = ids.slice(-3);
+      const beforeCount = Object.keys(app.state.data.todos).length;
+
+      lastThree.forEach((id, i) => {
+        app.dispatch(cutTodo({ id, _multi: i > 0 }));
+      });
+
+      // All 3 removed from data
+      expect(Object.keys(app.state.data.todos).length).toBe(beforeCount - 3);
+      // All 3 in clipboard
+      expect(app.state.ui.clipboard!.todos.length).toBe(3);
+      expect(app.state.ui.clipboard!.isCut).toBe(true);
+    });
+
+    test("multi-cut → paste: all 3 items restored", () => {
+      const app = createApp();
+      app.dispatch(addTodo({ text: "X" }));
+      app.dispatch(addTodo({ text: "Y" }));
+      app.dispatch(addTodo({ text: "Z" }));
+      const ids = Object.keys(app.state.data.todos).map(Number);
+      const lastThree = ids.slice(-3);
+      const beforeCount = Object.keys(app.state.data.todos).length;
+
+      lastThree.forEach((id, i) => {
+        app.dispatch(cutTodo({ id, _multi: i > 0 }));
+      });
+      expect(Object.keys(app.state.data.todos).length).toBe(beforeCount - 3);
+
+      app.dispatch(pasteTodo({}));
+      expect(Object.keys(app.state.data.todos).length).toBe(beforeCount);
+      const todos = Object.values(app.state.data.todos);
+      expect(todos.filter((t) => t.text === "X").length).toBe(1);
+      expect(todos.filter((t) => t.text === "Y").length).toBe(1);
+      expect(todos.filter((t) => t.text === "Z").length).toBe(1);
+    });
   });
 
   // ─── View ───

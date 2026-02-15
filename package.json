@@ -14,11 +14,7 @@
     "format": "biome format --write .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
-    "test": "vitest run",
-    "prepare": "husky"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,css}": "biome check --write --no-errors-on-unmatched"
+    "test": "vitest run"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.159.5",
@@ -53,10 +49,8 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.0",
     "globals": "^17.3.0",
-    "husky": "^9.1.7",
     "jsdom": "^28.0.0",
     "knip": "^5.83.1",
-    "lint-staged": "^16.2.7",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.55.0",

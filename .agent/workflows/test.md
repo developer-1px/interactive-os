@@ -10,10 +10,11 @@ description: 3단계(Unit/TestBot/E2E) 테스트 전략에 따라 테스트 코�
      - 런타임: **Vitest + Headless Kernel**
      - 목적: 특정 Command 실행 시 State Mutation이 정확한지 검증
 
-   - **Level 2: TestBot (Command Flow)**
-     - 대상: 여러 Command가 연쇄되는 시나리오 (Saga)
-     - 런타임: **Vitest + Headless Kernel (Virtual User)**
-     - 목적: UI 없이 커널 위에서 비즈니스 로직의 흐름(Flow) 검증
+   - **Level 2: Integration (OS×App)**
+     - 대상: OS 커맨드가 앱 커맨드를 호출하여 **최종 상태가 올바른지** 검증
+     - 런타임: **Vitest + Headless Kernel**
+     - 목적: 수직 통합 — "dispatch가 N번 된다"(수단)가 아니라 "N개가 실제로 처리된다"(목적)를 검증
+     - 예시: OS_CUT × 3아이템 → paste → 3개 복원되는가?
 
    - **Level 3: E2E (Browser)**
      - 대상: 실제 렌더링 및 사용자 인터랙션 (Glue Code)

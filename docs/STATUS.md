@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-15 13:16
+> Last updated: 2026-02-15 15:58
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -11,7 +11,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| docs-system-v2 | Definition | 02-15 |
+| docs-system-v2 | Execution | 02-15 |
 | todo-keyboard-dogfooding | Definition | 02-15 |
 
 ---
@@ -20,15 +20,13 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| docs-system-v2 | Definition | 02-15 | 🔥 Focus |
+| docs-system-v2 | Execution | 02-15 | 🔥 Focus |
 | todo-keyboard-dogfooding | Definition | 02-15 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
 | docs-dashboard | Design | 02-15 | ⏸ Idle |
 | define-app | Execution (Phase 3) | 02-14 | ⏸ Idle |
 | create-module | Design (Proposal 미승인) | 02-13 | ⏸ Idle |
 | testbot | Execution 준비 | 02-13 | ⏸ Idle |
-| builder-focus-navigation | Definition | 02-13 | 💤 Stale |
-| builder-os-panel-binding | Definition | 02-13 | 💤 Stale |
 
 ---
 
@@ -36,6 +34,8 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| builder-focus-navigation | 02-15 | ✅ 4-archive/2026-02 |
+| builder-os-panel-binding | 02-15 | ✅ 4-archive/2026-02 |
 | os-elegance | 02-14 | ✅ 4-archive/2026-02 |
 | focus-recovery | 02-15 | ✅ 4-archive/2026-02 |
 | todo-v3-migration | 02-15 | ✅ 4-archive/2026-02 |
@@ -61,18 +61,17 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 2 |
-| Active Projects (total) | 9 |
-| Completed (archived) | 11 |
+| Active Projects (total) | 7 |
+| Completed (archived) | 13 |
 | Inbox items | 0 |
-| New Areas created | 3 |
+| Backlog items | 2 |
 
 ---
 
 ## 📝 Recent Changes (2026-02-15)
 
-- 🆕 Created `docs-system-v2` project — docs & workflow restructure (Discussion→Project 전환)
-- 🆕 Created `todo-keyboard-dogfooding` project — keyboard-only dogfooding for Todo app
-- ✅ Biome config alignment — Tailwind v4 CSS parsing, a11y warn, routeTree exclusion
-- ✅ Archived 4 completed projects (os-elegance, focus-recovery, todo-v3-migration, todo-app) to `4-archive/2026-02-*/`
-- ✅ Replaced tombstone model with 3-tier lifecycle (active → cold → deep)
-- ✅ Updated `/archive` workflow — tombstone abolished
+- ✅ `/para` 세션 대청소 — `11-discussions/` 폴더 완전 폐지
+  - 21개 문서 마이그레이션: 프로젝트 귀속 11, archive 5, resource 3, backlog 2
+- ✅ Stale 프로젝트 2개 아카이브 (builder-focus-navigation, builder-os-panel-binding)
+- 🆕 Created `docs-system-v2` project — docs & workflow restructure
+- 🆕 Created `todo-keyboard-dogfooding` project

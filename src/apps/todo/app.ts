@@ -144,9 +144,9 @@ export const moveItemUp = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -171,9 +171,9 @@ export const moveItemDown = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -207,14 +207,19 @@ export const duplicateTodo = listZone.command(
 
 export const copyTodo = listZone.command(
   "copyTodo",
-  (ctx, payload: { id: number | string }) => {
+  (ctx, payload: { id: number | string; _multi?: boolean }) => {
     const targetId = Number(payload.id);
     if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
     const todo = ctx.state.data.todos[targetId];
     if (!todo) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
-        draft.ui.clipboard = { todos: [{ ...todo }], isCut: false };
+        const prev = draft.ui.clipboard;
+        if (payload._multi && prev && !prev.isCut) {
+          prev.todos.push({ ...todo });
+        } else {
+          draft.ui.clipboard = { todos: [{ ...todo }], isCut: false };
+        }
       }),
       clipboardWrite: { text: todo.text, json: JSON.stringify(todo) },
     };
@@ -223,14 +228,20 @@ export const copyTodo = listZone.command(
 
 export const cutTodo = listZone.command(
   "cutTodo",
-  (ctx, payload: { id: number | string }) => {
+  (ctx, payload: { id: number | string; _multi?: boolean }) => {
     const targetId = Number(payload.id);
     if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
     const todo = ctx.state.data.todos[targetId];
     if (!todo) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
-        draft.ui.clipboard = { todos: [{ ...todo }], isCut: true };
+        const prev = draft.ui.clipboard;
+        // Append to existing clipboard if same mode (cut), otherwise start fresh
+        if (payload._multi && prev && prev.isCut) {
+          prev.todos.push({ ...todo });
+        } else {
+          draft.ui.clipboard = { todos: [{ ...todo }], isCut: true };
+        }
         delete draft.data.todos[targetId];
         const index = draft.data.todoOrder.indexOf(targetId);
         if (index !== -1) draft.data.todoOrder.splice(index, 1);

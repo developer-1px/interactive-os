@@ -104,11 +104,18 @@ docs/1-project/[프로젝트명]/
 
 - Discussion 결론에서 핵심을 추출한다.
 - WHY (왜 하는가), Goals (목표), Scope (In/Out)를 포함한다.
-- **Heavy 트랙이면** 별도 PRD(`prd.md`)를 작성할 수 있다.
 
-### Step 6: BOARD.md 작성
+### Step 6: PRD 작성 — `/prd`
 
-- 초기 태스크를 Now 섹션에 작성한다.
+- `/prd` 워크플로우를 실행한다.
+- README의 Goals/Scope에서 기능을 추출하여 **Acceptance Criteria**, **상태 인벤토리**, **엣지 케이스**를 정의한다.
+- PRD는 프로젝트의 **진실의 원천(Single Source of Truth for WHAT)**이다.
+- `/redteam` → `/reflect` 검증을 거친 후 사용자 승인을 받는다.
+- Light 트랙이라도 AC + 엣지 케이스는 필수.
+
+### Step 7: BOARD.md 작성
+
+- PRD의 기능 요구사항에서 태스크를 도출하여 Now 섹션에 작성한다.
 - Discussion에서 도출된 아이디어가 있으면 Ideas 섹션에 배치한다.
 
 ---
@@ -117,28 +124,29 @@ docs/1-project/[프로젝트명]/
 
 > Light 트랙은 Phase 3를 전부 스킵하고 Phase 4로 넘어간다.
 
-### Step 7 (선택): 리소스 수집 — `/resources`
+### Step 8 (선택): 리소스 수집 — `/resources`
 
 - 기술 설계에 필요한 참조 자료를 수집한다.
 
-### Step 8: 제안서 작성 (proposal.md)
+### Step 9: 제안서 작성 (proposal.md)
 
-- README를 바탕으로 기술 설계 제안서를 작성한다.
+- README + PRD를 바탕으로 기술 설계 제안서를 작성한다.
+- PRD의 기능 요구사항을 **어떻게(HOW)** 구현할지를 정의한다.
 - 구현 방향, 변경 범위, 리스크, 대안을 포함한다.
 
-### Step 9: 사고 확장 — `/premortem`
+### Step 10: 사고 확장 — `/premortem`
 
 - "이 설계가 이미 실패했다. 왜?" — 실패 시나리오를 나열한다.
 - **수정 의무 없음** — 시야 확장이 목적.
 
-### Step 10: 자가 점검 — `/reflect`
+### Step 11: 자가 점검 — `/reflect`
 
 - 새 발견 0건이 될 때까지 반복한다.
 
-### Step 11: 사용자 승인
+### Step 12: 사용자 승인
 
 - ✅ 승인 → Phase 4 진행
-- ❌ 반려 → Step 8로 돌아가 수정
+- ❌ 반려 → Step 9로 돌아가 수정
 
 ---
 
@@ -146,11 +154,13 @@ docs/1-project/[프로젝트명]/
 
 > **대시보드 갱신**: Phase 4 진입 시 `docs/STATUS.md`에서 이 프로젝트의 Phase를 "Execution"으로 갱신한다.
 
-### Step 12: 테스트 먼저 — `/tdd` (기존 테스트가 없는 경우)
+### Step 13: 테스트 먼저 — `/tdd`
 
-- 기존 테스트가 이미 스펙 역할을 하고 있으면 스킵한다.
+- **PRD의 Acceptance Criteria를 테스트 케이스로 번역**한다.
+- PRD가 진실의 원천이고, 테스트는 그 기계적 번역이다.
+- 기존 테스트가 이미 PRD 시나리오를 커버하고 있으면 스킵한다.
 
-### Step 13: 분해 & 구현 — `/divide`
+### Step 14: 분해 & 구현 — `/divide`
 
 - BOARD.md의 Now 태스크를 하나씩 처리한다.
   - 🟢 **Known** → AI가 바로 실행
@@ -158,29 +168,30 @@ docs/1-project/[프로젝트명]/
   - 🔴 **Open** → 사용자에게 질문
 - 태스크 완료 시 BOARD.md에서 Done으로 이동한다.
 
-### Step 14: 코드 리뷰 — `/review`
+### Step 15: 코드 리뷰 — `/review`
 
 - 수정된 코드가 프로젝트 철학, 네이밍, 구조 규칙을 위반하지 않는지 확인한다.
+- **PRD 대비 코드 동작이 일치하는지** 확인한다.
 
-### Step 15: 검증 — `/fix`
+### Step 16: 검증 — `/fix`
 
 - Smoke test → Type check → Build 순서로 시스템 안정성을 확인한다.
 
-### Step 16: 정리 — `/cleanup`
+### Step 17: 정리 — `/cleanup`
 
 - Lazy comment 제거, 타입/린트 정리, 미사용 코드 제거.
 
-### Step 17: 중간 커밋 — `/changelog`
+### Step 18: 중간 커밋 — `/changelog`
 
 - 작업 단위가 완료될 때마다 `/changelog`를 호출한다.
 - BOARD.md의 Done 갱신 + STATUS.md Last Activity 갱신.
-- 모든 작업이 끝나지 않았으면 Step 12로 돌아가 다음 태스크를 시작한다.
+- 모든 작업이 끝나지 않았으면 Step 13으로 돌아가 다음 태스크를 시작한다.
 
 #### Gate Check
 - smoke ✅ / type ✅ / build ✅ 모두 통과하는가?
   - ✅ + Now가 비었음 → Phase 5 진행
-  - ✅ + Now에 남은 작업 → Step 12로 돌아가 반복
-  - ❌ → Step 12로 돌아가 수정
+  - ✅ + Now에 남은 작업 → Step 13으로 돌아가 반복
+  - ❌ → Step 13으로 돌아가 수정
 
 > **최소 루프**: `/divide` + `/verify`는 필수. `/review`, `/cleanup`, `/changelog`는 작업 규모에 따라 선택.
 
@@ -188,15 +199,15 @@ docs/1-project/[프로젝트명]/
 
 ## Phase 5: CLOSING (종료)
 
-### Step 18: STATUS 갱신 — `/status`
+### Step 19: STATUS 갱신 — `/status`
 
 - BOARD.md의 최종 상태를 확인한다.
 
-### Step 19 (선택): 학습 기록 — `/til`
+### Step 20 (선택): 학습 기록 — `/til`
 
 - 프로젝트를 수행하면서 얻은 기술적 인사이트를 TIL로 기록한다.
 
-### Step 20: 커밋 & 아카이브
+### Step 21: 커밋 & 아카이브
 
 1. 변경 파일을 **커밋**한다.
 2. **`/retrospect`를 실행**하여 워크플로우 자가 개선 회고를 한다.

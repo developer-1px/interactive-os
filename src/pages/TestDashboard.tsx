@@ -1,44 +1,61 @@
 /**
- * TestDashboard — Project health dashboard via test structure discovery
+ * TestDashboard — In-browser test runner
  *
  * Discovers all tests via import.meta.glob on the standardized
  * {slice}/tests/{unit,testbot,e2e}/ structure.
- * Groups by project, shows layer coverage, overall health.
+ *
+ * Features:
+ * - Source toggle (show/hide)
+ * - Real test execution via vitest-shim
+ * - Structured result tree with pass/fail/error display
  */
 
 import {
   Bot,
   BoxSelect,
-  Check,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
   Code2,
+  Eye,
+  EyeOff,
   FileCode2,
   FlaskConical,
   FolderOpen,
   Layout,
   MinusCircle,
   Play,
-  PlayCircle,
   RotateCw,
   Search,
   TestTube2,
   Theater,
   XCircle,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  TestRunner,
+  type SuiteResult,
+  type TestEvent,
+  type TestResult,
+  type TestStatus,
+} from "@/pages/test-runner/vitest-shim";
 
 // ═══════════════════════════════════════════════════════════════════
 // Discovery — build-time glob
 // ═══════════════════════════════════════════════════════════════════
 
-const unitFiles = import.meta.glob("/src/**/tests/unit/**/*.test.ts", {
+// Raw source for display
+const unitFilesRaw = import.meta.glob("/src/**/tests/unit/**/*.test.ts", {
   query: "?raw",
   eager: false,
 });
-const e2eFiles = import.meta.glob("/src/**/tests/e2e/**/*.spec.ts", {
+const e2eFilesRaw = import.meta.glob("/src/**/tests/e2e/**/*.spec.ts", {
   query: "?raw",
+  eager: false,
+});
+
+// Executable modules for running
+const unitFilesExec = import.meta.glob("/src/**/tests/unit/**/*.test.ts", {
   eager: false,
 });
 
@@ -50,7 +67,8 @@ interface TestFile {
   path: string;
   filename: string;
   layer: "unit" | "testbot" | "e2e";
-  loader: () => Promise<any>;
+  rawLoader: () => Promise<any>;
+  execLoader?: () => Promise<any>;
 }
 
 interface ProjectGroup {
@@ -66,86 +84,79 @@ interface ProjectGroup {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Test Parser (Regex-based Static Analysis)
+// Test Parser (Regex-based Static Analysis for idle state)
 // ═══════════════════════════════════════════════════════════════════
 
-type TestStatus = "idle" | "running" | "pass" | "fail";
-
-interface SuiteNode {
+interface StaticSuiteNode {
   type: "suite";
   name: string;
-  children: (SuiteNode | TestNode)[];
-  status?: TestStatus; // Mock status
+  children: (StaticSuiteNode | StaticTestNode)[];
+  status: TestStatus;
 }
 
-interface TestNode {
+interface StaticTestNode {
   type: "test";
   name: string;
-  status?: TestStatus; // Mock status
+  status: TestStatus;
 }
 
-function parseTestStructure(code: string): SuiteNode[] {
+function parseTestStructure(code: string): StaticSuiteNode[] {
   const lines = code.split("\n");
-
-  const _structure: SuiteNode[] = [];
-  const suiteStack: { node: SuiteNode; indent: number }[] = [];
-
-  // Root pseudo-node
-  const rootSuite: SuiteNode = { type: "suite", name: "ROOT", children: [] };
+  const suiteStack: { node: StaticSuiteNode; indent: number }[] = [];
+  const rootSuite: StaticSuiteNode = {
+    type: "suite",
+    name: "ROOT",
+    children: [],
+    status: "idle",
+  };
   suiteStack.push({ node: rootSuite, indent: -1 });
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const indent = line.search(/\S/);
-    if (indent === -1) continue; // Empty line
+    if (indent === -1) continue;
 
     const trimmed = line.trim();
     if (trimmed.startsWith("//") || trimmed.startsWith("*")) continue;
 
-    // Detect suite
-    const descMatch = trimmed.match(/^describe\s*\(\s*["'`)(](.*?)["'`)]/);
+    const descMatch = trimmed.match(/^describe\s*\(\s*["'`](.*?)["'`]/);
     if (descMatch) {
-      const name = descMatch[1];
-      const newNode: SuiteNode = {
+      const newNode: StaticSuiteNode = {
         type: "suite",
-        name,
+        name: descMatch[1],
         children: [],
         status: "idle",
       };
-
-      // Find parent: closest suite with strictly less indentation
       while (
         suiteStack.length > 1 &&
         suiteStack[suiteStack.length - 1].indent >= indent
       ) {
         suiteStack.pop();
       }
-
       suiteStack[suiteStack.length - 1].node.children.push(newNode);
       suiteStack.push({ node: newNode, indent });
       continue;
     }
 
-    // Detect test
-    const testMatch = trimmed.match(/^(it|test)\s*\(\s*["'`)(](.*?)["'`)]/);
+    const testMatch = trimmed.match(/^(it|test)\s*\(\s*["'`](.*?)["'`]/);
     if (testMatch) {
-      const name = testMatch[2];
-      const newNode: TestNode = { type: "test", name, status: "idle" };
-
-      // Find parent: closest suite with strictly less indentation
+      const newNode: StaticTestNode = {
+        type: "test",
+        name: testMatch[2],
+        status: "idle",
+      };
       while (
         suiteStack.length > 1 &&
         suiteStack[suiteStack.length - 1].indent >= indent
       ) {
         suiteStack.pop();
       }
-
       suiteStack[suiteStack.length - 1].node.children.push(newNode);
     }
   }
 
   return rootSuite.children[0]?.type === "suite"
-    ? rootSuite.children
+    ? (rootSuite.children as StaticSuiteNode[])
     : (rootSuite.children as any);
 }
 
@@ -155,11 +166,9 @@ function parseTestStructure(code: string): SuiteNode[] {
 
 function extractProjectInfo(path: string): { category: string; name: string } {
   const normalized = path.replace(/^\//, "");
-
   if (normalized.startsWith("src/tests/")) {
     return { category: "Global", name: "Global" };
   }
-
   const match = normalized.match(/^src\/([^/]+)\/([^/]+)\/tests\//);
   if (match) {
     return {
@@ -167,21 +176,22 @@ function extractProjectInfo(path: string): { category: string; name: string } {
       name: match[2],
     };
   }
-
   const firstDir = normalized.split("/")[1];
   return { category: "Other", name: firstDir || "Unknown" };
 }
 
 function buildGroups(
-  unitModules: Record<string, () => Promise<any>>,
-  e2eModules: Record<string, () => Promise<any>>,
+  rawModules: Record<string, () => Promise<any>>,
+  execModules: Record<string, () => Promise<any>>,
+  e2eRawModules: Record<string, () => Promise<any>>,
 ): ProjectGroup[] {
   const groupMap = new Map<string, ProjectGroup>();
 
   const addFile = (
     path: string,
     layer: "unit" | "testbot" | "e2e",
-    loader: () => Promise<any>,
+    rawLoader: () => Promise<any>,
+    execLoader?: () => Promise<any>,
   ) => {
     const { category, name } = extractProjectInfo(path);
     const slug = `${category.toLowerCase()}-${name}`;
@@ -189,24 +199,26 @@ function buildGroups(
 
     if (!groupMap.has(slug)) {
       groupMap.set(slug, {
-        name: name,
-        slug: slug,
-        category: category,
+        name,
+        slug,
+        category,
         tests: [],
         layers: { unit: [], testbot: [], e2e: [] },
       });
     }
 
-    const file: TestFile = { path, filename, layer, loader };
+    const file: TestFile = { path, filename, layer, rawLoader, execLoader };
     const group = groupMap.get(slug)!;
     group.tests.push(file);
     group.layers[layer].push(file);
   };
 
-  for (const [path, loader] of Object.entries(unitModules))
-    addFile(path, "unit", loader);
-  for (const [path, loader] of Object.entries(e2eModules))
+  for (const [path, loader] of Object.entries(rawModules)) {
+    addFile(path, "unit", loader, execModules[path]);
+  }
+  for (const [path, loader] of Object.entries(e2eRawModules)) {
     addFile(path, "e2e", loader);
+  }
 
   return Array.from(groupMap.values()).sort((a, b) => {
     if (a.category !== b.category) return a.category.localeCompare(b.category);
@@ -269,89 +281,244 @@ function StatusIcon({ status }: { status: TestStatus }) {
       return <XCircle size={14} className="text-red-500" />;
     default:
       return (
-        <PlayCircle
-          size={14}
-          className="text-stone-300 hover:text-stone-500 transition-colors"
-        />
+        <div className="w-3.5 h-3.5 rounded-full border-2 border-stone-200" />
       );
   }
 }
 
-function SuiteNodeRenderer({
+function ResultNode({
   node,
   depth = 0,
-  onRun,
 }: {
-  node: SuiteNode | TestNode;
+  node: SuiteResult | TestResult;
   depth?: number;
-  onRun: (node: SuiteNode | TestNode) => void;
 }) {
-  const status = node.status || "idle";
+  const [expanded, setExpanded] = useState(true);
 
   if (node.type === "test") {
     return (
       <div
         className="group flex items-center justify-between py-1 text-sm rounded-md hover:bg-stone-50 pr-2 transition-colors"
-        style={{ paddingLeft: depth * 16 }}
+        style={{ paddingLeft: depth * 16 + 4 }}
       >
-        <div className="flex items-center gap-2 overflow-hidden">
-          <button onClick={() => onRun(node)} disabled={status === "running"}>
-            <StatusIcon status={status} />
-          </button>
+        <div className="flex items-center gap-2 overflow-hidden min-w-0">
+          <StatusIcon status={node.status} />
           <span
-            className={`truncate ${status === "fail" ? "text-red-600" : status === "pass" ? "text-stone-400" : "text-stone-600"}`}
+            className={`truncate ${node.status === "fail"
+                ? "text-red-600"
+                : node.status === "pass"
+                  ? "text-emerald-700"
+                  : "text-stone-600"
+              }`}
           >
             {node.name}
           </span>
         </div>
-        {status === "fail" && (
-          <span className="text-[10px] text-red-500 font-bold px-1.5 py-0.5 bg-red-50 rounded">
-            FAIL
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {node.duration > 0 && (
+            <span className="text-[10px] font-mono text-stone-400">
+              {node.duration < 1 ? "<1" : Math.round(node.duration)}ms
+            </span>
+          )}
+          {node.status === "fail" && (
+            <span className="text-[10px] text-red-500 font-bold px-1.5 py-0.5 bg-red-50 rounded">
+              FAIL
+            </span>
+          )}
+          {node.status === "pass" && (
+            <span className="text-[10px] text-emerald-500 font-bold px-1.5 py-0.5 bg-emerald-50 rounded">
+              PASS
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Suite node
+  const suite = node as SuiteResult;
+  const testCount = countTests(suite);
+
+  return (
+    <div className="mb-0.5">
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="w-full group flex items-center justify-between py-1.5 text-sm font-semibold text-stone-800 rounded-md hover:bg-stone-50 pr-2 transition-colors"
+        style={{ paddingLeft: depth * 16 + 4 }}
+      >
+        <div className="flex items-center gap-2">
+          {expanded ? (
+            <ChevronDown size={12} className="text-stone-400" />
+          ) : (
+            <ChevronRight size={12} className="text-stone-400" />
+          )}
+          <StatusIcon status={suite.status} />
+          <span className="truncate">{suite.name}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {suite.duration > 0 && (
+            <span className="text-[10px] font-mono text-stone-400">
+              {Math.round(suite.duration)}ms
+            </span>
+          )}
+          <span className="text-[9px] font-mono text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">
+            {testCount.passed}/{testCount.total}
           </span>
-        )}
-        {status === "pass" && (
-          <span className="text-[10px] text-emerald-500 font-bold px-1.5 py-0.5 bg-emerald-50 rounded">
-            PASS
-          </span>
-        )}
+        </div>
+      </button>
+
+      {expanded && (
+        <div>
+          {suite.children.map((child, i) => (
+            <ResultNode key={i} node={child} depth={depth + 1} />
+          ))}
+        </div>
+      )}
+
+      {/* Show errors inline */}
+      {expanded &&
+        suite.children
+          .filter(
+            (c): c is TestResult =>
+              c.type === "test" && c.status === "fail" && !!c.error,
+          )
+          .map((test, i) => (
+            <div
+              key={`err-${i}`}
+              className="mx-4 my-1 p-2 bg-red-50 border border-red-100 rounded text-xs text-red-700 font-mono"
+              style={{ marginLeft: depth * 16 + 20 }}
+            >
+              <span className="font-bold text-red-500">✕ {test.name}:</span>{" "}
+              {test.error}
+            </div>
+          ))}
+    </div>
+  );
+}
+
+function StaticNode({
+  node,
+  depth = 0,
+}: {
+  node: StaticSuiteNode | StaticTestNode;
+  depth?: number;
+}) {
+  if (node.type === "test") {
+    return (
+      <div
+        className="flex items-center gap-2 py-1 text-sm text-stone-500"
+        style={{ paddingLeft: depth * 16 + 4 }}
+      >
+        <div className="w-3.5 h-3.5 rounded-full border-2 border-stone-200" />
+        <span className="truncate">{node.name}</span>
       </div>
     );
   }
 
   return (
-    <div className="mb-1">
+    <div className="mb-0.5">
       <div
-        className="group flex items-center justify-between py-1 text-sm font-bold text-stone-800 rounded-md hover:bg-stone-50 pr-2 transition-colors"
-        style={{ paddingLeft: depth * 16 }}
+        className="flex items-center gap-2 py-1.5 text-sm font-semibold text-stone-700"
+        style={{ paddingLeft: depth * 16 + 4 }}
       >
-        <div className="flex items-center gap-2">
-          <button onClick={() => onRun(node)} disabled={status === "running"}>
-            {status === "running" ? (
-              <RotateCw size={14} className="text-blue-500 animate-spin" />
-            ) : status === "pass" ? (
-              <CheckCircle2 size={14} className="text-emerald-500" />
-            ) : status === "fail" ? (
-              <XCircle size={14} className="text-red-500" />
-            ) : (
-              <BoxSelect
-                size={14}
-                className="text-stone-400 group-hover:text-stone-600 transition-colors"
-              />
-            )}
-          </button>
-          <span className="truncate">{node.name}</span>
-        </div>
+        <ChevronDown size={12} className="text-stone-400" />
+        <BoxSelect size={14} className="text-stone-400" />
+        <span className="truncate">{node.name}</span>
       </div>
       <div>
         {node.children.map((child, i) => (
-          <SuiteNodeRenderer
-            key={i}
-            node={child}
-            depth={depth + 1}
-            onRun={onRun}
-          />
+          <StaticNode key={i} node={child} depth={depth + 1} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function countTests(suite: SuiteResult): {
+  total: number;
+  passed: number;
+  failed: number;
+} {
+  let total = 0;
+  let passed = 0;
+  let failed = 0;
+  for (const child of suite.children) {
+    if (child.type === "test") {
+      total++;
+      if (child.status === "pass") passed++;
+      if (child.status === "fail") failed++;
+    } else {
+      const sub = countTests(child);
+      total += sub.total;
+      passed += sub.passed;
+      failed += sub.failed;
+    }
+  }
+  return { total, passed, failed };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Summary Bar
+// ═══════════════════════════════════════════════════════════════════
+
+function SummaryBar({
+  results,
+  running,
+  duration,
+}: {
+  results: SuiteResult[];
+  running: boolean;
+  duration: number;
+}) {
+  let total = 0;
+  let passed = 0;
+  let failed = 0;
+  for (const suite of results) {
+    const c = countTests(suite);
+    total += c.total;
+    passed += c.passed;
+    failed += c.failed;
+  }
+
+  if (total === 0 && !running) return null;
+
+  return (
+    <div className="px-4 py-2 border-t border-stone-100 bg-stone-50/80 flex items-center justify-between text-xs">
+      <div className="flex items-center gap-3">
+        {running && (
+          <div className="flex items-center gap-1.5 text-blue-600">
+            <RotateCw size={12} className="animate-spin" />
+            <span className="font-medium">Running...</span>
+          </div>
+        )}
+        {!running && total > 0 && (
+          <>
+            <div className="flex items-center gap-1 text-emerald-600">
+              <CheckCircle2 size={12} />
+              <span className="font-bold">{passed}</span>
+              <span className="text-stone-400">passed</span>
+            </div>
+            {failed > 0 && (
+              <div className="flex items-center gap-1 text-red-600">
+                <XCircle size={12} />
+                <span className="font-bold">{failed}</span>
+                <span className="text-stone-400">failed</span>
+              </div>
+            )}
+            <span className="text-stone-400">
+              {total} total
+            </span>
+          </>
+        )}
+      </div>
+      {duration > 0 && !running && (
+        <span className="font-mono text-stone-400">
+          {duration < 1000
+            ? `${Math.round(duration)}ms`
+            : `${(duration / 1000).toFixed(2)}s`}
+        </span>
+      )}
     </div>
   );
 }
@@ -361,22 +528,27 @@ function SuiteNodeRenderer({
 // ═══════════════════════════════════════════════════════════════════
 
 export function TestDashboard() {
-  const groups = useMemo(() => buildGroups(unitFiles, e2eFiles), []);
+  const groups = useMemo(
+    () => buildGroups(unitFilesRaw, unitFilesExec, e2eFilesRaw),
+    [],
+  );
 
   const [selectedGroup, setSelectedGroup] = useState<ProjectGroup | null>(
     groups[0] || null,
   );
   const [selectedFile, setSelectedFile] = useState<TestFile | null>(null);
   const [code, setCode] = useState<string>("");
+  const [showSource, setShowSource] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
     new Set(),
   );
 
-  // Mock State for Test Execution
-  const [testResults, setTestResults] = useState<Record<string, TestStatus>>(
-    {},
-  );
+  // Runner state
+  const [results, setResults] = useState<SuiteResult[]>([]);
   const [running, setRunning] = useState(false);
+  const [runDuration, setRunDuration] = useState(0);
+  const [events, setEvents] = useState<TestEvent[]>([]);
+  const runnerRef = useRef<TestRunner | null>(null);
 
   // Group projects by category
   const categorizedGroups = useMemo(() => {
@@ -412,79 +584,49 @@ export function TestDashboard() {
   // Load code when file changes
   useEffect(() => {
     if (selectedFile) {
-      selectedFile.loader().then((mod) => {
+      selectedFile.rawLoader().then((mod) => {
         setCode(typeof mod === "string" ? mod : mod.default || "");
       });
-      // Reset mocks when file changes
-      setTestResults({});
+      setResults([]);
+      setEvents([]);
+      setRunDuration(0);
     } else {
       setCode("");
     }
   }, [selectedFile]);
 
-  const structure = useMemo(() => {
-    const nodes = parseTestStructure(code);
-    // Apply mock status
-    const applyStatus = (nodes: (SuiteNode | TestNode)[]) => {
-      nodes.forEach((node) => {
-        if (testResults[node.name]) {
-          node.status = testResults[node.name];
-        }
-        if (node.type === "suite" && node.children) {
-          applyStatus(node.children);
-        }
-      });
-    };
-    applyStatus(nodes);
-    return nodes;
-  }, [code, testResults]);
+  // Static parse for idle display
+  const staticStructure = useMemo(() => parseTestStructure(code), [code]);
 
-  // Mock Runner Logic
-  const runTest = (name: string) => {
-    setTestResults((prev) => ({ ...prev, [name]: "running" }));
-    setTimeout(
-      () => {
-        setTestResults((prev) => ({
-          ...prev,
-          [name]: Math.random() > 0.3 ? "pass" : "fail",
-        }));
-      },
-      600 + Math.random() * 1000,
-    );
-  };
+  // Run tests
+  const runTests = useCallback(async () => {
+    if (!selectedFile?.execLoader || running) return;
 
-  const runAll = () => {
     setRunning(true);
-    const allNames: string[] = [];
-    const collectNames = (nodes: (SuiteNode | TestNode)[]) => {
-      nodes.forEach((node) => {
-        allNames.push(node.name);
-        if (node.type === "suite") collectNames(node.children);
-      });
-    };
-    collectNames(structure);
+    setResults([]);
+    setEvents([]);
+    setRunDuration(0);
 
-    // Set all to running
-    const runningState = allNames.reduce(
-      (acc, name) => ({ ...acc, [name]: "running" as TestStatus }),
-      {},
-    );
-    setTestResults(runningState);
+    const runner = new TestRunner();
+    runnerRef.current = runner;
 
-    // Settle one by one
-    allNames.forEach((name, i) => {
-      setTimeout(
-        () => {
-          setTestResults((prev) => ({
-            ...prev,
-            [name]: Math.random() > 0.2 ? "pass" : "fail",
-          }));
-          if (i === allNames.length - 1) setRunning(false);
-        },
-        800 + i * 200,
-      );
+    runner.onEvent((event) => {
+      setEvents((prev) => [...prev, event]);
     });
-  };
+
+    const startTime = performance.now();
+    try {
+      const suiteResults = await runner.run(
+        selectedFile.execLoader,
+        selectedFile.path,
+      );
+      setResults(suiteResults);
+    } catch (e) {
+      console.error("[TestDashboard] Run failed:", e);
+    }
+    setRunDuration(performance.now() - startTime);
+    setRunning(false);
+  }, [selectedFile, running]);
 
   return (
     <div className="flex h-full bg-stone-50 overflow-hidden">
@@ -495,6 +637,9 @@ export function TestDashboard() {
             <TestTube2 size={18} className="text-violet-600" />
           </div>
           <span className="font-bold text-stone-900">Tests</span>
+          <span className="ml-auto text-[10px] font-mono text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">
+            {groups.reduce((acc, g) => acc + g.tests.length, 0)}
+          </span>
         </div>
 
         <div className="flex-1 overflow-y-auto p-2 scrollbar-thin">
@@ -504,6 +649,7 @@ export function TestDashboard() {
               return (
                 <div key={category} className="mb-1">
                   <button
+                    type="button"
                     onClick={() => toggleCategory(category)}
                     className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs font-bold text-stone-500 hover:text-stone-800 hover:bg-stone-50 rounded-md transition-colors uppercase tracking-wide group"
                   >
@@ -530,13 +676,13 @@ export function TestDashboard() {
                       <div className="absolute left-3.5 top-0 bottom-0 w-px bg-stone-100" />
                       {categoryGroups.map((group) => (
                         <button
+                          type="button"
                           key={group.slug}
                           onClick={() => setSelectedGroup(group)}
-                          className={`relative w-full flex items-center gap-2.5 px-3 py-[5px] text-[13px] rounded-md transition-all text-left ml-1 ${
-                            selectedGroup === group
+                          className={`relative w-full flex items-center gap-2.5 px-3 py-[5px] text-[13px] rounded-md transition-all text-left ml-1 ${selectedGroup === group
                               ? "bg-violet-50 text-violet-900 font-semibold shadow-sm ring-1 ring-violet-100"
                               : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-                          }`}
+                            }`}
                         >
                           <HealthIcon group={group} size={12} />
                           <span className="truncate flex-1 leading-none">
@@ -565,9 +711,7 @@ export function TestDashboard() {
         {selectedGroup ? (
           <>
             <div className="h-14 flex items-center px-4 border-b border-stone-200 bg-white flex-shrink-0">
-              <span
-                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded text-stone-500 bg-stone-100 mr-2`}
-              >
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded text-stone-500 bg-stone-100 mr-2">
                 {selectedGroup.category}
               </span>
               <h2 className="font-bold text-stone-800 truncate">
@@ -592,13 +736,13 @@ export function TestDashboard() {
                     <div className="space-y-px">
                       {files.map((file) => (
                         <button
+                          type="button"
                           key={file.path}
                           onClick={() => setSelectedFile(file)}
-                          className={`w-full text-left flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-xs font-mono border ${
-                            selectedFile === file
+                          className={`w-full text-left flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-xs font-mono border ${selectedFile === file
                               ? "bg-white border-stone-300 shadow-sm text-stone-900 font-semibold scale-[1.02] origin-left"
                               : "border-transparent text-stone-500 hover:bg-stone-200/50 hover:text-stone-700"
-                          }`}
+                            }`}
                         >
                           <FileCode2
                             size={12}
@@ -611,6 +755,12 @@ export function TestDashboard() {
                           <span className="truncate direction-rtl text-left flex-1">
                             {file.filename}
                           </span>
+                          {file.execLoader && (
+                            <FlaskConical
+                              size={10}
+                              className="text-emerald-400 flex-shrink-0"
+                            />
+                          )}
                         </button>
                       ))}
                     </div>
@@ -627,84 +777,155 @@ export function TestDashboard() {
         )}
       </div>
 
-      {/* 3. Main Split View (Suite | Code) */}
+      {/* 3. Main View */}
       <div className="flex-1 bg-white flex flex-col min-w-0">
         {selectedFile ? (
           <>
+            {/* Header */}
             <div className="h-14 flex items-center justify-between px-6 border-b border-stone-100 bg-white flex-shrink-0">
               <div className="flex items-center gap-2 text-sm text-stone-600 font-mono truncate">
                 <FileCode2 size={16} className="text-stone-400" />
                 {selectedFile.path.replace(/^\/src\//, "")}
               </div>
-              <div
-                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${LAYER_META[selectedFile.layer].bg} ${LAYER_META[selectedFile.layer].color}`}
-              >
-                {selectedFile.layer}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSource(!showSource)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide transition-all border ${showSource
+                      ? "bg-stone-100 text-stone-700 border-stone-200"
+                      : "bg-white text-stone-400 border-stone-100 hover:text-stone-600 hover:border-stone-200"
+                    }`}
+                >
+                  {showSource ? (
+                    <EyeOff size={12} />
+                  ) : (
+                    <Eye size={12} />
+                  )}
+                  Source
+                </button>
+                <div
+                  className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${LAYER_META[selectedFile.layer].bg} ${LAYER_META[selectedFile.layer].color}`}
+                >
+                  {selectedFile.layer}
+                </div>
               </div>
             </div>
 
-            <div className="flex-1 flex flex-row overflow-hidden">
-              {/* Left: Suite Visualization (40%) */}
-              <div className="w-[40%] flex flex-col border-r border-stone-200 bg-white overflow-hidden">
-                <div className="px-4 py-2 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`p-1 rounded ${running ? "bg-blue-100 text-blue-600 animate-pulse" : "bg-emerald-50 text-emerald-600"}`}
-                    >
-                      <Check size={14} />
+            {/* Content */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className={`flex flex-1 overflow-hidden ${showSource ? "flex-row" : ""}`}>
+                {/* Test Results / Suite Panel */}
+                <div className={`flex flex-col border-r border-stone-200 bg-white overflow-hidden ${showSource ? "w-1/2" : "flex-1"}`}>
+                  {/* Runner controls */}
+                  <div className="px-4 py-2 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between flex-shrink-0">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`p-1 rounded ${running
+                            ? "bg-blue-100 text-blue-600 animate-pulse"
+                            : results.length > 0
+                              ? results.every((r) => r.status === "pass")
+                                ? "bg-emerald-50 text-emerald-600"
+                                : "bg-red-50 text-red-600"
+                              : "bg-stone-100 text-stone-400"
+                          }`}
+                      >
+                        {running ? (
+                          <RotateCw size={14} className="animate-spin" />
+                        ) : results.length > 0 ? (
+                          results.every((r) => r.status === "pass") ? (
+                            <CheckCircle2 size={14} />
+                          ) : (
+                            <XCircle size={14} />
+                          )
+                        ) : (
+                          <FlaskConical size={14} />
+                        )}
+                      </div>
+                      <span className="text-xs font-bold text-stone-600 uppercase tracking-wide">
+                        {results.length > 0 ? "Results" : "Test Plan"}
+                      </span>
                     </div>
-                    <span className="text-xs font-bold text-stone-600 uppercase tracking-wide">
-                      Test Plan
-                    </span>
-                  </div>
-                  <button
-                    onClick={runAll}
-                    disabled={running}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide transition-all shadow-sm ${
-                      running
-                        ? "bg-stone-100 text-stone-400 cursor-wait"
-                        : "bg-stone-900 text-white hover:bg-stone-700 hover:scale-105 active:scale-95"
-                    }`}
-                  >
-                    {running ? (
-                      <RotateCw size={10} className="animate-spin" />
-                    ) : (
-                      <Play size={10} fill="currentColor" />
-                    )}
-                    Run All
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
-                  {structure.length > 0 ? (
-                    <div className="space-y-4">
-                      {structure.map((node, i) => (
-                        <SuiteNodeRenderer
-                          key={i}
-                          node={node}
-                          onRun={(n) => runTest(n.name)}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-stone-300">
-                      <BoxSelect size={32} className="mb-2 opacity-20" />
-                      <p className="text-xs">No suites parsed</p>
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Right: Code Preview (60%) */}
-              <div className="flex-1 flex flex-col bg-stone-50 overflow-hidden">
-                <div className="px-4 py-2 border-b border-stone-200 bg-stone-100/50 flex items-center gap-2">
-                  <Code2 size={14} className="text-stone-400" />
-                  <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">
-                    Source
-                  </span>
+                    {selectedFile.execLoader && (
+                      <button
+                        type="button"
+                        onClick={runTests}
+                        disabled={running}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide transition-all shadow-sm ${running
+                            ? "bg-stone-100 text-stone-400 cursor-wait"
+                            : "bg-stone-900 text-white hover:bg-stone-700 hover:scale-105 active:scale-95"
+                          }`}
+                      >
+                        {running ? (
+                          <RotateCw size={11} className="animate-spin" />
+                        ) : (
+                          <Play size={11} fill="currentColor" />
+                        )}
+                        {running ? "Running" : results.length > 0 ? "Re-run" : "Run All"}
+                      </button>
+                    )}
+                    {!selectedFile.execLoader && (
+                      <span className="text-[10px] text-stone-400 italic">
+                        E2E — run via CLI
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Suite Tree */}
+                  <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
+                    {results.length > 0 ? (
+                      <div className="space-y-2">
+                        {results.map((suite, i) => (
+                          <ResultNode key={i} node={suite} />
+                        ))}
+                      </div>
+                    ) : staticStructure.length > 0 ? (
+                      <div className="space-y-2">
+                        {staticStructure.map((node, i) => (
+                          <StaticNode key={i} node={node} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-stone-300">
+                        <BoxSelect size={32} className="mb-2 opacity-20" />
+                        <p className="text-xs">No suites parsed</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <SummaryBar
+                    results={results}
+                    running={running}
+                    duration={runDuration}
+                  />
                 </div>
-                <div className="flex-1 p-4 overflow-auto font-mono text-xs text-stone-600 leading-relaxed scrollbar-thin">
-                  <pre className="whitespace-pre-wrap">{code}</pre>
-                </div>
+
+                {/* Source Panel (toggleable) */}
+                {showSource && (
+                  <div className="w-1/2 flex flex-col bg-stone-50 overflow-hidden">
+                    <div className="px-4 py-2 border-b border-stone-200 bg-stone-100/50 flex items-center gap-2 flex-shrink-0">
+                      <Code2 size={14} className="text-stone-400" />
+                      <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">
+                        Source
+                      </span>
+                      <span className="ml-auto text-[10px] font-mono text-stone-400">
+                        {code.split("\n").length} lines
+                      </span>
+                    </div>
+                    <div className="flex-1 p-4 overflow-auto font-mono text-xs leading-relaxed scrollbar-thin">
+                      <pre className="whitespace-pre-wrap">
+                        {code.split("\n").map((line, i) => (
+                          <div key={i} className="flex hover:bg-stone-100/50">
+                            <span className="w-8 text-right text-stone-300 select-none pr-3 flex-shrink-0">
+                              {i + 1}
+                            </span>
+                            <span className="text-stone-600">{line}</span>
+                          </div>
+                        ))}
+                      </pre>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </>
