@@ -20,8 +20,10 @@ import "@os/keymaps/osDefaults";
 
 // Register Mac fallback middleware (side-effect)
 import { macFallbackMiddleware } from "@os/keymaps/macFallbackMiddleware";
+import { typeaheadFallbackMiddleware } from "@os/keymaps/typeaheadFallbackMiddleware";
 
 kernel.use(macFallbackMiddleware);
+kernel.use(typeaheadFallbackMiddleware);
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers — extracted for readability
