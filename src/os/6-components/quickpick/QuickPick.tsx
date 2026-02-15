@@ -1,189 +1,486 @@
+/**
+ * QuickPick — OS-Level Combobox Primitive
+ *
+ * A command palette / quick picker composed from OS primitives:
+ *   - Dialog (overlay lifecycle)
+ *   - Zone with virtualFocus (keyboard navigation stays in input)
+ *   - Item (render prop for focus/selection state)
+ *
+ * Design: "OS provides behavior, app decides form."
+ *   - QuickPick provides: overlay, filter, virtual focus, keyboard nav, typeahead
+ *   - Apps provide: items, filterFn, renderItem, actions
+ *
+ * @example Basic usage
+ *   <QuickPick
+ *     id="file-picker"
+ *     isOpen={open}
+ *     items={files}
+ *     onSelect={(item) => openFile(item.id)}
+ *     onClose={() => setOpen(false)}
+ *   />
+ *
+ * @example Advanced (custom filter + render)
+ *   <QuickPick
+ *     id="command-palette"
+ *     isOpen={open}
+ *     items={allItems}
+ *     filterFn={fuzzyFilter}
+ *     renderItem={(item, { isFocused, query }) => <CustomRow ... />}
+ *     typeahead={(items, q) => items[0]?.label.slice(q.length) ?? ""}
+ *     renderFooter={() => <FooterHints />}
+ *     onSelect={handleSelect}
+ *     onClose={handleClose}
+ *   />
+ */
 
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@/os/3-commands";
+import { OS } from "@/os/AntigravityOS";
 import { kernel } from "@/os/kernel";
-import { Dialog } from "../radox/Dialog";
-import { FocusGroup, FocusItem } from "../base/FocusGroup";
-import { NAVIGATE } from "@/os/3-commands/navigate";
-import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@/os/3-commands/overlay";
+
+// ═══════════════════════════════════════════════════════════════════
+// Types
+// ═══════════════════════════════════════════════════════════════════
 
 export interface QuickPickItem {
-    id: string;
-    label: string;
-    description?: string;
-    icon?: React.ReactNode;
+  id: string;
+  label: string;
+  description?: string;
+  icon?: React.ReactNode;
+  category?: string;
 }
 
-export interface QuickPickProps {
-    items: QuickPickItem[];
-    onSelect: (item: QuickPickItem) => void;
-    placeholder?: string;
-    isOpen?: boolean;
-    onClose?: () => void;
-    title?: string;
-    className?: string;
+export interface QuickPickRenderState {
+  /** Whether this item is logically focused (virtual focus). */
+  isFocused: boolean;
+  /** Whether this item is selected. */
+  isSelected: boolean;
+  /** Current search query. */
+  query: string;
 }
 
-/**
- * QuickPick — OS Level Primitive
- * 
- * A command palette component that uses:
- * - Overlay system (Dialog)
- * - Virtual Focus (Input stays focused, List items are logically focused)
- * - FocusGroup for keyboard navigation
- */
-export function QuickPick({
-    items,
-    onSelect,
-    placeholder = "Type to search...",
-    isOpen,
-    onClose,
-    title,
-    className,
-}: QuickPickProps) {
-    const [query, setQuery] = useState("");
-    const inputRef = useRef<HTMLInputElement>(null);
+export interface QuickPickProps<T extends QuickPickItem = QuickPickItem> {
+  /** Overlay ID for the kernel. Used to open/close programmatically. */
+  id?: string;
 
-    // Filter items
-    const filteredItems = useMemo(() => {
-        if (!query) return items;
-        const lowerQuery = query.toLowerCase();
-        return items.filter(
-            (item) =>
-                item.label.toLowerCase().includes(lowerQuery) ||
-                item.description?.toLowerCase().includes(lowerQuery)
-        );
-    }, [items, query]);
+  /** Items to display and filter. */
+  items: T[];
 
-    // Sync external isOpen state with Kernel Overlay state
-    useEffect(() => {
-        if (isOpen) {
-            kernel.dispatch(OVERLAY_OPEN({ id: "quickpick" }));
-        } else {
-            kernel.dispatch(OVERLAY_CLOSE({ id: "quickpick" }));
+  /** Called when user selects an item (Enter or click). */
+  onSelect: (item: T) => void;
+
+  /** Called when the picker should close. */
+  onClose?: () => void;
+
+  /** Controlled open state. */
+  isOpen?: boolean;
+
+  /** Input placeholder text. */
+  placeholder?: string;
+
+  /**
+   * Custom filter function. Receives all items and the query string.
+   * Must return the filtered (and optionally sorted) items.
+   * Default: case-insensitive label/description includes match.
+   */
+  filterFn?: (items: T[], query: string) => T[];
+
+  /**
+   * Custom item renderer. If not provided, uses default rendering.
+   * Receives the item and its render state (focus, selection, query).
+   */
+  renderItem?: (item: T, state: QuickPickRenderState) => React.ReactNode;
+
+  /** Custom empty-state renderer. Default: "No results found". */
+  renderEmpty?: (query: string) => React.ReactNode;
+
+  /** Custom footer renderer. */
+  renderFooter?: () => React.ReactNode;
+
+  /**
+   * Typeahead ghost text completion.
+   *   - `true`:  auto-complete from first match's label prefix
+   *   - function: custom completion resolver `(filteredItems, query) => suffix`
+   */
+  typeahead?: boolean | ((items: T[], query: string) => string);
+
+  /** Additional className for the outer dialog. */
+  className?: string;
+
+  /** Additional className for the content panel. */
+  contentClassName?: string;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Default filter
+// ═══════════════════════════════════════════════════════════════════
+
+function defaultFilter<T extends QuickPickItem>(
+  items: T[],
+  query: string,
+): T[] {
+  if (!query.trim()) return items;
+  const q = query.toLowerCase();
+  return items.filter(
+    (item) =>
+      item.label.toLowerCase().includes(q) ||
+      item.description?.toLowerCase().includes(q),
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Default typeahead resolver
+// ═══════════════════════════════════════════════════════════════════
+
+function defaultTypeahead<T extends QuickPickItem>(
+  items: T[],
+  query: string,
+): string {
+  if (!query || items.length === 0) return "";
+  const top = items[0];
+  if (!top) return "";
+  const label = top.label;
+  if (label.toLowerCase().startsWith(query.toLowerCase())) {
+    return label.slice(query.length);
+  }
+  return "";
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Zone Options (static — prevents re-render)
+// ═══════════════════════════════════════════════════════════════════
+
+const QUICKPICK_ZONE_OPTIONS = {
+  project: { virtualFocus: true, autoFocus: true },
+  navigate: { orientation: "vertical" as const, loop: true },
+  select: { mode: "single" as const, followFocus: true },
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Component
+// ═══════════════════════════════════════════════════════════════════
+
+export function QuickPick<T extends QuickPickItem = QuickPickItem>({
+  id = "quickpick",
+  items,
+  onSelect,
+  onClose,
+  isOpen,
+  placeholder = "Type to search...",
+  filterFn,
+  renderItem,
+  renderEmpty,
+  renderFooter,
+  typeahead,
+  className,
+  contentClassName,
+}: QuickPickProps<T>) {
+  const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const zoneId = `${id}-list`;
+
+  // ── Overlay sync ──
+  useEffect(() => {
+    if (isOpen) {
+      kernel.dispatch(OVERLAY_OPEN({ id, type: "dialog" }) as any);
+    } else {
+      kernel.dispatch(OVERLAY_CLOSE({ id }) as any);
+    }
+  }, [isOpen, id]);
+
+  // Detect external close (Esc via DialogZone) → sync back to parent
+  const isOverlayOpen = kernel.useComputed((s) =>
+    s.os.overlays.stack.some((o) => o.id === id),
+  );
+
+  useEffect(() => {
+    if (isOpen && !isOverlayOpen && onClose) {
+      onClose();
+    }
+  }, [isOverlayOpen, isOpen, onClose]);
+
+  // ── Auto-focus input on open ──
+  useEffect(() => {
+    if (isOpen) {
+      setQuery("");
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [isOpen]);
+
+  // ── Filtering ──
+  const filter = filterFn ?? defaultFilter;
+  const filteredItems = useMemo(
+    () => filter(items, query),
+    [items, query, filter],
+  );
+
+  // ── Typeahead ──
+  const completion = useMemo(() => {
+    if (!typeahead || !query) return "";
+    const resolver =
+      typeof typeahead === "function" ? typeahead : defaultTypeahead;
+    return resolver(filteredItems, query);
+  }, [typeahead, filteredItems, query]);
+
+  // ── Focus trap: keep focus on input ──
+  const handleContainerMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.target !== inputRef.current) {
+      e.preventDefault();
+    }
+  }, []);
+
+  const handleInputBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      if (
+        containerRef.current &&
+        e.relatedTarget instanceof Node &&
+        containerRef.current.contains(e.relatedTarget)
+      ) {
+        inputRef.current?.focus();
+      }
+    },
+    [],
+  );
+
+  // ── Close helper ──
+  const handleClose = useCallback(() => {
+    kernel.dispatch(OVERLAY_CLOSE({ id }) as any);
+    onClose?.();
+  }, [id, onClose]);
+
+  // ── Select from virtual focus ──
+  const handleAction = useCallback(() => {
+    const state = kernel.getState();
+    const zone = state.os.focus.zones[zoneId];
+    const focusedId = zone?.focusedItemId;
+
+    if (focusedId) {
+      const item = filteredItems.find((r) => r.id === focusedId);
+      if (item) {
+        handleClose();
+        onSelect(item);
+      }
+    }
+  }, [filteredItems, zoneId, handleClose, onSelect]);
+
+  // ── Navigate from input → virtual zone ──
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Tab" || (e.key === "ArrowRight" && completion)) {
+        // Accept typeahead
+        e.preventDefault();
+        if (completion) {
+          setQuery((q) => q + completion);
         }
-    }, [isOpen]);
-
-    // Detect external close (e.g. Esc handled by DialogZone) to sync back to parent
-    const isOverlayOpen = kernel.useComputed(s => s.os.overlays.stack.some(o => o.id === "quickpick"));
-
-    useEffect(() => {
-        // If parent thinks it's open, but kernel says closed, notify parent
-        if (isOpen && !isOverlayOpen && onClose) {
-            onClose();
+      } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        // Proxy to the zone for virtual focus navigation
+        e.preventDefault();
+        const zoneEl = document.querySelector(`[data-zone-id="${zoneId}"]`);
+        if (zoneEl) {
+          zoneEl.dispatchEvent(
+            new KeyboardEvent("keydown", {
+              key: e.key,
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
         }
-    }, [isOverlayOpen, isOpen, onClose]);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        handleAction();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        handleClose();
+      }
+    },
+    [completion, handleAction, handleClose, zoneId],
+  );
 
-    // Handle manual close
-    const handleClose = () => {
-        onClose?.(); // Will trigger effect above to close overlay if needed
-        // Or we close overlay directly here to be faster
-        kernel.dispatch(OVERLAY_CLOSE({ id: "quickpick" }));
-    };
+  if (!isOpen) return null;
 
-    // Auto-focus input when open
-    useEffect(() => {
-        if (isOpen) {
-            setQuery("");
-            requestAnimationFrame(() => {
-                inputRef.current?.focus();
-            });
+  return (
+    <OS.Dialog id={id}>
+      <OS.Dialog.Content
+        title=""
+        className={
+          className ??
+          "fixed inset-0 w-screen h-screen max-w-none max-h-none m-0 bg-black/20 z-50 p-0 flex items-center justify-center"
         }
-    }, [isOpen]);
-
-    // Navigate logic: Input -> List
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            kernel.dispatch(NAVIGATE({ direction: "down" }));
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            kernel.dispatch(NAVIGATE({ direction: "up" }));
-        } else if (e.key === "Enter") {
-            e.preventDefault();
-            const state = kernel.getState();
-            const zone = state.os.focus.zones["quickpick-list"];
-            if (zone?.focusedItemId) {
-                const selected = filteredItems.find(i => i.id === zone.focusedItemId);
-                if (selected) {
-                    onSelect(selected);
-                    handleClose();
-                }
-            }
-        } else if (e.key === "Escape") {
-            e.preventDefault();
-            handleClose();
+        contentClassName={
+          contentClassName ??
+          "w-[640px] max-w-[90vw] bg-white rounded-xl shadow-2xl border border-black/5 flex flex-col overflow-hidden text-zinc-900"
         }
-    };
-
-    if (!isOpen) return null;
-
-    // Render Dialog without 'open' prop (controlled by ID)
-    return (
-        <Dialog id="quickpick">
-            <Dialog.Content
-                className="fixed top-[20%] left-1/2 -translate-x-1/2 w-[600px] max-w-[90vw] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col z-50"
+      >
+        <div
+          ref={containerRef}
+          onMouseDown={handleContainerMouseDown}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
+          {/* Search Input */}
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100">
+            <svg
+              className="w-[18px] h-[18px] text-zinc-400 shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
             >
-                <div className="flex items-center px-4 py-3 border-b border-gray-100">
-                    <svg className="w-5 h-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                        ref={inputRef}
-                        className="flex-1 bg-transparent border-none outline-none text-lg text-gray-800 placeholder:text-gray-400"
-                        placeholder={placeholder}
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        autoComplete="off"
-                    />
+              <title>Search</title>
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <div className="flex-1 relative">
+              <input
+                ref={inputRef}
+                type="text"
+                className="w-full bg-transparent border-none outline-none text-[16px] leading-6 font-normal text-zinc-900 placeholder:text-zinc-400 caret-blue-600 relative z-10"
+                placeholder={placeholder}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onBlur={handleInputBlur}
+                autoComplete="off"
+                spellCheck={false}
+                role="combobox"
+                aria-expanded={filteredItems.length > 0}
+                aria-controls={zoneId}
+                aria-autocomplete={typeahead ? "both" : "list"}
+              />
+              {completion && (
+                <div className="absolute inset-0 pointer-events-none flex items-center overflow-hidden whitespace-pre text-[16px] leading-6 font-normal">
+                  <span className="opacity-0">{query}</span>
+                  <span className="text-zinc-400 opacity-60">{completion}</span>
                 </div>
+              )}
+            </div>
+            <OS.Kbd
+              shortcut="Esc"
+              className="shrink-0 text-[10px] font-medium text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 font-mono shadow-sm"
+            />
+          </div>
 
-                <div className="max-h-[60vh] overflow-y-auto p-2 bg-gray-50/50">
-                    {filteredItems.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500 text-sm">No results found</div>
+          {/* Item List */}
+          <OS.Zone
+            id={zoneId}
+            role="listbox"
+            options={QUICKPICK_ZONE_OPTIONS}
+            className="max-h-[380px] overflow-y-auto p-2 scroll-py-2 custom-scrollbar"
+          >
+            {filteredItems.length === 0
+              ? (renderEmpty?.(query) ?? (
+                <div className="py-8 text-center text-sm text-zinc-500">
+                  No results found
+                </div>
+              ))
+              : filteredItems.map((item) => (
+                <OS.Item key={item.id} id={item.id}>
+                  {({ isFocused, isSelected }) =>
+                    renderItem ? (
+                      renderItem(item, { isFocused, isSelected, query })
                     ) : (
-                        <FocusGroup
-                            id="quickpick-list"
-                            role="listbox"
-                            project={{ virtualFocus: true }} // Virtual Focus Enabled
-                            navigate={{ orientation: "vertical", loop: true }}
-                            className="space-y-1"
-                        >
-                            {filteredItems.map(item => (
-                                <FocusItem
-                                    key={item.id}
-                                    id={item.id}
-                                    role="option"
-                                    className="
-                                px-4 py-2 rounded-lg flex items-center justify-between text-sm cursor-pointer
-                                hover:bg-gray-100 text-gray-700
-                                data-[focused=true]:bg-indigo-600 data-[focused=true]:text-white
-                                transition-colors
-                            "
-                                    onClick={() => {
-                                        onSelect(item);
-                                        handleClose();
-                                    }}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        {item.icon && <span className="opacity-70">{item.icon}</span>}
-                                        <span className="font-medium">{item.label}</span>
-                                    </div>
-                                    {item.description && (
-                                        <span className="text-xs opacity-60 ml-4 truncate max-w-[200px]">{item.description}</span>
-                                    )}
-                                </FocusItem>
-                            ))}
-                        </FocusGroup>
-                    )}
-                </div>
+                      <DefaultQuickPickRow
+                        item={item}
+                        isFocused={isFocused}
+                        onClick={() => {
+                          handleClose();
+                          onSelect(item);
+                        }}
+                      />
+                    )
+                  }
+                </OS.Item>
+              ))}
+          </OS.Zone>
 
-                <div className="bg-gray-50 px-4 py-2 text-xs text-gray-400 border-t border-gray-100 flex justify-end gap-3">
-                    <span>Scan keys: <kbd className="font-sans border rounded px-1 min-w-[1.2em] inline-block text-center bg-white">↑↓</kbd></span>
-                    <span>Select: <kbd className="font-sans border rounded px-1 min-w-[1.2em] inline-block text-center bg-white">↵</kbd></span>
-                    <span>Close: <kbd className="font-sans border rounded px-1 min-w-[1.2em] inline-block text-center bg-white">Esc</kbd></span>
-                </div>
-            </Dialog.Content>
-        </Dialog>
-    );
+          {/* Footer */}
+          {renderFooter ? (
+            renderFooter()
+          ) : (
+            <div className="flex items-center gap-4 px-4 py-2 bg-zinc-50 border-t border-zinc-100 text-[11px] text-zinc-500 select-none">
+              <span className="flex items-center gap-1.5">
+                <OS.Kbd
+                  shortcut="Up"
+                  className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+                />
+                <OS.Kbd
+                  shortcut="Down"
+                  className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+                />
+                navigate
+              </span>
+              {typeahead && (
+                <span className="flex items-center gap-1.5">
+                  <OS.Kbd
+                    shortcut="Tab"
+                    className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+                  />
+                  complete
+                </span>
+              )}
+              <span className="flex items-center gap-1.5">
+                <OS.Kbd
+                  shortcut="Enter"
+                  className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+                />
+                select
+              </span>
+              <span className="flex items-center gap-1.5">
+                <OS.Kbd
+                  shortcut="Esc"
+                  className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+                />
+                close
+              </span>
+            </div>
+          )}
+        </div>
+      </OS.Dialog.Content>
+    </OS.Dialog>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Default Row
+// ═══════════════════════════════════════════════════════════════════
+
+function DefaultQuickPickRow({
+  item,
+  isFocused,
+  onClick,
+}: {
+  item: QuickPickItem;
+  isFocused: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      role="option"
+      tabIndex={-1}
+      aria-selected={isFocused}
+      className={`
+        flex items-center gap-3 px-3.5 py-2.5 rounded-lg cursor-pointer transition-all duration-100 mb-[1px]
+        ${isFocused ? "bg-zinc-100 text-zinc-950" : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-800"}
+      `}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") onClick();
+      }}
+    >
+      {item.icon && <span className="text-base opacity-70">{item.icon}</span>}
+      <span className="flex-1 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+        {item.label}
+      </span>
+      {item.description && (
+        <span
+          className={`text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right transition-colors ${isFocused ? "text-zinc-500" : "text-zinc-400"
+            }`}
+        >
+          {item.description}
+        </span>
+      )}
+    </div>
+  );
 }
