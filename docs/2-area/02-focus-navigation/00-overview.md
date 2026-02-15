@@ -141,6 +141,7 @@ Zone이 Container이면서 동시에 Target인 경우:
 ### 가상 포커스 (Combobox)
 - `virtualFocus: true`: `aria-activedescendant` 사용
 - Input이 실제 포커스 유지, Arrow로 가상 커서 이동
+- 📚 [Deep Dive: Virtual Focus & aria-activedescendant](../../3-resource/04-architecture/2026-0215-virtual-focus-activedescendant.md)
 
 ### 안티 패턴
 

@@ -23,5 +23,8 @@
 - [x] Todo ID 마이그레이션: number → string + uid() (02-15)
 - [x] SPEC.md 갱신 — 전 Gap 해결(G1-G7), Coverage Map 완전 (02-15)
 
+## 📚 Resources
+- [Virtual Focus & aria-activedescendant](../../3-resource/04-architecture/2026-0215-virtual-focus-activedescendant.md) — T5a/T5b 구현 가이드
+
 ## 💡 Ideas
 - SPEC.md를 코드에서 참조: 커맨드 파일 상단에 SPEC 섹션 번호 링크

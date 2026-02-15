@@ -22,6 +22,7 @@ import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
 import { Route as MinimalPlaygroundTestsRouteImport } from './routes/_minimal/playground.tests'
 import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/playground.radix'
+import { Route as MinimalPlaygroundQuickpickRouteImport } from './routes/_minimal/playground.quickpick'
 import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
 import { Route as MinimalPlaygroundDesignDashboardV3RouteImport } from './routes/_minimal/playground.design-dashboard-v3'
@@ -94,6 +95,12 @@ const MinimalPlaygroundRadixRoute = MinimalPlaygroundRadixRouteImport.update({
   path: '/playground/radix',
   getParentRoute: () => MinimalRoute,
 } as any)
+const MinimalPlaygroundQuickpickRoute =
+  MinimalPlaygroundQuickpickRouteImport.update({
+    id: '/playground/quickpick',
+    path: '/playground/quickpick',
+    getParentRoute: () => MinimalRoute,
+  } as any)
 const MinimalPlaygroundKernelRoute = MinimalPlaygroundKernelRouteImport.update({
   id: '/playground/kernel',
   path: '/playground/kernel',
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
+  '/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
   '/playground/tests': typeof MinimalPlaygroundTestsRoute
   '/docs/': typeof MinimalDocsIndexRoute
@@ -160,6 +168,7 @@ export interface FileRoutesByTo {
   '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
+  '/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
   '/playground/tests': typeof MinimalPlaygroundTestsRoute
   '/docs': typeof MinimalDocsIndexRoute
@@ -182,6 +191,7 @@ export interface FileRoutesById {
   '/_minimal/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
+  '/_minimal/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
   '/_minimal/playground/radix': typeof MinimalPlaygroundRadixRoute
   '/_minimal/playground/tests': typeof MinimalPlaygroundTestsRoute
   '/_minimal/docs/': typeof MinimalDocsIndexRoute
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/playground/design-dashboard-v3'
     | '/playground/focus'
     | '/playground/kernel'
+    | '/playground/quickpick'
     | '/playground/radix'
     | '/playground/tests'
     | '/docs/'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/playground/design-dashboard-v3'
     | '/playground/focus'
     | '/playground/kernel'
+    | '/playground/quickpick'
     | '/playground/radix'
     | '/playground/tests'
     | '/docs'
@@ -242,6 +254,7 @@ export interface FileRouteTypes {
     | '/_minimal/playground/design-dashboard-v3'
     | '/_minimal/playground/focus'
     | '/_minimal/playground/kernel'
+    | '/_minimal/playground/quickpick'
     | '/_minimal/playground/radix'
     | '/_minimal/playground/tests'
     | '/_minimal/docs/'
@@ -347,6 +360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalPlaygroundRadixRouteImport
       parentRoute: typeof MinimalRoute
     }
+    '/_minimal/playground/quickpick': {
+      id: '/_minimal/playground/quickpick'
+      path: '/playground/quickpick'
+      fullPath: '/playground/quickpick'
+      preLoaderRoute: typeof MinimalPlaygroundQuickpickRouteImport
+      parentRoute: typeof MinimalRoute
+    }
     '/_minimal/playground/kernel': {
       id: '/_minimal/playground/kernel'
       path: '/playground/kernel'
@@ -414,6 +434,7 @@ interface MinimalRouteChildren {
   MinimalPlaygroundDesignDashboardV3Route: typeof MinimalPlaygroundDesignDashboardV3Route
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
   MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
+  MinimalPlaygroundQuickpickRoute: typeof MinimalPlaygroundQuickpickRoute
   MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute
   MinimalPlaygroundTestsRoute: typeof MinimalPlaygroundTestsRoute
 }
@@ -427,6 +448,7 @@ const MinimalRouteChildren: MinimalRouteChildren = {
     MinimalPlaygroundDesignDashboardV3Route,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,
   MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
+  MinimalPlaygroundQuickpickRoute: MinimalPlaygroundQuickpickRoute,
   MinimalPlaygroundRadixRoute: MinimalPlaygroundRadixRoute,
   MinimalPlaygroundTestsRoute: MinimalPlaygroundTestsRoute,
 }
