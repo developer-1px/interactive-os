@@ -7,17 +7,20 @@
  *  3. Dialog with actions
  */
 
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { Item } from "@os/6-components/primitives/Item.tsx";
 import { Dialog } from "@os/6-components/radox/Dialog.tsx";
-import { useRadixPlaygroundBotRoutes } from "./RadixPlaygroundBot";
+
+// @ts-expect-error — spec-wrapper plugin transforms at build time
+import runDialogSpec from "./tests/e2e/dialog.spec.ts";
 
 export function RadixPlayground() {
-  const resetKey = useRadixPlaygroundBotRoutes();
+  usePlaywrightSpecs("radix-e2e", [runDialogSpec]);
 
   return (
-    <div key={resetKey} className="min-h-screen bg-slate-50 p-8">
+    <div className="min-h-screen bg-slate-50 p-8">
       {/* Header */}
       <div className="max-w-3xl mx-auto mb-8">
         <h1 className="text-2xl font-bold text-slate-800">Radix Playground</h1>

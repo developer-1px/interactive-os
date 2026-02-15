@@ -18,10 +18,12 @@ import {
   OS_DELETE,
   OS_MOVE_DOWN,
   OS_MOVE_UP,
+  OS_REDO,
+  OS_UNDO,
   TAB,
 } from "@os/3-commands/interaction";
 import { NAVIGATE } from "@os/3-commands/navigate";
-import { SELECT } from "@os/3-commands/selection";
+import { OS_SELECT_ALL, SELECT } from "@os/3-commands/selection";
 import { Keybindings } from "./keybindings";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -120,6 +122,7 @@ Keybindings.registerAll([
     args: [{ mode: "toggle" }],
     when: "navigating",
   },
+  { key: "Meta+A", command: OS_SELECT_ALL, when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -138,6 +141,15 @@ Keybindings.registerAll([
 Keybindings.registerAll([
   { key: "Meta+ArrowUp", command: OS_MOVE_UP, when: "navigating" },
   { key: "Meta+ArrowDown", command: OS_MOVE_DOWN, when: "navigating" },
+]);
+
+// ═══════════════════════════════════════════════════════════════════
+// Undo / Redo
+// ═══════════════════════════════════════════════════════════════════
+
+Keybindings.registerAll([
+  { key: "Meta+Z", command: OS_UNDO },
+  { key: "Meta+Shift+Z", command: OS_REDO },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════

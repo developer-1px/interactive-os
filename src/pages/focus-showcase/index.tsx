@@ -1,5 +1,6 @@
 import { InspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotActions } from "@inspector/testbot";
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { TestGrid } from "../shared/TestLayout";
 import { ActivateTest } from "./tests/ActivateTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";
@@ -7,12 +8,15 @@ import { AriaInteractionTest } from "./tests/AriaInteractionTest";
 import { AutofocusTest } from "./tests/AutofocusTest";
 import { DismissTest } from "./tests/DismissTest";
 import { ExpandTest } from "./tests/ExpandTest";
+// @ts-expect-error — spec-wrapper plugin transforms at build time
+import runFocusShowcase from "./tests/e2e/focus-showcase.spec.ts";
 import { FocusStackTest } from "./tests/FocusStackTest";
 import { NavigateTest } from "./tests/NavigateTest";
 import { SelectTest } from "./tests/SelectTest";
 import { TabTest } from "./tests/TabTest";
 
 export function FocusShowcasePage() {
+  usePlaywrightSpecs("focus-showcase", [runFocusShowcase]);
   const runAllTests = () => {
     InspectorStore.setOpen(true);
     InspectorStore.setActiveTab("TESTBOT");

@@ -197,7 +197,6 @@ export function createActions(
       ].join("") + label;
 
     cursor.showBubble(modLabel, "default");
-    cursor.pressKey(modLabel);
     const target = document.activeElement || document.body;
     const eventInit: KeyboardEventInit = {
       key,
@@ -228,6 +227,24 @@ export function createActions(
       }
     }
 
+    // Meta+C/X/V → synthetic KeyboardEvent doesn't trigger native clipboard.
+    // Dispatch ClipboardEvent manually so ClipboardListener can intercept.
+    if (modifiers?.meta && key.toLowerCase() === "c") {
+      target.dispatchEvent(
+        new ClipboardEvent("copy", { bubbles: true, cancelable: true }),
+      );
+    }
+    if (modifiers?.meta && key.toLowerCase() === "x") {
+      target.dispatchEvent(
+        new ClipboardEvent("cut", { bubbles: true, cancelable: true }),
+      );
+    }
+    if (modifiers?.meta && key.toLowerCase() === "v") {
+      target.dispatchEvent(
+        new ClipboardEvent("paste", { bubbles: true, cancelable: true }),
+      );
+    }
+
     steps.push({ action: "press", detail: modLabel, passed: true });
     emitStep();
     await wait(pauseTime());
@@ -244,7 +261,6 @@ export function createActions(
     );
 
     for (const char of text) {
-      cursor.pressKey(char);
       const key = char === " " ? " " : char;
       const target = document.activeElement || document.body;
       const eventInit: KeyboardEventInit = {

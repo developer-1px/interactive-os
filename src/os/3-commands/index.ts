@@ -24,6 +24,8 @@ export {
   OS_DELETE,
   OS_MOVE_DOWN,
   OS_MOVE_UP,
+  OS_REDO,
+  OS_UNDO,
   TAB,
 } from "./interaction";
 // Navigation
@@ -32,6 +34,7 @@ export { NAVIGATE } from "./navigate";
 export { OVERLAY_CLOSE, OVERLAY_OPEN } from "./overlay/overlay";
 // Selection
 export {
+  OS_SELECT_ALL,
   SELECT,
   SELECTION_ADD,
   SELECTION_CLEAR,

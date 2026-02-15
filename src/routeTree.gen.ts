@@ -25,6 +25,7 @@ import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/pl
 import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
 import { Route as MinimalPlaygroundDesignDashboardV3RouteImport } from './routes/_minimal/playground.design-dashboard-v3'
+import { Route as MinimalPlaygroundCommandPaletteRouteImport } from './routes/_minimal/playground.command-palette'
 import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
 import { Route as MinimalDocsSplatRouteImport } from './routes/_minimal/docs/$'
 
@@ -109,6 +110,12 @@ const MinimalPlaygroundDesignDashboardV3Route =
     path: '/playground/design-dashboard-v3',
     getParentRoute: () => MinimalRoute,
   } as any)
+const MinimalPlaygroundCommandPaletteRoute =
+  MinimalPlaygroundCommandPaletteRouteImport.update({
+    id: '/playground/command-palette',
+    path: '/playground/command-palette',
+    getParentRoute: () => MinimalRoute,
+  } as any)
 const MinimalPlaygroundAriaRoute = MinimalPlaygroundAriaRouteImport.update({
   id: '/playground/aria',
   path: '/playground/aria',
@@ -131,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/playground/poc-registry-monitor': typeof PlaygroundPocRegistryMonitorRoute
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
   '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
@@ -148,6 +156,7 @@ export interface FileRoutesByTo {
   '/playground/poc-registry-monitor': typeof PlaygroundPocRegistryMonitorRoute
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
   '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
@@ -169,6 +178,7 @@ export interface FileRoutesById {
   '/_todo/': typeof TodoIndexRoute
   '/_minimal/docs/$': typeof MinimalDocsSplatRoute
   '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
+  '/_minimal/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
   '/_minimal/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/playground/poc-registry-monitor'
     | '/docs/$'
     | '/playground/aria'
+    | '/playground/command-palette'
     | '/playground/design-dashboard-v3'
     | '/playground/focus'
     | '/playground/kernel'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/playground/poc-registry-monitor'
     | '/docs/$'
     | '/playground/aria'
+    | '/playground/command-palette'
     | '/playground/design-dashboard-v3'
     | '/playground/focus'
     | '/playground/kernel'
@@ -226,6 +238,7 @@ export interface FileRouteTypes {
     | '/_todo/'
     | '/_minimal/docs/$'
     | '/_minimal/playground/aria'
+    | '/_minimal/playground/command-palette'
     | '/_minimal/playground/design-dashboard-v3'
     | '/_minimal/playground/focus'
     | '/_minimal/playground/kernel'
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalPlaygroundDesignDashboardV3RouteImport
       parentRoute: typeof MinimalRoute
     }
+    '/_minimal/playground/command-palette': {
+      id: '/_minimal/playground/command-palette'
+      path: '/playground/command-palette'
+      fullPath: '/playground/command-palette'
+      preLoaderRoute: typeof MinimalPlaygroundCommandPaletteRouteImport
+      parentRoute: typeof MinimalRoute
+    }
     '/_minimal/playground/aria': {
       id: '/_minimal/playground/aria'
       path: '/playground/aria'
@@ -390,6 +410,7 @@ interface MinimalRouteChildren {
   MinimalBuilderRoute: typeof MinimalBuilderRoute
   MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
   MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
+  MinimalPlaygroundCommandPaletteRoute: typeof MinimalPlaygroundCommandPaletteRoute
   MinimalPlaygroundDesignDashboardV3Route: typeof MinimalPlaygroundDesignDashboardV3Route
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
   MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
@@ -401,6 +422,7 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalBuilderRoute: MinimalBuilderRoute,
   MinimalDocsRoute: MinimalDocsRouteWithChildren,
   MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
+  MinimalPlaygroundCommandPaletteRoute: MinimalPlaygroundCommandPaletteRoute,
   MinimalPlaygroundDesignDashboardV3Route:
     MinimalPlaygroundDesignDashboardV3Route,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,

@@ -12,6 +12,8 @@ import { ACTIVATE } from "@os/3-commands/interaction/activate";
 import { OS_CHECK } from "@os/3-commands/interaction/check";
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
 import { OS_MOVE_DOWN, OS_MOVE_UP } from "@os/3-commands/interaction/move";
+import { OS_REDO } from "@os/3-commands/interaction/redo";
+import { OS_UNDO } from "@os/3-commands/interaction/undo";
 import { SELECT } from "@os/3-commands/selection/select";
 import { kernel } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
@@ -37,6 +39,8 @@ const mockAction = createMockCommand("action");
 const mockDelete = createMockCommand("delete");
 const mockMoveUp = createMockCommand("moveUp");
 const mockMoveDown = createMockCommand("moveDown");
+const mockUndo = createMockCommand("undo");
+const mockRedo = createMockCommand("redo");
 
 function setupFocus(zoneId: string, focusedItemId: string) {
   kernel.setState((prev) => ({
@@ -67,6 +71,8 @@ function registerZone(
     onDelete: any;
     onMoveUp: any;
     onMoveDown: any;
+    onUndo: any;
+    onRedo: any;
   }>,
 ) {
   ZoneRegistry.register(id, {
@@ -200,5 +206,57 @@ describe("OS_MOVE → onMoveUp/Down pipeline", () => {
     });
 
     kernel.dispatch(OS_MOVE_DOWN());
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// OS_UNDO → onUndo
+// ═══════════════════════════════════════════════════════════════════
+
+describe("OS_UNDO → onUndo pipeline", () => {
+  it("dispatches onUndo callback when Zone has it", () => {
+    setupFocus("testZone", "item-1");
+    registerZone("testZone", {
+      onUndo: mockUndo(),
+    });
+
+    kernel.dispatch(OS_UNDO());
+  });
+
+  it("does nothing when Zone has no onUndo", () => {
+    setupFocus("testZone", "item-1");
+    registerZone("testZone", {});
+
+    kernel.dispatch(OS_UNDO());
+  });
+
+  it("does nothing when no active zone", () => {
+    kernel.dispatch(OS_UNDO());
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// OS_REDO → onRedo
+// ═══════════════════════════════════════════════════════════════════
+
+describe("OS_REDO → onRedo pipeline", () => {
+  it("dispatches onRedo callback when Zone has it", () => {
+    setupFocus("testZone", "item-1");
+    registerZone("testZone", {
+      onRedo: mockRedo(),
+    });
+
+    kernel.dispatch(OS_REDO());
+  });
+
+  it("does nothing when Zone has no onRedo", () => {
+    setupFocus("testZone", "item-1");
+    registerZone("testZone", {});
+
+    kernel.dispatch(OS_REDO());
+  });
+
+  it("does nothing when no active zone", () => {
+    kernel.dispatch(OS_REDO());
   });
 });

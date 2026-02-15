@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-15 15:58
+> Last updated: 2026-02-15 18:14
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -11,8 +11,10 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
+| os-prd | Execution | 02-15 |
+| fix-tab-navigation | Execution | 02-15 |
 | docs-system-v2 | Execution | 02-15 |
-| todo-keyboard-dogfooding | Definition | 02-15 |
+| todo-keyboard-dogfooding | Execution | 02-15 |
 
 ---
 
@@ -20,8 +22,10 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| os-prd | Execution | 02-15 | 🔥 Focus |
+| fix-tab-navigation | Execution | 02-15 | 🔥 Focus |
 | docs-system-v2 | Execution | 02-15 | 🔥 Focus |
-| todo-keyboard-dogfooding | Definition | 02-15 | 🔥 Focus |
+| todo-keyboard-dogfooding | Execution | 02-15 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
 | docs-dashboard | Design | 02-15 | ⏸ Idle |
 | define-app | Execution (Phase 3) | 02-14 | ⏸ Idle |
@@ -60,8 +64,8 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 2 |
-| Active Projects (total) | 7 |
+| Active Focus | 3 |
+| Active Projects (total) | 8 |
 | Completed (archived) | 13 |
 | Inbox items | 0 |
 | Backlog items | 2 |

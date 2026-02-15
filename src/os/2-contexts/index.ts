@@ -76,3 +76,35 @@ export const ZONE_CONFIG = kernel.defineContext(
     return entry?.config ?? DEFAULT_CONFIG;
   },
 );
+
+// ═══════════════════════════════════════════════════════════════════
+// DOM_ZONE_ORDER — all zones in DOM order (for cross-zone Tab)
+// ═══════════════════════════════════════════════════════════════════
+
+export interface ZoneOrderEntry {
+  zoneId: string;
+  firstItemId: string | null;
+  lastItemId: string | null;
+}
+
+export const DOM_ZONE_ORDER = kernel.defineContext(
+  "dom-zone-order",
+  (): ZoneOrderEntry[] => {
+    const zones: ZoneOrderEntry[] = [];
+    const els = document.querySelectorAll("[data-focus-group]");
+    for (const el of els) {
+      const zoneId = el.getAttribute("data-focus-group");
+      if (!zoneId) continue;
+      const items = el.querySelectorAll(
+        "[data-item-id]:not([data-nav-skip='true'])",
+      );
+      zones.push({
+        zoneId,
+        firstItemId: items[0]?.getAttribute("data-item-id") ?? null,
+        lastItemId:
+          items[items.length - 1]?.getAttribute("data-item-id") ?? null,
+      });
+    }
+    return zones;
+  },
+);

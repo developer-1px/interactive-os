@@ -1,199 +1,165 @@
+/* ── Container ─────────────────────────────────────────────────────── */
 .testbot-cursor {
   position: fixed;
   z-index: 99999;
   pointer-events: none;
   width: 24px;
   height: 24px;
+  /* Smooth movement - macOS style */
   transition:
-    left 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-    top 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    left 0.1s cubic-bezier(0.25, 1, 0.5, 1),
+    top 0.1s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: left, top;
 }
 
-.testbot-cursor svg {
+/* ── Cursor Geometry ──────────────────────────────────────────────── */
+.testbot-cursor-svg {
   width: 100%;
   height: 100%;
+  transition: transform 0.1s ease-out;
+  transform-origin: center;
+}
+
+.testbot-cursor.clicking .testbot-cursor-svg {
+  transform: scale(0.92);
 }
 
 /* ── Spotlight ────────────────────────────────────────────────────── */
 .testbot-spotlight {
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   background: radial-gradient(
     circle,
-    rgba(79, 70, 229, 0.4) 0%,
-    rgba(79, 70, 229, 0) 70%
+    rgba(0, 122, 255, 0.3) 0%,
+    rgba(0, 122, 255, 0) 70%
   );
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: -1;
-  mix-blend-mode: screen;
-  filter: blur(4px);
+  mix-blend-mode: multiply;
 }
 
-/* ── SVG Wrapper ─────────────────────────────────────────────────── */
-.testbot-cursor-svg {
-  width: 100%;
-  height: 100%;
-  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-/* ── Unified Bubble Tray (Horizontal) ────────────────────────────── */
-.testbot-bubble-tray {
-  position: absolute;
-  left: 20px;
-  top: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  pointer-events: none;
-  z-index: 99999;
-}
-
-.testbot-bubble {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 8px;
-  background: white;
-  border-radius: 6px;
-  color: #334155;
-  font-family: "Inter", system-ui, sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transform-origin: top left;
-  animation: testbot-bubble-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)
-    forwards;
-}
-
-/* Bubble Variants */
-.testbot-bubble.variant-click {
-  background: #4f46e5;
-  color: white;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.testbot-bubble.variant-success {
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #10b981;
-}
-
-.testbot-bubble.variant-error {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #ef4444;
-}
-
-.testbot-bubble.fading {
-  opacity: 0;
-  transform: translateY(-5px);
-  transition:
-    opacity 0.3s,
-    transform 0.3s;
-}
-
-@keyframes testbot-bubble-pop {
-  0% {
-    transform: scale(0.8) translateY(5px);
-    opacity: 0;
-  }
-
-  100% {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-}
-
-/* ── Ripple ───────────────────────────────────────────────────────── */
+/* ── Ripple Effect (Clean Ring) ───────────────────────────────────── */
 .testbot-ripple {
   position: fixed;
   z-index: 99998;
   pointer-events: none;
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  border: 2px solid rgba(79, 70, 229, 0.3);
-  background: radial-gradient(
-    circle,
-    rgba(79, 70, 229, 0.1) 0%,
-    transparent 70%
-  );
-  transform: translate(-50%, -50%) scale(0);
-  animation: testbot-ripple-anim 0.5s cubic-bezier(0, 0, 0.2, 1) forwards;
+  border: 1.5px solid rgba(0, 122, 255, 0.6);
+  transform: translate(-50%, -50%) scale(0.5);
+  animation: testbot-ripple-expand 0.4s ease-out forwards;
 }
 
-@keyframes testbot-ripple-anim {
+@keyframes testbot-ripple-expand {
   0% {
-    transform: translate(-50%, -50%) scale(0);
+    transform: translate(-50%, -50%) scale(0.5);
     opacity: 1;
   }
 
   100% {
-    transform: translate(-50%, -50%) scale(1.5);
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* ── Bubble Tray (Horizontal) ────────────────────────────────────── */
+.testbot-bubble-tray {
+  position: absolute;
+  left: 20px;
+  top: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.testbot-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+
+  /* Native System Font Stack */
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui,
+    sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  transform-origin: top left;
+  animation: bubble-fadein 0.2s ease-out forwards;
+}
+
+/* Variants using System Colors */
+.testbot-bubble.variant-click {
+  color: #007aff;
+  font-weight: 600;
+}
+
+.testbot-bubble.variant-success {
+  color: #34c759;
+}
+
+.testbot-bubble.variant-error {
+  color: #ff3b30;
+}
+
+.testbot-bubble.fading {
+  animation: bubble-fadeout 0.2s ease-in forwards;
+}
+
+@keyframes bubble-fadein {
+  from {
+    transform: translateY(2px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bubble-fadeout {
+  to {
+    transform: translateY(-2px);
     opacity: 0;
   }
 }
 
 /* ── Off-screen State ────────────────────────────────────────────── */
 .testbot-cursor.off-screen .testbot-cursor-body {
-  color: #4f46e5;
-  filter: drop-shadow(0 2px 4px rgba(79, 70, 229, 0.3));
-  transform-origin: center;
-  animation: testbot-ptr-pulse 0.5s infinite;
+  color: #007aff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  animation: cursor-pulse 2s infinite ease-in-out;
 }
 
 .testbot-cursor.off-screen .testbot-spotlight {
   opacity: 0;
 }
 
-/* ── Key HUD (KeyCastr-style) ────────────────────────────────────── */
-.testbot-key-hud {
-  position: fixed;
-  bottom: 32px;
-  left: 24px;
-  z-index: 99999;
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-start;
-  gap: 4px;
-  pointer-events: none;
-}
-
-.testbot-key-item {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.9);
-  border-radius: 5px;
-  padding: 3px 10px;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  animation: key-slide-in 0.2s ease-out forwards;
-}
-
-@keyframes key-slide-in {
-  0% {
-    transform: translateX(-8px);
-    opacity: 0;
+@keyframes cursor-pulse {
+  0%,
+  100% {
+    opacity: 1;
   }
 
-  100% {
-    transform: translateX(0);
-    opacity: 1;
+  50% {
+    opacity: 0.5;
   }
 }

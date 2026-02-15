@@ -58,6 +58,9 @@ const e2eFilesRaw = import.meta.glob("/src/**/tests/e2e/**/*.spec.ts", {
 const unitFilesExec = import.meta.glob("/src/**/tests/unit/**/*.test.ts", {
   eager: false,
 });
+const e2eFilesExec = import.meta.glob("/src/**/tests/e2e/**/*.spec.ts", {
+  eager: false,
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -184,6 +187,7 @@ function buildGroups(
   rawModules: Record<string, () => Promise<any>>,
   execModules: Record<string, () => Promise<any>>,
   e2eRawModules: Record<string, () => Promise<any>>,
+  e2eExecModules: Record<string, () => Promise<any>>,
 ): ProjectGroup[] {
   const groupMap = new Map<string, ProjectGroup>();
 
@@ -217,7 +221,7 @@ function buildGroups(
     addFile(path, "unit", loader, execModules[path]);
   }
   for (const [path, loader] of Object.entries(e2eRawModules)) {
-    addFile(path, "e2e", loader);
+    addFile(path, "e2e", loader, e2eExecModules[path]);
   }
 
   return Array.from(groupMap.values()).sort((a, b) => {
@@ -305,10 +309,10 @@ function ResultNode({
           <StatusIcon status={node.status} />
           <span
             className={`truncate ${node.status === "fail"
-                ? "text-red-600"
-                : node.status === "pass"
-                  ? "text-emerald-700"
-                  : "text-stone-600"
+              ? "text-red-600"
+              : node.status === "pass"
+                ? "text-emerald-700"
+                : "text-stone-600"
               }`}
           >
             {node.name}
@@ -529,7 +533,7 @@ function SummaryBar({
 
 export function TestDashboard() {
   const groups = useMemo(
-    () => buildGroups(unitFilesRaw, unitFilesExec, e2eFilesRaw),
+    () => buildGroups(unitFilesRaw, unitFilesExec, e2eFilesRaw, e2eFilesExec),
     [],
   );
 
@@ -680,8 +684,8 @@ export function TestDashboard() {
                           key={group.slug}
                           onClick={() => setSelectedGroup(group)}
                           className={`relative w-full flex items-center gap-2.5 px-3 py-[5px] text-[13px] rounded-md transition-all text-left ml-1 ${selectedGroup === group
-                              ? "bg-violet-50 text-violet-900 font-semibold shadow-sm ring-1 ring-violet-100"
-                              : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                            ? "bg-violet-50 text-violet-900 font-semibold shadow-sm ring-1 ring-violet-100"
+                            : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
                             }`}
                         >
                           <HealthIcon group={group} size={12} />
@@ -720,7 +724,7 @@ export function TestDashboard() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-3 space-y-6">
-              {(["unit", "e2e"] as const).map((layer) => {
+              {(["unit", "testbot", "e2e"] as const).map((layer) => {
                 const files = selectedGroup.layers[layer];
                 if (files.length === 0) return null;
                 const meta = LAYER_META[layer];
@@ -740,8 +744,8 @@ export function TestDashboard() {
                           key={file.path}
                           onClick={() => setSelectedFile(file)}
                           className={`w-full text-left flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-xs font-mono border ${selectedFile === file
-                              ? "bg-white border-stone-300 shadow-sm text-stone-900 font-semibold scale-[1.02] origin-left"
-                              : "border-transparent text-stone-500 hover:bg-stone-200/50 hover:text-stone-700"
+                            ? "bg-white border-stone-300 shadow-sm text-stone-900 font-semibold scale-[1.02] origin-left"
+                            : "border-transparent text-stone-500 hover:bg-stone-200/50 hover:text-stone-700"
                             }`}
                         >
                           <FileCode2
@@ -792,8 +796,8 @@ export function TestDashboard() {
                   type="button"
                   onClick={() => setShowSource(!showSource)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide transition-all border ${showSource
-                      ? "bg-stone-100 text-stone-700 border-stone-200"
-                      : "bg-white text-stone-400 border-stone-100 hover:text-stone-600 hover:border-stone-200"
+                    ? "bg-stone-100 text-stone-700 border-stone-200"
+                    : "bg-white text-stone-400 border-stone-100 hover:text-stone-600 hover:border-stone-200"
                     }`}
                 >
                   {showSource ? (
@@ -821,12 +825,12 @@ export function TestDashboard() {
                     <div className="flex items-center gap-2">
                       <div
                         className={`p-1 rounded ${running
-                            ? "bg-blue-100 text-blue-600 animate-pulse"
-                            : results.length > 0
-                              ? results.every((r) => r.status === "pass")
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-red-50 text-red-600"
-                              : "bg-stone-100 text-stone-400"
+                          ? "bg-blue-100 text-blue-600 animate-pulse"
+                          : results.length > 0
+                            ? results.every((r) => r.status === "pass")
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-red-50 text-red-600"
+                            : "bg-stone-100 text-stone-400"
                           }`}
                       >
                         {running ? (
@@ -852,8 +856,8 @@ export function TestDashboard() {
                         onClick={runTests}
                         disabled={running}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide transition-all shadow-sm ${running
-                            ? "bg-stone-100 text-stone-400 cursor-wait"
-                            : "bg-stone-900 text-white hover:bg-stone-700 hover:scale-105 active:scale-95"
+                          ? "bg-stone-100 text-stone-400 cursor-wait"
+                          : "bg-stone-900 text-white hover:bg-stone-700 hover:scale-105 active:scale-95"
                           }`}
                       >
                         {running ? (

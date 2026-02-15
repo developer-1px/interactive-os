@@ -430,6 +430,44 @@ test.describe("Focus Showcase", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
+  // 8b. Tab: Escape Mode — Tab exits zone immediately
+  // ─────────────────────────────────────────────────────────────
+  test("Tab: Escape Mode", async ({ page }) => {
+    // Focus the first item in escape group
+    await page.locator("#tab-escape-0").click();
+    await expect(page.locator("#tab-escape-0")).toBeFocused();
+
+    // Tab should exit the zone — focus should NOT be on any item in this group
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#tab-escape-0")).not.toBeFocused();
+    await expect(page.locator("#tab-escape-1")).not.toBeFocused();
+    await expect(page.locator("#tab-escape-2")).not.toBeFocused();
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 8c. Tab: Flow Mode — Tab navigates internally, escapes at boundary
+  // ─────────────────────────────────────────────────────────────
+  test("Tab: Flow Mode", async ({ page }) => {
+    // Focus the first item in flow group
+    await page.locator("#tab-flow-0").click();
+    await expect(page.locator("#tab-flow-0")).toBeFocused();
+
+    // Tab moves to next item in the group
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#tab-flow-1")).toBeFocused();
+
+    // Tab moves to the last item
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#tab-flow-2")).toBeFocused();
+
+    // Tab at boundary should escape — no item in this group focused
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#tab-flow-0")).not.toBeFocused();
+    await expect(page.locator("#tab-flow-1")).not.toBeFocused();
+    await expect(page.locator("#tab-flow-2")).not.toBeFocused();
+  });
+
+  // ─────────────────────────────────────────────────────────────
   // 9. Activate: Automatic Mode
   // ─────────────────────────────────────────────────────────────
   test("Activate: Automatic", async ({ page }) => {

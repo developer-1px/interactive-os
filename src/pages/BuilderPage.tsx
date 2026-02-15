@@ -1,7 +1,10 @@
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { OS } from "@os/AntigravityOS";
 import { useEffect, useState } from "react";
 import { BuilderApp, type PropertyType } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
+// @ts-expect-error — spec-wrapper plugin transforms at build time
+import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
 import { kernel } from "@/os/kernel";
 import {
   EditorToolbar,
@@ -20,6 +23,7 @@ import {
  * Kernel focus → BuilderApp.selectElement 동기화
  */
 export default function BuilderPage() {
+  usePlaywrightSpecs("builder", [runBuilderSpec]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
 
   // Derive selection from kernel focus → sync to BuilderApp

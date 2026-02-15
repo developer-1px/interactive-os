@@ -3,6 +3,7 @@
  * Demonstrates standard ARIA patterns using FocusGroup facade.
  */
 
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { kernel } from "@os/kernel.ts";
@@ -10,7 +11,40 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/lib/Icon";
 import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
 
+// @ts-expect-error — spec-wrapper plugin transforms at build time
+import runComplexPatterns from "./tests/e2e/complex-patterns.spec.ts";
+// @ts-expect-error
+import runDisclosure from "./tests/e2e/disclosure.spec.ts";
+// @ts-expect-error
+import runGrid from "./tests/e2e/grid.spec.ts";
+// @ts-expect-error
+import runListbox from "./tests/e2e/listbox.spec.ts";
+// @ts-expect-error
+import runMenu from "./tests/e2e/menu.spec.ts";
+// @ts-expect-error
+import runRadiogroup from "./tests/e2e/radiogroup.spec.ts";
+// @ts-expect-error
+import runTabs from "./tests/e2e/tabs.spec.ts";
+// @ts-expect-error
+import runToolbar from "./tests/e2e/toolbar.spec.ts";
+// @ts-expect-error
+import runTree from "./tests/e2e/tree.spec.ts";
+
+const ARIA_SPECS = [
+  runTabs,
+  runMenu,
+  runDisclosure,
+  runGrid,
+  runListbox,
+  runRadiogroup,
+  runToolbar,
+  runTree,
+  runComplexPatterns,
+];
+
 export function AriaShowcasePage() {
+  usePlaywrightSpecs("aria-showcase", ARIA_SPECS);
+
   return <AriaShowcaseContent />;
 }
 

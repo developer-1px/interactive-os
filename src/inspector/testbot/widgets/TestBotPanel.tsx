@@ -2,6 +2,7 @@
  * TestBotPanel — TestBot UI inside the Inspector
  *
  * Premium UI for running and viewing test results.
+ * Spec registration is each page's responsibility via usePlaywrightSpecs.
  */
 
 import { Check, ChevronDown, Play, RefreshCw, Square, X } from "lucide-react";
@@ -20,9 +21,6 @@ export function TestBotPanel() {
   const isRunning = useTestBotStore((s) => s.isRunning);
   const currentSuiteIndex = useTestBotStore((s) => s.currentSuiteIndex);
   const routeCount = useTestBotStore((s) => s.routeDefiners.size);
-
-  // Register E2E Routes globally when panel is mounted
-  // This ensures they persist across page navigations during test runs
 
   const [expandedSuites, setExpandedSuites] = useState<Set<string>>(new Set());
 

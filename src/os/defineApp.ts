@@ -209,9 +209,10 @@ export function defineApp<S>(
   },
 ): AppHandle<S> & { [key: string]: any } {
   // ── Production: register on singleton kernel ──
+  const enableHistory = options?.history ?? false;
   const slice = registerAppSlice<S>(appId, {
     initialState,
-    history: options?.history ?? undefined,
+    history: enableHistory || undefined,
     persistence: options?.persistence ?? undefined,
   } as any);
 
@@ -313,6 +314,13 @@ export function defineApp<S>(
   ): ZoneHandle<S> {
     const scope = defineScope(`${appId}:${zoneName}`);
     const zoneGroup = (parentGroup ?? slice.group).group({ scope });
+
+    // History middleware must run wherever commands are handled.
+    // Zone commands run in this child scope, so we register here too.
+    if (enableHistory) {
+      const historyMw = createHistoryMiddleware(appId, scope);
+      zoneGroup.use(historyMw);
+    }
 
     const zone: ZoneHandle<S> = {
       command<T extends string, P = void>(
@@ -465,8 +473,8 @@ export function defineApp<S>(
       "history" in rawOverrides && rawOverrides.history === true;
     const stateOverrides = enableHistory
       ? (({ history: _h, ...rest }) => rest)(
-          rawOverrides as Record<string, unknown>,
-        )
+        rawOverrides as Record<string, unknown>,
+      )
       : rawOverrides;
 
     const testState =
@@ -669,11 +677,11 @@ export function defineApp<S>(
         className?: string;
         asChild?: boolean;
       }> = ({ children, className, asChild }) =>
-        React.createElement(
-          (OS.Dialog as any).Trigger,
-          { className, asChild },
-          children,
-        );
+          React.createElement(
+            (OS.Dialog as any).Trigger,
+            { className, asChild },
+            children,
+          );
       TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
       const ContentComponent: React.FC<{
@@ -682,7 +690,7 @@ export function defineApp<S>(
         className?: string;
         zoneClassName?: string;
       }> = (props) =>
-        React.createElement((OS.Dialog as any).Content, props as any);
+          React.createElement((OS.Dialog as any).Content, props as any);
       ContentComponent.displayName = `${appId}.Dialog.Content`;
 
       const PortalComponent: React.FC<{
@@ -692,14 +700,14 @@ export function defineApp<S>(
         className?: string;
         contentClassName?: string;
       }> = (props) =>
-        React.createElement((OS.Trigger as any).Portal, props as any);
+          React.createElement((OS.Trigger as any).Portal, props as any);
       PortalComponent.displayName = `${appId}.Dialog.Portal`;
 
       const DismissComponent: React.FC<{
         children: ReactNode;
         className?: string;
       }> = ({ children, className }) =>
-        React.createElement((OS.Dialog as any).Close, { className }, children);
+          React.createElement((OS.Dialog as any).Close, { className }, children);
       DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
       const ConfirmComponent: React.FC<{
@@ -848,9 +856,9 @@ export function defineApp<S>(
           // v3 when is bare lambda, not Condition
           const whenCondition = cmdOptions?.when
             ? defineCondition(
-                `__v3_when_${type}`,
-                cmdOptions.when as (state: S) => boolean,
-              )
+              `__v3_when_${type}`,
+              cmdOptions.when as (state: S) => boolean,
+            )
             : undefined;
 
           const factory = registerCommand(type, flatHandler, {

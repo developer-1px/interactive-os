@@ -74,7 +74,18 @@ export function SuiteDetails({
     }
   }, [isRunning]);
 
-  if (!steps || steps.length === 0) return null;
+  if (!steps || steps.length === 0) {
+    return (
+      <div className="relative pb-2">
+        <div className="flex items-center pl-3 pr-2 py-1.5">
+          <div className="shrink-0 w-6 flex justify-center mr-2 pt-0.5">
+            <div className="w-2 h-2 rounded-full bg-slate-200 bg-white z-10 relative" />
+          </div>
+          <span className="text-[11px] text-slate-400">Ready to run</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative pb-2">

@@ -7,9 +7,13 @@
 
 import { KernelPanel } from "@inspector/panels/KernelPanel.tsx";
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
+import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
+import { registerGotoReset } from "@inspector/testbot/playwright/shim";
 import { createKernel, type Transaction } from "@kernel";
 import { useEffect, useRef, useState } from "react";
-import { useKernelLabBotRoutes } from "./tests/KernelLabBot";
+
+// @ts-expect-error — spec-wrapper plugin transforms at build time
+import runKernelLabSpec from "./tests/e2e/kernel-lab.spec.ts";
 
 // ─── State Schema ───
 
@@ -247,6 +251,7 @@ function EffectLogPanel() {
 function TransactionPanel() {
   const txs = kernel.inspector.getTransactions();
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [, refresh] = useState(0);
 
   const handleTravel = (tx: Transaction) => {
     kernel.inspector.travelTo(tx.id);
@@ -263,6 +268,7 @@ function TransactionPanel() {
           onClick={() => {
             kernel.inspector.clearTransactions();
             setSelectedId(null);
+            refresh((n) => n + 1);
           }}
         >
           Clear
@@ -317,15 +323,18 @@ function TransactionPanel() {
 // ─── Main Page ───
 
 export default function KernelLabPage() {
-  const resetKey = useKernelLabBotRoutes();
+  const resetKey = usePlaywrightSpecs("kernel-lab", [runKernelLabSpec]);
 
-  // Reset state only — registries stay intact (idempotent, Strict Mode safe)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey is intentional trigger
   // Reset state only — registries stay intact (idempotent, Strict Mode safe)
   // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey is intentional trigger
   useEffect(() => {
     resetKernelLab();
   }, [resetKey]);
+
+  // Register goto reset for TestBot test isolation
+  useEffect(() => {
+    return registerGotoReset(resetKernelLab);
+  }, []);
 
   // Register Kernel Inspector Panel
   useEffect(() => {

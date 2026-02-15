@@ -7,11 +7,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type {
-  CursorBubble,
-  CursorRipple,
-  KeyPress,
-} from "../entities/CursorState";
+import type { CursorBubble, CursorRipple } from "../entities/CursorState";
 import {
   removeCursorBubble,
   removeCursorRipple,
@@ -24,6 +20,14 @@ import "./CursorOverlay.css";
 // SVG Assets
 // ═══════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════
+// SVG Assets (Premium Design)
+// ═══════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════
+// SVG Assets (Mac-like Native Look)
+// ═══════════════════════════════════════════════════════════════════
+
 const CursorSvg = () => (
   <svg
     width="24"
@@ -31,7 +35,7 @@ const CursorSvg = () => (
     viewBox="0 0 24 24"
     fill="none"
     aria-hidden="true"
-    style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
+    style={{ filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.2))" }}
   >
     <path d="M5.5 3.21V20.8L10.07 15.35H18.59L5.5 3.21Z" fill="black" />
     <path
@@ -50,6 +54,7 @@ const ArrowSvg = () => (
     aria-hidden="true"
     className="testbot-cursor-body"
     xmlns="http://www.w3.org/2000/svg"
+    style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
   >
     <line
       x1="12"
@@ -77,9 +82,8 @@ const IconCheck = () => (
     height="14"
     viewBox="0 0 24 24"
     fill="none"
-    aria-hidden="true"
     stroke="currentColor"
-    strokeWidth="4"
+    strokeWidth="3"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -93,9 +97,8 @@ const IconExclamation = () => (
     height="14"
     viewBox="0 0 24 24"
     fill="none"
-    aria-hidden="true"
     stroke="currentColor"
-    strokeWidth="4"
+    strokeWidth="3"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -110,9 +113,8 @@ const IconClick = () => (
     height="14"
     viewBox="0 0 24 24"
     fill="none"
-    aria-hidden="true"
     stroke="currentColor"
-    strokeWidth="3"
+    strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -174,24 +176,6 @@ function RippleItem({ ripple }: { ripple: CursorRipple }) {
 
   return (
     <div className="testbot-ripple" style={{ left: ripple.x, top: ripple.y }} />
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Key Press HUD
-// ═══════════════════════════════════════════════════════════════════
-
-function KeyPressHUD({ keys }: { keys: KeyPress[] }) {
-  if (keys.length === 0) return null;
-
-  return (
-    <div className="testbot-key-hud">
-      {keys.map((k) => (
-        <div key={k.id} className="testbot-key-item">
-          {k.key}
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -281,9 +265,6 @@ export function CursorOverlay() {
       {ripples.map((r) => (
         <RippleItem key={r.id} ripple={r} />
       ))}
-
-      {/* Key Press HUD */}
-      <KeyPressHUD keys={cursorState.activeKeys} />
     </>,
     document.body,
   );
