@@ -78,6 +78,8 @@ docs/1-project/[프로젝트명]/
 
 - `docs/1-project/[프로젝트명]/` 폴더를 만든다.
 - Step 3에서 수집한 문서를 배치한다.
+- **대시보드 갱신**: `docs/STATUS.md`의 All Active Projects에 이 프로젝트를 추가한다.
+  - Phase: Definition, Last Activity: 오늘, Status: 🔥 Focus
 
 ### Step 5: PRD 작성 (2-prd.md)
 
@@ -125,6 +127,8 @@ docs/1-project/[프로젝트명]/
 ---
 
 ## Phase 4: EXECUTION (실행)
+
+> **대시보드 갱신**: Phase 4 진입 시 `docs/STATUS.md`에서 이 프로젝트의 Phase를 "Execution"으로 갱신한다.
 
 ### Step 12: 테스트 먼저 — `/tdd` (기존 테스트가 없는 경우)
 
@@ -193,5 +197,9 @@ docs/1-project/[프로젝트명]/
    |------|------|
    | `해시` | 커밋 메시지 — 변경 파일 요약 |
    ```
-4. `/para`를 실행하여 프로젝트 폴더를 `docs/4-archive/YYYY/[프로젝트명]/`으로 이동한다.
-5. 사용자에게 최종 리포트를 보고한다.
+4. **대시보드 갱신**: `docs/STATUS.md`에서:
+   - All Active Projects에서 제거
+   - Completed 섹션으로 이동
+   - 관련 Inbox 항목이 있으면 Suggested Action을 `→ archive`로 갱신
+5. `/para`를 실행하여 프로젝트 폴더를 `docs/4-archive/YYYY/[프로젝트명]/`으로 이동한다.
+6. 사용자에게 최종 리포트를 보고한다.

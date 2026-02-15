@@ -46,5 +46,10 @@ description: 작업 중 중간 커밋을 수행하고, 프로젝트 폴더의 ch
    - 완료된 항목 체크, 진행률 업데이트.
    - `4-status.md`가 없으면 이 단계를 스킵한다.
 
-6. **문서 커밋**
-   - changelog + status 변경을 `docs: changelog & status 갱신`으로 커밋한다.
+6. **대시보드 갱신**
+   - `docs/STATUS.md`를 읽어 해당 프로젝트의 Last Activity를 현재 시각으로 갱신한다.
+   - Phase가 변경되었으면 Phase도 갱신한다.
+   - Focus 상태를 재판정한다 (최근 2일 이내 활동 = 🔥 Focus).
+
+7. **문서 커밋**
+   - changelog + status + STATUS.md 변경을 `docs: changelog & status 갱신`으로 커밋한다.

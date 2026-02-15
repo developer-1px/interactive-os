@@ -26,9 +26,15 @@ description: 사용자 요청을 분석하여 정형화된 보고서를 docs/0-i
      - **6. 열린 질문 (Open Questions)**: 사용자의 의사결정이 필요한 항목을 번호 목록으로 제시한다. 정답이 있는 문제(Known)는 여기에 넣지 않고 제안에서 바로 답을 제시한다.
      - **한줄요약**: 보고서 전체를 1문장으로 압축한다. 문서 목록에서 훑어볼 때 이것만 보고 내용을 떠올릴 수 있어야 한다.
 
-3. **Prepare Destination**
-   - Target Directory: `docs/0-inbox` (relative to workspace root).
-   - Ensure this directory exists. If not, create it.
+3. **저장 위치 결정 (프로젝트 컨텍스트 라우팅)**
+   - `docs/STATUS.md`를 읽어 현재 Active Focus 프로젝트를 확인한다.
+   - **Focus가 1개**: 보고서 내용이 해당 프로젝트와 관련 있는지 판단한다.
+     - 관련 있음 → `docs/1-project/[name]/notes/`에 저장
+     - 관련 없음 → `docs/0-inbox/`에 저장
+   - **Focus가 2개 이상**: 보고서 내용과 프로젝트명을 매칭한다.
+     - 매칭됨 → 해당 `docs/1-project/[name]/notes/`에 저장
+     - 매칭 안 됨 → `docs/0-inbox/`에 저장
+   - **Focus가 0개**: `docs/0-inbox/`에 저장 (기본 동작)
 
 4. **Save Report**
     - Generate a filename using the following format: `YYYY-MMDD-HHmm-[type]-kebab-title.md`
@@ -45,5 +51,13 @@ description: 사용자 요청을 분석하여 정형화된 보고서를 docs/0-i
    - Write the drafted content to this file using `write_to_file`.
    - **Important**: Do NOT overwrite existing files unless explicitly instructed.
 
-5. **Notify User**
+5. **대시보드 갱신**
+   - 보고서가 `docs/0-inbox/`에 저장된 경우:
+     - `docs/STATUS.md`의 Inbox 섹션에 새 항목을 추가한다.
+     - Related Project와 Suggested Action을 판정하여 기록한다.
+   - 보고서가 `docs/1-project/[name]/notes/`에 저장된 경우:
+     - 대시보드의 해당 프로젝트 Last Activity를 갱신한다.
+
+6. **Notify User**
    - Inform the user that the report has been created and provide the path for review.
+   - 프로젝트로 라우팅된 경우 어떤 프로젝트에 배치되었는지 명시한다.
