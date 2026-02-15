@@ -37,6 +37,17 @@ function isEditingElement(target: HTMLElement): boolean {
   );
 }
 
+/**
+ * Combobox inputs (e.g. QuickPick) are self-managed:
+ * they dispatch kernel commands directly from their own keydown handler.
+ * The global KeyboardListener should skip them to avoid conflict.
+ */
+function isComboboxInput(target: HTMLElement): boolean {
+  return (
+    target instanceof HTMLInputElement &&
+    target.getAttribute("role") === "combobox"
+  );
+}
 function buildInputMeta(
   e: KeyboardEvent,
   canonicalKey: string,
@@ -109,6 +120,9 @@ export function KeyboardListener() {
 
       const target = e.target as HTMLElement;
       if (!target || target.closest("[data-inspector]")) return;
+
+      // Combobox inputs dispatch kernel commands from their own handler.
+      if (isComboboxInput(target)) return;
 
       const canonicalKey = getCanonicalKey(e);
       const isEditing = isEditingElement(target);

@@ -36,6 +36,7 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@/os/3-commands";
+import { NAVIGATE } from "@/os/3-commands/navigate";
 import { OS } from "@/os/AntigravityOS";
 import { kernel } from "@/os/kernel";
 
@@ -266,6 +267,8 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
   }, [filteredItems, zoneId, handleClose, onSelect]);
 
   // ── Navigate from input → virtual zone ──
+  // NOTE: KeyboardListener skips role="combobox" inputs entirely,
+  //       so QuickPick is responsible for dispatching kernel commands.
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Tab" || (e.key === "ArrowRight" && completion)) {
@@ -275,18 +278,13 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
           setQuery((q) => q + completion);
         }
       } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        // Proxy to the zone for virtual focus navigation
+        // Direct kernel dispatch — virtualFocus keeps DOM focus on input
         e.preventDefault();
-        const zoneEl = document.querySelector(`[data-zone-id="${zoneId}"]`);
-        if (zoneEl) {
-          zoneEl.dispatchEvent(
-            new KeyboardEvent("keydown", {
-              key: e.key,
-              bubbles: true,
-              cancelable: true,
-            }),
-          );
-        }
+        kernel.dispatch(
+          NAVIGATE({
+            direction: e.key === "ArrowDown" ? "down" : "up",
+          }) as any,
+        );
       } else if (e.key === "Enter") {
         e.preventDefault();
         handleAction();
@@ -295,7 +293,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
         handleClose();
       }
     },
-    [completion, handleAction, handleClose, zoneId],
+    [completion, handleAction, handleClose],
   );
 
   if (!isOpen) return null;

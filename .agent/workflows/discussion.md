@@ -38,23 +38,24 @@ Toulmin 논증 모델의 Warrant를 누적해가며, 논리의 빈틈을 통찰�
 
 ## 종료 시 산출물
 
-종료 시그널을 받으면 **3단계 프로세스**로 1개의 통합 문서를 `docs/11-discussions`에 작성한다:
+종료 시그널을 받으면 **2단계 프로세스**로 1개의 통합 문서를 작성한다:
 
-### Step 1: Conclusion 작성 (임시)
-- 완결된 **Why** / **Intent** / **Warrant** 전체 구조
-- 마지막에 **한 줄 요약**: 이 모든 논증을 1문장으로 압축
-- 임시 파일명: `temp-conclusion.md`
+### Step 1: 문서 작성
 
-### Step 2: Journey 작성 (임시)
+**Journey** (상단) + **Conclusion** (하단)을 하나의 파일에 직접 작성한다.
+
+**Journey 부분**:
 - **대화록 형식**으로 작성 — 주고받는 흐름이 보여야 한다
 - 원문을 최대한 그대로 인용하되, 모든 대화를 쓰지 않고 **맥락이 이해되는 수준으로 압축**
 - 형식: `**🧑 사용자**: ...` / `**🤖 AI**: ...` 로 턴을 구분
 - 전환점마다 `---` 구분선으로 단락 분리
-- 코드 블록, 다이어그램 등은 논의 흐름에 필요한 만큼 포함
 - 마지막에 **한 줄 요약**으로 마무리
-- 임시 파일명: `temp-journey.md`
 
-### Step 3: 저장 위치 결정 및 통합
+**Conclusion 부분** (`---` 구분선 후):
+- 완결된 **Why** / **Intent** / **Warrant** 전체 구조
+- 마지막에 **한 줄 요약**: 이 모든 논증을 1문장으로 압축
+
+### Step 2: 저장 위치 결정
 
 1. **프로젝트 컨텍스트 확인**: `docs/STATUS.md`를 읽어 Active Focus 프로젝트를 확인한다.
 2. **5갈래 라우팅** — Discussion의 결론에 따라 행선지를 결정한다:
@@ -65,16 +66,9 @@ Toulmin 논증 모델의 Warrant를 누적해가며, 논리의 빈틈을 통찰�
    | **기존 프로젝트의 Discussion** | `1-project/[name]/discussions/` | 사고 기록으로 저장. BOARD 변경 없음 |
    | **새 프로젝트 생성** (드물게) | `1-project/[new-name]/` | `/project` 워크플로우로 전환 |
    | **리소스 (공부/읽을거리)** | `3-resource/[category]/` | 참고 자료로 저장 |
-   | **백로그 (나중에)** | `5-backlog/` | 아이디어로 보관. 나중에 다시 Discussion으로 복귀 |
+   | **백로그 (나중에)** | `5-backlog/` | 아이디어로 보관 |
 
-3. Journey와 Conclusion을 **기계적으로 concat**한다. 절대 내용을 다시 작성하지 않는다:
-   ```bash
-   cat temp-journey.md > final.md
-   echo "\n---\n" >> final.md
-   cat temp-conclusion.md >> final.md
-   rm temp-journey.md temp-conclusion.md
-   ```
-4. **최종 파일명**: `YYYY-MMDD-HHmm-{topic-slug}.md`
+3. **최종 파일명**: `YYYY-MMDD-HHmm-{topic-slug}.md`
    - `{topic-slug}`: 논의 주제를 2~3단어로 요약한 kebab-case
    - **주제 slug는 필수** — 파일명만으로 내용을 알 수 있어야 함
 
@@ -84,3 +78,4 @@ Toulmin 논증 모델의 Warrant를 누적해가며, 논리의 빈틈을 통찰�
 - **새 프로젝트 시**: `/project` 워크플로우로 전환. Discussion 문서가 프로젝트의 첫 번째 `discussions/` 파일이 된다.
 - **백로그 시**: `5-backlog/`에 저장. STATUS.md 변경 없음.
 - **리소스 시**: `3-resource/`에 저장. STATUS.md 변경 없음.
+

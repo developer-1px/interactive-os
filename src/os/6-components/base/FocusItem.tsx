@@ -133,14 +133,18 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     const visualFocused = isFocused && isGroupActive;
 
     // --- Focus Effect: apply .focus() when this item becomes focused ---
+    // Skip DOM focus when virtualFocus is enabled (e.g. combobox pattern):
+    // the kernel tracks focus state internally while DOM focus stays on the input.
+    const isVirtualFocus = config.project.virtualFocus;
     const internalRef = useRef<HTMLElement>(null);
     useLayoutEffect(() => {
+      if (isVirtualFocus) return; // virtual focus — don't steal DOM focus
       if (visualFocused && internalRef.current) {
         if (document.activeElement !== internalRef.current) {
           internalRef.current.focus({ preventScroll: true });
         }
       }
-    }, [visualFocused]);
+    }, [visualFocused, isVirtualFocus]);
     const isAnchor = isFocused && !isGroupActive;
 
     // Auto-resolve child role from parent Zone role (e.g., listbox → option)

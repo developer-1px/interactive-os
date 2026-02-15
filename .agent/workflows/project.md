@@ -19,7 +19,7 @@ Phase 2: DEFINITION
   문서 수집 → 폴더 생성 → README.md → BOARD.md
 
 Phase 3: DESIGN (선택 — 규모가 큰 프로젝트만)
-  /resources(선택) → 제안서 → /premortem → /reflect → 사용자 승인
+  /resources(선택) → 제안서 → /redteam(premortem) → /review(인라인) → 사용자 승인
   ──[Gate: 사용자 승인]──
 
 Phase 4: EXECUTION
@@ -28,7 +28,7 @@ Phase 4: EXECUTION
   ──[Gate: smoke ✅ / type ✅ / build ✅]──
 
 Phase 5: CLOSING
-  /status → /til(선택) → 커밋 → /para(아카이브)
+  /status → 커밋 → /para(아카이브)
 ```
 
 ## 프로젝트 폴더 표준 구조
@@ -110,7 +110,7 @@ docs/1-project/[프로젝트명]/
 - `/prd` 워크플로우를 실행한다.
 - README의 Goals/Scope에서 기능을 추출하여 **Acceptance Criteria**, **상태 인벤토리**, **엣지 케이스**를 정의한다.
 - PRD는 프로젝트의 **진실의 원천(Single Source of Truth for WHAT)**이다.
-- `/redteam` → `/reflect` 검증을 거친 후 사용자 승인을 받는다.
+- `/redteam` → `/review`(인라인) 검증을 거친 후 사용자 승인을 받는다.
 - Light 트랙이라도 AC + 엣지 케이스는 필수.
 
 ### Step 7: BOARD.md 작성
@@ -160,12 +160,12 @@ docs/1-project/[프로젝트명]/
   식별된 리스크와 대응 방안.
   ```
 
-### Step 10: 사고 확장 — `/premortem`
+### Step 10: 사고 확장 — `/redteam` (premortem 모드)
 
 - "이 설계가 이미 실패했다. 왜?" — 실패 시나리오를 나열한다.
 - **수정 의무 없음** — 시야 확장이 목적.
 
-### Step 11: 자가 점검 — `/reflect`
+### Step 11: 자가 점검 — `/review` (인라인 모드)
 
 - 새 발견 0건이 될 때까지 반복한다.
 
@@ -229,11 +229,7 @@ docs/1-project/[프로젝트명]/
 
 - BOARD.md의 최종 상태를 확인한다.
 
-### Step 20 (선택): 학습 기록 — `/til`
-
-- 프로젝트를 수행하면서 얻은 기술적 인사이트를 TIL로 기록한다.
-
-### Step 21: 커밋 & 아카이브
+### Step 20: 커밋 & 아카이브
 
 1. 변경 파일을 **커밋**한다.
 2. **`/retrospect`를 실행**하여 워크플로우 자가 개선 회고를 한다.

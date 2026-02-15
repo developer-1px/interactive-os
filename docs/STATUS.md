@@ -11,6 +11,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
+| command-palette-e2e | Execution | 02-15 |
 | os-prd | Execution | 02-15 |
 | fix-tab-navigation | Execution | 02-15 |
 | docs-system-v2 | Execution | 02-15 |

@@ -104,7 +104,7 @@ Given/When/Then은 다음 기준을 만족해야 한다:
 - **독립적**: 각 Scenario는 다른 Scenario와 독립적으로 검증 가능해야 한다.
 - **엣지 케이스도 Scenario로**: 별도 섹션으로 분리하지 않고, 해당 기능의 Scenario에 포함한다. 경계 조건, 에러 시나리오, 빈 상태 모두 Given으로 표현.
 
-### Step 4: 검증 — `/redteam` → `/reflect`
+### Step 4: 검증 — `/redteam` → `/review`(인라인)
 
 PRD 작성 후, **코드를 쓰기 전에** 검증한다.
 
@@ -113,7 +113,7 @@ PRD 작성 후, **코드를 쓰기 전에** 검증한다.
    - 공격적으로 누락된 Scenario, 빠진 Given 전제, 미처 생각 못한 대안 흐름을 찾는다.
    - 발견된 항목을 PRD에 추가한다.
 
-2. **`/reflect` 실행** (수렴)
+2. **`/review`(인라인) 실행** (수렴)
    - 새 발견 0건까지 반복한다.
    - 체크리스트:
      - [ ] 모든 기능에 Story + Use Case + Scenarios가 있는가?
@@ -144,7 +144,7 @@ Light 트랙이라도 **Story와 BDD Scenarios는 필수**다. Given이 없으�
 ```
 /project Phase 2 (Definition) → /prd (자동 호출)
 /prd → /redteam (PRD 발산 검증)
-/prd → /reflect (PRD 수렴 검증)
+/prd → /review (PRD 수렴 검증, 인라인 모드)
 /tdd → prd.md 참조 (테스트 시나리오의 소스)
 /review → prd.md 참조 (코드의 정오 판단 기준)
 /issue → prd.md 참조 (버그 = PRD 대비 이탈)
