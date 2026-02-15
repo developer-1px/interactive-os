@@ -384,18 +384,18 @@
 | Select (range) | ✅ | ✅ | ✅ |
 | Select (toggle) | ✅ | ✅ | ✅ |
 | Select (followFocus/radio) | ✅ | — | ⚠️ |
-| Tab (trap) | ✅ | — | ⚠️ |
-| Tab (escape) | ✅ | — | ⚠️ |
-| Tab (flow) | ✅ | — | ⚠️ |
-| Activate (automatic) | ✅ | — | ⚠️ |
-| Dismiss (escape) | ✅ | — | ⚠️ |
-| Expand (tree) | ✅ | — | ⚠️ |
-| Focus Stack (restore) | ✅ | — | ⚠️ |
+| Tab (trap) | ✅ | ✅ `tab.test` | ✅ |
+| Tab (escape) | ✅ | ✅ `tab.test` | ✅ |
+| Tab (flow) | ✅ | ✅ `tab.test` | ✅ |
+| Activate (automatic) | ✅ | — | ⚠️ DOM 의존 |
+| Dismiss (escape) | ✅ | ✅ `escape.test` | ✅ |
+| Expand (tree) | ✅ | ✅ `expand.test` | ✅ |
+| Focus Stack (restore) | ✅ | — | ⚠️ STACK 미구현 |
 | Clipboard (copy/cut/paste) | ✅ `dogfooding` | ✅ | ✅ |
 | Delete (single/multi) | ✅ `dogfooding` | ✅ | ✅ |
 | Undo/Redo | ✅ `dogfooding` | ✅ `history.test` | ✅ |
 | Field (edit/commit/cancel) | — | ✅ `field.test` | ✅ state 전환 검증 |
-| Overlay (open/close) | — | — | ❌ |
+| Overlay (open/close) | — | — | ❌ 미구현 |
 
 ---
 
