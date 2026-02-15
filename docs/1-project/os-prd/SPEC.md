@@ -390,7 +390,7 @@
 | Activate (automatic) | ✅ | — | ⚠️ DOM 의존 |
 | Dismiss (escape) | ✅ | ✅ `escape.test` | ✅ |
 | Expand (tree) | ✅ | ✅ `expand.test` | ✅ |
-| Focus Stack (restore) | ✅ | — | ⚠️ STACK 미구현 |
+| Focus Stack (restore) | ✅ | ✅ `stack.test` | ✅ |
 | Clipboard (copy/cut/paste) | ✅ `dogfooding` | ✅ | ✅ |
 | Delete (single/multi) | ✅ `dogfooding` | ✅ | ✅ |
 | Undo/Redo | ✅ `dogfooding` | ✅ `history.test` | ✅ |
