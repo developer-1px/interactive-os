@@ -28,7 +28,7 @@ Phase 4: EXECUTION
   ──[Gate: smoke ✅ / type ✅ / build ✅]──
 
 Phase 5: CLOSING
-  /status → 커밋 → /para(아카이브)
+  /doubt(코드/파일) → /status → 커밋 → /para(아카이브)
 ```
 
 ## 프로젝트 폴더 표준 구조
@@ -225,11 +225,17 @@ docs/1-project/[프로젝트명]/
 
 ## Phase 5: CLOSING (종료)
 
-### Step 19: STATUS 갱신 — `/status`
+### Step 19: 의심 — `/doubt`
+
+- 프로젝트 scope 내 코드와 파일에 `/doubt`를 실행한다.
+- 프로젝트 진행 중 생긴 dead code, 미사용 export, 레거시 파일을 정리한다.
+- 이미 `/cleanup`에서 knip을 돌렸더라도, `/doubt`은 **의미적 불필요성**(과잉 추상화, 중복 모듈)까지 질문한다.
+
+### Step 20: STATUS 갱신 — `/status`
 
 - BOARD.md의 최종 상태를 확인한다.
 
-### Step 20: 커밋 & 아카이브
+### Step 21: 커밋 & 아카이브
 
 1. 변경 파일을 **커밋**한다.
 2. **`/retrospect`를 실행**하여 워크플로우 자가 개선 회고를 한다.

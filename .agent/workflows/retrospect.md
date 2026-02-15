@@ -51,6 +51,7 @@ description: 세션을 세 관점(개발·협업·워크플로우)으로 KPT 회
 
 4. **자가 개선 실행**
    - ⚙️ Workflow Try → 즉시 `.agent/workflows/*.md` 파일에 반영한다. diff를 보여준다.
+     - 절차를 **추가**하려는 Try가 있으면, `/doubt` 렌즈로 검증한다: "이건 과잉 처리가 아닌가? 기존 단계에 병합할 수 없나?"
    - 🤝 Collaboration Try → 필요 시 `.agent/rules.md`에 규칙을 추가한다.
    - 🔧 Development Try → 필요 시 `docs/` 또는 rules에 교훈을 기록한다.
 
