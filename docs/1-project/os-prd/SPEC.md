@@ -396,6 +396,8 @@
 | Undo/Redo | ✅ `dogfooding` | ✅ `history.test` | ✅ |
 | Field (edit/commit/cancel) | — | ✅ `field.test` | ✅ state 전환 검증 |
 | Overlay (open/close) | — | — | ❌ 미구현 |
+| Role Presets (§7 table) | — | ✅ `rolePresets.test` | ✅ 17 roles × 9 fields |
+| Role Helpers (child/check/expand) | — | ✅ `roleHelpers.test` | ✅ |
 
 ---
 
