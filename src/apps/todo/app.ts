@@ -30,6 +30,9 @@ import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { FOCUS } from "@/os/3-commands/focus/focus";
 import { defineApp } from "@/os/defineApp";
 
+/** Collision-free random ID */
+const uid = () => Math.random().toString(36).slice(2, 10);
+
 // ═══════════════════════════════════════════════════════════════════
 // App
 // ═══════════════════════════════════════════════════════════════════
@@ -86,12 +89,9 @@ const listZone = TodoApp.createZone("list");
 
 export const toggleTodo = listZone.command(
   "toggleTodo",
-  (ctx, payload: { id: number | string }) => ({
+  (ctx, payload: { id: string }) => ({
     state: produce(ctx.state, (draft) => {
-      const targetId =
-        typeof payload.id === "string" ? parseInt(payload.id, 10) : payload.id;
-      if (!targetId || Number.isNaN(targetId)) return;
-      const todo = draft.data.todos[targetId];
+      const todo = draft.data.todos[payload.id];
       if (todo) todo.completed = !todo.completed;
     }),
   }),
@@ -99,12 +99,11 @@ export const toggleTodo = listZone.command(
 
 export const deleteTodo = listZone.command(
   "deleteTodo",
-  (ctx, payload: { id: number | string }) => ({
+  (ctx, payload: { id: string }) => ({
     state: produce(ctx.state, (draft) => {
-      const targetId = Number(payload.id);
-      if (!targetId || Number.isNaN(targetId)) return;
-      delete draft.data.todos[targetId];
-      const index = draft.data.todoOrder.indexOf(targetId);
+      if (!payload.id) return;
+      delete draft.data.todos[payload.id];
+      const index = draft.data.todoOrder.indexOf(payload.id);
       if (index !== -1) draft.data.todoOrder.splice(index, 1);
     }),
   }),
@@ -112,12 +111,11 @@ export const deleteTodo = listZone.command(
 
 export const startEdit = listZone.command(
   "startEdit",
-  (ctx, payload: { id: number | string }) => ({
+  (ctx, payload: { id: string }) => ({
     state: produce(ctx.state, (draft) => {
-      const targetId = Number(payload.id);
-      if (!targetId || Number.isNaN(targetId)) return;
-      draft.ui.editingId = targetId;
-      draft.ui.editDraft = draft.data.todos[targetId]?.text || "";
+      if (!payload.id) return;
+      draft.ui.editingId = payload.id;
+      draft.ui.editDraft = draft.data.todos[payload.id]?.text || "";
     }),
     // Also set OS-level editingItemId so Field auto-focuses
     dispatch: FIELD_START_EDIT(),
@@ -126,19 +124,18 @@ export const startEdit = listZone.command(
 
 export const moveItemUp = listZone.command(
   "moveItemUp",
-  (ctx, payload: { id: number | string }) => ({
+  (ctx, payload: { id: string }) => ({
     state: produce(ctx.state, (draft) => {
-      const focusId = Number(payload.id);
-      if (!focusId || Number.isNaN(focusId)) return;
+      if (!payload.id) return;
       const visibleIds = ctx.state.data.todoOrder.filter(
         (id) =>
           ctx.state.data.todos[id]?.categoryId ===
           ctx.state.ui.selectedCategoryId,
       );
-      const visualIdx = visibleIds.indexOf(focusId);
+      const visualIdx = visibleIds.indexOf(payload.id);
       if (visualIdx <= 0) return;
       const swapId = visibleIds[visualIdx - 1]!;
-      const globalTargetIdx = draft.data.todoOrder.indexOf(focusId);
+      const globalTargetIdx = draft.data.todoOrder.indexOf(payload.id);
       const globalSwapIdx = draft.data.todoOrder.indexOf(swapId);
       [
         draft.data.todoOrder[globalTargetIdx],
@@ -153,19 +150,18 @@ export const moveItemUp = listZone.command(
 
 export const moveItemDown = listZone.command(
   "moveItemDown",
-  (ctx, payload: { id: number | string }) => ({
+  (ctx, payload: { id: string }) => ({
     state: produce(ctx.state, (draft) => {
-      const focusId = Number(payload.id);
-      if (!focusId || Number.isNaN(focusId)) return;
+      if (!payload.id) return;
       const visibleIds = ctx.state.data.todoOrder.filter(
         (id) =>
           ctx.state.data.todos[id]?.categoryId ===
           ctx.state.ui.selectedCategoryId,
       );
-      const visualIdx = visibleIds.indexOf(focusId);
+      const visualIdx = visibleIds.indexOf(payload.id);
       if (visualIdx === -1 || visualIdx >= visibleIds.length - 1) return;
       const swapId = visibleIds[visualIdx + 1]!;
-      const globalTargetIdx = draft.data.todoOrder.indexOf(focusId);
+      const globalTargetIdx = draft.data.todoOrder.indexOf(payload.id);
       const globalSwapIdx = draft.data.todoOrder.indexOf(swapId);
       [
         draft.data.todoOrder[globalTargetIdx],
@@ -180,21 +176,20 @@ export const moveItemDown = listZone.command(
 
 export const duplicateTodo = listZone.command(
   "duplicateTodo",
-  (ctx, payload: { id: number | string }) => {
-    const targetId = Number(payload.id);
-    if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
-    const todo = ctx.state.data.todos[targetId];
+  (ctx, payload: { id: string }) => {
+    if (!payload.id) return { state: ctx.state };
+    const todo = ctx.state.data.todos[payload.id];
     if (!todo) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
-        const newId = Date.now();
+        const newId = uid();
         draft.data.todos[newId] = {
           id: newId,
           text: todo.text,
           completed: todo.completed,
           categoryId: todo.categoryId,
         };
-        const originalIndex = draft.data.todoOrder.indexOf(targetId);
+        const originalIndex = draft.data.todoOrder.indexOf(payload.id);
         if (originalIndex !== -1) {
           draft.data.todoOrder.splice(originalIndex + 1, 0, newId);
         } else {
@@ -207,10 +202,9 @@ export const duplicateTodo = listZone.command(
 
 export const copyTodo = listZone.command(
   "copyTodo",
-  (ctx, payload: { id: number | string; _multi?: boolean }) => {
-    const targetId = Number(payload.id);
-    if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
-    const todo = ctx.state.data.todos[targetId];
+  (ctx, payload: { id: string; _multi?: boolean }) => {
+    if (!payload.id) return { state: ctx.state };
+    const todo = ctx.state.data.todos[payload.id];
     if (!todo) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
@@ -228,10 +222,9 @@ export const copyTodo = listZone.command(
 
 export const cutTodo = listZone.command(
   "cutTodo",
-  (ctx, payload: { id: number | string; _multi?: boolean }) => {
-    const targetId = Number(payload.id);
-    if (!targetId || Number.isNaN(targetId)) return { state: ctx.state };
-    const todo = ctx.state.data.todos[targetId];
+  (ctx, payload: { id: string; _multi?: boolean }) => {
+    if (!payload.id) return { state: ctx.state };
+    const todo = ctx.state.data.todos[payload.id];
     if (!todo) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
@@ -242,8 +235,8 @@ export const cutTodo = listZone.command(
         } else {
           draft.ui.clipboard = { todos: [{ ...todo }], isCut: true };
         }
-        delete draft.data.todos[targetId];
-        const index = draft.data.todoOrder.indexOf(targetId);
+        delete draft.data.todos[payload.id];
+        const index = draft.data.todoOrder.indexOf(payload.id);
         if (index !== -1) draft.data.todoOrder.splice(index, 1);
       }),
       clipboardWrite: { text: todo.text, json: JSON.stringify(todo) },
@@ -253,17 +246,16 @@ export const cutTodo = listZone.command(
 
 export const pasteTodo = listZone.command(
   "pasteTodo",
-  (ctx, payload: { id?: number | string }) => {
+  (ctx, payload: { id?: string }) => {
     const clip = ctx.state.ui.clipboard;
     if (!clip || clip.todos.length === 0) return { state: ctx.state };
 
-    const baseTime = Date.now();
-    let lastNewId = baseTime;
+    let lastNewId = "";
     return {
       state: produce(ctx.state, (draft) => {
         for (let i = 0; i < clip.todos.length; i++) {
           const sourceTodo = clip.todos[i]!;
-          const newId = baseTime + i;
+          const newId = uid();
           lastNewId = newId;
           draft.data.todos[newId] = {
             id: newId,
@@ -271,9 +263,8 @@ export const pasteTodo = listZone.command(
             completed: sourceTodo.completed,
             categoryId: draft.ui.selectedCategoryId,
           };
-          const numericFocusId = payload.id ? Number(payload.id) : undefined;
-          if (numericFocusId && !Number.isNaN(numericFocusId)) {
-            const focusIndex = draft.data.todoOrder.indexOf(numericFocusId);
+          if (payload.id) {
+            const focusIndex = draft.data.todoOrder.indexOf(payload.id);
             if (focusIndex !== -1) {
               draft.data.todoOrder.splice(focusIndex + 1 + i, 0, newId);
             } else {
@@ -284,7 +275,7 @@ export const pasteTodo = listZone.command(
           }
         }
       }),
-      dispatch: FOCUS({ zoneId: "list", itemId: String(lastNewId) }),
+      dispatch: FOCUS({ zoneId: "list", itemId: lastNewId }),
     };
   },
 );
@@ -469,7 +460,7 @@ export const addTodo = draftZone.command(
     state: produce(ctx.state, (draft) => {
       const text = payload?.text ?? draft.ui.draft;
       if (text?.trim()) {
-        const newId = Date.now();
+        const newId = uid();
         draft.data.todos[newId] = {
           id: newId,
           text: text.trim(),
@@ -512,7 +503,7 @@ export const updateTodoText = editZone.command(
   (ctx, payload: { text: string }) => ({
     state: produce(ctx.state, (draft) => {
       if (!ctx.state.ui.editingId) return;
-      const id = ctx.state.ui.editingId as number;
+      const id = ctx.state.ui.editingId as string;
       if (draft.data.todos[id]) {
         draft.data.todos[id].text = payload.text || ctx.state.ui.editDraft;
       }

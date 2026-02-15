@@ -1,20 +1,20 @@
 export type AppEffect =
   | { type: "FOCUS_ID"; id: string | number }
   | {
-      type: "NAVIGATE";
-      direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
-      targetZone?: string;
-    }
+    type: "NAVIGATE";
+    direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
+    targetZone?: string;
+  }
   | { type: "SCROLL_INTO_VIEW"; id: string | number };
 
-type FocusTarget = "DRAFT" | number | string | null;
+type FocusTarget = "DRAFT" | string | null;
 
 export interface Category {
   id: string;
   text: string;
 }
 export interface Todo {
-  id: number;
+  id: string;
   text: string;
   completed: boolean;
   categoryId: string;
@@ -40,11 +40,11 @@ export interface HistoryEntry {
 export interface DataState {
   // Entities
   categories: Record<string, Category>;
-  todos: Record<number, Todo>;
+  todos: Record<string, Todo>;
 
   // Ordering
   categoryOrder: string[];
-  todoOrder: number[];
+  todoOrder: string[];
 }
 
 export interface UIState {

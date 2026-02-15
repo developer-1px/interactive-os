@@ -48,10 +48,7 @@ export function selectStats(state: AppState): {
 /** The todo currently being edited, or null. */
 export function selectEditingTodo(state: AppState): Todo | null {
   if (!state.ui.editingId) return null;
-  const id =
-    typeof state.ui.editingId === "number"
-      ? state.ui.editingId
-      : parseInt(state.ui.editingId as string, 10);
+  const id = String(state.ui.editingId);
   return state.data.todos[id] ?? null;
 }
 

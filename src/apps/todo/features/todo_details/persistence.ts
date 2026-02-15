@@ -9,32 +9,32 @@ export const INITIAL_STATE: AppState = {
     },
     categoryOrder: ["cat_inbox", "cat_work", "cat_personal"],
     todos: {
-      1: {
-        id: 1,
+      "todo_1": {
+        id: "todo_1",
         text: "Complete Interaction OS docs",
         completed: false,
         categoryId: "cat_inbox",
       },
-      2: {
-        id: 2,
+      "todo_2": {
+        id: "todo_2",
         text: "Review Red Team feedback",
         completed: true,
         categoryId: "cat_work",
       },
-      3: {
-        id: 3,
+      "todo_3": {
+        id: "todo_3",
         text: "Plan next iteration",
         completed: false,
         categoryId: "cat_work",
       },
-      4: {
-        id: 4,
+      "todo_4": {
+        id: "todo_4",
         text: "Buy groceries",
         completed: false,
         categoryId: "cat_personal",
       },
     },
-    todoOrder: [1, 2, 3, 4],
+    todoOrder: ["todo_1", "todo_2", "todo_3", "todo_4"],
   },
   ui: {
     selectedCategoryId: "cat_inbox",

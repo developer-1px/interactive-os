@@ -20,17 +20,7 @@ import {
     toggleTodo,
     undoCommand,
 } from "@apps/todo/app";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-// addTodo uses Date.now() for IDs — incrementing fake time prevents key collisions
-let fakeNow = 1000000;
-beforeEach(() => {
-    fakeNow = 1000000;
-    vi.spyOn(Date, "now").mockImplementation(() => fakeNow++);
-});
-afterEach(() => {
-    vi.restoreAllMocks();
-});
+import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // Basic Undo/Redo
@@ -131,7 +121,7 @@ describe("History: OS Passthrough Commands (SPEC §10)", () => {
         app.dispatch(addTodo({ text: "Test" }));
         const pastBefore = app.state.history.past.length;
 
-        const id = Number(Object.keys(app.state.data.todos)[0]);
+        const id = Object.keys(app.state.data.todos)[0]!;
         app.dispatch(toggleTodo({ id }));
 
         expect(app.state.history.past.length).toBe(pastBefore + 1);

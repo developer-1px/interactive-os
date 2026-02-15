@@ -76,7 +76,7 @@ describe("Todo v5 — defineApp native", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Delete me" }));
       const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
       app.dispatch(deleteTodo({ id: lastId }));
       expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
@@ -85,7 +85,7 @@ describe("Todo v5 — defineApp native", () => {
     test("toggleTodo flips completed", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Toggle me" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const id = ids[ids.length - 1]!;
       expect(app.state.data.todos[id]!.completed).toBe(false);
       app.dispatch(toggleTodo({ id }));
@@ -96,7 +96,7 @@ describe("Todo v5 — defineApp native", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Keep" }));
       app.dispatch(addTodo({ text: "Remove" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
       app.dispatch(toggleTodo({ id: lastId }));
       const activeBefore = Object.values(app.state.data.todos).filter(
@@ -115,7 +115,7 @@ describe("Todo v5 — defineApp native", () => {
     test("Start → SyncEditDraft → Save", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Original" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const id = ids[ids.length - 1]!;
 
       app.dispatch(startEdit({ id }));
@@ -133,7 +133,7 @@ describe("Todo v5 — defineApp native", () => {
     test("Cancel preserves original", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Original" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const id = ids[ids.length - 1]!;
 
       app.dispatch(startEdit({ id }));
@@ -167,7 +167,7 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(addTodo({ text: "One" }));
       app.dispatch(addTodo({ text: "Two" }));
       const statsBefore = app.select(stats);
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
       app.dispatch(toggleTodo({ id: lastId }));
       const statsAfter = app.select(stats);
@@ -178,7 +178,7 @@ describe("Todo v5 — defineApp native", () => {
     test("editingTodo returns editing item", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Edit me" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const id = ids[ids.length - 1]!;
       app.dispatch(startEdit({ id }));
       const editing = app.select(editingTodo);
@@ -198,7 +198,7 @@ describe("Todo v5 — defineApp native", () => {
       const app = createApp();
       expect(app.evaluate(isEditing)).toBe(false);
       app.dispatch(addTodo({ text: "Edit me" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       app.dispatch(startEdit({ id: ids[ids.length - 1]! }));
       expect(app.evaluate(isEditing)).toBe(true);
     });
@@ -207,7 +207,7 @@ describe("Todo v5 — defineApp native", () => {
       const app = createApp();
       expect(app.evaluate(hasClipboard)).toBe(false);
       app.dispatch(addTodo({ text: "Copy me" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       app.dispatch(copyTodo({ id: ids[ids.length - 1]! }));
       expect(app.evaluate(hasClipboard)).toBe(true);
     });
@@ -225,7 +225,7 @@ describe("Todo v5 — defineApp native", () => {
     test("cancelEdit allowed when editing", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Edit me" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       app.dispatch(startEdit({ id: ids[ids.length - 1]! }));
       const result = app.dispatch(cancelEdit());
       expect(result).toBe(true);
@@ -316,7 +316,7 @@ describe("Todo v5 — defineApp native", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Original" }));
       const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
       app.dispatch(duplicateTodo({ id: lastId }));
       expect(Object.keys(app.state.data.todos).length).toBe(before + 1);
@@ -325,7 +325,7 @@ describe("Todo v5 — defineApp native", () => {
     test("copyTodo stores todo in state.ui.clipboard", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Copy me" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
       app.dispatch(copyTodo({ id: lastId }));
       expect(app.state.ui.clipboard).not.toBeNull();
@@ -337,7 +337,7 @@ describe("Todo v5 — defineApp native", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Round trip" }));
       const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
       app.dispatch(copyTodo({ id: lastId }));
       app.dispatch(pasteTodo({}));
@@ -350,7 +350,7 @@ describe("Todo v5 — defineApp native", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Cut me" }));
       const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
       app.dispatch(cutTodo({ id: lastId }));
       expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
@@ -363,7 +363,7 @@ describe("Todo v5 — defineApp native", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Move me" }));
       const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
       app.dispatch(cutTodo({ id: lastId }));
       expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
@@ -386,7 +386,7 @@ describe("Todo v5 — defineApp native", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "First" }));
       app.dispatch(addTodo({ text: "Second" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
 
       // Copy first item
       app.dispatch(copyTodo({ id: ids[ids.length - 2]! }));
@@ -404,7 +404,7 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(addTodo({ text: "A" }));
       app.dispatch(addTodo({ text: "B" }));
       app.dispatch(addTodo({ text: "C" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastThree = ids.slice(-3);
 
       // Simulate OS_COPY: first item overwrites, subsequent append
@@ -424,7 +424,7 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(addTodo({ text: "A" }));
       app.dispatch(addTodo({ text: "B" }));
       app.dispatch(addTodo({ text: "C" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastThree = ids.slice(-3);
       const beforeCount = Object.keys(app.state.data.todos).length;
 
@@ -446,7 +446,7 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(addTodo({ text: "X" }));
       app.dispatch(addTodo({ text: "Y" }));
       app.dispatch(addTodo({ text: "Z" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastThree = ids.slice(-3);
       const beforeCount = Object.keys(app.state.data.todos).length;
 
@@ -466,7 +466,7 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(addTodo({ text: "X" }));
       app.dispatch(addTodo({ text: "Y" }));
       app.dispatch(addTodo({ text: "Z" }));
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastThree = ids.slice(-3);
       const beforeCount = Object.keys(app.state.data.todos).length;
 

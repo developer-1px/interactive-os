@@ -30,7 +30,7 @@ describe("History Transaction", () => {
       expect(countBefore).toBeGreaterThanOrEqual(3);
 
       // Delete 2 in a transaction
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const [idA, idB] = [ids[ids.length - 2]!, ids[ids.length - 1]!];
 
       app.transaction(() => {
@@ -52,7 +52,7 @@ describe("History Transaction", () => {
       app.dispatch(addTodo({ text: "Charlie" }));
       const countBefore = Object.keys(app.state.data.todos).length;
 
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const [idA, idB] = [ids[ids.length - 2]!, ids[ids.length - 1]!];
 
       app.transaction(() => {
@@ -76,7 +76,7 @@ describe("History Transaction", () => {
       app.dispatch(addTodo({ text: "Bravo" }));
       const countBefore = Object.keys(app.state.data.todos).length;
 
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const idA = ids[ids.length - 2]!;
       const idB = ids[ids.length - 1]!;
 
@@ -113,7 +113,7 @@ describe("History Transaction", () => {
       app.dispatch(addTodo({ text: "Alpha" }));
       const countBefore = Object.keys(app.state.data.todos).length;
 
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
 
       app.transaction(() => {
@@ -137,7 +137,7 @@ describe("History Transaction", () => {
       app.dispatch(addTodo({ text: "G" }));
 
       const countBefore = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos).map(Number);
+      const ids = Object.keys(app.state.data.todos);
 
       app.transaction(() => {
         app.dispatch(deleteTodo({ id: ids[ids.length - 1]! }));
