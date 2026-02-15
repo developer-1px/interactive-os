@@ -245,11 +245,11 @@ function EffectLogPanel() {
 }
 
 function TransactionPanel() {
-  const txs = kernel.getTransactions();
+  const txs = kernel.inspector.getTransactions();
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const handleTravel = (tx: Transaction) => {
-    kernel.travelTo(tx.id);
+    kernel.inspector.travelTo(tx.id);
     setSelectedId(tx.id);
   };
 
@@ -261,7 +261,7 @@ function TransactionPanel() {
           type="button"
           style={{ ...btnSmallStyle, marginLeft: 8 }}
           onClick={() => {
-            kernel.clearTransactions();
+            kernel.inspector.clearTransactions();
             setSelectedId(null);
           }}
         >

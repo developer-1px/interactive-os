@@ -56,7 +56,7 @@ function TransactionSection({ kernel }: { kernel: AnyKernel }) {
   // useComputed triggers re-render on state change → transactions also update
   kernel.useComputed((s: any) => s);
 
-  const txs = kernel.getTransactions();
+  const txs = kernel.inspector.getTransactions();
 
   // Auto-scroll to bottom on new transactions
   // biome-ignore lint/correctness/useExhaustiveDependencies: txs.length is intentional trigger
@@ -66,12 +66,12 @@ function TransactionSection({ kernel }: { kernel: AnyKernel }) {
   }, [txs.length]);
 
   const handleTravel = (tx: { id: number }) => {
-    kernel.travelTo(tx.id);
+    kernel.inspector.travelTo(tx.id);
     setSelectedId(tx.id);
   };
 
   const handleClear = () => {
-    kernel.clearTransactions();
+    kernel.inspector.clearTransactions();
     setSelectedId(null);
     refresh((n) => n + 1);
   };

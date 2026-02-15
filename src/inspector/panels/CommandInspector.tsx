@@ -48,7 +48,7 @@ export function CommandInspector() {
   }, [ctx]);
 
   // Telemetry from kernel transactions
-  const transactions = kernel.getTransactions();
+  const transactions = kernel.inspector.getTransactions();
   const historyCount = transactions.length;
   const lastEntry = historyCount > 0 ? transactions[historyCount - 1] : null;
   const lastCommandId = lastEntry ? lastEntry.command?.type : null;

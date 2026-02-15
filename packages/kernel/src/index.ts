@@ -14,6 +14,11 @@
  */
 
 export type {
+  KernelInspector,
+  KernelIntrospectionPort,
+  RegistrySnapshot,
+} from "./core/inspectorPort.ts";
+export type {
   BaseCommand,
   Command,
   CommandFactory,

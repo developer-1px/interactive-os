@@ -4,7 +4,8 @@
  * Each call creates a fully independent kernel instance.
  * No globalThis. No singletons. HMR-safe via module separation.
  *
- * @frozen 2026-02-11 — Reviewed and locked. Do not modify without design review.
+ * @frozen 2026-02-11 — Core runtime (dispatch, store, group/scope) locked.
+ * Inspector API is separated into createInspector.ts via Port/Adapter pattern.
  *
  * @example
  *   const kernel = createKernel<AppState>({ count: 0 });
@@ -15,6 +16,7 @@
  */
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
+import type { KernelIntrospectionPort } from "./core/inspectorPort.ts";
 import {
   type BaseCommand,
   type Command,
@@ -31,6 +33,7 @@ import {
   type TypedContext,
 } from "./core/tokens.ts";
 import { computeChanges, type Transaction } from "./core/transaction.ts";
+import { createInspector } from "./createInspector.ts";
 
 type Listener = () => void;
 
@@ -150,8 +153,8 @@ export function createKernel<S>(initialState: S) {
     return transactions;
   }
 
-  function getLastTransaction(): Transaction | undefined {
-    return transactions[transactions.length - 1];
+  function getLastTransaction(): Transaction | null {
+    return transactions[transactions.length - 1] ?? null;
   }
 
   function travelTo(transactionId: number): void {
@@ -411,6 +414,7 @@ export function createKernel<S>(initialState: S) {
       list[existing] = middleware;
     } else {
       list.push(middleware);
+      inspector.invalidateRegistry();
     }
   }
 
@@ -488,6 +492,7 @@ export function createKernel<S>(initialState: S) {
 
         // HMR-safe: silent overwrite on re-registration
         scopeMap.set(type, handler);
+        inspector.invalidateRegistry();
 
         // Register when guard (W26/W33)
         if (whenOptions?.when) {
@@ -568,6 +573,7 @@ export function createKernel<S>(initialState: S) {
           scopedEffects.set(scope, new Map());
         }
         scopedEffects.get(scope)?.set(type, handler as InternalEffectHandler);
+        inspector.invalidateRegistry();
         return type as EffectToken<T, V>;
       },
 
@@ -588,6 +594,7 @@ export function createKernel<S>(initialState: S) {
         // Record parent-child relationship in scope tree
         if (childScope !== scope) {
           parentMap.set(childScope, scope);
+          inspector.invalidateRegistry();
         }
 
         // Register state lens for this scope (inherit parent lens if not provided)
@@ -634,6 +641,57 @@ export function createKernel<S>(initialState: S) {
     return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   }
 
+  // ─── Inspector Port (narrow read-only window into kernel internals) ───
+
+  const introspectionPort: KernelIntrospectionPort<S> = {
+    getState: () => state,
+
+    getCommandTypes(scope: ScopeToken): readonly string[] {
+      return Array.from(scopedCommands.get(scope as string)?.keys() ?? []);
+    },
+    getWhenGuardTypes(scope: ScopeToken): readonly string[] {
+      return Array.from(scopedWhenGuards.get(scope as string)?.keys() ?? []);
+    },
+    getMiddlewareIds(scope: ScopeToken): readonly string[] {
+      return (scopedMiddleware.get(scope as string) ?? []).map((m) => m.id);
+    },
+    getEffectTypes(scope: ScopeToken): readonly string[] {
+      return Array.from(scopedEffects.get(scope as string)?.keys() ?? []);
+    },
+    getAllScopes(): readonly ScopeToken[] {
+      const all = new Set<string>();
+      for (const s of scopedCommands.keys()) all.add(s);
+      for (const s of scopedEffects.keys()) all.add(s);
+      for (const s of scopedMiddleware.keys()) all.add(s);
+      for (const s of scopedWhenGuards.keys()) all.add(s);
+      for (const [child, parent] of parentMap) {
+        all.add(child);
+        all.add(parent);
+      }
+      return Array.from(all) as ScopeToken[];
+    },
+    getParent(scope: ScopeToken): ScopeToken | null {
+      return (parentMap.get(scope as string) as ScopeToken) ?? null;
+    },
+    buildBubblePath(scope: ScopeToken): readonly ScopeToken[] {
+      return buildBubblePath(scope as string);
+    },
+    evaluateWhenGuard(scope: ScopeToken, type: string): boolean | null {
+      const whenMap = scopedWhenGuards.get(scope as string);
+      const guard = whenMap?.get(type);
+      if (!guard) return null;
+      const lens = scopeStateLens.get(scope as string);
+      const guardState = lens ? lens.get(state) : state;
+      return guard(guardState);
+    },
+    getTransactions,
+    getLastTransaction,
+    clearTransactions,
+    travelTo,
+  };
+
+  const inspector = createInspector(introspectionPort);
+
   // ─── Return Kernel Instance ───
 
   return {
@@ -648,19 +706,8 @@ export function createKernel<S>(initialState: S) {
     // React
     useComputed,
 
-    // Inspector
-    getTransactions,
-    getLastTransaction,
-    clearTransactions,
-    travelTo,
-
-    // Scope Tree
-    getScopePath(scope: ScopeToken): ScopeToken[] {
-      return buildBubblePath(scope as string);
-    },
-    getScopeParent(scope: ScopeToken): ScopeToken | null {
-      return (parentMap.get(scope as string) as ScopeToken) ?? null;
-    },
+    // Inspector (separated via Port/Adapter)
+    inspector,
 
     // Fallback
     resolveFallback,
