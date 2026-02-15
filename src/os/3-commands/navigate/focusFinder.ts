@@ -14,7 +14,7 @@ export type FocusDirection = "up" | "down" | "left" | "right";
 // Checks whether dest is at least partially to the direction of source.
 // ═══════════════════════════════════════════════════════════════════
 
-export function isCandidate(
+function isCandidate(
   src: DOMRect,
   dest: DOMRect,
   direction: FocusDirection,
@@ -47,7 +47,7 @@ export function isCandidate(
 // beamsOverlap — do the "beams" w.r.t. the direction's axis overlap?
 // ═══════════════════════════════════════════════════════════════════
 
-export function beamsOverlap(
+function beamsOverlap(
   direction: FocusDirection,
   rect1: DOMRect,
   rect2: DOMRect,
@@ -89,7 +89,7 @@ function isToDirectionOf(
 // majorAxisDistance — edge-to-near-edge along the direction axis
 // ═══════════════════════════════════════════════════════════════════
 
-export function majorAxisDistance(
+function majorAxisDistance(
   direction: FocusDirection,
   source: DOMRect,
   dest: DOMRect,
@@ -147,7 +147,7 @@ function majorAxisDistanceToFarEdgeRaw(
 // minorAxisDistance — center-to-center on the perpendicular axis
 // ═══════════════════════════════════════════════════════════════════
 
-export function minorAxisDistance(
+function minorAxisDistance(
   direction: FocusDirection,
   source: DOMRect,
   dest: DOMRect,
@@ -174,7 +174,7 @@ export function minorAxisDistance(
 //  all focus tests if you dare tweak it."
 // ═══════════════════════════════════════════════════════════════════
 
-export function getWeightedDistanceFor(major: number, minor: number): number {
+function getWeightedDistanceFor(major: number, minor: number): number {
   return 13 * major * major + minor * minor;
 }
 
@@ -183,7 +183,7 @@ export function getWeightedDistanceFor(major: number, minor: number): number {
 // being exclusively in the beam of the source rect
 // ═══════════════════════════════════════════════════════════════════
 
-export function beamBeats(
+function beamBeats(
   direction: FocusDirection,
   source: DOMRect,
   rect1: DOMRect,
@@ -221,7 +221,7 @@ export function beamBeats(
 // isBetterCandidate — THE core routine that determines focus order
 // ═══════════════════════════════════════════════════════════════════
 
-export function isBetterCandidate(
+function isBetterCandidate(
   direction: FocusDirection,
   source: DOMRect,
   rect1: DOMRect,
