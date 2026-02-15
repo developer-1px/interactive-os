@@ -30,6 +30,7 @@ description: 프로젝트 철학 준수 및 네이밍/구조 일관성을 코드
      - `useEffect`로 상태 동기화하지 않고 커널의 단방향 흐름을 따르는가?
      - DOM 이벤트 직접 부착(`addEventListener`) 대신 선언적 핸들러
    - **로깅 원칙**: `console.log` 대신 `logger` 사용
+   - **구조 변경 완전성**: 레지스트리/캐시를 변경하는 코드가 있을 때, 모든 mutation 지점에서 invalidation/notification이 호출되는가?
 
 4. **네이밍/구조 검사**
    - **파일명**: 번호 prefix 컨벤션 준수 (`1-listeners`, `2-contexts`, `3-commands`, `6-components`)
