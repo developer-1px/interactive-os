@@ -17,7 +17,7 @@ test.describe("Dialog Playground", () => {
     await page.goto("/playground/radix");
     // Wait for React mount
     await page.waitForFunction(
-      () => document.querySelector("#root")?.children.length! > 0,
+      () => (document.querySelector("#root")?.children.length ?? 0) > 0,
       null,
       { timeout: 10000 },
     );

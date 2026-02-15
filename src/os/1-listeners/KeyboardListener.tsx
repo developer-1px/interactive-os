@@ -8,8 +8,8 @@
  * via parentMap. Global commands go directly to GLOBAL.
  */
 
-import { OS_CHECK } from "@os/3-commands/interaction";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { OS_CHECK } from "@os/3-commands/interaction";
 import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
 import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
 import { useEffect } from "react";

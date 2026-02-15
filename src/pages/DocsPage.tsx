@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { DocsDashboard } from "../docs-viewer/DocsDashboard";
 import { DocsSidebar } from "../docs-viewer/DocsSidebar";
 import {
   buildDocTree,
@@ -11,7 +12,6 @@ import {
   loadDocContent,
 } from "../docs-viewer/docsUtils";
 import { MarkdownRenderer } from "../docs-viewer/MarkdownRenderer";
-import { DocsDashboard } from "../docs-viewer/DocsDashboard";
 
 export default function DocsPage() {
   const location = useLocation();
@@ -27,7 +27,6 @@ export default function DocsPage() {
   const prevFile = currentIndex > 0 ? allFiles[currentIndex - 1] : null;
   const nextFile =
     currentIndex < allFiles.length - 1 ? allFiles[currentIndex + 1] : null;
-
 
   useEffect(() => {
     if (!splat) {
@@ -45,9 +44,10 @@ export default function DocsPage() {
         setError(err.message ?? "Failed to load document");
         setContent("");
       });
-  }, [splat, navigate, allFiles]);
+  }, [splat]);
 
   // Reset scroll on file change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: splat triggers scroll reset on route change
   useEffect(() => {
     const el = document.querySelector("[data-docs-scroll]");
     el?.scrollTo(0, 0);
@@ -56,7 +56,6 @@ export default function DocsPage() {
   const handleSelect = (path: string) => {
     navigate({ to: `/docs/${path}` });
   };
-
 
   return (
     <div className="flex h-screen w-full bg-white text-slate-900 overflow-hidden font-sans selection:bg-indigo-100 selection:text-indigo-900">

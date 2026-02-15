@@ -26,15 +26,19 @@
  */
 
 import { createKernel, defineScope } from "@kernel";
-import type { BaseCommand, CommandFactory, ScopeToken } from "@kernel/core/tokens";
+import type {
+  BaseCommand,
+  CommandFactory,
+  ScopeToken,
+} from "@kernel/core/tokens";
 import { OS } from "@os/AntigravityOS";
 import { Keybindings as KeybindingsRegistry } from "@os/keymaps/keybindings";
 import React, { type ReactNode } from "react";
 import { registerAppSlice } from "./appSlice";
 import {
   beginTransaction,
-  endTransaction,
   createHistoryMiddleware,
+  endTransaction,
 } from "./middleware/historyKernelMiddleware";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -67,10 +71,16 @@ export type Selector<S, T> = {
 // ═══════════════════════════════════════════════════════════════════
 
 type CommandContext<S> = { readonly state: S };
-type HandlerResult<S> = { state: S; dispatch?: BaseCommand | BaseCommand[] } | void;
+type HandlerResult<S> = {
+  state: S;
+  dispatch?: BaseCommand | BaseCommand[];
+} | void;
 
 /** Flat handler: (ctx, payload) => result */
-type FlatHandler<S, P> = (ctx: CommandContext<S>, payload: P) => HandlerResult<S>;
+type FlatHandler<S, P> = (
+  ctx: CommandContext<S>,
+  payload: P,
+) => HandlerResult<S>;
 
 // ═══════════════════════════════════════════════════════════════════
 // Zone Bindings
@@ -226,7 +236,9 @@ export function defineApp<S>(
     predicate: (state: S) => boolean,
   ): Condition<S> {
     if (conditionNames.has(name)) {
-      throw new Error(`[defineApp:${appId}] Condition "${name}" already defined`);
+      throw new Error(
+        `[defineApp:${appId}] Condition "${name}" already defined`,
+      );
     }
     conditionNames.add(name);
     const cond = {
@@ -245,7 +257,9 @@ export function defineApp<S>(
     select: (state: S) => T,
   ): Selector<S, T> {
     if (selectorNames.has(name)) {
-      throw new Error(`[defineApp:${appId}] Selector "${name}" already defined`);
+      throw new Error(
+        `[defineApp:${appId}] Selector "${name}" already defined`,
+      );
     }
     selectorNames.add(name);
     const sel = {
@@ -437,7 +451,9 @@ export function defineApp<S>(
 
   // ── create (test instance) ──
 
-  function create(overrides?: Partial<S> | { history?: boolean }): TestInstance<S> {
+  function create(
+    overrides?: Partial<S> | { history?: boolean },
+  ): TestInstance<S> {
     interface TestAppState {
       os: Record<string, never>;
       apps: Record<string, unknown>;
@@ -445,14 +461,18 @@ export function defineApp<S>(
 
     // Separate test options from state overrides
     const rawOverrides = overrides ?? {};
-    const enableHistory = 'history' in rawOverrides && rawOverrides.history === true;
+    const enableHistory =
+      "history" in rawOverrides && rawOverrides.history === true;
     const stateOverrides = enableHistory
-      ? (({ history: _h, ...rest }) => rest)(rawOverrides as Record<string, unknown>)
+      ? (({ history: _h, ...rest }) => rest)(
+          rawOverrides as Record<string, unknown>,
+        )
       : rawOverrides;
 
-    const testState = Object.keys(stateOverrides).length > 0
-      ? { ...initialState, ...stateOverrides as Partial<S> }
-      : initialState;
+    const testState =
+      Object.keys(stateOverrides).length > 0
+        ? { ...initialState, ...(stateOverrides as Partial<S>) }
+        : initialState;
 
     const testKernel = createKernel<TestAppState>({
       os: {} as Record<string, never>,
@@ -556,17 +576,14 @@ export function defineApp<S>(
       ),
 
       // Dual: v5 select(brandedSelector) + v3 select.visibleTodos()
-      select: Object.assign(
-        (selectorOrBranded: any) => {
-          // v5 style: select(brandedSelector)
-          if (selectorOrBranded && __selectorBrand in selectorOrBranded) {
-            const currentState = testKernel.getState().apps[appId] as S;
-            return selectorOrBranded.select(currentState);
-          }
-          return undefined;
-        },
-        selectProxy,
-      ) as any,
+      select: Object.assign((selectorOrBranded: any) => {
+        // v5 style: select(brandedSelector)
+        if (selectorOrBranded && __selectorBrand in selectorOrBranded) {
+          const currentState = testKernel.getState().apps[appId] as S;
+          return selectorOrBranded.select(currentState);
+        }
+        return undefined;
+      }, selectProxy) as any,
 
       // v3 style: commands.cancelEdit
       commands: commandsMap,
@@ -643,9 +660,7 @@ export function defineApp<S>(
       };
       const dialogId = config.id ?? `${appId}-dialog-${Date.now()}`;
 
-      const RootComponent: React.FC<{ children: ReactNode }> = ({
-        children,
-      }) =>
+      const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) =>
         React.createElement(OS.Dialog as any, { id: dialogId }, children);
       RootComponent.displayName = `${appId}.Dialog`;
 
@@ -654,11 +669,11 @@ export function defineApp<S>(
         className?: string;
         asChild?: boolean;
       }> = ({ children, className, asChild }) =>
-          React.createElement(
-            (OS.Dialog as any).Trigger,
-            { className, asChild },
-            children,
-          );
+        React.createElement(
+          (OS.Dialog as any).Trigger,
+          { className, asChild },
+          children,
+        );
       TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
       const ContentComponent: React.FC<{
@@ -667,7 +682,7 @@ export function defineApp<S>(
         className?: string;
         zoneClassName?: string;
       }> = (props) =>
-          React.createElement((OS.Dialog as any).Content, props as any);
+        React.createElement((OS.Dialog as any).Content, props as any);
       ContentComponent.displayName = `${appId}.Dialog.Content`;
 
       const PortalComponent: React.FC<{
@@ -677,18 +692,14 @@ export function defineApp<S>(
         className?: string;
         contentClassName?: string;
       }> = (props) =>
-          React.createElement((OS.Trigger as any).Portal, props as any);
+        React.createElement((OS.Trigger as any).Portal, props as any);
       PortalComponent.displayName = `${appId}.Dialog.Portal`;
 
       const DismissComponent: React.FC<{
         children: ReactNode;
         className?: string;
       }> = ({ children, className }) =>
-          React.createElement(
-            (OS.Dialog as any).Close,
-            { className },
-            children,
-          );
+        React.createElement((OS.Dialog as any).Close, { className }, children);
       DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
       const ConfirmComponent: React.FC<{
@@ -715,7 +726,9 @@ export function defineApp<S>(
         Confirm: ConfirmComponent,
       };
     }) as {
-      (command: CommandFactory<string, any>): React.FC<{
+      (
+        command: CommandFactory<string, any>,
+      ): React.FC<{
         payload?: any;
         children: ReactNode;
       }>;
@@ -835,9 +848,9 @@ export function defineApp<S>(
           // v3 when is bare lambda, not Condition
           const whenCondition = cmdOptions?.when
             ? defineCondition(
-              `__v3_when_${type}`,
-              cmdOptions.when as (state: S) => boolean,
-            )
+                `__v3_when_${type}`,
+                cmdOptions.when as (state: S) => boolean,
+              )
             : undefined;
 
           const factory = registerCommand(type, flatHandler, {

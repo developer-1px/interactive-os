@@ -11,14 +11,15 @@ import {
 } from "./docsUtils";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
-export function DocsViewer() {
-  // Hash-based routing: URL ↔ selected doc sync
-  const getPathFromHash = () => {
-    const hash = window.location.hash.replace(/^#\/?/, "");
-    return hash || undefined;
-  };
+function getPathFromHash() {
+  const hash = window.location.hash.replace(/^#\/?/, "");
+  return hash || undefined;
+}
 
-  const [activePath, setActivePath] = useState<string | undefined>(getPathFromHash);
+export function DocsViewer() {
+  const [activePath, setActivePath] = useState<string | undefined>(
+    getPathFromHash,
+  );
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 

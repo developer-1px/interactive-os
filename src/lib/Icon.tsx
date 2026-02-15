@@ -10,18 +10,6 @@
 import {
   Accessibility,
   Activity,
-  // ... imports
-  Book,
-  // ...
-  Component,
-  // ...
-  FlaskConical,
-  // ...
-  Layout,
-  // ...
-  Package,
-  // ...
-  TestTube2,
   // ...
 
   // Status
@@ -38,6 +26,8 @@ import {
   BarChart3,
   // Editing
   Bold,
+  // ... imports
+  Book,
   Bookmark,
   Box,
   Brain,
@@ -52,6 +42,8 @@ import {
   Clipboard,
   Clock,
   Columns,
+  // ...
+  Component,
   Copy,
   CornerDownLeft,
   Cpu,
@@ -65,6 +57,8 @@ import {
   FileCog,
   FileImage,
   FileText,
+  // ...
+  FlaskConical,
   // File/Folder icons
   Folder,
   FolderOpen,
@@ -81,6 +75,8 @@ import {
   Italic,
   Keyboard,
   Layers,
+  // ...
+  Layout,
   LayoutGrid,
   LayoutList,
   Link,
@@ -95,6 +91,8 @@ import {
   MoreHorizontal,
   MoreVertical,
   MousePointer2,
+  // ...
+  Package,
   Pause,
   Pencil,
   // Media
@@ -115,6 +113,8 @@ import {
   Strikethrough,
   Tag,
   Terminal,
+  // ...
+  TestTube2,
   Trash2,
   Underline,
   Undo2,

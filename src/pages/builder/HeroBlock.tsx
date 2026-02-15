@@ -37,9 +37,7 @@ export function HeroBlock() {
               name="hero-badge"
               mode="deferred"
               value={fields["hero-badge"] ?? ""}
-              onCommit={(val: string) =>
-                builderUpdateField("hero-badge", val)
-              }
+              onCommit={(val: string) => builderUpdateField("hero-badge", val)}
               className={`
                                 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-300 cursor-default
                                 data-[focused=true]:bg-violet-600 data-[focused=true]:text-white data-[focused=true]:scale-105 data-[focused=true]:shadow-lg data-[focused=true]:shadow-violet-500/30
@@ -56,9 +54,7 @@ export function HeroBlock() {
             name="hero-headline"
             mode="deferred"
             value={fields["hero-headline"] ?? ""}
-            onCommit={(val: string) =>
-              builderUpdateField("hero-headline", val)
-            }
+            onCommit={(val: string) => builderUpdateField("hero-headline", val)}
             className={`
                             mb-6 transition-all duration-300 rounded-2xl p-4 -mx-4 cursor-default
                             text-[56px] md:text-[72px] font-semibold tracking-[-0.04em] leading-[1.05] text-slate-900
@@ -95,9 +91,10 @@ export function HeroBlock() {
                 type="button"
                 className={`
                   px-7 py-3.5 rounded-xl font-medium text-[15px] transition-all duration-300
-                  ${isFocused
-                    ? "bg-violet-600 text-white scale-105 shadow-xl shadow-violet-500/40"
-                    : "bg-slate-900 text-white hover:bg-slate-800"
+                  ${
+                    isFocused
+                      ? "bg-violet-600 text-white scale-105 shadow-xl shadow-violet-500/40"
+                      : "bg-slate-900 text-white hover:bg-slate-800"
                   }
                 `}
               >
@@ -112,9 +109,10 @@ export function HeroBlock() {
                 type="button"
                 className={`
                   px-7 py-3.5 rounded-xl font-medium text-[15px] transition-all duration-300 border
-                  ${isFocused
-                    ? "bg-violet-50 border-violet-500 text-violet-700 scale-105"
-                    : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                  ${
+                    isFocused
+                      ? "bg-violet-50 border-violet-500 text-violet-700 scale-105"
+                      : "border-slate-300 text-slate-600 hover:bg-slate-50"
                   }
                 `}
               >

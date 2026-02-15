@@ -28,12 +28,42 @@ export function NCPServicesBlock() {
 
   // Structural data (non-editable via OS.Field)
   const featuredServices = [
-    { icon: Server, color: "text-blue-600 bg-blue-50", badge: "UPDATED", title: "Server" },
-    { icon: Database, color: "text-purple-600 bg-purple-50", badge: "NEW", title: "Database" },
-    { icon: Brain, color: "text-green-600 bg-green-50", badge: "", title: "AI" },
-    { icon: Layers, color: "text-orange-600 bg-orange-50", badge: "", title: "Network" },
-    { icon: Globe, color: "text-cyan-600 bg-cyan-50", badge: "", title: "Global" },
-    { icon: Box, color: "text-indigo-600 bg-indigo-50", badge: "", title: "Hybrid" },
+    {
+      icon: Server,
+      color: "text-blue-600 bg-blue-50",
+      badge: "UPDATED",
+      title: "Server",
+    },
+    {
+      icon: Database,
+      color: "text-purple-600 bg-purple-50",
+      badge: "NEW",
+      title: "Database",
+    },
+    {
+      icon: Brain,
+      color: "text-green-600 bg-green-50",
+      badge: "",
+      title: "AI",
+    },
+    {
+      icon: Layers,
+      color: "text-orange-600 bg-orange-50",
+      badge: "",
+      title: "Network",
+    },
+    {
+      icon: Globe,
+      color: "text-cyan-600 bg-cyan-50",
+      badge: "",
+      title: "Global",
+    },
+    {
+      icon: Box,
+      color: "text-indigo-600 bg-indigo-50",
+      badge: "",
+      title: "Hybrid",
+    },
   ];
 
   return (
@@ -83,9 +113,10 @@ export function NCPServicesBlock() {
                     variant={tab.active ? "primary" : "ghost"}
                     className={`
                       flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap
-                      ${tab.active
-                        ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
-                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                      ${
+                        tab.active
+                          ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
+                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
                       }
                       data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 data-[focused=true]:z-10
                     `}

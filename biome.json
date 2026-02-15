@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!!**/dist"]
+    "includes": ["**", "!!**/dist", "!!**/routeTree.gen.ts"]
   },
   "formatter": {
     "enabled": true,
@@ -23,12 +23,40 @@
           "options": {
             "maxAllowedComplexity": 15
           }
-        }
+        },
+        "useLiteralKeys": "warn"
+      },
+      "correctness": {
+        "useHookAtTopLevel": "warn"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noArrayIndexKey": "warn",
+        "useIterableCallbackReturn": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn"
+      },
+      "a11y": {
+        "useButtonType": "warn",
+        "useKeyWithClickEvents": "warn",
+        "noStaticElementInteractions": "warn",
+        "useFocusableInteractive": "warn",
+        "useSemanticElements": "warn",
+        "noLabelWithoutControl": "warn",
+        "useAriaPropsForRole": "warn",
+        "useValidAriaRole": "warn",
+        "noSvgWithoutTitle": "warn"
       },
       "performance": {
         "noBarrelFile": "off",
         "noReExportAll": "warn"
       }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   },
   "javascript": {

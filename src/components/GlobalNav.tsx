@@ -1,7 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Icon } from "@/lib/Icon";
 import { useDocsNotification } from "@/docs-viewer/useDocsNotification";
+import { Icon } from "@/lib/Icon";
 import { useNavRoutes } from "./useNavRoutes";
 
 export function GlobalNav() {
@@ -72,7 +72,11 @@ export function GlobalNav() {
           >
             {({ isActive }) => (
               <>
-                <Icon name={item.icon} size={18} strokeWidth={isActive ? 2.5 : 2} />
+                <Icon
+                  name={item.icon}
+                  size={18}
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
                 {/* Red dot for new docs */}
                 {item.path === "/docs" && hasNewDocs && !isOnDocs && (
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#F8FAFC] animate-pulse" />

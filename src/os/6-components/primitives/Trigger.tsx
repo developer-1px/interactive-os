@@ -106,6 +106,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       customDispatch || ((cmd: BaseCommand) => kernel.dispatch(cmd as any));
 
     // Use explicit overlayId if provided, otherwise auto-generate
+    // biome-ignore lint/correctness/useExhaustiveDependencies: overlayRole intentionally excluded — ID must be stable
     const overlayId = useMemo(
       () => externalOverlayId ?? (overlayRole ? generateOverlayId() : null),
       // eslint-disable-next-line react-hooks/exhaustive-deps

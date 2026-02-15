@@ -8,8 +8,8 @@
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
-import { resolveFocusId } from "../utils/resolveFocusId";
 import { SELECTION_CLEAR } from "../selection/selection";
+import { resolveFocusId } from "../utils/resolveFocusId";
 
 export const OS_DELETE = kernel.defineCommand("OS_DELETE", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;

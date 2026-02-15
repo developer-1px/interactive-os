@@ -47,15 +47,18 @@ export function CommandPalette() {
       kind: "route" | "doc",
     ): MatchedItem[] => {
       if (!query.trim()) {
-        return items.map((item) => ({
-          id: `${kind}:${item.path}`,
-          path: item.path,
-          label: item.label,
-          kind,
-          ...(item.category != null ? { category: item.category } : {}),
-          pathMatch: empty,
-          labelMatch: empty,
-        } as MatchedItem));
+        return items.map(
+          (item) =>
+            ({
+              id: `${kind}:${item.path}`,
+              path: item.path,
+              label: item.label,
+              kind,
+              ...(item.category != null ? { category: item.category } : {}),
+              pathMatch: empty,
+              labelMatch: empty,
+            }) as MatchedItem,
+        );
       }
       return items
         .map((item) => {
@@ -113,15 +116,12 @@ export function CommandPalette() {
   }, [isOpen]);
 
   // ── Combobox focus trap: keep focus on input ──
-  const handleContainerMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      // Prevent clicks within the palette from stealing focus from the input
-      if (e.target !== inputRef.current) {
-        e.preventDefault();
-      }
-    },
-    [],
-  );
+  const handleContainerMouseDown = useCallback((e: React.MouseEvent) => {
+    // Prevent clicks within the palette from stealing focus from the input
+    if (e.target !== inputRef.current) {
+      e.preventDefault();
+    }
+  }, []);
 
   const handleInputBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
@@ -196,7 +196,11 @@ export function CommandPalette() {
         contentClassName="w-[640px] max-w-[90vw] bg-white rounded-xl shadow-2xl border border-black/5 flex flex-col overflow-hidden text-zinc-900"
       >
         {/* Focus trap wrapper — prevents clicks from stealing input focus */}
-        <div ref={containerRef} onMouseDown={handleContainerMouseDown} className="flex flex-col flex-1 overflow-hidden">
+        <div
+          ref={containerRef}
+          onMouseDown={handleContainerMouseDown}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
           {/* Search Input */}
           <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100">
             <svg

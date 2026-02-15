@@ -48,9 +48,7 @@ export function CTABlock() {
               name="cta-subtext"
               mode="deferred"
               value={fields["cta-subtext"] ?? ""}
-              onCommit={(val: string) =>
-                builderUpdateField("cta-subtext", val)
-              }
+              onCommit={(val: string) => builderUpdateField("cta-subtext", val)}
               className={`
                                 transition-all duration-300 rounded-xl p-3 -mx-3 cursor-default
                                 text-lg text-white/70
@@ -68,9 +66,10 @@ export function CTABlock() {
               type="button"
               className={`
                 inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300
-                ${isFocused
-                  ? "bg-white text-violet-700 scale-110 shadow-2xl"
-                  : "bg-white text-violet-700 hover:shadow-xl"
+                ${
+                  isFocused
+                    ? "bg-white text-violet-700 scale-110 shadow-2xl"
+                    : "bg-white text-violet-700 hover:shadow-xl"
                 }
               `}
             >
@@ -87,9 +86,7 @@ export function CTABlock() {
               name="cta-footer"
               mode="deferred"
               value={fields["cta-footer"] ?? ""}
-              onCommit={(val: string) =>
-                builderUpdateField("cta-footer", val)
-              }
+              onCommit={(val: string) => builderUpdateField("cta-footer", val)}
               className={`
                                 px-2 py-1 rounded inline-block transition-all
                                 text-sm text-white/50

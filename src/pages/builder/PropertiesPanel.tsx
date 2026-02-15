@@ -87,14 +87,10 @@ export function PropertiesPanel() {
 
       {/* Form Content */}
       <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
-        {selectedType === "text" && (
-          <TextProperties fieldName={selectedId} />
-        )}
+        {selectedType === "text" && <TextProperties fieldName={selectedId} />}
         {selectedType === "image" && <ImageProperties />}
         {selectedType === "icon" && <IconProperties />}
-        {selectedType === "link" && (
-          <LinkProperties fieldName={selectedId} />
-        )}
+        {selectedType === "link" && <LinkProperties fieldName={selectedId} />}
         {selectedType === "button" && (
           <ButtonProperties fieldName={selectedId} />
         )}
@@ -117,10 +113,11 @@ function TabButton({
 }) {
   return (
     <div
-      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${active
+      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${
+        active
           ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
           : "text-slate-400"
-        }`}
+      }`}
       title={label}
     >
       {icon}
@@ -153,9 +150,7 @@ function getIconForType(type: PropertyType) {
  * ------------------------------------------------------------------------------------------------- */
 
 function TextProperties({ fieldName }: { fieldName: string }) {
-  const value = BuilderApp.useComputed(
-    (s) => s.data.fields[fieldName] ?? "",
-  );
+  const value = BuilderApp.useComputed((s) => s.data.fields[fieldName] ?? "");
 
   return (
     <div className="space-y-6">
@@ -220,10 +215,11 @@ function IconProperties() {
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 ${i === 1
+              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 ${
+                i === 1
                   ? "border-violet-500 bg-violet-50 text-violet-600"
                   : "border-slate-200 text-slate-400"
-                }`}
+              }`}
             >
               <Square size={20} />
             </div>
@@ -242,9 +238,7 @@ function IconProperties() {
 }
 
 function LinkProperties({ fieldName }: { fieldName: string }) {
-  const value = BuilderApp.useComputed(
-    (s) => s.data.fields[fieldName] ?? "",
-  );
+  const value = BuilderApp.useComputed((s) => s.data.fields[fieldName] ?? "");
 
   return (
     <div className="space-y-6">
@@ -285,9 +279,7 @@ function LinkProperties({ fieldName }: { fieldName: string }) {
 }
 
 function ButtonProperties({ fieldName }: { fieldName: string }) {
-  const value = BuilderApp.useComputed(
-    (s) => s.data.fields[fieldName] ?? "",
-  );
+  const value = BuilderApp.useComputed((s) => s.data.fields[fieldName] ?? "");
 
   return (
     <div className="space-y-6">

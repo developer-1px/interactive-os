@@ -14,7 +14,6 @@ import { Keybindings } from "../../keybindings";
 // Side-effect import: registers all OS default keybindings
 import "../../osDefaults";
 
-
 import {
   FIELD_CANCEL,
   FIELD_COMMIT,

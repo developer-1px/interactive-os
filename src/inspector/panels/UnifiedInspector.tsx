@@ -159,6 +159,7 @@ export function UnifiedInspector({
   const [storeOpen, setStoreOpen] = useState(false);
 
   // Auto-expand new events (optional, maybe just the latest)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — react to new tx appended, not full array ref
   useEffect(() => {
     if (transactions.length > 0) {
       const lastTx = transactions[transactions.length - 1];

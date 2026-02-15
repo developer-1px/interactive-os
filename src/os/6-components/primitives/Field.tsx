@@ -251,9 +251,9 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       "aria-controls": controls,
       "aria-activedescendant":
         target === "virtual" &&
-          controls &&
-          osFocusedItemId &&
-          osFocusedItemId !== name
+        controls &&
+        osFocusedItemId &&
+        osFocusedItemId !== name
           ? osFocusedItemId
           : undefined,
       children: null, // Managed by useFieldDOMSync

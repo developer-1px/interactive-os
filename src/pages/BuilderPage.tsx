@@ -1,10 +1,7 @@
 import { OS } from "@os/AntigravityOS";
 import { useEffect, useState } from "react";
+import { BuilderApp, type PropertyType } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
-import {
-  BuilderApp,
-  type PropertyType,
-} from "@/apps/builder/app";
 import { kernel } from "@/os/kernel";
 import {
   EditorToolbar,

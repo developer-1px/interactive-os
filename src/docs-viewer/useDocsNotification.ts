@@ -11,48 +11,48 @@ import { docsModules } from "@/docs-viewer/docsUtils";
 
 /** Get current list of doc file keys */
 function getDocKeys(): Set<string> {
-    return new Set(Object.keys(docsModules));
+  return new Set(Object.keys(docsModules));
 }
 
 export function useDocsNotification() {
-    const snapshotRef = useRef<Set<string>>(getDocKeys());
-    const [hasNewDocs, setHasNewDocs] = useState(false);
-    const [newDocPaths, setNewDocPaths] = useState<string[]>([]);
+  const snapshotRef = useRef<Set<string>>(getDocKeys());
+  const [hasNewDocs, setHasNewDocs] = useState(false);
+  const [newDocPaths, setNewDocPaths] = useState<string[]>([]);
 
-    // Check for new docs on HMR updates
-    useEffect(() => {
-        if (!import.meta.hot) return;
+  // Check for new docs on HMR updates
+  useEffect(() => {
+    if (!import.meta.hot) return;
 
-        const checkForNewDocs = () => {
-            const current = getDocKeys();
-            const snapshot = snapshotRef.current;
-            const added: string[] = [];
+    const checkForNewDocs = () => {
+      const current = getDocKeys();
+      const snapshot = snapshotRef.current;
+      const added: string[] = [];
 
-            for (const key of current) {
-                if (!snapshot.has(key)) {
-                    added.push(key);
-                }
-            }
+      for (const key of current) {
+        if (!snapshot.has(key)) {
+          added.push(key);
+        }
+      }
 
-            if (added.length > 0) {
-                setHasNewDocs(true);
-                setNewDocPaths((prev) => [...prev, ...added]);
-            }
-        };
+      if (added.length > 0) {
+        setHasNewDocs(true);
+        setNewDocPaths((prev) => [...prev, ...added]);
+      }
+    };
 
-        // Vite HMR: listen for any module update events
-        import.meta.hot.on("vite:afterUpdate", checkForNewDocs);
+    // Vite HMR: listen for any module update events
+    import.meta.hot.on("vite:afterUpdate", checkForNewDocs);
 
-        return () => {
-            import.meta.hot?.off?.("vite:afterUpdate", checkForNewDocs);
-        };
-    }, []);
+    return () => {
+      import.meta.hot?.off?.("vite:afterUpdate", checkForNewDocs);
+    };
+  }, []);
 
-    const clearNotification = useCallback(() => {
-        snapshotRef.current = getDocKeys();
-        setHasNewDocs(false);
-        setNewDocPaths([]);
-    }, []);
+  const clearNotification = useCallback(() => {
+    snapshotRef.current = getDocKeys();
+    setHasNewDocs(false);
+    setNewDocPaths([]);
+  }, []);
 
-    return { hasNewDocs, newDocPaths, clearNotification };
+  return { hasNewDocs, newDocPaths, clearNotification };
 }

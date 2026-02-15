@@ -10,8 +10,8 @@
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
-import { resolveFocusId } from "../utils/resolveFocusId";
 import { SELECTION_CLEAR } from "../selection/selection";
+import { resolveFocusId } from "../utils/resolveFocusId";
 
 export const OS_COPY = kernel.defineCommand("OS_COPY", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
