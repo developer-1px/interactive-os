@@ -62,8 +62,8 @@ export type CommandFactory<Type extends string = string, Payload = void> = {
     ...args: [Payload] extends [undefined]
       ? []
       : undefined extends Payload
-        ? [payload?: Payload]
-        : [payload: Payload]
+      ? [payload?: Payload]
+      : [payload: Payload]
   ): Command<Type, Payload>;
   /** The command type string (for debugging/inspection). */
   readonly commandType: Type;
@@ -89,8 +89,8 @@ type Prettify<T> = { [K in keyof T]: T[K] } & {};
  */
 export type EffectFields<E extends Record<string, EffectToken>> = {
   [K in keyof E as E[K] extends EffectToken<infer T, unknown>
-    ? T
-    : never]?: E[K] extends EffectToken<string, infer V> ? V : never;
+  ? T
+  : never]?: E[K] extends EffectToken<string, infer V> ? V : never;
 };
 
 /**
@@ -109,9 +109,9 @@ export type TypedEffectMap<S, E extends Record<string, EffectToken>> = {
  * → `{ NOW: number; USER: User }`
  */
 export type InjectResult<T extends ContextToken[]> = Prettify<{
-  [K in T[number] as K["__id"]]: K extends ContextToken<string, infer V>
-    ? V
-    : never;
+  [K in T[number]as K["__id"]]: K extends ContextToken<string, infer V>
+  ? V
+  : never;
 }>;
 
 /** Context passed to command handlers. state + injected values. */
@@ -123,11 +123,6 @@ export type TypedContext<
     readonly state: S;
   } & Readonly<Injected>
 >;
-
-// ─── Phantom State Marker ───
-
-/** Phantom type marker for state type inference in createKernel. */
-export type StateMarker<S> = { readonly __stateType?: S };
 
 // ─── Internal Types (merged from internal-types.ts) ───
 
