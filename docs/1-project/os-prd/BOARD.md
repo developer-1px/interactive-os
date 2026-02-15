@@ -1,7 +1,10 @@
 # BOARD — os-prd
 
 ## 🔴 Now
-- [ ] T5: QuickPick 패키지 구현 (→ 별도 프로젝트로 분리 추천)
+- [ ] T5: QuickPick (OS Level Primitive) 구현
+    - [ ] T5a: `virtualFocus` 지원 (NAVIGATE 커맨드 및 Effect 수정)
+    - [ ] T5b: `QuickPick` 컴포넌트 조립 (Combobox Zone + Overlay)
+    - [ ] T5c: `CommandBar` (App Level) 예제 구현 및 검증
 
 ## ⏳ Done
 - [x] T0: SPEC.md 초안 작성 — 코드 역추적으로 전체 인벤토리 (02-15)

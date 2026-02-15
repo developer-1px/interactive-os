@@ -121,7 +121,6 @@ export const NAVIGATE = kernel.defineCommand(
           }
         }
 
-        // Follow-focus selection
         if (
           !payload.select &&
           config.select.followFocus &&
@@ -134,7 +133,8 @@ export const NAVIGATE = kernel.defineCommand(
       }) as typeof ctx.state,
 
       // Effects
-      focus: navResult.targetId,
+      // Skip DOM focus if virtualFocus is enabled
+      focus: config.project.virtualFocus ? undefined : navResult.targetId,
       scroll: navResult.targetId,
     };
   },
