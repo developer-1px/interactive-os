@@ -30,11 +30,15 @@ description: 사용자 요청을 분석하여 정형화된 보고서를 docs/0-i
    - `docs/STATUS.md`를 읽어 현재 Active Focus 프로젝트를 확인한다.
    - **Focus가 1개**: 보고서 내용이 해당 프로젝트와 관련 있는지 판단한다.
      - 관련 있음 → `docs/1-project/[name]/notes/`에 저장
-     - 관련 없음 → `docs/0-inbox/`에 저장
+     - 관련 없음 → 아래 분류 기준으로 판단
    - **Focus가 2개 이상**: 보고서 내용과 프로젝트명을 매칭한다.
      - 매칭됨 → 해당 `docs/1-project/[name]/notes/`에 저장
-     - 매칭 안 됨 → `docs/0-inbox/`에 저장
-   - **Focus가 0개**: `docs/0-inbox/`에 저장 (기본 동작)
+     - 매칭 안 됨 → 아래 분류 기준으로 판단
+   - **Focus가 0개**: 아래 분류 기준으로 판단
+   - **분류 기준**:
+     - 언젠가 할 아이디어, 지금은 아님 → `docs/5-backlog/`
+     - 참고 자료, 공부, 읽을거리 → `docs/3-resource/`
+     - 기타 → `docs/0-inbox/` (기본 동작)
 
 4. **Save Report**
     - Generate a filename using the following format: `YYYY-MMDD-HHmm-[type]-kebab-title.md`

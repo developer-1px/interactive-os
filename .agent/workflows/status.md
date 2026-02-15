@@ -14,7 +14,7 @@ description: docs/STATUS.md를 갱신하여 프로젝트 대시보드를 최신 
 
 2. **프로젝트 스캔**
    - `docs/1-project/`의 모든 하위 폴더를 스캔한다.
-   - 각 프로젝트의 status 파일, 최근 git 활동을 확인한다.
+   - 각 프로젝트의 BOARD.md, README.md, 최근 git 활동을 확인한다.
    - Phase를 판정한다: Discovery → Definition → Design → Execution → Closing
 
 3. **Focus 자동 판정**
@@ -44,5 +44,6 @@ description: docs/STATUS.md를 갱신하여 프로젝트 대시보드를 최신 
      - Stale로 강등된 프로젝트
      - Completed로 판정된 프로젝트
      - Inbox에서 즉시 처리 가능한 항목
+     - Backlog에서 승격 가능한 아이디어
 
 > **⚠️ 금지**: `docs/0-inbox/`에 새 상태 보고서를 생성하지 않는다. 대시보드가 유일한 상태 파일이다.

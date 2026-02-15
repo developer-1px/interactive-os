@@ -35,7 +35,7 @@ description: superseded된 문서를 식별하여 AI 컨텍스트에서 제거�
 완료된 프로젝트 또는 superseded 문서를 냉장 보관한다:
 
 ```bash
-# 폴더를 4-archive/로 이동 (원본 그대로)
+# 프로젝트 통째로 4-archive/로 이동 (BOARD.md, discussions/, notes/ 포함)
 mv docs/1-project/name/ docs/4-archive/YYYY-MM-name/
 
 # 또는 개별 문서
@@ -43,7 +43,8 @@ mv docs/3-resource/path/to/file.md docs/4-archive/YYYY-MM-topic/
 ```
 
 - 날짜 프리픽스: `YYYY-MM-` (아카이브 시점 기준)
-- 폴더 내 파일은 원본 그대로 유지 (tombstone 금지)
+- 프로젝트 폴더는 **통째로** 이동 — BOARD.md, discussions/, notes/ 모두 보존
+- 개별 파일도 원본 그대로 유지 (tombstone 금지)
 - `MIGRATION_MAP.md`의 냉장 보관 섹션에 기록
 
 ```bash

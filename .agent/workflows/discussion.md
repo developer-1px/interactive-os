@@ -57,9 +57,16 @@ Toulmin 논증 모델의 Warrant를 누적해가며, 논리의 빈틈을 통찰�
 ### Step 3: 저장 위치 결정 및 통합
 
 1. **프로젝트 컨텍스트 확인**: `docs/STATUS.md`를 읽어 Active Focus 프로젝트를 확인한다.
-2. **저장 위치 결정**:
-   - Discussion 내용이 Active Focus 프로젝트와 직접 관련 → `docs/1-project/[name]/0-discussion.md`로 바로 저장
-   - 관련 프로젝트 없음 또는 독립적 사고 → `docs/11-discussions/`에 저장
+2. **5갈래 라우팅** — Discussion의 결론에 따라 행선지를 결정한다:
+
+   | 판정 | 행선지 | 조치 |
+   |------|--------|------|
+   | **기존 프로젝트의 Task** | `1-project/[name]/BOARD.md` | BOARD.md의 Now에 태스크 추가, discussion 파일은 `discussions/`에 저장 |
+   | **기존 프로젝트의 Discussion** | `1-project/[name]/discussions/` | 사고 기록으로 저장. BOARD 변경 없음 |
+   | **새 프로젝트 생성** (드물게) | `1-project/[new-name]/` | `/project` 워크플로우로 전환 |
+   | **리소스 (공부/읽을거리)** | `3-resource/[category]/` | 참고 자료로 저장 |
+   | **백로그 (나중에)** | `5-backlog/` | 아이디어로 보관. 나중에 다시 Discussion으로 복귀 |
+
 3. Journey와 Conclusion을 **기계적으로 concat**한다. 절대 내용을 다시 작성하지 않는다:
    ```bash
    cat temp-journey.md > final.md
@@ -68,22 +75,12 @@ Toulmin 논증 모델의 Warrant를 누적해가며, 논리의 빈틈을 통찰�
    rm temp-journey.md temp-conclusion.md
    ```
 4. **최종 파일명**: `YYYY-MMDD-HHmm-{topic-slug}.md`
-   - `{topic-slug}`: 논의 주제를 2~3단어로 요약한 kebab-case (예: `discussion-archiving`, `headless-ui-pattern`)
+   - `{topic-slug}`: 논의 주제를 2~3단어로 요약한 kebab-case
    - **주제 slug는 필수** — 파일명만으로 내용을 알 수 있어야 함
-   - 프로젝트로 직접 저장하는 경우 파일명은 `0-discussion.md`
 
-### 디스커션의 운명
+### 라우팅 후 조치
 
-생성된 디스커션은 **저장 시점에** 운명이 결정된다:
-
-**A) 프로젝트 직행** (Active Focus와 관련)
-- 저장 시점에 바로 `1-project/[name]/0-discussion.md`로 저장
-- 중간 경유지(`11-discussions/`) 없이 즉시 프로젝트에 합류
-- **대시보드 갱신**: `docs/STATUS.md`에서 해당 프로젝트의 Last Activity를 갱신
-
-**B) 독립 에세이로 잔류** (Active Focus 무관)
-- `11-discussions/`에 저장
-- 블로그 포스트의 성격 — 독립적인 사고 기록
-- 나중에 `/project`에 의해 승격될 수 있음 (기존 로직 유지)
-
-이를 통해 `11-discussions/`는 **자가 정리(self-pruning)** 된다.
+- **프로젝트 귀속 시** (Task 또는 Discussion): `docs/STATUS.md`에서 해당 프로젝트의 Last Activity를 갱신한다.
+- **새 프로젝트 시**: `/project` 워크플로우로 전환. Discussion 문서가 프로젝트의 첫 번째 `discussions/` 파일이 된다.
+- **백로그 시**: `5-backlog/`에 저장. STATUS.md 변경 없음.
+- **리소스 시**: `3-resource/`에 저장. STATUS.md 변경 없음.

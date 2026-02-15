@@ -21,35 +21,43 @@ description: 표준 PARA 방법론(Projects, Areas, Resources, Archives)을 적�
    - **대시보드 기반**: STATUS.md의 Inbox 섹션에 Suggested Action이 이미 있는 항목은 바로 실행한다.
    - **신규 스캔**: 대시보드에 없는 inbox 파일이 있으면 분석 후 처리한다.
    - **이동 기준**:
-     - `→ project/notes/` — 관련 Active 프로젝트가 있음
+     - `→ project/discussions/` 또는 `project/notes/` — 관련 Active 프로젝트가 있음
+     - `→ 5-backlog/` — 언젠가 할 아이디어, 지금은 아님
      - `→ archive` — 일회성 보고서 또는 관련 프로젝트가 Completed
      - `→ 2-area/` — 프로젝트 무관, 지속 참조 가치
-     - `→ 3-resource/` — 참고 자료, 레퍼런스
+     - `→ 3-resource/` — 참고 자료, 레퍼런스, 공부/읽을거리
      - `→ 삭제` — STATUS.md로 대체된 과거 상태 스냅샷
    - Do NOT merge files; keep them intact.
 
 3. **Project Review (Active → Archive)**
    - **대시보드 기반**: Completed 섹션의 `Archived? ❌` 항목을 아카이브한다.
    - **추가 검토**: Stale 프로젝트(`💤`)에 대해 사용자에게 아카이브 여부를 묻는다.
-   - **Archive**: 프로젝트 폴더를 `docs/4-archive/[YYYY]/[ProjectName]`으로 이동한다.
-     - Create the year folder if it doesn't exist.
+   - **Archive**: 프로젝트 폴더를 `docs/4-archive/YYYY-MM-[ProjectName]/`으로 통째로 이동한다.
+     - BOARD.md, discussions/, notes/ 모두 포함.
+     - Create the date folder if it doesn't exist.
 
-4. **Area & Resource Maintenance**
+4. **Backlog Review**
+   - `docs/5-backlog/`를 스캔한다.
+   - Active 프로젝트로 승격 가능한 아이디어가 있으면 사용자에게 보고한다.
+   - 오래된 아이디어(30일+)는 여전히 관심 있는지 사용자에게 묻는다.
+
+5. **Area & Resource Maintenance**
    - `docs/2-area`와 `docs/3-resource`를 스캔한다.
    - If an Area/Resource has become a specific Project → move to `docs/1-project`.
-   - If no longer relevant → move to `docs/4-archive/[YYYY]/[ItemName]`.
+   - If no longer relevant → move to `docs/4-archive/YYYY-MM-[ItemName]/`.
 
-5. **대시보드 최종 갱신**
+6. **대시보드 최종 갱신**
    - 모든 이동이 완료되면 `docs/STATUS.md`를 갱신한다:
      - Inbox 섹션에서 처리된 항목 제거
      - Archived 프로젝트를 `Archived? ✅`로 갱신 또는 목록에서 제거
      - Summary 카운트 갱신
      - Last updated 타임스탬프 갱신
 
-6. **Execution**
+7. **Execution**
    - Present a summary of all moves.
    - Upon confirmation, execute filesystem commands (`mv`).
    - Ensure the structure remains clean:
-     - `docs/1-project` contains only *active* projects.
-     - `docs/4-archive` contains the history, organized by year.
+     - `docs/1-project` contains only *active* strategic projects.
+     - `docs/4-archive` contains the history.
+     - `docs/5-backlog` contains ideas waiting for activation.
      - `docs/0-inbox` is empty or near-empty.

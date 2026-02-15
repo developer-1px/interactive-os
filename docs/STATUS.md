@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-15 11:03
+> Last updated: 2026-02-15 13:16
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -11,8 +11,8 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| registry-monitor-v5 | Design | 02-15 |
-| docs-dashboard | Design | 02-15 |
+| docs-system-v2 | Definition | 02-15 |
+| todo-keyboard-dogfooding | Definition | 02-15 |
 
 ---
 
@@ -20,8 +20,10 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| registry-monitor-v5 | Design | 02-15 | 🔥 Focus |
-| docs-dashboard | Design | 02-15 | 🔥 Focus |
+| docs-system-v2 | Definition | 02-15 | 🔥 Focus |
+| todo-keyboard-dogfooding | Definition | 02-15 | 🔥 Focus |
+| registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
+| docs-dashboard | Design | 02-15 | ⏸ Idle |
 | define-app | Execution (Phase 3) | 02-14 | ⏸ Idle |
 | create-module | Design (Proposal 미승인) | 02-13 | ⏸ Idle |
 | testbot | Execution 준비 | 02-13 | ⏸ Idle |
@@ -59,7 +61,7 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 2 |
-| Active Projects (total) | 7 |
+| Active Projects (total) | 9 |
 | Completed (archived) | 11 |
 | Inbox items | 0 |
 | New Areas created | 3 |
@@ -68,13 +70,9 @@
 
 ## 📝 Recent Changes (2026-02-15)
 
+- 🆕 Created `docs-system-v2` project — docs & workflow restructure (Discussion→Project 전환)
+- 🆕 Created `todo-keyboard-dogfooding` project — keyboard-only dogfooding for Todo app
+- ✅ Biome config alignment — Tailwind v4 CSS parsing, a11y warn, routeTree exclusion
 - ✅ Archived 4 completed projects (os-elegance, focus-recovery, todo-v3-migration, todo-app) to `4-archive/2026-02-*/`
 - ✅ Replaced tombstone model with 3-tier lifecycle (active → cold → deep)
 - ✅ Updated `/archive` workflow — tombstone abolished
-- ✅ Archived 7 completed projects to `4-archive/2026/` (earlier)
-- ✅ Deleted 4 legacy status snapshots (replaced by STATUS.md)
-- ✅ Routed 7 technical documents to project `notes/`
-- ✅ Created 3 new areas:
-  - `2-area/07-docs-structure/` — Docs structure standards
-  - `2-area/08-pending-decisions/` — Decision tracking registry
-  - `2-area/99-project-philosophy/` — Philosophy audit trail
