@@ -128,11 +128,37 @@ docs/1-project/[프로젝트명]/
 
 - 기술 설계에 필요한 참조 자료를 수집한다.
 
-### Step 9: 제안서 작성 (proposal.md)
+### Step 9: 제안서 작성 — ADR 포맷 (proposal.md)
 
-- README + PRD를 바탕으로 기술 설계 제안서를 작성한다.
+- README + PRD를 바탕으로 기술 설계 제안서를 **ADR(Architecture Decision Record) 포맷**으로 작성한다.
 - PRD의 기능 요구사항을 **어떻게(HOW)** 구현할지를 정의한다.
-- 구현 방향, 변경 범위, 리스크, 대안을 포함한다.
+- 포맷:
+  ```markdown
+  # Proposal — [프로젝트명]
+
+  ## Status
+  Proposed / Accepted / Superseded
+
+  ## Context
+  이 기술 결정이 필요한 배경. PRD의 어떤 요구사항을 해결하려 하는가?
+
+  ## Decision
+  무엇을 결정했는가? 구현 방향, 변경 범위를 구체적으로.
+
+  ## Alternatives Considered
+  | 대안 | 장점 | 단점 | 기각 사유 |
+  |------|------|------|----------|
+  | [대안 A] | ... | ... | [왜 선택하지 않았는가] |
+  | [대안 B] | ... | ... | [왜 선택하지 않았는가] |
+
+  ## Consequences
+  이 결정의 결과. 좋은 것과 나쁜 것 모두.
+  - ✅ [긍정적 결과]
+  - ⚠️ [부정적 결과 / 트레이드오프]
+
+  ## Risk
+  식별된 리스크와 대응 방안.
+  ```
 
 ### Step 10: 사고 확장 — `/premortem`
 

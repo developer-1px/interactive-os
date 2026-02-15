@@ -10,7 +10,6 @@
 import {
   Accessibility,
   Activity,
-  // ...
 
   // Status
   AlertCircle,
@@ -26,7 +25,6 @@ import {
   BarChart3,
   // Editing
   Bold,
-  // ... imports
   Book,
   Bookmark,
   Box,
@@ -42,7 +40,6 @@ import {
   Clipboard,
   Clock,
   Columns,
-  // ...
   Component,
   Copy,
   CornerDownLeft,
@@ -57,7 +54,6 @@ import {
   FileCog,
   FileImage,
   FileText,
-  // ...
   FlaskConical,
   // File/Folder icons
   Folder,
@@ -75,7 +71,6 @@ import {
   Italic,
   Keyboard,
   Layers,
-  // ...
   Layout,
   LayoutGrid,
   LayoutList,
@@ -91,7 +86,6 @@ import {
   MoreHorizontal,
   MoreVertical,
   MousePointer2,
-  // ...
   Package,
   Pause,
   Pencil,
@@ -113,7 +107,6 @@ import {
   Strikethrough,
   Tag,
   Terminal,
-  // ...
   TestTube2,
   Trash2,
   Underline,
