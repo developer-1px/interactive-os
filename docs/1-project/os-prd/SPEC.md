@@ -383,7 +383,7 @@
 | Navigate (typeahead) | — | ✅ `typeahead.test` | ✅ 구현 + 테스트 |
 | Select (range) | ✅ | ✅ | ✅ |
 | Select (toggle) | ✅ | ✅ | ✅ |
-| Select (followFocus/radio) | ✅ | — | ⚠️ |
+| Select (followFocus/radio) | ✅ | — | ⚠️ E2E 충분 |
 | Tab (trap) | ✅ | ✅ `tab.test` | ✅ |
 | Tab (escape) | ✅ | ✅ `tab.test` | ✅ |
 | Tab (flow) | ✅ | ✅ `tab.test` | ✅ |
@@ -395,7 +395,7 @@
 | Delete (single/multi) | ✅ `dogfooding` | ✅ | ✅ |
 | Undo/Redo | ✅ `dogfooding` | ✅ `history.test` | ✅ |
 | Field (edit/commit/cancel) | — | ✅ `field.test` | ✅ state 전환 검증 |
-| Overlay (open/close) | — | — | ❌ 미구현 |
+| Overlay (open/close) | — | ✅ `overlay.test` | ✅ G3 해결 |
 | Role Presets (§7 table) | — | ✅ `rolePresets.test` | ✅ 17 roles × 9 fields |
 | Role Helpers (child/check/expand) | — | ✅ `roleHelpers.test` | ✅ |
 
@@ -407,7 +407,7 @@
 |---|-----|----------|-------|
 | G1 | ~~`tabEscape` effect 미등록~~ | ~~Critical~~ | ✅ 수정됨 — TAB 커맨드가 직접 zone 이동 처리 |
 | G2 | ~~Field 커맨드 테스트 없음~~ | ~~Medium~~ | ✅ `field.test.ts` — 14개 unit test |
-| G3 | Overlay 커맨드 테스트 없음 | Medium | E2E + unit 모두 부재 |
+| G3 | ~~Overlay 커맨드 테스트 없음~~ | ~~Medium~~ | ✅ `overlay.test.ts` — 9개 unit test |
 | G4 | `recoveryTargetId` 동작 미검증 | Low | RECOVER 커맨드의 E2E 없음 |
 | G5 | `seamless` 네비게이션 미구현 확인 필요 | Low | builderBlock/application role에서 사용 |
 | G6 | ~~`typeahead` 네비게이션 미구현~~ | ~~Low~~ | ✅ `typeahead.ts` 구현 + 12개 unit test |
