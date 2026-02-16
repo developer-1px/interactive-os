@@ -3,8 +3,8 @@
  *
  * Tests the state transitions for Field editing lifecycle:
  *   FIELD_START_EDIT → editingItemId set
- *   FIELD_COMMIT → editingItemId cleared, fieldEvent emitted
- *   FIELD_CANCEL → editingItemId cleared, fieldEvent emitted
+ *   FIELD_COMMIT → editingItemId cleared
+ *   FIELD_CANCEL → editingItemId cleared
  *
  * DOM-dependent behaviors (FieldRegistry lookup, onSubmit dispatch)
  * are not tested here — they belong in E2E/integration tests.
@@ -77,18 +77,6 @@ describe("FIELD_START_EDIT (SPEC §3.8)", () => {
     expect(zone.editingItemId).toBe("item-1");
   });
 
-  it("clears any pending fieldEvent", () => {
-    setupFocus("z1", "item-1", {
-      fieldEvent: { type: "commit", id: "item-0", tick: 100 },
-    });
-
-    kernel.dispatch(FIELD_START_EDIT());
-
-    const zone = getZone("z1");
-    expect(zone.editingItemId).toBe("item-1");
-    expect(zone.fieldEvent).toBeNull();
-  });
-
   it("no-op when already editing the same item", () => {
     setupFocus("z1", "item-1", { editingItemId: "item-1" });
     const stateBefore = kernel.getState();
@@ -122,26 +110,13 @@ describe("FIELD_START_EDIT (SPEC §3.8)", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("FIELD_COMMIT (SPEC §3.8)", () => {
-  it("clears editingItemId and emits commit fieldEvent", () => {
+  it("clears editingItemId", () => {
     setupFocus("z1", "item-1", { editingItemId: "item-1" });
 
     kernel.dispatch(FIELD_COMMIT());
 
     const zone = getZone("z1");
     expect(zone.editingItemId).toBeNull();
-    expect(zone.fieldEvent?.type).toBe("commit");
-    expect(zone.fieldEvent?.id).toBe("item-1");
-  });
-
-  it("fieldEvent.tick is a timestamp", () => {
-    setupFocus("z1", "item-1", { editingItemId: "item-1" });
-    const before = Date.now();
-
-    kernel.dispatch(FIELD_COMMIT());
-
-    const zone = getZone("z1");
-    expect(zone.fieldEvent?.tick).toBeGreaterThanOrEqual(before);
-    expect(zone.fieldEvent?.tick).toBeLessThanOrEqual(Date.now() + 10);
   });
 
   it("no state change when not in editing mode (no editingItemId)", () => {
@@ -161,15 +136,13 @@ describe("FIELD_COMMIT (SPEC §3.8)", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("FIELD_CANCEL (SPEC §3.8)", () => {
-  it("clears editingItemId and emits cancel fieldEvent", () => {
+  it("clears editingItemId", () => {
     setupFocus("z1", "item-1", { editingItemId: "item-1" });
 
     kernel.dispatch(FIELD_CANCEL());
 
     const zone = getZone("z1");
     expect(zone.editingItemId).toBeNull();
-    expect(zone.fieldEvent?.type).toBe("cancel");
-    expect(zone.fieldEvent?.id).toBe("item-1");
   });
 
   it("no-op when not in editing mode", () => {
@@ -205,7 +178,6 @@ describe("Field Lifecycle: start → commit / cancel", () => {
     // Commit
     kernel.dispatch(FIELD_COMMIT());
     expect(getZone("z1").editingItemId).toBeNull();
-    expect(getZone("z1").fieldEvent?.type).toBe("commit");
   });
 
   it("full cycle: start → cancel", () => {
@@ -218,7 +190,6 @@ describe("Field Lifecycle: start → commit / cancel", () => {
     // Cancel
     kernel.dispatch(FIELD_CANCEL());
     expect(getZone("z1").editingItemId).toBeNull();
-    expect(getZone("z1").fieldEvent?.type).toBe("cancel");
   });
 
   it("start on different item replaces editingItemId", () => {

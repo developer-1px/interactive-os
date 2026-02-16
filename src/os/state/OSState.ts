@@ -30,7 +30,6 @@ export interface ZoneState {
 
   // Field Slice
   editingItemId: string | null;
-  fieldEvent: { type: "commit" | "cancel"; id: string; tick: number } | null;
 
   // Spatial Slice
   stickyX: number | null;

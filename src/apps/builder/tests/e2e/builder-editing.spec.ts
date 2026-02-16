@@ -14,22 +14,24 @@ test.describe("Builder Inline Editing & Panel Sync", () => {
     //   - Escape (editing) → FIELD_CANCEL → revert
     // ═══════════════════════════════════════════════════════════════
 
-    test("F2로 deferred field 편집 모드 진입 (contentEditable)", async ({
+    test("F2로 deferred field 편집 모드 진입 (contentEditable + data-editing)", async ({
         page,
     }) => {
         const field = page.locator("#ncp-hero-title");
 
-        // 초기: navigating, contentEditable=false
+        // 초기: navigating, contentEditable=false, data-editing 없음
         await expect(field).toHaveAttribute("contenteditable", "false");
+        await expect(field).not.toHaveAttribute("data-editing", "true");
 
         // F2 → FIELD_START_EDIT → editing mode
         await page.keyboard.press("F2");
 
-        // contentEditable이 true로 전환됨
+        // contentEditable + data-editing 동시 활성화
         await expect(field).toHaveAttribute("contenteditable", "true");
+        await expect(field).toHaveAttribute("data-editing", "true");
     });
 
-    test("Escape로 편집 취소 시 contentEditable false로 복원", async ({
+    test("Escape로 편집 취소 시 contentEditable + data-editing 복원", async ({
         page,
     }) => {
         const field = page.locator("#ncp-hero-title");
@@ -37,12 +39,14 @@ test.describe("Builder Inline Editing & Panel Sync", () => {
         // F2로 편집 진입
         await page.keyboard.press("F2");
         await expect(field).toHaveAttribute("contenteditable", "true");
+        await expect(field).toHaveAttribute("data-editing", "true");
 
         // Escape → FIELD_CANCEL
         await page.keyboard.press("Escape");
 
-        // contentEditable이 false로 복원
+        // 둘 다 복원
         await expect(field).toHaveAttribute("contenteditable", "false");
+        await expect(field).not.toHaveAttribute("data-editing", "true");
     });
 
     // ═══════════════════════════════════════════════════════════════

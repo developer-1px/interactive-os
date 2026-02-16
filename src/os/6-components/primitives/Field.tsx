@@ -164,15 +164,11 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
     // --- State Subscription ---
     const fieldData = useFieldRegistry((s) => s.fields.get(fieldId));
-    const isEditing = fieldData?.state.isEditing ?? false;
     const localValue = fieldData?.state.localValue ?? value;
 
-    // Sync prop value to registry when NOT editing
-    useEffect(() => {
-      if (!isEditing && value !== fieldData?.state.localValue) {
-        FieldRegistry.updateValue(fieldId, value);
-      }
-    }, [value, isEditing, fieldId, fieldData?.state.localValue]);
+    // Sync prop value to registry when not actively editing (contentEditable)
+    // isContentEditable is computed below; use a ref to avoid circular dependency
+    const isContentEditableRef = useRef(false);
 
     // --- Focus Computation ---
     const isSystemActive = activeZoneId === zoneId;
@@ -190,9 +186,17 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
     const isContentEditable =
       mode === "deferred"
-        ? (isFocused && isEditing) || isParentEditing
+        ? (isFocused && osEditingItemId === fieldId) || isParentEditing
         : isFocused || isParentEditing;
     const isActive = isContentEditable;
+    isContentEditableRef.current = isContentEditable;
+
+    // Sync prop value to registry when not actively editing
+    useEffect(() => {
+      if (!isContentEditableRef.current && value !== fieldData?.state.localValue) {
+        FieldRegistry.updateValue(fieldId, value);
+      }
+    }, [value, fieldId, fieldData?.state.localValue]);
 
     // --- Initial Value (set once on mount via ref) ---
     // contentEditable manages its own DOM, we only set initial value
@@ -209,11 +213,11 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     // Sync value prop → DOM when not editing (enables panel → preview binding)
     const prevValueRef = useRef(value);
     useLayoutEffect(() => {
-      if (innerRef.current && prevValueRef.current !== value && !isEditing) {
+      if (innerRef.current && prevValueRef.current !== value && !isContentEditable) {
         innerRef.current.innerText = value;
       }
       prevValueRef.current = value;
-    }, [value, isEditing]);
+    }, [value, isContentEditable]);
 
     const shouldHaveDOMFocus = mode === "deferred" ? isFocused : isActive;
     useFieldFocus({
@@ -227,7 +231,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const { className: customClassName, ...otherProps } = rest as any;
     const composeProps = getFieldClasses({
       isFocused,
-      isEditing,
+      isEditing: isContentEditable,
       multiline,
       value: localValue,
       ...(placeholder !== undefined ? { placeholder } : {}),
@@ -246,14 +250,18 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       "data-placeholder": placeholder,
       "data-mode": mode,
       "data-editing":
-        mode === "deferred" ? (isEditing ? "true" : undefined) : undefined,
+        mode === "deferred"
+          ? isContentEditable
+            ? "true"
+            : undefined
+          : undefined,
       "data-focused": isFocused ? "true" : undefined,
       "aria-controls": controls,
       "aria-activedescendant":
         target === "virtual" &&
-        controls &&
-        osFocusedItemId &&
-        osFocusedItemId !== name
+          controls &&
+          osFocusedItemId &&
+          osFocusedItemId !== name
           ? osFocusedItemId
           : undefined,
       children: null, // Managed by useFieldDOMSync

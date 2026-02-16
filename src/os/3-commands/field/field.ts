@@ -1,7 +1,7 @@
 /**
- * FIELD Commands — Kernel-based field editing (replaces FieldRegistry).
+ * FIELD Commands — OS-level field editing.
  *
- * State: ZoneState.editingItemId, ZoneState.fieldEvent
+ * State: ZoneState.editingItemId
  *
  * Commands:
  *   FIELD_START_EDIT — Enter editing mode on the focused item
@@ -34,7 +34,6 @@ export const FIELD_START_EDIT = kernel.defineCommand(
         const z = draft.os.focus.zones[activeZoneId];
         if (z) {
           z.editingItemId = z.focusedItemId;
-          z.fieldEvent = null; // Clear any pending event
         }
       }) as typeof ctx.state,
     };
@@ -102,11 +101,6 @@ export const FIELD_COMMIT = kernel.defineCommand(
           const z = draft.os.focus.zones[activeZoneId];
           if (z) {
             z.editingItemId = null;
-            z.fieldEvent = {
-              type: "commit",
-              id: editingId,
-              tick: Date.now(),
-            };
           }
         }) as typeof ctx.state,
       };
@@ -149,11 +143,6 @@ export const FIELD_CANCEL = kernel.defineCommand(
         const z = draft.os.focus.zones[activeZoneId];
         if (z) {
           z.editingItemId = null;
-          z.fieldEvent = {
-            type: "cancel",
-            id: editingId,
-            tick: Date.now(),
-          };
         }
       }) as typeof ctx.state,
     };

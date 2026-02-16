@@ -3,14 +3,11 @@
 ## 🔴 Now
 
 - [ ] T9: defineApp.ts 분할 — 912줄, 25 `as any` → 모듈 분리
-  - 책임 분리: CommandFactory, SelectorFactory, ZoneHandle, BoundComponents, persistence
-  - T8 조사 결과: dispatch 타입은 정상, 25 `as any`는 defineApp 내부 generic 문제
-  - ref: define-app 프로젝트 P2 태스크와 연동
-  - [ ] /discussion (분할 경계)
-  - [ ] /divide
-  - [ ] /verify
 
 ## ⏳ Done
+- [x] T12: G5 — seamless 미구현+미사용 확인, severity Info로 변경 (02-16)
+- [x] T11: G4 — recoveryTargetId E2E 검증 완료 (dogfooding SC-2) (02-16)
+- [x] T10: SPEC §8.1 갱신 — keyCode 229, combobox skip, Key Ownership, typeahead middleware (02-16)
 - [x] T8: `as any` 조사 — dispatch 타입 정상, gratuitous 7개 제거, 나머지 25개는 defineApp 내부 (02-16)
 - [x] T7: ⚠️ 커맨드 테스트 보강 — SPEC ⚠️ 13→0, +31 unit tests (02-16)
 - [x] T5d: `CommandPalette` 리팩토링 → QuickPick 소비자로 전환 (02-15)

@@ -296,14 +296,15 @@
 
 | Step | Action |
 |------|--------|
-| 1 | `e.defaultPrevented \|\| e.isComposing` → 무시 |
+| 1 | `e.defaultPrevented \|\| e.isComposing \|\| e.keyCode === 229` → 무시 (IME 가드: Chrome 한글 IME 첫 keydown 누출 방지) |
 | 2 | Inspector 내부 (`[data-inspector]`) → 무시 |
-| 3 | `getCanonicalKey(e)` → 정규화된 키 문자열 |
-| 4 | `isEditing` 판단 (input/textarea/contentEditable) |
-| 5 | Space + checkbox/switch → `OS_CHECK` 오버라이드 |
-| 6 | `Keybindings.resolve(key, { isEditing })` → binding |
-| 7 | binding 없음 → `kernel.resolveFallback(e)` |
-| 8 | binding 있음 → `kernel.dispatch(command)` + `e.preventDefault()` |
+| 3 | Combobox input (`role="combobox"`) → 무시 (자체 keydown 처리) |
+| 4 | `getCanonicalKey(e)` → 정규화된 키 문자열 |
+| 5 | `isEditing` + `isFieldActive` 판단 (Key Ownership Model) |
+| 6 | Space + checkbox/switch → `OS_CHECK` 오버라이드 |
+| 7 | `Keybindings.resolve(key, { isEditing, isFieldActive })` → binding |
+| 8 | binding 없음 → `kernel.resolveFallback(e)` (typeahead 등 middleware) |
+| 9 | binding 있음 → `kernel.dispatch(command)` + `e.preventDefault()` |
 
 ### 8.2 FocusListener
 
@@ -368,6 +369,7 @@
 |-----------|---------|----------|--------|
 | `historyKernelMiddleware` | state-changing commands | Undo/Redo 스택 관리 | ✅ |
 | `macFallbackMiddleware` | unhandled keyboard events | Mac 특수 키 처리 | ✅ |
+| `typeaheadFallbackMiddleware` | unhandled single-char keys | zone의 typeahead 설정 확인 → DOM label 매칭 → FOCUS | ✅ |
 
 ---
 
@@ -420,7 +422,7 @@
 | G1 | ~~`tabEscape` effect 미등록~~ | ~~Critical~~ | ✅ 수정됨 — TAB 커맨드가 직접 zone 이동 처리 |
 | G2 | ~~Field 커맨드 테스트 없음~~ | ~~Medium~~ | ✅ `field.test.ts` — 14개 unit test |
 | G3 | ~~Overlay 커맨드 테스트 없음~~ | ~~Medium~~ | ✅ `overlay.test.ts` — 9개 unit test |
-| G4 | `recoveryTargetId` 동작 미검증 | Low | RECOVER 커맨드의 E2E 없음 |
-| G5 | `seamless` 네비게이션 미구현 확인 필요 | Low | builderBlock/application role에서 사용 |
+| G4 | ~~`recoveryTargetId` 동작 미검증~~ | ~~Low~~ | ✅ unit: `recover.test.ts` + E2E: `dogfooding.spec.ts` SC-2 |
+| G5 | `seamless` 네비게이션 미구현 | Info | 미구현 + 사용처 없음 (builderBlock/application role 미사용). 필요 시 구현 |
 | G6 | ~~`typeahead` 네비게이션 미구현~~ | ~~Low~~ | ✅ `typeahead.ts` 구현 + 12개 unit test |
 | G7 | ~~History middleware unit test 부재~~ | ~~Medium~~ | ✅ `history.test.ts` — 13개 unit test |
