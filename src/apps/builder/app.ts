@@ -1,14 +1,15 @@
 /**
- * Builder App — defineApp + createWidget based.
+ * Builder App v5 — defineApp native (createZone + bind).
  *
- * Second dogfooding of defineApp pattern.
+ * Second dogfooding of defineApp pattern, now using v5 native API.
  * Unlike Todo (entity CRUD with id → object), Builder manages flat key-value content fields.
  * Each field name maps 1:1 to an OS.Field `name` prop.
  *
  * Structure:
- *   BuilderApp (defineApp) — state + selectors
- *   ├── BuilderCanvas (createWidget) — updateField, selectElement commands
- *   └── (PropertiesPanel reads via useComputed, writes via same updateField)
+ *   BuilderApp (defineApp)
+ *     ├── Selectors: fieldValue, selectedId, selectedType, allFields
+ *     └── Zones:
+ *         └── canvas — grid (updateField, selectElement commands)
  */
 
 import { produce } from "immer";
@@ -158,46 +159,57 @@ export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE, {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// BuilderCanvas — canvas + panel shared commands
+// Canvas Zone — v5 native (createZone + bind)
 // ═══════════════════════════════════════════════════════════════════
 
-export const BuilderCanvas = BuilderApp.createWidget("canvas", (define) => {
-  /**
-   * updateField — 필드 값 변경.
-   * 캔버스 인라인 편집과 패널 편집 모두 이 하나의 커맨드를 사용.
-   */
-  const updateField = define.command(
-    "updateField",
-    [],
-    (ctx: { state: BuilderState }) =>
-      (payload: { name: string; value: string }) => ({
-        state: produce(ctx.state, (draft) => {
-          draft.data.fields[payload.name] = payload.value;
-        }),
-      }),
-  );
+const canvasZone = BuilderApp.createZone("canvas");
 
-  /**
-   * selectElement — 요소 선택 상태 변경.
-   * kernel focus와 동기화하여 패널에 해당 요소 데이터를 표시.
-   */
-  const selectElement = define.command(
-    "selectElement",
-    [],
-    (ctx: { state: BuilderState }) =>
-      (payload: { id: string | null; type: PropertyType }) => ({
-        state: produce(ctx.state, (draft) => {
-          draft.ui.selectedId = payload.id;
-          draft.ui.selectedType = payload.type;
-        }),
-      }),
-  );
+/**
+ * updateField — 필드 값 변경.
+ * 캔버스 인라인 편집과 패널 편집 모두 이 하나의 커맨드를 사용.
+ */
+export const updateField = canvasZone.command(
+  "updateField",
+  (ctx: { state: BuilderState }, payload: { name: string; value: string }) => ({
+    state: produce(ctx.state, (draft) => {
+      draft.data.fields[payload.name] = payload.value;
+    }),
+  }),
+);
 
-  return {
-    commands: { updateField, selectElement },
-    zone: { role: "grid" },
-  };
+/**
+ * selectElement — 요소 선택 상태 변경.
+ * kernel focus와 동기화하여 패널에 해당 요소 데이터를 표시.
+ */
+export const selectElement = canvasZone.command(
+  "selectElement",
+  (
+    ctx: { state: BuilderState },
+    payload: { id: string | null; type: PropertyType },
+  ) => ({
+    state: produce(ctx.state, (draft) => {
+      draft.ui.selectedId = payload.id;
+      draft.ui.selectedType = payload.type;
+    }),
+  }),
+);
+
+// Zone binding — spatial grid navigation
+export const BuilderCanvasUI = canvasZone.bind({
+  role: "grid",
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// v3 Compat Alias — existing imports use BuilderCanvas.Zone pattern
+// ═══════════════════════════════════════════════════════════════════
+
+export const BuilderCanvas = {
+  ...BuilderCanvasUI,
+  commands: {
+    updateField,
+    selectElement,
+  },
+};
 
 // ═══════════════════════════════════════════════════════════════════
 // Helper for onCommit callbacks (OS.Field → state update)

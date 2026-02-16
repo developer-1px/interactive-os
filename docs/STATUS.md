@@ -11,6 +11,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
+| builder-mvp | Definition | 02-16 |
 | os-prd | Execution | 02-16 |
 
 ---
@@ -19,6 +20,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| builder-mvp | Definition | 02-16 | 🔥 Focus |
 | os-prd | Execution | 02-16 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
 | docs-dashboard | Design | 02-15 | ⏸ Idle |
@@ -63,8 +65,8 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 1 |
-| Active Projects (total) | 5 |
+| Active Focus | 2 |
+| Active Projects (total) | 6 |
 | Completed (archived) | 18 |
 | Inbox items | 0 |
 | Backlog items | 2 |
