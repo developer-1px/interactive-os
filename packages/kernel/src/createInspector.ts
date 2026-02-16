@@ -15,7 +15,7 @@ import type { ScopeToken } from "./core/tokens";
 
 export function createInspector<T>(
   port: KernelIntrospectionPort<T>,
-): KernelInspectorInternal<T> {
+): KernelInspectorInternal {
   // ─── Registry Cache (dirty flag pattern) ───
   let registryCache: RegistrySnapshot | null = null;
   let registryDirty = true;

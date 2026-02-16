@@ -81,26 +81,6 @@ export const GLOBAL: ScopeToken<"GLOBAL"> = "GLOBAL" as ScopeToken<"GLOBAL">;
 /** Forces TypeScript to eagerly resolve intersections and mapped types. */
 type Prettify<T> = { [K in keyof T]: T[K] } & {};
 
-/**
- * Derives EffectMap fields from a record of EffectTokens.
- *
- * Given `{ NOTIFY: EffectToken<"NOTIFY", string>, TRACK: EffectToken<"TRACK", Event> }`:
- * → `{ NOTIFY?: string; TRACK?: Event }`
- */
-export type EffectFields<E extends Record<string, EffectToken>> = {
-  [K in keyof E as E[K] extends EffectToken<infer T, unknown>
-  ? T
-  : never]?: E[K] extends EffectToken<string, infer V> ? V : never;
-};
-
-/**
- * Full EffectMap type for a kernel with known effects.
- * Includes built-in fields (state, dispatch) + effect-derived fields.
- */
-export type TypedEffectMap<S, E extends Record<string, EffectToken>> = {
-  state?: S;
-  dispatch?: BaseCommand | BaseCommand[];
-} & EffectFields<E>;
 
 /**
  * Derives injected context fields from ContextTokens (wrapper objects).

@@ -54,7 +54,7 @@ export interface RegistrySnapshot {
 
 // ─── Inspector API (returned as kernel.inspector) ───
 
-export interface KernelInspector<T = unknown> {
+export interface KernelInspector {
   /** Read-only snapshot of all registered commands, effects, middleware, and scope tree. */
   getRegistry(): RegistrySnapshot;
 
@@ -84,8 +84,7 @@ export interface KernelInspector<T = unknown> {
 }
 
 /** @internal Extended inspector with cache invalidation — used only inside createKernel. */
-export interface KernelInspectorInternal<T = unknown>
-  extends KernelInspector<T> {
+export interface KernelInspectorInternal extends KernelInspector {
   /** Mark the registry cache as stale. Called by kernel on registration changes. */
   invalidateRegistry(): void;
 }
