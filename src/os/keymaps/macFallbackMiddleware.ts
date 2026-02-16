@@ -12,7 +12,7 @@
 import type { BaseCommand, Middleware } from "@kernel";
 import { FieldRegistry } from "@os/6-components/primitives/FieldRegistry";
 import { getCanonicalKey, getMacFallbackKey } from "./getCanonicalKey";
-import { isKeyConsumedByField } from "./fieldKeyOwnership";
+import { isKeyDelegatedToOS } from "./fieldKeyOwnership";
 import { Keybindings, type KeyResolveContext } from "./keybindings";
 
 const isMac =
@@ -43,7 +43,7 @@ function resolveIsEditingForKey(
     const fieldEntry = FieldRegistry.getField(fieldId);
     if (fieldEntry) {
       const fieldType = fieldEntry.config.fieldType ?? "inline";
-      return isKeyConsumedByField(canonicalKey, fieldType);
+      return !isKeyDelegatedToOS(canonicalKey, fieldType);
     }
   }
   return isEditingElement(target);

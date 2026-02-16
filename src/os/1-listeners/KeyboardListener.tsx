@@ -11,7 +11,7 @@
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_CHECK } from "@os/3-commands/interaction";
 import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
-import { isKeyConsumedByField } from "@os/keymaps/fieldKeyOwnership";
+import { isKeyDelegatedToOS } from "@os/keymaps/fieldKeyOwnership";
 import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
 import { useEffect } from "react";
 import { kernel } from "../kernel";
@@ -44,14 +44,16 @@ function isEditingElement(target: HTMLElement): boolean {
 }
 
 /**
- * Resolve the effective "isEditing" state for a specific key.
+ * Resolve whether the field actively owns a specific key (isFieldActive).
  *
- * Key Ownership Model:
- * - For OS.Field (registered in FieldRegistry): use per-key consumption table
- * - For native inputs (not registered): fall back to binary isEditing
+ * Key Ownership Model (Delegation):
+ * - Fields OWN all keys by default during editing
+ * - Fields DELEGATE specific navigation keys to the OS
+ * - Delegated keys: Tab, Arrow, etc. (defined in FIELD_DELEGATES_TO_OS)
+ * - Non-delegated keys: Space, letters, numbers → always field-owned
  *
- * This means an inline field (e.g. Draft) will NOT block Tab or ArrowDown,
- * but a code editor field WILL block Tab (for indentation).
+ * Returns true = field owns this key (OS should NOT handle)
+ * Returns false = field delegates this key to OS (OS can handle)
  */
 function resolveIsEditingForKey(
   target: HTMLElement,
@@ -63,13 +65,13 @@ function resolveIsEditingForKey(
     const fieldEntry = FieldRegistry.getField(fieldId);
     if (fieldEntry) {
       const fieldType = fieldEntry.config.fieldType ?? "inline";
-      // If the field consumes this key → treat as editing (block OS)
-      // If the field does NOT consume → treat as navigating (let OS handle)
-      return isKeyConsumedByField(canonicalKey, fieldType);
+      // If delegated to OS → field does NOT own this key (return false)
+      // If NOT delegated → field OWNS this key (return true)
+      return !isKeyDelegatedToOS(canonicalKey, fieldType);
     }
   }
 
-  // Fallback: unregistered native inputs use binary check
+  // Fallback: unregistered native inputs own all keys
   return isEditingElement(target);
 }
 
@@ -171,7 +173,8 @@ export function KeyboardListener() {
         : false;
 
       // Space on checkbox/switch → CHECK override (W3C APG)
-      if (canonicalKey === "Space" && !isFieldActive) {
+      // Must use isEditing (not isFieldActive): Space is always text input when editing
+      if (canonicalKey === "Space" && !isEditing) {
         if (tryDispatchCheck(e, canonicalKey)) {
           e.preventDefault();
           e.stopPropagation();

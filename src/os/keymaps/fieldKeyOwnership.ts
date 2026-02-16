@@ -1,73 +1,80 @@
 /**
- * Field Key Ownership — Per-key consumption table for field type presets.
+ * Field Key Ownership — Per-key delegation table for field type presets.
  *
- * Principle: OS owns all keys by default. Fields opt-in to consume specific keys.
+ * Principle: When a field is editing, it OWNS all keys by default.
+ * Fields explicitly DELEGATE specific navigation keys to the OS.
  *
- * The table maps each FieldType preset to the set of canonical key names
- * that the field "consumes" during editing (i.e., the OS should NOT handle them).
- * Any key NOT in the set is delegated to the OS for navigation/actions.
+ * This is the inverse of "consumption": instead of listing what fields block,
+ * we list what fields release to OS for navigation/actions.
  *
- * Common keys consumed by ALL field types (not listed in table):
- *   - Letter/number/symbol keys → always consumed for typing (no keybinding match)
+ * Why delegation (not consumption)?
+ *   Text input keys (Space, letters, numbers, punctuation) must NEVER be
+ *   intercepted by OS navigating bindings during editing. The delegation model
+ *   ensures only explicitly listed navigation keys can pass through to OS.
+ *
+ * Keys always handled by the field (never delegated):
+ *   - Letter/number/symbol/Space → text input
  *   - ArrowLeft, ArrowRight → cursor movement within text
- *   - Home, End → cursor jump within text
- *   - Backspace, Delete (when field has content) → delete character
- *   - Meta+Z, Meta+A, Meta+C/X/V → native browser behavior (undo, select, clipboard)
+ *   - Home, End (without Meta) → cursor jump within text
+ *   - Backspace, Delete → character deletion
+ *   - Meta+Z, Meta+A, Meta+C/X/V → native browser behavior
  *
- * These "base" keys are handled by the field inherently (browser default behavior)
- * and never have OS keybindings, so they don't need to be in the consume table.
- *
- * The table only lists keys that HAVE OS keybindings and need to be blocked:
+ * The table only contains keys that HAVE OS keybindings and should pass through:
  */
 
 import type { FieldType } from "../6-components/primitives/FieldRegistry";
 
 /**
- * Keys that each field type CONSUMES (blocks from OS).
- * If a canonical key is in this set, the OS treats the field as "editing" for that key.
- * If NOT in the set, the OS handles it normally (navigation, zone escape, etc.).
+ * Keys that each field type DELEGATES to the OS during editing.
+ *
+ * If a canonical key is in this set → the OS can handle it (isFieldActive = false).
+ * If NOT in the set → the field owns it (isFieldActive = true, OS skips it).
  */
-const FIELD_CONSUMES: Record<FieldType, Set<string>> = {
+const FIELD_DELEGATES_TO_OS: Record<FieldType, Set<string>> = {
     // inline: single-line input (draft, search, rename)
-    // Consumes nothing extra — OS handles Tab, ↑↓, everything
-    inline: new Set([]),
-
-    // tokens: chip/tag input (email recipients, tags)
-    // Like inline, but also delegates Backspace-when-empty to OS
-    // (Backspace delegation is handled separately via isEmpty check)
-    tokens: new Set([]),
-
-    // block: multi-line text (comment, description, chat)
-    // Consumes vertical arrows (cursor moves between lines)
-    block: new Set([
+    // Delegates: Tab (zone escape), ↑↓ (item navigation)
+    inline: new Set([
+        "Tab",
+        "Shift+Tab",
         "ArrowUp",
         "ArrowDown",
         "Shift+ArrowUp",
         "Shift+ArrowDown",
     ]),
 
-    // editor: code editor, rich text
-    // Consumes vertical arrows + Tab (for indentation)
-    editor: new Set([
+    // tokens: chip/tag input (email recipients, tags)
+    // Same as inline + Backspace-when-empty is handled separately
+    tokens: new Set([
+        "Tab",
+        "Shift+Tab",
         "ArrowUp",
         "ArrowDown",
         "Shift+ArrowUp",
         "Shift+ArrowDown",
+    ]),
+
+    // block: multi-line text (comment, description, chat)
+    // Delegates Tab only (arrows move cursor between lines)
+    block: new Set([
         "Tab",
         "Shift+Tab",
     ]),
+
+    // editor: code editor, rich text
+    // Delegates nothing — editor handles Tab (indent) and ↑↓ (cursor)
+    editor: new Set([]),
 };
 
 /**
- * Check if a specific key is consumed by the active field type.
+ * Check if a specific key is delegated to the OS by the active field type.
  *
  * @param canonicalKey - The canonical key string (e.g., "Tab", "ArrowDown")
  * @param fieldType - The field type preset (defaults to "inline")
- * @returns true if the field consumes this key (OS should NOT handle it)
+ * @returns true if the key is delegated to OS (isFieldActive = false)
  */
-export function isKeyConsumedByField(
+export function isKeyDelegatedToOS(
     canonicalKey: string,
     fieldType: FieldType = "inline",
 ): boolean {
-    return FIELD_CONSUMES[fieldType].has(canonicalKey);
+    return FIELD_DELEGATES_TO_OS[fieldType].has(canonicalKey);
 }
