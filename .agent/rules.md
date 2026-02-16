@@ -48,3 +48,7 @@
 4. **증명 없는 통과는 통과가 아니다.** 빌드가 됐다는 건 안 깨졌다는 증거가 아니다. 자동화된 검증만 증거다. → `/fix`
 5. **빌드 통과 ≠ 런타임 정상.** `vite build`(Rollup)와 dev 서버(esbuild)는 모듈 해석이 다르다. type erasure, export 처리 차이로 빌드는 통과해도 브라우저에서 깨질 수 있다. E2E Smoke가 진짜 검증이다. → `/verify`
 6. **안 쓰는 테스트는 정리한다.** 죽은 테스트는 거짓 안전감을 준다. 동작하지 않는 증명은 증명이 아니다. → `/cleanup`, `/review`
+
+## 성능 — 우리가 지키는 규칙
+
+1. **`useComputed` selector는 원시값을 반환한다.** `useSyncExternalStore`는 `Object.is`로 비교한다. string ID나 객체를 반환하면 값이 바뀔 때 모든 구독자가 리렌더된다. `=== id` 비교를 selector 안에서 수행하여 boolean을 반환하면, 실제로 변경된 컴포넌트만 리렌더된다.

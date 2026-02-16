@@ -48,13 +48,14 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
     const zoneId = context?.zoneId || "unknown";
 
     // --- State (Kernel Direct) ---
-    const focusedItemId = kernel.useComputed(
-      (s) => s.os.focus.zones[zoneId]?.focusedItemId ?? null,
+    // Subscribe to booleans, not raw IDs — avoids re-render of all items
+    // when focus moves from one item to another.
+    const isFocused = kernel.useComputed(
+      (s) => (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === stringId,
     );
-    const activeZoneId = kernel.useComputed((s) => s.os.focus.activeZoneId);
-
-    const isActive = activeZoneId === zoneId;
-    const isFocused = focusedItemId === stringId;
+    const isActive = kernel.useComputed(
+      (s) => s.os.focus.activeZoneId === zoneId,
+    );
 
     // Selection from kernel state
     const isStoreSelected = kernel.useComputed(

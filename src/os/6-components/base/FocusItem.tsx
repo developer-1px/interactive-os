@@ -111,8 +111,10 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     const isSelectableGroup = config.select.mode !== "none";
 
     // --- State Subscriptions (Kernel Direct) ---
-    const activeGroupId = kernel.useComputed(
-      (state) => state.os.focus.activeZoneId,
+    // Subscribe to booleans — avoids re-render when activeZoneId changes
+    // between two unrelated zones.
+    const isGroupActive = kernel.useComputed(
+      (state) => state.os.focus.activeZoneId === zoneId,
     );
 
     const isFocused = kernel.useComputed(
@@ -129,7 +131,6 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     );
 
     // --- Computed State ---
-    const isGroupActive = activeGroupId === zoneId;
     const visualFocused = isFocused && isGroupActive;
 
     // --- Focus Effect: apply .focus() when this item becomes focused ---
