@@ -7,9 +7,9 @@ import { ListView } from "@apps/todo/widgets/ListView";
 import { TodoToolbarView } from "@apps/todo/widgets/TodoToolbar";
 
 export function TodoPanel() {
-  const ui = TodoApp.useComputed((s) => s?.ui);
+  const initialized = TodoApp.useComputed((s) => s?.ui != null);
 
-  if (!ui) return null;
+  if (!initialized) return null;
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-50">

@@ -4,7 +4,6 @@
  * Each call creates a fully independent kernel instance.
  * No globalThis. No singletons. HMR-safe via module separation.
  *
- * @frozen 2026-02-11 — Core runtime (dispatch, store, group/scope) locked.
  * Inspector API is separated into createInspector.ts via Port/Adapter pattern.
  *
  * @example
@@ -16,6 +15,14 @@
  */
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
+
+// ─── Logger Adapter ───
+// Kernel-local logger. Defaults to console. No public API surface.
+const logger = {
+  warn: (...args: unknown[]) => console.warn(...args),
+  error: (...args: unknown[]) => console.error(...args),
+};
+
 import type { KernelIntrospectionPort } from "./core/inspectorPort.ts";
 import {
   type BaseCommand,
@@ -113,7 +120,7 @@ export function createKernel<S>(initialState: S) {
   function resolveContext(id: string): unknown {
     const provider = contextProviders.get(id);
     if (provider) return provider();
-    console.warn(`[kernel] No context provider registered for "${id}"`);
+    logger.warn(`[kernel] No context provider registered for "${id}"`);
     return undefined;
   }
 
@@ -160,7 +167,7 @@ export function createKernel<S>(initialState: S) {
   function travelTo(transactionId: number): void {
     const tx = transactions.find((t) => t.id === transactionId);
     if (!tx) {
-      console.warn(`[kernel] Transaction ${transactionId} not found`);
+      logger.warn(`[kernel] Transaction ${transactionId} not found`);
       return;
     }
     setState(() => tx.stateAfter as S);
@@ -389,10 +396,10 @@ export function createKernel<S>(initialState: S) {
         try {
           effectHandler(value);
         } catch (err) {
-          console.error(`[kernel] Effect "${key}" threw:`, err);
+          logger.error(`[kernel] Effect "${key}" threw:`, err);
         }
       } else {
-        console.warn(`[kernel] Unknown effect "${key}" in EffectMap`);
+        logger.warn(`[kernel] Unknown effect "${key}" in EffectMap`);
       }
     }
   }

@@ -17,6 +17,10 @@ import {
   User,
 } from "lucide-react";
 
+// Stable fallback refs to avoid referential inequality in useSyncExternalStore
+const EMPTY_ORDER: readonly string[] = [];
+const EMPTY_CATS: Readonly<Record<string, never>> = {};
+
 const getIcon = (id: string) => {
   switch (id) {
     case "cat_inbox":
@@ -39,9 +43,15 @@ export function Sidebar() {
 }
 
 function SidebarContent() {
-  const state = TodoApp.useComputed((s) => s);
-
-  if (!state || !state.data) return null;
+  const categoryOrder = TodoApp.useComputed(
+    (s) => s?.data.categoryOrder ?? EMPTY_ORDER,
+  );
+  const categories = TodoApp.useComputed(
+    (s) => s?.data.categories ?? EMPTY_CATS,
+  );
+  const selectedCategoryId = TodoApp.useComputed(
+    (s) => s?.ui.selectedCategoryId ?? "",
+  );
 
   return (
     <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">
@@ -58,8 +68,8 @@ function SidebarContent() {
         <div className="text-[10px] font-black tracking-widest text-slate-400 uppercase px-4 mb-2">
           Categories
         </div>
-        {(state.data.categoryOrder ?? []).map((categoryId) => {
-          const category = state.data.categories?.[categoryId];
+        {categoryOrder.map((categoryId) => {
+          const category = categories[categoryId];
           if (!category) return null;
 
           return (
@@ -78,17 +88,17 @@ function SidebarContent() {
                                   `}
                 >
                   <span
-                    className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                    className={`transition-colors duration-200 ${selectedCategoryId === category.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
                   >
                     {getIcon(category.id)}
                   </span>
                   <span
-                    className={`transition-colors duration-200 ${state.ui.selectedCategoryId === category.id ? "text-slate-900 font-semibold" : "text-slate-600 group-hover:text-slate-900"}`}
+                    className={`transition-colors duration-200 ${selectedCategoryId === category.id ? "text-slate-900 font-semibold" : "text-slate-600 group-hover:text-slate-900"}`}
                   >
                     {category.text}
                   </span>
 
-                  {state.ui.selectedCategoryId === category.id && (
+                  {selectedCategoryId === category.id && (
                     <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
                   )}
                 </div>

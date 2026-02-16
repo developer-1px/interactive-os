@@ -2,7 +2,6 @@
 
 > A universal command processing engine for building interactive applications.
 
-**Status**: `@frozen 2026-02-11`
 
 ## Overview
 
