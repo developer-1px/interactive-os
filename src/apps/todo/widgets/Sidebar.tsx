@@ -43,14 +43,10 @@ export function Sidebar() {
 }
 
 function SidebarContent() {
-  const categoryOrder = TodoApp.useComputed(
-    (s) => s?.data.categoryOrder ?? EMPTY_ORDER,
-  );
-  const categories = TodoApp.useComputed(
-    (s) => s?.data.categories ?? EMPTY_CATS,
-  );
+  const categoryOrder = TodoApp.useComputed((s) => s.data.categoryOrder);
+  const categories = TodoApp.useComputed((s) => s.data.categories);
   const selectedCategoryId = TodoApp.useComputed(
-    (s) => s?.ui.selectedCategoryId ?? "",
+    (s) => s.ui.selectedCategoryId,
   );
 
   return (

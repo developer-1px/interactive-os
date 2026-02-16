@@ -21,15 +21,15 @@ const UndoButton = TodoApp.createTrigger(TodoList.commands.undoCommand);
 const RedoButton = TodoApp.createTrigger(TodoList.commands.redoCommand);
 
 export function TodoToolbarView() {
-  const isBoard = TodoApp.useComputed((s) => s?.ui.viewMode === "board");
+  const isBoard = TodoApp.useComputed((s) => s.ui.viewMode === "board");
   const hasHistoryPast = TodoApp.useComputed(
-    (s) => (s?.history?.past?.length ?? 0) > 0,
+    (s) => s.history.past.length > 0,
   );
   const hasHistoryFuture = TodoApp.useComputed(
-    (s) => (s?.history?.future?.length ?? 0) > 0,
+    (s) => s.history.future.length > 0,
   );
-  const completedCount = TodoApp.useComputed((s) =>
-    s?.data ? Object.values(s.data.todos).filter((t) => t.completed).length : 0,
+  const completedCount = TodoApp.useComputed(
+    (s) => Object.values(s.data.todos).filter((t) => t.completed).length,
   );
 
   return (

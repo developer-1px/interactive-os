@@ -248,7 +248,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     });
 
     // --- Styling ---
-    const { className: customClassName, ...otherProps } = rest as any;
+    const { className: customClassName, ...otherProps } = rest;
     const composeProps = getFieldClasses({
       isFocused,
       isEditing: isContentEditable,
@@ -283,9 +283,9 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     };
 
     const setInnerRef = (node: HTMLElement | null) => {
-      (innerRef as any).current = node;
+      innerRef.current = node;
       if (typeof ref === "function") ref(node);
-      else if (ref) (ref as any).current = node;
+      else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
     };
 
     return <FocusItem id={fieldId} as={as} ref={setInnerRef} {...baseProps} />;
