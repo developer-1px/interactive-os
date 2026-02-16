@@ -42,7 +42,7 @@ export function createInspector<T>(
       const effectTypes = port.getEffectTypes(scope);
       if (effectTypes.length > 0) effects.set(scope, effectTypes);
 
-      const parent = port.getParent(scope);
+      const parent = port.getScopeParent(scope);
       if (parent !== null) scopeTree.set(scope, parent);
     }
 
@@ -71,11 +71,11 @@ export function createInspector<T>(
     },
 
     getScopeParent(scope: ScopeToken): ScopeToken | null {
-      return port.getParent(scope);
+      return port.getScopeParent(scope);
     },
 
     getScopePath(scope: ScopeToken): readonly ScopeToken[] {
-      return port.buildBubblePath(scope);
+      return port.getScopePath(scope);
     },
 
     getTransactions: port.getTransactions,

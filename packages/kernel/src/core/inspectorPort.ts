@@ -29,8 +29,8 @@ export interface KernelIntrospectionPort<T = unknown> {
   getAllScopes(): readonly ScopeToken[];
 
   // Scope tree
-  getParent(scope: ScopeToken): ScopeToken | null;
-  buildBubblePath(scope: ScopeToken): readonly ScopeToken[];
+  getScopeParent(scope: ScopeToken): ScopeToken | null;
+  getScopePath(scope: ScopeToken): readonly ScopeToken[];
 
   // When guard evaluation (delegates to kernel closure for state access)
   evaluateWhenGuard(scope: ScopeToken, type: string): boolean | null;

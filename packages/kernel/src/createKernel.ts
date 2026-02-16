@@ -82,7 +82,7 @@ export function createKernel<S>(initialState: S) {
   // ─── Registries (closure) ───
 
   const scopedCommands = new Map<string, Map<string, InternalCommandHandler>>();
-  const scopedInterceptors = new Map<string, Map<string, Middleware[]>>();
+  const perCommandMiddleware = new Map<string, Map<string, Middleware[]>>();
   const scopedEffects = new Map<string, Map<string, InternalEffectHandler>>();
   const scopedMiddleware = new Map<string, Middleware[]>();
   // when guard registry: scope → type → (state) => boolean
@@ -280,11 +280,11 @@ export function createKernel<S>(initialState: S) {
         if (!whenGuard(guardState)) continue; // guard failed → bubble up
       }
 
-      // 3. Per-command interceptors (inject middleware)
-      const interceptorsMap = scopedInterceptors.get(currentScope);
-      const interceptors = interceptorsMap?.get(resolvedType);
-      if (interceptors) {
-        for (const ic of interceptors) {
+      // 3. Per-command middleware (inject DI tokens)
+      const perCmdMwMap = perCommandMiddleware.get(currentScope);
+      const perCmdMws = perCmdMwMap?.get(resolvedType);
+      if (perCmdMws) {
+        for (const ic of perCmdMws) {
           if (ic.before) {
             mwCtx = ic.before(mwCtx);
           }
@@ -305,9 +305,9 @@ export function createKernel<S>(initialState: S) {
 
       // 5. After-middleware (reverse order)
       mwCtx.effects = handlerResult as Record<string, unknown> | null;
-      if (interceptors) {
-        for (let i = interceptors.length - 1; i >= 0; i--) {
-          const ic = interceptors[i];
+      if (perCmdMws) {
+        for (let i = perCmdMws.length - 1; i >= 0; i--) {
+          const ic = perCmdMws[i];
           if (ic?.after) {
             mwCtx = ic.after(mwCtx) ?? mwCtx;
           }
@@ -525,10 +525,10 @@ export function createKernel<S>(initialState: S) {
             },
           };
 
-          if (!scopedInterceptors.has(scope)) {
-            scopedInterceptors.set(scope, new Map());
+          if (!perCommandMiddleware.has(scope)) {
+            perCommandMiddleware.set(scope, new Map());
           }
-          scopedInterceptors.get(scope)?.set(type, [injectMw]);
+          perCommandMiddleware.get(scope)?.set(type, [injectMw]);
         }
 
         // Return CommandFactory
@@ -677,10 +677,10 @@ export function createKernel<S>(initialState: S) {
       }
       return Array.from(all) as ScopeToken[];
     },
-    getParent(scope: ScopeToken): ScopeToken | null {
+    getScopeParent(scope: ScopeToken): ScopeToken | null {
       return (parentMap.get(scope as string) as ScopeToken) ?? null;
     },
-    buildBubblePath(scope: ScopeToken): readonly ScopeToken[] {
+    getScopePath(scope: ScopeToken): readonly ScopeToken[] {
       return buildBubblePath(scope as string);
     },
     evaluateWhenGuard(scope: ScopeToken, type: string): boolean | null {
