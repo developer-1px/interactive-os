@@ -12,6 +12,7 @@ import {
   FieldRegistry,
   useFieldRegistry,
 } from "./FieldRegistry";
+import { Label } from "./Label";
 
 /**
  * Checks if the value is effectively empty for placeholder display.
@@ -293,7 +294,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
 FieldBase.displayName = "Field";
 
-import { Label } from "./Label";
 
 // Namespace merge — attach Label as Field.Label (same pattern as Trigger.Portal)
 export const Field = Object.assign(FieldBase, {

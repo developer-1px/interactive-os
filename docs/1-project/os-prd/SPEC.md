@@ -267,24 +267,24 @@
 
 > 각 role이 어떤 config를 세팅하는지의 진실의 원천.
 
-| Role | orient | loop | entry | select.mode | followFocus | tab | activate | dismiss.esc | autoFocus |
-|------|--------|------|-------|------------|------------|-----|----------|------------|-----------|
-| `group` | V | — | — | none | — | flow | — | — | — |
-| `listbox` | V | ✗ | selected | single | ✓ | escape | — | — | — |
-| `menu` | V | ✓ | first | none | — | trap | auto | close | ✓ |
-| `menubar` | H | ✓ | restore | none | — | escape | auto | — | — |
-| `radiogroup` | V | ✓ | selected | single | ✓ | escape | — | — | — |
-| `tablist` | H | ✓ | selected | single | ✓ | escape | auto | — | — |
-| `toolbar` | H | ✓ | restore | none | — | escape | — | — | — |
-| `grid` | 2D | ✗ | — | multiple | ✗ | escape | — | — | — |
-| `treegrid` | 2D | ✗ | — | multiple | ✗ | escape | manual | — | — |
-| `tree` | V | ✗ | selected | single | ✗ | escape | manual | — | — |
-| `dialog` | V | — | — | — | — | trap | — | close | ✓ |
-| `alertdialog` | V | — | — | — | — | trap | — | close | ✓ |
-| `combobox` | V | ✗ | — | single | ✓ | escape | — | close | — |
-| `feed` | V | ✗ | — | — | — | escape | — | — | — |
-| `accordion` | V | ✗ | — | — | — | escape | manual | — | — |
-| `disclosure` | — | — | — | — | — | flow | manual | — | — |
+| Role | orient | loop | typeahead | entry | select.mode | followFocus | tab | activate | dismiss.esc | autoFocus |
+|------|--------|------|-----------|-------|------------|------------|-----|----------|------------|-----------|
+| `group` | V | — | — | — | none | — | flow | — | — | — |
+| `listbox` | V | ✗ | ✓ | selected | single | ✓ | escape | — | — | — |
+| `menu` | V | ✓ | — | first | none | — | trap | auto | close | ✓ |
+| `menubar` | H | ✓ | — | restore | none | — | escape | auto | — | — |
+| `radiogroup` | V | ✓ | — | selected | single | ✓ | escape | — | — | — |
+| `tablist` | H | ✓ | — | selected | single | ✓ | escape | auto | — | — |
+| `toolbar` | H | ✓ | — | restore | none | — | escape | — | — | — |
+| `grid` | 2D | ✗ | — | — | multiple | ✗ | escape | — | — | — |
+| `treegrid` | 2D | ✗ | — | — | multiple | ✗ | escape | manual | — | — |
+| `tree` | V | ✗ | ✓ | selected | single | ✗ | escape | manual | — | — |
+| `dialog` | V | — | — | — | — | — | trap | — | close | ✓ |
+| `alertdialog` | V | — | — | — | — | — | trap | — | close | ✓ |
+| `combobox` | V | ✗ | — | — | single | ✓ | escape | — | close | — |
+| `feed` | V | ✗ | — | — | — | — | escape | — | — | — |
+| `accordion` | V | ✗ | — | — | — | — | escape | manual | — | — |
+| `disclosure` | — | — | — | — | — | — | flow | manual | — | — |
 
 **Legend**: V=vertical, H=horizontal, 2D=both, ✓=true, ✗=false, —=default
 
