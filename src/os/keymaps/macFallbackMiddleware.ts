@@ -10,8 +10,8 @@
  */
 
 import type { BaseCommand, Middleware } from "@kernel";
-import { getCanonicalKey, getMacFallbackKey } from "./getCanonicalKey";
 import { isEditingElement, resolveIsEditingForKey } from "./fieldKeyOwnership";
+import { getCanonicalKey, getMacFallbackKey } from "./getCanonicalKey";
 import { Keybindings, type KeyResolveContext } from "./keybindings";
 
 const isMac =

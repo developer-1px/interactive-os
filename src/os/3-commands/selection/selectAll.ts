@@ -11,21 +11,21 @@ import { kernel } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
 export const OS_SELECT_ALL = kernel.defineCommand(
-    "OS_SELECT_ALL",
-    [DOM_ITEMS],
-    (ctx) => () => {
-        const { activeZoneId } = ctx.state.os.focus;
-        if (!activeZoneId) return;
+  "OS_SELECT_ALL",
+  [DOM_ITEMS],
+  (ctx) => () => {
+    const { activeZoneId } = ctx.state.os.focus;
+    if (!activeZoneId) return;
 
-        const items: string[] = ctx.inject(DOM_ITEMS);
-        if (items.length === 0) return;
+    const items: string[] = ctx.inject(DOM_ITEMS);
+    if (items.length === 0) return;
 
-        return {
-            state: produce(ctx.state, (draft: any) => {
-                const zone = ensureZone(draft.os, activeZoneId);
-                zone.selection = [...items];
-                zone.selectionAnchor = items[0] ?? null;
-            }) as typeof ctx.state,
-        };
-    },
+    return {
+      state: produce(ctx.state, (draft: any) => {
+        const zone = ensureZone(draft.os, activeZoneId);
+        zone.selection = [...items];
+        zone.selectionAnchor = items[0] ?? null;
+      }) as typeof ctx.state,
+    };
+  },
 );

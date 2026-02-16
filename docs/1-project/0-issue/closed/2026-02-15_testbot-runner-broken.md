@@ -1,6 +1,6 @@
 # 🐛 TestBot 러너 — Playwright spec 연동 불가
 > 등록일: 2026-02-15
-> 상태: open
+> 상태: done ✅
 > 심각도: P1
 
 ## 원문
@@ -64,6 +64,17 @@ const unitFilesExec = import.meta.glob("/src/**/tests/unit/**/*.test.ts");
 | 2 | `src/inspector/testbot/playwright/registry.ts` | `setLoadingContext` — spec 등록 컨텍스트 관리 |
 | 3 | TestDashboard E2E exec glob 추가 | E2E spec도 in-browser 실행 가능하게 |
 | 4 | Playwright test/expect → TestBot API 브릿지 | `page.locator()`, `page.keyboard`, `expect().toBeVisible()` 등 |
+
+## 해결
+
+Playwright 호환 레이어가 모두 구현되었다:
+- `src/inspector/testbot/playwright/index.ts` — Playwright API shim
+- `src/inspector/testbot/playwright/registry.ts` — Spec 등록 컨텍스트
+- `src/inspector/testbot/playwright/loader.tsx` — `usePlaywrightSpecs` hook
+- `src/inspector/testbot/playwright/shim.ts` — API bridge
+
+모든 페이지가 `usePlaywrightSpecs`로 E2E spec을 등록한다:
+TodoPage, BuilderPage, KernelLabPage, AriaShowcase, FocusShowcase, CommandPalette, RadixPlayground
 
 ## 관련 이슈
 - docs/1-project/testbot/2-prd.md — "한 번 작성, 세 곳에서 실행" 목표

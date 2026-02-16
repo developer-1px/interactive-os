@@ -1,7 +1,7 @@
 import { produce } from "immer";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
 import { ensureZone } from "../../state/utils";
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 
 interface FocusPayload {
   zoneId: string;

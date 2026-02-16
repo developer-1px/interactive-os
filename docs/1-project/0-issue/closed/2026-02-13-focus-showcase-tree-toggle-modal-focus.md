@@ -1,6 +1,6 @@
 # 🐛 Focus Showcase: Tree Toggle + Modal Focus Failures
 > 등록일: 2026-02-13
-> 상태: open
+> 상태: done ✅
 > 심각도: P2
 
 ## 원문

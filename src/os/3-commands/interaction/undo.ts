@@ -9,11 +9,11 @@ import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
 
 export const OS_UNDO = kernel.defineCommand("OS_UNDO", (ctx) => () => {
-    const { activeZoneId } = ctx.state.os.focus;
-    if (!activeZoneId) return;
+  const { activeZoneId } = ctx.state.os.focus;
+  if (!activeZoneId) return;
 
-    const entry = ZoneRegistry.get(activeZoneId);
-    if (!entry?.onUndo) return;
+  const entry = ZoneRegistry.get(activeZoneId);
+  if (!entry?.onUndo) return;
 
-    return { dispatch: entry.onUndo };
+  return { dispatch: entry.onUndo };
 });

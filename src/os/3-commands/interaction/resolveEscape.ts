@@ -9,7 +9,7 @@
 export type DismissBehavior = "deselect" | "close" | "none";
 
 export interface EscapeResult {
-    action: "deselect" | "close" | "none";
+  action: "deselect" | "close" | "none";
 }
 
 /**
@@ -20,16 +20,16 @@ export interface EscapeResult {
  * @returns The action to perform
  */
 export function resolveEscape(
-    behavior: DismissBehavior,
-    hasSelection: boolean,
+  behavior: DismissBehavior,
+  hasSelection: boolean,
 ): EscapeResult {
-    switch (behavior) {
-        case "deselect":
-            // Only acts if there's a selection to clear
-            return { action: hasSelection ? "deselect" : "none" };
-        case "close":
-            return { action: "close" };
-        default:
-            return { action: "none" };
-    }
+  switch (behavior) {
+    case "deselect":
+      // Only acts if there's a selection to clear
+      return { action: hasSelection ? "deselect" : "none" };
+    case "close":
+      return { action: "close" };
+    default:
+      return { action: "none" };
+  }
 }

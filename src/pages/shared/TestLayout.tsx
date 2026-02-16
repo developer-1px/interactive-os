@@ -28,10 +28,11 @@ export function TestBox({ title, children, description, spec }: TestBoxProps) {
           <button
             type="button"
             onClick={() => setShowDocs(!showDocs)}
-            className={`text-[10px] px-2 py-0.5 rounded border ${showDocs
+            className={`text-[10px] px-2 py-0.5 rounded border ${
+              showDocs
                 ? "text-gray-700 border-gray-300 bg-gray-100"
                 : "border-transparent text-gray-400"
-              }`}
+            }`}
           >
             Docs
           </button>

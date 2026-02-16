@@ -354,7 +354,7 @@ test.describe("Todo App", () => {
     const focusedText = await focused.textContent();
     expect(
       focusedText?.includes("Item B") ||
-      focusedText?.includes("Complete Interaction OS docs"),
+        focusedText?.includes("Complete Interaction OS docs"),
     ).toBe(true);
   });
 
@@ -412,9 +412,7 @@ test.describe("Todo App", () => {
 
     // Shift+Tab → backward escape: list zone → sidebar zone (sidebar is before list in DOM)
     await page.keyboard.press("Shift+Tab");
-    const sidebarFocused = page.locator(
-      `${SIDEBAR} [data-focused="true"]`,
-    );
+    const sidebarFocused = page.locator(`${SIDEBAR} [data-focused="true"]`);
     await expect(sidebarFocused).toHaveCount(1);
 
     // Tab → forward escape: sidebar zone → list zone, landing on Draft (first item)

@@ -130,7 +130,6 @@ export const deleteTodo = listZone.command(
   },
 );
 
-
 export const startEdit = listZone.command(
   "startEdit",
   (ctx, payload: { id: string }) => ({
@@ -163,9 +162,9 @@ export const moveItemUp = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+        draft.data.todoOrder[globalSwapIdx]!,
+        draft.data.todoOrder[globalTargetIdx]!,
+      ];
     }),
   }),
 );
@@ -189,9 +188,9 @@ export const moveItemDown = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+        draft.data.todoOrder[globalSwapIdx]!,
+        draft.data.todoOrder[globalTargetIdx]!,
+      ];
     }),
   }),
 );

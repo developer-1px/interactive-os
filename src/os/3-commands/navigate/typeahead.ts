@@ -23,11 +23,11 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 const TIMEOUT = 500;
 
 export function resetTypeaheadBuffer(): void {
-    buffer = "";
-    if (timer) {
-        clearTimeout(timer);
-        timer = null;
-    }
+  buffer = "";
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -44,55 +44,55 @@ export function resetTypeaheadBuffer(): void {
  * @returns Target item ID, or null if no match
  */
 export function resolveTypeahead(
-    currentId: string | null,
-    char: string,
-    items: string[],
-    labels: Map<string, string>,
+  currentId: string | null,
+  char: string,
+  items: string[],
+  labels: Map<string, string>,
 ): string | null {
-    if (items.length === 0) return null;
+  if (items.length === 0) return null;
 
-    // Ignore non-printable / special keys
-    if (char.length !== 1 || char === " ") return null;
+  // Ignore non-printable / special keys
+  if (char.length !== 1 || char === " ") return null;
 
-    // Reset timer
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(resetTypeaheadBuffer, TIMEOUT);
+  // Reset timer
+  if (timer) clearTimeout(timer);
+  timer = setTimeout(resetTypeaheadBuffer, TIMEOUT);
 
-    const lowerChar = char.toLowerCase();
+  const lowerChar = char.toLowerCase();
 
-    // Same-character cycling: if buffer is a single repeated character
-    // and the new char matches, cycle through items starting with that character
-    const isSameChar = buffer.length === 1 && buffer[0] === lowerChar;
+  // Same-character cycling: if buffer is a single repeated character
+  // and the new char matches, cycle through items starting with that character
+  const isSameChar = buffer.length === 1 && buffer[0] === lowerChar;
 
-    if (isSameChar) {
-        // Find all items starting with this character
-        const matches = items.filter((id) =>
-            labels.get(id)?.toLowerCase().startsWith(lowerChar),
-        );
-        if (matches.length === 0) return null;
+  if (isSameChar) {
+    // Find all items starting with this character
+    const matches = items.filter((id) =>
+      labels.get(id)?.toLowerCase().startsWith(lowerChar),
+    );
+    if (matches.length === 0) return null;
 
-        // Find current index in matches
-        const currentIdx = currentId ? matches.indexOf(currentId) : -1;
-        const nextIdx = (currentIdx + 1) % matches.length;
-        return matches[nextIdx] ?? null;
+    // Find current index in matches
+    const currentIdx = currentId ? matches.indexOf(currentId) : -1;
+    const nextIdx = (currentIdx + 1) % matches.length;
+    return matches[nextIdx] ?? null;
+  }
+
+  // Append to buffer (multi-character prefix)
+  buffer += lowerChar;
+
+  // Find first item whose label starts with the buffer prefix
+  // Start searching after current item for wrap-around
+  const currentIdx = currentId ? items.indexOf(currentId) : -1;
+
+  // Search from after current to end, then from start to current
+  for (let i = 0; i < items.length; i++) {
+    const idx = (currentIdx + 1 + i) % items.length;
+    const id = items[idx];
+    const label = labels.get(id);
+    if (label && label.toLowerCase().startsWith(buffer)) {
+      return id;
     }
+  }
 
-    // Append to buffer (multi-character prefix)
-    buffer += lowerChar;
-
-    // Find first item whose label starts with the buffer prefix
-    // Start searching after current item for wrap-around
-    const currentIdx = currentId ? items.indexOf(currentId) : -1;
-
-    // Search from after current to end, then from start to current
-    for (let i = 0; i < items.length; i++) {
-        const idx = (currentIdx + 1 + i) % items.length;
-        const id = items[idx];
-        const label = labels.get(id);
-        if (label && label.toLowerCase().startsWith(buffer)) {
-            return id;
-        }
-    }
-
-    return null;
+  return null;
 }

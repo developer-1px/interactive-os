@@ -13,69 +13,72 @@
  */
 
 import type { BaseCommand, Middleware } from "@kernel";
-import { FOCUS } from "@os/3-commands/focus/focus";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { FOCUS } from "@os/3-commands/focus/focus";
+import {
+  resetTypeaheadBuffer,
+  resolveTypeahead,
+} from "@os/3-commands/navigate/typeahead";
 import { kernel } from "@os/kernel";
-import { resolveTypeahead, resetTypeaheadBuffer } from "@os/3-commands/navigate/typeahead";
 
 /**
  * Get ordered item IDs and their labels from DOM for a zone element.
  */
 function getItemsAndLabels(zoneEl: HTMLElement): {
-    items: string[];
-    labels: Map<string, string>;
+  items: string[];
+  labels: Map<string, string>;
 } {
-    const itemEls = zoneEl.querySelectorAll<HTMLElement>("[data-item-id]");
-    const items: string[] = [];
-    const labels = new Map<string, string>();
+  const itemEls = zoneEl.querySelectorAll<HTMLElement>("[data-item-id]");
+  const items: string[] = [];
+  const labels = new Map<string, string>();
 
-    for (const el of itemEls) {
-        const id = el.dataset.itemId;
-        if (!id) continue;
-        items.push(id);
-        // W3C accessible name: aria-label > textContent
-        const label = el.getAttribute("aria-label") || el.textContent || "";
-        labels.set(id, label.trim());
-    }
+  for (const el of itemEls) {
+    const id = el.dataset.itemId;
+    if (!id) continue;
+    items.push(id);
+    // W3C accessible name: aria-label > textContent
+    const label = el.getAttribute("aria-label") || el.textContent || "";
+    labels.set(id, label.trim());
+  }
 
-    return { items, labels };
+  return { items, labels };
 }
 
 export const typeaheadFallbackMiddleware: Middleware = {
-    id: "typeahead",
-    fallback: (event: Event): BaseCommand | null => {
-        if (!(event instanceof KeyboardEvent)) return null;
+  id: "typeahead",
+  fallback: (event: Event): BaseCommand | null => {
+    if (!(event instanceof KeyboardEvent)) return null;
 
-        // Only single printable characters (no modifiers except Shift)
-        if (event.key.length !== 1) return null;
-        if (event.metaKey || event.ctrlKey || event.altKey) return null;
+    // Only single printable characters (no modifiers except Shift)
+    if (event.key.length !== 1) return null;
+    if (event.metaKey || event.ctrlKey || event.altKey) return null;
 
-        // Ignore Space (handled by check override)
-        if (event.key === " ") return null;
+    // Ignore Space (handled by check override)
+    if (event.key === " ") return null;
 
-        // Get active zone
-        const osState = kernel.getState().os?.focus;
-        if (!osState?.activeZoneId) return null;
+    // Get active zone
+    const osState = kernel.getState().os?.focus;
+    if (!osState?.activeZoneId) return null;
 
-        const zoneId = osState.activeZoneId;
-        const entry = ZoneRegistry.get(zoneId);
-        if (!entry) return null;
+    const zoneId = osState.activeZoneId;
+    const entry = ZoneRegistry.get(zoneId);
+    if (!entry) return null;
 
-        // Check if typeahead is enabled for this zone
-        if (!entry.config.navigate.typeahead) return null;
+    // Check if typeahead is enabled for this zone
+    if (!entry.config.navigate.typeahead) return null;
 
-        // Get current focused item
-        const zone = osState.zones?.[zoneId];
-        const currentId = zone?.focusedItemId ?? null;
+    // Get current focused item
+    const zone = osState.zones?.[zoneId];
+    const currentId = zone?.focusedItemId ?? null;
 
-        // Read items and labels from DOM
-        const { items, labels } = getItemsAndLabels(entry.element);
-        if (items.length === 0) return null;
+    // Read items and labels from DOM
+    const { items, labels } = getItemsAndLabels(entry.element);
+    if (items.length === 0) return null;
 
-        // Resolve typeahead
-        const targetId = resolveTypeahead(currentId, event.key, items, labels);
-        if (!targetId || targetId === currentId) return null;
+    // Resolve typeahead
+    const targetId = resolveTypeahead(currentId, event.key, items, labels);
+    if (!targetId || targetId === currentId) return null;
 
-        return FOCUS({ zoneId, itemId: targetId }) as BaseCommand;
-    },
+    return FOCUS({ zoneId, itemId: targetId }) as BaseCommand;
+  },
 };

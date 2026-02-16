@@ -35,7 +35,7 @@
 
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { OVERLAY_CLOSE, OVERLAY_OPEN, FOCUS } from "@/os/3-commands";
+import { FOCUS, OVERLAY_CLOSE, OVERLAY_OPEN } from "@/os/3-commands";
 import { NAVIGATE } from "@/os/3-commands/navigate";
 import { OS } from "@/os/AntigravityOS";
 import { kernel } from "@/os/kernel";
@@ -214,13 +214,12 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
       // This sets activeZoneId so NAVIGATE works correctly.
       const containerEl = containerRef.current;
       if (containerEl) {
-        const firstItem = containerEl.querySelector<HTMLElement>("[data-item-id]");
+        const firstItem =
+          containerEl.querySelector<HTMLElement>("[data-item-id]");
         if (firstItem) {
           const itemId = firstItem.getAttribute("data-item-id");
           if (itemId) {
-            kernel.dispatch(
-              FOCUS({ zoneId, itemId }) as any,
-            );
+            kernel.dispatch(FOCUS({ zoneId, itemId }) as any);
           }
         }
       }
@@ -388,28 +387,28 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
           >
             {filteredItems.length === 0
               ? (renderEmpty?.(query) ?? (
-                <div className="py-8 text-center text-sm text-zinc-500">
-                  No results found
-                </div>
-              ))
+                  <div className="py-8 text-center text-sm text-zinc-500">
+                    No results found
+                  </div>
+                ))
               : filteredItems.map((item) => (
-                <OS.Item key={item.id} id={item.id}>
-                  {({ isFocused, isSelected }) =>
-                    renderItem ? (
-                      renderItem(item, { isFocused, isSelected, query })
-                    ) : (
-                      <DefaultQuickPickRow
-                        item={item}
-                        isFocused={isFocused}
-                        onClick={() => {
-                          handleClose();
-                          onSelect(item);
-                        }}
-                      />
-                    )
-                  }
-                </OS.Item>
-              ))}
+                  <OS.Item key={item.id} id={item.id}>
+                    {({ isFocused, isSelected }) =>
+                      renderItem ? (
+                        renderItem(item, { isFocused, isSelected, query })
+                      ) : (
+                        <DefaultQuickPickRow
+                          item={item}
+                          isFocused={isFocused}
+                          onClick={() => {
+                            handleClose();
+                            onSelect(item);
+                          }}
+                        />
+                      )
+                    }
+                  </OS.Item>
+                ))}
           </OS.Zone>
 
           {/* Footer */}
@@ -492,8 +491,9 @@ function DefaultQuickPickRow({
       </span>
       {item.description && (
         <span
-          className={`text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right transition-colors ${isFocused ? "text-zinc-500" : "text-zinc-400"
-            }`}
+          className={`text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right transition-colors ${
+            isFocused ? "text-zinc-500" : "text-zinc-400"
+          }`}
         >
           {item.description}
         </span>

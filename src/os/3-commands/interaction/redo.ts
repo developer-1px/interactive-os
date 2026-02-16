@@ -9,11 +9,11 @@ import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
 
 export const OS_REDO = kernel.defineCommand("OS_REDO", (ctx) => () => {
-    const { activeZoneId } = ctx.state.os.focus;
-    if (!activeZoneId) return;
+  const { activeZoneId } = ctx.state.os.focus;
+  if (!activeZoneId) return;
 
-    const entry = ZoneRegistry.get(activeZoneId);
-    if (!entry?.onRedo) return;
+  const entry = ZoneRegistry.get(activeZoneId);
+  if (!entry?.onRedo) return;
 
-    return { dispatch: entry.onRedo };
+  return { dispatch: entry.onRedo };
 });

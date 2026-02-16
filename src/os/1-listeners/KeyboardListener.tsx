@@ -10,8 +10,12 @@
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_CHECK } from "@os/3-commands/interaction";
+import {
+  isEditingElement,
+  isKeyDelegatedToOS,
+  resolveIsEditingForKey,
+} from "@os/keymaps/fieldKeyOwnership";
 import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
-import { isKeyDelegatedToOS, isEditingElement, resolveIsEditingForKey } from "@os/keymaps/fieldKeyOwnership";
 import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
 import { useEffect } from "react";
 import { kernel } from "../kernel";
@@ -25,7 +29,6 @@ import { typeaheadFallbackMiddleware } from "@os/keymaps/typeaheadFallbackMiddle
 
 kernel.use(macFallbackMiddleware);
 kernel.use(typeaheadFallbackMiddleware);
-
 
 /**
  * Combobox inputs (e.g. QuickPick) are self-managed:
@@ -70,7 +73,12 @@ function tryDispatchCheck(e: KeyboardEvent, canonicalKey: string): boolean {
     if (itemId) {
       kernel.dispatch(OS_CHECK({ targetId: itemId }), {
         meta: {
-          input: { type: "KEYBOARD", key: e.key, code: canonicalKey, elementId: itemId },
+          input: {
+            type: "KEYBOARD",
+            key: e.key,
+            code: canonicalKey,
+            elementId: itemId,
+          },
         },
       });
       return true;
@@ -88,7 +96,12 @@ function tryDispatchCheck(e: KeyboardEvent, canonicalKey: string): boolean {
       if (targetId) {
         kernel.dispatch(OS_CHECK({ targetId }), {
           meta: {
-            input: { type: "KEYBOARD", key: e.key, code: canonicalKey, elementId: targetId },
+            input: {
+              type: "KEYBOARD",
+              key: e.key,
+              code: canonicalKey,
+              elementId: targetId,
+            },
           },
         });
         return true;

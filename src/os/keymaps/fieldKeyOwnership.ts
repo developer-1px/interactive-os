@@ -32,33 +32,30 @@ import { FieldRegistry } from "../6-components/primitives/FieldRegistry";
  * If NOT in the set → the field owns it (isFieldActive = true, OS skips it).
  */
 const INLINE_DELEGATES = new Set([
-    "Tab",
-    "Shift+Tab",
-    "ArrowUp",
-    "ArrowDown",
-    "Shift+ArrowUp",
-    "Shift+ArrowDown",
+  "Tab",
+  "Shift+Tab",
+  "ArrowUp",
+  "ArrowDown",
+  "Shift+ArrowUp",
+  "Shift+ArrowDown",
 ]);
 
 const FIELD_DELEGATES_TO_OS: Record<FieldType, Set<string>> = {
-    // inline: single-line input (draft, search, rename)
-    // Delegates: Tab (zone escape), ↑↓ (item navigation)
-    inline: INLINE_DELEGATES,
+  // inline: single-line input (draft, search, rename)
+  // Delegates: Tab (zone escape), ↑↓ (item navigation)
+  inline: INLINE_DELEGATES,
 
-    // tokens: chip/tag input (email recipients, tags)
-    // Same delegation as inline; Backspace∅→OS is handled separately when implemented
-    tokens: INLINE_DELEGATES,
+  // tokens: chip/tag input (email recipients, tags)
+  // Same delegation as inline; Backspace∅→OS is handled separately when implemented
+  tokens: INLINE_DELEGATES,
 
-    // block: multi-line text (comment, description, chat)
-    // Delegates Tab only (arrows move cursor between lines)
-    block: new Set([
-        "Tab",
-        "Shift+Tab",
-    ]),
+  // block: multi-line text (comment, description, chat)
+  // Delegates Tab only (arrows move cursor between lines)
+  block: new Set(["Tab", "Shift+Tab"]),
 
-    // editor: code editor, rich text
-    // Delegates nothing — editor handles Tab (indent) and ↑↓ (cursor)
-    editor: new Set([]),
+  // editor: code editor, rich text
+  // Delegates nothing — editor handles Tab (indent) and ↑↓ (cursor)
+  editor: new Set([]),
 };
 
 /**
@@ -69,10 +66,10 @@ const FIELD_DELEGATES_TO_OS: Record<FieldType, Set<string>> = {
  * @returns true if the key is delegated to OS (isFieldActive = false)
  */
 export function isKeyDelegatedToOS(
-    canonicalKey: string,
-    fieldType: FieldType = "inline",
+  canonicalKey: string,
+  fieldType: FieldType = "inline",
 ): boolean {
-    return FIELD_DELEGATES_TO_OS[fieldType].has(canonicalKey);
+  return FIELD_DELEGATES_TO_OS[fieldType].has(canonicalKey);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -84,11 +81,11 @@ export function isKeyDelegatedToOS(
  * Fallback for elements NOT registered in FieldRegistry.
  */
 export function isEditingElement(target: HTMLElement): boolean {
-    return (
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target.isContentEditable
-    );
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target.isContentEditable
+  );
 }
 
 /**
@@ -99,16 +96,16 @@ export function isEditingElement(target: HTMLElement): boolean {
  * Fallback: unregistered native inputs own all keys.
  */
 export function resolveIsEditingForKey(
-    target: HTMLElement,
-    canonicalKey: string,
+  target: HTMLElement,
+  canonicalKey: string,
 ): boolean {
-    const fieldId = target.id || target.getAttribute("data-item-id");
-    if (fieldId) {
-        const fieldEntry = FieldRegistry.getField(fieldId);
-        if (fieldEntry) {
-            const fieldType = fieldEntry.config.fieldType ?? "inline";
-            return !isKeyDelegatedToOS(canonicalKey, fieldType);
-        }
+  const fieldId = target.id || target.getAttribute("data-item-id");
+  if (fieldId) {
+    const fieldEntry = FieldRegistry.getField(fieldId);
+    if (fieldEntry) {
+      const fieldType = fieldEntry.config.fieldType ?? "inline";
+      return !isKeyDelegatedToOS(canonicalKey, fieldType);
     }
-    return isEditingElement(target);
+  }
+  return isEditingElement(target);
 }

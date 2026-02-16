@@ -69,4 +69,3 @@ export const TAB = kernel.defineCommand(
     };
   },
 );
-

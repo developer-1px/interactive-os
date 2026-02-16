@@ -41,9 +41,7 @@ test.describe("E2E: Command Palette", () => {
     await expect(input).toBeFocused();
   });
 
-  test("input maintains focus after clicking a list item", async ({
-    page,
-  }) => {
+  test("input maintains focus after clicking a list item", async ({ page }) => {
     const { dialog, input } = await openPalette(page);
 
     // Type to filter

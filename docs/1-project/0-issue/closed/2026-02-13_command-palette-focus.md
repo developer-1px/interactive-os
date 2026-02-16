@@ -1,6 +1,6 @@
 # 🐛 Command Palette Persistent Focus
 > Registration Date: 2026-02-13
-> Status: open
+> Status: done ✅
 > Severity: P2
 
 ## Original
