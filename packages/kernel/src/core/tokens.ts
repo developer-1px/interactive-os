@@ -62,8 +62,8 @@ export type CommandFactory<Type extends string = string, Payload = void> = {
     ...args: [Payload] extends [undefined]
       ? []
       : undefined extends Payload
-      ? [payload?: Payload]
-      : [payload: Payload]
+        ? [payload?: Payload]
+        : [payload: Payload]
   ): Command<Type, Payload>;
   /** The command type string (for debugging/inspection). */
   readonly commandType: Type;
@@ -81,7 +81,6 @@ export const GLOBAL: ScopeToken<"GLOBAL"> = "GLOBAL" as ScopeToken<"GLOBAL">;
 /** Forces TypeScript to eagerly resolve intersections and mapped types. */
 type Prettify<T> = { [K in keyof T]: T[K] } & {};
 
-
 /**
  * Derives injected context fields from ContextTokens (wrapper objects).
  *
@@ -89,9 +88,9 @@ type Prettify<T> = { [K in keyof T]: T[K] } & {};
  * → `{ NOW: number; USER: User }`
  */
 export type InjectResult<T extends ContextToken[]> = Prettify<{
-  [K in T[number]as K["__id"]]: K extends ContextToken<string, infer V>
-  ? V
-  : never;
+  [K in T[number] as K["__id"]]: K extends ContextToken<string, infer V>
+    ? V
+    : never;
 }>;
 
 /** Context passed to command handlers. state + injected values. */
