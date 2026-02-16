@@ -278,4 +278,123 @@ test.describe("Todo App", () => {
     const workIdx = texts.findIndex((t) => t.includes("Work"));
     expect(workIdx).toBeLessThan(inboxIdx);
   });
+
+  // ─────────────────────────────────────────────────────────────
+  // 13. Undo — Meta+Z restores deleted item (SC-2)
+  // ─────────────────────────────────────────────────────────────
+
+  test("Meta+Z undoes delete", async ({ page }) => {
+    // Create an item to delete
+    const draft = page.locator(DRAFT);
+    await draft.click();
+    await page.keyboard.type("Undo target");
+    await page.keyboard.press("Enter");
+    await expect(page.getByText("Undo target")).toBeVisible();
+
+    // Click, focus, and delete
+    await page.getByText("Undo target").click();
+    const focused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(focused).toContainText("Undo target");
+    await page.keyboard.press("Backspace");
+    await expect(page.getByText("Undo target")).toHaveCount(0);
+
+    // Undo → item should reappear
+    await page.keyboard.press("Meta+z");
+    await expect(page.getByText("Undo target")).toBeVisible();
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 14. Cut + Paste — Meta+X → move → Meta+V (SC-3)
+  // ─────────────────────────────────────────────────────────────
+
+  test("Meta+X then Meta+V moves item", async ({ page }) => {
+    // Use the pre-existing item + create one more
+    const draft = page.locator(DRAFT);
+    await draft.click();
+    await page.keyboard.type("Anchor item");
+    await page.keyboard.press("Enter");
+    await expect(page.getByText("Anchor item")).toBeVisible();
+
+    // Cut the pre-existing item
+    await page.getByText("Complete Interaction OS docs").click();
+    await page.keyboard.press("Meta+x");
+    await expect(page.getByText("Complete Interaction OS docs")).toHaveCount(0);
+
+    // Paste after "Anchor item"
+    await page.getByText("Anchor item").click();
+    await page.keyboard.press("Meta+v");
+
+    // Cut item should reappear
+    await expect(page.getByText("Complete Interaction OS docs")).toBeVisible();
+    await expect(page.getByText("Anchor item")).toBeVisible();
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 15. Focus recovery — delete restores focus to neighbor (SC-2)
+  // ─────────────────────────────────────────────────────────────
+
+  test("Deleting item moves focus to neighbor", async ({ page }) => {
+    // Create two extra items (we already have "Complete Interaction OS docs")
+    const draft = page.locator(DRAFT);
+    await draft.click();
+    await page.keyboard.type("Item A");
+    await page.keyboard.press("Enter");
+    await draft.click();
+    await page.keyboard.type("Item B");
+    await page.keyboard.press("Enter");
+
+    // Focus "Item A" (middle item) and delete
+    await page.getByText("Item A").click();
+    const focused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(focused).toContainText("Item A");
+    await page.keyboard.press("Backspace");
+
+    // Focus should move to a neighbor — either "Item B" or "Complete Interaction OS docs"
+    await expect(focused).toHaveCount(1);
+    const focusedText = await focused.textContent();
+    expect(
+      focusedText?.includes("Item B") ||
+      focusedText?.includes("Complete Interaction OS docs"),
+    ).toBe(true);
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 16. Multi-select + bulk delete + Undo (SC-4)
+  // ─────────────────────────────────────────────────────────────
+
+  test("Shift+Arrow selects range, Backspace bulk deletes, Meta+Z undoes", async ({
+    page,
+  }) => {
+    // Create 3 items
+    const draft = page.locator(DRAFT);
+    for (const text of ["Bulk A", "Bulk B", "Bulk C"]) {
+      await draft.click();
+      await page.keyboard.type(text);
+      await page.keyboard.press("Enter");
+    }
+    await expect(page.getByText("Bulk A")).toBeVisible();
+    await expect(page.getByText("Bulk B")).toBeVisible();
+    await expect(page.getByText("Bulk C")).toBeVisible();
+
+    // Focus "Bulk A" then Shift+ArrowDown twice to select A, B, C
+    await page.getByText("Bulk A").click();
+    await page.keyboard.press("Shift+ArrowDown");
+    await page.keyboard.press("Shift+ArrowDown");
+
+    // Verify selection: should have selected items
+    const selected = page.locator(`${LISTVIEW} [aria-selected="true"]`);
+    await expect(selected).toHaveCount(3);
+
+    // Bulk delete
+    await page.keyboard.press("Backspace");
+    await expect(page.getByText("Bulk A")).toHaveCount(0);
+    await expect(page.getByText("Bulk B")).toHaveCount(0);
+    await expect(page.getByText("Bulk C")).toHaveCount(0);
+
+    // Undo → all 3 should reappear
+    await page.keyboard.press("Meta+z");
+    await expect(page.getByText("Bulk A")).toBeVisible();
+    await expect(page.getByText("Bulk B")).toBeVisible();
+    await expect(page.getByText("Bulk C")).toBeVisible();
+  });
 });

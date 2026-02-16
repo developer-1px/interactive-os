@@ -99,15 +99,37 @@ export const toggleTodo = listZone.command(
 
 export const deleteTodo = listZone.command(
   "deleteTodo",
-  (ctx, payload: { id: string }) => ({
-    state: produce(ctx.state, (draft) => {
-      if (!payload.id) return;
-      delete draft.data.todos[payload.id];
-      const index = draft.data.todoOrder.indexOf(payload.id);
-      if (index !== -1) draft.data.todoOrder.splice(index, 1);
-    }),
-  }),
+  (ctx, payload: { id: string }) => {
+    if (!payload.id) return { state: ctx.state };
+
+    // Compute the next focus target BEFORE deleting
+    const visibleIds = ctx.state.data.todoOrder.filter(
+      (id) =>
+        ctx.state.data.todos[id]?.categoryId ===
+        ctx.state.ui.selectedCategoryId,
+    );
+    const idx = visibleIds.indexOf(payload.id);
+    // Prefer next item, fall back to previous
+    const nextFocusId =
+      idx < visibleIds.length - 1
+        ? visibleIds[idx + 1]
+        : idx > 0
+          ? visibleIds[idx - 1]
+          : undefined;
+
+    return {
+      state: produce(ctx.state, (draft) => {
+        delete draft.data.todos[payload.id];
+        const index = draft.data.todoOrder.indexOf(payload.id);
+        if (index !== -1) draft.data.todoOrder.splice(index, 1);
+      }),
+      dispatch: nextFocusId
+        ? FOCUS({ zoneId: "list", itemId: nextFocusId })
+        : undefined,
+    };
+  },
 );
+
 
 export const startEdit = listZone.command(
   "startEdit",

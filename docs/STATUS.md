@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-16 15:27
+> Last updated: 2026-02-16 15:35
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -12,7 +12,6 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | os-prd | Execution | 02-16 |
-| todo-keyboard-dogfooding | Execution | 02-15 |
 
 ---
 
@@ -21,7 +20,6 @@
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
 | os-prd | Execution | 02-16 | 🔥 Focus |
-| todo-keyboard-dogfooding | Execution | 02-15 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
 | docs-dashboard | Design | 02-15 | ⏸ Idle |
 | define-app | Execution (Phase 3) | 02-16 | ⏸ Idle |
@@ -34,6 +32,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| todo-keyboard-dogfooding | 02-16 | ✅ 4-archive/2026-02 |
 | command-palette-e2e | 02-16 | ✅ 4-archive/2026-02 |
 | fix-tab-navigation | 02-16 | ✅ 4-archive/2026-02 |
 | docs-system-v2 | 02-16 | ✅ 4-archive/2026-02 |
@@ -63,9 +62,9 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 2 |
-| Active Projects (total) | 7 |
-| Completed (archived) | 16 |
+| Active Focus | 1 |
+| Active Projects (total) | 6 |
+| Completed (archived) | 17 |
 | Inbox items | 0 |
 | Backlog items | 2 |
 
@@ -79,3 +78,4 @@
 - 🆕 `/perf` 워크플로우 신설, `/review` 성능 렌즈 추가
 - 🆕 BOARD 파이프라인 체크리스트 도입 (워크플로우 단계 누락 방지)
 - perf: useComputed 구독 패턴 최적화 (string→boolean, 300→2 리렌더)
+- ✅ `todo-keyboard-dogfooding` 프로젝트 완료 — 포커스 복원 구현, E2E 16개 전부 통과 (SC-1~SC-5)

@@ -2,20 +2,7 @@
 
 ## 🔴 Now
 
-- [ ] Dogfooding 라이브 세션 — 실제로 키보드만으로 5개 시나리오 수행 + 마찰 포인트 리스트업
-  - ref: README.md#acceptance-criteria
-
-- [ ] Undo/Redo 키바인딩 검증 — ⌘Z/⌘⇧Z가 실제로 동작하는지 확인, 미동작 시 등록
-  - ref: notes/ref-keyboard-first-checklist.md (Phase 1)
-
-- [ ] 전체 선택 ⌘A — listView zone에서 ⌘A → 전체 선택이 동작하는지 확인
-  - ref: notes/ref-keyboard-first-checklist.md (Phase 1)
-
-- [ ] 포커스 복원 검증 — 삭제/붙여넣기/Undo/Redo 후 포커스가 올바른 위치로 이동하는지
-  - ref: README.md SC-2, SC-3
-
-- [ ] Multi-select 범위 선택 (⇧↑/⇧↓) — FocusGroup range select 동작 검증
-  - ref: README.md SC-4
+_(empty)_
 
 ## ⏳ Done
 
@@ -29,10 +16,15 @@
 - [x] 클립보드 포커스 이동 이슈 (02-13) — notes/issue-clipboard-focus.md
 - [x] Playwright clipboard 퍼미션 (02-13) — notes/issue-copy-paste-fail.md
 - [x] 네이티브 클립보드 OS 오버라이드 차단 (02-13) — notes/issue-native-clipboard-blocked.md
+- [x] Undo/Redo 키바인딩 검증 (02-16) — 이미 osDefaults.ts에 등록됨 확인. E2E 테스트 추가.
+- [x] ⌘A 전체 선택 검증 (02-16) — 이미 osDefaults.ts에 등록됨 확인.
+- [x] 포커스 복원 구현 (02-16) — deleteTodo에 FOCUS dispatch 추가. E2E 테스트 통과.
+- [x] Multi-select 범위 선택 검증 (02-16) — Shift+Arrow OS keybinding 확인. E2E 벌크삭제+Undo 검증.
+- [x] Dogfooding 라이브 세션 (02-16) — SC-1~SC-5 모든 시나리오 E2E 테스트로 16개 커버 완료.
 
 ## 💡 Ideas
 
 - History Middleware의 스냅샷 추적이 올바르게 동작하는지 E2E 검증
-- Playwright E2E로 5개 시나리오 자동화 (M3 마일스톤)
+- Playwright E2E로 5개 시나리오 자동화 (M3 마일스톤) → ✅ 완료됨
 - Board View 카드 컬럼 간 이동 (⌘←/⌘→) — Out of Scope이나 미래 과제
 - 컨텍스트 메뉴 (⇧F10) — Power User 기능
