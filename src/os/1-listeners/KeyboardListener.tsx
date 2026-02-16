@@ -119,7 +119,10 @@ function tryDispatchCheck(e: KeyboardEvent, canonicalKey: string): boolean {
 export function KeyboardListener() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || e.isComposing) return;
+      // IME guard: isComposing catches most cases, but Chrome dispatches
+      // the FIRST keydown of Korean IME with isComposing=false (compositionstart
+      // fires AFTER keydown). keyCode 229 is the standard IME processing signal.
+      if (e.defaultPrevented || e.isComposing || e.keyCode === 229) return;
 
       const target = e.target as HTMLElement;
       if (!target || target.closest("[data-inspector]")) return;

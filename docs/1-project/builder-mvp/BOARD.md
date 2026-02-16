@@ -2,20 +2,14 @@
 
 ## 🔴 Now
 
-- [ ] T2: 캔버스 인라인 편집 — Enter 진입, 텍스트 수정, Enter/Escape 저장/취소
-  - ref: prd.md §1.2
-  - [ ] /tdd
-  - [ ] /divide
-  - [ ] /verify
-- [ ] T3: 패널 양방향 동기화 — 실제 데이터 바인딩 (mock → BuilderApp.useComputed)
-  - ref: prd.md §1.3
-  - [ ] /tdd
-  - [ ] /divide
-  - [ ] /verify
+_(empty — T1~T3 완료. 개밥먹기 보고서 작성 대기)_
 
 ## ⏳ Done
 
 - [x] T1: createZone + bind 마이그레이션 (02-16) — Unit 23, E2E 10 통과. `4640f39`
+- [x] T2: 캔버스 인라인 편집 검증 (02-16) — 이미 구현됨(OS.Field deferred + onCommit). E2E 2개 추가. `6d2e90d`
+  - 발견: F2(표준)로 편집 진입, Enter(표준)는 ACTIVATE. data-editing 동기화 이슈 (Open)
+- [x] T3: 패널 양방향 동기화 검증 (02-16) — 이미 구현됨(useComputed + builderUpdateField). E2E 3개 추가. `6d2e90d`
 
 ## 💡 Ideas
 
