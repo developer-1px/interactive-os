@@ -34,25 +34,3 @@ export const SCROLL_EFFECT = kernel.defineEffect("scroll", (itemId: string) => {
     el.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
 });
-
-// ═══════════════════════════════════════════════════════════════════
-// Blur Effect — Remove focus from active element
-// ═══════════════════════════════════════════════════════════════════
-
-export const BLUR_EFFECT = kernel.defineEffect("blur", () => {
-  (document.activeElement as HTMLElement)?.blur();
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// Click Effect — Synthesize click on element
-// ═══════════════════════════════════════════════════════════════════
-
-export const CLICK_EFFECT = kernel.defineEffect("click", (itemId: string) => {
-  const el =
-    (document.querySelector(
-      `[data-item-id="${itemId}"]`,
-    ) as HTMLElement | null) ?? document.getElementById(itemId);
-  if (el) {
-    el.click();
-  }
-});

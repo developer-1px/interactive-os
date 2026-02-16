@@ -62,5 +62,4 @@ export type {
   TransactionCommand,
   TransactionInput,
 } from "./state/OSTransaction.ts";
-export type { PersistenceAdapter } from "./state/PersistenceAdapter.ts";
-export { LocalStorageAdapter } from "./state/PersistenceAdapter.ts";
+

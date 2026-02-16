@@ -88,7 +88,7 @@ export const useFieldFocus = ({
                 const textLength = innerRef.current.innerText.length;
                 setCaretPosition(innerRef.current, textLength);
               }
-            } catch (_e) {}
+            } catch (_e) { }
           }
         });
       });
@@ -116,9 +116,5 @@ export const useFieldContext = (
     cursorRef.current = pos;
   };
 
-  const setFieldFocused = (_isFocused: boolean) => {
-    // No-op: Field focus is now tracked by kernel state
-  };
-
-  return { updateCursorContext, setFieldFocused };
+  return { updateCursorContext };
 };
