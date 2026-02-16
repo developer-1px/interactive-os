@@ -11,9 +11,11 @@
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_CHECK } from "@os/3-commands/interaction";
 import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
+import { isKeyConsumedByField } from "@os/keymaps/fieldKeyOwnership";
 import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
 import { useEffect } from "react";
 import { kernel } from "../kernel";
+import { FieldRegistry } from "@os/6-components/primitives/FieldRegistry";
 
 // Ensure OS defaults are registered
 import "@os/keymaps/osDefaults";
@@ -29,12 +31,46 @@ kernel.use(typeaheadFallbackMiddleware);
 // Helpers — extracted for readability
 // ═══════════════════════════════════════════════════════════════════
 
+/**
+ * Check if the target element is an editable element.
+ * Used as fallback for elements NOT registered in FieldRegistry.
+ */
 function isEditingElement(target: HTMLElement): boolean {
   return (
     target instanceof HTMLInputElement ||
     target instanceof HTMLTextAreaElement ||
     target.isContentEditable
   );
+}
+
+/**
+ * Resolve the effective "isEditing" state for a specific key.
+ *
+ * Key Ownership Model:
+ * - For OS.Field (registered in FieldRegistry): use per-key consumption table
+ * - For native inputs (not registered): fall back to binary isEditing
+ *
+ * This means an inline field (e.g. Draft) will NOT block Tab or ArrowDown,
+ * but a code editor field WILL block Tab (for indentation).
+ */
+function resolveIsEditingForKey(
+  target: HTMLElement,
+  canonicalKey: string,
+): boolean {
+  // Check if this is a registered OS.Field
+  const fieldId = target.id || target.getAttribute("data-item-id");
+  if (fieldId) {
+    const fieldEntry = FieldRegistry.getField(fieldId);
+    if (fieldEntry) {
+      const fieldType = fieldEntry.config.fieldType ?? "inline";
+      // If the field consumes this key → treat as editing (block OS)
+      // If the field does NOT consume → treat as navigating (let OS handle)
+      return isKeyConsumedByField(canonicalKey, fieldType);
+    }
+  }
+
+  // Fallback: unregistered native inputs use binary check
+  return isEditingElement(target);
 }
 
 /**
@@ -125,7 +161,7 @@ export function KeyboardListener() {
       if (isComboboxInput(target)) return;
 
       const canonicalKey = getCanonicalKey(e);
-      const isEditing = isEditingElement(target);
+      const isEditing = resolveIsEditingForKey(target, canonicalKey);
 
       // Space on checkbox/switch → CHECK override (W3C APG)
       if (canonicalKey === "Space" && !isEditing) {

@@ -2,9 +2,23 @@ import type { BaseCommand } from "@kernel";
 import { useSyncExternalStore } from "react";
 import type { FieldCommandFactory } from "../../schema/command/BaseCommand.ts";
 
+/**
+ * Field Type Presets — Key Ownership Model
+ *
+ * Determines which keys the field "consumes" during editing vs delegates to OS.
+ * Derived from 3 independent axes: ↑↓ ownership, Tab ownership, Backspace∅ ownership.
+ *
+ * - inline:  Tab→OS, ↑↓→OS, Bksp∅→Field  (search, draft, rename)
+ * - tokens:  Tab→OS, ↑↓→OS, Bksp∅→OS     (chips, tags, email recipients)
+ * - block:   Tab→OS, ↑↓→Field, Bksp∅→Field (comment, description, chat)
+ * - editor:  Tab→Field, ↑↓→Field, Bksp∅→Field (code editor, rich text)
+ */
+export type FieldType = "inline" | "tokens" | "block" | "editor";
+
 export interface FieldConfig {
   name: string;
   mode?: "immediate" | "deferred"; // immediate = always editing, deferred = needs Enter to edit
+  fieldType?: FieldType; // Key ownership preset (default: "inline")
   multiline?: boolean;
   onSubmit?: FieldCommandFactory; // Field injects { text: currentValue }
   onChange?: FieldCommandFactory; // Field injects { text: currentValue }

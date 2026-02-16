@@ -148,8 +148,8 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  { key: "Meta+Z", command: OS_UNDO },
-  { key: "Meta+Shift+Z", command: OS_REDO },
+  { key: "Meta+Z", command: OS_UNDO, when: "navigating" },
+  { key: "Meta+Shift+Z", command: OS_REDO, when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
