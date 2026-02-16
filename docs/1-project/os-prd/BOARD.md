@@ -2,13 +2,6 @@
 
 ## 🔴 Now
 
-- [ ] T7: ⚠️ 커맨드 테스트 보강 — SPEC ⚠️ 13개 → ✅ 승격
-  - 대상: SYNC_FOCUS, RECOVER, OS_MOVE_UP/DOWN, FIELD_*, OVERLAY_*, macFallback
-  - 이미 ✅인 것(OS_UNDO/REDO — history.test + dogfooding E2E)은 SPEC만 갱신
-  - ref: discussions/2026-0216-1832-[report]-os-code-health-review.md
-  - [ ] /tdd
-  - [ ] /verify
-
 - [ ] T8: kernel.dispatch 타입 개선 — `as any` 30+개 제거
   - `kernel.dispatch(CMD() as any)` 패턴의 근본 원인 해결
   - kernel Command generic → OS Command 타입 호환
@@ -26,6 +19,7 @@
   - [ ] /verify
 
 ## ⏳ Done
+- [x] T7: ⚠️ 커맨드 테스트 보강 — SPEC ⚠️ 13→0, +31 unit tests (02-16)
 - [x] T5d: `CommandPalette` 리팩토링 → QuickPick 소비자로 전환 (02-15)
 - [x] T5: QuickPick (OS Level Primitive) 구현 (02-15)
     - [x] T5a: `virtualFocus` 지원 (NAVIGATE/FOCUS) (02-15)
