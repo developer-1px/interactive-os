@@ -160,9 +160,6 @@ export interface AppHandle<S> {
         children: ReactNode;
     }>;
     useComputed<T>(selector: Selector<S, T>): T;
-    useCondition(condition: Condition<S>): boolean;
     getState(): S;
     create(overrides?: Partial<S>): TestInstance<S>;
-    conditions(): readonly Condition<S>[];
-    selectors(): readonly Selector<S, unknown>[];
 }

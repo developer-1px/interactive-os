@@ -101,9 +101,7 @@ export function defineApp<S>(
   } as any);
 
   // ── Registries ──
-  const conditionRegistry: Condition<S>[] = [];
   const conditionNames = new Set<string>();
-  const selectorRegistry: Selector<S, unknown>[] = [];
   const selectorNames = new Set<string>();
 
   // For test instance: track all flat handlers + when guards
@@ -111,8 +109,6 @@ export function defineApp<S>(
     string,
     { handler: FlatHandler<S, any>; when?: Condition<S> }
   >();
-  // For v3 test compat: track CommandFactory instances
-  const allCommandFactories = new Map<string, CommandFactory<any, any>>();
 
   // ── condition ──
 
@@ -131,7 +127,6 @@ export function defineApp<S>(
       evaluate: predicate,
       [__conditionBrand]: true as const,
     } as unknown as Condition<S>;
-    conditionRegistry.push(cond);
     return cond;
   }
 
@@ -152,7 +147,6 @@ export function defineApp<S>(
       select,
       [__selectorBrand]: true as const,
     } as unknown as Selector<S, T>;
-    selectorRegistry.push(sel as Selector<S, unknown>);
     return sel;
   }
 
@@ -183,9 +177,6 @@ export function defineApp<S>(
       kernelHandler as any,
       whenGuard as any,
     ) as unknown as CommandFactory<T, P>;
-
-    // Track for v3 test compat
-    allCommandFactories.set(type, factory);
 
     return factory;
   }
@@ -318,10 +309,6 @@ export function defineApp<S>(
       return slice.useComputed(selectorOrFn as (s: S) => T);
     },
 
-    useCondition(condition: Condition<S>): boolean {
-      return slice.useComputed((s) => condition.evaluate(s));
-    },
-
     /** v3 compat: read state */
     getState(): S {
       return slice.getState();
@@ -332,22 +319,7 @@ export function defineApp<S>(
       slice.setState(updater);
     },
 
-    /** All registered commands across all zones */
-    get commands() {
-      return Object.fromEntries(
-        [...flatHandlerRegistry.keys()].map((type) => [type, null]),
-      );
-    },
-
     create,
-
-    conditions() {
-      return conditionRegistry;
-    },
-
-    selectors() {
-      return selectorRegistry;
-    },
 
     // ═══════════════════════════════════════════════════════════════
     // v3 COMPAT: createWidget
