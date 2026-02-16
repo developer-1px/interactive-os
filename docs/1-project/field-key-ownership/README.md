@@ -1,7 +1,7 @@
 # Field Key Ownership — OS가 필드 편집 중 키보드를 지능적으로 처리한다
 
 > 등록일: 2026-02-16
-> Phase: Definition
+> Phase: Done ✅
 
 ## 문제 (Why)
 
@@ -24,13 +24,18 @@ isEditing === false →  OS가 모든 키를 처리
 
 ### 원칙
 
-> **OS가 기본적으로 모든 키를 소유한다. 필드는 자기가 필요한 키만 선언적으로 가져간다.**
+> **편집 중 필드는 모든 키를 소유한다. 필요한 navigation 키만 OS에 위임(delegate)한다.**
 
-현재의 역전:
+핵심 전환:
 ```
-현재: "편집 중이면 OS가 물러난다" (Field이 전부 가져감, OS가 opt-in)
-제안: "OS가 기본 처리하고, 필드가 필요한 것만 가져간다" (OS가 기본, Field이 opt-in)
+이전: "편집 중이면 OS가 물러난다" (Field이 전부 가져감, OS가 opt-in)
+최종: "편집 중 필드가 기본 소유. 명시적으로 OS에 위임한 키만 OS가 처리" (Field이 기본, OS가 allowlist)
 ```
+
+이 위임(delegation) 모델이 소비(consumption) 모델보다 우수한 이유:
+- **문자 입력 안전성**: Space, 숫자, 문자 등은 절대 OS navigation에 잡히지 않음
+- **명시적 allowlist**: OS에 넘길 키(Tab, Arrow)만 나열하므로 의도가 명확
+- **기본값 안전**: 새 키가 추가되어도 필드가 기본 소유 → 예기치 않은 키 삼킴 방지
 
 ## MECE 분석
 
@@ -108,26 +113,19 @@ isEditing === false →  OS가 모든 키를 처리
 
 ## 기존 코드 영향 분석
 
-### 변경 대상
+### 실제 구현
 
-1. **`isEditingElement()`** (KeyboardListener.tsx:32-38)
-   - Before: `contentEditable || input || textarea` → boolean
-   - After: 필드 유형 기반 per-key 판단
-
-2. **`Keybindings.resolve()`** (keybindings.ts:81-82)
-   - Before: `when: "navigating" && !isEditing`
-   - After: `when: "navigating" && !isConsumedByField(key, fieldType)`
-
-3. **`FieldConfig`** (FieldRegistry.ts:5-14)
-   - `fieldType?: "inline" | "block" | "editor" | "tokens"` 추가
-   - 기본값: `"inline"` (가장 보편적)
-
-4. **`OS.Field` / `defineApp.bind()`**
-   - `fieldType` prop 추가
-
-5. **Meta+Z/Shift+Z** 가드 추가 (osDefaults.ts:151-152)
-   - 현재 `when` 없이 등록 → editing 중에도 OS_UNDO 발동 (버그)
-   - 수정: `when: "navigating"` 추가 (editing 중에는 native browser undo 사용)
+1. **`isEditingElement()`** (KeyboardListener.tsx) — 변경 없음, binary check 유지
+2. **`resolveIsEditingForKey()`** (KeyboardListener.tsx) — 신규, per-key 위임 판단
+3. **Dual Context**: `isEditing` (mode) + `isFieldActive` (per-key)
+4. **`Keybindings.resolve()`** (keybindings.ts)
+   - `when: "editing"` → `isEditing`으로 판단 (Enter→FIELD_COMMIT)
+   - `when: "navigating"` → `!isFieldActive`로 판단 (Tab→zone escape)
+5. **`FIELD_DELEGATES_TO_OS`** (fieldKeyOwnership.ts)
+   - 각 프리셋이 OS에 위임하는 키의 allowlist
+6. **`FieldConfig.fieldType`** (FieldRegistry.ts) — 기본값: `"inline"`
+7. **Meta+Z/Shift+Z** `when: "navigating"` 가드 추가
+8. **Space CHECK override** — `!isEditing` 조건 (편집 중 Space는 무조건 텍스트)
 
 ### 기존 호환성
 
@@ -140,15 +138,15 @@ isEditing === false →  OS가 모든 키를 처리
 
 ## 성공 기준
 
-| ID | 기준 | 검증 |
-|----|------|------|
-| SC-1 | Todo Draft에서 Tab/Shift+Tab으로 zone 이동 가능 | E2E 테스트 |
-| SC-2 | Todo Draft에서 ArrowDown으로 리스트 아이템 이동 가능 | E2E 테스트 |
-| SC-3 | 코드 에디터에서 Tab이 indent로 동작 (zone escape 아님) | E2E 테스트 |
-| SC-4 | 모든 필드에서 Meta+Z가 native text undo로 동작 | E2E 테스트 |
-| SC-5 | `fieldType` 미지정 시 `inline`이 기본값으로 동작 | Unit 테스트 |
-| SC-6 | 기존 236개+ Unit 테스트 깨지지 않음 | CI |
-| SC-7 | 기존 16개 Todo E2E 테스트 깨지지 않음 | CI |
+| ID | 기준 | 검증 | 상태 |
+|----|------|------|------|
+| SC-1 | Todo Draft에서 Tab/Shift+Tab으로 zone 이동 가능 | E2E 테스트 | ✅ |
+| SC-2 | Todo Draft에서 ArrowDown으로 리스트 아이템 이동 가능 | E2E 테스트 | ✅ |
+| SC-3 | 코드 에디터에서 Tab이 indent로 동작 (zone escape 아님) | E2E 테스트 | 💡 (PoC 대기) |
+| SC-4 | 모든 필드에서 Meta+Z가 native text undo로 동작 | E2E 테스트 | ✅ |
+| SC-5 | `fieldType` 미지정 시 `inline`이 기본값으로 동작 | Unit 테스트 | ✅ |
+| SC-6 | 기존 476개 Unit 테스트 깨지지 않음 | CI | ✅ |
+| SC-7 | 기존 16개 + 신규 3개 Todo E2E 테스트 통과 | CI | ✅ (19/19) |
 
 ## Out of Scope
 
