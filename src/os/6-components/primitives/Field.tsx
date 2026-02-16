@@ -125,10 +125,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
   ) => {
     const context = useFocusGroupContext();
     const zoneId = context?.zoneId || "unknown";
-    const activeZoneId = kernel.useComputed((s) => s.os.focus.activeZoneId);
-    const osFocusedItemId = kernel.useComputed(
-      (s) => s.os.focus.zones[zoneId]?.focusedItemId ?? null,
-    );
 
     const innerRef = useRef<HTMLElement>(null);
     const cursorRef = useRef<number | null>(null);
@@ -170,23 +166,38 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     // isContentEditable is computed below; use a ref to avoid circular dependency
     const isContentEditableRef = useRef(false);
 
-    // --- Focus Computation ---
-    const isSystemActive = activeZoneId === zoneId;
-    const isFocused = isSystemActive && osFocusedItemId === fieldId;
+    // --- Focus Computation (boolean subscriptions — avoids re-render on unrelated zone changes) ---
+    const isSystemActive = kernel.useComputed(
+      (s) => s.os.focus.activeZoneId === zoneId,
+    );
+    const isFocused = kernel.useComputed(
+      (s) =>
+        s.os.focus.activeZoneId === zoneId &&
+        (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === fieldId,
+    );
 
     // For inline editing: Field might be a child of the focused item (e.g., "EDIT" inside todo "1")
     // In that case, isFocused is false but the zone's editingItemId is set
-    const osEditingItemId = kernel.useComputed(
-      (s) => s.os.focus.zones[zoneId]?.editingItemId ?? null,
+    const isEditingThisField = kernel.useComputed(
+      (s) => (s.os.focus.zones[zoneId]?.editingItemId ?? null) === fieldId,
     );
-    const isParentEditing =
-      isSystemActive &&
-      osEditingItemId !== null &&
-      osFocusedItemId === osEditingItemId;
+    const isParentEditing = kernel.useComputed((s) => {
+      if (s.os.focus.activeZoneId !== zoneId) return false;
+      const zone = s.os.focus.zones[zoneId];
+      if (!zone?.editingItemId) return false;
+      return zone.focusedItemId === zone.editingItemId;
+    });
+
+    // aria-activedescendant needs the actual string ID (virtual focus only)
+    const activedescendantId = kernel.useComputed((s) => {
+      if (target !== "virtual" || !controls) return null;
+      const focusedId = s.os.focus.zones[zoneId]?.focusedItemId ?? null;
+      return focusedId && focusedId !== name ? focusedId : null;
+    });
 
     const isContentEditable =
       mode === "deferred"
-        ? (isFocused && osEditingItemId === fieldId) || isParentEditing
+        ? (isFocused && isEditingThisField) || isParentEditing
         : isFocused || isParentEditing;
     const isActive = isContentEditable;
     isContentEditableRef.current = isContentEditable;
@@ -211,10 +222,18 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     }, []);
 
     // Sync value prop → DOM when not editing (enables panel → preview binding)
+    // Also restores original value when editing is cancelled (Escape)
     const prevValueRef = useRef(value);
+    const wasEditableRef = useRef(isContentEditable);
     useLayoutEffect(() => {
-      if (innerRef.current && prevValueRef.current !== value && !isContentEditable) {
-        innerRef.current.innerText = value;
+      const exitedEditing = wasEditableRef.current && !isContentEditable;
+      wasEditableRef.current = isContentEditable;
+
+      if (innerRef.current && !isContentEditable) {
+        // On editing exit OR value change: force DOM sync
+        if (exitedEditing || prevValueRef.current !== value) {
+          innerRef.current.innerText = value;
+        }
       }
       prevValueRef.current = value;
     }, [value, isContentEditable]);
@@ -257,13 +276,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
           : undefined,
       "data-focused": isFocused ? "true" : undefined,
       "aria-controls": controls,
-      "aria-activedescendant":
-        target === "virtual" &&
-          controls &&
-          osFocusedItemId &&
-          osFocusedItemId !== name
-          ? osFocusedItemId
-          : undefined,
+      "aria-activedescendant": activedescendantId || undefined,
       children: null, // Managed by useFieldDOMSync
       ...otherProps,
     };
