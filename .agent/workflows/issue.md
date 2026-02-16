@@ -2,19 +2,21 @@
 description: 이슈를 프로젝트에 등록한 뒤, 기존 workflow 조합으로 분석→수정→검증→재발방지까지 체계적으로 처리한다.
 ---
 
-## /issue — 이슈 기반 체계적 문제 해결 파이프라인
+## /issue — 8D 기반 이슈 해결 파이프라인
+
+> **이론적 기반**: 8D Problem Solving (Ford Motor Company) + Cynefin Framework (`rules.md` 참조)
 
 ```
-등록 → Triage → 베이스라인(/ready)
-→ 분석(/diagnose) → 문서 읽기
-  ──[Gate ①: Known/Open 분류 → 사용자 확인]──
-→ 재현 테스트(/tdd)
-→ 분해·수정(/divide)
+D1: Team      — AI + 사용자
+D2: Describe  → 등록
+D3: Contain   → Triage → 베이스라인(/ready)
+D4: Root Cause→ 분석(/diagnose) → 문서 읽기
+  ──[Gate ①: Cynefin 도메인 분류 → 사용자 확인]──
+D5: Corrective→ 재현 테스트(/tdd) → 분해·수정(/divide)
   ──[Gate ②: 테스트 통과]──
-→ 코드리뷰(/review)
-→ 검증(/fix)
-→ 재발방지(/rules)
-→ 이슈 종료 & 최종 리포트
+D6: Implement → 코드리뷰(/review) → 검증(/fix)
+D7: Prevent   → 재발방지(/rules)
+D8: Close     → 이슈 종료 & 최종 리포트
 ```
 
 ---
@@ -101,16 +103,16 @@ description: 이슈를 프로젝트에 등록한 뒤, 기존 workflow 조합으�
 - **관련 프로젝트 문서를 먼저 읽는다** — `docs/1-project/`에서 관련 PRD, Proposal, Status를 찾아 읽는다. 문서가 없으면 그 사실을 기록한다.
 - 삽질 일지의 "원인 추정"을 이슈 문서에 요약 링크한다.
 
-#### Gate Check ① — Known/Open 분류 & 이해 확인
+#### Gate Check ① — Cynefin 도메인 분류 & 이해 확인
 
 분석 결과를 다음 형식으로 **사용자에게 보고**한다. 보고 없이 수정으로 넘어가지 않는다.
 
 ```markdown
-**Known** (코드에서 확인한 사실):
-- 예: "파일 X가 커밋 Y에서 삭제됨"
-- 예: "Vite alias는 설정되어 있으나 대상 파일 없음"
+**Clear/Complicated** (코드에서 확인한 사실):
+- 예: "파일 X가 커밋 Y에서 삭제됨" (Clear)
+- 예: "Vite alias는 설정되어 있으나 대상 파일 없음 — 2가지 수정 방법 존재" (Complicated)
 
-**Open** (판단·확인이 필요한 질문):
+**Complex** (판단·확인이 필요한 질문):
 - 예: "삭제가 의도적인가, 실수인가?"
 - 예: "복구해야 한다면 어디서 호출해야 하는가?"
 
@@ -119,7 +121,7 @@ description: 이슈를 프로젝트에 등록한 뒤, 기존 workflow 조합으�
 
 - 사용자가 **"맞다"** → 다음 단계 진행
 - 사용자가 **교정** → 이해를 수정하고 다시 보고. 코드를 수정하지 않는다.
-- Open 항목이 있는데 사용자 확인 없이 추측으로 결정하면 **이 게이트를 위반**한 것이다.
+- Complex 항목이 있는데 사용자 확인 없이 추측으로 결정하면 **이 게이트를 위반**한 것이다.
 
 ### 5. 재현 테스트 — `/tdd` 실행
 

@@ -19,11 +19,14 @@ export function cleanLabel(label: string) {
 
 /** Build a file tree from a list of glob paths */
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: tree building logic
-export function buildDocTree(paths: string[]): DocItem[] {
+export function buildDocTree(
+  paths: string[],
+  prefix = "../../docs/",
+): DocItem[] {
   const root: DocItem[] = [];
 
   for (const filePath of paths) {
-    const relativePath = filePath.replace("../../docs/", "").replace(".md", "");
+    const relativePath = filePath.replace(prefix, "").replace(".md", "");
     const parts = relativePath.split("/");
 
     let currentLevel = root;

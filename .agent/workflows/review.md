@@ -2,6 +2,8 @@
 description: 프로젝트 철학 준수 및 네이밍/구조 일관성을 코드 리뷰하여 위반 사항을 리포트한다
 ---
 
+> **이론적 기반**: Conventional Comments (conventionalcomments.org)
+
 ## 모드
 
 | 모드 | 트리거 | 산출물 |
@@ -38,7 +40,7 @@ description: 프로젝트 철학 준수 및 네이밍/구조 일관성을 코드
    - 기존 코드를 복붙하지 않고 원칙에 맞게 작성했는가?
    - 레거시 패턴(deprecated API, 구식 컨벤션)을 따라가지 않았는가?
    - 불필요한 추상화나 과잉 설계가 없는가?
-   - Known 해법이 있는데 "나중에"로 미룬 것이 없는가?
+   - Clear 해법이 있는데 "나중에"로 미룬 것이 없는가?
 
    ### 성능 패턴 검사
    - `useComputed` selector가 원시값(boolean, number)을 반환하는가? string/object 반환은 🔴.
@@ -57,7 +59,7 @@ description: 프로젝트 철학 준수 및 네이밍/구조 일관성을 코드
    - **인라인 모드**: 즉시 수정. `[N회차] 발견 M건: ...` 보고.
    - **보고서 모드**: 심각도 × 의도 2축 분류로 기록.
      - 심각도: 🔴 철학 위반 / 🟡 네이밍/구조 / 🔵 개선 제안
-     - 의도: `[Blocker]` `[Suggest]` `[Question]` `[Nitpick]` `[Praise]`
+     - 의도 (Conventional Comments): `[Blocker]` `[Suggest]` `[Question]` `[Thought]` `[Nitpick]` `[Praise]`
 
 5. **완료**
    - **인라인**: `✅ review 통과 (N회차, 총 M건 수정)` 한 줄 보고.

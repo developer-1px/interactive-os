@@ -17,13 +17,14 @@ description: 사용자 요청을 분석하여 정형화된 보고서를 docs/0-i
      - **1. 개요 (Overview)**: Summary of the request.
      - **2. 분석 (Analysis) / 상세 내용 (Details)**: Technical findings, code snippets, or research data.
      - **3. 결론 (Conclusion) / 제안 (Proposal)**: Recommended actions or summary.
-     - **4. 해법 유형 (Solution Landscape)**: 이 문제가 "정답이 있는 문제"인지 판단한다.
-       - 🟢 **Known**: 자명한 해법, 업계 Best Practice, 널리 알려진 정답이 존재.
-       - 🟡 **Constrained**: 선택지가 있지만 트레이드오프가 명확하여 범위가 좁음.
-       - 🔴 **Open**: 정답이 없고, 프로젝트 맥락에 따른 의사결정이 필요.
-       - 판정 근거를 1~2줄로 제시한다.
-     - **5. 인식 한계 (Epistemic Status)**: AI가 이 분석에서 확인하지 못한 것, 추측에 기반한 부분을 명시한다. (예: "이 분석은 코드 정적 분석에 기반하며, 런타임 성능 영향은 확인하지 못했다.")
-     - **6. 열린 질문 (Open Questions)**: 사용자의 의사결정이 필요한 항목을 번호 목록으로 제시한다. 정답이 있는 문제(Known)는 여기에 넣지 않고 제안에서 바로 답을 제시한다.
+      - **4. Cynefin 도메인 판정** (`rules.md` 참조): 이 문제의 복잡도 도메인을 판단한다.
+        - 🟢 **Clear**: 자명한 해법, 업계 Best Practice가 존재. → Sense-Categorize-Respond.
+        - 🟡 **Complicated**: 선택지가 있지만 분석하면 답이 좁혀짐. → Sense-Analyze-Respond.
+        - 🔴 **Complex**: 정답이 없고, 프로젝트 맥락에 따른 의사결정이 필요. → Probe-Sense-Respond.
+        - 판정 근거를 1~2줄로 제시한다.
+        - (Chaotic은 inbox 분석이 아닌 즉시 행동 영역이므로 여기서 분류하지 않는다)
+      - **5. 인식 한계 (Epistemic Status)**: AI가 이 분석에서 확인하지 못한 것, 추측에 기반한 부분을 명시한다. (예: "이 분석은 코드 정적 분석에 기반하며, 런타임 성능 영향은 확인하지 못했다.")
+     - **6. 열린 질문 (Complex Questions)**: 사용자의 의사결정이 필요한 항목을 번호 목록으로 제시한다. Clear/Complicated 문제는 여기에 넣지 않고 제안에서 바로 답을 제시한다.
      - **한줄요약**: 보고서 전체를 1문장으로 압축한다. 문서 목록에서 훑어볼 때 이것만 보고 내용을 떠올릴 수 있어야 한다.
 
 3. **저장 위치 결정 (프로젝트 컨텍스트 라우팅)**

@@ -9,25 +9,27 @@ description: Discussion 결론을 프로젝트로 전환한다. 관련 문서를
 > 프로젝트는 **전략적 컨테이너(Epic)**다. 하나의 프로젝트 안에 여러 Discussion과 Task가 포함된다.
 > 이 workflow는 Discussion(발산)을 프로젝트(수렴)로 전환하는 구조화된 전환점이다.
 
-## 파이프라인 전체 지도
+> **이론적 기반**: PMBOK 5 Process Groups (PMI) + Cynefin Framework (`rules.md` 참조)
+
+## 파이프라인 전체 지도 (PMBOK 대응)
 
 ```
-Phase 1: DISCOVERY
+Phase 1: DISCOVERY  ← PMBOK: Initiating
   /onboarding → /discussion(선택)
 
-Phase 2: DEFINITION
+Phase 2: DEFINITION ← PMBOK: Planning
   문서 수집 → 폴더 생성 → README.md → BOARD.md
 
-Phase 3: DESIGN (선택 — 규모가 큰 프로젝트만)
+Phase 3: DESIGN     ← PMBOK: Planning (선택 — 규모가 큰 프로젝트만)
   /resources(선택) → 제안서 → /redteam(premortem) → /review(인라인) → 사용자 승인
   ──[Gate: 사용자 승인]──
 
-Phase 4: EXECUTION
+Phase 4: EXECUTION  ← PMBOK: Executing + Monitoring
   ┌─ /tdd → /divide → /review → /fix → /cleanup → /changelog ─┐
   └──────────────── 반복 (작업 단위마다) ────────────────────────┘
   ──[Gate: smoke ✅ / type ✅ / build ✅]──
 
-Phase 5: CLOSING
+Phase 5: CLOSING    ← PMBOK: Closing
   /doubt(코드/파일) → /status → 커밋 → /para(아카이브)
 ```
 
@@ -198,9 +200,9 @@ docs/1-project/[프로젝트명]/
 ### Step 14: 분해 & 구현 — `/divide`
 
 - BOARD.md의 Now 태스크를 하나씩 처리한다.
-  - 🟢 **Known** → AI가 바로 실행
-  - 🟡 **Constrained** → 트레이드오프를 제시, 사용자가 선택
-  - 🔴 **Open** → 사용자에게 질문
+  - 🟢 **Clear** → AI가 바로 실행
+  - 🟡 **Complicated** → 트레이드오프를 분석, 사용자가 선택
+  - 🔴 **Complex** → 사용자에게 질문
 - 태스크 완료 시 BOARD.md에서 Done으로 이동한다.
 
 ### Step 15: 코드 리뷰 — `/review`

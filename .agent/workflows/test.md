@@ -2,8 +2,12 @@
 description: 3단계(Unit/TestBot/E2E) 테스트 전략에 따라 테스트 코드를 작성한다. OS Dogfooding 철학을 준수하여 로직 검증은 Headless Kernel 위에서 수행한다.
 ---
 
-1. **테스트 레벨 결정**
+> **이론적 기반**: Test Pyramid (Mike Cohn, *Succeeding with Agile*)
+> 빠른 테스트를 많이, 느린 테스트를 적게. Unit ▶▶▶ Integration ▶▶ E2E ▶
+
+1. **테스트 레벨 결정** (Test Pyramid 비율을 의식한다)
    사용자의 요청이나 변경 사항의 성격에 따라 테스트 레벨을 결정한다.
+   **비율 원칙**: 로직 검증은 최대한 Unit/Integration(Headless Kernel)에서 해결하고, E2E는 Glue Code(렌더링, 이벤트 바인딩)만 검증한다.
 
    - **Level 1: Unit (Handler)**
      - 대상: 개별 Command Handler의 로직 검증

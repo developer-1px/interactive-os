@@ -1,6 +1,12 @@
 import clsx from "clsx";
-import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  FolderOpen,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DocsSidebar } from "./DocsSidebar";
 import {
   buildDocTree,
@@ -9,67 +15,206 @@ import {
   flattenTree,
   loadDocContent,
 } from "./docsUtils";
+import {
+  openExternalFolder,
+  type ExternalFolderSource,
+} from "./fsAccessUtils";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
-function getPathFromHash() {
+/** Parse hash: returns { source: "docs" | "ext", path?, folderName? } */
+function parseHash(): {
+  source: "docs" | "ext";
+  path?: string;
+  folderName?: string;
+} {
   const hash = window.location.hash.replace(/^#\/?/, "");
-  return hash || undefined;
+  if (!hash) return { source: "docs" };
+
+  if (hash.startsWith("ext:")) {
+    const rest = hash.slice(4);
+    const slashIdx = rest.indexOf("/");
+    if (slashIdx === -1) {
+      return { source: "ext", folderName: rest };
+    }
+    return {
+      source: "ext",
+      folderName: rest.slice(0, slashIdx),
+      path: rest.slice(slashIdx + 1),
+    };
+  }
+
+  return { source: "docs", path: hash };
 }
 
 export function DocsViewer() {
-  const [activePath, setActivePath] = useState<string | undefined>(
-    getPathFromHash,
-  );
+  const [activePath, setActivePath] = useState<string | undefined>(undefined);
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [externalSource, setExternalSource] =
+    useState<ExternalFolderSource | null>(null);
 
-  const docTree = useMemo(() => buildDocTree(Object.keys(docsModules)), []);
-  const allFiles = useMemo(() => flattenTree(docTree), [docTree]);
+  // Use ref so event handlers always see the latest external source
+  const externalRef = useRef(externalSource);
+  externalRef.current = externalSource;
+
+  const isExternal = externalSource != null;
+
+  // Built-in docs tree (always available)
+  const builtinTree = useMemo(
+    () => buildDocTree(Object.keys(docsModules)),
+    [],
+  );
+  const builtinFiles = useMemo(() => flattenTree(builtinTree), [builtinTree]);
+
+  // Current tree depends on mode
+  const docTree = isExternal ? externalSource.tree : builtinTree;
+  const allFiles = isExternal ? externalSource.allFiles : builtinFiles;
 
   const currentIndex = allFiles.findIndex((f) => f.path === activePath);
   const prevFile = currentIndex > 0 ? allFiles[currentIndex - 1] : null;
   const nextFile =
     currentIndex < allFiles.length - 1 ? allFiles[currentIndex + 1] : null;
 
-  // Sync hash → state on popstate (back/forward)
+  // --- Core: load content for a path ---
+  const loadContent = (path: string, source: ExternalFolderSource | null) => {
+    if (source) {
+      // External: synchronous lookup from in-memory map
+      const fileContent = source.files.get(path);
+      if (fileContent != null) {
+        setContent(fileContent);
+        setError(null);
+      } else {
+        setContent("");
+        setError("Document not found in external folder");
+      }
+    } else {
+      // Built-in: async glob loader
+      loadDocContent(path)
+        .then((raw) => {
+          setContent(raw);
+          setError(null);
+        })
+        .catch((err) => {
+          console.error(err);
+          setError(err.message ?? "Failed to load document");
+          setContent("");
+        });
+    }
+  };
+
+  // --- Update URL without triggering hashchange ---
+  const setHash = (hash: string) => {
+    history.replaceState(null, "", hash);
+  };
+
+  // --- Select a file (sidebar click, prev/next) ---
+  const handleSelect = (path: string) => {
+    const ext = externalRef.current;
+    if (ext) {
+      setHash(`#ext:${ext.name}/${path}`);
+    } else {
+      setHash(`#/${path}`);
+    }
+    setActivePath(path);
+    loadContent(path, ext);
+  };
+
+  // Initialize from hash on mount
   useEffect(() => {
-    const onHashChange = () => {
-      setActivePath(getPathFromHash());
-    };
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
+    const parsed = parseHash();
+    if (parsed.source === "docs" && parsed.path) {
+      setActivePath(parsed.path);
+      loadContent(parsed.path, null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-select first file on mount if no hash
+  // Sync hash → state on browser back/forward (popstate only)
+  useEffect(() => {
+    const onPopState = () => {
+      const parsed = parseHash();
+      const ext = externalRef.current;
+      if (parsed.source === "docs") {
+        if (ext) setExternalSource(null);
+        setActivePath(parsed.path);
+        if (parsed.path) loadContent(parsed.path, null);
+      } else if (parsed.source === "ext" && ext) {
+        setActivePath(parsed.path);
+        if (parsed.path) loadContent(parsed.path, ext);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-select first file when tree changes and no active path
   useEffect(() => {
     if (!activePath && allFiles.length > 0) {
       const first = allFiles[0];
       if (first) {
-        window.location.hash = `#/${first.path}`;
-        setActivePath(first.path);
+        handleSelect(first.path);
       }
     }
-  }, [activePath, allFiles]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allFiles]);
 
-  useEffect(() => {
-    if (!activePath) return;
+  // --- Folder open / close ---
+  const handleOpenFolder = async () => {
+    const result = await openExternalFolder();
+    if (!result) return;
 
-    loadDocContent(activePath)
-      .then((raw) => {
-        setContent(raw);
-        setError(null);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError(err.message ?? "Failed to load document");
-        setContent("");
-      });
-  }, [activePath]);
-
-  const handleSelect = (path: string) => {
-    window.location.hash = `#/${path}`;
-    setActivePath(path);
+    setExternalSource(result);
+    externalRef.current = result;
+    setActivePath(undefined);
+    setContent("");
+    setError(null);
+    // Auto-select will fire via the allFiles effect
   };
+
+  const handleCloseFolder = () => {
+    setExternalSource(null);
+    externalRef.current = null;
+    setActivePath(undefined);
+    setContent("");
+    setError(null);
+    setHash("#");
+  };
+
+  // Sidebar header with source indicator
+  const sidebarHeader = (
+    <div className="px-5 py-5 flex items-center gap-2 mb-2">
+      <div className="p-1 bg-white border border-slate-200 rounded-md shadow-sm">
+        {isExternal ? (
+          <FolderOpen size={14} className="text-indigo-600" />
+        ) : (
+          <FileText size={14} className="text-slate-700" />
+        )}
+      </div>
+      <span className="font-semibold text-slate-700 text-sm tracking-tight flex-1 truncate">
+        {isExternal ? externalSource.name : "Handbook"}
+      </span>
+      {isExternal ? (
+        <button
+          type="button"
+          onClick={handleCloseFolder}
+          title="Close external folder"
+          className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+        >
+          <X size={14} />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleOpenFolder}
+          title="Open folder"
+          className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+        >
+          <FolderOpen size={14} />
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div className="flex h-screen w-full bg-white text-slate-900 overflow-hidden font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -78,6 +223,7 @@ export function DocsViewer() {
         items={docTree}
         activePath={activePath}
         onSelect={handleSelect}
+        header={sidebarHeader}
       />
 
       {/* Main Content */}
@@ -95,7 +241,7 @@ export function DocsViewer() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (allFiles[0]) setActivePath(allFiles[0].path);
+                    if (allFiles[0]) handleSelect(allFiles[0].path);
                   }}
                   className="mt-8 px-6 py-2 bg-slate-100 text-slate-600 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors shadow-sm"
                 >
@@ -106,6 +252,14 @@ export function DocsViewer() {
               <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
                 {/* Document Metadata Header */}
                 <div className="flex items-center gap-2 mb-10 border-b border-slate-50 pb-6">
+                  {isExternal && (
+                    <>
+                      <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                        {externalSource.name}
+                      </span>
+                      <span className="text-slate-300">/</span>
+                    </>
+                  )}
                   {activePath?.split("/").map((part, i, arr) => (
                     <div key={part} className="flex items-center gap-2">
                       {i > 0 && <span className="text-slate-300">/</span>}
