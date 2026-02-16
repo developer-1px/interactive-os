@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-16 20:36
+> Last updated: 2026-02-16 20:54
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -11,7 +11,6 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| behavior-first-zone | Definition | 02-16 |
 | builder-mvp | Definition | 02-16 |
 | os-prd | Execution | 02-16 |
 
@@ -21,7 +20,6 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| behavior-first-zone | Definition | 02-16 | 🔥 Focus |
 | builder-mvp | Definition | 02-16 | 🔥 Focus |
 | os-prd | Execution | 02-16 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
@@ -67,11 +65,11 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 3 |
-| Active Projects (total) | 7 |
+| Active Focus | 2 |
+| Active Projects (total) | 6 |
 | Completed (archived) | 18 |
 | Inbox items | 0 |
-| Backlog items | 2 |
+| Backlog items | 3 |
 | Open issues | 0 |
 
 ---
@@ -89,3 +87,6 @@
 - ✅ 전체 이슈 클리어 (5개 이슈 done → closed)
 - ✅ `field-key-ownership` 프로젝트 완료
 - 🆕 `behavior-first-zone` 프로젝트 생성 — ARIA role→behavior 인과관계 역전 수정
+- 📥 `behavior-first-zone` 백로그 이동 — 전제 무효(IME 버그였음), typeahead 복원
+- fix: IME keyCode 229 가드 추가 (KeyboardListener) — 한글 IME 첫 keydown 누출 방지
+- fix: Todo dead code 정리 (AppEffect, GenericCommand, logic/)
