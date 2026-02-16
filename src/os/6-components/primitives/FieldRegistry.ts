@@ -28,7 +28,6 @@ export interface FieldConfig {
 }
 
 export interface FieldState {
-  isEditing: boolean;
   localValue: string;
 }
 
@@ -39,14 +38,12 @@ export interface FieldEntry {
 
 interface FieldRegistryState {
   fields: Map<string, FieldEntry>;
-  activeFieldId: string | null; // The ID of the field currently in "Editing" mode
 }
 
 // ─── Vanilla Store ───
 
 let state: FieldRegistryState = {
   fields: new Map(),
-  activeFieldId: null,
 };
 
 const listeners = new Set<() => void>();
@@ -72,7 +69,7 @@ function register(id: string, config: FieldConfig) {
   if (!newFields.has(id)) {
     newFields.set(id, {
       config,
-      state: { isEditing: false, localValue: "" },
+      state: { localValue: "" },
     });
   } else {
     // Update config if re-registering
@@ -86,29 +83,7 @@ function register(id: string, config: FieldConfig) {
 function unregister(id: string) {
   const newFields = new Map(state.fields);
   newFields.delete(id);
-  const newActiveId = state.activeFieldId === id ? null : state.activeFieldId;
-  state = { fields: newFields, activeFieldId: newActiveId };
-  emit();
-}
-
-function setEditing(id: string, isEditing: boolean) {
-  const newFields = new Map(state.fields);
-  const entry = newFields.get(id);
-  if (!entry) return;
-
-  newFields.set(id, {
-    ...entry,
-    state: { ...entry.state, isEditing },
-  });
-
-  state = {
-    fields: newFields,
-    activeFieldId: isEditing
-      ? id
-      : state.activeFieldId === id
-        ? null
-        : state.activeFieldId,
-  };
+  state = { fields: newFields };
   emit();
 }
 
@@ -129,12 +104,6 @@ function getField(id: string) {
   return state.fields.get(id);
 }
 
-function getActiveField() {
-  const { activeFieldId, fields } = state;
-  if (!activeFieldId) return undefined;
-  return fields.get(activeFieldId);
-}
-
 // ─── React Hook ───
 
 export function useFieldRegistry<T>(selector: (s: FieldRegistryState) => T): T {
@@ -151,8 +120,6 @@ export const FieldRegistry = {
   get: () => getSnapshot(),
   register: (id: string, config: FieldConfig) => register(id, config),
   unregister: (id: string) => unregister(id),
-  setEditing: (id: string, isEditing: boolean) => setEditing(id, isEditing),
   updateValue: (id: string, value: string) => updateValue(id, value),
   getField: (id: string) => getField(id),
-  getActiveField: () => getActiveField(),
 };
