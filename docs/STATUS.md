@@ -12,6 +12,7 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | os-prd | Execution | 02-16 |
+| field-key-ownership | Definition | 02-16 |
 
 ---
 
@@ -20,6 +21,7 @@
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
 | os-prd | Execution | 02-16 | 🔥 Focus |
+| field-key-ownership | Definition | 02-16 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
 | docs-dashboard | Design | 02-15 | ⏸ Idle |
 | define-app | Execution (Phase 3) | 02-16 | ⏸ Idle |
