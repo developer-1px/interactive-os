@@ -2,23 +2,16 @@
 
 ## 🔴 Now
 
-- [ ] T8: kernel.dispatch 타입 개선 — `as any` 30+개 제거
-  - `kernel.dispatch(CMD() as any)` 패턴의 근본 원인 해결
-  - kernel Command generic → OS Command 타입 호환
-  - ref: discussions/2026-0216-1832-[report]-os-code-health-review.md
-  - [ ] /discussion (설계 방향)
-  - [ ] /tdd
-  - [ ] /verify
-
-- [ ] T9: defineApp.ts 분할 — 912줄 → 모듈 분리
-  - T8 완료 후에만 착수 (타입이 정확해야 분할 경계가 보임)
+- [ ] T9: defineApp.ts 분할 — 912줄, 25 `as any` → 모듈 분리
   - 책임 분리: CommandFactory, SelectorFactory, ZoneHandle, BoundComponents, persistence
+  - T8 조사 결과: dispatch 타입은 정상, 25 `as any`는 defineApp 내부 generic 문제
   - ref: define-app 프로젝트 P2 태스크와 연동
   - [ ] /discussion (분할 경계)
   - [ ] /divide
   - [ ] /verify
 
 ## ⏳ Done
+- [x] T8: `as any` 조사 — dispatch 타입 정상, gratuitous 7개 제거, 나머지 25개는 defineApp 내부 (02-16)
 - [x] T7: ⚠️ 커맨드 테스트 보강 — SPEC ⚠️ 13→0, +31 unit tests (02-16)
 - [x] T5d: `CommandPalette` 리팩토링 → QuickPick 소비자로 전환 (02-15)
 - [x] T5: QuickPick (OS Level Primitive) 구현 (02-15)

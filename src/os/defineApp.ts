@@ -41,158 +41,40 @@ import {
   endTransaction,
 } from "./middleware/historyKernelMiddleware";
 
-// ═══════════════════════════════════════════════════════════════════
-// Brand Symbols
-// ═══════════════════════════════════════════════════════════════════
+// Re-export all types for consumers
+export type {
+  AppHandle,
+  BoundComponents,
+  Condition,
+  CommandContext,
+  FieldBindings,
+  FlatHandler,
+  HandlerResult,
+  KeybindingEntry,
+  Selector,
+  TestInstance,
+  ZoneBindings,
+  ZoneHandle,
+} from "./defineApp.types";
 
-const __conditionBrand = Symbol("condition");
-const __selectorBrand = Symbol("selector");
-
-// ═══════════════════════════════════════════════════════════════════
-// Branded Types
-// ═══════════════════════════════════════════════════════════════════
-
-/** Branded Condition — named boolean predicate for when guards */
-export type Condition<S> = {
-  readonly name: string;
-  readonly evaluate: (state: S) => boolean;
-  readonly [__conditionBrand]: true;
-};
-
-/** Branded Selector — named data derivation */
-export type Selector<S, T> = {
-  readonly name: string;
-  readonly select: (state: S) => T;
-  readonly [__selectorBrand]: true;
-};
-
-// ═══════════════════════════════════════════════════════════════════
-// Handler Types
-// ═══════════════════════════════════════════════════════════════════
-
-type CommandContext<S> = { readonly state: S };
-type HandlerResult<S> = {
-  state: S;
-  dispatch?: BaseCommand | BaseCommand[];
-} | void;
-
-/** Flat handler: (ctx, payload) => result */
-type FlatHandler<S, P> = (
-  ctx: CommandContext<S>,
-  payload: P,
-) => HandlerResult<S>;
-
-// ═══════════════════════════════════════════════════════════════════
-// Zone Bindings
-// ═══════════════════════════════════════════════════════════════════
-
-interface ZoneBindings {
-  role: string;
-  onCheck?: CommandFactory<string, any>;
-  onAction?: CommandFactory<string, any>;
-  onDelete?: CommandFactory<string, any>;
-  onCopy?: CommandFactory<string, any>;
-  onCut?: CommandFactory<string, any>;
-  onPaste?: CommandFactory<string, any>;
-  onMoveUp?: CommandFactory<string, any>;
-  onMoveDown?: CommandFactory<string, any>;
-  onUndo?: CommandFactory<string, any>;
-  onRedo?: CommandFactory<string, any>;
-}
-
-interface FieldBindings {
-  onChange?: CommandFactory<string, any>;
-  onSubmit?: CommandFactory<string, any>;
-  onCancel?: CommandFactory<string, any>;
-}
-
-interface KeybindingEntry<S> {
-  key: string;
-  command: CommandFactory<string, any>;
-  when?: Condition<S>;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Bound Components (returned by bind)
-// ═══════════════════════════════════════════════════════════════════
-
-export interface BoundComponents<S> {
-  Zone: React.FC<{ id?: string; className?: string; children?: ReactNode }>;
-  Item: React.FC<{
-    id: string | number;
-    className?: string;
-    children?: ReactNode;
-    asChild?: boolean;
-  }>;
-  Field: React.FC<{
-    name: string;
-    value?: string;
-    placeholder?: string;
-    className?: string;
-    autoFocus?: boolean;
-    blurOnInactive?: boolean;
-  }>;
-  When: React.FC<{ condition: Condition<S>; children?: ReactNode }>;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ZoneHandle
-// ═══════════════════════════════════════════════════════════════════
-
-export interface ZoneHandle<S> {
-  command<T extends string, P = void>(
-    type: T,
-    handler: FlatHandler<S, P>,
-    options?: { when?: Condition<S> },
-  ): CommandFactory<T, P>;
-
-  createZone(name: string): ZoneHandle<S>;
-
-  bind(
-    config: ZoneBindings & {
-      field?: FieldBindings;
-      keybindings?: KeybindingEntry<S>[];
-    },
-  ): BoundComponents<S>;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// TestInstance
-// ═══════════════════════════════════════════════════════════════════
-
-export interface TestInstance<S> {
-  readonly state: S;
-  dispatch(command: BaseCommand): boolean;
-  reset(): void;
-  evaluate(condition: Condition<S>): boolean;
-  select<T>(selector: Selector<S, T>): T;
-  transaction(fn: () => void): void;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// AppHandle
-// ═══════════════════════════════════════════════════════════════════
-
-export interface AppHandle<S> {
-  condition(name: string, predicate: (state: S) => boolean): Condition<S>;
-  selector<T>(name: string, select: (state: S) => T): Selector<S, T>;
-  command<T extends string, P = void>(
-    type: T,
-    handler: FlatHandler<S, P>,
-    options?: { when?: Condition<S> },
-  ): CommandFactory<T, P>;
-  createZone(name: string): ZoneHandle<S>;
-  createTrigger(command: CommandFactory<string, any>): React.FC<{
-    payload?: any;
-    children: ReactNode;
-  }>;
-  useComputed<T>(selector: Selector<S, T>): T;
-  useCondition(condition: Condition<S>): boolean;
-  getState(): S;
-  create(overrides?: Partial<S>): TestInstance<S>;
-  conditions(): readonly Condition<S>[];
-  selectors(): readonly Selector<S, unknown>[];
-}
+import {
+  __conditionBrand,
+  __selectorBrand,
+  type AppHandle,
+  type BoundComponents,
+  type Condition,
+  type FieldBindings,
+  type FlatHandler,
+  type KeybindingEntry,
+  type Selector,
+  type ZoneBindings,
+  type ZoneHandle,
+} from "./defineApp.types";
+import {
+  createCompoundTrigger,
+  createSimpleTrigger,
+} from "./defineApp.trigger";
+import { createTestInstance } from "./defineApp.testInstance";
 
 // ═══════════════════════════════════════════════════════════════════
 // defineApp — Production Implementation
@@ -462,181 +344,12 @@ export function defineApp<S>(
   function create(
     overrides?: Partial<S> | { history?: boolean },
   ): TestInstance<S> {
-    interface TestAppState {
-      os: Record<string, never>;
-      apps: Record<string, unknown>;
-    }
-
-    // Separate test options from state overrides
-    const rawOverrides = overrides ?? {};
-    const enableHistory =
-      "history" in rawOverrides && rawOverrides.history === true;
-    const stateOverrides = enableHistory
-      ? (({ history: _h, ...rest }) => rest)(
-          rawOverrides as Record<string, unknown>,
-        )
-      : rawOverrides;
-
-    const testState =
-      Object.keys(stateOverrides).length > 0
-        ? { ...initialState, ...(stateOverrides as Partial<S>) }
-        : initialState;
-
-    const testKernel = createKernel<TestAppState>({
-      os: {} as Record<string, never>,
-      apps: { [appId]: testState },
-    });
-
-    const testScope = defineScope(appId);
-    const testGroup = testKernel.group({
-      scope: testScope,
-      stateSlice: {
-        get: (full: TestAppState) => full.apps[appId] as S,
-        set: (full: TestAppState, s: unknown) => ({
-          ...full,
-          apps: { ...full.apps, [appId]: s },
-        }),
-      },
-    });
-
-    // Register history middleware on test kernel when history is enabled
-    if (enableHistory) {
-      const historyMw = createHistoryMiddleware(appId, testScope);
-      testKernel.use(historyMw);
-    }
-
-    // Re-register all commands on test kernel, collecting test factories
-    const testFactories = new Map<string, CommandFactory<any, any>>();
-    for (const [type, entry] of flatHandlerRegistry) {
-      const kernelHandler = (ctx: { state: S }) => (payload: any) =>
-        entry.handler(ctx, payload);
-
-      const whenGuard = entry.when
-        ? { when: (state: unknown) => entry.when!.evaluate(state as S) }
-        : undefined;
-
-      const testFactory = testGroup.defineCommand(
-        type,
-        kernelHandler as any,
-        whenGuard as any,
-      );
-      testFactories.set(type, testFactory);
-    }
-
-    // ── v3 compat: Build dispatch proxy ──
-    const dispatchProxy: Record<string, (payload?: any) => void> = {};
-    for (const [type] of flatHandlerRegistry) {
-      dispatchProxy[type] = (payload?: any) => {
-        const factory = testFactories.get(type);
-        if (factory) {
-          testKernel.dispatch((factory as any)(payload ?? {}));
-        }
-      };
-    }
-
-    // ── v3 compat: Build select proxy ──
-    const selectProxy: Record<string, (...args: any[]) => any> = {};
-    if (options?.selectors) {
-      for (const [name, selectorFn] of Object.entries(options.selectors)) {
-        selectProxy[name] = (...args: any[]) => {
-          const appState = testKernel.getState().apps[appId] as S;
-          return selectorFn(appState, ...args);
-        };
-      }
-    }
-
-    // ── v3 compat: Build commands map with `when` metadata ──
-    const commandsMap: Record<string, any> = {};
-    for (const [type, entry] of flatHandlerRegistry) {
-      const factory = testFactories.get(type);
-      if (factory) {
-        commandsMap[type] = factory;
-        (commandsMap[type] as any).when = entry.when
-          ? (state: any) => entry.when!.evaluate(state)
-          : null;
-      }
-    }
-
-    return {
-      get state() {
-        return testKernel.getState().apps[appId] as S;
-      },
-
-      dispatch: Object.assign(
-        (command: any): boolean => {
-          // v5 style: dispatch(command)
-          const entry = flatHandlerRegistry.get(command.type);
-          if (entry?.when) {
-            const currentState = testKernel.getState().apps[appId] as S;
-            if (!entry.when.evaluate(currentState)) return false;
-          }
-          // Redirect to test scope — zone commands carry production scope
-          // (e.g., ['todo-v5:list']) but test kernel uses single test scope
-          const normalizedCmd = {
-            ...command,
-            scope: [testScope],
-          };
-          testKernel.dispatch(normalizedCmd);
-          return true;
-        },
-        // v3 style: dispatch.addTodo({...})
-        dispatchProxy,
-      ),
-
-      // Dual: v5 select(brandedSelector) + v3 select.visibleTodos()
-      select: Object.assign((selectorOrBranded: any) => {
-        // v5 style: select(brandedSelector)
-        if (selectorOrBranded && __selectorBrand in selectorOrBranded) {
-          const currentState = testKernel.getState().apps[appId] as S;
-          return selectorOrBranded.select(currentState);
-        }
-        return undefined;
-      }, selectProxy) as any,
-
-      // v3 style: commands.cancelEdit
-      commands: commandsMap,
-
-      reset() {
-        testKernel.setState(() => ({
-          os: {} as Record<string, never>,
-          apps: { [appId]: testState },
-        }));
-      },
-
-      evaluate(condition: Condition<S>): boolean {
-        const currentState = testKernel.getState().apps[appId] as S;
-        return condition.evaluate(currentState);
-      },
-
-      transaction(fn: () => void): void {
-        beginTransaction();
-        try {
-          fn();
-        } finally {
-          endTransaction();
-        }
-      },
-    } as any;
+    return createTestInstance(
+      { appId, initialState, flatHandlerRegistry, options },
+      overrides,
+    );
   }
 
-  // ── createTrigger ──
-
-  function createTrigger(
-    command: CommandFactory<string, any>,
-  ): React.FC<{ payload?: any; children: ReactNode }> {
-    const SimpleTrigger: React.FC<{ payload?: any; children: ReactNode }> = ({
-      payload,
-      children,
-    }) => {
-      return React.createElement(
-        OS.Trigger as any,
-        { onPress: command(payload ?? {}) },
-        children,
-      );
-    };
-    SimpleTrigger.displayName = `${appId}.Trigger`;
-    return SimpleTrigger;
-  }
 
   // ── Return AppHandle (v5 + v3 compat) ──
 
@@ -659,80 +372,10 @@ export function defineApp<S>(
     createTrigger: ((commandOrConfig: any): any => {
       // ── Simple trigger ──
       if (typeof commandOrConfig === "function") {
-        return createTrigger(commandOrConfig);
+        return createSimpleTrigger(appId, commandOrConfig);
       }
       // ── Compound trigger (Dialog pattern) — v3 compat ──
-      const config = commandOrConfig as {
-        id?: string;
-        confirm?: CommandFactory<string, any>;
-      };
-      const dialogId = config.id ?? `${appId}-dialog-${Date.now()}`;
-
-      const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) =>
-        React.createElement(OS.Dialog as any, { id: dialogId }, children);
-      RootComponent.displayName = `${appId}.Dialog`;
-
-      const TriggerComponent: React.FC<{
-        children: ReactNode;
-        className?: string;
-        asChild?: boolean;
-      }> = ({ children, className, asChild }) =>
-        React.createElement(
-          (OS.Dialog as any).Trigger,
-          { className, asChild },
-          children,
-        );
-      TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
-
-      const ContentComponent: React.FC<{
-        children: ReactNode;
-        title?: string;
-        className?: string;
-        zoneClassName?: string;
-      }> = (props) =>
-        React.createElement((OS.Dialog as any).Content, props as any);
-      ContentComponent.displayName = `${appId}.Dialog.Content`;
-
-      const PortalComponent: React.FC<{
-        children: ReactNode;
-        title?: string;
-        description?: string;
-        className?: string;
-        contentClassName?: string;
-      }> = (props) =>
-        React.createElement((OS.Trigger as any).Portal, props as any);
-      PortalComponent.displayName = `${appId}.Dialog.Portal`;
-
-      const DismissComponent: React.FC<{
-        children: ReactNode;
-        className?: string;
-      }> = ({ children, className }) =>
-        React.createElement((OS.Dialog as any).Close, { className }, children);
-      DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
-
-      const ConfirmComponent: React.FC<{
-        children: ReactNode;
-        className?: string;
-      }> = ({ children, className }) => {
-        const confirmCmd = config.confirm
-          ? config.confirm({} as any)
-          : undefined;
-        return React.createElement(
-          (OS.Dialog as any).Close,
-          { className, onPress: confirmCmd },
-          children,
-        );
-      };
-      ConfirmComponent.displayName = `${appId}.Dialog.Confirm`;
-
-      return {
-        Root: RootComponent,
-        Trigger: TriggerComponent,
-        Portal: PortalComponent,
-        Content: ContentComponent,
-        Dismiss: DismissComponent,
-        Confirm: ConfirmComponent,
-      };
+      return createCompoundTrigger(appId, commandOrConfig);
     }) as {
       (
         command: CommandFactory<string, any>,
@@ -856,9 +499,9 @@ export function defineApp<S>(
           // v3 when is bare lambda, not Condition
           const whenCondition = cmdOptions?.when
             ? defineCondition(
-                `__v3_when_${type}`,
-                cmdOptions.when as (state: S) => boolean,
-              )
+              `__v3_when_${type}`,
+              cmdOptions.when as (state: S) => boolean,
+            )
             : undefined;
 
           const factory = registerCommand(type, flatHandler, {
