@@ -3,7 +3,7 @@
 > 모든 동작 계약을 이 문서 하나로 관리한다.
 > 코드는 이 문서를 따르고, 테스트는 이 문서를 검증한다.
 >
-> Last verified: 2026-02-15
+> Last verified: 2026-02-16
 
 ---
 
@@ -56,10 +56,10 @@
 | Command | Payload | State Change | Effects | Status |
 |---------|---------|-------------|---------|--------|
 | `FOCUS` | `{ zoneId, itemId }` | `activeZoneId = zoneId`, zone의 `focusedItemId = itemId` | `focus: itemId` | ✅ |
-| `SYNC_FOCUS` | `{ zoneId, itemId }` | zone의 `focusedItemId = itemId` (activeZone 변경 안함) | — | ⚠️ |
-| `RECOVER` | `{ zoneId }` | `focusedItemId = recoveryTargetId \|\| lastFocusedId` | `focus: targetId` | ⚠️ |
-| `STACK_PUSH` | `{ zoneId }` | focusStack에 현재 상태 push | — | ⚠️ |
-| `STACK_POP` | `{}` | focusStack에서 pop, 이전 zone/item 복원 | `focus: restoredId` | ⚠️ |
+| `SYNC_FOCUS` | `{ zoneId, itemId }` | zone의 `focusedItemId = itemId`, `activeZoneId = zoneId` | — (no focus effect) | ✅ |
+| `RECOVER` | `{ zoneId }` | `focusedItemId = recoveryTargetId \|\| lastFocusedId` | `focus: targetId` | ✅ |
+| `STACK_PUSH` | `{ zoneId }` | focusStack에 현재 상태 push | — | ✅ |
+| `STACK_POP` | `{}` | focusStack에서 pop, 이전 zone/item 복원 | `focus: restoredId` | ✅ |
 
 ### 3.2 Navigation Commands
 
@@ -154,10 +154,10 @@
 | `OS_CHECK` | `{ targetId }` | onCheck 콜백 dispatch | `dispatch: onCheck` | ✅ |
 | `ESCAPE` | `{}` | dismiss.escape 설정에 따라: close→onDismiss, deselect→selection clear | `dispatch: onDismiss` | ✅ |
 | `OS_DELETE` | `{}` | onDelete 콜백 dispatch (선택된 아이템 대상) | `dispatch: onDelete` | ✅ |
-| `OS_MOVE_UP` | `{}` | onMoveUp 콜백 dispatch | `dispatch: onMoveUp` | ⚠️ |
-| `OS_MOVE_DOWN` | `{}` | onMoveDown 콜백 dispatch | `dispatch: onMoveDown` | ⚠️ |
-| `OS_UNDO` | `{}` | onUndo 콜백 dispatch | `dispatch: onUndo` | ⚠️ |
-| `OS_REDO` | `{}` | onRedo 콜백 dispatch | `dispatch: onRedo` | ⚠️ |
+| `OS_MOVE_UP` | `{}` | onMoveUp 콜백 dispatch | `dispatch: onMoveUp` | ✅ |
+| `OS_MOVE_DOWN` | `{}` | onMoveDown 콜백 dispatch | `dispatch: onMoveDown` | ✅ |
+| `OS_UNDO` | `{}` | onUndo 콜백 dispatch | `dispatch: onUndo` | ✅ |
+| `OS_REDO` | `{}` | onRedo 콜백 dispatch | `dispatch: onRedo` | ✅ |
 
 ### 3.6 Clipboard Commands
 
@@ -177,16 +177,16 @@
 
 | Command | Payload | Behavior | Effects | Status |
 |---------|---------|----------|---------|--------|
-| `FIELD_START_EDIT` | `{ fieldId }` | editing 상태 진입 | — | ⚠️ |
-| `FIELD_COMMIT` | `{ fieldId, value }` | 값 커밋, editing 종료 | — | ⚠️ |
-| `FIELD_CANCEL` | `{ fieldId }` | 취소, editing 종료 | — | ⚠️ |
+| `FIELD_START_EDIT` | `{ fieldId }` | editing 상태 진입 | — | ✅ |
+| `FIELD_COMMIT` | `{ fieldId, value }` | 값 커밋, editing 종료 | — | ✅ |
+| `FIELD_CANCEL` | `{ fieldId }` | 취소, editing 종료 | — | ✅ |
 
 ### 3.9 Overlay Commands
 
 | Command | Payload | Behavior | Effects | Status |
 |---------|---------|----------|---------|--------|
-| `OVERLAY_OPEN` | `{ overlayId }` | 오버레이 열기, 포커스 이동 | — | ⚠️ |
-| `OVERLAY_CLOSE` | `{ overlayId }` | 오버레이 닫기, 포커스 복원 | — | ⚠️ |
+| `OVERLAY_OPEN` | `{ overlayId }` | 오버레이 열기, 포커스 이동 | — | ✅ |
+| `OVERLAY_CLOSE` | `{ overlayId }` | 오버레이 닫기, 포커스 복원 | — | ✅ |
 
 ---
 
@@ -367,7 +367,7 @@
 | Middleware | Trigger | Behavior | Status |
 |-----------|---------|----------|--------|
 | `historyKernelMiddleware` | state-changing commands | Undo/Redo 스택 관리 | ✅ |
-| `macFallbackMiddleware` | unhandled keyboard events | Mac 특수 키 처리 | ⚠️ |
+| `macFallbackMiddleware` | unhandled keyboard events | Mac 특수 키 처리 | ✅ |
 
 ---
 
@@ -382,7 +382,7 @@
 | Entry: restore | ✅ | ✅ `navigate.test` | ✅ |
 | Navigate (vertical loop) | ✅ | ✅ `navigate.test` | ✅ |
 | Navigate (horizontal clamp) | ✅ | ✅ `navigate.test` | ✅ |
-| Navigate (2D grid) | ✅ | — | ⚠️ spatial은 DOM 필요 |
+| Navigate (2D grid) | ✅ | — | ⚠️ spatial은 DOM 의존, E2E로 충분 |
 | Navigate (Home/End) | ✅ | ✅ `navigate.test` | ✅ |
 | Navigate (orthogonal ignored) | ✅ | ✅ `navigate.test` | ✅ |
 | Navigate (typeahead) | — | ✅ `typeahead.test` | ✅ 구현 + 테스트 |

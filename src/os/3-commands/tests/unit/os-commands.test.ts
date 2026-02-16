@@ -207,6 +207,28 @@ describe("OS_MOVE → onMoveUp/Down pipeline", () => {
 
     kernel.dispatch(OS_MOVE_DOWN());
   });
+
+  it("does nothing when Zone has no onMoveUp", () => {
+    setupFocus("testZone", "item-1");
+    registerZone("testZone", {});
+
+    kernel.dispatch(OS_MOVE_UP());
+  });
+
+  it("does nothing when Zone has no onMoveDown", () => {
+    setupFocus("testZone", "item-1");
+    registerZone("testZone", {});
+
+    kernel.dispatch(OS_MOVE_DOWN());
+  });
+
+  it("does nothing when no active zone (MOVE_UP)", () => {
+    kernel.dispatch(OS_MOVE_UP());
+  });
+
+  it("does nothing when no active zone (MOVE_DOWN)", () => {
+    kernel.dispatch(OS_MOVE_DOWN());
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
