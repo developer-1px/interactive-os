@@ -75,6 +75,8 @@ import {
   createSimpleTrigger,
 } from "./defineApp.trigger";
 import { createTestInstance } from "./defineApp.testInstance";
+import { createBoundComponents } from "./defineApp.bind";
+import { createWidgetFactory } from "./defineApp.widget";
 
 // ═══════════════════════════════════════════════════════════════════
 // defineApp — Production Implementation
@@ -223,116 +225,10 @@ export function defineApp<S>(
           keybindings?: KeybindingEntry<S>[];
         },
       ): BoundComponents<S> {
-        // ── Zone component ──
-        const ZoneComponent: React.FC<{
-          id?: string;
-          className?: string;
-          children?: ReactNode;
-        }> = ({ id, className, children }) => {
-          const zoneProps: Record<string, any> = {
-            id: id ?? zoneName,
-            className,
-            role: config.role,
-          };
-
-          // Map zone bindings → OS.Zone event props
-          const eventMap: Record<string, string> = {
-            onCheck: "onCheck",
-            onAction: "onAction",
-            onDelete: "onDelete",
-            onCopy: "onCopy",
-            onCut: "onCut",
-            onPaste: "onPaste",
-            onMoveUp: "onMoveUp",
-            onMoveDown: "onMoveDown",
-            onUndo: "onUndo",
-            onRedo: "onRedo",
-          };
-
-          for (const [declKey, propKey] of Object.entries(eventMap)) {
-            const cmd = (config as any)[declKey];
-            if (cmd) {
-              zoneProps[propKey] = cmd({ id: OS.FOCUS });
-            }
-          }
-
-          // Keybindings registration
-          React.useEffect(() => {
-            if (!config.keybindings || config.keybindings.length === 0) return;
-            const bindings = config.keybindings.map((kb) => ({
-              key: kb.key,
-              command: kb.command,
-              args: [{ id: "OS.FOCUS" }],
-              when: "navigating" as const,
-            }));
-            return KeybindingsRegistry.registerAll(bindings);
-          }, []);
-
-          return React.createElement(OS.Zone, zoneProps as any, children);
-        };
-        ZoneComponent.displayName = `${appId}.${zoneName}.Zone`;
-
-        // ── Item component ──
-        const ItemComponent: React.FC<{
-          id: string | number;
-          className?: string;
-          children?: ReactNode;
-          asChild?: boolean;
-        }> = ({ id, className, children, asChild }) => {
-          return React.createElement(
-            OS.Item,
-            { id: String(id), className, asChild } as any,
-            children,
-          );
-        };
-        ItemComponent.displayName = `${appId}.${zoneName}.Item`;
-
-        // ── Field component ──
-        const FieldComponent: React.FC<{
-          name: string;
-          value?: string;
-          placeholder?: string;
-          className?: string;
-          autoFocus?: boolean;
-          blurOnInactive?: boolean;
-        }> = (props) => {
-          const fieldProps: Record<string, any> = { ...props };
-
-          if (config.field) {
-            if (config.field.onChange)
-              fieldProps["onChange"] = config.field.onChange;
-            if (config.field.onSubmit)
-              fieldProps["onSubmit"] = config.field.onSubmit;
-            if (config.field.onCancel) {
-              // onCancel may be a CommandFactory (function) or a BaseCommand (object)
-              const cancel = config.field.onCancel;
-              fieldProps["onCancel"] =
-                typeof cancel === "function" ? cancel() : cancel;
-            }
-          }
-
-          return React.createElement(OS.Field, fieldProps as any);
-        };
-        FieldComponent.displayName = `${appId}.${zoneName}.Field`;
-
-        // ── When component ──
-        const WhenComponent: React.FC<{
-          condition: Condition<S>;
-          children?: ReactNode;
-        }> = ({ condition, children }) => {
-          const value = slice.useComputed((s) => condition.evaluate(s));
-          return value
-            ? React.createElement(React.Fragment, null, children)
-            : null;
-        };
-        WhenComponent.displayName = `${appId}.${zoneName}.When`;
-
-        return {
-          Zone: ZoneComponent,
-          Item: ItemComponent,
-          Field: FieldComponent,
-          When: WhenComponent,
-        };
+        return createBoundComponents(
+          { appId, zoneName, useComputed: slice.useComputed },
+          config,
+        );
       },
     };
 
@@ -472,84 +368,11 @@ export function defineApp<S>(
         keybindings?: any[];
       },
     ): any {
-      const zone = createZone(widgetName);
-
-      // Build v3-style define API
-      const widgetDefine = {
-        command(type: string, ...args: any[]) {
-          // Support: (type, deps, handler, options?) and (type, handler, options?)
-          let handler: any;
-          let cmdOptions: any;
-
-          if (args.length >= 2 && Array.isArray(args[0])) {
-            // (type, deps, handler, options?)
-            handler = args[1];
-            cmdOptions = args[2];
-          } else {
-            // (type, handler, options?)
-            handler = args[0];
-            cmdOptions = args[1];
-          }
-
-          // v3 handler is curried: (ctx) => (payload) => result
-          // Wrap to flat: (ctx, payload) => result
-          const flatHandler: FlatHandler<S, any> = (ctx, payload) =>
-            handler(ctx)(payload);
-
-          // v3 when is bare lambda, not Condition
-          const whenCondition = cmdOptions?.when
-            ? defineCondition(
-              `__v3_when_${type}`,
-              cmdOptions.when as (state: S) => boolean,
-            )
-            : undefined;
-
-          const factory = registerCommand(type, flatHandler, {
-            when: whenCondition,
-          });
-
-          // v3 compat: attach when metadata
-          (factory as any).when = cmdOptions?.when ?? null;
-
-          return factory as any;
-        },
-      };
-
-      // Run factory
-      const config = factory(widgetDefine as any);
-
-      // Build bound components
-      const bound = zone.bind({
-        role: config.zone?.role ?? "group",
-        ...config.zone,
-        field: config.field,
-        keybindings: config.keybindings?.map((kb: any) => ({
-          key: kb.key,
-          command: kb.command,
-        })),
-      });
-
-      return {
-        Zone: bound.Zone,
-        Item: bound.Item,
-        Field: bound.Field,
-        When: bound.When,
-        // v3: Keybindings component (standalone, for widgets without Zone)
-        Keybindings: ((props: { children?: ReactNode }) => {
-          React.useEffect(() => {
-            if (!config.keybindings || config.keybindings.length === 0) return;
-            const bindings = config.keybindings.map((kb: any) => ({
-              key: kb.key,
-              command: kb.command,
-              args: [{ id: "OS.FOCUS" }],
-              when: kb.when ?? ("navigating" as const),
-            }));
-            return KeybindingsRegistry.registerAll(bindings);
-          }, []);
-          return React.createElement(React.Fragment, null, props.children);
-        }) as React.FC<{ children?: ReactNode }>,
-        commands: config.commands,
-      };
+      return createWidgetFactory(
+        { createZone, registerCommand, defineCondition },
+        widgetName,
+        factory,
+      );
     },
   };
 }
