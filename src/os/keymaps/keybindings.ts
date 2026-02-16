@@ -31,8 +31,15 @@ export interface KeyBinding {
 }
 
 export interface KeyResolveContext {
-  /** Whether a Field is currently being edited */
+  /** Whether the target element is an editable element (input/textarea/contentEditable) */
   isEditing: boolean;
+  /**
+   * Whether the field actively consumes this specific key.
+   * When false AND isEditing is true, the key is "released" to OS navigation.
+   * This enables inline fields (draft, search) to let Tab/ArrowDown through.
+   * Defaults to isEditing if not provided (backward compatibility).
+   */
+  isFieldActive?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -76,10 +83,16 @@ export const Keybindings = {
     const list = bindings.get(key);
     if (!list || list.length === 0) return null;
 
+    // isFieldActive: does the field consume this specific key?
+    // Falls back to isEditing for backward compatibility.
+    const fieldActive = context.isFieldActive ?? context.isEditing;
+
     // Priority: context-specific bindings first, then universal
     for (const b of list) {
+      // "editing" bindings fire when the element is an editing element (mode-based)
       if (b.when === "editing" && context.isEditing) return b;
-      if (b.when === "navigating" && !context.isEditing) return b;
+      // "navigating" bindings fire when the field does NOT consume this key
+      if (b.when === "navigating" && !fieldActive) return b;
     }
 
     // Fallback: universal (no `when`)

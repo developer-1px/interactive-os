@@ -60,9 +60,12 @@ export const macFallbackMiddleware: Middleware = {
     if (!fallbackKey) return null;
 
     const target = event.target as HTMLElement;
-    const isEditing = resolveIsEditingForKey(target, fallbackKey);
+    const isEditing = isEditingElement(target);
+    const isFieldActive = isEditing
+      ? resolveIsEditingForKey(target, fallbackKey)
+      : false;
 
-    const context: KeyResolveContext = { isEditing };
+    const context: KeyResolveContext = { isEditing, isFieldActive };
     const binding = Keybindings.resolve(fallbackKey, context);
     if (!binding) return null;
 

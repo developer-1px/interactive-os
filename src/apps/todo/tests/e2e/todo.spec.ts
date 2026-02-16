@@ -397,4 +397,56 @@ test.describe("Todo App", () => {
     await expect(page.getByText("Bulk B")).toBeVisible();
     await expect(page.getByText("Bulk C")).toBeVisible();
   });
+
+  // ─────────────────────────────────────────────────────────────
+  // Field Key Ownership — Draft inline field navigation
+  // ─────────────────────────────────────────────────────────────
+
+  test("Tab from Draft escapes to sidebar, Shift+Tab returns to Draft", async ({
+    page,
+  }) => {
+    // Click Draft to focus it
+    const draft = page.locator(DRAFT);
+    await draft.click();
+    await expect(draft).toHaveAttribute("data-focused", "true");
+
+    // Tab → should escape list zone to sidebar zone
+    await page.keyboard.press("Tab");
+    const sidebarFocused = page.locator(
+      `${SIDEBAR} [data-focused="true"]`,
+    );
+    await expect(sidebarFocused).toHaveCount(1);
+
+    // Shift+Tab → should return to list zone, landing on Draft (first item)
+    await page.keyboard.press("Shift+Tab");
+    await expect(draft).toHaveAttribute("data-focused", "true");
+  });
+
+  test("ArrowDown from Draft moves to first todo item", async ({ page }) => {
+    // Click Draft to focus it
+    const draft = page.locator(DRAFT);
+    await draft.click();
+    await expect(draft).toHaveAttribute("data-focused", "true");
+
+    // ArrowDown → should move focus from Draft to the first todo item
+    await page.keyboard.press("ArrowDown");
+
+    // Draft should lose focus, first todo should gain focus
+    const todoFocused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(todoFocused).toHaveCount(1);
+    await expect(todoFocused).toContainText("Complete Interaction OS docs");
+  });
+
+  test("ArrowUp from first todo item moves to Draft", async ({ page }) => {
+    // Click on the todo item to focus it
+    await page.getByText("Complete Interaction OS docs").click();
+    const todoFocused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(todoFocused).toHaveCount(1);
+
+    // ArrowUp → should move to Draft (previous item in zone)
+    await page.keyboard.press("ArrowUp");
+
+    const draft = page.locator(DRAFT);
+    await expect(draft).toHaveAttribute("data-focused", "true");
+  });
 });

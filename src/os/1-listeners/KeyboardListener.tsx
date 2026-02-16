@@ -161,10 +161,17 @@ export function KeyboardListener() {
       if (isComboboxInput(target)) return;
 
       const canonicalKey = getCanonicalKey(e);
-      const isEditing = resolveIsEditingForKey(target, canonicalKey);
+
+      // Dual context for Key Ownership Model:
+      // - isEditing: is the element an editing element? (Enter→FIELD_COMMIT, Escape→FIELD_CANCEL)
+      // - isFieldActive: does the field consume this specific key? (Tab, Arrow → may pass through)
+      const isEditing = isEditingElement(target);
+      const isFieldActive = isEditing
+        ? resolveIsEditingForKey(target, canonicalKey)
+        : false;
 
       // Space on checkbox/switch → CHECK override (W3C APG)
-      if (canonicalKey === "Space" && !isEditing) {
+      if (canonicalKey === "Space" && !isFieldActive) {
         if (tryDispatchCheck(e, canonicalKey)) {
           e.preventDefault();
           e.stopPropagation();
@@ -172,8 +179,11 @@ export function KeyboardListener() {
         }
       }
 
-      // Resolve keybinding
-      const binding = Keybindings.resolve(canonicalKey, { isEditing });
+      // Resolve keybinding with dual context
+      const binding = Keybindings.resolve(canonicalKey, {
+        isEditing,
+        isFieldActive,
+      });
 
       if (!binding) {
         // No keybinding → try middleware fallback
