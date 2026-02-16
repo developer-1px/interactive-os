@@ -162,9 +162,9 @@ export const moveItemUp = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -188,9 +188,9 @@ export const moveItemDown = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -394,6 +394,7 @@ export const redoCommand = listZone.command(
 // Zone binding
 export const TodoListUI = listZone.bind({
   role: "listbox",
+  options: { navigate: { typeahead: false } },
   onCheck: toggleTodo,
   onAction: startEdit,
   onDelete: deleteTodo,

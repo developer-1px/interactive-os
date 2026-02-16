@@ -45,7 +45,6 @@ export const INITIAL_STATE: AppState = {
     isInspectorOpen: true,
     clipboard: null,
   },
-  effects: [],
   history: {
     past: [],
     future: [],

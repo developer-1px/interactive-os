@@ -15,6 +15,7 @@ import type {
     KeybindingEntry,
     ZoneBindings,
 } from "./defineApp.types";
+import type { ZoneOptions } from "@os/6-components/primitives/Zone";
 
 // ═══════════════════════════════════════════════════════════════════
 // Bind Config (injected by createZone)
@@ -35,6 +36,7 @@ export function createBoundComponents<S>(
     config: ZoneBindings & {
         field?: FieldBindings;
         keybindings?: KeybindingEntry<S>[];
+        options?: ZoneOptions;
     },
 ): BoundComponents<S> {
     const { appId, zoneName, useComputed } = bindConfig;
@@ -70,6 +72,11 @@ export function createBoundComponents<S>(
             if (cmd) {
                 zoneProps[propKey] = cmd({ id: OS.FOCUS });
             }
+        }
+
+        // Forward advanced options (e.g., navigate override)
+        if (config.options) {
+            zoneProps["options"] = config.options;
         }
 
         // Keybindings registration

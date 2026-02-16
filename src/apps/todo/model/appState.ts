@@ -1,12 +1,3 @@
-export type AppEffect =
-  | { type: "FOCUS_ID"; id: string | number }
-  | {
-      type: "NAVIGATE";
-      direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
-      targetZone?: string;
-    }
-  | { type: "SCROLL_INTO_VIEW"; id: string | number };
-
 type FocusTarget = "DRAFT" | string | null;
 
 export interface Category {
@@ -20,14 +11,8 @@ export interface Todo {
   categoryId: string;
 }
 
-// Decoupled Command Type for History to avoid Cycle
-export interface GenericCommand {
-  type: string;
-  payload?: any;
-}
-
 export interface HistoryEntry {
-  command: GenericCommand; // Was TodoCommand
+  command: { type: string; payload?: any };
   timestamp: number;
   // Snapshot state for undo/redo (optional if just logging)
   snapshot?: any;
@@ -67,6 +52,5 @@ export interface HistoryState {
 export interface AppState {
   data: DataState;
   ui: UIState;
-  effects: AppEffect[]; // [NEW] FIFO Queue for Side Effects
   history: HistoryState;
 }
