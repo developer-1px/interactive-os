@@ -1,4 +1,13 @@
-import { buildDocTree, type DocItem } from "./docsUtils";
+import { buildDocTree, type DocItem, flattenTree } from "./docsUtils";
+
+// ─── File System Access API (experimental, Chrome/Edge only) ───
+declare global {
+    interface Window {
+        showDirectoryPicker?(options?: {
+            mode?: "read" | "readwrite";
+        }): Promise<FileSystemDirectoryHandle>;
+    }
+}
 
 /**
  * Read all .md files recursively from a FileSystemDirectoryHandle.
@@ -54,8 +63,7 @@ export async function openExternalFolder(): Promise<ExternalFolderSource | null>
     }
 
     try {
-        // biome-ignore lint/suspicious/noExplicitAny: showDirectoryPicker not yet in all TS libs
-        const dirHandle = await (window as any).showDirectoryPicker({
+        const dirHandle = await window.showDirectoryPicker!({
             mode: "read",
         });
 
@@ -70,7 +78,7 @@ export async function openExternalFolder(): Promise<ExternalFolderSource | null>
         // We need to transform paths to look like the glob format buildDocTree expects
         const fakePaths = Array.from(files.keys()).map((p) => `../../ext/${p}.md`);
         const tree = buildDocTree(fakePaths, "../../ext/");
-        const allFiles = flattenTreeLocal(tree);
+        const allFiles = flattenTree(tree);
 
         return {
             name: dirHandle.name,
@@ -85,14 +93,4 @@ export async function openExternalFolder(): Promise<ExternalFolderSource | null>
         }
         throw err;
     }
-}
-
-/** Local flatten (same logic as docsUtils but avoids circular dependency concerns) */
-function flattenTreeLocal(items: DocItem[]): DocItem[] {
-    let flat: DocItem[] = [];
-    for (const item of items) {
-        if (item.type === "file") flat.push(item);
-        if (item.children) flat = flat.concat(flattenTreeLocal(item.children));
-    }
-    return flat;
 }
