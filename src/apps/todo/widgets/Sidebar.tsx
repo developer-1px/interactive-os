@@ -17,10 +17,6 @@ import {
   User,
 } from "lucide-react";
 
-// Stable fallback refs to avoid referential inequality in useSyncExternalStore
-const EMPTY_ORDER: readonly string[] = [];
-const EMPTY_CATS: Readonly<Record<string, never>> = {};
-
 const getIcon = (id: string) => {
   switch (id) {
     case "cat_inbox":
