@@ -486,11 +486,10 @@ function AriaShowcaseContent() {
                 className={`
                                   w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
                                   flex items-center gap-2 transition-all
-                                  ${
-                                    isComboInvalid
-                                      ? "border-red-300 bg-red-50 text-red-700"
-                                      : "border-gray-200 hover:border-gray-300"
-                                  }
+                                  ${isComboInvalid
+                    ? "border-red-300 bg-red-50 text-red-700"
+                    : "border-gray-200 hover:border-gray-300"
+                  }
                                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
                                   aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
                               `}
@@ -937,13 +936,12 @@ function DialogDemo({
 
   const handleClose = useCallback(() => {
     onClose();
-    // Defer focus restore to after dialog unmount to prevent RECOVER from stealing it
-    // Double-rAF to ensure we run AFTER React unmount and synchronous useLayoutEffect cleanup (STACK_POP)
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        triggerRef.current?.focus();
-      });
-    });
+    // Defer focus restore to after dialog unmount + STACK_POP cleanup.
+    // setTimeout(0) runs after React's synchronous useLayoutEffect cleanup
+    // but is more reliable than double-rAF which can race with effects.
+    setTimeout(() => {
+      triggerRef.current?.focus();
+    }, 0);
   }, [onClose]);
 
   // Observe kernel dismiss: when dialog zone becomes inactive after being open,
@@ -1031,13 +1029,10 @@ function AlertDialogDemo({
 
   const handleClose = useCallback(() => {
     onClose();
-    // Defer focus restore to after dialog unmount to prevent RECOVER from stealing it
-    // Double-rAF to ensure we run AFTER React unmount and synchronous useLayoutEffect cleanup (STACK_POP)
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        triggerRef.current?.focus();
-      });
-    });
+    // Defer focus restore to after dialog unmount + STACK_POP cleanup.
+    setTimeout(() => {
+      triggerRef.current?.focus();
+    }, 0);
   }, [onClose]);
 
   // Observe kernel dismiss: when alertdialog zone becomes inactive after being open,

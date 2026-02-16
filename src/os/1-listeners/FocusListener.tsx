@@ -8,7 +8,7 @@
  * Handles: mousedown (pointer focus), focusin (DOM sync), MutationObserver (recovery)
  */
 
-import { FOCUS, RECOVER, SELECT, SYNC_FOCUS } from "@os/3-commands";
+import { ACTIVATE, FOCUS, RECOVER, SELECT, SYNC_FOCUS } from "@os/3-commands";
 import { kernel } from "@os/kernel";
 import { useEffect } from "react";
 import { sensorGuard } from "../lib/loopGuard";
@@ -51,6 +51,20 @@ let isDispatching = false;
 
 export function setDispatching(value: boolean) {
   isDispatching = value;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Click-Expand Role Check
+// ═══════════════════════════════════════════════════════════════════
+
+/** Roles where click should NOT toggle expansion (keyboard-only expand). */
+const KEYBOARD_ONLY_EXPAND_ROLES = new Set(["treeitem", "menuitem"]);
+
+/** Returns true if clicking this element should toggle its aria-expanded. */
+function isClickExpandableRole(el: HTMLElement): boolean {
+  const role = el.getAttribute("role");
+  if (!role) return true; // no role → assume clickable
+  return !KEYBOARD_ONLY_EXPAND_ROLES.has(role);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -146,8 +160,14 @@ function senseMouseDown(e: Event) {
   // CHECK is keyboard-only (Space key) — matches W3C APG pattern
   dispatchSelectCommand(me, itemId);
 
-  // W3C APG: click = focus + select only.
-  // Expand/collapse is handled by ArrowRight/Left/Enter/Space (navigate command).
+  // W3C APG: Click on disclosure/accordion buttons toggles expansion.
+  // Tree expansion is keyboard-only (ArrowRight/Left/Enter/Space per APG).
+  // ACTIVATE checks for aria-expanded and dispatches EXPAND if present.
+  if (item.hasAttribute("aria-expanded") && isClickExpandableRole(item)) {
+    kernel.dispatch(ACTIVATE(), {
+      meta: { input: { type: "MOUSE", key: e.type, elementId: itemId } },
+    });
+  }
 }
 
 /** FocusIn → SYNC_FOCUS (state sync only, no DOM effects) */

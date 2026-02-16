@@ -60,9 +60,16 @@ test.describe("Tree", () => {
   });
 
   test("Click Interaction", async ({ page }) => {
-    // Click 1: focuses + expands tree-src (toggle: false→true)
+    // Click focuses the item but does NOT toggle expansion (tree expansion is keyboard-only)
     await page.locator("#tree-src").click();
     await expect(page.locator("#tree-src")).toBeFocused();
+    await expect(page.locator("#tree-src")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+
+    // Enter toggles expansion: false→true
+    await page.keyboard.press("Enter");
     await expect(page.locator("#tree-src")).toHaveAttribute(
       "aria-expanded",
       "true",
@@ -72,8 +79,15 @@ test.describe("Tree", () => {
     await page.locator("#tree-components").click();
     await expect(page.locator("#tree-components")).toBeFocused();
 
-    // Click parent again: toggles expansion (true→false)
+    // Click parent again: focuses it but doesn't collapse
     await page.locator("#tree-src").click();
+    await expect(page.locator("#tree-src")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    // Space toggles expansion: true→false
+    await page.keyboard.press("Space");
     await expect(page.locator("#tree-src")).toHaveAttribute(
       "aria-expanded",
       "false",
