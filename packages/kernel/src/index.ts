@@ -24,7 +24,5 @@ export type {
   ScopeToken,
 } from "./core/tokens.ts";
 export { GLOBAL } from "./core/tokens.ts";
-// ─── Types ───
-export type { StateDiff, Transaction } from "./core/transaction.ts";
-// ─── Entry Point ───
+export type { Transaction } from "./core/transaction.ts";
 export { createKernel, defineScope } from "./createKernel.ts";

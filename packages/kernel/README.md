@@ -58,9 +58,11 @@ console.log(kernel.getState()); // { count: 1 }
 ```
 packages/kernel/src/
 ├── index.ts              Public API exports
-├── createKernel.ts       Kernel factory (~640 lines)
+├── createKernel.ts       Kernel factory
+├── createInspector.ts    Inspector adapter (Port → API)
 └── core/
-    ├── tokens.ts         Type definitions
+    ├── tokens.ts         Branded token types
+    ├── inspectorPort.ts  Inspector port/interface
     └── transaction.ts    StateDiff computation
 ```
 
