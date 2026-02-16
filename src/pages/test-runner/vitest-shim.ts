@@ -306,9 +306,9 @@ createExpect.arrayContaining = (expected: any[]) => ({
   __arrayContaining: true,
   expected,
 });
-createExpect.any = (constructor: any) => ({
+createExpect.any = (ctor: any) => ({
   __any: true,
-  constructor,
+  constructor: ctor,
 });
 createExpect.stringContaining = (expected: string) => ({
   __stringContaining: true,

@@ -225,8 +225,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
       }
     }, 0);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, zoneId]);
 
   // ── Filtering ──
   const filter = filterFn ?? defaultFilter;

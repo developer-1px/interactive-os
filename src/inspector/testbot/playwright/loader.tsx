@@ -85,10 +85,8 @@ export function usePlaywrightSpecs(
   // We assume runSpecs array content (filenames) doesn't change for the component lifetime.
   const sourceFiles = useMemo(
     () => runSpecs.map((s) => s.sourceFile),
-    // If runSpecs array is re-created but contents are same, we want stable result.
-    // JSON.stringify is cheap for array of strings.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [runSpecs.map],
+    // runSpecs is stable per component — loaded once at mount.
+    [runSpecs],
   );
 
   // 3. Stable definer callback

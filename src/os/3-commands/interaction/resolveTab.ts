@@ -91,13 +91,21 @@ export function resolveTab(
     const target = resolveTabWithinZone(currentItemId, items, direction, false);
     if (target) return { type: "within", itemId: target };
     // Boundary reached → escape
-    const escape = resolveTabEscapeZone(currentZoneId, zoneOrder, direction);
-    if (escape) return { type: "escape", ...escape };
+    const escapeTarget = resolveTabEscapeZone(
+      currentZoneId,
+      zoneOrder,
+      direction,
+    );
+    if (escapeTarget) return { type: "escape", ...escapeTarget };
     return null;
   }
 
   // ─── escape: move to next/prev zone immediately ───
-  const escape = resolveTabEscapeZone(currentZoneId, zoneOrder, direction);
-  if (escape) return { type: "escape", ...escape };
+  const escapeTarget = resolveTabEscapeZone(
+    currentZoneId,
+    zoneOrder,
+    direction,
+  );
+  if (escapeTarget) return { type: "escape", ...escapeTarget };
   return null;
 }
