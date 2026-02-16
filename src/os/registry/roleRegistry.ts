@@ -130,13 +130,13 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   group: {},
 
   // ─── Listbox (ARIA APG: Listbox Pattern) ───
-  // Spec: vertical, no wrap, selection follows focus in single-select,
-  //       entry to selected item, typeahead recommended
+  // MUST: vertical, no wrap, selection follows focus (single-select),
+  //       entry to selected item, Tab escapes
+  // SHOULD (opt-in via options): typeahead
   listbox: {
     navigate: {
       orientation: "vertical",
       loop: false,
-      typeahead: true,
       entry: "selected",
     },
     select: { mode: "single", followFocus: true },
@@ -214,13 +214,13 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   },
 
   // ─── Tree (ARIA APG: Tree View Pattern) ───
-  // Spec: vertical, no wrap, selection explicit (Enter/Space),
-  //       typeahead recommended, entry to selected node
+  // MUST: vertical, no wrap, selection explicit (Enter/Space),
+  //       entry to selected node
+  // SHOULD (opt-in via options): typeahead
   tree: {
     navigate: {
       orientation: "vertical",
       loop: false,
-      typeahead: true,
       entry: "selected",
     },
     select: { mode: "single", followFocus: false },

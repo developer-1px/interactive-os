@@ -27,6 +27,7 @@ interface SpecRow {
   role: string;
   orient: "vertical" | "horizontal" | "both";
   loop: boolean;
+  typeahead: boolean;
   entry: "first" | "last" | "restore" | "selected";
   selectMode: "none" | "single" | "multiple";
   followFocus: boolean;
@@ -40,6 +41,7 @@ interface SpecRow {
 const D = {
   orient: "vertical" as const,
   loop: false,
+  typeahead: false,
   entry: "first" as const,
   selectMode: "none" as const,
   followFocus: false,
@@ -55,6 +57,7 @@ const specTable: SpecRow[] = [
     role: "group",
     orient: D.orient,
     loop: D.loop,
+    typeahead: D.typeahead,
     entry: D.entry,
     selectMode: D.selectMode,
     followFocus: D.followFocus,
@@ -69,6 +72,7 @@ const specTable: SpecRow[] = [
     role: "listbox",
     orient: "vertical",
     loop: false,
+    typeahead: false,
     entry: "selected",
     selectMode: "single",
     followFocus: true,
@@ -83,6 +87,7 @@ const specTable: SpecRow[] = [
     role: "menu",
     orient: "vertical",
     loop: true,
+    typeahead: D.typeahead,
     entry: "first",
     selectMode: "none",
     followFocus: D.followFocus,
@@ -97,6 +102,7 @@ const specTable: SpecRow[] = [
     role: "menubar",
     orient: "horizontal",
     loop: true,
+    typeahead: D.typeahead,
     entry: "restore",
     selectMode: "none",
     followFocus: D.followFocus,
@@ -111,6 +117,7 @@ const specTable: SpecRow[] = [
     role: "radiogroup",
     orient: "vertical",
     loop: true,
+    typeahead: D.typeahead,
     entry: "selected",
     selectMode: "single",
     followFocus: true,
@@ -125,6 +132,7 @@ const specTable: SpecRow[] = [
     role: "tablist",
     orient: "horizontal",
     loop: true,
+    typeahead: D.typeahead,
     entry: "selected",
     selectMode: "single",
     followFocus: true,
@@ -139,6 +147,7 @@ const specTable: SpecRow[] = [
     role: "toolbar",
     orient: "horizontal",
     loop: true,
+    typeahead: D.typeahead,
     entry: "restore",
     selectMode: "none",
     followFocus: D.followFocus,
@@ -153,6 +162,7 @@ const specTable: SpecRow[] = [
     role: "grid",
     orient: "both",
     loop: false,
+    typeahead: D.typeahead,
     entry: D.entry,
     selectMode: "multiple",
     followFocus: false,
@@ -167,6 +177,7 @@ const specTable: SpecRow[] = [
     role: "treegrid",
     orient: "both",
     loop: false,
+    typeahead: D.typeahead,
     entry: D.entry,
     selectMode: "multiple",
     followFocus: false,
@@ -181,6 +192,7 @@ const specTable: SpecRow[] = [
     role: "tree",
     orient: "vertical",
     loop: false,
+    typeahead: false,
     entry: "selected",
     selectMode: "single",
     followFocus: false,
@@ -195,6 +207,7 @@ const specTable: SpecRow[] = [
     role: "dialog",
     orient: D.orient,
     loop: D.loop,
+    typeahead: D.typeahead,
     entry: D.entry,
     selectMode: D.selectMode,
     followFocus: D.followFocus,
@@ -209,6 +222,7 @@ const specTable: SpecRow[] = [
     role: "alertdialog",
     orient: D.orient,
     loop: D.loop,
+    typeahead: D.typeahead,
     entry: D.entry,
     selectMode: D.selectMode,
     followFocus: D.followFocus,
@@ -223,6 +237,7 @@ const specTable: SpecRow[] = [
     role: "combobox",
     orient: "vertical",
     loop: false,
+    typeahead: false,
     entry: D.entry,
     selectMode: "single",
     followFocus: true,
@@ -237,6 +252,7 @@ const specTable: SpecRow[] = [
     role: "feed",
     orient: "vertical",
     loop: false,
+    typeahead: D.typeahead,
     entry: D.entry,
     selectMode: D.selectMode,
     followFocus: D.followFocus,
@@ -251,6 +267,7 @@ const specTable: SpecRow[] = [
     role: "accordion",
     orient: "vertical",
     loop: false,
+    typeahead: D.typeahead,
     entry: D.entry,
     selectMode: D.selectMode,
     followFocus: D.followFocus,
@@ -265,6 +282,7 @@ const specTable: SpecRow[] = [
     role: "disclosure",
     orient: D.orient,
     loop: D.loop,
+    typeahead: D.typeahead,
     entry: D.entry,
     selectMode: D.selectMode,
     followFocus: D.followFocus,
@@ -290,6 +308,10 @@ describe("Role Presets vs SPEC §7 Table", () => {
 
       it(`loop = ${row.loop}`, () => {
         expect(config.navigate.loop).toBe(row.loop);
+      });
+
+      it(`typeahead = ${row.typeahead}`, () => {
+        expect(config.navigate.typeahead).toBe(row.typeahead);
       });
 
       it(`entry = ${row.entry}`, () => {
