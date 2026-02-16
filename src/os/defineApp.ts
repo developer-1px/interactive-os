@@ -25,37 +25,12 @@
  *   const { Zone, Item } = listZone.bind({ role: "listbox", onCheck: toggleTodo });
  */
 
-import { createKernel, defineScope } from "@kernel";
-import type {
-  BaseCommand,
-  CommandFactory,
-  ScopeToken,
-} from "@kernel/core/tokens";
-import { OS } from "@os/AntigravityOS";
-import { Keybindings as KeybindingsRegistry } from "@os/keymaps/keybindings";
-import React, { type ReactNode } from "react";
+import { defineScope } from "@kernel";
+import type { CommandFactory } from "@kernel/core/tokens";
+import type React from "react";
+import type { ReactNode } from "react";
 import { registerAppSlice } from "./appSlice";
-import {
-  beginTransaction,
-  createHistoryMiddleware,
-  endTransaction,
-} from "./middleware/historyKernelMiddleware";
-
-// Re-export all types for consumers
-export type {
-  AppHandle,
-  BoundComponents,
-  Condition,
-  CommandContext,
-  FieldBindings,
-  FlatHandler,
-  HandlerResult,
-  KeybindingEntry,
-  Selector,
-  TestInstance,
-  ZoneBindings,
-  ZoneHandle,
-} from "./defineApp.types";
+import { createHistoryMiddleware } from "./middleware/historyKernelMiddleware";
 
 import {
   __conditionBrand,
@@ -73,6 +48,7 @@ import {
 import {
   createCompoundTrigger,
   createSimpleTrigger,
+  type CompoundTriggerComponents,
 } from "./defineApp.trigger";
 import { createTestInstance } from "./defineApp.testInstance";
 import { createBoundComponents } from "./defineApp.bind";
@@ -264,38 +240,11 @@ export function defineApp<S>(
       // ── Compound trigger (Dialog pattern) — v3 compat ──
       return createCompoundTrigger(appId, commandOrConfig);
     }) as {
-      (
-        command: CommandFactory<string, any>,
-      ): React.FC<{
+      (command: CommandFactory<string, any>): React.FC<{
         payload?: any;
         children: ReactNode;
       }>;
-      (config: {
-        id?: string;
-        confirm?: CommandFactory<string, any>;
-      }): {
-        Root: React.FC<{ children: ReactNode }>;
-        Trigger: React.FC<{
-          children: ReactNode;
-          className?: string;
-          asChild?: boolean;
-        }>;
-        Portal: React.FC<{
-          children: ReactNode;
-          title?: string;
-          description?: string;
-          className?: string;
-          contentClassName?: string;
-        }>;
-        Content: React.FC<{
-          children: ReactNode;
-          title?: string;
-          className?: string;
-          zoneClassName?: string;
-        }>;
-        Dismiss: React.FC<{ children: ReactNode; className?: string }>;
-        Confirm: React.FC<{ children: ReactNode; className?: string }>;
-      };
+      (config: CompoundTriggerConfig): CompoundTriggerComponents;
     },
 
     /** v5: Selector-based hook */
