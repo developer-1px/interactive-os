@@ -51,7 +51,7 @@ test.describe("E2E: Command Palette", () => {
     await expect(input).toHaveValue("ho");
 
     // Click on the first result item within the dialog
-    const firstItem = dialog.locator('[role="option"]').first();
+    const firstItem = dialog.locator("[data-item-id]").first();
     await firstItem.click();
 
     // Input should still be focused — type more characters
@@ -91,21 +91,19 @@ test.describe("E2E: Command Palette", () => {
   test("ArrowDown moves virtual focus to next item", async ({ page }) => {
     const { dialog, input } = await openPalette(page);
 
-    // Wait for items to appear
-    const items = dialog.locator('[role="option"]');
+    // Wait for items to appear (use data-item-id to avoid matching inner role="option")
+    const items = dialog.locator("[data-item-id]");
     await expect(items.first()).toBeVisible({ timeout: 3000 });
 
-    // Press ArrowDown to move focus
+    // autoFocus puts virtual focus on first item (data-focused="true")
+    await expect(items.first()).toHaveAttribute("data-focused", "true");
+
+    // Press ArrowDown — moves from item 0 to item 1
     await page.keyboard.press("ArrowDown");
 
-    // First item should be focused (aria-selected=true)
-    await expect(items.first()).toHaveAttribute("aria-selected", "true");
-
-    // Press ArrowDown again
-    await page.keyboard.press("ArrowDown");
-
-    // Second item should now be focused
+    // Second item should now be focused and selected
     await expect(items.nth(1)).toHaveAttribute("aria-selected", "true");
+    await expect(items.nth(1)).toHaveAttribute("data-focused", "true");
 
     // First item should no longer be focused
     await expect(items.first()).toHaveAttribute("aria-selected", "false");
@@ -117,16 +115,16 @@ test.describe("E2E: Command Palette", () => {
   test("ArrowUp moves virtual focus to previous item", async ({ page }) => {
     const { dialog, input } = await openPalette(page);
 
-    const items = dialog.locator('[role="option"]');
+    const items = dialog.locator("[data-item-id]");
     await expect(items.first()).toBeVisible({ timeout: 3000 });
 
-    // Move down twice, then up once
-    await page.keyboard.press("ArrowDown");
+    // autoFocus puts focus on first item. Move down then up.
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("ArrowUp");
 
     // Should be back on first item
     await expect(items.first()).toHaveAttribute("aria-selected", "true");
+    await expect(items.first()).toHaveAttribute("data-focused", "true");
 
     // Input should still be focused
     await expect(input).toBeFocused();
@@ -135,13 +133,10 @@ test.describe("E2E: Command Palette", () => {
   test("Enter selects focused item and navigates", async ({ page }) => {
     const { dialog, input } = await openPalette(page);
 
-    const items = dialog.locator('[role="option"]');
+    const items = dialog.locator("[data-item-id]");
     await expect(items.first()).toBeVisible({ timeout: 3000 });
 
-    // Focus first item
-    await page.keyboard.press("ArrowDown");
-
-    // Press Enter to select
+    // autoFocus already focuses first item — Enter to select
     await page.keyboard.press("Enter");
 
     // Palette should close after selection

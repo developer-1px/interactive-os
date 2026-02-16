@@ -89,7 +89,9 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
         ref={ref}
         asChild={
           asChild ||
-          (typeof children === "function" && isValidElement(resolvedChildren))
+          (typeof children === "function" &&
+            isValidElement(resolvedChildren) &&
+            typeof resolvedChildren.type === "string")
         }
         className={className}
         data-selected={isSelected ? "true" : undefined}

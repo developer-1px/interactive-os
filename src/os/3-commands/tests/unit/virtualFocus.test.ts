@@ -12,7 +12,8 @@ import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { NAVIGATE } from "@os/3-commands/navigate";
 import { FOCUS } from "@os/3-commands/focus";
 import { initialOSState } from "@os/state/initial";
-import { describe, expect, it, beforeEach, vi } from "vitest";
+import { DEFAULT_CONFIG } from "@os/schema/focus/config/FocusGroupConfig";
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
@@ -25,17 +26,37 @@ function resetState() {
     }));
 }
 
+/**
+ * Create a real DOM element with data-item-id children,
+ * so that DOM_ITEMS context provider can query them.
+ */
+function createZoneElement(zoneId: string, items: string[]): HTMLElement {
+    const container = document.createElement("div");
+    container.setAttribute("data-focus-group", zoneId);
+    for (const itemId of items) {
+        const el = document.createElement("div");
+        el.setAttribute("data-item-id", itemId);
+        el.id = itemId;
+        container.appendChild(el);
+    }
+    document.body.appendChild(container);
+    return container;
+}
+
 function registerVirtualZone(id: string, items: string[]) {
-    // Register zone with virtualFocus: true
+    const element = createZoneElement(id, items);
+
+    // Register zone with DEFAULT_CONFIG + virtualFocus: true override
     ZoneRegistry.register(id, {
         config: {
-            project: { virtualFocus: true },
-        } as any,
-        element: document.createElement("div"),
-        items,
+            ...DEFAULT_CONFIG,
+            project: { ...DEFAULT_CONFIG.project, virtualFocus: true },
+        },
+        element,
+        parentId: null,
     });
 
-    // Set initial state
+    // Set initial state — zone is active + first item focused
     kernel.setState((prev) => ({
         ...prev,
         os: {
@@ -46,16 +67,25 @@ function registerVirtualZone(id: string, items: string[]) {
                 zones: {
                     ...prev.os.focus.zones,
                     [id]: {
-                        ...prev.os.focus.zones[id],
-                        // Default select config is needed for NAVIGATE to work
-                        // (Mocking minimal state)
-                        selection: [],
                         focusedItemId: items[0] || null,
+                        lastFocusedId: items[0] || null,
+                        selection: [],
+                        selectionAnchor: null,
+                        expandedItems: [],
+                        editingItemId: null,
+                        stickyX: undefined,
+                        stickyY: undefined,
+                        recoveryTargetId: null,
                     } as any,
                 },
             },
         },
     }));
+}
+
+function cleanup() {
+    // Remove all zone elements from DOM
+    document.querySelectorAll("[data-focus-group]").forEach((el) => el.remove());
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -65,11 +95,14 @@ function registerVirtualZone(id: string, items: string[]) {
 describe("Virtual Focus (T5a)", () => {
     beforeEach(() => {
         resetState();
-        // Assuming ZoneRegistry mocks are handled or reset by framework/setup
-        // If ZoneRegistry behaves as singleton, we might need to clear it or overwrite.
+        cleanup();
     });
 
-    describe.skip("NAVIGATE with virtualFocus: true", () => {
+    afterEach(() => {
+        cleanup();
+    });
+
+    describe("NAVIGATE with virtualFocus: true", () => {
         it("updates state but suppresses focus effect", () => {
             const items = ["item-1", "item-2"];
             registerVirtualZone("z-virtual", items);
@@ -79,22 +112,46 @@ describe("Virtual Focus (T5a)", () => {
             expect(stateBefore?.focusedItemId).toBe("item-1");
 
             // Dispatch NAVIGATE (down)
-            const result = kernel.dispatch(NAVIGATE({ direction: "down" }));
+            kernel.dispatch(NAVIGATE({ direction: "down" }));
 
-            // 1. Check State Update
+            // 1. State must update — focusedItemId moves to item-2
             const stateAfter = kernel.getState().os.focus.zones["z-virtual"];
             expect(stateAfter?.focusedItemId).toBe("item-2");
 
-            // 2. Check Result Effect
-            // The command should return a result object.
-            // We expect 'focus' property to be undefined or null to skip DOM focus.
-            expect(result).toBeDefined();
-            if (result && typeof result === "object") {
-                // @ts-ignore - inspecting internal command result structure
-                expect(result.focus).toBeUndefined();
-                // @ts-ignore
-                expect(result.scroll).toBe("item-2"); // Scroll should still happen
-            }
+            // 2. Verify effects via transaction log
+            const tx = kernel.inspector.getLastTransaction();
+            expect(tx).toBeDefined();
+            expect(tx!.effects).toBeDefined();
+            // virtualFocus: focus effect must be absent (undefined → not in effects)
+            expect((tx!.effects as any)?.focus).toBeUndefined();
+            // scroll effect should still be present
+            expect((tx!.effects as any)?.scroll).toBe("item-2");
+        });
+
+        it("wraps or stops at boundary based on config", () => {
+            const items = ["item-1", "item-2"];
+            registerVirtualZone("z-virtual", items);
+
+            // Navigate down twice — item-1 → item-2 → stop (wrap: false)
+            kernel.dispatch(NAVIGATE({ direction: "down" }));
+            kernel.dispatch(NAVIGATE({ direction: "down" }));
+
+            const state = kernel.getState().os.focus.zones["z-virtual"];
+            // Should stay at item-2 (no wrap)
+            expect(state?.focusedItemId).toBe("item-2");
+        });
+
+        it("navigates up from item-2 to item-1", () => {
+            const items = ["item-1", "item-2"];
+            registerVirtualZone("z-virtual", items);
+
+            // Move to item-2 first
+            kernel.dispatch(NAVIGATE({ direction: "down" }));
+            expect(kernel.getState().os.focus.zones["z-virtual"]?.focusedItemId).toBe("item-2");
+
+            // Navigate up
+            kernel.dispatch(NAVIGATE({ direction: "up" }));
+            expect(kernel.getState().os.focus.zones["z-virtual"]?.focusedItemId).toBe("item-1");
         });
     });
 
@@ -119,11 +176,17 @@ describe("Virtual Focus (T5a)", () => {
         });
 
         it("triggers focus effect when virtualFocus is false (default)", () => {
-            // Register normal zone
+            const items = ["item-A"];
+            const element = createZoneElement("z-normal", items);
+
+            // Register normal zone (virtualFocus: false)
             ZoneRegistry.register("z-normal", {
-                config: { project: { virtualFocus: false } } as any,
-                element: document.createElement("div"),
-                items: ["item-A"],
+                config: {
+                    ...DEFAULT_CONFIG,
+                    project: { ...DEFAULT_CONFIG.project, virtualFocus: false },
+                },
+                element,
+                parentId: null,
             });
 
             const result = kernel.dispatch(FOCUS({ zoneId: "z-normal", itemId: "item-A" }));

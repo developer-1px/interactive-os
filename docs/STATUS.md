@@ -29,7 +29,7 @@
 | todo-keyboard-dogfooding | Execution | 02-15 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
 | docs-dashboard | Design | 02-15 | ⏸ Idle |
-| define-app | Execution (Phase 3) | 02-14 | ⏸ Idle |
+| define-app | Execution (Phase 3) | 02-16 | ⏸ Idle |
 | create-module | Design (Proposal 미승인) | 02-13 | ⏸ Idle |
 | testbot | Execution 준비 | 02-13 | ⏸ Idle |
 
