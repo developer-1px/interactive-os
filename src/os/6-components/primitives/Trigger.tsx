@@ -103,7 +103,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     ref,
   ) => {
     const dispatch =
-      customDispatch || ((cmd: BaseCommand) => kernel.dispatch(cmd as any));
+      customDispatch || ((cmd: BaseCommand) => kernel.dispatch(cmd));
 
     // Use explicit overlayId if provided, otherwise auto-generate
     // biome-ignore lint/correctness/useExhaustiveDependencies: overlayRole intentionally excluded — ID must be stable
@@ -345,7 +345,7 @@ function TriggerDismiss({
   ...rest
 }: TriggerDismissProps) {
   const overlayCtx = useOverlayContext();
-  const dispatch = (cmd: BaseCommand) => kernel.dispatch(cmd as any);
+  const dispatch = (cmd: BaseCommand) => kernel.dispatch(cmd);
 
   const handleClick = (e: ReactMouseEvent) => {
     e.stopPropagation();
