@@ -402,7 +402,7 @@ test.describe("Todo App", () => {
   // Field Key Ownership — Draft inline field navigation
   // ─────────────────────────────────────────────────────────────
 
-  test("Tab from Draft escapes to sidebar, Shift+Tab returns to Draft", async ({
+  test("Shift+Tab from Draft escapes to sidebar, Tab returns to Draft", async ({
     page,
   }) => {
     // Click Draft to focus it
@@ -410,15 +410,15 @@ test.describe("Todo App", () => {
     await draft.click();
     await expect(draft).toHaveAttribute("data-focused", "true");
 
-    // Tab → should escape list zone to sidebar zone
-    await page.keyboard.press("Tab");
+    // Shift+Tab → backward escape: list zone → sidebar zone (sidebar is before list in DOM)
+    await page.keyboard.press("Shift+Tab");
     const sidebarFocused = page.locator(
       `${SIDEBAR} [data-focused="true"]`,
     );
     await expect(sidebarFocused).toHaveCount(1);
 
-    // Shift+Tab → should return to list zone, landing on Draft (first item)
-    await page.keyboard.press("Shift+Tab");
+    // Tab → forward escape: sidebar zone → list zone, landing on Draft (first item)
+    await page.keyboard.press("Tab");
     await expect(draft).toHaveAttribute("data-focused", "true");
   });
 
