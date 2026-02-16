@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-16 20:54
+> Last updated: 2026-02-16 22:05
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -76,7 +76,8 @@
 
 ## 📝 Recent Changes (2026-02-16)
 
-- ✅ `command-palette-e2e` 프로젝트 완료 — E2E 8/8, asChild 버그 수정, 성능 최적화
+- 🔧 워크플로우 프레임워크 도입: Cynefin, 8D, PMBOK, Test Pyramid, Conventional Comments, Mikado Method
+- 🔧 rules.md: #4 판단 기준 확장, #5 산출물 부채 확장, Cynefin 부록 분리
 - ✅ `fix-tab-navigation` 프로젝트 완료 — Tab escape/flow 모드 수정
 - ✅ `docs-system-v2` 프로젝트 완료 — 워크플로우 리팩토링, PARA 구조 정착
 - 🆕 `/perf` 워크플로우 신설, `/review` 성능 렌즈 추가
