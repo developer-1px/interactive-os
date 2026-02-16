@@ -32,7 +32,11 @@ import { useFocusGroupContext } from "./FocusGroup.tsx";
 // Props
 // ═══════════════════════════════════════════════════════════════════
 
-export interface FocusItemProps {
+export interface FocusItemProps
+  extends Omit<
+    React.HTMLAttributes<HTMLElement>,
+    "id" | "children" | "className" | "style" | "role"
+  > {
   /** Item ID (required) */
   id: string;
 
@@ -56,9 +60,6 @@ export interface FocusItemProps {
 
   /** ARIA role override (auto-resolved from parent Zone role if not set) */
   role?: string;
-
-  /** Additional props to pass through */
-  [key: string]: any;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -154,10 +155,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     const expandable = isExpandableRole(effectiveRole);
 
     // --- Prop Consolidation ---
-    const { tabIndex: propTabIndex, ...otherRest } = rest as {
-      tabIndex?: number;
-      [key: string]: any;
-    };
+    const { tabIndex: propTabIndex, ...otherRest } = rest;
 
     const sharedProps = {
       id,

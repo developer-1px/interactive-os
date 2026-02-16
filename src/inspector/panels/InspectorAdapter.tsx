@@ -9,7 +9,7 @@ import { UnifiedInspector } from "@inspector/panels/UnifiedInspector.tsx";
 import { kernel } from "@/os/kernel.ts";
 
 export function InspectorAdapter() {
-  // Subscribe to kernel changes to trigger re-renders
+  // Intentional: Inspector must re-render on ALL state changes
   kernel.useComputed((s) => s);
   const transactions = kernel.inspector.getTransactions();
   const storeState = kernel.getState();
