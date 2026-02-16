@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-15 22:59
+> Last updated: 2026-02-16 15:27
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -11,10 +11,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| command-palette-e2e | Execution | 02-15 |
-| os-prd | Execution | 02-15 |
-| fix-tab-navigation | Execution | 02-15 |
-| docs-system-v2 | Execution | 02-15 |
+| os-prd | Execution | 02-16 |
 | todo-keyboard-dogfooding | Execution | 02-15 |
 
 ---
@@ -23,9 +20,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| os-prd | Execution | 02-15 | 🔥 Focus |
-| fix-tab-navigation | Execution | 02-15 | 🔥 Focus |
-| docs-system-v2 | Execution | 02-15 | 🔥 Focus |
+| os-prd | Execution | 02-16 | 🔥 Focus |
 | todo-keyboard-dogfooding | Execution | 02-15 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
 | docs-dashboard | Design | 02-15 | ⏸ Idle |
@@ -39,6 +34,9 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| command-palette-e2e | 02-16 | ✅ 4-archive/2026-02 |
+| fix-tab-navigation | 02-16 | ✅ 4-archive/2026-02 |
+| docs-system-v2 | 02-16 | ✅ 4-archive/2026-02 |
 | builder-focus-navigation | 02-15 | ✅ 4-archive/2026-02 |
 | builder-os-panel-binding | 02-15 | ✅ 4-archive/2026-02 |
 | os-elegance | 02-14 | ✅ 4-archive/2026-02 |
@@ -65,19 +63,19 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 3 |
-| Active Projects (total) | 8 |
-| Completed (archived) | 13 |
+| Active Focus | 2 |
+| Active Projects (total) | 7 |
+| Completed (archived) | 16 |
 | Inbox items | 0 |
 | Backlog items | 2 |
 
 ---
 
-## 📝 Recent Changes (2026-02-15)
+## 📝 Recent Changes (2026-02-16)
 
-- ✅ `os-prd` T5d: CommandPalette → QuickPick OS primitive 리팩토링 완료
-- ✅ `/para` 세션 대청소 — `11-discussions/` 폴더 완전 폐지
-  - 21개 문서 마이그레이션: 프로젝트 귀속 11, archive 5, resource 3, backlog 2
-- ✅ Stale 프로젝트 2개 아카이브 (builder-focus-navigation, builder-os-panel-binding)
-- 🆕 Created `docs-system-v2` project — docs & workflow restructure
-- 🆕 Created `todo-keyboard-dogfooding` project
+- ✅ `command-palette-e2e` 프로젝트 완료 — E2E 8/8, asChild 버그 수정, 성능 최적화
+- ✅ `fix-tab-navigation` 프로젝트 완료 — Tab escape/flow 모드 수정
+- ✅ `docs-system-v2` 프로젝트 완료 — 워크플로우 리팩토링, PARA 구조 정착
+- 🆕 `/perf` 워크플로우 신설, `/review` 성능 렌즈 추가
+- 🆕 BOARD 파이프라인 체크리스트 도입 (워크플로우 단계 누락 방지)
+- perf: useComputed 구독 패턴 최적화 (string→boolean, 300→2 리렌더)

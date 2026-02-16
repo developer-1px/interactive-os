@@ -1,13 +1,8 @@
 # BOARD — command-palette-e2e
 
 ## 🔴 Now
-- [ ] T8: 워크플로우 파이프라인 추적 검증
-  - [x] /discussion
-  - [x] /review 성능 렌즈 추가
-  - [x] /project BOARD 포맷 갱신
-  - [x] /go 컨텍스트 파악 갱신
-  - [ ] /verify
-  - [ ] /retrospect
+
+(완료 — 아카이브 대기)
 
 ## ⏳ Done
 - [x] T1: E2E goto URL을 `/playground/command-palette`로 변경 (02-15)
@@ -17,5 +12,6 @@
 - [x] T5: 화살표 네비게이션(ArrowUp/Down) E2E 테스트 추가 (02-16)
 - [x] T6: Item.tsx asChild 버그 수정 — data-item-id DOM 누락 해결 (02-16)
 - [x] T7: 성능 개선 — useComputed 구독 패턴 최적화 (02-16)
+- [x] T8: 워크플로우 파이프라인 추적 체계 구축 (02-16)
 
 ## 💡 Ideas

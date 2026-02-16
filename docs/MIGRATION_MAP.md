@@ -23,6 +23,9 @@
 
 | 현재 경로 | 원래 경로 | 아카이브 사유 |
 |-----------|-----------|--------------|
+| `4-archive/2026-02-command-palette-e2e/` | `1-project/command-palette-e2e/` | 프로젝트 완료 — E2E 테스트 8/8, asChild 버그 수정, useComputed 성능 최적화 |
+| `4-archive/2026-02-fix-tab-navigation/` | `1-project/fix-tab-navigation/` | 프로젝트 완료 — Tab escape/flow 모드 수정, E2E 검증 |
+| `4-archive/2026-02-docs-system-v2/` | `1-project/docs-system-v2/` | 프로젝트 완료 — PARA 구조 정착, 워크플로우 12개 리팩토링 |
 | `4-archive/2026-02-os-elegance/` | `1-project/os-elegance/` | 프로젝트 완료 — Shell UI, dead code 제거, Devtools 분리 등 |
 | `4-archive/2026-02-focus-recovery/` | `1-project/focus-recovery/` | 프로젝트 완료 — FocusSync → FocusListener 전환 완료 |
 | `4-archive/2026-02-todo-v3-migration/` | `1-project/todo-v3-migration/` | 프로젝트 완료 — v3 승격, v1/v2 코드 완전 제거 |
