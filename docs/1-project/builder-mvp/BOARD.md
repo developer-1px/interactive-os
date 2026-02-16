@@ -2,11 +2,6 @@
 
 ## 🔴 Now
 
-- [ ] T1: createZone + bind 마이그레이션 — `createWidget` → `createZone` + `zone.command` + `zone.bind`
-  - ref: prd.md §1.1
-  - [ ] /tdd
-  - [ ] /divide
-  - [ ] /verify
 - [ ] T2: 캔버스 인라인 편집 — Enter 진입, 텍스트 수정, Enter/Escape 저장/취소
   - ref: prd.md §1.2
   - [ ] /tdd
@@ -20,7 +15,7 @@
 
 ## ⏳ Done
 
-_(empty)_
+- [x] T1: createZone + bind 마이그레이션 (02-16) — Unit 23, E2E 10 통과. `4640f39`
 
 ## 💡 Ideas
 

@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-16 18:32
+> Last updated: 2026-02-16 20:36
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -11,6 +11,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
+| behavior-first-zone | Definition | 02-16 |
 | builder-mvp | Definition | 02-16 |
 | os-prd | Execution | 02-16 |
 
@@ -20,6 +21,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| behavior-first-zone | Definition | 02-16 | 🔥 Focus |
 | builder-mvp | Definition | 02-16 | 🔥 Focus |
 | os-prd | Execution | 02-16 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
@@ -65,8 +67,8 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 2 |
-| Active Projects (total) | 6 |
+| Active Focus | 3 |
+| Active Projects (total) | 7 |
 | Completed (archived) | 18 |
 | Inbox items | 0 |
 | Backlog items | 2 |
@@ -86,3 +88,4 @@
 - fix: click-to-expand — disclosure/accordion 클릭 확장 + dialog 포커스 복원, E2E 164/164 통과
 - ✅ 전체 이슈 클리어 (5개 이슈 done → closed)
 - ✅ `field-key-ownership` 프로젝트 완료
+- 🆕 `behavior-first-zone` 프로젝트 생성 — ARIA role→behavior 인과관계 역전 수정
