@@ -10,44 +10,13 @@
  */
 
 import type { BaseCommand, Middleware } from "@kernel";
-import { FieldRegistry } from "@os/6-components/primitives/FieldRegistry";
 import { getCanonicalKey, getMacFallbackKey } from "./getCanonicalKey";
-import { isKeyDelegatedToOS } from "./fieldKeyOwnership";
+import { isEditingElement, resolveIsEditingForKey } from "./fieldKeyOwnership";
 import { Keybindings, type KeyResolveContext } from "./keybindings";
 
 const isMac =
   typeof navigator !== "undefined" &&
   /Mac|iPhone|iPad|iPod/.test(navigator.platform);
-
-/**
- * Check if the target is an editable element (fallback for unregistered fields).
- */
-function isEditingElement(target: HTMLElement): boolean {
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target.isContentEditable
-  );
-}
-
-/**
- * Resolve per-key editing state using the Key Ownership model.
- * Same logic as KeyboardListener.resolveIsEditingForKey.
- */
-function resolveIsEditingForKey(
-  target: HTMLElement,
-  canonicalKey: string,
-): boolean {
-  const fieldId = target.id || target.getAttribute("data-item-id");
-  if (fieldId) {
-    const fieldEntry = FieldRegistry.getField(fieldId);
-    if (fieldEntry) {
-      const fieldType = fieldEntry.config.fieldType ?? "inline";
-      return !isKeyDelegatedToOS(canonicalKey, fieldType);
-    }
-  }
-  return isEditingElement(target);
-}
 
 export const macFallbackMiddleware: Middleware = {
   id: "mac-normalize",

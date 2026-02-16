@@ -11,11 +11,10 @@
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_CHECK } from "@os/3-commands/interaction";
 import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
-import { isKeyDelegatedToOS } from "@os/keymaps/fieldKeyOwnership";
+import { isKeyDelegatedToOS, isEditingElement, resolveIsEditingForKey } from "@os/keymaps/fieldKeyOwnership";
 import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
 import { useEffect } from "react";
 import { kernel } from "../kernel";
-import { FieldRegistry } from "@os/6-components/primitives/FieldRegistry";
 
 // Ensure OS defaults are registered
 import "@os/keymaps/osDefaults";
@@ -27,53 +26,6 @@ import { typeaheadFallbackMiddleware } from "@os/keymaps/typeaheadFallbackMiddle
 kernel.use(macFallbackMiddleware);
 kernel.use(typeaheadFallbackMiddleware);
 
-// ═══════════════════════════════════════════════════════════════════
-// Helpers — extracted for readability
-// ═══════════════════════════════════════════════════════════════════
-
-/**
- * Check if the target element is an editable element.
- * Used as fallback for elements NOT registered in FieldRegistry.
- */
-function isEditingElement(target: HTMLElement): boolean {
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target.isContentEditable
-  );
-}
-
-/**
- * Resolve whether the field actively owns a specific key (isFieldActive).
- *
- * Key Ownership Model (Delegation):
- * - Fields OWN all keys by default during editing
- * - Fields DELEGATE specific navigation keys to the OS
- * - Delegated keys: Tab, Arrow, etc. (defined in FIELD_DELEGATES_TO_OS)
- * - Non-delegated keys: Space, letters, numbers → always field-owned
- *
- * Returns true = field owns this key (OS should NOT handle)
- * Returns false = field delegates this key to OS (OS can handle)
- */
-function resolveIsEditingForKey(
-  target: HTMLElement,
-  canonicalKey: string,
-): boolean {
-  // Check if this is a registered OS.Field
-  const fieldId = target.id || target.getAttribute("data-item-id");
-  if (fieldId) {
-    const fieldEntry = FieldRegistry.getField(fieldId);
-    if (fieldEntry) {
-      const fieldType = fieldEntry.config.fieldType ?? "inline";
-      // If delegated to OS → field does NOT own this key (return false)
-      // If NOT delegated → field OWNS this key (return true)
-      return !isKeyDelegatedToOS(canonicalKey, fieldType);
-    }
-  }
-
-  // Fallback: unregistered native inputs own all keys
-  return isEditingElement(target);
-}
 
 /**
  * Combobox inputs (e.g. QuickPick) are self-managed:

@@ -23,6 +23,7 @@
  */
 
 import type { FieldType } from "../6-components/primitives/FieldRegistry";
+import { FieldRegistry } from "../6-components/primitives/FieldRegistry";
 
 /**
  * Keys that each field type DELEGATES to the OS during editing.
@@ -30,28 +31,23 @@ import type { FieldType } from "../6-components/primitives/FieldRegistry";
  * If a canonical key is in this set → the OS can handle it (isFieldActive = false).
  * If NOT in the set → the field owns it (isFieldActive = true, OS skips it).
  */
+const INLINE_DELEGATES = new Set([
+    "Tab",
+    "Shift+Tab",
+    "ArrowUp",
+    "ArrowDown",
+    "Shift+ArrowUp",
+    "Shift+ArrowDown",
+]);
+
 const FIELD_DELEGATES_TO_OS: Record<FieldType, Set<string>> = {
     // inline: single-line input (draft, search, rename)
     // Delegates: Tab (zone escape), ↑↓ (item navigation)
-    inline: new Set([
-        "Tab",
-        "Shift+Tab",
-        "ArrowUp",
-        "ArrowDown",
-        "Shift+ArrowUp",
-        "Shift+ArrowDown",
-    ]),
+    inline: INLINE_DELEGATES,
 
     // tokens: chip/tag input (email recipients, tags)
-    // Same as inline + Backspace-when-empty is handled separately
-    tokens: new Set([
-        "Tab",
-        "Shift+Tab",
-        "ArrowUp",
-        "ArrowDown",
-        "Shift+ArrowUp",
-        "Shift+ArrowDown",
-    ]),
+    // Same delegation as inline; Backspace∅→OS is handled separately when implemented
+    tokens: INLINE_DELEGATES,
 
     // block: multi-line text (comment, description, chat)
     // Delegates Tab only (arrows move cursor between lines)
@@ -77,4 +73,42 @@ export function isKeyDelegatedToOS(
     fieldType: FieldType = "inline",
 ): boolean {
     return FIELD_DELEGATES_TO_OS[fieldType].has(canonicalKey);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Shared helpers — single source of truth for KeyboardListener + macFallback
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Check if the target element is an editable element.
+ * Fallback for elements NOT registered in FieldRegistry.
+ */
+export function isEditingElement(target: HTMLElement): boolean {
+    return (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target.isContentEditable
+    );
+}
+
+/**
+ * Resolve whether the field actively owns a specific key (isFieldActive).
+ *
+ * Returns true = field owns this key (OS should NOT handle)
+ * Returns false = field delegates this key to OS (OS can handle)
+ * Fallback: unregistered native inputs own all keys.
+ */
+export function resolveIsEditingForKey(
+    target: HTMLElement,
+    canonicalKey: string,
+): boolean {
+    const fieldId = target.id || target.getAttribute("data-item-id");
+    if (fieldId) {
+        const fieldEntry = FieldRegistry.getField(fieldId);
+        if (fieldEntry) {
+            const fieldType = fieldEntry.config.fieldType ?? "inline";
+            return !isKeyDelegatedToOS(canonicalKey, fieldType);
+        }
+    }
+    return isEditingElement(target);
 }
