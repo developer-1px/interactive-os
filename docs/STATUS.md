@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-18 00:18
+> Last updated: 2026-02-18 00:25
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-_(없음 — 모든 Focus 프로젝트 태스크 소진)_
+_(없음 — 다음 Focus 프로젝트 선택 대기)_
 
 ---
 
@@ -17,7 +17,6 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| os-prd | Closing 판정 대기 | 02-18 | ⏸ Idle |
 | builder-mvp | Definition | 02-16 | ⏸ Idle |
 | define-app | Execution (Phase 3) | 02-16 | ⏸ Idle |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
@@ -31,6 +30,7 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| os-prd | 02-18 | ✅ 4-archive/2026-02 (SPEC.md → 2-area/os-spec) |
 | naming-convention | 02-17 | ✅ 4-archive/2026-02 |
 | field-key-ownership | 02-16 | ✅ 4-archive/2026-02 |
 | todo-keyboard-dogfooding | 02-16 | ✅ 4-archive/2026-02 |
@@ -64,20 +64,22 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 | Metric | Count |
 |--------|-------|
 | Active Focus | 0 |
-| Active Projects (total) | 7 |
-| Completed (archived) | 19 |
+| Active Projects (total) | 6 |
+| Completed (archived) | 20 |
 | Inbox items | 0 |
-| Backlog items | 3 |
+| Backlog items | 4 |
 | Open issues | 0 (7 closed) |
 
 ---
 
 ## 📝 Recent Changes (2026-02-18)
 
-- ✅ `os-prd` T9 완료 확인 — defineApp.ts 분할 이미 완료 (912→299줄, 6개 모듈)
-- 📥 Inbox 5건 라우팅 — os-prd/notes 1건, builder-mvp/notes 1건, 3-resource/05-reviews 3건
+- 🆕 `/solve` 워크플로우 신설 — Complex 자율 해결 4단계 래더
+- 🔧 `/go` 워크플로우 갱신 — Complex 시 `/solve` 호출하도록 통합
+- ✅ `os-prd` 프로젝트 Closing — SPEC.md → `2-area/os-spec`, 프로젝트 → archive
 - 📦 `naming-convention` + `field-key-ownership` + `todo-keyboard-dogfooding` → archive
-- ⏸ Active Focus 0 — 모든 프로젝트 Idle 상태
+- 📥 Inbox 5건 전부 라우팅 — os-prd/notes, builder-mvp/notes, 3-resource/05-reviews
+- 📝 `as any` 근본해결 → 백로그 등록 (kernel dispatch generic, 긴급하지 않음)
 
 ## 📝 Recent Changes (2026-02-17)
 
@@ -86,15 +88,6 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 ## 📝 Recent Changes (2026-02-16)
 
 - 🔧 워크플로우 프레임워크 도입: Cynefin, 8D, PMBOK, Test Pyramid, Conventional Comments, Mikado Method
-- 🔧 rules.md: #4 판단 기준 확장, #5 산출물 부채 확장, Cynefin 부록 분리
-- ✅ `fix-tab-navigation` 프로젝트 완료 — Tab escape/flow 모드 수정
-- ✅ `docs-system-v2` 프로젝트 완료 — 워크플로우 리팩토링, PARA 구조 정착
+- ✅ `fix-tab-navigation`, `docs-system-v2`, `todo-keyboard-dogfooding`, `field-key-ownership` 완료
 - 🆕 `/perf` 워크플로우 신설, `/review` 성능 렌즈 추가
-- 🆕 BOARD 파이프라인 체크리스트 도입 (워크플로우 단계 누락 방지)
-- perf: useComputed 구독 패턴 최적화 (string→boolean, 300→2 리렌더)
-- ✅ `todo-keyboard-dogfooding` 프로젝트 완료 — 포커스 복원 구현, E2E 16개 전부 통과 (SC-1~SC-5)
-- fix: click-to-expand — disclosure/accordion 클릭 확장 + dialog 포커스 복원, E2E 164/164 통과
-- ✅ 전체 이슈 클리어 (5개 이슈 done → closed)
-- ✅ `field-key-ownership` 프로젝트 완료
-- fix: IME keyCode 229 가드 추가 (KeyboardListener) — 한글 IME 첫 keydown 누출 방지
-- fix: Todo dead code 정리 (AppEffect, GenericCommand, logic/)
+- fix: IME keyCode 229 가드, Todo dead code 정리
