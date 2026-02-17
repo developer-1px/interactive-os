@@ -53,6 +53,47 @@
 ## 성능 — 우리가 지키는 규칙
 
 1. **`useComputed` selector는 원시값을 반환한다.** `useSyncExternalStore`는 `Object.is`로 비교한다. string ID나 객체를 반환하면 값이 바뀔 때 모든 구독자가 리렌더된다. `=== id` 비교를 selector 안에서 수행하여 boolean을 반환하면, 실제로 변경된 컴포넌트만 리렌더된다.
+2. **애니메이션은 과정을 보여줘야 한다. 과정을 가리는 애니메이션은 잘못된 애니메이션이다.** Repeatable한 빠른 이동(커서, 포커스)에 opacity·색상 transition을 걸면, 이동 중 상태가 보이지 않는 순간이 생겨 오히려 과정을 가린다. 이런 요소에는 transition 없이 즉시 반영한다.
+
+## 네이밍 — 이름은 법이다
+
+> "표준이 있으면 발명하지 않는다" (Rule #7). 파일 케이스는 확장자가 법이고, 폴더는 업계 관행이 법이다.
+
+### 파일 케이스
+
+| 역할 | 케이스 | 예시 |
+|------|--------|------|
+| React 컴포넌트 | `PascalCase.tsx` | `QuickPick.tsx`, `Zone.tsx` |
+| 타입/스키마/Store/Registry | `PascalCase.ts` | `FocusState.ts`, `InspectorStore.ts` |
+| 함수/유틸/로직 | `camelCase.ts` | `focusFinder.ts`, `loopGuard.ts` |
+| 커맨드 핸들러 | `camelCase(동사).ts` | `activate.ts`, `escape.ts` |
+| 앱 정의 | `app.ts` (고정) | — |
+| 앱 등록 | `register.ts` (고정) | — |
+| barrel export | `index.ts` (고정) | — |
+| 모듈 분해 | `module.concern.ts` | `defineApp.bind.ts` (defineApp에만 적용) |
+| 단위 테스트 | `kebab-case.test.ts` | `navigate.test.ts` |
+| E2E 테스트 | `kebab-case.spec.ts` | `todo.spec.ts` |
+| CSS | `kebab-case.css` | `docs-viewer.css` |
+| 시스템 메타 문서 | `UPPER_CASE.md` | `STATUS.md`, `BOARD.md` |
+| 분석/보고 문서 | `YYYY-MMDD-HHmm-[type]-slug.md` | — |
+
+### 폴더 네이밍
+
+| 규칙 | 기준 | 예시 |
+|------|------|------|
+| 업계 관행 이름 | 표준 그대로 (단수) | `lib/`, `ui/`, `config/`, `model/`, `state/` |
+| 컬렉션 폴더 | 복수형 | `widgets/`, `primitives/`, `stores/`, `keymaps/` |
+| 테스트 | `tests/` → `unit/`, `e2e/` | 고정 구조 |
+| 순서가 의미인 곳 | `N-name/` (번호 접두사) | `1-listeners/`, `0-inbox/` |
+| 앱/모듈/프로젝트 | kebab-case | `todo/`, `builder-mvp/` |
+
+### 구조 어휘 — 세 세계
+
+| 영역 | 어휘 체계 | 근거 |
+|------|----------|------|
+| **Apps** | **FSD** (Feature-Sliced Design) | `app.ts` → `widgets/` → `features/` → `entities/` → `shared/` |
+| **OS** | **파이프라인** (번호 접두사) | `1-listeners/` → … → `6-components/` |
+| **Docs** | **PARA** (번호 접두사) | `0-inbox/` → … → `5-backlog/` |
 
 ---
 

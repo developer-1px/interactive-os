@@ -11,8 +11,8 @@
  */
 
 import { kernel } from "../kernel";
-import type { FocusGroupConfig } from "../schema/focus/config/FocusGroupConfig";
-import { DEFAULT_CONFIG } from "../schema/focus/config/FocusGroupConfig";
+import type { FocusGroupConfig } from "../schemas/focus/config/FocusGroupConfig";
+import { DEFAULT_CONFIG } from "../schemas/focus/config/FocusGroupConfig";
 import { ZoneRegistry } from "./zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════

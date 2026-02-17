@@ -12,11 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TodoRouteImport } from './routes/_todo'
 import { Route as MinimalRouteImport } from './routes/_minimal'
 import { Route as TodoIndexRouteImport } from './routes/_todo/index'
-import { Route as PlaygroundPocRegistryMonitorRouteImport } from './routes/playground/poc-registry-monitor'
-import { Route as PlaygroundDesignTestbotCursorRouteImport } from './routes/playground/design-testbot-cursor'
-import { Route as TodoSettingsRouteImport } from './routes/_todo/settings'
-import { Route as TodoSearchRouteImport } from './routes/_todo/search'
-import { Route as TodoProfileRouteImport } from './routes/_todo/profile'
 import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
@@ -25,7 +20,6 @@ import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/pl
 import { Route as MinimalPlaygroundQuickpickRouteImport } from './routes/_minimal/playground.quickpick'
 import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
-import { Route as MinimalPlaygroundDesignDashboardV3RouteImport } from './routes/_minimal/playground.design-dashboard-v3'
 import { Route as MinimalPlaygroundCommandPaletteRouteImport } from './routes/_minimal/playground.command-palette'
 import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
 import { Route as MinimalDocsSplatRouteImport } from './routes/_minimal/docs/$'
@@ -41,33 +35,6 @@ const MinimalRoute = MinimalRouteImport.update({
 const TodoIndexRoute = TodoIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => TodoRoute,
-} as any)
-const PlaygroundPocRegistryMonitorRoute =
-  PlaygroundPocRegistryMonitorRouteImport.update({
-    id: '/playground/poc-registry-monitor',
-    path: '/playground/poc-registry-monitor',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PlaygroundDesignTestbotCursorRoute =
-  PlaygroundDesignTestbotCursorRouteImport.update({
-    id: '/playground/design-testbot-cursor',
-    path: '/playground/design-testbot-cursor',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const TodoSettingsRoute = TodoSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => TodoRoute,
-} as any)
-const TodoSearchRoute = TodoSearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => TodoRoute,
-} as any)
-const TodoProfileRoute = TodoProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
   getParentRoute: () => TodoRoute,
 } as any)
 const MinimalDocsRoute = MinimalDocsRouteImport.update({
@@ -111,12 +78,6 @@ const MinimalPlaygroundFocusRoute = MinimalPlaygroundFocusRouteImport.update({
   path: '/playground/focus',
   getParentRoute: () => MinimalRoute,
 } as any)
-const MinimalPlaygroundDesignDashboardV3Route =
-  MinimalPlaygroundDesignDashboardV3RouteImport.update({
-    id: '/playground/design-dashboard-v3',
-    path: '/playground/design-dashboard-v3',
-    getParentRoute: () => MinimalRoute,
-  } as any)
 const MinimalPlaygroundCommandPaletteRoute =
   MinimalPlaygroundCommandPaletteRouteImport.update({
     id: '/playground/command-palette',
@@ -138,15 +99,9 @@ export interface FileRoutesByFullPath {
   '/': typeof TodoIndexRoute
   '/builder': typeof MinimalBuilderRoute
   '/docs': typeof MinimalDocsRouteWithChildren
-  '/profile': typeof TodoProfileRoute
-  '/search': typeof TodoSearchRoute
-  '/settings': typeof TodoSettingsRoute
-  '/playground/design-testbot-cursor': typeof PlaygroundDesignTestbotCursorRoute
-  '/playground/poc-registry-monitor': typeof PlaygroundPocRegistryMonitorRoute
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
-  '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
@@ -157,15 +112,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof TodoIndexRoute
   '/builder': typeof MinimalBuilderRoute
-  '/profile': typeof TodoProfileRoute
-  '/search': typeof TodoSearchRoute
-  '/settings': typeof TodoSettingsRoute
-  '/playground/design-testbot-cursor': typeof PlaygroundDesignTestbotCursorRoute
-  '/playground/poc-registry-monitor': typeof PlaygroundPocRegistryMonitorRoute
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
-  '/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
@@ -179,16 +128,10 @@ export interface FileRoutesById {
   '/_todo': typeof TodoRouteWithChildren
   '/_minimal/builder': typeof MinimalBuilderRoute
   '/_minimal/docs': typeof MinimalDocsRouteWithChildren
-  '/_todo/profile': typeof TodoProfileRoute
-  '/_todo/search': typeof TodoSearchRoute
-  '/_todo/settings': typeof TodoSettingsRoute
-  '/playground/design-testbot-cursor': typeof PlaygroundDesignTestbotCursorRoute
-  '/playground/poc-registry-monitor': typeof PlaygroundPocRegistryMonitorRoute
   '/_todo/': typeof TodoIndexRoute
   '/_minimal/docs/$': typeof MinimalDocsSplatRoute
   '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/_minimal/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
-  '/_minimal/playground/design-dashboard-v3': typeof MinimalPlaygroundDesignDashboardV3Route
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/_minimal/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
@@ -202,15 +145,9 @@ export interface FileRouteTypes {
     | '/'
     | '/builder'
     | '/docs'
-    | '/profile'
-    | '/search'
-    | '/settings'
-    | '/playground/design-testbot-cursor'
-    | '/playground/poc-registry-monitor'
     | '/docs/$'
     | '/playground/aria'
     | '/playground/command-palette'
-    | '/playground/design-dashboard-v3'
     | '/playground/focus'
     | '/playground/kernel'
     | '/playground/quickpick'
@@ -221,15 +158,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/builder'
-    | '/profile'
-    | '/search'
-    | '/settings'
-    | '/playground/design-testbot-cursor'
-    | '/playground/poc-registry-monitor'
     | '/docs/$'
     | '/playground/aria'
     | '/playground/command-palette'
-    | '/playground/design-dashboard-v3'
     | '/playground/focus'
     | '/playground/kernel'
     | '/playground/quickpick'
@@ -242,16 +173,10 @@ export interface FileRouteTypes {
     | '/_todo'
     | '/_minimal/builder'
     | '/_minimal/docs'
-    | '/_todo/profile'
-    | '/_todo/search'
-    | '/_todo/settings'
-    | '/playground/design-testbot-cursor'
-    | '/playground/poc-registry-monitor'
     | '/_todo/'
     | '/_minimal/docs/$'
     | '/_minimal/playground/aria'
     | '/_minimal/playground/command-palette'
-    | '/_minimal/playground/design-dashboard-v3'
     | '/_minimal/playground/focus'
     | '/_minimal/playground/kernel'
     | '/_minimal/playground/quickpick'
@@ -263,8 +188,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   MinimalRoute: typeof MinimalRouteWithChildren
   TodoRoute: typeof TodoRouteWithChildren
-  PlaygroundDesignTestbotCursorRoute: typeof PlaygroundDesignTestbotCursorRoute
-  PlaygroundPocRegistryMonitorRoute: typeof PlaygroundPocRegistryMonitorRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -288,41 +211,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof TodoIndexRouteImport
-      parentRoute: typeof TodoRoute
-    }
-    '/playground/poc-registry-monitor': {
-      id: '/playground/poc-registry-monitor'
-      path: '/playground/poc-registry-monitor'
-      fullPath: '/playground/poc-registry-monitor'
-      preLoaderRoute: typeof PlaygroundPocRegistryMonitorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/playground/design-testbot-cursor': {
-      id: '/playground/design-testbot-cursor'
-      path: '/playground/design-testbot-cursor'
-      fullPath: '/playground/design-testbot-cursor'
-      preLoaderRoute: typeof PlaygroundDesignTestbotCursorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_todo/settings': {
-      id: '/_todo/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof TodoSettingsRouteImport
-      parentRoute: typeof TodoRoute
-    }
-    '/_todo/search': {
-      id: '/_todo/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof TodoSearchRouteImport
-      parentRoute: typeof TodoRoute
-    }
-    '/_todo/profile': {
-      id: '/_todo/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof TodoProfileRouteImport
       parentRoute: typeof TodoRoute
     }
     '/_minimal/docs': {
@@ -381,13 +269,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalPlaygroundFocusRouteImport
       parentRoute: typeof MinimalRoute
     }
-    '/_minimal/playground/design-dashboard-v3': {
-      id: '/_minimal/playground/design-dashboard-v3'
-      path: '/playground/design-dashboard-v3'
-      fullPath: '/playground/design-dashboard-v3'
-      preLoaderRoute: typeof MinimalPlaygroundDesignDashboardV3RouteImport
-      parentRoute: typeof MinimalRoute
-    }
     '/_minimal/playground/command-palette': {
       id: '/_minimal/playground/command-palette'
       path: '/playground/command-palette'
@@ -431,7 +312,6 @@ interface MinimalRouteChildren {
   MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
   MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
   MinimalPlaygroundCommandPaletteRoute: typeof MinimalPlaygroundCommandPaletteRoute
-  MinimalPlaygroundDesignDashboardV3Route: typeof MinimalPlaygroundDesignDashboardV3Route
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
   MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
   MinimalPlaygroundQuickpickRoute: typeof MinimalPlaygroundQuickpickRoute
@@ -444,8 +324,6 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalDocsRoute: MinimalDocsRouteWithChildren,
   MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
   MinimalPlaygroundCommandPaletteRoute: MinimalPlaygroundCommandPaletteRoute,
-  MinimalPlaygroundDesignDashboardV3Route:
-    MinimalPlaygroundDesignDashboardV3Route,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,
   MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
   MinimalPlaygroundQuickpickRoute: MinimalPlaygroundQuickpickRoute,
@@ -457,16 +335,10 @@ const MinimalRouteWithChildren =
   MinimalRoute._addFileChildren(MinimalRouteChildren)
 
 interface TodoRouteChildren {
-  TodoProfileRoute: typeof TodoProfileRoute
-  TodoSearchRoute: typeof TodoSearchRoute
-  TodoSettingsRoute: typeof TodoSettingsRoute
   TodoIndexRoute: typeof TodoIndexRoute
 }
 
 const TodoRouteChildren: TodoRouteChildren = {
-  TodoProfileRoute: TodoProfileRoute,
-  TodoSearchRoute: TodoSearchRoute,
-  TodoSettingsRoute: TodoSettingsRoute,
   TodoIndexRoute: TodoIndexRoute,
 }
 
@@ -475,8 +347,6 @@ const TodoRouteWithChildren = TodoRoute._addFileChildren(TodoRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   MinimalRoute: MinimalRouteWithChildren,
   TodoRoute: TodoRouteWithChildren,
-  PlaygroundDesignTestbotCursorRoute: PlaygroundDesignTestbotCursorRoute,
-  PlaygroundPocRegistryMonitorRoute: PlaygroundPocRegistryMonitorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

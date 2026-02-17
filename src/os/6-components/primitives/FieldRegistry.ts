@@ -1,6 +1,6 @@
 import type { BaseCommand } from "@kernel";
 import { useSyncExternalStore } from "react";
-import type { FieldCommandFactory } from "../../schema/command/BaseCommand.ts";
+import type { FieldCommandFactory } from "../../schemas/command/BaseCommand.ts";
 
 /**
  * Field Type Presets — Key Ownership Model

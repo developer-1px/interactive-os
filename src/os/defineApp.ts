@@ -30,7 +30,7 @@ import type { CommandFactory } from "@kernel/core/tokens";
 import type React from "react";
 import type { ReactNode } from "react";
 import { registerAppSlice } from "./appSlice";
-import { createHistoryMiddleware } from "./middleware/historyKernelMiddleware";
+import { createHistoryMiddleware } from "./middlewares/historyKernelMiddleware";
 
 import {
   __conditionBrand,

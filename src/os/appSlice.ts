@@ -33,7 +33,7 @@
 import { defineScope } from "@kernel";
 import type { Middleware, ScopeToken } from "@kernel/core/tokens";
 import { type AppState, initialAppState, kernel } from "@os/kernel";
-import { createHistoryMiddleware } from "@/os/middleware/historyKernelMiddleware";
+import { createHistoryMiddleware } from "@/os/middlewares/historyKernelMiddleware";
 
 // ═══════════════════════════════════════════════════════════════════
 // Slice Registry (for resetAllAppSlices)

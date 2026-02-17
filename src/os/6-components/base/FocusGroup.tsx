@@ -27,7 +27,7 @@ import {
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
 import { FOCUS, STACK_POP, STACK_PUSH } from "../../3-commands/focus";
 import { kernel } from "../../kernel.ts";
-import { resolveRole, type ZoneRole } from "../../registry/roleRegistry.ts";
+import { resolveRole, type ZoneRole } from "../../registries/roleRegistry.ts";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -36,7 +36,7 @@ import type {
   ProjectConfig,
   SelectConfig,
   TabConfig,
-} from "../../schema";
+} from "../../schemas";
 
 import { initialZoneState } from "../../state/initial.ts";
 

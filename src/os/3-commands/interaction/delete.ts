@@ -13,7 +13,7 @@ import { kernel } from "../../kernel";
 import {
   beginTransaction,
   endTransaction,
-} from "../../middleware/historyKernelMiddleware";
+} from "../../middlewares/historyKernelMiddleware";
 import { SELECTION_CLEAR } from "../selection/selection";
 import { resolveFocusId } from "../utils/resolveFocusId";
 

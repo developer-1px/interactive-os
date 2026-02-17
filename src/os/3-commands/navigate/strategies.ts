@@ -4,8 +4,8 @@
  * Pure function — no DOM access. Rects are passed in via the spatial parameter.
  */
 
-import type { NavigateConfig } from "../../schema/focus/config/FocusNavigateConfig.ts";
-import type { Direction } from "../../schema/focus/FocusDirection.ts";
+import type { NavigateConfig } from "../../schemas/focus/config/FocusNavigateConfig.ts";
+import type { Direction } from "../../schemas/focus/FocusDirection.ts";
 import { resolveCorner } from "./cornerNav.ts";
 import { type FocusCandidate, findBestCandidate } from "./focusFinder.ts";
 

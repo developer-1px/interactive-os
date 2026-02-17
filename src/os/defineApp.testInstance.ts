@@ -7,8 +7,8 @@
 
 import { createKernel, defineScope } from "@kernel";
 import type { CommandFactory, ScopeToken } from "@kernel/core/tokens";
-import { createHistoryMiddleware } from "./middleware/historyKernelMiddleware";
-import { beginTransaction, endTransaction } from "./middleware/historyKernelMiddleware";
+import { createHistoryMiddleware } from "./middlewares/historyKernelMiddleware";
+import { beginTransaction, endTransaction } from "./middlewares/historyKernelMiddleware";
 import {
     __selectorBrand,
     type Condition,

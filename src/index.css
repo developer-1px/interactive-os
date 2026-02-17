@@ -174,7 +174,7 @@ dialog.os-modal::backdrop {
 }
 
 dialog.os-modal[open] {
-  animation: os-modal-scale-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scale-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 dialog.os-modal .os-modal-content {
@@ -198,17 +198,6 @@ dialog.os-modal .os-modal-content {
   }
 }
 
-@keyframes os-modal-scale-in {
-  from {
-    transform: scale(0.96);
-    opacity: 0;
-  }
-
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 
 /* ── Nav Tooltip (instant, CSS-only) ────────────────────── */
 .nav-item[data-tooltip] {

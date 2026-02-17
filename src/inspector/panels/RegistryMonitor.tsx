@@ -31,7 +31,7 @@ export const RegistryMonitor = memo(
       // Ingest from GroupRegistry (kernel-native defineCommand)
       groupRegistryMap.forEach(
         (
-          factories: import("@os/schema/command/CommandFactory.ts").CommandFactory<
+          factories: import("@os/schemas/command/CommandFactory.ts").CommandFactory<
             any,
             any
           >[],

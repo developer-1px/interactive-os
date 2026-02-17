@@ -16,7 +16,7 @@ import type {
   ProjectConfig,
   SelectConfig,
   TabConfig,
-} from "../schema";
+} from "../schemas";
 import {
   DEFAULT_ACTIVATE,
   DEFAULT_DISMISS,
@@ -24,7 +24,7 @@ import {
   DEFAULT_PROJECT,
   DEFAULT_SELECT,
   DEFAULT_TAB,
-} from "../schema";
+} from "../schemas";
 
 // ═══════════════════════════════════════════════════════════════════
 // Zone Role Type

@@ -8,7 +8,7 @@
 
 import type { BaseCommand } from "@kernel";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
-import type { ZoneRole } from "@os/registry/roleRegistry.ts";
+import type { ZoneRole } from "@os/registries/roleRegistry.ts";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -16,7 +16,7 @@ import type {
   ProjectConfig,
   SelectConfig,
   TabConfig,
-} from "@os/schema";
+} from "@os/schemas";
 import type { ComponentProps, ReactNode } from "react";
 
 /** Advanced configuration overrides - use sparingly, prefer role presets */

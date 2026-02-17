@@ -5,7 +5,7 @@ import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { extractText } from "./docsUtils";
 import { MermaidBlock } from "./MermaidBlock";
-import "./codeTheme.css";
+import "./code-theme.css";
 
 // biome-ignore lint/suspicious/noExplicitAny: ReactMarkdown component props
 const MarkdownComponents: Record<string, React.FC<any>> = {

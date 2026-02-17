@@ -96,6 +96,8 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
         }
         className={className}
         data-selected={isSelected ? "true" : undefined}
+        _isFocusedHint={isFocused}
+        _isActiveHint={isActive}
         {...rest}
       >
         {resolvedChildren}

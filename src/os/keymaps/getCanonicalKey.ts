@@ -1,4 +1,4 @@
-import type { KeybindingItem } from "../schema/keyboard/KeybindingItem.ts";
+import type { KeybindingItem } from "../schemas/keyboard/KeybindingItem.ts";
 
 export interface KeymapConfig<T = string> {
   global?: KeybindingItem<T>[];

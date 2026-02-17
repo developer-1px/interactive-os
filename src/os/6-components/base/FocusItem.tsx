@@ -25,7 +25,7 @@ import {
   getChildRole,
   isCheckedRole,
   isExpandableRole,
-} from "../../registry/roleRegistry.ts";
+} from "../../registries/roleRegistry.ts";
 import { useFocusGroupContext } from "./FocusGroup.tsx";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -60,6 +60,13 @@ export interface FocusItemProps
 
   /** ARIA role override (auto-resolved from parent Zone role if not set) */
   role?: string;
+
+  /**
+   * Pre-computed hints from parent Item — avoids double kernel subscription.
+   * When provided, FocusItem skips its own useComputed for these values.
+   */
+  _isFocusedHint?: boolean;
+  _isActiveHint?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -96,6 +103,8 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       as: Element = "div",
       asChild = false,
       role,
+      _isFocusedHint,
+      _isActiveHint,
       ...rest
     },
     ref,
@@ -112,15 +121,21 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     const isSelectableGroup = config.select.mode !== "none";
 
     // --- State Subscriptions (Kernel Direct) ---
-    // Subscribe to booleans — avoids re-render when activeZoneId changes
-    // between two unrelated zones.
-    const isGroupActive = kernel.useComputed(
-      (state) => state.os.focus.activeZoneId === zoneId,
+    // When parent Item provides hints, skip redundant subscriptions
+    // to prevent double-render (the root cause of focus cursor flicker).
+    const isGroupActiveSub = kernel.useComputed(
+      _isActiveHint !== undefined
+        ? () => _isActiveHint
+        : (state) => state.os.focus.activeZoneId === zoneId,
     );
+    const isGroupActive = _isActiveHint ?? isGroupActiveSub;
 
-    const isFocused = kernel.useComputed(
-      (state) => state.os.focus.zones[zoneId]?.focusedItemId === id,
+    const isFocusedSub = kernel.useComputed(
+      _isFocusedHint !== undefined
+        ? () => _isFocusedHint
+        : (state) => state.os.focus.zones[zoneId]?.focusedItemId === id,
     );
+    const isFocused = _isFocusedHint ?? isFocusedSub;
 
     const isSelected = kernel.useComputed(
       (state) => state.os.focus.zones[zoneId]?.selection.includes(id) ?? false,

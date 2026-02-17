@@ -4,8 +4,8 @@
  * Pure function — delegates to strategy registry.
  */
 
-import type { NavigateConfig } from "../../schema/focus/config/FocusNavigateConfig.ts";
-import type { Direction } from "../../schema/focus/FocusDirection.ts";
+import type { NavigateConfig } from "../../schemas/focus/config/FocusNavigateConfig.ts";
+import type { Direction } from "../../schemas/focus/FocusDirection.ts";
 import { resolveEntry } from "./entry.ts";
 import { type NavigateResult, resolveWithStrategy } from "./strategies.ts";
 

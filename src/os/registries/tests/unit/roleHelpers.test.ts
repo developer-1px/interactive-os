@@ -9,7 +9,7 @@ import {
   getChildRole,
   isCheckedRole,
   isExpandableRole,
-} from "@os/registry/roleRegistry";
+} from "@os/registries/roleRegistry";
 import { describe, expect, it } from "vitest";
 
 describe("getChildRole", () => {

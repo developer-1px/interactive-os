@@ -12,7 +12,7 @@
  *   ✓=true, ✗=false, —=default
  */
 
-import { resolveRole } from "@os/registry/roleRegistry";
+import { resolveRole } from "@os/registries/roleRegistry";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

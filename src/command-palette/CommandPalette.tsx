@@ -219,7 +219,7 @@ function PaletteRow({
       tabIndex={-1}
       aria-selected={isFocused}
       className={`
-        flex items-center gap-3 px-3.5 py-2.5 rounded-lg cursor-pointer transition-all duration-100 mb-[1px]
+        flex items-center gap-3 px-3.5 py-2.5 rounded-lg cursor-pointer mb-[1px]
         ${isFocused ? "bg-zinc-100 text-zinc-950" : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-800"}
       `}
     >
@@ -234,7 +234,7 @@ function PaletteRow({
       </span>
       <span
         className={`
-          text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right transition-colors
+          text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right
           ${isFocused ? "text-zinc-500" : "text-zinc-400"}
         `}
       >
@@ -245,7 +245,7 @@ function PaletteRow({
       </span>
       <div
         className={`
-          w-[36px] flex justify-end transition-opacity duration-100
+          w-[36px] flex justify-end
           ${isFocused ? "opacity-100" : "opacity-0"}
         `}
       >

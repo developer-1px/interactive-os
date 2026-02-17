@@ -9,7 +9,7 @@
  *      Pipeline inferred via pure function inferPipeline().
  */
 
-import type { Transaction } from "@os/schema";
+import type { Transaction } from "@os/schemas";
 import {
   AlertTriangle,
   ArrowRightLeft,

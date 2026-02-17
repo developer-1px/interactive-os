@@ -12,7 +12,7 @@ import { Modal } from "@os/6-components/radox/Modal.tsx";
 import { Kbd } from "@/os/6-components/Kbd";
 
 // Logic Evaluation
-export { evalContext } from "@/os/schema/logic/evalContext";
+export { evalContext } from "@/os/schemas/logic/evalContext";
 
 // OS Namespace - All primitives in one place
 export const OS = {

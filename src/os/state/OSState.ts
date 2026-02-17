@@ -1,4 +1,4 @@
-import type { FocusStackEntry } from "../schema/focus/FocusStack";
+import type { FocusStackEntry } from "../schemas/focus/FocusStack";
 
 export interface OverlayEntry {
   /** Unique overlay ID */

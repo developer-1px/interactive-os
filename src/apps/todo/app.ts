@@ -16,7 +16,7 @@
  *     │   └── toolbar  — view toggle, clear completed
  */
 
-import { INITIAL_STATE } from "@apps/todo/features/todo_details/persistence";
+import { INITIAL_STATE } from "@apps/todo/features/todo-details/persistence";
 import type { AppState, Todo } from "@apps/todo/model/appState";
 import {
   selectCategories,

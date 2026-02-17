@@ -3,8 +3,8 @@ import { useFieldFocus } from "@os/5-hooks/useFieldHooks.ts";
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { kernel } from "@os/kernel.ts";
-import type { FieldCommandFactory } from "@os/schema/command/BaseCommand.ts";
-import type { FocusTarget } from "@os/schema/focus/FocusTarget.ts";
+import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
+import type { FocusTarget } from "@os/schemas/focus/FocusTarget.ts";
 import type { HTMLAttributes } from "react";
 import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
 import {

@@ -11,7 +11,7 @@ import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { FOCUS } from "@os/3-commands/focus";
 import { NAVIGATE } from "@os/3-commands/navigate";
 import { kernel } from "@os/kernel";
-import { DEFAULT_CONFIG } from "@os/schema/focus/config/FocusGroupConfig";
+import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import { initialOSState } from "@os/state/initial";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 

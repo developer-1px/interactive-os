@@ -12,8 +12,8 @@
 
 import { resolveEntry } from "@os/3-commands/navigate/entry";
 import { resolveNavigate } from "@os/3-commands/navigate/resolve";
-import type { NavigateConfig } from "@os/schema/focus/config/FocusNavigateConfig";
-import { DEFAULT_NAVIGATE } from "@os/schema/focus/config/FocusNavigateConfig";
+import type { NavigateConfig } from "@os/schemas/focus/config/FocusNavigateConfig";
+import { DEFAULT_NAVIGATE } from "@os/schemas/focus/config/FocusNavigateConfig";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

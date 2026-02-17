@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-16 22:05
+> Last updated: 2026-02-17 12:19
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -11,8 +11,9 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
+| naming-convention | Definition | 02-17 |
 | builder-mvp | Definition | 02-16 |
-| os-prd | Execution | 02-16 |
+| os-prd | Execution | 02-17 |
 
 ---
 
@@ -20,8 +21,9 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| naming-convention | Definition | 02-17 | 🔥 Focus |
 | builder-mvp | Definition | 02-16 | 🔥 Focus |
-| os-prd | Execution | 02-16 | 🔥 Focus |
+| os-prd | Execution | 02-17 | 🔥 Focus |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
 | docs-dashboard | Design | 02-15 | ⏸ Idle |
 | define-app | Execution (Phase 3) | 02-16 | ⏸ Idle |
@@ -65,14 +67,18 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 2 |
-| Active Projects (total) | 6 |
+| Active Focus | 3 |
+| Active Projects (total) | 8 |
 | Completed (archived) | 18 |
 | Inbox items | 0 |
 | Backlog items | 3 |
 | Open issues | 0 |
 
 ---
+
+## 📝 Recent Changes (2026-02-17)
+
+- 🆕 `naming-convention` 프로젝트 생성 — 네이밍 컨벤션 감사 + rules.md 반영 + 폴더 리네이밍
 
 ## 📝 Recent Changes (2026-02-16)
 

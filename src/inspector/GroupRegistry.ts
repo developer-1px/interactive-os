@@ -1,4 +1,4 @@
-import type { CommandFactory } from "@os/schema/command/CommandFactory";
+import type { CommandFactory } from "@os/schemas/command/CommandFactory";
 
 /**
  * Global static registry for Group-based command discovery.
