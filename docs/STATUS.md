@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-18 00:05
+> Last updated: 2026-02-18 00:18
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -17,7 +17,7 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| os-prd | Execution (Now 비어있음) | 02-18 | ⏸ Idle |
+| os-prd | Closing 판정 대기 | 02-18 | ⏸ Idle |
 | builder-mvp | Definition | 02-16 | ⏸ Idle |
 | define-app | Execution (Phase 3) | 02-16 | ⏸ Idle |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
@@ -31,8 +31,8 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
-| naming-convention | 02-17 | pending |
-| field-key-ownership | 02-16 | pending |
+| naming-convention | 02-17 | ✅ 4-archive/2026-02 |
+| field-key-ownership | 02-16 | ✅ 4-archive/2026-02 |
 | todo-keyboard-dogfooding | 02-16 | ✅ 4-archive/2026-02 |
 | command-palette-e2e | 02-16 | ✅ 4-archive/2026-02 |
 | fix-tab-navigation | 02-16 | ✅ 4-archive/2026-02 |
@@ -55,13 +55,7 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 
 ## 📥 Inbox
 
-| File | Type | Suggested Action |
-|------|------|-----------------|
-| `2026-0215-1845-divide-os-remaining.md` | /divide report | → `os-prd/notes/` |
-| `2026-0216-2053-analysis-diagnose-editing-ownership.md` | 아키텍처 분석 | → `builder-mvp/notes/` |
-| `2026-0216-2100-report-kernel-code-review.md` | 코드 리뷰 | → `3-resource/` |
-| `2026-0216-2104-[report]-os-code-review.md` | 코드 리뷰 | → `3-resource/` |
-| `2026-0216-2217-[report]-code-review.md` | 코드 리뷰 | → `3-resource/` |
+**✨ Inbox is empty!** All documents have been routed.
 
 ---
 
@@ -72,7 +66,7 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 | Active Focus | 0 |
 | Active Projects (total) | 7 |
 | Completed (archived) | 19 |
-| Inbox items | 5 |
+| Inbox items | 0 |
 | Backlog items | 3 |
 | Open issues | 0 (7 closed) |
 
@@ -81,9 +75,9 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 ## 📝 Recent Changes (2026-02-18)
 
 - ✅ `os-prd` T9 완료 확인 — defineApp.ts 분할 이미 완료 (912→299줄, 6개 모듈)
-- ⏸ `os-prd` Now 비어있음 → Idle (Closing 또는 Living Spec 판정 필요)
-- ⏸ `builder-mvp` Focus → Idle 강등 (02-16 이후 활동 없음)
-- 📥 Inbox 5건 누적 — 코드 리뷰 3건 + /divide 보고서 1건 + 아키텍처 분석 1건
+- 📥 Inbox 5건 라우팅 — os-prd/notes 1건, builder-mvp/notes 1건, 3-resource/05-reviews 3건
+- 📦 `naming-convention` + `field-key-ownership` + `todo-keyboard-dogfooding` → archive
+- ⏸ Active Focus 0 — 모든 프로젝트 Idle 상태
 
 ## 📝 Recent Changes (2026-02-17)
 
@@ -102,7 +96,5 @@ _(없음 — 모든 Focus 프로젝트 태스크 소진)_
 - fix: click-to-expand — disclosure/accordion 클릭 확장 + dialog 포커스 복원, E2E 164/164 통과
 - ✅ 전체 이슈 클리어 (5개 이슈 done → closed)
 - ✅ `field-key-ownership` 프로젝트 완료
-- 🆕 `behavior-first-zone` 프로젝트 생성 — ARIA role→behavior 인과관계 역전 수정
-- 📥 `behavior-first-zone` 백로그 이동 — 전제 무효(IME 버그였음), typeahead 복원
 - fix: IME keyCode 229 가드 추가 (KeyboardListener) — 한글 IME 첫 keydown 누출 방지
 - fix: Todo dead code 정리 (AppEffect, GenericCommand, logic/)
