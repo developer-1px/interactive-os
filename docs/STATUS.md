@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-17 12:19
+> Last updated: 2026-02-18 00:05
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,11 +9,7 @@
 
 ## 🔥 Active Focus
 
-| Project | Phase | Last Activity |
-|---------|-------|---------------|
-| naming-convention | Definition | 02-17 |
-| builder-mvp | Definition | 02-16 |
-| os-prd | Execution | 02-17 |
+_(없음 — 모든 Focus 프로젝트 태스크 소진)_
 
 ---
 
@@ -21,14 +17,13 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| naming-convention | Definition | 02-17 | 🔥 Focus |
-| builder-mvp | Definition | 02-16 | 🔥 Focus |
-| os-prd | Execution | 02-17 | 🔥 Focus |
+| os-prd | Execution (Now 비어있음) | 02-18 | ⏸ Idle |
+| builder-mvp | Definition | 02-16 | ⏸ Idle |
+| define-app | Execution (Phase 3) | 02-16 | ⏸ Idle |
 | registry-monitor-v5 | Design | 02-15 | ⏸ Idle |
 | docs-dashboard | Design | 02-15 | ⏸ Idle |
-| define-app | Execution (Phase 3) | 02-16 | ⏸ Idle |
-| create-module | Design (Proposal 미승인) | 02-13 | ⏸ Idle |
-| testbot | Execution 준비 | 02-13 | ⏸ Idle |
+| create-module | Design (Proposal 미승인) | 02-15 | ⏸ Idle |
+| testbot | Execution 준비 | 02-15 | ⏸ Idle |
 
 ---
 
@@ -36,6 +31,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| naming-convention | 02-17 | pending |
 | field-key-ownership | 02-16 | pending |
 | todo-keyboard-dogfooding | 02-16 | ✅ 4-archive/2026-02 |
 | command-palette-e2e | 02-16 | ✅ 4-archive/2026-02 |
@@ -59,7 +55,13 @@
 
 ## 📥 Inbox
 
-**✨ Inbox is empty!** All documents have been routed.
+| File | Type | Suggested Action |
+|------|------|-----------------|
+| `2026-0215-1845-divide-os-remaining.md` | /divide report | → `os-prd/notes/` |
+| `2026-0216-2053-analysis-diagnose-editing-ownership.md` | 아키텍처 분석 | → `builder-mvp/notes/` |
+| `2026-0216-2100-report-kernel-code-review.md` | 코드 리뷰 | → `3-resource/` |
+| `2026-0216-2104-[report]-os-code-review.md` | 코드 리뷰 | → `3-resource/` |
+| `2026-0216-2217-[report]-code-review.md` | 코드 리뷰 | → `3-resource/` |
 
 ---
 
@@ -67,14 +69,21 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 3 |
-| Active Projects (total) | 8 |
-| Completed (archived) | 18 |
-| Inbox items | 0 |
+| Active Focus | 0 |
+| Active Projects (total) | 7 |
+| Completed (archived) | 19 |
+| Inbox items | 5 |
 | Backlog items | 3 |
-| Open issues | 0 |
+| Open issues | 0 (7 closed) |
 
 ---
+
+## 📝 Recent Changes (2026-02-18)
+
+- ✅ `os-prd` T9 완료 확인 — defineApp.ts 분할 이미 완료 (912→299줄, 6개 모듈)
+- ⏸ `os-prd` Now 비어있음 → Idle (Closing 또는 Living Spec 판정 필요)
+- ⏸ `builder-mvp` Focus → Idle 강등 (02-16 이후 활동 없음)
+- 📥 Inbox 5건 누적 — 코드 리뷰 3건 + /divide 보고서 1건 + 아키텍처 분석 1건
 
 ## 📝 Recent Changes (2026-02-17)
 

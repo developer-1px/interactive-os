@@ -2,9 +2,10 @@
 
 ## 🔴 Now
 
-- [ ] T9: defineApp.ts 분할 — 912줄, 25 `as any` → 모듈 분리
+_(empty — 모든 계획 태스크 완료)_
 
 ## ⏳ Done
+- [x] T9: defineApp.ts 분할 — 912→299줄 (6개 모듈 분리 완료), `as any` 25→4 (02-18)
 - [x] T12: G5 — seamless 미구현+미사용 확인, severity Info로 변경 (02-16)
 - [x] T11: G4 — recoveryTargetId E2E 검증 완료 (dogfooding SC-2) (02-16)
 - [x] T10: SPEC §8.1 갱신 — keyCode 229, combobox skip, Key Ownership, typeahead middleware (02-16)
@@ -35,6 +36,7 @@
 ## 💡 Ideas
 - Kernel Test Utils (Context Mocking) — Unit Test 작성 효율화
 - SPEC.md를 코드에서 참조: 커맨드 파일 상단에 SPEC 섹션 번호 링크
+- `as any` 근본 해결: kernel dispatch generic 타입 개선 (별도 프로젝트 — defineApp 외 25개 잔존)
 
 ## 📚 Resources
 - [Virtual Focus & aria-activedescendant](../../3-resource/04-architecture/2026-0215-virtual-focus-activedescendant.md) — T5a/T5b 구현 가이드
