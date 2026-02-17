@@ -7,7 +7,7 @@ import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotPanel } from "@inspector/testbot";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { kernel } from "@/os/kernel";
 
 // --- Main Component ---
@@ -16,44 +16,13 @@ export function CommandInspector() {
   // v7.50: Use global InspectorStore for tab state
   const activeTab = useInspectorStore((s) => s.activeTab);
 
-  // --- Kernel state subscriptions ---
-  const activeGroupId = kernel.useComputed((s) => s.os.focus.activeZoneId);
-
-  const focusedItemId = kernel.useComputed((s) => {
-    const zoneId = s.os.focus.activeZoneId;
-    return zoneId ? (s.os.focus.zones[zoneId]?.focusedItemId ?? null) : null;
-  });
-
-  // Build ctx on-demand (simplified — no contextMap)
-  const ctx = useMemo(
-    () => ({
-      activeZone: activeGroupId ?? undefined,
-      focusPath: [] as string[],
-      focusedItemId,
-    }),
-    [activeGroupId, focusedItemId],
-  );
-
-  // Keybinding map — empty for now (was powered by legacy CommandRegistry)
-  const activeKeybindingMap = useMemo(() => new Map<string, boolean>(), []);
-
   // --- UI State ---
   const [physicalZone, setPhysicalZone] = useState<string | null>("NONE");
   const [isInputActive, setIsInputActive] = useState(false);
 
-  // Optimize Context for Registry
-  const registryContext = useMemo(() => {
-    if (!ctx) return {};
-    return ctx;
-  }, [ctx]);
-
   // Telemetry from kernel transactions
   const transactions = kernel.inspector.getTransactions();
   const historyCount = transactions.length;
-  const lastEntry = historyCount > 0 ? transactions[historyCount - 1] : null;
-  const lastCommandId = lastEntry ? lastEntry.command?.type : null;
-  const lastPayload = lastEntry?.command?.payload ?? null;
-  const currentFocusId = focusedItemId;
   const rawKeys = useInputTelemetry((s) => s.logs);
 
   useEffect(() => {
@@ -92,14 +61,7 @@ export function CommandInspector() {
         return (
           <div className="flex-1 flex flex-col overflow-hidden bg-white">
             <KeyMonitor rawKeys={rawKeys} />
-            <RegistryMonitor
-              ctx={registryContext}
-              activeKeybindingMap={activeKeybindingMap}
-              isInputActive={isInputActive}
-              lastCommandId={lastCommandId}
-              lastPayload={lastPayload}
-              historyCount={historyCount}
-            />
+            <RegistryMonitor historyCount={historyCount} />
           </div>
         );
       case "STATE":
@@ -128,7 +90,7 @@ export function CommandInspector() {
         </div>
         <div className="flex items-center gap-2">
           <div className="px-1.5 py-0.5 rounded bg-[#ffffff] text-[8px] text-[#aaaaaa] font-mono leading-none border border-[#e5e5e5]">
-            v7.50
+            v8
           </div>
         </div>
       </div>
