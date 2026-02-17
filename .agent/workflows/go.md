@@ -1,5 +1,5 @@
 ---
-description: 자율 실행 에이전트 루프. Clear/Complicated는 실행, Complex는 보고하고 멈춘다.
+description: 자율 실행 에이전트 루프. Clear/Complicated는 실행, Complex는 /solve로 자율 해결을 시도한다.
 ---
 
 ## /go — 갈 수 있는 데까지 가라
@@ -7,8 +7,8 @@ description: 자율 실행 에이전트 루프. Clear/Complicated는 실행, Com
 ### 원칙
 
 > /divide의 자율 버전이다. Cynefin Framework (`rules.md` 참조)로 도메인을 판단한다.
-> Clear/Complicated면 실행하고, Complex면 보고서를 쓰고 멈춘다.
-> 사용자가 "갈 수 있는 데까지 가" 라고 말할 때 쓴다.
+> Clear/Complicated면 실행하고, Complex면 `/solve`로 자율 해결을 시도한다.
+> `/solve`가 실패한 경우(배타적 + 비가역적)에만 사용자에게 보고하고 멈춘다.
 
 ### 절차
 
@@ -17,18 +17,21 @@ description: 자율 실행 에이전트 루프. Clear/Complicated는 실행, Com
    - BOARD.md의 Now 태스크에 **미완료 파이프라인 단계**(예: `- [ ] /review`)가 있으면 이어서 실행한다.
    - 지금 이어갈 작업이 무엇인지 판단한다.
 
-2. **자율 실행 루프** (Complex 발견 전까지 반복)
+2. **자율 실행 루프** (반복)
    - **Clear** (자명한 해법) → 바로 실행. 멈추지 않는다.
    - **Complicated** (선택지가 있는 것) → 트레이드오프를 분석하고 최선을 골라 실행. 근거를 기록.
      - 판단 기준: "변경 후 `biome check --write` 및 `tsc` 오류 없음 + 테스트 통과"면 실행.
      - 아키텍처 변경이나 새 인터페이스 도입이 필요하면 Complex로 분류.
+   - **Complex** → `/solve`를 호출한다.
+     - `/solve` 성공 (Step 1~3에서 해결) → 루프 계속.
+     - `/solve` 실패 (Step 4 탈출: 배타적 + 비가역적) → 3단계로 이동.
    - 실행 중 `/verify`로 주기적 검증.
    - 검증 통과한 작업 단위는 **즉시 커밋**한다. 큰 변경을 커밋 없이 누적하지 않는다.
 
 3. **탈출 조건**
    - 다음 중 하나를 만족하면 루프를 종료하고 보고한다:
-     - **Complex 항목 발견** — 의사결정이 필요.
-     - **Clear/Complicated 소진** — 연속 3건의 후보가 모두 Complex로 판정됨.
+     - **`/solve` 실패** — 배타적 + 비가역적 선택지만 남음. 의사결정이 필요.
+     - **모든 작업 완료** — Now가 비었고 추가 작업 후보도 없음.
      - **시간 제약** — 커밋 3회 이상 누적 시 중간 보고.
 
 4. **멈춤 — 의사결정 필요**
