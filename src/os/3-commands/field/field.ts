@@ -55,13 +55,10 @@ export const FIELD_COMMIT = kernel.defineCommand(
 
     const editingId = zone.editingItemId;
 
-    // Find the active field: by editingId, by focused element, or by scanning registry
+    // Find the active field: by editingId, by focused item, or by scanning registry
     let fieldEntry = editingId ? FieldRegistry.getField(editingId) : null;
-    if (!fieldEntry) {
-      const activeEl = document.activeElement as HTMLElement | null;
-      if (activeEl?.id) {
-        fieldEntry = FieldRegistry.getField(activeEl.id) ?? null;
-      }
+    if (!fieldEntry && zone.focusedItemId) {
+      fieldEntry = FieldRegistry.getField(zone.focusedItemId) ?? null;
     }
     if (!fieldEntry) {
       const allFields = FieldRegistry.get().fields;
@@ -83,15 +80,19 @@ export const FIELD_COMMIT = kernel.defineCommand(
 
     // Bridge: dispatch app's onSubmit command
     if (fieldEntry?.config.onSubmit) {
-      const fieldName = fieldEntry.config.name;
-      const el = document.getElementById(fieldName);
-      const text = el?.innerText?.trim() ?? fieldEntry.state.localValue;
-      // Clear DOM immediately for immediate-mode fields (e.g., DRAFT)
-      if (el && !editingId) {
-        el.innerText = "";
-      }
+      // Use state value — no DOM read needed.
+      const text = fieldEntry.state.localValue;
       const appCommand = fieldEntry.config.onSubmit({ text });
       queueMicrotask(() => kernel.dispatch(appCommand));
+
+      // Clear DOM via effect for immediate-mode fields (e.g., DRAFT)
+      if (!editingId) {
+        const fieldName = fieldEntry.config.name;
+        queueMicrotask(() => {
+          const el = document.getElementById(fieldName);
+          if (el) el.innerText = "";
+        });
+      }
     }
 
     // Only clear editingItemId if we were in deferred editing mode

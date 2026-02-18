@@ -8,7 +8,12 @@
 
 import { produce } from "immer";
 import { DOM_ITEMS, ZONE_CONFIG } from "../../2-contexts";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
+import {
+  getChildRole,
+  isExpandableRole,
+} from "../../registries/roleRegistry";
 import { ensureZone } from "../../state/utils";
 import { EXPAND } from "../expand";
 
@@ -32,9 +37,11 @@ export const SELECT = kernel.defineCommand(
 
     // W3C Tree Pattern: Space toggles expansion for expandable items
     // Only applies for keyboard-triggered SELECT (no explicit targetId)
+    // Expandability is determined by zone role, not DOM attribute.
     if (!payload.targetId) {
-      const targetEl = document.getElementById(targetId);
-      if (targetEl?.hasAttribute("aria-expanded")) {
+      const entry = ZoneRegistry.get(activeZoneId);
+      const childRole = getChildRole(entry?.role);
+      if (childRole && isExpandableRole(childRole)) {
         return {
           dispatch: EXPAND({ action: "toggle", itemId: targetId }),
         };

@@ -13,6 +13,10 @@ import { DOM_ITEMS, DOM_RECTS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
 import { ensureZone } from "../../state/utils";
+import {
+  getChildRole,
+  isExpandableRole,
+} from "../../registries/roleRegistry";
 import { EXPAND } from "../expand";
 import { resolveNavigate } from "./resolve";
 
@@ -52,8 +56,10 @@ export const NAVIGATE = kernel.defineCommand(
       const focusedId = zone.focusedItemId;
       if (focusedId) {
         const isExpanded = zone.expandedItems.includes(focusedId);
-        const focusedEl = document.getElementById(focusedId);
-        const isExpandable = focusedEl?.hasAttribute("aria-expanded") ?? false;
+        // Expandability is determined by role, not DOM attribute.
+        // FocusItem renders aria-expanded when isExpandableRole(childRole) is true.
+        const childRole = getChildRole(zoneEntry?.role);
+        const isExpandable = childRole ? isExpandableRole(childRole) : false;
 
         if (isExpandable) {
           if (payload.direction === "right" && !isExpanded) {
