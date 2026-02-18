@@ -5,7 +5,7 @@
  * Uses mock commands to isolate OS behavior from app-specific logic.
  *
  * App-level clipboard tests (CopyTodo, PasteTodo, etc.) are in
- * src/apps/todo/tests/unit/todo.v3.test.ts
+ * src/apps/todo/tests/unit/todo.test.ts
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";

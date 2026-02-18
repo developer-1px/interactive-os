@@ -1,7 +1,6 @@
 /**
  * Todo App v5 — defineApp native (flat handlers, branded types).
  *
- * Migrated from app-v3.ts (curried handlers + createWidget compat layer)
  * to v5 native API (flat handlers + createZone + Condition/Selector).
  *
  * Structure:
@@ -163,9 +162,9 @@ export const moveItemUp = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -189,9 +188,9 @@ export const moveItemDown = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -586,7 +585,7 @@ export const TodoToolbarUI = toolbarZone.bind({
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// v3 Compat Aliases — widget imports use these names
+// Namespaced Exports — widget imports use these names
 // Allows: import { TodoList, TodoSidebar } from "@apps/todo/app"
 // ═══════════════════════════════════════════════════════════════════
 

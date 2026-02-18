@@ -22,7 +22,7 @@ export function ListView() {
 
   return (
     <div className="flex-1 flex flex-col h-full relative bg-white overflow-hidden font-sans">
-      {/* v3: Zero manual bindings — TodoList.Zone has everything from createWidget */}
+      {/* Zero manual bindings — TodoList.Zone has everything from zone.bind */}
       <TodoList.Zone className="flex flex-col h-full">
         <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full z-10 p-8 sm:p-12 pb-6">
           {/* Header */}

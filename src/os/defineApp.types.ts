@@ -43,9 +43,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-      state: S;
-      dispatch?: BaseCommand | BaseCommand[];
-    }
+    state: S;
+    dispatch?: BaseCommand | BaseCommand[];
+  }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -158,6 +158,6 @@ export interface AppHandle<S> {
     children: ReactNode;
   }>;
   useComputed<T>(selector: Selector<S, T>): T;
-  getState(): S;
+  useComputed<T>(fn: (state: S) => T): T;
   create(overrides?: Partial<S>): TestInstance<S>;
 }

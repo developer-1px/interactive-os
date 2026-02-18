@@ -6,7 +6,6 @@
  */
 
 import { createKernel, defineScope } from "@kernel";
-import type { CommandFactory } from "@kernel/core/tokens";
 import {
   __selectorBrand,
   type Condition,
@@ -30,9 +29,6 @@ export interface CreateTestConfig<S> {
     string,
     { handler: FlatHandler<S, any>; when?: Condition<S> }
   >;
-  options?: {
-    selectors?: Record<string, (state: S, ...args: any[]) => any>;
-  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -48,7 +44,7 @@ export function createTestInstance<S>(
   config: CreateTestConfig<S>,
   overrides?: Partial<S> | { history?: boolean },
 ): TestInstance<S> {
-  const { appId, initialState, flatHandlerRegistry, options } = config;
+  const { appId, initialState, flatHandlerRegistry } = config;
 
   // Separate test options from state overrides
   const rawOverrides = overrides ?? {};
@@ -56,8 +52,8 @@ export function createTestInstance<S>(
     "history" in rawOverrides && rawOverrides.history === true;
   const stateOverrides = enableHistory
     ? (({ history: _h, ...rest }) => rest)(
-        rawOverrides as Record<string, unknown>,
-      )
+      rawOverrides as Record<string, unknown>,
+    )
     : rawOverrides;
 
   const testState =
@@ -88,8 +84,7 @@ export function createTestInstance<S>(
     testKernel.use(historyMw);
   }
 
-  // Re-register all commands on test kernel, collecting test factories
-  const testFactories = new Map<string, CommandFactory<any, any>>();
+  // Re-register all commands on test kernel
   for (const [type, entry] of flatHandlerRegistry) {
     const kernelHandler = (ctx: { state: S }) => (payload: any) =>
       entry.handler(ctx, payload);
@@ -98,46 +93,11 @@ export function createTestInstance<S>(
       ? { when: (state: unknown) => entry.when?.evaluate(state as S) }
       : undefined;
 
-    const testFactory = testGroup.defineCommand(
+    testGroup.defineCommand(
       type,
       kernelHandler as any,
       whenGuard as any,
     );
-    testFactories.set(type, testFactory);
-  }
-
-  // ── v3 compat: Build dispatch proxy ──
-  const dispatchProxy: Record<string, (payload?: any) => void> = {};
-  for (const [type] of flatHandlerRegistry) {
-    dispatchProxy[type] = (payload?: any) => {
-      const factory = testFactories.get(type);
-      if (factory) {
-        testKernel.dispatch((factory as any)(payload ?? {}));
-      }
-    };
-  }
-
-  // ── v3 compat: Build select proxy ──
-  const selectProxy: Record<string, (...args: any[]) => any> = {};
-  if (options?.selectors) {
-    for (const [name, selectorFn] of Object.entries(options.selectors)) {
-      selectProxy[name] = (...args: any[]) => {
-        const appState = testKernel.getState().apps[appId] as S;
-        return selectorFn(appState, ...args);
-      };
-    }
-  }
-
-  // ── v3 compat: Build commands map with `when` metadata ──
-  const commandsMap: Record<string, any> = {};
-  for (const [type, entry] of flatHandlerRegistry) {
-    const factory = testFactories.get(type);
-    if (factory) {
-      commandsMap[type] = factory;
-      (commandsMap[type] as any).when = entry.when
-        ? (state: any) => entry.when?.evaluate(state)
-        : null;
-    }
   }
 
   return {
@@ -145,39 +105,29 @@ export function createTestInstance<S>(
       return testKernel.getState().apps[appId] as S;
     },
 
-    dispatch: Object.assign(
-      (command: any): boolean => {
-        // v5 style: dispatch(command)
-        const entry = flatHandlerRegistry.get(command.type);
-        if (entry?.when) {
-          const currentState = testKernel.getState().apps[appId] as S;
-          if (!entry.when.evaluate(currentState)) return false;
-        }
-        // Redirect to test scope — zone commands carry production scope
-        // (e.g., ['todo-v5:list']) but test kernel uses single test scope
-        const normalizedCmd = {
-          ...command,
-          scope: [testScope],
-        };
-        testKernel.dispatch(normalizedCmd);
-        return true;
-      },
-      // v3 style: dispatch.addTodo({...})
-      dispatchProxy,
-    ),
-
-    // Dual: v5 select(brandedSelector) + v3 select.visibleTodos()
-    select: Object.assign((selectorOrBranded: any) => {
-      // v5 style: select(brandedSelector)
-      if (selectorOrBranded && __selectorBrand in selectorOrBranded) {
+    dispatch(command: any): boolean {
+      const entry = flatHandlerRegistry.get(command.type);
+      if (entry?.when) {
         const currentState = testKernel.getState().apps[appId] as S;
-        return selectorOrBranded.select(currentState);
+        if (!entry.when.evaluate(currentState)) return false;
+      }
+      // Redirect to test scope — zone commands carry production scope
+      // (e.g., ['todo-v5:list']) but test kernel uses single test scope
+      const normalizedCmd = {
+        ...command,
+        scope: [testScope],
+      };
+      testKernel.dispatch(normalizedCmd);
+      return true;
+    },
+
+    select(selectorBranded: any) {
+      if (selectorBranded && __selectorBrand in selectorBranded) {
+        const currentState = testKernel.getState().apps[appId] as S;
+        return selectorBranded.select(currentState);
       }
       return undefined;
-    }, selectProxy) as any,
-
-    // v3 style: commands.cancelEdit
-    commands: commandsMap,
+    },
 
     reset() {
       testKernel.setState(() => ({
@@ -201,3 +151,4 @@ export function createTestInstance<S>(
     },
   } as any;
 }
+

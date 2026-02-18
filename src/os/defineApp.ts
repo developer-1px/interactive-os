@@ -63,8 +63,6 @@ export function defineApp<S>(
   options?: {
     history?: boolean;
     persistence?: { key: string; debounceMs?: number };
-    /** v3 compat: named selectors for test instance select proxy */
-    selectors?: Record<string, (state: S, ...args: unknown[]) => unknown>;
   },
 ): AppHandle<S> {
   // ── Production: register on singleton kernel ──
@@ -207,12 +205,12 @@ export function defineApp<S>(
     overrides?: Partial<S> | { history?: boolean },
   ): TestInstance<S> {
     return createTestInstance(
-      { appId, initialState, flatHandlerRegistry, options },
+      { appId, initialState, flatHandlerRegistry },
       overrides,
     );
   }
 
-  // ── Return AppHandle (v5 + v3 compat) ──
+  // ── Return AppHandle ──
 
   return {
     condition: defineCondition,
@@ -252,25 +250,17 @@ export function defineApp<S>(
       (config: CompoundTriggerConfig): CompoundTriggerComponents;
     },
 
-    /** v5: Selector-based hook */
     useComputed<T>(selectorOrFn: Selector<S, T> | ((s: S) => T)): T {
-      if (__selectorBrand in (selectorOrFn as object)) {
+      if (
+        typeof selectorOrFn === "object" &&
+        selectorOrFn !== null &&
+        "select" in selectorOrFn
+      ) {
         return slice.useComputed((s) =>
           (selectorOrFn as Selector<S, T>).select(s),
         );
       }
-      // v3 compat: bare lambda
       return slice.useComputed(selectorOrFn as (s: S) => T);
-    },
-
-    /** v3 compat: read state */
-    getState(): S {
-      return slice.getState();
-    },
-
-    /** v3 compat: direct state update (callback-based handlers like onCommit) */
-    setState(updater: (prev: S) => S) {
-      slice.setState(updater);
     },
 
     create,

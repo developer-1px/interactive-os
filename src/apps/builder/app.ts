@@ -148,15 +148,24 @@ export const INITIAL_STATE: BuilderState = {
 // App definition
 // ═══════════════════════════════════════════════════════════════════
 
-export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE, {
-  selectors: {
-    fieldValue: (state: BuilderState, name: string) =>
-      state.data.fields[name] ?? "",
-    selectedId: (state: BuilderState) => state.ui.selectedId,
-    selectedType: (state: BuilderState) => state.ui.selectedType,
-    allFields: (state: BuilderState) => state.data.fields,
-  },
-});
+export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE);
+
+// ═══════════════════════════════════════════════════════════════════
+// Selectors (v5 branded)
+// ═══════════════════════════════════════════════════════════════════
+
+export const selectedId = BuilderApp.selector(
+  "selectedId",
+  (s) => s.ui.selectedId,
+);
+export const selectedType = BuilderApp.selector(
+  "selectedType",
+  (s) => s.ui.selectedType,
+);
+export const allFields = BuilderApp.selector(
+  "allFields",
+  (s) => s.data.fields,
+);
 
 // ═══════════════════════════════════════════════════════════════════
 // Canvas Zone — v5 native (createZone + bind)
@@ -200,20 +209,10 @@ export const BuilderCanvasUI = canvasZone.bind({
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// v3 Compat Alias — existing imports use BuilderCanvas.Zone pattern
-// ═══════════════════════════════════════════════════════════════════
-
-export const BuilderCanvas = {
-  ...BuilderCanvasUI,
-  commands: {
-    updateField,
-    selectElement,
-  },
-};
-
-// ═══════════════════════════════════════════════════════════════════
 // Helper for onCommit callbacks (OS.Field → state update)
 // ═══════════════════════════════════════════════════════════════════
+
+import { kernel } from "@/os/kernel";
 
 /**
  * Update a single field value in the centralized state.
@@ -223,9 +222,5 @@ export const BuilderCanvas = {
  * Both canvas inline editing and panel editing converge on the same state.
  */
 export function builderUpdateField(name: string, value: string) {
-  BuilderApp.setState((prev) =>
-    produce(prev, (draft) => {
-      draft.data.fields[name] = value;
-    }),
-  );
+  kernel.dispatch(updateField({ name, value }));
 }

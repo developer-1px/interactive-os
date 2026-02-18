@@ -4,7 +4,7 @@
  * Tests the dispatch chain: OS command → ZoneRegistry lookup → zone callback.
  * Uses mock callbacks to isolate OS behavior from app-specific logic.
  *
- * App-level command tests are in src/apps/todo/tests/unit/todo.v3.test.ts
+ * App-level command tests are in src/apps/todo/tests/unit/todo.test.ts
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
