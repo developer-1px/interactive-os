@@ -55,7 +55,9 @@ _(없음 — 다음 Focus 프로젝트 선택 대기)_
 
 ## 📥 Inbox
 
-**✨ Inbox is empty!**
+| Item | Related Project | Suggested Action | Cynefin |
+|------|----------------|-----------------|---------|
+| [area-stale-docs-audit](0-inbox/2026-0218-1046-[analysis]-area-stale-docs-audit.md) | — (cross-cutting) | 🟡 7건 문서 처리 전략 결정 (A경로수정/B통합/C원칙보존) | Complicated |
 
 ---
 
@@ -66,7 +68,7 @@ _(없음 — 다음 Focus 프로젝트 선택 대기)_
 | Active Focus | 0 |
 | Active Projects (total) | 2 |
 | Completed (archived) | 24 |
-| Inbox items | 0 |
+| Inbox items | 1 |
 | Backlog items | 4 |
 | Open issues | 0 |
 
