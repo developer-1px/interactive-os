@@ -49,7 +49,7 @@ describe("resolveFocusId", () => {
 
   it("does not mutate original command", () => {
     const cmd = makeCommand("CMD", { id: "OS.FOCUS" });
-    const original = { ...cmd, payload: { ...cmd.payload } };
+    const _original = { ...cmd, payload: { ...cmd.payload } };
     resolveFocusId(cmd as any, "42");
     expect(cmd.payload.id).toBe("OS.FOCUS"); // unchanged
   });

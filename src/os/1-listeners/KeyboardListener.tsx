@@ -12,11 +12,10 @@ import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_CHECK } from "@os/3-commands/interaction";
 import {
   isEditingElement,
-  isKeyDelegatedToOS,
   resolveIsEditingForKey,
 } from "@os/keymaps/fieldKeyOwnership";
 import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
-import { Keybindings, type KeyResolveContext } from "@os/keymaps/keybindings";
+import { Keybindings } from "@os/keymaps/keybindings";
 import { useEffect } from "react";
 import { kernel } from "../kernel";
 

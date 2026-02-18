@@ -7,10 +7,7 @@
  * These are pure type declarations with zero runtime dependencies.
  */
 
-import type {
-    BaseCommand,
-    CommandFactory,
-} from "@kernel/core/tokens";
+import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import type React from "react";
 import type { ReactNode } from "react";
 
@@ -27,16 +24,16 @@ export const __selectorBrand = Symbol("selector");
 
 /** Branded Condition — named boolean predicate for when guards */
 export type Condition<S> = {
-    readonly name: string;
-    readonly evaluate: (state: S) => boolean;
-    readonly [__conditionBrand]: true;
+  readonly name: string;
+  readonly evaluate: (state: S) => boolean;
+  readonly [__conditionBrand]: true;
 };
 
 /** Branded Selector — named data derivation */
 export type Selector<S, T> = {
-    readonly name: string;
-    readonly select: (state: S) => T;
-    readonly [__selectorBrand]: true;
+  readonly name: string;
+  readonly select: (state: S) => T;
+  readonly [__selectorBrand]: true;
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -45,14 +42,14 @@ export type Selector<S, T> = {
 
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> = {
-    state: S;
-    dispatch?: BaseCommand | BaseCommand[];
+  state: S;
+  dispatch?: BaseCommand | BaseCommand[];
 } | void;
 
 /** Flat handler: (ctx, payload) => result */
 export type FlatHandler<S, P> = (
-    ctx: CommandContext<S>,
-    payload: P,
+  ctx: CommandContext<S>,
+  payload: P,
 ) => HandlerResult<S>;
 
 // ═══════════════════════════════════════════════════════════════════
@@ -60,29 +57,29 @@ export type FlatHandler<S, P> = (
 // ═══════════════════════════════════════════════════════════════════
 
 export interface ZoneBindings {
-    role: string;
-    onCheck?: CommandFactory<string, any>;
-    onAction?: CommandFactory<string, any>;
-    onDelete?: CommandFactory<string, any>;
-    onCopy?: CommandFactory<string, any>;
-    onCut?: CommandFactory<string, any>;
-    onPaste?: CommandFactory<string, any>;
-    onMoveUp?: CommandFactory<string, any>;
-    onMoveDown?: CommandFactory<string, any>;
-    onUndo?: CommandFactory<string, any>;
-    onRedo?: CommandFactory<string, any>;
+  role: string;
+  onCheck?: CommandFactory<string, any>;
+  onAction?: CommandFactory<string, any>;
+  onDelete?: CommandFactory<string, any>;
+  onCopy?: CommandFactory<string, any>;
+  onCut?: CommandFactory<string, any>;
+  onPaste?: CommandFactory<string, any>;
+  onMoveUp?: CommandFactory<string, any>;
+  onMoveDown?: CommandFactory<string, any>;
+  onUndo?: CommandFactory<string, any>;
+  onRedo?: CommandFactory<string, any>;
 }
 
 export interface FieldBindings {
-    onChange?: CommandFactory<string, any>;
-    onSubmit?: CommandFactory<string, any>;
-    onCancel?: CommandFactory<string, any>;
+  onChange?: CommandFactory<string, any>;
+  onSubmit?: CommandFactory<string, any>;
+  onCancel?: CommandFactory<string, any>;
 }
 
 export interface KeybindingEntry<S> {
-    key: string;
-    command: CommandFactory<string, any>;
-    when?: Condition<S>;
+  key: string;
+  command: CommandFactory<string, any>;
+  when?: Condition<S>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -90,22 +87,22 @@ export interface KeybindingEntry<S> {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface BoundComponents<S> {
-    Zone: React.FC<{ id?: string; className?: string; children?: ReactNode }>;
-    Item: React.FC<{
-        id: string | number;
-        className?: string;
-        children?: ReactNode;
-        asChild?: boolean;
-    }>;
-    Field: React.FC<{
-        name: string;
-        value?: string;
-        placeholder?: string;
-        className?: string;
-        autoFocus?: boolean;
-        blurOnInactive?: boolean;
-    }>;
-    When: React.FC<{ condition: Condition<S>; children?: ReactNode }>;
+  Zone: React.FC<{ id?: string; className?: string; children?: ReactNode }>;
+  Item: React.FC<{
+    id: string | number;
+    className?: string;
+    children?: ReactNode;
+    asChild?: boolean;
+  }>;
+  Field: React.FC<{
+    name: string;
+    value?: string;
+    placeholder?: string;
+    className?: string;
+    autoFocus?: boolean;
+    blurOnInactive?: boolean;
+  }>;
+  When: React.FC<{ condition: Condition<S>; children?: ReactNode }>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -113,20 +110,20 @@ export interface BoundComponents<S> {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface ZoneHandle<S> {
-    command<T extends string, P = void>(
-        type: T,
-        handler: FlatHandler<S, P>,
-        options?: { when?: Condition<S> },
-    ): CommandFactory<T, P>;
+  command<T extends string, P = void>(
+    type: T,
+    handler: FlatHandler<S, P>,
+    options?: { when?: Condition<S> },
+  ): CommandFactory<T, P>;
 
-    createZone(name: string): ZoneHandle<S>;
+  createZone(name: string): ZoneHandle<S>;
 
-    bind(
-        config: ZoneBindings & {
-            field?: FieldBindings;
-            keybindings?: KeybindingEntry<S>[];
-        },
-    ): BoundComponents<S>;
+  bind(
+    config: ZoneBindings & {
+      field?: FieldBindings;
+      keybindings?: KeybindingEntry<S>[];
+    },
+  ): BoundComponents<S>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -134,12 +131,12 @@ export interface ZoneHandle<S> {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface TestInstance<S> {
-    readonly state: S;
-    dispatch(command: BaseCommand): boolean;
-    reset(): void;
-    evaluate(condition: Condition<S>): boolean;
-    select<T>(selector: Selector<S, T>): T;
-    transaction(fn: () => void): void;
+  readonly state: S;
+  dispatch(command: BaseCommand): boolean;
+  reset(): void;
+  evaluate(condition: Condition<S>): boolean;
+  select<T>(selector: Selector<S, T>): T;
+  transaction(fn: () => void): void;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -147,19 +144,19 @@ export interface TestInstance<S> {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface AppHandle<S> {
-    condition(name: string, predicate: (state: S) => boolean): Condition<S>;
-    selector<T>(name: string, select: (state: S) => T): Selector<S, T>;
-    command<T extends string, P = void>(
-        type: T,
-        handler: FlatHandler<S, P>,
-        options?: { when?: Condition<S> },
-    ): CommandFactory<T, P>;
-    createZone(name: string): ZoneHandle<S>;
-    createTrigger(command: CommandFactory<string, any>): React.FC<{
-        payload?: any;
-        children: ReactNode;
-    }>;
-    useComputed<T>(selector: Selector<S, T>): T;
-    getState(): S;
-    create(overrides?: Partial<S>): TestInstance<S>;
+  condition(name: string, predicate: (state: S) => boolean): Condition<S>;
+  selector<T>(name: string, select: (state: S) => T): Selector<S, T>;
+  command<T extends string, P = void>(
+    type: T,
+    handler: FlatHandler<S, P>,
+    options?: { when?: Condition<S> },
+  ): CommandFactory<T, P>;
+  createZone(name: string): ZoneHandle<S>;
+  createTrigger(command: CommandFactory<string, any>): React.FC<{
+    payload?: any;
+    children: ReactNode;
+  }>;
+  useComputed<T>(selector: Selector<S, T>): T;
+  getState(): S;
+  create(overrides?: Partial<S>): TestInstance<S>;
 }

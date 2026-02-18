@@ -458,10 +458,10 @@ export function ElementPanel() {
           <Layout size={12} strokeWidth={1.5} />
           DOM
           <span style={{ marginLeft: "auto", fontSize: "9px", color: "#ccc" }}>
-            {expandedSections["dom"] ? "▾" : "▸"}
+            {expandedSections.dom ? "▾" : "▸"}
           </span>
         </div>
-        {expandedSections["dom"] && (
+        {expandedSections.dom && (
           <div>
             {/* Row 1: Identity (Tag + File) */}
             <div style={S.row}>
@@ -610,10 +610,10 @@ export function ElementPanel() {
           <MousePointer2 size={12} strokeWidth={1.5} />
           OS Context
           <span style={{ marginLeft: "auto", fontSize: "9px", color: "#ccc" }}>
-            {expandedSections["os"] ? "▾" : "▸"}
+            {expandedSections.os ? "▾" : "▸"}
           </span>
         </div>
-        {expandedSections["os"] && (
+        {expandedSections.os && (
           <div>
             <Row label="Type">
               {osComponentType ? (
@@ -666,10 +666,10 @@ export function ElementPanel() {
             ({componentStack.length})
           </span>
           <span style={{ marginLeft: "auto", fontSize: "9px", color: "#ccc" }}>
-            {expandedSections["stack"] ? "▾" : "▸"}
+            {expandedSections.stack ? "▾" : "▸"}
           </span>
         </div>
-        {expandedSections["stack"] ? (
+        {expandedSections.stack ? (
           <div style={{ padding: "4px 0" }}>
             {componentStack.length > 0 ? (
               componentStack.map((name, i) => (
@@ -731,10 +731,10 @@ export function ElementPanel() {
           <Package size={12} strokeWidth={1.5} />
           Component Props
           <span style={{ marginLeft: "auto", fontSize: "9px", color: "#ccc" }}>
-            {expandedSections["props"] ? "▾" : "▸"}
+            {expandedSections.props ? "▾" : "▸"}
           </span>
         </div>
-        {expandedSections["props"] &&
+        {expandedSections.props &&
           (fiberProps.length > 0 ? (
             fiberProps.map((entry, idx) => (
               <div key={entry.componentName + idx}>

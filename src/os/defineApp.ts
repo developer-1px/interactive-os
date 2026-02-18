@@ -30,8 +30,13 @@ import type { CommandFactory } from "@kernel/core/tokens";
 import type React from "react";
 import type { ReactNode } from "react";
 import { registerAppSlice } from "./appSlice";
-import { createHistoryMiddleware } from "./middlewares/historyKernelMiddleware";
-
+import { createBoundComponents } from "./defineApp.bind";
+import { createTestInstance } from "./defineApp.testInstance";
+import {
+  type CompoundTriggerComponents,
+  createCompoundTrigger,
+  createSimpleTrigger,
+} from "./defineApp.trigger";
 import {
   __conditionBrand,
   __selectorBrand,
@@ -45,14 +50,8 @@ import {
   type ZoneBindings,
   type ZoneHandle,
 } from "./defineApp.types";
-import {
-  createCompoundTrigger,
-  createSimpleTrigger,
-  type CompoundTriggerComponents,
-} from "./defineApp.trigger";
-import { createTestInstance } from "./defineApp.testInstance";
-import { createBoundComponents } from "./defineApp.bind";
 import { createWidgetFactory } from "./defineApp.widget";
+import { createHistoryMiddleware } from "./middlewares/historyKernelMiddleware";
 
 // ═══════════════════════════════════════════════════════════════════
 // defineApp — Production Implementation
@@ -213,7 +212,6 @@ export function defineApp<S>(
     );
   }
 
-
   // ── Return AppHandle (v5 + v3 compat) ──
 
   return {
@@ -240,7 +238,9 @@ export function defineApp<S>(
       // ── Compound trigger (Dialog pattern) — v3 compat ──
       return createCompoundTrigger(appId, commandOrConfig);
     }) as {
-      (command: CommandFactory<string, any>): React.FC<{
+      (
+        command: CommandFactory<string, any>,
+      ): React.FC<{
         payload?: any;
         children: ReactNode;
       }>;

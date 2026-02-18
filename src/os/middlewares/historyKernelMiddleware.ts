@@ -14,8 +14,8 @@
  */
 
 import type { Middleware, ScopeToken } from "@kernel/core/tokens";
-import { produce } from "immer";
 import type { AppState } from "@os/kernel";
+import { produce } from "immer";
 
 /**
  * HistoryEntry — 앱 히스토리 단위 엔트리

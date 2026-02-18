@@ -24,7 +24,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // ═══════════════════════════════════════════════════════════════════
 
 let snapshot: ReturnType<typeof kernel.getState>;
-let callLog: string[];
+let _callLog: string[];
 
 // Mock command factories — track invocations via kernel state side-effect
 function createMockCommand(name: string) {
@@ -85,7 +85,7 @@ function registerZone(
 
 beforeEach(() => {
   snapshot = kernel.getState();
-  callLog = [];
+  _callLog = [];
   return () => {
     kernel.setState(() => snapshot);
     for (const key of [...ZoneRegistry.keys()]) {
@@ -133,7 +133,7 @@ describe("SELECT — pure selection (no onCheck delegation)", () => {
     // SELECT only updates selection state, does not trigger app callbacks
     kernel.dispatch(SELECT({ mode: "toggle" }));
 
-    const zone = kernel.getState().os.focus.zones["testZone"];
+    const zone = kernel.getState().os.focus.zones.testZone;
     expect(zone?.selection).toContain("item-1");
   });
 
@@ -143,7 +143,7 @@ describe("SELECT — pure selection (no onCheck delegation)", () => {
 
     kernel.dispatch(SELECT({ mode: "toggle" }));
 
-    const zone = kernel.getState().os.focus.zones["plainZone"];
+    const zone = kernel.getState().os.focus.zones.plainZone;
     expect(zone?.selection).toContain("item-1");
   });
 });

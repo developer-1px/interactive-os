@@ -15,10 +15,7 @@
 import type { BaseCommand, Middleware } from "@kernel";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { FOCUS } from "@os/3-commands/focus/focus";
-import {
-  resetTypeaheadBuffer,
-  resolveTypeahead,
-} from "@os/3-commands/navigate/typeahead";
+import { resolveTypeahead } from "@os/3-commands/navigate/typeahead";
 import { kernel } from "@os/kernel";
 
 /**

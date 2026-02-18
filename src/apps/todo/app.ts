@@ -17,7 +17,7 @@
  */
 
 import { INITIAL_STATE } from "@apps/todo/features/todo-details/persistence";
-import type { AppState, Todo } from "@apps/todo/model/appState";
+import type { AppState } from "@apps/todo/model/appState";
 import {
   selectCategories,
   selectEditingTodo,
@@ -162,9 +162,9 @@ export const moveItemUp = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+        draft.data.todoOrder[globalSwapIdx]!,
+        draft.data.todoOrder[globalTargetIdx]!,
+      ];
     }),
   }),
 );
@@ -188,9 +188,9 @@ export const moveItemDown = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
+        draft.data.todoOrder[globalSwapIdx]!,
+        draft.data.todoOrder[globalTargetIdx]!,
+      ];
     }),
   }),
 );

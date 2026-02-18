@@ -21,7 +21,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 let snapshot: ReturnType<typeof kernel.getState>;
 
 // Track which callbacks were invoked
-let callLog: string[] = [];
+let _callLog: string[] = [];
 
 // Mock command factories that just log when dispatched
 const mockCopy = Object.assign(
@@ -76,7 +76,7 @@ function registerZoneWithClipboard(
 
 beforeEach(() => {
   snapshot = kernel.getState();
-  callLog = [];
+  _callLog = [];
 
   // Mock navigator.clipboard to avoid browser API errors in vitest
   Object.defineProperty(navigator, "clipboard", {
@@ -115,7 +115,7 @@ describe("OS_COPY dispatch chain", () => {
   });
 
   it("OS_COPY without activeZoneId is no-op", () => {
-    const beforeState = kernel.getState();
+    const _beforeState = kernel.getState();
     kernel.dispatch(OS_COPY());
     // Should not crash
     expect(kernel.getState().os).toBeDefined();

@@ -11,7 +11,6 @@
 
 import type { Transaction } from "@os/schemas";
 import {
-  AlertTriangle,
   ArrowRightLeft,
   Check,
   ChevronDown,
@@ -40,9 +39,9 @@ export type PipelineStep = {
 
 /** Infer 6-domino pipeline from a kernel Transaction. Pure function. */
 export function inferPipeline(tx: Transaction): PipelineStep[] {
-  const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.[
-    "input"
-  ] as { type?: string; key?: string; code?: string } | undefined;
+  const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.input as
+    | { type?: string; key?: string; code?: string }
+    | undefined;
 
   const hasInput = !!inputMeta;
   const hasCommand = !!tx.command?.type;
@@ -88,7 +87,7 @@ export function inferPipeline(tx: Transaction): PipelineStep[] {
 // ─── Helpers ───
 
 function getInputMeta(tx: Transaction) {
-  return (tx.meta as Record<string, unknown> | undefined)?.["input"] as
+  return (tx.meta as Record<string, unknown> | undefined)?.input as
     | { type?: string; key?: string; code?: string; elementId?: string }
     | undefined;
 }
@@ -131,13 +130,13 @@ function highlightElement(id: string | undefined, active: boolean) {
 
   if (el && el instanceof HTMLElement) {
     if (active) {
-      el.dataset["inspectorHighlight"] = "true";
+      el.dataset.inspectorHighlight = "true";
       el.style.outline = "2px solid #f06595";
       el.style.outlineOffset = "2px";
       el.style.boxShadow = "0 0 0 4px rgba(240, 101, 149, 0.3)";
       el.style.transition = "all 0.2s";
     } else {
-      delete el.dataset["inspectorHighlight"];
+      delete el.dataset.inspectorHighlight;
       el.style.outline = "";
       el.style.outlineOffset = "";
       el.style.boxShadow = "";

@@ -9,7 +9,7 @@ import type { StepResult } from "../entities/StepResult";
 import type { OnProgress, OnStep, SuiteResult } from "../entities/SuiteResult";
 import type { TestActions } from "../entities/TestActions";
 import type { TestBot } from "../entities/TestBot";
-import { createActions, createMockActions, wait } from "./actions";
+import { createActions, wait } from "./actions";
 import { createCursor } from "./cursor";
 
 // Re-export entities for backward compatibility

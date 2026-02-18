@@ -48,11 +48,11 @@ export default function BuilderPage() {
     let type: PropertyType = "text"; // Default fallback
 
     // 1. Check explicit builder type
-    if (el.dataset["builderType"]) {
-      type = el.dataset["builderType"] as PropertyType;
+    if (el.dataset.builderType) {
+      type = el.dataset.builderType as PropertyType;
     }
     // 2. Infer from explicit level
-    else if (el.dataset["level"] === "section") {
+    else if (el.dataset.level === "section") {
       type = "section";
     }
     // 3. Infer from DOM tags/structure

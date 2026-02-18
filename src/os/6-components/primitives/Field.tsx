@@ -168,7 +168,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const isContentEditableRef = useRef(false);
 
     // --- Focus Computation (boolean subscriptions — avoids re-render on unrelated zone changes) ---
-    const isSystemActive = kernel.useComputed(
+    const _isSystemActive = kernel.useComputed(
       (s) => s.os.focus.activeZoneId === zoneId,
     );
     const isFocused = kernel.useComputed(
@@ -205,7 +205,10 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
     // Sync prop value to registry when not actively editing
     useEffect(() => {
-      if (!isContentEditableRef.current && value !== fieldData?.state.localValue) {
+      if (
+        !isContentEditableRef.current &&
+        value !== fieldData?.state.localValue
+      ) {
         FieldRegistry.updateValue(fieldId, value);
       }
     }, [value, fieldId, fieldData?.state.localValue]);
@@ -285,7 +288,8 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const setInnerRef = (node: HTMLElement | null) => {
       innerRef.current = node;
       if (typeof ref === "function") ref(node);
-      else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+      else if (ref)
+        (ref as React.MutableRefObject<HTMLElement | null>).current = node;
     };
 
     return <FocusItem id={fieldId} as={as} ref={setInnerRef} {...baseProps} />;
@@ -293,7 +297,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 );
 
 FieldBase.displayName = "Field";
-
 
 // Namespace merge — attach Label as Field.Label (same pattern as Trigger.Portal)
 export const Field = Object.assign(FieldBase, {

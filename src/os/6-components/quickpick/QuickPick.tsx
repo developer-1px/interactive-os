@@ -386,28 +386,28 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
           >
             {filteredItems.length === 0
               ? (renderEmpty?.(query) ?? (
-                <div className="py-8 text-center text-sm text-zinc-500">
-                  No results found
-                </div>
-              ))
+                  <div className="py-8 text-center text-sm text-zinc-500">
+                    No results found
+                  </div>
+                ))
               : filteredItems.map((item) => (
-                <OS.Item key={item.id} id={item.id}>
-                  {({ isFocused, isSelected }) =>
-                    renderItem ? (
-                      renderItem(item, { isFocused, isSelected, query })
-                    ) : (
-                      <DefaultQuickPickRow
-                        item={item}
-                        isFocused={isFocused}
-                        onClick={() => {
-                          handleClose();
-                          onSelect(item);
-                        }}
-                      />
-                    )
-                  }
-                </OS.Item>
-              ))}
+                  <OS.Item key={item.id} id={item.id}>
+                    {({ isFocused, isSelected }) =>
+                      renderItem ? (
+                        renderItem(item, { isFocused, isSelected, query })
+                      ) : (
+                        <DefaultQuickPickRow
+                          item={item}
+                          isFocused={isFocused}
+                          onClick={() => {
+                            handleClose();
+                            onSelect(item);
+                          }}
+                        />
+                      )
+                    }
+                  </OS.Item>
+                ))}
           </OS.Zone>
 
           {/* Footer */}
@@ -490,8 +490,9 @@ function DefaultQuickPickRow({
       </span>
       {item.description && (
         <span
-          className={`text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right ${isFocused ? "text-zinc-500" : "text-zinc-400"
-            }`}
+          className={`text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right ${
+            isFocused ? "text-zinc-500" : "text-zinc-400"
+          }`}
         >
           {item.description}
         </span>

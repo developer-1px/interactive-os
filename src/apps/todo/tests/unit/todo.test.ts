@@ -8,7 +8,6 @@
 import {
   addTodo,
   cancelEdit,
-  canRedo,
   canUndo,
   categories,
   clearCompleted,
@@ -24,7 +23,6 @@ import {
   moveItemDown,
   moveItemUp,
   pasteTodo,
-  redoCommand,
   selectCategory,
   startEdit,
   stats,
@@ -33,7 +31,6 @@ import {
   TodoApp,
   toggleTodo,
   toggleView,
-  undoCommand,
   updateTodoText,
   visibleTodos,
 } from "@apps/todo/app";

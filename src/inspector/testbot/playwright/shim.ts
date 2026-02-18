@@ -13,8 +13,6 @@ import type {
 import { matchesName, matchesRole } from "../features/actions/implicitRoles";
 import {
   findAllByText,
-  findByRole,
-  findByText,
   getUniqueSelector,
   resolveElement,
 } from "../features/actions/selectors";

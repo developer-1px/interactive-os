@@ -22,9 +22,7 @@ const RedoButton = TodoApp.createTrigger(TodoList.commands.redoCommand);
 
 export function TodoToolbarView() {
   const isBoard = TodoApp.useComputed((s) => s.ui.viewMode === "board");
-  const hasHistoryPast = TodoApp.useComputed(
-    (s) => s.history.past.length > 0,
-  );
+  const hasHistoryPast = TodoApp.useComputed((s) => s.history.past.length > 0);
   const hasHistoryFuture = TodoApp.useComputed(
     (s) => s.history.future.length > 0,
   );
@@ -38,6 +36,7 @@ export function TodoToolbarView() {
       <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
         <ToggleViewButton>
           <button
+            type="button"
             className={`p-1.5 rounded-md transition-all flex items-center justify-center ${!isBoard ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             title="List View"
           >
@@ -46,6 +45,7 @@ export function TodoToolbarView() {
         </ToggleViewButton>
         <ToggleViewButton>
           <button
+            type="button"
             className={`p-1.5 rounded-md transition-all flex items-center justify-center ${isBoard ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             title="Board View"
           >
@@ -59,6 +59,7 @@ export function TodoToolbarView() {
         <div className="flex items-center bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
           <UndoButton>
             <button
+              type="button"
               disabled={!hasHistoryPast}
               className="px-3 py-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-colors border-r border-slate-100"
               title="Undo"
@@ -68,6 +69,7 @@ export function TodoToolbarView() {
           </UndoButton>
           <RedoButton>
             <button
+              type="button"
               disabled={!hasHistoryFuture}
               className="px-3 py-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
               title="Redo"
@@ -82,6 +84,7 @@ export function TodoToolbarView() {
           <ClearDialog.Root>
             <ClearDialog.Trigger>
               <button
+                type="button"
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100"
                 title="Clear Completed Tasks"
               >
@@ -109,12 +112,12 @@ export function TodoToolbarView() {
 
               <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <ClearDialog.Dismiss>
-                  <button className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
+                  <button type="button" className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
                     Cancel
                   </button>
                 </ClearDialog.Dismiss>
                 <ClearDialog.Confirm>
-                  <button className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium">
+                  <button type="button" className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium">
                     Clear All
                   </button>
                 </ClearDialog.Confirm>

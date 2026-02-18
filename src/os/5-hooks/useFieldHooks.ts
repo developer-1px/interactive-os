@@ -88,7 +88,7 @@ export const useFieldFocus = ({
                 const textLength = innerRef.current.innerText.length;
                 setCaretPosition(innerRef.current, textLength);
               }
-            } catch (_e) { }
+            } catch (_e) {}
           }
         });
       });

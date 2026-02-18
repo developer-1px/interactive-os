@@ -14,7 +14,6 @@
 
 import {
   addTodo,
-  deleteTodo,
   redoCommand,
   TodoApp,
   toggleTodo,

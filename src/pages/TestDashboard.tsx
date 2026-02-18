@@ -550,7 +550,7 @@ export function TestDashboard() {
   const [results, setResults] = useState<SuiteResult[]>([]);
   const [running, setRunning] = useState(false);
   const [runDuration, setRunDuration] = useState(0);
-  const [events, setEvents] = useState<TestEvent[]>([]);
+  const [_events, setEvents] = useState<TestEvent[]>([]);
   const runnerRef = useRef<TestRunner | null>(null);
 
   // Group projects by category

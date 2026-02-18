@@ -1,9 +1,7 @@
-import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import {
   ArrowRight,
   Calendar,
-  CheckCircle2,
   Clock,
   FileText,
   Inbox,
@@ -11,7 +9,6 @@ import {
   MoreHorizontal,
   Plus,
 } from "lucide-react";
-import React from "react";
 import type { DocItem } from "./docsUtils";
 import { cleanLabel } from "./docsUtils";
 
@@ -88,7 +85,7 @@ export function DocsDashboard({ allFiles, onSelect }: DocsDashboardProps) {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">
+          <button type="button" className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">
             <Plus size={16} />
             Quick Capture
           </button>
@@ -118,6 +115,7 @@ export function DocsDashboard({ allFiles, onSelect }: DocsDashboardProps) {
             {inboxItems.length > 0 ? (
               inboxItems.map((item) => (
                 <button
+                  type="button"
                   key={item.path}
                   onClick={() => onSelect(item.path)}
                   className="w-full text-left p-3 bg-white rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-sm transition-all group/item"
@@ -147,6 +145,7 @@ export function DocsDashboard({ allFiles, onSelect }: DocsDashboardProps) {
               <span>Active Projects</span>
             </div>
             <button
+              type="button"
               onClick={() => onSelect("1-project")}
               className="text-xs text-slate-500 hover:text-slate-900 font-medium"
             >
@@ -208,7 +207,7 @@ export function DocsDashboard({ allFiles, onSelect }: DocsDashboardProps) {
           </div>
 
           <div className="divide-y divide-slate-100">
-            {recentFiles.map((file, i) => (
+            {recentFiles.map((file, _i) => (
               <div
                 key={file.path}
                 className="flex items-center justify-between py-3 hover:bg-slate-50 px-2 rounded-lg -mx-2 transition-colors cursor-pointer group"

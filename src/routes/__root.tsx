@@ -52,7 +52,7 @@ function RootComponent() {
         const sd = matches[i]?.staticData as
           | Record<string, unknown>
           | undefined;
-        if (sd?.["isAppShell"]) return true;
+        if (sd?.isAppShell) return true;
       }
       return false;
     },

@@ -89,7 +89,7 @@ export function resolveTypeahead(
     const idx = (currentIdx + 1 + i) % items.length;
     const id = items[idx];
     const label = labels.get(id);
-    if (label && label.toLowerCase().startsWith(buffer)) {
+    if (label?.toLowerCase().startsWith(buffer)) {
       return id;
     }
   }

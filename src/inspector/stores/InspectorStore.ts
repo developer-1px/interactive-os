@@ -25,14 +25,12 @@ function loadPersistedState(): Partial<InspectorState> {
     if (!raw) return {};
     const parsed = JSON.parse(raw) as Record<string, unknown>;
     return {
-      ...(typeof parsed["isOpen"] === "boolean"
-        ? { isOpen: parsed["isOpen"] }
+      ...(typeof parsed.isOpen === "boolean" ? { isOpen: parsed.isOpen } : {}),
+      ...(typeof parsed.activeTab === "string"
+        ? { activeTab: parsed.activeTab }
         : {}),
-      ...(typeof parsed["activeTab"] === "string"
-        ? { activeTab: parsed["activeTab"] }
-        : {}),
-      ...(typeof parsed["isPanelExpanded"] === "boolean"
-        ? { isPanelExpanded: parsed["isPanelExpanded"] }
+      ...(typeof parsed.isPanelExpanded === "boolean"
+        ? { isPanelExpanded: parsed.isPanelExpanded }
         : {}),
     };
   } catch {

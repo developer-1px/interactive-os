@@ -10,45 +10,45 @@
  */
 
 import {
-    getMacFallbackKey,
-    getCanonicalKey,
-    normalizeKeyDefinition,
+  getCanonicalKey,
+  getMacFallbackKey,
+  normalizeKeyDefinition,
 } from "@os/keymaps/getCanonicalKey";
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // getMacFallbackKey
 // ═══════════════════════════════════════════════════════════════════
 
 describe("getMacFallbackKey", () => {
-    // Note: getMacFallbackKey checks isMac (navigator.platform) internally.
-    // In jsdom (vitest default), navigator.platform varies.
-    // We test the normalization map entries directly.
+  // Note: getMacFallbackKey checks isMac (navigator.platform) internally.
+  // In jsdom (vitest default), navigator.platform varies.
+  // We test the normalization map entries directly.
 
-    it("maps Meta+ArrowUp → Home", () => {
-        // On Mac, getMacFallbackKey("Meta+ArrowUp") should return "Home"
-        // On non-Mac, it returns null.
-        // We can test the function - if on Mac environment it returns Home,
-        // if not, it returns null. Either way, this validates behavior.
-        const result = getMacFallbackKey("Meta+ArrowUp");
-        // In test env (jsdom), isMac detection depends on navigator.platform
-        // Accept either null (non-Mac test env) or "Home" (Mac test env)
-        expect(result === "Home" || result === null).toBe(true);
-    });
+  it("maps Meta+ArrowUp → Home", () => {
+    // On Mac, getMacFallbackKey("Meta+ArrowUp") should return "Home"
+    // On non-Mac, it returns null.
+    // We can test the function - if on Mac environment it returns Home,
+    // if not, it returns null. Either way, this validates behavior.
+    const result = getMacFallbackKey("Meta+ArrowUp");
+    // In test env (jsdom), isMac detection depends on navigator.platform
+    // Accept either null (non-Mac test env) or "Home" (Mac test env)
+    expect(result === "Home" || result === null).toBe(true);
+  });
 
-    it("maps Meta+ArrowDown → End", () => {
-        const result = getMacFallbackKey("Meta+ArrowDown");
-        expect(result === "End" || result === null).toBe(true);
-    });
+  it("maps Meta+ArrowDown → End", () => {
+    const result = getMacFallbackKey("Meta+ArrowDown");
+    expect(result === "End" || result === null).toBe(true);
+  });
 
-    it("returns null for non-Mac keys", () => {
-        expect(getMacFallbackKey("ArrowUp")).toBeNull();
-        expect(getMacFallbackKey("ArrowDown")).toBeNull();
-        expect(getMacFallbackKey("Enter")).toBeNull();
-        expect(getMacFallbackKey("Escape")).toBeNull();
-        expect(getMacFallbackKey("Tab")).toBeNull();
-        expect(getMacFallbackKey("Meta+C")).toBeNull();
-    });
+  it("returns null for non-Mac keys", () => {
+    expect(getMacFallbackKey("ArrowUp")).toBeNull();
+    expect(getMacFallbackKey("ArrowDown")).toBeNull();
+    expect(getMacFallbackKey("Enter")).toBeNull();
+    expect(getMacFallbackKey("Escape")).toBeNull();
+    expect(getMacFallbackKey("Tab")).toBeNull();
+    expect(getMacFallbackKey("Meta+C")).toBeNull();
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -56,54 +56,54 @@ describe("getMacFallbackKey", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("getCanonicalKey", () => {
-    function mockKeyEvent(
-        overrides: Partial<KeyboardEvent> & { key: string },
-    ): KeyboardEvent {
-        return {
-            key: overrides.key,
-            metaKey: overrides.metaKey ?? false,
-            ctrlKey: overrides.ctrlKey ?? false,
-            altKey: overrides.altKey ?? false,
-            shiftKey: overrides.shiftKey ?? false,
-        } as KeyboardEvent;
-    }
+  function mockKeyEvent(
+    overrides: Partial<KeyboardEvent> & { key: string },
+  ): KeyboardEvent {
+    return {
+      key: overrides.key,
+      metaKey: overrides.metaKey ?? false,
+      ctrlKey: overrides.ctrlKey ?? false,
+      altKey: overrides.altKey ?? false,
+      shiftKey: overrides.shiftKey ?? false,
+    } as KeyboardEvent;
+  }
 
-    it("returns plain key for no modifiers", () => {
-        expect(getCanonicalKey(mockKeyEvent({ key: "ArrowDown" }))).toBe(
-            "ArrowDown",
-        );
-    });
+  it("returns plain key for no modifiers", () => {
+    expect(getCanonicalKey(mockKeyEvent({ key: "ArrowDown" }))).toBe(
+      "ArrowDown",
+    );
+  });
 
-    it("capitalizes single letter keys", () => {
-        expect(getCanonicalKey(mockKeyEvent({ key: "k" }))).toBe("K");
-    });
+  it("capitalizes single letter keys", () => {
+    expect(getCanonicalKey(mockKeyEvent({ key: "k" }))).toBe("K");
+  });
 
-    it("prepends Meta modifier", () => {
-        expect(
-            getCanonicalKey(mockKeyEvent({ key: "c", metaKey: true })),
-        ).toBe("Meta+C");
-    });
+  it("prepends Meta modifier", () => {
+    expect(getCanonicalKey(mockKeyEvent({ key: "c", metaKey: true }))).toBe(
+      "Meta+C",
+    );
+  });
 
-    it("combines multiple modifiers in order: Meta → Ctrl → Alt → Shift", () => {
-        expect(
-            getCanonicalKey(
-                mockKeyEvent({
-                    key: "z",
-                    metaKey: true,
-                    shiftKey: true,
-                }),
-            ),
-        ).toBe("Meta+Shift+Z");
-    });
+  it("combines multiple modifiers in order: Meta → Ctrl → Alt → Shift", () => {
+    expect(
+      getCanonicalKey(
+        mockKeyEvent({
+          key: "z",
+          metaKey: true,
+          shiftKey: true,
+        }),
+      ),
+    ).toBe("Meta+Shift+Z");
+  });
 
-    it("normalizes Space key", () => {
-        expect(getCanonicalKey(mockKeyEvent({ key: " " }))).toBe("Space");
-    });
+  it("normalizes Space key", () => {
+    expect(getCanonicalKey(mockKeyEvent({ key: " " }))).toBe("Space");
+  });
 
-    it("ignores modifier-only presses", () => {
-        expect(getCanonicalKey(mockKeyEvent({ key: "Shift" }))).toBe("Shift");
-        expect(getCanonicalKey(mockKeyEvent({ key: "Meta" }))).toBe("Meta");
-    });
+  it("ignores modifier-only presses", () => {
+    expect(getCanonicalKey(mockKeyEvent({ key: "Shift" }))).toBe("Shift");
+    expect(getCanonicalKey(mockKeyEvent({ key: "Meta" }))).toBe("Meta");
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -111,27 +111,27 @@ describe("getCanonicalKey", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("normalizeKeyDefinition", () => {
-    it("normalizes cmd → Meta", () => {
-        expect(normalizeKeyDefinition("cmd+c")).toBe("Meta+C");
-    });
+  it("normalizes cmd → Meta", () => {
+    expect(normalizeKeyDefinition("cmd+c")).toBe("Meta+C");
+  });
 
-    it("normalizes command → Meta", () => {
-        expect(normalizeKeyDefinition("command+v")).toBe("Meta+V");
-    });
+  it("normalizes command → Meta", () => {
+    expect(normalizeKeyDefinition("command+v")).toBe("Meta+V");
+  });
 
-    it("normalizes control → Ctrl", () => {
-        expect(normalizeKeyDefinition("control+c")).toBe("Ctrl+C");
-    });
+  it("normalizes control → Ctrl", () => {
+    expect(normalizeKeyDefinition("control+c")).toBe("Ctrl+C");
+  });
 
-    it("sorts modifiers correctly", () => {
-        expect(normalizeKeyDefinition("shift+meta+z")).toBe("Meta+Shift+Z");
-    });
+  it("sorts modifiers correctly", () => {
+    expect(normalizeKeyDefinition("shift+meta+z")).toBe("Meta+Shift+Z");
+  });
 
-    it("handles single key without modifiers", () => {
-        expect(normalizeKeyDefinition("Enter")).toBe("Enter");
-    });
+  it("handles single key without modifiers", () => {
+    expect(normalizeKeyDefinition("Enter")).toBe("Enter");
+  });
 
-    it("capitalizes single-character key", () => {
-        expect(normalizeKeyDefinition("k")).toBe("K");
-    });
+  it("capitalizes single-character key", () => {
+    expect(normalizeKeyDefinition("k")).toBe("K");
+  });
 });

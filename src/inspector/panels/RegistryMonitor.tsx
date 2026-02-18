@@ -1,8 +1,8 @@
-import { kernel } from "@/os/kernel";
 import type { RegistrySnapshot } from "@kernel/core/inspectorPort";
 import type { ScopeToken } from "@kernel/core/tokens";
 import { ChevronDown, ChevronRight, Shield } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
+import { kernel } from "@/os/kernel";
 
 // ═══════════════════════════════════════════════════════════════════
 // Registry Monitor v5 — Reads directly from kernel.inspector
@@ -99,16 +99,18 @@ function CommandEntry({
     >
       <div className="flex items-center gap-2 min-w-0">
         <div
-          className={`w-1 h-1 rounded-full flex-shrink-0 transition-colors ${isLastExecuted
-            ? "bg-[#007acc] shadow-[0_0_4px_#007acc]"
-            : guardEnabled === false
-              ? "bg-[#f48771]"
-              : "bg-[#4ec9b0]"
-            }`}
+          className={`w-1 h-1 rounded-full flex-shrink-0 transition-colors ${
+            isLastExecuted
+              ? "bg-[#007acc] shadow-[0_0_4px_#007acc]"
+              : guardEnabled === false
+                ? "bg-[#f48771]"
+                : "bg-[#4ec9b0]"
+          }`}
         />
         <span
-          className={`text-[9px] font-bold tracking-tight truncate leading-none ${isLastExecuted ? "text-[#007acc]" : "text-[#444]"
-            }`}
+          className={`text-[9px] font-bold tracking-tight truncate leading-none ${
+            isLastExecuted ? "text-[#007acc]" : "text-[#444]"
+          }`}
         >
           {type}
         </span>
@@ -151,9 +153,7 @@ function ScopeSection({
   const toggle = useCallback(() => setCollapsed((c) => !c), []);
 
   const totalItems =
-    data.commands.length +
-    data.middleware.length +
-    data.effects.length;
+    data.commands.length + data.middleware.length + data.effects.length;
 
   if (totalItems === 0 && data.children.length === 0) return null;
 
@@ -188,8 +188,9 @@ function ScopeSection({
           )}
           <div className={`w-1 h-3 rounded-full ${depthColor} opacity-60`} />
           <span
-            className={`text-[8px] font-black tracking-[0.15em] uppercase ${isActive ? "text-[#007acc]" : "text-[#666]"
-              }`}
+            className={`text-[8px] font-black tracking-[0.15em] uppercase ${
+              isActive ? "text-[#007acc]" : "text-[#666]"
+            }`}
           >
             {data.scope as string}
           </span>

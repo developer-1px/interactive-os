@@ -15,10 +15,7 @@ import {
   flattenTree,
   loadDocContent,
 } from "./docsUtils";
-import {
-  openExternalFolder,
-  type ExternalFolderSource,
-} from "./fsAccessUtils";
+import { type ExternalFolderSource, openExternalFolder } from "./fsAccessUtils";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
 /** Parse hash: returns { source: "docs" | "ext", path?, folderName? } */
@@ -60,10 +57,7 @@ export function DocsViewer() {
   const isExternal = externalSource != null;
 
   // Built-in docs tree (always available)
-  const builtinTree = useMemo(
-    () => buildDocTree(Object.keys(docsModules)),
-    [],
-  );
+  const builtinTree = useMemo(() => buildDocTree(Object.keys(docsModules)), []);
   const builtinFiles = useMemo(() => flattenTree(builtinTree), [builtinTree]);
 
   // Current tree depends on mode
