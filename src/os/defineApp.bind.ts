@@ -131,8 +131,23 @@ export function createBoundComponents<S>(
     const fieldProps: Record<string, unknown> = { ...props };
 
     if (config.field) {
-      if (config.field.onChange) fieldProps.onChange = config.field.onChange;
-      if (config.field.onSubmit) fieldProps.onSubmit = config.field.onSubmit;
+      // onChange/onSubmit: BaseCommand → FieldCommandFactory
+      // Field expects (payload) => BaseCommand, but FieldBindings provides BaseCommand.
+      // Wrap into a factory that merges { text } into the command's payload.
+      if (config.field.onChange) {
+        const cmd = config.field.onChange;
+        fieldProps.onChange = (p: { text: string }) => ({
+          ...cmd,
+          payload: { ...(cmd.payload as Record<string, unknown>), ...p },
+        });
+      }
+      if (config.field.onSubmit) {
+        const cmd = config.field.onSubmit;
+        fieldProps.onSubmit = (p: { text: string }) => ({
+          ...cmd,
+          payload: { ...(cmd.payload as Record<string, unknown>), ...p },
+        });
+      }
       if (config.field.onCancel) fieldProps.onCancel = config.field.onCancel;
     }
 
