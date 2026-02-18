@@ -14,7 +14,6 @@ export const findFocusableItem = (el: HTMLElement) =>
 
 export interface FocusTargetInfo {
     itemId: string;
-    itemEl: HTMLElement;
     groupId: string;
 }
 
@@ -28,7 +27,7 @@ export function resolveFocusTarget(
     const groupId = zoneEl?.getAttribute("data-focus-group") ?? null;
     if (!groupId) return null;
 
-    return { itemId: itemEl.id, itemEl, groupId };
+    return { itemId: itemEl.id, groupId };
 }
 
 // ═══════════════════════════════════════════════════════════════════

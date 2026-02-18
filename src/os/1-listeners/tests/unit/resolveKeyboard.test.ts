@@ -5,12 +5,11 @@
  * No DOM, no JSDOM, no kernel — just input → output.
  */
 
-import { describe, expect, test, beforeEach } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
     resolveKeyboard,
     type KeyboardInput,
 } from "@os/1-listeners/keyboard/resolveKeyboard";
-import { Keybindings } from "@os/keymaps/keybindings";
 
 // Ensure OS defaults are registered for Keybindings.resolve
 import "@os/keymaps/osDefaults";

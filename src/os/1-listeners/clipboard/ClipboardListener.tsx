@@ -36,46 +36,47 @@ function canZoneHandle(callback: "onCopy" | "onCut" | "onPaste"): boolean {
     return !!entry?.[callback];
 }
 
-const COMMAND_MAP = {
-    copy: OS_COPY,
-    cut: OS_CUT,
-    paste: OS_PASTE,
-} as const;
-
-const CALLBACK_MAP = {
-    copy: "onCopy",
-    cut: "onCut",
-    paste: "onPaste",
-} as const;
-
 // ═══════════════════════════════════════════════════════════════════
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
 export function ClipboardListener() {
     useEffect(() => {
-        function handleClipboard(
-            event: "copy" | "cut" | "paste",
-            e: ClipboardEvent,
-        ) {
+        const handleCopy = (e: Event) => {
             const result = resolveClipboard({
-                event,
+                event: "copy",
                 isInputActive: isInputActive(),
-                zoneHasCallback: canZoneHandle(CALLBACK_MAP[event]),
+                zoneHasCallback: canZoneHandle("onCopy"),
             });
-
             if (result.action === "dispatch") {
-                kernel.dispatch(COMMAND_MAP[result.event]());
+                kernel.dispatch(OS_COPY());
                 e.preventDefault();
             }
-        }
+        };
 
-        const handleCopy = (e: Event) =>
-            handleClipboard("copy", e as ClipboardEvent);
-        const handleCut = (e: Event) =>
-            handleClipboard("cut", e as ClipboardEvent);
-        const handlePaste = (e: Event) =>
-            handleClipboard("paste", e as ClipboardEvent);
+        const handleCut = (e: Event) => {
+            const result = resolveClipboard({
+                event: "cut",
+                isInputActive: isInputActive(),
+                zoneHasCallback: canZoneHandle("onCut"),
+            });
+            if (result.action === "dispatch") {
+                kernel.dispatch(OS_CUT());
+                e.preventDefault();
+            }
+        };
+
+        const handlePaste = (e: Event) => {
+            const result = resolveClipboard({
+                event: "paste",
+                isInputActive: isInputActive(),
+                zoneHasCallback: canZoneHandle("onPaste"),
+            });
+            if (result.action === "dispatch") {
+                kernel.dispatch(OS_PASTE());
+                e.preventDefault();
+            }
+        };
 
         window.addEventListener("copy", handleCopy);
         window.addEventListener("cut", handleCut);

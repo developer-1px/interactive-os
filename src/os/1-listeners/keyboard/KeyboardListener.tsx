@@ -47,11 +47,13 @@ function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
     const entry = activeZoneId ? ZoneRegistry.get(activeZoneId) : null;
     const zone = activeZoneId ? focusState?.zones?.[activeZoneId] : null;
 
+    const isEditing = isEditingElement(target);
+
     return {
         canonicalKey,
         key: e.key,
-        isEditing: isEditingElement(target),
-        isFieldActive: isEditingElement(target)
+        isEditing,
+        isFieldActive: isEditing
             ? resolveIsEditingForKey(target, canonicalKey)
             : false,
         isComposing: e.isComposing || e.keyCode === 229,
