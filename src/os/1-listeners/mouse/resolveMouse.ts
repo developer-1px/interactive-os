@@ -37,6 +37,7 @@ export type SelectMode = "replace" | "toggle" | "range";
 export type MouseResult =
     | { action: "ignore" }
     | { action: "label-redirect"; itemId: string; groupId: string }
+    | { action: "zone-activate"; groupId: string }
     | {
         action: "focus-and-select";
         itemId: string;
@@ -81,7 +82,12 @@ export function resolveMouse(input: MouseInput): MouseResult {
         };
     }
 
-    // No target → ignore
+    // No item but has zone → zone-activate (empty area click)
+    if (!input.targetItemId && input.targetGroupId) {
+        return { action: "zone-activate", groupId: input.targetGroupId };
+    }
+
+    // No target at all → ignore
     if (!input.targetItemId || !input.targetGroupId) {
         return { action: "ignore" };
     }

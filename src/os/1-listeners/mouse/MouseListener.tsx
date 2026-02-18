@@ -60,7 +60,25 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
 
     // Normal item detection
     const item = findFocusableItem(target);
-    if (!item) return null;
+    if (!item) {
+        // Zone-only click: no item, but zone exists → activate zone
+        const zoneEl = target.closest("[data-focus-group]") as HTMLElement | null;
+        const zoneId = zoneEl?.getAttribute("data-focus-group");
+        if (!zoneId) return null;
+
+        return {
+            targetItemId: null,
+            targetGroupId: zoneId,
+            shiftKey: e.shiftKey,
+            metaKey: e.metaKey,
+            ctrlKey: e.ctrlKey,
+            isLabel: false,
+            labelTargetItemId: null,
+            labelTargetGroupId: null,
+            hasAriaExpanded: false,
+            itemRole: null,
+        };
+    }
     const focusTarget = resolveFocusTarget(item);
     if (!focusTarget) return null;
 
@@ -94,6 +112,24 @@ export function MouseListener() {
             switch (result.action) {
                 case "ignore":
                     return;
+
+                case "zone-activate": {
+                    setDispatching(true);
+                    kernel.dispatch(
+                        FOCUS({ zoneId: result.groupId, itemId: null }),
+                        {
+                            meta: {
+                                input: {
+                                    type: "MOUSE",
+                                    key: me.type,
+                                    elementId: null,
+                                },
+                            },
+                        },
+                    );
+                    setDispatching(false);
+                    return;
+                }
 
                 case "label-redirect": {
                     me.preventDefault();

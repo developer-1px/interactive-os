@@ -23,10 +23,12 @@ export const FOCUS = kernel.defineCommand(
         const zone = ensureZone(draft.os, zoneId);
         zone.focusedItemId = itemId;
 
+        // Always activate the zone (even zone-only click with null itemId)
+        draft.os.focus.activeZoneId = zoneId;
+
         if (itemId) {
           zone.lastFocusedId = itemId;
           zone.recoveryTargetId = null;
-          draft.os.focus.activeZoneId = zoneId;
         }
       }),
 

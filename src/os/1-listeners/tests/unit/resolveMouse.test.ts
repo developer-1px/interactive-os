@@ -148,10 +148,20 @@ describe("resolveMouse", () => {
         });
     });
 
-    test("no target item → ignore", () => {
+    test("no target item, no zone → ignore", () => {
         const result = resolveMouse(
             baseInput({ targetItemId: null, targetGroupId: null }),
         );
         expect(result.action).toBe("ignore");
+    });
+
+    test("no target item, but zone exists → zone-activate", () => {
+        const result = resolveMouse(
+            baseInput({ targetItemId: null, targetGroupId: "zone-1" }),
+        );
+        expect(result).toEqual({
+            action: "zone-activate",
+            groupId: "zone-1",
+        });
     });
 });
