@@ -165,13 +165,12 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     }, [visualFocused, isVirtualFocus]);
 
     // --- Sync disabled prop → kernel state ---
+    // Only dispatch when actually disabled (most items aren't).
     useLayoutEffect(() => {
-      kernel.dispatch(SYNC_DISABLED({ zoneId, itemId: id, disabled }));
+      if (!disabled) return;
+      kernel.dispatch(SYNC_DISABLED({ zoneId, itemId: id, disabled: true }));
       return () => {
-        // Clean up on unmount: ensure item is removed from disabledItems
-        if (disabled) {
-          kernel.dispatch(SYNC_DISABLED({ zoneId, itemId: id, disabled: false }));
-        }
+        kernel.dispatch(SYNC_DISABLED({ zoneId, itemId: id, disabled: false }));
       };
     }, [zoneId, id, disabled]);
 
