@@ -31,56 +31,16 @@ import { Keybindings } from "./keybindings";
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  {
-    key: "ArrowDown",
-    command: NAVIGATE,
-    args: [{ direction: "down" }],
-    when: "navigating",
-  },
-  {
-    key: "ArrowUp",
-    command: NAVIGATE,
-    args: [{ direction: "up" }],
-    when: "navigating",
-  },
-  {
-    key: "ArrowLeft",
-    command: NAVIGATE,
-    args: [{ direction: "left" }],
-    when: "navigating",
-  },
-  {
-    key: "ArrowRight",
-    command: NAVIGATE,
-    args: [{ direction: "right" }],
-    when: "navigating",
-  },
-  {
-    key: "Home",
-    command: NAVIGATE,
-    args: [{ direction: "home" }],
-    when: "navigating",
-  },
-  {
-    key: "End",
-    command: NAVIGATE,
-    args: [{ direction: "end" }],
-    when: "navigating",
-  },
+  { key: "ArrowDown", command: NAVIGATE({ direction: "down" }), when: "navigating" },
+  { key: "ArrowUp", command: NAVIGATE({ direction: "up" }), when: "navigating" },
+  { key: "ArrowLeft", command: NAVIGATE({ direction: "left" }), when: "navigating" },
+  { key: "ArrowRight", command: NAVIGATE({ direction: "right" }), when: "navigating" },
+  { key: "Home", command: NAVIGATE({ direction: "home" }), when: "navigating" },
+  { key: "End", command: NAVIGATE({ direction: "end" }), when: "navigating" },
 
   // Shift+Arrow → range selection
-  {
-    key: "Shift+ArrowDown",
-    command: NAVIGATE,
-    args: [{ direction: "down", select: "range" }],
-    when: "navigating",
-  },
-  {
-    key: "Shift+ArrowUp",
-    command: NAVIGATE,
-    args: [{ direction: "up", select: "range" }],
-    when: "navigating",
-  },
+  { key: "Shift+ArrowDown", command: NAVIGATE({ direction: "down", select: "range" }), when: "navigating" },
+  { key: "Shift+ArrowUp", command: NAVIGATE({ direction: "up", select: "range" }), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -88,18 +48,8 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  {
-    key: "Tab",
-    command: TAB,
-    args: [{ direction: "forward" }],
-    when: "navigating",
-  },
-  {
-    key: "Shift+Tab",
-    command: TAB,
-    args: [{ direction: "backward" }],
-    when: "navigating",
-  },
+  { key: "Tab", command: TAB({ direction: "forward" }), when: "navigating" },
+  { key: "Shift+Tab", command: TAB({ direction: "backward" }), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -107,8 +57,8 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  { key: "Enter", command: ACTIVATE, when: "navigating" },
-  { key: "Escape", command: ESCAPE, when: "navigating" },
+  { key: "Enter", command: ACTIVATE(), when: "navigating" },
+  { key: "Escape", command: ESCAPE(), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -116,13 +66,8 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  {
-    key: "Space",
-    command: SELECT,
-    args: [{ mode: "toggle" }],
-    when: "navigating",
-  },
-  { key: "Meta+A", command: OS_SELECT_ALL, when: "navigating" },
+  { key: "Space", command: SELECT({ mode: "toggle" }), when: "navigating" },
+  { key: "Meta+A", command: OS_SELECT_ALL(), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -130,8 +75,8 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  { key: "Backspace", command: OS_DELETE, when: "navigating" },
-  { key: "Delete", command: OS_DELETE, when: "navigating" },
+  { key: "Backspace", command: OS_DELETE(), when: "navigating" },
+  { key: "Delete", command: OS_DELETE(), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -139,8 +84,8 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  { key: "Meta+ArrowUp", command: OS_MOVE_UP, when: "navigating" },
-  { key: "Meta+ArrowDown", command: OS_MOVE_DOWN, when: "navigating" },
+  { key: "Meta+ArrowUp", command: OS_MOVE_UP(), when: "navigating" },
+  { key: "Meta+ArrowDown", command: OS_MOVE_DOWN(), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -148,8 +93,8 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  { key: "Meta+Z", command: OS_UNDO, when: "navigating" },
-  { key: "Meta+Shift+Z", command: OS_REDO, when: "navigating" },
+  { key: "Meta+Z", command: OS_UNDO(), when: "navigating" },
+  { key: "Meta+Shift+Z", command: OS_REDO(), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -167,9 +112,9 @@ Keybindings.registerAll([
 // F2 (navigating) → start editing (standard OS pattern, avoids Enter conflict with ACTIVATE)
 
 Keybindings.registerAll([
-  { key: "Enter", command: FIELD_COMMIT, when: "editing" },
-  { key: "Escape", command: FIELD_CANCEL, when: "editing" },
-  { key: "F2", command: FIELD_START_EDIT, when: "navigating" },
+  { key: "Enter", command: FIELD_COMMIT(), when: "editing" },
+  { key: "Escape", command: FIELD_CANCEL(), when: "editing" },
+  { key: "F2", command: FIELD_START_EDIT(), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════

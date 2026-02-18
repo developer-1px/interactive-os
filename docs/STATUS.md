@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-_(없음 — 다음 Focus 프로젝트 선택 대기)_
+**command-type-unification** — defineApp ↔ OS간 커맨드 타입 체계 단일화 (Factory → BaseCommand)
 
 ---
 
@@ -17,6 +17,8 @@ _(없음 — 다음 Focus 프로젝트 선택 대기)_
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| command-type-unification | Definition | 02-18 | 🔥 Focus |
+| docs-topology | Execution | 02-18 | ⏸ Idle |
 | docs-dashboard | Design (PRD/Proposal 완비) | 02-15 | ⏸ Idle |
 | testbot | Execution 준비 (Phase 1) | 02-15 | ⏸ Idle |
 
@@ -26,30 +28,30 @@ _(없음 — 다음 Focus 프로젝트 선택 대기)_
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
-| registry-monitor-v5 | 02-18 | ✅ 4-archive/2026-02 |
-| define-app | 02-18 | ✅ 4-archive/2026-02 |
-| builder-mvp | 02-18 | ✅ 4-archive/2026-02 |
-| os-prd | 02-18 | ✅ 4-archive/2026-02 (SPEC.md → 2-area/20-os/SPEC.md) |
-| naming-convention | 02-17 | ✅ 4-archive/2026-02 |
-| field-key-ownership | 02-16 | ✅ 4-archive/2026-02 |
-| todo-keyboard-dogfooding | 02-16 | ✅ 4-archive/2026-02 |
-| create-module | — | ✅ 4-archive/2026-02 (superseded by define-app) |
-| command-palette-e2e | 02-16 | ✅ 4-archive/2026-02 |
-| fix-tab-navigation | 02-16 | ✅ 4-archive/2026-02 |
-| docs-system-v2 | 02-16 | ✅ 4-archive/2026-02 |
-| builder-focus-navigation | 02-15 | ✅ 4-archive/2026-02 |
-| builder-os-panel-binding | 02-15 | ✅ 4-archive/2026-02 |
-| os-elegance | 02-14 | ✅ 4-archive/2026-02 |
-| focus-recovery | 02-15 | ✅ 4-archive/2026-02 |
-| todo-v3-migration | 02-15 | ✅ 4-archive/2026-02 |
-| todo-app | 02-15 | ✅ 4-archive/2026-02 |
-| workflow-ecosystem-refactoring | 02-13 | ✅ 2026 |
-| test-structure-convention | 02-13 | ✅ 2026 |
-| stream-inspector | 02-13 | ✅ 2026 |
-| os-keybinding-architecture | 02-13 | ✅ 2026 |
-| official-docs | 02-14 | ✅ 2026 |
-| move-docs-script | 02-13 | ✅ 2026 |
-| os-core-refactoring | 02-12 | ✅ 2026 |
+| registry-monitor-v5 | 02-18 | ✅ archive/2026/02/W08 |
+| define-app | 02-18 | ✅ archive/2026/02/W08 |
+| builder-mvp | 02-18 | ✅ archive/2026/02/W08 |
+| os-prd | 02-18 | ✅ archive/2026/02/W08 (SPEC.md → official/os/SPEC.md) |
+| naming-convention | 02-17 | ✅ archive/2026/02/W08 |
+| field-key-ownership | 02-16 | ✅ archive/2026/02/W07 |
+| todo-keyboard-dogfooding | 02-16 | ✅ archive/2026/02/W07 |
+| create-module | — | ✅ archive/2026/02/W07 |
+| command-palette-e2e | 02-16 | ✅ archive/2026/02/W08 |
+| fix-tab-navigation | 02-16 | ✅ archive/2026/02/W08 |
+| docs-system-v2 | 02-16 | ✅ archive/2026/02/W08 |
+| builder-focus-navigation | 02-15 | ✅ archive/2026/02/W07 |
+| builder-os-panel-binding | 02-15 | ✅ archive/2026/02/W07 |
+| os-elegance | 02-14 | ✅ archive/2026/02/W07 |
+| focus-recovery | 02-15 | ✅ archive/2026/02/W07 |
+| todo-v3-migration | 02-15 | ✅ archive/2026/02/W07 |
+| todo-app | 02-15 | ✅ archive/2026/02/W07 |
+| workflow-ecosystem-refactoring | 02-13 | ✅ archive/2026/02/W07 |
+| test-structure-convention | 02-13 | ✅ archive/2026/02/W07 |
+| stream-inspector | 02-13 | ✅ archive/2026/02/W07 |
+| os-keybinding-architecture | 02-13 | ✅ archive/2026/02/W07 |
+| official-docs | 02-14 | ✅ archive/2026/02/W07 |
+| move-docs-script | 02-13 | ✅ archive/2026/02/W07 |
+| os-core-refactoring | 02-12 | ✅ archive/2026/02/W07 |
 
 ---
 
@@ -65,8 +67,8 @@ _(없음 — 다음 Focus 프로젝트 선택 대기)_
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 0 |
-| Active Projects (total) | 2 |
+| Active Focus | 1 |
+| Active Projects (total) | 4 |
 | Completed (archived) | 24 |
 | Inbox items | 0 |
 | Backlog items | 4 |

@@ -10,7 +10,7 @@
  *   - `when: undefined`    — always active
  */
 
-import type { Command } from "@kernel";
+import type { BaseCommand } from "@kernel";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -20,11 +20,8 @@ export interface KeyBinding {
   /** Canonical key string (e.g. "ArrowDown", "Meta+K", "Shift+Tab") */
   key: string;
 
-  /** Factory that produces a kernel Command */
-  command: (...args: any[]) => Command<string, any>;
-
-  /** Static args passed to the factory (spread as arguments) */
-  args?: any[];
+  /** Pre-built kernel command to dispatch when this key is pressed */
+  command: BaseCommand;
 
   /** Context guard: when should this binding be active? */
   when?: "editing" | "navigating";

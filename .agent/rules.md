@@ -93,7 +93,21 @@
 |------|----------|------|
 | **Apps** | **FSD** (Feature-Sliced Design) | `app.ts` → `widgets/` → `features/` → `entities/` → `shared/` |
 | **OS** | **파이프라인** (번호 접두사) | `1-listeners/` → … → `6-components/` |
-| **Docs** | **PARA** (번호 접두사) | `0-inbox/` → … → `5-backlog/` |
+| **Docs** | **토폴로지** | `official/` (살아있는 문서) + `archive/` (죽은 문서) + `2-area/` (인큐베이터) |
+
+### 문서 토폴로지 — 살아있는 문서 vs 죽은 문서
+
+> 문서의 노화 축은 "시점 의존 vs 시점 독립"이다. 소스코드 토폴로지에 기반한 문서는 안 늙는다.
+
+| 계층 | 역할 | 규칙 |
+|------|------|------|
+| `official/` | 공식 지식의 인지 지도 | 개념 단위, 덮어쓰기, 날짜 없음, 소스코드 토폴로지와 동형 |
+| `.agent/rules.md` | 헌법 | 강제 노출 경로, 매 세션 읽힘, 시점 독립 원칙만 |
+| `2-area/` | 인큐베이터 | official로 아직 졸업 못 한 지식 (meta, cross-cutting) |
+| `archive/YYYY/MM/WNN/` | 매장 | 분류 없이 주차별 flat, 정리 비용 0 |
+
+- **개발 중 문서**(BOARD, discussions, devnote)는 에이전트의 세션 간 작업 기억으로 필수 — 생산량을 줄이지 않는다.
+- **작업 완료 시** `/archive` 워크플로우로 환류: official 추출 + archive/주차 매장.
 
 ---
 

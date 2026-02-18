@@ -27,33 +27,50 @@ description: 개발 환경이 정상 동작하는지 확인하고, 아니면 복
 
 ### 절차
 
-1. **타입 체크**
+1. **Node 버전 보장**
+   - 프로젝트 루트의 `.nvmrc` 파일에 명시된 버전을 사용한다.
+   - `source ~/.nvm/nvm.sh && nvm use`
+   - 이후 모든 명령(`tsc`, `vite` 등)은 이 Node 버전 위에서 실행해야 한다.
+
+2. **패키지 최신화**
+   - `ncu` (npm-check-updates)로 최신 버전을 확인한다.
+   - 업데이트가 있으면:
+     ```
+     ncu -u
+     npm install
+     ```
+   - peer dependency conflict 등으로 제외해야 할 패키지는 `.ncurc.json`의 `reject`에 추가하여 관리한다.
+   - 변경 없으면 아무것도 하지 않는다.
+   - 이후 Step 3(타입 체크)에서 breakage를 잡는다.
+
+3. **타입 체크**
    - `npx tsc --noEmit`
    - 0 errors가 아니면 에러를 보고하고 **멈춘다**. 타입이 깨진 채로 서버를 띄워봐야 의미 없다.
 
-2. **좀비 프로세스 정리**
+4. **좀비 프로세스 정리**
    - 각 포트(5555, 4444)에 대해 health check:
      ```
      curl -s --connect-timeout 3 --max-time 5 -o /dev/null -w "%{http_code}" http://localhost:{PORT}/
      ```
    - 200이면 → 해당 서버 정상. 다음 포트로.
    - 연결은 되지만 응답 없음(타임아웃) → 좀비. `lsof -t -i :{PORT} | xargs kill -9`
-   - 연결 거부 → 서버 없음. 4단계에서 기동.
+   - 연결 거부 → 서버 없음. 6단계에서 기동.
 
-3. **Vite 캐시 확인**
+5. **Vite 캐시 확인**
    - 좀비가 발견됐거나 서버를 새로 시작해야 하면:
      ```
      rm -rf node_modules/.vite
      ```
    - 이미 두 서버 모두 정상이면 캐시를 건드리지 않는다.
 
-4. **서버 기동**
+6. **서버 기동**
    - 정상이 아닌 서버만 개별 시작한다.
-   - App 서버가 없으면: `npx vite &` (백그라운드)
-   - Docs 서버가 없으면: `npx vite --config vite.docs.config.ts &` (백그라운드)
+   - 모든 서버 기동 명령 앞에 `source ~/.nvm/nvm.sh && nvm use` 를 붙인다.
+   - App 서버가 없으면: `source ~/.nvm/nvm.sh && nvm use && npx vite` (백그라운드)
+   - Docs 서버가 없으면: `source ~/.nvm/nvm.sh && nvm use && npx vite --config vite.docs.config.ts` (백그라운드)
    - 각 서버가 200 응답할 때까지 재시도 (최대 15초).
 
-5. **렌더 스모크**
+7. **렌더 스모크**
    - App 서버의 홈페이지가 실제로 렌더되는지 확인:
      ```
      curl -s http://localhost:5555/ | grep -q '<div id="root">'
@@ -61,14 +78,16 @@ description: 개발 환경이 정상 동작하는지 확인하고, 아니면 복
    - HTML이 정상 응답되면 ✅
    - 빈 응답이거나 에러 페이지이면 Vite 터미널 로그를 확인하고 에러를 보고한다.
 
-6. **결과 보고**
+8. **결과 보고**
    ```
-   | 항목   | 결과 |
-   |--------|------|
-   | tsc    | ✅ 0 errors |
-   | App    | ✅ 5555 |
-   | Docs   | ✅ 4444 |
-   | Render | ✅ |
+   | 항목    | 결과 |
+   |---------|------|
+   | Node    | ✅ (`.nvmrc` 버전) |
+   | npm     | ✅ up to date |
+   | tsc     | ✅ 0 errors |
+   | App     | ✅ 5555 |
+   | Docs    | ✅ 4444 |
+   | Render  | ✅ |
    ```
 
 ### 호출 관계

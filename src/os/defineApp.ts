@@ -231,17 +231,16 @@ export function defineApp<S>(
     },
 
     createTrigger: ((commandOrConfig: any): any => {
-      // ── Simple trigger ──
-      if (typeof commandOrConfig === "function") {
+      // ── Simple trigger (BaseCommand has .type) ──
+      if (commandOrConfig && typeof commandOrConfig.type === "string") {
         return createSimpleTrigger(appId, commandOrConfig);
       }
       // ── Compound trigger (Dialog pattern) — v3 compat ──
       return createCompoundTrigger(appId, commandOrConfig);
     }) as {
       (
-        command: CommandFactory<string, any>,
+        command: BaseCommand,
       ): React.FC<{
-        payload?: any;
         children: ReactNode;
       }>;
       (config: CompoundTriggerConfig): CompoundTriggerComponents;

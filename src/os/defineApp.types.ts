@@ -58,27 +58,27 @@ export type FlatHandler<S, P> = (
 
 export interface ZoneBindings {
   role: string;
-  onCheck?: CommandFactory<string, any>;
-  onAction?: CommandFactory<string, any>;
-  onDelete?: CommandFactory<string, any>;
-  onCopy?: CommandFactory<string, any>;
-  onCut?: CommandFactory<string, any>;
-  onPaste?: CommandFactory<string, any>;
-  onMoveUp?: CommandFactory<string, any>;
-  onMoveDown?: CommandFactory<string, any>;
-  onUndo?: CommandFactory<string, any>;
-  onRedo?: CommandFactory<string, any>;
+  onCheck?: BaseCommand;
+  onAction?: BaseCommand;
+  onDelete?: BaseCommand;
+  onCopy?: BaseCommand;
+  onCut?: BaseCommand;
+  onPaste?: BaseCommand;
+  onMoveUp?: BaseCommand;
+  onMoveDown?: BaseCommand;
+  onUndo?: BaseCommand;
+  onRedo?: BaseCommand;
 }
 
 export interface FieldBindings {
-  onChange?: CommandFactory<string, any>;
-  onSubmit?: CommandFactory<string, any>;
-  onCancel?: CommandFactory<string, any>;
+  onChange?: BaseCommand;
+  onSubmit?: BaseCommand;
+  onCancel?: BaseCommand;
 }
 
 export interface KeybindingEntry<S> {
   key: string;
-  command: CommandFactory<string, any>;
+  command: BaseCommand;
   when?: Condition<S>;
 }
 
@@ -152,8 +152,7 @@ export interface AppHandle<S> {
     options?: { when?: Condition<S> },
   ): CommandFactory<T, P>;
   createZone(name: string): ZoneHandle<S>;
-  createTrigger(command: CommandFactory<string, any>): React.FC<{
-    payload?: any;
+  createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;
   }>;
   useComputed<T>(selector: Selector<S, T>): T;

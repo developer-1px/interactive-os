@@ -38,7 +38,6 @@ export const macFallbackMiddleware: Middleware = {
     const binding = Keybindings.resolve(fallbackKey, context);
     if (!binding) return null;
 
-    const args = binding.args ?? [];
-    return binding.command(...args) as BaseCommand;
+    return binding.command;
   },
 };

@@ -70,7 +70,7 @@ export function createBoundComponents<S>(
     for (const [declKey, propKey] of Object.entries(eventMap)) {
       const cmd = (config as any)[declKey];
       if (cmd) {
-        zoneProps[propKey] = cmd({ id: OS.FOCUS });
+        zoneProps[propKey] = cmd;
       }
     }
 
@@ -85,7 +85,6 @@ export function createBoundComponents<S>(
       const bindings = config.keybindings.map((kb) => ({
         key: kb.key,
         command: kb.command,
-        args: [{ id: "OS.FOCUS" }],
         when: "navigating" as const,
       }));
       return KeybindingsRegistry.registerAll(bindings);
@@ -124,11 +123,7 @@ export function createBoundComponents<S>(
     if (config.field) {
       if (config.field.onChange) fieldProps.onChange = config.field.onChange;
       if (config.field.onSubmit) fieldProps.onSubmit = config.field.onSubmit;
-      if (config.field.onCancel) {
-        // onCancel may be a CommandFactory (function) or a BaseCommand (object)
-        const cancel = config.field.onCancel;
-        fieldProps.onCancel = typeof cancel === "function" ? cancel() : cancel;
-      }
+      if (config.field.onCancel) fieldProps.onCancel = config.field.onCancel;
     }
 
     return React.createElement(OS.Field, fieldProps as any);

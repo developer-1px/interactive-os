@@ -1,20 +1,32 @@
 ---
-description: 프로젝트 완료 시 지식을 Area/Resource로 분배하고, 잔여 산출물만 4-archive로 이동한다.
+description: 프로젝트 완료 시 지식을 official/rules로 환류하고, 잔여 산출물은 archive/연도/월/주차로 매장한다.
 ---
 
 ## /archive — 프로젝트 완료 & 지식 환류
 
-> **목적**: 프로젝트 완료 시 지식을 소멸시키지 않고 Area와 Resource로 환류한다.
-> **원칙**: 단순 이동 금지. 지식을 분배한 후 껍데기만 아카이브한다.
+> **목적**: 프로젝트 완료 시 지식을 소멸시키지 않고 살아있는 문서(official/rules)로 환류한다.
+> **원칙**: 단순 이동 금지. 지식을 추출한 후 잔여물만 매장한다.
+
+### 문서 토폴로지
+
+```
+살아있는 문서 (덮어쓰기, 지형 기반):
+  official/          ← 공식 지식의 인지 지도 (소스코드 토폴로지와 동형)
+  .agent/rules.md    ← 헌법 (강제 노출, 매 세션 읽힘)
+
+성숙 중인 문서 (인큐베이터):
+  2-area/            ← official로 아직 졸업 못 한 것 (meta, cross-cutting)
+
+죽은 문서 (매장, 분류 없음):
+  archive/YYYY/MM/WNN/ ← 연도/월/주차로 자동 매장
+```
 
 ### Why
 
-프로젝트가 완료되면 BOARD.md, discussions/ 등이 통째로 `4-archive/`로 이동했다.
-그 안에 있던 **아키텍처 결정, 스펙 변경, 참고자료**도 함께 묻혔다.
-결과: 코드는 24번 바뀌었는데 Area 지식은 멈춰있는 상태.
+**살아있는 문서**는 소스코드 토폴로지에 기반하여 안 늙는다 (official/, rules.md).
+**죽은 문서**는 시점에 바인딩되어 노화한다 — 분류할 필요 없이 시간순으로 매장한다.
 
-`/archive`는 이 문제를 해결한다:
-**프로젝트의 지식을 Area/Resource로 분배 → 잔여물만 archive.**
+`/archive`의 역할: **프로젝트의 지식을 official/rules로 추출 → 나머지는 archive/주차에 매장.**
 
 ### 프로세스
 
@@ -46,29 +58,29 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 
 #### 3. 지식 분배 (핵심)
 
-프로젝트의 모든 문서를 하나씩 검토하고 **4갈래 라우팅**:
+프로젝트의 모든 문서를 하나씩 검토하고 **3갈래 라우팅**:
 
 | 판단 기준 | 행선지 | 예시 |
 |-----------|--------|------|
-| **현재 코드의 동작을 설명**한다 | `2-area/` (스펙/아키텍처 갱신) | "focus pipeline은 이렇게 동작한다" |
-| **의사결정 과정을 기록**한다 | `2-area/` (ADR로 보존) | "왜 X 대신 Y를 선택했는가" |
-| **외부 지식/비교 분석**이다 | `3-resource/` | "W3C ARIA 스펙 비교", "Radix vs 자체 구현 분석" |
-| **진행 기록일 뿐**이다 | `4-archive/` | BOARD.md, 일일 진행 상황 |
+| **시점 독립 원칙/스펙** | `official/` 갱신 또는 `rules.md` 추가 | 커맨드 동작 스펙, 아키텍처 원칙 |
+| **아직 성숙 안 된 지식** | `2-area/` 잔류 (인큐베이터) | 초기 설계, 미확정 패턴 |
+| **그 외 전부** | `archive/YYYY/MM/WNN/` 매장 | BOARD, discussions, 보고서, 분석 |
 
 구체적 동작:
 
-**a) Area 갱신 (스펙/아키텍처)**
-- 대응 Area 문서가 이미 있으면 → **기존 문서 내용 업데이트** (merge)
-- 없으면 → **새 문서 생성** (Johnny.Decimal 번호 부여)
-- Area 문서는 "현재 코드가 어떻게 동작하는가"의 진실이어야 함
+**a) official 갱신 (살아있는 문서)**
+- 프로젝트에서 확정된 스펙/동작이 있으면 → `official/` 해당 섹션 **덮어쓰기**
+- 새 원칙이 발견됐으면 → `.agent/rules.md`에 추가
+- 핵심: official은 **개념 단위**로 존재, 날짜 없음, 코드 토폴로지와 동형
 
-**b) Resource 이동 (참고자료)**
-- 프로젝트 안에서 생산된 조사/비교/분석 문서
-- `3-resource/[category]/`로 이동 (원본 유지, tombstone 금지)
+**b) Area 잔류 (인큐베이터)**
+- 아직 official로 졸업시킬 만큼 성숙하지 않은 지식
+- cross-cutting standards, 미확정 설계 등
 
-**c) Archive 이동 (잔여)**
-- BOARD.md, 진행 기록, 일시적 메모
-- `4-archive/YYYY-MM-[project-name]/`으로 이동
+**c) Archive 매장 (죽은 문서)**
+- BOARD.md, discussions, 진행 기록, 분석 보고서 — 전부
+- `archive/YYYY/MM/WNN/`에 주차별로 이동 (프로젝트 이름은 폴더 없이 flat)
+- 주차 계산: `python3 -c "from datetime import date; d=date.today(); print(f'W{d.isocalendar()[1]:02d}')"`
 
 #### 4. Area 동기화 검증
 
@@ -82,12 +94,12 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 
 ```md
 ## ✅ Completed (→ archive 완료)
-| Project | Completed | Area 갱신 | Archived |
-|---------|-----------|----------|----------|
-| [name]  | MM-DD     | ✅ 20-os/22-focus | ✅ 4-archive/YYYY-MM |
+| Project | Completed | official 갱신 | Archived |
+|---------|-----------|-------------|----------|
+| [name]  | MM-DD     | ✅ official/os/SPEC.md | ✅ archive/YYYY/MM/WNN |
 ```
 
-- Area 갱신 컬럼 추가 — 어떤 Area가 갱신됐는지 추적
+- official 갱신 컬럼 — 어떤 살아있는 문서가 갱신됐는지 추적
 - Last updated 타임스탬프 갱신
 
 #### 6. 보고
@@ -95,14 +107,13 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 ```
 📊 Archive Report: [project-name]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📚 Area 갱신: N개 문서
-   - 2-area/20-os/22-focus/22.03-pipeline-invariants.md (업데이트)
-   - 2-area/10-kernel/10.02-inspector-api.md (신규)
-📖 Resource 이동: N개
-   - 3-resource/aria/w3c-comparison.md
-📦 Archive 이동: N개
-   - 4-archive/YYYY-MM-[name]/BOARD.md
-   - 4-archive/YYYY-MM-[name]/daily-notes/
+📘 official 갱신: N개
+   - official/os/SPEC.md (갱신)
+   - .agent/rules.md (원칙 추가)
+📝 Area 잔류: N개
+   - 2-area/80-cross-cutting/... (인큐베이터)
+📦 Archive 매장: N개
+   - archive/YYYY/MM/WNN/ (주차별 flat)
 ```
 
 ### `/para`와의 관계

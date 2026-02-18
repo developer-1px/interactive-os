@@ -76,9 +76,9 @@ export function createWidgetFactory<
       // v3 when is bare lambda, not Condition
       const whenCondition = cmdOptions?.when
         ? deps.defineCondition(
-            `__v3_when_${type}`,
-            cmdOptions.when as (state: S) => boolean,
-          )
+          `__v3_when_${type}`,
+          cmdOptions.when as (state: S) => boolean,
+        )
         : undefined;
 
       const cmdFactory = deps.registerCommand(type, flatHandler, {
@@ -118,7 +118,6 @@ export function createWidgetFactory<
         const bindings = config.keybindings.map((kb: any) => ({
           key: kb.key,
           command: kb.command,
-          args: [{ id: "OS.FOCUS" }],
           when: kb.when ?? ("navigating" as const),
         }));
         return KeybindingsRegistry.registerAll(bindings);

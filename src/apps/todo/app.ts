@@ -28,6 +28,7 @@ import {
 import { produce } from "immer";
 import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { FOCUS } from "@/os/3-commands/focus/focus";
+import { OS } from "@/os/AntigravityOS";
 import { defineApp } from "@/os/defineApp";
 
 /** Collision-free random ID */
@@ -162,9 +163,9 @@ export const moveItemUp = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -188,9 +189,9 @@ export const moveItemDown = listZone.command(
         draft.data.todoOrder[globalTargetIdx],
         draft.data.todoOrder[globalSwapIdx],
       ] = [
-        draft.data.todoOrder[globalSwapIdx]!,
-        draft.data.todoOrder[globalTargetIdx]!,
-      ];
+          draft.data.todoOrder[globalSwapIdx]!,
+          draft.data.todoOrder[globalTargetIdx]!,
+        ];
     }),
   }),
 );
@@ -394,17 +395,17 @@ export const redoCommand = listZone.command(
 // Zone binding
 export const TodoListUI = listZone.bind({
   role: "listbox",
-  onCheck: toggleTodo,
-  onAction: startEdit,
-  onDelete: deleteTodo,
-  onCopy: copyTodo,
-  onCut: cutTodo,
-  onPaste: pasteTodo,
-  onMoveUp: moveItemUp,
-  onMoveDown: moveItemDown,
-  onUndo: undoCommand,
-  onRedo: redoCommand,
-  keybindings: [{ key: "Meta+D", command: duplicateTodo }],
+  onCheck: toggleTodo({ id: OS.FOCUS }),
+  onAction: startEdit({ id: OS.FOCUS }),
+  onDelete: deleteTodo({ id: OS.FOCUS }),
+  onCopy: copyTodo({ id: OS.FOCUS }),
+  onCut: cutTodo({ id: OS.FOCUS }),
+  onPaste: pasteTodo({ id: OS.FOCUS }),
+  onMoveUp: moveItemUp({ id: OS.FOCUS }),
+  onMoveDown: moveItemDown({ id: OS.FOCUS }),
+  onUndo: undoCommand(),
+  onRedo: redoCommand(),
+  keybindings: [{ key: "Meta+D", command: duplicateTodo({ id: OS.FOCUS }) }],
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -455,9 +456,9 @@ export const moveCategoryDown = sidebarZone.command(
 
 export const TodoSidebarUI = sidebarZone.bind({
   role: "listbox",
-  onAction: selectCategory,
-  onMoveUp: moveCategoryUp,
-  onMoveDown: moveCategoryDown,
+  onAction: selectCategory({ id: OS.FOCUS }),
+  onMoveUp: moveCategoryUp(),
+  onMoveDown: moveCategoryDown(),
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -499,8 +500,8 @@ export const addTodo = draftZone.command(
 export const TodoDraftUI = draftZone.bind({
   role: "textbox",
   field: {
-    onChange: syncDraft,
-    onSubmit: addTodo,
+    onChange: syncDraft({ text: "" }),
+    onSubmit: addTodo(),
   },
 });
 
@@ -548,9 +549,9 @@ export const cancelEdit = editZone.command(
 export const TodoEditUI = editZone.bind({
   role: "textbox",
   field: {
-    onChange: syncEditDraft,
-    onSubmit: updateTodoText,
-    onCancel: cancelEdit,
+    onChange: syncEditDraft({ text: "" }),
+    onSubmit: updateTodoText({ text: "" }),
+    onCancel: cancelEdit(),
   },
 });
 
@@ -581,7 +582,7 @@ export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => ({
 
 export const TodoToolbarUI = toolbarZone.bind({
   role: "toolbar",
-  keybindings: [{ key: "Meta+Shift+V", command: toggleView }],
+  keybindings: [{ key: "Meta+Shift+V", command: toggleView() }],
 });
 
 // ═══════════════════════════════════════════════════════════════════

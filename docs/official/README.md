@@ -4,6 +4,14 @@
 
 ---
 
+## Vision
+
+| Guide | Description |
+|---|---|
+| [**VISION**](./VISION.md) | 왜 Interactive OS가 존재하는가 — Problem, Pipeline, Module Ecosystem |
+
+---
+
 ## Kernel
 
 A universal command processing engine for building interactive applications.
@@ -23,7 +31,25 @@ A universal command processing engine for building interactive applications.
 
 ## OS Layer
 
-*Coming soon.*
+The behavioral infrastructure for interactive web applications.
+
+### Why — Problem Space (각 모듈이 존재하는 이유)
+
+| Guide | Pipeline Stage | Description |
+|---|---|---|
+| [Why Focus](./os/why-focus.md) | ① Spatial | 웹에서 "지금 어디에 있는가"를 시스템이 모르는 문제 |
+| [Why Navigation](./os/why-navigation.md) | ③ Behavior | 방향키 내비게이션의 재발명 문제 |
+| [Why Selection](./os/why-selection.md) | ③ Behavior | 다중 선택 상태 머신의 조합 폭발 |
+| [Why Tab](./os/why-tab.md) | ③ Behavior | 영역 간 Tab 이동 (trap/flow/escape) |
+| [Why ARIA](./os/why-aria.md) | ④ Output | 접근성은 기능이 아니라 인프라 |
+| [Why Command](./os/why-command.md) | ② Input | 입력과 행동의 분리, 단축키 충돌 해결 |
+| [Why Overlay](./os/why-overlay.md) | ③ Behavior | 모달/다이얼로그 포커스 생명주기 |
+
+### What — Solution Space (동작 명세)
+
+| Guide | Description |
+|---|---|
+| [SPEC](./os/SPEC.md) | Single Source of Truth — State, Commands, Keymaps, ARIA Role Presets, Components |
 
 ## Architecture
 
@@ -47,4 +73,4 @@ A universal command processing engine for building interactive applications.
 | Package | Status | Documentation |
 |---------|--------|---------------|
 | **Kernel** | `@frozen 2026-02-11` | ✅ Complete |
-| **OS** | In development | 🚧 Planned |
+| **OS** | In development | 🚧 SPEC (complete) |

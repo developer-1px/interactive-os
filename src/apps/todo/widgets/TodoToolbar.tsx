@@ -15,10 +15,10 @@ import {
   Trash2,
 } from "lucide-react";
 
-// Simple triggers — defined inline here (or import from triggers.ts)
-const ToggleViewButton = TodoApp.createTrigger(TodoToolbar.commands.toggleView);
-const UndoButton = TodoApp.createTrigger(TodoList.commands.undoCommand);
-const RedoButton = TodoApp.createTrigger(TodoList.commands.redoCommand);
+// Simple triggers — now pass pre-built BaseCommand
+const ToggleViewButton = TodoApp.createTrigger(TodoToolbar.commands.toggleView());
+const UndoButton = TodoApp.createTrigger(TodoList.commands.undoCommand());
+const RedoButton = TodoApp.createTrigger(TodoList.commands.redoCommand());
 
 export function TodoToolbarView() {
   const isBoard = TodoApp.useComputed((s) => s.ui.viewMode === "board");

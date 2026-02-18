@@ -165,8 +165,7 @@ export function KeyboardListener() {
       }
 
       // Dispatch command — kernel handles everything (including Tab)
-      const command = binding.command(...(binding.args ?? []));
-      kernel.dispatch(command, {
+      kernel.dispatch(binding.command, {
         meta: { input: buildInputMeta(e, canonicalKey, target) },
       });
 

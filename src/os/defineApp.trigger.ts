@@ -5,7 +5,7 @@
  * Only dependency: appId (for displayName) and OS namespace (for primitives).
  */
 
-import type { CommandFactory } from "@kernel/core/tokens";
+import type { BaseCommand } from "@kernel/core/tokens";
 import { OS } from "@os/AntigravityOS";
 import React, { type ReactNode } from "react";
 
@@ -15,15 +15,14 @@ import React, { type ReactNode } from "react";
 
 export function createSimpleTrigger(
   appId: string,
-  command: CommandFactory<string, any>,
-): React.FC<{ payload?: any; children: ReactNode }> {
-  const SimpleTrigger: React.FC<{ payload?: any; children: ReactNode }> = ({
-    payload,
+  command: BaseCommand,
+): React.FC<{ children: ReactNode }> {
+  const SimpleTrigger: React.FC<{ children: ReactNode }> = ({
     children,
   }) => {
     return React.createElement(
       OS.Trigger as any,
-      { onPress: command(payload ?? {}) },
+      { onPress: command },
       children,
     );
   };
@@ -37,7 +36,7 @@ export function createSimpleTrigger(
 
 export interface CompoundTriggerConfig {
   id?: string;
-  confirm?: CommandFactory<string, any>;
+  confirm?: BaseCommand;
 }
 
 export interface CompoundTriggerComponents {
@@ -79,11 +78,11 @@ export function createCompoundTrigger(
     className?: string;
     asChild?: boolean;
   }> = ({ children, className, asChild }) =>
-    React.createElement(
-      (OS.Dialog as any).Trigger,
-      { className, asChild },
-      children,
-    );
+      React.createElement(
+        (OS.Dialog as any).Trigger,
+        { className, asChild },
+        children,
+      );
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
   const ContentComponent: React.FC<{
@@ -107,14 +106,14 @@ export function createCompoundTrigger(
     children: ReactNode;
     className?: string;
   }> = ({ children, className }) =>
-    React.createElement((OS.Dialog as any).Close, { className }, children);
+      React.createElement((OS.Dialog as any).Close, { className }, children);
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{
     children: ReactNode;
     className?: string;
   }> = ({ children, className }) => {
-    const confirmCmd = config.confirm ? config.confirm({} as any) : undefined;
+    const confirmCmd = config.confirm ?? undefined;
     return React.createElement(
       (OS.Dialog as any).Close,
       { className, onPress: confirmCmd },
