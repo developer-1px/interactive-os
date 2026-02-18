@@ -26,12 +26,11 @@ export default function BuilderPage() {
   usePlaywrightSpecs("builder", [runBuilderSpec]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
 
-  // Derive selection from kernel focus → sync to BuilderApp
-  const focusedId = kernel.useComputed((state) => {
-    const zoneId = state.os.focus.activeZoneId;
-    if (!zoneId) return null;
-    return state.os.focus.zones[zoneId]?.focusedItemId ?? null;
-  });
+  // Derive selection from builder-canvas zone's last focused item.
+  // Uses lastFocusedId so selection persists even when panel gains focus.
+  const focusedId = kernel.useComputed(
+    (state) => state.os.focus.zones["builder-canvas"]?.lastFocusedId ?? null,
+  );
 
   useEffect(() => {
     if (!focusedId) {
