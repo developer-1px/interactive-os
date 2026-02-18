@@ -30,11 +30,9 @@ description: 표준 PARA 방법론(Projects, Areas, Resources, Archives)을 적�
    - Do NOT merge files; keep them intact.
 
 3. **Project Review (Active → Archive)**
-   - **대시보드 기반**: Completed 섹션의 `Archived? ❌` 항목을 아카이브한다.
+   - **대시보드 기반**: Completed 섹션의 `Archived? ❌` 항목을 처리한다.
    - **추가 검토**: Stale 프로젝트(`💤`)에 대해 사용자에게 아카이브 여부를 묻는다.
-   - **Archive**: 프로젝트 폴더를 `docs/4-archive/YYYY-MM-[ProjectName]/`으로 통째로 이동한다.
-     - BOARD.md, discussions/, notes/ 모두 포함.
-     - Create the date folder if it doesn't exist.
+   - **`/archive` 호출**: 직접 `mv`하지 않는다. `/archive` 워크플로우를 호출하여 지식을 Area/Resource로 분배한 후 잔여물만 아카이브한다.
 
 4. **Backlog Review**
    - `docs/5-backlog/`를 스캔한다.
@@ -43,8 +41,9 @@ description: 표준 PARA 방법론(Projects, Areas, Resources, Archives)을 적�
 
 5. **Area & Resource Maintenance**
    - `docs/2-area`와 `docs/3-resource`를 스캔한다.
-   - If an Area/Resource has become a specific Project → move to `docs/1-project`.
-   - If no longer relevant → move to `docs/4-archive/YYYY-MM-[ItemName]/`.
+   - Area/Resource가 특정 프로젝트가 되었으면 → `docs/1-project`로 이동.
+   - **Superseded 문서 발견 시**: `/retire` 워크플로우를 호출하여 AI 컨텍스트에서 제거한다.
+   - Area가 소스코드 구조와 동기화되어 있는지 확인한다.
 
 6. **대시보드 최종 갱신**
    - 모든 이동이 완료되면 `docs/STATUS.md`를 갱신한다:

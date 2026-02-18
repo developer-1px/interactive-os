@@ -46,8 +46,8 @@ description: 패턴 A를 패턴 B로 전환하는 리팩토링 파이프라인. 
    - `.agent/rules.md`에 패턴 A 금지 규칙을 등록한다.
    - 예: "zustand useStore 대신 kernel.subscribe를 사용할 것"
 
-7. **문서 퇴출 — `/archive`** (해당 시)
-   - 패턴 A를 참조하는 문서를 `/archive`로 퇴출한다.
+7. **문서 퇴출 — `/retire`** (해당 시)
+   - 패턴 A를 참조하는 문서를 `/retire`로 퇴출한다.
 
 8. **회고 — `/retrospect`**
    - 리팩토링 과정의 개발·협업·워크플로우를 KPT로 회고한다.

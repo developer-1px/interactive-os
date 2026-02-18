@@ -253,5 +253,5 @@ docs/1-project/[프로젝트명]/
 3. **대시보드 갱신**: `docs/STATUS.md`에서:
    - All Active Projects에서 제거
    - Completed 섹션으로 이동
-4. `/para`를 실행하여 프로젝트 폴더를 `docs/4-archive/YYYY-MM-[프로젝트명]/`으로 이동한다.
+4. `/archive`를 실행하여 프로젝트의 지식을 Area/Resource로 분배하고, 잔여 산출물만 `docs/4-archive/`로 이동한다.
 5. 사용자에게 최종 리포트를 보고한다.
