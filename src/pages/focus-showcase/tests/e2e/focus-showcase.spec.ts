@@ -1123,4 +1123,107 @@ test.describe("Focus Showcase", () => {
       "true",
     );
   });
+
+  // ═══════════════════════════════════════════════════════════════
+  // §3.2  TYPEAHEAD NAVIGATION
+  // ═══════════════════════════════════════════════════════════════
+
+  // ─────────────────────────────────────────────────────────────
+  // 27. Typeahead: single char matches first item starting with that letter
+  // ─────────────────────────────────────────────────────────────
+  test("Navigate: Typeahead — typing a letter focuses matching item", async ({
+    page,
+  }) => {
+    // nav-list is a listbox (typeahead=true per §7 Role Preset)
+    // Items: Apple, Banana, Cherry
+    await page.locator("#nav-apple").click();
+    await expect(page.locator("#nav-apple")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Type 'b' → should focus Banana
+    await page.keyboard.press("b");
+    await expect(page.locator("#nav-banana")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Wait for typeahead buffer to reset (TIMEOUT = 500ms)
+    await page.waitForTimeout(600);
+
+    // Type 'c' → should focus Cherry
+    await page.keyboard.press("c");
+    await expect(page.locator("#nav-cherry")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Wait for buffer reset
+    await page.waitForTimeout(600);
+
+    // Type 'a' → should focus Apple
+    await page.keyboard.press("a");
+    await expect(page.locator("#nav-apple")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 28. Tab: escape cross-zone — Tab lands in next zone
+  // ─────────────────────────────────────────────────────────────
+  test("Tab: Escape cross-zone — Tab exits and lands in next zone", async ({
+    page,
+  }) => {
+    // tab-escape is a listbox with behavior=escape
+    // tab-trap is the next zone in DOM order
+    await page.locator("#tab-escape-1").click();
+    await expect(page.locator("#tab-escape-1")).toBeFocused();
+
+    // Tab → should exit escape zone and land in trap zone
+    await page.keyboard.press("Tab");
+
+    // Should NOT be in escape zone
+    await expect(page.locator("#tab-escape-0")).not.toBeFocused();
+    await expect(page.locator("#tab-escape-1")).not.toBeFocused();
+    await expect(page.locator("#tab-escape-2")).not.toBeFocused();
+
+    // Should be in the next zone (trap zone)
+    const trapFocused = page.locator("#tab-trap-0");
+    await expect(trapFocused).toBeFocused();
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 29. Tab: multi-zone — Shift+Tab backward across zones
+  // ─────────────────────────────────────────────────────────────
+  test("Tab: Multi-zone — Shift+Tab navigates backward across zones", async ({
+    page,
+  }) => {
+    // Start in trap zone
+    await page.locator("#tab-trap-0").click();
+    await expect(page.locator("#tab-trap-0")).toBeFocused();
+
+    // Shift+Tab in trap → should wrap within trap (trap cycles)
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator("#tab-trap-2")).toBeFocused();
+
+    // Now go to flow zone
+    await page.locator("#tab-flow-2").click();
+    await expect(page.locator("#tab-flow-2")).toBeFocused();
+
+    // Shift+Tab → flow walks backward: 2 → 1
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator("#tab-flow-1")).toBeFocused();
+
+    // Shift+Tab → flow walks backward: 1 → 0
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator("#tab-flow-0")).toBeFocused();
+
+    // Shift+Tab → at boundary, exits backward to previous zone
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator("#tab-flow-0")).not.toBeFocused();
+    await expect(page.locator("#tab-flow-1")).not.toBeFocused();
+    await expect(page.locator("#tab-flow-2")).not.toBeFocused();
+  });
 });

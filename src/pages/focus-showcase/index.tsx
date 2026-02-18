@@ -60,7 +60,7 @@ export function FocusShowcasePage() {
             Focus Strategy Audit
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            SPEC §3–§9 coverage · 26 E2E tests · Ordered by specification
+            SPEC §3–§9 coverage · 29 E2E tests · Ordered by specification
             section
           </p>
         </div>

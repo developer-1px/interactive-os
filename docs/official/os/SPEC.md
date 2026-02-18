@@ -3,7 +3,7 @@
 > 모든 동작 계약을 이 문서 하나로 관리한다.
 > 코드는 이 문서를 따르고, 테스트는 이 문서를 검증한다.
 >
-> Last verified: 2026-02-16
+> Last verified: 2026-02-18
 
 ---
 
@@ -375,7 +375,7 @@
 
 ## 11. Test Coverage Map
 
-> E2E: 26 tests (`focus-showcase.spec.ts`)
+> E2E: 29 tests (`focus-showcase.spec.ts`)
 > Unit: 다수 (`navigate`, `tab`, `escape`, `expand`, `stack`, `field`, `overlay`, `rolePresets`, `roleHelpers`, etc.)
 
 | Spec Area | E2E Tests | Unit Tests | Status |
@@ -387,7 +387,7 @@
 | Navigate (2D grid) | ✅ | — | ⚠️ spatial은 DOM 의존, E2E로 충분 |
 | Navigate (Home/End) | ✅ | ✅ `navigate.test` | ✅ |
 | Navigate (orthogonal ignored) | ✅ | ✅ `navigate.test` | ✅ |
-| Navigate (typeahead) | — | ✅ `typeahead.test` | ✅ 구현 + 테스트 |
+| Navigate (typeahead) | ✅ | ✅ `typeahead.test` | ✅ |
 | Select (Cmd+Click toggle) | ✅ | ✅ | ✅ |
 | Select (Shift+Click range) | ✅ | ✅ | ✅ |
 | Select (single toggle) | ✅ | ✅ | ✅ |
@@ -395,6 +395,8 @@
 | Tab (trap + Shift+Tab) | ✅ | ✅ `tab.test` | ✅ |
 | Tab (escape + Shift+Tab) | ✅ | ✅ `tab.test` | ✅ |
 | Tab (flow + Shift+Tab) | ✅ | ✅ `tab.test` | ✅ |
+| Tab (escape cross-zone) | ✅ | — | ✅ E2E: 다음 zone 진입 검증 |
+| Tab (multi-zone backward) | ✅ | — | ✅ E2E: Shift+Tab zone 횡단 |
 | Activate (automatic) | ✅ | — | ✅ E2E 충분 |
 | Activate (manual + listbox preset) | ✅ | — | ✅ §7 preset 검증 |
 | Dismiss (escape=deselect) | ✅ | ✅ `escape.test` | ✅ |
