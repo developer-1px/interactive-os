@@ -148,7 +148,10 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     );
 
     // --- Computed State ---
-    const visualFocused = isFocused && isGroupActive;
+    // Focus is always visible — even when zone is inactive (anchor state).
+    // Only the active zone's focused item receives DOM focus and tabIndex=0.
+    const visualFocused = isFocused;
+    const isActiveFocused = isFocused && isGroupActive;
 
     // --- Focus Effect: apply .focus() when this item becomes focused ---
     // Skip DOM focus when virtualFocus is enabled (e.g. combobox pattern):
@@ -157,12 +160,12 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     const internalRef = useRef<HTMLElement>(null);
     useLayoutEffect(() => {
       if (isVirtualFocus) return; // virtual focus — don't steal DOM focus
-      if (visualFocused && internalRef.current) {
+      if (isActiveFocused && internalRef.current) {
         if (document.activeElement !== internalRef.current) {
           internalRef.current.focus({ preventScroll: true });
         }
       }
-    }, [visualFocused, isVirtualFocus]);
+    }, [isActiveFocused, isVirtualFocus]);
 
     // --- Sync disabled prop → registry (declaration, not action) ---
     useLayoutEffect(() => {
@@ -186,8 +189,11 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     const sharedProps = {
       id,
       role: effectiveRole,
+      // APG roving tabindex: last focused item retains tabIndex=0
+      // even when zone is inactive, so Tab returns to last position.
       tabIndex: propTabIndex ?? (visualFocused ? 0 : -1),
-      "aria-current": visualFocused || undefined,
+      // aria-current only on the active zone's focused item (keyboard receiver)
+      "aria-current": isActiveFocused || undefined,
 
       // Selection state: aria-checked for radio/checkbox, aria-selected for rest
       // W3C: selectable items MUST have explicit "true" or "false"

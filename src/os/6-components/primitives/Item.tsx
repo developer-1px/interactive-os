@@ -62,20 +62,22 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
       (s) => s.os.focus.zones[zoneId]?.selection.includes(stringId) ?? false,
     );
 
-    // Anchor Logic
+    // Anchor: focused but zone is inactive (retained focus)
     const isAnchor = isFocused && !isActive;
 
     // Combined selection: prop OR store
     const isSelected = selected || isStoreSelected;
 
     // State for Render Props
+    // isFocused is always true when this item is the zone's focused item,
+    // regardless of whether the zone is active. Use isAnchor to distinguish.
     const itemState: ItemState = useMemo(
       () => ({
-        isFocused: isFocused && isActive,
+        isFocused,
         isSelected,
         isAnchor,
       }),
-      [isFocused, isActive, isSelected, isAnchor],
+      [isFocused, isSelected, isAnchor],
     );
 
     // Resolve Children
