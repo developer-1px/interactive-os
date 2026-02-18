@@ -354,7 +354,7 @@ test.describe("Todo App", () => {
     const focusedText = await focused.textContent();
     expect(
       focusedText?.includes("Item B") ||
-        focusedText?.includes("Complete Interaction OS docs"),
+      focusedText?.includes("Complete Interaction OS docs"),
     ).toBe(true);
   });
 
@@ -444,6 +444,48 @@ test.describe("Todo App", () => {
     // ArrowUp → should move to Draft (previous item in zone)
     await page.keyboard.press("ArrowUp");
 
+    const draft = page.locator(DRAFT);
+    await expect(draft).toHaveAttribute("data-focused", "true");
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // Cross-zone navigation — reported bugs
+  // ─────────────────────────────────────────────────────────────
+
+  test("Click sidebar category activates sidebar zone", async ({ page }) => {
+    // Focus a list item first
+    await page.getByText("Complete Interaction OS docs").click();
+    const todoFocused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(todoFocused).toHaveCount(1);
+
+    // Click sidebar category
+    await page.getByText("Work").click();
+    const sidebarFocused = page.locator(`${SIDEBAR} [data-focused="true"]`);
+    await expect(sidebarFocused).toHaveCount(1);
+    await expect(sidebarFocused).toContainText("Work");
+  });
+
+  test("Tab forward from list item stays (list is last zone in DOM)", async ({ page }) => {
+    // Click a list item (not draft)
+    await page.getByText("Complete Interaction OS docs").click();
+    const todoFocused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(todoFocused).toHaveCount(1);
+
+    // Tab forward → list is last zone in DOM order, no next zone
+    await page.keyboard.press("Tab");
+
+    // Focus should stay on the list item (no zone to escape to)
+    await expect(todoFocused).toHaveCount(1);
+  });
+
+  test("Tab forward from sidebar escapes to list", async ({ page }) => {
+    // Click sidebar category first
+    await page.getByText("Work").click();
+    const sidebarFocused = page.locator(`${SIDEBAR} [data-focused="true"]`);
+    await expect(sidebarFocused).toHaveCount(1);
+
+    // Tab forward → sidebar is before list in DOM, so next zone is list
+    await page.keyboard.press("Tab");
     const draft = page.locator(DRAFT);
     await expect(draft).toHaveAttribute("data-focused", "true");
   });

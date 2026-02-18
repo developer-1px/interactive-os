@@ -11,7 +11,10 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["src/**/tests/unit/**/*.test.ts"],
+    include: [
+      "src/**/tests/unit/**/*.test.ts",
+      "src/**/tests/integration/**/*.test.ts",
+    ],
     environment: "jsdom",
     globals: true,
   },
