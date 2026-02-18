@@ -1,7 +1,7 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { Zone } from "@os/6-components/primitives/Zone";
 import { useEffect, useState } from "react";
-import { BuilderApp, type PropertyType } from "@/apps/builder/app";
+import { selectElement, type PropertyType } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
@@ -35,10 +35,7 @@ export default function BuilderPage() {
 
   useEffect(() => {
     if (!focusedId) {
-      BuilderApp.setState((prev) => ({
-        ...prev,
-        ui: { ...prev.ui, selectedId: null, selectedType: null },
-      }));
+      kernel.dispatch(selectElement({ id: null, type: null }));
       return;
     }
 
@@ -71,10 +68,7 @@ export default function BuilderPage() {
       type = "text";
     }
 
-    BuilderApp.setState((prev) => ({
-      ...prev,
-      ui: { ...prev.ui, selectedId: focusedId, selectedType: type },
-    }));
+    kernel.dispatch(selectElement({ id: focusedId, type }));
   }, [focusedId]);
 
   const getViewportStyle = () => {
