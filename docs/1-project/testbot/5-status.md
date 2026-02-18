@@ -18,6 +18,10 @@
 | 2026-02-12 | TestBot dryRun 버그 수정 | `ffea73c` | dryRun이 테스트 본문 실행하는 버그 (중복 키 근본 원인) |
 | 2026-02-13 | 프로젝트 폴더 생성 | — | PRD, KPI, Proposal 작성 |
 
+## 관련 리소스
+
+- [Code Coverage 측정 원리](../../3-resource/06-typescript/code-coverage-internals.md)
+
 ## 다음 할 일
 
 1. [ ] Phase 1: 추가 Playwright API shim 구현 (fill, focus, toBeVisible, not.*)
