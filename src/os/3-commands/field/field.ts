@@ -7,11 +7,15 @@
  *   FIELD_START_EDIT — Enter editing mode on the focused item
  *   FIELD_COMMIT    — Exit editing mode and commit the value
  *   FIELD_CANCEL    — Exit editing mode and discard changes
+ *
+ * DOM Policy: Commands read from FieldRegistry (synced by InputListener).
+ *            DOM mutations are delegated to FIELD_CLEAR_EFFECT.
  */
 
 import { produce } from "immer";
 import { FieldRegistry } from "../../6-components/primitives/FieldRegistry";
 import { kernel } from "../../kernel";
+import { clearFieldDOM } from "../../4-effects/index";
 
 // ═══════════════════════════════════════════════════════════════════
 // FIELD_START_EDIT
@@ -80,17 +84,17 @@ export const FIELD_COMMIT = kernel.defineCommand(
 
     // Bridge: dispatch app's onSubmit command
     if (fieldEntry?.config.onSubmit) {
-      // Use state value — no DOM read needed.
+      // Read from FieldRegistry — InputListener keeps localValue in sync with DOM.
       const text = fieldEntry.state.localValue;
       const appCommand = fieldEntry.config.onSubmit({ text });
       queueMicrotask(() => kernel.dispatch(appCommand));
 
-      // Clear DOM via effect for immediate-mode fields (e.g., DRAFT)
+      // Clear field for immediate-mode (e.g., DRAFT) — delegate to effect
       if (!editingId) {
         const fieldName = fieldEntry.config.name;
         queueMicrotask(() => {
-          const el = document.getElementById(fieldName);
-          if (el) el.innerText = "";
+          clearFieldDOM(fieldName);
+          FieldRegistry.updateValue(fieldName, "");
         });
       }
     }

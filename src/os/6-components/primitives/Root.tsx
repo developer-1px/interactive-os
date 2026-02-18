@@ -7,10 +7,12 @@
  * - MouseListener: Mouse Events (§3.4) → mousedown → FOCUS/SELECT/EXPAND
  * - FocusListener: Focus Events (§3.3) → focusin → SYNC_FOCUS, MutationObserver → RECOVER
  * - ClipboardListener: Clipboard Events (§3.7) → native copy/cut/paste → Zone routing
+ * - InputListener: Input Events → contentEditable text sync → FieldRegistry + onChange
  */
 
 import { ClipboardListener } from "@os/1-listeners/clipboard/ClipboardListener";
 import { FocusListener } from "@os/1-listeners/focus/FocusListener";
+import { InputListener } from "@os/1-listeners/input/InputListener";
 import { KeyboardListener } from "@os/1-listeners/keyboard/KeyboardListener";
 import { MouseListener } from "@os/1-listeners/mouse/MouseListener";
 import type React from "react";
@@ -34,6 +36,7 @@ export function Root({ children }: RootProps) {
       <MouseListener />
       <FocusListener />
       <ClipboardListener />
+      <InputListener />
       {children}
     </>
   );

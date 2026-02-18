@@ -34,3 +34,17 @@ export const SCROLL_EFFECT = kernel.defineEffect("scroll", (itemId: string) => {
     el.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Field Clear Effect — Clear contentEditable field DOM content
+// ═══════════════════════════════════════════════════════════════════
+
+/** Imperative DOM clear — callable from queueMicrotask in commands. */
+export function clearFieldDOM(fieldId: string): void {
+  const el = document.getElementById(fieldId);
+  if (el) {
+    el.innerText = "";
+  }
+}
+
+export const FIELD_CLEAR_EFFECT = kernel.defineEffect("field-clear", clearFieldDOM);
