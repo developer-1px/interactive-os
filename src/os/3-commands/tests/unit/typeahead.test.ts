@@ -138,3 +138,43 @@ describe("Typeahead: Edge Cases", () => {
     expect(r2).toBeNull();
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Same-Character Cycling (within buffer window)
+// ═══════════════════════════════════════════════════════════════════
+
+describe("Typeahead: Same-Character Cycling (isSameChar branch)", () => {
+  it("pressing 'b' twice rapidly cycles through b-items", () => {
+    // First 'b' → buffer = "b", goes to multi-char path (buffer was empty)
+    const r1 = resolveTypeahead("apple", "b", ITEMS, LABELS);
+    expect(r1).toBe("banana");
+
+    // Second 'b' within window → isSameChar = true, cycles
+    vi.advanceTimersByTime(100);
+    const r2 = resolveTypeahead("banana", "b", ITEMS, LABELS);
+    expect(r2).toBe("blueberry");
+  });
+
+  it("pressing 'b' three times rapidly wraps around", () => {
+    resolveTypeahead("apple", "b", ITEMS, LABELS);
+    vi.advanceTimersByTime(100);
+    resolveTypeahead("banana", "b", ITEMS, LABELS);
+    vi.advanceTimersByTime(100);
+    const r3 = resolveTypeahead("blueberry", "b", ITEMS, LABELS);
+    expect(r3).toBe("banana"); // wraps
+  });
+
+  it("same-char cycling with null currentId → first match", () => {
+    resolveTypeahead(null, "a", ITEMS, LABELS);
+    vi.advanceTimersByTime(100);
+    const r2 = resolveTypeahead("apple", "a", ITEMS, LABELS);
+    expect(r2).toBe("avocado");
+  });
+
+  it("same-char cycling when no matches → null", () => {
+    resolveTypeahead("apple", "z", ITEMS, LABELS);
+    vi.advanceTimersByTime(100);
+    const r2 = resolveTypeahead("apple", "z", ITEMS, LABELS);
+    expect(r2).toBeNull();
+  });
+});
