@@ -36,7 +36,7 @@ export const SELECT = kernel.defineCommand(
     if (!targetId) return;
 
     // APG: disabled items cannot be selected
-    if (zone.disabledItems.includes(targetId)) return;
+    if (ZoneRegistry.isDisabled(activeZoneId, targetId)) return;
 
     // W3C Tree Pattern: Space toggles expansion for expandable items
     // Only applies for keyboard-triggered SELECT (no explicit targetId)

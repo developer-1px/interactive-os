@@ -26,7 +26,7 @@ import {
   isCheckedRole,
   isExpandableRole,
 } from "../../registries/roleRegistry.ts";
-import { SYNC_DISABLED } from "../../3-commands/focus/syncDisabled.ts";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
 import { useFocusGroupContext } from "./FocusGroup.tsx";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -164,13 +164,12 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       }
     }, [visualFocused, isVirtualFocus]);
 
-    // --- Sync disabled prop → kernel state ---
-    // Only dispatch when actually disabled (most items aren't).
+    // --- Sync disabled prop → registry (declaration, not action) ---
     useLayoutEffect(() => {
       if (!disabled) return;
-      kernel.dispatch(SYNC_DISABLED({ zoneId, itemId: id, disabled: true }));
+      ZoneRegistry.setDisabled(zoneId, id, true);
       return () => {
-        kernel.dispatch(SYNC_DISABLED({ zoneId, itemId: id, disabled: false }));
+        ZoneRegistry.setDisabled(zoneId, id, false);
       };
     }, [zoneId, id, disabled]);
 

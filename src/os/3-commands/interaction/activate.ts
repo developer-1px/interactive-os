@@ -24,7 +24,7 @@ export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
   if (!zone?.focusedItemId) return;
 
   // APG: disabled items cannot be activated
-  if (zone.disabledItems.includes(zone.focusedItemId)) return;
+  if (ZoneRegistry.isDisabled(activeZoneId, zone.focusedItemId)) return;
 
   // W3C Tree Pattern: Enter/Space toggles expansion for expandable items
   // Expandability is determined by zone role, not DOM attribute.

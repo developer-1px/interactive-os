@@ -35,6 +35,7 @@ export interface ZoneEntry {
 }
 
 const registry = new Map<string, ZoneEntry>();
+const disabledItems = new Map<string, Set<string>>();
 
 export const ZoneRegistry = {
   register(id: string, entry: ZoneEntry): void {
@@ -43,6 +44,7 @@ export const ZoneRegistry = {
 
   unregister(id: string): void {
     registry.delete(id);
+    disabledItems.delete(id);
   },
 
   get(id: string): ZoneEntry | undefined {
@@ -57,4 +59,29 @@ export const ZoneRegistry = {
   keys(): IterableIterator<string> {
     return registry.keys();
   },
+
+  // ─── Per-item disabled state (declaration, not action) ───
+
+  setDisabled(zoneId: string, itemId: string, disabled: boolean): void {
+    if (disabled) {
+      let set = disabledItems.get(zoneId);
+      if (!set) {
+        set = new Set();
+        disabledItems.set(zoneId, set);
+      }
+      set.add(itemId);
+    } else {
+      disabledItems.get(zoneId)?.delete(itemId);
+    }
+  },
+
+  isDisabled(zoneId: string, itemId: string): boolean {
+    return disabledItems.get(zoneId)?.has(itemId) ?? false;
+  },
+
+  getDisabledItems(zoneId: string): Set<string> {
+    return disabledItems.get(zoneId) ?? EMPTY_SET;
+  },
 };
+
+const EMPTY_SET: ReadonlySet<string> = new Set();

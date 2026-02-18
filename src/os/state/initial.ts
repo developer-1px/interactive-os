@@ -19,9 +19,6 @@ export const initialZoneState: ZoneState = {
 
   // Expansion
   expandedItems: [],
-
-  // Disabled
-  disabledItems: [],
 };
 
 export const initialOSState: OSState = {

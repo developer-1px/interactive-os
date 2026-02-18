@@ -80,7 +80,7 @@ export const NAVIGATE = kernel.defineCommand(
     }
 
     // APG: Arrow navigation skips disabled items
-    const disabledSet = new Set(zone.disabledItems);
+    const disabledSet = ZoneRegistry.getDisabledItems(activeZoneId);
     const navigableItems = items.filter((id) => !disabledSet.has(id));
     if (navigableItems.length === 0) return;
 
