@@ -8,7 +8,6 @@
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import { OS_CHECK } from "@os/3-commands/interaction";
 import { Keybindings } from "@os/keymaps/keybindings";
 
 // ═══════════════════════════════════════════════════════════════════

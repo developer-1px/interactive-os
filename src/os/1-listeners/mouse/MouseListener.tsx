@@ -12,31 +12,12 @@ import { ACTIVATE, FOCUS, SELECT } from "@os/3-commands";
 import { kernel } from "../../kernel";
 import { useEffect } from "react";
 import { sensorGuard } from "../../lib/loopGuard";
+import {
+    findFocusableItem,
+    resolveFocusTarget,
+    setDispatching,
+} from "../shared";
 import { resolveMouse, type MouseInput } from "./resolveMouse";
-
-// ═══════════════════════════════════════════════════════════════════
-// DOM Query Utilities (Sense)
-// ═══════════════════════════════════════════════════════════════════
-
-const findFocusableItem = (el: HTMLElement) =>
-    el.closest("[data-item-id]") as HTMLElement | null;
-
-interface FocusTargetInfo {
-    itemId: string;
-    itemEl: HTMLElement;
-    groupId: string;
-}
-
-function resolveFocusTarget(target: HTMLElement): FocusTargetInfo | null {
-    const itemEl = findFocusableItem(target);
-    if (!itemEl?.id) return null;
-
-    const zoneEl = itemEl.closest("[data-focus-group]") as HTMLElement | null;
-    const groupId = zoneEl?.getAttribute("data-focus-group") ?? null;
-    if (!groupId) return null;
-
-    return { itemId: itemEl.id, itemEl, groupId };
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // Sense: DOM → MouseInput
@@ -98,20 +79,6 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Re-entrance Guard (shared with FocusListener)
-// ═══════════════════════════════════════════════════════════════════
-
-let isDispatching = false;
-
-export function setMouseDispatching(value: boolean) {
-    isDispatching = value;
-}
-
-export function getMouseDispatching(): boolean {
-    return isDispatching;
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
@@ -130,7 +97,7 @@ export function MouseListener() {
 
                 case "label-redirect": {
                     me.preventDefault();
-                    isDispatching = true;
+                    setDispatching(true);
                     kernel.dispatch(
                         FOCUS({ zoneId: result.groupId, itemId: result.itemId }),
                         {
@@ -143,7 +110,7 @@ export function MouseListener() {
                             },
                         },
                     );
-                    isDispatching = false;
+                    setDispatching(false);
                     return;
                 }
 
@@ -159,15 +126,18 @@ export function MouseListener() {
                     };
 
                     // FOCUS first
-                    isDispatching = true;
+                    setDispatching(true);
                     kernel.dispatch(
                         FOCUS({ zoneId: result.groupId, itemId: result.itemId }),
                         mouseMeta,
                     );
-                    isDispatching = false;
+                    setDispatching(false);
 
                     // SELECT
-                    if (result.selectMode === "range" || result.selectMode === "toggle") {
+                    if (
+                        result.selectMode === "range" ||
+                        result.selectMode === "toggle"
+                    ) {
                         me.preventDefault();
                     }
                     kernel.dispatch(
@@ -186,7 +156,9 @@ export function MouseListener() {
 
         document.addEventListener("mousedown", onMouseDown, { capture: true });
         return () =>
-            document.removeEventListener("mousedown", onMouseDown, { capture: true });
+            document.removeEventListener("mousedown", onMouseDown, {
+                capture: true,
+            });
     }, []);
 
     return null;

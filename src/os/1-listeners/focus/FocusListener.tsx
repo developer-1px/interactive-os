@@ -14,27 +14,11 @@ import { RECOVER, SYNC_FOCUS } from "@os/3-commands";
 import { kernel } from "../../kernel";
 import { useEffect } from "react";
 import { sensorGuard } from "../../lib/loopGuard";
-import { getMouseDispatching } from "../mouse/MouseListener";
-
-// ═══════════════════════════════════════════════════════════════════
-// DOM Query Utilities (Sense)
-// ═══════════════════════════════════════════════════════════════════
-
-const findFocusableItem = (el: HTMLElement) =>
-    el.closest("[data-item-id]") as HTMLElement | null;
-
-function resolveFocusTarget(
-    target: HTMLElement,
-): { itemId: string; groupId: string } | null {
-    const itemEl = findFocusableItem(target);
-    if (!itemEl?.id) return null;
-
-    const zoneEl = itemEl.closest("[data-focus-group]") as HTMLElement | null;
-    const groupId = zoneEl?.getAttribute("data-focus-group") ?? null;
-    if (!groupId) return null;
-
-    return { itemId: itemEl.id, groupId };
-}
+import {
+    findFocusableItem,
+    resolveFocusTarget,
+    isDispatching,
+} from "../shared";
 
 // ═══════════════════════════════════════════════════════════════════
 // Component
@@ -53,7 +37,7 @@ export function FocusListener() {
             if (target.closest("[data-inspector]") || !sensorGuard.check()) return;
 
             // Re-entrance guard: prevents focusin from kernel's el.focus() effect
-            if (getMouseDispatching()) return;
+            if (isDispatching()) return;
 
             const item = findFocusableItem(target);
             if (!item) return;
