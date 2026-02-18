@@ -88,12 +88,26 @@ describe("resolveTabEscapeZone (SPEC §3.3)", () => {
     });
   });
 
-  it("forward from last zone: returns null", () => {
-    expect(resolveTabEscapeZone("z3", zones, "forward")).toBeNull();
+  it("forward from last zone: wraps to first zone", () => {
+    expect(resolveTabEscapeZone("z3", zones, "forward")).toEqual({
+      zoneId: "z1",
+      itemId: "z1_a",
+    });
   });
 
-  it("backward from first zone: returns null", () => {
-    expect(resolveTabEscapeZone("z1", zones, "backward")).toBeNull();
+  it("backward from first zone: wraps to last zone", () => {
+    expect(resolveTabEscapeZone("z1", zones, "backward")).toEqual({
+      zoneId: "z3",
+      itemId: "z3_b",
+    });
+  });
+
+  it("single zone: returns null (nowhere to go)", () => {
+    const singleZone: ZoneOrderEntry[] = [
+      { zoneId: "only", firstItemId: "o_a", lastItemId: "o_b" },
+    ];
+    expect(resolveTabEscapeZone("only", singleZone, "forward")).toBeNull();
+    expect(resolveTabEscapeZone("only", singleZone, "backward")).toBeNull();
   });
 
   it("unknown zone: returns null", () => {
@@ -162,7 +176,7 @@ describe("resolveTab — top-level orchestrator (SPEC §3.3)", () => {
       );
     });
 
-    it("returns null at boundary with no next zone", () => {
+    it("single zone at boundary: returns null", () => {
       expect(
         resolveTab("c", items, "flow", "forward", "z1", [zones[0]!]),
       ).toBeNull();
@@ -189,10 +203,21 @@ describe("resolveTab — top-level orchestrator (SPEC §3.3)", () => {
       });
     });
 
-    it("returns null when no zone to escape to", () => {
+    it("single zone: returns null (no wrap to self)", () => {
       expect(
         resolveTab("c", items, "escape", "forward", "z1", [zones[0]!]),
       ).toBeNull();
+    });
+
+    it("wraps from last zone to first zone (forward)", () => {
+      const z2Items = ["d", "e", "f"];
+      expect(
+        resolveTab("d", z2Items, "escape", "forward", "z2", zones),
+      ).toEqual({
+        type: "escape",
+        zoneId: "z1",
+        itemId: "a",
+      });
     });
   });
 

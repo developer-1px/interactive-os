@@ -53,9 +53,15 @@ export function resolveTabEscapeZone(
   if (currentIdx === -1) return null;
 
   const nextIdx = direction === "forward" ? currentIdx + 1 : currentIdx - 1;
-  if (nextIdx < 0 || nextIdx >= zoneOrder.length) return null;
 
-  const nextZone = zoneOrder[nextIdx]!;
+  // Wrap around like native browser Tab (loop across zones)
+  const wrappedIdx =
+    ((nextIdx % zoneOrder.length) + zoneOrder.length) % zoneOrder.length;
+
+  // Single zone — nowhere to go
+  if (wrappedIdx === currentIdx) return null;
+
+  const nextZone = zoneOrder[wrappedIdx]!;
   const targetId =
     direction === "forward" ? nextZone.firstItemId : nextZone.lastItemId;
   if (!targetId) return null;

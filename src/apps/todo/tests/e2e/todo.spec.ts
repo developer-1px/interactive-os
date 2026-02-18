@@ -465,17 +465,16 @@ test.describe("Todo App", () => {
     await expect(sidebarFocused).toContainText("Work");
   });
 
-  test("Tab forward from list item stays (list is last zone in DOM)", async ({ page }) => {
+  test("Tab forward from list item wraps to sidebar", async ({ page }) => {
     // Click a list item (not draft)
     await page.getByText("Complete Interaction OS docs").click();
     const todoFocused = page.locator(focusedTodoItem(LISTVIEW));
     await expect(todoFocused).toHaveCount(1);
 
-    // Tab forward → list is last zone in DOM order, no next zone
+    // Tab forward → list is last zone in DOM, wraps to first zone (sidebar)
     await page.keyboard.press("Tab");
-
-    // Focus should stay on the list item (no zone to escape to)
-    await expect(todoFocused).toHaveCount(1);
+    const sidebarFocused = page.locator(`${SIDEBAR} [data-focused="true"]`);
+    await expect(sidebarFocused).toHaveCount(1);
   });
 
   test("Tab forward from sidebar escapes to list", async ({ page }) => {

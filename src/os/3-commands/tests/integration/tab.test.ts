@@ -263,7 +263,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
     // ─── edge cases ───
 
-    it("no next zone: Tab does nothing", () => {
+    it("single zone: Tab does nothing", () => {
         const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
             createTestKernel();
 
@@ -280,7 +280,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
         kernel.dispatch(TAB({ direction: "forward" }));
 
-        // Should stay — no next zone
+        // Should stay — single zone, nowhere to wrap to
         expect(kernel.getState().os.focus.activeZoneId).toBe("only");
         expect(
             kernel.getState().os.focus.zones["only"].focusedItemId,
@@ -314,9 +314,9 @@ describe("TAB Command — Headless Kernel Integration", () => {
         kernel.dispatch(TAB({ direction: "forward" }));
         expect(kernel.getState().os.focus.activeZoneId).toBe("toolbar");
 
-        // At toolbar — no next zone
+        // At toolbar — wraps back to list
         mockItems.current = ["t-0", "t-1", "t-2"];
         kernel.dispatch(TAB({ direction: "forward" }));
-        expect(kernel.getState().os.focus.activeZoneId).toBe("toolbar"); // stays
+        expect(kernel.getState().os.focus.activeZoneId).toBe("list"); // wrap!
     });
 });
