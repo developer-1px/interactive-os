@@ -23,6 +23,9 @@ export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
   const zone = ctx.state.os.focus.zones[activeZoneId];
   if (!zone?.focusedItemId) return;
 
+  // APG: disabled items cannot be activated
+  if (zone.disabledItems.includes(zone.focusedItemId)) return;
+
   // W3C Tree Pattern: Enter/Space toggles expansion for expandable items
   // Expandability is determined by zone role, not DOM attribute.
   const entry = ZoneRegistry.get(activeZoneId);

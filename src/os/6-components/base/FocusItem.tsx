@@ -26,6 +26,7 @@ import {
   isCheckedRole,
   isExpandableRole,
 } from "../../registries/roleRegistry.ts";
+import { SYNC_DISABLED } from "../../3-commands/focus/syncDisabled.ts";
 import { useFocusGroupContext } from "./FocusGroup.tsx";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -162,6 +163,18 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
         }
       }
     }, [visualFocused, isVirtualFocus]);
+
+    // --- Sync disabled prop → kernel state ---
+    useLayoutEffect(() => {
+      kernel.dispatch(SYNC_DISABLED({ zoneId, itemId: id, disabled }));
+      return () => {
+        // Clean up on unmount: ensure item is removed from disabledItems
+        if (disabled) {
+          kernel.dispatch(SYNC_DISABLED({ zoneId, itemId: id, disabled: false }));
+        }
+      };
+    }, [zoneId, id, disabled]);
+
     const isAnchor = isFocused && !isGroupActive;
 
     // Auto-resolve child role from parent Zone role (e.g., listbox → option)

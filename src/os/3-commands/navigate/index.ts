@@ -79,11 +79,16 @@ export const NAVIGATE = kernel.defineCommand(
       }
     }
 
+    // APG: Arrow navigation skips disabled items
+    const disabledSet = new Set(zone.disabledItems);
+    const navigableItems = items.filter((id) => !disabledSet.has(id));
+    if (navigableItems.length === 0) return;
+
     // Delegate to existing pure resolver
     const navResult = resolveNavigate(
       zone.focusedItemId,
       payload.direction,
-      items,
+      navigableItems,
       config.navigate,
       {
         stickyX: zone.stickyX,

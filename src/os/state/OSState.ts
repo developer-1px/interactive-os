@@ -41,4 +41,7 @@ export interface ZoneState {
 
   // Expansion Slice
   expandedItems: string[];
+
+  // Disabled Slice
+  disabledItems: string[];
 }
