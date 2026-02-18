@@ -50,6 +50,7 @@
 5. **빌드 통과 ≠ 런타임 정상.** `vite build`(Rollup)와 dev 서버(esbuild)는 모듈 해석이 다르다. type erasure, export 처리 차이로 빌드는 통과해도 브라우저에서 깨질 수 있다. E2E Smoke가 진짜 검증이다. → `/verify`
 6. **안 쓰는 테스트는 정리한다.** 죽은 테스트는 거짓 안전감을 준다. 동작하지 않는 증명은 증명이 아니다. → `/cleanup`, `/review`
 7. **리팩토링은 측정 가능한 지표가 단조 개선될 때만 한다.** cast 수, import 수, 의존 방향 수, 코드 줄 수 — 하나 이상이 strictly 개선되고, 나머지가 악화되지 않아야 한다. 등가 교환이면 하지 않는다. → `/doubt`
+8. **3-commands는 DOM을 모른다.** Command 레이어에서 `document.getElementById`, `document.querySelector`, `document.activeElement` 등 동기 DOM 접근은 금지. DOM 데이터가 필요하면 `ctx.inject()`로 context에서 받거나, kernel state에서 읽는다. ESLint `pipeline/no-dom-in-commands`가 자동 차단한다.
 
 ## 성능 — 우리가 지키는 규칙
 

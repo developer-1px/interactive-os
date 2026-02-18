@@ -283,11 +283,97 @@ const noImperativeHandler = {
   },
 };
 
+// ─── No DOM in Commands ─────────────────────────────────────────────
+// 3-commands 레이어에서 DOM 직접 접근을 금지.
+// Commands는 순수 state 연산이어야 하며, DOM 데이터는 context(inject)로 받아야 한다.
+// 이 규칙이 없으면 document.getElementById 같은 접근이 조용히 침투한다.
+
+/** @type {import('eslint').Rule.RuleModule} */
+const noDomInCommands = {
+  meta: {
+    type: "problem",
+    docs: {
+      description:
+        "Disallow direct DOM access in command handlers (3-commands layer)",
+      recommended: true,
+    },
+    messages: {
+      noDomAccess:
+        "Direct DOM access '{{expr}}' in command layer violates headless architecture. " +
+        "Use kernel state or context (ctx.inject) instead.",
+    },
+    schema: [],
+  },
+  create(context) {
+    const filename = context.filename || context.getFilename();
+
+    // Only applies to 3-commands/ (excluding tests)
+    if (!filename.includes("3-commands/") || filename.includes("/tests/")) {
+      return {};
+    }
+
+    // Forbidden: document.getElementById, document.querySelector*,
+    // document.activeElement, el.hasAttribute, el.getAttribute,
+    // el.innerText, el.textContent
+    const FORBIDDEN_DOCUMENT_PROPS = new Set([
+      "getElementById",
+      "querySelector",
+      "querySelectorAll",
+      "activeElement",
+      "createElement",
+    ]);
+
+    return {
+      MemberExpression(node) {
+        const object = node.object;
+        const property = node.property;
+
+        // document.xxx
+        if (
+          object.type === "Identifier" &&
+          object.name === "document" &&
+          property.type === "Identifier" &&
+          FORBIDDEN_DOCUMENT_PROPS.has(property.name)
+        ) {
+          // Allow inside queueMicrotask (effect-like async boundary)
+          if (isInsideQueueMicrotask(node)) return;
+
+          context.report({
+            node,
+            messageId: "noDomAccess",
+            data: { expr: `document.${property.name}` },
+          });
+        }
+      },
+    };
+
+    /**
+     * Check if a node is inside a queueMicrotask callback
+     * (async boundary = acceptable for effect-like DOM mutation)
+     */
+    function isInsideQueueMicrotask(node) {
+      let current = node.parent;
+      while (current) {
+        if (
+          current.type === "CallExpression" &&
+          current.callee?.type === "Identifier" &&
+          current.callee.name === "queueMicrotask"
+        ) {
+          return true;
+        }
+        current = current.parent;
+      }
+      return false;
+    }
+  },
+};
+
 export default {
   rules: {
     "no-pipeline-bypass": noPipelineBypass,
     "no-direct-commit": noDirectCommit,
     "no-handler-in-app": noHandlerInApp,
     "no-imperative-handler": noImperativeHandler,
+    "no-dom-in-commands": noDomInCommands,
   },
 };
