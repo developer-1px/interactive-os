@@ -11,75 +11,64 @@ UI 호출부에서 `OS.FOCUS`라는 명시적인 상수를 페이로드로 전�
 - `DeleteTodo({})` 호출 시, 이것이 "전체 삭제"를 의도한 것인지, "포커스 삭제"를 의도한 것인지, 아니면 "실수"인지 구분하기 어려움.
 - 코드를 읽는 사람 입장에서 `id`가 어디서 오는지 추적하기 힘듦.
 
-### ✅ 제안: OS.FOCUS 센티넬 패턴
-UI 컴포넌트나 키바인딩 정의에서 페이로드에 **`OS.FOCUS`**라는 예약어를 명시적으로 주입합니다.
-미들웨어는 이 예약어를 감지했을 때만 OS 상태(Store)를 조회하여 실제 값으로 치환(Resolve)합니다.
+### ✅ 채택: OS.FOCUS 센티넬 패턴
+Zone 콜백(`onAction`, `onDelete`, `onCheck` 등)에 `"OS.FOCUS"` placeholder를 포함한 커맨드를 미리 등록한다.
+OS가 커맨드를 dispatch하기 직전에 `resolveFocusId()`가 placeholder를 실제 `focusedItemId`로 치환한다.
 
 #### 흐름
-1. **Definition**: `export const OS = { FOCUS: "__OS_FOCUS_SENTINEL__" } as const;`
-2. **Trigger**: `dispatch(DeleteTodo({ id: OS.FOCUS }))`
-   - "이 커맨드는 현재 OS가 포커스하고 있는 ID를 타겟으로 한다"는 의도가 코드에 명시됨.
-3. **Middleware (Smart Dispatcher)**:
-   - 페이로드를 순회하며 값이 `OS.FOCUS`인 필드를 찾음.
-   - 해당 필드를 `useFocusStore.getState().focusedItemId`로 교체.
-   - 교체된 후 로그: `Dispatching [DELETE_TODO] payload: { id: 123 } (resolved from OS.FOCUS)`
-4. **Command Reducer (Pure)**:
-   - 입력: `(state, { id: 123 })`
-   - 리듀서는 여전히 순수하며, `OS.FOCUS` 예약어의 존재를 모름.
+1. **Zone 등록**: `<Zone onAction={ToggleTodo({ id: "OS.FOCUS" })}>`
+2. **Activate 시**: OS가 `resolveFocusId(command, focusedItemId)` 호출
+3. **결과**: `ToggleTodo({ id: "42" })` — 실제 ID로 치환된 커맨드가 dispatch
 
-## 3. 구현 예시
+## 3. 현재 구현
 
-> **현재 구현 위치**: `src/os/entities/FocusTarget.ts` 및 `src/os/features/command/middleware/`
+> **구현 위치**: `src/os/3-commands/utils/resolveFocusId.ts`
 
-### 센티넬 컨텍스트
 ```typescript
-// src/os/entities/FocusTarget.ts
-export const OS = {
-  FOCUS: Symbol.for("OS.FOCUS"), // 또는 unique string
-  SELECTION: Symbol.for("OS.SELECTION")
-} as const;
-```
+const FOCUS_PLACEHOLDER = "OS.FOCUS";
 
-### 타입 정의
-```typescript
-// Command Payload Type
-type TodoPayload = {
-  id: number | typeof OS.FOCUS; // Union Type으로 명시
-};
-
-export const DeleteTodo = defineCommand<TodoPayload>({
-  id: "DELETE_TODO",
-  run: (state, payload) => {
-     // Runtime에는 이미 number만 넘어옴 (Middleware가 보장)
-     const targetId = payload.id as number;
-     delete state.data.todos[targetId];
-  }
-});
-```
-
-### 해결 미들웨어
-```typescript
-const payloadResolver = (action: AnyAction) => {
-  const nextPayload = { ...action.payload };
-  
-  if (nextPayload.id === OS.FOCUS) {
-    const focusId = useFocusStore.getState().focusedItemId;
-    if (!focusId) {
-       console.warn("Operation aborted: No focus found.");
-       return null; // 중단
+export function resolveFocusId<T extends Command<string, any>>(
+  command: T,
+  focusedItemId: string,
+): T {
+  if (!command.payload) return command;
+  const resolved = { ...command };
+  const payload = { ...command.payload };
+  for (const key of Object.keys(payload)) {
+    if (payload[key] === FOCUS_PLACEHOLDER) {
+      payload[key] = focusedItemId;
     }
-    nextPayload.id = Number(focusId);
   }
-  
-  return { ...action, payload: nextPayload };
+  resolved.payload = payload;
+  return resolved;
 }
 ```
 
+### 사용처 (현재 소스코드에서 활발히 사용)
+
+| OS 커맨드 | 호출 위치 | 해결 방식 |
+|-----------|----------|----------|
+| `ACTIVATE` | `activate.ts` | `resolveFocusId(entry.onAction, zone.focusedItemId)` |
+| `OS_DELETE` | `delete.ts` | selection 각 ID 또는 focusedItemId |
+| `OS_CHECK` | `check.ts` | `resolveFocusId(entry.onCheck, targetId)` |
+| `OS_MOVE_UP/DOWN` | `move.ts` | `resolveFocusId(entry.onMoveUp/Down, focusedItemId)` |
+| `OS_COPY/CUT/PASTE` | `clipboard.ts` | `resolveFocusId(entry.onCopy/Cut/Paste, id)` |
+
 ## 4. 결론
 이 방식은 **"명시성(Explicitness)"**과 **"순수성(Purity)"**을 모두 만족합니다.
-- **Developer**: `OS.FOCUS`를 씀으로써 의도를 명확히 표현.
-- **Debugger**: `OS.FOCUS`가 언제 `123`으로 변했는지 추적 가능.
-- **Reducer**: 여전히 순수 데이터만 처리.
+- **Developer**: `"OS.FOCUS"`를 씀으로써 의도를 명확히 표현.
+- **Debugger**: placeholder → 실제 ID 치환 시점이 `resolveFocusId` 한 곳.
+- **Command Handler**: 여전히 순수 데이터만 처리.
+
+### ADR 결정 (vs 초기 제안)
+
+| 항목 | 초기 제안 (2026-02-03) | 현재 구현 |
+|------|----------------------|----------|
+| Sentinel 값 | `Symbol.for("OS.FOCUS")` | `"OS.FOCUS"` (문자열) |
+| 해결 위치 | 범용 미들웨어 (`payloadResolver`) | 각 커맨드 핸들러에서 호출 (`resolveFocusId`) |
+| 해결 방식 | dispatch 파이프라인에 자동 삽입 | 핸들러가 명시적으로 호출 |
+
+문자열이 선택된 이유: JSON 직렬화 가능, Symbol은 디버거에서 불투명.
 
 ---
-*Antigravity 아키텍처 보고서 (2026-02-03)*
+*ADR (2026-02-03) / 소스코드 현행화: 2026-02-18*

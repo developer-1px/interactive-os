@@ -55,9 +55,9 @@ _(없음 — 다음 Focus 프로젝트 선택 대기)_
 
 ## 📥 Inbox
 
-| Item | Related Project | Suggested Action | Cynefin |
-|------|----------------|-----------------|---------|
-| [area-stale-docs-audit](0-inbox/2026-0218-1046-[analysis]-area-stale-docs-audit.md) | — (cross-cutting) | 🟡 7건 문서 처리 전략 결정 (A경로수정/B통합/C원칙보존) | Complicated |
+**✨ Inbox is empty!**
+
+> ✅ [area-stale-docs-audit](0-inbox/2026-0218-1046-[analysis]-area-stale-docs-audit.md) — /solve로 해결 (3건 삭제 + 4건 축소/교정). 참고용으로 보존.
 
 ---
 
@@ -68,7 +68,7 @@ _(없음 — 다음 Focus 프로젝트 선택 대기)_
 | Active Focus | 0 |
 | Active Projects (total) | 2 |
 | Completed (archived) | 24 |
-| Inbox items | 1 |
+| Inbox items | 0 |
 | Backlog items | 4 |
 | Open issues | 0 |
 
