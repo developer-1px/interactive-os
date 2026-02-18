@@ -41,10 +41,12 @@ export type Selector<S, T> = {
 // ═══════════════════════════════════════════════════════════════════
 
 export type CommandContext<S> = { readonly state: S };
-export type HandlerResult<S> = {
-  state: S;
-  dispatch?: BaseCommand | BaseCommand[];
-} | void;
+export type HandlerResult<S> =
+  | {
+      state: S;
+      dispatch?: BaseCommand | BaseCommand[];
+    }
+  | undefined;
 
 /** Flat handler: (ctx, payload) => result */
 export type FlatHandler<S, P> = (

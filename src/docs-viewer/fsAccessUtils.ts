@@ -63,7 +63,7 @@ export async function openExternalFolder(): Promise<ExternalFolderSource | null>
   }
 
   try {
-    const dirHandle = await window.showDirectoryPicker!({
+    const dirHandle = await window.showDirectoryPicker?.({
       mode: "read",
     });
 

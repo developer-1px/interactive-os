@@ -72,7 +72,7 @@ function findSuiteIndex(name: string): number {
     }
 
     console.log(
-      `🔄 Re-running ${failedIndices.length} failed suite(s): ${failedIndices.map((i) => suites[i]!.name).join(", ")}`,
+      `🔄 Re-running ${failedIndices.length} failed suite(s): ${failedIndices.map((i) => suites[i]?.name).join(", ")}`,
     );
 
     for (const idx of failedIndices) {

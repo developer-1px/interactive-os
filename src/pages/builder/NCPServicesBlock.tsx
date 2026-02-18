@@ -1,4 +1,4 @@
-import { OS } from "@os/AntigravityOS";
+import { Field } from "@os/6-components/primitives/Field";
 import {
   ArrowRight,
   Box,
@@ -76,7 +76,7 @@ export function NCPServicesBlock() {
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                 <Builder.Item asChild id="ncp-service-category">
-                  <OS.Field
+                  <Field
                     name="ncp-service-category"
                     mode="deferred"
                     value={fields["ncp-service-category"] ?? ""}
@@ -88,7 +88,7 @@ export function NCPServicesBlock() {
                 </Builder.Item>
               </div>
               <Builder.Item asChild id="ncp-service-title">
-                <OS.Field
+                <Field
                   name="ncp-service-title"
                   mode="deferred"
                   multiline
@@ -165,7 +165,7 @@ export function NCPServicesBlock() {
                   </div>
 
                   <Builder.Item asChild id={`service-title-${index}`}>
-                    <OS.Field
+                    <Field
                       name={`service-title-${index}`}
                       mode="deferred"
                       value={fields[`service-title-${index}`] ?? ""}
@@ -177,7 +177,7 @@ export function NCPServicesBlock() {
                   </Builder.Item>
 
                   <Builder.Item asChild id={`service-desc-${index}`}>
-                    <OS.Field
+                    <Field
                       name={`service-desc-${index}`}
                       mode="deferred"
                       multiline

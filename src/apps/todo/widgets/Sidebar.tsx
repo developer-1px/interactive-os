@@ -6,7 +6,7 @@
 
 import { TodoApp, TodoSidebar } from "@apps/todo/app";
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { OS } from "@os/AntigravityOS";
+import { Trigger } from "@os/6-components/primitives/Trigger";
 import {
   ArrowRight,
   Briefcase,
@@ -66,7 +66,7 @@ function SidebarContent() {
 
           return (
             <TodoSidebar.Item key={category.id} id={category.id} asChild>
-              <OS.Trigger
+              <Trigger
                 onPress={TodoSidebar.commands.selectCategory({
                   id: category.id,
                 })}
@@ -94,7 +94,7 @@ function SidebarContent() {
                     <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
                   )}
                 </div>
-              </OS.Trigger>
+              </Trigger>
             </TodoSidebar.Item>
           );
         })}

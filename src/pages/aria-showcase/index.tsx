@@ -879,11 +879,7 @@ function DisclosureContent() {
 
   return (
     <div className="w-full">
-      <FocusGroup
-        id="demo-disclosure"
-        role="disclosure"
-        aria-label="Disclosure"
-      >
+      <FocusGroup id="demo-disclosure" aria-label="Disclosure">
         <FocusItem
           id="disclosure-trigger"
           as="button"

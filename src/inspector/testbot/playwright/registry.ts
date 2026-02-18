@@ -85,7 +85,7 @@ export function getEntriesByFile(filePath: string): TestEntry[] {
  */
 export function clearEntriesForFile(filePath: string) {
   for (let i = registry.length - 1; i >= 0; i--) {
-    if (registry[i]!.sourceFile === filePath) {
+    if (registry[i]?.sourceFile === filePath) {
       registry.splice(i, 1);
     }
   }

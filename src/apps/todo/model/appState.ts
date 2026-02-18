@@ -12,12 +12,10 @@ export interface Todo {
 }
 
 export interface HistoryEntry {
-  command: { type: string; payload?: any };
+  command: { type: string; payload?: unknown };
   timestamp: number;
   // Snapshot state for undo/redo (optional if just logging)
-  snapshot?: any;
-  // Legacy support
-  resultingState?: any;
+  snapshot?: Record<string, unknown>;
   groupId?: string; // For transaction support
   focusedItemId?: string | number; // For restoring focus on undo/redo
 }

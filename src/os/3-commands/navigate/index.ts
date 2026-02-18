@@ -87,7 +87,7 @@ export const NAVIGATE = kernel.defineCommand(
     );
 
     return {
-      state: produce(ctx.state, (draft: any) => {
+      state: produce(ctx.state, (draft) => {
         const z = ensureZone(draft.os, activeZoneId);
         z.focusedItemId = navResult.targetId;
         z.stickyX = navResult.stickyX;

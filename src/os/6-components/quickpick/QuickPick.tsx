@@ -33,11 +33,14 @@
  *   />
  */
 
+import { Item } from "@os/6-components/primitives/Item";
+import { Zone } from "@os/6-components/primitives/Zone";
+import { Dialog } from "@os/6-components/radox/Dialog";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FOCUS, OVERLAY_CLOSE, OVERLAY_OPEN } from "@/os/3-commands";
 import { NAVIGATE } from "@/os/3-commands/navigate";
-import { OS } from "@/os/AntigravityOS";
+import { Kbd } from "@/os/6-components/Kbd";
 import { kernel } from "@/os/kernel";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -316,8 +319,8 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
   if (!isOpen) return null;
 
   return (
-    <OS.Dialog id={id}>
-      <OS.Dialog.Content
+    <Dialog id={id}>
+      <Dialog.Content
         title=""
         className={
           className ??
@@ -371,14 +374,14 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
                 </div>
               )}
             </div>
-            <OS.Kbd
+            <Kbd
               shortcut="Esc"
               className="shrink-0 text-[10px] font-medium text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 font-mono shadow-sm"
             />
           </div>
 
           {/* Item List */}
-          <OS.Zone
+          <Zone
             id={zoneId}
             role="listbox"
             options={QUICKPICK_ZONE_OPTIONS}
@@ -391,7 +394,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
                   </div>
                 ))
               : filteredItems.map((item) => (
-                  <OS.Item key={item.id} id={item.id}>
+                  <Item key={item.id} id={item.id}>
                     {({ isFocused, isSelected }) =>
                       renderItem ? (
                         renderItem(item, { isFocused, isSelected, query })
@@ -406,9 +409,9 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
                         />
                       )
                     }
-                  </OS.Item>
+                  </Item>
                 ))}
-          </OS.Zone>
+          </Zone>
 
           {/* Footer */}
           {renderFooter ? (
@@ -416,11 +419,11 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
           ) : (
             <div className="flex items-center gap-4 px-4 py-2 bg-zinc-50 border-t border-zinc-100 text-[11px] text-zinc-500 select-none">
               <span className="flex items-center gap-1.5">
-                <OS.Kbd
+                <Kbd
                   shortcut="Up"
                   className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
                 />
-                <OS.Kbd
+                <Kbd
                   shortcut="Down"
                   className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
                 />
@@ -428,7 +431,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
               </span>
               {typeahead && (
                 <span className="flex items-center gap-1.5">
-                  <OS.Kbd
+                  <Kbd
                     shortcut="Tab"
                     className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
                   />
@@ -436,14 +439,14 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
                 </span>
               )}
               <span className="flex items-center gap-1.5">
-                <OS.Kbd
+                <Kbd
                   shortcut="Enter"
                   className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
                 />
                 select
               </span>
               <span className="flex items-center gap-1.5">
-                <OS.Kbd
+                <Kbd
                   shortcut="Esc"
                   className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
                 />
@@ -452,8 +455,8 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
             </div>
           )}
         </div>
-      </OS.Dialog.Content>
-    </OS.Dialog>
+      </Dialog.Content>
+    </Dialog>
   );
 }
 

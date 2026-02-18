@@ -7,7 +7,7 @@
 
 import { TodoEdit, TodoList } from "@apps/todo/app";
 import type { Todo } from "@apps/todo/model/types";
-import { OS } from "@os/AntigravityOS";
+import { Trigger } from "@os/6-components/primitives/Trigger";
 import {
   ArrowDown,
   ArrowUp,
@@ -50,7 +50,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
         </div>
 
         {/* Checkbox Trigger */}
-        <OS.Trigger onPress={TodoList.commands.toggleTodo({ id: todo.id })}>
+        <Trigger onPress={TodoList.commands.toggleTodo({ id: todo.id })}>
           <div
             className={`
                             w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
@@ -67,7 +67,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
               strokeWidth={3}
             />
           </div>
-        </OS.Trigger>
+        </Trigger>
 
         {/* Content Area */}
         <div className="flex-1 min-w-0 pt-0.5">
@@ -108,9 +108,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
             </div>
           ) : (
             <>
-              <OS.Trigger
-                onPress={TodoList.commands.startEdit({ id: todo.id })}
-              >
+              <Trigger onPress={TodoList.commands.startEdit({ id: todo.id })}>
                 <button
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
@@ -118,11 +116,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                 >
                   <CornerDownLeft size={14} />
                 </button>
-              </OS.Trigger>
+              </Trigger>
 
               <div className="w-px h-3 bg-slate-200 mx-1" />
 
-              <OS.Trigger
+              <Trigger
                 onPress={TodoList.commands.moveItemUp({ focusId: todo.id })}
               >
                 <button
@@ -132,8 +130,8 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                 >
                   <ArrowUp size={14} />
                 </button>
-              </OS.Trigger>
-              <OS.Trigger
+              </Trigger>
+              <Trigger
                 onPress={TodoList.commands.moveItemDown({ focusId: todo.id })}
               >
                 <button
@@ -143,13 +141,11 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                 >
                   <ArrowDown size={14} />
                 </button>
-              </OS.Trigger>
+              </Trigger>
 
               <div className="w-px h-3 bg-slate-200 mx-1" />
 
-              <OS.Trigger
-                onPress={TodoList.commands.deleteTodo({ id: todo.id })}
-              >
+              <Trigger onPress={TodoList.commands.deleteTodo({ id: todo.id })}>
                 <button
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -157,7 +153,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                 >
                   <Trash2 size={14} />
                 </button>
-              </OS.Trigger>
+              </Trigger>
             </>
           )}
         </div>

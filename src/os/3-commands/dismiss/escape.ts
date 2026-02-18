@@ -29,7 +29,7 @@ export const ESCAPE = kernel.defineCommand(
       case "deselect": {
         if (zone.selection.length === 0) return;
         return {
-          state: produce(ctx.state, (draft: any) => {
+          state: produce(ctx.state, (draft) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.selection = [];
             z.selectionAnchor = null;
@@ -42,7 +42,7 @@ export const ESCAPE = kernel.defineCommand(
         const dismissCommand = zoneEntry?.onDismiss;
 
         return {
-          state: produce(ctx.state, (draft: any) => {
+          state: produce(ctx.state, (draft) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.focusedItemId = null;
             // Clear active zone so components can detect dismiss

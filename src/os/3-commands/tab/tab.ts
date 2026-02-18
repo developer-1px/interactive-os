@@ -48,7 +48,7 @@ export const TAB = kernel.defineCommand(
 
     if (result.type === "within") {
       return {
-        state: produce(ctx.state, (draft: any) => {
+        state: produce(ctx.state, (draft) => {
           const z = ensureZone(draft.os, activeZoneId);
           z.focusedItemId = result.itemId;
           z.lastFocusedId = result.itemId;
@@ -59,7 +59,7 @@ export const TAB = kernel.defineCommand(
 
     // escape to different zone
     return {
-      state: produce(ctx.state, (draft: any) => {
+      state: produce(ctx.state, (draft) => {
         draft.os.focus.activeZoneId = result.zoneId;
         const z = ensureZone(draft.os, result.zoneId);
         z.focusedItemId = result.itemId;

@@ -2,10 +2,13 @@
  * OS Commands — Barrel export
  *
  * All kernel-based OS commands.
+ * Folder structure mirrors official/os/why-*.md documents.
  */
 
 // Clipboard
 export { OS_COPY, OS_CUT, OS_PASTE } from "./clipboard/clipboard";
+// Dismiss
+export { ESCAPE } from "./dismiss";
 // Expansion
 export { EXPAND } from "./expand";
 // Field
@@ -16,17 +19,15 @@ export {
 } from "./field/field";
 // Focus
 export { FOCUS, RECOVER, STACK_POP, STACK_PUSH, SYNC_FOCUS } from "./focus";
-// Interaction
+// Interaction (delegates: activate, check, delete, move, undo, redo)
 export {
   ACTIVATE,
-  ESCAPE,
   OS_CHECK,
   OS_DELETE,
   OS_MOVE_DOWN,
   OS_MOVE_UP,
   OS_REDO,
   OS_UNDO,
-  TAB,
 } from "./interaction";
 // Navigation
 export { NAVIGATE } from "./navigate";
@@ -42,3 +43,5 @@ export {
   SELECTION_SET,
   SELECTION_TOGGLE,
 } from "./selection";
+// Tab
+export { TAB } from "./tab";

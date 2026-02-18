@@ -2,11 +2,12 @@
  * defineApp — Trigger & Dialog component factories
  *
  * Pure functions that create bound trigger and dialog components.
- * Only dependency: appId (for displayName) and OS namespace (for primitives).
+ * Only dependency: appId (for displayName) and OS primitives.
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import { OS } from "@os/AntigravityOS";
+import { Trigger } from "@os/6-components/primitives/Trigger";
+import { Dialog } from "@os/6-components/radox/Dialog";
 import React, { type ReactNode } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -17,14 +18,8 @@ export function createSimpleTrigger(
   appId: string,
   command: BaseCommand,
 ): React.FC<{ children: ReactNode }> {
-  const SimpleTrigger: React.FC<{ children: ReactNode }> = ({
-    children,
-  }) => {
-    return React.createElement(
-      OS.Trigger as any,
-      { onPress: command },
-      children,
-    );
+  const SimpleTrigger: React.FC<{ children: ReactNode }> = ({ children }) => {
+    return React.createElement(Trigger, { onPress: command }, children);
   };
   SimpleTrigger.displayName = `${appId}.Trigger`;
   return SimpleTrigger;
@@ -70,7 +65,7 @@ export function createCompoundTrigger(
   const dialogId = config.id ?? `${appId}-dialog-${Date.now()}`;
 
   const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) =>
-    React.createElement(OS.Dialog as any, { id: dialogId }, children);
+    React.createElement(Dialog, { id: dialogId }, children);
   RootComponent.displayName = `${appId}.Dialog`;
 
   const TriggerComponent: React.FC<{
@@ -78,11 +73,7 @@ export function createCompoundTrigger(
     className?: string;
     asChild?: boolean;
   }> = ({ children, className, asChild }) =>
-      React.createElement(
-        (OS.Dialog as any).Trigger,
-        { className, asChild },
-        children,
-      );
+    React.createElement(Dialog.Trigger, { className, asChild }, children);
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
   const ContentComponent: React.FC<{
@@ -90,7 +81,7 @@ export function createCompoundTrigger(
     title?: string;
     className?: string;
     zoneClassName?: string;
-  }> = (props) => React.createElement((OS.Dialog as any).Content, props as any);
+  }> = (props) => React.createElement(Dialog.Content, props);
   ContentComponent.displayName = `${appId}.Dialog.Content`;
 
   const PortalComponent: React.FC<{
@@ -99,14 +90,14 @@ export function createCompoundTrigger(
     description?: string;
     className?: string;
     contentClassName?: string;
-  }> = (props) => React.createElement((OS.Trigger as any).Portal, props as any);
+  }> = (props) => React.createElement(Trigger.Portal, props);
   PortalComponent.displayName = `${appId}.Dialog.Portal`;
 
   const DismissComponent: React.FC<{
     children: ReactNode;
     className?: string;
   }> = ({ children, className }) =>
-      React.createElement((OS.Dialog as any).Close, { className }, children);
+    React.createElement(Dialog.Close, { className }, children);
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{
@@ -115,7 +106,7 @@ export function createCompoundTrigger(
   }> = ({ children, className }) => {
     const confirmCmd = config.confirm ?? undefined;
     return React.createElement(
-      (OS.Dialog as any).Close,
+      Dialog.Close,
       { className, onPress: confirmCmd },
       children,
     );

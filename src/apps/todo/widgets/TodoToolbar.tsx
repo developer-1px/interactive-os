@@ -16,7 +16,9 @@ import {
 } from "lucide-react";
 
 // Simple triggers — now pass pre-built BaseCommand
-const ToggleViewButton = TodoApp.createTrigger(TodoToolbar.commands.toggleView());
+const ToggleViewButton = TodoApp.createTrigger(
+  TodoToolbar.commands.toggleView(),
+);
 const UndoButton = TodoApp.createTrigger(TodoList.commands.undoCommand());
 const RedoButton = TodoApp.createTrigger(TodoList.commands.redoCommand());
 
@@ -112,12 +114,18 @@ export function TodoToolbarView() {
 
               <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <ClearDialog.Dismiss>
-                  <button type="button" className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                  >
                     Cancel
                   </button>
                 </ClearDialog.Dismiss>
                 <ClearDialog.Confirm>
-                  <button type="button" className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium">
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium"
+                  >
                     Clear All
                   </button>
                 </ClearDialog.Confirm>

@@ -23,43 +23,43 @@ describe("Keybinding Resolution", () => {
     it("Space → SELECT", () => {
       const result = Keybindings.resolve("Space", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("OS_SELECT");
+      expect(result?.command.type).toBe("OS_SELECT");
     });
 
     it("Enter → ACTIVATE", () => {
       const result = Keybindings.resolve("Enter", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("OS_ACTIVATE");
+      expect(result?.command.type).toBe("OS_ACTIVATE");
     });
 
     it("Escape → ESCAPE", () => {
       const result = Keybindings.resolve("Escape", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("OS_ESCAPE");
+      expect(result?.command.type).toBe("OS_ESCAPE");
     });
 
     it("Backspace → OS_DELETE", () => {
       const result = Keybindings.resolve("Backspace", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("OS_DELETE");
+      expect(result?.command.type).toBe("OS_DELETE");
     });
 
     it("Delete → OS_DELETE", () => {
       const result = Keybindings.resolve("Delete", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("OS_DELETE");
+      expect(result?.command.type).toBe("OS_DELETE");
     });
 
     it("Meta+ArrowUp → OS_MOVE_UP", () => {
       const result = Keybindings.resolve("Meta+ArrowUp", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("OS_MOVE_UP");
+      expect(result?.command.type).toBe("OS_MOVE_UP");
     });
 
     it("Meta+ArrowDown → OS_MOVE_DOWN", () => {
       const result = Keybindings.resolve("Meta+ArrowDown", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("OS_MOVE_DOWN");
+      expect(result?.command.type).toBe("OS_MOVE_DOWN");
     });
 
     // Clipboard: Meta+C/X/V are NOT registered as keybindings
@@ -82,13 +82,13 @@ describe("Keybinding Resolution", () => {
     it("ArrowDown → NAVIGATE", () => {
       const result = Keybindings.resolve("ArrowDown", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("OS_NAVIGATE");
+      expect(result?.command.type).toBe("OS_NAVIGATE");
     });
 
     it("F2 → FIELD_START_EDIT", () => {
       const result = Keybindings.resolve("F2", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("FIELD_START_EDIT");
+      expect(result?.command.type).toBe("FIELD_START_EDIT");
     });
   });
 
@@ -100,15 +100,15 @@ describe("Keybinding Resolution", () => {
     it("Enter → FIELD_COMMIT (not ACTIVATE)", () => {
       const result = Keybindings.resolve("Enter", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("FIELD_COMMIT");
-      expect(result!.command.type).not.toBe("OS_ACTIVATE");
+      expect(result?.command.type).toBe("FIELD_COMMIT");
+      expect(result?.command.type).not.toBe("OS_ACTIVATE");
     });
 
     it("Escape → FIELD_CANCEL (not ESCAPE)", () => {
       const result = Keybindings.resolve("Escape", ctx);
       expect(result).not.toBeNull();
-      expect(result!.command.type).toBe("FIELD_CANCEL");
-      expect(result!.command.type).not.toBe("OS_ESCAPE");
+      expect(result?.command.type).toBe("FIELD_CANCEL");
+      expect(result?.command.type).not.toBe("OS_ESCAPE");
     });
 
     it("Space does NOT resolve to SELECT", () => {

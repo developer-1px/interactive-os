@@ -85,7 +85,10 @@ export function DocsDashboard({ allFiles, onSelect }: DocsDashboardProps) {
           </p>
         </div>
         <div className="flex gap-3">
-          <button type="button" className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">
+          <button
+            type="button"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm"
+          >
             <Plus size={16} />
             Quick Capture
           </button>

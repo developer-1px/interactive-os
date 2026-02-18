@@ -45,7 +45,7 @@ export function ActivateTest() {
             {["Preview A", "Preview B"].map((item) => (
               <FocusItem
                 key={item}
-                id={`act-auto-${item.split(" ")[1]!.toLowerCase()}`}
+                id={`act-auto-${item.split(" ")[1]?.toLowerCase()}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-rose-100 aria-[current=true]:text-rose-700 text-sm border border-transparent aria-[current=true]:border-rose-300"
               >

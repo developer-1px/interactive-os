@@ -15,7 +15,7 @@ export interface ItemProps
   id: string | number;
 
   // Data Binding
-  payload?: any;
+  payload?: unknown;
   index?: number;
 
   // Visuals (Polymorphic)

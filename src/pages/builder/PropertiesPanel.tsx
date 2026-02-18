@@ -113,10 +113,11 @@ function TabButton({
 }) {
   return (
     <div
-      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${active
-        ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
-        : "text-slate-400"
-        }`}
+      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${
+        active
+          ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
+          : "text-slate-400"
+      }`}
       title={label}
     >
       {icon}
@@ -183,7 +184,10 @@ function ImageProperties() {
             alt="Preview"
             className="w-full h-full object-cover"
           />
-          <button type="button" className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium text-sm">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium text-sm"
+          >
             Replace Image
           </button>
         </div>
@@ -214,10 +218,11 @@ function IconProperties() {
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 ${i === 1
-                ? "border-violet-500 bg-violet-50 text-violet-600"
-                : "border-slate-200 text-slate-400"
-                }`}
+              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 ${
+                i === 1
+                  ? "border-violet-500 bg-violet-50 text-violet-600"
+                  : "border-slate-200 text-slate-400"
+              }`}
             >
               <Square size={20} />
             </div>

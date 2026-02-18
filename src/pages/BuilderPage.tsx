@@ -1,5 +1,5 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
-import { OS } from "@os/AntigravityOS";
+import { Zone } from "@os/6-components/primitives/Zone";
 import { useEffect, useState } from "react";
 import { BuilderApp, type PropertyType } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
@@ -98,7 +98,7 @@ export default function BuilderPage() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Canvas Area */}
-        <OS.Zone
+        <Zone
           id="builder-canvas"
           className="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-100/50"
           options={{
@@ -124,7 +124,7 @@ export default function BuilderPage() {
               </div>
             </div>
           </div>
-        </OS.Zone>
+        </Zone>
 
         {/* Properties Panel (Fixed Right) — reads state from BuilderApp */}
         <PropertiesPanel />

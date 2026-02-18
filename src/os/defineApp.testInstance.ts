@@ -95,7 +95,7 @@ export function createTestInstance<S>(
       entry.handler(ctx, payload);
 
     const whenGuard = entry.when
-      ? { when: (state: unknown) => entry.when!.evaluate(state as S) }
+      ? { when: (state: unknown) => entry.when?.evaluate(state as S) }
       : undefined;
 
     const testFactory = testGroup.defineCommand(
@@ -135,7 +135,7 @@ export function createTestInstance<S>(
     if (factory) {
       commandsMap[type] = factory;
       (commandsMap[type] as any).when = entry.when
-        ? (state: any) => entry.when!.evaluate(state)
+        ? (state: any) => entry.when?.evaluate(state)
         : null;
     }
   }

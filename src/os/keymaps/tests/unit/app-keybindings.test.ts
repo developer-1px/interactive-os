@@ -41,7 +41,7 @@ describe("App Keybinding Registration", () => {
 
     const result = Keybindings.resolve("Meta+D", { isEditing: false });
     expect(result).not.toBeNull();
-    expect(result!.command).toBe(mockDuplicate);
+    expect(result?.command).toBe(mockDuplicate);
   });
 
   it("app keybinding does not resolve when editing", () => {
@@ -75,12 +75,12 @@ describe("App Keybinding Registration", () => {
       { key: "Meta+Shift+V", command: mockToggleView, when: "navigating" },
     ]);
 
-    expect(Keybindings.resolve("Meta+D", { isEditing: false })!.command).toBe(
+    expect(Keybindings.resolve("Meta+D", { isEditing: false })?.command).toBe(
       mockDuplicate,
     );
 
     expect(
-      Keybindings.resolve("Meta+Shift+V", { isEditing: false })!.command,
+      Keybindings.resolve("Meta+Shift+V", { isEditing: false })?.command,
     ).toBe(mockToggleView);
   });
 
@@ -96,6 +96,6 @@ describe("App Keybinding Registration", () => {
     // App custom works
     const metaD = Keybindings.resolve("Meta+D", { isEditing: false });
     expect(metaD).not.toBeNull();
-    expect(metaD!.command).toBe(mockDuplicate);
+    expect(metaD?.command).toBe(mockDuplicate);
   });
 });

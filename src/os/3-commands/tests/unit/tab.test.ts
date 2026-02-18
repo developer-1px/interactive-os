@@ -12,7 +12,7 @@ import {
   resolveTabEscapeZone,
   resolveTabWithinZone,
   type ZoneOrderEntry,
-} from "@os/3-commands/interaction/resolveTab";
+} from "@os/3-commands/tab/resolveTab";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

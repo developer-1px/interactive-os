@@ -41,7 +41,7 @@ export const RECOVER = kernel.defineCommand(
     if (!targetId) return;
 
     return {
-      state: produce(ctx.state, (draft: any) => {
+      state: produce(ctx.state, (draft) => {
         const z = ensureZone(draft.os, activeZoneId);
         z.focusedItemId = targetId;
         z.lastFocusedId = targetId;

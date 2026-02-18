@@ -7,8 +7,7 @@ import { extractText } from "./docsUtils";
 import { MermaidBlock } from "./MermaidBlock";
 import "./code-theme.css";
 
-// biome-ignore lint/suspicious/noExplicitAny: ReactMarkdown component props
-const MarkdownComponents: Record<string, React.FC<any>> = {
+const MarkdownComponents: Record<string, React.FC<Record<string, unknown>>> = {
   h1: (props) => (
     <h1
       className="text-3xl font-extrabold tracking-tight mb-6 mt-4 text-slate-900 leading-[1.2] max-w-2xl"
@@ -66,8 +65,15 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
     />
   ),
   hr: (props) => <hr className="border-slate-100 my-8 max-w-2xl" {...props} />,
-  // biome-ignore lint/suspicious/noExplicitAny: ReactMarkdown component props
-  code: ({ className, children, ...props }: any) => {
+  code: ({
+    className,
+    children,
+    ...props
+  }: {
+    className?: string;
+    children?: React.ReactNode;
+    [key: string]: unknown;
+  }) => {
     const isBlock =
       className?.includes("hljs") || className?.includes("language-");
     if (isBlock) {
@@ -86,8 +92,13 @@ const MarkdownComponents: Record<string, React.FC<any>> = {
       </code>
     );
   },
-  // biome-ignore lint/suspicious/noExplicitAny: ReactMarkdown component props
-  pre: ({ children, ...props }: any) => {
+  pre: ({
+    children,
+    ...props
+  }: {
+    children?: React.ReactNode;
+    [key: string]: unknown;
+  }) => {
     const codeChild = children?.props;
     const langClass = codeChild?.className ?? "";
     const lang = langClass

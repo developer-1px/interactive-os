@@ -1,4 +1,4 @@
-import { OS } from "@os/AntigravityOS";
+import { Field } from "@os/6-components/primitives/Field";
 import {
   Github,
   Globe,
@@ -70,7 +70,7 @@ export function NCPFooterBlock() {
             {/* Brand Column */}
             <div className="lg:col-span-2">
               <Builder.Item asChild id="footer-brand">
-                <OS.Field
+                <Field
                   name="footer-brand"
                   mode="deferred"
                   value={fields["footer-brand"] ?? ""}
@@ -82,7 +82,7 @@ export function NCPFooterBlock() {
               </Builder.Item>
 
               <Builder.Item asChild id="footer-desc">
-                <OS.Field
+                <Field
                   name="footer-desc"
                   mode="deferred"
                   multiline
@@ -190,7 +190,7 @@ export function NCPFooterBlock() {
             </div>
 
             <Builder.Item asChild id="footer-copyright">
-              <OS.Field
+              <Field
                 name="footer-copyright"
                 mode="deferred"
                 value={fields["footer-copyright"] ?? ""}

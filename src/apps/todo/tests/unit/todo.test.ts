@@ -84,9 +84,9 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(addTodo({ text: "Toggle me" }));
       const ids = Object.keys(app.state.data.todos);
       const id = ids[ids.length - 1]!;
-      expect(app.state.data.todos[id]!.completed).toBe(false);
+      expect(app.state.data.todos[id]?.completed).toBe(false);
       app.dispatch(toggleTodo({ id }));
-      expect(app.state.data.todos[id]!.completed).toBe(true);
+      expect(app.state.data.todos[id]?.completed).toBe(true);
     });
 
     test("clearCompleted removes only completed", () => {
@@ -123,7 +123,7 @@ describe("Todo v5 — defineApp native", () => {
       expect(app.state.ui.editDraft).toBe("Updated");
 
       app.dispatch(updateTodoText({ text: "Updated" }));
-      expect(app.state.data.todos[id]!.text).toBe("Updated");
+      expect(app.state.data.todos[id]?.text).toBe("Updated");
       expect(app.state.ui.editingId).toBeNull();
     });
 
@@ -137,7 +137,7 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(syncEditDraft({ text: "Changed" }));
       app.dispatch(cancelEdit());
 
-      expect(app.state.data.todos[id]!.text).toBe("Original");
+      expect(app.state.data.todos[id]?.text).toBe("Original");
       expect(app.state.ui.editingId).toBeNull();
     });
   });
@@ -326,8 +326,8 @@ describe("Todo v5 — defineApp native", () => {
       const lastId = ids[ids.length - 1]!;
       app.dispatch(copyTodo({ id: lastId }));
       expect(app.state.ui.clipboard).not.toBeNull();
-      expect(app.state.ui.clipboard!.todos[0]!.text).toBe("Copy me");
-      expect(app.state.ui.clipboard!.isCut).toBe(false);
+      expect(app.state.ui.clipboard?.todos[0]?.text).toBe("Copy me");
+      expect(app.state.ui.clipboard?.isCut).toBe(false);
     });
 
     test("copyTodo → pasteTodo creates duplicate", () => {
@@ -352,8 +352,8 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(cutTodo({ id: lastId }));
       expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
       expect(app.state.ui.clipboard).not.toBeNull();
-      expect(app.state.ui.clipboard!.todos[0]!.text).toBe("Cut me");
-      expect(app.state.ui.clipboard!.isCut).toBe(true);
+      expect(app.state.ui.clipboard?.todos[0]?.text).toBe("Cut me");
+      expect(app.state.ui.clipboard?.isCut).toBe(true);
     });
 
     test("cutTodo → pasteTodo restores item", () => {
@@ -387,13 +387,13 @@ describe("Todo v5 — defineApp native", () => {
 
       // Copy first item
       app.dispatch(copyTodo({ id: ids[ids.length - 2]! }));
-      expect(app.state.ui.clipboard!.todos.length).toBe(1);
-      expect(app.state.ui.clipboard!.todos[0]!.text).toBe("First");
+      expect(app.state.ui.clipboard?.todos.length).toBe(1);
+      expect(app.state.ui.clipboard?.todos[0]?.text).toBe("First");
 
       // Copy second item — should overwrite, not append
       app.dispatch(copyTodo({ id: ids[ids.length - 1]! }));
-      expect(app.state.ui.clipboard!.todos.length).toBe(1);
-      expect(app.state.ui.clipboard!.todos[0]!.text).toBe("Second");
+      expect(app.state.ui.clipboard?.todos.length).toBe(1);
+      expect(app.state.ui.clipboard?.todos[0]?.text).toBe("Second");
     });
 
     test("multi-copy: copyTodo 3 items → clipboard has 3 todos", () => {
@@ -410,8 +410,8 @@ describe("Todo v5 — defineApp native", () => {
       });
 
       expect(app.state.ui.clipboard).not.toBeNull();
-      expect(app.state.ui.clipboard!.todos.length).toBe(3);
-      expect(app.state.ui.clipboard!.todos.map((t) => t.text)).toEqual(
+      expect(app.state.ui.clipboard?.todos.length).toBe(3);
+      expect(app.state.ui.clipboard?.todos.map((t) => t.text)).toEqual(
         expect.arrayContaining(["A", "B", "C"]),
       );
     });
@@ -454,8 +454,8 @@ describe("Todo v5 — defineApp native", () => {
       // All 3 removed from data
       expect(Object.keys(app.state.data.todos).length).toBe(beforeCount - 3);
       // All 3 in clipboard
-      expect(app.state.ui.clipboard!.todos.length).toBe(3);
-      expect(app.state.ui.clipboard!.isCut).toBe(true);
+      expect(app.state.ui.clipboard?.todos.length).toBe(3);
+      expect(app.state.ui.clipboard?.isCut).toBe(true);
     });
 
     test("multi-cut → paste: all 3 items restored", () => {

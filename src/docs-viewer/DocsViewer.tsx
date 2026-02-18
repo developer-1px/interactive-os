@@ -121,7 +121,7 @@ export function DocsViewer() {
       loadContent(parsed.path, null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadContent]);
 
   // Sync hash → state on browser back/forward (popstate only)
   useEffect(() => {
@@ -140,7 +140,7 @@ export function DocsViewer() {
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadContent]);
 
   // Auto-select first file when tree changes and no active path
   useEffect(() => {
@@ -151,7 +151,7 @@ export function DocsViewer() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allFiles]);
+  }, [allFiles, activePath, handleSelect]);
 
   // --- Folder open / close ---
   const handleOpenFolder = async () => {

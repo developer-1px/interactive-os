@@ -1,4 +1,5 @@
-import { OS } from "@os/AntigravityOS";
+import { Field } from "@os/6-components/primitives/Field";
+import { Item } from "@os/6-components/primitives/Item";
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 
 /**
@@ -11,7 +12,7 @@ export function HeroBlock() {
   const fields = BuilderApp.useComputed((s) => s.data.fields);
 
   return (
-    <OS.Item
+    <Item
       id="hero-block"
       className="relative bg-white text-slate-900 overflow-hidden"
     >
@@ -32,8 +33,8 @@ export function HeroBlock() {
       <div className="relative max-w-4xl mx-auto px-8 py-32 text-center">
         {/* Announcement Badge */}
         <div className="mb-8">
-          <OS.Item id="hero-badge" asChild>
-            <OS.Field
+          <Item id="hero-badge" asChild>
+            <Field
               name="hero-badge"
               mode="deferred"
               value={fields["hero-badge"] ?? ""}
@@ -45,12 +46,12 @@ export function HeroBlock() {
                                 data-[editing=true]:ring-2 data-[editing=true]:ring-violet-300 data-[editing=true]:bg-violet-700
                             `}
             />
-          </OS.Item>
+          </Item>
         </div>
 
         {/* Main Headline */}
-        <OS.Item id="hero-headline" asChild>
-          <OS.Field
+        <Item id="hero-headline" asChild>
+          <Field
             name="hero-headline"
             mode="deferred"
             value={fields["hero-headline"] ?? ""}
@@ -62,11 +63,11 @@ export function HeroBlock() {
                             data-[editing=true]:bg-white data-[editing=true]:shadow-xl
                         `}
           />
-        </OS.Item>
+        </Item>
 
         {/* Subheadline */}
-        <OS.Item id="hero-subheadline" asChild>
-          <OS.Field
+        <Item id="hero-subheadline" asChild>
+          <Field
             name="hero-subheadline"
             mode="deferred"
             multiline
@@ -81,11 +82,11 @@ export function HeroBlock() {
                             data-[editing=true]:bg-white data-[editing=true]:shadow-lg
                         `}
           />
-        </OS.Item>
+        </Item>
 
         {/* CTA Buttons */}
         <div className="flex items-center justify-center gap-4">
-          <OS.Item id="hero-cta-primary">
+          <Item id="hero-cta-primary">
             {({ isFocused }: { isFocused: boolean }) => (
               <button
                 type="button"
@@ -101,9 +102,9 @@ export function HeroBlock() {
                 Start for free
               </button>
             )}
-          </OS.Item>
+          </Item>
 
-          <OS.Item id="hero-cta-secondary">
+          <Item id="hero-cta-secondary">
             {({ isFocused }: { isFocused: boolean }) => (
               <button
                 type="button"
@@ -119,7 +120,7 @@ export function HeroBlock() {
                 Watch demo →
               </button>
             )}
-          </OS.Item>
+          </Item>
         </div>
 
         {/* Trust Bar */}
@@ -129,7 +130,7 @@ export function HeroBlock() {
           </p>
           <div className="flex items-center justify-center gap-12">
             {["Vercel", "Linear", "Notion", "Figma", "Stripe"].map((brand) => (
-              <OS.Item key={brand} id={`brand-${brand}`}>
+              <Item key={brand} id={`brand-${brand}`}>
                 {({ isFocused }: { isFocused: boolean }) => (
                   <span
                     className={`
@@ -140,11 +141,11 @@ export function HeroBlock() {
                     {brand}
                   </span>
                 )}
-              </OS.Item>
+              </Item>
             ))}
           </div>
         </div>
       </div>
-    </OS.Item>
+    </Item>
   );
 }

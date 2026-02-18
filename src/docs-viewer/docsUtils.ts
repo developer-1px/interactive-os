@@ -83,13 +83,20 @@ export function flattenTree(items: DocItem[]): DocItem[] {
 }
 
 /** Recursively extract text content from React node trees */
-// biome-ignore lint/suspicious/noExplicitAny: recursive React node text extraction
-export function extractText(node: any): string {
+export function extractText(node: unknown): string {
   if (node == null) return "";
   if (typeof node === "string") return node;
   if (typeof node === "number") return String(node);
   if (Array.isArray(node)) return node.map(extractText).join("");
-  if (node?.props?.children) return extractText(node.props.children);
+  if (
+    typeof node === "object" &&
+    "props" in node &&
+    (node as { props: { children?: unknown } }).props?.children
+  ) {
+    return extractText(
+      (node as { props: { children: unknown } }).props.children,
+    );
+  }
   return "";
 }
 

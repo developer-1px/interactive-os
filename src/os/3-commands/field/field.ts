@@ -135,7 +135,7 @@ export const FIELD_CANCEL = kernel.defineCommand(
       }
     }
     if (fieldEntry?.config.onCancel) {
-      queueMicrotask(() => kernel.dispatch(fieldEntry!.config.onCancel!));
+      queueMicrotask(() => kernel.dispatch(fieldEntry?.config.onCancel!));
     }
 
     return {

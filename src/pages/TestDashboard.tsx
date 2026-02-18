@@ -70,8 +70,8 @@ interface TestFile {
   path: string;
   filename: string;
   layer: "unit" | "testbot" | "e2e";
-  rawLoader: () => Promise<any>;
-  execLoader?: () => Promise<any>;
+  rawLoader: () => Promise<unknown>;
+  execLoader?: () => Promise<unknown>;
 }
 
 interface ProjectGroup {
@@ -160,7 +160,7 @@ function parseTestStructure(code: string): StaticSuiteNode[] {
 
   return rootSuite.children[0]?.type === "suite"
     ? (rootSuite.children as StaticSuiteNode[])
-    : (rootSuite.children as any);
+    : (rootSuite.children as (StaticSuiteNode | StaticTestNode)[]);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -184,18 +184,18 @@ function extractProjectInfo(path: string): { category: string; name: string } {
 }
 
 function buildGroups(
-  rawModules: Record<string, () => Promise<any>>,
-  execModules: Record<string, () => Promise<any>>,
-  e2eRawModules: Record<string, () => Promise<any>>,
-  e2eExecModules: Record<string, () => Promise<any>>,
+  rawModules: Record<string, () => Promise<unknown>>,
+  execModules: Record<string, () => Promise<unknown>>,
+  e2eRawModules: Record<string, () => Promise<unknown>>,
+  e2eExecModules: Record<string, () => Promise<unknown>>,
 ): ProjectGroup[] {
   const groupMap = new Map<string, ProjectGroup>();
 
   const addFile = (
     path: string,
     layer: "unit" | "testbot" | "e2e",
-    rawLoader: () => Promise<any>,
-    execLoader?: () => Promise<any>,
+    rawLoader: () => Promise<unknown>,
+    execLoader?: () => Promise<unknown>,
   ) => {
     const { category, name } = extractProjectInfo(path);
     const slug = `${category.toLowerCase()}-${name}`;

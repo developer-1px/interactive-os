@@ -35,15 +35,19 @@ The behavioral infrastructure for interactive web applications.
 
 ### Why — Problem Space (각 모듈이 존재하는 이유)
 
-| Guide | Pipeline Stage | Description |
-|---|---|---|
-| [Why Focus](./os/why-focus.md) | ① Spatial | 웹에서 "지금 어디에 있는가"를 시스템이 모르는 문제 |
-| [Why Navigation](./os/why-navigation.md) | ③ Behavior | 방향키 내비게이션의 재발명 문제 |
-| [Why Selection](./os/why-selection.md) | ③ Behavior | 다중 선택 상태 머신의 조합 폭발 |
-| [Why Tab](./os/why-tab.md) | ③ Behavior | 영역 간 Tab 이동 (trap/flow/escape) |
-| [Why ARIA](./os/why-aria.md) | ④ Output | 접근성은 기능이 아니라 인프라 |
-| [Why Command](./os/why-command.md) | ② Input | 입력과 행동의 분리, 단축키 충돌 해결 |
-| [Why Overlay](./os/why-overlay.md) | ③ Behavior | 모달/다이얼로그 포커스 생명주기 |
+| Guide | Pipeline | Source Folder | Description |
+|---|---|---|---|
+| [Why Focus](./os/why-focus.md) | ① Spatial | `focus/` | Zone 단위 포커스 추적, 복원, 복구 |
+| [Why Command](./os/why-command.md) | ② Input | `keymaps/`, `1-listeners/` | 입력과 행동의 분리, Keybinding Table |
+| [Why Navigation](./os/why-navigation.md) | ③ Behavior | `navigate/` | 방향키 내비게이션 (1D, 2D, spatial) |
+| [Why Selection](./os/why-selection.md) | ③ Behavior | `selection/` | 단일/다중/범위 선택 상태 머신 |
+| [Why Tab](./os/why-tab.md) | ③ Behavior | `tab/` | 영역 간 Tab 이동 (trap/flow/escape) |
+| [Why Dismiss](./os/why-dismiss.md) | ③ Behavior | `dismiss/` | Escape 키의 맥락별 해석 |
+| [Why Overlay](./os/why-overlay.md) | ③ Behavior | `overlay/` | 모달/다이얼로그 포커스 생명주기 |
+| [Why Expand](./os/why-expand.md) | ③ Behavior | `expand/` | 트리/아코디언 확장-축소 |
+| [Why Field](./os/why-field.md) | ③ Behavior | `field/` | 인라인 편집 모드 전환, 키 소유권 |
+| [Why Clipboard](./os/why-clipboard.md) | ③ Behavior | `clipboard/` | 조건부 클립보드 가로채기 |
+| [Why ARIA](./os/why-aria.md) | ④ Output | `registries/` | 접근성은 기능이 아니라 인프라 |
 
 ### What — Solution Space (동작 명세)
 

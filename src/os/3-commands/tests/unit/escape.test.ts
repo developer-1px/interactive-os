@@ -7,7 +7,7 @@
  * - none: no action
  */
 
-import { resolveEscape } from "@os/3-commands/interaction/resolveEscape";
+import { resolveEscape } from "@os/3-commands/dismiss/resolveEscape";
 import { describe, expect, it } from "vitest";
 
 describe("resolveEscape (SPEC §3.5)", () => {

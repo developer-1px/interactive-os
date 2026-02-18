@@ -7,7 +7,7 @@
 import { TodoApp, TodoDraft, TodoList } from "@apps/todo/app";
 import { selectVisibleTodos } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { OS } from "@os/AntigravityOS";
+import { Field } from "@os/6-components/primitives/Field";
 import { Plus } from "lucide-react";
 
 export function ListView() {
@@ -37,7 +37,7 @@ export function ListView() {
 
           <div className="flex-1 overflow-y-auto space-y-2 px-2 custom-scrollbar">
             {/* Draft Field — pre-bound via TodoDraft.Field */}
-            <OS.Field.Label className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20">
+            <Field.Label className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20">
               <div className="text-slate-400 group-has-[[data-focused=true]]:text-indigo-500 transition-colors">
                 <Plus size={18} strokeWidth={2.5} />
               </div>
@@ -47,7 +47,7 @@ export function ListView() {
                 className="flex-1 bg-transparent outline-none text-slate-700 text-[15px] font-medium placeholder:text-slate-400"
                 placeholder="Add a new task..."
               />
-            </OS.Field.Label>
+            </Field.Label>
 
             <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent my-4" />
 

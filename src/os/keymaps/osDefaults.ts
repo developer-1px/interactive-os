@@ -7,6 +7,7 @@
  * These map directly to commands from 3-commands/.
  */
 
+import { ESCAPE } from "@os/3-commands/dismiss";
 import {
   FIELD_CANCEL,
   FIELD_COMMIT,
@@ -14,16 +15,15 @@ import {
 } from "@os/3-commands/field/field";
 import {
   ACTIVATE,
-  ESCAPE,
   OS_DELETE,
   OS_MOVE_DOWN,
   OS_MOVE_UP,
   OS_REDO,
   OS_UNDO,
-  TAB,
 } from "@os/3-commands/interaction";
 import { NAVIGATE } from "@os/3-commands/navigate";
 import { OS_SELECT_ALL, SELECT } from "@os/3-commands/selection";
+import { TAB } from "@os/3-commands/tab";
 import { Keybindings } from "./keybindings";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -31,16 +31,40 @@ import { Keybindings } from "./keybindings";
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  { key: "ArrowDown", command: NAVIGATE({ direction: "down" }), when: "navigating" },
-  { key: "ArrowUp", command: NAVIGATE({ direction: "up" }), when: "navigating" },
-  { key: "ArrowLeft", command: NAVIGATE({ direction: "left" }), when: "navigating" },
-  { key: "ArrowRight", command: NAVIGATE({ direction: "right" }), when: "navigating" },
+  {
+    key: "ArrowDown",
+    command: NAVIGATE({ direction: "down" }),
+    when: "navigating",
+  },
+  {
+    key: "ArrowUp",
+    command: NAVIGATE({ direction: "up" }),
+    when: "navigating",
+  },
+  {
+    key: "ArrowLeft",
+    command: NAVIGATE({ direction: "left" }),
+    when: "navigating",
+  },
+  {
+    key: "ArrowRight",
+    command: NAVIGATE({ direction: "right" }),
+    when: "navigating",
+  },
   { key: "Home", command: NAVIGATE({ direction: "home" }), when: "navigating" },
   { key: "End", command: NAVIGATE({ direction: "end" }), when: "navigating" },
 
   // Shift+Arrow → range selection
-  { key: "Shift+ArrowDown", command: NAVIGATE({ direction: "down", select: "range" }), when: "navigating" },
-  { key: "Shift+ArrowUp", command: NAVIGATE({ direction: "up", select: "range" }), when: "navigating" },
+  {
+    key: "Shift+ArrowDown",
+    command: NAVIGATE({ direction: "down", select: "range" }),
+    when: "navigating",
+  },
+  {
+    key: "Shift+ArrowUp",
+    command: NAVIGATE({ direction: "up", select: "range" }),
+    when: "navigating",
+  },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -49,7 +73,11 @@ Keybindings.registerAll([
 
 Keybindings.registerAll([
   { key: "Tab", command: TAB({ direction: "forward" }), when: "navigating" },
-  { key: "Shift+Tab", command: TAB({ direction: "backward" }), when: "navigating" },
+  {
+    key: "Shift+Tab",
+    command: TAB({ direction: "backward" }),
+    when: "navigating",
+  },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════

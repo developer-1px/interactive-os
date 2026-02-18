@@ -1,4 +1,5 @@
-import { OS } from "@os/AntigravityOS";
+import { Field } from "@os/6-components/primitives/Field";
+import { Item } from "@os/6-components/primitives/Item";
 import { BarChart3, Lock, Wand2, Zap } from "lucide-react";
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 
@@ -15,13 +16,13 @@ export function FeaturesBlock() {
   const fields = BuilderApp.useComputed((s) => s.data.fields);
 
   return (
-    <OS.Item id="features-block" className="bg-slate-50 py-24 px-8">
+    <Item id="features-block" className="bg-slate-50 py-24 px-8">
       <div className="max-w-5xl mx-auto">
         {/* Section Header - Items directly in the grid zone */}
         <div className="text-center mb-16">
           <div className="mb-4">
-            <OS.Item id="features-eyebrow" asChild>
-              <OS.Field
+            <Item id="features-eyebrow" asChild>
+              <Field
                 name="features-eyebrow"
                 mode="deferred"
                 value={fields["features-eyebrow"] ?? ""}
@@ -33,11 +34,11 @@ export function FeaturesBlock() {
                                     data-[focused=true]:scale-105 data-[focused=true]:bg-violet-50 data-[focused=true]:ring-1 data-[focused=true]:ring-violet-200
                                 `}
               />
-            </OS.Item>
+            </Item>
           </div>
           <div>
-            <OS.Item id="features-title" asChild>
-              <OS.Field
+            <Item id="features-title" asChild>
+              <Field
                 name="features-title"
                 mode="deferred"
                 value={fields["features-title"] ?? ""}
@@ -50,14 +51,14 @@ export function FeaturesBlock() {
                                     data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-violet-500 data-[focused=true]:shadow-sm
                                 `}
               />
-            </OS.Item>
+            </Item>
           </div>
         </div>
 
         {/* Bento Grid - Nested Zones */}
         <div className="grid grid-cols-12 gap-4">
           {/* Large Card - Spans 7 columns */}
-          <OS.Item
+          <Item
             id="feature-main-zone"
             className="col-span-12 md:col-span-7 flex flex-col"
           >
@@ -66,8 +67,8 @@ export function FeaturesBlock() {
                 <Wand2 size={40} className="text-violet-600" />
               </div>
               <div className="absolute bottom-8 left-8 right-8 flex flex-col items-start">
-                <OS.Item id="feature-main-title" asChild>
-                  <OS.Field
+                <Item id="feature-main-title" asChild>
+                  <Field
                     name="feature-main-title"
                     mode="deferred"
                     value={fields["feature-main-title"] ?? ""}
@@ -79,9 +80,9 @@ export function FeaturesBlock() {
                                             data-[focused=true]:bg-white/50 data-[focused=true]:ring-1 data-[focused=true]:ring-violet-300
                                         `}
                   />
-                </OS.Item>
-                <OS.Item id="feature-main-desc" asChild>
-                  <OS.Field
+                </Item>
+                <Item id="feature-main-desc" asChild>
+                  <Field
                     name="feature-main-desc"
                     mode="deferred"
                     multiline
@@ -94,21 +95,21 @@ export function FeaturesBlock() {
                                             data-[focused=true]:bg-white/50 data-[focused=true]:ring-1 data-[focused=true]:ring-violet-300
                                         `}
                   />
-                </OS.Item>
+                </Item>
               </div>
             </div>
-          </OS.Item>
+          </Item>
 
           {/* Stacked Cards - Right Column */}
           <div className="col-span-12 md:col-span-5 flex flex-col gap-4">
-            <OS.Item
+            <Item
               id="feature-speed-zone"
               className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200"
             >
               <div className="flex items-start justify-between h-full">
                 <div className="flex flex-col items-start pr-12">
-                  <OS.Item id="feature-speed-title" asChild>
-                    <OS.Field
+                  <Item id="feature-speed-title" asChild>
+                    <Field
                       name="feature-speed-title"
                       mode="deferred"
                       value={fields["feature-speed-title"] ?? ""}
@@ -120,9 +121,9 @@ export function FeaturesBlock() {
                                                 data-[focused=true]:bg-amber-50 data-[focused=true]:ring-1 data-[focused=true]:ring-amber-200
                                             `}
                     />
-                  </OS.Item>
-                  <OS.Item id="feature-speed-desc" asChild>
-                    <OS.Field
+                  </Item>
+                  <Item id="feature-speed-desc" asChild>
+                    <Field
                       name="feature-speed-desc"
                       mode="deferred"
                       value={fields["feature-speed-desc"] ?? ""}
@@ -134,22 +135,22 @@ export function FeaturesBlock() {
                                                 data-[focused=true]:bg-amber-50 data-[focused=true]:ring-1 data-[focused=true]:ring-amber-200
                                             `}
                     />
-                  </OS.Item>
+                  </Item>
                 </div>
                 <div className="absolute top-6 right-6 w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
                   <Zap size={20} className="text-amber-600" />
                 </div>
               </div>
-            </OS.Item>
+            </Item>
 
-            <OS.Item
+            <Item
               id="feature-security-zone"
               className="relative h-[152px] rounded-2xl p-6 bg-white border border-slate-200"
             >
               <div className="flex items-start justify-between h-full">
                 <div className="flex flex-col items-start pr-12">
-                  <OS.Item id="feature-security-title" asChild>
-                    <OS.Field
+                  <Item id="feature-security-title" asChild>
+                    <Field
                       name="feature-security-title"
                       mode="deferred"
                       value={fields["feature-security-title"] ?? ""}
@@ -161,9 +162,9 @@ export function FeaturesBlock() {
                                                 data-[focused=true]:bg-emerald-50 data-[focused=true]:ring-1 data-[focused=true]:ring-emerald-200
                                             `}
                     />
-                  </OS.Item>
-                  <OS.Item id="feature-security-desc" asChild>
-                    <OS.Field
+                  </Item>
+                  <Item id="feature-security-desc" asChild>
+                    <Field
                       name="feature-security-desc"
                       mode="deferred"
                       value={fields["feature-security-desc"] ?? ""}
@@ -175,17 +176,17 @@ export function FeaturesBlock() {
                                                 data-[focused=true]:bg-emerald-50 data-[focused=true]:ring-1 data-[focused=true]:ring-emerald-200
                                             `}
                     />
-                  </OS.Item>
+                  </Item>
                 </div>
                 <div className="absolute top-6 right-6 w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
                   <Lock size={20} className="text-emerald-600" />
                 </div>
               </div>
-            </OS.Item>
+            </Item>
           </div>
 
           {/* Bottom Row - Nested Zones */}
-          <OS.Item
+          <Item
             id="feature-analytics-zone"
             className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0"
           >
@@ -194,8 +195,8 @@ export function FeaturesBlock() {
                 <BarChart3 size={24} className="text-blue-600" />
               </div>
               <div className="flex flex-col items-start">
-                <OS.Item id="feature-analytics-title" asChild>
-                  <OS.Field
+                <Item id="feature-analytics-title" asChild>
+                  <Field
                     name="feature-analytics-title"
                     mode="deferred"
                     value={fields["feature-analytics-title"] ?? ""}
@@ -207,9 +208,9 @@ export function FeaturesBlock() {
                                             data-[focused=true]:bg-blue-50 data-[focused=true]:ring-1 data-[focused=true]:ring-blue-200
                                         `}
                   />
-                </OS.Item>
-                <OS.Item id="feature-analytics-desc" asChild>
-                  <OS.Field
+                </Item>
+                <Item id="feature-analytics-desc" asChild>
+                  <Field
                     name="feature-analytics-desc"
                     mode="deferred"
                     multiline
@@ -222,12 +223,12 @@ export function FeaturesBlock() {
                                             data-[focused=true]:bg-blue-50 data-[focused=true]:ring-1 data-[focused=true]:ring-blue-200
                                         `}
                   />
-                </OS.Item>
+                </Item>
               </div>
             </div>
-          </OS.Item>
+          </Item>
 
-          <OS.Item
+          <Item
             id="feature-collab-zone"
             className="col-span-12 md:col-span-6 h-[160px] rounded-2xl p-6 bg-white border border-slate-200 shrink-0"
           >
@@ -243,8 +244,8 @@ export function FeaturesBlock() {
                 ))}
               </div>
               <div className="flex flex-col items-start">
-                <OS.Item id="feature-collab-title" asChild>
-                  <OS.Field
+                <Item id="feature-collab-title" asChild>
+                  <Field
                     name="feature-collab-title"
                     mode="deferred"
                     value={fields["feature-collab-title"] ?? ""}
@@ -256,9 +257,9 @@ export function FeaturesBlock() {
                                             data-[focused=true]:bg-pink-50 data-[focused=true]:ring-1 data-[focused=true]:ring-pink-200
                                         `}
                   />
-                </OS.Item>
-                <OS.Item id="feature-collab-desc" asChild>
-                  <OS.Field
+                </Item>
+                <Item id="feature-collab-desc" asChild>
+                  <Field
                     name="feature-collab-desc"
                     mode="deferred"
                     value={fields["feature-collab-desc"] ?? ""}
@@ -270,12 +271,12 @@ export function FeaturesBlock() {
                                             data-[focused=true]:bg-pink-50 data-[focused=true]:ring-1 data-[focused=true]:ring-pink-200
                                         `}
                   />
-                </OS.Item>
+                </Item>
               </div>
             </div>
-          </OS.Item>
+          </Item>
         </div>
       </div>
-    </OS.Item>
+    </Item>
   );
 }

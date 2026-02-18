@@ -21,7 +21,7 @@
  *   </Builder.Section>
  */
 
-import { OS } from "@os/AntigravityOS";
+import { Item as OSItem } from "@os/6-components/primitives/Item";
 import { forwardRef, type ReactElement } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -47,7 +47,7 @@ function createBuilderComponent(level: BuilderLevel, displayName: string) {
   const Component = forwardRef<HTMLElement, BuilderComponentProps>(
     function BuilderComponent({ id, children }, ref) {
       return (
-        <OS.Item
+        <OSItem
           id={id}
           asChild
           ref={ref}
@@ -56,7 +56,7 @@ function createBuilderComponent(level: BuilderLevel, displayName: string) {
           data-nav-skip={level !== "item" ? "true" : undefined}
         >
           {children}
-        </OS.Item>
+        </OSItem>
       );
     },
   );

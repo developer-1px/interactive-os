@@ -1,4 +1,4 @@
-import { OS } from "@os/AntigravityOS";
+import { Field } from "@os/6-components/primitives/Field";
 import { ArrowRight, Globe } from "lucide-react";
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
@@ -43,7 +43,7 @@ export function NCPHeroBlock() {
             </Builder.Group>
 
             <Builder.Item asChild id="ncp-hero-title">
-              <OS.Field
+              <Field
                 name="ncp-hero-title"
                 mode="deferred"
                 multiline
@@ -59,7 +59,7 @@ export function NCPHeroBlock() {
             </Builder.Item>
 
             <Builder.Item asChild id="ncp-hero-sub">
-              <OS.Field
+              <Field
                 name="ncp-hero-sub"
                 mode="deferred"
                 multiline
@@ -116,7 +116,7 @@ export function NCPHeroBlock() {
                     />
                   </Builder.Item>
                   <Builder.Item asChild id="ncp-hero-portal-title">
-                    <OS.Field
+                    <Field
                       name="ncp-hero-portal-title"
                       mode="deferred"
                       value={fields["ncp-hero-portal-title"] ?? ""}
@@ -129,7 +129,7 @@ export function NCPHeroBlock() {
                     />
                   </Builder.Item>
                   <Builder.Item asChild id="ncp-hero-portal-subtitle">
-                    <OS.Field
+                    <Field
                       name="ncp-hero-portal-subtitle"
                       mode="deferred"
                       value={fields["ncp-hero-portal-subtitle"] ?? ""}
@@ -154,7 +154,7 @@ export function NCPHeroBlock() {
         {/* Minimal Nav */}
         <div className="absolute top-0 left-0 right-0 px-8 py-6 flex justify-between items-center z-50">
           <Builder.Item asChild id="ncp-hero-brand">
-            <OS.Field
+            <Field
               name="ncp-hero-brand"
               mode="deferred"
               value={fields["ncp-hero-brand"] ?? ""}

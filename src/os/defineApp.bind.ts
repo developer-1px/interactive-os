@@ -5,8 +5,10 @@
  * Pure function — all dependencies passed as parameters.
  */
 
+import { Field } from "@os/6-components/primitives/Field";
+import { Item } from "@os/6-components/primitives/Item";
 import type { ZoneOptions } from "@os/6-components/primitives/Zone";
-import { OS } from "@os/AntigravityOS";
+import { Zone } from "@os/6-components/primitives/Zone";
 import { Keybindings as KeybindingsRegistry } from "@os/keymaps/keybindings";
 import React, { type ReactNode } from "react";
 import type {
@@ -47,30 +49,32 @@ export function createBoundComponents<S>(
     className?: string;
     children?: ReactNode;
   }> = ({ id, className, children }) => {
-    const zoneProps: Record<string, any> = {
+    const zoneProps: Record<string, unknown> = {
       id: id ?? zoneName,
       className,
       role: config.role,
     };
 
-    // Map zone bindings → OS.Zone event props
-    const eventMap: Record<string, string> = {
-      onCheck: "onCheck",
-      onAction: "onAction",
-      onDelete: "onDelete",
-      onCopy: "onCopy",
-      onCut: "onCut",
-      onPaste: "onPaste",
-      onMoveUp: "onMoveUp",
-      onMoveDown: "onMoveDown",
-      onUndo: "onUndo",
-      onRedo: "onRedo",
-    };
+    // Map zone bindings → Zone event props
+    const eventKeys = [
+      "onCheck",
+      "onAction",
+      "onDelete",
+      "onCopy",
+      "onCut",
+      "onPaste",
+      "onMoveUp",
+      "onMoveDown",
+      "onUndo",
+      "onRedo",
+    ] as const;
 
-    for (const [declKey, propKey] of Object.entries(eventMap)) {
-      const cmd = (config as any)[declKey];
-      if (cmd) {
-        zoneProps[propKey] = cmd;
+    for (const key of eventKeys) {
+      if (key in config) {
+        const cmd = (config as Record<string, unknown>)[key];
+        if (cmd) {
+          zoneProps[key] = cmd;
+        }
       }
     }
 
@@ -90,7 +94,11 @@ export function createBoundComponents<S>(
       return KeybindingsRegistry.registerAll(bindings);
     }, []);
 
-    return React.createElement(OS.Zone, zoneProps as any, children);
+    return React.createElement(
+      Zone,
+      zoneProps as React.ComponentProps<typeof Zone>,
+      children,
+    );
   };
   ZoneComponent.displayName = `${appId}.${zoneName}.Zone`;
 
@@ -102,8 +110,10 @@ export function createBoundComponents<S>(
     asChild?: boolean;
   }> = ({ id, className, children, asChild }) => {
     return React.createElement(
-      OS.Item,
-      { id: String(id), className, asChild } as any,
+      Item,
+      { id: String(id), className, asChild } as React.ComponentProps<
+        typeof Item
+      >,
       children,
     );
   };
@@ -118,7 +128,7 @@ export function createBoundComponents<S>(
     autoFocus?: boolean;
     blurOnInactive?: boolean;
   }> = (props) => {
-    const fieldProps: Record<string, any> = { ...props };
+    const fieldProps: Record<string, unknown> = { ...props };
 
     if (config.field) {
       if (config.field.onChange) fieldProps.onChange = config.field.onChange;
@@ -126,7 +136,10 @@ export function createBoundComponents<S>(
       if (config.field.onCancel) fieldProps.onCancel = config.field.onCancel;
     }
 
-    return React.createElement(OS.Field, fieldProps as any);
+    return React.createElement(
+      Field,
+      fieldProps as React.ComponentProps<typeof Field>,
+    );
   };
   FieldComponent.displayName = `${appId}.${zoneName}.Field`;
 

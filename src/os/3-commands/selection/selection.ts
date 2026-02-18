@@ -12,7 +12,7 @@ import { ensureZone } from "../../state/utils";
 export const SELECTION_SET = kernel.defineCommand(
   "OS_SELECTION_SET",
   (ctx) => (payload: { zoneId: string; ids: string[] }) => ({
-    state: produce(ctx.state, (draft: any) => {
+    state: produce(ctx.state, (draft) => {
       const zone = ensureZone(draft.os, payload.zoneId);
       zone.selection = payload.ids;
       zone.selectionAnchor =
@@ -27,7 +27,7 @@ export const SELECTION_SET = kernel.defineCommand(
 export const SELECTION_ADD = kernel.defineCommand(
   "OS_SELECTION_ADD",
   (ctx) => (payload: { zoneId: string; id: string }) => ({
-    state: produce(ctx.state, (draft: any) => {
+    state: produce(ctx.state, (draft) => {
       const zone = ensureZone(draft.os, payload.zoneId);
       if (!zone.selection.includes(payload.id)) {
         zone.selection.push(payload.id);
@@ -41,7 +41,7 @@ export const SELECTION_ADD = kernel.defineCommand(
 export const SELECTION_REMOVE = kernel.defineCommand(
   "OS_SELECTION_REMOVE",
   (ctx) => (payload: { zoneId: string; id: string }) => ({
-    state: produce(ctx.state, (draft: any) => {
+    state: produce(ctx.state, (draft) => {
       const zone = ensureZone(draft.os, payload.zoneId);
       zone.selection = zone.selection.filter((item) => item !== payload.id);
       if (zone.selectionAnchor === payload.id) {
@@ -55,7 +55,7 @@ export const SELECTION_REMOVE = kernel.defineCommand(
 export const SELECTION_TOGGLE = kernel.defineCommand(
   "OS_SELECTION_TOGGLE",
   (ctx) => (payload: { zoneId: string; id: string }) => ({
-    state: produce(ctx.state, (draft: any) => {
+    state: produce(ctx.state, (draft) => {
       const zone = ensureZone(draft.os, payload.zoneId);
       if (zone.selection.includes(payload.id)) {
         zone.selection = zone.selection.filter((item) => item !== payload.id);
@@ -72,7 +72,7 @@ export const SELECTION_TOGGLE = kernel.defineCommand(
 export const SELECTION_CLEAR = kernel.defineCommand(
   "OS_SELECTION_CLEAR",
   (ctx) => (payload: { zoneId: string }) => ({
-    state: produce(ctx.state, (draft: any) => {
+    state: produce(ctx.state, (draft) => {
       const zone = ensureZone(draft.os, payload.zoneId);
       zone.selection = [];
       zone.selectionAnchor = null;

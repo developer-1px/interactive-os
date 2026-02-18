@@ -45,7 +45,7 @@ export const SELECT = kernel.defineCommand(
     const mode = payload.mode ?? "single";
 
     return {
-      state: produce(ctx.state, (draft: any) => {
+      state: produce(ctx.state, (draft) => {
         const z = ensureZone(draft.os, activeZoneId);
 
         switch (mode) {

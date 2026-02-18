@@ -121,11 +121,11 @@ describe("Virtual Focus (T5a)", () => {
       // 2. Verify effects via transaction log
       const tx = kernel.inspector.getLastTransaction();
       expect(tx).toBeDefined();
-      expect(tx!.effects).toBeDefined();
+      expect(tx?.effects).toBeDefined();
       // virtualFocus: focus effect must be absent (undefined → not in effects)
-      expect((tx!.effects as any)?.focus).toBeUndefined();
+      expect((tx?.effects as any)?.focus).toBeUndefined();
       // scroll effect should still be present
-      expect((tx!.effects as any)?.scroll).toBe("item-2");
+      expect((tx?.effects as any)?.scroll).toBe("item-2");
     });
 
     it("wraps or stops at boundary based on config", () => {

@@ -32,7 +32,7 @@ describe("History: Basic Undo/Redo (SPEC §10)", () => {
     app.dispatch(addTodo({ text: "Test" }));
 
     expect(app.state.history.past.length).toBe(1);
-    expect(app.state.history.past[0]!.command.type).toBe("addTodo");
+    expect(app.state.history.past[0]?.command.type).toBe("addTodo");
   });
 
   it("undo restores previous state", () => {
@@ -212,7 +212,7 @@ describe("History: Entry Structure", () => {
     const entry = app.state.history.past[1]!;
     // snapshot should be the state BEFORE "Second" was added
     // snapshot has { data, ui } structure
-    expect(Object.keys(entry.snapshot!.data.todos).length).toBe(
+    expect(Object.keys(entry.snapshot?.data.todos).length).toBe(
       Object.keys(dataAfterFirst.todos).length,
     );
   });

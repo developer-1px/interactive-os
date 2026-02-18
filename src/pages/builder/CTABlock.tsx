@@ -1,4 +1,5 @@
-import { OS } from "@os/AntigravityOS";
+import { Field } from "@os/6-components/primitives/Field";
+import { Item } from "@os/6-components/primitives/Item";
 import { ArrowRight } from "lucide-react";
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 
@@ -12,7 +13,7 @@ export function CTABlock() {
   const fields = BuilderApp.useComputed((s) => s.data.fields);
 
   return (
-    <OS.Item
+    <Item
       id="cta-block"
       className="relative bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 py-32 px-8 overflow-hidden"
     >
@@ -23,8 +24,8 @@ export function CTABlock() {
       <div className="relative max-w-3xl mx-auto text-center">
         {/* Headline */}
         <div className="mb-6">
-          <OS.Item id="cta-headline" asChild>
-            <OS.Field
+          <Item id="cta-headline" asChild>
+            <Field
               name="cta-headline"
               mode="deferred"
               value={fields["cta-headline"] ?? ""}
@@ -38,13 +39,13 @@ export function CTABlock() {
                                 data-[editing=true]:bg-white/20 data-[editing=true]:shadow-2xl
                             `}
             />
-          </OS.Item>
+          </Item>
         </div>
 
         {/* Subtext */}
         <div className="mb-10">
-          <OS.Item id="cta-subtext" asChild>
-            <OS.Field
+          <Item id="cta-subtext" asChild>
+            <Field
               name="cta-subtext"
               mode="deferred"
               value={fields["cta-subtext"] ?? ""}
@@ -56,11 +57,11 @@ export function CTABlock() {
                                 data-[editing=true]:bg-white/20
                             `}
             />
-          </OS.Item>
+          </Item>
         </div>
 
         {/* CTA Button */}
-        <OS.Item id="cta-button">
+        <Item id="cta-button">
           {({ isFocused }: { isFocused: boolean }) => (
             <button
               type="button"
@@ -77,12 +78,12 @@ export function CTABlock() {
               <ArrowRight size={20} />
             </button>
           )}
-        </OS.Item>
+        </Item>
 
         {/* Footer Note */}
         <div className="mt-8">
-          <OS.Item id="cta-footer" asChild>
-            <OS.Field
+          <Item id="cta-footer" asChild>
+            <Field
               name="cta-footer"
               mode="deferred"
               value={fields["cta-footer"] ?? ""}
@@ -93,9 +94,9 @@ export function CTABlock() {
                                 data-[focused=true]:bg-white/10 data-[focused=true]:text-white/80
                             `}
             />
-          </OS.Item>
+          </Item>
         </div>
       </div>
-    </OS.Item>
+    </Item>
   );
 }

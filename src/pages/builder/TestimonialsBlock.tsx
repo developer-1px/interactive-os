@@ -1,4 +1,5 @@
-import { OS } from "@os/AntigravityOS";
+import { Field } from "@os/6-components/primitives/Field";
+import { Item } from "@os/6-components/primitives/Item";
 import { Star } from "lucide-react";
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 
@@ -55,13 +56,13 @@ export function TestimonialsBlock() {
   };
 
   return (
-    <OS.Item id="testimonials-block" className="bg-white py-24 px-8">
+    <Item id="testimonials-block" className="bg-white py-24 px-8">
       <div className="max-w-5xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">
           <div className="mb-4">
-            <OS.Item id="testimonials-eyebrow" asChild>
-              <OS.Field
+            <Item id="testimonials-eyebrow" asChild>
+              <Field
                 name="testimonials-eyebrow"
                 mode="deferred"
                 value={fields["testimonials-eyebrow"] ?? ""}
@@ -73,11 +74,11 @@ export function TestimonialsBlock() {
                                     data-[focused=true]:scale-105 data-[focused=true]:bg-emerald-50 data-[focused=true]:ring-1 data-[focused=true]:ring-emerald-200
                                 `}
               />
-            </OS.Item>
+            </Item>
           </div>
           <div>
-            <OS.Item id="testimonials-title" asChild>
-              <OS.Field
+            <Item id="testimonials-title" asChild>
+              <Field
                 name="testimonials-title"
                 mode="deferred"
                 value={fields["testimonials-title"] ?? ""}
@@ -90,7 +91,7 @@ export function TestimonialsBlock() {
                                     data-[focused=true]:bg-slate-100 data-[focused=true]:ring-2 data-[focused=true]:ring-violet-500
                                 `}
               />
-            </OS.Item>
+            </Item>
           </div>
         </div>
 
@@ -99,7 +100,7 @@ export function TestimonialsBlock() {
           {testimonials.map((t) => {
             const colors = colorMap[t.color]!;
             return (
-              <OS.Item
+              <Item
                 key={t.id}
                 id={`zone-${t.id}`}
                 className={`
@@ -121,8 +122,8 @@ export function TestimonialsBlock() {
 
                 {/* Quote */}
                 <div className="mb-6 h-full flex flex-col items-start min-h-[80px]">
-                  <OS.Item id={`${t.id}-quote`} asChild>
-                    <OS.Field
+                  <Item id={`${t.id}-quote`} asChild>
+                    <Field
                       name={`${t.id}-quote`}
                       mode="deferred"
                       multiline
@@ -135,7 +136,7 @@ export function TestimonialsBlock() {
                                                 data-[focused=true]:bg-white data-[focused=true]:ring-1 data-[focused=true]:ring-slate-200 data-[focused=true]:shadow-sm
                                             `}
                     />
-                  </OS.Item>
+                  </Item>
                 </div>
 
                 {/* Author */}
@@ -146,8 +147,8 @@ export function TestimonialsBlock() {
                     {t.avatar}
                   </div>
                   <div className="flex flex-col items-start min-w-0">
-                    <OS.Item id={`${t.id}-name`} asChild>
-                      <OS.Field
+                    <Item id={`${t.id}-name`} asChild>
+                      <Field
                         name={`${t.id}-name`}
                         mode="deferred"
                         value={fields[`${t.id}-name`] ?? ""}
@@ -159,9 +160,9 @@ export function TestimonialsBlock() {
                                                     data-[focused=true]:bg-white data-[focused=true]:ring-1 data-[focused=true]:ring-slate-200
                                                 `}
                       />
-                    </OS.Item>
-                    <OS.Item id={`${t.id}-role`} asChild>
-                      <OS.Field
+                    </Item>
+                    <Item id={`${t.id}-role`} asChild>
+                      <Field
                         name={`${t.id}-role`}
                         mode="deferred"
                         value={fields[`${t.id}-role`] ?? ""}
@@ -173,14 +174,14 @@ export function TestimonialsBlock() {
                                                     data-[focused=true]:bg-white data-[focused=true]:ring-1 data-[focused=true]:ring-slate-200
                                                 `}
                       />
-                    </OS.Item>
+                    </Item>
                   </div>
                 </div>
-              </OS.Item>
+              </Item>
             );
           })}
         </div>
       </div>
-    </OS.Item>
+    </Item>
   );
 }

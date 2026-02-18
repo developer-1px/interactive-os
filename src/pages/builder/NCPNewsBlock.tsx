@@ -1,4 +1,4 @@
-import { OS } from "@os/AntigravityOS";
+import { Field } from "@os/6-components/primitives/Field";
 import { ArrowRight } from "lucide-react";
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
@@ -37,7 +37,7 @@ export function NCPNewsBlock() {
                 Updates
               </Builder.Badge>
               <Builder.Item asChild id="ncp-news-title">
-                <OS.Field
+                <Field
                   name="ncp-news-title"
                   mode="deferred"
                   multiline
@@ -90,7 +90,7 @@ export function NCPNewsBlock() {
                         </Builder.Badge>
                       </Builder.Item>
                       <Builder.Item asChild id={`${card0.id}-title`}>
-                        <OS.Field
+                        <Field
                           name={`${card0.id}-title`}
                           mode="deferred"
                           multiline
@@ -102,7 +102,7 @@ export function NCPNewsBlock() {
                         />
                       </Builder.Item>
                       <Builder.Item asChild id={`${card0.id}-desc`}>
-                        <OS.Field
+                        <Field
                           name={`${card0.id}-desc`}
                           mode="deferred"
                           value={fields[`${card0.id}-desc`] ?? ""}
@@ -140,7 +140,7 @@ export function NCPNewsBlock() {
                     </Builder.Badge>
                   </Builder.Item>
                   <Builder.Item asChild id={`${card1.id}-title`}>
-                    <OS.Field
+                    <Field
                       name={`${card1.id}-title`}
                       mode="deferred"
                       multiline
@@ -154,7 +154,7 @@ export function NCPNewsBlock() {
                 </div>
                 <div className="flex justify-between items-end border-t border-slate-200 pt-6 mt-4">
                   <Builder.Item asChild id={`${card1.id}-date`}>
-                    <OS.Field
+                    <Field
                       name={`${card1.id}-date`}
                       mode="deferred"
                       value={fields[`${card1.id}-date`] ?? ""}
@@ -194,7 +194,7 @@ export function NCPNewsBlock() {
                     </Builder.Badge>
                   </Builder.Item>
                   <Builder.Item asChild id={`${card2.id}-title`}>
-                    <OS.Field
+                    <Field
                       name={`${card2.id}-title`}
                       mode="deferred"
                       multiline
@@ -208,7 +208,7 @@ export function NCPNewsBlock() {
                 </div>
                 <div className="relative z-10 flex justify-between items-end">
                   <Builder.Item asChild id={`${card2.id}-date`}>
-                    <OS.Field
+                    <Field
                       name={`${card2.id}-date`}
                       mode="deferred"
                       value={fields[`${card2.id}-date`] ?? ""}

@@ -38,11 +38,11 @@ export type OSCommandUnion =
     }
   | { type: typeof OS_COMMANDS.FIELD_COMMIT; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.FIELD_CANCEL; payload?: { fieldId?: string } }
-  | { type: typeof OS_COMMANDS.UNDO; payload?: any }
-  | { type: typeof OS_COMMANDS.REDO; payload?: any }
-  | { type: typeof OS_COMMANDS.COPY; payload?: any }
-  | { type: typeof OS_COMMANDS.CUT; payload?: any }
-  | { type: typeof OS_COMMANDS.PASTE; payload?: any }
-  | { type: typeof OS_COMMANDS.DELETE; payload?: any }
-  | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: any }
-  | { type: typeof OS_COMMANDS.RECOVER; payload?: any };
+  | { type: typeof OS_COMMANDS.UNDO; payload?: undefined }
+  | { type: typeof OS_COMMANDS.REDO; payload?: undefined }
+  | { type: typeof OS_COMMANDS.COPY; payload?: undefined }
+  | { type: typeof OS_COMMANDS.CUT; payload?: undefined }
+  | { type: typeof OS_COMMANDS.PASTE; payload?: undefined }
+  | { type: typeof OS_COMMANDS.DELETE; payload?: undefined }
+  | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: undefined }
+  | { type: typeof OS_COMMANDS.RECOVER; payload?: undefined };

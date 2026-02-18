@@ -1,6 +1,6 @@
 import { InspectorShell } from "@inspector/shell/InspectorShell";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
-import { OS } from "@os/AntigravityOS";
+import { Root } from "@os/6-components/primitives/Root";
 import {
   createRootRoute,
   Link,
@@ -59,7 +59,7 @@ function RootComponent() {
   });
 
   return (
-    <OS.Root>
+    <Root>
       <div className="app-viewport">
         {/* Global Activity Bar */}
         <GlobalNav />
@@ -86,6 +86,6 @@ function RootComponent() {
 
         <TanStackRouterDevtools />
       </div>
-    </OS.Root>
+    </Root>
   );
 }

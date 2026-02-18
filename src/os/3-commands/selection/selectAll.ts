@@ -21,7 +21,7 @@ export const OS_SELECT_ALL = kernel.defineCommand(
     if (items.length === 0) return;
 
     return {
-      state: produce(ctx.state, (draft: any) => {
+      state: produce(ctx.state, (draft) => {
         const zone = ensureZone(draft.os, activeZoneId);
         zone.selection = [...items];
         zone.selectionAnchor = items[0] ?? null;

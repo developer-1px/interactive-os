@@ -50,7 +50,7 @@ import {
   type ZoneBindings,
   type ZoneHandle,
 } from "./defineApp.types";
-import { createWidgetFactory } from "./defineApp.widget";
+
 import { createHistoryMiddleware } from "./middlewares/historyKernelMiddleware";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -64,16 +64,16 @@ export function defineApp<S>(
     history?: boolean;
     persistence?: { key: string; debounceMs?: number };
     /** v3 compat: named selectors for test instance select proxy */
-    selectors?: Record<string, (state: S, ...args: any[]) => any>;
+    selectors?: Record<string, (state: S, ...args: unknown[]) => unknown>;
   },
-): AppHandle<S> & { [key: string]: any } {
+): AppHandle<S> {
   // ── Production: register on singleton kernel ──
   const enableHistory = options?.history ?? false;
   const slice = registerAppSlice<S>(appId, {
     initialState,
     history: enableHistory || undefined,
     persistence: options?.persistence ?? undefined,
-  } as any);
+  });
 
   // ── Registries ──
   const conditionNames = new Set<string>();
@@ -144,7 +144,7 @@ export function defineApp<S>(
     // Register on kernel group with when guard
     const targetGroup = group ?? slice.group;
     const whenGuard = opts?.when
-      ? { when: (state: unknown) => opts.when!.evaluate(state as S) }
+      ? { when: (state: unknown) => opts.when?.evaluate(state as S) }
       : undefined;
 
     const factory = targetGroup.defineCommand(
@@ -230,13 +230,19 @@ export function defineApp<S>(
       return createZone(name);
     },
 
-    createTrigger: ((commandOrConfig: any): any => {
+    createTrigger: ((commandOrConfig: BaseCommand | CompoundTriggerConfig) => {
       // ── Simple trigger (BaseCommand has .type) ──
-      if (commandOrConfig && typeof commandOrConfig.type === "string") {
-        return createSimpleTrigger(appId, commandOrConfig);
+      if (
+        commandOrConfig &&
+        typeof (commandOrConfig as BaseCommand).type === "string"
+      ) {
+        return createSimpleTrigger(appId, commandOrConfig as BaseCommand);
       }
-      // ── Compound trigger (Dialog pattern) — v3 compat ──
-      return createCompoundTrigger(appId, commandOrConfig);
+      // ── Compound trigger (Dialog pattern) ──
+      return createCompoundTrigger(
+        appId,
+        commandOrConfig as CompoundTriggerConfig,
+      );
     }) as {
       (
         command: BaseCommand,
@@ -248,7 +254,7 @@ export function defineApp<S>(
 
     /** v5: Selector-based hook */
     useComputed<T>(selectorOrFn: Selector<S, T> | ((s: S) => T)): T {
-      if (__selectorBrand in (selectorOrFn as any)) {
+      if (__selectorBrand in (selectorOrFn as object)) {
         return slice.useComputed((s) =>
           (selectorOrFn as Selector<S, T>).select(s),
         );
@@ -268,31 +274,5 @@ export function defineApp<S>(
     },
 
     create,
-
-    // ═══════════════════════════════════════════════════════════════
-    // v3 COMPAT: createWidget
-    // Adapts v3 widget pattern → v5 createZone + bind
-    // ═══════════════════════════════════════════════════════════════
-
-    createWidget<C extends Record<string, CommandFactory<any, any>>>(
-      widgetName: string,
-      factory: (define: {
-        command(
-          type: string,
-          ...args: any[]
-        ): CommandFactory<string, any> & { when: any };
-      }) => {
-        commands: C;
-        zone?: any;
-        field?: any;
-        keybindings?: any[];
-      },
-    ): any {
-      return createWidgetFactory(
-        { createZone, registerCommand, defineCondition },
-        widgetName,
-        factory,
-      );
-    },
   };
 }
