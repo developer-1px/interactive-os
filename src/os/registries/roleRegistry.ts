@@ -60,7 +60,8 @@ export type ZoneRole =
   | "disclosure"
   // Custom (non-ARIA)
   | "builderBlock"
-  | "application";
+  | "application"
+  | "textbox";
 
 // ═══════════════════════════════════════════════════════════════════
 // Child Role Mapping (Zone role → default Item role)
@@ -293,6 +294,11 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // ─── Application (custom — full spatial navigation) ───
   application: {
     navigate: { orientation: "both", seamless: true },
+    tab: { behavior: "flow" },
+  },
+
+  // ─── Textbox (custom — Field zone, keyboard delegated to contenteditable) ───
+  textbox: {
     tab: { behavior: "flow" },
   },
 };

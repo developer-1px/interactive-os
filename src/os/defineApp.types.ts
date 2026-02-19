@@ -11,7 +11,9 @@ import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import type React from "react";
 import type { ReactNode } from "react";
 import type { ZoneCallback } from "./2-contexts/zoneRegistry";
+import type { ZoneRole } from "./registries/roleRegistry";
 import type { ZodSchema } from "zod";
+import type { FieldCommandFactory } from "./schemas/command/BaseCommand";
 
 // ═══════════════════════════════════════════════════════════════════
 // Brand Symbols
@@ -46,7 +48,7 @@ export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
     state: S;
-    dispatch?: BaseCommand | BaseCommand[];
+    dispatch?: BaseCommand | BaseCommand[] | undefined;
   }
   | undefined;
 
@@ -61,7 +63,7 @@ export type FlatHandler<S, P> = (
 // ═══════════════════════════════════════════════════════════════════
 
 export interface ZoneBindings {
-  role: string;
+  role: ZoneRole;
   onCheck?: ZoneCallback;
   onAction?: ZoneCallback;
   onDelete?: ZoneCallback;
@@ -79,7 +81,7 @@ export interface FieldBindings {
   onChange?: BaseCommand;
   /** @deprecated Use onCommit instead */
   onSubmit?: BaseCommand;
-  onCommit?: CommandFactory;
+  onCommit?: FieldCommandFactory;
   trigger?: "change" | "blur" | "enter";
   schema?: ZodSchema;
   resetOnSubmit?: boolean;

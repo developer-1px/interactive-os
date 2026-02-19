@@ -16,7 +16,7 @@
  */
 
 import { INITIAL_STATE } from "@apps/todo/features/todo-details/persistence";
-import type { AppState } from "@apps/todo/model/appState";
+import type { AppState, Todo } from "@apps/todo/model/appState";
 import {
   selectCategories,
   selectEditingTodo,
@@ -136,7 +136,6 @@ export const startEdit = listZone.command(
     state: produce(ctx.state, (draft) => {
       if (!payload.id) return;
       draft.ui.editingId = payload.id;
-      draft.ui.editDraft = draft.data.todos[payload.id]?.text || "";
     }),
     // Also set OS-level editingItemId so Field auto-focuses
     dispatch: FIELD_START_EDIT(),
@@ -226,7 +225,7 @@ export const copyTodo = listZone.command(
   (ctx, payload: { ids: string[] }) => {
     const todos = payload.ids
       .map((id) => ctx.state.data.todos[id])
-      .filter(Boolean);
+      .filter((t): t is Todo => Boolean(t));
     if (todos.length === 0) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
@@ -248,7 +247,7 @@ export const cutTodo = listZone.command(
   (ctx, payload: { ids: string[] }) => {
     const todos = payload.ids
       .map((id) => ctx.state.data.todos[id])
-      .filter(Boolean);
+      .filter((t): t is Todo => Boolean(t));
     if (todos.length === 0) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
@@ -586,7 +585,7 @@ export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => ({
 
 export const TodoToolbarUI = toolbarZone.bind({
   role: "toolbar",
-  keybindings: [{ key: "Meta+Shift+V", command: toggleView() }],
+  keybindings: [{ key: "Meta+Shift+V", command: () => toggleView() }],
 });
 
 // ═══════════════════════════════════════════════════════════════════

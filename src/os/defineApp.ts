@@ -97,8 +97,8 @@ export function defineApp<S>(
   const enableHistory = options?.history ?? false;
   const slice = registerAppSlice<S>(appId, {
     initialState,
-    history: enableHistory || undefined,
-    persistence: options?.persistence ?? undefined,
+    ...(enableHistory ? { history: true } : {}),
+    ...(options?.persistence ? { persistence: options.persistence } : {}),
   });
 
   // ── Registries ──
@@ -151,7 +151,7 @@ export function defineApp<S>(
     group?: ReturnType<typeof slice.group>,
   ): CommandFactory<T, P> {
     // Track for test instance
-    flatHandlerRegistry.set(type, { handler, when: opts?.when });
+    flatHandlerRegistry.set(type, { handler, ...(opts?.when ? { when: opts.when } : {}) });
 
     // Wrap flat → curried for kernel (readonly state matches TypedContext)
     const kernelHandler = (ctx: { readonly state: S }) => (payload: P) =>

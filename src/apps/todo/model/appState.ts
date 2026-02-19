@@ -16,8 +16,8 @@ export interface HistoryEntry {
   timestamp: number;
   // Snapshot state for undo/redo (optional if just logging)
   snapshot?: Record<string, unknown>;
-  groupId?: string; // For transaction support
-  focusedItemId?: string | number; // For restoring focus on undo/redo
+  groupId?: string | undefined; // For transaction support
+  focusedItemId?: string | number | undefined; // For restoring focus on undo/redo
 }
 
 export interface DataState {
