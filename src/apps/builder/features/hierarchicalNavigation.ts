@@ -7,11 +7,11 @@
  *   - \: drill up (item→group→section)
  *
  * Architecture:
- *   - itemFilter: derived from focused item's data-level (no separate state)
- *   - drillDown/drillUp: ZoneCallbacks (DOM read → command return)
- *   - No kernel.defineCommand — callbacks are app-layer, not command-layer
+ *   - itemFilter: derived from focused item's level (via BuilderRegistry)
+ *   - drillDown/drillUp: ZoneCallbacks (registry read → command return)
+ *   - Zero DOM access — all hierarchy data from BuilderRegistry
  *
- * Rule #8: Commands don't read DOM. Callbacks do.
+ * Rule: DOM은 OS에서만 읽는다. 앱은 Registry/State만 사용한다.
  *
  * @see discussions/2026-0219-1954-builder-focus-policy.md
  */
@@ -22,6 +22,7 @@ import { kernel } from "@/os/kernel";
 import type { ZoneCursor } from "@/os/2-contexts/zoneRegistry";
 import type { BaseCommand } from "@kernel";
 import type { BuilderLevel } from "../primitives/Builder";
+import { BuilderRegistry } from "../BuilderRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Level Hierarchy
@@ -40,35 +41,6 @@ function getParentLevel(level: BuilderLevel): BuilderLevel | null {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// DOM Helpers (app-layer — callbacks can read DOM)
-// ═══════════════════════════════════════════════════════════════════
-
-function getLevel(id: string): BuilderLevel | null {
-    const el = document.getElementById(id);
-    return (el?.dataset["level"] as BuilderLevel) ?? null;
-}
-
-function findFirstChildAtLevel(
-    parentEl: HTMLElement,
-    level: BuilderLevel,
-): string | null {
-    const child = parentEl.querySelector<HTMLElement>(
-        `[data-level="${level}"][data-item-id]`,
-    );
-    return child?.getAttribute("data-item-id") ?? null;
-}
-
-function findParentAtLevel(
-    el: HTMLElement,
-    level: BuilderLevel,
-): string | null {
-    const parent = el.parentElement?.closest<HTMLElement>(
-        `[data-level="${level}"][data-item-id]`,
-    );
-    return parent?.getAttribute("data-item-id") ?? null;
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // Item Filter — Dynamic (derived from focused item's level)
 // ═══════════════════════════════════════════════════════════════════
 
@@ -76,8 +48,9 @@ function findParentAtLevel(
  * Creates the itemFilter function for a canvas zone.
  *
  * Filters items to only those at the same level as the currently focused item.
- * If no focused item or no level attribute, defaults to "section" level
- * (top-level entry point).
+ * If no focused item or no level, defaults to "section" level.
+ *
+ * Reads level from BuilderRegistry — no DOM access.
  */
 export function createCanvasItemFilter(
     zoneId: string,
@@ -86,10 +59,12 @@ export function createCanvasItemFilter(
         const focusedId =
             kernel.getState().os.focus.zones[zoneId]?.focusedItemId ?? null;
         const currentLevel: BuilderLevel = focusedId
-            ? (getLevel(focusedId) ?? "section")
+            ? (BuilderRegistry.getLevel(focusedId) ?? "section")
             : "section";
 
-        return items.filter((id) => getLevel(id) === currentLevel);
+        return items.filter(
+            (id) => BuilderRegistry.getLevel(id) === currentLevel,
+        );
     };
 }
 
@@ -105,15 +80,10 @@ const CANVAS_ZONE_ID = "builder-canvas";
  * At section/group: focuses the first child at the next level down.
  * At item level: starts field editing.
  *
- * This is a ZoneCallback (app-layer), NOT a kernel command.
- * It reads DOM to determine the target, then returns commands
- * for the OS to dispatch.
+ * Reads hierarchy from BuilderRegistry — no DOM access.
  */
 export function drillDown(cursor: ZoneCursor): BaseCommand | BaseCommand[] {
-    const el = document.getElementById(cursor.focusId);
-    if (!el) return [];
-
-    const level = el.dataset["level"] as BuilderLevel | undefined;
+    const level = BuilderRegistry.getLevel(cursor.focusId);
     if (!level) return [];
 
     // At item level: start editing
@@ -121,11 +91,14 @@ export function drillDown(cursor: ZoneCursor): BaseCommand | BaseCommand[] {
         return FIELD_START_EDIT();
     }
 
-    // At section/group: find first child at next level
+    // At section/group: find first descendant at next level
     const childLevel = getChildLevel(level);
     if (!childLevel) return [];
 
-    const childId = findFirstChildAtLevel(el, childLevel);
+    const childId = BuilderRegistry.getFirstDescendantAtLevel(
+        cursor.focusId,
+        childLevel,
+    );
     if (!childId) return [];
 
     return FOCUS({ zoneId: CANVAS_ZONE_ID, itemId: childId });
@@ -137,22 +110,24 @@ export function drillDown(cursor: ZoneCursor): BaseCommand | BaseCommand[] {
  * At group: focuses the parent section.
  * At item: focuses the parent group (or section if no group).
  * At section: no-op.
+ *
+ * Reads hierarchy from BuilderRegistry — no DOM access.
  */
 export function drillUp(cursor: ZoneCursor): BaseCommand | BaseCommand[] {
-    const el = document.getElementById(cursor.focusId);
-    if (!el) return [];
-
-    const level = el.dataset["level"] as BuilderLevel | undefined;
+    const level = BuilderRegistry.getLevel(cursor.focusId);
     if (!level || level === "section") return []; // Already at top
 
     const parentLevel = getParentLevel(level);
     if (!parentLevel) return [];
 
-    let parentId = findParentAtLevel(el, parentLevel);
+    let parentId = BuilderRegistry.getAncestorAtLevel(
+        cursor.focusId,
+        parentLevel,
+    );
 
     // If no group parent found for item, try section directly
     if (!parentId && level === "item") {
-        parentId = findParentAtLevel(el, "section");
+        parentId = BuilderRegistry.getAncestorAtLevel(cursor.focusId, "section");
     }
 
     if (!parentId) return [];
