@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-19 23:30
+> Last updated: 2026-02-20 00:20
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -22,7 +22,6 @@
 | builder-v2 | Execution | 02-19 | 🔥 Focus |
 | collection-clipboard | Execution | 02-20 | 🔥 Focus |
 | philosophy-hygiene | Execution | 02-19 | 🔥 Focus |
-| sentinel-removal | Done | 02-19 | ✅ Complete |
 | apg-axis-audit | Discovery | 02-19 | ⏸ Idle |
 | command-type-unification | Definition | 02-18 | ⏸ Idle |
 | docs-topology | Execution | 02-18 | ⏸ Idle |
@@ -35,7 +34,10 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
-| test-seam | 02-19 | ✅ docs/1-project/test-seam |
+| sentinel-removal | 02-19 | ✅ archive/2026/02/W08 |
+| test-seam | 02-19 | ✅ archive/2026/02/W08 |
+| lint-cleanup | 02-19 | ✅ archive/2026/02/W08 |
+| eliminate-sync-draft | 02-20 | ✅ archive/2026/02/W08 (FieldRegistry로 대체) |
 | registry-monitor-v5 | 02-18 | ✅ archive/2026/02/W08 |
 | define-app | 02-18 | ✅ archive/2026/02/W08 |
 | builder-mvp | 02-18 | ✅ archive/2026/02/W08 |
@@ -69,9 +71,6 @@
 |---|------|-----------------|------------------|
 | 1 | [os-code-review-issues](0-inbox/2026-0219-1312-[analysis]-os-code-review-issues.md) | command-type-unification | P1: defineCommand when guard 공식화, P3: React 타입 일괄 정리 |
 | 2 | [workflow-dependency-graph](0-inbox/2026-0219-1328-[analysis]-workflow-dependency-graph.md) | — | 참고용 시각화. 고립 노드(/design) 정리 검토 |
-| 3 | [field-commit-design](0-inbox/2026-0219-1813-field-commit-design.md) | — | FieldState 표준화 + 입력 경로 단일화 실행. 프로젝트화 또는 즉시 실행 |
-
-> ✅ [area-stale-docs-audit](0-inbox/2026-0218-1046-[analysis]-area-stale-docs-audit.md) — /solve로 해결 (3건 삭제 + 4건 축소/교정). 참고용으로 보존.
 
 ---
 
@@ -79,34 +78,35 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 2 |
-| Active Projects (total) | 7 |
-| Completed (archived) | 25 |
+| Active Focus | 3 |
+| Active Projects (total) | 8 |
+| Completed (archived) | 29 |
 | Inbox items | 2 |
 | Backlog items | 4 |
-| Open issues | 0 |
+| Open issues | 1 |
 
 ---
 
-## 📝 Recent Changes (2026-02-19)
+## 📝 Recent Changes (2026-02-20)
+
+- 🧹 `/para` 대청소 실행
+  - 📥 Inbox 8건 라우팅: 2건 archive, 2건 area(Field/OS 철학), 2건 philosophy-hygiene, 2건 area(커버리지/메타)
+  - 📦 4 프로젝트 archive: `sentinel-removal`, `lint-cleanup`, `eliminate-sync-draft`(FieldRegistry 대체), `test-seam`
+  - 🗑️ `behavior-first-zone` 백로그 삭제 (가설 무효화, IME 버그가 진짜 원인)
+  - 🔧 `2-area/coverage-gap` → `80-cross-cutting/`으로 이동
+  - 📊 Summary 수치 교정 (Active Focus 2→3, Open issues 0→1)
+
+<details>
+<summary>📝 Previous Changes (2026-02-19)</summary>
 
 - ✅ `builder-v2` T8: Collection Zone Facade 완료 — `createCollectionZone` + `fromArray`/`fromEntities`. Builder sidebar 120줄→55줄. Facade 경계 발견: 단순 CRUD+ordering = facade, 필터/clipboard/포커스 = 앱 책임.
 - 🆕 `philosophy-hygiene` 프로젝트 생성 — /review + /redteam 분석 결과 기반. useComputed 성능 위반 10건, ESLint 규칙 추가, deprecated API 정리.
 - ✅ field-architecture-refactor — FieldRegistry implementation, syncDraft removal, TodoApp migration.
-
 - 🔧 `2-area/` 소스코드 미러 구조로 재편 — Johnny.Decimal 번호 체계 적용
-  - `10-kernel/`, `20-os/{21-commands,22-focus,23-primitives,24-aria}`, `30-apps/`, `80-cross-cutting/`, `90-meta/`
 - 🔧 `/archive` 워크플로우 재정의 — 프로젝트 완료 시 지식을 Area/Resource로 분배
 - 🆕 `/retire` 워크플로우 분리 — 기존 `/archive`(문서 퇴출)를 `/retire`로 이름 변경
-- 🔧 `/para`, `/project`, `/refactor` 워크플로우 갱신 — `/archive`·`/retire` 호출 연결
 - 🆕 `/solve` 워크플로우 신설 — Complex 자율 해결 4단계 래더
-- 🔧 `/go` 워크플로우 갱신 — Complex 시 `/solve` 호출하도록 통합
-- ✅ `registry-monitor-v5` 완료 — kernel inspector 직접 연결, GroupRegistry 삭제, 521 unit tests
-- ✅ `define-app` Phase 3 완료 확인 → archive
-- ✅ `builder-mvp` Definition 완료 → archive (Ideas는 별도 프로젝트로)
-- ✅ `os-prd` Closing — SPEC.md → 2-area/20-os/SPEC.md, 나머지 archive
-- ✅ `create-module` → archive (superseded by define-app)
+- ✅ `registry-monitor-v5`, `define-app`, `builder-mvp`, `os-prd`, `create-module` → archive
 - 📦 closed issues 7건 → archive
-- 📥 Inbox 5건 전부 라우팅
-- 📝 `as any` 근본해결 → 백로그 등록
-- 📝 [analysis] OS 구조 및 철학 준수 심층 분석 보고서 작성 (notes/2026-0219-2255-[analysis]-os-structure-deep-dive.md)
+
+</details>

@@ -4,25 +4,18 @@
 
 ## 🔴 Now
 
-- [ ] T1: Facade에 copy/cut/paste 추가 — Light
-  - copy: 선택 아이템 → clipboard state + clipboardWrite effect
-  - cut: copy + remove
-  - paste: clipboard → insert after focused item (onPaste 훅)
-  - collectionBindings()에 onCopy/onCut/onPaste 추가
-  - [ ] Step 1: /ready
-  - [ ] Step 5: /tdd — 테스트 먼저
-  - [ ] Step 6: /solve — 구현
-  - [ ] Step 8: /fix
-  - [ ] Step 11: /verify
-
-- [ ] T2: Todo 마이그레이션 — Light
-  - 수동 copyTodo/cutTodo/pasteTodo → facade 자동 생성으로 대체
-  - [ ] Step 6: /solve
-  - [ ] Step 11: /verify
+(없음)
 
 ## ⏳ Done
 
-(없음)
+- [x] T1: Facade에 copy/cut/paste 추가
+  - ClipboardConfig: accessor/set/toText/onPaste
+  - 38 facade tests all pass
+- [x] T2: Todo 마이그레이션
+  - 90줄 수동 clipboard → 8줄 config
+  - clipboard.todos → clipboard.items (정규화)
+  - collectionBindings()가 onCopy/onCut/onPaste 자동 생성
+  - 35 todo tests all pass
 
 ## 💡 Ideas
 
