@@ -140,12 +140,12 @@ describe("inferPipeline", () => {
       meta: { input: { type: "KEYBOARD", key: "Enter", code: "Enter" } },
     });
     const steps = inferPipeline(tx);
-    expect(steps[0].detail).toBe("Enter");
+    expect(steps[0]!.detail).toBe("Enter");
   });
 
   it("detail shows handler scope for Dispatch", () => {
     const tx = makeTx({ handlerScope: "sidebarZone" });
     const steps = inferPipeline(tx);
-    expect(steps[1].detail).toBe("sidebarZone");
+    expect(steps[1]!.detail).toBe("sidebarZone");
   });
 });

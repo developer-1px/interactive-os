@@ -51,6 +51,8 @@ export interface CollectionConfig<S, T = any> extends CollectionAdapter<S, T> {
     generateId?: () => string;
     /** Translate DOM focusId to entity ID. Default: identity. */
     extractId?: (focusId: string) => string;
+    /** Customize how an item is cloned for duplicate. Receives original + new ID. */
+    onClone?: (original: T, newId: string) => T;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -162,7 +164,9 @@ export function createCollectionZone<S>(
             if (!original) return { state: ctx.state };
 
             const newId = uid();
-            const cloned = { ...original, id: newId };
+            const cloned = config.onClone
+                ? config.onClone(original, newId)
+                : { ...original, id: newId };
 
             return {
                 state: produce(ctx.state, (draft) => {

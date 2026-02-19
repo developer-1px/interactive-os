@@ -290,14 +290,40 @@ export const redoCommand = BuilderApp.command(
 );
 
 // ═══════════════════════════════════════════════════════════════════
-// Sidebar Zone — section thumbnail list (PPT-style)
+// Sidebar Zone — Collection Zone Facade
 // ═══════════════════════════════════════════════════════════════════
 
-const sidebarZone = BuilderApp.createZone("sidebar");
+import { z } from "zod";
+import {
+  createCollectionZone,
+  fromArray,
+} from "@/os/collection/createCollectionZone";
 
-// Section management commands
+const SectionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  type: z.enum(["hero", "news", "services", "footer"]),
+});
 
-export const renameSectionLabel = sidebarZone.command(
+const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
+  schema: SectionSchema,
+  ...fromArray((s: BuilderState) => s.data.sections),
+  extractId: (focusId: string) => focusId.replace("sidebar-", ""),
+  onClone: (original, newId) => ({
+    ...original,
+    id: newId,
+    label: `${original.label} (copy)`,
+  }),
+});
+
+// Re-export for backward compatibility with existing tests
+export const deleteSection = sidebarCollection.remove;
+export const duplicateSection = sidebarCollection.duplicate;
+export const moveSectionUp = sidebarCollection.moveUp;
+export const moveSectionDown = sidebarCollection.moveDown;
+
+// Custom command not covered by collection CRUD
+export const renameSectionLabel = sidebarCollection.command(
   "renameSectionLabel",
   (ctx: { state: BuilderState }, payload: { id: string; label: string }) => ({
     state: produce(ctx.state, (draft) => {
@@ -307,106 +333,11 @@ export const renameSectionLabel = sidebarZone.command(
   }),
 );
 
-export const deleteSection = sidebarZone.command(
-  "deleteSection",
-  (ctx: { state: BuilderState }, payload: { id: string }) => {
-    const sections = ctx.state.data.sections;
-    const index = sections.findIndex((s) => s.id === payload.id);
-    if (index === -1) return { state: ctx.state };
-
-    // Focus recovery: next sibling, or previous, or null
-    const nextFocusId =
-      sections[index + 1]?.id ?? sections[index - 1]?.id ?? null;
-
-    const newState = produce(ctx.state, (draft) => {
-      draft.data.sections.splice(index, 1);
-    });
-
-    if (nextFocusId) {
-      return {
-        state: newState,
-        dispatch: FOCUS({ zoneId: "builder-sidebar", itemId: `sidebar-${nextFocusId}` }),
-      };
-    }
-    return { state: newState };
-  },
-);
-
-export const duplicateSection = sidebarZone.command(
-  "duplicateSection",
-  (ctx: { state: BuilderState }, payload: { id: string }) => {
-    const sections = ctx.state.data.sections;
-    const index = sections.findIndex((s) => s.id === payload.id);
-    if (index === -1) return { state: ctx.state };
-
-    const source = sections[index]!;
-    const newId = `${source.id}-copy-${Date.now()}`;
-    const newSection: SectionEntry = {
-      id: newId,
-      label: `${source.label} (copy)`,
-      type: source.type,
-    };
-
-    return {
-      state: produce(ctx.state, (draft) => {
-        draft.data.sections.splice(index + 1, 0, newSection);
-      }),
-      dispatch: FOCUS({
-        zoneId: "builder-sidebar",
-        itemId: `sidebar-${newId}`,
-      }),
-    };
-  },
-);
-
-export const moveSectionUp = sidebarZone.command(
-  "moveSectionUp",
-  (ctx: { state: BuilderState }, payload: { id: string }) => ({
-    state: produce(ctx.state, (draft) => {
-      const index = draft.data.sections.findIndex((s) => s.id === payload.id);
-      if (index <= 0) return;
-      [draft.data.sections[index - 1], draft.data.sections[index]] = [
-        draft.data.sections[index]!,
-        draft.data.sections[index - 1]!,
-      ];
-    }),
-  }),
-);
-
-export const moveSectionDown = sidebarZone.command(
-  "moveSectionDown",
-  (ctx: { state: BuilderState }, payload: { id: string }) => ({
-    state: produce(ctx.state, (draft) => {
-      const index = draft.data.sections.findIndex((s) => s.id === payload.id);
-      if (index === -1 || index >= draft.data.sections.length - 1) return;
-      [draft.data.sections[index], draft.data.sections[index + 1]] = [
-        draft.data.sections[index + 1]!,
-        draft.data.sections[index]!,
-      ];
-    }),
-  }),
-);
-
-// Sidebar keybindings — commands receive focusId from ZoneCallback cursor
-import { FOCUS } from "@/os/3-commands/focus/focus";
-
-const sidebarDelete = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) =>
-  deleteSection({ id: cursor.focusId.replace("sidebar-", "") });
-
-const sidebarDuplicate = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) =>
-  duplicateSection({ id: cursor.focusId.replace("sidebar-", "") });
-
-const sidebarMoveUp = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) =>
-  moveSectionUp({ id: cursor.focusId.replace("sidebar-", "") });
-
-const sidebarMoveDown = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) =>
-  moveSectionDown({ id: cursor.focusId.replace("sidebar-", "") });
-
-export const BuilderSidebarUI = sidebarZone.bind({
+// Bind with auto-wired CRUD + custom options
+const collectionBindings = sidebarCollection.collectionBindings();
+export const BuilderSidebarUI = sidebarCollection.bind({
   role: "listbox",
-  onDelete: sidebarDelete,
-  onMoveUp: sidebarMoveUp,
-  onMoveDown: sidebarMoveDown,
+  ...collectionBindings,
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   options: {
@@ -414,9 +345,10 @@ export const BuilderSidebarUI = sidebarZone.bind({
     tab: { behavior: "flow" },
   },
   keybindings: [
-    { key: "Cmd+d", command: sidebarDuplicate },
+    ...collectionBindings.keybindings,
   ],
 });
+
 
 // ═══════════════════════════════════════════════════════════════════
 // Canvas Zone — v5 native (createZone + bind)

@@ -21,6 +21,10 @@ const DRAFT = '[data-placeholder="Add a new task..."]';
 const LISTVIEW = '[role="listbox"]#list';
 const SIDEBAR = '[role="listbox"]#sidebar';
 
+/** Get any item in listView (excluding DRAFT) */
+const todoItem = (listview: string) =>
+  `${listview} [data-item-id]:not(#DRAFT)`;
+
 /** Get the focused item in listView (excluding DRAFT) */
 const focusedTodoItem = (listview: string) =>
   `${listview} [data-focused="true"]:not(#DRAFT)`;
@@ -504,7 +508,7 @@ test.describe("Todo App", () => {
 
     // Arrow Down → Should move focus AND selection (followFocus: true)
     await page.keyboard.press("ArrowDown");
-    const secondItem = page
+    const _secondItem = page
       .locator(todoItem(LISTVIEW))
       .filter({ hasText: "Refactor focus ring styles" }); // Assuming this is 2nd, but better to select by index to be robust
 

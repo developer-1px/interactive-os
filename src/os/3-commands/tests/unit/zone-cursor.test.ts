@@ -54,6 +54,7 @@ function setupFocusWithSelection(
 }
 
 /** Capture dispatched commands via GLOBAL before-middleware */
+// @ts-expect-error — helper kept for future test expansion
 function _captureDispatches() {
     const captured: Command[] = [];
     kernel.use({

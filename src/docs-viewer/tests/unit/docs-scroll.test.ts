@@ -45,10 +45,10 @@ function createScrollContainer(): HTMLDivElement {
 
   el.scrollBy = vi.fn((opts: ScrollToOptions) => {
     if (opts.top) el.scrollTop += opts.top;
-  });
+  }) as unknown as typeof el.scrollBy;
   el.scrollTo = vi.fn((opts: ScrollToOptions) => {
     if (opts.top !== undefined) el.scrollTop = opts.top;
-  });
+  }) as unknown as typeof el.scrollTo;
 
   document.body.appendChild(el);
   return el;

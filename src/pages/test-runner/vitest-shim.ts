@@ -37,21 +37,21 @@ export type TestEvent =
   | { type: "suite:end"; name: string; path: string[]; status: TestStatus }
   | { type: "test:start"; name: string; path: string[] }
   | {
-      type: "test:end";
-      name: string;
-      path: string[];
-      status: TestStatus;
-      duration: number;
-      error?: string;
-    }
+    type: "test:end";
+    name: string;
+    path: string[];
+    status: TestStatus;
+    duration: number;
+    error?: string;
+  }
   | { type: "run:start"; file: string }
   | {
-      type: "run:end";
-      file: string;
-      passed: number;
-      failed: number;
-      total: number;
-    };
+    type: "run:end";
+    file: string;
+    passed: number;
+    failed: number;
+    total: number;
+  };
 
 // ═══════════════════════════════════════════════════════════════════
 // Expect — minimal assertion library
@@ -462,7 +462,7 @@ export class TestRunner {
     };
 
     if (this.suiteStack.length > 0) {
-      this.suiteStack[this.suiteStack.length - 1].children.push(suite);
+      this.suiteStack[this.suiteStack.length - 1]!.children.push(suite);
     } else {
       this.rootSuites.push(suite);
     }
@@ -475,12 +475,12 @@ export class TestRunner {
   private it = (name: string, fn: () => void | Promise<void>) => {
     const test: TestRegistration = { type: "test", name, fn };
     if (this.suiteStack.length > 0) {
-      this.suiteStack[this.suiteStack.length - 1].children.push(test);
+      this.suiteStack[this.suiteStack.length - 1]!.children.push(test);
     } else {
       // Top-level test without describe
       const implicitSuite: SuiteRegistration = {
         name: "(root)",
-        fn: () => {},
+        fn: () => { },
         children: [test],
         beforeEach: [],
         afterEach: [],
@@ -494,7 +494,7 @@ export class TestRunner {
 
   private beforeEachFn = (fn: () => any) => {
     if (this.suiteStack.length > 0) {
-      this.suiteStack[this.suiteStack.length - 1].beforeEach.push(fn);
+      this.suiteStack[this.suiteStack.length - 1]!.beforeEach.push(fn);
     } else {
       this.globalBeforeEach.push(fn);
     }
@@ -502,7 +502,7 @@ export class TestRunner {
 
   private afterEachFn = (fn: () => any) => {
     if (this.suiteStack.length > 0) {
-      this.suiteStack[this.suiteStack.length - 1].afterEach.push(fn);
+      this.suiteStack[this.suiteStack.length - 1]!.afterEach.push(fn);
     } else {
       this.globalAfterEach.push(fn);
     }
@@ -629,12 +629,12 @@ export class TestRunner {
       type: "test:end",
       name: test.name,
       path,
-      status,
+      status: status as TestStatus,
       duration,
-      error,
+      ...(error !== undefined ? { error } : {}),
     });
 
-    return { type: "test", name: test.name, status, duration, error };
+    return { type: "test", name: test.name, status, duration, ...(error !== undefined ? { error } : {}) };
   }
 
   /**

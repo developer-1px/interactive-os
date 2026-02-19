@@ -11,10 +11,16 @@
   - Discussion: [2026-0219-2330-collection-zone-facade](discussions/2026-0219-2330-collection-zone-facade.md)
   - [x] Step 1: /ready — 환경 보장
   - [x] Step 2: /discussion — 아키텍처 논의 완료
-  - [x] Step 5: /tdd — 18 tests → 25 tests (bind 5 + extractId 2)
-  - [x] Step 6: /solve — createCollectionZone + fromArray + fromEntities + collectionBindings + extractId
-  - [x] Step 11: /verify — 25/25 pass, regression 0 (648/663)
-  - 다음 iteration: 실제 Builder sidebar / Todo list 마이그레이션
+  - [x] Step 5: /tdd — 25 tests all pass
+  - [x] Step 6: /solve — createCollectionZone + fromArray + fromEntities + collectionBindings + extractId + onClone
+  - [x] Iter 3: Builder sidebar 마이그레이션 — 120줄 → 55줄. 기존 sidebar 10/10 pass.
+  - [x] Iter 4: Todo 분석 — facade 경계 발견. 아래 기록.
+  - **발견 — facade 경계**:
+    - ✅ remove, duplicate: generic → facade 커버 가능
+    - ❌ moveUp/Down with category filter: 앱-특화 (visible 순서 기준 reorder)
+    - ❌ copy/cut/paste: clipboard + UI state 통합 → 앱-특화
+    - ❌ FOCUS dispatch after mutation: 앱-특화 (zoneId/itemId 지정 필요)
+    - 결론: facade = **단순 CRUD + ordering**. 복잡한 필터/clipboard/포커스 전략은 앱 책임.
 
 ## 🟡 Next
 

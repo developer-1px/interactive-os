@@ -165,7 +165,7 @@ describe("Virtual Focus (T5a)", () => {
       registerVirtualZone("z-virtual", items);
 
       // Dispatch FOCUS to item-2
-      const result = kernel.dispatch(
+      kernel.dispatch(
         FOCUS({ zoneId: "z-virtual", itemId: "item-2" }),
       );
 
@@ -192,7 +192,7 @@ describe("Virtual Focus (T5a)", () => {
         parentId: null,
       });
 
-      const result = kernel.dispatch(
+      kernel.dispatch(
         FOCUS({ zoneId: "z-normal", itemId: "item-A" }),
       );
       // kernel.dispatch returns void — check transaction log for effects
