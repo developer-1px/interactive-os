@@ -1,7 +1,7 @@
 import { Field } from "@os/6-components/field/Field";
 import { Item } from "@os/6-components/primitives/Item";
 import { Star } from "lucide-react";
-import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
+import { BuilderApp, createFieldCommit } from "@/apps/builder/app";
 
 /**
  * TestimonialsBlock
@@ -66,9 +66,7 @@ export function TestimonialsBlock() {
                 name="testimonials-eyebrow"
                 mode="deferred"
                 value={fields["testimonials-eyebrow"] ?? ""}
-                onCommit={(val: string) =>
-                  builderUpdateField("testimonials-eyebrow", val)
-                }
+                onCommit={createFieldCommit("testimonials-eyebrow")}
                 className={`
                                     inline-block transition-all px-2 py-1 rounded-md text-[13px] text-emerald-600 font-semibold tracking-[0.2em]
                                     data-[focused=true]:scale-105 data-[focused=true]:bg-emerald-50 data-[focused=true]:ring-1 data-[focused=true]:ring-emerald-200
@@ -82,9 +80,7 @@ export function TestimonialsBlock() {
                 name="testimonials-title"
                 mode="deferred"
                 value={fields["testimonials-title"] ?? ""}
-                onCommit={(val: string) =>
-                  builderUpdateField("testimonials-title", val)
-                }
+                onCommit={createFieldCommit("testimonials-title")}
                 className={`
                                     inline-block transition-all duration-300 rounded-xl p-3 -mx-3
                                     text-4xl md:text-5xl font-semibold tracking-[-0.03em] text-slate-900
@@ -128,9 +124,7 @@ export function TestimonialsBlock() {
                       mode="deferred"
                       multiline
                       value={fields[`${t.id}-quote`] ?? ""}
-                      onCommit={(val: string) =>
-                        builderUpdateField(`${t.id}-quote`, val)
-                      }
+                      onCommit={createFieldCommit(`${t.id}-quote`)}
                       className={`
                                                 text-slate-600 leading-relaxed p-1 -m-1 rounded w-full
                                                 data-[focused=true]:bg-white data-[focused=true]:ring-1 data-[focused=true]:ring-slate-200 data-[focused=true]:shadow-sm
@@ -152,9 +146,7 @@ export function TestimonialsBlock() {
                         name={`${t.id}-name`}
                         mode="deferred"
                         value={fields[`${t.id}-name`] ?? ""}
-                        onCommit={(val: string) =>
-                          builderUpdateField(`${t.id}-name`, val)
-                        }
+                        onCommit={createFieldCommit(`${t.id}-name`)}
                         className={`
                                                     font-medium text-slate-900 text-sm px-1 -mx-1 rounded inline-block truncate w-full
                                                     data-[focused=true]:bg-white data-[focused=true]:ring-1 data-[focused=true]:ring-slate-200
@@ -166,9 +158,7 @@ export function TestimonialsBlock() {
                         name={`${t.id}-role`}
                         mode="deferred"
                         value={fields[`${t.id}-role`] ?? ""}
-                        onCommit={(val: string) =>
-                          builderUpdateField(`${t.id}-role`, val)
-                        }
+                        onCommit={createFieldCommit(`${t.id}-role`)}
                         className={`
                                                     text-xs text-slate-500 px-1 -mx-1 rounded inline-block truncate w-full
                                                     data-[focused=true]:bg-white data-[focused=true]:ring-1 data-[focused=true]:ring-slate-200

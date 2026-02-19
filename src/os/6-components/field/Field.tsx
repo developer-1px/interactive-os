@@ -28,9 +28,9 @@ interface FieldStyleParams {
   isEditing: boolean;
   multiline: boolean;
   value: string;
-  error?: string | null;
-  placeholder?: string;
-  customClassName?: string;
+  error?: string | null | undefined;
+  placeholder?: string | undefined;
+  customClassName?: string | undefined;
 }
 
 /**
@@ -163,7 +163,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       if (schemaRef.current) {
         const result = schemaRef.current.safeParse(currentValue);
         if (!result.success) {
-          const errorMessage = result.error.errors[0].message;
+          const errorMessage = result.error.issues[0].message;
           FieldRegistry.setError(fieldId, errorMessage);
           return; // Block Commit
         }
@@ -198,11 +198,11 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
         name,
         mode,
         multiline,
-        onCommit: onCommitRef.current,
         trigger,
-        schema,
         resetOnSubmit,
-        onCancel: onCancelRef.current,
+        ...(onCommitRef.current !== undefined ? { onCommit: onCommitRef.current } : {}),
+        ...(schema !== undefined ? { schema } : {}),
+        ...(onCancelRef.current !== undefined ? { onCancel: onCancelRef.current } : {}),
       };
 
       FieldRegistry.register(name, config);
@@ -372,7 +372,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     });
 
     const baseProps = {
-      id: fieldId,
       contentEditable: isContentEditable,
       suppressContentEditableWarning: true,
       role: "textbox",

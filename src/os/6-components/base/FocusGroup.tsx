@@ -14,7 +14,7 @@
  */
 import { type BaseCommand, defineScope, type ScopeToken } from "@kernel";
 import { produce } from "immer";
-import type { ZoneCallback } from "../../2-contexts/zoneRegistry.ts";
+import type { ZoneCallback, ZoneEntry } from "../../2-contexts/zoneRegistry.ts";
 import {
   type ComponentProps,
   createContext,
@@ -176,55 +176,46 @@ const INIT_ZONE = kernel.defineCommand(
   },
 );
 
-// ═══════════════════════════════════════════════════════════════════
-// ZoneRegistry Entry Builder
-// ═══════════════════════════════════════════════════════════════════
-
-function setIfDefined(
-  entry: Record<string, unknown>,
-  key: string,
-  value: unknown,
-) {
-  if (value !== undefined) entry[key] = value;
-}
-
 function buildZoneEntry(
   config: FocusGroupConfig,
   element: HTMLDivElement,
   props: {
-    role?: ZoneRole;
+    role?: ZoneRole | undefined;
     parentId: string | null;
-    onDismiss?: BaseCommand;
-    onAction?: BaseCommand;
-    onSelect?: BaseCommand;
-    onCheck?: BaseCommand;
-    onDelete?: BaseCommand;
-    onMoveUp?: BaseCommand;
-    onMoveDown?: BaseCommand;
-    onCopy?: BaseCommand;
-    onCut?: BaseCommand;
-    onPaste?: BaseCommand;
-    onUndo?: BaseCommand;
-    onRedo?: BaseCommand;
-    itemFilter?: (items: string[]) => string[];
+    onDismiss?: BaseCommand | undefined;
+    onAction?: ZoneCallback | undefined;
+    onSelect?: ZoneCallback | undefined;
+    onCheck?: ZoneCallback | undefined;
+    onDelete?: ZoneCallback | undefined;
+    onMoveUp?: ZoneCallback | undefined;
+    onMoveDown?: ZoneCallback | undefined;
+    onCopy?: ZoneCallback | undefined;
+    onCut?: ZoneCallback | undefined;
+    onPaste?: ZoneCallback | undefined;
+    onUndo?: BaseCommand | undefined;
+    onRedo?: BaseCommand | undefined;
+    itemFilter?: ((items: string[]) => string[]) | undefined;
   },
-): Record<string, unknown> {
-  const entry: Record<string, unknown> = { config, element };
-  setIfDefined(entry, "role", props.role);
-  if (props.parentId != null) entry['parentId'] = props.parentId;
-  setIfDefined(entry, "onDismiss", props.onDismiss);
-  setIfDefined(entry, "onAction", props.onAction);
-  setIfDefined(entry, "onSelect", props.onSelect);
-  setIfDefined(entry, "onCheck", props.onCheck);
-  setIfDefined(entry, "onDelete", props.onDelete);
-  setIfDefined(entry, "onMoveUp", props.onMoveUp);
-  setIfDefined(entry, "onMoveDown", props.onMoveDown);
-  setIfDefined(entry, "onCopy", props.onCopy);
-  setIfDefined(entry, "onCut", props.onCut);
-  setIfDefined(entry, "onPaste", props.onPaste);
-  setIfDefined(entry, "onUndo", props.onUndo);
-  setIfDefined(entry, "onRedo", props.onRedo);
-  setIfDefined(entry, "itemFilter", props.itemFilter);
+): ZoneEntry {
+  const entry: ZoneEntry = {
+    config,
+    element,
+    parentId: props.parentId,
+  };
+  if (props.role !== undefined) entry.role = props.role;
+  if (props.onDismiss !== undefined) entry.onDismiss = props.onDismiss;
+  if (props.onAction !== undefined) entry.onAction = props.onAction;
+  if (props.onSelect !== undefined) entry.onSelect = props.onSelect;
+  if (props.onCheck !== undefined) entry.onCheck = props.onCheck;
+  if (props.onDelete !== undefined) entry.onDelete = props.onDelete;
+  if (props.onMoveUp !== undefined) entry.onMoveUp = props.onMoveUp;
+  if (props.onMoveDown !== undefined) entry.onMoveDown = props.onMoveDown;
+  if (props.onCopy !== undefined) entry.onCopy = props.onCopy;
+  if (props.onCut !== undefined) entry.onCut = props.onCut;
+  if (props.onPaste !== undefined) entry.onPaste = props.onPaste;
+  if (props.onUndo !== undefined) entry.onUndo = props.onUndo;
+  if (props.onRedo !== undefined) entry.onRedo = props.onRedo;
+  if (props.itemFilter !== undefined) entry.itemFilter = props.itemFilter;
   return entry;
 }
 

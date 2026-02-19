@@ -1,7 +1,7 @@
 import { Field } from "@os/6-components/field/Field";
 import { Item } from "@os/6-components/primitives/Item";
 import { BarChart3, Lock, Wand2, Zap } from "lucide-react";
-import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
+import { BuilderApp, createFieldCommit } from "@/apps/builder/app";
 
 /**
  * FeaturesBlock
@@ -26,9 +26,7 @@ export function FeaturesBlock() {
                 name="features-eyebrow"
                 mode="deferred"
                 value={fields["features-eyebrow"] ?? ""}
-                onCommit={(val: string) =>
-                  builderUpdateField("features-eyebrow", val)
-                }
+                onCommit={createFieldCommit("features-eyebrow")}
                 className={`
                                     inline-block transition-all px-2 py-1 rounded-md text-[13px] text-violet-600 font-semibold tracking-[0.2em]
                                     data-[focused=true]:scale-105 data-[focused=true]:bg-violet-50 data-[focused=true]:ring-1 data-[focused=true]:ring-violet-200
@@ -42,9 +40,7 @@ export function FeaturesBlock() {
                 name="features-title"
                 mode="deferred"
                 value={fields["features-title"] ?? ""}
-                onCommit={(val: string) =>
-                  builderUpdateField("features-title", val)
-                }
+                onCommit={createFieldCommit("features-title")}
                 className={`
                                     inline-block transition-all duration-300 rounded-xl p-3 -mx-3
                                     text-4xl md:text-5xl font-semibold tracking-[-0.03em] text-slate-900
@@ -72,9 +68,7 @@ export function FeaturesBlock() {
                     name="feature-main-title"
                     mode="deferred"
                     value={fields["feature-main-title"] ?? ""}
-                    onCommit={(val: string) =>
-                      builderUpdateField("feature-main-title", val)
-                    }
+                    onCommit={createFieldCommit("feature-main-title")}
                     className={`
                                             text-2xl font-semibold text-slate-900 mb-1 px-2 py-1 -mx-2 rounded
                                             data-[focused=true]:bg-white/50 data-[focused=true]:ring-1 data-[focused=true]:ring-violet-300
@@ -87,9 +81,7 @@ export function FeaturesBlock() {
                     mode="deferred"
                     multiline
                     value={fields["feature-main-desc"] ?? ""}
-                    onCommit={(val: string) =>
-                      builderUpdateField("feature-main-desc", val)
-                    }
+                    onCommit={createFieldCommit("feature-main-desc")}
                     className={`
                                             text-slate-600 leading-relaxed px-2 py-1 -mx-2 rounded
                                             data-[focused=true]:bg-white/50 data-[focused=true]:ring-1 data-[focused=true]:ring-violet-300
@@ -113,9 +105,7 @@ export function FeaturesBlock() {
                       name="feature-speed-title"
                       mode="deferred"
                       value={fields["feature-speed-title"] ?? ""}
-                      onCommit={(val: string) =>
-                        builderUpdateField("feature-speed-title", val)
-                      }
+                      onCommit={createFieldCommit("feature-speed-title")}
                       className={`
                                                 text-lg font-semibold text-slate-900 mb-1 px-1 -mx-1 rounded inline-block
                                                 data-[focused=true]:bg-amber-50 data-[focused=true]:ring-1 data-[focused=true]:ring-amber-200
@@ -127,9 +117,7 @@ export function FeaturesBlock() {
                       name="feature-speed-desc"
                       mode="deferred"
                       value={fields["feature-speed-desc"] ?? ""}
-                      onCommit={(val: string) =>
-                        builderUpdateField("feature-speed-desc", val)
-                      }
+                      onCommit={createFieldCommit("feature-speed-desc")}
                       className={`
                                                 text-sm text-slate-500 px-1 -mx-1 rounded inline-block
                                                 data-[focused=true]:bg-amber-50 data-[focused=true]:ring-1 data-[focused=true]:ring-amber-200
@@ -154,9 +142,7 @@ export function FeaturesBlock() {
                       name="feature-security-title"
                       mode="deferred"
                       value={fields["feature-security-title"] ?? ""}
-                      onCommit={(val: string) =>
-                        builderUpdateField("feature-security-title", val)
-                      }
+                      onCommit={createFieldCommit("feature-security-title")}
                       className={`
                                                 text-lg font-semibold text-slate-900 mb-1 px-1 -mx-1 rounded inline-block
                                                 data-[focused=true]:bg-emerald-50 data-[focused=true]:ring-1 data-[focused=true]:ring-emerald-200
@@ -168,9 +154,7 @@ export function FeaturesBlock() {
                       name="feature-security-desc"
                       mode="deferred"
                       value={fields["feature-security-desc"] ?? ""}
-                      onCommit={(val: string) =>
-                        builderUpdateField("feature-security-desc", val)
-                      }
+                      onCommit={createFieldCommit("feature-security-desc")}
                       className={`
                                                 text-sm text-slate-500 px-1 -mx-1 rounded inline-block
                                                 data-[focused=true]:bg-emerald-50 data-[focused=true]:ring-1 data-[focused=true]:ring-emerald-200
@@ -200,9 +184,7 @@ export function FeaturesBlock() {
                     name="feature-analytics-title"
                     mode="deferred"
                     value={fields["feature-analytics-title"] ?? ""}
-                    onCommit={(val: string) =>
-                      builderUpdateField("feature-analytics-title", val)
-                    }
+                    onCommit={createFieldCommit("feature-analytics-title")}
                     className={`
                                             text-lg font-semibold text-slate-900 mb-1 px-1 -mx-1 rounded inline-block
                                             data-[focused=true]:bg-blue-50 data-[focused=true]:ring-1 data-[focused=true]:ring-blue-200
@@ -215,9 +197,7 @@ export function FeaturesBlock() {
                     mode="deferred"
                     multiline
                     value={fields["feature-analytics-desc"] ?? ""}
-                    onCommit={(val: string) =>
-                      builderUpdateField("feature-analytics-desc", val)
-                    }
+                    onCommit={createFieldCommit("feature-analytics-desc")}
                     className={`
                                             text-sm text-slate-500 px-1 -mx-1 rounded inline-block
                                             data-[focused=true]:bg-blue-50 data-[focused=true]:ring-1 data-[focused=true]:ring-blue-200
@@ -249,9 +229,7 @@ export function FeaturesBlock() {
                     name="feature-collab-title"
                     mode="deferred"
                     value={fields["feature-collab-title"] ?? ""}
-                    onCommit={(val: string) =>
-                      builderUpdateField("feature-collab-title", val)
-                    }
+                    onCommit={createFieldCommit("feature-collab-title")}
                     className={`
                                             text-lg font-semibold text-slate-900 mb-1 px-1 -mx-1 rounded inline-block
                                             data-[focused=true]:bg-pink-50 data-[focused=true]:ring-1 data-[focused=true]:ring-pink-200
@@ -263,9 +241,7 @@ export function FeaturesBlock() {
                     name="feature-collab-desc"
                     mode="deferred"
                     value={fields["feature-collab-desc"] ?? ""}
-                    onCommit={(val: string) =>
-                      builderUpdateField("feature-collab-desc", val)
-                    }
+                    onCommit={createFieldCommit("feature-collab-desc")}
                     className={`
                                             text-sm text-slate-500 px-1 -mx-1 rounded inline-block
                                             data-[focused=true]:bg-pink-50 data-[focused=true]:ring-1 data-[focused=true]:ring-pink-200
