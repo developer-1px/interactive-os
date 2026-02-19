@@ -37,7 +37,9 @@ export const DOM_ITEMS = kernel.defineContext("dom-items", (): string[] => {
     const id = el.getAttribute("data-item-id");
     if (id) items.push(id);
   }
-  return items;
+
+  // Dynamic item filter — zone-level hook for runtime filtering
+  return entry.itemFilter ? entry.itemFilter(items) : items;
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -62,6 +64,14 @@ export const DOM_RECTS = kernel.defineContext(
       if (el.closest("[data-focus-group]") !== entry.element) continue;
       const id = el.getAttribute("data-item-id");
       if (id) rects.set(id, el.getBoundingClientRect());
+    }
+
+    // Dynamic item filter — apply same filter as DOM_ITEMS for consistency
+    if (entry.itemFilter) {
+      const allowedIds = new Set(entry.itemFilter(Array.from(rects.keys())));
+      for (const id of rects.keys()) {
+        if (!allowedIds.has(id)) rects.delete(id);
+      }
     }
     return rects;
   },

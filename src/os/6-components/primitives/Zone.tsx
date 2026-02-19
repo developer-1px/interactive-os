@@ -66,6 +66,8 @@ export interface ZoneProps
   onRedo?: BaseCommand;
   /** Command dispatched when the zone is dismissed (ESC key) */
   onDismiss?: BaseCommand;
+  /** Dynamic item filter — controls which items are keyboard-navigable at runtime */
+  itemFilter?: (items: string[]) => string[];
   /** Children */
   children: ReactNode;
 }
@@ -86,6 +88,7 @@ export function Zone({
   onUndo,
   onRedo,
   onDismiss,
+  itemFilter,
   children,
   className,
   style,
@@ -117,6 +120,7 @@ export function Zone({
       {...(onUndo !== undefined ? { onUndo } : {})}
       {...(onRedo !== undefined ? { onRedo } : {})}
       {...(onDismiss !== undefined ? { onDismiss } : {})}
+      {...(itemFilter !== undefined ? { itemFilter } : {})}
       {...(className !== undefined ? { className } : {})}
       {...(style !== undefined ? { style } : {})}
       {...props}

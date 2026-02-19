@@ -53,7 +53,6 @@ function createBuilderComponent(level: BuilderLevel, displayName: string) {
           ref={ref}
           data-level={level}
           data-builder-id={id}
-          data-nav-skip={level !== "item" ? "true" : undefined}
         >
           {children}
         </OSItem>

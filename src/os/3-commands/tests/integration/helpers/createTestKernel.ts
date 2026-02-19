@@ -21,6 +21,7 @@ import { initialZoneState } from "@os/state/initial";
 import { ensureZone } from "@os/state/utils";
 import type { FocusGroupConfig } from "@os/schemas/focus/config/FocusGroupConfig";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
+import { ZoneRegistry as ZoneRegistryImport } from "@os/2-contexts/zoneRegistry";
 
 // Production commands — registered on test kernel via kernel.register()
 import { FOCUS as prodFOCUS } from "../../../focus/focus";
@@ -66,10 +67,25 @@ export function createTestKernel(overrides?: Partial<AppState>) {
     kernel.defineEffect("scroll", () => { });
 
     // ─── Define contexts with mock providers ───
-    const DOM_ITEMS = kernel.defineContext("dom-items", () => mockItems.current);
+    const DOM_ITEMS = kernel.defineContext("dom-items", () => {
+        const zoneId = kernel.getState().os.focus.activeZoneId;
+        const entry = zoneId ? ZoneRegistryImport.get(zoneId) : undefined;
+        const items = mockItems.current;
+        return entry?.itemFilter ? entry.itemFilter(items) : items;
+    });
     const DOM_RECTS = kernel.defineContext(
         "dom-rects",
-        () => mockRects.current,
+        () => {
+            const zoneId = kernel.getState().os.focus.activeZoneId;
+            const entry = zoneId ? ZoneRegistryImport.get(zoneId) : undefined;
+            if (!entry?.itemFilter) return mockRects.current;
+            const allowedIds = new Set(entry.itemFilter(Array.from(mockRects.current.keys())));
+            const filtered = new Map<string, DOMRect>();
+            for (const [id, rect] of mockRects.current) {
+                if (allowedIds.has(id)) filtered.set(id, rect);
+            }
+            return filtered;
+        },
     );
     const ZONE_CONFIG = kernel.defineContext(
         "zone-config",

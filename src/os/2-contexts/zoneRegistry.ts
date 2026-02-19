@@ -38,6 +38,18 @@ export interface ZoneEntry {
   parentId: string | null;
   /** Command dispatched on ESC when dismiss.escape is "close" */
   onDismiss?: BaseCommand;
+  /**
+   * Dynamic item filter — determines which items are keyboard-navigable.
+   *
+   * Called by DOM_ITEMS/DOM_RECTS context providers on every interaction.
+   * This is the dynamic version of data-nav-skip:
+   *   data-nav-skip = static exclusion (decorative elements)
+   *   itemFilter    = dynamic filtering (level-based, search results, etc.)
+   *
+   * @param items - All item IDs in DOM order (after static nav-skip filtering)
+   * @returns Subset of items that should be navigable right now
+   */
+  itemFilter?: (items: string[]) => string[];
   // Cursor-based callbacks — app receives full focus/selection context
   onAction?: ZoneCallback;
   onSelect?: ZoneCallback;

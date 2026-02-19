@@ -10,6 +10,15 @@
   - [ ] 1-2: 선택된 섹션 ID를 커맨드에 자동 주입 (selectedId → ids)
   - [ ] 1-3: Unit test — 키 이벤트 시뮬레이션으로 각 커맨드 동작 확인
 
+- [x] T6: 계층 키보드 내비게이션 (Section/Group/Item)
+  - Discussion: [builder-focus-policy](discussions/2026-0219-1954-builder-focus-policy.md)
+  - [x] 6-1: OS — Zone config에 `itemFilter?: (items: string[]) => string[]` 추가
+  - [x] 6-2: OS — `DOM_ITEMS` / `DOM_RECTS` context provider에 filter 적용
+  - [x] 6-3: Builder — `Builder.Section`/`Builder.Group`에서 `data-nav-skip` 제거
+  - [x] 6-4: Builder — `DRILL_DOWN` / `DRILL_UP` command 구현
+  - [x] 6-5: Builder — `setupHierarchicalNavigation()` 조합 함수 + keybinding (Enter/\)
+  - [x] 6-6: Unit test — 레벨별 순회, drill-down/up, 레벨 파생 검증
+
 - [ ] T2: PropertiesPanel 라이브 바인딩 강화
   - [ ] 2-1: ImageProperties에 실제 URL 입력 → 이미지 교체 연동
   - [ ] 2-2: IconProperties에 아이콘 검색/선택 연동

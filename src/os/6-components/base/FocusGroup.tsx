@@ -138,6 +138,9 @@ export interface FocusGroupProps
   /** Command dispatched when zone is dismissed (ESC with dismiss.escape: "close") */
   onDismiss?: BaseCommand;
 
+  /** Dynamic item filter — controls which items are keyboard-navigable at runtime */
+  itemFilter?: (items: string[]) => string[];
+
   /** Children */
   children: ReactNode;
 
@@ -203,6 +206,7 @@ function buildZoneEntry(
     onPaste?: BaseCommand;
     onUndo?: BaseCommand;
     onRedo?: BaseCommand;
+    itemFilter?: (items: string[]) => string[];
   },
 ): Record<string, unknown> {
   const entry: Record<string, unknown> = { config, element };
@@ -220,6 +224,7 @@ function buildZoneEntry(
   setIfDefined(entry, "onPaste", props.onPaste);
   setIfDefined(entry, "onUndo", props.onUndo);
   setIfDefined(entry, "onRedo", props.onRedo);
+  setIfDefined(entry, "itemFilter", props.itemFilter);
   return entry;
 }
 
@@ -249,6 +254,7 @@ export function FocusGroup({
   onUndo: _onUndo,
   onRedo: _onRedo,
   onDismiss,
+  itemFilter: _itemFilter,
   children,
   className,
   style,
@@ -313,6 +319,7 @@ export function FocusGroup({
           onPaste: _onPaste,
           onUndo: _onUndo,
           onRedo: _onRedo,
+          itemFilter: _itemFilter,
         }),
       );
     }
@@ -337,6 +344,7 @@ export function FocusGroup({
     _onPaste,
     _onUndo,
     _onRedo,
+    _itemFilter,
   ]);
 
   // --- AutoFocus: focus first item on mount when config.project.autoFocus ---

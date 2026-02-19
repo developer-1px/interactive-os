@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**builder-v2** — Sidebar 키보드 바인딩, PropertiesPanel 라이브 바인딩, Undo/Redo
+**builder-v2** — 계층 키보드 내비게이션(itemFilter), Sidebar 키보드 바인딩, PropertiesPanel 라이브 바인딩
 
 ---
 

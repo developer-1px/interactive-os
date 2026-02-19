@@ -174,10 +174,6 @@ export function UnifiedInspector({
   const [isUserScrolled, setIsUserScrolled] = useState(false);
   const prevTxCount = useRef(transactions.length);
 
-  // Each row is ~36px, show 3 recent items above current
-  const ROWS_VISIBLE = 3;
-  const ROW_HEIGHT = 36;
-
   const isAtBottom = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return true;
@@ -195,7 +191,7 @@ export function UnifiedInspector({
     setIsUserScrolled(!isAtBottom());
   }, [isAtBottom]);
 
-  // Auto-scroll when new transactions arrive (if user hasn't scrolled up)
+  // Auto-scroll: find the 3rd-from-last item in DOM and scroll its top into view
   // biome-ignore lint/correctness/useExhaustiveDependencies: track tx count changes
   useEffect(() => {
     if (transactions.length > prevTxCount.current) {
@@ -203,9 +199,15 @@ export function UnifiedInspector({
         requestAnimationFrame(() => {
           const el = scrollRef.current;
           if (!el) return;
-          // Scroll so the last ~3 items are visible at the top
-          const targetScroll = el.scrollHeight - el.clientHeight;
-          el.scrollTop = targetScroll;
+          // Find the target item: 3rd from last (or first if < 3 items)
+          const targetIdx = Math.max(0, transactions.length - 3);
+          const targetEl = el.querySelector(`[data-tx-index="${targetIdx}"]`) as HTMLElement | null;
+          if (targetEl) {
+            // Account for sticky headers: Inspector header (32px) + section header (28px)
+            el.scrollTop = targetEl.offsetTop - 60;
+          } else {
+            el.scrollTop = el.scrollHeight;
+          }
         });
       }
     }
@@ -269,6 +271,7 @@ export function UnifiedInspector({
                   index={i + 1}
                   expanded={expandedIds.has(tx.id)}
                   onToggle={() => toggle(tx.id)}
+                  dataIndex={i}
                 />
               ))
             )}
@@ -290,9 +293,9 @@ export function UnifiedInspector({
             </CollapsibleSection>
           )}
 
-          {/* Bottom spacer — allows latest ~3 items to sit near top */}
+          {/* Bottom spacer — allows latest items to sit near top */}
           {transactions.length > 0 && (
-            <div style={{ height: `calc(100% - ${ROWS_VISIBLE * ROW_HEIGHT}px)` }} aria-hidden />
+            <div style={{ height: "80%" }} aria-hidden />
           )}
         </div>
 
@@ -319,11 +322,13 @@ function TimelineNode({
   index,
   expanded,
   onToggle,
+  dataIndex,
 }: {
   tx: Transaction;
   index: number;
   expanded: boolean;
   onToggle: () => void;
+  dataIndex: number;
 }) {
   const pipeline = inferPipeline(tx);
   const inputMeta = getInputMeta(tx);
@@ -349,6 +354,7 @@ function TimelineNode({
 
   return (
     <div
+      data-tx-index={dataIndex}
       className={`flex flex-col border-b border-[#f0f0f0] ${expanded ? "bg-white" : "hover:bg-[#fafafa]"}`}
     >
       {/* Header Row (Icon + Number + Text — all middle-aligned) */}

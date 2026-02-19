@@ -3,10 +3,15 @@ import { Zone } from "@os/6-components/primitives/Zone";
 import { useEffect, useState } from "react";
 import { selectElement, type PropertyType } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
-import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
+import {
+  createCanvasItemFilter,
+  BUILDER_DRILL_DOWN,
+  BUILDER_DRILL_UP,
+} from "@/apps/builder/features/hierarchicalNavigation";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
 import { kernel } from "@/os/kernel";
+import { Keybindings } from "@/os/keymaps/keybindings";
 import {
   EditorToolbar,
   NCPFooterBlock,
@@ -16,6 +21,11 @@ import {
   PropertiesPanel,
   type ViewportMode,
 } from "./builder";
+
+const CANVAS_ZONE_ID = "builder-canvas";
+
+// Stable item filter — derived from focused item's data-level
+const canvasItemFilter = createCanvasItemFilter(CANVAS_ZONE_ID);
 
 /**
  * BuilderPage
@@ -30,7 +40,7 @@ export default function BuilderPage() {
   // Derive selection from builder-canvas zone's last focused item.
   // Uses lastFocusedId so selection persists even when panel gains focus.
   const focusedId = kernel.useComputed(
-    (state) => state.os.focus.zones["builder-canvas"]?.lastFocusedId ?? null,
+    (state) => state.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
   );
 
   useEffect(() => {
@@ -71,6 +81,21 @@ export default function BuilderPage() {
     kernel.dispatch(selectElement({ id: focusedId, type }));
   }, [focusedId]);
 
+  // Register \ keybinding for drill-up
+  useEffect(() => {
+    return Keybindings.registerAll([
+      {
+        key: "\\",
+        command: BUILDER_DRILL_UP({ zoneId: CANVAS_ZONE_ID }),
+        when: "navigating",
+      },
+    ]);
+  }, []);
+
+  // onAction: Enter → drill down (section/group→child, item→edit)
+  const handleAction = () =>
+    BUILDER_DRILL_DOWN({ zoneId: CANVAS_ZONE_ID });
+
   const getViewportStyle = () => {
     switch (viewport) {
       case "mobile":
@@ -93,9 +118,10 @@ export default function BuilderPage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Canvas Area */}
         <Zone
-          id="builder-canvas"
+          id={CANVAS_ZONE_ID}
           className="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-100/50"
-          onAction={() => FIELD_START_EDIT()}
+          onAction={handleAction}
+          itemFilter={canvasItemFilter}
           options={{
             navigate: { orientation: "corner" },
             tab: { behavior: "trap" },
@@ -127,3 +153,4 @@ export default function BuilderPage() {
     </div>
   );
 }
+
