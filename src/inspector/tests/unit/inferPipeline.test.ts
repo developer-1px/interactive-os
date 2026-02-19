@@ -9,7 +9,7 @@ import {
   inferPipeline,
   type PipelineStep,
 } from "@inspector/panels/UnifiedInspector";
-import type { Transaction } from "@os/schemas";
+import type { Transaction } from "@kernel/core/transaction";
 import { describe, expect, it } from "vitest";
 
 // ─── Helpers ───
