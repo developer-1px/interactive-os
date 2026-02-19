@@ -23,10 +23,12 @@
 
 ## ⏳ Done
 
-- [x] T8: Collection Zone Facade — `createCollectionZone` (probe-first 4 iterations)
-  - createCollectionZone + fromArray/fromEntities + collectionBindings + extractId + onClone
-  - Builder sidebar 마이그레이션: 120줄 → 55줄. 25 facade tests + 10 기존 tests all pass.
-  - Facade 경계 발견: 단순 CRUD+ordering = facade, 필터/clipboard/포커스 = 앱 책임.
+- [x] T8: Collection Zone Facade — `createCollectionZone` (probe-first → /doubt → 재설계)
+  - 285줄 facade로 Builder(-78줄) + Todo(-94줄) 양쪽 마이그레이션 완료
+  - API: accessor(array) / fromEntities(entity+order) / filter / extractId / onClone / collectionBindings
+  - /doubt 자기교정: normalize/denormalize → ItemOps 직접 mutation으로 재설계
+  - 27 facade tests + 10 builder tests + 35 todo tests all pass
+  - 다음: copy/cut/paste facade화 (onPaste 훅)
 - [x] T3: Undo/Redo 기초 구현
   - [x] BuilderState.history (past/future stacks)
   - [x] undoCommand / redoCommand + canUndo/canRedo conditions

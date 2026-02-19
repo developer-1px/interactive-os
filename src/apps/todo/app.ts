@@ -82,12 +82,32 @@ export const todosByCategory = TodoApp.selector(
 );
 
 // ═══════════════════════════════════════════════════════════════════
-// TodoList Zone — listbox with CRUD, clipboard, ordering
+// TodoList Zone — Collection Zone Facade + app-specific commands
 // ═══════════════════════════════════════════════════════════════════
 
-const listZone = TodoApp.createZone("list");
+import {
+  createCollectionZone,
+  fromEntities,
+} from "@/os/collection/createCollectionZone";
 
-export const toggleTodo = listZone.command(
+const listCollection = createCollectionZone(TodoApp, "list", {
+  ...fromEntities(
+    (s: AppState) => s.data.todos,
+    (s: AppState) => s.data.todoOrder,
+  ),
+  filter: (state: AppState) => (item: Todo) =>
+    item.categoryId === state.ui.selectedCategoryId,
+});
+
+// Re-export for backward compatibility
+export const deleteTodo = listCollection.remove;
+export const moveItemUp = listCollection.moveUp;
+export const moveItemDown = listCollection.moveDown;
+export const duplicateTodo = listCollection.duplicate;
+
+// ── App-specific commands on the collection zone ──
+
+export const toggleTodo = listCollection.command(
   "toggleTodo",
   (ctx, payload: { id: string }) => ({
     state: produce(ctx.state, (draft) => {
@@ -97,40 +117,7 @@ export const toggleTodo = listZone.command(
   }),
 );
 
-export const deleteTodo = listZone.command(
-  "deleteTodo",
-  (ctx, payload: { id: string }) => {
-    if (!payload.id) return { state: ctx.state };
-
-    // Compute the next focus target BEFORE deleting
-    const visibleIds = ctx.state.data.todoOrder.filter(
-      (id) =>
-        ctx.state.data.todos[id]?.categoryId ===
-        ctx.state.ui.selectedCategoryId,
-    );
-    const idx = visibleIds.indexOf(payload.id);
-    // Prefer next item, fall back to previous
-    const nextFocusId =
-      idx < visibleIds.length - 1
-        ? visibleIds[idx + 1]
-        : idx > 0
-          ? visibleIds[idx - 1]
-          : undefined;
-
-    return {
-      state: produce(ctx.state, (draft) => {
-        delete draft.data.todos[payload.id];
-        const index = draft.data.todoOrder.indexOf(payload.id);
-        if (index !== -1) draft.data.todoOrder.splice(index, 1);
-      }),
-      dispatch: nextFocusId
-        ? FOCUS({ zoneId: "list", itemId: nextFocusId })
-        : undefined,
-    };
-  },
-);
-
-export const startEdit = listZone.command(
+export const startEdit = listCollection.command(
   "startEdit",
   (ctx, payload: { id: string }) => ({
     state: produce(ctx.state, (draft) => {
@@ -142,85 +129,7 @@ export const startEdit = listZone.command(
   }),
 );
 
-export const moveItemUp = listZone.command(
-  "moveItemUp",
-  (ctx, payload: { id: string }) => ({
-    state: produce(ctx.state, (draft) => {
-      if (!payload.id) return;
-      const visibleIds = ctx.state.data.todoOrder.filter(
-        (id) =>
-          ctx.state.data.todos[id]?.categoryId ===
-          ctx.state.ui.selectedCategoryId,
-      );
-      const visualIdx = visibleIds.indexOf(payload.id);
-      if (visualIdx <= 0) return;
-      const swapId = visibleIds[visualIdx - 1]!;
-      const globalTargetIdx = draft.data.todoOrder.indexOf(payload.id);
-      const globalSwapIdx = draft.data.todoOrder.indexOf(swapId);
-      [
-        draft.data.todoOrder[globalTargetIdx],
-        draft.data.todoOrder[globalSwapIdx],
-      ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
-    }),
-  }),
-);
-
-export const moveItemDown = listZone.command(
-  "moveItemDown",
-  (ctx, payload: { id: string }) => ({
-    state: produce(ctx.state, (draft) => {
-      if (!payload.id) return;
-      const visibleIds = ctx.state.data.todoOrder.filter(
-        (id) =>
-          ctx.state.data.todos[id]?.categoryId ===
-          ctx.state.ui.selectedCategoryId,
-      );
-      const visualIdx = visibleIds.indexOf(payload.id);
-      if (visualIdx === -1 || visualIdx >= visibleIds.length - 1) return;
-      const swapId = visibleIds[visualIdx + 1]!;
-      const globalTargetIdx = draft.data.todoOrder.indexOf(payload.id);
-      const globalSwapIdx = draft.data.todoOrder.indexOf(swapId);
-      [
-        draft.data.todoOrder[globalTargetIdx],
-        draft.data.todoOrder[globalSwapIdx],
-      ] = [
-          draft.data.todoOrder[globalSwapIdx]!,
-          draft.data.todoOrder[globalTargetIdx]!,
-        ];
-    }),
-  }),
-);
-
-export const duplicateTodo = listZone.command(
-  "duplicateTodo",
-  (ctx, payload: { id: string }) => {
-    if (!payload.id) return { state: ctx.state };
-    const todo = ctx.state.data.todos[payload.id];
-    if (!todo) return { state: ctx.state };
-    return {
-      state: produce(ctx.state, (draft) => {
-        const newId = uid();
-        draft.data.todos[newId] = {
-          id: newId,
-          text: todo.text,
-          completed: todo.completed,
-          categoryId: todo.categoryId,
-        };
-        const originalIndex = draft.data.todoOrder.indexOf(payload.id);
-        if (originalIndex !== -1) {
-          draft.data.todoOrder.splice(originalIndex + 1, 0, newId);
-        } else {
-          draft.data.todoOrder.push(newId);
-        }
-      }),
-    };
-  },
-);
-
-export const copyTodo = listZone.command(
+export const copyTodo = listCollection.command(
   "copyTodo",
   (ctx, payload: { ids: string[] }) => {
     const todos = payload.ids
@@ -242,7 +151,7 @@ export const copyTodo = listZone.command(
   },
 );
 
-export const cutTodo = listZone.command(
+export const cutTodo = listCollection.command(
   "cutTodo",
   (ctx, payload: { ids: string[] }) => {
     const todos = payload.ids
@@ -269,7 +178,7 @@ export const cutTodo = listZone.command(
   },
 );
 
-export const pasteTodo = listZone.command(
+export const pasteTodo = listCollection.command(
   "pasteTodo",
   (ctx, payload: { id?: string }) => {
     const clip = ctx.state.ui.clipboard;
@@ -310,7 +219,7 @@ export const pasteTodo = listZone.command(
   },
 );
 
-export const undoCommand = listZone.command(
+export const undoCommand = listCollection.command(
   "undo",
   (ctx) => {
     // when: canUndo guarantees past.length > 0
@@ -369,7 +278,7 @@ export const undoCommand = listZone.command(
   { when: canUndo },
 );
 
-export const redoCommand = listZone.command(
+export const redoCommand = listCollection.command(
   "redo",
   (ctx) => {
     // when: canRedo guarantees future.length > 0
@@ -400,15 +309,13 @@ export const redoCommand = listZone.command(
   { when: canRedo },
 );
 
-// Zone binding
-export const TodoListUI = listZone.bind({
+// Zone binding — auto-wired CRUD + app-specific handlers
+const listBindings = listCollection.collectionBindings();
+export const TodoListUI = listCollection.bind({
   role: "listbox",
   onCheck: (cursor) => toggleTodo({ id: cursor.focusId }),
   onAction: (cursor) => startEdit({ id: cursor.focusId }),
-  onDelete: (cursor) => {
-    const ids = cursor.selection.length > 0 ? cursor.selection : [cursor.focusId];
-    return ids.map(id => deleteTodo({ id }));
-  },
+  ...listBindings,
   onCopy: (cursor) => {
     const ids = cursor.selection.length > 0 ? cursor.selection : [cursor.focusId];
     return copyTodo({ ids });
@@ -418,11 +325,11 @@ export const TodoListUI = listZone.bind({
     return cutTodo({ ids });
   },
   onPaste: (cursor) => pasteTodo({ id: cursor.focusId }),
-  onMoveUp: (cursor) => moveItemUp({ id: cursor.focusId }),
-  onMoveDown: (cursor) => moveItemDown({ id: cursor.focusId }),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
-  keybindings: [{ key: "Meta+D", command: (cursor) => duplicateTodo({ id: cursor.focusId }) }],
+  keybindings: [
+    ...listBindings.keybindings,
+  ],
 });
 
 // ═══════════════════════════════════════════════════════════════════
