@@ -309,7 +309,7 @@ describe("Todo v5 — defineApp native", () => {
       const lastId = ids[ids.length - 1]!;
       app.dispatch(copyTodo({ ids: [lastId] }));
       expect(app.state.ui.clipboard).not.toBeNull();
-      expect(app.state.ui.clipboard?.todos[0]?.text).toBe("Copy me");
+      expect(app.state.ui.clipboard?.items[0]?.text).toBe("Copy me");
       expect(app.state.ui.clipboard?.isCut).toBe(false);
     });
 
@@ -335,7 +335,7 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(cutTodo({ ids: [lastId] }));
       expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
       expect(app.state.ui.clipboard).not.toBeNull();
-      expect(app.state.ui.clipboard?.todos[0]?.text).toBe("Cut me");
+      expect(app.state.ui.clipboard?.items[0]?.text).toBe("Cut me");
       expect(app.state.ui.clipboard?.isCut).toBe(true);
     });
 
@@ -369,12 +369,12 @@ describe("Todo v5 — defineApp native", () => {
       const ids = Object.keys(app.state.data.todos);
 
       app.dispatch(copyTodo({ ids: [ids[ids.length - 2]!] }));
-      expect(app.state.ui.clipboard?.todos.length).toBe(1);
-      expect(app.state.ui.clipboard?.todos[0]?.text).toBe("First");
+      expect(app.state.ui.clipboard?.items.length).toBe(1);
+      expect(app.state.ui.clipboard?.items[0]?.text).toBe("First");
 
       app.dispatch(copyTodo({ ids: [ids[ids.length - 1]!] }));
-      expect(app.state.ui.clipboard?.todos.length).toBe(1);
-      expect(app.state.ui.clipboard?.todos[0]?.text).toBe("Second");
+      expect(app.state.ui.clipboard?.items.length).toBe(1);
+      expect(app.state.ui.clipboard?.items[0]?.text).toBe("Second");
     });
 
     // ── Batch clipboard: {ids} API ──
@@ -390,8 +390,8 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(copyTodo({ ids: lastThree }));
 
       expect(app.state.ui.clipboard).not.toBeNull();
-      expect(app.state.ui.clipboard?.todos.length).toBe(3);
-      expect(app.state.ui.clipboard?.todos.map((t) => t.text)).toEqual(
+      expect(app.state.ui.clipboard?.items.length).toBe(3);
+      expect(app.state.ui.clipboard?.items.map((t) => t.text)).toEqual(
         expect.arrayContaining(["A", "B", "C"]),
       );
     });
@@ -427,7 +427,7 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(cutTodo({ ids: lastThree }));
 
       expect(Object.keys(app.state.data.todos).length).toBe(beforeCount - 3);
-      expect(app.state.ui.clipboard?.todos.length).toBe(3);
+      expect(app.state.ui.clipboard?.items.length).toBe(3);
       expect(app.state.ui.clipboard?.isCut).toBe(true);
     });
 

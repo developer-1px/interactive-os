@@ -97,6 +97,15 @@ const listCollection = createCollectionZone(TodoApp, "list", {
   ),
   filter: (state: AppState) => (item: Todo) =>
     item.categoryId === state.ui.selectedCategoryId,
+  clipboard: {
+    accessor: (s: AppState) => s.ui.clipboard,
+    set: (draft: AppState, value) => { draft.ui.clipboard = value; },
+    toText: (items: Todo[]) => items.map(t => t.text).join("\n"),
+    onPaste: (item: Todo, state: AppState) => ({
+      ...item,
+      categoryId: state.ui.selectedCategoryId,
+    }),
+  },
 });
 
 // Re-export for backward compatibility
@@ -104,6 +113,9 @@ export const deleteTodo = listCollection.remove;
 export const moveItemUp = listCollection.moveUp;
 export const moveItemDown = listCollection.moveDown;
 export const duplicateTodo = listCollection.duplicate;
+export const copyTodo = listCollection.copy;
+export const cutTodo = listCollection.cut;
+export const pasteTodo = listCollection.paste;
 
 // ── App-specific commands on the collection zone ──
 
@@ -129,95 +141,6 @@ export const startEdit = listCollection.command(
   }),
 );
 
-export const copyTodo = listCollection.command(
-  "copyTodo",
-  (ctx, payload: { ids: string[] }) => {
-    const todos = payload.ids
-      .map((id) => ctx.state.data.todos[id])
-      .filter((t): t is Todo => Boolean(t));
-    if (todos.length === 0) return { state: ctx.state };
-    return {
-      state: produce(ctx.state, (draft) => {
-        draft.ui.clipboard = {
-          todos: todos.map((t) => ({ ...t })),
-          isCut: false,
-        };
-      }),
-      clipboardWrite: {
-        text: todos.map((t) => t.text).join("\n"),
-        json: JSON.stringify(todos),
-      },
-    };
-  },
-);
-
-export const cutTodo = listCollection.command(
-  "cutTodo",
-  (ctx, payload: { ids: string[] }) => {
-    const todos = payload.ids
-      .map((id) => ctx.state.data.todos[id])
-      .filter((t): t is Todo => Boolean(t));
-    if (todos.length === 0) return { state: ctx.state };
-    return {
-      state: produce(ctx.state, (draft) => {
-        draft.ui.clipboard = {
-          todos: todos.map((t) => ({ ...t })),
-          isCut: true,
-        };
-        for (const id of payload.ids) {
-          delete draft.data.todos[id];
-          const index = draft.data.todoOrder.indexOf(id);
-          if (index !== -1) draft.data.todoOrder.splice(index, 1);
-        }
-      }),
-      clipboardWrite: {
-        text: todos.map((t) => t.text).join("\n"),
-        json: JSON.stringify(todos),
-      },
-    };
-  },
-);
-
-export const pasteTodo = listCollection.command(
-  "pasteTodo",
-  (ctx, payload: { id?: string }) => {
-    const clip = ctx.state.ui.clipboard;
-    if (!clip || clip.todos.length === 0) return { state: ctx.state };
-
-    const newIds: string[] = [];
-    return {
-      state: produce(ctx.state, (draft) => {
-        for (let i = 0; i < clip.todos.length; i++) {
-          const sourceTodo = clip.todos[i]!;
-          const newId = uid();
-          newIds.push(newId);
-          draft.data.todos[newId] = {
-            id: newId,
-            text: sourceTodo.text,
-            completed: sourceTodo.completed,
-            categoryId: draft.ui.selectedCategoryId,
-          };
-          if (payload.id) {
-            const focusIndex = draft.data.todoOrder.indexOf(payload.id);
-            if (focusIndex !== -1) {
-              draft.data.todoOrder.splice(focusIndex + 1 + i, 0, newId);
-            } else {
-              draft.data.todoOrder.push(newId);
-            }
-          } else {
-            draft.data.todoOrder.push(newId);
-          }
-        }
-      }),
-      // Focus last pasted item, select all pasted items
-      dispatch: FOCUS({
-        zoneId: "list",
-        itemId: newIds.at(-1)!,
-        selection: newIds,
-      }),
-    };
-  },
-);
 
 export const undoCommand = listCollection.command(
   "undo",
@@ -309,22 +232,13 @@ export const redoCommand = listCollection.command(
   { when: canRedo },
 );
 
-// Zone binding — auto-wired CRUD + app-specific handlers
+// Zone binding — auto-wired CRUD + clipboard + app-specific handlers
 const listBindings = listCollection.collectionBindings();
 export const TodoListUI = listCollection.bind({
   role: "listbox",
   onCheck: (cursor) => toggleTodo({ id: cursor.focusId }),
   onAction: (cursor) => startEdit({ id: cursor.focusId }),
   ...listBindings,
-  onCopy: (cursor) => {
-    const ids = cursor.selection.length > 0 ? cursor.selection : [cursor.focusId];
-    return copyTodo({ ids });
-  },
-  onCut: (cursor) => {
-    const ids = cursor.selection.length > 0 ? cursor.selection : [cursor.focusId];
-    return cutTodo({ ids });
-  },
-  onPaste: (cursor) => pasteTodo({ id: cursor.focusId }),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   keybindings: [

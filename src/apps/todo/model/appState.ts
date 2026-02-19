@@ -37,7 +37,7 @@ export interface UIState {
   editingId: FocusTarget;
   viewMode: "list" | "board";
   isInspectorOpen: boolean;
-  clipboard: { todos: Todo[]; isCut: boolean } | null;
+  clipboard: { items: Todo[]; isCut: boolean } | null;
 }
 
 export interface HistoryState {

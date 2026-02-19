@@ -68,8 +68,10 @@ export interface EntityCollectionConfig<S, T extends { id: string }> {
 }
 
 export interface ClipboardConfig<S, T extends { id: string }> {
-    /** Accessor to the clipboard state slot. Must return { items: T[], isCut: boolean } | null. */
+    /** Read clipboard state. */
     accessor: (state: S) => { items: T[]; isCut: boolean } | null;
+    /** Write clipboard state (needed because accessor may return null). */
+    set: (draft: S, value: { items: T[]; isCut: boolean }) => void;
     /** Serialize items for OS clipboard text. */
     toText: (items: T[]) => string;
     /** Transform item on paste. E.g., assign current category. */
@@ -144,46 +146,6 @@ function opsFromAccessor<S, T extends { id: string }>(
 // ═══════════════════════════════════════════════════════════════════
 
 const defaultGenerateId = () => Math.random().toString(36).slice(2, 10);
-
-/**
- * Set clipboard state through accessor.
- * Since Immer draft accessors return the draft value, we need to find
- * the parent and set the property. We use a trick: call the accessor on
- * the draft and Object.assign the result.
- */
-function setClipboard<S, T extends { id: string }>(
-    draft: S,
-    accessor: (state: S) => { items: T[]; isCut: boolean } | null,
-    value: { items: T[]; isCut: boolean },
-): void {
-    // Walk up to find the parent object that contains the clipboard field.
-    // Since we can't generically set a nullable accessor's return, we need
-    // the accessor to point to a mutable slot. We'll use a workaround:
-    // wrap the accessor result in a parent search.
-    // Simple approach: scan the draft for the key whose value matches accessor result.
-    // This is fragile, so instead we require clipboard accessor to always
-    // return a non-null reference or use a setter pattern.
-
-    // Pragmatic solution: use a getter/setter pair by convention.
-    // For now, we'll use a known pattern: the accessor returns `state.ui.clipboard`,
-    // and we directly set it on the draft.
-    // This means the ClipboardConfig needs a setter too.
-    // But to keep API simple, let's just do: accessor returns parent.clipboard,
-    // and we detect the property name.
-    // Actually, simplest: just make setClipboard a config method.
-    // KISS: add `setAccessor` to ClipboardConfig.
-    // NO — too complex. Let's just store clipboard items in a known location
-    // that the accessor can find.
-
-    // Pragmatic: We'll iterate draft keys to find a match.
-    // Actually, the simplest approach that works with Immer:
-    // accessor(draft) returns a draft proxy. We can mutate it in place
-    // if it's not null. If it IS null, we can't because there's no reference.
-    // Solution: require the clipboard slot to be initialized to a non-null value... NO.
-
-    // Final approach: require a `set` function in ClipboardConfig.
-    // This is the cleanest.
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // createCollectionZone
