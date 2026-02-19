@@ -34,12 +34,12 @@ const LEVEL_ORDER: BuilderLevel[] = ["section", "group", "item"];
 
 function getChildLevel(level: BuilderLevel): BuilderLevel | null {
     const idx = LEVEL_ORDER.indexOf(level);
-    return idx < LEVEL_ORDER.length - 1 ? LEVEL_ORDER[idx + 1] : null;
+    return idx < LEVEL_ORDER.length - 1 ? LEVEL_ORDER[idx + 1] ?? null : null;
 }
 
 function getParentLevel(level: BuilderLevel): BuilderLevel | null {
     const idx = LEVEL_ORDER.indexOf(level);
-    return idx > 0 ? LEVEL_ORDER[idx - 1] : null;
+    return idx > 0 ? LEVEL_ORDER[idx - 1] ?? null : null;
 }
 
 // ═══════════════════════════════════════════════════════════════════

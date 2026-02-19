@@ -74,6 +74,8 @@ export interface ZoneBindings {
   onMoveDown?: ZoneCallback;
   onUndo?: BaseCommand;
   onRedo?: BaseCommand;
+  options?: import("@os/6-components/primitives/Zone").ZoneOptions;
+  itemFilter?: (items: string[]) => string[];
 }
 
 export interface FieldBindings {

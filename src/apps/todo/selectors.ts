@@ -23,6 +23,14 @@ export function selectVisibleTodos(state: AppState): Todo[] {
     );
 }
 
+/** IDs of visible todos in the currently selected category. */
+export function selectVisibleTodoIds(state: AppState): string[] {
+  const { selectedCategoryId } = state.ui;
+  return state.data.todoOrder.filter(
+    (id) => state.data.todos[id]?.categoryId === selectedCategoryId,
+  );
+}
+
 /** All categories in display order. */
 export function selectCategories(state: AppState): Category[] {
   return state.data.categoryOrder

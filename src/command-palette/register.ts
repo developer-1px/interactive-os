@@ -41,7 +41,7 @@ export const TOGGLE_COMMAND_PALETTE = kernel.defineCommand(
 
 Keybindings.register({
   key: "Meta+K",
-  command: TOGGLE_COMMAND_PALETTE,
+  command: TOGGLE_COMMAND_PALETTE(),
 });
 
 // ── Shift+Shift Double-Tap (IntelliJ "Search Everywhere") ────────

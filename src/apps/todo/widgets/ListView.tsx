@@ -17,8 +17,6 @@ export function ListView() {
   const visibleTodos = selectVisibleTodos(state);
 
   const editingId = state.ui.editingId;
-  const editDraft = state.ui.editDraft ?? "";
-  const draft = state.ui.draft ?? "";
 
   return (
     <div className="flex-1 flex flex-col h-full relative bg-white overflow-hidden font-sans">
@@ -43,7 +41,7 @@ export function ListView() {
               </div>
               <TodoDraft.Field
                 name="DRAFT"
-                value={draft}
+                value=""
                 className="flex-1 bg-transparent outline-none text-slate-700 text-[15px] font-medium placeholder:text-slate-400"
                 placeholder="Add a new task..."
               />
@@ -58,7 +56,7 @@ export function ListView() {
                   key={todo.id}
                   todo={todo}
                   isEditing={editingId === todo.id}
-                  editDraft={editDraft}
+
                 />
               ))}
             </div>

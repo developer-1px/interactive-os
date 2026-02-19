@@ -38,9 +38,7 @@ export const INITIAL_STATE: AppState = {
   },
   ui: {
     selectedCategoryId: "cat_inbox",
-    draft: "",
     editingId: null,
-    editDraft: "",
     viewMode: "list",
     isInspectorOpen: true,
     clipboard: null,

@@ -6,7 +6,6 @@
  */
 
 import { TodoEdit, TodoList } from "@apps/todo/app";
-import type { Todo } from "@apps/todo/model/types";
 import { Trigger } from "@os/6-components/primitives/Trigger";
 import {
   ArrowDown,
@@ -17,14 +16,14 @@ import {
   Loader2,
   Trash2,
 } from "lucide-react";
+import type { Todo } from "@apps/todo/model/types";
 
 interface TaskItemProps {
   todo: Todo;
   isEditing: boolean;
-  editDraft: string;
 }
 
-export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
+export function TaskItem({ todo, isEditing }: TaskItemProps) {
   const isCompleted = todo.completed;
 
   return (
@@ -73,7 +72,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
           {isEditing ? (
             <TodoEdit.Field
               name="EDIT"
-              value={editDraft}
+              value=""
               autoFocus
               className="w-full bg-transparent outline-none text-slate-900 text-[15px] font-medium leading-relaxed placeholder:text-slate-400"
               placeholder="What needs to be done?"
@@ -119,7 +118,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
               <div className="w-px h-3 bg-slate-200 mx-1" />
 
               <Trigger
-                onPress={TodoList.commands.moveItemUp({ focusId: todo.id })}
+                onPress={TodoList.commands.moveItemUp({ id: todo.id })}
               >
                 <button
                   type="button"
@@ -130,7 +129,7 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
                 </button>
               </Trigger>
               <Trigger
-                onPress={TodoList.commands.moveItemDown({ focusId: todo.id })}
+                onPress={TodoList.commands.moveItemDown({ id: todo.id })}
               >
                 <button
                   type="button"

@@ -29,5 +29,5 @@ export const TOGGLE_INSPECTOR = kernel.defineCommand(
 
 Keybindings.register({
   key: "Meta+I",
-  command: TOGGLE_INSPECTOR,
+  command: TOGGLE_INSPECTOR(),
 });
