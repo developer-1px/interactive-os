@@ -31,10 +31,12 @@ export const DOM_ITEMS = kernel.defineContext("dom-items", (): string[] => {
   const els = entry.element.querySelectorAll(
     "[data-item-id]:not([data-nav-skip='true'])",
   );
-  els.forEach((el) => {
+  for (const el of els) {
+    // Only include items that DIRECTLY belong to this zone (not nested child zones)
+    if (el.closest("[data-focus-group]") !== entry.element) continue;
     const id = el.getAttribute("data-item-id");
     if (id) items.push(id);
-  });
+  }
   return items;
 });
 
@@ -55,10 +57,12 @@ export const DOM_RECTS = kernel.defineContext(
     const els = entry.element.querySelectorAll(
       "[data-item-id]:not([data-nav-skip='true'])",
     );
-    els.forEach((el) => {
+    for (const el of els) {
+      // Only include items that DIRECTLY belong to this zone
+      if (el.closest("[data-focus-group]") !== entry.element) continue;
       const id = el.getAttribute("data-item-id");
       if (id) rects.set(id, el.getBoundingClientRect());
-    });
+    }
     return rects;
   },
 );

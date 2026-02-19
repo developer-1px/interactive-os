@@ -488,4 +488,51 @@ test.describe("Todo App", () => {
     const draft = page.locator(DRAFT);
     await expect(draft).toHaveAttribute("data-focused", "true");
   });
+
+  // ─────────────────────────────────────────────────────────────
+  // APG Tab Recovery — entry=selected
+  // ─────────────────────────────────────────────────────────────
+
+  test("Tab round-trip returns to selected sidebar item (Work)", async ({
+    page,
+  }) => {
+    // Step 1: Click Work category to select it
+    await page.locator("#cat_work").click();
+    const sidebarFocused = page.locator(`${SIDEBAR} [data-focused="true"]`);
+    await expect(sidebarFocused).toContainText("Work");
+
+    // Step 2: Tab forward → escapes to list zone (Draft)
+    await page.keyboard.press("Tab");
+    const draft = page.locator(DRAFT);
+    await expect(draft).toHaveAttribute("data-focused", "true");
+
+    // While in list zone, sidebar should show anchor (retained focus)
+    const sidebarAnchor = page.locator(`${SIDEBAR} [data-anchor="true"]`);
+    await expect(sidebarAnchor).toHaveCount(1);
+    await expect(sidebarAnchor).toContainText("Work");
+
+    // Step 3: Tab forward again → escapes from list back to sidebar
+    // APG Tab Recovery: sidebar is listbox with entry=selected
+    // → should land on Work (the selected item), NOT first item (Inbox)
+    await page.keyboard.press("Tab");
+    const sidebarFocusedAgain = page.locator(
+      `${SIDEBAR} [data-focused="true"]`,
+    );
+    await expect(sidebarFocusedAgain).toContainText("Work");
+  });
+
+  test("Inactive zone shows anchor focus indicator", async ({ page }) => {
+    // Focus a list item
+    await page.getByText("Complete Interaction OS docs").click();
+    const todoFocused = page.locator(focusedTodoItem(LISTVIEW));
+    await expect(todoFocused).toHaveCount(1);
+
+    // Tab to sidebar → list should show anchor on the previously focused item
+    await page.keyboard.press("Tab");
+    const listAnchor = page.locator(
+      `${LISTVIEW} [data-anchor="true"]:not(#DRAFT)`,
+    );
+    await expect(listAnchor).toHaveCount(1);
+    await expect(listAnchor).toContainText("Complete Interaction OS docs");
+  });
 });
