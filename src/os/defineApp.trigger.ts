@@ -26,6 +26,22 @@ export function createSimpleTrigger(
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Dynamic Trigger (CommandFactory bound at render time)
+// ═══════════════════════════════════════════════════════════════════
+
+export function createDynamicTrigger(
+  appId: string,
+  factory: (...args: any[]) => BaseCommand,
+): React.FC<{ children: ReactNode; payload?: unknown }> {
+  const DynamicTrigger: React.FC<{ children: ReactNode; payload?: unknown }> = ({ children, payload }) => {
+    const cmd = factory(payload);
+    return React.createElement(Trigger, { onPress: cmd, children });
+  };
+  DynamicTrigger.displayName = `${appId}.DynamicTrigger`;
+  return DynamicTrigger;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Compound Trigger (Dialog pattern)
 // ═══════════════════════════════════════════════════════════════════
 
@@ -73,7 +89,7 @@ export function createCompoundTrigger(
     className?: string;
     asChild?: boolean;
   }> = ({ children, className, asChild }) =>
-      React.createElement(Dialog.Trigger, { className, asChild, children });
+      React.createElement(Dialog.Trigger, { ...(className !== undefined ? { className } : {}), ...(asChild !== undefined ? { asChild } : {}), children });
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
   const ContentComponent: React.FC<{

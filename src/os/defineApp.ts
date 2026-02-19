@@ -36,6 +36,7 @@ import {
   type CompoundTriggerComponents,
   type CompoundTriggerConfig,
   createCompoundTrigger,
+  createDynamicTrigger,
   createSimpleTrigger,
 } from "./defineApp.trigger";
 import {
@@ -251,13 +252,7 @@ export function defineApp<S>(
     createTrigger: ((commandOrConfig: BaseCommand | CompoundTriggerConfig | CommandFactory<any, any>) => {
       // ── CommandFactory (Dynamic Trigger) ──
       if (typeof commandOrConfig === "function") {
-        const factory = commandOrConfig as CommandFactory<any, any>;
-        const DynamicTrigger: React.FC<{ children: ReactNode; payload?: any }> = ({ children, payload }) => {
-          const cmd = factory(payload);
-          return React.createElement(Trigger, { onPress: cmd, children });
-        };
-        DynamicTrigger.displayName = `${appId}.DynamicTrigger`;
-        return DynamicTrigger;
+        return createDynamicTrigger(appId, commandOrConfig as CommandFactory<any, any>);
       }
       // ── Simple trigger (BaseCommand has .type) ──
       if (

@@ -12,7 +12,7 @@ import { Plus } from "lucide-react";
 
 export function ListView() {
   const visibleTodoIds = TodoApp.useComputed(selectVisibleTodoIds);
-  const draft = TodoApp.useComputed((s) => s.ui.draft ?? "");
+  const draft = ""; // Field manages its own value via FieldRegistry
 
   return (
     <div className="flex-1 flex flex-col h-full relative bg-white overflow-hidden font-sans">

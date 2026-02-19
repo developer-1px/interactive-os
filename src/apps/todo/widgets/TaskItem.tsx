@@ -22,7 +22,7 @@ interface TaskItemProps {
 }
 
 function TaskItemEditor() {
-  const editDraft = TodoApp.useComputed((s) => s.ui.editDraft ?? "");
+  const editDraft = ""; // Field manages its own value via FieldRegistry
 
   return (
     <TodoEdit.Field
@@ -129,7 +129,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
               <div className="w-px h-3 bg-slate-200 mx-1" />
 
               <Trigger
-                onPress={TodoList.commands.moveItemUp({ focusId: todo.id })}
+                onPress={TodoList.commands.moveItemUp({ id: todo.id })}
               >
                 <button
                   type="button"
@@ -140,7 +140,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
                 </button>
               </Trigger>
               <Trigger
-                onPress={TodoList.commands.moveItemDown({ focusId: todo.id })}
+                onPress={TodoList.commands.moveItemDown({ id: todo.id })}
               >
                 <button
                   type="button"
