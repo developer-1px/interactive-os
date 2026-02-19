@@ -13,7 +13,7 @@
  */
 
 import { produce } from "immer";
-import { FieldRegistry } from "../../6-components/primitives/FieldRegistry";
+import { FieldRegistry } from "../../6-components/field/FieldRegistry";
 import { kernel } from "../../kernel";
 import { clearFieldDOM } from "../../4-effects/index";
 
@@ -68,7 +68,7 @@ export const FIELD_COMMIT = kernel.defineCommand(
       const allFields = FieldRegistry.get().fields;
       const isDeferred = !!editingId;
       for (const [, entry] of allFields) {
-        if (entry.config.onSubmit) {
+        if (entry.config.onCommit || entry.config.onSubmit) {
           if (isDeferred && entry.config.mode === "deferred") {
             fieldEntry = entry;
             break;
@@ -82,11 +82,12 @@ export const FIELD_COMMIT = kernel.defineCommand(
       }
     }
 
-    // Bridge: dispatch app's onSubmit command
-    if (fieldEntry?.config.onSubmit) {
-      // Read from FieldRegistry — InputListener keeps localValue in sync with DOM.
-      const text = fieldEntry.state.localValue;
-      const appCommand = fieldEntry.config.onSubmit({ text });
+    // Bridge: dispatch app's onCommit command
+    const commitFactory = fieldEntry?.config.onCommit ?? fieldEntry?.config.onSubmit;
+    if (commitFactory) {
+      // Read from FieldRegistry — InputListener keeps value in sync with DOM.
+      const text = fieldEntry!.state.value;
+      const appCommand = commitFactory({ text });
       queueMicrotask(() => kernel.dispatch(appCommand));
 
       // Clear field for immediate-mode (e.g., DRAFT) — delegate to effect

@@ -25,7 +25,7 @@ import {
   MousePointerClick,
   Package,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // ─── Types ───
 
@@ -172,6 +172,43 @@ export function UnifiedInspector({
     }
   }, [transactions.length, transactions[transactions.length - 1]?.id]);
 
+  // ── Discord/Slack-style auto-scroll ──
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isUserScrolled, setIsUserScrolled] = useState(false);
+  const prevTxCount = useRef(transactions.length);
+
+  const isAtBottom = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return true;
+    // 40px threshold — close enough to bottom
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    setIsUserScrolled(false);
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    setIsUserScrolled(!isAtBottom());
+  }, [isAtBottom]);
+
+  // Auto-scroll when new transactions arrive (if user hasn't scrolled up)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: track tx count changes
+  useEffect(() => {
+    if (transactions.length > prevTxCount.current) {
+      if (!isUserScrolled) {
+        // At bottom → auto-scroll to show new item
+        requestAnimationFrame(() => {
+          scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+        });
+      }
+    }
+    prevTxCount.current = transactions.length;
+  }, [transactions.length, isUserScrolled]);
+
   const toggle = (id: number) => {
     const next = new Set(expandedIds);
     next.has(id) ? next.delete(id) : next.add(id);
@@ -187,46 +224,65 @@ export function UnifiedInspector({
           ({transactions.length} events)
         </span>
       </div>
-      <div className="flex-1 overflow-y-auto">
-        {/* ── Trace Log Section ── */}
-        <CollapsibleSection
-          title="Trace Log"
-          icon={<Layers size={10} />}
-          open={traceOpen}
-          onToggle={() => setTraceOpen(!traceOpen)}
-          count={transactions.length}
-        >
-          {transactions.length === 0 ? (
-            <div className="p-4 text-center text-[#999] italic">
-              No events captured yet.
-            </div>
-          ) : (
-            transactions.map((tx, i) => (
-              <TimelineNode
-                key={tx.id}
-                tx={tx}
-                index={i + 1}
-                expanded={expandedIds.has(tx.id)}
-                onToggle={() => toggle(tx.id)}
-              />
-            ))
-          )}
-        </CollapsibleSection>
-
-        {/* ── Store State Section ── */}
-        {storeState && (
+      <div className="relative flex-1 overflow-hidden">
+        <div ref={scrollRef} onScroll={handleScroll} className="h-full overflow-y-auto">
+          {/* ── Trace Log Section ── */}
           <CollapsibleSection
-            title="Store State"
-            icon={<Package size={10} />}
-            open={storeOpen}
-            onToggle={() => setStoreOpen(!storeOpen)}
+            title="Trace Log"
+            icon={<Layers size={10} />}
+            open={traceOpen}
+            onToggle={() => setTraceOpen(!traceOpen)}
+            count={transactions.length}
           >
-            <div className="p-2 bg-[#1e293b] overflow-x-auto">
-              <pre className="text-[9px] font-mono text-[#e2e8f0] leading-relaxed whitespace-pre-wrap break-all">
-                {JSON.stringify(storeState, null, 2)}
-              </pre>
-            </div>
+            {transactions.length === 0 ? (
+              <div className="p-4 text-center text-[#999] italic">
+                No events captured yet.
+              </div>
+            ) : (
+              transactions.map((tx, i) => (
+                <TimelineNode
+                  key={tx.id}
+                  tx={tx}
+                  index={i + 1}
+                  expanded={expandedIds.has(tx.id)}
+                  onToggle={() => toggle(tx.id)}
+                />
+              ))
+            )}
           </CollapsibleSection>
+
+          {/* ── Store State Section ── */}
+          {storeState && (
+            <CollapsibleSection
+              title="Store State"
+              icon={<Package size={10} />}
+              open={storeOpen}
+              onToggle={() => setStoreOpen(!storeOpen)}
+            >
+              <div className="p-2 bg-[#1e293b] overflow-x-auto">
+                <pre className="text-[9px] font-mono text-[#e2e8f0] leading-relaxed whitespace-pre-wrap break-all">
+                  {JSON.stringify(storeState, null, 2)}
+                </pre>
+              </div>
+            </CollapsibleSection>
+          )}
+
+          {/* Bottom spacer — allows latest item to scroll to top */}
+          {transactions.length > 0 && (
+            <div style={{ height: "calc(100% - 40px)" }} aria-hidden />
+          )}
+        </div>
+
+        {/* Jump to latest indicator — shows when user scrolled up */}
+        {isUserScrolled && (
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1e293b] text-white text-[9px] font-semibold shadow-lg hover:bg-[#334155] transition-all cursor-pointer border-none"
+          >
+            <ChevronDown size={10} />
+            Jump to latest
+          </button>
         )}
       </div>
     </div>

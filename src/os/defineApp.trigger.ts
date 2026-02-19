@@ -73,7 +73,7 @@ export function createCompoundTrigger(
     className?: string;
     asChild?: boolean;
   }> = ({ children, className, asChild }) =>
-    React.createElement(Dialog.Trigger, { className, asChild }, children);
+      React.createElement(Dialog.Trigger, { className, asChild }, children);
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
   const ContentComponent: React.FC<{
@@ -97,14 +97,14 @@ export function createCompoundTrigger(
     children: ReactNode;
     className?: string;
   }> = ({ children, className }) =>
-    React.createElement(Dialog.Close, { className }, children);
+      React.createElement(Dialog.Close, { className }, children);
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{
     children: ReactNode;
     className?: string;
   }> = ({ children, className }) => {
-    const confirmCmd = config.confirm ?? undefined;
+    const confirmCmd = config.confirm;
     return React.createElement(
       Dialog.Close,
       { className, onPress: confirmCmd },

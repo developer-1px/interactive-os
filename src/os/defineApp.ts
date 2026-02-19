@@ -54,6 +54,32 @@ import {
 import { createHistoryMiddleware } from "./middlewares/historyKernelMiddleware";
 
 // ═══════════════════════════════════════════════════════════════════
+// Brand Type Factories (cast isolated here)
+// ═══════════════════════════════════════════════════════════════════
+
+function createCondition<S>(
+  name: string,
+  predicate: (state: S) => boolean,
+): Condition<S> {
+  return {
+    name,
+    evaluate: predicate,
+    [__conditionBrand]: true as const,
+  } as unknown as Condition<S>;
+}
+
+function createSelector<S, T>(
+  name: string,
+  select: (state: S) => T,
+): Selector<S, T> {
+  return {
+    name,
+    select,
+    [__selectorBrand]: true as const,
+  } as unknown as Selector<S, T>;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // defineApp — Production Implementation
 // ═══════════════════════════════════════════════════════════════════
 
@@ -95,12 +121,7 @@ export function defineApp<S>(
       );
     }
     conditionNames.add(name);
-    const cond = {
-      name,
-      evaluate: predicate,
-      [__conditionBrand]: true as const,
-    } as unknown as Condition<S>;
-    return cond;
+    return createCondition(name, predicate);
   }
 
   // ── selector ──
@@ -115,12 +136,7 @@ export function defineApp<S>(
       );
     }
     selectorNames.add(name);
-    const sel = {
-      name,
-      select,
-      [__selectorBrand]: true as const,
-    } as unknown as Selector<S, T>;
-    return sel;
+    return createSelector(name, select);
   }
 
   // ── command (shared: app-level + zone-level) ──

@@ -24,10 +24,8 @@ import {
   moveItemUp,
   pasteTodo,
   selectCategory,
-  startEdit,
   stats,
-  syncDraft,
-  syncEditDraft,
+  startEdit,
   TodoApp,
   toggleTodo,
   toggleView,
@@ -54,13 +52,7 @@ describe("Todo v5 — defineApp native", () => {
       expect(Object.keys(app.state.data.todos).length).toBe(before + 1);
     });
 
-    test("addTodo via draft", () => {
-      const app = createApp();
-      app.dispatch(syncDraft({ text: "From draft" }));
-      app.dispatch(addTodo({}));
-      const todos = Object.values(app.state.data.todos);
-      expect(todos.some((t) => t.text === "From draft")).toBe(true);
-    });
+
 
     test("addTodo with empty text → no-op", () => {
       const app = createApp();
@@ -117,10 +109,10 @@ describe("Todo v5 — defineApp native", () => {
 
       app.dispatch(startEdit({ id }));
       expect(app.state.ui.editingId).toBe(id);
-      expect(app.state.ui.editDraft).toBe("Original");
 
-      app.dispatch(syncEditDraft({ text: "Updated" }));
-      expect(app.state.ui.editDraft).toBe("Updated");
+
+      // No syncEditDraft step anymore - Field manages state locally
+      // app.dispatch(syncEditDraft({ text: "Updated" }));
 
       app.dispatch(updateTodoText({ text: "Updated" }));
       expect(app.state.data.todos[id]?.text).toBe("Updated");
@@ -134,7 +126,8 @@ describe("Todo v5 — defineApp native", () => {
       const id = ids[ids.length - 1]!;
 
       app.dispatch(startEdit({ id }));
-      app.dispatch(syncEditDraft({ text: "Changed" }));
+      // Field would have local state "Changed", but app state doesn't see it until commit
+      // app.dispatch(syncEditDraft({ text: "Changed" }));
       app.dispatch(cancelEdit());
 
       expect(app.state.data.todos[id]?.text).toBe("Original");
@@ -268,17 +261,7 @@ describe("Todo v5 — defineApp native", () => {
     });
   });
 
-  // ─── Draft ───
 
-  describe("Draft", () => {
-    test("syncDraft updates draft text", () => {
-      const app = createApp();
-      app.dispatch(syncDraft({ text: "Hello" }));
-      expect(app.state.ui.draft).toBe("Hello");
-      app.dispatch(syncDraft({ text: "" }));
-      expect(app.state.ui.draft).toBe("");
-    });
-  });
 
   // ─── Category ───
 

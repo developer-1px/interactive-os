@@ -34,9 +34,7 @@ export interface UIState {
   selectedCategoryId: string;
   // focusId: FocusTarget; // Moved to OS Layer (useFocusStore)
   // focusRequest removed in favor of state.effects
-  draft: string;
   editingId: FocusTarget;
-  editDraft: string;
   viewMode: "list" | "board";
   isInspectorOpen: boolean;
   clipboard: { todos: Todo[]; isCut: boolean } | null;

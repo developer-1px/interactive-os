@@ -28,6 +28,7 @@ import { produce } from "immer";
 import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { FOCUS } from "@/os/3-commands/focus/focus";
 import { defineApp } from "@/os/defineApp";
+import { z } from "zod";
 
 /** Collision-free random ID */
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -479,20 +480,11 @@ export const TodoSidebarUI = sidebarZone.bind({
 
 const draftZone = TodoApp.createZone("draft");
 
-export const syncDraft = draftZone.command(
-  "syncDraft",
-  (ctx, payload: { text: string }) => ({
-    state: produce(ctx.state, (draft) => {
-      draft.ui.draft = payload.text;
-    }),
-  }),
-);
-
 export const addTodo = draftZone.command(
   "addTodo",
-  (ctx, payload: { text?: string }) => ({
+  (ctx, payload: { text: string }) => ({
     state: produce(ctx.state, (draft) => {
-      const text = payload?.text ?? draft.ui.draft;
+      const text = payload.text;
       if (text?.trim()) {
         const newId = uid();
         draft.data.todos[newId] = {
@@ -502,8 +494,6 @@ export const addTodo = draftZone.command(
           categoryId: draft.ui.selectedCategoryId,
         };
         draft.data.todoOrder.push(newId);
-        draft.ui.draft = "";
-        draft.ui.editDraft = "";
       }
     }),
   }),
@@ -512,8 +502,13 @@ export const addTodo = draftZone.command(
 export const TodoDraftUI = draftZone.bind({
   role: "textbox",
   field: {
-    onChange: syncDraft({ text: "" }),
-    onSubmit: addTodo(),
+    onCommit: addTodo,
+    trigger: "enter",
+    resetOnSubmit: true,
+    schema: z.string().min(1, "Hal is watching"),
+    // Wait, Field checks schema against string value.
+    // Zod schema should be z.string().min(1).
+    // My Field.tsx checks schema.safeParse(currentValue). currentValue is string.
   },
 });
 
@@ -523,15 +518,6 @@ export const TodoDraftUI = draftZone.bind({
 
 const editZone = TodoApp.createZone("edit");
 
-export const syncEditDraft = editZone.command(
-  "syncEditDraft",
-  (ctx, payload: { text: string }) => ({
-    state: produce(ctx.state, (draft) => {
-      draft.ui.editDraft = payload.text;
-    }),
-  }),
-);
-
 export const updateTodoText = editZone.command(
   "updateTodoText",
   (ctx, payload: { text: string }) => ({
@@ -539,10 +525,12 @@ export const updateTodoText = editZone.command(
       if (!ctx.state.ui.editingId) return;
       const id = ctx.state.ui.editingId as string;
       if (draft.data.todos[id]) {
-        draft.data.todos[id].text = payload.text || ctx.state.ui.editDraft;
+        // Must use payload.text directly. No fallback.
+        if (payload.text) {
+          draft.data.todos[id].text = payload.text;
+        }
       }
       draft.ui.editingId = null;
-      draft.ui.editDraft = "";
     }),
   }),
 );
@@ -552,7 +540,6 @@ export const cancelEdit = editZone.command(
   (ctx) => ({
     state: produce(ctx.state, (draft) => {
       draft.ui.editingId = null;
-      draft.ui.editDraft = "";
     }),
   }),
   { when: isEditing },
@@ -561,9 +548,9 @@ export const cancelEdit = editZone.command(
 export const TodoEditUI = editZone.bind({
   role: "textbox",
   field: {
-    onChange: syncEditDraft({ text: "" }),
-    onSubmit: updateTodoText({ text: "" }),
-    onCancel: cancelEdit(),
+    onCommit: updateTodoText, // Factory without call
+    trigger: "enter",
+    onCancel: cancelEdit(), // Command (Result of Factory) matches BaseCommand
   },
 });
 
@@ -631,7 +618,6 @@ export const TodoSidebar = {
 export const TodoDraft = {
   ...TodoDraftUI,
   commands: {
-    syncDraft,
     addTodo,
   },
 };
@@ -639,7 +625,6 @@ export const TodoDraft = {
 export const TodoEdit = {
   ...TodoEditUI,
   commands: {
-    syncEditDraft,
     updateTodoText,
     cancelEdit,
   },

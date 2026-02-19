@@ -65,6 +65,7 @@
 |---|------|-----------------|------------------|
 | 1 | [os-code-review-issues](0-inbox/2026-0219-1312-[analysis]-os-code-review-issues.md) | command-type-unification | P1: defineCommand when guard 공식화, P3: React 타입 일괄 정리 |
 | 2 | [workflow-dependency-graph](0-inbox/2026-0219-1328-[analysis]-workflow-dependency-graph.md) | — | 참고용 시각화. 고립 노드(/design) 정리 검토 |
+| 3 | [field-commit-design](0-inbox/2026-0219-1813-field-commit-design.md) | — | FieldState 표준화 + 입력 경로 단일화 실행. 프로젝트화 또는 즉시 실행 |
 
 > ✅ [area-stale-docs-audit](0-inbox/2026-0218-1046-[analysis]-area-stale-docs-audit.md) — /solve로 해결 (3건 삭제 + 4건 축소/교정). 참고용으로 보존.
 
@@ -83,7 +84,9 @@
 
 ---
 
-## 📝 Recent Changes (2026-02-18)
+## 📝 Recent Changes (2026-02-19)
+
+- ✅ field-architecture-refactor — FieldRegistry implementation, syncDraft removal, TodoApp migration.
 
 - 🔧 `2-area/` 소스코드 미러 구조로 재편 — Johnny.Decimal 번호 체계 적용
   - `10-kernel/`, `20-os/{21-commands,22-focus,23-primitives,24-aria}`, `30-apps/`, `80-cross-cutting/`, `90-meta/`

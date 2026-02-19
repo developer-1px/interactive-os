@@ -7,7 +7,7 @@
 import { TodoApp, TodoDraft, TodoList } from "@apps/todo/app";
 import { selectVisibleTodos } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { Field } from "@os/6-components/primitives/Field";
+import { Field } from "@os/6-components/field/Field";
 import { Plus } from "lucide-react";
 
 export function ListView() {

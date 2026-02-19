@@ -1,6 +1,6 @@
-import { Field } from "@os/6-components/primitives/Field";
+import { Field } from "@os/6-components/field/Field";
 import { Item } from "@os/6-components/primitives/Item";
-import { Label } from "@os/6-components/primitives/Label";
+
 import { Trigger } from "@os/6-components/primitives/Trigger";
 import { Zone } from "@os/6-components/primitives/Zone";
 import {
@@ -122,7 +122,7 @@ export default function BuilderListPage() {
             {/* Toolbar: Search & Filter */}
             <div className="px-8 py-4 bg-white border-b border-slate-200 flex items-center gap-4">
                 {/* Search Bar */}
-                <Label className="flex-1 flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:bg-white border border-transparent focus-within:border-blue-500/50 transition-all cursor-text group">
+                <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:bg-white border border-transparent focus-within:border-blue-500/50 transition-all cursor-text group">
                     <Search
                         size={16}
                         className="text-slate-400 group-focus-within:text-blue-500 transition-colors"
@@ -142,7 +142,7 @@ export default function BuilderListPage() {
                             <X size={14} />
                         </button>
                     )}
-                </Label>
+                </div>
 
                 {/* Filter Trigger */}
                 <Trigger

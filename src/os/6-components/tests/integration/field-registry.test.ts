@@ -16,7 +16,7 @@
  */
 
 import { describe, expect, it, beforeEach } from "vitest";
-import { FieldRegistry } from "@os/6-components/primitives/FieldRegistry";
+import { FieldRegistry } from "@os/6-components/field/FieldRegistry";
 
 describe("FieldRegistry seam: register/unregister lifecycle", () => {
     const FIELD_ID = "TEST_FIELD";
@@ -30,7 +30,7 @@ describe("FieldRegistry seam: register/unregister lifecycle", () => {
         FieldRegistry.register(FIELD_ID, { name: FIELD_ID });
         const entry = FieldRegistry.getField(FIELD_ID);
         expect(entry).toBeDefined();
-        expect(entry!.state.localValue).toBe("");
+        expect(entry!.state.value).toBe("");
     });
 
     it("updateValue persists text", () => {
@@ -38,7 +38,7 @@ describe("FieldRegistry seam: register/unregister lifecycle", () => {
         FieldRegistry.updateValue(FIELD_ID, "Hello world");
 
         const entry = FieldRegistry.getField(FIELD_ID);
-        expect(entry!.state.localValue).toBe("Hello world");
+        expect(entry!.state.value).toBe("Hello world");
     });
 
     it("re-register with new config preserves localValue", () => {
@@ -58,7 +58,7 @@ describe("FieldRegistry seam: register/unregister lifecycle", () => {
 
         // localValue must survive
         const entry = FieldRegistry.getField(FIELD_ID);
-        expect(entry!.state.localValue).toBe("typed text");
+        expect(entry!.state.value).toBe("typed text");
         expect(entry!.config.onSubmit).toBe(newOnSubmit);
     });
 
@@ -72,7 +72,7 @@ describe("FieldRegistry seam: register/unregister lifecycle", () => {
 
         // localValue is reset — this is the bug scenario
         const entry = FieldRegistry.getField(FIELD_ID);
-        expect(entry!.state.localValue).toBe("");
+        expect(entry!.state.value).toBe("");
     });
 
     it("updateValue on non-existent field is no-op", () => {
@@ -94,7 +94,7 @@ describe("FieldRegistry seam: register/unregister lifecycle", () => {
             onChange: () => ({ type: "B", payload: {} }),
         });
 
-        expect(FieldRegistry.getField(FIELD_ID)!.state.localValue).toBe(
+        expect(FieldRegistry.getField(FIELD_ID)!.state.value).toBe(
             "fast typing",
         );
     });
@@ -119,7 +119,7 @@ describe("FieldRegistry seam: FIELD_COMMIT reads localValue", () => {
 
         // Simulate what FIELD_COMMIT does
         const entry = FieldRegistry.getField(FIELD_ID)!;
-        const text = entry.state.localValue;
+        const text = entry.state.value;
         entry.config.onSubmit!({ text });
 
         expect(capturedText).toBe("Buy milk");
@@ -145,11 +145,11 @@ describe("FieldRegistry seam: FIELD_COMMIT reads localValue", () => {
 
         // FIELD_COMMIT calls the registered onSubmit
         const entry = FieldRegistry.getField(FIELD_ID)!;
-        const result = entry.config.onSubmit!({ text: entry.state.localValue });
+        const result = entry.config.onSubmit!({ text: entry.state.value });
 
         // Should use the latest version via ref delegation
         expect(result.type).toBe("V1");
         // localValue preserved (no re-registration occurred)
-        expect(entry.state.localValue).toBe("test");
+        expect(entry.state.value).toBe("test");
     });
 });

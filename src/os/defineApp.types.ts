@@ -11,6 +11,7 @@ import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import type React from "react";
 import type { ReactNode } from "react";
 import type { ZoneCallback } from "./2-contexts/zoneRegistry";
+import type { ZodSchema } from "zod";
 
 // ═══════════════════════════════════════════════════════════════════
 // Brand Symbols
@@ -74,8 +75,14 @@ export interface ZoneBindings {
 }
 
 export interface FieldBindings {
+  /** @deprecated Data stream should not produce commands. Use trigger: "change" + onCommit. */
   onChange?: BaseCommand;
+  /** @deprecated Use onCommit instead */
   onSubmit?: BaseCommand;
+  onCommit?: CommandFactory;
+  trigger?: "change" | "blur" | "enter";
+  schema?: ZodSchema;
+  resetOnSubmit?: boolean;
   onCancel?: BaseCommand;
 }
 

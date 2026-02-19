@@ -5,7 +5,7 @@
  * Pure function — all dependencies passed as parameters.
  */
 
-import { Field } from "@os/6-components/primitives/Field";
+import { Field } from "@os/6-components/field/Field";
 import { Item } from "@os/6-components/primitives/Item";
 import type { ZoneOptions } from "@os/6-components/primitives/Zone";
 import { Zone } from "@os/6-components/primitives/Zone";
@@ -49,39 +49,23 @@ export function createBoundComponents<S>(
     className?: string;
     children?: ReactNode;
   }> = ({ id, className, children }) => {
-    const zoneProps: Record<string, unknown> = {
+    // Explicit prop mapping — no runtime loop, no Record<string, unknown> cast
+    const zoneProps: React.ComponentProps<typeof Zone> = {
       id: id ?? zoneName,
       className,
       role: config.role,
+      onCheck: config.onCheck,
+      onAction: config.onAction,
+      onDelete: config.onDelete,
+      onCopy: config.onCopy,
+      onCut: config.onCut,
+      onPaste: config.onPaste,
+      onMoveUp: config.onMoveUp,
+      onMoveDown: config.onMoveDown,
+      onUndo: config.onUndo,
+      onRedo: config.onRedo,
+      options: config.options,
     };
-
-    // Map zone bindings → Zone event props
-    const eventKeys = [
-      "onCheck",
-      "onAction",
-      "onDelete",
-      "onCopy",
-      "onCut",
-      "onPaste",
-      "onMoveUp",
-      "onMoveDown",
-      "onUndo",
-      "onRedo",
-    ] as const;
-
-    for (const key of eventKeys) {
-      if (key in config) {
-        const cmd = (config as Record<string, unknown>)[key];
-        if (cmd) {
-          zoneProps[key] = cmd;
-        }
-      }
-    }
-
-    // Forward advanced options (e.g., navigate override)
-    if (config.options) {
-      zoneProps.options = config.options;
-    }
 
     // Keybindings registration
     React.useEffect(() => {
@@ -94,11 +78,7 @@ export function createBoundComponents<S>(
       return KeybindingsRegistry.registerAll(bindings);
     }, []);
 
-    return React.createElement(
-      Zone,
-      zoneProps as React.ComponentProps<typeof Zone>,
-      children,
-    );
+    return React.createElement(Zone, zoneProps, children);
   };
   ZoneComponent.displayName = `${appId}.${zoneName}.Zone`;
 
@@ -128,33 +108,33 @@ export function createBoundComponents<S>(
     autoFocus?: boolean;
     blurOnInactive?: boolean;
   }> = (props) => {
-    const fieldProps: Record<string, unknown> = { ...props };
+    const fieldConfig = config.field;
 
-    if (config.field) {
-      // onChange/onSubmit: BaseCommand → FieldCommandFactory
-      // Field expects (payload) => BaseCommand, but FieldBindings provides BaseCommand.
-      // Wrap into a factory that merges { text } into the command's payload.
-      if (config.field.onChange) {
-        const cmd = config.field.onChange;
-        fieldProps.onChange = (p: { text: string }) => ({
-          ...cmd,
-          payload: { ...(cmd.payload as Record<string, unknown>), ...p },
-        });
-      }
-      if (config.field.onSubmit) {
-        const cmd = config.field.onSubmit;
-        fieldProps.onSubmit = (p: { text: string }) => ({
-          ...cmd,
-          payload: { ...(cmd.payload as Record<string, unknown>), ...p },
-        });
-      }
-      if (config.field.onCancel) fieldProps.onCancel = config.field.onCancel;
-    }
+    // Build typed onChange/onSubmit factories that merge { text } into payload
+    const onChange = fieldConfig?.onChange
+      ? (p: { text: string }) => ({
+        ...fieldConfig.onChange!,
+        payload: { ...fieldConfig.onChange!.payload, ...p },
+      })
+      : undefined;
 
-    return React.createElement(
-      Field,
-      fieldProps as React.ComponentProps<typeof Field>,
-    );
+    const onSubmit = fieldConfig?.onSubmit
+      ? (p: { text: string }) => ({
+        ...fieldConfig.onSubmit!,
+        payload: { ...fieldConfig.onSubmit!.payload, ...p },
+      })
+      : undefined;
+
+    return React.createElement(Field, {
+      ...props,
+      onChange,
+      onSubmit,
+      onCommit: fieldConfig?.onCommit,
+      trigger: fieldConfig?.trigger,
+      schema: fieldConfig?.schema,
+      resetOnSubmit: fieldConfig?.resetOnSubmit,
+      onCancel: fieldConfig?.onCancel,
+    } as React.ComponentProps<typeof Field>);
   };
   FieldComponent.displayName = `${appId}.${zoneName}.Field`;
 

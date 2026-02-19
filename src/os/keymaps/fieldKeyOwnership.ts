@@ -22,8 +22,8 @@
  * The table only contains keys that HAVE OS keybindings and should pass through:
  */
 
-import type { FieldType } from "../6-components/primitives/FieldRegistry";
-import { FieldRegistry } from "../6-components/primitives/FieldRegistry";
+import type { FieldType } from "../6-components/field/FieldRegistry";
+import { FieldRegistry } from "../6-components/field/FieldRegistry";
 
 /**
  * Keys that each field type DELEGATES to the OS during editing.

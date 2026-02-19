@@ -7,9 +7,11 @@ import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
 import type { FocusTarget } from "@os/schemas/focus/FocusTarget.ts";
 import type { HTMLAttributes } from "react";
 import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
+import type { ZodSchema } from "zod";
 import {
   type FieldConfig,
   FieldRegistry,
+  type FieldTrigger,
   useFieldRegistry,
 } from "./FieldRegistry";
 import { Label } from "./Label";
@@ -26,23 +28,20 @@ interface FieldStyleParams {
   isEditing: boolean;
   multiline: boolean;
   value: string;
+  error?: string | null;
   placeholder?: string;
   customClassName?: string;
 }
 
 /**
  * Composes the Tailwind classes for the field.
- *
- * Visual States:
- * - Default: No special styling
- * - Focused (Selected): Ring outline indicating selection
- * - Editing (Active): Blue ring + blue tint background indicating input mode
  */
 const getFieldClasses = ({
   isFocused: _isFocused,
   isEditing,
   multiline,
   value,
+  error,
   placeholder,
   customClassName = "",
 }: FieldStyleParams): string => {
@@ -57,14 +56,16 @@ const getFieldClasses = ({
     : "whitespace-nowrap overflow-hidden";
 
   // --- State Visual Distinction ---
-  // Editing: Blue ring + blue tint background (clearly "input mode")
-  // Focused: Default focus ring (from FocusItem or custom)
-  const stateClasses = isEditing
-    ? "ring-2 ring-blue-500 bg-blue-500/10 rounded-sm"
-    : "";
+  // Error: Red ring (overrides editing blue)
+  // Editing: Blue ring + blue tint background
+  // Focused: Default focus ring
+  let stateClasses = "";
+  if (error) {
+    stateClasses = "ring-2 ring-red-500 bg-red-500/10 rounded-sm";
+  } else if (isEditing) {
+    stateClasses = "ring-2 ring-blue-500 bg-blue-500/10 rounded-sm";
+  }
 
-  // User's customClassName comes LAST to allow full control over display, sizing, etc.
-  // Field only provides: placeholder, whitespace handling, state feedback, and min-height
   return `${placeholderClasses} ${lineClasses} ${stateClasses} relative min-h-[1lh] ${customClassName}`.trim();
 };
 
@@ -79,13 +80,18 @@ export interface FieldProps
   name?: string;
   placeholder?: string;
   multiline?: boolean;
-  onSubmit?: FieldCommandFactory; // Field injects { text: currentValue }
-  onChange?: FieldCommandFactory; // Field injects { text: currentValue }
+
+  // -- New Architecture --
+  onCommit?: FieldCommandFactory;
+  trigger?: FieldTrigger;
+  schema?: ZodSchema;
+  resetOnSubmit?: boolean;
+
+  // -- Legacy --
+  /** @deprecated Use onCommit instead */
+  onSubmit?: FieldCommandFactory;
   onCancel?: BaseCommand;
-  updateType?: string;
-  onCommit?: (value: string) => void;
-  onSync?: (value: string) => void;
-  onCancelCallback?: () => void;
+
   mode?: FieldMode;
   target?: FocusTarget;
   controls?: string;
@@ -99,9 +105,8 @@ export interface FieldProps
  * A passive text input component that:
  * - Registers with FieldRegistry for state management
  * - Subscribes to registry state for rendering
- * - Delegates all event handling to InputSensor (pipeline)
- *
- * NO event handlers - all logic in InputSensor + InputIntent.
+ * - Validates input against Zod schema (Gatekeeper)
+ * - Dispatches 'onCommit' command with injected payload
  */
 const FieldBase = forwardRef<HTMLElement, FieldProps>(
   (
@@ -110,11 +115,15 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       name,
       placeholder,
       multiline = false,
-      onSubmit,
-      onChange,
-      onCancel,
-      updateType,
+
       onCommit,
+      trigger: triggerProp,
+      schema,
+      resetOnSubmit = false,
+
+      onSubmit, // Legacy alias
+      onCancel,
+
       mode = "immediate",
       target = "real",
       controls,
@@ -124,6 +133,8 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     },
     ref,
   ) => {
+    const trigger: FieldTrigger = triggerProp ?? "enter";
+
     const context = useFocusGroupContext();
     const zoneId = context?.zoneId || "unknown";
 
@@ -133,69 +144,82 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     // --- Identity ---
     const fieldId = name || "unknown-field";
 
-    // --- Registry Binding ---
-    // Use refs for callback props to avoid useEffect re-runs on every render.
-    // defineApp.bind creates new function references for onSubmit/onChange on each render,
-    // which would trigger unregister→register→localValue="" reset without this.
-    const onSubmitRef = useRef(onSubmit);
-    const onChangeRef = useRef(onChange);
+    // --- Refs for Stabilizing Config ---
+    const onCommitRef = useRef(onCommit || onSubmit);
     const onCancelRef = useRef(onCancel);
-    const onCommitRef = useRef(onCommit);
-    onSubmitRef.current = onSubmit;
-    onChangeRef.current = onChange;
+    const schemaRef = useRef(schema);
+
+    onCommitRef.current = onCommit || onSubmit;
     onCancelRef.current = onCancel;
-    onCommitRef.current = onCommit;
+    schemaRef.current = schema;
 
-    // Stable wrapper functions that always delegate to the latest ref.
-    // Registered once — never changes identity.
-    const stableOnSubmit = useRef(
-      onSubmit
-        ? (p: { text: string }) => onSubmitRef.current!(p)
-        : undefined,
-    );
-    const stableOnChange = useRef(
-      onChange
-        ? (p: { text: string }) => onChangeRef.current!(p)
-        : undefined,
-    );
+    // --- Actions ---
+
+    const handleCommit = (currentValue: string) => {
+      const commitCmd = onCommitRef.current;
+      if (!commitCmd) return;
+
+      // 1. Validate
+      if (schemaRef.current) {
+        const result = schemaRef.current.safeParse(currentValue);
+        if (!result.success) {
+          const errorMessage = result.error.errors[0].message;
+          FieldRegistry.setError(fieldId, errorMessage);
+          return; // Block Commit
+        }
+      }
+
+      // 2. Clear Error (if any)
+      FieldRegistry.setError(fieldId, null);
+
+      // 3. Dispatch (Inject Payload)
+      // The factory expects { text: string }, we inject it.
+      // We assume defineApp has wrapped the handler to accept this payload.
+      // But wait, we need to DISPATCH the command.
+      // FieldCommandFactory returns a Command object.
+      const command = commitCmd({ text: currentValue });
+      kernel.dispatch(command);
+
+      // 4. Reset (if configured)
+      if (resetOnSubmit) {
+        FieldRegistry.reset(fieldId);
+      }
+    };
+
+    // Stable wrappers for Registry (Config)
+    // We wrap these so Registry can call them if needed, but mostly Field handles logic internally now.
     const stableOnCommit = useRef(
-      onCommit ? (v: string) => onCommitRef.current!(v) : undefined,
+      (p: { text: string }) => handleCommit(p.text)
     );
 
-    // Register once, unregister on unmount or name change
+    // --- Registry Registration ---
     useEffect(() => {
       if (!name) return;
+
       const config: FieldConfig = {
         name,
         mode,
         multiline,
-        ...(stableOnSubmit.current !== undefined
-          ? { onSubmit: stableOnSubmit.current }
-          : {}),
-        ...(stableOnChange.current !== undefined
-          ? { onChange: stableOnChange.current }
-          : {}),
-        ...(onCancelRef.current !== undefined
-          ? { onCancel: onCancelRef.current }
-          : {}),
-        ...(updateType !== undefined ? { updateType } : {}),
-        ...(stableOnCommit.current !== undefined
-          ? { onCommit: stableOnCommit.current }
-          : {}),
+        onCommit: onCommitRef.current,
+        trigger,
+        schema,
+        resetOnSubmit,
+        onCancel: onCancelRef.current,
       };
+
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
-    }, [name, mode, multiline, updateType]);
+    }, [name, mode, multiline, trigger, resetOnSubmit]); // Re-register on config change
 
     // --- State Subscription ---
     const fieldData = useFieldRegistry((s) => s.fields.get(fieldId));
-    const localValue = fieldData?.state.localValue ?? value;
+    const localValue = fieldData?.state.value ?? value;
+    const error = fieldData?.state.error;
 
     // Sync prop value to registry when not actively editing (contentEditable)
-    // isContentEditable is computed below; use a ref to avoid circular dependency
     const isContentEditableRef = useRef(false);
 
-    // --- Focus Computation (boolean subscriptions — avoids re-render on unrelated zone changes) ---
+    // --- Focus Computation ---
     const _isSystemActive = kernel.useComputed(
       (s) => s.os.focus.activeZoneId === zoneId,
     );
@@ -205,8 +229,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
         (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === fieldId,
     );
 
-    // For inline editing: Field might be a child of the focused item (e.g., "EDIT" inside todo "1")
-    // In that case, isFocused is false but the zone's editingItemId is set
     const isEditingThisField = kernel.useComputed(
       (s) => (s.os.focus.zones[zoneId]?.editingItemId ?? null) === fieldId,
     );
@@ -217,7 +239,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       return zone.focusedItemId === zone.editingItemId;
     });
 
-    // aria-activedescendant needs the actual string ID (virtual focus only)
     const activedescendantId = kernel.useComputed((s) => {
       if (target !== "virtual" || !controls) return null;
       const focusedId = s.os.focus.zones[zoneId]?.focusedItemId ?? null;
@@ -231,21 +252,21 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const isActive = isContentEditable;
     isContentEditableRef.current = isContentEditable;
 
+    // --- DOM Sync & Event Listeners ---
+
     // Sync prop value to registry when not actively editing
     useEffect(() => {
       if (
         !isContentEditableRef.current &&
-        value !== fieldData?.state.localValue
+        value !== fieldData?.state.value
       ) {
         FieldRegistry.updateValue(fieldId, value);
       }
-    }, [value, fieldId, fieldData?.state.localValue]);
+    }, [value, fieldId, fieldData?.state.value]);
 
-    // --- Initial Value (set once on mount via ref) ---
-    // contentEditable manages its own DOM, we only set initial value
+    // Initial Value
     const initialValueRef = useRef(value);
     const hasInitialized = useRef(false);
-
     useLayoutEffect(() => {
       if (innerRef.current && !hasInitialized.current) {
         innerRef.current.innerText = initialValueRef.current;
@@ -253,8 +274,9 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       }
     }, []);
 
-    // Sync value prop → DOM when not editing (enables panel → preview binding)
-    // Also restores original value when editing is cancelled (Escape)
+    // Restore value on cancel/exit
+    // - Deferred mode: restore to prop value (cancel semantics)
+    // - Immediate mode: restore to FieldRegistry value (preserve draft)
     const prevValueRef = useRef(value);
     const wasEditableRef = useRef(isContentEditable);
     useLayoutEffect(() => {
@@ -262,15 +284,73 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       wasEditableRef.current = isContentEditable;
 
       if (innerRef.current && !isContentEditable) {
-        // On editing exit OR value change: force DOM sync
-        if (exitedEditing || prevValueRef.current !== value) {
-          innerRef.current.innerText = value;
+        if (mode === "deferred") {
+          // Deferred: revert to app's value prop (cancel/blur = discard changes)
+          if (exitedEditing || prevValueRef.current !== value) {
+            innerRef.current.innerText = value;
+          }
+        } else {
+          // Immediate: preserve FieldRegistry value (draft survives blur)
+          if (exitedEditing) {
+            const registryValue = FieldRegistry.getValue(fieldId);
+            if (registryValue && innerRef.current.innerText !== registryValue) {
+              innerRef.current.innerText = registryValue;
+            }
+          }
         }
       }
       prevValueRef.current = value;
-    }, [value, isContentEditable]);
+    }, [value, isContentEditable, mode, fieldId]);
 
     const shouldHaveDOMFocus = mode === "deferred" ? isFocused : isActive;
+
+    // --- DOM Event Listeners ---
+    // InputListener (global) handles DOM→FieldRegistry sync (data stream).
+    // Field only handles commit triggers (command stream).
+
+    useEffect(() => {
+      const el = innerRef.current;
+      if (!el) return;
+
+      const handleInput = () => {
+        // Trigger: change → commit on every keystroke
+        if (trigger === "change") {
+          handleCommit(FieldRegistry.getValue(fieldId));
+        }
+      };
+
+      const handleBlur = () => {
+        // Trigger: Blur
+        if (trigger === "blur") {
+          handleCommit(FieldRegistry.getValue(fieldId));
+        }
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Skip IME composition (Korean, Japanese, Chinese)
+        // Matches KeyboardListener's guard: e.isComposing || e.keyCode === 229
+        if (e.isComposing || e.keyCode === 229) return;
+
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (trigger === "enter") {
+            handleCommit(FieldRegistry.getValue(fieldId));
+          }
+        }
+      };
+
+      el.addEventListener("input", handleInput);
+      el.addEventListener("blur", handleBlur);
+      el.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        el.removeEventListener("input", handleInput);
+        el.removeEventListener("blur", handleBlur);
+        el.removeEventListener("keydown", handleKeyDown);
+      };
+    }, [fieldId, trigger, resetOnSubmit]); // Re-bind if config changes
+
     useFieldFocus({
       innerRef,
       isActive: shouldHaveDOMFocus,
@@ -285,11 +365,11 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       isEditing: isContentEditable,
       multiline,
       value: localValue,
+      error,
       ...(placeholder !== undefined ? { placeholder } : {}),
       customClassName,
     });
 
-    // --- Base Props (Projection Only) ---
     const baseProps = {
       id: fieldId,
       contentEditable: isContentEditable,
@@ -300,6 +380,9 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       className: composeProps,
       "data-placeholder": placeholder,
       "data-mode": mode,
+      // Error state for styling/accessibility
+      "aria-invalid": !!error,
+      "aria-errormessage": error || undefined,
       "data-editing":
         mode === "deferred"
           ? isContentEditable
@@ -309,7 +392,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       "data-focused": isFocused ? "true" : undefined,
       "aria-controls": controls,
       "aria-activedescendant": activedescendantId || undefined,
-      children: null, // Managed by useFieldDOMSync
+      children: null,
       ...otherProps,
     };
 
@@ -326,7 +409,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
 FieldBase.displayName = "Field";
 
-// Namespace merge — attach Label as Field.Label (same pattern as Trigger.Portal)
 export const Field = Object.assign(FieldBase, {
   Label,
 });

@@ -1,5 +1,6 @@
 import type { BaseCommand } from "@kernel";
 import { useSyncExternalStore } from "react";
+import type { ZodSchema } from "zod";
 import type { FieldCommandFactory } from "../../schemas/command/BaseCommand.ts";
 
 /**
@@ -15,20 +16,33 @@ import type { FieldCommandFactory } from "../../schemas/command/BaseCommand.ts";
  */
 export type FieldType = "inline" | "tokens" | "block" | "editor";
 
+export type FieldTrigger = "change" | "blur" | "enter";
+
 export interface FieldConfig {
   name: string;
+  defaultValue?: string; // Initial value (HTML/RHF standard)
   mode?: "immediate" | "deferred"; // immediate = always editing, deferred = needs Enter to edit
   fieldType?: FieldType; // Key ownership preset (default: "inline")
   multiline?: boolean;
-  onSubmit?: FieldCommandFactory; // Field injects { text: currentValue }
-  onChange?: FieldCommandFactory; // Field injects { text: currentValue }
+
+  // -- Commit Architecture --
+  onCommit?: FieldCommandFactory; // Field injects { text: currentValue }
+  trigger?: FieldTrigger; // Default: 'enter'
+  schema?: ZodSchema;
+  resetOnSubmit?: boolean;
   onCancel?: BaseCommand;
-  updateType?: string; // Legacy support
-  onCommit?: (value: string) => void; // Local callback support
+
+  // -- Legacy (Deprecating) --
+  /** @deprecated Use onCommit instead */
+  onSubmit?: FieldCommandFactory;
 }
 
 export interface FieldState {
-  localValue: string;
+  value: string;
+  defaultValue: string;
+  isDirty: boolean;
+  isValid: boolean;
+  error: string | null;
 }
 
 export interface FieldEntry {
@@ -63,19 +77,28 @@ function getSnapshot() {
   return state;
 }
 
+// ─── Actions ───
+
 function register(id: string, config: FieldConfig) {
   const newFields = new Map(state.fields);
-  // Initialize with default state if not present
-  if (!newFields.has(id)) {
-    newFields.set(id, {
-      config,
-      state: { localValue: "" },
-    });
-  } else {
-    // Update config if re-registering
-    const entry = newFields.get(id)!;
-    newFields.set(id, { ...entry, config });
-  }
+  const existing = newFields.get(id);
+  const defaultValue = config.defaultValue ?? "";
+
+  // If re-registering, preserve state but update config
+  // If new, initialize default state
+  const newState: FieldState = existing ? existing.state : {
+    value: defaultValue,
+    defaultValue,
+    isValid: true,
+    isDirty: false,
+    error: null,
+  };
+
+  newFields.set(id, {
+    config,
+    state: { ...newState, defaultValue }, // Always sync defaultValue from config
+  });
+
   state = { ...state, fields: newFields };
   emit();
 }
@@ -92,16 +115,63 @@ function updateValue(id: string, value: string) {
   const entry = newFields.get(id);
   if (!entry) return;
 
+  // Check dirtiness against default value (if we tracked it, but for now just existence)
+  const isDirty = true;
+
   newFields.set(id, {
     ...entry,
-    state: { ...entry.state, localValue: value },
+    state: { ...entry.state, value, isDirty },
   });
+
+  state = { ...state, fields: newFields };
+  emit();
+}
+
+function setError(id: string, error: string | null) {
+  const newFields = new Map(state.fields);
+  const entry = newFields.get(id);
+  if (!entry) return;
+
+  newFields.set(id, {
+    ...entry,
+    state: {
+      ...entry.state,
+      error,
+      isValid: !error
+    },
+  });
+
+  state = { ...state, fields: newFields };
+  emit();
+}
+
+function reset(id: string) {
+  const newFields = new Map(state.fields);
+  const entry = newFields.get(id);
+  if (!entry) return;
+
+  const defaultValue = entry.state.defaultValue;
+  newFields.set(id, {
+    ...entry,
+    state: {
+      value: defaultValue,
+      defaultValue,
+      error: null,
+      isValid: true,
+      isDirty: false,
+    },
+  });
+
   state = { ...state, fields: newFields };
   emit();
 }
 
 function getField(id: string) {
   return state.fields.get(id);
+}
+
+function getValue(id: string) {
+  return state.fields.get(id)?.state.value ?? "";
 }
 
 // ─── React Hook ───
@@ -118,8 +188,11 @@ export function useFieldRegistry<T>(selector: (s: FieldRegistryState) => T): T {
 
 export const FieldRegistry = {
   get: () => getSnapshot(),
-  register: (id: string, config: FieldConfig) => register(id, config),
-  unregister: (id: string) => unregister(id),
-  updateValue: (id: string, value: string) => updateValue(id, value),
-  getField: (id: string) => getField(id),
+  register,
+  unregister,
+  updateValue,
+  setError,
+  reset,
+  getField,
+  getValue,
 };

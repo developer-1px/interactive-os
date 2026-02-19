@@ -1,6 +1,6 @@
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import { Field } from "@os/6-components/primitives/Field.tsx";
+import { Field } from "@os/6-components/field/Field.tsx";
 import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
 import { useState } from "react";
 import { TestBox } from "../../shared/TestLayout";

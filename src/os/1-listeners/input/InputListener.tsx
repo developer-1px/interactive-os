@@ -1,14 +1,14 @@
 /**
  * InputListener — Global DOM input event handler for contentEditable fields.
  *
- * Syncs contentEditable DOM text → FieldRegistry.localValue on every input.
+ * Syncs contentEditable DOM text → FieldRegistry.value on every input.
  * Also dispatches the field's onChange command if registered.
  *
  * This bridges the gap between native contentEditable (which has no React onChange)
  * and the FieldRegistry + kernel command system.
  */
 
-import { FieldRegistry } from "@os/6-components/primitives/FieldRegistry";
+import { FieldRegistry } from "@os/6-components/field/FieldRegistry";
 import { useEffect } from "react";
 import { kernel } from "../../kernel";
 

@@ -1,4 +1,4 @@
-import { Field } from "@os/6-components/primitives/Field";
+import { Field } from "@os/6-components/field/Field";
 import { Item } from "@os/6-components/primitives/Item";
 import { ArrowRight } from "lucide-react";
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
