@@ -29,10 +29,19 @@ export type PropertyType =
   | "section"
   | null;
 
+export interface SectionEntry {
+  id: string;
+  label: string;
+  /** Component type for rendering */
+  type: "hero" | "news" | "services" | "footer";
+}
+
 export interface BuilderState {
   data: {
     /** field name → value. OS.Field의 name과 1:1 매핑 */
     fields: Record<string, string>;
+    /** Ordered section list */
+    sections: SectionEntry[];
   };
   ui: {
     /** 현재 선택된 요소의 builder ID */
@@ -48,6 +57,12 @@ export interface BuilderState {
 
 export const INITIAL_STATE: BuilderState = {
   data: {
+    sections: [
+      { id: "ncp-hero", label: "Hero", type: "hero" },
+      { id: "ncp-news", label: "News", type: "news" },
+      { id: "ncp-services", label: "Services", type: "services" },
+      { id: "ncp-footer", label: "Footer", type: "footer" },
+    ],
     fields: {
       // Hero Block
       "ncp-hero-title": "AI 시대를 위한\n가장 완벽한 플랫폼",
@@ -174,12 +189,115 @@ export const allFields = BuilderApp.selector(
 
 const sidebarZone = BuilderApp.createZone("sidebar");
 
+// Section management commands
+
+export const deleteSection = sidebarZone.command(
+  "deleteSection",
+  (ctx: { state: BuilderState }, payload: { id: string }) => {
+    const sections = ctx.state.data.sections;
+    const index = sections.findIndex((s) => s.id === payload.id);
+    if (index === -1) return { state: ctx.state };
+
+    // Focus recovery: next sibling, or previous, or null
+    const nextFocusId =
+      sections[index + 1]?.id ?? sections[index - 1]?.id ?? null;
+
+    const newState = produce(ctx.state, (draft) => {
+      draft.data.sections.splice(index, 1);
+    });
+
+    if (nextFocusId) {
+      return {
+        state: newState,
+        dispatch: FOCUS({ zoneId: "builder-sidebar", itemId: `sidebar-${nextFocusId}` }),
+      };
+    }
+    return { state: newState };
+  },
+);
+
+export const duplicateSection = sidebarZone.command(
+  "duplicateSection",
+  (ctx: { state: BuilderState }, payload: { id: string }) => {
+    const sections = ctx.state.data.sections;
+    const index = sections.findIndex((s) => s.id === payload.id);
+    if (index === -1) return { state: ctx.state };
+
+    const source = sections[index]!;
+    const newId = `${source.id}-copy-${Date.now()}`;
+    const newSection: SectionEntry = {
+      id: newId,
+      label: `${source.label} (copy)`,
+      type: source.type,
+    };
+
+    return {
+      state: produce(ctx.state, (draft) => {
+        draft.data.sections.splice(index + 1, 0, newSection);
+      }),
+      dispatch: FOCUS({
+        zoneId: "builder-sidebar",
+        itemId: `sidebar-${newId}`,
+      }),
+    };
+  },
+);
+
+export const moveSectionUp = sidebarZone.command(
+  "moveSectionUp",
+  (ctx: { state: BuilderState }, payload: { id: string }) => ({
+    state: produce(ctx.state, (draft) => {
+      const index = draft.data.sections.findIndex((s) => s.id === payload.id);
+      if (index <= 0) return;
+      [draft.data.sections[index - 1], draft.data.sections[index]] = [
+        draft.data.sections[index]!,
+        draft.data.sections[index - 1]!,
+      ];
+    }),
+  }),
+);
+
+export const moveSectionDown = sidebarZone.command(
+  "moveSectionDown",
+  (ctx: { state: BuilderState }, payload: { id: string }) => ({
+    state: produce(ctx.state, (draft) => {
+      const index = draft.data.sections.findIndex((s) => s.id === payload.id);
+      if (index === -1 || index >= draft.data.sections.length - 1) return;
+      [draft.data.sections[index], draft.data.sections[index + 1]] = [
+        draft.data.sections[index + 1]!,
+        draft.data.sections[index]!,
+      ];
+    }),
+  }),
+);
+
+// Sidebar keybindings — commands receive focusId from ZoneCallback cursor
+import { FOCUS } from "@/os/3-commands/focus/focus";
+
+const sidebarDelete = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) =>
+  deleteSection({ id: cursor.focusId.replace("sidebar-", "") });
+
+const sidebarDuplicate = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) =>
+  duplicateSection({ id: cursor.focusId.replace("sidebar-", "") });
+
+const sidebarMoveUp = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) =>
+  moveSectionUp({ id: cursor.focusId.replace("sidebar-", "") });
+
+const sidebarMoveDown = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) =>
+  moveSectionDown({ id: cursor.focusId.replace("sidebar-", "") });
+
 export const BuilderSidebarUI = sidebarZone.bind({
   role: "listbox",
+  onDelete: sidebarDelete,
+  onMoveUp: sidebarMoveUp,
+  onMoveDown: sidebarMoveDown,
   options: {
     navigate: { orientation: "vertical" },
     tab: { behavior: "move" },
   },
+  keybindings: [
+    { key: "Cmd+d", command: sidebarDuplicate },
+  ],
 });
 
 // ═══════════════════════════════════════════════════════════════════

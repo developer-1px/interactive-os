@@ -6,6 +6,7 @@
 ## 🔴 Now
 
 - [ ] T1: Sidebar 키보드 바인딩 연결 — Delete/Duplicate/Move/Copy/Paste 커맨드에 키보드 단축키 바인딩
+  - [x] 1-0: sidebarZone 생성 + SectionSidebar PPT 썸네일 UI + BuilderPage 통합
   - [ ] 1-1: sidebar Zone에 keybinding 선언 (Delete, Cmd+D, Cmd+↑↓, Cmd+C, Cmd+V)
   - [ ] 1-2: 선택된 섹션 ID를 커맨드에 자동 주입 (selectedId → ids)
   - [ ] 1-3: Unit test — 키 이벤트 시뮬레이션으로 각 커맨드 동작 확인

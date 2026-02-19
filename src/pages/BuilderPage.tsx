@@ -1,9 +1,11 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { useEffect, useState } from "react";
 import {
+  BuilderApp,
   BuilderCanvasUI,
   selectElement,
   type PropertyType,
+  type SectionEntry,
 } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
@@ -116,12 +118,9 @@ export default function BuilderPage() {
               className="transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col shadow-2xl ring-1 ring-slate-900/5 bg-white shrink-0 origin-top"
               style={getViewportStyle()}
             >
-              {/* Content Container */}
+              {/* Content Container — dynamic from state */}
               <div className="flex-1 bg-white relative group/canvas">
-                <NCPHeroBlock id="ncp-hero" />
-                <NCPNewsBlock id="ncp-news" />
-                <NCPServicesBlock id="ncp-services" />
-                <NCPFooterBlock id="ncp-footer" />
+                <SectionRenderer />
               </div>
             </div>
           </div>
@@ -131,5 +130,27 @@ export default function BuilderPage() {
         <PropertiesPanel />
       </div>
     </div>
+  );
+}
+
+// ─── Section Renderer — maps section.type → block component ───
+
+const SECTION_COMPONENTS: Record<SectionEntry["type"], React.FC<{ id: string }>> = {
+  hero: NCPHeroBlock,
+  news: NCPNewsBlock,
+  services: NCPServicesBlock,
+  footer: NCPFooterBlock,
+};
+
+function SectionRenderer() {
+  const sections = BuilderApp.useComputed((s) => s.data.sections);
+
+  return (
+    <>
+      {sections.map((section) => {
+        const Component = SECTION_COMPONENTS[section.type];
+        return Component ? <Component key={section.id} id={section.id} /> : null;
+      })}
+    </>
   );
 }

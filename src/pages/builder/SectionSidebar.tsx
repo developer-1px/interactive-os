@@ -1,32 +1,18 @@
 /**
  * SectionSidebar — PPT-style section thumbnail list.
  *
- * Minimal: numbered list of section names with selection indicator.
+ * Reads sections from BuilderApp state (dynamic).
  * Uses BuilderSidebarUI.Zone + Item from app.ts bind().
  */
 
-import { BuilderSidebarUI } from "@/apps/builder/app";
+import { BuilderSidebarUI, BuilderApp } from "@/apps/builder/app";
 import { kernel } from "@/os/kernel";
 
 const SIDEBAR_ZONE_ID = "builder-sidebar";
 const CANVAS_ZONE_ID = "builder-canvas";
 
-interface SectionEntry {
-    id: string;
-    label: string;
-}
-
-const SECTIONS: SectionEntry[] = [
-    { id: "ncp-hero", label: "Hero" },
-    { id: "ncp-news", label: "News" },
-    { id: "ncp-services", label: "Services" },
-    { id: "ncp-footer", label: "Footer" },
-];
-
 export function SectionSidebar() {
-    const focusedSidebarId = kernel.useComputed(
-        (s) => s.os.focus.zones[SIDEBAR_ZONE_ID]?.focusedItemId ?? null,
-    );
+    const sections = BuilderApp.useComputed((s) => s.data.sections);
 
     const focusedCanvasId = kernel.useComputed(
         (s) => s.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
@@ -44,7 +30,7 @@ export function SectionSidebar() {
                 </span>
             </div>
 
-            {SECTIONS.map((section, idx) => {
+            {sections.map((section, idx) => {
                 const isCanvasActive = focusedCanvasId?.startsWith(section.id) ?? false;
 
                 return (
