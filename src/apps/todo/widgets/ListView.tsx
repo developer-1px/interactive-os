@@ -37,8 +37,8 @@ export function ListView() {
 
           <div className="flex-1 overflow-y-auto space-y-2 px-2 custom-scrollbar">
             {/* Draft Field — pre-bound via TodoDraft.Field */}
-            <Field.Label className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20">
-              <div className="text-slate-400 group-has-[[data-focused=true]]:text-indigo-500 transition-colors">
+            <Field.Label className="group flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-text border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300 has-[[data-focused=true]]:border-solid has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-500/20 has-[[data-anchor=true]]:border-solid has-[[data-anchor=true]]:border-slate-300 has-[[data-anchor=true]]:bg-white has-[[data-anchor=true]]:ring-1 has-[[data-anchor=true]]:ring-slate-300">
+              <div className="text-slate-400 group-has-[[data-focused=true]]:text-indigo-500 group-has-[[data-anchor=true]]:text-slate-500 transition-colors">
                 <Plus size={18} strokeWidth={2.5} />
               </div>
               <TodoDraft.Field

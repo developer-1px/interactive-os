@@ -148,9 +148,9 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     );
 
     // --- Computed State ---
-    // Focus is always visible — even when zone is inactive (anchor state).
-    // Only the active zone's focused item receives DOM focus and tabIndex=0.
-    const visualFocused = isFocused;
+    // data-focused: only on active zone's focused item (colorful ring).
+    // data-anchor: only on inactive zone's focused item (grayscale ring).
+    // tabIndex=0 is set for BOTH states (roving tabindex across zones).
     const isActiveFocused = isFocused && isGroupActive;
 
     // --- Focus Effect: apply .focus() when this item becomes focused ---
@@ -189,9 +189,9 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     const sharedProps = {
       id,
       role: effectiveRole,
-      // APG roving tabindex: last focused item retains tabIndex=0
+      // APG roving tabindex: focused item retains tabIndex=0
       // even when zone is inactive, so Tab returns to last position.
-      tabIndex: propTabIndex ?? (visualFocused ? 0 : -1),
+      tabIndex: propTabIndex ?? (isFocused ? 0 : -1),
       // aria-current only on the active zone's focused item (keyboard receiver)
       "aria-current": isActiveFocused || undefined,
 
@@ -206,7 +206,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       "data-focus-item": true,
       "data-item-id": id,
       "data-anchor": isAnchor || undefined,
-      "data-focused": visualFocused || undefined,
+      "data-focused": isActiveFocused || undefined,
       "data-selected": isSelected || undefined,
       "data-expanded": isExpanded || undefined,
       className: className || undefined,
