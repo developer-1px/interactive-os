@@ -1,12 +1,12 @@
-# Middleware
+# 미들웨어
 
-> Cross-cutting logic with before/after hooks.
+> before/after 훅을 통한 횡단 관심사 처리
 
 ---
 
-## Overview
+## 개요
 
-Middleware adds logic that runs **before** and **after** every command at a given scope. Inspired by re-frame's interceptor model.
+미들웨어는 특정 스코프 내 모든 커맨드의 전후에 실행되는 로직을 추가한다. re-frame의 인터셉터 모델에서 영감을 받았다.
 
 ```typescript
 type Middleware = {
@@ -18,9 +18,11 @@ type Middleware = {
 };
 ```
 
+Redux 스타일의 `(next) => (state, action) => ...` 체이닝 대신 `{ before, after }` 구조를 채택하였다. 이 구조에서는 실행 순서를 엔진이 관리하므로 각 미들웨어가 독립적이며, 순서 변경이 자유롭다.
+
 ---
 
-## Registration
+## 등록
 
 ```typescript
 kernel.use({
@@ -36,55 +38,56 @@ kernel.use({
 });
 ```
 
-- `kernel.use()` registers at **GLOBAL** scope
-- `scopedGroup.use()` registers at that group's scope
-- Omitting `scope` in the middleware object defaults to GLOBAL
+- `kernel.use()` — GLOBAL 스코프에 등록
+- `scopedGroup.use()` — 해당 그룹의 스코프에 등록
+- 미들웨어 객체에서 `scope`를 생략하면 GLOBAL이 기본값이 된다
 
 ---
 
-## Execution Model
+## 실행 모델
 
-### Onion Pattern
+### 양파 패턴
 
-Middleware executes in an onion pattern. `before` hooks run in registration order; `after` hooks run in **reverse** order.
+미들웨어는 양파 패턴으로 실행된다. `before` 훅은 등록 순서대로, `after` 훅은 역순으로 실행된다.
 
 ```
 A:before → B:before → C:before → [handler] → C:after → B:after → A:after
 ```
 
-### Full Pipeline (Per Scope)
+### 스코프별 파이프라인
 
-At each scope in the bubble path:
+버블 경로의 각 스코프에서 다음 순서로 처리된다.
 
 ```
-1. scope before-middleware (A → B → C)
-2. per-command inject interceptors
-3. handler execution
-4. per-command inject interceptors (after, reverse)
-5. scope after-middleware (C → B → A)
+1. 스코프 before 미들웨어 (A → B → C)
+2. when guard 평가
+3. 커맨드별 inject 인터셉터 (before)
+4. 핸들러 실행
+5. 커맨드별 inject 인터셉터 (after, 역순)
+6. 스코프 after 미들웨어 (C → B → A)
 ```
 
 ---
 
 ## MiddlewareContext
 
-The context object flows through all middleware hooks and can be transformed:
+컨텍스트 객체는 모든 미들웨어 훅을 통해 흐르며 변환될 수 있다.
 
 ```typescript
 type MiddlewareContext = {
-  command: Command;              // the command being processed
-  state: unknown;                // current state snapshot
-  handlerScope: string;          // which scope we're currently at
-  effects: Record<string, unknown> | null;  // handler result (null in before)
-  injected: Record<string, unknown>;        // injected context values
+  command: Command;              // 처리 중인 커맨드
+  state: unknown;                // 현재 상태 스냅샷
+  handlerScope: string;          // 현재 스코프
+  effects: Record<string, unknown> | null;  // 핸들러 결과 (before에서는 null)
+  injected: Record<string, unknown>;        // 주입된 컨텍스트 값
 };
 ```
 
 ---
 
-## Patterns
+## 패턴
 
-### Logging
+### 로깅
 
 ```typescript
 kernel.use({
@@ -102,9 +105,9 @@ kernel.use({
 });
 ```
 
-### Command Aliasing
+### 커맨드 별칭
 
-Transform a command type in the `before` hook:
+`before` 훅에서 커맨드 타입을 변환한다.
 
 ```typescript
 kernel.use({
@@ -118,9 +121,9 @@ kernel.use({
 });
 ```
 
-### Effect Transformation
+### 이펙트 변환
 
-Modify effect values in the `after` hook:
+`after` 훅에서 이펙트 값을 수정한다.
 
 ```typescript
 kernel.use({
@@ -140,9 +143,9 @@ kernel.use({
 });
 ```
 
-### Context Injection
+### 컨텍스트 주입
 
-Inject additional data into the handler context:
+핸들러 컨텍스트에 추가 데이터를 주입한다.
 
 ```typescript
 kernel.use({
@@ -154,43 +157,43 @@ kernel.use({
 });
 ```
 
-### Fallback Handler
+### 폴백 핸들러
 
-Handle native Events that no listener could resolve:
+리스너가 매칭하지 못한 네이티브 Event를 처리한다.
 
 ```typescript
 kernel.use({
   id: "KEYBOARD_FALLBACK",
   fallback: (event: Event) => {
     if (event instanceof KeyboardEvent && event.key === "F5") {
-      return REFRESH();  // returns a Command
+      return REFRESH();  // Command를 반환
     }
-    return null;  // pass to next middleware
+    return null;  // 다음 미들웨어로 전달
   },
 });
 ```
 
-Fallback is invoked via `kernel.resolveFallback(event)` — a separate path from normal dispatch.
+폴백은 `kernel.resolveFallback(event)`를 통해 호출되며, 일반 디스패치와는 별도의 경로로 처리된다.
 
 ---
 
-## Deduplication
+## 중복 제거
 
-Middleware with the same `id` at the same scope is **replaced**, not duplicated:
+같은 스코프에서 같은 `id`를 가진 미들웨어를 등록하면 기존 미들웨어가 교체된다. 중복 등록은 발생하지 않는다.
 
 ```typescript
 kernel.use({ id: "logger", before: v1Handler });
 kernel.use({ id: "logger", before: v2Handler });
-// → only v2Handler runs
+// v2Handler만 실행된다
 ```
 
-This makes middleware **HMR-safe** — re-registration during hot reload doesn't create duplicates.
+id 기반 중복 제거를 통해 HMR 환경에서 모듈 재실행 시 `kernel.use()`가 다시 호출되더라도 미들웨어가 중복으로 누적되지 않는다.
 
 ---
 
-## Scoped Middleware
+## 스코프 미들웨어
 
-Middleware can be scoped to run only for commands processed at a specific scope:
+미들웨어를 특정 스코프에 한정하여 등록할 수 있다.
 
 ```typescript
 const todoGroup = kernel.group({ scope: TODO_LIST });
@@ -198,17 +201,17 @@ const todoGroup = kernel.group({ scope: TODO_LIST });
 todoGroup.use({
   id: "TODO_VALIDATOR",
   before: (ctx) => {
-    // Only runs for commands at TODO_LIST scope
+    // TODO_LIST 스코프의 커맨드에서만 실행된다
     console.log(`[todo] Processing: ${ctx.command.type}`);
     return ctx;
   },
 });
 ```
 
-Scoped middleware only executes when the pipeline is **evaluating that scope**. If a command doesn't reach that scope (handled earlier in the bubble path), the middleware won't run.
+스코프 미들웨어는 파이프라인이 해당 스코프를 평가할 때만 실행된다. 커맨드가 그 스코프에 도달하지 않으면(버블 경로에서 더 일찍 처리된 경우) 미들웨어가 실행되지 않는다.
 
 ---
 
-## Next
+## 다음
 
-→ [State Management](./07-state-management.md) — State, Store, and State Lens for scope isolation.
+→ [상태 관리](./07-state-management.md) — State, Store, 상태 렌즈
