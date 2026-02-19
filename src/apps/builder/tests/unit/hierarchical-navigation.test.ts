@@ -11,8 +11,6 @@ import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import {
     getItemAttribute,
-    getItemParent,
-    getItemChildren,
     getFirstDescendantWithAttribute,
     getAncestorWithAttribute,
 } from "@os/2-contexts/itemQueries";
@@ -106,30 +104,7 @@ describe("hierarchicalNavigation — OS item queries", () => {
         });
     });
 
-    describe("getItemParent", () => {
-        it("finds parent item from DOM nesting", () => {
-            expect(getItemParent(ZONE_ID, "g1")).toBe("s1");
-            expect(getItemParent(ZONE_ID, "i1")).toBe("g1");
-            expect(getItemParent(ZONE_ID, "i2")).toBe("g1");
-        });
 
-        it("returns null for top-level items", () => {
-            expect(getItemParent(ZONE_ID, "s1")).toBeNull();
-            expect(getItemParent(ZONE_ID, "s2")).toBeNull();
-        });
-    });
-
-    describe("getItemChildren", () => {
-        it("finds direct children", () => {
-            expect(getItemChildren(ZONE_ID, "s1")).toEqual(["g1"]);
-            expect(getItemChildren(ZONE_ID, "g1")).toEqual(["i1", "i2"]);
-        });
-
-        it("returns empty for leaf items", () => {
-            expect(getItemChildren(ZONE_ID, "i1")).toEqual([]);
-            expect(getItemChildren(ZONE_ID, "s2")).toEqual([]);
-        });
-    });
 
     describe("getFirstDescendantWithAttribute", () => {
         it("finds first group inside section", () => {

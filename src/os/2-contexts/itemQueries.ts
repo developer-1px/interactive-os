@@ -33,77 +33,10 @@ export function getItemAttribute(
     return el?.getAttribute(attribute) ?? null;
 }
 
+
 // ═══════════════════════════════════════════════════════════════════
 // Item Hierarchy — derived from DOM nesting
 // ═══════════════════════════════════════════════════════════════════
-
-/**
- * Get the closest ancestor item of an item.
- *
- * Walks up the DOM from the item's parent until it finds another
- * [data-item-id] element, within the same zone boundary.
- */
-export function getItemParent(
-    zoneId: string,
-    itemId: string,
-): string | null {
-    const entry = ZoneRegistry.get(zoneId);
-    if (!entry?.element) return null;
-
-    const el = entry.element.querySelector(`[data-item-id="${itemId}"]`);
-    if (!el) return null;
-
-    // Walk up. Stop at zone boundary.
-    let current = el.parentElement;
-    while (current && current !== entry.element) {
-        const parentItemId = current.getAttribute("data-item-id");
-        if (parentItemId) return parentItemId;
-        current = current.parentElement;
-    }
-    return null;
-}
-
-/**
- * Get direct child items of an item (one level of nesting).
- *
- * Returns item IDs that are immediate children in the item tree
- * (not DOM children — item tree children, skipping non-item elements).
- */
-export function getItemChildren(
-    zoneId: string,
-    parentId: string,
-): string[] {
-    const entry = ZoneRegistry.get(zoneId);
-    if (!entry?.element) return [];
-
-    const parentEl = entry.element.querySelector(
-        `[data-item-id="${parentId}"]`,
-    );
-    if (!parentEl) return [];
-
-    const children: string[] = [];
-    const allItems = parentEl.querySelectorAll("[data-item-id]");
-    for (const el of allItems) {
-        const id = el.getAttribute("data-item-id");
-        if (!id || id === parentId) continue;
-        // Only direct children: their closest ancestor item is parentId
-        let ancestor = el.parentElement;
-        let closestItemId: string | null = null;
-        while (ancestor && ancestor !== parentEl) {
-            const ancestorItemId = ancestor.getAttribute("data-item-id");
-            if (ancestorItemId && ancestorItemId !== parentId) {
-                closestItemId = ancestorItemId;
-                break;
-            }
-            ancestor = ancestor.parentElement;
-        }
-        // If no intermediate item found, it's a direct child
-        if (!closestItemId) {
-            children.push(id);
-        }
-    }
-    return children;
-}
 
 /**
  * Get the first descendant item matching a specific attribute value.
