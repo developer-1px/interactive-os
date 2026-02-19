@@ -36,6 +36,14 @@ export interface SectionEntry {
   type: "hero" | "news" | "services" | "footer";
 }
 
+interface HistoryEntry {
+  command: { type: string; payload?: unknown };
+  timestamp: number;
+  snapshot?: Record<string, unknown>;
+  groupId?: string;
+  focusedItemId?: string | number;
+}
+
 export interface BuilderState {
   data: {
     /** field name → value. OS.Field의 name과 1:1 매핑 */
@@ -48,6 +56,10 @@ export interface BuilderState {
     selectedId: string | null;
     /** 선택된 요소의 프로퍼티 타입 */
     selectedType: PropertyType;
+  };
+  history: {
+    past: HistoryEntry[];
+    future: HistoryEntry[];
   };
 }
 
@@ -158,13 +170,19 @@ export const INITIAL_STATE: BuilderState = {
     selectedId: null,
     selectedType: null,
   },
+  history: {
+    past: [],
+    future: [],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════
 // App definition
 // ═══════════════════════════════════════════════════════════════════
 
-export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE);
+export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE, {
+  history: true,
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // Selectors (v5 branded)
@@ -181,6 +199,94 @@ export const selectedType = BuilderApp.selector(
 export const allFields = BuilderApp.selector(
   "allFields",
   (s) => s.data.fields,
+);
+
+// ═══════════════════════════════════════════════════════════════════
+// Conditions
+// ═══════════════════════════════════════════════════════════════════
+
+export const canUndo = BuilderApp.condition(
+  "canUndo",
+  (s) => (s.history?.past?.length ?? 0) > 0,
+);
+
+export const canRedo = BuilderApp.condition(
+  "canRedo",
+  (s) => (s.history?.future?.length ?? 0) > 0,
+);
+
+// ═══════════════════════════════════════════════════════════════════
+// Undo / Redo commands
+// ═══════════════════════════════════════════════════════════════════
+
+export const undoCommand = BuilderApp.command(
+  "undo",
+  (ctx: { state: BuilderState }) => {
+    const past = ctx.state.history.past;
+    if (past.length === 0) return { state: ctx.state };
+
+    const lastEntry = past.at(-1)!;
+    const groupId = lastEntry.groupId;
+
+    let entriesToPop = 1;
+    if (groupId) {
+      entriesToPop = 0;
+      for (let i = past.length - 1; i >= 0; i--) {
+        if (past[i]?.groupId === groupId) entriesToPop++;
+        else break;
+      }
+    }
+
+    const earliestEntry = past[past.length - entriesToPop]!;
+    const snap = earliestEntry.snapshot;
+
+    return {
+      state: produce(ctx.state, (draft) => {
+        const { history: _h, ...rest } = ctx.state;
+        const entry: HistoryEntry = {
+          command: { type: "UNDO_SNAPSHOT" },
+          timestamp: Date.now(),
+          snapshot: rest as Record<string, unknown>,
+        };
+        if (groupId) entry.groupId = groupId;
+        draft.history.future.push(entry);
+        for (let i = 0; i < entriesToPop; i++) {
+          draft.history.past.pop();
+        }
+        if (snap) {
+          if (snap["data"]) draft.data = snap["data"] as typeof draft.data;
+          if (snap["ui"]) draft.ui = snap["ui"] as typeof draft.ui;
+        }
+      }),
+    };
+  },
+  { when: canUndo },
+);
+
+export const redoCommand = BuilderApp.command(
+  "redo",
+  (ctx: { state: BuilderState }) => {
+    const future = ctx.state.history.future;
+    if (future.length === 0) return { state: ctx.state };
+
+    const entry = future.at(-1)!;
+    return {
+      state: produce(ctx.state, (draft) => {
+        draft.history.future.pop();
+        const { history: _h, ...rest } = ctx.state;
+        draft.history.past.push({
+          command: { type: "REDO_SNAPSHOT" },
+          timestamp: Date.now(),
+          snapshot: rest as Record<string, unknown>,
+        });
+        if (entry.snapshot) {
+          if (entry.snapshot["data"]) draft.data = entry.snapshot["data"] as typeof draft.data;
+          if (entry.snapshot["ui"]) draft.ui = entry.snapshot["ui"] as typeof draft.ui;
+        }
+      }),
+    };
+  },
+  { when: canRedo },
 );
 
 // ═══════════════════════════════════════════════════════════════════
@@ -301,6 +407,8 @@ export const BuilderSidebarUI = sidebarZone.bind({
   onDelete: sidebarDelete,
   onMoveUp: sidebarMoveUp,
   onMoveDown: sidebarMoveDown,
+  onUndo: undoCommand(),
+  onRedo: redoCommand(),
   options: {
     navigate: { orientation: "vertical" },
     tab: { behavior: "move" },
@@ -358,6 +466,8 @@ const CANVAS_ZONE_ID = "builder-canvas";
 export const BuilderCanvasUI = canvasZone.bind({
   role: "grid",
   onAction: createDrillDown(CANVAS_ZONE_ID),
+  onUndo: undoCommand(),
+  onRedo: redoCommand(),
   options: {
     navigate: { orientation: "corner" },
     tab: { behavior: "trap" },
