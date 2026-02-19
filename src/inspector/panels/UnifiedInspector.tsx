@@ -9,7 +9,7 @@
  *      Pipeline inferred via pure function inferPipeline().
  */
 
-import type { Transaction } from "@os/schemas";
+import type { Transaction } from "@kernel/core/transaction";
 import {
   ArrowRightLeft,
   Check,
