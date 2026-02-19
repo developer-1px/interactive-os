@@ -33,9 +33,20 @@
 
 ### 심층 보관 (`archive/legacy-docs` 브랜치 — git으로만 접근)
 
-| 원래 경로 | 퇴출 사유 | 한줄평 |
+```bash
+# 복원 방법
+git show archive/legacy-docs:docs/path/to/file.md
+```
+
+| 원래 경로 | 퇴출 사유 | 퇴출일 |
 |-----------|-----------|--------|
-| `docs/3-resource/00-guides/00-developer-usage.md` | Zustand, CommandRegistry, 구 defineCommand API 기반 | Zustand 시절의 개발 온보딩 가이드 — kernel 도입으로 전면 무효 |
-| `docs/3-resource/00-guides/01-app-architecture-usage.md` | createCommandStore, useEngine, Immer 기반 | "Smart Core, Dumb App" 초기 구현 가이드 — 엔진 레이어 자체가 사라짐 |
-| `docs/3-resource/00-guides/02-debugging.md` | AntigravityLogger, 구 Inspector 구조 기반 | 커스텀 로거 시절의 디버깅 가이드 — Inspector 전면 재설계됨 |
+| `docs/3-resource/00-guides/00-developer-usage.md` | Zustand, CommandRegistry, 구 defineCommand API 기반 — kernel 도입으로 전면 무효 | 02-13 |
+| `docs/3-resource/00-guides/01-app-architecture-usage.md` | createCommandStore, useEngine, Immer 기반 — 엔진 레이어 자체 소멸 | 02-13 |
+| `docs/3-resource/00-guides/02-debugging.md` | AntigravityLogger, 구 Inspector 구조 기반 — Inspector 전면 재설계됨 | 02-13 |
+| `docs/3-resource/02-analysis-reports/2026-02-12-mo-s-co-w-folder-structure-report.md` | `os-new/`, `packages/surface/`, `TestBot shim` 기반 스냅샷 — 모두 소멸 | 02-20 |
+| `docs/3-resource/02-analysis-reports/2026-0212-2204-[report]-onboarding-essential-knowledge.md` | `window.__TESTBOT__`, `os-new/`, `AntigravityOS.tsx` 기반 — 현행 구조와 전면 불일치 | 02-20 |
+| `docs/3-resource/02-analysis-reports/2026-0212-2138-[report]-divide-workflow-retro.md` | `TestBot` API 기반 회고 — TestBot 소멸로 무효 | 02-20 |
+| `docs/3-resource/04-architecture/2026-02-12-1200-os-structure.md` | `os-new/` 폴더 구조 확정 기록 — 결론 적용 완료, 여행 기록 가치 소멸 | 02-20 |
+| `docs/3-resource/04-architecture/2026-0213-2215-headless-zone.md` | `Widget`, `packages/surface/`, `OS.Zone` 기반 — defineApp/ZIFT로 진화 완료 | 02-20 |
+| `docs/10-devnote/` (7파일) | 2026-02-10~13 일일 개발 일지 — 일회성 스냅샷, 지식 없음 | 02-20 |
 
