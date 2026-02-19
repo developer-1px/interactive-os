@@ -1,9 +1,21 @@
-# [OPEN] Maximum update depth exceeded
+# [Closed] Maximum update depth exceeded
 
-**등록일**: 2026-02-20  
-**우선순위**: P1 (특정 상황에서 무한 렌더링 루프 발생)
+**등록일**: 2026-02-20 | **종료일**: 2026-02-20  
+**우선순위**: P1 | **커밋**: `8edf3bb`
+
+## 해결 요약
+
+**원인**: `Field.tsx` `useEffect` deps 배열에 `fieldData?.state.value` (FieldRegistry 구독값)이
+포함된 상태에서 effect body에서 `FieldRegistry.updateValue()`를 호출 →
+`emit()` → `useFieldRegistry` re-render → `fieldData?.state.value` 변경 → effect 재실행 → 무한 루프.
+
+**수정**: `registryValueRef`를 도입하여 구독값을 deps 없이 읽도록 변경.
+deps를 `[value, fieldId]`로 축소 — effect는 prop이 바뀔 때만 실행됨.
+
+**파일**: `src/os/6-components/field/Field.tsx` L258-275
 
 ---
+
 
 ## 원문
 
