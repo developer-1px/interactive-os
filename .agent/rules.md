@@ -61,24 +61,8 @@
 
 ## 성능 — 우리가 지키는 규칙
 
-1. **`useComputed` selector는 원시값을 반환한다.** `useSyncExternalStore`는 `Object.is`로 비교한다. string ID나 객체를 반환하면 값이 바뀔 때 모든 구독자가 리렌더된다. `=== id` 비교를 selector 안에서 수행하여 boolean을 반환하면, 실제로 변경된 컴포넌트만 리렌더된다.
-2. **애니메이션은 과정을 보여줘야 한다. 과정을 가리는 애니메이션은 잘못된 애니메이션이다.** Repeatable한 빠른 이동(커서, 포커스)에 opacity·색상 transition을 걸면, 이동 중 상태가 보이지 않는 순간이 생겨 오히려 과정을 가린다. 이런 요소에는 transition 없이 즉시 반영한다.
-3. **외부 스토어 구독값을 `useEffect` deps에 넣는 동시에 effect body에서 그 스토어를 변이(mutate)하지 않는다.** 이 패턴은 `구독 변경 → effect 재실행 → mutate → emit → 구독 변경 → ...` 무한 루프를 만든다 (`Maximum update depth exceeded`). **수정 패턴**: 구독값을 `ref`에 저장하고 렌더마다 갱신하되, deps에는 포함하지 않는다.
-   ```tsx
-   // ❌ BAD — 무한 루프
-   const data = useFieldRegistry(s => s.fields.get(id));
-   useEffect(() => {
-     if (value !== data?.state.value) FieldRegistry.updateValue(id, value);
-   }, [value, id, data?.state.value]); // ← 구독값이 deps에!
-
-   // ✅ GOOD — ref로 읽어 deps에서 제거
-   const data = useFieldRegistry(s => s.fields.get(id));
-   const dataRef = useRef(data?.state.value);
-   dataRef.current = data?.state.value;
-   useEffect(() => {
-     if (value !== dataRef.current) FieldRegistry.updateValue(id, value);
-   }, [value, id]); // ← 구독값 제거
-   ```
+1. **애니메이션은 과정을 보여줘야 한다. 과정을 가리는 애니메이션은 잘못된 애니메이션이다.** Repeatable한 빠른 이동(커서, 포커스)에 opacity·색상 transition을 걸면, 이동 중 상태가 보이지 않는 순간이 생겨 오히려 과정을 가린다. 이런 요소에는 transition 없이 즉시 반영한다.
+2. **외부 스토어 구독값을 `useEffect` deps에 넣는 동시에 effect body에서 그 스토어를 변이(mutate)하지 않는다.** 이 패턴은 `구독 변경 → effect 재실행 → mutate → emit → 구독 변경 → ...` 무한 루프를 만든다 (`Maximum update depth exceeded`). **수정 패턴**: 구독값을 `ref`에 저장하고 렌더마다 갱신하되, deps에는 포함하지 않는다.
 
 
 ## 네이밍 — 이름은 법이다
