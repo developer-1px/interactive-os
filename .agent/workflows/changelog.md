@@ -21,7 +21,13 @@ description: 작업 중 중간 커밋을 수행하고, 프로젝트 폴더의 ch
    - `docs/1-project/` 하위 폴더 중 가장 관련성 높은 프로젝트를 선택한다.
    - 판단 불가 시 사용자에게 묻는다.
 
-3. **코드 커밋**
+3. **타입 체크**
+   - `npx tsc -p tsconfig.app.json --noEmit 2>&1 | grep -c ": error TS"` 실행.
+   - 에러 0 → 정상 진행.
+   - 에러 > 0 → 커밋 메시지 끝에 `[tsc:N]` 접미사 추가. (예: `fix(os): refactor zone config [tsc:12]`)
+   - 에러 > 50 → 사용자에게 경고: "tsc 에러가 N개 누적되어 있습니다. `/divide`로 정리할까요?"
+
+4. **코드 커밋**
    - 변경 내용을 요약하는 **Conventional Commits** 메시지를 작성한다.
    - 형식: `type(scope): 한줄 요약`
    - **타입 목록** (이 목록 외의 타입은 사용하지 않는다):
@@ -36,7 +42,7 @@ description: 작업 중 중간 커밋을 수행하고, 프로젝트 폴더의 ch
    - `git add` + `git commit` 실행.
    - 커밋 해시를 기록한다.
 
-4. **Changelog 갱신**
+5. **Changelog 갱신**
    - 프로젝트 폴더의 `changelog.md`에 기록을 추가한다.
    - 위치: `docs/1-project/[프로젝트명]/changelog.md`
    - 파일이 없으면 생성한다.
@@ -50,15 +56,15 @@ description: 작업 중 중간 커밋을 수행하고, 프로젝트 폴더의 ch
      ```
    - 새 기록은 테이블 **맨 위**에 추가한다 (최신순).
 
-5. **Status 갱신**
+6. **Status 갱신**
    - 프로젝트의 `4-status.md`를 갱신한다.
    - 완료된 항목 체크, 진행률 업데이트.
    - `4-status.md`가 없으면 이 단계를 스킵한다.
 
-6. **대시보드 갱신**
+7. **대시보드 갱신**
    - `docs/STATUS.md`를 읽어 해당 프로젝트의 Last Activity를 현재 시각으로 갱신한다.
    - Phase가 변경되었으면 Phase도 갱신한다.
    - Focus 상태를 재판정한다 (최근 2일 이내 활동 = 🔥 Focus).
 
-7. **문서 커밋**
+8. **문서 커밋**
    - changelog + status + STATUS.md 변경을 `docs: changelog & status 갱신`으로 커밋한다.

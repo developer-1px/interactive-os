@@ -53,10 +53,11 @@
 4. **증명 없는 통과는 통과가 아니다.** 빌드가 됐다는 건 안 깨졌다는 증거가 아니다. 자동화된 검증만 증거다. → `/fix`
 5. **빌드 통과 ≠ 런타임 정상.** `vite build`(Rollup)와 dev 서버(esbuild)는 모듈 해석이 다르다. type erasure, export 처리 차이로 빌드는 통과해도 브라우저에서 깨질 수 있다. E2E Smoke가 진짜 검증이다. → `/verify`
 6. **안 쓰는 테스트는 정리한다.** 죽은 테스트는 거짓 안전감을 준다. 동작하지 않는 증명은 증명이 아니다. → `/cleanup`, `/review`
-7. **리팩토링은 측정 가능한 지표가 단조 개선될 때만 한다.** cast 수, import 수, 의존 방향 수, 코드 줄 수 — 하나 이상이 strictly 개선되고, 나머지가 악화되지 않아야 한다. 등가 교환이면 하지 않는다. → `/doubt`
-8. **3-commands는 DOM을 모른다.** Command 레이어에서 `document.getElementById`, `document.querySelector`, `document.activeElement` 등 동기 DOM 접근은 금지. DOM 데이터가 필요하면 `ctx.inject()`로 context에서 받거나, kernel state에서 읽는다. ESLint `pipeline/no-dom-in-commands`가 자동 차단한다.
-9. **Focus/Keyboard 동작은 APG가 스펙이다.** 구현 전에 [APG](https://www.w3.org/WAI/ARIA/apg/) 해당 패턴을 읽는다. 직감으로 구현하고 나중에 APG를 확인하는 것은 금지. 순서: ① APG 패턴 읽기 → ② 요구사항을 테스트로 인코딩 → ③ 테스트를 통과하는 코드 작성. "그럴 것 같은" 동작이 아니라 "스펙이 요구하는" 동작을 구현한다.
-10. **상태는 변경 주체에 따라 배치한다.** 유저 액션(click, key)으로 바뀌는 상호작용 상태(focus, selection, expanded) → kernel state. 앱 로직으로 결정되는 선언 상태(disabled, role, config) → ZoneRegistry. "일관성을 위해 같은 곳에"가 아니라 "누가 바꾸는가"가 배치 기준이다.
+7. **`as any`는 해결이 아니라 부채다.** 타입 에러를 `as any`로 억제하면 에러 카운트는 줄지만 cast 카운트가 늘고, 나중에 다시 되돌려야 한다. 타입 에러에 대한 올바른 분류: ① 진짜 수정 (타입을 맞춘다) ② skip (프로덕션 타입 설계 변경이 필요하다 → 지금은 안 건든다). `as any`로 메우는 ③번 선택지는 없다.
+8. **리팩토링은 측정 가능한 지표가 단조 개선될 때만 한다.** cast 수, import 수, 의존 방향 수, 코드 줄 수 — 하나 이상이 strictly 개선되고, 나머지가 악화되지 않아야 한다. 등가 교환이면 하지 않는다. → `/doubt`
+9. **3-commands는 DOM을 모른다.** Command 레이어에서 `document.getElementById`, `document.querySelector`, `document.activeElement` 등 동기 DOM 접근은 금지. DOM 데이터가 필요하면 `ctx.inject()`로 context에서 받거나, kernel state에서 읽는다. ESLint `pipeline/no-dom-in-commands`가 자동 차단한다.
+10. **Focus/Keyboard 동작은 APG가 스펙이다.** 구현 전에 [APG](https://www.w3.org/WAI/ARIA/apg/) 해당 패턴을 읽는다. 직감으로 구현하고 나중에 APG를 확인하는 것은 금지. 순서: ① APG 패턴 읽기 → ② 요구사항을 테스트로 인코딩 → ③ 테스트를 통과하는 코드 작성. "그럴 것 같은" 동작이 아니라 "스펙이 요구하는" 동작을 구현한다.
+11. **상태는 변경 주체에 따라 배치한다.** 유저 액션(click, key)으로 바뀌는 상호작용 상태(focus, selection, expanded) → kernel state. 앱 로직으로 결정되는 선언 상태(disabled, role, config) → ZoneRegistry. "일관성을 위해 같은 곳에"가 아니라 "누가 바꾸는가"가 배치 기준이다.
 
 ## 성능 — 우리가 지키는 규칙
 

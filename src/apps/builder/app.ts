@@ -293,21 +293,12 @@ export const redoCommand = BuilderApp.command(
 // Sidebar Zone — Collection Zone Facade
 // ═══════════════════════════════════════════════════════════════════
 
-import { z } from "zod";
 import {
   createCollectionZone,
-  fromArray,
 } from "@/os/collection/createCollectionZone";
 
-const SectionSchema = z.object({
-  id: z.string(),
-  label: z.string(),
-  type: z.enum(["hero", "news", "services", "footer"]),
-});
-
 const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
-  schema: SectionSchema,
-  ...fromArray((s: BuilderState) => s.data.sections),
+  accessor: (s: BuilderState) => s.data.sections,
   extractId: (focusId: string) => focusId.replace("sidebar-", ""),
   onClone: (original, newId) => ({
     ...original,

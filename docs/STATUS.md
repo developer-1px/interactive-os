@@ -88,7 +88,7 @@
 
 ## 📝 Recent Changes (2026-02-19)
 
-- 🆕 `builder-v2` T8: Collection Zone Facade — Zod+normalize/denormalize 기반 CRUD 자동생성 퍼사드. Probe-first로 Builder sidebar + Todo list 리팩터링하며 발견.
+- ✅ `builder-v2` T8: Collection Zone Facade 완료 — `createCollectionZone` + `fromArray`/`fromEntities`. Builder sidebar 120줄→55줄. Facade 경계 발견: 단순 CRUD+ordering = facade, 필터/clipboard/포커스 = 앱 책임.
 - 🆕 `philosophy-hygiene` 프로젝트 생성 — /review + /redteam 분석 결과 기반. useComputed 성능 위반 10건, ESLint 규칙 추가, deprecated API 정리.
 - ✅ field-architecture-refactor — FieldRegistry implementation, syncDraft removal, TodoApp migration.
 

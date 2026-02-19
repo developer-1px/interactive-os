@@ -1,62 +1,74 @@
 /**
  * createCollectionZone — Collection Zone Facade
  *
- * A factory that wraps createZone to auto-generate CRUD commands
+ * Wraps createZone to auto-generate CRUD commands
  * (remove, moveUp, moveDown, duplicate) for ordered collections.
  *
- * The facade operates on a normalized internal form { ids, entities },
- * and apps provide normalize/denormalize adapters via presets:
- *   - fromArray:    for SectionEntry[] style (Builder)
- *   - fromEntities: for Record<id, T> + order[] style (Todo)
+ * Supports two data shapes via config:
+ *   - accessor:     for T[] arrays (Builder)
+ *   - fromEntities: for Record<id, T> + order[] (Todo)
  *
  * @example
+ *   // Array-based (Builder)
  *   const sidebar = createCollectionZone(BuilderApp, "sidebar", {
- *     schema: SectionSchema,
- *     ...fromArray((s) => s.data.sections),
+ *     accessor: (s) => s.data.sections,
  *   });
- *   sidebar.remove({ id: "hero" });
- *   sidebar.moveUp({ id: "news" });
+ *
+ *   // Entity+Order (Todo)
+ *   const list = createCollectionZone(TodoApp, "list", {
+ *     ...fromEntities((s) => s.data.todos, (s) => s.data.todoOrder),
+ *   });
  */
 
 import { produce } from "immer";
-import type { ZodSchema } from "zod";
 import type { AppHandle, ZoneHandle } from "@/os/defineApp.types";
 import type { CommandFactory } from "@kernel/core/tokens";
 
 // ═══════════════════════════════════════════════════════════════════
-// Normalized Form — single internal representation
+// Internal Item Ops — unified mutation interface
 // ═══════════════════════════════════════════════════════════════════
 
-export interface Normalized<T = any> {
-    ids: string[];
-    entities: Record<string, T>;
+interface ItemOps<S, T extends { id: string }> {
+    /** Get ordered array of items (read-only snapshot) */
+    getItems: (state: S) => T[];
+    /** Remove item by id from draft */
+    removeItem: (draft: S, id: string) => void;
+    /** Swap two adjacent items in draft by their ids */
+    swapItems: (draft: S, idA: string, idB: string) => void;
+    /** Insert item after a given index in draft */
+    insertAfter: (draft: S, index: number, item: T) => void;
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Collection Adapter — normalize/denormalize pair
+// Config
 // ═══════════════════════════════════════════════════════════════════
 
-export interface CollectionAdapter<S, T = any> {
-    normalize: (state: S) => Normalized<T>;
-    denormalize: (draft: S, data: Normalized<T>) => void;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Collection Config
-// ═══════════════════════════════════════════════════════════════════
-
-export interface CollectionConfig<S, T = any> extends CollectionAdapter<S, T> {
-    schema: ZodSchema<T>;
-    /** Custom ID generation. Default: random 8-char alphanumeric. */
-    generateId?: () => string;
-    /** Translate DOM focusId to entity ID. Default: identity. */
+/** Array-based config: single accessor to T[] */
+export interface ArrayCollectionConfig<S, T extends { id: string }> {
+    accessor: (state: S) => T[];
     extractId?: (focusId: string) => string;
-    /** Customize how an item is cloned for duplicate. Receives original + new ID. */
+    generateId?: () => string;
     onClone?: (original: T, newId: string) => T;
+    /** Optional visibility filter for moveUp/moveDown. Items not matching are skipped. */
+    filter?: (state: S) => (item: T) => boolean;
 }
 
+/** Entity+Order config: produced by fromEntities() */
+export interface EntityCollectionConfig<S, T extends { id: string }> {
+    _ops: ItemOps<S, T>;
+    extractId?: (focusId: string) => string;
+    generateId?: () => string;
+    onClone?: (original: T, newId: string) => T;
+    /** Optional visibility filter for moveUp/moveDown. Items not matching are skipped. */
+    filter?: (state: S) => (item: T) => boolean;
+}
+
+export type CollectionConfig<S, T extends { id: string } = any> =
+    | ArrayCollectionConfig<S, T>
+    | EntityCollectionConfig<S, T>;
+
 // ═══════════════════════════════════════════════════════════════════
-// Collection Zone Handle — extends ZoneHandle with CRUD commands
+// Handle
 // ═══════════════════════════════════════════════════════════════════
 
 export interface CollectionZoneHandle<S> extends ZoneHandle<S> {
@@ -64,16 +76,48 @@ export interface CollectionZoneHandle<S> extends ZoneHandle<S> {
     moveUp: CommandFactory<string, { id: string }>;
     moveDown: CommandFactory<string, { id: string }>;
     duplicate: CommandFactory<string, { id: string }>;
-    /** Get pre-wired ZoneBindings callbacks for use in bind(). */
     collectionBindings(): CollectionBindingsResult;
 }
 
-/** The callbacks auto-generated from the collection config. */
 export interface CollectionBindingsResult {
     onDelete: (cursor: { focusId: string; selection: string[] }) => any;
     onMoveUp: (cursor: { focusId: string; selection: string[] }) => any;
     onMoveDown: (cursor: { focusId: string; selection: string[] }) => any;
     keybindings: Array<{ key: string; command: (cursor: { focusId: string; selection: string[] }) => any }>;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Resolve config → ItemOps
+// ═══════════════════════════════════════════════════════════════════
+
+function isEntityConfig<S, T extends { id: string }>(
+    c: CollectionConfig<S, T>,
+): c is EntityCollectionConfig<S, T> {
+    return "_ops" in c;
+}
+
+function opsFromAccessor<S, T extends { id: string }>(
+    accessor: (state: S) => T[],
+): ItemOps<S, T> {
+    return {
+        getItems: (state) => accessor(state),
+        removeItem: (draft, id) => {
+            const arr = accessor(draft);
+            const idx = arr.findIndex(item => item.id === id);
+            if (idx !== -1) arr.splice(idx, 1);
+        },
+        swapItems: (draft, idA, idB) => {
+            const arr = accessor(draft);
+            const iA = arr.findIndex(item => item.id === idA);
+            const iB = arr.findIndex(item => item.id === idB);
+            if (iA !== -1 && iB !== -1) {
+                [arr[iA], arr[iB]] = [arr[iB]!, arr[iA]!];
+            }
+        },
+        insertAfter: (draft, index, item) => {
+            accessor(draft).splice(index + 1, 0, item);
+        },
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -83,32 +127,30 @@ export interface CollectionBindingsResult {
 const defaultGenerateId = () => Math.random().toString(36).slice(2, 10);
 
 // ═══════════════════════════════════════════════════════════════════
-// createCollectionZone — the facade
+// createCollectionZone
 // ═══════════════════════════════════════════════════════════════════
 
-export function createCollectionZone<S>(
+export function createCollectionZone<S, T extends { id: string } = any>(
     app: AppHandle<S>,
     zoneName: string,
-    config: CollectionConfig<S>,
+    config: CollectionConfig<S, T>,
 ): CollectionZoneHandle<S> {
     const zone = app.createZone(zoneName);
     const uid = config.generateId ?? defaultGenerateId;
     const toEntityId = config.extractId ?? ((id: string) => id);
+    const ops: ItemOps<S, T> = isEntityConfig(config)
+        ? config._ops
+        : opsFromAccessor((config as ArrayCollectionConfig<S, T>).accessor);
 
     // ── remove ──
     const remove = zone.command(
         `${zoneName}:remove`,
         (ctx: { readonly state: S }, payload: { id: string }) => {
-            const normalized = config.normalize(ctx.state);
-            const index = normalized.ids.indexOf(payload.id);
-            if (index === -1) return { state: ctx.state };
-
+            const items = ops.getItems(ctx.state);
+            if (!items.some(item => item.id === payload.id)) return { state: ctx.state };
             return {
                 state: produce(ctx.state, (draft) => {
-                    const n = config.normalize(draft as S);
-                    n.ids.splice(index, 1);
-                    delete n.entities[payload.id];
-                    config.denormalize(draft as S, n);
+                    ops.removeItem(draft as S, payload.id);
                 }),
             };
         },
@@ -118,15 +160,15 @@ export function createCollectionZone<S>(
     const moveUp = zone.command(
         `${zoneName}:moveUp`,
         (ctx: { readonly state: S }, payload: { id: string }) => {
-            const normalized = config.normalize(ctx.state);
-            const index = normalized.ids.indexOf(payload.id);
-            if (index <= 0) return { state: ctx.state };
-
+            const allItems = ops.getItems(ctx.state);
+            const visible = config.filter
+                ? allItems.filter(config.filter(ctx.state))
+                : allItems;
+            const visIdx = visible.findIndex(item => item.id === payload.id);
+            if (visIdx <= 0) return { state: ctx.state };
             return {
                 state: produce(ctx.state, (draft) => {
-                    const n = config.normalize(draft as S);
-                    [n.ids[index - 1], n.ids[index]] = [n.ids[index]!, n.ids[index - 1]!];
-                    config.denormalize(draft as S, n);
+                    ops.swapItems(draft as S, payload.id, visible[visIdx - 1]!.id);
                 }),
             };
         },
@@ -136,17 +178,15 @@ export function createCollectionZone<S>(
     const moveDown = zone.command(
         `${zoneName}:moveDown`,
         (ctx: { readonly state: S }, payload: { id: string }) => {
-            const normalized = config.normalize(ctx.state);
-            const index = normalized.ids.indexOf(payload.id);
-            if (index === -1 || index >= normalized.ids.length - 1) {
-                return { state: ctx.state };
-            }
-
+            const allItems = ops.getItems(ctx.state);
+            const visible = config.filter
+                ? allItems.filter(config.filter(ctx.state))
+                : allItems;
+            const visIdx = visible.findIndex(item => item.id === payload.id);
+            if (visIdx === -1 || visIdx >= visible.length - 1) return { state: ctx.state };
             return {
                 state: produce(ctx.state, (draft) => {
-                    const n = config.normalize(draft as S);
-                    [n.ids[index], n.ids[index + 1]] = [n.ids[index + 1]!, n.ids[index]!];
-                    config.denormalize(draft as S, n);
+                    ops.swapItems(draft as S, payload.id, visible[visIdx + 1]!.id);
                 }),
             };
         },
@@ -156,30 +196,25 @@ export function createCollectionZone<S>(
     const duplicate = zone.command(
         `${zoneName}:duplicate`,
         (ctx: { readonly state: S }, payload: { id: string }) => {
-            const normalized = config.normalize(ctx.state);
-            const index = normalized.ids.indexOf(payload.id);
+            const items = ops.getItems(ctx.state);
+            const index = items.findIndex(item => item.id === payload.id);
             if (index === -1) return { state: ctx.state };
 
-            const original = normalized.entities[payload.id];
-            if (!original) return { state: ctx.state };
-
+            const original = items[index]!;
             const newId = uid();
             const cloned = config.onClone
                 ? config.onClone(original, newId)
-                : { ...original, id: newId };
+                : { ...original, id: newId } as T;
 
             return {
                 state: produce(ctx.state, (draft) => {
-                    const n = config.normalize(draft as S);
-                    n.ids.splice(index + 1, 0, newId);
-                    n.entities[newId] = cloned;
-                    config.denormalize(draft as S, n);
+                    ops.insertAfter(draft as S, index, cloned);
                 }),
             };
         },
     );
 
-    // ── collectionBindings — pre-wired callbacks for bind() ──
+    // ── collectionBindings ──
     function collectionBindings(): CollectionBindingsResult {
         return {
             onDelete: (cursor) => {
@@ -207,67 +242,44 @@ export function createCollectionZone<S>(
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Presets: fromArray / fromEntities
+// fromEntities — Entity+Order preset
 // ═══════════════════════════════════════════════════════════════════
-
-/**
- * fromArray — Adapter for array-based collections.
- *
- * The accessor must point to a direct property in the state
- * (e.g., `(s) => s.data.sections`). Works for both read (state)
- * and write (immer draft).
- *
- * Items must have an `id: string` field.
- */
-export function fromArray<S, T extends { id: string }>(
-    accessor: (state: S) => T[],
-): CollectionAdapter<S, T> {
-    return {
-        normalize: (state: S): Normalized<T> => {
-            const items = accessor(state);
-            return {
-                ids: items.map((item) => item.id),
-                entities: Object.fromEntries(items.map((item) => [item.id, item])),
-            };
-        },
-        denormalize: (draft: S, { ids, entities }: Normalized<T>): void => {
-            const arr = accessor(draft);
-            arr.length = 0;
-            for (const id of ids) {
-                const entity = entities[id];
-                if (entity) arr.push(entity);
-            }
-        },
-    };
-}
 
 /**
  * fromEntities — Adapter for entity-map + order-array collections.
  *
- * Already normalized by nature. The accessors point to the entities
- * record and the order array respectively.
+ * Produces an _ops interface that works directly on the entity map
+ * and order array. No intermediate normalize/denormalize.
  */
 export function fromEntities<S, T extends { id: string }>(
     entitiesAccessor: (state: S) => Record<string, T>,
     orderAccessor: (state: S) => string[],
-): CollectionAdapter<S, T> {
+): { _ops: ItemOps<S, T> } {
     return {
-        normalize: (state: S): Normalized<T> => ({
-            ids: [...orderAccessor(state)],
-            entities: { ...entitiesAccessor(state) },
-        }),
-        denormalize: (draft: S, { ids, entities }: Normalized<T>): void => {
-            // Replace order array contents
-            const orderArr = orderAccessor(draft);
-            orderArr.length = 0;
-            orderArr.push(...ids);
-
-            // Replace entities
-            const entitiesObj = entitiesAccessor(draft);
-            for (const key of Object.keys(entitiesObj)) {
-                delete entitiesObj[key];
-            }
-            Object.assign(entitiesObj, entities);
+        _ops: {
+            getItems: (state) => {
+                const entities = entitiesAccessor(state);
+                return orderAccessor(state).map(id => entities[id]!).filter(Boolean);
+            },
+            removeItem: (draft, id) => {
+                delete entitiesAccessor(draft)[id];
+                const order = orderAccessor(draft);
+                const idx = order.indexOf(id);
+                if (idx !== -1) order.splice(idx, 1);
+            },
+            swapItems: (draft, idA, idB) => {
+                const order = orderAccessor(draft);
+                const iA = order.indexOf(idA);
+                const iB = order.indexOf(idB);
+                if (iA !== -1 && iB !== -1) {
+                    [order[iA], order[iB]] = [order[iB]!, order[iA]!];
+                }
+                // entities don't need swapping — only order matters
+            },
+            insertAfter: (draft, index, item) => {
+                entitiesAccessor(draft)[item.id] = item;
+                orderAccessor(draft).splice(index + 1, 0, item.id);
+            },
         },
     };
 }

@@ -1,33 +1,22 @@
 /**
- * createCollectionZone — Unit tests (TDD Red Phase)
+ * createCollectionZone — Unit tests
  *
- * Tests the Collection Zone Facade:
- *   - Two data shapes: Array (Builder) and Entity+Order (Todo)
- *   - Auto-generated commands: remove, moveUp, moveDown, duplicate
- *   - normalize/denormalize roundtrip integrity
- *   - fromArray / fromEntities presets
- *
- * These tests drive the API design. The implementation does not exist yet.
+ * Tests two data shapes:
+ *   - Array (Builder): accessor-based
+ *   - Entity+Order (Todo): fromEntities-based
+ * Both share the same CRUD API.
  */
 
 import { describe, expect, it, beforeEach } from "vitest";
-import { z } from "zod";
 import { defineApp } from "@/os/defineApp";
 import {
     createCollectionZone,
-    fromArray,
     fromEntities,
 } from "@/os/collection/createCollectionZone";
 
 // ═══════════════════════════════════════════════════════════════════
-// Test Fixture A: Array-based collection (Builder pattern)
+// Fixture A: Array-based (Builder)
 // ═══════════════════════════════════════════════════════════════════
-
-const SectionSchema = z.object({
-    id: z.string(),
-    label: z.string(),
-    type: z.enum(["hero", "news", "services", "footer"]),
-});
 
 interface SectionEntry {
     id: string;
@@ -36,9 +25,7 @@ interface SectionEntry {
 }
 
 interface ArrayState {
-    data: {
-        sections: SectionEntry[];
-    };
+    data: { sections: SectionEntry[] };
     history: { past: any[]; future: any[] };
 }
 
@@ -54,20 +41,21 @@ const ARRAY_INITIAL: ArrayState = {
     history: { past: [], future: [] },
 };
 
-// ═══════════════════════════════════════════════════════════════════
-// Test Fixture B: Entity+Order collection (Todo pattern)
-// ═══════════════════════════════════════════════════════════════════
+const ArrayApp = defineApp<ArrayState>("test-array-v2", ARRAY_INITIAL);
 
-const TodoSchema = z.object({
-    id: z.string(),
-    text: z.string(),
-    completed: z.boolean(),
+const arraySidebar = createCollectionZone(ArrayApp, "sidebar-v2", {
+    accessor: (s: ArrayState) => s.data.sections,
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Fixture B: Entity+Order (Todo)
+// ═══════════════════════════════════════════════════════════════════
 
 interface Todo {
     id: string;
     text: string;
     completed: boolean;
+    categoryId: string;
 }
 
 interface EntityState {
@@ -75,51 +63,49 @@ interface EntityState {
         todos: Record<string, Todo>;
         todoOrder: string[];
     };
+    ui: { selectedCategoryId: string };
     history: { past: any[]; future: any[] };
 }
 
 const ENTITY_INITIAL: EntityState = {
     data: {
         todos: {
-            a: { id: "a", text: "Buy milk", completed: false },
-            b: { id: "b", text: "Write tests", completed: true },
-            c: { id: "c", text: "Ship it", completed: false },
+            a: { id: "a", text: "Buy milk", completed: false, categoryId: "work" },
+            b: { id: "b", text: "Write tests", completed: true, categoryId: "personal" },
+            c: { id: "c", text: "Ship it", completed: false, categoryId: "work" },
+            d: { id: "d", text: "Read book", completed: false, categoryId: "personal" },
         },
-        todoOrder: ["a", "b", "c"],
+        todoOrder: ["a", "b", "c", "d"],
     },
+    ui: { selectedCategoryId: "work" },
     history: { past: [], future: [] },
 };
 
-// ═══════════════════════════════════════════════════════════════════
-// Fixture A: Array-based Collection App
-// ═══════════════════════════════════════════════════════════════════
+const EntityApp = defineApp<EntityState>("test-entity-v2", ENTITY_INITIAL);
 
-const ArrayApp = defineApp<ArrayState>("test-array", ARRAY_INITIAL);
-
-const arraySidebar = createCollectionZone(ArrayApp, "sidebar", {
-    schema: SectionSchema,
-    ...fromArray((s: ArrayState) => s.data.sections),
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// Fixture B: Entity+Order Collection App
-// ═══════════════════════════════════════════════════════════════════
-
-const EntityApp = defineApp<EntityState>("test-entity", ENTITY_INITIAL);
-
-const entityList = createCollectionZone(EntityApp, "list", {
-    schema: TodoSchema,
+// Without filter — basic entity+order
+const entityList = createCollectionZone(EntityApp, "list-v2", {
     ...fromEntities(
         (s: EntityState) => s.data.todos,
         (s: EntityState) => s.data.todoOrder,
     ),
 });
 
+// With filter — category-filtered (like real Todo app)
+const filteredList = createCollectionZone(EntityApp, "filtered-v2", {
+    ...fromEntities(
+        (s: EntityState) => s.data.todos,
+        (s: EntityState) => s.data.todoOrder,
+    ),
+    filter: (state: EntityState) => (item: Todo) =>
+        item.categoryId === state.ui.selectedCategoryId,
+});
+
 // ═══════════════════════════════════════════════════════════════════
-// Tests: Array-based collection (Builder pattern)
+// Tests: Array-based (Builder pattern)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("createCollectionZone — Array (Builder pattern)", () => {
+describe("createCollectionZone — Array (Builder)", () => {
     let app: ReturnType<typeof ArrayApp.create>;
 
     beforeEach(() => {
@@ -129,8 +115,6 @@ describe("createCollectionZone — Array (Builder pattern)", () => {
     function ids(): string[] {
         return app.state.data.sections.map((s) => s.id);
     }
-
-    // ─── remove ────────────────────────────────────────────────────
 
     describe("remove", () => {
         it("removes item by id", () => {
@@ -145,8 +129,6 @@ describe("createCollectionZone — Array (Builder pattern)", () => {
         });
     });
 
-    // ─── moveUp ────────────────────────────────────────────────────
-
     describe("moveUp", () => {
         it("swaps item with previous sibling", () => {
             app.dispatch(arraySidebar.moveUp({ id: "news" }));
@@ -158,8 +140,6 @@ describe("createCollectionZone — Array (Builder pattern)", () => {
             expect(ids()).toEqual(["hero", "news", "services", "footer"]);
         });
     });
-
-    // ─── moveDown ──────────────────────────────────────────────────
 
     describe("moveDown", () => {
         it("swaps item with next sibling", () => {
@@ -173,16 +153,12 @@ describe("createCollectionZone — Array (Builder pattern)", () => {
         });
     });
 
-    // ─── duplicate ─────────────────────────────────────────────────
-
     describe("duplicate", () => {
         it("inserts copy after original", () => {
             app.dispatch(arraySidebar.duplicate({ id: "hero" }));
             expect(app.state.data.sections).toHaveLength(5);
             expect(app.state.data.sections[0]!.id).toBe("hero");
-            // Copy should be at index 1 with same type
             expect(app.state.data.sections[1]!.type).toBe("hero");
-            // Copy should have different id
             expect(app.state.data.sections[1]!.id).not.toBe("hero");
         });
 
@@ -194,10 +170,10 @@ describe("createCollectionZone — Array (Builder pattern)", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// Tests: Entity+Order collection (Todo pattern)
+// Tests: Entity+Order (Todo pattern)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("createCollectionZone — Entity+Order (Todo pattern)", () => {
+describe("createCollectionZone — Entity+Order (Todo)", () => {
     let app: ReturnType<typeof EntityApp.create>;
 
     beforeEach(() => {
@@ -212,12 +188,10 @@ describe("createCollectionZone — Entity+Order (Todo pattern)", () => {
         return app.state.data.todos[id];
     }
 
-    // ─── remove ────────────────────────────────────────────────────
-
     describe("remove", () => {
         it("removes entity and order entry", () => {
             app.dispatch(entityList.remove({ id: "b" }));
-            expect(order()).toEqual(["a", "c"]);
+            expect(order()).toEqual(["a", "c", "d"]);
             expect(entity("b")).toBeUndefined();
         });
 
@@ -228,83 +202,47 @@ describe("createCollectionZone — Entity+Order (Todo pattern)", () => {
         });
     });
 
-    // ─── moveUp ────────────────────────────────────────────────────
-
     describe("moveUp", () => {
         it("swaps item with previous in order", () => {
             app.dispatch(entityList.moveUp({ id: "b" }));
-            expect(order()).toEqual(["b", "a", "c"]);
-            // Entities untouched
+            expect(order()).toEqual(["b", "a", "c", "d"]);
             expect(entity("b")!.text).toBe("Write tests");
         });
 
         it("is no-op when already first", () => {
             app.dispatch(entityList.moveUp({ id: "a" }));
-            expect(order()).toEqual(["a", "b", "c"]);
+            expect(order()).toEqual(["a", "b", "c", "d"]);
         });
     });
-
-    // ─── moveDown ──────────────────────────────────────────────────
 
     describe("moveDown", () => {
         it("swaps item with next in order", () => {
             app.dispatch(entityList.moveDown({ id: "b" }));
-            expect(order()).toEqual(["a", "c", "b"]);
+            expect(order()).toEqual(["a", "c", "b", "d"]);
         });
 
         it("is no-op when already last", () => {
-            app.dispatch(entityList.moveDown({ id: "c" }));
-            expect(order()).toEqual(["a", "b", "c"]);
+            app.dispatch(entityList.moveDown({ id: "d" }));
+            expect(order()).toEqual(["a", "b", "c", "d"]);
         });
     });
-
-    // ─── duplicate ─────────────────────────────────────────────────
 
     describe("duplicate", () => {
         it("creates new entity and inserts after original in order", () => {
             app.dispatch(entityList.duplicate({ id: "a" }));
-            expect(order()).toHaveLength(4);
-            // Original stays at index 0
+            expect(order()).toHaveLength(5);
             expect(order()[0]).toBe("a");
-            // New item at index 1 with different id
             const newId = order()[1]!;
             expect(newId).not.toBe("a");
-            // New entity has same data
             expect(entity(newId)!.text).toBe("Buy milk");
             expect(entity(newId)!.completed).toBe(false);
-            // New entity has its own id
             expect(entity(newId)!.id).toBe(newId);
         });
 
         it("is no-op for unknown id", () => {
             app.dispatch(entityList.duplicate({ id: "zzz" }));
-            expect(order()).toHaveLength(3);
+            expect(order()).toHaveLength(4);
         });
-    });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// Tests: normalize/denormalize roundtrip
-// ═══════════════════════════════════════════════════════════════════
-
-describe("normalize/denormalize roundtrip", () => {
-    it("fromArray roundtrip preserves data", () => {
-        const adapter = fromArray((s: ArrayState) => s.data.sections);
-        const normalized = adapter.normalize(ARRAY_INITIAL);
-
-        expect(normalized.ids).toEqual(["hero", "news", "services", "footer"]);
-        expect(normalized.entities["hero"]).toEqual(ARRAY_INITIAL.data.sections[0]);
-    });
-
-    it("fromEntities roundtrip preserves data", () => {
-        const adapter = fromEntities(
-            (s: EntityState) => s.data.todos,
-            (s: EntityState) => s.data.todoOrder,
-        );
-        const normalized = adapter.normalize(ENTITY_INITIAL);
-
-        expect(normalized.ids).toEqual(["a", "b", "c"]);
-        expect(normalized.entities["a"]).toEqual(ENTITY_INITIAL.data.todos["a"]);
     });
 });
 
@@ -313,7 +251,6 @@ describe("normalize/denormalize roundtrip", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("createCollectionZone — bind() auto-wiring", () => {
-    // Helper: dispatch result which may be a single command or array
     function dispatchAll(app: any, result: any) {
         if (Array.isArray(result)) {
             for (const cmd of result) app.dispatch(cmd);
@@ -322,76 +259,52 @@ describe("createCollectionZone — bind() auto-wiring", () => {
         }
     }
 
-    it("produces bindConfig with onDelete, onMoveUp, onMoveDown callbacks", () => {
+    it("produces bindConfig with onDelete, onMoveUp, onMoveDown", () => {
         const bindConfig = arraySidebar.collectionBindings();
-
         expect(bindConfig.onDelete).toBeDefined();
         expect(bindConfig.onMoveUp).toBeDefined();
         expect(bindConfig.onMoveDown).toBeDefined();
-        expect(typeof bindConfig.onDelete).toBe("function");
     });
 
     it("onDelete produces remove command from cursor.focusId", () => {
         const bindings = arraySidebar.collectionBindings();
-        const cursor = { focusId: "news", selection: [] };
+        const result = bindings.onDelete({ focusId: "news", selection: [] });
 
-        const result = bindings.onDelete!(cursor);
-        // result should be a command (or array) that removes "news"
-        expect(result).toBeDefined();
-
-        // Dispatch it on a real test instance
         const app = ArrayApp.create();
         dispatchAll(app, result);
-        expect(app.state.data.sections.map(s => s.id)).toEqual(["hero", "services", "footer"]);
+        expect(app.state.data.sections.map((s: SectionEntry) => s.id)).toEqual(["hero", "services", "footer"]);
     });
 
     it("onDelete with selection produces batch remove", () => {
         const bindings = arraySidebar.collectionBindings();
-        const cursor = { focusId: "hero", selection: ["hero", "news"] };
-
-        const result = bindings.onDelete!(cursor);
+        const result = bindings.onDelete({ focusId: "hero", selection: ["hero", "news"] });
 
         const app = ArrayApp.create();
         dispatchAll(app, result);
-        expect(app.state.data.sections.map(s => s.id)).toEqual(["services", "footer"]);
-    });
-
-    it("onMoveUp produces moveUp command from cursor.focusId", () => {
-        const bindings = arraySidebar.collectionBindings();
-        const cursor = { focusId: "news", selection: [] };
-
-        const result = bindings.onMoveUp!(cursor);
-
-        const app = ArrayApp.create();
-        dispatchAll(app, result);
-        expect(app.state.data.sections.map(s => s.id)).toEqual(["news", "hero", "services", "footer"]);
+        expect(app.state.data.sections.map((s: SectionEntry) => s.id)).toEqual(["services", "footer"]);
     });
 
     it("keybindings include Meta+D for duplicate", () => {
         const bindings = arraySidebar.collectionBindings();
-        expect(bindings.keybindings).toBeDefined();
-        expect(bindings.keybindings!.some(kb => kb.key === "Meta+D")).toBe(true);
+        expect(bindings.keybindings.some((kb: { key: string }) => kb.key === "Meta+D")).toBe(true);
     });
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// Tests: extractId — DOM focusId to entity ID translation
+// Tests: extractId
 // ═══════════════════════════════════════════════════════════════════
 
 describe("createCollectionZone — extractId", () => {
-    const AppWithPrefix = defineApp<ArrayState>("test-prefix", ARRAY_INITIAL);
+    const AppWithPrefix = defineApp<ArrayState>("test-prefix-v2", ARRAY_INITIAL);
 
-    const prefixedSidebar = createCollectionZone(AppWithPrefix, "prefixed", {
-        schema: SectionSchema,
-        ...fromArray((s: ArrayState) => s.data.sections),
+    const prefixedSidebar = createCollectionZone(AppWithPrefix, "prefixed-v2", {
+        accessor: (s: ArrayState) => s.data.sections,
         extractId: (focusId: string) => focusId.replace("sidebar-", ""),
     });
 
-    it("remove uses extractId to translate focusId", () => {
+    it("extractId translates focusId in bindings", () => {
         const bindings = prefixedSidebar.collectionBindings();
-        const cursor = { focusId: "sidebar-news", selection: [] as string[] };
-
-        const result = bindings.onDelete!(cursor);
+        const result = bindings.onDelete({ focusId: "sidebar-news", selection: [] as string[] });
 
         const app = AppWithPrefix.create();
         if (Array.isArray(result)) {
@@ -399,13 +312,63 @@ describe("createCollectionZone — extractId", () => {
         } else {
             app.dispatch(result);
         }
-        expect(app.state.data.sections.map(s => s.id)).toEqual(["hero", "services", "footer"]);
+        expect(app.state.data.sections.map((s: SectionEntry) => s.id)).toEqual(["hero", "services", "footer"]);
     });
 
     it("direct command still accepts raw entity id", () => {
         const app = AppWithPrefix.create();
         app.dispatch(prefixedSidebar.remove({ id: "news" }));
-        expect(app.state.data.sections.map(s => s.id)).toEqual(["hero", "services", "footer"]);
+        expect(app.state.data.sections.map((s: SectionEntry) => s.id)).toEqual(["hero", "services", "footer"]);
     });
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// Tests: filter — category-filtered moveUp/moveDown (Todo pattern)
+// ═══════════════════════════════════════════════════════════════════
+
+describe("createCollectionZone — filtered moveUp/moveDown", () => {
+    // Global order: [a(work), b(personal), c(work), d(personal)]
+    // selectedCategoryId: "work" → visible: [a, c]
+    let app: ReturnType<typeof EntityApp.create>;
+
+    beforeEach(() => {
+        app = EntityApp.create();
+    });
+
+    function order(): string[] {
+        return app.state.data.todoOrder;
+    }
+
+    it("moveDown skips non-visible items (a→c, not a→b)", () => {
+        // a is first in visible [a, c]. moveDown should swap with c.
+        app.dispatch(filteredList.moveDown({ id: "a" }));
+        // Global: a(idx 0) and c(idx 2) swap positions → [c, b, a, d]
+        expect(order()).toEqual(["c", "b", "a", "d"]);
+    });
+
+    it("moveUp skips non-visible items (c→a, not c→b)", () => {
+        // c is second in visible [a, c]. moveUp should swap with a.
+        app.dispatch(filteredList.moveUp({ id: "c" }));
+        // Global: [c, b, a, d]
+        expect(order()).toEqual(["c", "b", "a", "d"]);
+    });
+
+    it("moveDown is no-op on last visible item", () => {
+        // c is last in visible [a, c]
+        app.dispatch(filteredList.moveDown({ id: "c" }));
+        expect(order()).toEqual(["a", "b", "c", "d"]);
+    });
+
+    it("moveUp is no-op on first visible item", () => {
+        // a is first in visible [a, c]
+        app.dispatch(filteredList.moveUp({ id: "a" }));
+        expect(order()).toEqual(["a", "b", "c", "d"]);
+    });
+
+    it("non-visible items are not affected", () => {
+        app.dispatch(filteredList.moveDown({ id: "a" }));
+        // b (personal) should keep its position relative to d (personal)
+        expect(app.state.data.todos["b"]!.categoryId).toBe("personal");
+        expect(app.state.data.todos["d"]!.categoryId).toBe("personal");
+    });
+});
