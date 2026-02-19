@@ -67,7 +67,7 @@ describe("Focus Stack (SPEC §8)", () => {
 
     it("saves triggeredBy metadata", () => {
       setupFocus("z1", "item-a");
-      kernel.dispatch(STACK_PUSH({ triggeredBy: "modal-open" }));
+      kernel.dispatch((STACK_PUSH as any)({ triggeredBy: "modal-open" }));
 
       const stack = getStack();
       expect(stack[0]?.triggeredBy).toBe("modal-open");

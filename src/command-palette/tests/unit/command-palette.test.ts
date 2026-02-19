@@ -45,6 +45,7 @@ function setupFocus(zoneId: string, focusedItemId: string) {
 /**
  * Helper: Register a zone mock
  */
+// @ts-expect-error — helper kept for future test expansion
 function _registerZone(
   id: string,
   callbacks: Partial<{

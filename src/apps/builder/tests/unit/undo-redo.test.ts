@@ -20,7 +20,7 @@ describe("builder undo/redo", () => {
     let app: ReturnType<typeof BuilderApp.create>;
 
     beforeEach(() => {
-        app = BuilderApp.create({ history: true });
+        app = BuilderApp.create();
     });
 
     it("initially canUndo is false", () => {

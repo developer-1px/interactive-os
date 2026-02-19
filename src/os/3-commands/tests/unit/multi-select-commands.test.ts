@@ -79,7 +79,7 @@ describe("OS_DELETE with multi-selection", () => {
     );
 
     ZoneRegistry.register("testZone", {
-      config: {} as Record<string, never>,
+      config: {} as any,
       element: document.createElement("div"),
       parentId: null,
       onDelete,
@@ -105,7 +105,7 @@ describe("OS_DELETE with multi-selection", () => {
     const captured = captureDispatches();
 
     ZoneRegistry.register("testZone", {
-      config: {} as Record<string, never>,
+      config: {} as any,
       element: document.createElement("div"),
       parentId: null,
       onDelete: (cursor: ZoneCursor) =>
@@ -136,7 +136,7 @@ describe("OS_DELETE with multi-selection", () => {
     }));
 
     ZoneRegistry.register("testZone", {
-      config: {} as Record<string, never>,
+      config: {} as any,
       element: document.createElement("div"),
       parentId: null,
       onDelete,
@@ -154,7 +154,7 @@ describe("OS_DELETE with multi-selection", () => {
 
   it("clears selection after multi-delete", () => {
     ZoneRegistry.register("testZone", {
-      config: {} as Record<string, never>,
+      config: {} as any,
       element: document.createElement("div"),
       parentId: null,
       onDelete: () => ({ type: "mock/delete", payload: {} }),
@@ -180,7 +180,7 @@ describe("OS_COPY with multi-selection", () => {
     }));
 
     ZoneRegistry.register("testZone", {
-      config: {} as Record<string, never>,
+      config: {} as any,
       element: document.createElement("div"),
       parentId: null,
       onCopy,
@@ -205,7 +205,7 @@ describe("OS_CUT with multi-selection", () => {
     }));
 
     ZoneRegistry.register("testZone", {
-      config: {} as Record<string, never>,
+      config: {} as any,
       element: document.createElement("div"),
       parentId: null,
       onCut,
@@ -219,7 +219,7 @@ describe("OS_CUT with multi-selection", () => {
 
   it("clears selection after multi-cut", () => {
     ZoneRegistry.register("testZone", {
-      config: {} as Record<string, never>,
+      config: {} as any,
       element: document.createElement("div"),
       parentId: null,
       onCut: () => ({ type: "mock/cut", payload: {} }),

@@ -114,10 +114,10 @@ describe("itemFilter — dynamic item filtering", () => {
 
         t.setItems(allItems);
         t.setActiveZone("test", "a");
-        t.setConfig({ tab: { behavior: "trap" } });
+        t.setConfig({ tab: { behavior: "trap", restoreFocus: false } });
 
         ZoneRegistry.register("test", {
-            config: { ...DEFAULT_CONFIG, tab: { behavior: "trap" } },
+            config: { ...DEFAULT_CONFIG, tab: { behavior: "trap", restoreFocus: false } },
             element: document.createElement("div"),
             parentId: null,
             itemFilter: (items: string[]) =>

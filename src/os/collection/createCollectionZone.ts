@@ -49,6 +49,8 @@ export interface CollectionConfig<S, T = any> extends CollectionAdapter<S, T> {
     schema: ZodSchema<T>;
     /** Custom ID generation. Default: random 8-char alphanumeric. */
     generateId?: () => string;
+    /** Translate DOM focusId to entity ID. Default: identity. */
+    extractId?: (focusId: string) => string;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -60,6 +62,16 @@ export interface CollectionZoneHandle<S> extends ZoneHandle<S> {
     moveUp: CommandFactory<string, { id: string }>;
     moveDown: CommandFactory<string, { id: string }>;
     duplicate: CommandFactory<string, { id: string }>;
+    /** Get pre-wired ZoneBindings callbacks for use in bind(). */
+    collectionBindings(): CollectionBindingsResult;
+}
+
+/** The callbacks auto-generated from the collection config. */
+export interface CollectionBindingsResult {
+    onDelete: (cursor: { focusId: string; selection: string[] }) => any;
+    onMoveUp: (cursor: { focusId: string; selection: string[] }) => any;
+    onMoveDown: (cursor: { focusId: string; selection: string[] }) => any;
+    keybindings: Array<{ key: string; command: (cursor: { focusId: string; selection: string[] }) => any }>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -79,6 +91,7 @@ export function createCollectionZone<S>(
 ): CollectionZoneHandle<S> {
     const zone = app.createZone(zoneName);
     const uid = config.generateId ?? defaultGenerateId;
+    const toEntityId = config.extractId ?? ((id: string) => id);
 
     // ── remove ──
     const remove = zone.command(
@@ -162,12 +175,30 @@ export function createCollectionZone<S>(
         },
     );
 
+    // ── collectionBindings — pre-wired callbacks for bind() ──
+    function collectionBindings(): CollectionBindingsResult {
+        return {
+            onDelete: (cursor) => {
+                const ids = cursor.selection.length > 0
+                    ? cursor.selection.map(toEntityId)
+                    : [toEntityId(cursor.focusId)];
+                return ids.map(id => remove({ id }));
+            },
+            onMoveUp: (cursor) => moveUp({ id: toEntityId(cursor.focusId) }),
+            onMoveDown: (cursor) => moveDown({ id: toEntityId(cursor.focusId) }),
+            keybindings: [
+                { key: "Meta+D", command: (cursor) => duplicate({ id: toEntityId(cursor.focusId) }) },
+            ],
+        };
+    }
+
     return {
         ...zone,
         remove,
         moveUp,
         moveDown,
         duplicate,
+        collectionBindings,
     };
 }
 

@@ -307,3 +307,105 @@ describe("normalize/denormalize roundtrip", () => {
         expect(normalized.entities["a"]).toEqual(ENTITY_INITIAL.data.todos["a"]);
     });
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Tests: bind() auto-wiring
+// ═══════════════════════════════════════════════════════════════════
+
+describe("createCollectionZone — bind() auto-wiring", () => {
+    // Helper: dispatch result which may be a single command or array
+    function dispatchAll(app: any, result: any) {
+        if (Array.isArray(result)) {
+            for (const cmd of result) app.dispatch(cmd);
+        } else {
+            app.dispatch(result);
+        }
+    }
+
+    it("produces bindConfig with onDelete, onMoveUp, onMoveDown callbacks", () => {
+        const bindConfig = arraySidebar.collectionBindings();
+
+        expect(bindConfig.onDelete).toBeDefined();
+        expect(bindConfig.onMoveUp).toBeDefined();
+        expect(bindConfig.onMoveDown).toBeDefined();
+        expect(typeof bindConfig.onDelete).toBe("function");
+    });
+
+    it("onDelete produces remove command from cursor.focusId", () => {
+        const bindings = arraySidebar.collectionBindings();
+        const cursor = { focusId: "news", selection: [] };
+
+        const result = bindings.onDelete!(cursor);
+        // result should be a command (or array) that removes "news"
+        expect(result).toBeDefined();
+
+        // Dispatch it on a real test instance
+        const app = ArrayApp.create();
+        dispatchAll(app, result);
+        expect(app.state.data.sections.map(s => s.id)).toEqual(["hero", "services", "footer"]);
+    });
+
+    it("onDelete with selection produces batch remove", () => {
+        const bindings = arraySidebar.collectionBindings();
+        const cursor = { focusId: "hero", selection: ["hero", "news"] };
+
+        const result = bindings.onDelete!(cursor);
+
+        const app = ArrayApp.create();
+        dispatchAll(app, result);
+        expect(app.state.data.sections.map(s => s.id)).toEqual(["services", "footer"]);
+    });
+
+    it("onMoveUp produces moveUp command from cursor.focusId", () => {
+        const bindings = arraySidebar.collectionBindings();
+        const cursor = { focusId: "news", selection: [] };
+
+        const result = bindings.onMoveUp!(cursor);
+
+        const app = ArrayApp.create();
+        dispatchAll(app, result);
+        expect(app.state.data.sections.map(s => s.id)).toEqual(["news", "hero", "services", "footer"]);
+    });
+
+    it("keybindings include Meta+D for duplicate", () => {
+        const bindings = arraySidebar.collectionBindings();
+        expect(bindings.keybindings).toBeDefined();
+        expect(bindings.keybindings!.some(kb => kb.key === "Meta+D")).toBe(true);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Tests: extractId — DOM focusId to entity ID translation
+// ═══════════════════════════════════════════════════════════════════
+
+describe("createCollectionZone — extractId", () => {
+    const AppWithPrefix = defineApp<ArrayState>("test-prefix", ARRAY_INITIAL);
+
+    const prefixedSidebar = createCollectionZone(AppWithPrefix, "prefixed", {
+        schema: SectionSchema,
+        ...fromArray((s: ArrayState) => s.data.sections),
+        extractId: (focusId: string) => focusId.replace("sidebar-", ""),
+    });
+
+    it("remove uses extractId to translate focusId", () => {
+        const bindings = prefixedSidebar.collectionBindings();
+        const cursor = { focusId: "sidebar-news", selection: [] as string[] };
+
+        const result = bindings.onDelete!(cursor);
+
+        const app = AppWithPrefix.create();
+        if (Array.isArray(result)) {
+            for (const cmd of result) app.dispatch(cmd);
+        } else {
+            app.dispatch(result);
+        }
+        expect(app.state.data.sections.map(s => s.id)).toEqual(["hero", "services", "footer"]);
+    });
+
+    it("direct command still accepts raw entity id", () => {
+        const app = AppWithPrefix.create();
+        app.dispatch(prefixedSidebar.remove({ id: "news" }));
+        expect(app.state.data.sections.map(s => s.id)).toEqual(["hero", "services", "footer"]);
+    });
+});
+

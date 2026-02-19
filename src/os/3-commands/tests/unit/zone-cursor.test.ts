@@ -14,7 +14,7 @@ import { OS_COPY } from "@os/3-commands/clipboard/clipboard";
 import { ACTIVATE } from "@os/3-commands/interaction/activate";
 import { OS_CHECK } from "@os/3-commands/interaction/check";
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
-import { OS_MOVE_DOWN, OS_MOVE_UP } from "@os/3-commands/interaction/move";
+
 import { kernel } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it, vi } from "vitest";

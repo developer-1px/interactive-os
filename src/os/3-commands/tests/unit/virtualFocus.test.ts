@@ -173,12 +173,9 @@ describe("Virtual Focus (T5a)", () => {
       const stateAfter = kernel.getState().os.focus.zones["z-virtual"];
       expect(stateAfter?.focusedItemId).toBe("item-2");
 
-      // 2. Check Result Effect
-      // If result is undefined, it means no effect ran (which is good)
-      if (result && typeof result === "object") {
-        // @ts-expect-error
-        expect(result.focus).toBeUndefined();
-      }
+      // kernel.dispatch returns void — check transaction log for effects
+      const tx = kernel.inspector.getLastTransaction();
+      expect((tx?.effects as any)?.focus).toBeUndefined();
     });
 
     it("triggers focus effect when virtualFocus is false (default)", () => {
@@ -198,11 +195,9 @@ describe("Virtual Focus (T5a)", () => {
       const result = kernel.dispatch(
         FOCUS({ zoneId: "z-normal", itemId: "item-A" }),
       );
-
-      if (result && typeof result === "object") {
-        // @ts-expect-error
-        expect(result.focus).toBe("item-A");
-      }
+      // kernel.dispatch returns void — check transaction log for effects
+      const tx = kernel.inspector.getLastTransaction();
+      expect((tx?.effects as any)?.focus).toBe("item-A");
     });
   });
 });

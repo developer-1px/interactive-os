@@ -16,8 +16,10 @@ function cfg(overrides: Partial<NavigateConfig> = {}): NavigateConfig {
     return {
         orientation: "vertical",
         loop: false,
+        seamless: false,
         entry: "first",
         typeahead: false,
+        recovery: "next",
         ...overrides,
     };
 }
