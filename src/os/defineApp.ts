@@ -135,21 +135,21 @@ export function defineApp<S>(
     // Track for test instance
     flatHandlerRegistry.set(type, { handler, when: opts?.when });
 
-    // Wrap flat → curried for kernel
-    const kernelHandler = (ctx: { state: S }) => (payload: P) =>
+    // Wrap flat → curried for kernel (readonly state matches TypedContext)
+    const kernelHandler = (ctx: { readonly state: S }) => (payload: P) =>
       handler(ctx, payload);
 
     // Register on kernel group with when guard
     const targetGroup = group ?? slice.group;
     const whenGuard = opts?.when
-      ? { when: (state: unknown) => opts.when?.evaluate(state as S) }
+      ? { when: (state: S) => opts.when!.evaluate(state) }
       : undefined;
 
     const factory = targetGroup.defineCommand(
       type,
-      kernelHandler as any,
-      whenGuard as any,
-    ) as unknown as CommandFactory<T, P>;
+      kernelHandler,
+      whenGuard,
+    ) as CommandFactory<T, P>;
 
     return factory;
   }

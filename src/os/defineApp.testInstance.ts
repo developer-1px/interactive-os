@@ -6,10 +6,11 @@
  */
 
 import { createKernel, defineScope } from "@kernel";
+import type { BaseCommand } from "@kernel/core/tokens";
 import {
-  __selectorBrand,
   type Condition,
   type FlatHandler,
+  type Selector,
   type TestInstance,
 } from "./defineApp.types";
 import {
@@ -86,17 +87,17 @@ export function createTestInstance<S>(
 
   // Re-register all commands on test kernel
   for (const [type, entry] of flatHandlerRegistry) {
-    const kernelHandler = (ctx: { state: S }) => (payload: any) =>
+    const kernelHandler = (ctx: { readonly state: S }) => (payload: any) =>
       entry.handler(ctx, payload);
 
     const whenGuard = entry.when
-      ? { when: (state: unknown) => entry.when?.evaluate(state as S) }
+      ? { when: (state: S) => entry.when!.evaluate(state) }
       : undefined;
 
     testGroup.defineCommand(
       type,
-      kernelHandler as any,
-      whenGuard as any,
+      kernelHandler,
+      whenGuard,
     );
   }
 
@@ -105,7 +106,7 @@ export function createTestInstance<S>(
       return testKernel.getState().apps[appId] as S;
     },
 
-    dispatch(command: any): boolean {
+    dispatch(command: BaseCommand): boolean {
       const entry = flatHandlerRegistry.get(command.type);
       if (entry?.when) {
         const currentState = testKernel.getState().apps[appId] as S;
@@ -121,12 +122,9 @@ export function createTestInstance<S>(
       return true;
     },
 
-    select(selectorBranded: any) {
-      if (selectorBranded && __selectorBrand in selectorBranded) {
-        const currentState = testKernel.getState().apps[appId] as S;
-        return selectorBranded.select(currentState);
-      }
-      return undefined;
+    select<T>(selectorBranded: Selector<S, T>): T {
+      const currentState = testKernel.getState().apps[appId] as S;
+      return selectorBranded.select(currentState);
     },
 
     reset() {
@@ -149,6 +147,6 @@ export function createTestInstance<S>(
         endTransaction();
       }
     },
-  } as any;
+  };
 }
 

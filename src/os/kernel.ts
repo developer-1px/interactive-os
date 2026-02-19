@@ -34,6 +34,12 @@ export const kernel = createKernel<AppState>(initialAppState);
 // Dev/Test: Expose kernel on window for Playwright E2E
 // ═══════════════════════════════════════════════════════════════════
 
+declare global {
+  interface Window {
+    __kernel?: typeof kernel;
+  }
+}
+
 if (import.meta.env.DEV) {
-  (window as any).__kernel = kernel;
+  window.__kernel = kernel;
 }

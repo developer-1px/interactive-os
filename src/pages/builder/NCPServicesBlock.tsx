@@ -13,8 +13,9 @@ import {
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
-export function NCPServicesBlock() {
+export function NCPServicesBlock({ id }: { id: string }) {
   const fields = BuilderApp.useComputed((s) => s.data.fields);
+  const fid = (key: string) => `${id}.${key}`;
 
   const tabs = [
     { icon: Star, label: "Featured", active: true },
@@ -67,7 +68,7 @@ export function NCPServicesBlock() {
   ];
 
   return (
-    <Builder.Section asChild id="ncp-services">
+    <Builder.Section asChild id={id}>
       <div className="py-24 px-6 bg-[#F8F9FA] border-t border-slate-200">
         <div className="max-w-7xl mx-auto">
           {/* Header & Controls */}
@@ -77,11 +78,11 @@ export function NCPServicesBlock() {
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                 <Builder.Item asChild id="ncp-service-category">
                   <Field
-                    name="ncp-service-category"
+                    name={fid("ncp-service-category")}
                     mode="deferred"
-                    value={fields["ncp-service-category"] ?? ""}
+                    value={fields[fid("ncp-service-category")] ?? ""}
                     onCommit={(val: string) =>
-                      builderUpdateField("ncp-service-category", val)
+                      builderUpdateField(fid("ncp-service-category"), val)
                     }
                     className="text-blue-600 font-bold text-xs tracking-widest uppercase"
                   />
@@ -89,12 +90,12 @@ export function NCPServicesBlock() {
               </div>
               <Builder.Item asChild id="ncp-service-title">
                 <Field
-                  name="ncp-service-title"
+                  name={fid("ncp-service-title")}
                   mode="deferred"
                   multiline
-                  value={fields["ncp-service-title"] ?? ""}
+                  value={fields[fid("ncp-service-title")] ?? ""}
                   onCommit={(val: string) =>
-                    builderUpdateField("ncp-service-title", val)
+                    builderUpdateField(fid("ncp-service-title"), val)
                   }
                   className={`
                     text-3xl md:text-4xl font-bold text-slate-900 leading-tight tracking-tight
@@ -113,10 +114,9 @@ export function NCPServicesBlock() {
                     variant={tab.active ? "primary" : "ghost"}
                     className={`
                       flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap
-                      ${
-                        tab.active
-                          ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
-                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                      ${tab.active
+                        ? "bg-white text-slate-900 shadow-sm ring-1 ring-black/5"
+                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
                       }
                       data-[focused=true]:bg-white data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 data-[focused=true]:z-10
                     `}
@@ -166,11 +166,11 @@ export function NCPServicesBlock() {
 
                   <Builder.Item asChild id={`service-title-${index}`}>
                     <Field
-                      name={`service-title-${index}`}
+                      name={fid(`service-title-${index}`)}
                       mode="deferred"
-                      value={fields[`service-title-${index}`] ?? ""}
+                      value={fields[fid(`service-title-${index}`)] ?? ""}
                       onCommit={(val: string) =>
-                        builderUpdateField(`service-title-${index}`, val)
+                        builderUpdateField(fid(`service-title-${index}`), val)
                       }
                       className={`text-lg font-bold text-slate-900 mb-2 block`}
                     />
@@ -178,12 +178,12 @@ export function NCPServicesBlock() {
 
                   <Builder.Item asChild id={`service-desc-${index}`}>
                     <Field
-                      name={`service-desc-${index}`}
+                      name={fid(`service-desc-${index}`)}
                       mode="deferred"
                       multiline
-                      value={fields[`service-desc-${index}`] ?? ""}
+                      value={fields[fid(`service-desc-${index}`)] ?? ""}
                       onCommit={(val: string) =>
-                        builderUpdateField(`service-desc-${index}`, val)
+                        builderUpdateField(fid(`service-desc-${index}`), val)
                       }
                       className={`text-sm text-slate-500 leading-relaxed block min-h-[40px]`}
                     />

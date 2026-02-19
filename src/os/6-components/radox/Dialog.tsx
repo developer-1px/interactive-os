@@ -85,6 +85,7 @@ function DialogRoot({ children, id }: DialogProps) {
   const transformed: ReactNode[] = [];
 
   Children.forEach(children, (child) => {
+    // Reference identity — see Trigger.tsx comment for rationale
     if (isValidElement(child) && (child.type as any) === DialogContent) {
       const props = child.props as DialogContentProps;
       transformed.push(

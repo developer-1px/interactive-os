@@ -128,7 +128,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         dispatch(onPress);
       }
 
-      onClick?.(e as any);
+      onClick?.(e as ReactMouseEvent<HTMLElement>);
     };
 
     const baseProps = {
@@ -144,8 +144,11 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
 
     const childArray = Array.isArray(children) ? children : [children];
     for (const child of childArray) {
+      // Reference identity is the only reliable way to identify compound sub-components.
+      // `as any` is acceptable: ReactElement.type is `string | JSXElementConstructor<any>`
+      // but function identity comparison is runtime-safe and won't break under minification.
       if (isValidElement(child) && (child.type as any) === TriggerPortal) {
-        portalElement = child as ReactElement;
+        portalElement = child as ReactElement<TriggerPortalProps>;
       } else {
         triggerChildren.push(child);
       }
@@ -159,7 +162,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       overlayRole && overlayId && portalElement ? (
         <OverlayContext.Provider value={{ overlayId }}>
           {cloneElement(portalElement, {
-            ...(portalElement.props as any),
+            ...portalElement.props,
             _overlayId: overlayId,
             _overlayType: overlayRole,
           })}
@@ -207,7 +210,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     // Fallback: multiple children or non-element children — wrap in span
     return (
       <>
-        <span ref={ref as any} {...(baseProps as any)}>
+        <span ref={ref as React.Ref<HTMLSpanElement>} {...(baseProps as React.HTMLAttributes<HTMLSpanElement>)}>
           {triggerContent}
         </span>
         {portalWithContext}

@@ -3,11 +3,12 @@ import { ArrowRight, Globe } from "lucide-react";
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
-export function NCPHeroBlock() {
+export function NCPHeroBlock({ id }: { id: string }) {
   const fields = BuilderApp.useComputed((s) => s.data.fields);
+  const fid = (key: string) => `${id}.${key}`;
 
   return (
-    <Builder.Section asChild id="ncp-hero">
+    <Builder.Section asChild id={id}>
       <div className="relative h-[700px] flex flex-col justify-center overflow-hidden bg-white text-slate-900">
         {/* Background: Subtle Mesh Gradient (Very Light) */}
         <div className="absolute inset-0 pointer-events-none opacity-40">
@@ -44,12 +45,12 @@ export function NCPHeroBlock() {
 
             <Builder.Item asChild id="ncp-hero-title">
               <Field
-                name="ncp-hero-title"
+                name={fid("ncp-hero-title")}
                 mode="deferred"
                 multiline
-                value={fields["ncp-hero-title"] ?? ""}
+                value={fields[fid("ncp-hero-title")] ?? ""}
                 onCommit={(val: string) =>
-                  builderUpdateField("ncp-hero-title", val)
+                  builderUpdateField(fid("ncp-hero-title"), val)
                 }
                 className={`
                     block text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter mb-8 -ml-1
@@ -60,12 +61,12 @@ export function NCPHeroBlock() {
 
             <Builder.Item asChild id="ncp-hero-sub">
               <Field
-                name="ncp-hero-sub"
+                name={fid("ncp-hero-sub")}
                 mode="deferred"
                 multiline
-                value={fields["ncp-hero-sub"] ?? ""}
+                value={fields[fid("ncp-hero-sub")] ?? ""}
                 onCommit={(val: string) =>
-                  builderUpdateField("ncp-hero-sub", val)
+                  builderUpdateField(fid("ncp-hero-sub"), val)
                 }
                 className={`
                     block text-xl lg:text-2xl text-slate-500 font-medium leading-relaxed mb-12 max-w-lg
@@ -85,7 +86,7 @@ export function NCPHeroBlock() {
                     hover:bg-[#03C75A] hover:shadow-green-500/30 hover:-translate-y-1
                 `}
               >
-                {fields["ncp-hero-cta"] ?? "무료로 시작하기"}
+                {fields[fid("ncp-hero-cta")] ?? "무료로 시작하기"}
                 <ArrowRight
                   size={20}
                   className="group-hover:translate-x-1 transition-transform"
@@ -117,11 +118,11 @@ export function NCPHeroBlock() {
                   </Builder.Item>
                   <Builder.Item asChild id="ncp-hero-portal-title">
                     <Field
-                      name="ncp-hero-portal-title"
+                      name={fid("ncp-hero-portal-title")}
                       mode="deferred"
-                      value={fields["ncp-hero-portal-title"] ?? ""}
+                      value={fields[fid("ncp-hero-portal-title")] ?? ""}
                       onCommit={(val: string) =>
-                        builderUpdateField("ncp-hero-portal-title", val)
+                        builderUpdateField(fid("ncp-hero-portal-title"), val)
                       }
                       as="div"
                       multiline
@@ -130,11 +131,11 @@ export function NCPHeroBlock() {
                   </Builder.Item>
                   <Builder.Item asChild id="ncp-hero-portal-subtitle">
                     <Field
-                      name="ncp-hero-portal-subtitle"
+                      name={fid("ncp-hero-portal-subtitle")}
                       mode="deferred"
-                      value={fields["ncp-hero-portal-subtitle"] ?? ""}
+                      value={fields[fid("ncp-hero-portal-subtitle")] ?? ""}
                       onCommit={(val: string) =>
-                        builderUpdateField("ncp-hero-portal-subtitle", val)
+                        builderUpdateField(fid("ncp-hero-portal-subtitle"), val)
                       }
                       as="div"
                       multiline
@@ -155,11 +156,11 @@ export function NCPHeroBlock() {
         <div className="absolute top-0 left-0 right-0 px-8 py-6 flex justify-between items-center z-50">
           <Builder.Item asChild id="ncp-hero-brand">
             <Field
-              name="ncp-hero-brand"
+              name={fid("ncp-hero-brand")}
               mode="deferred"
-              value={fields["ncp-hero-brand"] ?? ""}
+              value={fields[fid("ncp-hero-brand")] ?? ""}
               onCommit={(val: string) =>
-                builderUpdateField("ncp-hero-brand", val)
+                builderUpdateField(fid("ncp-hero-brand"), val)
               }
               className={`
                 font-black tracking-tighter text-lg text-slate-900

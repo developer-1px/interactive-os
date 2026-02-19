@@ -91,7 +91,7 @@ test.describe("Focus Showcase", () => {
     );
 
     // Re-enter the restore zone — should restore Memory 2
-    await page.locator("#af-restore-wrapper").click();
+    await page.locator("#af-restore").click();
     await expect(page.locator("#af-restore-2")).toHaveAttribute(
       "aria-current",
       "true",
@@ -1048,7 +1048,7 @@ test.describe("Focus Showcase", () => {
     );
 
     // Open sub-modal via the "Open Sub-Modal" button
-    await page.locator("text=Open Sub-Modal").click();
+    await page.locator("#fs-open-sub-modal").click();
 
     // Sub-modal should have focus on its first item
     await expect(page.locator("#fs-modal2-1")).toHaveAttribute(

@@ -11,12 +11,20 @@ interface FocusPayload {
 export const FOCUS = kernel.defineCommand(
   "OS_FOCUS",
   (ctx) => (payload: FocusPayload) => {
-    const { zoneId, itemId } = payload;
+    const { zoneId } = payload;
+    let { itemId } = payload;
 
     // Check virtualFocus config from registry
-    // (Focus command doesn't inject config context directly)
     const zoneEntry = ZoneRegistry.get(zoneId);
     const isVirtual = zoneEntry?.config?.project?.virtualFocus ?? false;
+
+    // Restore: if no explicit itemId, restore lastFocusedId (zone re-entry)
+    if (!itemId) {
+      const existingZone = ctx.state.os.focus.zones[zoneId];
+      if (existingZone?.lastFocusedId) {
+        itemId = existingZone.lastFocusedId;
+      }
+    }
 
     return {
       state: produce(ctx.state, (draft) => {

@@ -92,6 +92,7 @@ export function FocusStackTest() {
                               <Dialog.Trigger>
                                 <button
                                   type="button"
+                                  id="fs-open-sub-modal"
                                   className="ml-2 text-xs text-violet-500 hover:underline"
                                 >
                                   Open Sub-Modal

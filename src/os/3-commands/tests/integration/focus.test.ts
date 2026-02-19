@@ -293,3 +293,80 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
         expect(t.focusedItemId("b")).toBe("b-2");
     });
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// FOCUS — Zone Re-entry Restore
+// ═══════════════════════════════════════════════════════════════════
+
+describe("FOCUS — Zone Re-entry Restore", () => {
+    it("zone re-entry with itemId=null restores lastFocusedId", () => {
+        const t = createTestKernel();
+        t.setItems(["a", "b", "c"]);
+        t.setActiveZone("list", "b");
+
+        // "b" should be remembered as lastFocusedId
+        expect(t.zone()?.lastFocusedId).toBe("b");
+
+        // Move to different zone
+        t.initZone("sidebar");
+        t.dispatch(t.FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
+        expect(t.activeZoneId()).toBe("sidebar");
+
+        // Re-enter list zone with null itemId (zone-only click)
+        t.dispatch(t.FOCUS({ zoneId: "list", itemId: null }));
+
+        // Should restore to "b", not null
+        expect(t.activeZoneId()).toBe("list");
+        expect(t.focusedItemId()).toBe("b");
+    });
+
+    it("zone re-entry: no lastFocusedId → focusedItemId stays null", () => {
+        const t = createTestKernel();
+        t.setItems(["a", "b", "c"]);
+        t.initZone("list"); // zone state initialized but never focused
+
+        // Zone has no lastFocusedId
+        expect(t.zone("list")?.lastFocusedId).toBeNull();
+
+        // Zone-only click with no history
+        t.dispatch(t.FOCUS({ zoneId: "list", itemId: null }));
+
+        // No restore target → stays null
+        expect(t.activeZoneId()).toBe("list");
+        expect(t.focusedItemId()).toBeNull();
+    });
+
+    it("zone re-entry restores after multiple focus changes", () => {
+        const t = createTestKernel();
+        t.setItems(["a", "b", "c"]);
+        t.setActiveZone("list", "a");
+
+        // Navigate through items: a → b → c
+        t.dispatch(t.FOCUS({ zoneId: "list", itemId: "b" }));
+        t.dispatch(t.FOCUS({ zoneId: "list", itemId: "c" }));
+        expect(t.zone()?.lastFocusedId).toBe("c");
+
+        // Leave zone
+        t.initZone("sidebar");
+        t.dispatch(t.FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
+
+        // Re-enter → should restore "c" (last, not first)
+        t.dispatch(t.FOCUS({ zoneId: "list", itemId: null }));
+        expect(t.focusedItemId()).toBe("c");
+    });
+
+    it("explicit itemId overrides restore (not null = direct focus)", () => {
+        const t = createTestKernel();
+        t.setItems(["a", "b", "c"]);
+        t.setActiveZone("list", "c");
+
+        // Leave and come back with explicit target
+        t.initZone("sidebar");
+        t.dispatch(t.FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
+        t.dispatch(t.FOCUS({ zoneId: "list", itemId: "a" }));
+
+        // Should be "a" (explicit), not "c" (restored)
+        expect(t.focusedItemId()).toBe("a");
+    });
+});
+

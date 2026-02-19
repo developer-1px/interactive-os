@@ -10,8 +10,9 @@ import {
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
-export function NCPFooterBlock() {
+export function NCPFooterBlock({ id }: { id: string }) {
   const fields = BuilderApp.useComputed((s) => s.data.fields);
+  const fid = (key: string) => `${id}.${key}`;
 
   // Structural data (non-editable via OS.Field)
   const columns = [
@@ -63,7 +64,7 @@ export function NCPFooterBlock() {
   ];
 
   return (
-    <Builder.Section asChild id="ncp-footer">
+    <Builder.Section asChild id={id}>
       <footer className="bg-slate-900 py-16 px-6 text-slate-300 border-t border-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 mb-16">
@@ -71,11 +72,11 @@ export function NCPFooterBlock() {
             <div className="lg:col-span-2">
               <Builder.Item asChild id="footer-brand">
                 <Field
-                  name="footer-brand"
+                  name={fid("footer-brand")}
                   mode="deferred"
-                  value={fields["footer-brand"] ?? ""}
+                  value={fields[fid("footer-brand")] ?? ""}
                   onCommit={(val: string) =>
-                    builderUpdateField("footer-brand", val)
+                    builderUpdateField(fid("footer-brand"), val)
                   }
                   className="font-black text-2xl tracking-tighter text-white mb-6 block w-fit data-[focused=true]:bg-slate-800 data-[focused=true]:ring-2 data-[focused=true]:ring-slate-600 rounded px-2 -mx-2"
                 />
@@ -83,12 +84,12 @@ export function NCPFooterBlock() {
 
               <Builder.Item asChild id="footer-desc">
                 <Field
-                  name="footer-desc"
+                  name={fid("footer-desc")}
                   mode="deferred"
                   multiline
-                  value={fields["footer-desc"] ?? ""}
+                  value={fields[fid("footer-desc")] ?? ""}
                   onCommit={(val: string) =>
-                    builderUpdateField("footer-desc", val)
+                    builderUpdateField(fid("footer-desc"), val)
                   }
                   className="text-slate-500 text-sm leading-relaxed max-w-sm mb-6 block data-[focused=true]:bg-slate-800 rounded p-2 -ml-2"
                 />
@@ -191,11 +192,11 @@ export function NCPFooterBlock() {
 
             <Builder.Item asChild id="footer-copyright">
               <Field
-                name="footer-copyright"
+                name={fid("footer-copyright")}
                 mode="deferred"
-                value={fields["footer-copyright"] ?? ""}
+                value={fields[fid("footer-copyright")] ?? ""}
                 onCommit={(val: string) =>
-                  builderUpdateField("footer-copyright", val)
+                  builderUpdateField(fid("footer-copyright"), val)
                 }
                 className="text-xs text-slate-600 font-medium data-[focused=true]:text-slate-400"
               />

@@ -3,8 +3,9 @@ import { ArrowRight } from "lucide-react";
 import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
-export function NCPNewsBlock() {
+export function NCPNewsBlock({ id }: { id: string }) {
   const fields = BuilderApp.useComputed((s) => s.data.fields);
+  const fid = (key: string) => `${id}.${key}`;
 
   // Structural data (non-editable via OS.Field)
   const cards = [
@@ -23,7 +24,7 @@ export function NCPNewsBlock() {
   const card2 = cards[2]!;
 
   return (
-    <Builder.Section asChild id="ncp-news">
+    <Builder.Section asChild id={id}>
       <div className="py-24 px-6 bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
@@ -38,12 +39,12 @@ export function NCPNewsBlock() {
               </Builder.Badge>
               <Builder.Item asChild id="ncp-news-title">
                 <Field
-                  name="ncp-news-title"
+                  name={fid("ncp-news-title")}
                   mode="deferred"
                   multiline
-                  value={fields["ncp-news-title"] ?? ""}
+                  value={fields[fid("ncp-news-title")] ?? ""}
                   onCommit={(val: string) =>
-                    builderUpdateField("ncp-news-title", val)
+                    builderUpdateField(fid("ncp-news-title"), val)
                   }
                   className={`
                      text-4xl md:text-5xl font-bold text-slate-900 leading-tight tracking-tight
@@ -91,23 +92,23 @@ export function NCPNewsBlock() {
                       </Builder.Item>
                       <Builder.Item asChild id={`${card0.id}-title`}>
                         <Field
-                          name={`${card0.id}-title`}
+                          name={fid(`${card0.id}-title`)}
                           mode="deferred"
                           multiline
-                          value={fields[`${card0.id}-title`] ?? ""}
+                          value={fields[fid(`${card0.id}-title`)] ?? ""}
                           onCommit={(val: string) =>
-                            builderUpdateField(`${card0.id}-title`, val)
+                            builderUpdateField(fid(`${card0.id}-title`), val)
                           }
                           className="text-3xl md:text-4xl font-bold leading-tight mb-4 block text-white"
                         />
                       </Builder.Item>
                       <Builder.Item asChild id={`${card0.id}-desc`}>
                         <Field
-                          name={`${card0.id}-desc`}
+                          name={fid(`${card0.id}-desc`)}
                           mode="deferred"
-                          value={fields[`${card0.id}-desc`] ?? ""}
+                          value={fields[fid(`${card0.id}-desc`)] ?? ""}
                           onCommit={(val: string) =>
-                            builderUpdateField(`${card0.id}-desc`, val)
+                            builderUpdateField(fid(`${card0.id}-desc`), val)
                           }
                           className="text-white/80 max-w-lg leading-relaxed mb-6 block"
                         />
@@ -141,12 +142,12 @@ export function NCPNewsBlock() {
                   </Builder.Item>
                   <Builder.Item asChild id={`${card1.id}-title`}>
                     <Field
-                      name={`${card1.id}-title`}
+                      name={fid(`${card1.id}-title`)}
                       mode="deferred"
                       multiline
-                      value={fields[`${card1.id}-title`] ?? ""}
+                      value={fields[fid(`${card1.id}-title`)] ?? ""}
                       onCommit={(val: string) =>
-                        builderUpdateField(`${card1.id}-title`, val)
+                        builderUpdateField(fid(`${card1.id}-title`), val)
                       }
                       className="text-xl font-bold text-slate-900 leading-snug mb-3 block"
                     />
@@ -155,11 +156,11 @@ export function NCPNewsBlock() {
                 <div className="flex justify-between items-end border-t border-slate-200 pt-6 mt-4">
                   <Builder.Item asChild id={`${card1.id}-date`}>
                     <Field
-                      name={`${card1.id}-date`}
+                      name={fid(`${card1.id}-date`)}
                       mode="deferred"
-                      value={fields[`${card1.id}-date`] ?? ""}
+                      value={fields[fid(`${card1.id}-date`)] ?? ""}
                       onCommit={(val: string) =>
-                        builderUpdateField(`${card1.id}-date`, val)
+                        builderUpdateField(fid(`${card1.id}-date`), val)
                       }
                       className="text-sm text-slate-400"
                     />
@@ -195,12 +196,12 @@ export function NCPNewsBlock() {
                   </Builder.Item>
                   <Builder.Item asChild id={`${card2.id}-title`}>
                     <Field
-                      name={`${card2.id}-title`}
+                      name={fid(`${card2.id}-title`)}
                       mode="deferred"
                       multiline
-                      value={fields[`${card2.id}-title`] ?? ""}
+                      value={fields[fid(`${card2.id}-title`)] ?? ""}
                       onCommit={(val: string) =>
-                        builderUpdateField(`${card2.id}-title`, val)
+                        builderUpdateField(fid(`${card2.id}-title`), val)
                       }
                       className="text-xl font-bold text-slate-900 leading-snug mb-3 block"
                     />
@@ -209,11 +210,11 @@ export function NCPNewsBlock() {
                 <div className="relative z-10 flex justify-between items-end">
                   <Builder.Item asChild id={`${card2.id}-date`}>
                     <Field
-                      name={`${card2.id}-date`}
+                      name={fid(`${card2.id}-date`)}
                       mode="deferred"
-                      value={fields[`${card2.id}-date`] ?? ""}
+                      value={fields[fid(`${card2.id}-date`)] ?? ""}
                       onCommit={(val: string) =>
-                        builderUpdateField(`${card2.id}-date`, val)
+                        builderUpdateField(fid(`${card2.id}-date`), val)
                       }
                       className="text-sm text-slate-400"
                     />

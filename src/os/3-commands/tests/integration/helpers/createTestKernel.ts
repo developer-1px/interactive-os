@@ -2,7 +2,7 @@
  * createTestKernel — Shared headless kernel factory for integration tests.
  *
  * Creates an isolated kernel instance with:
- *   - Real commands: FOCUS, SYNC_FOCUS, SELECT, NAVIGATE, TAB
+ *   - Real commands via kernel.register() (same handlers as production)
  *   - Mock contexts: dom-items, dom-rects, zone-config, dom-zone-order
  *
  * Usage:
@@ -19,10 +19,15 @@ import type { AppState } from "@os/kernel";
 import { initialOSState } from "@os/state/initial";
 import { initialZoneState } from "@os/state/initial";
 import { ensureZone } from "@os/state/utils";
-import { resolveTab } from "../../../tab/resolveTab";
-import { resolveNavigate } from "../../../navigate/resolve";
 import type { FocusGroupConfig } from "@os/schemas/focus/config/FocusGroupConfig";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
+
+// Production commands — registered on test kernel via kernel.register()
+import { FOCUS as prodFOCUS } from "../../../focus/focus";
+import { SYNC_FOCUS as prodSYNC_FOCUS } from "../../../focus/syncFocus";
+import { SELECT as prodSELECT } from "../../../selection/select";
+import { NAVIGATE as prodNAVIGATE } from "../../../navigate";
+import { TAB as prodTAB } from "../../../tab/tab";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -75,226 +80,12 @@ export function createTestKernel(overrides?: Partial<AppState>) {
         () => mockZoneOrder.current,
     );
 
-    // ─── FOCUS command ───
-    const FOCUS = kernel.defineCommand(
-        "OS_FOCUS",
-        (ctx) => (payload: { zoneId: string; itemId: string | null }) => {
-            const { zoneId, itemId } = payload;
-            return {
-                state: produce(ctx.state, (draft) => {
-                    const zone = ensureZone(draft.os, zoneId);
-                    zone.focusedItemId = itemId;
-                    draft.os.focus.activeZoneId = zoneId;
-                    if (itemId) {
-                        zone.lastFocusedId = itemId;
-                        zone.recoveryTargetId = null;
-                    }
-                }),
-                focus: itemId,
-            };
-        },
-    );
-
-    // ─── SYNC_FOCUS command ───
-    const SYNC_FOCUS = kernel.defineCommand(
-        "OS_SYNC_FOCUS",
-        (ctx) => (payload: { id: string; zoneId: string }) => ({
-            state: produce(ctx.state, (draft) => {
-                const z = ensureZone(draft.os, payload.zoneId);
-                z.focusedItemId = payload.id;
-                z.lastFocusedId = payload.id;
-                draft.os.focus.activeZoneId = payload.zoneId;
-            }),
-        }),
-    );
-
-    // ─── SELECT command ───
-    const SELECT = kernel.defineCommand(
-        "OS_SELECT",
-        [DOM_ITEMS, ZONE_CONFIG],
-        (ctx) =>
-            (payload: {
-                targetId?: string;
-                mode?: "single" | "replace" | "toggle" | "range";
-            }) => {
-                const { activeZoneId } = ctx.state.os.focus;
-                if (!activeZoneId) return;
-
-                const zone = ctx.state.os.focus.zones[activeZoneId];
-                if (!zone) return;
-
-                const targetId = payload.targetId ?? zone.focusedItemId;
-                if (!targetId) return;
-
-                const items: string[] = ctx.inject(DOM_ITEMS);
-                const mode = payload.mode ?? "single";
-
-                return {
-                    state: produce(ctx.state, (draft) => {
-                        const z = ensureZone(draft.os, activeZoneId);
-                        switch (mode) {
-                            case "single":
-                            case "replace":
-                                z.selection = [targetId];
-                                z.selectionAnchor = targetId;
-                                break;
-                            case "toggle":
-                                if (z.selection.includes(targetId)) {
-                                    z.selection = z.selection.filter(
-                                        (id: string) => id !== targetId,
-                                    );
-                                } else {
-                                    z.selection.push(targetId);
-                                    z.selectionAnchor = targetId;
-                                }
-                                break;
-                            case "range": {
-                                const anchor = z.selectionAnchor ?? targetId;
-                                const anchorIdx = items.indexOf(anchor);
-                                const targetIdx = items.indexOf(targetId);
-                                if (anchorIdx !== -1 && targetIdx !== -1) {
-                                    const start = Math.min(anchorIdx, targetIdx);
-                                    const end = Math.max(anchorIdx, targetIdx);
-                                    z.selection = items.slice(start, end + 1);
-                                    z.selectionAnchor = anchor;
-                                }
-                                break;
-                            }
-                        }
-                    }) as typeof ctx.state,
-                };
-            },
-    );
-
-    // ─── NAVIGATE command ───
-    const NAVIGATE = kernel.defineCommand(
-        "OS_NAVIGATE",
-        [DOM_ITEMS, DOM_RECTS, ZONE_CONFIG],
-        (ctx) =>
-            (payload: {
-                direction: "up" | "down" | "left" | "right" | "home" | "end";
-                select?: "range" | "toggle";
-            }) => {
-                const { activeZoneId } = ctx.state.os.focus;
-                if (!activeZoneId) return;
-
-                const zone = ctx.state.os.focus.zones[activeZoneId];
-                if (!zone) return;
-
-                const items: string[] = ctx.inject(DOM_ITEMS);
-                const itemRects: Map<string, DOMRect> = ctx.inject(DOM_RECTS);
-                const config = ctx.inject(ZONE_CONFIG);
-
-                if (items.length === 0) return;
-
-                const navResult = resolveNavigate(
-                    zone.focusedItemId,
-                    payload.direction,
-                    items,
-                    config.navigate,
-                    { stickyX: zone.stickyX, stickyY: zone.stickyY, itemRects },
-                );
-
-                return {
-                    state: produce(ctx.state, (draft) => {
-                        const z = ensureZone(draft.os, activeZoneId);
-                        z.focusedItemId = navResult.targetId;
-                        z.stickyX = navResult.stickyX;
-                        z.stickyY = navResult.stickyY;
-                        z.editingItemId = null;
-
-                        if (navResult.targetId) {
-                            z.lastFocusedId = navResult.targetId;
-                            z.recoveryTargetId = null;
-                            const idx = items.indexOf(navResult.targetId);
-                            if (idx !== -1) {
-                                z.recoveryTargetId =
-                                    items[idx + 1] ?? items[idx - 1] ?? null;
-                            }
-                        }
-
-                        // Shift+arrow selection
-                        if (payload.select === "range" && navResult.targetId) {
-                            const anchor =
-                                z.selectionAnchor ||
-                                zone.focusedItemId ||
-                                navResult.targetId;
-                            const anchorIdx = items.indexOf(anchor);
-                            const targetIdx = items.indexOf(navResult.targetId);
-                            if (anchorIdx !== -1 && targetIdx !== -1) {
-                                const start = Math.min(anchorIdx, targetIdx);
-                                const end = Math.max(anchorIdx, targetIdx);
-                                z.selection = items.slice(start, end + 1);
-                                z.selectionAnchor = anchor;
-                            }
-                        }
-
-                        // followFocus
-                        if (
-                            !payload.select &&
-                            config.select.followFocus &&
-                            config.select.mode !== "none" &&
-                            navResult.targetId
-                        ) {
-                            z.selection = [navResult.targetId];
-                            z.selectionAnchor = navResult.targetId;
-                        }
-                    }) as typeof ctx.state,
-                    focus: config.project.virtualFocus ? undefined : navResult.targetId,
-                    scroll: navResult.targetId,
-                };
-            },
-    );
-
-    // ─── TAB command ───
-    const TAB = kernel.defineCommand(
-        "OS_TAB",
-        [DOM_ITEMS, ZONE_CONFIG, DOM_ZONE_ORDER],
-        (ctx) => (payload: { direction?: "forward" | "backward" }) => {
-            const { activeZoneId } = ctx.state.os.focus;
-            if (!activeZoneId) return;
-
-            const zone = ctx.state.os.focus.zones[activeZoneId];
-            if (!zone) return;
-
-            const items: string[] = ctx.inject(DOM_ITEMS);
-            const config = ctx.inject(ZONE_CONFIG);
-            const zoneOrder = ctx.inject(DOM_ZONE_ORDER);
-            const direction = payload.direction ?? "forward";
-
-            const result = resolveTab(
-                zone.focusedItemId,
-                items,
-                config.tab.behavior,
-                direction,
-                activeZoneId,
-                zoneOrder,
-            );
-
-            if (!result) return;
-
-            if (result.type === "within") {
-                return {
-                    state: produce(ctx.state, (draft) => {
-                        const z = ensureZone(draft.os, activeZoneId);
-                        z.focusedItemId = result.itemId;
-                        z.lastFocusedId = result.itemId;
-                    }) as typeof ctx.state,
-                    focus: result.itemId,
-                };
-            }
-
-            return {
-                state: produce(ctx.state, (draft) => {
-                    draft.os.focus.activeZoneId = result.zoneId;
-                    const z = ensureZone(draft.os, result.zoneId);
-                    z.focusedItemId = result.itemId;
-                    z.lastFocusedId = result.itemId;
-                }) as typeof ctx.state,
-                focus: result.itemId,
-            };
-        },
-    );
+    // ─── Register production commands (no duplication) ───
+    const FOCUS = kernel.register(prodFOCUS);
+    const SYNC_FOCUS = kernel.register(prodSYNC_FOCUS);
+    const SELECT = kernel.register(prodSELECT);
+    const NAVIGATE = kernel.register(prodNAVIGATE);
+    const TAB = kernel.register(prodTAB);
 
     // ─── Convenience helpers ───
 

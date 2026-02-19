@@ -44,6 +44,11 @@ import { createInspector } from "./createInspector.ts";
 
 type Listener = () => void;
 
+/** Option to conditionally execute a command based on current state. */
+type WhenGuardOption<S> = {
+  when: (state: S) => boolean;
+};
+
 const MAX_TRANSACTIONS = 200;
 
 /** Create a ScopeToken. No tree management — Kernel doesn't know about DOM. */
@@ -531,7 +536,7 @@ export function createKernel<S>(initialState: S) {
           perCommandMiddleware.get(scope)?.set(type, [injectMw]);
         }
 
-        // Return CommandFactory
+        // Return CommandFactory (self-describing: carries handler + tokens)
         const factory = (payload?: unknown) =>
           ({
             type,
@@ -542,6 +547,8 @@ export function createKernel<S>(initialState: S) {
 
         (factory as unknown as { commandType: string }).commandType = type;
         (factory as unknown as { id: string }).id = type;
+        (factory as unknown as { handler: InternalCommandHandler }).handler = handler;
+        (factory as unknown as { tokens: ContextToken[] }).tokens = perCommandTokens;
 
         return factory as unknown as CommandFactory<string, any>;
       }) as {
@@ -549,12 +556,14 @@ export function createKernel<S>(initialState: S) {
         <T extends string>(
           type: T,
           handler: (ctx: Ctx) => () => HandlerReturn | undefined,
+          options?: WhenGuardOption<S>,
         ): CommandFactory<T, void>;
 
         // With payload
         <T extends string, P>(
           type: T,
           handler: (ctx: Ctx) => (payload: P) => HandlerReturn | undefined,
+          options?: WhenGuardOption<S>,
         ): CommandFactory<T, P>;
 
         // With per-command inject tokens (no payload)
@@ -562,6 +571,7 @@ export function createKernel<S>(initialState: S) {
           type: T,
           tokens: ContextToken[],
           handler: (ctx: any) => () => HandlerReturn | undefined,
+          options?: WhenGuardOption<S>,
         ): CommandFactory<T, void>;
 
         // With per-command inject tokens (with payload)
@@ -569,6 +579,7 @@ export function createKernel<S>(initialState: S) {
           type: T,
           tokens: ContextToken[],
           handler: (ctx: any) => (payload: P) => HandlerReturn | undefined,
+          options?: WhenGuardOption<S>,
         ): CommandFactory<T, P>;
       },
 
@@ -618,6 +629,19 @@ export function createKernel<S>(initialState: S) {
       use: registerMiddleware,
 
       dispatch,
+
+      /**
+       * Register an external CommandFactory's handler on this kernel.
+       * Reads .handler, .tokens, .commandType from the factory.
+       * Enables test kernels to use production handlers without duplication.
+       */
+      register(factory: CommandFactory<string, any>): CommandFactory<string, any> {
+        const { commandType: type, handler, tokens } = factory;
+        if (tokens && tokens.length > 0) {
+          return this.defineCommand(type, tokens, handler);
+        }
+        return this.defineCommand(type, handler);
+      },
 
       reset(newInitialState: S): void {
         setState(() => newInitialState);
