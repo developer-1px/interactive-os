@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-20 00:44
+> Last updated: 2026-02-20 00:52
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,8 +9,7 @@
 
 ## 🔥 Active Focus
 
-**philosophy-hygiene** — T3: pages/onClick → OS 프리미티브, T4: deprecated API 제거, T5: console.log 제거
-**command-type-unification** — ZoneBindings, FieldBindings, KeyBinding → BaseCommand 타입 통일
+**builder-v2** — T4/T5 선정 대기 (Next: 블록 타입별 패널 폼 E2E, 드래그 정렬 UI)
 
 ---
 
@@ -18,8 +17,6 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| philosophy-hygiene | Execution | 02-20 | 🔥 Focus |
-| command-type-unification | Definition | 02-18 | 🔥 Focus |
 | builder-v2 | Next 태스크 선정 대기 | 02-19 | ⏸ Idle |
 
 ---
@@ -28,6 +25,8 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| command-type-unification | 02-20 | ✅ 4-archive/2026-02-command-type-unification (자연 해소) |
+| philosophy-hygiene | 02-20 | ✅ 4-archive/2026-02-philosophy-hygiene (예정) |
 | collection-clipboard | 02-20 | ✅ 4-archive/2026-02-collection-clipboard |
 | apg-axis-audit | 02-20 | ✅ 4-archive/2026-02-apg-axis-audit |
 | docs-topology | 02-20 | ✅ 4-archive/2026-02-docs-topology |
