@@ -5,19 +5,7 @@
 
 ## 🔴 Now
 
-- [x] T6: 계층 키보드 내비게이션 (Section/Group/Item)
-  - Discussion: [builder-focus-policy](discussions/2026-0219-1954-builder-focus-policy.md)
-  - [x] 6-1: OS — Zone config에 `itemFilter?: (items: string[]) => string[]` 추가
-  - [x] 6-2: OS — `DOM_ITEMS` / `DOM_RECTS` context provider에 filter 적용
-  - [x] 6-3: Builder — `Builder.Section`/`Builder.Group`에서 `data-nav-skip` 제거
-  - [x] 6-4: Builder — `DRILL_DOWN` / `DRILL_UP` command 구현
-  - [x] 6-5: Builder — `setupHierarchicalNavigation()` 조합 함수 + keybinding (Enter/\)
-  - [x] 6-6: Unit test — 레벨별 순회, drill-down/up, 레벨 파생 검증
-
-- [ ] T2: PropertiesPanel 라이브 바인딩 강화
-  - [ ] 2-1: ImageProperties에 실제 URL 입력 → 이미지 교체 연동
-  - [ ] 2-2: IconProperties에 아이콘 검색/선택 연동
-  - [ ] 2-3: SectionProperties에 섹션 이름 편집 → state 반영
+(No active Now tasks — promote from Next or Backlog)
 
 ## 🟡 Next
 
@@ -39,9 +27,14 @@
 
 ## ⏳ Done
 
+- [x] T2: PropertiesPanel 라이브 바인딩 강화
+  - [x] 2-1: ImageProperties — URL/alt 입력 → state → canvas preview
+  - [x] 2-2: IconProperties — 아이콘 선택/검색 → state
+  - [x] 2-3: SectionProperties — 섹션 이름 편집 → renameSectionLabel command
 - [x] T1: Sidebar 키보드 바인딩 연결
   - [x] 1-0: sidebarZone 생성 + SectionSidebar PPT 썸네일 UI + BuilderPage 통합
   - [x] 1-1: sidebar Zone에 keybinding 선언 (Delete, Cmd+D, Cmd+↑↓)
   - [x] 1-2: 섹션 관리 커맨드 (deleteSection, duplicateSection, moveSectionUp/Down)
   - [x] 1-3: Unit test — 10건 headless 커맨드 검증
 - [x] T6: 계층 키보드 내비게이션 (Section/Group/Item)
+
