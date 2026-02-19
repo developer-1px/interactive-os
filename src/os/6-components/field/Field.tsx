@@ -236,7 +236,13 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       if (s.os.focus.activeZoneId !== zoneId) return false;
       const zone = s.os.focus.zones[zoneId];
       if (!zone?.editingItemId) return false;
-      return zone.focusedItemId === zone.editingItemId;
+      if (zone.focusedItemId !== zone.editingItemId) return false;
+      // If this field IS the editing item, isEditingThisField handles it
+      if (zone.editingItemId === fieldId) return false;
+      // Verify DOM ancestry: the editing item must be a parent of this field
+      if (!innerRef.current) return false;
+      const editingEl = document.getElementById(String(zone.editingItemId));
+      return editingEl?.contains(innerRef.current) ?? false;
     });
 
     const activedescendantId = kernel.useComputed((s) => {

@@ -109,6 +109,9 @@ export const FIELD_COMMIT = kernel.defineCommand(
             z.editingItemId = null;
           }
         }) as typeof ctx.state,
+
+        // Restore DOM focus to the item (browser loses it when contentEditable→false)
+        focus: editingId,
       };
     }
   },
@@ -151,6 +154,9 @@ export const FIELD_CANCEL = kernel.defineCommand(
           z.editingItemId = null;
         }
       }) as typeof ctx.state,
+
+      // Restore DOM focus to the item
+      focus: editingId,
     };
   },
 );

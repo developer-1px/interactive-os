@@ -174,20 +174,20 @@ export function UnifiedInspector({
   const [isUserScrolled, setIsUserScrolled] = useState(false);
   const prevTxCount = useRef(transactions.length);
 
-  // Sticky header (32px) + section header (28px) = 60px offset
-  const STICKY_OFFSET = 60;
+  // Each row is ~36px, show 3 recent items above current
+  const ROWS_VISIBLE = 3;
+  const ROW_HEIGHT = 36;
 
   const isAtBottom = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return true;
-    // 40px threshold — close enough to bottom
-    return el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 80;
   }, []);
 
   const scrollToBottom = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    el.scrollTop = el.scrollHeight;
     setIsUserScrolled(false);
   }, []);
 
@@ -200,12 +200,12 @@ export function UnifiedInspector({
   useEffect(() => {
     if (transactions.length > prevTxCount.current) {
       if (!isUserScrolled) {
-        // At bottom → auto-scroll, accounting for sticky offset
         requestAnimationFrame(() => {
           const el = scrollRef.current;
           if (!el) return;
-          // Scroll so the new last item is visible below sticky headers
-          el.scrollTo({ top: el.scrollHeight - el.clientHeight + STICKY_OFFSET, behavior: "smooth" });
+          // Scroll so the last ~3 items are visible at the top
+          const targetScroll = el.scrollHeight - el.clientHeight;
+          el.scrollTop = targetScroll;
         });
       }
     }
@@ -290,9 +290,9 @@ export function UnifiedInspector({
             </CollapsibleSection>
           )}
 
-          {/* Bottom spacer — allows latest item to scroll to top */}
+          {/* Bottom spacer — allows latest ~3 items to sit near top */}
           {transactions.length > 0 && (
-            <div style={{ height: "calc(100% - 40px)" }} aria-hidden />
+            <div style={{ height: `calc(100% - ${ROWS_VISIBLE * ROW_HEIGHT}px)` }} aria-hidden />
           )}
         </div>
 

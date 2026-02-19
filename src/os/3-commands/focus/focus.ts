@@ -6,6 +6,8 @@ import { applyFollowFocus, ensureZone } from "../../state/utils";
 interface FocusPayload {
   zoneId: string;
   itemId: string | null;
+  /** Override selection (e.g., paste selects all new items) */
+  selection?: string[];
 }
 
 export const FOCUS = kernel.defineCommand(
@@ -38,8 +40,13 @@ export const FOCUS = kernel.defineCommand(
           zone.lastFocusedId = itemId;
           zone.recoveryTargetId = null;
 
-          // followFocus: selection follows focus (W3C APG)
-          applyFollowFocus(zone, itemId, zoneEntry?.config?.select);
+          // Selection: explicit override > followFocus
+          if (payload.selection) {
+            zone.selection = payload.selection;
+            zone.selectionAnchor = itemId;
+          } else {
+            applyFollowFocus(zone, itemId, zoneEntry?.config?.select);
+          }
         }
       }),
 

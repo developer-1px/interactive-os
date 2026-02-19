@@ -276,13 +276,13 @@ export const pasteTodo = listZone.command(
     const clip = ctx.state.ui.clipboard;
     if (!clip || clip.todos.length === 0) return { state: ctx.state };
 
-    let lastNewId = "";
+    const newIds: string[] = [];
     return {
       state: produce(ctx.state, (draft) => {
         for (let i = 0; i < clip.todos.length; i++) {
           const sourceTodo = clip.todos[i]!;
           const newId = uid();
-          lastNewId = newId;
+          newIds.push(newId);
           draft.data.todos[newId] = {
             id: newId,
             text: sourceTodo.text,
@@ -301,7 +301,12 @@ export const pasteTodo = listZone.command(
           }
         }
       }),
-      dispatch: FOCUS({ zoneId: "list", itemId: lastNewId }),
+      // Focus last pasted item, select all pasted items
+      dispatch: FOCUS({
+        zoneId: "list",
+        itemId: newIds.at(-1)!,
+        selection: newIds,
+      }),
     };
   },
 );
