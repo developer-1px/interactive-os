@@ -9,8 +9,10 @@ import {
 import {
   BuilderApp,
   builderUpdateField,
+  renameSectionLabel,
   type PropertyType,
 } from "@/apps/builder/app";
+import { kernel } from "@/os/kernel";
 
 /**
  * PropertiesPanel
@@ -88,8 +90,8 @@ export function PropertiesPanel() {
       {/* Form Content */}
       <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
         {selectedType === "text" && <TextProperties fieldName={selectedId} />}
-        {selectedType === "image" && <ImageProperties />}
-        {selectedType === "icon" && <IconProperties />}
+        {selectedType === "image" && <ImageProperties fieldName={selectedId} />}
+        {selectedType === "icon" && <IconProperties fieldName={selectedId} />}
         {selectedType === "link" && <LinkProperties fieldName={selectedId} />}
         {selectedType === "button" && (
           <ButtonProperties fieldName={selectedId} />
@@ -113,11 +115,10 @@ function TabButton({
 }) {
   return (
     <div
-      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${
-        active
-          ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
-          : "text-slate-400"
-      }`}
+      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${active
+        ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
+        : "text-slate-400"
+        }`}
       title={label}
     >
       {icon}
@@ -174,67 +175,107 @@ function TextProperties({ fieldName }: { fieldName: string }) {
   );
 }
 
-function ImageProperties() {
+function ImageProperties({ fieldName }: { fieldName: string }) {
+  // Image fields follow pattern: {fieldName}-url, {fieldName}-alt
+  const urlKey = `${fieldName}-url`;
+  const altKey = `${fieldName}-alt`;
+  const url = BuilderApp.useComputed((s) => s.data.fields[urlKey] ?? "");
+  const alt = BuilderApp.useComputed((s) => s.data.fields[altKey] ?? "");
+
   return (
     <div className="space-y-6">
       <FormGroup label="Preview">
         <div className="aspect-video bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center mb-3 overflow-hidden relative group">
-          <img
-            src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80"
-            alt="Preview"
-            className="w-full h-full object-cover"
-          />
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium text-sm"
-          >
-            Replace Image
-          </button>
+          {url ? (
+            <img
+              src={url}
+              alt={alt || "Preview"}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="text-slate-300 text-sm">No image</div>
+          )}
         </div>
       </FormGroup>
 
       <FormGroup label="Source">
-        <TextInput label="Image URL" value="https://images.unsplash.com/..." />
-        <div className="mt-3">
-          <TextInput label="Alt Text" value="Code editor on screen" />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-slate-600 font-medium">Image URL</label>
+          <input
+            type="text"
+            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+            value={url}
+            onChange={(e) => builderUpdateField(urlKey, e.target.value)}
+            placeholder="https://..."
+          />
+        </div>
+        <div className="mt-3 flex flex-col gap-1">
+          <label className="text-xs text-slate-600 font-medium">Alt Text</label>
+          <input
+            type="text"
+            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+            value={alt}
+            onChange={(e) => builderUpdateField(altKey, e.target.value)}
+            placeholder="Describe the image"
+          />
           <p className="text-[10px] text-slate-400 mt-1">
             Important for accessibility and SEO.
           </p>
         </div>
       </FormGroup>
-
-      <FormGroup label="Interaction">
-        <Select label="Click Action" value="Open Lightbox" />
-      </FormGroup>
     </div>
   );
 }
 
-function IconProperties() {
+function IconProperties({ fieldName }: { fieldName: string }) {
+  const iconKey = `${fieldName}-icon`;
+  const labelKey = `${fieldName}-label`;
+  const icon = BuilderApp.useComputed((s) => s.data.fields[iconKey] ?? "");
+  const label = BuilderApp.useComputed((s) => s.data.fields[labelKey] ?? "");
+
+  const ICON_OPTIONS = ["ArrowRight", "Check", "Star", "Heart", "Mail", "Phone", "Globe", "Shield"];
+
   return (
     <div className="space-y-6">
       <FormGroup label="Icon Selection">
         <div className="grid grid-cols-4 gap-2 mb-2">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 ${
-                i === 1
-                  ? "border-violet-500 bg-violet-50 text-violet-600"
-                  : "border-slate-200 text-slate-400"
-              }`}
+          {ICON_OPTIONS.map((name) => (
+            <button
+              type="button"
+              key={name}
+              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${icon === name
+                ? "border-violet-500 bg-violet-50 text-violet-600"
+                : "border-slate-200 text-slate-400"
+                }`}
+              onClick={() => builderUpdateField(iconKey, name)}
+              title={name}
             >
-              <Square size={20} />
-            </div>
+              {name.slice(0, 2)}
+            </button>
           ))}
         </div>
-        <TextInput label="Search Icon" value="ArrowRight" />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-slate-600 font-medium">Icon Name</label>
+          <input
+            type="text"
+            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+            value={icon}
+            onChange={(e) => builderUpdateField(iconKey, e.target.value)}
+            placeholder="Search icon..."
+          />
+        </div>
       </FormGroup>
       <FormGroup label="Accessibility">
-        <TextInput label="Label" value="" />
-        <p className="text-[10px] text-slate-400 mt-1">
-          Leave empty if decorative.
-        </p>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-slate-600 font-medium">Label</label>
+          <input
+            type="text"
+            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+            value={label}
+            onChange={(e) => builderUpdateField(labelKey, e.target.value)}
+            placeholder="Leave empty if decorative"
+          />
+        </div>
       </FormGroup>
     </div>
   );
@@ -320,12 +361,35 @@ function ButtonProperties({ fieldName }: { fieldName: string }) {
 }
 
 function SectionProperties({ fieldName }: { fieldName: string }) {
+  // Find section in state to get its label
+  const sectionLabel = BuilderApp.useComputed(
+    (s) => s.data.sections.find((sec) => sec.id === fieldName)?.label ?? fieldName,
+  );
+
   return (
     <div className="space-y-6">
       <FormGroup label="Section Identity">
-        <TextInput label="Section Name" value={fieldName} />
-        <div className="mt-3">
-          <TextInput label="ID (Anchor)" value={fieldName} />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-slate-600 font-medium">Section Name</label>
+          <input
+            type="text"
+            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+            value={sectionLabel}
+            onChange={(e) =>
+              kernel.dispatch(
+                renameSectionLabel({ id: fieldName, label: e.target.value }),
+              )
+            }
+          />
+        </div>
+        <div className="mt-3 flex flex-col gap-1">
+          <label className="text-xs text-slate-600 font-medium">ID (Anchor)</label>
+          <input
+            type="text"
+            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-500"
+            value={fieldName}
+            readOnly
+          />
           <p className="text-[10px] text-slate-400 mt-1">
             Used for anchor links (e.g. #{fieldName}).
           </p>
@@ -334,9 +398,6 @@ function SectionProperties({ fieldName }: { fieldName: string }) {
 
       <FormGroup label="Visibility">
         <Select label="Status" value="Published" />
-        <div className="mt-3 p-3 bg-slate-50 rounded text-xs text-slate-500 border border-slate-100">
-          Design settings are locked by the theme.
-        </div>
       </FormGroup>
     </div>
   );

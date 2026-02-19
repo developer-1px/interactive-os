@@ -191,6 +191,16 @@ const sidebarZone = BuilderApp.createZone("sidebar");
 
 // Section management commands
 
+export const renameSectionLabel = sidebarZone.command(
+  "renameSectionLabel",
+  (ctx: { state: BuilderState }, payload: { id: string; label: string }) => ({
+    state: produce(ctx.state, (draft) => {
+      const section = draft.data.sections.find((s) => s.id === payload.id);
+      if (section) section.label = payload.label;
+    }),
+  }),
+);
+
 export const deleteSection = sidebarZone.command(
   "deleteSection",
   (ctx: { state: BuilderState }, payload: { id: string }) => {
