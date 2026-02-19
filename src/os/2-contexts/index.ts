@@ -103,9 +103,20 @@ export const DOM_ZONE_ORDER = kernel.defineContext(
     for (const el of els) {
       const zoneId = el.getAttribute("data-focus-group");
       if (!zoneId) continue;
-      const items = el.querySelectorAll(
+
+      // Collect items that DIRECTLY belong to this zone (not nested child zones).
+      // An item belongs to a zone if its closest [data-focus-group] ancestor is this zone.
+      const allItems = el.querySelectorAll(
         "[data-item-id]:not([data-nav-skip='true'])",
       );
+      const ownItems: Element[] = [];
+      for (const item of allItems) {
+        const closestGroup = item.closest("[data-focus-group]");
+        if (closestGroup === el) {
+          ownItems.push(item);
+        }
+      }
+
       // Read zone state for recovery targets
       const zoneState = state.os.focus.zones[zoneId];
       const zoneEntry = ZoneRegistry.get(zoneId);
@@ -113,9 +124,9 @@ export const DOM_ZONE_ORDER = kernel.defineContext(
 
       zones.push({
         zoneId,
-        firstItemId: items[0]?.getAttribute("data-item-id") ?? null,
+        firstItemId: ownItems[0]?.getAttribute("data-item-id") ?? null,
         lastItemId:
-          items[items.length - 1]?.getAttribute("data-item-id") ?? null,
+          ownItems[ownItems.length - 1]?.getAttribute("data-item-id") ?? null,
         entry,
         selectedItemId: zoneState?.selection?.[0] ?? null,
         lastFocusedId: zoneState?.lastFocusedId ?? null,

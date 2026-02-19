@@ -54,42 +54,44 @@ export function resolveTabEscapeZone(
 ): { zoneId: string; itemId: string } | null {
   const currentIdx = zoneOrder.findIndex((z) => z.zoneId === currentZoneId);
   if (currentIdx === -1) return null;
+  if (zoneOrder.length <= 1) return null;
 
-  const nextIdx = direction === "forward" ? currentIdx + 1 : currentIdx - 1;
+  const delta = direction === "forward" ? 1 : -1;
 
-  // Wrap around like native browser Tab (loop across zones)
-  const wrappedIdx =
-    ((nextIdx % zoneOrder.length) + zoneOrder.length) % zoneOrder.length;
+  // Try each successive zone, skipping empty ones (e.g., parent container zones)
+  for (let step = 1; step < zoneOrder.length; step++) {
+    const candidateIdx =
+      ((currentIdx + delta * step) % zoneOrder.length + zoneOrder.length) %
+      zoneOrder.length;
 
-  // Single zone — nowhere to go
-  if (wrappedIdx === currentIdx) return null;
+    const nextZone = zoneOrder[candidateIdx]!;
 
-  const nextZone = zoneOrder[wrappedIdx]!;
+    // APG Tab Recovery: target depends on navigate.entry config
+    let targetId: string | null = null;
+    switch (nextZone.entry) {
+      case "selected":
+        targetId = nextZone.selectedItemId ?? nextZone.firstItemId;
+        break;
+      case "restore":
+        targetId = nextZone.lastFocusedId ?? nextZone.firstItemId;
+        break;
+      case "last":
+        targetId = nextZone.lastItemId;
+        break;
+      case "first":
+      default:
+        targetId =
+          direction === "forward" ? nextZone.firstItemId : nextZone.lastItemId;
+        break;
+    }
 
-  // APG Tab Recovery: target depends on navigate.entry config
-  // - "selected": focus goes to first selected item (listbox, tree, tablist, radiogroup)
-  // - "restore": focus goes to last focused item (grid, toolbar optionally)
-  // - "first"/"last": focus goes to edge item (menu, toolbar default)
-  let targetId: string | null = null;
-  switch (nextZone.entry) {
-    case "selected":
-      targetId = nextZone.selectedItemId ?? nextZone.firstItemId;
-      break;
-    case "restore":
-      targetId = nextZone.lastFocusedId ?? nextZone.firstItemId;
-      break;
-    case "last":
-      targetId = nextZone.lastItemId;
-      break;
-    case "first":
-    default:
-      targetId =
-        direction === "forward" ? nextZone.firstItemId : nextZone.lastItemId;
-      break;
+    if (targetId) {
+      return { zoneId: nextZone.zoneId, itemId: targetId };
+    }
+    // targetId is null → zone has no items, skip to next
   }
-  if (!targetId) return null;
 
-  return { zoneId: nextZone.zoneId, itemId: targetId };
+  return null;
 }
 
 /**

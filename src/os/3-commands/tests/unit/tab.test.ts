@@ -203,6 +203,44 @@ describe("resolveTabEscapeZone (SPEC §3.3)", () => {
       });
     });
   });
+
+  // ─── Empty zone skip ─────────────────────────────────────────
+  describe("Empty zone skip", () => {
+    it("skips zone with no items (parent container)", () => {
+      const zonesWithEmpty: ZoneOrderEntry[] = [
+        zone("parent", null, null), // empty parent (application container)
+        zone("sidebar", "s-0", "s-2", { entry: "selected", selectedItemId: "s-1" }),
+        zone("list", "l-0", "l-2"),
+      ];
+      // from list → forward → skip parent → land on sidebar
+      expect(resolveTabEscapeZone("list", zonesWithEmpty, "forward")).toEqual({
+        zoneId: "sidebar",
+        itemId: "s-1", // selected!
+      });
+    });
+
+    it("skips empty zone backward", () => {
+      const zonesWithEmpty: ZoneOrderEntry[] = [
+        zone("sidebar", "s-0", "s-2"),
+        zone("parent", null, null), // empty
+        zone("list", "l-0", "l-2"),
+      ];
+      // from list → backward → skip parent → land on sidebar
+      expect(resolveTabEscapeZone("list", zonesWithEmpty, "backward")).toEqual({
+        zoneId: "sidebar",
+        itemId: "s-2",
+      });
+    });
+
+    it("returns null when all other zones are empty", () => {
+      const zonesAllEmpty: ZoneOrderEntry[] = [
+        zone("active", "a-0", "a-1"),
+        zone("empty1", null, null),
+        zone("empty2", null, null),
+      ];
+      expect(resolveTabEscapeZone("active", zonesAllEmpty, "forward")).toBeNull();
+    });
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════

@@ -77,6 +77,9 @@ function SidebarContent() {
                                     data-[focused=true]:bg-indigo-50
                                     data-[focused=true]:ring-1
                                     data-[focused=true]:ring-indigo-200
+                                    data-[anchor=true]:bg-slate-100
+                                    data-[anchor=true]:ring-1
+                                    data-[anchor=true]:ring-slate-300
                                   `}
                 >
                   <span
