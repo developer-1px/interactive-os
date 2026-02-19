@@ -20,7 +20,7 @@ const defineApp = TodoApp;
 describe("History Transaction", () => {
   describe("Transaction grouping", () => {
     it("multiple deletes in a transaction create single undo entry", () => {
-      const app = defineApp.create({ history: true });
+      const app = defineApp.create();
 
       // Add 3 items
       app.dispatch(addTodo({ text: "Alpha" }));
@@ -45,7 +45,7 @@ describe("History Transaction", () => {
     });
 
     it("single redo re-applies entire transaction", () => {
-      const app = defineApp.create({ history: true });
+      const app = defineApp.create();
 
       app.dispatch(addTodo({ text: "Alpha" }));
       app.dispatch(addTodo({ text: "Bravo" }));
@@ -70,7 +70,7 @@ describe("History Transaction", () => {
     });
 
     it("mixed commands in transaction are undone together", () => {
-      const app = defineApp.create({ history: true });
+      const app = defineApp.create();
 
       app.dispatch(addTodo({ text: "Alpha" }));
       app.dispatch(addTodo({ text: "Bravo" }));
@@ -97,7 +97,7 @@ describe("History Transaction", () => {
 
   describe("Edge cases", () => {
     it("empty transaction is no-op (no history entry)", () => {
-      const app = defineApp.create({ history: true });
+      const app = defineApp.create();
       app.dispatch(addTodo({ text: "Alpha" }));
       const pastLenBefore = app.state.history.past.length;
 
@@ -109,7 +109,7 @@ describe("History Transaction", () => {
     });
 
     it("single command in transaction behaves like normal dispatch", () => {
-      const app = defineApp.create({ history: true });
+      const app = defineApp.create();
       app.dispatch(addTodo({ text: "Alpha" }));
       const countBefore = Object.keys(app.state.data.todos).length;
 
@@ -126,7 +126,7 @@ describe("History Transaction", () => {
     });
 
     it("nested transactions flatten to outer group", () => {
-      const app = defineApp.create({ history: true });
+      const app = defineApp.create();
 
       app.dispatch(addTodo({ text: "A" }));
       app.dispatch(addTodo({ text: "B" }));

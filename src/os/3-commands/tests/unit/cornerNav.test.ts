@@ -25,9 +25,12 @@ function makeItemRects(
 }
 
 const defaultConfig: NavigateConfig = {
-    strategy: "corner",
-    wrap: "none",
     orientation: "vertical",
+    loop: false,
+    seamless: false,
+    typeahead: false,
+    entry: "first",
+    recovery: "next",
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -52,7 +55,7 @@ describe("resolveCorner — 2×3 grid", () => {
         { id: "F", x: 2 * (w + gap), y: h + gap, w, h },
     ];
     const itemRects = makeItemRects(layout);
-    const spatial = { itemRects };
+    const spatial = { stickyX: null, stickyY: null, itemRects };
 
     test("E → right = F", () => {
         const result = resolveCorner("E", "right", items, defaultConfig, spatial);
@@ -116,7 +119,7 @@ describe("resolveCorner — home/end", () => {
         { id: "B", x: 110, y: 0, w: 100, h: 40 },
         { id: "C", x: 220, y: 0, w: 100, h: 40 },
     ]);
-    const spatial = { itemRects };
+    const spatial = { stickyX: null, stickyY: null, itemRects };
 
     test("home → first item", () => {
         const result = resolveCorner("C", "home", items, defaultConfig, spatial);
@@ -139,7 +142,7 @@ describe("resolveCorner — edge cases", () => {
         { id: "A", x: 0, y: 0, w: 100, h: 40 },
         { id: "B", x: 110, y: 0, w: 100, h: 40 },
     ]);
-    const spatial = { itemRects };
+    const spatial = { stickyX: null, stickyY: null, itemRects };
 
     test("null currentId → first item", () => {
         const result = resolveCorner(null, "right", items, defaultConfig, spatial);
@@ -147,7 +150,7 @@ describe("resolveCorner — edge cases", () => {
     });
 
     test("no itemRects → stays at current", () => {
-        const result = resolveCorner("A", "right", items, defaultConfig, {});
+        const result = resolveCorner("A", "right", items, defaultConfig, { stickyX: null, stickyY: null });
         expect(result.targetId).toBe("A");
     });
 
@@ -167,6 +170,7 @@ describe("resolveCorner — edge cases", () => {
             { id: "ONLY", x: 0, y: 0, w: 100, h: 40 },
         ]);
         const result = resolveCorner("ONLY", "right", ["ONLY"], defaultConfig, {
+            stickyX: null, stickyY: null,
             itemRects: singleRects,
         });
         expect(result.targetId).toBe("ONLY");
@@ -186,6 +190,7 @@ describe("resolveCorner — containment filtering", () => {
             { id: "child2", x: 150, y: 10, w: 100, h: 40 },
         ]);
         const result = resolveCorner("child1", "right", items, defaultConfig, {
+            stickyX: null, stickyY: null,
             itemRects,
         });
         // Should go to child2, not parent (which contains child1)

@@ -9,6 +9,11 @@
   - Zod schema + normalize/denormalize 어댑터 기반 CRUD 자동 생성
   - Builder sidebar + Todo list를 리팩터링하며 probe-first 발견
   - Discussion: [2026-0219-2330-collection-zone-facade](discussions/2026-0219-2330-collection-zone-facade.md)
+  - [x] Step 1: /ready — 환경 보장 (App ✅, tsc 앱코드 0 errors)
+  - [x] Step 2: /discussion — 아키텍처 논의 완료
+  - [x] Step 5: /tdd — 18 tests (Array 8 + Entity 8 + roundtrip 2), 🟢 all pass
+  - [x] Step 6: /solve — createCollectionZone + fromArray + fromEntities 구현
+  - [ ] Step 7: /review ← 현재 지점
 
 ## 🟡 Next
 
