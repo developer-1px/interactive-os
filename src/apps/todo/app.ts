@@ -222,44 +222,49 @@ export const duplicateTodo = listZone.command(
 
 export const copyTodo = listZone.command(
   "copyTodo",
-  (ctx, payload: { id: string; _multi?: boolean }) => {
-    if (!payload.id) return { state: ctx.state };
-    const todo = ctx.state.data.todos[payload.id];
-    if (!todo) return { state: ctx.state };
+  (ctx, payload: { ids: string[] }) => {
+    const todos = payload.ids
+      .map((id) => ctx.state.data.todos[id])
+      .filter(Boolean);
+    if (todos.length === 0) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
-        const prev = draft.ui.clipboard;
-        if (payload._multi && prev && !prev.isCut) {
-          prev.todos.push({ ...todo });
-        } else {
-          draft.ui.clipboard = { todos: [{ ...todo }], isCut: false };
-        }
+        draft.ui.clipboard = {
+          todos: todos.map((t) => ({ ...t })),
+          isCut: false,
+        };
       }),
-      clipboardWrite: { text: todo.text, json: JSON.stringify(todo) },
+      clipboardWrite: {
+        text: todos.map((t) => t.text).join("\n"),
+        json: JSON.stringify(todos),
+      },
     };
   },
 );
 
 export const cutTodo = listZone.command(
   "cutTodo",
-  (ctx, payload: { id: string; _multi?: boolean }) => {
-    if (!payload.id) return { state: ctx.state };
-    const todo = ctx.state.data.todos[payload.id];
-    if (!todo) return { state: ctx.state };
+  (ctx, payload: { ids: string[] }) => {
+    const todos = payload.ids
+      .map((id) => ctx.state.data.todos[id])
+      .filter(Boolean);
+    if (todos.length === 0) return { state: ctx.state };
     return {
       state: produce(ctx.state, (draft) => {
-        const prev = draft.ui.clipboard;
-        // Append to existing clipboard if same mode (cut), otherwise start fresh
-        if (payload._multi && prev && prev.isCut) {
-          prev.todos.push({ ...todo });
-        } else {
-          draft.ui.clipboard = { todos: [{ ...todo }], isCut: true };
+        draft.ui.clipboard = {
+          todos: todos.map((t) => ({ ...t })),
+          isCut: true,
+        };
+        for (const id of payload.ids) {
+          delete draft.data.todos[id];
+          const index = draft.data.todoOrder.indexOf(id);
+          if (index !== -1) draft.data.todoOrder.splice(index, 1);
         }
-        delete draft.data.todos[payload.id];
-        const index = draft.data.todoOrder.indexOf(payload.id);
-        if (index !== -1) draft.data.todoOrder.splice(index, 1);
       }),
-      clipboardWrite: { text: todo.text, json: JSON.stringify(todo) },
+      clipboardWrite: {
+        text: todos.map((t) => t.text).join("\n"),
+        json: JSON.stringify(todos),
+      },
     };
   },
 );
@@ -401,11 +406,11 @@ export const TodoListUI = listZone.bind({
   },
   onCopy: (cursor) => {
     const ids = cursor.selection.length > 0 ? cursor.selection : [cursor.focusId];
-    return ids.map(id => copyTodo({ id }));
+    return copyTodo({ ids });
   },
   onCut: (cursor) => {
     const ids = cursor.selection.length > 0 ? cursor.selection : [cursor.focusId];
-    return ids.map(id => cutTodo({ id }));
+    return cutTodo({ ids });
   },
   onPaste: (cursor) => pasteTodo({ id: cursor.focusId }),
   onMoveUp: (cursor) => moveItemUp({ id: cursor.focusId }),
