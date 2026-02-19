@@ -255,15 +255,27 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
     // --- DOM Sync & Event Listeners ---
 
-    // Sync prop value to registry when not actively editing
+    // Sync prop value to registry when not actively editing.
+    //
+    // ⚠️ CRITICAL: fieldData?.state.value must NOT be in deps.
+    //   If it were, the loop would be:
+    //   updateValue → emit → useFieldRegistry re-render
+    //   → fieldData?.state.value changes → effect re-runs → updateValue → ...
+    //
+    // FIX: use a ref to read the latest registry value without adding it to deps.
+    const registryValueRef = useRef(fieldData?.state.value);
+    registryValueRef.current = fieldData?.state.value;
+
     useEffect(() => {
       if (
         !isContentEditableRef.current &&
-        value !== fieldData?.state.value
+        value !== registryValueRef.current
       ) {
         FieldRegistry.updateValue(fieldId, value);
       }
-    }, [value, fieldId, fieldData?.state.value]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value, fieldId]); // registryValueRef intentionally excluded — read via ref above
+
 
     // Initial Value
     const initialValueRef = useRef(value);

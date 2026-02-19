@@ -13,9 +13,12 @@ export default defineConfig({
   test: {
     include: [
       "src/**/tests/unit/**/*.test.ts",
+      "src/**/tests/unit/**/*.test.tsx",
       "src/**/tests/integration/**/*.test.ts",
+      "src/**/tests/integration/**/*.test.tsx",
     ],
     environment: "jsdom",
     globals: true,
+    setupFiles: ["./vitest.setup.ts"],
   },
 });

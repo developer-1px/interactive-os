@@ -313,6 +313,56 @@ export const duplicateSection = sidebarCollection.duplicate;
 export const moveSectionUp = sidebarCollection.moveUp;
 export const moveSectionDown = sidebarCollection.moveDown;
 
+/**
+ * pasteSection — Builder-specific paste.
+ *
+ * The generic collection paste only clones the SectionEntry item.
+ * Builder sections have associated field entries in data.fields keyed
+ * by section-id prefix (e.g. "ncp-hero-title").
+ * This command clones both the section AND its fields under a new prefix.
+ */
+export const pasteSection = sidebarCollection.command(
+  "sidebar:pasteSection",
+  (ctx: { state: BuilderState }, payload: { afterId?: string }) => {
+    const clip = ctx.state.ui.clipboard;
+    if (!clip || clip.items.length === 0) return { state: ctx.state };
+
+    return {
+      state: produce(ctx.state, (draft) => {
+        const sections = draft.data.sections;
+        let insertIdx = payload.afterId
+          ? sections.findIndex((s) => s.id === payload.afterId)
+          : sections.length - 1;
+        if (insertIdx === -1) insertIdx = sections.length - 1;
+
+        for (let i = 0; i < clip.items.length; i++) {
+          const source = clip.items[i]!;
+          const oldId = source.id;
+          const newId = Math.random().toString(36).slice(2, 10);
+
+          // 1. Insert new section entry
+          const newSection: SectionEntry = {
+            ...source,
+            id: newId,
+            label: `${source.label} (paste)`,
+          };
+          sections.splice(insertIdx + 1 + i, 0, newSection);
+
+          // 2. Clone all field entries that belong to this section.
+          //    Sections own fields whose keys start with "<sectionId>-".
+          const oldPrefix = `${oldId}-`;
+          const newPrefix = `${newId}-`;
+          for (const [key, value] of Object.entries(ctx.state.data.fields)) {
+            if (key.startsWith(oldPrefix)) {
+              draft.data.fields[newPrefix + key.slice(oldPrefix.length)] = value;
+            }
+          }
+        }
+      }),
+    };
+  },
+);
+
 // Custom command not covered by collection CRUD
 export const renameSectionLabel = sidebarCollection.command(
   "renameSectionLabel",
@@ -329,6 +379,8 @@ const collectionBindings = sidebarCollection.collectionBindings();
 export const BuilderSidebarUI = sidebarCollection.bind({
   role: "listbox",
   ...collectionBindings,
+  // Override generic paste with field-aware pasteSection
+  onPaste: (cursor) => pasteSection({ afterId: cursor.focusId.replace("sidebar-", "") }),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   options: {
