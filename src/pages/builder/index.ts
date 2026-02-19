@@ -7,4 +7,5 @@ export * from "./NCPHeroBlock";
 export * from "./NCPNewsBlock";
 export * from "./NCPServicesBlock";
 export * from "./PropertiesPanel";
+export * from "./SectionSidebar";
 export * from "./TestimonialsBlock";

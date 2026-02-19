@@ -16,6 +16,7 @@ import {
   NCPNewsBlock,
   NCPServicesBlock,
   PropertiesPanel,
+  SectionSidebar,
   type ViewportMode,
 } from "./builder";
 
@@ -98,6 +99,9 @@ export default function BuilderPage() {
       />
 
       <div className="flex-1 flex overflow-hidden">
+        {/* Section Sidebar (PPT-style) */}
+        <SectionSidebar />
+
         {/* Canvas Area — behavior declared in app.ts bind() */}
         <BuilderCanvasUI.Zone
           id={CANVAS_ZONE_ID}

@@ -169,6 +169,20 @@ export const allFields = BuilderApp.selector(
 );
 
 // ═══════════════════════════════════════════════════════════════════
+// Sidebar Zone — section thumbnail list (PPT-style)
+// ═══════════════════════════════════════════════════════════════════
+
+const sidebarZone = BuilderApp.createZone("sidebar");
+
+export const BuilderSidebarUI = sidebarZone.bind({
+  role: "listbox",
+  options: {
+    navigate: { orientation: "vertical" },
+    tab: { behavior: "move" },
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════
 // Canvas Zone — v5 native (createZone + bind)
 // ═══════════════════════════════════════════════════════════════════
 
