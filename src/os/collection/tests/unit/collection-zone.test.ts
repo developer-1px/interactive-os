@@ -63,7 +63,10 @@ interface EntityState {
         todos: Record<string, Todo>;
         todoOrder: string[];
     };
-    ui: { selectedCategoryId: string };
+    ui: {
+        selectedCategoryId: string;
+        clipboard: { items: Todo[]; isCut: boolean } | null;
+    };
     history: { past: any[]; future: any[] };
 }
 
@@ -77,7 +80,7 @@ const ENTITY_INITIAL: EntityState = {
         },
         todoOrder: ["a", "b", "c", "d"],
     },
-    ui: { selectedCategoryId: "work" },
+    ui: { selectedCategoryId: "work", clipboard: null },
     history: { past: [], future: [] },
 };
 
@@ -99,6 +102,22 @@ const filteredList = createCollectionZone(EntityApp, "filtered-v2", {
     ),
     filter: (state: EntityState) => (item: Todo) =>
         item.categoryId === state.ui.selectedCategoryId,
+});
+
+// With clipboard — full Todo pattern
+const clipboardList = createCollectionZone(EntityApp, "clip-v2", {
+    ...fromEntities(
+        (s: EntityState) => s.data.todos,
+        (s: EntityState) => s.data.todoOrder,
+    ),
+    clipboard: {
+        accessor: (s: EntityState) => s.ui.clipboard,
+        toText: (items: Todo[]) => items.map(t => t.text).join("\n"),
+        onPaste: (item: Todo, state: EntityState) => ({
+            ...item,
+            categoryId: state.ui.selectedCategoryId,
+        }),
+    },
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -370,5 +389,111 @@ describe("createCollectionZone — filtered moveUp/moveDown", () => {
         // b (personal) should keep its position relative to d (personal)
         expect(app.state.data.todos["b"]!.categoryId).toBe("personal");
         expect(app.state.data.todos["d"]!.categoryId).toBe("personal");
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Tests: Clipboard — copy/cut/paste
+// ═══════════════════════════════════════════════════════════════════
+
+describe("createCollectionZone — clipboard", () => {
+    let app: ReturnType<typeof EntityApp.create>;
+
+    beforeEach(() => {
+        app = EntityApp.create();
+    });
+
+    function order(): string[] {
+        return app.state.data.todoOrder;
+    }
+
+    function clipboard() {
+        return app.state.ui.clipboard;
+    }
+
+    describe("copy", () => {
+        it("stores items in clipboard state", () => {
+            app.dispatch(clipboardList.copy({ ids: ["a", "c"] }));
+            expect(clipboard()).not.toBeNull();
+            expect(clipboard()!.items).toHaveLength(2);
+            expect(clipboard()!.items[0]!.id).toBe("a");
+            expect(clipboard()!.items[1]!.id).toBe("c");
+            expect(clipboard()!.isCut).toBe(false);
+        });
+
+        it("does not remove items from collection", () => {
+            app.dispatch(clipboardList.copy({ ids: ["a"] }));
+            expect(order()).toEqual(["a", "b", "c", "d"]);
+            expect(app.state.data.todos["a"]).toBeDefined();
+        });
+
+        it("returns clipboardWrite with text and json", () => {
+            const cmd = clipboardList.copy({ ids: ["a", "c"] });
+            const result = app.dispatch(cmd);
+            expect(result.clipboardWrite).toBeDefined();
+            expect(result.clipboardWrite!.text).toBe("Buy milk\nShip it");
+            expect(result.clipboardWrite!.json).toBeDefined();
+        });
+
+        it("is no-op for empty ids", () => {
+            app.dispatch(clipboardList.copy({ ids: [] }));
+            expect(clipboard()).toBeNull();
+        });
+    });
+
+    describe("cut", () => {
+        it("stores items in clipboard and removes them", () => {
+            app.dispatch(clipboardList.cut({ ids: ["a", "c"] }));
+            expect(clipboard()!.items).toHaveLength(2);
+            expect(clipboard()!.isCut).toBe(true);
+            expect(order()).toEqual(["b", "d"]);
+            expect(app.state.data.todos["a"]).toBeUndefined();
+        });
+
+        it("returns clipboardWrite", () => {
+            const cmd = clipboardList.cut({ ids: ["b"] });
+            const result = app.dispatch(cmd);
+            expect(result.clipboardWrite!.text).toBe("Write tests");
+        });
+    });
+
+    describe("paste", () => {
+        it("inserts clipboard items after focused item", () => {
+            app.dispatch(clipboardList.copy({ ids: ["a"] }));
+            app.dispatch(clipboardList.paste({ afterId: "b" }));
+            // New item should appear after "b"
+            expect(order()).toHaveLength(5);
+            expect(order()[0]).toBe("a");
+            expect(order()[1]).toBe("b");
+            // new item at index 2
+            expect(order()[3]).toBe("c");
+        });
+
+        it("applies onPaste transform (categoryId change)", () => {
+            app.dispatch(clipboardList.copy({ ids: ["b"] })); // b is personal
+            app.dispatch(clipboardList.paste({ afterId: "a" }));
+            // Pasted item should get selectedCategoryId = "work"
+            const newId = order()[1]!; // inserted after a
+            expect(app.state.data.todos[newId]!.categoryId).toBe("work");
+        });
+
+        it("appends to end when no afterId", () => {
+            app.dispatch(clipboardList.copy({ ids: ["a"] }));
+            app.dispatch(clipboardList.paste({}));
+            expect(order()).toHaveLength(5);
+            expect(order()[4]).not.toBe("a"); // new item at end
+        });
+
+        it("is no-op when clipboard is empty", () => {
+            app.dispatch(clipboardList.paste({ afterId: "a" }));
+            expect(order()).toHaveLength(4); // unchanged
+        });
+
+        it("creates new IDs for pasted items", () => {
+            app.dispatch(clipboardList.copy({ ids: ["a"] }));
+            app.dispatch(clipboardList.paste({ afterId: "a" }));
+            const newId = order()[1]!;
+            expect(newId).not.toBe("a");
+        });
     });
 });

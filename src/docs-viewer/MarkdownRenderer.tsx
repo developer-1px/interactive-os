@@ -1,3 +1,4 @@
+import React from "react";
 import clsx from "clsx";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
@@ -99,8 +100,8 @@ const MarkdownComponents: Record<string, React.FC<Record<string, unknown>>> = {
     children?: React.ReactNode;
     [key: string]: unknown;
   }) => {
-    const codeChild = children?.props;
-    const langClass = codeChild?.className ?? "";
+    const codeChild = React.isValidElement(children) ? children.props as Record<string, unknown> : undefined;
+    const langClass = (codeChild?.["className"] as string) ?? "";
     const lang = langClass
       .replace(/language-/, "")
       .replace(/hljs/, "")
@@ -108,7 +109,7 @@ const MarkdownComponents: Record<string, React.FC<Record<string, unknown>>> = {
 
     // Mermaid block: render as diagram
     if (lang === "mermaid" || langClass.includes("language-mermaid")) {
-      const code = extractText(codeChild?.children);
+      const code = extractText(codeChild?.["children"]);
       return <MermaidBlock code={code} />;
     }
 

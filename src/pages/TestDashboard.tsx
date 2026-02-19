@@ -158,9 +158,9 @@ function parseTestStructure(code: string): StaticSuiteNode[] {
     }
   }
 
-  return rootSuite.children[0]?.type === "suite"
-    ? (rootSuite.children as StaticSuiteNode[])
-    : rootSuite.children;
+  return rootSuite.children.filter(
+    (c): c is StaticSuiteNode => c.type === "suite",
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════════

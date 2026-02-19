@@ -8,7 +8,7 @@
  *   3. Component Props: React Fiber memoizedProps tree
  */
 
-import { useInspectedElementStore } from "@inspector/stores/InspectedElementStore";
+import { useInspectedElementStore, type InspectedElementState } from "@inspector/stores/InspectedElementStore";
 import {
   Code,
   Crosshair,
@@ -230,7 +230,7 @@ function BoxModelDiagram({
   boxModel,
 }: {
   boxModel: NonNullable<
-    ReturnType<typeof useInspectedElementStore.getState>["boxModel"]
+    InspectedElementState["boxModel"]
   >;
 }) {
   const { marginTop, marginRight, marginBottom, marginLeft } = boxModel;

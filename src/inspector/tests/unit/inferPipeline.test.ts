@@ -73,7 +73,8 @@ describe("inferPipeline", () => {
   });
 
   it("no input meta: Input and Dispatch are skip", () => {
-    const tx = makeTx({ meta: undefined });
+    const { meta: _, ...base } = makeTx();
+    const tx = base as Transaction;
     const statuses = stepStatuses(inferPipeline(tx));
     expect(statuses[0]).toBe("skip"); // Input
     expect(statuses[1]).toBe("skip"); // Dispatch

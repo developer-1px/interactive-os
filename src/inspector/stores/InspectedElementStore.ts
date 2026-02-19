@@ -52,7 +52,7 @@ export interface FiberPropsEntry {
   props: Record<string, unknown>;
 }
 
-interface InspectedElementState {
+export interface InspectedElementState {
   element: HTMLElement | null;
   isInspectorActive: boolean;
 

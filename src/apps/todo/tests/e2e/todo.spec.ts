@@ -508,9 +508,6 @@ test.describe("Todo App", () => {
 
     // Arrow Down → Should move focus AND selection (followFocus: true)
     await page.keyboard.press("ArrowDown");
-    const _secondItem = page
-      .locator(todoItem(LISTVIEW))
-      .filter({ hasText: "Refactor focus ring styles" }); // Assuming this is 2nd, but better to select by index to be robust
 
     // Use nth locator for robustness
     const item1 = page.locator(todoItem(LISTVIEW)).nth(0);

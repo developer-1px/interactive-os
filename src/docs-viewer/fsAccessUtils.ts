@@ -19,6 +19,7 @@ async function readMdFiles(
 ): Promise<Map<string, string>> {
   const results = new Map<string, string>();
 
+  // @ts-expect-error — entries() is a runtime API (Chrome/Edge) not yet in TS lib defs
   for await (const [name, handle] of dirHandle.entries()) {
     const path = prefix ? `${prefix}/${name}` : name;
 

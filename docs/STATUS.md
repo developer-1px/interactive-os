@@ -10,6 +10,7 @@
 ## 🔥 Active Focus
 
 **builder-v2** — 계층 키보드 내비게이션(itemFilter), Sidebar 키보드 바인딩, PropertiesPanel 라이브 바인딩
+**collection-clipboard** — createCollectionZone에 copy/cut/paste 자동 생성 추가
 **philosophy-hygiene** — useComputed 성능 위반 수정, ESLint 가드레일 추가, deprecated API 정리
 
 ---
@@ -19,6 +20,7 @@
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
 | builder-v2 | Execution | 02-19 | 🔥 Focus |
+| collection-clipboard | Execution | 02-20 | 🔥 Focus |
 | philosophy-hygiene | Execution | 02-19 | 🔥 Focus |
 | sentinel-removal | Done | 02-19 | ✅ Complete |
 | apg-axis-audit | Discovery | 02-19 | ⏸ Idle |
