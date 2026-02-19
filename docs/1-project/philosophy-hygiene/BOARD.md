@@ -25,15 +25,18 @@
 
 ### T3. pages/ onClick → OS 프리미티브 전환 (Clear)
 
-- [ ] Step 1~11 (미착수)
+- [x] Step 6: 스캔 결과 실질 위반 0건 — CommandPalettePage(kernel.dispatch 사용 중), BuilderListPage(로컈UI), EditorToolbar(프레젠테이션 prop)
+- [x] Step 11: /verify (tsc clean)
 
 ### T4. deprecated API 완전 제거 (Clear)
 
-- [ ] Step 1~11 (미착수)
+- [x] Step 6: FieldBindings.onChange/onSubmit 제거 — defineApp.types.ts + Field.tsx + FieldRegistry.ts, 사용처 0건
+- [x] Step 11: /verify (tsc clean)
 
 ### T5. console.log 제거 (Clear)
 
-- [ ] Step 1~11 (미착수)
+- [x] Step 6: BuilderListPage.tsx handleRowClick dead code 제거
+- [x] Step 11: /verify (tsc clean)
 
 ---
 
