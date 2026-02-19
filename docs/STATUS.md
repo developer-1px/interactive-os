@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-19 14:28
+> Last updated: 2026-02-19 15:58
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -23,6 +23,7 @@
 | command-type-unification | Definition | 02-18 | ⏸ Idle |
 | docs-topology | Execution | 02-18 | ⏸ Idle |
 | docs-dashboard | Design (PRD/Proposal 완비) | 02-15 | ⏸ Idle |
+| test-seam | Definition | 02-19 | 🆕 New |
 | testbot | Execution 준비 (Phase 1) | 02-19 | ⏸ Idle |
 
 ---
@@ -74,7 +75,7 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 1 |
-| Active Projects (total) | 7 |
+| Active Projects (total) | 8 |
 | Completed (archived) | 24 |
 | Inbox items | 2 |
 | Backlog items | 4 |

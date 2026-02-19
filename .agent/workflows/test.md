@@ -45,27 +45,45 @@ description: 3단계(Unit/TestBot/E2E) 테스트 전략에 따라 테스트 코�
      });
      ```
 
-3. **Level 2: TestBot (Command Flow) 작성 가이드**
-   - 위치: `{slice}/tests/testbot/[scenario].test.ts` (슬라이스 안에 co-locate)
-   - 패턴:
-     ```ts
-     import { describe, it, expect } from "vitest";
-     import { Kernel } from "@kernel";
-     // VirtualUser 등 헬퍼가 있다면 활용
+3. **Level 2: Integration (OS×App + Seam)**
+   - 대상 A: **Command Flow** — OS 커맨드가 앱 커맨드를 호출하여 **최종 상태가 올바른지** 검증
+   - 대상 B: **Seam** — 모듈 경계(React ↔ vanilla store, listener ↔ registry)의 계약 검증
+   - 런타임: **Vitest + Headless Kernel** (DOM 불필요)
+   - 위치: `{slice}/tests/integration/[scenario].test.ts`
+   - 목적: 각 부품이 합성(compose)될 때 올바른지 검증
 
-     describe("Scenario: [ScenarioName]", () => {
-       it("should complete the flow", async () => {
-         const kernel = new Kernel();
-         
-         // Step 1
-         await kernel.dispatch({ type: "CMD_1" });
-         // Step 2
-         await kernel.dispatch({ type: "CMD_2" });
-         
-         expect(kernel.store.getState().[result]).toBe([finalState]);
-       });
+   **Seam이란?** 두 모듈이 만나는 경계. 각 모듈의 유닛 테스트가 통과해도, 경계에서 계약이 깨질 수 있다.
+   대표 사례: `FieldRegistry.register/unregister` lifecycle과 `Field.tsx`의 `useEffect` 의존성 사이의 동기화.
+
+   **Seam 테스트 대상 식별 기준:**
+   - React component가 vanilla store(FieldRegistry, ZoneRegistry)와 상호작용하는 곳
+   - useEffect cleanup/setup 사이클이 외부 상태에 영향을 주는 곳
+   - kernel dispatch → state 변경 → React re-render → 부수효과 체인
+
+   **Command Flow 패턴:**
+   ```ts
+   describe("Scenario: [ScenarioName]", () => {
+     it("should complete the flow", async () => {
+       const kernel = new Kernel();
+       await kernel.dispatch({ type: "CMD_1" });
+       await kernel.dispatch({ type: "CMD_2" });
+       expect(kernel.store.getState().[result]).toBe([finalState]);
      });
-     ```
+   });
+   ```
+
+   **Seam 패턴:**
+   ```ts
+   describe("FieldRegistry seam: lifecycle", () => {
+     it("re-register preserves localValue", () => {
+       FieldRegistry.register("DRAFT", { name: "DRAFT" });
+       FieldRegistry.updateValue("DRAFT", "typed text");
+       // Simulates re-render with new config (same name)
+       FieldRegistry.register("DRAFT", { name: "DRAFT", onSubmit: newFn });
+       expect(FieldRegistry.getField("DRAFT")!.state.localValue).toBe("typed text");
+     });
+   });
+   ```
 
 4. **Level 3: E2E (Playwright) 작성 가이드**
    - 위치: `{slice}/tests/e2e/[name].spec.ts` (슬라이스 안에 co-locate)

@@ -134,30 +134,58 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const fieldId = name || "unknown-field";
 
     // --- Registry Binding ---
+    // Use refs for callback props to avoid useEffect re-runs on every render.
+    // defineApp.bind creates new function references for onSubmit/onChange on each render,
+    // which would trigger unregister→register→localValue="" reset without this.
+    const onSubmitRef = useRef(onSubmit);
+    const onChangeRef = useRef(onChange);
+    const onCancelRef = useRef(onCancel);
+    const onCommitRef = useRef(onCommit);
+    onSubmitRef.current = onSubmit;
+    onChangeRef.current = onChange;
+    onCancelRef.current = onCancel;
+    onCommitRef.current = onCommit;
+
+    // Stable wrapper functions that always delegate to the latest ref.
+    // Registered once — never changes identity.
+    const stableOnSubmit = useRef(
+      onSubmit
+        ? (p: { text: string }) => onSubmitRef.current!(p)
+        : undefined,
+    );
+    const stableOnChange = useRef(
+      onChange
+        ? (p: { text: string }) => onChangeRef.current!(p)
+        : undefined,
+    );
+    const stableOnCommit = useRef(
+      onCommit ? (v: string) => onCommitRef.current!(v) : undefined,
+    );
+
+    // Register once, unregister on unmount or name change
     useEffect(() => {
       if (!name) return;
       const config: FieldConfig = {
         name,
         mode,
         multiline,
-        ...(onSubmit !== undefined ? { onSubmit } : {}),
-        ...(onChange !== undefined ? { onChange } : {}),
-        ...(onCancel !== undefined ? { onCancel } : {}),
+        ...(stableOnSubmit.current !== undefined
+          ? { onSubmit: stableOnSubmit.current }
+          : {}),
+        ...(stableOnChange.current !== undefined
+          ? { onChange: stableOnChange.current }
+          : {}),
+        ...(onCancelRef.current !== undefined
+          ? { onCancel: onCancelRef.current }
+          : {}),
         ...(updateType !== undefined ? { updateType } : {}),
-        ...(onCommit !== undefined ? { onCommit } : {}),
+        ...(stableOnCommit.current !== undefined
+          ? { onCommit: stableOnCommit.current }
+          : {}),
       };
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
-    }, [
-      name,
-      mode,
-      multiline,
-      onSubmit,
-      onChange,
-      onCancel,
-      updateType,
-      onCommit,
-    ]);
+    }, [name, mode, multiline, updateType]);
 
     // --- State Subscription ---
     const fieldData = useFieldRegistry((s) => s.fields.get(fieldId));
