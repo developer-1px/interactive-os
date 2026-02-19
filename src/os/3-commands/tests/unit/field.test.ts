@@ -52,7 +52,7 @@ function setupFocus(
 }
 
 function getZone(zoneId: string) {
-  return kernel.getState().os.focus.zones[zoneId];
+  return kernel.getState().os.focus.zones[zoneId]!;
 }
 
 beforeEach(() => {

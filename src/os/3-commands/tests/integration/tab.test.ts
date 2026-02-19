@@ -50,7 +50,7 @@ function createTestKernel(overrides?: Partial<AppState>) {
                 typeahead: false,
                 entry: "first" as const,
             },
-            tab: { behavior: "escape" as const, restoreFocus: false },
+            tab: { behavior: "escape" as string, restoreFocus: false },
             select: {
                 mode: "single" as const,
                 followFocus: false,
@@ -179,7 +179,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
         const state = kernel.getState();
         expect(state.os.focus.activeZoneId).toBe("sidebar");
-        expect(state.os.focus.zones["sidebar"].focusedItemId).toBe("cat-1");
+        expect(state.os.focus.zones["sidebar"]!.focusedItemId).toBe("cat-1");
     });
 
     it("escape backward: moves to previous zone", () => {
@@ -202,7 +202,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
         const state = kernel.getState();
         expect(state.os.focus.activeZoneId).toBe("list");
-        expect(state.os.focus.zones["list"].focusedItemId).toBe("item-c");
+        expect(state.os.focus.zones["list"]!.focusedItemId).toBe("item-c");
     });
 
     // ─── trap behavior ───
@@ -222,7 +222,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
         const state = kernel.getState();
         expect(state.os.focus.activeZoneId).toBe("dialog");
-        expect(state.os.focus.zones["dialog"].focusedItemId).toBe("t-0");
+        expect(state.os.focus.zones["dialog"]!.focusedItemId).toBe("t-0");
     });
 
     // ─── flow behavior ───
@@ -247,20 +247,20 @@ describe("TAB Command — Headless Kernel Integration", () => {
         kernel.dispatch(TAB({ direction: "forward" }));
         expect(kernel.getState().os.focus.activeZoneId).toBe("toolbar");
         expect(
-            kernel.getState().os.focus.zones["toolbar"].focusedItemId,
+            kernel.getState().os.focus.zones["toolbar"]!.focusedItemId,
         ).toBe("f-1");
 
         // Tab forward: f-1 → f-2
         kernel.dispatch(TAB({ direction: "forward" }));
         expect(
-            kernel.getState().os.focus.zones["toolbar"].focusedItemId,
+            kernel.getState().os.focus.zones["toolbar"]!.focusedItemId,
         ).toBe("f-2");
 
         // Tab forward: f-2 → escape to next-zone
         kernel.dispatch(TAB({ direction: "forward" }));
         expect(kernel.getState().os.focus.activeZoneId).toBe("next-zone");
         expect(
-            kernel.getState().os.focus.zones["next-zone"].focusedItemId,
+            kernel.getState().os.focus.zones["next-zone"]!.focusedItemId,
         ).toBe("n-0");
     });
 
@@ -286,7 +286,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
         // Should stay — single zone, nowhere to wrap to
         expect(kernel.getState().os.focus.activeZoneId).toBe("only");
         expect(
-            kernel.getState().os.focus.zones["only"].focusedItemId,
+            kernel.getState().os.focus.zones["only"]!.focusedItemId,
         ).toBe("only-0");
     });
 
