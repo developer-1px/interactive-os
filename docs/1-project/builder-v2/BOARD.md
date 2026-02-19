@@ -5,7 +5,10 @@
 
 ## 🔴 Now
 
-(No active Now tasks — promote from Next or Backlog)
+- [ ] T8: Collection Zone Facade — `createCollectionZone`
+  - Zod schema + normalize/denormalize 어댑터 기반 CRUD 자동 생성
+  - Builder sidebar + Todo list를 리팩터링하며 probe-first 발견
+  - Discussion: [2026-0219-2330-collection-zone-facade](discussions/2026-0219-2330-collection-zone-facade.md)
 
 ## 🟡 Next
 

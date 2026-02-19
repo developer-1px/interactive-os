@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-19 21:18
+> Last updated: 2026-02-19 23:30
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -88,6 +88,7 @@
 
 ## 📝 Recent Changes (2026-02-19)
 
+- 🆕 `builder-v2` T8: Collection Zone Facade — Zod+normalize/denormalize 기반 CRUD 자동생성 퍼사드. Probe-first로 Builder sidebar + Todo list 리팩터링하며 발견.
 - 🆕 `philosophy-hygiene` 프로젝트 생성 — /review + /redteam 분석 결과 기반. useComputed 성능 위반 10건, ESLint 규칙 추가, deprecated API 정리.
 - ✅ field-architecture-refactor — FieldRegistry implementation, syncDraft removal, TodoApp migration.
 
