@@ -31,10 +31,6 @@ export interface FieldConfig {
   schema?: ZodSchema;
   resetOnSubmit?: boolean;
   onCancel?: BaseCommand;
-
-  // -- Legacy (Deprecating) --
-  /** @deprecated Use onCommit instead */
-  onSubmit?: FieldCommandFactory;
 }
 
 export interface FieldState {

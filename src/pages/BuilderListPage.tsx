@@ -91,12 +91,6 @@ export default function BuilderListPage() {
         }
     };
 
-    const handleRowClick = (pageId: string) => {
-        // Ideally this would navigate to the builder with this ID
-        console.log("Navigating to builder for:", pageId);
-        // For demo purposes, we can just alert or log
-        // router.navigate({ to: '/_minimal/builder', search: { pageId } })
-    };
 
     return (
         <div className="flex flex-col h-full bg-slate-50/50">
@@ -202,7 +196,6 @@ export default function BuilderListPage() {
                                 <Item key={page.id} id={page.id} asChild>
                                     <button
                                         className="w-full grid grid-cols-12 gap-4 px-6 py-4 items-center text-left border-b border-slate-100 last:border-0 hover:bg-slate-50 focus:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-blue-500 transition-colors group data-[focused]:bg-blue-50 data-[focused]:ring-1 data-[focused]:ring-blue-500"
-                                        onClick={() => handleRowClick(page.id)}
                                     >
                                         <div className="col-span-4 flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-focus:bg-blue-100 group-focus:text-blue-600 group-data-[focused]:bg-blue-100 group-data-[focused]:text-blue-600 transition-colors">

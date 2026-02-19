@@ -83,10 +83,6 @@ export interface ZoneBindings {
 }
 
 export interface FieldBindings {
-  /** @deprecated Data stream should not produce commands. Use trigger: "change" + onCommit. */
-  onChange?: BaseCommand;
-  /** @deprecated Use onCommit instead */
-  onSubmit?: BaseCommand;
   onCommit?: FieldCommandFactory;
   trigger?: "change" | "blur" | "enter";
   schema?: ZodSchema;

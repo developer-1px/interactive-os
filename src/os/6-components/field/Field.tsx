@@ -87,9 +87,6 @@ export interface FieldProps
   schema?: ZodSchema;
   resetOnSubmit?: boolean;
 
-  // -- Legacy --
-  /** @deprecated Use onCommit instead */
-  onSubmit?: FieldCommandFactory;
   onCancel?: BaseCommand;
 
   mode?: FieldMode;
@@ -121,7 +118,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       schema,
       resetOnSubmit = false,
 
-      onSubmit, // Legacy alias
       onCancel,
 
       mode = "immediate",
@@ -145,11 +141,11 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const fieldId = name || "unknown-field";
 
     // --- Refs for Stabilizing Config ---
-    const onCommitRef = useRef(onCommit || onSubmit);
+    const onCommitRef = useRef(onCommit);
     const onCancelRef = useRef(onCancel);
     const schemaRef = useRef(schema);
 
-    onCommitRef.current = onCommit || onSubmit;
+    onCommitRef.current = onCommit;
     onCancelRef.current = onCancel;
     schemaRef.current = schema;
 
