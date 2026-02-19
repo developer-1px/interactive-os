@@ -49,4 +49,8 @@ git show archive/legacy-docs:docs/path/to/file.md
 | `docs/3-resource/04-architecture/2026-02-12-1200-os-structure.md` | `os-new/` 폴더 구조 확정 기록 — 결론 적용 완료, 여행 기록 가치 소멸 | 02-20 |
 | `docs/3-resource/04-architecture/2026-0213-2215-headless-zone.md` | `Widget`, `packages/surface/`, `OS.Zone` 기반 — defineApp/ZIFT로 진화 완료 | 02-20 |
 | `docs/10-devnote/` (7파일) | 2026-02-10~13 일일 개발 일지 — 일회성 스냅샷, 지식 없음 | 02-20 |
+| `docs/3-resource/09-project-meta/2026-0212-1324-[report]-os-codebase-status.md` | 2월 12일 전체 코드베이스 스냅샷 — `os-new/`, `surface/`, `testbot/` 등 소멸된 구조 기술 | 02-20 |
+| `docs/3-resource/09-project-meta/2026-0212-1350-[report]-workflow-quality-assessment.md` | 17개 워크플로우 평가 — 현행 30+개와 불일치, `/daily`/`/til`/`/next` 등 소멸됨 | 02-20 |
+| `docs/3-resource/09-project-meta/workflow-manual.md` | 워크플로우 연대기 (23개 기준) — 현행 워크플로우 생태계와 불일치, TestBot 포함 | 02-20 |
+| `docs/3-resource/05-reviews/2026-0216-2104-[report]-os-code-review.md` | `src/os/` 코드 리뷰 — `src/os/` 자체가 삭제되어 대상 파일 없음 | 02-20 |
 
