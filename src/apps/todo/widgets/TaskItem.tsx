@@ -37,8 +37,8 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
           : "bg-white border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"
         }
                 outline-none
-                data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-500/50 data-[focused=true]:border-indigo-300 data-[focused=true]:z-10
-                data-[anchor=true]:ring-1 data-[anchor=true]:ring-slate-300 data-[anchor=true]:border-slate-300 data-[anchor=true]:z-10
+                data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400 data-[focused=true]:border-indigo-300 data-[focused=true]:z-10
+                data-[anchor=true]:ring-1 data-[anchor=true]:ring-slate-200 data-[anchor=true]:z-10
                 data-[selected=true]:bg-indigo-50/80 data-[selected=true]:border-indigo-200 data-[selected=true]:shadow-sm
                 ${isEditing ? "bg-white ring-2 ring-indigo-500 border-transparent shadow-lg z-20" : ""}
             `}
@@ -82,8 +82,8 @@ export function TaskItem({ todo, isEditing, editDraft }: TaskItemProps) {
           ) : (
             <span
               className={`block text-[15px] leading-relaxed transition-all select-none ${isCompleted
-                  ? "text-slate-400 line-through decoration-slate-300"
-                  : "text-slate-700 font-medium"
+                ? "text-slate-400 line-through decoration-slate-300"
+                : "text-slate-700 font-medium"
                 }`}
             >
               {todo.text}

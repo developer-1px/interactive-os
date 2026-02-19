@@ -506,10 +506,10 @@ test.describe("Todo App", () => {
     const draft = page.locator(DRAFT);
     await expect(draft).toHaveAttribute("data-focused", "true");
 
-    // While in list zone, sidebar should show anchor (retained focus)
-    const sidebarAnchor = page.locator(`${SIDEBAR} [data-anchor="true"]`);
-    await expect(sidebarAnchor).toHaveCount(1);
-    await expect(sidebarAnchor).toContainText("Work");
+    // While in list zone, sidebar shows selected state (APG: listbox uses selection, not ghost focus)
+    const sidebarSelected = page.locator(`${SIDEBAR} [aria-selected="true"]`);
+    await expect(sidebarSelected).toHaveCount(1);
+    await expect(sidebarSelected).toContainText("Work");
 
     // Step 3: Tab forward again → escapes from list back to sidebar
     // APG Tab Recovery: sidebar is listbox with entry=selected
