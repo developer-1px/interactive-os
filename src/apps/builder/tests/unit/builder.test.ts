@@ -1,14 +1,13 @@
 /**
  * Builder unit tests — v5 native defineApp API.
  *
+ * Section-scoped field model: fields live inside SectionEntry.
  * Uses BuilderApp.create() for isolated testing (no DOM, no browser).
- * v5 style: app.dispatch(commandFactory(payload)), app.select(brandedSelector)
  */
 
 import {
   BuilderApp,
   INITIAL_STATE,
-  allFields,
   selectElement,
   selectedId,
   selectedType,
@@ -21,50 +20,53 @@ describe("BuilderApp (v5 native)", () => {
     return BuilderApp.create();
   }
 
+  /** Helper: read a section's field */
+  function getField(app: ReturnType<typeof createApp>, sectionId: string, field: string): string | undefined {
+    return app.state.data.sections.find((s) => s.id === sectionId)?.fields[field];
+  }
+
   // ═══════════════════════════════════════════════════════════════════
-  // updateField — 핵심 커맨드
+  // updateField — sectionId + field 기반
   // ═══════════════════════════════════════════════════════════════════
 
   describe("updateField command", () => {
     test("기존 필드 값을 변경한다", () => {
       const app = createApp();
-      expect(app.state.data.fields["ncp-hero-title"]).toBe(
-        INITIAL_STATE.data.fields["ncp-hero-title"],
+      expect(getField(app, "ncp-hero", "title")).toBe(
+        INITIAL_STATE.data.sections[0]!.fields["title"],
       );
 
-      app.dispatch(updateField({ name: "ncp-hero-title", value: "새로운 제목" }));
-      expect(app.state.data.fields["ncp-hero-title"]).toBe("새로운 제목");
+      app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "새로운 제목" }));
+      expect(getField(app, "ncp-hero", "title")).toBe("새로운 제목");
     });
 
     test("존재하지 않는 필드도 생성할 수 있다", () => {
       const app = createApp();
-      expect(app.state.data.fields["new-field"]).toBeUndefined();
+      expect(getField(app, "ncp-hero", "new-field")).toBeUndefined();
 
-      app.dispatch(updateField({ name: "new-field", value: "Hello" }));
-      expect(app.state.data.fields["new-field"]).toBe("Hello");
+      app.dispatch(updateField({ sectionId: "ncp-hero", field: "new-field", value: "Hello" }));
+      expect(getField(app, "ncp-hero", "new-field")).toBe("Hello");
     });
 
     test("빈 문자열로 업데이트 가능하다", () => {
       const app = createApp();
-      app.dispatch(updateField({ name: "ncp-hero-title", value: "" }));
-      expect(app.state.data.fields["ncp-hero-title"]).toBe("");
+      app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "" }));
+      expect(getField(app, "ncp-hero", "title")).toBe("");
     });
 
     test("멀티라인 값을 유지한다", () => {
       const app = createApp();
       const multiline = "첫 줄\n둘째 줄\n셋째 줄";
-      app.dispatch(updateField({ name: "ncp-hero-title", value: multiline }));
-      expect(app.state.data.fields["ncp-hero-title"]).toBe(multiline);
+      app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: multiline }));
+      expect(getField(app, "ncp-hero", "title")).toBe(multiline);
     });
 
     test("다른 필드에 영향을 주지 않는다", () => {
       const app = createApp();
-      const originalSub = app.state.data.fields["ncp-hero-sub"];
+      const originalSub = getField(app, "ncp-hero", "sub")!;
 
-      app.dispatch(
-        updateField({ name: "ncp-hero-title", value: "변경된 제목" }),
-      );
-      expect(app.state.data.fields["ncp-hero-sub"]).toBe(originalSub);
+      app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "변경된 제목" }));
+      expect(getField(app, "ncp-hero", "sub")).toBe(originalSub);
     });
   });
 
@@ -128,20 +130,6 @@ describe("BuilderApp (v5 native)", () => {
       app.dispatch(selectElement({ id: "test-id", type: "image" }));
       expect(app.select(selectedType)).toBe("image");
     });
-
-    test("allFields returns the full field map", () => {
-      const app = createApp();
-      const fields = app.select(allFields);
-      expect(fields).toEqual(INITIAL_STATE.data.fields);
-    });
-
-    test("allFields reflects updateField changes", () => {
-      const app = createApp();
-      app.dispatch(
-        updateField({ name: "ncp-hero-title", value: "업데이트됨" }),
-      );
-      expect(app.select(allFields)["ncp-hero-title"]).toBe("업데이트됨");
-    });
   });
 
   // ═══════════════════════════════════════════════════════════════════
@@ -152,36 +140,13 @@ describe("BuilderApp (v5 native)", () => {
     test("캔버스 인라인 편집과 패널 편집은 같은 커맨드를 사용한다", () => {
       const app = createApp();
 
-      // 시나리오: 캔버스에서 인라인 편집 (onCommit → updateField)
-      app.dispatch(
-        updateField({ name: "ncp-hero-title", value: "캔버스에서 수정" }),
-      );
-      expect(app.state.data.fields["ncp-hero-title"]).toBe("캔버스에서 수정");
+      // 캔버스에서 인라인 편집
+      app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "캔버스에서 수정" }));
+      expect(getField(app, "ncp-hero", "title")).toBe("캔버스에서 수정");
 
-      // 시나리오: 패널에서 같은 필드 편집 (onChange → updateField)
-      app.dispatch(
-        updateField({ name: "ncp-hero-title", value: "패널에서 수정" }),
-      );
-      expect(app.state.data.fields["ncp-hero-title"]).toBe("패널에서 수정");
-    });
-
-    test("선택 후 해당 필드 값을 읽고 수정할 수 있다", () => {
-      const app = createApp();
-
-      // 1. 요소 선택
-      app.dispatch(selectElement({ id: "ncp-hero-title", type: "text" }));
-
-      // 2. 선택된 요소의 데이터 읽기 (패널이 하는 일)
-      const id = app.select(selectedId)!;
-      expect(app.state.data.fields[id]).toBe(
-        INITIAL_STATE.data.fields["ncp-hero-title"],
-      );
-
-      // 3. 패널에서 수정
-      app.dispatch(updateField({ name: id, value: "패널에서 변경" }));
-
-      // 4. 캔버스도 같은 값을 읽는다
-      expect(app.state.data.fields["ncp-hero-title"]).toBe("패널에서 변경");
+      // 패널에서 같은 필드 편집
+      app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "패널에서 수정" }));
+      expect(getField(app, "ncp-hero", "title")).toBe("패널에서 수정");
     });
   });
 
@@ -192,39 +157,41 @@ describe("BuilderApp (v5 native)", () => {
   describe("reset & initial state", () => {
     test("reset은 초기 상태로 복원한다", () => {
       const app = createApp();
-      app.dispatch(
-        updateField({ name: "ncp-hero-title", value: "변경됨" }),
-      );
+      app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "변경됨" }));
       app.dispatch(selectElement({ id: "some-id", type: "text" }));
 
       app.reset();
 
-      expect(app.state.data.fields["ncp-hero-title"]).toBe(
-        INITIAL_STATE.data.fields["ncp-hero-title"],
+      expect(getField(app, "ncp-hero", "title")).toBe(
+        INITIAL_STATE.data.sections[0]!.fields["title"],
       );
       expect(app.state.ui.selectedId).toBeNull();
     });
 
     test("모든 NCP 블록 필드가 초기값으로 등록되어 있다", () => {
       const app = createApp();
-      const fields = app.state.data.fields;
+      const sections = app.state.data.sections;
 
-      // Hero
-      expect(fields["ncp-hero-title"]).toBeDefined();
-      expect(fields["ncp-hero-sub"]).toBeDefined();
-      expect(fields["ncp-hero-brand"]).toBeDefined();
+      // Hero (id="ncp-hero")
+      const hero = sections.find((s) => s.id === "ncp-hero")!;
+      expect(hero.fields["title"]).toBeDefined();
+      expect(hero.fields["sub"]).toBeDefined();
+      expect(hero.fields["brand"]).toBeDefined();
 
-      // News
-      expect(fields["ncp-news-title"]).toBeDefined();
-      expect(fields["news-1-title"]).toBeDefined();
+      // News (id="ncp-news")
+      const news = sections.find((s) => s.id === "ncp-news")!;
+      expect(news.fields["title"]).toBeDefined();
+      expect(news.fields["item-1-title"]).toBeDefined();
 
-      // Services
-      expect(fields["ncp-service-title"]).toBeDefined();
-      expect(fields["service-title-0"]).toBeDefined();
+      // Services (id="ncp-services")
+      const services = sections.find((s) => s.id === "ncp-services")!;
+      expect(services.fields["title"]).toBeDefined();
+      expect(services.fields["item-title-0"]).toBeDefined();
 
-      // Footer
-      expect(fields["footer-brand"]).toBeDefined();
-      expect(fields["footer-desc"]).toBeDefined();
+      // Footer (id="ncp-footer")
+      const footer = sections.find((s) => s.id === "ncp-footer")!;
+      expect(footer.fields["brand"]).toBeDefined();
+      expect(footer.fields["desc"]).toBeDefined();
     });
 
     test("초기 선택 상태는 비어 있다", () => {
@@ -232,27 +199,32 @@ describe("BuilderApp (v5 native)", () => {
       expect(app.state.ui.selectedId).toBeNull();
       expect(app.state.ui.selectedType).toBeNull();
     });
+  });
 
-    test("패널 시나리오: 선택 → 필드 읽기 → 수정 → 캔버스 반영", () => {
+  // ═══════════════════════════════════════════════════════════════════
+  // Section co-located fields — paste = deep clone
+  // ═══════════════════════════════════════════════════════════════════
+
+  describe("section co-located fields", () => {
+    test("각 섹션은 자신만의 fields를 소유한다", () => {
       const app = createApp();
+      const hero = app.state.data.sections.find((s) => s.id === "ncp-hero")!;
+      const news = app.state.data.sections.find((s) => s.id === "ncp-news")!;
 
-      // 1. 레거시 블록 요소 선택
-      app.dispatch(selectElement({ id: "cta-headline", type: "text" }));
-      expect(app.select(selectedId)).toBe("cta-headline");
-      expect(app.select(selectedType)).toBe("text");
+      // 서로 다른 title
+      expect(hero.fields["title"]).not.toBe(news.fields["title"]);
+    });
 
-      // 2. 패널에서 현재 값 읽기
-      expect(app.state.data.fields["cta-headline"]).toBe(
-        "Ready to build something amazing?",
-      );
+    test("updateField는 해당 섹션의 필드만 변경한다", () => {
+      const app = createApp();
+      const originalNewsTitle = app.state.data.sections.find((s) => s.id === "ncp-news")!.fields["title"];
 
-      // 3. 패널에서 수정 (같은 updateField 커맨드)
-      app.dispatch(
-        updateField({ name: "cta-headline", value: "패널에서 수정됨" }),
-      );
+      app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "변경됨" }));
 
-      // 4. 캔버스도 같은 값을 읽는다
-      expect(app.state.data.fields["cta-headline"]).toBe("패널에서 수정됨");
+      // Hero changed
+      expect(app.state.data.sections.find((s) => s.id === "ncp-hero")!.fields["title"]).toBe("변경됨");
+      // News unchanged
+      expect(app.state.data.sections.find((s) => s.id === "ncp-news")!.fields["title"]).toBe(originalNewsTitle);
     });
   });
 });

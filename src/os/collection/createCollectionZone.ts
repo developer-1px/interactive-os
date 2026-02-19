@@ -22,7 +22,9 @@
 
 import { produce } from "immer";
 import type { AppHandle, ZoneHandle } from "@/os/defineApp.types";
-import type { CommandFactory } from "@kernel/core/tokens";
+import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
+import { FOCUS } from "@/os/3-commands/focus/focus";
+import { SELECTION_SET } from "@/os/3-commands/selection/selection";
 
 // ═══════════════════════════════════════════════════════════════════
 // Internal Item Ops — unified mutation interface
@@ -298,24 +300,35 @@ export function createCollectionZone<S, T extends { id: string } = any>(
             const clip = clipCfg.accessor(ctx.state);
             if (!clip || clip.items.length === 0) return { state: ctx.state };
 
-            return {
-                state: produce(ctx.state, (draft) => {
-                    const items = ops.getItems(ctx.state);
-                    let insertIdx = payload.afterId
-                        ? items.findIndex(item => item.id === payload.afterId)
-                        : items.length - 1;
-                    if (insertIdx === -1) insertIdx = items.length - 1;
+            const pastedIds: string[] = [];
+            const nextState = produce(ctx.state, (draft) => {
+                const items = ops.getItems(ctx.state);
+                let insertIdx = payload.afterId
+                    ? items.findIndex(item => item.id === payload.afterId)
+                    : items.length - 1;
+                if (insertIdx === -1) insertIdx = items.length - 1;
 
-                    for (let i = 0; i < clip.items.length; i++) {
-                        const source = clip.items[i]!;
-                        const newId = uid();
-                        let newItem = { ...source, id: newId } as T;
-                        if (clipCfg.onPaste) {
-                            newItem = clipCfg.onPaste(newItem, ctx.state);
-                        }
-                        ops.insertAfter(draft as S, insertIdx + i, newItem);
+                for (let i = 0; i < clip.items.length; i++) {
+                    const source = clip.items[i]!;
+                    const newId = uid();
+                    pastedIds.push(newId);
+                    let newItem = { ...source, id: newId } as T;
+                    if (clipCfg.onPaste) {
+                        newItem = clipCfg.onPaste(newItem, ctx.state);
                     }
-                }),
+                    ops.insertAfter(draft as S, insertIdx + i, newItem);
+                }
+            });
+
+            const commands: BaseCommand[] = [];
+            if (pastedIds.length > 0) {
+                commands.push(SELECTION_SET({ zoneId: zoneName, ids: pastedIds }));
+                commands.push(FOCUS({ zoneId: zoneName, itemId: pastedIds[pastedIds.length - 1]! }));
+            }
+
+            return {
+                state: nextState,
+                dispatch: commands.length > 0 ? commands : undefined,
             };
         },
     );

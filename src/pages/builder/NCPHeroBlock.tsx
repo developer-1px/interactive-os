@@ -1,15 +1,11 @@
 import { Field } from "@os/6-components/field/Field";
 import { ArrowRight, Globe } from "lucide-react";
-import { createFieldCommit, useField } from "@/apps/builder/app";
+import { createFieldCommit, useSectionFields } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPHeroBlock({ id }: { id: string }) {
-  const title = useField("ncp-hero-title");
-  const sub = useField("ncp-hero-sub");
-  const brand = useField("ncp-hero-brand");
-  const cta = useField("ncp-hero-cta");
-  const portalTitle = useField("ncp-hero-portal-title");
-  const portalSubtitle = useField("ncp-hero-portal-subtitle");
+  const fid = (local: string) => `${id}-${local}`;
+  const fields = useSectionFields(id);
 
   return (
     <Builder.Section asChild id={id}>
@@ -20,7 +16,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
           <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-green-50/50 rounded-full blur-[80px] mix-blend-multiply" />
         </div>
 
-        {/* Grid Pattern overlay for 'constructed' feel */}
+        {/* Grid Pattern overlay */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{
@@ -32,12 +28,12 @@ export function NCPHeroBlock({ id }: { id: string }) {
         <div className="max-w-7xl mx-auto px-6 w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="flex flex-col items-start text-left pt-20">
-            <Builder.Group asChild id="ncp-hero-new-badge-container">
+            <Builder.Group asChild id={fid("new-badge-container")}>
               <div className="inline-flex items-center gap-2 mb-8 px-3 py-1 bg-slate-100 rounded-full border border-slate-200 data-[focused=true]:ring-2 data-[focused=true]:ring-slate-400">
                 <div className="w-2 h-2 rounded-full bg-[#03C75A]" />
-                <Builder.Item asChild id="ncp-hero-new-badge">
+                <Builder.Item asChild id={fid("new-badge")}>
                   <Builder.Badge
-                    id="ncp-hero-new-badge-inner"
+                    id={fid("new-badge-inner")}
                     variant="success"
                     className="text-xs font-bold text-slate-600 tracking-wider"
                   >
@@ -47,13 +43,13 @@ export function NCPHeroBlock({ id }: { id: string }) {
               </div>
             </Builder.Group>
 
-            <Builder.Item asChild id="ncp-hero-title">
+            <Builder.Item asChild id={fid("title")}>
               <Field
-                name="ncp-hero-title"
+                name={fid("title")}
                 mode="deferred"
                 multiline
-                value={title}
-                onCommit={createFieldCommit("ncp-hero-title")}
+                value={fields["title"] ?? ""}
+                onCommit={createFieldCommit(id, "title")}
                 className={`
                     block text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter mb-8 -ml-1
                     data-[focused=true]:bg-slate-100 data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 rounded-lg p-2
@@ -61,13 +57,13 @@ export function NCPHeroBlock({ id }: { id: string }) {
               />
             </Builder.Item>
 
-            <Builder.Item asChild id="ncp-hero-sub">
+            <Builder.Item asChild id={fid("sub")}>
               <Field
-                name="ncp-hero-sub"
+                name={fid("sub")}
                 mode="deferred"
                 multiline
-                value={sub}
-                onCommit={createFieldCommit("ncp-hero-sub")}
+                value={fields["sub"] ?? ""}
+                onCommit={createFieldCommit(id, "sub")}
                 className={`
                     block text-xl lg:text-2xl text-slate-500 font-medium leading-relaxed mb-12 max-w-lg
                     data-[focused=true]:bg-slate-100 data-[focused=true]:ring-2 data-[focused=true]:ring-slate-300 rounded-lg p-2 -ml-2
@@ -75,9 +71,9 @@ export function NCPHeroBlock({ id }: { id: string }) {
               />
             </Builder.Item>
 
-            <Builder.Item asChild id="ncp-hero-cta">
+            <Builder.Item asChild id={fid("cta")}>
               <Builder.Button
-                id="ncp-hero-cta-btn"
+                id={fid("cta-btn")}
                 variant="primary"
                 className={`
                     group inline-flex items-center gap-3 px-10 py-5 rounded-full text-lg font-bold transition-all duration-300
@@ -86,29 +82,22 @@ export function NCPHeroBlock({ id }: { id: string }) {
                     hover:bg-[#03C75A] hover:shadow-green-500/30 hover:-translate-y-1
                 `}
               >
-                {cta || "무료로 시작하기"}
-                <ArrowRight
-                  size={20}
-                  className="group-hover:translate-x-1 transition-transform"
-                />
+                {fields["cta"] || "무료로 시작하기"}
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </Builder.Button>
             </Builder.Item>
           </div>
 
           {/* Right Visual: The "Portal" */}
           <div className="relative h-[600px] hidden lg:flex items-center justify-center perspective-[1000px]">
-            {/* Abstract Portal Composition */}
             <div className="relative w-[500px] h-[500px] animate-[float_6s_ease-in-out_infinite]">
-              {/* Glass Card 1 */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-xl border border-white/50 rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] transform rotate-[-6deg] z-10" />
-
-              {/* Glass Card 2 (Offset) */}
               <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/80 to-white/40 backdrop-blur-md border border-white/60 rounded-[3rem] shadow-2xl transform rotate-[3deg] scale-95 z-20 flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1639322537228-ad71c4295843?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-overlay" />
                 <div className="text-center p-12">
-                  <Builder.Item asChild id="ncp-hero-portal-icon">
+                  <Builder.Item asChild id={fid("portal-icon")}>
                     <Builder.Icon
-                      id="ncp-hero-portal-icon-inner"
+                      id={fid("portal-icon-inner")}
                       icon={Globe}
                       size={64}
                       iconClassName="text-slate-300"
@@ -116,23 +105,23 @@ export function NCPHeroBlock({ id }: { id: string }) {
                       className="mx-auto mb-6 data-[focused=true]:ring-2 data-[focused=true]:ring-slate-400 data-[focused=true]:rounded w-fit"
                     />
                   </Builder.Item>
-                  <Builder.Item asChild id="ncp-hero-portal-title">
+                  <Builder.Item asChild id={fid("portal-title")}>
                     <Field
-                      name="ncp-hero-portal-title"
+                      name={fid("portal-title")}
                       mode="deferred"
-                      value={portalTitle}
-                      onCommit={createFieldCommit("ncp-hero-portal-title")}
+                      value={fields["portal-title"] ?? ""}
+                      onCommit={createFieldCommit(id, "portal-title")}
                       as="div"
                       multiline
                       className="text-2xl font-bold text-slate-800 mb-2 block"
                     />
                   </Builder.Item>
-                  <Builder.Item asChild id="ncp-hero-portal-subtitle">
+                  <Builder.Item asChild id={fid("portal-subtitle")}>
                     <Field
-                      name="ncp-hero-portal-subtitle"
+                      name={fid("portal-subtitle")}
                       mode="deferred"
-                      value={portalSubtitle}
-                      onCommit={createFieldCommit("ncp-hero-portal-subtitle")}
+                      value={fields["portal-subtitle"] ?? ""}
+                      onCommit={createFieldCommit(id, "portal-subtitle")}
                       as="div"
                       multiline
                       className="text-slate-400 block"
@@ -140,8 +129,6 @@ export function NCPHeroBlock({ id }: { id: string }) {
                   </Builder.Item>
                 </div>
               </div>
-
-              {/* Decorative Elements */}
               <div className="absolute -top-12 -right-12 w-24 h-24 bg-[#03C75A] rounded-full blur-xl opacity-20" />
               <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-blue-500 rounded-full blur-2xl opacity-10" />
             </div>
@@ -150,12 +137,12 @@ export function NCPHeroBlock({ id }: { id: string }) {
 
         {/* Minimal Nav */}
         <div className="absolute top-0 left-0 right-0 px-8 py-6 flex justify-between items-center z-50">
-          <Builder.Item asChild id="ncp-hero-brand">
+          <Builder.Item asChild id={fid("brand")}>
             <Field
-              name="ncp-hero-brand"
+              name={fid("brand")}
               mode="deferred"
-              value={brand}
-              onCommit={createFieldCommit("ncp-hero-brand")}
+              value={fields["brand"] ?? ""}
+              onCommit={createFieldCommit(id, "brand")}
               className={`
                 font-black tracking-tighter text-lg text-slate-900
                 data-[focused=true]:bg-slate-100 rounded px-2 -mx-2
@@ -163,18 +150,18 @@ export function NCPHeroBlock({ id }: { id: string }) {
             />
           </Builder.Item>
           <div className="flex gap-6 text-sm font-bold text-slate-600">
-            <Builder.Item asChild id="nav-login">
+            <Builder.Item asChild id={fid("nav-login")}>
               <Builder.Button
-                id="nav-login-btn"
+                id={fid("nav-login-btn")}
                 variant="ghost"
                 className="hover:text-slate-900 transition-colors data-[focused=true]:underline data-[focused=true]:text-slate-900"
               >
                 로그인
               </Builder.Button>
             </Builder.Item>
-            <Builder.Item asChild id="nav-signup">
+            <Builder.Item asChild id={fid("nav-signup")}>
               <Builder.Button
-                id="nav-signup-btn"
+                id={fid("nav-signup-btn")}
                 variant="outline"
                 className="px-4 py-2 rounded-full border border-slate-200 hover:border-slate-800 hover:text-slate-900 transition-all data-[focused=true]:ring-2 data-[focused=true]:ring-slate-800"
               >

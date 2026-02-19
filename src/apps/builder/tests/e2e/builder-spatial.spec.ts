@@ -50,62 +50,62 @@ test.describe("Builder Spatial Navigation", () => {
     await expect(page.locator("#ncp-news-title")).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator("#ncp-news-all")).toBeFocused();
+    await expect(page.locator("#ncp-news-all-link")).toBeFocused();
 
     await page.keyboard.press("ArrowLeft");
     await expect(page.locator("#ncp-news-title")).toBeFocused();
   });
 
   test("Services 탭 수평", async ({ page }) => {
-    await page.locator("#tab-0").click();
-    await expect(page.locator("#tab-0")).toBeFocused();
+    await page.locator("#ncp-services-tab-btn-0").click();
+    await expect(page.locator("#ncp-services-tab-btn-0")).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator("#tab-1")).toBeFocused();
+    await expect(page.locator("#ncp-services-tab-btn-1")).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator("#tab-2")).toBeFocused();
+    await expect(page.locator("#ncp-services-tab-btn-2")).toBeFocused();
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator("#tab-1")).toBeFocused();
+    await expect(page.locator("#ncp-services-tab-btn-1")).toBeFocused();
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator("#tab-0")).toBeFocused();
+    await expect(page.locator("#ncp-services-tab-btn-0")).toBeFocused();
   });
 
   test("Services 탭 → 서비스 카드", async ({ page }) => {
     // Navigate from Header Title (Left) -> Card 0 (Left)
-    await page.locator("#ncp-service-title").click();
-    await expect(page.locator("#ncp-service-title")).toBeFocused();
+    await page.locator("#ncp-services-title").click();
+    await expect(page.locator("#ncp-services-title")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
     // Should land on first card's first item (Icon or Badge)
-    await expect(page.locator("#service-icon-0")).toBeFocused();
+    await expect(page.locator("#ncp-services-service-icon-inner-0")).toBeFocused();
   });
 
   test("Services 서비스 카드 내부", async ({ page }) => {
-    await page.locator("#service-title-0").click();
-    await expect(page.locator("#service-title-0")).toBeFocused();
+    await page.locator("#ncp-services-item-title-0").click();
+    await expect(page.locator("#ncp-services-item-title-0")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#service-desc-0")).toBeFocused();
+    await expect(page.locator("#ncp-services-item-desc-0")).toBeFocused();
 
     await page.keyboard.press("ArrowUp");
-    await expect(page.locator("#service-title-0")).toBeFocused();
+    await expect(page.locator("#ncp-services-item-title-0")).toBeFocused();
   });
 
   test("Services 서비스 카드 수평", async ({ page }) => {
-    await page.locator("#service-title-0").click();
-    await expect(page.locator("#service-title-0")).toBeFocused();
+    await page.locator("#ncp-services-item-title-0").click();
+    await expect(page.locator("#ncp-services-item-title-0")).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator("#service-title-1")).toBeFocused();
+    await expect(page.locator("#ncp-services-item-title-1")).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator("#service-title-2")).toBeFocused();
+    await expect(page.locator("#ncp-services-item-title-2")).toBeFocused();
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator("#service-title-1")).toBeFocused();
+    await expect(page.locator("#ncp-services-item-title-1")).toBeFocused();
   });
 
   test("News → Services 크로스존", async ({ page }) => {
@@ -115,7 +115,7 @@ test.describe("Builder Spatial Navigation", () => {
 
     await page.keyboard.press("ArrowDown");
     // Should skip container and hit first item in News Grid (Card 0 Tag)
-    await expect(page.locator("#news-1-tag")).toBeFocused();
+    await expect(page.locator("#ncp-news-item-1-tag-badge")).toBeFocused();
 
     // We want to test Cross Zone, so let's go from Bottom of News -> Top of Services
     // But simplified: Just test from Services Category Back Up?
@@ -137,8 +137,8 @@ test.describe("Builder Spatial Navigation", () => {
     //   Header (Category, Title) (Left)
 
     // If we are at News Card 0 (bottom of it), Down -> Services Header.
-    await page.locator("#news-1-desc").click(); // Bottom of Card 0
-    await expect(page.locator("#news-1-desc")).toBeFocused();
+    await page.locator("#ncp-news-item-1-desc").click(); // Bottom of Card 0
+    await expect(page.locator("#ncp-news-item-1-desc")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
     // Should hit Service Category or Title
@@ -146,7 +146,7 @@ test.describe("Builder Spatial Navigation", () => {
     // But it is above Title.
     // Let's expect one or the other, or check coverage.
     // Based on layout, Category is #ncp-service-category.
-    await expect(page.locator("#ncp-service-category")).toBeFocused();
+    await expect(page.locator("#ncp-services-category")).toBeFocused();
   });
 
   test("전체 페이지 수직 스윕", async ({ page }) => {
@@ -158,27 +158,27 @@ test.describe("Builder Spatial Navigation", () => {
     await expect(page.locator("#ncp-hero-sub")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#ncp-hero-cta")).toBeFocused();
+    await expect(page.locator("#ncp-hero-cta-btn")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#ncp-news-title")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
     // News Title -> News Card 1 Tag (Left column)
-    await expect(page.locator("#news-1-tag")).toBeFocused();
+    await expect(page.locator("#ncp-news-item-1-tag-badge")).toBeFocused();
 
     // Continue down through News Card 1
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#news-1-title")).toBeFocused();
+    await expect(page.locator("#ncp-news-item-1-title")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#news-1-desc")).toBeFocused();
+    await expect(page.locator("#ncp-news-item-1-desc")).toBeFocused();
 
     // From News Card 1 Desc -> Services Category
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#ncp-service-category")).toBeFocused();
+    await expect(page.locator("#ncp-services-category")).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#ncp-service-title")).toBeFocused();
+    await expect(page.locator("#ncp-services-title")).toBeFocused();
   });
 });

@@ -206,9 +206,12 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     }, [name, mode, multiline, trigger, resetOnSubmit]); // Re-register on config change
 
     // --- State Subscription ---
-    const fieldData = useFieldRegistry((s) => s.fields.get(fieldId));
-    const localValue = fieldData?.state.value ?? value;
-    const error = fieldData?.state.error;
+    // Subscribe to primitive values to avoid unnecessary re-renders on object reference changes.
+    const rawRegistryValue = useFieldRegistry(
+      (s) => s.fields.get(fieldId)?.state.value,
+    );
+    const localValue = rawRegistryValue ?? value;
+    const error = useFieldRegistry((s) => s.fields.get(fieldId)?.state.error);
 
     // Sync prop value to registry when not actively editing (contentEditable)
     const isContentEditableRef = useRef(false);
@@ -259,8 +262,8 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     //   → fieldData?.state.value changes → effect re-runs → updateValue → ...
     //
     // FIX: use a ref to read the latest registry value without adding it to deps.
-    const registryValueRef = useRef(fieldData?.state.value);
-    registryValueRef.current = fieldData?.state.value;
+    const registryValueRef = useRef(rawRegistryValue);
+    registryValueRef.current = rawRegistryValue;
 
     useEffect(() => {
       if (
