@@ -23,9 +23,9 @@ interface ScrollPagePayload {
 
 export const DOCS_SCROLL_PAGE = kernel.defineCommand(
   "DOCS_SCROLL_PAGE",
-  (_ctx) => (payload: ScrollPagePayload) => {
+  (_ctx) => (payload: ScrollPagePayload): undefined => {
     const el = document.querySelector("[data-docs-scroll]");
-    if (!el) return;
+    if (!el) return undefined;
 
     // We use getBoundingClientRect for robust relative positioning
     const containerRect = el.getBoundingClientRect();
@@ -134,17 +134,13 @@ const docsNavigateMiddleware: Middleware = {
       if (zoneEl?.querySelector("[data-item-id]")) return ctx;
     }
 
-    const direction = (ctx.command.payload as { direction: string })?.direction;
+    const direction = (ctx.command.payload as unknown as { direction: string })?.direction;
     if (direction === "left" || direction === "right") {
       return {
         ...ctx,
-        command: {
-          ...ctx.command,
-          type: "DOCS_SCROLL_PAGE",
-          payload: {
-            direction: direction === "right" ? "forward" : "backward",
-          },
-        },
+        command: DOCS_SCROLL_PAGE({
+          direction: direction === "right" ? "forward" : "backward",
+        }),
       };
     }
 

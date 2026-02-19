@@ -34,7 +34,7 @@ export function DocsDashboard({ allFiles, onSelect }: DocsDashboardProps) {
         .map((f) => f.path.split("/")[2]), // Extract project name
     ),
   )
-    .filter(Boolean)
+    .filter((name): name is string => Boolean(name))
     .map((name) => ({
       name: cleanLabel(name),
       path: `1-project/${name}`,

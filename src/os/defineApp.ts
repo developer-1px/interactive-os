@@ -149,7 +149,7 @@ export function defineApp<S>(
     type: T,
     handler: FlatHandler<S, P>,
     opts?: { when?: Condition<S> },
-    group?: ReturnType<typeof slice.group>,
+    group?: typeof slice.group,
   ): CommandFactory<T, P> {
     // Track for test instance
     flatHandlerRegistry.set(type, { handler, ...(opts?.when ? { when: opts.when } : {}) });
@@ -168,7 +168,7 @@ export function defineApp<S>(
       type,
       kernelHandler,
       whenGuard,
-    ) as CommandFactory<T, P>;
+    ) as unknown as CommandFactory<T, P>;
 
     return factory;
   }
@@ -177,7 +177,7 @@ export function defineApp<S>(
 
   function createZone(
     zoneName: string,
-    parentGroup?: ReturnType<typeof slice.group>,
+    parentGroup?: typeof slice.group,
   ): ZoneHandle<S> {
     const scope = defineScope(`${appId}:${zoneName}`);
     const zoneGroup = (parentGroup ?? slice.group).group({ scope });

@@ -411,7 +411,7 @@ export const BuilderSidebarUI = sidebarZone.bind({
   onRedo: redoCommand(),
   options: {
     navigate: { orientation: "vertical" },
-    tab: { behavior: "move" },
+    tab: { behavior: "flow" },
   },
   keybindings: [
     { key: "Cmd+d", command: sidebarDuplicate },

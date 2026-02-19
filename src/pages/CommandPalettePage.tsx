@@ -16,7 +16,7 @@ export default function CommandPalettePage() {
   usePlaywrightSpecs("command-palette", [runCommandPaletteSpec]);
 
   const openPalette = () => {
-    kernel.dispatch(OVERLAY_OPEN({ id: "command-palette" }));
+    kernel.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
   };
 
   return (
