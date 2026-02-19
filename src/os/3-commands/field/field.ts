@@ -92,7 +92,7 @@ export const FIELD_COMMIT = kernel.defineCommand(
 
       // Clear field for immediate-mode (e.g., DRAFT) — delegate to effect
       if (!editingId) {
-        const fieldName = fieldEntry.config.name;
+        const fieldName = fieldEntry!.config.name;
         queueMicrotask(() => {
           clearFieldDOM(fieldName);
           FieldRegistry.updateValue(fieldName, "");

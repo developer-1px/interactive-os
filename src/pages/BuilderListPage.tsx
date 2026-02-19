@@ -1,4 +1,3 @@
-import { Field } from "@os/6-components/field/Field";
 import { Item } from "@os/6-components/primitives/Item";
 
 import { Trigger } from "@os/6-components/primitives/Trigger";
@@ -127,12 +126,12 @@ export default function BuilderListPage() {
                         size={16}
                         className="text-slate-400 group-focus-within:text-blue-500 transition-colors"
                     />
-                    <Field
+                    <input
                         value={searchQuery}
                         name="page-search"
                         placeholder="Search pages..."
                         className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400"
-                        onChange={(_: unknown, val: string) => setSearchQuery(val)}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     {searchQuery && (
                         <button

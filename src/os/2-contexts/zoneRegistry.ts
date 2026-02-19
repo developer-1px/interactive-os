@@ -108,7 +108,7 @@ export const ZoneRegistry = {
     return disabledItems.get(zoneId)?.has(itemId) ?? false;
   },
 
-  getDisabledItems(zoneId: string): Set<string> {
+  getDisabledItems(zoneId: string): ReadonlySet<string> {
     return disabledItems.get(zoneId) ?? EMPTY_SET;
   },
 };

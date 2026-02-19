@@ -87,7 +87,7 @@ export function resolveTypeahead(
   // Search from after current to end, then from start to current
   for (let i = 0; i < items.length; i++) {
     const idx = (currentIdx + 1 + i) % items.length;
-    const id = items[idx];
+    const id = items[idx]!;
     const label = labels.get(id);
     if (label?.toLowerCase().startsWith(buffer)) {
       return id;

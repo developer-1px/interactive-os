@@ -25,9 +25,9 @@ export interface HistoryEntry {
   timestamp: number;
   snapshot?: Record<string, unknown>;
   /** Captured focusedItemId for focus restoration on undo */
-  focusedItemId?: string | null;
+  focusedItemId?: string | null | undefined;
   /** Transaction group ID — entries with same groupId are undone/redone atomically */
-  groupId?: string;
+  groupId?: string | undefined;
 }
 
 /**
