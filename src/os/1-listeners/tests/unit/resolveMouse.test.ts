@@ -22,6 +22,7 @@ function baseInput(overrides: Partial<MouseInput> = {}): MouseInput {
         shiftKey: false,
         metaKey: false,
         ctrlKey: false,
+        altKey: false,
         isLabel: false,
         labelTargetItemId: null,
         labelTargetGroupId: null,
@@ -54,6 +55,9 @@ describe("resolveSelectMode", () => {
 
     test("shift takes priority over meta", () => {
         expect(resolveSelectMode({ shiftKey: true, metaKey: true, ctrlKey: false })).toBe("range");
+    });
+    test("alt → replace (default unless specified)", () => {
+        expect(resolveSelectMode({ shiftKey: false, metaKey: false, ctrlKey: false, altKey: true })).toBe("replace");
     });
 });
 

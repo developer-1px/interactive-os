@@ -47,6 +47,7 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
                     shiftKey: e.shiftKey,
                     metaKey: e.metaKey,
                     ctrlKey: e.ctrlKey,
+                    altKey: e.altKey,
                     isLabel: true,
                     labelTargetItemId: fieldTarget.itemId,
                     labelTargetGroupId: fieldTarget.groupId,
@@ -72,6 +73,7 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
             shiftKey: e.shiftKey,
             metaKey: e.metaKey,
             ctrlKey: e.ctrlKey,
+            altKey: e.altKey,
             isLabel: false,
             labelTargetItemId: null,
             labelTargetGroupId: null,
@@ -88,6 +90,7 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
         shiftKey: e.shiftKey,
         metaKey: e.metaKey,
         ctrlKey: e.ctrlKey,
+        altKey: e.altKey,
         isLabel: false,
         labelTargetItemId: null,
         labelTargetGroupId: null,
@@ -164,7 +167,11 @@ export function MouseListener() {
                     // FOCUS first
                     setDispatching(true);
                     kernel.dispatch(
-                        FOCUS({ zoneId: result.groupId, itemId: result.itemId }),
+                        FOCUS({
+                            zoneId: result.groupId,
+                            itemId: result.itemId,
+                            skipSelection: true,
+                        }),
                         mouseMeta,
                     );
                     setDispatching(false);

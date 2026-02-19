@@ -6,6 +6,7 @@
  */
 
 import { createKernel, defineScope } from "@kernel";
+import { type AppState, initialAppState } from "@os/kernel";
 import type { BaseCommand } from "@kernel/core/tokens";
 import {
   type Condition,
@@ -18,6 +19,7 @@ import {
   createHistoryMiddleware,
   endTransaction,
 } from "./middlewares/historyKernelMiddleware";
+import { focusHandler } from "./3-commands/focus/focus";
 
 // ═══════════════════════════════════════════════════════════════════
 // TestInstance Config (injected by defineApp)
@@ -43,7 +45,7 @@ interface TestAppState {
 
 export function createTestInstance<S>(
   config: CreateTestConfig<S>,
-  overrides?: Partial<S> | { history?: boolean },
+  overrides?: Partial<S> | { history?: boolean; withOS?: boolean },
 ): TestInstance<S> {
   const { appId, initialState, flatHandlerRegistry } = config;
 
@@ -51,8 +53,12 @@ export function createTestInstance<S>(
   const rawOverrides = overrides ?? {};
   const enableHistory =
     "history" in rawOverrides && rawOverrides.history === true;
-  const stateOverrides = enableHistory
-    ? (({ history: _h, ...rest }) => rest)(
+  const enableOS =
+    "withOS" in rawOverrides && rawOverrides.withOS === true;
+
+
+  const stateOverrides = enableHistory || enableOS
+    ? (({ history: _h, withOS: _w, ...rest }) => rest)(
       rawOverrides as Record<string, unknown>,
     )
     : rawOverrides;
@@ -62,17 +68,24 @@ export function createTestInstance<S>(
       ? { ...initialState, ...(stateOverrides as Partial<S>) }
       : initialState;
 
-  const testKernel = createKernel<TestAppState>({
-    os: {} as Record<string, never>,
-    apps: { [appId]: testState },
-  });
+  const testKernel = createKernel<AppState | TestAppState>(
+    enableOS
+      ? {
+        ...initialAppState,
+        apps: { [appId]: testState },
+      }
+      : {
+        os: {} as Record<string, never>,
+        apps: { [appId]: testState },
+      }
+  );
 
   const testScope = defineScope(appId);
   const testGroup = testKernel.group({
     scope: testScope,
     stateSlice: {
-      get: (full: TestAppState) => full.apps[appId] as S,
-      set: (full: TestAppState, s: unknown) => ({
+      get: (full: AppState | TestAppState) => full.apps[appId] as S,
+      set: (full: AppState | TestAppState, s: unknown) => ({
         ...full,
         apps: { ...full.apps, [appId]: s },
       }),
@@ -96,10 +109,14 @@ export function createTestInstance<S>(
 
     testGroup.defineCommand(
       type,
-      kernelHandler,
-      whenGuard,
+      kernelHandler as any,
+      whenGuard ? { when: whenGuard.when } as any : undefined,
     );
   }
+
+  // Register OS commands (FOCUS) on test kernel
+  // Required for integration tests that rely on focus/selection persistence
+  testKernel.defineCommand("OS_FOCUS", focusHandler as any);
 
   return {
     get state() {
@@ -109,6 +126,7 @@ export function createTestInstance<S>(
     dispatch(command: BaseCommand): boolean {
       const entry = flatHandlerRegistry.get(command.type);
       if (entry?.when) {
+        // Evaluate against APP state
         const currentState = testKernel.getState().apps[appId] as S;
         if (!entry.when.evaluate(currentState)) return false;
       }
@@ -147,6 +165,10 @@ export function createTestInstance<S>(
         endTransaction();
       }
     },
+
+    // Expose kernel for integration tests (OS state inspection)
+    get kernel() {
+      return testKernel;
+    },
   };
 }
-

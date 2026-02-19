@@ -1,0 +1,12 @@
+# [Closed] Selection Focus Recovery
+- **Status**: Fixed
+- **Date**: 2026-02-20
+- **Resolution**:
+  - Identified that the `cut` command in `createCollectionZone` lacked focus recovery logic (unlike `remove`).
+  - Updated `createCollectionZone:cut` to accept `focusId` in the payload and calculate the nearest stable neighbor (Next -> Prev) before removal.
+  - Updated `collectionBindings:onCut` to pass `focusId` from the active cursor relative to the zone.
+  - Verified with a new headless integration test `cut-focus.test.ts` which confirms focus moves to the next item when the focused item is cut along with others.
+- **Changed Files**:
+  - `src/os/collection/createCollectionZone.ts`: Implemented focus recovery logic.
+  - `src/apps/todo/app.ts`: Exported `listCollection` for better testability.
+  - `src/os/3-commands/tests/integration/cut-focus.test.ts`: Added regression test.

@@ -146,6 +146,7 @@ export interface ZoneHandle<S> {
 
 export interface TestInstance<S> {
   readonly state: S;
+  readonly kernel: any; // Exposed for integration tests (typed as any to avoid circular dep with @kernel/core)
   dispatch(command: BaseCommand): boolean;
   reset(): void;
   evaluate(condition: Condition<S>): boolean;
@@ -176,5 +177,5 @@ export interface AppHandle<S> {
   createTrigger(config: CompoundTriggerConfig): CompoundTriggerComponents;
   useComputed<T>(selector: Selector<S, T>): T;
   useComputed<T>(fn: (state: S) => T): T;
-  create(overrides?: Partial<S>): TestInstance<S>;
+  create(overrides?: Partial<S> | { history?: boolean; withOS?: boolean }): TestInstance<S>;
 }

@@ -24,7 +24,7 @@ import { produce } from "immer";
 import type { AppHandle, ZoneHandle } from "@/os/defineApp.types";
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import { FOCUS } from "@/os/3-commands/focus/focus";
-import { SELECTION_SET } from "@/os/3-commands/selection/selection";
+
 
 // ═══════════════════════════════════════════════════════════════════
 // Internal Item Ops — unified mutation interface
@@ -94,7 +94,7 @@ export interface CollectionZoneHandle<S> extends ZoneHandle<S> {
     moveDown: CommandFactory<string, { id: string }>;
     duplicate: CommandFactory<string, { id: string }>;
     copy: CommandFactory<string, { ids: string[] }>;
-    cut: CommandFactory<string, { ids: string[] }>;
+    cut: CommandFactory<string, { ids: string[]; focusId?: string }>;
     paste: CommandFactory<string, { afterId?: string }>;
     collectionBindings(): CollectionBindingsResult;
 }
@@ -169,12 +169,30 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     const remove = zone.command(
         `${zoneName}:remove`,
         (ctx: { readonly state: S }, payload: { id: string }) => {
-            const items = ops.getItems(ctx.state);
-            if (!items.some(item => item.id === payload.id)) return { state: ctx.state };
+            const allItems = ops.getItems(ctx.state);
+            // Calculate neighbor for focus recovery (using visible items)
+            const visible = config.filter
+                ? allItems.filter(config.filter(ctx.state))
+                : allItems;
+            const visIdx = visible.findIndex(item => item.id === payload.id);
+
+            let focusCmd: BaseCommand | undefined;
+            if (visIdx !== -1) {
+                const neighbor = visible[visIdx + 1] ?? visible[visIdx - 1];
+                if (neighbor) {
+                    focusCmd = FOCUS({
+                        zoneId: zoneName,
+                        itemId: neighbor.id
+                    });
+                }
+            }
+
+            if (!allItems.some(item => item.id === payload.id)) return { state: ctx.state };
             return {
                 state: produce(ctx.state, (draft) => {
                     ops.removeItem(draft as S, payload.id);
                 }),
+                dispatch: focusCmd,
             };
         },
     );
@@ -266,12 +284,45 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     // ── cut ──
     const cut = zone.command(
         `${zoneName}:cut`,
-        (ctx: { readonly state: S }, payload: { ids: string[] }) => {
+        (ctx: { readonly state: S }, payload: { ids: string[]; focusId?: string }) => {
             const items = ops.getItems(ctx.state);
             const found = payload.ids
                 .map(id => items.find(item => item.id === id))
                 .filter((t): t is T => Boolean(t));
             if (found.length === 0) return { state: ctx.state };
+
+            // Focus Recovery Logic
+            // We use payload.focusId because App Commands cannot read OS state.
+            const focusId = payload.focusId;
+            let focusCmd: BaseCommand | undefined;
+
+            if (focusId && payload.ids.includes(focusId)) {
+                // Focused item is being removed. Find nearest stable neighbor.
+                const visible = config.filter
+                    ? items.filter(config.filter(ctx.state))
+                    : items;
+
+                const currentIndex = visible.findIndex(item => item.id === focusId);
+                if (currentIndex !== -1) {
+                    // Look forward first
+                    const next = visible.slice(currentIndex + 1).find(item => !payload.ids.includes(item.id));
+                    // Look backward second
+                    const prev = visible.slice(0, currentIndex).reverse().find(item => !payload.ids.includes(item.id));
+
+                    const targetId = next?.id ?? prev?.id;
+                    if (targetId) {
+                        focusCmd = FOCUS({
+                            zoneId: zoneName,
+                            itemId: targetId,
+                            // Clear selection on new focus to avoid phantom state?
+                            // No, cut logic clears selection below implicitly by removing items.
+                            // But FOCUS command doesn't touch selection.
+                            // And selection is cleared by OS (clipboard.ts) OR here?
+                            // OS_CUT clears selection. This command removes items meaning selection becomes invalid.
+                        });
+                    }
+                }
+            }
 
             const clipCfg = config.clipboard;
             return {
@@ -282,7 +333,12 @@ export function createCollectionZone<S, T extends { id: string } = any>(
                     for (const id of payload.ids) {
                         ops.removeItem(draft as S, id);
                     }
+                    // Selection cleanup happens because IDs are gone.
+                    // But Zone.selection might still hold stale IDs? 
+                    // OS checks validity usually? Or we should clear it?
+                    // OS_CUT clears it. 
                 }),
+                dispatch: focusCmd,
                 clipboardWrite: clipCfg ? {
                     text: clipCfg.toText(found),
                     json: JSON.stringify(found),
@@ -322,8 +378,13 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
             const commands: BaseCommand[] = [];
             if (pastedIds.length > 0) {
-                commands.push(SELECTION_SET({ zoneId: zoneName, ids: pastedIds }));
-                commands.push(FOCUS({ zoneId: zoneName, itemId: pastedIds[pastedIds.length - 1]! }));
+                // Focus newly pasted items and explicitly set selection to prevent
+                // "followFocus" from overwriting our multi-selection with the single focused item.
+                commands.push(FOCUS({
+                    zoneId: zoneName,
+                    itemId: pastedIds[pastedIds.length - 1]!,
+                    selection: pastedIds
+                }));
             }
 
             return {
@@ -354,7 +415,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
                 const ids = cursor.selection.length > 0
                     ? cursor.selection.map(toEntityId)
                     : [toEntityId(cursor.focusId)];
-                return cut({ ids });
+                return cut({ ids, focusId: toEntityId(cursor.focusId) });
             },
             onPaste: (cursor) => paste({ afterId: toEntityId(cursor.focusId) }),
             keybindings: [

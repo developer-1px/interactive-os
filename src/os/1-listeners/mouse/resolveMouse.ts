@@ -20,6 +20,7 @@ export interface MouseInput {
     shiftKey: boolean;
     metaKey: boolean;
     ctrlKey: boolean;
+    altKey: boolean;
 
     /** Whether the item has a label (data-label + data-for) */
     isLabel: boolean;
@@ -57,9 +58,11 @@ export function resolveSelectMode(input: {
     shiftKey: boolean;
     metaKey: boolean;
     ctrlKey: boolean;
+    altKey: boolean;
 }): SelectMode {
     if (input.shiftKey) return "range";
     if (input.metaKey || input.ctrlKey) return "toggle";
+    // APG: Alt+Click defaults to replace
     return "replace";
 }
 
