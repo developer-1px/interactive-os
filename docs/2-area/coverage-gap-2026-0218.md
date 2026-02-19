@@ -40,10 +40,21 @@
 
 | 범위 | Lines | 이유 |
 |:-----|:-----:|:-----|
-| `5-hooks/*` | <11% | React hooks |
-| `6-components/**/*.tsx` | <11% | React components |
+| `5-hooks/*` | <11% | React hooks — DOM/focus 의존 |
 | `schemas/state/OSStateDiff.ts` | 0% | 렌더 연결 |
 | `schemas/effect/EffectRecord.ts` | 0% | 타입 정의 |
+
+### 🔗 Seam 영역 (Integration 대상 — 2026-02-19 재분류)
+
+| 범위 | Lines | 이유 | 상태 |
+|:-----|:-----:|:-----|:----:|
+| `6-components/primitives/FieldRegistry.ts` | — | vanilla store lifecycle (register/unregister/updateValue) | ✅ 8 tests |
+| `6-components/primitives/Field.tsx` ↔ FieldRegistry | — | useEffect deps → re-registration → localValue 리셋 | ✅ seam test로 커버 |
+| `6-components/**/*.tsx` (나머지) | <11% | 순수 React 렌더링 — E2E 유지 | — |
+
+> **교훈 (2026-02-19)**: `6-components`를 일괄 "E2E 영역"으로 분류한 것이 잘못이었다.
+> React component 중에서도 **vanilla store와 상호작용하는 경계(seam)** 는 Vitest integration으로 검증 가능.
+> 실제로 FieldRegistry lifecycle 버그는 E2E에서만 발견되었고, seam test로 회귀 방지됨.
 
 ### ✅ 충분 (80% 이상)
 
@@ -59,3 +70,14 @@
 | `keymaps/*` | 88-100% | 77-100% |
 | `state/*` | 100% | 100% |
 | `registries/*` | 100% | 100% |
+
+---
+
+## 📝 Update (2026-02-19)
+
+| 지표 | 02-18 | 02-19 | 변화 |
+|:-----|:-----:|:-----:|:-----|
+| Total Tests | 645 | 581 | −64 (중복 압축 −144, seam +8, 기타 증분 +72) |
+| Test Files | 37 | 41 | +4 |
+| Seam Tests | 0 | 8 | 🆕 `field-registry.test.ts` |
+| rolePresets.test.ts | 163 tests | 19 tests | `it.each` 통합 (동일 커버리지) |

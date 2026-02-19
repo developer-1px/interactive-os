@@ -2,9 +2,7 @@
 
 ## 🔴 Now
 
-- [ ] Task 4: coverage-gap 문서 갱신
-  - [ ] Step 1: "E2E 영역"으로 분류된 항목 재검토
-  - [ ] Step 2: Seam test 대상으로 재분류할 항목 이동
+(없음 — 모든 태스크 완료)
 
 ## ⏳ Done
 
@@ -23,7 +21,11 @@
   - register/unregister lifecycle 검증
   - FIELD_COMMIT → localValue 읽기 검증
   - stable wrapper pattern 검증
-  - 전체: 573 + 8 = 581 tests
+
+- [x] Task 4: coverage-gap 문서 갱신 (02-19)
+  - `6-components`를 E2E 일괄 분류 → seam/E2E 분리
+  - 🔗 Seam 영역 신설 (FieldRegistry, Field↔Registry)
+  - 수치 업데이트 (645→581, seam 0→8)
 
 ## 💡 Ideas
 
