@@ -163,7 +163,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       if (schemaRef.current) {
         const result = schemaRef.current.safeParse(currentValue);
         if (!result.success) {
-          const errorMessage = result.error.issues[0].message;
+          const errorMessage = result.error.issues[0]?.message ?? "Validation failed";
           FieldRegistry.setError(fieldId, errorMessage);
           return; // Block Commit
         }
@@ -360,7 +360,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     });
 
     // --- Styling ---
-    const { className: customClassName, ...otherProps } = rest;
+    const { className: customClassName, id: _id, ...otherProps } = rest;
     const composeProps = getFieldClasses({
       isFocused,
       isEditing: isContentEditable,

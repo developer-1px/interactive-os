@@ -81,10 +81,7 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
     );
 
     // Resolve Children
-    let resolvedChildren = children;
-    if (typeof children === "function") {
-      resolvedChildren = children(itemState);
-    }
+    let resolvedChildren: ReactNode = typeof children === "function" ? children(itemState) : children;
 
     return (
       <FocusItem

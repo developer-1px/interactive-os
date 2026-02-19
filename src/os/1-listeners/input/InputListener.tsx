@@ -10,7 +10,6 @@
 
 import { FieldRegistry } from "@os/6-components/field/FieldRegistry";
 import { useEffect } from "react";
-import { kernel } from "../../kernel";
 
 export function InputListener() {
     useEffect(() => {
@@ -28,12 +27,6 @@ export function InputListener() {
 
             // Sync DOM → FieldRegistry
             FieldRegistry.updateValue(fieldId, text);
-
-            // Dispatch onChange command if registered
-            if (entry.config.onChange) {
-                const cmd = entry.config.onChange({ text });
-                kernel.dispatch(cmd);
-            }
         };
 
         document.addEventListener("input", onInput, { capture: true });

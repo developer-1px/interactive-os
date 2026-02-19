@@ -51,7 +51,7 @@ export function createBoundComponents<S>(
     children?: ReactNode;
   }> = ({ id, className, children }) => {
     // Explicit prop mapping — no runtime loop, no Record<string, unknown> cast
-    const zoneProps: React.ComponentProps<typeof Zone> = {
+    const zoneProps: Omit<React.ComponentProps<typeof Zone>, "children"> = {
       id: id ?? zoneName,
       className,
       role: config.role,
@@ -80,7 +80,7 @@ export function createBoundComponents<S>(
       return KeybindingsRegistry.registerAll(bindings);
     }, []);
 
-    return React.createElement(Zone, zoneProps, children);
+    return React.createElement(Zone, zoneProps as React.ComponentProps<typeof Zone>, children);
   };
   ZoneComponent.displayName = `${appId}.${zoneName}.Zone`;
 
@@ -112,30 +112,13 @@ export function createBoundComponents<S>(
   }> = (props) => {
     const fieldConfig = config.field;
 
-    // Build typed onChange/onSubmit factories that merge { text } into payload
-    const onChange = fieldConfig?.onChange
-      ? (p: { text: string }) => ({
-        ...fieldConfig.onChange!,
-        payload: { ...fieldConfig.onChange!.payload, ...p },
-      })
-      : undefined;
-
-    const onSubmit = fieldConfig?.onSubmit
-      ? (p: { text: string }) => ({
-        ...fieldConfig.onSubmit!,
-        payload: { ...fieldConfig.onSubmit!.payload, ...p },
-      })
-      : undefined;
-
     return React.createElement(Field, {
       ...props,
-      onChange,
-      onSubmit,
-      onCommit: fieldConfig?.onCommit,
-      trigger: fieldConfig?.trigger,
-      schema: fieldConfig?.schema,
-      resetOnSubmit: fieldConfig?.resetOnSubmit,
-      onCancel: fieldConfig?.onCancel,
+      ...(fieldConfig?.onCommit ? { onCommit: fieldConfig.onCommit } : {}),
+      ...(fieldConfig?.trigger ? { trigger: fieldConfig.trigger } : {}),
+      ...(fieldConfig?.schema ? { schema: fieldConfig.schema } : {}),
+      ...(fieldConfig?.resetOnSubmit ? { resetOnSubmit: fieldConfig.resetOnSubmit } : {}),
+      ...(fieldConfig?.onCancel ? { onCancel: fieldConfig.onCancel } : {}),
     } as React.ComponentProps<typeof Field>);
   };
   FieldComponent.displayName = `${appId}.${zoneName}.Field`;

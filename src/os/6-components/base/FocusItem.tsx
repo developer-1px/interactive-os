@@ -225,8 +225,8 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
         ? (children as ReactElement<any>)
         : null;
     const combinedRef = useMemo(
-      () => composeRefs(ref, internalRef, (childElement as any)?.ref),
-      [ref, (childElement as any)?.ref],
+      () => composeRefs(ref, internalRef, (childElement as ReactElement & { ref?: React.Ref<HTMLElement> })?.ref),
+      [ref, childElement],
     );
 
     // --- Rendering ---
