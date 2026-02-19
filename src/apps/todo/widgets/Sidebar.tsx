@@ -30,6 +30,11 @@ const getIcon = (id: string) => {
   }
 };
 
+import { kernel } from "@os/kernel";
+import { useEffect } from "react";
+
+// ... existing imports
+
 export function Sidebar() {
   return (
     <TodoSidebar.Zone className="h-full">
@@ -44,6 +49,18 @@ function SidebarContent() {
   const selectedCategoryId = TodoApp.useComputed(
     (s) => s.ui.selectedCategoryId,
   );
+
+  // followFocus implementation: Sync OS selection -> App state
+  const selectionId = TodoApp.useComputed(
+    (s) => s.os.focus.zones["sidebar"]?.selection?.[0],
+  );
+
+  useEffect(() => {
+    if (selectionId && selectionId !== selectedCategoryId) {
+      // Dispatch immediately to feel responsive
+      kernel.dispatch(TodoSidebar.commands.selectCategory({ id: selectionId }));
+    }
+  }, [selectionId, selectedCategoryId]);
 
   return (
     <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">

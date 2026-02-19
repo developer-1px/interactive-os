@@ -490,7 +490,45 @@ test.describe("Todo App", () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // APG Tab Recovery — entry=selected
+  // 3. Selection & FollowFocus
+  // ─────────────────────────────────────────────────────────────
+  test("Navigation follows focus (arrow keys update selection)", async ({
+    page,
+  }) => {
+    // Click first item to select it
+    await page.getByText("Complete Interaction OS docs").click();
+    const firstItem = page
+      .locator(todoItem(LISTVIEW))
+      .filter({ hasText: "Complete Interaction OS docs" });
+    await expect(firstItem).toHaveAttribute("aria-selected", "true");
+
+    // Arrow Down → Should move focus AND selection (followFocus: true)
+    await page.keyboard.press("ArrowDown");
+    const secondItem = page
+      .locator(todoItem(LISTVIEW))
+      .filter({ hasText: "Refactor focus ring styles" }); // Assuming this is 2nd, but better to select by index to be robust
+
+    // Use nth locator for robustness
+    const item1 = page.locator(todoItem(LISTVIEW)).nth(0);
+    const item2 = page.locator(todoItem(LISTVIEW)).nth(1);
+
+    // Initial state check (after click)
+    await expect(item1).toHaveAttribute("aria-selected", "true");
+
+    // Move down
+    // (Note: we need to ensure focus is on item1 before pressing global arrow)
+    await item1.focus();
+    await page.keyboard.press("ArrowDown");
+
+    // Check item 2 is selected
+    await expect(item2).toHaveAttribute("aria-selected", "true");
+
+    // Check item 1 is NOT selected
+    await expect(item1).toHaveAttribute("aria-selected", "false");
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 4. Tab Navigation
   // ─────────────────────────────────────────────────────────────
 
   test("Tab round-trip returns to selected sidebar item (Work)", async ({

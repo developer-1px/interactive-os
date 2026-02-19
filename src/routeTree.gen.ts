@@ -14,6 +14,7 @@ import { Route as MinimalRouteImport } from './routes/_minimal'
 import { Route as TodoIndexRouteImport } from './routes/_todo/index'
 import { Route as MinimalTodoRouteImport } from './routes/_minimal/todo'
 import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
+import { Route as MinimalBuilderListRouteImport } from './routes/_minimal/builder-list'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
 import { Route as MinimalPlaygroundTestsRouteImport } from './routes/_minimal/playground.tests'
@@ -46,6 +47,11 @@ const MinimalTodoRoute = MinimalTodoRouteImport.update({
 const MinimalDocsRoute = MinimalDocsRouteImport.update({
   id: '/docs',
   path: '/docs',
+  getParentRoute: () => MinimalRoute,
+} as any)
+const MinimalBuilderListRoute = MinimalBuilderListRouteImport.update({
+  id: '/builder-list',
+  path: '/builder-list',
   getParentRoute: () => MinimalRoute,
 } as any)
 const MinimalBuilderRoute = MinimalBuilderRouteImport.update({
@@ -104,6 +110,7 @@ const MinimalDocsSplatRoute = MinimalDocsSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof TodoIndexRoute
   '/builder': typeof MinimalBuilderRoute
+  '/builder-list': typeof MinimalBuilderListRoute
   '/docs': typeof MinimalDocsRouteWithChildren
   '/todo': typeof MinimalTodoRoute
   '/docs/$': typeof MinimalDocsSplatRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof TodoIndexRoute
   '/builder': typeof MinimalBuilderRoute
+  '/builder-list': typeof MinimalBuilderListRoute
   '/todo': typeof MinimalTodoRoute
   '/docs/$': typeof MinimalDocsSplatRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/_minimal': typeof MinimalRouteWithChildren
   '/_todo': typeof TodoRouteWithChildren
   '/_minimal/builder': typeof MinimalBuilderRoute
+  '/_minimal/builder-list': typeof MinimalBuilderListRoute
   '/_minimal/docs': typeof MinimalDocsRouteWithChildren
   '/_minimal/todo': typeof MinimalTodoRoute
   '/_todo/': typeof TodoIndexRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/builder'
+    | '/builder-list'
     | '/docs'
     | '/todo'
     | '/docs/$'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/builder'
+    | '/builder-list'
     | '/todo'
     | '/docs/$'
     | '/playground/aria'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/_minimal'
     | '/_todo'
     | '/_minimal/builder'
+    | '/_minimal/builder-list'
     | '/_minimal/docs'
     | '/_minimal/todo'
     | '/_todo/'
@@ -237,6 +249,13 @@ declare module '@tanstack/react-router' {
       path: '/docs'
       fullPath: '/docs'
       preLoaderRoute: typeof MinimalDocsRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/builder-list': {
+      id: '/_minimal/builder-list'
+      path: '/builder-list'
+      fullPath: '/builder-list'
+      preLoaderRoute: typeof MinimalBuilderListRouteImport
       parentRoute: typeof MinimalRoute
     }
     '/_minimal/builder': {
@@ -328,6 +347,7 @@ const MinimalDocsRouteWithChildren = MinimalDocsRoute._addFileChildren(
 
 interface MinimalRouteChildren {
   MinimalBuilderRoute: typeof MinimalBuilderRoute
+  MinimalBuilderListRoute: typeof MinimalBuilderListRoute
   MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
   MinimalTodoRoute: typeof MinimalTodoRoute
   MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
@@ -341,6 +361,7 @@ interface MinimalRouteChildren {
 
 const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalBuilderRoute: MinimalBuilderRoute,
+  MinimalBuilderListRoute: MinimalBuilderListRoute,
   MinimalDocsRoute: MinimalDocsRouteWithChildren,
   MinimalTodoRoute: MinimalTodoRoute,
   MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
