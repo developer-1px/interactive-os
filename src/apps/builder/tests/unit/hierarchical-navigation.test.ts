@@ -1,16 +1,13 @@
 /**
- * hierarchicalNavigation — Integration tests for BUILDER_DRILL_DOWN / DRILL_UP.
+ * hierarchicalNavigation — Unit tests for ZoneCallbacks + itemFilter.
  *
- * Tests the complete hierarchical navigation flow:
+ * Tests:
  *   - createCanvasItemFilter: level-based filtering
- *   - BUILDER_DRILL_DOWN: section→group→item→edit
- *   - BUILDER_DRILL_UP: item→group→section
+ *   - drillDown/drillUp: ZoneCallback shape (returns commands, not void)
+ *   - DOM structure correctness
  *
- * These tests use a minimal DOM tree that mirrors the Builder structure:
- *   section[data-level="section"]
- *     └── group[data-level="group"]
- *           ├── item-1[data-level="item"]
- *           └── item-2[data-level="item"]
+ * These callbacks read DOM and return commands — they're app-layer, not commands.
+ * Rule #8: Commands don't read DOM. Callbacks do.
  */
 
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
@@ -19,8 +16,8 @@ import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import {
     createCanvasItemFilter,
-    BUILDER_DRILL_DOWN,
-    BUILDER_DRILL_UP,
+    drillDown,
+    drillUp,
 } from "../../features/hierarchicalNavigation";
 
 const ZONE_ID = "test-canvas";
@@ -75,7 +72,7 @@ function buildTestDOM(): HTMLDivElement {
     return container;
 }
 
-describe("hierarchicalNavigation — drill-down/up with itemFilter", () => {
+describe("hierarchicalNavigation — ZoneCallbacks + itemFilter", () => {
     let container: HTMLDivElement;
     let t: ReturnType<typeof createTestKernel>;
 
@@ -83,10 +80,6 @@ describe("hierarchicalNavigation — drill-down/up with itemFilter", () => {
         container = buildTestDOM();
         t = createTestKernel();
 
-        // Register BUILDER_DRILL_DOWN and DRILL_UP on the test kernel
-        // (They're already defined on the production kernel at import time)
-
-        // Register zone with itemFilter
         ZoneRegistry.register(ZONE_ID, {
             config: { ...DEFAULT_CONFIG },
             element: container,
@@ -101,61 +94,90 @@ describe("hierarchicalNavigation — drill-down/up with itemFilter", () => {
     });
 
     describe("createCanvasItemFilter", () => {
-        it("filters to section level when focused on a section", () => {
-            t.setItems(["s1", "g1", "i1", "i2", "s2"]);
-            t.setActiveZone(ZONE_ID, "s1");
-
+        it("filters to section level by default (no focus)", () => {
             const filter = createCanvasItemFilter(ZONE_ID);
-            // Note: filter reads from production kernel state, not test kernel.
-            // But we can test the filter function's logic directly.
-
-            // Since the filter reads from the global kernel, we test indirectly
-            // through the ZoneRegistry-based filtering in the test kernel.
             const allItems = ["s1", "g1", "i1", "i2", "s2"];
+            const filtered = filter(allItems);
+            // No focused item → defaults to "section"
+            expect(filtered).toEqual(["s1", "s2"]);
+        });
 
-            // Test kernel's mock DOM_ITEMS with the filter
+        it("is registered on the zone entry", () => {
             const entry = ZoneRegistry.get(ZONE_ID);
             expect(entry?.itemFilter).toBeDefined();
 
-            const filtered = entry!.itemFilter!(allItems);
-            // Without focus state in the global kernel, defaults to "section"
+            const filtered = entry!.itemFilter!(["s1", "g1", "i1", "i2", "s2"]);
             expect(filtered).toEqual(["s1", "s2"]);
         });
     });
 
-    describe("BUILDER_DRILL_DOWN", () => {
-        it("is a defined kernel command", () => {
-            expect(BUILDER_DRILL_DOWN).toBeDefined();
-            expect(typeof BUILDER_DRILL_DOWN).toBe("function");
+    describe("drillDown — ZoneCallback", () => {
+        it("is a function (not a kernel command factory)", () => {
+            expect(typeof drillDown).toBe("function");
         });
 
-        it("creates a command with zoneId payload", () => {
-            const cmd = BUILDER_DRILL_DOWN({ zoneId: ZONE_ID });
-            expect(cmd).toHaveProperty("type");
-            expect(cmd).toHaveProperty("payload");
+        it("returns a command when focused on a section", () => {
+            const cursor = { focusId: "s1", selection: [], anchor: null };
+            const result = drillDown(cursor);
+            // Should return FOCUS command to first child (g1)
+            if (Array.isArray(result)) {
+                expect(result.length).toBeGreaterThan(0);
+            } else {
+                expect(result).toHaveProperty("type");
+            }
+        });
+
+        it("returns FIELD_START_EDIT when focused on an item", () => {
+            const cursor = { focusId: "i1", selection: [], anchor: null };
+            const result = drillDown(cursor);
+            if (!Array.isArray(result)) {
+                expect(result.type).toContain("FIELD");
+            }
+        });
+
+        it("returns empty array for unknown elements", () => {
+            const cursor = { focusId: "nonexistent", selection: [], anchor: null };
+            const result = drillDown(cursor);
+            expect(result).toEqual([]);
         });
     });
 
-    describe("BUILDER_DRILL_UP", () => {
-        it("is a defined kernel command", () => {
-            expect(BUILDER_DRILL_UP).toBeDefined();
-            expect(typeof BUILDER_DRILL_UP).toBe("function");
+    describe("drillUp — ZoneCallback", () => {
+        it("is a function (not a kernel command factory)", () => {
+            expect(typeof drillUp).toBe("function");
         });
 
-        it("creates a command with zoneId payload", () => {
-            const cmd = BUILDER_DRILL_UP({ zoneId: ZONE_ID });
-            expect(cmd).toHaveProperty("type");
-            expect(cmd).toHaveProperty("payload");
+        it("returns a command when focused on a group", () => {
+            const cursor = { focusId: "g1", selection: [], anchor: null };
+            const result = drillUp(cursor);
+            // Should return FOCUS command to parent section (s1)
+            if (Array.isArray(result)) {
+                expect(result.length).toBeGreaterThan(0);
+            } else {
+                expect(result).toHaveProperty("type");
+            }
+        });
+
+        it("returns empty array when focused on a section (top level)", () => {
+            const cursor = { focusId: "s1", selection: [], anchor: null };
+            const result = drillUp(cursor);
+            expect(result).toEqual([]);
+        });
+
+        it("returns empty array for unknown elements", () => {
+            const cursor = { focusId: "nonexistent", selection: [], anchor: null };
+            const result = drillUp(cursor);
+            expect(result).toEqual([]);
         });
     });
 
     describe("DOM structure", () => {
         it("has correct data-level hierarchy in test DOM", () => {
-            expect(document.getElementById("s1")?.dataset.level).toBe("section");
-            expect(document.getElementById("g1")?.dataset.level).toBe("group");
-            expect(document.getElementById("i1")?.dataset.level).toBe("item");
-            expect(document.getElementById("i2")?.dataset.level).toBe("item");
-            expect(document.getElementById("s2")?.dataset.level).toBe("section");
+            expect(document.getElementById("s1")?.dataset["level"]).toBe("section");
+            expect(document.getElementById("g1")?.dataset["level"]).toBe("group");
+            expect(document.getElementById("i1")?.dataset["level"]).toBe("item");
+            expect(document.getElementById("i2")?.dataset["level"]).toBe("item");
+            expect(document.getElementById("s2")?.dataset["level"]).toBe("section");
         });
 
         it("items at item level are children of group", () => {

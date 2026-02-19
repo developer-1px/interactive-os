@@ -204,12 +204,22 @@ export const selectElement = canvasZone.command(
   }),
 );
 
-// Zone binding — spatial grid navigation + Enter to edit
-import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
+// Zone binding — hierarchical navigation (section/group/item)
+import {
+  createCanvasItemFilter,
+  drillDown,
+  drillUp,
+} from "@/apps/builder/features/hierarchicalNavigation";
 
 export const BuilderCanvasUI = canvasZone.bind({
   role: "grid",
-  onAction: () => FIELD_START_EDIT(),
+  onAction: drillDown,
+  options: {
+    navigate: { orientation: "corner" },
+    tab: { behavior: "trap" },
+  },
+  itemFilter: createCanvasItemFilter("builder-canvas"),
+  keybindings: [{ key: "\\", command: drillUp }],
 });
 
 // ═══════════════════════════════════════════════════════════════════

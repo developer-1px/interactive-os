@@ -39,6 +39,7 @@ export function createBoundComponents<S>(
     field?: FieldBindings;
     keybindings?: KeybindingEntry<S>[];
     options?: ZoneOptions;
+    itemFilter?: (items: string[]) => string[];
   },
 ): BoundComponents<S> {
   const { appId, zoneName, useComputed } = bindConfig;
@@ -65,6 +66,7 @@ export function createBoundComponents<S>(
       onUndo: config.onUndo,
       onRedo: config.onRedo,
       options: config.options,
+      itemFilter: config.itemFilter,
     };
 
     // Keybindings registration
