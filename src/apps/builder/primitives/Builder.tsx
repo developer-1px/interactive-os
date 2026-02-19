@@ -6,9 +6,9 @@
  *   - data-level: "section" | "group" | "item"
  *   - data-builder-id: unique builder element ID
  *
- * On mount, each component registers in BuilderRegistry with:
- *   - level (section/group/item)
- *   - parentId (closest ancestor Builder component, via React Context)
+ * The OS reads these attributes through item query utilities
+ * (getItemAttribute, getFirstDescendantWithAttribute, etc.)
+ * Apps never touch DOM — OS provides the abstraction.
  *
  * Three levels:
  *   Builder.Section  → data-level="section"  (Hero, News, Services)
@@ -26,14 +26,7 @@
  */
 
 import { Item as OSItem } from "@os/6-components/primitives/Item";
-import {
-  createContext,
-  forwardRef,
-  type ReactElement,
-  useContext,
-  useEffect,
-} from "react";
-import { BuilderRegistry } from "../BuilderRegistry";
+import { forwardRef, type ReactElement } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -51,38 +44,22 @@ interface BuilderComponentProps {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Parent Context — tracks closest ancestor Builder component
-// ═══════════════════════════════════════════════════════════════════
-
-const BuilderParentContext = createContext<string | null>(null);
-
-// ═══════════════════════════════════════════════════════════════════
 // createBuilderComponent — Factory for Section/Group/Item
 // ═══════════════════════════════════════════════════════════════════
 
 function createBuilderComponent(level: BuilderLevel, displayName: string) {
   const Component = forwardRef<HTMLElement, BuilderComponentProps>(
     function BuilderComponent({ id, children }, ref) {
-      const parentId = useContext(BuilderParentContext);
-
-      // Register in BuilderRegistry on mount, unregister on unmount
-      useEffect(() => {
-        BuilderRegistry.register(id, { level, parentId });
-        return () => BuilderRegistry.unregister(id);
-      }, [id, parentId]);
-
       return (
-        <BuilderParentContext.Provider value={id}>
-          <OSItem
-            id={id}
-            asChild
-            ref={ref}
-            data-level={level}
-            data-builder-id={id}
-          >
-            {children}
-          </OSItem>
-        </BuilderParentContext.Provider>
+        <OSItem
+          id={id}
+          asChild
+          ref={ref}
+          data-level={level}
+          data-builder-id={id}
+        >
+          {children}
+        </OSItem>
       );
     },
   );

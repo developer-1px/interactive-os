@@ -203,6 +203,8 @@ export function defineApp<S>(
         config: ZoneBindings & {
           field?: FieldBindings;
           keybindings?: KeybindingEntry<S>[];
+          options?: import("@os/6-components/primitives/Zone").ZoneOptions;
+          itemFilter?: (items: string[]) => string[];
         },
       ): BoundComponents<S> {
         return createBoundComponents(

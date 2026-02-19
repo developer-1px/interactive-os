@@ -3,10 +3,6 @@
  *
  * Tests that when a zone has an itemFilter callback registered,
  * NAVIGATE only traverses items that pass the filter.
- *
- * This is the dynamic version of data-nav-skip:
- *   data-nav-skip = static exclusion (decorative elements)
- *   itemFilter    = dynamic filtering (level-based, search results, etc.)
  */
 
 import { describe, expect, it, beforeEach } from "vitest";

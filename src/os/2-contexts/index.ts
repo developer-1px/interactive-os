@@ -28,9 +28,7 @@ export const DOM_ITEMS = kernel.defineContext("dom-items", (): string[] => {
   if (!entry?.element) return [];
 
   const items: string[] = [];
-  const els = entry.element.querySelectorAll(
-    "[data-item-id]:not([data-nav-skip='true'])",
-  );
+  const els = entry.element.querySelectorAll("[data-item-id]");
   for (const el of els) {
     // Only include items that DIRECTLY belong to this zone (not nested child zones)
     if (el.closest("[data-focus-group]") !== entry.element) continue;
@@ -56,9 +54,7 @@ export const DOM_RECTS = kernel.defineContext(
     if (!entry?.element) return new Map();
 
     const rects = new Map<string, DOMRect>();
-    const els = entry.element.querySelectorAll(
-      "[data-item-id]:not([data-nav-skip='true'])",
-    );
+    const els = entry.element.querySelectorAll("[data-item-id]");
     for (const el of els) {
       // Only include items that DIRECTLY belong to this zone
       if (el.closest("[data-focus-group]") !== entry.element) continue;
@@ -120,9 +116,7 @@ export const DOM_ZONE_ORDER = kernel.defineContext(
 
       // Collect items that DIRECTLY belong to this zone (not nested child zones).
       // An item belongs to a zone if its closest [data-focus-group] ancestor is this zone.
-      const allItems = el.querySelectorAll(
-        "[data-item-id]:not([data-nav-skip='true'])",
-      );
+      const allItems = el.querySelectorAll("[data-item-id]");
       const ownItems: Element[] = [];
       for (const item of allItems) {
         const closestGroup = item.closest("[data-focus-group]");

@@ -7,11 +7,9 @@
  *   - \: drill up (item→group→section)
  *
  * Architecture:
- *   - itemFilter: derived from focused item's level (via BuilderRegistry)
- *   - drillDown/drillUp: ZoneCallbacks (registry read → command return)
- *   - Zero DOM access — all hierarchy data from BuilderRegistry
- *
- * Rule: DOM은 OS에서만 읽는다. 앱은 Registry/State만 사용한다.
+ *   - All hierarchy queries go through OS item queries (DOM은 OS에서만 읽는다)
+ *   - drillDown/drillUp: ZoneCallback factories (curried with zoneId)
+ *   - No DOM access, no app-level registry
  *
  * @see discussions/2026-0219-1954-builder-focus-policy.md
  */
@@ -19,10 +17,14 @@
 import { FOCUS } from "@/os/3-commands/focus/focus";
 import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { kernel } from "@/os/kernel";
+import {
+    getItemAttribute,
+    getFirstDescendantWithAttribute,
+    getAncestorWithAttribute,
+} from "@/os/2-contexts/itemQueries";
 import type { ZoneCursor } from "@/os/2-contexts/zoneRegistry";
 import type { BaseCommand } from "@kernel";
 import type { BuilderLevel } from "../primitives/Builder";
-import { BuilderRegistry } from "../BuilderRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Level Hierarchy
@@ -50,7 +52,7 @@ function getParentLevel(level: BuilderLevel): BuilderLevel | null {
  * Filters items to only those at the same level as the currently focused item.
  * If no focused item or no level, defaults to "section" level.
  *
- * Reads level from BuilderRegistry — no DOM access.
+ * Uses OS getItemAttribute — no DOM access in app code.
  */
 export function createCanvasItemFilter(
     zoneId: string,
@@ -59,78 +61,98 @@ export function createCanvasItemFilter(
         const focusedId =
             kernel.getState().os.focus.zones[zoneId]?.focusedItemId ?? null;
         const currentLevel: BuilderLevel = focusedId
-            ? (BuilderRegistry.getLevel(focusedId) ?? "section")
+            ? ((getItemAttribute(zoneId, focusedId, "data-level") as BuilderLevel) ??
+                "section")
             : "section";
 
         return items.filter(
-            (id) => BuilderRegistry.getLevel(id) === currentLevel,
+            (id) => getItemAttribute(zoneId, id, "data-level") === currentLevel,
         );
     };
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Zone Callbacks — drillDown / drillUp
+// Zone Callback Factories — curried with zoneId
 // ═══════════════════════════════════════════════════════════════════
 
-const CANVAS_ZONE_ID = "builder-canvas";
-
 /**
- * drillDown — ZoneCallback for Enter key.
+ * Create a drillDown ZoneCallback for a specific zone.
  *
  * At section/group: focuses the first child at the next level down.
  * At item level: starts field editing.
  *
- * Reads hierarchy from BuilderRegistry — no DOM access.
+ * Uses OS item queries — no DOM access in app code.
  */
-export function drillDown(cursor: ZoneCursor): BaseCommand | BaseCommand[] {
-    const level = BuilderRegistry.getLevel(cursor.focusId);
-    if (!level) return [];
+export function createDrillDown(zoneId: string) {
+    return (cursor: ZoneCursor): BaseCommand | BaseCommand[] => {
+        const level = getItemAttribute(
+            zoneId,
+            cursor.focusId,
+            "data-level",
+        ) as BuilderLevel | null;
+        if (!level) return [];
 
-    // At item level: start editing
-    if (level === "item") {
-        return FIELD_START_EDIT();
-    }
+        // At item level: start editing
+        if (level === "item") {
+            return FIELD_START_EDIT();
+        }
 
-    // At section/group: find first descendant at next level
-    const childLevel = getChildLevel(level);
-    if (!childLevel) return [];
+        // At section/group: find first descendant at next level
+        const childLevel = getChildLevel(level);
+        if (!childLevel) return [];
 
-    const childId = BuilderRegistry.getFirstDescendantAtLevel(
-        cursor.focusId,
-        childLevel,
-    );
-    if (!childId) return [];
+        const childId = getFirstDescendantWithAttribute(
+            zoneId,
+            cursor.focusId,
+            "data-level",
+            childLevel,
+        );
+        if (!childId) return [];
 
-    return FOCUS({ zoneId: CANVAS_ZONE_ID, itemId: childId });
+        return FOCUS({ zoneId, itemId: childId });
+    };
 }
 
 /**
- * drillUp — ZoneCallback for backslash key.
+ * Create a drillUp ZoneCallback for a specific zone.
  *
  * At group: focuses the parent section.
  * At item: focuses the parent group (or section if no group).
  * At section: no-op.
  *
- * Reads hierarchy from BuilderRegistry — no DOM access.
+ * Uses OS item queries — no DOM access in app code.
  */
-export function drillUp(cursor: ZoneCursor): BaseCommand | BaseCommand[] {
-    const level = BuilderRegistry.getLevel(cursor.focusId);
-    if (!level || level === "section") return []; // Already at top
+export function createDrillUp(zoneId: string) {
+    return (cursor: ZoneCursor): BaseCommand | BaseCommand[] => {
+        const level = getItemAttribute(
+            zoneId,
+            cursor.focusId,
+            "data-level",
+        ) as BuilderLevel | null;
+        if (!level || level === "section") return []; // Already at top
 
-    const parentLevel = getParentLevel(level);
-    if (!parentLevel) return [];
+        const parentLevel = getParentLevel(level);
+        if (!parentLevel) return [];
 
-    let parentId = BuilderRegistry.getAncestorAtLevel(
-        cursor.focusId,
-        parentLevel,
-    );
+        let parentId = getAncestorWithAttribute(
+            zoneId,
+            cursor.focusId,
+            "data-level",
+            parentLevel,
+        );
 
-    // If no group parent found for item, try section directly
-    if (!parentId && level === "item") {
-        parentId = BuilderRegistry.getAncestorAtLevel(cursor.focusId, "section");
-    }
+        // If no group parent found for item, try section directly
+        if (!parentId && level === "item") {
+            parentId = getAncestorWithAttribute(
+                zoneId,
+                cursor.focusId,
+                "data-level",
+                "section",
+            );
+        }
 
-    if (!parentId) return [];
+        if (!parentId) return [];
 
-    return FOCUS({ zoneId: CANVAS_ZONE_ID, itemId: parentId });
+        return FOCUS({ zoneId, itemId: parentId });
+    };
 }

@@ -1,51 +1,87 @@
 /**
  * hierarchicalNavigation — Unit tests for ZoneCallbacks + itemFilter.
  *
- * Tests that drillDown/drillUp and itemFilter use BuilderRegistry
- * (not DOM) to resolve hierarchy. Zero DOM queries in app layer.
+ * Tests that drillDown/drillUp use OS item queries (not app-level registry).
+ * Tests build a minimal DOM tree because the OS item queries read DOM
+ * (OS reads DOM, apps don't — the test is testing the OS+app integration).
  */
 
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { createTestKernel } from "@os/3-commands/tests/integration/helpers/createTestKernel";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
-import { BuilderRegistry } from "../../BuilderRegistry";
+import {
+    getItemAttribute,
+    getItemParent,
+    getItemChildren,
+    getFirstDescendantWithAttribute,
+    getAncestorWithAttribute,
+} from "@os/2-contexts/itemQueries";
 import {
     createCanvasItemFilter,
-    drillDown,
-    drillUp,
+    createDrillDown,
+    createDrillUp,
 } from "../../features/hierarchicalNavigation";
 
 const ZONE_ID = "test-canvas";
 
 /**
- * Register a realistic builder hierarchy in BuilderRegistry.
- * No DOM needed — pure data.
+ * Build a DOM tree that mirrors the Builder structure.
+ * OS item queries read DOM — so tests need real DOM.
  *
- *   s1 (section)
- *     └── g1 (group)
- *           ├── i1 (item)
- *           └── i2 (item)
- *   s2 (section)
+ *   [zone container]
+ *     s1 (section)
+ *       └── g1 (group)
+ *             ├── i1 (item)
+ *             └── i2 (item)
+ *     s2 (section)
  */
-function registerTestHierarchy() {
-    BuilderRegistry.register("s1", { level: "section", parentId: null });
-    BuilderRegistry.register("g1", { level: "group", parentId: "s1" });
-    BuilderRegistry.register("i1", { level: "item", parentId: "g1" });
-    BuilderRegistry.register("i2", { level: "item", parentId: "g1" });
-    BuilderRegistry.register("s2", { level: "section", parentId: null });
+function buildTestDOM(): HTMLDivElement {
+    const container = document.createElement("div");
+    container.id = ZONE_ID;
+    container.setAttribute("data-focus-group", ZONE_ID);
+
+    const s1 = document.createElement("div");
+    s1.setAttribute("data-item-id", "s1");
+    s1.setAttribute("data-level", "section");
+
+    const g1 = document.createElement("div");
+    g1.setAttribute("data-item-id", "g1");
+    g1.setAttribute("data-level", "group");
+
+    const i1 = document.createElement("div");
+    i1.setAttribute("data-item-id", "i1");
+    i1.setAttribute("data-level", "item");
+
+    const i2 = document.createElement("div");
+    i2.setAttribute("data-item-id", "i2");
+    i2.setAttribute("data-level", "item");
+
+    g1.appendChild(i1);
+    g1.appendChild(i2);
+    s1.appendChild(g1);
+
+    const s2 = document.createElement("div");
+    s2.setAttribute("data-item-id", "s2");
+    s2.setAttribute("data-level", "section");
+
+    container.appendChild(s1);
+    container.appendChild(s2);
+    document.body.appendChild(container);
+    return container;
 }
 
-describe("hierarchicalNavigation — registry-based (zero DOM)", () => {
-    let t: ReturnType<typeof createTestKernel>;
+describe("hierarchicalNavigation — OS item queries", () => {
+    let container: HTMLDivElement;
+
+    // Create callbacks curried with the test zone ID
+    const drillDown = createDrillDown(ZONE_ID);
+    const drillUp = createDrillUp(ZONE_ID);
 
     beforeEach(() => {
-        t = createTestKernel();
-        registerTestHierarchy();
-
+        container = buildTestDOM();
         ZoneRegistry.register(ZONE_ID, {
             config: { ...DEFAULT_CONFIG },
-            element: document.createElement("div"),
+            element: container,
             parentId: null,
             itemFilter: createCanvasItemFilter(ZONE_ID),
         });
@@ -53,75 +89,101 @@ describe("hierarchicalNavigation — registry-based (zero DOM)", () => {
 
     afterEach(() => {
         ZoneRegistry.unregister(ZONE_ID);
-        BuilderRegistry.clear();
+        container.remove();
     });
 
-    describe("BuilderRegistry", () => {
-        it("stores level for each element", () => {
-            expect(BuilderRegistry.getLevel("s1")).toBe("section");
-            expect(BuilderRegistry.getLevel("g1")).toBe("group");
-            expect(BuilderRegistry.getLevel("i1")).toBe("item");
-            expect(BuilderRegistry.getLevel("s2")).toBe("section");
+    // ─── OS Item Queries (OS reads DOM) ──────────────────────────
+
+    describe("getItemAttribute", () => {
+        it("reads data-level from items", () => {
+            expect(getItemAttribute(ZONE_ID, "s1", "data-level")).toBe("section");
+            expect(getItemAttribute(ZONE_ID, "g1", "data-level")).toBe("group");
+            expect(getItemAttribute(ZONE_ID, "i1", "data-level")).toBe("item");
         });
 
-        it("tracks parent-child relationships", () => {
-            expect(BuilderRegistry.getChildren("s1")).toEqual(["g1"]);
-            expect(BuilderRegistry.getChildren("g1")).toEqual(["i1", "i2"]);
-            expect(BuilderRegistry.getChildren("s2")).toEqual([]);
-        });
-
-        it("finds first descendant at level", () => {
-            // Section s1 → first group descendant = g1
-            expect(BuilderRegistry.getFirstDescendantAtLevel("s1", "group")).toBe(
-                "g1",
-            );
-            // Section s1 → first item descendant = i1 (recursive)
-            expect(BuilderRegistry.getFirstDescendantAtLevel("s1", "item")).toBe(
-                "i1",
-            );
-            // Group g1 → first item descendant = i1
-            expect(BuilderRegistry.getFirstDescendantAtLevel("g1", "item")).toBe(
-                "i1",
-            );
-        });
-
-        it("finds ancestor at level", () => {
-            // Item i1 → closest group ancestor = g1
-            expect(BuilderRegistry.getAncestorAtLevel("i1", "group")).toBe("g1");
-            // Item i1 → closest section ancestor = s1
-            expect(BuilderRegistry.getAncestorAtLevel("i1", "section")).toBe("s1");
-            // Group g1 → closest section ancestor = s1
-            expect(BuilderRegistry.getAncestorAtLevel("g1", "section")).toBe("s1");
-        });
-
-        it("cleans up on unregister", () => {
-            BuilderRegistry.unregister("i2");
-            expect(BuilderRegistry.getChildren("g1")).toEqual(["i1"]);
-            expect(BuilderRegistry.getLevel("i2")).toBeNull();
+        it("returns null for unknown items", () => {
+            expect(getItemAttribute(ZONE_ID, "nonexistent", "data-level")).toBeNull();
         });
     });
+
+    describe("getItemParent", () => {
+        it("finds parent item from DOM nesting", () => {
+            expect(getItemParent(ZONE_ID, "g1")).toBe("s1");
+            expect(getItemParent(ZONE_ID, "i1")).toBe("g1");
+            expect(getItemParent(ZONE_ID, "i2")).toBe("g1");
+        });
+
+        it("returns null for top-level items", () => {
+            expect(getItemParent(ZONE_ID, "s1")).toBeNull();
+            expect(getItemParent(ZONE_ID, "s2")).toBeNull();
+        });
+    });
+
+    describe("getItemChildren", () => {
+        it("finds direct children", () => {
+            expect(getItemChildren(ZONE_ID, "s1")).toEqual(["g1"]);
+            expect(getItemChildren(ZONE_ID, "g1")).toEqual(["i1", "i2"]);
+        });
+
+        it("returns empty for leaf items", () => {
+            expect(getItemChildren(ZONE_ID, "i1")).toEqual([]);
+            expect(getItemChildren(ZONE_ID, "s2")).toEqual([]);
+        });
+    });
+
+    describe("getFirstDescendantWithAttribute", () => {
+        it("finds first group inside section", () => {
+            expect(
+                getFirstDescendantWithAttribute(ZONE_ID, "s1", "data-level", "group"),
+            ).toBe("g1");
+        });
+
+        it("finds first item inside section (recursive)", () => {
+            expect(
+                getFirstDescendantWithAttribute(ZONE_ID, "s1", "data-level", "item"),
+            ).toBe("i1");
+        });
+
+        it("finds first item inside group", () => {
+            expect(
+                getFirstDescendantWithAttribute(ZONE_ID, "g1", "data-level", "item"),
+            ).toBe("i1");
+        });
+    });
+
+    describe("getAncestorWithAttribute", () => {
+        it("finds section ancestor of item", () => {
+            expect(
+                getAncestorWithAttribute(ZONE_ID, "i1", "data-level", "section"),
+            ).toBe("s1");
+        });
+
+        it("finds group ancestor of item", () => {
+            expect(
+                getAncestorWithAttribute(ZONE_ID, "i1", "data-level", "group"),
+            ).toBe("g1");
+        });
+
+        it("finds section ancestor of group", () => {
+            expect(
+                getAncestorWithAttribute(ZONE_ID, "g1", "data-level", "section"),
+            ).toBe("s1");
+        });
+    });
+
+    // ─── App Callbacks (use OS queries, no DOM) ──────────────────
 
     describe("createCanvasItemFilter", () => {
-        it("filters to section level by default (no focus)", () => {
+        it("filters to section level by default", () => {
             const filter = createCanvasItemFilter(ZONE_ID);
             const filtered = filter(["s1", "g1", "i1", "i2", "s2"]);
             expect(filtered).toEqual(["s1", "s2"]);
         });
-
-        it("is a pure registry lookup, no DOM", () => {
-            // This test exists to document: filter uses BuilderRegistry.getLevel
-            const entry = ZoneRegistry.get(ZONE_ID);
-            expect(entry?.itemFilter).toBeDefined();
-            const filtered = entry!.itemFilter!(["s1", "g1", "i1", "i2", "s2"]);
-            expect(filtered).toEqual(["s1", "s2"]);
-        });
     });
 
-    describe("drillDown — ZoneCallback", () => {
+    describe("drillDown", () => {
         it("returns FOCUS to first child group when on a section", () => {
-            const cursor = { focusId: "s1", selection: [], anchor: null };
-            const result = drillDown(cursor);
-            // s1 → first group child = g1
+            const result = drillDown({ focusId: "s1", selection: [], anchor: null });
             expect(result).not.toEqual([]);
             if (!Array.isArray(result)) {
                 expect(result.type).toContain("FOCUS");
@@ -129,8 +191,7 @@ describe("hierarchicalNavigation — registry-based (zero DOM)", () => {
         });
 
         it("returns FOCUS to first child item when on a group", () => {
-            const cursor = { focusId: "g1", selection: [], anchor: null };
-            const result = drillDown(cursor);
+            const result = drillDown({ focusId: "g1", selection: [], anchor: null });
             expect(result).not.toEqual([]);
             if (!Array.isArray(result)) {
                 expect(result.type).toContain("FOCUS");
@@ -138,23 +199,22 @@ describe("hierarchicalNavigation — registry-based (zero DOM)", () => {
         });
 
         it("returns FIELD_START_EDIT when on an item", () => {
-            const cursor = { focusId: "i1", selection: [], anchor: null };
-            const result = drillDown(cursor);
+            const result = drillDown({ focusId: "i1", selection: [], anchor: null });
             if (!Array.isArray(result)) {
                 expect(result.type).toContain("FIELD");
             }
         });
 
         it("returns empty for unknown elements", () => {
-            const cursor = { focusId: "nonexistent", selection: [], anchor: null };
-            expect(drillDown(cursor)).toEqual([]);
+            expect(
+                drillDown({ focusId: "nonexistent", selection: [], anchor: null }),
+            ).toEqual([]);
         });
     });
 
-    describe("drillUp — ZoneCallback", () => {
+    describe("drillUp", () => {
         it("returns FOCUS to parent section when on a group", () => {
-            const cursor = { focusId: "g1", selection: [], anchor: null };
-            const result = drillUp(cursor);
+            const result = drillUp({ focusId: "g1", selection: [], anchor: null });
             expect(result).not.toEqual([]);
             if (!Array.isArray(result)) {
                 expect(result.type).toContain("FOCUS");
@@ -162,8 +222,7 @@ describe("hierarchicalNavigation — registry-based (zero DOM)", () => {
         });
 
         it("returns FOCUS to parent group when on an item", () => {
-            const cursor = { focusId: "i1", selection: [], anchor: null };
-            const result = drillUp(cursor);
+            const result = drillUp({ focusId: "i1", selection: [], anchor: null });
             expect(result).not.toEqual([]);
             if (!Array.isArray(result)) {
                 expect(result.type).toContain("FOCUS");
@@ -171,13 +230,15 @@ describe("hierarchicalNavigation — registry-based (zero DOM)", () => {
         });
 
         it("returns empty when on a section (top level)", () => {
-            const cursor = { focusId: "s1", selection: [], anchor: null };
-            expect(drillUp(cursor)).toEqual([]);
+            expect(
+                drillUp({ focusId: "s1", selection: [], anchor: null }),
+            ).toEqual([]);
         });
 
         it("returns empty for unknown elements", () => {
-            const cursor = { focusId: "nonexistent", selection: [], anchor: null };
-            expect(drillUp(cursor)).toEqual([]);
+            expect(
+                drillUp({ focusId: "nonexistent", selection: [], anchor: null }),
+            ).toEqual([]);
         });
     });
 });

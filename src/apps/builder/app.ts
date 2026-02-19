@@ -207,19 +207,21 @@ export const selectElement = canvasZone.command(
 // Zone binding — hierarchical navigation (section/group/item)
 import {
   createCanvasItemFilter,
-  drillDown,
-  drillUp,
+  createDrillDown,
+  createDrillUp,
 } from "@/apps/builder/features/hierarchicalNavigation";
+
+const CANVAS_ZONE_ID = "builder-canvas";
 
 export const BuilderCanvasUI = canvasZone.bind({
   role: "grid",
-  onAction: drillDown,
+  onAction: createDrillDown(CANVAS_ZONE_ID),
   options: {
     navigate: { orientation: "corner" },
     tab: { behavior: "trap" },
   },
-  itemFilter: createCanvasItemFilter("builder-canvas"),
-  keybindings: [{ key: "\\", command: drillUp }],
+  itemFilter: createCanvasItemFilter(CANVAS_ZONE_ID),
+  keybindings: [{ key: "\\", command: createDrillUp(CANVAS_ZONE_ID) }],
 });
 
 // ═══════════════════════════════════════════════════════════════════

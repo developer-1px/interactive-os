@@ -40,7 +40,8 @@
 
 - defineApp API v6 설계 (개밥먹기 보고서 기반)
 - 블록 타입별 Zone 분리 (tab으로 블록 간 이동)
+- [ ] T7: Builder 프리미티브 headless 리팩토링 — Builder.Section/Group/Item을 Zone 기반 OS 패턴으로 전환. 별도 BuilderRegistry 제거, OS의 기존 레지스트리 체계를 확장
 
 ## ⏳ Done
 
-_(시작 전)_
+- [x] T6: 계층 키보드 내비게이션 (Section/Group/Item)
