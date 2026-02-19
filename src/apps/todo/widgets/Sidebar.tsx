@@ -51,8 +51,9 @@ function SidebarContent() {
   );
 
   // followFocus implementation: Sync OS selection -> App state
-  const selectionId = TodoApp.useComputed(
-    (s) => s.os.focus.zones["sidebar"]?.selection?.[0],
+  // Use kernel.useComputed because TodoApp.useComputed only sees TodoState (no 'os')
+  const selectionId = kernel.useComputed(
+    (s) => s.os?.focus?.zones?.["sidebar"]?.selection?.[0],
   );
 
   useEffect(() => {
