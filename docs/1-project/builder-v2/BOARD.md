@@ -9,10 +9,6 @@
 
 ## 🟡 Next
 
-- [ ] T3: Undo/Redo 기초 구현
-  - state history stack 도입
-  - Cmd+Z / Cmd+Shift+Z 바인딩
-
 - [ ] T4: 블록 타입별 패널 폼 E2E
   - image, link, button 패널의 실제 동작 E2E 검증
 
@@ -27,6 +23,11 @@
 
 ## ⏳ Done
 
+- [x] T3: Undo/Redo 기초 구현
+  - [x] BuilderState.history (past/future stacks)
+  - [x] undoCommand / redoCommand + canUndo/canRedo conditions
+  - [x] Cmd+Z / Cmd+Shift+Z — sidebar + canvas zones
+  - [x] Unit test — 7건 headless 검증
 - [x] T2: PropertiesPanel 라이브 바인딩 강화
   - [x] 2-1: ImageProperties — URL/alt 입력 → state → canvas preview
   - [x] 2-2: IconProperties — 아이콘 선택/검색 → state
