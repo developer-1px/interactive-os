@@ -10,11 +10,12 @@ mermaid.initialize({
 
 export function MermaidBlock({ code }: { code: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const idRef = useRef(`mermaid-${crypto.randomUUID()}`);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = idRef.current;
+    // Generate a unique ID per render attempt to avoid mermaid ID collisions
+    // (e.g. React StrictMode double-invocation, or re-render after error)
+    const id = `mermaid-${crypto.randomUUID()}`;
 
     let cancelled = false;
     mermaid
@@ -34,6 +35,9 @@ export function MermaidBlock({ code }: { code: string }) {
 
     return () => {
       cancelled = true;
+      // Clean up ghost SVG element that mermaid may have left in the DOM
+      const ghost = document.getElementById(id);
+      if (ghost) ghost.remove();
     };
   }, [code]);
 

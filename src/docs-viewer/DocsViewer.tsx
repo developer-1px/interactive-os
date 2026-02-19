@@ -51,6 +51,7 @@ export function DocsViewer() {
     useState<ExternalFolderSource | null>(null);
 
   // Use ref so event handlers always see the latest external source
+  const contentRef = useRef<HTMLDivElement>(null);
   const externalRef = useRef(externalSource);
   externalRef.current = externalSource;
 
@@ -111,6 +112,10 @@ export function DocsViewer() {
     }
     setActivePath(path);
     loadContent(path, ext);
+    // Scroll content area to top on document switch
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
   };
 
   // Initialize from hash on mount
@@ -222,7 +227,7 @@ export function DocsViewer() {
 
       {/* Main Content */}
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">
-        <div className="flex-1 overflow-y-auto relative z-10 custom-scrollbar pt-6">
+        <div ref={contentRef} className="flex-1 overflow-y-auto relative z-10 custom-scrollbar pt-6">
           <div className="px-12 py-12 lg:px-16 w-full max-w-5xl mx-auto">
             {error ? (
               <div className="flex flex-col items-center justify-center py-40 text-slate-300">
