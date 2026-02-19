@@ -164,10 +164,17 @@ export function defineApp<S>(
       ? { when: (state: S) => opts.when!.evaluate(state) }
       : undefined;
 
-    const factory = targetGroup.defineCommand(
-      type,
-      kernelHandler,
-      whenGuard,
+    // defineApp's FlatHandler context `{ readonly state: S }` differs from kernel's
+    // `TypedContext<S, InjectResult<Tokens>>`. Cast through the loose internal signature.
+    const defineCmd = targetGroup.defineCommand as (
+      type: string,
+      handler: unknown,
+      options?: unknown,
+    ) => CommandFactory<string, unknown>;
+
+    const factory = (whenGuard
+      ? defineCmd(type, kernelHandler, whenGuard)
+      : defineCmd(type, kernelHandler)
     ) as unknown as CommandFactory<T, P>;
 
     return factory;
