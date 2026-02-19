@@ -9,6 +9,7 @@ description: LLM 산출물의 well-formedness를 intent-preserving하게 보장�
 > **목적**: LLM이 "완료"라고 했지만 실제로 돌아가지 않는 malformed code를 고친다.
 > **범위**: Form(형태)만 고친다. Logic/Design(의도)은 건드리지 않는다.
 > **구분**: `/fix` = 형식 정정, `/issue` = 문제 해결. 이 둘은 다르다.
+> **분류**: 리프. 다른 워크플로우를 호출하지 않는다.
 
 ### 핵심 제약: Intent-Preserving
 
@@ -43,8 +44,9 @@ description: LLM 산출물의 well-formedness를 intent-preserving하게 보장�
    - 발견되면 git history에서 원본을 복원한다.
    - 이 패턴은 tsc/build를 통과하지만 런타임에서 크래시하므로 정적 검증만으로는 잡히지 않는다.
 
-2. **검증 게이트 실행**
-   - `/verify` 워크플로우를 실행한다 (type → unit → e2e → build).
+2. **에러 수집**
+   - `npx tsc --noEmit` 실행하여 타입 에러를 수집한다.
+   - 에러가 없으면 → Step 5(완료)로.
 
 3. **에러 분류**
    - 수집된 에러가 **well-formedness 에러**(malformed)인지 판단한다.
@@ -53,22 +55,11 @@ description: LLM 산출물의 well-formedness를 intent-preserving하게 보장�
 
 4. **Intent-preserving 수정**
    - well-formedness 에러만 수정한다.
-   - 수정 후 `/verify`를 재실행하여 확인한다 (루프).
+   - 수정 후 Step 2로 돌아가 재확인한다 (루프).
 
 5. **범위 밖 에러 보고**
    - Form으로 고칠 수 없는 에러(correctness 문제)가 남으면:
-   - "이 에러는 well-formedness 범위 밖입니다. `/issue`로 등록하세요." 보고하고 멈춘다.
+   - "이 에러는 well-formedness 범위 밖입니다." 보고하고 멈춘다.
 
 6. **완료**
-   - 모든 검증 통과 시: `✅ well-formedness 확인 완료` 보고.
-
-### 호출 관계
-
-```
-/issue → /fix (검증 게이트로 호출) ✅
-/project → /fix (구현 후 검증) ✅
-/refactor → /fix (변환 후 검증) ✅
-/poc → /fix (spike 후 검증) ✅
-/fix → /issue ❌ (금지 — /fix는 문제 해결하지 않는다)
-/fix → /divide ❌ (금지 — /fix는 분해하지 않는다)
-```
+   - 모든 에러 해소 시: `✅ well-formedness 확인 완료` 보고.

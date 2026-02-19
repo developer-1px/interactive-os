@@ -2,35 +2,36 @@
 description: 아이디어를 빠르게 검증하는 PoC spike를 만든다. 별도 라우트 + GlobalNav 등록.
 ---
 
-## /poc — Proof of Concept
+## /poc — PoC Spike
 
-### 원칙
+> **분류**: 오케스트레이터. `/go` 보편 사이클의 **Light 프리셋**을 따른다.
 
-> PoC는 "이거 되나?" 확인이다. 실패하면 버리면 된다.
-> 별도 라우트에서 작업하고, GlobalNav에 등록하여 눈에 보이게 한다.
+### `/go` 보편 사이클과의 관계
 
-### Phase 1: Discovery (선택) — `/discussion`
+`/poc`은 `/go`의 Light 프리셋이다. 생각(2~4), 다듬기(7, 9, 10), 회고(14~16)를 skip.
+가볍게 만들고 돌아가는지만 확인한다.
 
-1. 아이디어가 모호하면 `/discussion`으로 정리한다.
-2. 이미 명확하면 스킵한다.
+### PoC 준비 (보편 사이클 진입 전)
 
-### Phase 2: PRD — `/inbox`
+1. **검증 질문 1개** 정의: "이 실험으로 확인하고 싶은 것은?"
+2. **스코프 제한**: 1~2시간 안에 끝낼 수 있는 범위로 좁힌다.
+3. `/routes` — 별도 라우트 생성 + GlobalNav 등록.
 
-3. `/inbox`로 간략한 PRD를 작성한다.
-   - 핵심 기능, 검증 목적, 스코프를 포함한다.
+### 보편 사이클 진입 (Light)
 
-### Phase 3: 구현
+- Step 1: /ready
+- Step 6: /solve — 최소 구현 (spike)
+- Step 8: /fix — 형식 정정
+- Step 11: /verify — 돌아가는지 확인
+- Step 12: /changelog — 커밋
+- Step 13: /ready — 확인
 
-4. **라우트 생성** — 별도 경로에 페이지를 생성한다.
-5. **GlobalNav 등록** — `/routes`를 실행하여 아이콘+이름 매칭 → GlobalNav에 등록한다.
-6. **spike 구현** — 최소한의 동작하는 코드를 작성한다.
+### PoC 평가 (보편 사이클 이후)
 
-### Phase 4: 검증 — `/fix`
+사용자와 함께 결과를 평가한다:
 
-7. smoke → type → build 검증.
-
-### Phase 5: 판정
-
-8. 사용자에게 질문: **"채택할까요, 폐기할까요?"**
-   - ✅ **채택** → `/project`로 전환을 제안한다.
-   - ❌ **폐기** → `/routes`를 실행하여 라우트 삭제 + GlobalNav 제거 + 관련 파일 정리.
+| 판정 | 조치 |
+|------|------|
+| **채택 (Adopt)** | `/project` 생성. PoC 코드는 프로젝트 첫 커밋. |
+| **폐기 (Discard)** | `/routes` 제거 모드로 관련 파일 삭제. |
+| **보류 (Hold)** | PoC 코드 유지. `docs/5-backlog/`에 기록. |

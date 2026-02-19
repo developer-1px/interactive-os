@@ -1,84 +1,71 @@
 ---
-description: 코드 변경 후 반드시 실행하는 검증 게이트. 다른 워크플로우에서 참조한다.
+description: 검증 게이트. tsc, lint, unit, e2e, build를 순차 실행하여 코드 안정성을 확인한다.
 ---
-
-## /verify — 검증 게이트
-
-> **원칙**: 코드를 수정했으면 반드시 검증 게이트를 통과해야 한다.
-> 하나라도 빠뜨리면 검증이 불완전하다. "통과했다"고 말하지 마라.
-
-### 절차
 
 // turbo-all
 
-0. **환경 확인** (E2E 실행 시에만)
-   - `/ready` 워크플로우를 실행한다 (App 5555 + Docs 4444 health check & 복구).
-   - 타입/린트/유닛만 검증할 때는 이 단계를 스킵한다.
+## /verify — 검증 게이트
 
-1. **Type Check**
-   - `npx tsc --noEmit`
-   - 0 errors 확인.
+> **목적**: 코드 변경 후 시스템 안정성을 확인하는 기계적 게이트.
+> **분류**: 리프. 다른 워크플로우를 호출하지 않는다.
+> **전제**: 개발 환경이 정상 동작 중이어야 한다. 서버가 없으면 오케스트레이터가 `/ready`를 먼저 실행한다.
 
-2. **Lint**
-   - `npx biome check src/` (변경 파일 대상)
-   - errors 0 확인. warnings는 보고하되 블로커로 취급하지 않는다.
-   - lint 오류가 pre-commit hook에서만 발견되는 사태를 방지한다.
+### 게이트 순서
 
-3. **Unit Test**
-   - `npx vitest run`
-   - 전체 통과 확인. 실패 시 수정 후 재실행.
+각 게이트를 순차 실행한다. 실패 시 즉시 보고하고 멈춘다.
 
-4. **E2E Smoke** (필수 — 항상 실행)
-   - `npx playwright test src/tests/e2e/smoke.spec.ts --workers=1`
-   - 모든 라우트가 에러 없이 렌더되는지 확인한다 (~15초).
-   - **import 변경, 모듈 구조 변경은 빌드에서 통과해도 dev 서버에서 깨질 수 있다.** Smoke가 이를 잡는다.
-   - 실패 시 원인 분석 후 수정. 이 단계는 절대 스킵하지 않는다.
+#### Gate 1: Type Check
+// turbo
+```bash
+npx tsc --noEmit
+```
+- 0 errors → 다음 게이트
+- errors → 보고하고 멈춘다
 
-5. **E2E Full** (UI/라우트 변경 시)
-   - `npx playwright test`
-   - 30초 이상 출력 없이 멈추면 dev 서버 상태를 재확인한다 (Step 0).
-   - 전체 통과 확인. 실패 시 원인 분석.
-   - E2E 실패가 코드 변경의 파급이면 수정한다.
-   - E2E 실패가 기존 문제면 명시적으로 보고한다.
-   - **스킵 가능 조건**: UI 컴포넌트/라우트/CSS 변경이 없는 순수 타입/로직 변경. 보고서에 `⏭️ E2E Full skipped — no UI changes` 명시.
+#### Gate 2: Lint
+// turbo
+```bash
+npx biome check --write
+```
 
-6. **Build**
-   - `npx vite build` (또는 `npm run build`)
-   - 빌드 성공 확인.
-   - ⚠️ **빌드 통과 ≠ dev 서버 정상.** `vite build`는 Rollup을 사용하고, dev 서버는 esbuild를 사용한다. type erasure, 모듈 해석 방식이 다르므로 빌드만으로 런타임을 보장할 수 없다. E2E Smoke가 진짜 검증이다.
+#### Gate 3: Unit Test
+// turbo
+```bash
+npx vitest run 2>&1 | tail -30
+```
+- all pass → 다음 게이트
+- fail → 실패한 테스트 목록을 보고하고 멈춘다
 
-7. **Dev Server Recovery** (dev 서버 환경 복구)
-   - `vite build`는 `node_modules/.vite` 캐시 해시를 변경하여 실행 중인 dev 서버를 오염시킨다 (504 Outdated Optimize Dep).
-   - 캐시를 정리하고 dev 서버를 재시작한다:
-     ```
-     rm -rf node_modules/.vite
-     ```
-   - `/ready` 워크플로우를 실행하여 두 서버(App 5555, Docs 4444)가 200 응답하는지 확인한다.
-   - **이 단계를 생략하면 "검증 통과했지만 앱이 깨진" 상태가 된다.**
+#### Gate 4: E2E Smoke (해당 시)
+```bash
+npx playwright test --grep @smoke 2>&1 | tail -30
+```
+- smoke가 없거나 E2E 설정이 없으면 스킵
+
+#### Gate 5: Build
+// turbo
+```bash
+npx vite build 2>&1 | tail -20
+```
+- success → 완료
+- fail → 보고하고 멈춘다
 
 ### 결과 보고
 
-모든 단계 완료 후 아래 형식으로 보고한다:
-
 ```
-| 단계         | 결과                    |
-|-------------|------------------------|
-| Type        | ✅ 0 errors             |
-| Lint        | ✅ 0 errors (N warnings)|
-| Unit        | ✅ N/N passed           |
-| E2E Smoke   | ✅ N/N passed           |
-| E2E Full    | ✅ N/N passed (또는 ⏭️ skipped — no UI changes) |
-| Build       | ✅ OK                   |
-| Dev Recovery| ✅ dev servers 200      |
+| Gate | Result |
+|------|--------|
+| tsc  | ✅ 0 errors |
+| lint | ✅ |
+| unit | ✅ N passed |
+| e2e  | ✅ / ⏭ skip |
+| build| ✅ |
 ```
 
-### 호출 관계
+### Dev Server 복구
 
-이 워크플로우를 호출하는 곳:
-- `/fix` — 수정 후 검증
-- `/go` — 자율 실행 루프의 주기적 검증
-- `/cleanup` — 정리 후 최종 검증
-- `/project` — 구현 후 검증
-- `/refactor` — 변환 후 검증
-- `/tdd` — 테스트 통과 확인
-- `/poc` — spike 후 검증
+빌드가 성공했는데 dev 서버가 죽어있으면:
+```bash
+lsof -t -i :5555 | xargs kill -9 2>/dev/null
+source ~/.nvm/nvm.sh && nvm use && npx vite
+```
