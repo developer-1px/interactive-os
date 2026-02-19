@@ -14,6 +14,7 @@
  */
 import { type BaseCommand, defineScope, type ScopeToken } from "@kernel";
 import { produce } from "immer";
+import type { ZoneCallback } from "../../2-contexts/zoneRegistry.ts";
 import {
   type ComponentProps,
   createContext,
@@ -98,32 +99,32 @@ export interface FocusGroupProps
   /** Project configuration */
   project?: Partial<ProjectConfig>;
 
-  /** Command dispatched on item activation (Enter key) */
-  onAction?: BaseCommand;
+  /** Callback for item activation (Enter key) */
+  onAction?: ZoneCallback;
 
-  /** Command dispatched on item selection (Space key) */
-  onSelect?: BaseCommand;
+  /** Callback for item selection (Space key) */
+  onSelect?: ZoneCallback;
 
-  /** Command dispatched on copy (Cmd+C) */
-  onCopy?: BaseCommand;
+  /** Callback for copy (Cmd+C) */
+  onCopy?: ZoneCallback;
 
-  /** Command dispatched on cut (Cmd+X) */
-  onCut?: BaseCommand;
+  /** Callback for cut (Cmd+X) */
+  onCut?: ZoneCallback;
 
-  /** Command dispatched on paste (Cmd+V) */
-  onPaste?: BaseCommand;
+  /** Callback for paste (Cmd+V) */
+  onPaste?: ZoneCallback;
 
-  /** Command dispatched on check (Space) - for aria-checked state */
-  onCheck?: BaseCommand;
+  /** Callback for check (Space) - for aria-checked state */
+  onCheck?: ZoneCallback;
 
-  /** Command dispatched on delete (Backspace/Delete) */
-  onDelete?: BaseCommand;
+  /** Callback for delete (Backspace/Delete) */
+  onDelete?: ZoneCallback;
 
-  /** Command dispatched on move up (Meta+ArrowUp) */
-  onMoveUp?: BaseCommand;
+  /** Callback for move up (Meta+ArrowUp) */
+  onMoveUp?: ZoneCallback;
 
-  /** Command dispatched on move down (Meta+ArrowDown) */
-  onMoveDown?: BaseCommand;
+  /** Callback for move down (Meta+ArrowDown) */
+  onMoveDown?: ZoneCallback;
 
   /** Command dispatched on undo (Cmd+Z) */
   onUndo?: BaseCommand;

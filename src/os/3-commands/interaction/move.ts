@@ -1,24 +1,25 @@
 /**
  * OS_MOVE_UP / OS_MOVE_DOWN Commands — Meta+Arrow reordering
  *
- * Dispatches the active zone's onMoveUp/onMoveDown callbacks with resolved focus ID.
+ * Passes ZoneCursor to the active zone's onMoveUp/onMoveDown callbacks.
  */
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
-import { resolveFocusId } from "../utils/resolveFocusId";
+import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 export const OS_MOVE_UP = kernel.defineCommand("OS_MOVE_UP", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
   if (!activeZoneId) return;
 
   const zone = ctx.state.os.focus.zones[activeZoneId];
-  if (!zone?.focusedItemId) return;
-
   const entry = ZoneRegistry.get(activeZoneId);
   if (!entry?.onMoveUp) return;
 
-  return { dispatch: resolveFocusId(entry.onMoveUp, zone.focusedItemId) };
+  const cursor = buildZoneCursor(zone);
+  if (!cursor) return;
+
+  return { dispatch: entry.onMoveUp(cursor) };
 });
 
 export const OS_MOVE_DOWN = kernel.defineCommand(
@@ -28,11 +29,12 @@ export const OS_MOVE_DOWN = kernel.defineCommand(
     if (!activeZoneId) return;
 
     const zone = ctx.state.os.focus.zones[activeZoneId];
-    if (!zone?.focusedItemId) return;
-
     const entry = ZoneRegistry.get(activeZoneId);
     if (!entry?.onMoveDown) return;
 
-    return { dispatch: resolveFocusId(entry.onMoveDown, zone.focusedItemId) };
+    const cursor = buildZoneCursor(zone);
+    if (!cursor) return;
+
+    return { dispatch: entry.onMoveDown(cursor) };
   },
 );

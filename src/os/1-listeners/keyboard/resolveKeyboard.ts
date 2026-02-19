@@ -8,6 +8,7 @@
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
+import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
 import { Keybindings } from "@os/keymaps/keybindings";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -40,6 +41,7 @@ export type KeyboardResult =
     | { action: "ignore" }
     | { action: "check"; targetId: string; meta: InputMeta }
     | { action: "dispatch"; command: BaseCommand; meta: InputMeta }
+    | { action: "dispatch-callback"; callback: ZoneCallback; meta: InputMeta }
     | { action: "fallback" };
 
 interface InputMeta {
@@ -83,6 +85,10 @@ export function resolveKeyboard(input: KeyboardInput): KeyboardResult {
 
     if (!binding) {
         return { action: "fallback" };
+    }
+
+    if (typeof binding.command === "function") {
+        return { action: "dispatch-callback", callback: binding.command, meta };
     }
 
     return { action: "dispatch", command: binding.command, meta };

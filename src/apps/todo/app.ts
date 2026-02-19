@@ -28,7 +28,6 @@ import { produce } from "immer";
 import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { FOCUS } from "@/os/3-commands/focus/focus";
 import { defineApp } from "@/os/defineApp";
-import { OS_FOCUS } from "@/os/sentinels";
 
 /** Collision-free random ID */
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -394,17 +393,26 @@ export const redoCommand = listZone.command(
 // Zone binding
 export const TodoListUI = listZone.bind({
   role: "listbox",
-  onCheck: toggleTodo({ id: OS_FOCUS }),
-  onAction: startEdit({ id: OS_FOCUS }),
-  onDelete: deleteTodo({ id: OS_FOCUS }),
-  onCopy: copyTodo({ id: OS_FOCUS }),
-  onCut: cutTodo({ id: OS_FOCUS }),
-  onPaste: pasteTodo({ id: OS_FOCUS }),
-  onMoveUp: moveItemUp({ id: OS_FOCUS }),
-  onMoveDown: moveItemDown({ id: OS_FOCUS }),
+  onCheck: (cursor) => toggleTodo({ id: cursor.focusId }),
+  onAction: (cursor) => startEdit({ id: cursor.focusId }),
+  onDelete: (cursor) => {
+    const ids = cursor.selection.length > 0 ? cursor.selection : [cursor.focusId];
+    return ids.map(id => deleteTodo({ id }));
+  },
+  onCopy: (cursor) => {
+    const ids = cursor.selection.length > 0 ? cursor.selection : [cursor.focusId];
+    return ids.map(id => copyTodo({ id }));
+  },
+  onCut: (cursor) => {
+    const ids = cursor.selection.length > 0 ? cursor.selection : [cursor.focusId];
+    return ids.map(id => cutTodo({ id }));
+  },
+  onPaste: (cursor) => pasteTodo({ id: cursor.focusId }),
+  onMoveUp: (cursor) => moveItemUp({ id: cursor.focusId }),
+  onMoveDown: (cursor) => moveItemDown({ id: cursor.focusId }),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
-  keybindings: [{ key: "Meta+D", command: duplicateTodo({ id: OS_FOCUS }) }],
+  keybindings: [{ key: "Meta+D", command: (cursor) => duplicateTodo({ id: cursor.focusId }) }],
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -455,9 +463,9 @@ export const moveCategoryDown = sidebarZone.command(
 
 export const TodoSidebarUI = sidebarZone.bind({
   role: "listbox",
-  onAction: selectCategory({ id: OS_FOCUS }),
-  onMoveUp: moveCategoryUp(),
-  onMoveDown: moveCategoryDown(),
+  onAction: (cursor) => selectCategory({ id: cursor.focusId }),
+  onMoveUp: () => moveCategoryUp(),
+  onMoveDown: () => moveCategoryDown(),
 });
 
 // ═══════════════════════════════════════════════════════════════════

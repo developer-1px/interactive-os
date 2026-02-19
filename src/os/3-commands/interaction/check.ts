@@ -4,13 +4,13 @@
  * Maps to aria-checked. Triggered by Space on checkbox/switch roles,
  * or by click on checkbox elements.
  *
- * If the zone has onCheck registered, dispatches that (app semantics).
+ * If the zone has onCheck registered, passes ZoneCursor to the callback.
  */
 
 import { ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
-import { resolveFocusId } from "../utils/resolveFocusId";
+import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 interface CheckPayload {
   targetId?: string;
@@ -29,14 +29,17 @@ export const OS_CHECK = kernel.defineCommand(
     const targetId = payload.targetId ?? zone.focusedItemId;
     if (!targetId) return;
 
-    // Zone callback: dispatch onCheck if registered
+    // Zone callback: pass cursor to onCheck
     const entry = ZoneRegistry.get(activeZoneId);
     if (entry?.onCheck) {
+      const cursor = buildZoneCursor(zone);
+      if (!cursor) return;
+      // Override focusId with targetId (click target may differ from focused item)
       return {
-        dispatch: resolveFocusId(entry.onCheck, targetId),
+        dispatch: entry.onCheck({ ...cursor, focusId: targetId }),
       };
     }
 
-    // No onCheck registered — no-op (pure CHECK has no default OS behavior)
+    // No onCheck registered — no-op
   },
 );

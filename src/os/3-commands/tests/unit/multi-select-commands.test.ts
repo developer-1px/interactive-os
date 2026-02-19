@@ -1,12 +1,13 @@
 /**
- * OS Multi-Select Commands — Unit Tests (TDD Spec)
+ * OS Multi-Select Commands — Unit Tests (ZoneCursor pattern)
  *
- * Tests that OS_DELETE, OS_COPY, OS_CUT dispatch app callbacks
- * for ALL selected items (not just the focused one) when selection exists.
+ * Tests that OS commands pass cursor with selection to callbacks,
+ * and that callbacks receive full context for batch decisions.
  */
 
 import { GLOBAL } from "@kernel";
 import type { Command, ScopeToken } from "@kernel/core/tokens";
+import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_COPY, OS_CUT } from "@os/3-commands/clipboard/clipboard";
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
@@ -14,28 +15,7 @@ import { kernel } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// ═══════════════════════════════════════════════════════════════════
-// Helpers
-// ═══════════════════════════════════════════════════════════════════
-
 let snapshot: ReturnType<typeof kernel.getState>;
-
-function createMockCommand(name: string) {
-  return Object.assign(
-    (payload?: Record<string, unknown>) => ({
-      type: `mock/${name}`,
-      payload,
-    }),
-    {
-      type: `mock/${name}`,
-      commandType: `mock/${name}`,
-    },
-  );
-}
-
-const mockDelete = createMockCommand("delete");
-const mockCopy = createMockCommand("copy");
-const mockCut = createMockCommand("cut");
 
 function setupFocusWithSelection(
   zoneId: string,
@@ -64,28 +44,6 @@ function setupFocusWithSelection(
   }));
 }
 
-function registerZone(
-  id: string,
-  callbacks: Partial<{
-    onDelete: Command;
-    onCopy: Command;
-    onCut: Command;
-    onPaste: Command;
-  }>,
-) {
-  ZoneRegistry.register(id, {
-    config: {} as Record<string, never>,
-    element: document.createElement("div"),
-    parentId: null,
-    ...callbacks,
-  });
-}
-
-/**
- * Capture dispatched commands via a GLOBAL before-middleware.
- * This captures ALL dispatches, including those triggered by
- * the kernel's internal dispatch() via the dispatch effect.
- */
 function captureDispatches() {
   const captured: Command[] = [];
   kernel.use({
@@ -115,17 +73,49 @@ beforeEach(() => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("OS_DELETE with multi-selection", () => {
-  it("dispatches onDelete for each selected item when selection exists", () => {
-    const captured = captureDispatches();
+  it("passes cursor with full selection to onDelete (ONE call)", () => {
+    const onDelete = vi.fn((cursor: ZoneCursor) =>
+      cursor.selection.map((id) => ({ type: "mock/delete", payload: { id } })),
+    );
 
+    ZoneRegistry.register("testZone", {
+      config: {} as Record<string, never>,
+      element: document.createElement("div"),
+      parentId: null,
+      onDelete,
+    });
     setupFocusWithSelection("testZone", "item-3", [
       "item-1",
       "item-2",
       "item-3",
     ]);
-    registerZone("testZone", {
-      onDelete: mockDelete({ id: "OS.FOCUS" }),
+
+    kernel.dispatch(OS_DELETE());
+
+    // Callback called exactly ONCE with full cursor
+    expect(onDelete).toHaveBeenCalledTimes(1);
+    expect(onDelete).toHaveBeenCalledWith({
+      focusId: "item-3",
+      selection: ["item-1", "item-2", "item-3"],
+      anchor: "item-1",
     });
+  });
+
+  it("dispatches all commands returned by callback", () => {
+    const captured = captureDispatches();
+
+    ZoneRegistry.register("testZone", {
+      config: {} as Record<string, never>,
+      element: document.createElement("div"),
+      parentId: null,
+      onDelete: (cursor: ZoneCursor) =>
+        cursor.selection.map((id) => ({ type: "mock/delete", payload: { id } })),
+    });
+    setupFocusWithSelection("testZone", "item-3", [
+      "item-1",
+      "item-2",
+      "item-3",
+    ]);
 
     kernel.dispatch(OS_DELETE());
 
@@ -140,20 +130,36 @@ describe("OS_DELETE with multi-selection", () => {
   });
 
   it("falls back to single focusedItemId when no selection", () => {
-    setupFocusWithSelection("testZone", "item-1", []);
-    registerZone("testZone", {
-      onDelete: mockDelete({ id: "OS.FOCUS" }),
-    });
+    const onDelete = vi.fn((cursor: ZoneCursor) => ({
+      type: "mock/delete",
+      payload: { id: cursor.focusId },
+    }));
 
-    // Should not throw — dispatches single delete for focused item
+    ZoneRegistry.register("testZone", {
+      config: {} as Record<string, never>,
+      element: document.createElement("div"),
+      parentId: null,
+      onDelete,
+    });
+    setupFocusWithSelection("testZone", "item-1", []);
+
     kernel.dispatch(OS_DELETE());
+
+    expect(onDelete).toHaveBeenCalledWith({
+      focusId: "item-1",
+      selection: [],
+      anchor: null,
+    });
   });
 
   it("clears selection after multi-delete", () => {
-    setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
-    registerZone("testZone", {
-      onDelete: mockDelete({ id: "OS.FOCUS" }),
+    ZoneRegistry.register("testZone", {
+      config: {} as Record<string, never>,
+      element: document.createElement("div"),
+      parentId: null,
+      onDelete: () => ({ type: "mock/delete", payload: {} }),
     });
+    setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
     kernel.dispatch(OS_DELETE());
 
@@ -167,18 +173,23 @@ describe("OS_DELETE with multi-selection", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("OS_COPY with multi-selection", () => {
-  it("dispatches onCopy for each selected item", () => {
-    const captured = captureDispatches();
+  it("passes cursor with selection to onCopy (ONE call)", () => {
+    const onCopy = vi.fn((cursor: ZoneCursor) => ({
+      type: "mock/copy",
+      payload: { ids: cursor.selection },
+    }));
 
-    setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
-    registerZone("testZone", {
-      onCopy: mockCopy({ id: "OS.FOCUS" }),
+    ZoneRegistry.register("testZone", {
+      config: {} as Record<string, never>,
+      element: document.createElement("div"),
+      parentId: null,
+      onCopy,
     });
+    setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
     kernel.dispatch(OS_COPY());
 
-    const copyCmds = captured.filter((cmd) => cmd.type === "mock/copy");
-    expect(copyCmds.length).toBe(2);
+    expect(onCopy).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -187,25 +198,33 @@ describe("OS_COPY with multi-selection", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("OS_CUT with multi-selection", () => {
-  it("dispatches onCut for each selected item", () => {
-    const captured = captureDispatches();
+  it("passes cursor with selection to onCut (ONE call)", () => {
+    const onCut = vi.fn((cursor: ZoneCursor) => ({
+      type: "mock/cut",
+      payload: { ids: cursor.selection },
+    }));
 
-    setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
-    registerZone("testZone", {
-      onCut: mockCut({ id: "OS.FOCUS" }),
+    ZoneRegistry.register("testZone", {
+      config: {} as Record<string, never>,
+      element: document.createElement("div"),
+      parentId: null,
+      onCut,
     });
+    setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
     kernel.dispatch(OS_CUT());
 
-    const cutCmds = captured.filter((cmd) => cmd.type === "mock/cut");
-    expect(cutCmds.length).toBe(2);
+    expect(onCut).toHaveBeenCalledTimes(1);
   });
 
   it("clears selection after multi-cut", () => {
-    setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
-    registerZone("testZone", {
-      onCut: mockCut({ id: "OS.FOCUS" }),
+    ZoneRegistry.register("testZone", {
+      config: {} as Record<string, never>,
+      element: document.createElement("div"),
+      parentId: null,
+      onCut: () => ({ type: "mock/cut", payload: {} }),
     });
+    setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
     kernel.dispatch(OS_CUT());
 

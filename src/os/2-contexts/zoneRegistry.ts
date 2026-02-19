@@ -13,6 +13,24 @@ import type { BaseCommand } from "@kernel";
 import type { ZoneRole } from "../registries/roleRegistry";
 import type { FocusGroupConfig } from "../schemas/focus/config/FocusGroupConfig";
 
+/**
+ * ZoneCursor — OS→App interface for focus/selection context.
+ *
+ * OS constructs this from kernel state and passes to zone callbacks.
+ * App decides how to handle based on focusId, selection, and anchor.
+ */
+export interface ZoneCursor {
+  /** Currently focused item ID */
+  focusId: string;
+  /** Selected item IDs (may be empty) */
+  selection: string[];
+  /** Selection anchor (starting point of range selection) */
+  anchor: string | null;
+}
+
+/** Zone callback: receives cursor, returns command(s) for OS to dispatch */
+export type ZoneCallback = (cursor: ZoneCursor) => BaseCommand | BaseCommand[];
+
 export interface ZoneEntry {
   config: FocusGroupConfig;
   element: HTMLElement;
@@ -20,16 +38,17 @@ export interface ZoneEntry {
   parentId: string | null;
   /** Command dispatched on ESC when dismiss.escape is "close" */
   onDismiss?: BaseCommand;
-  // Command bindings (Zone-level delegation)
-  onAction?: BaseCommand;
-  onSelect?: BaseCommand;
-  onCheck?: BaseCommand;
-  onDelete?: BaseCommand;
-  onMoveUp?: BaseCommand;
-  onMoveDown?: BaseCommand;
-  onCopy?: BaseCommand;
-  onCut?: BaseCommand;
-  onPaste?: BaseCommand;
+  // Cursor-based callbacks — app receives full focus/selection context
+  onAction?: ZoneCallback;
+  onSelect?: ZoneCallback;
+  onCheck?: ZoneCallback;
+  onDelete?: ZoneCallback;
+  onMoveUp?: ZoneCallback;
+  onMoveDown?: ZoneCallback;
+  onCopy?: ZoneCallback;
+  onCut?: ZoneCallback;
+  onPaste?: ZoneCallback;
+  // Static commands — no cursor needed
   onUndo?: BaseCommand;
   onRedo?: BaseCommand;
 }

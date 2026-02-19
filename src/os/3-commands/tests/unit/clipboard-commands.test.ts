@@ -1,41 +1,15 @@
 /**
- * Clipboard OS Command Integration Test
- *
- * Tests the dispatch chain: OS_COPY → ZoneRegistry lookup → onCopy callback.
- * Uses mock commands to isolate OS behavior from app-specific logic.
- *
- * App-level clipboard tests (CopyTodo, PasteTodo, etc.) are in
- * src/apps/todo/tests/unit/todo.test.ts
+ * Clipboard OS Command Integration Test (ZoneCursor pattern)
  */
 
+import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
 import { kernel } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// ═══════════════════════════════════════════════════════════════════
-// Helpers
-// ═══════════════════════════════════════════════════════════════════
-
 let snapshot: ReturnType<typeof kernel.getState>;
-
-// Track which callbacks were invoked
-let _callLog: string[] = [];
-
-// Mock command factories that just log when dispatched
-const mockCopy = Object.assign(
-  (payload?: any) => ({ type: "test/copy", payload }),
-  { type: "test/copy" },
-);
-const mockCut = Object.assign(
-  (payload?: any) => ({ type: "test/cut", payload }),
-  { type: "test/cut" },
-);
-const mockPaste = Object.assign(
-  (payload?: any) => ({ type: "test/paste", payload }),
-  { type: "test/paste" },
-);
 
 function setupFocus(zoneId: string, focusedItemId: string) {
   kernel.setState((prev) => ({
@@ -61,9 +35,9 @@ function setupFocus(zoneId: string, focusedItemId: string) {
 function registerZoneWithClipboard(
   id: string,
   callbacks: Partial<{
-    onCopy: any;
-    onCut: any;
-    onPaste: any;
+    onCopy: (cursor: ZoneCursor) => any;
+    onCut: (cursor: ZoneCursor) => any;
+    onPaste: (cursor: ZoneCursor) => any;
   }>,
 ) {
   ZoneRegistry.register(id, {
@@ -76,9 +50,7 @@ function registerZoneWithClipboard(
 
 beforeEach(() => {
   snapshot = kernel.getState();
-  _callLog = [];
 
-  // Mock navigator.clipboard to avoid browser API errors in vitest
   Object.defineProperty(navigator, "clipboard", {
     value: {
       write: vi.fn().mockResolvedValue(undefined),
@@ -98,35 +70,27 @@ beforeEach(() => {
   };
 });
 
-// ═══════════════════════════════════════════════════════════════════
-// Tests
-// ═══════════════════════════════════════════════════════════════════
-
 describe("OS_COPY dispatch chain", () => {
   it("OS_COPY with onCopy callback dispatches the callback", () => {
     const zoneId = "test-zone-copy";
     registerZoneWithClipboard(zoneId, {
-      onCopy: mockCopy({ id: "OS.FOCUS" }),
+      onCopy: (cursor) => ({ type: "test/copy", payload: { id: cursor.focusId } }),
     });
     setupFocus(zoneId, "item-1");
 
-    // Should not throw
     kernel.dispatch(OS_COPY());
   });
 
   it("OS_COPY without activeZoneId is no-op", () => {
-    const _beforeState = kernel.getState();
     kernel.dispatch(OS_COPY());
-    // Should not crash
     expect(kernel.getState().os).toBeDefined();
   });
 
   it("OS_COPY without onCopy callback is no-op", () => {
     const zoneId = "test-zone-no-copy";
-    registerZoneWithClipboard(zoneId, {}); // No onCopy
+    registerZoneWithClipboard(zoneId, {});
     setupFocus(zoneId, "123");
 
-    // Should not crash
     kernel.dispatch(OS_COPY());
   });
 });
@@ -135,7 +99,7 @@ describe("OS_CUT dispatch chain", () => {
   it("OS_CUT with onCut callback dispatches the callback", () => {
     const zoneId = "test-zone-cut";
     registerZoneWithClipboard(zoneId, {
-      onCut: mockCut({ id: "OS.FOCUS" }),
+      onCut: (cursor) => ({ type: "test/cut", payload: { id: cursor.focusId } }),
     });
     setupFocus(zoneId, "item-1");
 
@@ -147,7 +111,7 @@ describe("OS_PASTE dispatch chain", () => {
   it("OS_PASTE with onPaste callback dispatches the callback", () => {
     const zoneId = "test-zone-paste";
     registerZoneWithClipboard(zoneId, {
-      onPaste: mockPaste({ id: "OS.FOCUS" }),
+      onPaste: (cursor) => ({ type: "test/paste", payload: { id: cursor.focusId } }),
     });
     setupFocus(zoneId, "item-1");
 

@@ -8,6 +8,7 @@
 
 import type { BaseCommand } from "@kernel";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
 import type { ZoneRole } from "@os/registries/roleRegistry.ts";
 import type {
   ActivateConfig,
@@ -41,24 +42,24 @@ export interface ZoneProps
   role?: ZoneRole;
   /** Advanced config overrides (use sparingly) */
   options?: ZoneOptions;
-  /** Command dispatched on item activation (Enter key) */
-  onAction?: BaseCommand;
-  /** Command dispatched on item selection (Space key) */
-  onSelect?: BaseCommand;
-  /** Command dispatched on copy (Cmd+C) */
-  onCopy?: BaseCommand;
-  /** Command dispatched on cut (Cmd+X) */
-  onCut?: BaseCommand;
-  /** Command dispatched on paste (Cmd+V) */
-  onPaste?: BaseCommand;
-  /** Command dispatched on check (Space) - for aria-checked state */
-  onCheck?: BaseCommand;
-  /** Command dispatched on delete (Backspace/Delete) */
-  onDelete?: BaseCommand;
-  /** Command dispatched on move up (Meta+ArrowUp) */
-  onMoveUp?: BaseCommand;
-  /** Command dispatched on move down (Meta+ArrowDown) */
-  onMoveDown?: BaseCommand;
+  /** Callback for item activation (Enter key) */
+  onAction?: ZoneCallback;
+  /** Callback for item selection (Space key) */
+  onSelect?: ZoneCallback;
+  /** Callback for copy (Cmd+C) */
+  onCopy?: ZoneCallback;
+  /** Callback for cut (Cmd+X) */
+  onCut?: ZoneCallback;
+  /** Callback for paste (Cmd+V) */
+  onPaste?: ZoneCallback;
+  /** Callback for check (Space) - for aria-checked state */
+  onCheck?: ZoneCallback;
+  /** Callback for delete (Backspace/Delete) */
+  onDelete?: ZoneCallback;
+  /** Callback for move up (Meta+ArrowUp) */
+  onMoveUp?: ZoneCallback;
+  /** Callback for move down (Meta+ArrowDown) */
+  onMoveDown?: ZoneCallback;
   /** Command dispatched on undo (Cmd+Z) */
   onUndo?: BaseCommand;
   /** Command dispatched on redo (Cmd+Shift+Z) */

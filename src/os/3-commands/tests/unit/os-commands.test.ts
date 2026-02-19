@@ -1,13 +1,12 @@
 /**
- * L3. OS Commands — Integration Tests
+ * L3. OS Commands — Integration Tests (ZoneCursor pattern)
  *
- * Tests the dispatch chain: OS command → ZoneRegistry lookup → zone callback.
+ * Tests the dispatch chain: OS command → ZoneRegistry lookup → ZoneCallback(cursor).
  * Uses mock callbacks to isolate OS behavior from app-specific logic.
- *
- * App-level command tests are in src/apps/todo/tests/unit/todo.test.ts
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
 import { ACTIVATE } from "@os/3-commands/interaction/activate";
 import { OS_CHECK } from "@os/3-commands/interaction/check";
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
@@ -24,23 +23,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // ═══════════════════════════════════════════════════════════════════
 
 let snapshot: ReturnType<typeof kernel.getState>;
-let _callLog: string[];
-
-// Mock command factories — track invocations via kernel state side-effect
-function createMockCommand(name: string) {
-  return Object.assign((payload?: any) => ({ type: `mock/${name}`, payload }), {
-    type: `mock/${name}`,
-    commandType: `mock/${name}`,
-  });
-}
-
-const mockToggle = createMockCommand("toggle");
-const mockAction = createMockCommand("action");
-const mockDelete = createMockCommand("delete");
-const mockMoveUp = createMockCommand("moveUp");
-const mockMoveDown = createMockCommand("moveDown");
-const mockUndo = createMockCommand("undo");
-const mockRedo = createMockCommand("redo");
 
 function setupFocus(zoneId: string, focusedItemId: string) {
   kernel.setState((prev) => ({
@@ -66,11 +48,11 @@ function setupFocus(zoneId: string, focusedItemId: string) {
 function registerZone(
   id: string,
   callbacks: Partial<{
-    onCheck: any;
-    onAction: any;
-    onDelete: any;
-    onMoveUp: any;
-    onMoveDown: any;
+    onCheck: (cursor: ZoneCursor) => any;
+    onAction: (cursor: ZoneCursor) => any;
+    onDelete: (cursor: ZoneCursor) => any;
+    onMoveUp: (cursor: ZoneCursor) => any;
+    onMoveDown: (cursor: ZoneCursor) => any;
     onUndo: any;
     onRedo: any;
   }>,
@@ -85,7 +67,6 @@ function registerZone(
 
 beforeEach(() => {
   snapshot = kernel.getState();
-  _callLog = [];
   return () => {
     kernel.setState(() => snapshot);
     for (const key of [...ZoneRegistry.keys()]) {
@@ -103,10 +84,9 @@ describe("CHECK → onCheck pipeline", () => {
   it("dispatches onCheck callback when Zone has it", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
-      onCheck: mockToggle({ id: "OS.FOCUS" }),
+      onCheck: (cursor) => ({ type: "mock/toggle", payload: { id: cursor.focusId } }),
     });
 
-    // Should not throw
     kernel.dispatch(OS_CHECK({ targetId: "item-1" }));
   });
 
@@ -114,23 +94,21 @@ describe("CHECK → onCheck pipeline", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {});
 
-    // Should not throw
     kernel.dispatch(OS_CHECK({ targetId: "item-1" }));
   });
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// SELECT — pure aria-selected state (does NOT dispatch onCheck)
+// SELECT
 // ═══════════════════════════════════════════════════════════════════
 
 describe("SELECT — pure selection (no onCheck delegation)", () => {
   it("does NOT dispatch onCheck on SELECT", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
-      onCheck: mockToggle({ id: "OS.FOCUS" }),
+      onCheck: (cursor) => ({ type: "mock/toggle", payload: { id: cursor.focusId } }),
     });
 
-    // SELECT only updates selection state, does not trigger app callbacks
     kernel.dispatch(SELECT({ mode: "toggle" }));
 
     const zone = kernel.getState().os.focus.zones.testZone;
@@ -156,7 +134,7 @@ describe("ACTIVATE → onAction pipeline", () => {
   it("dispatches onAction callback when Zone has it", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
-      onAction: mockAction({ id: "OS.FOCUS" }),
+      onAction: (cursor) => ({ type: "mock/action", payload: { id: cursor.focusId } }),
     });
 
     kernel.dispatch(ACTIVATE());
@@ -171,7 +149,7 @@ describe("OS_DELETE → onDelete pipeline", () => {
   it("dispatches onDelete callback when Zone has it", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
-      onDelete: mockDelete({ id: "OS.FOCUS" }),
+      onDelete: (cursor) => ({ type: "mock/delete", payload: { id: cursor.focusId } }),
     });
 
     kernel.dispatch(OS_DELETE());
@@ -186,14 +164,14 @@ describe("OS_DELETE → onDelete pipeline", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// OS_MOVE_UP / OS_MOVE_DOWN → onMoveUp / onMoveDown
+// OS_MOVE_UP / OS_MOVE_DOWN
 // ═══════════════════════════════════════════════════════════════════
 
 describe("OS_MOVE → onMoveUp/Down pipeline", () => {
   it("dispatches onMoveUp callback when Zone has it", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
-      onMoveUp: mockMoveUp({ focusId: "OS.FOCUS" }),
+      onMoveUp: (cursor) => ({ type: "mock/moveUp", payload: { id: cursor.focusId } }),
     });
 
     kernel.dispatch(OS_MOVE_UP());
@@ -202,7 +180,7 @@ describe("OS_MOVE → onMoveUp/Down pipeline", () => {
   it("dispatches onMoveDown callback when Zone has it", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
-      onMoveDown: mockMoveDown({ focusId: "OS.FOCUS" }),
+      onMoveDown: (cursor) => ({ type: "mock/moveDown", payload: { id: cursor.focusId } }),
     });
 
     kernel.dispatch(OS_MOVE_DOWN());
@@ -232,14 +210,14 @@ describe("OS_MOVE → onMoveUp/Down pipeline", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// OS_UNDO → onUndo
+// OS_UNDO → onUndo (BaseCommand, not ZoneCallback)
 // ═══════════════════════════════════════════════════════════════════
 
 describe("OS_UNDO → onUndo pipeline", () => {
   it("dispatches onUndo callback when Zone has it", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
-      onUndo: mockUndo(),
+      onUndo: { type: "mock/undo", payload: undefined },
     });
 
     kernel.dispatch(OS_UNDO());
@@ -258,14 +236,14 @@ describe("OS_UNDO → onUndo pipeline", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// OS_REDO → onRedo
+// OS_REDO → onRedo (BaseCommand, not ZoneCallback)
 // ═══════════════════════════════════════════════════════════════════
 
 describe("OS_REDO → onRedo pipeline", () => {
   it("dispatches onRedo callback when Zone has it", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
-      onRedo: mockRedo(),
+      onRedo: { type: "mock/redo", payload: undefined },
     });
 
     kernel.dispatch(OS_REDO());

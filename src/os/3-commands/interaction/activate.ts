@@ -3,7 +3,7 @@
  *
  * Behavior:
  * - If zone role is expandable: toggle expansion (via OS_EXPAND dispatch)
- * - If zone has onAction: dispatch onAction with resolved focus ID
+ * - If zone has onAction: pass ZoneCursor to onAction callback
  * - Otherwise: trigger CLICK effect on focused element
  */
 
@@ -14,7 +14,7 @@ import {
   isExpandableRole,
 } from "../../registries/roleRegistry";
 import { EXPAND } from "../expand";
-import { resolveFocusId } from "../utils/resolveFocusId";
+import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
@@ -27,7 +27,6 @@ export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
   if (ZoneRegistry.isDisabled(activeZoneId, zone.focusedItemId)) return;
 
   // W3C Tree Pattern: Enter/Space toggles expansion for expandable items
-  // Expandability is determined by zone role, not DOM attribute.
   const entry = ZoneRegistry.get(activeZoneId);
   const childRole = getChildRole(entry?.role);
   if (childRole && isExpandableRole(childRole)) {
@@ -36,11 +35,12 @@ export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
     };
   }
 
-  // Zone callback: dispatch onAction if registered
+  // Zone callback: pass cursor to onAction
   if (entry?.onAction) {
-    return {
-      dispatch: resolveFocusId(entry.onAction, zone.focusedItemId),
-    };
+    const cursor = buildZoneCursor(zone);
+    if (!cursor) return;
+    const result = entry.onAction(cursor);
+    return { dispatch: result };
   }
 
   // Fallback: programmatic click

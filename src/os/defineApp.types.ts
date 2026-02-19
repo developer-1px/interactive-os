@@ -10,6 +10,7 @@
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import type React from "react";
 import type { ReactNode } from "react";
+import type { ZoneCallback } from "./2-contexts/zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Brand Symbols
@@ -60,14 +61,14 @@ export type FlatHandler<S, P> = (
 
 export interface ZoneBindings {
   role: string;
-  onCheck?: BaseCommand;
-  onAction?: BaseCommand;
-  onDelete?: BaseCommand;
-  onCopy?: BaseCommand;
-  onCut?: BaseCommand;
-  onPaste?: BaseCommand;
-  onMoveUp?: BaseCommand;
-  onMoveDown?: BaseCommand;
+  onCheck?: ZoneCallback;
+  onAction?: ZoneCallback;
+  onDelete?: ZoneCallback;
+  onCopy?: ZoneCallback;
+  onCut?: ZoneCallback;
+  onPaste?: ZoneCallback;
+  onMoveUp?: ZoneCallback;
+  onMoveDown?: ZoneCallback;
   onUndo?: BaseCommand;
   onRedo?: BaseCommand;
 }
@@ -80,7 +81,7 @@ export interface FieldBindings {
 
 export interface KeybindingEntry<S> {
   key: string;
-  command: BaseCommand;
+  command: ZoneCallback;
   when?: Condition<S>;
 }
 

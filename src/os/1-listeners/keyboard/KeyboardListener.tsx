@@ -106,6 +106,32 @@ export function KeyboardListener() {
                     e.stopPropagation();
                     return;
 
+                case "dispatch-callback": {
+                    // Build ZoneCursor from current kernel state
+                    const { activeZoneId } = kernel.getState().os.focus;
+                    if (!activeZoneId) return;
+                    const zone =
+                        kernel.getState().os.focus.zones[activeZoneId];
+                    if (!zone?.focusedItemId) return;
+
+                    const cursor = {
+                        focusId: zone.focusedItemId,
+                        selection: zone.selection ?? [],
+                        anchor: zone.selectionAnchor ?? null,
+                    };
+
+                    const cmds = result.callback(cursor);
+                    const cmdArray = Array.isArray(cmds) ? cmds : [cmds];
+                    for (const cmd of cmdArray) {
+                        kernel.dispatch(cmd, {
+                            meta: { input: result.meta },
+                        });
+                    }
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+
                 case "fallback":
                     if (kernel.resolveFallback(e)) {
                         e.preventDefault();

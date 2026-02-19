@@ -33,7 +33,7 @@ const getIcon = (id: string) => {
 import { kernel } from "@os/kernel";
 import { useEffect } from "react";
 
-// ... existing imports
+
 
 export function Sidebar() {
   return (

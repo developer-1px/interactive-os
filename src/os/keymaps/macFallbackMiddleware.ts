@@ -38,6 +38,9 @@ export const macFallbackMiddleware: Middleware = {
     const binding = Keybindings.resolve(fallbackKey, context);
     if (!binding) return null;
 
+    // ZoneCallback bindings are not supported in Mac fallback (no kernel access)
+    if (typeof binding.command === "function") return null;
+
     return binding.command;
   },
 };

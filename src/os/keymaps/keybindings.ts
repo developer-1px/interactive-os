@@ -11,6 +11,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
+import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -20,8 +21,8 @@ export interface KeyBinding {
   /** Canonical key string (e.g. "ArrowDown", "Meta+K", "Shift+Tab") */
   key: string;
 
-  /** Pre-built kernel command to dispatch when this key is pressed */
-  command: BaseCommand;
+  /** Command or callback. OS defaults: BaseCommand. App custom: ZoneCallback */
+  command: BaseCommand | ZoneCallback;
 
   /** Context guard: when should this binding be active? */
   when?: "editing" | "navigating";

@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-19 10:05
+> Last updated: 2026-02-19 14:28
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**apg-axis-audit** — APG 패턴 전수조사 → 축 발견 → 갭 분석 → 테스트 증명
+**builder-v2** — Sidebar 키보드 바인딩, PropertiesPanel 라이브 바인딩, Undo/Redo
 
 ---
 
@@ -17,11 +17,13 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| apg-axis-audit | Discovery | 02-19 | 🔥 Focus |
+| builder-v2 | Execution | 02-19 | 🔥 Focus |
+| sentinel-removal | Execution (Heavy) | 02-19 | 🔥 Focus |
+| apg-axis-audit | Discovery | 02-19 | ⏸ Idle |
 | command-type-unification | Definition | 02-18 | ⏸ Idle |
 | docs-topology | Execution | 02-18 | ⏸ Idle |
 | docs-dashboard | Design (PRD/Proposal 완비) | 02-15 | ⏸ Idle |
-| testbot | Execution 준비 (Phase 1) | 02-15 | ⏸ Idle |
+| testbot | Execution 준비 (Phase 1) | 02-19 | ⏸ Idle |
 
 ---
 
@@ -58,7 +60,10 @@
 
 ## 📥 Inbox
 
-**✨ Inbox is empty!**
+| # | Item | Related Project | Suggested Action |
+|---|------|-----------------|------------------|
+| 1 | [os-code-review-issues](0-inbox/2026-0219-1312-[analysis]-os-code-review-issues.md) | command-type-unification | P1: defineCommand when guard 공식화, P3: React 타입 일괄 정리 |
+| 2 | [workflow-dependency-graph](0-inbox/2026-0219-1328-[analysis]-workflow-dependency-graph.md) | — | 참고용 시각화. 고립 노드(/design) 정리 검토 |
 
 > ✅ [area-stale-docs-audit](0-inbox/2026-0218-1046-[analysis]-area-stale-docs-audit.md) — /solve로 해결 (3건 삭제 + 4건 축소/교정). 참고용으로 보존.
 
@@ -69,9 +74,9 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 1 |
-| Active Projects (total) | 5 |
+| Active Projects (total) | 7 |
 | Completed (archived) | 24 |
-| Inbox items | 0 |
+| Inbox items | 2 |
 | Backlog items | 4 |
 | Open issues | 0 |
 
