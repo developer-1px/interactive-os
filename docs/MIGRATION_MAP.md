@@ -53,4 +53,5 @@ git show archive/legacy-docs:docs/path/to/file.md
 | `docs/3-resource/09-project-meta/2026-0212-1350-[report]-workflow-quality-assessment.md` | 17개 워크플로우 평가 — 현행 30+개와 불일치, `/daily`/`/til`/`/next` 등 소멸됨 | 02-20 |
 | `docs/3-resource/09-project-meta/workflow-manual.md` | 워크플로우 연대기 (23개 기준) — 현행 워크플로우 생태계와 불일치, TestBot 포함 | 02-20 |
 | `docs/3-resource/05-reviews/2026-0216-2104-[report]-os-code-review.md` | `src/os/` 코드 리뷰 — `src/os/` 자체가 삭제되어 대상 파일 없음 | 02-20 |
+| `docs/3-resource/09-project-meta/2026-0212-1402-[analysis]-mermaid-rendering-failure.md` | mermaid 렌더링 버그 분석 — `docviewer-mermaid-error` 이슈 닫힘 (02-19), 역사 기록 | 02-20 |
 
