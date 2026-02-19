@@ -14,6 +14,7 @@
 
 import { produce } from "immer";
 import { defineApp } from "@/os/defineApp";
+import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -203,23 +204,41 @@ export const selectElement = canvasZone.command(
   }),
 );
 
-// Zone binding — spatial grid navigation
+// Zone binding — spatial grid navigation + Enter to edit
+import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
+
 export const BuilderCanvasUI = canvasZone.bind({
   role: "grid",
+  onAction: () => FIELD_START_EDIT(),
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// Helper for onCommit callbacks (OS.Field → state update)
+// Helpers for Field ↔ State bridging
 // ═══════════════════════════════════════════════════════════════════
 
 import { kernel } from "@/os/kernel";
 
 /**
- * Update a single field value in the centralized state.
- * Used in NCP blocks' OS.Field onCommit callbacks.
+ * createFieldCommit — Curried FieldCommandFactory for a specific field name.
  *
- * This bridges OS.Field's callback-based API and defineApp's state.
- * Both canvas inline editing and panel editing converge on the same state.
+ * Usage in NCP blocks:
+ *   <Field onCommit={createFieldCommit("ncp-hero-title")} ... />
+ *
+ * Field calls `onCommit({ text: currentValue })`, which dispatches
+ * `updateField({ name, value: text })` to the kernel.
+ */
+export function createFieldCommit(name: string): FieldCommandFactory {
+  const factory = (payload: { text: string }) =>
+    updateField({ name, value: payload.text });
+  factory.id = `builder:commitField:${name}`;
+  return factory as FieldCommandFactory;
+}
+
+/**
+ * builderUpdateField — Imperative helper for PropertiesPanel.
+ *
+ * Used in raw <textarea>/<input> onChange handlers where
+ * FieldCommandFactory pattern doesn't apply.
  */
 export function builderUpdateField(name: string, value: string) {
   kernel.dispatch(updateField({ name, value }));

@@ -15,3 +15,23 @@ export function ensureZone(draft: OSState, zoneId: string): ZoneState {
   }
   return draft.focus.zones[zoneId];
 }
+
+/**
+ * Apply followFocus: selection follows the focused item.
+ * W3C APG: In single-select listbox, selection follows focus.
+ *
+ * Single source of truth — used by both FOCUS and NAVIGATE commands.
+ */
+export function applyFollowFocus(
+  zone: ZoneState,
+  itemId: string,
+  selectConfig?: { followFocus?: boolean; mode?: string },
+): void {
+  if (
+    selectConfig?.followFocus &&
+    selectConfig?.mode !== "none"
+  ) {
+    zone.selection = [itemId];
+    zone.selectionAnchor = itemId;
+  }
+}

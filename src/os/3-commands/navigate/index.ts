@@ -12,7 +12,7 @@ import { produce } from "immer";
 import { DOM_ITEMS, DOM_RECTS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
-import { ensureZone } from "../../state/utils";
+import { applyFollowFocus, ensureZone } from "../../state/utils";
 import {
   getChildRole,
   isExpandableRole,
@@ -132,14 +132,8 @@ export const NAVIGATE = kernel.defineCommand(
           }
         }
 
-        if (
-          !payload.select &&
-          config.select.followFocus &&
-          config.select.mode !== "none" &&
-          navResult.targetId
-        ) {
-          z.selection = [navResult.targetId];
-          z.selectionAnchor = navResult.targetId;
+        if (!payload.select && navResult.targetId) {
+          applyFollowFocus(z, navResult.targetId, config.select);
         }
       }) as typeof ctx.state,
 

@@ -15,6 +15,7 @@
 import type { BaseCommand, Middleware } from "@kernel";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { FOCUS } from "@os/3-commands/focus/focus";
+import { isEditingElement } from "@os/keymaps/fieldKeyOwnership";
 import { resolveTypeahead } from "@os/3-commands/navigate/typeahead";
 import { kernel } from "@os/kernel";
 
@@ -33,7 +34,6 @@ function getItemsAndLabels(zoneEl: HTMLElement): {
     const id = el.dataset.itemId;
     if (!id) continue;
     items.push(id);
-    // W3C accessible name: aria-label > textContent
     const label = el.getAttribute("aria-label") || el.textContent || "";
     labels.set(id, label.trim());
   }
@@ -45,6 +45,13 @@ export const typeaheadFallbackMiddleware: Middleware = {
   id: "typeahead",
   fallback: (event: Event): BaseCommand | null => {
     if (!(event instanceof KeyboardEvent)) return null;
+
+    // Never typeahead during IME composition (Korean, Japanese, Chinese)
+    if (event.isComposing || event.keyCode === 229) return null;
+
+    // Never typeahead while editing a field (contentEditable, input, textarea)
+    const target = event.target as HTMLElement;
+    if (target?.isContentEditable || isEditingElement(target)) return null;
 
     // Only single printable characters (no modifiers except Shift)
     if (event.key.length !== 1) return null;

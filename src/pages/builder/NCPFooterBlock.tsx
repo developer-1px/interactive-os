@@ -7,12 +7,11 @@ import {
   Twitter,
   Youtube,
 } from "lucide-react";
-import { BuilderApp, builderUpdateField } from "@/apps/builder/app";
+import { BuilderApp, createFieldCommit } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPFooterBlock({ id }: { id: string }) {
   const fields = BuilderApp.useComputed((s) => s.data.fields);
-  const fid = (key: string) => `${id}.${key}`;
 
   // Structural data (non-editable via OS.Field)
   const columns = [
@@ -72,25 +71,21 @@ export function NCPFooterBlock({ id }: { id: string }) {
             <div className="lg:col-span-2">
               <Builder.Item asChild id="footer-brand">
                 <Field
-                  name={fid("footer-brand")}
+                  name="footer-brand"
                   mode="deferred"
-                  value={fields[fid("footer-brand")] ?? ""}
-                  onCommit={(val: string) =>
-                    builderUpdateField(fid("footer-brand"), val)
-                  }
+                  value={fields["footer-brand"] ?? ""}
+                  onCommit={createFieldCommit("footer-brand")}
                   className="font-black text-2xl tracking-tighter text-white mb-6 block w-fit data-[focused=true]:bg-slate-800 data-[focused=true]:ring-2 data-[focused=true]:ring-slate-600 rounded px-2 -mx-2"
                 />
               </Builder.Item>
 
               <Builder.Item asChild id="footer-desc">
                 <Field
-                  name={fid("footer-desc")}
+                  name="footer-desc"
                   mode="deferred"
                   multiline
-                  value={fields[fid("footer-desc")] ?? ""}
-                  onCommit={(val: string) =>
-                    builderUpdateField(fid("footer-desc"), val)
-                  }
+                  value={fields["footer-desc"] ?? ""}
+                  onCommit={createFieldCommit("footer-desc")}
                   className="text-slate-500 text-sm leading-relaxed max-w-sm mb-6 block data-[focused=true]:bg-slate-800 rounded p-2 -ml-2"
                 />
               </Builder.Item>
@@ -142,12 +137,6 @@ export function NCPFooterBlock({ id }: { id: string }) {
               </Builder.Group>
             ))}
 
-            {/* Social / Contact Column? Maybe merge into last column or separate. 
-                Actually 2+1+1+1 = 5 columns. I used lg:grid-cols-6. 
-                Let's make Brand 2 cols, Products 1, Solutions 1, Support 1. That's 5. 
-                Maybe add an empty column or spacer, or just let them space out.
-                Let's stick to the current layout.
-            */}
             <div className="lg:col-span-1">
               <Builder.Item asChild id="footer-social-title">
                 <h3 className="font-bold text-white text-sm tracking-wider uppercase mb-6 data-[focused=true]:bg-slate-800 rounded px-1 w-fit">
@@ -192,12 +181,10 @@ export function NCPFooterBlock({ id }: { id: string }) {
 
             <Builder.Item asChild id="footer-copyright">
               <Field
-                name={fid("footer-copyright")}
+                name="footer-copyright"
                 mode="deferred"
-                value={fields[fid("footer-copyright")] ?? ""}
-                onCommit={(val: string) =>
-                  builderUpdateField(fid("footer-copyright"), val)
-                }
+                value={fields["footer-copyright"] ?? ""}
+                onCommit={createFieldCommit("footer-copyright")}
                 className="text-xs text-slate-600 font-medium data-[focused=true]:text-slate-400"
               />
             </Builder.Item>

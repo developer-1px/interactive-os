@@ -18,6 +18,7 @@ export function InspectorAdapter() {
     <UnifiedInspector
       transactions={[...transactions]}
       storeState={storeState}
+      onClear={() => kernel.inspector.clearTransactions()}
     />
   );
 }

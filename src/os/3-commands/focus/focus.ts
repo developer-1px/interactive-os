@@ -1,7 +1,7 @@
 import { produce } from "immer";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
-import { ensureZone } from "../../state/utils";
+import { applyFollowFocus, ensureZone } from "../../state/utils";
 
 interface FocusPayload {
   zoneId: string;
@@ -37,6 +37,9 @@ export const FOCUS = kernel.defineCommand(
         if (itemId) {
           zone.lastFocusedId = itemId;
           zone.recoveryTargetId = null;
+
+          // followFocus: selection follows focus (W3C APG)
+          applyFollowFocus(zone, itemId, zoneEntry?.config?.select);
         }
       }),
 

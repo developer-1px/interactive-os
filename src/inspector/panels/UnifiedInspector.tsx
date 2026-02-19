@@ -149,33 +149,33 @@ function highlightElement(id: string | undefined, active: boolean) {
 export function UnifiedInspector({
   transactions,
   storeState,
+  onClear,
 }: {
   transactions: Transaction[];
   storeState?: Record<string, unknown>;
+  onClear?: () => void;
 }) {
-  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  // ── Auto-expand: only the latest command ──
+  // manualToggles tracks ids the user explicitly clicked (preserved across new events)
+  const [manualToggles, setManualToggles] = useState<Set<number>>(new Set());
   const [traceOpen, setTraceOpen] = useState(true);
   const [storeOpen, setStoreOpen] = useState(false);
 
-  // Auto-expand new events (optional, maybe just the latest)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — react to new tx appended, not full array ref
-  useEffect(() => {
-    if (transactions.length > 0) {
-      const lastTx = transactions[transactions.length - 1];
-      if (lastTx) {
-        setExpandedIds((prev) => {
-          const next = new Set(prev);
-          // next.add(lastTx.id); // Auto-expand latest? Maybe too noisy.
-          return next;
-        });
-      }
-    }
-  }, [transactions.length, transactions[transactions.length - 1]?.id]);
+  // Compute expanded set: auto-expand latest + preserve manual toggles
+  const latestTxId = transactions.length > 0 ? transactions[transactions.length - 1]?.id : undefined;
+  const expandedIds = new Set(manualToggles);
+  // Auto-expand latest only if user hasn't manually collapsed it
+  if (latestTxId !== undefined && !manualToggles.has(latestTxId)) {
+    expandedIds.add(latestTxId);
+  }
 
   // ── Discord/Slack-style auto-scroll ──
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isUserScrolled, setIsUserScrolled] = useState(false);
   const prevTxCount = useRef(transactions.length);
+
+  // Sticky header (32px) + section header (28px) = 60px offset
+  const STICKY_OFFSET = 60;
 
   const isAtBottom = useCallback(() => {
     const el = scrollRef.current;
@@ -200,9 +200,12 @@ export function UnifiedInspector({
   useEffect(() => {
     if (transactions.length > prevTxCount.current) {
       if (!isUserScrolled) {
-        // At bottom → auto-scroll to show new item
+        // At bottom → auto-scroll, accounting for sticky offset
         requestAnimationFrame(() => {
-          scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+          const el = scrollRef.current;
+          if (!el) return;
+          // Scroll so the new last item is visible below sticky headers
+          el.scrollTo({ top: el.scrollHeight - el.clientHeight + STICKY_OFFSET, behavior: "smooth" });
         });
       }
     }
@@ -210,9 +213,17 @@ export function UnifiedInspector({
   }, [transactions.length, isUserScrolled]);
 
   const toggle = (id: number) => {
-    const next = new Set(expandedIds);
-    next.has(id) ? next.delete(id) : next.add(id);
-    setExpandedIds(next);
+    setManualToggles((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        // Was manually toggled — remove to let auto behavior take over
+        next.delete(id);
+      } else {
+        // User explicitly toggles: if currently expanded, manual-close; if collapsed, manual-open
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   return (
@@ -223,6 +234,18 @@ export function UnifiedInspector({
         <span className="ml-2 text-[#999] text-[9px]">
           ({transactions.length} events)
         </span>
+        {onClear && transactions.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              onClear();
+              setManualToggles(new Set());
+            }}
+            className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider text-[#999] hover:text-[#ef4444] hover:bg-[#fef2f2] transition-colors cursor-pointer border border-[#e5e5e5] bg-white"
+          >
+            Clear
+          </button>
+        )}
       </div>
       <div className="relative flex-1 overflow-hidden">
         <div ref={scrollRef} onScroll={handleScroll} className="h-full overflow-y-auto">

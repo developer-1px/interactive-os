@@ -3,6 +3,7 @@ import { Zone } from "@os/6-components/primitives/Zone";
 import { useEffect, useState } from "react";
 import { selectElement, type PropertyType } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
+import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
 import { kernel } from "@/os/kernel";
@@ -94,6 +95,7 @@ export default function BuilderPage() {
         <Zone
           id="builder-canvas"
           className="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-100/50"
+          onAction={() => FIELD_START_EDIT()}
           options={{
             navigate: { orientation: "corner" },
             tab: { behavior: "trap" },
@@ -110,10 +112,10 @@ export default function BuilderPage() {
             >
               {/* Content Container */}
               <div className="flex-1 bg-white relative group/canvas">
-                <NCPHeroBlock />
-                <NCPNewsBlock />
-                <NCPServicesBlock />
-                <NCPFooterBlock />
+                <NCPHeroBlock id="ncp-hero" />
+                <NCPNewsBlock id="ncp-news" />
+                <NCPServicesBlock id="ncp-services" />
+                <NCPFooterBlock id="ncp-footer" />
               </div>
             </div>
           </div>
