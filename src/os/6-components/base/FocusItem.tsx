@@ -74,16 +74,16 @@ export interface FocusItemProps
 // Utils
 // ═══════════════════════════════════════════════════════════════════
 
-function setRef<T>(ref: React.Ref<T> | undefined, value: T) {
+function setRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
   if (typeof ref === "function") {
     ref(value);
   } else if (ref !== null && ref !== undefined) {
-    (ref as React.MutableRefObject<T>).current = value;
+    (ref as React.MutableRefObject<T | null>).current = value;
   }
 }
 
 function composeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
-  return (node: T) =>
+  return (node: T | null) =>
     refs.forEach((ref) => {
       setRef(ref, node);
     });

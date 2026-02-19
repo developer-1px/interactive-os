@@ -248,7 +248,17 @@ export function defineApp<S>(
       return createZone(name);
     },
 
-    createTrigger: ((commandOrConfig: BaseCommand | CompoundTriggerConfig) => {
+    createTrigger: ((commandOrConfig: BaseCommand | CompoundTriggerConfig | CommandFactory<any, any>) => {
+      // ── CommandFactory (Dynamic Trigger) ──
+      if (typeof commandOrConfig === "function") {
+        const factory = commandOrConfig as CommandFactory<any, any>;
+        const DynamicTrigger: React.FC<{ children: ReactNode; payload?: any }> = ({ children, payload }) => {
+          const cmd = factory(payload);
+          return React.createElement(Trigger, { onPress: cmd, children });
+        };
+        DynamicTrigger.displayName = `${appId}.DynamicTrigger`;
+        return DynamicTrigger;
+      }
       // ── Simple trigger (BaseCommand has .type) ──
       if (
         commandOrConfig &&
@@ -262,11 +272,18 @@ export function defineApp<S>(
         commandOrConfig as CompoundTriggerConfig,
       );
     }) as {
+      /* Factory Overload: Returns component taking payload */
+      <P>(factory: CommandFactory<string, P>): React.FC<{
+        children: ReactNode;
+        payload?: P;
+      }>;
+      /* Command Overload: Returns simple component */
       (
         command: BaseCommand,
       ): React.FC<{
         children: ReactNode;
       }>;
+      /* Config Overload: Returns compound components */
       (config: CompoundTriggerConfig): CompoundTriggerComponents;
     },
 

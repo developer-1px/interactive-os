@@ -10,6 +10,10 @@
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import type React from "react";
 import type { ReactNode } from "react";
+import type {
+  CompoundTriggerConfig,
+  CompoundTriggerComponents,
+} from "@os/defineApp.trigger";
 import type { ZoneCallback } from "./2-contexts/zoneRegistry";
 import type { ZoneRole } from "./registries/roleRegistry";
 import type { ZodSchema } from "zod";
@@ -166,9 +170,14 @@ export interface AppHandle<S> {
     options?: { when?: Condition<S> },
   ): CommandFactory<T, P>;
   createZone(name: string): ZoneHandle<S>;
+  createTrigger<P>(factory: CommandFactory<string, P>): React.FC<{
+    children: ReactNode;
+    payload?: P;
+  }>;
   createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;
   }>;
+  createTrigger(config: CompoundTriggerConfig): CompoundTriggerComponents;
   useComputed<T>(selector: Selector<S, T>): T;
   useComputed<T>(fn: (state: S) => T): T;
   create(overrides?: Partial<S>): TestInstance<S>;

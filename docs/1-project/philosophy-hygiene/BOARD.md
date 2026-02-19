@@ -12,16 +12,16 @@
 - [x] Step 6: KernelLabPage — `(s) => s` → `useSyncExternalStore` (디버그 도구)
 - [x] Step 6: `useField` 헬퍼 추가 — 개별 필드 primitive 구독 패턴
 - [x] Step 6: NCPHeroBlock — `useField` 전환 (1/8, 나머지는 builder-v2에서)
-- [ ] Step 6: ListView.tsx — `(s) => s` → 개별 필드 구독
-- [ ] Step 6: Sidebar.tsx — `(s) => s.data.categories` → 개별 구독 검토
-- [ ] Step 11: /verify
+- [x] Step 6: ListView.tsx — `(s) => s` → 개별 필드 구독 (ID 기반 최적화)
+- [x] Step 6: Sidebar.tsx — `(s) => s.data.categories` → 개별 구독 (SidebarCategoryItem 분리)
+- [x] Step 11: /verify (unit test pass)
 
 ### T2. ESLint `no-full-state-useComputed` 규칙 (Clear)
 > `(s) => s` 패턴만 기계적으로 차단. 객체 반환은 앱 레이어 정책 (rules.md).
 
-- [ ] Step 6: 규칙 구현 — `useComputed((s) => s)` 정확 매치만 error
-- [ ] Step 6: `eslint.config.js` 활성화
-- [ ] Step 11: /verify
+- [x] Step 6: 규칙 구현 — `useComputed((s) => s)` 정확 매치만 error
+- [x] Step 6: `eslint.config.js` 활성화
+- [x] Step 11: /verify (manual validation)
 
 ### T3. pages/ onClick → OS 프리미티브 전환 (Clear)
 

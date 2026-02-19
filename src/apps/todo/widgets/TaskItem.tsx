@@ -5,7 +5,7 @@
  * Still uses OS.Trigger for mouse-based actions — Zone handles keyboard.
  */
 
-import { TodoEdit, TodoList } from "@apps/todo/app";
+import { TodoApp, TodoEdit, TodoList } from "@apps/todo/app";
 import { Trigger } from "@os/6-components/primitives/Trigger";
 import {
   ArrowDown,
@@ -16,14 +16,32 @@ import {
   Loader2,
   Trash2,
 } from "lucide-react";
-import type { Todo } from "@apps/todo/model/types";
 
 interface TaskItemProps {
-  todo: Todo;
-  isEditing: boolean;
+  todoId: string;
 }
 
-export function TaskItem({ todo, isEditing }: TaskItemProps) {
+function TaskItemEditor() {
+  const editDraft = TodoApp.useComputed((s) => s.ui.editDraft ?? "");
+
+  return (
+    <TodoEdit.Field
+      name="EDIT"
+      value={editDraft}
+      autoFocus
+      className="w-full bg-transparent outline-none text-slate-900 text-[15px] font-medium leading-relaxed placeholder:text-slate-400"
+      placeholder="What needs to be done?"
+      blurOnInactive={true}
+    />
+  );
+}
+
+export function TaskItem({ todoId }: TaskItemProps) {
+  const todo = TodoApp.useComputed((s) => s.data.todos[todoId]);
+  const isEditing = TodoApp.useComputed((s) => s.ui.editingId === todoId);
+
+  if (!todo) return null;
+
   const isCompleted = todo.completed;
 
   return (
@@ -70,14 +88,7 @@ export function TaskItem({ todo, isEditing }: TaskItemProps) {
         {/* Content Area */}
         <div className="flex-1 min-w-0 pt-0.5">
           {isEditing ? (
-            <TodoEdit.Field
-              name="EDIT"
-              value=""
-              autoFocus
-              className="w-full bg-transparent outline-none text-slate-900 text-[15px] font-medium leading-relaxed placeholder:text-slate-400"
-              placeholder="What needs to be done?"
-              blurOnInactive={true}
-            />
+            <TaskItemEditor />
           ) : (
             <span
               className={`block text-[15px] leading-relaxed transition-all select-none ${isCompleted
@@ -118,7 +129,7 @@ export function TaskItem({ todo, isEditing }: TaskItemProps) {
               <div className="w-px h-3 bg-slate-200 mx-1" />
 
               <Trigger
-                onPress={TodoList.commands.moveItemUp({ id: todo.id })}
+                onPress={TodoList.commands.moveItemUp({ focusId: todo.id })}
               >
                 <button
                   type="button"
@@ -129,7 +140,7 @@ export function TaskItem({ todo, isEditing }: TaskItemProps) {
                 </button>
               </Trigger>
               <Trigger
-                onPress={TodoList.commands.moveItemDown({ id: todo.id })}
+                onPress={TodoList.commands.moveItemDown({ focusId: todo.id })}
               >
                 <button
                   type="button"

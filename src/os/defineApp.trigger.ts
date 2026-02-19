@@ -19,7 +19,7 @@ export function createSimpleTrigger(
   command: BaseCommand,
 ): React.FC<{ children: ReactNode }> {
   const SimpleTrigger: React.FC<{ children: ReactNode }> = ({ children }) => {
-    return React.createElement(Trigger, { onPress: command }, children);
+    return React.createElement(Trigger, { onPress: command, children });
   };
   SimpleTrigger.displayName = `${appId}.Trigger`;
   return SimpleTrigger;
@@ -65,7 +65,7 @@ export function createCompoundTrigger(
   const dialogId = config.id ?? `${appId}-dialog-${Date.now()}`;
 
   const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) =>
-    React.createElement(Dialog, { id: dialogId }, children);
+    React.createElement(Dialog, { id: dialogId, children });
   RootComponent.displayName = `${appId}.Dialog`;
 
   const TriggerComponent: React.FC<{
@@ -73,7 +73,7 @@ export function createCompoundTrigger(
     className?: string;
     asChild?: boolean;
   }> = ({ children, className, asChild }) =>
-      React.createElement(Dialog.Trigger, { className, asChild }, children);
+      React.createElement(Dialog.Trigger, { className, asChild, children });
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
   const ContentComponent: React.FC<{
@@ -97,7 +97,7 @@ export function createCompoundTrigger(
     children: ReactNode;
     className?: string;
   }> = ({ children, className }) =>
-      React.createElement(Dialog.Close, { className }, children);
+      React.createElement(Dialog.Close, { className, children });
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{
@@ -105,11 +105,7 @@ export function createCompoundTrigger(
     className?: string;
   }> = ({ children, className }) => {
     const confirmCmd = config.confirm;
-    return React.createElement(
-      Dialog.Close,
-      { className, onPress: confirmCmd },
-      children,
-    );
+    return React.createElement(Dialog.Close, { className, onPress: confirmCmd as any, children });
   };
   ConfirmComponent.displayName = `${appId}.Dialog.Confirm`;
 

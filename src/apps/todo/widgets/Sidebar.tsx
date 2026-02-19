@@ -7,6 +7,7 @@
 import { TodoApp, TodoSidebar } from "@apps/todo/app";
 import { Kbd } from "@inspector/shell/components/Kbd";
 import { Trigger } from "@os/6-components/primitives/Trigger";
+import { kernel } from "@os/kernel";
 import {
   ArrowRight,
   Briefcase,
@@ -16,6 +17,7 @@ import {
   MoveUp,
   User,
 } from "lucide-react";
+import { useEffect } from "react";
 
 const getIcon = (id: string) => {
   switch (id) {
@@ -30,11 +32,6 @@ const getIcon = (id: string) => {
   }
 };
 
-import { kernel } from "@os/kernel";
-import { useEffect } from "react";
-
-
-
 export function Sidebar() {
   return (
     <TodoSidebar.Zone className="h-full">
@@ -43,9 +40,52 @@ export function Sidebar() {
   );
 }
 
+// Extracted component to isolate category data subscription
+function SidebarCategoryItem({ categoryId }: { categoryId: string }) {
+  const category = TodoApp.useComputed((s) => s.data.categories[categoryId]);
+  const selectedCategoryId = TodoApp.useComputed((s) => s.ui.selectedCategoryId);
+
+  if (!category) return null;
+
+  const isSelected = selectedCategoryId === category.id;
+
+  return (
+    <TodoSidebar.Item id={category.id} asChild>
+      <Trigger
+        onPress={TodoSidebar.commands.selectCategory({
+          id: category.id,
+        })}
+      >
+        <div
+          className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
+                            hover:bg-slate-100/80
+                            data-[focused=true]:bg-indigo-50
+                            data-[focused=true]:ring-2
+                            data-[focused=true]:ring-indigo-400
+                          `}
+        >
+          <span
+            className={`transition-colors duration-200 ${isSelected ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
+          >
+            {getIcon(category.id)}
+          </span>
+          <span
+            className={`transition-colors duration-200 ${isSelected ? "text-slate-900 font-semibold" : "text-slate-600 group-hover:text-slate-900"}`}
+          >
+            {category.text}
+          </span>
+
+          {isSelected && (
+            <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
+          )}
+        </div>
+      </Trigger>
+    </TodoSidebar.Item>
+  );
+}
+
 function SidebarContent() {
   const categoryOrder = TodoApp.useComputed((s) => s.data.categoryOrder);
-  const categories = TodoApp.useComputed((s) => s.data.categories);
   const selectedCategoryId = TodoApp.useComputed(
     (s) => s.ui.selectedCategoryId,
   );
@@ -78,44 +118,9 @@ function SidebarContent() {
         <div className="text-[10px] font-black tracking-widest text-slate-400 uppercase px-4 mb-2">
           Categories
         </div>
-        {categoryOrder.map((categoryId) => {
-          const category = categories[categoryId];
-          if (!category) return null;
-
-          return (
-            <TodoSidebar.Item key={category.id} id={category.id} asChild>
-              <Trigger
-                onPress={TodoSidebar.commands.selectCategory({
-                  id: category.id,
-                })}
-              >
-                <div
-                  className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
-                                    hover:bg-slate-100/80
-                                    data-[focused=true]:bg-indigo-50
-                                    data-[focused=true]:ring-2
-                                    data-[focused=true]:ring-indigo-400
-                                  `}
-                >
-                  <span
-                    className={`transition-colors duration-200 ${selectedCategoryId === category.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
-                  >
-                    {getIcon(category.id)}
-                  </span>
-                  <span
-                    className={`transition-colors duration-200 ${selectedCategoryId === category.id ? "text-slate-900 font-semibold" : "text-slate-600 group-hover:text-slate-900"}`}
-                  >
-                    {category.text}
-                  </span>
-
-                  {selectedCategoryId === category.id && (
-                    <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
-                  )}
-                </div>
-              </Trigger>
-            </TodoSidebar.Item>
-          );
-        })}
+        {categoryOrder.map((categoryId) => (
+          <SidebarCategoryItem key={categoryId} categoryId={categoryId} />
+        ))}
       </div>
 
       <div className="p-6 mt-auto border-t border-slate-100 bg-slate-50/50 z-10">

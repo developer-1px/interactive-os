@@ -23,6 +23,7 @@ export default defineConfig([
       "pipeline/no-pipeline-bypass": "error",
       "pipeline/no-direct-commit": "error",
       "pipeline/no-dom-in-commands": "error",
+      "pipeline/no-full-state-useComputed": "error",
     },
     languageOptions: {
       ecmaVersion: 2020,

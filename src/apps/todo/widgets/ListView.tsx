@@ -5,18 +5,14 @@
  */
 
 import { TodoApp, TodoDraft, TodoList } from "@apps/todo/app";
-import { selectVisibleTodos } from "@apps/todo/selectors";
+import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
 import { Field } from "@os/6-components/field/Field";
 import { Plus } from "lucide-react";
 
 export function ListView() {
-  const state = TodoApp.useComputed((s) => s);
-  if (!state || !state.data) return null;
-
-  const visibleTodos = selectVisibleTodos(state);
-
-  const editingId = state.ui.editingId;
+  const visibleTodoIds = TodoApp.useComputed(selectVisibleTodoIds);
+  const draft = TodoApp.useComputed((s) => s.ui.draft ?? "");
 
   return (
     <div className="flex-1 flex flex-col h-full relative bg-white overflow-hidden font-sans">
@@ -41,7 +37,7 @@ export function ListView() {
               </div>
               <TodoDraft.Field
                 name="DRAFT"
-                value=""
+                value={draft}
                 className="flex-1 bg-transparent outline-none text-slate-700 text-[15px] font-medium placeholder:text-slate-400"
                 placeholder="Add a new task..."
               />
@@ -51,17 +47,12 @@ export function ListView() {
 
             {/* Task Items */}
             <div className="space-y-2.5">
-              {visibleTodos.map((todo) => (
-                <TaskItem
-                  key={todo.id}
-                  todo={todo}
-                  isEditing={editingId === todo.id}
-
-                />
+              {visibleTodoIds.map((id) => (
+                <TaskItem key={id} todoId={id} />
               ))}
             </div>
 
-            {visibleTodos.length === 0 && (
+            {visibleTodoIds.length === 0 && (
               <div className="py-24 flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                   <span className="text-2xl opacity-20">📝</span>

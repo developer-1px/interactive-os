@@ -368,6 +368,75 @@ const noDomInCommands = {
   },
 };
 
+// ─── No Full State UseComputed ──────────────────────────────────────
+// useComputed((s) => s) 패턴을 감지하여 차단.
+// 이는 모든 상태 변경마다 리렌더를 유발하므로 성능에 치명적이다.
+
+/** @type {import('eslint').Rule.RuleModule} */
+const noFullStateUseComputed = {
+  meta: {
+    type: "problem",
+    docs: {
+      description: "Disallow useComputed((s) => s) which causes full re-renders",
+      recommended: true,
+    },
+    messages: {
+      noFullState:
+        "useComputed((s) => s) triggers re-renders on ANY state change. Subscribe to specific selectors.",
+    },
+    schema: [],
+  },
+  create(context) {
+    return {
+      CallExpression(node) {
+        // Check if function name matches useComputed
+        const callee = node.callee;
+        let isUseComputed = false;
+
+        // 1. useComputed(...)
+        if (callee.type === "Identifier" && callee.name === "useComputed") {
+          isUseComputed = true;
+        }
+        // 2. App.useComputed(...) or kernel.useComputed(...)
+        else if (
+          callee.type === "MemberExpression" &&
+          callee.property.type === "Identifier" &&
+          callee.property.name === "useComputed"
+        ) {
+          isUseComputed = true;
+        }
+
+        if (!isUseComputed) return;
+
+        const arg = node.arguments[0];
+        if (!arg || arg.type !== "ArrowFunctionExpression") return;
+
+        // Check params: (s) => ...
+        if (arg.params.length !== 1) return;
+        const param = arg.params[0];
+        if (param.type !== "Identifier") return;
+        const paramName = param.name;
+
+        // Check body: (s) => s
+        if (arg.body.type === "Identifier" && arg.body.name === paramName) {
+          context.report({ node, messageId: "noFullState" });
+        }
+        // Check body: (s) => { return s; } - optional, but good to have
+        if (arg.body.type === "BlockStatement" && arg.body.body.length === 1) {
+          const statement = arg.body.body[0];
+          if (
+            statement.type === "ReturnStatement" &&
+            statement.argument.type === "Identifier" &&
+            statement.argument.name === paramName
+          ) {
+            context.report({ node, messageId: "noFullState" });
+          }
+        }
+      },
+    };
+  },
+};
+
 export default {
   rules: {
     "no-pipeline-bypass": noPipelineBypass,
@@ -375,5 +444,7 @@ export default {
     "no-handler-in-app": noHandlerInApp,
     "no-imperative-handler": noImperativeHandler,
     "no-dom-in-commands": noDomInCommands,
+    "no-full-state-useComputed": noFullStateUseComputed,
   },
 };
+

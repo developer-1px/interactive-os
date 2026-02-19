@@ -47,5 +47,5 @@ export const EditButton = TodoApp.createTrigger(TodoList.commands.startEdit);
  */
 export const ClearDialog = TodoApp.createTrigger({
   id: "todo-clear-dialog",
-  confirm: TodoToolbar.commands.clearCompleted,
+  confirm: TodoToolbar.commands.clearCompleted(),
 });
