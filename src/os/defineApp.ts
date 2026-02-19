@@ -26,7 +26,7 @@
  */
 
 import { defineScope } from "@kernel";
-import type { CommandFactory } from "@kernel/core/tokens";
+import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import type React from "react";
 import type { ReactNode } from "react";
 import { registerAppSlice } from "./appSlice";
@@ -34,6 +34,7 @@ import { createBoundComponents } from "./defineApp.bind";
 import { createTestInstance } from "./defineApp.testInstance";
 import {
   type CompoundTriggerComponents,
+  type CompoundTriggerConfig,
   createCompoundTrigger,
   createSimpleTrigger,
 } from "./defineApp.trigger";
@@ -47,6 +48,7 @@ import {
   type FlatHandler,
   type KeybindingEntry,
   type Selector,
+  type TestInstance,
   type ZoneBindings,
   type ZoneHandle,
 } from "./defineApp.types";

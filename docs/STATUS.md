@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-19 16:12
+> Last updated: 2026-02-19 21:18
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -10,6 +10,7 @@
 ## 🔥 Active Focus
 
 **builder-v2** — 계층 키보드 내비게이션(itemFilter), Sidebar 키보드 바인딩, PropertiesPanel 라이브 바인딩
+**philosophy-hygiene** — useComputed 성능 위반 수정, ESLint 가드레일 추가, deprecated API 정리
 
 ---
 
@@ -18,6 +19,7 @@
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
 | builder-v2 | Execution | 02-19 | 🔥 Focus |
+| philosophy-hygiene | Execution | 02-19 | 🔥 Focus |
 | sentinel-removal | Done | 02-19 | ✅ Complete |
 | apg-axis-audit | Discovery | 02-19 | ⏸ Idle |
 | command-type-unification | Definition | 02-18 | ⏸ Idle |
@@ -75,8 +77,8 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 1 |
-| Active Projects (total) | 6 |
+| Active Focus | 2 |
+| Active Projects (total) | 7 |
 | Completed (archived) | 25 |
 | Inbox items | 2 |
 | Backlog items | 4 |
@@ -86,6 +88,7 @@
 
 ## 📝 Recent Changes (2026-02-19)
 
+- 🆕 `philosophy-hygiene` 프로젝트 생성 — /review + /redteam 분석 결과 기반. useComputed 성능 위반 10건, ESLint 규칙 추가, deprecated API 정리.
 - ✅ field-architecture-refactor — FieldRegistry implementation, syncDraft removal, TodoApp migration.
 
 - 🔧 `2-area/` 소스코드 미러 구조로 재편 — Johnny.Decimal 번호 체계 적용

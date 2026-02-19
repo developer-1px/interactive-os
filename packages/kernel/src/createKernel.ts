@@ -635,12 +635,12 @@ export function createKernel<S>(initialState: S) {
        * Reads .handler, .tokens, .commandType from the factory.
        * Enables test kernels to use production handlers without duplication.
        */
-      register(factory: CommandFactory<string, any>): CommandFactory<string, any> {
+      register<T extends string, P>(factory: CommandFactory<T, P>): CommandFactory<T, P> {
         const { commandType: type, handler, tokens } = factory;
         if (tokens && tokens.length > 0) {
-          return this.defineCommand(type, tokens, handler);
+          return this.defineCommand(type, tokens, handler) as unknown as CommandFactory<T, P>;
         }
-        return this.defineCommand(type, handler);
+        return this.defineCommand(type, handler) as unknown as CommandFactory<T, P>;
       },
 
       reset(newInitialState: S): void {

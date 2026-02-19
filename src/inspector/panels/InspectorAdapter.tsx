@@ -6,11 +6,13 @@
  */
 
 import { UnifiedInspector } from "@inspector/panels/UnifiedInspector.tsx";
+import { useSyncExternalStore } from "react";
 import { kernel } from "@/os/kernel.ts";
 
 export function InspectorAdapter() {
-  // Intentional: Inspector must re-render on ALL state changes
-  kernel.useComputed((s) => s);
+  // Intentional: Inspector must re-render on ALL state changes.
+  // Uses useSyncExternalStore directly — useComputed is primitive-only.
+  useSyncExternalStore(kernel.subscribe, kernel.getState, kernel.getState);
   const transactions = kernel.inspector.getTransactions();
   const storeState = kernel.getState();
 

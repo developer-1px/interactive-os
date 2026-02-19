@@ -13,7 +13,7 @@ import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
 import { kernel } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 // ═════════════════════════════════════════════════════════════════════
 // Helpers

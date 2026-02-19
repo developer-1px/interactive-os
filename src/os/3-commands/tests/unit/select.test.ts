@@ -22,7 +22,7 @@ describe("SELECT — pure selection (no onCheck delegation)", () => {
 
         kernel.dispatch(SELECT({ mode: "toggle" }));
 
-        const zone = kernel.getState().os.focus.zones.testZone;
+        const zone = kernel.getState().os.focus.zones['testZone'];
         expect(zone?.selection).toContain("item-1");
     });
 
@@ -32,7 +32,7 @@ describe("SELECT — pure selection (no onCheck delegation)", () => {
 
         kernel.dispatch(SELECT({ mode: "toggle" }));
 
-        const zone = kernel.getState().os.focus.zones.plainZone;
+        const zone = kernel.getState().os.focus.zones['plainZone'];
         expect(zone?.selection).toContain("item-1");
     });
 });

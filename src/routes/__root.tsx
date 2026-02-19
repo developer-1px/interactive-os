@@ -13,10 +13,10 @@ import { GlobalNav } from "@/components/GlobalNav";
 
 const TanStackRouterDevtools = import.meta.env.DEV
   ? React.lazy(() =>
-      import("@tanstack/router-devtools").then((m) => ({
-        default: m.TanStackRouterDevtools,
-      })),
-    )
+    import("@tanstack/router-devtools").then((m) => ({
+      default: m.TanStackRouterDevtools,
+    })),
+  )
   : () => null;
 
 // Plugin registrations (side-effect imports)
@@ -52,7 +52,7 @@ function RootComponent() {
         const sd = matches[i]?.staticData as
           | Record<string, unknown>
           | undefined;
-        if (sd?.isAppShell) return true;
+        if (sd?.['isAppShell']) return true;
       }
       return false;
     },

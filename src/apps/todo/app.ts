@@ -358,8 +358,8 @@ export const undoCommand = listZone.command(
 
         // Restore from the earliest entry's snapshot
         if (restoreSnapshot) {
-          if (restoreSnapshot.data) draft.data = restoreSnapshot.data;
-          if (restoreSnapshot.ui) draft.ui = restoreSnapshot.ui;
+          if (restoreSnapshot['data']) draft.data = restoreSnapshot['data'] as typeof draft.data;
+          if (restoreSnapshot['ui']) draft.ui = restoreSnapshot['ui'] as typeof draft.ui;
         }
       }),
       dispatch: focusTarget
@@ -389,8 +389,8 @@ export const redoCommand = listZone.command(
         });
         if (popped.snapshot) {
           const snapshot = popped.snapshot;
-          if (snapshot.data) draft.data = snapshot.data;
-          if (snapshot.ui) draft.ui = snapshot.ui;
+          if (snapshot['data']) draft.data = snapshot['data'] as typeof draft.data;
+          if (snapshot['ui']) draft.ui = snapshot['ui'] as typeof draft.ui;
         }
       }),
       dispatch: focusTarget

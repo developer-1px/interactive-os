@@ -188,9 +188,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
     // Stable wrappers for Registry (Config)
     // We wrap these so Registry can call them if needed, but mostly Field handles logic internally now.
-    const stableOnCommit = useRef(
-      (p: { text: string }) => handleCommit(p.text)
-    );
+
 
     // --- Registry Registration ---
     useEffect(() => {
@@ -220,9 +218,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const isContentEditableRef = useRef(false);
 
     // --- Focus Computation ---
-    const _isSystemActive = kernel.useComputed(
-      (s) => s.os.focus.activeZoneId === zoneId,
-    );
     const isFocused = kernel.useComputed(
       (s) =>
         s.os.focus.activeZoneId === zoneId &&

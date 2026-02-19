@@ -132,7 +132,7 @@ export default function BuilderListPage() {
                         name="page-search"
                         placeholder="Search pages..."
                         className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400"
-                        onChange={(_, val) => setSearchQuery(val)}
+                        onChange={(_: unknown, val: string) => setSearchQuery(val)}
                     />
                     {searchQuery && (
                         <button

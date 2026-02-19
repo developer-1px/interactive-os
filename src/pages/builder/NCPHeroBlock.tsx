@@ -1,10 +1,15 @@
 import { Field } from "@os/6-components/field/Field";
 import { ArrowRight, Globe } from "lucide-react";
-import { BuilderApp, createFieldCommit } from "@/apps/builder/app";
+import { createFieldCommit, useField } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPHeroBlock({ id }: { id: string }) {
-  const fields = BuilderApp.useComputed((s) => s.data.fields);
+  const title = useField("ncp-hero-title");
+  const sub = useField("ncp-hero-sub");
+  const brand = useField("ncp-hero-brand");
+  const cta = useField("ncp-hero-cta");
+  const portalTitle = useField("ncp-hero-portal-title");
+  const portalSubtitle = useField("ncp-hero-portal-subtitle");
 
   return (
     <Builder.Section asChild id={id}>
@@ -47,7 +52,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                 name="ncp-hero-title"
                 mode="deferred"
                 multiline
-                value={fields["ncp-hero-title"] ?? ""}
+                value={title}
                 onCommit={createFieldCommit("ncp-hero-title")}
                 className={`
                     block text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter mb-8 -ml-1
@@ -61,7 +66,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                 name="ncp-hero-sub"
                 mode="deferred"
                 multiline
-                value={fields["ncp-hero-sub"] ?? ""}
+                value={sub}
                 onCommit={createFieldCommit("ncp-hero-sub")}
                 className={`
                     block text-xl lg:text-2xl text-slate-500 font-medium leading-relaxed mb-12 max-w-lg
@@ -81,7 +86,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                     hover:bg-[#03C75A] hover:shadow-green-500/30 hover:-translate-y-1
                 `}
               >
-                {fields["ncp-hero-cta"] ?? "무료로 시작하기"}
+                {cta || "무료로 시작하기"}
                 <ArrowRight
                   size={20}
                   className="group-hover:translate-x-1 transition-transform"
@@ -115,7 +120,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                     <Field
                       name="ncp-hero-portal-title"
                       mode="deferred"
-                      value={fields["ncp-hero-portal-title"] ?? ""}
+                      value={portalTitle}
                       onCommit={createFieldCommit("ncp-hero-portal-title")}
                       as="div"
                       multiline
@@ -126,7 +131,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                     <Field
                       name="ncp-hero-portal-subtitle"
                       mode="deferred"
-                      value={fields["ncp-hero-portal-subtitle"] ?? ""}
+                      value={portalSubtitle}
                       onCommit={createFieldCommit("ncp-hero-portal-subtitle")}
                       as="div"
                       multiline
@@ -149,7 +154,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
             <Field
               name="ncp-hero-brand"
               mode="deferred"
-              value={fields["ncp-hero-brand"] ?? ""}
+              value={brand}
               onCommit={createFieldCommit("ncp-hero-brand")}
               className={`
                 font-black tracking-tighter text-lg text-slate-900

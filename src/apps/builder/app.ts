@@ -507,3 +507,16 @@ export function createFieldCommit(name: string): FieldCommandFactory {
 export function builderUpdateField(name: string, value: string) {
   kernel.dispatch(updateField({ name, value }));
 }
+
+/**
+ * useField — Subscribe to a single field value (primitive string).
+ *
+ * useComputed enforces T extends Primitive, so we can't return `s.data.fields` (Record).
+ * Instead, subscribe to each field individually for targeted re-renders.
+ *
+ * @example
+ *   const title = useField("ncp-hero-title");
+ */
+export function useField(key: string): string {
+  return BuilderApp.useComputed((s) => s.data.fields[key] ?? "");
+}

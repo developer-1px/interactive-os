@@ -212,7 +212,7 @@ describe("History: Entry Structure", () => {
     const entry = app.state.history.past[1]!;
     // snapshot should be the state BEFORE "Second" was added
     // snapshot has { data, ui } structure
-    expect(Object.keys(entry.snapshot?.data.todos).length).toBe(
+    expect(Object.keys((entry.snapshot?.['data'] as Record<string, any>)['todos']).length).toBe(
       Object.keys(dataAfterFirst.todos).length,
     );
   });

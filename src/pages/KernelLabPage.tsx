@@ -10,7 +10,7 @@ import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { registerGotoReset } from "@inspector/testbot/playwright/shim";
 import { createKernel, type Transaction } from "@kernel";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runKernelLabSpec from "./tests/e2e/kernel-lab.spec.ts";
@@ -345,7 +345,9 @@ export default function KernelLabPage() {
     );
   }, []);
 
-  const state = kernel.useComputed((s) => s);
+  // Debug page: intentionally subscribes to full state.
+  // Uses useSyncExternalStore directly — useComputed is primitive-only.
+  const state = useSyncExternalStore(kernel.subscribe, kernel.getState, kernel.getState) as DemoState;
 
   return (
     <div key={resetKey} style={pageStyle}>

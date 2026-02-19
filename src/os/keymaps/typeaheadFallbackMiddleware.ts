@@ -31,7 +31,7 @@ function getItemsAndLabels(zoneEl: HTMLElement): {
   const labels = new Map<string, string>();
 
   for (const el of itemEls) {
-    const id = el.dataset.itemId;
+    const id = el.dataset['itemId'];
     if (!id) continue;
     items.push(id);
     const label = el.getAttribute("aria-label") || el.textContent || "";

@@ -211,7 +211,7 @@ function buildZoneEntry(
 ): Record<string, unknown> {
   const entry: Record<string, unknown> = { config, element };
   setIfDefined(entry, "role", props.role);
-  if (props.parentId != null) entry.parentId = props.parentId;
+  if (props.parentId != null) entry['parentId'] = props.parentId;
   setIfDefined(entry, "onDismiss", props.onDismiss);
   setIfDefined(entry, "onAction", props.onAction);
   setIfDefined(entry, "onSelect", props.onSelect);

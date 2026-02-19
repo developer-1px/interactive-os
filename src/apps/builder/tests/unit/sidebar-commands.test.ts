@@ -12,7 +12,6 @@ import {
     duplicateSection,
     moveSectionUp,
     moveSectionDown,
-    type BuilderState,
 } from "../../app";
 
 describe("sidebar section commands", () => {
@@ -26,9 +25,7 @@ describe("sidebar section commands", () => {
         return app.state.data.sections.map((s) => s.id);
     }
 
-    function sectionLabels(): string[] {
-        return app.state.data.sections.map((s) => s.label);
-    }
+
 
     // ─── deleteSection ────────────────────────────────────────────
 

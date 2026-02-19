@@ -65,7 +65,7 @@ describe("NAVIGATE — Basic Movement", () => {
                     zones: {
                         ...s.os.focus.zones,
                         list: {
-                            ...s.os.focus.zones.list!,
+                            ...s.os.focus.zones['list']!,
                             editingItemId: "a",
                         },
                     },

@@ -67,13 +67,13 @@ export function createTestKernel(overrides?: Partial<AppState>) {
     kernel.defineEffect("scroll", () => { });
 
     // ─── Define contexts with mock providers ───
-    const DOM_ITEMS = kernel.defineContext("dom-items", () => {
+    kernel.defineContext("dom-items", () => {
         const zoneId = kernel.getState().os.focus.activeZoneId;
         const entry = zoneId ? ZoneRegistryImport.get(zoneId) : undefined;
         const items = mockItems.current;
         return entry?.itemFilter ? entry.itemFilter(items) : items;
     });
-    const DOM_RECTS = kernel.defineContext(
+    kernel.defineContext(
         "dom-rects",
         () => {
             const zoneId = kernel.getState().os.focus.activeZoneId;
@@ -87,11 +87,11 @@ export function createTestKernel(overrides?: Partial<AppState>) {
             return filtered;
         },
     );
-    const ZONE_CONFIG = kernel.defineContext(
+    kernel.defineContext(
         "zone-config",
         () => mockConfig.current,
     );
-    const DOM_ZONE_ORDER = kernel.defineContext(
+    kernel.defineContext(
         "dom-zone-order",
         () => mockZoneOrder.current,
     );

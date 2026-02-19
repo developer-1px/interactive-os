@@ -10,7 +10,7 @@
 import { GLOBAL } from "@kernel";
 import type { Command, ScopeToken } from "@kernel/core/tokens";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
+import { OS_COPY } from "@os/3-commands/clipboard/clipboard";
 import { ACTIVATE } from "@os/3-commands/interaction/activate";
 import { OS_CHECK } from "@os/3-commands/interaction/check";
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
@@ -54,7 +54,7 @@ function setupFocusWithSelection(
 }
 
 /** Capture dispatched commands via GLOBAL before-middleware */
-function captureDispatches() {
+function _captureDispatches() {
     const captured: Command[] = [];
     kernel.use({
         id: "test:capture-dispatches",
@@ -261,7 +261,7 @@ describe("FR7: SELECTION_CLEAR after delete/cut", () => {
 
         kernel.dispatch(OS_DELETE());
 
-        const zone = kernel.getState().os.focus.zones.z1;
+        const zone = kernel.getState().os.focus.zones['z1'];
         expect(zone?.selection).toEqual([]);
     });
 });
