@@ -31,6 +31,7 @@ import {
   type ContextToken,
   type EffectToken,
   GLOBAL,
+  type InjectableContext,
   type InjectResult,
   type InternalCommandHandler,
   type InternalEffectHandler,
@@ -570,7 +571,7 @@ export function createKernel<S>(initialState: S) {
         <T extends string>(
           type: T,
           tokens: ContextToken[],
-          handler: (ctx: any) => () => HandlerReturn | undefined,
+          handler: (ctx: InjectableContext<S>) => () => HandlerReturn | undefined,
           options?: WhenGuardOption<S>,
         ): CommandFactory<T, void>;
 
@@ -578,7 +579,7 @@ export function createKernel<S>(initialState: S) {
         <T extends string, P>(
           type: T,
           tokens: ContextToken[],
-          handler: (ctx: any) => (payload: P) => HandlerReturn | undefined,
+          handler: (ctx: InjectableContext<S>) => (payload: P) => HandlerReturn | undefined,
           options?: WhenGuardOption<S>,
         ): CommandFactory<T, P>;
       },

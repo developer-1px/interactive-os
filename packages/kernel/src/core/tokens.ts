@@ -107,6 +107,16 @@ export type TypedContext<
   } & Readonly<Injected>
 >;
 
+/**
+ * Context with inject() method — for commands with per-command tokens.
+ * Unlike TypedContext (which flattens injected values), this provides
+ * a typed inject() method that preserves ContextToken phantom types.
+ */
+export type InjectableContext<S> = {
+  readonly state: S;
+  inject<Id extends string, V>(token: ContextToken<Id, V>): V;
+};
+
 // ─── Internal Types (merged from internal-types.ts) ───
 
 /** Internal command handler (curried: ctx → payload → effects) */
