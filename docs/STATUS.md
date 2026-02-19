@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-18 10:30
+> Last updated: 2026-02-19 10:05
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**command-type-unification** — defineApp ↔ OS간 커맨드 타입 체계 단일화 (Factory → BaseCommand)
+**apg-axis-audit** — APG 패턴 전수조사 → 축 발견 → 갭 분석 → 테스트 증명
 
 ---
 
@@ -17,7 +17,8 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| command-type-unification | Definition | 02-18 | 🔥 Focus |
+| apg-axis-audit | Discovery | 02-19 | 🔥 Focus |
+| command-type-unification | Definition | 02-18 | ⏸ Idle |
 | docs-topology | Execution | 02-18 | ⏸ Idle |
 | docs-dashboard | Design (PRD/Proposal 완비) | 02-15 | ⏸ Idle |
 | testbot | Execution 준비 (Phase 1) | 02-15 | ⏸ Idle |
@@ -68,7 +69,7 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 1 |
-| Active Projects (total) | 4 |
+| Active Projects (total) | 5 |
 | Completed (archived) | 24 |
 | Inbox items | 0 |
 | Backlog items | 4 |
