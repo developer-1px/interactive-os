@@ -32,6 +32,9 @@ interface ZoneOrderEntry {
     zoneId: string;
     firstItemId: string | null;
     lastItemId: string | null;
+    entry: "first" | "last" | "restore" | "selected";
+    selectedItemId: string | null;
+    lastFocusedId: string | null;
 }
 
 // ═══════════════════════════════════════════════════════════════════

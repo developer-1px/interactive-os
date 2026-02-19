@@ -13,6 +13,7 @@
 import { kernel } from "../kernel";
 import type { FocusGroupConfig } from "../schemas/focus/config/FocusGroupConfig";
 import { DEFAULT_CONFIG } from "../schemas/focus/config/FocusGroupConfig";
+import type { NavigateEntry } from "../schemas/focus/config/FocusNavigateConfig";
 import { ZoneRegistry } from "./zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -85,11 +86,18 @@ export interface ZoneOrderEntry {
   zoneId: string;
   firstItemId: string | null;
   lastItemId: string | null;
+  /** APG Tab recovery strategy from navigate.entry config */
+  entry: NavigateEntry;
+  /** First selected item in the zone (for entry="selected") */
+  selectedItemId: string | null;
+  /** Last focused item in the zone (for entry="restore") */
+  lastFocusedId: string | null;
 }
 
 export const DOM_ZONE_ORDER = kernel.defineContext(
   "dom-zone-order",
   (): ZoneOrderEntry[] => {
+    const state = kernel.getState();
     const zones: ZoneOrderEntry[] = [];
     const els = document.querySelectorAll("[data-focus-group]");
     for (const el of els) {
@@ -98,11 +106,19 @@ export const DOM_ZONE_ORDER = kernel.defineContext(
       const items = el.querySelectorAll(
         "[data-item-id]:not([data-nav-skip='true'])",
       );
+      // Read zone state for recovery targets
+      const zoneState = state.os.focus.zones[zoneId];
+      const zoneEntry = ZoneRegistry.get(zoneId);
+      const entry = zoneEntry?.config?.navigate?.entry ?? "first";
+
       zones.push({
         zoneId,
         firstItemId: items[0]?.getAttribute("data-item-id") ?? null,
         lastItemId:
           items[items.length - 1]?.getAttribute("data-item-id") ?? null,
+        entry,
+        selectedItemId: zoneState?.selection?.[0] ?? null,
+        lastFocusedId: zoneState?.lastFocusedId ?? null,
       });
     }
     return zones;

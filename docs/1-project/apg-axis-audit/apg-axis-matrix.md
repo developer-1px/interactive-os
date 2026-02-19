@@ -137,27 +137,24 @@
 
 | 축 | 현재 config 키 | 구현 상태 | 갭 |
 |---|---------------|---------|-----|
-| Tab Recovery | ❌ 없음 | 항상 lastFocus 사용 | **listbox/tree/tablist/radiogroup은 selected여야 함** |
+| Tab Recovery | `navigate.entry` | ✅ 스키마 + rolePreset + **런타임 반영 완료** | — |
 | Navigate Orientation | `navigate.orientation` | ✅ vertical/horizontal/corner | — |
-| Navigate Wrap | `navigate.wrap` | ✅ wrap/nowrap | — |
+| Navigate Wrap | `navigate.loop` | ✅ wrap/nowrap | — |
 | Select Mode | `select.mode` | ✅ none/single/multiple | — |
-| Selection Follows Focus | ❌ 없음 | 항상 manual | **radiogroup은 always, listbox/tablist은 optional** |
-| Tab Behavior | `tab.behavior` | ✅ escape/trap | — |
-| Activate Action | `activate.action` | ⚠️ activate만 | **select, check, edit 구분 없음** |
+| Selection Follows Focus | `select.followFocus` | ✅ true/false | — |
+| Tab Behavior | `tab.behavior` | ✅ escape/trap/flow | — |
+| Activate Action | `activate.mode` | ✅ automatic/manual | — |
 | Dismiss | `dismiss.escape` | ✅ close/deselect/none | — |
-| Expand/Collapse | ⚠️ tree만 구현 | 부분 구현 | 일반화 필요 |
+| Expand/Collapse | `EXPAND` command | ✅ tree/treegrid | — |
 
-### 빠진 축 (구현 필요)
+### 해결된 갭
 
-1. **`tab.recovery`**: `"selected"` | `"lastFocus"` | `"first"`
-   - role에서 자동 파생 가능: listbox/tree → selected, grid → lastFocus, toolbar → first
-2. **`select.followsFocus`**: `"auto"` | `"manual"` | `"always"`
-   - role에서 자동 파생 가능: radiogroup → always, listbox(single) → auto(optional)
+1. ~~**`tab.recovery`**: resolveTabEscapeZone이 navigate.entry를 무시~~ → **해결!** ZoneOrderEntry에 entry/selectedItemId/lastFocusedId 추가, resolveTabEscapeZone에서 entry별 분기 구현
+2. ~~**Focus vs Selection 시각 구분**~~ → `data-selected` + `data-focused` + `data-anchor` 이미 존재. CSS만 추가 가능
 
-### 잘못된 기본값 (수정 필요)
+### 남은 미세 갭 (Optional)
 
-1. **FocusItem.tsx의 tabIndex**: 현재 `focusedItemId` 기반 → listbox/tree는 `selection` 기반이어야 함
-2. **Focus vs Selection 시각 구분**: `data-focused`와 `data-selected`는 있지만 CSS에서 구분하지 않음
+1. **FocusItem의 tabIndex**: listbox/tree에서 Tab 재진입 시 `tabIndex=0`이 selected item에 갈지 lastFocused에 갈지 — DOM_ZONE_ORDER의 entry 사용으로 해결됨 (커맨드 레벨에서 올바른 아이템으로 포커스)
 
 ---
 
@@ -166,12 +163,12 @@
 ```
 Role         → tabRecovery   selFollowsFocus  orientation  wrap    selectMode  tabBehavior
 ─────────────┼──────────────┼────────────────┼────────────┼───────┼───────────┼──────────
-listbox      │ selected     │ auto           │ vertical   │ no    │ single    │ escape
-tree         │ selected     │ manual         │ vertical   │ no    │ single    │ escape
-grid         │ lastFocus    │ manual         │ corner     │ no    │ single    │ escape
-tablist      │ selected     │ auto           │ horizontal │ yes   │ single    │ escape
-toolbar      │ first        │ n/a            │ horizontal │ opt   │ none      │ escape
-menubar      │ first        │ n/a            │ horizontal │ yes   │ none      │ escape
-radiogroup   │ selected     │ always         │ both       │ yes   │ single    │ escape
-dialog       │ first        │ n/a            │ n/a        │ n/a   │ none      │ trap
+listbox      │ selected     │ true           │ vertical   │ no    │ single    │ escape
+tree         │ selected     │ false          │ vertical   │ no    │ single    │ escape
+grid         │ (first)      │ false          │ both       │ no    │ multiple  │ escape
+tablist      │ selected     │ true           │ horizontal │ yes   │ single    │ escape
+toolbar      │ restore      │ n/a            │ horizontal │ yes   │ none      │ escape
+menubar      │ restore      │ n/a            │ horizontal │ yes   │ none      │ escape
+radiogroup   │ selected     │ true           │ vertical   │ yes   │ single    │ escape
+dialog       │ (first)      │ n/a            │ vertical   │ no    │ none      │ trap
 ```

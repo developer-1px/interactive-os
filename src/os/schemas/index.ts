@@ -31,7 +31,7 @@ export type { DismissConfig } from "./focus/config/FocusDismissConfig.ts";
 export { DEFAULT_DISMISS } from "./focus/config/FocusDismissConfig.ts";
 export type { FocusGroupConfig } from "./focus/config/FocusGroupConfig.ts";
 export { DEFAULT_CONFIG } from "./focus/config/FocusGroupConfig.ts";
-export type { NavigateConfig } from "./focus/config/FocusNavigateConfig.ts";
+export type { NavigateConfig, NavigateEntry } from "./focus/config/FocusNavigateConfig.ts";
 export { DEFAULT_NAVIGATE } from "./focus/config/FocusNavigateConfig.ts";
 export type { ProjectConfig } from "./focus/config/FocusProjectConfig.ts";
 export { DEFAULT_PROJECT } from "./focus/config/FocusProjectConfig.ts";

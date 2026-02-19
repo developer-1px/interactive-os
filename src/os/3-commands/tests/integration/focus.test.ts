@@ -224,8 +224,8 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
 
         // Setup 2 zones
         const zones = [
-            { zoneId: "list", firstItemId: "l-0", lastItemId: "l-2" },
-            { zoneId: "sidebar", firstItemId: "s-0", lastItemId: "s-2" },
+            { zoneId: "list", firstItemId: "l-0", lastItemId: "l-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
+            { zoneId: "sidebar", firstItemId: "s-0", lastItemId: "s-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
         ];
         t.setZoneOrder(zones);
         t.initZone("list");
@@ -253,8 +253,8 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
     it("Tab round-trip: A → B → A (2 zones, wrap)", () => {
         const t = createTestKernel();
         const zones = [
-            { zoneId: "main", firstItemId: "m-0", lastItemId: "m-2" },
-            { zoneId: "nav", firstItemId: "n-0", lastItemId: "n-2" },
+            { zoneId: "main", firstItemId: "m-0", lastItemId: "m-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
+            { zoneId: "nav", firstItemId: "n-0", lastItemId: "n-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
         ];
         t.setZoneOrder(zones);
         t.setConfig({ tab: { behavior: "escape", restoreFocus: false } });
@@ -276,9 +276,9 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
     it("Shift+Tab: reverse direction", () => {
         const t = createTestKernel();
         const zones = [
-            { zoneId: "a", firstItemId: "a-0", lastItemId: "a-2" },
-            { zoneId: "b", firstItemId: "b-0", lastItemId: "b-2" },
-            { zoneId: "c", firstItemId: "c-0", lastItemId: "c-2" },
+            { zoneId: "a", firstItemId: "a-0", lastItemId: "a-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
+            { zoneId: "b", firstItemId: "b-0", lastItemId: "b-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
+            { zoneId: "c", firstItemId: "c-0", lastItemId: "c-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
         ];
         t.setZoneOrder(zones);
         t.setConfig({ tab: { behavior: "escape", restoreFocus: false } });

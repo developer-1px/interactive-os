@@ -1,11 +1,13 @@
 import type { Orientation } from "../FocusDirection.ts";
 
+export type NavigateEntry = "first" | "last" | "restore" | "selected";
+
 export interface NavigateConfig {
   orientation: Orientation;
   loop: boolean;
   seamless: boolean;
   typeahead: boolean;
-  entry: "first" | "last" | "restore" | "selected";
+  entry: NavigateEntry;
   recovery: "next" | "prev" | "nearest";
 }
 

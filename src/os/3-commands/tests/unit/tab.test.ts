@@ -3,7 +3,7 @@
  *
  * Tests pure tab navigation resolvers:
  * - resolveTabWithinZone: within-zone movement (trap/flow)
- * - resolveTabEscapeZone: cross-zone escape
+ * - resolveTabEscapeZone: cross-zone escape with APG Tab Recovery
  * - resolveTab: top-level orchestrator (trap/flow/escape)
  */
 
@@ -14,6 +14,23 @@ import {
   type ZoneOrderEntry,
 } from "@os/3-commands/tab/resolveTab";
 import { describe, expect, it } from "vitest";
+
+// Helper to create a ZoneOrderEntry with defaults
+function zone(
+  zoneId: string,
+  firstItemId: string | null,
+  lastItemId: string | null,
+  overrides: Partial<Pick<ZoneOrderEntry, "entry" | "selectedItemId" | "lastFocusedId">> = {},
+): ZoneOrderEntry {
+  return {
+    zoneId,
+    firstItemId,
+    lastItemId,
+    entry: overrides.entry ?? "first",
+    selectedItemId: overrides.selectedItemId ?? null,
+    lastFocusedId: overrides.lastFocusedId ?? null,
+  };
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // resolveTabWithinZone
@@ -69,9 +86,9 @@ describe("resolveTabWithinZone (SPEC §3.3)", () => {
 
 describe("resolveTabEscapeZone (SPEC §3.3)", () => {
   const zones: ZoneOrderEntry[] = [
-    { zoneId: "z1", firstItemId: "z1_a", lastItemId: "z1_c" },
-    { zoneId: "z2", firstItemId: "z2_a", lastItemId: "z2_d" },
-    { zoneId: "z3", firstItemId: "z3_a", lastItemId: "z3_b" },
+    zone("z1", "z1_a", "z1_c"),
+    zone("z2", "z2_a", "z2_d"),
+    zone("z3", "z3_a", "z3_b"),
   ];
 
   it("forward: escapes to next zone's first item", () => {
@@ -103,15 +120,88 @@ describe("resolveTabEscapeZone (SPEC §3.3)", () => {
   });
 
   it("single zone: returns null (nowhere to go)", () => {
-    const singleZone: ZoneOrderEntry[] = [
-      { zoneId: "only", firstItemId: "o_a", lastItemId: "o_b" },
-    ];
+    const singleZone: ZoneOrderEntry[] = [zone("only", "o_a", "o_b")];
     expect(resolveTabEscapeZone("only", singleZone, "forward")).toBeNull();
     expect(resolveTabEscapeZone("only", singleZone, "backward")).toBeNull();
   });
 
   it("unknown zone: returns null", () => {
     expect(resolveTabEscapeZone("unknown", zones, "forward")).toBeNull();
+  });
+
+  // ─── APG Tab Recovery ───────────────────────────────────────────
+  describe("APG Tab Recovery — navigate.entry", () => {
+    it('entry="selected": Tab goes to selected item', () => {
+      const zonesWithSelected: ZoneOrderEntry[] = [
+        zone("list", "a", "c"),
+        zone("sidebar", "cat-1", "cat-3", {
+          entry: "selected",
+          selectedItemId: "cat-2",
+        }),
+      ];
+      expect(resolveTabEscapeZone("list", zonesWithSelected, "forward")).toEqual({
+        zoneId: "sidebar",
+        itemId: "cat-2",
+      });
+    });
+
+    it('entry="selected": falls back to first when no selection', () => {
+      const zonesNoSel: ZoneOrderEntry[] = [
+        zone("list", "a", "c"),
+        zone("sidebar", "cat-1", "cat-3", { entry: "selected" }),
+      ];
+      expect(resolveTabEscapeZone("list", zonesNoSel, "forward")).toEqual({
+        zoneId: "sidebar",
+        itemId: "cat-1",
+      });
+    });
+
+    it('entry="restore": Tab goes to last focused item', () => {
+      const zonesRestore: ZoneOrderEntry[] = [
+        zone("z1", "a", "c"),
+        zone("toolbar", "t-0", "t-2", {
+          entry: "restore",
+          lastFocusedId: "t-1",
+        }),
+      ];
+      expect(resolveTabEscapeZone("z1", zonesRestore, "forward")).toEqual({
+        zoneId: "toolbar",
+        itemId: "t-1",
+      });
+    });
+
+    it('entry="restore": falls back to first when no lastFocusedId', () => {
+      const zonesNoRestore: ZoneOrderEntry[] = [
+        zone("z1", "a", "c"),
+        zone("toolbar", "t-0", "t-2", { entry: "restore" }),
+      ];
+      expect(resolveTabEscapeZone("z1", zonesNoRestore, "forward")).toEqual({
+        zoneId: "toolbar",
+        itemId: "t-0",
+      });
+    });
+
+    it('entry="first": Tab always goes to first item (default)', () => {
+      const zonesFirst: ZoneOrderEntry[] = [
+        zone("z1", "a", "c"),
+        zone("menu", "m-0", "m-2", { entry: "first" }),
+      ];
+      expect(resolveTabEscapeZone("z1", zonesFirst, "forward")).toEqual({
+        zoneId: "menu",
+        itemId: "m-0",
+      });
+    });
+
+    it('entry="first" backward: Tab goes to last item', () => {
+      const zonesFirst: ZoneOrderEntry[] = [
+        zone("z1", "a", "c", { entry: "first" }),
+        zone("z2", "d", "f"),
+      ];
+      expect(resolveTabEscapeZone("z2", zonesFirst, "backward")).toEqual({
+        zoneId: "z1",
+        itemId: "c",
+      });
+    });
   });
 });
 
@@ -122,8 +212,8 @@ describe("resolveTabEscapeZone (SPEC §3.3)", () => {
 describe("resolveTab — top-level orchestrator (SPEC §3.3)", () => {
   const items = ["a", "b", "c"];
   const zones: ZoneOrderEntry[] = [
-    { zoneId: "z1", firstItemId: "a", lastItemId: "c" },
-    { zoneId: "z2", firstItemId: "d", lastItemId: "f" },
+    zone("z1", "a", "c"),
+    zone("z2", "d", "f"),
   ];
 
   describe("trap", () => {

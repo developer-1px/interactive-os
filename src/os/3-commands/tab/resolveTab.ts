@@ -12,6 +12,9 @@ export interface ZoneOrderEntry {
   zoneId: string;
   firstItemId: string | null;
   lastItemId: string | null;
+  entry: "first" | "last" | "restore" | "selected";
+  selectedItemId: string | null;
+  lastFocusedId: string | null;
 }
 
 /**
@@ -62,8 +65,28 @@ export function resolveTabEscapeZone(
   if (wrappedIdx === currentIdx) return null;
 
   const nextZone = zoneOrder[wrappedIdx]!;
-  const targetId =
-    direction === "forward" ? nextZone.firstItemId : nextZone.lastItemId;
+
+  // APG Tab Recovery: target depends on navigate.entry config
+  // - "selected": focus goes to first selected item (listbox, tree, tablist, radiogroup)
+  // - "restore": focus goes to last focused item (grid, toolbar optionally)
+  // - "first"/"last": focus goes to edge item (menu, toolbar default)
+  let targetId: string | null = null;
+  switch (nextZone.entry) {
+    case "selected":
+      targetId = nextZone.selectedItemId ?? nextZone.firstItemId;
+      break;
+    case "restore":
+      targetId = nextZone.lastFocusedId ?? nextZone.firstItemId;
+      break;
+    case "last":
+      targetId = nextZone.lastItemId;
+      break;
+    case "first":
+    default:
+      targetId =
+        direction === "forward" ? nextZone.firstItemId : nextZone.lastItemId;
+      break;
+  }
   if (!targetId) return null;
 
   return { zoneId: nextZone.zoneId, itemId: targetId };

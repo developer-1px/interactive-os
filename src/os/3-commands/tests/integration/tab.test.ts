@@ -36,6 +36,9 @@ function createTestKernel(overrides?: Partial<AppState>) {
             zoneId: string;
             firstItemId: string | null;
             lastItemId: string | null;
+            entry: "first" | "last" | "restore" | "selected";
+            selectedItemId: string | null;
+            lastFocusedId: string | null;
         }>,
     };
     const mockConfig = {
@@ -162,8 +165,8 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
         mockItems.current = ["item-a", "item-b", "item-c"];
         mockZoneOrder.current = [
-            { zoneId: "list", firstItemId: "item-a", lastItemId: "item-c" },
-            { zoneId: "sidebar", firstItemId: "cat-1", lastItemId: "cat-3" },
+            { zoneId: "list", firstItemId: "item-a", lastItemId: "item-c", entry: "first", selectedItemId: null, lastFocusedId: null },
+            { zoneId: "sidebar", firstItemId: "cat-1", lastItemId: "cat-3", entry: "first", selectedItemId: null, lastFocusedId: null },
         ];
         mockConfig.current = {
             ...mockConfig.current,
@@ -185,8 +188,8 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
         mockItems.current = ["cat-1", "cat-2", "cat-3"];
         mockZoneOrder.current = [
-            { zoneId: "list", firstItemId: "item-a", lastItemId: "item-c" },
-            { zoneId: "sidebar", firstItemId: "cat-1", lastItemId: "cat-3" },
+            { zoneId: "list", firstItemId: "item-a", lastItemId: "item-c", entry: "first", selectedItemId: null, lastFocusedId: null },
+            { zoneId: "sidebar", firstItemId: "cat-1", lastItemId: "cat-3", entry: "first", selectedItemId: null, lastFocusedId: null },
         ];
         mockConfig.current = {
             ...mockConfig.current,
@@ -230,8 +233,8 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
         mockItems.current = ["f-0", "f-1", "f-2"];
         mockZoneOrder.current = [
-            { zoneId: "toolbar", firstItemId: "f-0", lastItemId: "f-2" },
-            { zoneId: "next-zone", firstItemId: "n-0", lastItemId: "n-2" },
+            { zoneId: "toolbar", firstItemId: "f-0", lastItemId: "f-2", entry: "first", selectedItemId: null, lastFocusedId: null },
+            { zoneId: "next-zone", firstItemId: "n-0", lastItemId: "n-2", entry: "first", selectedItemId: null, lastFocusedId: null },
         ];
         mockConfig.current = {
             ...mockConfig.current,
@@ -269,7 +272,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
         mockItems.current = ["only-0", "only-1"];
         mockZoneOrder.current = [
-            { zoneId: "only", firstItemId: "only-0", lastItemId: "only-1" },
+            { zoneId: "only", firstItemId: "only-0", lastItemId: "only-1", entry: "first", selectedItemId: null, lastFocusedId: null },
         ];
         mockConfig.current = {
             ...mockConfig.current,
@@ -292,9 +295,9 @@ describe("TAB Command — Headless Kernel Integration", () => {
             createTestKernel();
 
         const zones = [
-            { zoneId: "list", firstItemId: "l-0", lastItemId: "l-2" },
-            { zoneId: "sidebar", firstItemId: "s-0", lastItemId: "s-2" },
-            { zoneId: "toolbar", firstItemId: "t-0", lastItemId: "t-2" },
+            { zoneId: "list", firstItemId: "l-0", lastItemId: "l-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
+            { zoneId: "sidebar", firstItemId: "s-0", lastItemId: "s-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
+            { zoneId: "toolbar", firstItemId: "t-0", lastItemId: "t-2", entry: "first" as const, selectedItemId: null, lastFocusedId: null },
         ];
         mockZoneOrder.current = zones;
         mockConfig.current = {
