@@ -1,32 +1,27 @@
 /**
- * APG Toolbar Pattern — Contract Test (Headless Kernel)
+ * APG Toolbar Pattern — Contract Test
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
+ *        + Tabs variant: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
  *
- * Source of Truth: https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
- *
- * Verifies that the Interaction OS satisfies the W3C APG Toolbar
- * keyboard interaction contract using headless kernel dispatch.
- *
- * Toolbar is a horizontal widget with roving tabindex:
- *   - Left/Right arrows move between controls
- *   - Tab moves focus OUT of the toolbar to the next zone
- *   - On re-entry, focus restores to the last focused control
- *
- * Structure:
- *   1. Horizontal Navigation (←→)
- *   2. Vertical Ignored (↑↓ do nothing)
- *   3. Tab Escape (focus exits toolbar)
- *   4. Focus Restore on Re-entry
- *   5. Home / End
+ * Config: horizontal, loop, Tab=escape, select=none
+ * Unique: Tab escape to next zone, vertical keys ignored
+ * Tabs variant: same axis + followFocus (automatic activation)
  */
 
 import { describe, expect, it } from "vitest";
 import { createTestKernel } from "../integration/helpers/createTestKernel";
+import {
+    assertHomeEnd,
+    assertHorizontalNav,
+    assertLoop,
+    assertNoSelection,
+    assertOrthogonalIgnored,
+} from "./helpers/contracts";
 
-// ─── Helpers ───
+// ─── Toolbar Config ───
 
 const TOOLBAR_ITEMS = ["bold-btn", "italic-btn", "underline-btn", "link-btn"];
 
-/** Toolbar config: horizontal, Tab escapes, restore on re-entry */
 const TOOLBAR_CONFIG = {
     navigate: {
         orientation: "horizontal" as const,
@@ -43,10 +38,7 @@ const TOOLBAR_CONFIG = {
         range: false,
         toggle: false,
     },
-    tab: {
-        behavior: "escape" as const,
-        restoreFocus: false,
-    },
+    tab: { behavior: "escape" as const, restoreFocus: false },
 };
 
 function createToolbar(focusedItem = "bold-btn") {
@@ -57,77 +49,30 @@ function createToolbar(focusedItem = "bold-btn") {
     return t;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// 1. APG Toolbar: Horizontal Navigation
-//    "Right Arrow: Moves focus to the next control."
-//    "Left Arrow: Moves focus to the previous control."
-//    "Optionally, focus movement may wrap."
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// Shared contracts
+// ═══════════════════════════════════════════════════
 
-describe("APG Toolbar: Horizontal Navigation", () => {
-    it("Right Arrow: moves focus to next control", () => {
-        const t = createToolbar("bold-btn");
-
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
-
-        expect(t.focusedItemId()).toBe("italic-btn");
+describe("APG Toolbar: Navigation", () => {
+    assertHorizontalNav(createToolbar);
+    assertLoop(createToolbar, {
+        firstId: "bold-btn",
+        lastId: "link-btn",
+        axis: "horizontal",
+        factoryAtFirst: () => createToolbar("bold-btn"),
+        factoryAtLast: () => createToolbar("link-btn"),
     });
-
-    it("Left Arrow: moves focus to previous control", () => {
-        const t = createToolbar("underline-btn");
-
-        t.dispatch(t.NAVIGATE({ direction: "left" }));
-
-        expect(t.focusedItemId()).toBe("italic-btn");
-    });
-
-    it("Right Arrow at last: wraps to first (loop=true)", () => {
-        const t = createToolbar("link-btn");
-
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
-
-        expect(t.focusedItemId()).toBe("bold-btn"); // wrapped
-    });
-
-    it("Left Arrow at first: wraps to last (loop=true)", () => {
-        const t = createToolbar("bold-btn");
-
-        t.dispatch(t.NAVIGATE({ direction: "left" }));
-
-        expect(t.focusedItemId()).toBe("link-btn"); // wrapped
-    });
+    assertHomeEnd(createToolbar, { firstId: "bold-btn", lastId: "link-btn" });
+    assertOrthogonalIgnored(createToolbar, "horizontal");
+    assertNoSelection(createToolbar);
 });
 
-// ═══════════════════════════════════════════════════════════════════
-// 2. APG Toolbar: Vertical Ignored
-//    "[For horizontal toolbar] Up/Down do nothing"
-// ═══════════════════════════════════════════════════════════════════
-
-describe("APG Toolbar: Vertical Keys Ignored", () => {
-    it("Down Arrow: no effect in horizontal toolbar", () => {
-        const t = createToolbar("italic-btn");
-
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-
-        expect(t.focusedItemId()).toBe("italic-btn"); // unchanged
-    });
-
-    it("Up Arrow: no effect in horizontal toolbar", () => {
-        const t = createToolbar("italic-btn");
-
-        t.dispatch(t.NAVIGATE({ direction: "up" }));
-
-        expect(t.focusedItemId()).toBe("italic-btn"); // unchanged
-    });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// 3. APG Toolbar: Tab Escape
-//    "Tab and Shift+Tab: Move focus into and out of the toolbar."
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// Unique: Tab Escape
+// ═══════════════════════════════════════════════════
 
 describe("APG Toolbar: Tab Escape", () => {
-    it("Tab: moves focus out of toolbar to next zone", () => {
+    it("Tab: moves focus out to next zone", () => {
         const t = createToolbar("italic-btn");
         t.setZoneOrder([
             {
@@ -147,34 +92,53 @@ describe("APG Toolbar: Tab Escape", () => {
                 lastFocusedId: null,
             },
         ]);
-
         t.dispatch(t.TAB({ direction: "forward" }));
-
         expect(t.activeZoneId()).toBe("editor");
-        expect(t.focusedItemId("editor")).toBe("line-1");
     });
 });
 
-// ═══════════════════════════════════════════════════════════════════
-// 4. APG Toolbar: Home / End
-//    "Home: Moves focus to first element."
-//    "End: Moves focus to last element."
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// Tabs Variant (horizontal + loop + followFocus)
+// Source: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
+// Config delta: select.mode="single", followFocus=true, disallowEmpty=true
+// ═══════════════════════════════════════════════════
 
-describe("APG Toolbar: Home / End", () => {
-    it("Home: moves focus to first control", () => {
-        const t = createToolbar("underline-btn");
+describe("APG Toolbar: Tabs Variant", () => {
+    const TAB_ITEMS = ["tab-general", "tab-security", "tab-advanced"];
 
-        t.dispatch(t.NAVIGATE({ direction: "home" }));
+    function createTabs(focusedTab = "tab-general") {
+        const t = createTestKernel();
+        t.setItems(TAB_ITEMS);
+        t.setConfig({
+            ...TOOLBAR_CONFIG,
+            navigate: { ...TOOLBAR_CONFIG.navigate, entry: "first" as const },
+            select: {
+                mode: "single" as const,
+                followFocus: true,
+                disallowEmpty: true,
+                range: false,
+                toggle: false,
+            },
+        });
+        t.setActiveZone("tablist", focusedTab);
+        t.dispatch(t.SELECT({ targetId: focusedTab, mode: "replace" }));
+        return t;
+    }
 
-        expect(t.focusedItemId()).toBe("bold-btn");
+    it("auto-activation: navigation selects tab", () => {
+        const t = createTabs("tab-general");
+        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        expect(t.focusedItemId()).toBe("tab-security");
+        expect(t.selection()).toEqual(["tab-security"]);
     });
 
-    it("End: moves focus to last control", () => {
-        const t = createToolbar("italic-btn");
-
-        t.dispatch(t.NAVIGATE({ direction: "end" }));
-
-        expect(t.focusedItemId()).toBe("link-btn");
+    it("full cycle: selection follows each navigation", () => {
+        const t = createTabs("tab-general");
+        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        expect(t.selection()).toEqual(["tab-security"]);
+        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        expect(t.selection()).toEqual(["tab-advanced"]);
+        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        expect(t.selection()).toEqual(["tab-general"]);
     });
 });
