@@ -18,7 +18,7 @@ describe("sidebar section commands", () => {
   let app: ReturnType<typeof BuilderApp.create>;
 
   beforeEach(() => {
-    app = BuilderApp.create();
+    app = BuilderApp.create({ withOS: true });
   });
 
   function sectionIds(): string[] {
@@ -34,7 +34,7 @@ describe("sidebar section commands", () => {
       app.dispatch(deleteSection({ id: "ncp-news" }));
 
       expect(sectionIds()).not.toContain("ncp-news");
-      expect(app.state.data.blocks).toHaveLength(3);
+      expect(app.state.data.blocks).toHaveLength(4);
     });
 
     it("does not modify state for unknown section", () => {
@@ -45,7 +45,7 @@ describe("sidebar section commands", () => {
 
     it("preserves order of remaining sections", () => {
       app.dispatch(deleteSection({ id: "ncp-news" }));
-      expect(sectionIds()).toEqual(["ncp-hero", "ncp-services", "ncp-footer"]);
+      expect(sectionIds()).toEqual(["ncp-hero", "ncp-services", "ncp-pricing", "ncp-footer"]);
     });
   });
 
@@ -55,7 +55,7 @@ describe("sidebar section commands", () => {
     it("inserts a copy after the original", () => {
       app.dispatch(duplicateSection({ id: "ncp-hero" }));
 
-      expect(app.state.data.blocks).toHaveLength(5);
+      expect(app.state.data.blocks).toHaveLength(6);
       // Original stays at index 0, copy is at index 1
       expect(app.state.data.blocks[0]!.id).toBe("ncp-hero");
       expect(app.state.data.blocks[1]!.label).toBe("Hero (copy)");
@@ -66,16 +66,17 @@ describe("sidebar section commands", () => {
       app.dispatch(duplicateSection({ id: "ncp-news" }));
 
       // ncp-hero, ncp-news, ncp-news-copy-..., ncp-services, ncp-footer
-      expect(app.state.data.blocks).toHaveLength(5);
+      expect(app.state.data.blocks).toHaveLength(6);
       expect(app.state.data.blocks[0]!.id).toBe("ncp-hero");
       expect(app.state.data.blocks[1]!.id).toBe("ncp-news");
       expect(app.state.data.blocks[3]!.id).toBe("ncp-services");
-      expect(app.state.data.blocks[4]!.id).toBe("ncp-footer");
+      expect(app.state.data.blocks[4]!.id).toBe("ncp-pricing");
+      expect(app.state.data.blocks[5]!.id).toBe("ncp-footer");
     });
 
     it("does nothing for unknown section", () => {
       app.dispatch(duplicateSection({ id: "nonexistent" }));
-      expect(app.state.data.blocks).toHaveLength(4);
+      expect(app.state.data.blocks).toHaveLength(5);
     });
   });
 
@@ -88,6 +89,7 @@ describe("sidebar section commands", () => {
         "ncp-news",
         "ncp-hero",
         "ncp-services",
+        "ncp-pricing",
         "ncp-footer",
       ]);
     });
@@ -98,6 +100,7 @@ describe("sidebar section commands", () => {
         "ncp-hero",
         "ncp-news",
         "ncp-services",
+        "ncp-pricing",
         "ncp-footer",
       ]);
     });
@@ -112,6 +115,7 @@ describe("sidebar section commands", () => {
         "ncp-hero",
         "ncp-services",
         "ncp-news",
+        "ncp-pricing",
         "ncp-footer",
       ]);
     });
@@ -122,6 +126,7 @@ describe("sidebar section commands", () => {
         "ncp-hero",
         "ncp-news",
         "ncp-services",
+        "ncp-pricing",
         "ncp-footer",
       ]);
     });

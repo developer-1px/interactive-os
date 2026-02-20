@@ -58,9 +58,32 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 import { createCollectionZone } from "@/os/collection/createCollectionZone";
 import { OS_EXPAND } from "@/os/3-commands/expand/index";
 
+/** Recursively clone a block tree, assigning new IDs to all descendants. */
+function deepCloneBlock(block: Block, newId: string): Block {
+  const cloned: Block = {
+    ...block,
+    id: newId,
+    fields: { ...block.fields },
+  };
+  if (block.children) {
+    cloned.children = block.children.map((child) =>
+      deepCloneBlock(child, Math.random().toString(36).slice(2, 10)),
+    );
+  }
+  return cloned;
+}
+
 const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
   accessor: (s: BuilderState) => s.data.blocks,
   text: (item: Block) => item.label,
+  onClone: (original: Block, newId: string) => ({
+    ...deepCloneBlock(original, newId),
+    label: `${original.label} (copy)`,
+  }),
+  onPaste: (item: Block) => ({
+    ...item,
+    label: `${item.label} (paste)`,
+  }),
 });
 
 // Re-export for backward compatibility with existing tests

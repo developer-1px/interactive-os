@@ -135,7 +135,7 @@ describe("createCollectionZone — Array (Builder)", () => {
   let app: ReturnType<typeof ArrayApp.create>;
 
   beforeEach(() => {
-    app = ArrayApp.create();
+    app = ArrayApp.create({ withOS: true });
   });
 
   function ids(): string[] {
@@ -203,7 +203,7 @@ describe("createCollectionZone — Entity+Order (Todo)", () => {
   let app: ReturnType<typeof EntityApp.create>;
 
   beforeEach(() => {
-    app = EntityApp.create();
+    app = EntityApp.create({ withOS: true });
   });
 
   function order(): string[] {
@@ -296,7 +296,7 @@ describe("createCollectionZone — bind() auto-wiring", () => {
     const bindings = arraySidebar.collectionBindings();
     const result = bindings.onDelete({ focusId: "news", selection: [] });
 
-    const app = ArrayApp.create();
+    const app = ArrayApp.create({ withOS: true });
     dispatchAll(app, result);
     expect(app.state.data.sections.map((s: SectionEntry) => s.id)).toEqual([
       "hero",
@@ -312,7 +312,7 @@ describe("createCollectionZone — bind() auto-wiring", () => {
       selection: ["hero", "news"],
     });
 
-    const app = ArrayApp.create();
+    const app = ArrayApp.create({ withOS: true });
     dispatchAll(app, result);
     expect(app.state.data.sections.map((s: SectionEntry) => s.id)).toEqual([
       "services",
@@ -347,7 +347,7 @@ describe("createCollectionZone — extractId", () => {
       selection: [] as string[],
     });
 
-    const app = AppWithPrefix.create();
+    const app = AppWithPrefix.create({ withOS: true });
     if (Array.isArray(result)) {
       for (const cmd of result) app.dispatch(cmd);
     } else {
@@ -361,7 +361,7 @@ describe("createCollectionZone — extractId", () => {
   });
 
   it("direct command still accepts raw entity id", () => {
-    const app = AppWithPrefix.create();
+    const app = AppWithPrefix.create({ withOS: true });
     app.dispatch(prefixedSidebar.remove({ id: "news" }));
     expect(app.state.data.sections.map((s: SectionEntry) => s.id)).toEqual([
       "hero",
@@ -381,7 +381,7 @@ describe("createCollectionZone — filtered moveUp/moveDown", () => {
   let app: ReturnType<typeof EntityApp.create>;
 
   beforeEach(() => {
-    app = EntityApp.create();
+    app = EntityApp.create({ withOS: true });
   });
 
   function order(): string[] {

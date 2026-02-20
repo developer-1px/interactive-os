@@ -10,6 +10,7 @@ import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
 import { os } from "@/os/kernel";
+import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
 import {
   EditorToolbar,
   NCPFooterBlock,
@@ -39,9 +40,7 @@ export default function BuilderPage() {
 
   // Derive selection from builder-canvas zone's last focused item.
   // Uses lastFocusedId so selection persists even when panel gains focus.
-  const focusedId = os.useComputed(
-    (state) => state.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
-  );
+  const focusedId = useFocusedItem(CANVAS_ZONE_ID);
 
   useEffect(() => {
     if (!focusedId) {

@@ -21,7 +21,7 @@ describe("builder undo/redo", () => {
   let app: ReturnType<typeof BuilderApp.create>;
 
   beforeEach(() => {
-    app = BuilderApp.create();
+    app = BuilderApp.create({ withOS: true, history: true });
   });
 
   it("initially canUndo is false", () => {
@@ -30,25 +30,25 @@ describe("builder undo/redo", () => {
   });
 
   it("undo reverts deleteSection", () => {
-    expect(app.state.data.blocks).toHaveLength(4);
+    expect(app.state.data.blocks).toHaveLength(5);
 
     app.dispatch(deleteSection({ id: "ncp-news" }));
-    expect(app.state.data.blocks).toHaveLength(3);
+    expect(app.state.data.blocks).toHaveLength(4);
     expect(app.evaluate(canUndo)).toBe(true);
 
     app.dispatch(undoCommand());
-    expect(app.state.data.blocks).toHaveLength(4);
+    expect(app.state.data.blocks).toHaveLength(5);
     expect(app.state.data.blocks.map((s) => s.id)).toContain("ncp-news");
   });
 
   it("redo restores the undone action", () => {
     app.dispatch(deleteSection({ id: "ncp-news" }));
     app.dispatch(undoCommand());
-    expect(app.state.data.blocks).toHaveLength(4);
+    expect(app.state.data.blocks).toHaveLength(5);
     expect(app.evaluate(canRedo)).toBe(true);
 
     app.dispatch(redoCommand());
-    expect(app.state.data.blocks).toHaveLength(3);
+    expect(app.state.data.blocks).toHaveLength(4);
     expect(app.state.data.blocks.map((s) => s.id)).not.toContain("ncp-news");
   });
 
@@ -63,25 +63,26 @@ describe("builder undo/redo", () => {
   });
 
   it("undo reverts updateField", () => {
-    const original = app.state.data.fields["ncp-hero-title"];
+    const hero = app.state.data.blocks.find((b) => b.id === "ncp-hero")!;
+    const original = hero.fields["title"];
 
-    app.dispatch(updateField({ name: "ncp-hero-title", value: "Changed!" }));
-    expect(app.state.data.fields["ncp-hero-title"]).toBe("Changed!");
+    app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "Changed!" }));
+    expect(app.state.data.blocks.find((b) => b.id === "ncp-hero")!.fields["title"]).toBe("Changed!");
 
     app.dispatch(undoCommand());
-    expect(app.state.data.fields["ncp-hero-title"]).toBe(original);
+    expect(app.state.data.blocks.find((b) => b.id === "ncp-hero")!.fields["title"]).toBe(original);
   });
 
   it("multiple undos in sequence", () => {
     app.dispatch(deleteSection({ id: "ncp-news" }));
     app.dispatch(deleteSection({ id: "ncp-services" }));
-    expect(app.state.data.blocks).toHaveLength(2);
-
-    app.dispatch(undoCommand()); // undo delete services
     expect(app.state.data.blocks).toHaveLength(3);
 
-    app.dispatch(undoCommand()); // undo delete news
+    app.dispatch(undoCommand()); // undo delete services
     expect(app.state.data.blocks).toHaveLength(4);
+
+    app.dispatch(undoCommand()); // undo delete news
+    expect(app.state.data.blocks).toHaveLength(5);
   });
 
   it("redo is cleared after a new action", () => {
@@ -90,7 +91,7 @@ describe("builder undo/redo", () => {
     expect(app.evaluate(canRedo)).toBe(true);
 
     // New action clears redo stack
-    app.dispatch(updateField({ name: "ncp-hero-title", value: "New" }));
+    app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "New" }));
     expect(app.evaluate(canRedo)).toBe(false);
   });
 });

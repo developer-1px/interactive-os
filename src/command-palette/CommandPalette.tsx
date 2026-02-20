@@ -19,6 +19,7 @@ import {
   type QuickPickRenderState,
 } from "@/os/6-components/quickpick/QuickPick";
 import { os } from "@/os/kernel";
+import { useOverlay } from "@/os/5-hooks/useOverlay";
 import { type FuzzyMatchResult, fuzzyMatch } from "./fuzzyMatch";
 import { useDocsList } from "./useDocsList";
 import { useRouteList } from "./useRouteList";
@@ -78,10 +79,8 @@ export function CommandPalette() {
   const routes = useRouteList();
   const docs = useDocsList();
 
-  // ── Overlay State (kernel) ──
-  const isOpen = os.useComputed((s) =>
-    s.os.overlays.stack.some((e) => e.id === "command-palette"),
-  );
+  // ── Overlay State (OS hook) ──
+  const isOpen = useOverlay("command-palette");
 
   // ── Build items ──
   const items = useMemo<PaletteItem[]>(() => {

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createIntegrationTest } from "@/os/tests/createIntegrationTest";
+import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 import { addTodo, TodoApp, TodoList } from "../../app";
 
 describe("Todo Integration: Paste & Focus (OS Level)", () => {
@@ -8,6 +9,7 @@ describe("Todo Integration: Paste & Focus (OS Level)", () => {
   >;
 
   beforeEach(() => {
+    _resetClipboardStore();
     testContext = createIntegrationTest(TodoApp);
     testContext.resetZone("list");
   });

@@ -11,8 +11,8 @@
 
 import type { Block } from "@/apps/builder/app";
 import { BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
-import { os } from "@/os/kernel";
 import { useFocusExpansion as useExpansion } from "@/os/5-hooks/useFocusExpansion";
+import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 const SIDEBAR_ZONE_ID = "builder-sidebar";
@@ -24,9 +24,7 @@ export function SectionSidebar() {
   // OS-provided expansion hook — no manual state reading or dispatch
   const { isExpanded, toggleExpanded } = useExpansion();
 
-  const focusedCanvasId = os.useComputed(
-    (s) => s.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
-  );
+  const focusedCanvasId = useFocusedItem(CANVAS_ZONE_ID);
 
   // Flatten tree for sidebar display — each node gets a depth
   const flatNodes = getFlatNodes(blocks, isExpanded);
