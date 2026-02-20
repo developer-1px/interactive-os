@@ -50,7 +50,7 @@ export function ClipboardListener() {
       });
       if (result.action === "dispatch") {
         os.dispatch(OS_COPY());
-        e.preventDefault();
+        // No preventDefault — native copy coexists (inspector text selection works)
       }
     };
 
