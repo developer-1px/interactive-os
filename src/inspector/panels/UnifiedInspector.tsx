@@ -493,50 +493,58 @@ function TimelineNode({
         ? "text-[#f59e0b]"
         : "text-[#94a3b8]";
 
+  // Hide command badge if it's the exact same string as the trigger
+  const showCommandBadge =
+    command.type !== "NO_COMMAND" && command.type !== trigger.raw;
+
   return (
     <div
       data-tx-index={dataIndex}
-      className={`flex flex-col border-b border-[#eee] transition-opacity ${opacityClass} ${expanded ? "bg-[#f9fafb]" : "hover:bg-[#fafafa]"}`}
+      className={`flex flex-col border-b border-[#eee] transition-opacity ${opacityClass} ${expanded ? "bg-[#f8fafc]" : "hover:bg-[#fafafa]"}`}
     >
-      <div className="flex items-center w-full">
+      <div className="flex items-start w-full">
         <button
           type="button"
           onClick={onToggle}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") onToggle();
           }}
-          className="flex-1 flex items-center gap-1.5 px-2 py-1 cursor-pointer bg-transparent border-none text-left min-w-0"
+          className="flex-1 flex items-start gap-1.5 px-2 py-1.5 cursor-pointer bg-transparent border-none text-left min-w-0"
         >
           {/* Icon */}
-          <div className="w-4 h-4 flex items-center justify-center shrink-0">
+          <div className="w-4 h-4 flex items-center justify-center shrink-0 mt-px">
             {icon}
           </div>
 
-          {/* # + Trigger + Element */}
-          <span className="font-mono text-[8px] text-[#b0b0b0] shrink-0">
-            #{index}
+          {/* # */}
+          <span className="font-mono text-[8px] text-[#94a3b8] shrink-0 mt-0.5 w-3 text-right">
+            {index}
           </span>
-          <span className="font-semibold text-[10px] truncate text-[#1e293b]">
-            {trigger.raw || "Unknown"}
-          </span>
-          {trigger.elementId && (
-            <span
-              className="px-0.5 rounded text-[#c2255c] text-[8px] font-mono bg-[#fff0f6] cursor-help max-w-[70px] truncate shrink-0"
-              title={`Element: ${trigger.elementId}`}
-              onMouseEnter={() => highlightElement(trigger.elementId, true)}
-              onMouseLeave={() => highlightElement(trigger.elementId, false)}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {trigger.elementId}
-            </span>
-          )}
 
-          {/* Command Badge */}
-          {command.type !== "NO_COMMAND" && (
-            <span className="px-1 py-px rounded bg-[#eff6ff] text-[#2563eb] text-[8px] font-semibold shrink-0">
-              {command.type}
+          {/* Trigger + Element + Command */}
+          <div className="flex-1 flex flex-wrap items-center gap-1.5 min-w-0 pr-1">
+            <span className="font-semibold text-[10px] text-[#1e293b] break-all leading-snug tracking-tight">
+              {trigger.raw || "Unknown"}
             </span>
-          )}
+
+            {trigger.elementId && (
+              <span
+                className="px-1 py-0.5 rounded text-[#c2255c] text-[8.5px] font-mono bg-[#fff0f6] border border-[#ffdeeb] cursor-help break-all leading-none"
+                title={`Element: ${trigger.elementId}`}
+                onMouseEnter={() => highlightElement(trigger.elementId, true)}
+                onMouseLeave={() => highlightElement(trigger.elementId, false)}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {trigger.elementId}
+              </span>
+            )}
+
+            {showCommandBadge && (
+              <span className="px-1 py-0.5 rounded bg-[#eff6ff] text-[#2563eb] text-[8.5px] font-semibold border border-[#bfdbfe] break-all leading-none shadow-sm">
+                {command.type}
+              </span>
+            )}
+          </div>
 
           <span className="ml-auto flex items-center gap-1.5 shrink-0">
             <span className={`text-[8px] font-mono ${deltaColorClass}`}>
@@ -566,35 +574,44 @@ function TimelineNode({
 
       {/* Expanded Details */}
       {expanded && (
-        <div className="flex flex-col gap-1 pl-8 pr-2 pb-2">
+        <div className="flex flex-col gap-1.5 pl-8 pr-2 pb-2.5">
           {/* ── Diff (primary info) ── */}
           {diff.length > 0 && (
-            <Section title="Diff">
-              {diff.map((d: { path: string; from?: unknown; to?: unknown }) => (
-                <Row key={d.path}>
-                  <span
-                    className="text-[#475569] font-mono text-[9px] truncate max-w-[40%]"
-                    title={d.path}
-                  >
-                    {d.path}
-                  </span>
-                  <span className="ml-auto flex items-center gap-1 shrink-0 font-mono overflow-hidden text-[9px]">
-                    <span
-                      className="text-[#ef4444] line-through opacity-60 truncate max-w-[100px]"
-                      title={JSON.stringify(d.from)}
+            <Section title="State Diff">
+              <div className="flex flex-col gap-1.5 mt-1">
+                {diff.map(
+                  (d: { path: string; from?: unknown; to?: unknown }, i) => (
+                    <div
+                      key={`${d.path}-${i}`}
+                      className="flex flex-col gap-0.5 font-mono text-[9.5px]"
                     >
-                      {JSON.stringify(d.from)}
-                    </span>
-                    <span className="text-[#b0b0b0]">→</span>
-                    <span
-                      className="text-[#10b981] font-bold truncate max-w-[100px]"
-                      title={JSON.stringify(d.to)}
-                    >
-                      {JSON.stringify(d.to)}
-                    </span>
-                  </span>
-                </Row>
-              ))}
+                      <div className="text-[#334155] font-semibold break-all bg-[#f1f5f9] px-1 py-0.5 rounded-sm inline-block self-start">
+                        {d.path}
+                      </div>
+                      {(d.from !== undefined || d.to !== undefined) && (
+                        <div className="flex flex-col gap-[1px] ml-1 mt-0.5 border-l-2 border-[#e2e8f0] pl-1.5">
+                          {d.from !== undefined && (
+                            <div className="text-[#b91c1c] bg-[#fef2f2] px-1 py-0.5 rounded-sm whitespace-pre-wrap break-all border border-[#fecaca]">
+                              -{" "}
+                              {typeof d.from === "object"
+                                ? JSON.stringify(d.from, null, 2)
+                                : String(d.from)}
+                            </div>
+                          )}
+                          {d.to !== undefined && (
+                            <div className="text-[#15803d] bg-[#f0fdf4] px-1 py-0.5 rounded-sm whitespace-pre-wrap break-all border border-[#bbf7d0]">
+                              +{" "}
+                              {typeof d.to === "object"
+                                ? JSON.stringify(d.to, null, 2)
+                                : String(d.to)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ),
+                )}
+              </div>
             </Section>
           )}
 
@@ -679,13 +696,4 @@ function Section({
     </div>
   );
 }
-
-function Row({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-1.5 px-2 py-0.5 text-[9px] bg-white hover:bg-[#fafafa]">
-      {children}
-    </div>
-  );
-}
-
 

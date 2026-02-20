@@ -27,9 +27,11 @@ import { FOCUS as prodFOCUS } from "../../../focus/focus";
 import { STACK_POP as prodSTACK_POP } from "../../../focus/stack";
 import { STACK_PUSH as prodSTACK_PUSH } from "../../../focus/stack";
 import { SYNC_FOCUS as prodSYNC_FOCUS } from "../../../focus/syncFocus";
+import { RECOVER as prodRECOVER } from "../../../focus/recover";
 import { NAVIGATE as prodNAVIGATE } from "../../../navigate";
 import { ESCAPE as prodESCAPE } from "../../../dismiss/escape";
 import { SELECT as prodSELECT } from "../../../selection/select";
+import { SELECTION_CLEAR as prodSELECTION_CLEAR } from "../../../selection/selection";
 import { TAB as prodTAB } from "../../../tab/tab";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -94,7 +96,9 @@ export function createTestKernel(overrides?: Partial<AppState>) {
   // ─── Register production commands (no duplication) ───
   const FOCUS = kernel.register(prodFOCUS);
   const SYNC_FOCUS = kernel.register(prodSYNC_FOCUS);
+  const RECOVER = kernel.register(prodRECOVER);
   const SELECT = kernel.register(prodSELECT);
+  const SELECTION_CLEAR = kernel.register(prodSELECTION_CLEAR);
   const NAVIGATE = kernel.register(prodNAVIGATE);
   const TAB = kernel.register(prodTAB);
   const ESCAPE = kernel.register(prodESCAPE);
@@ -160,10 +164,12 @@ export function createTestKernel(overrides?: Partial<AppState>) {
     // Commands
     FOCUS,
     SYNC_FOCUS,
+    RECOVER,
     SELECT,
     NAVIGATE,
     TAB,
     ESCAPE,
+    SELECTION_CLEAR,
     STACK_PUSH,
     STACK_POP,
 
