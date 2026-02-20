@@ -46,7 +46,7 @@ export function _resetClipboardStore(): void {
 }
 
 /** @internal Set text to clipboard store (used by static item copy) */
-export function _setTextClipboardStore(text: string): void {
+export function setTextClipboard(text: string): void {
   _clipboardStore = {
     source: "text",
     items: [{ type: "text", value: text }],
@@ -54,8 +54,8 @@ export function _setTextClipboardStore(text: string): void {
   };
 }
 
-/** @internal Read clipboard first item for paste bubbling accept check */
-export function _getClipboardPreview(): unknown | null {
+/** Read clipboard first item for paste bubbling accept check */
+export function getClipboardPreview(): unknown | null {
   return _clipboardStore.items[0] ?? null;
 }
 

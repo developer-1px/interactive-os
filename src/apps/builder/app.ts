@@ -51,7 +51,7 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 // Sidebar Zone — Collection Zone Facade
 // ═══════════════════════════════════════════════════════════════════
 
-import { createCollectionZone, _getClipboardPreview, _setTextClipboardStore } from "@/os/collection/createCollectionZone";
+import { createCollectionZone, getClipboardPreview, setTextClipboard } from "@/os/collection/createCollectionZone";
 import { OS_EXPAND } from "@/os/3-commands/expand/index";
 
 /** Recursively clone a block tree, assigning new IDs to all descendants. */
@@ -288,11 +288,11 @@ export const canvasOnCopy = (cursor: import("@/os/2-contexts/zoneRegistry").Zone
     // Dynamic item → structural copy (section/card/tab)
     return sidebarCollection.copy({ ids: [cursor.focusId] });
   }
-  // Static item → copy field text value directly to system clipboard & internal store
+  // Static item → copy field text value via OS clipboard write
   const text = getStaticItemTextValue(cursor.focusId);
   if (text) {
-    navigator.clipboard.writeText(text).catch(() => { });
-    _setTextClipboardStore(text);
+    setTextClipboard(text);
+    return { clipboardWrite: { text } };
   }
   return [];
 };
@@ -309,7 +309,7 @@ export const canvasOnCut = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneC
 export const canvasOnPaste = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
   const collections = buildCanvasCollections();
   // Read clipboard data for type-checking (imported from createCollectionZone)
-  const clipData = _getClipboardPreview();
+  const clipData = getClipboardPreview();
   if (!clipData) return [];
 
   // Static item text paste handling

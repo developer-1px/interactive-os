@@ -8,7 +8,7 @@
 
 import { describe, expect, test, vi, beforeEach } from "vitest";
 import { BuilderApp, canvasOnCopy, canvasOnCut, canvasOnPaste } from "@apps/builder/app";
-import { _resetClipboardStore, _getClipboardPreview } from "@/os/collection/createCollectionZone";
+import { _resetClipboardStore, getClipboardPreview } from "@/os/collection/createCollectionZone";
 import type { BaseCommand } from "@kernel/core/tokens";
 
 // Mock navigator.clipboard
@@ -49,7 +49,7 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
         const result = canvasOnCopy({ focusId: heroId, selection: [] } as any) as BaseCommand[];
         dispatchCanvasResult(app, result);
 
-        const clip = _getClipboardPreview() as { id?: string };
+        const clip = getClipboardPreview() as { id?: string };
         expect(clip).toBeDefined();
         // It should have copied the hero section structure
         expect(clip.id).toBe(heroId);
@@ -62,10 +62,9 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
         const app = createApp();
 
         // ncp-hero-title is a static field item inside ncp-hero
-        const result = canvasOnCopy({ focusId: "ncp-hero-title", selection: [] } as any) as BaseCommand[];
-        dispatchCanvasResult(app, result);
+        const result = canvasOnCopy({ focusId: "ncp-hero-title", selection: [] } as any);
 
-        const clip = _getClipboardPreview() as { type?: string, value?: string };
+        const clip = getClipboardPreview() as { type?: string, value?: string };
         expect(clip).not.toBeNull();
         expect(clip.type).toBe("text");
 
@@ -73,8 +72,8 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
         const expectedText = "AI 시대를 위한\n가장 완벽한 플랫폼";
         expect(clip.value).toBe(expectedText);
 
-        // System clipboard should also be called
-        expect(mockWriteText).toHaveBeenCalledWith(expectedText);
+        // Result should include clipboardWrite for OS to handle system clipboard
+        expect((result as any).clipboardWrite?.text).toBe(expectedText);
     });
 
     test("Scenario: 정적 아이템(필드) 잘라내기 → no-op (PRD 1.3)", () => {
@@ -85,7 +84,7 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
         dispatchCanvasResult(app, result);
 
         // Nothing was copied to clipboard
-        expect(_getClipboardPreview()).toBeNull();
+        expect(getClipboardPreview()).toBeNull();
         // Blocks remain unchanged
         expect(app.state.data.blocks.length).toBe(initialBlocks.length);
     });
@@ -98,7 +97,7 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
         const result = canvasOnCut({ focusId: heroId, selection: [] } as any) as BaseCommand[];
         dispatchCanvasResult(app, result);
 
-        const clip = _getClipboardPreview() as { id?: string };
+        const clip = getClipboardPreview() as { id?: string };
         expect(clip).toBeDefined();
         expect(clip.id).toBe(heroId);
 
