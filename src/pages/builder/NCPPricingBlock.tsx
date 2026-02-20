@@ -37,7 +37,7 @@ export function NCPPricingBlock({ id }: { id: string }) {
                     </Builder.Item>
 
                     <Builder.Item asChild id={`${id}-title`}>
-                        <Field
+                        <Field.Editable
                             onCommit={createFieldCommit(id, "title")}
                             value={fields["title"] || "Simple, transparent pricing"}
                             mode="deferred"
@@ -45,11 +45,11 @@ export function NCPPricingBlock({ id }: { id: string }) {
                             <h2 className="text-3xl font-bold text-slate-900 mb-3">
                                 {fields["title"] || "Simple, transparent pricing"}
                             </h2>
-                        </Field>
+                        </Field.Editable>
                     </Builder.Item>
 
                     <Builder.Item asChild id={`${id}-sub`}>
-                        <Field
+                        <Field.Editable
                             onCommit={createFieldCommit(id, "sub")}
                             value={fields["sub"] || "Choose the plan that fits your needs"}
                             mode="deferred"
@@ -57,7 +57,7 @@ export function NCPPricingBlock({ id }: { id: string }) {
                             <p className="text-slate-500 text-lg">
                                 {fields["sub"] || "Choose the plan that fits your needs"}
                             </p>
-                        </Field>
+                        </Field.Editable>
                     </Builder.Item>
                 </div>
 
@@ -169,7 +169,7 @@ function PricingCard({
       `}
         >
             <Builder.Item asChild id={`${id}-name`}>
-                <Field
+                <Field.Editable
                     onCommit={createFieldCommit(id.split("-").slice(0, -2).join("-"), `${prefix}-name`)}
                     value={fields[`${prefix}-name`] || defaults.name}
                     mode="deferred"
@@ -179,12 +179,12 @@ function PricingCard({
                     >
                         {fields[`${prefix}-name`] || defaults.name}
                     </h3>
-                </Field>
+                </Field.Editable>
             </Builder.Item>
 
             <div className="flex items-baseline mb-4">
                 <Builder.Item asChild id={`${id}-price`}>
-                    <Field
+                    <Field.Editable
                         onCommit={createFieldCommit(id.split("-").slice(0, -2).join("-"), `${prefix}-price`)}
                         value={fields[`${prefix}-price`] || defaults.price}
                         mode="deferred"
@@ -192,7 +192,7 @@ function PricingCard({
                         <span className="text-4xl font-bold tracking-tight">
                             {fields[`${prefix}-price`] || defaults.price}
                         </span>
-                    </Field>
+                    </Field.Editable>
                 </Builder.Item>
                 <span className={`ml-1 text-base font-medium ${highlight ? "text-slate-400" : "text-slate-500"}`}>
                     {defaults.period}
@@ -200,7 +200,7 @@ function PricingCard({
             </div>
 
             <Builder.Item asChild id={`${id}-desc`}>
-                <Field
+                <Field.Editable
                     onCommit={createFieldCommit(id.split("-").slice(0, -2).join("-"), `${prefix}-desc`)}
                     value={fields[`${prefix}-desc`] || defaults.desc}
                     mode="deferred"
@@ -208,7 +208,7 @@ function PricingCard({
                     <p className={`text-base font-medium mb-8 ${highlight ? "text-slate-300" : "text-slate-500"}`}>
                         {fields[`${prefix}-desc`] || defaults.desc}
                     </p>
-                </Field>
+                </Field.Editable>
             </Builder.Item>
 
             <div className="mt-auto">

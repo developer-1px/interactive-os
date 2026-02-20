@@ -87,7 +87,7 @@ export function AriaInteractionTest() {
           <div className="text-[10px] font-mono text-gray-500 mb-2 uppercase">
             Field (Input)
           </div>
-          <Field
+          <Field.Editable
             name="test-field-input"
             value=""
             placeholder="Focus me..."

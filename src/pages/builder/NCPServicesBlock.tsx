@@ -76,7 +76,7 @@ export function NCPServicesBlock({ id }: { id: string }) {
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                 <Builder.Item asChild id={fid("category")}>
-                  <Field
+                  <Field.Editable
                     name={fid("category")}
                     mode="deferred"
                     value={fields["category"] ?? ""}
@@ -86,7 +86,7 @@ export function NCPServicesBlock({ id }: { id: string }) {
                 </Builder.Item>
               </div>
               <Builder.Item asChild id={fid("title")}>
-                <Field
+                <Field.Editable
                   name={fid("title")}
                   mode="deferred"
                   multiline
@@ -157,7 +157,7 @@ export function NCPServicesBlock({ id }: { id: string }) {
                   </div>
 
                   <Builder.Item asChild id={fid(`item-title-${index}`)}>
-                    <Field
+                    <Field.Editable
                       name={fid(`item-title-${index}`)}
                       mode="deferred"
                       value={fields[`item-title-${index}`] ?? ""}
@@ -167,7 +167,7 @@ export function NCPServicesBlock({ id }: { id: string }) {
                   </Builder.Item>
 
                   <Builder.Item asChild id={fid(`item-desc-${index}`)}>
-                    <Field
+                    <Field.Editable
                       name={fid(`item-desc-${index}`)}
                       mode="deferred"
                       multiline

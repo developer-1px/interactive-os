@@ -38,7 +38,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                 Updates
               </Builder.Badge>
               <Builder.Item asChild id={fid("title")}>
-                <Field
+                <Field.Editable
                   name={fid("title")}
                   mode="deferred"
                   multiline
@@ -88,7 +88,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                         </Builder.Badge>
                       </Builder.Item>
                       <Builder.Item asChild id={`${card0.id}-title`}>
-                        <Field
+                        <Field.Editable
                           name={`${card0.id}-title`}
                           mode="deferred"
                           multiline
@@ -101,7 +101,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                         />
                       </Builder.Item>
                       <Builder.Item asChild id={`${card0.id}-desc`}>
-                        <Field
+                        <Field.Editable
                           name={`${card0.id}-desc`}
                           mode="deferred"
                           value={fields[`${card0.localPrefix}-desc`] ?? ""}
@@ -140,7 +140,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                     </Builder.Badge>
                   </Builder.Item>
                   <Builder.Item asChild id={`${card1.id}-title`}>
-                    <Field
+                    <Field.Editable
                       name={`${card1.id}-title`}
                       mode="deferred"
                       multiline
@@ -155,7 +155,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                 </div>
                 <div className="flex justify-between items-end border-t border-slate-200 pt-6 mt-4">
                   <Builder.Item asChild id={`${card1.id}-date`}>
-                    <Field
+                    <Field.Editable
                       name={`${card1.id}-date`}
                       mode="deferred"
                       value={fields[`${card1.localPrefix}-date`] ?? ""}
@@ -194,7 +194,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                     </Builder.Badge>
                   </Builder.Item>
                   <Builder.Item asChild id={`${card2.id}-title`}>
-                    <Field
+                    <Field.Editable
                       name={`${card2.id}-title`}
                       mode="deferred"
                       multiline
@@ -209,7 +209,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                 </div>
                 <div className="relative z-10 flex justify-between items-end">
                   <Builder.Item asChild id={`${card2.id}-date`}>
-                    <Field
+                    <Field.Editable
                       name={`${card2.id}-date`}
                       mode="deferred"
                       value={fields[`${card2.localPrefix}-date`] ?? ""}

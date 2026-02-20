@@ -44,7 +44,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
             </Builder.Group>
 
             <Builder.Item asChild id={fid("title")}>
-              <Field
+              <Field.Editable
                 name={fid("title")}
                 mode="deferred"
                 multiline
@@ -58,7 +58,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
             </Builder.Item>
 
             <Builder.Item asChild id={fid("sub")}>
-              <Field
+              <Field.Editable
                 name={fid("sub")}
                 mode="deferred"
                 multiline
@@ -109,7 +109,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                     />
                   </Builder.Item>
                   <Builder.Item asChild id={fid("portal-title")}>
-                    <Field
+                    <Field.Editable
                       name={fid("portal-title")}
                       mode="deferred"
                       value={fields["portal-title"] ?? ""}
@@ -120,7 +120,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                     />
                   </Builder.Item>
                   <Builder.Item asChild id={fid("portal-subtitle")}>
-                    <Field
+                    <Field.Editable
                       name={fid("portal-subtitle")}
                       mode="deferred"
                       value={fields["portal-subtitle"] ?? ""}
@@ -141,7 +141,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
         {/* Minimal Nav */}
         <div className="absolute top-0 left-0 right-0 px-8 py-6 flex justify-between items-center z-50">
           <Builder.Item asChild id={fid("brand")}>
-            <Field
+            <Field.Editable
               name={fid("brand")}
               mode="deferred"
               value={fields["brand"] ?? ""}

@@ -70,7 +70,7 @@ export function NCPFooterBlock({ id }: { id: string }) {
             {/* Brand Column */}
             <div className="lg:col-span-2">
               <Builder.Item asChild id={fid("brand")}>
-                <Field
+                <Field.Editable
                   name={fid("brand")}
                   mode="deferred"
                   value={fields["brand"] ?? ""}
@@ -79,7 +79,7 @@ export function NCPFooterBlock({ id }: { id: string }) {
                 />
               </Builder.Item>
               <Builder.Item asChild id={fid("desc")}>
-                <Field
+                <Field.Editable
                   name={fid("desc")}
                   mode="deferred"
                   multiline
@@ -177,7 +177,7 @@ export function NCPFooterBlock({ id }: { id: string }) {
               ))}
             </div>
             <Builder.Item asChild id={fid("copyright")}>
-              <Field
+              <Field.Editable
                 name={fid("copyright")}
                 mode="deferred"
                 value={fields["copyright"] ?? ""}

@@ -440,8 +440,26 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
   },
 );
 
-FieldBase.displayName = "Field";
+FieldBase.displayName = "Field.Editable";
 
-export const Field = Object.assign(FieldBase, {
-  Label,
-});
+/**
+ * Field — Compound namespace for OS-integrated input primitives.
+ *
+ * Field.Editable  — contentEditable inline editing (canvas, rich text, chips/mentions)
+ * Field.Label     — <label> for field association
+ * Field.Input     — (planned) native <input> wrapper
+ * Field.Textarea  — (planned) native <textarea> wrapper
+ */
+const Editable = FieldBase;
+
+export const Field = Object.assign(
+  // Field() itself still works as Editable for backward compatibility
+  // TODO: deprecate direct Field() usage — prefer Field.Editable
+  FieldBase,
+  {
+    Editable,
+    Label,
+  },
+);
+
+

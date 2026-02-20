@@ -19,7 +19,7 @@
  *   <Builder.Section asChild id="hero">
  *     <div className="bg-white py-24">
  *       <Builder.Item asChild id="hero-title">
- *         <Field value={title} ... />
+ *         <Field.Editable value={title} ... />
  *       </Builder.Item>
  *     </div>
  *   </Builder.Section>

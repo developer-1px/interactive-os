@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-20 18:33
+> Last updated: 2026-02-20 21:13
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**builder-v2** — T13: Tab Container → 범용 Container Block (accept + Dual Projection)
+**field-compound** — T1: Field → Field.Editable rename + compound namespace
 
 ---
 
@@ -18,6 +18,7 @@
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
 | builder-v2 | T13 Container Block PoC | 02-20 | 🟢 Active |
+| field-compound | T1 Field.Editable rename | 02-20 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
 

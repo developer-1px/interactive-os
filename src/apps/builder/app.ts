@@ -198,7 +198,7 @@ export const BuilderCanvasUI = canvasZone.bind({
  * createFieldCommit — Section-aware FieldCommandFactory.
  *
  * Usage in NCP blocks:
- *   <Field onCommit={createFieldCommit(sectionId, "title")} ... />
+ *   <Field.Editable onCommit={createFieldCommit(sectionId, "title")} ... />
  */
 export function createFieldCommit(
   sectionId: string,

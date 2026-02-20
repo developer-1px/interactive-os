@@ -10,6 +10,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { os } from "@/os/kernel";
+import { ZoneRegistry } from "@/os/2-contexts/zoneRegistry";
+
+/** Zone-scoped element lookup: searches within active zone container first. */
+function findItemInZone(zoneId: string | null, itemId: string): HTMLElement | null {
+  const zoneEl = zoneId ? ZoneRegistry.get(zoneId)?.element : null;
+  if (zoneEl) {
+    const scoped = zoneEl.querySelector<HTMLElement>(`[data-item-id="${itemId}"]`);
+    if (scoped) return scoped;
+  }
+  return document.getElementById(itemId);
+}
 
 // ── Color palette for Builder levels ──
 const LEVEL_COLORS = {
@@ -69,7 +80,7 @@ export function FocusDebugOverlay() {
     const zoneId = s.os.focus.activeZoneId;
     const zoneState = zoneId ? s.os.focus.zones[zoneId] : null;
     const itemId = zoneState?.focusedItemId ?? null;
-    const el = itemId ? document.getElementById(itemId) : null;
+    const el = itemId ? findItemInZone(zoneId, itemId) : null;
 
     if (!el || !itemId || !zoneId) {
       setState((prev) => (prev.visible ? HIDDEN : prev));
@@ -132,7 +143,7 @@ export function FocusDebugOverlay() {
       const zoneId = s.os.focus.activeZoneId;
       const zoneState = zoneId ? s.os.focus.zones[zoneId] : null;
       const itemId = zoneState?.focusedItemId;
-      const el = itemId ? document.getElementById(itemId) : null;
+      const el = itemId ? findItemInZone(zoneId, itemId) : null;
       if (el) {
         ro.observe(el);
         prevEl = el;
@@ -156,7 +167,7 @@ export function FocusDebugOverlay() {
       const zoneId = s.os.focus.activeZoneId;
       const zoneState = zoneId ? s.os.focus.zones[zoneId] : null;
       const newItemId = zoneState?.focusedItemId ?? null;
-      const newEl = newItemId ? document.getElementById(newItemId) : null;
+      const newEl = newItemId ? findItemInZone(zoneId, newItemId) : null;
 
       if (newEl !== prevEl && ro) {
         if (prevEl) ro.unobserve(prevEl);
