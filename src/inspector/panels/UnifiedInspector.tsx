@@ -237,7 +237,15 @@ export function UnifiedInspector({
         const el = scrollRef.current;
         if (!el) return;
         isProgrammaticScroll.current = true;
-        el.scrollTop = el.scrollHeight;
+        // Scroll last node to the TOP of the viewport so it's fully visible
+        const lastNode = el.querySelector(
+          `[data-tx-index="${filteredTx.length - 1}"]`,
+        );
+        if (lastNode) {
+          lastNode.scrollIntoView({ block: "start", behavior: "auto" });
+        } else {
+          el.scrollTop = el.scrollHeight;
+        }
         requestAnimationFrame(() => {
           isProgrammaticScroll.current = false;
         });
@@ -320,8 +328,8 @@ export function UnifiedInspector({
                   type="button"
                   onClick={() => toggleGroup(group)}
                   className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
-                      ? "bg-[#1e293b] text-white border-[#1e293b]"
-                      : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                    ? "bg-[#1e293b] text-white border-[#1e293b]"
+                    : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
                     }`}
                 >
                   {group}
