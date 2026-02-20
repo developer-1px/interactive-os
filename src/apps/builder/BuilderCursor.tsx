@@ -51,6 +51,7 @@ interface OverlayState {
   animating: boolean;
   dimmed: boolean;
   level: string;
+  editing: boolean;
 }
 
 const HIDDEN: OverlayState = {
@@ -65,6 +66,7 @@ const HIDDEN: OverlayState = {
   animating: false,
   dimmed: false,
   level: "",
+  editing: false,
 };
 
 /**
@@ -86,6 +88,7 @@ export function BuilderCursor() {
     const zoneState = s.os.focus.zones[zoneId];
     const itemId = zoneState?.lastFocusedId ?? null;
     const isActive = s.os.focus.activeZoneId === zoneId;
+    const editingId = zoneState?.editingItemId ?? null;
     const el = itemId ? findItemInZone(zoneId, itemId) : null;
 
     if (!el || !itemId) {
@@ -129,6 +132,7 @@ export function BuilderCursor() {
       animating,
       dimmed: !isActive,
       level: el.getAttribute("data-level") ?? "",
+      editing: editingId !== null,
     });
   }, []);
 
@@ -224,10 +228,16 @@ export function BuilderCursor() {
           left: state.left - pad,
           width: state.width + pad * 2,
           height: state.height + pad * 2,
-          border: `2px solid ${state.color}`,
+          border: state.editing
+            ? `2px dashed #3b82f6`
+            : `2px solid ${state.color}`,
           borderRadius: 4,
-          background: state.level === "section" ? "transparent" : `${state.color}10`,
-          boxShadow: `0 0 0 1px ${state.color}30`,
+          background: state.editing
+            ? "rgba(59, 130, 246, 0.06)"
+            : state.level === "section" ? "transparent" : `${state.color}10`,
+          boxShadow: state.editing
+            ? "0 0 0 1px rgba(59, 130, 246, 0.2)"
+            : `0 0 0 1px ${state.color}30`,
           opacity: state.dimmed ? 0.4 : 1,
           transition: state.animating
             ? "top 120ms ease-out, left 120ms ease-out, width 120ms ease-out, height 120ms ease-out"
@@ -240,7 +250,7 @@ export function BuilderCursor() {
             position: "absolute",
             top: -22,
             left: -2,
-            background: state.color,
+            background: state.editing ? "#3b82f6" : state.color,
             color: "white",
             fontSize: 10,
             fontWeight: 700,
@@ -252,7 +262,7 @@ export function BuilderCursor() {
             letterSpacing: "0.02em",
           }}
         >
-          {state.itemId}
+          {state.editing ? `✏️ ${state.itemId}` : state.itemId}
         </div>
 
         {/* Zone Badge */}
