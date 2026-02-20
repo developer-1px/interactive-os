@@ -171,6 +171,13 @@ export function createHistoryMiddleware(
 
       // Record snapshot
       const previousFocusId = ctx.injected["_historyFocusId"] as string | null;
+      const now = Date.now();
+
+      // ── Noise Filtering ──────────────────────────────────────
+      // Rapid consecutive commands of the SAME type (e.g., per-keystroke
+      // field updates) are coalesced: replace the last entry's payload
+      // but keep its original snapshot, so undo jumps to pre-burst state.
+      const NOISE_WINDOW_MS = 500;
 
       const updatedAppState = produce(
         effectsState,
@@ -185,19 +192,38 @@ export function createHistoryMiddleware(
           };
           const { history: _h, ...prevWithoutHistory } = prevAppState;
 
-          history.past.push({
-            command: {
-              type: commandType,
-              payload: ctx.command.payload,
-            },
-            timestamp: Date.now(),
-            snapshot: prevWithoutHistory,
-            focusedItemId: previousFocusId,
-            groupId: getActiveGroupId() ?? undefined,
-          });
+          const lastEntry = history.past.at(-1);
+          const isSameType = lastEntry?.command.type === commandType;
+          const isRecent = lastEntry && (now - lastEntry.timestamp) < NOISE_WINDOW_MS;
+          const isNotGrouped = !getActiveGroupId();
 
-          if (history.past.length > HISTORY_LIMIT) {
-            history.past.shift();
+          // Check if payloads target the same identity (e.g., same domId/id)
+          const lastPayload = lastEntry?.command.payload as Record<string, unknown> | undefined;
+          const currPayload = ctx.command.payload as Record<string, unknown> | undefined;
+          const identityKey = currPayload?.["domId"] ?? currPayload?.["id"];
+          const lastIdentityKey = lastPayload?.["domId"] ?? lastPayload?.["id"];
+          const isSameTarget = identityKey !== undefined && identityKey === lastIdentityKey;
+
+          if (isSameType && isRecent && isNotGrouped && isSameTarget) {
+            // Coalesce: update payload + timestamp, keep original snapshot
+            lastEntry!.command.payload = ctx.command.payload;
+            lastEntry!.timestamp = now;
+          } else {
+            // Normal push
+            history.past.push({
+              command: {
+                type: commandType,
+                payload: ctx.command.payload,
+              },
+              timestamp: now,
+              snapshot: prevWithoutHistory,
+              focusedItemId: previousFocusId,
+              groupId: getActiveGroupId() ?? undefined,
+            });
+
+            if (history.past.length > HISTORY_LIMIT) {
+              history.past.shift();
+            }
           }
 
           // New action → clear redo future
