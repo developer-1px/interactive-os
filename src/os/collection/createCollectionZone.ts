@@ -273,6 +273,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
         const currentIndex = visible.findIndex((item) => item.id === focusId);
         if (currentIndex !== -1) {
+          // Root-level focus recovery
           const next = visible
             .slice(currentIndex + 1)
             .find((item) => !payload.ids.includes(item.id));
@@ -283,6 +284,18 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
           const targetId = next?.id ?? prev?.id;
           if (targetId) {
+            focusCmd = OS_FOCUS({
+              zoneId: zoneName,
+              itemId: toItemId(targetId),
+            });
+          }
+        } else {
+          // Nested item focus recovery: next sibling → prev sibling → parent
+          const parent = findParentOf(items as any[], focusId);
+          if (parent?.children) {
+            const idx = parent.children.findIndex((c: { id: string }) => c.id === focusId);
+            const neighbor = parent.children[idx + 1] ?? parent.children[idx - 1];
+            const targetId = neighbor?.id ?? parent.id;
             focusCmd = OS_FOCUS({
               zoneId: zoneName,
               itemId: toItemId(targetId),
