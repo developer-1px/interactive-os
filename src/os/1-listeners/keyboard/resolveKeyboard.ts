@@ -7,9 +7,10 @@
  * W3C UI Events Module: Keyboard Events (§3.5)
  */
 
-import type { BaseCommand } from "@kernel/core/tokens";
-import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
+import { OS_CHECK } from "@os/3-commands";
 import { Keybindings } from "@os/keymaps/keybindings";
+import type { ResolveResult } from "../shared";
 
 // ═══════════════════════════════════════════════════════════════════
 // Input / Output Types
@@ -35,14 +36,10 @@ export interface KeyboardInput {
 
   /** For building input meta */
   elementId: string | undefined;
-}
 
-export type KeyboardResult =
-  | { action: "ignore" }
-  | { action: "check"; targetId: string; meta: InputMeta }
-  | { action: "dispatch"; command: BaseCommand; meta: InputMeta }
-  | { action: "dispatch-callback"; callback: ZoneCallback; meta: InputMeta }
-  | { action: "fallback" };
+  /** For resolving ZoneCallbacks */
+  cursor: ZoneCursor | null;
+}
 
 interface InputMeta {
   type: "KEYBOARD";
@@ -55,13 +52,13 @@ interface InputMeta {
 // Pure Resolution
 // ═══════════════════════════════════════════════════════════════════
 
-export function resolveKeyboard(input: KeyboardInput): KeyboardResult {
+export function resolveKeyboard(input: KeyboardInput): ResolveResult {
   // Guard: IME, defaultPrevented, inspector, combobox
   if (input.isDefaultPrevented || input.isComposing) {
-    return { action: "ignore" };
+    return { commands: [], meta: null, preventDefault: false, fallback: false };
   }
   if (input.isInspector || input.isCombobox) {
-    return { action: "ignore" };
+    return { commands: [], meta: null, preventDefault: false, fallback: false };
   }
 
   const meta: InputMeta = {
@@ -84,14 +81,23 @@ export function resolveKeyboard(input: KeyboardInput): KeyboardResult {
   });
 
   if (!binding) {
-    return { action: "fallback" };
+    return { commands: [], meta: null, preventDefault: false, fallback: true };
   }
 
   if (typeof binding.command === "function") {
-    return { action: "dispatch-callback", callback: binding.command, meta };
+    if (!input.cursor) {
+      return { commands: [], meta: null, preventDefault: false, fallback: false };
+    }
+    const cmds = binding.command(input.cursor);
+    return {
+      commands: Array.isArray(cmds) ? cmds : [cmds],
+      meta,
+      preventDefault: true,
+      fallback: false,
+    };
   }
 
-  return { action: "dispatch", command: binding.command, meta };
+  return { commands: [binding.command], meta, preventDefault: true, fallback: false };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -101,7 +107,7 @@ export function resolveKeyboard(input: KeyboardInput): KeyboardResult {
 function resolveCheck(
   input: KeyboardInput,
   meta: InputMeta,
-): KeyboardResult | null {
+): ResolveResult | null {
   // Case 1: Explicit checkbox/switch role → always CHECK
   if (
     (input.focusedItemRole === "checkbox" ||
@@ -109,18 +115,20 @@ function resolveCheck(
     input.focusedItemId
   ) {
     return {
-      action: "check",
-      targetId: input.focusedItemId,
+      commands: [OS_CHECK({ targetId: input.focusedItemId })],
       meta: { ...meta, elementId: input.focusedItemId },
+      preventDefault: true,
+      fallback: false,
     };
   }
 
   // Case 2: Active zone has onCheck registered → CHECK (app semantics)
   if (input.activeZoneHasCheck && input.activeZoneFocusedItemId) {
     return {
-      action: "check",
-      targetId: input.activeZoneFocusedItemId,
+      commands: [OS_CHECK({ targetId: input.activeZoneFocusedItemId })],
       meta: { ...meta, elementId: input.activeZoneFocusedItemId },
+      preventDefault: true,
+      fallback: false,
     };
   }
 

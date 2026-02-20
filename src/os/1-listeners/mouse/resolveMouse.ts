@@ -11,6 +11,9 @@
 // Input / Output Types
 // ═══════════════════════════════════════════════════════════════════
 
+import { OS_ACTIVATE, OS_FOCUS, OS_SELECT } from "@os/3-commands";
+import type { ResolveResult } from "../shared";
+
 export interface MouseInput {
   /** Resolved item under the pointer, if any */
   targetItemId: string | null;
@@ -34,18 +37,6 @@ export interface MouseInput {
 }
 
 export type SelectMode = "replace" | "toggle" | "range";
-
-export type MouseResult =
-  | { action: "ignore" }
-  | { action: "label-redirect"; itemId: string; groupId: string }
-  | { action: "zone-activate"; groupId: string }
-  | {
-      action: "focus-and-select";
-      itemId: string;
-      groupId: string;
-      selectMode: SelectMode;
-      shouldExpand: boolean;
-    };
 
 // ═══════════════════════════════════════════════════════════════════
 // Pure Resolution
@@ -75,31 +66,65 @@ export function isClickExpandable(
   return !KEYBOARD_ONLY_EXPAND_ROLES.has(role);
 }
 
-export function resolveMouse(input: MouseInput): MouseResult {
+export function resolveMouse(input: MouseInput): ResolveResult {
+  const meta = {
+    input: {
+      type: "MOUSE",
+      key: "mousedown",
+      elementId: null as string | null,
+    },
+  };
+
   // Label redirect takes priority
   if (input.isLabel && input.labelTargetItemId && input.labelTargetGroupId) {
+    meta.input.elementId = input.labelTargetItemId;
     return {
-      action: "label-redirect",
-      itemId: input.labelTargetItemId,
-      groupId: input.labelTargetGroupId,
+      commands: [OS_FOCUS({ zoneId: input.labelTargetGroupId, itemId: input.labelTargetItemId }) as any],
+      meta,
+      preventDefault: true,
+      fallback: false,
     };
   }
 
   // No item but has zone → zone-activate (empty area click)
   if (!input.targetItemId && input.targetGroupId) {
-    return { action: "zone-activate", groupId: input.targetGroupId };
+    return {
+      commands: [OS_FOCUS({ zoneId: input.targetGroupId, itemId: null }) as any],
+      meta,
+      preventDefault: false,
+      fallback: false,
+    };
   }
 
   // No target at all → ignore
   if (!input.targetItemId || !input.targetGroupId) {
-    return { action: "ignore" };
+    return { commands: [], meta: null, preventDefault: false, fallback: false };
   }
 
+  meta.input.elementId = input.targetItemId;
+
+  const commands = [];
+  commands.push(
+    OS_FOCUS({
+      zoneId: input.targetGroupId,
+      itemId: input.targetItemId,
+      skipSelection: true,
+    }) as any,
+  );
+
+  const selectMode = resolveSelectMode(input);
+  commands.push(OS_SELECT({ targetId: input.targetItemId, mode: selectMode }) as any);
+
+  if (isClickExpandable(input.hasAriaExpanded, input.itemRole)) {
+    commands.push(OS_ACTIVATE() as any);
+  }
+
+  const preventDefault = selectMode === "range" || selectMode === "toggle";
+
   return {
-    action: "focus-and-select",
-    itemId: input.targetItemId,
-    groupId: input.targetGroupId,
-    selectMode: resolveSelectMode(input),
-    shouldExpand: isClickExpandable(input.hasAriaExpanded, input.itemRole),
+    commands,
+    meta,
+    preventDefault,
+    fallback: false,
   };
 }

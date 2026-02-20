@@ -8,7 +8,7 @@
  * Handles: mousedown → OS_FOCUS + OS_SELECT + optional OS_EXPAND
  */
 
-import { OS_ACTIVATE, OS_FOCUS, OS_SELECT } from "@os/3-commands";
+
 import { useEffect } from "react";
 import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
@@ -112,82 +112,17 @@ export function MouseListener() {
 
       const result = resolveMouse(input);
 
-      switch (result.action) {
-        case "ignore":
-          return;
-
-        case "zone-activate": {
-          setDispatching(true);
-          os.dispatch(OS_FOCUS({ zoneId: result.groupId, itemId: null }), {
-            meta: {
-              input: {
-                type: "MOUSE",
-                key: me.type,
-                elementId: null,
-              },
-            },
-          });
-          setDispatching(false);
-          return;
+      if (result.commands.length > 0) {
+        setDispatching(true);
+        for (const cmd of result.commands) {
+          const opts = result.meta ? { meta: result.meta } : undefined;
+          os.dispatch(cmd, opts);
         }
+        setDispatching(false);
+      }
 
-        case "label-redirect": {
-          me.preventDefault();
-          setDispatching(true);
-          os.dispatch(
-            OS_FOCUS({ zoneId: result.groupId, itemId: result.itemId }),
-            {
-              meta: {
-                input: {
-                  type: "MOUSE",
-                  key: me.type,
-                  elementId: result.itemId,
-                },
-              },
-            },
-          );
-          setDispatching(false);
-          return;
-        }
-
-        case "focus-and-select": {
-          const mouseMeta = {
-            meta: {
-              input: {
-                type: "MOUSE",
-                key: me.type,
-                elementId: result.itemId,
-              },
-            },
-          };
-
-          // OS_FOCUS first
-          setDispatching(true);
-          os.dispatch(
-            OS_FOCUS({
-              zoneId: result.groupId,
-              itemId: result.itemId,
-              skipSelection: true,
-            }),
-            mouseMeta,
-          );
-          setDispatching(false);
-
-          // OS_SELECT
-          if (result.selectMode === "range" || result.selectMode === "toggle") {
-            me.preventDefault();
-          }
-          os.dispatch(
-            OS_SELECT({ targetId: result.itemId, mode: result.selectMode }),
-            mouseMeta,
-          );
-
-          // OS_EXPAND if applicable
-          if (result.shouldExpand) {
-            os.dispatch(OS_ACTIVATE(), mouseMeta);
-          }
-          return;
-        }
+      if (result.preventDefault) {
+        me.preventDefault();
       }
     };
 

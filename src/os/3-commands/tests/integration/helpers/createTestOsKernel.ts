@@ -4,23 +4,43 @@
  * Creates an isolated kernel instance with:
  *   - Real commands via kernel.register() (same handlers as production)
  *   - Mock contexts: dom-items, dom-rects, zone-config, dom-zone-order
+ *   - Input shims: pressKey, click (same as user actions)
+ *   - DOM projection: attrs (computes what FocusItem would render)
  *
  * Usage:
  *   const t = createTestOsKernel();
  *   t.setItems(["a", "b", "c"]);
+ *   t.setRole("list", "listbox");
  *   t.setActiveZone("list", "a");
- *   t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+ *   t.pressKey("ArrowDown");
  *   expect(t.focusedItemId()).toBe("b");
  */
 
 import { createKernel } from "@kernel";
 import { ZoneRegistry as ZoneRegistryImport } from "@os/2-contexts/zoneRegistry";
+import {
+  type KeyboardInput,
+  resolveKeyboard,
+} from "@os/1-listeners/keyboard/resolveKeyboard";
+import {
+  type MouseInput,
+  resolveMouse,
+} from "@os/1-listeners/mouse/resolveMouse";
 import type { AppState } from "@os/kernel";
 import type { FocusGroupConfig } from "@os/schemas/focus/config/FocusGroupConfig";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
+import {
+  getChildRole,
+  isCheckedRole,
+  isExpandableRole,
+  type ZoneRole,
+} from "@os/registries/roleRegistry";
 import { initialOSState, initialZoneState } from "@os/state/initial";
 import { ensureZone } from "@os/state/utils";
 import { produce } from "immer";
+
+// Ensure OS defaults are registered (keybindings for ArrowDown → OS_NAVIGATE, etc.)
+import "@os/keymaps/osDefaults";
 
 // Production commands — registered on test kernel via kernel.register()
 import { OS_FOCUS as prodOS_FOCUS } from "../../../focus/focus";
@@ -35,6 +55,9 @@ import { OS_SELECTION_CLEAR as prodSELECTION_CLEAR } from "../../../selection/se
 import { OS_TAB as prodOS_TAB } from "../../../tab/tab";
 import { OS_EXPAND as prodEXPAND } from "../../../expand/index";
 import { OS_FIELD_START_EDIT as prodFIELD_START_EDIT } from "../../../field/field";
+import { OS_ACTIVATE as prodACTIVATE } from "../../../interaction/activate";
+import { OS_CHECK as prodCHECK } from "../../../interaction";
+
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -47,6 +70,16 @@ interface ZoneOrderEntry {
   entry: "first" | "last" | "restore" | "selected";
   selectedItemId: string | null;
   lastFocusedId: string | null;
+}
+
+export interface ItemAttrs {
+  role: string | undefined;
+  tabIndex: number;
+  "aria-selected"?: boolean;
+  "aria-checked"?: boolean;
+  "aria-expanded"?: boolean;
+  "aria-disabled"?: boolean;
+  "data-focused"?: true | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -96,10 +129,10 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
   kernel.defineContext("dom-zone-order", () => mockZoneOrder.current);
 
   // ─── Register production commands (no duplication) ───
-  const OS_FOCUS = kernel.register(prodOS_FOCUS);
+  const OS_FOCUS_CMD = kernel.register(prodOS_FOCUS);
   const OS_SYNC_FOCUS = kernel.register(prodSYNC_FOCUS);
   const OS_RECOVER = kernel.register(prodOS_RECOVER);
-  const OS_SELECT = kernel.register(prodOS_SELECT);
+  const OS_SELECT_CMD = kernel.register(prodOS_SELECT);
   const OS_SELECTION_CLEAR = kernel.register(prodSELECTION_CLEAR);
   const OS_NAVIGATE = kernel.register(prodNAVIGATE);
   const OS_TAB = kernel.register(prodOS_TAB);
@@ -108,6 +141,8 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
   const OS_STACK_POP = kernel.register(prodSTACK_POP);
   const OS_EXPAND = kernel.register(prodEXPAND);
   const OS_FIELD_START_EDIT = kernel.register(prodFIELD_START_EDIT);
+  const OS_ACTIVATE_CMD = kernel.register(prodACTIVATE);
+  const OS_CHECK_CMD = kernel.register(prodCHECK);
 
   // ─── Convenience helpers ───
 
@@ -161,15 +196,170 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
     zone(zoneId)?.focusedItemId ?? null;
   const selection = (zoneId?: string) => zone(zoneId)?.selection ?? [];
 
+  // ─── Role Registration ───
+
+  function setRole(
+    zoneId: string,
+    role: ZoneRole,
+    opts?: { onAction?: (cursor: any) => any; onCheck?: (cursor: any) => any },
+  ) {
+    ZoneRegistryImport.register(zoneId, {
+      role,
+      config: DEFAULT_CONFIG,
+      element: null as unknown as HTMLElement, // headless — no DOM
+      parentId: null,
+      ...opts,
+    });
+  }
+
+  // ─── Zone helpers ───
+
+  function getZoneEntry(zoneId?: string) {
+    const id = zoneId ?? activeZoneId();
+    return id ? ZoneRegistryImport.get(id) : undefined;
+  }
+
+  function getChildRoleForZone(zoneId?: string): string | undefined {
+    const entry = getZoneEntry(zoneId);
+    return entry?.role ? getChildRole(entry.role) : undefined;
+  }
+
+  // ─── Input Shims ───
+
+  const dispatch = kernel.dispatch.bind(kernel);
+  const baseRef = () => ({ dispatch, state, activeZoneId, zone, focusedItemId, selection });
+
+  /**
+   * Simulate a keyboard press. Derives KeyboardInput from kernel state,
+   * runs resolveKeyboard, and dispatches the result.
+   */
+  function pressKey(key: string) {
+    const z = zone();
+    const entry = getZoneEntry();
+    const childRole = getChildRoleForZone();
+
+    const input: KeyboardInput = {
+      canonicalKey: key,
+      key,
+      isEditing: false,
+      isFieldActive: false,
+      isComposing: false,
+      isDefaultPrevented: false,
+      isInspector: false,
+      isCombobox: false,
+      focusedItemRole: childRole ?? null,
+      focusedItemId: z?.focusedItemId ?? null,
+      activeZoneHasCheck: !!entry?.onCheck,
+      activeZoneFocusedItemId: z?.focusedItemId ?? null,
+      elementId: z?.focusedItemId ?? undefined,
+      cursor: z?.focusedItemId
+        ? {
+          focusId: z.focusedItemId,
+          selection: z.selection ?? [],
+          anchor: z.selectionAnchor ?? null,
+        }
+        : null,
+    };
+
+    const result = resolveKeyboard(input);
+    executeKeyboardResult(result, baseRef());
+  }
+
+  /**
+   * Simulate a mouse click on an item. Derives MouseInput from kernel state,
+   * runs resolveMouse, and dispatches the result.
+   */
+  function click(
+    itemId: string,
+    opts?: { shift?: boolean; meta?: boolean; ctrl?: boolean; zoneId?: string },
+  ) {
+    const zoneId = opts?.zoneId ?? activeZoneId();
+    if (!zoneId) return;
+    const childRole = getChildRoleForZone(zoneId);
+    const expandable = childRole ? isExpandableRole(childRole) : false;
+
+    const input: MouseInput = {
+      targetItemId: itemId,
+      targetGroupId: zoneId,
+      shiftKey: opts?.shift ?? false,
+      metaKey: opts?.meta ?? false,
+      ctrlKey: opts?.ctrl ?? false,
+      altKey: false,
+      isLabel: false,
+      labelTargetItemId: null,
+      labelTargetGroupId: null,
+      hasAriaExpanded: expandable,
+      itemRole: childRole ?? null,
+    };
+
+    const result = resolveMouse(input);
+    executeMouseResult(result, baseRef());
+  }
+
+  // ─── DOM Projection ───
+
+  /**
+   * Returns the DOM attributes that FocusItem would project for this item.
+   * Pure computation from kernel state — no React.
+   */
+  function attrs(itemId: string, zoneId?: string): ItemAttrs {
+    const id = zoneId ?? activeZoneId();
+    if (!id) {
+      return { role: undefined, tabIndex: -1 };
+    }
+
+    const s = state();
+    const z = s.os.focus.zones[id];
+    const entry = getZoneEntry(id);
+    const childRole = entry?.role ? getChildRole(entry.role) : undefined;
+    const expandable = childRole ? isExpandableRole(childRole) : false;
+    const useChecked = childRole ? isCheckedRole(childRole) : false;
+
+    const isFocused = z?.focusedItemId === itemId;
+    const isActiveZone = s.os.focus.activeZoneId === id;
+    const isSelected = z?.selection.includes(itemId) ?? false;
+    const isExpanded = z?.expandedItems.includes(itemId) ?? false;
+    const isDisabled = ZoneRegistryImport.isDisabled(id, itemId);
+
+    const result: ItemAttrs = {
+      role: childRole,
+      tabIndex: isFocused ? 0 : -1,
+      "data-focused": (isFocused && isActiveZone) || undefined,
+    };
+
+    if (useChecked) {
+      result["aria-checked"] = isSelected;
+    } else {
+      result["aria-selected"] = isSelected;
+    }
+
+    if (expandable) {
+      result["aria-expanded"] = isExpanded;
+    }
+
+    if (isDisabled) {
+      result["aria-disabled"] = true;
+    }
+
+    return result;
+  }
+
+  // ─── Cleanup ───
+
+  function cleanup() {
+    const zId = activeZoneId();
+    if (zId) ZoneRegistryImport.unregister(zId);
+  }
+
   return {
     kernel,
-    dispatch: kernel.dispatch.bind(kernel),
+    dispatch,
 
     // Commands
-    OS_FOCUS,
+    OS_FOCUS: OS_FOCUS_CMD,
     OS_SYNC_FOCUS,
     OS_RECOVER,
-    OS_SELECT,
+    OS_SELECT: OS_SELECT_CMD,
     OS_NAVIGATE,
     OS_TAB,
     OS_ESCAPE,
@@ -178,16 +368,26 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
     OS_STACK_POP,
     OS_EXPAND,
     OS_FIELD_START_EDIT,
+    OS_ACTIVATE: OS_ACTIVATE_CMD,
+    OS_CHECK: OS_CHECK_CMD,
 
     // Mock setters
     setItems,
     setRects,
     setZoneOrder,
     setConfig,
+    setRole,
 
     // State helpers
     setActiveZone,
     initZone,
+
+    // Input shims
+    pressKey,
+    click,
+
+    // DOM projection
+    attrs,
 
     // State accessors
     state,
@@ -195,5 +395,45 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
     zone,
     focusedItemId,
     selection,
+
+    // Cleanup
+    cleanup,
   };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Dispatch Pipeline (mirrors actual Listener dispatch logic)
+// ═══════════════════════════════════════════════════════════════════
+
+type BaseRef = {
+  dispatch: (...args: any[]) => any;
+  state: () => AppState;
+  activeZoneId: () => string | null;
+  zone: (id?: string) => any;
+  focusedItemId: (zoneId?: string) => string | null;
+  selection: (zoneId?: string) => string[];
+};
+
+function executeKeyboardResult(
+  result: ReturnType<typeof resolveKeyboard>,
+  base: BaseRef,
+) {
+  if (result.commands.length > 0) {
+    for (const cmd of result.commands) {
+      const opts = result.meta ? { meta: { input: result.meta } } : undefined;
+      base.dispatch(cmd, opts);
+    }
+  }
+}
+
+function executeMouseResult(
+  result: ReturnType<typeof resolveMouse>,
+  base: BaseRef,
+) {
+  if (result.commands.length > 0) {
+    for (const cmd of result.commands) {
+      const opts = result.meta ? { meta: result.meta } : undefined;
+      base.dispatch(cmd, opts);
+    }
+  }
 }

@@ -136,45 +136,43 @@ describe("isClickExpandable", () => {
 describe("resolveMouse", () => {
   test("normal click → focus-and-select with replace", () => {
     const result = resolveMouse(baseInput());
-    expect(result).toEqual({
-      action: "focus-and-select",
-      itemId: "item-1",
-      groupId: "zone-1",
-      selectMode: "replace",
-      shouldExpand: false,
-    });
+    expect(result.commands).toHaveLength(2);
+    expect(result.commands[0]!.type).toBe("OS_FOCUS");
+    expect(result.commands[1]!.type).toBe("OS_SELECT");
+    expect((result.commands[1]!.payload as any).mode).toBe("replace");
+    expect(result.preventDefault).toBe(false);
   });
 
   test("shift+click → range select", () => {
     const result = resolveMouse(baseInput({ shiftKey: true }));
-    if (result.action === "focus-and-select") {
-      expect(result.selectMode).toBe("range");
-    }
+    const selectCmd = result.commands.find((c) => c.type === "OS_SELECT");
+    expect(selectCmd).toBeDefined();
+    expect((selectCmd!.payload as any).mode).toBe("range");
+    expect(result.preventDefault).toBe(true);
   });
 
   test("meta+click → toggle select", () => {
     const result = resolveMouse(baseInput({ metaKey: true }));
-    if (result.action === "focus-and-select") {
-      expect(result.selectMode).toBe("toggle");
-    }
+    const selectCmd = result.commands.find((c) => c.type === "OS_SELECT");
+    expect(selectCmd).toBeDefined();
+    expect((selectCmd!.payload as any).mode).toBe("toggle");
+    expect(result.preventDefault).toBe(true);
   });
 
   test("expandable button → shouldExpand true", () => {
     const result = resolveMouse(
       baseInput({ hasAriaExpanded: true, itemRole: "button" }),
     );
-    if (result.action === "focus-and-select") {
-      expect(result.shouldExpand).toBe(true);
-    }
+    expect(result.commands).toHaveLength(3);
+    const activateCmd = result.commands.find((c) => c.type === "OS_ACTIVATE");
+    expect(activateCmd).toBeDefined();
   });
 
   test("treeitem with aria-expanded → shouldExpand false", () => {
     const result = resolveMouse(
       baseInput({ hasAriaExpanded: true, itemRole: "treeitem" }),
     );
-    if (result.action === "focus-and-select") {
-      expect(result.shouldExpand).toBe(false);
-    }
+    expect(result.commands.some((c) => c.type === "OS_ACTIVATE")).toBe(false);
   });
 
   test("label click → label-redirect", () => {
@@ -187,27 +185,26 @@ describe("resolveMouse", () => {
         labelTargetGroupId: "zone-1",
       }),
     );
-    expect(result).toEqual({
-      action: "label-redirect",
-      itemId: "field-1",
-      groupId: "zone-1",
-    });
+    expect(result.commands).toHaveLength(1);
+    expect(result.commands[0]!.type).toBe("OS_FOCUS");
+    expect((result.commands[0]!.payload as any).itemId).toBe("field-1");
+    expect(result.preventDefault).toBe(true);
   });
 
   test("no target item, no zone → ignore", () => {
     const result = resolveMouse(
       baseInput({ targetItemId: null, targetGroupId: null }),
     );
-    expect(result.action).toBe("ignore");
+    expect(result.commands).toHaveLength(0);
+    expect(result.preventDefault).toBe(false);
   });
 
   test("no target item, but zone exists → zone-activate", () => {
     const result = resolveMouse(
       baseInput({ targetItemId: null, targetGroupId: "zone-1" }),
     );
-    expect(result).toEqual({
-      action: "zone-activate",
-      groupId: "zone-1",
-    });
+    expect(result.commands).toHaveLength(1);
+    expect(result.commands[0]!.type).toBe("OS_FOCUS");
+    expect((result.commands[0]!.payload as any).itemId).toBe(null);
   });
 });

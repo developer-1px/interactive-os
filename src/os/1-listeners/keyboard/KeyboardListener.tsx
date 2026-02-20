@@ -7,7 +7,6 @@
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { OS_CHECK } from "@os/3-commands/interaction";
 import {
   isEditingElement,
   resolveIsEditingForKey,
@@ -71,6 +70,13 @@ function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
       target.getAttribute("data-zone-id") ??
       target.id ??
       undefined,
+    cursor: zone?.focusedItemId
+      ? {
+        focusId: zone.focusedItemId,
+        selection: zone.selection ?? [],
+        anchor: zone.selectionAnchor ?? null,
+      }
+      : null,
   };
 }
 
@@ -86,57 +92,23 @@ export function KeyboardListener() {
 
       const result = resolveKeyboard(input);
 
-      switch (result.action) {
-        case "ignore":
-          return;
-
-        case "check":
-          os.dispatch(OS_CHECK({ targetId: result.targetId }), {
-            meta: { input: result.meta },
-          });
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-
-        case "dispatch":
-          os.dispatch(result.command, {
-            meta: { input: result.meta },
-          });
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-
-        case "dispatch-callback": {
-          // Build ZoneCursor from current kernel state
-          const { activeZoneId } = os.getState().os.focus;
-          if (!activeZoneId) return;
-          const zone = os.getState().os.focus.zones[activeZoneId];
-          if (!zone?.focusedItemId) return;
-
-          const cursor = {
-            focusId: zone.focusedItemId,
-            selection: zone.selection ?? [],
-            anchor: zone.selectionAnchor ?? null,
-          };
-
-          const cmds = result.callback(cursor);
-          const cmdArray = Array.isArray(cmds) ? cmds : [cmds];
-          for (const cmd of cmdArray) {
-            os.dispatch(cmd, {
-              meta: { input: result.meta },
-            });
-          }
-          e.preventDefault();
-          e.stopPropagation();
-          return;
+      if (result.commands.length > 0) {
+        for (const cmd of result.commands) {
+          const opts = result.meta ? { meta: { input: result.meta } } : undefined;
+          os.dispatch(cmd, opts);
         }
+      }
 
-        case "fallback":
-          if (os.resolveFallback(e)) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-          return;
+      if (result.fallback) {
+        if (os.resolveFallback(e)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+
+      if (result.preventDefault) {
+        e.preventDefault();
+        e.stopPropagation();
       }
     };
 

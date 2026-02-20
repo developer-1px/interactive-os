@@ -5,6 +5,15 @@
  * to avoid duplication across W3C event modules.
  */
 
+import type { BaseCommand } from "@kernel/core/tokens";
+
+export interface ResolveResult {
+  commands: BaseCommand[];
+  meta: Record<string, any> | null;
+  preventDefault: boolean;
+  fallback: boolean;
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // DOM Query
 // ═══════════════════════════════════════════════════════════════════
