@@ -16,6 +16,7 @@
 import { produce } from "immer";
 import { defineApp } from "@/os/defineApp";
 import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
+import { os } from "@/os/kernel";
 import { type Block, type BuilderState, INITIAL_STATE, type PropertyType, type SectionEntry } from "./model/appState";
 export type { Block, BuilderState, PropertyType, SectionEntry };
 export { INITIAL_STATE };
@@ -177,11 +178,39 @@ import {
 
 const CANVAS_ZONE_ID = "canvas";
 
+/**
+ * Canvas clipboard — bubbles focused item up to parent section,
+ * then delegates to sidebarCollection commands.
+ * Same data, same commands, different view.
+ */
+function resolveCanvasSectionId(focusId: string): string | null {
+  const state = os.getState().apps["builder"] as BuilderState;
+  // Direct match: focused on a section itself
+  if (state.data.blocks.some((b: Block) => b.id === focusId)) return focusId;
+  // Otherwise: find parent section via prefix matching (ncp-hero-title → ncp-hero)
+  const addr = resolveFieldAddress(focusId, state.data.blocks);
+  return addr?.section.id ?? null;
+}
+
 export const BuilderCanvasUI = canvasZone.bind({
   role: "grid",
   onAction: createDrillDown(CANVAS_ZONE_ID),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
+  onCopy: (cursor) => {
+    const sectionId = resolveCanvasSectionId(cursor.focusId);
+    if (!sectionId) return [];
+    return sidebarCollection.copy({ ids: [sectionId] });
+  },
+  onCut: (cursor) => {
+    const sectionId = resolveCanvasSectionId(cursor.focusId);
+    if (!sectionId) return [];
+    return sidebarCollection.cut({ ids: [sectionId], focusId: sectionId });
+  },
+  onPaste: (cursor) => {
+    const sectionId = resolveCanvasSectionId(cursor.focusId);
+    return sidebarCollection.paste({ afterId: sectionId ?? "" });
+  },
   options: {
     navigate: { orientation: "corner" },
     tab: { behavior: "trap" },
