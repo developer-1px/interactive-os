@@ -46,6 +46,35 @@ export function createUndoRedoCommands<S extends WithHistory>(
     app: AppHandle<S>,
     options?: UndoRedoOptions,
 ) {
+    // ── Shared helpers ──────────────────────────────────────────
+
+    /** Restore data/ui from snapshot into draft */
+    function restoreSnapshot(draft: any, snap: Record<string, unknown> | undefined) {
+        if (!snap) return;
+        if (snap["data"]) draft.data = snap["data"];
+        if (snap["ui"]) draft.ui = snap["ui"];
+    }
+
+    /** Build FOCUS dispatch command if applicable */
+    function buildFocusDispatch(entry: any): BaseCommand | undefined {
+        const focusTarget = entry.focusedItemId ? String(entry.focusedItemId) : undefined;
+        if (focusTarget && options?.focusZoneId) {
+            return {
+                type: "FOCUS",
+                payload: { zoneId: options.focusZoneId, itemId: focusTarget },
+            } as BaseCommand;
+        }
+        return undefined;
+    }
+
+    /** Snapshot current state (excluding history) */
+    function snapshotCurrent(state: S): Record<string, unknown> {
+        const { history: _h, ...rest } = state;
+        return rest as Record<string, unknown>;
+    }
+
+    // ── Conditions ──────────────────────────────────────────────
+
     const canUndo = app.condition(
         "canUndo",
         (s) => (s.history?.past?.length ?? 0) > 0,
@@ -55,6 +84,8 @@ export function createUndoRedoCommands<S extends WithHistory>(
         "canRedo",
         (s) => (s.history?.future?.length ?? 0) > 0,
     );
+
+    // ── Commands ────────────────────────────────────────────────
 
     const undoCommand = app.command(
         "undo",
@@ -73,49 +104,25 @@ export function createUndoRedoCommands<S extends WithHistory>(
                 }
             }
 
-            const earliestEntry = past[past.length - entriesToPop]!;
-            const snap = earliestEntry.snapshot;
-
-            // Focus restoration
-            const focusTarget = lastEntry.focusedItemId
-                ? String(lastEntry.focusedItemId)
-                : undefined;
-
-            let dispatch: BaseCommand | undefined;
-            if (focusTarget && options?.focusZoneId) {
-                // Dynamic import avoided — use inline FOCUS command structure
-                dispatch = {
-                    type: "FOCUS",
-                    payload: { zoneId: options.focusZoneId, itemId: focusTarget },
-                } as BaseCommand;
-            }
+            const snap = past[past.length - entriesToPop]!.snapshot;
 
             return {
                 state: produce(ctx.state, (draft) => {
-                    const { history: _h, ...currentWithoutHistory } = ctx.state;
-                    const entry: {
-                        command: { type: string };
-                        timestamp: number;
-                        snapshot: Record<string, unknown>;
-                        groupId?: string;
-                    } = {
+                    const entry: any = {
                         command: { type: "UNDO_SNAPSHOT" },
                         timestamp: Date.now(),
-                        snapshot: currentWithoutHistory as Record<string, unknown>,
+                        snapshot: snapshotCurrent(ctx.state),
                     };
                     if (groupId) entry.groupId = groupId;
-                    draft.history.future.push(entry as any);
+                    draft.history.future.push(entry);
 
                     for (let i = 0; i < entriesToPop; i++) {
                         draft.history.past.pop();
                     }
 
-                    if (snap) {
-                        if (snap["data"]) draft.data = snap["data"] as typeof draft.data;
-                        if (snap["ui"]) draft.ui = snap["ui"] as typeof draft.ui;
-                    }
+                    restoreSnapshot(draft, snap);
                 }),
-                dispatch,
+                dispatch: buildFocusDispatch(lastEntry),
             };
         },
         { when: canUndo },
@@ -126,35 +133,17 @@ export function createUndoRedoCommands<S extends WithHistory>(
         (ctx) => {
             const entry = ctx.state.history.future.at(-1)!;
 
-            const focusTarget = entry.focusedItemId
-                ? String(entry.focusedItemId)
-                : undefined;
-
-            let dispatch: BaseCommand | undefined;
-            if (focusTarget && options?.focusZoneId) {
-                dispatch = {
-                    type: "FOCUS",
-                    payload: { zoneId: options.focusZoneId, itemId: focusTarget },
-                } as BaseCommand;
-            }
-
             return {
                 state: produce(ctx.state, (draft) => {
                     draft.history.future.pop();
-                    const { history: _h, ...currentWithoutHistory } = ctx.state;
                     draft.history.past.push({
                         command: { type: "REDO_SNAPSHOT" },
                         timestamp: Date.now(),
-                        snapshot: currentWithoutHistory as Record<string, unknown>,
+                        snapshot: snapshotCurrent(ctx.state),
                     } as any);
-                    if (entry.snapshot) {
-                        if (entry.snapshot["data"])
-                            draft.data = entry.snapshot["data"] as typeof draft.data;
-                        if (entry.snapshot["ui"])
-                            draft.ui = entry.snapshot["ui"] as typeof draft.ui;
-                    }
+                    restoreSnapshot(draft, entry.snapshot);
                 }),
-                dispatch,
+                dispatch: buildFocusDispatch(entry),
             };
         },
         { when: canRedo },
