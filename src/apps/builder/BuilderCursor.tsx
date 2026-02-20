@@ -195,7 +195,7 @@ export function BuilderCursor() {
     };
   }, [measure]);
 
-  if (!state.visible) {
+  if (!state.visible || state.level === "section") {
     return (
       <div
         ref={containerRef}

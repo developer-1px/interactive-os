@@ -212,19 +212,22 @@ function PricingCard({
             </Builder.Item>
 
             <div className="mt-auto">
-                <Builder.Button
-                    id={`${id}-cta`}
-                    variant="primary"
-                    className={`
-              w-full py-4 px-6 rounded-full text-base font-bold transition-all duration-300
-              ${highlight
-                            ? "bg-[#03C75A] text-white hover:bg-[#02b350] hover:shadow-lg hover:shadow-green-500/20"
-                            : "bg-slate-100 text-slate-900 hover:bg-slate-200 border border-slate-200"
-                        }
-            `}
-                >
-                    {fields[`${prefix}-cta`] || defaults.cta}
-                </Builder.Button>
+                <Builder.Item asChild id={`${id}-cta`}>
+                    <Builder.Button
+                        id={`${id}-cta-btn`}
+                        variant="primary"
+                        className={`
+                  w-full py-4 px-6 rounded-full text-base font-bold transition-all duration-300
+                  ${highlight
+                                ? "bg-[#03C75A] text-white hover:bg-[#02b350] hover:shadow-lg hover:shadow-green-500/20"
+                                : "bg-slate-100 text-slate-900 hover:bg-slate-200 border border-slate-200"
+                            }
+                  data-[focused=true]:ring-4 data-[focused=true]:ring-violet-400
+                `}
+                    >
+                        {fields[`${prefix}-cta`] || defaults.cta}
+                    </Builder.Button>
+                </Builder.Item>
             </div>
         </div>
     );

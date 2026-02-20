@@ -299,6 +299,18 @@ function IconProperties({ fieldName }: { fieldName: string }) {
 
 function LinkProperties({ fieldName }: { fieldName: string }) {
   const value = useFieldByDomId(fieldName);
+  const resolved = useResolvedField(fieldName);
+  const block = resolved?.block ?? null;
+  const fieldKey = resolved?.fieldKey ?? "";
+
+  // Derive href field key: "link" → "link-href", "all" → "all-href"
+  const hrefFieldKey = `${fieldKey}-href`;
+  const hrefValue = block?.fields[hrefFieldKey] ?? "";
+
+  const dispatchField = (key: string, value: string) => {
+    if (!block) return;
+    os.dispatch(updateField({ sectionId: block.id, field: key, value }));
+  };
 
   return (
     <div className="space-y-6">
@@ -310,8 +322,33 @@ function LinkProperties({ fieldName }: { fieldName: string }) {
         />
       </FormGroup>
 
-      <FormGroup label="Element Info">
-        <ReadOnlyField label="DOM ID" value={fieldName} />
+      <FormGroup label="URL">
+        <LiveInput
+          label="Href"
+          value={hrefValue}
+          onChange={(v) => dispatchField(hrefFieldKey, v)}
+          placeholder="https://..."
+        />
+        <p className="text-[10px] text-slate-400 mt-1.5">
+          The link destination URL. Leave empty for # anchor.
+        </p>
+      </FormGroup>
+
+      <FormGroup label="Context">
+        <div className="text-xs text-slate-500 space-y-1">
+          <div className="flex justify-between">
+            <span className="text-slate-400">Block</span>
+            <span className="font-mono">{block?.id ?? "—"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Field</span>
+            <span className="font-mono">{fieldKey || "—"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Type</span>
+            <span className="font-mono">{block?.type ?? "—"}</span>
+          </div>
+        </div>
       </FormGroup>
     </div>
   );
@@ -319,6 +356,28 @@ function LinkProperties({ fieldName }: { fieldName: string }) {
 
 function ButtonProperties({ fieldName }: { fieldName: string }) {
   const value = useFieldByDomId(fieldName);
+  const resolved = useResolvedField(fieldName);
+  const block = resolved?.block ?? null;
+  const fieldKey = resolved?.fieldKey ?? "";
+
+  // Read current variant from DOM attribute
+  const currentVariant = getItemAttribute(CANVAS_ZONE_ID, fieldName, "data-variant") ?? "primary";
+
+  // Derive href field key for button links
+  const hrefFieldKey = `${fieldKey}-href`;
+  const hrefValue = block?.fields[hrefFieldKey] ?? "";
+
+  const VARIANT_OPTIONS: { value: string; label: string; preview: string }[] = [
+    { value: "primary", label: "Primary", preview: "bg-slate-900 text-white" },
+    { value: "secondary", label: "Secondary", preview: "bg-slate-100 text-slate-900" },
+    { value: "ghost", label: "Ghost", preview: "bg-transparent text-slate-600 border border-slate-200" },
+    { value: "outline", label: "Outline", preview: "bg-transparent text-slate-900 border-2 border-slate-900" },
+  ];
+
+  const dispatchField = (key: string, value: string) => {
+    if (!block) return;
+    os.dispatch(updateField({ sectionId: block.id, field: key, value }));
+  };
 
   return (
     <div className="space-y-6">
@@ -331,8 +390,56 @@ function ButtonProperties({ fieldName }: { fieldName: string }) {
         />
       </FormGroup>
 
-      <FormGroup label="Element Info">
-        <ReadOnlyField label="DOM ID" value={fieldName} />
+      <FormGroup label="Variant">
+        <div className="grid grid-cols-2 gap-2">
+          {VARIANT_OPTIONS.map((opt) => (
+            <button
+              type="button"
+              key={opt.value}
+              className={`px-3 py-2 rounded-md text-xs font-bold transition-all ${currentVariant === opt.value
+                  ? "ring-2 ring-violet-500 ring-offset-1"
+                  : "hover:bg-slate-50"
+                }`}
+              onClick={() => dispatchField(`${fieldKey}-variant`, opt.value)}
+            >
+              <div className={`w-full h-5 rounded mb-1.5 ${opt.preview}`} />
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </FormGroup>
+
+      <FormGroup label="Action URL">
+        <LiveInput
+          label="Href"
+          value={hrefValue}
+          onChange={(v) => dispatchField(hrefFieldKey, v)}
+          placeholder="https://..."
+        />
+        <p className="text-[10px] text-slate-400 mt-1.5">
+          URL to navigate when clicked. Leave empty for no action.
+        </p>
+      </FormGroup>
+
+      <FormGroup label="Context">
+        <div className="text-xs text-slate-500 space-y-1">
+          <div className="flex justify-between">
+            <span className="text-slate-400">Block</span>
+            <span className="font-mono">{block?.id ?? "—"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Field</span>
+            <span className="font-mono">{fieldKey || "—"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Type</span>
+            <span className="font-mono">{block?.type ?? "—"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Variant</span>
+            <span className="font-mono">{currentVariant}</span>
+          </div>
+        </div>
       </FormGroup>
     </div>
   );
