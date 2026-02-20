@@ -70,7 +70,7 @@ export function SectionSidebar() {
               >
                 <div
                   className={`
-                    flex items-center gap-1.5 py-1.5 px-2 rounded cursor-pointer transition-colors
+                    flex items-center gap-1.5 py-1.5 px-2 rounded cursor-pointer
                     group-focus:ring-2 group-focus:ring-indigo-500/50 
                     ${isCanvasActive ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-200/50 text-slate-500"}
                   `}
@@ -78,7 +78,7 @@ export function SectionSidebar() {
                 >
                   <button
                     type="button"
-                    className="shrink-0 p-0.5 rounded hover:bg-slate-300/50 transition-colors"
+                    className="shrink-0 p-0.5 rounded hover:bg-slate-300/50"
                     aria-label={isCollapsed ? "Expand" : "Collapse"}
                   >
                     {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
@@ -99,7 +99,7 @@ export function SectionSidebar() {
               <div
                 className={`
                   relative flex items-center gap-2 py-2 pr-3 rounded-lg cursor-pointer
-                  transition-all duration-200 border border-transparent
+                  border border-transparent
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
                   ${isCanvasActive
                     ? "bg-white shadow-sm border-slate-200/60"
@@ -127,7 +127,7 @@ export function SectionSidebar() {
                 <div
                   className={`
                   w-10 h-7 rounded border shrink-0 flex items-center justify-center
-                  transition-colors ml-1
+                  ml-1
                   ${isCanvasActive
                       ? "bg-indigo-50 border-indigo-100"
                       : "bg-slate-100 border-slate-200 group-hover:bg-white"
@@ -150,7 +150,7 @@ export function SectionSidebar() {
                   >
                     {node.block.label}
                   </span>
-                  <span className="text-[9px] text-slate-400 truncate hidden group-hover:block">
+                  <span className="text-[9px] text-slate-400 truncate">
                     {node.block.type}
                   </span>
                 </div>
