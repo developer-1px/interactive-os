@@ -31,7 +31,13 @@ export function NCPPricingBlock({ id }: { id: string }) {
                                 variant="success"
                                 className="inline-block px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold tracking-wider rounded-full mb-4 border border-slate-200"
                             >
-                                {fields["badge"] || "PRICING"}
+                                <Field.Editable
+                                    name={`${id}-badge`}
+                                    mode="deferred"
+                                    value={fields["badge"] ?? ""}
+                                    onCommit={createFieldCommit(id, "badge")}
+                                    className="bg-transparent text-inherit"
+                                />
                             </Builder.Badge>
                         </div>
                     </Builder.Item>
@@ -225,7 +231,13 @@ function PricingCard({
                   data-[focused=true]:ring-4 data-[focused=true]:ring-violet-400
                 `}
                     >
-                        {fields[`${prefix}-cta`] || defaults.cta}
+                        <Field.Editable
+                            name={`${id}-cta`}
+                            mode="deferred"
+                            value={fields[`${prefix}-cta`] ?? defaults.cta}
+                            onCommit={createFieldCommit(id.split("-").slice(0, -2).join("-"), `${prefix}-cta`)}
+                            className="bg-transparent text-inherit"
+                        />
                     </Builder.Button>
                 </Builder.Item>
             </div>

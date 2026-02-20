@@ -60,7 +60,13 @@ export function NCPNewsBlock({ id }: { id: string }) {
                   data-[focused=true]:border-slate-900 data-[focused=true]:scale-105 data-[focused=true]:origin-right data-[focused=true]:ring-2 data-[focused=true]:ring-slate-100 data-[focused=true]:rounded data-[focused=true]:px-2
                 `}
               >
-                {fields["all"] || "전체 뉴스 보기"}
+                <Field.Editable
+                  name={fid("all")}
+                  mode="deferred"
+                  value={fields["all"] ?? ""}
+                  onCommit={createFieldCommit(id, "all")}
+                  className="bg-transparent text-inherit"
+                />
               </Builder.Link>
             </Builder.Item>
           </div>

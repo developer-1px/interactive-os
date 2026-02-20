@@ -82,7 +82,13 @@ export function NCPHeroBlock({ id }: { id: string }) {
                     hover:bg-[#03C75A] hover:shadow-green-500/30 hover:-translate-y-1
                 `}
               >
-                {fields["cta"] || "무료로 시작하기"}
+                <Field.Editable
+                  name={fid("cta")}
+                  mode="deferred"
+                  value={fields["cta"] ?? ""}
+                  onCommit={createFieldCommit(id, "cta")}
+                  className="bg-transparent text-inherit"
+                />
                 <ArrowRight
                   size={20}
                   className="group-hover:translate-x-1 transition-transform"
@@ -159,7 +165,13 @@ export function NCPHeroBlock({ id }: { id: string }) {
                 variant="ghost"
                 className="hover:text-slate-900 transition-colors data-[focused=true]:underline data-[focused=true]:text-slate-900"
               >
-                {fields["nav-login"] || "로그인"}
+                <Field.Editable
+                  name={fid("nav-login")}
+                  mode="deferred"
+                  value={fields["nav-login"] ?? ""}
+                  onCommit={createFieldCommit(id, "nav-login")}
+                  className="bg-transparent text-inherit"
+                />
               </Builder.Button>
             </Builder.Item>
             <Builder.Item asChild id={fid("nav-signup")}>
@@ -168,7 +180,13 @@ export function NCPHeroBlock({ id }: { id: string }) {
                 variant="outline"
                 className="px-4 py-2 rounded-full border border-slate-200 hover:border-slate-800 hover:text-slate-900 transition-all data-[focused=true]:ring-2 data-[focused=true]:ring-slate-800"
               >
-                {fields["nav-signup"] || "회원가입"}
+                <Field.Editable
+                  name={fid("nav-signup")}
+                  mode="deferred"
+                  value={fields["nav-signup"] ?? ""}
+                  onCommit={createFieldCommit(id, "nav-signup")}
+                  className="bg-transparent text-inherit"
+                />
               </Builder.Button>
             </Builder.Item>
           </div>
