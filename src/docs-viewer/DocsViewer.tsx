@@ -6,7 +6,7 @@ import {
   FolderOpen,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DocsSidebar } from "./DocsSidebar";
 import {
   buildDocTree,
@@ -71,52 +71,58 @@ export function DocsViewer() {
     currentIndex < allFiles.length - 1 ? allFiles[currentIndex + 1] : null;
 
   // --- Core: load content for a path ---
-  const loadContent = (path: string, source: ExternalFolderSource | null) => {
-    if (source) {
-      // External: synchronous lookup from in-memory map
-      const fileContent = source.files.get(path);
-      if (fileContent != null) {
-        setContent(fileContent);
-        setError(null);
-      } else {
-        setContent("");
-        setError("Document not found in external folder");
-      }
-    } else {
-      // Built-in: async glob loader
-      loadDocContent(path)
-        .then((raw) => {
-          setContent(raw);
+  const loadContent = useCallback(
+    (path: string, source: ExternalFolderSource | null) => {
+      if (source) {
+        // External: synchronous lookup from in-memory map
+        const fileContent = source.files.get(path);
+        if (fileContent != null) {
+          setContent(fileContent);
           setError(null);
-        })
-        .catch((err) => {
-          console.error(err);
-          setError(err.message ?? "Failed to load document");
+        } else {
           setContent("");
-        });
-    }
-  };
+          setError("Document not found in external folder");
+        }
+      } else {
+        // Built-in: async glob loader
+        loadDocContent(path)
+          .then((raw) => {
+            setContent(raw);
+            setError(null);
+          })
+          .catch((err) => {
+            console.error(err);
+            setError(err.message ?? "Failed to load document");
+            setContent("");
+          });
+      }
+    },
+    [],
+  );
 
   // --- Update URL without triggering hashchange ---
-  const setHash = (hash: string) => {
+  const setHash = useCallback((hash: string) => {
     history.replaceState(null, "", hash);
-  };
+  }, []);
 
   // --- Select a file (sidebar click, prev/next) ---
-  const handleSelect = (path: string) => {
-    const ext = externalRef.current;
-    if (ext) {
-      setHash(`#ext:${ext.name}/${path}`);
-    } else {
-      setHash(`#/${path}`);
-    }
-    setActivePath(path);
-    loadContent(path, ext);
-    // Scroll content area to top on document switch
-    if (contentRef.current) {
-      contentRef.current.scrollTop = 0;
-    }
-  };
+  const handleSelect = useCallback(
+    (path: string) => {
+      const ext = externalRef.current;
+      if (ext) {
+        setHash(`#ext:${ext.name}/${path}`);
+      } else {
+        setHash(`#/${path}`);
+      }
+      setActivePath(path);
+      loadContent(path, ext);
+      // Scroll content area to top on document switch
+      if (contentRef.current) {
+        contentRef.current.scrollTop = 0;
+      }
+    },
+    [loadContent, setHash],
+  );
 
   // Initialize from hash on mount
   useEffect(() => {
@@ -227,7 +233,10 @@ export function DocsViewer() {
 
       {/* Main Content */}
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">
-        <div ref={contentRef} className="flex-1 overflow-y-auto relative z-10 custom-scrollbar pt-6">
+        <div
+          ref={contentRef}
+          className="flex-1 overflow-y-auto relative z-10 custom-scrollbar pt-6"
+        >
           <div className="px-12 py-12 lg:px-16 w-full max-w-5xl mx-auto">
             {error ? (
               <div className="flex flex-col items-center justify-center py-40 text-slate-300">

@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-20 00:52
+> Last updated: 2026-02-20 09:19
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**builder-v2** — T4/T5 선정 대기 (Next: 블록 타입별 패널 폼 E2E, 드래그 정렬 UI)
+**defineapp-unification** — defineApp canonical usage 확립 및 createTrigger Pit of Success (Next: T1 createTrigger 타입 안전화)
 
 ---
 
@@ -17,7 +17,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| builder-v2 | Next 태스크 선정 대기 | 02-19 | ⏸ Idle |
+| defineapp-unification | T1 타입 안전화 | 02-20 | 🟢 Active |
 
 ---
 
@@ -25,6 +25,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| inspector-redesign | 02-20 | ✅ archive/2026/02/W08/inspector-redesign |
 | command-type-unification | 02-20 | ✅ 4-archive/2026-02-command-type-unification (자연 해소) |
 | philosophy-hygiene | 02-20 | ✅ 4-archive/2026-02-philosophy-hygiene (예정) |
 | collection-clipboard | 02-20 | ✅ 4-archive/2026-02-collection-clipboard |
@@ -57,9 +58,9 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 2 |
-| Active Projects (total) | 3 |
-| Completed (archived) | 17+ |
+| Active Focus | 1 |
+| Active Projects (total) | 1 |
+| Completed (archived) | 18+ |
 | Inbox items | 2 |
 | Backlog items | 5 (docs-dashboard 포함) |
 | Open issues | 1 |
@@ -69,6 +70,9 @@
 
 ## 📝 Recent Changes (2026-02-20)
 
+- ✅ `inspector-redesign` — 타임라인 기반 Signal vs Noise 인스펙터 아키텍처 재설계 완수 및 `/archive` 매장 완료. `inferSignal` OS 관찰 원칙 `rules.md` 환류.
+- 🆕 `defineapp-unification` 프로젝트 생성 — Discussion에서 8개 문제 분해, Headless-first 원칙 확립, createTrigger Pit of Success 방향 확정
+- 📏 `rules.md`에 9개 학문적 원칙 추가 — Pit of Success, POLA, Hollywood, SRP, CQS, Ubiquitous Language 등 + Headless-first (Project #1)
 - 🗑️ `/retire` Round 2: 5건 심층 보관 → `archive/legacy-docs` (02-12 스냅샷 3건 + src/os/ 리뷰 + mermaid 분석)
 - 🔍 `/doubt docs/`: 완료 프로젝트 4개 → 4-archive/, testbot 보류 → 4-archive/2026-02-testbot, docs-dashboard → 5-backlog/
 - 🔍 `/doubt workflow 문서 타입`: README.md/KPI/retrospect/daily-log 제거 대상 확정, /project 최소 패키지 = BOARD.md + discussions/ 만

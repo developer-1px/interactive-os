@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   getAllOSComponents,
   getDebugSource,
@@ -25,7 +25,7 @@ export const DebugManager: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [osComponents, setOsComponents] = useState<OSComponentInfo[]>([]);
 
-  const copyElementSource = (element: HTMLElement) => {
+  const copyElementSource = useCallback((element: HTMLElement) => {
     let current = element;
     let source: {
       fileName: string;
@@ -49,7 +49,7 @@ export const DebugManager: React.FC = () => {
     } else {
       setToastMessage("Locked (No source found)");
     }
-  };
+  }, []);
 
   // Track hovered element globally
   useEffect(() => {

@@ -13,9 +13,9 @@
  */
 
 import { produce } from "immer";
+import { clearFieldDOM } from "../../4-effects/index";
 import { FieldRegistry } from "../../6-components/field/FieldRegistry";
 import { kernel } from "../../kernel";
-import { clearFieldDOM } from "../../4-effects/index";
 
 // ═══════════════════════════════════════════════════════════════════
 // FIELD_START_EDIT
@@ -68,7 +68,7 @@ export const FIELD_COMMIT = kernel.defineCommand(
       const allFields = FieldRegistry.get().fields;
       const isDeferred = !!editingId;
       for (const [, entry] of allFields) {
-        if (entry.config.onCommit || entry.config.onSubmit) {
+        if (entry.config.onCommit) {
           if (isDeferred && entry.config.mode === "deferred") {
             fieldEntry = entry;
             break;
@@ -83,7 +83,7 @@ export const FIELD_COMMIT = kernel.defineCommand(
     }
 
     // Bridge: dispatch app's onCommit command
-    const commitFactory = fieldEntry?.config.onCommit ?? fieldEntry?.config.onSubmit;
+    const commitFactory = fieldEntry?.config.onCommit;
     if (commitFactory) {
       // Read from FieldRegistry — InputListener keeps value in sync with DOM.
       const text = fieldEntry!.state.value;
@@ -144,7 +144,8 @@ export const FIELD_CANCEL = kernel.defineCommand(
       }
     }
     if (fieldEntry?.config.onCancel) {
-      queueMicrotask(() => kernel.dispatch(fieldEntry?.config.onCancel!));
+      const command = fieldEntry.config.onCancel;
+      queueMicrotask(() => kernel.dispatch(command));
     }
 
     return {

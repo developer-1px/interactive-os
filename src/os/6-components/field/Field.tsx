@@ -6,7 +6,13 @@ import { kernel } from "@os/kernel.ts";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
 import type { FocusTarget } from "@os/schemas/focus/FocusTarget.ts";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import type { ZodSchema } from "zod";
 import {
   type FieldConfig,
@@ -151,40 +157,43 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
     // --- Actions ---
 
-    const handleCommit = (currentValue: string) => {
-      const commitCmd = onCommitRef.current;
-      if (!commitCmd) return;
+    const handleCommit = useCallback(
+      (currentValue: string) => {
+        const commitCmd = onCommitRef.current;
+        if (!commitCmd) return;
 
-      // 1. Validate
-      if (schemaRef.current) {
-        const result = schemaRef.current.safeParse(currentValue);
-        if (!result.success) {
-          const errorMessage = result.error.issues[0]?.message ?? "Validation failed";
-          FieldRegistry.setError(fieldId, errorMessage);
-          return; // Block Commit
+        // 1. Validate
+        if (schemaRef.current) {
+          const result = schemaRef.current.safeParse(currentValue);
+          if (!result.success) {
+            const errorMessage =
+              result.error.issues[0]?.message ?? "Validation failed";
+            FieldRegistry.setError(fieldId, errorMessage);
+            return; // Block Commit
+          }
         }
-      }
 
-      // 2. Clear Error (if any)
-      FieldRegistry.setError(fieldId, null);
+        // 2. Clear Error (if any)
+        FieldRegistry.setError(fieldId, null);
 
-      // 3. Dispatch (Inject Payload)
-      // The factory expects { text: string }, we inject it.
-      // We assume defineApp has wrapped the handler to accept this payload.
-      // But wait, we need to DISPATCH the command.
-      // FieldCommandFactory returns a Command object.
-      const command = commitCmd({ text: currentValue });
-      kernel.dispatch(command);
+        // 3. Dispatch (Inject Payload)
+        // The factory expects { text: string }, we inject it.
+        // We assume defineApp has wrapped the handler to accept this payload.
+        // But wait, we need to DISPATCH the command.
+        // FieldCommandFactory returns a Command object.
+        const command = commitCmd({ text: currentValue });
+        kernel.dispatch(command);
 
-      // 4. Reset (if configured)
-      if (resetOnSubmit) {
-        FieldRegistry.reset(fieldId);
-      }
-    };
+        // 4. Reset (if configured)
+        if (resetOnSubmit) {
+          FieldRegistry.reset(fieldId);
+        }
+      },
+      [fieldId, resetOnSubmit],
+    );
 
     // Stable wrappers for Registry (Config)
     // We wrap these so Registry can call them if needed, but mostly Field handles logic internally now.
-
 
     // --- Registry Registration ---
     useEffect(() => {
@@ -196,14 +205,18 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
         multiline,
         trigger,
         resetOnSubmit,
-        ...(onCommitRef.current !== undefined ? { onCommit: onCommitRef.current } : {}),
+        ...(onCommitRef.current !== undefined
+          ? { onCommit: onCommitRef.current }
+          : {}),
         ...(schema !== undefined ? { schema } : {}),
-        ...(onCancelRef.current !== undefined ? { onCancel: onCancelRef.current } : {}),
+        ...(onCancelRef.current !== undefined
+          ? { onCancel: onCancelRef.current }
+          : {}),
       };
 
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
-    }, [name, mode, multiline, trigger, resetOnSubmit]); // Re-register on config change
+    }, [name, mode, multiline, trigger, resetOnSubmit, schema]); // Re-register on config change
 
     // --- State Subscription ---
     // Subscribe to primitive values to avoid unnecessary re-renders on object reference changes.
@@ -266,15 +279,11 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     registryValueRef.current = rawRegistryValue;
 
     useEffect(() => {
-      if (
-        !isContentEditableRef.current &&
-        value !== registryValueRef.current
-      ) {
+      if (!isContentEditableRef.current && value !== registryValueRef.current) {
         FieldRegistry.updateValue(fieldId, value);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value, fieldId]); // registryValueRef intentionally excluded — read via ref above
-
 
     // Initial Value
     const initialValueRef = useRef(value);
@@ -361,7 +370,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
         el.removeEventListener("blur", handleBlur);
         el.removeEventListener("keydown", handleKeyDown);
       };
-    }, [fieldId, trigger, resetOnSubmit]); // Re-bind if config changes
+    }, [fieldId, trigger, handleCommit]); // Re-bind if config changes
 
     useFieldFocus({
       innerRef,
@@ -414,7 +423,14 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
         (ref as React.MutableRefObject<HTMLElement | null>).current = node;
     };
 
-    return <FocusItem id={fieldId} as={as} ref={setInnerRef} {...baseProps} />;
+    return (
+      <FocusItem
+        id={fieldId}
+        as={as}
+        ref={setInnerRef}
+        {...(baseProps as any)}
+      />
+    );
   },
 );
 

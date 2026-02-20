@@ -46,7 +46,8 @@ function getDebugSource(el: HTMLElement | null): string | undefined {
 /** Check if element has direct text nodes with content */
 function hasDirectText(el: HTMLElement): boolean {
   return Array.from(el.childNodes).some(
-    (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim().length! > 0,
+    (n) =>
+      n.nodeType === Node.TEXT_NODE && (n.textContent?.trim().length ?? 0) > 0,
   );
 }
 
