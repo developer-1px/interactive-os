@@ -16,6 +16,7 @@ export default defineConfig({
       "src/**/tests/unit/**/*.test.tsx",
       "src/**/tests/integration/**/*.test.ts",
       "src/**/tests/integration/**/*.test.tsx",
+      "src/**/tests/apg/**/*.test.ts",
       "packages/kernel/src/**/tests/unit/**/*.test.ts",
       "packages/kernel/src/**/tests/unit/**/*.test.tsx",
       "packages/kernel/src/**/tests/integration/**/*.test.ts",

@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**defineapp-unification** — defineApp canonical usage 확립 및 createTrigger Pit of Success (Next: T1 createTrigger 타입 안전화)
+**apg-contract-testing** — W3C APG 스펙 기반 Contract Testing (Headless Kernel). T1: Listbox
 
 ---
 
@@ -17,7 +17,8 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| defineapp-unification | T1 타입 안전화 | 02-20 | 🟢 Active |
+| apg-contract-testing | T1 Listbox APG | 02-20 | 🟢 Active |
+| defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
 
 ---
 
