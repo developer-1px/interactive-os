@@ -52,6 +52,7 @@ interface OverlayState {
   dimmed: boolean;
   level: string;
   editing: boolean;
+  itemType: string;
 }
 
 const HIDDEN: OverlayState = {
@@ -67,6 +68,7 @@ const HIDDEN: OverlayState = {
   dimmed: false,
   level: "",
   editing: false,
+  itemType: "",
 };
 
 /**
@@ -133,6 +135,7 @@ export function BuilderCursor() {
       dimmed: !isActive,
       level: el.getAttribute("data-level") ?? "",
       editing: editingId !== null,
+      itemType: el.getAttribute("data-builder-type") ?? el.getAttribute("role") ?? "element",
     });
   }, []);
 
@@ -262,28 +265,7 @@ export function BuilderCursor() {
             letterSpacing: "0.02em",
           }}
         >
-          {state.editing ? `✏️ ${state.itemId}` : state.itemId}
-        </div>
-
-        {/* Zone Badge */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: -20,
-            left: -2,
-            color: "#94a3b8",
-            fontSize: 9,
-            fontWeight: 600,
-            fontFamily: "'SF Mono', 'Fira Code', 'Consolas', monospace",
-            padding: "1px 5px",
-            borderRadius: "0 0 3px 3px",
-            background: "rgba(255,255,255,0.95)",
-            border: "1px solid rgba(0,0,0,0.08)",
-            whiteSpace: "nowrap",
-            lineHeight: "14px",
-          }}
-        >
-          zone: {state.zoneId}
+          {state.editing ? `✏️ ${state.itemType}` : state.itemType}
         </div>
       </div>
     </div>
