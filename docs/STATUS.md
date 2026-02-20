@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**apg-contract-testing** — W3C APG 스펙 기반 Contract Testing (Headless Kernel). T1: Listbox
+**apg-contract-testing** — W3C APG 스펙 기반 Contract Testing (Headless Kernel). 58 tests across 4 patterns
 
 ---
 
@@ -17,7 +17,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| apg-contract-testing | T1 Listbox APG | 02-20 | 🟢 Active |
+| apg-contract-testing | T1~T4 완료 (58 tests) | 02-20 | 🟢 Active |
 | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
 
 ---
