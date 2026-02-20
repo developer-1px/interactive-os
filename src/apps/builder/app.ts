@@ -56,6 +56,7 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 // ═══════════════════════════════════════════════════════════════════
 
 import { createCollectionZone } from "@/os/collection/createCollectionZone";
+import { EXPAND } from "@/os/3-commands/expand/index";
 
 const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
   accessor: (s: BuilderState) => s.data.blocks,
@@ -105,15 +106,20 @@ export const renameSectionLabel = sidebarCollection.command(
 const collectionBindings = sidebarCollection.collectionBindings();
 export { sidebarCollection };
 export const BuilderSidebarUI = sidebarCollection.bind({
-  role: "listbox",
+  role: "tree",
   ...collectionBindings,
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   options: {
     navigate: { orientation: "vertical" },
+    select: { mode: "single", followFocus: true },
     tab: { behavior: "flow" },
   },
-  keybindings: [...collectionBindings.keybindings],
+  keybindings: [
+    ...collectionBindings.keybindings,
+    { key: "ArrowLeft", command: () => EXPAND({ action: "toggle" }) },
+    { key: "ArrowRight", command: () => EXPAND({ action: "toggle" }) },
+  ],
 });
 
 // ═══════════════════════════════════════════════════════════════════

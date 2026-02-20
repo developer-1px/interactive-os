@@ -376,11 +376,10 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                    active
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
                       ? "bg-[#1e293b] text-white border-[#1e293b]"
                       : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                  }`}
+                    }`}
                 >
                   {group}
                 </button>
@@ -645,8 +644,8 @@ function TimelineNode({
                   key={`${group.basePath}-${gi}`}
                   className="flex flex-col font-mono text-[9.5px]"
                 >
-                  {/* Base path label - Enclosed in a subtle bar */}
-                  <div className="text-[#475569] font-medium break-all bg-[#f8fafc] border border-[#e2e8f0] px-1.5 py-0.5 rounded-sm inline-flex items-center self-start">
+                  {/* Base path label - Clean minimal header */}
+                  <div className="text-[#475569] font-semibold break-all bg-transparent px-1.5 py-0.5 inline-flex items-center self-start">
                     {group.basePath}
                     {group.entries.length > 1 && (
                       <span className="text-[#94a3b8] font-normal ml-1 text-[8.5px]">
@@ -654,15 +653,15 @@ function TimelineNode({
                       </span>
                     )}
                   </div>
-                  {/* Entries - Connected by a left border */}
-                  <div className="flex flex-col gap-1 ml-2 mt-1 border-l-2 border-[#f1f5f9] pl-2">
+                  {/* Entries - Connected by a clean subtle left border */}
+                  <div className="flex flex-col gap-0.5 ml-3 mt-0.5 border-l border-[#e2e8f0] py-0.5">
                     {group.entries.map((entry, ei) => (
                       <div
                         key={`${entry.index ?? ei}`}
                         className="flex flex-col gap-[1px]"
                       >
                         {entry.index !== undefined && (
-                          <span className="text-[8.5px] text-[#94a3b8] font-mono leading-none mb-0.5">
+                          <span className="text-[8.5px] text-[#94a3b8] font-mono leading-none mb-0.5 pl-5">
                             [{entry.index}]
                           </span>
                         )}
@@ -770,35 +769,34 @@ function DiffValue({
   switch (type) {
     case "removed":
       prefix = "-";
-      colorClass = "text-[#dc2626] bg-[#fef2f2] border border-[#fee2e2]";
+      colorClass = "text-[#ef4444]";
       break;
     case "added":
       prefix = "+";
-      colorClass = "text-[#16a34a] bg-[#f0fdf4] border border-[#dcfce7]";
+      colorClass = "text-[#10b981]";
       break;
     case "changed-from":
-      prefix = "";
-      colorClass =
-        "text-[#94a3b8] bg-[#f8fafc] border border-transparent line-through";
+      prefix = ""; // empty so it aligns perfectly with the text
+      colorClass = "text-[#94a3b8] line-through";
       break;
     case "changed-to":
       prefix = "→";
-      colorClass =
-        "text-[#334155] bg-[#f1f5f9] border border-[#e2e8f0] font-medium";
+      colorClass = "text-[#0f172a] font-medium";
       break;
   }
 
-  const prefixNode = prefix ? (
-    <span className="shrink-0 font-bold mr-1">{prefix}</span>
-  ) : null;
+  // Fixed 4-unit width container for the prefix ensures vertical alignment of all text payloads
+  const prefixNode = (
+    <span className="inline-block w-5 shrink-0 text-center font-bold text-[#cbd5e1] select-none">
+      {prefix}
+    </span>
+  );
 
   if (!isLarge) {
     return (
-      <div
-        className={`px-1.5 py-0.5 rounded-sm whitespace-pre-wrap break-all inline-block self-start ${colorClass}`}
-      >
+      <div className={`py-0.5 whitespace-pre-wrap break-all flex ${colorClass}`}>
         {prefixNode}
-        {str}
+        <span>{str}</span>
       </div>
     );
   }
@@ -811,17 +809,15 @@ function DiffValue({
       : "Long String ...";
 
   return (
-    <details
-      className={`px-1.5 py-0.5 rounded-sm inline-block self-start group ${colorClass}`}
-    >
+    <details className={`py-0.5 flex group ${colorClass}`}>
       <summary className="cursor-pointer outline-none flex items-center select-none list-none text-[9.5px]">
-        <div className="flex items-center opacity-80 hover:opacity-100">
+        <div className="flex items-center w-full opacity-80 hover:opacity-100">
           {prefixNode}
           <span className="group-open:hidden italic">{summaryText}</span>
           <span className="hidden group-open:inline italic">Collapse</span>
         </div>
       </summary>
-      <div className="whitespace-pre-wrap break-all text-[9.5px] mt-1 pt-1 border-t border-black/10">
+      <div className="whitespace-pre-wrap break-all text-[9.5px] mt-1 pl-5">
         {str}
       </div>
     </details>

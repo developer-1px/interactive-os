@@ -12,22 +12,27 @@
 import type { Block } from "@/apps/builder/app";
 import { BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
 import { kernel } from "@/os/kernel";
+import { EXPAND } from "@/os/3-commands/expand/index";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 const SIDEBAR_ZONE_ID = "builder-sidebar";
 const CANVAS_ZONE_ID = "builder-canvas";
 
 export function SectionSidebar() {
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  // OS expandedItems = toggled items = collapsed (inverted: default empty = all expanded)
+  const expandedItems = kernel.useComputed(
+    (s) => s.os.focus.zones[SIDEBAR_ZONE_ID]?.expandedItems ?? [],
+  );
+  const collapsed = new Set(expandedItems);
 
   const focusedCanvasId = kernel.useComputed(
     (s) => s.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
   );
 
   const toggleCollapse = useCallback((id: string) => {
-    setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
+    kernel.dispatch(EXPAND({ itemId: id, action: "toggle" }));
   }, []);
 
   // Flatten tree for sidebar display — each node gets a depth
@@ -52,7 +57,7 @@ export function SectionSidebar() {
         {flatNodes.map((node) => {
           const isCanvasActive =
             focusedCanvasId?.startsWith(node.block.id) ?? false;
-          const isCollapsed = collapsed[node.block.id] ?? false;
+          const isCollapsed = collapsed.has(node.block.id);
 
           if (node.isSection) {
             // ─── PPT SECTION HEADER ───
@@ -166,7 +171,7 @@ interface FlatNode {
   slideIndex: number | null;
 }
 
-function getFlatNodes(blocks: Block[], collapsed: Record<string, boolean>) {
+function getFlatNodes(blocks: Block[], collapsed: Set<string>) {
   let slideIndex = 1;
   const result: FlatNode[] = [];
 
@@ -179,7 +184,8 @@ function getFlatNodes(blocks: Block[], collapsed: Record<string, boolean>) {
         isSection: !!isSection,
         slideIndex: isSection ? null : slideIndex++
       });
-      if (isSection && !collapsed[block.id]) {
+      // Inverted: items IN collapsed set are collapsed
+      if (isSection && !collapsed.has(block.id)) {
         traverse(block.children!, depth + 1);
       }
     }
