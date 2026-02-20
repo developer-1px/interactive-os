@@ -17,7 +17,7 @@ description: Complex 항목을 자율적으로 해결하는 4단계 래더. /go�
 
 #### Step 1: 분해 (Divide)
 
-- Complex 항목을 Cynefin 도메인으로 분류한다.
+- `/divide` 보고서가 있으면 참조한다. 없으면 인라인으로 Cynefin 분해를 수행한다.
 - Clear/Complicated가 보이면 **실행 프로토콜**로 즉시 실행한다.
 - 실행 결과로 남은 Complex 조각만 Step 2로 넘긴다.
 - 나눠서 전부 Clear/Complicated가 되면 → **해결. 루프 종료.**

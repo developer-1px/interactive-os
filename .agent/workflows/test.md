@@ -1,5 +1,5 @@
 ---
-description: 3단계(Unit/TestBot/E2E) 테스트 전략에 따라 테스트 코드를 작성한다. OS Dogfooding 철학을 준수하여 로직 검증은 Headless Kernel 위에서 수행한다.
+description: 3-Level(Unit/Integration/E2E) 테스트 코드 작성 가이드. /tdd가 What이라면 /test는 How.
 ---
 
 > **이론적 기반**: Test Pyramid (Mike Cohn, *Succeeding with Agile*)

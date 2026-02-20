@@ -1,5 +1,5 @@
 ---
-description: Cynefin 도메인을 기준으로 문제를 분해하고, Clear/Complicated는 단위 테스트로 증명한 뒤 실행한다. 최종 산출물은 보고서.
+description: 실행 없이 Cynefin 분해 보고서만 작성한다. /solve의 입력을 만든다.
 ---
 ## /divide — 분해 기반 문제 해결
 

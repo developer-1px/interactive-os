@@ -12,31 +12,24 @@
 import type { Block } from "@/apps/builder/app";
 import { BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
 import { os } from "@/os/kernel";
-import { OS_EXPAND } from "@/os/3-commands/expand/index";
+import { useFocusExpansion as useExpansion } from "@/os/5-hooks/useFocusExpansion";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useCallback } from "react";
 
 const SIDEBAR_ZONE_ID = "builder-sidebar";
 const CANVAS_ZONE_ID = "builder-canvas";
 
 export function SectionSidebar() {
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);
-  // OS expandedItems: IDs present = expanded (open). Default [] = all collapsed.
-  const expandedItems = os.useComputed(
-    (s) => s.os.focus.zones[SIDEBAR_ZONE_ID]?.expandedItems ?? [],
-  );
-  const expanded = new Set(expandedItems);
+
+  // OS-provided expansion hook — no manual state reading or dispatch
+  const { isExpanded, toggleExpanded } = useExpansion();
 
   const focusedCanvasId = os.useComputed(
     (s) => s.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
   );
 
-  const toggleExpand = useCallback((itemId: string) => {
-    os.dispatch(OS_EXPAND({ itemId, action: "toggle" }));
-  }, []);
-
   // Flatten tree for sidebar display — each node gets a depth
-  const flatNodes = getFlatNodes(blocks, expanded);
+  const flatNodes = getFlatNodes(blocks, isExpanded);
 
   return (
     <BuilderSidebarUI.Zone
@@ -58,7 +51,7 @@ export function SectionSidebar() {
           const itemId = `sidebar-${node.block.id}`;
           const isCanvasActive =
             focusedCanvasId?.startsWith(node.block.id) ?? false;
-          const isExpanded = expanded.has(itemId);
+          const itemExpanded = isExpanded(itemId);
 
           if (node.isSection) {
             // ─── PPT SECTION HEADER ───
@@ -74,14 +67,14 @@ export function SectionSidebar() {
                     group-focus:ring-2 group-focus:ring-indigo-500/50 
                     ${isCanvasActive ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-200/50 text-slate-500"}
                   `}
-                  onClick={() => toggleExpand(itemId)}
+                  onClick={() => toggleExpanded(itemId)}
                 >
                   <button
                     type="button"
                     className="shrink-0 p-0.5 rounded hover:bg-slate-300/50"
-                    aria-label={isExpanded ? "Collapse" : "Expand"}
+                    aria-label={itemExpanded ? "Collapse" : "Expand"}
                   >
-                    {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                    {itemExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   </button>
                   <span className="text-[11px] font-bold uppercase tracking-widest truncate">{node.block.label}</span>
                 </div>
@@ -172,7 +165,7 @@ interface FlatNode {
   slideIndex: number | null;
 }
 
-function getFlatNodes(blocks: Block[], expanded: Set<string>) {
+function getFlatNodes(blocks: Block[], isExpanded: (id: string) => boolean) {
   let slideIndex = 1;
   const result: FlatNode[] = [];
 
@@ -186,7 +179,7 @@ function getFlatNodes(blocks: Block[], expanded: Set<string>) {
         slideIndex: isSection ? null : slideIndex++
       });
       // Show children only when section is expanded
-      if (isSection && expanded.has(`sidebar-${block.id}`)) {
+      if (isSection && isExpanded(`sidebar-${block.id}`)) {
         traverse(block.children!, depth + 1);
       }
     }

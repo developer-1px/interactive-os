@@ -16,7 +16,7 @@ description: 자율 실행 에이전트 루프. 보편 사이클을 정의하고
 
 ## Phase 0: 부팅
 
-1. **`/onboarding` 실행** — rules.md 숙지 + 프로젝트 구조 파악 + 워크플로 목록 확인.
+1. **Rule 숙지** — `.agent/rules.md`를 읽는다.
 2. `docs/STATUS.md`를 읽는다. (Active Focus 프로젝트, 현재 Phase)
 3. 해당 프로젝트의 `BOARD.md`를 읽는다. (Now 태스크, 마지막 체크포인트)
 4. 대화 맥락이 있으면 참조한다.

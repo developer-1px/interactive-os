@@ -1,5 +1,5 @@
 ---
-description: /test를 이용해 테스트를 먼저 만들고 개발하는 TDD 전략. 테스트가 스펙이고, 통과가 증명이다.
+description: PRD에서 시나리오를 뽑아 Red-Green-Refactor를 돌리는 전략. /test가 How라면 /tdd는 What.
 ---
 
 ## /tdd — 테스트가 먼저다
