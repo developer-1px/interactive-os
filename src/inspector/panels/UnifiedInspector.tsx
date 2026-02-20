@@ -7,14 +7,17 @@
  *
  * v11: Accepts Transaction[] directly. No intermediate InspectorEvent type.
  *      Pipeline inferred via pure function inferPipeline().
+ * v12: Focuses on Signal/Noise separation using inferSignal.
  */
 
 import type { Transaction } from "@kernel/core/transaction";
+import { inferSignal } from "@kernel/inspector/inferSignal";
 import {
   ArrowRightLeft,
   Check,
   ChevronDown,
   ChevronRight,
+  ClipboardCopy,
   Database,
   Eye,
   GitBranch,
@@ -27,87 +30,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// ─── Types ───
-
-export type PipelineStep = {
-  name: string;
-  status: "pass" | "fail" | "skip";
-  detail?: string;
-};
-
-// ─── Pipeline Inference (pure function) ───
-
-/** Infer 6-domino pipeline from a kernel Transaction. Pure function. */
-export function inferPipeline(tx: Transaction): PipelineStep[] {
-  const inputMeta = (tx.meta as Record<string, unknown> | undefined)?.['input'] as
-    | { type?: string; key?: string; code?: string }
-    | undefined;
-
-  const hasInput = !!inputMeta;
-  const hasCommand = !!tx.command?.type;
-  const changes = tx.changes ?? [];
-  const effects = tx.effects ?? {};
-  const hasChanges = changes.length > 0;
-  const hasEffects = Object.keys(effects).length > 0;
-
-  return [
-    {
-      name: "Input",
-      status: hasInput ? "pass" : "skip",
-      detail: inputMeta?.key ?? inputMeta?.code ?? "",
-    },
-    {
-      name: "Dispatch",
-      status: hasInput ? "pass" : "skip",
-      detail: tx.handlerScope || "",
-    },
-    {
-      name: "Command",
-      status: hasCommand ? "pass" : "fail",
-      detail: hasCommand ? tx.command.type : "no handler",
-    },
-    {
-      name: "State",
-      status: hasCommand ? (hasChanges ? "pass" : "skip") : "skip",
-      detail: hasChanges ? `Δ${changes.length}` : "no change",
-    },
-    {
-      name: "Effect",
-      status: hasCommand ? (hasEffects ? "pass" : "skip") : "skip",
-      detail: hasEffects ? `${Object.keys(effects).length} fx` : "",
-    },
-    {
-      name: "Render",
-      status: hasChanges ? "pass" : "skip",
-      detail: hasChanges ? "updated" : "",
-    },
-  ];
-}
-
 // ─── Helpers ───
-
-function getInputMeta(tx: Transaction) {
-  return (tx.meta as Record<string, unknown> | undefined)?.['input'] as
-    | { type?: string; key?: string; code?: string; elementId?: string }
-    | undefined;
-}
-
-function getInputType(
-  meta: { type?: string } | undefined,
-): "KEYBOARD" | "MOUSE" | "FOCUS" {
-  if (meta?.type === "MOUSE") return "MOUSE";
-  if (meta?.type === "FOCUS") return "FOCUS";
-  return "KEYBOARD";
-}
-
-function getInputRaw(
-  tx: Transaction,
-  meta: { key?: string } | undefined,
-): string {
-  return (
-    meta?.key ?? (tx.command?.payload as any)?.key ?? tx.command?.type ?? ""
-  );
-}
 
 function formatTime(timestamp: number): string {
   return new Date(timestamp).toLocaleTimeString("en-US", {
@@ -117,6 +40,30 @@ function formatTime(timestamp: number): string {
     second: "2-digit",
     fractionalSecondDigits: 3,
   });
+}
+
+function copyToClipboard(text: string) {
+  navigator.clipboard.writeText(text).catch((err) => {
+    console.error("Failed to copy instructor context: ", err);
+  });
+}
+
+function formatAiContext(tx: Transaction, signal: ReturnType<typeof inferSignal>): string {
+  const trigger = `**Action**: ${signal.trigger.kind} (Raw: ${signal.trigger.raw}${signal.trigger.elementId ? `, Element: ${signal.trigger.elementId}` : ""})`;
+  const command = `**Command**: \`${signal.command.type}\``;
+  const payload = `**Payload**: \`${JSON.stringify(signal.command.payload)}\``;
+
+  let diffStr = "**Diff**: None";
+  if (signal.diff.length > 0) {
+    diffStr = "**Diff**:\n" + signal.diff.map(d => `  - \`${d.path}\`: \`${JSON.stringify(d.from)}\` -> \`${JSON.stringify(d.to)}\``).join("\n");
+  }
+
+  let effectStr = "";
+  if (signal.effects.length > 0) {
+    effectStr = `\n**Effects**: \n` + signal.effects.map(e => `  - \`${e}\``).join("\n");
+  }
+
+  return `**[Inspector Captured Event - ${formatTime(tx.timestamp)}]**\n- ${trigger}\n- ${command}\n- ${payload}\n${diffStr}${effectStr}`;
 }
 
 // ─── Highlighting ───
@@ -155,14 +102,19 @@ export function UnifiedInspector({
   storeState?: Record<string, unknown>;
   onClear?: () => void;
 }) {
-  // ── Auto-expand: only the latest command ──
-  // manualToggles tracks ids the user explicitly clicked (preserved across new events)
+  const [showOsEvents, setShowOsEvents] = useState(false);
   const [manualToggles, setManualToggles] = useState<Set<number>>(new Set());
   const [traceOpen, setTraceOpen] = useState(true);
   const [storeOpen, setStoreOpen] = useState(false);
 
   // Compute expanded set: auto-expand latest + preserve manual toggles
-  const latestTxId = transactions.length > 0 ? transactions[transactions.length - 1]?.id : undefined;
+  const filteredTx = transactions.filter((tx) => {
+    if (showOsEvents) return true;
+    const signal = inferSignal(tx);
+    return signal.type !== "OS";
+  });
+
+  const latestTxId = filteredTx.length > 0 ? filteredTx[filteredTx.length - 1]?.id : undefined;
   const expandedIds = new Set(manualToggles);
   // Auto-expand latest only if user hasn't manually collapsed it
   if (latestTxId !== undefined && !manualToggles.has(latestTxId)) {
@@ -194,16 +146,14 @@ export function UnifiedInspector({
   // Auto-scroll: find the 3rd-from-last item in DOM and scroll its top into view
   // biome-ignore lint/correctness/useExhaustiveDependencies: track tx count changes
   useEffect(() => {
-    if (transactions.length > prevTxCount.current) {
+    if (filteredTx.length > prevTxCount.current) {
       if (!isUserScrolled) {
         requestAnimationFrame(() => {
           const el = scrollRef.current;
           if (!el) return;
-          // Find the target item: 3rd from last (or first if < 3 items)
-          const targetIdx = Math.max(0, transactions.length - 3);
+          const targetIdx = Math.max(0, filteredTx.length - 3);
           const targetEl = el.querySelector(`[data-tx-index="${targetIdx}"]`) as HTMLElement | null;
           if (targetEl) {
-            // Account for sticky headers: Inspector header (32px) + section header (28px)
             el.scrollTop = targetEl.offsetTop - 60;
           } else {
             el.scrollTop = el.scrollHeight;
@@ -211,17 +161,15 @@ export function UnifiedInspector({
         });
       }
     }
-    prevTxCount.current = transactions.length;
-  }, [transactions.length, isUserScrolled]);
+    prevTxCount.current = filteredTx.length;
+  }, [filteredTx.length, isUserScrolled]);
 
   const toggle = (id: number) => {
     setManualToggles((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
-        // Was manually toggled — remove to let auto behavior take over
         next.delete(id);
       } else {
-        // User explicitly toggles: if currently expanded, manual-close; if collapsed, manual-open
         next.add(id);
       }
       return next;
@@ -234,9 +182,19 @@ export function UnifiedInspector({
         <Layers size={14} className="text-[#007acc] mr-2" />
         <span className="font-bold text-[#555]">Inspector</span>
         <span className="ml-2 text-[#999] text-[9px]">
-          ({transactions.length} events)
+          ({filteredTx.length} events)
         </span>
-        {onClear && transactions.length > 0 && (
+        <label className="ml-3 flex items-center gap-1.5 cursor-pointer text-[#64748b]">
+          <input
+            type="checkbox"
+            checked={showOsEvents}
+            onChange={(e) => setShowOsEvents(e.target.checked)}
+            className="w-3 h-3 accent-blue-500 rounded-sm"
+          />
+          <span className="font-medium text-[9px] tracking-wide">OS Events</span>
+        </label>
+
+        {onClear && filteredTx.length > 0 && (
           <button
             type="button"
             onClick={() => {
@@ -257,14 +215,14 @@ export function UnifiedInspector({
             icon={<Layers size={10} />}
             open={traceOpen}
             onToggle={() => setTraceOpen(!traceOpen)}
-            count={transactions.length}
+            count={filteredTx.length}
           >
-            {transactions.length === 0 ? (
+            {filteredTx.length === 0 ? (
               <div className="p-4 text-center text-[#999] italic">
                 No events captured yet.
               </div>
             ) : (
-              transactions.map((tx, i) => (
+              filteredTx.map((tx, i) => (
                 <TimelineNode
                   key={tx.id}
                   tx={tx}
@@ -315,8 +273,6 @@ export function UnifiedInspector({
   );
 }
 
-// ─── Node ───
-
 function TimelineNode({
   tx,
   index,
@@ -330,23 +286,20 @@ function TimelineNode({
   onToggle: () => void;
   dataIndex: number;
 }) {
-  const pipeline = inferPipeline(tx);
-  const inputMeta = getInputMeta(tx);
-  const inputType = getInputType(inputMeta);
-  const inputRaw = getInputRaw(tx, inputMeta);
-  const isFail = pipeline.some((s) => s.status === "fail");
-  const isNoOp = pipeline[0]?.status === "fail"; // Optional chaining just in case
-  const changes = tx.changes ?? [];
-  const effects = tx.effects ?? {};
-  const effectEntries = Object.entries(effects);
+  const signal = inferSignal(tx);
+  const { type, trigger, command, diff, effects } = signal;
+
+  const isNoOp = type === "NO_OP";
+  const opacityClass = isNoOp ? "opacity-40 hover:opacity-100" : "";
+
   const icon =
-    inputType === "MOUSE" ? (
-      inputRaw === "Click" ? (
+    trigger.kind === "MOUSE" ? (
+      trigger.raw === "Click" ? (
         <MousePointerClick size={12} className="text-blue-500" />
       ) : (
         <MousePointer2 size={12} className="text-blue-500" />
       )
-    ) : inputType === "FOCUS" ? (
+    ) : trigger.kind === "FOCUS" ? (
       <Eye size={12} className="text-emerald-500" />
     ) : (
       <Keyboard size={12} className="text-slate-500" />
@@ -355,105 +308,88 @@ function TimelineNode({
   return (
     <div
       data-tx-index={dataIndex}
-      className={`flex flex-col border-b border-[#f0f0f0] ${expanded ? "bg-white" : "hover:bg-[#fafafa]"}`}
+      className={`flex flex-col border-b border-[#f0f0f0] transition-opacity ${opacityClass} ${expanded ? "bg-white" : "hover:bg-[#fafafa]"}`}
     >
-      {/* Header Row (Icon + Number + Text — all middle-aligned) */}
-      <button
-        type="button"
-        onClick={onToggle}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") onToggle();
-        }}
-        className="flex items-center gap-2 px-2 py-2 cursor-pointer bg-transparent border-none text-left w-full"
-      >
-        {/* Icon (Fixed width container for alignment) */}
-        <div className="w-3.5 flex justify-center shrink-0">{icon}</div>
-
-        {/* #Number + Input */}
-        <span className="font-mono text-[9px] text-[#a0aec0] font-bold select-none">
-          #{index}
-        </span>
-        <span
-          className={`font-bold text-[11px] truncate ${isFail ? "text-[#dc2626]" : "text-[#1e293b]"}`}
+      <div className="flex items-center w-full">
+        <button
+          type="button"
+          onClick={onToggle}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") onToggle();
+          }}
+          className="flex-1 flex items-center gap-2 px-2 py-2 cursor-pointer bg-transparent border-none text-left"
         >
-          {inputRaw}
-        </span>
+          {/* Icon */}
+          <div className="w-3.5 flex justify-center shrink-0">{icon}</div>
 
-        {/* Element ID Badge (with highlight interaction) */}
-        {inputMeta?.elementId && (
-          <span
-            className="px-1 py-px rounded bg-[#fff0f6] text-[#c2255c] text-[9px] font-mono border border-[#ffdeeb] cursor-help max-w-[80px] truncate"
-            title={`Element ID: ${inputMeta.elementId}`}
-            onMouseEnter={() => highlightElement(inputMeta.elementId!, true)}
-            onMouseLeave={() => highlightElement(inputMeta.elementId!, false)}
-          >
-            {inputMeta.elementId}
+          {/* Number + Trigger */}
+          <span className="font-mono text-[9px] text-[#a0aec0] font-bold select-none">
+            #{index}
           </span>
-        )}
-
-        {/* Command Badge */}
-        {tx.command && !isFail && (
-          <span className="px-1 py-px rounded bg-[#eff6ff] text-[#2563eb] text-[9px] font-semibold border border-[#bfdbfe]">
-            {tx.command.type}
+          <span className="font-bold text-[11px] truncate text-[#1e293b]">
+            {trigger.raw || "Unknown"}
           </span>
-        )}
 
-        {/* Time */}
-        <span className="ml-auto text-[9px] text-[#cbd5e1] font-mono tabular-nums shrink-0">
-          {formatTime(tx.timestamp).split(".")[0]}
-        </span>
-      </button>
-
-      {/* Expanded */}
-      {expanded && (
-        <div className="flex flex-col gap-2 pl-9 pr-2 pb-3">
-          {/* ── Pipeline ── */}
-          {pipeline.length > 0 && (
-            <Section title="Pipeline">
-              {pipeline.map((step) => (
-                <Row key={step.name}>
-                  <span
-                    className={`inline-block w-1 h-1 rounded-full shrink-0 ${step.status === "pass" ? "bg-[#22c55e]" : step.status === "fail" ? "bg-[#ef4444]" : "bg-[#d1d5db]"}`}
-                  />
-                  <span
-                    className={`font-mono font-bold w-10 shrink-0 ${step.status === "pass" ? "text-[#475569]" : step.status === "fail" ? "text-[#dc2626]" : "text-[#94a3b8]"}`}
-                  >
-                    {step.name}
-                  </span>
-                  {step.detail && (
-                    <span
-                      className={`truncate ${step.status === "fail" ? "text-[#ef4444] font-bold" : "text-[#64748b]"}`}
-                    >
-                      {step.detail}
-                    </span>
-                  )}
-                </Row>
-              ))}
-            </Section>
+          {/* Element ID Badge */}
+          {trigger.elementId && (
+            <span
+              className="px-1 py-px rounded bg-[#fff0f6] text-[#c2255c] text-[9px] font-mono border border-[#ffdeeb] cursor-help max-w-[80px] truncate"
+              title={`Element ID: ${trigger.elementId}`}
+              onMouseEnter={() => highlightElement(trigger.elementId, true)}
+              onMouseLeave={() => highlightElement(trigger.elementId, false)}
+            >
+              {trigger.elementId}
+            </span>
           )}
 
-          {/* ── State ── */}
-          {!isNoOp && changes.length > 0 && (
-            <Section title="State">
-              {changes.map((d: { path: string; from?: unknown; to?: unknown }) => (
+          {/* Command Badge */}
+          {command.type !== "NO_COMMAND" && (
+            <span className="px-1 py-px rounded bg-[#eff6ff] text-[#2563eb] text-[9px] font-semibold border border-[#bfdbfe]">
+              {command.type}
+            </span>
+          )}
+
+          <span className="ml-auto text-[9px] text-[#cbd5e1] font-mono tabular-nums shrink-0">
+            {formatTime(tx.timestamp).split(".")[0]}
+          </span>
+        </button>
+
+        {/* Copy for AI Button */}
+        {expanded && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              copyToClipboard(formatAiContext(tx, signal));
+            }}
+            title="Copy Context for AI"
+            className="shrink-0 mx-2 p-1.5 rounded-md text-[#94a3b8] hover:bg-[#e0e7ff] hover:text-[#4f46e5] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-1 group"
+          >
+            <ClipboardCopy size={12} />
+            <span className="text-[8px] font-bold uppercase hidden group-hover:inline">Copy for AI</span>
+          </button>
+        )}
+      </div>
+
+      {/* Expanded Details */}
+      {expanded && (
+        <div className="flex flex-col gap-2 pl-9 pr-2 pb-3">
+          {/* ── State Mutation (Diff) ── */}
+          {diff.length > 0 && (
+            <Section title="State Mutation">
+              {diff.map((d: { path: string; from?: unknown; to?: unknown }) => (
                 <Row key={d.path}>
-                  <ArrowRightLeft
-                    size={9}
-                    className="text-[#94a3b8] shrink-0"
-                  />
-                  <span
-                    className="text-[#475569] font-mono truncate"
-                    title={d.path}
-                  >
+                  <ArrowRightLeft size={9} className="text-[#94a3b8] shrink-0" />
+                  <span className="text-[#475569] font-mono truncate" title={d.path}>
                     {d.path}
                   </span>
                   <span className="ml-auto flex items-center gap-1 shrink-0 font-mono">
                     <span className="text-[#ef4444] line-through opacity-60">
-                      {String(d.from)}
+                      {JSON.stringify(d.from)}
                     </span>
                     <span className="text-[#cbd5e1]">→</span>
                     <span className="text-[#16a34a] font-bold">
-                      {String(d.to)}
+                      {JSON.stringify(d.to)}
                     </span>
                   </span>
                 </Row>
@@ -462,23 +398,22 @@ function TimelineNode({
           )}
 
           {/* ── Effects ── */}
-          {!isNoOp && effectEntries.length > 0 && (
+          {effects.length > 0 && (
             <Section title="Effects">
-              {effectEntries.map(([key], idx) => (
+              {effects.map((key, idx) => (
                 <Row key={`${key}-${idx}`}>
                   <Check size={9} className="text-[#16a34a] shrink-0" />
                   <span className="font-mono text-[#334155]">
                     {key}
-                    <span className="text-[#94a3b8]">(global)</span>
                   </span>
                 </Row>
               ))}
             </Section>
           )}
 
-          {/* ── Kernel ── */}
-          {!isNoOp && tx.handlerScope && (
-            <Section title="Kernel">
+          {/* ── Kernel Details ── */}
+          {tx.handlerScope && (
+            <Section title="Kernel Routine">
               <Row>
                 <Hash size={9} className="text-[#94a3b8] shrink-0" />
                 <span className="text-[#94a3b8] shrink-0">handler</span>
@@ -496,7 +431,7 @@ function TimelineNode({
             </Section>
           )}
 
-          {/* ── Snapshot ── */}
+          {/* ── Raw Snapshot ── */}
           {tx.meta && <RawDataToggle data={tx.meta} />}
         </div>
       )}
