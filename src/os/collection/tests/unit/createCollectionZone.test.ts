@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AppHandle, ZoneHandle } from "@/os/defineApp.types";
 import {
+  _resetClipboardStore,
   type CollectionConfig,
   createCollectionZone,
 } from "../../createCollectionZone";
@@ -23,7 +24,7 @@ describe("createCollectionZone", () => {
     createZone: vi.fn(() => mockZone),
   } as unknown as AppHandle<any>;
 
-  // Mock State (clipboard no longer in app state)
+  // Mock State
   interface MockState {
     data: { items: { id: string; text: string }[] };
   }
@@ -42,26 +43,30 @@ describe("createCollectionZone", () => {
     text: (item) => item.text,
   };
 
-  it("onCopy with selection should dispatch OS_CLIPBOARD_SET with all selected items", () => {
+  it("onCopy with selection should copy all selected items to clipboard store", () => {
+    _resetClipboardStore();
     const zone = createCollectionZone(mockApp, "test", config);
     const bindings = zone.collectionBindings();
 
-    // onCopy returns the command result which now dispatches OS_CLIPBOARD_SET
     const result = bindings.onCopy({ focusId: "B", selection: ["A", "B"] });
 
     expect(result).toBeDefined();
-    // Copy no longer modifies app state — state should be unchanged
+    // Copy does not modify app state
     expect(result.state).toBe(mockState);
-    // Should dispatch OS_CLIPBOARD_SET
-    expect(result.dispatch).toBeDefined();
-    expect(result.dispatch.type).toBe("OS_CLIPBOARD_SET");
-    // clipboardWrite should have text
+    // No OS_CLIPBOARD_SET dispatch — _clipboardStore is single source of truth
+    // clipboardWrite should have text for native clipboard
     expect(result.clipboardWrite).toBeDefined();
     expect(result.clipboardWrite.text).toContain("Item A");
     expect(result.clipboardWrite.text).toContain("Item B");
+
+    // readClipboard should reflect what was copied
+    const preview = zone.readClipboard() as { id: string };
+    expect(preview).toBeDefined();
+    expect(preview.id).toBe("A");
   });
 
   it("onCopy without selection should copy focused item only", () => {
+    _resetClipboardStore();
     const zone = createCollectionZone(mockApp, "test", config);
     const bindings = zone.collectionBindings();
 
@@ -69,8 +74,29 @@ describe("createCollectionZone", () => {
 
     expect(result).toBeDefined();
     expect(result.state).toBe(mockState);
-    expect(result.dispatch).toBeDefined();
-    expect(result.dispatch.type).toBe("OS_CLIPBOARD_SET");
     expect(result.clipboardWrite.text).toBe("Item B");
+
+    // readClipboard should return the single copied item
+    const preview = zone.readClipboard() as { id: string };
+    expect(preview.id).toBe("B");
+  });
+
+  it("copyText writes text data to clipboard store", () => {
+    _resetClipboardStore();
+    const zone = createCollectionZone(mockApp, "test", config);
+
+    zone.copyText("Hello World");
+
+    const preview = zone.readClipboard() as { type: string; value: string };
+    expect(preview).toBeDefined();
+    expect(preview.type).toBe("text");
+    expect(preview.value).toBe("Hello World");
+  });
+
+  it("readClipboard returns null when clipboard is empty", () => {
+    _resetClipboardStore();
+    const zone = createCollectionZone(mockApp, "test", config);
+
+    expect(zone.readClipboard()).toBeNull();
   });
 });

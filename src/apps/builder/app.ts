@@ -13,14 +13,19 @@
  */
 
 import { produce } from "immer";
-import { defineApp } from "@/os/defineApp";
-import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
-import { os } from "@/os/kernel";
-import { type Block, type BuilderState, INITIAL_STATE, type PropertyType } from "./model/appState";
 import {
   type CollectionNode,
   findAcceptingCollection,
 } from "@/os/collection/pasteBubbling";
+import { defineApp } from "@/os/defineApp";
+import { os } from "@/os/kernel";
+import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
+import {
+  type Block,
+  type BuilderState,
+  INITIAL_STATE,
+  type PropertyType,
+} from "./model/appState";
 export type { Block, BuilderState, PropertyType };
 export { INITIAL_STATE };
 
@@ -37,7 +42,6 @@ export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE, {
   history: true,
 });
 
-
 // ═══════════════════════════════════════════════════════════════════
 // Undo / Redo — generic factory (defineApp.undoRedo.ts)
 // ═══════════════════════════════════════════════════════════════════
@@ -51,8 +55,8 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 // Sidebar Zone — Collection Zone Facade
 // ═══════════════════════════════════════════════════════════════════
 
-import { createCollectionZone, getClipboardPreview, setTextClipboard } from "@/os/collection/createCollectionZone";
 import { OS_EXPAND } from "@/os/3-commands/expand/index";
+import { createCollectionZone } from "@/os/collection/createCollectionZone";
 
 /** Recursively clone a block tree, assigning new IDs to all descendants. */
 function deepCloneBlock(block: Block, newId: string): Block {
@@ -85,7 +89,11 @@ const collectionConfig = {
   }),
 };
 
-export const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", collectionConfig);
+export const sidebarCollection = createCollectionZone(
+  BuilderApp,
+  "sidebar",
+  collectionConfig,
+);
 
 // Re-export for backward compatibility with existing tests
 export const deleteSection = sidebarCollection.remove;
@@ -131,7 +139,11 @@ export const BuilderSidebarUI = sidebarCollection.bind({
 // Canvas Zone — own collection (same data accessor, own focus scope)
 // ═══════════════════════════════════════════════════════════════════
 
-const canvasCollection = createCollectionZone(BuilderApp, CANVAS_ZONE_ID, collectionConfig);
+const canvasCollection = createCollectionZone(
+  BuilderApp,
+  CANVAS_ZONE_ID,
+  collectionConfig,
+);
 
 /**
  * updateField — 섹션 필드 값 변경.
@@ -139,10 +151,7 @@ const canvasCollection = createCollectionZone(BuilderApp, CANVAS_ZONE_ID, collec
  */
 export const updateField = canvasCollection.command(
   "updateField",
-  (
-    ctx,
-    payload: { sectionId: string; field: string; value: string },
-  ) => ({
+  (ctx, payload: { sectionId: string; field: string; value: string }) => ({
     state: produce(ctx.state, (draft) => {
       let target: Block | null = null;
       function traverse(blocks: Block[]) {
@@ -177,7 +186,6 @@ import {
  *   onPaste: findAcceptingCollection → sidebarCollection.paste (tree-aware)
  */
 
-
 /** Build collection hierarchy from current block tree for paste bubbling. */
 function buildCanvasCollections(): CollectionNode[] {
   const blocks = getBuilderState().data.blocks;
@@ -192,8 +200,7 @@ function buildCanvasCollections(): CollectionNode[] {
         if (data && typeof data === "object" && "id" in data) return data;
         return null;
       },
-      containsItem: (itemId: string) =>
-        blocks.some((b) => b.id === itemId),
+      containsItem: (itemId: string) => blocks.some((b) => b.id === itemId),
     },
   ];
 
@@ -287,7 +294,9 @@ function getStaticItemTextValue(focusId: string): string | null {
   return addr.section.fields[addr.field] ?? null;
 }
 
-export const canvasOnCopy = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
+export const canvasOnCopy = (
+  cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor,
+) => {
   if (isDynamicItem(cursor.focusId)) {
     // Dynamic item → structural copy (section/card/tab)
     return canvasCollection.copy({ ids: [cursor.focusId] });
@@ -295,23 +304,50 @@ export const canvasOnCopy = (cursor: import("@/os/2-contexts/zoneRegistry").Zone
   // Static item → copy field text value via OS clipboard write
   const text = getStaticItemTextValue(cursor.focusId);
   if (text) {
-    setTextClipboard(text);
+    canvasCollection.copyText(text);
     return { clipboardWrite: { text } };
   }
   return [];
 };
 
-export const canvasOnPaste = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
+export const canvasOnCut = (
+  cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor,
+) => {
+  if (!isDynamicItem(cursor.focusId)) {
+    // Static item → cut not allowed (PRD 1.3)
+    return [];
+  }
+  return canvasCollection.cut({
+    ids: [cursor.focusId],
+    focusId: cursor.focusId,
+  });
+};
+
+export const canvasOnPaste = (
+  cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor,
+) => {
   const collections = buildCanvasCollections();
-  const clipData = getClipboardPreview();
+  const clipData = canvasCollection.readClipboard();
   if (!clipData) return [];
 
   // Static item text paste handling
-  if ((clipData as { type?: string }).type === "text" && !isDynamicItem(cursor.focusId)) {
-    return [updateFieldByDomId({ domId: cursor.focusId, value: (clipData as { value: string }).value })];
+  if (
+    (clipData as { type?: string }).type === "text" &&
+    !isDynamicItem(cursor.focusId)
+  ) {
+    return [
+      updateFieldByDomId({
+        domId: cursor.focusId,
+        value: (clipData as { value: string }).value,
+      }),
+    ];
   }
 
-  const bubbleResult = findAcceptingCollection(cursor.focusId, clipData, collections);
+  const bubbleResult = findAcceptingCollection(
+    cursor.focusId,
+    clipData,
+    collections,
+  );
   if (!bubbleResult) return [];
 
   const targetId = resolveCanvasCopyTarget(cursor.focusId);
@@ -329,8 +365,9 @@ export const BuilderCanvasUI = canvasCollection.bind({
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   ...canvasBindings,
-  // Override: static text copy/paste support
+  // Override: static text copy/cut/paste support
   onCopy: canvasOnCopy,
+  onCut: canvasOnCut,
   onPaste: canvasOnPaste,
   options: {
     navigate: { orientation: "corner" },
@@ -362,8 +399,6 @@ export function createFieldCommit(
   factory.id = `builder:commitField:${sectionId}:${field}`;
   return factory as FieldCommandFactory;
 }
-
-
 
 /**
  * useSectionFields — Subscribe to a section's fields (targeted re-render).

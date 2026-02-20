@@ -7,8 +7,8 @@
  * These are the only place where DOM mutation happens.
  */
 
-import { os } from "../kernel";
 import { ZoneRegistry } from "../2-contexts/zoneRegistry";
+import { os } from "../kernel";
 
 // ═══════════════════════════════════════════════════════════════════
 // Zone-scoped element lookup
@@ -62,6 +62,19 @@ os.defineEffect("scroll", (itemId: string) => {
     el.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Clipboard Write Effect — Write text to native clipboard
+// ═══════════════════════════════════════════════════════════════════
+
+os.defineEffect(
+  "clipboardWrite",
+  (payload: { text: string; json?: string }) => {
+    navigator.clipboard.writeText(payload.text).catch(() => {
+      // Clipboard API may fail in non-secure contexts — silent fallback
+    });
+  },
+);
 
 // ═══════════════════════════════════════════════════════════════════
 // Field Clear — Imperative DOM mutation (direct import, not effect)

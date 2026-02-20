@@ -9,9 +9,10 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  _resetClipboardStore,
   createCollectionZone,
   fromEntities,
-  _resetClipboardStore,
+  readClipboard,
 } from "@/os/collection/createCollectionZone";
 import { defineApp } from "@/os/defineApp";
 
@@ -438,19 +439,16 @@ describe("createCollectionZone — clipboard (OS-managed)", () => {
     return app.state.data.todoOrder;
   }
 
-  function osClipboard() {
-    return (app.runtime as any).getState().os.clipboard;
+  function clipFirstItem(): any {
+    return readClipboard();
   }
 
   describe("copy", () => {
-    it("stores items in OS clipboard", () => {
+    it("stores items in clipboard and first item is accessible", () => {
       app.dispatch(clipboardList.copy({ ids: ["a", "c"] }));
-      const clip = osClipboard();
-      expect(clip.items).toHaveLength(2);
-      expect((clip.items[0] as any).id).toBe("a");
-      expect((clip.items[1] as any).id).toBe("c");
-      expect(clip.isCut).toBe(false);
-      expect(clip.source).toBe("clip-v2");
+      const first = clipFirstItem();
+      expect(first).toBeDefined();
+      expect(first.id).toBe("a");
     });
 
     it("does not remove items from collection", () => {
@@ -461,26 +459,24 @@ describe("createCollectionZone — clipboard (OS-managed)", () => {
 
     it("is no-op for empty ids", () => {
       app.dispatch(clipboardList.copy({ ids: [] }));
-      const clip = osClipboard();
-      expect(clip.items).toHaveLength(0);
+      expect(clipFirstItem()).toBeNull();
     });
   });
 
   describe("cut", () => {
-    it("stores items in OS clipboard and removes them", () => {
+    it("stores items in clipboard and removes them", () => {
       app.dispatch(clipboardList.cut({ ids: ["a", "c"] }));
-      const clip = osClipboard();
-      expect(clip.items).toHaveLength(2);
-      expect(clip.isCut).toBe(true);
+      const first = clipFirstItem();
+      expect(first).toBeDefined();
+      expect(first.id).toBe("a");
       expect(order()).toEqual(["b", "d"]);
       expect(app.state.data.todos["a"]).toBeUndefined();
     });
 
     it("stores cut items with correct text", () => {
       app.dispatch(clipboardList.cut({ ids: ["b"] }));
-      const clip = osClipboard();
-      expect((clip.items[0] as any).text).toBe("Write tests");
-      expect(clip.isCut).toBe(true);
+      const first = clipFirstItem();
+      expect(first.text).toBe("Write tests");
     });
   });
 

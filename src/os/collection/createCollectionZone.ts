@@ -8,24 +8,34 @@
 import type { BaseCommand } from "@kernel/core/tokens";
 import { produce } from "immer";
 import { OS_FOCUS } from "@/os/3-commands/focus/focus";
-import { OS_CLIPBOARD_SET } from "@/os/3-commands/clipboard/clipboardSet";
-import { findInTree, findParentOf, insertChild, removeFromTree } from "@/os/collection/treeUtils";
-import type { AppHandle } from "@/os/defineApp.types";
 import {
+  type ArrayCollectionConfig,
+  autoDeepClone,
+  type CollectionBindingsResult,
   type CollectionConfig,
   type CollectionZoneHandle,
-  type CollectionBindingsResult,
-  type ArrayCollectionConfig,
+  defaultGenerateId,
+  defaultToText,
   type ItemOps,
   isEntityConfig,
   opsFromAccessor,
-  defaultGenerateId,
-  defaultToText,
-  autoDeepClone,
 } from "@/os/collection/collectionZone.core";
+import {
+  findInTree,
+  findParentOf,
+  insertChild,
+  removeFromTree,
+} from "@/os/collection/treeUtils";
+import type { AppHandle } from "@/os/defineApp.types";
 
 // Re-export types for consumers
-export type { CollectionConfig, CollectionZoneHandle, CollectionBindingsResult, ArrayCollectionConfig, EntityCollectionConfig } from "@/os/collection/collectionZone.core";
+export type {
+  ArrayCollectionConfig,
+  CollectionBindingsResult,
+  CollectionConfig,
+  CollectionZoneHandle,
+  EntityCollectionConfig,
+} from "@/os/collection/collectionZone.core";
 export { fromEntities } from "@/os/collection/collectionZone.core";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -45,8 +55,11 @@ export function _resetClipboardStore(): void {
   _clipboardStore = { source: "", items: [], isCut: false };
 }
 
-/** @internal Set text to clipboard store (used by static item copy) */
-export function setTextClipboard(text: string): void {
+/**
+ * Write text content to the global clipboard store.
+ * Used by apps to copy non-structural data (e.g., static field text).
+ */
+export function copyText(text: string): void {
   _clipboardStore = {
     source: "text",
     items: [{ type: "text", value: text }],
@@ -54,8 +67,8 @@ export function setTextClipboard(text: string): void {
   };
 }
 
-/** Read clipboard first item for paste bubbling accept check */
-export function getClipboardPreview(): unknown | null {
+/** Read the first item from clipboard store (for paste accept checks). */
+export function readClipboard(): unknown | null {
   return _clipboardStore.items[0] ?? null;
 }
 
@@ -108,7 +121,9 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         // Focus recovery for nested items: next sibling → prev sibling → parent
         const parent = findParentOf(allItems as any[], payload.id);
         if (parent?.children) {
-          const idx = parent.children.findIndex((c: { id: string }) => c.id === payload.id);
+          const idx = parent.children.findIndex(
+            (c: { id: string }) => c.id === payload.id,
+          );
           const neighbor = parent.children[idx + 1] ?? parent.children[idx - 1];
           const targetId = neighbor?.id ?? parent.id;
           focusCmd = OS_FOCUS({
@@ -145,7 +160,8 @@ export function createCollectionZone<S, T extends { id: string } = any>(
             : allItems;
           const visIdx = visible.findIndex((item) => item.id === payload.id);
           const neighborIdx = visIdx + dir;
-          if (neighborIdx < 0 || neighborIdx >= visible.length) return { state: ctx.state };
+          if (neighborIdx < 0 || neighborIdx >= visible.length)
+            return { state: ctx.state };
           return {
             state: produce(ctx.state, (draft) => {
               ops.swapItems(draft as S, payload.id, visible[neighborIdx]!.id);
@@ -155,13 +171,19 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
         const parent = findParentOf(allItems as any[], payload.id);
         if (!parent?.children) return { state: ctx.state };
-        const idx = parent.children.findIndex((c: { id: string }) => c.id === payload.id);
+        const idx = parent.children.findIndex(
+          (c: { id: string }) => c.id === payload.id,
+        );
         const neighborIdx = idx + dir;
-        if (neighborIdx < 0 || neighborIdx >= parent.children.length) return { state: ctx.state };
+        if (neighborIdx < 0 || neighborIdx >= parent.children.length)
+          return { state: ctx.state };
 
         return {
           state: produce(ctx.state, (draft) => {
-            const draftParent = findInTree(ops.getItems(draft as S) as any[], parent.id);
+            const draftParent = findInTree(
+              ops.getItems(draft as S) as any[],
+              parent.id,
+            );
             if (draftParent?.children) {
               const arr = draftParent.children;
               [arr[idx], arr[neighborIdx]] = [arr[neighborIdx]!, arr[idx]!];
@@ -223,23 +245,25 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     (ctx: { readonly state: S }, payload: { ids: string[] }) => {
       const items = ops.getItems(ctx.state);
       const found = payload.ids
-        .map((id) => items.find((item) => item.id === id)
-          ?? findInTree(items as any[], id) as T | undefined)
+        .map(
+          (id) =>
+            items.find((item) => item.id === id) ??
+            (findInTree(items as any[], id) as T | undefined),
+        )
         .filter((t): t is T => Boolean(t));
       if (found.length === 0) return { state: ctx.state };
 
       const cloned = found.map((t) => ({ ...t }));
 
-      // Write to module-level store (primary data channel)
-      _clipboardStore = { source: clipboardSource, items: cloned, isCut: false };
+      // Write to module-level store (single source of truth)
+      _clipboardStore = {
+        source: clipboardSource,
+        items: cloned,
+        isCut: false,
+      };
 
       return {
         state: ctx.state,
-        dispatch: OS_CLIPBOARD_SET({
-          source: clipboardSource,
-          items: cloned,
-          isCut: false,
-        }),
         clipboardWrite: {
           text: cloned.map(toText).join("\n"),
           json: JSON.stringify(cloned),
@@ -257,8 +281,11 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     ) => {
       const items = ops.getItems(ctx.state);
       const found = payload.ids
-        .map((id) => items.find((item) => item.id === id)
-          ?? findInTree(items as any[], id) as T | undefined)
+        .map(
+          (id) =>
+            items.find((item) => item.id === id) ??
+            (findInTree(items as any[], id) as T | undefined),
+        )
         .filter((t): t is T => Boolean(t));
       if (found.length === 0) return { state: ctx.state };
 
@@ -293,8 +320,11 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           // Nested item focus recovery: next sibling → prev sibling → parent
           const parent = findParentOf(items as any[], focusId);
           if (parent?.children) {
-            const idx = parent.children.findIndex((c: { id: string }) => c.id === focusId);
-            const neighbor = parent.children[idx + 1] ?? parent.children[idx - 1];
+            const idx = parent.children.findIndex(
+              (c: { id: string }) => c.id === focusId,
+            );
+            const neighbor =
+              parent.children[idx + 1] ?? parent.children[idx - 1];
             const targetId = neighbor?.id ?? parent.id;
             focusCmd = OS_FOCUS({
               zoneId: zoneName,
@@ -306,17 +336,8 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
       const cloned = found.map((t) => ({ ...t }));
 
-      // Write to module-level store (primary data channel)
+      // Write to module-level store (single source of truth)
       _clipboardStore = { source: clipboardSource, items: cloned, isCut: true };
-
-      const commands: BaseCommand[] = [
-        OS_CLIPBOARD_SET({
-          source: clipboardSource,
-          items: cloned,
-          isCut: true,
-        }),
-      ];
-      if (focusCmd) commands.push(focusCmd);
 
       return {
         state: produce(ctx.state, (draft) => {
@@ -330,7 +351,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
             }
           }
         }),
-        dispatch: commands,
+        dispatch: focusCmd,
         clipboardWrite: {
           text: cloned.map(toText).join("\n"),
           json: JSON.stringify(cloned),
@@ -371,7 +392,9 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         const targetNode = targetId
           ? findInTree(readItems as any[], targetId)
           : undefined;
-        const targetAccept = (targetNode as any)?.accept as string[] | undefined;
+        const targetAccept = (targetNode as any)?.accept as
+          | string[]
+          | undefined;
 
         // Track the last inserted id for sequential pastes within the same parent
         let lastInsertedId: string | undefined;
@@ -390,14 +413,32 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           const itemType = (source as any).type as string | undefined;
           const afterSibling = lastInsertedId ?? targetId;
 
-          if (targetId && targetAccept && itemType && targetAccept.includes(itemType)) {
+          if (
+            targetId &&
+            targetAccept &&
+            itemType &&
+            targetAccept.includes(itemType)
+          ) {
             // Case 1: Target accepts this type → insert as child of target
-            insertChild(draftItems as any[], targetId, newItem as any, lastInsertedId);
-          } else if (targetId && readItems.findIndex((item) => item.id === targetId) === -1) {
+            insertChild(
+              draftItems as any[],
+              targetId,
+              newItem as any,
+              lastInsertedId,
+            );
+          } else if (
+            targetId &&
+            readItems.findIndex((item) => item.id === targetId) === -1
+          ) {
             // Case 2: Target is a nested node (not in root) → insert as sibling within parent
             const parentNode = findParentOf(draftItems as any[], targetId);
             if (parentNode) {
-              insertChild(draftItems as any[], parentNode.id, newItem as any, afterSibling);
+              insertChild(
+                draftItems as any[],
+                parentNode.id,
+                newItem as any,
+                afterSibling,
+              );
             } else {
               // Fallback: append to root
               ops.insertAfter(draft as S, readItems.length - 1 + i, newItem);
@@ -436,16 +477,26 @@ export function createCollectionZone<S, T extends { id: string } = any>(
   // ── move ── (atomic, no clipboard, single undo step)
   const move = zone.command(
     `${zoneName}:move`,
-    (ctx: { readonly state: S }, payload: { id: string; toParentId?: string; afterId?: string }) => {
+    (
+      ctx: { readonly state: S },
+      payload: { id: string; toParentId?: string; afterId?: string },
+    ) => {
       const items = ops.getItems(ctx.state);
       const node = findInTree(items as any[], payload.id) as T | undefined;
       if (!node) return { state: ctx.state };
 
       // Validate accept constraint if moving into a parent
       if (payload.toParentId) {
-        const targetParent = findInTree(items as any[], payload.toParentId) as any;
-        if (targetParent?.accept && !(node as any).type) return { state: ctx.state };
-        if (targetParent?.accept && !targetParent.accept.includes((node as any).type)) {
+        const targetParent = findInTree(
+          items as any[],
+          payload.toParentId,
+        ) as any;
+        if (targetParent?.accept && !(node as any).type)
+          return { state: ctx.state };
+        if (
+          targetParent?.accept &&
+          !targetParent.accept.includes((node as any).type)
+        ) {
           return { state: ctx.state };
         }
       }
@@ -457,10 +508,17 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           removeFromTree(draftItems, payload.id);
           // 2. Insert at new position
           if (payload.toParentId) {
-            insertChild(draftItems, payload.toParentId, node as any, payload.afterId);
+            insertChild(
+              draftItems,
+              payload.toParentId,
+              node as any,
+              payload.afterId,
+            );
           } else if (payload.afterId) {
             // Insert as root sibling after afterId
-            const idx = draftItems.findIndex((i: any) => i.id === payload.afterId);
+            const idx = draftItems.findIndex(
+              (i: any) => i.id === payload.afterId,
+            );
             if (idx !== -1) {
               draftItems.splice(idx + 1, 0, node);
             } else {
@@ -479,10 +537,12 @@ export function createCollectionZone<S, T extends { id: string } = any>(
   );
 
   // ── collectionBindings ──
-  function collectionBindings(options?: { guard?: (cursor: { focusId: string; selection: string[] }) => boolean }): CollectionBindingsResult {
+  function collectionBindings(options?: {
+    guard?: (cursor: { focusId: string; selection: string[] }) => boolean;
+  }): CollectionBindingsResult {
     const guard = options?.guard;
     const guarded = <F extends (cursor: any) => any>(fn: F): F =>
-      (guard ? ((cursor: any) => guard(cursor) ? fn(cursor) : []) as F : fn);
+      guard ? (((cursor: any) => (guard(cursor) ? fn(cursor) : [])) as F) : fn;
 
     const idsFromCursor = (cursor: { focusId: string; selection: string[] }) =>
       cursor.selection.length > 0
@@ -490,16 +550,29 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         : [toEntityId(cursor.focusId)];
 
     return {
-      onDelete: guarded((cursor) => idsFromCursor(cursor).map((id) => remove({ id }))),
+      onDelete: guarded((cursor) =>
+        idsFromCursor(cursor).map((id) => remove({ id })),
+      ),
       onMoveUp: guarded((cursor) => moveUp({ id: toEntityId(cursor.focusId) })),
-      onMoveDown: guarded((cursor) => moveDown({ id: toEntityId(cursor.focusId) })),
+      onMoveDown: guarded((cursor) =>
+        moveDown({ id: toEntityId(cursor.focusId) }),
+      ),
       onCopy: guarded((cursor) => copy({ ids: idsFromCursor(cursor) })),
-      onCut: guarded((cursor) => cut({ ids: idsFromCursor(cursor), focusId: toEntityId(cursor.focusId) })),
-      onPaste: guarded((cursor) => paste({ afterId: toEntityId(cursor.focusId) })),
+      onCut: guarded((cursor) =>
+        cut({
+          ids: idsFromCursor(cursor),
+          focusId: toEntityId(cursor.focusId),
+        }),
+      ),
+      onPaste: guarded((cursor) =>
+        paste({ afterId: toEntityId(cursor.focusId) }),
+      ),
       keybindings: [
         {
           key: "Meta+D",
-          command: guarded((cursor) => duplicate({ id: toEntityId(cursor.focusId) })),
+          command: guarded((cursor) =>
+            duplicate({ id: toEntityId(cursor.focusId) }),
+          ),
         },
       ],
     };
@@ -517,6 +590,8 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     copy,
     cut,
     paste,
+    copyText,
+    readClipboard,
     collectionBindings,
   };
 }

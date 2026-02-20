@@ -1,15 +1,5 @@
 import type { FocusStackEntry } from "../schemas/focus/FocusStack";
 
-/** Global single clipboard — one at a time, source-tagged for accept matching. */
-export interface ClipboardState {
-  /** Source collection identifier (appName:zoneName). null = empty. */
-  source: string | null;
-  /** Stored items (type-agnostic, collection owns interpretation). */
-  items: unknown[];
-  /** Was this a cut operation? */
-  isCut: boolean;
-}
-
 export interface OverlayEntry {
   /** Unique overlay ID */
   id: string;
@@ -26,8 +16,6 @@ export interface OSState {
     /** Map of zone IDs to their specific state */
     zones: Record<string, ZoneState>;
   };
-  /** 클립보드 서브시스템 — 글로벌 단일 */
-  clipboard: ClipboardState;
   overlays: {
     /** Stack of open overlays (top = most recent) */
     stack: OverlayEntry[];

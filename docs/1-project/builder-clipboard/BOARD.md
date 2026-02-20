@@ -1,7 +1,16 @@
 # BOARD — builder-clipboard
 
 ## 🔴 Now
-(T1 사이클 완료 — 다음 태스크 대기)
+- [ ] T2: Clipboard Hygiene — /doubt 분석 기반 구조적 부채 해소
+  - [x] Step 8: /tdd
+  - [x] Step 9: /solve — P0+P1+P2 구현 완료
+  - [ ] Step 15: /verify
+  - Changes:
+    - P0: ✅ clipboardWrite effect handler 등록 (4-effects/index.ts)
+    - P1: ✅ OS_CLIPBOARD_SET + os.clipboard 제거 → _clipboardStore만 유지
+    - P2: ✅ setTextClipboard→copyText, getClipboardPreview→readClipboard (인스턴스 메서드로 일관성 유지)
+    - ✅ canvasOnCut export 추가 (기존 결함 수정)
+    - ✅ clipboardSet.ts 삭제, OSState.clipboard 제거, initialOSState.clipboard 제거
 
 ## ⏳ Done
 - [x] A: accept 인터페이스 — 이미 존재 (config.accept)
@@ -9,15 +18,9 @@
 - [x] C: 캔버스 clipboard — pasteBubbling 기반 통합 완료
 - [x] F2: pasteBubbling 순수함수 — 7 tests
 - [x] T1: 캔버스 paste bubbling 통합
-  - buildCanvasCollections: 블록 트리에서 CollectionNode 자동 생성
-  - resolveCanvasCopyTarget: 가장 가까운 동적 조상 해결
-  - _getClipboardPreview: clipboard 타입 확인
-  - findAcceptingCollection → sidebarCollection.paste (tree-aware)
-  - /review 4건 수정, /verify 통과
 
 ## 💡 Ideas / Future
-- T2: 탭 컬렉션 독립 clipboard (현재는 sidebarCollection의 tree-aware paste로 커버)
-- T3: cross-collection paste 고급 시나리오
+- T3: 탭 컬렉션 독립 clipboard
+- T4: cross-collection paste 고급 시나리오
 - cross-app clipboard (빌더 → 다른 앱)
 - 붙여넣기 미리보기 (ghost preview)
-- 정적 아이템 값 교체
