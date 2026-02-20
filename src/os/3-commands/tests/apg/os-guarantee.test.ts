@@ -14,7 +14,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestKernel } from "../integration/helpers/createTestKernel";
+import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
 
 // ─── Config ───
 
@@ -39,7 +39,7 @@ const LIST_CONFIG = {
 };
 
 function createList(focusedItem = "a") {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(ITEMS);
     t.setConfig(LIST_CONFIG);
     t.setActiveZone("list", focusedItem);
@@ -89,7 +89,7 @@ describe("OS Guarantee §1: Delete + Focus Recovery", () => {
     // The focusedItemId becomes a stale pointer. This is by design:
     // the zone will reset focus on next entry/interaction.
     it("§1.3: delete only item → RECOVER is no-op (stale pointer)", () => {
-        const t = createTestKernel();
+        const t = createTestOsKernel();
         t.setItems(["solo"]);
         t.setConfig(LIST_CONFIG);
         t.setActiveZone("list", "solo");
@@ -264,7 +264,7 @@ describe("OS Guarantee §7: Field (Edit Mode)", () => {
 
     // §7: 포커스 없으면 진입 불가
     it("no focused item → FIELD_START_EDIT is no-op", () => {
-        const t = createTestKernel();
+        const t = createTestOsKernel();
         t.setItems(ITEMS);
         t.setConfig(LIST_CONFIG);
         t.setActiveZone("list", null);

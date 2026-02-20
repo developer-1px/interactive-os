@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestKernel } from "../integration/helpers/createTestKernel";
+import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
 import { assertEscapeClose, assertTabTrap } from "./helpers/contracts";
 
 // ─── Config ───
@@ -35,7 +35,7 @@ const DIALOG_CONFIG = {
 };
 
 function createDialog(focusedItem = "close-btn") {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(DIALOG_ITEMS);
     t.setConfig(DIALOG_CONFIG);
     t.setActiveZone("dialog", focusedItem);
@@ -78,7 +78,7 @@ describe("APG Dialog: Escape", () => {
 
 describe("APG Dialog: Focus Restore", () => {
     it("on close, focus restores to invoker", () => {
-        const t = createTestKernel();
+        const t = createTestOsKernel();
         t.setItems(["new-btn", "edit-btn", "delete-btn"]);
         t.setActiveZone("toolbar", "edit-btn");
         t.dispatch(t.STACK_PUSH());
@@ -91,7 +91,7 @@ describe("APG Dialog: Focus Restore", () => {
     });
 
     it("nested dialogs: LIFO focus restore", () => {
-        const t = createTestKernel();
+        const t = createTestOsKernel();
         t.setItems(["btn-1"]);
         t.setActiveZone("toolbar", "btn-1");
         t.dispatch(t.STACK_PUSH());

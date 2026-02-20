@@ -9,7 +9,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestKernel } from "../integration/helpers/createTestKernel";
+import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
 import {
     assertHomeEnd,
     assertHorizontalNav,
@@ -42,7 +42,7 @@ const TOOLBAR_CONFIG = {
 };
 
 function createToolbar(focusedItem = "bold-btn") {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(TOOLBAR_ITEMS);
     t.setConfig(TOOLBAR_CONFIG);
     t.setActiveZone("toolbar", focusedItem);
@@ -107,7 +107,7 @@ describe("APG Toolbar: Tabs Variant", () => {
     const TAB_ITEMS = ["tab-general", "tab-security", "tab-advanced"];
 
     function createTabs(focusedTab = "tab-general") {
-        const t = createTestKernel();
+        const t = createTestOsKernel();
         t.setItems(TAB_ITEMS);
         t.setConfig({
             ...TOOLBAR_CONFIG,

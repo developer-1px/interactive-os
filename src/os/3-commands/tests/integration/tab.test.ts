@@ -20,7 +20,7 @@ import { resolveTab } from "../../tab/resolveTab";
 // Test Kernel Factory — independent instance per test
 // ═══════════════════════════════════════════════════════════════════
 
-function createTestKernel(overrides?: Partial<AppState>) {
+function createTestOsKernel(overrides?: Partial<AppState>) {
   const initialState: AppState = {
     os: initialOSState,
     apps: {},
@@ -157,7 +157,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
   it("escape forward: moves to next zone", () => {
     const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
-      createTestKernel();
+      createTestOsKernel();
 
     mockItems.current = ["item-a", "item-b", "item-c"];
     mockZoneOrder.current = [
@@ -194,7 +194,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
   it("escape backward: moves to previous zone", () => {
     const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
-      createTestKernel();
+      createTestOsKernel();
 
     mockItems.current = ["cat-1", "cat-2", "cat-3"];
     mockZoneOrder.current = [
@@ -232,7 +232,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
   // ─── trap behavior ───
 
   it("trap: cycles within zone (forward wrap)", () => {
-    const { kernel, TAB, mockItems, mockConfig } = createTestKernel();
+    const { kernel, TAB, mockItems, mockConfig } = createTestOsKernel();
 
     mockItems.current = ["t-0", "t-1", "t-2"];
     mockConfig.current = {
@@ -253,7 +253,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
   it("flow: walks within zone then escapes at boundary", () => {
     const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
-      createTestKernel();
+      createTestOsKernel();
 
     mockItems.current = ["f-0", "f-1", "f-2"];
     mockZoneOrder.current = [
@@ -306,7 +306,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
   it("single zone: Tab does nothing", () => {
     const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
-      createTestKernel();
+      createTestOsKernel();
 
     mockItems.current = ["only-0", "only-1"];
     mockZoneOrder.current = [
@@ -337,7 +337,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
   it("3-zone cycle: list → sidebar → toolbar (forward)", () => {
     const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
-      createTestKernel();
+      createTestOsKernel();
 
     const zones = [
       {

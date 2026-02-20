@@ -7,7 +7,7 @@
  */
 
 import { describe } from "vitest";
-import { createTestKernel } from "../integration/helpers/createTestKernel";
+import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
 import {
     assertBoundaryClamp,
     assertEscapeClose,
@@ -42,7 +42,7 @@ const MENU_CONFIG = {
 };
 
 function createMenu(focusedItem = "cut") {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["menu-btn"]);
     t.setActiveZone("toolbar", "menu-btn");
     t.dispatch(t.STACK_PUSH());

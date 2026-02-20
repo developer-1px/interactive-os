@@ -8,7 +8,7 @@
  */
 
 import { describe } from "vitest";
-import { createTestKernel } from "../integration/helpers/createTestKernel";
+import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
 import {
     assertBoundaryClamp,
     assertEscapeClose,
@@ -43,7 +43,7 @@ const POPUP_CONFIG = {
 };
 
 function createComboboxPopup(focusedItem = "apple") {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["input-field"]);
     t.setActiveZone("combobox", "input-field");
     t.dispatch(t.STACK_PUSH());

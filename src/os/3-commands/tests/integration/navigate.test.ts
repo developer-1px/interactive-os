@@ -13,7 +13,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestKernel } from "./helpers/createTestKernel";
+import { createTestOsKernel } from "./helpers/createTestOsKernel";
 
 // ═══════════════════════════════════════════════════════════════════
 // Basic Navigation
@@ -21,7 +21,7 @@ import { createTestKernel } from "./helpers/createTestKernel";
 
 describe("NAVIGATE — Basic Movement", () => {
   it("ArrowDown: moves focus to next item", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
@@ -31,7 +31,7 @@ describe("NAVIGATE — Basic Movement", () => {
   });
 
   it("ArrowUp: moves focus to previous item", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "c");
 
@@ -41,7 +41,7 @@ describe("NAVIGATE — Basic Movement", () => {
   });
 
   it("navigation updates lastFocusedId", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
@@ -51,7 +51,7 @@ describe("NAVIGATE — Basic Movement", () => {
   });
 
   it("navigation clears editingItemId", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
@@ -79,7 +79,7 @@ describe("NAVIGATE — Basic Movement", () => {
   });
 
   it("no active zone: NAVIGATE does nothing", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
 
     // No setActiveZone → no activeZoneId
@@ -90,7 +90,7 @@ describe("NAVIGATE — Basic Movement", () => {
   });
 
   it("empty items: NAVIGATE does nothing", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems([]);
     t.setActiveZone("list", "a");
 
@@ -106,7 +106,7 @@ describe("NAVIGATE — Basic Movement", () => {
 
 describe("NAVIGATE — Boundary Behavior", () => {
   it("clamp: at last item, ArrowDown stays (loop=false)", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {
@@ -126,7 +126,7 @@ describe("NAVIGATE — Boundary Behavior", () => {
   });
 
   it("clamp: at first item, ArrowUp stays (loop=false)", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {
@@ -146,7 +146,7 @@ describe("NAVIGATE — Boundary Behavior", () => {
   });
 
   it("wrap: at last item, ArrowDown wraps to first (loop=true)", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {
@@ -166,7 +166,7 @@ describe("NAVIGATE — Boundary Behavior", () => {
   });
 
   it("wrap: at first item, ArrowUp wraps to last (loop=true)", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {
@@ -192,7 +192,7 @@ describe("NAVIGATE — Boundary Behavior", () => {
 
 describe("NAVIGATE — Home / End", () => {
   it("Home: moves to first item", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d", "e"]);
     t.setActiveZone("list", "c");
 
@@ -202,7 +202,7 @@ describe("NAVIGATE — Home / End", () => {
   });
 
   it("End: moves to last item", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d", "e"]);
     t.setActiveZone("list", "b");
 
@@ -212,7 +212,7 @@ describe("NAVIGATE — Home / End", () => {
   });
 
   it("Home at first item: no change", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
@@ -222,7 +222,7 @@ describe("NAVIGATE — Home / End", () => {
   });
 
   it("End at last item: no change", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "c");
 
@@ -238,7 +238,7 @@ describe("NAVIGATE — Home / End", () => {
 
 describe("NAVIGATE — followFocus", () => {
   it("followFocus=true: ArrowDown updates selection to focused item", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       select: {
@@ -262,7 +262,7 @@ describe("NAVIGATE — followFocus", () => {
   });
 
   it("followFocus=true: ArrowUp updates selection", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       select: {
@@ -283,7 +283,7 @@ describe("NAVIGATE — followFocus", () => {
   });
 
   it("followFocus=true: selection anchor also updates", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       select: {
@@ -302,7 +302,7 @@ describe("NAVIGATE — followFocus", () => {
   });
 
   it("followFocus=false: ArrowDown does NOT change selection", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       select: {
@@ -323,7 +323,7 @@ describe("NAVIGATE — followFocus", () => {
   });
 
   it("followFocus=true + select.mode='none': no selection change", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       select: {
@@ -343,7 +343,7 @@ describe("NAVIGATE — followFocus", () => {
   });
 
   it("followFocus + wrap: selection follows wrapped focus", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {
@@ -373,7 +373,7 @@ describe("NAVIGATE — followFocus", () => {
   });
 
   it("followFocus: multiple navigations track correctly", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d", "e"]);
     t.setConfig({
       select: {
@@ -406,7 +406,7 @@ describe("NAVIGATE — followFocus", () => {
 
 describe("NAVIGATE — Shift+Arrow Range Selection", () => {
   it("Shift+Down: extends selection range forward", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d", "e"]);
     t.setConfig({
       select: {
@@ -429,7 +429,7 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
   });
 
   it("Shift+Down twice: extends range further", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d", "e"]);
     t.setConfig({
       select: {
@@ -451,7 +451,7 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
   });
 
   it("Shift+Up: extends selection range backward", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d", "e"]);
     t.setConfig({
       select: {
@@ -472,7 +472,7 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
   });
 
   it("Shift+Down then Shift+Up: shrinks selection", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d", "e"]);
     t.setConfig({
       select: {
@@ -497,7 +497,7 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
   });
 
   it("Shift+Arrow does NOT overwrite selection when followFocus is also on", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d"]);
     t.setConfig({
       select: {
@@ -525,7 +525,7 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
 
 describe("NAVIGATE — recoveryTargetId", () => {
   it("after navigate: recoveryTargetId set to next neighbor", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
@@ -536,7 +536,7 @@ describe("NAVIGATE — recoveryTargetId", () => {
   });
 
   it("at last item: recoveryTargetId set to previous neighbor", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "b");
 
@@ -548,7 +548,7 @@ describe("NAVIGATE — recoveryTargetId", () => {
   });
 
   it("single item: recoveryTargetId is null", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["only"]);
     t.setActiveZone("list", "only");
 
@@ -568,7 +568,7 @@ describe("NAVIGATE — recoveryTargetId", () => {
 
 describe("NAVIGATE — Orientation", () => {
   it("vertical orientation: ArrowLeft/Right are ignored", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {
@@ -590,7 +590,7 @@ describe("NAVIGATE — Orientation", () => {
   });
 
   it("horizontal orientation: ArrowUp/Down are ignored", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {
@@ -612,7 +612,7 @@ describe("NAVIGATE — Orientation", () => {
   });
 
   it("horizontal orientation: ArrowRight moves to next", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {
@@ -640,7 +640,7 @@ describe("NAVIGATE — Orientation", () => {
 
 describe("NAVIGATE — Entry (no current focus)", () => {
   it("entry=first: first navigation focuses first item", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {
@@ -660,7 +660,7 @@ describe("NAVIGATE — Entry (no current focus)", () => {
   });
 
   it("entry=last: first navigation focuses last item", () => {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setConfig({
       navigate: {

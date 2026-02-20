@@ -9,9 +9,9 @@
  */
 
 import { expect, it } from "vitest";
-import type { createTestKernel } from "../../integration/helpers/createTestKernel";
+import type { createTestOsKernel } from "../../integration/helpers/createTestOsKernel";
 
-type TestKernel = ReturnType<typeof createTestKernel>;
+type TestKernel = ReturnType<typeof createTestOsKernel>;
 type Factory = () => TestKernel;
 
 // ─── Axis: Linear Navigation ───

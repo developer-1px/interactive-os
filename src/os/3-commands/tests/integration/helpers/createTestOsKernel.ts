@@ -1,12 +1,12 @@
 /**
- * createTestKernel — Shared headless kernel factory for integration tests.
+ * createTestOsKernel — Shared headless kernel factory for integration tests.
  *
  * Creates an isolated kernel instance with:
  *   - Real commands via kernel.register() (same handlers as production)
  *   - Mock contexts: dom-items, dom-rects, zone-config, dom-zone-order
  *
  * Usage:
- *   const t = createTestKernel();
+ *   const t = createTestOsKernel();
  *   t.setItems(["a", "b", "c"]);
  *   t.setActiveZone("list", "a");
  *   t.dispatch(t.NAVIGATE({ direction: "down" }));
@@ -53,7 +53,7 @@ interface ZoneOrderEntry {
 // Factory
 // ═══════════════════════════════════════════════════════════════════
 
-export function createTestKernel(overrides?: Partial<AppState>) {
+export function createTestOsKernel(overrides?: Partial<AppState>) {
   const initialState: AppState = {
     os: initialOSState,
     apps: {},

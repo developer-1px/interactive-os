@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestKernel } from "../integration/helpers/createTestKernel";
+import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
 import { assertHomeEnd } from "./helpers/contracts";
 
 // ─── 3×3 Grid Layout ───
@@ -53,7 +53,7 @@ const GRID_CONFIG = {
 };
 
 function createGrid(focusedCell = "r0c0") {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(allCellIds());
     t.setRects(gridRects());
     t.setConfig(GRID_CONFIG);

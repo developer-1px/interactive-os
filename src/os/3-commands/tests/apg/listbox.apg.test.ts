@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestKernel } from "../integration/helpers/createTestKernel";
+import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
 import {
     assertBoundaryClamp,
     assertFollowFocus,
@@ -50,7 +50,7 @@ const MULTI_SELECT = {
 };
 
 function singleSelect(focusedItem = "apple") {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(ITEMS);
     t.setConfig(SINGLE_SELECT);
     t.setActiveZone("listbox", focusedItem);
@@ -59,7 +59,7 @@ function singleSelect(focusedItem = "apple") {
 }
 
 function multiSelect(focusedItem = "apple") {
-    const t = createTestKernel();
+    const t = createTestOsKernel();
     t.setItems(ITEMS);
     t.setConfig(MULTI_SELECT);
     t.setActiveZone("listbox", focusedItem);
@@ -181,7 +181,7 @@ describe("APG Listbox: Multi-Select", () => {
 
 describe("APG Listbox: Focus Initialization", () => {
     it("single-select, no selection: focus goes to first option", () => {
-        const t = createTestKernel();
+        const t = createTestOsKernel();
         t.setItems(ITEMS);
         t.setConfig(SINGLE_SELECT);
         t.setActiveZone("listbox", null);
@@ -190,7 +190,7 @@ describe("APG Listbox: Focus Initialization", () => {
     });
 
     it("multi-select, no selection: focus first, no auto-select", () => {
-        const t = createTestKernel();
+        const t = createTestOsKernel();
         t.setItems(ITEMS);
         t.setConfig(MULTI_SELECT);
         t.setActiveZone("listbox", null);
@@ -206,7 +206,7 @@ describe("APG Listbox: Focus Initialization", () => {
 
 describe("APG Listbox: Horizontal Orientation", () => {
     function horizontal(focusedItem = "apple") {
-        const t = createTestKernel();
+        const t = createTestOsKernel();
         t.setItems(ITEMS);
         t.setConfig({
             navigate: { ...SINGLE_SELECT.navigate, orientation: "horizontal" },
@@ -239,7 +239,7 @@ describe("APG Listbox: Horizontal Orientation", () => {
 
 describe("APG Listbox: RadioGroup Variant", () => {
     function radioGroup(selected = "radio-sm") {
-        const t = createTestKernel();
+        const t = createTestOsKernel();
         t.setItems(["radio-sm", "radio-md", "radio-lg"]);
         t.setConfig({
             navigate: {
