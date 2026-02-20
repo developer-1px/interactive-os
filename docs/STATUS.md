@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-20 09:19
+> Last updated: 2026-02-20 11:31
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**defineapp-unification** — defineApp canonical usage 확립 및 createTrigger Pit of Success
+**builder-v2** — 보편 Block Tree 모델 + Tab Container 구조 프리미티브 구현
 
 ---
 
@@ -17,6 +17,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| builder-v2 | T9 Block Tree 모델 | 02-20 | 🟢 Active |
 | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
 
 ---
@@ -60,7 +61,7 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 1 |
-| Active Projects (total) | 1 |
+| Active Projects (total) | 2 |
 | Completed (archived) | 18+ |
 | Inbox items | 2 |
 | Backlog items | 5 (docs-dashboard 포함) |
@@ -71,6 +72,7 @@
 
 ## 📝 Recent Changes (2026-02-20)
 
+- 🔥 `builder-v2` Active Focus 전환 — Block Tree + Tab Container Discussion에서 보편 빌더 아키텍처 발견. T9(Block Tree 모델) + T10(Tabs 프리미티브) + T11(사이드바 트리뷰) 태스크 등록
 - ✅ `inspector-redesign` — 타임라인 기반 Signal vs Noise 인스펙터 아키텍처 재설계 완수 및 `/archive` 매장 완료. `inferSignal` OS 관찰 원칙 `rules.md` 환류.
 - 🆕 `defineapp-unification` 프로젝트 생성 — Discussion에서 8개 문제 분해, Headless-first 원칙 확립, createTrigger Pit of Success 방향 확정
 - 📏 `rules.md`에 9개 학문적 원칙 추가 — Pit of Success, POLA, Hollywood, SRP, CQS, Ubiquitous Language 등 + Headless-first (Project #1)

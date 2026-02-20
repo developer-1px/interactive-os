@@ -12,7 +12,7 @@ const SIDEBAR_ZONE_ID = "builder-sidebar";
 const CANVAS_ZONE_ID = "builder-canvas";
 
 export function SectionSidebar() {
-  const sections = BuilderApp.useComputed((s) => s.data.sections);
+  const sections = BuilderApp.useComputed((s) => s.data.blocks);
 
   const focusedCanvasId = kernel.useComputed(
     (s) => s.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
@@ -51,10 +51,9 @@ export function SectionSidebar() {
                   rounded-lg cursor-pointer transition-all duration-200
                   border border-transparent
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
-                  ${
-                    isCanvasActive
-                      ? "bg-white shadow-sm border-slate-200/60"
-                      : "hover:bg-white/60 hover:border-slate-200/50 text-slate-500 hover:text-slate-700"
+                  ${isCanvasActive
+                    ? "bg-white shadow-sm border-slate-200/60"
+                    : "hover:bg-white/60 hover:border-slate-200/50 text-slate-500 hover:text-slate-700"
                   }
                 `}
               >
@@ -78,11 +77,10 @@ export function SectionSidebar() {
                   className={`
                   w-10 h-7 rounded border shrink-0 flex items-center justify-center
                   transition-colors
-                  ${
-                    isCanvasActive
+                  ${isCanvasActive
                       ? "bg-indigo-50 border-indigo-100"
                       : "bg-slate-100 border-slate-200 group-hover:bg-white"
-                  }
+                    }
                 `}
                 >
                   {/* Miniature representation */}

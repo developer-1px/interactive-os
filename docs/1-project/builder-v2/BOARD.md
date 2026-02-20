@@ -1,47 +1,50 @@
 # BOARD — builder-v2
 
-> 목표: builder-mvp 완료 후 남은 Ideas를 단계적으로 구현한다.
+> 목표: 보편 Block Tree 모델을 확립하고, Builder Primitives로 감싸면 어떤 디자인이든 inline-edit 가능하게 한다.
 > 이전 프로젝트: archive/2026/02/W08/builder-mvp
 
 ## 🔴 Now
 
-(다음 태스크 선정 대기)
+- [ ] T9: Block Tree 데이터 모델 — `SectionEntry` → `Block { id, type, fields, children? }`
+  - [ ] 9-1: `Block` 인터페이스 정의 (model/appState.ts)
+  - [ ] 9-2: 기존 `SectionEntry` → `Block`으로 마이그레이션 (하위호환 유지)
+  - [ ] 9-3: block type registry (string → 렌더러 컴포넌트 resolve)
+  - [ ] 9-4: children 지원 — 재귀적 `SectionRenderer`
+  - [ ] 9-5: 기존 테스트 통과 확인
+
+- [ ] T10: `Builder.Tabs` 구조 프리미티브
+  - [ ] 10-1: `Builder.Tabs` / `Builder.TabPanel` 컴포넌트 (ARIA tablist 매핑)
+  - [ ] 10-2: 탭 전환 인터랙션 (키보드: ←→ 전환, Enter 진입, Escape 복귀)
+  - [ ] 10-3: 탭 라벨 인라인 편집 (Field 활용)
+  - [ ] 10-4: 탭 컨테이너 디자인 블록 예제 (Pricing or Services)
+  - [ ] 10-5: URL 바인딩 (퍼블리싱 모드)
 
 ## 🟡 Next
 
-- [ ] T4: 블록 타입별 패널 폼 E2E
-  - image, link, button 패널의 실제 동작 E2E 검증
+- [ ] T11: 사이드바 트리 뷰 — Block Tree의 시각적 투영
+  - [ ] indent + collapse/expand
+  - [ ] ARIA treeitem + aria-expanded
+  - [ ] 키보드: ← 접기, → 펼치기
 
+- [ ] T4: 블록 타입별 패널 폼 E2E
 - [ ] T5: 블록 드래그 정렬 UI
-  - 사이드바 썸네일 드래그로 섹션 순서 변경
 
 ## 📋 Backlog
 
 - defineApp API v6 설계 (개밥먹기 보고서 기반)
-- 블록 타입별 Zone 분리 (tab으로 블록 간 이동)
-- [ ] T7: Builder 프리미티브 headless 리팩토링 — Builder.Section/Group/Item을 Zone 기반 OS 패턴으로 전환. 별도 BuilderRegistry 제거, OS의 기존 레지스트리 체계를 확장
+- Accordion / Carousel 컨테이너 프리미티브 (Tabs와 동일 추상 변형)
+- [ ] T7: Builder 프리미티브 headless 리팩토링
+
+## 💡 Ideas
+
+- Container 추상 일반화: "N개 자식, 조건부 가시성, 전환 UI" = Tabs | Accordion | Carousel
+- Block Tree undo/redo: children 변경 시 history snapshot 전략
 
 ## ⏳ Done
 
 - [x] T8: Collection Zone Facade — `createCollectionZone` (probe-first → /doubt → 재설계)
   - 285줄 facade로 Builder(-78줄) + Todo(-94줄) 양쪽 마이그레이션 완료
-  - API: accessor(array) / fromEntities(entity+order) / filter / extractId / onClone / collectionBindings
-  - /doubt 자기교정: normalize/denormalize → ItemOps 직접 mutation으로 재설계
-  - 27 facade tests + 10 builder tests + 35 todo tests all pass
-  - 다음: copy/cut/paste facade화 (onPaste 훅)
 - [x] T3: Undo/Redo 기초 구현
-  - [x] BuilderState.history (past/future stacks)
-  - [x] undoCommand / redoCommand + canUndo/canRedo conditions
-  - [x] Cmd+Z / Cmd+Shift+Z — sidebar + canvas zones
-  - [x] Unit test — 7건 headless 검증
 - [x] T2: PropertiesPanel 라이브 바인딩 강화
-  - [x] 2-1: ImageProperties — URL/alt 입력 → state → canvas preview
-  - [x] 2-2: IconProperties — 아이콘 선택/검색 → state
-  - [x] 2-3: SectionProperties — 섹션 이름 편집 → renameSectionLabel command
 - [x] T1: Sidebar 키보드 바인딩 연결
-  - [x] 1-0: sidebarZone 생성 + SectionSidebar PPT 썸네일 UI + BuilderPage 통합
-  - [x] 1-1: sidebar Zone에 keybinding 선언 (Delete, Cmd+D, Cmd+↑↓)
-  - [x] 1-2: 섹션 관리 커맨드 (deleteSection, duplicateSection, moveSectionUp/Down)
-  - [x] 1-3: Unit test — 10건 headless 커맨드 검증
 - [x] T6: 계층 키보드 내비게이션 (Section/Group/Item)
-

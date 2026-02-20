@@ -7,14 +7,30 @@ export type PropertyType =
     | "section"
     | null;
 
-export interface SectionEntry {
+/**
+ * Block — Universal builder data model.
+ *
+ * Every element in the builder is a Block: hero sections, cards, tabs, etc.
+ * Container blocks (tabs, accordion, carousel) have children.
+ * Leaf blocks (hero, footer) do not.
+ *
+ * Design blocks are free to use any HTML/CSS.
+ * Builder Primitives annotate which parts are editable.
+ * `fields` stores editable content values (always strings).
+ */
+export interface Block {
     id: string;
     label: string;
-    /** Component type for rendering */
-    type: "hero" | "news" | "services" | "footer";
-    /** Co-located field data — each section owns its fields */
+    /** Block type — resolved by BlockRegistry to a renderer component */
+    type: string;
+    /** Editable content — all values are strings (text, URLs, icon names) */
     fields: Record<string, string>;
+    /** Child blocks for container types (tabs, accordion, carousel) */
+    children?: Block[];
 }
+
+/** @deprecated Use `Block` instead. Kept for backward compatibility. */
+export type SectionEntry = Block;
 
 interface HistoryEntry {
     command: { type: string; payload?: unknown };
@@ -26,16 +42,16 @@ interface HistoryEntry {
 
 export interface BuilderState {
     data: {
-        /** Ordered section list — each section owns its fields */
-        sections: SectionEntry[];
+        /** Block tree — top-level blocks, each may contain children */
+        blocks: Block[];
     };
     ui: {
         /** 현재 선택된 요소의 builder ID */
         selectedId: string | null;
         /** 선택된 요소의 프로퍼티 타입 */
         selectedType: PropertyType;
-        /** 사이드바 섹션 클립보드 */
-        clipboard: { items: SectionEntry[]; isCut: boolean } | null;
+        /** 사이드바 블록 클립보드 */
+        clipboard: { items: Block[]; isCut: boolean } | null;
     };
     history: {
         past: HistoryEntry[];
@@ -45,7 +61,7 @@ export interface BuilderState {
 
 export const INITIAL_STATE: BuilderState = {
     data: {
-        sections: [
+        blocks: [
             {
                 id: "ncp-hero",
                 label: "Hero",

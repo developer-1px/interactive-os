@@ -22,7 +22,7 @@ describe("sidebar section commands", () => {
   });
 
   function sectionIds(): string[] {
-    return app.state.data.sections.map((s) => s.id);
+    return app.state.data.blocks.map((s) => s.id);
   }
 
   // ─── deleteSection ────────────────────────────────────────────
@@ -34,13 +34,13 @@ describe("sidebar section commands", () => {
       app.dispatch(deleteSection({ id: "ncp-news" }));
 
       expect(sectionIds()).not.toContain("ncp-news");
-      expect(app.state.data.sections).toHaveLength(3);
+      expect(app.state.data.blocks).toHaveLength(3);
     });
 
     it("does not modify state for unknown section", () => {
-      const before = app.state.data.sections;
+      const before = app.state.data.blocks;
       app.dispatch(deleteSection({ id: "nonexistent" }));
-      expect(app.state.data.sections).toEqual(before);
+      expect(app.state.data.blocks).toEqual(before);
     });
 
     it("preserves order of remaining sections", () => {
@@ -55,27 +55,27 @@ describe("sidebar section commands", () => {
     it("inserts a copy after the original", () => {
       app.dispatch(duplicateSection({ id: "ncp-hero" }));
 
-      expect(app.state.data.sections).toHaveLength(5);
+      expect(app.state.data.blocks).toHaveLength(5);
       // Original stays at index 0, copy is at index 1
-      expect(app.state.data.sections[0]!.id).toBe("ncp-hero");
-      expect(app.state.data.sections[1]!.label).toBe("Hero (copy)");
-      expect(app.state.data.sections[1]!.type).toBe("hero");
+      expect(app.state.data.blocks[0]!.id).toBe("ncp-hero");
+      expect(app.state.data.blocks[1]!.label).toBe("Hero (copy)");
+      expect(app.state.data.blocks[1]!.type).toBe("hero");
     });
 
     it("preserves the rest of the list", () => {
       app.dispatch(duplicateSection({ id: "ncp-news" }));
 
       // ncp-hero, ncp-news, ncp-news-copy-..., ncp-services, ncp-footer
-      expect(app.state.data.sections).toHaveLength(5);
-      expect(app.state.data.sections[0]!.id).toBe("ncp-hero");
-      expect(app.state.data.sections[1]!.id).toBe("ncp-news");
-      expect(app.state.data.sections[3]!.id).toBe("ncp-services");
-      expect(app.state.data.sections[4]!.id).toBe("ncp-footer");
+      expect(app.state.data.blocks).toHaveLength(5);
+      expect(app.state.data.blocks[0]!.id).toBe("ncp-hero");
+      expect(app.state.data.blocks[1]!.id).toBe("ncp-news");
+      expect(app.state.data.blocks[3]!.id).toBe("ncp-services");
+      expect(app.state.data.blocks[4]!.id).toBe("ncp-footer");
     });
 
     it("does nothing for unknown section", () => {
       app.dispatch(duplicateSection({ id: "nonexistent" }));
-      expect(app.state.data.sections).toHaveLength(4);
+      expect(app.state.data.blocks).toHaveLength(4);
     });
   });
 

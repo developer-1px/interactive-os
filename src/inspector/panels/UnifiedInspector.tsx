@@ -210,9 +210,15 @@ export function UnifiedInspector({
     const el = scrollRef.current;
     if (!el) return;
     isProgrammaticScroll.current = true;
-    el.scrollTop = el.scrollHeight;
+    const lastNode = el.querySelector(
+      `[data-tx-index]:last-of-type`,
+    );
+    if (lastNode) {
+      lastNode.scrollIntoView({ block: "start", behavior: "auto" });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
     setIsUserScrolled(false);
-    // Reset flag after scroll event fires
     requestAnimationFrame(() => {
       isProgrammaticScroll.current = false;
     });

@@ -26,7 +26,7 @@ describe("BuilderApp (v5 native)", () => {
     sectionId: string,
     field: string,
   ): string | undefined {
-    return app.state.data.sections.find((s) => s.id === sectionId)?.fields[
+    return app.state.data.blocks.find((s) => s.id === sectionId)?.fields[
       field
     ];
   }
@@ -39,7 +39,7 @@ describe("BuilderApp (v5 native)", () => {
     test("기존 필드 값을 변경한다", () => {
       const app = createApp();
       expect(getField(app, "ncp-hero", "title")).toBe(
-        INITIAL_STATE.data.sections[0]!.fields["title"],
+        INITIAL_STATE.data.blocks[0]!.fields["title"],
       );
 
       app.dispatch(
@@ -209,14 +209,14 @@ describe("BuilderApp (v5 native)", () => {
       app.reset();
 
       expect(getField(app, "ncp-hero", "title")).toBe(
-        INITIAL_STATE.data.sections[0]!.fields["title"],
+        INITIAL_STATE.data.blocks[0]!.fields["title"],
       );
       expect(app.state.ui.selectedId).toBeNull();
     });
 
     test("모든 NCP 블록 필드가 초기값으로 등록되어 있다", () => {
       const app = createApp();
-      const sections = app.state.data.sections;
+      const sections = app.state.data.blocks;
 
       // Hero (id="ncp-hero")
       const hero = sections.find((s) => s.id === "ncp-hero")!;
@@ -254,8 +254,8 @@ describe("BuilderApp (v5 native)", () => {
   describe("section co-located fields", () => {
     test("각 섹션은 자신만의 fields를 소유한다", () => {
       const app = createApp();
-      const hero = app.state.data.sections.find((s) => s.id === "ncp-hero")!;
-      const news = app.state.data.sections.find((s) => s.id === "ncp-news")!;
+      const hero = app.state.data.blocks.find((s) => s.id === "ncp-hero")!;
+      const news = app.state.data.blocks.find((s) => s.id === "ncp-news")!;
 
       // 서로 다른 title
       expect(hero.fields["title"]).not.toBe(news.fields["title"]);
@@ -263,7 +263,7 @@ describe("BuilderApp (v5 native)", () => {
 
     test("updateField는 해당 섹션의 필드만 변경한다", () => {
       const app = createApp();
-      const originalNewsTitle = app.state.data.sections.find(
+      const originalNewsTitle = app.state.data.blocks.find(
         (s) => s.id === "ncp-news",
       )!.fields["title"];
 
@@ -273,14 +273,14 @@ describe("BuilderApp (v5 native)", () => {
 
       // Hero changed
       expect(
-        app.state.data.sections.find((s) => s.id === "ncp-hero")!.fields[
-          "title"
+        app.state.data.blocks.find((s) => s.id === "ncp-hero")!.fields[
+        "title"
         ],
       ).toBe("변경됨");
       // News unchanged
       expect(
-        app.state.data.sections.find((s) => s.id === "ncp-news")!.fields[
-          "title"
+        app.state.data.blocks.find((s) => s.id === "ncp-news")!.fields[
+        "title"
         ],
       ).toBe(originalNewsTitle);
     });

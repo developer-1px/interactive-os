@@ -30,36 +30,36 @@ describe("builder undo/redo", () => {
   });
 
   it("undo reverts deleteSection", () => {
-    expect(app.state.data.sections).toHaveLength(4);
+    expect(app.state.data.blocks).toHaveLength(4);
 
     app.dispatch(deleteSection({ id: "ncp-news" }));
-    expect(app.state.data.sections).toHaveLength(3);
+    expect(app.state.data.blocks).toHaveLength(3);
     expect(app.evaluate(canUndo)).toBe(true);
 
     app.dispatch(undoCommand());
-    expect(app.state.data.sections).toHaveLength(4);
-    expect(app.state.data.sections.map((s) => s.id)).toContain("ncp-news");
+    expect(app.state.data.blocks).toHaveLength(4);
+    expect(app.state.data.blocks.map((s) => s.id)).toContain("ncp-news");
   });
 
   it("redo restores the undone action", () => {
     app.dispatch(deleteSection({ id: "ncp-news" }));
     app.dispatch(undoCommand());
-    expect(app.state.data.sections).toHaveLength(4);
+    expect(app.state.data.blocks).toHaveLength(4);
     expect(app.evaluate(canRedo)).toBe(true);
 
     app.dispatch(redoCommand());
-    expect(app.state.data.sections).toHaveLength(3);
-    expect(app.state.data.sections.map((s) => s.id)).not.toContain("ncp-news");
+    expect(app.state.data.blocks).toHaveLength(3);
+    expect(app.state.data.blocks.map((s) => s.id)).not.toContain("ncp-news");
   });
 
   it("undo reverts moveSectionUp", () => {
-    const originalOrder = app.state.data.sections.map((s) => s.id);
+    const originalOrder = app.state.data.blocks.map((s) => s.id);
 
     app.dispatch(moveSectionUp({ id: "ncp-news" }));
-    expect(app.state.data.sections[0]!.id).toBe("ncp-news");
+    expect(app.state.data.blocks[0]!.id).toBe("ncp-news");
 
     app.dispatch(undoCommand());
-    expect(app.state.data.sections.map((s) => s.id)).toEqual(originalOrder);
+    expect(app.state.data.blocks.map((s) => s.id)).toEqual(originalOrder);
   });
 
   it("undo reverts updateField", () => {
@@ -75,13 +75,13 @@ describe("builder undo/redo", () => {
   it("multiple undos in sequence", () => {
     app.dispatch(deleteSection({ id: "ncp-news" }));
     app.dispatch(deleteSection({ id: "ncp-services" }));
-    expect(app.state.data.sections).toHaveLength(2);
+    expect(app.state.data.blocks).toHaveLength(2);
 
     app.dispatch(undoCommand()); // undo delete services
-    expect(app.state.data.sections).toHaveLength(3);
+    expect(app.state.data.blocks).toHaveLength(3);
 
     app.dispatch(undoCommand()); // undo delete news
-    expect(app.state.data.sections).toHaveLength(4);
+    expect(app.state.data.blocks).toHaveLength(4);
   });
 
   it("redo is cleared after a new action", () => {

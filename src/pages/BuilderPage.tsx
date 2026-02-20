@@ -4,7 +4,6 @@ import {
   BuilderApp,
   BuilderCanvasUI,
   type PropertyType,
-  type SectionEntry,
   selectElement,
 } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
@@ -135,8 +134,8 @@ export default function BuilderPage() {
 
 // ─── Section Renderer — maps section.type → block component ───
 
-const SECTION_COMPONENTS: Record<
-  SectionEntry["type"],
+const BLOCK_COMPONENTS: Record<
+  string,
   React.FC<{ id: string }>
 > = {
   hero: NCPHeroBlock,
@@ -146,14 +145,14 @@ const SECTION_COMPONENTS: Record<
 };
 
 function SectionRenderer() {
-  const sections = BuilderApp.useComputed((s) => s.data.sections);
+  const blocks = BuilderApp.useComputed((s) => s.data.blocks);
 
   return (
     <>
-      {sections.map((section) => {
-        const Component = SECTION_COMPONENTS[section.type];
+      {blocks.map((block) => {
+        const Component = BLOCK_COMPONENTS[block.type];
         return Component ? (
-          <Component key={section.id} id={section.id} />
+          <Component key={block.id} id={block.id} />
         ) : null;
       })}
     </>

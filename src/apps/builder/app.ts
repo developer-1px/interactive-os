@@ -1,8 +1,9 @@
 /**
  * Builder App v5 — defineApp native (createZone + bind).
  *
- * Section-scoped field model: each SectionEntry owns its fields.
- * Paste = structuredClone(section) + new id. No prefix convention needed.
+ * Block-scoped field model: each Block owns its fields.
+ * Container blocks (tabs, accordion) have children.
+ * Paste = structuredClone(block) + new id. No prefix convention needed.
  *
  * Structure:
  *   BuilderApp (defineApp)
@@ -15,8 +16,8 @@
 import { produce } from "immer";
 import { defineApp } from "@/os/defineApp";
 import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
-import { type BuilderState, INITIAL_STATE, type PropertyType, type SectionEntry } from "./model/appState";
-export type { BuilderState, PropertyType, SectionEntry };
+import { type Block, type BuilderState, INITIAL_STATE, type PropertyType, type SectionEntry } from "./model/appState";
+export type { Block, BuilderState, PropertyType, SectionEntry };
 export { INITIAL_STATE };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -57,7 +58,7 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 import { createCollectionZone } from "@/os/collection/createCollectionZone";
 
 const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
-  accessor: (s: BuilderState) => s.data.sections,
+  accessor: (s: BuilderState) => s.data.blocks,
   extractId: (focusId: string) => focusId.replace("sidebar-", ""),
   onClone: (original, newId) => ({
     ...original,
@@ -70,8 +71,8 @@ const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
     set: (draft: BuilderState, value) => {
       draft.ui.clipboard = value;
     },
-    toText: (items: SectionEntry[]) => items.map((s) => s.label).join("\n"),
-    onPaste: (item: SectionEntry) => ({
+    toText: (items: Block[]) => items.map((s) => s.label).join("\n"),
+    onPaste: (item: Block) => ({
       ...item,
       id: Math.random().toString(36).slice(2, 10),
       label: `${item.label} (paste)`,
@@ -87,14 +88,14 @@ export const moveSectionUp = sidebarCollection.moveUp;
 export const moveSectionDown = sidebarCollection.moveDown;
 
 // pasteSection is no longer needed — clipboard.onPaste handles
-// deep cloning because fields are co-located in SectionEntry.
+// deep cloning because fields are co-located in Block.
 
 // Custom command not covered by collection CRUD
 export const renameSectionLabel = sidebarCollection.command(
   "renameSectionLabel",
   (ctx, payload: { id: string; label: string }) => ({
     state: produce(ctx.state, (draft) => {
-      const section = draft.data.sections.find((s) => s.id === payload.id);
+      const section = draft.data.blocks.find((s) => s.id === payload.id);
       if (section) section.label = payload.label;
     }),
   }),
@@ -132,7 +133,7 @@ export const updateField = canvasZone.command(
     payload: { sectionId: string; field: string; value: string },
   ) => ({
     state: produce(ctx.state, (draft) => {
-      const section = draft.data.sections.find(
+      const section = draft.data.blocks.find(
         (s) => s.id === payload.sectionId,
       );
       if (section) section.fields[payload.field] = payload.value;
@@ -212,7 +213,7 @@ export function createFieldCommit(
  */
 export function useSectionFields(sectionId: string): Record<string, string> {
   return BuilderApp.useComputed(
-    (s) => s.data.sections.find((sec) => sec.id === sectionId)?.fields ?? {},
+    (s) => s.data.blocks.find((b) => b.id === sectionId)?.fields ?? {},
   ) as unknown as Record<string, string>;
 }
 
@@ -225,10 +226,10 @@ export function useSectionFields(sectionId: string): Record<string, string> {
  */
 export function resolveFieldAddress(
   domId: string,
-  sections: SectionEntry[],
-): { section: SectionEntry; field: string } | null {
-  // Match the longest section id prefix
-  let best: SectionEntry | null = null;
+  sections: Block[],
+): { section: Block; field: string } | null {
+  // Match the longest block id prefix
+  let best: Block | null = null;
   for (const sec of sections) {
     if (domId.startsWith(`${sec.id}-`)) {
       if (!best || sec.id.length > best.id.length) best = sec;
@@ -244,7 +245,7 @@ export function resolveFieldAddress(
  */
 export function useFieldByDomId(domId: string): string {
   return BuilderApp.useComputed((s) => {
-    const addr = resolveFieldAddress(domId, s.data.sections);
+    const addr = resolveFieldAddress(domId, s.data.blocks);
     if (!addr) return "";
     return addr.section.fields[addr.field] ?? "";
   }) as unknown as string;
@@ -259,7 +260,7 @@ export function builderUpdateFieldByDomId(domId: string, value: string) {
     | BuilderState
     | undefined;
   if (!appState) return;
-  const addr = resolveFieldAddress(domId, appState.data.sections);
+  const addr = resolveFieldAddress(domId, appState.data.blocks);
   if (!addr) return;
   kernel.dispatch(
     updateField({ sectionId: addr.section.id, field: addr.field, value }),

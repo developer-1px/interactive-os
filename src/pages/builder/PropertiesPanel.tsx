@@ -116,11 +116,10 @@ function TabButton({
 }) {
   return (
     <div
-      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${
-        active
+      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${active
           ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
           : "text-slate-400"
-      }`}
+        }`}
       title={label}
     >
       {icon}
@@ -255,11 +254,10 @@ function IconProperties({ fieldName }: { fieldName: string }) {
             <button
               type="button"
               key={name}
-              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${
-                icon === name
+              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${icon === name
                   ? "border-violet-500 bg-violet-50 text-violet-600"
                   : "border-slate-200 text-slate-400"
-              }`}
+                }`}
               onClick={() => builderUpdateFieldByDomId(iconKey, name)}
               title={name}
             >
@@ -381,7 +379,7 @@ function SectionProperties({ fieldName }: { fieldName: string }) {
   // Find section in state to get its label
   const sectionLabel = BuilderApp.useComputed(
     (s) =>
-      s.data.sections.find((sec) => sec.id === fieldName)?.label ?? fieldName,
+      s.data.blocks.find((sec) => sec.id === fieldName)?.label ?? fieldName,
   );
 
   return (
