@@ -69,7 +69,12 @@ export interface CollectionZoneHandle<S> extends ZoneHandle<S> {
     copy: CommandFactory<string, { ids: string[] }>;
     cut: CommandFactory<string, { ids: string[]; focusId?: string }>;
     paste: CommandFactory<string, { afterId?: string }>;
-    collectionBindings(): CollectionBindingsResult;
+    collectionBindings(options?: CollectionBindingsOptions): CollectionBindingsResult;
+}
+
+export interface CollectionBindingsOptions {
+    /** Guard predicate: if returns false, the callback becomes no-op (returns []). */
+    guard?: (cursor: { focusId: string; selection: string[] }) => boolean;
 }
 
 export interface CollectionBindingsResult {

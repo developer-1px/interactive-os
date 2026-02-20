@@ -479,23 +479,27 @@ export function createCollectionZone<S, T extends { id: string } = any>(
   );
 
   // ── collectionBindings ──
-  function collectionBindings(): CollectionBindingsResult {
+  function collectionBindings(options?: { guard?: (cursor: { focusId: string; selection: string[] }) => boolean }): CollectionBindingsResult {
+    const guard = options?.guard;
+    const guarded = <F extends (cursor: any) => any>(fn: F): F =>
+      (guard ? ((cursor: any) => guard(cursor) ? fn(cursor) : []) as F : fn);
+
     const idsFromCursor = (cursor: { focusId: string; selection: string[] }) =>
       cursor.selection.length > 0
         ? cursor.selection.map(toEntityId)
         : [toEntityId(cursor.focusId)];
 
     return {
-      onDelete: (cursor) => idsFromCursor(cursor).map((id) => remove({ id })),
-      onMoveUp: (cursor) => moveUp({ id: toEntityId(cursor.focusId) }),
-      onMoveDown: (cursor) => moveDown({ id: toEntityId(cursor.focusId) }),
-      onCopy: (cursor) => copy({ ids: idsFromCursor(cursor) }),
-      onCut: (cursor) => cut({ ids: idsFromCursor(cursor), focusId: toEntityId(cursor.focusId) }),
-      onPaste: (cursor) => paste({ afterId: toEntityId(cursor.focusId) }),
+      onDelete: guarded((cursor) => idsFromCursor(cursor).map((id) => remove({ id }))),
+      onMoveUp: guarded((cursor) => moveUp({ id: toEntityId(cursor.focusId) })),
+      onMoveDown: guarded((cursor) => moveDown({ id: toEntityId(cursor.focusId) })),
+      onCopy: guarded((cursor) => copy({ ids: idsFromCursor(cursor) })),
+      onCut: guarded((cursor) => cut({ ids: idsFromCursor(cursor), focusId: toEntityId(cursor.focusId) })),
+      onPaste: guarded((cursor) => paste({ afterId: toEntityId(cursor.focusId) })),
       keybindings: [
         {
           key: "Meta+D",
-          command: (cursor) => duplicate({ id: toEntityId(cursor.focusId) }),
+          command: guarded((cursor) => duplicate({ id: toEntityId(cursor.focusId) })),
         },
       ],
     };

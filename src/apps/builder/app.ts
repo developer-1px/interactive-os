@@ -301,55 +301,37 @@ export const canvasOnCopy = (cursor: import("@/os/2-contexts/zoneRegistry").Zone
   return [];
 };
 
-export const canvasOnCut = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
-  if (isDynamicItem(cursor.focusId)) {
-    // Dynamic item → structural cut
-    return canvasCollection.cut({ ids: [cursor.focusId], focusId: cursor.focusId });
-  }
-  // Static item → no-op (can't cut template slots)
-  return [];
-};
-
 export const canvasOnPaste = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
   const collections = buildCanvasCollections();
-  // Read clipboard data for type-checking (imported from createCollectionZone)
   const clipData = getClipboardPreview();
   if (!clipData) return [];
 
   // Static item text paste handling
   if ((clipData as { type?: string }).type === "text" && !isDynamicItem(cursor.focusId)) {
-    // It's a static text paste onto a static item (field)
     return [updateFieldByDomId({ domId: cursor.focusId, value: (clipData as { value: string }).value })];
   }
 
-  const bubbleResult = findAcceptingCollection(
-    cursor.focusId,
-    clipData,
-    collections,
-  );
-  if (!bubbleResult) return []; // No collection accepts → no-op
+  const bubbleResult = findAcceptingCollection(cursor.focusId, clipData, collections);
+  if (!bubbleResult) return [];
 
-  // Tree-aware paste: canvasCollection handles insertChild + focus stays in canvas
   const targetId = resolveCanvasCopyTarget(cursor.focusId);
   return canvasCollection.paste({ afterId: targetId ?? "" });
 };
 
-export const canvasOnDelete = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
-  if (isDynamicItem(cursor.focusId)) {
-    return canvasCollection.remove({ id: cursor.focusId });
-  }
-  return [];
-};
+// Guard: collection ops only for dynamic items (sections/cards), static fields → no-op
+const canvasBindings = canvasCollection.collectionBindings({
+  guard: (cursor) => isDynamicItem(cursor.focusId),
+});
 
 export const BuilderCanvasUI = canvasCollection.bind({
   role: "grid",
   onAction: createDrillDown(CANVAS_ZONE_ID),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
+  ...canvasBindings,
+  // Override: static text copy/paste support
   onCopy: canvasOnCopy,
-  onCut: canvasOnCut,
   onPaste: canvasOnPaste,
-  onDelete: canvasOnDelete,
   options: {
     navigate: { orientation: "corner" },
     tab: { behavior: "trap" },
@@ -357,15 +339,7 @@ export const BuilderCanvasUI = canvasCollection.bind({
   itemFilter: createCanvasItemFilter(CANVAS_ZONE_ID),
   keybindings: [
     { key: "\\", command: createDrillUp(CANVAS_ZONE_ID) },
-    {
-      key: "Meta+D",
-      command: (cursor) => {
-        if (isDynamicItem(cursor.focusId)) {
-          return canvasCollection.duplicate({ id: cursor.focusId });
-        }
-        return [];
-      },
-    },
+    ...canvasBindings.keybindings,
   ],
 });
 

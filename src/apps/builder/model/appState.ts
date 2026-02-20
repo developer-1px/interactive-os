@@ -4,6 +4,9 @@ export type PropertyType =
     | "icon"
     | "link"
     | "button"
+    | "badge"
+    | "divider"
+    | "tabs"
     | "section"
     | null;
 

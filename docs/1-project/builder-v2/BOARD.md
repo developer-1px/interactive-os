@@ -24,6 +24,15 @@
   - Discussion: [collection-zone-v2-facade](discussions/2026-0220-1306-collection-zone-v2-facade.md)
 
 - [ ] T4: 블록 타입별 패널 폼 E2E
+  - [x] PropertyType 확장: badge, divider, tabs 추가
+  - [x] PropertiesPanel 전면 재작성: useResolvedField → Block.fields 직접 접근
+  - [x] IconProperties: resolveFieldAddress → block.fields["icon"] 라이브 바인딩
+  - [x] ImageProperties: resolveFieldAddress → block.fields + alt 필드 연동
+  - [x] BadgeProperties / DividerProperties / TabsProperties 신규 추가
+  - [x] LinkProperties / ButtonProperties: 미연결 static 폼 제거 → 라이브 바인딩
+  - [x] SectionProperties: 모든 fields 일괄 편집 UI 추가
+  - [x] tsc clean, 57 tests pass
+
 - [ ] T5: 블록 드래그 정렬 UI
 
 ## 📋 Backlog
