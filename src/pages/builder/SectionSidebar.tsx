@@ -110,6 +110,23 @@ export function SectionSidebar() {
                   </span>
                 )}
 
+                {/* Restored PPT Thumbnail */}
+                <div
+                  className={`
+                  w-10 h-7 rounded border shrink-0 flex items-center justify-center
+                  transition-colors ml-1
+                  ${isCanvasActive
+                      ? "bg-indigo-50 border-indigo-100"
+                      : "bg-slate-100 border-slate-200 group-hover:bg-white"
+                    }
+                `}
+                >
+                  <div className="flex flex-col gap-0.5 w-6">
+                    <div className={`h-0.5 rounded-full w-full ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`} />
+                    <div className={`h-0.5 rounded-full w-2/3 ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`} />
+                  </div>
+                </div>
+
                 {/* Block label */}
                 <div className="flex flex-col min-w-0 flex-1">
                   <span

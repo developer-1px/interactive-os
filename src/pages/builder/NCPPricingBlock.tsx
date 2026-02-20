@@ -25,7 +25,7 @@ export function NCPPricingBlock({ id }: { id: string }) {
                             <Builder.Badge
                                 id={`${id}-badge`}
                                 variant="success"
-                                className="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full mb-4"
+                                className="inline-block px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold tracking-wider rounded-full mb-4 border border-slate-200"
                             >
                                 {fields["badge"] || "PRICING"}
                             </Builder.Badge>
@@ -140,10 +140,10 @@ function PricingCard({
     return (
         <div
             className={`
-        rounded-2xl p-8 flex flex-col transition-all
+        rounded-3xl p-8 flex flex-col transition-all duration-300
         ${highlight
-                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-200 ring-2 ring-indigo-600 scale-105"
-                    : "bg-white text-slate-900 shadow-lg shadow-slate-100 ring-1 ring-slate-200 hover:shadow-xl"
+                    ? "bg-slate-900 text-white shadow-2xl ring-1 ring-slate-800 scale-[1.03]"
+                    : "bg-white text-slate-900 shadow-lg border border-slate-200 hover:shadow-xl hover:-translate-y-1"
                 }
       `}
         >
@@ -154,7 +154,7 @@ function PricingCard({
                     mode="deferred"
                 >
                     <h3
-                        className={`text-lg font-semibold mb-2 ${highlight ? "text-indigo-100" : "text-slate-500"}`}
+                        className={`text-xl font-bold mb-2 ${highlight ? "text-slate-100" : "text-slate-700"}`}
                     >
                         {fields[`${prefix}-name`] || defaults.name}
                     </h3>
@@ -173,7 +173,7 @@ function PricingCard({
                         </span>
                     </Field>
                 </Builder.Item>
-                <span className={`ml-1 text-sm ${highlight ? "text-indigo-200" : "text-slate-400"}`}>
+                <span className={`ml-1 text-base font-medium ${highlight ? "text-slate-400" : "text-slate-500"}`}>
                     {defaults.period}
                 </span>
             </div>
@@ -184,7 +184,7 @@ function PricingCard({
                     value={fields[`${prefix}-desc`] || defaults.desc}
                     mode="deferred"
                 >
-                    <p className={`text-sm mb-6 ${highlight ? "text-indigo-100" : "text-slate-500"}`}>
+                    <p className={`text-base font-medium mb-8 ${highlight ? "text-slate-300" : "text-slate-500"}`}>
                         {fields[`${prefix}-desc`] || defaults.desc}
                     </p>
                 </Field>
@@ -195,10 +195,10 @@ function PricingCard({
                     id={`${id}-cta`}
                     variant="primary"
                     className={`
-              w-full py-3 px-4 rounded-xl text-sm font-semibold transition-colors
+              w-full py-4 px-6 rounded-full text-base font-bold transition-all duration-300
               ${highlight
-                            ? "bg-white text-indigo-600 hover:bg-indigo-50"
-                            : "bg-indigo-600 text-white hover:bg-indigo-700"
+                            ? "bg-[#03C75A] text-white hover:bg-[#02b350] hover:shadow-lg hover:shadow-green-500/20"
+                            : "bg-slate-100 text-slate-900 hover:bg-slate-200 border border-slate-200"
                         }
             `}
                 >
