@@ -27,7 +27,7 @@ import {
 import { produce } from "immer";
 import { z } from "zod";
 import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
-import { FOCUS } from "@/os/3-commands/focus/focus";
+
 import { defineApp } from "@/os/defineApp";
 
 /** Collision-free random ID */
@@ -41,19 +41,11 @@ export const TodoApp = defineApp<AppState>("todo-v5", INITIAL_STATE, {
   history: true,
 });
 
-// ═══════════════════════════════════════════════════════════════════
-// Conditions
-// ═══════════════════════════════════════════════════════════════════
+// Undo / Redo — generic factory
+import { createUndoRedoCommands } from "@/os/defineApp.undoRedo";
 
-export const canUndo = TodoApp.condition(
-  "canUndo",
-  (s) => (s.history?.past?.length ?? 0) > 0,
-);
-
-export const canRedo = TodoApp.condition(
-  "canRedo",
-  (s) => (s.history?.future?.length ?? 0) > 0,
-);
+export const { canUndo, canRedo, undoCommand, redoCommand } =
+  createUndoRedoCommands(TodoApp, { focusZoneId: "list" });
 
 export const isEditing = TodoApp.condition(
   "isEditing",
@@ -143,98 +135,7 @@ export const startEdit = listCollection.command(
   }),
 );
 
-export const undoCommand = listCollection.command(
-  "undo",
-  (ctx) => {
-    // when: canUndo guarantees past.length > 0
-    const past = ctx.state.history.past;
-    const lastEntry = past.at(-1)!;
-    const groupId = lastEntry.groupId;
 
-    // Count consecutive entries with the same groupId from the end
-    let entriesToPop = 1;
-    if (groupId) {
-      entriesToPop = 0;
-      for (let i = past.length - 1; i >= 0; i--) {
-        if (past[i]?.groupId === groupId) {
-          entriesToPop++;
-        } else {
-          break;
-        }
-      }
-    }
-
-    // The snapshot to restore is from the EARLIEST entry being undone
-    const earliestUndoEntry = past[past.length - entriesToPop]!;
-    const restoreSnapshot = earliestUndoEntry.snapshot;
-
-    const focusTarget = lastEntry.focusedItemId
-      ? String(lastEntry.focusedItemId)
-      : undefined;
-
-    return {
-      state: produce(ctx.state, (draft) => {
-        // Save current state for redo
-        const { history: _h, ...currentWithoutHistory } = ctx.state;
-        draft.history.future.push({
-          command: { type: "UNDO_SNAPSHOT" },
-          timestamp: Date.now(),
-          snapshot: currentWithoutHistory,
-          groupId,
-        });
-
-        // Pop all grouped entries
-        for (let i = 0; i < entriesToPop; i++) {
-          draft.history.past.pop();
-        }
-
-        // Restore from the earliest entry's snapshot
-        if (restoreSnapshot) {
-          if (restoreSnapshot["data"])
-            draft.data = restoreSnapshot["data"] as typeof draft.data;
-          if (restoreSnapshot["ui"])
-            draft.ui = restoreSnapshot["ui"] as typeof draft.ui;
-        }
-      }),
-      dispatch: focusTarget
-        ? FOCUS({ zoneId: "list", itemId: focusTarget })
-        : undefined,
-    };
-  },
-  { when: canUndo },
-);
-
-export const redoCommand = listCollection.command(
-  "redo",
-  (ctx) => {
-    // when: canRedo guarantees future.length > 0
-    const entry = ctx.state.history.future.at(-1)!;
-    const focusTarget = entry.focusedItemId
-      ? String(entry.focusedItemId)
-      : undefined;
-    return {
-      state: produce(ctx.state, (draft) => {
-        const popped = draft.history.future.pop()!;
-        const { history: _h, ...currentWithoutHistory } = ctx.state;
-        draft.history.past.push({
-          command: { type: "REDO_SNAPSHOT" },
-          timestamp: Date.now(),
-          snapshot: currentWithoutHistory,
-        });
-        if (popped.snapshot) {
-          const snapshot = popped.snapshot;
-          if (snapshot["data"])
-            draft.data = snapshot["data"] as typeof draft.data;
-          if (snapshot["ui"]) draft.ui = snapshot["ui"] as typeof draft.ui;
-        }
-      }),
-      dispatch: focusTarget
-        ? FOCUS({ zoneId: "list", itemId: focusTarget })
-        : undefined,
-    };
-  },
-  { when: canRedo },
-);
 
 // Zone binding — auto-wired CRUD + clipboard + app-specific handlers
 const listBindings = listCollection.collectionBindings();

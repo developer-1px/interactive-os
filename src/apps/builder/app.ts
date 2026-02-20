@@ -182,96 +182,13 @@ export const allFields = BuilderApp.selector("allFields", (s) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// Conditions
+// Undo / Redo — generic factory (defineApp.undoRedo.ts)
 // ═══════════════════════════════════════════════════════════════════
 
-export const canUndo = BuilderApp.condition(
-  "canUndo",
-  (s) => (s.history?.past?.length ?? 0) > 0,
-);
+import { createUndoRedoCommands } from "@/os/defineApp.undoRedo";
 
-export const canRedo = BuilderApp.condition(
-  "canRedo",
-  (s) => (s.history?.future?.length ?? 0) > 0,
-);
-
-// ═══════════════════════════════════════════════════════════════════
-// Undo / Redo commands
-// ═══════════════════════════════════════════════════════════════════
-
-export const undoCommand = BuilderApp.command(
-  "undo",
-  (ctx) => {
-    const past = ctx.state.history.past;
-    if (past.length === 0) return { state: ctx.state };
-
-    const lastEntry = past.at(-1)!;
-    const groupId = lastEntry.groupId;
-
-    let entriesToPop = 1;
-    if (groupId) {
-      entriesToPop = 0;
-      for (let i = past.length - 1; i >= 0; i--) {
-        if (past[i]?.groupId === groupId) entriesToPop++;
-        else break;
-      }
-    }
-
-    const earliestEntry = past[past.length - entriesToPop]!;
-    const snap = earliestEntry.snapshot;
-
-    return {
-      state: produce(ctx.state, (draft) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { history: _h, ...rest } = ctx.state;
-        const entry: HistoryEntry = {
-          command: { type: "UNDO_SNAPSHOT" },
-          timestamp: Date.now(),
-          snapshot: rest as Record<string, unknown>,
-        };
-        if (groupId) entry.groupId = groupId;
-        draft.history.future.push(entry);
-        for (let i = 0; i < entriesToPop; i++) {
-          draft.history.past.pop();
-        }
-        if (snap) {
-          if (snap["data"]) draft.data = snap["data"] as typeof draft.data;
-          if (snap["ui"]) draft.ui = snap["ui"] as typeof draft.ui;
-        }
-      }),
-    };
-  },
-  { when: canUndo },
-);
-
-export const redoCommand = BuilderApp.command(
-  "redo",
-  (ctx) => {
-    const future = ctx.state.history.future;
-    if (future.length === 0) return { state: ctx.state };
-
-    const entry = future.at(-1)!;
-    return {
-      state: produce(ctx.state, (draft) => {
-        draft.history.future.pop();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { history: _, ...rest } = ctx.state;
-        draft.history.past.push({
-          command: { type: "REDO_SNAPSHOT" },
-          timestamp: Date.now(),
-          snapshot: rest as Record<string, unknown>,
-        });
-        if (entry.snapshot) {
-          if (entry.snapshot["data"])
-            draft.data = entry.snapshot["data"] as typeof draft.data;
-          if (entry.snapshot["ui"])
-            draft.ui = entry.snapshot["ui"] as typeof draft.ui;
-        }
-      }),
-    };
-  },
-  { when: canRedo },
-);
+export const { canUndo, canRedo, undoCommand, redoCommand } =
+  createUndoRedoCommands(BuilderApp);
 
 // ═══════════════════════════════════════════════════════════════════
 // Sidebar Zone — Collection Zone Facade

@@ -2,7 +2,6 @@
 
 ## 🔴 Now
 
-- [ ] T3: Undo/Redo 앱-레벨 통합 — 중복 로직(Todo 57줄 + Builder 43줄) → generic 팩토리 추출
 - [ ] T5: useComputed 캐스팅 해소 — `as unknown as` 제거, API 타입 개선
 - [ ] T6: Export 패턴 통일 — Namespaced export 관례 확정 (Todo 패턴 canonical)
 - [ ] T7: Builder 미사용 BoundComponents 정리 — `BuilderSidebarUI`/`BuilderCanvasUI` 활용 또는 제거
@@ -13,6 +12,7 @@
 - [x] T1: createTrigger 타입 안전화 — `payload: unknown` → 제네릭 `P` 추론 (02-20)
 - [x] T2: Trigger 패턴 canonical — TaskItem 5개 + Sidebar 1개 원시 Trigger → createTrigger (02-20)
 - [x] T4: Builder 핸들러 타입 명시 제거 — 5개 커맨드 `(ctx: {state})` → `(ctx)` 추론 (02-20)
+- [x] T3: Undo/Redo generic 팩토리 — 180줄→6줄 `createUndoRedoCommands` + P1 소속 통일 (02-20)
 
 ## 💡 Ideas
 
