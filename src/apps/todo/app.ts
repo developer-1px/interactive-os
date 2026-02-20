@@ -374,5 +374,9 @@ export const TodoToolbar = {
     toggleView,
     clearCompleted,
   },
+  ClearDialog: TodoApp.createTrigger({
+    id: "todo-clear-dialog",
+    confirm: clearCompleted(),
+  }),
 };
 export { listCollection };

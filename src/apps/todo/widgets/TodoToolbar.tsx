@@ -5,7 +5,8 @@
  */
 
 import { TodoApp, TodoList, TodoToolbar } from "@apps/todo/app";
-import { ClearDialog } from "@apps/todo/triggers";
+
+const { ClearDialog } = TodoToolbar;
 import {
   AlertTriangle,
   LayoutGrid,
