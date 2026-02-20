@@ -645,34 +645,34 @@ function TimelineNode({
                   key={`${group.basePath}-${gi}`}
                   className="flex flex-col font-mono text-[9.5px]"
                 >
-                  {/* Base path label - Clean minimal header */}
-                  <div className="text-[#475569] font-semibold break-all bg-transparent px-1.5 py-0.5 inline-flex items-center self-start">
+                  {/* Base path label - Spacing & Typography (Context) */}
+                  <div className="text-[#475569] font-semibold break-all mt-1.5 mb-1 inline-flex items-center self-start">
                     {group.basePath}
                     {group.entries.length > 1 && (
-                      <span className="text-[#94a3b8] font-normal ml-1 text-[8.5px]">
+                      <span className="text-[#94a3b8] font-normal ml-1.5 text-[8.5px]">
                         ×{group.entries.length}
                       </span>
                     )}
                   </div>
-                  {/* Entries - Connected by a clean subtle left border */}
-                  <div className="flex flex-col gap-0.5 ml-3 mt-0.5 border-l border-[#e2e8f0] py-0.5">
+                  {/* Entries - Lines (Structural Connection) */}
+                  <div className="flex flex-col gap-1 ml-1.5 border-l border-[#e2e8f0] pl-2.5">
                     {group.entries.map((entry, ei) => (
                       <div
                         key={`${entry.index ?? ei}`}
                         className="flex flex-col gap-[1px]"
                       >
                         {entry.index !== undefined && (
-                          <span className="text-[8.5px] text-[#94a3b8] font-mono leading-none mb-0.5 pl-5">
+                          <span className="text-[8.5px] text-[#94a3b8] font-mono leading-none mb-0.5">
                             [{entry.index}]
                           </span>
                         )}
                         {entry.from !== undefined && entry.to !== undefined ? (
-                          <div className="flex flex-col gap-[1px]">
+                          <div className="flex flex-col gap-[1px] w-full">
                             <DiffValue value={entry.from} type="changed-from" />
                             <DiffValue value={entry.to} type="changed-to" />
                           </div>
                         ) : (
-                          <div className="flex flex-col gap-[1px]">
+                          <div className="flex flex-col gap-[1px] w-full">
                             {entry.from !== undefined && (
                               <DiffValue value={entry.from} type="removed" />
                             )}
@@ -765,30 +765,35 @@ function DiffValue({
   const isLarge = lines.length > 7 || str.length > 150;
 
   let prefix = "";
-  let colorClass = "";
+  let surfaceClass = "";
+  let textClass = "";
 
+  // Surfaces (Backgrounds) specifically for the diff payloads
   switch (type) {
     case "removed":
       prefix = "-";
-      colorClass = "text-[#ef4444]";
+      surfaceClass = "bg-[#fef2f2]";
+      textClass = "text-[#991b1b]";
       break;
     case "added":
       prefix = "+";
-      colorClass = "text-[#10b981]";
+      surfaceClass = "bg-[#f0fdf4]";
+      textClass = "text-[#166534]";
       break;
     case "changed-from":
-      prefix = ""; // empty so it aligns perfectly with the text
-      colorClass = "text-[#94a3b8] line-through";
+      prefix = "";
+      surfaceClass = "bg-[#f8fafc]";
+      textClass = "text-[#64748b] line-through";
       break;
     case "changed-to":
       prefix = "→";
-      colorClass = "text-[#0f172a] font-medium";
+      surfaceClass = "bg-[#e2e8f0]/50";
+      textClass = "text-[#0f172a] font-medium";
       break;
   }
 
-  // Fixed 4-unit width container for the prefix ensures vertical alignment of all text payloads
   const prefixNode = (
-    <span className="inline-block w-5 shrink-0 text-center font-bold text-[#cbd5e1] select-none">
+    <span className="inline-block w-5 shrink-0 text-center font-bold text-black/20 select-none">
       {prefix}
     </span>
   );
@@ -796,7 +801,7 @@ function DiffValue({
   if (!isLarge) {
     return (
       <div
-        className={`py-0.5 whitespace-pre-wrap break-all flex ${colorClass}`}
+        className={`py-0.5 px-0.5 rounded-sm whitespace-pre-wrap break-all flex ${surfaceClass} ${textClass}`}
       >
         {prefixNode}
         <span>{str}</span>
@@ -812,7 +817,9 @@ function DiffValue({
       : "Long String ...";
 
   return (
-    <details className={`py-0.5 flex group ${colorClass}`}>
+    <details
+      className={`py-0.5 px-0.5 rounded-sm flex flex-col group ${surfaceClass} ${textClass}`}
+    >
       <summary className="cursor-pointer outline-none flex items-center select-none list-none text-[9.5px]">
         <div className="flex items-center w-full opacity-80 hover:opacity-100">
           {prefixNode}
@@ -820,7 +827,7 @@ function DiffValue({
           <span className="hidden group-open:inline italic">Collapse</span>
         </div>
       </summary>
-      <div className="whitespace-pre-wrap break-all text-[9.5px] mt-1 pl-5">
+      <div className="whitespace-pre-wrap break-all text-[9.5px] mt-1 pl-5 pb-1">
         {str}
       </div>
     </details>
