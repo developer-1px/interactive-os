@@ -9,10 +9,15 @@
  */
 
 import { produce } from "immer";
-import { DOM_ITEMS, DOM_RECTS, ZONE_CONFIG } from "../../2-contexts";
+import {
+  DOM_EXPANDABLE_ITEMS,
+  DOM_ITEMS,
+  DOM_RECTS,
+  DOM_TREE_LEVELS,
+  ZONE_CONFIG,
+} from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
-import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { applyFollowFocus, ensureZone } from "../../state/utils";
 import { OS_EXPAND } from "../expand";
 import { resolveNavigate } from "./resolve";
@@ -26,7 +31,7 @@ interface NavigatePayload {
 
 export const OS_NAVIGATE = os.defineCommand(
   "OS_NAVIGATE",
-  [DOM_ITEMS, DOM_RECTS, ZONE_CONFIG],
+  [DOM_ITEMS, DOM_RECTS, ZONE_CONFIG, DOM_EXPANDABLE_ITEMS, DOM_TREE_LEVELS],
   (ctx) => (payload: NavigatePayload) => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
@@ -46,6 +51,8 @@ export const OS_NAVIGATE = os.defineCommand(
     const isTreeRole =
       zoneEntry?.role === "tree" || zoneEntry?.role === "treegrid";
 
+    let overrideTargetId: string | null = null;
+
     if (
       isTreeRole &&
       (payload.direction === "right" || payload.direction === "left")
@@ -53,10 +60,9 @@ export const OS_NAVIGATE = os.defineCommand(
       const focusedId = zone.focusedItemId;
       if (focusedId) {
         const isExpanded = zone.expandedItems.includes(focusedId);
-        // Expandability is determined by role, not DOM attribute.
-        // FocusItem renders aria-expanded when isExpandableRole(childRole) is true.
-        const childRole = getChildRole(zoneEntry?.role);
-        const isExpandable = childRole ? isExpandableRole(childRole) : false;
+        // Expandability is determined by DOM projection (aria-expanded presence)
+        const expandableItems = ctx.inject(DOM_EXPANDABLE_ITEMS);
+        const isExpandable = expandableItems.has(focusedId);
 
         if (isExpandable) {
           if (payload.direction === "right" && !isExpanded) {
@@ -73,6 +79,35 @@ export const OS_NAVIGATE = os.defineCommand(
             };
           }
         }
+
+        // APG Tree: Hierarchy Jump
+        const treeLevels = ctx.inject(DOM_TREE_LEVELS);
+
+        if (payload.direction === "right" && isExpandable && isExpanded) {
+          const idx = items.indexOf(focusedId);
+          const nextId = items[idx + 1];
+          if (nextId) {
+            const currentLevel = treeLevels.get(focusedId) ?? 1;
+            const nextLevel = treeLevels.get(nextId) ?? 1;
+            if (nextLevel > currentLevel) {
+              overrideTargetId = nextId;
+            }
+          }
+        }
+
+        if (payload.direction === "left" && (!isExpandable || !isExpanded)) {
+          const idx = items.indexOf(focusedId);
+          const currentLevel = treeLevels.get(focusedId) ?? 1;
+          for (let i = idx - 1; i >= 0; i--) {
+            const prevId = items[i];
+            if (!prevId) continue;
+            const prevLevel = treeLevels.get(prevId) ?? 1;
+            if (prevLevel < currentLevel) {
+              overrideTargetId = prevId;
+              break;
+            }
+          }
+        }
       }
     }
 
@@ -81,23 +116,25 @@ export const OS_NAVIGATE = os.defineCommand(
     const navigableItems = items.filter((id) => !disabledSet.has(id));
     if (navigableItems.length === 0) return;
 
-    // Delegate to existing pure resolver
-    const navResult = resolveNavigate(
-      zone.focusedItemId,
-      payload.direction,
-      navigableItems,
-      config.navigate,
-      {
-        stickyX: zone.stickyX,
-        stickyY: zone.stickyY,
-        itemRects,
-      },
-    );
+    // Delegate to existing pure resolver OR use override
+    const navResult = overrideTargetId
+      ? { targetId: overrideTargetId, stickyX: zone.stickyX, stickyY: zone.stickyY }
+      : resolveNavigate(
+        zone.focusedItemId,
+        payload.direction,
+        navigableItems,
+        config.navigate,
+        {
+          stickyX: zone.stickyX,
+          stickyY: zone.stickyY,
+          itemRects,
+        },
+      );
 
     return {
       state: produce(ctx.state, (draft) => {
         const z = ensureZone(draft.os, activeZoneId);
-        z.focusedItemId = navResult.targetId;
+        z.focusedItemId = navResult.targetId ?? null;
         z.stickyX = navResult.stickyX;
         z.stickyY = navResult.stickyY;
 

@@ -24,6 +24,7 @@ import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/p
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
 import { Route as MinimalPlaygroundCommandPaletteRouteImport } from './routes/_minimal/playground.command-palette'
 import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
+import { Route as MinimalPlaygroundApgRouteImport } from './routes/_minimal/playground.apg'
 import { Route as MinimalDocsSplatRouteImport } from './routes/_minimal/docs/$'
 
 const TodoRoute = TodoRouteImport.update({
@@ -101,6 +102,11 @@ const MinimalPlaygroundAriaRoute = MinimalPlaygroundAriaRouteImport.update({
   path: '/playground/aria',
   getParentRoute: () => MinimalRoute,
 } as any)
+const MinimalPlaygroundApgRoute = MinimalPlaygroundApgRouteImport.update({
+  id: '/playground/apg',
+  path: '/playground/apg',
+  getParentRoute: () => MinimalRoute,
+} as any)
 const MinimalDocsSplatRoute = MinimalDocsSplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof MinimalDocsRouteWithChildren
   '/todo': typeof MinimalTodoRoute
   '/docs/$': typeof MinimalDocsSplatRoute
+  '/playground/apg': typeof MinimalPlaygroundApgRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/builder-list': typeof MinimalBuilderListRoute
   '/todo': typeof MinimalTodoRoute
   '/docs/$': typeof MinimalDocsSplatRoute
+  '/playground/apg': typeof MinimalPlaygroundApgRoute
   '/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/_minimal/todo': typeof MinimalTodoRoute
   '/_todo/': typeof TodoIndexRoute
   '/_minimal/docs/$': typeof MinimalDocsSplatRoute
+  '/_minimal/playground/apg': typeof MinimalPlaygroundApgRoute
   '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
   '/_minimal/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/todo'
     | '/docs/$'
+    | '/playground/apg'
     | '/playground/aria'
     | '/playground/command-palette'
     | '/playground/focus'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/builder-list'
     | '/todo'
     | '/docs/$'
+    | '/playground/apg'
     | '/playground/aria'
     | '/playground/command-palette'
     | '/playground/focus'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/_minimal/todo'
     | '/_todo/'
     | '/_minimal/docs/$'
+    | '/_minimal/playground/apg'
     | '/_minimal/playground/aria'
     | '/_minimal/playground/command-palette'
     | '/_minimal/playground/focus'
@@ -321,6 +333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalPlaygroundAriaRouteImport
       parentRoute: typeof MinimalRoute
     }
+    '/_minimal/playground/apg': {
+      id: '/_minimal/playground/apg'
+      path: '/playground/apg'
+      fullPath: '/playground/apg'
+      preLoaderRoute: typeof MinimalPlaygroundApgRouteImport
+      parentRoute: typeof MinimalRoute
+    }
     '/_minimal/docs/$': {
       id: '/_minimal/docs/$'
       path: '/$'
@@ -350,6 +369,7 @@ interface MinimalRouteChildren {
   MinimalBuilderListRoute: typeof MinimalBuilderListRoute
   MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
   MinimalTodoRoute: typeof MinimalTodoRoute
+  MinimalPlaygroundApgRoute: typeof MinimalPlaygroundApgRoute
   MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
   MinimalPlaygroundCommandPaletteRoute: typeof MinimalPlaygroundCommandPaletteRoute
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
@@ -364,6 +384,7 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalBuilderListRoute: MinimalBuilderListRoute,
   MinimalDocsRoute: MinimalDocsRouteWithChildren,
   MinimalTodoRoute: MinimalTodoRoute,
+  MinimalPlaygroundApgRoute: MinimalPlaygroundApgRoute,
   MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
   MinimalPlaygroundCommandPaletteRoute: MinimalPlaygroundCommandPaletteRoute,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,

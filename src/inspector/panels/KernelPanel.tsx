@@ -1,13 +1,48 @@
 /**
- * KernelPanel — Kernel State + Transaction Log for OS Inspector
+ * KernelPanel — Event / Cmd / Diff log for OS Inspector
  *
- * Accepts a kernel instance prop. If not provided, shows a placeholder.
+ * Optimized for debugging: shows only the essential triple per transaction.
+ * Clear button properly resets. Copy sends event log to clipboard.
  */
 
-// import type { createKernel } from "@kernel";
 import { useEffect, useRef, useState } from "react";
 
 type AnyKernel = any;
+
+// ─── Format helpers ───
+
+/** Extract compact event info from transaction meta */
+function formatEvent(meta: Record<string, unknown> | undefined): string {
+  if (!meta?.["input"]) return "—";
+  const input = meta["input"] as Record<string, unknown>;
+  if (input["type"] === "KEYBOARD") return `⌨ ${input["key"] ?? input["code"] ?? "?"}`;
+  if (input["type"] === "MOUSE") return `🖱 ${input["target"] ?? "click"}`;
+  return String(input["type"] ?? "?");
+}
+
+/** Format changes as compact diff lines */
+function formatDiff(changes: { path: string; before: unknown; after: unknown }[]): string {
+  if (!changes || changes.length === 0) return "(no change)";
+  return changes
+    .map((c) => {
+      const path = c.path;
+      const before = JSON.stringify(c.before);
+      const after = JSON.stringify(c.after);
+      return `${path}: ${before} → ${after}`;
+    })
+    .join("\n");
+}
+
+/** Format a single transaction as a debug line */
+function formatTxLine(tx: any): string {
+  const event = formatEvent(tx.meta);
+  const cmd = tx.command?.type ?? "?";
+  const payload = tx.command?.payload
+    ? ` ${JSON.stringify(tx.command.payload)}`
+    : "";
+  const diff = formatDiff(tx.changes);
+  return `[${event}] ${cmd}${payload}\n  ${diff}`;
+}
 
 // ─── Main Panel ───
 
@@ -22,112 +57,142 @@ export function KernelPanel({ kernel }: { kernel?: AnyKernel }) {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-white">
-      <TransactionSection kernel={kernel} />
-      <div className="border-t border-[#e5e5e5]" />
-      <StateSection kernel={kernel} />
+      <TransactionLog kernel={kernel} />
     </div>
   );
 }
 
-// ─── State Section ───
+// ─── Transaction Log ───
 
-function StateSection({ kernel }: { kernel: AnyKernel }) {
-  const state = kernel.useComputed((s: any) => s);
-
-  return (
-    <div className="flex-1 overflow-y-auto p-3">
-      <div className="text-[10px] font-bold text-[#999] tracking-wide uppercase mb-2">
-        KERNEL STATE
-      </div>
-      <pre className="text-[11px] font-mono leading-relaxed text-[#333] bg-[#f5f5f5] rounded p-2 m-0 whitespace-pre-wrap break-all">
-        {JSON.stringify(state, null, 2)}
-      </pre>
-    </div>
-  );
-}
-
-// ─── Transaction Section ───
-
-function TransactionSection({ kernel }: { kernel: AnyKernel }) {
-  const [, refresh] = useState(0);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+function TransactionLog({ kernel }: { kernel: AnyKernel }) {
+  const [version, refresh] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
 
-  // useComputed triggers re-render on state change → transactions also update
+  // Subscribe to state changes so transactions update reactively
   kernel.useComputed((s: any) => s);
 
-  const txs = kernel.inspector.getTransactions();
+  const txs: any[] = kernel.inspector.getTransactions();
 
   // Auto-scroll to bottom on new transactions
   // biome-ignore lint/correctness/useExhaustiveDependencies: txs.length is intentional trigger
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [txs.length]);
-
-  const handleTravel = (tx: { id: number }) => {
-    kernel.inspector.travelTo(tx.id);
-    setSelectedId(tx.id);
-  };
+  }, [txs.length, version]);
 
   const handleClear = () => {
     kernel.inspector.clearTransactions();
-    setSelectedId(null);
     refresh((n) => n + 1);
   };
 
+  const handleCopy = async () => {
+    const lines = txs.map((tx: any, i: number) => `#${i} ${formatTxLine(tx)}`);
+    const text = lines.join("\n\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Fallback for non-secure contexts
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+
   return (
-    <div className="shrink-0 max-h-[200px] flex flex-col overflow-hidden p-3">
-      <div className="flex items-center justify-between mb-1">
+    <div className="flex-1 flex flex-col overflow-hidden p-3">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2 shrink-0">
         <div className="text-[10px] font-bold text-[#999] tracking-wide uppercase">
-          TRANSACTIONS ({txs.length})
+          EVENT LOG ({txs.length})
         </div>
-        {txs.length > 0 && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="text-[9px] px-1.5 py-0.5 rounded border border-[#e0e0e0] text-[#999] hover:text-[#666] hover:bg-[#f5f5f5] bg-white"
-          >
-            Clear
-          </button>
-        )}
+        <div className="flex gap-1">
+          {txs.length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="text-[9px] px-1.5 py-0.5 rounded border border-[#e0e0e0] text-[#999] hover:text-[#666] hover:bg-[#f5f5f5] bg-white"
+              >
+                {copied ? "✓ Copied" : "📋 Copy"}
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="text-[9px] px-1.5 py-0.5 rounded border border-[#e0e0e0] text-[#999] hover:text-[#666] hover:bg-[#f5f5f5] bg-white"
+              >
+                Clear
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
+      {/* Log entries */}
       {txs.length === 0 ? (
         <div className="text-[11px] text-[#aaa] italic">
-          No transactions yet.
+          No events yet. Interact with the app to see logs.
         </div>
       ) : (
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto flex flex-col gap-0.5"
+          className="flex-1 overflow-y-auto flex flex-col gap-px"
         >
-          {txs.map((tx: any) => (
-            <button
-              key={tx.id}
-              type="button"
-              onClick={() => handleTravel(tx)}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded text-left text-[11px] font-mono transition-all w-full ${
-                selectedId === tx.id
-                  ? "bg-[#e8f0fe] border border-[#4285f4] text-[#1a73e8]"
-                  : "bg-[#fafafa] border border-transparent hover:bg-[#f0f0f0] text-[#555]"
-              }`}
-            >
-              <span className="text-[9px] text-[#aaa] min-w-[18px]">
-                #{tx.id}
-              </span>
-              <span className="font-semibold text-[#333] flex-1 truncate">
-                {tx.command.type}
-              </span>
-              <span className="text-[9px] text-[#bbb]">
-                {tx.handlerScope === "GLOBAL" ? "" : tx.handlerScope}
-              </span>
-              {tx.changes.length > 0 && (
-                <span className="text-[9px] px-1 py-px rounded bg-[#e8f5e9] text-[#2e7d32]">
-                  Δ{tx.changes.length}
-                </span>
-              )}
-            </button>
+          {txs.map((tx: any, i: number) => (
+            <TxEntry key={tx.id} tx={tx} index={i} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Single Transaction Entry ───
+
+function TxEntry({ tx, index }: { tx: any; index: number }) {
+  const event = formatEvent(tx.meta);
+  const cmd = tx.command?.type ?? "?";
+  const payload = tx.command?.payload;
+  const changes: any[] = tx.changes ?? [];
+  const hasChanges = changes.length > 0;
+
+  return (
+    <div className="px-2 py-1.5 bg-[#fafafa] rounded text-[11px] font-mono border border-transparent hover:border-[#e0e0e0]">
+      {/* Event + Command */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-[9px] text-[#bbb] min-w-[16px]">#{index}</span>
+        <span className="text-[10px] text-[#888]">{event}</span>
+        <span className="font-semibold text-[#333] flex-1 truncate">{cmd}</span>
+        {hasChanges && (
+          <span className="text-[9px] px-1 py-px rounded bg-[#e8f5e9] text-[#2e7d32]">
+            Δ{changes.length}
+          </span>
+        )}
+      </div>
+
+      {/* Payload (if present) */}
+      {payload != null && Object.keys(payload).length > 0 && (
+        <div className="mt-0.5 pl-[22px] text-[10px] text-[#777]">
+          {JSON.stringify(payload)}
+        </div>
+      )}
+
+      {/* Diff */}
+      {hasChanges && (
+        <div className="mt-0.5 pl-[22px] flex flex-col gap-px">
+          {changes.map((c: any, j: number) => (
+            <div key={j} className="text-[10px]">
+              <span className="text-[#999]">{c.path}</span>
+              <span className="text-[#c62828] ml-1">−{JSON.stringify(c.before)}</span>
+              <span className="text-[#2e7d32] ml-1">+{JSON.stringify(c.after)}</span>
+            </div>
           ))}
         </div>
       )}

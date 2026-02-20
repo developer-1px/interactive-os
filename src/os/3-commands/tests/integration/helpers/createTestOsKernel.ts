@@ -100,6 +100,8 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
   const mockRects = { current: new Map<string, DOMRect>() };
   const mockZoneOrder = { current: [] as ZoneOrderEntry[] };
   const mockConfig = { current: { ...DEFAULT_CONFIG } as FocusGroupConfig };
+  const mockExpandableItems = { current: new Set<string>() };
+  const mockTreeLevels = { current: new Map<string, number>() };
 
   // ─── No-op effects (suppress "Unknown effect" warnings in headless mode) ───
   kernel.defineEffect("focus", () => { });
@@ -125,6 +127,8 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
     }
     return filtered;
   });
+  kernel.defineContext("dom-expandable-items", () => mockExpandableItems.current);
+  kernel.defineContext("dom-tree-levels", () => mockTreeLevels.current);
   kernel.defineContext("zone-config", () => mockConfig.current);
   kernel.defineContext("dom-zone-order", () => mockZoneOrder.current);
 
@@ -148,6 +152,14 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
 
   function setItems(items: string[]) {
     mockItems.current = items;
+  }
+
+  function setExpandableItems(items: string[]) {
+    mockExpandableItems.current = new Set(items);
+  }
+
+  function setTreeLevels(levels: Record<string, number>) {
+    mockTreeLevels.current = new Map(Object.entries(levels));
   }
 
   function setRects(rects: Map<string, DOMRect>) {
@@ -377,6 +389,8 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
     setZoneOrder,
     setConfig,
     setRole,
+    setExpandableItems,
+    setTreeLevels,
 
     // State helpers
     setActiveZone,

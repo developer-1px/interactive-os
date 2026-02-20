@@ -10,9 +10,7 @@ import { produce } from "immer";
 import { DOM_ITEMS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
-import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { ensureZone } from "../../state/utils";
-import { OS_EXPAND } from "../expand";
 
 interface SelectPayload {
   targetId?: string;
@@ -35,18 +33,8 @@ export const OS_SELECT = os.defineCommand(
     // APG: disabled items cannot be selected
     if (ZoneRegistry.isDisabled(activeZoneId, targetId)) return;
 
-    // W3C Tree Pattern: Space toggles expansion for expandable items
-    // Only applies for keyboard-triggered OS_SELECT (no explicit targetId)
-    // Expandability is determined by zone role, not DOM attribute.
-    if (!payload.targetId) {
-      const entry = ZoneRegistry.get(activeZoneId);
-      const childRole = getChildRole(entry?.role);
-      if (childRole && isExpandableRole(childRole)) {
-        return {
-          dispatch: OS_EXPAND({ action: "toggle", itemId: targetId }),
-        };
-      }
-    }
+    // W3C APG: Space toggles selection, Enter activates.
+    // Ensure we process selection rather than expanding, as expansion belongs in OS_ACTIVATE.
 
     const items: string[] = ctx.inject(DOM_ITEMS);
     const mode = payload.mode ?? "single";

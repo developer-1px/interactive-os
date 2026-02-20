@@ -19,6 +19,12 @@ export default defineConfig({
       },
     },
   ],
+  // Separate dep cache from the main Vite server to prevent
+  // "Invalid hook call" errors caused by shared pre-bundled React modules.
+  cacheDir: "node_modules/.vite-docs",
+  resolve: {
+    dedupe: ["react", "react-dom"],
+  },
   server: {
     port: 4444,
     strictPort: true,

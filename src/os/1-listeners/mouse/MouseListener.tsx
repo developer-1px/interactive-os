@@ -115,7 +115,20 @@ export function MouseListener() {
       if (result.commands.length > 0) {
         setDispatching(true);
         for (const cmd of result.commands) {
-          const opts = result.meta ? { meta: result.meta } : undefined;
+          const opts = result.meta
+            ? {
+              meta: {
+                ...result.meta,
+                pipeline: {
+                  sensed: input,
+                  resolved: {
+                    preventDefault: result.preventDefault,
+                    fallback: result.fallback,
+                  },
+                },
+              },
+            }
+            : undefined;
           os.dispatch(cmd, opts);
         }
         setDispatching(false);

@@ -25,7 +25,10 @@ export function specWrapperPlugin(): Plugin {
     enforce: "pre",
 
     transform(code, id) {
-      if (!id.endsWith(".spec.ts")) return null;
+      // Handle both .spec.ts and .apg.test.ts
+      const isSpec = id.endsWith(".spec.ts");
+      const isApgTest = id.includes(".apg.test.ts");
+      if (!isSpec && !isApgTest) return null;
 
       // Skip specs that use Node.js APIs (e.g. smoke.spec.ts) — they are
       // Playwright-only and cannot be bundled for the browser / TestBot.
@@ -39,20 +42,51 @@ export function specWrapperPlugin(): Plugin {
 
       // Extract relative path from project root for context tagging
       // e.g. "/Users/.../e2e/aria-showcase/tabs.spec.ts" → "e2e/aria-showcase/tabs.spec.ts"
+      // e.g. "/Users/.../tests/apg/tree.apg.test.ts" → "tests/apg/tree.apg.test.ts"
       const e2eIndex = id.indexOf("e2e/");
-      const relativePath = e2eIndex >= 0 ? id.slice(e2eIndex) : id;
+      const apgIndex = id.indexOf("tests/apg/");
+      const cutIndex = apgIndex >= 0 ? apgIndex : e2eIndex;
+      const relativePath = cutIndex >= 0 ? id.slice(cutIndex) : id;
 
       const lines = code.split("\n");
       const importLines: string[] = [];
       const bodyLines: string[] = [];
 
       let inImports = true;
+      let inBlockComment = false;
+      let inMultiLineImport = false;
       for (const line of lines) {
-        // Collect all import lines (including multi-line)
+        const trimmed = line.trim();
+
+        // Track block comments: /** ... */ or /* ... */
+        if (!inBlockComment && trimmed.startsWith("/*")) inBlockComment = true;
+        if (inBlockComment) {
+          importLines.push(line);
+          if (trimmed.endsWith("*/")) inBlockComment = false;
+          continue;
+        }
+
+        // Inside a multi-line import (e.g. `import {\n  foo,\n} from "..."`)
+        if (inMultiLineImport) {
+          importLines.push(line);
+          if (trimmed.includes("from ") || trimmed.startsWith("} from")) {
+            inMultiLineImport = false;
+          }
+          continue;
+        }
+
+        // Detect start of multi-line import: `import {` without closing `}`
+        if (inImports && line.startsWith("import ") && line.includes("{") && !line.includes("}")) {
+          importLines.push(line);
+          inMultiLineImport = true;
+          continue;
+        }
+
+        // Single-line imports, empty lines, comments
         if (
           inImports &&
           (line.startsWith("import ") ||
-            line.trim() === "" ||
+            trimmed === "" ||
             line.startsWith("//")) &&
           bodyLines.length === 0
         ) {

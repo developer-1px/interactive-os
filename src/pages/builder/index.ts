@@ -6,3 +6,4 @@ export * from "./NCPPricingBlock";
 export * from "./NCPServicesBlock";
 export * from "./PropertiesPanel";
 export * from "./SectionSidebar";
+export * from "./TabContainerBlock";

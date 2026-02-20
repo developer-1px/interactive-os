@@ -73,7 +73,7 @@ function deepCloneBlock(block: Block, newId: string): Block {
   return cloned;
 }
 
-const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
+export const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
   accessor: (s: BuilderState) => s.data.blocks,
   text: (item: Block) => item.label,
   onClone: (original: Block, newId: string) => ({
@@ -108,7 +108,7 @@ export const renameSectionLabel = sidebarCollection.command(
 
 // Bind with auto-wired CRUD + custom options
 const collectionBindings = sidebarCollection.collectionBindings();
-export { sidebarCollection };
+
 export const BuilderSidebarUI = sidebarCollection.bind({
   role: "tree",
   ...collectionBindings,
@@ -175,7 +175,7 @@ import {
   createDrillUp,
 } from "@/apps/builder/features/hierarchicalNavigation";
 
-const CANVAS_ZONE_ID = "builder-canvas";
+const CANVAS_ZONE_ID = "canvas";
 
 export const BuilderCanvasUI = canvasZone.bind({
   role: "grid",
@@ -193,8 +193,6 @@ export const BuilderCanvasUI = canvasZone.bind({
 // ═══════════════════════════════════════════════════════════════════
 // Helpers for Field ↔ State bridging
 // ═══════════════════════════════════════════════════════════════════
-
-import { os } from "@/os/kernel";
 
 /**
  * createFieldCommit — Section-aware FieldCommandFactory.
@@ -262,17 +260,22 @@ export function useFieldByDomId(domId: string): string {
 }
 
 /**
- * builderUpdateFieldByDomId — Write a field value using its DOM element id.
+ * updateFieldByDomId — Write a field value using DOM element id.
+ * Resolves domId → { section, field } inside the handler (ctx.state).
  * Used by PropertiesPanel's imperative onChange handlers.
  */
-export function builderUpdateFieldByDomId(domId: string, value: string) {
-  const appState = os.getState().apps["builder"] as
-    | BuilderState
-    | undefined;
-  if (!appState) return;
-  const addr = resolveFieldAddress(domId, appState.data.blocks);
-  if (!addr) return;
-  os.dispatch(
-    updateField({ sectionId: addr.section.id, field: addr.field, value }),
-  );
-}
+export const updateFieldByDomId = canvasZone.command(
+  "updateFieldByDomId",
+  (ctx, payload: { domId: string; value: string }) => {
+    const addr = resolveFieldAddress(payload.domId, ctx.state.data.blocks);
+    if (!addr) return undefined;
+    return {
+      state: produce(ctx.state, (draft) => {
+        const section = draft.data.blocks.find(
+          (s) => s.id === addr.section.id,
+        );
+        if (section) section.fields[addr.field] = payload.value;
+      }),
+    };
+  },
+);

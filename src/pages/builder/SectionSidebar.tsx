@@ -15,13 +15,25 @@ import { useFocusExpansion as useExpansion } from "@/os/5-hooks/useFocusExpansio
 import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
-const SIDEBAR_ZONE_ID = "builder-sidebar";
+
 const CANVAS_ZONE_ID = "builder-canvas";
 
 export function SectionSidebar() {
+  return (
+    <BuilderSidebarUI.Zone
+      className="w-56 shrink-0 bg-slate-50 border-r border-slate-200 flex flex-col py-3 overflow-y-auto select-none"
+      aria-label="Sections"
+    >
+      <SidebarContent />
+    </BuilderSidebarUI.Zone>
+  );
+}
+
+/** Inner component — must be a child of Zone so useExpansion reads the correct FocusGroupContext */
+function SidebarContent() {
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);
 
-  // OS-provided expansion hook — no manual state reading or dispatch
+  // OS-provided expansion hook — reads sidebar zone context (not parent)
   const { isExpanded, toggleExpanded } = useExpansion();
 
   const focusedCanvasId = useFocusedItem(CANVAS_ZONE_ID);
@@ -30,11 +42,7 @@ export function SectionSidebar() {
   const flatNodes = getFlatNodes(blocks, isExpanded);
 
   return (
-    <BuilderSidebarUI.Zone
-      id={SIDEBAR_ZONE_ID}
-      className="w-56 shrink-0 bg-slate-50 border-r border-slate-200 flex flex-col py-3 overflow-y-auto select-none"
-      aria-label="Sections"
-    >
+    <>
       <div className="px-4 pb-3 flex items-center justify-between">
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
           Slides
@@ -46,25 +54,39 @@ export function SectionSidebar() {
 
       <div className="flex-1 px-2 space-y-0.5">
         {flatNodes.map((node) => {
-          const itemId = `sidebar-${node.block.id}`;
+          const itemId = node.block.id;
           const isCanvasActive =
             focusedCanvasId?.startsWith(node.block.id) ?? false;
           const itemExpanded = isExpanded(itemId);
 
+          // Depth-based indent: 8px base + 16px per level
+          const indent = 8 + node.depth * 16;
+
+          // Depth-based surface colors (subtle background tint per level)
+          const depthBg = node.depth === 0
+            ? ""
+            : node.depth === 1
+              ? "bg-slate-100/40"
+              : "bg-slate-100/70";
+
           if (node.isSection) {
-            // ─── PPT SECTION HEADER ───
+            // ─── TREE SECTION HEADER (expandable) ───
             return (
               <BuilderSidebarUI.Item
                 key={node.block.id}
-                id={`sidebar-${node.block.id}`}
-                className="outline-none group focus:outline-none mt-3 mb-1 first:mt-0"
+                id={node.block.id}
+                className="outline-none group focus:outline-none"
               >
                 <div
                   className={`
-                    flex items-center gap-1.5 py-1.5 px-2 rounded cursor-pointer
-                    group-focus:ring-2 group-focus:ring-indigo-500/50 
+                    flex items-center gap-1.5 py-1.5 rounded cursor-pointer
+                    ${node.depth === 0 ? "mt-3 mb-1 first:mt-0" : "mt-0.5"}
+                    group-focus:ring-2 group-focus:ring-indigo-500/50
+                    group-aria-selected:bg-indigo-100 group-aria-selected:text-indigo-700
+                    ${depthBg}
                     ${isCanvasActive ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-200/50 text-slate-500"}
                   `}
+                  style={{ paddingLeft: `${indent}px` }}
                   onClick={() => toggleExpanded(itemId)}
                 >
                   <button
@@ -74,17 +96,24 @@ export function SectionSidebar() {
                   >
                     {itemExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   </button>
-                  <span className="text-[11px] font-bold uppercase tracking-widest truncate">{node.block.label}</span>
+                  <span className={`
+                    truncate
+                    ${node.depth === 0
+                      ? "text-[11px] font-bold uppercase tracking-widest"
+                      : "text-[11px] font-semibold tracking-wide"
+                    }
+                  `}>{node.block.label}</span>
+                  <span className="ml-auto text-[9px] text-slate-400 shrink-0">{node.block.type}</span>
                 </div>
               </BuilderSidebarUI.Item>
             );
           }
 
-          // ─── PPT SLIDE (Leaf Node) ───
+          // ─── TREE LEAF NODE ───
           return (
             <BuilderSidebarUI.Item
               key={node.block.id}
-              id={`sidebar-${node.block.id}`}
+              id={node.block.id}
               className="outline-none group focus:outline-none"
             >
               <div
@@ -92,12 +121,14 @@ export function SectionSidebar() {
                   relative flex items-center gap-2 py-2 pr-3 rounded-lg cursor-pointer
                   border border-transparent
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
+                  group-aria-selected:bg-indigo-50 group-aria-selected:border-indigo-200 group-aria-selected:shadow-sm
+                  ${depthBg}
                   ${isCanvasActive
                     ? "bg-white shadow-sm border-slate-200/60"
                     : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
                   }
                 `}
-                style={{ paddingLeft: `${node.depth > 0 ? 12 : 8}px` }}
+                style={{ paddingLeft: `${indent}px` }}
               >
                 {/* Active Indicator (Left Bar) */}
                 {isCanvasActive && (
@@ -114,7 +145,7 @@ export function SectionSidebar() {
                   {node.slideIndex}
                 </span>
 
-                {/* Restored PPT Thumbnail */}
+                {/* Mini Thumbnail */}
                 <div
                   className={`
                   w-10 h-7 rounded border shrink-0 flex items-center justify-center
@@ -150,7 +181,7 @@ export function SectionSidebar() {
           );
         })}
       </div>
-    </BuilderSidebarUI.Zone>
+    </>
   );
 }
 
@@ -177,7 +208,7 @@ function getFlatNodes(blocks: Block[], isExpanded: (id: string) => boolean) {
         slideIndex: isSection ? null : slideIndex++
       });
       // Show children only when section is expanded
-      if (isSection && isExpanded(`sidebar-${block.id}`)) {
+      if (isSection && isExpanded(block.id)) {
         traverse(block.children!, depth + 1);
       }
     }

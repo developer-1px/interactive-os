@@ -37,7 +37,7 @@ export function createReentrantGuard(name: string, maxDepth: number = 8) {
           warned = true;
           console.error(
             `[LoopGuard] ⛔ "${name}" exceeded max reentrant depth (${maxDepth}). ` +
-              `This is likely an infinite loop. Current depth: ${depth}. Breaking out.`,
+            `This is likely an infinite loop. Current depth: ${depth}. Breaking out.`,
           );
           // Log stack trace for debugging
           console.trace(`[LoopGuard] "${name}" stack trace:`);
@@ -108,7 +108,7 @@ export function createFrequencyGuard(name: string, maxPerFrame: number = 50) {
           warned = true;
           console.error(
             `[LoopGuard] ⛔ "${name}" exceeded ${maxPerFrame} calls/frame. ` +
-              `Likely an infinite loop. Throttling until next frame.`,
+            `Likely an infinite loop. Throttling until next frame.`,
           );
         }
         return false;
@@ -137,11 +137,5 @@ export function createFrequencyGuard(name: string, maxPerFrame: number = 50) {
 // Pre-built Guards (Singleton instances for OS systems)
 // ═══════════════════════════════════════════════════════════════════
 
-/** Guard for command dispatch — prevents recursive dispatch loops */
-export const dispatchGuard = createReentrantGuard("command.dispatch", 10);
-
 /** Guard for focus sensor events — prevents event storm */
 export const sensorGuard = createFrequencyGuard("focus.sensor", 200);
-
-/** Guard for active zone changes — prevents zone flip-flop */
-export const activeZoneGuard = createFrequencyGuard("focus.activeZone", 50);

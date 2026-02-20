@@ -17,14 +17,7 @@ export type {
 } from "./command/OSCommandPayload.ts";
 export type { OSCommandType } from "./command/OSCommands.ts";
 export { OS_COMMANDS } from "./command/OSCommands.ts";
-// ── Effect domain ──
-export type {
-  EffectRecord,
-  EffectSource,
-  FocusEffectAction,
-  InputSource,
-} from "./effect/EffectRecord.ts";
-export { createFocusEffect } from "./effect/EffectRecord.ts";
+// ── Focus config ──
 export type { ActivateConfig } from "./focus/config/FocusActivateConfig.ts";
 export { DEFAULT_ACTIVATE } from "./focus/config/FocusActivateConfig.ts";
 export type { DismissConfig } from "./focus/config/FocusDismissConfig.ts";
@@ -48,20 +41,6 @@ export type {
   Orientation,
   TabDirection,
 } from "./focus/FocusDirection.ts";
-export type { FocusIntent } from "./focus/FocusIntent.ts";
-export type { FocusNode } from "./focus/FocusNode.ts";
-export type { PipelineContext } from "./focus/FocusPipelineContext.ts";
-export type { FocusState, ZoneSnapshot } from "./focus/FocusState.ts";
 export type { FocusTarget } from "./focus/FocusTarget.ts";
 // ── Keyboard domain ──
 export type { KeybindingItem } from "./keyboard/KeybindingItem.ts";
-export { computeDiff } from "./state/computeOSStateDiff.ts";
-// ── State domain ──
-export type { OSState } from "./state/OSState.ts";
-export { INITIAL_OS_STATE } from "./state/OSState.ts";
-export type {
-  StateDiff,
-  Transaction,
-  TransactionCommand,
-  TransactionInput,
-} from "./state/OSTransaction.ts";

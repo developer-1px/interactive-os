@@ -30,25 +30,25 @@ describe("builder undo/redo", () => {
   });
 
   it("undo reverts deleteSection", () => {
-    expect(app.state.data.blocks).toHaveLength(5);
+    expect(app.state.data.blocks).toHaveLength(6);
 
     app.dispatch(deleteSection({ id: "ncp-news" }));
-    expect(app.state.data.blocks).toHaveLength(4);
+    expect(app.state.data.blocks).toHaveLength(5);
     expect(app.evaluate(canUndo)).toBe(true);
 
     app.dispatch(undoCommand());
-    expect(app.state.data.blocks).toHaveLength(5);
+    expect(app.state.data.blocks).toHaveLength(6);
     expect(app.state.data.blocks.map((s) => s.id)).toContain("ncp-news");
   });
 
   it("redo restores the undone action", () => {
     app.dispatch(deleteSection({ id: "ncp-news" }));
     app.dispatch(undoCommand());
-    expect(app.state.data.blocks).toHaveLength(5);
+    expect(app.state.data.blocks).toHaveLength(6);
     expect(app.evaluate(canRedo)).toBe(true);
 
     app.dispatch(redoCommand());
-    expect(app.state.data.blocks).toHaveLength(4);
+    expect(app.state.data.blocks).toHaveLength(5);
     expect(app.state.data.blocks.map((s) => s.id)).not.toContain("ncp-news");
   });
 
@@ -76,13 +76,13 @@ describe("builder undo/redo", () => {
   it("multiple undos in sequence", () => {
     app.dispatch(deleteSection({ id: "ncp-news" }));
     app.dispatch(deleteSection({ id: "ncp-services" }));
-    expect(app.state.data.blocks).toHaveLength(3);
-
-    app.dispatch(undoCommand()); // undo delete services
     expect(app.state.data.blocks).toHaveLength(4);
 
-    app.dispatch(undoCommand()); // undo delete news
+    app.dispatch(undoCommand()); // undo delete services
     expect(app.state.data.blocks).toHaveLength(5);
+
+    app.dispatch(undoCommand()); // undo delete news
+    expect(app.state.data.blocks).toHaveLength(6);
   });
 
   it("redo is cleared after a new action", () => {

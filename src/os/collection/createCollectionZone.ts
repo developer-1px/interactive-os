@@ -1,42 +1,36 @@
 /**
- * createCollectionZone — Collection Zone Facade v2
+ * createCollectionZone — Tree-aware CRUD + clipboard commands.
  *
- * Wraps createZone to auto-generate CRUD + clipboard commands
- * (remove, moveUp, moveDown, duplicate, copy, cut, paste).
- *
- * v2: Clipboard is OS-managed (global single).
- * Apps only provide data location + optional overrides.
- *
- * Supports two data shapes via config:
- *   - accessor:     for T[] arrays (Builder)
- *   - fromEntities: for Record<id, T> + order[] (Todo)
- *
- * @example
- *   // Minimal — items accessor only
- *   const sidebar = createCollectionZone(BuilderApp, "sidebar", {
- *     accessor: (s) => s.data.blocks,
- *     text: (item) => item.label,
- *   });
- *
- *   // Entity+Order with paste transform
- *   const list = createCollectionZone(TodoApp, "list", {
- *     ...fromEntities((s) => s.data.todos, (s) => s.data.todoOrder),
- *     text: (item) => item.text,
- *     onPaste: (item, s) => ({ ...item, categoryId: s.ui.selectedCategoryId }),
- *   });
+ * Wraps createZone to auto-generate: remove, moveUp, moveDown,
+ * move, duplicate, copy, cut, paste.
  */
 
-import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
+import type { BaseCommand } from "@kernel/core/tokens";
 import { produce } from "immer";
 import { OS_FOCUS } from "@/os/3-commands/focus/focus";
 import { OS_CLIPBOARD_SET } from "@/os/3-commands/clipboard/clipboardSet";
-import type { AppHandle, ZoneHandle } from "@/os/defineApp.types";
+import { findInTree, findParentOf, insertChild, removeFromTree } from "@/os/collection/treeUtils";
+import type { AppHandle } from "@/os/defineApp.types";
+import {
+  type CollectionConfig,
+  type CollectionZoneHandle,
+  type CollectionBindingsResult,
+  type ArrayCollectionConfig,
+  type ItemOps,
+  isEntityConfig,
+  opsFromAccessor,
+  defaultGenerateId,
+  defaultToText,
+  autoDeepClone,
+} from "@/os/collection/collectionZone.core";
+
+// Re-export types for consumers
+export type { CollectionConfig, CollectionZoneHandle, CollectionBindingsResult, ArrayCollectionConfig, EntityCollectionConfig } from "@/os/collection/collectionZone.core";
+export { fromEntities } from "@/os/collection/collectionZone.core";
 
 // ═══════════════════════════════════════════════════════════════════
-// Internal clipboard store — module-level, kernel-agnostic
+// Internal clipboard store
 // ═══════════════════════════════════════════════════════════════════
-// Primary data channel for copy→paste. OS_CLIPBOARD_SET dispatch is
-// the secondary sync channel for OS state/UI indicators.
 
 interface ClipboardEntry {
   source: string;
@@ -52,146 +46,6 @@ export function _resetClipboardStore(): void {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Internal Item Ops — unified mutation interface
-// ═══════════════════════════════════════════════════════════════════
-
-interface ItemOps<S, T extends { id: string }> {
-  /** Get ordered array of items (read-only snapshot) */
-  getItems: (state: S) => T[];
-  /** Remove item by id from draft */
-  removeItem: (draft: S, id: string) => void;
-  /** Swap two adjacent items in draft by their ids */
-  swapItems: (draft: S, idA: string, idB: string) => void;
-  /** Insert item after a given index in draft */
-  insertAfter: (draft: S, index: number, item: T) => void;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Config
-// ═══════════════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════════════
-// Config — Shared fields
-// ═══════════════════════════════════════════════════════════════════
-
-interface SharedCollectionConfig<S, T extends { id: string }> {
-  extractId?: (focusId: string) => string;
-  generateId?: () => string;
-  onClone?: (original: T, newId: string) => T;
-  /** Optional visibility filter for moveUp/moveDown. Items not matching are skipped. */
-  filter?: (state: S) => (item: T) => boolean;
-  /** Serialize item to text for native clipboard. Default: item.label ?? item.text ?? item.id */
-  text?: (item: T) => string;
-  /** Validate incoming paste data from a different collection. Default: same-source auto-accept. */
-  accept?: (data: unknown) => T | null;
-  /** Transform item on paste. E.g., assign current category or context. */
-  onPaste?: (item: T, state: S) => T;
-}
-
-/** Array-based config: single accessor to T[] */
-export interface ArrayCollectionConfig<S, T extends { id: string }>
-  extends SharedCollectionConfig<S, T> {
-  accessor: (state: S) => T[];
-}
-
-/** Entity+Order config: produced by fromEntities() */
-export interface EntityCollectionConfig<S, T extends { id: string }>
-  extends SharedCollectionConfig<S, T> {
-  _ops: ItemOps<S, T>;
-}
-
-export type CollectionConfig<S, T extends { id: string } = any> =
-  | ArrayCollectionConfig<S, T>
-  | EntityCollectionConfig<S, T>;
-
-// ═══════════════════════════════════════════════════════════════════
-// Handle
-// ═══════════════════════════════════════════════════════════════════
-
-export interface CollectionZoneHandle<S> extends ZoneHandle<S> {
-  remove: CommandFactory<string, { id: string }>;
-  moveUp: CommandFactory<string, { id: string }>;
-  moveDown: CommandFactory<string, { id: string }>;
-  duplicate: CommandFactory<string, { id: string }>;
-  copy: CommandFactory<string, { ids: string[] }>;
-  cut: CommandFactory<string, { ids: string[]; focusId?: string }>;
-  paste: CommandFactory<string, { afterId?: string }>;
-  collectionBindings(): CollectionBindingsResult;
-}
-
-export interface CollectionBindingsResult {
-  onDelete: (cursor: { focusId: string; selection: string[] }) => any;
-  onMoveUp: (cursor: { focusId: string; selection: string[] }) => any;
-  onMoveDown: (cursor: { focusId: string; selection: string[] }) => any;
-  onCopy: (cursor: { focusId: string; selection: string[] }) => any;
-  onCut: (cursor: { focusId: string; selection: string[] }) => any;
-  onPaste: (cursor: { focusId: string; selection: string[] }) => any;
-  keybindings: Array<{
-    key: string;
-    command: (cursor: { focusId: string; selection: string[] }) => any;
-  }>;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Resolve config → ItemOps
-// ═══════════════════════════════════════════════════════════════════
-
-function isEntityConfig<S, T extends { id: string }>(
-  c: CollectionConfig<S, T>,
-): c is EntityCollectionConfig<S, T> {
-  return "_ops" in c;
-}
-
-function opsFromAccessor<S, T extends { id: string }>(
-  accessor: (state: S) => T[],
-): ItemOps<S, T> {
-  return {
-    getItems: (state) => accessor(state),
-    removeItem: (draft, id) => {
-      const arr = accessor(draft);
-      const idx = arr.findIndex((item) => item.id === id);
-      if (idx !== -1) arr.splice(idx, 1);
-    },
-    swapItems: (draft, idA, idB) => {
-      const arr = accessor(draft);
-      const iA = arr.findIndex((item) => item.id === idA);
-      const iB = arr.findIndex((item) => item.id === idB);
-      if (iA !== -1 && iB !== -1) {
-        [arr[iA], arr[iB]] = [arr[iB]!, arr[iA]!];
-      }
-    },
-    insertAfter: (draft, index, item) => {
-      accessor(draft).splice(index + 1, 0, item);
-    },
-  };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Defaults
-// ═══════════════════════════════════════════════════════════════════
-
-const defaultGenerateId = () => Math.random().toString(36).slice(2, 10);
-
-/** Default text serializer: tries label, text, then id. */
-function defaultToText(item: any): string {
-  return item.label ?? item.text ?? item.id ?? "";
-}
-
-/** Auto deep clone: recursively regenerate IDs for items with children. */
-function autoDeepClone<T extends { id: string }>(item: T, newId: string, uid: () => string): T {
-  const cloned: any = { ...item, id: newId };
-  if (item.hasOwnProperty("fields")) {
-    cloned.fields = { ...(item as any).fields };
-  }
-  if (Array.isArray((item as any).children)) {
-    cloned.children = (item as any).children.map((child: any) =>
-      autoDeepClone(child, uid(), uid),
-    );
-  }
-  return cloned as T;
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // createCollectionZone
 // ═══════════════════════════════════════════════════════════════════
 
@@ -202,92 +56,136 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 ): CollectionZoneHandle<S> {
   const zone = app.createZone(zoneName);
   const uid = config.generateId ?? defaultGenerateId;
-  const toEntityId = config.extractId ?? ((id: string) => id.replace(`${zoneName}-`, ""));
+  const toEntityId = config.extractId ?? ((id: string) => id);
+  /** Reverse of extractId: entity ID → DOM item ID for FOCUS dispatch */
+  const toItemId = (entityId: string) => entityId;
   const toText = config.text ?? defaultToText;
   const clipboardSource = zoneName; // Unique per collection
   const ops: ItemOps<S, T> = isEntityConfig(config)
     ? config._ops
     : opsFromAccessor((config as ArrayCollectionConfig<S, T>).accessor);
 
-  // ── remove ──
+  // ── remove ── (tree-aware)
   const remove = zone.command(
     `${zoneName}:remove`,
     (ctx: { readonly state: S }, payload: { id: string }) => {
       const allItems = ops.getItems(ctx.state);
-      // Calculate neighbor for focus recovery (using visible items)
-      const visible = config.filter
-        ? allItems.filter(config.filter(ctx.state))
-        : allItems;
-      const visIdx = visible.findIndex((item) => item.id === payload.id);
+      const isRoot = allItems.some((item) => item.id === payload.id);
+      const isNested = !isRoot && !!findInTree(allItems as any[], payload.id);
+      if (!isRoot && !isNested) return { state: ctx.state };
 
       let focusCmd: BaseCommand | undefined;
-      if (visIdx !== -1) {
-        const neighbor = visible[visIdx + 1] ?? visible[visIdx - 1];
-        if (neighbor) {
+      if (isRoot) {
+        // Focus recovery for root items
+        const visible = config.filter
+          ? allItems.filter(config.filter(ctx.state))
+          : allItems;
+        const visIdx = visible.findIndex((item) => item.id === payload.id);
+        if (visIdx !== -1) {
+          const neighbor = visible[visIdx + 1] ?? visible[visIdx - 1];
+          if (neighbor) {
+            focusCmd = OS_FOCUS({
+              zoneId: zoneName,
+              itemId: toItemId(neighbor.id),
+            });
+          }
+        }
+      } else {
+        // Focus recovery for nested items: next sibling → prev sibling → parent
+        const parent = findParentOf(allItems as any[], payload.id);
+        if (parent?.children) {
+          const idx = parent.children.findIndex((c: { id: string }) => c.id === payload.id);
+          const neighbor = parent.children[idx + 1] ?? parent.children[idx - 1];
+          const targetId = neighbor?.id ?? parent.id;
           focusCmd = OS_FOCUS({
             zoneId: zoneName,
-            itemId: neighbor.id,
+            itemId: toItemId(targetId),
           });
         }
       }
 
-      if (!allItems.some((item) => item.id === payload.id))
-        return { state: ctx.state };
       return {
         state: produce(ctx.state, (draft) => {
-          ops.removeItem(draft as S, payload.id);
+          if (isRoot) {
+            ops.removeItem(draft as S, payload.id);
+          } else {
+            removeFromTree(ops.getItems(draft as S) as any[], payload.id);
+          }
         }),
         dispatch: focusCmd,
       };
     },
   );
 
-  // ── moveUp ──
-  const moveUp = zone.command(
-    `${zoneName}:moveUp`,
-    (ctx: { readonly state: S }, payload: { id: string }) => {
-      const allItems = ops.getItems(ctx.state);
-      const visible = config.filter
-        ? allItems.filter(config.filter(ctx.state))
-        : allItems;
-      const visIdx = visible.findIndex((item) => item.id === payload.id);
-      if (visIdx <= 0) return { state: ctx.state };
-      return {
-        state: produce(ctx.state, (draft) => {
-          ops.swapItems(draft as S, payload.id, visible[visIdx - 1]!.id);
-        }),
-      };
-    },
-  );
+  // ── moveUp / moveDown ── (tree-aware, shared logic)
+  function makeMoveCommand(name: string, dir: -1 | 1) {
+    return zone.command(
+      `${zoneName}:${name}`,
+      (ctx: { readonly state: S }, payload: { id: string }) => {
+        const allItems = ops.getItems(ctx.state);
+        const rootIdx = allItems.findIndex((item) => item.id === payload.id);
 
-  // ── moveDown ──
-  const moveDown = zone.command(
-    `${zoneName}:moveDown`,
-    (ctx: { readonly state: S }, payload: { id: string }) => {
-      const allItems = ops.getItems(ctx.state);
-      const visible = config.filter
-        ? allItems.filter(config.filter(ctx.state))
-        : allItems;
-      const visIdx = visible.findIndex((item) => item.id === payload.id);
-      if (visIdx === -1 || visIdx >= visible.length - 1)
-        return { state: ctx.state };
-      return {
-        state: produce(ctx.state, (draft) => {
-          ops.swapItems(draft as S, payload.id, visible[visIdx + 1]!.id);
-        }),
-      };
-    },
-  );
+        if (rootIdx !== -1) {
+          const visible = config.filter
+            ? allItems.filter(config.filter(ctx.state))
+            : allItems;
+          const visIdx = visible.findIndex((item) => item.id === payload.id);
+          const neighborIdx = visIdx + dir;
+          if (neighborIdx < 0 || neighborIdx >= visible.length) return { state: ctx.state };
+          return {
+            state: produce(ctx.state, (draft) => {
+              ops.swapItems(draft as S, payload.id, visible[neighborIdx]!.id);
+            }),
+          };
+        }
 
-  // ── duplicate ──
+        const parent = findParentOf(allItems as any[], payload.id);
+        if (!parent?.children) return { state: ctx.state };
+        const idx = parent.children.findIndex((c: { id: string }) => c.id === payload.id);
+        const neighborIdx = idx + dir;
+        if (neighborIdx < 0 || neighborIdx >= parent.children.length) return { state: ctx.state };
+
+        return {
+          state: produce(ctx.state, (draft) => {
+            const draftParent = findInTree(ops.getItems(draft as S) as any[], parent.id);
+            if (draftParent?.children) {
+              const arr = draftParent.children;
+              [arr[idx], arr[neighborIdx]] = [arr[neighborIdx]!, arr[idx]!];
+            }
+          }),
+        };
+      },
+    );
+  }
+
+  const moveUp = makeMoveCommand("moveUp", -1);
+  const moveDown = makeMoveCommand("moveDown", 1);
+
+  // ── duplicate ── (tree-aware)
   const duplicate = zone.command(
     `${zoneName}:duplicate`,
     (ctx: { readonly state: S }, payload: { id: string }) => {
       const items = ops.getItems(ctx.state);
-      const index = items.findIndex((item) => item.id === payload.id);
-      if (index === -1) return { state: ctx.state };
+      const rootIdx = items.findIndex((item) => item.id === payload.id);
 
-      const original = items[index]!;
+      if (rootIdx !== -1) {
+        // Root-level duplicate
+        const original = items[rootIdx]!;
+        const newId = uid();
+        const cloned = config.onClone
+          ? config.onClone(original, newId)
+          : autoDeepClone(original, newId, uid);
+        return {
+          state: produce(ctx.state, (draft) => {
+            ops.insertAfter(draft as S, rootIdx, cloned);
+          }),
+        };
+      }
+
+      // Nested duplicate: clone within parent's children
+      const original = findInTree(items as any[], payload.id) as T | undefined;
+      if (!original) return { state: ctx.state };
+
       const newId = uid();
       const cloned = config.onClone
         ? config.onClone(original, newId)
@@ -295,7 +193,11 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
       return {
         state: produce(ctx.state, (draft) => {
-          ops.insertAfter(draft as S, index, cloned);
+          const draftItems = ops.getItems(draft as S) as any[];
+          const parent = findParentOf(draftItems, payload.id);
+          if (parent) {
+            insertChild(draftItems, parent.id, cloned as any, payload.id);
+          }
         }),
       };
     },
@@ -307,7 +209,8 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     (ctx: { readonly state: S }, payload: { ids: string[] }) => {
       const items = ops.getItems(ctx.state);
       const found = payload.ids
-        .map((id) => items.find((item) => item.id === id))
+        .map((id) => items.find((item) => item.id === id)
+          ?? findInTree(items as any[], id) as T | undefined)
         .filter((t): t is T => Boolean(t));
       if (found.length === 0) return { state: ctx.state };
 
@@ -331,7 +234,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     },
   );
 
-  // ── cut ──
+  // ── cut ── (tree-aware)
   const cut = zone.command(
     `${zoneName}:cut`,
     (
@@ -340,7 +243,8 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     ) => {
       const items = ops.getItems(ctx.state);
       const found = payload.ids
-        .map((id) => items.find((item) => item.id === id))
+        .map((id) => items.find((item) => item.id === id)
+          ?? findInTree(items as any[], id) as T | undefined)
         .filter((t): t is T => Boolean(t));
       if (found.length === 0) return { state: ctx.state };
 
@@ -367,7 +271,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           if (targetId) {
             focusCmd = OS_FOCUS({
               zoneId: zoneName,
-              itemId: targetId,
+              itemId: toItemId(targetId),
             });
           }
         }
@@ -389,8 +293,14 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
       return {
         state: produce(ctx.state, (draft) => {
+          const draftItems = ops.getItems(draft as S);
           for (const id of payload.ids) {
-            ops.removeItem(draft as S, id);
+            const isRoot = draftItems.some((item) => item.id === id);
+            if (isRoot) {
+              ops.removeItem(draft as S, id);
+            } else {
+              removeFromTree(draftItems as any[], id);
+            }
           }
         }),
         dispatch: commands,
@@ -426,11 +336,18 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
       const pastedIds: string[] = [];
       const nextState = produce(ctx.state, (draft) => {
-        const items = ops.getItems(ctx.state);
-        let insertIdx = payload.afterId
-          ? items.findIndex((item) => item.id === payload.afterId)
-          : items.length - 1;
-        if (insertIdx === -1) insertIdx = items.length - 1;
+        const readItems = ops.getItems(ctx.state);
+        const draftItems = ops.getItems(draft as S);
+
+        // Tree-aware paste: check if target node has `accept` for clipboard item type
+        const targetId = payload.afterId;
+        const targetNode = targetId
+          ? findInTree(readItems as any[], targetId)
+          : undefined;
+        const targetAccept = (targetNode as any)?.accept as string[] | undefined;
+
+        // Track the last inserted id for sequential pastes within the same parent
+        let lastInsertedId: string | undefined;
 
         for (let i = 0; i < clipItems.length; i++) {
           const source = clipItems[i]!;
@@ -442,7 +359,32 @@ export function createCollectionZone<S, T extends { id: string } = any>(
             newItem = config.onPaste(newItem, ctx.state);
           }
           pastedIds.push(newItem.id);
-          ops.insertAfter(draft as S, insertIdx + i, newItem);
+
+          const itemType = (source as any).type as string | undefined;
+          const afterSibling = lastInsertedId ?? targetId;
+
+          if (targetId && targetAccept && itemType && targetAccept.includes(itemType)) {
+            // Case 1: Target accepts this type → insert as child of target
+            insertChild(draftItems as any[], targetId, newItem as any, lastInsertedId);
+          } else if (targetId && readItems.findIndex((item) => item.id === targetId) === -1) {
+            // Case 2: Target is a nested node (not in root) → insert as sibling within parent
+            const parentNode = findParentOf(draftItems as any[], targetId);
+            if (parentNode) {
+              insertChild(draftItems as any[], parentNode.id, newItem as any, afterSibling);
+            } else {
+              // Fallback: append to root
+              ops.insertAfter(draft as S, readItems.length - 1 + i, newItem);
+            }
+          } else {
+            // Case 3: Flat insert at root level (existing behavior)
+            let insertIdx = targetId
+              ? readItems.findIndex((item) => item.id === targetId)
+              : readItems.length - 1;
+            if (insertIdx === -1) insertIdx = readItems.length - 1;
+            ops.insertAfter(draft as S, insertIdx + i, newItem);
+          }
+
+          lastInsertedId = newItem.id;
         }
       });
 
@@ -451,8 +393,8 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         commands.push(
           OS_FOCUS({
             zoneId: zoneName,
-            itemId: pastedIds[pastedIds.length - 1]!,
-            selection: pastedIds,
+            itemId: toItemId(pastedIds[pastedIds.length - 1]!),
+            selection: pastedIds.map(toItemId),
           }),
         );
       }
@@ -464,32 +406,64 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     },
   );
 
+  // ── move ── (atomic, no clipboard, single undo step)
+  const move = zone.command(
+    `${zoneName}:move`,
+    (ctx: { readonly state: S }, payload: { id: string; toParentId?: string; afterId?: string }) => {
+      const items = ops.getItems(ctx.state);
+      const node = findInTree(items as any[], payload.id) as T | undefined;
+      if (!node) return { state: ctx.state };
+
+      // Validate accept constraint if moving into a parent
+      if (payload.toParentId) {
+        const targetParent = findInTree(items as any[], payload.toParentId) as any;
+        if (targetParent?.accept && !(node as any).type) return { state: ctx.state };
+        if (targetParent?.accept && !targetParent.accept.includes((node as any).type)) {
+          return { state: ctx.state };
+        }
+      }
+
+      return {
+        state: produce(ctx.state, (draft) => {
+          const draftItems = ops.getItems(draft as S) as any[];
+          // 1. Remove from current position
+          removeFromTree(draftItems, payload.id);
+          // 2. Insert at new position
+          if (payload.toParentId) {
+            insertChild(draftItems, payload.toParentId, node as any, payload.afterId);
+          } else if (payload.afterId) {
+            // Insert as root sibling after afterId
+            const idx = draftItems.findIndex((i: any) => i.id === payload.afterId);
+            if (idx !== -1) {
+              draftItems.splice(idx + 1, 0, node);
+            } else {
+              draftItems.push(node);
+            }
+          } else {
+            draftItems.push(node);
+          }
+        }),
+        dispatch: OS_FOCUS({
+          zoneId: zoneName,
+          itemId: toItemId(payload.id),
+        }),
+      };
+    },
+  );
+
   // ── collectionBindings ──
   function collectionBindings(): CollectionBindingsResult {
+    const idsFromCursor = (cursor: { focusId: string; selection: string[] }) =>
+      cursor.selection.length > 0
+        ? cursor.selection.map(toEntityId)
+        : [toEntityId(cursor.focusId)];
+
     return {
-      onDelete: (cursor) => {
-        const ids =
-          cursor.selection.length > 0
-            ? cursor.selection.map(toEntityId)
-            : [toEntityId(cursor.focusId)];
-        return ids.map((id) => remove({ id }));
-      },
+      onDelete: (cursor) => idsFromCursor(cursor).map((id) => remove({ id })),
       onMoveUp: (cursor) => moveUp({ id: toEntityId(cursor.focusId) }),
       onMoveDown: (cursor) => moveDown({ id: toEntityId(cursor.focusId) }),
-      onCopy: (cursor) => {
-        const ids =
-          cursor.selection.length > 0
-            ? cursor.selection.map(toEntityId)
-            : [toEntityId(cursor.focusId)];
-        return copy({ ids });
-      },
-      onCut: (cursor) => {
-        const ids =
-          cursor.selection.length > 0
-            ? cursor.selection.map(toEntityId)
-            : [toEntityId(cursor.focusId)];
-        return cut({ ids, focusId: toEntityId(cursor.focusId) });
-      },
+      onCopy: (cursor) => copy({ ids: idsFromCursor(cursor) }),
+      onCut: (cursor) => cut({ ids: idsFromCursor(cursor), focusId: toEntityId(cursor.focusId) }),
       onPaste: (cursor) => paste({ afterId: toEntityId(cursor.focusId) }),
       keybindings: [
         {
@@ -502,58 +476,16 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
   return {
     ...zone,
+    /** Canonical zone ID — use this for <Zone id={}> in DOM. Single source of truth. */
+    zoneId: zoneName,
     remove,
     moveUp,
     moveDown,
+    move,
     duplicate,
     copy,
     cut,
     paste,
     collectionBindings,
-  };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// fromEntities — Entity+Order preset
-// ═══════════════════════════════════════════════════════════════════
-
-/**
- * fromEntities — Adapter for entity-map + order-array collections.
- *
- * Produces an _ops interface that works directly on the entity map
- * and order array. No intermediate normalize/denormalize.
- */
-export function fromEntities<S, T extends { id: string }>(
-  entitiesAccessor: (state: S) => Record<string, T>,
-  orderAccessor: (state: S) => string[],
-): { _ops: ItemOps<S, T> } {
-  return {
-    _ops: {
-      getItems: (state) => {
-        const entities = entitiesAccessor(state);
-        return orderAccessor(state)
-          .map((id) => entities[id]!)
-          .filter(Boolean);
-      },
-      removeItem: (draft, id) => {
-        delete entitiesAccessor(draft)[id];
-        const order = orderAccessor(draft);
-        const idx = order.indexOf(id);
-        if (idx !== -1) order.splice(idx, 1);
-      },
-      swapItems: (draft, idA, idB) => {
-        const order = orderAccessor(draft);
-        const iA = order.indexOf(idA);
-        const iB = order.indexOf(idB);
-        if (iA !== -1 && iB !== -1) {
-          [order[iA], order[iB]] = [order[iB]!, order[iA]!];
-        }
-        // entities don't need swapping — only order matters
-      },
-      insertAfter: (draft, index, item) => {
-        entitiesAccessor(draft)[item.id] = item;
-        orderAccessor(draft).splice(index + 1, 0, item.id);
-      },
-    },
   };
 }

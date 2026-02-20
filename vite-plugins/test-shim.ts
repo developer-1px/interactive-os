@@ -29,6 +29,13 @@ export function testShimPlugin(): Plugin {
       if (source === "vitest" && importer?.endsWith(".test.ts")) {
         return "\0vitest-browser-shim";
       }
+      // Redirect createApgKernel to browser version for .apg.test.ts
+      if (
+        source.includes("createApgKernel") &&
+        importer?.includes(".apg.test.ts")
+      ) {
+        return "/src/inspector/testbot/vitest/createApgKernel.browser.ts";
+      }
       return null;
     },
 

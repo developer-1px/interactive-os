@@ -1,7 +1,9 @@
 /**
- * OS Effects — DOM side-effect handlers (kernel version)
+ * OS Effects — DOM side-effect handlers (re-frame reg-fx pattern)
  *
- * Registered via os.defineEffect.
+ * Commands return effects as inline map keys: { focus: itemId, scroll: itemId }
+ * Kernel matches these keys to handlers registered here via os.defineEffect.
+ *
  * These are the only place where DOM mutation happens.
  */
 
@@ -11,7 +13,7 @@ import { os } from "../kernel";
 // Focus Effect — Move DOM focus to an element
 // ═══════════════════════════════════════════════════════════════════
 
-export const FOCUS_EFFECT = os.defineEffect("focus", (itemId: string) => {
+os.defineEffect("focus", (itemId: string) => {
   const el =
     (document.querySelector(
       `[data-item-id="${itemId}"]`,
@@ -25,7 +27,7 @@ export const FOCUS_EFFECT = os.defineEffect("focus", (itemId: string) => {
 // Scroll Effect — Scroll element into view
 // ═══════════════════════════════════════════════════════════════════
 
-export const SCROLL_EFFECT = os.defineEffect("scroll", (itemId: string) => {
+os.defineEffect("scroll", (itemId: string) => {
   const el =
     (document.querySelector(
       `[data-item-id="${itemId}"]`,
@@ -36,7 +38,7 @@ export const SCROLL_EFFECT = os.defineEffect("scroll", (itemId: string) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// Field Clear Effect — Clear contentEditable field DOM content
+// Field Clear — Imperative DOM mutation (direct import, not effect)
 // ═══════════════════════════════════════════════════════════════════
 
 /** Imperative DOM clear — callable from queueMicrotask in commands. */
@@ -46,8 +48,3 @@ export function clearFieldDOM(fieldId: string): void {
     el.innerText = "";
   }
 }
-
-export const FIELD_CLEAR_EFFECT = os.defineEffect(
-  "field-clear",
-  clearFieldDOM,
-);

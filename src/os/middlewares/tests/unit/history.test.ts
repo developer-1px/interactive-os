@@ -27,7 +27,7 @@ import { describe, expect, it } from "vitest";
 
 describe("History: Basic Undo/Redo (SPEC §10)", () => {
   it("addTodo creates a history entry", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
 
     app.dispatch(addTodo({ text: "Test" }));
 
@@ -36,7 +36,7 @@ describe("History: Basic Undo/Redo (SPEC §10)", () => {
   });
 
   it("undo restores previous state", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
 
     app.dispatch(addTodo({ text: "First" }));
     const countAfterAdd = Object.keys(app.state.data.todos).length;
@@ -48,7 +48,7 @@ describe("History: Basic Undo/Redo (SPEC §10)", () => {
   });
 
   it("redo re-applies undone action", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
 
     app.dispatch(addTodo({ text: "First" }));
     const countAfterAdd = Object.keys(app.state.data.todos).length;
@@ -60,7 +60,7 @@ describe("History: Basic Undo/Redo (SPEC §10)", () => {
   });
 
   it("undo when empty past is no-op", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
     const stateBefore = app.state;
 
     app.dispatch(undoCommand());
@@ -69,7 +69,7 @@ describe("History: Basic Undo/Redo (SPEC §10)", () => {
   });
 
   it("redo when empty future is no-op", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
     app.dispatch(addTodo({ text: "First" }));
     const stateBefore = app.state;
 
@@ -85,7 +85,7 @@ describe("History: Basic Undo/Redo (SPEC §10)", () => {
 
 describe("History: Future is cleared on new action", () => {
   it("new command after undo clears future", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
 
     app.dispatch(addTodo({ text: "A" }));
     app.dispatch(addTodo({ text: "B" }));
@@ -106,7 +106,7 @@ describe("History: Future is cleared on new action", () => {
 
 describe("History: OS Passthrough Commands (SPEC §10)", () => {
   it("data-changing commands are recorded", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
 
     app.dispatch(addTodo({ text: "Test" }));
     expect(app.state.history.past.length).toBe(1);
@@ -116,7 +116,7 @@ describe("History: OS Passthrough Commands (SPEC §10)", () => {
   });
 
   it("toggleTodo creates a history entry (data changes)", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
     app.dispatch(addTodo({ text: "Test" }));
     const pastBefore = app.state.history.past.length;
 
@@ -133,7 +133,7 @@ describe("History: OS Passthrough Commands (SPEC §10)", () => {
 
 describe("History: Multiple Undo/Redo", () => {
   it("multiple undos work correctly", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
     const initial = Object.keys(app.state.data.todos).length;
 
     app.dispatch(addTodo({ text: "A" }));
@@ -159,7 +159,7 @@ describe("History: Multiple Undo/Redo", () => {
   });
 
   it("undo then redo preserves state", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
 
     app.dispatch(addTodo({ text: "A" }));
     app.dispatch(addTodo({ text: "B" }));
@@ -181,7 +181,7 @@ describe("History: Multiple Undo/Redo", () => {
 
 describe("History: Entry Structure", () => {
   it("entry contains command type and payload", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
 
     app.dispatch(addTodo({ text: "Hello" }));
 
@@ -191,7 +191,7 @@ describe("History: Entry Structure", () => {
   });
 
   it("entry contains timestamp", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
     const before = Date.now();
 
     app.dispatch(addTodo({ text: "Hello" }));
@@ -202,7 +202,7 @@ describe("History: Entry Structure", () => {
   });
 
   it("entry contains snapshot of previous state", () => {
-    const app = TodoApp.create();
+    const app = TodoApp.create({ history: true, withOS: true });
 
     app.dispatch(addTodo({ text: "First" }));
     const dataAfterFirst = { ...app.state.data };

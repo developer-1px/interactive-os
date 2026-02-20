@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 import {
   BuilderApp,
-  builderUpdateFieldByDomId,
   type PropertyType,
   renameSectionLabel,
+  updateFieldByDomId,
   useFieldByDomId,
 } from "@/apps/builder/app";
 import { os } from "@/os/kernel";
@@ -117,8 +117,8 @@ function TabButton({
   return (
     <div
       className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${active
-          ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
-          : "text-slate-400"
+        ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
+        : "text-slate-400"
         }`}
       title={label}
     >
@@ -160,7 +160,7 @@ function TextProperties({ fieldName }: { fieldName: string }) {
         <textarea
           className="w-full p-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 min-h-[80px] resize-y"
           value={value}
-          onChange={(e) => builderUpdateFieldByDomId(fieldName, e.target.value)}
+          onChange={(e) => os.dispatch(updateFieldByDomId({ domId: fieldName, value: e.target.value }))}
         />
         <p className="text-[10px] text-slate-400 mt-1.5">
           Edit the text content. Changes apply to canvas in real-time.
@@ -207,7 +207,7 @@ function ImageProperties({ fieldName }: { fieldName: string }) {
             type="text"
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
             value={url}
-            onChange={(e) => builderUpdateFieldByDomId(urlKey, e.target.value)}
+            onChange={(e) => os.dispatch(updateFieldByDomId({ domId: urlKey, value: e.target.value }))}
             placeholder="https://..."
           />
         </div>
@@ -217,7 +217,7 @@ function ImageProperties({ fieldName }: { fieldName: string }) {
             type="text"
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
             value={alt}
-            onChange={(e) => builderUpdateFieldByDomId(altKey, e.target.value)}
+            onChange={(e) => os.dispatch(updateFieldByDomId({ domId: altKey, value: e.target.value }))}
             placeholder="Describe the image"
           />
           <p className="text-[10px] text-slate-400 mt-1">
@@ -255,10 +255,10 @@ function IconProperties({ fieldName }: { fieldName: string }) {
               type="button"
               key={name}
               className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${icon === name
-                  ? "border-violet-500 bg-violet-50 text-violet-600"
-                  : "border-slate-200 text-slate-400"
+                ? "border-violet-500 bg-violet-50 text-violet-600"
+                : "border-slate-200 text-slate-400"
                 }`}
-              onClick={() => builderUpdateFieldByDomId(iconKey, name)}
+              onClick={() => os.dispatch(updateFieldByDomId({ domId: iconKey, value: name }))}
               title={name}
             >
               {name.slice(0, 2)}
@@ -273,7 +273,7 @@ function IconProperties({ fieldName }: { fieldName: string }) {
             type="text"
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
             value={icon}
-            onChange={(e) => builderUpdateFieldByDomId(iconKey, e.target.value)}
+            onChange={(e) => os.dispatch(updateFieldByDomId({ domId: iconKey, value: e.target.value }))}
             placeholder="Search icon..."
           />
         </div>
@@ -286,7 +286,7 @@ function IconProperties({ fieldName }: { fieldName: string }) {
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
             value={label}
             onChange={(e) =>
-              builderUpdateFieldByDomId(labelKey, e.target.value)
+              os.dispatch(updateFieldByDomId({ domId: labelKey, value: e.target.value }))
             }
             placeholder="Leave empty if decorative"
           />
@@ -305,7 +305,7 @@ function LinkProperties({ fieldName }: { fieldName: string }) {
         <textarea
           className="w-full p-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 min-h-[40px] resize-y"
           value={value}
-          onChange={(e) => builderUpdateFieldByDomId(fieldName, e.target.value)}
+          onChange={(e) => os.dispatch(updateFieldByDomId({ domId: fieldName, value: e.target.value }))}
         />
       </FormGroup>
 
@@ -347,7 +347,7 @@ function ButtonProperties({ fieldName }: { fieldName: string }) {
           type="text"
           className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
           value={value}
-          onChange={(e) => builderUpdateFieldByDomId(fieldName, e.target.value)}
+          onChange={(e) => os.dispatch(updateFieldByDomId({ domId: fieldName, value: e.target.value }))}
         />
       </FormGroup>
 

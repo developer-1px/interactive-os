@@ -46,13 +46,14 @@ export function createBoundComponents<S>(
 
   // ── Zone component ──
   const ZoneComponent: React.FC<{
-    id?: string;
     className?: string;
     children?: ReactNode;
-  }> = ({ id, className, children }) => {
-    // Explicit prop mapping — no runtime loop, no Record<string, unknown> cast
+    "aria-label"?: string;
+  }> = ({ className, children, ...rest }) => {
+    // Zone ID is always auto-injected from bind() — not developer-specified
     const zoneProps: any = {
-      id: id ?? zoneName,
+      ...rest,
+      id: zoneName,
       className,
       role: config.role,
       onCheck: config.onCheck,

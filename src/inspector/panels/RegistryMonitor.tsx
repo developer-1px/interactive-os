@@ -19,9 +19,16 @@ interface ScopeData {
   effects: readonly string[];
   children: ScopeToken[];
   depth: number;
+  isMounted: boolean;
 }
 
-/** Build a tree-ordered list of scopes from the registry snapshot. */
+/** Check if a scope has a corresponding mounted DOM element. */
+function isScopeMounted(scope: string): boolean {
+  if (scope === "GLOBAL") return true; // GLOBAL is always "mounted"
+  return !!document.querySelector(`[data-zone-id="${scope}"]`);
+}
+
+/** Build a tree-ordered list of scopes from the registry snapshot. GLOBAL last. */
 function buildScopeTree(registry: RegistrySnapshot): ScopeData[] {
   // Collect all scopes
   const allScopes = new Set<string>();
@@ -41,8 +48,9 @@ function buildScopeTree(registry: RegistrySnapshot): ScopeData[] {
     if (arr) arr.push(child as string);
   }
 
-  // DFS ordering from GLOBAL root
-  const result: ScopeData[] = [];
+  // DFS ordering from GLOBAL root (children first, GLOBAL last)
+  const globalData: ScopeData[] = [];
+  const childData: ScopeData[] = [];
   const visited = new Set<string>();
 
   function dfs(scope: string, depth: number) {
@@ -50,7 +58,7 @@ function buildScopeTree(registry: RegistrySnapshot): ScopeData[] {
     visited.add(scope);
 
     const children = childrenMap.get(scope) ?? [];
-    result.push({
+    const data: ScopeData = {
       scope: scope as ScopeToken,
       commands: registry.commands.get(scope as ScopeToken) ?? [],
       whenGuards: registry.whenGuards.get(scope as ScopeToken) ?? [],
@@ -58,7 +66,15 @@ function buildScopeTree(registry: RegistrySnapshot): ScopeData[] {
       effects: registry.effects.get(scope as ScopeToken) ?? [],
       children: children as ScopeToken[],
       depth,
-    });
+      isMounted: isScopeMounted(scope),
+    };
+
+    // GLOBAL goes to separate bucket (rendered last)
+    if (scope === "GLOBAL") {
+      globalData.push(data);
+    } else {
+      childData.push(data);
+    }
 
     for (const child of children.sort()) {
       dfs(child, depth + 1);
@@ -72,7 +88,8 @@ function buildScopeTree(registry: RegistrySnapshot): ScopeData[] {
     if (!visited.has(s)) dfs(s, 0);
   }
 
-  return result;
+  // Children first, GLOBAL last
+  return [...childData, ...globalData];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -99,18 +116,16 @@ function CommandEntry({
     >
       <div className="flex items-center gap-2 min-w-0">
         <div
-          className={`w-1 h-1 rounded-full flex-shrink-0 transition-colors ${
-            isLastExecuted
-              ? "bg-[#007acc] shadow-[0_0_4px_#007acc]"
-              : guardEnabled === false
-                ? "bg-[#f48771]"
-                : "bg-[#4ec9b0]"
-          }`}
+          className={`w-1 h-1 rounded-full flex-shrink-0 transition-colors ${isLastExecuted
+            ? "bg-[#007acc] shadow-[0_0_4px_#007acc]"
+            : guardEnabled === false
+              ? "bg-[#f48771]"
+              : "bg-[#4ec9b0]"
+            }`}
         />
         <span
-          className={`text-[9px] font-bold tracking-tight truncate leading-none ${
-            isLastExecuted ? "text-[#007acc]" : "text-[#444]"
-          }`}
+          className={`text-[9px] font-bold tracking-tight truncate leading-none ${isLastExecuted ? "text-[#007acc]" : "text-[#444]"
+            }`}
         >
           {type}
         </span>
@@ -149,6 +164,7 @@ function ScopeSection({
 }) {
   const [collapsed, setCollapsed] = useState(data.depth > 1);
   const isActive = lastCommandScope === (data.scope as string);
+  const dimmed = !data.isMounted;
 
   const toggle = useCallback(() => setCollapsed((c) => !c), []);
 
@@ -171,6 +187,7 @@ function ScopeSection({
         type="button"
         onClick={toggle}
         className={`w-full flex items-center justify-between px-3 py-1.5 transition-colors
+          ${dimmed ? "opacity-40" : ""}
           ${isActive ? "bg-[#007acc]/5" : "bg-[#f8f8f8] hover:bg-[#f0f0f0]"}`}
       >
         <div
@@ -188,9 +205,8 @@ function ScopeSection({
           )}
           <div className={`w-1 h-3 rounded-full ${depthColor} opacity-60`} />
           <span
-            className={`text-[8px] font-black tracking-[0.15em] uppercase ${
-              isActive ? "text-[#007acc]" : "text-[#666]"
-            }`}
+            className={`text-[8px] font-black tracking-[0.15em] uppercase ${isActive ? "text-[#007acc]" : "text-[#666]"
+              }`}
           >
             {data.scope as string}
           </span>
@@ -253,30 +269,52 @@ export const RegistryMonitor = memo(
     const lastTx = os.inspector.getLastTransaction();
     const lastCommandType = lastTx?.command?.type ?? null;
     const lastCommandScope = lastTx?.handlerScope ?? null;
+    const [mountOnly, setMountOnly] = useState(true);
 
     const scopeTree = useMemo(() => buildScopeTree(registry), [registry]);
+
+    const filteredTree = useMemo(
+      () => (mountOnly ? scopeTree.filter((s) => s.isMounted) : scopeTree),
+      [scopeTree, mountOnly],
+    );
 
     // Summary stats
     let totalCommands = 0;
     let totalScopes = 0;
+    let mountedScopes = 0;
     for (const s of scopeTree) {
       totalCommands += s.commands.length;
       if (s.commands.length > 0 || s.effects.length > 0) totalScopes++;
+      if (s.isMounted) mountedScopes++;
     }
+
+    const toggleMount = useCallback(() => setMountOnly((v) => !v), []);
 
     return (
       <div className="flex flex-col flex-1 overflow-auto">
         {/* Summary header */}
         <div className="flex items-center justify-between px-3 py-1.5 bg-[#fafafa] border-b border-[#e8e8e8]">
-          <span className="text-[8px] font-bold text-[#999] uppercase tracking-[0.15em]">
-            Kernel Registry
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[8px] font-bold text-[#999] uppercase tracking-[0.15em]">
+              Kernel Registry
+            </span>
+            <button
+              type="button"
+              onClick={toggleMount}
+              className={`text-[7px] font-mono px-1 py-0.5 rounded border transition-colors ${mountOnly
+                  ? "bg-[#007acc]/10 text-[#007acc] border-[#007acc]/30"
+                  : "bg-white text-[#999] border-[#e5e5e5] hover:border-[#ccc]"
+                }`}
+            >
+              {mountOnly ? "mounted" : "all"}
+            </button>
+          </div>
           <div className="flex items-center gap-2">
             <span className="text-[7px] font-mono text-[#007acc]">
               {totalCommands} commands
             </span>
             <span className="text-[7px] font-mono text-[#999]">
-              {totalScopes} scopes
+              {mountedScopes}/{totalScopes}
             </span>
             <span className="text-[7px] font-mono text-[#ccc]">
               #{historyCount}
@@ -285,7 +323,7 @@ export const RegistryMonitor = memo(
         </div>
 
         {/* Scope Tree */}
-        {scopeTree.map((data) => (
+        {filteredTree.map((data) => (
           <ScopeSection
             key={data.scope as string}
             data={data}

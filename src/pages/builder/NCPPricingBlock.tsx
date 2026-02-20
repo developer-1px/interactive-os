@@ -16,9 +16,8 @@ export function NCPPricingBlock({ id }: { id: string }) {
     const fields = useSectionFields(id);
     const block = BuilderApp.useComputed((s) => s.data.blocks.find(b => b.id === id));
 
-    // Extract children to drive the Tabs
+    // Extract children to drive the Tab panels
     const children = block?.children || [];
-    const tabLabels = children.length > 0 ? children.map(c => c.label) : ["Monthly", "Annual"];
 
     return (
         <Builder.Section asChild id={id}>
@@ -62,10 +61,10 @@ export function NCPPricingBlock({ id }: { id: string }) {
                     </Builder.Item>
                 </div>
 
-                {/* Tab Container — Builder.Tabs primitive */}
+                {/* Tab Container — Builder.Tabs primitive (data-driven from Block.children) */}
                 <Builder.Tabs
                     id={`${id}-plans`}
-                    tabs={tabLabels}
+                    block={block}
                     className="max-w-4xl mx-auto"
                 >
                     {children.length > 0 ? (

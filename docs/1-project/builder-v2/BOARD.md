@@ -5,6 +5,14 @@
 
 ## 🔴 Now
 
+- [ ] T13: Tab Container → 범용 Container Block (PoC)
+  - [ ] `Block.accept?: string[]` 필드 추가 — Container가 받을 수 있는 하위 블록 타입 제한
+  - [ ] `BuilderTabs` 리팩토링 — 하드코딩 → Block Tree 데이터 주도 렌더링
+  - [ ] 사이드바 Tree View — flat list(`role="listbox"`) → recursive tree(`role="tree"`)
+  - [ ] Tab Container에 기존 블록 붙여넣기 동작 확인
+  - [ ] Dual Projection 검증: 트리 접기/펼치기 ↔ 캔버스 탭 전환 동기화
+  - Discussion: [tab-container-accept](discussions/2026-0220-1833-tab-container-accept.md)
+
 - [ ] T12: Collection Zone v2 — Minimal Facade 리팩토링
   - [ ] Clipboard → OS state로 이동 (글로벌 단일)
   - [ ] `text` 기본값 체인 (`label → text → id`)

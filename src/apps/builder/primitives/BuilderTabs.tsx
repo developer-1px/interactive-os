@@ -6,6 +6,9 @@
  *   - Tab (role="tab") — individual tab button, label is inline-editable
  *   - TabPanel (role="tabpanel") — content area, visible when tab is active
  *
+ * Data-driven: derives tab labels from Block.children[].label.
+ * Supports both legacy `tabs: string[]` prop AND new `block: Block` prop.
+ *
  * State: Active tab is local React state (runtime concern).
  *        Published pages bind active tab to URL hash.
  *
@@ -13,18 +16,9 @@
  *   Builder.Tabs      → wrapper div with builder annotations
  *   Tab headers       → OS.Item within a Zone (role="tablist")
  *   Tab panels        → conditionally rendered children
- *
- * Usage:
- *   <Builder.Tabs id="pricing-tabs" tabs={["Monthly", "Annual"]}>
- *     <Builder.TabPanel>
- *       ...monthly content (Builder primitives)...
- *     </Builder.TabPanel>
- *     <Builder.TabPanel>
- *       ...annual content (Builder primitives)...
- *     </Builder.TabPanel>
- *   </Builder.Tabs>
  */
 
+import type { Block } from "@/apps/builder/model/appState";
 import { Item as OSItem } from "@os/6-components/primitives/Item";
 import { Zone } from "@os/6-components/primitives/Zone";
 import {
@@ -41,8 +35,13 @@ import {
 interface BuilderTabsProps {
     /** Unique builder ID for this tab container */
     id: string;
-    /** Tab labels — each becomes an inline-editable header */
-    tabs: string[];
+    /**
+     * Tab labels — legacy prop for hardcoded tabs.
+     * If `block` is provided, labels are derived from block.children.
+     */
+    tabs?: string[];
+    /** Block data for data-driven rendering (preferred) */
+    block?: Block | undefined;
     /** Initially active tab index (default: 0) */
     defaultTab?: number;
     /** Tab panel children — one per tab, in order */
@@ -53,12 +52,19 @@ interface BuilderTabsProps {
 
 export function BuilderTabs({
     id,
-    tabs,
+    tabs: legacyTabs,
+    block,
     defaultTab = 0,
     children,
     className,
 }: BuilderTabsProps) {
     const [activeIndex, setActiveIndex] = useState(defaultTab);
+
+    // Derive tab labels: block.children takes precedence, then legacy tabs
+    const tabLabels: string[] = block?.children
+        ? block.children.map(c => c.label)
+        : legacyTabs ?? [];
+
     const panels = Children.toArray(children) as ReactElement[];
 
     return (
@@ -72,30 +78,33 @@ export function BuilderTabs({
             <Zone
                 id={`${id}-tablist`}
                 role="tablist"
+                className="flex flex-wrap items-center gap-2 border-b border-slate-200"
                 options={{
                     navigate: { orientation: "horizontal" },
                     tab: { behavior: "flow" },
                 }}
             >
-                {tabs.map((label, idx) => (
+                {tabLabels.map((label, idx) => (
                     <OSItem
                         key={`${id}-tab-${idx}`}
                         id={`${id}-tab-${idx}`}
                         aria-selected={idx === activeIndex}
                         aria-controls={`${id}-panel-${idx}`}
+                        asChild
                     >
                         <button
                             type="button"
                             role="tab"
                             className={`
-                px-4 py-2 text-sm font-medium transition-all outline-none
-                border-b-2
-                ${idx === activeIndex
-                                    ? "border-indigo-500 text-indigo-600"
-                                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                                relative px-5 py-3.5 text-base font-semibold transition-colors outline-none
+                                border-b-2 -mb-[1px] whitespace-nowrap
+                                ${idx === activeIndex
+                                    ? "border-slate-900 text-slate-900"
+                                    : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
                                 }
-                data-[focused]:ring-2 data-[focused]:ring-indigo-500/30 data-[focused]:rounded-t
-              `}
+                                data-[focused]:ring-2 data-[focused]:ring-slate-400/50 data-[focused]:rounded-t-lg
+                                data-[focused]:z-10
+                            `}
                             onClick={() => setActiveIndex(idx)}
                             tabIndex={-1}
                         >

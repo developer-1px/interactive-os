@@ -1,5 +1,14 @@
 import type { FocusStackEntry } from "../schemas/focus/FocusStack";
-import type { ClipboardState } from "../schemas/state/OSState";
+
+/** Global single clipboard — one at a time, source-tagged for accept matching. */
+export interface ClipboardState {
+  /** Source collection identifier (appName:zoneName). null = empty. */
+  source: string | null;
+  /** Stored items (type-agnostic, collection owns interpretation). */
+  items: unknown[];
+  /** Was this a cut operation? */
+  isCut: boolean;
+}
 
 export interface OverlayEntry {
   /** Unique overlay ID */

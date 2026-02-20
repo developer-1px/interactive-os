@@ -13,7 +13,6 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardCopy,
-  Download,
   Eye,
   Keyboard,
   Layers,
@@ -45,19 +44,13 @@ function copyToClipboard(text: string) {
   });
 }
 
-function downloadSession(transactions: Transaction[]) {
-  const dataStr =
-    "data:text/json;charset=utf-8," +
-    encodeURIComponent(JSON.stringify(transactions, null, 2));
-  const downloadAnchorNode = document.createElement("a");
-  downloadAnchorNode.setAttribute("href", dataStr);
-  downloadAnchorNode.setAttribute(
-    "download",
-    `inspector-session-${Date.now()}.json`,
-  );
-  document.body.appendChild(downloadAnchorNode); // required for firefox
-  downloadAnchorNode.click();
-  downloadAnchorNode.remove();
+function copyAllToClipboard(transactions: Transaction[]) {
+  const lines = transactions.map((tx) => {
+    const signal = inferSignal(tx);
+    return formatAiContext(tx, signal);
+  });
+  const text = lines.join("\n\n---\n\n");
+  copyToClipboard(text);
 }
 
 function formatAiContext(
@@ -342,14 +335,14 @@ export function UnifiedInspector({
           <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => downloadSession(transactions)}
+              onClick={() => copyAllToClipboard(transactions)}
               className="p-1 rounded text-[#94a3b8] hover:text-[#333] hover:bg-[#f5f5f5] cursor-pointer"
-              title="Export JSON"
+              title="Copy All to Clipboard"
             >
-              <Download size={11} />
+              <ClipboardCopy size={11} />
             </button>
 
-            {onClear && filteredTx.length > 0 && (
+            {onClear && transactions.length > 0 && (
               <button
                 type="button"
                 onClick={() => {
@@ -376,11 +369,10 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                    active
-                      ? "bg-[#1e293b] text-white border-[#1e293b]"
-                      : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                  }`}
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
+                    ? "bg-[#1e293b] text-white border-[#1e293b]"
+                    : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                    }`}
                 >
                   {group}
                 </button>
@@ -637,6 +629,50 @@ function TimelineNode({
       {/* Expanded Details */}
       {expanded && (
         <div className="flex flex-col gap-1.5 pl-6 pr-2 pb-2">
+          {/* ── Pipeline: Sensed & Resolved ── */}
+          {signal.pipeline && (
+            <div className="flex flex-col gap-1 mt-0.5">
+              {!!signal.pipeline.sensed && (
+                <div className="flex flex-col font-mono text-[9.5px]">
+                  <div className="text-[#475569] font-semibold break-all mt-1 mb-1 inline-flex items-center self-start">
+                    DOM SENSE
+                  </div>
+                  <div className="flex flex-col gap-1 ml-1.5 border-l border-[#e2e8f0] pl-2.5">
+                    <div className="flex flex-col gap-[1px] w-full">
+                      <DiffValue value={signal.pipeline.sensed} type="changed-from" />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!!signal.pipeline.resolved && (
+                <div className="flex flex-col font-mono text-[9.5px]">
+                  <div className="text-[#475569] font-semibold break-all mt-1 mb-1 inline-flex items-center self-start">
+                    PURE RESOLVE
+                  </div>
+                  <div className="flex flex-col gap-1 ml-1.5 border-l border-[#e2e8f0] pl-2.5">
+                    <div className="flex flex-col gap-[1px] w-full">
+                      <DiffValue value={signal.pipeline.resolved} type="changed-to" />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── FINAL ARIA Snapshot ── */}
+          {trigger.elementId && (
+            <div className="flex flex-col gap-1 mt-0.5">
+              <div className="flex flex-col font-mono text-[9.5px]">
+                <div className="text-[#8b5cf6] font-semibold break-all mt-1 mb-1 inline-flex items-center self-start">
+                  FINAL ARIA
+                </div>
+                <div className="flex flex-col gap-1 ml-1.5 border-l border-[#ede9fe] pl-2.5">
+                  <AriaSnapshot elementId={trigger.elementId} />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── Diff (primary info) ── */}
           {diff.length > 0 && (
             <div className="flex flex-col gap-1 mt-0.5">
@@ -751,6 +787,50 @@ function CollapsibleSection({
 }
 
 // ─── Unified Building Blocks ───
+
+function AriaSnapshot({ elementId }: { elementId: string }) {
+  const [snapshot, setSnapshot] = useState<Record<string, string | null> | null>(null);
+
+  useEffect(() => {
+    // Wait for DOM updates to flush after kernel transaction
+    const raf = requestAnimationFrame(() => {
+      // Small timeout to ensure async renders land 
+      setTimeout(() => {
+        const el =
+          document.querySelector(`[data-id="${elementId}"]`) ||
+          document.querySelector(`[data-zone-id="${elementId}"]`) ||
+          document.getElementById(elementId);
+
+        if (el) {
+          setSnapshot({
+            role: el.getAttribute("role"),
+            "aria-current": el.getAttribute("aria-current"),
+            "aria-selected": el.getAttribute("aria-selected"),
+            "aria-checked": el.getAttribute("aria-checked"),
+            "aria-expanded": el.getAttribute("aria-expanded"),
+            tabIndex: el.getAttribute("tabIndex"),
+          });
+        } else {
+          setSnapshot({ error: "Element not found" });
+        }
+      }, 0);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [elementId]);
+
+  if (!snapshot) return <div className="text-[9px] text-[#94a3b8] italic px-1">Capturing...</div>;
+  if (snapshot["error"]) return <div className="text-[9px] text-[#ef4444] italic px-1">{snapshot["error"]}</div>;
+
+  // Filter out nulls for cleaner display
+  const filtered = Object.fromEntries(Object.entries(snapshot).filter(([_, v]) => v !== null));
+  if (Object.keys(filtered).length === 0) return <div className="text-[9px] text-[#94a3b8] italic px-1">No ARIA attributes</div>;
+
+  return (
+    <div className="flex flex-col gap-[1px] w-full">
+      <DiffValue value={filtered} type="changed-to" />
+    </div>
+  );
+}
 
 function DiffValue({
   value,

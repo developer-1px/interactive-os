@@ -17,6 +17,57 @@ import type { NavigateEntry } from "../schemas/focus/config/FocusNavigateConfig"
 import { ZoneRegistry } from "./zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
+// DOM_EXPANDABLE_ITEMS — Set of item IDs that have aria-expanded attribute
+// ═══════════════════════════════════════════════════════════════════
+
+export const DOM_EXPANDABLE_ITEMS = os.defineContext(
+  "dom-expandable-items",
+  (): Set<string> => {
+    const zoneId = os.getState().os.focus.activeZoneId;
+    if (!zoneId) return new Set();
+
+    const entry = ZoneRegistry.get(zoneId);
+    if (!entry?.element) return new Set();
+
+    const expandableIds = new Set<string>();
+    const els = entry.element.querySelectorAll("[data-item-id][aria-expanded]");
+    for (const el of els) {
+      if (el.closest("[data-focus-group]") !== entry.element) continue;
+      const id = el.getAttribute("data-item-id");
+      if (id) expandableIds.add(id);
+    }
+    return expandableIds;
+  },
+);
+
+// ═══════════════════════════════════════════════════════════════════
+// DOM_TREE_LEVELS — Map of item IDs to their aria-level (default 1)
+// ═══════════════════════════════════════════════════════════════════
+
+export const DOM_TREE_LEVELS = os.defineContext(
+  "dom-tree-levels",
+  (): Map<string, number> => {
+    const zoneId = os.getState().os.focus.activeZoneId;
+    if (!zoneId) return new Map();
+
+    const entry = ZoneRegistry.get(zoneId);
+    if (!entry?.element) return new Map();
+
+    const levels = new Map<string, number>();
+    const els = entry.element.querySelectorAll("[data-item-id]");
+    for (const el of els) {
+      if (el.closest("[data-focus-group]") !== entry.element) continue;
+      const id = el.getAttribute("data-item-id");
+      if (id) {
+        const levelStr = el.getAttribute("aria-level");
+        levels.set(id, levelStr ? parseInt(levelStr, 10) : 1);
+      }
+    }
+    return levels;
+  },
+);
+
+// ═══════════════════════════════════════════════════════════════════
 // DOM_ITEMS — ordered item IDs within the active zone
 // ═══════════════════════════════════════════════════════════════════
 

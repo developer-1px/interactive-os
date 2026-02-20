@@ -10,6 +10,7 @@ import { os } from "@os/kernel.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
+import { useSelection } from "@/os/5-hooks/useSelection";
 
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runComplexPatterns from "./tests/e2e/complex-patterns.spec.ts";
@@ -55,7 +56,9 @@ function AriaShowcaseContent() {
   const [pressedTools, setPressedTools] = useState<Record<string, boolean>>({
     bold: true,
   });
-  // expandedTreeNodes removed - now using store-driven expansion
+  const [menuChecks, setMenuChecks] = useState<Record<string, boolean>>({
+    "menu-ruler": true,
+  });
   const [isComboOpen, setIsComboOpen] = useState(false);
   const [isComboInvalid, setIsComboInvalid] = useState(false);
   const [radioValue, setRadioValue] = useState("all");
@@ -69,7 +72,9 @@ function AriaShowcaseContent() {
     setPressedTools((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // toggleTreeNode removed - now using store-driven expansion
+  const toggleMenuCheck = (id: string) => {
+    setMenuChecks((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const toggleGridCell = (id: string) => {
     setGridSelection((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -173,8 +178,14 @@ function AriaShowcaseContent() {
             id="demo-menu"
             role="menu"
             navigate={{ orientation: "vertical", loop: true }}
-            select={{ mode: "multiple", toggle: true }}
-            tab={{ behavior: "trap" }}
+            onCheck={(c) => {
+              if (c.focusId) toggleMenuCheck(c.focusId);
+              return [];
+            }}
+            onAction={(c) => {
+              if (c.focusId) toggleMenuCheck(c.focusId);
+              return [];
+            }}
             aria-label="File actions"
             className="w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1"
           >
@@ -199,6 +210,8 @@ function AriaShowcaseContent() {
               id="menu-ruler"
               role="menuitemcheckbox"
               as="button"
+              aria-checked={!!menuChecks["menu-ruler"]}
+              onClick={() => toggleMenuCheck("menu-ruler")}
               className="
                                 group w-full px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 
                                 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none
@@ -206,7 +219,7 @@ function AriaShowcaseContent() {
                             "
             >
               <span>Show Ruler</span>
-              <span className="text-indigo-600 opacity-0 group-data-[selected=true]:opacity-100 transition-opacity">
+              <span className="text-indigo-600 opacity-0 group-aria-checked:opacity-100 transition-opacity">
                 ✓
               </span>
             </FocusItem>
@@ -214,6 +227,8 @@ function AriaShowcaseContent() {
               id="menu-grid"
               role="menuitemcheckbox"
               as="button"
+              aria-checked={!!menuChecks["menu-grid"]}
+              onClick={() => toggleMenuCheck("menu-grid")}
               className="
                                 group w-full px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 
                                 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none
@@ -221,7 +236,7 @@ function AriaShowcaseContent() {
                             "
             >
               <span>Show Grid</span>
-              <span className="text-indigo-600 opacity-0 group-data-[selected=true]:opacity-100 transition-opacity">
+              <span className="text-indigo-600 opacity-0 group-aria-checked:opacity-100 transition-opacity">
                 ✓
               </span>
             </FocusItem>
@@ -428,6 +443,8 @@ function AriaShowcaseContent() {
             id="demo-tree"
             role="tree"
             navigate={{ orientation: "vertical" }}
+            select={{ mode: "multiple", range: true }}
+            aria-multiselectable="true"
             aria-label="File explorer"
             className="w-full bg-white border border-gray-200 rounded-lg p-2"
           >
@@ -486,11 +503,10 @@ function AriaShowcaseContent() {
                 className={`
                                   w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
                                   flex items-center gap-2 transition-all
-                                  ${
-                                    isComboInvalid
-                                      ? "border-red-300 bg-red-50 text-red-700"
-                                      : "border-gray-200 hover:border-gray-300"
-                                  }
+                                  ${isComboInvalid
+                    ? "border-red-300 bg-red-50 text-red-700"
+                    : "border-gray-200 hover:border-gray-300"
+                  }
                                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
                                   aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
                               `}
@@ -677,6 +693,8 @@ function AriaCard({
 
 function TreeContent() {
   const { isExpanded } = useFocusExpansion();
+  const selection = useSelection("demo-tree");
+  const isSelected = (id: string) => selection.includes(id);
 
   return (
     <>
@@ -684,10 +702,11 @@ function TreeContent() {
         id="tree-src"
         role="treeitem"
         aria-level={1}
+        aria-selected={isSelected("tree-src")}
         className="
                     group px-2 py-1 text-sm rounded flex items-center gap-2 cursor-pointer
-                    hover:bg-gray-50
-                    data-[focused=true]:bg-indigo-50 data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-300
+                    hover:bg-gray-50 aria-selected:bg-indigo-100 aria-selected:text-indigo-800
+                    data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-300
                 "
       >
         <Icon
@@ -709,7 +728,8 @@ function TreeContent() {
             id="tree-components"
             role="treeitem"
             aria-level={2}
-            className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 data-[focused=true]:bg-indigo-50 rounded flex items-center gap-2"
+            aria-selected={isSelected("tree-components")}
+            className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 aria-selected:bg-indigo-100 aria-selected:text-indigo-800 data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-300 rounded flex items-center gap-2"
           >
             <span className="w-3 flex-shrink-0" />
             {/* chevron placeholder */}
@@ -724,7 +744,8 @@ function TreeContent() {
             id="tree-app"
             role="treeitem"
             aria-level={2}
-            className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 data-[focused=true]:bg-indigo-50 rounded flex items-center gap-2"
+            aria-selected={isSelected("tree-app")}
+            className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 aria-selected:bg-indigo-100 aria-selected:text-indigo-800 data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-300 rounded flex items-center gap-2"
           >
             <span className="w-3 flex-shrink-0" />
             {/* chevron placeholder */}
@@ -739,7 +760,8 @@ function TreeContent() {
             id="tree-index"
             role="treeitem"
             aria-level={2}
-            className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 data-[focused=true]:bg-indigo-50 rounded flex items-center gap-2"
+            aria-selected={isSelected("tree-index")}
+            className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 aria-selected:bg-indigo-100 aria-selected:text-indigo-800 data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-300 rounded flex items-center gap-2"
           >
             <span className="w-3 flex-shrink-0" />
             {/* chevron placeholder */}
@@ -757,10 +779,11 @@ function TreeContent() {
         id="tree-public"
         role="treeitem"
         aria-level={1}
+        aria-selected={isSelected("tree-public")}
         className="
                     group px-2 py-1 text-sm rounded flex items-center gap-2 cursor-pointer
-                    hover:bg-gray-50
-                    data-[focused=true]:bg-indigo-50 data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-300
+                    hover:bg-gray-50 aria-selected:bg-indigo-100 aria-selected:text-indigo-800
+                    data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-300
                 "
       >
         <Icon
@@ -781,7 +804,8 @@ function TreeContent() {
           id="tree-favicon"
           role="treeitem"
           aria-level={2}
-          className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 data-[focused=true]:bg-indigo-50 rounded flex items-center gap-2"
+          aria-selected={isSelected("tree-favicon")}
+          className="ml-5 px-2 py-1 text-sm hover:bg-gray-50 aria-selected:bg-indigo-100 aria-selected:text-indigo-800 data-[focused=true]:ring-1 data-[focused=true]:ring-indigo-300 rounded flex items-center gap-2"
         >
           <span className="w-3 flex-shrink-0" />
           {/* chevron placeholder */}

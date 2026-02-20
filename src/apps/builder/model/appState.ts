@@ -27,6 +27,8 @@ export interface Block {
     fields: Record<string, string>;
     /** Child blocks for container types (tabs, accordion, carousel) */
     children?: Block[];
+    /** Constrained Composition — allowed child block types (e.g. ["section"]) */
+    accept?: string[];
 }
 
 /** @deprecated Use `Block` instead. Kept for backward compatibility. */
@@ -135,6 +137,71 @@ export const INITIAL_STATE: BuilderState = {
                         fields: {},
                     }
                 ]
+            },
+            {
+                id: "tab-container-1",
+                label: "Tab Container",
+                type: "tabs",
+                fields: {
+                    title: "Features Overview",
+                },
+                accept: ["tab"],
+                children: [
+                    {
+                        id: "tab-1-overview",
+                        label: "Overview",
+                        type: "tab",
+                        fields: {},
+                        accept: ["section"],
+                        children: [
+                            {
+                                id: "tab-1-overview-s1",
+                                label: "Platform Overview",
+                                type: "section",
+                                fields: {
+                                    heading: "Platform Overview",
+                                    description: "Everything you need to build, deploy, and scale your applications.",
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        id: "tab-1-details",
+                        label: "Details",
+                        type: "tab",
+                        fields: {},
+                        accept: ["section"],
+                        children: [
+                            {
+                                id: "tab-1-details-s1",
+                                label: "Technical Details",
+                                type: "section",
+                                fields: {
+                                    heading: "Technical Details",
+                                    description: "Built on proven infrastructure with 99.99% uptime guarantee.",
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        id: "tab-1-faq",
+                        label: "FAQ",
+                        type: "tab",
+                        fields: {},
+                        accept: ["section"],
+                        children: [
+                            {
+                                id: "tab-1-faq-s1",
+                                label: "FAQ Content",
+                                type: "section",
+                                fields: {
+                                    heading: "Frequently Asked Questions",
+                                    description: "Find answers to common questions about our platform.",
+                                },
+                            },
+                        ],
+                    },
+                ],
             },
             {
                 id: "ncp-footer",

@@ -15,6 +15,10 @@ export interface InspectorSignal {
   };
   diff: Array<{ path: string; from: unknown; to: unknown }>;
   effects: string[];
+  pipeline?: {
+    sensed?: unknown;
+    resolved?: unknown;
+  };
 }
 
 export function inferSignal(tx: Transaction): InspectorSignal {
@@ -89,5 +93,6 @@ export function inferSignal(tx: Transaction): InspectorSignal {
       to: c.to,
     })),
     effects: effectKeys,
+    ...((tx.meta as any)?.pipeline ? { pipeline: (tx.meta as any).pipeline } : {}),
   };
 }

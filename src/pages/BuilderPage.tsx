@@ -20,10 +20,11 @@ import {
   NCPServicesBlock,
   PropertiesPanel,
   SectionSidebar,
+  TabContainerBlock,
   type ViewportMode,
 } from "./builder";
 
-const CANVAS_ZONE_ID = "builder-canvas";
+const CANVAS_ZONE_ID = "canvas";
 
 /**
  * BuilderPage
@@ -105,7 +106,6 @@ export default function BuilderPage() {
 
         {/* Canvas Area — behavior declared in app.ts bind() */}
         <BuilderCanvasUI.Zone
-          id={CANVAS_ZONE_ID}
           className="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-100/50"
         >
           {/* Focus Debug Overlay — inside scroll container */}
@@ -142,6 +142,7 @@ const BLOCK_COMPONENTS: Record<
   news: NCPNewsBlock,
   services: NCPServicesBlock,
   pricing: NCPPricingBlock,
+  tabs: TabContainerBlock,    // generic tab container — data-driven from Block.children
   footer: NCPFooterBlock,
 };
 

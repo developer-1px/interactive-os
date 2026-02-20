@@ -12,15 +12,17 @@ import { type ExpandAction, resolveExpansion } from "./resolveExpansion";
 interface ExpandPayload {
   itemId?: string;
   action?: ExpandAction;
+  /** Explicit zone — use when dispatching outside normal focus flow (e.g. onClick) */
+  zoneId?: string;
 }
 
 export const OS_EXPAND = os.defineCommand(
   "OS_EXPAND",
   (ctx) => (payload: ExpandPayload) => {
-    const { activeZoneId } = ctx.state.os.focus;
-    if (!activeZoneId) return;
+    const zoneId = payload.zoneId ?? ctx.state.os.focus.activeZoneId;
+    if (!zoneId) return;
 
-    const zone = ctx.state.os.focus.zones[activeZoneId];
+    const zone = ctx.state.os.focus.zones[zoneId];
     if (!zone) return;
 
     const targetId = payload.itemId ?? zone.focusedItemId;
@@ -32,7 +34,7 @@ export const OS_EXPAND = os.defineCommand(
 
     return {
       state: produce(ctx.state, (draft) => {
-        const z = ensureZone(draft.os, activeZoneId);
+        const z = ensureZone(draft.os, zoneId);
         z.expandedItems = result.expandedItems;
       }),
     };
