@@ -14,15 +14,19 @@ interface ClipboardSetPayload {
     isCut: boolean;
 }
 
+/** Handler exported for test kernel registration (same pattern as focusHandler). */
+export const clipboardSetHandler = (ctx: any) => (payload: ClipboardSetPayload) => ({
+    state: produce(ctx.state, (draft: any) => {
+        draft.os.clipboard = {
+            source: payload.source,
+            items: payload.items,
+            isCut: payload.isCut,
+        };
+    }),
+});
+
 export const OS_CLIPBOARD_SET = kernel.defineCommand(
     "OS_CLIPBOARD_SET",
-    (ctx) => (payload: ClipboardSetPayload) => ({
-        state: produce(ctx.state, (draft: any) => {
-            draft.os.clipboard = {
-                source: payload.source,
-                items: payload.items,
-                isCut: payload.isCut,
-            };
-        }),
-    }),
+    clipboardSetHandler,
 );
+

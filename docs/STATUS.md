@@ -17,7 +17,8 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| builder-v2 | T9 Block Tree 모델 | 02-20 | 🟢 Active |
+| builder-v2 | T11-b Deep clone + Expand | 02-20 | 🟢 Active |
+| os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
 
 ---
@@ -72,6 +73,7 @@
 
 ## 📝 Recent Changes (2026-02-20)
 
+- 🆕 `os-api-rename` 프로젝트 생성 — Discussion + /doubt + /divide에서 도출. kernel→os rename, OS_ 접두어 통일, 훅 네이밍 정비
 - 🔥 `builder-v2` Active Focus 전환 — Block Tree + Tab Container Discussion에서 보편 빌더 아키텍처 발견. T9(Block Tree 모델) + T10(Tabs 프리미티브) + T11(사이드바 트리뷰) 태스크 등록
 - ✅ `inspector-redesign` — 타임라인 기반 Signal vs Noise 인스펙터 아키텍처 재설계 완수 및 `/archive` 매장 완료. `inferSignal` OS 관찰 원칙 `rules.md` 환류.
 - 🆕 `defineapp-unification` 프로젝트 생성 — Discussion에서 8개 문제 분해, Headless-first 원칙 확립, createTrigger Pit of Success 방향 확정

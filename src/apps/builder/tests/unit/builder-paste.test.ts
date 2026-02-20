@@ -7,6 +7,7 @@
  */
 
 import { BuilderApp, sidebarCollection } from "@apps/builder/app";
+import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 import { describe, expect, test } from "vitest";
 
 /** Helper: read OS clipboard from kernel state */
@@ -16,6 +17,7 @@ function getOsClipboard(app: ReturnType<typeof BuilderApp.create>) {
 
 describe("Builder copy → paste → paste 연속 실행", () => {
     function createApp() {
+        _resetClipboardStore();
         return BuilderApp.create({ withOS: true });
     }
 

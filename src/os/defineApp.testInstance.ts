@@ -9,6 +9,7 @@ import { createKernel, defineScope } from "@kernel";
 import type { BaseCommand } from "@kernel/core/tokens";
 import { type AppState, initialAppState } from "@os/kernel";
 import { focusHandler } from "./3-commands/focus/focus";
+import { clipboardSetHandler } from "./3-commands/clipboard/clipboardSet";
 import type {
   Condition,
   FlatHandler,
@@ -58,8 +59,8 @@ export function createTestInstance<S>(
   const stateOverrides =
     enableHistory || enableOS
       ? (({ history: _h, withOS: _w, ...rest }) => rest)(
-          rawOverrides as Record<string, unknown>,
-        )
+        rawOverrides as Record<string, unknown>,
+      )
       : rawOverrides;
 
   const testState =
@@ -70,13 +71,13 @@ export function createTestInstance<S>(
   const testKernel = createKernel<AppState | TestAppState>(
     enableOS
       ? {
-          ...initialAppState,
-          apps: { [appId]: testState },
-        }
+        ...initialAppState,
+        apps: { [appId]: testState },
+      }
       : {
-          os: {} as Record<string, never>,
-          apps: { [appId]: testState },
-        },
+        os: {} as Record<string, never>,
+        apps: { [appId]: testState },
+      },
   );
 
   const testScope = defineScope(appId);
@@ -113,9 +114,10 @@ export function createTestInstance<S>(
     );
   }
 
-  // Register OS commands (FOCUS) on test kernel
-  // Required for integration tests that rely on focus/selection persistence
+  // Register OS commands (FOCUS, CLIPBOARD_SET) on test kernel
+  // Required for integration tests that rely on focus/selection/clipboard persistence
   testKernel.defineCommand("OS_FOCUS", focusHandler as any);
+  testKernel.defineCommand("OS_CLIPBOARD_SET", clipboardSetHandler as any);
 
   return {
     get state() {

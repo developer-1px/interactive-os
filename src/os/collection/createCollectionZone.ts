@@ -30,8 +30,26 @@ import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import { produce } from "immer";
 import { FOCUS } from "@/os/3-commands/focus/focus";
 import { OS_CLIPBOARD_SET } from "@/os/3-commands/clipboard/clipboardSet";
-import { kernel } from "@/os/kernel";
 import type { AppHandle, ZoneHandle } from "@/os/defineApp.types";
+
+// ═══════════════════════════════════════════════════════════════════
+// Internal clipboard store — module-level, kernel-agnostic
+// ═══════════════════════════════════════════════════════════════════
+// Primary data channel for copy→paste. OS_CLIPBOARD_SET dispatch is
+// the secondary sync channel for OS state/UI indicators.
+
+interface ClipboardEntry {
+  source: string;
+  items: unknown[];
+  isCut: boolean;
+}
+
+let _clipboardStore: ClipboardEntry = { source: "", items: [], isCut: false };
+
+/** @internal Test helper: reset clipboard store between test runs */
+export function _resetClipboardStore(): void {
+  _clipboardStore = { source: "", items: [], isCut: false };
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // Internal Item Ops — unified mutation interface
@@ -294,6 +312,10 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       if (found.length === 0) return { state: ctx.state };
 
       const cloned = found.map((t) => ({ ...t }));
+
+      // Write to module-level store (primary data channel)
+      _clipboardStore = { source: clipboardSource, items: cloned, isCut: false };
+
       return {
         state: ctx.state,
         dispatch: OS_CLIPBOARD_SET({
@@ -352,6 +374,10 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       }
 
       const cloned = found.map((t) => ({ ...t }));
+
+      // Write to module-level store (primary data channel)
+      _clipboardStore = { source: clipboardSource, items: cloned, isCut: true };
+
       const commands: BaseCommand[] = [
         OS_CLIPBOARD_SET({
           source: clipboardSource,
@@ -380,16 +406,16 @@ export function createCollectionZone<S, T extends { id: string } = any>(
   const paste = zone.command(
     `${zoneName}:paste`,
     (ctx: { readonly state: S }, payload: { afterId?: string }) => {
-      // Read from OS-managed global clipboard
-      const osClip = kernel.getState().os.clipboard;
-      if (!osClip || osClip.items.length === 0) return { state: ctx.state };
+      // Read from module-level clipboard store (kernel-agnostic)
+      const clip = _clipboardStore;
+      if (!clip || clip.items.length === 0) return { state: ctx.state };
 
       // Accept check: same source = auto-accept, different = use accept() if provided
       let clipItems: T[];
-      if (osClip.source === clipboardSource) {
-        clipItems = osClip.items as T[];
+      if (clip.source === clipboardSource) {
+        clipItems = clip.items as T[];
       } else if (config.accept) {
-        clipItems = osClip.items
+        clipItems = clip.items
           .map((item) => config.accept!(item))
           .filter((t): t is T => t !== null);
         if (clipItems.length === 0) return { state: ctx.state };

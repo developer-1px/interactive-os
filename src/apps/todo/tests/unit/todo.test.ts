@@ -32,6 +32,7 @@ import {
   updateTodoText,
   visibleTodos,
 } from "@apps/todo/app";
+import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 import { describe, expect, test, vi } from "vitest";
 
 let now = 1000;
@@ -39,7 +40,13 @@ let now = 1000;
 describe("Todo v5 — defineApp native", () => {
   function createApp() {
     vi.spyOn(Date, "now").mockImplementation(() => ++now);
-    return TodoApp.create();
+    _resetClipboardStore();
+    return TodoApp.create({ withOS: true });
+  }
+
+  /** Helper: read OS clipboard from kernel state */
+  function getOsClipboard(app: ReturnType<typeof createApp>) {
+    return (app.kernel as any).getState().os.clipboard;
   }
 
   // ─── CRUD ───
@@ -190,12 +197,9 @@ describe("Todo v5 — defineApp native", () => {
       expect(app.evaluate(isEditing)).toBe(true);
     });
 
-    test("hasClipboard reflects clipboard state", () => {
+    test("hasClipboard is always true (OS-managed)", () => {
       const app = createApp();
-      expect(app.evaluate(hasClipboard)).toBe(false);
-      app.dispatch(addTodo({ text: "Copy me" }));
-      const ids = Object.keys(app.state.data.todos);
-      app.dispatch(copyTodo({ ids: [ids[ids.length - 1]!] }));
+      // hasClipboard is now always true since clipboard is OS-managed
       expect(app.evaluate(hasClipboard)).toBe(true);
     });
   });
@@ -303,9 +307,10 @@ describe("Todo v5 — defineApp native", () => {
       const ids = Object.keys(app.state.data.todos);
       const lastId = ids[ids.length - 1]!;
       app.dispatch(copyTodo({ ids: [lastId] }));
-      expect(app.state.ui.clipboard).not.toBeNull();
-      expect(app.state.ui.clipboard?.items[0]?.text).toBe("Copy me");
-      expect(app.state.ui.clipboard?.isCut).toBe(false);
+      const clip = getOsClipboard(app);
+      expect(clip.items.length).toBe(1);
+      expect((clip.items[0] as any)?.text).toBe("Copy me");
+      expect(clip.isCut).toBe(false);
     });
 
     test("copyTodo → pasteTodo creates duplicate", () => {
@@ -329,9 +334,10 @@ describe("Todo v5 — defineApp native", () => {
       const lastId = ids[ids.length - 1]!;
       app.dispatch(cutTodo({ ids: [lastId] }));
       expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
-      expect(app.state.ui.clipboard).not.toBeNull();
-      expect(app.state.ui.clipboard?.items[0]?.text).toBe("Cut me");
-      expect(app.state.ui.clipboard?.isCut).toBe(true);
+      const clip = getOsClipboard(app);
+      expect(clip.items.length).toBe(1);
+      expect((clip.items[0] as any)?.text).toBe("Cut me");
+      expect(clip.isCut).toBe(true);
     });
 
     test("cutTodo → pasteTodo restores item", () => {
@@ -364,12 +370,14 @@ describe("Todo v5 — defineApp native", () => {
       const ids = Object.keys(app.state.data.todos);
 
       app.dispatch(copyTodo({ ids: [ids[ids.length - 2]!] }));
-      expect(app.state.ui.clipboard?.items.length).toBe(1);
-      expect(app.state.ui.clipboard?.items[0]?.text).toBe("First");
+      let clip = getOsClipboard(app);
+      expect(clip.items.length).toBe(1);
+      expect((clip.items[0] as any)?.text).toBe("First");
 
       app.dispatch(copyTodo({ ids: [ids[ids.length - 1]!] }));
-      expect(app.state.ui.clipboard?.items.length).toBe(1);
-      expect(app.state.ui.clipboard?.items[0]?.text).toBe("Second");
+      clip = getOsClipboard(app);
+      expect(clip.items.length).toBe(1);
+      expect((clip.items[0] as any)?.text).toBe("Second");
     });
 
     // ── Batch clipboard: {ids} API ──
@@ -384,9 +392,9 @@ describe("Todo v5 — defineApp native", () => {
 
       app.dispatch(copyTodo({ ids: lastThree }));
 
-      expect(app.state.ui.clipboard).not.toBeNull();
-      expect(app.state.ui.clipboard?.items.length).toBe(3);
-      expect(app.state.ui.clipboard?.items.map((t) => t.text)).toEqual(
+      const clip = getOsClipboard(app);
+      expect(clip.items.length).toBe(3);
+      expect(clip.items.map((t: any) => t.text)).toEqual(
         expect.arrayContaining(["A", "B", "C"]),
       );
     });
@@ -422,8 +430,9 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(cutTodo({ ids: lastThree }));
 
       expect(Object.keys(app.state.data.todos).length).toBe(beforeCount - 3);
-      expect(app.state.ui.clipboard?.items.length).toBe(3);
-      expect(app.state.ui.clipboard?.isCut).toBe(true);
+      const clip = getOsClipboard(app);
+      expect(clip.items.length).toBe(3);
+      expect(clip.isCut).toBe(true);
     });
 
     test("cutTodo batch → paste: all 3 restored", () => {
@@ -449,7 +458,8 @@ describe("Todo v5 — defineApp native", () => {
     test("copyTodo with empty ids is no-op", () => {
       const app = createApp();
       app.dispatch(copyTodo({ ids: [] }));
-      expect(app.state.ui.clipboard).toBeNull();
+      const clip = getOsClipboard(app);
+      expect(clip.items.length).toBe(0);
     });
   });
 

@@ -11,6 +11,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   createCollectionZone,
   fromEntities,
+  _resetClipboardStore,
 } from "@/os/collection/createCollectionZone";
 import { defineApp } from "@/os/defineApp";
 
@@ -65,7 +66,6 @@ interface EntityState {
   };
   ui: {
     selectedCategoryId: string;
-    clipboard: { items: Todo[]; isCut: boolean } | null;
   };
   history: { past: any[]; future: any[] };
 }
@@ -90,7 +90,7 @@ const ENTITY_INITIAL: EntityState = {
     },
     todoOrder: ["a", "b", "c", "d"],
   },
-  ui: { selectedCategoryId: "work", clipboard: null },
+  ui: { selectedCategoryId: "work" },
   history: { past: [], future: [] },
 };
 
@@ -114,23 +114,17 @@ const filteredList = createCollectionZone(EntityApp, "filtered-v2", {
     item.categoryId === state.ui.selectedCategoryId,
 });
 
-// With clipboard — full Todo pattern
+// With clipboard — full Todo pattern (v2: text + onPaste, no ClipboardConfig)
 const clipboardList = createCollectionZone(EntityApp, "clip-v2", {
   ...fromEntities(
     (s: EntityState) => s.data.todos,
     (s: EntityState) => s.data.todoOrder,
   ),
-  clipboard: {
-    accessor: (s: EntityState) => s.ui.clipboard,
-    set: (draft: EntityState, value: { items: Todo[]; isCut: boolean }) => {
-      draft.ui.clipboard = value;
-    },
-    toText: (items: Todo[]) => items.map((t) => t.text).join("\n"),
-    onPaste: (item: Todo, state: EntityState) => ({
-      ...item,
-      categoryId: state.ui.selectedCategoryId,
-    }),
-  },
+  text: (item: Todo) => item.text,
+  onPaste: (item: Todo, state: EntityState) => ({
+    ...item,
+    categoryId: state.ui.selectedCategoryId,
+  }),
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -432,29 +426,31 @@ describe("createCollectionZone — filtered moveUp/moveDown", () => {
 // Tests: Clipboard — copy/cut/paste
 // ═══════════════════════════════════════════════════════════════════
 
-describe("createCollectionZone — clipboard", () => {
+describe("createCollectionZone — clipboard (OS-managed)", () => {
   let app: ReturnType<typeof EntityApp.create>;
 
   beforeEach(() => {
-    app = EntityApp.create();
+    _resetClipboardStore();
+    app = EntityApp.create({ withOS: true });
   });
 
   function order(): string[] {
     return app.state.data.todoOrder;
   }
 
-  function clipboard() {
-    return app.state.ui.clipboard;
+  function osClipboard() {
+    return (app.kernel as any).getState().os.clipboard;
   }
 
   describe("copy", () => {
-    it("stores items in clipboard state", () => {
+    it("stores items in OS clipboard", () => {
       app.dispatch(clipboardList.copy({ ids: ["a", "c"] }));
-      expect(clipboard()).not.toBeNull();
-      expect(clipboard()!.items).toHaveLength(2);
-      expect(clipboard()!.items[0]!.id).toBe("a");
-      expect(clipboard()!.items[1]!.id).toBe("c");
-      expect(clipboard()!.isCut).toBe(false);
+      const clip = osClipboard();
+      expect(clip.items).toHaveLength(2);
+      expect((clip.items[0] as any).id).toBe("a");
+      expect((clip.items[1] as any).id).toBe("c");
+      expect(clip.isCut).toBe(false);
+      expect(clip.source).toBe("clip-v2");
     });
 
     it("does not remove items from collection", () => {
@@ -463,36 +459,28 @@ describe("createCollectionZone — clipboard", () => {
       expect(app.state.data.todos["a"]).toBeDefined();
     });
 
-    it("returns clipboardWrite effect (checked via state)", () => {
-      app.dispatch(clipboardList.copy({ ids: ["a", "c"] }));
-      // clipboardWrite is returned as a side effect on the command result,
-      // which dispatch passes to the kernel. We verify clipboard state instead.
-      expect(clipboard()!.items.map((t: Todo) => t.text)).toEqual([
-        "Buy milk",
-        "Ship it",
-      ]);
-    });
-
     it("is no-op for empty ids", () => {
       app.dispatch(clipboardList.copy({ ids: [] }));
-      expect(clipboard()).toBeNull();
+      const clip = osClipboard();
+      expect(clip.items).toHaveLength(0);
     });
   });
 
   describe("cut", () => {
-    it("stores items in clipboard and removes them", () => {
+    it("stores items in OS clipboard and removes them", () => {
       app.dispatch(clipboardList.cut({ ids: ["a", "c"] }));
-      expect(clipboard()!.items).toHaveLength(2);
-      expect(clipboard()!.isCut).toBe(true);
+      const clip = osClipboard();
+      expect(clip.items).toHaveLength(2);
+      expect(clip.isCut).toBe(true);
       expect(order()).toEqual(["b", "d"]);
       expect(app.state.data.todos["a"]).toBeUndefined();
     });
 
-    it("returns clipboardWrite effect", () => {
+    it("stores cut items with correct text", () => {
       app.dispatch(clipboardList.cut({ ids: ["b"] }));
-      // Verify cut stored correctly
-      expect(clipboard()!.items[0]!.text).toBe("Write tests");
-      expect(clipboard()!.isCut).toBe(true);
+      const clip = osClipboard();
+      expect((clip.items[0] as any).text).toBe("Write tests");
+      expect(clip.isCut).toBe(true);
     });
   });
 
