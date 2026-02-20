@@ -1,9 +1,11 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { useState } from "react";
-import { BuilderApp, BuilderCanvasUI } from "@/apps/builder/app";
+import { BuilderApp, BuilderCanvasUI, loadPagePreset } from "@/apps/builder/app";
 import { BuilderCursor } from "@/apps/builder/BuilderCursor";
+import { PAGE_PRESETS } from "@/apps/builder/presets/pages";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
+import { os } from "@/os/kernel";
 import {
   EditorToolbar,
   NCPFooterBlock,
@@ -93,6 +95,10 @@ const BLOCK_COMPONENTS: Record<string, React.FC<{ id: string }>> = {
 function SectionRenderer() {
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);
 
+  if (blocks.length === 0) {
+    return <PagePresetPicker />;
+  }
+
   return (
     <>
       {blocks.map((block) => {
@@ -100,5 +106,49 @@ function SectionRenderer() {
         return Component ? <Component key={block.id} id={block.id} /> : null;
       })}
     </>
+  );
+}
+
+/** Shown when canvas is empty — lets user pick a page preset to start from. */
+function PagePresetPicker() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center p-8">
+      <div className="max-w-xl w-full">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+            <span className="text-2xl">✨</span>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            새 페이지를 시작하세요
+          </h2>
+          <p className="text-sm text-slate-500">
+            템플릿을 선택하거나, 빈 페이지에서 블록을 하나씩 추가하세요.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {PAGE_PRESETS.map((preset) => (
+            <button
+              type="button"
+              key={preset.id}
+              onClick={() => os.dispatch(loadPagePreset({ blocks: preset.blocks }))}
+              className="group flex flex-col items-center gap-3 p-6 rounded-2xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-100/50 hover:-translate-y-1 transition-all duration-300 text-center cursor-pointer"
+            >
+              <span className="text-3xl w-14 h-14 flex items-center justify-center rounded-xl bg-slate-50 group-hover:bg-indigo-50 group-hover:scale-110 transition-all duration-300">
+                {preset.icon}
+              </span>
+              <div>
+                <span className="text-sm font-bold text-slate-800 group-hover:text-indigo-700 transition-colors block">
+                  {preset.label}
+                </span>
+                <span className="text-[11px] text-slate-400 mt-0.5 block">
+                  {preset.description}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

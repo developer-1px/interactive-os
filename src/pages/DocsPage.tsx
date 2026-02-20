@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DocsDashboard } from "../docs-viewer/DocsDashboard";
 import { DocsSidebar } from "../docs-viewer/DocsSidebar";
 import {
@@ -18,6 +18,7 @@ export default function DocsPage() {
   const splat = location.pathname.replace(/^\/docs\/?/, "") || undefined;
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const docTree = useMemo(() => buildDocTree(Object.keys(docsModules)), []);
   const allFiles = useMemo(() => flattenTree(docTree), [docTree]);
@@ -49,8 +50,7 @@ export default function DocsPage() {
   // Reset scroll on file change
   // biome-ignore lint/correctness/useExhaustiveDependencies: splat triggers scroll reset on route change
   useEffect(() => {
-    const el = document.querySelector("[data-docs-scroll]");
-    el?.scrollTo(0, 0);
+    scrollRef.current?.scrollTo(0, 0);
   }, [splat]);
 
   const handleSelect = (path: string) => {
@@ -65,6 +65,7 @@ export default function DocsPage() {
       {/* Main Content */}
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">
         <div
+          ref={scrollRef}
           data-docs-scroll
           className="flex-1 overflow-y-auto relative z-10 custom-scrollbar pt-6"
         >

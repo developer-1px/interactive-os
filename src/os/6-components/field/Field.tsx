@@ -12,6 +12,7 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
 } from "react";
 import type { ZodSchema } from "zod";
 import {
@@ -246,18 +247,27 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const isEditingThisField = os.useComputed(
       (s) => (s.os.focus.zones[zoneId]?.editingItemId ?? null) === fieldId,
     );
-    const isParentEditing = os.useComputed((s) => {
-      if (s.os.focus.activeZoneId !== zoneId) return false;
+
+    // isParentEditing: detect when a parent item is editing, making child fields editable.
+    // Uses a pure useComputed for state + useEffect for DOM ancestry check.
+    const parentEditingCandidate = os.useComputed((s) => {
+      if (s.os.focus.activeZoneId !== zoneId) return null;
       const zone = s.os.focus.zones[zoneId];
-      if (!zone?.editingItemId) return false;
-      if (zone.focusedItemId !== zone.editingItemId) return false;
-      // If this field IS the editing item, isEditingThisField handles it
-      if (zone.editingItemId === fieldId) return false;
-      // Verify DOM ancestry: the editing item must be a parent of this field
-      if (!innerRef.current) return false;
-      const editingEl = document.getElementById(String(zone.editingItemId));
-      return editingEl?.contains(innerRef.current) ?? false;
+      if (!zone?.editingItemId) return null;
+      if (zone.focusedItemId !== zone.editingItemId) return null;
+      if (zone.editingItemId === fieldId) return null;
+      return zone.editingItemId;
     });
+
+    const [isParentEditing, setIsParentEditing] = useState(false);
+    useEffect(() => {
+      if (!parentEditingCandidate || !innerRef.current) {
+        setIsParentEditing(false);
+        return;
+      }
+      const editingEl = document.getElementById(String(parentEditingCandidate));
+      setIsParentEditing(editingEl?.contains(innerRef.current) ?? false);
+    }, [parentEditingCandidate]);
 
     const activedescendantId = os.useComputed((s) => {
       if (target !== "virtual" || !controls) return null;
