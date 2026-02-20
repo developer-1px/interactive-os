@@ -186,11 +186,92 @@ describe("OS Guarantee §3: Multi-Select + Operation", () => {
         t.dispatch(t.SELECTION_CLEAR({ zoneId: "list" }));
         t.dispatch(t.RECOVER());
 
-        // RECOVER returns nothing when no items → focus unchanged
-        // But the focused item no longer exists, so it should be effectively null
-        t.focusedItemId();
-        // Either null or the old value pointing at a deleted item
-        // This tests that OS doesn't crash, not specific target
         expect(t.selection()).toEqual([]);
     });
 });
+
+// ═══════════════════════════════════════════════════
+// §6. Expand / Collapse
+//
+// §0: 변화 주체에 머무름. Expand/Collapse는 부모가 주체.
+// ═══════════════════════════════════════════════════
+
+describe("OS Guarantee §6: Expand / Collapse", () => {
+    // §6.1 — 펼치기: 포커스 = 부모 유지
+    it("§6.1: expand keeps focus on parent", () => {
+        const t = createList("b");
+        expect(t.focusedItemId()).toBe("b");
+
+        t.dispatch(t.EXPAND({ itemId: "b", action: "expand" }));
+
+        expect(t.focusedItemId()).toBe("b"); // unchanged
+    });
+
+    // §6.2 — 접기: 포커스 = 부모 유지
+    it("§6.2: collapse keeps focus on parent", () => {
+        const t = createList("b");
+        t.dispatch(t.EXPAND({ itemId: "b", action: "expand" }));
+
+        t.dispatch(t.EXPAND({ itemId: "b", action: "collapse" }));
+
+        expect(t.focusedItemId()).toBe("b"); // unchanged
+    });
+
+    // §6: expandedItems 상태가 정확히 변경되는지
+    it("expand toggles expandedItems state", () => {
+        const t = createList("a");
+        t.dispatch(t.NAVIGATE({ direction: "down" }));
+
+        t.dispatch(t.EXPAND({ itemId: "b" }));
+        expect(t.zone()?.expandedItems).toContain("b");
+
+        t.dispatch(t.EXPAND({ itemId: "b" }));
+        expect(t.zone()?.expandedItems).not.toContain("b");
+    });
+});
+
+// ═══════════════════════════════════════════════════
+// §7. Field (편집 모드)
+//
+// §0: 위치 불변 = 포커스 변화 없음.
+// ═══════════════════════════════════════════════════
+
+describe("OS Guarantee §7: Field (Edit Mode)", () => {
+    // §7.1 — 편집 진입: editingItemId = focusedItemId
+    it("§7.1: FIELD_START_EDIT sets editingItemId to focused item", () => {
+        const t = createList("a");
+        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        expect(t.focusedItemId()).toBe("c");
+
+        t.dispatch(t.FIELD_START_EDIT());
+
+        expect(t.zone()?.editingItemId).toBe("c");
+        expect(t.focusedItemId()).toBe("c"); // unchanged
+    });
+
+    // §7.1 — 이미 편집 중인 아이템에 다시 진입: no-op
+    it("§7.1: double FIELD_START_EDIT is no-op", () => {
+        const t = createList("a");
+        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.FIELD_START_EDIT());
+
+        const stateBefore = t.zone()?.editingItemId;
+        t.dispatch(t.FIELD_START_EDIT());
+
+        expect(t.zone()?.editingItemId).toBe(stateBefore);
+    });
+
+    // §7: 포커스 없으면 진입 불가
+    it("no focused item → FIELD_START_EDIT is no-op", () => {
+        const t = createTestKernel();
+        t.setItems(ITEMS);
+        t.setConfig(LIST_CONFIG);
+        t.setActiveZone("list", null);
+
+        t.dispatch(t.FIELD_START_EDIT());
+
+        expect(t.zone()?.editingItemId).toBeNull();
+    });
+});
+

@@ -33,6 +33,8 @@ import { ESCAPE as prodESCAPE } from "../../../dismiss/escape";
 import { SELECT as prodSELECT } from "../../../selection/select";
 import { SELECTION_CLEAR as prodSELECTION_CLEAR } from "../../../selection/selection";
 import { TAB as prodTAB } from "../../../tab/tab";
+import { EXPAND as prodEXPAND } from "../../../expand/index";
+import { FIELD_START_EDIT as prodFIELD_START_EDIT } from "../../../field/field";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -104,6 +106,8 @@ export function createTestKernel(overrides?: Partial<AppState>) {
   const ESCAPE = kernel.register(prodESCAPE);
   const STACK_PUSH = kernel.register(prodSTACK_PUSH);
   const STACK_POP = kernel.register(prodSTACK_POP);
+  const EXPAND = kernel.register(prodEXPAND);
+  const FIELD_START_EDIT = kernel.register(prodFIELD_START_EDIT);
 
   // ─── Convenience helpers ───
 
@@ -172,6 +176,8 @@ export function createTestKernel(overrides?: Partial<AppState>) {
     SELECTION_CLEAR,
     STACK_PUSH,
     STACK_POP,
+    EXPAND,
+    FIELD_START_EDIT,
 
     // Mock setters
     setItems,

@@ -90,6 +90,51 @@ function formatAiContext(
   return `**[Inspector Captured Event - ${formatTime(tx.timestamp)}]**\n- ${trigger}\n- ${command}\n- ${payload}\n${diffStr}${effectStr}`;
 }
 
+// ─── Array-Index Diff Grouping ───
+
+interface DiffEntry {
+  index?: string;
+  from?: unknown;
+  to?: unknown;
+}
+
+interface DiffGroup {
+  basePath: string;
+  entries: DiffEntry[];
+}
+
+const ARRAY_INDEX_RE = /^(.+)\[(\d+)\]$/;
+
+/** Groups diffs that share the same base path (e.g. todoOrder[4], todoOrder[5]) */
+function groupDiffs(
+  diffs: Array<{ path: string; from?: unknown; to?: unknown }>,
+): DiffGroup[] {
+  const groups: DiffGroup[] = [];
+  const groupMap = new Map<string, DiffGroup>();
+
+  for (const d of diffs) {
+    const m = ARRAY_INDEX_RE.exec(d.path);
+    if (m) {
+      const basePath = m[1]!;
+      const index = m[2]!;
+      let group = groupMap.get(basePath);
+      if (!group) {
+        group = { basePath, entries: [] };
+        groupMap.set(basePath, group);
+        groups.push(group);
+      }
+      group.entries.push({ index, from: d.from, to: d.to });
+    } else {
+      groups.push({
+        basePath: d.path,
+        entries: [{ from: d.from, to: d.to }],
+      });
+    }
+  }
+
+  return groups;
+}
+
 // ─── Highlighting ───
 
 function highlightElement(id: string | undefined, active: boolean) {
@@ -282,7 +327,7 @@ export function UnifiedInspector({
   };
 
   return (
-    <div className="flex flex-col w-full h-full bg-white text-[#333] font-sans text-[10px] select-none">
+    <div className="flex flex-col w-full h-full bg-white text-[#333] font-sans text-[10px]">
       <div className="flex flex-col border-b border-[#e0e0e0] bg-white z-20 shrink-0 sticky top-0">
         {/* Top Header Row */}
         <div className="h-7 px-2 flex items-center justify-between">
@@ -331,11 +376,10 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                    active
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
                       ? "bg-[#1e293b] text-white border-[#1e293b]"
                       : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                  }`}
+                    }`}
                 >
                   {group}
                 </button>
@@ -596,37 +640,56 @@ function TimelineNode({
           {diff.length > 0 && (
             <Section title="State Diff">
               <div className="flex flex-col gap-1.5 mt-1">
-                {diff.map(
-                  (d: { path: string; from?: unknown; to?: unknown }, i) => (
-                    <div
-                      key={`${d.path}-${i}`}
-                      className="flex flex-col gap-0.5 font-mono text-[9.5px]"
-                    >
-                      <div className="text-[#334155] font-semibold break-all bg-[#f1f5f9] px-1 py-0.5 rounded-sm inline-block self-start">
-                        {d.path}
-                      </div>
-                      {(d.from !== undefined || d.to !== undefined) && (
-                        <div className="flex flex-col gap-[1px] ml-1 mt-0.5 border-l-2 border-[#e2e8f0] pl-1.5">
-                          {d.from !== undefined && d.to !== undefined ? (
-                            <div className="flex flex-col gap-[1px]">
-                              <DiffValue value={d.from} type="changed-from" />
-                              <DiffValue value={d.to} type="changed-to" />
-                            </div>
+                {groupDiffs(diff).map((group, gi) => (
+                  <div
+                    key={`${group.basePath}-${gi}`}
+                    className="flex flex-col gap-0.5 font-mono text-[9.5px]"
+                  >
+                    {/* Base path label */}
+                    <div className="text-[#334155] font-semibold break-all bg-[#f1f5f9] px-1 py-0.5 rounded-sm inline-block self-start">
+                      {group.basePath}
+                      {group.entries.length > 1 && (
+                        <span className="text-[#94a3b8] font-normal ml-1">
+                          ×{group.entries.length}
+                        </span>
+                      )}
+                    </div>
+                    {/* Entries */}
+                    <div className="flex flex-col gap-[1px] ml-1 mt-0.5 border-l-2 border-[#e2e8f0] pl-1.5">
+                      {group.entries.map((entry, ei) => (
+                        <div
+                          key={`${entry.index ?? ei}`}
+                          className="flex flex-col gap-[1px]"
+                        >
+                          {entry.index !== undefined && (
+                            <span className="text-[8px] text-[#94a3b8] font-mono">
+                              [{entry.index}]
+                            </span>
+                          )}
+                          {entry.from !== undefined &&
+                            entry.to !== undefined ? (
+                            <>
+                              <DiffValue
+                                value={entry.from}
+                                type="changed-from"
+                              />
+                              <DiffValue value={entry.to} type="changed-to" />
+                            </>
                           ) : (
                             <>
-                              {d.from !== undefined && (
-                                <DiffValue value={d.from} type="removed" />
+                              {entry.from !== undefined && (
+                                <DiffValue value={entry.from} type="removed" />
                               )}
-                              {d.to !== undefined && (
-                                <DiffValue value={d.to} type="added" />
+                              {entry.to !== undefined && (
+                                <DiffValue value={entry.to} type="added" />
                               )}
                             </>
                           )}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  ),
-                )}
+                  </div>
+                ))}
               </div>
             </Section>
           )}
