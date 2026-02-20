@@ -24,8 +24,11 @@ import { produce } from "immer";
 
 // Production commands — registered on test kernel via kernel.register()
 import { FOCUS as prodFOCUS } from "../../../focus/focus";
+import { STACK_POP as prodSTACK_POP } from "../../../focus/stack";
+import { STACK_PUSH as prodSTACK_PUSH } from "../../../focus/stack";
 import { SYNC_FOCUS as prodSYNC_FOCUS } from "../../../focus/syncFocus";
 import { NAVIGATE as prodNAVIGATE } from "../../../navigate";
+import { ESCAPE as prodESCAPE } from "../../../dismiss/escape";
 import { SELECT as prodSELECT } from "../../../selection/select";
 import { TAB as prodTAB } from "../../../tab/tab";
 
@@ -62,8 +65,8 @@ export function createTestKernel(overrides?: Partial<AppState>) {
   const mockConfig = { current: { ...DEFAULT_CONFIG } as FocusGroupConfig };
 
   // ─── No-op effects (suppress "Unknown effect" warnings in headless mode) ───
-  kernel.defineEffect("focus", () => {});
-  kernel.defineEffect("scroll", () => {});
+  kernel.defineEffect("focus", () => { });
+  kernel.defineEffect("scroll", () => { });
 
   // ─── Define contexts with mock providers ───
   kernel.defineContext("dom-items", () => {
@@ -94,6 +97,9 @@ export function createTestKernel(overrides?: Partial<AppState>) {
   const SELECT = kernel.register(prodSELECT);
   const NAVIGATE = kernel.register(prodNAVIGATE);
   const TAB = kernel.register(prodTAB);
+  const ESCAPE = kernel.register(prodESCAPE);
+  const STACK_PUSH = kernel.register(prodSTACK_PUSH);
+  const STACK_POP = kernel.register(prodSTACK_POP);
 
   // ─── Convenience helpers ───
 
@@ -157,6 +163,9 @@ export function createTestKernel(overrides?: Partial<AppState>) {
     SELECT,
     NAVIGATE,
     TAB,
+    ESCAPE,
+    STACK_PUSH,
+    STACK_POP,
 
     // Mock setters
     setItems,

@@ -1,13 +1,13 @@
 # BOARD — APG Contract Testing
 
 ## 🔴 Now
-- [ ] **T1: Listbox APG Contract Test** — W3C Listbox Pattern 기반 headless 행동 검증
-  - [x] Step 5: /tdd — `listbox.apg.test.ts` 26 tests written & passed
-  - [x] Step 6: /solve — All 26 tests pass (no implementation changes needed)
-  - [x] Step 11: /verify — Full suite regression check passed
+(empty — cycle complete)
 
 ## ⏳ Done
 - [x] Discussion: 테스트 전략 재정립 (2026-02-20)
+- [x] **T1: Listbox APG Contract** — 26 tests, all passed
+- [x] **T2: Dialog APG Contract** — 9 tests (focus trap, escape, focus restore)
+- [x] **Pruning** — `navigate.test.ts` (296L) + `select.test.ts` (46L) deleted. APG + integration이 대체.
 
 ## 💡 Ideas
 - Grid APG Contract Test (2D navigation, cell selection)
