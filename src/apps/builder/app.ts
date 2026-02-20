@@ -276,20 +276,58 @@ function resolveCanvasCopyTarget(focusId: string): string | null {
   return addr?.section.id ?? null;
 }
 
+/**
+ * Check if focusId is a dynamic collection item (section/card/tab)
+ * vs a static field item (title, icon, etc.)
+ */
+function isDynamicItem(focusId: string): boolean {
+  const blocks = getBuilderState().data.blocks;
+  // Root block
+  if (blocks.some((b) => b.id === focusId)) return true;
+  // Child of container
+  for (const block of blocks) {
+    if (block.children?.some((c) => c.id === focusId)) return true;
+    if (block.children) {
+      for (const child of block.children) {
+        if (child.children?.some((gc) => gc.id === focusId)) return true;
+      }
+    }
+  }
+  return false;
+}
+
+/** Read field text value for a static item (e.g., "ncp-hero-title" → field value) */
+function getStaticItemTextValue(focusId: string): string | null {
+  const blocks = getBuilderState().data.blocks;
+  const addr = resolveFieldAddress(focusId, blocks);
+  if (!addr) return null;
+  return addr.section.fields[addr.field] ?? null;
+}
+
 export const BuilderCanvasUI = canvasZone.bind({
   role: "grid",
   onAction: createDrillDown(CANVAS_ZONE_ID),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   onCopy: (cursor) => {
-    const targetId = resolveCanvasCopyTarget(cursor.focusId);
-    if (!targetId) return [];
-    return sidebarCollection.copy({ ids: [targetId] });
+    if (isDynamicItem(cursor.focusId)) {
+      // Dynamic item → structural copy (section/card/tab)
+      return sidebarCollection.copy({ ids: [cursor.focusId] });
+    }
+    // Static item → copy field text value directly to system clipboard
+    const text = getStaticItemTextValue(cursor.focusId);
+    if (text) {
+      navigator.clipboard.writeText(text).catch(() => { });
+    }
+    return [];
   },
   onCut: (cursor) => {
-    const targetId = resolveCanvasCopyTarget(cursor.focusId);
-    if (!targetId) return [];
-    return sidebarCollection.cut({ ids: [targetId], focusId: targetId });
+    if (isDynamicItem(cursor.focusId)) {
+      // Dynamic item → structural cut
+      return sidebarCollection.cut({ ids: [cursor.focusId], focusId: cursor.focusId });
+    }
+    // Static item → no-op (can't cut template slots)
+    return [];
   },
   onPaste: (cursor) => {
     const collections = buildCanvasCollections();
