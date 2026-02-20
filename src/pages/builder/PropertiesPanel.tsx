@@ -14,6 +14,10 @@ import {
   useFieldByDomId,
 } from "@/apps/builder/app";
 import { os } from "@/os/kernel";
+import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
+import { getItemAttribute } from "@/os/2-contexts/itemQueries";
+
+const CANVAS_ZONE_ID = "canvas";
 
 /**
  * PropertiesPanel
@@ -23,10 +27,12 @@ import { os } from "@/os/kernel";
  * Writes field changes via builderUpdateField (same command as canvas inline editing).
  */
 export function PropertiesPanel() {
-  const selectedId = BuilderApp.useComputed((s) => s.ui.selectedId);
-  const selectedType = BuilderApp.useComputed((s) => s.ui.selectedType);
+  const focusedId = useFocusedItem(CANVAS_ZONE_ID);
+  const selectedType = focusedId
+    ? (getItemAttribute(CANVAS_ZONE_ID, focusedId, "data-builder-type") as PropertyType) ?? "text"
+    : null;
 
-  if (!selectedId || !selectedType) {
+  if (!focusedId || !selectedType) {
     return (
       <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col items-center justify-center p-6 text-slate-400">
         <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
@@ -83,22 +89,22 @@ export function PropertiesPanel() {
             {selectedType} Properties
           </h2>
           <p className="text-[10px] text-slate-400 font-medium truncate max-w-[180px]">
-            {selectedId}
+            {focusedId}
           </p>
         </div>
       </div>
 
       {/* Form Content */}
       <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
-        {selectedType === "text" && <TextProperties fieldName={selectedId} />}
-        {selectedType === "image" && <ImageProperties fieldName={selectedId} />}
-        {selectedType === "icon" && <IconProperties fieldName={selectedId} />}
-        {selectedType === "link" && <LinkProperties fieldName={selectedId} />}
+        {selectedType === "text" && <TextProperties fieldName={focusedId} />}
+        {selectedType === "image" && <ImageProperties fieldName={focusedId} />}
+        {selectedType === "icon" && <IconProperties fieldName={focusedId} />}
+        {selectedType === "link" && <LinkProperties fieldName={focusedId} />}
         {selectedType === "button" && (
-          <ButtonProperties fieldName={selectedId} />
+          <ButtonProperties fieldName={focusedId} />
         )}
         {selectedType === "section" && (
-          <SectionProperties fieldName={selectedId} />
+          <SectionProperties fieldName={focusedId} />
         )}
       </div>
     </div>

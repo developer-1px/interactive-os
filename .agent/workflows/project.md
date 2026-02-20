@@ -14,6 +14,9 @@ description: Discussion 결론을 프로젝트로 전환한다. 관련 문서를
 
 ### 프로젝트 초기화 (보편 사이클 진입 전)
 
+0. **Discussion 여부 확인** — `/discussion`을 거쳐 왔는가?
+   - ✅ 거쳤다 → Step 1로.
+   - ❌ 거치지 않았다 → **`/discussion`부터 시작한다.** 종료 후 돌아온다.
 1. **관련 문서 수집** — `docs/5-backlog/`, `docs/0-inbox/`에서 관련 문서 검색 → `discussions/`, `notes/`로 이동.
 2. **프로젝트 폴더 생성** — `docs/1-project/[프로젝트명]/` + `discussions/` + `notes/`
 3. **대시보드 갱신** — `docs/STATUS.md`에 프로젝트 추가.

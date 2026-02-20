@@ -1,16 +1,12 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   BuilderApp,
   BuilderCanvasUI,
-  type PropertyType,
-  selectElement,
 } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
-import { os } from "@/os/kernel";
-import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
 import {
   EditorToolbar,
   NCPFooterBlock,
@@ -24,62 +20,18 @@ import {
   type ViewportMode,
 } from "./builder";
 
-const CANVAS_ZONE_ID = "canvas";
-
 /**
  * BuilderPage
  *
  * Visual CMS / Web Builder 데모 - Light Theme
- * Kernel focus → BuilderApp.selectElement 동기화
  *
  * Zone behavior (navigation, keybindings, itemFilter) is declared
  * in app.ts via canvasZone.bind() — not wired manually here.
+ * PropertiesPanel reads focused item type directly via OS item queries.
  */
 export default function BuilderPage() {
   usePlaywrightSpecs("builder", [runBuilderSpec]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
-
-  // Derive selection from builder-canvas zone's last focused item.
-  // Uses lastFocusedId so selection persists even when panel gains focus.
-  const focusedId = useFocusedItem(CANVAS_ZONE_ID);
-
-  useEffect(() => {
-    if (!focusedId) {
-      os.dispatch(selectElement({ id: null, type: null }));
-      return;
-    }
-
-    const el = document.getElementById(focusedId);
-    if (!el) return;
-
-    let type: PropertyType = "text"; // Default fallback
-
-    // 1. Check explicit builder type
-    if (el.dataset["builderType"]) {
-      type = el.dataset["builderType"] as PropertyType;
-    }
-    // 2. Infer from explicit level
-    else if (el.dataset["level"] === "section") {
-      type = "section";
-    }
-    // 3. Infer from DOM tags/structure
-    else if (el.tagName === "IMG" || el.querySelector("img")) {
-      type = "image";
-    } else if (el.tagName === "A" || el.closest("a")) {
-      type = "link";
-    } else if (el.tagName === "BUTTON" || el.closest("button")) {
-      type = "button";
-    } else if (el.querySelector("svg")) {
-      type = "icon";
-    } else if (
-      el.hasAttribute("data-os-field") ||
-      el.querySelector("[data-os-field]")
-    ) {
-      type = "text";
-    }
-
-    os.dispatch(selectElement({ id: focusedId, type }));
-  }, [focusedId]);
 
   const getViewportStyle = () => {
     switch (viewport) {

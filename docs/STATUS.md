@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 00:34
+> Last updated: 2026-02-21 00:46
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**builder-usage-cleanup** — T1: Dead code 제거 + CANVAS_ZONE_ID 통일
+**builder-usage-cleanup** — T4: Private API 캡슐화
 
 ---
 

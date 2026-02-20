@@ -10,8 +10,9 @@ import {
   Server,
   Star,
 } from "lucide-react";
-import { createFieldCommit, useSectionFields } from "@/apps/builder/app";
+import { BuilderApp, createFieldCommit, useSectionFields } from "@/apps/builder/app";
 import { Builder } from "@/apps/builder/primitives/Builder";
+import type { BuilderState, Block } from "@/apps/builder/model/appState";
 
 export function NCPServicesBlock({ id }: { id: string }) {
   const fid = (local: string) => `${id}-${local}`;
@@ -27,44 +28,12 @@ export function NCPServicesBlock({ id }: { id: string }) {
     { icon: Layers, label: "Network" },
   ];
 
-  const featuredServices = [
-    {
-      icon: Server,
-      color: "text-blue-600 bg-blue-50",
-      badge: "UPDATED",
-      title: "Server",
-    },
-    {
-      icon: Database,
-      color: "text-purple-600 bg-purple-50",
-      badge: "NEW",
-      title: "Database",
-    },
-    {
-      icon: Brain,
-      color: "text-green-600 bg-green-50",
-      badge: "",
-      title: "AI",
-    },
-    {
-      icon: Layers,
-      color: "text-orange-600 bg-orange-50",
-      badge: "",
-      title: "Network",
-    },
-    {
-      icon: Globe,
-      color: "text-cyan-600 bg-cyan-50",
-      badge: "",
-      title: "Global",
-    },
-    {
-      icon: Box,
-      color: "text-indigo-600 bg-indigo-50",
-      badge: "",
-      title: "Hybrid",
-    },
-  ];
+  const block: Block | undefined = BuilderApp.useComputed((s: BuilderState) => s.data.blocks.find((b: Block) => b.id === id));
+  const cards: Block[] = block?.children || [];
+
+  const iconMap: Record<string, React.FC<any>> = {
+    Server, Database, Brain, Layers, Globe, Box, Cpu, Star
+  };
 
   return (
     <Builder.Section asChild id={id}>
@@ -126,70 +95,79 @@ export function NCPServicesBlock({ id }: { id: string }) {
 
           {/* Service Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredServices.map((service, index) => (
-              <Builder.Group
-                asChild
-                key={service.title}
-                id={fid(`service-card-${index}`)}
-              >
-                <div className="group bg-white rounded-2xl p-8 border border-slate-200 transition-all duration-300 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 cursor-pointer data-[focused=true]:ring-4 data-[focused=true]:ring-blue-500 data-[focused=true]:border-blue-500">
-                  <div className="flex justify-between items-start mb-6">
-                    <Builder.Item asChild id={fid(`service-icon-${index}`)}>
-                      <Builder.Icon
-                        id={fid(`service-icon-inner-${index}`)}
-                        icon={service.icon}
-                        size={24}
-                        strokeWidth={2}
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center ${service.color} data-[focused=true]:ring-2 data-[focused=true]:ring-slate-400`}
+            {cards.map((card: Block) => {
+              const cardFields = card.fields;
+              const title = cardFields["item-title"] || "Service";
+              const desc = cardFields["item-desc"] || "Description";
+              const badge = cardFields["badge"] || "";
+              const color = cardFields["color"] || "text-slate-600 bg-slate-50";
+              const Icon = iconMap[cardFields["icon"] || "Box"] || Box;
+
+              return (
+                <Builder.Group
+                  asChild
+                  key={card.id}
+                  id={card.id}
+                >
+                  <div className="group bg-white rounded-2xl p-8 border border-slate-200 transition-all duration-300 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 cursor-pointer data-[focused=true]:ring-4 data-[focused=true]:ring-blue-500 data-[focused=true]:border-blue-500">
+                    <div className="flex justify-between items-start mb-6">
+                      <Builder.Item asChild id={`${card.id}-icon`}>
+                        <Builder.Icon
+                          id={`${card.id}-icon-inner`}
+                          icon={Icon}
+                          size={24}
+                          strokeWidth={2}
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} data-[focused=true]:ring-2 data-[focused=true]:ring-slate-400`}
+                        />
+                      </Builder.Item>
+                      {badge && (
+                        <Builder.Item asChild id={`${card.id}-badge`}>
+                          <Builder.Badge
+                            id={`${card.id}-badge-inner`}
+                            variant="default"
+                            className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider data-[focused=true]:ring-2 data-[focused=true]:ring-slate-400"
+                          >
+                            {badge}
+                          </Builder.Badge>
+                        </Builder.Item>
+                      )}
+                    </div>
+
+                    <Builder.Item asChild id={`${card.id}-item-title`}>
+                      <Field.Editable
+                        name={`${card.id}-item-title`}
+                        mode="deferred"
+                        value={title}
+                        onCommit={createFieldCommit(card.id, "item-title")}
+                        className={`text-lg font-bold text-slate-900 mb-2 block`}
                       />
                     </Builder.Item>
-                    {service.badge && (
-                      <Builder.Item asChild id={fid(`service-badge-${index}`)}>
-                        <Builder.Badge
-                          id={fid(`service-badge-inner-${index}`)}
-                          variant="default"
-                          className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider data-[focused=true]:ring-2 data-[focused=true]:ring-slate-400"
-                        >
-                          {service.badge}
-                        </Builder.Badge>
-                      </Builder.Item>
-                    )}
+
+                    <Builder.Item asChild id={`${card.id}-item-desc`}>
+                      <Field.Editable
+                        name={`${card.id}-item-desc`}
+                        mode="deferred"
+                        multiline
+                        value={desc}
+                        onCommit={createFieldCommit(card.id, "item-desc")}
+                        className={`text-sm text-slate-500 leading-relaxed block min-h-[40px]`}
+                      />
+                    </Builder.Item>
+
+                    <Builder.Item asChild id={`${card.id}-service-details`}>
+                      <Builder.Link
+                        id={`${card.id}-service-details-link`}
+                        href="#"
+                        className="mt-6 flex items-center text-blue-600 text-sm font-bold opacity-0 group-hover:opacity-100 data-[focused=true]:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 data-[focused=true]:translate-x-0 duration-300 data-[focused=true]:ring-2 data-[focused=true]:ring-blue-300 data-[focused=true]:rounded"
+                      >
+                        <span>Details</span>
+                        <ArrowRight size={16} className="ml-1" />
+                      </Builder.Link>
+                    </Builder.Item>
                   </div>
-
-                  <Builder.Item asChild id={fid(`item-title-${index}`)}>
-                    <Field.Editable
-                      name={fid(`item-title-${index}`)}
-                      mode="deferred"
-                      value={fields[`item-title-${index}`] ?? ""}
-                      onCommit={createFieldCommit(id, `item-title-${index}`)}
-                      className={`text-lg font-bold text-slate-900 mb-2 block`}
-                    />
-                  </Builder.Item>
-
-                  <Builder.Item asChild id={fid(`item-desc-${index}`)}>
-                    <Field.Editable
-                      name={fid(`item-desc-${index}`)}
-                      mode="deferred"
-                      multiline
-                      value={fields[`item-desc-${index}`] ?? ""}
-                      onCommit={createFieldCommit(id, `item-desc-${index}`)}
-                      className={`text-sm text-slate-500 leading-relaxed block min-h-[40px]`}
-                    />
-                  </Builder.Item>
-
-                  <Builder.Item asChild id={fid(`service-details-${index}`)}>
-                    <Builder.Link
-                      id={fid(`service-details-link-${index}`)}
-                      href="#"
-                      className="mt-6 flex items-center text-blue-600 text-sm font-bold opacity-0 group-hover:opacity-100 data-[focused=true]:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 data-[focused=true]:translate-x-0 duration-300 data-[focused=true]:ring-2 data-[focused=true]:ring-blue-300 data-[focused=true]:rounded"
-                    >
-                      <span>Details</span>
-                      <ArrowRight size={16} className="ml-1" />
-                    </Builder.Link>
-                  </Builder.Item>
-                </div>
-              </Builder.Group>
-            ))}
+                </Builder.Group>
+              )
+            })}
 
             {/* "View All" Card */}
             <Builder.Group asChild id={fid("service-view-all")}>

@@ -16,7 +16,7 @@ import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 
-const CANVAS_ZONE_ID = "builder-canvas";
+const CANVAS_ZONE_ID = "canvas";
 
 export function SectionSidebar() {
   return (

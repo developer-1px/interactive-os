@@ -9,6 +9,8 @@ import {
   Tablet,
   Undo2,
 } from "lucide-react";
+import { canUndo, canRedo, undoCommand, redoCommand, BuilderApp } from "@/apps/builder/app";
+import { os } from "@/os/kernel";
 
 export type ViewportMode = "desktop" | "tablet" | "mobile";
 
@@ -53,8 +55,16 @@ export function EditorToolbar({
             <ToolButton icon={<Hand size={16} />} />
             <ToolButton icon={<Square size={16} />} />
             <div className="w-px h-5 bg-slate-300 mx-1" />
-            <ToolButton icon={<Undo2 size={16} />} />
-            <ToolButton icon={<Redo2 size={16} />} />
+            <ToolButton
+              icon={<Undo2 size={16} />}
+              disabled={!BuilderApp.useComputed(canUndo)}
+              onClick={() => os.dispatch(undoCommand())}
+            />
+            <ToolButton
+              icon={<Redo2 size={16} />}
+              disabled={!BuilderApp.useComputed(canRedo)}
+              onClick={() => os.dispatch(redoCommand())}
+            />
           </div>
 
           <div className="w-px h-6 bg-slate-200" />
@@ -88,11 +98,10 @@ export function EditorToolbar({
             <button
               type="button"
               onClick={onToggleTest}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all rounded-md ${
-                testActive
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all rounded-md ${testActive
                   ? "bg-amber-100 text-amber-700 ring-1 ring-amber-300"
                   : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
-              }`}
+                }`}
             >
               🧪 Test
             </button>
@@ -119,18 +128,26 @@ export function EditorToolbar({
 function ToolButton({
   icon,
   active,
+  disabled,
+  onClick,
 }: {
   icon: React.ReactNode;
   active?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <button
       type="button"
+      onClick={onClick}
+      disabled={disabled}
       className={`
         w-8 h-8 rounded-md flex items-center justify-center transition-all
-        ${
-          active
-            ? "bg-white text-slate-800 shadow-sm"
+        ${disabled ? "text-slate-200 cursor-not-allowed" : ""}
+        ${active
+          ? "bg-white text-slate-800 shadow-sm"
+          : disabled
+            ? ""
             : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
         }
       `}
@@ -157,10 +174,9 @@ function DeviceButton({
       onClick={onClick}
       className={`
         flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all
-        ${
-          active
-            ? "bg-white text-slate-800 shadow-sm"
-            : "text-slate-400 hover:text-slate-600"
+        ${active
+          ? "bg-white text-slate-800 shadow-sm"
+          : "text-slate-400 hover:text-slate-600"
         }
       `}
     >

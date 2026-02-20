@@ -2,12 +2,16 @@
 description: 3-Level(Unit/Integration/E2E) 테스트 코드 작성 가이드. /tdd가 What이라면 /test는 How.
 ---
 
-> **이론적 기반**: Test Pyramid (Mike Cohn, *Succeeding with Agile*)
-> 빠른 테스트를 많이, 느린 테스트를 적게. Unit ▶▶▶ Integration ▶▶ E2E ▶
+> **이론적 기반**: Testing Trophy (Kent C. Dodds)
+> Integration을 가장 두껍게. Unit은 순수 로직만, E2E는 Glue Code만.
+>
+> **우리 프로젝트의 강점**: Headless Kernel + OS가 DOM 없이 전체 커맨드 파이프라인을 실행할 수 있다.
+> 따라서 **대부분의 동작을 Integration(Vitest + Headless Kernel)에서 커버**하고,
+> E2E는 렌더링·이벤트 바인딩만 최소한으로 검증한다.
 
-1. **테스트 레벨 결정** (Test Pyramid 비율을 의식한다)
+1. **테스트 레벨 결정** (Testing Trophy — Integration이 가장 두껍다)
    사용자의 요청이나 변경 사항의 성격에 따라 테스트 레벨을 결정한다.
-   **비율 원칙**: 로직 검증은 최대한 Unit/Integration(Headless Kernel)에서 해결하고, E2E는 Glue Code(렌더링, 이벤트 바인딩)만 검증한다.
+   **비율 원칙**: Unit ▶ **Integration ▶▶▶** E2E ▶ — Kernel+OS 통합이 대부분을 커버.
 
    - **Level 1: Unit (Handler)**
      - 대상: 개별 Command Handler의 로직 검증

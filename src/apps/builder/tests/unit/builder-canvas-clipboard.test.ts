@@ -13,7 +13,7 @@ import type { BaseCommand } from "@kernel/core/tokens";
 
 // Mock navigator.clipboard
 const mockWriteText = vi.fn(() => Promise.resolve());
-Object.assign(global.navigator, {
+Object.assign(globalThis.navigator, {
     clipboard: {
         writeText: mockWriteText,
     },

@@ -31,8 +31,6 @@ export interface Block {
     accept?: string[];
 }
 
-/** @deprecated Use `Block` instead. Kept for backward compatibility. */
-export type SectionEntry = Block;
 
 interface HistoryEntry {
     command: { type: string; payload?: unknown };
@@ -46,12 +44,6 @@ export interface BuilderState {
     data: {
         /** Block tree — top-level blocks, each may contain children */
         blocks: Block[];
-    };
-    ui: {
-        /** 현재 선택된 요소의 builder ID */
-        selectedId: string | null;
-        /** 선택된 요소의 프로퍼티 타입 */
-        selectedType: PropertyType;
     };
     history: {
         past: HistoryEntry[];
@@ -98,21 +90,82 @@ export const INITIAL_STATE: BuilderState = {
                 fields: {
                     category: "Service Category",
                     title: "비즈니스에 최적화된\n클라우드 서비스",
-                    "item-title-0": "Server",
-                    "item-desc-0":
-                        "고성능 클라우드 서버 인프라를 \n몇 번의 클릭으로 구축하세요.",
-                    "item-title-1": "Cloud DB for Cache",
-                    "item-desc-1": "Valkey 기반의 완전 관리형 \n인메모리 캐시 서비스.",
-                    "item-title-2": "CLOVA Speech",
-                    "item-desc-2": "비즈니스 환경에 특화된 \n최고 수준의 음성 인식 기술.",
-                    "item-title-3": "Data Stream",
-                    "item-desc-3":
-                        "대용량 데이터의 실시간 수집과 \n처리를 위한 파이프라인.",
-                    "item-title-4": "Global CDN",
-                    "item-desc-4": "전 세계 사용자에게 빠르고 \n안정적인 콘텐츠 전송.",
-                    "item-title-5": "Kubernetes",
-                    "item-desc-5": "컨테이너화된 애플리케이션의 \n자동화된 배포 및 관리.",
                 },
+                accept: ["service-card"],
+                children: [
+                    {
+                        id: "ncp-services-service-card-1",
+                        type: "service-card",
+                        label: "Service Card",
+                        fields: {
+                            "item-title": "Server",
+                            "item-desc": "고성능 클라우드 서버 인프라를 \n몇 번의 클릭으로 구축하세요.",
+                            icon: "Server",
+                            color: "text-blue-600 bg-blue-50",
+                            badge: "UPDATED"
+                        }
+                    },
+                    {
+                        id: "ncp-services-service-card-2",
+                        type: "service-card",
+                        label: "Service Card",
+                        fields: {
+                            "item-title": "Cloud DB for Cache",
+                            "item-desc": "Valkey 기반의 완전 관리형 \n인메모리 캐시 서비스.",
+                            icon: "Database",
+                            color: "text-purple-600 bg-purple-50",
+                            badge: "NEW"
+                        }
+                    },
+                    {
+                        id: "ncp-services-service-card-3",
+                        type: "service-card",
+                        label: "Service Card",
+                        fields: {
+                            "item-title": "CLOVA Speech",
+                            "item-desc": "비즈니스 환경에 특화된 \n최고 수준의 음성 인식 기술.",
+                            icon: "Brain",
+                            color: "text-green-600 bg-green-50",
+                            badge: ""
+                        }
+                    },
+                    {
+                        id: "ncp-services-service-card-4",
+                        type: "service-card",
+                        label: "Service Card",
+                        fields: {
+                            "item-title": "Data Stream",
+                            "item-desc": "대용량 데이터의 실시간 수집과 \n처리를 위한 파이프라인.",
+                            icon: "Layers",
+                            color: "text-orange-600 bg-orange-50",
+                            badge: ""
+                        }
+                    },
+                    {
+                        id: "ncp-services-service-card-5",
+                        type: "service-card",
+                        label: "Service Card",
+                        fields: {
+                            "item-title": "Global CDN",
+                            "item-desc": "전 세계 사용자에게 빠르고 \n안정적인 콘텐츠 전송.",
+                            icon: "Globe",
+                            color: "text-cyan-600 bg-cyan-50",
+                            badge: ""
+                        }
+                    },
+                    {
+                        id: "ncp-services-service-card-6",
+                        type: "service-card",
+                        label: "Service Card",
+                        fields: {
+                            "item-title": "Kubernetes",
+                            "item-desc": "컨테이너화된 애플리케이션의 \n자동화된 배포 및 관리.",
+                            icon: "Box",
+                            color: "text-indigo-600 bg-indigo-50",
+                            badge: ""
+                        }
+                    }
+                ]
             },
             {
                 id: "ncp-pricing",
@@ -214,10 +267,6 @@ export const INITIAL_STATE: BuilderState = {
                 },
             },
         ],
-    },
-    ui: {
-        selectedId: null,
-        selectedType: null,
     },
     history: {
         past: [],

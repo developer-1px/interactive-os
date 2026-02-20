@@ -57,6 +57,7 @@ function createBuilderComponent(level: BuilderLevel, displayName: string) {
           ref={ref}
           data-level={level}
           data-builder-id={id}
+          {...(level === "section" ? { "data-builder-type": "section" } : {})}
         >
           {children}
         </OSItem>

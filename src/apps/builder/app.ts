@@ -7,22 +7,21 @@
  *
  * Structure:
  *   BuilderApp (defineApp)
- *     ├── Selectors: selectedId, selectedType
  *     └── Zones:
  *         ├── sidebar — collection CRUD + clipboard
- *         └── canvas — grid (updateField, selectElement)
+ *         └── canvas — grid (updateField)
  */
 
 import { produce } from "immer";
 import { defineApp } from "@/os/defineApp";
 import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
 import { os } from "@/os/kernel";
-import { type Block, type BuilderState, INITIAL_STATE, type PropertyType, type SectionEntry } from "./model/appState";
+import { type Block, type BuilderState, INITIAL_STATE, type PropertyType } from "./model/appState";
 import {
   type CollectionNode,
   findAcceptingCollection,
 } from "@/os/collection/pasteBubbling";
-export type { Block, BuilderState, PropertyType, SectionEntry };
+export type { Block, BuilderState, PropertyType };
 export { INITIAL_STATE };
 
 /** Read current builder state from kernel. */
@@ -37,19 +36,6 @@ function getBuilderState(): BuilderState {
 export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE, {
   history: true,
 });
-
-// ═══════════════════════════════════════════════════════════════════
-// Selectors (v5 branded)
-// ═══════════════════════════════════════════════════════════════════
-
-export const selectedId = BuilderApp.selector(
-  "selectedId",
-  (s) => s.ui.selectedId,
-);
-export const selectedType = BuilderApp.selector(
-  "selectedType",
-  (s) => s.ui.selectedType,
-);
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -153,27 +139,20 @@ export const updateField = canvasZone.command(
     payload: { sectionId: string; field: string; value: string },
   ) => ({
     state: produce(ctx.state, (draft) => {
-      const section = draft.data.blocks.find(
-        (s) => s.id === payload.sectionId,
-      );
-      if (section) section.fields[payload.field] = payload.value;
-    }),
-  }),
-);
-
-/**
- * selectElement — 요소 선택 상태 변경.
- * kernel focus와 동기화하여 패널에 해당 요소 데이터를 표시.
- */
-export const selectElement = canvasZone.command(
-  "selectElement",
-  (
-    ctx,
-    payload: { id: string | null; type: PropertyType },
-  ) => ({
-    state: produce(ctx.state, (draft) => {
-      draft.ui.selectedId = payload.id;
-      draft.ui.selectedType = payload.type;
+      let target: Block | null = null;
+      function traverse(blocks: Block[]) {
+        for (const b of blocks) {
+          if (b.id === payload.sectionId) {
+            target = b as Block;
+            return;
+          }
+          if (b.children) traverse(b.children);
+        }
+      }
+      traverse(draft.data.blocks as Block[]);
+      if (target) {
+        (target as Block).fields[payload.field] = payload.value;
+      }
     }),
   }),
 );
@@ -413,15 +392,24 @@ export function resolveFieldAddress(
   domId: string,
   sections: Block[],
 ): { section: Block; field: string } | null {
-  // Match the longest block id prefix
+  // Match the longest block id prefix recursively
   let best: Block | null = null;
-  for (const sec of sections) {
-    if (domId.startsWith(`${sec.id}-`)) {
-      if (!best || sec.id.length > best.id.length) best = sec;
+
+  function traverse(blocks: Block[]) {
+    for (const sec of blocks) {
+      if (domId.startsWith(`${sec.id}-`)) {
+        if (!best || sec.id.length > best.id.length) best = sec;
+      }
+      if (sec.children) {
+        traverse(sec.children);
+      }
     }
   }
+
+  traverse(sections);
   if (!best) return null;
-  return { section: best, field: domId.slice(best.id.length + 1) };
+  const bestBlock = best as Block;
+  return { section: bestBlock, field: domId.slice(bestBlock.id.length + 1) };
 }
 
 /**
@@ -448,10 +436,20 @@ export const updateFieldByDomId = canvasZone.command(
     if (!addr) return undefined;
     return {
       state: produce(ctx.state, (draft) => {
-        const section = draft.data.blocks.find(
-          (s) => s.id === addr.section.id,
-        );
-        if (section) section.fields[addr.field] = payload.value;
+        let target: Block | null = null;
+        function traverse(blocks: Block[]) {
+          for (const b of blocks) {
+            if (b.id === addr!.section.id) {
+              target = b as Block;
+              return;
+            }
+            if (b.children) traverse(b.children);
+          }
+        }
+        traverse(draft.data.blocks as Block[]);
+        if (target) {
+          (target as Block).fields[addr.field] = payload.value;
+        }
       }),
     };
   },

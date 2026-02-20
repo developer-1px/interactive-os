@@ -1,16 +1,13 @@
 /**
  * Builder unit tests — v5 native defineApp API.
  *
- * Section-scoped field model: fields live inside SectionEntry.
+ * Section-scoped field model: fields live inside Block.
  * Uses BuilderApp.create() for isolated testing (no DOM, no browser).
  */
 
 import {
   BuilderApp,
   INITIAL_STATE,
-  selectElement,
-  selectedId,
-  selectedType,
   updateField,
 } from "@apps/builder/app";
 import { describe, expect, test } from "vitest";
@@ -102,67 +99,6 @@ describe("BuilderApp (v5 native)", () => {
     });
   });
 
-  // ═══════════════════════════════════════════════════════════════════
-  // selectElement — 선택 상태 관리
-  // ═══════════════════════════════════════════════════════════════════
-
-  describe("selectElement command", () => {
-    test("요소를 선택하면 ui 상태가 갱신된다", () => {
-      const app = createApp();
-      expect(app.state.ui.selectedId).toBeNull();
-      expect(app.state.ui.selectedType).toBeNull();
-
-      app.dispatch(selectElement({ id: "ncp-hero-title", type: "text" }));
-      expect(app.state.ui.selectedId).toBe("ncp-hero-title");
-      expect(app.state.ui.selectedType).toBe("text");
-    });
-
-    test("null로 선택 해제할 수 있다", () => {
-      const app = createApp();
-      app.dispatch(selectElement({ id: "ncp-hero-title", type: "text" }));
-      app.dispatch(selectElement({ id: null, type: null }));
-      expect(app.state.ui.selectedId).toBeNull();
-      expect(app.state.ui.selectedType).toBeNull();
-    });
-
-    test("다른 요소로 전환하면 이전 선택이 덮어씌워진다", () => {
-      const app = createApp();
-      app.dispatch(selectElement({ id: "ncp-hero-title", type: "text" }));
-      app.dispatch(selectElement({ id: "ncp-hero-cta", type: "button" }));
-      expect(app.state.ui.selectedId).toBe("ncp-hero-cta");
-      expect(app.state.ui.selectedType).toBe("button");
-    });
-
-    test("section 타입도 선택 가능하다", () => {
-      const app = createApp();
-      app.dispatch(selectElement({ id: "ncp-hero", type: "section" }));
-      expect(app.state.ui.selectedType).toBe("section");
-    });
-  });
-
-  // ═══════════════════════════════════════════════════════════════════
-  // Selectors (v5 branded)
-  // ═══════════════════════════════════════════════════════════════════
-
-  describe("selectors", () => {
-    test("selectedId returns null initially", () => {
-      const app = createApp();
-      expect(app.select(selectedId)).toBeNull();
-    });
-
-    test("selectedId reflects selectElement", () => {
-      const app = createApp();
-      app.dispatch(selectElement({ id: "test-id", type: "text" }));
-      expect(app.select(selectedId)).toBe("test-id");
-    });
-
-    test("selectedType reflects selectElement", () => {
-      const app = createApp();
-      expect(app.select(selectedType)).toBeNull();
-      app.dispatch(selectElement({ id: "test-id", type: "image" }));
-      expect(app.select(selectedType)).toBe("image");
-    });
-  });
 
   // ═══════════════════════════════════════════════════════════════════
   // 양방향 동기화 증명 — 캔버스 = 패널 = 같은 커맨드
@@ -204,14 +140,12 @@ describe("BuilderApp (v5 native)", () => {
       app.dispatch(
         updateField({ sectionId: "ncp-hero", field: "title", value: "변경됨" }),
       );
-      app.dispatch(selectElement({ id: "some-id", type: "text" }));
 
       app.reset();
 
       expect(getField(app, "ncp-hero", "title")).toBe(
         INITIAL_STATE.data.blocks[0]!.fields["title"],
       );
-      expect(app.state.ui.selectedId).toBeNull();
     });
 
     test("모든 NCP 블록 필드가 초기값으로 등록되어 있다", () => {
@@ -232,7 +166,7 @@ describe("BuilderApp (v5 native)", () => {
       // Services (id="ncp-services")
       const services = sections.find((s) => s.id === "ncp-services")!;
       expect(services.fields["title"]).toBeDefined();
-      expect(services.fields["item-title-0"]).toBeDefined();
+      expect(services.children![0]!.fields["item-title"]).toBeDefined();
 
       // Footer (id="ncp-footer")
       const footer = sections.find((s) => s.id === "ncp-footer")!;
@@ -240,11 +174,6 @@ describe("BuilderApp (v5 native)", () => {
       expect(footer.fields["desc"]).toBeDefined();
     });
 
-    test("초기 선택 상태는 비어 있다", () => {
-      const app = createApp();
-      expect(app.state.ui.selectedId).toBeNull();
-      expect(app.state.ui.selectedType).toBeNull();
-    });
   });
 
   // ═══════════════════════════════════════════════════════════════════
