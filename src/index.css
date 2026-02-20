@@ -13,9 +13,9 @@
   scroll-margin-inline: 5vw;
 }
 
-/* BuilderCursor provides visual focus — suppress native ring */
-[data-item-id]:focus,
-[data-item-id]:focus-visible {
+/* BuilderCursor provides visual focus — suppress native ring in canvas only */
+#canvas [data-item-id]:focus,
+#canvas [data-item-id]:focus-visible {
   outline: none !important;
   box-shadow: none;
 }
