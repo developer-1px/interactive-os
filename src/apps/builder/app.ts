@@ -56,7 +56,7 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 // Sidebar Zone — Collection Zone Facade
 // ═══════════════════════════════════════════════════════════════════
 
-import { createCollectionZone } from "@/os/collection/createCollectionZone";
+import { createCollectionZone, _getClipboardPreview } from "@/os/collection/createCollectionZone";
 import { OS_EXPAND } from "@/os/3-commands/expand/index";
 
 /** Recursively clone a block tree, assigning new IDs to all descendants. */
@@ -177,19 +177,107 @@ import {
 } from "@/apps/builder/features/hierarchicalNavigation";
 
 const CANVAS_ZONE_ID = "canvas";
+/**
+ * Canvas clipboard — uses pasteBubbling to find the right collection.
+ *
+ * Architecture:
+ *   onCopy/onCut: find nearest dynamic ancestor of focused item → copy that
+ *   onPaste: findAcceptingCollection → sidebarCollection.paste (tree-aware)
+ */
+import {
+  type CollectionNode,
+  findAcceptingCollection,
+} from "@/os/collection/pasteBubbling";
+import { findInTree } from "@/os/collection/treeUtils";
+
+/** Build collection hierarchy from current block tree for paste bubbling. */
+function buildCanvasCollections(): CollectionNode[] {
+  const state = os.getState().apps["builder"] as BuilderState;
+  const blocks = state.data.blocks;
+
+  const nodes: CollectionNode[] = [
+    // Root: section collection
+    {
+      id: "sidebar",
+      parentId: null,
+      accept: (data: unknown) => {
+        // Accept any block (section-level paste always works)
+        if (data && typeof data === "object" && "id" in data) return data;
+        return null;
+      },
+      containsItem: (itemId: string) =>
+        blocks.some((b) => b.id === itemId),
+    },
+  ];
+
+  // Dynamic child collections: blocks with accept + children
+  for (const block of blocks) {
+    if (block.accept && block.children) {
+      nodes.push({
+        id: `${block.id}:children`,
+        parentId: "sidebar",
+        accept: (data: unknown) => {
+          const d = data as { type?: string };
+          if (d?.type && block.accept!.includes(d.type)) return data;
+          return null;
+        },
+        containsItem: (itemId: string) =>
+          block.children!.some((c) => c.id === itemId),
+      });
+
+      // Nested: children with their own accept
+      for (const child of block.children) {
+        if (child.accept && child.children) {
+          nodes.push({
+            id: `${child.id}:children`,
+            parentId: `${block.id}:children`,
+            accept: (data: unknown) => {
+              const d = data as { type?: string };
+              if (d?.type && child.accept!.includes(d.type)) return data;
+              return null;
+            },
+            containsItem: (itemId: string) =>
+              child.children!.some((c) => c.id === itemId),
+          });
+        }
+      }
+    }
+  }
+
+  return nodes;
+}
 
 /**
- * Canvas clipboard — bubbles focused item up to parent section,
- * then delegates to sidebarCollection commands.
- * Same data, same commands, different view.
+ * Resolve which block to copy/cut from the canvas focus.
+ * Walks up from the focused item to the nearest dynamic collection item.
  */
-function resolveCanvasSectionId(focusId: string): string | null {
+function resolveCanvasCopyTarget(focusId: string): string | null {
   const state = os.getState().apps["builder"] as BuilderState;
-  // Direct match: focused on a section itself
-  if (state.data.blocks.some((b: Block) => b.id === focusId)) return focusId;
-  // Otherwise: find parent section via prefix matching (ncp-hero-title → ncp-hero)
-  const addr = resolveFieldAddress(focusId, state.data.blocks);
-  return addr?.section.id ?? null;
+  const blocks = state.data.blocks;
+
+  // Direct match: focused on a root block
+  if (blocks.some((b) => b.id === focusId)) return focusId;
+
+  // Check if it's a child of a container block
+  for (const block of blocks) {
+    if (block.children?.some((c) => c.id === focusId)) return focusId;
+    if (block.children) {
+      for (const child of block.children) {
+        if (child.children?.some((gc) => gc.id === focusId)) return focusId;
+      }
+    }
+  }
+
+  // Otherwise: find parent section via prefix matching
+  const addr = resolveFieldAddress(focusId, blocks);
+  if (addr) {
+    // Check if addr.section has children with prefix-matched children
+    const fieldNode = findInTree(blocks as any[], focusId);
+    if (fieldNode) return (fieldNode as Block).id;
+    return addr.section.id;
+  }
+
+  return null;
 }
 
 export const BuilderCanvasUI = canvasZone.bind({
@@ -198,18 +286,31 @@ export const BuilderCanvasUI = canvasZone.bind({
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   onCopy: (cursor) => {
-    const sectionId = resolveCanvasSectionId(cursor.focusId);
-    if (!sectionId) return [];
-    return sidebarCollection.copy({ ids: [sectionId] });
+    const targetId = resolveCanvasCopyTarget(cursor.focusId);
+    if (!targetId) return [];
+    return sidebarCollection.copy({ ids: [targetId] });
   },
   onCut: (cursor) => {
-    const sectionId = resolveCanvasSectionId(cursor.focusId);
-    if (!sectionId) return [];
-    return sidebarCollection.cut({ ids: [sectionId], focusId: sectionId });
+    const targetId = resolveCanvasCopyTarget(cursor.focusId);
+    if (!targetId) return [];
+    return sidebarCollection.cut({ ids: [targetId], focusId: targetId });
   },
   onPaste: (cursor) => {
-    const sectionId = resolveCanvasSectionId(cursor.focusId);
-    return sidebarCollection.paste({ afterId: sectionId ?? "" });
+    const collections = buildCanvasCollections();
+    // Read clipboard data for type-checking (imported from createCollectionZone)
+    const clipData = _getClipboardPreview();
+    if (!clipData) return [];
+
+    const bubbleResult = findAcceptingCollection(
+      cursor.focusId,
+      clipData,
+      collections,
+    );
+    if (!bubbleResult) return []; // No collection accepts → no-op
+
+    // Tree-aware paste: sidebarCollection.paste handles insertChild
+    const targetId = resolveCanvasCopyTarget(cursor.focusId);
+    return sidebarCollection.paste({ afterId: targetId ?? "" });
   },
   options: {
     navigate: { orientation: "corner" },

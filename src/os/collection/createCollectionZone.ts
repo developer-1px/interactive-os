@@ -45,6 +45,11 @@ export function _resetClipboardStore(): void {
   _clipboardStore = { source: "", items: [], isCut: false };
 }
 
+/** @internal Read clipboard first item for paste bubbling accept check */
+export function _getClipboardPreview(): unknown | null {
+  return _clipboardStore.items[0] ?? null;
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // createCollectionZone
 // ═══════════════════════════════════════════════════════════════════
