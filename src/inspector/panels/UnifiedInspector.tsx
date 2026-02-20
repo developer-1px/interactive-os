@@ -198,7 +198,7 @@ export function UnifiedInspector({
   // ── Discord/Slack-style auto-scroll ──
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isUserScrolled, setIsUserScrolled] = useState(false);
-  const prevTxCount = useRef(transactions.length);
+  const prevLatestId = useRef<number | undefined>(undefined);
 
   const isAtBottom = useCallback(() => {
     const el = scrollRef.current;
@@ -217,19 +217,30 @@ export function UnifiedInspector({
     setIsUserScrolled(!isAtBottom());
   }, [isAtBottom]);
 
-  // Auto-scroll logic
+  // Auto-scroll when a NEW transaction arrives (not on filter change)
   useEffect(() => {
-    if (filteredTx.length > prevTxCount.current) {
-      if (!isUserScrolled && !searchQuery) {
-        requestAnimationFrame(() => {
-          const el = scrollRef.current;
-          if (!el) return;
+    if (latestTxId === undefined || latestTxId === prevLatestId.current) return;
+    prevLatestId.current = latestTxId;
+
+    if (isUserScrolled || searchQuery) return;
+
+    // Double rAF: first waits for React commit, second waits for layout
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        // Find the last rendered node and scroll it into view
+        const lastNode = el.querySelector(
+          `[data-tx-index="${filteredTx.length - 1}"]`,
+        );
+        if (lastNode) {
+          lastNode.scrollIntoView({ block: "end", behavior: "auto" });
+        } else {
           el.scrollTop = el.scrollHeight;
-        });
-      }
-    }
-    prevTxCount.current = filteredTx.length;
-  }, [filteredTx.length, isUserScrolled, searchQuery]);
+        }
+      });
+    });
+  }, [latestTxId, isUserScrolled, searchQuery, filteredTx.length]);
 
   const toggle = (id: number) => {
     setManualToggles((prev) => {
@@ -305,10 +316,11 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
-                    ? "bg-[#1e293b] text-white border-[#1e293b]"
-                    : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                    }`}
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
+                    active
+                      ? "bg-[#1e293b] text-white border-[#1e293b]"
+                      : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                  }`}
                 >
                   {group}
                 </button>
@@ -591,9 +603,7 @@ function TimelineNode({
           {/* ── Effects + Kernel: inline summary ── */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[8px] text-[#94a3b8] font-mono">
             {effects.length > 0 && (
-              <span title={effects.join(", ")}>
-                fx: {effects.join(", ")}
-              </span>
+              <span title={effects.join(", ")}>fx: {effects.join(", ")}</span>
             )}
             {tx.handlerScope && tx.handlerScope !== "unknown" && (
               <span>scope: {tx.handlerScope}</span>
