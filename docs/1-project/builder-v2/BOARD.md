@@ -5,14 +5,15 @@
 
 ## 🔴 Now
 
-- (다음 태스크 선정 대기)
-
-## 🟡 Next
-
-- [ ] T11: 사이드바 트리 뷰 — Block Tree의 시각적 투영
-  - [ ] indent + collapse/expand
-  - [ ] ARIA treeitem + aria-expanded
-  - [ ] 키보드: ← 접기, → 펼치기
+- [ ] T12: Collection Zone v2 — Minimal Facade 리팩토링
+  - [ ] Clipboard → OS state로 이동 (글로벌 단일)
+  - [ ] `text` 기본값 체인 (`label → text → id`)
+  - [ ] `accept` 기반 타입 매칭 (같은 collection 자동 수락)
+  - [ ] `fromText` 선택적 ingress hook
+  - [ ] deep clone 자동 감지 (`children`)
+  - [ ] `extractId` Convention (`{zoneName}-`)
+  - [ ] undo/redo 자동 포함
+  - Discussion: [collection-zone-v2-facade](discussions/2026-0220-1306-collection-zone-v2-facade.md)
 
 - [ ] T4: 블록 타입별 패널 폼 E2E
 - [ ] T5: 블록 드래그 정렬 UI
@@ -30,7 +31,9 @@
 
 ## ⏳ Done
 
-- [x] T11: 사이드바 트리 뷰 — Block Tree의 시각적 투영
+- [x] T11-b: Deep clone fix — Copy/paste children ID 재생성
+  - `deepCloneBlock()` 재귀 헬퍼, `onClone` + `onPaste` 양쪽 적용
+  - 테스트 기대값 수정 (5+3=8), container children uniqueness 테스트 추가
   - indent(16px/depth) + collapse/expand chevron + leaf dot
   - flattenBlocks() 재귀 순회, 캔버스 포커스 동기화 유지
 - [x] T10: Builder.Tabs 구조 프리미티브 + NCPPricingBlock
