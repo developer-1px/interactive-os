@@ -273,18 +273,18 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       return {
         state: clipCfg
           ? produce(ctx.state, (draft) => {
-              const clipData = {
-                items: found.map((t) => ({ ...t })),
-                isCut: false as const,
-              };
-              clipCfg.set(draft as S, clipData);
-            })
+            const clipData = {
+              items: found.map((t) => ({ ...t })),
+              isCut: false as const,
+            };
+            clipCfg.set(draft as S, clipData);
+          })
           : ctx.state,
         clipboardWrite: clipCfg
           ? {
-              text: clipCfg.toText(found),
-              json: JSON.stringify(found),
-            }
+            text: clipCfg.toText(found),
+            json: JSON.stringify(found),
+          }
           : undefined,
       };
     },
@@ -361,9 +361,9 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         dispatch: focusCmd,
         clipboardWrite: clipCfg
           ? {
-              text: clipCfg.toText(found),
-              json: JSON.stringify(found),
-            }
+            text: clipCfg.toText(found),
+            json: JSON.stringify(found),
+          }
           : undefined,
       };
     },
@@ -389,11 +389,12 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         for (let i = 0; i < clip.items.length; i++) {
           const source = clip.items[i]!;
           const newId = uid();
-          pastedIds.push(newId);
           let newItem = { ...source, id: newId } as T;
           if (clipCfg.onPaste) {
             newItem = clipCfg.onPaste(newItem, ctx.state);
           }
+          // Capture final ID AFTER onPaste — it may override the generated id
+          pastedIds.push(newItem.id);
           ops.insertAfter(draft as S, insertIdx + i, newItem);
         }
       });

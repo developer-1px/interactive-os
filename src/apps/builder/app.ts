@@ -102,6 +102,7 @@ export const renameSectionLabel = sidebarCollection.command(
 
 // Bind with auto-wired CRUD + custom options
 const collectionBindings = sidebarCollection.collectionBindings();
+export { sidebarCollection };
 export const BuilderSidebarUI = sidebarCollection.bind({
   role: "listbox",
   ...collectionBindings,
