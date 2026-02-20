@@ -304,55 +304,61 @@ function getStaticItemTextValue(focusId: string): string | null {
   return addr.section.fields[addr.field] ?? null;
 }
 
+export const canvasOnCopy = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
+  if (isDynamicItem(cursor.focusId)) {
+    // Dynamic item → structural copy (section/card/tab)
+    return sidebarCollection.copy({ ids: [cursor.focusId] });
+  }
+  // Static item → copy field text value directly to system clipboard & internal store
+  const text = getStaticItemTextValue(cursor.focusId);
+  if (text) {
+    navigator.clipboard.writeText(text).catch(() => { });
+    _setTextClipboardStore(text);
+  }
+  return [];
+};
+
+export const canvasOnCut = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
+  if (isDynamicItem(cursor.focusId)) {
+    // Dynamic item → structural cut
+    return sidebarCollection.cut({ ids: [cursor.focusId], focusId: cursor.focusId });
+  }
+  // Static item → no-op (can't cut template slots)
+  return [];
+};
+
+export const canvasOnPaste = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
+  const collections = buildCanvasCollections();
+  // Read clipboard data for type-checking (imported from createCollectionZone)
+  const clipData = _getClipboardPreview();
+  if (!clipData) return [];
+
+  // Static item text paste handling
+  if ((clipData as { type?: string }).type === "text" && !isDynamicItem(cursor.focusId)) {
+    // It's a static text paste onto a static item (field)
+    return [updateFieldByDomId({ domId: cursor.focusId, value: (clipData as { value: string }).value })];
+  }
+
+  const bubbleResult = findAcceptingCollection(
+    cursor.focusId,
+    clipData,
+    collections,
+  );
+  if (!bubbleResult) return []; // No collection accepts → no-op
+
+  // Tree-aware paste: sidebarCollection.paste handles insertChild
+  const targetId = resolveCanvasCopyTarget(cursor.focusId);
+  return sidebarCollection.paste({ afterId: targetId ?? "" });
+};
+
 export const BuilderCanvasUI = canvasZone.bind({
   role: "grid",
   onAction: createDrillDown(CANVAS_ZONE_ID),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
-  onCopy: (cursor) => {
-    if (isDynamicItem(cursor.focusId)) {
-      // Dynamic item → structural copy (section/card/tab)
-      return sidebarCollection.copy({ ids: [cursor.focusId] });
-    }
-    // Static item → copy field text value directly to system clipboard & internal store
-    const text = getStaticItemTextValue(cursor.focusId);
-    if (text) {
-      navigator.clipboard.writeText(text).catch(() => { });
-      _setTextClipboardStore(text);
-    }
-    return [];
-  },
-  onCut: (cursor) => {
-    if (isDynamicItem(cursor.focusId)) {
-      // Dynamic item → structural cut
-      return sidebarCollection.cut({ ids: [cursor.focusId], focusId: cursor.focusId });
-    }
-    // Static item → no-op (can't cut template slots)
-    return [];
-  },
-  onPaste: (cursor) => {
-    const collections = buildCanvasCollections();
-    // Read clipboard data for type-checking (imported from createCollectionZone)
-    const clipData = _getClipboardPreview();
-    if (!clipData) return [];
-
-    // Static item text paste handling
-    if ((clipData as { type?: string }).type === "text" && !isDynamicItem(cursor.focusId)) {
-      // It's a static text paste onto a static item (field)
-      return [updateFieldByDomId({ domId: cursor.focusId, value: (clipData as { value: string }).value })];
-    }
-
-    const bubbleResult = findAcceptingCollection(
-      cursor.focusId,
-      clipData,
-      collections,
-    );
-    if (!bubbleResult) return []; // No collection accepts → no-op
-
-    // Tree-aware paste: sidebarCollection.paste handles insertChild
-    const targetId = resolveCanvasCopyTarget(cursor.focusId);
-    return sidebarCollection.paste({ afterId: targetId ?? "" });
-  },
+  onCopy: canvasOnCopy,
+  onCut: canvasOnCut,
+  onPaste: canvasOnPaste,
   options: {
     navigate: { orientation: "corner" },
     tab: { behavior: "trap" },
