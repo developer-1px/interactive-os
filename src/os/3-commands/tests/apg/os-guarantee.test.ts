@@ -188,7 +188,7 @@ describe("OS Guarantee §3: Multi-Select + Operation", () => {
 
         // RECOVER returns nothing when no items → focus unchanged
         // But the focused item no longer exists, so it should be effectively null
-        const focus = t.focusedItemId();
+        t.focusedItemId();
         // Either null or the old value pointing at a deleted item
         // This tests that OS doesn't crash, not specific target
         expect(t.selection()).toEqual([]);

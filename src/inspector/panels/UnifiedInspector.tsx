@@ -315,10 +315,11 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
+                    active
                       ? "bg-[#1e293b] text-white border-[#1e293b]"
                       : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                    }`}
+                  }`}
                 >
                   {group}
                 </button>
@@ -591,20 +592,10 @@ function TimelineNode({
                       {(d.from !== undefined || d.to !== undefined) && (
                         <div className="flex flex-col gap-[1px] ml-1 mt-0.5 border-l-2 border-[#e2e8f0] pl-1.5">
                           {d.from !== undefined && (
-                            <div className="text-[#b91c1c] bg-[#fef2f2] px-1 py-0.5 rounded-sm whitespace-pre-wrap break-all border border-[#fecaca]">
-                              -{" "}
-                              {typeof d.from === "object"
-                                ? JSON.stringify(d.from, null, 2)
-                                : String(d.from)}
-                            </div>
+                            <DiffValue value={d.from} type="removed" />
                           )}
                           {d.to !== undefined && (
-                            <div className="text-[#15803d] bg-[#f0fdf4] px-1 py-0.5 rounded-sm whitespace-pre-wrap break-all border border-[#bbf7d0]">
-                              +{" "}
-                              {typeof d.to === "object"
-                                ? JSON.stringify(d.to, null, 2)
-                                : String(d.to)}
-                            </div>
+                            <DiffValue value={d.to} type="added" />
                           )}
                         </div>
                       )}
@@ -697,3 +688,53 @@ function Section({
   );
 }
 
+function DiffValue({
+  value,
+  type,
+}: {
+  value: unknown;
+  type: "removed" | "added";
+}) {
+  const str =
+    typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
+  const lines = str.split("\n");
+  const isLarge = lines.length > 7 || str.length > 150;
+
+  const prefix = type === "removed" ? "-" : "+";
+  const colorClass =
+    type === "removed"
+      ? "text-[#b91c1c] bg-[#fef2f2] border-[#fecaca]"
+      : "text-[#15803d] bg-[#f0fdf4] border-[#bbf7d0]";
+
+  if (!isLarge) {
+    return (
+      <div
+        className={`px-1 py-0.5 rounded-sm whitespace-pre-wrap break-all border ${colorClass}`}
+      >
+        {prefix} {str}
+      </div>
+    );
+  }
+
+  const summaryText =
+    typeof value === "object" && value !== null
+      ? Array.isArray(value)
+        ? `Array(${value.length})`
+        : `Object { ... }`
+      : "Long String ...";
+
+  return (
+    <details className={`px-1 py-0.5 rounded-sm border ${colorClass} group`}>
+      <summary className="cursor-pointer outline-none flex items-center select-none list-none text-[9.5px]">
+        <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
+          <span className="shrink-0 font-bold">{prefix}</span>
+          <span className="group-open:hidden italic">{summaryText}</span>
+          <span className="hidden group-open:inline italic">Collapse</span>
+        </div>
+      </summary>
+      <div className="mt-1 whitespace-pre-wrap break-all text-[9.5px] border-t border-black/10 pt-1">
+        {str}
+      </div>
+    </details>
+  );
+}
