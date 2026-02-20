@@ -14,7 +14,7 @@ import {
   beginTransaction,
   endTransaction,
 } from "../../middlewares/historyKernelMiddleware";
-import { SELECTION_CLEAR } from "../selection/selection";
+import { OS_SELECTION_CLEAR } from "../selection/selection";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 export const OS_DELETE = os.defineCommand("OS_DELETE", (ctx) => () => {
@@ -34,7 +34,7 @@ export const OS_DELETE = os.defineCommand("OS_DELETE", (ctx) => () => {
   // Wrap in transaction for single-undo, then clear selection
   if (cursor.selection.length > 0) {
     beginTransaction();
-    commands.push(SELECTION_CLEAR({ zoneId: activeZoneId }));
+    commands.push(OS_SELECTION_CLEAR({ zoneId: activeZoneId }));
     queueMicrotask(endTransaction);
   }
 

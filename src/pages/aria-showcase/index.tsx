@@ -933,7 +933,7 @@ function DialogDemo({
 
   const handleClose = useCallback(() => {
     onClose();
-    // Defer focus restore to after dialog unmount + STACK_POP cleanup.
+    // Defer focus restore to after dialog unmount + OS_STACK_POP cleanup.
     // setTimeout(0) runs after React's synchronous useLayoutEffect cleanup
     // but is more reliable than double-rAF which can race with effects.
     setTimeout(() => {
@@ -1026,7 +1026,7 @@ function AlertDialogDemo({
 
   const handleClose = useCallback(() => {
     onClose();
-    // Defer focus restore to after dialog unmount + STACK_POP cleanup.
+    // Defer focus restore to after dialog unmount + OS_STACK_POP cleanup.
     setTimeout(() => {
       triggerRef.current?.focus();
     }, 0);

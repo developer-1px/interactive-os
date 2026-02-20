@@ -92,7 +92,7 @@ describe("APG Toolbar: Tab Escape", () => {
                 lastFocusedId: null,
             },
         ]);
-        t.dispatch(t.TAB({ direction: "forward" }));
+        t.dispatch(t.OS_TAB({ direction: "forward" }));
         expect(t.activeZoneId()).toBe("editor");
     });
 });
@@ -121,24 +121,24 @@ describe("APG Toolbar: Tabs Variant", () => {
             },
         });
         t.setActiveZone("tablist", focusedTab);
-        t.dispatch(t.SELECT({ targetId: focusedTab, mode: "replace" }));
+        t.dispatch(t.OS_SELECT({ targetId: focusedTab, mode: "replace" }));
         return t;
     }
 
     it("auto-activation: navigation selects tab", () => {
         const t = createTabs("tab-general");
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
         expect(t.focusedItemId()).toBe("tab-security");
         expect(t.selection()).toEqual(["tab-security"]);
     });
 
     it("full cycle: selection follows each navigation", () => {
         const t = createTabs("tab-general");
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
         expect(t.selection()).toEqual(["tab-security"]);
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
         expect(t.selection()).toEqual(["tab-advanced"]);
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
         expect(t.selection()).toEqual(["tab-general"]);
     });
 });

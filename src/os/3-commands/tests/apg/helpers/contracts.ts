@@ -21,7 +21,7 @@ export function assertVerticalNav(factory: Factory) {
     it("Down Arrow: moves focus to next item", () => {
         const t = factory();
         const first = t.focusedItemId()!;
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.focusedItemId()).not.toBe(first);
     });
 
@@ -29,8 +29,8 @@ export function assertVerticalNav(factory: Factory) {
         const t = factory();
         // Move down first, then up should return
         const first = t.focusedItemId()!;
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        t.dispatch(t.NAVIGATE({ direction: "up" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
         expect(t.focusedItemId()).toBe(first);
     });
 }
@@ -40,15 +40,15 @@ export function assertHorizontalNav(factory: Factory) {
     it("Right Arrow: moves focus to next item", () => {
         const t = factory();
         const first = t.focusedItemId()!;
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
         expect(t.focusedItemId()).not.toBe(first);
     });
 
     it("Left Arrow: moves focus to previous item", () => {
         const t = factory();
         const first = t.focusedItemId()!;
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
-        t.dispatch(t.NAVIGATE({ direction: "left" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "left" }));
         expect(t.focusedItemId()).toBe(first);
     });
 }
@@ -68,18 +68,18 @@ export function assertBoundaryClamp(
     it(`${fwd} at last item: focus stays`, () => {
         const t = factory();
         // Navigate to last
-        for (let i = 0; i < 20; i++) t.dispatch(t.NAVIGATE({ direction: fwd }));
+        for (let i = 0; i < 20; i++) t.dispatch(t.OS_NAVIGATE({ direction: fwd }));
         expect(t.focusedItemId()).toBe(opts.lastId);
-        t.dispatch(t.NAVIGATE({ direction: fwd }));
+        t.dispatch(t.OS_NAVIGATE({ direction: fwd }));
         expect(t.focusedItemId()).toBe(opts.lastId);
     });
 
     it(`${bwd} at first item: focus stays`, () => {
         const t = factory();
         // Navigate to first
-        for (let i = 0; i < 20; i++) t.dispatch(t.NAVIGATE({ direction: bwd }));
+        for (let i = 0; i < 20; i++) t.dispatch(t.OS_NAVIGATE({ direction: bwd }));
         expect(t.focusedItemId()).toBe(opts.firstId);
-        t.dispatch(t.NAVIGATE({ direction: bwd }));
+        t.dispatch(t.OS_NAVIGATE({ direction: bwd }));
         expect(t.focusedItemId()).toBe(opts.firstId);
     });
 }
@@ -102,14 +102,14 @@ export function assertLoop(
     it(`${fwd} at last item: wraps to first`, () => {
         const t = opts.factoryAtLast();
         expect(t.focusedItemId()).toBe(opts.lastId);
-        t.dispatch(t.NAVIGATE({ direction: fwd }));
+        t.dispatch(t.OS_NAVIGATE({ direction: fwd }));
         expect(t.focusedItemId()).toBe(opts.firstId);
     });
 
     it(`${bwd} at first item: wraps to last`, () => {
         const t = opts.factoryAtFirst();
         expect(t.focusedItemId()).toBe(opts.firstId);
-        t.dispatch(t.NAVIGATE({ direction: bwd }));
+        t.dispatch(t.OS_NAVIGATE({ direction: bwd }));
         expect(t.focusedItemId()).toBe(opts.lastId);
     });
 }
@@ -122,13 +122,13 @@ export function assertHomeEnd(
 ) {
     it("Home: moves to first item", () => {
         const t = factory();
-        t.dispatch(t.NAVIGATE({ direction: "home" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "home" }));
         expect(t.focusedItemId()).toBe(opts.firstId);
     });
 
     it("End: moves to last item", () => {
         const t = factory();
-        t.dispatch(t.NAVIGATE({ direction: "end" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "end" }));
         expect(t.focusedItemId()).toBe(opts.lastId);
     });
 }
@@ -148,14 +148,14 @@ export function assertOrthogonalIgnored(
     it(`${d1} Arrow: no effect`, () => {
         const t = factory();
         const before = t.focusedItemId();
-        t.dispatch(t.NAVIGATE({ direction: d1 }));
+        t.dispatch(t.OS_NAVIGATE({ direction: d1 }));
         expect(t.focusedItemId()).toBe(before);
     });
 
     it(`${d2} Arrow: no effect`, () => {
         const t = factory();
         const before = t.focusedItemId();
-        t.dispatch(t.NAVIGATE({ direction: d2 }));
+        t.dispatch(t.OS_NAVIGATE({ direction: d2 }));
         expect(t.focusedItemId()).toBe(before);
     });
 }
@@ -166,7 +166,7 @@ export function assertOrthogonalIgnored(
 export function assertFollowFocus(factory: Factory) {
     it("selection follows focus on navigation", () => {
         const t = factory();
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         const focused = t.focusedItemId()!;
         expect(t.selection()).toEqual([focused]);
     });
@@ -178,8 +178,8 @@ export function assertFollowFocus(factory: Factory) {
 export function assertNoSelection(factory: Factory) {
     it("navigation does not create selection", () => {
         const t = factory();
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.selection()).toEqual([]);
     });
 }
@@ -190,20 +190,20 @@ export function assertNoSelection(factory: Factory) {
 export function assertEscapeClose(factory: Factory) {
     it("Escape: closes popup (clears active zone)", () => {
         const t = factory();
-        t.dispatch(t.ESCAPE());
+        t.dispatch(t.OS_ESCAPE());
         expect(t.activeZoneId()).toBeNull();
     });
 }
 
-/** Tests ESCAPE + STACK_POP restores focus to invoker */
+/** Tests OS_ESCAPE + OS_STACK_POP restores focus to invoker */
 export function assertFocusRestore(
     factory: Factory,
     opts: { invokerZoneId: string; invokerItemId: string },
 ) {
-    it("Escape + STACK_POP: restores focus to invoker", () => {
+    it("Escape + OS_STACK_POP: restores focus to invoker", () => {
         const t = factory();
-        t.dispatch(t.ESCAPE());
-        t.dispatch(t.STACK_POP());
+        t.dispatch(t.OS_ESCAPE());
+        t.dispatch(t.OS_STACK_POP());
         expect(t.activeZoneId()).toBe(opts.invokerZoneId);
         expect(t.focusedItemId(opts.invokerZoneId)).toBe(opts.invokerItemId);
     });
@@ -224,14 +224,14 @@ export function assertTabTrap(
     it("Tab at last: wraps to first (focus trap)", () => {
         const t = (opts.factoryAtLast ?? factory)();
         expect(t.focusedItemId()).toBe(opts.lastId);
-        t.dispatch(t.TAB({ direction: "forward" }));
+        t.dispatch(t.OS_TAB({ direction: "forward" }));
         expect(t.focusedItemId()).toBe(opts.firstId);
     });
 
     it("Shift+Tab at first: wraps to last (focus trap)", () => {
         const t = (opts.factoryAtFirst ?? factory)();
         expect(t.focusedItemId()).toBe(opts.firstId);
-        t.dispatch(t.TAB({ direction: "backward" }));
+        t.dispatch(t.OS_TAB({ direction: "backward" }));
         expect(t.focusedItemId()).toBe(opts.lastId);
     });
 }

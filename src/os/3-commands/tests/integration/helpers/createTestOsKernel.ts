@@ -9,7 +9,7 @@
  *   const t = createTestOsKernel();
  *   t.setItems(["a", "b", "c"]);
  *   t.setActiveZone("list", "a");
- *   t.dispatch(t.NAVIGATE({ direction: "down" }));
+ *   t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
  *   expect(t.focusedItemId()).toBe("b");
  */
 
@@ -23,18 +23,18 @@ import { ensureZone } from "@os/state/utils";
 import { produce } from "immer";
 
 // Production commands — registered on test kernel via kernel.register()
-import { FOCUS as prodFOCUS } from "../../../focus/focus";
-import { STACK_POP as prodSTACK_POP } from "../../../focus/stack";
-import { STACK_PUSH as prodSTACK_PUSH } from "../../../focus/stack";
-import { SYNC_FOCUS as prodSYNC_FOCUS } from "../../../focus/syncFocus";
-import { RECOVER as prodRECOVER } from "../../../focus/recover";
-import { NAVIGATE as prodNAVIGATE } from "../../../navigate";
-import { ESCAPE as prodESCAPE } from "../../../dismiss/escape";
-import { SELECT as prodSELECT } from "../../../selection/select";
-import { SELECTION_CLEAR as prodSELECTION_CLEAR } from "../../../selection/selection";
-import { TAB as prodTAB } from "../../../tab/tab";
-import { EXPAND as prodEXPAND } from "../../../expand/index";
-import { FIELD_START_EDIT as prodFIELD_START_EDIT } from "../../../field/field";
+import { OS_FOCUS as prodOS_FOCUS } from "../../../focus/focus";
+import { OS_STACK_POP as prodSTACK_POP } from "../../../focus/stack";
+import { OS_STACK_PUSH as prodSTACK_PUSH } from "../../../focus/stack";
+import { OS_SYNC_FOCUS as prodSYNC_FOCUS } from "../../../focus/syncFocus";
+import { OS_RECOVER as prodOS_RECOVER } from "../../../focus/recover";
+import { OS_NAVIGATE as prodNAVIGATE } from "../../../navigate";
+import { OS_ESCAPE as prodOS_ESCAPE } from "../../../dismiss/escape";
+import { OS_SELECT as prodOS_SELECT } from "../../../selection/select";
+import { OS_SELECTION_CLEAR as prodSELECTION_CLEAR } from "../../../selection/selection";
+import { OS_TAB as prodOS_TAB } from "../../../tab/tab";
+import { OS_EXPAND as prodEXPAND } from "../../../expand/index";
+import { OS_FIELD_START_EDIT as prodFIELD_START_EDIT } from "../../../field/field";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -96,18 +96,18 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
   kernel.defineContext("dom-zone-order", () => mockZoneOrder.current);
 
   // ─── Register production commands (no duplication) ───
-  const FOCUS = kernel.register(prodFOCUS);
-  const SYNC_FOCUS = kernel.register(prodSYNC_FOCUS);
-  const RECOVER = kernel.register(prodRECOVER);
-  const SELECT = kernel.register(prodSELECT);
-  const SELECTION_CLEAR = kernel.register(prodSELECTION_CLEAR);
-  const NAVIGATE = kernel.register(prodNAVIGATE);
-  const TAB = kernel.register(prodTAB);
-  const ESCAPE = kernel.register(prodESCAPE);
-  const STACK_PUSH = kernel.register(prodSTACK_PUSH);
-  const STACK_POP = kernel.register(prodSTACK_POP);
-  const EXPAND = kernel.register(prodEXPAND);
-  const FIELD_START_EDIT = kernel.register(prodFIELD_START_EDIT);
+  const OS_FOCUS = kernel.register(prodOS_FOCUS);
+  const OS_SYNC_FOCUS = kernel.register(prodSYNC_FOCUS);
+  const OS_RECOVER = kernel.register(prodOS_RECOVER);
+  const OS_SELECT = kernel.register(prodOS_SELECT);
+  const OS_SELECTION_CLEAR = kernel.register(prodSELECTION_CLEAR);
+  const OS_NAVIGATE = kernel.register(prodNAVIGATE);
+  const OS_TAB = kernel.register(prodOS_TAB);
+  const OS_ESCAPE = kernel.register(prodOS_ESCAPE);
+  const OS_STACK_PUSH = kernel.register(prodSTACK_PUSH);
+  const OS_STACK_POP = kernel.register(prodSTACK_POP);
+  const OS_EXPAND = kernel.register(prodEXPAND);
+  const OS_FIELD_START_EDIT = kernel.register(prodFIELD_START_EDIT);
 
   // ─── Convenience helpers ───
 
@@ -166,18 +166,18 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
     dispatch: kernel.dispatch.bind(kernel),
 
     // Commands
-    FOCUS,
-    SYNC_FOCUS,
-    RECOVER,
-    SELECT,
-    NAVIGATE,
-    TAB,
-    ESCAPE,
-    SELECTION_CLEAR,
-    STACK_PUSH,
-    STACK_POP,
-    EXPAND,
-    FIELD_START_EDIT,
+    OS_FOCUS,
+    OS_SYNC_FOCUS,
+    OS_RECOVER,
+    OS_SELECT,
+    OS_NAVIGATE,
+    OS_TAB,
+    OS_ESCAPE,
+    OS_SELECTION_CLEAR,
+    OS_STACK_PUSH,
+    OS_STACK_POP,
+    OS_EXPAND,
+    OS_FIELD_START_EDIT,
 
     // Mock setters
     setItems,

@@ -45,7 +45,7 @@ function createMenu(focusedItem = "cut") {
     const t = createTestOsKernel();
     t.setItems(["menu-btn"]);
     t.setActiveZone("toolbar", "menu-btn");
-    t.dispatch(t.STACK_PUSH());
+    t.dispatch(t.OS_STACK_PUSH());
     t.setItems(MENU_ITEMS);
     t.setConfig(MENU_CONFIG);
     t.setActiveZone("menu", focusedItem);

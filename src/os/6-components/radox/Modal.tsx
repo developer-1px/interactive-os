@@ -15,7 +15,7 @@
  *   </OS.Modal>
  *
  * The inner OS.Zone role="dialog" handles:
- *   - STACK_PUSH on mount / STACK_POP on unmount
+ *   - OS_STACK_PUSH on mount / OS_STACK_POP on unmount
  *   - autoFocus to first item
  *   - ESC → onDismiss callback
  */

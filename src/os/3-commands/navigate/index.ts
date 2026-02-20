@@ -14,7 +14,7 @@ import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { applyFollowFocus, ensureZone } from "../../state/utils";
-import { EXPAND } from "../expand";
+import { OS_EXPAND } from "../expand";
 import { resolveNavigate } from "./resolve";
 
 type Direction = "up" | "down" | "left" | "right" | "home" | "end";
@@ -24,7 +24,7 @@ interface NavigatePayload {
   select?: "range" | "toggle";
 }
 
-export const NAVIGATE = os.defineCommand(
+export const OS_NAVIGATE = os.defineCommand(
   "OS_NAVIGATE",
   [DOM_ITEMS, DOM_RECTS, ZONE_CONFIG],
   (ctx) => (payload: NavigatePayload) => {
@@ -61,12 +61,12 @@ export const NAVIGATE = os.defineCommand(
         if (isExpandable) {
           if (payload.direction === "right" && !isExpanded) {
             return {
-              dispatch: EXPAND({ action: "expand", itemId: focusedId }),
+              dispatch: OS_EXPAND({ action: "expand", itemId: focusedId }),
             };
           }
           if (payload.direction === "left" && isExpanded) {
             return {
-              dispatch: EXPAND({
+              dispatch: OS_EXPAND({
                 action: "collapse",
                 itemId: focusedId,
               }),

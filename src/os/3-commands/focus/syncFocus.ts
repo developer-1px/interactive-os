@@ -14,7 +14,7 @@ interface SyncFocusPayload {
   zoneId: string;
 }
 
-export const SYNC_FOCUS = os.defineCommand(
+export const OS_SYNC_FOCUS = os.defineCommand(
   "OS_SYNC_FOCUS",
   (ctx) => (payload: SyncFocusPayload) => {
     return {

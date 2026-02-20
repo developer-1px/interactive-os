@@ -18,7 +18,7 @@ const IMPLICIT_ROLE_MAP: Record<string, string | ((el: Element) => boolean)> = {
     el.tagName === "INPUT" && (el as HTMLInputElement).type === "checkbox",
   radio: (el) =>
     el.tagName === "INPUT" && (el as HTMLInputElement).type === "radio",
-  listbox: "SELECT",
+  listbox: "OS_SELECT",
   option: "OPTION",
   heading: (el) => /^H[1-6]$/.test(el.tagName),
   img: "IMG",

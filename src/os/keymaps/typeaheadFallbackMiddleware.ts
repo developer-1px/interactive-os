@@ -14,7 +14,7 @@
 
 import type { BaseCommand, Middleware } from "@kernel";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { FOCUS } from "@os/3-commands/focus/focus";
+import { OS_FOCUS } from "@os/3-commands/focus/focus";
 import { resolveTypeahead } from "@os/3-commands/navigate/typeahead";
 import { os } from "@os/kernel";
 import { isEditingElement } from "@os/keymaps/fieldKeyOwnership";
@@ -83,6 +83,6 @@ export const typeaheadFallbackMiddleware: Middleware = {
     const targetId = resolveTypeahead(currentId, event.key, items, labels);
     if (!targetId || targetId === currentId) return null;
 
-    return FOCUS({ zoneId, itemId: targetId }) as BaseCommand;
+    return OS_FOCUS({ zoneId, itemId: targetId }) as BaseCommand;
   },
 };

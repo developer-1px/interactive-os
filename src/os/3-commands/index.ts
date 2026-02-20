@@ -8,20 +8,20 @@
 // Clipboard
 export { OS_COPY, OS_CUT, OS_PASTE } from "./clipboard/clipboard";
 // Dismiss
-export { ESCAPE } from "./dismiss";
+export { OS_ESCAPE } from "./dismiss";
 // Expansion
-export { EXPAND } from "./expand";
+export { OS_EXPAND } from "./expand";
 // Field
 export {
-  FIELD_CANCEL,
-  FIELD_COMMIT,
-  FIELD_START_EDIT,
+  OS_FIELD_CANCEL,
+  OS_FIELD_COMMIT,
+  OS_FIELD_START_EDIT,
 } from "./field/field";
 // Focus
-export { FOCUS, RECOVER, STACK_POP, STACK_PUSH, SYNC_FOCUS } from "./focus";
+export { OS_FOCUS, OS_RECOVER, OS_STACK_POP, OS_STACK_PUSH, OS_SYNC_FOCUS } from "./focus";
 // Interaction (delegates: activate, check, delete, move, undo, redo)
 export {
-  ACTIVATE,
+  OS_ACTIVATE,
   OS_CHECK,
   OS_DELETE,
   OS_MOVE_DOWN,
@@ -30,18 +30,18 @@ export {
   OS_UNDO,
 } from "./interaction";
 // Navigation
-export { NAVIGATE } from "./navigate";
+export { OS_NAVIGATE } from "./navigate";
 // Overlay
-export { OVERLAY_CLOSE, OVERLAY_OPEN } from "./overlay/overlay";
+export { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "./overlay/overlay";
 // Selection
 export {
   OS_SELECT_ALL,
-  SELECT,
-  SELECTION_ADD,
-  SELECTION_CLEAR,
-  SELECTION_REMOVE,
-  SELECTION_SET,
-  SELECTION_TOGGLE,
+  OS_SELECT,
+  OS_SELECTION_ADD,
+  OS_SELECTION_CLEAR,
+  OS_SELECTION_REMOVE,
+  OS_SELECTION_SET,
+  OS_SELECTION_TOGGLE,
 } from "./selection";
 // Tab
-export { TAB } from "./tab";
+export { OS_TAB } from "./tab";

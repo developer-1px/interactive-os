@@ -1,8 +1,8 @@
 // @ts-nocheck
 
 import { OS_COPY, OS_PASTE } from "@os/3-commands/clipboard/clipboard"; // Registers OS_COPY/PASTE
-import { FOCUS } from "@os/3-commands/focus/focus"; // Registers FOCUS
-import { SELECTION_SET } from "@os/3-commands/selection"; // Registers SELECTION_SET
+import { OS_FOCUS } from "@os/3-commands/focus/focus"; // Registers OS_FOCUS
+import { OS_SELECTION_SET } from "@os/3-commands/selection"; // Registers OS_SELECTION_SET
 import { os } from "@os/kernel";
 import { beforeEach, describe, expect, it } from "vitest";
 import { addTodo, TodoApp } from "../../app";
@@ -49,7 +49,7 @@ describe("TodoApp Clipboard Multi-Select Bug", () => {
     const [idA, idB, idC] = list;
 
     // 1. Focus B (middle)
-    // FOCUS command inside kernel requires 'list' zone to be registered?
+    // OS_FOCUS command inside kernel requires 'list' zone to be registered?
     // DefineApp registers zone commands, but does it register ZoneRegistry entries?
     // ZoneRegistry is usually populated by <Zone> component mounting.
     // In this unit test, no components are mounted.

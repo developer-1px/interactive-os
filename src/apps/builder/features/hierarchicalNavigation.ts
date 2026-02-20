@@ -21,8 +21,8 @@ import {
   getItemAttribute,
 } from "@/os/2-contexts/itemQueries";
 import type { ZoneCursor } from "@/os/2-contexts/zoneRegistry";
-import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
-import { FOCUS } from "@/os/3-commands/focus/focus";
+import { OS_FIELD_START_EDIT } from "@/os/3-commands/field/field";
+import { OS_FOCUS } from "@/os/3-commands/focus/focus";
 import { os } from "@/os/kernel";
 import type { BuilderLevel } from "../primitives/Builder";
 
@@ -94,7 +94,7 @@ export function createDrillDown(zoneId: string) {
 
     // At item level: start editing
     if (level === "item") {
-      return FIELD_START_EDIT();
+      return OS_FIELD_START_EDIT();
     }
 
     // At section/group: find first descendant at next level
@@ -109,7 +109,7 @@ export function createDrillDown(zoneId: string) {
     );
     if (!childId) return [];
 
-    return FOCUS({ zoneId, itemId: childId });
+    return OS_FOCUS({ zoneId, itemId: childId });
   };
 }
 
@@ -153,6 +153,6 @@ export function createDrillUp(zoneId: string) {
 
     if (!parentId) return [];
 
-    return FOCUS({ zoneId, itemId: parentId });
+    return OS_FOCUS({ zoneId, itemId: parentId });
   };
 }

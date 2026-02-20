@@ -7,7 +7,7 @@
  *
  * Bug: defineApp.bind creates new onSubmit/onChange function references
  * on each render → useEffect deps change → unregister → register →
- * localValue reset to "" → FIELD_COMMIT reads empty string.
+ * localValue reset to "" → OS_FIELD_COMMIT reads empty string.
  *
  * These tests verify:
  *   1. localValue survives re-registration (config-only update)
@@ -98,7 +98,7 @@ describe("FieldRegistry seam: register/unregister lifecycle", () => {
   });
 });
 
-describe("FieldRegistry seam: FIELD_COMMIT reads localValue", () => {
+describe("FieldRegistry seam: OS_FIELD_COMMIT reads localValue", () => {
   const FIELD_ID = "DRAFT";
 
   beforeEach(() => {
@@ -118,7 +118,7 @@ describe("FieldRegistry seam: FIELD_COMMIT reads localValue", () => {
     });
     FieldRegistry.updateValue(FIELD_ID, "Buy milk");
 
-    // Simulate what FIELD_COMMIT does
+    // Simulate what OS_FIELD_COMMIT does
     const entry = FieldRegistry.getField(FIELD_ID)!;
     const text = entry.state.value;
     entry.config.onCommit!({ text });
@@ -146,7 +146,7 @@ describe("FieldRegistry seam: FIELD_COMMIT reads localValue", () => {
     version = 1;
     ref.current = (p) => ({ type: `V${version}`, payload: p });
 
-    // FIELD_COMMIT calls the registered onCommit
+    // OS_FIELD_COMMIT calls the registered onCommit
     const entry = FieldRegistry.getField(FIELD_ID)!;
     const result = entry.config.onCommit!({ text: entry.state.value });
 

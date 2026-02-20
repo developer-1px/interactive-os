@@ -12,14 +12,14 @@ import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { ensureZone } from "../../state/utils";
-import { EXPAND } from "../expand";
+import { OS_EXPAND } from "../expand";
 
 interface SelectPayload {
   targetId?: string;
   mode?: "single" | "replace" | "toggle" | "range";
 }
 
-export const SELECT = os.defineCommand(
+export const OS_SELECT = os.defineCommand(
   "OS_SELECT",
   [DOM_ITEMS, ZONE_CONFIG],
   (ctx) => (payload: SelectPayload) => {
@@ -36,14 +36,14 @@ export const SELECT = os.defineCommand(
     if (ZoneRegistry.isDisabled(activeZoneId, targetId)) return;
 
     // W3C Tree Pattern: Space toggles expansion for expandable items
-    // Only applies for keyboard-triggered SELECT (no explicit targetId)
+    // Only applies for keyboard-triggered OS_SELECT (no explicit targetId)
     // Expandability is determined by zone role, not DOM attribute.
     if (!payload.targetId) {
       const entry = ZoneRegistry.get(activeZoneId);
       const childRole = getChildRole(entry?.role);
       if (childRole && isExpandableRole(childRole)) {
         return {
-          dispatch: EXPAND({ action: "toggle", itemId: targetId }),
+          dispatch: OS_EXPAND({ action: "toggle", itemId: targetId }),
         };
       }
     }

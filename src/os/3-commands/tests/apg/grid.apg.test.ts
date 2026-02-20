@@ -76,34 +76,34 @@ describe("APG Grid: Home / End", () => {
 describe("APG Grid: 4-Directional Navigation", () => {
     it("Right: moves one cell right", () => {
         const t = createGrid("r1c1");
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
         expect(t.focusedItemId()).toBe("r1c2");
     });
 
     it("Left: moves one cell left", () => {
         const t = createGrid("r1c1");
-        t.dispatch(t.NAVIGATE({ direction: "left" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "left" }));
         expect(t.focusedItemId()).toBe("r1c0");
     });
 
     it("Down: moves one cell down", () => {
         const t = createGrid("r1c1");
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.focusedItemId()).toBe("r2c1");
     });
 
     it("Up: moves one cell up", () => {
         const t = createGrid("r1c1");
-        t.dispatch(t.NAVIGATE({ direction: "up" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
         expect(t.focusedItemId()).toBe("r0c1");
     });
 
     it("corner to corner traversal", () => {
         const t = createGrid("r0c0");
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.focusedItemId()).toBe("r2c2");
     });
 });
@@ -115,33 +115,33 @@ describe("APG Grid: 4-Directional Navigation", () => {
 describe("APG Grid: 2D Boundary", () => {
     it("Right at right edge: stays", () => {
         const t = createGrid("r1c2");
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
         expect(t.focusedItemId()).toBe("r1c2");
     });
 
     it("Left at left edge: stays", () => {
         const t = createGrid("r1c0");
-        t.dispatch(t.NAVIGATE({ direction: "left" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "left" }));
         expect(t.focusedItemId()).toBe("r1c0");
     });
 
     it("Down at bottom: stays", () => {
         const t = createGrid("r2c1");
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.focusedItemId()).toBe("r2c1");
     });
 
     it("Up at top: stays", () => {
         const t = createGrid("r0c1");
-        t.dispatch(t.NAVIGATE({ direction: "up" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
         expect(t.focusedItemId()).toBe("r0c1");
     });
 
     it("top-left corner: up and left both stay", () => {
         const t = createGrid("r0c0");
-        t.dispatch(t.NAVIGATE({ direction: "up" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
         expect(t.focusedItemId()).toBe("r0c0");
-        t.dispatch(t.NAVIGATE({ direction: "left" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "left" }));
         expect(t.focusedItemId()).toBe("r0c0");
     });
 });

@@ -46,7 +46,7 @@ function createComboboxPopup(focusedItem = "apple") {
     const t = createTestOsKernel();
     t.setItems(["input-field"]);
     t.setActiveZone("combobox", "input-field");
-    t.dispatch(t.STACK_PUSH());
+    t.dispatch(t.OS_STACK_PUSH());
     t.setItems(POPUP_ITEMS);
     t.setConfig(POPUP_CONFIG);
     t.setActiveZone("popup", focusedItem);

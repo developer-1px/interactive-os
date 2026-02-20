@@ -9,7 +9,7 @@ import { ensureZone } from "../../state/utils";
  */
 
 // 1. SET: Replace current selection
-export const SELECTION_SET = os.defineCommand(
+export const OS_SELECTION_SET = os.defineCommand(
   "OS_SELECTION_SET",
   (ctx) => (payload: { zoneId: string; ids: string[] }) => ({
     state: produce(ctx.state, (draft) => {
@@ -24,7 +24,7 @@ export const SELECTION_SET = os.defineCommand(
 );
 
 // 2. ADD: Add item to selection
-export const SELECTION_ADD = os.defineCommand(
+export const OS_SELECTION_ADD = os.defineCommand(
   "OS_SELECTION_ADD",
   (ctx) => (payload: { zoneId: string; id: string }) => ({
     state: produce(ctx.state, (draft) => {
@@ -38,7 +38,7 @@ export const SELECTION_ADD = os.defineCommand(
 );
 
 // 3. REMOVE: Remove item from selection
-export const SELECTION_REMOVE = os.defineCommand(
+export const OS_SELECTION_REMOVE = os.defineCommand(
   "OS_SELECTION_REMOVE",
   (ctx) => (payload: { zoneId: string; id: string }) => ({
     state: produce(ctx.state, (draft) => {
@@ -52,7 +52,7 @@ export const SELECTION_REMOVE = os.defineCommand(
 );
 
 // 4. TOGGLE: Toggle item in selection
-export const SELECTION_TOGGLE = os.defineCommand(
+export const OS_SELECTION_TOGGLE = os.defineCommand(
   "OS_SELECTION_TOGGLE",
   (ctx) => (payload: { zoneId: string; id: string }) => ({
     state: produce(ctx.state, (draft) => {
@@ -69,7 +69,7 @@ export const SELECTION_TOGGLE = os.defineCommand(
 );
 
 // 5. CLEAR: Clear selection
-export const SELECTION_CLEAR = os.defineCommand(
+export const OS_SELECTION_CLEAR = os.defineCommand(
   "OS_SELECTION_CLEAR",
   (ctx) => (payload: { zoneId: string }) => ({
     state: produce(ctx.state, (draft) => {

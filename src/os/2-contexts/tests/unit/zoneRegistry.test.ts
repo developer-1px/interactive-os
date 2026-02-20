@@ -42,26 +42,26 @@ describe("ZoneRegistry", () => {
   });
 
   it("preserves onCheck callback", () => {
-    const toggle = { type: "TOGGLE_TODO", payload: { id: "OS.FOCUS" } };
+    const toggle = { type: "TOGGLE_TODO", payload: { id: "OS.OS_FOCUS" } };
     ZoneRegistry.register("listView", mockEntry({ onCheck: toggle as any }));
     expect(ZoneRegistry.get("listView")?.onCheck).toBe(toggle);
   });
 
   it("preserves onAction callback", () => {
-    const action = { type: "START_EDIT", payload: { id: "OS.FOCUS" } };
+    const action = { type: "START_EDIT", payload: { id: "OS.OS_FOCUS" } };
     ZoneRegistry.register("listView", mockEntry({ onAction: action as any }));
     expect(ZoneRegistry.get("listView")?.onAction).toBe(action);
   });
 
   it("preserves onDelete callback", () => {
-    const del = { type: "DELETE_TODO", payload: { id: "OS.FOCUS" } };
+    const del = { type: "DELETE_TODO", payload: { id: "OS.OS_FOCUS" } };
     ZoneRegistry.register("listView", mockEntry({ onDelete: del as any }));
     expect(ZoneRegistry.get("listView")?.onDelete).toBe(del);
   });
 
   it("preserves onMoveUp and onMoveDown callbacks", () => {
-    const moveUp = { type: "MOVE_UP", payload: { focusId: "OS.FOCUS" } };
-    const moveDown = { type: "MOVE_DOWN", payload: { focusId: "OS.FOCUS" } };
+    const moveUp = { type: "MOVE_UP", payload: { focusId: "OS.OS_FOCUS" } };
+    const moveDown = { type: "MOVE_DOWN", payload: { focusId: "OS.OS_FOCUS" } };
     ZoneRegistry.register(
       "listView",
       mockEntry({ onMoveUp: moveUp as any, onMoveDown: moveDown as any }),

@@ -1,15 +1,15 @@
 /**
- * FOCUS — Headless Kernel Integration Test
+ * OS_FOCUS — Headless Kernel Integration Test
  *
  * Tests the full focus pipeline without DOM:
- *   Mouse click simulation: FOCUS + SELECT → state
- *   focusin simulation: SYNC_FOCUS → state
+ *   Mouse click simulation: OS_FOCUS + OS_SELECT → state
+ *   focusin simulation: OS_SYNC_FOCUS → state
  *   Zone activation, cross-zone movement, selection modes
  *
  * APG Reference:
  *   - Focus is visible (state.focusedItemId matches dispatched target)
  *   - Selection follows focus when config.select.followFocus is true
- *   - Click on item: FOCUS → SELECT (replace/toggle/range)
+ *   - Click on item: OS_FOCUS → OS_SELECT (replace/toggle/range)
  */
 
 import { describe, expect, it } from "vitest";
@@ -19,7 +19,7 @@ import { createTestOsKernel } from "./helpers/createTestOsKernel";
 // Focus (Mouse Click Simulation)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("FOCUS — Headless Kernel Integration", () => {
+describe("OS_FOCUS — Headless Kernel Integration", () => {
   // ─── Basic Focus ───
 
   it("click on item: sets focusedItemId and activeZoneId", () => {
@@ -27,7 +27,7 @@ describe("FOCUS — Headless Kernel Integration", () => {
     t.setItems(["item-a", "item-b", "item-c"]);
     t.initZone("list");
 
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-b" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-b" }));
 
     expect(t.activeZoneId()).toBe("list");
     expect(t.focusedItemId()).toBe("item-b");
@@ -38,7 +38,7 @@ describe("FOCUS — Headless Kernel Integration", () => {
     t.setItems(["item-a", "item-b", "item-c"]);
     t.setActiveZone("list", "item-a");
 
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-c" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-c" }));
 
     expect(t.focusedItemId()).toBe("item-c");
     expect(t.activeZoneId()).toBe("list");
@@ -49,7 +49,7 @@ describe("FOCUS — Headless Kernel Integration", () => {
     t.setActiveZone("list", "item-a");
     t.initZone("sidebar");
 
-    t.dispatch(t.FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
 
     expect(t.activeZoneId()).toBe("sidebar");
     expect(t.focusedItemId("sidebar")).toBe("cat-1");
@@ -61,7 +61,7 @@ describe("FOCUS — Headless Kernel Integration", () => {
     const t = createTestOsKernel();
     t.initZone("empty-zone");
 
-    t.dispatch(t.FOCUS({ zoneId: "empty-zone", itemId: null }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "empty-zone", itemId: null }));
 
     expect(t.activeZoneId()).toBe("empty-zone");
     expect(t.focusedItemId("empty-zone")).toBeNull();
@@ -72,30 +72,30 @@ describe("FOCUS — Headless Kernel Integration", () => {
     t.setActiveZone("list", "item-a");
     t.setItems(["item-a", "item-b", "item-c"]);
 
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-b" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-b" }));
 
     expect(t.zone("list")?.lastFocusedId).toBe("item-b");
   });
 
-  // ─── SYNC_FOCUS (focusin simulation) ───
+  // ─── OS_SYNC_FOCUS (focusin simulation) ───
 
-  it("SYNC_FOCUS: updates state from external focus event", () => {
+  it("OS_SYNC_FOCUS: updates state from external focus event", () => {
     const t = createTestOsKernel();
     t.initZone("list");
 
-    t.dispatch(t.SYNC_FOCUS({ id: "item-c", zoneId: "list" }));
+    t.dispatch(t.OS_SYNC_FOCUS({ id: "item-c", zoneId: "list" }));
 
     expect(t.activeZoneId()).toBe("list");
     expect(t.focusedItemId()).toBe("item-c");
     expect(t.zone("list")?.lastFocusedId).toBe("item-c");
   });
 
-  it("SYNC_FOCUS on different zone: switches active zone", () => {
+  it("OS_SYNC_FOCUS on different zone: switches active zone", () => {
     const t = createTestOsKernel();
     t.setActiveZone("list", "item-a");
     t.initZone("toolbar");
 
-    t.dispatch(t.SYNC_FOCUS({ id: "btn-1", zoneId: "toolbar" }));
+    t.dispatch(t.OS_SYNC_FOCUS({ id: "btn-1", zoneId: "toolbar" }));
 
     expect(t.activeZoneId()).toBe("toolbar");
     expect(t.focusedItemId("toolbar")).toBe("btn-1");
@@ -106,8 +106,8 @@ describe("FOCUS — Headless Kernel Integration", () => {
 // Focus + Selection (Mouse Click Pipeline)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("FOCUS + SELECT — Mouse Click Pipeline", () => {
-  it("click: FOCUS + SELECT(replace) → focus + selection set", () => {
+describe("OS_FOCUS + OS_SELECT — Mouse Click Pipeline", () => {
+  it("click: OS_FOCUS + OS_SELECT(replace) → focus + selection set", () => {
     const t = createTestOsKernel();
     t.setItems(["item-a", "item-b", "item-c"]);
     t.setActiveZone("list", "item-a");
@@ -121,9 +121,9 @@ describe("FOCUS + SELECT — Mouse Click Pipeline", () => {
       },
     });
 
-    // Simulate mouse pipeline: FOCUS then SELECT
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-b" }));
-    t.dispatch(t.SELECT({ targetId: "item-b", mode: "replace" }));
+    // Simulate mouse pipeline: OS_FOCUS then OS_SELECT
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-b" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-b", mode: "replace" }));
 
     expect(t.focusedItemId()).toBe("item-b");
     expect(t.selection()).toEqual(["item-b"]);
@@ -144,13 +144,13 @@ describe("FOCUS + SELECT — Mouse Click Pipeline", () => {
     });
 
     // First click
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-a" }));
-    t.dispatch(t.SELECT({ targetId: "item-a", mode: "replace" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-a" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-a", mode: "replace" }));
     expect(t.selection()).toEqual(["item-a"]);
 
     // Second click
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-c" }));
-    t.dispatch(t.SELECT({ targetId: "item-c", mode: "replace" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-c" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-c", mode: "replace" }));
 
     expect(t.focusedItemId()).toBe("item-c");
     expect(t.selection()).toEqual(["item-c"]);
@@ -171,12 +171,12 @@ describe("FOCUS + SELECT — Mouse Click Pipeline", () => {
     });
 
     // Click first
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-a" }));
-    t.dispatch(t.SELECT({ targetId: "item-a", mode: "replace" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-a" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-a", mode: "replace" }));
 
     // Cmd+click second
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-c" }));
-    t.dispatch(t.SELECT({ targetId: "item-c", mode: "toggle" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-c" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-c", mode: "toggle" }));
 
     expect(t.selection()).toEqual(["item-a", "item-c"]);
   });
@@ -196,14 +196,14 @@ describe("FOCUS + SELECT — Mouse Click Pipeline", () => {
     });
 
     // Select A and C
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-a" }));
-    t.dispatch(t.SELECT({ targetId: "item-a", mode: "replace" }));
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-c" }));
-    t.dispatch(t.SELECT({ targetId: "item-c", mode: "toggle" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-a" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-a", mode: "replace" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-c" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-c", mode: "toggle" }));
     expect(t.selection()).toEqual(["item-a", "item-c"]);
 
     // Cmd+click A again → deselect
-    t.dispatch(t.SELECT({ targetId: "item-a", mode: "toggle" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-a", mode: "toggle" }));
 
     expect(t.selection()).toEqual(["item-c"]);
   });
@@ -223,11 +223,11 @@ describe("FOCUS + SELECT — Mouse Click Pipeline", () => {
     });
 
     // Click anchor
-    t.dispatch(t.SELECT({ targetId: "item-b", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-b", mode: "replace" }));
 
     // Shift+click to item-d
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "item-d" }));
-    t.dispatch(t.SELECT({ targetId: "item-d", mode: "range" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "item-d" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-d", mode: "range" }));
 
     expect(t.selection()).toEqual(["item-b", "item-c", "item-d"]);
   });
@@ -247,13 +247,13 @@ describe("FOCUS + SELECT — Mouse Click Pipeline", () => {
     });
 
     // Select in list
-    t.dispatch(t.SELECT({ targetId: "item-a", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "item-a", mode: "replace" }));
     expect(t.selection("list")).toEqual(["item-a"]);
 
     // Click in sidebar
     t.setItems(["cat-1", "cat-2"]);
-    t.dispatch(t.FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
-    t.dispatch(t.SELECT({ targetId: "cat-1", mode: "replace" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
+    t.dispatch(t.OS_SELECT({ targetId: "cat-1", mode: "replace" }));
 
     expect(t.activeZoneId()).toBe("sidebar");
     expect(t.selection("sidebar")).toEqual(["cat-1"]);
@@ -295,19 +295,19 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
 
     // Step 1: Click in list
     t.setItems(["l-0", "l-1", "l-2"]);
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "l-1" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "l-1" }));
     expect(t.activeZoneId()).toBe("list");
     expect(t.focusedItemId()).toBe("l-1");
 
     // Step 2: Tab → sidebar
     t.setConfig({ tab: { behavior: "escape", restoreFocus: false } });
-    t.dispatch(t.TAB({ direction: "forward" }));
+    t.dispatch(t.OS_TAB({ direction: "forward" }));
     expect(t.activeZoneId()).toBe("sidebar");
     expect(t.focusedItemId("sidebar")).toBe("s-0");
 
     // Step 3: Click back in list
     t.setItems(["l-0", "l-1", "l-2"]);
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "l-2" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "l-2" }));
     expect(t.activeZoneId()).toBe("list");
     expect(t.focusedItemId("list")).toBe("l-2");
   });
@@ -340,12 +340,12 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
     t.setActiveZone("main", "m-1");
 
     // Tab → nav
-    t.dispatch(t.TAB({ direction: "forward" }));
+    t.dispatch(t.OS_TAB({ direction: "forward" }));
     expect(t.activeZoneId()).toBe("nav");
 
     // Tab → main (wrap)
     t.setItems(["n-0", "n-1", "n-2"]);
-    t.dispatch(t.TAB({ direction: "forward" }));
+    t.dispatch(t.OS_TAB({ direction: "forward" }));
     expect(t.activeZoneId()).toBe("main");
   });
 
@@ -385,17 +385,17 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
     t.setActiveZone("c", "c-0");
 
     // Shift+Tab → zone b (backward focus to lastItemId)
-    t.dispatch(t.TAB({ direction: "backward" }));
+    t.dispatch(t.OS_TAB({ direction: "backward" }));
     expect(t.activeZoneId()).toBe("b");
     expect(t.focusedItemId("b")).toBe("b-2");
   });
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// FOCUS — Zone Re-entry Restore
+// OS_FOCUS — Zone Re-entry Restore
 // ═══════════════════════════════════════════════════════════════════
 
-describe("FOCUS — Zone Re-entry Restore", () => {
+describe("OS_FOCUS — Zone Re-entry Restore", () => {
   it("zone re-entry with itemId=null restores lastFocusedId", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
@@ -406,11 +406,11 @@ describe("FOCUS — Zone Re-entry Restore", () => {
 
     // Move to different zone
     t.initZone("sidebar");
-    t.dispatch(t.FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
     expect(t.activeZoneId()).toBe("sidebar");
 
     // Re-enter list zone with null itemId (zone-only click)
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: null }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: null }));
 
     // Should restore to "b", not null
     expect(t.activeZoneId()).toBe("list");
@@ -426,7 +426,7 @@ describe("FOCUS — Zone Re-entry Restore", () => {
     expect(t.zone("list")?.lastFocusedId).toBeNull();
 
     // Zone-only click with no history
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: null }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: null }));
 
     // No restore target → stays null
     expect(t.activeZoneId()).toBe("list");
@@ -439,16 +439,16 @@ describe("FOCUS — Zone Re-entry Restore", () => {
     t.setActiveZone("list", "a");
 
     // Navigate through items: a → b → c
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "b" }));
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "c" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "b" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "c" }));
     expect(t.zone()?.lastFocusedId).toBe("c");
 
     // Leave zone
     t.initZone("sidebar");
-    t.dispatch(t.FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
 
     // Re-enter → should restore "c" (last, not first)
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: null }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: null }));
     expect(t.focusedItemId()).toBe("c");
   });
 
@@ -459,8 +459,8 @@ describe("FOCUS — Zone Re-entry Restore", () => {
 
     // Leave and come back with explicit target
     t.initZone("sidebar");
-    t.dispatch(t.FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
-    t.dispatch(t.FOCUS({ zoneId: "list", itemId: "a" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "sidebar", itemId: "cat-1" }));
+    t.dispatch(t.OS_FOCUS({ zoneId: "list", itemId: "a" }));
 
     // Should be "a" (explicit), not "c" (restored)
     expect(t.focusedItemId()).toBe("a");

@@ -26,7 +26,7 @@ import {
 } from "react";
 import type { ZoneCallback, ZoneEntry } from "../../2-contexts/zoneRegistry.ts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
-import { FOCUS, STACK_POP, STACK_PUSH } from "../../3-commands/focus";
+import { OS_FOCUS, OS_STACK_POP, OS_STACK_PUSH } from "../../3-commands/focus";
 import { os } from "../../kernel.ts";
 import { resolveRole, type ZoneRole } from "../../registries/roleRegistry.ts";
 import type {
@@ -351,7 +351,7 @@ export function FocusGroup({
       if (firstItem) {
         const itemId = firstItem.getAttribute("data-item-id") || firstItem.id;
         if (itemId) {
-          os.dispatch(FOCUS({ zoneId: groupId, itemId }));
+          os.dispatch(OS_FOCUS({ zoneId: groupId, itemId }));
         }
       }
     });
@@ -362,9 +362,9 @@ export function FocusGroup({
   // When autoFocus is true, push focus stack on mount and pop on unmount
   useLayoutEffect(() => {
     if (!config.project.autoFocus) return;
-    os.dispatch(STACK_PUSH());
+    os.dispatch(OS_STACK_PUSH());
     return () => {
-      os.dispatch(STACK_POP());
+      os.dispatch(OS_STACK_POP());
     };
   }, [config.project.autoFocus]);
 

@@ -541,7 +541,7 @@ function TimelineNode({
       ) : (
         <MousePointer2 size={12} className="text-[#3b82f6]" strokeWidth={2.5} />
       )
-    ) : trigger.kind === "FOCUS" ? (
+    ) : trigger.kind === "OS_FOCUS" ? (
       <Eye size={12} className="text-[#10b981]" strokeWidth={2.5} />
     ) : (
       <Keyboard size={12} className="text-[#f59e0b]" strokeWidth={2.5} />

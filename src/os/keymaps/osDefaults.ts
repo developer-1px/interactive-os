@@ -7,23 +7,23 @@
  * These map directly to commands from 3-commands/.
  */
 
-import { ESCAPE } from "@os/3-commands/dismiss";
+import { OS_ESCAPE } from "@os/3-commands/dismiss";
 import {
-  FIELD_CANCEL,
-  FIELD_COMMIT,
-  FIELD_START_EDIT,
+  OS_FIELD_CANCEL,
+  OS_FIELD_COMMIT,
+  OS_FIELD_START_EDIT,
 } from "@os/3-commands/field/field";
 import {
-  ACTIVATE,
+  OS_ACTIVATE,
   OS_DELETE,
   OS_MOVE_DOWN,
   OS_MOVE_UP,
   OS_REDO,
   OS_UNDO,
 } from "@os/3-commands/interaction";
-import { NAVIGATE } from "@os/3-commands/navigate";
-import { OS_SELECT_ALL, SELECT } from "@os/3-commands/selection";
-import { TAB } from "@os/3-commands/tab";
+import { OS_NAVIGATE } from "@os/3-commands/navigate";
+import { OS_SELECT_ALL, OS_SELECT } from "@os/3-commands/selection";
+import { OS_TAB } from "@os/3-commands/tab";
 import { Keybindings } from "./keybindings";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -33,36 +33,36 @@ import { Keybindings } from "./keybindings";
 Keybindings.registerAll([
   {
     key: "ArrowDown",
-    command: NAVIGATE({ direction: "down" }),
+    command: OS_NAVIGATE({ direction: "down" }),
     when: "navigating",
   },
   {
     key: "ArrowUp",
-    command: NAVIGATE({ direction: "up" }),
+    command: OS_NAVIGATE({ direction: "up" }),
     when: "navigating",
   },
   {
     key: "ArrowLeft",
-    command: NAVIGATE({ direction: "left" }),
+    command: OS_NAVIGATE({ direction: "left" }),
     when: "navigating",
   },
   {
     key: "ArrowRight",
-    command: NAVIGATE({ direction: "right" }),
+    command: OS_NAVIGATE({ direction: "right" }),
     when: "navigating",
   },
-  { key: "Home", command: NAVIGATE({ direction: "home" }), when: "navigating" },
-  { key: "End", command: NAVIGATE({ direction: "end" }), when: "navigating" },
+  { key: "Home", command: OS_NAVIGATE({ direction: "home" }), when: "navigating" },
+  { key: "End", command: OS_NAVIGATE({ direction: "end" }), when: "navigating" },
 
   // Shift+Arrow → range selection
   {
     key: "Shift+ArrowDown",
-    command: NAVIGATE({ direction: "down", select: "range" }),
+    command: OS_NAVIGATE({ direction: "down", select: "range" }),
     when: "navigating",
   },
   {
     key: "Shift+ArrowUp",
-    command: NAVIGATE({ direction: "up", select: "range" }),
+    command: OS_NAVIGATE({ direction: "up", select: "range" }),
     when: "navigating",
   },
 ]);
@@ -72,10 +72,10 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  { key: "Tab", command: TAB({ direction: "forward" }), when: "navigating" },
+  { key: "Tab", command: OS_TAB({ direction: "forward" }), when: "navigating" },
   {
     key: "Shift+Tab",
-    command: TAB({ direction: "backward" }),
+    command: OS_TAB({ direction: "backward" }),
     when: "navigating",
   },
 ]);
@@ -85,8 +85,8 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  { key: "Enter", command: ACTIVATE(), when: "navigating" },
-  { key: "Escape", command: ESCAPE(), when: "navigating" },
+  { key: "Enter", command: OS_ACTIVATE(), when: "navigating" },
+  { key: "Escape", command: OS_ESCAPE(), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -94,7 +94,7 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 
 Keybindings.registerAll([
-  { key: "Space", command: SELECT({ mode: "toggle" }), when: "navigating" },
+  { key: "Space", command: OS_SELECT({ mode: "toggle" }), when: "navigating" },
   { key: "Meta+A", command: OS_SELECT_ALL(), when: "navigating" },
 ]);
 
@@ -137,16 +137,16 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 // Enter (editing) → commit and exit editing mode
 // Escape (editing) → cancel and exit editing mode
-// F2 (navigating) → start editing (standard OS pattern, avoids Enter conflict with ACTIVATE)
+// F2 (navigating) → start editing (standard OS pattern, avoids Enter conflict with OS_ACTIVATE)
 
 Keybindings.registerAll([
-  { key: "Enter", command: FIELD_COMMIT(), when: "editing" },
-  { key: "Escape", command: FIELD_CANCEL(), when: "editing" },
-  { key: "F2", command: FIELD_START_EDIT(), when: "navigating" },
+  { key: "Enter", command: OS_FIELD_COMMIT(), when: "editing" },
+  { key: "Escape", command: OS_FIELD_CANCEL(), when: "editing" },
+  { key: "F2", command: OS_FIELD_START_EDIT(), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
 // Expansion
 // ═══════════════════════════════════════════════════════════════════
-// ArrowRight/ArrowLeft expand/collapse is handled inline by NAVIGATE
+// ArrowRight/ArrowLeft expand/collapse is handled inline by OS_NAVIGATE
 // (W3C tree pattern). No separate keybindings needed.

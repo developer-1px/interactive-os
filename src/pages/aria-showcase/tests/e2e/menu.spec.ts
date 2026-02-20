@@ -33,7 +33,7 @@ test.describe("Menu", () => {
   });
 
   test("Checkbox Toggle", async ({ page }) => {
-    // Click ruler — SELECT(replace) adds to selection → checked=true
+    // Click ruler — OS_SELECT(replace) adds to selection → checked=true
     await page.locator("#menu-ruler").click();
     await expect(page.locator("#menu-ruler")).toBeFocused();
     await expect(page.locator("#menu-ruler")).toHaveAttribute(

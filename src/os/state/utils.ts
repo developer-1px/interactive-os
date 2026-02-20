@@ -20,7 +20,7 @@ export function ensureZone(draft: OSState, zoneId: string): ZoneState {
  * Apply followFocus: selection follows the focused item.
  * W3C APG: In single-select listbox, selection follows focus.
  *
- * Single source of truth — used by both FOCUS and NAVIGATE commands.
+ * Single source of truth — used by both OS_FOCUS and OS_NAVIGATE commands.
  */
 export function applyFollowFocus(
   zone: ZoneState,

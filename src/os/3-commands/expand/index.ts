@@ -14,7 +14,7 @@ interface ExpandPayload {
   action?: ExpandAction;
 }
 
-export const EXPAND = os.defineCommand(
+export const OS_EXPAND = os.defineCommand(
   "OS_EXPAND",
   (ctx) => (payload: ExpandPayload) => {
     const { activeZoneId } = ctx.state.os.focus;

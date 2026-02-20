@@ -4,8 +4,8 @@
  * Registers DOCS_SCROLL_PAGE command and middleware through the OS kernel.
  * Follows the Inspector/CommandPalette plugin model.
  *
- * Strategy: OS NAVIGATE already claims ArrowLeft/Right. When there's no active
- * zone (docs page), NAVIGATE returns undefined. We use kernel middleware to
+ * Strategy: OS OS_NAVIGATE already claims ArrowLeft/Right. When there's no active
+ * zone (docs page), OS_NAVIGATE returns undefined. We use kernel middleware to
  * intercept OS_NAVIGATE and redirect to DOCS_SCROLL_PAGE when the docs scroll
  * container is present.
  *

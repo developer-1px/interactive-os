@@ -114,7 +114,7 @@ export function createTestInstance<S>(
     );
   }
 
-  // Register OS commands (FOCUS, CLIPBOARD_SET) on test kernel
+  // Register OS commands (OS_FOCUS, CLIPBOARD_SET) on test kernel
   // Required for integration tests that rely on focus/selection/clipboard persistence
   testKernel.defineCommand("OS_FOCUS", focusHandler as any);
   testKernel.defineCommand("OS_CLIPBOARD_SET", clipboardSetHandler as any);

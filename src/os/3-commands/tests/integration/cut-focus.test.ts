@@ -1,5 +1,5 @@
 import { listCollection, TodoDraft } from "@apps/todo/app";
-import { FOCUS } from "@os/3-commands/focus/focus";
+import { OS_FOCUS } from "@os/3-commands/focus/focus";
 import { createHeadlessTest } from "@os/tests/createHeadlessTest";
 
 describe("OS Integration: Cut Focus Recovery", () => {
@@ -30,7 +30,7 @@ describe("OS Integration: Cut Focus Recovery", () => {
     });
 
     // Ensure list is active
-    dispatch(FOCUS({ zoneId: "list", itemId: b.id }));
+    dispatch(OS_FOCUS({ zoneId: "list", itemId: b.id }));
 
     // Verify State
     const focusState = (runtime.getState() as any).os.focus.zones["list"];

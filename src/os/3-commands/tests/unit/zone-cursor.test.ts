@@ -11,7 +11,7 @@ import { GLOBAL } from "@kernel";
 import type { Command, ScopeToken } from "@kernel/core/tokens";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_COPY } from "@os/3-commands/clipboard/clipboard";
-import { ACTIVATE } from "@os/3-commands/interaction/activate";
+import { OS_ACTIVATE } from "@os/3-commands/interaction/activate";
 import { OS_CHECK } from "@os/3-commands/interaction/check";
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
 
@@ -140,7 +140,7 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
     });
     setupFocusWithSelection("z1", "item-1");
 
-    os.dispatch(ACTIVATE());
+    os.dispatch(OS_ACTIVATE());
 
     expect(receivedCursor).toHaveBeenCalledWith({
       focusId: "item-1",
@@ -255,10 +255,10 @@ describe("Edge cases", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// FR7: SELECTION_CLEAR after delete/cut
+// FR7: OS_SELECTION_CLEAR after delete/cut
 // ═══════════════════════════════════════════════════════════════════
 
-describe("FR7: SELECTION_CLEAR after delete/cut", () => {
+describe("FR7: OS_SELECTION_CLEAR after delete/cut", () => {
   it("clears selection after OS_DELETE with multi-selection", () => {
     const onDelete = vi.fn(() => ({ type: "mock/delete", payload: {} }));
 

@@ -9,7 +9,7 @@ import { produce } from "immer";
  *
  * Provides a clean global kernel environment for integration testing.
  * Uses the SINGLETON kernel (mimicking production) but resets state between tests.
- * This ensures all OS commands (FOCUS, NAVIGATE) are registered and working.
+ * This ensures all OS commands (OS_FOCUS, OS_NAVIGATE) are registered and working.
  *
  * Usage:
  *   const { dispatch, getState } = createHeadlessTest();

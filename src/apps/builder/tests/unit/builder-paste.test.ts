@@ -2,7 +2,7 @@
  * Builder copy-paste reproduction test.
  * 
  * Reproduces: copy → paste → paste (연속) 시나리오
- * Uses withOS: true to include OS focus state for FOCUS command.
+ * Uses withOS: true to include OS focus state for OS_FOCUS command.
  * Clipboard is OS-managed (os.clipboard).
  */
 

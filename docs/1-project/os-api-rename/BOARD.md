@@ -2,11 +2,11 @@
 
 ## 🔴 Now
 
-- [ ] T1: `kernel` → `os` 전체 rename
-  - [ ] `src/os/kernel.ts` — `export const os = createKernel<AppState>(...)`
-  - [ ] 모든 `import { kernel }` → `import { os }` (앱, 페이지, 테스트)
-  - [ ] `window.__kernel` → `window.__os`
-  - [ ] tsc clean + 전체 테스트 통과
+- [x] T1: `kernel` → `os` 전체 rename
+  - [x] `src/os/kernel.ts` — `export const os = createKernel<AppState>(...)`
+  - [x] 모든 `import { kernel }` → `import { os }` (앱, 페이지, 테스트)
+  - [x] `window.__kernel` → `window.__os`
+  - [x] tsc clean + 전체 테스트 통과
 
 - [ ] T2: 커맨드 변수명 `OS_` 접두어 통일
   - [ ] 접두어 미적용 21개 rename (`NAVIGATE` → `OS_NAVIGATE` 등)

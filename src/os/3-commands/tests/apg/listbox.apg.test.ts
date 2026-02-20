@@ -54,7 +54,7 @@ function singleSelect(focusedItem = "apple") {
     t.setItems(ITEMS);
     t.setConfig(SINGLE_SELECT);
     t.setActiveZone("listbox", focusedItem);
-    t.dispatch(t.SELECT({ targetId: focusedItem, mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: focusedItem, mode: "replace" }));
     return t;
 }
 
@@ -92,14 +92,14 @@ describe("APG Listbox: Single-Select", () => {
 
     it("selection follows focus on Home", () => {
         const t = singleSelect("cherry");
-        t.dispatch(t.NAVIGATE({ direction: "home" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "home" }));
         expect(t.focusedItemId()).toBe("apple");
         expect(t.selection()).toEqual(["apple"]);
     });
 
     it("selection follows focus on End", () => {
         const t = singleSelect("banana");
-        t.dispatch(t.NAVIGATE({ direction: "end" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "end" }));
         expect(t.focusedItemId()).toBe("elderberry");
         expect(t.selection()).toEqual(["elderberry"]);
     });
@@ -112,65 +112,65 @@ describe("APG Listbox: Single-Select", () => {
 describe("APG Listbox: Multi-Select", () => {
     it("Down Arrow: moves focus without changing selection", () => {
         const t = multiSelect("apple");
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.focusedItemId()).toBe("banana");
         expect(t.selection()).toEqual([]);
     });
 
     it("Space: toggles selection of focused option", () => {
         const t = multiSelect("banana");
-        t.dispatch(t.SELECT({ targetId: "banana", mode: "toggle" }));
+        t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "toggle" }));
         expect(t.selection()).toEqual(["banana"]);
     });
 
     it("Space: deselects already-selected option", () => {
         const t = multiSelect("banana");
-        t.dispatch(t.SELECT({ targetId: "banana", mode: "toggle" }));
-        t.dispatch(t.SELECT({ targetId: "banana", mode: "toggle" }));
+        t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "toggle" }));
+        t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "toggle" }));
         expect(t.selection()).toEqual([]);
     });
 
     it("Shift+Down: extends selection range", () => {
         const t = multiSelect("banana");
-        t.dispatch(t.SELECT({ targetId: "banana", mode: "replace" }));
-        t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
+        t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "replace" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
         expect(t.focusedItemId()).toBe("cherry");
         expect(t.selection()).toEqual(["banana", "cherry"]);
     });
 
     it("Shift+Up: extends selection range backward", () => {
         const t = multiSelect("cherry");
-        t.dispatch(t.SELECT({ targetId: "cherry", mode: "replace" }));
-        t.dispatch(t.NAVIGATE({ direction: "up", select: "range" }));
+        t.dispatch(t.OS_SELECT({ targetId: "cherry", mode: "replace" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "up", select: "range" }));
         expect(t.focusedItemId()).toBe("banana");
         expect(t.selection()).toEqual(["banana", "cherry"]);
     });
 
     it("Shift+Space: range select from anchor to focused", () => {
         const t = multiSelect("banana");
-        t.dispatch(t.SELECT({ targetId: "banana", mode: "replace" }));
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        t.dispatch(t.SELECT({ targetId: "date", mode: "range" }));
+        t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "replace" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_SELECT({ targetId: "date", mode: "range" }));
         expect(t.selection()).toEqual(["banana", "cherry", "date"]);
     });
 
     it("Shift+Down × 3: progressively extends range", () => {
         const t = multiSelect("apple");
-        t.dispatch(t.SELECT({ targetId: "apple", mode: "replace" }));
-        t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
-        t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
-        t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
+        t.dispatch(t.OS_SELECT({ targetId: "apple", mode: "replace" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
         expect(t.selection()).toEqual(["apple", "banana", "cherry", "date"]);
     });
 
     it("Shift+Down then Shift+Up: shrinks range", () => {
         const t = multiSelect("banana");
-        t.dispatch(t.SELECT({ targetId: "banana", mode: "replace" }));
-        t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
-        t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
+        t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "replace" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
         expect(t.selection()).toEqual(["banana", "cherry", "date"]);
-        t.dispatch(t.NAVIGATE({ direction: "up", select: "range" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "up", select: "range" }));
         expect(t.selection()).toEqual(["banana", "cherry"]);
     });
 });
@@ -185,7 +185,7 @@ describe("APG Listbox: Focus Initialization", () => {
         t.setItems(ITEMS);
         t.setConfig(SINGLE_SELECT);
         t.setActiveZone("listbox", null);
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.focusedItemId()).toBe("apple");
     });
 
@@ -194,7 +194,7 @@ describe("APG Listbox: Focus Initialization", () => {
         t.setItems(ITEMS);
         t.setConfig(MULTI_SELECT);
         t.setActiveZone("listbox", null);
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.focusedItemId()).toBe("apple");
         expect(t.selection()).toEqual([]);
     });
@@ -213,19 +213,19 @@ describe("APG Listbox: Horizontal Orientation", () => {
             select: SINGLE_SELECT.select,
         });
         t.setActiveZone("listbox", focusedItem);
-        t.dispatch(t.SELECT({ targetId: focusedItem, mode: "replace" }));
+        t.dispatch(t.OS_SELECT({ targetId: focusedItem, mode: "replace" }));
         return t;
     }
 
     it("Right Arrow: moves focus to next option", () => {
         const t = horizontal("apple");
-        t.dispatch(t.NAVIGATE({ direction: "right" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
         expect(t.focusedItemId()).toBe("banana");
     });
 
     it("Left Arrow: moves focus to previous option", () => {
         const t = horizontal("cherry");
-        t.dispatch(t.NAVIGATE({ direction: "left" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "left" }));
         expect(t.focusedItemId()).toBe("banana");
     });
 
@@ -253,29 +253,29 @@ describe("APG Listbox: RadioGroup Variant", () => {
             },
         });
         t.setActiveZone("radiogroup", selected);
-        t.dispatch(t.SELECT({ targetId: selected, mode: "replace" }));
+        t.dispatch(t.OS_SELECT({ targetId: selected, mode: "replace" }));
         return t;
     }
 
     it("navigate + select: Down moves and selects", () => {
         const t = radioGroup("radio-sm");
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.focusedItemId()).toBe("radio-md");
         expect(t.selection()).toEqual(["radio-md"]);
     });
 
     it("loop: Down at last wraps to first", () => {
         const t = radioGroup("radio-lg");
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.focusedItemId()).toBe("radio-sm");
         expect(t.selection()).toEqual(["radio-sm"]);
     });
 
     it("never-empty: always one selection", () => {
         const t = radioGroup("radio-sm");
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.selection()).toHaveLength(1);
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
+        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
         expect(t.selection()).toHaveLength(1);
     });
 });

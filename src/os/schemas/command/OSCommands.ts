@@ -6,28 +6,28 @@
  */
 export const OS_COMMANDS = {
   // --- Navigation (The "Physics" of Focus) ---
-  NAVIGATE: "OS_NAVIGATE",
-  FOCUS: "OS_FOCUS",
-  SYNC_FOCUS: "OS_SYNC_FOCUS",
-  RECOVER: "OS_RECOVER",
-  TAB: "OS_TAB",
+  OS_NAVIGATE: "OS_NAVIGATE",
+  OS_FOCUS: "OS_FOCUS",
+  OS_SYNC_FOCUS: "OS_SYNC_FOCUS",
+  OS_RECOVER: "OS_RECOVER",
+  OS_TAB: "OS_TAB",
   TAB_PREV: "OS_TAB_PREV",
 
   // --- Selection (The "Selection" of Items) ---
-  SELECT: "OS_SELECT",
+  OS_SELECT: "OS_SELECT",
   SELECT_ALL: "OS_SELECT_ALL",
   DESELECT_ALL: "OS_DESELECT_ALL",
 
   // --- Activation (The "Action" Trigger) ---
-  ACTIVATE: "OS_ACTIVATE",
+  OS_ACTIVATE: "OS_ACTIVATE",
 
   // --- Escape (Context-aware: deselect, close, or none) ---
-  ESCAPE: "OS_ESCAPE",
+  OS_ESCAPE: "OS_ESCAPE",
 
   // --- Field Editing (The "Edit" Lifecycle) ---
-  FIELD_START_EDIT: "OS_FIELD_START_EDIT",
-  FIELD_COMMIT: "OS_FIELD_COMMIT",
-  FIELD_CANCEL: "OS_FIELD_CANCEL",
+  OS_FIELD_START_EDIT: "OS_FIELD_START_EDIT",
+  OS_FIELD_COMMIT: "OS_FIELD_COMMIT",
+  OS_FIELD_CANCEL: "OS_FIELD_CANCEL",
   FIELD_SYNC: "OS_FIELD_SYNC",
   FIELD_BLUR: "OS_FIELD_BLUR",
 

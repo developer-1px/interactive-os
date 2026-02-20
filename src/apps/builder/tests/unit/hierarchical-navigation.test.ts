@@ -155,23 +155,23 @@ describe("hierarchicalNavigation — OS item queries", () => {
   });
 
   describe("drillDown", () => {
-    it("returns FOCUS to first child group when on a section", () => {
+    it("returns OS_FOCUS to first child group when on a section", () => {
       const result = drillDown({ focusId: "s1", selection: [], anchor: null });
       expect(result).not.toEqual([]);
       if (!Array.isArray(result)) {
-        expect(result.type).toContain("FOCUS");
+        expect(result.type).toContain("OS_FOCUS");
       }
     });
 
-    it("returns FOCUS to first child item when on a group", () => {
+    it("returns OS_FOCUS to first child item when on a group", () => {
       const result = drillDown({ focusId: "g1", selection: [], anchor: null });
       expect(result).not.toEqual([]);
       if (!Array.isArray(result)) {
-        expect(result.type).toContain("FOCUS");
+        expect(result.type).toContain("OS_FOCUS");
       }
     });
 
-    it("returns FIELD_START_EDIT when on an item", () => {
+    it("returns OS_FIELD_START_EDIT when on an item", () => {
       const result = drillDown({ focusId: "i1", selection: [], anchor: null });
       if (!Array.isArray(result)) {
         expect(result.type).toContain("FIELD");
@@ -186,19 +186,19 @@ describe("hierarchicalNavigation — OS item queries", () => {
   });
 
   describe("drillUp", () => {
-    it("returns FOCUS to parent section when on a group", () => {
+    it("returns OS_FOCUS to parent section when on a group", () => {
       const result = drillUp({ focusId: "g1", selection: [], anchor: null });
       expect(result).not.toEqual([]);
       if (!Array.isArray(result)) {
-        expect(result.type).toContain("FOCUS");
+        expect(result.type).toContain("OS_FOCUS");
       }
     });
 
-    it("returns FOCUS to parent group when on an item", () => {
+    it("returns OS_FOCUS to parent group when on an item", () => {
       const result = drillUp({ focusId: "i1", selection: [], anchor: null });
       expect(result).not.toEqual([]);
       if (!Array.isArray(result)) {
-        expect(result.type).toContain("FOCUS");
+        expect(result.type).toContain("OS_FOCUS");
       }
     });
 

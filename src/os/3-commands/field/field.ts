@@ -4,9 +4,9 @@
  * State: ZoneState.editingItemId
  *
  * Commands:
- *   FIELD_START_EDIT — Enter editing mode on the focused item
- *   FIELD_COMMIT    — Exit editing mode and commit the value
- *   FIELD_CANCEL    — Exit editing mode and discard changes
+ *   OS_FIELD_START_EDIT — Enter editing mode on the focused item
+ *   OS_FIELD_COMMIT    — Exit editing mode and commit the value
+ *   OS_FIELD_CANCEL    — Exit editing mode and discard changes
  *
  * DOM Policy: Commands read from FieldRegistry (synced by InputListener).
  *            DOM mutations are delegated to FIELD_CLEAR_EFFECT.
@@ -18,11 +18,11 @@ import { FieldRegistry } from "../../6-components/field/FieldRegistry";
 import { os } from "../../kernel";
 
 // ═══════════════════════════════════════════════════════════════════
-// FIELD_START_EDIT
+// OS_FIELD_START_EDIT
 // ═══════════════════════════════════════════════════════════════════
 
-export const FIELD_START_EDIT = os.defineCommand(
-  "FIELD_START_EDIT",
+export const OS_FIELD_START_EDIT = os.defineCommand(
+  "OS_FIELD_START_EDIT",
   (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
@@ -45,11 +45,11 @@ export const FIELD_START_EDIT = os.defineCommand(
 );
 
 // ═══════════════════════════════════════════════════════════════════
-// FIELD_COMMIT
+// OS_FIELD_COMMIT
 // ═══════════════════════════════════════════════════════════════════
 
-export const FIELD_COMMIT = os.defineCommand(
-  "FIELD_COMMIT",
+export const OS_FIELD_COMMIT = os.defineCommand(
+  "OS_FIELD_COMMIT",
   (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
@@ -118,11 +118,11 @@ export const FIELD_COMMIT = os.defineCommand(
 );
 
 // ═══════════════════════════════════════════════════════════════════
-// FIELD_CANCEL
+// OS_FIELD_CANCEL
 // ═══════════════════════════════════════════════════════════════════
 
-export const FIELD_CANCEL = os.defineCommand(
-  "FIELD_CANCEL",
+export const OS_FIELD_CANCEL = os.defineCommand(
+  "OS_FIELD_CANCEL",
   (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;

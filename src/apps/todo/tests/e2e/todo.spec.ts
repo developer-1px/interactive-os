@@ -88,7 +88,7 @@ test.describe("Todo App", () => {
     // Click on the todo item to focus it
     await page.getByText("Complete Interaction OS docs").click();
 
-    // Enter edit mode (Enter = ACTIVATE = onAction = StartEdit)
+    // Enter edit mode (Enter = OS_ACTIVATE = onAction = StartEdit)
     await page.keyboard.press("Enter");
 
     // Edit field should appear

@@ -7,7 +7,7 @@
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
-import { SELECTION_CLEAR } from "../selection/selection";
+import { OS_SELECTION_CLEAR } from "../selection/selection";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 export const OS_COPY = os.defineCommand("OS_COPY", (ctx) => () => {
@@ -40,7 +40,7 @@ export const OS_CUT = os.defineCommand("OS_CUT", (ctx) => () => {
 
   // OS clears selection after cut
   if (cursor.selection.length > 0) {
-    commands.push(SELECTION_CLEAR({ zoneId: activeZoneId }));
+    commands.push(OS_SELECTION_CLEAR({ zoneId: activeZoneId }));
   }
 
   return { dispatch: commands };

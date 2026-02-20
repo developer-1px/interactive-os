@@ -5,7 +5,7 @@ export interface InspectorSignal {
   /** The kernel scope (group name) that handled this command. Source: tx.handlerScope */
   group: string;
   trigger: {
-    kind: "KEYBOARD" | "MOUSE" | "FOCUS";
+    kind: "KEYBOARD" | "MOUSE" | "OS_FOCUS";
     raw: string;
     elementId?: string;
   };
@@ -28,8 +28,8 @@ export function inferSignal(tx: Transaction): InspectorSignal {
   const kind =
     inputMeta?.type === "MOUSE"
       ? "MOUSE"
-      : inputMeta?.type === "FOCUS"
-        ? "FOCUS"
+      : inputMeta?.type === "OS_FOCUS"
+        ? "OS_FOCUS"
         : "KEYBOARD";
 
   const hasPayloadKey =
@@ -57,7 +57,7 @@ export function inferSignal(tx: Transaction): InspectorSignal {
   // 3. Classify Signal type
   let type: InspectorSignal["type"] = "NO_OP";
 
-  if (kind === "FOCUS") {
+  if (kind === "OS_FOCUS") {
     type = hasMutation ? "STATE_MUTATION" : "OS";
   } else if (hasMutation) {
     type = "STATE_MUTATION";

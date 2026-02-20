@@ -3,20 +3,20 @@ import { describe, expect, it } from "vitest";
 import { inferSignal } from "../../inferSignal";
 
 describe("inferSignal", () => {
-  it("should classify FOCUS events without state mutation as NO_OP when OS filter is ON", () => {
+  it("should classify OS_FOCUS events without state mutation as NO_OP when OS filter is ON", () => {
     const tx = {
       id: 1,
       timestamp: Date.now(),
       bubblePath: ["item-1", "GLOBAL"],
       command: { type: "COM_ACTIVATE_ITEM", payload: { id: "item-1" } },
-      meta: { input: { type: "FOCUS", key: "Focus" } },
+      meta: { input: { type: "OS_FOCUS", key: "Focus" } },
       changes: [], // No state mutations
       effects: {},
     };
 
     const signal = inferSignal(tx as unknown as Transaction);
     expect(signal.type).toBe("OS");
-    expect(signal.trigger.kind).toBe("FOCUS");
+    expect(signal.trigger.kind).toBe("OS_FOCUS");
     expect(signal.diff).toHaveLength(0);
   });
 

@@ -20,19 +20,19 @@ describe("Keybinding Resolution", () => {
   describe("when navigating (isEditing: false)", () => {
     const ctx = { isEditing: false };
 
-    it("Space → SELECT", () => {
+    it("Space → OS_SELECT", () => {
       const result = Keybindings.resolve("Space", ctx);
       expect(result).not.toBeNull();
       expect((result?.command as any)?.type).toBe("OS_SELECT");
     });
 
-    it("Enter → ACTIVATE", () => {
+    it("Enter → OS_ACTIVATE", () => {
       const result = Keybindings.resolve("Enter", ctx);
       expect(result).not.toBeNull();
       expect((result?.command as any)?.type).toBe("OS_ACTIVATE");
     });
 
-    it("Escape → ESCAPE", () => {
+    it("Escape → OS_ESCAPE", () => {
       const result = Keybindings.resolve("Escape", ctx);
       expect(result).not.toBeNull();
       expect((result?.command as any)?.type).toBe("OS_ESCAPE");
@@ -79,16 +79,16 @@ describe("Keybinding Resolution", () => {
       expect(result).toBeNull();
     });
 
-    it("ArrowDown → NAVIGATE", () => {
+    it("ArrowDown → OS_NAVIGATE", () => {
       const result = Keybindings.resolve("ArrowDown", ctx);
       expect(result).not.toBeNull();
       expect((result?.command as any)?.type).toBe("OS_NAVIGATE");
     });
 
-    it("F2 → FIELD_START_EDIT", () => {
+    it("F2 → OS_FIELD_START_EDIT", () => {
       const result = Keybindings.resolve("F2", ctx);
       expect(result).not.toBeNull();
-      expect((result?.command as any)?.type).toBe("FIELD_START_EDIT");
+      expect((result?.command as any)?.type).toBe("OS_FIELD_START_EDIT");
     });
   });
 
@@ -97,21 +97,21 @@ describe("Keybinding Resolution", () => {
   describe("when editing (isEditing: true)", () => {
     const ctx = { isEditing: true };
 
-    it("Enter → FIELD_COMMIT (not ACTIVATE)", () => {
+    it("Enter → OS_FIELD_COMMIT (not OS_ACTIVATE)", () => {
       const result = Keybindings.resolve("Enter", ctx);
       expect(result).not.toBeNull();
-      expect((result?.command as any)?.type).toBe("FIELD_COMMIT");
+      expect((result?.command as any)?.type).toBe("OS_FIELD_COMMIT");
       expect((result?.command as any)?.type).not.toBe("OS_ACTIVATE");
     });
 
-    it("Escape → FIELD_CANCEL (not ESCAPE)", () => {
+    it("Escape → OS_FIELD_CANCEL (not OS_ESCAPE)", () => {
       const result = Keybindings.resolve("Escape", ctx);
       expect(result).not.toBeNull();
-      expect((result?.command as any)?.type).toBe("FIELD_CANCEL");
+      expect((result?.command as any)?.type).toBe("OS_FIELD_CANCEL");
       expect((result?.command as any)?.type).not.toBe("OS_ESCAPE");
     });
 
-    it("Space does NOT resolve to SELECT", () => {
+    it("Space does NOT resolve to OS_SELECT", () => {
       const result = Keybindings.resolve("Space", ctx);
       // Should be null since Space only has navigating binding
       if (result) {

@@ -56,13 +56,13 @@ describe("APG Dialog: Focus Trap", () => {
 
     it("Tab cycles through all elements without escaping", () => {
         const t = createDialog();
-        t.dispatch(t.TAB({ direction: "forward" }));
+        t.dispatch(t.OS_TAB({ direction: "forward" }));
         expect(t.focusedItemId()).toBe("input-name");
-        t.dispatch(t.TAB({ direction: "forward" }));
+        t.dispatch(t.OS_TAB({ direction: "forward" }));
         expect(t.focusedItemId()).toBe("input-email");
-        t.dispatch(t.TAB({ direction: "forward" }));
+        t.dispatch(t.OS_TAB({ direction: "forward" }));
         expect(t.focusedItemId()).toBe("save-btn");
-        t.dispatch(t.TAB({ direction: "forward" }));
+        t.dispatch(t.OS_TAB({ direction: "forward" }));
         expect(t.focusedItemId()).toBe("close-btn");
         expect(t.activeZoneId()).toBe("dialog");
     });
@@ -81,11 +81,11 @@ describe("APG Dialog: Focus Restore", () => {
         const t = createTestOsKernel();
         t.setItems(["new-btn", "edit-btn", "delete-btn"]);
         t.setActiveZone("toolbar", "edit-btn");
-        t.dispatch(t.STACK_PUSH());
+        t.dispatch(t.OS_STACK_PUSH());
         t.setItems(DIALOG_ITEMS);
         t.setConfig(DIALOG_CONFIG);
         t.setActiveZone("dialog", "close-btn");
-        t.dispatch(t.STACK_POP());
+        t.dispatch(t.OS_STACK_POP());
         expect(t.activeZoneId()).toBe("toolbar");
         expect(t.focusedItemId("toolbar")).toBe("edit-btn");
     });
@@ -94,15 +94,15 @@ describe("APG Dialog: Focus Restore", () => {
         const t = createTestOsKernel();
         t.setItems(["btn-1"]);
         t.setActiveZone("toolbar", "btn-1");
-        t.dispatch(t.STACK_PUSH());
+        t.dispatch(t.OS_STACK_PUSH());
         t.setItems(["d1-close", "d1-ok"]);
         t.setActiveZone("dialog-1", "d1-close");
-        t.dispatch(t.STACK_PUSH());
+        t.dispatch(t.OS_STACK_PUSH());
         t.setItems(["d2-yes", "d2-no"]);
         t.setActiveZone("dialog-2", "d2-yes");
-        t.dispatch(t.STACK_POP());
+        t.dispatch(t.OS_STACK_POP());
         expect(t.activeZoneId()).toBe("dialog-1");
-        t.dispatch(t.STACK_POP());
+        t.dispatch(t.OS_STACK_POP());
         expect(t.activeZoneId()).toBe("toolbar");
         expect(t.focusedItemId("toolbar")).toBe("btn-1");
     });

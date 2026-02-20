@@ -20,7 +20,7 @@ interface TabPayload {
   direction?: "forward" | "backward";
 }
 
-export const TAB = os.defineCommand(
+export const OS_TAB = os.defineCommand(
   "OS_TAB",
   [DOM_ITEMS, ZONE_CONFIG, DOM_ZONE_ORDER],
   (ctx) => (payload: TabPayload) => {

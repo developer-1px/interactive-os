@@ -13,7 +13,7 @@ import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
-export const ESCAPE = os.defineCommand(
+export const OS_ESCAPE = os.defineCommand(
   "OS_ESCAPE",
   [ZONE_CONFIG],
   (ctx) => () => {

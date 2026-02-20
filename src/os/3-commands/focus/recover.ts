@@ -10,7 +10,7 @@ import { DOM_ITEMS } from "../../2-contexts";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
-export const RECOVER = os.defineCommand(
+export const OS_RECOVER = os.defineCommand(
   "OS_RECOVER",
   [DOM_ITEMS],
   (ctx) => () => {

@@ -1,15 +1,15 @@
 /**
- * RECOVER — Unit Tests
+ * OS_RECOVER — Unit Tests
  *
- * SPEC §3.1: RECOVER restores focus after focused element removal.
+ * SPEC §3.1: OS_RECOVER restores focus after focused element removal.
  * Priority: recoveryTargetId → lastFocusedId → first item in DOM.
  *
- * RECOVER uses ctx.inject(DOM_ITEMS), so tests must set up
+ * OS_RECOVER uses ctx.inject(DOM_ITEMS), so tests must set up
  * ZoneRegistry + DOM elements for the context provider.
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { RECOVER } from "@os/3-commands/focus/recover";
+import { OS_RECOVER } from "@os/3-commands/focus/recover";
 import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -70,13 +70,13 @@ beforeEach(() => {
   };
 });
 
-describe("RECOVER (SPEC §3.1)", () => {
+describe("OS_RECOVER (SPEC §3.1)", () => {
   it("re-focuses current item if it still exists in DOM", () => {
     setupZone("z1", ["item-1", "item-2", "item-3"], {
       focusedItemId: "item-2",
     });
 
-    os.dispatch(RECOVER());
+    os.dispatch(OS_RECOVER());
 
     // State should NOT change — item is still present
     const zone = os.getState().os.focus.zones["z1"];
@@ -92,7 +92,7 @@ describe("RECOVER (SPEC §3.1)", () => {
       lastFocusedId: "item-1",
     });
 
-    os.dispatch(RECOVER());
+    os.dispatch(OS_RECOVER());
 
     const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-3");
@@ -106,7 +106,7 @@ describe("RECOVER (SPEC §3.1)", () => {
       lastFocusedId: "item-2",
     });
 
-    os.dispatch(RECOVER());
+    os.dispatch(OS_RECOVER());
 
     const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-1");
@@ -122,7 +122,7 @@ describe("RECOVER (SPEC §3.1)", () => {
     }));
 
     // Should not throw
-    os.dispatch(RECOVER());
+    os.dispatch(OS_RECOVER());
   });
 
   it("does nothing when zone state is missing", () => {
@@ -135,7 +135,7 @@ describe("RECOVER (SPEC §3.1)", () => {
     }));
 
     // Should not throw
-    os.dispatch(RECOVER());
+    os.dispatch(OS_RECOVER());
   });
 
   it("does nothing when DOM has no items", () => {
@@ -144,9 +144,9 @@ describe("RECOVER (SPEC §3.1)", () => {
       recoveryTargetId: null,
     });
 
-    os.dispatch(RECOVER());
+    os.dispatch(OS_RECOVER());
 
-    // focusedItemId should remain unchanged (RECOVER returns early)
+    // focusedItemId should remain unchanged (OS_RECOVER returns early)
     const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-1");
   });
@@ -158,7 +158,7 @@ describe("RECOVER (SPEC §3.1)", () => {
       lastFocusedId: "item-2",
     });
 
-    os.dispatch(RECOVER());
+    os.dispatch(OS_RECOVER());
 
     const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.lastFocusedId).toBe("item-3");

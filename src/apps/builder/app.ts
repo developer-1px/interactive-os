@@ -56,7 +56,7 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 // ═══════════════════════════════════════════════════════════════════
 
 import { createCollectionZone } from "@/os/collection/createCollectionZone";
-import { EXPAND } from "@/os/3-commands/expand/index";
+import { OS_EXPAND } from "@/os/3-commands/expand/index";
 
 const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
   accessor: (s: BuilderState) => s.data.blocks,
@@ -98,8 +98,8 @@ export const BuilderSidebarUI = sidebarCollection.bind({
   },
   keybindings: [
     ...collectionBindings.keybindings,
-    { key: "ArrowLeft", command: () => EXPAND({ action: "collapse" }) },
-    { key: "ArrowRight", command: () => EXPAND({ action: "expand" }) },
+    { key: "ArrowLeft", command: () => OS_EXPAND({ action: "collapse" }) },
+    { key: "ArrowRight", command: () => OS_EXPAND({ action: "expand" }) },
   ],
 });
 

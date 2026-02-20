@@ -17,7 +17,7 @@ interface StackPushPayload {
   triggeredBy?: string;
 }
 
-export const STACK_PUSH = os.defineCommand(
+export const OS_STACK_PUSH = os.defineCommand(
   "OS_STACK_PUSH",
   (ctx) =>
     (payload: StackPushPayload = {}) => {
@@ -48,7 +48,7 @@ export const STACK_PUSH = os.defineCommand(
 // POP
 // ═══════════════════════════════════════════════════════════════════
 
-export const STACK_POP = os.defineCommand("OS_STACK_POP", (ctx) => () => {
+export const OS_STACK_POP = os.defineCommand("OS_STACK_POP", (ctx) => () => {
   const stack = ctx.state.os.focus.focusStack;
 
   if (stack.length === 0) return;

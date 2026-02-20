@@ -1,4 +1,4 @@
-export { FOCUS } from "./focus";
-export { RECOVER } from "./recover";
-export { STACK_POP, STACK_PUSH } from "./stack";
-export { SYNC_FOCUS } from "./syncFocus";
+export { OS_FOCUS } from "./focus";
+export { OS_RECOVER } from "./recover";
+export { OS_STACK_POP, OS_STACK_PUSH } from "./stack";
+export { OS_SYNC_FOCUS } from "./syncFocus";

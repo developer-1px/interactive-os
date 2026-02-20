@@ -1,15 +1,15 @@
 /**
  * Virtual Focus Unit Tests — T5a
  *
- * Checks that NAVIGATE and FOCUS commands respect the `virtualFocus` project config.
+ * Checks that OS_NAVIGATE and OS_FOCUS commands respect the `virtualFocus` project config.
  * When `virtualFocus: true`, they should NOT trigger the `focus` effect (el.focus()),
  * allowing the DOM focus to remain on the container (e.g. input) while
  * logically moving the active item state.
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { FOCUS } from "@os/3-commands/focus";
-import { NAVIGATE } from "@os/3-commands/navigate";
+import { OS_FOCUS } from "@os/3-commands/focus";
+import { OS_NAVIGATE } from "@os/3-commands/navigate";
 import { os } from "@os/kernel";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import { initialOSState } from "@os/state/initial";
@@ -102,7 +102,7 @@ describe("Virtual Focus (T5a)", () => {
     cleanup();
   });
 
-  describe("NAVIGATE with virtualFocus: true", () => {
+  describe("OS_NAVIGATE with virtualFocus: true", () => {
     it("updates state but suppresses focus effect", () => {
       const items = ["item-1", "item-2"];
       registerVirtualZone("z-virtual", items);
@@ -111,8 +111,8 @@ describe("Virtual Focus (T5a)", () => {
       const stateBefore = os.getState().os.focus.zones["z-virtual"];
       expect(stateBefore?.focusedItemId).toBe("item-1");
 
-      // Dispatch NAVIGATE (down)
-      os.dispatch(NAVIGATE({ direction: "down" }));
+      // Dispatch OS_NAVIGATE (down)
+      os.dispatch(OS_NAVIGATE({ direction: "down" }));
 
       // 1. State must update — focusedItemId moves to item-2
       const stateAfter = os.getState().os.focus.zones["z-virtual"];
@@ -133,8 +133,8 @@ describe("Virtual Focus (T5a)", () => {
       registerVirtualZone("z-virtual", items);
 
       // Navigate down twice — item-1 → item-2 → stop (wrap: false)
-      os.dispatch(NAVIGATE({ direction: "down" }));
-      os.dispatch(NAVIGATE({ direction: "down" }));
+      os.dispatch(OS_NAVIGATE({ direction: "down" }));
+      os.dispatch(OS_NAVIGATE({ direction: "down" }));
 
       const state = os.getState().os.focus.zones["z-virtual"];
       // Should stay at item-2 (no wrap)
@@ -146,26 +146,26 @@ describe("Virtual Focus (T5a)", () => {
       registerVirtualZone("z-virtual", items);
 
       // Move to item-2 first
-      os.dispatch(NAVIGATE({ direction: "down" }));
+      os.dispatch(OS_NAVIGATE({ direction: "down" }));
       expect(os.getState().os.focus.zones["z-virtual"]?.focusedItemId).toBe(
         "item-2",
       );
 
       // Navigate up
-      os.dispatch(NAVIGATE({ direction: "up" }));
+      os.dispatch(OS_NAVIGATE({ direction: "up" }));
       expect(os.getState().os.focus.zones["z-virtual"]?.focusedItemId).toBe(
         "item-1",
       );
     });
   });
 
-  describe("FOCUS with virtualFocus: true", () => {
+  describe("OS_FOCUS with virtualFocus: true", () => {
     it("updates state but suppresses focus effect", () => {
       const items = ["item-1", "item-2"];
       registerVirtualZone("z-virtual", items);
 
-      // Dispatch FOCUS to item-2
-      os.dispatch(FOCUS({ zoneId: "z-virtual", itemId: "item-2" }));
+      // Dispatch OS_FOCUS to item-2
+      os.dispatch(OS_FOCUS({ zoneId: "z-virtual", itemId: "item-2" }));
 
       // 1. Check State Update
       const stateAfter = os.getState().os.focus.zones["z-virtual"];
@@ -190,7 +190,7 @@ describe("Virtual Focus (T5a)", () => {
         parentId: null,
       });
 
-      os.dispatch(FOCUS({ zoneId: "z-normal", itemId: "item-A" }));
+      os.dispatch(OS_FOCUS({ zoneId: "z-normal", itemId: "item-A" }));
       // os.dispatch returns void — check transaction log for effects
       const tx = os.inspector.getLastTransaction();
       expect((tx?.effects as any)?.focus).toBe("item-A");

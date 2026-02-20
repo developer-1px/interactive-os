@@ -38,7 +38,7 @@ interface WithHistory {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface UndoRedoOptions {
-    /** Optional: dispatch a FOCUS command after undo/redo for focus restoration */
+    /** Optional: dispatch a OS_FOCUS command after undo/redo for focus restoration */
     focusZoneId?: string;
 }
 
@@ -55,12 +55,12 @@ export function createUndoRedoCommands<S extends WithHistory>(
         if (snap["ui"]) draft.ui = snap["ui"];
     }
 
-    /** Build FOCUS dispatch command if applicable */
+    /** Build OS_FOCUS dispatch command if applicable */
     function buildFocusDispatch(entry: any): BaseCommand | undefined {
         const focusTarget = entry.focusedItemId ? String(entry.focusedItemId) : undefined;
         if (focusTarget && options?.focusZoneId) {
             return {
-                type: "FOCUS",
+                type: "OS_FOCUS",
                 payload: { zoneId: options.focusZoneId, itemId: focusTarget },
             } as BaseCommand;
         }

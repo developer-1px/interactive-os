@@ -1,10 +1,10 @@
 /**
- * ACTIVATE command — Unit Tests
+ * OS_ACTIVATE command — Unit Tests
  *
- * Tests: ACTIVATE → onAction callback pipeline via ZoneRegistry.
+ * Tests: OS_ACTIVATE → onAction callback pipeline via ZoneRegistry.
  */
 
-import { ACTIVATE } from "@os/3-commands/interaction/activate";
+import { OS_ACTIVATE } from "@os/3-commands/interaction/activate";
 import { os } from "@os/kernel";
 import { describe, it } from "vitest";
 import {
@@ -15,7 +15,7 @@ import {
 
 useKernelSnapshot();
 
-describe("ACTIVATE → onAction pipeline", () => {
+describe("OS_ACTIVATE → onAction pipeline", () => {
   it("dispatches onAction callback when Zone has it", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {
@@ -25,6 +25,6 @@ describe("ACTIVATE → onAction pipeline", () => {
       }),
     });
 
-    os.dispatch(ACTIVATE());
+    os.dispatch(OS_ACTIVATE());
   });
 });

@@ -28,7 +28,7 @@
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import { produce } from "immer";
-import { FOCUS } from "@/os/3-commands/focus/focus";
+import { OS_FOCUS } from "@/os/3-commands/focus/focus";
 import { OS_CLIPBOARD_SET } from "@/os/3-commands/clipboard/clipboardSet";
 import type { AppHandle, ZoneHandle } from "@/os/defineApp.types";
 
@@ -224,7 +224,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       if (visIdx !== -1) {
         const neighbor = visible[visIdx + 1] ?? visible[visIdx - 1];
         if (neighbor) {
-          focusCmd = FOCUS({
+          focusCmd = OS_FOCUS({
             zoneId: zoneName,
             itemId: neighbor.id,
           });
@@ -365,7 +365,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
           const targetId = next?.id ?? prev?.id;
           if (targetId) {
-            focusCmd = FOCUS({
+            focusCmd = OS_FOCUS({
               zoneId: zoneName,
               itemId: targetId,
             });
@@ -449,7 +449,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       const commands: BaseCommand[] = [];
       if (pastedIds.length > 0) {
         commands.push(
-          FOCUS({
+          OS_FOCUS({
             zoneId: zoneName,
             itemId: pastedIds[pastedIds.length - 1]!,
             selection: pastedIds,

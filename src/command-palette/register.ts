@@ -7,7 +7,7 @@
  * Side-effect import: `import "@/command-palette/register"`
  */
 
-import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@/os/3-commands";
+import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@/os/3-commands";
 import { os } from "@/os/kernel";
 import { Keybindings } from "@/os/keymaps/keybindings";
 
@@ -23,12 +23,12 @@ export const TOGGLE_COMMAND_PALETTE = os.defineCommand(
     if (isOpen) {
       return {
         // biome-ignore lint/suspicious/noExplicitAny: command dispatch type compatibility
-        dispatch: OVERLAY_CLOSE({ id: "command-palette" }) as any,
+        dispatch: OS_OVERLAY_CLOSE({ id: "command-palette" }) as any,
       };
     }
 
     return {
-      dispatch: OVERLAY_OPEN({
+      dispatch: OS_OVERLAY_OPEN({
         id: "command-palette",
         type: "dialog",
         // biome-ignore lint/suspicious/noExplicitAny: command dispatch type compatibility
@@ -65,7 +65,7 @@ if (typeof window !== "undefined") {
       );
       if (!isOpen) {
         os.dispatch(
-          OVERLAY_OPEN({
+          OS_OVERLAY_OPEN({
             id: "command-palette",
             type: "dialog",
             // biome-ignore lint/suspicious/noExplicitAny: command dispatch type compatibility

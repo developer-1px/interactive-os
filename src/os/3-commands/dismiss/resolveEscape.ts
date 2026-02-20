@@ -13,7 +13,7 @@ export interface EscapeResult {
 }
 
 /**
- * Resolve what ESCAPE should do for a given dismiss config + zone state.
+ * Resolve what OS_ESCAPE should do for a given dismiss config + zone state.
  *
  * @param behavior - The zone's dismiss.escape config value
  * @param hasSelection - Whether the zone currently has selected items

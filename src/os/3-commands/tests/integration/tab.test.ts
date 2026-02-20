@@ -1,8 +1,8 @@
 /**
- * TAB Command — Headless Kernel Integration Test (PoC)
+ * OS_TAB Command — Headless Kernel Integration Test (PoC)
  *
  * Tests the FULL command pipeline without DOM:
- *   state + context(mock) → dispatch(TAB) → new state
+ *   state + context(mock) → dispatch(OS_TAB) → new state
  *
  * This proves that "wiring correctness" can be tested
  * headlessly via the kernel's defineContext override.
@@ -77,8 +77,8 @@ function createTestOsKernel(overrides?: Partial<AppState>) {
     () => mockZoneOrder.current,
   );
 
-  // ─── Register TAB command ───
-  const TAB = kernel.defineCommand(
+  // ─── Register OS_TAB command ───
+  const OS_TAB = kernel.defineCommand(
     "OS_TAB",
     [DOM_ITEMS, ZONE_CONFIG, DOM_ZONE_ORDER],
     (ctx: any) => (payload: { direction?: "forward" | "backward" }) => {
@@ -126,7 +126,7 @@ function createTestOsKernel(overrides?: Partial<AppState>) {
     },
   );
 
-  return { kernel, TAB, mockItems, mockZoneOrder, mockConfig };
+  return { kernel, OS_TAB, mockItems, mockZoneOrder, mockConfig };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -152,11 +152,11 @@ function withActiveZone(
 // Tests
 // ═══════════════════════════════════════════════════════════════════
 
-describe("TAB Command — Headless Kernel Integration", () => {
+describe("OS_TAB Command — Headless Kernel Integration", () => {
   // ─── escape behavior ───
 
   it("escape forward: moves to next zone", () => {
-    const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
+    const { kernel, OS_TAB, mockItems, mockZoneOrder, mockConfig } =
       createTestOsKernel();
 
     mockItems.current = ["item-a", "item-b", "item-c"];
@@ -185,7 +185,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
     withActiveZone(kernel, "list", "item-b");
 
-    kernel.dispatch(TAB({ direction: "forward" }));
+    kernel.dispatch(OS_TAB({ direction: "forward" }));
 
     const state = kernel.getState();
     expect(state.os.focus.activeZoneId).toBe("sidebar");
@@ -193,7 +193,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
   });
 
   it("escape backward: moves to previous zone", () => {
-    const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
+    const { kernel, OS_TAB, mockItems, mockZoneOrder, mockConfig } =
       createTestOsKernel();
 
     mockItems.current = ["cat-1", "cat-2", "cat-3"];
@@ -222,7 +222,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
     withActiveZone(kernel, "sidebar", "cat-2");
 
-    kernel.dispatch(TAB({ direction: "backward" }));
+    kernel.dispatch(OS_TAB({ direction: "backward" }));
 
     const state = kernel.getState();
     expect(state.os.focus.activeZoneId).toBe("list");
@@ -232,7 +232,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
   // ─── trap behavior ───
 
   it("trap: cycles within zone (forward wrap)", () => {
-    const { kernel, TAB, mockItems, mockConfig } = createTestOsKernel();
+    const { kernel, OS_TAB, mockItems, mockConfig } = createTestOsKernel();
 
     mockItems.current = ["t-0", "t-1", "t-2"];
     mockConfig.current = {
@@ -242,7 +242,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
     withActiveZone(kernel, "dialog", "t-2");
 
-    kernel.dispatch(TAB({ direction: "forward" }));
+    kernel.dispatch(OS_TAB({ direction: "forward" }));
 
     const state = kernel.getState();
     expect(state.os.focus.activeZoneId).toBe("dialog");
@@ -252,7 +252,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
   // ─── flow behavior ───
 
   it("flow: walks within zone then escapes at boundary", () => {
-    const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
+    const { kernel, OS_TAB, mockItems, mockZoneOrder, mockConfig } =
       createTestOsKernel();
 
     mockItems.current = ["f-0", "f-1", "f-2"];
@@ -282,20 +282,20 @@ describe("TAB Command — Headless Kernel Integration", () => {
     withActiveZone(kernel, "toolbar", "f-0");
 
     // Tab forward: f-0 → f-1
-    kernel.dispatch(TAB({ direction: "forward" }));
+    kernel.dispatch(OS_TAB({ direction: "forward" }));
     expect(kernel.getState().os.focus.activeZoneId).toBe("toolbar");
     expect(kernel.getState().os.focus.zones["toolbar"]!.focusedItemId).toBe(
       "f-1",
     );
 
     // Tab forward: f-1 → f-2
-    kernel.dispatch(TAB({ direction: "forward" }));
+    kernel.dispatch(OS_TAB({ direction: "forward" }));
     expect(kernel.getState().os.focus.zones["toolbar"]!.focusedItemId).toBe(
       "f-2",
     );
 
     // Tab forward: f-2 → escape to next-zone
-    kernel.dispatch(TAB({ direction: "forward" }));
+    kernel.dispatch(OS_TAB({ direction: "forward" }));
     expect(kernel.getState().os.focus.activeZoneId).toBe("next-zone");
     expect(kernel.getState().os.focus.zones["next-zone"]!.focusedItemId).toBe(
       "n-0",
@@ -305,7 +305,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
   // ─── edge cases ───
 
   it("single zone: Tab does nothing", () => {
-    const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
+    const { kernel, OS_TAB, mockItems, mockZoneOrder, mockConfig } =
       createTestOsKernel();
 
     mockItems.current = ["only-0", "only-1"];
@@ -326,7 +326,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
 
     withActiveZone(kernel, "only", "only-0");
 
-    kernel.dispatch(TAB({ direction: "forward" }));
+    kernel.dispatch(OS_TAB({ direction: "forward" }));
 
     // Should stay — single zone, nowhere to wrap to
     expect(kernel.getState().os.focus.activeZoneId).toBe("only");
@@ -336,7 +336,7 @@ describe("TAB Command — Headless Kernel Integration", () => {
   });
 
   it("3-zone cycle: list → sidebar → toolbar (forward)", () => {
-    const { kernel, TAB, mockItems, mockZoneOrder, mockConfig } =
+    const { kernel, OS_TAB, mockItems, mockZoneOrder, mockConfig } =
       createTestOsKernel();
 
     const zones = [
@@ -375,17 +375,17 @@ describe("TAB Command — Headless Kernel Integration", () => {
     mockItems.current = ["l-0", "l-1", "l-2"];
     withActiveZone(kernel, "list", "l-1");
 
-    kernel.dispatch(TAB({ direction: "forward" }));
+    kernel.dispatch(OS_TAB({ direction: "forward" }));
     expect(kernel.getState().os.focus.activeZoneId).toBe("sidebar");
 
     // Now at sidebar — update items
     mockItems.current = ["s-0", "s-1", "s-2"];
-    kernel.dispatch(TAB({ direction: "forward" }));
+    kernel.dispatch(OS_TAB({ direction: "forward" }));
     expect(kernel.getState().os.focus.activeZoneId).toBe("toolbar");
 
     // At toolbar — wraps back to list
     mockItems.current = ["t-0", "t-1", "t-2"];
-    kernel.dispatch(TAB({ direction: "forward" }));
+    kernel.dispatch(OS_TAB({ direction: "forward" }));
     expect(kernel.getState().os.focus.activeZoneId).toBe("list"); // wrap!
   });
 });

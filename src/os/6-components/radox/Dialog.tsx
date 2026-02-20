@@ -21,7 +21,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { OVERLAY_CLOSE } from "@os/3-commands/overlay/overlay";
+import { OS_OVERLAY_CLOSE } from "@os/3-commands/overlay/overlay";
 import {
   Children,
   isValidElement,
@@ -32,7 +32,7 @@ import { Trigger, useOverlayContext } from "../primitives/Trigger.tsx";
 import { Zone } from "../primitives/Zone.tsx";
 
 // ═══════════════════════════════════════════════════════════════════
-// DialogZone — Zone wrapper that connects dismiss to OVERLAY_CLOSE
+// DialogZone — Zone wrapper that connects dismiss to OS_OVERLAY_CLOSE
 // ═══════════════════════════════════════════════════════════════════
 
 interface DialogZoneProps {
@@ -42,14 +42,14 @@ interface DialogZoneProps {
 
 /**
  * DialogZone — wraps Zone role="dialog" and connects its onDismiss
- * command to OVERLAY_CLOSE. Fully declarative — no callbacks.
+ * command to OS_OVERLAY_CLOSE. Fully declarative — no callbacks.
  */
 function DialogZone({ children, zoneClassName }: DialogZoneProps) {
   const overlayCtx = useOverlayContext();
 
   // Construct dismiss command declaratively
   const dismissCommand = overlayCtx?.overlayId
-    ? OVERLAY_CLOSE({ id: overlayCtx.overlayId })
+    ? OS_OVERLAY_CLOSE({ id: overlayCtx.overlayId })
     : undefined;
 
   return (

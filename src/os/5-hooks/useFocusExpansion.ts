@@ -7,7 +7,7 @@
 
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { useCallback } from "react";
-import { EXPAND } from "@/os/3-commands/expand";
+import { OS_EXPAND } from "@/os/3-commands/expand";
 import { os } from "@/os/kernel";
 
 // Stable empty array reference to avoid infinite re-render in useSyncExternalStore.
@@ -29,12 +29,12 @@ export function useFocusExpansion() {
   );
 
   const toggleExpanded = useCallback((id: string) => {
-    os.dispatch(EXPAND({ itemId: id, action: "toggle" }));
+    os.dispatch(OS_EXPAND({ itemId: id, action: "toggle" }));
   }, []);
 
   const setExpanded = useCallback((id: string, expanded: boolean) => {
     os.dispatch(
-      EXPAND({ itemId: id, action: expanded ? "expand" : "collapse" }),
+      OS_EXPAND({ itemId: id, action: expanded ? "expand" : "collapse" }),
     );
   }, []);
 

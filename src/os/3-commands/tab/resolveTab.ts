@@ -2,7 +2,7 @@
  * resolveTab — Pure tab navigation resolver.
  *
  * Extracts the core tab navigation logic into testable pure functions.
- * The TAB command delegates to these resolvers.
+ * The OS_TAB command delegates to these resolvers.
  */
 
 export type TabDirection = "forward" | "backward";

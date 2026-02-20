@@ -11,7 +11,7 @@
 
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
-import { OVERLAY_CLOSE } from "@/os/3-commands";
+import { OS_OVERLAY_CLOSE } from "@/os/3-commands";
 import { Kbd } from "@/os/6-components/Kbd";
 import {
   QuickPick,
@@ -118,7 +118,7 @@ export function CommandPalette() {
   );
 
   const handleClose = useCallback(() => {
-    os.dispatch(OVERLAY_CLOSE({ id: "command-palette" }));
+    os.dispatch(OS_OVERLAY_CLOSE({ id: "command-palette" }));
   }, []);
 
   // ── Typeahead resolver (uses fuzzy-matched label) ──

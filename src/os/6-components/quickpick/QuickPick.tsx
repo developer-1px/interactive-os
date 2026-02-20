@@ -33,7 +33,7 @@
  *   />
  */
 
-import { FOCUS, NAVIGATE, OVERLAY_CLOSE, OVERLAY_OPEN } from "@os/3-commands";
+import { OS_FOCUS, OS_NAVIGATE, OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os/3-commands";
 import { Kbd } from "@os/6-components/Kbd";
 import { Item } from "@os/6-components/primitives/Item";
 import { Zone } from "@os/6-components/primitives/Zone";
@@ -187,9 +187,9 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
   // ── Overlay sync ──
   useEffect(() => {
     if (isOpen) {
-      os.dispatch(OVERLAY_OPEN({ id, type: "dialog" }));
+      os.dispatch(OS_OVERLAY_OPEN({ id, type: "dialog" }));
     } else {
-      os.dispatch(OVERLAY_CLOSE({ id }));
+      os.dispatch(OS_OVERLAY_CLOSE({ id }));
     }
   }, [isOpen, id]);
 
@@ -213,7 +213,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
     const timer = setTimeout(() => {
       inputRef.current?.focus();
       // Activate the QuickPick zone by focusing the first item.
-      // This sets activeZoneId so NAVIGATE works correctly.
+      // This sets activeZoneId so OS_NAVIGATE works correctly.
       const containerEl = containerRef.current;
       if (containerEl) {
         const firstItem =
@@ -221,7 +221,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
         if (firstItem) {
           const itemId = firstItem.getAttribute("data-item-id");
           if (itemId) {
-            os.dispatch(FOCUS({ zoneId, itemId }));
+            os.dispatch(OS_FOCUS({ zoneId, itemId }));
           }
         }
       }
@@ -266,7 +266,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
 
   // ── Close helper ──
   const handleClose = useCallback(() => {
-    os.dispatch(OVERLAY_CLOSE({ id }));
+    os.dispatch(OS_OVERLAY_CLOSE({ id }));
     onClose?.();
   }, [id, onClose]);
 
@@ -300,7 +300,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
         // Direct kernel dispatch — virtualFocus keeps DOM focus on input
         e.preventDefault();
         os.dispatch(
-          NAVIGATE({
+          OS_NAVIGATE({
             direction: e.key === "ArrowDown" ? "down" : "up",
           }),
         );

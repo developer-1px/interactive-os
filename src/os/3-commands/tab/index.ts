@@ -8,4 +8,4 @@ export {
   resolveTabEscapeZone,
   resolveTabWithinZone,
 } from "./resolveTab";
-export { TAB } from "./tab";
+export { OS_TAB } from "./tab";

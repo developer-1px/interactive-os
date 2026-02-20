@@ -12,7 +12,7 @@
 import type { Block } from "@/apps/builder/app";
 import { BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
 import { os } from "@/os/kernel";
-import { EXPAND } from "@/os/3-commands/expand/index";
+import { OS_EXPAND } from "@/os/3-commands/expand/index";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useCallback } from "react";
 
@@ -32,7 +32,7 @@ export function SectionSidebar() {
   );
 
   const toggleExpand = useCallback((itemId: string) => {
-    os.dispatch(EXPAND({ itemId, action: "toggle" }));
+    os.dispatch(OS_EXPAND({ itemId, action: "toggle" }));
   }, []);
 
   // Flatten tree for sidebar display — each node gets a depth

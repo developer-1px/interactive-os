@@ -14,7 +14,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
+import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import type { OverlayEntry } from "@os/state/OSState.ts";
@@ -120,7 +120,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
 
       // If overlay role is set, open the overlay
       if (overlayRole && overlayId) {
-        os.dispatch(OVERLAY_OPEN({ id: overlayId, type: overlayRole }));
+        os.dispatch(OS_OVERLAY_OPEN({ id: overlayId, type: overlayRole }));
       }
 
       // Also dispatch onPress command if provided
@@ -285,7 +285,7 @@ function TriggerPortal({
       e.preventDefault();
       // Let Zone role="dialog" handle ESC via kernel
       // Or close directly for overlays without Zone
-      os.dispatch(OVERLAY_CLOSE({ id: overlayId }));
+      os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
     };
 
     dialog.addEventListener("cancel", handleCancel);
@@ -295,7 +295,7 @@ function TriggerPortal({
   // Backdrop click → close (only for dialog/alertdialog types)
   const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
     if (e.target === dialogRef.current && _overlayType !== "alertdialog") {
-      os.dispatch(OVERLAY_CLOSE({ id: overlayId }));
+      os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
     }
   };
 
@@ -363,7 +363,7 @@ function TriggerDismiss({
 
     // Close the nearest overlay
     if (overlayCtx) {
-      os.dispatch(OVERLAY_CLOSE({ id: overlayCtx.overlayId }));
+      os.dispatch(OS_OVERLAY_CLOSE({ id: overlayCtx.overlayId }));
     }
   };
 

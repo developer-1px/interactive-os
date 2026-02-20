@@ -2,15 +2,15 @@
  * Level 2: Integration Tests — Command Palette overlay & navigation flow
  *
  * Tests the kernel-level behavior of the Command Palette:
- *   - OVERLAY_OPEN/CLOSE for palette lifecycle
- *   - Zone navigation (NAVIGATE) within the palette list
+ *   - OS_OVERLAY_OPEN/CLOSE for palette lifecycle
+ *   - Zone navigation (OS_NAVIGATE) within the palette list
  *   - Focus state management
  *
  * Uses the headless kernel — no DOM, no React, no browser.
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
+import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
 import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -80,7 +80,7 @@ beforeEach(() => {
 
 describe("Command Palette — overlay lifecycle", () => {
   it("opens overlay and adds to stack", () => {
-    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OS_OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
 
     const state = os.getState();
     const entry = state.os.overlays.stack.find(
@@ -91,8 +91,8 @@ describe("Command Palette — overlay lifecycle", () => {
   });
 
   it("closes overlay and removes from stack", () => {
-    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
-    os.dispatch(OVERLAY_CLOSE({ id: "command-palette" }));
+    os.dispatch(OS_OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OS_OVERLAY_CLOSE({ id: "command-palette" }));
 
     const state = os.getState();
     const entry = state.os.overlays.stack.find(
@@ -102,8 +102,8 @@ describe("Command Palette — overlay lifecycle", () => {
   });
 
   it("duplicate open does not create duplicate entries", () => {
-    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
-    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OS_OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OS_OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
 
     const state = os.getState();
     const entries = state.os.overlays.stack.filter(
@@ -119,7 +119,7 @@ describe("Command Palette — overlay lifecycle", () => {
 
 describe("Command Palette — zone focus management", () => {
   it("maintains focusedItemId after overlay open", () => {
-    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OS_OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
 
     setupFocus("command-palette-list", "route:/home");
 
@@ -128,10 +128,10 @@ describe("Command Palette — zone focus management", () => {
   });
 
   it("clears focus state after overlay close", () => {
-    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OS_OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
     setupFocus("command-palette-list", "route:/home");
 
-    os.dispatch(OVERLAY_CLOSE({ id: "command-palette" }));
+    os.dispatch(OS_OVERLAY_CLOSE({ id: "command-palette" }));
 
     const state = os.getState();
     const entry = state.os.overlays.stack.find(

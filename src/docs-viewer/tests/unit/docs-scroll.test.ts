@@ -4,7 +4,7 @@
  * Tests the docs-navigate-redirect middleware and heading-based navigation.
  */
 
-import { NAVIGATE } from "@os/3-commands/navigate";
+import { OS_NAVIGATE } from "@os/3-commands/navigate";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { os } from "@/os/kernel";
 
@@ -111,7 +111,7 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     }));
 
     // 1. Jump to H1 (100) -> snaps to 76 (100 - 24)
-    os.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(OS_NAVIGATE({ direction: "right" }));
     expect(el.scrollBy).toHaveBeenCalledWith({
       top: 76,
       behavior: "instant",
@@ -131,7 +131,7 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     // Clear mock history
     vi.clearAllMocks();
 
-    os.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(OS_NAVIGATE({ direction: "right" }));
     expect(el.scrollBy).toHaveBeenCalledWith({
       top: 400,
       behavior: "instant",
@@ -156,7 +156,7 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     // scrollBy(-124).
     // New scrollTop will be 200 - 124 = 76 (which is 100 - 24). Correct.
 
-    os.dispatch(NAVIGATE({ direction: "left" }));
+    os.dispatch(OS_NAVIGATE({ direction: "left" }));
     expect(el.scrollBy).toHaveBeenCalledWith({
       top: -124,
       behavior: "instant",
@@ -184,7 +184,7 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     // scrollBy(-400).
     // New scrollTop: 476 - 400 = 76 (100 - 24). Correct.
 
-    os.dispatch(NAVIGATE({ direction: "left" }));
+    os.dispatch(OS_NAVIGATE({ direction: "left" }));
     expect(el.scrollBy).toHaveBeenCalledWith({
       top: -400,
       behavior: "instant",
@@ -208,7 +208,7 @@ describe("DOCS_SCROLL_PAGE (boundaries)", () => {
       os: { ...prev.os, focus: { ...prev.os.focus, activeZoneId: null } },
     }));
 
-    os.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(OS_NAVIGATE({ direction: "right" }));
 
     expect(nextLink.click).toHaveBeenCalled();
   });
@@ -223,7 +223,7 @@ describe("DOCS_SCROLL_PAGE (boundaries)", () => {
       os: { ...prev.os, focus: { ...prev.os.focus, activeZoneId: null } },
     }));
 
-    os.dispatch(NAVIGATE({ direction: "left" }));
+    os.dispatch(OS_NAVIGATE({ direction: "left" }));
 
     expect(prevLink.click).toHaveBeenCalled();
   });
@@ -247,7 +247,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
       },
     }));
 
-    os.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(OS_NAVIGATE({ direction: "right" }));
     expect(el.scrollBy).toHaveBeenCalled();
   });
 
@@ -269,7 +269,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
       },
     }));
 
-    os.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(OS_NAVIGATE({ direction: "right" }));
     expect(el.scrollBy).toHaveBeenCalled();
   });
 
@@ -294,8 +294,8 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
       },
     }));
 
-    os.dispatch(NAVIGATE({ direction: "right" }));
-    // Should NOT redirect to docs scroll — NAVIGATE handles it (or returns early)
+    os.dispatch(OS_NAVIGATE({ direction: "right" }));
+    // Should NOT redirect to docs scroll — OS_NAVIGATE handles it (or returns early)
     expect(el.scrollBy).not.toHaveBeenCalled();
   });
 });

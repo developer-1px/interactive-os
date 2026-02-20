@@ -5,8 +5,8 @@
  * via kernel state. Replaces imperative useState-driven open/close patterns.
  *
  * Commands:
- *   OVERLAY_OPEN(id, type)  → Push overlay onto stack
- *   OVERLAY_CLOSE(id?)      → Remove specific overlay or pop top
+ *   OS_OVERLAY_OPEN(id, type)  → Push overlay onto stack
+ *   OS_OVERLAY_CLOSE(id?)      → Remove specific overlay or pop top
  */
 
 import { produce } from "immer";
@@ -22,7 +22,7 @@ interface OverlayOpenPayload {
   type: OverlayEntry["type"];
 }
 
-export const OVERLAY_OPEN = os.defineCommand(
+export const OS_OVERLAY_OPEN = os.defineCommand(
   "OS_OVERLAY_OPEN",
   (ctx) => (payload: OverlayOpenPayload) => {
     // Don't open if already in stack
@@ -49,7 +49,7 @@ interface OverlayClosePayload {
   id?: string;
 }
 
-export const OVERLAY_CLOSE = os.defineCommand(
+export const OS_OVERLAY_CLOSE = os.defineCommand(
   "OS_OVERLAY_CLOSE",
   (ctx) => (payload: OverlayClosePayload) => {
     const { stack } = ctx.state.os.overlays;

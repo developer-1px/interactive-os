@@ -5,10 +5,10 @@
  *
  * W3C UI Events Module: Mouse Events (§3.4)
  *
- * Handles: mousedown → FOCUS + SELECT + optional EXPAND
+ * Handles: mousedown → OS_FOCUS + OS_SELECT + optional OS_EXPAND
  */
 
-import { ACTIVATE, FOCUS, SELECT } from "@os/3-commands";
+import { OS_ACTIVATE, OS_FOCUS, OS_SELECT } from "@os/3-commands";
 import { useEffect } from "react";
 import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
@@ -118,7 +118,7 @@ export function MouseListener() {
 
         case "zone-activate": {
           setDispatching(true);
-          os.dispatch(FOCUS({ zoneId: result.groupId, itemId: null }), {
+          os.dispatch(OS_FOCUS({ zoneId: result.groupId, itemId: null }), {
             meta: {
               input: {
                 type: "MOUSE",
@@ -135,7 +135,7 @@ export function MouseListener() {
           me.preventDefault();
           setDispatching(true);
           os.dispatch(
-            FOCUS({ zoneId: result.groupId, itemId: result.itemId }),
+            OS_FOCUS({ zoneId: result.groupId, itemId: result.itemId }),
             {
               meta: {
                 input: {
@@ -161,10 +161,10 @@ export function MouseListener() {
             },
           };
 
-          // FOCUS first
+          // OS_FOCUS first
           setDispatching(true);
           os.dispatch(
-            FOCUS({
+            OS_FOCUS({
               zoneId: result.groupId,
               itemId: result.itemId,
               skipSelection: true,
@@ -173,18 +173,18 @@ export function MouseListener() {
           );
           setDispatching(false);
 
-          // SELECT
+          // OS_SELECT
           if (result.selectMode === "range" || result.selectMode === "toggle") {
             me.preventDefault();
           }
           os.dispatch(
-            SELECT({ targetId: result.itemId, mode: result.selectMode }),
+            OS_SELECT({ targetId: result.itemId, mode: result.selectMode }),
             mouseMeta,
           );
 
-          // EXPAND if applicable
+          // OS_EXPAND if applicable
           if (result.shouldExpand) {
-            os.dispatch(ACTIVATE(), mouseMeta);
+            os.dispatch(OS_ACTIVATE(), mouseMeta);
           }
           return;
         }

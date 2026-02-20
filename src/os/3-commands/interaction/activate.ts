@@ -10,10 +10,10 @@
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
-import { EXPAND } from "../expand";
+import { OS_EXPAND } from "../expand";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
-export const ACTIVATE = os.defineCommand("OS_ACTIVATE", (ctx) => () => {
+export const OS_ACTIVATE = os.defineCommand("OS_ACTIVATE", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
   if (!activeZoneId) return;
 
@@ -28,7 +28,7 @@ export const ACTIVATE = os.defineCommand("OS_ACTIVATE", (ctx) => () => {
   const childRole = getChildRole(entry?.role);
   if (childRole && isExpandableRole(childRole)) {
     return {
-      dispatch: EXPAND({ action: "toggle", itemId: zone.focusedItemId }),
+      dispatch: OS_EXPAND({ action: "toggle", itemId: zone.focusedItemId }),
     };
   }
 

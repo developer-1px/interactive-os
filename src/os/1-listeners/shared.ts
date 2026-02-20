@@ -36,7 +36,7 @@ export function resolveFocusTarget(
 
 /**
  * Tracks whether the kernel is executing a command that may trigger
- * DOM focus events (el.focus()). Prevents focusin → SYNC_FOCUS loop.
+ * DOM focus events (el.focus()). Prevents focusin → OS_SYNC_FOCUS loop.
  *
  * Set by MouseListener, read by FocusListener. Shared here to avoid
  * circular dependency between mouse/ and focus/ modules.

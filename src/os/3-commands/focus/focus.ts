@@ -8,7 +8,7 @@ interface FocusPayload {
   itemId: string | null;
   /** Override selection (e.g., paste selects all new items) */
   selection?: string[];
-  /** Skip selection processing completely (useful when chaining SELECT) */
+  /** Skip selection processing completely (useful when chaining OS_SELECT) */
   skipSelection?: boolean;
 }
 
@@ -57,4 +57,4 @@ export const focusHandler = (ctx: any) => (payload: FocusPayload) => {
   };
 };
 
-export const FOCUS = os.defineCommand("OS_FOCUS", focusHandler);
+export const OS_FOCUS = os.defineCommand("OS_FOCUS", focusHandler);

@@ -2,7 +2,7 @@
  * itemFilter — Zone-level dynamic item filtering.
  *
  * Tests that when a zone has an itemFilter callback registered,
- * NAVIGATE only traverses items that pass the filter.
+ * OS_NAVIGATE only traverses items that pass the filter.
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
@@ -17,7 +17,7 @@ describe("itemFilter — dynamic item filtering", () => {
     t = createTestOsKernel();
   });
 
-  it("NAVIGATE traverses only filtered items when itemFilter is set", () => {
+  it("OS_NAVIGATE traverses only filtered items when itemFilter is set", () => {
     // All items: a(section), b(item), c(item), d(section)
     // Filter: only "item" level
     const allItems = ["a", "b", "c", "d"];
@@ -41,15 +41,15 @@ describe("itemFilter — dynamic item filtering", () => {
     });
 
     // Navigate down from b → should go to c (skipping d which is "section")
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.focusedItemId()).toBe("c");
 
     // Navigate down from c → should stay at c (no more "item" level items)
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.focusedItemId()).toBe("c");
   });
 
-  it("NAVIGATE traverses all items when no itemFilter is set", () => {
+  it("OS_NAVIGATE traverses all items when no itemFilter is set", () => {
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("test", "a");
 
@@ -60,10 +60,10 @@ describe("itemFilter — dynamic item filtering", () => {
       parentId: null,
     });
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.focusedItemId()).toBe("b");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.focusedItemId()).toBe("c");
   });
 
@@ -92,7 +92,7 @@ describe("itemFilter — dynamic item filtering", () => {
     });
 
     // Level = "section": navigate s1 → s2
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.focusedItemId()).toBe("s2");
 
     // Switch level to "item" and set focus to i1
@@ -100,15 +100,15 @@ describe("itemFilter — dynamic item filtering", () => {
     t.setActiveZone("test", "i1");
 
     // Navigate i1 → i2
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.focusedItemId()).toBe("i2");
 
     // Navigate up from i2 → i1
-    t.dispatch(t.NAVIGATE({ direction: "up" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
     expect(t.focusedItemId()).toBe("i1");
   });
 
-  it("itemFilter applies to TAB as well", () => {
+  it("itemFilter applies to OS_TAB as well", () => {
     const allItems = ["a", "b", "c"];
     const visibleItems = new Set(["a", "c"]);
 
@@ -128,7 +128,7 @@ describe("itemFilter — dynamic item filtering", () => {
     });
 
     // Tab from a → should go to c (b is filtered out)
-    t.dispatch(t.TAB({ direction: "forward" }));
+    t.dispatch(t.OS_TAB({ direction: "forward" }));
     expect(t.focusedItemId()).toBe("c");
   });
 });

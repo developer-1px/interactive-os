@@ -53,7 +53,7 @@ test.describe("Builder Inline Editing & Panel Sync", () => {
     await page.keyboard.press("Meta+A");
     await page.keyboard.type("New Title");
 
-    // Enter → FIELD_COMMIT → 편집 종료
+    // Enter → OS_FIELD_COMMIT → 편집 종료
     await page.keyboard.press("Enter");
 
     // 편집 모드 종료 확인
@@ -72,7 +72,7 @@ test.describe("Builder Inline Editing & Panel Sync", () => {
     await page.keyboard.press("Meta+A");
     await page.keyboard.type("This should be reverted");
 
-    // Escape → FIELD_CANCEL → 복원
+    // Escape → OS_FIELD_CANCEL → 복원
     await page.keyboard.press("Escape");
 
     // 원본 복원

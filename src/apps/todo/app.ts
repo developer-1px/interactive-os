@@ -26,7 +26,7 @@ import {
 } from "@apps/todo/selectors";
 import { produce } from "immer";
 import { z } from "zod";
-import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
+import { OS_FIELD_START_EDIT } from "@/os/3-commands/field/field";
 
 import { defineApp } from "@/os/defineApp";
 
@@ -125,7 +125,7 @@ export const startEdit = listCollection.command(
       draft.ui.editingId = payload.id;
     }),
     // Also set OS-level editingItemId so Field auto-focuses
-    dispatch: FIELD_START_EDIT(),
+    dispatch: OS_FIELD_START_EDIT(),
   }),
 );
 

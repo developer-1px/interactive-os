@@ -11,7 +11,7 @@
  * - After timeout → buffer resets
  *
  * This is a pure function with minimal state (buffer + timer).
- * The NAVIGATE command integrates it when config.typeahead === true.
+ * The OS_NAVIGATE command integrates it when config.typeahead === true.
  */
 
 // ═══════════════════════════════════════════════════════════════════

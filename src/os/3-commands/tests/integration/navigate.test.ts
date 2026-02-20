@@ -1,7 +1,7 @@
 /**
- * NAVIGATE — Headless Kernel Integration Test
+ * OS_NAVIGATE — Headless Kernel Integration Test
  *
- * Tests the full NAVIGATE pipeline without DOM:
+ * Tests the full OS_NAVIGATE pipeline without DOM:
  *   direction movement, wrap/clamp, followFocus, Shift+Arrow range selection,
  *   Home/End, recoveryTargetId, disabled item skipping.
  *
@@ -19,13 +19,13 @@ import { createTestOsKernel } from "./helpers/createTestOsKernel";
 // Basic Navigation
 // ═══════════════════════════════════════════════════════════════════
 
-describe("NAVIGATE — Basic Movement", () => {
+describe("OS_NAVIGATE — Basic Movement", () => {
   it("ArrowDown: moves focus to next item", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("b");
   });
@@ -35,7 +35,7 @@ describe("NAVIGATE — Basic Movement", () => {
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "c");
 
-    t.dispatch(t.NAVIGATE({ direction: "up" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
 
     expect(t.focusedItemId()).toBe("b");
   });
@@ -45,7 +45,7 @@ describe("NAVIGATE — Basic Movement", () => {
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.zone()?.lastFocusedId).toBe("b");
   });
@@ -73,28 +73,28 @@ describe("NAVIGATE — Basic Movement", () => {
       },
     }));
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.zone()?.editingItemId).toBeNull();
   });
 
-  it("no active zone: NAVIGATE does nothing", () => {
+  it("no active zone: OS_NAVIGATE does nothing", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
 
     // No setActiveZone → no activeZoneId
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     // State unchanged
     expect(t.activeZoneId()).toBeNull();
   });
 
-  it("empty items: NAVIGATE does nothing", () => {
+  it("empty items: OS_NAVIGATE does nothing", () => {
     const t = createTestOsKernel();
     t.setItems([]);
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("a");
   });
@@ -104,7 +104,7 @@ describe("NAVIGATE — Basic Movement", () => {
 // Boundary: Clamp vs Wrap (loop)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("NAVIGATE — Boundary Behavior", () => {
+describe("OS_NAVIGATE — Boundary Behavior", () => {
   it("clamp: at last item, ArrowDown stays (loop=false)", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
@@ -120,7 +120,7 @@ describe("NAVIGATE — Boundary Behavior", () => {
     });
     t.setActiveZone("list", "c");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("c");
   });
@@ -140,7 +140,7 @@ describe("NAVIGATE — Boundary Behavior", () => {
     });
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "up" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
 
     expect(t.focusedItemId()).toBe("a");
   });
@@ -160,7 +160,7 @@ describe("NAVIGATE — Boundary Behavior", () => {
     });
     t.setActiveZone("list", "c");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("a");
   });
@@ -180,7 +180,7 @@ describe("NAVIGATE — Boundary Behavior", () => {
     });
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "up" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
 
     expect(t.focusedItemId()).toBe("c");
   });
@@ -190,13 +190,13 @@ describe("NAVIGATE — Boundary Behavior", () => {
 // Home / End
 // ═══════════════════════════════════════════════════════════════════
 
-describe("NAVIGATE — Home / End", () => {
+describe("OS_NAVIGATE — Home / End", () => {
   it("Home: moves to first item", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d", "e"]);
     t.setActiveZone("list", "c");
 
-    t.dispatch(t.NAVIGATE({ direction: "home" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "home" }));
 
     expect(t.focusedItemId()).toBe("a");
   });
@@ -206,7 +206,7 @@ describe("NAVIGATE — Home / End", () => {
     t.setItems(["a", "b", "c", "d", "e"]);
     t.setActiveZone("list", "b");
 
-    t.dispatch(t.NAVIGATE({ direction: "end" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "end" }));
 
     expect(t.focusedItemId()).toBe("e");
   });
@@ -216,7 +216,7 @@ describe("NAVIGATE — Home / End", () => {
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "home" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "home" }));
 
     expect(t.focusedItemId()).toBe("a");
   });
@@ -226,7 +226,7 @@ describe("NAVIGATE — Home / End", () => {
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "c");
 
-    t.dispatch(t.NAVIGATE({ direction: "end" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "end" }));
 
     expect(t.focusedItemId()).toBe("c");
   });
@@ -236,7 +236,7 @@ describe("NAVIGATE — Home / End", () => {
 // followFocus — Selection follows focus (★ Recent Bug)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("NAVIGATE — followFocus", () => {
+describe("OS_NAVIGATE — followFocus", () => {
   it("followFocus=true: ArrowDown updates selection to focused item", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
@@ -251,11 +251,11 @@ describe("NAVIGATE — followFocus", () => {
     });
     t.setActiveZone("list", "a");
     // Set initial selection
-    t.dispatch(t.SELECT({ targetId: "a", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "a", mode: "replace" }));
     expect(t.selection()).toEqual(["a"]);
 
     // Navigate down → selection should follow
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("b");
     expect(t.selection()).toEqual(["b"]);
@@ -274,9 +274,9 @@ describe("NAVIGATE — followFocus", () => {
       },
     });
     t.setActiveZone("list", "c");
-    t.dispatch(t.SELECT({ targetId: "c", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "c", mode: "replace" }));
 
-    t.dispatch(t.NAVIGATE({ direction: "up" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
 
     expect(t.focusedItemId()).toBe("b");
     expect(t.selection()).toEqual(["b"]);
@@ -296,7 +296,7 @@ describe("NAVIGATE — followFocus", () => {
     });
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.zone()?.selectionAnchor).toBe("b");
   });
@@ -314,9 +314,9 @@ describe("NAVIGATE — followFocus", () => {
       },
     });
     t.setActiveZone("list", "a");
-    t.dispatch(t.SELECT({ targetId: "a", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "a", mode: "replace" }));
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("b");
     expect(t.selection()).toEqual(["a"]); // selection stays on "a"
@@ -336,7 +336,7 @@ describe("NAVIGATE — followFocus", () => {
     });
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("b");
     expect(t.selection()).toEqual([]); // mode=none, no selection
@@ -363,10 +363,10 @@ describe("NAVIGATE — followFocus", () => {
       },
     });
     t.setActiveZone("list", "c");
-    t.dispatch(t.SELECT({ targetId: "c", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "c", mode: "replace" }));
 
     // Wrap: c → a
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("a");
     expect(t.selection()).toEqual(["a"]); // selection followed the wrap
@@ -386,16 +386,16 @@ describe("NAVIGATE — followFocus", () => {
     });
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.selection()).toEqual(["b"]);
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.selection()).toEqual(["c"]);
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.selection()).toEqual(["d"]);
 
-    t.dispatch(t.NAVIGATE({ direction: "up" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
     expect(t.selection()).toEqual(["c"]);
   });
 });
@@ -404,7 +404,7 @@ describe("NAVIGATE — followFocus", () => {
 // Shift+Arrow — Range Selection
 // ═══════════════════════════════════════════════════════════════════
 
-describe("NAVIGATE — Shift+Arrow Range Selection", () => {
+describe("OS_NAVIGATE — Shift+Arrow Range Selection", () => {
   it("Shift+Down: extends selection range forward", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c", "d", "e"]);
@@ -419,10 +419,10 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
     });
     t.setActiveZone("list", "b");
     // Set anchor
-    t.dispatch(t.SELECT({ targetId: "b", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "b", mode: "replace" }));
 
     // Shift+Down: b → c (range: b, c)
-    t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
 
     expect(t.focusedItemId()).toBe("c");
     expect(t.selection()).toEqual(["b", "c"]);
@@ -441,10 +441,10 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
       },
     });
     t.setActiveZone("list", "b");
-    t.dispatch(t.SELECT({ targetId: "b", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "b", mode: "replace" }));
 
-    t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
-    t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
 
     expect(t.focusedItemId()).toBe("d");
     expect(t.selection()).toEqual(["b", "c", "d"]);
@@ -463,9 +463,9 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
       },
     });
     t.setActiveZone("list", "d");
-    t.dispatch(t.SELECT({ targetId: "d", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "d", mode: "replace" }));
 
-    t.dispatch(t.NAVIGATE({ direction: "up", select: "range" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "up", select: "range" }));
 
     expect(t.focusedItemId()).toBe("c");
     expect(t.selection()).toEqual(["c", "d"]);
@@ -484,15 +484,15 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
       },
     });
     t.setActiveZone("list", "b");
-    t.dispatch(t.SELECT({ targetId: "b", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "b", mode: "replace" }));
 
     // Extend forward: b, c, d
-    t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
-    t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
     expect(t.selection()).toEqual(["b", "c", "d"]);
 
     // Shrink: b, c
-    t.dispatch(t.NAVIGATE({ direction: "up", select: "range" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "up", select: "range" }));
     expect(t.selection()).toEqual(["b", "c"]);
   });
 
@@ -509,10 +509,10 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
       },
     });
     t.setActiveZone("list", "b");
-    t.dispatch(t.SELECT({ targetId: "b", mode: "replace" }));
+    t.dispatch(t.OS_SELECT({ targetId: "b", mode: "replace" }));
 
     // Shift+Down should extend range, not replace with single
-    t.dispatch(t.NAVIGATE({ direction: "down", select: "range" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
 
     expect(t.focusedItemId()).toBe("c");
     expect(t.selection()).toEqual(["b", "c"]); // range, not [c] from followFocus
@@ -523,13 +523,13 @@ describe("NAVIGATE — Shift+Arrow Range Selection", () => {
 // recoveryTargetId — Focus Recovery Metadata
 // ═══════════════════════════════════════════════════════════════════
 
-describe("NAVIGATE — recoveryTargetId", () => {
+describe("OS_NAVIGATE — recoveryTargetId", () => {
   it("after navigate: recoveryTargetId set to next neighbor", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     // After focusing "b", recovery should point to "c" (next)
     expect(t.zone()?.recoveryTargetId).toBe("c");
@@ -540,7 +540,7 @@ describe("NAVIGATE — recoveryTargetId", () => {
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "b");
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     // Now focused on "c" (last), no next → fall back to "b" (previous)
     expect(t.focusedItemId()).toBe("c");
@@ -555,7 +555,7 @@ describe("NAVIGATE — recoveryTargetId", () => {
     // Navigate attempts but stays (clamp) — focus doesn't change
     // Recovery target already set from initial state; let's navigate to it
     // by starting fresh
-    t.dispatch(t.NAVIGATE({ direction: "home" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "home" }));
 
     expect(t.focusedItemId()).toBe("only");
     expect(t.zone()?.recoveryTargetId).toBeNull();
@@ -566,7 +566,7 @@ describe("NAVIGATE — recoveryTargetId", () => {
 // Orientation — Ignore cross-axis direction
 // ═══════════════════════════════════════════════════════════════════
 
-describe("NAVIGATE — Orientation", () => {
+describe("OS_NAVIGATE — Orientation", () => {
   it("vertical orientation: ArrowLeft/Right are ignored", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
@@ -582,10 +582,10 @@ describe("NAVIGATE — Orientation", () => {
     });
     t.setActiveZone("list", "b");
 
-    t.dispatch(t.NAVIGATE({ direction: "left" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "left" }));
     expect(t.focusedItemId()).toBe("b"); // unchanged
 
-    t.dispatch(t.NAVIGATE({ direction: "right" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
     expect(t.focusedItemId()).toBe("b"); // unchanged
   });
 
@@ -604,10 +604,10 @@ describe("NAVIGATE — Orientation", () => {
     });
     t.setActiveZone("list", "b");
 
-    t.dispatch(t.NAVIGATE({ direction: "up" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
     expect(t.focusedItemId()).toBe("b"); // unchanged
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.focusedItemId()).toBe("b"); // unchanged
   });
 
@@ -626,10 +626,10 @@ describe("NAVIGATE — Orientation", () => {
     });
     t.setActiveZone("list", "a");
 
-    t.dispatch(t.NAVIGATE({ direction: "right" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
     expect(t.focusedItemId()).toBe("b");
 
-    t.dispatch(t.NAVIGATE({ direction: "left" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "left" }));
     expect(t.focusedItemId()).toBe("a");
   });
 });
@@ -638,7 +638,7 @@ describe("NAVIGATE — Orientation", () => {
 // Entry — First focus when currentId is null
 // ═══════════════════════════════════════════════════════════════════
 
-describe("NAVIGATE — Entry (no current focus)", () => {
+describe("OS_NAVIGATE — Entry (no current focus)", () => {
   it("entry=first: first navigation focuses first item", () => {
     const t = createTestOsKernel();
     t.setItems(["a", "b", "c"]);
@@ -654,7 +654,7 @@ describe("NAVIGATE — Entry (no current focus)", () => {
     });
     t.setActiveZone("list", null);
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("a");
   });
@@ -674,7 +674,7 @@ describe("NAVIGATE — Entry (no current focus)", () => {
     });
     t.setActiveZone("list", null);
 
-    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     expect(t.focusedItemId()).toBe("c");
   });

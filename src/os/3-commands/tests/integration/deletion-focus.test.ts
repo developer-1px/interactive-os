@@ -1,5 +1,5 @@
 import { deleteTodo, TodoDraft } from "@apps/todo/app";
-import { FOCUS } from "@os/3-commands/focus/focus";
+import { OS_FOCUS } from "@os/3-commands/focus/focus";
 import { createHeadlessTest } from "@os/tests/createHeadlessTest";
 
 describe("OS Integration: Deletion Focus Recovery", () => {
@@ -31,7 +31,7 @@ describe("OS Integration: Deletion Focus Recovery", () => {
 
     // 3. Focus Middle Item (B)
     // OS Focus command
-    dispatch(FOCUS({ zoneId: "list", itemId: itemB.id }));
+    dispatch(OS_FOCUS({ zoneId: "list", itemId: itemB.id }));
 
     // Assert initial focus state
     const focusState = (runtime.getState() as any).os.focus;
@@ -59,7 +59,7 @@ describe("OS Integration: Deletion Focus Recovery", () => {
     const itemB = todos.find((t) => t.text === "Item B")!;
 
     // 2. Focus Last Item (B)
-    dispatch(FOCUS({ zoneId: "list", itemId: itemB.id }));
+    dispatch(OS_FOCUS({ zoneId: "list", itemId: itemB.id }));
 
     // 3. Delete Last Item (B)
     dispatch(deleteTodo({ id: itemB.id }));

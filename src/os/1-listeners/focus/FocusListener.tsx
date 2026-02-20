@@ -1,16 +1,16 @@
 /**
  * FocusListener — DOM Adapter for focus events (focusin).
  *
- * Pipeline: FocusEvent → sense (DOM) → SYNC_FOCUS dispatch
+ * Pipeline: FocusEvent → sense (DOM) → OS_SYNC_FOCUS dispatch
  *
  * W3C UI Events Module: Focus Events (§3.3)
  *
  * Handles:
- * - focusin → SYNC_FOCUS (state sync from external focus changes)
- * - MutationObserver → RECOVER (focused element removed from DOM)
+ * - focusin → OS_SYNC_FOCUS (state sync from external focus changes)
+ * - MutationObserver → OS_RECOVER (focused element removed from DOM)
  */
 
-import { RECOVER, SYNC_FOCUS } from "@os/3-commands";
+import { OS_RECOVER, OS_SYNC_FOCUS } from "@os/3-commands";
 import { useEffect } from "react";
 import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
@@ -31,7 +31,7 @@ export function FocusListener() {
     if (isMounted) return;
     isMounted = true;
 
-    // FocusIn → SYNC_FOCUS
+    // FocusIn → OS_SYNC_FOCUS
     const senseFocusIn = (e: Event) => {
       const target = e.target as HTMLElement;
       if (target.closest("[data-inspector]") || !sensorGuard.check()) return;
@@ -45,11 +45,11 @@ export function FocusListener() {
       if (!focusTarget) return;
 
       os.dispatch(
-        SYNC_FOCUS({ id: focusTarget.itemId, zoneId: focusTarget.groupId }),
+        OS_SYNC_FOCUS({ id: focusTarget.itemId, zoneId: focusTarget.groupId }),
         {
           meta: {
             input: {
-              type: "FOCUS",
+              type: "OS_FOCUS",
               key: e.type,
               elementId: focusTarget.itemId,
             },
@@ -77,8 +77,8 @@ export function FocusListener() {
         !document.body.contains(lastFocusedElement)
       ) {
         lastFocusedElement = null;
-        os.dispatch(RECOVER(), {
-          meta: { input: { type: "FOCUS", key: "Recovery" } },
+        os.dispatch(OS_RECOVER(), {
+          meta: { input: { type: "OS_FOCUS", key: "Recovery" } },
         });
       }
     });
