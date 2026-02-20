@@ -176,8 +176,6 @@ export const OS_NAVIGATE = os.defineCommand(
       }) as typeof ctx.state,
 
       // Effects
-      // Skip DOM focus if virtualFocus is enabled
-      focus: config.project.virtualFocus ? undefined : navResult.targetId,
       scroll: navResult.targetId,
     };
   },

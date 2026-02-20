@@ -2,9 +2,12 @@
  * Virtual Focus Unit Tests — T5a
  *
  * Checks that OS_NAVIGATE and OS_FOCUS commands respect the `virtualFocus` project config.
- * When `virtualFocus: true`, they should NOT trigger the `focus` effect (el.focus()),
- * allowing the DOM focus to remain on the container (e.g. input) while
+ * When `virtualFocus: true`, DOM focus stays on the container (e.g. input) while
  * logically moving the active item state.
+ *
+ * Architecture note: OS_FOCUS/OS_NAVIGATE no longer emit `focus` effects.
+ * DOM focus is handled by FocusItem.useLayoutEffect (state → render → DOM focus).
+ * The `focus` effect is reserved for OS_RECOVER only (re-focus without state change).
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
@@ -176,7 +179,7 @@ describe("Virtual Focus (T5a)", () => {
       expect((tx?.effects as any)?.focus).toBeUndefined();
     });
 
-    it("triggers focus effect when virtualFocus is false (default)", () => {
+    it("does not emit focus effect (DOM focus is handled by FocusItem)", () => {
       const items = ["item-A"];
       const element = createZoneElement("z-normal", items);
 
@@ -191,9 +194,15 @@ describe("Virtual Focus (T5a)", () => {
       });
 
       os.dispatch(OS_FOCUS({ zoneId: "z-normal", itemId: "item-A" }));
-      // os.dispatch returns void — check transaction log for effects
+
+      // New architecture: OS_FOCUS returns { state } only.
+      // DOM focus is handled by FocusItem.useLayoutEffect, not by 4-effects/focus.
       const tx = os.inspector.getLastTransaction();
-      expect((tx?.effects as any)?.focus).toBe("item-A");
+      expect((tx?.effects as any)?.focus).toBeUndefined();
+      // State must still update
+      expect(os.getState().os.focus.zones["z-normal"]?.focusedItemId).toBe(
+        "item-A",
+      );
     });
   });
 });

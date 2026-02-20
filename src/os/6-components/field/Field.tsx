@@ -249,7 +249,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     );
 
     // isParentEditing: detect when a parent item is editing, making child fields editable.
-    // Uses a pure useComputed for state + useEffect for DOM ancestry check.
+    // Uses a pure useComputed for state + useLayoutEffect for DOM ancestry check.
     const parentEditingCandidate = os.useComputed((s) => {
       if (s.os.focus.activeZoneId !== zoneId) return null;
       const zone = s.os.focus.zones[zoneId];
@@ -260,7 +260,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     });
 
     const [isParentEditing, setIsParentEditing] = useState(false);
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (!parentEditingCandidate || !innerRef.current) {
         setIsParentEditing(false);
         return;

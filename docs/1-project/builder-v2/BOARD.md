@@ -5,15 +5,6 @@
 
 ## 🔴 Now
 
-- [ ] T14: 블록 추가 UI + 프리셋 시스템
-  - [x] Block Preset 데이터 (`presets/blocks.ts`) — 5개 블록 타입 프리셋
-  - [x] Page Preset 데이터 (`presets/pages.ts`) — SaaS/미니멀/빈 페이지 3종
-  - [x] 사이드바 "+ 블록" 버튼 → Block Preset 선택 팝오버
-  - [x] 블록 삽입 = `addBlock` 커맨드 (deepClone)
-  - [x] 빈 캔버스 → Page Preset 선택 화면 (PagePresetPicker)
-  - [x] 빌더 툴바 "새 페이지" → `loadPagePreset({ blocks: [] })`
-  - Discussion: [block-add-and-presets](discussions/2026-0221-0250-block-add-and-presets.md)
-
 
 - [ ] T13: Tab Container → 범용 Container Block (PoC)
   - [ ] `Block.accept?: string[]` 필드 추가 — Container가 받을 수 있는 하위 블록 타입 제한
@@ -58,6 +49,8 @@
 
 ## ⏳ Done
 
+- [x] T14: 블록 추가 UI + 프리셋 시스템 (02-21)
+  - Block/Page Preset 데이터 + 사이드바 팝오버 + PagePresetPicker
 - [x] T11-b: Deep clone fix — Copy/paste children ID 재생성
   - `deepCloneBlock()` 재귀 헬퍼, `onClone` + `onPaste` 양쪽 적용
   - 테스트 기대값 수정 (5+3=8), container children uniqueness 테스트 추가

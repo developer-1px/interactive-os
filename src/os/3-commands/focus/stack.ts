@@ -83,8 +83,5 @@ export const OS_STACK_POP = os.defineCommand("OS_STACK_POP", (ctx) => () => {
         zone.lastFocusedId = targetId;
       }
     }),
-
-    // Effect: trigger DOM focus immediately
-    focus: targetId,
   };
 });

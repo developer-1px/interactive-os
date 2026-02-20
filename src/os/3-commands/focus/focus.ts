@@ -16,9 +16,7 @@ export const focusHandler = (ctx: any) => (payload: FocusPayload) => {
   const { zoneId } = payload;
   let { itemId } = payload;
 
-  // Check virtualFocus config from registry
   const zoneEntry = ZoneRegistry.get(zoneId);
-  const isVirtual = zoneEntry?.config?.project?.virtualFocus ?? false;
 
   // Restore: if no explicit itemId, restore lastFocusedId (zone re-entry)
   if (!itemId) {
@@ -51,9 +49,6 @@ export const focusHandler = (ctx: any) => (payload: FocusPayload) => {
         }
       }
     }),
-
-    // Effect: trigger DOM focus only if NOT virtual
-    focus: isVirtual ? undefined : itemId,
   };
 };
 

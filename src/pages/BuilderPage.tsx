@@ -1,6 +1,10 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { useState } from "react";
-import { BuilderApp, BuilderCanvasUI, loadPagePreset } from "@/apps/builder/app";
+import {
+  BuilderApp,
+  BuilderCanvasUI,
+  loadPagePreset,
+} from "@/apps/builder/app";
 import { BuilderCursor } from "@/apps/builder/BuilderCursor";
 import { PAGE_PRESETS } from "@/apps/builder/presets/pages";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
@@ -131,7 +135,9 @@ function PagePresetPicker() {
             <button
               type="button"
               key={preset.id}
-              onClick={() => os.dispatch(loadPagePreset({ blocks: preset.blocks }))}
+              onClick={() =>
+                os.dispatch(loadPagePreset({ blocks: preset.blocks }))
+              }
               className="group flex flex-col items-center gap-3 p-6 rounded-2xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-100/50 hover:-translate-y-1 transition-all duration-300 text-center cursor-pointer"
             >
               <span className="text-3xl w-14 h-14 flex items-center justify-center rounded-xl bg-slate-50 group-hover:bg-indigo-50 group-hover:scale-110 transition-all duration-300">

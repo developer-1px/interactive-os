@@ -194,15 +194,21 @@ export function createHistoryMiddleware(
 
           const lastEntry = history.past.at(-1);
           const isSameType = lastEntry?.command.type === commandType;
-          const isRecent = lastEntry && (now - lastEntry.timestamp) < NOISE_WINDOW_MS;
+          const isRecent =
+            lastEntry && now - lastEntry.timestamp < NOISE_WINDOW_MS;
           const isNotGrouped = !getActiveGroupId();
 
           // Check if payloads target the same identity (e.g., same domId/id)
-          const lastPayload = lastEntry?.command.payload as Record<string, unknown> | undefined;
-          const currPayload = ctx.command.payload as Record<string, unknown> | undefined;
+          const lastPayload = lastEntry?.command.payload as
+            | Record<string, unknown>
+            | undefined;
+          const currPayload = ctx.command.payload as
+            | Record<string, unknown>
+            | undefined;
           const identityKey = currPayload?.["domId"] ?? currPayload?.["id"];
           const lastIdentityKey = lastPayload?.["domId"] ?? lastPayload?.["id"];
-          const isSameTarget = identityKey !== undefined && identityKey === lastIdentityKey;
+          const isSameTarget =
+            identityKey !== undefined && identityKey === lastIdentityKey;
 
           if (isSameType && isRecent && isNotGrouped && isSameTarget) {
             // Coalesce: update payload + timestamp, keep original snapshot

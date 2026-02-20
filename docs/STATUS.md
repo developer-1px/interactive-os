@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 00:53
+> Last updated: 2026-02-21 03:04
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -20,6 +20,7 @@
 | builder-usage-cleanup | T1~T6 완료 | 02-21 | ✅ Done |
 | apg-testing-rebalance | T1~T3 완료 | 02-21 | ✅ Done |
 | builder-v2 | T14 블록 추가 + 프리셋 | 02-21 | 🟢 Active |
+| focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
 | field-compound | T1~T4 완료 | 02-20 | ✅ Done |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
@@ -66,7 +67,7 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 1 |
-| Active Projects (total) | 2 |
+| Active Projects (total) | 3 |
 | Completed (archived) | 18+ |
 | Inbox items | 2 |
 | Backlog items | 5 (docs-dashboard 포함) |
@@ -75,7 +76,9 @@
 
 ---
 
-## 📝 Recent Changes (2026-02-20)
+## 📝 Recent Changes (2026-02-21)
+
+- 🆕 `focus-single-path` 프로젝트 생성 — /doubt + /divide에서 DOM 안티패턴 전수 조사. Focus 이중 경로(4-effects vs Component) 근본 원인 발견. C1(DocsPage ref), K1(Field computed 순수성) 즉시 수정 완료.
 
 - 🆕 `os-api-rename` 프로젝트 생성 — Discussion + /doubt + /divide에서 도출. kernel→os rename, OS_ 접두어 통일, 훅 네이밍 정비
 - 🔥 `builder-v2` T13 등록 — Tab Container → 범용 Container Block. `accept` 제약 + Dual Projection (Tree ↔ Canvas) 아키텍처

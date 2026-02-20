@@ -42,7 +42,12 @@ function findItemElement(itemId: string): HTMLElement | null {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Focus Effect — Move DOM focus to an element
+// Focus Effect — Recovery-only DOM focus restore
+//
+// Normal focus transitions are handled by FocusItem.useLayoutEffect
+// (state change → re-render → DOM focus). This effect exists solely
+// for OS_RECOVER's "re-focus current item" path where state doesn't
+// change but DOM focus needs to be restored (e.g., focus lost to body).
 // ═══════════════════════════════════════════════════════════════════
 
 os.defineEffect("focus", (itemId: string) => {

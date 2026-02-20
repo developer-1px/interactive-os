@@ -106,10 +106,11 @@ function SidebarContent() {
                   <span
                     className={`
                     truncate
-                    ${node.depth === 0
+                    ${
+                      node.depth === 0
                         ? "text-[11px] font-bold uppercase tracking-widest"
                         : "text-[11px] font-semibold tracking-wide"
-                      }
+                    }
                   `}
                   >
                     {node.block.label}
@@ -136,9 +137,10 @@ function SidebarContent() {
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
                   group-aria-selected:bg-indigo-50 group-aria-selected:border-indigo-200 group-aria-selected:shadow-sm
                   ${depthBg}
-                  ${isCanvasActive
-                    ? "bg-white shadow-sm border-slate-200/60"
-                    : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
+                  ${
+                    isCanvasActive
+                      ? "bg-white shadow-sm border-slate-200/60"
+                      : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
                   }
                 `}
                 style={{ paddingLeft: `${indent}px` }}
@@ -163,10 +165,11 @@ function SidebarContent() {
                   className={`
                   w-10 h-7 rounded border shrink-0 flex items-center justify-center
                   ml-1
-                  ${isCanvasActive
+                  ${
+                    isCanvasActive
                       ? "bg-indigo-50 border-indigo-100"
                       : "bg-slate-100 border-slate-200 group-hover:bg-white"
-                    }
+                  }
                 `}
                 >
                   <div className="flex flex-col gap-0.5 w-6">
@@ -256,9 +259,10 @@ function AddBlockPalette() {
         className={`
           w-full flex items-center justify-center gap-1.5 py-2 rounded-lg
           text-xs font-semibold transition-all duration-200
-          ${open
-            ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200"
-            : "bg-white text-slate-500 hover:text-slate-700 hover:bg-white border border-slate-200 hover:border-slate-300 hover:shadow-sm"
+          ${
+            open
+              ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200"
+              : "bg-white text-slate-500 hover:text-slate-700 hover:bg-white border border-slate-200 hover:border-slate-300 hover:shadow-sm"
           }
         `}
       >

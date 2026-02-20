@@ -7,46 +7,49 @@
  * Related issue: 2025-02-21_field-history-explosion
  */
 
-import { BuilderApp, updateFieldByDomId } from "@apps/builder/app";
-import { undoCommand } from "@apps/builder/app";
+import { BuilderApp, undoCommand, updateFieldByDomId } from "@apps/builder/app";
 import { describe, expect, it } from "vitest";
 
 describe("History: Noise Filtering for rapid field updates", () => {
-    function createApp() {
-        return BuilderApp.create({ history: true, withOS: true });
+  function createApp() {
+    return BuilderApp.create({ history: true, withOS: true });
+  }
+
+  it("rapid field updates should NOT create one history entry per keystroke", () => {
+    const app = createApp();
+    const initialPast = app.state.history.past.length;
+
+    // Simulate typing "hello" — 5 rapid updateFieldByDomId commands
+    for (const char of ["h", "he", "hel", "hell", "hello"]) {
+      app.dispatch(
+        updateFieldByDomId({ domId: "ncp-hero-title", value: char }),
+      );
     }
 
-    it("rapid field updates should NOT create one history entry per keystroke", () => {
-        const app = createApp();
-        const initialPast = app.state.history.past.length;
+    // Should NOT have 5 separate entries — should be coalesced
+    const entriesCreated = app.state.history.past.length - initialPast;
 
-        // Simulate typing "hello" — 5 rapid updateFieldByDomId commands
-        for (const char of ["h", "he", "hel", "hell", "hello"]) {
-            app.dispatch(updateFieldByDomId({ domId: "ncp-hero-title", value: char }));
-        }
+    // Expectation: at most 1 entry for the whole typing burst
+    expect(entriesCreated).toBeLessThanOrEqual(1);
+  });
 
-        // Should NOT have 5 separate entries — should be coalesced
-        const entriesCreated = app.state.history.past.length - initialPast;
+  it("undo after coalesced typing should restore to pre-typing state", () => {
+    const app = createApp();
+    const originalTitle = app.state.data.blocks[0]!.fields["title"];
 
-        // Expectation: at most 1 entry for the whole typing burst
-        expect(entriesCreated).toBeLessThanOrEqual(1);
-    });
+    // Type several characters
+    for (const char of ["X", "XY", "XYZ"]) {
+      app.dispatch(
+        updateFieldByDomId({ domId: "ncp-hero-title", value: char }),
+      );
+    }
 
-    it("undo after coalesced typing should restore to pre-typing state", () => {
-        const app = createApp();
-        const originalTitle = app.state.data.blocks[0]!.fields["title"];
+    // Field should be "XYZ" now
+    expect(app.state.data.blocks[0]!.fields["title"]).toBe("XYZ");
 
-        // Type several characters
-        for (const char of ["X", "XY", "XYZ"]) {
-            app.dispatch(updateFieldByDomId({ domId: "ncp-hero-title", value: char }));
-        }
+    // Single undo should restore original
+    app.dispatch(undoCommand());
 
-        // Field should be "XYZ" now
-        expect(app.state.data.blocks[0]!.fields["title"]).toBe("XYZ");
-
-        // Single undo should restore original
-        app.dispatch(undoCommand());
-
-        expect(app.state.data.blocks[0]!.fields["title"]).toBe(originalTitle);
-    });
+    expect(app.state.data.blocks[0]!.fields["title"]).toBe(originalTitle);
+  });
 });

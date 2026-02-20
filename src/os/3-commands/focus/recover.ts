@@ -46,7 +46,6 @@ export const OS_RECOVER = os.defineCommand(
         z.focusedItemId = targetId;
         z.lastFocusedId = targetId;
       }) as typeof ctx.state,
-      focus: targetId,
     };
   },
 );

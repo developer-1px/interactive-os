@@ -119,12 +119,15 @@ export const renameSectionLabel = sidebarCollection.command(
 export const addBlock = sidebarCollection.command(
   "addBlock",
   (ctx, payload: { block: Block; afterId?: string }) => {
-    const uid = () => `blk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    const uid = () =>
+      `blk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
     const newBlock = deepCloneBlock(payload.block, uid());
     return {
       state: produce(ctx.state, (draft) => {
         if (payload.afterId) {
-          const idx = draft.data.blocks.findIndex((b) => b.id === payload.afterId);
+          const idx = draft.data.blocks.findIndex(
+            (b) => b.id === payload.afterId,
+          );
           draft.data.blocks.splice(idx + 1, 0, newBlock);
         } else {
           draft.data.blocks.push(newBlock);
@@ -138,7 +141,8 @@ export const addBlock = sidebarCollection.command(
 export const loadPagePreset = sidebarCollection.command(
   "loadPagePreset",
   (ctx, payload: { blocks: Block[] }) => {
-    const uid = () => `blk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    const uid = () =>
+      `blk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
     const cloned = payload.blocks.map((b) => deepCloneBlock(b, uid()));
     return {
       state: produce(ctx.state, (draft) => {

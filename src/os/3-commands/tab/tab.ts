@@ -53,7 +53,6 @@ export const OS_TAB = os.defineCommand(
           z.focusedItemId = result.itemId;
           z.lastFocusedId = result.itemId;
         }) as typeof ctx.state,
-        focus: result.itemId,
       };
     }
 
@@ -65,7 +64,6 @@ export const OS_TAB = os.defineCommand(
         z.focusedItemId = result.itemId;
         z.lastFocusedId = result.itemId;
       }) as typeof ctx.state,
-      focus: result.itemId,
     };
   },
 );
