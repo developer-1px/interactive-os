@@ -117,8 +117,8 @@ export const BuilderSidebarUI = sidebarCollection.bind({
   },
   keybindings: [
     ...collectionBindings.keybindings,
-    { key: "ArrowLeft", command: () => EXPAND({ action: "toggle" }) },
-    { key: "ArrowRight", command: () => EXPAND({ action: "toggle" }) },
+    { key: "ArrowLeft", command: () => EXPAND({ action: "collapse" }) },
+    { key: "ArrowRight", command: () => EXPAND({ action: "expand" }) },
   ],
 });
 
