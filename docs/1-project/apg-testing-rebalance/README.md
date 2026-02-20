@@ -1,33 +1,45 @@
-# APG Testing Rebalance Project
+# APG Testing Rebalance — Testing Trophy 전략
 
-> **WHY**: The "Delete -> Focus Draft" bug proved that unit tests for reducers are insufficient to catch orchestration issues (e.g., focus recovery), while E2E tests are too slow/heavy for covering all edge cases. We need a robust **Headless Kernel Integration** layer that verifies APG behaviors deterministically.
+> **WHY**: 유닛 테스트 중심의 테스트 피라미드는 이 OS의 핵심 복잡성인 **커맨드 간 오케스트레이션**을 검증하지 못한다. `Delete → Focus Draft` 버그가 증거. Testing Trophy 전략으로 전환하여 Integration 레이어를 가장 두껍게 만든다.
 
 ## Goals
 
-1.  **Orchestration Logic Coverage**: Ensure OS-level behaviors (Focus Recovery, Selection Sync, History Restoration) are tested together.
-2.  **APG Compliance**: Verify that keyboard/mouse interactions produce the correct state transitions according to W3C specs.
-3.  **Reduce Redundant Unit Tests**: Move away from testing trivial reducers in isolation if the behavior is better covered by integration tests.
+1. **2-Tier Integration 구축**: APG Contract (Tier 1: pressKey→attrs) + Orchestration (Tier 2: dispatch→state)
+2. **Unit 테스트 정리**: 순수 함수/알고리즘에만 집중 (54개 → ~35개)
+3. **APG 준수 증명 품질 향상**: 사용자 행동 시뮬레이션 + ARIA 속성 검증
 
 ## Scope
 
 - **In Scope**:
-    - `src/os/tests/createIntegrationTest.ts`: Establish a standard `KernelTestKit`.
-    - `src/os/3-commands/tests/integration`: Create new suites for Selection, Deletion, History.
-    - `src/apps/todo/tests/e2e`: Refactor/Merge existing tests.
+    - 기존 APG 테스트 6개 → pressKey/click + attrs 패턴 전환
+    - OS Command Unit 19개 → Integration 마이그레이션
+    - 사소한 Unit 4개 제거 (흡수 완료 후)
 - **Out of Scope**:
-    - Changing the actual implementation code (unless bugs are found).
-    - UI/Visual E2E tests (style checking).
+    - 앱 레벨 유닛 테스트 (builder 7개, todo 1개 등) — 별도 판단
+    - E2E 테스트 변경
+    - 프로덕션 코드 변경 (테스트 리밸런싱만)
 
-## Testing Strategy (The Trophy)
+## Testing Trophy Strategy (The 2-Tier Model)
 
-1.  **Headless Integration (Kernel + App)**: **Primary Layer**.
-    - Load Kernel + App Slice.
-    - Dispatch `OS_DELETE`.
-    - Assert `os.focus.focusedItemId`.
-    - Catches: Selector bugs, Middleware failures, Focus logic gaps.
-2.  **E2E (Playwright)**: **Guardrails**.
-    - Verify critical paths in real browser.
-    - Verify complex DOM events (Shift+Click ranges).
-3.  **Unit (Jest)**: **Targeted**.
-    - Complex Algorithms (Spatial Navigation, Diff-Patch).
-    - Utility Logic (Data structures).
+```
+┌───────────────────────────────────────────────┐
+│  E2E (Playwright) — 가드레일. 22개 유지       │
+├───────────────────────────────────────────────┤
+│  Tier 1: APG Contract                        │  pressKey/click → attrs
+│  "사용자 행동 → APG 명세 준수"                │  Phase 1→5 전체
+├───────────────────────────────────────────────┤
+│  Tier 2: Orchestration Integration            │  dispatch → state
+│  "커맨드 간 상호작용 정확성"                   │  Phase 3→4
+├───────────────────────────────────────────────┤
+│  Unit — 순수 알고리즘/함수만                  │  ~35개
+└───────────────────────────────────────────────┘
+```
+
+### Target Metrics
+
+| Layer | Before | After |
+|-------|:------:|:-----:|
+| Unit | 54 (59%) | ~35 (38%) |
+| APG Contract (Tier 1) | 8 (9%) | 8 (9%) — 품질↑ |
+| Integration (Tier 2) | 8 (9%) | ~22 (24%) |
+| E2E | 22 (24%) | 22 (24%) |
