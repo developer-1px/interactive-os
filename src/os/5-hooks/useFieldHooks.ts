@@ -76,7 +76,7 @@ export const useFieldFocus = ({
   useEffect(() => {
     if (isActive && innerRef.current) {
       if (document.activeElement !== innerRef.current) {
-        innerRef.current.focus();
+        innerRef.current.focus({ preventScroll: true });
       }
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -88,7 +88,7 @@ export const useFieldFocus = ({
                 const textLength = innerRef.current.innerText.length;
                 setCaretPosition(innerRef.current, textLength);
               }
-            } catch (_e) {}
+            } catch (_e) { }
           }
         });
       });
