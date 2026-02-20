@@ -69,7 +69,10 @@ function deepCloneBlock(block: Block, newId: string): Block {
   return cloned;
 }
 
-export const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
+const CANVAS_ZONE_ID = "canvas";
+
+/** Shared collection config — same data accessor for sidebar and canvas */
+const collectionConfig = {
   accessor: (s: BuilderState) => s.data.blocks,
   text: (item: Block) => item.label,
   onClone: (original: Block, newId: string) => ({
@@ -80,7 +83,9 @@ export const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
     ...item,
     label: `${item.label} (paste)`,
   }),
-});
+};
+
+export const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", collectionConfig);
 
 // Re-export for backward compatibility with existing tests
 export const deleteSection = sidebarCollection.remove;
@@ -123,16 +128,16 @@ export const BuilderSidebarUI = sidebarCollection.bind({
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// Canvas Zone — v5 native (createZone + bind)
+// Canvas Zone — own collection (same data accessor, own focus scope)
 // ═══════════════════════════════════════════════════════════════════
 
-const canvasZone = BuilderApp.createZone("canvas");
+const canvasCollection = createCollectionZone(BuilderApp, CANVAS_ZONE_ID, collectionConfig);
 
 /**
  * updateField — 섹션 필드 값 변경.
  * sectionId + field (local key) 로 대상 식별.
  */
-export const updateField = canvasZone.command(
+export const updateField = canvasCollection.command(
   "updateField",
   (
     ctx,
@@ -164,7 +169,6 @@ import {
   createDrillUp,
 } from "@/apps/builder/features/hierarchicalNavigation";
 
-const CANVAS_ZONE_ID = "canvas";
 /**
  * Canvas clipboard — uses pasteBubbling to find the right collection.
  *
@@ -286,7 +290,7 @@ function getStaticItemTextValue(focusId: string): string | null {
 export const canvasOnCopy = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
   if (isDynamicItem(cursor.focusId)) {
     // Dynamic item → structural copy (section/card/tab)
-    return sidebarCollection.copy({ ids: [cursor.focusId] });
+    return canvasCollection.copy({ ids: [cursor.focusId] });
   }
   // Static item → copy field text value via OS clipboard write
   const text = getStaticItemTextValue(cursor.focusId);
@@ -300,7 +304,7 @@ export const canvasOnCopy = (cursor: import("@/os/2-contexts/zoneRegistry").Zone
 export const canvasOnCut = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
   if (isDynamicItem(cursor.focusId)) {
     // Dynamic item → structural cut
-    return sidebarCollection.cut({ ids: [cursor.focusId], focusId: cursor.focusId });
+    return canvasCollection.cut({ ids: [cursor.focusId], focusId: cursor.focusId });
   }
   // Static item → no-op (can't cut template slots)
   return [];
@@ -325,12 +329,12 @@ export const canvasOnPaste = (cursor: import("@/os/2-contexts/zoneRegistry").Zon
   );
   if (!bubbleResult) return []; // No collection accepts → no-op
 
-  // Tree-aware paste: sidebarCollection.paste handles insertChild
+  // Tree-aware paste: canvasCollection handles insertChild + focus stays in canvas
   const targetId = resolveCanvasCopyTarget(cursor.focusId);
-  return sidebarCollection.paste({ afterId: targetId ?? "" });
+  return canvasCollection.paste({ afterId: targetId ?? "" });
 };
 
-export const BuilderCanvasUI = canvasZone.bind({
+export const BuilderCanvasUI = canvasCollection.bind({
   role: "grid",
   onAction: createDrillDown(CANVAS_ZONE_ID),
   onUndo: undoCommand(),
@@ -429,7 +433,7 @@ export function useFieldByDomId(domId: string): string {
  * Resolves domId → { section, field } inside the handler (ctx.state).
  * Used by PropertiesPanel's imperative onChange handlers.
  */
-export const updateFieldByDomId = canvasZone.command(
+export const updateFieldByDomId = canvasCollection.command(
   "updateFieldByDomId",
   (ctx, payload: { domId: string; value: string }) => {
     const addr = resolveFieldAddress(payload.domId, ctx.state.data.blocks);
