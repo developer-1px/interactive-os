@@ -8,12 +8,12 @@
   - [x] `window.__kernel` → `window.__os`
   - [x] tsc clean + 전체 테스트 통과
 
-- [ ] T2: 커맨드 변수명 `OS_` 접두어 통일
-  - [ ] 접두어 미적용 21개 rename (`NAVIGATE` → `OS_NAVIGATE` 등)
-  - [ ] barrel export `3-commands/index.ts` 갱신
-  - [ ] 모든 import site 업데이트
-  - [ ] 변수명 = 디버그 문자열 일치 확인
-  - [ ] tsc clean + 전체 테스트 통과
+- [x] T2: 커맨드 변수명 `OS_` 접두어 통일
+  - [x] 접두어 미적용 21개 rename (`NAVIGATE` → `OS_NAVIGATE` 등)
+  - [x] barrel export `3-commands/index.ts` 갱신
+  - [x] 모든 import site 업데이트
+  - [x] 변수명 = 디버그 문자열 일치 확인
+  - [x] tsc clean + 전체 테스트 통과
 
 - [ ] T3: OS 훅 `os.*` 통합
   - [ ] `useFocusExpansion` → `os.useExpansion()`
