@@ -115,6 +115,16 @@ export const INITIAL_STATE: BuilderState = {
                 },
             },
             {
+                id: "ncp-pricing",
+                label: "Pricing",
+                type: "pricing",
+                fields: {
+                    badge: "PRICING",
+                    title: "Simple, transparent pricing",
+                    sub: "Choose the plan that fits your needs",
+                },
+            },
+            {
                 id: "ncp-footer",
                 label: "Footer",
                 type: "footer",

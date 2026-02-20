@@ -2,6 +2,7 @@ export * from "./EditorToolbar";
 export * from "./NCPFooterBlock";
 export * from "./NCPHeroBlock";
 export * from "./NCPNewsBlock";
+export * from "./NCPPricingBlock";
 export * from "./NCPServicesBlock";
 export * from "./PropertiesPanel";
 export * from "./SectionSidebar";

@@ -15,6 +15,7 @@ import {
   NCPFooterBlock,
   NCPHeroBlock,
   NCPNewsBlock,
+  NCPPricingBlock,
   NCPServicesBlock,
   PropertiesPanel,
   SectionSidebar,
@@ -141,6 +142,7 @@ const BLOCK_COMPONENTS: Record<
   hero: NCPHeroBlock,
   news: NCPNewsBlock,
   services: NCPServicesBlock,
+  pricing: NCPPricingBlock,
   footer: NCPFooterBlock,
 };
 

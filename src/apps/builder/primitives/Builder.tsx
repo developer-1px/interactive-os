@@ -83,12 +83,18 @@ import { BuilderIcon } from "./BuilderIcon";
 // --- Universal Design Primitives ---
 import { BuilderImage } from "./BuilderImage";
 import { BuilderLink } from "./BuilderLink";
+// --- Structural Container Primitives ---
+import { BuilderTabPanel, BuilderTabs } from "./BuilderTabs";
 
 export const Builder = {
+  // Structural
   Section,
   Group,
   Item,
-  // Universal primitives
+  // Container (conditional visibility)
+  Tabs: BuilderTabs,
+  TabPanel: BuilderTabPanel,
+  // Content primitives
   Image: BuilderImage,
   Icon: BuilderIcon,
   Button: BuilderButton,
@@ -96,3 +102,4 @@ export const Builder = {
   Badge: BuilderBadge,
   Divider: BuilderDivider,
 } as const;
+
