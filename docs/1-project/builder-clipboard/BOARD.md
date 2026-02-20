@@ -6,10 +6,8 @@
   - [x] Step 3: /prd
   - [x] Step 4: /redteam + /divide
   - [x] Step 5: /tdd — pasteBubbling 순수함수 + 7 tests
-  - [ ] Step 6: /solve
-- [ ] T2: 탭 컬렉션 collectionZone 선언 — tab-container의 children (T1과 동일 패턴)
-- [ ] T3: Paste Bubbling — F1(레지스트리) + F2(bubbling 루프) + F3(캔버스 통합)
-- [ ] T4: 캔버스 onPaste 교체 — quick hack → bubbling 기반으로 교체
+  - [x] Step 6: /solve — buildCanvasCollections + _getClipboardPreview + bubbling 통합
+  - [ ] Step 7: /review
 
 ## ⏳ Done
 - [x] A: accept 인터페이스 — 이미 존재 (config.accept)

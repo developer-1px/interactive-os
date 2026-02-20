@@ -18,8 +18,17 @@ import { defineApp } from "@/os/defineApp";
 import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
 import { os } from "@/os/kernel";
 import { type Block, type BuilderState, INITIAL_STATE, type PropertyType, type SectionEntry } from "./model/appState";
+import {
+  type CollectionNode,
+  findAcceptingCollection,
+} from "@/os/collection/pasteBubbling";
 export type { Block, BuilderState, PropertyType, SectionEntry };
 export { INITIAL_STATE };
+
+/** Read current builder state from kernel. */
+function getBuilderState(): BuilderState {
+  return os.getState().apps["builder"] as BuilderState;
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // App definition
@@ -184,16 +193,11 @@ const CANVAS_ZONE_ID = "canvas";
  *   onCopy/onCut: find nearest dynamic ancestor of focused item → copy that
  *   onPaste: findAcceptingCollection → sidebarCollection.paste (tree-aware)
  */
-import {
-  type CollectionNode,
-  findAcceptingCollection,
-} from "@/os/collection/pasteBubbling";
-import { findInTree } from "@/os/collection/treeUtils";
+
 
 /** Build collection hierarchy from current block tree for paste bubbling. */
 function buildCanvasCollections(): CollectionNode[] {
-  const state = os.getState().apps["builder"] as BuilderState;
-  const blocks = state.data.blocks;
+  const blocks = getBuilderState().data.blocks;
 
   const nodes: CollectionNode[] = [
     // Root: section collection
@@ -217,7 +221,7 @@ function buildCanvasCollections(): CollectionNode[] {
         id: `${block.id}:children`,
         parentId: "sidebar",
         accept: (data: unknown) => {
-          const d = data as { type?: string };
+          const d = data as Block;
           if (d?.type && block.accept!.includes(d.type)) return data;
           return null;
         },
@@ -232,7 +236,7 @@ function buildCanvasCollections(): CollectionNode[] {
             id: `${child.id}:children`,
             parentId: `${block.id}:children`,
             accept: (data: unknown) => {
-              const d = data as { type?: string };
+              const d = data as Block;
               if (d?.type && child.accept!.includes(d.type)) return data;
               return null;
             },
@@ -252,13 +256,12 @@ function buildCanvasCollections(): CollectionNode[] {
  * Walks up from the focused item to the nearest dynamic collection item.
  */
 function resolveCanvasCopyTarget(focusId: string): string | null {
-  const state = os.getState().apps["builder"] as BuilderState;
-  const blocks = state.data.blocks;
+  const blocks = getBuilderState().data.blocks;
 
   // Direct match: focused on a root block
   if (blocks.some((b) => b.id === focusId)) return focusId;
 
-  // Check if it's a child of a container block
+  // Check if it's a child of a container block (dynamic collection item)
   for (const block of blocks) {
     if (block.children?.some((c) => c.id === focusId)) return focusId;
     if (block.children) {
@@ -268,16 +271,9 @@ function resolveCanvasCopyTarget(focusId: string): string | null {
     }
   }
 
-  // Otherwise: find parent section via prefix matching
+  // Static item (e.g., ncp-hero-title): bubble to parent section
   const addr = resolveFieldAddress(focusId, blocks);
-  if (addr) {
-    // Check if addr.section has children with prefix-matched children
-    const fieldNode = findInTree(blocks as any[], focusId);
-    if (fieldNode) return (fieldNode as Block).id;
-    return addr.section.id;
-  }
-
-  return null;
+  return addr?.section.id ?? null;
 }
 
 export const BuilderCanvasUI = canvasZone.bind({
