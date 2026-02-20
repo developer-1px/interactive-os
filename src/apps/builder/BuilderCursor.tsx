@@ -49,6 +49,7 @@ interface OverlayState {
   zoneId: string;
   color: string;
   animating: boolean;
+  dimmed: boolean;
 }
 
 const HIDDEN: OverlayState = {
@@ -61,6 +62,7 @@ const HIDDEN: OverlayState = {
   zoneId: "",
   color: "#6366f1",
   animating: false,
+  dimmed: false,
 };
 
 /**
@@ -78,12 +80,13 @@ export function BuilderCursor() {
     if (!container) return;
 
     const s = os.getState();
-    const zoneId = s.os.focus.activeZoneId;
-    const zoneState = zoneId ? s.os.focus.zones[zoneId] : null;
-    const itemId = zoneState?.focusedItemId ?? null;
+    const zoneId = "canvas";
+    const zoneState = s.os.focus.zones[zoneId];
+    const itemId = zoneState?.lastFocusedId ?? null;
+    const isActive = s.os.focus.activeZoneId === zoneId;
     const el = itemId ? findItemInZone(zoneId, itemId) : null;
 
-    if (!el || !itemId || !zoneId) {
+    if (!el || !itemId) {
       setState((prev) => (prev.visible ? HIDDEN : prev));
       prevItemRef.current = null;
       return;
@@ -122,6 +125,7 @@ export function BuilderCursor() {
       zoneId,
       color: getLevelColor(el),
       animating,
+      dimmed: !isActive,
     });
   }, []);
 
@@ -141,9 +145,9 @@ export function BuilderCursor() {
 
       // Observe the currently focused element
       const s = os.getState();
-      const zoneId = s.os.focus.activeZoneId;
-      const zoneState = zoneId ? s.os.focus.zones[zoneId] : null;
-      const itemId = zoneState?.focusedItemId;
+      const zoneId = "canvas";
+      const zoneState = s.os.focus.zones[zoneId];
+      const itemId = zoneState?.lastFocusedId;
       const el = itemId ? findItemInZone(zoneId, itemId) : null;
       if (el) {
         ro.observe(el);
@@ -165,9 +169,9 @@ export function BuilderCursor() {
     // Subscribe to kernel state changes
     const unsub = os.subscribe(() => {
       const s = os.getState();
-      const zoneId = s.os.focus.activeZoneId;
-      const zoneState = zoneId ? s.os.focus.zones[zoneId] : null;
-      const newItemId = zoneState?.focusedItemId ?? null;
+      const zoneId = "canvas";
+      const zoneState = s.os.focus.zones[zoneId];
+      const newItemId = zoneState?.lastFocusedId ?? null;
       const newEl = newItemId ? findItemInZone(zoneId, newItemId) : null;
 
       if (newEl !== prevEl && ro) {
@@ -221,6 +225,7 @@ export function BuilderCursor() {
           borderRadius: 4,
           background: `${state.color}10`,
           boxShadow: `0 0 0 1px ${state.color}30`,
+          opacity: state.dimmed ? 0.4 : 1,
           transition: state.animating
             ? "top 120ms ease-out, left 120ms ease-out, width 120ms ease-out, height 120ms ease-out"
             : "none",
