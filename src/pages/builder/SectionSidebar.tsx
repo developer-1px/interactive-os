@@ -31,8 +31,8 @@ export function SectionSidebar() {
     (s) => s.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
   );
 
-  const toggleCollapse = useCallback((id: string) => {
-    kernel.dispatch(EXPAND({ itemId: id, action: "toggle" }));
+  const toggleCollapse = useCallback((itemId: string) => {
+    kernel.dispatch(EXPAND({ itemId, action: "toggle" }));
   }, []);
 
   // Flatten tree for sidebar display — each node gets a depth
@@ -55,9 +55,10 @@ export function SectionSidebar() {
 
       <div className="flex-1 px-2 space-y-0.5">
         {flatNodes.map((node) => {
+          const itemId = `sidebar-${node.block.id}`;
           const isCanvasActive =
             focusedCanvasId?.startsWith(node.block.id) ?? false;
-          const isCollapsed = collapsed.has(node.block.id);
+          const isCollapsed = collapsed.has(itemId);
 
           if (node.isSection) {
             // ─── PPT SECTION HEADER ───
@@ -73,7 +74,7 @@ export function SectionSidebar() {
                     group-focus:ring-2 group-focus:ring-indigo-500/50 
                     ${isCanvasActive ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-200/50 text-slate-500"}
                   `}
-                  onClick={() => toggleCollapse(node.block.id)}
+                  onClick={() => toggleCollapse(itemId)}
                 >
                   <button
                     type="button"
@@ -185,7 +186,7 @@ function getFlatNodes(blocks: Block[], collapsed: Set<string>) {
         slideIndex: isSection ? null : slideIndex++
       });
       // Inverted: items IN collapsed set are collapsed
-      if (isSection && !collapsed.has(block.id)) {
+      if (isSection && !collapsed.has(`sidebar-${block.id}`)) {
         traverse(block.children!, depth + 1);
       }
     }
