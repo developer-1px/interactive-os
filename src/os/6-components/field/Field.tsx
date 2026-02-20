@@ -18,6 +18,7 @@ import {
   type FieldConfig,
   FieldRegistry,
   type FieldTrigger,
+  type FieldType,
   useFieldRegistry,
 } from "./FieldRegistry";
 import { Label } from "./Label";
@@ -86,6 +87,7 @@ export interface FieldProps
   name?: string;
   placeholder?: string;
   multiline?: boolean;
+  fieldType?: FieldType;
 
   // -- New Architecture --
   onCommit?: FieldCommandFactory;
@@ -130,6 +132,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       target = "real",
       controls,
       blurOnInactive = false,
+      fieldType: fieldTypeProp,
       as = "span",
       ...rest
     },
@@ -199,10 +202,13 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     useEffect(() => {
       if (!name) return;
 
+      const computedFieldType: FieldType = fieldTypeProp ?? (multiline ? "block" : "inline");
+
       const config: FieldConfig = {
         name,
         mode,
         multiline,
+        fieldType: computedFieldType,
         trigger,
         resetOnSubmit,
         ...(onCommitRef.current !== undefined
@@ -216,7 +222,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
-    }, [name, mode, multiline, trigger, resetOnSubmit, schema]); // Re-register on config change
+    }, [name, mode, multiline, fieldTypeProp, trigger, resetOnSubmit, schema]); // Re-register on config change
 
     // --- State Subscription ---
     // Subscribe to primitive values to avoid unnecessary re-renders on object reference changes.
