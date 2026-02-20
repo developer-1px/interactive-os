@@ -66,6 +66,8 @@ export const INITIAL_STATE: BuilderState = {
                     sub: "네이버클라우드의 기술력으로 완성된\n하이퍼스케일 AI 스튜디오를 경험하세요.",
                     brand: "NAVER CLOUD",
                     cta: "무료로 시작하기",
+                    "nav-login": "로그인",
+                    "nav-signup": "회원가입",
                     "portal-title": "Global Scale",
                     "portal-subtitle": "Hyper-connected infrastructure",
                 },
@@ -76,6 +78,7 @@ export const INITIAL_STATE: BuilderState = {
                 type: "news",
                 fields: {
                     title: "네이버클라우드의\n새로운 소식",
+                    all: "전체 뉴스 보기",
                     "item-1-title": "Cloud DB for Cache\nRedis 호환성 강화",
                     "item-1-desc":
                         "Valkey 기반의 인메모리 캐시 서비스를 이제 클라우드에서 만나보세요.",
@@ -176,6 +179,12 @@ export const INITIAL_STATE: BuilderState = {
                 type: "pricing",
                 fields: {
                     badge: "PRICING",
+                    "m-starter-cta": "Get Started",
+                    "m-pro-cta": "Start Free Trial",
+                    "m-ent-cta": "Contact Sales",
+                    "a-starter-cta": "Get Started",
+                    "a-pro-cta": "Start Free Trial",
+                    "a-ent-cta": "Contact Sales",
                     title: "Simple, transparent pricing",
                     sub: "Choose the plan that fits your needs",
                 },

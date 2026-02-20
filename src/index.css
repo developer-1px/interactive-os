@@ -13,6 +13,13 @@
   scroll-margin-inline: 5vw;
 }
 
+/* BuilderCursor provides visual focus — suppress native ring */
+[data-item-id]:focus,
+[data-item-id]:focus-visible {
+  outline: none !important;
+  box-shadow: none;
+}
+
 @theme {
   /* Premium Semantic Colors */
   --color-app-bg: #fdfdfd;

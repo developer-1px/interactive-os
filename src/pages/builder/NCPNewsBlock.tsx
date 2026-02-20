@@ -60,7 +60,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                   data-[focused=true]:border-slate-900 data-[focused=true]:scale-105 data-[focused=true]:origin-right data-[focused=true]:ring-2 data-[focused=true]:ring-slate-100 data-[focused=true]:rounded data-[focused=true]:px-2
                 `}
               >
-                전체 뉴스 보기
+                {fields["all"] || "전체 뉴스 보기"}
               </Builder.Link>
             </Builder.Item>
           </div>

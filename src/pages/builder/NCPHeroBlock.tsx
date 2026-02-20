@@ -159,7 +159,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                 variant="ghost"
                 className="hover:text-slate-900 transition-colors data-[focused=true]:underline data-[focused=true]:text-slate-900"
               >
-                로그인
+                {fields["nav-login"] || "로그인"}
               </Builder.Button>
             </Builder.Item>
             <Builder.Item asChild id={fid("nav-signup")}>
@@ -168,7 +168,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                 variant="outline"
                 className="px-4 py-2 rounded-full border border-slate-200 hover:border-slate-800 hover:text-slate-900 transition-all data-[focused=true]:ring-2 data-[focused=true]:ring-slate-800"
               >
-                회원가입
+                {fields["nav-signup"] || "회원가입"}
               </Builder.Button>
             </Builder.Item>
           </div>
