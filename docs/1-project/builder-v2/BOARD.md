@@ -5,19 +5,7 @@
 
 ## 🔴 Now
 
-- [ ] T9: Block Tree 데이터 모델 — `SectionEntry` → `Block { id, type, fields, children? }`
-  - [ ] 9-1: `Block` 인터페이스 정의 (model/appState.ts)
-  - [ ] 9-2: 기존 `SectionEntry` → `Block`으로 마이그레이션 (하위호환 유지)
-  - [ ] 9-3: block type registry (string → 렌더러 컴포넌트 resolve)
-  - [ ] 9-4: children 지원 — 재귀적 `SectionRenderer`
-  - [ ] 9-5: 기존 테스트 통과 확인
-
-- [ ] T10: `Builder.Tabs` 구조 프리미티브
-  - [ ] 10-1: `Builder.Tabs` / `Builder.TabPanel` 컴포넌트 (ARIA tablist 매핑)
-  - [ ] 10-2: 탭 전환 인터랙션 (키보드: ←→ 전환, Enter 진입, Escape 복귀)
-  - [ ] 10-3: 탭 라벨 인라인 편집 (Field 활용)
-  - [ ] 10-4: 탭 컨테이너 디자인 블록 예제 (Pricing or Services)
-  - [ ] 10-5: URL 바인딩 (퍼블리싱 모드)
+- (다음 태스크 선정 대기)
 
 ## 🟡 Next
 
@@ -42,6 +30,17 @@
 
 ## ⏳ Done
 
+- [x] T11: 사이드바 트리 뷰 — Block Tree의 시각적 투영
+  - indent(16px/depth) + collapse/expand chevron + leaf dot
+  - flattenBlocks() 재귀 순회, 캔버스 포커스 동기화 유지
+- [x] T10: Builder.Tabs 구조 프리미티브 + NCPPricingBlock
+  - ARIA tablist 패턴, Zone+Item 키보드 내비게이션
+  - Monthly/Annual 탭 × 3 프라이싱 카드 데모
+  - 활성 탭 = 로컬 React 상태, 블록 데이터에 미저장
+- [x] T9: Block Tree 데이터 모델 — SectionEntry → Block
+  - Block 인터페이스 (id, type:string, label, fields, children?)
+  - sections → blocks 9개 파일 마이그레이션, tsc clean
+  - BLOCK_COMPONENTS 레지스트리 (string key, open set)
 - [x] T8: Collection Zone Facade — `createCollectionZone` (probe-first → /doubt → 재설계)
   - 285줄 facade로 Builder(-78줄) + Todo(-94줄) 양쪽 마이그레이션 완료
 - [x] T3: Undo/Redo 기초 구현
