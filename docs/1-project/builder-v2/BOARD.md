@@ -6,12 +6,12 @@
 ## 🔴 Now
 
 - [ ] T14: 블록 추가 UI + 프리셋 시스템
-  - [ ] Block Preset 데이터 (`presets/blocks.ts`) — 타입별 기본 Block 정의
-  - [ ] Page Preset 데이터 (`presets/pages.ts`) — INITIAL_STATE를 "SaaS 랜딩" 프리셋으로 승격
-  - [ ] 사이드바 "+ 블록" 버튼 → Block Preset 선택 팝오버
-  - [ ] 블록 삽입 = `sidebarCollection.paste(deepClone(preset))` — 기존 파이프라인 재사용
-  - [ ] 빈 캔버스 / 최초 진입 → Page Preset 선택 화면
-  - [ ] 빌더 툴바 "새 페이지" → Page Preset 선택
+  - [x] Block Preset 데이터 (`presets/blocks.ts`) — 5개 블록 타입 프리셋
+  - [x] Page Preset 데이터 (`presets/pages.ts`) — SaaS/미니멀/빈 페이지 3종
+  - [x] 사이드바 "+ 블록" 버튼 → Block Preset 선택 팝오버
+  - [x] 블록 삽입 = `addBlock` 커맨드 (deepClone)
+  - [x] 빈 캔버스 → Page Preset 선택 화면 (PagePresetPicker)
+  - [x] 빌더 툴바 "새 페이지" → `loadPagePreset({ blocks: [] })`
   - Discussion: [block-add-and-presets](discussions/2026-0221-0250-block-add-and-presets.md)
 
 
