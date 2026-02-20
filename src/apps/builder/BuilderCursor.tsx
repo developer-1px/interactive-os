@@ -229,14 +229,14 @@ export function BuilderCursor() {
           width: state.width + pad * 2,
           height: state.height + pad * 2,
           border: state.editing
-            ? `2px dashed #3b82f6`
+            ? `2px solid #3b82f6`
             : `2px solid ${state.color}`,
           borderRadius: 4,
           background: state.editing
-            ? "rgba(59, 130, 246, 0.06)"
+            ? "rgba(59, 130, 246, 0.04)"
             : state.level === "section" ? "transparent" : `${state.color}10`,
           boxShadow: state.editing
-            ? "0 0 0 1px rgba(59, 130, 246, 0.2)"
+            ? "0 0 0 1px rgba(59, 130, 246, 0.3), 0 0 12px 2px rgba(59, 130, 246, 0.15)"
             : `0 0 0 1px ${state.color}30`,
           opacity: state.dimmed ? 0.4 : 1,
           transition: state.animating
