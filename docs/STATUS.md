@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**apg-contract-testing** — W3C APG 스펙 기반 Contract Testing (Headless Kernel). 58 tests across 4 patterns
+**defineapp-unification** — defineApp canonical usage 확립 및 createTrigger Pit of Success
 
 ---
 
@@ -17,7 +17,6 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| apg-contract-testing | T1~T4 완료 (58 tests) | 02-20 | 🟢 Active |
 | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
 
 ---
@@ -26,6 +25,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| apg-contract-testing | 02-20 | ✅ Layer A 완료 (58 APG tests, 4 patterns) |
 | inspector-redesign | 02-20 | ✅ archive/2026/02/W08/inspector-redesign |
 | command-type-unification | 02-20 | ✅ 4-archive/2026-02-command-type-unification (자연 해소) |
 | philosophy-hygiene | 02-20 | ✅ 4-archive/2026-02-philosophy-hygiene (예정) |
