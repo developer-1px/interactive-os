@@ -2,7 +2,7 @@ import type { BaseCommand } from "@kernel";
 import { useFieldFocus } from "@os/5-hooks/useFieldHooks.ts";
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import { kernel } from "@os/kernel.ts";
+import { os } from "@os/kernel.ts";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
 import type { FocusTarget } from "@os/schemas/focus/FocusTarget.ts";
 import type { HTMLAttributes } from "react";
@@ -182,7 +182,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
         // But wait, we need to DISPATCH the command.
         // FieldCommandFactory returns a Command object.
         const command = commitCmd({ text: currentValue });
-        kernel.dispatch(command);
+        os.dispatch(command);
 
         // 4. Reset (if configured)
         if (resetOnSubmit) {
@@ -230,16 +230,16 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const isContentEditableRef = useRef(false);
 
     // --- Focus Computation ---
-    const isFocused = kernel.useComputed(
+    const isFocused = os.useComputed(
       (s) =>
         s.os.focus.activeZoneId === zoneId &&
         (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === fieldId,
     );
 
-    const isEditingThisField = kernel.useComputed(
+    const isEditingThisField = os.useComputed(
       (s) => (s.os.focus.zones[zoneId]?.editingItemId ?? null) === fieldId,
     );
-    const isParentEditing = kernel.useComputed((s) => {
+    const isParentEditing = os.useComputed((s) => {
       if (s.os.focus.activeZoneId !== zoneId) return false;
       const zone = s.os.focus.zones[zoneId];
       if (!zone?.editingItemId) return false;
@@ -252,7 +252,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       return editingEl?.contains(innerRef.current) ?? false;
     });
 
-    const activedescendantId = kernel.useComputed((s) => {
+    const activedescendantId = os.useComputed((s) => {
       if (target !== "virtual" || !controls) return null;
       const focusedId = s.os.focus.zones[zoneId]?.focusedItemId ?? null;
       return focusedId && focusedId !== name ? focusedId : null;

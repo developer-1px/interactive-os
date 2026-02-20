@@ -2,7 +2,7 @@
  * FocusItem - Pure Projection Focusable Item
  *
  * Automatically registers with parent FocusGroup's context.
- * Uses Kernel state via kernel.useComputed for performant UI updates.
+ * Uses Kernel state via os.useComputed for performant UI updates.
  *
  * NOTE: This is a PROJECTION-ONLY component.
  * - Does NOT handle events (click, keydown)
@@ -10,7 +10,7 @@
  * - Event handling is done by FocusListener
  */
 
-import { kernel } from "@os/kernel.ts";
+import { os } from "@os/kernel.ts";
 import {
   cloneElement,
   forwardRef,
@@ -124,25 +124,25 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     // --- State Subscriptions (Kernel Direct) ---
     // When parent Item provides hints, skip redundant subscriptions
     // to prevent double-render (the root cause of focus cursor flicker).
-    const isGroupActiveSub = kernel.useComputed(
+    const isGroupActiveSub = os.useComputed(
       _isActiveHint !== undefined
         ? () => _isActiveHint
         : (state) => state.os.focus.activeZoneId === zoneId,
     );
     const isGroupActive = _isActiveHint ?? isGroupActiveSub;
 
-    const isFocusedSub = kernel.useComputed(
+    const isFocusedSub = os.useComputed(
       _isFocusedHint !== undefined
         ? () => _isFocusedHint
         : (state) => state.os.focus.zones[zoneId]?.focusedItemId === id,
     );
     const isFocused = _isFocusedHint ?? isFocusedSub;
 
-    const isSelected = kernel.useComputed(
+    const isSelected = os.useComputed(
       (state) => state.os.focus.zones[zoneId]?.selection.includes(id) ?? false,
     );
 
-    const isExpanded = kernel.useComputed(
+    const isExpanded = os.useComputed(
       (state) =>
         state.os.focus.zones[zoneId]?.expandedItems.includes(id) ?? false,
     );

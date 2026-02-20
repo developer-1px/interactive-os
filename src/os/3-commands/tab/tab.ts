@@ -12,7 +12,7 @@
 
 import { produce } from "immer";
 import { DOM_ITEMS, DOM_ZONE_ORDER, ZONE_CONFIG } from "../../2-contexts";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 import { resolveTab } from "./resolveTab";
 
@@ -20,7 +20,7 @@ interface TabPayload {
   direction?: "forward" | "backward";
 }
 
-export const TAB = kernel.defineCommand(
+export const TAB = os.defineCommand(
   "OS_TAB",
   [DOM_ITEMS, ZONE_CONFIG, DOM_ZONE_ORDER],
   (ctx) => (payload: TabPayload) => {

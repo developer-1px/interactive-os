@@ -12,7 +12,7 @@
 
 import { RECOVER, SYNC_FOCUS } from "@os/3-commands";
 import { useEffect } from "react";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
 import {
   findFocusableItem,
@@ -44,7 +44,7 @@ export function FocusListener() {
       const focusTarget = resolveFocusTarget(item);
       if (!focusTarget) return;
 
-      kernel.dispatch(
+      os.dispatch(
         SYNC_FOCUS({ id: focusTarget.itemId, zoneId: focusTarget.groupId }),
         {
           meta: {
@@ -77,7 +77,7 @@ export function FocusListener() {
         !document.body.contains(lastFocusedElement)
       ) {
         lastFocusedElement = null;
-        kernel.dispatch(RECOVER(), {
+        os.dispatch(RECOVER(), {
           meta: { input: { type: "FOCUS", key: "Recovery" } },
         });
       }

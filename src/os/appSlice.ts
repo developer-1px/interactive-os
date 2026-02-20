@@ -32,7 +32,7 @@
 
 import { defineScope } from "@kernel";
 import type { Middleware, ScopeToken } from "@kernel/core/tokens";
-import { type AppState, initialAppState, kernel } from "@os/kernel";
+import { type AppState, initialAppState, os } from "@os/kernel";
 import { createHistoryMiddleware } from "@/os/middlewares/historyKernelMiddleware";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -60,9 +60,9 @@ export interface AppSliceHandle<S> {
   /** Kernel scope token for this app */
   scope: ScopeToken;
   /** Scoped kernel group — use to defineCommand, defineEffect, etc. */
-  group: ReturnType<typeof kernel.group>;
+  group: ReturnType<typeof os.group>;
   /** Context token — inject in commands to read app state */
-  AppState: ReturnType<typeof kernel.defineContext>;
+  AppState: ReturnType<typeof os.defineContext>;
   /** Read current app state */
   getState(): S;
   /** Update app state (immutable updater pattern) */
@@ -92,13 +92,13 @@ export function registerAppSlice<S>(
     : initialState;
 
   // 2. Initialize state in kernel tree
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     apps: { ...prev.apps, [appId]: startState },
   }));
 
   // 3. Create scoped group with state lens (ownership isolation)
-  const appGroup = kernel.group({
+  const appGroup = os.group({
     scope,
     stateSlice: {
       get: (full: AppState) => full.apps[appId] as S,
@@ -112,17 +112,17 @@ export function registerAppSlice<S>(
   // 4. Context token for commands to read app state
   const AppStateToken = appGroup.defineContext(
     `app:${appId}`,
-    () => kernel.getState().apps[appId] as S,
+    () => os.getState().apps[appId] as S,
   );
 
   // 5. Persistence middleware (if configured)
   if (persistence) {
-    kernel.use(createPersistenceMiddleware(appId, scope, persistence));
+    os.use(createPersistenceMiddleware(appId, scope, persistence));
   }
 
   // 6. History middleware (if configured)
   if (config.history) {
-    kernel.use(createHistoryMiddleware(appId, scope));
+    os.use(createHistoryMiddleware(appId, scope));
   }
 
   const handle: AppSliceHandle<S> = {
@@ -131,11 +131,11 @@ export function registerAppSlice<S>(
     AppState: AppStateToken,
 
     getState() {
-      return kernel.getState().apps[appId] as S;
+      return os.getState().apps[appId] as S;
     },
 
     setState(updater: (prev: S) => S) {
-      kernel.setState((prev) => ({
+      os.setState((prev) => ({
         ...prev,
         apps: {
           ...prev.apps,
@@ -145,21 +145,21 @@ export function registerAppSlice<S>(
     },
 
     resetState() {
-      kernel.setState((prev) => ({
+      os.setState((prev) => ({
         ...prev,
         apps: { ...prev.apps, [appId]: initialState },
       }));
     },
 
     useComputed<T>(selector: (s: S) => T): T {
-      return kernel.useComputed((root: AppState) =>
+      return os.useComputed((root: AppState) =>
         selector(root.apps[appId] as S),
       );
     },
 
     dispose() {
       sliceResetters.delete(appId);
-      kernel.setState((prev) => {
+      os.setState((prev) => {
         const { [appId]: _, ...rest } = prev.apps;
         return { ...prev, apps: rest };
       });
@@ -186,7 +186,7 @@ export function resetAllAppSlices(): void {
     resetter();
   }
   // Reset OS state (focus, zones, etc.)
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: initialAppState.os,
   }));
@@ -221,8 +221,8 @@ function createPersistenceMiddleware(
    * When state changes outside middleware, cancel pending saves
    * to prevent stale closure data from overwriting the restored state.
    */
-  kernel.subscribe(() => {
-    const currentAppState = (kernel.getState() as AppState).apps[appId];
+  os.subscribe(() => {
+    const currentAppState = (os.getState() as AppState).apps[appId];
     if (currentAppState !== lastSaved && saveTimeout) {
       // State changed externally — cancel pending stale save
       cancelPendingSave();
@@ -244,7 +244,7 @@ function createPersistenceMiddleware(
       saveTimeout = setTimeout(() => {
         try {
           // Read fresh state at save time (not closure-captured state)
-          const freshState = (kernel.getState() as AppState).apps[appId];
+          const freshState = (os.getState() as AppState).apps[appId];
           localStorage.setItem(key, JSON.stringify(freshState));
           lastSaved = freshState;
         } catch {

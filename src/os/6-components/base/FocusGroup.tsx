@@ -27,7 +27,7 @@ import {
 import type { ZoneCallback, ZoneEntry } from "../../2-contexts/zoneRegistry.ts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
 import { FOCUS, STACK_POP, STACK_PUSH } from "../../3-commands/focus";
-import { kernel } from "../../kernel.ts";
+import { os } from "../../kernel.ts";
 import { resolveRole, type ZoneRole } from "../../registries/roleRegistry.ts";
 import type {
   ActivateConfig,
@@ -164,7 +164,7 @@ function generateGroupId() {
 // Init command (module-scoped, lightweight)
 // ═══════════════════════════════════════════════════════════════════
 
-const INIT_ZONE = kernel.defineCommand(
+const INIT_ZONE = os.defineCommand(
   "FOCUS_GROUP_INIT",
   (ctx) => (zoneId: string) => {
     if (ctx.state.os.focus.zones[zoneId]) return; // already init
@@ -289,7 +289,7 @@ export function FocusGroup({
   // --- Register in ZoneRegistry + init kernel state ---
   useLayoutEffect(() => {
     // Init kernel state for this zone
-    kernel.dispatch(INIT_ZONE(groupId));
+    os.dispatch(INIT_ZONE(groupId));
 
     // Register in ZoneRegistry (for context providers)
     if (containerRef.current) {
@@ -351,7 +351,7 @@ export function FocusGroup({
       if (firstItem) {
         const itemId = firstItem.getAttribute("data-item-id") || firstItem.id;
         if (itemId) {
-          kernel.dispatch(FOCUS({ zoneId: groupId, itemId }));
+          os.dispatch(FOCUS({ zoneId: groupId, itemId }));
         }
       }
     });
@@ -362,14 +362,14 @@ export function FocusGroup({
   // When autoFocus is true, push focus stack on mount and pop on unmount
   useLayoutEffect(() => {
     if (!config.project.autoFocus) return;
-    kernel.dispatch(STACK_PUSH());
+    os.dispatch(STACK_PUSH());
     return () => {
-      kernel.dispatch(STACK_POP());
+      os.dispatch(STACK_POP());
     };
   }, [config.project.autoFocus]);
 
   // --- Is Active ---
-  const isActive = kernel.useComputed(
+  const isActive = os.useComputed(
     (s) => s.os.focus.activeZoneId === groupId,
   );
 

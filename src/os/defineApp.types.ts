@@ -51,9 +51,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-      state: S;
-      dispatch?: BaseCommand | BaseCommand[] | undefined;
-    }
+    state: S;
+    dispatch?: BaseCommand | BaseCommand[] | undefined;
+  }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -146,7 +146,7 @@ export interface ZoneHandle<S> {
 
 export interface TestInstance<S> {
   readonly state: S;
-  readonly kernel: any; // Exposed for integration tests (typed as any to avoid circular dep with @kernel/core)
+  readonly runtime: any; // Exposed for integration tests (typed as any to avoid circular dep with @kernel/core)
   dispatch(command: BaseCommand): boolean;
   reset(): void;
   evaluate(condition: Condition<S>): boolean;
@@ -171,8 +171,8 @@ export interface AppHandle<S> {
     factory: CommandFactory<string, P>,
   ): React.FC<
     P extends void
-      ? { children: ReactNode; payload?: never }
-      : { children: ReactNode; payload: P }
+    ? { children: ReactNode; payload?: never }
+    : { children: ReactNode; payload: P }
   >;
   createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;

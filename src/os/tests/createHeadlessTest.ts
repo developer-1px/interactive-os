@@ -1,6 +1,6 @@
 import { resetAllAppSlices } from "@os/appSlice";
 import type { AppState } from "@os/kernel";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { produce } from "immer";
 
@@ -24,7 +24,7 @@ export function createHeadlessTest() {
     zoneId: string,
     overrides: Partial<AppState["os"]["focus"]["zones"][string]> = {},
   ) {
-    kernel.setState(
+    os.setState(
       produce((state: AppState) => {
         state.os.focus.zones[zoneId] = {
           ...initialZoneState,
@@ -36,13 +36,13 @@ export function createHeadlessTest() {
 
   // 3. Return interfaces
   return {
-    kernel,
-    dispatch: kernel.dispatch,
+    runtime: os,
+    dispatch: os.dispatch,
     get state() {
-      return kernel.getState() as AppState;
+      return os.getState() as AppState;
     },
     get os() {
-      return (kernel.getState() as any).os as AppState["os"];
+      return (os.getState() as any).os as AppState["os"];
     },
     resetZone,
   };

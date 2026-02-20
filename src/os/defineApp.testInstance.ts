@@ -167,8 +167,8 @@ export function createTestInstance<S>(
       }
     },
 
-    // Expose kernel for integration tests (OS state inspection)
-    get kernel() {
+    // Expose runtime for integration tests (OS state inspection)
+    get runtime() {
       return testKernel;
     },
   };

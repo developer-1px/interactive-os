@@ -10,7 +10,7 @@ describe("OS Integration: Cut Focus Recovery", () => {
   });
 
   test("When selected items are CUT, focus should move to nearest unselected neighbor (Next -> Prev)", () => {
-    const { dispatch, kernel } = headless;
+    const { dispatch, runtime } = headless;
 
     // 1. Setup: [A, B, C, D]
     dispatch(TodoDraft.commands.addTodo({ text: "A" }));
@@ -18,7 +18,7 @@ describe("OS Integration: Cut Focus Recovery", () => {
     dispatch(TodoDraft.commands.addTodo({ text: "C" }));
     dispatch(TodoDraft.commands.addTodo({ text: "D" }));
 
-    const appState = (kernel.getState() as any).apps["todo-v5"];
+    const appState = (runtime.getState() as any).apps["todo-v5"];
     const todos = Object.values(appState.data.todos) as any[];
     const get = (txt: string) => todos.find((t) => t.text === txt)!;
     const [, b, c, d] = ["A", "B", "C", "D"].map(get);
@@ -33,7 +33,7 @@ describe("OS Integration: Cut Focus Recovery", () => {
     dispatch(FOCUS({ zoneId: "list", itemId: b.id }));
 
     // Verify State
-    const focusState = (kernel.getState() as any).os.focus.zones["list"];
+    const focusState = (runtime.getState() as any).os.focus.zones["list"];
     expect(focusState.focusedItemId).toBe(b.id);
     expect(focusState.selection).toContain(b.id);
     expect(focusState.selection).toContain(c.id);
@@ -42,7 +42,7 @@ describe("OS Integration: Cut Focus Recovery", () => {
     // Mock clipboardWrite effect to avoid Kernel "Unknown effect" warning/error
     // This is necessary because the test kernel might not have the effect registered if defineApp namespacing mismatches
     try {
-      kernel.defineEffect("clipboardWrite", () => Promise.resolve());
+      runtime.defineEffect("clipboardWrite", () => Promise.resolve());
     } catch (e) {
       // Ignore if already defined
     }
@@ -52,7 +52,7 @@ describe("OS Integration: Cut Focus Recovery", () => {
     dispatch(listCollection.cut({ ids: [b.id, c.id], focusId: b.id }));
 
     // 4. Verify Items B and C are removed
-    const newAppState = (kernel.getState() as any).apps["todo-v5"];
+    const newAppState = (runtime.getState() as any).apps["todo-v5"];
     const newTodos = Object.values(newAppState.data.todos) as any[];
     const initialCount = todos.length;
     expect(newTodos.find((t) => t.id === b.id)).toBeUndefined();
@@ -60,7 +60,7 @@ describe("OS Integration: Cut Focus Recovery", () => {
     expect(newTodos).toHaveLength(initialCount - 2);
 
     // 5. Verify Focus Recovery -> Should be D (Next neighbor of the block [B,C])
-    const finalFocusState = (kernel.getState() as any).os.focus.zones["list"];
+    const finalFocusState = (runtime.getState() as any).os.focus.zones["list"];
     expect(finalFocusState.focusedItemId).toBe(d.id);
   });
 });

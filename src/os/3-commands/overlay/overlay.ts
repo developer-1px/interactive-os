@@ -10,7 +10,7 @@
  */
 
 import { produce } from "immer";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import type { OverlayEntry } from "../../state/OSState";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -22,7 +22,7 @@ interface OverlayOpenPayload {
   type: OverlayEntry["type"];
 }
 
-export const OVERLAY_OPEN = kernel.defineCommand(
+export const OVERLAY_OPEN = os.defineCommand(
   "OS_OVERLAY_OPEN",
   (ctx) => (payload: OverlayOpenPayload) => {
     // Don't open if already in stack
@@ -49,7 +49,7 @@ interface OverlayClosePayload {
   id?: string;
 }
 
-export const OVERLAY_CLOSE = kernel.defineCommand(
+export const OVERLAY_CLOSE = os.defineCommand(
   "OS_OVERLAY_CLOSE",
   (ctx) => (payload: OverlayClosePayload) => {
     const { stack } = ctx.state.os.overlays;

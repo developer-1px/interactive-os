@@ -5,7 +5,7 @@
  */
 
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { describe, it } from "vitest";
 import {
   registerZone,
@@ -25,13 +25,13 @@ describe("OS_DELETE → onDelete pipeline", () => {
       }),
     });
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
   });
 
   it("does nothing when Zone has no onDelete", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {});
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
   });
 });

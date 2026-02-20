@@ -6,9 +6,9 @@
  */
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 
-export const OS_UNDO = kernel.defineCommand("OS_UNDO", (ctx) => () => {
+export const OS_UNDO = os.defineCommand("OS_UNDO", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
   if (!activeZoneId) return;
 

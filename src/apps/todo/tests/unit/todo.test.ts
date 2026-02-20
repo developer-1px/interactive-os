@@ -46,7 +46,7 @@ describe("Todo v5 — defineApp native", () => {
 
   /** Helper: read OS clipboard from kernel state */
   function getOsClipboard(app: ReturnType<typeof createApp>) {
-    return (app.kernel as any).getState().os.clipboard;
+    return (app.runtime as any).getState().os.clipboard;
   }
 
   // ─── CRUD ───

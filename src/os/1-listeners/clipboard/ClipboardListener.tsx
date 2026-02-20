@@ -13,7 +13,7 @@ import {
   OS_CUT,
   OS_PASTE,
 } from "../../3-commands/clipboard/clipboard";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { resolveClipboard } from "./resolveClipboard";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -30,7 +30,7 @@ function isInputActive(): boolean {
 }
 
 function canZoneHandle(callback: "onCopy" | "onCut" | "onPaste"): boolean {
-  const { activeZoneId } = kernel.getState().os.focus;
+  const { activeZoneId } = os.getState().os.focus;
   if (!activeZoneId) return false;
   const entry = ZoneRegistry.get(activeZoneId);
   return !!entry?.[callback];
@@ -49,7 +49,7 @@ export function ClipboardListener() {
         zoneHasCallback: canZoneHandle("onCopy"),
       });
       if (result.action === "dispatch") {
-        kernel.dispatch(OS_COPY());
+        os.dispatch(OS_COPY());
         e.preventDefault();
       }
     };
@@ -61,7 +61,7 @@ export function ClipboardListener() {
         zoneHasCallback: canZoneHandle("onCut"),
       });
       if (result.action === "dispatch") {
-        kernel.dispatch(OS_CUT());
+        os.dispatch(OS_CUT());
         e.preventDefault();
       }
     };
@@ -73,7 +73,7 @@ export function ClipboardListener() {
         zoneHasCallback: canZoneHandle("onPaste"),
       });
       if (result.action === "dispatch") {
-        kernel.dispatch(OS_PASTE());
+        os.dispatch(OS_PASTE());
         e.preventDefault();
       }
     };

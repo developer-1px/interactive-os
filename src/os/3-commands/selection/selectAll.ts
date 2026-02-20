@@ -7,10 +7,10 @@
 
 import { produce } from "immer";
 import { DOM_ITEMS } from "../../2-contexts";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
-export const OS_SELECT_ALL = kernel.defineCommand(
+export const OS_SELECT_ALL = os.defineCommand(
   "OS_SELECT_ALL",
   [DOM_ITEMS],
   (ctx) => () => {

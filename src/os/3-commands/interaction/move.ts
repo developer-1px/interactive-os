@@ -5,10 +5,10 @@
  */
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
-export const OS_MOVE_UP = kernel.defineCommand("OS_MOVE_UP", (ctx) => () => {
+export const OS_MOVE_UP = os.defineCommand("OS_MOVE_UP", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
   if (!activeZoneId) return;
 
@@ -22,7 +22,7 @@ export const OS_MOVE_UP = kernel.defineCommand("OS_MOVE_UP", (ctx) => () => {
   return { dispatch: entry.onMoveUp(cursor) };
 });
 
-export const OS_MOVE_DOWN = kernel.defineCommand(
+export const OS_MOVE_DOWN = os.defineCommand(
   "OS_MOVE_DOWN",
   (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;

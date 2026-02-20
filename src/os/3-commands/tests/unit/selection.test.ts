@@ -12,20 +12,20 @@ import {
   SELECTION_SET,
   SELECTION_TOGGLE,
 } from "@os/3-commands/selection/selection";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it } from "vitest";
 
 // ─── Helpers ───
 
-let snapshot: ReturnType<typeof kernel.getState>;
+let snapshot: ReturnType<typeof os.getState>;
 
 function setupZone(
   zoneId: string,
   selection: string[] = [],
   anchor: string | null = null,
 ) {
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: {
       ...prev.os,
@@ -47,13 +47,13 @@ function setupZone(
 }
 
 function getZone(zoneId: string) {
-  return kernel.getState().os.focus.zones[zoneId];
+  return os.getState().os.focus.zones[zoneId];
 }
 
 beforeEach(() => {
-  snapshot = kernel.getState();
+  snapshot = os.getState();
   return () => {
-    kernel.setState(() => snapshot);
+    os.setState(() => snapshot);
   };
 });
 
@@ -65,7 +65,7 @@ describe("SELECTION_SET", () => {
   it("replaces selection with given ids", () => {
     setupZone("z1", ["old-1", "old-2"]);
 
-    kernel.dispatch(
+    os.dispatch(
       SELECTION_SET({ zoneId: "z1", ids: ["new-1", "new-2", "new-3"] }),
     );
 
@@ -76,7 +76,7 @@ describe("SELECTION_SET", () => {
   it("sets anchor to last item", () => {
     setupZone("z1");
 
-    kernel.dispatch(SELECTION_SET({ zoneId: "z1", ids: ["a", "b", "c"] }));
+    os.dispatch(SELECTION_SET({ zoneId: "z1", ids: ["a", "b", "c"] }));
 
     expect(getZone("z1")?.selectionAnchor).toBe("c");
   });
@@ -84,7 +84,7 @@ describe("SELECTION_SET", () => {
   it("sets anchor to null when ids is empty", () => {
     setupZone("z1", ["a"], "a");
 
-    kernel.dispatch(SELECTION_SET({ zoneId: "z1", ids: [] }));
+    os.dispatch(SELECTION_SET({ zoneId: "z1", ids: [] }));
 
     const zone = getZone("z1");
     expect(zone?.selection).toEqual([]);
@@ -100,7 +100,7 @@ describe("SELECTION_ADD", () => {
   it("adds item to selection", () => {
     setupZone("z1", ["item-1"]);
 
-    kernel.dispatch(SELECTION_ADD({ zoneId: "z1", id: "item-2" }));
+    os.dispatch(SELECTION_ADD({ zoneId: "z1", id: "item-2" }));
 
     expect(getZone("z1")?.selection).toEqual(["item-1", "item-2"]);
   });
@@ -108,7 +108,7 @@ describe("SELECTION_ADD", () => {
   it("does not duplicate existing item", () => {
     setupZone("z1", ["item-1"]);
 
-    kernel.dispatch(SELECTION_ADD({ zoneId: "z1", id: "item-1" }));
+    os.dispatch(SELECTION_ADD({ zoneId: "z1", id: "item-1" }));
 
     expect(getZone("z1")?.selection).toEqual(["item-1"]);
   });
@@ -116,7 +116,7 @@ describe("SELECTION_ADD", () => {
   it("updates anchor to added item", () => {
     setupZone("z1", ["item-1"], "item-1");
 
-    kernel.dispatch(SELECTION_ADD({ zoneId: "z1", id: "item-2" }));
+    os.dispatch(SELECTION_ADD({ zoneId: "z1", id: "item-2" }));
 
     expect(getZone("z1")?.selectionAnchor).toBe("item-2");
   });
@@ -130,7 +130,7 @@ describe("SELECTION_REMOVE", () => {
   it("removes item from selection", () => {
     setupZone("z1", ["item-1", "item-2", "item-3"]);
 
-    kernel.dispatch(SELECTION_REMOVE({ zoneId: "z1", id: "item-2" }));
+    os.dispatch(SELECTION_REMOVE({ zoneId: "z1", id: "item-2" }));
 
     expect(getZone("z1")?.selection).toEqual(["item-1", "item-3"]);
   });
@@ -138,7 +138,7 @@ describe("SELECTION_REMOVE", () => {
   it("clears anchor if removed item was anchor", () => {
     setupZone("z1", ["item-1", "item-2"], "item-2");
 
-    kernel.dispatch(SELECTION_REMOVE({ zoneId: "z1", id: "item-2" }));
+    os.dispatch(SELECTION_REMOVE({ zoneId: "z1", id: "item-2" }));
 
     expect(getZone("z1")?.selectionAnchor).toBeNull();
   });
@@ -146,7 +146,7 @@ describe("SELECTION_REMOVE", () => {
   it("preserves anchor if different item removed", () => {
     setupZone("z1", ["item-1", "item-2"], "item-2");
 
-    kernel.dispatch(SELECTION_REMOVE({ zoneId: "z1", id: "item-1" }));
+    os.dispatch(SELECTION_REMOVE({ zoneId: "z1", id: "item-1" }));
 
     expect(getZone("z1")?.selectionAnchor).toBe("item-2");
   });
@@ -160,7 +160,7 @@ describe("SELECTION_TOGGLE", () => {
   it("adds item if not in selection", () => {
     setupZone("z1", []);
 
-    kernel.dispatch(SELECTION_TOGGLE({ zoneId: "z1", id: "item-1" }));
+    os.dispatch(SELECTION_TOGGLE({ zoneId: "z1", id: "item-1" }));
 
     const zone = getZone("z1");
     expect(zone?.selection).toEqual(["item-1"]);
@@ -170,7 +170,7 @@ describe("SELECTION_TOGGLE", () => {
   it("removes item if already in selection", () => {
     setupZone("z1", ["item-1", "item-2"], "item-1");
 
-    kernel.dispatch(SELECTION_TOGGLE({ zoneId: "z1", id: "item-1" }));
+    os.dispatch(SELECTION_TOGGLE({ zoneId: "z1", id: "item-1" }));
 
     const zone = getZone("z1");
     expect(zone?.selection).toEqual(["item-2"]);
@@ -180,7 +180,7 @@ describe("SELECTION_TOGGLE", () => {
   it("sets anchor when adding", () => {
     setupZone("z1", ["item-1"], "item-1");
 
-    kernel.dispatch(SELECTION_TOGGLE({ zoneId: "z1", id: "item-2" }));
+    os.dispatch(SELECTION_TOGGLE({ zoneId: "z1", id: "item-2" }));
 
     expect(getZone("z1")?.selectionAnchor).toBe("item-2");
   });
@@ -194,7 +194,7 @@ describe("SELECTION_CLEAR", () => {
   it("clears all selection and anchor", () => {
     setupZone("z1", ["item-1", "item-2", "item-3"], "item-2");
 
-    kernel.dispatch(SELECTION_CLEAR({ zoneId: "z1" }));
+    os.dispatch(SELECTION_CLEAR({ zoneId: "z1" }));
 
     const zone = getZone("z1");
     expect(zone?.selection).toEqual([]);
@@ -204,7 +204,7 @@ describe("SELECTION_CLEAR", () => {
   it("is idempotent on empty selection", () => {
     setupZone("z1", []);
 
-    kernel.dispatch(SELECTION_CLEAR({ zoneId: "z1" }));
+    os.dispatch(SELECTION_CLEAR({ zoneId: "z1" }));
 
     const zone = getZone("z1");
     expect(zone?.selection).toEqual([]);

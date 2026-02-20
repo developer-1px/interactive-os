@@ -6,7 +6,7 @@
  */
 
 import { produce } from "immer";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
 interface SyncFocusPayload {
@@ -14,7 +14,7 @@ interface SyncFocusPayload {
   zoneId: string;
 }
 
-export const SYNC_FOCUS = kernel.defineCommand(
+export const SYNC_FOCUS = os.defineCommand(
   "OS_SYNC_FOCUS",
   (ctx) => (payload: SyncFocusPayload) => {
     return {

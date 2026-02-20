@@ -10,7 +10,7 @@
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { FOCUS } from "@os/3-commands/focus";
 import { NAVIGATE } from "@os/3-commands/navigate";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import { initialOSState } from "@os/state/initial";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -20,7 +20,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 // ═══════════════════════════════════════════════════════════════════
 
 function resetState() {
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: JSON.parse(JSON.stringify(initialOSState)),
   }));
@@ -57,7 +57,7 @@ function registerVirtualZone(id: string, items: string[]) {
   });
 
   // Set initial state — zone is active + first item focused
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: {
       ...prev.os,
@@ -108,18 +108,18 @@ describe("Virtual Focus (T5a)", () => {
       registerVirtualZone("z-virtual", items);
 
       // Verify setup
-      const stateBefore = kernel.getState().os.focus.zones["z-virtual"];
+      const stateBefore = os.getState().os.focus.zones["z-virtual"];
       expect(stateBefore?.focusedItemId).toBe("item-1");
 
       // Dispatch NAVIGATE (down)
-      kernel.dispatch(NAVIGATE({ direction: "down" }));
+      os.dispatch(NAVIGATE({ direction: "down" }));
 
       // 1. State must update — focusedItemId moves to item-2
-      const stateAfter = kernel.getState().os.focus.zones["z-virtual"];
+      const stateAfter = os.getState().os.focus.zones["z-virtual"];
       expect(stateAfter?.focusedItemId).toBe("item-2");
 
       // 2. Verify effects via transaction log
-      const tx = kernel.inspector.getLastTransaction();
+      const tx = os.inspector.getLastTransaction();
       expect(tx).toBeDefined();
       expect(tx?.effects).toBeDefined();
       // virtualFocus: focus effect must be absent (undefined → not in effects)
@@ -133,10 +133,10 @@ describe("Virtual Focus (T5a)", () => {
       registerVirtualZone("z-virtual", items);
 
       // Navigate down twice — item-1 → item-2 → stop (wrap: false)
-      kernel.dispatch(NAVIGATE({ direction: "down" }));
-      kernel.dispatch(NAVIGATE({ direction: "down" }));
+      os.dispatch(NAVIGATE({ direction: "down" }));
+      os.dispatch(NAVIGATE({ direction: "down" }));
 
-      const state = kernel.getState().os.focus.zones["z-virtual"];
+      const state = os.getState().os.focus.zones["z-virtual"];
       // Should stay at item-2 (no wrap)
       expect(state?.focusedItemId).toBe("item-2");
     });
@@ -146,14 +146,14 @@ describe("Virtual Focus (T5a)", () => {
       registerVirtualZone("z-virtual", items);
 
       // Move to item-2 first
-      kernel.dispatch(NAVIGATE({ direction: "down" }));
-      expect(kernel.getState().os.focus.zones["z-virtual"]?.focusedItemId).toBe(
+      os.dispatch(NAVIGATE({ direction: "down" }));
+      expect(os.getState().os.focus.zones["z-virtual"]?.focusedItemId).toBe(
         "item-2",
       );
 
       // Navigate up
-      kernel.dispatch(NAVIGATE({ direction: "up" }));
-      expect(kernel.getState().os.focus.zones["z-virtual"]?.focusedItemId).toBe(
+      os.dispatch(NAVIGATE({ direction: "up" }));
+      expect(os.getState().os.focus.zones["z-virtual"]?.focusedItemId).toBe(
         "item-1",
       );
     });
@@ -165,14 +165,14 @@ describe("Virtual Focus (T5a)", () => {
       registerVirtualZone("z-virtual", items);
 
       // Dispatch FOCUS to item-2
-      kernel.dispatch(FOCUS({ zoneId: "z-virtual", itemId: "item-2" }));
+      os.dispatch(FOCUS({ zoneId: "z-virtual", itemId: "item-2" }));
 
       // 1. Check State Update
-      const stateAfter = kernel.getState().os.focus.zones["z-virtual"];
+      const stateAfter = os.getState().os.focus.zones["z-virtual"];
       expect(stateAfter?.focusedItemId).toBe("item-2");
 
-      // kernel.dispatch returns void — check transaction log for effects
-      const tx = kernel.inspector.getLastTransaction();
+      // os.dispatch returns void — check transaction log for effects
+      const tx = os.inspector.getLastTransaction();
       expect((tx?.effects as any)?.focus).toBeUndefined();
     });
 
@@ -190,9 +190,9 @@ describe("Virtual Focus (T5a)", () => {
         parentId: null,
       });
 
-      kernel.dispatch(FOCUS({ zoneId: "z-normal", itemId: "item-A" }));
-      // kernel.dispatch returns void — check transaction log for effects
-      const tx = kernel.inspector.getLastTransaction();
+      os.dispatch(FOCUS({ zoneId: "z-normal", itemId: "item-A" }));
+      // os.dispatch returns void — check transaction log for effects
+      const tx = os.inspector.getLastTransaction();
       expect((tx?.effects as any)?.focus).toBe("item-A");
     });
   });

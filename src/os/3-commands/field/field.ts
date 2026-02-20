@@ -15,13 +15,13 @@
 import { produce } from "immer";
 import { clearFieldDOM } from "../../4-effects/index";
 import { FieldRegistry } from "../../6-components/field/FieldRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 
 // ═══════════════════════════════════════════════════════════════════
 // FIELD_START_EDIT
 // ═══════════════════════════════════════════════════════════════════
 
-export const FIELD_START_EDIT = kernel.defineCommand(
+export const FIELD_START_EDIT = os.defineCommand(
   "FIELD_START_EDIT",
   (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
@@ -48,7 +48,7 @@ export const FIELD_START_EDIT = kernel.defineCommand(
 // FIELD_COMMIT
 // ═══════════════════════════════════════════════════════════════════
 
-export const FIELD_COMMIT = kernel.defineCommand(
+export const FIELD_COMMIT = os.defineCommand(
   "FIELD_COMMIT",
   (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
@@ -88,7 +88,7 @@ export const FIELD_COMMIT = kernel.defineCommand(
       // Read from FieldRegistry — InputListener keeps value in sync with DOM.
       const text = fieldEntry!.state.value;
       const appCommand = commitFactory({ text });
-      queueMicrotask(() => kernel.dispatch(appCommand));
+      queueMicrotask(() => os.dispatch(appCommand));
 
       // Clear field for immediate-mode (e.g., DRAFT) — delegate to effect
       if (!editingId) {
@@ -121,7 +121,7 @@ export const FIELD_COMMIT = kernel.defineCommand(
 // FIELD_CANCEL
 // ═══════════════════════════════════════════════════════════════════
 
-export const FIELD_CANCEL = kernel.defineCommand(
+export const FIELD_CANCEL = os.defineCommand(
   "FIELD_CANCEL",
   (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
@@ -145,7 +145,7 @@ export const FIELD_CANCEL = kernel.defineCommand(
     }
     if (fieldEntry?.config.onCancel) {
       const command = fieldEntry.config.onCancel;
-      queueMicrotask(() => kernel.dispatch(command));
+      queueMicrotask(() => os.dispatch(command));
     }
 
     return {

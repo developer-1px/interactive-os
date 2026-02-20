@@ -6,7 +6,7 @@
  */
 
 import { produce } from "immer";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -17,7 +17,7 @@ interface StackPushPayload {
   triggeredBy?: string;
 }
 
-export const STACK_PUSH = kernel.defineCommand(
+export const STACK_PUSH = os.defineCommand(
   "OS_STACK_PUSH",
   (ctx) =>
     (payload: StackPushPayload = {}) => {
@@ -48,7 +48,7 @@ export const STACK_PUSH = kernel.defineCommand(
 // POP
 // ═══════════════════════════════════════════════════════════════════
 
-export const STACK_POP = kernel.defineCommand("OS_STACK_POP", (ctx) => () => {
+export const STACK_POP = os.defineCommand("OS_STACK_POP", (ctx) => () => {
   const stack = ctx.state.os.focus.focusStack;
 
   if (stack.length === 0) return;

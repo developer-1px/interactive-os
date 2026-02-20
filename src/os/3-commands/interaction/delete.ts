@@ -9,7 +9,7 @@
  */
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import {
   beginTransaction,
   endTransaction,
@@ -17,7 +17,7 @@ import {
 import { SELECTION_CLEAR } from "../selection/selection";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
-export const OS_DELETE = kernel.defineCommand("OS_DELETE", (ctx) => () => {
+export const OS_DELETE = os.defineCommand("OS_DELETE", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
   if (!activeZoneId) return;
 

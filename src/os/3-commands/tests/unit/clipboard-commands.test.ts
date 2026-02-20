@@ -5,14 +5,14 @@
 import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-let snapshot: ReturnType<typeof kernel.getState>;
+let snapshot: ReturnType<typeof os.getState>;
 
 function setupFocus(zoneId: string, focusedItemId: string) {
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: {
       ...prev.os,
@@ -49,7 +49,7 @@ function registerZoneWithClipboard(
 }
 
 beforeEach(() => {
-  snapshot = kernel.getState();
+  snapshot = os.getState();
 
   Object.defineProperty(navigator, "clipboard", {
     value: {
@@ -62,7 +62,7 @@ beforeEach(() => {
   });
 
   return () => {
-    kernel.setState(() => snapshot);
+    os.setState(() => snapshot);
     for (const key of [...ZoneRegistry.keys()]) {
       ZoneRegistry.unregister(key);
     }
@@ -81,12 +81,12 @@ describe("OS_COPY dispatch chain", () => {
     });
     setupFocus(zoneId, "item-1");
 
-    kernel.dispatch(OS_COPY());
+    os.dispatch(OS_COPY());
   });
 
   it("OS_COPY without activeZoneId is no-op", () => {
-    kernel.dispatch(OS_COPY());
-    expect(kernel.getState().os).toBeDefined();
+    os.dispatch(OS_COPY());
+    expect(os.getState().os).toBeDefined();
   });
 
   it("OS_COPY without onCopy callback is no-op", () => {
@@ -94,7 +94,7 @@ describe("OS_COPY dispatch chain", () => {
     registerZoneWithClipboard(zoneId, {});
     setupFocus(zoneId, "123");
 
-    kernel.dispatch(OS_COPY());
+    os.dispatch(OS_COPY());
   });
 });
 
@@ -109,7 +109,7 @@ describe("OS_CUT dispatch chain", () => {
     });
     setupFocus(zoneId, "item-1");
 
-    kernel.dispatch(OS_CUT());
+    os.dispatch(OS_CUT());
   });
 });
 
@@ -124,6 +124,6 @@ describe("OS_PASTE dispatch chain", () => {
     });
     setupFocus(zoneId, "item-1");
 
-    kernel.dispatch(OS_PASTE());
+    os.dispatch(OS_PASTE());
   });
 });

@@ -16,7 +16,7 @@ import type { BaseCommand, Middleware } from "@kernel";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { FOCUS } from "@os/3-commands/focus/focus";
 import { resolveTypeahead } from "@os/3-commands/navigate/typeahead";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { isEditingElement } from "@os/keymaps/fieldKeyOwnership";
 
 /**
@@ -61,7 +61,7 @@ export const typeaheadFallbackMiddleware: Middleware = {
     if (event.key === " ") return null;
 
     // Get active zone
-    const osState = kernel.getState().os?.focus;
+    const osState = os.getState().os?.focus;
     if (!osState?.activeZoneId) return null;
 
     const zoneId = osState.activeZoneId;

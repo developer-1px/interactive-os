@@ -2,13 +2,13 @@
  * useFocusExpansion - Hook to access expansion state from kernel
  *
  * Provides a simple API to check and toggle expansion for tree and accordion items.
- * Uses OS_EXPAND kernel command for mutations, kernel state for reads.
+ * Uses OS_EXPAND kernel command for mutations, os state for reads.
  */
 
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { useCallback } from "react";
 import { EXPAND } from "@/os/3-commands/expand";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 
 // Stable empty array reference to avoid infinite re-render in useSyncExternalStore.
 // `?? []` inside a selector creates a new reference per call → referential inequality → re-render loop.
@@ -24,16 +24,16 @@ export function useFocusExpansion() {
   const { zoneId } = ctx;
 
   // Subscribe to expandedItems for reactive use
-  const expandedItems = kernel.useComputed(
+  const expandedItems = os.useComputed(
     (s) => s.os.focus.zones[zoneId]?.expandedItems ?? EMPTY,
   );
 
   const toggleExpanded = useCallback((id: string) => {
-    kernel.dispatch(EXPAND({ itemId: id, action: "toggle" }));
+    os.dispatch(EXPAND({ itemId: id, action: "toggle" }));
   }, []);
 
   const setExpanded = useCallback((id: string, expanded: boolean) => {
-    kernel.dispatch(
+    os.dispatch(
       EXPAND({ itemId: id, action: expanded ? "expand" : "collapse" }),
     );
   }, []);

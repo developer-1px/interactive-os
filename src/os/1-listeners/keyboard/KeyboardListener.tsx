@@ -14,7 +14,7 @@ import {
 } from "@os/keymaps/fieldKeyOwnership";
 import { getCanonicalKey } from "@os/keymaps/getCanonicalKey";
 import { useEffect } from "react";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { type KeyboardInput, resolveKeyboard } from "./resolveKeyboard";
 
 // Ensure OS defaults are registered
@@ -24,8 +24,8 @@ import "@os/keymaps/osDefaults";
 import { macFallbackMiddleware } from "@os/keymaps/macFallbackMiddleware";
 import { typeaheadFallbackMiddleware } from "@os/keymaps/typeaheadFallbackMiddleware";
 
-kernel.use(macFallbackMiddleware);
-kernel.use(typeaheadFallbackMiddleware);
+os.use(macFallbackMiddleware);
+os.use(typeaheadFallbackMiddleware);
 
 // ═══════════════════════════════════════════════════════════════════
 // Sense: DOM → Data extraction
@@ -42,7 +42,7 @@ function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
   const itemEl = focusedEl?.closest?.("[data-item-id]") as HTMLElement | null;
 
   // Zone state for CHECK resolution
-  const focusState = kernel.getState().os?.focus;
+  const focusState = os.getState().os?.focus;
   const activeZoneId = focusState?.activeZoneId;
   const entry = activeZoneId ? ZoneRegistry.get(activeZoneId) : null;
   const zone = activeZoneId ? focusState?.zones?.[activeZoneId] : null;
@@ -91,7 +91,7 @@ export function KeyboardListener() {
           return;
 
         case "check":
-          kernel.dispatch(OS_CHECK({ targetId: result.targetId }), {
+          os.dispatch(OS_CHECK({ targetId: result.targetId }), {
             meta: { input: result.meta },
           });
           e.preventDefault();
@@ -99,7 +99,7 @@ export function KeyboardListener() {
           return;
 
         case "dispatch":
-          kernel.dispatch(result.command, {
+          os.dispatch(result.command, {
             meta: { input: result.meta },
           });
           e.preventDefault();
@@ -108,9 +108,9 @@ export function KeyboardListener() {
 
         case "dispatch-callback": {
           // Build ZoneCursor from current kernel state
-          const { activeZoneId } = kernel.getState().os.focus;
+          const { activeZoneId } = os.getState().os.focus;
           if (!activeZoneId) return;
-          const zone = kernel.getState().os.focus.zones[activeZoneId];
+          const zone = os.getState().os.focus.zones[activeZoneId];
           if (!zone?.focusedItemId) return;
 
           const cursor = {
@@ -122,7 +122,7 @@ export function KeyboardListener() {
           const cmds = result.callback(cursor);
           const cmdArray = Array.isArray(cmds) ? cmds : [cmds];
           for (const cmd of cmdArray) {
-            kernel.dispatch(cmd, {
+            os.dispatch(cmd, {
               meta: { input: result.meta },
             });
           }
@@ -132,7 +132,7 @@ export function KeyboardListener() {
         }
 
         case "fallback":
-          if (kernel.resolveFallback(e)) {
+          if (os.resolveFallback(e)) {
             e.preventDefault();
             e.stopPropagation();
           }

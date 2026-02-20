@@ -11,7 +11,7 @@
  */
 
 import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialOSState } from "@os/state/initial";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -20,14 +20,14 @@ import { beforeEach, describe, expect, it } from "vitest";
 // ═══════════════════════════════════════════════════════════════════
 
 function resetState() {
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: JSON.parse(JSON.stringify(initialOSState)),
   }));
 }
 
 function getStack() {
-  return kernel.getState().os.overlays.stack;
+  return os.getState().os.overlays.stack;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -39,7 +39,7 @@ describe("Overlay Commands", () => {
 
   describe("OVERLAY_OPEN", () => {
     it("pushes overlay onto stack", () => {
-      kernel.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
 
       const stack = getStack();
       expect(stack).toHaveLength(1);
@@ -47,21 +47,21 @@ describe("Overlay Commands", () => {
     });
 
     it("supports different overlay types", () => {
-      kernel.dispatch(OVERLAY_OPEN({ id: "m1", type: "menu" }));
+      os.dispatch(OVERLAY_OPEN({ id: "m1", type: "menu" }));
       expect(getStack()[0]?.type).toBe("menu");
     });
 
     it("is idempotent — does not duplicate same id", () => {
-      kernel.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
-      kernel.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
 
       expect(getStack()).toHaveLength(1);
     });
 
     it("stacks multiple different overlays", () => {
-      kernel.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
-      kernel.dispatch(OVERLAY_OPEN({ id: "menu-1", type: "menu" }));
-      kernel.dispatch(OVERLAY_OPEN({ id: "pop-1", type: "popover" }));
+      os.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "menu-1", type: "menu" }));
+      os.dispatch(OVERLAY_OPEN({ id: "pop-1", type: "popover" }));
 
       const stack = getStack();
       expect(stack).toHaveLength(3);
@@ -71,10 +71,10 @@ describe("Overlay Commands", () => {
 
   describe("OVERLAY_CLOSE", () => {
     it("removes specific overlay by id", () => {
-      kernel.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
-      kernel.dispatch(OVERLAY_OPEN({ id: "dlg-2", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "dlg-2", type: "dialog" }));
 
-      kernel.dispatch(OVERLAY_CLOSE({ id: "dlg-1" }));
+      os.dispatch(OVERLAY_CLOSE({ id: "dlg-1" }));
 
       const stack = getStack();
       expect(stack).toHaveLength(1);
@@ -82,10 +82,10 @@ describe("Overlay Commands", () => {
     });
 
     it("pops top overlay when no id provided", () => {
-      kernel.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
-      kernel.dispatch(OVERLAY_OPEN({ id: "dlg-2", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "dlg-1", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "dlg-2", type: "dialog" }));
 
-      kernel.dispatch(OVERLAY_CLOSE({}));
+      os.dispatch(OVERLAY_CLOSE({}));
 
       const stack = getStack();
       expect(stack).toHaveLength(1);
@@ -93,18 +93,18 @@ describe("Overlay Commands", () => {
     });
 
     it("is no-op on empty stack", () => {
-      const before = JSON.stringify(kernel.getState().os);
-      kernel.dispatch(OVERLAY_CLOSE({}));
-      const after = JSON.stringify(kernel.getState().os);
+      const before = JSON.stringify(os.getState().os);
+      os.dispatch(OVERLAY_CLOSE({}));
+      const after = JSON.stringify(os.getState().os);
       expect(before).toBe(after);
     });
 
     it("removes middle overlay from stack", () => {
-      kernel.dispatch(OVERLAY_OPEN({ id: "a", type: "dialog" }));
-      kernel.dispatch(OVERLAY_OPEN({ id: "b", type: "menu" }));
-      kernel.dispatch(OVERLAY_OPEN({ id: "c", type: "popover" }));
+      os.dispatch(OVERLAY_OPEN({ id: "a", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "b", type: "menu" }));
+      os.dispatch(OVERLAY_OPEN({ id: "c", type: "popover" }));
 
-      kernel.dispatch(OVERLAY_CLOSE({ id: "b" }));
+      os.dispatch(OVERLAY_CLOSE({ id: "b" }));
 
       const stack = getStack();
       expect(stack).toHaveLength(2);
@@ -112,17 +112,17 @@ describe("Overlay Commands", () => {
     });
 
     it("LIFO: sequential pop removes in reverse order", () => {
-      kernel.dispatch(OVERLAY_OPEN({ id: "a", type: "dialog" }));
-      kernel.dispatch(OVERLAY_OPEN({ id: "b", type: "menu" }));
-      kernel.dispatch(OVERLAY_OPEN({ id: "c", type: "popover" }));
+      os.dispatch(OVERLAY_OPEN({ id: "a", type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id: "b", type: "menu" }));
+      os.dispatch(OVERLAY_OPEN({ id: "c", type: "popover" }));
 
-      kernel.dispatch(OVERLAY_CLOSE({})); // removes c
+      os.dispatch(OVERLAY_CLOSE({})); // removes c
       expect(getStack().map((e) => e.id)).toEqual(["a", "b"]);
 
-      kernel.dispatch(OVERLAY_CLOSE({})); // removes b
+      os.dispatch(OVERLAY_CLOSE({})); // removes b
       expect(getStack().map((e) => e.id)).toEqual(["a"]);
 
-      kernel.dispatch(OVERLAY_CLOSE({})); // removes a
+      os.dispatch(OVERLAY_CLOSE({})); // removes a
       expect(getStack()).toHaveLength(0);
     });
   });

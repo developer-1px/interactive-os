@@ -11,18 +11,18 @@ import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OS_COPY, OS_CUT } from "@os/3-commands/clipboard/clipboard";
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-let snapshot: ReturnType<typeof kernel.getState>;
+let snapshot: ReturnType<typeof os.getState>;
 
 function setupFocusWithSelection(
   zoneId: string,
   focusedItemId: string,
   selection: string[],
 ) {
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: {
       ...prev.os,
@@ -46,7 +46,7 @@ function setupFocusWithSelection(
 
 function captureDispatches() {
   const captured: Command[] = [];
-  kernel.use({
+  os.use({
     id: "test:capture-dispatches",
     scope: GLOBAL as ScopeToken,
     before(ctx) {
@@ -58,9 +58,9 @@ function captureDispatches() {
 }
 
 beforeEach(() => {
-  snapshot = kernel.getState();
+  snapshot = os.getState();
   return () => {
-    kernel.setState(() => snapshot);
+    os.setState(() => snapshot);
     for (const key of [...ZoneRegistry.keys()]) {
       ZoneRegistry.unregister(key);
     }
@@ -90,7 +90,7 @@ describe("OS_DELETE with multi-selection", () => {
       "item-3",
     ]);
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
 
     // Callback called exactly ONCE with full cursor
     expect(onDelete).toHaveBeenCalledTimes(1);
@@ -120,7 +120,7 @@ describe("OS_DELETE with multi-selection", () => {
       "item-3",
     ]);
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
 
     const deleteCmds = captured.filter((cmd) => cmd.type === "mock/delete");
     expect(deleteCmds.length).toBe(3);
@@ -146,7 +146,7 @@ describe("OS_DELETE with multi-selection", () => {
     });
     setupFocusWithSelection("testZone", "item-1", []);
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
 
     expect(onDelete).toHaveBeenCalledWith({
       focusId: "item-1",
@@ -164,9 +164,9 @@ describe("OS_DELETE with multi-selection", () => {
     });
     setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
 
-    const zone = kernel.getState().os.focus.zones["testZone"];
+    const zone = os.getState().os.focus.zones["testZone"];
     expect(zone?.selection).toEqual([]);
   });
 });
@@ -190,7 +190,7 @@ describe("OS_COPY with multi-selection", () => {
     });
     setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
-    kernel.dispatch(OS_COPY());
+    os.dispatch(OS_COPY());
 
     expect(onCopy).toHaveBeenCalledTimes(1);
   });
@@ -215,7 +215,7 @@ describe("OS_CUT with multi-selection", () => {
     });
     setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
-    kernel.dispatch(OS_CUT());
+    os.dispatch(OS_CUT());
 
     expect(onCut).toHaveBeenCalledTimes(1);
   });
@@ -229,9 +229,9 @@ describe("OS_CUT with multi-selection", () => {
     });
     setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
-    kernel.dispatch(OS_CUT());
+    os.dispatch(OS_CUT());
 
-    const zone = kernel.getState().os.focus.zones["testZone"];
+    const zone = os.getState().os.focus.zones["testZone"];
     expect(zone?.selection).toEqual([]);
   });
 });

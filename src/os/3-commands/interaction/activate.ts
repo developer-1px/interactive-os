@@ -8,12 +8,12 @@
  */
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { EXPAND } from "../expand";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
-export const ACTIVATE = kernel.defineCommand("OS_ACTIVATE", (ctx) => () => {
+export const ACTIVATE = os.defineCommand("OS_ACTIVATE", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
   if (!activeZoneId) return;
 

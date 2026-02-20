@@ -38,7 +38,7 @@ import { Kbd } from "@os/6-components/Kbd";
 import { Item } from "@os/6-components/primitives/Item";
 import { Zone } from "@os/6-components/primitives/Zone";
 import { Dialog } from "@os/6-components/radox/Dialog";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -187,14 +187,14 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
   // ── Overlay sync ──
   useEffect(() => {
     if (isOpen) {
-      kernel.dispatch(OVERLAY_OPEN({ id, type: "dialog" }));
+      os.dispatch(OVERLAY_OPEN({ id, type: "dialog" }));
     } else {
-      kernel.dispatch(OVERLAY_CLOSE({ id }));
+      os.dispatch(OVERLAY_CLOSE({ id }));
     }
   }, [isOpen, id]);
 
   // Detect external close (Esc via DialogZone) → sync back to parent
-  const isOverlayOpen = kernel.useComputed((s) =>
+  const isOverlayOpen = os.useComputed((s) =>
     s.os.overlays.stack.some((o) => o.id === id),
   );
 
@@ -221,7 +221,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
         if (firstItem) {
           const itemId = firstItem.getAttribute("data-item-id");
           if (itemId) {
-            kernel.dispatch(FOCUS({ zoneId, itemId }));
+            os.dispatch(FOCUS({ zoneId, itemId }));
           }
         }
       }
@@ -266,13 +266,13 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
 
   // ── Close helper ──
   const handleClose = useCallback(() => {
-    kernel.dispatch(OVERLAY_CLOSE({ id }));
+    os.dispatch(OVERLAY_CLOSE({ id }));
     onClose?.();
   }, [id, onClose]);
 
   // ── Select from virtual focus ──
   const handleAction = useCallback(() => {
-    const state = kernel.getState();
+    const state = os.getState();
     const zone = state.os.focus.zones[zoneId];
     const focusedId = zone?.focusedItemId;
 
@@ -299,7 +299,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
       } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         // Direct kernel dispatch — virtualFocus keeps DOM focus on input
         e.preventDefault();
-        kernel.dispatch(
+        os.dispatch(
           NAVIGATE({
             direction: e.key === "ArrowDown" ? "down" : "up",
           }),

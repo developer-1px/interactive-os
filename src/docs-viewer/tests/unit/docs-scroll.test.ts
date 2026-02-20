@@ -6,7 +6,7 @@
 
 import { NAVIGATE } from "@os/3-commands/navigate";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 
 // Side-effect: register DOCS_SCROLL_PAGE command + middleware
 import "@/docs-viewer/register";
@@ -15,7 +15,7 @@ import "@/docs-viewer/register";
 // Helpers
 // ═══════════════════════════════════════════════════════════════════
 
-let snapshot: ReturnType<typeof kernel.getState>;
+let snapshot: ReturnType<typeof os.getState>;
 
 function createScrollContainer(): HTMLDivElement {
   const el = document.createElement("div");
@@ -85,12 +85,12 @@ function cleanup() {
 }
 
 beforeEach(() => {
-  snapshot = kernel.getState();
+  snapshot = os.getState();
   cleanup();
 });
 
 afterEach(() => {
-  kernel.setState(() => snapshot);
+  os.setState(() => snapshot);
   cleanup();
 });
 
@@ -105,13 +105,13 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     addHeading(el, 1, 100);
     addHeading(el, 2, 500);
 
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: { ...prev.os, focus: { ...prev.os.focus, activeZoneId: null } },
     }));
 
     // 1. Jump to H1 (100) -> snaps to 76 (100 - 24)
-    kernel.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(NAVIGATE({ direction: "right" }));
     expect(el.scrollBy).toHaveBeenCalledWith({
       top: 76,
       behavior: "instant",
@@ -131,7 +131,7 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     // Clear mock history
     vi.clearAllMocks();
 
-    kernel.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(NAVIGATE({ direction: "right" }));
     expect(el.scrollBy).toHaveBeenCalledWith({
       top: 400,
       behavior: "instant",
@@ -145,7 +145,7 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     // Reading body of H1
     el.scrollTop = 200;
 
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: { ...prev.os, focus: { ...prev.os.focus, activeZoneId: null } },
     }));
@@ -156,7 +156,7 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     // scrollBy(-124).
     // New scrollTop will be 200 - 124 = 76 (which is 100 - 24). Correct.
 
-    kernel.dispatch(NAVIGATE({ direction: "left" }));
+    os.dispatch(NAVIGATE({ direction: "left" }));
     expect(el.scrollBy).toHaveBeenCalledWith({
       top: -124,
       behavior: "instant",
@@ -171,7 +171,7 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     // At start of H2
     el.scrollTop = 476; // 500 - 24
 
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: { ...prev.os, focus: { ...prev.os.focus, activeZoneId: null } },
     }));
@@ -184,7 +184,7 @@ describe("DOCS_SCROLL_PAGE (heading snapping)", () => {
     // scrollBy(-400).
     // New scrollTop: 476 - 400 = 76 (100 - 24). Correct.
 
-    kernel.dispatch(NAVIGATE({ direction: "left" }));
+    os.dispatch(NAVIGATE({ direction: "left" }));
     expect(el.scrollBy).toHaveBeenCalledWith({
       top: -400,
       behavior: "instant",
@@ -203,12 +203,12 @@ describe("DOCS_SCROLL_PAGE (boundaries)", () => {
     el.scrollTop = 1600; // 1600 + 800 = 2400 (scrollHeight)
     const nextLink = createNavLink("next");
 
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: { ...prev.os, focus: { ...prev.os.focus, activeZoneId: null } },
     }));
 
-    kernel.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(NAVIGATE({ direction: "right" }));
 
     expect(nextLink.click).toHaveBeenCalled();
   });
@@ -218,12 +218,12 @@ describe("DOCS_SCROLL_PAGE (boundaries)", () => {
     el.scrollTop = 0;
     const prevLink = createNavLink("prev");
 
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: { ...prev.os, focus: { ...prev.os.focus, activeZoneId: null } },
     }));
 
-    kernel.dispatch(NAVIGATE({ direction: "left" }));
+    os.dispatch(NAVIGATE({ direction: "left" }));
 
     expect(prevLink.click).toHaveBeenCalled();
   });
@@ -239,7 +239,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
     addHeading(el, 1, 100);
 
     // Simulate stale zone: activeZoneId set but no matching DOM element
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: {
         ...prev.os,
@@ -247,7 +247,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
       },
     }));
 
-    kernel.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(NAVIGATE({ direction: "right" }));
     expect(el.scrollBy).toHaveBeenCalled();
   });
 
@@ -261,7 +261,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
     zoneEl.setAttribute("data-focus-group", "empty-zone");
     document.body.appendChild(zoneEl);
 
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: {
         ...prev.os,
@@ -269,7 +269,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
       },
     }));
 
-    kernel.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(NAVIGATE({ direction: "right" }));
     expect(el.scrollBy).toHaveBeenCalled();
   });
 
@@ -286,7 +286,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
     zoneEl.appendChild(item);
     document.body.appendChild(zoneEl);
 
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: {
         ...prev.os,
@@ -294,7 +294,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
       },
     }));
 
-    kernel.dispatch(NAVIGATE({ direction: "right" }));
+    os.dispatch(NAVIGATE({ direction: "right" }));
     // Should NOT redirect to docs scroll — NAVIGATE handles it (or returns early)
     expect(el.scrollBy).not.toHaveBeenCalled();
   });

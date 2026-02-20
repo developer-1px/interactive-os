@@ -6,7 +6,7 @@
 
 import { TodoApp, TodoSidebar } from "@apps/todo/app";
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import {
   ArrowRight,
   Briefcase,
@@ -92,15 +92,15 @@ function SidebarContent() {
   );
 
   // followFocus implementation: Sync OS selection -> App state
-  // Use kernel.useComputed because TodoApp.useComputed only sees TodoState (no 'os')
-  const selectionId = kernel.useComputed(
+  // Use os.useComputed because TodoApp.useComputed only sees TodoState (no 'os')
+  const selectionId = os.useComputed(
     (s) => s.os?.focus?.zones?.["sidebar"]?.selection?.[0],
   );
 
   useEffect(() => {
     if (selectionId && selectionId !== selectedCategoryId) {
       // Dispatch immediately to feel responsive
-      kernel.dispatch(TodoSidebar.commands.selectCategory({ id: selectionId }));
+      os.dispatch(TodoSidebar.commands.selectCategory({ id: selectionId }));
     }
   }, [selectionId, selectedCategoryId]);
 

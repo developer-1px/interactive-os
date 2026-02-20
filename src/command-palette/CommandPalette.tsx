@@ -18,7 +18,7 @@ import {
   type QuickPickItem,
   type QuickPickRenderState,
 } from "@/os/6-components/quickpick/QuickPick";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 import { type FuzzyMatchResult, fuzzyMatch } from "./fuzzyMatch";
 import { useDocsList } from "./useDocsList";
 import { useRouteList } from "./useRouteList";
@@ -79,7 +79,7 @@ export function CommandPalette() {
   const docs = useDocsList();
 
   // ── Overlay State (kernel) ──
-  const isOpen = kernel.useComputed((s) =>
+  const isOpen = os.useComputed((s) =>
     s.os.overlays.stack.some((e) => e.id === "command-palette"),
   );
 
@@ -118,7 +118,7 @@ export function CommandPalette() {
   );
 
   const handleClose = useCallback(() => {
-    kernel.dispatch(OVERLAY_CLOSE({ id: "command-palette" }));
+    os.dispatch(OVERLAY_CLOSE({ id: "command-palette" }));
   }, []);
 
   // ── Typeahead resolver (uses fuzzy-matched label) ──

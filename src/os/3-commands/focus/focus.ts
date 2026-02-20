@@ -1,6 +1,6 @@
 import { produce } from "immer";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { applyFollowFocus, ensureZone } from "../../state/utils";
 
 interface FocusPayload {
@@ -57,4 +57,4 @@ export const focusHandler = (ctx: any) => (payload: FocusPayload) => {
   };
 };
 
-export const FOCUS = kernel.defineCommand("OS_FOCUS", focusHandler);
+export const FOCUS = os.defineCommand("OS_FOCUS", focusHandler);

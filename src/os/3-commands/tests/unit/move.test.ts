@@ -5,7 +5,7 @@
  */
 
 import { OS_MOVE_DOWN, OS_MOVE_UP } from "@os/3-commands/interaction/move";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { describe, it } from "vitest";
 import {
   registerZone,
@@ -25,7 +25,7 @@ describe("OS_MOVE → onMoveUp/Down pipeline", () => {
       }),
     });
 
-    kernel.dispatch(OS_MOVE_UP());
+    os.dispatch(OS_MOVE_UP());
   });
 
   it("dispatches onMoveDown callback when Zone has it", () => {
@@ -37,28 +37,28 @@ describe("OS_MOVE → onMoveUp/Down pipeline", () => {
       }),
     });
 
-    kernel.dispatch(OS_MOVE_DOWN());
+    os.dispatch(OS_MOVE_DOWN());
   });
 
   it("does nothing when Zone has no onMoveUp", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {});
 
-    kernel.dispatch(OS_MOVE_UP());
+    os.dispatch(OS_MOVE_UP());
   });
 
   it("does nothing when Zone has no onMoveDown", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {});
 
-    kernel.dispatch(OS_MOVE_DOWN());
+    os.dispatch(OS_MOVE_DOWN());
   });
 
   it("does nothing when no active zone (MOVE_UP)", () => {
-    kernel.dispatch(OS_MOVE_UP());
+    os.dispatch(OS_MOVE_UP());
   });
 
   it("does nothing when no active zone (MOVE_DOWN)", () => {
-    kernel.dispatch(OS_MOVE_DOWN());
+    os.dispatch(OS_MOVE_DOWN());
   });
 });

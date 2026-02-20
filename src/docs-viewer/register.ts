@@ -13,7 +13,7 @@
  */
 
 import type { Middleware, MiddlewareContext } from "@kernel";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 
 // ── Command ──────────────────────────────────────────────────────
 
@@ -21,7 +21,7 @@ interface ScrollPagePayload {
   direction: "forward" | "backward";
 }
 
-export const DOCS_SCROLL_PAGE = kernel.defineCommand(
+export const DOCS_SCROLL_PAGE = os.defineCommand(
   "DOCS_SCROLL_PAGE",
   (_ctx) =>
     (payload: ScrollPagePayload): undefined => {
@@ -126,7 +126,7 @@ const docsNavigateMiddleware: Middleware = {
     const el = document.querySelector("[data-docs-scroll]");
     if (!el) return ctx;
 
-    const state = kernel.getState();
+    const state = os.getState();
     const zoneId = state.os.focus.activeZoneId;
     if (zoneId) {
       // Only skip if the active zone actually has focusable items in the DOM.
@@ -151,4 +151,4 @@ const docsNavigateMiddleware: Middleware = {
   },
 };
 
-kernel.use(docsNavigateMiddleware);
+os.use(docsNavigateMiddleware);

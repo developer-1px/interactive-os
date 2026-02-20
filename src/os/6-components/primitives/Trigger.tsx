@@ -16,7 +16,7 @@
 import type { BaseCommand } from "@kernel";
 import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import { kernel } from "@os/kernel.ts";
+import { os } from "@os/kernel.ts";
 import type { OverlayEntry } from "@os/state/OSState.ts";
 import type {
   ReactElement,
@@ -103,7 +103,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     ref,
   ) => {
     const dispatch =
-      customDispatch || ((cmd: BaseCommand) => kernel.dispatch(cmd));
+      customDispatch || ((cmd: BaseCommand) => os.dispatch(cmd));
 
     // Use explicit overlayId if provided, otherwise auto-generate
     // biome-ignore lint/correctness/useExhaustiveDependencies: overlayRole intentionally excluded — ID must be stable
@@ -120,7 +120,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
 
       // If overlay role is set, open the overlay
       if (overlayRole && overlayId) {
-        kernel.dispatch(OVERLAY_OPEN({ id: overlayId, type: overlayRole }));
+        os.dispatch(OVERLAY_OPEN({ id: overlayId, type: overlayRole }));
       }
 
       // Also dispatch onPress command if provided
@@ -260,7 +260,7 @@ function TriggerPortal({
   const overlayId = _overlayId ?? "";
 
   // Subscribe to overlay open state from kernel
-  const isOpen = kernel.useComputed((s) =>
+  const isOpen = os.useComputed((s) =>
     s.os.overlays.stack.some((e) => e.id === overlayId),
   );
 
@@ -285,7 +285,7 @@ function TriggerPortal({
       e.preventDefault();
       // Let Zone role="dialog" handle ESC via kernel
       // Or close directly for overlays without Zone
-      kernel.dispatch(OVERLAY_CLOSE({ id: overlayId }));
+      os.dispatch(OVERLAY_CLOSE({ id: overlayId }));
     };
 
     dialog.addEventListener("cancel", handleCancel);
@@ -295,7 +295,7 @@ function TriggerPortal({
   // Backdrop click → close (only for dialog/alertdialog types)
   const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
     if (e.target === dialogRef.current && _overlayType !== "alertdialog") {
-      kernel.dispatch(OVERLAY_CLOSE({ id: overlayId }));
+      os.dispatch(OVERLAY_CLOSE({ id: overlayId }));
     }
   };
 
@@ -351,7 +351,7 @@ function TriggerDismiss({
   ...rest
 }: TriggerDismissProps) {
   const overlayCtx = useOverlayContext();
-  const dispatch = (cmd: BaseCommand) => kernel.dispatch(cmd);
+  const dispatch = (cmd: BaseCommand) => os.dispatch(cmd);
 
   const handleClick = (e: ReactMouseEvent) => {
     e.stopPropagation();
@@ -363,7 +363,7 @@ function TriggerDismiss({
 
     // Close the nearest overlay
     if (overlayCtx) {
-      kernel.dispatch(OVERLAY_CLOSE({ id: overlayCtx.overlayId }));
+      os.dispatch(OVERLAY_CLOSE({ id: overlayCtx.overlayId }));
     }
   };
 

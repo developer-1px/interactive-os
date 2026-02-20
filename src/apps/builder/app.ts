@@ -171,7 +171,7 @@ export const BuilderCanvasUI = canvasZone.bind({
 // Helpers for Field ↔ State bridging
 // ═══════════════════════════════════════════════════════════════════
 
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 
 /**
  * createFieldCommit — Section-aware FieldCommandFactory.
@@ -243,13 +243,13 @@ export function useFieldByDomId(domId: string): string {
  * Used by PropertiesPanel's imperative onChange handlers.
  */
 export function builderUpdateFieldByDomId(domId: string, value: string) {
-  const appState = kernel.getState().apps["builder"] as
+  const appState = os.getState().apps["builder"] as
     | BuilderState
     | undefined;
   if (!appState) return;
   const addr = resolveFieldAddress(domId, appState.data.blocks);
   if (!addr) return;
-  kernel.dispatch(
+  os.dispatch(
     updateField({ sectionId: addr.section.id, field: addr.field, value }),
   );
 }

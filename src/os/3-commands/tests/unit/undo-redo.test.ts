@@ -7,7 +7,7 @@
 
 import { OS_REDO } from "@os/3-commands/interaction/redo";
 import { OS_UNDO } from "@os/3-commands/interaction/undo";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { describe, it } from "vitest";
 import {
   registerZone,
@@ -28,18 +28,18 @@ describe("OS_UNDO → onUndo pipeline", () => {
       onUndo: { type: "mock/undo", payload: undefined },
     });
 
-    kernel.dispatch(OS_UNDO());
+    os.dispatch(OS_UNDO());
   });
 
   it("does nothing when Zone has no onUndo", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {});
 
-    kernel.dispatch(OS_UNDO());
+    os.dispatch(OS_UNDO());
   });
 
   it("does nothing when no active zone", () => {
-    kernel.dispatch(OS_UNDO());
+    os.dispatch(OS_UNDO());
   });
 });
 
@@ -54,17 +54,17 @@ describe("OS_REDO → onRedo pipeline", () => {
       onRedo: { type: "mock/redo", payload: undefined },
     });
 
-    kernel.dispatch(OS_REDO());
+    os.dispatch(OS_REDO());
   });
 
   it("does nothing when Zone has no onRedo", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {});
 
-    kernel.dispatch(OS_REDO());
+    os.dispatch(OS_REDO());
   });
 
   it("does nothing when no active zone", () => {
-    kernel.dispatch(OS_REDO());
+    os.dispatch(OS_REDO());
   });
 });

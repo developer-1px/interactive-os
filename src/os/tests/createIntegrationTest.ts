@@ -1,5 +1,6 @@
 import type { AppHandle } from "@os/defineApp.types";
 import type { AppState } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { produce } from "immer";
 
@@ -19,15 +20,14 @@ export function createIntegrationTest<S>(
     ...(initialStateOverride || {}),
   });
 
-  // 2. Extract components
-  const kernel = testInstance.kernel;
+  // 2. Extract components (os is the global singleton)
 
   // 3. Helper to reset specific zones (common in integration)
   function resetZone(
     zoneId: string,
     overrides: Partial<AppState["os"]["focus"]["zones"][string]> = {},
   ) {
-    kernel.setState(
+    os.setState(
       produce((state: AppState) => {
         state.os.focus.zones[zoneId] = {
           ...initialZoneState,
@@ -39,12 +39,12 @@ export function createIntegrationTest<S>(
 
   // 4. Return testbed
   return {
-    kernel,
+    runtime: os,
     get state() {
       return testInstance.state;
     },
     get os() {
-      return (kernel.getState() as any).os as AppState["os"];
+      return (os.getState() as any).os as AppState["os"];
     },
     resetZone,
     dispatch: testInstance.dispatch, // Use testInstance dispatch to ensure listeners if any

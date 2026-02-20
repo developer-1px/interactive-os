@@ -5,12 +5,12 @@
  * lazily when a command injects it via middleware.
  *
  * Provider reads:
- *   kernel.getState() → activeZoneId
+ *   os.getState() → activeZoneId
  *   ZoneRegistry → config, element
  *   DOM queries → items, rects
  */
 
-import { kernel } from "../kernel";
+import { os } from "../kernel";
 import type { FocusGroupConfig } from "../schemas/focus/config/FocusGroupConfig";
 import { DEFAULT_CONFIG } from "../schemas/focus/config/FocusGroupConfig";
 import type { NavigateEntry } from "../schemas/focus/config/FocusNavigateConfig";
@@ -20,8 +20,8 @@ import { ZoneRegistry } from "./zoneRegistry";
 // DOM_ITEMS — ordered item IDs within the active zone
 // ═══════════════════════════════════════════════════════════════════
 
-export const DOM_ITEMS = kernel.defineContext("dom-items", (): string[] => {
-  const zoneId = kernel.getState().os.focus.activeZoneId;
+export const DOM_ITEMS = os.defineContext("dom-items", (): string[] => {
+  const zoneId = os.getState().os.focus.activeZoneId;
   if (!zoneId) return [];
 
   const entry = ZoneRegistry.get(zoneId);
@@ -44,10 +44,10 @@ export const DOM_ITEMS = kernel.defineContext("dom-items", (): string[] => {
 // DOM_RECTS — item bounding rects (for spatial navigation)
 // ═══════════════════════════════════════════════════════════════════
 
-export const DOM_RECTS = kernel.defineContext(
+export const DOM_RECTS = os.defineContext(
   "dom-rects",
   (): Map<string, DOMRect> => {
-    const zoneId = kernel.getState().os.focus.activeZoneId;
+    const zoneId = os.getState().os.focus.activeZoneId;
     if (!zoneId) return new Map();
 
     const entry = ZoneRegistry.get(zoneId);
@@ -77,10 +77,10 @@ export const DOM_RECTS = kernel.defineContext(
 // ZONE_CONFIG — configuration for the active zone
 // ═══════════════════════════════════════════════════════════════════
 
-export const ZONE_CONFIG = kernel.defineContext(
+export const ZONE_CONFIG = os.defineContext(
   "zone-config",
   (): FocusGroupConfig => {
-    const zoneId = kernel.getState().os.focus.activeZoneId;
+    const zoneId = os.getState().os.focus.activeZoneId;
     if (!zoneId) return DEFAULT_CONFIG;
 
     const entry = ZoneRegistry.get(zoneId);
@@ -104,10 +104,10 @@ export interface ZoneOrderEntry {
   lastFocusedId: string | null;
 }
 
-export const DOM_ZONE_ORDER = kernel.defineContext(
+export const DOM_ZONE_ORDER = os.defineContext(
   "dom-zone-order",
   (): ZoneOrderEntry[] => {
-    const state = kernel.getState();
+    const state = os.getState();
     const zones: ZoneOrderEntry[] = [];
     const els = document.querySelectorAll("[data-focus-group]");
     for (const el of els) {

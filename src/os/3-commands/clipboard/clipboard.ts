@@ -6,11 +6,11 @@
  */
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { SELECTION_CLEAR } from "../selection/selection";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
-export const OS_COPY = kernel.defineCommand("OS_COPY", (ctx) => () => {
+export const OS_COPY = os.defineCommand("OS_COPY", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
   if (!activeZoneId) return;
 
@@ -24,7 +24,7 @@ export const OS_COPY = kernel.defineCommand("OS_COPY", (ctx) => () => {
   return { dispatch: entry.onCopy(cursor) };
 });
 
-export const OS_CUT = kernel.defineCommand("OS_CUT", (ctx) => () => {
+export const OS_CUT = os.defineCommand("OS_CUT", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
   if (!activeZoneId) return;
 
@@ -46,7 +46,7 @@ export const OS_CUT = kernel.defineCommand("OS_CUT", (ctx) => () => {
   return { dispatch: commands };
 });
 
-export const OS_PASTE = kernel.defineCommand("OS_PASTE", (ctx) => () => {
+export const OS_PASTE = os.defineCommand("OS_PASTE", (ctx) => () => {
   const { activeZoneId } = ctx.state.os.focus;
   if (!activeZoneId) return;
 

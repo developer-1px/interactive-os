@@ -10,11 +10,11 @@
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { RECOVER } from "@os/3-commands/focus/recover";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it } from "vitest";
 
-let snapshot: ReturnType<typeof kernel.getState>;
+let snapshot: ReturnType<typeof os.getState>;
 let container: HTMLDivElement;
 
 function setupZone(
@@ -40,7 +40,7 @@ function setupZone(
   });
 
   // Set kernel state
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: {
       ...prev.os,
@@ -60,9 +60,9 @@ function setupZone(
 }
 
 beforeEach(() => {
-  snapshot = kernel.getState();
+  snapshot = os.getState();
   return () => {
-    kernel.setState(() => snapshot);
+    os.setState(() => snapshot);
     container?.remove();
     for (const key of [...ZoneRegistry.keys()]) {
       ZoneRegistry.unregister(key);
@@ -76,10 +76,10 @@ describe("RECOVER (SPEC §3.1)", () => {
       focusedItemId: "item-2",
     });
 
-    kernel.dispatch(RECOVER());
+    os.dispatch(RECOVER());
 
     // State should NOT change — item is still present
-    const zone = kernel.getState().os.focus.zones["z1"];
+    const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-2");
   });
 
@@ -92,9 +92,9 @@ describe("RECOVER (SPEC §3.1)", () => {
       lastFocusedId: "item-1",
     });
 
-    kernel.dispatch(RECOVER());
+    os.dispatch(RECOVER());
 
-    const zone = kernel.getState().os.focus.zones["z1"];
+    const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-3");
   });
 
@@ -106,14 +106,14 @@ describe("RECOVER (SPEC §3.1)", () => {
       lastFocusedId: "item-2",
     });
 
-    kernel.dispatch(RECOVER());
+    os.dispatch(RECOVER());
 
-    const zone = kernel.getState().os.focus.zones["z1"];
+    const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-1");
   });
 
   it("does nothing when no active zone", () => {
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: {
         ...prev.os,
@@ -122,11 +122,11 @@ describe("RECOVER (SPEC §3.1)", () => {
     }));
 
     // Should not throw
-    kernel.dispatch(RECOVER());
+    os.dispatch(RECOVER());
   });
 
   it("does nothing when zone state is missing", () => {
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: {
         ...prev.os,
@@ -135,7 +135,7 @@ describe("RECOVER (SPEC §3.1)", () => {
     }));
 
     // Should not throw
-    kernel.dispatch(RECOVER());
+    os.dispatch(RECOVER());
   });
 
   it("does nothing when DOM has no items", () => {
@@ -144,10 +144,10 @@ describe("RECOVER (SPEC §3.1)", () => {
       recoveryTargetId: null,
     });
 
-    kernel.dispatch(RECOVER());
+    os.dispatch(RECOVER());
 
     // focusedItemId should remain unchanged (RECOVER returns early)
-    const zone = kernel.getState().os.focus.zones["z1"];
+    const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-1");
   });
 
@@ -158,9 +158,9 @@ describe("RECOVER (SPEC §3.1)", () => {
       lastFocusedId: "item-2",
     });
 
-    kernel.dispatch(RECOVER());
+    os.dispatch(RECOVER());
 
-    const zone = kernel.getState().os.focus.zones["z1"];
+    const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.lastFocusedId).toBe("item-3");
   });
 });

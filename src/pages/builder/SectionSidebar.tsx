@@ -11,7 +11,7 @@
 
 import type { Block } from "@/apps/builder/app";
 import { BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 import { EXPAND } from "@/os/3-commands/expand/index";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useCallback } from "react";
@@ -22,17 +22,17 @@ const CANVAS_ZONE_ID = "builder-canvas";
 export function SectionSidebar() {
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);
   // OS expandedItems: IDs present = expanded (open). Default [] = all collapsed.
-  const expandedItems = kernel.useComputed(
+  const expandedItems = os.useComputed(
     (s) => s.os.focus.zones[SIDEBAR_ZONE_ID]?.expandedItems ?? [],
   );
   const expanded = new Set(expandedItems);
 
-  const focusedCanvasId = kernel.useComputed(
+  const focusedCanvasId = os.useComputed(
     (s) => s.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
   );
 
   const toggleExpand = useCallback((itemId: string) => {
-    kernel.dispatch(EXPAND({ itemId, action: "toggle" }));
+    os.dispatch(EXPAND({ itemId, action: "toggle" }));
   }, []);
 
   // Flatten tree for sidebar display — each node gets a depth

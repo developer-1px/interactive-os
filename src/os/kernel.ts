@@ -1,8 +1,8 @@
 /**
- * OS Kernel — Single kernel instance for the OS layer.
+ * OS Runtime — Single instance for the Interactive OS layer.
  *
- * Uses createKernel with AppState (which includes os slice).
- * Defines context providers, effects, and an OS group for commands.
+ * Uses createKernel (framework library) with AppState.
+ * The `os` variable is the public API for all apps.
  */
 
 import { createKernel } from "@kernel";
@@ -25,21 +25,21 @@ export const initialAppState: AppState = {
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// Kernel Instance
+// OS Instance (powered by createKernel)
 // ═══════════════════════════════════════════════════════════════════
 
-export const kernel = createKernel<AppState>(initialAppState);
+export const os = createKernel<AppState>(initialAppState);
 
 // ═══════════════════════════════════════════════════════════════════
-// Dev/Test: Expose kernel on window for Playwright E2E
+// Dev/Test: Expose OS on window for Playwright E2E
 // ═══════════════════════════════════════════════════════════════════
 
 declare global {
   interface Window {
-    __kernel?: typeof kernel;
+    __os?: typeof os;
   }
 }
 
 if (import.meta.env.DEV) {
-  window.__kernel = kernel;
+  window.__os = os;
 }

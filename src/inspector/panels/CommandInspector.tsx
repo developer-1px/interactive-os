@@ -8,7 +8,7 @@ import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotPanel } from "@inspector/testbot";
 
 import { useEffect, useState } from "react";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 
 // --- Main Component ---
 
@@ -21,7 +21,7 @@ export function CommandInspector() {
   const [isInputActive, setIsInputActive] = useState(false);
 
   // Telemetry from kernel transactions
-  const transactions = kernel.inspector.getTransactions();
+  const transactions = os.inspector.getTransactions();
   const historyCount = transactions.length;
   const rawKeys = useInputTelemetry((s) => s.logs);
 

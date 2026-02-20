@@ -9,7 +9,7 @@
 import { produce } from "immer";
 import { DOM_ITEMS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { ensureZone } from "../../state/utils";
 import { EXPAND } from "../expand";
@@ -19,7 +19,7 @@ interface SelectPayload {
   mode?: "single" | "replace" | "toggle" | "range";
 }
 
-export const SELECT = kernel.defineCommand(
+export const SELECT = os.defineCommand(
   "OS_SELECT",
   [DOM_ITEMS, ZONE_CONFIG],
   (ctx) => (payload: SelectPayload) => {

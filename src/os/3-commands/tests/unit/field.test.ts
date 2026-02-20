@@ -15,7 +15,7 @@ import {
   FIELD_COMMIT,
   FIELD_START_EDIT,
 } from "@os/3-commands/field/field";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -23,14 +23,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Helpers
 // ═══════════════════════════════════════════════════════════════════
 
-let snapshot: ReturnType<typeof kernel.getState>;
+let snapshot: ReturnType<typeof os.getState>;
 
 function setupFocus(
   zoneId: string,
   focusedItemId: string,
   extra: Partial<typeof initialZoneState> = {},
 ) {
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: {
       ...prev.os,
@@ -52,13 +52,13 @@ function setupFocus(
 }
 
 function getZone(zoneId: string) {
-  return kernel.getState().os.focus.zones[zoneId]!;
+  return os.getState().os.focus.zones[zoneId]!;
 }
 
 beforeEach(() => {
-  snapshot = kernel.getState();
+  snapshot = os.getState();
   return () => {
-    kernel.setState(() => snapshot);
+    os.setState(() => snapshot);
     vi.restoreAllMocks();
   };
 });
@@ -71,7 +71,7 @@ describe("FIELD_START_EDIT (SPEC §3.8)", () => {
   it("sets editingItemId to focusedItemId", () => {
     setupFocus("z1", "item-1");
 
-    kernel.dispatch(FIELD_START_EDIT());
+    os.dispatch(FIELD_START_EDIT());
 
     const zone = getZone("z1");
     expect(zone.editingItemId).toBe("item-1");
@@ -79,29 +79,29 @@ describe("FIELD_START_EDIT (SPEC §3.8)", () => {
 
   it("no-op when already editing the same item", () => {
     setupFocus("z1", "item-1", { editingItemId: "item-1" });
-    const stateBefore = kernel.getState();
+    const stateBefore = os.getState();
 
-    kernel.dispatch(FIELD_START_EDIT());
+    os.dispatch(FIELD_START_EDIT());
 
     // State reference should be the same (no change)
-    expect(kernel.getState()).toBe(stateBefore);
+    expect(os.getState()).toBe(stateBefore);
   });
 
   it("no-op when no focused item", () => {
     setupFocus("z1", null as any);
-    const stateBefore = kernel.getState();
+    const stateBefore = os.getState();
 
-    kernel.dispatch(FIELD_START_EDIT());
+    os.dispatch(FIELD_START_EDIT());
 
-    expect(kernel.getState()).toBe(stateBefore);
+    expect(os.getState()).toBe(stateBefore);
   });
 
   it("no-op when no active zone", () => {
-    const stateBefore = kernel.getState();
+    const stateBefore = os.getState();
 
-    kernel.dispatch(FIELD_START_EDIT());
+    os.dispatch(FIELD_START_EDIT());
 
-    expect(kernel.getState()).toBe(stateBefore);
+    expect(os.getState()).toBe(stateBefore);
   });
 });
 
@@ -113,7 +113,7 @@ describe("FIELD_COMMIT (SPEC §3.8)", () => {
   it("clears editingItemId", () => {
     setupFocus("z1", "item-1", { editingItemId: "item-1" });
 
-    kernel.dispatch(FIELD_COMMIT());
+    os.dispatch(FIELD_COMMIT());
 
     const zone = getZone("z1");
     expect(zone.editingItemId).toBeNull();
@@ -124,7 +124,7 @@ describe("FIELD_COMMIT (SPEC §3.8)", () => {
 
     // FIELD_COMMIT without editingItemId may still try to find fields
     // but should not produce a state change
-    kernel.dispatch(FIELD_COMMIT());
+    os.dispatch(FIELD_COMMIT());
 
     const zone = getZone("z1");
     expect(zone.editingItemId).toBeNull();
@@ -139,7 +139,7 @@ describe("FIELD_CANCEL (SPEC §3.8)", () => {
   it("clears editingItemId", () => {
     setupFocus("z1", "item-1", { editingItemId: "item-1" });
 
-    kernel.dispatch(FIELD_CANCEL());
+    os.dispatch(FIELD_CANCEL());
 
     const zone = getZone("z1");
     expect(zone.editingItemId).toBeNull();
@@ -147,19 +147,19 @@ describe("FIELD_CANCEL (SPEC §3.8)", () => {
 
   it("no-op when not in editing mode", () => {
     setupFocus("z1", "item-1", { editingItemId: null });
-    const stateBefore = kernel.getState();
+    const stateBefore = os.getState();
 
-    kernel.dispatch(FIELD_CANCEL());
+    os.dispatch(FIELD_CANCEL());
 
-    expect(kernel.getState()).toBe(stateBefore);
+    expect(os.getState()).toBe(stateBefore);
   });
 
   it("no-op when no active zone", () => {
-    const stateBefore = kernel.getState();
+    const stateBefore = os.getState();
 
-    kernel.dispatch(FIELD_CANCEL());
+    os.dispatch(FIELD_CANCEL());
 
-    expect(kernel.getState()).toBe(stateBefore);
+    expect(os.getState()).toBe(stateBefore);
   });
 });
 
@@ -172,11 +172,11 @@ describe("Field Lifecycle: start → commit / cancel", () => {
     setupFocus("z1", "item-1");
 
     // Start editing
-    kernel.dispatch(FIELD_START_EDIT());
+    os.dispatch(FIELD_START_EDIT());
     expect(getZone("z1").editingItemId).toBe("item-1");
 
     // Commit
-    kernel.dispatch(FIELD_COMMIT());
+    os.dispatch(FIELD_COMMIT());
     expect(getZone("z1").editingItemId).toBeNull();
   });
 
@@ -184,22 +184,22 @@ describe("Field Lifecycle: start → commit / cancel", () => {
     setupFocus("z1", "item-1");
 
     // Start editing
-    kernel.dispatch(FIELD_START_EDIT());
+    os.dispatch(FIELD_START_EDIT());
     expect(getZone("z1").editingItemId).toBe("item-1");
 
     // Cancel
-    kernel.dispatch(FIELD_CANCEL());
+    os.dispatch(FIELD_CANCEL());
     expect(getZone("z1").editingItemId).toBeNull();
   });
 
   it("start on different item replaces editingItemId", () => {
     setupFocus("z1", "item-1");
-    kernel.dispatch(FIELD_START_EDIT());
+    os.dispatch(FIELD_START_EDIT());
     expect(getZone("z1").editingItemId).toBe("item-1");
 
     // Move focus and start editing another item
     setupFocus("z1", "item-2");
-    kernel.dispatch(FIELD_START_EDIT());
+    os.dispatch(FIELD_START_EDIT());
     expect(getZone("z1").editingItemId).toBe("item-2");
   });
 });

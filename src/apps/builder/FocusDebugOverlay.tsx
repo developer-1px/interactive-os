@@ -9,7 +9,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 
 // ── Color palette for Builder levels ──
 const LEVEL_COLORS = {
@@ -65,7 +65,7 @@ export function FocusDebugOverlay() {
     const container = containerRef.current?.parentElement;
     if (!container) return;
 
-    const s = kernel.getState();
+    const s = os.getState();
     const zoneId = s.os.focus.activeZoneId;
     const zoneState = zoneId ? s.os.focus.zones[zoneId] : null;
     const itemId = zoneState?.focusedItemId ?? null;
@@ -128,7 +128,7 @@ export function FocusDebugOverlay() {
       if (container) ro.observe(container);
 
       // Observe the currently focused element
-      const s = kernel.getState();
+      const s = os.getState();
       const zoneId = s.os.focus.activeZoneId;
       const zoneState = zoneId ? s.os.focus.zones[zoneId] : null;
       const itemId = zoneState?.focusedItemId;
@@ -151,8 +151,8 @@ export function FocusDebugOverlay() {
     };
 
     // Subscribe to kernel state changes
-    const unsub = kernel.subscribe(() => {
-      const s = kernel.getState();
+    const unsub = os.subscribe(() => {
+      const s = os.getState();
       const zoneId = s.os.focus.activeZoneId;
       const zoneState = zoneId ? s.os.focus.zones[zoneId] : null;
       const newItemId = zoneState?.focusedItemId ?? null;

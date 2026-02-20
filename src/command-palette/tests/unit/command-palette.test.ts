@@ -11,7 +11,7 @@
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -19,10 +19,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 // Helpers
 // ═════════════════════════════════════════════════════════════════════
 
-let snapshot: ReturnType<typeof kernel.getState>;
+let snapshot: ReturnType<typeof os.getState>;
 
 function setupFocus(zoneId: string, focusedItemId: string) {
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: {
       ...prev.os,
@@ -65,9 +65,9 @@ function _registerZone(
 }
 
 beforeEach(() => {
-  snapshot = kernel.getState();
+  snapshot = os.getState();
   return () => {
-    kernel.setState(() => snapshot);
+    os.setState(() => snapshot);
     for (const key of [...ZoneRegistry.keys()]) {
       ZoneRegistry.unregister(key);
     }
@@ -80,9 +80,9 @@ beforeEach(() => {
 
 describe("Command Palette — overlay lifecycle", () => {
   it("opens overlay and adds to stack", () => {
-    kernel.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
 
-    const state = kernel.getState();
+    const state = os.getState();
     const entry = state.os.overlays.stack.find(
       (e) => e.id === "command-palette",
     );
@@ -91,10 +91,10 @@ describe("Command Palette — overlay lifecycle", () => {
   });
 
   it("closes overlay and removes from stack", () => {
-    kernel.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
-    kernel.dispatch(OVERLAY_CLOSE({ id: "command-palette" }));
+    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OVERLAY_CLOSE({ id: "command-palette" }));
 
-    const state = kernel.getState();
+    const state = os.getState();
     const entry = state.os.overlays.stack.find(
       (e) => e.id === "command-palette",
     );
@@ -102,10 +102,10 @@ describe("Command Palette — overlay lifecycle", () => {
   });
 
   it("duplicate open does not create duplicate entries", () => {
-    kernel.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
-    kernel.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
 
-    const state = kernel.getState();
+    const state = os.getState();
     const entries = state.os.overlays.stack.filter(
       (e) => e.id === "command-palette",
     );
@@ -119,21 +119,21 @@ describe("Command Palette — overlay lifecycle", () => {
 
 describe("Command Palette — zone focus management", () => {
   it("maintains focusedItemId after overlay open", () => {
-    kernel.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
 
     setupFocus("command-palette-list", "route:/home");
 
-    const zone = kernel.getState().os.focus.zones["command-palette-list"];
+    const zone = os.getState().os.focus.zones["command-palette-list"];
     expect(zone?.focusedItemId).toBe("route:/home");
   });
 
   it("clears focus state after overlay close", () => {
-    kernel.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
+    os.dispatch(OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));
     setupFocus("command-palette-list", "route:/home");
 
-    kernel.dispatch(OVERLAY_CLOSE({ id: "command-palette" }));
+    os.dispatch(OVERLAY_CLOSE({ id: "command-palette" }));
 
-    const state = kernel.getState();
+    const state = os.getState();
     const entry = state.os.overlays.stack.find(
       (e) => e.id === "command-palette",
     );

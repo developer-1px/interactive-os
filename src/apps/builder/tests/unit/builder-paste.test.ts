@@ -12,7 +12,7 @@ import { describe, expect, test } from "vitest";
 
 /** Helper: read OS clipboard from kernel state */
 function getOsClipboard(app: ReturnType<typeof BuilderApp.create>) {
-    return (app.kernel as any).getState().os.clipboard;
+    return (app.runtime as any).getState().os.clipboard;
 }
 
 describe("Builder copy → paste → paste 연속 실행", () => {

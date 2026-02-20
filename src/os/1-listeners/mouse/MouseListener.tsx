@@ -10,7 +10,7 @@
 
 import { ACTIVATE, FOCUS, SELECT } from "@os/3-commands";
 import { useEffect } from "react";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
 import {
   findFocusableItem,
@@ -118,7 +118,7 @@ export function MouseListener() {
 
         case "zone-activate": {
           setDispatching(true);
-          kernel.dispatch(FOCUS({ zoneId: result.groupId, itemId: null }), {
+          os.dispatch(FOCUS({ zoneId: result.groupId, itemId: null }), {
             meta: {
               input: {
                 type: "MOUSE",
@@ -134,7 +134,7 @@ export function MouseListener() {
         case "label-redirect": {
           me.preventDefault();
           setDispatching(true);
-          kernel.dispatch(
+          os.dispatch(
             FOCUS({ zoneId: result.groupId, itemId: result.itemId }),
             {
               meta: {
@@ -163,7 +163,7 @@ export function MouseListener() {
 
           // FOCUS first
           setDispatching(true);
-          kernel.dispatch(
+          os.dispatch(
             FOCUS({
               zoneId: result.groupId,
               itemId: result.itemId,
@@ -177,14 +177,14 @@ export function MouseListener() {
           if (result.selectMode === "range" || result.selectMode === "toggle") {
             me.preventDefault();
           }
-          kernel.dispatch(
+          os.dispatch(
             SELECT({ targetId: result.itemId, mode: result.selectMode }),
             mouseMeta,
           );
 
           // EXPAND if applicable
           if (result.shouldExpand) {
-            kernel.dispatch(ACTIVATE(), mouseMeta);
+            os.dispatch(ACTIVATE(), mouseMeta);
           }
           return;
         }

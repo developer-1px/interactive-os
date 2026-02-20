@@ -11,7 +11,7 @@ describe("OS Integration: Deletion Focus Recovery", () => {
   });
 
   test("When an item is deleted, focus should move to its neighbor (Next)", () => {
-    const { dispatch, kernel } = headless;
+    const { dispatch, runtime } = headless;
 
     // 1. Add Items (A, B, C)
     // We use TodoDraft commands to populate state via normal app logic
@@ -20,8 +20,8 @@ describe("OS Integration: Deletion Focus Recovery", () => {
     dispatch(TodoDraft.commands.addTodo({ text: "Item C" }));
 
     // 2. Resolve IDs from State
-    // Access state fresh via kernel.getState()
-    const appState = (kernel.getState() as any).apps["todo-v5"];
+    // Access state fresh via runtime.getState()
+    const appState = (runtime.getState() as any).apps["todo-v5"];
     const todos = Object.values(appState.data.todos) as any[];
     const itemA = todos.find((t) => t.text === "Item A");
     const itemB = todos.find((t) => t.text === "Item B");
@@ -34,26 +34,26 @@ describe("OS Integration: Deletion Focus Recovery", () => {
     dispatch(FOCUS({ zoneId: "list", itemId: itemB.id }));
 
     // Assert initial focus state
-    const focusState = (kernel.getState() as any).os.focus;
+    const focusState = (runtime.getState() as any).os.focus;
     expect(focusState.zones["list"].focusedItemId).toBe(itemB.id);
 
     // 4. Delete Middle Item (B)
     dispatch(deleteTodo({ id: itemB.id }));
 
     // 5. Verify Focus Moved to Neighbor (C)
-    const finalFocusState = (kernel.getState() as any).os.focus;
+    const finalFocusState = (runtime.getState() as any).os.focus;
     const finalFocusId = finalFocusState.zones["list"].focusedItemId;
     expect(finalFocusId).toBe(itemC.id);
   });
 
   test("When the last item is deleted, focus should move to previous (Prev)", () => {
-    const { dispatch, kernel } = headless;
+    const { dispatch, runtime } = headless;
 
     // 1. Add Items (A, B)
     dispatch(TodoDraft.commands.addTodo({ text: "Item A" }));
     dispatch(TodoDraft.commands.addTodo({ text: "Item B" }));
 
-    const appState = (kernel.getState() as any).apps["todo-v5"];
+    const appState = (runtime.getState() as any).apps["todo-v5"];
     const todos = Object.values(appState.data.todos) as any[];
     const itemA = todos.find((t) => t.text === "Item A")!;
     const itemB = todos.find((t) => t.text === "Item B")!;
@@ -65,7 +65,7 @@ describe("OS Integration: Deletion Focus Recovery", () => {
     dispatch(deleteTodo({ id: itemB.id }));
 
     // 4. Verify Focus Moved to Prev (A)
-    const finalFocusState = (kernel.getState() as any).os.focus;
+    const finalFocusState = (runtime.getState() as any).os.focus;
     expect(finalFocusState.zones["list"].focusedItemId).toBe(itemA.id);
   });
 });

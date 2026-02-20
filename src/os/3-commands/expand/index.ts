@@ -5,7 +5,7 @@
  */
 
 import { produce } from "immer";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 import { type ExpandAction, resolveExpansion } from "./resolveExpansion";
 
@@ -14,7 +14,7 @@ interface ExpandPayload {
   action?: ExpandAction;
 }
 
-export const EXPAND = kernel.defineCommand(
+export const EXPAND = os.defineCommand(
   "OS_EXPAND",
   (ctx) => (payload: ExpandPayload) => {
     const { activeZoneId } = ctx.state.os.focus;

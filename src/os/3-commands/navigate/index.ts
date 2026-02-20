@@ -11,7 +11,7 @@
 import { produce } from "immer";
 import { DOM_ITEMS, DOM_RECTS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { applyFollowFocus, ensureZone } from "../../state/utils";
 import { EXPAND } from "../expand";
@@ -24,7 +24,7 @@ interface NavigatePayload {
   select?: "range" | "toggle";
 }
 
-export const NAVIGATE = kernel.defineCommand(
+export const NAVIGATE = os.defineCommand(
   "OS_NAVIGATE",
   [DOM_ITEMS, DOM_RECTS, ZONE_CONFIG],
   (ctx) => (payload: NavigatePayload) => {

@@ -1,6 +1,6 @@
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import { kernel } from "@os/kernel.ts";
+import { os } from "@os/kernel.ts";
 import { forwardRef, isValidElement, type ReactNode, useMemo } from "react";
 
 // --- Types ---
@@ -50,15 +50,15 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
     // --- State (Kernel Direct) ---
     // Subscribe to booleans, not raw IDs — avoids re-render of all items
     // when focus moves from one item to another.
-    const isFocused = kernel.useComputed(
+    const isFocused = os.useComputed(
       (s) => (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === stringId,
     );
-    const isActive = kernel.useComputed(
+    const isActive = os.useComputed(
       (s) => s.os.focus.activeZoneId === zoneId,
     );
 
     // Selection from kernel state
-    const isStoreSelected = kernel.useComputed(
+    const isStoreSelected = os.useComputed(
       (s) => s.os.focus.zones[zoneId]?.selection.includes(stringId) ?? false,
     );
 

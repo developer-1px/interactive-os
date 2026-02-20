@@ -3,14 +3,14 @@
 import { OS_COPY, OS_PASTE } from "@os/3-commands/clipboard/clipboard"; // Registers OS_COPY/PASTE
 import { FOCUS } from "@os/3-commands/focus/focus"; // Registers FOCUS
 import { SELECTION_SET } from "@os/3-commands/selection"; // Registers SELECTION_SET
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { beforeEach, describe, expect, it } from "vitest";
 import { addTodo, TodoApp } from "../../app";
 
 describe("TodoApp Clipboard Multi-Select Bug", () => {
   beforeEach(() => {
     // Reset Kernel State
-    kernel.setState(() => ({
+    os.setState(() => ({
       os: {
         focus: {
           activeZoneId: null,
@@ -29,18 +29,18 @@ describe("TodoApp Clipboard Multi-Select Bug", () => {
     }));
 
     // Populate 3 items
-    kernel.dispatch(addTodo({ text: "A" })); // A
-    kernel.dispatch(addTodo({ text: "B" })); // B
-    kernel.dispatch(addTodo({ text: "C" })); // C
+    os.dispatch(addTodo({ text: "A" })); // A
+    os.dispatch(addTodo({ text: "B" })); // B
+    os.dispatch(addTodo({ text: "C" })); // C
   });
 
   function getTodoOrder() {
-    return (kernel.getState().apps["todo-v5"] as typeof INITIAL_STATE).data
+    return (os.getState().apps["todo-v5"] as typeof INITIAL_STATE).data
       .todoOrder;
   }
 
   function getClipboard() {
-    return (kernel.getState().apps["todo-v5"] as typeof INITIAL_STATE).ui
+    return (os.getState().apps["todo-v5"] as typeof INITIAL_STATE).ui
       .clipboard;
   }
 

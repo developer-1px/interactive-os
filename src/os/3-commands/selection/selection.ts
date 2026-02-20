@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
 /**
@@ -9,7 +9,7 @@ import { ensureZone } from "../../state/utils";
  */
 
 // 1. SET: Replace current selection
-export const SELECTION_SET = kernel.defineCommand(
+export const SELECTION_SET = os.defineCommand(
   "OS_SELECTION_SET",
   (ctx) => (payload: { zoneId: string; ids: string[] }) => ({
     state: produce(ctx.state, (draft) => {
@@ -24,7 +24,7 @@ export const SELECTION_SET = kernel.defineCommand(
 );
 
 // 2. ADD: Add item to selection
-export const SELECTION_ADD = kernel.defineCommand(
+export const SELECTION_ADD = os.defineCommand(
   "OS_SELECTION_ADD",
   (ctx) => (payload: { zoneId: string; id: string }) => ({
     state: produce(ctx.state, (draft) => {
@@ -38,7 +38,7 @@ export const SELECTION_ADD = kernel.defineCommand(
 );
 
 // 3. REMOVE: Remove item from selection
-export const SELECTION_REMOVE = kernel.defineCommand(
+export const SELECTION_REMOVE = os.defineCommand(
   "OS_SELECTION_REMOVE",
   (ctx) => (payload: { zoneId: string; id: string }) => ({
     state: produce(ctx.state, (draft) => {
@@ -52,7 +52,7 @@ export const SELECTION_REMOVE = kernel.defineCommand(
 );
 
 // 4. TOGGLE: Toggle item in selection
-export const SELECTION_TOGGLE = kernel.defineCommand(
+export const SELECTION_TOGGLE = os.defineCommand(
   "OS_SELECTION_TOGGLE",
   (ctx) => (payload: { zoneId: string; id: string }) => ({
     state: produce(ctx.state, (draft) => {
@@ -69,7 +69,7 @@ export const SELECTION_TOGGLE = kernel.defineCommand(
 );
 
 // 5. CLEAR: Clear selection
-export const SELECTION_CLEAR = kernel.defineCommand(
+export const SELECTION_CLEAR = os.defineCommand(
   "OS_SELECTION_CLEAR",
   (ctx) => (payload: { zoneId: string }) => ({
     state: produce(ctx.state, (draft) => {

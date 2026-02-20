@@ -9,14 +9,14 @@
 
 import { ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 interface CheckPayload {
   targetId?: string;
 }
 
-export const OS_CHECK = kernel.defineCommand(
+export const OS_CHECK = os.defineCommand(
   "OS_CHECK",
   [ZONE_CONFIG],
   (ctx) => (payload: CheckPayload) => {

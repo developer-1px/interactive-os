@@ -8,12 +8,12 @@
  */
 
 import { OVERLAY_CLOSE, OVERLAY_OPEN } from "@/os/3-commands";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 import { Keybindings } from "@/os/keymaps/keybindings";
 
 // ── Command ──────────────────────────────────────────────────────
 
-export const TOGGLE_COMMAND_PALETTE = kernel.defineCommand(
+export const TOGGLE_COMMAND_PALETTE = os.defineCommand(
   "TOGGLE_COMMAND_PALETTE",
   (ctx) => () => {
     const isOpen = ctx.state.os.overlays.stack.some(
@@ -59,12 +59,12 @@ if (typeof window !== "undefined") {
     if (now - lastShiftUp < 300) {
       lastShiftUp = 0;
       // Only open if not already open
-      const state = kernel.getState();
+      const state = os.getState();
       const isOpen = state.os.overlays.stack.some(
         (entry) => entry.id === "command-palette",
       );
       if (!isOpen) {
-        kernel.dispatch(
+        os.dispatch(
           OVERLAY_OPEN({
             id: "command-palette",
             type: "dialog",

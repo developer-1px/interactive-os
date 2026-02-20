@@ -439,7 +439,7 @@ describe("createCollectionZone — clipboard (OS-managed)", () => {
   }
 
   function osClipboard() {
-    return (app.kernel as any).getState().os.clipboard;
+    return (app.runtime as any).getState().os.clipboard;
   }
 
   describe("copy", () => {

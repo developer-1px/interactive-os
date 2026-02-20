@@ -23,7 +23,7 @@ import {
 import type { ZoneCursor } from "@/os/2-contexts/zoneRegistry";
 import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { FOCUS } from "@/os/3-commands/focus/focus";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 import type { BuilderLevel } from "../primitives/Builder";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -59,7 +59,7 @@ export function createCanvasItemFilter(
 ): (items: string[]) => string[] {
   return (items: string[]) => {
     const focusedId =
-      kernel.getState().os.focus.zones[zoneId]?.focusedItemId ?? null;
+      os.getState().os.focus.zones[zoneId]?.focusedItemId ?? null;
     const currentLevel: BuilderLevel = focusedId
       ? ((getItemAttribute(zoneId, focusedId, "data-level") as BuilderLevel) ??
         "section")

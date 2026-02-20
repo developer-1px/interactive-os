@@ -15,7 +15,7 @@ import { ACTIVATE } from "@os/3-commands/interaction/activate";
 import { OS_CHECK } from "@os/3-commands/interaction/check";
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
 
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -23,7 +23,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Helpers
 // ═══════════════════════════════════════════════════════════════════
 
-let snapshot: ReturnType<typeof kernel.getState>;
+let snapshot: ReturnType<typeof os.getState>;
 
 function setupFocusWithSelection(
   zoneId: string,
@@ -31,7 +31,7 @@ function setupFocusWithSelection(
   selection: string[] = [],
   anchor: string | null = null,
 ) {
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: {
       ...prev.os,
@@ -57,7 +57,7 @@ function setupFocusWithSelection(
 // @ts-expect-error — helper kept for future test expansion
 function _captureDispatches() {
   const captured: Command[] = [];
-  kernel.use({
+  os.use({
     id: "test:capture-dispatches",
     scope: GLOBAL as ScopeToken,
     before(ctx) {
@@ -69,9 +69,9 @@ function _captureDispatches() {
 }
 
 beforeEach(() => {
-  snapshot = kernel.getState();
+  snapshot = os.getState();
   return () => {
-    kernel.setState(() => snapshot);
+    os.setState(() => snapshot);
     for (const key of [...ZoneRegistry.keys()]) {
       ZoneRegistry.unregister(key);
     }
@@ -95,7 +95,7 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
     });
     setupFocusWithSelection("z1", "item-1");
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
 
     expect(receivedCursor).toHaveBeenCalledWith({
       focusId: "item-1",
@@ -120,7 +120,7 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
       "item-1",
     );
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
 
     expect(receivedCursor).toHaveBeenCalledWith({
       focusId: "item-3",
@@ -140,7 +140,7 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
     });
     setupFocusWithSelection("z1", "item-1");
 
-    kernel.dispatch(ACTIVATE());
+    os.dispatch(ACTIVATE());
 
     expect(receivedCursor).toHaveBeenCalledWith({
       focusId: "item-1",
@@ -160,7 +160,7 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
     });
     setupFocusWithSelection("z1", "item-1");
 
-    kernel.dispatch(OS_CHECK({ targetId: "item-1" }));
+    os.dispatch(OS_CHECK({ targetId: "item-1" }));
 
     expect(receivedCursor).toHaveBeenCalledWith({
       focusId: "item-1",
@@ -195,7 +195,7 @@ describe("FR2: OS commands call callback once, not per-item", () => {
       "item-1",
     );
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
 
     expect(onDelete).toHaveBeenCalledTimes(1);
   });
@@ -211,7 +211,7 @@ describe("FR2: OS commands call callback once, not per-item", () => {
     });
     setupFocusWithSelection("z1", "item-2", ["item-1", "item-2"]);
 
-    kernel.dispatch(OS_COPY());
+    os.dispatch(OS_COPY());
 
     expect(onCopy).toHaveBeenCalledTimes(1);
   });
@@ -233,7 +233,7 @@ describe("Edge cases", () => {
     });
 
     // Set active zone but no focusedItemId
-    kernel.setState((prev) => ({
+    os.setState((prev) => ({
       ...prev,
       os: {
         ...prev.os,
@@ -248,7 +248,7 @@ describe("Edge cases", () => {
       },
     }));
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
 
     expect(onDelete).not.toHaveBeenCalled();
   });
@@ -270,9 +270,9 @@ describe("FR7: SELECTION_CLEAR after delete/cut", () => {
     });
     setupFocusWithSelection("z1", "item-2", ["item-1", "item-2"]);
 
-    kernel.dispatch(OS_DELETE());
+    os.dispatch(OS_DELETE());
 
-    const zone = kernel.getState().os.focus.zones["z1"];
+    const zone = os.getState().os.focus.zones["z1"];
     expect(zone?.selection).toEqual([]);
   });
 });

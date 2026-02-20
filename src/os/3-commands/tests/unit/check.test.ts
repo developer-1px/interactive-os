@@ -5,7 +5,7 @@
  */
 
 import { OS_CHECK } from "@os/3-commands/interaction/check";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { describe, it } from "vitest";
 import {
   registerZone,
@@ -25,13 +25,13 @@ describe("CHECK → onCheck pipeline", () => {
       }),
     });
 
-    kernel.dispatch(OS_CHECK({ targetId: "item-1" }));
+    os.dispatch(OS_CHECK({ targetId: "item-1" }));
   });
 
   it("does nothing when Zone has no onCheck", () => {
     setupFocus("testZone", "item-1");
     registerZone("testZone", {});
 
-    kernel.dispatch(OS_CHECK({ targetId: "item-1" }));
+    os.dispatch(OS_CHECK({ targetId: "item-1" }));
   });
 });

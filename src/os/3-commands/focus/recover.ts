@@ -7,10 +7,10 @@
 
 import { produce } from "immer";
 import { DOM_ITEMS } from "../../2-contexts";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
-export const RECOVER = kernel.defineCommand(
+export const RECOVER = os.defineCommand(
   "OS_RECOVER",
   [DOM_ITEMS],
   (ctx) => () => {

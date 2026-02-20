@@ -5,12 +5,12 @@
 
 import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, vi } from "vitest";
 
 export function setupFocus(zoneId: string, focusedItemId: string) {
-  kernel.setState((prev) => ({
+  os.setState((prev) => ({
     ...prev,
     os: {
       ...prev.os,
@@ -51,12 +51,12 @@ export function registerZone(
 }
 
 export function useKernelSnapshot() {
-  let snapshot: ReturnType<typeof kernel.getState>;
+  let snapshot: ReturnType<typeof os.getState>;
 
   beforeEach(() => {
-    snapshot = kernel.getState();
+    snapshot = os.getState();
     return () => {
-      kernel.setState(() => snapshot);
+      os.setState(() => snapshot);
       for (const key of [...ZoneRegistry.keys()]) {
         ZoneRegistry.unregister(key);
       }

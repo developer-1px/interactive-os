@@ -2,10 +2,10 @@ import type { RegistrySnapshot } from "@kernel/core/inspectorPort";
 import type { ScopeToken } from "@kernel/core/tokens";
 import { ChevronDown, ChevronRight, Shield } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 
 // ═══════════════════════════════════════════════════════════════════
-// Registry Monitor v5 — Reads directly from kernel.inspector
+// Registry Monitor v5 — Reads directly from os.inspector
 //
 // No more GroupRegistry. The kernel is the Single Source of Truth.
 // Data flows: kernel closures → introspectionPort → inspector → here.
@@ -220,7 +220,7 @@ function ScopeSection({
           {data.commands.map((type) => {
             const hasGuard = data.whenGuards.includes(type);
             const guardEnabled = hasGuard
-              ? kernel.inspector.evaluateWhenGuard(data.scope, type)
+              ? os.inspector.evaluateWhenGuard(data.scope, type)
               : null;
             const isLastExecuted =
               type === lastCommandType &&
@@ -249,8 +249,8 @@ function ScopeSection({
 
 export const RegistryMonitor = memo(
   ({ historyCount }: { historyCount: number }) => {
-    const registry = kernel.inspector.getRegistry();
-    const lastTx = kernel.inspector.getLastTransaction();
+    const registry = os.inspector.getRegistry();
+    const lastTx = os.inspector.getLastTransaction();
     const lastCommandType = lastTx?.command?.type ?? null;
     const lastCommandScope = lastTx?.handlerScope ?? null;
 

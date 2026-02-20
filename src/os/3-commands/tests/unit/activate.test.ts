@@ -5,7 +5,7 @@
  */
 
 import { ACTIVATE } from "@os/3-commands/interaction/activate";
-import { kernel } from "@os/kernel";
+import { os } from "@os/kernel";
 import { describe, it } from "vitest";
 import {
   registerZone,
@@ -25,6 +25,6 @@ describe("ACTIVATE → onAction pipeline", () => {
       }),
     });
 
-    kernel.dispatch(ACTIVATE());
+    os.dispatch(ACTIVATE());
   });
 });

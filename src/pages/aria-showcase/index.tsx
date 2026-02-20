@@ -6,7 +6,7 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import { kernel } from "@os/kernel.ts";
+import { os } from "@os/kernel.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
@@ -870,7 +870,7 @@ function AccordionContent() {
 }
 
 function DisclosureContent() {
-  const isOpen = kernel.useComputed(
+  const isOpen = os.useComputed(
     (state) =>
       state.os.focus.zones["demo-disclosure"]?.expandedItems?.includes(
         "disclosure-trigger",
@@ -943,7 +943,7 @@ function DialogDemo({
 
   // Observe kernel dismiss: when dialog zone becomes inactive after being open,
   // close the dialog and restore focus to trigger.
-  const dialogActive = kernel.useComputed(
+  const dialogActive = os.useComputed(
     (state) => state.os.focus.activeZoneId === "demo-dialog",
   );
   const wasActiveRef = useRef(false);
@@ -1034,7 +1034,7 @@ function AlertDialogDemo({
 
   // Observe kernel dismiss: when alertdialog zone becomes inactive after being open,
   // close the dialog and restore focus to trigger.
-  const alertActive = kernel.useComputed(
+  const alertActive = os.useComputed(
     (state) => state.os.focus.activeZoneId === "demo-alertdialog",
   );
   const wasActiveRef = useRef(false);

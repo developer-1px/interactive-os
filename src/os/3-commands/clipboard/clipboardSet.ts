@@ -6,7 +6,7 @@
  */
 
 import { produce } from "immer";
-import { kernel } from "../../kernel";
+import { os } from "../../kernel";
 
 interface ClipboardSetPayload {
     source: string;
@@ -25,7 +25,7 @@ export const clipboardSetHandler = (ctx: any) => (payload: ClipboardSetPayload) 
     }),
 });
 
-export const OS_CLIPBOARD_SET = kernel.defineCommand(
+export const OS_CLIPBOARD_SET = os.defineCommand(
     "OS_CLIPBOARD_SET",
     clipboardSetHandler,
 );

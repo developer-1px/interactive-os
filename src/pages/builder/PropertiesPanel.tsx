@@ -13,7 +13,7 @@ import {
   renameSectionLabel,
   useFieldByDomId,
 } from "@/apps/builder/app";
-import { kernel } from "@/os/kernel";
+import { os } from "@/os/kernel";
 
 /**
  * PropertiesPanel
@@ -394,7 +394,7 @@ function SectionProperties({ fieldName }: { fieldName: string }) {
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
             value={sectionLabel}
             onChange={(e) =>
-              kernel.dispatch(
+              os.dispatch(
                 renameSectionLabel({ id: fieldName, label: e.target.value }),
               )
             }
