@@ -4,7 +4,7 @@ import {
   BuilderApp,
   BuilderCanvasUI,
 } from "@/apps/builder/app";
-import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
+import { BuilderCursor } from "@/apps/builder/BuilderCursor";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
 import {
@@ -60,8 +60,8 @@ export default function BuilderPage() {
         <BuilderCanvasUI.Zone
           className="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-100/50"
         >
-          {/* Focus Debug Overlay — inside scroll container */}
-          <FocusDebugOverlay />
+          {/* Builder Cursor — visual focus indicator inside scroll container */}
+          <BuilderCursor />
 
           {/* Page Being Edited - Centered Canvas */}
           <div className="min-h-full flex justify-center py-8 px-4 transition-all duration-300 ease-in-out">

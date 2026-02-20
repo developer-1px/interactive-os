@@ -1,11 +1,12 @@
 /**
- * FocusDebugOverlay
+ * BuilderCursor
  *
- * Absolute overlay inside the scroll container.
- * Positions are calculated relative to the container,
- * so the highlight scrolls naturally with content — no rAF lag.
+ * Visual focus cursor for the Builder canvas.
+ * Highlights the currently focused item with a colored border
+ * that follows keyboard navigation — replaces mouse cursor.
  *
- * Ported from legacy FocusData API → kernel state.
+ * Positions are calculated relative to the scroll container,
+ * so the highlight scrolls naturally with content.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -66,7 +67,7 @@ const HIDDEN: OverlayState = {
  * Must be placed inside the scroll container.
  * The parent element needs `position: relative`.
  */
-export function FocusDebugOverlay() {
+export function BuilderCursor() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<OverlayState>(HIDDEN);
   const prevItemRef = useRef<string | null>(null);

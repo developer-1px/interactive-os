@@ -1,16 +1,10 @@
 # BOARD — builder-usage-cleanup
 
 ## 🔴 Now
-- [ ] T4: Private API 캡슐화 — `_getClipboardPreview`, `_setTextClipboardStore` → Facade 메서드
-  - `navigator.clipboard.writeText` → OS Bridge 패턴 적용
-  - Cynefin: Complicated
-- [ ] T5: FocusDebugOverlay 범용화 — `apps/builder/` → `os/` 또는 inspector 모듈
-  - `os.getState()` 직접 접근 → 전용 hook 전환
-  - Cynefin: Complicated
 - [ ] T6: OS Clipboard 범용 패턴 추출 — text/structural 이중 모드 정식화
   - createCollectionZone에서 textCopy/structuralCopy 분리
   - why-clipboard.md 갱신
-  - Cynefin: Complex (T4/T5 완료 후 패턴 발견)
+  - Cynefin: Complex (T4 완료 후 패턴 발견)
 
 ## ⏳ Done
 - [x] T1: Dead Code 제거 — `SectionEntry` deprecated type 삭제, EditorToolbar Undo/Redo 연결 (02-21)
@@ -22,8 +16,15 @@
   - BuilderPage.tsx DOM 추론 코드 38줄 제거
   - PropertiesPanel → `useFocusedItem` + `getItemAttribute` 직접 쿼리
   - Builder.Section에 `data-builder-type="section"` 추가
-  - 관련 테스트 정리 (65→57 tests, ui 복제본 테스트 8건 삭제)
-  - `os` 미사용 import 제거 (BuilderPage.tsx)
+  - 관련 테스트 정리 (65→57 tests)
+- [x] T4: Private API 캡슐화 (02-21)
+  - `_setTextClipboardStore` → `setTextClipboard` (public)
+  - `_getClipboardPreview` → `getClipboardPreview` (public)
+  - `navigator.clipboard.writeText` → `clipboardWrite` effect (OS 위임)
+  - 테스트: browser API 직접 호출 대신 clipboardWrite effect 검증
+
+## ❌ Cancelled
+- T5: FocusDebugOverlay 범용화 — Builder 전용 UI 기능임. 이동 불필요.
 
 ## 💡 Ideas
 - PropertiesPanel의 `os.dispatch()` 반복 → `BuilderApp.dispatch()` 래퍼로 축소
