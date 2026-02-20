@@ -50,6 +50,7 @@ interface OverlayState {
   color: string;
   animating: boolean;
   dimmed: boolean;
+  level: string;
 }
 
 const HIDDEN: OverlayState = {
@@ -63,6 +64,7 @@ const HIDDEN: OverlayState = {
   color: "#6366f1",
   animating: false,
   dimmed: false,
+  level: "",
 };
 
 /**
@@ -126,6 +128,7 @@ export function BuilderCursor() {
       color: getLevelColor(el),
       animating,
       dimmed: !isActive,
+      level: el.getAttribute("data-level") ?? "",
     });
   }, []);
 
@@ -223,7 +226,7 @@ export function BuilderCursor() {
           height: state.height + pad * 2,
           border: `2px solid ${state.color}`,
           borderRadius: 4,
-          background: `${state.color}10`,
+          background: state.level === "section" ? "transparent" : `${state.color}10`,
           boxShadow: `0 0 0 1px ${state.color}30`,
           opacity: state.dimmed ? 0.4 : 1,
           transition: state.animating
