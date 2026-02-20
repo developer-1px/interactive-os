@@ -10,7 +10,6 @@
 
 import type { Transaction } from "@kernel/core/transaction";
 import {
-  ArrowRightLeft,
   Check,
   ChevronDown,
   ChevronRight,
@@ -18,8 +17,6 @@ import {
   Database,
   Download,
   Eye,
-  GitBranch,
-  Hash,
   Keyboard,
   Layers,
   ListMinus,
@@ -244,39 +241,35 @@ export function UnifiedInspector({
 
   return (
     <div className="flex flex-col w-full h-full bg-white text-[#333] font-sans text-[10px] select-none">
-      <div className="flex flex-col border-b border-[#e8e8e8] bg-white z-20 shrink-0 sticky top-0">
+      <div className="flex flex-col border-b border-[#e0e0e0] bg-white z-20 shrink-0 sticky top-0">
         {/* Top Header Row */}
-        <div className="h-9 px-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <Layers size={14} className="text-[#007acc] mr-2" />
-            <span className="font-bold text-[#555] text-[11px] mr-2">
-              Inspector
-            </span>
-            <span className="text-[#999] text-[9px] bg-[#f1f5f9] px-1.5 py-0.5 rounded font-mono">
+        <div className="h-7 px-2 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Layers size={12} className="text-[#007acc]" />
+            <span className="font-bold text-[#555] text-[10px]">Inspector</span>
+            <span className="text-[#999] text-[9px] font-mono">
               {filteredTx.length}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-1.5 cursor-pointer text-[#64748b] hover:text-[#333] transition-colors py-1 px-2 rounded hover:bg-[#f8f9fa]">
+          <div className="flex items-center gap-1">
+            <label className="flex items-center gap-1 cursor-pointer text-[#64748b] hover:text-[#333] px-1 py-0.5 rounded hover:bg-[#f5f5f5]">
               <input
                 type="checkbox"
                 checked={showOsEvents}
                 onChange={(e) => setShowOsEvents(e.target.checked)}
-                className="w-3 h-3 accent-blue-500 rounded-sm"
+                className="w-2.5 h-2.5 accent-blue-500"
               />
-              <span className="font-semibold text-[9px] tracking-wide">
-                OS Events
-              </span>
+              <span className="text-[9px]">OS</span>
             </label>
 
             <button
               type="button"
               onClick={() => downloadSession(transactions)}
-              className="p-1.5 rounded text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9] transition-colors cursor-pointer"
-              title="Export Session as JSON"
+              className="p-1 rounded text-[#94a3b8] hover:text-[#333] hover:bg-[#f5f5f5] cursor-pointer"
+              title="Export JSON"
             >
-              <Download size={13} />
+              <Download size={11} />
             </button>
 
             {onClear && filteredTx.length > 0 && (
@@ -287,7 +280,7 @@ export function UnifiedInspector({
                   setManualToggles(new Set());
                   setSearchQuery("");
                 }}
-                className="px-2 py-1 rounded text-[9px] font-bold tracking-widest text-[#999] hover:text-[#ef4444] hover:bg-[#fef2f2] transition-colors cursor-pointer border border-[#e5e5e5] bg-white"
+                className="px-1.5 py-0.5 rounded text-[8px] font-bold text-[#999] hover:text-[#ef4444] hover:bg-[#fef2f2] cursor-pointer border border-[#e5e5e5]"
               >
                 CLEAR
               </button>
@@ -296,47 +289,45 @@ export function UnifiedInspector({
         </div>
 
         {/* Search & Actions Row */}
-        <div className="h-8 border-t border-[#f1f5f9] bg-[#fafafa] flex items-center px-2 gap-2">
+        <div className="h-6 border-t border-[#f0f0f0] bg-[#fafafa] flex items-center px-1.5 gap-1">
           <div className="flex-1 relative">
             <Search
-              size={10}
-              className="absolute left-2 top-1/2 -translate-y-1/2 text-[#94a3b8]"
+              size={9}
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[#b0b0b0]"
             />
             <input
               type="text"
-              placeholder="Filter by command, element, path..."
+              placeholder="Filter..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-[10px] bg-white border border-[#e2e8f0] focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] rounded px-6 py-1 outline-none text-[#334155] placeholder:text-[#cbd5e1] transition-all"
+              className="w-full text-[9px] bg-white border border-[#e0e0e0] focus:border-[#3b82f6] rounded pl-5 pr-4 py-0.5 outline-none text-[#334155] placeholder:text-[#ccc]"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#ef4444] font-bold text-[8px]"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[#b0b0b0] hover:text-[#ef4444] text-[8px] leading-none"
               >
                 ✕
               </button>
             )}
           </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              type="button"
-              onClick={expandAll}
-              className="p-1 text-[#94a3b8] hover:text-[#3b82f6] hover:bg-[#eff6ff] rounded transition-colors"
-              title="Expand All"
-            >
-              <ListTree size={12} />
-            </button>
-            <button
-              type="button"
-              onClick={collapseAll}
-              className="p-1 text-[#94a3b8] hover:text-[#334155] hover:bg-[#e2e8f0] rounded transition-colors"
-              title="Collapse All"
-            >
-              <ListMinus size={12} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={expandAll}
+            className="p-0.5 text-[#b0b0b0] hover:text-[#3b82f6] rounded"
+            title="Expand All"
+          >
+            <ListTree size={11} />
+          </button>
+          <button
+            type="button"
+            onClick={collapseAll}
+            className="p-0.5 text-[#b0b0b0] hover:text-[#333] rounded"
+            title="Collapse All"
+          >
+            <ListMinus size={11} />
+          </button>
         </div>
       </div>
 
@@ -349,25 +340,21 @@ export function UnifiedInspector({
           {/* ── Trace Log Section ── */}
           <CollapsibleSection
             title="Trace Log"
-            icon={<Layers size={10} />}
+            icon={<Layers size={9} />}
             open={traceOpen}
             onToggle={() => setTraceOpen(!traceOpen)}
             count={filteredTx.length}
           >
             {filteredTx.length === 0 ? (
-              <div className="p-8 text-center text-[#94a3b8] italic text-[11px]">
-                {searchQuery
-                  ? "No events match your search."
-                  : "No events captured yet."}
+              <div className="p-4 text-center text-[#999] italic text-[10px]">
+                {searchQuery ? "No match." : "No events yet."}
               </div>
             ) : (
               filteredTx.map((tx, i) => {
-                // Calculate time delta from previous event in the array
                 const prevTx = i > 0 ? filteredTx[i - 1] : undefined;
                 const timeDeltaMs = prevTx
                   ? tx.timestamp - prevTx.timestamp
                   : 0;
-
                 return (
                   <TimelineNode
                     key={tx.id}
@@ -387,33 +374,33 @@ export function UnifiedInspector({
           {storeState && (
             <CollapsibleSection
               title="Store State"
-              icon={<Package size={10} />}
+              icon={<Package size={9} />}
               open={storeOpen}
               onToggle={() => setStoreOpen(!storeOpen)}
             >
-              <div className="p-2 bg-[#1e293b] overflow-x-auto shadow-inner">
-                <pre className="text-[10px] font-mono text-[#e2e8f0] leading-relaxed whitespace-pre-wrap break-all custom-scrollbar">
+              <div className="p-1.5 bg-[#1e293b] overflow-x-auto">
+                <pre className="text-[9px] font-mono text-[#e2e8f0] leading-snug whitespace-pre-wrap break-all">
                   {JSON.stringify(storeState, null, 2)}
                 </pre>
               </div>
             </CollapsibleSection>
           )}
 
-          {/* Bottom spacer — allows latest items to sit near top */}
+          {/* Bottom spacer */}
           {transactions.length > 0 && (
             <div style={{ height: "80%" }} aria-hidden />
           )}
         </div>
 
-        {/* Jump to latest indicator — shows when user scrolled up */}
+        {/* Jump to latest */}
         {isUserScrolled && (
           <button
             type="button"
             onClick={scrollToBottom}
-            className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0f172a] text-white text-[10px] font-semibold shadow-[0_4px_15px_rgba(0,0,0,0.2)] hover:bg-[#334155] hover:-translate-y-0.5 transition-all cursor-pointer border-none"
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#334155] text-white text-[9px] font-semibold hover:bg-[#1e293b] cursor-pointer border-none"
           >
-            <ChevronDown size={12} />
-            Jump to latest
+            <ChevronDown size={10} />
+            Latest
           </button>
         )}
       </div>
@@ -470,72 +457,59 @@ function TimelineNode({
   return (
     <div
       data-tx-index={dataIndex}
-      className={`flex flex-col border-b border-[#f1f5f9] transition-opacity ${opacityClass} ${expanded ? "bg-[#f8fafc]" : "hover:bg-[#f8fafc]"}`}
+      className={`flex flex-col border-b border-[#eee] transition-opacity ${opacityClass} ${expanded ? "bg-[#f9fafb]" : "hover:bg-[#fafafa]"}`}
     >
-      <div className="flex items-center w-full group">
+      <div className="flex items-center w-full">
         <button
           type="button"
           onClick={onToggle}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") onToggle();
           }}
-          className="flex-1 flex items-center gap-2.5 px-2 py-2 cursor-pointer bg-transparent border-none text-left"
+          className="flex-1 flex items-center gap-1.5 px-2 py-1 cursor-pointer bg-transparent border-none text-left min-w-0"
         >
           {/* Icon */}
-          <div className="w-5 h-5 flex items-center justify-center shrink-0 bg-white rounded shadow-sm border border-[#e2e8f0] group-hover:border-[#cbd5e1] transition-colors">
+          <div className="w-4 h-4 flex items-center justify-center shrink-0">
             {icon}
           </div>
 
-          <div className="flex flex-col justify-center">
-            {/* Element ID Badge + Trigger */}
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-[11px] truncate text-[#1e293b]">
-                {trigger.raw || "Unknown"}
-              </span>
-              {trigger.elementId && (
-                <span
-                  className="px-1 py-px rounded bg-[#fff0f6] text-[#c2255c] text-[9px] font-mono border border-[#ffdeeb] cursor-help max-w-[80px] truncate"
-                  title={`Element ID: ${trigger.elementId}`}
-                  onMouseEnter={() => highlightElement(trigger.elementId, true)}
-                  onMouseLeave={() =>
-                    highlightElement(trigger.elementId, false)
-                  }
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {trigger.elementId}
-                </span>
-              )}
-            </div>
-
-            {/* Number + Delta */}
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="font-mono text-[9px] text-[#94a3b8] font-bold">
-                #{index}
-              </span>
-              <span className="w-0.5 h-0.5 rounded-full bg-[#cbd5e1]" />
-              <span
-                className={`text-[8px] font-mono tracking-tighter uppercase ${deltaColorClass}`}
-              >
-                +{timeDeltaMs}ms
-              </span>
-            </div>
-          </div>
+          {/* # + Trigger + Element */}
+          <span className="font-mono text-[8px] text-[#b0b0b0] shrink-0">
+            #{index}
+          </span>
+          <span className="font-semibold text-[10px] truncate text-[#1e293b]">
+            {trigger.raw || "Unknown"}
+          </span>
+          {trigger.elementId && (
+            <span
+              className="px-0.5 rounded text-[#c2255c] text-[8px] font-mono bg-[#fff0f6] cursor-help max-w-[70px] truncate shrink-0"
+              title={`Element: ${trigger.elementId}`}
+              onMouseEnter={() => highlightElement(trigger.elementId, true)}
+              onMouseLeave={() => highlightElement(trigger.elementId, false)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {trigger.elementId}
+            </span>
+          )}
 
           {/* Command Badge */}
-          <div className="ml-auto flex flex-col items-end gap-1">
-            {command.type !== "NO_COMMAND" && (
-              <span className="px-1.5 py-0.5 rounded bg-[#eff6ff] text-[#2563eb] text-[9px] font-semibold border border-[#bfdbfe]">
-                {command.type}
-              </span>
-            )}
-          </div>
+          {command.type !== "NO_COMMAND" && (
+            <span className="px-1 py-px rounded bg-[#eff6ff] text-[#2563eb] text-[8px] font-semibold shrink-0">
+              {command.type}
+            </span>
+          )}
+
+          <span className="ml-auto flex items-center gap-1.5 shrink-0">
+            <span className={`text-[8px] font-mono ${deltaColorClass}`}>
+              +{timeDeltaMs}ms
+            </span>
+            <span className="text-[8px] text-[#ccc] font-mono tabular-nums hidden sm:inline">
+              {formatTime(tx.timestamp).split(".")[0]}
+            </span>
+          </span>
         </button>
 
-        <span className="text-[9px] text-[#cbd5e1] font-mono tabular-nums shrink-0 p-2 hidden sm:block">
-          {formatTime(tx.timestamp).split(".")[0]}
-        </span>
-
-        {/* Copy for AI Button */}
+        {/* Copy for AI */}
         {expanded && (
           <button
             type="button"
@@ -543,51 +517,38 @@ function TimelineNode({
               e.stopPropagation();
               copyToClipboard(formatAiContext(tx, signal));
             }}
-            title="Copy Context for AI"
-            className="shrink-0 mx-2 p-1.5 rounded-md text-[#94a3b8] hover:bg-[#e0e7ff] hover:text-[#4f46e5] border border-transparent hover:border-[#c7d2fe] transition-all cursor-pointer bg-white shadow-sm flex items-center gap-1 group/btn"
+            title="Copy for AI"
+            className="shrink-0 mr-1.5 p-1 rounded text-[#b0b0b0] hover:bg-[#e0e7ff] hover:text-[#4f46e5] cursor-pointer bg-transparent border-none"
           >
-            <ClipboardCopy
-              size={12}
-              className="group-hover/btn:scale-110 transition-transform"
-            />
-            <span className="text-[8px] font-bold uppercase hidden group-hover/btn:inline-block">
-              Copy for AI
-            </span>
+            <ClipboardCopy size={11} />
           </button>
         )}
       </div>
 
       {/* Expanded Details */}
       {expanded && (
-        <div className="flex flex-col gap-2 pl-10 pr-3 pb-4">
+        <div className="flex flex-col gap-1 pl-8 pr-2 pb-2">
           {/* ── State Mutation (Diff) ── */}
           {diff.length > 0 && (
-            <Section
-              title="State Mutation"
-              icon={<ArrowRightLeft size={9} className="text-pink-500" />}
-            >
+            <Section title="Diff">
               {diff.map((d: { path: string; from?: unknown; to?: unknown }) => (
                 <Row key={d.path}>
-                  <ArrowRightLeft
-                    size={10}
-                    className="text-[#94a3b8] shrink-0"
-                  />
                   <span
-                    className="text-[#475569] font-mono text-[10px] truncate max-w-[40%] bg-white px-1 py-0.5 rounded border border-[#e2e8f0]"
+                    className="text-[#475569] font-mono text-[9px] truncate max-w-[40%]"
                     title={d.path}
                   >
                     {d.path}
                   </span>
-                  <span className="ml-auto flex items-center gap-1.5 shrink-0 font-mono overflow-hidden">
+                  <span className="ml-auto flex items-center gap-1 shrink-0 font-mono overflow-hidden text-[9px]">
                     <span
-                      className="text-[#ef4444] line-through opacity-70 truncate max-w-[120px]"
+                      className="text-[#ef4444] line-through opacity-60 truncate max-w-[100px]"
                       title={JSON.stringify(d.from)}
                     >
                       {JSON.stringify(d.from)}
                     </span>
-                    <span className="text-[#94a3b8]">→</span>
+                    <span className="text-[#b0b0b0]">→</span>
                     <span
-                      className="text-[#10b981] font-bold truncate max-w-[120px] bg-[#ecfdf5] px-1 py-0.5 rounded border border-[#d1fae5]"
+                      className="text-[#10b981] font-bold truncate max-w-[100px]"
                       title={JSON.stringify(d.to)}
                     >
                       {JSON.stringify(d.to)}
@@ -600,18 +561,17 @@ function TimelineNode({
 
           {/* ── Effects ── */}
           {effects.length > 0 && (
-            <Section
-              title="Effects"
-              icon={<Check size={9} className="text-emerald-500" />}
-            >
+            <Section title="Effects">
               {effects.map((key, idx) => (
                 <Row key={`${key}-${idx}`}>
                   <Check
-                    size={10}
+                    size={9}
                     className="text-[#10b981] shrink-0"
                     strokeWidth={3}
                   />
-                  <span className="font-mono text-[#334155]">{key}</span>
+                  <span className="font-mono text-[#334155] text-[9px]">
+                    {key}
+                  </span>
                 </Row>
               ))}
             </Section>
@@ -619,37 +579,22 @@ function TimelineNode({
 
           {/* ── Kernel Details ── */}
           {tx.handlerScope && (
-            <Section
-              title="Kernel Routine"
-              icon={<Hash size={9} className="text-blue-500" />}
-            >
+            <Section title="Kernel">
               <Row>
-                <Hash size={10} className="text-[#94a3b8] shrink-0" />
-                <span className="text-[#94a3b8] shrink-0 w-12 uppercase text-[8px] font-bold tracking-wider">
-                  handler
+                <span className="text-[#94a3b8] text-[8px] font-bold w-10 shrink-0">
+                  HANDLER
                 </span>
-                <span className="font-mono text-[#2563eb] font-bold bg-[#eff6ff] px-1 py-0.5 rounded border border-[#bfdbfe]">
+                <span className="font-mono text-[#2563eb] font-semibold text-[9px]">
                   {tx.handlerScope}
                 </span>
               </Row>
               <Row>
-                <GitBranch size={10} className="text-[#94a3b8] shrink-0" />
-                <span className="text-[#94a3b8] shrink-0 w-12 uppercase text-[8px] font-bold tracking-wider">
-                  path
+                <span className="text-[#94a3b8] text-[8px] font-bold w-10 shrink-0">
+                  PATH
                 </span>
-                <div className="flex items-center gap-1 flex-wrap">
-                  {tx.bubblePath.map((pb, idx) => (
-                    <span
-                      key={`${pb}-${idx}`}
-                      className="flex items-center gap-1"
-                    >
-                      <span className="text-[#475569] font-medium">{pb}</span>
-                      {idx < tx.bubblePath.length - 1 && (
-                        <ChevronRight size={10} className="text-[#cbd5e1]" />
-                      )}
-                    </span>
-                  ))}
-                </div>
+                <span className="text-[#475569] text-[9px]">
+                  {tx.bubblePath.join(" › ")}
+                </span>
               </Row>
             </Section>
           )}
@@ -680,25 +625,23 @@ function CollapsibleSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-b border-[#e2e8f0]">
+    <div className="border-b border-[#e0e0e0]">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-1.5 px-4 py-2.5 bg-[#f8fafc] hover:bg-[#f1f5f9] transition-colors cursor-pointer border-none text-left"
+        className="w-full flex items-center gap-1 px-2 py-1 bg-[#f8f8f8] hover:bg-[#f0f0f0] cursor-pointer border-none text-left"
       >
         <ChevronRight
-          size={12}
-          className={`text-[#94a3b8] transition-transform ${open ? "rotate-90" : ""}`}
+          size={10}
+          className={`text-[#b0b0b0] transition-transform ${open ? "rotate-90" : ""}`}
         />
-        <div className="w-5 h-5 flex items-center justify-center bg-white border border-[#e2e8f0] rounded text-[#64748b] shadow-sm">
-          {icon}
-        </div>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[#475569]">
+        <span className="text-[#b0b0b0]">{icon}</span>
+        <span className="text-[8px] font-bold uppercase tracking-wider text-[#666]">
           {title}
         </span>
         {count !== undefined && (
-          <span className="text-[10px] text-[#3b82f6] font-mono font-bold bg-[#eff6ff] px-2 py-0.5 rounded-full border border-[#bfdbfe] ml-auto">
-            {count}
+          <span className="text-[8px] text-[#999] font-mono ml-auto">
+            ({count})
           </span>
         )}
       </button>
@@ -709,33 +652,28 @@ function CollapsibleSection({
 
 // ─── Unified Building Blocks ───
 
-/** Section: The ONE pattern for all detail groups. Label + bordered row list. */
 function Section({
   title,
-  icon,
   children,
 }: {
   title: string;
-  icon?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-[#64748b] mb-1.5 ml-1">
-        {icon}
+      <div className="text-[8px] font-bold uppercase tracking-wider text-[#999] mb-0.5">
         {title}
       </div>
-      <div className="flex flex-col border border-[#e2e8f0] bg-white rounded-md shadow-sm overflow-hidden divide-y divide-[#f1f5f9]">
+      <div className="flex flex-col border border-[#eee] rounded overflow-hidden divide-y divide-[#f5f5f5]">
         {children}
       </div>
     </div>
   );
 }
 
-/** Row: The ONE pattern for all data rows within a Section. */
 function Row({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 text-[10px] bg-white hover:bg-[#fafafa] transition-colors">
+    <div className="flex items-center gap-1.5 px-2 py-0.5 text-[9px] bg-white hover:bg-[#fafafa]">
       {children}
     </div>
   );
@@ -744,26 +682,24 @@ function Row({ children }: { children: React.ReactNode }) {
 function RawDataToggle({ data }: { data: Record<string, unknown> }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="mt-1">
+    <div>
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-3 py-1.5 rounded-md border border-[#e2e8f0] bg-[#f8fafc] text-[#64748b] hover:text-[#334155] hover:bg-[#f1f5f9] transition-colors"
+        className="w-full flex items-center justify-between px-2 py-0.5 rounded border border-[#eee] bg-[#fafafa] text-[#999] hover:text-[#555] hover:bg-[#f5f5f5]"
       >
-        <div className="flex items-center gap-2">
-          <Database size={10} />
-          <span className="font-bold text-[9px] uppercase tracking-widest">
-            Snapshot
-          </span>
+        <div className="flex items-center gap-1">
+          <Database size={9} />
+          <span className="font-bold text-[8px] uppercase">Snapshot</span>
         </div>
         <ChevronDown
-          size={12}
+          size={10}
           className={`transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
-        <div className="mt-2 p-3 rounded-md border border-[#cbd5e1] bg-[#1e293b] overflow-x-auto shadow-inner">
-          <pre className="text-[10px] font-mono text-[#e2e8f0] leading-relaxed custom-scrollbar">
+        <div className="mt-1 p-1.5 rounded border border-[#ddd] bg-[#1e293b] overflow-x-auto">
+          <pre className="text-[9px] font-mono text-[#e2e8f0] leading-snug">
             {JSON.stringify(data, null, 2)}
           </pre>
         </div>
