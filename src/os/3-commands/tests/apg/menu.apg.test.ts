@@ -1,9 +1,16 @@
 /**
- * APG Menu Button Pattern — Contract Test
+ * APG Menu Button Pattern — Contract Test (Tier 1: pressKey → attrs)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/
+ *
+ * Testing Trophy Tier 1:
+ *   Input:  pressKey (user action simulation)
+ *   Assert: attrs() → tabIndex (ARIA contract)
  *
  * Config: vertical, no-loop, select=none, Tab=trap, Escape=close
  * Unique: action-only (no selection state), popup lifecycle
+ *
+ * NOTE: All tests in this file use shared contracts from contracts.ts,
+ * which are already pressKey-based. No unique dispatch calls needed.
  */
 
 import { describe } from "vitest";
@@ -53,7 +60,7 @@ function createMenu(focusedItem = "cut") {
 }
 
 // ═══════════════════════════════════════════════════
-// Shared contracts
+// Shared contracts (all pressKey-based via contracts.ts)
 // ═══════════════════════════════════════════════════
 
 describe("APG Menu: Navigation", () => {

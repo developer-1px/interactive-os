@@ -1,6 +1,10 @@
 /**
- * APG Dialog (Modal) Pattern — Contract Test
+ * APG Dialog (Modal) Pattern — Contract Test (Tier 1: pressKey → attrs)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
+ *
+ * Testing Trophy Tier 1:
+ *   Input:  pressKey (user action simulation)
+ *   Assert: attrs() → tabIndex (ARIA contract) + state verification
  *
  * Config: vertical, Tab=trap, Escape=close
  * Unique: focus trap (Tab cycling), STACK restore, nested LIFO
@@ -43,7 +47,7 @@ function createDialog(focusedItem = "close-btn") {
 }
 
 // ═══════════════════════════════════════════════════
-// Shared contracts
+// Shared contracts (pressKey via contracts.ts)
 // ═══════════════════════════════════════════════════
 
 describe("APG Dialog: Focus Trap", () => {
@@ -56,13 +60,14 @@ describe("APG Dialog: Focus Trap", () => {
 
     it("Tab cycles through all elements without escaping", () => {
         const t = createDialog();
-        t.dispatch(t.OS_TAB({ direction: "forward" }));
+        t.pressKey("Tab");
         expect(t.focusedItemId()).toBe("input-name");
-        t.dispatch(t.OS_TAB({ direction: "forward" }));
+        expect(t.attrs("input-name").tabIndex).toBe(0);
+        t.pressKey("Tab");
         expect(t.focusedItemId()).toBe("input-email");
-        t.dispatch(t.OS_TAB({ direction: "forward" }));
+        t.pressKey("Tab");
         expect(t.focusedItemId()).toBe("save-btn");
-        t.dispatch(t.OS_TAB({ direction: "forward" }));
+        t.pressKey("Tab");
         expect(t.focusedItemId()).toBe("close-btn");
         expect(t.activeZoneId()).toBe("dialog");
     });
@@ -73,7 +78,7 @@ describe("APG Dialog: Escape", () => {
 });
 
 // ═══════════════════════════════════════════════════
-// Unique: Focus Restore via STACK
+// Unique: Focus Restore via STACK (pressKey for Escape)
 // ═══════════════════════════════════════════════════
 
 describe("APG Dialog: Focus Restore", () => {
@@ -85,6 +90,7 @@ describe("APG Dialog: Focus Restore", () => {
         t.setItems(DIALOG_ITEMS);
         t.setConfig(DIALOG_CONFIG);
         t.setActiveZone("dialog", "close-btn");
+        // Close dialog via stack pop (internal OS mechanism)
         t.dispatch(t.OS_STACK_POP());
         expect(t.activeZoneId()).toBe("toolbar");
         expect(t.focusedItemId("toolbar")).toBe("edit-btn");

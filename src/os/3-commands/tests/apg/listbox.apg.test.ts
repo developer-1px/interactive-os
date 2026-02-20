@@ -1,6 +1,10 @@
 /**
- * APG Listbox Pattern — Contract Test
+ * APG Listbox Pattern — Contract Test (Tier 1: pressKey → attrs)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/listbox/
+ *
+ * Testing Trophy Tier 1:
+ *   Input:  pressKey / click (user action simulation)
+ *   Assert: attrs() → tabIndex, aria-selected, data-focused (ARIA contract)
  *
  * Config: vertical, no-loop, single/multi-select
  * Unique: followFocus on/off, Shift+Arrow range, horizontal variant
@@ -67,7 +71,7 @@ function multiSelect(focusedItem = "apple") {
 }
 
 // ═══════════════════════════════════════════════════
-// Shared contracts
+// Shared contracts (pressKey → attrs)
 // ═══════════════════════════════════════════════════
 
 describe("APG Listbox: Navigation", () => {
@@ -90,18 +94,20 @@ describe("APG Listbox: Navigation", () => {
 describe("APG Listbox: Single-Select", () => {
     assertFollowFocus(singleSelect);
 
-    it("selection follows focus on Home", () => {
+    it("selection follows focus on Home (aria-selected)", () => {
         const t = singleSelect("cherry");
-        t.dispatch(t.OS_NAVIGATE({ direction: "home" }));
+        t.pressKey("Home");
         expect(t.focusedItemId()).toBe("apple");
-        expect(t.selection()).toEqual(["apple"]);
+        expect(t.attrs("apple")["aria-selected"]).toBe(true);
+        expect(t.attrs("cherry")["aria-selected"]).toBe(false);
     });
 
-    it("selection follows focus on End", () => {
+    it("selection follows focus on End (aria-selected)", () => {
         const t = singleSelect("banana");
-        t.dispatch(t.OS_NAVIGATE({ direction: "end" }));
+        t.pressKey("End");
         expect(t.focusedItemId()).toBe("elderberry");
-        expect(t.selection()).toEqual(["elderberry"]);
+        expect(t.attrs("elderberry")["aria-selected"]).toBe(true);
+        expect(t.attrs("banana")["aria-selected"]).toBe(false);
     });
 });
 
@@ -112,66 +118,82 @@ describe("APG Listbox: Single-Select", () => {
 describe("APG Listbox: Multi-Select", () => {
     it("Down Arrow: moves focus without changing selection", () => {
         const t = multiSelect("apple");
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.pressKey("ArrowDown");
         expect(t.focusedItemId()).toBe("banana");
-        expect(t.selection()).toEqual([]);
+        expect(t.attrs("banana").tabIndex).toBe(0);
+        expect(t.attrs("banana")["aria-selected"]).toBe(false);
+        expect(t.attrs("apple").tabIndex).toBe(-1);
     });
 
     it("Space: toggles selection of focused option", () => {
         const t = multiSelect("banana");
-        t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "toggle" }));
-        expect(t.selection()).toEqual(["banana"]);
+        t.pressKey("Space");
+        expect(t.attrs("banana")["aria-selected"]).toBe(true);
     });
 
     it("Space: deselects already-selected option", () => {
         const t = multiSelect("banana");
-        t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "toggle" }));
-        t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "toggle" }));
-        expect(t.selection()).toEqual([]);
+        t.pressKey("Space");
+        expect(t.attrs("banana")["aria-selected"]).toBe(true);
+        t.pressKey("Space");
+        expect(t.attrs("banana")["aria-selected"]).toBe(false);
     });
 
     it("Shift+Down: extends selection range", () => {
         const t = multiSelect("banana");
         t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "replace" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
+        t.pressKey("Shift+ArrowDown");
         expect(t.focusedItemId()).toBe("cherry");
-        expect(t.selection()).toEqual(["banana", "cherry"]);
+        expect(t.attrs("banana")["aria-selected"]).toBe(true);
+        expect(t.attrs("cherry")["aria-selected"]).toBe(true);
     });
 
     it("Shift+Up: extends selection range backward", () => {
         const t = multiSelect("cherry");
         t.dispatch(t.OS_SELECT({ targetId: "cherry", mode: "replace" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "up", select: "range" }));
+        t.pressKey("Shift+ArrowUp");
         expect(t.focusedItemId()).toBe("banana");
-        expect(t.selection()).toEqual(["banana", "cherry"]);
+        expect(t.attrs("banana")["aria-selected"]).toBe(true);
+        expect(t.attrs("cherry")["aria-selected"]).toBe(true);
     });
 
     it("Shift+Space: range select from anchor to focused", () => {
         const t = multiSelect("banana");
         t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "replace" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.pressKey("ArrowDown");
+        t.pressKey("ArrowDown");
+        // Shift+Space = range select from anchor (banana) to focused (date)
         t.dispatch(t.OS_SELECT({ targetId: "date", mode: "range" }));
-        expect(t.selection()).toEqual(["banana", "cherry", "date"]);
+        expect(t.attrs("banana")["aria-selected"]).toBe(true);
+        expect(t.attrs("cherry")["aria-selected"]).toBe(true);
+        expect(t.attrs("date")["aria-selected"]).toBe(true);
     });
 
     it("Shift+Down × 3: progressively extends range", () => {
         const t = multiSelect("apple");
         t.dispatch(t.OS_SELECT({ targetId: "apple", mode: "replace" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
-        expect(t.selection()).toEqual(["apple", "banana", "cherry", "date"]);
+        t.pressKey("Shift+ArrowDown");
+        t.pressKey("Shift+ArrowDown");
+        t.pressKey("Shift+ArrowDown");
+        expect(t.attrs("apple")["aria-selected"]).toBe(true);
+        expect(t.attrs("banana")["aria-selected"]).toBe(true);
+        expect(t.attrs("cherry")["aria-selected"]).toBe(true);
+        expect(t.attrs("date")["aria-selected"]).toBe(true);
+        expect(t.attrs("elderberry")["aria-selected"]).toBe(false);
     });
 
     it("Shift+Down then Shift+Up: shrinks range", () => {
         const t = multiSelect("banana");
         t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "replace" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
-        expect(t.selection()).toEqual(["banana", "cherry", "date"]);
-        t.dispatch(t.OS_NAVIGATE({ direction: "up", select: "range" }));
-        expect(t.selection()).toEqual(["banana", "cherry"]);
+        t.pressKey("Shift+ArrowDown");
+        t.pressKey("Shift+ArrowDown");
+        expect(t.attrs("banana")["aria-selected"]).toBe(true);
+        expect(t.attrs("cherry")["aria-selected"]).toBe(true);
+        expect(t.attrs("date")["aria-selected"]).toBe(true);
+        t.pressKey("Shift+ArrowUp");
+        expect(t.attrs("banana")["aria-selected"]).toBe(true);
+        expect(t.attrs("cherry")["aria-selected"]).toBe(true);
+        expect(t.attrs("date")["aria-selected"]).toBe(false);
     });
 });
 
@@ -185,8 +207,9 @@ describe("APG Listbox: Focus Initialization", () => {
         t.setItems(ITEMS);
         t.setConfig(SINGLE_SELECT);
         t.setActiveZone("listbox", null);
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.pressKey("ArrowDown");
         expect(t.focusedItemId()).toBe("apple");
+        expect(t.attrs("apple").tabIndex).toBe(0);
     });
 
     it("multi-select, no selection: focus first, no auto-select", () => {
@@ -194,9 +217,10 @@ describe("APG Listbox: Focus Initialization", () => {
         t.setItems(ITEMS);
         t.setConfig(MULTI_SELECT);
         t.setActiveZone("listbox", null);
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.pressKey("ArrowDown");
         expect(t.focusedItemId()).toBe("apple");
-        expect(t.selection()).toEqual([]);
+        expect(t.attrs("apple").tabIndex).toBe(0);
+        expect(t.attrs("apple")["aria-selected"]).toBe(false);
     });
 });
 
@@ -219,14 +243,17 @@ describe("APG Listbox: Horizontal Orientation", () => {
 
     it("Right Arrow: moves focus to next option", () => {
         const t = horizontal("apple");
-        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
+        t.pressKey("ArrowRight");
         expect(t.focusedItemId()).toBe("banana");
+        expect(t.attrs("banana").tabIndex).toBe(0);
+        expect(t.attrs("banana")["aria-selected"]).toBe(true);
     });
 
     it("Left Arrow: moves focus to previous option", () => {
         const t = horizontal("cherry");
-        t.dispatch(t.OS_NAVIGATE({ direction: "left" }));
+        t.pressKey("ArrowLeft");
         expect(t.focusedItemId()).toBe("banana");
+        expect(t.attrs("banana").tabIndex).toBe(0);
     });
 
     assertOrthogonalIgnored(horizontal, "horizontal");
@@ -259,23 +286,24 @@ describe("APG Listbox: RadioGroup Variant", () => {
 
     it("navigate + select: Down moves and selects", () => {
         const t = radioGroup("radio-sm");
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.pressKey("ArrowDown");
         expect(t.focusedItemId()).toBe("radio-md");
-        expect(t.selection()).toEqual(["radio-md"]);
+        expect(t.attrs("radio-md")["aria-selected"]).toBe(true);
+        expect(t.attrs("radio-sm")["aria-selected"]).toBe(false);
     });
 
     it("loop: Down at last wraps to first", () => {
         const t = radioGroup("radio-lg");
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.pressKey("ArrowDown");
         expect(t.focusedItemId()).toBe("radio-sm");
-        expect(t.selection()).toEqual(["radio-sm"]);
+        expect(t.attrs("radio-sm")["aria-selected"]).toBe(true);
     });
 
     it("never-empty: always one selection", () => {
         const t = radioGroup("radio-sm");
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.pressKey("ArrowDown");
         expect(t.selection()).toHaveLength(1);
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.pressKey("ArrowDown");
         expect(t.selection()).toHaveLength(1);
     });
 });

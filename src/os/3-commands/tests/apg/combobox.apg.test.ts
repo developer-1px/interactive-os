@@ -1,10 +1,17 @@
 /**
- * APG Combobox Pattern — Contract Test
+ * APG Combobox Pattern — Contract Test (Tier 1: pressKey → attrs)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
+ *
+ * Testing Trophy Tier 1:
+ *   Input:  pressKey (user action simulation)
+ *   Assert: attrs() → tabIndex, aria-selected (ARIA contract)
  *
  * Composite: Input (combobox) + Popup (listbox)
  * Config: vertical, followFocus, Tab=trap, Escape=close
  * Unique: popup lifecycle via STACK, selection in popup
+ *
+ * NOTE: All tests use shared contracts from contracts.ts,
+ * which are already pressKey-based.
  */
 
 import { describe } from "vitest";
@@ -54,7 +61,7 @@ function createComboboxPopup(focusedItem = "apple") {
 }
 
 // ═══════════════════════════════════════════════════
-// Shared contracts
+// Shared contracts (all pressKey-based via contracts.ts)
 // ═══════════════════════════════════════════════════
 
 describe("APG Combobox: Popup Navigation", () => {

@@ -1,7 +1,11 @@
 /**
- * APG Toolbar Pattern — Contract Test
+ * APG Toolbar Pattern — Contract Test (Tier 1: pressKey → attrs)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
  *        + Tabs variant: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
+ *
+ * Testing Trophy Tier 1:
+ *   Input:  pressKey (user action simulation)
+ *   Assert: attrs() → tabIndex, aria-selected (ARIA contract)
  *
  * Config: horizontal, loop, Tab=escape, select=none
  * Unique: Tab escape to next zone, vertical keys ignored
@@ -50,7 +54,7 @@ function createToolbar(focusedItem = "bold-btn") {
 }
 
 // ═══════════════════════════════════════════════════
-// Shared contracts
+// Shared contracts (pressKey via contracts.ts)
 // ═══════════════════════════════════════════════════
 
 describe("APG Toolbar: Navigation", () => {
@@ -68,7 +72,7 @@ describe("APG Toolbar: Navigation", () => {
 });
 
 // ═══════════════════════════════════════════════════
-// Unique: Tab Escape
+// Unique: Tab Escape (pressKey)
 // ═══════════════════════════════════════════════════
 
 describe("APG Toolbar: Tab Escape", () => {
@@ -92,7 +96,7 @@ describe("APG Toolbar: Tab Escape", () => {
                 lastFocusedId: null,
             },
         ]);
-        t.dispatch(t.OS_TAB({ direction: "forward" }));
+        t.pressKey("Tab");
         expect(t.activeZoneId()).toBe("editor");
     });
 });
@@ -125,20 +129,21 @@ describe("APG Toolbar: Tabs Variant", () => {
         return t;
     }
 
-    it("auto-activation: navigation selects tab", () => {
+    it("auto-activation: navigation selects tab (aria-selected)", () => {
         const t = createTabs("tab-general");
-        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
+        t.pressKey("ArrowRight");
         expect(t.focusedItemId()).toBe("tab-security");
-        expect(t.selection()).toEqual(["tab-security"]);
+        expect(t.attrs("tab-security")["aria-selected"]).toBe(true);
+        expect(t.attrs("tab-general")["aria-selected"]).toBe(false);
     });
 
     it("full cycle: selection follows each navigation", () => {
         const t = createTabs("tab-general");
-        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
-        expect(t.selection()).toEqual(["tab-security"]);
-        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
-        expect(t.selection()).toEqual(["tab-advanced"]);
-        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
-        expect(t.selection()).toEqual(["tab-general"]);
+        t.pressKey("ArrowRight");
+        expect(t.attrs("tab-security")["aria-selected"]).toBe(true);
+        t.pressKey("ArrowRight");
+        expect(t.attrs("tab-advanced")["aria-selected"]).toBe(true);
+        t.pressKey("ArrowRight"); // loop back
+        expect(t.attrs("tab-general")["aria-selected"]).toBe(true);
     });
 });

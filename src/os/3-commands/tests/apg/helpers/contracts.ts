@@ -1,11 +1,15 @@
 /**
- * APG Contract Test Factory — Shared Axis Tests
+ * APG Contract Test Factory — Shared Axis Tests (Tier 1: pressKey → attrs)
  *
  * Each function below tests one "axis" of keyboard behavior.
  * APG pattern files assemble these axes into W3C-compliant test suites.
  *
  * Axis = reusable behavioral unit (defined once, shared across patterns)
  * APG file = combination proof (config + axis assembly = W3C spec satisfied)
+ *
+ * Testing Trophy Tier 1:
+ *   Input:  pressKey / click (user action simulation)
+ *   Assert: attrs() → tabIndex, aria-selected, data-focused (ARIA contract)
  */
 
 import { expect, it } from "vitest";
@@ -16,75 +20,85 @@ type Factory = () => TestKernel;
 
 // ─── Axis: Linear Navigation ───
 
-/** Tests vertical Down/Up navigation (orientation=vertical) */
+/** Tests vertical Down/Up navigation via pressKey (orientation=vertical) */
 export function assertVerticalNav(factory: Factory) {
     it("Down Arrow: moves focus to next item", () => {
         const t = factory();
         const first = t.focusedItemId()!;
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
-        expect(t.focusedItemId()).not.toBe(first);
+        t.pressKey("ArrowDown");
+        const next = t.focusedItemId()!;
+        expect(next).not.toBe(first);
+        // Tier 1: ARIA contract — focused item gets tabIndex=0
+        expect(t.attrs(next).tabIndex).toBe(0);
+        expect(t.attrs(first).tabIndex).toBe(-1);
     });
 
     it("Up Arrow: moves focus to previous item", () => {
         const t = factory();
-        // Move down first, then up should return
         const first = t.focusedItemId()!;
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "up" }));
+        t.pressKey("ArrowDown");
+        t.pressKey("ArrowUp");
         expect(t.focusedItemId()).toBe(first);
+        expect(t.attrs(first).tabIndex).toBe(0);
     });
 }
 
-/** Tests horizontal Left/Right navigation (orientation=horizontal) */
+/** Tests horizontal Left/Right navigation via pressKey (orientation=horizontal) */
 export function assertHorizontalNav(factory: Factory) {
     it("Right Arrow: moves focus to next item", () => {
         const t = factory();
         const first = t.focusedItemId()!;
-        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
-        expect(t.focusedItemId()).not.toBe(first);
+        t.pressKey("ArrowRight");
+        const next = t.focusedItemId()!;
+        expect(next).not.toBe(first);
+        expect(t.attrs(next).tabIndex).toBe(0);
+        expect(t.attrs(first).tabIndex).toBe(-1);
     });
 
     it("Left Arrow: moves focus to previous item", () => {
         const t = factory();
         const first = t.focusedItemId()!;
-        t.dispatch(t.OS_NAVIGATE({ direction: "right" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "left" }));
+        t.pressKey("ArrowRight");
+        t.pressKey("ArrowLeft");
         expect(t.focusedItemId()).toBe(first);
+        expect(t.attrs(first).tabIndex).toBe(0);
     });
 }
 
 // ─── Axis: Boundary ───
 
-/** Tests that focus does NOT move at edges (loop=false) */
+/** Tests that focus does NOT move at edges via pressKey (loop=false) */
 export function assertBoundaryClamp(
     factory: Factory,
     opts: { firstId: string; lastId: string; axis: "vertical" | "horizontal" },
 ) {
-    const [fwd, bwd] =
+    const key =
         opts.axis === "vertical"
-            ? (["down", "up"] as const)
-            : (["right", "left"] as const);
+            ? { fwd: "ArrowDown", bwd: "ArrowUp" }
+            : { fwd: "ArrowRight", bwd: "ArrowLeft" };
 
-    it(`${fwd} at last item: focus stays`, () => {
+    it(`${key.fwd} at last item: focus stays (clamp)`, () => {
         const t = factory();
         // Navigate to last
-        for (let i = 0; i < 20; i++) t.dispatch(t.OS_NAVIGATE({ direction: fwd }));
+        for (let i = 0; i < 20; i++) t.pressKey(key.fwd);
         expect(t.focusedItemId()).toBe(opts.lastId);
-        t.dispatch(t.OS_NAVIGATE({ direction: fwd }));
+        expect(t.attrs(opts.lastId).tabIndex).toBe(0);
+        t.pressKey(key.fwd);
         expect(t.focusedItemId()).toBe(opts.lastId);
     });
 
-    it(`${bwd} at first item: focus stays`, () => {
+    it(`${key.bwd} at first item: focus stays (clamp)`, () => {
         const t = factory();
         // Navigate to first
-        for (let i = 0; i < 20; i++) t.dispatch(t.OS_NAVIGATE({ direction: bwd }));
+        for (let i = 0; i < 20; i++) t.pressKey(key.bwd);
         expect(t.focusedItemId()).toBe(opts.firstId);
-        t.dispatch(t.OS_NAVIGATE({ direction: bwd }));
+        expect(t.attrs(opts.firstId).tabIndex).toBe(0);
+        t.pressKey(key.bwd);
         expect(t.focusedItemId()).toBe(opts.firstId);
     });
 }
 
-/** Tests that focus wraps at edges (loop=true) */
+/** Tests that focus wraps at edges via pressKey (loop=true) */
 export function assertLoop(
     opts: {
         firstId: string;
@@ -94,23 +108,25 @@ export function assertLoop(
         factoryAtFirst: Factory;
     },
 ) {
-    const [fwd, bwd] =
+    const key =
         opts.axis === "vertical"
-            ? (["down", "up"] as const)
-            : (["right", "left"] as const);
+            ? { fwd: "ArrowDown", bwd: "ArrowUp" }
+            : { fwd: "ArrowRight", bwd: "ArrowLeft" };
 
-    it(`${fwd} at last item: wraps to first`, () => {
+    it(`${key.fwd} at last item: wraps to first`, () => {
         const t = opts.factoryAtLast();
         expect(t.focusedItemId()).toBe(opts.lastId);
-        t.dispatch(t.OS_NAVIGATE({ direction: fwd }));
+        t.pressKey(key.fwd);
         expect(t.focusedItemId()).toBe(opts.firstId);
+        expect(t.attrs(opts.firstId).tabIndex).toBe(0);
     });
 
-    it(`${bwd} at first item: wraps to last`, () => {
+    it(`${key.bwd} at first item: wraps to last`, () => {
         const t = opts.factoryAtFirst();
         expect(t.focusedItemId()).toBe(opts.firstId);
-        t.dispatch(t.OS_NAVIGATE({ direction: bwd }));
+        t.pressKey(key.bwd);
         expect(t.focusedItemId()).toBe(opts.lastId);
+        expect(t.attrs(opts.lastId).tabIndex).toBe(0);
     });
 }
 
@@ -122,53 +138,60 @@ export function assertHomeEnd(
 ) {
     it("Home: moves to first item", () => {
         const t = factory();
-        t.dispatch(t.OS_NAVIGATE({ direction: "home" }));
+        t.pressKey("Home");
         expect(t.focusedItemId()).toBe(opts.firstId);
+        expect(t.attrs(opts.firstId).tabIndex).toBe(0);
     });
 
     it("End: moves to last item", () => {
         const t = factory();
-        t.dispatch(t.OS_NAVIGATE({ direction: "end" }));
+        t.pressKey("End");
         expect(t.focusedItemId()).toBe(opts.lastId);
+        expect(t.attrs(opts.lastId).tabIndex).toBe(0);
     });
 }
 
 // ─── Axis: Orthogonal Ignored ───
 
-/** Tests that orthogonal axis keys have no effect */
+/** Tests that orthogonal axis keys have no effect via pressKey */
 export function assertOrthogonalIgnored(
     factory: Factory,
     axis: "vertical" | "horizontal",
 ) {
-    const [d1, d2] =
+    const [k1, k2] =
         axis === "vertical"
-            ? (["right", "left"] as const)
-            : (["down", "up"] as const);
+            ? (["ArrowRight", "ArrowLeft"] as const)
+            : (["ArrowDown", "ArrowUp"] as const);
 
-    it(`${d1} Arrow: no effect`, () => {
+    it(`${k1}: no effect`, () => {
         const t = factory();
-        const before = t.focusedItemId();
-        t.dispatch(t.OS_NAVIGATE({ direction: d1 }));
+        const before = t.focusedItemId()!;
+        t.pressKey(k1);
         expect(t.focusedItemId()).toBe(before);
+        expect(t.attrs(before).tabIndex).toBe(0);
     });
 
-    it(`${d2} Arrow: no effect`, () => {
+    it(`${k2}: no effect`, () => {
         const t = factory();
-        const before = t.focusedItemId();
-        t.dispatch(t.OS_NAVIGATE({ direction: d2 }));
+        const before = t.focusedItemId()!;
+        t.pressKey(k2);
         expect(t.focusedItemId()).toBe(before);
+        expect(t.attrs(before).tabIndex).toBe(0);
     });
 }
 
 // ─── Axis: Follow Focus ───
 
-/** Tests that selection follows focus on navigation */
+/** Tests that selection (aria-selected) follows focus on navigation */
 export function assertFollowFocus(factory: Factory) {
-    it("selection follows focus on navigation", () => {
+    it("selection follows focus on navigation (aria-selected)", () => {
         const t = factory();
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
-        const focused = t.focusedItemId()!;
-        expect(t.selection()).toEqual([focused]);
+        const first = t.focusedItemId()!;
+        t.pressKey("ArrowDown");
+        const next = t.focusedItemId()!;
+        // After navigation: new focus gets selected, old loses selection
+        expect(t.attrs(next)["aria-selected"]).toBe(true);
+        expect(t.attrs(first)["aria-selected"]).toBe(false);
     });
 }
 
@@ -178,8 +201,8 @@ export function assertFollowFocus(factory: Factory) {
 export function assertNoSelection(factory: Factory) {
     it("navigation does not create selection", () => {
         const t = factory();
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
-        t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+        t.pressKey("ArrowDown");
+        t.pressKey("ArrowDown");
         expect(t.selection()).toEqual([]);
     });
 }
@@ -190,19 +213,19 @@ export function assertNoSelection(factory: Factory) {
 export function assertEscapeClose(factory: Factory) {
     it("Escape: closes popup (clears active zone)", () => {
         const t = factory();
-        t.dispatch(t.OS_ESCAPE());
+        t.pressKey("Escape");
         expect(t.activeZoneId()).toBeNull();
     });
 }
 
-/** Tests OS_ESCAPE + OS_STACK_POP restores focus to invoker */
+/** Tests Escape + stack pop restores focus to invoker */
 export function assertFocusRestore(
     factory: Factory,
     opts: { invokerZoneId: string; invokerItemId: string },
 ) {
-    it("Escape + OS_STACK_POP: restores focus to invoker", () => {
+    it("Escape + stack pop: restores focus to invoker", () => {
         const t = factory();
-        t.dispatch(t.OS_ESCAPE());
+        t.pressKey("Escape");
         t.dispatch(t.OS_STACK_POP());
         expect(t.activeZoneId()).toBe(opts.invokerZoneId);
         expect(t.focusedItemId(opts.invokerZoneId)).toBe(opts.invokerItemId);
@@ -224,14 +247,16 @@ export function assertTabTrap(
     it("Tab at last: wraps to first (focus trap)", () => {
         const t = (opts.factoryAtLast ?? factory)();
         expect(t.focusedItemId()).toBe(opts.lastId);
-        t.dispatch(t.OS_TAB({ direction: "forward" }));
+        t.pressKey("Tab");
         expect(t.focusedItemId()).toBe(opts.firstId);
+        expect(t.attrs(opts.firstId).tabIndex).toBe(0);
     });
 
     it("Shift+Tab at first: wraps to last (focus trap)", () => {
         const t = (opts.factoryAtFirst ?? factory)();
         expect(t.focusedItemId()).toBe(opts.firstId);
-        t.dispatch(t.OS_TAB({ direction: "backward" }));
+        t.pressKey("Shift+Tab");
         expect(t.focusedItemId()).toBe(opts.lastId);
+        expect(t.attrs(opts.lastId).tabIndex).toBe(0);
     });
 }
