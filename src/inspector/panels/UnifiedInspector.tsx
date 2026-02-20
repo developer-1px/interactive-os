@@ -10,7 +10,6 @@
 
 import type { Transaction } from "@kernel/core/transaction";
 import {
-  Check,
   ChevronDown,
   ChevronRight,
   ClipboardCopy,
@@ -306,11 +305,10 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                    active
-                      ? "bg-[#1e293b] text-white border-[#1e293b]"
-                      : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                  }`}
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
+                    ? "bg-[#1e293b] text-white border-[#1e293b]"
+                    : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                    }`}
                 >
                   {group}
                 </button>
@@ -559,7 +557,7 @@ function TimelineNode({
       {/* Expanded Details */}
       {expanded && (
         <div className="flex flex-col gap-1 pl-8 pr-2 pb-2">
-          {/* ── State Mutation (Diff) ── */}
+          {/* ── Diff (primary info) ── */}
           {diff.length > 0 && (
             <Section title="Diff">
               {diff.map((d: { path: string; from?: unknown; to?: unknown }) => (
@@ -590,45 +588,20 @@ function TimelineNode({
             </Section>
           )}
 
-          {/* ── Effects ── */}
-          {effects.length > 0 && (
-            <Section title="Effects">
-              {effects.map((key, idx) => (
-                <Row key={`${key}-${idx}`}>
-                  <Check
-                    size={9}
-                    className="text-[#10b981] shrink-0"
-                    strokeWidth={3}
-                  />
-                  <span className="font-mono text-[#334155] text-[9px]">
-                    {key}
-                  </span>
-                </Row>
-              ))}
-            </Section>
-          )}
-
-          {/* ── Kernel Details ── */}
-          {tx.handlerScope && (
-            <Section title="Kernel">
-              <Row>
-                <span className="text-[#94a3b8] text-[8px] font-bold w-10 shrink-0">
-                  HANDLER
-                </span>
-                <span className="font-mono text-[#2563eb] font-semibold text-[9px]">
-                  {tx.handlerScope}
-                </span>
-              </Row>
-              <Row>
-                <span className="text-[#94a3b8] text-[8px] font-bold w-10 shrink-0">
-                  PATH
-                </span>
-                <span className="text-[#475569] text-[9px]">
-                  {tx.bubblePath.join(" › ")}
-                </span>
-              </Row>
-            </Section>
-          )}
+          {/* ── Effects + Kernel: inline summary ── */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[8px] text-[#94a3b8] font-mono">
+            {effects.length > 0 && (
+              <span title={effects.join(", ")}>
+                fx: {effects.join(", ")}
+              </span>
+            )}
+            {tx.handlerScope && tx.handlerScope !== "unknown" && (
+              <span>scope: {tx.handlerScope}</span>
+            )}
+            {tx.bubblePath?.length > 1 && (
+              <span>path: {tx.bubblePath.join(" › ")}</span>
+            )}
+          </div>
 
           {/* ── Raw Snapshot ── */}
           {tx.meta && <RawDataToggle data={tx.meta} />}
