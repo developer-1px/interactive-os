@@ -11,7 +11,5 @@ import { os } from "@/os/kernel";
 const EMPTY: readonly string[] = [];
 
 export function useSelection(zoneId: string): readonly string[] {
-    return os.useComputed(
-        (s) => s.os.focus.zones[zoneId]?.selection ?? EMPTY,
-    );
+  return os.useComputed((s) => s.os.focus.zones[zoneId]?.selection ?? EMPTY);
 }

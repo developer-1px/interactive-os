@@ -9,7 +9,13 @@ import {
   Tablet,
   Undo2,
 } from "lucide-react";
-import { canUndo, canRedo, undoCommand, redoCommand, BuilderApp } from "@/apps/builder/app";
+import {
+  BuilderApp,
+  canRedo,
+  canUndo,
+  redoCommand,
+  undoCommand,
+} from "@/apps/builder/app";
 import { os } from "@/os/kernel";
 
 export type ViewportMode = "desktop" | "tablet" | "mobile";
@@ -98,10 +104,11 @@ export function EditorToolbar({
             <button
               type="button"
               onClick={onToggleTest}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all rounded-md ${testActive
-                ? "bg-amber-100 text-amber-700 ring-1 ring-amber-300"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
-                }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all rounded-md ${
+                testActive
+                  ? "bg-amber-100 text-amber-700 ring-1 ring-amber-300"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+              }`}
             >
               🧪 Test
             </button>
@@ -144,11 +151,12 @@ function ToolButton({
       className={`
         w-8 h-8 rounded-md flex items-center justify-center transition-all
         ${disabled ? "text-slate-200 cursor-not-allowed" : ""}
-        ${active
-          ? "bg-white text-slate-800 shadow-sm"
-          : disabled
-            ? ""
-            : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+        ${
+          active
+            ? "bg-white text-slate-800 shadow-sm"
+            : disabled
+              ? ""
+              : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
         }
       `}
     >
@@ -174,9 +182,10 @@ function DeviceButton({
       onClick={onClick}
       className={`
         flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all
-        ${active
-          ? "bg-white text-slate-800 shadow-sm"
-          : "text-slate-400 hover:text-slate-600"
+        ${
+          active
+            ? "bg-white text-slate-800 shadow-sm"
+            : "text-slate-400 hover:text-slate-600"
         }
       `}
     >

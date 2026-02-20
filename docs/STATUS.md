@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**builder-v2** — T13 Container Block PoC
+**builder-v2** — T14 블록 추가 UI + 프리셋
 
 ---
 
@@ -19,7 +19,7 @@
 |---------|-------|---------------|--------|
 | builder-usage-cleanup | T1~T6 완료 | 02-21 | ✅ Done |
 | apg-testing-rebalance | T1~T3 완료 | 02-21 | ✅ Done |
-| builder-v2 | T13 Container Block PoC | 02-20 | 🟢 Active |
+| builder-v2 | T14 블록 추가 + 프리셋 | 02-21 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
 | field-compound | T1~T4 완료 | 02-20 | ✅ Done |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |

@@ -14,7 +14,10 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
+import {
+  OS_OVERLAY_CLOSE,
+  OS_OVERLAY_OPEN,
+} from "@os/3-commands/overlay/overlay";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import type { OverlayEntry } from "@os/state/OSState.ts";
@@ -102,8 +105,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     },
     ref,
   ) => {
-    const dispatch =
-      customDispatch || ((cmd: BaseCommand) => os.dispatch(cmd));
+    const dispatch = customDispatch || ((cmd: BaseCommand) => os.dispatch(cmd));
 
     // Use explicit overlayId if provided, otherwise auto-generate
     // biome-ignore lint/correctness/useExhaustiveDependencies: overlayRole intentionally excluded — ID must be stable

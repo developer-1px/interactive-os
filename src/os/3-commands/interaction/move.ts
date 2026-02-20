@@ -22,19 +22,16 @@ export const OS_MOVE_UP = os.defineCommand("OS_MOVE_UP", (ctx) => () => {
   return { dispatch: entry.onMoveUp(cursor) };
 });
 
-export const OS_MOVE_DOWN = os.defineCommand(
-  "OS_MOVE_DOWN",
-  (ctx) => () => {
-    const { activeZoneId } = ctx.state.os.focus;
-    if (!activeZoneId) return;
+export const OS_MOVE_DOWN = os.defineCommand("OS_MOVE_DOWN", (ctx) => () => {
+  const { activeZoneId } = ctx.state.os.focus;
+  if (!activeZoneId) return;
 
-    const zone = ctx.state.os.focus.zones[activeZoneId];
-    const entry = ZoneRegistry.get(activeZoneId);
-    if (!entry?.onMoveDown) return;
+  const zone = ctx.state.os.focus.zones[activeZoneId];
+  const entry = ZoneRegistry.get(activeZoneId);
+  if (!entry?.onMoveDown) return;
 
-    const cursor = buildZoneCursor(zone);
-    if (!cursor) return;
+  const cursor = buildZoneCursor(zone);
+  if (!cursor) return;
 
-    return { dispatch: entry.onMoveDown(cursor) };
-  },
-);
+  return { dispatch: entry.onMoveDown(cursor) };
+});

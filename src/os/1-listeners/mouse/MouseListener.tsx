@@ -8,7 +8,6 @@
  * Handles: mousedown → OS_FOCUS + OS_SELECT + optional OS_EXPAND
  */
 
-
 import { useEffect } from "react";
 import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
@@ -117,17 +116,17 @@ export function MouseListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-              meta: {
-                ...result.meta,
-                pipeline: {
-                  sensed: input,
-                  resolved: {
-                    preventDefault: result.preventDefault,
-                    fallback: result.fallback,
+                meta: {
+                  ...result.meta,
+                  pipeline: {
+                    sensed: input,
+                    resolved: {
+                      preventDefault: result.preventDefault,
+                      fallback: result.fallback,
+                    },
                   },
                 },
-              },
-            }
+              }
             : undefined;
           os.dispatch(cmd, opts);
         }

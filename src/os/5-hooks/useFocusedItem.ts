@@ -11,12 +11,10 @@
 import { os } from "@/os/kernel";
 
 export function useFocusedItem(zoneId: string): string | null {
-    return os.useComputed(
-        (s) => s.os.focus.zones[zoneId]?.lastFocusedId ?? null,
-    );
+  return os.useComputed((s) => s.os.focus.zones[zoneId]?.lastFocusedId ?? null);
 }
 
 /** Non-hook accessor for imperative code (callbacks, filters). */
 export function getFocusedItem(zoneId: string): string | null {
-    return os.getState().os.focus.zones[zoneId]?.focusedItemId ?? null;
+  return os.getState().os.focus.zones[zoneId]?.focusedItemId ?? null;
 }

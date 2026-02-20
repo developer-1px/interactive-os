@@ -33,7 +33,12 @@
  *   />
  */
 
-import { OS_FOCUS, OS_NAVIGATE, OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os/3-commands";
+import {
+  OS_FOCUS,
+  OS_NAVIGATE,
+  OS_OVERLAY_CLOSE,
+  OS_OVERLAY_OPEN,
+} from "@os/3-commands";
 import { Kbd } from "@os/6-components/Kbd";
 import { Item } from "@os/6-components/primitives/Item";
 import { Zone } from "@os/6-components/primitives/Zone";

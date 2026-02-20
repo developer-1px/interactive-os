@@ -84,7 +84,8 @@ function formatAiContext(
   if (signal.diff.length > 0) {
     // Filter out noisy history snapshot diffs entirely
     const meaningful = signal.diff.filter(
-      (d) => !/history\.(past|future)\[\d+\]\.(snapshot|timestamp)/.test(d.path),
+      (d) =>
+        !/history\.(past|future)\[\d+\]\.(snapshot|timestamp)/.test(d.path),
     );
     if (meaningful.length > 0) {
       diffStr =
@@ -396,10 +397,11 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
-                    ? "bg-[#1e293b] text-white border-[#1e293b]"
-                    : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                    }`}
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
+                    active
+                      ? "bg-[#1e293b] text-white border-[#1e293b]"
+                      : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                  }`}
                 >
                   {group}
                 </button>
@@ -666,7 +668,10 @@ function TimelineNode({
                   </div>
                   <div className="flex flex-col gap-1 ml-1.5 border-l border-[#e2e8f0] pl-2.5">
                     <div className="flex flex-col gap-[1px] w-full">
-                      <DiffValue value={signal.pipeline.sensed} type="changed-from" />
+                      <DiffValue
+                        value={signal.pipeline.sensed}
+                        type="changed-from"
+                      />
                     </div>
                   </div>
                 </div>
@@ -678,7 +683,10 @@ function TimelineNode({
                   </div>
                   <div className="flex flex-col gap-1 ml-1.5 border-l border-[#e2e8f0] pl-2.5">
                     <div className="flex flex-col gap-[1px] w-full">
-                      <DiffValue value={signal.pipeline.resolved} type="changed-to" />
+                      <DiffValue
+                        value={signal.pipeline.resolved}
+                        type="changed-to"
+                      />
                     </div>
                   </div>
                 </div>
@@ -816,12 +824,15 @@ function CollapsibleSection({
 // ─── Unified Building Blocks ───
 
 function AriaSnapshot({ elementId }: { elementId: string }) {
-  const [snapshot, setSnapshot] = useState<Record<string, string | null> | null>(null);
+  const [snapshot, setSnapshot] = useState<Record<
+    string,
+    string | null
+  > | null>(null);
 
   useEffect(() => {
     // Wait for DOM updates to flush after kernel transaction
     const raf = requestAnimationFrame(() => {
-      // Small timeout to ensure async renders land 
+      // Small timeout to ensure async renders land
       setTimeout(() => {
         const el =
           document.querySelector(`[data-id="${elementId}"]`) ||
@@ -845,12 +856,27 @@ function AriaSnapshot({ elementId }: { elementId: string }) {
     return () => cancelAnimationFrame(raf);
   }, [elementId]);
 
-  if (!snapshot) return <div className="text-[9px] text-[#94a3b8] italic px-1">Capturing...</div>;
-  if (snapshot["error"]) return <div className="text-[9px] text-[#ef4444] italic px-1">{snapshot["error"]}</div>;
+  if (!snapshot)
+    return (
+      <div className="text-[9px] text-[#94a3b8] italic px-1">Capturing...</div>
+    );
+  if (snapshot["error"])
+    return (
+      <div className="text-[9px] text-[#ef4444] italic px-1">
+        {snapshot["error"]}
+      </div>
+    );
 
   // Filter out nulls for cleaner display
-  const filtered = Object.fromEntries(Object.entries(snapshot).filter(([_, v]) => v !== null));
-  if (Object.keys(filtered).length === 0) return <div className="text-[9px] text-[#94a3b8] italic px-1">No ARIA attributes</div>;
+  const filtered = Object.fromEntries(
+    Object.entries(snapshot).filter(([_, v]) => v !== null),
+  );
+  if (Object.keys(filtered).length === 0)
+    return (
+      <div className="text-[9px] text-[#94a3b8] italic px-1">
+        No ARIA attributes
+      </div>
+    );
 
   return (
     <div className="flex flex-col gap-[1px] w-full">

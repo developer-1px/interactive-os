@@ -86,7 +86,12 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
 
   if (typeof binding.command === "function") {
     if (!input.cursor) {
-      return { commands: [], meta: null, preventDefault: false, fallback: false };
+      return {
+        commands: [],
+        meta: null,
+        preventDefault: false,
+        fallback: false,
+      };
     }
     const cmds = binding.command(input.cursor);
     return {
@@ -97,7 +102,12 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
     };
   }
 
-  return { commands: [binding.command], meta, preventDefault: true, fallback: false };
+  return {
+    commands: [binding.command],
+    meta,
+    preventDefault: true,
+    fallback: false,
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════

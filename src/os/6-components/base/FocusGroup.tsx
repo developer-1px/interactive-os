@@ -369,9 +369,7 @@ export function FocusGroup({
   }, [config.project.autoFocus]);
 
   // --- Is Active ---
-  const isActive = os.useComputed(
-    (s) => s.os.focus.activeZoneId === groupId,
-  );
+  const isActive = os.useComputed((s) => s.os.focus.activeZoneId === groupId);
 
   // --- Context Value ---
   const contextValue = useMemo<FocusGroupContextValue>(

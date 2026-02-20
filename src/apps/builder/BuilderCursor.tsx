@@ -10,14 +10,19 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { os } from "@/os/kernel";
 import { ZoneRegistry } from "@/os/2-contexts/zoneRegistry";
+import { os } from "@/os/kernel";
 
 /** Zone-scoped element lookup: searches within active zone container first. */
-function findItemInZone(zoneId: string | null, itemId: string): HTMLElement | null {
+function findItemInZone(
+  zoneId: string | null,
+  itemId: string,
+): HTMLElement | null {
   const zoneEl = zoneId ? ZoneRegistry.get(zoneId)?.element : null;
   if (zoneEl) {
-    const scoped = zoneEl.querySelector<HTMLElement>(`[data-item-id="${itemId}"]`);
+    const scoped = zoneEl.querySelector<HTMLElement>(
+      `[data-item-id="${itemId}"]`,
+    );
     if (scoped) return scoped;
   }
   return document.getElementById(itemId);
@@ -237,7 +242,9 @@ export function BuilderCursor() {
           borderRadius: 4,
           background: state.editing
             ? "rgba(59, 130, 246, 0.04)"
-            : state.level === "section" ? "transparent" : `${state.color}10`,
+            : state.level === "section"
+              ? "transparent"
+              : `${state.color}10`,
           boxShadow: state.editing
             ? "0 0 0 1px rgba(59, 130, 246, 0.3), 0 0 12px 2px rgba(59, 130, 246, 0.15)"
             : `0 0 0 1px ${state.color}30`,

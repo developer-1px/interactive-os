@@ -5,11 +5,7 @@
  * Uses BuilderApp.create() for isolated testing (no DOM, no browser).
  */
 
-import {
-  BuilderApp,
-  INITIAL_STATE,
-  updateField,
-} from "@apps/builder/app";
+import { BuilderApp, INITIAL_STATE, updateField } from "@apps/builder/app";
 import { describe, expect, test } from "vitest";
 
 describe("BuilderApp (v5 native)", () => {
@@ -23,9 +19,7 @@ describe("BuilderApp (v5 native)", () => {
     sectionId: string,
     field: string,
   ): string | undefined {
-    return app.state.data.blocks.find((s) => s.id === sectionId)?.fields[
-      field
-    ];
+    return app.state.data.blocks.find((s) => s.id === sectionId)?.fields[field];
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -98,7 +92,6 @@ describe("BuilderApp (v5 native)", () => {
       expect(getField(app, "ncp-hero", "sub")).toBe(originalSub);
     });
   });
-
 
   // ═══════════════════════════════════════════════════════════════════
   // 양방향 동기화 증명 — 캔버스 = 패널 = 같은 커맨드
@@ -173,7 +166,6 @@ describe("BuilderApp (v5 native)", () => {
       expect(footer.fields["brand"]).toBeDefined();
       expect(footer.fields["desc"]).toBeDefined();
     });
-
   });
 
   // ═══════════════════════════════════════════════════════════════════
@@ -202,15 +194,11 @@ describe("BuilderApp (v5 native)", () => {
 
       // Hero changed
       expect(
-        app.state.data.blocks.find((s) => s.id === "ncp-hero")!.fields[
-        "title"
-        ],
+        app.state.data.blocks.find((s) => s.id === "ncp-hero")!.fields["title"],
       ).toBe("변경됨");
       // News unchanged
       expect(
-        app.state.data.blocks.find((s) => s.id === "ncp-news")!.fields[
-        "title"
-        ],
+        app.state.data.blocks.find((s) => s.id === "ncp-news")!.fields["title"],
       ).toBe(originalNewsTitle);
     });
   });

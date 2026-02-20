@@ -17,7 +17,6 @@
  */
 
 import { createKernel } from "@kernel";
-import { ZoneRegistry as ZoneRegistryImport } from "@os/2-contexts/zoneRegistry";
 import {
   type KeyboardInput,
   resolveKeyboard,
@@ -26,15 +25,16 @@ import {
   type MouseInput,
   resolveMouse,
 } from "@os/1-listeners/mouse/resolveMouse";
+import { ZoneRegistry as ZoneRegistryImport } from "@os/2-contexts/zoneRegistry";
 import type { AppState } from "@os/kernel";
-import type { FocusGroupConfig } from "@os/schemas/focus/config/FocusGroupConfig";
-import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import {
   getChildRole,
   isCheckedRole,
   isExpandableRole,
   type ZoneRole,
 } from "@os/registries/roleRegistry";
+import type { FocusGroupConfig } from "@os/schemas/focus/config/FocusGroupConfig";
+import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import { initialOSState, initialZoneState } from "@os/state/initial";
 import { ensureZone } from "@os/state/utils";
 import { produce } from "immer";
@@ -42,22 +42,23 @@ import { produce } from "immer";
 // Ensure OS defaults are registered (keybindings for ArrowDown → OS_NAVIGATE, etc.)
 import "@os/keymaps/osDefaults";
 
+import { OS_ESCAPE as prodOS_ESCAPE } from "../../../dismiss/escape";
+import { OS_EXPAND as prodEXPAND } from "../../../expand/index";
+import { OS_FIELD_START_EDIT as prodFIELD_START_EDIT } from "../../../field/field";
 // Production commands — registered on test kernel via kernel.register()
 import { OS_FOCUS as prodOS_FOCUS } from "../../../focus/focus";
-import { OS_STACK_POP as prodSTACK_POP } from "../../../focus/stack";
-import { OS_STACK_PUSH as prodSTACK_PUSH } from "../../../focus/stack";
-import { OS_SYNC_FOCUS as prodSYNC_FOCUS } from "../../../focus/syncFocus";
 import { OS_RECOVER as prodOS_RECOVER } from "../../../focus/recover";
+import {
+  OS_STACK_POP as prodSTACK_POP,
+  OS_STACK_PUSH as prodSTACK_PUSH,
+} from "../../../focus/stack";
+import { OS_SYNC_FOCUS as prodSYNC_FOCUS } from "../../../focus/syncFocus";
+import { OS_CHECK as prodCHECK } from "../../../interaction";
+import { OS_ACTIVATE as prodACTIVATE } from "../../../interaction/activate";
 import { OS_NAVIGATE as prodNAVIGATE } from "../../../navigate";
-import { OS_ESCAPE as prodOS_ESCAPE } from "../../../dismiss/escape";
 import { OS_SELECT as prodOS_SELECT } from "../../../selection/select";
 import { OS_SELECTION_CLEAR as prodSELECTION_CLEAR } from "../../../selection/selection";
 import { OS_TAB as prodOS_TAB } from "../../../tab/tab";
-import { OS_EXPAND as prodEXPAND } from "../../../expand/index";
-import { OS_FIELD_START_EDIT as prodFIELD_START_EDIT } from "../../../field/field";
-import { OS_ACTIVATE as prodACTIVATE } from "../../../interaction/activate";
-import { OS_CHECK as prodCHECK } from "../../../interaction";
-
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -104,8 +105,8 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
   const mockTreeLevels = { current: new Map<string, number>() };
 
   // ─── No-op effects (suppress "Unknown effect" warnings in headless mode) ───
-  kernel.defineEffect("focus", () => { });
-  kernel.defineEffect("scroll", () => { });
+  kernel.defineEffect("focus", () => {});
+  kernel.defineEffect("scroll", () => {});
 
   // ─── Define contexts with mock providers ───
   kernel.defineContext("dom-items", () => {
@@ -127,7 +128,10 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
     }
     return filtered;
   });
-  kernel.defineContext("dom-expandable-items", () => mockExpandableItems.current);
+  kernel.defineContext(
+    "dom-expandable-items",
+    () => mockExpandableItems.current,
+  );
   kernel.defineContext("dom-tree-levels", () => mockTreeLevels.current);
   kernel.defineContext("zone-config", () => mockConfig.current);
   kernel.defineContext("dom-zone-order", () => mockZoneOrder.current);
@@ -239,7 +243,14 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
   // ─── Input Shims ───
 
   const dispatch = kernel.dispatch.bind(kernel);
-  const baseRef = () => ({ dispatch, state, activeZoneId, zone, focusedItemId, selection });
+  const baseRef = () => ({
+    dispatch,
+    state,
+    activeZoneId,
+    zone,
+    focusedItemId,
+    selection,
+  });
 
   /**
    * Simulate a keyboard press. Derives KeyboardInput from kernel state,
@@ -266,10 +277,10 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
       elementId: z?.focusedItemId ?? undefined,
       cursor: z?.focusedItemId
         ? {
-          focusId: z.focusedItemId,
-          selection: z.selection ?? [],
-          anchor: z.selectionAnchor ?? null,
-        }
+            focusId: z.focusedItemId,
+            selection: z.selection ?? [],
+            anchor: z.selectionAnchor ?? null,
+          }
         : null,
     };
 

@@ -79,7 +79,12 @@ export function resolveMouse(input: MouseInput): ResolveResult {
   if (input.isLabel && input.labelTargetItemId && input.labelTargetGroupId) {
     meta.input.elementId = input.labelTargetItemId;
     return {
-      commands: [OS_FOCUS({ zoneId: input.labelTargetGroupId, itemId: input.labelTargetItemId }) as any],
+      commands: [
+        OS_FOCUS({
+          zoneId: input.labelTargetGroupId,
+          itemId: input.labelTargetItemId,
+        }) as any,
+      ],
       meta,
       preventDefault: true,
       fallback: false,
@@ -89,7 +94,9 @@ export function resolveMouse(input: MouseInput): ResolveResult {
   // No item but has zone → zone-activate (empty area click)
   if (!input.targetItemId && input.targetGroupId) {
     return {
-      commands: [OS_FOCUS({ zoneId: input.targetGroupId, itemId: null }) as any],
+      commands: [
+        OS_FOCUS({ zoneId: input.targetGroupId, itemId: null }) as any,
+      ],
       meta,
       preventDefault: false,
       fallback: false,
@@ -113,7 +120,9 @@ export function resolveMouse(input: MouseInput): ResolveResult {
   );
 
   const selectMode = resolveSelectMode(input);
-  commands.push(OS_SELECT({ targetId: input.targetItemId, mode: selectMode }) as any);
+  commands.push(
+    OS_SELECT({ targetId: input.targetItemId, mode: selectMode }) as any,
+  );
 
   if (isClickExpandable(input.hasAriaExpanded, input.itemRole)) {
     commands.push(OS_ACTIVATE() as any);

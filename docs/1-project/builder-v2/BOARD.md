@@ -5,6 +5,16 @@
 
 ## 🔴 Now
 
+- [ ] T14: 블록 추가 UI + 프리셋 시스템
+  - [ ] Block Preset 데이터 (`presets/blocks.ts`) — 타입별 기본 Block 정의
+  - [ ] Page Preset 데이터 (`presets/pages.ts`) — INITIAL_STATE를 "SaaS 랜딩" 프리셋으로 승격
+  - [ ] 사이드바 "+ 블록" 버튼 → Block Preset 선택 팝오버
+  - [ ] 블록 삽입 = `sidebarCollection.paste(deepClone(preset))` — 기존 파이프라인 재사용
+  - [ ] 빈 캔버스 / 최초 진입 → Page Preset 선택 화면
+  - [ ] 빌더 툴바 "새 페이지" → Page Preset 선택
+  - Discussion: [block-add-and-presets](discussions/2026-0221-0250-block-add-and-presets.md)
+
+
 - [ ] T13: Tab Container → 범용 Container Block (PoC)
   - [ ] `Block.accept?: string[]` 필드 추가 — Container가 받을 수 있는 하위 블록 타입 제한
   - [ ] `BuilderTabs` 리팩토링 — 하드코딩 → Block Tree 데이터 주도 렌더링

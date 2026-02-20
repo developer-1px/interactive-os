@@ -8,7 +8,5 @@
 import { os } from "@/os/kernel";
 
 export function useOverlay(id: string): boolean {
-    return os.useComputed(
-        (s) => s.os.overlays.stack.some((e) => e.id === id),
-    );
+  return os.useComputed((s) => s.os.overlays.stack.some((e) => e.id === id));
 }

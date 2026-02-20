@@ -47,4 +47,5 @@ export const OS_ACTIVATE = os.defineCommand(
     return {
       click: zone.focusedItemId,
     };
-  });
+  },
+);

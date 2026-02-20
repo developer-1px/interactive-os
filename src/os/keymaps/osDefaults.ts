@@ -22,7 +22,7 @@ import {
   OS_UNDO,
 } from "@os/3-commands/interaction";
 import { OS_NAVIGATE } from "@os/3-commands/navigate";
-import { OS_SELECT_ALL, OS_SELECT } from "@os/3-commands/selection";
+import { OS_SELECT, OS_SELECT_ALL } from "@os/3-commands/selection";
 import { OS_TAB } from "@os/3-commands/tab";
 import { Keybindings } from "./keybindings";
 
@@ -51,8 +51,16 @@ Keybindings.registerAll([
     command: OS_NAVIGATE({ direction: "right" }),
     when: "navigating",
   },
-  { key: "Home", command: OS_NAVIGATE({ direction: "home" }), when: "navigating" },
-  { key: "End", command: OS_NAVIGATE({ direction: "end" }), when: "navigating" },
+  {
+    key: "Home",
+    command: OS_NAVIGATE({ direction: "home" }),
+    when: "navigating",
+  },
+  {
+    key: "End",
+    command: OS_NAVIGATE({ direction: "end" }),
+    when: "navigating",
+  },
 
   // Shift+Arrow → range selection
   {

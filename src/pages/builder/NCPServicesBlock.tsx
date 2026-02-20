@@ -10,9 +10,13 @@ import {
   Server,
   Star,
 } from "lucide-react";
-import { BuilderApp, createFieldCommit, useSectionFields } from "@/apps/builder/app";
+import {
+  BuilderApp,
+  createFieldCommit,
+  useSectionFields,
+} from "@/apps/builder/app";
+import type { Block, BuilderState } from "@/apps/builder/model/appState";
 import { Builder } from "@/apps/builder/primitives/Builder";
-import type { BuilderState, Block } from "@/apps/builder/model/appState";
 
 export function NCPServicesBlock({ id }: { id: string }) {
   const fid = (local: string) => `${id}-${local}`;
@@ -28,11 +32,20 @@ export function NCPServicesBlock({ id }: { id: string }) {
     { icon: Layers, label: "Network" },
   ];
 
-  const block: Block | undefined = BuilderApp.useComputed((s: BuilderState) => s.data.blocks.find((b: Block) => b.id === id));
+  const block: Block | undefined = BuilderApp.useComputed((s: BuilderState) =>
+    s.data.blocks.find((b: Block) => b.id === id),
+  );
   const cards: Block[] = block?.children || [];
 
   const iconMap: Record<string, React.FC<any>> = {
-    Server, Database, Brain, Layers, Globe, Box, Cpu, Star
+    Server,
+    Database,
+    Brain,
+    Layers,
+    Globe,
+    Box,
+    Cpu,
+    Star,
   };
 
   return (
@@ -104,11 +117,7 @@ export function NCPServicesBlock({ id }: { id: string }) {
               const Icon = iconMap[cardFields["icon"] || "Box"] || Box;
 
               return (
-                <Builder.Group
-                  asChild
-                  key={card.id}
-                  id={card.id}
-                >
+                <Builder.Group asChild key={card.id} id={card.id}>
                   <div className="group bg-white rounded-2xl p-8 border border-slate-200 transition-all duration-300 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 cursor-pointer data-[focused=true]:ring-4 data-[focused=true]:ring-blue-500 data-[focused=true]:border-blue-500">
                     <div className="flex justify-between items-start mb-6">
                       <Builder.Item asChild id={`${card.id}-icon`}>
@@ -166,7 +175,7 @@ export function NCPServicesBlock({ id }: { id: string }) {
                     </Builder.Item>
                   </div>
                 </Builder.Group>
-              )
+              );
             })}
 
             {/* "View All" Card */}

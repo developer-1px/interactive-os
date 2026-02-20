@@ -76,7 +76,12 @@ export function specWrapperPlugin(): Plugin {
         }
 
         // Detect start of multi-line import: `import {` without closing `}`
-        if (inImports && line.startsWith("import ") && line.includes("{") && !line.includes("}")) {
+        if (
+          inImports &&
+          line.startsWith("import ") &&
+          line.includes("{") &&
+          !line.includes("}")
+        ) {
           importLines.push(line);
           inMultiLineImport = true;
           continue;

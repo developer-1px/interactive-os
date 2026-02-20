@@ -129,8 +129,6 @@ export const startEdit = listCollection.command(
   }),
 );
 
-
-
 // Zone binding — auto-wired CRUD + clipboard + app-specific handlers
 const listBindings = listCollection.collectionBindings();
 export const TodoListUI = listCollection.bind({

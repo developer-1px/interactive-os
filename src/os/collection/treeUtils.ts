@@ -13,8 +13,8 @@
 // ═══════════════════════════════════════════════════════════════════
 
 export interface TreeNode {
-    id: string;
-    children?: TreeNode[];
+  id: string;
+  children?: TreeNode[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -26,17 +26,17 @@ export interface TreeNode {
  * Returns the node or undefined if not found.
  */
 export function findInTree<T extends TreeNode>(
-    nodes: T[],
-    id: string,
+  nodes: T[],
+  id: string,
 ): T | undefined {
-    for (const node of nodes) {
-        if (node.id === id) return node;
-        if (node.children) {
-            const found = findInTree(node.children as T[], id);
-            if (found) return found;
-        }
+  for (const node of nodes) {
+    if (node.id === id) return node;
+    if (node.children) {
+      const found = findInTree(node.children as T[], id);
+      if (found) return found;
     }
-    return undefined;
+  }
+  return undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -48,19 +48,19 @@ export function findInTree<T extends TreeNode>(
  * Returns undefined if the node is at root level or not found.
  */
 export function findParentOf<T extends TreeNode>(
-    nodes: T[],
-    id: string,
+  nodes: T[],
+  id: string,
 ): T | undefined {
-    for (const node of nodes) {
-        if (node.children) {
-            for (const child of node.children) {
-                if (child.id === id) return node;
-            }
-            const found = findParentOf(node.children as T[], id);
-            if (found) return found;
-        }
+  for (const node of nodes) {
+    if (node.children) {
+      for (const child of node.children) {
+        if (child.id === id) return node;
+      }
+      const found = findParentOf(node.children as T[], id);
+      if (found) return found;
     }
-    return undefined;
+  }
+  return undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -72,20 +72,20 @@ export function findParentOf<T extends TreeNode>(
  * Returns true if the node was found and removed, false otherwise.
  */
 export function removeFromTree<T extends TreeNode>(
-    nodes: T[],
-    id: string,
+  nodes: T[],
+  id: string,
 ): boolean {
-    const idx = nodes.findIndex((n) => n.id === id);
-    if (idx !== -1) {
-        nodes.splice(idx, 1);
-        return true;
+  const idx = nodes.findIndex((n) => n.id === id);
+  if (idx !== -1) {
+    nodes.splice(idx, 1);
+    return true;
+  }
+  for (const node of nodes) {
+    if (node.children) {
+      if (removeFromTree(node.children as T[], id)) return true;
     }
-    for (const node of nodes) {
-        if (node.children) {
-            if (removeFromTree(node.children as T[], id)) return true;
-        }
-    }
-    return false;
+  }
+  return false;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -100,26 +100,26 @@ export function removeFromTree<T extends TreeNode>(
  * Does nothing if parent is not found.
  */
 export function insertChild<T extends TreeNode>(
-    nodes: T[],
-    parentId: string,
-    item: T,
-    afterId?: string,
+  nodes: T[],
+  parentId: string,
+  item: T,
+  afterId?: string,
 ): void {
-    const parent = findInTree(nodes, parentId);
-    if (!parent) return;
+  const parent = findInTree(nodes, parentId);
+  if (!parent) return;
 
-    if (!parent.children) {
-        parent.children = [];
-    }
+  if (!parent.children) {
+    parent.children = [];
+  }
 
-    if (afterId) {
-        const idx = parent.children.findIndex((c) => c.id === afterId);
-        if (idx !== -1) {
-            parent.children.splice(idx + 1, 0, item);
-        } else {
-            parent.children.push(item);
-        }
+  if (afterId) {
+    const idx = parent.children.findIndex((c) => c.id === afterId);
+    if (idx !== -1) {
+      parent.children.splice(idx + 1, 0, item);
     } else {
-        parent.children.push(item);
+      parent.children.push(item);
     }
+  } else {
+    parent.children.push(item);
+  }
 }

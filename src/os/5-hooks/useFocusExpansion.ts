@@ -28,15 +28,25 @@ export function useFocusExpansion() {
     (s) => s.os.focus.zones[zoneId]?.expandedItems ?? EMPTY,
   );
 
-  const toggleExpanded = useCallback((id: string) => {
-    os.dispatch(OS_EXPAND({ itemId: id, action: "toggle", zoneId }));
-  }, [zoneId]);
+  const toggleExpanded = useCallback(
+    (id: string) => {
+      os.dispatch(OS_EXPAND({ itemId: id, action: "toggle", zoneId }));
+    },
+    [zoneId],
+  );
 
-  const setExpanded = useCallback((id: string, expanded: boolean) => {
-    os.dispatch(
-      OS_EXPAND({ itemId: id, action: expanded ? "expand" : "collapse", zoneId }),
-    );
-  }, [zoneId]);
+  const setExpanded = useCallback(
+    (id: string, expanded: boolean) => {
+      os.dispatch(
+        OS_EXPAND({
+          itemId: id,
+          action: expanded ? "expand" : "collapse",
+          zoneId,
+        }),
+      );
+    },
+    [zoneId],
+  );
 
   const isExpanded = (id: string) => {
     return expandedItems.includes(id);

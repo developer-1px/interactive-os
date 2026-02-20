@@ -6,8 +6,8 @@
 
 import { TodoApp, TodoSidebar } from "@apps/todo/app";
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { os } from "@os/kernel";
 import { useSelection } from "@os/5-hooks/useSelection";
+import { os } from "@os/kernel";
 import {
   ArrowRight,
   Briefcase,

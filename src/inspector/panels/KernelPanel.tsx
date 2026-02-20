@@ -15,13 +15,16 @@ type AnyKernel = any;
 function formatEvent(meta: Record<string, unknown> | undefined): string {
   if (!meta?.["input"]) return "—";
   const input = meta["input"] as Record<string, unknown>;
-  if (input["type"] === "KEYBOARD") return `⌨ ${input["key"] ?? input["code"] ?? "?"}`;
+  if (input["type"] === "KEYBOARD")
+    return `⌨ ${input["key"] ?? input["code"] ?? "?"}`;
   if (input["type"] === "MOUSE") return `🖱 ${input["target"] ?? "click"}`;
   return String(input["type"] ?? "?");
 }
 
 /** Format changes as compact diff lines */
-function formatDiff(changes: { path: string; before: unknown; after: unknown }[]): string {
+function formatDiff(
+  changes: { path: string; before: unknown; after: unknown }[],
+): string {
   if (!changes || changes.length === 0) return "(no change)";
   return changes
     .map((c) => {
@@ -190,8 +193,12 @@ function TxEntry({ tx, index }: { tx: any; index: number }) {
           {changes.map((c: any, j: number) => (
             <div key={j} className="text-[10px]">
               <span className="text-[#999]">{c.path}</span>
-              <span className="text-[#c62828] ml-1">−{JSON.stringify(c.before)}</span>
-              <span className="text-[#2e7d32] ml-1">+{JSON.stringify(c.after)}</span>
+              <span className="text-[#c62828] ml-1">
+                −{JSON.stringify(c.before)}
+              </span>
+              <span className="text-[#2e7d32] ml-1">
+                +{JSON.stringify(c.after)}
+              </span>
             </div>
           ))}
         </div>

@@ -50,4 +50,3 @@ export function createIntegrationTest<S>(
     dispatch: testInstance.dispatch,
   };
 }
-

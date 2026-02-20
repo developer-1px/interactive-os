@@ -72,10 +72,10 @@ function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
       undefined,
     cursor: zone?.focusedItemId
       ? {
-        focusId: zone.focusedItemId,
-        selection: zone.selection ?? [],
-        anchor: zone.selectionAnchor ?? null,
-      }
+          focusId: zone.focusedItemId,
+          selection: zone.selection ?? [],
+          anchor: zone.selectionAnchor ?? null,
+        }
       : null,
   };
 }
@@ -96,17 +96,17 @@ export function KeyboardListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-              meta: {
-                input: result.meta,
-                pipeline: {
-                  sensed: input,
-                  resolved: {
-                    fallback: result.fallback,
-                    preventDefault: result.preventDefault,
+                meta: {
+                  input: result.meta,
+                  pipeline: {
+                    sensed: input,
+                    resolved: {
+                      fallback: result.fallback,
+                      preventDefault: result.preventDefault,
+                    },
                   },
                 },
-              },
-            }
+              }
             : undefined;
           os.dispatch(cmd, opts);
         }

@@ -10,7 +10,10 @@
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
+import {
+  OS_OVERLAY_CLOSE,
+  OS_OVERLAY_OPEN,
+} from "@os/3-commands/overlay/overlay";
 import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it } from "vitest";

@@ -87,27 +87,41 @@ test.describe("Builder Spatial Navigation", () => {
 
   test("Services 서비스 카드 내부", async ({ page }) => {
     await page.locator("#ncp-services-service-card-1-item-title").click();
-    await expect(page.locator("#ncp-services-service-card-1-item-title")).toBeFocused();
+    await expect(
+      page.locator("#ncp-services-service-card-1-item-title"),
+    ).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#ncp-services-service-card-1-item-desc")).toBeFocused();
+    await expect(
+      page.locator("#ncp-services-service-card-1-item-desc"),
+    ).toBeFocused();
 
     await page.keyboard.press("ArrowUp");
-    await expect(page.locator("#ncp-services-service-card-1-item-title")).toBeFocused();
+    await expect(
+      page.locator("#ncp-services-service-card-1-item-title"),
+    ).toBeFocused();
   });
 
   test("Services 서비스 카드 수평", async ({ page }) => {
     await page.locator("#ncp-services-service-card-1-item-title").click();
-    await expect(page.locator("#ncp-services-service-card-1-item-title")).toBeFocused();
+    await expect(
+      page.locator("#ncp-services-service-card-1-item-title"),
+    ).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator("#ncp-services-service-card-2-item-title")).toBeFocused();
+    await expect(
+      page.locator("#ncp-services-service-card-2-item-title"),
+    ).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator("#ncp-services-service-card-3-item-title")).toBeFocused();
+    await expect(
+      page.locator("#ncp-services-service-card-3-item-title"),
+    ).toBeFocused();
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator("#ncp-services-service-card-2-item-title")).toBeFocused();
+    await expect(
+      page.locator("#ncp-services-service-card-2-item-title"),
+    ).toBeFocused();
   });
 
   test("News → Services 크로스존", async ({ page }) => {

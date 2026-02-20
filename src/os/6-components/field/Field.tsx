@@ -202,7 +202,8 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     useEffect(() => {
       if (!name) return;
 
-      const computedFieldType: FieldType = fieldTypeProp ?? (multiline ? "block" : "inline");
+      const computedFieldType: FieldType =
+        fieldTypeProp ?? (multiline ? "block" : "inline");
 
       const config: FieldConfig = {
         name,
@@ -466,4 +467,3 @@ export const Field = Object.assign(
     Label,
   },
 );
-

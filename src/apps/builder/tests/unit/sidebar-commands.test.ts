@@ -47,7 +47,13 @@ describe("sidebar section commands", () => {
 
     it("preserves order of remaining sections", () => {
       app.dispatch(deleteSection({ id: "ncp-news" }));
-      expect(sectionIds()).toEqual(["ncp-hero", "ncp-services", "ncp-pricing", "tab-container-1", "ncp-footer"]);
+      expect(sectionIds()).toEqual([
+        "ncp-hero",
+        "ncp-services",
+        "ncp-pricing",
+        "tab-container-1",
+        "ncp-footer",
+      ]);
     });
   });
 

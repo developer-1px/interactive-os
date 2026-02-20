@@ -53,9 +53,7 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
     const isFocused = os.useComputed(
       (s) => (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === stringId,
     );
-    const isActive = os.useComputed(
-      (s) => s.os.focus.activeZoneId === zoneId,
-    );
+    const isActive = os.useComputed((s) => s.os.focus.activeZoneId === zoneId);
 
     // Selection from kernel state
     const isStoreSelected = os.useComputed(

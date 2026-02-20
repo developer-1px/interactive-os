@@ -9,12 +9,11 @@
  * Uses BuilderSidebarUI.Zone + Item from app.ts bind().
  */
 
+import { ChevronDown, ChevronRight } from "lucide-react";
 import type { Block } from "@/apps/builder/app";
 import { BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
 import { useFocusExpansion as useExpansion } from "@/os/5-hooks/useFocusExpansion";
 import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
-import { ChevronDown, ChevronRight } from "lucide-react";
-
 
 const CANVAS_ZONE_ID = "canvas";
 
@@ -48,7 +47,7 @@ function SidebarContent() {
           Slides
         </span>
         <span className="text-[10px] text-slate-300 font-medium">
-          {flatNodes.filter(n => !n.isSection).length}
+          {flatNodes.filter((n) => !n.isSection).length}
         </span>
       </div>
 
@@ -63,11 +62,12 @@ function SidebarContent() {
           const indent = 8 + node.depth * 16;
 
           // Depth-based surface colors (subtle background tint per level)
-          const depthBg = node.depth === 0
-            ? ""
-            : node.depth === 1
-              ? "bg-slate-100/40"
-              : "bg-slate-100/70";
+          const depthBg =
+            node.depth === 0
+              ? ""
+              : node.depth === 1
+                ? "bg-slate-100/40"
+                : "bg-slate-100/70";
 
           if (node.isSection) {
             // ─── TREE SECTION HEADER (expandable) ───
@@ -94,16 +94,27 @@ function SidebarContent() {
                     className="shrink-0 p-0.5 rounded hover:bg-slate-300/50"
                     aria-label={itemExpanded ? "Collapse" : "Expand"}
                   >
-                    {itemExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                    {itemExpanded ? (
+                      <ChevronDown size={14} />
+                    ) : (
+                      <ChevronRight size={14} />
+                    )}
                   </button>
-                  <span className={`
+                  <span
+                    className={`
                     truncate
-                    ${node.depth === 0
-                      ? "text-[11px] font-bold uppercase tracking-widest"
-                      : "text-[11px] font-semibold tracking-wide"
+                    ${
+                      node.depth === 0
+                        ? "text-[11px] font-bold uppercase tracking-widest"
+                        : "text-[11px] font-semibold tracking-wide"
                     }
-                  `}>{node.block.label}</span>
-                  <span className="ml-auto text-[9px] text-slate-400 shrink-0">{node.block.type}</span>
+                  `}
+                  >
+                    {node.block.label}
+                  </span>
+                  <span className="ml-auto text-[9px] text-slate-400 shrink-0">
+                    {node.block.type}
+                  </span>
                 </div>
               </BuilderSidebarUI.Item>
             );
@@ -123,9 +134,10 @@ function SidebarContent() {
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
                   group-aria-selected:bg-indigo-50 group-aria-selected:border-indigo-200 group-aria-selected:shadow-sm
                   ${depthBg}
-                  ${isCanvasActive
-                    ? "bg-white shadow-sm border-slate-200/60"
-                    : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
+                  ${
+                    isCanvasActive
+                      ? "bg-white shadow-sm border-slate-200/60"
+                      : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
                   }
                 `}
                 style={{ paddingLeft: `${indent}px` }}
@@ -150,15 +162,20 @@ function SidebarContent() {
                   className={`
                   w-10 h-7 rounded border shrink-0 flex items-center justify-center
                   ml-1
-                  ${isCanvasActive
+                  ${
+                    isCanvasActive
                       ? "bg-indigo-50 border-indigo-100"
                       : "bg-slate-100 border-slate-200 group-hover:bg-white"
-                    }
+                  }
                 `}
                 >
                   <div className="flex flex-col gap-0.5 w-6">
-                    <div className={`h-0.5 rounded-full w-full ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`} />
-                    <div className={`h-[2.5px] rounded-full w-2/3 ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`} />
+                    <div
+                      className={`h-0.5 rounded-full w-full ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`}
+                    />
+                    <div
+                      className={`h-[2.5px] rounded-full w-2/3 ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`}
+                    />
                   </div>
                 </div>
 
@@ -205,7 +222,7 @@ function getFlatNodes(blocks: Block[], isExpanded: (id: string) => boolean) {
         block,
         depth,
         isSection: !!isSection,
-        slideIndex: isSection ? null : slideIndex++
+        slideIndex: isSection ? null : slideIndex++,
       });
       // Show children only when section is expanded
       if (isSection && isExpanded(block.id)) {

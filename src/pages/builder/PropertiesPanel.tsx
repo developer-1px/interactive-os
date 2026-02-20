@@ -1,12 +1,12 @@
 import {
   Bookmark,
+  Columns,
   Image as ImageIcon,
   Layout,
   Link as LinkIcon,
-  MousePointer2,
-  Columns,
-  Square,
   Minus,
+  MousePointer2,
+  Square,
   Type,
 } from "lucide-react";
 import {
@@ -18,10 +18,10 @@ import {
   updateFieldByDomId,
   useFieldByDomId,
 } from "@/apps/builder/app";
-import { os } from "@/os/kernel";
-import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
-import { getItemAttribute } from "@/os/2-contexts/itemQueries";
 import type { Block } from "@/apps/builder/model/appState";
+import { getItemAttribute } from "@/os/2-contexts/itemQueries";
+import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
+import { os } from "@/os/kernel";
 
 const CANVAS_ZONE_ID = "canvas";
 
@@ -57,12 +57,16 @@ function useResolvedField(focusedId: string) {
 export function PropertiesPanel() {
   const focusedId = useFocusedItem(CANVAS_ZONE_ID);
   const rawType = focusedId
-    ? (getItemAttribute(CANVAS_ZONE_ID, focusedId, "data-builder-type") as PropertyType)
+    ? (getItemAttribute(
+        CANVAS_ZONE_ID,
+        focusedId,
+        "data-builder-type",
+      ) as PropertyType)
     : null;
 
   // Normalize: null/undefined → "text" (plain Field.Editable with no data-builder-type)
   const selectedType: ResolvedPropertyType | null = focusedId
-    ? rawType ?? "text"
+    ? (rawType ?? "text")
     : null;
 
   if (!focusedId || !selectedType) {
@@ -99,10 +103,16 @@ export function PropertiesPanel() {
         {selectedType === "image" && <ImageProperties fieldName={focusedId} />}
         {selectedType === "icon" && <IconProperties fieldName={focusedId} />}
         {selectedType === "link" && <LinkProperties fieldName={focusedId} />}
-        {selectedType === "button" && <ButtonProperties fieldName={focusedId} />}
+        {selectedType === "button" && (
+          <ButtonProperties fieldName={focusedId} />
+        )}
         {selectedType === "badge" && <BadgeProperties fieldName={focusedId} />}
-        {selectedType === "section" && <SectionProperties fieldName={focusedId} />}
-        {selectedType === "divider" && <DividerProperties fieldName={focusedId} />}
+        {selectedType === "section" && (
+          <SectionProperties fieldName={focusedId} />
+        )}
+        {selectedType === "divider" && (
+          <DividerProperties fieldName={focusedId} />
+        )}
         {selectedType === "tabs" && <TabsProperties fieldName={focusedId} />}
       </div>
     </div>
@@ -147,7 +157,11 @@ function TextProperties({ fieldName }: { fieldName: string }) {
         <textarea
           className="w-full p-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 min-h-[80px] resize-y"
           value={value}
-          onChange={(e) => os.dispatch(updateFieldByDomId({ domId: fieldName, value: e.target.value }))}
+          onChange={(e) =>
+            os.dispatch(
+              updateFieldByDomId({ domId: fieldName, value: e.target.value }),
+            )
+          }
         />
         <p className="text-[10px] text-slate-400 mt-1.5">
           Edit the text content. Changes apply to canvas in real-time.
@@ -224,17 +238,31 @@ function IconProperties({ fieldName }: { fieldName: string }) {
   const currentIcon = block?.fields[iconFieldKey] ?? "";
 
   // Try common label field patterns
-  const labelFieldKey = block?.fields["label"] !== undefined
-    ? "label"
-    : block?.fields[`${fieldKey}-label`] !== undefined
-      ? `${fieldKey}-label`
-      : null;
-  const currentLabel = labelFieldKey ? (block?.fields[labelFieldKey] ?? "") : "";
+  const labelFieldKey =
+    block?.fields["label"] !== undefined
+      ? "label"
+      : block?.fields[`${fieldKey}-label`] !== undefined
+        ? `${fieldKey}-label`
+        : null;
+  const currentLabel = labelFieldKey
+    ? (block?.fields[labelFieldKey] ?? "")
+    : "";
 
   const ICON_OPTIONS = [
-    "ArrowRight", "Check", "Star", "Heart", "Mail", "Phone",
-    "Globe", "Shield", "Server", "Database", "Brain", "Layers",
-    "Box", "Cpu",
+    "ArrowRight",
+    "Check",
+    "Star",
+    "Heart",
+    "Mail",
+    "Phone",
+    "Globe",
+    "Shield",
+    "Server",
+    "Database",
+    "Brain",
+    "Layers",
+    "Box",
+    "Cpu",
   ];
 
   const dispatchField = (key: string, value: string) => {
@@ -250,10 +278,11 @@ function IconProperties({ fieldName }: { fieldName: string }) {
             <button
               type="button"
               key={name}
-              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${currentIcon === name
-                ? "border-violet-500 bg-violet-50 text-violet-600"
-                : "border-slate-200 text-slate-400"
-                }`}
+              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${
+                currentIcon === name
+                  ? "border-violet-500 bg-violet-50 text-violet-600"
+                  : "border-slate-200 text-slate-400"
+              }`}
               onClick={() => dispatchField(iconFieldKey, name)}
               title={name}
             >
@@ -318,7 +347,11 @@ function LinkProperties({ fieldName }: { fieldName: string }) {
         <textarea
           className="w-full p-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 min-h-[40px] resize-y"
           value={value}
-          onChange={(e) => os.dispatch(updateFieldByDomId({ domId: fieldName, value: e.target.value }))}
+          onChange={(e) =>
+            os.dispatch(
+              updateFieldByDomId({ domId: fieldName, value: e.target.value }),
+            )
+          }
         />
       </FormGroup>
 
@@ -361,7 +394,8 @@ function ButtonProperties({ fieldName }: { fieldName: string }) {
   const fieldKey = resolved?.fieldKey ?? "";
 
   // Read current variant from DOM attribute
-  const currentVariant = getItemAttribute(CANVAS_ZONE_ID, fieldName, "data-variant") ?? "primary";
+  const currentVariant =
+    getItemAttribute(CANVAS_ZONE_ID, fieldName, "data-variant") ?? "primary";
 
   // Derive href field key for button links
   const hrefFieldKey = `${fieldKey}-href`;
@@ -369,9 +403,21 @@ function ButtonProperties({ fieldName }: { fieldName: string }) {
 
   const VARIANT_OPTIONS: { value: string; label: string; preview: string }[] = [
     { value: "primary", label: "Primary", preview: "bg-slate-900 text-white" },
-    { value: "secondary", label: "Secondary", preview: "bg-slate-100 text-slate-900" },
-    { value: "ghost", label: "Ghost", preview: "bg-transparent text-slate-600 border border-slate-200" },
-    { value: "outline", label: "Outline", preview: "bg-transparent text-slate-900 border-2 border-slate-900" },
+    {
+      value: "secondary",
+      label: "Secondary",
+      preview: "bg-slate-100 text-slate-900",
+    },
+    {
+      value: "ghost",
+      label: "Ghost",
+      preview: "bg-transparent text-slate-600 border border-slate-200",
+    },
+    {
+      value: "outline",
+      label: "Outline",
+      preview: "bg-transparent text-slate-900 border-2 border-slate-900",
+    },
   ];
 
   const dispatchField = (key: string, value: string) => {
@@ -386,7 +432,11 @@ function ButtonProperties({ fieldName }: { fieldName: string }) {
           type="text"
           className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
           value={value}
-          onChange={(e) => os.dispatch(updateFieldByDomId({ domId: fieldName, value: e.target.value }))}
+          onChange={(e) =>
+            os.dispatch(
+              updateFieldByDomId({ domId: fieldName, value: e.target.value }),
+            )
+          }
         />
       </FormGroup>
 
@@ -396,10 +446,11 @@ function ButtonProperties({ fieldName }: { fieldName: string }) {
             <button
               type="button"
               key={opt.value}
-              className={`px-3 py-2 rounded-md text-xs font-bold transition-all ${currentVariant === opt.value
+              className={`px-3 py-2 rounded-md text-xs font-bold transition-all ${
+                currentVariant === opt.value
                   ? "ring-2 ring-violet-500 ring-offset-1"
                   : "hover:bg-slate-50"
-                }`}
+              }`}
               onClick={() => dispatchField(`${fieldKey}-variant`, opt.value)}
             >
               <div className={`w-full h-5 rounded mb-1.5 ${opt.preview}`} />
@@ -457,7 +508,11 @@ function BadgeProperties({ fieldName }: { fieldName: string }) {
           type="text"
           className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
           value={value}
-          onChange={(e) => os.dispatch(updateFieldByDomId({ domId: fieldName, value: e.target.value }))}
+          onChange={(e) =>
+            os.dispatch(
+              updateFieldByDomId({ domId: fieldName, value: e.target.value }),
+            )
+          }
         />
         <p className="text-[10px] text-slate-400 mt-1.5">
           Short label text, typically uppercase.
@@ -520,7 +575,9 @@ function SectionProperties({ fieldName }: { fieldName: string }) {
                 label={key}
                 value={val}
                 onChange={(v) =>
-                  os.dispatch(updateField({ sectionId: fieldName, field: key, value: v }))
+                  os.dispatch(
+                    updateField({ sectionId: fieldName, field: key, value: v }),
+                  )
                 }
               />
             ))}

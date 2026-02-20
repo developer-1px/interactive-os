@@ -1,9 +1,6 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { useState } from "react";
-import {
-  BuilderApp,
-  BuilderCanvasUI,
-} from "@/apps/builder/app";
+import { BuilderApp, BuilderCanvasUI } from "@/apps/builder/app";
 import { BuilderCursor } from "@/apps/builder/BuilderCursor";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
@@ -57,9 +54,7 @@ export default function BuilderPage() {
         <SectionSidebar />
 
         {/* Canvas Area — behavior declared in app.ts bind() */}
-        <BuilderCanvasUI.Zone
-          className="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-100/50"
-        >
+        <BuilderCanvasUI.Zone className="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-100/50">
           {/* Builder Cursor — visual focus indicator inside scroll container */}
           <BuilderCursor />
 
@@ -86,15 +81,12 @@ export default function BuilderPage() {
 
 // ─── Section Renderer — maps section.type → block component ───
 
-const BLOCK_COMPONENTS: Record<
-  string,
-  React.FC<{ id: string }>
-> = {
+const BLOCK_COMPONENTS: Record<string, React.FC<{ id: string }>> = {
   hero: NCPHeroBlock,
   news: NCPNewsBlock,
   services: NCPServicesBlock,
   pricing: NCPPricingBlock,
-  tabs: TabContainerBlock,    // generic tab container — data-driven from Block.children
+  tabs: TabContainerBlock, // generic tab container — data-driven from Block.children
   footer: NCPFooterBlock,
 };
 
@@ -105,9 +97,7 @@ function SectionRenderer() {
     <>
       {blocks.map((block) => {
         const Component = BLOCK_COMPONENTS[block.type];
-        return Component ? (
-          <Component key={block.id} id={block.id} />
-        ) : null;
+        return Component ? <Component key={block.id} id={block.id} /> : null;
       })}
     </>
   );

@@ -122,7 +122,7 @@ describe("resolveKeyboard — Space CHECK", () => {
       }),
     );
     // Editing means Space is text input, not CHECK
-    expect(result.commands.some(c => c.type === "OS_CHECK")).toBe(false);
+    expect(result.commands.some((c) => c.type === "OS_CHECK")).toBe(false);
   });
 });
 

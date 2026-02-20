@@ -66,11 +66,17 @@ describe("builder undo/redo", () => {
     const hero = app.state.data.blocks.find((b) => b.id === "ncp-hero")!;
     const original = hero.fields["title"];
 
-    app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "Changed!" }));
-    expect(app.state.data.blocks.find((b) => b.id === "ncp-hero")!.fields["title"]).toBe("Changed!");
+    app.dispatch(
+      updateField({ sectionId: "ncp-hero", field: "title", value: "Changed!" }),
+    );
+    expect(
+      app.state.data.blocks.find((b) => b.id === "ncp-hero")!.fields["title"],
+    ).toBe("Changed!");
 
     app.dispatch(undoCommand());
-    expect(app.state.data.blocks.find((b) => b.id === "ncp-hero")!.fields["title"]).toBe(original);
+    expect(
+      app.state.data.blocks.find((b) => b.id === "ncp-hero")!.fields["title"],
+    ).toBe(original);
   });
 
   it("multiple undos in sequence", () => {
@@ -91,7 +97,9 @@ describe("builder undo/redo", () => {
     expect(app.evaluate(canRedo)).toBe(true);
 
     // New action clears redo stack
-    app.dispatch(updateField({ sectionId: "ncp-hero", field: "title", value: "New" }));
+    app.dispatch(
+      updateField({ sectionId: "ncp-hero", field: "title", value: "New" }),
+    );
     expect(app.evaluate(canRedo)).toBe(false);
   });
 });
