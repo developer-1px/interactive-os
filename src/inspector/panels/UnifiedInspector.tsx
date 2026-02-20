@@ -13,7 +13,6 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardCopy,
-  Database,
   Download,
   Eye,
   Keyboard,
@@ -316,11 +315,10 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                    active
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
                       ? "bg-[#1e293b] text-white border-[#1e293b]"
                       : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                  }`}
+                    }`}
                 >
                   {group}
                 </button>
@@ -612,9 +610,6 @@ function TimelineNode({
               <span>path: {tx.bubblePath.join(" › ")}</span>
             )}
           </div>
-
-          {/* ── Raw Snapshot ── */}
-          {tx.meta && <RawDataToggle data={tx.meta} />}
         </div>
       )}
     </div>
@@ -693,31 +688,4 @@ function Row({ children }: { children: React.ReactNode }) {
   );
 }
 
-function RawDataToggle({ data }: { data: Record<string, unknown> }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-2 py-0.5 rounded border border-[#eee] bg-[#fafafa] text-[#999] hover:text-[#555] hover:bg-[#f5f5f5]"
-      >
-        <div className="flex items-center gap-1">
-          <Database size={9} />
-          <span className="font-bold text-[8px] uppercase">Snapshot</span>
-        </div>
-        <ChevronDown
-          size={10}
-          className={`transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-      {open && (
-        <div className="mt-1 p-1.5 rounded border border-[#ddd] bg-[#1e293b] overflow-x-auto">
-          <pre className="text-[9px] font-mono text-[#e2e8f0] leading-snug">
-            {JSON.stringify(data, null, 2)}
-          </pre>
-        </div>
-      )}
-    </div>
-  );
-}
+
