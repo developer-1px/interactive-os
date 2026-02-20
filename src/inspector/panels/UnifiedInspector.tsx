@@ -128,43 +128,60 @@ export function UnifiedInspector({
   storeState?: Record<string, unknown>;
   onClear?: () => void;
 }) {
-  const [showOsEvents, setShowOsEvents] = useState(false);
+  const [disabledGroups, setDisabledGroups] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [manualToggles, setManualToggles] = useState<Set<number>>(new Set());
   const [traceOpen, setTraceOpen] = useState(true);
   const [storeOpen, setStoreOpen] = useState(false);
 
-  // Compute filtered view based on OS Events and Search Query
+  // Discover all groups from the actual transactions (kernel is source of truth)
+  const allGroups = useMemo(() => {
+    const groups = new Set<string>();
+    for (const tx of transactions) {
+      groups.add(inferSignal(tx).group);
+    }
+    return Array.from(groups).sort();
+  }, [transactions]);
+
+  const toggleGroup = (group: string) => {
+    setDisabledGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) {
+        next.delete(group);
+      } else {
+        next.add(group);
+      }
+      return next;
+    });
+  };
+
+  // Compute filtered view based on group toggles and search
   const filteredTx = useMemo(() => {
     let result = transactions;
 
-    if (!showOsEvents) {
-      result = result.filter((tx) => inferSignal(tx).type !== "OS");
+    if (disabledGroups.size > 0) {
+      result = result.filter(
+        (tx) => !disabledGroups.has(inferSignal(tx).group),
+      );
     }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter((tx) => {
         const signal = inferSignal(tx);
-        // Search in command type, trigger raw, or element ID
         if (signal.command.type.toLowerCase().includes(q)) return true;
         if (signal.trigger.raw.toLowerCase().includes(q)) return true;
         if (signal.trigger.elementId?.toLowerCase().includes(q)) return true;
-
-        // Search in effects
         if (signal.effects.some((e) => e.toLowerCase().includes(q)))
           return true;
-
-        // Search in diff paths
         if (signal.diff.some((d) => d.path.toLowerCase().includes(q)))
           return true;
-
         return false;
       });
     }
 
     return result;
-  }, [transactions, showOsEvents, searchQuery]);
+  }, [transactions, disabledGroups, searchQuery]);
 
   const latestTxId =
     filteredTx.length > 0 ? filteredTx[filteredTx.length - 1]?.id : undefined;
@@ -253,16 +270,6 @@ export function UnifiedInspector({
           </div>
 
           <div className="flex items-center gap-1">
-            <label className="flex items-center gap-1 cursor-pointer text-[#64748b] hover:text-[#333] px-1 py-0.5 rounded hover:bg-[#f5f5f5]">
-              <input
-                type="checkbox"
-                checked={showOsEvents}
-                onChange={(e) => setShowOsEvents(e.target.checked)}
-                className="w-2.5 h-2.5 accent-blue-500"
-              />
-              <span className="text-[9px]">OS</span>
-            </label>
-
             <button
               type="button"
               onClick={() => downloadSession(transactions)}
@@ -279,6 +286,7 @@ export function UnifiedInspector({
                   onClear();
                   setManualToggles(new Set());
                   setSearchQuery("");
+                  setDisabledGroups(new Set());
                 }}
                 className="px-1.5 py-0.5 rounded text-[8px] font-bold text-[#999] hover:text-[#ef4444] hover:bg-[#fef2f2] cursor-pointer border border-[#e5e5e5]"
               >
@@ -287,6 +295,29 @@ export function UnifiedInspector({
             )}
           </div>
         </div>
+
+        {/* Group Filter Pills — dynamically discovered from kernel scopes */}
+        {allGroups.length > 0 && (
+          <div className="flex items-center gap-1 px-2 py-1 border-t border-[#f0f0f0] bg-[#fafafa] overflow-x-auto">
+            {allGroups.map((group) => {
+              const active = !disabledGroups.has(group);
+              return (
+                <button
+                  key={group}
+                  type="button"
+                  onClick={() => toggleGroup(group)}
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
+                    active
+                      ? "bg-[#1e293b] text-white border-[#1e293b]"
+                      : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                  }`}
+                >
+                  {group}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Search & Actions Row */}
         <div className="h-6 border-t border-[#f0f0f0] bg-[#fafafa] flex items-center px-1.5 gap-1">

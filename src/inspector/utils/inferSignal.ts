@@ -2,6 +2,8 @@ import type { StateDiff, Transaction } from "@kernel/core/transaction";
 
 export interface InspectorSignal {
   type: "OS" | "STATE_MUTATION" | "NO_OP";
+  /** The kernel scope (group name) that handled this command. Source: tx.handlerScope */
+  group: string;
   trigger: {
     kind: "KEYBOARD" | "MOUSE" | "FOCUS";
     raw: string;
@@ -52,13 +54,10 @@ export function inferSignal(tx: Transaction): InspectorSignal {
 
   const hasMutation = changes.length > 0 || effectKeys.length > 0;
 
-  // 3. Classify Signal
+  // 3. Classify Signal type
   let type: InspectorSignal["type"] = "NO_OP";
 
   if (kind === "FOCUS") {
-    // Focus always gets classified as OS, unless it had a direct state mutation
-    // Typically Focus itself doesn't mutate app domain state.
-    // If it did, we could promote it to STATE_MUTATION, but the requirement specifically treats Focus as OS-level.
     type = hasMutation ? "STATE_MUTATION" : "OS";
   } else if (hasMutation) {
     type = "STATE_MUTATION";
@@ -69,10 +68,12 @@ export function inferSignal(tx: Transaction): InspectorSignal {
     type = "NO_OP";
   }
 
-  // Rare case: A mouse/keyboard event with NO mutation and NO specific command might just be NO_OP.
+  // 4. Group = handlerScope (kernel's authoritative group name)
+  const group = tx.handlerScope ?? "unknown";
 
   return {
     type,
+    group,
     trigger: {
       kind,
       raw: rawTrigger,
