@@ -55,7 +55,7 @@ function createToolbar(focusedItem = "bold-btn") {
 
 describe("APG Toolbar: Navigation", () => {
     assertHorizontalNav(createToolbar);
-    assertLoop(createToolbar, {
+    assertLoop({
         firstId: "bold-btn",
         lastId: "link-btn",
         axis: "horizontal",

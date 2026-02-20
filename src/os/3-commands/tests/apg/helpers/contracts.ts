@@ -86,7 +86,6 @@ export function assertBoundaryClamp(
 
 /** Tests that focus wraps at edges (loop=true) */
 export function assertLoop(
-    factory: Factory,
     opts: {
         firstId: string;
         lastId: string;
