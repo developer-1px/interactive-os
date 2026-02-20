@@ -53,24 +53,48 @@ function copyAllToClipboard(transactions: Transaction[]) {
   copyToClipboard(text);
 }
 
+/** Truncate large JSON values for LLM readability */
+function truncateValue(value: unknown, path: string): string {
+  // History snapshots are noise — summarize
+  if (/history\.(past|future)\[\d+\]$/.test(path)) {
+    return "[history entry]";
+  }
+  if (/\.snapshot$/.test(path) || /\.snapshot\./.test(path)) {
+    return "[snapshot]";
+  }
+  const json = JSON.stringify(value);
+  if (json.length > 200) {
+    return json.slice(0, 120) + "…[truncated, " + json.length + " chars]";
+  }
+  return json;
+}
+
 function formatAiContext(
   tx: Transaction,
   signal: ReturnType<typeof inferSignal>,
 ): string {
   const trigger = `**Action**: ${signal.trigger.kind} (Raw: ${signal.trigger.raw}${signal.trigger.elementId ? `, Element: ${signal.trigger.elementId}` : ""})`;
   const command = `**Command**: \`${signal.command.type}\``;
-  const payload = `**Payload**: \`${JSON.stringify(signal.command.payload)}\``;
+  const payload = `**Payload**: \`${truncateValue(signal.command.payload, "payload")}\``;
 
   let diffStr = "**Diff**: None";
   if (signal.diff.length > 0) {
-    diffStr =
-      "**Diff**:\n" +
-      signal.diff
-        .map(
-          (d) =>
-            `  - \`${d.path}\`: \`${JSON.stringify(d.from)}\` -> \`${JSON.stringify(d.to)}\``,
-        )
-        .join("\n");
+    // Filter out noisy history snapshot diffs entirely
+    const meaningful = signal.diff.filter(
+      (d) => !/history\.(past|future)\[\d+\]\.(snapshot|timestamp)/.test(d.path),
+    );
+    if (meaningful.length > 0) {
+      diffStr =
+        "**Diff**:\n" +
+        meaningful
+          .map(
+            (d) =>
+              `  - \`${d.path}\`: \`${truncateValue(d.from, d.path)}\` -> \`${truncateValue(d.to, d.path)}\``,
+          )
+          .join("\n");
+    } else {
+      diffStr = "**Diff**: [history only]";
+    }
   }
 
   let effectStr = "";
