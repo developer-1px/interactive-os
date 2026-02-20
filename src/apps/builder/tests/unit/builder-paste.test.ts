@@ -75,11 +75,39 @@ describe("Builder copy → paste → paste 연속 실행", () => {
         app.dispatch(sidebarCollection.paste({ afterId: heroId }));
         app.dispatch(sidebarCollection.paste({ afterId: heroId }));
 
-        // 4 original + 3 pasted = 7
-        expect(app.state.data.blocks.length).toBe(7);
+        // 5 original + 3 pasted = 8
+        expect(app.state.data.blocks.length).toBe(8);
 
         // All IDs unique
         const ids = app.state.data.blocks.map((s) => s.id);
-        expect(new Set(ids).size).toBe(7);
+        expect(new Set(ids).size).toBe(8);
+    });
+
+    test("container 블록 paste: children ID도 재생성된다", () => {
+        const app = createApp();
+        const pricingId = app.state.data.blocks.find(b => b.children && b.children.length > 0)!.id;
+
+        app.dispatch(sidebarCollection.copy({ ids: [pricingId] }));
+        app.dispatch(sidebarCollection.paste({ afterId: pricingId }));
+
+        const original = app.state.data.blocks.find(b => b.id === pricingId)!;
+        const pasted = app.state.data.blocks.find(b => b.id !== pricingId && b.type === original.type && b.children && b.children.length > 0)!;
+
+        expect(pasted).toBeDefined();
+        expect(pasted.id).not.toBe(original.id);
+        expect(pasted.children!.length).toBe(original.children!.length);
+
+        // Each child ID must be unique (not same as original)
+        for (let i = 0; i < original.children!.length; i++) {
+            expect(pasted.children![i]!.id).not.toBe(original.children![i]!.id);
+        }
+
+        // All IDs across the entire tree must be unique
+        const allIds: string[] = [];
+        for (const block of app.state.data.blocks) {
+            allIds.push(block.id);
+            block.children?.forEach(c => allIds.push(c.id));
+        }
+        expect(new Set(allIds).size).toBe(allIds.length);
     });
 });

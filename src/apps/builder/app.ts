@@ -58,14 +58,27 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 import { createCollectionZone } from "@/os/collection/createCollectionZone";
 import { EXPAND } from "@/os/3-commands/expand/index";
 
+/** Recursively clone a Block tree, regenerating IDs at every level. */
+function deepCloneBlock(block: Block, newId: string): Block {
+  const cloned: Block = {
+    ...block,
+    id: newId,
+    fields: { ...block.fields },
+  };
+  if (block.children) {
+    cloned.children = block.children.map((child) =>
+      deepCloneBlock(child, Math.random().toString(36).slice(2, 10)),
+    );
+  }
+  return cloned;
+}
+
 const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
   accessor: (s: BuilderState) => s.data.blocks,
   extractId: (focusId: string) => focusId.replace("sidebar-", ""),
   onClone: (original, newId) => ({
-    ...original,
-    id: newId,
+    ...deepCloneBlock(original, newId),
     label: `${original.label} (copy)`,
-    fields: { ...original.fields },
   }),
   clipboard: {
     accessor: (s: BuilderState) => s.ui.clipboard,
@@ -74,10 +87,8 @@ const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
     },
     toText: (items: Block[]) => items.map((s) => s.label).join("\n"),
     onPaste: (item: Block) => ({
-      ...item,
-      id: Math.random().toString(36).slice(2, 10),
+      ...deepCloneBlock(item, Math.random().toString(36).slice(2, 10)),
       label: `${item.label} (paste)`,
-      fields: { ...item.fields },
     }),
   },
 });
