@@ -9,11 +9,16 @@
  */
 
 import { Builder } from "@/apps/builder/primitives/Builder";
-import { createFieldCommit, useSectionFields } from "@/apps/builder/app";
+import { BuilderApp, createFieldCommit, useSectionFields } from "@/apps/builder/app";
 import { Field } from "@os/6-components/field/Field";
 
 export function NCPPricingBlock({ id }: { id: string }) {
     const fields = useSectionFields(id);
+    const block = BuilderApp.useComputed((s) => s.data.blocks.find(b => b.id === id));
+
+    // Extract children to drive the Tabs
+    const children = block?.children || [];
+    const tabLabels = children.length > 0 ? children.map(c => c.label) : ["Monthly", "Annual"];
 
     return (
         <Builder.Section asChild id={id}>
@@ -60,65 +65,82 @@ export function NCPPricingBlock({ id }: { id: string }) {
                 {/* Tab Container — Builder.Tabs primitive */}
                 <Builder.Tabs
                     id={`${id}-plans`}
-                    tabs={["Monthly", "Annual"]}
+                    tabs={tabLabels}
                     className="max-w-4xl mx-auto"
                 >
-                    {/* Monthly Panel */}
-                    <Builder.TabPanel>
-                        <div className="grid grid-cols-3 gap-6 mt-8">
-                            <PricingCard
-                                id={`${id}-monthly-starter`}
-                                fields={fields}
-                                prefix="m-starter"
-                                defaults={{ name: "Starter", price: "$29", period: "/mo", desc: "Perfect for small teams", cta: "Get Started" }}
-                                highlight={false}
-                            />
-                            <PricingCard
-                                id={`${id}-monthly-pro`}
-                                fields={fields}
-                                prefix="m-pro"
-                                defaults={{ name: "Professional", price: "$79", period: "/mo", desc: "For growing businesses", cta: "Start Free Trial" }}
-                                highlight={true}
-                            />
-                            <PricingCard
-                                id={`${id}-monthly-ent`}
-                                fields={fields}
-                                prefix="m-ent"
-                                defaults={{ name: "Enterprise", price: "$199", period: "/mo", desc: "For large organizations", cta: "Contact Sales" }}
-                                highlight={false}
-                            />
-                        </div>
-                    </Builder.TabPanel>
-
-                    {/* Annual Panel */}
-                    <Builder.TabPanel>
-                        <div className="grid grid-cols-3 gap-6 mt-8">
-                            <PricingCard
-                                id={`${id}-annual-starter`}
-                                fields={fields}
-                                prefix="a-starter"
-                                defaults={{ name: "Starter", price: "$290", period: "/yr", desc: "Save 17% with annual", cta: "Get Started" }}
-                                highlight={false}
-                            />
-                            <PricingCard
-                                id={`${id}-annual-pro`}
-                                fields={fields}
-                                prefix="a-pro"
-                                defaults={{ name: "Professional", price: "$790", period: "/yr", desc: "Save 17% with annual", cta: "Start Free Trial" }}
-                                highlight={true}
-                            />
-                            <PricingCard
-                                id={`${id}-annual-ent`}
-                                fields={fields}
-                                prefix="a-ent"
-                                defaults={{ name: "Enterprise", price: "$1,990", period: "/yr", desc: "Save 17% with annual", cta: "Contact Sales" }}
-                                highlight={false}
-                            />
-                        </div>
-                    </Builder.TabPanel>
+                    {children.length > 0 ? (
+                        children.map((childBlock) => (
+                            <Builder.TabPanel key={childBlock.id}>
+                                <PricingTabContent childId={childBlock.id} parentId={id} fields={fields} />
+                            </Builder.TabPanel>
+                        ))
+                    ) : (
+                        <>
+                            {/* Fallback Monthly Panel */}
+                            <Builder.TabPanel>
+                                <PricingTabContent childId={`${id}-monthly`} parentId={id} fields={fields} />
+                            </Builder.TabPanel>
+                            {/* Fallback Annual Panel */}
+                            <Builder.TabPanel>
+                                <PricingTabContent childId={`${id}-annual`} parentId={id} fields={fields} />
+                            </Builder.TabPanel>
+                        </>
+                    )}
                 </Builder.Tabs>
             </div>
         </Builder.Section>
+    );
+}
+
+// ─── PricingTabContent — content derived by child layout ───
+
+function PricingTabContent({
+    childId,
+    parentId,
+    fields,
+}: {
+    childId: string;
+    parentId: string;
+    fields: Record<string, string>;
+}) {
+    const isAnnual = childId.includes("annual");
+    const prefix = isAnnual ? "a" : "m";
+    const defaults = isAnnual
+        ? [
+            { name: "Starter", price: "$290", period: "/yr", desc: "Save 17% with annual", cta: "Get Started" },
+            { name: "Professional", price: "$790", period: "/yr", desc: "Save 17% with annual", cta: "Start Free Trial" },
+            { name: "Enterprise", price: "$1,990", period: "/yr", desc: "Save 17% with annual", cta: "Contact Sales" },
+        ]
+        : [
+            { name: "Starter", price: "$29", period: "/mo", desc: "Perfect for small teams", cta: "Get Started" },
+            { name: "Professional", price: "$79", period: "/mo", desc: "For growing businesses", cta: "Start Free Trial" },
+            { name: "Enterprise", price: "$199", period: "/mo", desc: "For large organizations", cta: "Contact Sales" },
+        ];
+
+    return (
+        <div className="grid grid-cols-3 gap-6 mt-8">
+            <PricingCard
+                id={`${parentId}-${isAnnual ? "annual" : "monthly"}-starter`}
+                fields={fields}
+                prefix={`${prefix}-starter`}
+                defaults={defaults[0]!}
+                highlight={false}
+            />
+            <PricingCard
+                id={`${parentId}-${isAnnual ? "annual" : "monthly"}-pro`}
+                fields={fields}
+                prefix={`${prefix}-pro`}
+                defaults={defaults[1]!}
+                highlight={true}
+            />
+            <PricingCard
+                id={`${parentId}-${isAnnual ? "annual" : "monthly"}-ent`}
+                fields={fields}
+                prefix={`${prefix}-ent`}
+                defaults={defaults[2]!}
+                highlight={false}
+            />
+        </div>
     );
 }
 

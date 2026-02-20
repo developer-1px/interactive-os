@@ -116,13 +116,27 @@ export const INITIAL_STATE: BuilderState = {
             },
             {
                 id: "ncp-pricing",
-                label: "Pricing",
+                label: "Pricing Section",
                 type: "pricing",
                 fields: {
                     badge: "PRICING",
                     title: "Simple, transparent pricing",
                     sub: "Choose the plan that fits your needs",
                 },
+                children: [
+                    {
+                        id: "ncp-pricing-monthly",
+                        label: "Monthly Plans",
+                        type: "pricing-tab",
+                        fields: {},
+                    },
+                    {
+                        id: "ncp-pricing-annual",
+                        label: "Annual Plans",
+                        type: "pricing-tab",
+                        fields: {},
+                    }
+                ]
             },
             {
                 id: "ncp-footer",

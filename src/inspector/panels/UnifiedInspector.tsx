@@ -376,10 +376,11 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
+                    active
                       ? "bg-[#1e293b] text-white border-[#1e293b]"
                       : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                    }`}
+                  }`}
                 >
                   {group}
                 </button>
@@ -635,63 +636,57 @@ function TimelineNode({
 
       {/* Expanded Details */}
       {expanded && (
-        <div className="flex flex-col gap-1.5 pl-8 pr-2 pb-2.5">
+        <div className="flex flex-col gap-1.5 pl-6 pr-2 pb-2">
           {/* ── Diff (primary info) ── */}
           {diff.length > 0 && (
-            <Section title="State Diff">
-              <div className="flex flex-col gap-1.5 mt-1">
-                {groupDiffs(diff).map((group, gi) => (
-                  <div
-                    key={`${group.basePath}-${gi}`}
-                    className="flex flex-col gap-0.5 font-mono text-[9.5px]"
-                  >
-                    {/* Base path label */}
-                    <div className="text-[#334155] font-semibold break-all bg-[#f1f5f9] px-1 py-0.5 rounded-sm inline-block self-start">
-                      {group.basePath}
-                      {group.entries.length > 1 && (
-                        <span className="text-[#94a3b8] font-normal ml-1">
-                          ×{group.entries.length}
-                        </span>
-                      )}
-                    </div>
-                    {/* Entries */}
-                    <div className="flex flex-col gap-[1px] ml-1 mt-0.5 border-l-2 border-[#e2e8f0] pl-1.5">
-                      {group.entries.map((entry, ei) => (
-                        <div
-                          key={`${entry.index ?? ei}`}
-                          className="flex flex-col gap-[1px]"
-                        >
-                          {entry.index !== undefined && (
-                            <span className="text-[8px] text-[#94a3b8] font-mono">
-                              [{entry.index}]
-                            </span>
-                          )}
-                          {entry.from !== undefined &&
-                            entry.to !== undefined ? (
-                            <>
-                              <DiffValue
-                                value={entry.from}
-                                type="changed-from"
-                              />
-                              <DiffValue value={entry.to} type="changed-to" />
-                            </>
-                          ) : (
-                            <>
-                              {entry.from !== undefined && (
-                                <DiffValue value={entry.from} type="removed" />
-                              )}
-                              {entry.to !== undefined && (
-                                <DiffValue value={entry.to} type="added" />
-                              )}
-                            </>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+            <div className="flex flex-col gap-1 mt-0.5">
+              {groupDiffs(diff).map((group, gi) => (
+                <div
+                  key={`${group.basePath}-${gi}`}
+                  className="flex flex-col font-mono text-[9.5px]"
+                >
+                  {/* Base path label - Enclosed in a subtle bar */}
+                  <div className="text-[#475569] font-medium break-all bg-[#f8fafc] border border-[#e2e8f0] px-1.5 py-0.5 rounded-sm inline-flex items-center self-start">
+                    {group.basePath}
+                    {group.entries.length > 1 && (
+                      <span className="text-[#94a3b8] font-normal ml-1 text-[8.5px]">
+                        ×{group.entries.length}
+                      </span>
+                    )}
                   </div>
-                ))}
-              </div>
-            </Section>
+                  {/* Entries - Connected by a left border */}
+                  <div className="flex flex-col gap-1 ml-2 mt-1 border-l-2 border-[#f1f5f9] pl-2">
+                    {group.entries.map((entry, ei) => (
+                      <div
+                        key={`${entry.index ?? ei}`}
+                        className="flex flex-col gap-[1px]"
+                      >
+                        {entry.index !== undefined && (
+                          <span className="text-[8.5px] text-[#94a3b8] font-mono leading-none mb-0.5">
+                            [{entry.index}]
+                          </span>
+                        )}
+                        {entry.from !== undefined && entry.to !== undefined ? (
+                          <div className="flex flex-col gap-[1px]">
+                            <DiffValue value={entry.from} type="changed-from" />
+                            <DiffValue value={entry.to} type="changed-to" />
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-[1px]">
+                            {entry.from !== undefined && (
+                              <DiffValue value={entry.from} type="removed" />
+                            )}
+                            {entry.to !== undefined && (
+                              <DiffValue value={entry.to} type="added" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
 
           {/* ── Effects + Kernel: inline summary ── */}
@@ -757,25 +752,6 @@ function CollapsibleSection({
 
 // ─── Unified Building Blocks ───
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="text-[8px] font-bold uppercase tracking-wider text-[#999] mb-0.5">
-        {title}
-      </div>
-      <div className="flex flex-col border border-[#eee] rounded overflow-hidden divide-y divide-[#f5f5f5]">
-        {children}
-      </div>
-    </div>
-  );
-}
-
 function DiffValue({
   value,
   type,
@@ -794,20 +770,21 @@ function DiffValue({
   switch (type) {
     case "removed":
       prefix = "-";
-      colorClass = "text-[#b91c1c] bg-[#fef2f2] border-[#fecaca]";
+      colorClass = "text-[#dc2626] bg-[#fef2f2] border border-[#fee2e2]";
       break;
     case "added":
       prefix = "+";
-      colorClass = "text-[#15803d] bg-[#f0fdf4] border-[#bbf7d0]";
+      colorClass = "text-[#16a34a] bg-[#f0fdf4] border border-[#dcfce7]";
       break;
     case "changed-from":
       prefix = "";
       colorClass =
-        "text-[#94a3b8] bg-[#f8fafc] border-[#e2e8f0] opacity-80 line-through";
+        "text-[#94a3b8] bg-[#f8fafc] border border-transparent line-through";
       break;
     case "changed-to":
       prefix = "→";
-      colorClass = "text-[#0f172a] bg-[#f1f5f9] border-[#cbd5e1] font-medium";
+      colorClass =
+        "text-[#334155] bg-[#f1f5f9] border border-[#e2e8f0] font-medium";
       break;
   }
 
@@ -818,7 +795,7 @@ function DiffValue({
   if (!isLarge) {
     return (
       <div
-        className={`px-1 py-0.5 rounded-sm whitespace-pre-wrap break-all border ${colorClass}`}
+        className={`px-1.5 py-0.5 rounded-sm whitespace-pre-wrap break-all inline-block self-start ${colorClass}`}
       >
         {prefixNode}
         {str}
@@ -834,7 +811,9 @@ function DiffValue({
       : "Long String ...";
 
   return (
-    <details className={`px-1 py-0.5 rounded-sm border ${colorClass} group`}>
+    <details
+      className={`px-1.5 py-0.5 rounded-sm inline-block self-start group ${colorClass}`}
+    >
       <summary className="cursor-pointer outline-none flex items-center select-none list-none text-[9.5px]">
         <div className="flex items-center opacity-80 hover:opacity-100">
           {prefixNode}
@@ -842,7 +821,7 @@ function DiffValue({
           <span className="hidden group-open:inline italic">Collapse</span>
         </div>
       </summary>
-      <div className="mt-1 whitespace-pre-wrap break-all text-[9.5px] border-t border-black/10 pt-1">
+      <div className="whitespace-pre-wrap break-all text-[9.5px] mt-1 pt-1 border-t border-black/10">
         {str}
       </div>
     </details>

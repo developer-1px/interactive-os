@@ -31,7 +31,7 @@ export function SectionSidebar() {
   }, []);
 
   // Flatten tree for sidebar display — each node gets a depth
-  const flatNodes = flattenBlocks(blocks, 0, collapsed);
+  const flatNodes = getFlatNodes(blocks, collapsed);
 
   return (
     <BuilderSidebarUI.Zone
@@ -41,21 +41,49 @@ export function SectionSidebar() {
     >
       <div className="px-4 pb-3 flex items-center justify-between">
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-          Sections
+          Slides
         </span>
         <span className="text-[10px] text-slate-300 font-medium">
-          {blocks.length}
+          {flatNodes.filter(n => !n.isSection).length}
         </span>
       </div>
 
       <div className="flex-1 px-2 space-y-0.5">
-        {flatNodes.map((node, idx) => {
+        {flatNodes.map((node) => {
           const isCanvasActive =
             focusedCanvasId?.startsWith(node.block.id) ?? false;
-          const hasChildren =
-            node.block.children && node.block.children.length > 0;
           const isCollapsed = collapsed[node.block.id] ?? false;
 
+          if (node.isSection) {
+            // ─── PPT SECTION HEADER ───
+            return (
+              <BuilderSidebarUI.Item
+                key={node.block.id}
+                id={`sidebar-${node.block.id}`}
+                className="outline-none group focus:outline-none mt-3 mb-1 first:mt-0"
+              >
+                <div
+                  className={`
+                    flex items-center gap-1.5 py-1.5 px-2 rounded cursor-pointer transition-colors
+                    group-focus:ring-2 group-focus:ring-indigo-500/50 
+                    ${isCanvasActive ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-200/50 text-slate-500"}
+                  `}
+                  onClick={() => toggleCollapse(node.block.id)}
+                >
+                  <button
+                    type="button"
+                    className="shrink-0 p-0.5 rounded hover:bg-slate-300/50 transition-colors"
+                    aria-label={isCollapsed ? "Expand" : "Collapse"}
+                  >
+                    {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                  </button>
+                  <span className="text-[11px] font-bold uppercase tracking-widest truncate">{node.block.label}</span>
+                </div>
+              </BuilderSidebarUI.Item>
+            );
+          }
+
+          // ─── PPT SLIDE (Leaf Node) ───
           return (
             <BuilderSidebarUI.Item
               key={node.block.id}
@@ -69,46 +97,25 @@ export function SectionSidebar() {
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
                   ${isCanvasActive
                     ? "bg-white shadow-sm border-slate-200/60"
-                    : "hover:bg-white/60 hover:border-slate-200/50 text-slate-500 hover:text-slate-700"
+                    : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
                   }
                 `}
-                style={{ paddingLeft: `${12 + node.depth * 16}px` }}
+                style={{ paddingLeft: `${node.depth > 0 ? 12 : 8}px` }}
               >
                 {/* Active Indicator (Left Bar) */}
                 {isCanvasActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 bg-indigo-500 rounded-r-full" />
                 )}
 
-                {/* Collapse/Expand toggle or leaf indicator */}
-                {hasChildren ? (
-                  <button
-                    type="button"
-                    className={`
-                      shrink-0 w-4 h-4 flex items-center justify-center rounded
-                      hover:bg-slate-200 transition-colors
-                      ${isCanvasActive ? "text-indigo-500" : "text-slate-400"}
-                    `}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCollapse(node.block.id);
-                    }}
-                    tabIndex={-1}
-                    aria-label={isCollapsed ? "Expand" : "Collapse"}
-                  >
-                    {isCollapsed ? (
-                      <ChevronRight size={12} />
-                    ) : (
-                      <ChevronDown size={12} />
-                    )}
-                  </button>
-                ) : (
-                  <span className="shrink-0 w-4 h-4 flex items-center justify-center">
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${isCanvasActive ? "bg-indigo-400" : "bg-slate-300"
-                        }`}
-                    />
-                  </span>
-                )}
+                {/* Slide number */}
+                <span
+                  className={`
+                    text-[10px] font-bold tabular-nums text-right shrink-0 w-5
+                    ${isCanvasActive ? "text-indigo-600" : "text-slate-400"}
+                  `}
+                >
+                  {node.slideIndex}
+                </span>
 
                 {/* Restored PPT Thumbnail */}
                 <div
@@ -123,16 +130,16 @@ export function SectionSidebar() {
                 >
                   <div className="flex flex-col gap-0.5 w-6">
                     <div className={`h-0.5 rounded-full w-full ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`} />
-                    <div className={`h-0.5 rounded-full w-2/3 ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`} />
+                    <div className={`h-[2.5px] rounded-full w-2/3 ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`} />
                   </div>
                 </div>
 
                 {/* Block label */}
-                <div className="flex flex-col min-w-0 flex-1">
+                <div className="flex flex-col min-w-0 flex-1 ml-1">
                   <span
                     className={`
                       text-xs font-medium truncate
-                      ${isCanvasActive ? "text-slate-800" : "text-slate-600"}
+                      ${isCanvasActive ? "text-slate-900" : "text-slate-700"}
                     `}
                   >
                     {node.block.label}
@@ -141,18 +148,6 @@ export function SectionSidebar() {
                     {node.block.type}
                   </span>
                 </div>
-
-                {/* Slide number for top-level */}
-                {node.depth === 0 && (
-                  <span
-                    className={`
-                      text-[10px] font-medium tabular-nums shrink-0
-                      ${isCanvasActive ? "text-indigo-400" : "text-slate-300"}
-                    `}
-                  >
-                    {idx + 1}
-                  </span>
-                )}
               </div>
             </BuilderSidebarUI.Item>
           );
@@ -167,19 +162,29 @@ export function SectionSidebar() {
 interface FlatNode {
   block: Block;
   depth: number;
+  isSection: boolean;
+  slideIndex: number | null;
 }
 
-function flattenBlocks(
-  blocks: Block[],
-  depth: number,
-  collapsed: Record<string, boolean>,
-): FlatNode[] {
+function getFlatNodes(blocks: Block[], collapsed: Record<string, boolean>) {
+  let slideIndex = 1;
   const result: FlatNode[] = [];
-  for (const block of blocks) {
-    result.push({ block, depth });
-    if (block.children && !collapsed[block.id]) {
-      result.push(...flattenBlocks(block.children, depth + 1, collapsed));
+
+  function traverse(list: Block[], depth: number) {
+    for (const block of list) {
+      const isSection = block.children && block.children.length > 0;
+      result.push({
+        block,
+        depth,
+        isSection: !!isSection,
+        slideIndex: isSection ? null : slideIndex++
+      });
+      if (isSection && !collapsed[block.id]) {
+        traverse(block.children!, depth + 1);
+      }
     }
   }
+
+  traverse(blocks, 0);
   return result;
 }
