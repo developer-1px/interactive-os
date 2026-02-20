@@ -15,11 +15,10 @@
   - [x] 변수명 = 디버그 문자열 일치 확인
   - [x] tsc clean + 전체 테스트 통과
 
-- [ ] T3: OS 훅 `os.*` 통합
-  - [ ] `useFocusExpansion` → `os.useExpansion()`
-  - [ ] `useFieldHooks` → `os.useField()`
-  - [ ] 훅 접근 경로 정규화
-  - [ ] SectionSidebar 등 기존 사용처 마이그레이션
+- [x] T3: OS 훅 통합 + 사이드바 적용
+  - [x] `SectionSidebar` — `useExpansion()` 훅 적용 (8줄 → 2줄)
+  - [ ] `os.useExpansion()` 형태는 circular import로 보류 → Ideas로 이동
+  - [x] tsc clean + 전체 테스트 통과
 
 ## 💡 Ideas
 
