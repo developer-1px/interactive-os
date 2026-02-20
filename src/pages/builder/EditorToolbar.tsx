@@ -57,12 +57,12 @@ export function EditorToolbar({
             <div className="w-px h-5 bg-slate-300 mx-1" />
             <ToolButton
               icon={<Undo2 size={16} />}
-              disabled={!BuilderApp.useComputed(canUndo)}
+              disabled={!BuilderApp.useComputed(canUndo.evaluate)}
               onClick={() => os.dispatch(undoCommand())}
             />
             <ToolButton
               icon={<Redo2 size={16} />}
-              disabled={!BuilderApp.useComputed(canRedo)}
+              disabled={!BuilderApp.useComputed(canRedo.evaluate)}
               onClick={() => os.dispatch(redoCommand())}
             />
           </div>
@@ -99,8 +99,8 @@ export function EditorToolbar({
               type="button"
               onClick={onToggleTest}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all rounded-md ${testActive
-                  ? "bg-amber-100 text-amber-700 ring-1 ring-amber-300"
-                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                ? "bg-amber-100 text-amber-700 ring-1 ring-amber-300"
+                : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                 }`}
             >
               🧪 Test
