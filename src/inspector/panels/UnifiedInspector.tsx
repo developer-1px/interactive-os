@@ -198,6 +198,7 @@ export function UnifiedInspector({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isUserScrolled, setIsUserScrolled] = useState(false);
   const prevLatestId = useRef<number | undefined>(undefined);
+  const isProgrammaticScroll = useRef(false);
 
   const isAtBottom = useCallback(() => {
     const el = scrollRef.current;
@@ -208,11 +209,18 @@ export function UnifiedInspector({
   const scrollToBottom = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
+    isProgrammaticScroll.current = true;
     el.scrollTop = el.scrollHeight;
     setIsUserScrolled(false);
+    // Reset flag after scroll event fires
+    requestAnimationFrame(() => {
+      isProgrammaticScroll.current = false;
+    });
   }, []);
 
   const handleScroll = useCallback(() => {
+    // Ignore scroll events caused by our own programmatic scrolling
+    if (isProgrammaticScroll.current) return;
     setIsUserScrolled(!isAtBottom());
   }, [isAtBottom]);
 
@@ -228,18 +236,14 @@ export function UnifiedInspector({
       requestAnimationFrame(() => {
         const el = scrollRef.current;
         if (!el) return;
-        // Find the last rendered node and scroll it into view
-        const lastNode = el.querySelector(
-          `[data-tx-index="${filteredTx.length - 1}"]`,
-        );
-        if (lastNode) {
-          lastNode.scrollIntoView({ block: "end", behavior: "auto" });
-        } else {
-          el.scrollTop = el.scrollHeight;
-        }
+        isProgrammaticScroll.current = true;
+        el.scrollTop = el.scrollHeight;
+        requestAnimationFrame(() => {
+          isProgrammaticScroll.current = false;
+        });
       });
     });
-  }, [latestTxId, isUserScrolled, searchQuery, filteredTx.length]);
+  }, [latestTxId, isUserScrolled, searchQuery]);
 
   const toggle = (id: number) => {
     setManualToggles((prev) => {
@@ -315,11 +319,10 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                    active
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
                       ? "bg-[#1e293b] text-white border-[#1e293b]"
                       : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                  }`}
+                    }`}
                 >
                   {group}
                 </button>
