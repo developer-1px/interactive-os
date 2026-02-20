@@ -62,7 +62,10 @@ function truncateValue(value: unknown, path: string): string {
   if (/\.snapshot$/.test(path) || /\.snapshot\./.test(path)) {
     return "[snapshot]";
   }
+  if (value === undefined) return "undefined";
+  if (value === null) return "null";
   const json = JSON.stringify(value);
+  if (!json) return "undefined";
   if (json.length > 200) {
     return json.slice(0, 120) + "…[truncated, " + json.length + " chars]";
   }
