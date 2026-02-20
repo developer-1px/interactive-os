@@ -1,22 +1,37 @@
 /**
- * SectionSidebar — PPT-style section thumbnail list.
+ * SectionSidebar — Block Tree visual projection.
  *
- * Reads sections from BuilderApp state (dynamic).
+ * Displays a tree view of blocks with:
+ *   - Indent per depth level (PPT outline style)
+ *   - Collapse/expand for container blocks (those with children)
+ *   - Active section indicator synced with canvas focus
+ *
  * Uses BuilderSidebarUI.Zone + Item from app.ts bind().
  */
 
+import type { Block } from "@/apps/builder/app";
 import { BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
 import { kernel } from "@/os/kernel";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useCallback, useState } from "react";
 
 const SIDEBAR_ZONE_ID = "builder-sidebar";
 const CANVAS_ZONE_ID = "builder-canvas";
 
 export function SectionSidebar() {
-  const sections = BuilderApp.useComputed((s) => s.data.blocks);
+  const blocks = BuilderApp.useComputed((s) => s.data.blocks);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const focusedCanvasId = kernel.useComputed(
     (s) => s.os.focus.zones[CANVAS_ZONE_ID]?.lastFocusedId ?? null,
   );
+
+  const toggleCollapse = useCallback((id: string) => {
+    setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
+
+  // Flatten tree for sidebar display — each node gets a depth
+  const flatNodes = flattenBlocks(blocks, 0, collapsed);
 
   return (
     <BuilderSidebarUI.Zone
@@ -29,85 +44,98 @@ export function SectionSidebar() {
           Sections
         </span>
         <span className="text-[10px] text-slate-300 font-medium">
-          {sections.length}
+          {blocks.length}
         </span>
       </div>
 
-      <div className="flex-1 px-2 space-y-1">
-        {sections.map((section, idx) => {
-          // "Active" means the user is editing/viewing this section in the canvas
+      <div className="flex-1 px-2 space-y-0.5">
+        {flatNodes.map((node, idx) => {
           const isCanvasActive =
-            focusedCanvasId?.startsWith(section.id) ?? false;
+            focusedCanvasId?.startsWith(node.block.id) ?? false;
+          const hasChildren =
+            node.block.children && node.block.children.length > 0;
+          const isCollapsed = collapsed[node.block.id] ?? false;
 
           return (
             <BuilderSidebarUI.Item
-              key={section.id}
-              id={`sidebar-${section.id}`}
+              key={node.block.id}
+              id={`sidebar-${node.block.id}`}
               className="outline-none group focus:outline-none"
             >
               <div
                 className={`
-                  relative flex items-center gap-3 px-3 py-2.5
-                  rounded-lg cursor-pointer transition-all duration-200
-                  border border-transparent
+                  relative flex items-center gap-2 py-2 pr-3 rounded-lg cursor-pointer
+                  transition-all duration-200 border border-transparent
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
                   ${isCanvasActive
                     ? "bg-white shadow-sm border-slate-200/60"
                     : "hover:bg-white/60 hover:border-slate-200/50 text-slate-500 hover:text-slate-700"
                   }
                 `}
+                style={{ paddingLeft: `${12 + node.depth * 16}px` }}
               >
                 {/* Active Indicator (Left Bar) */}
                 {isCanvasActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 bg-indigo-500 rounded-r-full" />
                 )}
 
-                {/* Slide number */}
-                <span
-                  className={`
-                  text-[10px] font-medium tabular-nums text-right shrink-0 w-4
-                  ${isCanvasActive ? "text-indigo-600" : "text-slate-400"}
-                `}
-                >
-                  {idx + 1}
-                </span>
-
-                {/* Thumbnail preview box */}
-                <div
-                  className={`
-                  w-10 h-7 rounded border shrink-0 flex items-center justify-center
-                  transition-colors
-                  ${isCanvasActive
-                      ? "bg-indigo-50 border-indigo-100"
-                      : "bg-slate-100 border-slate-200 group-hover:bg-white"
-                    }
-                `}
-                >
-                  {/* Miniature representation */}
-                  <div className="flex flex-col gap-0.5 w-6">
-                    <div
-                      className={`h-0.5 rounded-full w-full ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`}
+                {/* Collapse/Expand toggle or leaf indicator */}
+                {hasChildren ? (
+                  <button
+                    type="button"
+                    className={`
+                      shrink-0 w-4 h-4 flex items-center justify-center rounded
+                      hover:bg-slate-200 transition-colors
+                      ${isCanvasActive ? "text-indigo-500" : "text-slate-400"}
+                    `}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCollapse(node.block.id);
+                    }}
+                    tabIndex={-1}
+                    aria-label={isCollapsed ? "Expand" : "Collapse"}
+                  >
+                    {isCollapsed ? (
+                      <ChevronRight size={12} />
+                    ) : (
+                      <ChevronDown size={12} />
+                    )}
+                  </button>
+                ) : (
+                  <span className="shrink-0 w-4 h-4 flex items-center justify-center">
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${isCanvasActive ? "bg-indigo-400" : "bg-slate-300"
+                        }`}
                     />
-                    <div
-                      className={`h-0.5 rounded-full w-2/3 ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`}
-                    />
-                  </div>
-                </div>
+                  </span>
+                )}
 
-                {/* Section name */}
-                <div className="flex flex-col min-w-0">
+                {/* Block label */}
+                <div className="flex flex-col min-w-0 flex-1">
                   <span
                     className={`
-                    text-xs font-medium truncate
-                    ${isCanvasActive ? "text-slate-800" : "text-slate-600"}
-                  `}
+                      text-xs font-medium truncate
+                      ${isCanvasActive ? "text-slate-800" : "text-slate-600"}
+                    `}
                   >
-                    {section.label}
+                    {node.block.label}
                   </span>
                   <span className="text-[9px] text-slate-400 truncate hidden group-hover:block">
-                    {section.type}
+                    {node.block.type}
                   </span>
                 </div>
+
+                {/* Slide number for top-level */}
+                {node.depth === 0 && (
+                  <span
+                    className={`
+                      text-[10px] font-medium tabular-nums shrink-0
+                      ${isCanvasActive ? "text-indigo-400" : "text-slate-300"}
+                    `}
+                  >
+                    {idx + 1}
+                  </span>
+                )}
               </div>
             </BuilderSidebarUI.Item>
           );
@@ -115,4 +143,26 @@ export function SectionSidebar() {
       </div>
     </BuilderSidebarUI.Zone>
   );
+}
+
+// ─── Flatten tree for rendering ───
+
+interface FlatNode {
+  block: Block;
+  depth: number;
+}
+
+function flattenBlocks(
+  blocks: Block[],
+  depth: number,
+  collapsed: Record<string, boolean>,
+): FlatNode[] {
+  const result: FlatNode[] = [];
+  for (const block of blocks) {
+    result.push({ block, depth });
+    if (block.children && !collapsed[block.id]) {
+      result.push(...flattenBlocks(block.children, depth + 1, collapsed));
+    }
+  }
+  return result;
 }
