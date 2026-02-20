@@ -1,4 +1,4 @@
-import type { Transaction } from "../core/transaction";
+import type { StateDiff, Transaction } from "@kernel/core/transaction";
 
 export interface InspectorSignal {
   type: "OS" | "STATE_MUTATION" | "NO_OP";
@@ -30,9 +30,14 @@ export function inferSignal(tx: Transaction): InspectorSignal {
         ? "FOCUS"
         : "KEYBOARD";
 
+  const hasPayloadKey =
+    tx.command?.payload &&
+    typeof tx.command.payload === "object" &&
+    "key" in tx.command.payload;
+
   const rawTrigger =
     inputMeta?.key ??
-    (tx.command?.payload as any)?.key ??
+    (hasPayloadKey ? (tx.command.payload as { key: string }).key : undefined) ??
     tx.command?.type ??
     "";
 
@@ -77,7 +82,7 @@ export function inferSignal(tx: Transaction): InspectorSignal {
       type: cmdType,
       payload: cmdPayload,
     },
-    diff: changes.map((c: any) => ({
+    diff: changes.map((c: StateDiff) => ({
       path: c.path,
       from: c.from,
       to: c.to,

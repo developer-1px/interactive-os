@@ -1,5 +1,5 @@
+import type { Transaction } from "@kernel/core/transaction";
 import { describe, expect, it } from "vitest";
-import type { Transaction } from "../../../core/transaction";
 import { inferSignal } from "../../inferSignal";
 
 describe("inferSignal", () => {

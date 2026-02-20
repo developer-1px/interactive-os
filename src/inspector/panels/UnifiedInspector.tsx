@@ -11,7 +11,7 @@
  */
 
 import type { Transaction } from "@kernel/core/transaction";
-import { inferSignal } from "@kernel/inspector/inferSignal";
+import { inferSignal } from "../utils/inferSignal";
 import {
   ArrowRightLeft,
   Check,
