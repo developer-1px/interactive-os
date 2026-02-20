@@ -20,22 +20,22 @@ import type { Plugin } from "vite";
  *   const beforeEach = globalThis.__vitest_shim_beforeEach;
  */
 export function testShimPlugin(): Plugin {
-    return {
-        name: "test-shim",
-        enforce: "pre",
+  return {
+    name: "test-shim",
+    enforce: "pre",
 
-        resolveId(source, importer) {
-            // Only intercept vitest imports from .test.ts files
-            if (source === "vitest" && importer?.endsWith(".test.ts")) {
-                return "\0vitest-browser-shim";
-            }
-            return null;
-        },
+    resolveId(source, importer) {
+      // Only intercept vitest imports from .test.ts files
+      if (source === "vitest" && importer?.endsWith(".test.ts")) {
+        return "\0vitest-browser-shim";
+      }
+      return null;
+    },
 
-        load(id) {
-            if (id === "\0vitest-browser-shim") {
-                // Generate a virtual module that exports from globalThis shim
-                return `
+    load(id) {
+      if (id === "\0vitest-browser-shim") {
+        // Generate a virtual module that exports from globalThis shim
+        return `
 export const describe = (...args) => globalThis.__vitest_shim_describe(...args);
 export const it = (...args) => globalThis.__vitest_shim_it(...args);
 export const test = (...args) => globalThis.__vitest_shim_test(...args);
@@ -46,8 +46,8 @@ export const afterEach = (...args) => globalThis.__vitest_shim_afterEach(...args
 export const beforeAll = (...args) => globalThis.__vitest_shim_beforeAll(...args);
 export const afterAll = (...args) => globalThis.__vitest_shim_afterAll(...args);
 `;
-            }
-            return null;
-        },
-    };
+      }
+      return null;
+    },
+  };
 }

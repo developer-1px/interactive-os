@@ -14,7 +14,6 @@
  */
 import { type BaseCommand, defineScope, type ScopeToken } from "@kernel";
 import { produce } from "immer";
-import type { ZoneCallback, ZoneEntry } from "../../2-contexts/zoneRegistry.ts";
 import {
   type ComponentProps,
   createContext,
@@ -25,6 +24,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+import type { ZoneCallback, ZoneEntry } from "../../2-contexts/zoneRegistry.ts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
 import { FOCUS, STACK_POP, STACK_PUSH } from "../../3-commands/focus";
 import { kernel } from "../../kernel.ts";

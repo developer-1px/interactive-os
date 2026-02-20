@@ -6,7 +6,6 @@
 
 import { TodoApp, TodoSidebar } from "@apps/todo/app";
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { Trigger } from "@os/6-components/primitives/Trigger";
 import { kernel } from "@os/kernel";
 import {
   ArrowRight,
@@ -43,7 +42,9 @@ export function Sidebar() {
 // Extracted component to isolate category data subscription
 function SidebarCategoryItem({ categoryId }: { categoryId: string }) {
   const category = TodoApp.useComputed((s) => s.data.categories[categoryId]);
-  const selectedCategoryId = TodoApp.useComputed((s) => s.ui.selectedCategoryId);
+  const selectedCategoryId = TodoApp.useComputed(
+    (s) => s.ui.selectedCategoryId,
+  );
 
   if (!category) return null;
 
@@ -51,10 +52,10 @@ function SidebarCategoryItem({ categoryId }: { categoryId: string }) {
 
   return (
     <TodoSidebar.Item id={category.id} asChild>
-      <Trigger
-        onPress={TodoSidebar.commands.selectCategory({
+      <TodoSidebar.triggers.SelectCategory
+        payload={{
           id: category.id,
-        })}
+        }}
       >
         <div
           className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
@@ -79,7 +80,7 @@ function SidebarCategoryItem({ categoryId }: { categoryId: string }) {
             <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
           )}
         </div>
-      </Trigger>
+      </TodoSidebar.triggers.SelectCategory>
     </TodoSidebar.Item>
   );
 }

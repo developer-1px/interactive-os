@@ -9,10 +9,7 @@
 
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
-import {
-  getChildRole,
-  isExpandableRole,
-} from "../../registries/roleRegistry";
+import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { EXPAND } from "../expand";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 

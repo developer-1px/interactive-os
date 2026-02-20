@@ -12,11 +12,8 @@ import { produce } from "immer";
 import { DOM_ITEMS, DOM_RECTS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
+import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { applyFollowFocus, ensureZone } from "../../state/utils";
-import {
-  getChildRole,
-  isExpandableRole,
-} from "../../registries/roleRegistry";
 import { EXPAND } from "../expand";
 import { resolveNavigate } from "./resolve";
 

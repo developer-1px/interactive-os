@@ -82,13 +82,15 @@ function register(id: string, config: FieldConfig) {
 
   // If re-registering, preserve state but update config
   // If new, initialize default state
-  const newState: FieldState = existing ? existing.state : {
-    value: defaultValue,
-    defaultValue,
-    isValid: true,
-    isDirty: false,
-    error: null,
-  };
+  const newState: FieldState = existing
+    ? existing.state
+    : {
+        value: defaultValue,
+        defaultValue,
+        isValid: true,
+        isDirty: false,
+        error: null,
+      };
 
   newFields.set(id, {
     config,
@@ -133,7 +135,7 @@ function setError(id: string, error: string | null) {
     state: {
       ...entry.state,
       error,
-      isValid: !error
+      isValid: !error,
     },
   });
 

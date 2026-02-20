@@ -8,12 +8,14 @@
 import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
 import type { ZoneState } from "@os/state/OSState";
 
-export function buildZoneCursor(zone: ZoneState | undefined): ZoneCursor | null {
-    if (!zone?.focusedItemId) return null;
+export function buildZoneCursor(
+  zone: ZoneState | undefined,
+): ZoneCursor | null {
+  if (!zone?.focusedItemId) return null;
 
-    return {
-        focusId: zone.focusedItemId,
-        selection: zone.selection ?? [],
-        anchor: zone.selectionAnchor ?? null,
-    };
+  return {
+    focusId: zone.focusedItemId,
+    selection: zone.selection ?? [],
+    anchor: zone.selectionAnchor ?? null,
+  };
 }

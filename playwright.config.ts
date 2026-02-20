@@ -4,9 +4,9 @@ export default defineConfig({
   testDir: "./src",
   testMatch: "**/tests/e2e/**/*.spec.ts",
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  forbidOnly: !!process.env["CI"],
+  retries: process.env["CI"] ? 2 : 0,
+  ...(process.env["CI"] ? { workers: 1 } : {}),
   reporter: "list",
   use: {
     baseURL: "http://localhost:5555",
@@ -22,6 +22,6 @@ export default defineConfig({
   webServer: {
     command: "npm run dev",
     url: "http://localhost:5555",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !process.env["CI"],
   },
 });

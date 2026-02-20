@@ -165,9 +165,7 @@ describe("Virtual Focus (T5a)", () => {
       registerVirtualZone("z-virtual", items);
 
       // Dispatch FOCUS to item-2
-      kernel.dispatch(
-        FOCUS({ zoneId: "z-virtual", itemId: "item-2" }),
-      );
+      kernel.dispatch(FOCUS({ zoneId: "z-virtual", itemId: "item-2" }));
 
       // 1. Check State Update
       const stateAfter = kernel.getState().os.focus.zones["z-virtual"];
@@ -192,9 +190,7 @@ describe("Virtual Focus (T5a)", () => {
         parentId: null,
       });
 
-      kernel.dispatch(
-        FOCUS({ zoneId: "z-normal", itemId: "item-A" }),
-      );
+      kernel.dispatch(FOCUS({ zoneId: "z-normal", itemId: "item-A" }));
       // kernel.dispatch returns void — check transaction log for effects
       const tx = kernel.inspector.getLastTransaction();
       expect((tx?.effects as any)?.focus).toBe("item-A");

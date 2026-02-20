@@ -74,7 +74,10 @@ describe("OS_COPY dispatch chain", () => {
   it("OS_COPY with onCopy callback dispatches the callback", () => {
     const zoneId = "test-zone-copy";
     registerZoneWithClipboard(zoneId, {
-      onCopy: (cursor) => ({ type: "test/copy", payload: { id: cursor.focusId } }),
+      onCopy: (cursor) => ({
+        type: "test/copy",
+        payload: { id: cursor.focusId },
+      }),
     });
     setupFocus(zoneId, "item-1");
 
@@ -99,7 +102,10 @@ describe("OS_CUT dispatch chain", () => {
   it("OS_CUT with onCut callback dispatches the callback", () => {
     const zoneId = "test-zone-cut";
     registerZoneWithClipboard(zoneId, {
-      onCut: (cursor) => ({ type: "test/cut", payload: { id: cursor.focusId } }),
+      onCut: (cursor) => ({
+        type: "test/cut",
+        payload: { id: cursor.focusId },
+      }),
     });
     setupFocus(zoneId, "item-1");
 
@@ -111,7 +117,10 @@ describe("OS_PASTE dispatch chain", () => {
   it("OS_PASTE with onPaste callback dispatches the callback", () => {
     const zoneId = "test-zone-paste";
     registerZoneWithClipboard(zoneId, {
-      onPaste: (cursor) => ({ type: "test/paste", payload: { id: cursor.focusId } }),
+      onPaste: (cursor) => ({
+        type: "test/paste",
+        payload: { id: cursor.focusId },
+      }),
     });
     setupFocus(zoneId, "item-1");
 

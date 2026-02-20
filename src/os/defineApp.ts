@@ -152,7 +152,10 @@ export function defineApp<S>(
     group?: typeof slice.group,
   ): CommandFactory<T, P> {
     // Track for test instance
-    flatHandlerRegistry.set(type, { handler, ...(opts?.when ? { when: opts.when } : {}) });
+    flatHandlerRegistry.set(type, {
+      handler,
+      ...(opts?.when ? { when: opts.when } : {}),
+    });
 
     // Wrap flat → curried for kernel (readonly state matches TypedContext)
     const kernelHandler = (ctx: { readonly state: S }) => (payload: P) =>
@@ -174,8 +177,7 @@ export function defineApp<S>(
 
     const factory = (whenGuard
       ? defineCmd(type, kernelHandler, whenGuard)
-      : defineCmd(type, kernelHandler)
-    ) as unknown as CommandFactory<T, P>;
+      : defineCmd(type, kernelHandler)) as unknown as CommandFactory<T, P>;
 
     return factory;
   }
@@ -256,10 +258,18 @@ export function defineApp<S>(
       return createZone(name);
     },
 
-    createTrigger: ((commandOrConfig: BaseCommand | CompoundTriggerConfig | CommandFactory<any, any>) => {
+    createTrigger: ((
+      commandOrConfig:
+        | BaseCommand
+        | CompoundTriggerConfig
+        | CommandFactory<any, any>,
+    ) => {
       // ── CommandFactory (Dynamic Trigger) ──
       if (typeof commandOrConfig === "function") {
-        return createDynamicTrigger(appId, commandOrConfig as CommandFactory<any, any>);
+        return createDynamicTrigger(
+          appId,
+          commandOrConfig as CommandFactory<any, any>,
+        );
       }
       // ── Simple trigger (BaseCommand has .type) ──
       if (
@@ -274,11 +284,14 @@ export function defineApp<S>(
         commandOrConfig as CompoundTriggerConfig,
       );
     }) as {
-      /* Factory Overload: Returns component taking payload */
-      <P>(factory: CommandFactory<string, P>): React.FC<{
-        children: ReactNode;
-        payload?: P;
-      }>;
+      /* Factory Overload: Returns component taking typed payload */
+      <P = void>(
+        factory: CommandFactory<string, P>,
+      ): React.FC<
+        P extends void
+          ? { children: ReactNode; payload?: never }
+          : { children: ReactNode; payload: P }
+      >;
       /* Command Overload: Returns simple component */
       (
         command: BaseCommand,

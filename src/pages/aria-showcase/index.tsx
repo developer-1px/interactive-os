@@ -8,7 +8,7 @@ import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { kernel } from "@os/kernel.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Icon } from "@/lib/Icon";
+import { Icon } from "@/components/Icon";
 import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
 
 // @ts-expect-error — spec-wrapper plugin transforms at build time

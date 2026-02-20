@@ -80,7 +80,9 @@ test.describe("Builder Spatial Navigation", () => {
 
     await page.keyboard.press("ArrowDown");
     // Should land on first card's first item (Icon or Badge)
-    await expect(page.locator("#ncp-services-service-icon-inner-0")).toBeFocused();
+    await expect(
+      page.locator("#ncp-services-service-icon-inner-0"),
+    ).toBeFocused();
   });
 
   test("Services 서비스 카드 내부", async ({ page }) => {

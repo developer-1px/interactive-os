@@ -45,21 +45,201 @@ const D = {
 
 const specTable: SpecRow[] = [
   { role: "group", ...D },
-  { role: "listbox", orient: "vertical", loop: false, typeahead: true, entry: "selected", selectMode: "single", followFocus: true, tab: "escape", activate: D.activate, dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "menu", orient: "vertical", loop: true, typeahead: D.typeahead, entry: "first", selectMode: "none", followFocus: D.followFocus, tab: "trap", activate: "automatic", dismissEsc: "close", autoFocus: true },
-  { role: "menubar", orient: "horizontal", loop: true, typeahead: D.typeahead, entry: "restore", selectMode: "none", followFocus: D.followFocus, tab: "escape", activate: "automatic", dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "radiogroup", orient: "vertical", loop: true, typeahead: D.typeahead, entry: "selected", selectMode: "single", followFocus: true, tab: "escape", activate: D.activate, dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "tablist", orient: "horizontal", loop: true, typeahead: D.typeahead, entry: "selected", selectMode: "single", followFocus: true, tab: "escape", activate: "automatic", dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "toolbar", orient: "horizontal", loop: true, typeahead: D.typeahead, entry: "restore", selectMode: "none", followFocus: D.followFocus, tab: "escape", activate: D.activate, dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "grid", orient: "both", loop: false, typeahead: D.typeahead, entry: D.entry, selectMode: "multiple", followFocus: false, tab: "escape", activate: D.activate, dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "treegrid", orient: "both", loop: false, typeahead: D.typeahead, entry: D.entry, selectMode: "multiple", followFocus: false, tab: "escape", activate: "manual", dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "tree", orient: "vertical", loop: false, typeahead: true, entry: "selected", selectMode: "single", followFocus: false, tab: "escape", activate: "manual", dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "dialog", orient: D.orient, loop: D.loop, typeahead: D.typeahead, entry: D.entry, selectMode: D.selectMode, followFocus: D.followFocus, tab: "trap", activate: D.activate, dismissEsc: "close", autoFocus: true },
-  { role: "alertdialog", orient: D.orient, loop: D.loop, typeahead: D.typeahead, entry: D.entry, selectMode: D.selectMode, followFocus: D.followFocus, tab: "trap", activate: D.activate, dismissEsc: "close", autoFocus: true },
-  { role: "combobox", orient: "vertical", loop: false, typeahead: false, entry: D.entry, selectMode: "single", followFocus: true, tab: "escape", activate: D.activate, dismissEsc: "close", autoFocus: D.autoFocus },
-  { role: "feed", orient: "vertical", loop: false, typeahead: D.typeahead, entry: D.entry, selectMode: D.selectMode, followFocus: D.followFocus, tab: "escape", activate: D.activate, dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "accordion", orient: "vertical", loop: false, typeahead: D.typeahead, entry: D.entry, selectMode: D.selectMode, followFocus: D.followFocus, tab: "escape", activate: "manual", dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
-  { role: "disclosure", orient: D.orient, loop: D.loop, typeahead: D.typeahead, entry: D.entry, selectMode: D.selectMode, followFocus: D.followFocus, tab: "flow", activate: "manual", dismissEsc: D.dismissEsc, autoFocus: D.autoFocus },
+  {
+    role: "listbox",
+    orient: "vertical",
+    loop: false,
+    typeahead: true,
+    entry: "selected",
+    selectMode: "single",
+    followFocus: true,
+    tab: "escape",
+    activate: D.activate,
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "menu",
+    orient: "vertical",
+    loop: true,
+    typeahead: D.typeahead,
+    entry: "first",
+    selectMode: "none",
+    followFocus: D.followFocus,
+    tab: "trap",
+    activate: "automatic",
+    dismissEsc: "close",
+    autoFocus: true,
+  },
+  {
+    role: "menubar",
+    orient: "horizontal",
+    loop: true,
+    typeahead: D.typeahead,
+    entry: "restore",
+    selectMode: "none",
+    followFocus: D.followFocus,
+    tab: "escape",
+    activate: "automatic",
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "radiogroup",
+    orient: "vertical",
+    loop: true,
+    typeahead: D.typeahead,
+    entry: "selected",
+    selectMode: "single",
+    followFocus: true,
+    tab: "escape",
+    activate: D.activate,
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "tablist",
+    orient: "horizontal",
+    loop: true,
+    typeahead: D.typeahead,
+    entry: "selected",
+    selectMode: "single",
+    followFocus: true,
+    tab: "escape",
+    activate: "automatic",
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "toolbar",
+    orient: "horizontal",
+    loop: true,
+    typeahead: D.typeahead,
+    entry: "restore",
+    selectMode: "none",
+    followFocus: D.followFocus,
+    tab: "escape",
+    activate: D.activate,
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "grid",
+    orient: "both",
+    loop: false,
+    typeahead: D.typeahead,
+    entry: D.entry,
+    selectMode: "multiple",
+    followFocus: false,
+    tab: "escape",
+    activate: D.activate,
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "treegrid",
+    orient: "both",
+    loop: false,
+    typeahead: D.typeahead,
+    entry: D.entry,
+    selectMode: "multiple",
+    followFocus: false,
+    tab: "escape",
+    activate: "manual",
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "tree",
+    orient: "vertical",
+    loop: false,
+    typeahead: true,
+    entry: "selected",
+    selectMode: "single",
+    followFocus: false,
+    tab: "escape",
+    activate: "manual",
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "dialog",
+    orient: D.orient,
+    loop: D.loop,
+    typeahead: D.typeahead,
+    entry: D.entry,
+    selectMode: D.selectMode,
+    followFocus: D.followFocus,
+    tab: "trap",
+    activate: D.activate,
+    dismissEsc: "close",
+    autoFocus: true,
+  },
+  {
+    role: "alertdialog",
+    orient: D.orient,
+    loop: D.loop,
+    typeahead: D.typeahead,
+    entry: D.entry,
+    selectMode: D.selectMode,
+    followFocus: D.followFocus,
+    tab: "trap",
+    activate: D.activate,
+    dismissEsc: "close",
+    autoFocus: true,
+  },
+  {
+    role: "combobox",
+    orient: "vertical",
+    loop: false,
+    typeahead: false,
+    entry: D.entry,
+    selectMode: "single",
+    followFocus: true,
+    tab: "escape",
+    activate: D.activate,
+    dismissEsc: "close",
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "feed",
+    orient: "vertical",
+    loop: false,
+    typeahead: D.typeahead,
+    entry: D.entry,
+    selectMode: D.selectMode,
+    followFocus: D.followFocus,
+    tab: "escape",
+    activate: D.activate,
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "accordion",
+    orient: "vertical",
+    loop: false,
+    typeahead: D.typeahead,
+    entry: D.entry,
+    selectMode: D.selectMode,
+    followFocus: D.followFocus,
+    tab: "escape",
+    activate: "manual",
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
+  {
+    role: "disclosure",
+    orient: D.orient,
+    loop: D.loop,
+    typeahead: D.typeahead,
+    entry: D.entry,
+    selectMode: D.selectMode,
+    followFocus: D.followFocus,
+    tab: "flow",
+    activate: "manual",
+    dismissEsc: D.dismissEsc,
+    autoFocus: D.autoFocus,
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -67,23 +247,22 @@ const specTable: SpecRow[] = [
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Role Presets vs SPEC §7 Table", () => {
-  it.each(specTable.map((row) => [row.role, row] as const))(
-    'role="%s" matches SPEC §7',
-    (_roleName, row) => {
-      const config = resolveRole(row.role);
+  it.each(
+    specTable.map((row) => [row.role, row] as const),
+  )('role="%s" matches SPEC §7', (_roleName, row) => {
+    const config = resolveRole(row.role);
 
-      expect(config.navigate.orientation).toBe(row.orient);
-      expect(config.navigate.loop).toBe(row.loop);
-      expect(config.navigate.typeahead).toBe(row.typeahead);
-      expect(config.navigate.entry).toBe(row.entry);
-      expect(config.select.mode).toBe(row.selectMode);
-      expect(config.select.followFocus).toBe(row.followFocus);
-      expect(config.tab.behavior).toBe(row.tab);
-      expect(config.activate.mode).toBe(row.activate);
-      expect(config.dismiss.escape).toBe(row.dismissEsc);
-      expect(config.project.autoFocus).toBe(row.autoFocus);
-    },
-  );
+    expect(config.navigate.orientation).toBe(row.orient);
+    expect(config.navigate.loop).toBe(row.loop);
+    expect(config.navigate.typeahead).toBe(row.typeahead);
+    expect(config.navigate.entry).toBe(row.entry);
+    expect(config.select.mode).toBe(row.selectMode);
+    expect(config.select.followFocus).toBe(row.followFocus);
+    expect(config.tab.behavior).toBe(row.tab);
+    expect(config.activate.mode).toBe(row.activate);
+    expect(config.dismiss.escape).toBe(row.dismissEsc);
+    expect(config.project.autoFocus).toBe(row.autoFocus);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════

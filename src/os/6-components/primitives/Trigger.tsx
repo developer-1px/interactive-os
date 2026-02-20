@@ -162,7 +162,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       overlayRole && overlayId && portalElement ? (
         <OverlayContext.Provider value={{ overlayId }}>
           {cloneElement(portalElement, {
-            ...portalElement.props,
+            ...(portalElement.props as any),
             _overlayId: overlayId,
             _overlayType: overlayRole,
           })}
@@ -174,7 +174,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     if (id) {
       return (
         <>
-          <FocusItem id={id} asChild={true} ref={ref} {...baseProps}>
+          <FocusItem id={id} asChild={true} ref={ref} {...(baseProps as any)}>
             {isValidElement(triggerContent) ? (
               triggerContent
             ) : (
@@ -210,7 +210,10 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     // Fallback: multiple children or non-element children — wrap in span
     return (
       <>
-        <span ref={ref as React.Ref<HTMLSpanElement>} {...(baseProps as React.HTMLAttributes<HTMLSpanElement>)}>
+        <span
+          ref={ref as React.Ref<HTMLSpanElement>}
+          {...(baseProps as React.HTMLAttributes<HTMLSpanElement>)}
+        >
           {triggerContent}
         </span>
         {portalWithContext}

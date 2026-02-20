@@ -79,7 +79,7 @@ describe("RECOVER (SPEC §3.1)", () => {
     kernel.dispatch(RECOVER());
 
     // State should NOT change — item is still present
-    const zone = kernel.getState().os.focus.zones['z1'];
+    const zone = kernel.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-2");
   });
 
@@ -94,7 +94,7 @@ describe("RECOVER (SPEC §3.1)", () => {
 
     kernel.dispatch(RECOVER());
 
-    const zone = kernel.getState().os.focus.zones['z1'];
+    const zone = kernel.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-3");
   });
 
@@ -108,7 +108,7 @@ describe("RECOVER (SPEC §3.1)", () => {
 
     kernel.dispatch(RECOVER());
 
-    const zone = kernel.getState().os.focus.zones['z1'];
+    const zone = kernel.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-1");
   });
 
@@ -147,7 +147,7 @@ describe("RECOVER (SPEC §3.1)", () => {
     kernel.dispatch(RECOVER());
 
     // focusedItemId should remain unchanged (RECOVER returns early)
-    const zone = kernel.getState().os.focus.zones['z1'];
+    const zone = kernel.getState().os.focus.zones["z1"];
     expect(zone?.focusedItemId).toBe("item-1");
   });
 
@@ -160,7 +160,7 @@ describe("RECOVER (SPEC §3.1)", () => {
 
     kernel.dispatch(RECOVER());
 
-    const zone = kernel.getState().os.focus.zones['z1'];
+    const zone = kernel.getState().os.focus.zones["z1"];
     expect(zone?.lastFocusedId).toBe("item-3");
   });
 });

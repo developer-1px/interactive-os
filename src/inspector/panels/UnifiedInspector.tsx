@@ -48,19 +48,31 @@ function copyToClipboard(text: string) {
   });
 }
 
-function formatAiContext(tx: Transaction, signal: ReturnType<typeof inferSignal>): string {
+function formatAiContext(
+  tx: Transaction,
+  signal: ReturnType<typeof inferSignal>,
+): string {
   const trigger = `**Action**: ${signal.trigger.kind} (Raw: ${signal.trigger.raw}${signal.trigger.elementId ? `, Element: ${signal.trigger.elementId}` : ""})`;
   const command = `**Command**: \`${signal.command.type}\``;
   const payload = `**Payload**: \`${JSON.stringify(signal.command.payload)}\``;
 
   let diffStr = "**Diff**: None";
   if (signal.diff.length > 0) {
-    diffStr = "**Diff**:\n" + signal.diff.map(d => `  - \`${d.path}\`: \`${JSON.stringify(d.from)}\` -> \`${JSON.stringify(d.to)}\``).join("\n");
+    diffStr =
+      "**Diff**:\n" +
+      signal.diff
+        .map(
+          (d) =>
+            `  - \`${d.path}\`: \`${JSON.stringify(d.from)}\` -> \`${JSON.stringify(d.to)}\``,
+        )
+        .join("\n");
   }
 
   let effectStr = "";
   if (signal.effects.length > 0) {
-    effectStr = `\n**Effects**: \n` + signal.effects.map(e => `  - \`${e}\``).join("\n");
+    effectStr =
+      `\n**Effects**: \n` +
+      signal.effects.map((e) => `  - \`${e}\``).join("\n");
   }
 
   return `**[Inspector Captured Event - ${formatTime(tx.timestamp)}]**\n- ${trigger}\n- ${command}\n- ${payload}\n${diffStr}${effectStr}`;
@@ -77,13 +89,13 @@ function highlightElement(id: string | undefined, active: boolean) {
 
   if (el && el instanceof HTMLElement) {
     if (active) {
-      el.dataset['inspectorHighlight'] = "true";
+      el.dataset["inspectorHighlight"] = "true";
       el.style.outline = "2px solid #f06595";
       el.style.outlineOffset = "2px";
       el.style.boxShadow = "0 0 0 4px rgba(240, 101, 149, 0.3)";
       el.style.transition = "all 0.2s";
     } else {
-      delete el.dataset['inspectorHighlight'];
+      delete el.dataset["inspectorHighlight"];
       el.style.outline = "";
       el.style.outlineOffset = "";
       el.style.boxShadow = "";
@@ -114,7 +126,8 @@ export function UnifiedInspector({
     return signal.type !== "OS";
   });
 
-  const latestTxId = filteredTx.length > 0 ? filteredTx[filteredTx.length - 1]?.id : undefined;
+  const latestTxId =
+    filteredTx.length > 0 ? filteredTx[filteredTx.length - 1]?.id : undefined;
   const expandedIds = new Set(manualToggles);
   // Auto-expand latest only if user hasn't manually collapsed it
   if (latestTxId !== undefined && !manualToggles.has(latestTxId)) {
@@ -152,7 +165,9 @@ export function UnifiedInspector({
           const el = scrollRef.current;
           if (!el) return;
           const targetIdx = Math.max(0, filteredTx.length - 3);
-          const targetEl = el.querySelector(`[data-tx-index="${targetIdx}"]`) as HTMLElement | null;
+          const targetEl = el.querySelector(
+            `[data-tx-index="${targetIdx}"]`,
+          ) as HTMLElement | null;
           if (targetEl) {
             el.scrollTop = targetEl.offsetTop - 60;
           } else {
@@ -191,7 +206,9 @@ export function UnifiedInspector({
             onChange={(e) => setShowOsEvents(e.target.checked)}
             className="w-3 h-3 accent-blue-500 rounded-sm"
           />
-          <span className="font-medium text-[9px] tracking-wide">OS Events</span>
+          <span className="font-medium text-[9px] tracking-wide">
+            OS Events
+          </span>
         </label>
 
         {onClear && filteredTx.length > 0 && (
@@ -208,7 +225,11 @@ export function UnifiedInspector({
         )}
       </div>
       <div className="relative flex-1 overflow-hidden">
-        <div ref={scrollRef} onScroll={handleScroll} className="h-full overflow-y-auto">
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="h-full overflow-y-auto"
+        >
           {/* ── Trace Log Section ── */}
           <CollapsibleSection
             title="Trace Log"
@@ -366,7 +387,9 @@ function TimelineNode({
             className="shrink-0 mx-2 p-1.5 rounded-md text-[#94a3b8] hover:bg-[#e0e7ff] hover:text-[#4f46e5] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-1 group"
           >
             <ClipboardCopy size={12} />
-            <span className="text-[8px] font-bold uppercase hidden group-hover:inline">Copy for AI</span>
+            <span className="text-[8px] font-bold uppercase hidden group-hover:inline">
+              Copy for AI
+            </span>
           </button>
         )}
       </div>
@@ -379,8 +402,14 @@ function TimelineNode({
             <Section title="State Mutation">
               {diff.map((d: { path: string; from?: unknown; to?: unknown }) => (
                 <Row key={d.path}>
-                  <ArrowRightLeft size={9} className="text-[#94a3b8] shrink-0" />
-                  <span className="text-[#475569] font-mono truncate" title={d.path}>
+                  <ArrowRightLeft
+                    size={9}
+                    className="text-[#94a3b8] shrink-0"
+                  />
+                  <span
+                    className="text-[#475569] font-mono truncate"
+                    title={d.path}
+                  >
                     {d.path}
                   </span>
                   <span className="ml-auto flex items-center gap-1 shrink-0 font-mono">
@@ -403,9 +432,7 @@ function TimelineNode({
               {effects.map((key, idx) => (
                 <Row key={`${key}-${idx}`}>
                   <Check size={9} className="text-[#16a34a] shrink-0" />
-                  <span className="font-mono text-[#334155]">
-                    {key}
-                  </span>
+                  <span className="font-mono text-[#334155]">{key}</span>
                 </Row>
               ))}
             </Section>

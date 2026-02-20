@@ -8,15 +8,15 @@
  */
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
+import type {
+  CompoundTriggerComponents,
+  CompoundTriggerConfig,
+} from "@os/defineApp.trigger";
 import type React from "react";
 import type { ReactNode } from "react";
-import type {
-  CompoundTriggerConfig,
-  CompoundTriggerComponents,
-} from "@os/defineApp.trigger";
+import type { ZodSchema } from "zod";
 import type { ZoneCallback } from "./2-contexts/zoneRegistry";
 import type { ZoneRole } from "./registries/roleRegistry";
-import type { ZodSchema } from "zod";
 import type { FieldCommandFactory } from "./schemas/command/BaseCommand";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -51,9 +51,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-    state: S;
-    dispatch?: BaseCommand | BaseCommand[] | undefined;
-  }
+      state: S;
+      dispatch?: BaseCommand | BaseCommand[] | undefined;
+    }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -167,15 +167,20 @@ export interface AppHandle<S> {
     options?: { when?: Condition<S> },
   ): CommandFactory<T, P>;
   createZone(name: string): ZoneHandle<S>;
-  createTrigger<P>(factory: CommandFactory<string, P>): React.FC<{
-    children: ReactNode;
-    payload?: P;
-  }>;
+  createTrigger<P = void>(
+    factory: CommandFactory<string, P>,
+  ): React.FC<
+    P extends void
+      ? { children: ReactNode; payload?: never }
+      : { children: ReactNode; payload: P }
+  >;
   createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;
   }>;
   createTrigger(config: CompoundTriggerConfig): CompoundTriggerComponents;
   useComputed<T>(selector: Selector<S, T>): T;
   useComputed<T>(fn: (state: S) => T): T;
-  create(overrides?: Partial<S> | { history?: boolean; withOS?: boolean }): TestInstance<S>;
+  create(
+    overrides?: Partial<S> | { history?: boolean; withOS?: boolean },
+  ): TestInstance<S>;
 }

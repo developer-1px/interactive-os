@@ -15,9 +15,9 @@
 import type { BaseCommand, Middleware } from "@kernel";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { FOCUS } from "@os/3-commands/focus/focus";
-import { isEditingElement } from "@os/keymaps/fieldKeyOwnership";
 import { resolveTypeahead } from "@os/3-commands/navigate/typeahead";
 import { kernel } from "@os/kernel";
+import { isEditingElement } from "@os/keymaps/fieldKeyOwnership";
 
 /**
  * Get ordered item IDs and their labels from DOM for a zone element.
@@ -31,7 +31,7 @@ function getItemsAndLabels(zoneEl: HTMLElement): {
   const labels = new Map<string, string>();
 
   for (const el of itemEls) {
-    const id = el.dataset['itemId'];
+    const id = el.dataset["itemId"];
     if (!id) continue;
     items.push(id);
     const label = el.getAttribute("aria-label") || el.textContent || "";

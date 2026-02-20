@@ -47,4 +47,7 @@ export function clearFieldDOM(fieldId: string): void {
   }
 }
 
-export const FIELD_CLEAR_EFFECT = kernel.defineEffect("field-clear", clearFieldDOM);
+export const FIELD_CLEAR_EFFECT = kernel.defineEffect(
+  "field-clear",
+  clearFieldDOM,
+);

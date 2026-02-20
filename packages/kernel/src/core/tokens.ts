@@ -86,9 +86,9 @@ type Prettify<T> = { [K in keyof T]: T[K] } & {};
  * → `{ NOW: number; USER: User }`
  */
 export type InjectResult<T extends ContextToken[]> = Prettify<{
-  [K in T[number]as K["__id"]]: K extends ContextToken<string, infer V>
-  ? V
-  : never;
+  [K in T[number] as K["__id"]]: K extends ContextToken<string, infer V>
+    ? V
+    : never;
 }>;
 
 /** Context passed to command handlers. state + injected values. */

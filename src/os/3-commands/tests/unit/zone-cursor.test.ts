@@ -26,57 +26,57 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 let snapshot: ReturnType<typeof kernel.getState>;
 
 function setupFocusWithSelection(
-    zoneId: string,
-    focusedItemId: string,
-    selection: string[] = [],
-    anchor: string | null = null,
+  zoneId: string,
+  focusedItemId: string,
+  selection: string[] = [],
+  anchor: string | null = null,
 ) {
-    kernel.setState((prev) => ({
-        ...prev,
-        os: {
-            ...prev.os,
-            focus: {
-                ...prev.os.focus,
-                activeZoneId: zoneId,
-                zones: {
-                    ...prev.os.focus.zones,
-                    [zoneId]: {
-                        ...initialZoneState,
-                        ...prev.os.focus.zones[zoneId],
-                        focusedItemId,
-                        selection,
-                        selectionAnchor: anchor,
-                    },
-                },
-            },
+  kernel.setState((prev) => ({
+    ...prev,
+    os: {
+      ...prev.os,
+      focus: {
+        ...prev.os.focus,
+        activeZoneId: zoneId,
+        zones: {
+          ...prev.os.focus.zones,
+          [zoneId]: {
+            ...initialZoneState,
+            ...prev.os.focus.zones[zoneId],
+            focusedItemId,
+            selection,
+            selectionAnchor: anchor,
+          },
         },
-    }));
+      },
+    },
+  }));
 }
 
 /** Capture dispatched commands via GLOBAL before-middleware */
 // @ts-expect-error — helper kept for future test expansion
 function _captureDispatches() {
-    const captured: Command[] = [];
-    kernel.use({
-        id: "test:capture-dispatches",
-        scope: GLOBAL as ScopeToken,
-        before(ctx) {
-            captured.push({ ...ctx.command } as Command);
-            return ctx;
-        },
-    });
-    return captured;
+  const captured: Command[] = [];
+  kernel.use({
+    id: "test:capture-dispatches",
+    scope: GLOBAL as ScopeToken,
+    before(ctx) {
+      captured.push({ ...ctx.command } as Command);
+      return ctx;
+    },
+  });
+  return captured;
 }
 
 beforeEach(() => {
-    snapshot = kernel.getState();
-    return () => {
-        kernel.setState(() => snapshot);
-        for (const key of [...ZoneRegistry.keys()]) {
-            ZoneRegistry.unregister(key);
-        }
-        vi.restoreAllMocks();
-    };
+  snapshot = kernel.getState();
+  return () => {
+    kernel.setState(() => snapshot);
+    for (const key of [...ZoneRegistry.keys()]) {
+      ZoneRegistry.unregister(key);
+    }
+    vi.restoreAllMocks();
+  };
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -84,85 +84,90 @@ beforeEach(() => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection + anchor", () => {
-    it("onDelete receives ZoneCursor with focusId when no selection", () => {
-        const receivedCursor = vi.fn(() => ({ type: "mock/delete", payload: {} }));
+  it("onDelete receives ZoneCursor with focusId when no selection", () => {
+    const receivedCursor = vi.fn(() => ({ type: "mock/delete", payload: {} }));
 
-        ZoneRegistry.register("z1", {
-            config: {} as any,
-            element: document.createElement("div"),
-            parentId: null,
-            onDelete: receivedCursor,
-        });
-        setupFocusWithSelection("z1", "item-1");
-
-        kernel.dispatch(OS_DELETE());
-
-        expect(receivedCursor).toHaveBeenCalledWith({
-            focusId: "item-1",
-            selection: [],
-            anchor: null,
-        });
+    ZoneRegistry.register("z1", {
+      config: {} as any,
+      element: document.createElement("div"),
+      parentId: null,
+      onDelete: receivedCursor,
     });
+    setupFocusWithSelection("z1", "item-1");
 
-    it("onDelete receives ZoneCursor with selection when items are selected", () => {
-        const receivedCursor = vi.fn(() => ({ type: "mock/delete", payload: {} }));
+    kernel.dispatch(OS_DELETE());
 
-        ZoneRegistry.register("z1", {
-            config: {} as any,
-            element: document.createElement("div"),
-            parentId: null,
-            onDelete: receivedCursor,
-        });
-        setupFocusWithSelection("z1", "item-3", ["item-1", "item-2", "item-3"], "item-1");
-
-        kernel.dispatch(OS_DELETE());
-
-        expect(receivedCursor).toHaveBeenCalledWith({
-            focusId: "item-3",
-            selection: ["item-1", "item-2", "item-3"],
-            anchor: "item-1",
-        });
+    expect(receivedCursor).toHaveBeenCalledWith({
+      focusId: "item-1",
+      selection: [],
+      anchor: null,
     });
+  });
 
-    it("onAction receives ZoneCursor", () => {
-        const receivedCursor = vi.fn(() => ({ type: "mock/action", payload: {} }));
+  it("onDelete receives ZoneCursor with selection when items are selected", () => {
+    const receivedCursor = vi.fn(() => ({ type: "mock/delete", payload: {} }));
 
-        ZoneRegistry.register("z1", {
-            config: {} as any,
-            element: document.createElement("div"),
-            parentId: null,
-            onAction: receivedCursor,
-        });
-        setupFocusWithSelection("z1", "item-1");
-
-        kernel.dispatch(ACTIVATE());
-
-        expect(receivedCursor).toHaveBeenCalledWith({
-            focusId: "item-1",
-            selection: [],
-            anchor: null,
-        });
+    ZoneRegistry.register("z1", {
+      config: {} as any,
+      element: document.createElement("div"),
+      parentId: null,
+      onDelete: receivedCursor,
     });
+    setupFocusWithSelection(
+      "z1",
+      "item-3",
+      ["item-1", "item-2", "item-3"],
+      "item-1",
+    );
 
-    it("onCheck receives ZoneCursor", () => {
-        const receivedCursor = vi.fn(() => ({ type: "mock/check", payload: {} }));
+    kernel.dispatch(OS_DELETE());
 
-        ZoneRegistry.register("z1", {
-            config: {} as any,
-            element: document.createElement("div"),
-            parentId: null,
-            onCheck: receivedCursor,
-        });
-        setupFocusWithSelection("z1", "item-1");
-
-        kernel.dispatch(OS_CHECK({ targetId: "item-1" }));
-
-        expect(receivedCursor).toHaveBeenCalledWith({
-            focusId: "item-1",
-            selection: [],
-            anchor: null,
-        });
+    expect(receivedCursor).toHaveBeenCalledWith({
+      focusId: "item-3",
+      selection: ["item-1", "item-2", "item-3"],
+      anchor: "item-1",
     });
+  });
+
+  it("onAction receives ZoneCursor", () => {
+    const receivedCursor = vi.fn(() => ({ type: "mock/action", payload: {} }));
+
+    ZoneRegistry.register("z1", {
+      config: {} as any,
+      element: document.createElement("div"),
+      parentId: null,
+      onAction: receivedCursor,
+    });
+    setupFocusWithSelection("z1", "item-1");
+
+    kernel.dispatch(ACTIVATE());
+
+    expect(receivedCursor).toHaveBeenCalledWith({
+      focusId: "item-1",
+      selection: [],
+      anchor: null,
+    });
+  });
+
+  it("onCheck receives ZoneCursor", () => {
+    const receivedCursor = vi.fn(() => ({ type: "mock/check", payload: {} }));
+
+    ZoneRegistry.register("z1", {
+      config: {} as any,
+      element: document.createElement("div"),
+      parentId: null,
+      onCheck: receivedCursor,
+    });
+    setupFocusWithSelection("z1", "item-1");
+
+    kernel.dispatch(OS_CHECK({ targetId: "item-1" }));
+
+    expect(receivedCursor).toHaveBeenCalledWith({
+      focusId: "item-1",
+      selection: [],
+      anchor: null,
+    });
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -170,41 +175,46 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
 // ═══════════════════════════════════════════════════════════════════
 
 describe("FR2: OS commands call callback once, not per-item", () => {
-    it("OS_DELETE calls onDelete exactly once even with 3 selected items", () => {
-        const onDelete = vi.fn(() => [
-            { type: "mock/delete", payload: { id: "item-1" } },
-            { type: "mock/delete", payload: { id: "item-2" } },
-            { type: "mock/delete", payload: { id: "item-3" } },
-        ]);
+  it("OS_DELETE calls onDelete exactly once even with 3 selected items", () => {
+    const onDelete = vi.fn(() => [
+      { type: "mock/delete", payload: { id: "item-1" } },
+      { type: "mock/delete", payload: { id: "item-2" } },
+      { type: "mock/delete", payload: { id: "item-3" } },
+    ]);
 
-        ZoneRegistry.register("z1", {
-            config: {} as any,
-            element: document.createElement("div"),
-            parentId: null,
-            onDelete,
-        });
-        setupFocusWithSelection("z1", "item-3", ["item-1", "item-2", "item-3"], "item-1");
-
-        kernel.dispatch(OS_DELETE());
-
-        expect(onDelete).toHaveBeenCalledTimes(1);
+    ZoneRegistry.register("z1", {
+      config: {} as any,
+      element: document.createElement("div"),
+      parentId: null,
+      onDelete,
     });
+    setupFocusWithSelection(
+      "z1",
+      "item-3",
+      ["item-1", "item-2", "item-3"],
+      "item-1",
+    );
 
-    it("OS_COPY calls onCopy exactly once with multi-selection", () => {
-        const onCopy = vi.fn(() => ({ type: "mock/copy", payload: {} }));
+    kernel.dispatch(OS_DELETE());
 
-        ZoneRegistry.register("z1", {
-            config: {} as any,
-            element: document.createElement("div"),
-            parentId: null,
-            onCopy,
-        });
-        setupFocusWithSelection("z1", "item-2", ["item-1", "item-2"]);
+    expect(onDelete).toHaveBeenCalledTimes(1);
+  });
 
-        kernel.dispatch(OS_COPY());
+  it("OS_COPY calls onCopy exactly once with multi-selection", () => {
+    const onCopy = vi.fn(() => ({ type: "mock/copy", payload: {} }));
 
-        expect(onCopy).toHaveBeenCalledTimes(1);
+    ZoneRegistry.register("z1", {
+      config: {} as any,
+      element: document.createElement("div"),
+      parentId: null,
+      onCopy,
     });
+    setupFocusWithSelection("z1", "item-2", ["item-1", "item-2"]);
+
+    kernel.dispatch(OS_COPY());
+
+    expect(onCopy).toHaveBeenCalledTimes(1);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -212,36 +222,36 @@ describe("FR2: OS commands call callback once, not per-item", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Edge cases", () => {
-    it("does not call callback when no focusedItemId", () => {
-        const onDelete = vi.fn(() => ({ type: "mock/delete", payload: {} }));
+  it("does not call callback when no focusedItemId", () => {
+    const onDelete = vi.fn(() => ({ type: "mock/delete", payload: {} }));
 
-        ZoneRegistry.register("z1", {
-            config: {} as any,
-            element: document.createElement("div"),
-            parentId: null,
-            onDelete,
-        });
-
-        // Set active zone but no focusedItemId
-        kernel.setState((prev) => ({
-            ...prev,
-            os: {
-                ...prev.os,
-                focus: {
-                    ...prev.os.focus,
-                    activeZoneId: "z1",
-                    zones: {
-                        ...prev.os.focus.zones,
-                        z1: { ...initialZoneState, focusedItemId: null as any },
-                    },
-                },
-            },
-        }));
-
-        kernel.dispatch(OS_DELETE());
-
-        expect(onDelete).not.toHaveBeenCalled();
+    ZoneRegistry.register("z1", {
+      config: {} as any,
+      element: document.createElement("div"),
+      parentId: null,
+      onDelete,
     });
+
+    // Set active zone but no focusedItemId
+    kernel.setState((prev) => ({
+      ...prev,
+      os: {
+        ...prev.os,
+        focus: {
+          ...prev.os.focus,
+          activeZoneId: "z1",
+          zones: {
+            ...prev.os.focus.zones,
+            z1: { ...initialZoneState, focusedItemId: null as any },
+          },
+        },
+      },
+    }));
+
+    kernel.dispatch(OS_DELETE());
+
+    expect(onDelete).not.toHaveBeenCalled();
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -249,20 +259,20 @@ describe("Edge cases", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("FR7: SELECTION_CLEAR after delete/cut", () => {
-    it("clears selection after OS_DELETE with multi-selection", () => {
-        const onDelete = vi.fn(() => ({ type: "mock/delete", payload: {} }));
+  it("clears selection after OS_DELETE with multi-selection", () => {
+    const onDelete = vi.fn(() => ({ type: "mock/delete", payload: {} }));
 
-        ZoneRegistry.register("z1", {
-            config: {} as any,
-            element: document.createElement("div"),
-            parentId: null,
-            onDelete,
-        });
-        setupFocusWithSelection("z1", "item-2", ["item-1", "item-2"]);
-
-        kernel.dispatch(OS_DELETE());
-
-        const zone = kernel.getState().os.focus.zones['z1'];
-        expect(zone?.selection).toEqual([]);
+    ZoneRegistry.register("z1", {
+      config: {} as any,
+      element: document.createElement("div"),
+      parentId: null,
+      onDelete,
     });
+    setupFocusWithSelection("z1", "item-2", ["item-1", "item-2"]);
+
+    kernel.dispatch(OS_DELETE());
+
+    const zone = kernel.getState().os.focus.zones["z1"];
+    expect(zone?.selection).toEqual([]);
+  });
 });

@@ -347,7 +347,11 @@ export default function KernelLabPage() {
 
   // Debug page: intentionally subscribes to full state.
   // Uses useSyncExternalStore directly — useComputed is primitive-only.
-  const state = useSyncExternalStore(kernel.subscribe, kernel.getState, kernel.getState) as DemoState;
+  const state = useSyncExternalStore(
+    kernel.subscribe,
+    kernel.getState,
+    kernel.getState,
+  ) as DemoState;
 
   return (
     <div key={resetKey} style={pageStyle}>

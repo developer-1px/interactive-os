@@ -21,12 +21,12 @@ import {
   useMemo,
   useRef,
 } from "react";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
 import {
   getChildRole,
   isCheckedRole,
   isExpandableRole,
 } from "../../registries/roleRegistry.ts";
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
 import { useFocusGroupContext } from "./FocusGroup.tsx";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -225,7 +225,13 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
         ? (children as ReactElement<any>)
         : null;
     const combinedRef = useMemo(
-      () => composeRefs(ref, internalRef, (childElement as ReactElement & { ref?: React.Ref<HTMLElement> })?.ref),
+      () =>
+        composeRefs(
+          ref,
+          internalRef,
+          (childElement as ReactElement & { ref?: React.Ref<HTMLElement> })
+            ?.ref,
+        ),
       [ref, childElement],
     );
 

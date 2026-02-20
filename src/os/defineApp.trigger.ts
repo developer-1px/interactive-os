@@ -5,7 +5,7 @@
  * Only dependency: appId (for displayName) and OS primitives.
  */
 
-import type { BaseCommand } from "@kernel/core/tokens";
+import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import { Trigger } from "@os/6-components/primitives/Trigger";
 import { Dialog } from "@os/6-components/radox/Dialog";
 import React, { type ReactNode } from "react";
@@ -29,12 +29,20 @@ export function createSimpleTrigger(
 // Dynamic Trigger (CommandFactory bound at render time)
 // ═══════════════════════════════════════════════════════════════════
 
-export function createDynamicTrigger(
+/** Props for dynamic trigger — payload required when P is not void */
+type DynamicTriggerProps<P> = P extends void
+  ? { children: ReactNode; payload?: never }
+  : { children: ReactNode; payload: P };
+
+export function createDynamicTrigger<P>(
   appId: string,
-  factory: (...args: any[]) => BaseCommand,
-): React.FC<{ children: ReactNode; payload?: unknown }> {
-  const DynamicTrigger: React.FC<{ children: ReactNode; payload?: unknown }> = ({ children, payload }) => {
-    const cmd = factory(payload);
+  factory: CommandFactory<string, P>,
+): React.FC<DynamicTriggerProps<P>> {
+  const DynamicTrigger: React.FC<DynamicTriggerProps<P>> = ({
+    children,
+    payload,
+  }) => {
+    const cmd = factory(payload as P);
     return React.createElement(Trigger, { onPress: cmd, children });
   };
   DynamicTrigger.displayName = `${appId}.DynamicTrigger`;
@@ -89,7 +97,11 @@ export function createCompoundTrigger(
     className?: string;
     asChild?: boolean;
   }> = ({ children, className, asChild }) =>
-      React.createElement(Dialog.Trigger, { ...(className !== undefined ? { className } : {}), ...(asChild !== undefined ? { asChild } : {}), children });
+    React.createElement(Dialog.Trigger, {
+      ...(className !== undefined ? { className } : {}),
+      ...(asChild !== undefined ? { asChild } : {}),
+      children,
+    });
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
   const ContentComponent: React.FC<{
@@ -113,7 +125,7 @@ export function createCompoundTrigger(
     children: ReactNode;
     className?: string;
   }> = ({ children, className }) =>
-      React.createElement(Dialog.Close, { className, children });
+    React.createElement(Dialog.Close, { className, children });
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{
@@ -121,7 +133,11 @@ export function createCompoundTrigger(
     className?: string;
   }> = ({ children, className }) => {
     const confirmCmd = config.confirm;
-    return React.createElement(Dialog.Close, { className, onPress: confirmCmd as any, children });
+    return React.createElement(Dialog.Close, {
+      className,
+      onPress: confirmCmd as any,
+      children,
+    });
   };
   ConfirmComponent.displayName = `${appId}.Dialog.Confirm`;
 

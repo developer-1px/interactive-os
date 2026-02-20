@@ -27,10 +27,7 @@ export function applyFollowFocus(
   itemId: string,
   selectConfig?: { followFocus?: boolean; mode?: string },
 ): void {
-  if (
-    selectConfig?.followFocus &&
-    selectConfig?.mode !== "none"
-  ) {
+  if (selectConfig?.followFocus && selectConfig?.mode !== "none") {
     zone.selection = [itemId];
     zone.selectionAnchor = itemId;
   }

@@ -7,8 +7,8 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
+import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import type { ZoneRole } from "@os/registries/roleRegistry.ts";
 import type {
   ActivateConfig,

@@ -10,10 +10,7 @@ import { produce } from "immer";
 import { DOM_ITEMS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { kernel } from "../../kernel";
-import {
-  getChildRole,
-  isExpandableRole,
-} from "../../registries/roleRegistry";
+import { getChildRole, isExpandableRole } from "../../registries/roleRegistry";
 import { ensureZone } from "../../state/utils";
 import { EXPAND } from "../expand";
 

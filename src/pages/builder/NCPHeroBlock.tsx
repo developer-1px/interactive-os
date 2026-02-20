@@ -83,7 +83,10 @@ export function NCPHeroBlock({ id }: { id: string }) {
                 `}
               >
                 {fields["cta"] || "무료로 시작하기"}
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight
+                  size={20}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
               </Builder.Button>
             </Builder.Item>
           </div>

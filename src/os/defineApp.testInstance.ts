@@ -6,20 +6,20 @@
  */
 
 import { createKernel, defineScope } from "@kernel";
-import { type AppState, initialAppState } from "@os/kernel";
 import type { BaseCommand } from "@kernel/core/tokens";
-import {
-  type Condition,
-  type FlatHandler,
-  type Selector,
-  type TestInstance,
+import { type AppState, initialAppState } from "@os/kernel";
+import { focusHandler } from "./3-commands/focus/focus";
+import type {
+  Condition,
+  FlatHandler,
+  Selector,
+  TestInstance,
 } from "./defineApp.types";
 import {
   beginTransaction,
   createHistoryMiddleware,
   endTransaction,
 } from "./middlewares/historyKernelMiddleware";
-import { focusHandler } from "./3-commands/focus/focus";
 
 // ═══════════════════════════════════════════════════════════════════
 // TestInstance Config (injected by defineApp)
@@ -53,15 +53,14 @@ export function createTestInstance<S>(
   const rawOverrides = overrides ?? {};
   const enableHistory =
     "history" in rawOverrides && rawOverrides.history === true;
-  const enableOS =
-    "withOS" in rawOverrides && rawOverrides.withOS === true;
+  const enableOS = "withOS" in rawOverrides && rawOverrides.withOS === true;
 
-
-  const stateOverrides = enableHistory || enableOS
-    ? (({ history: _h, withOS: _w, ...rest }) => rest)(
-      rawOverrides as Record<string, unknown>,
-    )
-    : rawOverrides;
+  const stateOverrides =
+    enableHistory || enableOS
+      ? (({ history: _h, withOS: _w, ...rest }) => rest)(
+          rawOverrides as Record<string, unknown>,
+        )
+      : rawOverrides;
 
   const testState =
     Object.keys(stateOverrides).length > 0
@@ -71,13 +70,13 @@ export function createTestInstance<S>(
   const testKernel = createKernel<AppState | TestAppState>(
     enableOS
       ? {
-        ...initialAppState,
-        apps: { [appId]: testState },
-      }
+          ...initialAppState,
+          apps: { [appId]: testState },
+        }
       : {
-        os: {} as Record<string, never>,
-        apps: { [appId]: testState },
-      }
+          os: {} as Record<string, never>,
+          apps: { [appId]: testState },
+        },
   );
 
   const testScope = defineScope(appId);
@@ -110,7 +109,7 @@ export function createTestInstance<S>(
     testGroup.defineCommand(
       type,
       kernelHandler as any,
-      whenGuard ? { when: whenGuard.when } as any : undefined,
+      whenGuard ? ({ when: whenGuard.when } as any) : undefined,
     );
   }
 

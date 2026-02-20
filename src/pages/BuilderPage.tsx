@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import {
   BuilderApp,
   BuilderCanvasUI,
-  selectElement,
   type PropertyType,
   type SectionEntry,
+  selectElement,
 } from "@/apps/builder/app";
 import { FocusDebugOverlay } from "@/apps/builder/FocusDebugOverlay";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
@@ -135,7 +135,10 @@ export default function BuilderPage() {
 
 // ─── Section Renderer — maps section.type → block component ───
 
-const SECTION_COMPONENTS: Record<SectionEntry["type"], React.FC<{ id: string }>> = {
+const SECTION_COMPONENTS: Record<
+  SectionEntry["type"],
+  React.FC<{ id: string }>
+> = {
   hero: NCPHeroBlock,
   news: NCPNewsBlock,
   services: NCPServicesBlock,
@@ -149,7 +152,9 @@ function SectionRenderer() {
     <>
       {sections.map((section) => {
         const Component = SECTION_COMPONENTS[section.type];
-        return Component ? <Component key={section.id} id={section.id} /> : null;
+        return Component ? (
+          <Component key={section.id} id={section.id} />
+        ) : null;
       })}
     </>
   );

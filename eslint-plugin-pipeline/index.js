@@ -377,7 +377,8 @@ const noFullStateUseComputed = {
   meta: {
     type: "problem",
     docs: {
-      description: "Disallow useComputed((s) => s) which causes full re-renders",
+      description:
+        "Disallow useComputed((s) => s) which causes full re-renders",
       recommended: true,
     },
     messages: {
@@ -447,4 +448,3 @@ export default {
     "no-full-state-useComputed": noFullStateUseComputed,
   },
 };
-

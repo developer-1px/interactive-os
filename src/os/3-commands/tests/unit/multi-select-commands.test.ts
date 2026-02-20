@@ -109,7 +109,10 @@ describe("OS_DELETE with multi-selection", () => {
       element: document.createElement("div"),
       parentId: null,
       onDelete: (cursor: ZoneCursor) =>
-        cursor.selection.map((id) => ({ type: "mock/delete", payload: { id } })),
+        cursor.selection.map((id) => ({
+          type: "mock/delete",
+          payload: { id },
+        })),
     });
     setupFocusWithSelection("testZone", "item-3", [
       "item-1",
@@ -124,7 +127,7 @@ describe("OS_DELETE with multi-selection", () => {
     expect(
       deleteCmds.map(
         (c: Record<string, unknown>) =>
-          (c['payload'] as Record<string, unknown>)?.['id'],
+          (c["payload"] as Record<string, unknown>)?.["id"],
       ),
     ).toEqual(expect.arrayContaining(["item-1", "item-2", "item-3"]));
   });
@@ -163,7 +166,7 @@ describe("OS_DELETE with multi-selection", () => {
 
     kernel.dispatch(OS_DELETE());
 
-    const zone = kernel.getState().os.focus.zones['testZone'];
+    const zone = kernel.getState().os.focus.zones["testZone"];
     expect(zone?.selection).toEqual([]);
   });
 });
@@ -228,7 +231,7 @@ describe("OS_CUT with multi-selection", () => {
 
     kernel.dispatch(OS_CUT());
 
-    const zone = kernel.getState().os.focus.zones['testZone'];
+    const zone = kernel.getState().os.focus.zones["testZone"];
     expect(zone?.selection).toEqual([]);
   });
 });

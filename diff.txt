@@ -1,0 +1,239 @@
+diff --git a/packages/kernel/src/createKernel.ts b/packages/kernel/src/createKernel.ts
+index 0a35af9..3f00c66 100644
+--- a/packages/kernel/src/createKernel.ts
++++ b/packages/kernel/src/createKernel.ts
+@@ -88,15 +88,12 @@ export function createKernel<S>(initialState: S) {
+ 
+   // ─── Registries (closure) ───
+ 
+-  const scopedCommands = new Map<string, Map<string, InternalCommandHandler>>();
+-  const perCommandMiddleware = new Map<string, Map<string, Middleware[]>>();
+-  const scopedEffects = new Map<string, Map<string, InternalEffectHandler>>();
+-  const scopedMiddleware = new Map<string, Middleware[]>();
+-  // when guard registry: scope → type → (state) => boolean
+-  const scopedWhenGuards = new Map<
++  const scopedCommands = new Map<
+     string,
+-    Map<string, (state: unknown) => boolean>
++    Map<string, { handler: InternalCommandHandler; tokens: ContextToken[]; whenGuard?: (state: unknown) => boolean }>
+   >();
++  const scopedEffects = new Map<string, Map<string, InternalEffectHandler>>();
++  const scopedMiddleware = new Map<string, Middleware[]>();
+ 
+   // ─── Scope Tree (closure) ───
+   // Records parent-child relationships from group() nesting.
+@@ -245,7 +242,7 @@ export function createKernel<S>(initialState: S) {
+   ): void {
+     const stateBefore = state;
+     const path: string[] = bubblePath
+-      ? (bubblePath as unknown as string[])
++      ? (bubblePath as string[])
+       : [GLOBAL as string];
+ 
+     let result: Record<string, unknown> | null = null;
+@@ -274,35 +271,30 @@ export function createKernel<S>(initialState: S) {
+       // 2. Handler lookup at this scope
+       const resolvedType = mwCtx.command.type;
+       const scopeMap = scopedCommands.get(currentScope);
+-      const handler = scopeMap?.get(resolvedType);
++      const commandConfig = scopeMap?.get(resolvedType);
+ 
+-      if (!handler) continue;
++      if (!commandConfig) continue;
++      const { handler, tokens, whenGuard } = commandConfig;
+ 
+       // 2.5. when guard — dispatch guard (W26/W33)
+-      const whenMap = scopedWhenGuards.get(currentScope);
+-      const whenGuard = whenMap?.get(resolvedType);
+       if (whenGuard) {
+         const guardLens = scopeStateLens.get(currentScope);
+         const guardState = guardLens ? guardLens.get(state) : state;
+         if (!whenGuard(guardState)) continue; // guard failed → bubble up
+       }
+ 
+-      // 3. Per-command middleware (inject DI tokens)
+-      const perCmdMwMap = perCommandMiddleware.get(currentScope);
+-      const perCmdMws = perCmdMwMap?.get(resolvedType);
+-      if (perCmdMws) {
+-        for (const ic of perCmdMws) {
+-          if (ic.before) {
+-            mwCtx = ic.before(mwCtx);
+-          }
+-        }
++      // 3. Inject per-command DI tokens directly
++      const injectedMap = { ...mwCtx.injected };
++      for (const token of tokens) {
++        const id = (token as ContextToken).__id;
++        injectedMap[id] = resolveContext(id);
+       }
++      mwCtx.injected = injectedMap;
+ 
+       // 4. Execute handler
+       //    State lens: scope with a registered lens sees only its slice
+       const lens = scopeStateLens.get(currentScope);
+       const scopedState = lens ? lens.get(mwCtx.state as S) : mwCtx.state;
+-      const injectedMap = mwCtx.injected;
+       const ctx = {
+         state: scopedState,
+         ...injectedMap,
+@@ -310,16 +302,8 @@ export function createKernel<S>(initialState: S) {
+       };
+       const handlerResult = handler(ctx)(mwCtx.command.payload);
+ 
+-      // 5. After-middleware (reverse order)
++      // 5. After-middleware (handler returns effects map)
+       mwCtx.effects = handlerResult as Record<string, unknown> | null;
+-      if (perCmdMws) {
+-        for (let i = perCmdMws.length - 1; i >= 0; i--) {
+-          const ic = perCmdMws[i];
+-          if (ic?.after) {
+-            mwCtx = ic.after(mwCtx) ?? mwCtx;
+-          }
+-        }
+-      }
+       if (scopeMws) {
+         for (let i = scopeMws.length - 1; i >= 0; i--) {
+           const mw = scopeMws[i];
+@@ -493,7 +477,7 @@ export function createKernel<S>(initialState: S) {
+           handler = handlerOrTokens;
+           perCommandTokens = [];
+           // When no tokens: (type, handler, options?)
+-          whenOptions = handlerArg as unknown as
++          whenOptions = handlerArg as
+             | { when?: (state: unknown) => boolean }
+             | undefined;
+         }
+@@ -504,55 +488,33 @@ export function createKernel<S>(initialState: S) {
+         }
+         const scopeMap = scopedCommands.get(scope)!;
+ 
+-        // HMR-safe: silent overwrite on re-registration
+-        scopeMap.set(type, handler);
+-        inspector.invalidateRegistry();
+-
+-        // Register when guard (W26/W33)
+-        if (whenOptions?.when) {
+-          if (!scopedWhenGuards.has(scope)) {
+-            scopedWhenGuards.set(scope, new Map());
+-          }
+-          scopedWhenGuards.get(scope)!.set(type, whenOptions.when);
+-        }
+-
+-        // Register inject interceptor for this command
+         // Merge group-level tokens with per-command tokens
+         const allTokens = [...injectTokens, ...perCommandTokens];
+-        if (allTokens.length > 0) {
+-          const injectMw: Middleware = {
+-            id: `inject:${scope}:${type}`,
+-            before: (ctx: MiddlewareContext): MiddlewareContext => {
+-              const injected = { ...ctx.injected };
+-              for (const token of allTokens) {
+-                const id = (token as ContextToken).__id;
+-                injected[id] = resolveContext(id);
+-              }
+-              return { ...ctx, injected };
+-            },
+-          };
+-
+-          if (!perCommandMiddleware.has(scope)) {
+-            perCommandMiddleware.set(scope, new Map());
+-          }
+-          perCommandMiddleware.get(scope)?.set(type, [injectMw]);
+-        }
++
++        // HMR-safe: silent overwrite on re-registration
++        scopeMap.set(type, {
++          handler,
++          tokens: allTokens,
++          ...(whenOptions?.when ? { whenGuard: whenOptions.when } : {}),
++        });
++        inspector.invalidateRegistry();
+ 
+         // Return CommandFactory (self-describing: carries handler + tokens)
+-        const factory = (payload?: unknown) =>
+-          ({
++        const factory = Object.assign(
++          (payload?: unknown) => ({
+             type,
+             payload,
+-            scope:
+-              scope !== (GLOBAL as string) ? [scope as ScopeToken] : undefined,
+-          }) as unknown as Command<string, any>;
+-
+-        (factory as unknown as { commandType: string }).commandType = type;
+-        (factory as unknown as { id: string }).id = type;
+-        (factory as unknown as { handler: InternalCommandHandler }).handler = handler;
+-        (factory as unknown as { tokens: ContextToken[] }).tokens = perCommandTokens;
++            scope: scope !== (GLOBAL as string) ? [scope as ScopeToken] : undefined,
++          } as Command<string, any>),
++          {
++            commandType: type,
++            id: type,
++            handler,
++            tokens: perCommandTokens,
++          }
++        );
+ 
+-        return factory as unknown as CommandFactory<string, any>;
++        return factory as CommandFactory<string, any>;
+       }) as {
+         // No payload
+         <T extends string>(
+@@ -640,9 +602,9 @@ export function createKernel<S>(initialState: S) {
+       register<T extends string, P>(factory: CommandFactory<T, P>): CommandFactory<T, P> {
+         const { commandType: type, handler, tokens } = factory;
+         if (tokens && tokens.length > 0) {
+-          return this.defineCommand(type, tokens, handler) as unknown as CommandFactory<T, P>;
++          return this.defineCommand<T, P>(type, tokens, handler);
+         }
+-        return this.defineCommand(type, handler) as unknown as CommandFactory<T, P>;
++        return this.defineCommand<T, P>(type, handler);
+       },
+ 
+       reset(newInitialState: S): void {
+@@ -661,8 +623,6 @@ export function createKernel<S>(initialState: S) {
+ 
+   // ─── useComputed (React Hook) ───
+ 
+-  // ─── useComputed (React Hook) ───
+-
+   function useComputed<T>(selector: (state: S) => T): T {
+     // We stabilize the selector result using a dual-layer cache strategy.
+     // 1. Input Stability: If state & selector haven't changed, return cached result.
+@@ -727,7 +687,11 @@ export function createKernel<S>(initialState: S) {
+       return Array.from(scopedCommands.get(scope as string)?.keys() ?? []);
+     },
+     getWhenGuardTypes(scope: ScopeToken): readonly string[] {
+-      return Array.from(scopedWhenGuards.get(scope as string)?.keys() ?? []);
++      const map = scopedCommands.get(scope as string);
++      if (!map) return [];
++      return Array.from(map.entries())
++        .filter(([_, config]) => config.whenGuard)
++        .map(([type]) => type);
+     },
+     getMiddlewareIds(scope: ScopeToken): readonly string[] {
+       return (scopedMiddleware.get(scope as string) ?? []).map((m) => m.id);
+@@ -740,7 +704,6 @@ export function createKernel<S>(initialState: S) {
+       for (const s of scopedCommands.keys()) all.add(s);
+       for (const s of scopedEffects.keys()) all.add(s);
+       for (const s of scopedMiddleware.keys()) all.add(s);
+-      for (const s of scopedWhenGuards.keys()) all.add(s);
+       for (const [child, parent] of parentMap) {
+         all.add(child);
+         all.add(parent);
+@@ -754,12 +717,11 @@ export function createKernel<S>(initialState: S) {
+       return buildBubblePath(scope as string);
+     },
+     evaluateWhenGuard(scope: ScopeToken, type: string): boolean | null {
+-      const whenMap = scopedWhenGuards.get(scope as string);
+-      const guard = whenMap?.get(type);
+-      if (!guard) return null;
++      const config = scopedCommands.get(scope as string)?.get(type);
++      if (!config?.whenGuard) return null;
+       const lens = scopeStateLens.get(scope as string);
+       const guardState = lens ? lens.get(state) : state;
+-      return guard(guardState);
++      return config.whenGuard(guardState);
+     },
+     getTransactions,
+     getLastTransaction,

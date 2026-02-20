@@ -15,7 +15,7 @@
  */
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
-import { shallow } from "./utils/shallow.ts";
+import { shallow } from "./core/shallow.ts";
 
 // ─── Logger Adapter ───
 // Kernel-local logger. Defaults to console. No public API surface.
@@ -90,7 +90,14 @@ export function createKernel<S>(initialState: S) {
 
   const scopedCommands = new Map<
     string,
-    Map<string, { handler: InternalCommandHandler; tokens: ContextToken[]; whenGuard?: (state: unknown) => boolean }>
+    Map<
+      string,
+      {
+        handler: InternalCommandHandler;
+        tokens: ContextToken[];
+        whenGuard?: (state: unknown) => boolean;
+      }
+    >
   >();
   const scopedEffects = new Map<string, Map<string, InternalEffectHandler>>();
   const scopedMiddleware = new Map<string, Middleware[]>();
@@ -501,17 +508,21 @@ export function createKernel<S>(initialState: S) {
 
         // Return CommandFactory (self-describing: carries handler + tokens)
         const factory = Object.assign(
-          (payload?: unknown) => ({
-            type,
-            payload,
-            scope: scope !== (GLOBAL as string) ? [scope as ScopeToken] : undefined,
-          } as Command<string, any>),
+          (payload?: unknown) =>
+            ({
+              type,
+              payload,
+              scope:
+                scope !== (GLOBAL as string)
+                  ? [scope as ScopeToken]
+                  : undefined,
+            }) as Command<string, any>,
           {
             commandType: type,
             id: type,
             handler,
             tokens: perCommandTokens,
-          }
+          },
         );
 
         return factory as CommandFactory<string, any>;
@@ -534,7 +545,9 @@ export function createKernel<S>(initialState: S) {
         <T extends string>(
           type: T,
           tokens: ContextToken[],
-          handler: (ctx: InjectableContext<S>) => () => HandlerReturn | undefined,
+          handler: (
+            ctx: InjectableContext<S>,
+          ) => () => HandlerReturn | undefined,
           options?: WhenGuardOption<S>,
         ): CommandFactory<T, void>;
 
@@ -542,7 +555,9 @@ export function createKernel<S>(initialState: S) {
         <T extends string, P>(
           type: T,
           tokens: ContextToken[],
-          handler: (ctx: InjectableContext<S>) => (payload: P) => HandlerReturn | undefined,
+          handler: (
+            ctx: InjectableContext<S>,
+          ) => (payload: P) => HandlerReturn | undefined,
           options?: WhenGuardOption<S>,
         ): CommandFactory<T, P>;
       },
@@ -599,7 +614,9 @@ export function createKernel<S>(initialState: S) {
        * Reads .handler, .tokens, .commandType from the factory.
        * Enables test kernels to use production handlers without duplication.
        */
-      register<T extends string, P>(factory: CommandFactory<T, P>): CommandFactory<T, P> {
+      register<T extends string, P>(
+        factory: CommandFactory<T, P>,
+      ): CommandFactory<T, P> {
         const { commandType: type, handler, tokens } = factory;
         if (tokens && tokens.length > 0) {
           return this.defineCommand<T, P>(type, tokens, handler);

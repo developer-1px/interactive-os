@@ -2,11 +2,10 @@
  * TaskItem — v5 native (createZone + bind).
  *
  * Uses TodoList.Item (maps to OS.Item).
- * Still uses OS.Trigger for mouse-based actions — Zone handles keyboard.
+ * Uses TodoList.triggers for mouse actions — headless-first, no raw OS imports.
  */
 
 import { TodoApp, TodoEdit, TodoList } from "@apps/todo/app";
-import { Trigger } from "@os/6-components/primitives/Trigger";
 import {
   ArrowDown,
   ArrowUp,
@@ -67,7 +66,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
         </div>
 
         {/* Checkbox Trigger */}
-        <Trigger onPress={TodoList.commands.toggleTodo({ id: todo.id })}>
+        <TodoList.triggers.ToggleTodo payload={{ id: todo.id }}>
           <div
             className={`
                             w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
@@ -83,7 +82,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
               strokeWidth={3}
             />
           </div>
-        </Trigger>
+        </TodoList.triggers.ToggleTodo>
 
         {/* Content Area */}
         <div className="flex-1 min-w-0 pt-0.5">
@@ -116,7 +115,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
             </div>
           ) : (
             <>
-              <Trigger onPress={TodoList.commands.startEdit({ id: todo.id })}>
+              <TodoList.triggers.StartEdit payload={{ id: todo.id }}>
                 <button
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
@@ -124,13 +123,11 @@ export function TaskItem({ todoId }: TaskItemProps) {
                 >
                   <CornerDownLeft size={14} />
                 </button>
-              </Trigger>
+              </TodoList.triggers.StartEdit>
 
               <div className="w-px h-3 bg-slate-200 mx-1" />
 
-              <Trigger
-                onPress={TodoList.commands.moveItemUp({ id: todo.id })}
-              >
+              <TodoList.triggers.MoveItemUp payload={{ id: todo.id }}>
                 <button
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
@@ -138,10 +135,8 @@ export function TaskItem({ todoId }: TaskItemProps) {
                 >
                   <ArrowUp size={14} />
                 </button>
-              </Trigger>
-              <Trigger
-                onPress={TodoList.commands.moveItemDown({ id: todo.id })}
-              >
+              </TodoList.triggers.MoveItemUp>
+              <TodoList.triggers.MoveItemDown payload={{ id: todo.id }}>
                 <button
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
@@ -149,11 +144,11 @@ export function TaskItem({ todoId }: TaskItemProps) {
                 >
                   <ArrowDown size={14} />
                 </button>
-              </Trigger>
+              </TodoList.triggers.MoveItemDown>
 
               <div className="w-px h-3 bg-slate-200 mx-1" />
 
-              <Trigger onPress={TodoList.commands.deleteTodo({ id: todo.id })}>
+              <TodoList.triggers.DeleteTodo payload={{ id: todo.id }}>
                 <button
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -161,7 +156,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
                 >
                   <Trash2 size={14} />
                 </button>
-              </Trigger>
+              </TodoList.triggers.DeleteTodo>
             </>
           )}
         </div>

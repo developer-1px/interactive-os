@@ -73,22 +73,27 @@ export const INITIAL_STATE: BuilderState = {
   data: {
     sections: [
       {
-        id: "ncp-hero", label: "Hero", type: "hero",
+        id: "ncp-hero",
+        label: "Hero",
+        type: "hero",
         fields: {
-          "title": "AI 시대를 위한\n가장 완벽한 플랫폼",
-          "sub": "네이버클라우드의 기술력으로 완성된\n하이퍼스케일 AI 스튜디오를 경험하세요.",
-          "brand": "NAVER CLOUD",
-          "cta": "무료로 시작하기",
+          title: "AI 시대를 위한\n가장 완벽한 플랫폼",
+          sub: "네이버클라우드의 기술력으로 완성된\n하이퍼스케일 AI 스튜디오를 경험하세요.",
+          brand: "NAVER CLOUD",
+          cta: "무료로 시작하기",
           "portal-title": "Global Scale",
           "portal-subtitle": "Hyper-connected infrastructure",
         },
       },
       {
-        id: "ncp-news", label: "News", type: "news",
+        id: "ncp-news",
+        label: "News",
+        type: "news",
         fields: {
-          "title": "네이버클라우드의\n새로운 소식",
+          title: "네이버클라우드의\n새로운 소식",
           "item-1-title": "Cloud DB for Cache\nRedis 호환성 강화",
-          "item-1-desc": "Valkey 기반의 인메모리 캐시 서비스를 이제 클라우드에서 만나보세요.",
+          "item-1-desc":
+            "Valkey 기반의 인메모리 캐시 서비스를 이제 클라우드에서 만나보세요.",
           "item-1-date": "2024.03.15",
           "item-2-title": "하이퍼클로바X\n기업용 솔루션 공개",
           "item-2-date": "2024.03.10",
@@ -97,18 +102,22 @@ export const INITIAL_STATE: BuilderState = {
         },
       },
       {
-        id: "ncp-services", label: "Services", type: "services",
+        id: "ncp-services",
+        label: "Services",
+        type: "services",
         fields: {
-          "category": "Service Category",
-          "title": "비즈니스에 최적화된\n클라우드 서비스",
+          category: "Service Category",
+          title: "비즈니스에 최적화된\n클라우드 서비스",
           "item-title-0": "Server",
-          "item-desc-0": "고성능 클라우드 서버 인프라를 \n몇 번의 클릭으로 구축하세요.",
+          "item-desc-0":
+            "고성능 클라우드 서버 인프라를 \n몇 번의 클릭으로 구축하세요.",
           "item-title-1": "Cloud DB for Cache",
           "item-desc-1": "Valkey 기반의 완전 관리형 \n인메모리 캐시 서비스.",
           "item-title-2": "CLOVA Speech",
           "item-desc-2": "비즈니스 환경에 특화된 \n최고 수준의 음성 인식 기술.",
           "item-title-3": "Data Stream",
-          "item-desc-3": "대용량 데이터의 실시간 수집과 \n처리를 위한 파이프라인.",
+          "item-desc-3":
+            "대용량 데이터의 실시간 수집과 \n처리를 위한 파이프라인.",
           "item-title-4": "Global CDN",
           "item-desc-4": "전 세계 사용자에게 빠르고 \n안정적인 콘텐츠 전송.",
           "item-title-5": "Kubernetes",
@@ -116,11 +125,13 @@ export const INITIAL_STATE: BuilderState = {
         },
       },
       {
-        id: "ncp-footer", label: "Footer", type: "footer",
+        id: "ncp-footer",
+        label: "Footer",
+        type: "footer",
         fields: {
-          "brand": "NAVER CLOUD",
-          "desc": "네이버클라우드는 기업의 비즈니스 혁신을 위한\n최적의 클라우드 서비스를 제공합니다.",
-          "copyright": `© ${new Date().getFullYear()} NAVER Cloud Corp. All rights reserved.`,
+          brand: "NAVER CLOUD",
+          desc: "네이버클라우드는 기업의 비즈니스 혁신을 위한\n최적의 클라우드 서비스를 제공합니다.",
+          copyright: `© ${new Date().getFullYear()} NAVER Cloud Corp. All rights reserved.`,
         },
       },
     ],
@@ -160,18 +171,15 @@ export const selectedType = BuilderApp.selector(
  * allFields — Flat view of all section fields (sectionId + "-" + key → value).
  * Used by PropertiesPanel for generic field lookup by DOM element id.
  */
-export const allFields = BuilderApp.selector(
-  "allFields",
-  (s) => {
-    const result: Record<string, string> = {};
-    for (const sec of s.data.sections) {
-      for (const [k, v] of Object.entries(sec.fields)) {
-        result[`${sec.id}-${k}`] = v;
-      }
+export const allFields = BuilderApp.selector("allFields", (s) => {
+  const result: Record<string, string> = {};
+  for (const sec of s.data.sections) {
+    for (const [k, v] of Object.entries(sec.fields)) {
+      result[`${sec.id}-${k}`] = v;
     }
-    return result;
-  },
-);
+  }
+  return result;
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // Conditions
@@ -193,7 +201,7 @@ export const canRedo = BuilderApp.condition(
 
 export const undoCommand = BuilderApp.command(
   "undo",
-  (ctx: { state: BuilderState }) => {
+  (ctx) => {
     const past = ctx.state.history.past;
     if (past.length === 0) return { state: ctx.state };
 
@@ -238,7 +246,7 @@ export const undoCommand = BuilderApp.command(
 
 export const redoCommand = BuilderApp.command(
   "redo",
-  (ctx: { state: BuilderState }) => {
+  (ctx) => {
     const future = ctx.state.history.future;
     if (future.length === 0) return { state: ctx.state };
 
@@ -254,8 +262,10 @@ export const redoCommand = BuilderApp.command(
           snapshot: rest as Record<string, unknown>,
         });
         if (entry.snapshot) {
-          if (entry.snapshot["data"]) draft.data = entry.snapshot["data"] as typeof draft.data;
-          if (entry.snapshot["ui"]) draft.ui = entry.snapshot["ui"] as typeof draft.ui;
+          if (entry.snapshot["data"])
+            draft.data = entry.snapshot["data"] as typeof draft.data;
+          if (entry.snapshot["ui"])
+            draft.ui = entry.snapshot["ui"] as typeof draft.ui;
         }
       }),
     };
@@ -267,9 +277,7 @@ export const redoCommand = BuilderApp.command(
 // Sidebar Zone — Collection Zone Facade
 // ═══════════════════════════════════════════════════════════════════
 
-import {
-  createCollectionZone,
-} from "@/os/collection/createCollectionZone";
+import { createCollectionZone } from "@/os/collection/createCollectionZone";
 
 const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
   accessor: (s: BuilderState) => s.data.sections,
@@ -282,7 +290,9 @@ const sidebarCollection = createCollectionZone(BuilderApp, "sidebar", {
   }),
   clipboard: {
     accessor: (s: BuilderState) => s.ui.clipboard,
-    set: (draft: BuilderState, value) => { draft.ui.clipboard = value; },
+    set: (draft: BuilderState, value) => {
+      draft.ui.clipboard = value;
+    },
     toText: (items: SectionEntry[]) => items.map((s) => s.label).join("\n"),
     onPaste: (item: SectionEntry) => ({
       ...item,
@@ -305,7 +315,7 @@ export const moveSectionDown = sidebarCollection.moveDown;
 // Custom command not covered by collection CRUD
 export const renameSectionLabel = sidebarCollection.command(
   "renameSectionLabel",
-  (ctx: { state: BuilderState }, payload: { id: string; label: string }) => ({
+  (ctx, payload: { id: string; label: string }) => ({
     state: produce(ctx.state, (draft) => {
       const section = draft.data.sections.find((s) => s.id === payload.id);
       if (section) section.label = payload.label;
@@ -324,11 +334,8 @@ export const BuilderSidebarUI = sidebarCollection.bind({
     navigate: { orientation: "vertical" },
     tab: { behavior: "flow" },
   },
-  keybindings: [
-    ...collectionBindings.keybindings,
-  ],
+  keybindings: [...collectionBindings.keybindings],
 });
-
 
 // ═══════════════════════════════════════════════════════════════════
 // Canvas Zone — v5 native (createZone + bind)
@@ -342,9 +349,14 @@ const canvasZone = BuilderApp.createZone("canvas");
  */
 export const updateField = canvasZone.command(
   "updateField",
-  (ctx: { state: BuilderState }, payload: { sectionId: string; field: string; value: string }) => ({
+  (
+    ctx,
+    payload: { sectionId: string; field: string; value: string },
+  ) => ({
     state: produce(ctx.state, (draft) => {
-      const section = draft.data.sections.find((s) => s.id === payload.sectionId);
+      const section = draft.data.sections.find(
+        (s) => s.id === payload.sectionId,
+      );
       if (section) section.fields[payload.field] = payload.value;
     }),
   }),
@@ -357,7 +369,7 @@ export const updateField = canvasZone.command(
 export const selectElement = canvasZone.command(
   "selectElement",
   (
-    ctx: { state: BuilderState },
+    ctx,
     payload: { id: string | null; type: PropertyType },
   ) => ({
     state: produce(ctx.state, (draft) => {
@@ -401,7 +413,10 @@ import { kernel } from "@/os/kernel";
  * Usage in NCP blocks:
  *   <Field onCommit={createFieldCommit(sectionId, "title")} ... />
  */
-export function createFieldCommit(sectionId: string, field: string): FieldCommandFactory {
+export function createFieldCommit(
+  sectionId: string,
+  field: string,
+): FieldCommandFactory {
   const factory = (payload: { text: string }) =>
     updateField({ sectionId, field, value: payload.text });
   factory.id = `builder:commitField:${sectionId}:${field}`;
@@ -411,7 +426,11 @@ export function createFieldCommit(sectionId: string, field: string): FieldComman
 /**
  * builderUpdateField — Imperative helper for PropertiesPanel.
  */
-export function builderUpdateField(sectionId: string, field: string, value: string) {
+export function builderUpdateField(
+  sectionId: string,
+  field: string,
+  value: string,
+) {
   kernel.dispatch(updateField({ sectionId, field, value }));
 }
 
@@ -468,9 +487,13 @@ export function useFieldByDomId(domId: string): string {
  * Used by PropertiesPanel's imperative onChange handlers.
  */
 export function builderUpdateFieldByDomId(domId: string, value: string) {
-  const appState = kernel.getState().apps["builder"] as BuilderState | undefined;
+  const appState = kernel.getState().apps["builder"] as
+    | BuilderState
+    | undefined;
   if (!appState) return;
   const addr = resolveFieldAddress(domId, appState.data.sections);
   if (!addr) return;
-  kernel.dispatch(updateField({ sectionId: addr.sectionId, field: addr.field, value }));
+  kernel.dispatch(
+    updateField({ sectionId: addr.sectionId, field: addr.field, value }),
+  );
 }

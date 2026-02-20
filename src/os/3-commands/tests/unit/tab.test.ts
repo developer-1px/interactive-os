@@ -20,7 +20,9 @@ function zone(
   zoneId: string,
   firstItemId: string | null,
   lastItemId: string | null,
-  overrides: Partial<Pick<ZoneOrderEntry, "entry" | "selectedItemId" | "lastFocusedId">> = {},
+  overrides: Partial<
+    Pick<ZoneOrderEntry, "entry" | "selectedItemId" | "lastFocusedId">
+  > = {},
 ): ZoneOrderEntry {
   return {
     zoneId,
@@ -139,7 +141,9 @@ describe("resolveTabEscapeZone (SPEC §3.3)", () => {
           selectedItemId: "cat-2",
         }),
       ];
-      expect(resolveTabEscapeZone("list", zonesWithSelected, "forward")).toEqual({
+      expect(
+        resolveTabEscapeZone("list", zonesWithSelected, "forward"),
+      ).toEqual({
         zoneId: "sidebar",
         itemId: "cat-2",
       });
@@ -209,7 +213,10 @@ describe("resolveTabEscapeZone (SPEC §3.3)", () => {
     it("skips zone with no items (parent container)", () => {
       const zonesWithEmpty: ZoneOrderEntry[] = [
         zone("parent", null, null), // empty parent (application container)
-        zone("sidebar", "s-0", "s-2", { entry: "selected", selectedItemId: "s-1" }),
+        zone("sidebar", "s-0", "s-2", {
+          entry: "selected",
+          selectedItemId: "s-1",
+        }),
         zone("list", "l-0", "l-2"),
       ];
       // from list → forward → skip parent → land on sidebar
@@ -238,7 +245,9 @@ describe("resolveTabEscapeZone (SPEC §3.3)", () => {
         zone("empty1", null, null),
         zone("empty2", null, null),
       ];
-      expect(resolveTabEscapeZone("active", zonesAllEmpty, "forward")).toBeNull();
+      expect(
+        resolveTabEscapeZone("active", zonesAllEmpty, "forward"),
+      ).toBeNull();
     });
   });
 });
@@ -249,10 +258,7 @@ describe("resolveTabEscapeZone (SPEC §3.3)", () => {
 
 describe("resolveTab — top-level orchestrator (SPEC §3.3)", () => {
   const items = ["a", "b", "c"];
-  const zones: ZoneOrderEntry[] = [
-    zone("z1", "a", "c"),
-    zone("z2", "d", "f"),
-  ];
+  const zones: ZoneOrderEntry[] = [zone("z1", "a", "c"), zone("z2", "d", "f")];
 
   describe("trap", () => {
     it("wraps forward at end", () => {

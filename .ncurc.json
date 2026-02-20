@@ -1,7 +1,4 @@
 {
-    "$schema": "https://raw.githubusercontent.com/raineorshine/npm-check-updates/main/src/types/RunOptions.json",
-    "reject": [
-        "eslint",
-        "@eslint/js"
-    ]
+  "$schema": "https://raw.githubusercontent.com/raineorshine/npm-check-updates/main/src/types/RunOptions.json",
+  "reject": ["eslint", "@eslint/js"]
 }

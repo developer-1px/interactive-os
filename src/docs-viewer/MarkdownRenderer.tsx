@@ -1,5 +1,5 @@
-import React from "react";
 import clsx from "clsx";
+import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkBreaks from "remark-breaks";
@@ -100,7 +100,9 @@ const MarkdownComponents: Record<string, React.FC<Record<string, unknown>>> = {
     children?: React.ReactNode;
     [key: string]: unknown;
   }) => {
-    const codeChild = React.isValidElement(children) ? children.props as Record<string, unknown> : undefined;
+    const codeChild = React.isValidElement(children)
+      ? (children.props as Record<string, unknown>)
+      : undefined;
     const langClass = (codeChild?.["className"] as string) ?? "";
     const lang = langClass
       .replace(/language-/, "")

@@ -16,39 +16,39 @@ import { Keybindings } from "@os/keymaps/keybindings";
 // ═══════════════════════════════════════════════════════════════════
 
 export interface KeyboardInput {
-    canonicalKey: string;
-    key: string;
-    isEditing: boolean;
-    isFieldActive: boolean;
-    isComposing: boolean;
-    isDefaultPrevented: boolean;
-    isInspector: boolean;
-    isCombobox: boolean;
+  canonicalKey: string;
+  key: string;
+  isEditing: boolean;
+  isFieldActive: boolean;
+  isComposing: boolean;
+  isDefaultPrevented: boolean;
+  isInspector: boolean;
+  isCombobox: boolean;
 
-    /** Role of the closest [data-item-id] element, e.g. "checkbox", "switch" */
-    focusedItemRole: string | null;
-    focusedItemId: string | null;
+  /** Role of the closest [data-item-id] element, e.g. "checkbox", "switch" */
+  focusedItemRole: string | null;
+  focusedItemId: string | null;
 
-    /** Whether the active zone has onCheck registered */
-    activeZoneHasCheck: boolean;
-    activeZoneFocusedItemId: string | null;
+  /** Whether the active zone has onCheck registered */
+  activeZoneHasCheck: boolean;
+  activeZoneFocusedItemId: string | null;
 
-    /** For building input meta */
-    elementId: string | undefined;
+  /** For building input meta */
+  elementId: string | undefined;
 }
 
 export type KeyboardResult =
-    | { action: "ignore" }
-    | { action: "check"; targetId: string; meta: InputMeta }
-    | { action: "dispatch"; command: BaseCommand; meta: InputMeta }
-    | { action: "dispatch-callback"; callback: ZoneCallback; meta: InputMeta }
-    | { action: "fallback" };
+  | { action: "ignore" }
+  | { action: "check"; targetId: string; meta: InputMeta }
+  | { action: "dispatch"; command: BaseCommand; meta: InputMeta }
+  | { action: "dispatch-callback"; callback: ZoneCallback; meta: InputMeta }
+  | { action: "fallback" };
 
 interface InputMeta {
-    type: "KEYBOARD";
-    key: string;
-    code: string;
-    elementId: string | undefined;
+  type: "KEYBOARD";
+  key: string;
+  code: string;
+  elementId: string | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -56,42 +56,42 @@ interface InputMeta {
 // ═══════════════════════════════════════════════════════════════════
 
 export function resolveKeyboard(input: KeyboardInput): KeyboardResult {
-    // Guard: IME, defaultPrevented, inspector, combobox
-    if (input.isDefaultPrevented || input.isComposing) {
-        return { action: "ignore" };
-    }
-    if (input.isInspector || input.isCombobox) {
-        return { action: "ignore" };
-    }
+  // Guard: IME, defaultPrevented, inspector, combobox
+  if (input.isDefaultPrevented || input.isComposing) {
+    return { action: "ignore" };
+  }
+  if (input.isInspector || input.isCombobox) {
+    return { action: "ignore" };
+  }
 
-    const meta: InputMeta = {
-        type: "KEYBOARD",
-        key: input.key,
-        code: input.canonicalKey,
-        elementId: input.elementId,
-    };
+  const meta: InputMeta = {
+    type: "KEYBOARD",
+    key: input.key,
+    code: input.canonicalKey,
+    elementId: input.elementId,
+  };
 
-    // Space on checkbox/switch → CHECK override (W3C APG)
-    if (input.canonicalKey === "Space" && !input.isEditing) {
-        const checkResult = resolveCheck(input, meta);
-        if (checkResult) return checkResult;
-    }
+  // Space on checkbox/switch → CHECK override (W3C APG)
+  if (input.canonicalKey === "Space" && !input.isEditing) {
+    const checkResult = resolveCheck(input, meta);
+    if (checkResult) return checkResult;
+  }
 
-    // Resolve keybinding with dual context
-    const binding = Keybindings.resolve(input.canonicalKey, {
-        isEditing: input.isEditing,
-        isFieldActive: input.isFieldActive,
-    });
+  // Resolve keybinding with dual context
+  const binding = Keybindings.resolve(input.canonicalKey, {
+    isEditing: input.isEditing,
+    isFieldActive: input.isFieldActive,
+  });
 
-    if (!binding) {
-        return { action: "fallback" };
-    }
+  if (!binding) {
+    return { action: "fallback" };
+  }
 
-    if (typeof binding.command === "function") {
-        return { action: "dispatch-callback", callback: binding.command, meta };
-    }
+  if (typeof binding.command === "function") {
+    return { action: "dispatch-callback", callback: binding.command, meta };
+  }
 
-    return { action: "dispatch", command: binding.command, meta };
+  return { action: "dispatch", command: binding.command, meta };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -99,30 +99,30 @@ export function resolveKeyboard(input: KeyboardInput): KeyboardResult {
 // ═══════════════════════════════════════════════════════════════════
 
 function resolveCheck(
-    input: KeyboardInput,
-    meta: InputMeta,
+  input: KeyboardInput,
+  meta: InputMeta,
 ): KeyboardResult | null {
-    // Case 1: Explicit checkbox/switch role → always CHECK
-    if (
-        (input.focusedItemRole === "checkbox" ||
-            input.focusedItemRole === "switch") &&
-        input.focusedItemId
-    ) {
-        return {
-            action: "check",
-            targetId: input.focusedItemId,
-            meta: { ...meta, elementId: input.focusedItemId },
-        };
-    }
+  // Case 1: Explicit checkbox/switch role → always CHECK
+  if (
+    (input.focusedItemRole === "checkbox" ||
+      input.focusedItemRole === "switch") &&
+    input.focusedItemId
+  ) {
+    return {
+      action: "check",
+      targetId: input.focusedItemId,
+      meta: { ...meta, elementId: input.focusedItemId },
+    };
+  }
 
-    // Case 2: Active zone has onCheck registered → CHECK (app semantics)
-    if (input.activeZoneHasCheck && input.activeZoneFocusedItemId) {
-        return {
-            action: "check",
-            targetId: input.activeZoneFocusedItemId,
-            meta: { ...meta, elementId: input.activeZoneFocusedItemId },
-        };
-    }
+  // Case 2: Active zone has onCheck registered → CHECK (app semantics)
+  if (input.activeZoneHasCheck && input.activeZoneFocusedItemId) {
+    return {
+      action: "check",
+      targetId: input.activeZoneFocusedItemId,
+      meta: { ...meta, elementId: input.activeZoneFocusedItemId },
+    };
+  }
 
-    return null;
+  return null;
 }

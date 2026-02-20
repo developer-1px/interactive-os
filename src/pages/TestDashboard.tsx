@@ -211,7 +211,13 @@ function buildGroups(
       });
     }
 
-    const file: TestFile = { path, filename, layer, rawLoader, ...(execLoader ? { execLoader } : {}) };
+    const file: TestFile = {
+      path,
+      filename,
+      layer,
+      rawLoader,
+      ...(execLoader ? { execLoader } : {}),
+    };
     const group = groupMap.get(slug)!;
     group.tests.push(file);
     group.layers[layer].push(file);
@@ -308,12 +314,13 @@ function ResultNode({
         <div className="flex items-center gap-2 overflow-hidden min-w-0">
           <StatusIcon status={node.status} />
           <span
-            className={`truncate ${node.status === "fail"
-              ? "text-red-600"
-              : node.status === "pass"
-                ? "text-emerald-700"
-                : "text-stone-600"
-              }`}
+            className={`truncate ${
+              node.status === "fail"
+                ? "text-red-600"
+                : node.status === "pass"
+                  ? "text-emerald-700"
+                  : "text-stone-600"
+            }`}
           >
             {node.name}
           </span>
@@ -682,10 +689,11 @@ export function TestDashboard() {
                           type="button"
                           key={group.slug}
                           onClick={() => setSelectedGroup(group)}
-                          className={`relative w-full flex items-center gap-2.5 px-3 py-[5px] text-[13px] rounded-md transition-all text-left ml-1 ${selectedGroup === group
-                            ? "bg-violet-50 text-violet-900 font-semibold shadow-sm ring-1 ring-violet-100"
-                            : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-                            }`}
+                          className={`relative w-full flex items-center gap-2.5 px-3 py-[5px] text-[13px] rounded-md transition-all text-left ml-1 ${
+                            selectedGroup === group
+                              ? "bg-violet-50 text-violet-900 font-semibold shadow-sm ring-1 ring-violet-100"
+                              : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                          }`}
                         >
                           <HealthIcon group={group} size={12} />
                           <span className="truncate flex-1 leading-none">
@@ -742,10 +750,11 @@ export function TestDashboard() {
                           type="button"
                           key={file.path}
                           onClick={() => setSelectedFile(file)}
-                          className={`w-full text-left flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-xs font-mono border ${selectedFile === file
-                            ? "bg-white border-stone-300 shadow-sm text-stone-900 font-semibold scale-[1.02] origin-left"
-                            : "border-transparent text-stone-500 hover:bg-stone-200/50 hover:text-stone-700"
-                            }`}
+                          className={`w-full text-left flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-xs font-mono border ${
+                            selectedFile === file
+                              ? "bg-white border-stone-300 shadow-sm text-stone-900 font-semibold scale-[1.02] origin-left"
+                              : "border-transparent text-stone-500 hover:bg-stone-200/50 hover:text-stone-700"
+                          }`}
                         >
                           <FileCode2
                             size={12}
@@ -794,10 +803,11 @@ export function TestDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowSource(!showSource)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide transition-all border ${showSource
-                    ? "bg-stone-100 text-stone-700 border-stone-200"
-                    : "bg-white text-stone-400 border-stone-100 hover:text-stone-600 hover:border-stone-200"
-                    }`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide transition-all border ${
+                    showSource
+                      ? "bg-stone-100 text-stone-700 border-stone-200"
+                      : "bg-white text-stone-400 border-stone-100 hover:text-stone-600 hover:border-stone-200"
+                  }`}
                 >
                   {showSource ? <EyeOff size={12} /> : <Eye size={12} />}
                   Source
@@ -823,14 +833,15 @@ export function TestDashboard() {
                   <div className="px-4 py-2 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between flex-shrink-0">
                     <div className="flex items-center gap-2">
                       <div
-                        className={`p-1 rounded ${running
-                          ? "bg-blue-100 text-blue-600 animate-pulse"
-                          : results.length > 0
-                            ? results.every((r) => r.status === "pass")
-                              ? "bg-emerald-50 text-emerald-600"
-                              : "bg-red-50 text-red-600"
-                            : "bg-stone-100 text-stone-400"
-                          }`}
+                        className={`p-1 rounded ${
+                          running
+                            ? "bg-blue-100 text-blue-600 animate-pulse"
+                            : results.length > 0
+                              ? results.every((r) => r.status === "pass")
+                                ? "bg-emerald-50 text-emerald-600"
+                                : "bg-red-50 text-red-600"
+                              : "bg-stone-100 text-stone-400"
+                        }`}
                       >
                         {running ? (
                           <RotateCw size={14} className="animate-spin" />
@@ -854,10 +865,11 @@ export function TestDashboard() {
                         type="button"
                         onClick={runTests}
                         disabled={running}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide transition-all shadow-sm ${running
-                          ? "bg-stone-100 text-stone-400 cursor-wait"
-                          : "bg-stone-900 text-white hover:bg-stone-700 hover:scale-105 active:scale-95"
-                          }`}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide transition-all shadow-sm ${
+                          running
+                            ? "bg-stone-100 text-stone-400 cursor-wait"
+                            : "bg-stone-900 text-white hover:bg-stone-700 hover:scale-105 active:scale-95"
+                        }`}
                       >
                         {running ? (
                           <RotateCw size={11} className="animate-spin" />

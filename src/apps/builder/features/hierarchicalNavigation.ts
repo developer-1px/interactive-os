@@ -14,16 +14,16 @@
  * @see discussions/2026-0219-1954-builder-focus-policy.md
  */
 
-import { FOCUS } from "@/os/3-commands/focus/focus";
-import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
-import { kernel } from "@/os/kernel";
+import type { BaseCommand } from "@kernel";
 import {
-    getItemAttribute,
-    getFirstDescendantWithAttribute,
-    getAncestorWithAttribute,
+  getAncestorWithAttribute,
+  getFirstDescendantWithAttribute,
+  getItemAttribute,
 } from "@/os/2-contexts/itemQueries";
 import type { ZoneCursor } from "@/os/2-contexts/zoneRegistry";
-import type { BaseCommand } from "@kernel";
+import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
+import { FOCUS } from "@/os/3-commands/focus/focus";
+import { kernel } from "@/os/kernel";
 import type { BuilderLevel } from "../primitives/Builder";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -33,13 +33,13 @@ import type { BuilderLevel } from "../primitives/Builder";
 const LEVEL_ORDER: BuilderLevel[] = ["section", "group", "item"];
 
 function getChildLevel(level: BuilderLevel): BuilderLevel | null {
-    const idx = LEVEL_ORDER.indexOf(level);
-    return idx < LEVEL_ORDER.length - 1 ? LEVEL_ORDER[idx + 1] ?? null : null;
+  const idx = LEVEL_ORDER.indexOf(level);
+  return idx < LEVEL_ORDER.length - 1 ? (LEVEL_ORDER[idx + 1] ?? null) : null;
 }
 
 function getParentLevel(level: BuilderLevel): BuilderLevel | null {
-    const idx = LEVEL_ORDER.indexOf(level);
-    return idx > 0 ? LEVEL_ORDER[idx - 1] ?? null : null;
+  const idx = LEVEL_ORDER.indexOf(level);
+  return idx > 0 ? (LEVEL_ORDER[idx - 1] ?? null) : null;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -55,20 +55,20 @@ function getParentLevel(level: BuilderLevel): BuilderLevel | null {
  * Uses OS getItemAttribute — no DOM access in app code.
  */
 export function createCanvasItemFilter(
-    zoneId: string,
+  zoneId: string,
 ): (items: string[]) => string[] {
-    return (items: string[]) => {
-        const focusedId =
-            kernel.getState().os.focus.zones[zoneId]?.focusedItemId ?? null;
-        const currentLevel: BuilderLevel = focusedId
-            ? ((getItemAttribute(zoneId, focusedId, "data-level") as BuilderLevel) ??
-                "section")
-            : "section";
+  return (items: string[]) => {
+    const focusedId =
+      kernel.getState().os.focus.zones[zoneId]?.focusedItemId ?? null;
+    const currentLevel: BuilderLevel = focusedId
+      ? ((getItemAttribute(zoneId, focusedId, "data-level") as BuilderLevel) ??
+        "section")
+      : "section";
 
-        return items.filter(
-            (id) => getItemAttribute(zoneId, id, "data-level") === currentLevel,
-        );
-    };
+    return items.filter(
+      (id) => getItemAttribute(zoneId, id, "data-level") === currentLevel,
+    );
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -84,33 +84,33 @@ export function createCanvasItemFilter(
  * Uses OS item queries — no DOM access in app code.
  */
 export function createDrillDown(zoneId: string) {
-    return (cursor: ZoneCursor): BaseCommand | BaseCommand[] => {
-        const level = getItemAttribute(
-            zoneId,
-            cursor.focusId,
-            "data-level",
-        ) as BuilderLevel | null;
-        if (!level) return [];
+  return (cursor: ZoneCursor): BaseCommand | BaseCommand[] => {
+    const level = getItemAttribute(
+      zoneId,
+      cursor.focusId,
+      "data-level",
+    ) as BuilderLevel | null;
+    if (!level) return [];
 
-        // At item level: start editing
-        if (level === "item") {
-            return FIELD_START_EDIT();
-        }
+    // At item level: start editing
+    if (level === "item") {
+      return FIELD_START_EDIT();
+    }
 
-        // At section/group: find first descendant at next level
-        const childLevel = getChildLevel(level);
-        if (!childLevel) return [];
+    // At section/group: find first descendant at next level
+    const childLevel = getChildLevel(level);
+    if (!childLevel) return [];
 
-        const childId = getFirstDescendantWithAttribute(
-            zoneId,
-            cursor.focusId,
-            "data-level",
-            childLevel,
-        );
-        if (!childId) return [];
+    const childId = getFirstDescendantWithAttribute(
+      zoneId,
+      cursor.focusId,
+      "data-level",
+      childLevel,
+    );
+    if (!childId) return [];
 
-        return FOCUS({ zoneId, itemId: childId });
-    };
+    return FOCUS({ zoneId, itemId: childId });
+  };
 }
 
 /**
@@ -123,36 +123,36 @@ export function createDrillDown(zoneId: string) {
  * Uses OS item queries — no DOM access in app code.
  */
 export function createDrillUp(zoneId: string) {
-    return (cursor: ZoneCursor): BaseCommand | BaseCommand[] => {
-        const level = getItemAttribute(
-            zoneId,
-            cursor.focusId,
-            "data-level",
-        ) as BuilderLevel | null;
-        if (!level || level === "section") return []; // Already at top
+  return (cursor: ZoneCursor): BaseCommand | BaseCommand[] => {
+    const level = getItemAttribute(
+      zoneId,
+      cursor.focusId,
+      "data-level",
+    ) as BuilderLevel | null;
+    if (!level || level === "section") return []; // Already at top
 
-        const parentLevel = getParentLevel(level);
-        if (!parentLevel) return [];
+    const parentLevel = getParentLevel(level);
+    if (!parentLevel) return [];
 
-        let parentId = getAncestorWithAttribute(
-            zoneId,
-            cursor.focusId,
-            "data-level",
-            parentLevel,
-        );
+    let parentId = getAncestorWithAttribute(
+      zoneId,
+      cursor.focusId,
+      "data-level",
+      parentLevel,
+    );
 
-        // If no group parent found for item, try section directly
-        if (!parentId && level === "item") {
-            parentId = getAncestorWithAttribute(
-                zoneId,
-                cursor.focusId,
-                "data-level",
-                "section",
-            );
-        }
+    // If no group parent found for item, try section directly
+    if (!parentId && level === "item") {
+      parentId = getAncestorWithAttribute(
+        zoneId,
+        cursor.focusId,
+        "data-level",
+        "section",
+      );
+    }
 
-        if (!parentId) return [];
+    if (!parentId) return [];
 
-        return FOCUS({ zoneId, itemId: parentId });
-    };
+    return FOCUS({ zoneId, itemId: parentId });
+  };
 }

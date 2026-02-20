@@ -14,15 +14,16 @@
     "format": "biome format --write .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc -b"
   },
   "dependencies": {
-    "@tanstack/react-router": "^1.161.1",
-    "@tanstack/router-devtools": "^1.161.1",
-    "@tanstack/router-plugin": "^1.161.1",
+    "@tanstack/react-router": "^1.161.3",
+    "@tanstack/router-devtools": "^1.161.3",
+    "@tanstack/router-plugin": "^1.161.3",
     "clsx": "^2.1.1",
     "immer": "^11.1.4",
-    "lucide-react": "^0.574.0",
+    "lucide-react": "^0.575.0",
     "mermaid": "^11.12.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -34,7 +35,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.2",
+    "@biomejs/biome": "2.4.3",
     "@eslint/js": "^9.39.2",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/vite": "^4.2.0",

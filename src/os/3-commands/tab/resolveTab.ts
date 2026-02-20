@@ -61,7 +61,7 @@ export function resolveTabEscapeZone(
   // Try each successive zone, skipping empty ones (e.g., parent container zones)
   for (let step = 1; step < zoneOrder.length; step++) {
     const candidateIdx =
-      ((currentIdx + delta * step) % zoneOrder.length + zoneOrder.length) %
+      (((currentIdx + delta * step) % zoneOrder.length) + zoneOrder.length) %
       zoneOrder.length;
 
     const nextZone = zoneOrder[candidateIdx]!;

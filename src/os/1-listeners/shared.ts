@@ -10,24 +10,24 @@
 // ═══════════════════════════════════════════════════════════════════
 
 export const findFocusableItem = (el: HTMLElement) =>
-    el.closest("[data-item-id]") as HTMLElement | null;
+  el.closest("[data-item-id]") as HTMLElement | null;
 
 export interface FocusTargetInfo {
-    itemId: string;
-    groupId: string;
+  itemId: string;
+  groupId: string;
 }
 
 export function resolveFocusTarget(
-    target: HTMLElement,
+  target: HTMLElement,
 ): FocusTargetInfo | null {
-    const itemEl = findFocusableItem(target);
-    if (!itemEl?.id) return null;
+  const itemEl = findFocusableItem(target);
+  if (!itemEl?.id) return null;
 
-    const zoneEl = itemEl.closest("[data-focus-group]") as HTMLElement | null;
-    const groupId = zoneEl?.getAttribute("data-focus-group") ?? null;
-    if (!groupId) return null;
+  const zoneEl = itemEl.closest("[data-focus-group]") as HTMLElement | null;
+  const groupId = zoneEl?.getAttribute("data-focus-group") ?? null;
+  if (!groupId) return null;
 
-    return { itemId: itemEl.id, groupId };
+  return { itemId: itemEl.id, groupId };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -44,9 +44,9 @@ export function resolveFocusTarget(
 let dispatching = false;
 
 export function setDispatching(value: boolean) {
-    dispatching = value;
+  dispatching = value;
 }
 
 export function isDispatching(): boolean {
-    return dispatching;
+  return dispatching;
 }

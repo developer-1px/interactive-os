@@ -25,10 +25,10 @@ import {
   selectVisibleTodos,
 } from "@apps/todo/selectors";
 import { produce } from "immer";
+import { z } from "zod";
 import { FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { FOCUS } from "@/os/3-commands/focus/focus";
 import { defineApp } from "@/os/defineApp";
-import { z } from "zod";
 
 /** Collision-free random ID */
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -99,8 +99,10 @@ const listCollection = createCollectionZone(TodoApp, "list", {
     item.categoryId === state.ui.selectedCategoryId,
   clipboard: {
     accessor: (s: AppState) => s.ui.clipboard,
-    set: (draft: AppState, value) => { draft.ui.clipboard = value; },
-    toText: (items: Todo[]) => items.map(t => t.text).join("\n"),
+    set: (draft: AppState, value) => {
+      draft.ui.clipboard = value;
+    },
+    toText: (items: Todo[]) => items.map((t) => t.text).join("\n"),
     onPaste: (item: Todo, state: AppState) => ({
       ...item,
       categoryId: state.ui.selectedCategoryId,
@@ -140,7 +142,6 @@ export const startEdit = listCollection.command(
     dispatch: FIELD_START_EDIT(),
   }),
 );
-
 
 export const undoCommand = listCollection.command(
   "undo",
@@ -189,8 +190,10 @@ export const undoCommand = listCollection.command(
 
         // Restore from the earliest entry's snapshot
         if (restoreSnapshot) {
-          if (restoreSnapshot['data']) draft.data = restoreSnapshot['data'] as typeof draft.data;
-          if (restoreSnapshot['ui']) draft.ui = restoreSnapshot['ui'] as typeof draft.ui;
+          if (restoreSnapshot["data"])
+            draft.data = restoreSnapshot["data"] as typeof draft.data;
+          if (restoreSnapshot["ui"])
+            draft.ui = restoreSnapshot["ui"] as typeof draft.ui;
         }
       }),
       dispatch: focusTarget
@@ -220,8 +223,9 @@ export const redoCommand = listCollection.command(
         });
         if (popped.snapshot) {
           const snapshot = popped.snapshot;
-          if (snapshot['data']) draft.data = snapshot['data'] as typeof draft.data;
-          if (snapshot['ui']) draft.ui = snapshot['ui'] as typeof draft.ui;
+          if (snapshot["data"])
+            draft.data = snapshot["data"] as typeof draft.data;
+          if (snapshot["ui"]) draft.ui = snapshot["ui"] as typeof draft.ui;
         }
       }),
       dispatch: focusTarget
@@ -241,9 +245,7 @@ export const TodoListUI = listCollection.bind({
   ...listBindings,
   onUndo: undoCommand(),
   onRedo: redoCommand(),
-  keybindings: [
-    ...listBindings.keybindings,
-  ],
+  keybindings: [...listBindings.keybindings],
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -429,6 +431,13 @@ export const TodoList = {
     undoCommand,
     redoCommand,
   },
+  triggers: {
+    ToggleTodo: TodoApp.createTrigger(toggleTodo),
+    DeleteTodo: TodoApp.createTrigger(deleteTodo),
+    StartEdit: TodoApp.createTrigger(startEdit),
+    MoveItemUp: TodoApp.createTrigger(moveItemUp),
+    MoveItemDown: TodoApp.createTrigger(moveItemDown),
+  },
 };
 
 export const TodoSidebar = {
@@ -437,6 +446,9 @@ export const TodoSidebar = {
     selectCategory,
     moveCategoryUp,
     moveCategoryDown,
+  },
+  triggers: {
+    SelectCategory: TodoApp.createTrigger(selectCategory),
   },
 };
 

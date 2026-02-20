@@ -22,17 +22,16 @@ import { ZoneRegistry } from "./zoneRegistry";
  *   getItemAttribute("canvas", "hero", "data-level")  // → "section"
  */
 export function getItemAttribute(
-    zoneId: string,
-    itemId: string,
-    attribute: string,
+  zoneId: string,
+  itemId: string,
+  attribute: string,
 ): string | null {
-    const entry = ZoneRegistry.get(zoneId);
-    if (!entry?.element) return null;
+  const entry = ZoneRegistry.get(zoneId);
+  if (!entry?.element) return null;
 
-    const el = entry.element.querySelector(`[data-item-id="${itemId}"]`);
-    return el?.getAttribute(attribute) ?? null;
+  const el = entry.element.querySelector(`[data-item-id="${itemId}"]`);
+  return el?.getAttribute(attribute) ?? null;
 }
-
 
 // ═══════════════════════════════════════════════════════════════════
 // Item Hierarchy — derived from DOM nesting
@@ -46,26 +45,24 @@ export function getItemAttribute(
  *   // → "hero-cards" (first group inside hero section)
  */
 export function getFirstDescendantWithAttribute(
-    zoneId: string,
-    parentId: string,
-    attribute: string,
-    value: string,
+  zoneId: string,
+  parentId: string,
+  attribute: string,
+  value: string,
 ): string | null {
-    const entry = ZoneRegistry.get(zoneId);
-    if (!entry?.element) return null;
+  const entry = ZoneRegistry.get(zoneId);
+  if (!entry?.element) return null;
 
-    const parentEl = entry.element.querySelector(
-        `[data-item-id="${parentId}"]`,
-    );
-    if (!parentEl) return null;
+  const parentEl = entry.element.querySelector(`[data-item-id="${parentId}"]`);
+  if (!parentEl) return null;
 
-    const descendant = parentEl.querySelector(
-        `[data-item-id][${attribute}="${value}"]`,
-    );
-    if (!descendant) return null;
+  const descendant = parentEl.querySelector(
+    `[data-item-id][${attribute}="${value}"]`,
+  );
+  if (!descendant) return null;
 
-    const id = descendant.getAttribute("data-item-id");
-    return id !== parentId ? id : null;
+  const id = descendant.getAttribute("data-item-id");
+  return id !== parentId ? id : null;
 }
 
 /**
@@ -76,24 +73,24 @@ export function getFirstDescendantWithAttribute(
  *   // → "hero" (closest section ancestor)
  */
 export function getAncestorWithAttribute(
-    zoneId: string,
-    itemId: string,
-    attribute: string,
-    value: string,
+  zoneId: string,
+  itemId: string,
+  attribute: string,
+  value: string,
 ): string | null {
-    const entry = ZoneRegistry.get(zoneId);
-    if (!entry?.element) return null;
+  const entry = ZoneRegistry.get(zoneId);
+  if (!entry?.element) return null;
 
-    const el = entry.element.querySelector(`[data-item-id="${itemId}"]`);
-    if (!el) return null;
+  const el = entry.element.querySelector(`[data-item-id="${itemId}"]`);
+  if (!el) return null;
 
-    let current = el.parentElement;
-    while (current && current !== entry.element) {
-        const currentItemId = current.getAttribute("data-item-id");
-        if (currentItemId && current.getAttribute(attribute) === value) {
-            return currentItemId;
-        }
-        current = current.parentElement;
+  let current = el.parentElement;
+  while (current && current !== entry.element) {
+    const currentItemId = current.getAttribute("data-item-id");
+    if (currentItemId && current.getAttribute(attribute) === value) {
+      return currentItemId;
     }
-    return null;
+    current = current.parentElement;
+  }
+  return null;
 }

@@ -81,7 +81,8 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
     );
 
     // Resolve Children
-    let resolvedChildren: ReactNode = typeof children === "function" ? children(itemState) : children;
+    const resolvedChildren: ReactNode =
+      typeof children === "function" ? children(itemState) : children;
 
     return (
       <FocusItem
@@ -93,11 +94,11 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
             isValidElement(resolvedChildren) &&
             typeof resolvedChildren.type === "string")
         }
-        className={className}
+        {...(className !== undefined ? { className } : {})}
         data-selected={isSelected ? "true" : undefined}
         _isFocusedHint={isFocused}
         _isActiveHint={isActive}
-        {...rest}
+        {...(rest as any)}
       >
         {resolvedChildren}
       </FocusItem>

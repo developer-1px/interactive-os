@@ -22,8 +22,7 @@ const LISTVIEW = '[role="listbox"]#list';
 const SIDEBAR = '[role="listbox"]#sidebar';
 
 /** Get any item in listView (excluding DRAFT) */
-const todoItem = (listview: string) =>
-  `${listview} [data-item-id]:not(#DRAFT)`;
+const todoItem = (listview: string) => `${listview} [data-item-id]:not(#DRAFT)`;
 
 /** Get the focused item in listView (excluding DRAFT) */
 const focusedTodoItem = (listview: string) =>
@@ -358,7 +357,7 @@ test.describe("Todo App", () => {
     const focusedText = await focused.textContent();
     expect(
       focusedText?.includes("Item B") ||
-      focusedText?.includes("Complete Interaction OS docs"),
+        focusedText?.includes("Complete Interaction OS docs"),
     ).toBe(true);
   });
 

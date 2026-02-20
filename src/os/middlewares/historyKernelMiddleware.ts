@@ -146,39 +146,40 @@ export function createHistoryMiddleware(
       if (OS_PASSTHROUGH.has(commandType)) return ctx;
       if (HISTORY_SELF_MANAGED.has(commandType)) return ctx;
 
-      const prevAppState = ctx.injected['_historyBefore'] as
+      const prevAppState = ctx.injected["_historyBefore"] as
         | Record<string, unknown>
         | undefined;
 
       // The handler's NEW state is in ctx.effects.state (scoped slice),
       // NOT in ctx.state (which is still the pre-handler full kernel state).
-      const effectsState = (ctx.effects as Record<string, unknown> | null)
-        ?.['state'] as Record<string, unknown> | undefined;
+      const effectsState = (ctx.effects as Record<string, unknown> | null)?.[
+        "state"
+      ] as Record<string, unknown> | undefined;
 
       if (!prevAppState || !effectsState) return ctx;
 
       // Skip if no history field in app state
-      if (!effectsState['history'] && !prevAppState['history']) return ctx;
+      if (!effectsState["history"] && !prevAppState["history"]) return ctx;
 
       // Skip if data hasn't changed
       if (
-        prevAppState['data'] !== undefined &&
-        prevAppState['data'] === effectsState['data']
+        prevAppState["data"] !== undefined &&
+        prevAppState["data"] === effectsState["data"]
       ) {
         return ctx;
       }
 
       // Record snapshot
-      const previousFocusId = ctx.injected['_historyFocusId'] as string | null;
+      const previousFocusId = ctx.injected["_historyFocusId"] as string | null;
 
       const updatedAppState = produce(
         effectsState,
         (draft: Record<string, unknown>) => {
-          if (!draft['history']) {
-            draft['history'] = { past: [], future: [] };
+          if (!draft["history"]) {
+            draft["history"] = { past: [], future: [] };
           }
 
-          const history = draft['history'] as {
+          const history = draft["history"] as {
             past: HistoryEntry[];
             future: HistoryEntry[];
           };

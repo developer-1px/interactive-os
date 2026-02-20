@@ -22,7 +22,7 @@ const fullPathBlock = genFile.match(
   /interface FileRoutesByFullPath \{([\s\S]*?)\}/,
 )?.[1];
 const allRoutes = [...(fullPathBlock?.matchAll(/'([^']+)'/g) ?? [])].map(
-  (m) => m[1],
+  (m) => m[1]!,
 );
 
 // splat($) 라우트, 중복 trailing slash 제외

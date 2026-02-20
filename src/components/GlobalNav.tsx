@@ -1,7 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { Icon } from "@/components/Icon";
 import { useDocsNotification } from "@/docs-viewer/useDocsNotification";
-import { Icon } from "@/lib/Icon";
 import { useNavRoutes } from "./useNavRoutes";
 
 export function GlobalNav() {

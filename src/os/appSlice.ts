@@ -279,19 +279,19 @@ function hydrateState<S>(initialState: S, storageKey: string): S {
       ...initialState,
       ...loaded,
       data:
-        init['data'] && load['data']
+        init["data"] && load["data"]
           ? {
-            ...(init['data'] as Record<string, unknown>),
-            ...(load['data'] as Record<string, unknown>),
-          }
-          : load['data'] || init['data'],
+              ...(init["data"] as Record<string, unknown>),
+              ...(load["data"] as Record<string, unknown>),
+            }
+          : load["data"] || init["data"],
       ui:
-        init['ui'] && load['ui']
+        init["ui"] && load["ui"]
           ? {
-            ...(init['ui'] as Record<string, unknown>),
-            ...(load['ui'] as Record<string, unknown>),
-          }
-          : load['ui'] || init['ui'],
+              ...(init["ui"] as Record<string, unknown>),
+              ...(load["ui"] as Record<string, unknown>),
+            }
+          : load["ui"] || init["ui"],
     };
   } catch {
     return initialState;

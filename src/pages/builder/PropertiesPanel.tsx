@@ -9,9 +9,9 @@ import {
 import {
   BuilderApp,
   builderUpdateFieldByDomId,
-  useFieldByDomId,
-  renameSectionLabel,
   type PropertyType,
+  renameSectionLabel,
+  useFieldByDomId,
 } from "@/apps/builder/app";
 import { kernel } from "@/os/kernel";
 
@@ -116,10 +116,11 @@ function TabButton({
 }) {
   return (
     <div
-      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${active
-        ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
-        : "text-slate-400"
-        }`}
+      className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${
+        active
+          ? "bg-white text-violet-600 shadow-sm ring-1 ring-violet-100"
+          : "text-slate-400"
+      }`}
       title={label}
     >
       {icon}
@@ -200,7 +201,9 @@ function ImageProperties({ fieldName }: { fieldName: string }) {
 
       <FormGroup label="Source">
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-slate-600 font-medium">Image URL</label>
+          <label className="text-xs text-slate-600 font-medium">
+            Image URL
+          </label>
           <input
             type="text"
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
@@ -233,7 +236,16 @@ function IconProperties({ fieldName }: { fieldName: string }) {
   const icon = useFieldByDomId(iconKey);
   const label = useFieldByDomId(labelKey);
 
-  const ICON_OPTIONS = ["ArrowRight", "Check", "Star", "Heart", "Mail", "Phone", "Globe", "Shield"];
+  const ICON_OPTIONS = [
+    "ArrowRight",
+    "Check",
+    "Star",
+    "Heart",
+    "Mail",
+    "Phone",
+    "Globe",
+    "Shield",
+  ];
 
   return (
     <div className="space-y-6">
@@ -243,10 +255,11 @@ function IconProperties({ fieldName }: { fieldName: string }) {
             <button
               type="button"
               key={name}
-              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${icon === name
-                ? "border-violet-500 bg-violet-50 text-violet-600"
-                : "border-slate-200 text-slate-400"
-                }`}
+              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${
+                icon === name
+                  ? "border-violet-500 bg-violet-50 text-violet-600"
+                  : "border-slate-200 text-slate-400"
+              }`}
               onClick={() => builderUpdateFieldByDomId(iconKey, name)}
               title={name}
             >
@@ -255,7 +268,9 @@ function IconProperties({ fieldName }: { fieldName: string }) {
           ))}
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-slate-600 font-medium">Icon Name</label>
+          <label className="text-xs text-slate-600 font-medium">
+            Icon Name
+          </label>
           <input
             type="text"
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
@@ -272,7 +287,9 @@ function IconProperties({ fieldName }: { fieldName: string }) {
             type="text"
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
             value={label}
-            onChange={(e) => builderUpdateFieldByDomId(labelKey, e.target.value)}
+            onChange={(e) =>
+              builderUpdateFieldByDomId(labelKey, e.target.value)
+            }
             placeholder="Leave empty if decorative"
           />
         </div>
@@ -363,14 +380,17 @@ function ButtonProperties({ fieldName }: { fieldName: string }) {
 function SectionProperties({ fieldName }: { fieldName: string }) {
   // Find section in state to get its label
   const sectionLabel = BuilderApp.useComputed(
-    (s) => s.data.sections.find((sec) => sec.id === fieldName)?.label ?? fieldName,
+    (s) =>
+      s.data.sections.find((sec) => sec.id === fieldName)?.label ?? fieldName,
   );
 
   return (
     <div className="space-y-6">
       <FormGroup label="Section Identity">
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-slate-600 font-medium">Section Name</label>
+          <label className="text-xs text-slate-600 font-medium">
+            Section Name
+          </label>
           <input
             type="text"
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
@@ -383,7 +403,9 @@ function SectionProperties({ fieldName }: { fieldName: string }) {
           />
         </div>
         <div className="mt-3 flex flex-col gap-1">
-          <label className="text-xs text-slate-600 font-medium">ID (Anchor)</label>
+          <label className="text-xs text-slate-600 font-medium">
+            ID (Anchor)
+          </label>
           <input
             type="text"
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-500"

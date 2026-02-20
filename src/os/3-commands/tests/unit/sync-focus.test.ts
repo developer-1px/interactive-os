@@ -47,7 +47,7 @@ describe("SYNC_FOCUS", () => {
 
     kernel.dispatch(SYNC_FOCUS({ id: "item-2", zoneId: "zoneA" }));
 
-    const zone = kernel.getState().os.focus.zones['zoneA'];
+    const zone = kernel.getState().os.focus.zones["zoneA"];
     expect(zone?.focusedItemId).toBe("item-2");
   });
 
@@ -56,7 +56,7 @@ describe("SYNC_FOCUS", () => {
 
     kernel.dispatch(SYNC_FOCUS({ id: "item-2", zoneId: "zoneA" }));
 
-    const zone = kernel.getState().os.focus.zones['zoneA'];
+    const zone = kernel.getState().os.focus.zones["zoneA"];
     expect(zone?.lastFocusedId).toBe("item-2");
   });
 
@@ -73,7 +73,7 @@ describe("SYNC_FOCUS", () => {
     // zoneNew has no prior state
     kernel.dispatch(SYNC_FOCUS({ id: "item-1", zoneId: "zoneNew" }));
 
-    const zone = kernel.getState().os.focus.zones['zoneNew'];
+    const zone = kernel.getState().os.focus.zones["zoneNew"];
     expect(zone).toBeDefined();
     expect(zone?.focusedItemId).toBe("item-1");
     expect(zone?.lastFocusedId).toBe("item-1");
@@ -89,7 +89,7 @@ describe("SYNC_FOCUS", () => {
     kernel.dispatch(SYNC_FOCUS({ id: "item-2", zoneId: "zoneA" }));
 
     // State was updated (the command did execute)
-    const zone = kernel.getState().os.focus.zones['zoneA'];
+    const zone = kernel.getState().os.focus.zones["zoneA"];
     expect(zone?.focusedItemId).toBe("item-2");
   });
 });

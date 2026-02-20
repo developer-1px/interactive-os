@@ -5,127 +5,130 @@
  * NAVIGATE only traverses items that pass the filter.
  */
 
-import { describe, expect, it, beforeEach } from "vitest";
-import { createTestKernel } from "./helpers/createTestKernel";
+import { beforeEach, describe, expect, it } from "vitest";
 import { ZoneRegistry } from "../../../2-contexts/zoneRegistry";
 import { DEFAULT_CONFIG } from "../../../schemas/focus/config/FocusGroupConfig";
+import { createTestKernel } from "./helpers/createTestKernel";
 
 describe("itemFilter — dynamic item filtering", () => {
-    let t: ReturnType<typeof createTestKernel>;
+  let t: ReturnType<typeof createTestKernel>;
 
-    beforeEach(() => {
-        t = createTestKernel();
+  beforeEach(() => {
+    t = createTestKernel();
+  });
+
+  it("NAVIGATE traverses only filtered items when itemFilter is set", () => {
+    // All items: a(section), b(item), c(item), d(section)
+    // Filter: only "item" level
+    const allItems = ["a", "b", "c", "d"];
+    const itemLevelMap: Record<string, string> = {
+      a: "section",
+      b: "item",
+      c: "item",
+      d: "section",
+    };
+
+    t.setItems(allItems);
+    t.setActiveZone("test", "b");
+
+    // Register zone with itemFilter
+    ZoneRegistry.register("test", {
+      config: { ...DEFAULT_CONFIG },
+      element: document.createElement("div"),
+      parentId: null,
+      itemFilter: (items: string[]) =>
+        items.filter((id) => itemLevelMap[id] === "item"),
     });
 
-    it("NAVIGATE traverses only filtered items when itemFilter is set", () => {
-        // All items: a(section), b(item), c(item), d(section)
-        // Filter: only "item" level
-        const allItems = ["a", "b", "c", "d"];
-        const itemLevelMap: Record<string, string> = {
-            a: "section",
-            b: "item",
-            c: "item",
-            d: "section",
-        };
+    // Navigate down from b → should go to c (skipping d which is "section")
+    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    expect(t.focusedItemId()).toBe("c");
 
-        t.setItems(allItems);
-        t.setActiveZone("test", "b");
+    // Navigate down from c → should stay at c (no more "item" level items)
+    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    expect(t.focusedItemId()).toBe("c");
+  });
 
-        // Register zone with itemFilter
-        ZoneRegistry.register("test", {
-            config: { ...DEFAULT_CONFIG },
-            element: document.createElement("div"),
-            parentId: null,
-            itemFilter: (items: string[]) =>
-                items.filter((id) => itemLevelMap[id] === "item"),
-        });
+  it("NAVIGATE traverses all items when no itemFilter is set", () => {
+    t.setItems(["a", "b", "c"]);
+    t.setActiveZone("test", "a");
 
-        // Navigate down from b → should go to c (skipping d which is "section")
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        expect(t.focusedItemId()).toBe("c");
-
-        // Navigate down from c → should stay at c (no more "item" level items)
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        expect(t.focusedItemId()).toBe("c");
+    // No itemFilter registered
+    ZoneRegistry.register("test", {
+      config: { ...DEFAULT_CONFIG },
+      element: document.createElement("div"),
+      parentId: null,
     });
 
-    it("NAVIGATE traverses all items when no itemFilter is set", () => {
-        t.setItems(["a", "b", "c"]);
-        t.setActiveZone("test", "a");
+    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    expect(t.focusedItemId()).toBe("b");
 
-        // No itemFilter registered
-        ZoneRegistry.register("test", {
-            config: { ...DEFAULT_CONFIG },
-            element: document.createElement("div"),
-            parentId: null,
-        });
+    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    expect(t.focusedItemId()).toBe("c");
+  });
 
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        expect(t.focusedItemId()).toBe("b");
+  it("itemFilter can change at runtime (dynamic level switching)", () => {
+    const allItems = ["s1", "g1", "i1", "i2", "s2"];
+    const levelMap: Record<string, string> = {
+      s1: "section",
+      g1: "group",
+      i1: "item",
+      i2: "item",
+      s2: "section",
+    };
 
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        expect(t.focusedItemId()).toBe("c");
+    let currentLevel = "section";
+
+    t.setItems(allItems);
+    t.setActiveZone("test", "s1");
+
+    const el = document.createElement("div");
+    ZoneRegistry.register("test", {
+      config: { ...DEFAULT_CONFIG },
+      element: el,
+      parentId: null,
+      itemFilter: (items: string[]) =>
+        items.filter((id) => levelMap[id] === currentLevel),
     });
 
-    it("itemFilter can change at runtime (dynamic level switching)", () => {
-        const allItems = ["s1", "g1", "i1", "i2", "s2"];
-        const levelMap: Record<string, string> = {
-            s1: "section",
-            g1: "group",
-            i1: "item",
-            i2: "item",
-            s2: "section",
-        };
+    // Level = "section": navigate s1 → s2
+    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    expect(t.focusedItemId()).toBe("s2");
 
-        let currentLevel = "section";
+    // Switch level to "item" and set focus to i1
+    currentLevel = "item";
+    t.setActiveZone("test", "i1");
 
-        t.setItems(allItems);
-        t.setActiveZone("test", "s1");
+    // Navigate i1 → i2
+    t.dispatch(t.NAVIGATE({ direction: "down" }));
+    expect(t.focusedItemId()).toBe("i2");
 
-        const el = document.createElement("div");
-        ZoneRegistry.register("test", {
-            config: { ...DEFAULT_CONFIG },
-            element: el,
-            parentId: null,
-            itemFilter: (items: string[]) =>
-                items.filter((id) => levelMap[id] === currentLevel),
-        });
+    // Navigate up from i2 → i1
+    t.dispatch(t.NAVIGATE({ direction: "up" }));
+    expect(t.focusedItemId()).toBe("i1");
+  });
 
-        // Level = "section": navigate s1 → s2
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        expect(t.focusedItemId()).toBe("s2");
+  it("itemFilter applies to TAB as well", () => {
+    const allItems = ["a", "b", "c"];
+    const visibleItems = new Set(["a", "c"]);
 
-        // Switch level to "item" and set focus to i1
-        currentLevel = "item";
-        t.setActiveZone("test", "i1");
+    t.setItems(allItems);
+    t.setActiveZone("test", "a");
+    t.setConfig({ tab: { behavior: "trap", restoreFocus: false } });
 
-        // Navigate i1 → i2
-        t.dispatch(t.NAVIGATE({ direction: "down" }));
-        expect(t.focusedItemId()).toBe("i2");
-
-        // Navigate up from i2 → i1
-        t.dispatch(t.NAVIGATE({ direction: "up" }));
-        expect(t.focusedItemId()).toBe("i1");
+    ZoneRegistry.register("test", {
+      config: {
+        ...DEFAULT_CONFIG,
+        tab: { behavior: "trap", restoreFocus: false },
+      },
+      element: document.createElement("div"),
+      parentId: null,
+      itemFilter: (items: string[]) =>
+        items.filter((id) => visibleItems.has(id)),
     });
 
-    it("itemFilter applies to TAB as well", () => {
-        const allItems = ["a", "b", "c"];
-        const visibleItems = new Set(["a", "c"]);
-
-        t.setItems(allItems);
-        t.setActiveZone("test", "a");
-        t.setConfig({ tab: { behavior: "trap", restoreFocus: false } });
-
-        ZoneRegistry.register("test", {
-            config: { ...DEFAULT_CONFIG, tab: { behavior: "trap", restoreFocus: false } },
-            element: document.createElement("div"),
-            parentId: null,
-            itemFilter: (items: string[]) =>
-                items.filter((id) => visibleItems.has(id)),
-        });
-
-        // Tab from a → should go to c (b is filtered out)
-        t.dispatch(t.TAB({ direction: "forward" }));
-        expect(t.focusedItemId()).toBe("c");
-    });
+    // Tab from a → should go to c (b is filtered out)
+    t.dispatch(t.TAB({ direction: "forward" }));
+    expect(t.focusedItemId()).toBe("c");
+  });
 });

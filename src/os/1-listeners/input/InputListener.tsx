@@ -12,28 +12,29 @@ import { FieldRegistry } from "@os/6-components/field/FieldRegistry";
 import { useEffect } from "react";
 
 export function InputListener() {
-    useEffect(() => {
-        const onInput = (e: Event) => {
-            const target = e.target as HTMLElement;
-            if (!target?.isContentEditable) return;
+  useEffect(() => {
+    const onInput = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (!target?.isContentEditable) return;
 
-            const fieldId = target.id;
-            if (!fieldId) return;
+      const fieldId = target.id;
+      if (!fieldId) return;
 
-            const entry = FieldRegistry.getField(fieldId);
-            if (!entry) return;
+      const entry = FieldRegistry.getField(fieldId);
+      if (!entry) return;
 
-            const text = target.innerText ?? "";
+      const text = target.innerText ?? "";
 
-            // Sync DOM → FieldRegistry
-            FieldRegistry.updateValue(fieldId, text);
-        };
+      // Sync DOM → FieldRegistry
+      FieldRegistry.updateValue(fieldId, text);
+    };
 
-        document.addEventListener("input", onInput, { capture: true });
-        return () => document.removeEventListener("input", onInput, { capture: true });
-    }, []);
+    document.addEventListener("input", onInput, { capture: true });
+    return () =>
+      document.removeEventListener("input", onInput, { capture: true });
+  }, []);
 
-    return null;
+  return null;
 }
 
 InputListener.displayName = "InputListener";

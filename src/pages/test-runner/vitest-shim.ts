@@ -37,21 +37,21 @@ export type TestEvent =
   | { type: "suite:end"; name: string; path: string[]; status: TestStatus }
   | { type: "test:start"; name: string; path: string[] }
   | {
-    type: "test:end";
-    name: string;
-    path: string[];
-    status: TestStatus;
-    duration: number;
-    error?: string;
-  }
+      type: "test:end";
+      name: string;
+      path: string[];
+      status: TestStatus;
+      duration: number;
+      error?: string;
+    }
   | { type: "run:start"; file: string }
   | {
-    type: "run:end";
-    file: string;
-    passed: number;
-    failed: number;
-    total: number;
-  };
+      type: "run:end";
+      file: string;
+      passed: number;
+      failed: number;
+      total: number;
+    };
 
 // ═══════════════════════════════════════════════════════════════════
 // Expect — minimal assertion library
@@ -480,7 +480,7 @@ export class TestRunner {
       // Top-level test without describe
       const implicitSuite: SuiteRegistration = {
         name: "(root)",
-        fn: () => { },
+        fn: () => {},
         children: [test],
         beforeEach: [],
         afterEach: [],
@@ -634,7 +634,13 @@ export class TestRunner {
       ...(error !== undefined ? { error } : {}),
     });
 
-    return { type: "test", name: test.name, status, duration, ...(error !== undefined ? { error } : {}) };
+    return {
+      type: "test",
+      name: test.name,
+      status,
+      duration,
+      ...(error !== undefined ? { error } : {}),
+    };
   }
 
   /**

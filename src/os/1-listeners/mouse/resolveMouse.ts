@@ -12,39 +12,39 @@
 // ═══════════════════════════════════════════════════════════════════
 
 export interface MouseInput {
-    /** Resolved item under the pointer, if any */
-    targetItemId: string | null;
-    targetGroupId: string | null;
+  /** Resolved item under the pointer, if any */
+  targetItemId: string | null;
+  targetGroupId: string | null;
 
-    /** Modifier keys held during click */
-    shiftKey: boolean;
-    metaKey: boolean;
-    ctrlKey: boolean;
-    altKey: boolean;
+  /** Modifier keys held during click */
+  shiftKey: boolean;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  altKey: boolean;
 
-    /** Whether the item has a label (data-label + data-for) */
-    isLabel: boolean;
-    labelTargetItemId: string | null;
-    labelTargetGroupId: string | null;
+  /** Whether the item has a label (data-label + data-for) */
+  isLabel: boolean;
+  labelTargetItemId: string | null;
+  labelTargetGroupId: string | null;
 
-    /** Expansion data */
-    hasAriaExpanded: boolean;
-    /** Role of the item element (e.g. "treeitem", "button") */
-    itemRole: string | null;
+  /** Expansion data */
+  hasAriaExpanded: boolean;
+  /** Role of the item element (e.g. "treeitem", "button") */
+  itemRole: string | null;
 }
 
 export type SelectMode = "replace" | "toggle" | "range";
 
 export type MouseResult =
-    | { action: "ignore" }
-    | { action: "label-redirect"; itemId: string; groupId: string }
-    | { action: "zone-activate"; groupId: string }
-    | {
-        action: "focus-and-select";
-        itemId: string;
-        groupId: string;
-        selectMode: SelectMode;
-        shouldExpand: boolean;
+  | { action: "ignore" }
+  | { action: "label-redirect"; itemId: string; groupId: string }
+  | { action: "zone-activate"; groupId: string }
+  | {
+      action: "focus-and-select";
+      itemId: string;
+      groupId: string;
+      selectMode: SelectMode;
+      shouldExpand: boolean;
     };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -55,51 +55,51 @@ export type MouseResult =
 const KEYBOARD_ONLY_EXPAND_ROLES = new Set(["treeitem", "menuitem"]);
 
 export function resolveSelectMode(input: {
-    shiftKey: boolean;
-    metaKey: boolean;
-    ctrlKey: boolean;
-    altKey: boolean;
+  shiftKey: boolean;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  altKey: boolean;
 }): SelectMode {
-    if (input.shiftKey) return "range";
-    if (input.metaKey || input.ctrlKey) return "toggle";
-    // APG: Alt+Click defaults to replace
-    return "replace";
+  if (input.shiftKey) return "range";
+  if (input.metaKey || input.ctrlKey) return "toggle";
+  // APG: Alt+Click defaults to replace
+  return "replace";
 }
 
 export function isClickExpandable(
-    hasAriaExpanded: boolean,
-    role: string | null,
+  hasAriaExpanded: boolean,
+  role: string | null,
 ): boolean {
-    if (!hasAriaExpanded) return false;
-    if (!role) return true; // no role → assume clickable
-    return !KEYBOARD_ONLY_EXPAND_ROLES.has(role);
+  if (!hasAriaExpanded) return false;
+  if (!role) return true; // no role → assume clickable
+  return !KEYBOARD_ONLY_EXPAND_ROLES.has(role);
 }
 
 export function resolveMouse(input: MouseInput): MouseResult {
-    // Label redirect takes priority
-    if (input.isLabel && input.labelTargetItemId && input.labelTargetGroupId) {
-        return {
-            action: "label-redirect",
-            itemId: input.labelTargetItemId,
-            groupId: input.labelTargetGroupId,
-        };
-    }
-
-    // No item but has zone → zone-activate (empty area click)
-    if (!input.targetItemId && input.targetGroupId) {
-        return { action: "zone-activate", groupId: input.targetGroupId };
-    }
-
-    // No target at all → ignore
-    if (!input.targetItemId || !input.targetGroupId) {
-        return { action: "ignore" };
-    }
-
+  // Label redirect takes priority
+  if (input.isLabel && input.labelTargetItemId && input.labelTargetGroupId) {
     return {
-        action: "focus-and-select",
-        itemId: input.targetItemId,
-        groupId: input.targetGroupId,
-        selectMode: resolveSelectMode(input),
-        shouldExpand: isClickExpandable(input.hasAriaExpanded, input.itemRole),
+      action: "label-redirect",
+      itemId: input.labelTargetItemId,
+      groupId: input.labelTargetGroupId,
     };
+  }
+
+  // No item but has zone → zone-activate (empty area click)
+  if (!input.targetItemId && input.targetGroupId) {
+    return { action: "zone-activate", groupId: input.targetGroupId };
+  }
+
+  // No target at all → ignore
+  if (!input.targetItemId || !input.targetGroupId) {
+    return { action: "ignore" };
+  }
+
+  return {
+    action: "focus-and-select",
+    itemId: input.targetItemId,
+    groupId: input.targetGroupId,
+    selectMode: resolveSelectMode(input),
+    shouldExpand: isClickExpandable(input.hasAriaExpanded, input.itemRole),
+  };
 }

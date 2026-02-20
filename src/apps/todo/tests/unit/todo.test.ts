@@ -24,8 +24,8 @@ import {
   moveItemUp,
   pasteTodo,
   selectCategory,
-  stats,
   startEdit,
+  stats,
   TodoApp,
   toggleTodo,
   toggleView,
@@ -51,8 +51,6 @@ describe("Todo v5 — defineApp native", () => {
       app.dispatch(addTodo({ text: "Buy milk" }));
       expect(Object.keys(app.state.data.todos).length).toBe(before + 1);
     });
-
-
 
     test("addTodo with empty text → no-op", () => {
       const app = createApp();
@@ -109,7 +107,6 @@ describe("Todo v5 — defineApp native", () => {
 
       app.dispatch(startEdit({ id }));
       expect(app.state.ui.editingId).toBe(id);
-
 
       // No syncEditDraft step anymore - Field manages state locally
       // app.dispatch(syncEditDraft({ text: "Updated" }));
@@ -260,8 +257,6 @@ describe("Todo v5 — defineApp native", () => {
       expect(app.state.data.todoOrder).toEqual(beforeOrder);
     });
   });
-
-
 
   // ─── Category ───
 

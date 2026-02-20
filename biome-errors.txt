@@ -1,0 +1,224 @@
+packages/surface/lint/core.ts:49:45 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    47 │ function hasDirectText(el: HTMLElement): boolean {
+    48 │   return Array.from(el.childNodes).some(
+  > 49 │     (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim().length! > 0,
+       │                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │   );
+    51 │ }
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+src/docs-viewer/DocsViewer.tsx:129:7 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
+
+  × loadContent changes on every re-render and should not be used as a hook dependency.
+  
+    127 │     }
+    128 │     // eslint-disable-next-line react-hooks/exhaustive-deps
+  > 129 │   }, [loadContent]);
+        │       ^^^^^^^^^^^
+    130 │ 
+    131 │   // Sync hash → state on browser back/forward (popstate only)
+  
+  i To fix this, wrap the definition of loadContent in its own useCallback() hook.
+  
+
+src/docs-viewer/DocsViewer.tsx:148:7 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
+
+  × loadContent changes on every re-render and should not be used as a hook dependency.
+  
+    146 │     return () => window.removeEventListener("popstate", onPopState);
+    147 │     // eslint-disable-next-line react-hooks/exhaustive-deps
+  > 148 │   }, [loadContent]);
+        │       ^^^^^^^^^^^
+    149 │ 
+    150 │   // Auto-select first file when tree changes and no active path
+  
+  i To fix this, wrap the definition of loadContent in its own useCallback() hook.
+  
+
+src/docs-viewer/DocsViewer.tsx:159:29 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━
+
+  × handleSelect changes on every re-render and should not be used as a hook dependency.
+  
+    157 │     }
+    158 │     // eslint-disable-next-line react-hooks/exhaustive-deps
+  > 159 │   }, [allFiles, activePath, handleSelect]);
+        │                             ^^^^^^^^^^^^
+    160 │ 
+    161 │   // --- Folder open / close ---
+  
+  i To fix this, wrap the definition of handleSelect in its own useCallback() hook.
+  
+
+src/os/3-commands/field/field.ts:147:44 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    145 │     }
+    146 │     if (fieldEntry?.config.onCancel) {
+  > 147 │       queueMicrotask(() => kernel.dispatch(fieldEntry?.config.onCancel!));
+        │                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    148 │     }
+    149 │ 
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+src/os/6-components/field/Field.tsx:190:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This hook does not specify its dependency on schema.
+  
+    189 │     // --- Registry Registration ---
+  > 190 │     useEffect(() => {
+        │     ^^^^^^^^^
+    191 │       if (!name) return;
+    192 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    200 │           ? { onCommit: onCommitRef.current }
+    201 │           : {}),
+  > 202 │         ...(schema !== undefined ? { schema } : {}),
+        │                                      ^^^^^^
+    203 │         ...(onCancelRef.current !== undefined
+    204 │           ? { onCancel: onCancelRef.current }
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    200 │           ? { onCommit: onCommitRef.current }
+    201 │           : {}),
+  > 202 │         ...(schema !== undefined ? { schema } : {}),
+        │             ^^^^^^
+    203 │         ...(onCancelRef.current !== undefined
+    204 │           ? { onCancel: onCancelRef.current }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    210 │ ····},·[name,·mode,·multiline,·trigger,·resetOnSubmit,·schema]);·//·Re-register·on·config·change
+        │                                                      ++++++++                                   
+
+src/os/6-components/field/Field.tsx:323:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This hook does not specify its dependency on handleCommit.
+  
+    321 │     // Field only handles commit triggers (command stream).
+    322 │ 
+  > 323 │     useEffect(() => {
+        │     ^^^^^^^^^
+    324 │       const el = innerRef.current;
+    325 │       if (!el) return;
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    348 │           e.stopPropagation();
+    349 │           if (trigger === "enter") {
+  > 350 │             handleCommit(FieldRegistry.getValue(fieldId));
+        │             ^^^^^^^^^^^^
+    351 │           }
+    352 │         }
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    335 │         // Trigger: Blur
+    336 │         if (trigger === "blur") {
+  > 337 │           handleCommit(FieldRegistry.getValue(fieldId));
+        │           ^^^^^^^^^^^^
+    338 │         }
+    339 │       };
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    328 │         // Trigger: change → commit on every keystroke
+    329 │         if (trigger === "change") {
+  > 330 │           handleCommit(FieldRegistry.getValue(fieldId));
+        │           ^^^^^^^^^^^^
+    331 │         }
+    332 │       };
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    364 │ ····},·[fieldId,·trigger,·resetOnSubmit,·handleCommit]);·//·Re-bind·if·config·changes
+        │                                        ++++++++++++++                                
+
+src/os/6-components/field/Field.tsx:323:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: resetOnSubmit.
+  
+    321 │     // Field only handles commit triggers (command stream).
+    322 │ 
+  > 323 │     useEffect(() => {
+        │     ^^^^^^^^^
+    324 │       const el = innerRef.current;
+    325 │       if (!el) return;
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    362 │         el.removeEventListener("keydown", handleKeyDown);
+    363 │       };
+  > 364 │     }, [fieldId, trigger, resetOnSubmit]); // Re-bind if config changes
+        │                           ^^^^^^^^^^^^^
+    365 │ 
+    366 │     useFieldFocus({
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    364 │ ····},·[fieldId,·trigger,·resetOnSubmit]);·//·Re-bind·if·config·changes
+        │                         ---------------                                
+
+vite-plugins/component-inspector/ui/DebugManager.tsx:147:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  × 
+        copyElementSource changes on every re-render and should not be used as a hook dependency.
+  
+    145 │     hoveredElement,
+    146 │     traversalHistory,
+  > 147 │     copyElementSource,
+        │     ^^^^^^^^^^^^^^^^^
+    148 │   ]);
+    149 │ 
+  
+  i To fix this, wrap the definition of 
+        copyElementSource in its own useCallback() hook.
+  
+
+vite-plugins/component-inspector/ui/DebugManager.tsx:190:57 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  × copyElementSource changes on every re-render and should not be used as a hook dependency.
+  
+    188 │       window.removeEventListener("click", handleClick, true);
+    189 │     };
+  > 190 │   }, [isInspectorActive, hoveredElement, lockedElement, copyElementSource]);
+        │                                                         ^^^^^^^^^^^^^^^^^
+    191 │ 
+    192 │   // Toast Auto-dismiss
+  
+  i To fix this, wrap the definition of copyElementSource in its own useCallback() hook.
+  
+
+Checked 389 files in 131ms. No fixes applied.
+Found 10 errors.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

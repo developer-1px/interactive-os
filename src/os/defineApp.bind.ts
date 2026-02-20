@@ -51,7 +51,7 @@ export function createBoundComponents<S>(
     children?: ReactNode;
   }> = ({ id, className, children }) => {
     // Explicit prop mapping — no runtime loop, no Record<string, unknown> cast
-    const zoneProps: Omit<React.ComponentProps<typeof Zone>, "children"> = {
+    const zoneProps: any = {
       id: id ?? zoneName,
       className,
       role: config.role,
@@ -80,7 +80,11 @@ export function createBoundComponents<S>(
       return KeybindingsRegistry.registerAll(bindings);
     }, []);
 
-    return React.createElement(Zone, zoneProps as React.ComponentProps<typeof Zone>, children);
+    return React.createElement(
+      Zone,
+      zoneProps as React.ComponentProps<typeof Zone>,
+      children,
+    );
   };
   ZoneComponent.displayName = `${appId}.${zoneName}.Zone`;
 
@@ -117,7 +121,9 @@ export function createBoundComponents<S>(
       ...(fieldConfig?.onCommit ? { onCommit: fieldConfig.onCommit } : {}),
       ...(fieldConfig?.trigger ? { trigger: fieldConfig.trigger } : {}),
       ...(fieldConfig?.schema ? { schema: fieldConfig.schema } : {}),
-      ...(fieldConfig?.resetOnSubmit ? { resetOnSubmit: fieldConfig.resetOnSubmit } : {}),
+      ...(fieldConfig?.resetOnSubmit
+        ? { resetOnSubmit: fieldConfig.resetOnSubmit }
+        : {}),
       ...(fieldConfig?.onCancel ? { onCancel: fieldConfig.onCancel } : {}),
     } as React.ComponentProps<typeof Field>);
   };

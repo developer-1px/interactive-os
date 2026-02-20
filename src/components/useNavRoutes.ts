@@ -11,7 +11,7 @@
 import { useRouter } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import { useMemo } from "react";
-import { type IconName, icons } from "@/lib/Icon";
+import { type IconName, icons } from "@/components/Icon";
 
 export interface NavRoute {
   path: string;
