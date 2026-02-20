@@ -334,6 +334,13 @@ export const canvasOnPaste = (cursor: import("@/os/2-contexts/zoneRegistry").Zon
   return canvasCollection.paste({ afterId: targetId ?? "" });
 };
 
+export const canvasOnDelete = (cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor) => {
+  if (isDynamicItem(cursor.focusId)) {
+    return canvasCollection.remove({ id: cursor.focusId });
+  }
+  return [];
+};
+
 export const BuilderCanvasUI = canvasCollection.bind({
   role: "grid",
   onAction: createDrillDown(CANVAS_ZONE_ID),
@@ -342,12 +349,24 @@ export const BuilderCanvasUI = canvasCollection.bind({
   onCopy: canvasOnCopy,
   onCut: canvasOnCut,
   onPaste: canvasOnPaste,
+  onDelete: canvasOnDelete,
   options: {
     navigate: { orientation: "corner" },
     tab: { behavior: "trap" },
   },
   itemFilter: createCanvasItemFilter(CANVAS_ZONE_ID),
-  keybindings: [{ key: "\\", command: createDrillUp(CANVAS_ZONE_ID) }],
+  keybindings: [
+    { key: "\\", command: createDrillUp(CANVAS_ZONE_ID) },
+    {
+      key: "Meta+D",
+      command: (cursor) => {
+        if (isDynamicItem(cursor.focusId)) {
+          return canvasCollection.duplicate({ id: cursor.focusId });
+        }
+        return [];
+      },
+    },
+  ],
 });
 
 // ═══════════════════════════════════════════════════════════════════
