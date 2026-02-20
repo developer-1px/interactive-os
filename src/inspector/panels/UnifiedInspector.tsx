@@ -210,9 +210,7 @@ export function UnifiedInspector({
     const el = scrollRef.current;
     if (!el) return;
     isProgrammaticScroll.current = true;
-    const lastNode = el.querySelector(
-      `[data-tx-index]:last-of-type`,
-    );
+    const lastNode = el.querySelector(`[data-tx-index]:last-of-type`);
     if (lastNode) {
       lastNode.scrollIntoView({ block: "start", behavior: "auto" });
     } else {
@@ -257,7 +255,7 @@ export function UnifiedInspector({
         });
       });
     });
-  }, [latestTxId, isUserScrolled, searchQuery]);
+  }, [latestTxId, isUserScrolled, searchQuery, filteredTx.length]);
 
   const toggle = (id: number) => {
     setManualToggles((prev) => {
@@ -608,11 +606,20 @@ function TimelineNode({
                       </div>
                       {(d.from !== undefined || d.to !== undefined) && (
                         <div className="flex flex-col gap-[1px] ml-1 mt-0.5 border-l-2 border-[#e2e8f0] pl-1.5">
-                          {d.from !== undefined && (
-                            <DiffValue value={d.from} type="removed" />
-                          )}
-                          {d.to !== undefined && (
-                            <DiffValue value={d.to} type="added" />
+                          {d.from !== undefined && d.to !== undefined ? (
+                            <div className="flex flex-col gap-[1px]">
+                              <DiffValue value={d.from} type="changed-from" />
+                              <DiffValue value={d.to} type="changed-to" />
+                            </div>
+                          ) : (
+                            <>
+                              {d.from !== undefined && (
+                                <DiffValue value={d.from} type="removed" />
+                              )}
+                              {d.to !== undefined && (
+                                <DiffValue value={d.to} type="added" />
+                              )}
+                            </>
                           )}
                         </div>
                       )}
@@ -710,25 +717,47 @@ function DiffValue({
   type,
 }: {
   value: unknown;
-  type: "removed" | "added";
+  type: "removed" | "added" | "changed-from" | "changed-to";
 }) {
   const str =
     typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
   const lines = str.split("\n");
   const isLarge = lines.length > 7 || str.length > 150;
 
-  const prefix = type === "removed" ? "-" : "+";
-  const colorClass =
-    type === "removed"
-      ? "text-[#b91c1c] bg-[#fef2f2] border-[#fecaca]"
-      : "text-[#15803d] bg-[#f0fdf4] border-[#bbf7d0]";
+  let prefix = "";
+  let colorClass = "";
+
+  switch (type) {
+    case "removed":
+      prefix = "-";
+      colorClass = "text-[#b91c1c] bg-[#fef2f2] border-[#fecaca]";
+      break;
+    case "added":
+      prefix = "+";
+      colorClass = "text-[#15803d] bg-[#f0fdf4] border-[#bbf7d0]";
+      break;
+    case "changed-from":
+      prefix = "";
+      colorClass =
+        "text-[#94a3b8] bg-[#f8fafc] border-[#e2e8f0] opacity-80 line-through";
+      break;
+    case "changed-to":
+      prefix = "→";
+      colorClass = "text-[#0f172a] bg-[#f1f5f9] border-[#cbd5e1] font-medium";
+      break;
+  }
+
+  const prefixNode = prefix ? (
+    <span className="shrink-0 font-bold mr-1">{prefix}</span>
+  ) : null;
 
   if (!isLarge) {
     return (
       <div
         className={`px-1 py-0.5 rounded-sm whitespace-pre-wrap break-all border ${colorClass}`}
       >
-        {prefix} {str}
+        {prefixNode}
+        {str}
       </div>
     );
   }
@@ -743,8 +772,8 @@ function DiffValue({
   return (
     <details className={`px-1 py-0.5 rounded-sm border ${colorClass} group`}>
       <summary className="cursor-pointer outline-none flex items-center select-none list-none text-[9.5px]">
-        <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
-          <span className="shrink-0 font-bold">{prefix}</span>
+        <div className="flex items-center opacity-80 hover:opacity-100">
+          {prefixNode}
           <span className="group-open:hidden italic">{summaryText}</span>
           <span className="hidden group-open:inline italic">Collapse</span>
         </div>
