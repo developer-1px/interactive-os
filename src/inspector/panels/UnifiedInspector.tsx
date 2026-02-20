@@ -376,10 +376,11 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
+                    active
                       ? "bg-[#1e293b] text-white border-[#1e293b]"
                       : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                    }`}
+                  }`}
                 >
                   {group}
                 </button>
@@ -794,7 +795,9 @@ function DiffValue({
 
   if (!isLarge) {
     return (
-      <div className={`py-0.5 whitespace-pre-wrap break-all flex ${colorClass}`}>
+      <div
+        className={`py-0.5 whitespace-pre-wrap break-all flex ${colorClass}`}
+      >
         {prefixNode}
         <span>{str}</span>
       </div>
