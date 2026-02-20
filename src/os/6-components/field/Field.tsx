@@ -446,11 +446,14 @@ FieldBase.displayName = "Field.Editable";
  * Field — Compound namespace for OS-integrated input primitives.
  *
  * Field.Editable  — contentEditable inline editing (canvas, rich text, chips/mentions)
+ * Field.Input     — native <input> (form panels, property panels)
+ * Field.Textarea  — native <textarea> (multi-line form inputs)
  * Field.Label     — <label> for field association
- * Field.Input     — (planned) native <input> wrapper
- * Field.Textarea  — (planned) native <textarea> wrapper
  */
 const Editable = FieldBase;
+
+import { FieldInput } from "./FieldInput";
+import { FieldTextarea } from "./FieldTextarea";
 
 export const Field = Object.assign(
   // Field() itself still works as Editable for backward compatibility
@@ -458,8 +461,9 @@ export const Field = Object.assign(
   FieldBase,
   {
     Editable,
+    Input: FieldInput,
+    Textarea: FieldTextarea,
     Label,
   },
 );
-
 
