@@ -1,4 +1,5 @@
 import type { FocusStackEntry } from "../schemas/focus/FocusStack";
+import type { ClipboardState } from "../schemas/state/OSState";
 
 export interface OverlayEntry {
   /** Unique overlay ID */
@@ -16,6 +17,8 @@ export interface OSState {
     /** Map of zone IDs to their specific state */
     zones: Record<string, ZoneState>;
   };
+  /** 클립보드 서브시스템 — 글로벌 단일 */
+  clipboard: ClipboardState;
   overlays: {
     /** Stack of open overlays (top = most recent) */
     stack: OverlayEntry[];

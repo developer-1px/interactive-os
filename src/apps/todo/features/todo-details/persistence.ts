@@ -41,7 +41,6 @@ export const INITIAL_STATE: AppState = {
     editingId: null,
     viewMode: "list",
     isInspectorOpen: true,
-    clipboard: null,
   },
   history: {
     past: [],

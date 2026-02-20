@@ -50,8 +50,6 @@ export interface BuilderState {
         selectedId: string | null;
         /** 선택된 요소의 프로퍼티 타입 */
         selectedType: PropertyType;
-        /** 사이드바 블록 클립보드 */
-        clipboard: { items: Block[]; isCut: boolean } | null;
     };
     history: {
         past: HistoryEntry[];
@@ -153,7 +151,6 @@ export const INITIAL_STATE: BuilderState = {
     ui: {
         selectedId: null,
         selectedType: null,
-        clipboard: null,
     },
     history: {
         past: [],

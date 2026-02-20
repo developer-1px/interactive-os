@@ -9,11 +9,24 @@
 import type { EffectRecord, InputSource } from "../effect/EffectRecord.ts";
 import type { FocusState } from "../focus/FocusState.ts";
 
+/** Global single clipboard — one at a time, source-tagged for accept matching. */
+export interface ClipboardState {
+  /** Source collection identifier (appName:zoneName). null = empty. */
+  source: string | null;
+  /** Stored items (type-agnostic, collection owns interpretation). */
+  items: unknown[];
+  /** Was this a cut operation? */
+  isCut: boolean;
+}
+
 export interface OSState {
   // ── Subsystem States ──
 
   /** 포커스 시스템 상태 */
   focus: FocusState;
+
+  /** 클립보드 서브시스템 — 글로벌 단일 */
+  clipboard: ClipboardState;
 
   // ── Shared Context ──
 
@@ -36,6 +49,12 @@ export const INITIAL_OS_STATE: OSState = {
     zone: null,
     focusStackDepth: 0,
   },
+  clipboard: {
+    source: null,
+    items: [],
+    isCut: false,
+  },
   inputSource: "programmatic",
   effects: [],
 };
+

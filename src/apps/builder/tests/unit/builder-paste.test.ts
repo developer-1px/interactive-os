@@ -3,10 +3,16 @@
  * 
  * Reproduces: copy → paste → paste (연속) 시나리오
  * Uses withOS: true to include OS focus state for FOCUS command.
+ * Clipboard is OS-managed (os.clipboard).
  */
 
 import { BuilderApp, sidebarCollection } from "@apps/builder/app";
 import { describe, expect, test } from "vitest";
+
+/** Helper: read OS clipboard from kernel state */
+function getOsClipboard(app: ReturnType<typeof BuilderApp.create>) {
+    return (app.kernel as any).getState().os.clipboard;
+}
 
 describe("Builder copy → paste → paste 연속 실행", () => {
     function createApp() {
@@ -20,15 +26,16 @@ describe("Builder copy → paste → paste 연속 실행", () => {
 
         // Copy Hero
         app.dispatch(sidebarCollection.copy({ ids: [heroId] }));
-        expect(app.state.ui.clipboard).not.toBeNull();
-        expect(app.state.ui.clipboard!.items.length).toBe(1);
+        const clip = getOsClipboard(app);
+        expect(clip.items.length).toBe(1);
+        expect(clip.source).toBe("sidebar");
 
         // Paste
         app.dispatch(sidebarCollection.paste({ afterId: heroId }));
         expect(app.state.data.blocks.length).toBe(initialCount + 1);
 
         // Clipboard should still be available for next paste
-        expect(app.state.ui.clipboard).not.toBeNull();
+        expect(getOsClipboard(app).items.length).toBe(1);
     });
 
     test("copy → paste → paste 연속: 2번째 paste도 동작해야 한다", () => {
@@ -55,14 +62,13 @@ describe("Builder copy → paste → paste 연속 실행", () => {
         const heroId = app.state.data.blocks[0]!.id;
 
         app.dispatch(sidebarCollection.copy({ ids: [heroId] }));
-        const clipBefore = app.state.ui.clipboard;
+        const clipBefore = getOsClipboard(app);
 
         app.dispatch(sidebarCollection.paste({ afterId: heroId }));
-        const clipAfter = app.state.ui.clipboard;
+        const clipAfter = getOsClipboard(app);
 
         // Clipboard should NOT be cleared after paste (only cut clears)
-        expect(clipAfter).not.toBeNull();
-        expect(clipAfter!.items.length).toBe(clipBefore!.items.length);
+        expect(clipAfter.items.length).toBe(clipBefore.items.length);
     });
 
     test("paste 3회 연속: 모두 다른 id를 가진다", () => {

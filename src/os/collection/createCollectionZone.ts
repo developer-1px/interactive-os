@@ -1,28 +1,36 @@
 /**
- * createCollectionZone — Collection Zone Facade
+ * createCollectionZone — Collection Zone Facade v2
  *
- * Wraps createZone to auto-generate CRUD commands
- * (remove, moveUp, moveDown, duplicate) for ordered collections.
+ * Wraps createZone to auto-generate CRUD + clipboard commands
+ * (remove, moveUp, moveDown, duplicate, copy, cut, paste).
+ *
+ * v2: Clipboard is OS-managed (global single).
+ * Apps only provide data location + optional overrides.
  *
  * Supports two data shapes via config:
  *   - accessor:     for T[] arrays (Builder)
  *   - fromEntities: for Record<id, T> + order[] (Todo)
  *
  * @example
- *   // Array-based (Builder)
+ *   // Minimal — items accessor only
  *   const sidebar = createCollectionZone(BuilderApp, "sidebar", {
- *     accessor: (s) => s.data.sections,
+ *     accessor: (s) => s.data.blocks,
+ *     text: (item) => item.label,
  *   });
  *
- *   // Entity+Order (Todo)
+ *   // Entity+Order with paste transform
  *   const list = createCollectionZone(TodoApp, "list", {
  *     ...fromEntities((s) => s.data.todos, (s) => s.data.todoOrder),
+ *     text: (item) => item.text,
+ *     onPaste: (item, s) => ({ ...item, categoryId: s.ui.selectedCategoryId }),
  *   });
  */
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import { produce } from "immer";
 import { FOCUS } from "@/os/3-commands/focus/focus";
+import { OS_CLIPBOARD_SET } from "@/os/3-commands/clipboard/clipboardSet";
+import { kernel } from "@/os/kernel";
 import type { AppHandle, ZoneHandle } from "@/os/defineApp.types";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -44,39 +52,34 @@ interface ItemOps<S, T extends { id: string }> {
 // Config
 // ═══════════════════════════════════════════════════════════════════
 
-/** Array-based config: single accessor to T[] */
-export interface ArrayCollectionConfig<S, T extends { id: string }> {
-  accessor: (state: S) => T[];
+// ═══════════════════════════════════════════════════════════════════
+// Config — Shared fields
+// ═══════════════════════════════════════════════════════════════════
+
+interface SharedCollectionConfig<S, T extends { id: string }> {
   extractId?: (focusId: string) => string;
   generateId?: () => string;
   onClone?: (original: T, newId: string) => T;
   /** Optional visibility filter for moveUp/moveDown. Items not matching are skipped. */
   filter?: (state: S) => (item: T) => boolean;
-  /** Clipboard config for copy/cut/paste. */
-  clipboard?: ClipboardConfig<S, T>;
+  /** Serialize item to text for native clipboard. Default: item.label ?? item.text ?? item.id */
+  text?: (item: T) => string;
+  /** Validate incoming paste data from a different collection. Default: same-source auto-accept. */
+  accept?: (data: unknown) => T | null;
+  /** Transform item on paste. E.g., assign current category or context. */
+  onPaste?: (item: T, state: S) => T;
+}
+
+/** Array-based config: single accessor to T[] */
+export interface ArrayCollectionConfig<S, T extends { id: string }>
+  extends SharedCollectionConfig<S, T> {
+  accessor: (state: S) => T[];
 }
 
 /** Entity+Order config: produced by fromEntities() */
-export interface EntityCollectionConfig<S, T extends { id: string }> {
+export interface EntityCollectionConfig<S, T extends { id: string }>
+  extends SharedCollectionConfig<S, T> {
   _ops: ItemOps<S, T>;
-  extractId?: (focusId: string) => string;
-  generateId?: () => string;
-  onClone?: (original: T, newId: string) => T;
-  /** Optional visibility filter for moveUp/moveDown. */
-  filter?: (state: S) => (item: T) => boolean;
-  /** Clipboard config for copy/cut/paste. */
-  clipboard?: ClipboardConfig<S, T>;
-}
-
-export interface ClipboardConfig<S, T extends { id: string }> {
-  /** Read clipboard state. */
-  accessor: (state: S) => { items: T[]; isCut: boolean } | null;
-  /** Write clipboard state (needed because accessor may return null). */
-  set: (draft: S, value: { items: T[]; isCut: boolean }) => void;
-  /** Serialize items for OS clipboard text. */
-  toText: (items: T[]) => string;
-  /** Transform item on paste. E.g., assign current category. */
-  onPaste?: (item: T, state: S) => T;
 }
 
 export type CollectionConfig<S, T extends { id: string } = any> =
@@ -146,10 +149,29 @@ function opsFromAccessor<S, T extends { id: string }>(
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Default ID generator
+// Defaults
 // ═══════════════════════════════════════════════════════════════════
 
 const defaultGenerateId = () => Math.random().toString(36).slice(2, 10);
+
+/** Default text serializer: tries label, text, then id. */
+function defaultToText(item: any): string {
+  return item.label ?? item.text ?? item.id ?? "";
+}
+
+/** Auto deep clone: recursively regenerate IDs for items with children. */
+function autoDeepClone<T extends { id: string }>(item: T, newId: string, uid: () => string): T {
+  const cloned: any = { ...item, id: newId };
+  if (item.hasOwnProperty("fields")) {
+    cloned.fields = { ...(item as any).fields };
+  }
+  if (Array.isArray((item as any).children)) {
+    cloned.children = (item as any).children.map((child: any) =>
+      autoDeepClone(child, uid(), uid),
+    );
+  }
+  return cloned as T;
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // createCollectionZone
@@ -162,7 +184,9 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 ): CollectionZoneHandle<S> {
   const zone = app.createZone(zoneName);
   const uid = config.generateId ?? defaultGenerateId;
-  const toEntityId = config.extractId ?? ((id: string) => id);
+  const toEntityId = config.extractId ?? ((id: string) => id.replace(`${zoneName}-`, ""));
+  const toText = config.text ?? defaultToText;
+  const clipboardSource = zoneName; // Unique per collection
   const ops: ItemOps<S, T> = isEntityConfig(config)
     ? config._ops
     : opsFromAccessor((config as ArrayCollectionConfig<S, T>).accessor);
@@ -249,7 +273,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       const newId = uid();
       const cloned = config.onClone
         ? config.onClone(original, newId)
-        : ({ ...original, id: newId } as T);
+        : autoDeepClone(original, newId, uid);
 
       return {
         state: produce(ctx.state, (draft) => {
@@ -269,23 +293,18 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         .filter((t): t is T => Boolean(t));
       if (found.length === 0) return { state: ctx.state };
 
-      const clipCfg = config.clipboard;
+      const cloned = found.map((t) => ({ ...t }));
       return {
-        state: clipCfg
-          ? produce(ctx.state, (draft) => {
-            const clipData = {
-              items: found.map((t) => ({ ...t })),
-              isCut: false as const,
-            };
-            clipCfg.set(draft as S, clipData);
-          })
-          : ctx.state,
-        clipboardWrite: clipCfg
-          ? {
-            text: clipCfg.toText(found),
-            json: JSON.stringify(found),
-          }
-          : undefined,
+        state: ctx.state,
+        dispatch: OS_CLIPBOARD_SET({
+          source: clipboardSource,
+          items: cloned,
+          isCut: false,
+        }),
+        clipboardWrite: {
+          text: cloned.map(toText).join("\n"),
+          json: JSON.stringify(cloned),
+        },
       };
     },
   );
@@ -304,23 +323,19 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       if (found.length === 0) return { state: ctx.state };
 
       // Focus Recovery Logic
-      // We use payload.focusId because App Commands cannot read OS state.
       const focusId = payload.focusId;
       let focusCmd: BaseCommand | undefined;
 
       if (focusId && payload.ids.includes(focusId)) {
-        // Focused item is being removed. Find nearest stable neighbor.
         const visible = config.filter
           ? items.filter(config.filter(ctx.state))
           : items;
 
         const currentIndex = visible.findIndex((item) => item.id === focusId);
         if (currentIndex !== -1) {
-          // Look forward first
           const next = visible
             .slice(currentIndex + 1)
             .find((item) => !payload.ids.includes(item.id));
-          // Look backward second
           const prev = visible
             .slice(0, currentIndex)
             .reverse()
@@ -331,40 +346,32 @@ export function createCollectionZone<S, T extends { id: string } = any>(
             focusCmd = FOCUS({
               zoneId: zoneName,
               itemId: targetId,
-              // Clear selection on new focus to avoid phantom state?
-              // No, cut logic clears selection below implicitly by removing items.
-              // But FOCUS command doesn't touch selection.
-              // And selection is cleared by OS (clipboard.ts) OR here?
-              // OS_CUT clears selection. This command removes items meaning selection becomes invalid.
             });
           }
         }
       }
 
-      const clipCfg = config.clipboard;
+      const cloned = found.map((t) => ({ ...t }));
+      const commands: BaseCommand[] = [
+        OS_CLIPBOARD_SET({
+          source: clipboardSource,
+          items: cloned,
+          isCut: true,
+        }),
+      ];
+      if (focusCmd) commands.push(focusCmd);
+
       return {
         state: produce(ctx.state, (draft) => {
-          if (clipCfg) {
-            clipCfg.set(draft as S, {
-              items: found.map((t) => ({ ...t })),
-              isCut: true,
-            });
-          }
           for (const id of payload.ids) {
             ops.removeItem(draft as S, id);
           }
-          // Selection cleanup happens because IDs are gone.
-          // But Zone.selection might still hold stale IDs?
-          // OS checks validity usually? Or we should clear it?
-          // OS_CUT clears it.
         }),
-        dispatch: focusCmd,
-        clipboardWrite: clipCfg
-          ? {
-            text: clipCfg.toText(found),
-            json: JSON.stringify(found),
-          }
-          : undefined,
+        dispatch: commands,
+        clipboardWrite: {
+          text: cloned.map(toText).join("\n"),
+          json: JSON.stringify(cloned),
+        },
       };
     },
   );
@@ -373,10 +380,23 @@ export function createCollectionZone<S, T extends { id: string } = any>(
   const paste = zone.command(
     `${zoneName}:paste`,
     (ctx: { readonly state: S }, payload: { afterId?: string }) => {
-      const clipCfg = config.clipboard;
-      if (!clipCfg) return { state: ctx.state };
-      const clip = clipCfg.accessor(ctx.state);
-      if (!clip || clip.items.length === 0) return { state: ctx.state };
+      // Read from OS-managed global clipboard
+      const osClip = kernel.getState().os.clipboard;
+      if (!osClip || osClip.items.length === 0) return { state: ctx.state };
+
+      // Accept check: same source = auto-accept, different = use accept() if provided
+      let clipItems: T[];
+      if (osClip.source === clipboardSource) {
+        clipItems = osClip.items as T[];
+      } else if (config.accept) {
+        clipItems = osClip.items
+          .map((item) => config.accept!(item))
+          .filter((t): t is T => t !== null);
+        if (clipItems.length === 0) return { state: ctx.state };
+      } else {
+        // Different source, no accept handler → reject
+        return { state: ctx.state };
+      }
 
       const pastedIds: string[] = [];
       const nextState = produce(ctx.state, (draft) => {
@@ -386,14 +406,15 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           : items.length - 1;
         if (insertIdx === -1) insertIdx = items.length - 1;
 
-        for (let i = 0; i < clip.items.length; i++) {
-          const source = clip.items[i]!;
+        for (let i = 0; i < clipItems.length; i++) {
+          const source = clipItems[i]!;
           const newId = uid();
-          let newItem = { ...source, id: newId } as T;
-          if (clipCfg.onPaste) {
-            newItem = clipCfg.onPaste(newItem, ctx.state);
+          let newItem = config.onClone
+            ? config.onClone(source, newId)
+            : autoDeepClone(source, newId, uid);
+          if (config.onPaste) {
+            newItem = config.onPaste(newItem, ctx.state);
           }
-          // Capture final ID AFTER onPaste — it may override the generated id
           pastedIds.push(newItem.id);
           ops.insertAfter(draft as S, insertIdx + i, newItem);
         }
@@ -401,8 +422,6 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
       const commands: BaseCommand[] = [];
       if (pastedIds.length > 0) {
-        // Focus newly pasted items and explicitly set selection to prevent
-        // "followFocus" from overwriting our multi-selection with the single focused item.
         commands.push(
           FOCUS({
             zoneId: zoneName,

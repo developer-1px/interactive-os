@@ -27,6 +27,11 @@ export const initialOSState: OSState = {
     focusStack: [],
     zones: {},
   },
+  clipboard: {
+    source: null,
+    items: [],
+    isCut: false,
+  },
   overlays: {
     stack: [],
   },

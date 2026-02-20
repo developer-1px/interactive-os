@@ -54,7 +54,7 @@ export const isEditing = TodoApp.condition(
 
 export const hasClipboard = TodoApp.condition(
   "hasClipboard",
-  (s) => s.ui.clipboard != null,
+  () => true, // Clipboard is OS-managed — always available for paste attempt
 );
 
 // ═══════════════════════════════════════════════════════════════════
@@ -89,17 +89,11 @@ const listCollection = createCollectionZone(TodoApp, "list", {
   ),
   filter: (state: AppState) => (item: Todo) =>
     item.categoryId === state.ui.selectedCategoryId,
-  clipboard: {
-    accessor: (s: AppState) => s.ui.clipboard,
-    set: (draft: AppState, value) => {
-      draft.ui.clipboard = value;
-    },
-    toText: (items: Todo[]) => items.map((t) => t.text).join("\n"),
-    onPaste: (item: Todo, state: AppState) => ({
-      ...item,
-      categoryId: state.ui.selectedCategoryId,
-    }),
-  },
+  text: (item: Todo) => item.text,
+  onPaste: (item: Todo, state: AppState) => ({
+    ...item,
+    categoryId: state.ui.selectedCategoryId,
+  }),
 });
 
 // Re-export for backward compatibility
