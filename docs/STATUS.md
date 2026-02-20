@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 00:46
+> Last updated: 2026-02-21 00:53
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**builder-usage-cleanup** — T4: Private API 캡슐화
+**builder-v2** — T13 Container Block PoC
 
 ---
 
@@ -17,7 +17,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| builder-usage-cleanup | T1 Dead code 제거 | 02-21 | 🟢 Active |
+| builder-usage-cleanup | T1~T6 완료 | 02-21 | ✅ Done |
 | apg-testing-rebalance | T1~T3 완료 | 02-21 | ✅ Done |
 | builder-v2 | T13 Container Block PoC | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
