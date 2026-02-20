@@ -135,7 +135,7 @@ export function BuilderCursor() {
       dimmed: !isActive,
       level: el.getAttribute("data-level") ?? "",
       editing: editingId !== null,
-      itemType: el.getAttribute("data-builder-type") ?? el.getAttribute("role") ?? "element",
+      itemType: el.getAttribute("data-builder-type") ?? "text",
     });
   }, []);
 
