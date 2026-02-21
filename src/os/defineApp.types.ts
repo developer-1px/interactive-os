@@ -241,11 +241,6 @@ export interface AppHandle<S> {
     overrides?: Partial<S> | { history?: boolean; withOS?: boolean },
   ): TestInstance<S>;
 
-  /** Create a Playwright Page-isomorphic headless AppPage.
-   *  @deprecated Use `createPage(app, Component?)` standalone function instead.
-   *  Pass a Component to enable projection checkpoint (query/html).
-   */
-  createPage(Component?: React.FC): AppPage<S>;
 
   // ── Internal (for OS-level createPage) ────────────────────────────
   /** @internal App ID for OS-level createPage. */

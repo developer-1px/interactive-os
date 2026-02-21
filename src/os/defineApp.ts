@@ -32,7 +32,7 @@ import type { ReactNode } from "react";
 import { registerAppSlice } from "./appSlice";
 import { createBoundComponents } from "./defineApp.bind";
 import { createTestInstance } from "./defineApp.testInstance";
-import { createAppPage } from "./defineApp.page";
+
 import {
   type CompoundTriggerComponents,
   type CompoundTriggerConfig,
@@ -51,7 +51,7 @@ import {
   type KeybindingEntry,
   type Selector,
   type TestInstance,
-  type AppPage,
+
   type ZoneBindings,
   type ZoneHandle,
 } from "./defineApp.types";
@@ -336,14 +336,5 @@ export function defineApp<S>(
     // ── Internal (for OS-level createPage) ──
     __appId: appId,
     __zoneBindings: zoneBindingEntries as Map<string, import("./defineApp.page").ZoneBindingEntry>,
-
-    /** @deprecated Use standalone `createPage(app, Component?)` instead. */
-    createPage(Component?: React.FC): AppPage<S> {
-      return createAppPage<S>(
-        appId,
-        zoneBindingEntries,
-        Component,
-      );
-    },
   };
 }
