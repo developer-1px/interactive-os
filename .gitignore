@@ -34,3 +34,4 @@ dist-ssr
 
 # TestBot
 /testbot-report.json
+/public/testbot-report.json

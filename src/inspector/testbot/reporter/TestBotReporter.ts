@@ -60,7 +60,7 @@ export class TestBotReporter implements Reporter {
     private outputPath: string;
 
     constructor(outputPath?: string) {
-        this.outputPath = outputPath ?? resolve(process.cwd(), "testbot-report.json");
+        this.outputPath = outputPath ?? resolve(process.cwd(), "public", "testbot-report.json");
     }
 
     onTestRunEnd(testModules: ReadonlyArray<TestModule>) {
@@ -159,7 +159,7 @@ export class TestBotReporter implements Reporter {
             status = "fail";
             const errors = result.errors;
             if (errors && errors.length > 0) {
-                error = errors[0].message;
+                error = errors?.[0]?.message;
             }
         }
 

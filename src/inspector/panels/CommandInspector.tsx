@@ -5,7 +5,7 @@ import { useInputTelemetry } from "@inspector/panels/LoggedKey.ts";
 import { RegistryMonitor } from "@inspector/panels/RegistryMonitor.tsx";
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
-import { TestBotPanel } from "@inspector/testbot";
+import { TestBotV2Panel } from "@inspector/testbot";
 
 import { useEffect, useState } from "react";
 import { os } from "@/os/kernel";
@@ -67,7 +67,7 @@ export function CommandInspector() {
       case "STATE":
         return <InspectorAdapter />;
       case "TESTBOT":
-        return <TestBotPanel />;
+        return <TestBotV2Panel />;
       default: {
         const dynamicPanel = InspectorRegistry.getPanel(activeTab);
         if (dynamicPanel) return <>{dynamicPanel.content}</>;

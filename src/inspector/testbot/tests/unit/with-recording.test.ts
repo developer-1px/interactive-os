@@ -131,7 +131,8 @@ describe("withRecording", () => {
         t.pressKey("ArrowDown");
 
         const steps = t.getSteps();
-        expect(steps[0].timestamp).toBeGreaterThanOrEqual(0);
-        expect(steps[0].timestamp).toBeLessThan(1000); // should be near-instant
+        const step = steps[0]!;
+        expect(step.timestamp).toBeGreaterThanOrEqual(0);
+        expect(step.timestamp).toBeLessThan(1000); // should be near-instant
     });
 });
