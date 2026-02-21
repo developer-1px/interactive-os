@@ -1,5 +1,6 @@
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
+import { TestBotReporter } from "./src/inspector/testbot/reporter/TestBotReporter";
 
 /**
  * Vitest Browser Mode Configuration
@@ -7,8 +8,9 @@ import { defineConfig } from "vitest/config";
  * Runs the same .test.ts files in a real browser (Chromium via Playwright).
  * Usage: npx vitest run --config vitest.browser.config.ts
  *
- * Purpose: TestBot v2 Record phase — tests execute in real browser,
- * pressKey/click/attrs calls are recorded for visual replay.
+ * Features:
+ *   - Same tests, real browser (Chromium)
+ *   - TestBotReporter writes testbot-report.json for visual replay
  */
 export default defineConfig({
     resolve: {
@@ -33,6 +35,7 @@ export default defineConfig({
             "packages/kernel/src/**/tests/integration/**/*.test.tsx",
         ],
         globals: true,
+        reporters: ["default", new TestBotReporter()],
         browser: {
             enabled: true,
             provider: playwright(),

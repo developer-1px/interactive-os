@@ -31,3 +31,6 @@ dist-ssr
 
 # Coverage
 /coverage/
+
+# TestBot
+/testbot-report.json
