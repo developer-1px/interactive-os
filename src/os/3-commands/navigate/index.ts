@@ -20,6 +20,7 @@ import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { applyFollowFocus, ensureZone } from "../../state/utils";
 import { OS_EXPAND } from "../expand";
+import { buildZoneCursor } from "../utils/buildZoneCursor";
 import { resolveNavigate } from "./resolve";
 
 type Direction = "up" | "down" | "left" | "right" | "home" | "end";
@@ -119,23 +120,23 @@ export const OS_NAVIGATE = os.defineCommand(
     // Delegate to existing pure resolver OR use override
     const navResult = overrideTargetId
       ? {
-          targetId: overrideTargetId,
+        targetId: overrideTargetId,
+        stickyX: zone.stickyX,
+        stickyY: zone.stickyY,
+      }
+      : resolveNavigate(
+        zone.focusedItemId,
+        payload.direction,
+        navigableItems,
+        config.navigate,
+        {
           stickyX: zone.stickyX,
           stickyY: zone.stickyY,
-        }
-      : resolveNavigate(
-          zone.focusedItemId,
-          payload.direction,
-          navigableItems,
-          config.navigate,
-          {
-            stickyX: zone.stickyX,
-            stickyY: zone.stickyY,
-            itemRects,
-          },
-        );
+          itemRects,
+        },
+      );
 
-    return {
+    const result = {
       state: produce(ctx.state, (draft) => {
         const z = ensureZone(draft.os, activeZoneId);
         z.focusedItemId = navResult.targetId ?? null;
@@ -147,13 +148,6 @@ export const OS_NAVIGATE = os.defineCommand(
 
         if (navResult.targetId) {
           z.lastFocusedId = navResult.targetId;
-          z.recoveryTargetId = null;
-
-          // Auto-compute recovery target
-          const idx = items.indexOf(navResult.targetId);
-          if (idx !== -1) {
-            z.recoveryTargetId = items[idx + 1] ?? items[idx - 1] ?? null;
-          }
         }
 
         // Handle shift+arrow selection
@@ -178,5 +172,27 @@ export const OS_NAVIGATE = os.defineCommand(
       // Effects
       scroll: navResult.targetId,
     };
+
+    // Dispatch onSelect callback if selection changed
+    if (zoneEntry?.onSelect && navResult.targetId) {
+      const updatedZone = result.state.os.focus.zones[activeZoneId];
+      const prevSelection = zone.selection;
+      const newSelection = updatedZone?.selection;
+      if (
+        newSelection &&
+        (newSelection.length !== prevSelection.length ||
+          newSelection.some((id: string, i: number) => id !== prevSelection[i]))
+      ) {
+        const cursor = buildZoneCursor(updatedZone);
+        if (cursor) {
+          return {
+            ...result,
+            dispatch: zoneEntry.onSelect(cursor),
+          };
+        }
+      }
+    }
+
+    return result;
   },
 );

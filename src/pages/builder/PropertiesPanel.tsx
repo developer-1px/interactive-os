@@ -1,6 +1,7 @@
 import {
   Bookmark,
   Columns,
+  Eye,
   Image as ImageIcon,
   Layout,
   Link as LinkIcon,
@@ -58,10 +59,10 @@ export function PropertiesPanel() {
   const focusedId = useFocusedItem(CANVAS_ZONE_ID);
   const rawType = focusedId
     ? (getItemAttribute(
-        CANVAS_ZONE_ID,
-        focusedId,
-        "data-builder-type",
-      ) as PropertyType)
+      CANVAS_ZONE_ID,
+      focusedId,
+      "data-builder-type",
+    ) as PropertyType)
     : null;
 
   // Normalize: null/undefined → "text" (plain Field.Editable with no data-builder-type)
@@ -71,17 +72,21 @@ export function PropertiesPanel() {
 
   if (!focusedId || !selectedType) {
     return (
-      <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col items-center justify-center p-6 text-slate-400">
-        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-          <Layout size={32} />
+      <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col">
+        <PanelActionBar />
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-slate-400">
+          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+            <Layout size={32} />
+          </div>
+          <p className="text-sm font-medium">Select an element to edit</p>
         </div>
-        <p className="text-sm font-medium">Select an element to edit</p>
       </div>
     );
   }
 
   return (
     <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col shadow-xl z-20">
+      <PanelActionBar />
       {/* Header Title */}
       <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-2 bg-white">
         <div className="p-1.5 bg-slate-100 rounded text-slate-500">
@@ -278,11 +283,10 @@ function IconProperties({ fieldName }: { fieldName: string }) {
             <button
               type="button"
               key={name}
-              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${
-                currentIcon === name
+              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${currentIcon === name
                   ? "border-violet-500 bg-violet-50 text-violet-600"
                   : "border-slate-200 text-slate-400"
-              }`}
+                }`}
               onClick={() => dispatchField(iconFieldKey, name)}
               title={name}
             >
@@ -446,11 +450,10 @@ function ButtonProperties({ fieldName }: { fieldName: string }) {
             <button
               type="button"
               key={opt.value}
-              className={`px-3 py-2 rounded-md text-xs font-bold transition-all ${
-                currentVariant === opt.value
+              className={`px-3 py-2 rounded-md text-xs font-bold transition-all ${currentVariant === opt.value
                   ? "ring-2 ring-violet-500 ring-offset-1"
                   : "hover:bg-slate-50"
-              }`}
+                }`}
               onClick={() => dispatchField(`${fieldKey}-variant`, opt.value)}
             >
               <div className={`w-full h-5 rounded mb-1.5 ${opt.preview}`} />
@@ -662,6 +665,30 @@ function TabsProperties({ fieldName }: { fieldName: string }) {
           </div>
         </FormGroup>
       )}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * Panel Action Bar — integrated from EditorToolbar right pill
+ * ------------------------------------------------------------------------------------------------- */
+
+function PanelActionBar() {
+  return (
+    <div className="px-3 py-2 border-b border-slate-200 flex items-center justify-end gap-1.5 shrink-0">
+      <button
+        type="button"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-500 hover:text-slate-700 text-[12px] font-medium transition-all rounded-lg hover:bg-slate-100"
+      >
+        <Eye size={14} />
+        Preview
+      </button>
+      <button
+        type="button"
+        className="px-3.5 py-1.5 bg-violet-600 text-white text-[12px] font-bold rounded-lg hover:bg-violet-700 active:scale-[0.97] transition-all shadow-sm shadow-violet-600/20"
+      >
+        Publish
+      </button>
     </div>
   );
 }

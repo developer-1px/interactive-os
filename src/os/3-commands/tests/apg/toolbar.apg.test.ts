@@ -13,7 +13,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
+import { createOsPage } from "@os/createOsPage";
 import {
   assertHomeEnd,
   assertHorizontalNav,
@@ -46,11 +46,11 @@ const TOOLBAR_CONFIG = {
 };
 
 function createToolbar(focusedItem = "bold-btn") {
-  const t = createTestOsKernel();
-  t.setItems(TOOLBAR_ITEMS);
-  t.setConfig(TOOLBAR_CONFIG);
-  t.setActiveZone("toolbar", focusedItem);
-  return t;
+  const page = createOsPage();
+  page.setItems(TOOLBAR_ITEMS);
+  page.setConfig(TOOLBAR_CONFIG);
+  page.setActiveZone("toolbar", focusedItem);
+  return page;
 }
 
 // ═══════════════════════════════════════════════════
@@ -96,7 +96,7 @@ describe("APG Toolbar: Tab Escape", () => {
         lastFocusedId: null,
       },
     ]);
-    t.pressKey("Tab");
+    t.keyboard.press("Tab");
     expect(t.activeZoneId()).toBe("editor");
   });
 });
@@ -111,9 +111,9 @@ describe("APG Toolbar: Tabs Variant", () => {
   const TAB_ITEMS = ["tab-general", "tab-security", "tab-advanced"];
 
   function createTabs(focusedTab = "tab-general") {
-    const t = createTestOsKernel();
-    t.setItems(TAB_ITEMS);
-    t.setConfig({
+    const page = createOsPage();
+    page.setItems(TAB_ITEMS);
+    page.setConfig({
       ...TOOLBAR_CONFIG,
       navigate: { ...TOOLBAR_CONFIG.navigate, entry: "first" as const },
       select: {
@@ -124,14 +124,14 @@ describe("APG Toolbar: Tabs Variant", () => {
         toggle: false,
       },
     });
-    t.setActiveZone("tablist", focusedTab);
-    t.dispatch(t.OS_SELECT({ targetId: focusedTab, mode: "replace" }));
-    return t;
+    page.setActiveZone("tablist", focusedTab);
+    page.dispatch(page.OS_SELECT({ targetId: focusedTab, mode: "replace" }));
+    return page;
   }
 
   it("auto-activation: navigation selects tab (aria-selected)", () => {
     const t = createTabs("tab-general");
-    t.pressKey("ArrowRight");
+    t.keyboard.press("ArrowRight");
     expect(t.focusedItemId()).toBe("tab-security");
     expect(t.attrs("tab-security")["aria-selected"]).toBe(true);
     expect(t.attrs("tab-general")["aria-selected"]).toBe(false);
@@ -139,11 +139,11 @@ describe("APG Toolbar: Tabs Variant", () => {
 
   it("full cycle: selection follows each navigation", () => {
     const t = createTabs("tab-general");
-    t.pressKey("ArrowRight");
+    t.keyboard.press("ArrowRight");
     expect(t.attrs("tab-security")["aria-selected"]).toBe(true);
-    t.pressKey("ArrowRight");
+    t.keyboard.press("ArrowRight");
     expect(t.attrs("tab-advanced")["aria-selected"]).toBe(true);
-    t.pressKey("ArrowRight"); // loop back
+    t.keyboard.press("ArrowRight"); // loop back
     expect(t.attrs("tab-general")["aria-selected"]).toBe(true);
   });
 });

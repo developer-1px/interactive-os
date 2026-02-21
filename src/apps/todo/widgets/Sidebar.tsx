@@ -6,8 +6,6 @@
 
 import { TodoApp, TodoSidebar } from "@apps/todo/app";
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { useSelection } from "@os/5-hooks/useSelection";
-import { os } from "@os/kernel";
 import {
   ArrowRight,
   Briefcase,
@@ -17,7 +15,6 @@ import {
   MoveUp,
   User,
 } from "lucide-react";
-import { useEffect } from "react";
 
 const getIcon = (id: string) => {
   switch (id) {
@@ -88,19 +85,6 @@ function SidebarCategoryItem({ categoryId }: { categoryId: string }) {
 
 function SidebarContent() {
   const categoryOrder = TodoApp.useComputed((s) => s.data.categoryOrder);
-  const selectedCategoryId = TodoApp.useComputed(
-    (s) => s.ui.selectedCategoryId,
-  );
-
-  const selectionIds = useSelection("sidebar");
-  const selectionId = selectionIds[0];
-
-  useEffect(() => {
-    if (selectionId && selectionId !== selectedCategoryId) {
-      // Dispatch immediately to feel responsive
-      os.dispatch(TodoSidebar.commands.selectCategory({ id: selectionId }));
-    }
-  }, [selectionId, selectedCategoryId]);
 
   return (
     <div className="w-72 flex flex-col h-full bg-[#FCFCFD] border-r border-slate-100 relative overflow-hidden">

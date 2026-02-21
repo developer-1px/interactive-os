@@ -6,14 +6,18 @@
  * Tests that the OS maintains correct focus and selection state
  * after data manipulation operations (delete, clipboard, multi-select).
  *
- * Focus recovery mechanism:
- *   1. OS_NAVIGATE pre-computes recoveryTargetId (next/prev neighbor)
- *   2. App removes item(s) from DOM + state
- *   3. OS_RECOVER reads recoveryTargetId → focuses it if still in DOM
- *   4. Fallback: first item in zone
+ * Focus recovery mechanism (Lazy Resolution):
+ *   1. Focus/Selection IDs are preserved as-is after data changes
+ *   2. At read-time, stale IDs are resolved to nearest neighbor
+ *   3. When the original item returns (undo), the stored ID resolves back automatically
+ *
+ * Note: In headless tests, `focusedItemId()` reads raw kernel state.
+ * Lazy resolution happens in `useFocusedItem` / `useSelection` hooks.
+ * These tests verify that the kernel state preserves original IDs correctly.
  */
 
 import { describe, expect, it } from "vitest";
+import { resolveItemId, resolveSelection } from "../../../state/resolve";
 import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
 
 // ─── Config ───
@@ -47,77 +51,88 @@ function createList(focusedItem = "a") {
 }
 
 // ═══════════════════════════════════════════════════
-// §1. Delete + Focus Recovery
+// §1. Delete + Focus Recovery (Lazy Resolution)
 //
-// OS_NAVIGATE pre-computes recoveryTargetId.
-// After item removal, OS_RECOVER uses it.
+// After item removal, stored focusedItemId becomes stale.
+// resolveItemId resolves it to nearest neighbor at read-time.
 // ═══════════════════════════════════════════════════
 
-describe("OS Guarantee §1: Delete + Focus Recovery", () => {
-  // §1.1 — 단일 아이템 삭제 (중간) → 포커스 → 다음
-  it("§1.1: delete middle item → focus recovers to next", () => {
+describe("OS Guarantee §1: Delete + Focus Recovery (Lazy Resolution)", () => {
+  // §1.1 — 단일 아이템 삭제 (중간) → lazy resolve → 다음
+  it("§1.1: delete middle item → resolveItemId recovers to next", () => {
     const t = createList("a");
-    // Navigate to "c" → recoveryTargetId = "d" (next neighbor)
     t.dispatch(t.OS_NAVIGATE({ direction: "down" })); // a→b
     t.dispatch(t.OS_NAVIGATE({ direction: "down" })); // b→c
     expect(t.focusedItemId()).toBe("c");
 
     // Simulate deletion: remove "c" from DOM
-    t.setItems(["a", "b", "d", "e"]);
-    // OS_RECOVER detects focused item gone, uses recoveryTargetId
-    t.dispatch(t.OS_RECOVER());
+    const items = ["a", "b", "d", "e"];
+    t.setItems(items);
 
-    expect(t.focusedItemId()).toBe("d");
+    // Raw state still has "c" (preserved, not overwritten)
+    expect(t.focusedItemId()).toBe("c");
+    // resolveItemId resolves the stale "c" → "d" (next at index 2)
+    expect(resolveItemId("c", items, 2)).toBe("d");
   });
 
-  // §1.2 — 마지막 아이템 삭제 → 포커스 → 이전
-  it("§1.2: delete last item → focus recovers to previous", () => {
+  // §1.2 — 마지막 아이템 삭제 → lazy resolve → 이전
+  it("§1.2: delete last item → resolveItemId recovers to previous", () => {
     const t = createList("a");
-    // Navigate to "e" (last) → recoveryTargetId = "d" (prev, no next)
     t.dispatch(t.OS_NAVIGATE({ direction: "end" }));
     expect(t.focusedItemId()).toBe("e");
 
-    t.setItems(["a", "b", "c", "d"]);
-    t.dispatch(t.OS_RECOVER());
+    const items = ["a", "b", "c", "d"];
+    t.setItems(items);
 
-    expect(t.focusedItemId()).toBe("d");
+    // resolveItemId resolves "e" (was at index 4) → "d" (last available)
+    expect(resolveItemId("e", items, 4)).toBe("d");
   });
 
-  // §1.3 — 유일한 아이템 삭제 → OS_RECOVER does not crash, focus is stale
-  //
-  // When the only item is deleted, OS_RECOVER has no target to move to.
-  // The focusedItemId becomes a stale pointer. This is by design:
-  // the zone will reset focus on next entry/interaction.
-  it("§1.3: delete only item → OS_RECOVER is no-op (stale pointer)", () => {
+  // §1.3 — 유일한 아이템 삭제 → stale pointer, null resolve
+  it("§1.3: delete only item → resolveItemId returns null", () => {
     const t = createTestOsKernel();
     t.setItems(["solo"]);
     t.setConfig(LIST_CONFIG);
     t.setActiveZone("list", "solo");
-    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
 
     t.setItems([]);
-    // Should NOT throw or crash
-    t.dispatch(t.OS_RECOVER());
 
-    // Focus is stale — "solo" no longer exists in DOM but pointer remains
-    // This is the expected behavior. Zone cleanup happens on re-entry.
+    // resolveItemId on empty list → null
+    expect(resolveItemId("solo", [])).toBeNull();
   });
 
-  // §1.5 — 삭제 후 selection 클리어
-  it("§1.5: after delete, selection is cleared", () => {
+  // §1.4 — Undo 시 원본 ID 복귀 (zero-cost)
+  it("§1.4: undo restores original item → resolveItemId returns original", () => {
     const t = createList("a");
-    t.dispatch(t.OS_NAVIGATE({ direction: "down" })); // →b
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
+    expect(t.focusedItemId()).toBe("c");
+
+    // Delete
+    const afterDelete = ["a", "b", "d", "e"];
+    expect(resolveItemId("c", afterDelete, 2)).toBe("d");
+
+    // Undo → "c" is back
+    const afterUndo = ["a", "b", "c", "d", "e"];
+    expect(resolveItemId("c", afterUndo)).toBe("c"); // ✅ zero-cost restoration
+  });
+
+  // §1.5 — 삭제 후 selection lazy filter
+  it("§1.5: after delete, selection lazily filters stale IDs", () => {
+    const t = createList("a");
+    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     t.dispatch(t.OS_SELECT({ targetId: "b", mode: "replace" }));
-    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" })); // →c
-    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" })); // →d
+    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
+    t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
     expect(t.selection()).toEqual(["b", "c", "d"]);
 
-    // Simulate delete: remove items + OS OS_SELECTION_CLEAR
-    t.setItems(["a", "e"]);
-    t.dispatch(t.OS_SELECTION_CLEAR({ zoneId: "list" }));
-    t.dispatch(t.OS_RECOVER());
+    const remainingItems = ["a", "e"];
 
-    expect(t.selection()).toEqual([]);
+    // Lazy resolution: filter stale IDs
+    expect(resolveSelection(["b", "c", "d"], remainingItems)).toEqual([]);
+
+    // Undo → selection restored
+    expect(resolveSelection(["b", "c", "d"], ITEMS)).toEqual(["b", "c", "d"]);
   });
 });
 
@@ -147,8 +162,8 @@ describe("OS Guarantee §2: Clipboard", () => {
 // ═══════════════════════════════════════════════════
 
 describe("OS Guarantee §3: Multi-Select + Operation", () => {
-  // §3.1 — 선택 후 삭제 → 남은 항목 선택 해제
-  it("§3.1: delete selected → remaining deselected", () => {
+  // §3.1 — 선택 후 삭제 → lazy filter로 남은 항목 자동 필터
+  it("§3.1: delete selected → resolveSelection filters stale", () => {
     const t = createList("a");
     t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     t.dispatch(t.OS_SELECT({ targetId: "b", mode: "replace" }));
@@ -156,37 +171,29 @@ describe("OS Guarantee §3: Multi-Select + Operation", () => {
     t.dispatch(t.OS_NAVIGATE({ direction: "down", select: "range" }));
     expect(t.selection()).toEqual(["b", "c", "d"]);
 
-    t.setItems(["a", "e"]);
-    t.dispatch(t.OS_SELECTION_CLEAR({ zoneId: "list" }));
-
-    expect(t.selection()).toEqual([]);
+    const remaining = ["a", "e"];
+    expect(resolveSelection(["b", "c", "d"], remaining)).toEqual([]);
   });
 
-  // §3.2 — 빈 selection에서 Delete → focusId만 삭제 + 포커스 복구
-  it("§3.2: delete with no selection → focus to next", () => {
+  // §3.2 — 빈 selection에서 Delete → focusId stale, lazy resolve
+  it("§3.2: delete with no selection → resolveItemId to next", () => {
     const t = createList("a");
     t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
     expect(t.focusedItemId()).toBe("c");
 
-    t.setItems(["a", "b", "d", "e"]);
-    t.dispatch(t.OS_RECOVER());
-
-    expect(t.focusedItemId()).toBe("d");
-    expect(t.selection()).toEqual([]);
+    const remaining = ["a", "b", "d", "e"];
+    expect(resolveItemId("c", remaining, 2)).toBe("d");
   });
 
   // §3.3 — 전체 삭제 → 빈 리스트
-  it("§3.3: delete all → empty list, null focus", () => {
+  it("§3.3: delete all → resolveItemId returns null", () => {
     const t = createList("a");
     t.dispatch(t.OS_SELECT({ targetId: "a", mode: "replace" }));
     t.dispatch(t.OS_NAVIGATE({ direction: "end", select: "range" }));
 
-    t.setItems([]);
-    t.dispatch(t.OS_SELECTION_CLEAR({ zoneId: "list" }));
-    t.dispatch(t.OS_RECOVER());
-
-    expect(t.selection()).toEqual([]);
+    expect(resolveItemId("e", [])).toBeNull();
+    expect(resolveSelection(["a", "b", "c", "d", "e"], [])).toEqual([]);
   });
 });
 

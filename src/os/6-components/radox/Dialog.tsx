@@ -38,13 +38,14 @@ import { Zone } from "../primitives/Zone.tsx";
 interface DialogZoneProps {
   children: ReactNode;
   zoneClassName?: string | undefined;
+  role?: "dialog" | "alertdialog";
 }
 
 /**
- * DialogZone — wraps Zone role="dialog" and connects its onDismiss
+ * DialogZone — wraps Zone role="dialog" or "alertdialog" and connects its onDismiss
  * command to OS_OVERLAY_CLOSE. Fully declarative — no callbacks.
  */
-function DialogZone({ children, zoneClassName }: DialogZoneProps) {
+function DialogZone({ children, zoneClassName, role = "dialog" }: DialogZoneProps) {
   const overlayCtx = useOverlayContext();
 
   // Construct dismiss command declaratively
@@ -54,7 +55,7 @@ function DialogZone({ children, zoneClassName }: DialogZoneProps) {
 
   return (
     <Zone
-      role="dialog"
+      role={role}
       options={DIALOG_ZONE_OPTIONS}
       className={zoneClassName}
       {...(dismissCommand !== undefined ? { onDismiss: dismissCommand } : {})}
@@ -73,6 +74,8 @@ export interface DialogProps {
   children: ReactNode;
   /** Explicit overlay ID — enables programmatic open/close (e.g. via keybinding) */
   id?: string;
+  /** ARIA role for the dialog zone. Default is "dialog". */
+  role?: "dialog" | "alertdialog";
 }
 
 /**
@@ -81,7 +84,7 @@ export interface DialogProps {
  * Transforms Dialog.Content into Trigger.Portal so the Trigger
  * primitive can correctly separate portal from trigger elements.
  */
-function DialogRoot({ children, id }: DialogProps) {
+function DialogRoot({ children, id, role = "dialog" }: DialogProps) {
   const transformed: ReactNode[] = [];
 
   Children.forEach(children, (child) => {
@@ -102,7 +105,7 @@ function DialogRoot({ children, id }: DialogProps) {
             ? { contentClassName: props.contentClassName }
             : {})}
         >
-          <DialogZone zoneClassName={props.zoneClassName}>
+          <DialogZone zoneClassName={props.zoneClassName} role={role}>
             {props.title && (
               <div className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200 mb-1">
                 {props.title}
@@ -118,7 +121,7 @@ function DialogRoot({ children, id }: DialogProps) {
   });
 
   return (
-    <Trigger role="dialog" overlayId={id}>
+    <Trigger role={role} overlayId={id}>
       {transformed}
     </Trigger>
   );

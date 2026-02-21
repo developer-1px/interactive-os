@@ -43,6 +43,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@playwright/test": "/src/inspector/testbot/playwright/index.ts",
+      "vitest": "/src/inspector/testbot/vitest/index.ts",
       "@inspector": "/src/inspector",
       "@kernel": "/packages/kernel/src",
       "@os": "/src/os",

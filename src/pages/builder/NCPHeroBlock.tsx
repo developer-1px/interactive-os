@@ -47,7 +47,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
               <Field.Editable
                 name={fid("title")}
                 mode="deferred"
-                multiline
+                fieldType="block"
                 value={fields["title"] ?? ""}
                 onCommit={createFieldCommit(id, "title")}
                 className={`
@@ -61,7 +61,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
               <Field.Editable
                 name={fid("sub")}
                 mode="deferred"
-                multiline
+                fieldType="block"
                 value={fields["sub"] ?? ""}
                 onCommit={createFieldCommit(id, "sub")}
                 className={`
@@ -120,8 +120,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                       mode="deferred"
                       value={fields["portal-title"] ?? ""}
                       onCommit={createFieldCommit(id, "portal-title")}
-                      as="div"
-                      multiline
+                      fieldType="block"
                       className="text-2xl font-bold text-slate-800 mb-2 block"
                     />
                   </Builder.Item>
@@ -131,8 +130,7 @@ export function NCPHeroBlock({ id }: { id: string }) {
                       mode="deferred"
                       value={fields["portal-subtitle"] ?? ""}
                       onCommit={createFieldCommit(id, "portal-subtitle")}
-                      as="div"
-                      multiline
+                      fieldType="block"
                       className="text-slate-400 block"
                     />
                   </Builder.Item>

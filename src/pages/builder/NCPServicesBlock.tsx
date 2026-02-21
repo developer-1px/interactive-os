@@ -71,7 +71,7 @@ export function NCPServicesBlock({ id }: { id: string }) {
                 <Field.Editable
                   name={fid("title")}
                   mode="deferred"
-                  multiline
+                  fieldType="block"
                   value={fields["title"] ?? ""}
                   onCommit={createFieldCommit(id, "title")}
                   className={`
@@ -156,7 +156,7 @@ export function NCPServicesBlock({ id }: { id: string }) {
                       <Field.Editable
                         name={`${card.id}-item-desc`}
                         mode="deferred"
-                        multiline
+                        fieldType="block"
                         value={desc}
                         onCommit={createFieldCommit(card.id, "item-desc")}
                         className={`text-sm text-slate-500 leading-relaxed block min-h-[40px]`}

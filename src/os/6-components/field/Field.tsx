@@ -4,7 +4,7 @@ import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
-import type { FocusTarget } from "@os/schemas/focus/FocusTarget.ts";
+
 import type { HTMLAttributes } from "react";
 import {
   forwardRef,
@@ -79,30 +79,33 @@ const getFieldClasses = ({
 
 export type FieldMode = "immediate" | "deferred";
 
-export interface FieldProps
+export interface EditableProps
   extends Omit<
     HTMLAttributes<HTMLElement>,
     "onChange" | "onBlur" | "onFocus" | "onSubmit"
   > {
+  /** Current text value */
   value: string;
-  name?: string;
+  /** Unique identifier — FieldRegistry key + FocusItem ID */
+  name: string;
   placeholder?: string;
-  multiline?: boolean;
+  /** Keyboard ownership preset (default: "inline") */
   fieldType?: FieldType;
 
-  // -- New Architecture --
+  /** Command factory invoked on commit with { text } payload */
   onCommit?: FieldCommandFactory;
+  /** When to commit: "enter" | "blur" | "change" (default: "enter") */
   trigger?: FieldTrigger;
+  /** Zod schema for pre-commit validation */
   schema?: ZodSchema;
+  /** Clear field value after successful commit */
   resetOnSubmit?: boolean;
 
+  /** Command dispatched on Escape */
   onCancel?: BaseCommand;
 
+  /** "immediate" = always editable, "deferred" = F2 to enter editing (default: "immediate") */
   mode?: FieldMode;
-  target?: FocusTarget;
-  controls?: string;
-  blurOnInactive?: boolean;
-  as?: "span" | "div";
 }
 
 /**
@@ -114,13 +117,12 @@ export interface FieldProps
  * - Validates input against Zod schema (Gatekeeper)
  * - Dispatches 'onCommit' command with injected payload
  */
-const FieldBase = forwardRef<HTMLElement, FieldProps>(
+const FieldBase = forwardRef<HTMLElement, EditableProps>(
   (
     {
       value,
       name,
       placeholder,
-      multiline = false,
 
       onCommit,
       trigger: triggerProp,
@@ -130,16 +132,18 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       onCancel,
 
       mode = "immediate",
-      target = "real",
-      controls,
-      blurOnInactive = false,
       fieldType: fieldTypeProp,
-      as = "span",
       ...rest
     },
     ref,
   ) => {
     const trigger: FieldTrigger = triggerProp ?? "enter";
+
+    // --- Derived props (from fieldType / mode) ---
+    const fieldType: FieldType = fieldTypeProp ?? "inline";
+    const multiline = fieldType === "block" || fieldType === "editor";
+    const blurOnInactive = mode === "deferred";
+    const tag = multiline ? "div" : "span";
 
     const context = useFocusGroupContext();
     const zoneId = context?.zoneId || "unknown";
@@ -148,7 +152,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     const cursorRef = useRef<number | null>(null);
 
     // --- Identity ---
-    const fieldId = name || "unknown-field";
+    const fieldId = name;
 
     // --- Refs for Stabilizing Config ---
     const onCommitRef = useRef(onCommit);
@@ -201,16 +205,11 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
     // --- Registry Registration ---
     useEffect(() => {
-      if (!name) return;
-
-      const computedFieldType: FieldType =
-        fieldTypeProp ?? (multiline ? "block" : "inline");
-
       const config: FieldConfig = {
         name,
         mode,
         multiline,
-        fieldType: computedFieldType,
+        fieldType,
         trigger,
         resetOnSubmit,
         ...(onCommitRef.current !== undefined
@@ -224,7 +223,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
 
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
-    }, [name, mode, multiline, fieldTypeProp, trigger, resetOnSubmit, schema]); // Re-register on config change
+    }, [name, mode, fieldType, trigger, resetOnSubmit, schema]); // Re-register on config change
 
     // --- State Subscription ---
     // Subscribe to primitive values to avoid unnecessary re-renders on object reference changes.
@@ -269,11 +268,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
       setIsParentEditing(editingEl?.contains(innerRef.current) ?? false);
     }, [parentEditingCandidate]);
 
-    const activedescendantId = os.useComputed((s) => {
-      if (target !== "virtual" || !controls) return null;
-      const focusedId = s.os.focus.zones[zoneId]?.focusedItemId ?? null;
-      return focusedId && focusedId !== name ? focusedId : null;
-    });
+
 
     const isContentEditable =
       mode === "deferred"
@@ -427,8 +422,6 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
             : undefined
           : undefined,
       "data-focused": isFocused ? "true" : undefined,
-      "aria-controls": controls,
-      "aria-activedescendant": activedescendantId || undefined,
       children: null,
       ...otherProps,
     };
@@ -443,7 +436,7 @@ const FieldBase = forwardRef<HTMLElement, FieldProps>(
     return (
       <FocusItem
         id={fieldId}
-        as={as}
+        as={tag}
         ref={setInnerRef}
         {...(baseProps as any)}
       />

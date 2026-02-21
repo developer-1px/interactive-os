@@ -48,24 +48,25 @@ export default function BuilderPage() {
   };
 
   return (
-    <div className="flex-1 h-full flex flex-col bg-slate-100 overflow-hidden">
-      {/* Editor Toolbar */}
-      <EditorToolbar
-        currentViewport={viewport}
-        onViewportChange={setViewport}
-      />
+    <div className="flex-1 h-full flex bg-slate-100 overflow-hidden">
+      {/* Section Sidebar (PPT-style) */}
+      <SectionSidebar />
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Section Sidebar (PPT-style) */}
-        <SectionSidebar />
+      {/* Canvas wrapper — relative container for floating toolbar */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* Floating Toolbar — OUTSIDE Zone to avoid OS event interception */}
+        <EditorToolbar
+          currentViewport={viewport}
+          onViewportChange={setViewport}
+        />
 
         {/* Canvas Area — behavior declared in app.ts bind() */}
-        <BuilderCanvasUI.Zone className="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-100/50">
+        <BuilderCanvasUI.Zone className="absolute inset-0 overflow-y-auto custom-scrollbar bg-slate-100/50">
           {/* Builder Cursor — visual focus indicator inside scroll container */}
           <BuilderCursor />
 
           {/* Page Being Edited - Centered Canvas */}
-          <div className="min-h-full flex justify-center py-8 px-4 transition-all duration-300 ease-in-out">
+          <div className="min-h-full flex justify-center pt-14 pb-8 px-4 transition-all duration-300 ease-in-out">
             <div
               className="transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col shadow-2xl ring-1 ring-slate-900/5 bg-white shrink-0 origin-top"
               style={getViewportStyle()}
@@ -77,10 +78,10 @@ export default function BuilderPage() {
             </div>
           </div>
         </BuilderCanvasUI.Zone>
-
-        {/* Properties Panel (Fixed Right) — reads state from BuilderApp */}
-        <PropertiesPanel />
       </div>
+
+      {/* Properties Panel (Fixed Right) — reads state from BuilderApp */}
+      <PropertiesPanel />
     </div>
   );
 }

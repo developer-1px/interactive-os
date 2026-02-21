@@ -3,7 +3,7 @@
  *
  * Tests the full OS_NAVIGATE pipeline without DOM:
  *   direction movement, wrap/clamp, followFocus, Shift+Arrow range selection,
- *   Home/End, recoveryTargetId, disabled item skipping.
+ *   Home/End, disabled item skipping.
  *
  * APG Reference:
  *   - Arrow keys move focus within a widget (listbox, grid, tree)
@@ -516,49 +516,6 @@ describe("OS_NAVIGATE — Shift+Arrow Range Selection", () => {
 
     expect(t.focusedItemId()).toBe("c");
     expect(t.selection()).toEqual(["b", "c"]); // range, not [c] from followFocus
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// recoveryTargetId — Focus Recovery Metadata
-// ═══════════════════════════════════════════════════════════════════
-
-describe("OS_NAVIGATE — recoveryTargetId", () => {
-  it("after navigate: recoveryTargetId set to next neighbor", () => {
-    const t = createTestOsKernel();
-    t.setItems(["a", "b", "c"]);
-    t.setActiveZone("list", "a");
-
-    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
-
-    // After focusing "b", recovery should point to "c" (next)
-    expect(t.zone()?.recoveryTargetId).toBe("c");
-  });
-
-  it("at last item: recoveryTargetId set to previous neighbor", () => {
-    const t = createTestOsKernel();
-    t.setItems(["a", "b", "c"]);
-    t.setActiveZone("list", "b");
-
-    t.dispatch(t.OS_NAVIGATE({ direction: "down" }));
-
-    // Now focused on "c" (last), no next → fall back to "b" (previous)
-    expect(t.focusedItemId()).toBe("c");
-    expect(t.zone()?.recoveryTargetId).toBe("b");
-  });
-
-  it("single item: recoveryTargetId is null", () => {
-    const t = createTestOsKernel();
-    t.setItems(["only"]);
-    t.setActiveZone("list", "only");
-
-    // Navigate attempts but stays (clamp) — focus doesn't change
-    // Recovery target already set from initial state; let's navigate to it
-    // by starting fresh
-    t.dispatch(t.OS_NAVIGATE({ direction: "home" }));
-
-    expect(t.focusedItemId()).toBe("only");
-    expect(t.zone()?.recoveryTargetId).toBeNull();
   });
 });
 

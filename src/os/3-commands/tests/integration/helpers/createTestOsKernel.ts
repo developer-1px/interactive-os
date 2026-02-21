@@ -38,6 +38,7 @@ import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import { initialOSState, initialZoneState } from "@os/state/initial";
 import { ensureZone } from "@os/state/utils";
 import { produce } from "immer";
+import { getVisualObserver } from "./visualObserver";
 
 // Ensure OS defaults are registered (keybindings for ArrowDown → OS_NAVIGATE, etc.)
 import "@os/keymaps/osDefaults";
@@ -47,7 +48,6 @@ import { OS_EXPAND as prodEXPAND } from "../../../expand/index";
 import { OS_FIELD_START_EDIT as prodFIELD_START_EDIT } from "../../../field/field";
 // Production commands — registered on test kernel via kernel.register()
 import { OS_FOCUS as prodOS_FOCUS } from "../../../focus/focus";
-import { OS_RECOVER as prodOS_RECOVER } from "../../../focus/recover";
 import {
   OS_STACK_POP as prodSTACK_POP,
   OS_STACK_PUSH as prodSTACK_PUSH,
@@ -105,8 +105,8 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
   const mockTreeLevels = { current: new Map<string, number>() };
 
   // ─── No-op effects (suppress "Unknown effect" warnings in headless mode) ───
-  kernel.defineEffect("focus", () => {});
-  kernel.defineEffect("scroll", () => {});
+  kernel.defineEffect("focus", () => { });
+  kernel.defineEffect("scroll", () => { });
 
   // ─── Define contexts with mock providers ───
   kernel.defineContext("dom-items", () => {
@@ -139,7 +139,6 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
   // ─── Register production commands (no duplication) ───
   const OS_FOCUS_CMD = kernel.register(prodOS_FOCUS);
   const OS_SYNC_FOCUS = kernel.register(prodSYNC_FOCUS);
-  const OS_RECOVER = kernel.register(prodOS_RECOVER);
   const OS_SELECT_CMD = kernel.register(prodOS_SELECT);
   const OS_SELECTION_CLEAR = kernel.register(prodSELECTION_CLEAR);
   const OS_NAVIGATE = kernel.register(prodNAVIGATE);
@@ -277,15 +276,18 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
       elementId: z?.focusedItemId ?? undefined,
       cursor: z?.focusedItemId
         ? {
-            focusId: z.focusedItemId,
-            selection: z.selection ?? [],
-            anchor: z.selectionAnchor ?? null,
-          }
+          focusId: z.focusedItemId,
+          selection: z.selection ?? [],
+          anchor: z.selectionAnchor ?? null,
+        }
         : null,
     };
 
     const result = resolveKeyboard(input);
     executeKeyboardResult(result, baseRef());
+
+    // Notify visual observer (browser only, no-op in Vitest)
+    getVisualObserver()?.onPressKey(key);
   }
 
   /**
@@ -317,6 +319,9 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
 
     const result = resolveMouse(input);
     executeMouseResult(result, baseRef());
+
+    // Notify visual observer (browser only, no-op in Vitest)
+    getVisualObserver()?.onClick(itemId, opts as Record<string, unknown>);
   }
 
   // ─── DOM Projection ───
@@ -381,7 +386,6 @@ export function createTestOsKernel(overrides?: Partial<AppState>) {
     // Commands
     OS_FOCUS: OS_FOCUS_CMD,
     OS_SYNC_FOCUS,
-    OS_RECOVER,
     OS_SELECT: OS_SELECT_CMD,
     OS_NAVIGATE,
     OS_TAB,

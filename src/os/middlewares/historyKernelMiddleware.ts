@@ -26,6 +26,8 @@ export interface HistoryEntry {
   snapshot?: Record<string, unknown>;
   /** Captured focusedItemId for focus restoration on undo */
   focusedItemId?: string | null | undefined;
+  /** Captured activeZoneId for focus restoration on undo */
+  activeZoneId?: string | null | undefined;
   /** Transaction group ID — entries with same groupId are undone/redone atomically */
   groupId?: string | undefined;
 }
@@ -56,7 +58,6 @@ const OS_PASSTHROUGH = new Set([
   "OS_ACTIVATE",
   "OS_ESCAPE",
   "OS_ESCAPE",
-  "OS_RECOVER",
   "OS_TOGGLE_INSPECTOR",
   "OS_COPY",
   "OS_CUT",
@@ -135,6 +136,7 @@ export function createHistoryMiddleware(
           ...ctx.injected,
           _historyBefore: appState,
           _historyFocusId: focusedItemId,
+          _historyZoneId: activeZoneId,
         },
       };
     },
@@ -224,6 +226,7 @@ export function createHistoryMiddleware(
               timestamp: now,
               snapshot: prevWithoutHistory,
               focusedItemId: previousFocusId,
+              activeZoneId: ctx.injected["_historyZoneId"] as string | null,
               groupId: getActiveGroupId() ?? undefined,
             });
 

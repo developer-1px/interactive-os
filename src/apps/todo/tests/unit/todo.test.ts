@@ -14,6 +14,9 @@ import {
   copyTodo,
   cutTodo,
   deleteTodo,
+  requestDeleteTodo,
+  confirmDeleteTodo,
+  cancelDeleteTodo,
   duplicateTodo,
   editingTodo,
   hasClipboard,
@@ -69,7 +72,7 @@ describe("Todo v5 — defineApp native", () => {
       expect(Object.keys(app.state.data.todos).length).toBe(before);
     });
 
-    test("deleteTodo removes item", () => {
+    test("deleteTodo removes item directly", () => {
       const app = createApp();
       app.dispatch(addTodo({ text: "Delete me" }));
       const before = Object.keys(app.state.data.todos).length;
@@ -77,6 +80,45 @@ describe("Todo v5 — defineApp native", () => {
       const lastId = ids[ids.length - 1]!;
       app.dispatch(deleteTodo({ id: lastId }));
       expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
+    });
+
+    // ── Dialog Delete Flow ──
+    test("requestDeleteTodo sets pending IDs", () => {
+      const app = createApp();
+      app.dispatch(addTodo({ text: "Pending delete" }));
+      const ids = Object.keys(app.state.data.todos);
+      const lastId = ids[ids.length - 1]!;
+
+      app.dispatch(requestDeleteTodo({ ids: [lastId] }));
+      expect(app.state.ui.pendingDeleteIds).toEqual([lastId]);
+    });
+
+    test("confirmDeleteTodo removes pending items", () => {
+      const app = createApp();
+      app.dispatch(addTodo({ text: "Confirm delete" }));
+      const before = Object.keys(app.state.data.todos).length;
+      const ids = Object.keys(app.state.data.todos);
+      const lastId = ids[ids.length - 1]!;
+
+      app.dispatch(requestDeleteTodo({ ids: [lastId] }));
+      app.dispatch(confirmDeleteTodo());
+
+      expect(app.state.ui.pendingDeleteIds).toEqual([]);
+      expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
+    });
+
+    test("cancelDeleteTodo clears pending without deleting", () => {
+      const app = createApp();
+      app.dispatch(addTodo({ text: "Cancel delete" }));
+      const before = Object.keys(app.state.data.todos).length;
+      const ids = Object.keys(app.state.data.todos);
+      const lastId = ids[ids.length - 1]!;
+
+      app.dispatch(requestDeleteTodo({ ids: [lastId] }));
+      app.dispatch(cancelDeleteTodo());
+
+      expect(app.state.ui.pendingDeleteIds).toEqual([]);
+      expect(Object.keys(app.state.data.todos).length).toBe(before);
     });
 
     test("toggleTodo flips completed", () => {

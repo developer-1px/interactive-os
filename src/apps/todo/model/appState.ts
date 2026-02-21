@@ -37,6 +37,8 @@ export interface UIState {
   editingId: FocusTarget;
   viewMode: "list" | "board";
   isInspectorOpen: boolean;
+  pendingDeleteIds: string[];
+  searchQuery: string;
 }
 
 export interface HistoryState {

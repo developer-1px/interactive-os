@@ -58,6 +58,7 @@ export function createBoundComponents<S>(
       role: config.role,
       onCheck: config.onCheck,
       onAction: config.onAction,
+      onSelect: config.onSelect,
       onDelete: config.onDelete,
       onCopy: config.onCopy,
       onCut: config.onCut,
@@ -113,7 +114,8 @@ export function createBoundComponents<S>(
     placeholder?: string;
     className?: string;
     autoFocus?: boolean;
-    blurOnInactive?: boolean;
+    mode?: import("@os/6-components/field/Field").FieldMode;
+    fieldType?: import("@os/6-components/field/FieldRegistry").FieldType;
   }> = (props) => {
     const fieldConfig = config.field;
 

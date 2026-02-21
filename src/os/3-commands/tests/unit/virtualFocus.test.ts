@@ -7,7 +7,7 @@
  *
  * Architecture note: OS_FOCUS/OS_NAVIGATE no longer emit `focus` effects.
  * DOM focus is handled by FocusItem.useLayoutEffect (state → render → DOM focus).
- * The `focus` effect is reserved for OS_RECOVER only (re-focus without state change).
+ * DOM focus is handled by FocusItem.useLayoutEffect (state → render → DOM focus).
  */
 
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
@@ -78,7 +78,6 @@ function registerVirtualZone(id: string, items: string[]) {
             editingItemId: null,
             stickyX: undefined,
             stickyY: undefined,
-            recoveryTargetId: null,
           } as any,
         },
       },

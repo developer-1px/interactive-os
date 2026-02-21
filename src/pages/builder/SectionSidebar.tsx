@@ -9,10 +9,14 @@
  * Uses BuilderSidebarUI.Zone + Item from app.ts bind().
  */
 
-import { ChevronDown, ChevronRight, Plus, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Layers, Plus, X } from "lucide-react";
 import { useState } from "react";
 import type { Block } from "@/apps/builder/app";
-import { addBlock, BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
+import {
+  addBlock,
+  BuilderApp,
+  BuilderSidebarUI,
+} from "@/apps/builder/app";
 import { BLOCK_PRESETS } from "@/apps/builder/presets/blocks";
 import { useFocusExpansion as useExpansion } from "@/os/5-hooks/useFocusExpansion";
 import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
@@ -22,12 +26,31 @@ const CANVAS_ZONE_ID = "canvas";
 
 export function SectionSidebar() {
   return (
-    <BuilderSidebarUI.Zone
-      className="w-56 shrink-0 bg-slate-50 border-r border-slate-200 flex flex-col py-3 overflow-y-auto select-none"
-      aria-label="Sections"
-    >
-      <SidebarContent />
-    </BuilderSidebarUI.Zone>
+    <div className="w-56 shrink-0 bg-slate-50 border-r border-slate-200 flex flex-col overflow-visible select-none relative">
+      {/* ── Sidebar Header: Logo + Page + Add ── */}
+      <div className="px-3 py-2.5 border-b border-slate-200 flex items-center gap-2.5">
+        <Layers size={16} className="text-slate-400 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-700 text-[13px] font-semibold tracking-tight truncate">
+              Landing Page
+            </span>
+            <span className="px-1 py-0.5 bg-emerald-50 text-emerald-600 text-[8px] font-bold rounded tracking-wide shrink-0">
+              SAVED
+            </span>
+          </div>
+        </div>
+        <AddBlockButton />
+      </div>
+
+      {/* ── Block Tree (Zone) ── */}
+      <BuilderSidebarUI.Zone
+        className="flex-1 flex flex-col py-3 overflow-y-auto"
+        aria-label="Sections"
+      >
+        <SidebarContent />
+      </BuilderSidebarUI.Zone>
+    </div>
   );
 }
 
@@ -45,7 +68,7 @@ function SidebarContent() {
 
   return (
     <>
-      <div className="px-4 pb-3 flex items-center justify-between">
+      <div className="px-4 pb-2 flex items-center justify-between">
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
           Slides
         </span>
@@ -106,11 +129,10 @@ function SidebarContent() {
                   <span
                     className={`
                     truncate
-                    ${
-                      node.depth === 0
+                    ${node.depth === 0
                         ? "text-[11px] font-bold uppercase tracking-widest"
                         : "text-[11px] font-semibold tracking-wide"
-                    }
+                      }
                   `}
                   >
                     {node.block.label}
@@ -137,10 +159,9 @@ function SidebarContent() {
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
                   group-aria-selected:bg-indigo-50 group-aria-selected:border-indigo-200 group-aria-selected:shadow-sm
                   ${depthBg}
-                  ${
-                    isCanvasActive
-                      ? "bg-white shadow-sm border-slate-200/60"
-                      : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
+                  ${isCanvasActive
+                    ? "bg-white shadow-sm border-slate-200/60"
+                    : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
                   }
                 `}
                 style={{ paddingLeft: `${indent}px` }}
@@ -165,11 +186,10 @@ function SidebarContent() {
                   className={`
                   w-10 h-7 rounded border shrink-0 flex items-center justify-center
                   ml-1
-                  ${
-                    isCanvasActive
+                  ${isCanvasActive
                       ? "bg-indigo-50 border-indigo-100"
                       : "bg-slate-100 border-slate-200 group-hover:bg-white"
-                  }
+                    }
                 `}
                 >
                   <div className="flex flex-col gap-0.5 w-6">
@@ -201,9 +221,6 @@ function SidebarContent() {
           );
         })}
       </div>
-
-      {/* Add Block Button */}
-      <AddBlockPalette />
     </>
   );
 }
@@ -241,9 +258,9 @@ function getFlatNodes(blocks: Block[], isExpanded: (id: string) => boolean) {
   return result;
 }
 
-// ─── Add Block Palette ───
+// ─── Add Block Button (Header) ───
 
-function AddBlockPalette() {
+function AddBlockButton() {
   const [open, setOpen] = useState(false);
 
   const handleAdd = (preset: (typeof BLOCK_PRESETS)[number]) => {
@@ -252,47 +269,56 @@ function AddBlockPalette() {
   };
 
   return (
-    <div className="relative px-2 pt-3 pb-2 border-t border-slate-200 mt-auto">
+    <>
       <button
         type="button"
         onClick={() => setOpen(!open)}
         className={`
-          w-full flex items-center justify-center gap-1.5 py-2 rounded-lg
-          text-xs font-semibold transition-all duration-200
-          ${
-            open
-              ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200"
-              : "bg-white text-slate-500 hover:text-slate-700 hover:bg-white border border-slate-200 hover:border-slate-300 hover:shadow-sm"
+          w-6 h-6 flex items-center justify-center rounded-md transition-colors shrink-0
+          ${open
+            ? "bg-indigo-100 text-indigo-600"
+            : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
           }
         `}
+        title="블록 추가"
       >
         {open ? <X size={14} /> : <Plus size={14} />}
-        {open ? "닫기" : "블록 추가"}
       </button>
 
+      {/* Side panel — opens to the right of the sidebar */}
       {open && (
-        <div className="absolute bottom-full left-2 right-2 mb-2 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden z-50">
-          <div className="px-3 py-2 border-b border-slate-100">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              블록 선택
+        <div className="absolute left-full top-0 bottom-0 w-64 bg-white border-r border-slate-200 shadow-xl z-[100] flex flex-col">
+          {/* Panel header */}
+          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between shrink-0">
+            <span className="text-xs font-bold text-slate-800">
+              블록 추가
             </span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              <X size={12} />
+            </button>
           </div>
-          <div className="p-1.5 max-h-[280px] overflow-y-auto">
+
+          {/* Block list */}
+          <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
             {BLOCK_PRESETS.map((preset) => (
               <button
                 type="button"
                 key={preset.type}
                 onClick={() => handleAdd(preset)}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-indigo-50 transition-colors group text-left"
+                className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg hover:bg-indigo-50 transition-colors group text-left"
               >
-                <span className="text-lg shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 group-hover:bg-indigo-100 transition-colors">
+                <span className="text-lg shrink-0 w-9 h-9 flex items-center justify-center rounded-lg bg-slate-50 group-hover:bg-indigo-100 transition-colors">
                   {preset.icon}
                 </span>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-semibold text-slate-700 group-hover:text-indigo-700 transition-colors">
+                  <span className="text-[12px] font-semibold text-slate-700 group-hover:text-indigo-700 transition-colors">
                     {preset.label}
                   </span>
-                  <span className="text-[10px] text-slate-400 truncate">
+                  <span className="text-[10px] text-slate-400 truncate leading-tight">
                     {preset.description}
                   </span>
                 </div>
@@ -301,6 +327,6 @@ function AddBlockPalette() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

@@ -2,14 +2,18 @@
 
 ## 🔴 Now
 
-- [ ] **T2: createTestOsKernel을 headless.ts 공용 함수로 마이그레이션** [Medium /refactor]
-  - `pressKey` → `simulateKeyPress`, `click` → `simulateClick`, `attrs` → `computeAttrs`
-  - `createTestOsKernel`에서 중복 로직 제거, `headless.ts`를 import하여 위임
-  - 기존 APG/integration 테스트 58+ 전수 통과 보장
-  - [ ] Step 8: /tdd ← 시작
+- [ ] **T3: APG 테스트를 createOsPage로 마이그레이션** [Medium /refactor]
+  - [ ] Step 9: /solve ← 시작
+- [ ] **T4: Todo unit test를 createPage 기반으로 전환** [Medium /refactor]
+  - [ ] Step 9: /solve
 
 ## ✅ Done
 
+- [x] **T2: createOsPage — OS-only TestPage factory** ✅
+  - `createOsPage()` — 격리 커널 + TestPage 인터페이스 + OS helpers
+  - `goto()` = setItems + setRole + setActiveZone 통합
+  - headless.ts 공용 함수 활용 (코드 중복 0)
+  - 7/7 Listbox PoC 테스트 GREEN, 865/865 전체 통과
 - [x] **T1: OS Page 인터페이스 설계 + 최소 구현** ✅
   - `defineApp.createPage()` → production kernel + preview sandbox
   - `headless.ts`: 공용 함수 추출 (simulateKeyPress/simulateClick/computeAttrs)
@@ -18,12 +22,10 @@
 
 ## 💡 Ideas
 
-- T2: 기존 `createTestOsKernel`을 OS Page 위에서 재구현 (앱 없는 Page = OS-only Page)
-- T3: 기존 APG 테스트를 OS Page API로 마이그레이션
+- T3: 기존 APG 테스트를 createOsPage API로 마이그레이션 (contracts.ts 타입 변경)
 - T4: Todo unit test를 pressKey 기반 integration test로 전환 (일부)
 - T5: TestBot v2가 OS Page를 visual runtime으로 사용
-- `createPage` 네이밍 재검토 — "create"가 격리 인스턴스를 연상시킴. preview 기반이라 실체와 다름. `Page`도 어색. `enterTestMode()`, `sandbox()` 등 후보 검토
-- `page.goto(zoneName)` — zone 자동 activate + items 설정
+- `createPage` 네이밍 재검토 — preview 기반이라 실체와 다름
 - Playwright `expect(locator).toBeFocused()` 동형 assertions
 
 ## 📎 References

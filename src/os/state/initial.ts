@@ -4,7 +4,6 @@ export const initialZoneState: ZoneState = {
   // Cursor
   focusedItemId: null,
   lastFocusedId: null,
-  recoveryTargetId: null,
 
   // Field
   editingItemId: null,
@@ -28,6 +27,9 @@ export const initialOSState: OSState = {
     zones: {},
   },
   overlays: {
+    stack: [],
+  },
+  toasts: {
     stack: [],
   },
 };

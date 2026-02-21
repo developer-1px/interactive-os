@@ -14,7 +14,7 @@
  */
 
 import { describe } from "vitest";
-import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
+import { createOsPage } from "@os/createOsPage";
 import {
   assertBoundaryClamp,
   assertEscapeClose,
@@ -49,14 +49,14 @@ const MENU_CONFIG = {
 };
 
 function createMenu(focusedItem = "cut") {
-  const t = createTestOsKernel();
-  t.setItems(["menu-btn"]);
-  t.setActiveZone("toolbar", "menu-btn");
-  t.dispatch(t.OS_STACK_PUSH());
-  t.setItems(MENU_ITEMS);
-  t.setConfig(MENU_CONFIG);
-  t.setActiveZone("menu", focusedItem);
-  return t;
+  const page = createOsPage();
+  page.setItems(["menu-btn"]);
+  page.setActiveZone("toolbar", "menu-btn");
+  page.dispatch(page.OS_STACK_PUSH());
+  page.setItems(MENU_ITEMS);
+  page.setConfig(MENU_CONFIG);
+  page.setActiveZone("menu", focusedItem);
+  return page;
 }
 
 // ═══════════════════════════════════════════════════

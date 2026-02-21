@@ -3,6 +3,9 @@
  *
  * Encapsulates OS internal state path so apps don't need to know
  * `s.os.focus.zones[zoneId]?.selection`.
+ *
+ * TODO: Lazy Resolution (resolveSelection) will be integrated here
+ * once Zone provides items list via state registration.
  */
 
 import { os } from "@/os/kernel";

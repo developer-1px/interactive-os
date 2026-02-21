@@ -27,6 +27,8 @@ import {
 import { produce } from "immer";
 import { z } from "zod";
 import { OS_FIELD_START_EDIT } from "@/os/3-commands/field/field";
+import { OS_OVERLAY_OPEN, OS_OVERLAY_CLOSE } from "@/os/3-commands/overlay/overlay";
+import { OS_TOAST_SHOW } from "@/os/3-commands/toast/toast";
 
 import { defineApp } from "@/os/defineApp";
 
@@ -45,7 +47,7 @@ export const TodoApp = defineApp<AppState>("todo-v5", INITIAL_STATE, {
 import { createUndoRedoCommands } from "@/os/defineApp.undoRedo";
 
 export const { canUndo, canRedo, undoCommand, redoCommand } =
-  createUndoRedoCommands(TodoApp, { focusZoneId: "list" });
+  createUndoRedoCommands(TodoApp);
 
 export const isEditing = TodoApp.condition(
   "isEditing",
@@ -129,6 +131,73 @@ export const startEdit = listCollection.command(
   }),
 );
 
+export const requestDeleteTodo = listCollection.command(
+  "requestDeleteTodo",
+  (ctx, payload: { ids: string[] }) => ({
+    state: produce(ctx.state, (draft) => {
+      draft.ui.pendingDeleteIds = payload.ids;
+    }),
+    dispatch: Object.keys(ctx.state.data.todos).some((id) => payload.ids.includes(id))
+      ? [
+        // Close first to clear any stale overlay from HMR or interrupted flow
+        OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+        OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
+      ]
+      : undefined,
+  }),
+);
+
+export const confirmDeleteTodo = listCollection.command(
+  "confirmDeleteTodo",
+  (ctx) => {
+    const ids = ctx.state.ui.pendingDeleteIds;
+    if (!ids || ids.length === 0) return { state: ctx.state };
+
+    const dispatches: any[] = ids.map(id => deleteTodo({ id }));
+    dispatches.push(OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }));
+    dispatches.push(
+      OS_TOAST_SHOW({
+        message: `${ids.length} task${ids.length > 1 ? "s" : ""} deleted`,
+        actionLabel: "Undo",
+        actionCommand: undoCommand(),
+      }),
+    );
+
+    return {
+      state: produce(ctx.state, (draft) => {
+        draft.ui.pendingDeleteIds = [];
+      }),
+      dispatch: dispatches,
+    };
+  },
+);
+
+export const cancelDeleteTodo = listCollection.command(
+  "cancelDeleteTodo",
+  (ctx) => ({
+    state: produce(ctx.state, (draft) => {
+      draft.ui.pendingDeleteIds = [];
+    }),
+    dispatch: OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+  }),
+);
+
+export const bulkToggleCompleted = listCollection.command(
+  "bulkToggleCompleted",
+  (ctx, payload: { ids: string[] }) => ({
+    state: produce(ctx.state, (draft) => {
+      const todos = payload.ids
+        .map((id) => draft.data.todos[id])
+        .filter((t): t is Todo => !!t);
+      // If any are incomplete → mark all complete; else mark all incomplete
+      const allCompleted = todos.every((t) => t.completed);
+      todos.forEach((t) => {
+        t.completed = !allCompleted;
+      });
+    }),
+  }),
+);
+
 // Zone binding — auto-wired CRUD + clipboard + app-specific handlers
 const listBindings = listCollection.collectionBindings();
 export const TodoListUI = listCollection.bind({
@@ -136,6 +205,9 @@ export const TodoListUI = listCollection.bind({
   onCheck: (cursor) => toggleTodo({ id: cursor.focusId }),
   onAction: (cursor) => startEdit({ id: cursor.focusId }),
   ...listBindings,
+  onDelete: (cursor) => requestDeleteTodo({
+    ids: cursor.selection.length > 0 ? cursor.selection : [cursor.focusId]
+  }),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   keybindings: [...listBindings.keybindings],
@@ -190,8 +262,12 @@ export const moveCategoryDown = sidebarZone.command(
 export const TodoSidebarUI = sidebarZone.bind({
   role: "listbox",
   onAction: (cursor) => selectCategory({ id: cursor.focusId }),
+  onSelect: (cursor) => selectCategory({ id: cursor.focusId }),
   onMoveUp: () => moveCategoryUp(),
   onMoveDown: () => moveCategoryDown(),
+  options: {
+    select: { followFocus: true },
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -275,6 +351,39 @@ export const TodoEditUI = editZone.bind({
 });
 
 // ═══════════════════════════════════════════════════════════════════
+// TodoSearch Zone — search input field
+// ═══════════════════════════════════════════════════════════════════
+
+const searchZone = TodoApp.createZone("search");
+
+export const setSearchQuery = searchZone.command(
+  "setSearchQuery",
+  (ctx, payload: { text: string }) => ({
+    state: produce(ctx.state, (draft) => {
+      draft.ui.searchQuery = payload.text;
+    }),
+  }),
+);
+
+export const clearSearch = searchZone.command(
+  "clearSearch",
+  (ctx) => ({
+    state: produce(ctx.state, (draft) => {
+      draft.ui.searchQuery = "";
+    }),
+  }),
+);
+
+export const TodoSearchUI = searchZone.bind({
+  role: "textbox",
+  field: {
+    onCommit: setSearchQuery,
+    trigger: "change",
+    onCancel: clearSearch(),
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════
 // TodoToolbar Zone — view toggle, clear completed
 // ═══════════════════════════════════════════════════════════════════
 
@@ -286,18 +395,28 @@ export const toggleView = toolbarZone.command("toggleView", (ctx) => ({
   }),
 }));
 
-export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => ({
-  state: produce(ctx.state, (draft) => {
-    const completedIds = Object.values(draft.data.todos)
-      .filter((t) => t.completed)
-      .map((t) => t.id);
-    completedIds.forEach((id) => {
-      delete draft.data.todos[id];
-      const idx = draft.data.todoOrder.indexOf(id);
-      if (idx !== -1) draft.data.todoOrder.splice(idx, 1);
-    });
-  }),
-}));
+export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => {
+  const completedIds = Object.values(ctx.state.data.todos)
+    .filter((t) => t.completed)
+    .map((t) => t.id);
+
+  if (completedIds.length === 0) return { state: ctx.state };
+
+  return {
+    state: produce(ctx.state, (draft) => {
+      completedIds.forEach((id) => {
+        delete draft.data.todos[id];
+        const idx = draft.data.todoOrder.indexOf(id);
+        if (idx !== -1) draft.data.todoOrder.splice(idx, 1);
+      });
+    }),
+    dispatch: OS_TOAST_SHOW({
+      message: `${completedIds.length} completed task${completedIds.length > 1 ? "s" : ""} cleared`,
+      actionLabel: "Undo",
+      actionCommand: undoCommand(),
+    }),
+  };
+});
 
 export const TodoToolbarUI = toolbarZone.bind({
   role: "toolbar",
@@ -314,6 +433,10 @@ export const TodoList = {
   commands: {
     toggleTodo,
     deleteTodo,
+    requestDeleteTodo,
+    confirmDeleteTodo,
+    cancelDeleteTodo,
+    bulkToggleCompleted,
     startEdit,
     moveItemUp,
     moveItemDown,
@@ -327,6 +450,11 @@ export const TodoList = {
   triggers: {
     ToggleTodo: TodoApp.createTrigger(toggleTodo),
     DeleteTodo: TodoApp.createTrigger(deleteTodo),
+    DeleteDialog: TodoApp.createTrigger({
+      id: "todo-delete-dialog",
+      confirm: confirmDeleteTodo(),
+      role: "alertdialog",
+    }),
     StartEdit: TodoApp.createTrigger(startEdit),
     MoveItemUp: TodoApp.createTrigger(moveItemUp),
     MoveItemDown: TodoApp.createTrigger(moveItemDown),
@@ -360,6 +488,14 @@ export const TodoEdit = {
   },
 };
 
+export const TodoSearch = {
+  ...TodoSearchUI,
+  commands: {
+    setSearchQuery,
+    clearSearch,
+  },
+};
+
 export const TodoToolbar = {
   ...TodoToolbarUI,
   commands: {
@@ -369,6 +505,7 @@ export const TodoToolbar = {
   ClearDialog: TodoApp.createTrigger({
     id: "todo-clear-dialog",
     confirm: clearCompleted(),
+    role: "alertdialog",
   }),
 };
 export { listCollection };

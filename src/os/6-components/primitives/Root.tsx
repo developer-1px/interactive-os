@@ -5,7 +5,7 @@
  * Each listener maps to a W3C UI Events module:
  * - KeyboardListener: Keyboard Events (§3.5) → keybinding resolve → kernel.dispatch
  * - MouseListener: Mouse Events (§3.4) → mousedown → OS_FOCUS/OS_SELECT/OS_EXPAND
- * - FocusListener: Focus Events (§3.3) → focusin → OS_SYNC_FOCUS, MutationObserver → OS_RECOVER
+ * - FocusListener: Focus Events (§3.3) → focusin → OS_SYNC_FOCUS
  * - ClipboardListener: Clipboard Events (§3.7) → native copy/cut/paste → Zone routing
  * - InputListener: Input Events → contentEditable text sync → FieldRegistry + onChange
  */

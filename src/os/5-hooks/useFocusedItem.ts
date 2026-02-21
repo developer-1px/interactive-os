@@ -4,6 +4,9 @@
  * Encapsulates OS internal state path so apps don't need to know
  * `s.os.focus.zones[zoneId]?.focusedItemId`.
  *
+ * TODO: Lazy Resolution will be integrated here once Zone provides
+ * items list via state registration (not DOM query).
+ *
  * - useFocusedItem: React hook (reactive re-render)
  * - getFocusedItem: Non-hook (imperative callbacks, filters)
  */

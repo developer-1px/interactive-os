@@ -69,7 +69,7 @@ export interface GotoOptions {
     items?: string[];
     role?: ZoneRole;
     config?: Partial<FocusGroupConfig>;
-    focusedItemId?: string;
+    focusedItemId?: string | null;
     onAction?: ZoneCallback;
     onCheck?: ZoneCallback;
     onDelete?: ZoneCallback;
@@ -90,12 +90,15 @@ export interface OsPage {
     // ── OS-specific advanced helpers ──
     setItems(items: string[]): void;
     setRects(rects: Map<string, DOMRect>): void;
-    setConfig(config: FocusGroupConfig): void;
+    setConfig(config: Partial<FocusGroupConfig>): void;
     setRole(zoneId: string, role: ZoneRole, opts?: { onAction?: ZoneCallback; onCheck?: ZoneCallback; onDelete?: ZoneCallback }): void;
-    setExpandableItems(items: Set<string>): void;
-    setTreeLevels(levels: Map<string, number>): void;
-    setActiveZone(zoneId: string, focusedItemId: string): void;
+    setExpandableItems(items: string[] | Set<string>): void;
+    setTreeLevels(levels: Record<string, number> | Map<string, number>): void;
+    setActiveZone(zoneId: string, focusedItemId: string | null): void;
     initZone(zoneId: string, opts?: Partial<{ focusedItemId: string; lastFocusedId: string; selection: string[]; parentId: string | null }>): void;
+    zone(zoneId?: string): any;
+    state(): AppState;
+    setZoneOrder(zones: any[]): void;
 
     // ── Direct kernel access ──
     readonly kernel: ReturnType<typeof createKernel<AppState>>;
@@ -136,6 +139,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     const mockConfig = { current: { ...DEFAULT_CONFIG } as FocusGroupConfig };
     const mockExpandableItems = { current: new Set<string>() };
     const mockTreeLevels = { current: new Map<string, number>() };
+    const mockZoneOrder = { current: [] as any[] };
 
     // ── No-op effects ──
     kernel.defineEffect("focus", () => { });
@@ -165,7 +169,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     kernel.defineContext("zone-config", () => mockConfig.current);
     kernel.defineContext("dom-expandable-items", () => mockExpandableItems.current);
     kernel.defineContext("dom-tree-levels", () => mockTreeLevels.current);
-    kernel.defineContext("dom-zone-order", () => []);
+    kernel.defineContext("dom-zone-order", () => mockZoneOrder.current);
 
     // ── Register OS commands ──
     const OS_FOCUS_CMD = kernel.register(prodOS_FOCUS);
@@ -189,9 +193,10 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     // ── Mock setters (OS-specific) ──
     function setItems(items: string[]) { mockItems.current = items; }
     function setRects(rects: Map<string, DOMRect>) { mockRects.current = rects; }
-    function setConfig(config: FocusGroupConfig) { mockConfig.current = config; }
-    function setExpandableItems(items: Set<string>) { mockExpandableItems.current = items; }
-    function setTreeLevels(levels: Map<string, number>) { mockTreeLevels.current = levels; }
+    function setConfig(config: Partial<FocusGroupConfig>) { mockConfig.current = { ...DEFAULT_CONFIG, ...config }; }
+    function setExpandableItems(items: string[] | Set<string>) { mockExpandableItems.current = items instanceof Set ? items : new Set(items); }
+    function setTreeLevels(levels: Record<string, number> | Map<string, number>) { mockTreeLevels.current = levels instanceof Map ? levels : new Map(Object.entries(levels)); }
+    function setZoneOrder(zones: any[]) { mockZoneOrder.current = zones; }
 
     function setRole(
         zoneId: string,
@@ -209,7 +214,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         });
     }
 
-    function setActiveZone(zoneId: string, focusedItemId: string) {
+    function setActiveZone(zoneId: string, focusedItemId: string | null) {
         ZoneRegistry.register(zoneId, {
             role: ZoneRegistry.get(zoneId)?.role,
             config: mockConfig.current,
@@ -221,7 +226,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
                 draft.os.focus.activeZoneId = zoneId;
                 const z = ensureZone(draft.os, zoneId);
                 z.focusedItemId = focusedItemId;
-                z.lastFocusedId = focusedItemId;
+                if (focusedItemId) z.lastFocusedId = focusedItemId;
             }),
         );
     }
@@ -262,7 +267,9 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
             ...(opts?.onDelete ? { onDelete: opts.onDelete } : {}),
         });
 
-        const focusedId = opts?.focusedItemId ?? opts?.items?.[0] ?? null;
+        const focusedId = opts?.focusedItemId !== undefined
+            ? opts.focusedItemId
+            : (opts?.items?.[0] ?? null);
         kernel.setState((s: AppState) =>
             produce(s, (draft) => {
                 draft.os.focus.activeZoneId = zoneId;
@@ -302,6 +309,12 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         setTreeLevels,
         setActiveZone,
         initZone,
+        setZoneOrder,
+        zone(zoneId?: string) {
+            const id = zoneId ?? readActiveZoneId(kernel);
+            return id ? kernel.getState().os.focus.zones[id] : undefined;
+        },
+        state() { return kernel.getState(); },
 
         // Kernel
         kernel,

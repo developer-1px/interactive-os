@@ -20,7 +20,6 @@ export {
 // Focus
 export {
   OS_FOCUS,
-  OS_RECOVER,
   OS_STACK_POP,
   OS_STACK_PUSH,
   OS_SYNC_FOCUS,

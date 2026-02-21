@@ -1,6 +1,31 @@
 import { ZoneRegistry } from "./zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
+// getZoneItems — Read ordered item IDs from DOM (same logic as DOM_ITEMS)
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Read the ordered item IDs for a zone, directly from the DOM.
+ * Same logic as the DOM_ITEMS context provider, but callable from hooks.
+ *
+ * Used by Lazy Resolution to resolve stale focusedItemId at read-time.
+ */
+export function getZoneItems(zoneId: string): string[] {
+  const entry = ZoneRegistry.get(zoneId);
+  if (!entry?.element) return [];
+
+  const items: string[] = [];
+  const els = entry.element.querySelectorAll("[data-item-id]");
+  for (const el of els) {
+    if (el.closest("[data-focus-group]") !== entry.element) continue;
+    const id = el.getAttribute("data-item-id");
+    if (id) items.push(id);
+  }
+
+  return entry.itemFilter ? entry.itemFilter(items) : items;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // findItemElement — Zone-scoped element lookup (single source)
 // ═══════════════════════════════════════════════════════════════════
 

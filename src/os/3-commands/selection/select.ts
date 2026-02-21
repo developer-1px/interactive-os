@@ -2,7 +2,7 @@
  * OS_SELECT Command — aria-selected state management (kernel version)
  *
  * Supports single, toggle, range, and replace modes.
- * Pure selection only — does NOT trigger app callbacks.
+ * After selection changes, dispatches onSelect callback if registered.
  * For aria-checked toggling, use OS_CHECK instead.
  */
 
@@ -11,6 +11,7 @@ import { DOM_ITEMS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
+import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 interface SelectPayload {
   targetId?: string;
@@ -39,7 +40,7 @@ export const OS_SELECT = os.defineCommand(
     const items: string[] = ctx.inject(DOM_ITEMS);
     const mode = payload.mode ?? "single";
 
-    return {
+    const result = {
       state: produce(ctx.state, (draft) => {
         const z = ensureZone(draft.os, activeZoneId);
 
@@ -74,5 +75,20 @@ export const OS_SELECT = os.defineCommand(
         }
       }) as typeof ctx.state,
     };
+
+    // Dispatch onSelect callback if registered
+    const entry = ZoneRegistry.get(activeZoneId);
+    if (entry?.onSelect) {
+      const updatedZone = result.state.os.focus.zones[activeZoneId];
+      const cursor = buildZoneCursor(updatedZone);
+      if (cursor) {
+        return {
+          ...result,
+          dispatch: entry.onSelect(cursor),
+        };
+      }
+    }
+
+    return result;
   },
 );

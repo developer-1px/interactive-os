@@ -82,7 +82,7 @@ export function NCPFooterBlock({ id }: { id: string }) {
                 <Field.Editable
                   name={fid("desc")}
                   mode="deferred"
-                  multiline
+                  fieldType="block"
                   value={fields["desc"] ?? ""}
                   onCommit={createFieldCommit(id, "desc")}
                   className="text-slate-500 text-sm leading-relaxed max-w-sm mb-6 block data-[focused=true]:bg-slate-800 rounded p-2 -ml-2"

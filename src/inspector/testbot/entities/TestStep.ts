@@ -21,6 +21,7 @@ export interface PressKeyStep {
     focusedBefore: string | null;
     focusedAfter: string | null;
     timestamp: number;
+    snapshot?: Record<string, unknown>;
 }
 
 export interface ClickStep {
@@ -28,6 +29,7 @@ export interface ClickStep {
     itemId: string;
     focusedAfter: string | null;
     timestamp: number;
+    snapshot?: Record<string, unknown>;
 }
 
 export interface AttrsStep {
@@ -35,6 +37,7 @@ export interface AttrsStep {
     itemId: string;
     result: Record<string, unknown>;
     timestamp: number;
+    snapshot?: Record<string, unknown>;
 }
 
 export interface SuiteStartStep {

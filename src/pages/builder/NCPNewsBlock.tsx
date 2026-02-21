@@ -41,7 +41,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                 <Field.Editable
                   name={fid("title")}
                   mode="deferred"
-                  multiline
+                  fieldType="block"
                   value={fields["title"] ?? ""}
                   onCommit={createFieldCommit(id, "title")}
                   className={`
@@ -97,7 +97,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                         <Field.Editable
                           name={`${card0.id}-title`}
                           mode="deferred"
-                          multiline
+                          fieldType="block"
                           value={fields[`${card0.localPrefix}-title`] ?? ""}
                           onCommit={createFieldCommit(
                             id,
@@ -149,7 +149,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                     <Field.Editable
                       name={`${card1.id}-title`}
                       mode="deferred"
-                      multiline
+                      fieldType="block"
                       value={fields[`${card1.localPrefix}-title`] ?? ""}
                       onCommit={createFieldCommit(
                         id,
@@ -203,7 +203,7 @@ export function NCPNewsBlock({ id }: { id: string }) {
                     <Field.Editable
                       name={`${card2.id}-title`}
                       mode="deferred"
-                      multiline
+                      fieldType="block"
                       value={fields[`${card2.localPrefix}-title`] ?? ""}
                       onCommit={createFieldCommit(
                         id,

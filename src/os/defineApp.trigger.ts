@@ -56,6 +56,7 @@ export function createDynamicTrigger<P>(
 export interface CompoundTriggerConfig {
   id?: string;
   confirm?: BaseCommand;
+  role?: "dialog" | "alertdialog";
 }
 
 export interface CompoundTriggerComponents {
@@ -89,7 +90,7 @@ export function createCompoundTrigger(
   const dialogId = config.id ?? `${appId}-dialog-${Date.now()}`;
 
   const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) =>
-    React.createElement(Dialog, { id: dialogId, children });
+    React.createElement(Dialog, { id: dialogId, ...(config.role !== undefined ? { role: config.role } : {}), children });
   RootComponent.displayName = `${appId}.Dialog`;
 
   const TriggerComponent: React.FC<{
@@ -97,11 +98,11 @@ export function createCompoundTrigger(
     className?: string;
     asChild?: boolean;
   }> = ({ children, className, asChild }) =>
-    React.createElement(Dialog.Trigger, {
-      ...(className !== undefined ? { className } : {}),
-      ...(asChild !== undefined ? { asChild } : {}),
-      children,
-    });
+      React.createElement(Dialog.Trigger, {
+        ...(className !== undefined ? { className } : {}),
+        ...(asChild !== undefined ? { asChild } : {}),
+        children,
+      });
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
   const ContentComponent: React.FC<{
@@ -125,7 +126,7 @@ export function createCompoundTrigger(
     children: ReactNode;
     className?: string;
   }> = ({ children, className }) =>
-    React.createElement(Dialog.Close, { className, children });
+      React.createElement(Dialog.Close, { className, children });
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{

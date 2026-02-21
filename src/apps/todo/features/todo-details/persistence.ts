@@ -41,6 +41,8 @@ export const INITIAL_STATE: AppState = {
     editingId: null,
     viewMode: "list",
     isInspectorOpen: true,
+    pendingDeleteIds: [],
+    searchQuery: "",
   },
   history: {
     past: [],

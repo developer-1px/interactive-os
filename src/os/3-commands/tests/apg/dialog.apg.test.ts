@@ -11,7 +11,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
+import { createOsPage } from "@os/createOsPage";
 import { assertEscapeClose, assertTabTrap } from "./helpers/contracts";
 
 // ─── Config ───
@@ -39,11 +39,11 @@ const DIALOG_CONFIG = {
 };
 
 function createDialog(focusedItem = "close-btn") {
-  const t = createTestOsKernel();
-  t.setItems(DIALOG_ITEMS);
-  t.setConfig(DIALOG_CONFIG);
-  t.setActiveZone("dialog", focusedItem);
-  return t;
+  const page = createOsPage();
+  page.setItems(DIALOG_ITEMS);
+  page.setConfig(DIALOG_CONFIG);
+  page.setActiveZone("dialog", focusedItem);
+  return page;
 }
 
 // ═══════════════════════════════════════════════════
@@ -60,14 +60,14 @@ describe("APG Dialog: Focus Trap", () => {
 
   it("Tab cycles through all elements without escaping", () => {
     const t = createDialog();
-    t.pressKey("Tab");
+    t.keyboard.press("Tab");
     expect(t.focusedItemId()).toBe("input-name");
     expect(t.attrs("input-name").tabIndex).toBe(0);
-    t.pressKey("Tab");
+    t.keyboard.press("Tab");
     expect(t.focusedItemId()).toBe("input-email");
-    t.pressKey("Tab");
+    t.keyboard.press("Tab");
     expect(t.focusedItemId()).toBe("save-btn");
-    t.pressKey("Tab");
+    t.keyboard.press("Tab");
     expect(t.focusedItemId()).toBe("close-btn");
     expect(t.activeZoneId()).toBe("dialog");
   });
@@ -83,33 +83,33 @@ describe("APG Dialog: Escape", () => {
 
 describe("APG Dialog: Focus Restore", () => {
   it("on close, focus restores to invoker", () => {
-    const t = createTestOsKernel();
-    t.setItems(["new-btn", "edit-btn", "delete-btn"]);
-    t.setActiveZone("toolbar", "edit-btn");
-    t.dispatch(t.OS_STACK_PUSH());
-    t.setItems(DIALOG_ITEMS);
-    t.setConfig(DIALOG_CONFIG);
-    t.setActiveZone("dialog", "close-btn");
+    const page = createOsPage();
+    page.setItems(["new-btn", "edit-btn", "delete-btn"]);
+    page.setActiveZone("toolbar", "edit-btn");
+    page.dispatch(page.OS_STACK_PUSH());
+    page.setItems(DIALOG_ITEMS);
+    page.setConfig(DIALOG_CONFIG);
+    page.setActiveZone("dialog", "close-btn");
     // Close dialog via stack pop (internal OS mechanism)
-    t.dispatch(t.OS_STACK_POP());
-    expect(t.activeZoneId()).toBe("toolbar");
-    expect(t.focusedItemId("toolbar")).toBe("edit-btn");
+    page.dispatch(page.OS_STACK_POP());
+    expect(page.activeZoneId()).toBe("toolbar");
+    expect(page.focusedItemId("toolbar")).toBe("edit-btn");
   });
 
   it("nested dialogs: LIFO focus restore", () => {
-    const t = createTestOsKernel();
-    t.setItems(["btn-1"]);
-    t.setActiveZone("toolbar", "btn-1");
-    t.dispatch(t.OS_STACK_PUSH());
-    t.setItems(["d1-close", "d1-ok"]);
-    t.setActiveZone("dialog-1", "d1-close");
-    t.dispatch(t.OS_STACK_PUSH());
-    t.setItems(["d2-yes", "d2-no"]);
-    t.setActiveZone("dialog-2", "d2-yes");
-    t.dispatch(t.OS_STACK_POP());
-    expect(t.activeZoneId()).toBe("dialog-1");
-    t.dispatch(t.OS_STACK_POP());
-    expect(t.activeZoneId()).toBe("toolbar");
-    expect(t.focusedItemId("toolbar")).toBe("btn-1");
+    const page = createOsPage();
+    page.setItems(["btn-1"]);
+    page.setActiveZone("toolbar", "btn-1");
+    page.dispatch(page.OS_STACK_PUSH());
+    page.setItems(["d1-close", "d1-ok"]);
+    page.setActiveZone("dialog-1", "d1-close");
+    page.dispatch(page.OS_STACK_PUSH());
+    page.setItems(["d2-yes", "d2-no"]);
+    page.setActiveZone("dialog-2", "d2-yes");
+    page.dispatch(page.OS_STACK_POP());
+    expect(page.activeZoneId()).toBe("dialog-1");
+    page.dispatch(page.OS_STACK_POP());
+    expect(page.activeZoneId()).toBe("toolbar");
+    expect(page.focusedItemId("toolbar")).toBe("btn-1");
   });
 });

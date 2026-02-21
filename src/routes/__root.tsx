@@ -10,13 +10,14 @@ import {
 import React from "react";
 import { CommandPalette } from "@/command-palette/CommandPalette";
 import { GlobalNav } from "@/components/GlobalNav";
+import { ToastContainer } from "@os/6-components/toast/ToastContainer";
 
 const TanStackRouterDevtools = import.meta.env.DEV
   ? React.lazy(() =>
-      import("@tanstack/router-devtools").then((m) => ({
-        default: m.TanStackRouterDevtools,
-      })),
-    )
+    import("@tanstack/router-devtools").then((m) => ({
+      default: m.TanStackRouterDevtools,
+    })),
+  )
   : () => null;
 
 // Plugin registrations (side-effect imports)
@@ -83,6 +84,9 @@ function RootComponent() {
 
         {/* Command Palette (⌘K) */}
         <CommandPalette />
+
+        {/* OS Toast Notifications */}
+        <ToastContainer />
 
         <TanStackRouterDevtools />
       </div>

@@ -19,7 +19,7 @@ export function describe(name: string, fn: () => void) {
   pushDescribe(name, fn);
 }
 
-describe.skip = () => {};
+describe.skip = () => { };
 describe.only = (name: string, fn: () => void) => {
   pushDescribe(name, fn);
 };
@@ -32,7 +32,7 @@ export function it(name: string, fn: Function) {
 
 export const test = it;
 
-it.skip = () => {};
+it.skip = () => { };
 it.only = (name: string, fn: Function) => {
   pushTest(name, fn);
 };
@@ -44,6 +44,14 @@ export function beforeEach(fn: Function) {
 }
 
 export function afterEach(_fn: Function) {
+  // no-op in TestBot
+}
+
+export function beforeAll(_fn: Function) {
+  // no-op in TestBot
+}
+
+export function afterAll(_fn: Function) {
   // no-op in TestBot
 }
 
@@ -104,3 +112,29 @@ export function expect(actual: any) {
     },
   };
 }
+
+// ── vi (mock utilities) ────────────────────────────────────────
+
+export const vi = {
+  fn(impl?: Function) {
+    const mock = (...args: any[]) => {
+      mock.calls.push(args);
+      return impl?.(...args);
+    };
+    mock.calls = [] as any[][];
+    mock.mockImplementation = (fn: Function) => { impl = fn; return mock; };
+    mock.mockReturnValue = (val: any) => { impl = () => val; return mock; };
+    mock.mockClear = () => { mock.calls = []; };
+    return mock;
+  },
+  spyOn(obj: any, method: string) {
+    const original = obj[method];
+    const spy = vi.fn(original?.bind(obj));
+    obj[method] = spy;
+    return {
+      ...spy,
+      mockImplementation: (fn: Function) => { obj[method] = fn; return spy; },
+      mockRestore: () => { obj[method] = original; },
+    };
+  },
+};

@@ -33,9 +33,9 @@ export type OSCommandUnion =
   | { type: typeof OS_COMMANDS.OS_ACTIVATE; payload?: OSActivatePayload }
   | { type: typeof OS_COMMANDS.OS_ESCAPE; payload?: undefined }
   | {
-      type: typeof OS_COMMANDS.OS_FIELD_START_EDIT;
-      payload?: { fieldId?: string };
-    }
+    type: typeof OS_COMMANDS.OS_FIELD_START_EDIT;
+    payload?: { fieldId?: string };
+  }
   | { type: typeof OS_COMMANDS.OS_FIELD_COMMIT; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.OS_FIELD_CANCEL; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.UNDO; payload?: undefined }
@@ -44,5 +44,4 @@ export type OSCommandUnion =
   | { type: typeof OS_COMMANDS.CUT; payload?: undefined }
   | { type: typeof OS_COMMANDS.PASTE; payload?: undefined }
   | { type: typeof OS_COMMANDS.DELETE; payload?: undefined }
-  | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: undefined }
-  | { type: typeof OS_COMMANDS.OS_RECOVER; payload?: undefined };
+  | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: undefined };

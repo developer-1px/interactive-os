@@ -12,23 +12,33 @@ import type { AppState, Category, Todo } from "@apps/todo/model/appState";
 // Todo Selectors
 // ═══════════════════════════════════════════════════════════════════
 
-/** Todos visible in the currently selected category, preserving todoOrder. */
+/** Todos visible in the currently selected category, preserving todoOrder.
+ *  When searchQuery is non-empty, further filters by text match (case-insensitive). */
 export function selectVisibleTodos(state: AppState): Todo[] {
-  const { selectedCategoryId } = state.ui;
+  const { selectedCategoryId, searchQuery } = state.ui;
+  const q = searchQuery.trim().toLowerCase();
   return state.data.todoOrder
     .map((id) => state.data.todos[id])
     .filter(
       (todo): todo is Todo =>
-        todo !== undefined && todo.categoryId === selectedCategoryId,
+        todo !== undefined &&
+        todo.categoryId === selectedCategoryId &&
+        (q === "" || todo.text.toLowerCase().includes(q)),
     );
 }
 
-/** IDs of visible todos in the currently selected category. */
+/** IDs of visible todos in the currently selected category.
+ *  When searchQuery is non-empty, further filters by text match (case-insensitive). */
 export function selectVisibleTodoIds(state: AppState): string[] {
-  const { selectedCategoryId } = state.ui;
-  return state.data.todoOrder.filter(
-    (id) => state.data.todos[id]?.categoryId === selectedCategoryId,
-  );
+  const { selectedCategoryId, searchQuery } = state.ui;
+  const q = searchQuery.trim().toLowerCase();
+  return state.data.todoOrder.filter((id) => {
+    const todo = state.data.todos[id];
+    return (
+      todo?.categoryId === selectedCategoryId &&
+      (q === "" || todo.text.toLowerCase().includes(q))
+    );
+  });
 }
 
 /** All categories in display order. */

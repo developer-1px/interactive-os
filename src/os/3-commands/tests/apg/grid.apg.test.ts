@@ -11,7 +11,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
+import { createOsPage } from "@os/createOsPage";
 import { assertHomeEnd } from "./helpers/contracts";
 
 // ─── 3×3 Grid Layout ───
@@ -60,12 +60,12 @@ const GRID_CONFIG = {
 };
 
 function createGrid(focusedCell = "r0c0") {
-  const t = createTestOsKernel();
-  t.setItems(allCellIds());
-  t.setRects(gridRects());
-  t.setConfig(GRID_CONFIG);
-  t.setActiveZone("grid", focusedCell);
-  return t;
+  const page = createOsPage();
+  page.setItems(allCellIds());
+  page.setRects(gridRects());
+  page.setConfig(GRID_CONFIG);
+  page.setActiveZone("grid", focusedCell);
+  return page;
 }
 
 // ═══════════════════════════════════════════════════
@@ -83,7 +83,7 @@ describe("APG Grid: Home / End", () => {
 describe("APG Grid: 4-Directional Navigation", () => {
   it("Right: moves one cell right", () => {
     const t = createGrid("r1c1");
-    t.pressKey("ArrowRight");
+    t.keyboard.press("ArrowRight");
     expect(t.focusedItemId()).toBe("r1c2");
     expect(t.attrs("r1c2").tabIndex).toBe(0);
     expect(t.attrs("r1c1").tabIndex).toBe(-1);
@@ -91,31 +91,31 @@ describe("APG Grid: 4-Directional Navigation", () => {
 
   it("Left: moves one cell left", () => {
     const t = createGrid("r1c1");
-    t.pressKey("ArrowLeft");
+    t.keyboard.press("ArrowLeft");
     expect(t.focusedItemId()).toBe("r1c0");
     expect(t.attrs("r1c0").tabIndex).toBe(0);
   });
 
   it("Down: moves one cell down", () => {
     const t = createGrid("r1c1");
-    t.pressKey("ArrowDown");
+    t.keyboard.press("ArrowDown");
     expect(t.focusedItemId()).toBe("r2c1");
     expect(t.attrs("r2c1").tabIndex).toBe(0);
   });
 
   it("Up: moves one cell up", () => {
     const t = createGrid("r1c1");
-    t.pressKey("ArrowUp");
+    t.keyboard.press("ArrowUp");
     expect(t.focusedItemId()).toBe("r0c1");
     expect(t.attrs("r0c1").tabIndex).toBe(0);
   });
 
   it("corner to corner traversal", () => {
     const t = createGrid("r0c0");
-    t.pressKey("ArrowRight");
-    t.pressKey("ArrowRight");
-    t.pressKey("ArrowDown");
-    t.pressKey("ArrowDown");
+    t.keyboard.press("ArrowRight");
+    t.keyboard.press("ArrowRight");
+    t.keyboard.press("ArrowDown");
+    t.keyboard.press("ArrowDown");
     expect(t.focusedItemId()).toBe("r2c2");
     expect(t.attrs("r2c2").tabIndex).toBe(0);
     expect(t.attrs("r0c0").tabIndex).toBe(-1);
@@ -129,34 +129,34 @@ describe("APG Grid: 4-Directional Navigation", () => {
 describe("APG Grid: 2D Boundary", () => {
   it("Right at right edge: stays", () => {
     const t = createGrid("r1c2");
-    t.pressKey("ArrowRight");
+    t.keyboard.press("ArrowRight");
     expect(t.focusedItemId()).toBe("r1c2");
     expect(t.attrs("r1c2").tabIndex).toBe(0);
   });
 
   it("Left at left edge: stays", () => {
     const t = createGrid("r1c0");
-    t.pressKey("ArrowLeft");
+    t.keyboard.press("ArrowLeft");
     expect(t.focusedItemId()).toBe("r1c0");
   });
 
   it("Down at bottom: stays", () => {
     const t = createGrid("r2c1");
-    t.pressKey("ArrowDown");
+    t.keyboard.press("ArrowDown");
     expect(t.focusedItemId()).toBe("r2c1");
   });
 
   it("Up at top: stays", () => {
     const t = createGrid("r0c1");
-    t.pressKey("ArrowUp");
+    t.keyboard.press("ArrowUp");
     expect(t.focusedItemId()).toBe("r0c1");
   });
 
   it("top-left corner: up and left both stay", () => {
     const t = createGrid("r0c0");
-    t.pressKey("ArrowUp");
+    t.keyboard.press("ArrowUp");
     expect(t.focusedItemId()).toBe("r0c0");
-    t.pressKey("ArrowLeft");
+    t.keyboard.press("ArrowLeft");
     expect(t.focusedItemId()).toBe("r0c0");
   });
 });

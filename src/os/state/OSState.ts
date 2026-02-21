@@ -7,6 +7,21 @@ export interface OverlayEntry {
   type: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip";
 }
 
+export interface ToastEntry {
+  /** Unique toast ID */
+  id: string;
+  /** Message to display */
+  message: string;
+  /** Optional action label (e.g. "Undo") */
+  actionLabel?: string;
+  /** Optional command to dispatch when action is clicked */
+  actionCommand?: { type: string; payload?: unknown; scope?: string[] };
+  /** Duration in ms before auto-dismiss (0 = manual only) */
+  duration: number;
+  /** Timestamp when toast was created */
+  createdAt: number;
+}
+
 export interface OSState {
   focus: {
     /** The ID of the currently active zone */
@@ -20,13 +35,16 @@ export interface OSState {
     /** Stack of open overlays (top = most recent) */
     stack: OverlayEntry[];
   };
+  toasts: {
+    /** Active toast stack (bottom = oldest, top = newest) */
+    stack: ToastEntry[];
+  };
 }
 
 export interface ZoneState {
   // Cursor Slice
   focusedItemId: string | null;
   lastFocusedId: string | null;
-  recoveryTargetId: string | null;
 
   // Field Slice
   editingItemId: string | null;

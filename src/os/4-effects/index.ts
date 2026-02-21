@@ -11,12 +11,12 @@ import { findItemElement } from "../2-contexts/itemQueries";
 import { os } from "../kernel";
 
 // ═══════════════════════════════════════════════════════════════════
-// Focus Effect — Recovery-only DOM focus restore
+// Focus Effect — DOM focus restore
 //
 // Normal focus transitions are handled by FocusItem.useLayoutEffect
-// (state change → re-render → DOM focus). This effect exists solely
-// for OS_RECOVER's "re-focus current item" path where state doesn't
-// change but DOM focus needs to be restored (e.g., focus lost to body).
+// (state change → re-render → DOM focus). This effect exists for
+// cases where DOM focus needs to be restored without state change
+// (e.g., focus lost to body after element removal).
 // ═══════════════════════════════════════════════════════════════════
 
 os.defineEffect("focus", (itemId: string) => {

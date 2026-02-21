@@ -14,7 +14,8 @@ import { useRef } from "react";
 import { findItemElement } from "@/os/2-contexts/itemQueries";
 import { useElementRect } from "@/hooks/useElementRect";
 import { os } from "@/os/kernel";
-import { BuilderApp, findBlockInfo } from "./app";
+import { BuilderApp, findBlockInfo, resolveFieldAddress } from "./app";
+import type { Block } from "./app";
 
 // ── Color by block type ──
 const TYPE_COLORS: Record<string, string> = {
@@ -30,6 +31,32 @@ const TYPE_COLORS: Record<string, string> = {
   footer: "#64748b",
 };
 const DEFAULT_COLOR = "#22c55e";
+
+/**
+ * Resolve block metadata for any item ID — block or field.
+ *
+ * - If itemId matches a block.id directly, use findBlockInfo.
+ * - Otherwise, resolve as a field item: find parent block via
+ *   resolveFieldAddress, then report depth = parentDepth + 1.
+ */
+function resolveItemBlockInfo(
+  blocks: Block[],
+  itemId: string,
+): { type: string; depth: number } | null {
+  // Direct block match
+  const direct = findBlockInfo(blocks, itemId);
+  if (direct) return direct;
+
+  // Field item: resolve parent block
+  const addr = resolveFieldAddress(itemId, blocks);
+  if (!addr) return null;
+
+  const parentInfo = findBlockInfo(blocks, addr.section.id);
+  return {
+    type: parentInfo?.type ?? addr.section.type,
+    depth: (parentInfo?.depth ?? 0) + 1,
+  };
+}
 
 /**
  * Must be placed inside the scroll container.
@@ -53,7 +80,7 @@ export function BuilderCursor() {
 
   // ── Block metadata from app state (source of truth) ──
   const blockInfo = BuilderApp.useComputed((s) =>
-    itemId ? findBlockInfo(s.data.blocks, itemId) : null,
+    itemId ? resolveItemBlockInfo(s.data.blocks, itemId) : null,
   );
   const depth = blockInfo?.depth ?? 0;
   const itemType = blockInfo?.type ?? "text";

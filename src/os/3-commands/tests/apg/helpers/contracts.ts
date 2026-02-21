@@ -13,10 +13,9 @@
  */
 
 import { expect, it } from "vitest";
-import type { createTestOsKernel } from "../../integration/helpers/createTestOsKernel";
+import type { OsPage } from "@os/createOsPage";
 
-type TestKernel = ReturnType<typeof createTestOsKernel>;
-type Factory = () => TestKernel;
+type Factory = () => OsPage;
 
 // ─── Axis: Linear Navigation ───
 
@@ -25,7 +24,7 @@ export function assertVerticalNav(factory: Factory) {
   it("Down Arrow: moves focus to next item", () => {
     const t = factory();
     const first = t.focusedItemId()!;
-    t.pressKey("ArrowDown");
+    t.keyboard.press("ArrowDown");
     const next = t.focusedItemId()!;
     expect(next).not.toBe(first);
     // Tier 1: ARIA contract — focused item gets tabIndex=0
@@ -36,8 +35,8 @@ export function assertVerticalNav(factory: Factory) {
   it("Up Arrow: moves focus to previous item", () => {
     const t = factory();
     const first = t.focusedItemId()!;
-    t.pressKey("ArrowDown");
-    t.pressKey("ArrowUp");
+    t.keyboard.press("ArrowDown");
+    t.keyboard.press("ArrowUp");
     expect(t.focusedItemId()).toBe(first);
     expect(t.attrs(first).tabIndex).toBe(0);
   });
@@ -48,7 +47,7 @@ export function assertHorizontalNav(factory: Factory) {
   it("Right Arrow: moves focus to next item", () => {
     const t = factory();
     const first = t.focusedItemId()!;
-    t.pressKey("ArrowRight");
+    t.keyboard.press("ArrowRight");
     const next = t.focusedItemId()!;
     expect(next).not.toBe(first);
     expect(t.attrs(next).tabIndex).toBe(0);
@@ -58,8 +57,8 @@ export function assertHorizontalNav(factory: Factory) {
   it("Left Arrow: moves focus to previous item", () => {
     const t = factory();
     const first = t.focusedItemId()!;
-    t.pressKey("ArrowRight");
-    t.pressKey("ArrowLeft");
+    t.keyboard.press("ArrowRight");
+    t.keyboard.press("ArrowLeft");
     expect(t.focusedItemId()).toBe(first);
     expect(t.attrs(first).tabIndex).toBe(0);
   });
@@ -80,20 +79,20 @@ export function assertBoundaryClamp(
   it(`${key.fwd} at last item: focus stays (clamp)`, () => {
     const t = factory();
     // Navigate to last
-    for (let i = 0; i < 20; i++) t.pressKey(key.fwd);
+    for (let i = 0; i < 20; i++) t.keyboard.press(key.fwd);
     expect(t.focusedItemId()).toBe(opts.lastId);
     expect(t.attrs(opts.lastId).tabIndex).toBe(0);
-    t.pressKey(key.fwd);
+    t.keyboard.press(key.fwd);
     expect(t.focusedItemId()).toBe(opts.lastId);
   });
 
   it(`${key.bwd} at first item: focus stays (clamp)`, () => {
     const t = factory();
     // Navigate to first
-    for (let i = 0; i < 20; i++) t.pressKey(key.bwd);
+    for (let i = 0; i < 20; i++) t.keyboard.press(key.bwd);
     expect(t.focusedItemId()).toBe(opts.firstId);
     expect(t.attrs(opts.firstId).tabIndex).toBe(0);
-    t.pressKey(key.bwd);
+    t.keyboard.press(key.bwd);
     expect(t.focusedItemId()).toBe(opts.firstId);
   });
 }
@@ -114,7 +113,7 @@ export function assertLoop(opts: {
   it(`${key.fwd} at last item: wraps to first`, () => {
     const t = opts.factoryAtLast();
     expect(t.focusedItemId()).toBe(opts.lastId);
-    t.pressKey(key.fwd);
+    t.keyboard.press(key.fwd);
     expect(t.focusedItemId()).toBe(opts.firstId);
     expect(t.attrs(opts.firstId).tabIndex).toBe(0);
   });
@@ -122,7 +121,7 @@ export function assertLoop(opts: {
   it(`${key.bwd} at first item: wraps to last`, () => {
     const t = opts.factoryAtFirst();
     expect(t.focusedItemId()).toBe(opts.firstId);
-    t.pressKey(key.bwd);
+    t.keyboard.press(key.bwd);
     expect(t.focusedItemId()).toBe(opts.lastId);
     expect(t.attrs(opts.lastId).tabIndex).toBe(0);
   });
@@ -136,14 +135,14 @@ export function assertHomeEnd(
 ) {
   it("Home: moves to first item", () => {
     const t = factory();
-    t.pressKey("Home");
+    t.keyboard.press("Home");
     expect(t.focusedItemId()).toBe(opts.firstId);
     expect(t.attrs(opts.firstId).tabIndex).toBe(0);
   });
 
   it("End: moves to last item", () => {
     const t = factory();
-    t.pressKey("End");
+    t.keyboard.press("End");
     expect(t.focusedItemId()).toBe(opts.lastId);
     expect(t.attrs(opts.lastId).tabIndex).toBe(0);
   });
@@ -164,7 +163,7 @@ export function assertOrthogonalIgnored(
   it(`${k1}: no effect`, () => {
     const t = factory();
     const before = t.focusedItemId()!;
-    t.pressKey(k1);
+    t.keyboard.press(k1);
     expect(t.focusedItemId()).toBe(before);
     expect(t.attrs(before).tabIndex).toBe(0);
   });
@@ -172,7 +171,7 @@ export function assertOrthogonalIgnored(
   it(`${k2}: no effect`, () => {
     const t = factory();
     const before = t.focusedItemId()!;
-    t.pressKey(k2);
+    t.keyboard.press(k2);
     expect(t.focusedItemId()).toBe(before);
     expect(t.attrs(before).tabIndex).toBe(0);
   });
@@ -185,7 +184,7 @@ export function assertFollowFocus(factory: Factory) {
   it("selection follows focus on navigation (aria-selected)", () => {
     const t = factory();
     const first = t.focusedItemId()!;
-    t.pressKey("ArrowDown");
+    t.keyboard.press("ArrowDown");
     const next = t.focusedItemId()!;
     // After navigation: new focus gets selected, old loses selection
     expect(t.attrs(next)["aria-selected"]).toBe(true);
@@ -199,8 +198,8 @@ export function assertFollowFocus(factory: Factory) {
 export function assertNoSelection(factory: Factory) {
   it("navigation does not create selection", () => {
     const t = factory();
-    t.pressKey("ArrowDown");
-    t.pressKey("ArrowDown");
+    t.keyboard.press("ArrowDown");
+    t.keyboard.press("ArrowDown");
     expect(t.selection()).toEqual([]);
   });
 }
@@ -211,7 +210,7 @@ export function assertNoSelection(factory: Factory) {
 export function assertEscapeClose(factory: Factory) {
   it("Escape: closes popup (clears active zone)", () => {
     const t = factory();
-    t.pressKey("Escape");
+    t.keyboard.press("Escape");
     expect(t.activeZoneId()).toBeNull();
   });
 }
@@ -223,7 +222,7 @@ export function assertFocusRestore(
 ) {
   it("Escape + stack pop: restores focus to invoker", () => {
     const t = factory();
-    t.pressKey("Escape");
+    t.keyboard.press("Escape");
     t.dispatch(t.OS_STACK_POP());
     expect(t.activeZoneId()).toBe(opts.invokerZoneId);
     expect(t.focusedItemId(opts.invokerZoneId)).toBe(opts.invokerItemId);
@@ -245,7 +244,7 @@ export function assertTabTrap(
   it("Tab at last: wraps to first (focus trap)", () => {
     const t = (opts.factoryAtLast ?? factory)();
     expect(t.focusedItemId()).toBe(opts.lastId);
-    t.pressKey("Tab");
+    t.keyboard.press("Tab");
     expect(t.focusedItemId()).toBe(opts.firstId);
     expect(t.attrs(opts.firstId).tabIndex).toBe(0);
   });
@@ -253,7 +252,7 @@ export function assertTabTrap(
   it("Shift+Tab at first: wraps to last (focus trap)", () => {
     const t = (opts.factoryAtFirst ?? factory)();
     expect(t.focusedItemId()).toBe(opts.firstId);
-    t.pressKey("Shift+Tab");
+    t.keyboard.press("Shift+Tab");
     expect(t.focusedItemId()).toBe(opts.lastId);
     expect(t.attrs(opts.lastId).tabIndex).toBe(0);
   });

@@ -15,7 +15,7 @@
  */
 
 import { describe } from "vitest";
-import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
+import { createOsPage } from "@os/createOsPage";
 import {
   assertBoundaryClamp,
   assertEscapeClose,
@@ -50,14 +50,14 @@ const POPUP_CONFIG = {
 };
 
 function createComboboxPopup(focusedItem = "apple") {
-  const t = createTestOsKernel();
-  t.setItems(["input-field"]);
-  t.setActiveZone("combobox", "input-field");
-  t.dispatch(t.OS_STACK_PUSH());
-  t.setItems(POPUP_ITEMS);
-  t.setConfig(POPUP_CONFIG);
-  t.setActiveZone("popup", focusedItem);
-  return t;
+  const page = createOsPage();
+  page.setItems(["input-field"]);
+  page.setActiveZone("combobox", "input-field");
+  page.dispatch(page.OS_STACK_PUSH());
+  page.setItems(POPUP_ITEMS);
+  page.setConfig(POPUP_CONFIG);
+  page.setActiveZone("popup", focusedItem);
+  return page;
 }
 
 // ═══════════════════════════════════════════════════

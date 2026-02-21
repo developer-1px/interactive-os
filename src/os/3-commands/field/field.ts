@@ -107,6 +107,10 @@ export const OS_FIELD_COMMIT = os.defineCommand(
           const z = draft.os.focus.zones[activeZoneId];
           if (z) {
             z.editingItemId = null;
+            // Restore focus to the item that was being edited
+            // (focusin on the field element may have overwritten these)
+            z.focusedItemId = editingId;
+            z.lastFocusedId = editingId;
           }
         }) as typeof ctx.state,
       };
@@ -149,6 +153,9 @@ export const OS_FIELD_CANCEL = os.defineCommand(
       state: produce(ctx.state, (draft) => {
         const z = draft.os.focus.zones[activeZoneId];
         if (z) {
+          // Restore focus to the item that was being edited
+          z.focusedItemId = editingId;
+          z.lastFocusedId = editingId;
           z.editingItemId = null;
         }
       }) as typeof ctx.state,

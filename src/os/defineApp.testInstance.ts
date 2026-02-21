@@ -58,8 +58,8 @@ export function createTestInstance<S>(
   const stateOverrides =
     enableHistory || enableOS
       ? (({ history: _h, withOS: _w, ...rest }) => rest)(
-          rawOverrides as Record<string, unknown>,
-        )
+        rawOverrides as Record<string, unknown>,
+      )
       : rawOverrides;
 
   const testState =
@@ -70,13 +70,13 @@ export function createTestInstance<S>(
   const testKernel = createKernel<AppState | TestAppState>(
     enableOS
       ? {
-          ...initialAppState,
-          apps: { [appId]: testState },
-        }
+        ...initialAppState,
+        apps: { [appId]: testState },
+      }
       : {
-          os: {} as Record<string, never>,
-          apps: { [appId]: testState },
-        },
+        os: {} as Record<string, never>,
+        apps: { [appId]: testState },
+      },
   );
 
   const testScope = defineScope(appId);
@@ -99,8 +99,18 @@ export function createTestInstance<S>(
 
   // Re-register all commands on test kernel
   for (const [type, entry] of flatHandlerRegistry) {
-    const kernelHandler = (ctx: { readonly state: S }) => (payload: any) =>
-      entry.handler(ctx, payload);
+    const kernelHandler = (ctx: { readonly state: S }) => (payload: any) => {
+      const result = entry.handler(ctx, payload);
+      if (result?.dispatch) {
+        // Normalize nested dispatches to the test scope
+        if (Array.isArray(result.dispatch)) {
+          result.dispatch = result.dispatch.map(cmd => ({ ...cmd, scope: [testScope] }));
+        } else {
+          result.dispatch = { ...result.dispatch, scope: [testScope] };
+        }
+      }
+      return result;
+    };
 
     const whenGuard = entry.when
       ? { when: (state: S) => entry.when!.evaluate(state) }

@@ -36,7 +36,6 @@ export const focusHandler = (ctx: any) => (payload: FocusPayload) => {
 
       if (itemId) {
         zone.lastFocusedId = itemId;
-        zone.recoveryTargetId = null;
 
         // Selection: explicit override > followFocus
         if (!payload.skipSelection) {

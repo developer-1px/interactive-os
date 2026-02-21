@@ -7,10 +7,12 @@
  *
  * Handles:
  * - focusin → OS_SYNC_FOCUS (state sync from external focus changes)
- * - MutationObserver → OS_RECOVER (focused element removed from DOM)
+ *
+ * Note: Focus recovery after item deletion is handled by Lazy Resolution
+ * (resolveItemId in useFocusedItem) — no MutationObserver needed.
  */
 
-import { OS_RECOVER, OS_SYNC_FOCUS } from "@os/3-commands";
+import { OS_SYNC_FOCUS } from "@os/3-commands";
 import { useEffect } from "react";
 import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
@@ -60,35 +62,9 @@ export function FocusListener() {
 
     document.addEventListener("focusin", senseFocusIn, { capture: true });
 
-    // --- Focus Recovery via MutationObserver ---
-    let lastFocusedElement: Element | null = null;
-
-    const trackFocus = () => {
-      if (document.activeElement && document.activeElement !== document.body) {
-        lastFocusedElement = document.activeElement;
-      }
-    };
-    document.addEventListener("focusin", trackFocus);
-
-    const observer = new MutationObserver(() => {
-      if (
-        document.activeElement === document.body &&
-        lastFocusedElement &&
-        !document.body.contains(lastFocusedElement)
-      ) {
-        lastFocusedElement = null;
-        os.dispatch(OS_RECOVER(), {
-          meta: { input: { type: "OS_FOCUS", key: "Recovery" } },
-        });
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-
     return () => {
       isMounted = false;
       document.removeEventListener("focusin", senseFocusIn, { capture: true });
-      document.removeEventListener("focusin", trackFocus);
-      observer.disconnect();
     };
   }, []);
 

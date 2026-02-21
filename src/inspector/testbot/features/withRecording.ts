@@ -27,6 +27,7 @@ interface RecordableKernel {
     click: (itemId: string, opts?: any) => void;
     attrs: (itemId: string, zoneId?: string) => ItemAttrs;
     focusedItemId: (zoneId?: string) => string | null;
+    state?: () => Record<string, unknown>;
 }
 
 type RecordedKernel<T extends RecordableKernel> = T & {
@@ -51,6 +52,15 @@ export function withRecording<T extends RecordableKernel>(
     const steps: TestStep[] = [];
     const startedAt = Date.now();
 
+    function captureSnapshot(): Record<string, unknown> | undefined {
+        if (!kernel.state) return undefined;
+        try {
+            return JSON.parse(JSON.stringify(kernel.state()));
+        } catch {
+            return undefined;
+        }
+    }
+
     // ─── Wrap pressKey ───
 
     const originalPressKey = kernel.pressKey.bind(kernel);
@@ -66,6 +76,7 @@ export function withRecording<T extends RecordableKernel>(
             focusedBefore,
             focusedAfter,
             timestamp: Date.now() - startedAt,
+            snapshot: captureSnapshot(),
         });
     }
 
@@ -82,6 +93,7 @@ export function withRecording<T extends RecordableKernel>(
             itemId,
             focusedAfter,
             timestamp: Date.now() - startedAt,
+            snapshot: captureSnapshot(),
         });
     }
 
@@ -97,6 +109,7 @@ export function withRecording<T extends RecordableKernel>(
             itemId,
             result: result as unknown as Record<string, unknown>,
             timestamp: Date.now() - startedAt,
+            snapshot: captureSnapshot(),
         });
 
         return result;
