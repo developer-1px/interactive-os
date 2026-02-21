@@ -279,20 +279,19 @@ function TriggerPortal({
   }, [isOpen]);
 
   // Handle native cancel event (ESC key triggers this on <dialog>)
+  // preventDefault only — ESC goes through the normal keyboard pipeline:
+  // keydown → OS_ESCAPE → onDismiss → OS_OVERLAY_CLOSE
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
     const handleCancel = (e: Event) => {
-      e.preventDefault();
-      // Let Zone role="dialog" handle ESC via kernel
-      // Or close directly for overlays without Zone
-      os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
+      e.preventDefault(); // Prevent native close. OS pipeline handles ESC.
     };
 
     dialog.addEventListener("cancel", handleCancel);
     return () => dialog.removeEventListener("cancel", handleCancel);
-  }, [overlayId]);
+  }, []);
 
   // Backdrop click → close (only for dialog/alertdialog types)
   const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
