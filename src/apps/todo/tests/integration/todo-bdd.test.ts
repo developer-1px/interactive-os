@@ -12,10 +12,6 @@ import {
     TodoApp,
     addTodo,
     visibleTodos,
-    copyTodo,
-    cutTodo,
-    pasteTodo,
-    selectCategory,
 } from "@apps/todo/app";
 import type { AppPage } from "@os/defineApp.types";
 import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
@@ -37,12 +33,13 @@ afterEach(() => {
     page.cleanup();
 });
 
-/** Helper: add N todos and return their IDs */
+/** Helper: add N todos and return their NEW IDs only */
 function addTodos(...texts: string[]): string[] {
+    const before = new Set(page.state.data.todoOrder);
     for (const text of texts) {
         page.dispatch(addTodo({ text }));
     }
-    return [...page.state.data.todoOrder];
+    return page.state.data.todoOrder.filter((id) => !before.has(id));
 }
 
 /** Helper: goto list zone with current todo items */
@@ -106,21 +103,27 @@ describe("§1.1 List: 키보드 네비게이션", () => {
     });
 
     it("ArrowUp at top — 경계에서 멈춤", () => {
-        const [a] = addTodos("A", "B", "C");
-        gotoList(a);
+        addTodos("A", "B", "C");
+        // First item in list is the initial todo_1, not our added ones
+        const allItems = page.state.data.todoOrder;
+        const firstId = allItems[0]!;
+        gotoList(firstId);
 
         page.keyboard.press("ArrowUp");
 
-        expect(page.focusedItemId()).toBe(a);
+        expect(page.focusedItemId()).toBe(firstId);
     });
 
     it("Home — 첫 번째 항목으로", () => {
-        const [a, , c] = addTodos("A", "B", "C");
-        gotoList(c);
+        addTodos("A", "B", "C");
+        const allItems = page.state.data.todoOrder;
+        const firstId = allItems[0]!;
+        const lastId = allItems[allItems.length - 1]!;
+        gotoList(lastId);
 
         page.keyboard.press("Home");
 
-        expect(page.focusedItemId()).toBe(a);
+        expect(page.focusedItemId()).toBe(firstId);
     });
 
     it("End — 마지막 항목으로", () => {
@@ -180,12 +183,21 @@ describe("§1.2 List: 키보드 범위 선택", () => {
         expect(page.selection()).not.toContain(c);
     });
 
-    // TODO: Meta+a (selectAll) is not handled by resolveKeyboard.
-    // It's an app-level keybinding dispatched through a separate path.
-    it.todo("Cmd+A — 전체 선택");
+    it("Cmd+A — 전체 선택", () => {
+        addTodos("A", "B", "C", "D", "E");
+        const allItems = page.state.data.todoOrder;
+        gotoList(allItems[0]);
 
-    // TODO: Escape in navigating mode deselection is not wired in resolveKeyboard
-    it.todo("Escape — 선택 해제");
+        page.keyboard.press("Meta+A");
+
+        // OS_SELECT_ALL selects ALL items in the zone
+        expect(page.selection().length).toBe(allItems.length);
+    });
+
+    // OS gap: OS_ESCAPE doesn't clear selection yet
+    // spec says Escape should deselect, but OS_ESCAPE currently
+    // is a dismiss/cancel command, not a deselect command.
+    it.todo("Escape — 선택 해제 (OS_ESCAPE 에서 selection clear 미구현)");
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -247,10 +259,31 @@ describe("§1.3 List: 키보드 액션", () => {
         expect(page.state.ui.pendingDeleteIds).toContain(c);
     });
 
-    // TODO: Meta+ArrowUp/Down (onMoveUp/onMoveDown) are app-level keybindings,
-    // not handled by resolveKeyboard. They need app keybinding dispatch in headless.
-    it.todo("Cmd+ArrowUp — 순서 위로 이동");
-    it.todo("Cmd+ArrowDown — 순서 아래로 이동");
+    it("Cmd+ArrowUp — 순서 위로 이동", () => {
+        const ids = addTodos("A", "B", "C");
+        const [a, b] = ids;
+        gotoList(b);
+
+        page.keyboard.press("Meta+ArrowUp");
+
+        const order = [...page.state.data.todoOrder];
+        const aIdx = order.indexOf(a!);
+        const bIdx = order.indexOf(b!);
+        expect(bIdx).toBeLessThan(aIdx);
+    });
+
+    it("Cmd+ArrowDown — 순서 아래로 이동", () => {
+        const ids = addTodos("A", "B", "C");
+        const [, b, c] = ids;
+        gotoList(b);
+
+        page.keyboard.press("Meta+ArrowDown");
+
+        const order = [...page.state.data.todoOrder];
+        const bIdx = order.indexOf(b!);
+        const cIdx = order.indexOf(c!);
+        expect(bIdx).toBeGreaterThan(cIdx);
+    });
 
     // F2 mapped to Enter (onAction → startEdit) via OS defaults
     it("F2 — 편집 시작 (OS 표준)", () => {
@@ -272,18 +305,15 @@ describe("§1.3 List: 키보드 액션", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("§1.4 List: 키보드 클립보드", () => {
-    // NOTE: Cmd+C/X/V/D are handled by browser native events (oncopy/oncut/onpaste)
-    // and app-level keybindings, NOT by resolveKeyboard.
-    // They cannot be tested via headless simulateKeyPress.
-    // These should be tested via dispatch() directly or in E2E.
+    // Clipboard shim: Meta+c/x/v → OS_COPY/CUT/PASTE in headless
+    // Zone keybindings: Meta+D registered via goto() → Keybindings.registerAll()
 
     it("Cmd+C — 복사 (항목 유지)", () => {
         const [a] = addTodos("Alpha", "Beta");
         const beforeCount = page.state.data.todoOrder.length;
         gotoList(a);
 
-        // Direct dispatch since Meta+c goes through browser native clipboard
-        page.dispatch(copyTodo({ ids: [a!] }));
+        page.keyboard.press("Meta+c");
 
         // Item should still be in the list — count unchanged
         expect(page.state.data.todoOrder).toContain(a);
@@ -295,7 +325,7 @@ describe("§1.4 List: 키보드 클립보드", () => {
         const beforeCount = page.state.data.todoOrder.length;
         gotoList(a);
 
-        page.dispatch(cutTodo({ ids: [a!] }));
+        page.keyboard.press("Meta+x");
 
         expect(page.state.data.todoOrder).not.toContain(a);
         expect(page.state.data.todoOrder.length).toBe(beforeCount - 1);
@@ -305,17 +335,23 @@ describe("§1.4 List: 키보드 클립보드", () => {
         const [a] = addTodos("Original");
         gotoList(a);
 
-        // Copy via dispatch
-        page.dispatch(copyTodo({ ids: [a!] }));
+        page.keyboard.press("Meta+c");
         const afterCopyCount = page.state.data.todoOrder.length;
 
-        // Paste via dispatch
-        page.dispatch(pasteTodo({ afterId: a! }));
+        page.keyboard.press("Meta+v");
 
         expect(page.state.data.todoOrder.length).toBe(afterCopyCount + 1);
     });
 
-    it.todo("Cmd+D — 복제 (needs keybinding dispatch in headless)");
+    it("Cmd+D — 복제", () => {
+        const [a] = addTodos("Duplicate me");
+        const beforeCount = page.state.data.todoOrder.length;
+        gotoList(a);
+
+        page.keyboard.press("Meta+D");
+
+        expect(page.state.data.todoOrder.length).toBe(beforeCount + 1);
+    });
 });
 
 // ═══════════════════════════════════════════════════════════════════

@@ -11,6 +11,7 @@
 import { os, type AppState, initialAppState } from "@os/kernel";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { DEFAULT_CONFIG, type FocusGroupConfig } from "@os/schemas/focus/config/FocusGroupConfig";
+import { Keybindings } from "@os/keymaps/keybindings";
 import { ensureZone } from "@os/state/utils";
 import { produce } from "immer";
 
@@ -51,6 +52,8 @@ export function createAppPage<S>(
 ): AppPage<S> {
     // ── Mock items for headless context ──
     const mockItems: string[] = [];
+    /** Track keybinding unregister so cleanup() works correctly */
+    let unregisterKeybindings: (() => void) | null = null;
 
     // Override DOM contexts for headless (no DOM, no React)
     os.defineContext("dom-items", () => {
@@ -114,6 +117,19 @@ export function createAppPage<S>(
             });
         }
 
+        // Register zone keybindings in the global Keybindings registry
+        // (mirrors what FocusGroup.tsx does at mount time in the browser)
+        if (unregisterKeybindings) unregisterKeybindings();
+        if (bindingEntry && bindingEntry.keybindings.length > 0) {
+            unregisterKeybindings = Keybindings.registerAll(
+                bindingEntry.keybindings.map((kb) => ({
+                    key: kb.key,
+                    command: kb.command,
+                    when: "navigating" as const,
+                })),
+            );
+        }
+
         // Set active zone + focused item via setState on preview layer
         const focusedId = opts?.focusedItemId ?? null;
         os.setState((s: AppState) =>
@@ -164,6 +180,10 @@ export function createAppPage<S>(
         },
 
         cleanup() {
+            if (unregisterKeybindings) {
+                unregisterKeybindings();
+                unregisterKeybindings = null;
+            }
             const zId = readActiveZoneId(os);
             if (zId) ZoneRegistry.unregister(zId);
             os.clearPreview();

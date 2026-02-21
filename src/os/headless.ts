@@ -27,7 +27,9 @@ import {
     isCheckedRole,
     isExpandableRole,
 } from "@os/registries/roleRegistry";
+import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
 import type { AppState } from "@os/kernel";
+import type { BaseCommand } from "@kernel/core/tokens";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -91,11 +93,44 @@ export function setInteractionObserver(obs: InteractionObserver | null) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Clipboard Shim — headless equivalent of ClipboardListener
+// ═══════════════════════════════════════════════════════════════════
+
+/** Map Meta+c/x/v to OS_COPY/CUT/PASTE (case-insensitive) */
+function resolveClipboardShim(key: string): BaseCommand | null {
+    const lower = key.toLowerCase();
+    if (lower === "meta+c") return OS_COPY();
+    if (lower === "meta+x") return OS_CUT();
+    if (lower === "meta+v") return OS_PASTE();
+    return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // simulateKeyPress
 // ═══════════════════════════════════════════════════════════════════
 
 export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
     const before = _observer ? JSON.parse(JSON.stringify(kernel.getState().os)) : null;
+
+    // ── Clipboard shim ──
+    // In browser: Meta+C/X/V → native copy/cut/paste events → ClipboardListener → OS_COPY/CUT/PASTE
+    // In headless: no native events, so we shim these keys directly.
+    const clipboardShim = resolveClipboardShim(key);
+    if (clipboardShim) {
+        kernel.dispatch(clipboardShim);
+
+        if (_observer && before) {
+            _observer({
+                type: "press",
+                label: key,
+                stateBefore: before,
+                stateAfter: JSON.parse(JSON.stringify(kernel.getState().os)),
+                timestamp: performance.now(),
+            });
+        }
+        return;
+    }
+
     const activeZoneId = readActiveZoneId(kernel);
     const zone = activeZoneId
         ? kernel.getState().os.focus.zones[activeZoneId]
