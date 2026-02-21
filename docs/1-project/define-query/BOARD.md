@@ -1,11 +1,12 @@
 # BOARD — define-query
 
 ## 🔴 Now
-- [ ] T2: `useQuery` React 훅 — defineQuery의 컴포넌트용 구독 인터페이스
-  - [ ] Step 8: /tdd     ← 다음 재개 지점
-  - [ ] Step 9: /solve
+(없음 — T3 승격 대기)
 
 ## ⏳ Done
+- [x] T2: `useQuery` React 훅 (2026-02-21) — `6b7143b`
+  - useSyncExternalStore 기반, shallow 안정화, invalidateOn 연동
+  - 4 unit tests
 - [x] T1: `defineQuery` 커널 API 설계 (2026-02-21) — `2e0899a`
   - defineQuery, resolveQuery, QueryToken, invalidateOn
   - 10 unit tests, PRD 12 BDD scenarios
