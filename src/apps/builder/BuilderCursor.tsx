@@ -5,61 +5,23 @@
  * Highlights the currently focused item with a colored border
  * that follows keyboard navigation — replaces mouse cursor.
  *
+ * Uses useElementRect for position tracking.
  * Positions are calculated relative to the scroll container,
  * so the highlight scrolls naturally with content.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { findItemElement } from "@/os/2-contexts/itemQueries";
+import { useElementRect } from "@/hooks/useElementRect";
 import { os } from "@/os/kernel";
 
 // ── Color palette for Builder levels ──
-const LEVEL_COLORS = {
+const LEVEL_COLORS: Record<string, string> = {
   section: "#a855f7", // purple-500
   group: "#3b82f6", // blue-500
   item: "#22c55e", // green-500
-  default: "#6366f1", // indigo-500 (fallback)
 };
-
-function getLevelColor(el: HTMLElement): string {
-  const level = el.getAttribute("data-level");
-  if (level === "section") return LEVEL_COLORS.section;
-  if (level === "group") return LEVEL_COLORS.group;
-  if (level === "item") return LEVEL_COLORS.item;
-  return LEVEL_COLORS.default;
-}
-
-interface OverlayState {
-  visible: boolean;
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-  itemId: string;
-  zoneId: string;
-  color: string;
-  animating: boolean;
-  dimmed: boolean;
-  level: string;
-  editing: boolean;
-  itemType: string;
-}
-
-const HIDDEN: OverlayState = {
-  visible: false,
-  top: 0,
-  left: 0,
-  width: 0,
-  height: 0,
-  itemId: "",
-  zoneId: "",
-  color: "#6366f1",
-  animating: false,
-  dimmed: false,
-  level: "",
-  editing: false,
-  itemType: "",
-};
+const DEFAULT_COLOR = "#6366f1"; // indigo-500
 
 /**
  * Must be placed inside the scroll container.
@@ -67,132 +29,44 @@ const HIDDEN: OverlayState = {
  */
 export function BuilderCursor() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState<OverlayState>(HIDDEN);
   const prevItemRef = useRef<string | null>(null);
   const animatingUntilRef = useRef<number>(0);
 
-  const measure = useCallback(() => {
-    const container = containerRef.current?.parentElement;
-    if (!container) return;
-
-    const s = os.getState();
-    const zoneId = "canvas";
-    const zoneState = s.os.focus.zones[zoneId];
-    const itemId = zoneState?.lastFocusedId ?? null;
-    const isActive = s.os.focus.activeZoneId === zoneId;
-    const editingId = zoneState?.editingItemId ?? null;
-    const el = itemId ? findItemElement(zoneId, itemId) : null;
-
-    if (!el || !itemId) {
-      setState((prev) => (prev.visible ? HIDDEN : prev));
-      prevItemRef.current = null;
-      return;
-    }
-
-    const elRect = el.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-
-    if (elRect.width === 0 && elRect.height === 0) {
-      setState((prev) => (prev.visible ? HIDDEN : prev));
-      return;
-    }
-
-    const now = performance.now();
-
-    // Focus moved → start animation window
-    if (prevItemRef.current !== null && prevItemRef.current !== itemId) {
-      animatingUntilRef.current = now + 150;
-    }
-    prevItemRef.current = itemId;
-
-    // Animate if within the animation window
-    const animating = now < animatingUntilRef.current;
-
-    // Convert viewport coords to container-relative coords
-    const top = elRect.top - containerRect.top + container.scrollTop;
-    const left = elRect.left - containerRect.left + container.scrollLeft;
-
-    setState({
-      visible: true,
-      top,
-      left,
-      width: elRect.width,
-      height: elRect.height,
-      itemId,
-      zoneId,
-      color: getLevelColor(el),
-      animating,
-      dimmed: !isActive,
-      level: el.getAttribute("data-level") ?? "",
-      editing: editingId !== null,
-      itemType: el.getAttribute("data-builder-type") ?? "text",
-    });
-  }, []);
-
-  useEffect(() => {
-    const container = containerRef.current?.parentElement;
-    let ro: ResizeObserver | null = null;
-    let mo: MutationObserver | null = null;
-    let prevEl: HTMLElement | null = null;
-
-    const setupObservers = () => {
-      ro?.disconnect();
-      mo?.disconnect();
-      prevEl = null;
-
-      ro = new ResizeObserver(measure);
-      if (container) ro.observe(container);
-
-      // Observe the currently focused element
-      const s = os.getState();
+  // ── Derive focused element from OS state ──
+  const { el, itemId, isActive, editing, level, itemType } = os.useComputed(
+    (s) => {
       const zoneId = "canvas";
       const zoneState = s.os.focus.zones[zoneId];
-      const itemId = zoneState?.lastFocusedId;
+      const itemId = zoneState?.lastFocusedId ?? null;
       const el = itemId ? findItemElement(zoneId, itemId) : null;
-      if (el) {
-        ro.observe(el);
-        prevEl = el;
-      }
+      return {
+        el,
+        itemId,
+        isActive: s.os.focus.activeZoneId === zoneId,
+        editing: (zoneState?.editingItemId ?? null) !== null,
+        level: el?.getAttribute("data-level") ?? "",
+        itemType: el?.getAttribute("data-builder-type") ?? "text",
+      };
+    },
+  );
 
-      // MutationObserver for sibling/ancestor layout shifts
-      if (container) {
-        mo = new MutationObserver(measure);
-        mo.observe(container, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          attributeFilter: ["class", "style"],
-        });
-      }
-    };
+  // ── Track element position via pure React hook ──
+  const container = containerRef.current?.parentElement ?? null;
+  const rect = useElementRect(el, container);
 
-    // Subscribe to kernel state changes
-    const unsub = os.subscribe(() => {
-      const s = os.getState();
-      const zoneId = "canvas";
-      const zoneState = s.os.focus.zones[zoneId];
-      const newItemId = zoneState?.lastFocusedId ?? null;
-      const newEl = newItemId ? findItemElement(zoneId, newItemId) : null;
+  // ── Animation detection ──
+  const now = performance.now();
+  if (prevItemRef.current !== null && prevItemRef.current !== itemId) {
+    animatingUntilRef.current = now + 150;
+  }
+  prevItemRef.current = itemId;
+  const animating = now < animatingUntilRef.current;
 
-      if (newEl !== prevEl && ro) {
-        if (prevEl) ro.unobserve(prevEl);
-        if (newEl) ro.observe(newEl);
-        prevEl = newEl;
-      }
-      measure();
-    });
+  // ── Derived visual state ──
+  const color = LEVEL_COLORS[level] ?? DEFAULT_COLOR;
+  const dimmed = !isActive;
 
-    setupObservers();
-    measure();
-
-    return () => {
-      unsub();
-      ro?.disconnect();
-      mo?.disconnect();
-    };
-  }, [measure]);
-
-  if (!state.visible || state.level === "section") {
+  if (!rect || level === "section") {
     return (
       <div
         ref={containerRef}
@@ -217,24 +91,22 @@ export function BuilderCursor() {
       <div
         style={{
           position: "absolute",
-          top: state.top - pad,
-          left: state.left - pad,
-          width: state.width + pad * 2,
-          height: state.height + pad * 2,
-          border: state.editing
-            ? `2px solid #3b82f6`
-            : `2px solid ${state.color}`,
+          top: rect.top - pad,
+          left: rect.left - pad,
+          width: rect.width + pad * 2,
+          height: rect.height + pad * 2,
+          border: editing
+            ? "2px solid #3b82f6"
+            : `2px solid ${color}`,
           borderRadius: 4,
-          background: state.editing
+          background: editing
             ? "rgba(59, 130, 246, 0.04)"
-            : state.level === "section"
-              ? "transparent"
-              : `${state.color}10`,
-          boxShadow: state.editing
+            : `${color}10`,
+          boxShadow: editing
             ? "0 0 0 1px rgba(59, 130, 246, 0.3), 0 0 12px 2px rgba(59, 130, 246, 0.15)"
-            : `0 0 0 1px ${state.color}30`,
-          opacity: state.dimmed ? 0.4 : 1,
-          transition: state.animating
+            : `0 0 0 1px ${color}30`,
+          opacity: dimmed ? 0.4 : 1,
+          transition: animating
             ? "top 120ms ease-out, left 120ms ease-out, width 120ms ease-out, height 120ms ease-out"
             : "none",
         }}
@@ -245,7 +117,7 @@ export function BuilderCursor() {
             position: "absolute",
             top: -22,
             left: -2,
-            background: state.editing ? "#3b82f6" : state.color,
+            background: editing ? "#3b82f6" : color,
             color: "white",
             fontSize: 10,
             fontWeight: 700,
@@ -257,7 +129,7 @@ export function BuilderCursor() {
             letterSpacing: "0.02em",
           }}
         >
-          {state.editing ? `✏️ ${state.itemType}` : state.itemType}
+          {editing ? `✏️ ${itemType}` : itemType}
         </div>
       </div>
     </div>
