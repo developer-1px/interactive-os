@@ -1,4 +1,6 @@
-# Dialog Focus Trap Not Active After Delete
+# Dialog Focus Trap Not Active After Delete [Closed]
+
+**Resolution**: headless `simulateKeyPress`에 overlay focus trap guard 추가. overlay stack이 비어있지 않으면 ESC 외 모든 키 차단 — 브라우저의 `<dialog>.showModal()` 네이티브 focus trap과 동등.
 
 **Date**: 2026-02-21
 **Priority**: P1
