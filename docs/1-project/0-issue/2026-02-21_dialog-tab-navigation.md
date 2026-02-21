@@ -1,4 +1,6 @@
-# Dialog Buttons Not Focusable via Tab
+# Dialog Buttons Not Focusable via Tab [Closed]
+
+**Resolution**: Trigger.Dismiss를 FocusItem으로 감싸서 dialog 버튼이 OS 관리 대상이 됨. Tab trap 순회 + autoFocus 정상 작동.
 
 **Date**: 2026-02-21
 **Priority**: P1
