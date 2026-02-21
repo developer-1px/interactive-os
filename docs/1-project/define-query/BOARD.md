@@ -1,10 +1,12 @@
 # BOARD — define-query
 
 ## 🔴 Now
-- [ ] T5: `defineContext`/`defineQuery` 관계 정리 — 같은 provider 재사용?
-  - [ ] Step 9: /solve     ← Light 프리셋
+(없음)
 
 ## ⏳ Done
+- [x] T5: query→cofx 브릿지 (2026-02-21) — `07e8bb5`
+  - defineQuery가 자동으로 contextProvider 등록, 캐시 공유
+  - 2 bridge tests
 - [x] T2: `useQuery` React 훅 (2026-02-21) — `6b7143b`
   - useSyncExternalStore 기반, shallow 안정화, invalidateOn 연동
   - 4 unit tests
