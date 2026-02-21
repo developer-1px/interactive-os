@@ -163,6 +163,11 @@ export function createKernel<S>(initialState: S) {
       cachedValue: undefined,
       invalidated: false,
     });
+
+    // Also register as a context provider so ctx.inject() works too.
+    // This bridges query → cofx: one definition, two consumption paths.
+    contextProviders.set(id, () => resolveQuery(id));
+
     return { __id: id, __queryBrand: true } as QueryToken<Id, T>;
   }
 

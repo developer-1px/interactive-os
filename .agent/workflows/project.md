@@ -1,64 +1,50 @@
 ---
-description: Discussion 결론을 프로젝트로 전환한다. 관련 문서를 모아 프로젝트 폴더를 만들고, BOARD.md로 태스크를 관리한다.
+description: Discussion 결론을 프로젝트로 전환한다. 프로젝트 폴더를 scaffold하고, `/go` 프리셋을 라우팅한다.
 ---
 
 ## /project — 프로젝트 생애주기
 
-> **분류**: 오케스트레이터. `/go` 보편 사이클의 **Heavy 프리셋**을 따른다.
-> **이론적 기반**: PMBOK 5 Process Groups + Cynefin Framework
+> **분류**: 오케스트레이터. `/go` 프리셋 라우터.
+> **진입점**: `/discussion` 종료 → "새 프로젝트" 판정 시 자동 전환.
 
-### `/go` 보편 사이클과의 관계
-
-`/project`는 `/go`의 Heavy 프리셋이다. 16단계를 모두 실행한다.
-다만 첫 실행 시 프로젝트 폴더 생성과 BOARD.md 작성이 선행된다.
-
-### 프로젝트 초기화 (보편 사이클 진입 전)
-
-0. **Discussion 여부 확인** — `/discussion`을 거쳐 왔는가?
-   - ✅ 거쳤다 → Step 1로.
-   - ❌ 거치지 않았다 → **`/discussion`부터 시작한다.** 종료 후 돌아온다.
-1. **관련 문서 수집** — `docs/5-backlog/`, `docs/0-inbox/`에서 관련 문서 검색 → `discussions/`, `notes/`로 이동.
-2. **프로젝트 폴더 생성** — `docs/1-project/[프로젝트명]/` + `discussions/` + `notes/`
-3. **대시보드 갱신** — `docs/STATUS.md`에 프로젝트 추가.
-4. **README.md 작성** — WHY, Goals, Scope.
-5. **BOARD.md 작성** — PRD에서 태스크 도출.
-
-초기화 완료 후 `/go` Heavy 프리셋으로 보편 사이클 진입.
-
-### 프로젝트 폴더 표준 구조
+### 라우팅
 
 ```
-docs/1-project/[프로젝트명]/
-  README.md                        ← WHY, 목표, 범위 (필수)
-  BOARD.md                         ← Now / Done / Ideas (필수)
-  prd.md                           ← 요구사항 (Heavy 필수)
-  discussions/                     ← 사고 기록 누적
-  notes/                           ← 관련 참고 문서
+/project
+  ├─ discussion 미완료 → /discussion 진입 → 완료 후 /project 재진입
+  └─ discussion 완료 → 규모 판정 → scaffold → /go [preset] 자동 진입
 ```
 
-### BOARD.md 표준 포맷
+### 초기화
 
-```markdown
-# BOARD — [프로젝트명]
+0. **Discussion 판정** — 미완료 시 `/discussion` 진입. 완료 후 재진입.
+1. **규모 판정** — Heavy / Light 결정.
+2. **문서 수집** — `docs/0-inbox/`, `docs/5-backlog/`, `docs/4-archive/` 탐색 → `discussions/`, `notes/`로 이동.
+3. **Scaffold** — `docs/1-project/[name]/` 표준 구조 생성.
+4. **등록** — `docs/STATUS.md`에 프로젝트 추가.
+5. **README.md** — Rust RFC 포맷 (`rust-lang/rfcs/0000-template.md`).
+   Discussion 산출물(Warrant, Conclusion)을 Motivation의 입력으로 사용.
+   Heavy는 Detailed Design을 `prd.md`에 위임 가능.
+6. **BOARD.md** — Now / Done / Ideas. 태스크별 진척은 `/go` 상태 기록에 위임.
 
-## 🔴 Now
-- [ ] 태스크명 — 한 줄 설명
-  - [x] Step 5: /tdd
-  - [x] Step 6: /solve
-  - [ ] Step 7: /review     ← 다음 재개 지점
+초기화 완료 → `/go` [판정된 프리셋] 자동 진입.
 
-## ⏳ Done
-- [x] 태스크명 — 한 줄 설명 (완료일)
+### 표준 구조
 
-## 💡 Ideas
-- 아이디어 메모 (프로젝트 로컬 백로그)
+```
+docs/1-project/[name]/
+  README.md          ← Rust RFC (필수)
+  BOARD.md           ← Now / Done / Ideas (필수)
+  prd.md             ← PRD (Heavy 필수)
+  discussions/
+  notes/
 ```
 
-### 규모별 트랙
+### 규모 판정
 
-| 규모 | 판단 기준 | 필수 문서 | 선택 문서 |
-|------|----------|----------|----------|
-| **Heavy** | 아키텍처 변경, 새 시스템 도입 | README + BOARD + PRD | Proposal |
-| **Light** | 작은 기능, 리팩토링, 수정 | README + BOARD | — |
+| 규모 | 기준 | 필수 |
+|------|------|------|
+| **Heavy** | 아키텍처 변경, 새 primitive | README + BOARD + PRD |
+| **Light** | 기능, 리팩토링, 버그 | README + BOARD |
 
-- 의심스러우면 **Light로 시작**하고, 필요 시 문서를 추가한다.
+Default: Light. 필요 시 escalate.

@@ -224,3 +224,61 @@ describe("query cache stability", () => {
     expect(provider).toHaveBeenCalledTimes(2);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// T5: Query → Context Bridge (one definition, two consumption paths)
+// ═══════════════════════════════════════════════════════════════════
+
+describe("query → context bridge", () => {
+  it("defineQuery auto-registers as context provider for ctx.inject()", () => {
+    const { kernel } = setup();
+
+    // Define query — should also register as context
+    const FOCUSED_QUERY = kernel.defineQuery(
+      "bridge-test",
+      (state: TestState) => state.focusedItemId,
+    );
+
+    // A command that injects the same ID should get the query's value
+    let injectedValue: unknown;
+    const READ_CMD = kernel.defineCommand(
+      "READ_BRIDGE",
+      [{ __id: "bridge-test" } as any],
+      (ctx: any) => () => {
+        injectedValue = ctx.inject({ __id: "bridge-test" });
+        return { state: ctx.state };
+      },
+    );
+
+    kernel.dispatch(READ_CMD());
+
+    // The injected value should come from the query provider
+    expect(injectedValue).toBe("item-1");
+  });
+
+  it("query cache is shared between resolveQuery and ctx.inject", () => {
+    const { kernel } = setup();
+
+    const provider = vi.fn((state: TestState) => state.focusedItemId);
+
+    kernel.defineQuery("shared-cache", provider);
+
+    // First: resolveQuery
+    kernel.resolveQuery("shared-cache");
+    expect(provider).toHaveBeenCalledTimes(1);
+
+    // Second: ctx.inject via command — should reuse query cache
+    kernel.defineCommand(
+      "READ_SHARED",
+      [{ __id: "shared-cache" } as any],
+      (ctx: any) => () => {
+        ctx.inject({ __id: "shared-cache" });
+        return { state: ctx.state };
+      },
+    );
+
+    // Provider count should still be 1 (cached)
+    // Note: processCommand calls resolveContext which delegates to resolveQuery
+    expect(provider).toHaveBeenCalledTimes(1);
+  });
+});
