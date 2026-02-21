@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 10:12
+> Last updated: 2026-02-21 10:59
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**builder-v2** — T14 블록 추가 UI + 프리셋
+**query-adoption** — BuilderCursor DOM 리팩토링
 
 ---
 
@@ -76,6 +76,9 @@
 
 ## 📝 Recent Changes (2026-02-21)
 
+- 🏗️ `6-products/` 체계 수립 — Product(ongoing) vs Project(bounded) 분리. `/archive` 워크플로우에 Product 에스컬레이션 추가.
+- 📄 `6-products/builder/VISION.md` — Visual CMS Product Vision Board 작성 (빌더가 아니라 Visual CMS임을 확인)
+- 🔧 `query-adoption` BuilderCursor 리팩토링 — useElementRect 훅 추출 (266→140줄), block metadata를 state에서 읽기, findBlockInfo 모델 유틸 분리. 13 new tests.
 - ✅ `define-query` 완료 — T1(defineQuery+resolveQuery+QueryToken+invalidateOn), T2(useQuery React hook), T5(query→cofx bridge). 커널 4번째 primitive 확립. 16 unit tests.
 - 🧹 `/para`: Inbox 13건→0건. define-query/builder-usage-cleanup/apg-testing-rebalance/field-compound → Completed.
 - 🆕 `define-query` 프로젝트 생성 — /doubt(DOM API 전수 조사) + /discussion에서 커널의 빠진 네 번째 primitive 발견. re-frame cofx/sub 사이의 빈칸 = `defineQuery`. 동기/비동기 범용 외부 데이터 구독.

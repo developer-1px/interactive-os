@@ -58,11 +58,12 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 
 #### 3. 지식 분배 (핵심)
 
-프로젝트의 모든 문서를 하나씩 검토하고 **3갈래 라우팅**:
+프로젝트의 모든 문서를 하나씩 검토하고 **4갈래 라우팅**:
 
 | 판단 기준 | 행선지 | 예시 |
 |-----------|--------|------|
 | **시점 독립 원칙/스펙** | `official/` 갱신 또는 `rules.md` 추가 | 커맨드 동작 스펙, 아키텍처 원칙 |
+| **Product에 귀속되는 검증된 결정** | `6-products/[name]/` 에스컬레이션 | 기능 스펙, 디자인 결정, 인터랙션 정의 |
 | **아직 성숙 안 된 지식** | `2-area/` 잔류 (인큐베이터) | 초기 설계, 미확정 패턴 |
 | **그 외 전부** | `archive/YYYY/MM/WNN/` 매장 | BOARD, discussions, 보고서, 분석 |
 
@@ -73,11 +74,19 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 - 새 원칙이 발견됐으면 → `.agent/rules.md`에 추가
 - 핵심: official은 **개념 단위**로 존재, 날짜 없음, 코드 토폴로지와 동형
 
-**b) Area 잔류 (인큐베이터)**
+**b) Product 에스컬레이션 (검증된 프로덕트 지식)**
+- 프로젝트가 `6-products/` 내 Product에 귀속되는지 확인
+- 귀속되면, 프로젝트에서 검증된 **기능 스펙, 디자인 결정, 인터랙션 정의**를 Product 폴더에 환류:
+  - 기능 동작 방식 → `6-products/[name]/spec/`
+  - UI/UX 결정과 근거 → `6-products/[name]/design/`
+  - VISION.md의 Now/Next/Later 갱신
+- 핵심: **추측이 아닌 검증된 결정만** 에스컬레이션한다. 코드로 구현되고 테스트를 통과한 것만.
+
+**c) Area 잔류 (인큐베이터)**
 - 아직 official로 졸업시킬 만큼 성숙하지 않은 지식
 - cross-cutting standards, 미확정 설계 등
 
-**c) Archive 매장 (죽은 문서)**
+**d) Archive 매장 (죽은 문서)**
 - BOARD.md, discussions, 진행 기록, 분석 보고서 — 전부
 - `archive/YYYY/MM/WNN/`에 주차별로 이동 (프로젝트 이름은 폴더 없이 flat)
 - 주차 계산: `python3 -c "from datetime import date; d=date.today(); print(f'W{d.isocalendar()[1]:02d}')"`
