@@ -58,7 +58,7 @@ export function readActiveZoneId(kernel: HeadlessKernel): string | null {
     return kernel.getState().os.focus.activeZoneId;
 }
 
-export function readZone(kernel: HeadlessKernel, zoneId?: string) {
+function readZone(kernel: HeadlessKernel, zoneId?: string) {
     const id = zoneId ?? readActiveZoneId(kernel);
     return id ? kernel.getState().os.focus.zones[id] : undefined;
 }
