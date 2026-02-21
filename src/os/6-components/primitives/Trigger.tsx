@@ -19,6 +19,7 @@ import {
   OS_OVERLAY_OPEN,
 } from "@os/3-commands/overlay/overlay";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Zone } from "@os/6-components/primitives/Zone";
 import { os } from "@os/kernel.ts";
 import type { OverlayEntry } from "@os/state/OSState.ts";
 import type {
@@ -302,6 +303,10 @@ function TriggerPortal({
 
   if (!isOpen) return null;
 
+  // Determine Zone role from overlay type (dialog, alertdialog, etc.)
+  // The role preset provides autoFocus, tab trap, and escape dismiss behavior.
+  const zoneRole = _overlayType ?? "dialog";
+
   return (
     <OverlayContext.Provider value={{ overlayId }}>
       <dialog
@@ -311,21 +316,27 @@ function TriggerPortal({
         aria-label={title}
         aria-describedby={description ? `${overlayId}-desc` : undefined}
       >
-        <div
-          className={`os-modal-content${contentClassName ? ` ${contentClassName}` : ""}`}
+        <Zone
+          id={overlayId}
+          role={zoneRole as any}
+          onDismiss={OS_OVERLAY_CLOSE({ id: overlayId })}
         >
-          {title && (
-            <div className="sr-only" id={`${overlayId}-title`}>
-              {title}
-            </div>
-          )}
-          {description && (
-            <div className="sr-only" id={`${overlayId}-desc`}>
-              {description}
-            </div>
-          )}
-          {children}
-        </div>
+          <div
+            className={`os-modal-content${contentClassName ? ` ${contentClassName}` : ""}`}
+          >
+            {title && (
+              <div className="sr-only" id={`${overlayId}-title`}>
+                {title}
+              </div>
+            )}
+            {description && (
+              <div className="sr-only" id={`${overlayId}-desc`}>
+                {description}
+              </div>
+            )}
+            {children}
+          </div>
+        </Zone>
       </dialog>
     </OverlayContext.Provider>
   );
