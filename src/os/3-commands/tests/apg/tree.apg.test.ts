@@ -6,8 +6,8 @@
  * Unique: ArrowRight/Left expand/collapse, leaf no-expand,
  *         Enter activates (does NOT expand)
  *
- * Uses createTestOsKernel for full pipeline testing:
- *   pressKey → resolveKeyboard → command → state → attrs
+ * Uses createOsPage for full pipeline testing:
+ *   keyboard.press → resolveKeyboard → command → state → attrs
  */
 
 import { describe, expect, it } from "vitest";

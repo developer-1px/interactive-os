@@ -18,7 +18,7 @@
 
 import { describe, expect, it } from "vitest";
 import { resolveItemId, resolveSelection } from "../../../state/resolve";
-import { createTestOsKernel } from "../integration/helpers/createTestOsKernel";
+import { createOsPage } from "@os/createOsPage";
 
 // ─── Config ───
 
@@ -43,7 +43,7 @@ const LIST_CONFIG = {
 };
 
 function createList(focusedItem = "a") {
-  const t = createTestOsKernel();
+  const t = createOsPage();
   t.setItems(ITEMS);
   t.setConfig(LIST_CONFIG);
   t.setActiveZone("list", focusedItem);
@@ -90,7 +90,7 @@ describe("OS Guarantee §1: Delete + Focus Recovery (Lazy Resolution)", () => {
 
   // §1.3 — 유일한 아이템 삭제 → stale pointer, null resolve
   it("§1.3: delete only item → resolveItemId returns null", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["solo"]);
     t.setConfig(LIST_CONFIG);
     t.setActiveZone("list", "solo");
@@ -271,7 +271,7 @@ describe("OS Guarantee §7: Field (Edit Mode)", () => {
 
   // §7: 포커스 없으면 진입 불가
   it("no focused item → OS_FIELD_START_EDIT is no-op", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(ITEMS);
     t.setConfig(LIST_CONFIG);
     t.setActiveZone("list", null);

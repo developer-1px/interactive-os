@@ -13,7 +13,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createTestOsKernel } from "./helpers/createTestOsKernel";
+import { createOsPage } from "@os/createOsPage";
 
 // ═══════════════════════════════════════════════════════════════════
 // Focus (Mouse Click Simulation)
@@ -23,7 +23,7 @@ describe("OS_FOCUS — Headless Kernel Integration", () => {
   // ─── Basic Focus ───
 
   it("click on item: sets focusedItemId and activeZoneId", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["item-a", "item-b", "item-c"]);
     t.initZone("list");
 
@@ -34,7 +34,7 @@ describe("OS_FOCUS — Headless Kernel Integration", () => {
   });
 
   it("click on different item: moves focus within zone", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["item-a", "item-b", "item-c"]);
     t.setActiveZone("list", "item-a");
 
@@ -45,7 +45,7 @@ describe("OS_FOCUS — Headless Kernel Integration", () => {
   });
 
   it("click on item in different zone: activates new zone", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setActiveZone("list", "item-a");
     t.initZone("sidebar");
 
@@ -58,7 +58,7 @@ describe("OS_FOCUS — Headless Kernel Integration", () => {
   });
 
   it("zone-only click (null itemId): activates zone without focusing item", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.initZone("empty-zone");
 
     t.dispatch(t.OS_FOCUS({ zoneId: "empty-zone", itemId: null }));
@@ -68,7 +68,7 @@ describe("OS_FOCUS — Headless Kernel Integration", () => {
   });
 
   it("lastFocusedId is updated on focus", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setActiveZone("list", "item-a");
     t.setItems(["item-a", "item-b", "item-c"]);
 
@@ -80,7 +80,7 @@ describe("OS_FOCUS — Headless Kernel Integration", () => {
   // ─── OS_SYNC_FOCUS (focusin simulation) ───
 
   it("OS_SYNC_FOCUS: updates state from external focus event", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.initZone("list");
 
     t.dispatch(t.OS_SYNC_FOCUS({ id: "item-c", zoneId: "list" }));
@@ -91,7 +91,7 @@ describe("OS_FOCUS — Headless Kernel Integration", () => {
   });
 
   it("OS_SYNC_FOCUS on different zone: switches active zone", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setActiveZone("list", "item-a");
     t.initZone("toolbar");
 
@@ -108,7 +108,7 @@ describe("OS_FOCUS — Headless Kernel Integration", () => {
 
 describe("OS_FOCUS + OS_SELECT — Mouse Click Pipeline", () => {
   it("click: OS_FOCUS + OS_SELECT(replace) → focus + selection set", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["item-a", "item-b", "item-c"]);
     t.setActiveZone("list", "item-a");
     t.setConfig({
@@ -130,7 +130,7 @@ describe("OS_FOCUS + OS_SELECT — Mouse Click Pipeline", () => {
   });
 
   it("click second item: selection moves (replace mode)", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["item-a", "item-b", "item-c"]);
     t.setActiveZone("list", "item-a");
     t.setConfig({
@@ -157,7 +157,7 @@ describe("OS_FOCUS + OS_SELECT — Mouse Click Pipeline", () => {
   });
 
   it("Cmd+click: toggle selection (multi-select)", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["item-a", "item-b", "item-c"]);
     t.setActiveZone("list", "item-a");
     t.setConfig({
@@ -182,7 +182,7 @@ describe("OS_FOCUS + OS_SELECT — Mouse Click Pipeline", () => {
   });
 
   it("Cmd+click toggle: deselects already-selected item", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["item-a", "item-b", "item-c"]);
     t.setActiveZone("list", "item-a");
     t.setConfig({
@@ -209,7 +209,7 @@ describe("OS_FOCUS + OS_SELECT — Mouse Click Pipeline", () => {
   });
 
   it("Shift+click: range selection", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["item-a", "item-b", "item-c", "item-d", "item-e"]);
     t.setActiveZone("list", "item-b");
     t.setConfig({
@@ -233,7 +233,7 @@ describe("OS_FOCUS + OS_SELECT — Mouse Click Pipeline", () => {
   });
 
   it("cross-zone click: clears previous zone selection", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["item-a", "item-b"]);
     t.setActiveZone("list", "item-a");
     t.setConfig({
@@ -268,7 +268,7 @@ describe("OS_FOCUS + OS_SELECT — Mouse Click Pipeline", () => {
 
 describe("Focus Journey — Multi-Zone Tab + Click", () => {
   it("click zone A → Tab to zone B → click zone A: restores focus", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
 
     // Setup 2 zones
     const zones = [
@@ -313,7 +313,7 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
   });
 
   it("Tab round-trip: A → B → A (2 zones, wrap)", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     const zones = [
       {
         zoneId: "main",
@@ -350,7 +350,7 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
   });
 
   it("Shift+Tab: reverse direction", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     const zones = [
       {
         zoneId: "a",
@@ -397,7 +397,7 @@ describe("Focus Journey — Multi-Zone Tab + Click", () => {
 
 describe("OS_FOCUS — Zone Re-entry Restore", () => {
   it("zone re-entry with itemId=null restores lastFocusedId", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "b");
 
@@ -418,7 +418,7 @@ describe("OS_FOCUS — Zone Re-entry Restore", () => {
   });
 
   it("zone re-entry: no lastFocusedId → focusedItemId stays null", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["a", "b", "c"]);
     t.initZone("list"); // zone state initialized but never focused
 
@@ -434,7 +434,7 @@ describe("OS_FOCUS — Zone Re-entry Restore", () => {
   });
 
   it("zone re-entry restores after multiple focus changes", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "a");
 
@@ -453,7 +453,7 @@ describe("OS_FOCUS — Zone Re-entry Restore", () => {
   });
 
   it("explicit itemId overrides restore (not null = direct focus)", () => {
-    const t = createTestOsKernel();
+    const t = createOsPage();
     t.setItems(["a", "b", "c"]);
     t.setActiveZone("list", "c");
 

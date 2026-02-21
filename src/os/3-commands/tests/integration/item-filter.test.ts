@@ -8,13 +8,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { ZoneRegistry } from "../../../2-contexts/zoneRegistry";
 import { DEFAULT_CONFIG } from "../../../schemas/focus/config/FocusGroupConfig";
-import { createTestOsKernel } from "./helpers/createTestOsKernel";
+import { createOsPage } from "@os/createOsPage";
 
 describe("itemFilter — dynamic item filtering", () => {
-  let t: ReturnType<typeof createTestOsKernel>;
+  let t: ReturnType<typeof createOsPage>;
 
   beforeEach(() => {
-    t = createTestOsKernel();
+    t = createOsPage();
   });
 
   it("OS_NAVIGATE traverses only filtered items when itemFilter is set", () => {
