@@ -34,6 +34,27 @@ export interface Block {
   accept?: string[];
 }
 
+export type BuilderLevel = "section" | "group" | "item";
+
+/** Find a block by id in the tree and return its type + depth-based level. */
+export function findBlockInfo(
+  blocks: Block[],
+  targetId: string,
+  depth = 0,
+): { type: string; level: BuilderLevel } | null {
+  const LEVELS: BuilderLevel[] = ["section", "group", "item"];
+  for (const block of blocks) {
+    if (block.id === targetId) {
+      return { type: block.type, level: LEVELS[Math.min(depth, 2)]! };
+    }
+    if (block.children) {
+      const found = findBlockInfo(block.children, targetId, depth + 1);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 interface HistoryEntry {
   command: { type: string; payload?: unknown };
   timestamp: number;
