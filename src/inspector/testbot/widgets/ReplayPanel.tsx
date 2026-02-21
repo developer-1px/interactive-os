@@ -27,7 +27,15 @@ import {
     type VisualStep,
 } from "../features/createVisualTestKit";
 import { registry } from "../playwright/registry";
-import { setVisualObserver } from "@os/3-commands/tests/integration/helpers/visualObserver";
+
+// Visual observer — legacy API, will be replaced by AppPage-based replay
+interface VisualObserver {
+    onPressKey(key: string): void;
+    onClick(itemId: string): void;
+    onAssert(label: string, passed: boolean, error?: string): void;
+    delay(): Promise<void>;
+}
+const setVisualObserver = (_observer: VisualObserver | null) => { };
 
 // ═══════════════════════════════════════════════════════════════════
 // Test file registry — import real test files here
@@ -150,7 +158,7 @@ export function ReplayPanel() {
                     type: "assert",
                     label,
                     passed,
-                    error,
+                    ...(error ? { error } : {}),
                     snapshot: JSON.parse(JSON.stringify(os.getState())),
                     timestamp: Date.now(),
                 });
@@ -209,7 +217,7 @@ export function ReplayPanel() {
                     type: "assert",
                     label,
                     passed,
-                    error,
+                    ...(error ? { error } : {}),
                     snapshot: JSON.parse(JSON.stringify(os.getState())),
                     timestamp: Date.now(),
                 });

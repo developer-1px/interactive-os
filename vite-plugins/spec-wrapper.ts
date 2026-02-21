@@ -25,10 +25,11 @@ export function specWrapperPlugin(): Plugin {
     enforce: "pre",
 
     transform(code, id) {
-      // Handle both .spec.ts and .apg.test.ts
+      // Handle .spec.ts, .apg.test.ts, and .bdd.test.ts
       const isSpec = id.endsWith(".spec.ts");
       const isApgTest = id.includes(".apg.test.ts");
-      if (!isSpec && !isApgTest) return null;
+      const isBddTest = id.includes(".bdd.test.ts");
+      if (!isSpec && !isApgTest && !isBddTest) return null;
 
       // Skip specs that use Node.js APIs (e.g. smoke.spec.ts) — they are
       // Playwright-only and cannot be bundled for the browser / TestBot.
@@ -45,7 +46,8 @@ export function specWrapperPlugin(): Plugin {
       // e.g. "/Users/.../tests/apg/tree.apg.test.ts" → "tests/apg/tree.apg.test.ts"
       const e2eIndex = id.indexOf("e2e/");
       const apgIndex = id.indexOf("tests/apg/");
-      const cutIndex = apgIndex >= 0 ? apgIndex : e2eIndex;
+      const bddIndex = id.indexOf("tests/integration/");
+      const cutIndex = bddIndex >= 0 ? bddIndex : apgIndex >= 0 ? apgIndex : e2eIndex;
       const relativePath = cutIndex >= 0 ? id.slice(cutIndex) : id;
 
       const lines = code.split("\n");
