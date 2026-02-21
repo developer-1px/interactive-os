@@ -16,6 +16,8 @@ import { ListView } from "@apps/todo/widgets/ListView";
 import { createPage } from "@os/defineApp.page";
 import type { AppPage } from "@os/defineApp.types";
 import { OS_OVERLAY_OPEN, OS_OVERLAY_CLOSE } from "@os/3-commands/overlay/overlay";
+import { OS_STACK_PUSH } from "@os/3-commands/focus/stack";
+import { OS_FOCUS } from "@os/3-commands/focus/focus";
 import { os } from "@/os/kernel";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];
@@ -85,5 +87,25 @@ describe("Dialog Focus Trap", () => {
         // ArrowDown should work again
         page.keyboard.press("ArrowDown");
         expect(page.focusedItemId()).toBe(b);
+    });
+
+    it("autoFocus must activate dialog zone even without FocusItems", () => {
+        const [a] = addTodos("First");
+        page.goto("list", {
+            items: ["DRAFT", a!],
+            focusedItemId: a!,
+        });
+
+        expect(page.activeZoneId()).toBe("list");
+
+        // Simulate what FocusGroup (after fix) does for dialog with autoFocus:
+        // 1. STACK_PUSH — saves current zone for later restoration
+        page.dispatch(OS_STACK_PUSH());
+        // 2. autoFocus finds no [data-focus-item] → dispatches OS_FOCUS(zoneId, null)
+        //    This is the fix: previously it did nothing when no item found
+        page.dispatch(OS_FOCUS({ zoneId: "todo-delete-dialog", itemId: null }));
+
+        // activeZoneId must now be the dialog zone
+        expect(page.activeZoneId()).toBe("todo-delete-dialog");
     });
 });

@@ -356,6 +356,10 @@ export function FocusGroup({
         if (itemId) {
           os.dispatch(OS_FOCUS({ zoneId: groupId, itemId }));
         }
+      } else {
+        // No focusable items (e.g., dialog with only buttons, not FocusItems).
+        // Still activate the zone to transfer activeZoneId.
+        os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: null }));
       }
     });
     return () => cancelAnimationFrame(raf);
