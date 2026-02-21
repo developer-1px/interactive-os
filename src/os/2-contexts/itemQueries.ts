@@ -1,13 +1,41 @@
-/**
- * Item Queries — OS-level DOM abstractions for item hierarchy.
- *
- * The DOM tree already encodes parent-child relationships between items.
- * These utilities expose that structure as data, so apps never touch DOM.
- *
- * Rule: DOM은 OS에서만 읽는다. 앱은 이 API만 사용한다.
- */
-
 import { ZoneRegistry } from "./zoneRegistry";
+
+// ═══════════════════════════════════════════════════════════════════
+// findItemElement — Zone-scoped element lookup (single source)
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Find the DOM element for an item, scoped to the active zone first.
+ *
+ * When the same entity id appears in multiple zones (e.g., sidebar + canvas),
+ * this resolves to the correct element by searching within the given zone's
+ * container. Falls back to document-global lookup.
+ *
+ * This is the single canonical implementation — used by:
+ * - 4-effects (focus, scroll)
+ * - defineQuery providers (FOCUSED_ELEMENT)
+ */
+export function findItemElement(
+  zoneId: string | null,
+  itemId: string,
+): HTMLElement | null {
+  const zoneEl = zoneId ? ZoneRegistry.get(zoneId)?.element : null;
+
+  // 1. Zone-scoped: look inside the zone container first
+  if (zoneEl) {
+    const scoped = zoneEl.querySelector<HTMLElement>(
+      `[data-item-id="${itemId}"]`,
+    );
+    if (scoped) return scoped;
+  }
+
+  // 2. Fallback: document-global
+  return (
+    (document.querySelector(
+      `[data-item-id="${itemId}"]`,
+    ) as HTMLElement | null) ?? document.getElementById(itemId)
+  );
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // Item Attribute Query

@@ -10,23 +10,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ZoneRegistry } from "@/os/2-contexts/zoneRegistry";
+import { findItemElement } from "@/os/2-contexts/itemQueries";
 import { os } from "@/os/kernel";
-
-/** Zone-scoped element lookup: searches within active zone container first. */
-function findItemInZone(
-  zoneId: string | null,
-  itemId: string,
-): HTMLElement | null {
-  const zoneEl = zoneId ? ZoneRegistry.get(zoneId)?.element : null;
-  if (zoneEl) {
-    const scoped = zoneEl.querySelector<HTMLElement>(
-      `[data-item-id="${itemId}"]`,
-    );
-    if (scoped) return scoped;
-  }
-  return document.getElementById(itemId);
-}
 
 // ── Color palette for Builder levels ──
 const LEVEL_COLORS = {
@@ -96,7 +81,7 @@ export function BuilderCursor() {
     const itemId = zoneState?.lastFocusedId ?? null;
     const isActive = s.os.focus.activeZoneId === zoneId;
     const editingId = zoneState?.editingItemId ?? null;
-    const el = itemId ? findItemInZone(zoneId, itemId) : null;
+    const el = itemId ? findItemElement(zoneId, itemId) : null;
 
     if (!el || !itemId) {
       setState((prev) => (prev.visible ? HIDDEN : prev));
@@ -163,7 +148,7 @@ export function BuilderCursor() {
       const zoneId = "canvas";
       const zoneState = s.os.focus.zones[zoneId];
       const itemId = zoneState?.lastFocusedId;
-      const el = itemId ? findItemInZone(zoneId, itemId) : null;
+      const el = itemId ? findItemElement(zoneId, itemId) : null;
       if (el) {
         ro.observe(el);
         prevEl = el;
@@ -187,7 +172,7 @@ export function BuilderCursor() {
       const zoneId = "canvas";
       const zoneState = s.os.focus.zones[zoneId];
       const newItemId = zoneState?.lastFocusedId ?? null;
-      const newEl = newItemId ? findItemInZone(zoneId, newItemId) : null;
+      const newEl = newItemId ? findItemElement(zoneId, newItemId) : null;
 
       if (newEl !== prevEl && ro) {
         if (prevEl) ro.unobserve(prevEl);
