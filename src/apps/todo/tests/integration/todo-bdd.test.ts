@@ -225,16 +225,17 @@ describe("§1.3 List: 키보드 액션", () => {
         expect(page.state.ui.editingId).toBe(a);
     });
 
-    it("Backspace — 삭제 다이얼로그 (onDelete)", () => {
+    it("Backspace — onDelete → pendingDeleteIds 설정", () => {
         const [a] = addTodos("Delete me");
         gotoList(a);
 
         page.keyboard.press("Backspace");
 
+        // headless: state 변경만 검증 (Dialog 렌더링은 React 계층)
         expect(page.state.ui.pendingDeleteIds).toContain(a);
     });
 
-    it("Delete — 삭제 다이얼로그 (onDelete)", () => {
+    it("Delete — onDelete → pendingDeleteIds 설정 (Backspace와 동일)", () => {
         const [a] = addTodos("Delete me");
         gotoList(a);
 
@@ -243,7 +244,7 @@ describe("§1.3 List: 키보드 액션", () => {
         expect(page.state.ui.pendingDeleteIds).toContain(a);
     });
 
-    it("다중 선택 후 Backspace — 배치 삭제", () => {
+    it("다중 선택 후 Backspace — 배치 pendingDeleteIds", () => {
         const [a, b, c] = addTodos("A", "B", "C");
         gotoList(a);
 
@@ -500,7 +501,18 @@ describe("§ARIA: 리스트 속성", () => {
 
         // The app state should reflect completed
         expect(page.state.data.todos[a!]?.completed).toBe(true);
-        // Note: aria-checked is derived from onCheck handler on the zone,
-        // which may or may not be projected in headless attrs.
     });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// §DOM: 커맨드 결과의 DOM 투영 검증
+// React는 테스트 대상이 아니라, OS 커맨드 결과를 DOM으로 확인하는 프로젝터.
+// render(createElement(ListView)) → screen.queryByRole("alertdialog")
+// ═══════════════════════════════════════════════════════════════════
+
+describe("§DOM: 커맨드 결과의 DOM 투영 검증", () => {
+    // BUG FOUND: pendingDeleteIds는 설정되지만 alertdialog가 DOM에 안 뜸.
+    // Trigger 컴포넌트가 overlay state를 읽어 렌더하는 경로에 문제가 있거나,
+    // headless에서 OS_OVERLAY_OPEN이 overlay state에 반영되지 않음.
+    it.todo("Backspace → alertdialog가 DOM에 존재한다");
 });
