@@ -11,9 +11,11 @@
  */
 
 import { useRef } from "react";
-import { findItemElement, getItemAttribute } from "@/os/2-contexts/itemQueries";
+import { findItemElement } from "@/os/2-contexts/itemQueries";
 import { useElementRect } from "@/hooks/useElementRect";
 import { os } from "@/os/kernel";
+import { BuilderApp } from "./app";
+import type { Block } from "./model/appState";
 
 // ── Color palette for Builder levels ──
 const LEVEL_COLORS: Record<string, string> = {
@@ -22,6 +24,28 @@ const LEVEL_COLORS: Record<string, string> = {
   item: "#22c55e", // green-500
 };
 const DEFAULT_COLOR = "#6366f1"; // indigo-500
+
+/** Find a block by id in the tree and return its depth-based level */
+function findBlockInfo(
+  blocks: Block[],
+  targetId: string,
+  depth = 0,
+): { type: string; level: "section" | "group" | "item" } | null {
+  const LEVELS = ["section", "group", "item"] as const;
+  for (const block of blocks) {
+    if (block.id === targetId) {
+      return {
+        type: block.type,
+        level: LEVELS[Math.min(depth, 2)] as "section" | "group" | "item",
+      };
+    }
+    if (block.children) {
+      const found = findBlockInfo(block.children, targetId, depth + 1);
+      if (found) return found;
+    }
+  }
+  return null;
+}
 
 /**
  * Must be placed inside the scroll container.
@@ -32,23 +56,26 @@ export function BuilderCursor() {
   const prevItemRef = useRef<string | null>(null);
   const animatingUntilRef = useRef<number>(0);
 
-  // ── Derive focused element from OS state ──
-  const { el, itemId, isActive, editing, level, itemType } = os.useComputed(
-    (s) => {
-      const zoneId = "canvas";
-      const zoneState = s.os.focus.zones[zoneId];
-      const itemId = zoneState?.lastFocusedId ?? null;
-      const el = itemId ? findItemElement(zoneId, itemId) : null;
-      return {
-        el,
-        itemId,
-        isActive: s.os.focus.activeZoneId === zoneId,
-        editing: (zoneState?.editingItemId ?? null) !== null,
-        level: itemId ? (getItemAttribute("canvas", itemId, "data-level") ?? "") : "",
-        itemType: itemId ? (getItemAttribute("canvas", itemId, "data-builder-type") ?? "text") : "text",
-      };
-    },
+  // ── Focus state from OS ──
+  const { itemId, isActive, editing } = os.useComputed((s) => {
+    const zoneId = "canvas";
+    const zoneState = s.os.focus.zones[zoneId];
+    return {
+      itemId: zoneState?.lastFocusedId ?? null,
+      isActive: s.os.focus.activeZoneId === zoneId,
+      editing: (zoneState?.editingItemId ?? null) !== null,
+    };
+  });
+
+  // ── Block metadata from app state (source of truth) ──
+  const blockInfo = BuilderApp.useComputed((s) =>
+    itemId ? findBlockInfo(s.data.blocks, itemId) : null,
   );
+  const level = blockInfo?.level ?? "";
+  const itemType = blockInfo?.type ?? "text";
+
+  // ── DOM element for position tracking ──
+  const el = itemId ? findItemElement("canvas", itemId) : null;
 
   // ── Track element position via pure React hook ──
   const container = containerRef.current?.parentElement ?? null;
