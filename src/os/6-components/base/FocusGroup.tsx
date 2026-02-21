@@ -286,12 +286,15 @@ export function FocusGroup({
   // --- Container Ref ---
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // --- Register in ZoneRegistry + init kernel state ---
-  useLayoutEffect(() => {
-    // Init kernel state for this zone
+  // --- Init kernel state (render-time, idempotent) ---
+  // Runs during render so it works in both browser AND renderToString.
+  // INIT_ZONE is a no-op if zone already exists: `if (zones[zoneId]) return;`
+  useMemo(() => {
     os.dispatch(INIT_ZONE(groupId));
+  }, [groupId]);
 
-    // Register in ZoneRegistry (for context providers)
+  // --- Register in ZoneRegistry (DOM required) ---
+  useLayoutEffect(() => {
     if (containerRef.current) {
       ZoneRegistry.register(
         groupId,
