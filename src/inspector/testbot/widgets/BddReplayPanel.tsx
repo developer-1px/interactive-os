@@ -1,16 +1,30 @@
 /**
- * BddReplayPanel — Run BDD test files in the browser and show results.
+ * BddReplayPanel — Run BDD test files in the browser, record interactions, replay.
  *
  * Architecture:
  *   1. Dynamic import test file → spec-wrapper wraps as __runSpec__()
  *   2. __runSpec__() calls vitest shim → describe/it register into registry
- *   3. Walk registry tree, execute each test with beforeEach hooks
- *   4. Collect pass/fail results
- *   5. Display structured results
+ *   3. Set interaction observer → simulateKeyPress/Click record snapshots
+ *   4. Walk registry, execute each test with beforeEach hooks
+ *   5. Display results + interaction timeline with replay
  */
 
-import { CheckCircle2, Play, RotateCcw, XCircle } from "lucide-react";
+import {
+    CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
+    Keyboard,
+    MousePointer2,
+    Play,
+    RotateCcw,
+    Square,
+    XCircle,
+} from "lucide-react";
 import { useCallback, useState } from "react";
+import {
+    type InteractionRecord,
+    setInteractionObserver,
+} from "@os/headless";
 import {
     clearEntriesForFile,
     getEntriesByFile,
@@ -26,6 +40,8 @@ interface TestResult {
     status: "pass" | "fail" | "idle";
     error?: string;
     duration: number;
+    /** Interaction records captured during this test */
+    records: InteractionRecord[];
 }
 
 // ── Test file catalog ──
@@ -38,7 +54,7 @@ const TEST_FILES = [
     },
 ];
 
-// ── Execute tests from registry ──
+// ── Execute tests from registry with recording ──
 
 function executeRegistryTests(sourceFile: string): TestResult[] {
     const results: TestResult[] = [];
@@ -51,6 +67,10 @@ function executeRegistryTests(sourceFile: string): TestResult[] {
                 runEntry(child, entry.name, hooks);
             }
         } else if (entry.type === "test") {
+            // Collect interaction records for this test
+            const records: InteractionRecord[] = [];
+            setInteractionObserver((record) => records.push(record));
+
             // Run beforeEach hooks
             for (const hook of parentBeforeEach) {
                 try { hook(); } catch { /* swallow hook errors */ }
@@ -64,6 +84,7 @@ function executeRegistryTests(sourceFile: string): TestResult[] {
                     name: entry.name,
                     status: "pass",
                     duration: performance.now() - start,
+                    records,
                 });
             } catch (e: any) {
                 results.push({
@@ -72,12 +93,14 @@ function executeRegistryTests(sourceFile: string): TestResult[] {
                     status: "fail",
                     error: e?.message || String(e),
                     duration: performance.now() - start,
+                    records,
                 });
             }
+
+            setInteractionObserver(null);
         }
     }
 
-    // Also run top-level entries that might not have a source file marker
     const targets = entries.length > 0 ? entries : registry;
     for (const entry of targets) {
         runEntry(entry, entry.name, []);
@@ -93,24 +116,23 @@ export function BddReplayPanel() {
     const [running, setRunning] = useState(false);
     const [selectedFile, setSelectedFile] = useState(TEST_FILES[0]!);
     const [duration, setDuration] = useState(0);
+    const [selectedTest, setSelectedTest] = useState<TestResult | null>(null);
+    const [replayIdx, setReplayIdx] = useState(-1);
 
     const run = useCallback(async () => {
         setRunning(true);
         setResults([]);
+        setSelectedTest(null);
+        setReplayIdx(-1);
 
-        // Clear previous entries for this file
         clearEntriesForFile(selectedFile.path);
 
         const start = performance.now();
         try {
-            // Dynamic import → spec-wrapper wraps → __runSpec__ called → registry populated
             const mod = await selectedFile.loader();
-            // spec-wrapper exports __runSpec__ as default
             if (mod && typeof (mod as any).default === "function") {
                 (mod as any).default();
             }
-
-            // Execute all registered tests
             const testResults = executeRegistryTests(selectedFile.path);
             setResults(testResults);
         } catch (e: any) {
@@ -120,6 +142,7 @@ export function BddReplayPanel() {
                 status: "fail",
                 error: e?.message || String(e),
                 duration: 0,
+                records: [],
             }]);
         }
 
@@ -129,6 +152,7 @@ export function BddReplayPanel() {
 
     const passed = results.filter((r) => r.status === "pass").length;
     const failed = results.filter((r) => r.status === "fail").length;
+    const totalRecords = results.reduce((acc, r) => acc + r.records.length, 0);
 
     // Group results by suite
     const suiteMap = new Map<string, TestResult[]>();
@@ -137,6 +161,89 @@ export function BddReplayPanel() {
         suiteMap.get(r.suite)!.push(r);
     }
 
+    // ── Replay view ──
+    if (selectedTest) {
+        const records = selectedTest.records;
+        const current = replayIdx >= 0 && replayIdx < records.length ? records[replayIdx] : null;
+
+        return (
+            <div className="flex flex-col h-full bg-white text-[13px]">
+                {/* Replay Header */}
+                <div className="flex items-center gap-2 px-3 py-2 border-b border-stone-200 bg-indigo-50">
+                    <button
+                        type="button"
+                        onClick={() => { setSelectedTest(null); setReplayIdx(-1); }}
+                        className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                    >
+                        ← Back
+                    </button>
+                    <span className="text-xs font-bold text-indigo-900 truncate flex-1">
+                        {selectedTest.name}
+                    </span>
+                    <span className="text-[10px] text-indigo-400 font-mono">
+                        {records.length} steps
+                    </span>
+                </div>
+
+                {/* Step Navigation */}
+                <div className="flex items-center gap-1 px-3 py-1.5 border-b border-stone-100 bg-stone-50">
+                    <button
+                        type="button"
+                        onClick={() => setReplayIdx(Math.max(0, replayIdx - 1))}
+                        disabled={replayIdx <= 0}
+                        className="p-0.5 rounded hover:bg-stone-200 disabled:opacity-30"
+                    >
+                        <ChevronLeft size={14} />
+                    </button>
+                    <span className="text-[10px] font-mono text-stone-500 min-w-[40px] text-center">
+                        {replayIdx + 1}/{records.length}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => setReplayIdx(Math.min(records.length - 1, replayIdx + 1))}
+                        disabled={replayIdx >= records.length - 1}
+                        className="p-0.5 rounded hover:bg-stone-200 disabled:opacity-30"
+                    >
+                        <ChevronRight size={14} />
+                    </button>
+                </div>
+
+                {/* Step List */}
+                <div className="flex-1 overflow-y-auto">
+                    {records.map((rec, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => setReplayIdx(i)}
+                            className={`w-full flex items-center gap-2 px-3 py-1 text-left text-xs border-l-2 transition-colors ${i === replayIdx
+                                    ? "bg-indigo-50 border-indigo-500 text-indigo-900"
+                                    : "border-transparent hover:bg-stone-50 text-stone-600"
+                                }`}
+                        >
+                            {rec.type === "press" ? (
+                                <Keyboard size={12} className="text-blue-500 flex-shrink-0" />
+                            ) : (
+                                <MousePointer2 size={12} className="text-amber-500 flex-shrink-0" />
+                            )}
+                            <span className="font-mono truncate">{rec.label}</span>
+                        </button>
+                    ))}
+                </div>
+
+                {/* State Diff */}
+                {current && (
+                    <div className="border-t border-stone-200 bg-stone-50 px-3 py-2 max-h-[200px] overflow-y-auto">
+                        <div className="text-[10px] font-bold text-stone-400 uppercase mb-1">
+                            State Change
+                        </div>
+                        <StateDiff before={current.stateBefore} after={current.stateAfter} />
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // ── Test List view ──
     return (
         <div className="flex flex-col h-full bg-white text-[13px]">
             {/* Header */}
@@ -169,6 +276,9 @@ export function BddReplayPanel() {
                         <span className="text-emerald-600 font-bold">{passed} ✓</span>
                         {failed > 0 && <span className="text-red-600 font-bold">{failed} ✗</span>}
                         <span className="text-stone-400 font-mono">{Math.round(duration)}ms</span>
+                        {totalRecords > 0 && (
+                            <span className="text-indigo-400 font-mono text-[10px]">{totalRecords} steps</span>
+                        )}
                     </div>
                 )}
             </div>
@@ -188,9 +298,11 @@ export function BddReplayPanel() {
                             {suite}
                         </div>
                         {tests.map((t, i) => (
-                            <div
+                            <button
                                 key={i}
-                                className={`flex items-center gap-2 px-2 py-1 rounded text-xs ${t.status === "fail" ? "bg-red-50" : t.status === "pass" ? "hover:bg-stone-50" : ""
+                                type="button"
+                                onClick={() => { setSelectedTest(t); setReplayIdx(0); }}
+                                className={`w-full flex items-center gap-2 px-2 py-1 rounded text-xs text-left transition-colors ${t.status === "fail" ? "bg-red-50 hover:bg-red-100" : "hover:bg-stone-50"
                                     }`}
                             >
                                 {t.status === "pass" ? (
@@ -201,12 +313,16 @@ export function BddReplayPanel() {
                                 <span className={`flex-1 truncate ${t.status === "fail" ? "text-red-700" : "text-stone-700"}`}>
                                     {t.name}
                                 </span>
+                                {t.records.length > 0 && (
+                                    <span className="text-indigo-400 font-mono text-[10px]">
+                                        {t.records.length} steps
+                                    </span>
+                                )}
                                 <span className="text-stone-400 font-mono text-[10px]">
                                     {t.duration < 1 ? "<1" : Math.round(t.duration)}ms
                                 </span>
-                            </div>
+                            </button>
                         ))}
-                        {/* Show errors */}
                         {tests.filter((t) => t.error).map((t, i) => (
                             <div key={`err-${i}`} className="mx-4 my-1 p-2 bg-red-50 border border-red-100 rounded text-[10px] text-red-600 font-mono">
                                 <span className="font-bold">✕ {t.name}:</span> {t.error}
@@ -215,6 +331,65 @@ export function BddReplayPanel() {
                     </div>
                 ))}
             </div>
+        </div>
+    );
+}
+
+// ── Simple State Diff ──
+
+function StateDiff({ before, after }: { before: unknown; after: unknown }) {
+    const b = before as any;
+    const a = after as any;
+
+    if (!b || !a) return <div className="text-[10px] text-stone-400">No state data</div>;
+
+    const changes: { path: string; from: string; to: string }[] = [];
+
+    // Compare focus state
+    const bFocus = b.focus;
+    const aFocus = a.focus;
+    if (bFocus && aFocus) {
+        if (bFocus.activeZoneId !== aFocus.activeZoneId) {
+            changes.push({ path: "activeZoneId", from: String(bFocus.activeZoneId), to: String(aFocus.activeZoneId) });
+        }
+        // Compare zone states
+        const allZones = new Set([...Object.keys(bFocus.zones || {}), ...Object.keys(aFocus.zones || {})]);
+        for (const z of allZones) {
+            const bz = bFocus.zones?.[z];
+            const az = aFocus.zones?.[z];
+            if (bz?.focusedItemId !== az?.focusedItemId) {
+                changes.push({
+                    path: `${z}.focusedItemId`,
+                    from: String(bz?.focusedItemId ?? "null"),
+                    to: String(az?.focusedItemId ?? "null"),
+                });
+            }
+            const bs = JSON.stringify(bz?.selection ?? []);
+            const as2 = JSON.stringify(az?.selection ?? []);
+            if (bs !== as2) {
+                changes.push({
+                    path: `${z}.selection`,
+                    from: bs,
+                    to: as2,
+                });
+            }
+        }
+    }
+
+    if (changes.length === 0) {
+        return <div className="text-[10px] text-stone-400 italic">No focus state changes</div>;
+    }
+
+    return (
+        <div className="space-y-0.5">
+            {changes.map((c, i) => (
+                <div key={i} className="flex items-baseline gap-1 text-[10px] font-mono">
+                    <span className="text-stone-500">{c.path}:</span>
+                    <span className="text-red-400 line-through">{c.from}</span>
+                    <span className="text-stone-300">→</span>
+                    <span className="text-emerald-600">{c.to}</span>
+                </div>
+            ))}
         </div>
     );
 }

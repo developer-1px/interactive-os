@@ -71,10 +71,31 @@ export function readSelection(kernel: HeadlessKernel, zoneId?: string): string[]
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Interaction Observer (for TestBot replay recording)
+// ═══════════════════════════════════════════════════════════════════
+
+export interface InteractionRecord {
+    type: "press" | "click";
+    label: string;
+    stateBefore: unknown;
+    stateAfter: unknown;
+    timestamp: number;
+}
+
+export type InteractionObserver = (record: InteractionRecord) => void;
+
+let _observer: InteractionObserver | null = null;
+
+export function setInteractionObserver(obs: InteractionObserver | null) {
+    _observer = obs;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // simulateKeyPress
 // ═══════════════════════════════════════════════════════════════════
 
 export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
+    const before = _observer ? JSON.parse(JSON.stringify(kernel.getState().os)) : null;
     const activeZoneId = readActiveZoneId(kernel);
     const zone = activeZoneId
         ? kernel.getState().os.focus.zones[activeZoneId]
@@ -107,6 +128,16 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
 
     const result = resolveKeyboard(input);
     dispatchResult(kernel, result);
+
+    if (_observer && before) {
+        _observer({
+            type: "press",
+            label: key,
+            stateBefore: before,
+            stateAfter: JSON.parse(JSON.stringify(kernel.getState().os)),
+            timestamp: performance.now(),
+        });
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -118,6 +149,7 @@ export function simulateClick(
     itemId: string,
     opts?: { shift?: boolean; meta?: boolean; ctrl?: boolean; zoneId?: string },
 ): void {
+    const before = _observer ? JSON.parse(JSON.stringify(kernel.getState().os)) : null;
     const zoneId = opts?.zoneId ?? readActiveZoneId(kernel);
     if (!zoneId) return;
 
@@ -141,6 +173,16 @@ export function simulateClick(
 
     const result = resolveMouse(input);
     dispatchResult(kernel, result);
+
+    if (_observer && before) {
+        _observer({
+            type: "click",
+            label: itemId,
+            stateBefore: before,
+            stateAfter: JSON.parse(JSON.stringify(kernel.getState().os)),
+            timestamp: performance.now(),
+        });
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════

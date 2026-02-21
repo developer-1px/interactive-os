@@ -17,7 +17,6 @@ import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
 import { Route as MinimalBuilderListRouteImport } from './routes/_minimal/builder-list'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
-import { Route as MinimalPlaygroundTestsRouteImport } from './routes/_minimal/playground.tests'
 import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/playground.radix'
 import { Route as MinimalPlaygroundQuickpickRouteImport } from './routes/_minimal/playground.quickpick'
 import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
@@ -64,11 +63,6 @@ const MinimalDocsIndexRoute = MinimalDocsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MinimalDocsRoute,
-} as any)
-const MinimalPlaygroundTestsRoute = MinimalPlaygroundTestsRouteImport.update({
-  id: '/playground/tests',
-  path: '/playground/tests',
-  getParentRoute: () => MinimalRoute,
 } as any)
 const MinimalPlaygroundRadixRoute = MinimalPlaygroundRadixRouteImport.update({
   id: '/playground/radix',
@@ -127,7 +121,6 @@ export interface FileRoutesByFullPath {
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
-  '/playground/tests': typeof MinimalPlaygroundTestsRoute
   '/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -143,7 +136,6 @@ export interface FileRoutesByTo {
   '/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
   '/playground/radix': typeof MinimalPlaygroundRadixRoute
-  '/playground/tests': typeof MinimalPlaygroundTestsRoute
   '/docs': typeof MinimalDocsIndexRoute
 }
 export interface FileRoutesById {
@@ -163,7 +155,6 @@ export interface FileRoutesById {
   '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
   '/_minimal/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
   '/_minimal/playground/radix': typeof MinimalPlaygroundRadixRoute
-  '/_minimal/playground/tests': typeof MinimalPlaygroundTestsRoute
   '/_minimal/docs/': typeof MinimalDocsIndexRoute
 }
 export interface FileRouteTypes {
@@ -182,7 +173,6 @@ export interface FileRouteTypes {
     | '/playground/kernel'
     | '/playground/quickpick'
     | '/playground/radix'
-    | '/playground/tests'
     | '/docs/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -198,7 +188,6 @@ export interface FileRouteTypes {
     | '/playground/kernel'
     | '/playground/quickpick'
     | '/playground/radix'
-    | '/playground/tests'
     | '/docs'
   id:
     | '__root__'
@@ -217,7 +206,6 @@ export interface FileRouteTypes {
     | '/_minimal/playground/kernel'
     | '/_minimal/playground/quickpick'
     | '/_minimal/playground/radix'
-    | '/_minimal/playground/tests'
     | '/_minimal/docs/'
   fileRoutesById: FileRoutesById
 }
@@ -283,13 +271,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/docs/'
       preLoaderRoute: typeof MinimalDocsIndexRouteImport
       parentRoute: typeof MinimalDocsRoute
-    }
-    '/_minimal/playground/tests': {
-      id: '/_minimal/playground/tests'
-      path: '/playground/tests'
-      fullPath: '/playground/tests'
-      preLoaderRoute: typeof MinimalPlaygroundTestsRouteImport
-      parentRoute: typeof MinimalRoute
     }
     '/_minimal/playground/radix': {
       id: '/_minimal/playground/radix'
@@ -376,7 +357,6 @@ interface MinimalRouteChildren {
   MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
   MinimalPlaygroundQuickpickRoute: typeof MinimalPlaygroundQuickpickRoute
   MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute
-  MinimalPlaygroundTestsRoute: typeof MinimalPlaygroundTestsRoute
 }
 
 const MinimalRouteChildren: MinimalRouteChildren = {
@@ -391,7 +371,6 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
   MinimalPlaygroundQuickpickRoute: MinimalPlaygroundQuickpickRoute,
   MinimalPlaygroundRadixRoute: MinimalPlaygroundRadixRoute,
-  MinimalPlaygroundTestsRoute: MinimalPlaygroundTestsRoute,
 }
 
 const MinimalRouteWithChildren =
