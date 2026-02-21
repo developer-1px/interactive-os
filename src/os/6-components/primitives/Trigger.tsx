@@ -319,7 +319,6 @@ function TriggerPortal({
         <Zone
           id={overlayId}
           role={zoneRole as any}
-          options={{ tab: { behavior: "flow" } }}
           onDismiss={OS_OVERLAY_CLOSE({ id: overlayId })}
         >
           <div
