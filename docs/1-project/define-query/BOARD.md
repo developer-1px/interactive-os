@@ -8,10 +8,11 @@
   - [x] Step 4: /naming — defineQuery, QueryToken, useQuery, QueryResult, invalidateOn
   - [x] Step 5: /tdd — 10 BDD tests (Red confirmed)
   - [x] Step 6: /solve — defineQuery + resolveQuery + QueryToken 구현 (807 tests green)
-  - [ ] Step 7: /verify    ← 다음 재개 지점
+  - [x] Step 7: /verify — tsc✅ lint✅ 807tests✅ build✅
+  - [x] Step 8: /changelog — `2e0899a`
 
 ## ⏳ Done
-(없음)
+- [x] T1: `defineQuery` 커널 API 설계 (2026-02-21)
 
 ## 💡 Ideas
 - T2: DOM Query 구현 — `useFocusedRect()`, `useItemRect()` 등 OS 편의 훅
