@@ -11,7 +11,7 @@
  */
 
 import { useRef } from "react";
-import { findItemElement } from "@/os/2-contexts/itemQueries";
+import { findItemElement, getItemAttribute } from "@/os/2-contexts/itemQueries";
 import { useElementRect } from "@/hooks/useElementRect";
 import { os } from "@/os/kernel";
 
@@ -44,8 +44,8 @@ export function BuilderCursor() {
         itemId,
         isActive: s.os.focus.activeZoneId === zoneId,
         editing: (zoneState?.editingItemId ?? null) !== null,
-        level: el?.getAttribute("data-level") ?? "",
-        itemType: el?.getAttribute("data-builder-type") ?? "text",
+        level: itemId ? (getItemAttribute("canvas", itemId, "data-level") ?? "") : "",
+        itemType: itemId ? (getItemAttribute("canvas", itemId, "data-builder-type") ?? "text") : "text",
       };
     },
   );
