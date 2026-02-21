@@ -2,9 +2,10 @@
  * Todo BDD Integration — keyboard-and-mouse.md 시나리오
  *
  * BDD spec (docs/6-products/todo/spec/keyboard-and-mouse.md)을
- * TodoApp.createPage() 기반 headless integration test로 구현.
+ * createPage(TodoApp, ListView) 기반 headless e2e test로 구현.
  *
- * "사용자 입력 레벨" BDD: 어떤 키를 누르면 무슨 일이 일어나야 하는가?
+ * Headless E2E: 모든 테스트가 ListView를 renderToString으로 렌더.
+ * state 검증 후 projection 검증(query)으로 변환 경계를 모두 커버.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -28,7 +29,7 @@ let now = 1000;
 beforeEach(() => {
     vi.spyOn(Date, "now").mockImplementation(() => ++now);
     _resetClipboardStore();
-    page = createPage(TodoApp);
+    page = createPage(TodoApp, ListView);
 });
 
 afterEach(() => {
@@ -233,8 +234,11 @@ describe("§1.3 List: 키보드 액션", () => {
 
         page.keyboard.press("Backspace");
 
-        // headless: state 변경만 검증 (Dialog 렌더링은 React 계층)
+        // State 검증
         expect(page.state.ui.pendingDeleteIds).toContain(a);
+
+        // Projection: dialog가 렌더 결과에 존재
+        expect(page.query("dialog")).toBe(true);
     });
 
     it("Delete — onDelete → pendingDeleteIds 설정 (Backspace와 동일)", () => {
@@ -503,39 +507,5 @@ describe("§ARIA: 리스트 속성", () => {
 
         // The app state should reflect completed
         expect(page.state.data.todos[a!]?.completed).toBe(true);
-    });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// §Projection: 커맨드 결과의 투영(DOM) 검증
-// renderToString 기반 projection checkpoint.
-// state가 맞아도 DOM이 안 나오는 배선 버그를 감지한다.
-// ═══════════════════════════════════════════════════════════════════
-
-describe("§Projection: 투영 검증", () => {
-    let projectionPage: Page;
-
-    beforeEach(() => {
-        projectionPage = createPage(TodoApp, ListView);
-    });
-
-    afterEach(() => {
-        projectionPage.cleanup();
-    });
-
-    it("Backspace → dialog가 렌더 결과에 존재한다", () => {
-        const [a] = addTodos("Delete me");
-        projectionPage.goto("list", {
-            items: ["DRAFT", a!],
-            focusedItemId: a!,
-        });
-
-        projectionPage.keyboard.press("Backspace");
-
-        // State 가드레일
-        expect(projectionPage.state.ui.pendingDeleteIds).toContain(a);
-
-        // Projection 가드레일 — 이 한 줄이 reference identity 버그를 잡는다
-        expect(projectionPage.query("dialog")).toBe(true);
     });
 });
