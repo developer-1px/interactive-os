@@ -2,21 +2,19 @@
 
 ## 🔴 Now
 
-- [ ] **T1: OS Page 인터페이스 설계 + 최소 구현** [WIP]
-  - `defineApp.createPage()` → production kernel + preview sandbox
-  - `headless.ts`: 공용 함수 추출 (simulateKeyPress/simulateClick/computeAttrs)
-  - DOM contexts headless override (dom-items, zone-config, dom-rects, etc.)
-  - `zone.bind()`의 onAction/onDelete/onCheck를 ZoneRegistry에서 headless 재활용
-  - Kernel 버그 수정: `processCommand`에서 bare `state` → `getState()` (preview 투명성)
-  - PoC: Todo 앱 9개 테스트 GREEN (Factory, Navigation, Click, Full Stack Integration)
-  - [x] Step 7: /naming — TestPage, createPage, goto, keyboard.press, attrs
-  - [x] Step 8: /tdd — 9개 RED 테스트 작성
-  - [x] Step 9: /solve — preview 기반 구현, headless 공용 함수 추출, 커널 버그 수정
-  - [ ] Step 10: /refactor ← 다음
+- [ ] **T2: createTestOsKernel을 headless.ts 공용 함수로 마이그레이션** [Medium /refactor]
+  - `pressKey` → `simulateKeyPress`, `click` → `simulateClick`, `attrs` → `computeAttrs`
+  - `createTestOsKernel`에서 중복 로직 제거, `headless.ts`를 import하여 위임
+  - 기존 APG/integration 테스트 58+ 전수 통과 보장
+  - [ ] Step 8: /tdd ← 시작
 
 ## ✅ Done
 
-(없음)
+- [x] **T1: OS Page 인터페이스 설계 + 최소 구현** ✅
+  - `defineApp.createPage()` → production kernel + preview sandbox
+  - `headless.ts`: 공용 함수 추출 (simulateKeyPress/simulateClick/computeAttrs)
+  - Kernel 버그 수정: `processCommand`에서 bare `state` → `getState()` (preview 투명성)
+  - 9/9 테스트 GREEN, 858/858 기존 테스트 통과
 
 ## 💡 Ideas
 
