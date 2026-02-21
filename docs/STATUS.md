@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**query-adoption** — BuilderCursor DOM 리팩토링
+**builder-v2** — T13 Container Block 범용화
 
 ---
 
@@ -17,8 +17,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| builder-v2 | T14 블록 추가 + 프리셋 | 02-21 | 🟢 Active |
-| query-adoption | T1 OS Query Provider 정의 | 02-21 | 🟢 Active |
+| builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
@@ -30,6 +29,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| query-adoption | 02-21 | ✅ 6-products/builder/design/builder-cursor.md | ✅ archive/2026/02/W08 |
 | define-query | 02-21 | ❌ T1/T2/T5 완료 (defineQuery, useQuery, bridge) |
 | builder-usage-cleanup | 02-21 | ❌ T1~T6 완료 |
 | apg-testing-rebalance | 02-21 | ❌ T1~T3 완료 |
