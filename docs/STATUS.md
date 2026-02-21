@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 10:59
+> Last updated: 2026-02-21 13:32
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -18,6 +18,7 @@
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
+| testbot-v2 | T1 Vitest Browser Mode 구축 | 02-21 | 🟢 Active |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
@@ -29,6 +30,8 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| field-props-cleanup | 02-21 | ✅ archive/2026/02/W08 |
+| lazy-resolution | 02-21 | ✅ rules.md #15 (Lazy Resolution) | ✅ archive/2026/02/W08 |
 | query-adoption | 02-21 | ✅ 6-products/builder/design/builder-cursor.md | ✅ archive/2026/02/W08 |
 | define-query | 02-21 | ❌ T1/T2/T5 완료 (defineQuery, useQuery, bridge) |
 | builder-usage-cleanup | 02-21 | ❌ T1~T6 완료 |
@@ -76,7 +79,9 @@
 
 ## 📝 Recent Changes (2026-02-21)
 
-- 🏗️ `6-products/` 체계 수립 — Product(ongoing) vs Project(bounded) 분리. `/archive` 워크플로우에 Product 에스컬레이션 추가.
+- 📄 `6-products/testbot/VISION.md` — TestBot Product Vision 확정. "LLM이 만든 테스트를 인간이 시각적으로 검증하는 도구". How는 바뀔 수 있지만 비전은 불변. Discussion → Product 승격.
+- 🆕 `field-props-cleanup` Light 프로젝트 생성 — /discussion + /doubt에서 Editable props 정리. 15→10 prop, 파생 prop 5개 제거, FieldProps→EditableProps rename. Pit of Success: 모순 조합 불가.
+- 🆕 `lazy-resolution` Heavy 프로젝트 생성 — Focus/Selection 복구를 Write-time → Read-time Lazy Resolution으로 전환. recoveryTargetId/OS_RECOVER 4개 개체 → resolveId 1개. Zero-cost undo restoration.
 - 📄 `6-products/builder/VISION.md` — Visual CMS Product Vision Board 작성 (빌더가 아니라 Visual CMS임을 확인)
 - 🔧 `query-adoption` BuilderCursor 리팩토링 — useElementRect 훅 추출 (266→140줄), block metadata를 state에서 읽기, findBlockInfo 모델 유틸 분리. 13 new tests.
 - ✅ `define-query` 완료 — T1(defineQuery+resolveQuery+QueryToken+invalidateOn), T2(useQuery React hook), T5(query→cofx bridge). 커널 4번째 primitive 확립. 16 unit tests.
