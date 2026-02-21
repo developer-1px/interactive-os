@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 21:32
+> Last updated: 2026-02-21 22:21
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**projection-checkpoint** — createPage(Component) + renderToString 투영 검증
+**replay** — createPage의 press/click/query를 가상 마우스+키보드+배지로 시각적 재생
 
 ---
 
@@ -17,10 +17,11 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| projection-checkpoint | T1 createAppPage 확장 | 02-21 | 🟢 Active |
+| projection-checkpoint | T1-T4 Done | 02-21 | ✅ Done |
+| replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-21 | 🟢 Active |
-| testbot-v2 | T8 BDD Visual Replay | 02-21 | 🟢 Active |
+| testbot-v2 | Superseded by Replay | 02-21 | 🔴 Superseded |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
