@@ -40,19 +40,19 @@ const BLOCKS: Block[] = [
 ];
 
 describe("findBlockInfo", () => {
-    it("finds root block → depth 0 = section", () => {
+    it("finds root block → depth 0", () => {
         const info = findBlockInfo(BLOCKS, "hero");
-        expect(info).toEqual({ type: "hero", level: "section" });
+        expect(info).toEqual({ type: "hero", depth: 0 });
     });
 
-    it("finds child block → depth 1 = group", () => {
+    it("finds child block → depth 1", () => {
         const info = findBlockInfo(BLOCKS, "card-1");
-        expect(info).toEqual({ type: "service-card", level: "group" });
+        expect(info).toEqual({ type: "service-card", depth: 1 });
     });
 
-    it("finds grandchild block → depth 2 = item", () => {
+    it("finds grandchild block → depth 2", () => {
         const info = findBlockInfo(BLOCKS, "tab-1");
-        expect(info).toEqual({ type: "tab", level: "item" });
+        expect(info).toEqual({ type: "tab", depth: 2 });
     });
 
     it("returns null for non-existent id", () => {
@@ -63,7 +63,7 @@ describe("findBlockInfo", () => {
         expect(findBlockInfo([], "hero")).toBeNull();
     });
 
-    it("clamps depth ≥ 3 to item", () => {
+    it("returns depth 3 for deeply nested", () => {
         const deep: Block[] = [
             {
                 id: "l0",
@@ -91,6 +91,6 @@ describe("findBlockInfo", () => {
                 ],
             },
         ];
-        expect(findBlockInfo(deep, "l3")).toEqual({ type: "d", level: "item" });
+        expect(findBlockInfo(deep, "l3")).toEqual({ type: "d", depth: 3 });
     });
 });

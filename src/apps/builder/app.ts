@@ -22,13 +22,12 @@ import { os } from "@/os/kernel";
 import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
 import {
   type Block,
-  type BuilderLevel,
   type BuilderState,
   INITIAL_STATE,
   type PropertyType,
   findBlockInfo,
 } from "./model/appState";
-export type { Block, BuilderState, PropertyType, BuilderLevel };
+export type { Block, BuilderState, PropertyType };
 export { INITIAL_STATE, findBlockInfo };
 
 /** Read current builder state from kernel. */

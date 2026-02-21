@@ -16,13 +16,20 @@ import { useElementRect } from "@/hooks/useElementRect";
 import { os } from "@/os/kernel";
 import { BuilderApp, findBlockInfo } from "./app";
 
-// ── Color palette for Builder levels ──
-const LEVEL_COLORS: Record<string, string> = {
-  section: "#a855f7", // purple-500
-  group: "#3b82f6", // blue-500
-  item: "#22c55e", // green-500
+// ── Color by block type ──
+const TYPE_COLORS: Record<string, string> = {
+  hero: "#a855f7",
+  news: "#f59e0b",
+  services: "#3b82f6",
+  "service-card": "#3b82f6",
+  pricing: "#10b981",
+  "pricing-tab": "#10b981",
+  tabs: "#6366f1",
+  tab: "#6366f1",
+  section: "#8b5cf6",
+  footer: "#64748b",
 };
-const DEFAULT_COLOR = "#6366f1"; // indigo-500
+const DEFAULT_COLOR = "#22c55e";
 
 /**
  * Must be placed inside the scroll container.
@@ -48,7 +55,7 @@ export function BuilderCursor() {
   const blockInfo = BuilderApp.useComputed((s) =>
     itemId ? findBlockInfo(s.data.blocks, itemId) : null,
   );
-  const level = blockInfo?.level ?? "";
+  const depth = blockInfo?.depth ?? 0;
   const itemType = blockInfo?.type ?? "text";
 
   // ── DOM element for position tracking ──
@@ -67,10 +74,11 @@ export function BuilderCursor() {
   const animating = now < animatingUntilRef.current;
 
   // ── Derived visual state ──
-  const color = LEVEL_COLORS[level] ?? DEFAULT_COLOR;
+  const color = TYPE_COLORS[itemType] ?? DEFAULT_COLOR;
   const dimmed = !isActive;
 
-  if (!rect || level === "section") {
+  // Top-level blocks (depth 0) don't show cursor
+  if (!rect || depth === 0) {
     return (
       <div
         ref={containerRef}

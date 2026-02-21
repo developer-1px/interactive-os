@@ -34,18 +34,15 @@ export interface Block {
   accept?: string[];
 }
 
-export type BuilderLevel = "section" | "group" | "item";
-
-/** Find a block by id in the tree and return its type + depth-based level. */
+/** Find a block by id in the tree and return its type + depth. */
 export function findBlockInfo(
   blocks: Block[],
   targetId: string,
   depth = 0,
-): { type: string; level: BuilderLevel } | null {
-  const LEVELS: BuilderLevel[] = ["section", "group", "item"];
+): { type: string; depth: number } | null {
   for (const block of blocks) {
     if (block.id === targetId) {
-      return { type: block.type, level: LEVELS[Math.min(depth, 2)]! };
+      return { type: block.type, depth };
     }
     if (block.children) {
       const found = findBlockInfo(block.children, targetId, depth + 1);
