@@ -14,6 +14,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TodoApp, addTodo } from "@apps/todo/app";
 import { ListView } from "@apps/todo/widgets/ListView";
 import { createPage } from "@os/defineApp.page";
+import { createOsPage } from "@os/createOsPage";
 import type { AppPage } from "@os/defineApp.types";
 import { OS_OVERLAY_OPEN, OS_OVERLAY_CLOSE } from "@os/3-commands/overlay/overlay";
 import { OS_STACK_PUSH } from "@os/3-commands/focus/stack";
@@ -107,5 +108,29 @@ describe("Dialog Focus Trap", () => {
 
         // activeZoneId must now be the dialog zone
         expect(page.activeZoneId()).toBe("todo-delete-dialog");
+    });
+
+    it("Dialog zone Tab trap: Tab cycles between dialog buttons", () => {
+        // Simulate a dialog zone with 2 button items (Cancel, Delete)
+        // This is what SHOULD happen when Dismiss/Confirm are FocusItems
+        const dialogPage = createOsPage();
+        dialogPage.setItems(["cancel-btn", "delete-btn"]);
+        dialogPage.setConfig({
+            tab: { behavior: "trap" as const, restoreFocus: true },
+            dismiss: { escape: "close" as const, outsideClick: "none" as const },
+        });
+        dialogPage.setActiveZone("dialog", "cancel-btn");
+
+        // Tab: cancel → delete
+        dialogPage.keyboard.press("Tab");
+        expect(dialogPage.focusedItemId()).toBe("delete-btn");
+
+        // Tab: delete → cancel (wrap = trap)
+        dialogPage.keyboard.press("Tab");
+        expect(dialogPage.focusedItemId()).toBe("cancel-btn");
+
+        // Shift+Tab: cancel → delete (reverse wrap)
+        dialogPage.keyboard.press("Shift+Tab");
+        expect(dialogPage.focusedItemId()).toBe("delete-btn");
     });
 });

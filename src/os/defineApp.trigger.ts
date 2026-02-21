@@ -134,6 +134,7 @@ export function createCompoundTrigger(
     return React.createElement(Dialog.Close, {
       className,
       onPress: confirmCmd as any,
+      id: `${dialogId}-confirm`,
       children,
     });
   };

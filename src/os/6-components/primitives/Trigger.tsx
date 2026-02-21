@@ -360,8 +360,9 @@ function TriggerDismiss({
   onPress,
   children,
   className,
+  id,
   ...rest
-}: TriggerDismissProps) {
+}: TriggerDismissProps & { id?: string }) {
   const overlayCtx = useOverlayContext();
   const dispatch = (cmd: BaseCommand) => os.dispatch(cmd);
 
@@ -379,10 +380,14 @@ function TriggerDismiss({
     }
   };
 
+  const itemId = id ?? `${overlayCtx?.overlayId ?? "dialog"}-dismiss`;
+
   return (
-    <button type="button" onClick={handleClick} className={className} {...rest}>
-      {children}
-    </button>
+    <FocusItem id={itemId}>
+      <button type="button" onClick={handleClick} className={className} {...rest}>
+        {children}
+      </button>
+    </FocusItem>
   );
 }
 
