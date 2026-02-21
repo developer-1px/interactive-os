@@ -131,6 +131,23 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
         return;
     }
 
+    // ── Overlay focus trap ──
+    // In browser: <dialog>.showModal() natively traps keyboard events.
+    // In headless: we guard manually. Only ESC is allowed when overlay is open.
+    const overlayStack = kernel.getState().os.overlays?.stack ?? [];
+    if (overlayStack.length > 0 && key !== "Escape") {
+        if (_observer && before) {
+            _observer({
+                type: "press",
+                label: `${key} (blocked: overlay)`,
+                stateBefore: before,
+                stateAfter: before,
+                timestamp: performance.now(),
+            });
+        }
+        return;
+    }
+
     const activeZoneId = readActiveZoneId(kernel);
     const zone = activeZoneId
         ? kernel.getState().os.focus.zones[activeZoneId]
