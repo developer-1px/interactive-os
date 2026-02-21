@@ -1,5 +1,5 @@
 /**
- * defineApp — TestPage factory
+ * defineApp — AppPage factory
  *
  * Creates a Playwright Page-isomorphic headless integration test interface.
  * Uses the production kernel with preview mode for state isolation.
@@ -27,7 +27,7 @@ import {
 // Ensure OS defaults are registered
 import "@os/keymaps/osDefaults";
 
-import type { TestPage, ZoneBindings, KeybindingEntry } from "./defineApp.types";
+import type { AppPage, ZoneBindings, KeybindingEntry } from "./defineApp.types";
 import type { ZoneRole } from "./registries/roleRegistry";
 import type { BaseCommand } from "@kernel/core/tokens";
 
@@ -42,13 +42,13 @@ export interface ZoneBindingEntry {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// createTestPage — Preview-based, ~50 lines of logic
+// createAppPage — Preview-based, ~50 lines of logic
 // ═══════════════════════════════════════════════════════════════════
 
-export function createTestPage<S>(
+export function createAppPage<S>(
     appId: string,
     zoneBindingEntries: Map<string, ZoneBindingEntry>,
-): TestPage<S> {
+): AppPage<S> {
     // ── Mock items for headless context ──
     const mockItems: string[] = [];
 
@@ -126,7 +126,7 @@ export function createTestPage<S>(
         );
     }
 
-    // ── Return TestPage ──
+    // ── Return AppPage ──
     return {
         keyboard: {
             press(key: string) { simulateKeyPress(os, key); },

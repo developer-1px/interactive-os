@@ -32,7 +32,7 @@ import type { ReactNode } from "react";
 import { registerAppSlice } from "./appSlice";
 import { createBoundComponents } from "./defineApp.bind";
 import { createTestInstance } from "./defineApp.testInstance";
-import { createTestPage } from "./defineApp.page";
+import { createAppPage } from "./defineApp.page";
 import {
   type CompoundTriggerComponents,
   type CompoundTriggerConfig,
@@ -51,7 +51,7 @@ import {
   type KeybindingEntry,
   type Selector,
   type TestInstance,
-  type TestPage,
+  type AppPage,
   type ZoneBindings,
   type ZoneHandle,
 } from "./defineApp.types";
@@ -114,7 +114,7 @@ export function defineApp<S>(
     { handler: FlatHandler<S, any>; when?: Condition<S> }
   >();
 
-  // For TestPage: track zone bindings (onAction, onDelete, etc.)
+  // For AppPage: track zone bindings (onAction, onDelete, etc.)
   const zoneBindingEntries = new Map<string, {
     role: import("./registries/roleRegistry").ZoneRole;
     bindings: ZoneBindings;
@@ -228,7 +228,7 @@ export function defineApp<S>(
           itemFilter?: (items: string[]) => string[];
         },
       ): BoundComponents<S> {
-        // Track zone bindings for TestPage
+        // Track zone bindings for AppPage
         zoneBindingEntries.set(zoneName, {
           role: config.role,
           bindings: config,
@@ -333,8 +333,8 @@ export function defineApp<S>(
 
     create,
 
-    createPage(): TestPage<S> {
-      return createTestPage<S>(
+    createPage(): AppPage<S> {
+      return createAppPage<S>(
         appId,
         zoneBindingEntries,
       );

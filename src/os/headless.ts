@@ -6,7 +6,7 @@
  *
  * Used by:
  *   - createOsPage (OS-only integration tests)
- *   - defineApp.page.ts (Full Stack TestPage)
+ *   - defineApp.page.ts (Full Stack AppPage)
  *   - withRecording (TestBot replay engine)
  *
  * All functions are pure — they read kernel state and ZoneRegistry,

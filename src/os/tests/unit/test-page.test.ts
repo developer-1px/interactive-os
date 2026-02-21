@@ -1,5 +1,5 @@
 /**
- * OS TestPage — Integration Test
+ * OS AppPage — Integration Test
  *
  * Verifies that defineApp.createPage() provides a Playwright-isomorphic
  * headless integration test interface.
@@ -22,8 +22,8 @@ import {
 // S1: Page creation + basic structure
 // ═══════════════════════════════════════════════════════════════════
 
-describe("TestPage: Factory", () => {
-    it("createPage returns a TestPage with keyboard, click, attrs, goto", () => {
+describe("AppPage: Factory", () => {
+    it("createPage returns a AppPage with keyboard, click, attrs, goto", () => {
         const page = TodoApp.createPage();
 
         expect(page).toBeDefined();
@@ -54,7 +54,7 @@ describe("TestPage: Factory", () => {
 // S2: goto + navigation
 // ═══════════════════════════════════════════════════════════════════
 
-describe("TestPage: Navigation", () => {
+describe("AppPage: Navigation", () => {
     it("goto activates a zone and sets items", () => {
         const page = TodoApp.createPage();
 
@@ -107,7 +107,7 @@ describe("TestPage: Navigation", () => {
 // S3: click
 // ═══════════════════════════════════════════════════════════════════
 
-describe("TestPage: Click", () => {
+describe("AppPage: Click", () => {
     it("click focuses and selects an item", () => {
         const page = TodoApp.createPage();
 
@@ -128,7 +128,7 @@ describe("TestPage: Click", () => {
 // S4: Full Stack — keyboard triggers app commands
 // ═══════════════════════════════════════════════════════════════════
 
-describe("TestPage: Full Stack Integration", () => {
+describe("AppPage: Full Stack Integration", () => {
     it("Space toggles todo completed (onCheck)", () => {
         const page = TodoApp.createPage();
 

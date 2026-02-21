@@ -17,11 +17,11 @@ import {
     pasteTodo,
     selectCategory,
 } from "@apps/todo/app";
-import type { TestPage } from "@os/defineApp.types";
+import type { AppPage } from "@os/defineApp.types";
 import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];
-type Page = TestPage<TodoState>;
+type Page = AppPage<TodoState>;
 
 let page: Page;
 

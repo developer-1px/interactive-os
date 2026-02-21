@@ -159,10 +159,10 @@ export interface TestInstance<S> {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TestPage — Playwright Page isomorphic headless interface
+// AppPage — Playwright Page isomorphic headless interface
 // ═══════════════════════════════════════════════════════════════════
 
-export interface TestPage<S> {
+export interface AppPage<S> {
   /** Navigate to a zone (like page.goto). Sets active zone + items. */
   goto(zoneName: string, opts?: {
     items?: string[];
@@ -233,7 +233,7 @@ export interface AppHandle<S> {
     overrides?: Partial<S> | { history?: boolean; withOS?: boolean },
   ): TestInstance<S>;
 
-  /** Create a Playwright Page-isomorphic headless TestPage. */
-  createPage(overrides?: Partial<S>): TestPage<S>;
+  /** Create a Playwright Page-isomorphic headless AppPage. */
+  createPage(overrides?: Partial<S>): AppPage<S>;
 }
 

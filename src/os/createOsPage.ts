@@ -1,8 +1,8 @@
 /**
- * createOsPage — OS-only TestPage factory for headless integration tests.
+ * createOsPage — OS-only AppPage factory for headless integration tests.
  *
  * Creates an isolated kernel with OS commands registered.
- * Returns a TestPage-compatible interface for keyboard, mouse, and ARIA testing.
+ * Returns a AppPage-compatible interface for keyboard, mouse, and ARIA testing.
  *
  * Unlike defineApp.createPage() which uses the production kernel + preview,
  * this creates a fresh kernel — ideal for OS-only tests (APG, navigation, etc.)
@@ -76,7 +76,7 @@ export interface GotoOptions {
 }
 
 export interface OsPage {
-    // ── TestPage-compatible interface ──
+    // ── AppPage-compatible interface ──
     keyboard: { press(key: string): void };
     click(itemId: string, opts?: { shift?: boolean; meta?: boolean; ctrl?: boolean; zoneId?: string }): void;
     attrs(itemId: string, zoneId?: string): ItemAttrs;
@@ -290,7 +290,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
 
     // ── Return OsPage ──
     return {
-        // TestPage-compatible
+        // AppPage-compatible
         keyboard: { press(key: string) { simulateKeyPress(kernel, key); } },
         click(itemId, opts?) { simulateClick(kernel, itemId, opts); },
         attrs(itemId, zoneId?) { return computeAttrs(kernel, itemId, zoneId); },
