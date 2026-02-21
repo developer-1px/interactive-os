@@ -2,13 +2,14 @@
 
 ## 🔴 Now
 
-- [ ] **T3: APG 테스트를 createOsPage로 마이그레이션** [Medium /refactor]
-  - [ ] Step 9: /solve ← 시작
-- [ ] **T4: Todo unit test를 createPage 기반으로 전환** [Medium /refactor]
-  - [ ] Step 9: /solve
+(없음)
 
 ## ✅ Done
 
+- [x] **T3: APG 테스트를 createOsPage로 마이그레이션** ✅
+  - 7개 APG 파일 + contracts.ts 전환
+  - pressKey → keyboard.press, factory → page.goto()
+  - 112/112 APG 테스트 통과
 - [x] **T2: createOsPage — OS-only TestPage factory** ✅
   - `createOsPage()` — 격리 커널 + TestPage 인터페이스 + OS helpers
   - `goto()` = setItems + setRole + setActiveZone 통합
@@ -22,8 +23,7 @@
 
 ## 💡 Ideas
 
-- T3: 기존 APG 테스트를 createOsPage API로 마이그레이션 (contracts.ts 타입 변경)
-- T4: Todo unit test를 pressKey 기반 integration test로 전환 (일부)
+- T4: Todo unit test를 createPage 기반으로 전환 — **Skip**: 기존 unit test는 커맨드 API 검증으로 가치 있음. createPage 기반 PoC는 test-page.test.ts에서 완료
 - T5: TestBot v2가 OS Page를 visual runtime으로 사용
 - `createPage` 네이밍 재검토 — preview 기반이라 실체와 다름
 - Playwright `expect(locator).toBeFocused()` 동형 assertions

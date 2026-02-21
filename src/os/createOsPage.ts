@@ -18,9 +18,9 @@
 
 import { createKernel } from "@kernel";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import type { ZoneCallback, ZoneCursor } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
 import type { AppState } from "@os/kernel";
-import { type ZoneRole, getChildRole } from "@os/registries/roleRegistry";
+import type { ZoneRole } from "@os/registries/roleRegistry";
 import {
     DEFAULT_CONFIG,
     type FocusGroupConfig,
@@ -215,8 +215,9 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     }
 
     function setActiveZone(zoneId: string, focusedItemId: string | null) {
+        const existingRole = ZoneRegistry.get(zoneId)?.role;
         ZoneRegistry.register(zoneId, {
-            role: ZoneRegistry.get(zoneId)?.role,
+            ...(existingRole ? { role: existingRole } : {}),
             config: mockConfig.current,
             element: null as unknown as HTMLElement,
             parentId: null,
