@@ -21,6 +21,7 @@ export type {
   EffectToken,
   Middleware,
   MiddlewareContext,
+  QueryToken,
   ScopeToken,
 } from "./core/tokens.ts";
 export { GLOBAL } from "./core/tokens.ts";

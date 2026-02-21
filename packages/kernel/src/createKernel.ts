@@ -38,6 +38,7 @@ import {
   type InternalEffectHandler,
   type Middleware,
   type MiddlewareContext,
+  type QueryToken,
   type ScopeToken,
   type TypedContext,
 } from "./core/tokens.ts";
@@ -133,6 +134,79 @@ export function createKernel<S>(initialState: S) {
     if (provider) return provider();
     logger.warn(`[kernel] No context provider registered for "${id}"`);
     return undefined;
+  }
+
+  // ─── Query Providers (closure) ───
+
+  interface QueryEntry {
+    provider: (state: S) => unknown;
+    invalidateOn?: string[];
+    /** Cache: last state reference when provider was executed */
+    cachedState: S | null;
+    /** Cache: last resolved value */
+    cachedValue: unknown;
+    /** Whether the cache has been invalidated by a matching command */
+    invalidated: boolean;
+  }
+
+  const queryProviders = new Map<string, QueryEntry>();
+
+  function defineQuery<Id extends string, T>(
+    id: Id,
+    provider: (state: S) => T,
+    options?: { invalidateOn?: string[] },
+  ): QueryToken<Id, T> {
+    queryProviders.set(id, {
+      provider: provider as (state: S) => unknown,
+      invalidateOn: options?.invalidateOn,
+      cachedState: null,
+      cachedValue: undefined,
+      invalidated: false,
+    });
+    return { __id: id, __queryBrand: true } as QueryToken<Id, T>;
+  }
+
+  function resolveQuery<T>(id: string): T {
+    const entry = queryProviders.get(id);
+    if (!entry) {
+      logger.warn(`[kernel] No query provider registered for "${id}"`);
+      return undefined as T;
+    }
+
+    const currentState = state;
+
+    // Cache hit: state hasn't changed AND not invalidated by command
+    if (entry.cachedState === currentState && !entry.invalidated) {
+      return entry.cachedValue as T;
+    }
+
+    // If invalidateOn is set and cache exists, only re-run if invalidated
+    if (
+      entry.invalidateOn &&
+      entry.cachedState !== null &&
+      !entry.invalidated
+    ) {
+      return entry.cachedValue as T;
+    }
+
+    // Re-run provider
+    const value = entry.provider(currentState);
+    entry.cachedState = currentState;
+    entry.cachedValue = value;
+    entry.invalidated = false;
+    return value as T;
+  }
+
+  /** Invalidate queries that match the dispatched command type */
+  function invalidateQueries(commandType: string): void {
+    for (const entry of queryProviders.values()) {
+      if (entry.invalidateOn) {
+        if (entry.invalidateOn.includes(commandType)) {
+          entry.invalidated = true;
+        }
+      }
+      // No invalidateOn = always invalidate (cachedState check handles it)
+    }
   }
 
   // ─── Transaction Log (closure) ───
@@ -248,6 +322,8 @@ export function createKernel<S>(initialState: S) {
     meta?: Record<string, unknown>,
   ): void {
     const stateBefore = state;
+    // Pre-invalidate queries matching this command type
+    invalidateQueries(cmd.type);
     const path: string[] = bubblePath
       ? (bubblePath as string[])
       : [GLOBAL as string];
@@ -761,6 +837,10 @@ export function createKernel<S>(initialState: S) {
 
     // React
     useComputed,
+
+    // Query (fourth primitive)
+    defineQuery,
+    resolveQuery,
 
     // Inspector (separated via Port/Adapter)
     inspector,

@@ -36,6 +36,14 @@ export type ContextToken<Id extends string = string, Value = unknown> = {
   readonly __phantom?: Value;
 };
 
+/** Query token — wrapper object for defineQuery providers. */
+export type QueryToken<Id extends string = string, Value = unknown> = {
+  readonly __id: Id;
+  readonly __queryBrand: true;
+  /** @internal phantom — carries Value type at compile time only */
+  readonly __phantom?: Value;
+};
+
 /** Typed command object. Created by CommandFactory, consumed by dispatch. */
 export type Command<Type extends string = string, Payload = void> = {
   readonly type: Type;

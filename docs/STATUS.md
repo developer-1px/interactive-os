@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 03:04
+> Last updated: 2026-02-21 09:36
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -20,6 +20,7 @@
 | builder-usage-cleanup | T1~T6 완료 | 02-21 | ✅ Done |
 | apg-testing-rebalance | T1~T3 완료 | 02-21 | ✅ Done |
 | builder-v2 | T14 블록 추가 + 프리셋 | 02-21 | 🟢 Active |
+| define-query | T1 커널 API 설계 | 02-21 | 🟢 Active |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
 | field-compound | T1~T4 완료 | 02-20 | ✅ Done |
@@ -67,7 +68,7 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 1 |
-| Active Projects (total) | 3 |
+| Active Projects (total) | 4 |
 | Completed (archived) | 18+ |
 | Inbox items | 2 |
 | Backlog items | 5 (docs-dashboard 포함) |
@@ -78,6 +79,7 @@
 
 ## 📝 Recent Changes (2026-02-21)
 
+- 🆕 `define-query` 프로젝트 생성 — /doubt(DOM API 전수 조사) + /discussion에서 커널의 빠진 네 번째 primitive 발견. re-frame cofx/sub 사이의 빈칸 = `defineQuery`. 동기/비동기 범용 외부 데이터 구독.
 - 🆕 `focus-single-path` 프로젝트 생성 — /doubt + /divide에서 DOM 안티패턴 전수 조사. Focus 이중 경로(4-effects vs Component) 근본 원인 발견. C1(DocsPage ref), K1(Field computed 순수성) 즉시 수정 완료.
 
 - 🆕 `os-api-rename` 프로젝트 생성 — Discussion + /doubt + /divide에서 도출. kernel→os rename, OS_ 접두어 통일, 훅 네이밍 정비
