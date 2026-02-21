@@ -2,7 +2,7 @@
  * withRecording — Decorator that wraps a test kernel with step recording.
  *
  * Usage:
- *   const t = withRecording(createTestOsKernel(), "my-test.test.ts");
+ *   const t = withRecording(createOsPage(), "my-test.test.ts");
  *   t.pressKey("ArrowDown");  // recorded as PressKeyStep
  *   t.click("item-1");        // recorded as ClickStep
  *   t.attrs("item-1");        // recorded as AttrsStep
@@ -14,7 +14,7 @@
  *   - Same return types as original kernel methods
  */
 
-import type { ItemAttrs } from "@os/3-commands/tests/integration/helpers/createTestOsKernel";
+import type { ItemAttrs } from "@os/headless";
 import type { TestRecording, TestStep } from "../entities/TestStep";
 
 // ═══════════════════════════════════════════════════════════════════

@@ -13,7 +13,7 @@
  * This is injected by a Vite alias when building for the browser.
  */
 
-import type { ItemAttrs } from "@os/3-commands/tests/integration/helpers/createTestOsKernel";
+import type { ItemAttrs } from "@os/headless";
 
 // ═══════════════════════════════════════════════════════════════════
 // Browser ApgKernel — wraps real DOM

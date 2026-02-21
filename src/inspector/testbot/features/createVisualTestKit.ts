@@ -1,10 +1,10 @@
 /**
  * createVisualTestKit — Browser adapter for integration tests.
  *
- * Same pressKey/click/attrs API as createTestOsKernel,
+ * Same pressKey/click/attrs API as createOsPage,
  * but dispatches REAL DOM events on the REAL app in preview sandbox.
  *
- * Vitest: createTestOsKernel (headless, fast, no visual)
+ * Vitest: createOsPage (headless, fast, no visual)
  * Browser: createVisualTestKit (real DOM, visual feedback, preview sandbox)
  */
 

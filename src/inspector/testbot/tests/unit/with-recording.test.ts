@@ -5,17 +5,24 @@
  * pressKey, click, and attrs calls without affecting test behavior.
  */
 
-import { createTestOsKernel } from "@os/3-commands/tests/integration/helpers/createTestOsKernel";
+import { createOsPage } from "@os/createOsPage";
 import { describe, expect, it } from "vitest";
 import { withRecording } from "../../features/withRecording";
 
 describe("withRecording", () => {
     function setup() {
-        const kernel = createTestOsKernel();
-        kernel.setItems(["a", "b", "c"]);
-        kernel.setRole("list", "listbox");
-        kernel.setActiveZone("list", "a");
-        return withRecording(kernel, "test-file.test.ts");
+        const page = createOsPage();
+        page.goto("list", { items: ["a", "b", "c"], role: "listbox", focusedItemId: "a" });
+
+        // withRecording expects pressKey — adapt from keyboard.press
+        const recordable = {
+            pressKey: (key: string) => page.keyboard.press(key),
+            click: (itemId: string, opts?: any) => page.click(itemId, opts),
+            attrs: (itemId: string, zoneId?: string) => page.attrs(itemId, zoneId),
+            focusedItemId: (zoneId?: string) => page.focusedItemId(zoneId),
+        };
+
+        return withRecording(recordable, "test-file.test.ts");
     }
 
     it("records pressKey with before/after focus", () => {

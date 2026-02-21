@@ -127,7 +127,7 @@ export function ReplayPanel() {
         const localSteps = kit.getSteps();
         kit.enter();
 
-        // Wire visual observer so createTestOsKernel reports actions
+        // Wire visual observer so test kernel reports actions
         setVisualObserver({
             onPressKey(key) {
                 localSteps.push({

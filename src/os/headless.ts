@@ -1,14 +1,13 @@
 /**
  * OS Headless Interaction — Shared utility functions
  *
- * Extracted from createTestOsKernel + KeyboardListener to eliminate
- * code duplication. These functions simulate user interactions
- * (keyboard, mouse) and compute ARIA attributes without DOM.
+ * Pure functions that simulate user interactions (keyboard, mouse)
+ * and compute ARIA attributes without DOM.
  *
  * Used by:
- *   - createTestOsKernel (OS-only integration tests)
+ *   - createOsPage (OS-only integration tests)
  *   - defineApp.page.ts (Full Stack TestPage)
- *   - (future) Visual TestBot replay engine
+ *   - withRecording (TestBot replay engine)
  *
  * All functions are pure — they read kernel state and ZoneRegistry,
  * then call resolveKeyboard/resolveMouse → dispatch.
