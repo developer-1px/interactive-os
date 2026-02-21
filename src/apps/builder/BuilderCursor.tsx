@@ -14,8 +14,7 @@ import { useRef } from "react";
 import { findItemElement } from "@/os/2-contexts/itemQueries";
 import { useElementRect } from "@/hooks/useElementRect";
 import { os } from "@/os/kernel";
-import { BuilderApp } from "./app";
-import type { Block } from "./model/appState";
+import { BuilderApp, findBlockInfo } from "./app";
 
 // ── Color palette for Builder levels ──
 const LEVEL_COLORS: Record<string, string> = {
@@ -24,28 +23,6 @@ const LEVEL_COLORS: Record<string, string> = {
   item: "#22c55e", // green-500
 };
 const DEFAULT_COLOR = "#6366f1"; // indigo-500
-
-/** Find a block by id in the tree and return its depth-based level */
-function findBlockInfo(
-  blocks: Block[],
-  targetId: string,
-  depth = 0,
-): { type: string; level: "section" | "group" | "item" } | null {
-  const LEVELS = ["section", "group", "item"] as const;
-  for (const block of blocks) {
-    if (block.id === targetId) {
-      return {
-        type: block.type,
-        level: LEVELS[Math.min(depth, 2)] as "section" | "group" | "item",
-      };
-    }
-    if (block.children) {
-      const found = findBlockInfo(block.children, targetId, depth + 1);
-      if (found) return found;
-    }
-  }
-  return null;
-}
 
 /**
  * Must be placed inside the scroll container.
