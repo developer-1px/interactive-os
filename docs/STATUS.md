@@ -18,6 +18,7 @@
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
 | builder-v2 | T14 블록 추가 + 프리셋 | 02-21 | 🟢 Active |
+| query-adoption | T1 OS Query Provider 정의 | 02-21 | 🟢 Active |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
