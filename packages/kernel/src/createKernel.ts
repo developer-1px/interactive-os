@@ -771,6 +771,44 @@ export function createKernel<S>(initialState: S) {
     return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   }
 
+  // ─── useQuery (React Hook) ───
+
+  function useQuery<T>(token: QueryToken<string, T>): T {
+    const tokenRef = useRef(token);
+    tokenRef.current = token;
+
+    const cacheRef = useRef<{
+      state: S;
+      value: T;
+    } | null>(null);
+
+    const getSnapshot = useCallback(() => {
+      const currentState = getState();
+      const id = tokenRef.current.__id;
+
+      // Resolve through the query cache (handles invalidateOn internally)
+      const nextValue = resolveQuery<T>(id);
+
+      // Output stability: shallow compare to prevent unnecessary re-renders
+      if (
+        cacheRef.current &&
+        shallow(cacheRef.current.value, nextValue)
+      ) {
+        cacheRef.current.state = currentState;
+        return cacheRef.current.value;
+      }
+
+      cacheRef.current = {
+        state: currentState,
+        value: nextValue,
+      };
+
+      return nextValue;
+    }, []);
+
+    return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  }
+
   // ─── Inspector Port (narrow read-only window into kernel internals) ───
 
   const introspectionPort: KernelIntrospectionPort<S> = {
@@ -837,6 +875,7 @@ export function createKernel<S>(initialState: S) {
 
     // React
     useComputed,
+    useQuery,
 
     // Query (fourth primitive)
     defineQuery,
