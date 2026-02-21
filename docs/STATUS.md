@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 18:19
+> Last updated: 2026-02-21 21:32
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**testbot-v2** — T8 BDD Visual Replay (todo-bdd.test.ts 브라우저 재생)
+**projection-checkpoint** — createPage(Component) + renderToString 투영 검증
 
 ---
 
@@ -17,6 +17,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| projection-checkpoint | T1 createAppPage 확장 | 02-21 | 🟢 Active |
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-21 | 🟢 Active |
 | testbot-v2 | T8 BDD Visual Replay | 02-21 | 🟢 Active |
@@ -81,6 +82,8 @@
 
 ## 📝 Recent Changes (2026-02-21)
 
+- 🆕 `projection-checkpoint` Light 프로젝트 생성 — Discussion에서 발견: state 정확해도 투영(DOM) 깨지는 배선 버그는 headless에서 감지 불가. `createPage(Component)` + `renderToString`로 projection checkpoint 추가. LLM 자율 개발 가드레일.
+- 🐛 `defineApp.trigger.ts` — Dialog 미렌더 버그 수정. `createCompoundTrigger`가 `Dialog.Content`를 래핑해 reference identity 깨짐. 1줄 수정.
 - 🆕 `os-page` Heavy 프로젝트 생성 — Discussion에서 발견: OS가 Playwright Page 동형 headless integration test API를 제공. `defineApp.createPage()` → `pressKey/click/attrs`. TestBot v2의 선행 의존.
 - ✅ `todo-dogfooding` T4 완료 — **OS Toast primitive 신규**. `ToastEntry` 상태 + `OS_TOAST_SHOW`/`OS_TOAST_DISMISS` 커맨드. `ToastContainer` (`aria-live`, 자동 해제, 액션 버튼). 삭제/완료삭제 후 "Undo" 토스트.
 - ✅ `todo-dogfooding` T3 완료 — Bulk Action Bar. `useSelection("list")` 기반 다중 선택 감지. 2+ 선택 시 절대 위치 하단 툴바 표시. `bulkToggleCompleted` 신규 커맨드.

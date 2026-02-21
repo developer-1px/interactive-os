@@ -333,10 +333,16 @@ export function defineApp<S>(
 
     create,
 
-    createPage(): AppPage<S> {
+    // ── Internal (for OS-level createPage) ──
+    __appId: appId,
+    __zoneBindings: zoneBindingEntries as Map<string, import("./defineApp.page").ZoneBindingEntry>,
+
+    /** @deprecated Use standalone `createPage(app, Component?)` instead. */
+    createPage(Component?: React.FC): AppPage<S> {
       return createAppPage<S>(
         appId,
         zoneBindingEntries,
+        Component,
       );
     },
   };

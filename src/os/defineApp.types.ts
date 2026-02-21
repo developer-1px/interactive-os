@@ -201,6 +201,14 @@ export interface AppPage<S> {
 
   /** Clean up zone registrations. */
   cleanup(): void;
+
+  // ── Projection Checkpoint (optional — requires Component) ────────
+
+  /** Check if search string exists in rendered HTML (renderToString). */
+  query(search: string): boolean;
+
+  /** Get the full rendered HTML string. */
+  html(): string;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -233,7 +241,16 @@ export interface AppHandle<S> {
     overrides?: Partial<S> | { history?: boolean; withOS?: boolean },
   ): TestInstance<S>;
 
-  /** Create a Playwright Page-isomorphic headless AppPage. */
-  createPage(overrides?: Partial<S>): AppPage<S>;
+  /** Create a Playwright Page-isomorphic headless AppPage.
+   *  @deprecated Use `createPage(app, Component?)` standalone function instead.
+   *  Pass a Component to enable projection checkpoint (query/html).
+   */
+  createPage(Component?: React.FC): AppPage<S>;
+
+  // ── Internal (for OS-level createPage) ────────────────────────────
+  /** @internal App ID for OS-level createPage. */
+  readonly __appId: string;
+  /** @internal Zone binding entries for OS-level createPage. */
+  readonly __zoneBindings: Map<string, import('./defineApp.page').ZoneBindingEntry>;
 }
 

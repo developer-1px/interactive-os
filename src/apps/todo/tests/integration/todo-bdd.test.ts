@@ -13,6 +13,8 @@ import {
     addTodo,
     visibleTodos,
 } from "@apps/todo/app";
+import { ListView } from "@apps/todo/widgets/ListView";
+import { createPage } from "@os/defineApp.page";
 import type { AppPage } from "@os/defineApp.types";
 import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 
@@ -26,7 +28,7 @@ let now = 1000;
 beforeEach(() => {
     vi.spyOn(Date, "now").mockImplementation(() => ++now);
     _resetClipboardStore();
-    page = TodoApp.createPage();
+    page = createPage(TodoApp);
 });
 
 afterEach(() => {
@@ -505,14 +507,35 @@ describe("§ARIA: 리스트 속성", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// §DOM: 커맨드 결과의 DOM 투영 검증
-// React는 테스트 대상이 아니라, OS 커맨드 결과를 DOM으로 확인하는 프로젝터.
-// render(createElement(ListView)) → screen.queryByRole("alertdialog")
+// §Projection: 커맨드 결과의 투영(DOM) 검증
+// renderToString 기반 projection checkpoint.
+// state가 맞아도 DOM이 안 나오는 배선 버그를 감지한다.
 // ═══════════════════════════════════════════════════════════════════
 
-describe("§DOM: 커맨드 결과의 DOM 투영 검증", () => {
-    // BUG FOUND: pendingDeleteIds는 설정되지만 alertdialog가 DOM에 안 뜸.
-    // Trigger 컴포넌트가 overlay state를 읽어 렌더하는 경로에 문제가 있거나,
-    // headless에서 OS_OVERLAY_OPEN이 overlay state에 반영되지 않음.
-    it.todo("Backspace → alertdialog가 DOM에 존재한다");
+describe("§Projection: 투영 검증", () => {
+    let projectionPage: Page;
+
+    beforeEach(() => {
+        projectionPage = createPage(TodoApp, ListView);
+    });
+
+    afterEach(() => {
+        projectionPage.cleanup();
+    });
+
+    it("Backspace → dialog가 렌더 결과에 존재한다", () => {
+        const [a] = addTodos("Delete me");
+        projectionPage.goto("list", {
+            items: ["DRAFT", a!],
+            focusedItemId: a!,
+        });
+
+        projectionPage.keyboard.press("Backspace");
+
+        // State 가드레일
+        expect(projectionPage.state.ui.pendingDeleteIds).toContain(a);
+
+        // Projection 가드레일 — 이 한 줄이 reference identity 버그를 잡는다
+        expect(projectionPage.query("dialog")).toBe(true);
+    });
 });

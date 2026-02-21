@@ -14,6 +14,8 @@ import { DEFAULT_CONFIG, type FocusGroupConfig } from "@os/schemas/focus/config/
 import { Keybindings } from "@os/keymaps/keybindings";
 import { ensureZone } from "@os/state/utils";
 import { produce } from "immer";
+import { createElement, type FC } from "react";
+import { renderToString } from "react-dom/server";
 
 import {
     type ItemAttrs,
@@ -39,7 +41,7 @@ import type { BaseCommand } from "@kernel/core/tokens";
 export interface ZoneBindingEntry {
     role: ZoneRole;
     bindings: ZoneBindings;
-    keybindings: KeybindingEntry<any>[];
+    keybindings?: KeybindingEntry<any>[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -49,6 +51,7 @@ export interface ZoneBindingEntry {
 export function createAppPage<S>(
     appId: string,
     zoneBindingEntries: Map<string, ZoneBindingEntry>,
+    Component?: FC,
 ): AppPage<S> {
     // ── Mock items for headless context ──
     const mockItems: string[] = [];
@@ -120,9 +123,10 @@ export function createAppPage<S>(
         // Register zone keybindings in the global Keybindings registry
         // (mirrors what FocusGroup.tsx does at mount time in the browser)
         if (unregisterKeybindings) unregisterKeybindings();
-        if (bindingEntry && bindingEntry.keybindings.length > 0) {
+        const keybindings = bindingEntry?.keybindings ?? [];
+        if (keybindings.length > 0) {
             unregisterKeybindings = Keybindings.registerAll(
-                bindingEntry.keybindings.map((kb) => ({
+                keybindings.map((kb) => ({
                     key: kb.key,
                     command: kb.command,
                     when: "navigating" as const,
@@ -188,7 +192,48 @@ export function createAppPage<S>(
             if (zId) ZoneRegistry.unregister(zId);
             os.clearPreview();
         },
+
+        // ── Projection Checkpoint ──────────────────────────────────
+
+        query(search: string): boolean {
+            if (!Component) {
+                throw new Error(
+                    "query() requires a Component. Use createPage(MyComponent) to enable projection checkpoint.",
+                );
+            }
+            const html = renderToString(createElement(Component));
+            return html.includes(search);
+        },
+
+        html(): string {
+            if (!Component) {
+                throw new Error(
+                    "html() requires a Component. Use createPage(MyComponent) to enable projection checkpoint.",
+                );
+            }
+            return renderToString(createElement(Component));
+        },
     };
 }
 
 export type { ItemAttrs };
+
+import type { AppHandle } from "./defineApp.types";
+
+/**
+ * Create a Playwright Page-isomorphic headless integration test interface.
+ *
+ * Usage:
+ *   import { createPage } from "@os/defineApp.page";
+ *   const page = createPage(TodoApp);              // headless
+ *   const page = createPage(TodoApp, ListView);    // headless + projection
+ *
+ * createPage is an OS capability — it reads app data (appId, zone bindings)
+ * from the AppHandle and sets up the headless test environment.
+ */
+export function createPage<S>(
+    app: AppHandle<S>,
+    Component?: FC,
+): AppPage<S> {
+    return createAppPage<S>(app.__appId, app.__zoneBindings, Component);
+}

@@ -17,6 +17,7 @@ import {
     TodoApp,
     addTodo,
 } from "@apps/todo/app";
+import { createPage } from "@os/defineApp.page";
 
 // ═══════════════════════════════════════════════════════════════════
 // S1: Page creation + basic structure
@@ -24,7 +25,7 @@ import {
 
 describe("AppPage: Factory", () => {
     it("createPage returns a AppPage with keyboard, click, attrs, goto", () => {
-        const page = TodoApp.createPage();
+        const page = createPage(TodoApp);
 
         expect(page).toBeDefined();
         expect(page.keyboard).toBeDefined();
@@ -38,7 +39,7 @@ describe("AppPage: Factory", () => {
     });
 
     it("createPage uses preview sandbox — dispatch writes to preview, not production", () => {
-        const page = TodoApp.createPage();
+        const page = createPage(TodoApp);
         const initialCount = Object.keys(page.state.data.todos).length;
 
         page.dispatch(addTodo({ text: "Preview only" }));
@@ -56,7 +57,7 @@ describe("AppPage: Factory", () => {
 
 describe("AppPage: Navigation", () => {
     it("goto activates a zone and sets items", () => {
-        const page = TodoApp.createPage();
+        const page = createPage(TodoApp);
 
         // Add some todos to get IDs
         page.dispatch(addTodo({ text: "Alpha" }));
@@ -73,7 +74,7 @@ describe("AppPage: Navigation", () => {
     });
 
     it("keyboard.press ArrowDown navigates focus", () => {
-        const page = TodoApp.createPage();
+        const page = createPage(TodoApp);
 
         page.dispatch(addTodo({ text: "Alpha" }));
         page.dispatch(addTodo({ text: "Beta" }));
@@ -88,7 +89,7 @@ describe("AppPage: Navigation", () => {
     });
 
     it("attrs returns correct ARIA attributes", () => {
-        const page = TodoApp.createPage();
+        const page = createPage(TodoApp);
 
         page.dispatch(addTodo({ text: "Alpha" }));
         page.dispatch(addTodo({ text: "Beta" }));
@@ -109,7 +110,7 @@ describe("AppPage: Navigation", () => {
 
 describe("AppPage: Click", () => {
     it("click focuses and selects an item", () => {
-        const page = TodoApp.createPage();
+        const page = createPage(TodoApp);
 
         page.dispatch(addTodo({ text: "Alpha" }));
         page.dispatch(addTodo({ text: "Beta" }));
@@ -130,7 +131,7 @@ describe("AppPage: Click", () => {
 
 describe("AppPage: Full Stack Integration", () => {
     it("Space toggles todo completed (onCheck)", () => {
-        const page = TodoApp.createPage();
+        const page = createPage(TodoApp);
 
         page.dispatch(addTodo({ text: "Toggle me" }));
         const ids = page.state.data.todoOrder;
@@ -145,7 +146,7 @@ describe("AppPage: Full Stack Integration", () => {
     });
 
     it("Enter starts edit (onAction)", () => {
-        const page = TodoApp.createPage();
+        const page = createPage(TodoApp);
 
         page.dispatch(addTodo({ text: "Edit me" }));
         const ids = page.state.data.todoOrder;
@@ -160,7 +161,7 @@ describe("AppPage: Full Stack Integration", () => {
     });
 
     it("Delete requests delete (onDelete)", () => {
-        const page = TodoApp.createPage();
+        const page = createPage(TodoApp);
 
         page.dispatch(addTodo({ text: "Delete me" }));
         const ids = page.state.data.todoOrder;

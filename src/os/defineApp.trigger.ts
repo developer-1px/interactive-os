@@ -105,13 +105,10 @@ export function createCompoundTrigger(
       });
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
-  const ContentComponent: React.FC<{
-    children: ReactNode;
-    title?: string;
-    className?: string;
-    zoneClassName?: string;
-  }> = (props) => React.createElement(Dialog.Content, props);
-  ContentComponent.displayName = `${appId}.Dialog.Content`;
+  // Dialog.Content must be used directly — DialogRoot identifies children by
+  // reference identity (child.type === DialogContent). Wrapping in a new
+  // component breaks this check, preventing the portal from rendering.
+  const ContentComponent = Dialog.Content;
 
   const PortalComponent: React.FC<{
     children: ReactNode;
