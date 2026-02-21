@@ -70,7 +70,7 @@ describe("AppPage: Navigation", () => {
         page.goto("list", { items: ids });
 
         // Zone should be active
-        expect(page.activeZoneId()).toBe("todo-v5:list");
+        expect(page.activeZoneId()).toBe("list");
     });
 
     it("keyboard.press ArrowDown navigates focus", () => {

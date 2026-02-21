@@ -86,7 +86,8 @@ export function createAppPage<S>(
         focusedItemId?: string | null;
         config?: Partial<FocusGroupConfig>;
     }) {
-        const fullZoneId = `${appId}:${zoneName}`;
+        // Use zoneName directly — matches FocusGroup's id in React.
+        // Preview sandbox is isolated per-app, so prefix is unnecessary.
 
         // Set mock items
         if (opts?.items) {
@@ -98,7 +99,7 @@ export function createAppPage<S>(
         const bindingEntry = zoneBindingEntries.get(zoneName);
         if (bindingEntry) {
             const { bindings } = bindingEntry;
-            ZoneRegistry.register(fullZoneId, {
+            ZoneRegistry.register(zoneName, {
                 role: bindingEntry.role,
                 config: opts?.config
                     ? { ...DEFAULT_CONFIG, ...opts.config }
@@ -138,8 +139,8 @@ export function createAppPage<S>(
         const focusedId = opts?.focusedItemId ?? null;
         os.setState((s: AppState) =>
             produce(s, (draft) => {
-                draft.os.focus.activeZoneId = fullZoneId;
-                const z = ensureZone(draft.os, fullZoneId);
+                draft.os.focus.activeZoneId = zoneName;
+                const z = ensureZone(draft.os, zoneName);
                 z.focusedItemId = focusedId;
                 if (focusedId) z.lastFocusedId = focusedId;
             }),
