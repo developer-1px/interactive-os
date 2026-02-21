@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 13:32
+> Last updated: 2026-02-21 16:35
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**builder-v2** — T13 Container Block 범용화
+**os-page** — T1 OS Page 인터페이스 설계 + 최소 구현
 
 ---
 
@@ -18,7 +18,9 @@
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
-| testbot-v2 | T1 Vitest Browser Mode 구축 | 02-21 | 🟢 Active |
+| todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-21 | 🟢 Active |
+| os-page | T1 OS Page 인터페이스 설계 | 02-21 | 🟢 Active |
+| testbot-v2 | ⏸ Blocked by os-page | 02-21 | 🟡 Paused |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
@@ -69,7 +71,7 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 1 |
-| Active Projects (total) | 5 (3 Active + 2 Paused) |
+| Active Projects (total) | 7 (4 Active + 3 Paused) |
 | Completed (archived) | 22+ |
 | Inbox items | 0 |
 | Backlog items | 5 |
@@ -79,6 +81,12 @@
 
 ## 📝 Recent Changes (2026-02-21)
 
+- 🆕 `os-page` Heavy 프로젝트 생성 — Discussion에서 발견: OS가 Playwright Page 동형 headless integration test API를 제공. `defineApp.createPage()` → `pressKey/click/attrs`. TestBot v2의 선행 의존.
+- ✅ `todo-dogfooding` T4 완료 — **OS Toast primitive 신규**. `ToastEntry` 상태 + `OS_TOAST_SHOW`/`OS_TOAST_DISMISS` 커맨드. `ToastContainer` (`aria-live`, 자동 해제, 액션 버튼). 삭제/완료삭제 후 "Undo" 토스트.
+- ✅ `todo-dogfooding` T3 완료 — Bulk Action Bar. `useSelection("list")` 기반 다중 선택 감지. 2+ 선택 시 절대 위치 하단 툴바 표시. `bulkToggleCompleted` 신규 커맨드.
+- ✅ `todo-dogfooding` T2 완료 — Search. `ui.searchQuery` 상태 추가, selector 검색 필터 확장, `TodoSearch` zone (textbox), 검색 0건 빈 상태 메시지 분기.
+- ✅ `todo-dogfooding` T1 완료 — `ClearDialog` 및 `DeleteDialog`에 `role: "alertdialog"` OS 패턴 적용. 포커스 트랩, Escape 닫기 완벽 지원. 다중 선택 개수 표기 및 `listCollection`과 연동.
+- 🆕 `todo-dogfooding` Heavy 프로젝트 생성 — Todo에 8개 OS 패턴 추가 (Dialog, Context Menu, Toast, Search, Bulk Action, DnD, Date Picker, Export). "데이터 스키마만 있으면 앱이 된다"를 증명. PRD 8개 Feature × BDD Scenarios 완비.
 - 📄 `6-products/testbot/VISION.md` — TestBot Product Vision 확정. "LLM이 만든 테스트를 인간이 시각적으로 검증하는 도구". How는 바뀔 수 있지만 비전은 불변. Discussion → Product 승격.
 - 🆕 `field-props-cleanup` Light 프로젝트 생성 — /discussion + /doubt에서 Editable props 정리. 15→10 prop, 파생 prop 5개 제거, FieldProps→EditableProps rename. Pit of Success: 모순 조합 불가.
 - 🆕 `lazy-resolution` Heavy 프로젝트 생성 — Focus/Selection 복구를 Write-time → Read-time Lazy Resolution으로 전환. recoveryTargetId/OS_RECOVER 4개 개체 → resolveId 1개. Zero-cost undo restoration.

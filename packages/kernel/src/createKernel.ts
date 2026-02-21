@@ -69,14 +69,20 @@ export function createKernel<S>(initialState: S) {
   // ─── Store (closure) ───
 
   let state: S = initialState;
+  let previewState: S | null = null;
   const listeners = new Set<Listener>();
 
   function getState(): S {
-    return state;
+    return previewState ?? state;
   }
 
   function setState(updater: (prev: S) => S): void {
-    state = updater(state);
+    if (previewState !== null) {
+      // Preview mode: write to preview layer, real state untouched
+      previewState = updater(previewState);
+    } else {
+      state = updater(state);
+    }
     for (const listener of listeners) {
       listener();
     }
@@ -326,7 +332,7 @@ export function createKernel<S>(initialState: S) {
     bubblePath?: ScopeToken[],
     meta?: Record<string, unknown>,
   ): void {
-    const stateBefore = state;
+    const stateBefore = getState();
     // Pre-invalidate queries matching this command type
     invalidateQueries(cmd.type);
     const path: string[] = bubblePath
@@ -341,7 +347,7 @@ export function createKernel<S>(initialState: S) {
       // 1. Scope before-middleware
       let mwCtx: MiddlewareContext = {
         command: cmd,
-        state: state as unknown,
+        state: getState() as unknown,
         handlerScope: currentScope,
         effects: null,
         injected: {},
@@ -367,7 +373,7 @@ export function createKernel<S>(initialState: S) {
       // 2.5. when guard — dispatch guard (W26/W33)
       if (whenGuard) {
         const guardLens = scopeStateLens.get(currentScope);
-        const guardState = guardLens ? guardLens.get(state) : state;
+        const guardState = guardLens ? guardLens.get(getState()) : getState();
         if (!whenGuard(guardState)) continue; // guard failed → bubble up
       }
 
@@ -415,18 +421,20 @@ export function createKernel<S>(initialState: S) {
       executeEffects(result, path, handlerScope);
     }
 
-    const stateAfter = state;
+    const stateAfter = getState();
 
-    // 8. Record transaction
-    recordTransaction(
-      resolvedCommand,
-      handlerScope,
-      result,
-      stateBefore,
-      stateAfter,
-      path,
-      meta,
-    );
+    // 8. Record transaction (skip during preview — preview is not recorded)
+    if (previewState === null) {
+      recordTransaction(
+        resolvedCommand,
+        handlerScope,
+        result,
+        stateBefore,
+        stateAfter,
+        path,
+        meta,
+      );
+    }
   }
 
   // ─── Effect Execution ───
@@ -877,6 +885,19 @@ export function createKernel<S>(initialState: S) {
     getState,
     setState,
     subscribe,
+
+    // Preview Layer (non-destructive state override for replay/inspection)
+    setPreview(s: S) {
+      previewState = s;
+      for (const listener of listeners) listener();
+    },
+    clearPreview() {
+      previewState = null;
+      for (const listener of listeners) listener();
+    },
+    isPreviewing() {
+      return previewState !== null;
+    },
 
     // React
     useComputed,
