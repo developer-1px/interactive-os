@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-21 16:35
+> Last updated: 2026-02-21 18:19
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**os-page** — T1 OS Page 인터페이스 설계 + 최소 구현
+**testbot-v2** — T8 BDD Visual Replay (todo-bdd.test.ts 브라우저 재생)
 
 ---
 
@@ -19,8 +19,7 @@
 |---------|-------|---------------|--------|
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-21 | 🟢 Active |
-| os-page | T1 OS Page 인터페이스 설계 | 02-21 | 🟢 Active |
-| testbot-v2 | ⏸ Blocked by os-page | 02-21 | 🟡 Paused |
+| testbot-v2 | T8 BDD Visual Replay | 02-21 | 🟢 Active |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
@@ -32,6 +31,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| os-page | 02-21 | ❌ T1~T3 완료, T4 skip. AppPage rename ✅ createTestOsKernel 제거 ✅ |
 | field-props-cleanup | 02-21 | ✅ archive/2026/02/W08 |
 | lazy-resolution | 02-21 | ✅ rules.md #15 (Lazy Resolution) | ✅ archive/2026/02/W08 |
 | query-adoption | 02-21 | ✅ 6-products/builder/design/builder-cursor.md | ✅ archive/2026/02/W08 |

@@ -2,41 +2,40 @@
 
 ## 🔴 Now
 
-- [ ] **T7: Replay Engine** [WIP]
-  - 아키텍처: scenario → withRecording (snapshot 포함) → os.setPreview(snapshot) → 실제 앱이 렌더
-  - `@kernel`: `setPreview(s)` / `clearPreview()` / `isPreviewing()` — 비파괴적 상태 오버레이
-  - `withRecording`: 매 step마다 `kernel.state()` 스냅샷 캡쳐
-  - `scenarios/listbox.ts` — 8개 시나리오 (setup + steps 분리)
-  - `ReplayPanel.tsx` — 컨트롤 전용 (시각화는 실제 앱이 담당)
-  - tsc ✅, 849 tests ✅
-  - [x] Step 7: /naming — setPreview/clearPreview/isPreviewing
-  - [x] Step 9: /solve — kernel preview layer + ReplayPanel
-  - [ ] Step 15: /verify ← 다음
-  - **남은 것**: 브라우저에서 Todo와 연동 동작 확인
+- [ ] **T8: BDD Visual Replay** ⬅️ Active
+  - 아키텍처: todo-bdd.test.ts → vitest shim → 동기 실행 + snapshot 기록 → setPreview 재생
+  - Step 1: Vitest Shim — describe/it/expect/vi/beforeEach/afterEach 브라우저 구현
+  - Step 2: Browser AppPage — createPage() 이중화 (headless: 현재, browser: snapshot 기록)
+  - Step 3: Replay Engine — snapshot 시퀀스 → setPreview() + 딜레이
+  - Step 4: Replay UI — 가상 keyboard/mouse + dispatch/diff + pass/fail
+  - Step 5: Inspector 통합 — TESTBOT 탭에서 .test.ts 파일 선택 → 재생
+  - 선행: os-page 완료 ✅, AppPage 네이밍 확정 ✅
+  - Discussion: `discussions/2026-0221-1819-bdd-visual-replay.md`
 
 ## ✅ Done
 
 - [x] **T1: Vitest Browser Mode 기반 구축** ✅
   - 73/74 파일 PASS, 832/832 테스트 PASS in Chromium
-  - `npm run test:browser` 스크립트
 - [x] **T2: TestStep 타입 + Record Decorator** ✅
   - TestStep 6종, withRecording() decorator, 8 unit tests
-  - headless + browser 양쪽 검증
 - [x] **T3: 데이터 브릿지 (TestBotReporter)** ✅
   - Vitest custom reporter → public/testbot-report.json
-  - 75 파일, 840 테스트 구조화 JSON
 - [x] **T4+T5: TestBotV2Panel** ✅
-  - testbot-report.json 로드 + File→Suite→Test 계층 뷰
-  - Pass/Fail 진행 바, 에러 표시, Reload 기능
-  - Inspector TESTBOT 탭에 연결
+  - File→Suite→Test 계층 뷰, Pass/Fail 진행 바
+- [x] **T7: Replay Engine (Preview Layer)** ✅
+  - setPreview/clearPreview/isPreviewing on kernel
+  - withRecording snapshot 캡처
+  - ReplayPanel.tsx 컨트롤
 
 ## 💡 Ideas
 
 - T6: 기존 Custom Shim 정리 — test-shim.ts, vitest/index.ts, createApgKernel.browser.ts 삭제
-- DOM 교차 검증: attrs() 결과와 실제 DOM 비교
-- Replay 시나리오 확장: tree, grid, dialog, menu 패턴
+- Inspector State Monitor 통합 — dispatch/diff 시각화 인프라 공유
+- APG 패턴 시나리오 확장 (tree, grid, dialog, menu)
+- Playwright E2E 동형 실행
 
 ## 📎 References
 
 - Product Vision: `6-products/testbot/VISION.md`
-- Divide Report: `6-products/testbot/discussions/2026-0221-1340-testbot-v2-divide.md`
+- os-page Discussion: `1-project/os-page/`
+- BDD Spec: `6-products/todo/spec/keyboard-and-mouse.md`
