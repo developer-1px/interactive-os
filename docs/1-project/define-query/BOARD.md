@@ -1,18 +1,12 @@
 # BOARD — define-query
 
 ## 🔴 Now
-- [ ] T1: `defineQuery` 커널 API 설계
-  - [x] Step 1: /ready — tsc 0 errors, 797 tests pass
-  - [x] Step 2: /discussion — 21개 Warrant 도출, W17-W21 핵심
-  - [x] Step 3: /prd — 4기능, 12 BDD 시나리오, 5상태
-  - [x] Step 4: /naming — defineQuery, QueryToken, useQuery, QueryResult, invalidateOn
-  - [x] Step 5: /tdd — 10 BDD tests (Red confirmed)
-  - [x] Step 6: /solve — defineQuery + resolveQuery + QueryToken 구현 (807 tests green)
-  - [x] Step 7: /verify — tsc✅ lint✅ 807tests✅ build✅
-  - [x] Step 8: /changelog — `2e0899a`
+(없음 — T2 승격 대기)
 
 ## ⏳ Done
-- [x] T1: `defineQuery` 커널 API 설계 (2026-02-21)
+- [x] T1: `defineQuery` 커널 API 설계 (2026-02-21) — `2e0899a`
+  - defineQuery, resolveQuery, QueryToken, invalidateOn
+  - 10 unit tests, PRD 12 BDD scenarios
 
 ## 💡 Ideas
 - T2: DOM Query 구현 — `useFocusedRect()`, `useItemRect()` 등 OS 편의 훅
