@@ -12,7 +12,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
     TodoApp,
     addTodo,
-    visibleTodos,
+    cancelDeleteTodo,
+    confirmDeleteTodo,
+    undoCommand,
 } from "@apps/todo/app";
 import { ListView } from "@apps/todo/widgets/ListView";
 import { createPage } from "@os/defineApp.page";
@@ -197,10 +199,20 @@ describe("§1.2 List: 키보드 범위 선택", () => {
         expect(page.selection().length).toBe(allItems.length);
     });
 
-    // OS gap: OS_ESCAPE doesn't clear selection yet
-    // spec says Escape should deselect, but OS_ESCAPE currently
-    // is a dismiss/cancel command, not a deselect command.
-    it.todo("Escape — 선택 해제 (OS_ESCAPE 에서 selection clear 미구현)");
+    it("Escape — 선택 해제", () => {
+        const [a, , c] = addTodos("A", "B", "C");
+        gotoList(a);
+
+        page.keyboard.press("Shift+ArrowDown");
+        page.keyboard.press("Shift+ArrowDown");
+        expect(page.selection().length).toBe(3);
+
+        page.keyboard.press("Escape");
+
+        expect(page.selection().length).toBe(0);
+        // Focus should remain on the target item (not cleared)
+        expect(page.focusedItemId()).toBe(c);
+    });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -264,6 +276,53 @@ describe("§1.3 List: 키보드 액션", () => {
         expect(page.state.ui.pendingDeleteIds).toContain(a);
         expect(page.state.ui.pendingDeleteIds).toContain(b);
         expect(page.state.ui.pendingDeleteIds).toContain(c);
+    });
+
+    it("Delete Cancel — 다중 삭제 취소 시 선택 영역 유지", () => {
+        const [a, b] = addTodos("A", "B", "C");
+        gotoList(a);
+
+        // Select A, B
+        page.keyboard.press("Shift+ArrowDown");
+        // Request Delete
+        page.keyboard.press("Backspace");
+
+        // Cancel dialog
+        page.dispatch(cancelDeleteTodo());
+
+        // Selection MUST be preserved because items were not deleted
+        expect(page.selection()).toContain(a);
+        expect(page.selection()).toContain(b);
+        expect(page.selection().length).toBe(2);
+    });
+
+    it("Undo — 다중 삭제 후 복원 시 선택 영역 복구", () => {
+        const [a, b] = addTodos("A", "B", "C");
+        gotoList(a);
+
+        // Select A, B
+        page.keyboard.press("Shift+ArrowDown");
+        // Delete
+        page.keyboard.press("Backspace");
+
+        // Confirm deletion in dialog
+        page.dispatch(confirmDeleteTodo());
+
+        // Now A and B are deleted
+        expect(page.state.data.todoOrder).not.toContain(a);
+        expect(page.state.data.todoOrder).not.toContain(b);
+
+        // Undo
+        page.dispatch(undoCommand());
+
+        // A and B should be restored
+        expect(page.state.data.todoOrder).toContain(a);
+        expect(page.state.data.todoOrder).toContain(b);
+
+        // Verification: Selection should be properly restored, containing a and b
+        expect(page.selection()).toContain(a);
+        expect(page.selection()).toContain(b);
+        expect(page.selection().length).toBe(2);
     });
 
     it("Cmd+ArrowUp — 순서 위로 이동", () => {
@@ -377,7 +436,7 @@ describe("§1.5 List: 마우스 인터랙션", () => {
     });
 
     it("Shift+클릭 → 범위 선택", () => {
-        const [a, b, c] = addTodos("Alpha", "Beta", "Gamma");
+        const [a, , c] = addTodos("Alpha", "Beta", "Gamma");
         gotoList(a);
 
         // First click to set anchor

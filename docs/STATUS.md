@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**os-collection** — JSON CRUD primitive. 앱의 CRUD/clipboard/undo를 OS가 보장.
+**kernel-items** — DOM_ITEMS를 kernel state로 전환. Zone이 자식을 알아 stale focus 자동 복구.
 
 ---
 
@@ -17,7 +17,8 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| os-collection | T1-T7 Done (patches + undo/redo) | 02-22 | 🔥 Focus |
+| kernel-items | Discussion 완료, Scaffold | 02-22 | 🔥 Focus |
+| os-collection | T1-T7 Done (patches + undo/redo) | 02-22 | ✅ Done |
 | projection-checkpoint | T1-T4 Done | 02-21 | ✅ Done |
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
@@ -65,7 +66,9 @@
 
 ## 📥 Inbox
 
-(비어있음 — /para 2026-02-21 10:12 정리 완료)
+- `docs/0-inbox/2026-0222-1937-analysis-json-crud-clipboard-undo-status.md` (JSON CRUD, Clipboard, Undo/Redo 현황 분석)
+  - Related Project: `os-collection`, `todo-dogfooding`
+  - Suggested Action: 추가 인프라 구축 생략 후 응용 기능(Builder 맵핑, DnD 등)으로 진행
 
 ---
 
@@ -76,7 +79,7 @@
 | Active Focus | 1 |
 | Active Projects (total) | 7 (4 Active + 3 Paused) |
 | Completed (archived) | 22+ |
-| Inbox items | 0 |
+| Inbox items | 1 |
 | Backlog items | 5 |
 | Open issues | 0 |
 

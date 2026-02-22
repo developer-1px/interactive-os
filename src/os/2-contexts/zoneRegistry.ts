@@ -33,7 +33,8 @@ export type ZoneCallback = (cursor: ZoneCursor) => BaseCommand | BaseCommand[];
 
 export interface ZoneEntry {
   config: FocusGroupConfig;
-  element: HTMLElement;
+  /** DOM element — only available in browser, null in headless */
+  element?: HTMLElement | null;
   role?: ZoneRole;
   parentId: string | null;
   /** Command dispatched on ESC when dismiss.escape is "close" */
@@ -61,9 +62,25 @@ export interface ZoneEntry {
   // Static commands — no cursor needed
   onUndo?: BaseCommand;
   onRedo?: BaseCommand;
+  /**
+   * Item accessor — returns ordered item IDs for this zone.
+   *
+   * Used by applyFocusPop for stale focus detection (Lazy Resolution).
+   * When the stored focusedItemId no longer exists in the returned list,
+   * the OS automatically resolves to the nearest neighbor.
+   *
+   * Registered by createCollectionZone (from ops.getItems) or manually
+   * via createOsPage.setItems.
+   */
+  getItems?: () => string[];
+  /** Expandable item accessor — returns IDs of items that have aria-expanded */
+  getExpandableItems?: () => Set<string>;
+  /** Tree level accessor — returns map of item ID → nesting level (1-based) */
+  getTreeLevels?: () => Map<string, number>;
 }
 
 const registry = new Map<string, ZoneEntry>();
+const registryOrder: string[] = []; // Registration order for headless zone ordering
 const disabledItems = new Map<string, Set<string>>();
 const itemCallbacks = new Map<string, Map<string, ItemCallbacks>>();
 
@@ -74,11 +91,14 @@ export interface ItemCallbacks {
 
 export const ZoneRegistry = {
   register(id: string, entry: ZoneEntry): void {
+    if (!registry.has(id)) registryOrder.push(id);
     registry.set(id, entry);
   },
 
   unregister(id: string): void {
     registry.delete(id);
+    const idx = registryOrder.indexOf(id);
+    if (idx !== -1) registryOrder.splice(idx, 1);
     disabledItems.delete(id);
     itemCallbacks.delete(id);
   },
@@ -94,6 +114,11 @@ export const ZoneRegistry = {
   /** Get all registered zone IDs */
   keys(): IterableIterator<string> {
     return registry.keys();
+  },
+
+  /** Zone IDs in registration order (for headless zone ordering) */
+  orderedKeys(): readonly string[] {
+    return registryOrder;
   },
 
   // ─── Per-item disabled state (declaration, not action) ───

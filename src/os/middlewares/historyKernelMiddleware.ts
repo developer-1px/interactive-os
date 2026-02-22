@@ -33,6 +33,8 @@ export interface HistoryEntry {
   focusedItemId?: string | null | undefined;
   /** Captured activeZoneId for focus restoration on undo */
   activeZoneId?: string | null | undefined;
+  /** Captured selection for focus restoration on undo */
+  activeZoneSelection?: string[];
   /** Transaction group ID — entries with same groupId are undone/redone atomically */
   groupId?: string | undefined;
 }
@@ -72,8 +74,6 @@ const OS_PASSTHROUGH = new Set([
   "OS_UNDO",
   "OS_REDO",
   "OS_SELECTION_CLEAR",
-  "OS_SELECTION_SET",
-  "OS_SELECTION_ADD",
 ]);
 
 // Commands that manage history themselves (both capitalized and lowercase)
@@ -128,9 +128,9 @@ export function createHistoryMiddleware(
       // Capture focus BEFORE command execution (for focus restoration on undo)
       const osState = (ctx.state as AppState).os;
       const activeZoneId = osState?.focus?.activeZoneId;
-      const focusedItemId = activeZoneId
-        ? (osState.focus.zones[activeZoneId]?.focusedItemId ?? null)
-        : null;
+      const activeZone = activeZoneId ? osState.focus.zones[activeZoneId] : null;
+      const focusedItemId = activeZone?.focusedItemId ?? null;
+      const activeZoneSelection = activeZone?.selection ? [...activeZone.selection] : undefined;
 
       // Capture app state BEFORE command
       const appState = (ctx.state as AppState).apps[appId];
@@ -142,6 +142,7 @@ export function createHistoryMiddleware(
           _historyBefore: appState,
           _historyFocusId: focusedItemId,
           _historyZoneId: activeZoneId,
+          _historySelection: activeZoneSelection,
         },
       };
     },
@@ -179,7 +180,8 @@ export function createHistoryMiddleware(
       // ── Capture data-level patches ────────────────────────────
       // Generate patches that transform prevAppState.data → effectsState.data
       // These are stored in HistoryEntry for patch-based undo/redo.
-      const { history: _prevH, ...prevWithoutHistory } = prevAppState;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { history: _, ...prevWithoutHistory } = prevAppState;
       const newData = effectsState["data"];
 
       let dataPatches: Patch[] = [];
@@ -208,7 +210,7 @@ export function createHistoryMiddleware(
       // but keep its original snapshot, so undo jumps to pre-burst state.
       const NOISE_WINDOW_MS = 500;
 
-      const [updatedAppState, historyPatches, historyInversePatches] =
+      const [updatedAppState] =
         produceWithPatches(
           effectsState,
           (draft: Record<string, unknown>) => {
@@ -258,6 +260,7 @@ export function createHistoryMiddleware(
                 inversePatches: dataInversePatches.length > 0 ? dataInversePatches : undefined,
                 focusedItemId: previousFocusId,
                 activeZoneId: ctx.injected["_historyZoneId"] as string | null,
+                activeZoneSelection: ctx.injected["_historySelection"] as string[] | undefined,
                 groupId: getActiveGroupId() ?? undefined,
               });
 

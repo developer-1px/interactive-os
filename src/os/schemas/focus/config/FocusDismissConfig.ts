@@ -1,9 +1,2 @@
-export interface DismissConfig {
-  escape: "close" | "deselect" | "none";
-  outsideClick: "close" | "none";
-}
-
-export const DEFAULT_DISMISS: DismissConfig = {
-  escape: "none",
-  outsideClick: "none",
-};
+export type { DismissConfig } from "./FocusGroupConfig.ts";
+export { DEFAULT_DISMISS } from "./FocusGroupConfig.ts";

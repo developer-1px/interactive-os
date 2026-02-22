@@ -8,6 +8,9 @@
 import type { BaseCommand } from "@kernel/core/tokens";
 import { produce } from "immer";
 import { OS_FOCUS } from "@/os/3-commands/focus/focus";
+import { OS_SELECTION_CLEAR } from "@/os/3-commands/selection/selection";
+import { resolveItemFallback } from "@/os/3-commands/focus/focusStackOps";
+import { os } from "@/os/kernel";
 import {
   type ArrayCollectionConfig,
   autoDeepClone,
@@ -92,6 +95,38 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     ? config._ops
     : opsFromAccessor((config as ArrayCollectionConfig<S, T>).accessor);
 
+  // ── Focus recovery for delete/cut (shared) ──
+  // Uses resolveItemFallback for root items, parent/sibling for nested.
+  function computeDeleteFocus(
+    allItems: T[],
+    targetId: string,
+    state: S,
+    excludeIds?: string[],
+  ): BaseCommand | undefined {
+    const isRoot = allItems.some((item) => item.id === targetId);
+    if (isRoot) {
+      const visible = config.filter
+        ? allItems.filter(config.filter(state))
+        : allItems;
+      const visibleIds = visible
+        .map((item) => toItemId(item.id))
+        .filter((id) => !excludeIds?.includes(id) || id === toItemId(targetId));
+      const idx = visibleIds.indexOf(toItemId(targetId));
+      const remaining = visibleIds.filter((id) => id !== toItemId(targetId) && !excludeIds?.includes(id));
+      const resolved = resolveItemFallback(toItemId(targetId), remaining, { index: idx });
+      return resolved ? OS_FOCUS({ zoneId: zoneName, itemId: resolved }) : undefined;
+    }
+    // Nested: next sibling → prev sibling → parent
+    const parent = findParentOf(allItems as any[], targetId);
+    if (parent?.children) {
+      const idx = parent.children.findIndex((c: { id: string }) => c.id === targetId);
+      const neighbor = parent.children[idx + 1] ?? parent.children[idx - 1];
+      const targetItemId = neighbor?.id ?? parent.id;
+      return OS_FOCUS({ zoneId: zoneName, itemId: toItemId(targetItemId) });
+    }
+    return undefined;
+  }
+
   // ── add ── (auto-generated from create factory)
   const add = config.create
     ? zone.command(
@@ -118,37 +153,8 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       const isNested = !isRoot && !!findInTree(allItems as any[], payload.id);
       if (!isRoot && !isNested) return { state: ctx.state };
 
-      let focusCmd: BaseCommand | undefined;
-      if (isRoot) {
-        // Focus recovery for root items
-        const visible = config.filter
-          ? allItems.filter(config.filter(ctx.state))
-          : allItems;
-        const visIdx = visible.findIndex((item) => item.id === payload.id);
-        if (visIdx !== -1) {
-          const neighbor = visible[visIdx + 1] ?? visible[visIdx - 1];
-          if (neighbor) {
-            focusCmd = OS_FOCUS({
-              zoneId: zoneName,
-              itemId: toItemId(neighbor.id),
-            });
-          }
-        }
-      } else {
-        // Focus recovery for nested items: next sibling → prev sibling → parent
-        const parent = findParentOf(allItems as any[], payload.id);
-        if (parent?.children) {
-          const idx = parent.children.findIndex(
-            (c: { id: string }) => c.id === payload.id,
-          );
-          const neighbor = parent.children[idx + 1] ?? parent.children[idx - 1];
-          const targetId = neighbor?.id ?? parent.id;
-          focusCmd = OS_FOCUS({
-            zoneId: zoneName,
-            itemId: toItemId(targetId),
-          });
-        }
-      }
+      // Focus recovery via resolveItemFallback (single path for all deletion)
+      const focusCmd = computeDeleteFocus(allItems, payload.id, ctx.state);
 
       return {
         state: produce(ctx.state, (draft) => {
@@ -306,50 +312,11 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         .filter((t): t is T => Boolean(t));
       if (found.length === 0) return { state: ctx.state };
 
-      // Focus Recovery Logic
+      // Focus recovery: reuse resolveItemFallback
       const focusId = payload.focusId;
-      let focusCmd: BaseCommand | undefined;
-
-      if (focusId && payload.ids.includes(focusId)) {
-        const visible = config.filter
-          ? items.filter(config.filter(ctx.state))
-          : items;
-
-        const currentIndex = visible.findIndex((item) => item.id === focusId);
-        if (currentIndex !== -1) {
-          // Root-level focus recovery
-          const next = visible
-            .slice(currentIndex + 1)
-            .find((item) => !payload.ids.includes(item.id));
-          const prev = visible
-            .slice(0, currentIndex)
-            .reverse()
-            .find((item) => !payload.ids.includes(item.id));
-
-          const targetId = next?.id ?? prev?.id;
-          if (targetId) {
-            focusCmd = OS_FOCUS({
-              zoneId: zoneName,
-              itemId: toItemId(targetId),
-            });
-          }
-        } else {
-          // Nested item focus recovery: next sibling → prev sibling → parent
-          const parent = findParentOf(items as any[], focusId);
-          if (parent?.children) {
-            const idx = parent.children.findIndex(
-              (c: { id: string }) => c.id === focusId,
-            );
-            const neighbor =
-              parent.children[idx + 1] ?? parent.children[idx - 1];
-            const targetId = neighbor?.id ?? parent.id;
-            focusCmd = OS_FOCUS({
-              zoneId: zoneName,
-              itemId: toItemId(targetId),
-            });
-          }
-        }
-      }
+      const focusCmd = focusId && payload.ids.includes(focusId)
+        ? computeDeleteFocus(items, focusId, ctx.state, payload.ids)
+        : undefined;
 
       const cloned = found.map((t) => ({ ...t }));
 
@@ -567,9 +534,13 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         : [toEntityId(cursor.focusId)];
 
     return {
-      onDelete: guarded((cursor) =>
-        idsFromCursor(cursor).map((id) => remove({ id })),
-      ),
+      onDelete: guarded((cursor) => {
+        const cmds: BaseCommand[] = idsFromCursor(cursor).map((id) => remove({ id }));
+        if (cursor.selection.length > 0) {
+          cmds.push(OS_SELECTION_CLEAR({ zoneId: zoneName }));
+        }
+        return cmds;
+      }),
       onMoveUp: guarded((cursor) => moveUp({ id: toEntityId(cursor.focusId) })),
       onMoveDown: guarded((cursor) =>
         moveDown({ id: toEntityId(cursor.focusId) }),
@@ -592,6 +563,11 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           ),
         },
       ],
+      getItems: () => {
+        const appState = os.getState().apps[(app as any).__appId] as S;
+        if (!appState) return [];
+        return ops.getItems(appState).map((item) => toItemId(item.id));
+      },
     };
   }
 

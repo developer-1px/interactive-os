@@ -85,10 +85,11 @@ describe("Keybinding Resolution", () => {
       expect((result?.command as any)?.type).toBe("OS_NAVIGATE");
     });
 
-    it("F2 → OS_FIELD_START_EDIT", () => {
+    it("F2 → OS_ACTIVATE", () => {
+      // F2 triggers onAction (standard OS pattern — app decides whether to enter edit mode)
       const result = Keybindings.resolve("F2", ctx);
       expect(result).not.toBeNull();
-      expect((result?.command as any)?.type).toBe("OS_FIELD_START_EDIT");
+      expect((result?.command as any)?.type).toBe("OS_ACTIVATE");
     });
   });
 

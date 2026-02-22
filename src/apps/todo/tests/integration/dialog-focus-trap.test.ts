@@ -235,7 +235,7 @@ describe("Dialog Duplicate Zone Fix — Red→Green Proof", () => {
         ZoneRegistry.register("todo-delete-dialog", {
             role: "alertdialog",
             config: dialogConfig,
-            element: null as unknown as HTMLElement,
+            element: null,
             parentId: null,
         });
 

@@ -145,19 +145,25 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     kernel.defineEffect("focus", () => { });
     kernel.defineEffect("scroll", () => { });
 
-    // ── Mock contexts ──
+    // ── Mock contexts (accessor-first, mock-fallback) ──
     kernel.defineContext("dom-items", () => {
         const zoneId = kernel.getState().os.focus.activeZoneId;
         const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
+        // Prefer state-derived accessor
+        if (entry?.getItems) {
+            const items = entry.getItems();
+            return entry.itemFilter ? entry.itemFilter(items) : items;
+        }
+        // Fallback: mock items
         const items = mockItems.current;
         return entry?.itemFilter ? entry.itemFilter(items) : items;
     });
     kernel.defineContext("dom-rects", () => {
         const zoneId = kernel.getState().os.focus.activeZoneId;
         const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
-        const items = entry?.itemFilter
-            ? entry.itemFilter(mockItems.current)
-            : mockItems.current;
+        // Items from accessor or mock
+        const items = entry?.getItems?.()
+            ?? (entry?.itemFilter ? entry.itemFilter(mockItems.current) : mockItems.current);
         const rects = mockRects.current;
         if (rects.size > 0) return rects;
         const auto = new Map<string, DOMRect>();
@@ -167,9 +173,40 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         return auto;
     });
     kernel.defineContext("zone-config", () => mockConfig.current);
-    kernel.defineContext("dom-expandable-items", () => mockExpandableItems.current);
-    kernel.defineContext("dom-tree-levels", () => mockTreeLevels.current);
-    kernel.defineContext("dom-zone-order", () => mockZoneOrder.current);
+    kernel.defineContext("dom-expandable-items", () => {
+        const zoneId = kernel.getState().os.focus.activeZoneId;
+        const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
+        return entry?.getExpandableItems?.() ?? mockExpandableItems.current;
+    });
+    kernel.defineContext("dom-tree-levels", () => {
+        const zoneId = kernel.getState().os.focus.activeZoneId;
+        const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
+        return entry?.getTreeLevels?.() ?? mockTreeLevels.current;
+    });
+    kernel.defineContext("dom-zone-order", () => {
+        // If zones have getItems, build order from registry
+        const registeredKeys = ZoneRegistry.orderedKeys();
+        if (registeredKeys.length > 0 && mockZoneOrder.current.length === 0) {
+            const state = kernel.getState();
+            return registeredKeys
+                .filter(zId => ZoneRegistry.has(zId))
+                .map(zId => {
+                    const ze = ZoneRegistry.get(zId)!;
+                    const items = ze.getItems?.() ?? mockItems.current;
+                    const filtered = ze.itemFilter ? ze.itemFilter(items) : items;
+                    const zoneState = state.os.focus.zones[zId];
+                    return {
+                        zoneId: zId,
+                        firstItemId: filtered[0] ?? null,
+                        lastItemId: filtered[filtered.length - 1] ?? null,
+                        entry: ze.config?.navigate?.entry ?? "first",
+                        selectedItemId: zoneState?.selection?.[0] ?? null,
+                        lastFocusedId: zoneState?.lastFocusedId ?? null,
+                    };
+                });
+        }
+        return mockZoneOrder.current;
+    });
 
     // ── Register OS commands ──
     const OS_FOCUS_CMD = kernel.register(prodOS_FOCUS);
@@ -206,7 +243,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         ZoneRegistry.register(zoneId, {
             role,
             config: DEFAULT_CONFIG,
-            element: null as unknown as HTMLElement,
+            element: null,
             parentId: null,
             ...(opts?.onAction ? { onAction: opts.onAction } : {}),
             ...(opts?.onCheck ? { onCheck: opts.onCheck } : {}),
@@ -215,12 +252,18 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     }
 
     function setActiveZone(zoneId: string, focusedItemId: string | null) {
-        const existingRole = ZoneRegistry.get(zoneId)?.role;
+        const existingEntry = ZoneRegistry.get(zoneId);
         ZoneRegistry.register(zoneId, {
-            ...(existingRole ? { role: existingRole } : {}),
+            ...(existingEntry?.role ? { role: existingEntry.role } : {}),
             config: mockConfig.current,
-            element: null as unknown as HTMLElement,
+            element: null,
             parentId: null,
+            // Preserve existing getItems if explicitly registered
+            ...(existingEntry?.getItems ? { getItems: existingEntry.getItems } : {}),
+            // Preserve other existing callbacks
+            ...(existingEntry?.onAction ? { onAction: existingEntry.onAction } : {}),
+            ...(existingEntry?.onCheck ? { onCheck: existingEntry.onCheck } : {}),
+            ...(existingEntry?.onDelete ? { onDelete: existingEntry.onDelete } : {}),
         });
         kernel.setState((s: AppState) =>
             produce(s, (draft) => {
@@ -261,7 +304,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         ZoneRegistry.register(zoneId, {
             ...(role ? { role } : {}),
             config: mockConfig.current,
-            element: null as unknown as HTMLElement,
+            element: null,
             parentId: null,
             ...(opts?.onAction ? { onAction: opts.onAction } : {}),
             ...(opts?.onCheck ? { onCheck: opts.onCheck } : {}),

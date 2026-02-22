@@ -103,6 +103,8 @@ export interface CollectionBindingsResult {
     key: string;
     command: (cursor: { focusId: string; selection: string[] }) => any;
   }>;
+  /** Item accessor — returns ordered item IDs for stale focus recovery */
+  getItems: () => string[];
 }
 
 // ═══════════════════════════════════════════════════════════════════

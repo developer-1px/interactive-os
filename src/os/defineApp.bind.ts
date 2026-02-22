@@ -40,6 +40,9 @@ export function createBoundComponents<S>(
     keybindings?: KeybindingEntry<S>[];
     options?: ZoneOptions;
     itemFilter?: (items: string[]) => string[];
+    getItems?: () => string[];
+    getExpandableItems?: () => Set<string>;
+    getTreeLevels?: () => Map<string, number>;
   },
 ): BoundComponents<S> {
   const { appId, zoneName, useComputed } = bindConfig;
@@ -69,6 +72,9 @@ export function createBoundComponents<S>(
       onRedo: config.onRedo,
       options: config.options,
       itemFilter: config.itemFilter,
+      getItems: config.getItems,
+      getExpandableItems: config.getExpandableItems,
+      getTreeLevels: config.getTreeLevels,
     };
 
     // Keybindings registration

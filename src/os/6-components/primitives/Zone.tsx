@@ -68,6 +68,12 @@ export interface ZoneProps
   onDismiss?: BaseCommand;
   /** Dynamic item filter — controls which items are keyboard-navigable at runtime */
   itemFilter?: (items: string[]) => string[];
+  /** Item accessor — returns ordered item IDs for stale focus recovery */
+  getItems?: () => string[];
+  /** Expandable item accessor */
+  getExpandableItems?: () => Set<string>;
+  /** Tree level accessor */
+  getTreeLevels?: () => Map<string, number>;
   /** Children */
   children: ReactNode;
 }
@@ -89,6 +95,9 @@ export function Zone({
   onRedo,
   onDismiss,
   itemFilter,
+  getItems,
+  getExpandableItems,
+  getTreeLevels,
   children,
   className,
   style,
@@ -121,6 +130,9 @@ export function Zone({
       {...(onRedo !== undefined ? { onRedo } : {})}
       {...(onDismiss !== undefined ? { onDismiss } : {})}
       {...(itemFilter !== undefined ? { itemFilter } : {})}
+      {...(getItems !== undefined ? { getItems } : {})}
+      {...(getExpandableItems !== undefined ? { getExpandableItems } : {})}
+      {...(getTreeLevels !== undefined ? { getTreeLevels } : {})}
       {...(className !== undefined ? { className } : {})}
       {...(style !== undefined ? { style } : {})}
       {...props}

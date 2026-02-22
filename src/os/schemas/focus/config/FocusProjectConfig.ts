@@ -1,9 +1,2 @@
-export interface ProjectConfig {
-  virtualFocus: boolean;
-  autoFocus: boolean;
-}
-
-export const DEFAULT_PROJECT: ProjectConfig = {
-  virtualFocus: false,
-  autoFocus: false,
-};
+export type { ProjectConfig } from "./FocusGroupConfig.ts";
+export { DEFAULT_PROJECT } from "./FocusGroupConfig.ts";

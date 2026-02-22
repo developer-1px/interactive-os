@@ -1,9 +1,2 @@
-export interface TabConfig {
-  behavior: "trap" | "escape" | "flow";
-  restoreFocus: boolean;
-}
-
-export const DEFAULT_TAB: TabConfig = {
-  behavior: "flow",
-  restoreFocus: false,
-};
+export type { TabConfig } from "./FocusGroupConfig.ts";
+export { DEFAULT_TAB } from "./FocusGroupConfig.ts";

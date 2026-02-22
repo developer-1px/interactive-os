@@ -155,7 +155,9 @@ describe("OS_DELETE with multi-selection", () => {
     });
   });
 
-  it("clears selection after multi-delete", () => {
+  it("preserves selection after multi-delete — app decides when to clear", () => {
+    // OS_DELETE delegates to onDelete callback — selection clearing is app's responsibility.
+    // This allows dialog-based deletion to preserve selection until user confirms.
     ZoneRegistry.register("testZone", {
       config: {} as any,
       element: document.createElement("div"),
@@ -167,7 +169,7 @@ describe("OS_DELETE with multi-selection", () => {
     os.dispatch(OS_DELETE());
 
     const zone = os.getState().os.focus.zones["testZone"];
-    expect(zone?.selection).toEqual([]);
+    expect(zone?.selection).toEqual(["item-1", "item-2"]);
   });
 });
 

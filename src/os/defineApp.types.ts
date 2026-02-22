@@ -83,6 +83,9 @@ export interface ZoneBindings {
   onRedo?: BaseCommand;
   options?: import("@os/6-components/primitives/Zone").ZoneOptions;
   itemFilter?: (items: string[]) => string[];
+  getItems?: () => string[];
+  getExpandableItems?: () => Set<string>;
+  getTreeLevels?: () => Map<string, number>;
 }
 
 export interface FieldBindings {

@@ -8,14 +8,13 @@
  */
 
 import { produce } from "immer";
-import { ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
 export const OS_ESCAPE = os.defineCommand(
   "OS_ESCAPE",
-  [ZONE_CONFIG],
+  [],
   (ctx) => () => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
@@ -23,9 +22,12 @@ export const OS_ESCAPE = os.defineCommand(
     const zone = ctx.state.os.focus.zones[activeZoneId];
     if (!zone) return;
 
-    const config = ctx.inject(ZONE_CONFIG);
+    const zoneEntry = ZoneRegistry.get(activeZoneId);
+    if (!zoneEntry) return;
 
-    switch (config.dismiss.escape) {
+    const config = zoneEntry.config;
+
+    switch (config.dismiss?.escape) {
       case "deselect": {
         if (zone.selection.length === 0) return;
         return {
@@ -38,7 +40,6 @@ export const OS_ESCAPE = os.defineCommand(
       }
       case "close": {
         // Dispatch onDismiss command if registered on this zone
-        const zoneEntry = ZoneRegistry.get(activeZoneId);
         const dismissCommand = zoneEntry?.onDismiss;
 
         return {

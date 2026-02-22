@@ -28,7 +28,7 @@ import { produce } from "immer";
 import { z } from "zod";
 import { OS_FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { OS_OVERLAY_OPEN, OS_OVERLAY_CLOSE } from "@/os/3-commands/overlay/overlay";
-import { OS_FOCUS } from "@/os/3-commands/focus/focus";
+import { OS_SELECTION_CLEAR } from "@/os/3-commands/selection/selection";
 import { OS_TOAST_SHOW } from "@/os/3-commands/toast/toast";
 
 import { defineApp } from "@/os/defineApp";
@@ -163,15 +163,6 @@ export const confirmDeleteTodo = listCollection.command(
     const ids = ctx.state.ui.pendingDeleteIds;
     if (!ids || ids.length === 0) return { state: ctx.state };
 
-    // Focus recovery: same logic as collection.remove()
-    // Find neighbor of first deleted item (next → prev)
-    const allItems = ctx.state.data.todoOrder;
-    const firstIdx = allItems.findIndex((id) => ids.includes(id));
-    const neighbor = firstIdx !== -1
-      ? allItems.find((id, i) => i > firstIdx && !ids.includes(id))
-      ?? [...allItems].slice(0, firstIdx).reverse().find((id) => !ids.includes(id))
-      : undefined;
-
     return {
       state: produce(ctx.state, (draft) => {
         for (const id of ids) {
@@ -179,10 +170,11 @@ export const confirmDeleteTodo = listCollection.command(
         }
         draft.ui.pendingDeleteIds = [];
       }),
+      // Focus recovery is automatic: OS_OVERLAY_CLOSE → applyFocusPop
+      // detects stale focusedItemId via zone's getItems, resolves to neighbor.
       dispatch: [
         OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
-        // Focus recovery after zone restoration (STACK_POP via OVERLAY_CLOSE)
-        ...(neighbor ? [OS_FOCUS({ zoneId: "list", itemId: neighbor })] : []),
+        OS_SELECTION_CLEAR({ zoneId: "list" }),
         OS_TOAST_SHOW({
           message: `${ids.length} task${ids.length > 1 ? "s" : ""} deleted`,
           actionLabel: "Undo",
@@ -223,6 +215,7 @@ export const bulkToggleCompleted = listCollection.command(
 const listBindings = listCollection.collectionBindings();
 export const TodoListUI = listCollection.bind({
   role: "listbox",
+  options: { dismiss: { escape: "deselect" } },
   onCheck: (cursor) => toggleTodo({ id: cursor.focusId }),
   onAction: (cursor) => startEdit({ id: cursor.focusId }),
   ...listBindings,

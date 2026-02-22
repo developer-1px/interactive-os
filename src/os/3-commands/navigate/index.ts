@@ -40,7 +40,11 @@ export const OS_NAVIGATE = os.defineCommand(
     const zone = ctx.state.os.focus.zones[activeZoneId];
     if (!zone) return;
 
-    const items: string[] = ctx.inject(DOM_ITEMS);
+    const zoneEntry = ZoneRegistry.get(activeZoneId);
+
+    // Prefer state-derived getItems, fall back to DOM_ITEMS (legacy)
+    const rawItems = zoneEntry?.getItems?.() ?? ctx.inject(DOM_ITEMS);
+    const items: string[] = zoneEntry?.itemFilter ? zoneEntry.itemFilter(rawItems) : rawItems;
     const itemRects: Map<string, DOMRect> = ctx.inject(DOM_RECTS);
     const config = ctx.inject(ZONE_CONFIG);
 
@@ -48,7 +52,6 @@ export const OS_NAVIGATE = os.defineCommand(
 
     // W3C Tree Pattern: ArrowRight/ArrowLeft handle expand/collapse
     // Only applies to tree/treegrid roles — not toolbars or other zones.
-    const zoneEntry = ZoneRegistry.get(activeZoneId);
     const isTreeRole =
       zoneEntry?.role === "tree" || zoneEntry?.role === "treegrid";
 

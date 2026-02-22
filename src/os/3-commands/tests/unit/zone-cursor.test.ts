@@ -258,8 +258,11 @@ describe("Edge cases", () => {
 // FR7: OS_SELECTION_CLEAR after delete/cut
 // ═══════════════════════════════════════════════════════════════════
 
-describe("FR7: OS_SELECTION_CLEAR after delete/cut", () => {
-  it("clears selection after OS_DELETE with multi-selection", () => {
+describe("FR7: OS_DELETE selection behavior", () => {
+  it("preserves selection after OS_DELETE — app decides when to clear", () => {
+    // OS_DELETE no longer auto-clears selection.
+    // This enables dialog-based deletion where selection must survive until confirmation.
+    // Apps include OS_SELECTION_CLEAR in their onDelete return when appropriate.
     const onDelete = vi.fn(() => ({ type: "mock/delete", payload: {} }));
 
     ZoneRegistry.register("z1", {
@@ -273,6 +276,7 @@ describe("FR7: OS_SELECTION_CLEAR after delete/cut", () => {
     os.dispatch(OS_DELETE());
 
     const zone = os.getState().os.focus.zones["z1"];
-    expect(zone?.selection).toEqual([]);
+    // Selection preserved — app's onDelete callback is responsible for clearing
+    expect(zone?.selection).toEqual(["item-1", "item-2"]);
   });
 });

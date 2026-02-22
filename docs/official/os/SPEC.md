@@ -3,7 +3,7 @@
 > 모든 동작 계약을 이 문서 하나로 관리한다.
 > 코드는 이 문서를 따르고, 테스트는 이 문서를 검증한다.
 >
-> Last verified: 2026-02-18
+> Last verified: 2026-02-23
 
 ---
 
@@ -55,17 +55,17 @@
 
 | Command | Payload | State Change | Effects | Status |
 |---------|---------|-------------|---------|--------|
-| `FOCUS` | `{ zoneId, itemId }` | `activeZoneId = zoneId`, zone의 `focusedItemId = itemId` | `focus: itemId` | ✅ |
-| `SYNC_FOCUS` | `{ zoneId, itemId }` | zone의 `focusedItemId = itemId`, `activeZoneId = zoneId` | — (no focus effect) | ✅ |
-| `RECOVER` | `{ zoneId }` | `focusedItemId = recoveryTargetId \|\| lastFocusedId` | `focus: targetId` | ✅ |
-| `STACK_PUSH` | `{ zoneId }` | focusStack에 현재 상태 push | — | ✅ |
-| `STACK_POP` | `{}` | focusStack에서 pop, 이전 zone/item 복원 | `focus: restoredId` | ✅ |
+| `OS_FOCUS` | `{ zoneId, itemId }` | `activeZoneId = zoneId`, zone의 `focusedItemId = itemId` | `focus: itemId` | ✅ |
+| `OS_SYNC_FOCUS` | `{ zoneId, itemId }` | zone의 `focusedItemId = itemId`, `activeZoneId = zoneId` | — (no focus effect) | ✅ |
+| `OS_RECOVER` | `{ zoneId }` | `focusedItemId = recoveryTargetId \|\| lastFocusedId` | `focus: targetId` | ✅ |
+| `OS_STACK_PUSH` | `{ zoneId }` | focusStack에 현재 상태 push | — | ✅ |
+| `OS_STACK_POP` | `{}` | focusStack에서 pop, 이전 zone/item 복원 | `focus: restoredId` | ✅ |
 
 ### 3.2 Navigation Commands
 
 | Command | Payload | Behavior (config-dependent) | Effects | Status |
 |---------|---------|---------------------------|---------|--------|
-| `NAVIGATE` | `{ direction }` | orientation에 따라 방향 필터링, loop/clamp 적용 | `focus: targetId` | ✅ |
+| `OS_NAVIGATE` | `{ direction }` | orientation에 따라 방향 필터링, loop/clamp 적용 | `focus: targetId` | ✅ |
 
 **Navigate Config Matrix:**
 
@@ -91,7 +91,7 @@
 
 | Command | Payload | Behavior (config-dependent) | Effects | Status |
 |---------|---------|---------------------------|---------|--------|
-| `TAB` | `{ direction }` | behavior에 따라 분기 | `focus: targetId` | ✅ |
+| `OS_TAB` | `{ direction }` | behavior에 따라 분기 | `focus: targetId` | ✅ |
 
 **Tab Config Matrix:**
 
@@ -110,13 +110,12 @@
 
 | Command | Payload | State Change | Effects | Status |
 |---------|---------|-------------|---------|--------|
-| `SELECT` | `{ targetId, meta }` | meta.cmd → toggle, meta.shift → range, 기본 → set | — | ✅ |
-| `SELECTION_SET` | `{ items }` | `selection = items` | — | ✅ |
-| `SELECTION_ADD` | `{ items }` | `selection += items` | — | ✅ |
-| `SELECTION_REMOVE` | `{ items }` | `selection -= items` | — | ✅ |
-| `SELECTION_TOGGLE` | `{ items }` | 각 item toggle | — | ✅ |
-| `SELECTION_CLEAR` | `{}` | `selection = []` | — | ✅ |
-| `OS_SELECT_ALL` | `{}` | `selection = DOM_ITEMS 전체` | — | ✅ |
+| `OS_SELECT` | `{ targetId, mode }` | mode: single/replace/toggle/range. 모든 selection 변경을 처리 | — | ✅ |
+| `OS_SELECTION_CLEAR` | `{ zoneId }` | `selection = []`, `selectionAnchor = null` | — | ✅ |
+| `OS_SELECT_ALL` | `{}` | `selection = 전체 아이템` | — | ✅ |
+
+> **Retired (2026-02-22)**: `SELECTION_SET`, `SELECTION_ADD`, `SELECTION_REMOVE`, `SELECTION_TOGGLE`
+> — `OS_SELECT(mode: ...)` 하나로 통합. 앱에서 직접 사용 0건이었음.
 
 **Select Config Matrix:**
 
@@ -150,9 +149,9 @@
 
 | Command | Payload | Behavior | Effects | Status |
 |---------|---------|----------|---------|--------|
-| `ACTIVATE` | `{ targetId }` | onAction 콜백 dispatch | `dispatch: onAction` | ✅ |
+| `OS_ACTIVATE` | `{ targetId }` | onAction 콜백 dispatch | `dispatch: onAction` | ✅ |
 | `OS_CHECK` | `{ targetId }` | onCheck 콜백 dispatch | `dispatch: onCheck` | ✅ |
-| `ESCAPE` | `{}` | dismiss.escape 설정에 따라: close→onDismiss, deselect→selection clear | `dispatch: onDismiss` | ✅ |
+| `OS_ESCAPE` | `{}` | dismiss.escape 설정에 따라: close→onDismiss, deselect→selection clear | `dispatch: onDismiss` | ✅ |
 | `OS_DELETE` | `{}` | onDelete 콜백 dispatch (선택된 아이템 대상) | `dispatch: onDelete` | ✅ |
 | `OS_MOVE_UP` | `{}` | onMoveUp 콜백 dispatch | `dispatch: onMoveUp` | ✅ |
 | `OS_MOVE_DOWN` | `{}` | onMoveDown 콜백 dispatch | `dispatch: onMoveDown` | ✅ |
@@ -171,22 +170,22 @@
 
 | Command | Payload | State Change | Effects | Status |
 |---------|---------|-------------|---------|--------|
-| `EXPAND` | `{ targetId, expanded }` | expandedItems에 추가/제거 | — | ✅ |
+| `OS_EXPAND` | `{ targetId, expanded }` | expandedItems에 추가/제거 | — | ✅ |
 
 ### 3.8 Field Commands
 
 | Command | Payload | Behavior | Effects | Status |
 |---------|---------|----------|---------|--------|
-| `FIELD_START_EDIT` | `{ fieldId }` | editing 상태 진입 | — | ✅ |
-| `FIELD_COMMIT` | `{ fieldId, value }` | 값 커밋, editing 종료 | — | ✅ |
-| `FIELD_CANCEL` | `{ fieldId }` | 취소, editing 종료 | — | ✅ |
+| `OS_FIELD_START_EDIT` | `{ fieldId }` | editing 상태 진입 | — | ✅ |
+| `OS_FIELD_COMMIT` | `{ fieldId, value }` | 값 커밋, editing 종료 | — | ✅ |
+| `OS_FIELD_CANCEL` | `{ fieldId }` | 취소, editing 종료 | — | ✅ |
 
 ### 3.9 Overlay Commands
 
 | Command | Payload | Behavior | Effects | Status |
 |---------|---------|----------|---------|--------|
-| `OVERLAY_OPEN` | `{ overlayId }` | 오버레이 열기, 포커스 이동 | — | ✅ |
-| `OVERLAY_CLOSE` | `{ overlayId }` | 오버레이 닫기, 포커스 복원 | — | ✅ |
+| `OS_OVERLAY_OPEN` | `{ overlayId }` | 오버레이 열기, 포커스 이동 | — | ✅ |
+| `OS_OVERLAY_CLOSE` | `{ overlayId }` | 오버레이 닫기, 포커스 복원 | — | ✅ |
 
 ---
 
@@ -203,12 +202,18 @@
 
 ## 5. Context Contract
 
-| Context | Returns | Used By |
-|---------|---------|---------|
-| `DOM_ITEMS` | `string[]` — 활성 zone의 아이템 ID 목록 (DOM 순서) | NAVIGATE, TAB, SELECT, DELETE 등 |
-| `DOM_RECTS` | `Map<string, DOMRect>` — 활성 zone 아이템의 위치 | NAVIGATE (spatial) |
-| `ZONE_CONFIG` | `FocusGroupConfig` — 활성 zone의 설정 | NAVIGATE, TAB, SELECT, ACTIVATE 등 |
-| `DOM_ZONE_ORDER` | `ZoneOrderEntry[]` — 모든 zone의 DOM 순서 + first/last item | TAB (cross-zone escape) |
+> **Accessor-first pattern (2026-02-22)**: `DOM_ITEMS`, `DOM_EXPANDABLE_ITEMS`, `DOM_TREE_LEVELS`는
+> ZoneEntry의 accessor (`getItems`, `getExpandableItems`, `getTreeLevels`)를 우선 사용하고,
+> accessor가 없을 때만 DOM fallback. DOM은 geometry(DOMRect)만 정당한 소스.
+
+| Context | Returns | Accessor | Used By |
+|---------|---------|----------|---------|
+| `DOM_ITEMS` | `string[]` — 아이템 ID 목록 | `ZoneEntry.getItems()` 우선 | NAVIGATE, TAB, SELECT, DELETE 등 |
+| `DOM_RECTS` | `Map<string, DOMRect>` — 아이템 위치 | ❌ (DOM 전용 — geometry) | NAVIGATE (spatial) |
+| `ZONE_CONFIG` | `FocusGroupConfig` — zone 설정 | — | NAVIGATE, TAB, SELECT, ACTIVATE 등 |
+| `DOM_ZONE_ORDER` | `ZoneOrderEntry[]` — zone 순서 | ZoneRegistry 순서 우선 | TAB (cross-zone escape) |
+| `DOM_EXPANDABLE_ITEMS` | `Set<string>` — 확장 가능 아이템 | `ZoneEntry.getExpandableItems()` 우선 | NAVIGATE (tree) |
+| `DOM_TREE_LEVELS` | `Map<string, number>` — 트리 레벨 | `ZoneEntry.getTreeLevels()` 우선 | NAVIGATE (tree) |
 
 ---
 
@@ -218,44 +223,49 @@
 
 | Key | Command | Args |
 |-----|---------|------|
-| `ArrowDown` | NAVIGATE | `{ direction: "down" }` |
-| `ArrowUp` | NAVIGATE | `{ direction: "up" }` |
-| `ArrowLeft` | NAVIGATE | `{ direction: "left" }` |
-| `ArrowRight` | NAVIGATE | `{ direction: "right" }` |
-| `Home` | NAVIGATE | `{ direction: "home" }` |
-| `End` | NAVIGATE | `{ direction: "end" }` |
-| `Tab` | TAB | `{ direction: "forward" }` |
-| `Shift+Tab` | TAB | `{ direction: "backward" }` |
+| `ArrowDown` | OS_NAVIGATE | `{ direction: "down" }` |
+| `ArrowUp` | OS_NAVIGATE | `{ direction: "up" }` |
+| `ArrowLeft` | OS_NAVIGATE | `{ direction: "left" }` |
+| `ArrowRight` | OS_NAVIGATE | `{ direction: "right" }` |
+| `Home` | OS_NAVIGATE | `{ direction: "home" }` |
+| `End` | OS_NAVIGATE | `{ direction: "end" }` |
+| `Tab` | OS_TAB | `{ direction: "forward" }` |
+| `Shift+Tab` | OS_TAB | `{ direction: "backward" }` |
 
 ### 6.2 Interaction (when: navigating)
 
 | Key | Command | Args |
 |-----|---------|------|
-| `Enter` | ACTIVATE | `{}` |
-| `Escape` | ESCAPE | `{}` |
+| `Enter` | OS_ACTIVATE | `{}` |
+| `Escape` | OS_ESCAPE | `{}` |
 | `Delete` / `Backspace` | OS_DELETE | `{}` |
-| `Alt+ArrowUp` | OS_MOVE_UP | `{}` |
-| `Alt+ArrowDown` | OS_MOVE_DOWN | `{}` |
+| `Meta+ArrowUp` | OS_MOVE_UP | `{}` |
+| `Meta+ArrowDown` | OS_MOVE_DOWN | `{}` |
 | `Meta+Z` | OS_UNDO | `{}` |
 | `Meta+Shift+Z` | OS_REDO | `{}` |
 | `Meta+A` | OS_SELECT_ALL | `{}` |
 
-### 6.3 Clipboard (when: navigating)
+### 6.3 Clipboard
+
+> Clipboard는 keybinding으로 등록하지 않는다 (native clipboard 보존).
+> `ClipboardListener`가 `copy`/`cut`/`paste` 이벤트를 가로채서 zone callback 호출.
+
+### 6.4 F2 (when: navigating)
 
 | Key | Command | Args |
 |-----|---------|------|
-| `Meta+C` | OS_COPY | `{}` |
-| `Meta+X` | OS_CUT | `{}` |
-| `Meta+V` | OS_PASTE | `{}` |
+| `F2` | OS_ACTIVATE | `{}` |
 
-### 6.4 Field (when: editing)
+> F2 → OS_ACTIVATE → onAction. 앱이 onAction에서 OS_FIELD_START_EDIT을 dispatch하여 편집 모드 진입.
+
+### 6.5 Field (when: editing)
 
 | Key | Command | Args |
 |-----|---------|------|
-| `Enter` | FIELD_COMMIT | `{}` |
-| `Escape` | FIELD_CANCEL | `{}` |
+| `Enter` | OS_FIELD_COMMIT | `{}` |
+| `Escape` | OS_FIELD_CANCEL | `{}` |
 
-### 6.5 Special (KeyboardListener)
+### 6.6 Special (KeyboardListener)
 
 | Key | Condition | Behavior |
 |-----|-----------|----------|

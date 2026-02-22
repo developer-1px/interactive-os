@@ -32,6 +32,7 @@ import "@os/keymaps/osDefaults";
 
 import type { AppPage, ZoneBindings, KeybindingEntry } from "./defineApp.types";
 import type { ZoneRole } from "./registries/roleRegistry";
+import { resolveRole } from "./registries/roleRegistry";
 import type { BaseCommand } from "@kernel/core/tokens";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -121,12 +122,12 @@ export function createAppPage<S>(
         const bindingEntry = zoneBindingEntries.get(zoneName);
         if (bindingEntry) {
             const { bindings } = bindingEntry;
+            const overrides = { ...bindings.options, ...opts?.config };
+            const config = resolveRole(bindingEntry.role, overrides);
             ZoneRegistry.register(zoneName, {
                 role: bindingEntry.role,
-                config: opts?.config
-                    ? { ...DEFAULT_CONFIG, ...opts.config }
-                    : DEFAULT_CONFIG,
-                element: null as unknown as HTMLElement,
+                config,
+                element: null,
                 parentId: null,
                 ...(bindings.onAction ? { onAction: bindings.onAction } : {}),
                 ...(bindings.onCheck ? { onCheck: bindings.onCheck } : {}),
@@ -140,6 +141,9 @@ export function createAppPage<S>(
                 ...(bindings.onRedo ? { onRedo: bindings.onRedo } : {}),
                 ...(bindings.onSelect ? { onSelect: bindings.onSelect } : {}),
                 ...(bindings.itemFilter ? { itemFilter: bindings.itemFilter } : {}),
+                ...(bindings.getItems ? { getItems: bindings.getItems } : {}),
+                ...(bindings.getExpandableItems ? { getExpandableItems: bindings.getExpandableItems } : {}),
+                ...(bindings.getTreeLevels ? { getTreeLevels: bindings.getTreeLevels } : {}),
             });
         }
 

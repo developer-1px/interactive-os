@@ -14,7 +14,6 @@ import {
   beginTransaction,
   endTransaction,
 } from "../../middlewares/historyKernelMiddleware";
-import { OS_SELECTION_CLEAR } from "../selection/selection";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 export const OS_DELETE = os.defineCommand("OS_DELETE", (ctx) => () => {
@@ -31,10 +30,10 @@ export const OS_DELETE = os.defineCommand("OS_DELETE", (ctx) => () => {
   const result = entry.onDelete(cursor);
   const commands = Array.isArray(result) ? result : [result];
 
-  // Wrap in transaction for single-undo, then clear selection
+  // OS_DELETE no longer forces OS_SELECTION_CLEAR, allowing apps to delay selection removal for dialogs.
+  // We still wrap the action in a single-undo transaction if there is a multi-selection.
   if (cursor.selection.length > 0) {
     beginTransaction();
-    commands.push(OS_SELECTION_CLEAR({ zoneId: activeZoneId }));
     queueMicrotask(endTransaction);
   }
 

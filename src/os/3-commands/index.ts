@@ -42,11 +42,7 @@ export { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "./overlay/overlay";
 export {
   OS_SELECT,
   OS_SELECT_ALL,
-  OS_SELECTION_ADD,
   OS_SELECTION_CLEAR,
-  OS_SELECTION_REMOVE,
-  OS_SELECTION_SET,
-  OS_SELECTION_TOGGLE,
 } from "./selection";
 // Tab
 export { OS_TAB } from "./tab";

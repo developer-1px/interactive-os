@@ -141,6 +141,15 @@ export interface FocusGroupProps
   /** Dynamic item filter — controls which items are keyboard-navigable at runtime */
   itemFilter?: (items: string[]) => string[];
 
+  /** Item accessor — returns ordered item IDs for stale focus recovery */
+  getItems?: () => string[];
+
+  /** Expandable item accessor — returns IDs of expandable items */
+  getExpandableItems?: () => Set<string>;
+
+  /** Tree level accessor — returns map of item ID → level */
+  getTreeLevels?: () => Map<string, number>;
+
   /** Children */
   children: ReactNode;
 
@@ -195,6 +204,9 @@ function buildZoneEntry(
     onUndo?: BaseCommand | undefined;
     onRedo?: BaseCommand | undefined;
     itemFilter?: ((items: string[]) => string[]) | undefined;
+    getItems?: (() => string[]) | undefined;
+    getExpandableItems?: (() => Set<string>) | undefined;
+    getTreeLevels?: (() => Map<string, number>) | undefined;
   },
 ): ZoneEntry {
   const entry: ZoneEntry = {
@@ -216,6 +228,9 @@ function buildZoneEntry(
   if (props.onUndo !== undefined) entry.onUndo = props.onUndo;
   if (props.onRedo !== undefined) entry.onRedo = props.onRedo;
   if (props.itemFilter !== undefined) entry.itemFilter = props.itemFilter;
+  if (props.getItems !== undefined) entry.getItems = props.getItems;
+  if (props.getExpandableItems !== undefined) entry.getExpandableItems = props.getExpandableItems;
+  if (props.getTreeLevels !== undefined) entry.getTreeLevels = props.getTreeLevels;
   return entry;
 }
 
@@ -246,6 +261,9 @@ export function FocusGroup({
   onRedo: _onRedo,
   onDismiss,
   itemFilter: _itemFilter,
+  getItems: _getItems,
+  getExpandableItems: _getExpandableItems,
+  getTreeLevels: _getTreeLevels,
   children,
   className,
   style,
@@ -314,6 +332,9 @@ export function FocusGroup({
           onUndo: _onUndo,
           onRedo: _onRedo,
           itemFilter: _itemFilter,
+          getItems: _getItems,
+          getExpandableItems: _getExpandableItems,
+          getTreeLevels: _getTreeLevels,
         }),
       );
     }
@@ -339,6 +360,9 @@ export function FocusGroup({
     _onUndo,
     _onRedo,
     _itemFilter,
+    _getItems,
+    _getExpandableItems,
+    _getTreeLevels,
   ]);
 
   // --- AutoFocus: focus first item on mount when config.project.autoFocus ---

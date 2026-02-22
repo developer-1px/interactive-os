@@ -1,7 +1,2 @@
-export interface ActivateConfig {
-  mode: "manual" | "automatic";
-}
-
-export const DEFAULT_ACTIVATE: ActivateConfig = {
-  mode: "manual",
-};
+export type { ActivateConfig } from "./FocusGroupConfig.ts";
+export { DEFAULT_ACTIVATE } from "./FocusGroupConfig.ts";

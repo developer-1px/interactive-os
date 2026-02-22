@@ -11,7 +11,6 @@ import { OS_ESCAPE } from "@os/3-commands/dismiss";
 import {
   OS_FIELD_CANCEL,
   OS_FIELD_COMMIT,
-  OS_FIELD_START_EDIT,
 } from "@os/3-commands/field/field";
 import {
   OS_ACTIVATE,
@@ -150,7 +149,7 @@ Keybindings.registerAll([
 Keybindings.registerAll([
   { key: "Enter", command: OS_FIELD_COMMIT(), when: "editing" },
   { key: "Escape", command: OS_FIELD_CANCEL(), when: "editing" },
-  { key: "F2", command: OS_FIELD_START_EDIT(), when: "navigating" },
+  { key: "F2", command: OS_ACTIVATE(), when: "navigating" }, // F2 triggers onAction (standard OS pattern for edit activation)
 ]);
 
 // ═══════════════════════════════════════════════════════════════════

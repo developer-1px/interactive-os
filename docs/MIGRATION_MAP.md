@@ -16,6 +16,14 @@
 | `Immer` / `produce` | 커널 순수 reducer | 2026-02-13 | 불변성 라이브러리 제거 |
 | `Zone` / `Item` / `Field` / `Trigger` (직접 import) | `createWidget` / `createTrigger` (headless) | 2026-02-13 | Headless UI 패턴 도입 |
 | `ZIFT` (프레임워크 명칭) | Interactive OS / Kernel | 2026-02-13 | 프로젝트명 변경, 일부 코드에 잔존 |
+| `OS_SELECTION_SET/ADD/REMOVE/TOGGLE` | `OS_SELECT(mode: "toggle"\|"range"\|"single"\|"replace")` | 2026-02-22 | 앱 사용 0건. OS_SELECT 하나로 통합 |
+| `null as unknown as HTMLElement` (ZoneEntry.element) | `element?: HTMLElement \| null` (optional) | 2026-02-22 | headless 환경 지원 |
+| DOM querySelectorAll → 구조 정보 역추적 | Zone accessor (`getItems`, `getExpandableItems`, `getTreeLevels`) 우선 | 2026-02-22 | Accessor-first pattern. DOM은 geometry만 |
+| 수동 focus recovery (remove/cut에서 OS_FOCUS) | OS 자동 resolve (`resolveItemFallback`) | 2026-02-22 | 68행 → 0행 |
+| `field/field.ts` (3 commands 합본) | `startEdit.ts`, `commit.ts`, `cancel.ts` (1 command = 1 file) | 2026-02-22 | 파일:컨셉 1:1 매핑 |
+| `clipboard/clipboard.ts` (3 commands 합본) | `copy.ts`, `cut.ts`, `paste.ts` (1 command = 1 file) | 2026-02-22 | 파일:컨셉 1:1 매핑 |
+| F2 → OS_FIELD_START_EDIT (keybinding) | F2 → OS_ACTIVATE → onAction (앱 결정) | 2026-02-22 | 표준 OS 패턴: F2는 활성화, 앱이 편집 결정 |
+| Config 7파일 분산 정의 | `FocusGroupConfig.ts` 단일 진실 원천 (나머지 re-export) | 2026-02-22 | 정의 위치 통합 |
 
 ## 아카이브된 문서
 
@@ -30,6 +38,23 @@
 | `4-archive/2026-02-focus-recovery/` | `1-project/focus-recovery/` | 프로젝트 완료 — FocusSync → FocusListener 전환 완료 |
 | `4-archive/2026-02-todo-v3-migration/` | `1-project/todo-v3-migration/` | 프로젝트 완료 — v3 승격, v1/v2 코드 완전 제거 |
 | `4-archive/2026-02-todo-app/` | `1-project/todo-app/` | 프로젝트 완료 — todo-v3-migration에 흡수 |
+| `archive/2026/02/W09/kernel-items/` | `1-project/kernel-items/` | 프로젝트 완료 — DOM context → accessor-first, focus recovery 자동화, 1:1 파일 분리 |
+| `archive/2026/02/W09/os-api-rename/` | `1-project/os-api-rename/` | 프로젝트 완료 — kernel→os rename, OS_ 접두어 통일, SELECTION_* 통합 |
+| `archive/2026/02/W09/apg-contract-testing/` | `1-project/apg-contract-testing/` | 프로젝트 완료 — APG contract test 체계 구축 |
+| `archive/2026/02/W09/apg-testing-rebalance/` | `1-project/apg-testing-rebalance/` | 프로젝트 완료 — APG 테스트 pressKey/attrs 패턴 전환 |
+| `archive/2026/02/W09/builder-clipboard/` | `1-project/builder-clipboard/` | 프로젝트 완료 — Builder clipboard 통합 |
+| `archive/2026/02/W09/builder-usage-cleanup/` | `1-project/builder-usage-cleanup/` | 프로젝트 완료 — Builder dead code/usage 정리 |
+| `archive/2026/02/W09/define-query/` | `1-project/define-query/` | 프로젝트 완료 — defineQuery API 구현 |
+| `archive/2026/02/W09/defineapp-unification/` | `1-project/defineapp-unification/` | 프로젝트 완료 — defineApp 통합 |
+| `archive/2026/02/W09/field-compound/` | `1-project/field-compound/` | 프로젝트 완료 — Field compound 패턴 구현 |
+| `archive/2026/02/W09/focus-single-path/` | `1-project/focus-single-path/` | 프로젝트 완료 — Focus 단일 경로 통합 |
+| `archive/2026/02/W09/os-collection/` | `1-project/os-collection/` | 프로젝트 완료 — Collection facade 구현 |
+| `archive/2026/02/W09/os-hygiene/` | `1-project/os-hygiene/` | 프로젝트 완료 — OS 코드 위생 정리 |
+| `archive/2026/02/W09/os-page/` | `1-project/os-page/` | 프로젝트 완료 — OS Page 헤드리스 테스트 인프라 |
+| `archive/2026/02/W09/projection-checkpoint/` | `1-project/projection-checkpoint/` | 프로젝트 완료 — Projection 체크포인트 |
+| `archive/2026/02/W09/todo-dogfooding/` | `1-project/todo-dogfooding/` | 프로젝트 완료 — Todo 앱 독푸딩 완료 |
+| `archive/2026/02/W09/01-naming-convention.md` | `2-area/80-cross-cutting/82-standards/01-naming-convention.md` | 🪦 superseded — `os-new/`, Zustand, Sensor/Intent 패턴 전면 소멸 |
+| `archive/2026/02/W09/08-focus-recovery.md` | `2-area/20-os/22-focus/08-focus-recovery.md` | 🪦 superseded — FocusSync, resolveRecovery 소멸. 현행: resolveItemFallback in focusStackOps.ts |
 
 ### 심층 보관 (`archive/legacy-docs` 브랜치 — git으로만 접근)
 

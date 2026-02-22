@@ -1,15 +1,99 @@
-import type { ActivateConfig } from "./FocusActivateConfig.ts";
-import { DEFAULT_ACTIVATE } from "./FocusActivateConfig.ts";
-import type { DismissConfig } from "./FocusDismissConfig.ts";
-import { DEFAULT_DISMISS } from "./FocusDismissConfig.ts";
-import type { NavigateConfig } from "./FocusNavigateConfig.ts";
-import { DEFAULT_NAVIGATE } from "./FocusNavigateConfig.ts";
-import type { ProjectConfig } from "./FocusProjectConfig.ts";
-import { DEFAULT_PROJECT } from "./FocusProjectConfig.ts";
-import type { SelectConfig } from "./FocusSelectConfig.ts";
-import { DEFAULT_SELECT } from "./FocusSelectConfig.ts";
-import type { TabConfig } from "./FocusTabConfig.ts";
-import { DEFAULT_TAB } from "./FocusTabConfig.ts";
+/**
+ * FocusGroupConfig — Unified zone behavior configuration.
+ *
+ * All sub-configs (Navigate, Tab, Select, Activate, Dismiss, Project)
+ * are defined here in a single file. Each maps 1:1 to a W3C APG concern.
+ */
+
+import type { Orientation } from "../FocusDirection.ts";
+
+// ── Navigate ──
+
+export type NavigateEntry = "first" | "last" | "restore" | "selected";
+
+export interface NavigateConfig {
+  orientation: Orientation;
+  loop: boolean;
+  seamless: boolean;
+  typeahead: boolean;
+  entry: NavigateEntry;
+  recovery: "next" | "prev" | "nearest";
+}
+
+export const DEFAULT_NAVIGATE: NavigateConfig = {
+  orientation: "vertical",
+  loop: false,
+  seamless: false,
+  typeahead: false,
+  entry: "first",
+  recovery: "next",
+};
+
+// ── Tab ──
+
+export interface TabConfig {
+  behavior: "trap" | "escape" | "flow";
+  restoreFocus: boolean;
+}
+
+export const DEFAULT_TAB: TabConfig = {
+  behavior: "flow",
+  restoreFocus: false,
+};
+
+// ── Select ──
+
+export interface SelectConfig {
+  mode: "none" | "single" | "multiple";
+  followFocus: boolean;
+  disallowEmpty: boolean;
+  range: boolean;
+  toggle: boolean;
+}
+
+export const DEFAULT_SELECT: SelectConfig = {
+  mode: "none",
+  followFocus: false,
+  disallowEmpty: false,
+  range: false,
+  toggle: false,
+};
+
+// ── Activate ──
+
+export interface ActivateConfig {
+  mode: "manual" | "automatic";
+}
+
+export const DEFAULT_ACTIVATE: ActivateConfig = {
+  mode: "manual",
+};
+
+// ── Dismiss ──
+
+export interface DismissConfig {
+  escape: "close" | "deselect" | "none";
+  outsideClick: "close" | "none";
+}
+
+export const DEFAULT_DISMISS: DismissConfig = {
+  escape: "none",
+  outsideClick: "none",
+};
+
+// ── Project ──
+
+export interface ProjectConfig {
+  virtualFocus: boolean;
+  autoFocus: boolean;
+}
+
+export const DEFAULT_PROJECT: ProjectConfig = {
+  virtualFocus: false,
+  autoFocus: false,
+};
+
+// ── Composed ──
 
 export interface FocusGroupConfig {
   navigate: NavigateConfig;

@@ -58,10 +58,11 @@ export function createUndoRedoCommands<S extends WithHistory>(
       ? String(entry.focusedItemId)
       : undefined;
     const zoneId = entry.activeZoneId as string | undefined;
+    const selection = entry.activeZoneSelection as string[] | undefined;
     if (focusTarget && zoneId) {
       return {
         type: "OS_FOCUS",
-        payload: { zoneId, itemId: focusTarget },
+        payload: { zoneId, itemId: focusTarget, selection },
       } as BaseCommand;
     }
     return undefined;

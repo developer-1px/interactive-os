@@ -48,7 +48,7 @@ export function resolveFocusId<T extends Command<string, any>>(
 
 | OS 커맨드 | 호출 위치 | 해결 방식 |
 |-----------|----------|----------|
-| `ACTIVATE` | `activate.ts` | `resolveFocusId(entry.onAction, zone.focusedItemId)` |
+| `OS_ACTIVATE` | `activate.ts` | `resolveFocusId(entry.onAction, zone.focusedItemId)` |
 | `OS_DELETE` | `delete.ts` | selection 각 ID 또는 focusedItemId |
 | `OS_CHECK` | `check.ts` | `resolveFocusId(entry.onCheck, targetId)` |
 | `OS_MOVE_UP/DOWN` | `move.ts` | `resolveFocusId(entry.onMoveUp/Down, focusedItemId)` |
