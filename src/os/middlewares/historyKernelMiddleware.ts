@@ -176,7 +176,29 @@ export function createHistoryMiddleware(
         return ctx;
       }
 
-      // Record snapshot
+      // ── Capture data-level patches ────────────────────────────
+      // Generate patches that transform prevAppState.data → effectsState.data
+      // These are stored in HistoryEntry for patch-based undo/redo.
+      const { history: _prevH, ...prevWithoutHistory } = prevAppState;
+      const newData = effectsState["data"];
+
+      let dataPatches: Patch[] = [];
+      let dataInversePatches: Patch[] = [];
+
+      if (prevWithoutHistory["data"] !== newData) {
+        const [, dp, dip] = produceWithPatches(
+          prevWithoutHistory,
+          (draft: Record<string, unknown>) => {
+            draft["data"] = newData;
+            // Also capture ui changes for complete undo
+            if (effectsState["ui"] !== prevWithoutHistory["ui"]) {
+              draft["ui"] = effectsState["ui"];
+            }
+          },
+        );
+        dataPatches = dp;
+        dataInversePatches = dip;
+      }
       const previousFocusId = ctx.injected["_historyFocusId"] as string | null;
       const now = Date.now();
 
@@ -198,7 +220,7 @@ export function createHistoryMiddleware(
               past: HistoryEntry[];
               future: HistoryEntry[];
             };
-            const { history: _h, ...prevWithoutHistory } = prevAppState;
+
 
             const lastEntry = history.past.at(-1);
             const isSameType = lastEntry?.command.type === commandType;
@@ -232,6 +254,8 @@ export function createHistoryMiddleware(
                 },
                 timestamp: now,
                 snapshot: prevWithoutHistory,
+                patches: dataPatches.length > 0 ? dataPatches : undefined,
+                inversePatches: dataInversePatches.length > 0 ? dataInversePatches : undefined,
                 focusedItemId: previousFocusId,
                 activeZoneId: ctx.injected["_historyZoneId"] as string | null,
                 groupId: getActiveGroupId() ?? undefined,

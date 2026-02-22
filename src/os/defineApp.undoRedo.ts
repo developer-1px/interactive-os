@@ -2,7 +2,7 @@
  * defineApp — Undo/Redo command factory
  *
  * Generic undo/redo command generator for apps with history middleware.
- * Eliminates duplicated undo/redo logic across apps.
+ * Supports patch-based undo/redo (primary) with snapshot fallback (legacy).
  *
  * Usage:
  *   const { undoCommand, redoCommand, canUndo, canRedo } =
@@ -10,7 +10,7 @@
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import { produce } from "immer";
+import { applyPatches, produce } from "immer";
 import type { AppHandle, Condition } from "./defineApp.types";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -42,7 +42,7 @@ export function createUndoRedoCommands<S extends WithHistory>(
 ) {
   // ── Shared helpers ──────────────────────────────────────────
 
-  /** Restore data/ui from snapshot into draft */
+  /** Restore data/ui from snapshot into draft (legacy fallback) */
   function restoreSnapshot(
     draft: any,
     snap: Record<string, unknown> | undefined,
@@ -104,23 +104,51 @@ export function createUndoRedoCommands<S extends WithHistory>(
         }
       }
 
-      const snap = past[past.length - entriesToPop]!.snapshot;
+      // Prefer patch-based undo, fall back to snapshot
+      const targetEntry = past[past.length - entriesToPop]!;
+      const hasPatches = targetEntry.inversePatches?.length > 0;
 
       return {
         state: produce(ctx.state, (draft) => {
-          const entry: any = {
+          // Save current state to future for redo
+          const futureEntry: any = {
             command: { type: "UNDO_SNAPSHOT" },
             timestamp: Date.now(),
             snapshot: snapshotCurrent(ctx.state),
           };
-          if (groupId) entry.groupId = groupId;
-          draft.history.future.push(entry);
+          if (groupId) futureEntry.groupId = groupId;
+
+          // Collect patches from all popped entries for redo
+          const poppedPatches: any[] = [];
+          const poppedInversePatches: any[] = [];
+          for (let i = 0; i < entriesToPop; i++) {
+            const entry = past[past.length - 1 - i];
+            if (entry?.patches) poppedPatches.unshift(...entry.patches);
+            if (entry?.inversePatches)
+              poppedInversePatches.unshift(...entry.inversePatches);
+          }
+          if (poppedPatches.length > 0) futureEntry.patches = poppedPatches;
+          if (poppedInversePatches.length > 0)
+            futureEntry.inversePatches = poppedInversePatches;
+
+          draft.history.future.push(futureEntry);
 
           for (let i = 0; i < entriesToPop; i++) {
             draft.history.past.pop();
           }
 
-          restoreSnapshot(draft, snap);
+          if (hasPatches) {
+            // Patch-based undo: apply inverse patches
+            const restored = applyPatches(
+              snapshotCurrent(ctx.state),
+              targetEntry.inversePatches,
+            );
+            if (restored["data"]) draft.data = restored["data"] as any;
+            if (restored["ui"]) draft.ui = restored["ui"] as any;
+          } else {
+            // Legacy: snapshot-based restore
+            restoreSnapshot(draft, targetEntry.snapshot);
+          }
         }),
         dispatch: buildFocusDispatch(lastEntry),
       };
@@ -132,16 +160,35 @@ export function createUndoRedoCommands<S extends WithHistory>(
     "redo",
     (ctx) => {
       const entry = ctx.state.history.future.at(-1)!;
+      const hasPatches = entry.patches?.length > 0;
 
       return {
         state: produce(ctx.state, (draft) => {
           draft.history.future.pop();
-          draft.history.past.push({
+          const pastEntry: any = {
             command: { type: "REDO_SNAPSHOT" },
             timestamp: Date.now(),
             snapshot: snapshotCurrent(ctx.state),
-          } as any);
-          restoreSnapshot(draft, entry.snapshot);
+          };
+
+          // Store patches for re-undo
+          if (entry.inversePatches) pastEntry.inversePatches = entry.inversePatches;
+          if (entry.patches) pastEntry.patches = entry.patches;
+
+          draft.history.past.push(pastEntry);
+
+          if (hasPatches) {
+            // Patch-based redo: apply forward patches
+            const restored = applyPatches(
+              snapshotCurrent(ctx.state),
+              entry.patches,
+            );
+            if (restored["data"]) draft.data = restored["data"] as any;
+            if (restored["ui"]) draft.ui = restored["ui"] as any;
+          } else {
+            // Legacy: snapshot-based restore
+            restoreSnapshot(draft, entry.snapshot);
+          }
         }),
         dispatch: buildFocusDispatch(entry),
       };
