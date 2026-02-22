@@ -592,6 +592,10 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     paste,
     copyText,
     readClipboard,
+    /** Remove entity by id directly from an Immer draft. Reuses collection ops. */
+    removeFromDraft: (draft: S, id: string) => {
+      ops.removeItem(draft, id);
+    },
     collectionBindings,
   };
 }

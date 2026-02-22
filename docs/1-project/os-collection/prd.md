@@ -48,6 +48,26 @@ const collection = os.collection({
 - 없으면 → 작동 안 함
 - 설정이 아니라 UI의 존재가 기능의 존재
 
+## 4.1 OS vs App 책임 경계
+
+| 층 | 책임 | 예시 |
+|----|------|------|
+| **OS** | 연산(Operation) | `remove`, `add`, `move`, `copy`, undo/redo |
+| **App** | 워크플로우(Workflow) | 삭제 전 확인 대화상자, 조건부 실행, 도메인 로직 |
+
+```typescript
+// OS가 제공: entity 삭제 연산
+collection.remove({ id })
+collection.removeFromDraft(draft, id)  // custom command 안에서 재사용
+
+// App이 결정: 삭제 전 확인이 필요한가?
+// → 필요하면: requestDelete → dialog → confirmDelete(removeFromDraft 호출)
+// → 불필요하면: remove 직접 호출
+```
+
+**원칙**: 삭제 시 확인할지, 어떤 토스트를 보여줄지, 어떤 조건에서 삭제가 가능한지는
+앱의 비즈니스 요구사항이다. OS는 이에 관여하지 않는다.
+
 ## 5. Undo/Redo: Immer Inverse Patches
 
 ```typescript

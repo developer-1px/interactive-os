@@ -76,6 +76,8 @@ export interface CollectionZoneHandle<S> extends ZoneHandle<S> {
   copyText: (text: string) => void;
   /** Read the first item from the clipboard store. */
   readClipboard: () => unknown | null;
+  /** Remove entity by id directly from an Immer draft. Use in custom commands. */
+  removeFromDraft: (draft: S, id: string) => void;
   collectionBindings(
     options?: CollectionBindingsOptions,
   ): CollectionBindingsResult;

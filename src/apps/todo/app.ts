@@ -156,10 +156,7 @@ export const confirmDeleteTodo = listCollection.command(
     return {
       state: produce(ctx.state, (draft) => {
         for (const id of ids) {
-          // Use collection's remove logic (entities + order)
-          delete draft.data.todos[id];
-          const idx = draft.data.todoOrder.indexOf(id);
-          if (idx !== -1) draft.data.todoOrder.splice(idx, 1);
+          listCollection.removeFromDraft(draft, id);
         }
         draft.ui.pendingDeleteIds = [];
       }),
@@ -388,9 +385,7 @@ export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => {
   return {
     state: produce(ctx.state, (draft) => {
       completedIds.forEach((id) => {
-        delete draft.data.todos[id];
-        const idx = draft.data.todoOrder.indexOf(id);
-        if (idx !== -1) draft.data.todoOrder.splice(idx, 1);
+        listCollection.removeFromDraft(draft, id);
       });
     }),
     dispatch: OS_TOAST_SHOW({
