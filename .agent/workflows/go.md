@@ -99,9 +99,10 @@ skip은 허용이지, 필수는 아니다 — 필요하면 언제든 실행해�
 
 ### 프리셋 결정 기준
 
+- **⛔ `src/os/` 수정이 포함되면 → 무조건 Heavy.** OS는 인프라다. 2~7(생각) 단계를 건너뛰지 않는다.
 - `/project` (새 기능, 아키텍처 변경) → **Heavy**
-- `/issue` (버그 수정) → **Medium** (2~7 skip, 8부터 시작)
-- `/refactor` (패턴 전환) → **Medium** (2~7 skip)
+- `/issue` (버그 수정) → **Medium** (2~7 skip, 8부터 시작) — 단, OS 수정이면 Heavy
+- `/refactor` (패턴 전환) → **Medium** (2~7 skip) — 단, OS 수정이면 Heavy
 - `/poc` (실험) → **Light**
 - 명시적 지정 없으면: BOARD.md 태스크의 Cynefin 도메인으로 판단
   - Complex → Heavy
