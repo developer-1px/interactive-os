@@ -92,6 +92,23 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     ? config._ops
     : opsFromAccessor((config as ArrayCollectionConfig<S, T>).accessor);
 
+  // ── add ── (auto-generated from create factory)
+  const add = config.create
+    ? zone.command(
+      `${zoneName}:add`,
+      (ctx: { readonly state: S }, payload: any) => {
+        const newItem = config.create!(payload, ctx.state);
+        if (!newItem) return { state: ctx.state };
+        return {
+          state: produce(ctx.state, (draft) => {
+            const items = ops.getItems(ctx.state);
+            ops.insertAfter(draft as S, items.length - 1, newItem);
+          }),
+        };
+      },
+    )
+    : undefined;
+
   // ── remove ── (tree-aware)
   const remove = zone.command(
     `${zoneName}:remove`,
@@ -582,6 +599,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     ...zone,
     /** Canonical zone ID — use this for <Zone id={}> in DOM. Single source of truth. */
     zoneId: zoneName,
+    add,
     remove,
     moveUp,
     moveDown,

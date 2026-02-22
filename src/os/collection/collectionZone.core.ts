@@ -28,6 +28,8 @@ interface SharedCollectionConfig<S, T extends { id: string }> {
   extractId?: (focusId: string) => string;
   generateId?: () => string;
   onClone?: (original: T, newId: string) => T;
+  /** Factory to create a new entity. Return null to reject (no-op). */
+  create?: (payload: any, state: S) => T | null;
   /** Optional visibility filter for moveUp/moveDown. Items not matching are skipped. */
   filter?: (state: S) => (item: T) => boolean;
   /** Serialize item to text for native clipboard. Default: item.label ?? item.text ?? item.id */
@@ -61,6 +63,8 @@ export type CollectionConfig<S, T extends { id: string } = any> =
 export interface CollectionZoneHandle<S> extends ZoneHandle<S> {
   /** Canonical zone ID — use for <Zone id={}> in DOM. Single source of truth. */
   readonly zoneId: string;
+  /** Add a new entity using the create factory. Only available if `create` is configured. */
+  add: CommandFactory<string, any> | undefined;
   remove: CommandFactory<string, { id: string }>;
   moveUp: CommandFactory<string, { id: string }>;
   moveDown: CommandFactory<string, { id: string }>;

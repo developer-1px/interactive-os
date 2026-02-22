@@ -32,7 +32,7 @@ describe("History: Basic Undo/Redo (SPEC §10)", () => {
     app.dispatch(addTodo({ text: "Test" }));
 
     expect(app.state.history.past.length).toBe(1);
-    expect(app.state.history.past[0]?.command.type).toBe("addTodo");
+    expect(app.state.history.past[0]?.command.type).toBe("list:add");
   });
 
   it("undo restores previous state", () => {
@@ -186,7 +186,7 @@ describe("History: Entry Structure", () => {
     app.dispatch(addTodo({ text: "Hello" }));
 
     const entry = app.state.history.past[0]!;
-    expect(entry.command.type).toBe("addTodo");
+    expect(entry.command.type).toBe("list:add");
     expect(entry.command.payload).toEqual({ text: "Hello" });
   });
 

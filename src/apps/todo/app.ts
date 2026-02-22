@@ -89,6 +89,15 @@ const listCollection = createCollectionZone(TodoApp, "list", {
     (s: AppState) => s.data.todos,
     (s: AppState) => s.data.todoOrder,
   ),
+  create: (payload: { text: string }, state: AppState): Todo | null => {
+    if (!payload.text?.trim()) return null;
+    return {
+      id: uid(),
+      text: payload.text.trim(),
+      completed: false,
+      categoryId: state.ui.selectedCategoryId,
+    };
+  },
   filter: (state: AppState) => (item: Todo) =>
     item.categoryId === state.ui.selectedCategoryId,
   text: (item: Todo) => item.text,
@@ -256,24 +265,7 @@ export const TodoSidebarUI = sidebarCollection.bind({
 
 const draftZone = TodoApp.createZone("draft");
 
-export const addTodo = draftZone.command(
-  "addTodo",
-  (ctx, payload: { text: string }) => ({
-    state: produce(ctx.state, (draft) => {
-      const text = payload.text;
-      if (text?.trim()) {
-        const newId = uid();
-        draft.data.todos[newId] = {
-          id: newId,
-          text: text.trim(),
-          completed: false,
-          categoryId: draft.ui.selectedCategoryId,
-        };
-        draft.data.todoOrder.push(newId);
-      }
-    }),
-  }),
-);
+export const addTodo = listCollection.add!;
 
 export const TodoDraftUI = draftZone.bind({
   role: "textbox",
