@@ -17,7 +17,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| os-collection | T1-T3 Done (patches + sidebar) | 02-22 | 🔥 Focus |
+| os-collection | T1-T7 Done (patches + undo/redo) | 02-22 | 🔥 Focus |
 | projection-checkpoint | T1-T4 Done | 02-21 | ✅ Done |
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
