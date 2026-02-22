@@ -156,6 +156,7 @@ export const confirmDeleteTodo = listCollection.command(
     return {
       state: produce(ctx.state, (draft) => {
         for (const id of ids) {
+          // Use collection's remove logic (entities + order)
           delete draft.data.todos[id];
           const idx = draft.data.todoOrder.indexOf(id);
           if (idx !== -1) draft.data.todoOrder.splice(idx, 1);
