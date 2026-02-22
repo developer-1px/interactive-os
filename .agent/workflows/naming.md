@@ -10,7 +10,7 @@ description: 구현 전에 이름(변수, 함수, 모듈, 커맨드)을 설계�
 
 ### 시점
 
-`/go` 보편 사이클 Step 7. /divide 후, /tdd 전에 실행.
+`/go` 보편 사이클 Step 8. /blueprint 후, /tdd 전에 실행.
 
 ### 절차
 

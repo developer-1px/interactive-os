@@ -62,7 +62,7 @@ type OverlayRole = OverlayEntry["type"];
 export interface TriggerProps<T extends BaseCommand>
   extends React.HTMLAttributes<HTMLElement> {
   id?: string;
-  onPress?: T;
+  onActivate?: T;
   children: ReactNode;
   dispatch?: (cmd: T) => void;
   allowPropagation?: boolean;
@@ -94,7 +94,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
   (
     {
       id,
-      onPress,
+      onActivate,
       children,
       dispatch: customDispatch,
       allowPropagation = false,
@@ -126,9 +126,9 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         os.dispatch(OS_OVERLAY_OPEN({ id: overlayId, type: overlayRole }));
       }
 
-      // Also dispatch onPress command if provided
-      if (onPress) {
-        dispatch(onPress);
+      // Also dispatch onActivate command if provided
+      if (onActivate) {
+        dispatch(onActivate);
       }
 
       onClick?.(e as ReactMouseEvent<HTMLElement>);
@@ -351,13 +351,13 @@ TriggerPortal.displayName = "Trigger.Portal";
 export interface TriggerDismissProps
   extends React.HTMLAttributes<HTMLButtonElement> {
   /** Optional command to dispatch before closing */
-  onPress?: BaseCommand;
+  onActivate?: BaseCommand;
   /** Button content */
   children: ReactNode;
 }
 
 function TriggerDismiss({
-  onPress,
+  onActivate,
   children,
   className,
   id,
@@ -370,8 +370,8 @@ function TriggerDismiss({
     e.stopPropagation();
 
     // Dispatch optional command first
-    if (onPress) {
-      dispatch(onPress);
+    if (onActivate) {
+      dispatch(onActivate);
     }
 
     // Close the nearest overlay
@@ -382,8 +382,16 @@ function TriggerDismiss({
 
   const itemId = id ?? `${overlayCtx?.overlayId ?? "dialog"}-dismiss`;
 
+  // Build the dismiss command for FocusItem → ZoneRegistry → OS_ACTIVATE(Enter)
+  // When overlay exists, Enter should close it (same as click).
+  const dismissCmd = overlayCtx
+    ? OS_OVERLAY_CLOSE({ id: overlayCtx.overlayId })
+    : undefined;
+  // If onActivate is provided, use it; otherwise use the dismiss command
+  const activateCmd = onActivate ?? dismissCmd;
+
   return (
-    <FocusItem id={itemId}>
+    <FocusItem id={itemId} asChild onActivate={activateCmd}>
       <button type="button" onClick={handleClick} className={className} {...rest}>
         {children}
       </button>

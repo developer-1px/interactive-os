@@ -19,7 +19,7 @@ export function createSimpleTrigger(
   command: BaseCommand,
 ): React.FC<{ children: ReactNode }> {
   const SimpleTrigger: React.FC<{ children: ReactNode }> = ({ children, ...rest }) => {
-    return React.createElement(Trigger, { onPress: command, children, ...rest });
+    return React.createElement(Trigger, { onActivate: command, children, ...rest });
   };
   SimpleTrigger.displayName = `${appId}.Trigger`;
   return SimpleTrigger;
@@ -44,7 +44,7 @@ export function createDynamicTrigger<P>(
     ...rest
   }) => {
     const cmd = factory(payload as P);
-    return React.createElement(Trigger, { onPress: cmd, children, ...rest });
+    return React.createElement(Trigger, { onActivate: cmd, children, ...rest });
   };
   DynamicTrigger.displayName = `${appId}.DynamicTrigger`;
   return DynamicTrigger;
@@ -134,7 +134,7 @@ export function createCompoundTrigger(
     const confirmCmd = config.confirm;
     return React.createElement(Dialog.Close, {
       className,
-      onPress: confirmCmd as any,
+      onActivate: confirmCmd as any,
       id: `${dialogId}-confirm`,
       children,
       ...rest,

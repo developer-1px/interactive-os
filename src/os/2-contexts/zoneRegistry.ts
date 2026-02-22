@@ -65,6 +65,12 @@ export interface ZoneEntry {
 
 const registry = new Map<string, ZoneEntry>();
 const disabledItems = new Map<string, Set<string>>();
+const itemCallbacks = new Map<string, Map<string, ItemCallbacks>>();
+
+/** Per-item callbacks — registered by FocusItem, read by OS commands */
+export interface ItemCallbacks {
+  onActivate?: BaseCommand;
+}
 
 export const ZoneRegistry = {
   register(id: string, entry: ZoneEntry): void {
@@ -74,6 +80,7 @@ export const ZoneRegistry = {
   unregister(id: string): void {
     registry.delete(id);
     disabledItems.delete(id);
+    itemCallbacks.delete(id);
   },
 
   get(id: string): ZoneEntry | undefined {
@@ -111,6 +118,26 @@ export const ZoneRegistry = {
   getDisabledItems(zoneId: string): ReadonlySet<string> {
     return disabledItems.get(zoneId) ?? EMPTY_SET;
   },
+
+  // ─── Per-item callbacks (e.g. Trigger.onActivate) ───
+
+  setItemCallback(zoneId: string, itemId: string, callbacks: ItemCallbacks): void {
+    let zone = itemCallbacks.get(zoneId);
+    if (!zone) {
+      zone = new Map();
+      itemCallbacks.set(zoneId, zone);
+    }
+    zone.set(itemId, callbacks);
+  },
+
+  clearItemCallback(zoneId: string, itemId: string): void {
+    itemCallbacks.get(zoneId)?.delete(itemId);
+  },
+
+  getItemCallback(zoneId: string, itemId: string): ItemCallbacks | undefined {
+    return itemCallbacks.get(zoneId)?.get(itemId);
+  },
 };
 
 const EMPTY_SET: ReadonlySet<string> = new Set();
+

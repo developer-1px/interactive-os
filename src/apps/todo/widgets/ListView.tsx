@@ -156,7 +156,7 @@ export function ListView() {
 
           <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
             {/* cancelDeleteTodo is dispatched to clear pending IDs, OS_OVERLAY_CLOSE happens via Dialog.Close implicitly if not prevented */}
-            <DeleteDialog.Dismiss className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors font-medium cursor-pointer" onPress={TodoList.commands.cancelDeleteTodo()}>
+            <DeleteDialog.Dismiss className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors font-medium cursor-pointer" onActivate={TodoList.commands.cancelDeleteTodo()}>
               Cancel
             </DeleteDialog.Dismiss>
             {/* Confirm uses the command defined in createTrigger config */}

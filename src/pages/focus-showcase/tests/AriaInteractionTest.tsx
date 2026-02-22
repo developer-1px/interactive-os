@@ -49,7 +49,7 @@ export function AriaInteractionTest() {
           </div>
           <Trigger
             id="test-trigger-btn"
-            onPress={mockCommand}
+            onActivate={mockCommand}
             dispatch={handleTriggerDispatch}
             className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm"
           >

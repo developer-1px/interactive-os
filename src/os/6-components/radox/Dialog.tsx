@@ -16,54 +16,19 @@
  * Internal mapping:
  *   Dialog         → Trigger role="dialog" (transforms children)
  *   Dialog.Trigger → passthrough that becomes Trigger's clickable element
- *   Dialog.Content → transformed into Trigger.Portal + DialogZone at render
+ *   Dialog.Content → transformed into Trigger.Portal at render
  *   Dialog.Close   → Trigger.Dismiss
  */
 
 import type { BaseCommand } from "@kernel";
-import { OS_OVERLAY_CLOSE } from "@os/3-commands/overlay/overlay";
 import {
   Children,
   isValidElement,
   type ReactElement,
   type ReactNode,
 } from "react";
-import { Trigger, useOverlayContext } from "../primitives/Trigger.tsx";
-import { Zone } from "../primitives/Zone.tsx";
+import { Trigger } from "../primitives/Trigger.tsx";
 
-// ═══════════════════════════════════════════════════════════════════
-// DialogZone — Zone wrapper that connects dismiss to OS_OVERLAY_CLOSE
-// ═══════════════════════════════════════════════════════════════════
-
-interface DialogZoneProps {
-  children: ReactNode;
-  zoneClassName?: string | undefined;
-  role?: "dialog" | "alertdialog";
-}
-
-/**
- * DialogZone — wraps Zone role="dialog" or "alertdialog" and connects its onDismiss
- * command to OS_OVERLAY_CLOSE. Fully declarative — no callbacks.
- */
-function DialogZone({ children, zoneClassName, role = "dialog" }: DialogZoneProps) {
-  const overlayCtx = useOverlayContext();
-
-  // Construct dismiss command declaratively
-  const dismissCommand = overlayCtx?.overlayId
-    ? OS_OVERLAY_CLOSE({ id: overlayCtx.overlayId })
-    : undefined;
-
-  return (
-    <Zone
-      role={role}
-      options={DIALOG_ZONE_OPTIONS}
-      className={zoneClassName}
-      {...(dismissCommand !== undefined ? { onDismiss: dismissCommand } : {})}
-    >
-      {children}
-    </Zone>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // Dialog.Root (default export = Dialog)
@@ -105,14 +70,12 @@ function DialogRoot({ children, id, role = "dialog" }: DialogProps) {
             ? { contentClassName: props.contentClassName }
             : {})}
         >
-          <DialogZone zoneClassName={props.zoneClassName} role={role}>
-            {props.title && (
-              <div className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200 mb-1">
-                {props.title}
-              </div>
-            )}
-            {props.children}
-          </DialogZone>
+          {props.title && (
+            <div className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200 mb-1">
+              {props.title}
+            </div>
+          )}
+          {props.children}
         </Trigger.Portal>,
       );
     } else {
@@ -193,7 +156,7 @@ export interface DialogContentProps {
  * Dialog.Content — the overlay content.
  *
  * This component is never rendered directly — DialogRoot transforms
- * it into Trigger.Portal + DialogZone at render time. It exists purely as
+ * it into Trigger.Portal at render time. It exists purely as
  * a declarative marker for the Dialog's content slot.
  */
 function DialogContent(_props: DialogContentProps): ReactElement {
@@ -209,7 +172,7 @@ DialogContent.displayName = "Dialog.Content";
 export interface DialogCloseProps
   extends React.HTMLAttributes<HTMLButtonElement> {
   /** Optional command to dispatch before closing */
-  onPress?: BaseCommand;
+  onActivate?: BaseCommand;
   /** Button content */
   children: ReactNode;
 }
@@ -233,5 +196,3 @@ export const Dialog = Object.assign(DialogRoot, {
   Content: DialogContent,
   Close: DialogClose,
 });
-
-const DIALOG_ZONE_OPTIONS = { project: { autoFocus: true } };

@@ -21,7 +21,7 @@
 | projection-checkpoint | T1-T4 Done | 02-21 | ✅ Done |
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
-| todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-21 | 🟢 Active |
+| todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-22 | 🟢 Active |
 | testbot-v2 | Superseded by Replay | 02-21 | 🔴 Superseded |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |

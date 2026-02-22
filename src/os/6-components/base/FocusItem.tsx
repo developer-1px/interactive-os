@@ -11,6 +11,7 @@
  */
 
 import { os } from "@os/kernel.ts";
+import type { BaseCommand } from "@kernel";
 import {
   cloneElement,
   forwardRef,
@@ -68,6 +69,12 @@ export interface FocusItemProps
    */
   _isFocusedHint?: boolean;
   _isActiveHint?: boolean;
+
+  /**
+   * Command to dispatch when this item is activated (Enter key).
+   * Registered in ZoneRegistry so OS_ACTIVATE can find it.
+   */
+  onActivate?: BaseCommand | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -106,6 +113,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       role,
       _isFocusedHint,
       _isActiveHint,
+      onActivate,
       ...rest
     },
     ref,
@@ -176,6 +184,15 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       };
     }, [zoneId, id, disabled]);
 
+    // --- Sync onActivate → ZoneRegistry (per-item callback) ---
+    useLayoutEffect(() => {
+      if (!onActivate) return;
+      ZoneRegistry.setItemCallback(zoneId, id, { onActivate });
+      return () => {
+        ZoneRegistry.clearItemCallback(zoneId, id);
+      };
+    }, [zoneId, id, onActivate]);
+
     const isAnchor = isFocused && !isGroupActive;
 
     // Auto-resolve child role from parent Zone role (e.g., listbox → option)
@@ -210,12 +227,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       "data-selected": isSelected || undefined,
       "data-expanded": isExpanded || undefined,
       className: className || undefined,
-      style: {
-        outline: "none",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.5 : undefined,
-        ...style,
-      },
+      style: style || undefined,
       ...otherRest,
     };
 
