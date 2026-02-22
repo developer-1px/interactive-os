@@ -15,12 +15,22 @@ description: Complex 항목을 자율적으로 해결하는 4단계 래더. /go�
 
 ### 래더 (순서대로 시도)
 
-#### Step 1: 분해 (Divide)
+#### Step 1: Root Cause Analysis (RCA) 및 Cynefin 판단
 
-- `/divide` 보고서가 있으면 참조한다. 없으면 인라인으로 Cynefin 분해를 수행한다.
-- Clear/Complicated가 보이면 **실행 프로토콜**로 즉시 실행한다.
-- 실행 결과로 남은 Complex 조각만 Step 2로 넘긴다.
-- 나눠서 전부 Clear/Complicated가 되면 → **해결. 루프 종료.**
+- ⚠️ **금지사항**: 어떤 경우에도 코드를 먼저 수정하지 마라.
+- 코드를 만지기 전, 화면에 반드시 다음 형태의 **[RCA & Cynefin 분석표]**를 마크다운으로 출력한다.
+
+```markdown
+### 🔍 RCA & Cynefin 분석표
+- **현상 (Symptom)**: [무엇이 깨졌나/무엇을 해야 하나]
+- **근본 원인 (Root Cause)**: [왜 발생했는가 (5 Whys)]
+- **Cynefin 도메인**: [Clear / Complicated / Complex / Chaotic]
+- **증빙 (Evidence)**: [로그, 스택 트레이스, 관련 파일/라인 등]
+```
+
+- RCA 분석표를 출력한 **이후에만** 툴(tool)을 사용하여 코드를 수정한다.
+- 분석 결과가 **Complex**라면 조각을 나누고 `/divide` 워크플로우로 전환하여 분해한다.
+- 분석 결과가 **Clear/Complicated**라면 아래의 **실행 프로토콜**로 즉시 실행한다.
 
 ##### 실행 프로토콜 (Clear/Complicated 조각)
 
@@ -33,10 +43,11 @@ description: Complex 항목을 자율적으로 해결하는 4단계 래더. /go�
 
 2. 최소 구현 (🟢 Green)
    - 테스트를 통과시키는 최소한의 코드만 작성한다.
+   - 단, 우회로(workaround)나 로직 복제는 허용하지 않는다. 새로 추가하는 코드가 SRP를 지키는지 확인하라.
 
 3. 통과 확인
    - 작성한 테스트 + 기존 테스트 모두 통과하는지 확인한다.
-   - 실패 시 수정. 통과할 때까지 다음으로 넘어가지 않는다.
+   - 실패 시 수정하되, 실패 상황을 복잡성 증가나 Chaotic으로 오판하여 우회로를 만들지 마라. 통과할 때까지 다음으로 넘어가지 않는다.
 ```
 
 #### Step 2: 선택지 평가
