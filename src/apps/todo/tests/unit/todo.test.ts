@@ -21,8 +21,6 @@ import {
   editingTodo,
   hasClipboard,
   isEditing,
-  moveCategoryDown,
-  moveCategoryUp,
   moveItemDown,
   moveItemUp,
   pasteTodo,
@@ -30,6 +28,7 @@ import {
   startEdit,
   stats,
   TodoApp,
+  TodoSidebar,
   toggleTodo,
   toggleView,
   updateTodoText,
@@ -322,12 +321,12 @@ describe("Todo v5 — defineApp native", () => {
       const beforeOrder = [...app.state.data.categoryOrder];
       const workIdxBefore = beforeOrder.indexOf("cat_work");
 
-      app.dispatch(moveCategoryUp());
+      app.dispatch(TodoSidebar.commands.moveCategoryUp({ id: "cat_work" }));
       const afterOrder = [...app.state.data.categoryOrder];
       const workIdxAfter = afterOrder.indexOf("cat_work");
       expect(workIdxAfter).toBeLessThan(workIdxBefore);
 
-      app.dispatch(moveCategoryDown());
+      app.dispatch(TodoSidebar.commands.moveCategoryDown({ id: "cat_work" }));
       const restored = [...app.state.data.categoryOrder];
       expect(restored).toEqual(beforeOrder);
     });

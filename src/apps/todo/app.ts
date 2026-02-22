@@ -16,7 +16,7 @@
  */
 
 import { INITIAL_STATE } from "@apps/todo/features/todo-details/persistence";
-import type { AppState, Todo } from "@apps/todo/model/appState";
+import type { AppState, Category, Todo } from "@apps/todo/model/appState";
 import {
   selectCategories,
   selectEditingTodo,
@@ -219,9 +219,15 @@ export const TodoListUI = listCollection.bind({
 // TodoSidebar Zone — category selection + ordering
 // ═══════════════════════════════════════════════════════════════════
 
-const sidebarZone = TodoApp.createZone("sidebar");
+const sidebarCollection = createCollectionZone(TodoApp, "sidebar", {
+  ...fromEntities(
+    (s: AppState) => s.data.categories,
+    (s: AppState) => s.data.categoryOrder,
+  ),
+  text: (item: Category) => item.text,
+});
 
-export const selectCategory = sidebarZone.command(
+export const selectCategory = sidebarCollection.command(
   "selectCategory",
   (ctx, payload: { id?: string }) => {
     const id = payload?.id;
@@ -234,39 +240,13 @@ export const selectCategory = sidebarZone.command(
   },
 );
 
-export const moveCategoryUp = sidebarZone.command("moveCategoryUp", (ctx) => ({
-  state: produce(ctx.state, (draft) => {
-    const id = ctx.state.ui.selectedCategoryId;
-    const idx = draft.data.categoryOrder.indexOf(id);
-    if (idx > 0) {
-      const prev = draft.data.categoryOrder[idx - 1]!;
-      draft.data.categoryOrder[idx - 1] = id;
-      draft.data.categoryOrder[idx] = prev;
-    }
-  }),
-}));
-
-export const moveCategoryDown = sidebarZone.command(
-  "moveCategoryDown",
-  (ctx) => ({
-    state: produce(ctx.state, (draft) => {
-      const id = ctx.state.ui.selectedCategoryId;
-      const idx = draft.data.categoryOrder.indexOf(id);
-      if (idx !== -1 && idx < draft.data.categoryOrder.length - 1) {
-        const next = draft.data.categoryOrder[idx + 1]!;
-        draft.data.categoryOrder[idx + 1] = id;
-        draft.data.categoryOrder[idx] = next;
-      }
-    }),
-  }),
-);
-
-export const TodoSidebarUI = sidebarZone.bind({
+const sidebarBindings = sidebarCollection.collectionBindings();
+export const TodoSidebarUI = sidebarCollection.bind({
   role: "listbox",
   onAction: (cursor) => selectCategory({ id: cursor.focusId }),
   onSelect: (cursor) => selectCategory({ id: cursor.focusId }),
-  onMoveUp: () => moveCategoryUp(),
-  onMoveDown: () => moveCategoryDown(),
+  onMoveUp: sidebarBindings.onMoveUp,
+  onMoveDown: sidebarBindings.onMoveDown,
   options: {
     select: { followFocus: true },
   },
@@ -467,8 +447,8 @@ export const TodoSidebar = {
   ...TodoSidebarUI,
   commands: {
     selectCategory,
-    moveCategoryUp,
-    moveCategoryDown,
+    moveCategoryUp: sidebarCollection.moveUp,
+    moveCategoryDown: sidebarCollection.moveDown,
   },
   triggers: {
     SelectCategory: TodoApp.createTrigger(selectCategory),
