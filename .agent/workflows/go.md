@@ -68,60 +68,21 @@ description: 자율 실행 에이전트 루프. 보편 사이클을 정의하고
 
 ---
 
-## Skip 프리셋
+## 모든 단계를 통과한다
 
-경중에 따라 skip하는 단계가 다르다.
-skip은 허용이지, 필수는 아니다 — 필요하면 언제든 실행해도 된다.
+Skip은 없다. 모든 작업은 모든 단계를 순서대로 통과한다.
+LLM에게 "생각을 덜 해도 된다"는 허가는 없다.
+단계의 산출물 크기가 다를 뿐이다 — Clear면 1줄, Complex면 문서.
 
-| 단계 | Heavy (project) | Medium (issue, refactor) | Light (poc, hotfix) |
-|------|:---:|:---:|:---:|
-| 1. /ready | ✅ | ✅ | ✅ |
-| 2. /discussion | ✅ | skip | 선택 |
-| 3. /prd | ✅ | skip | skip |
-| 4. /reflect | ✅ | skip | skip |
-| 5. /premortem | ✅ | skip | skip |
-| 6. /divide | ✅ | skip | skip |
-| 7. /naming | ✅ | skip | skip |
-| 8. /tdd | ✅ | ✅ | skip |
-| 9. /solve | ✅ | ✅ | ✅ |
-| 10. /refactor | ✅ | ✅ | skip |
-| 11. /review | ✅ | ✅ | skip |
-| 12. /fix | ✅ | ✅ | ✅ |
-| 13. /doubt | ✅ | 선택 | skip |
-| 14. /cleanup | ✅ | 선택 | skip |
-| 15. /verify | ✅ | ✅ | ✅ |
-| 16. /changelog | ✅ | ✅ | ✅ |
-| 17. /ready | ✅ | ✅ | ✅ |
-| 18. /retrospect | ✅ | ✅ | skip |
-| 19. /coverage | ✅ | 선택 | skip |
-| 20. /para | ✅ | skip | skip |
-| 21. /archive | ✅ | ✅ | skip |
+진입점은 항상 Step 2(/discussion)이다. 진입 후 단계를 건너뛰지 않는다.
 
-### 프리셋 결정 기준
-
-- **⛔ `src/os/` 수정이 포함되면 → 무조건 Heavy.** OS는 인프라다. 2~7(생각) 단계를 건너뛰지 않는다.
-- `/project` (새 기능, 아키텍처 변경) → **Heavy**
-- `/issue` (버그 수정) → **Medium** (2~7 skip, 8부터 시작) — 단, OS 수정이면 Heavy
-- `/refactor` (패턴 전환) → **Medium** (2~7 skip) — 단, OS 수정이면 Heavy
-- `/poc` (실험) → **Light**
-- 명시적 지정 없으면: BOARD.md 태스크의 Cynefin 도메인으로 판단
-  - Complex → Heavy
-  - Complicated → Medium
-  - Clear → Light
-
----
-
-## 진입점 라우팅
-
-사용자 요청의 성격에 따라 보편 사이클의 진입 단계가 다르다:
-
-| 요청 | 진입 단계 | 프리셋 |
-|------|----------|--------|
-| "이거 해보자 / 만들자" | Step 2 (/discussion) | Heavy |
-| "이거 고장났어 / 안 돼" | Step 8 (/tdd — 재현 테스트) | Medium |
-| "이거 개선하자 / 리팩토링" | Step 8 (/tdd) | Medium |
-| "실험해보자" | Step 9 (/solve) | Light |
-| "계속해" | 마지막 체크포인트에서 재개 | 기존 유지 |
+| 요청 | 진입 |
+|------|------|
+| "이거 해보자 / 만들자" | Step 2 |
+| "이거 고장났어 / 안 돼" | Step 2 |
+| "이거 개선하자 / 리팩토링" | Step 2 |
+| "실험해보자" | Step 2 |
+| "계속해" | 마지막 체크포인트에서 재개 |
 
 ---
 
