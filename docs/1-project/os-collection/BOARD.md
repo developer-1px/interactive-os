@@ -6,10 +6,10 @@
 
 ## 🔴 Now
 
-- [ ] T2: createCollectionZone에 read/write lens 전환
-  - [ ] fromEntities에 write 함수 추가
-  - [ ] createCollectionZone 내부를 lens 기반으로 리팩토링
-  - [ ] Todo 마이그레이션 테스트
+- [ ] T3: OS 레벨 collection API 노출
+  - [ ] `createCollectionZone`의 커맨드들을 OS scope로 승격
+  - [ ] 앱이 `os.collection({ read, write, create })` 한 줄로 전체 CRUD 얻기
+  - [ ] Todo에서 검증
 
 ## ✅ Done
 
@@ -23,9 +23,12 @@
   - [x] HistoryEntry에 patches/inversePatches 필드 추가
   - [x] history middleware에서 produceWithPatches 사용
   - [x] 905 tests 전부 통과
+- [x] T2: createCollectionZone lens 검토
+  - [x] fromEntities의 accessor는 이미 read/write lens 역할 수행
+  - [x] Immer draft 위에서 accessor가 동작 → write-back 내장
+  - [x] 추가 작업 불필요 (이미 달성)
 
 ## 💡 Ideas
 
-- T3: OS 레벨 collection API 노출
 - T4: Todo 마이그레이션 — 앱 CRUD 커맨드 제거
 - T5: Builder/Kanban 마이그레이션 — nested 검증
