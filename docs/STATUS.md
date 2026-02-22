@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**replay** — createPage의 press/click/query를 가상 마우스+키보드+배지로 시각적 재생
+**os-collection** — JSON CRUD primitive. 앱의 CRUD/clipboard/undo를 OS가 보장.
 
 ---
 
@@ -17,6 +17,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| os-collection | T1 Unresolved Questions 확정 | 02-22 | 🔥 Focus |
 | projection-checkpoint | T1-T4 Done | 02-21 | ✅ Done |
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
