@@ -15,7 +15,7 @@
 
 import type { Middleware, ScopeToken } from "@kernel/core/tokens";
 import type { AppState } from "@os/kernel";
-import { produce } from "immer";
+import { type Patch, produceWithPatches } from "immer";
 
 /**
  * HistoryEntry — 앱 히스토리 단위 엔트리
@@ -23,7 +23,12 @@ import { produce } from "immer";
 export interface HistoryEntry {
   command: { type: string; payload?: unknown };
   timestamp: number;
+  /** Full snapshot for legacy undo (will be removed in Phase 5) */
   snapshot?: Record<string, unknown>;
+  /** RFC 6902-compatible patches for redo */
+  patches?: Patch[];
+  /** RFC 6902-compatible inverse patches for undo */
+  inversePatches?: Patch[];
   /** Captured focusedItemId for focus restoration on undo */
   focusedItemId?: string | null | undefined;
   /** Captured activeZoneId for focus restoration on undo */
@@ -181,64 +186,66 @@ export function createHistoryMiddleware(
       // but keep its original snapshot, so undo jumps to pre-burst state.
       const NOISE_WINDOW_MS = 500;
 
-      const updatedAppState = produce(
-        effectsState,
-        (draft: Record<string, unknown>) => {
-          if (!draft["history"]) {
-            draft["history"] = { past: [], future: [] };
-          }
-
-          const history = draft["history"] as {
-            past: HistoryEntry[];
-            future: HistoryEntry[];
-          };
-          const { history: _h, ...prevWithoutHistory } = prevAppState;
-
-          const lastEntry = history.past.at(-1);
-          const isSameType = lastEntry?.command.type === commandType;
-          const isRecent =
-            lastEntry && now - lastEntry.timestamp < NOISE_WINDOW_MS;
-          const isNotGrouped = !getActiveGroupId();
-
-          // Check if payloads target the same identity (e.g., same domId/id)
-          const lastPayload = lastEntry?.command.payload as
-            | Record<string, unknown>
-            | undefined;
-          const currPayload = ctx.command.payload as
-            | Record<string, unknown>
-            | undefined;
-          const identityKey = currPayload?.["domId"] ?? currPayload?.["id"];
-          const lastIdentityKey = lastPayload?.["domId"] ?? lastPayload?.["id"];
-          const isSameTarget =
-            identityKey !== undefined && identityKey === lastIdentityKey;
-
-          if (isSameType && isRecent && isNotGrouped && isSameTarget) {
-            // Coalesce: update payload + timestamp, keep original snapshot
-            lastEntry!.command.payload = ctx.command.payload;
-            lastEntry!.timestamp = now;
-          } else {
-            // Normal push
-            history.past.push({
-              command: {
-                type: commandType,
-                payload: ctx.command.payload,
-              },
-              timestamp: now,
-              snapshot: prevWithoutHistory,
-              focusedItemId: previousFocusId,
-              activeZoneId: ctx.injected["_historyZoneId"] as string | null,
-              groupId: getActiveGroupId() ?? undefined,
-            });
-
-            if (history.past.length > HISTORY_LIMIT) {
-              history.past.shift();
+      const [updatedAppState, historyPatches, historyInversePatches] =
+        produceWithPatches(
+          effectsState,
+          (draft: Record<string, unknown>) => {
+            if (!draft["history"]) {
+              draft["history"] = { past: [], future: [] };
             }
-          }
 
-          // New action → clear redo future
-          history.future = [];
-        },
-      );
+            const history = draft["history"] as {
+              past: HistoryEntry[];
+              future: HistoryEntry[];
+            };
+            const { history: _h, ...prevWithoutHistory } = prevAppState;
+
+            const lastEntry = history.past.at(-1);
+            const isSameType = lastEntry?.command.type === commandType;
+            const isRecent =
+              lastEntry && now - lastEntry.timestamp < NOISE_WINDOW_MS;
+            const isNotGrouped = !getActiveGroupId();
+
+            // Check if payloads target the same identity (e.g., same domId/id)
+            const lastPayload = lastEntry?.command.payload as
+              | Record<string, unknown>
+              | undefined;
+            const currPayload = ctx.command.payload as
+              | Record<string, unknown>
+              | undefined;
+            const identityKey = currPayload?.["domId"] ?? currPayload?.["id"];
+            const lastIdentityKey =
+              lastPayload?.["domId"] ?? lastPayload?.["id"];
+            const isSameTarget =
+              identityKey !== undefined && identityKey === lastIdentityKey;
+
+            if (isSameType && isRecent && isNotGrouped && isSameTarget) {
+              // Coalesce: update payload + timestamp, keep original snapshot
+              lastEntry!.command.payload = ctx.command.payload;
+              lastEntry!.timestamp = now;
+            } else {
+              // Normal push
+              history.past.push({
+                command: {
+                  type: commandType,
+                  payload: ctx.command.payload,
+                },
+                timestamp: now,
+                snapshot: prevWithoutHistory,
+                focusedItemId: previousFocusId,
+                activeZoneId: ctx.injected["_historyZoneId"] as string | null,
+                groupId: getActiveGroupId() ?? undefined,
+              });
+
+              if (history.past.length > HISTORY_LIMIT) {
+                history.past.shift();
+              }
+            }
+
+            // New action → clear redo future
+            history.future = [];
+          },
+        );
 
       // Write the history-augmented state back to effects.state
       // so the kernel applies it via executeEffects

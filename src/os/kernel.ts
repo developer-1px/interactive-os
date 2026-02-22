@@ -6,8 +6,12 @@
  */
 
 import { createKernel } from "@kernel";
+import { enablePatches } from "immer";
 import { initialOSState } from "./state/initial";
 import type { OSState } from "./state/OSState";
+
+// Enable Immer patches — required for inverse-patch-based undo/redo
+enablePatches();
 
 // ═══════════════════════════════════════════════════════════════════
 // Application State Definition
