@@ -56,7 +56,7 @@
 6. **안 쓰는 테스트는 정리한다.** 죽은 테스트는 거짓 안전감을 준다. 동작하지 않는 증명은 증명이 아니다. → `/cleanup`, `/review`
 7. **`as any`는 해결이 아니라 부채다.** 타입 에러를 `as any`로 억제하면 에러 카운트는 줄지만 cast 카운트가 늘고, 나중에 다시 되돌려야 한다. 타입 에러에 대한 올바른 분류: ① 진짜 수정 (타입을 맞춘다) ② skip (프로덕션 타입 설계 변경이 필요하다 → 지금은 안 건든다). `as any`로 메우는 ③번 선택지는 없다.
 8. **리팩토링은 측정 가능한 지표가 단조 개선될 때만 한다.** cast 수, import 수, 의존 방향 수, 코드 줄 수 — 하나 이상이 strictly 개선되고, 나머지가 악화되지 않아야 한다. 등가 교환이면 하지 않는다. → `/doubt`
-9. **3-commands는 DOM을 모른다.** Command 레이어에서 `document.getElementById`, `document.querySelector`, `document.activeElement` 등 동기 DOM 접근은 금지. DOM 데이터가 필요하면 `ctx.inject()`로 context에서 받거나, kernel state에서 읽는다. ESLint `pipeline/no-dom-in-commands`가 자동 차단한다.
+9. **OS 코드는 DOM을 직접 조작하지 않는다.** `document.querySelector`, `.click()`, `.focus()` 등의 직접 DOM 접근은 3-commands뿐 아니라 **OS 전체**(6-components 포함)에서 금지. 기존 메커니즘으로 해결할 수 없으면 **우회하지 말고 새 메커니즘을 설계**한다. "기존 기능이 없다 → DOM 직접 접근"은 금지 분기. "기존 기능이 없다 → OS 기능 추가"가 올바른 분기. DOM 데이터가 필요하면 `ctx.inject()`나 kernel state를 사용한다. ESLint `pipeline/no-dom-in-commands`가 commands 레이어를 자동 차단한다.
 10. **Focus/Keyboard 동작은 APG가 스펙이다.** 구현 전에 [APG](https://www.w3.org/WAI/ARIA/apg/) 해당 패턴을 읽는다. 직감으로 구현하고 나중에 APG를 확인하는 것은 금지. 순서: ① APG 패턴 읽기 → ② 요구사항을 테스트로 인코딩 → ③ 테스트를 통과하는 코드 작성. "그럴 것 같은" 동작이 아니라 "스펙이 요구하는" 동작을 구현한다.
 11. **상태는 변경 주체에 따라 배치한다.** 유저 액션(click, key)으로 바뀌는 상호작용 상태(focus, selection, expanded) → kernel state. 앱 로직으로 결정되는 선언 상태(disabled, role, config) → ZoneRegistry. "일관성을 위해 같은 곳에"가 아니라 "누가 바꾸는가"가 배치 기준이다.
 12. **상태 변경은 신호(Signal)와 소음(Noise)으로 분리된다.** 빈번한 OS 이벤트(포커스, 키보드) 자체는 상태 변이를 일으키지 않는 한 소음이다. 디버깅, 로깅, AI에게 제공하는 콘텍스트는 언제나 유의미한 상태 변경(STATE_MUTATION)을 우선 노출해야 한다.
