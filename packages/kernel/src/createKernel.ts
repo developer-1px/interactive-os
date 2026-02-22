@@ -221,9 +221,17 @@ export function createKernel<S>(initialState: S) {
   }
 
   // ─── Transaction Log (closure) ───
+  // Two separate logs: main (production) and preview (headless/test).
+  // Preview mode writes to its own log so main log stays untouched.
 
   const transactions: Transaction[] = [];
+  let previewTransactions: Transaction[] = [];
   let txNextId = 0;
+
+  /** Returns the active transaction array based on current mode */
+  function activeTransactions(): Transaction[] {
+    return previewState !== null ? previewTransactions : transactions;
+  }
 
   function recordTransaction(
     command: Command,
@@ -235,7 +243,8 @@ export function createKernel<S>(initialState: S) {
     meta?: Record<string, unknown>,
   ): void {
     const id = txNextId++;
-    transactions.push({
+    const target = activeTransactions();
+    target.push({
       id,
       timestamp: Date.now(),
       command,
@@ -247,21 +256,23 @@ export function createKernel<S>(initialState: S) {
       stateAfter,
       ...(meta !== undefined ? { meta } : {}),
     });
-    if (transactions.length > MAX_TRANSACTIONS) {
-      transactions.splice(0, transactions.length - MAX_TRANSACTIONS);
+    if (target.length > MAX_TRANSACTIONS) {
+      target.splice(0, target.length - MAX_TRANSACTIONS);
     }
   }
 
   function getTransactions(): readonly Transaction[] {
-    return transactions;
+    return activeTransactions();
   }
 
   function getLastTransaction(): Transaction | null {
-    return transactions[transactions.length - 1] ?? null;
+    const target = activeTransactions();
+    return target[target.length - 1] ?? null;
   }
 
   function travelTo(transactionId: number): void {
-    const tx = transactions.find((t) => t.id === transactionId);
+    const target = activeTransactions();
+    const tx = target.find((t) => t.id === transactionId);
     if (!tx) {
       logger.warn(`[kernel] Transaction ${transactionId} not found`);
       return;
@@ -270,7 +281,8 @@ export function createKernel<S>(initialState: S) {
   }
 
   function clearTransactions(): void {
-    transactions.length = 0;
+    const target = activeTransactions();
+    target.length = 0;
     txNextId = 0;
   }
 
@@ -423,18 +435,16 @@ export function createKernel<S>(initialState: S) {
 
     const stateAfter = getState();
 
-    // 8. Record transaction (skip during preview — preview is not recorded)
-    if (previewState === null) {
-      recordTransaction(
-        resolvedCommand,
-        handlerScope,
-        result,
-        stateBefore,
-        stateAfter,
-        path,
-        meta,
-      );
-    }
+    // 8. Record transaction (always — preview mode writes to separate log)
+    recordTransaction(
+      resolvedCommand,
+      handlerScope,
+      result,
+      stateBefore,
+      stateAfter,
+      path,
+      meta,
+    );
   }
 
   // ─── Effect Execution ───
@@ -887,12 +897,14 @@ export function createKernel<S>(initialState: S) {
     subscribe,
 
     // Preview Layer (non-destructive state override for replay/inspection)
-    setPreview(s: S) {
+    enterPreview(s: S) {
       previewState = s;
+      previewTransactions = [];
       for (const listener of listeners) listener();
     },
-    clearPreview() {
+    exitPreview() {
       previewState = null;
+      previewTransactions = [];
       for (const listener of listeners) listener();
     },
     isPreviewing() {

@@ -153,21 +153,23 @@ export const confirmDeleteTodo = listCollection.command(
     const ids = ctx.state.ui.pendingDeleteIds;
     if (!ids || ids.length === 0) return { state: ctx.state };
 
-    const dispatches: any[] = ids.map(id => deleteTodo({ id }));
-    dispatches.push(OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }));
-    dispatches.push(
-      OS_TOAST_SHOW({
-        message: `${ids.length} task${ids.length > 1 ? "s" : ""} deleted`,
-        actionLabel: "Undo",
-        actionCommand: undoCommand(),
-      }),
-    );
-
     return {
       state: produce(ctx.state, (draft) => {
+        for (const id of ids) {
+          delete draft.data.todos[id];
+          const idx = draft.data.todoOrder.indexOf(id);
+          if (idx !== -1) draft.data.todoOrder.splice(idx, 1);
+        }
         draft.ui.pendingDeleteIds = [];
       }),
-      dispatch: dispatches,
+      dispatch: [
+        OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+        OS_TOAST_SHOW({
+          message: `${ids.length} task${ids.length > 1 ? "s" : ""} deleted`,
+          actionLabel: "Undo",
+          actionCommand: undoCommand(),
+        }),
+      ],
     };
   },
 );

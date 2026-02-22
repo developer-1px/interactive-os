@@ -18,8 +18,8 @@ export function createSimpleTrigger(
   appId: string,
   command: BaseCommand,
 ): React.FC<{ children: ReactNode }> {
-  const SimpleTrigger: React.FC<{ children: ReactNode }> = ({ children }) => {
-    return React.createElement(Trigger, { onPress: command, children });
+  const SimpleTrigger: React.FC<{ children: ReactNode }> = ({ children, ...rest }) => {
+    return React.createElement(Trigger, { onPress: command, children, ...rest });
   };
   SimpleTrigger.displayName = `${appId}.Trigger`;
   return SimpleTrigger;
@@ -41,9 +41,10 @@ export function createDynamicTrigger<P>(
   const DynamicTrigger: React.FC<DynamicTriggerProps<P>> = ({
     children,
     payload,
+    ...rest
   }) => {
     const cmd = factory(payload as P);
-    return React.createElement(Trigger, { onPress: cmd, children });
+    return React.createElement(Trigger, { onPress: cmd, children, ...rest });
   };
   DynamicTrigger.displayName = `${appId}.DynamicTrigger`;
   return DynamicTrigger;
@@ -122,20 +123,21 @@ export function createCompoundTrigger(
   const DismissComponent: React.FC<{
     children: ReactNode;
     className?: string;
-  }> = ({ children, className }) =>
-      React.createElement(Dialog.Close, { className, children });
+  }> = ({ children, className, ...rest }) =>
+      React.createElement(Dialog.Close, { className, children, ...rest });
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{
     children: ReactNode;
     className?: string;
-  }> = ({ children, className }) => {
+  }> = ({ children, className, ...rest }) => {
     const confirmCmd = config.confirm;
     return React.createElement(Dialog.Close, {
       className,
       onPress: confirmCmd as any,
       id: `${dialogId}-confirm`,
       children,
+      ...rest,
     });
   };
   ConfirmComponent.displayName = `${appId}.Dialog.Confirm`;

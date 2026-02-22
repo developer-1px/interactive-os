@@ -72,10 +72,32 @@ export function createAppPage<S>(
         const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
         return entry?.config ?? DEFAULT_CONFIG;
     });
-    os.defineContext("dom-zone-order", () => []);
+    os.defineContext("dom-zone-order", () => {
+        const state = os.getState();
+        const entries: Array<import("./2-contexts").ZoneOrderEntry> = [];
+        for (const zoneId of ZoneRegistry.keys()) {
+            const zoneEntry = ZoneRegistry.get(zoneId);
+            if (!zoneEntry) continue;
+            const zoneState = state.os.focus.zones[zoneId];
+            const entry = zoneEntry.config?.navigate?.entry ?? "first";
+            // In headless, items come from mockItems (only for active zone)
+            // For non-active zones, use lastFocusedId as fallback
+            const isActive = state.os.focus.activeZoneId === zoneId;
+            const items = isActive ? mockItems : [];
+            entries.push({
+                zoneId,
+                firstItemId: items[0] ?? zoneState?.lastFocusedId ?? null,
+                lastItemId: items[items.length - 1] ?? zoneState?.lastFocusedId ?? null,
+                entry,
+                selectedItemId: zoneState?.selection?.[0] ?? null,
+                lastFocusedId: zoneState?.lastFocusedId ?? null,
+            });
+        }
+        return entries;
+    });
 
     // ── Enter preview sandbox ──
-    os.setPreview({
+    os.enterPreview({
         ...os.getState(),
         os: { ...initialAppState.os },
     });
@@ -176,8 +198,8 @@ export function createAppPage<S>(
 
         reset() {
             // Clear and re-enter preview with fresh state
-            os.clearPreview();
-            os.setPreview({
+            os.exitPreview();
+            os.enterPreview({
                 ...os.getState(),
                 os: { ...initialAppState.os },
             });
@@ -191,7 +213,7 @@ export function createAppPage<S>(
             }
             const zId = readActiveZoneId(os);
             if (zId) ZoneRegistry.unregister(zId);
-            os.clearPreview();
+            os.exitPreview();
         },
 
         // ── Projection Checkpoint ──────────────────────────────────

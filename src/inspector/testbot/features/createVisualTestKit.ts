@@ -147,7 +147,7 @@ export function createVisualTestKit(): VisualTestKit {
     }
 
     function enter() {
-        os.setPreview(os.getState() as any);
+        os.enterPreview(os.getState() as any);
         active = true;
         steps.length = 0;
         steps.push({
@@ -159,7 +159,7 @@ export function createVisualTestKit(): VisualTestKit {
     }
 
     function exit() {
-        os.clearPreview();
+        os.exitPreview();
         active = false;
         cleanupBadge();
     }
