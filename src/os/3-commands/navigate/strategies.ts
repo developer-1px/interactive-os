@@ -155,42 +155,58 @@ const resolveSpatial: NavigationStrategy = (
 // Registry
 // ═══════════════════════════════════════════════════════════════════
 
-const strategies = new Map<string, NavigationStrategy>();
+interface StrategyEntry {
+  fn: NavigationStrategy;
+  /** True if this strategy requires DOM bounding rects to compute navigation. */
+  needsDOMRects: boolean;
+}
+
+const strategies = new Map<string, StrategyEntry>();
 
 function registerNavigationStrategy(
   name: string,
-  strategy: NavigationStrategy,
+  fn: NavigationStrategy,
+  opts: { needsDOMRects?: boolean } = {},
 ): void {
-  strategies.set(name, strategy);
+  strategies.set(name, { fn, needsDOMRects: opts.needsDOMRects ?? false });
 }
 
-registerNavigationStrategy("linear", resolveLinear);
-registerNavigationStrategy("spatial", resolveSpatial);
-registerNavigationStrategy("corner", resolveCorner);
+registerNavigationStrategy("linear", resolveLinear, { needsDOMRects: false });
+registerNavigationStrategy("spatial", resolveSpatial, { needsDOMRects: true });
+registerNavigationStrategy("corner", resolveCorner, { needsDOMRects: true });
 
 // ═══════════════════════════════════════════════════════════════════
 // Resolver Facade
 // ═══════════════════════════════════════════════════════════════════
 
+function resolveStrategyEntry(orientation: string): StrategyEntry | undefined {
+  const entry = strategies.get(orientation);
+  if (entry) return entry;
+
+  if (orientation === "horizontal" || orientation === "vertical") {
+    return strategies.get("linear");
+  }
+  if (orientation === "both") return strategies.get("spatial");
+  if (orientation === "corner") return strategies.get("corner");
+
+  return undefined;
+}
+
+/** Query whether the current orientation's strategy requires DOM rects. */
+export function strategyNeedsDOMRects(orientation: string): boolean {
+  return resolveStrategyEntry(orientation)?.needsDOMRects ?? false;
+}
+
 export function resolveWithStrategy(
   orientation: string,
   ...args: Parameters<NavigationStrategy>
 ): NavigateResult {
-  let strategy = strategies.get(orientation);
+  const entry = resolveStrategyEntry(orientation);
 
-  if (!strategy) {
-    if (orientation === "horizontal" || orientation === "vertical") {
-      strategy = strategies.get("linear");
-    } else if (orientation === "both") {
-      strategy = strategies.get("spatial");
-    } else if (orientation === "corner") {
-      strategy = strategies.get("corner");
-    }
-  }
-
-  if (strategy) {
-    return strategy(...args);
+  if (entry) {
+    return entry.fn(...args);
   }
 
   return { targetId: args[0], stickyX: null, stickyY: null };
 }
+

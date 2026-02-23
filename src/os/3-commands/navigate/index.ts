@@ -22,6 +22,7 @@ import { applyFollowFocus, ensureZone } from "../../state/utils";
 import { OS_EXPAND } from "../expand";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 import { resolveNavigate } from "./resolve";
+import { strategyNeedsDOMRects } from "./strategies";
 
 type Direction = "up" | "down" | "left" | "right" | "home" | "end";
 
@@ -47,10 +48,18 @@ export const OS_NAVIGATE = os.defineCommand(
     //   headless+React: renderToString → parse data-item-id
     //   pure headless:  getItems() fallback
     const items: string[] = ctx.inject(DOM_ITEMS);
-    const itemRects: Map<string, DOMRect> = ctx.inject(DOM_RECTS);
     const config = ctx.inject(ZONE_CONFIG);
 
     if (items.length === 0) return;
+
+    // DOM_RECTS causes getBoundingClientRect layout-flush on every item.
+    // Only inject when the active strategy actually needs it (spatial/corner).
+    // Strategy declares needsDOMRects — no hardcoding here (OCP).
+    const itemRects: Map<string, DOMRect> = strategyNeedsDOMRects(
+      config.navigate.orientation,
+    )
+      ? ctx.inject(DOM_RECTS)
+      : new Map();
 
     // W3C Tree Pattern: ArrowRight/ArrowLeft handle expand/collapse
     // Only applies to tree/treegrid roles — not toolbars or other zones.
