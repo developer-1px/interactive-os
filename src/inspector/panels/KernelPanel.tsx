@@ -5,7 +5,7 @@
  * Clear button properly resets. Copy sends event log to clipboard.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 type AnyKernel = any;
 
@@ -68,22 +68,13 @@ export function KernelPanel({ kernel }: { kernel?: AnyKernel }) {
 // ─── Transaction Log ───
 
 function TransactionLog({ kernel }: { kernel: AnyKernel }) {
-  const [txCount, setTxCount] = useState(0);
+  const [version, refresh] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
-  // Poll transaction count via rAF — catches commands with no state change.
-  // useComputed only triggers on state changes, missing no-op commands.
-  useEffect(() => {
-    let raf: number;
-    const check = () => {
-      const count = kernel.inspector.getTransactions().length;
-      setTxCount((prev) => (prev !== count ? count : prev));
-      raf = requestAnimationFrame(check);
-    };
-    raf = requestAnimationFrame(check);
-    return () => cancelAnimationFrame(raf);
-  }, [kernel]);
+  // tx-aware snapshot: re-render on ANY dispatch (state change or not)
+  const getSnapshot = () => kernel.inspector.getTransactions().length;
+  useSyncExternalStore(kernel.subscribe, getSnapshot, getSnapshot);
 
   const txs: any[] = kernel.inspector.getTransactions();
 
@@ -92,11 +83,11 @@ function TransactionLog({ kernel }: { kernel: AnyKernel }) {
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [txs.length, txCount]);
+  }, [txs.length, version]);
 
   const handleClear = () => {
     kernel.inspector.clearTransactions();
-    setTxCount(0);
+    refresh((n) => n + 1);
   };
 
   const handleCopy = async () => {

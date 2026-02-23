@@ -10,11 +10,12 @@ import { useState, useSyncExternalStore } from "react";
 import { os } from "@/os/kernel.ts";
 
 export function InspectorAdapter() {
-  // Intentional: Inspector must re-render on ALL state changes.
-  // Uses useSyncExternalStore directly — useComputed is primitive-only.
-  useSyncExternalStore(os.subscribe, os.getState, os.getState);
+  // tx-aware snapshot: re-render on ANY dispatch (state change or not).
+  // useSyncExternalStore compares snapshot by Object.is — txCount changes on every dispatch.
+  const getSnapshot = () => os.inspector.getTransactions().length;
+  useSyncExternalStore(os.subscribe, getSnapshot, getSnapshot);
 
-  // clearTransactions() doesn't trigger state change → needs explicit re-render
+  // clearTransactions() doesn't trigger dispatch → needs explicit re-render
   const [, bumpVersion] = useState(0);
 
   const transactions = os.inspector.getTransactions();

@@ -445,6 +445,15 @@ export function createKernel<S>(initialState: S) {
       path,
       meta,
     );
+
+    // 9. Notify subscribers even when state didn't change.
+    //    useSyncExternalStore dedup (Object.is) ensures zero re-render cost
+    //    for app components. Inspector uses tx-aware snapshot to detect new transactions.
+    if (stateBefore === stateAfter) {
+      for (const listener of listeners) {
+        listener();
+      }
+    }
   }
 
   // ─── Effect Execution ───
