@@ -22,6 +22,9 @@ const sidebarZone = DocsApp.createZone("docs-sidebar");
 
 export const DocsSidebarUI = sidebarZone.bind({
     role: "tree",
+    options: {
+        select: { followFocus: true },
+    },
 });
 
 // ═══════════════════════════════════════════════════════════════════
