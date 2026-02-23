@@ -12,6 +12,7 @@
 
 import { produce } from "immer";
 import { DOM_ITEMS, DOM_ZONE_ORDER, ZONE_CONFIG } from "../../2-contexts";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 import { resolveTab } from "./resolveTab";
@@ -30,7 +31,10 @@ export const OS_TAB = os.defineCommand(
     const zone = ctx.state.os.focus.zones[activeZoneId];
     if (!zone) return;
 
-    const items: string[] = ctx.inject(DOM_ITEMS);
+    // Accessor-first: prefer state-derived getItems, fall back to DOM_ITEMS
+    const zoneEntry = ZoneRegistry.get(activeZoneId);
+    const rawItems = zoneEntry?.getItems?.() ?? ctx.inject(DOM_ITEMS);
+    const items: string[] = zoneEntry?.itemFilter ? zoneEntry.itemFilter(rawItems) : rawItems;
     const config = ctx.inject(ZONE_CONFIG);
     const zoneOrder = ctx.inject(DOM_ZONE_ORDER);
     const direction = payload.direction ?? "forward";

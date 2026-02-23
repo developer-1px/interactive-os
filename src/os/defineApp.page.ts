@@ -54,12 +54,16 @@ export function createAppPage<S>(
     zoneBindingEntries: Map<string, ZoneBindingEntry>,
     Component?: FC,
 ): AppPage<S> {
-    // ── Mock items for headless context ──
+    // ── Mock items for headless context (fallback only) ──
+    // NOTE: For zones with getItems accessor (e.g. createCollectionZone),
+    // commands use getItems() directly and mockItems is IGNORED.
+    // mockItems is only used for legacy DOM-only zones without getItems.
     const mockItems: string[] = [];
     /** Track keybinding unregister so cleanup() works correctly */
     let unregisterKeybindings: (() => void) | null = null;
 
     // Override DOM contexts for headless (no DOM, no React)
+    // These are fallbacks — commands prefer getItems() accessor when available.
     os.defineContext("dom-items", () => {
         const zoneId = os.getState().os.focus.activeZoneId;
         const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
@@ -105,6 +109,8 @@ export function createAppPage<S>(
 
     // ── goto ──
     function goto(zoneName: string, opts?: {
+        /** @deprecated For zones with getItems accessor, this is ignored.
+         *  Only effective for legacy DOM-only zones without getItems. */
         items?: string[];
         focusedItemId?: string | null;
         config?: Partial<FocusGroupConfig>;
@@ -112,7 +118,7 @@ export function createAppPage<S>(
         // Use zoneName directly — matches FocusGroup's id in React.
         // Preview sandbox is isolated per-app, so prefix is unnecessary.
 
-        // Set mock items
+        // Set mock items (fallback for zones without getItems accessor)
         if (opts?.items) {
             mockItems.length = 0;
             mockItems.push(...opts.items);

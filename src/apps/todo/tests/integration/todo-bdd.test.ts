@@ -20,6 +20,7 @@ import { ListView } from "@apps/todo/widgets/ListView";
 import { createPage } from "@os/defineApp.page";
 import type { AppPage } from "@os/defineApp.types";
 import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
+import { selectVisibleTodoIds } from "@apps/todo/selectors";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];
 type Page = AppPage<TodoState>;
@@ -190,13 +191,14 @@ describe("§1.2 List: 키보드 범위 선택", () => {
 
     it("Cmd+A — 전체 선택", () => {
         addTodos("A", "B", "C", "D", "E");
-        const allItems = page.state.data.todoOrder;
-        gotoList(allItems[0]);
+        // Accessor-first: SELECT_ALL uses getItems → filtered (visible) items only
+        const visibleItems = selectVisibleTodoIds(page.state);
+        gotoList(visibleItems[0]);
 
         page.keyboard.press("Meta+A");
 
-        // OS_SELECT_ALL selects ALL items in the zone
-        expect(page.selection().length).toBe(allItems.length);
+        // OS_SELECT_ALL selects all VISIBLE items in the zone
+        expect(page.selection().length).toBe(visibleItems.length);
     });
 
     it("Escape — 선택 해제", () => {

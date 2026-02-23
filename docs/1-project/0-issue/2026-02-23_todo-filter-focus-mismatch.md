@@ -1,7 +1,12 @@
 # Issue: Todo 카테고리 필터 시 포커스 목록 불일치
 
-> **Status**: [Open]
+> **Status**: [Closed] ✅
 > **Priority**: P1 (기능불가 — 포커스 네비게이션이 보이지 않는 아이템으로 이동)
+> **Created**: 2026-02-23
+> **Closed**: 2026-02-23
+> **Resolution**: `createCollectionZone.ts` L566-569 — `getItems()`에 `config.filter` 적용 (3줄 추가).
+>   Regression: `test-page.test.ts` 수정 — `navigate/index.ts` L46에서 `getItems`가
+>   `DOM_ITEMS` context보다 우선 호출됨을 발견. 테스트를 `selectVisibleTodoIds`로 전환.
 > **Created**: 2026-02-23
 
 ## 증상

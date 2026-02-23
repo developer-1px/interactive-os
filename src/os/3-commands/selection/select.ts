@@ -37,7 +37,10 @@ export const OS_SELECT = os.defineCommand(
     // W3C APG: Space toggles selection, Enter activates.
     // Ensure we process selection rather than expanding, as expansion belongs in OS_ACTIVATE.
 
-    const items: string[] = ctx.inject(DOM_ITEMS);
+    // Accessor-first: prefer state-derived getItems, fall back to DOM_ITEMS
+    const zoneEntry = ZoneRegistry.get(activeZoneId);
+    const rawItems = zoneEntry?.getItems?.() ?? ctx.inject(DOM_ITEMS);
+    const items: string[] = zoneEntry?.itemFilter ? zoneEntry.itemFilter(rawItems) : rawItems;
     const mode = payload.mode ?? "single";
 
     const result = {
@@ -77,14 +80,13 @@ export const OS_SELECT = os.defineCommand(
     };
 
     // Dispatch onSelect callback if registered
-    const entry = ZoneRegistry.get(activeZoneId);
-    if (entry?.onSelect) {
+    if (zoneEntry?.onSelect) {
       const updatedZone = result.state.os.focus.zones[activeZoneId];
       const cursor = buildZoneCursor(updatedZone);
       if (cursor) {
         return {
           ...result,
-          dispatch: entry.onSelect(cursor),
+          dispatch: zoneEntry.onSelect(cursor),
         };
       }
     }

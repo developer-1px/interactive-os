@@ -7,6 +7,7 @@
 
 import { produce } from "immer";
 import { DOM_ITEMS } from "../../2-contexts";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
@@ -17,7 +18,10 @@ export const OS_SELECT_ALL = os.defineCommand(
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 
-    const items: string[] = ctx.inject(DOM_ITEMS);
+    // Accessor-first: prefer state-derived getItems, fall back to DOM_ITEMS
+    const zoneEntry = ZoneRegistry.get(activeZoneId);
+    const rawItems = zoneEntry?.getItems?.() ?? ctx.inject(DOM_ITEMS);
+    const items: string[] = zoneEntry?.itemFilter ? zoneEntry.itemFilter(rawItems) : rawItems;
     if (items.length === 0) return;
 
     return {
