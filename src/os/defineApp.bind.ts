@@ -54,8 +54,8 @@ export function createBoundComponents<S>(
     className?: string;
     children?: ReactNode;
     "aria-label"?: string;
-    onAction?: (cursor: { focusId: string; selection: string[] }) => void;
-    onSelect?: (cursor: { focusId: string; selection: string[] }) => void;
+    onAction?: (cursor: { focusId: string; selection: string[]; isExpandable: boolean; isDisabled: boolean; treeLevel: number | undefined }) => void;
+    onSelect?: (cursor: { focusId: string; selection: string[]; isExpandable: boolean; isDisabled: boolean; treeLevel: number | undefined }) => void;
     getExpandableItems?: () => Set<string>;
   }> = ({ className, children, ...rest }) => {
     // Zone ID is always auto-injected from bind() — not developer-specified

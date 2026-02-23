@@ -285,24 +285,23 @@ export function DocsSidebar({
     setFavVersion((v) => v + 1);
   }, []);
 
-  // onAction callback: Enter or Click (activate.onClick) on an Item
-  // Folders are auto-handled by OS (OS_ACTIVATE → OS_EXPAND)
+  // onAction callback: Enter or Click on an Item
+  // OS auto-handles expandable items (OS_ACTIVATE → OS_EXPAND)
+  // cursor.isExpandable provided by OS — no string convention needed
   const handleAction = useCallback(
-    (cursor: { focusId: string }) => {
-      const id = cursor.focusId;
-      if (id.startsWith("folder:")) return; // OS handles expand
-      onSelect(id);
+    (cursor: { focusId: string; isExpandable: boolean }) => {
+      if (cursor.isExpandable) return;
+      onSelect(cursor.focusId);
     },
     [onSelect],
   );
 
   // onSelect callback: Arrow key with followFocus → preview file
-  // Folders are skipped (arrow to folder = focus only, no document load)
+  // Expandable items (folders) skipped — no document load
   const handleSelect = useCallback(
-    (cursor: { focusId: string }) => {
-      const id = cursor.focusId;
-      if (id.startsWith("folder:")) return;
-      onSelect(id);
+    (cursor: { focusId: string; isExpandable: boolean }) => {
+      if (cursor.isExpandable) return;
+      onSelect(cursor.focusId);
     },
     [onSelect],
   );
