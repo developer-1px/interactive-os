@@ -34,8 +34,6 @@ export interface MouseInput {
   hasAriaExpanded: boolean;
   /** Role of the item element (e.g. "treeitem", "button") */
   itemRole: string | null;
-  /** Zone config: activate.onClick — click dispatches OS_ACTIVATE */
-  activateOnClick: boolean;
 }
 
 export type SelectMode = "replace" | "toggle" | "range";
@@ -126,7 +124,7 @@ export function resolveMouse(input: MouseInput): ResolveResult {
     OS_SELECT({ targetId: input.targetItemId, mode: selectMode }) as any,
   );
 
-  if (input.activateOnClick || isClickExpandable(input.hasAriaExpanded, input.itemRole)) {
+  if (isClickExpandable(input.hasAriaExpanded, input.itemRole)) {
     commands.push(OS_ACTIVATE() as any);
   }
 

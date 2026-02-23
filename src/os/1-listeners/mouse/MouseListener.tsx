@@ -17,6 +17,7 @@ import {
   resolveFocusTarget,
   setDispatching,
 } from "../shared";
+import { resolveClick } from "./resolveClick";
 import { type MouseInput, resolveMouse } from "./resolveMouse";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -53,7 +54,6 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
           labelTargetGroupId: fieldTarget.groupId,
           hasAriaExpanded: false,
           itemRole: null,
-          activateOnClick: false,
         };
       }
     }
@@ -80,15 +80,10 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
       labelTargetGroupId: null,
       hasAriaExpanded: false,
       itemRole: null,
-      activateOnClick: false,
     };
   }
   const focusTarget = resolveFocusTarget(item);
   if (!focusTarget) return null;
-
-  // Read zone config for activate.onClick
-  const zoneEntry = ZoneRegistry.get(focusTarget.groupId);
-  const activateOnClick = zoneEntry?.config?.activate?.onClick ?? false;
 
   return {
     targetItemId: focusTarget.itemId,
@@ -102,7 +97,6 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
     labelTargetGroupId: null,
     hasAriaExpanded: item.hasAttribute("aria-expanded"),
     itemRole: item.getAttribute("role"),
-    activateOnClick,
   };
 }
 
@@ -147,10 +141,44 @@ export function MouseListener() {
     };
 
     document.addEventListener("mousedown", onMouseDown, { capture: true });
-    return () =>
-      document.removeEventListener("mousedown", onMouseDown, {
-        capture: true,
+
+    // ── Click listener: activate.onClick (Navigation Tree) ──
+    const onClick = (e: Event) => {
+      const target = (e as MouseEvent).target as HTMLElement;
+      if (!target || target.closest("[data-inspector]")) return;
+
+      const state = os.getState();
+      const { activeZoneId } = state.os.focus;
+      if (!activeZoneId) return;
+
+      const zone = state.os.focus.zones[activeZoneId];
+
+      const entry = ZoneRegistry.get(activeZoneId);
+      const activateOnClick = entry?.config?.activate?.onClick ?? false;
+
+      const result = resolveClick({
+        activateOnClick,
+        focusedItemId: zone?.focusedItemId ?? null,
       });
+
+      if (result.commands.length > 0) {
+        setDispatching(true);
+        for (const cmd of result.commands) {
+          const opts = result.meta
+            ? { meta: { ...result.meta, pipeline: { sensed: {}, resolved: {} } } }
+            : undefined;
+          os.dispatch(cmd, opts);
+        }
+        setDispatching(false);
+      }
+    };
+
+    document.addEventListener("click", onClick, { capture: true });
+
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown, { capture: true });
+      document.removeEventListener("click", onClick, { capture: true });
+    };
   }, []);
 
   return null;

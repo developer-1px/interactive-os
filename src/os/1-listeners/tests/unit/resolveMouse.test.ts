@@ -28,7 +28,6 @@ function baseInput(overrides: Partial<MouseInput> = {}): MouseInput {
     labelTargetGroupId: null,
     hasAriaExpanded: false,
     itemRole: null,
-    activateOnClick: false,
     ...overrides,
   };
 }
@@ -207,38 +206,5 @@ describe("resolveMouse", () => {
     expect(result.commands).toHaveLength(1);
     expect(result.commands[0]!.type).toBe("OS_FOCUS");
     expect((result.commands[0]!.payload as any).itemId).toBe(null);
-  });
-
-  // ── activate.onClick (Navigation Tree) ──
-
-  test("activateOnClick + file (no aria-expanded) → OS_ACTIVATE dispatched", () => {
-    const result = resolveMouse(
-      baseInput({ activateOnClick: true, itemRole: "treeitem" }),
-    );
-    const activateCmd = result.commands.find((c) => c.type === "OS_ACTIVATE");
-    expect(activateCmd).toBeDefined();
-  });
-
-  test("activateOnClick + folder (aria-expanded) → OS_ACTIVATE dispatched", () => {
-    const result = resolveMouse(
-      baseInput({
-        activateOnClick: true,
-        hasAriaExpanded: true,
-        itemRole: "treeitem",
-      }),
-    );
-    const activateCmd = result.commands.find((c) => c.type === "OS_ACTIVATE");
-    expect(activateCmd).toBeDefined();
-  });
-
-  test("no activateOnClick + treeitem with aria-expanded → keyboard-only (no OS_ACTIVATE)", () => {
-    const result = resolveMouse(
-      baseInput({
-        activateOnClick: false,
-        hasAriaExpanded: true,
-        itemRole: "treeitem",
-      }),
-    );
-    expect(result.commands.some((c) => c.type === "OS_ACTIVATE")).toBe(false);
   });
 });
