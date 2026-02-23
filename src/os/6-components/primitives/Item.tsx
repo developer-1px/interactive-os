@@ -7,6 +7,7 @@ import { forwardRef, isValidElement, type ReactNode, useMemo } from "react";
 interface ItemState {
   isFocused: boolean;
   isSelected: boolean;
+  isExpanded: boolean;
   isAnchor?: boolean;
 }
 
@@ -60,6 +61,11 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
       (s) => s.os.focus.zones[zoneId]?.selection.includes(stringId) ?? false,
     );
 
+    // Expanded from kernel state
+    const isExpanded = os.useComputed(
+      (s) => s.os.focus.zones[zoneId]?.expandedItems.includes(stringId) ?? false,
+    );
+
     // Anchor: focused but zone is inactive (retained focus)
     const isAnchor = isFocused && !isActive;
 
@@ -73,9 +79,10 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
       () => ({
         isFocused,
         isSelected,
+        isExpanded,
         isAnchor,
       }),
-      [isFocused, isSelected, isAnchor],
+      [isFocused, isSelected, isExpanded, isAnchor],
     );
 
     // Resolve Children

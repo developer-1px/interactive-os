@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-23 14:29
+> Last updated: 2026-02-23 17:58
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -32,6 +32,7 @@
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
 | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
 | docs-viewer-features | T1 날짜 메타데이터 UI | 02-23 | 🟢 Active |
+| zone-focusgroup-separation | Discussion 완료, Scaffold | 02-23 | 🟢 Active |
 
 ---
 

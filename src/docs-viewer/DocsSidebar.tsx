@@ -1,7 +1,8 @@
 import clsx from "clsx";
 import { ChevronDown, ChevronRight, Clock, FileText, Star } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import docsMeta from "virtual:docs-meta";
+import { DocsSidebarUI } from "./app";
 import {
   cleanLabel,
   type DocItem,
@@ -164,39 +165,19 @@ function FavoritesSection({
   );
 }
 
-const SidebarItem = ({
+// --------------- Tree Item (OS-managed) ---------------
+
+const TreeItem = ({
   item,
   level = 0,
   index,
   activePath,
-  onSelect,
 }: {
   item: DocItem;
   level?: number;
   index?: number | undefined;
   activePath: string | undefined;
-  onSelect: (path: string) => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  // Auto-expand if a child is active
-  useEffect(() => {
-    if (item.type === "folder" && item.children) {
-      const hasActiveChild = (children: DocItem[]): boolean => {
-        return children.some(
-          (child) =>
-            (child.type === "file" && child.path === activePath) ||
-            (child.type === "folder" &&
-              child.children &&
-              hasActiveChild(child.children)),
-        );
-      };
-      if (hasActiveChild(item.children)) {
-        setIsOpen(true);
-      }
-    }
-  }, [activePath, item]);
-
   // Folder render
   if (item.type === "folder") {
     if (level === 0) {
@@ -207,13 +188,12 @@ const SidebarItem = ({
           </h3>
           <div className="flex flex-col">
             {item.children?.map((child, i) => (
-              <SidebarItem
+              <TreeItem
                 key={child.path}
                 item={child}
                 level={level + 1}
                 index={child.type === "file" ? i + 1 : undefined}
                 activePath={activePath}
-                onSelect={onSelect}
               />
             ))}
           </div>
@@ -221,41 +201,46 @@ const SidebarItem = ({
       );
     }
 
+    // Nested folder — OS-managed expand/collapse via Item
     return (
-      <div className="flex flex-col select-none">
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className={clsx(
-            "flex items-center gap-1.5 px-3 py-1 text-[13px] text-slate-600 hover:bg-slate-100 rounded-md transition-colors",
-            "text-left w-full truncate",
-          )}
-          style={{ paddingLeft: `${level * 12 + 12}px` }}
-        >
-          <span className="text-slate-400">
-            {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          </span>
-          <span className="truncate font-medium">{cleanLabel(item.name)}</span>
-        </button>
-        {isOpen && (
-          <div className="flex flex-col">
-            {item.children?.map((child, i) => (
-              <SidebarItem
-                key={child.path}
-                item={child}
-                level={level + 1}
-                index={child.type === "file" ? i + 1 : undefined}
-                activePath={activePath}
-                onSelect={onSelect}
-              />
-            ))}
+      <DocsSidebarUI.Item id={`folder:${item.path}`}>
+        {({ isFocused, isExpanded }) => (
+          <div className="flex flex-col select-none">
+            <div
+              className={clsx(
+                "flex items-center gap-1.5 px-3 py-1 text-[13px] rounded-md transition-colors cursor-pointer",
+                "text-left w-full truncate",
+                isFocused
+                  ? "bg-indigo-50 text-indigo-700"
+                  : "text-slate-600 hover:bg-slate-100",
+              )}
+              style={{ paddingLeft: `${level * 12 + 12}px` }}
+            >
+              <span className={clsx("text-slate-400 transition-transform", isExpanded && "rotate-90")}>
+                <ChevronRight size={14} />
+              </span>
+              <span className="truncate font-medium">{cleanLabel(item.name)}</span>
+            </div>
+            {isExpanded && (
+              <div className="flex flex-col">
+                {item.children?.map((child, i) => (
+                  <TreeItem
+                    key={child.path}
+                    item={child}
+                    level={level + 1}
+                    index={child.type === "file" ? i + 1 : undefined}
+                    activePath={activePath}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
-      </div>
+      </DocsSidebarUI.Item>
     );
   }
 
-  // File render
+  // File render — OS Item
   const isActive = item.path === activePath;
   const label =
     index != null
@@ -263,21 +248,25 @@ const SidebarItem = ({
       : cleanLabel(item.name);
 
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(item.path)}
-      className={clsx(
-        "flex items-center gap-1.5 px-3 py-1 text-[12.5px] rounded-md transition-all duration-200 border border-transparent",
-        "text-left w-full",
-        isActive
-          ? "bg-slate-100 text-slate-900 font-medium"
-          : "text-slate-500 hover:text-slate-900 hover:bg-slate-50",
+    <DocsSidebarUI.Item id={item.path}>
+      {({ isFocused }) => (
+        <div
+          className={clsx(
+            "flex items-center gap-1.5 px-3 py-1 text-[12.5px] rounded-md transition-all duration-200 border border-transparent",
+            "text-left w-full cursor-pointer",
+            isActive
+              ? "bg-slate-100 text-slate-900 font-medium"
+              : isFocused
+                ? "bg-indigo-50 text-indigo-700"
+                : "text-slate-500 hover:text-slate-900 hover:bg-slate-50",
+          )}
+          style={{ paddingLeft: `${level * 12 + 12}px` }}
+        >
+          <span className="w-[14px] flex justify-center opacity-50" />
+          <span className="truncate">{label}</span>
+        </div>
       )}
-      style={{ paddingLeft: `${level * 12 + 12}px` }}
-    >
-      <span className="w-[14px] flex justify-center opacity-50" />
-      <span className="truncate">{label}</span>
-    </button>
+    </DocsSidebarUI.Item>
   );
 };
 
@@ -295,6 +284,18 @@ export function DocsSidebar({
     toggleFavorite(path);
     setFavVersion((v) => v + 1);
   }, []);
+
+  // onAction callback: when Enter is pressed on an Item
+  const handleAction = useCallback(
+    (cursor: { focusId: string }) => {
+      const id = cursor.focusId;
+      // Skip folder items (they toggle expand via ArrowRight/Left)
+      if (id.startsWith("folder:")) return;
+      // File item — navigate
+      onSelect(id);
+    },
+    [onSelect],
+  );
 
   return (
     <div
@@ -316,7 +317,7 @@ export function DocsSidebar({
         </div>
       )}
 
-      <nav className="flex-1 overflow-y-auto px-2 pb-10 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-2 pb-10 custom-scrollbar">
         {/* Favorites Section — pinned docs */}
         <FavoritesSection
           allFiles={allFiles}
@@ -332,19 +333,24 @@ export function DocsSidebar({
           onSelect={onSelect}
         />
 
-        {/* Folder Tree */}
-        {items.map((item) => (
-          <SidebarItem
-            key={item.path}
-            item={item}
-            activePath={activePath}
-            onSelect={onSelect}
-          />
-        ))}
-      </nav>
+        {/* Folder Tree — OS Zone */}
+        <DocsSidebarUI.Zone
+          className="flex flex-col"
+          onAction={handleAction}
+        >
+          {items.map((item) => (
+            <TreeItem
+              key={item.path}
+              item={item}
+              activePath={activePath}
+            />
+          ))}
+        </DocsSidebarUI.Zone>
+      </div>
     </div>
   );
 }
 
 export { type DocsSidebarProps };
 export { toggleFavorite as _toggleFavorite };
+

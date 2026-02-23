@@ -2,7 +2,11 @@
 
 ## Now
 
-(empty)
+- [ ] **T5**: OS sidebar tree navigation — defineApp + Zone/Item 기반 트리 네비게이션
+  - [x] Step 2: /discussion
+  - [x] Step 7: /blueprint
+  - [x] Step 8: /naming (useExpanded)
+  - [ ] Step 10: /solve
 
 ## Next
 

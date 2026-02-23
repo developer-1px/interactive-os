@@ -2,10 +2,12 @@
  * OS_FIELD_START_EDIT — Enter editing mode on the focused item.
  *
  * Sets ZoneState.editingItemId = focusedItemId.
+ * Seeds FieldRegistry.caretPosition from ZoneState.caretPositions if available.
  * No-op if already editing the same item or no focused item.
  */
 
 import { produce } from "immer";
+import { FieldRegistry } from "../../6-components/field/FieldRegistry";
 import { os } from "../../kernel";
 
 export const OS_FIELD_START_EDIT = os.defineCommand(
@@ -19,6 +21,14 @@ export const OS_FIELD_START_EDIT = os.defineCommand(
 
         // Already editing this item — no-op
         if (zone.editingItemId === zone.focusedItemId) return;
+
+        const itemId = zone.focusedItemId;
+
+        // Seed FieldRegistry with saved caret position from ZoneState
+        const savedCaret = zone.caretPositions[itemId];
+        if (savedCaret != null) {
+            FieldRegistry.updateCaretPosition(itemId, savedCaret);
+        }
 
         return {
             state: produce(ctx.state, (draft) => {

@@ -65,15 +65,21 @@ export const OS_FIELD_COMMIT = os.defineCommand(
 
         // Only clear editingItemId if we were in deferred editing mode
         if (editingId) {
+            // Read latest caret position from FieldRegistry (updated by selectionchange)
+            const caretPos = FieldRegistry.getField(editingId)?.state.caretPosition;
+
             return {
                 state: produce(ctx.state, (draft) => {
                     const z = draft.os.focus.zones[activeZoneId];
                     if (z) {
                         z.editingItemId = null;
                         // Restore focus to the item that was being edited
-                        // (focusin on the field element may have overwritten these)
                         z.focusedItemId = editingId;
                         z.lastFocusedId = editingId;
+                        // Save caret position (visible in Inspector)
+                        if (caretPos != null) {
+                            z.caretPositions[editingId] = caretPos;
+                        }
                     }
                 }) as typeof ctx.state,
             };

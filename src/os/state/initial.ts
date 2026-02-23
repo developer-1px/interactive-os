@@ -7,6 +7,7 @@ export const initialZoneState: ZoneState = {
 
   // Field
   editingItemId: null,
+  caretPositions: {},
 
   // Spatial
   stickyX: null,

@@ -48,6 +48,8 @@ export interface ZoneState {
 
   // Field Slice
   editingItemId: string | null;
+  /** Per-field caret offset cache (fieldId → character offset) */
+  caretPositions: Record<string, number>;
 
   // Spatial Slice
   stickyX: number | null;

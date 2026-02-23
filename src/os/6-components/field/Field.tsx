@@ -141,7 +141,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
     const trigger: FieldTrigger = triggerProp ?? "enter";
 
     // --- Derived props (from fieldType / mode) ---
-    const fieldType: FieldType = fieldTypeProp ?? "inline";
+    const fieldType: FieldType = fieldTypeProp ?? "block";
     const blurOnInactive = mode === "deferred";
     const tag = "div";
 
@@ -390,6 +390,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       blurOnInactive,
       cursorRef,
       fieldId,
+      isEditing: isContentEditable,
     });
 
     // --- Styling ---

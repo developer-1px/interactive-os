@@ -111,7 +111,7 @@ export interface BoundComponents<S> {
   Item: React.FC<{
     id: string | number;
     className?: string;
-    children?: ReactNode;
+    children?: ReactNode | ((state: { isFocused: boolean; isSelected: boolean; isExpanded: boolean; isAnchor?: boolean }) => ReactNode);
     asChild?: boolean;
   }>;
   Field: React.FC<{

@@ -22,6 +22,8 @@ interface UseFieldFocusProps {
   cursorRef: MutableRefObject<number | null>;
   /** Field identifier for FieldRegistry caret persistence */
   fieldId?: string;
+  /** Whether the field is in editing mode (contentEditable) */
+  isEditing?: boolean;
 }
 
 // --- Hooks ---
@@ -70,12 +72,13 @@ export const useFieldDOMSync = ({
 /**
  * Manages physical focus and blur of the DOM element based on `isActive` state.
  *
- * Caret position lifecycle:
- *   1. active→inactive: save caret via getCaretPosition → FieldRegistry
- *   2. inactive→active: restore caret from FieldRegistry → setCaretPosition
+ * Caret position lifecycle (OS pipeline integration):
+ *   1. During editing: selectionchange → FieldRegistry.caretPosition (continuous, silent)
+ *   2. OS_FIELD_COMMIT/CANCEL: FieldRegistry → ZoneState.caretPositions (command, Inspector visible)
+ *   3. not-editing→editing: FieldRegistry.caretPosition → setCaretPosition (DOM effect)
  *
- * This makes caret position a state concern (headless-testable)
- * rather than a DOM-only concern.
+ * Key insight: In deferred mode, isActive (= isFocused) becomes true BEFORE editing.
+ * So caret restore must be triggered by the isEditing transition, not the isActive transition.
  */
 export const useFieldFocus = ({
   innerRef,
@@ -83,53 +86,57 @@ export const useFieldFocus = ({
   blurOnInactive,
   cursorRef,
   fieldId,
+  isEditing = false,
 }: UseFieldFocusProps) => {
-  // Track previous active state to detect inactive→active transition.
-  // setCaretPosition must only run ONCE on initial entry into edit mode,
-  // not on every re-render while active (which causes addRange → browser auto-scroll).
+  // Track focus transition (for DOM focus/blur management)
   const wasActiveRef = useRef(false);
+  // Track editing transition separately (for caret restore)
+  // In deferred mode, focus happens before editing — these are distinct transitions.
+  const wasEditingRef = useRef(false);
 
+  // Continuous caret tracking via selectionchange (when editing + fieldId)
+  useEffect(() => {
+    if (!isEditing || !fieldId || !innerRef.current) return;
+
+    const el = innerRef.current;
+    const onSelectionChange = () => {
+      const sel = document.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      if (!el.contains(sel.anchorNode)) return;
+      try {
+        const pos = getCaretPosition(el);
+        FieldRegistry.updateCaretPosition(fieldId, pos);
+      } catch (_e) { }
+    };
+
+    document.addEventListener("selectionchange", onSelectionChange);
+    return () => document.removeEventListener("selectionchange", onSelectionChange);
+  }, [isEditing, fieldId, innerRef]);
+
+  // Focus/blur management (triggered by isActive = isFocused)
   useEffect(() => {
     if (isActive && innerRef.current) {
-      const isFirstEntry = !wasActiveRef.current;
+      const isFirstFocus = !wasActiveRef.current;
       wasActiveRef.current = true;
 
       if (document.activeElement !== innerRef.current) {
         innerRef.current.focus({ preventScroll: true });
       }
 
-      // Restore caret position only on initial entry (inactive→active transition)
-      if (isFirstEntry) {
-        // Read saved position from FieldRegistry (state), fallback to cursorRef (legacy)
-        const savedPosition = fieldId
-          ? (FieldRegistry.getField(fieldId)?.state.caretPosition ?? null)
-          : cursorRef.current;
-
+      // On first focus (no editing yet), move caret to end
+      if (isFirstFocus && !isEditing) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (innerRef.current) {
               try {
-                if (savedPosition !== null) {
-                  setCaretPosition(innerRef.current, savedPosition);
-                } else {
-                  const textLength = innerRef.current.innerText.length;
-                  setCaretPosition(innerRef.current, textLength);
-                }
+                const textLength = innerRef.current.innerText.length;
+                setCaretPosition(innerRef.current, textLength);
               } catch (_e) { }
             }
           });
         });
       }
     } else if (!isActive) {
-      // Save caret position before deactivating (active→inactive transition)
-      if (wasActiveRef.current && innerRef.current && fieldId) {
-        try {
-          const pos = getCaretPosition(innerRef.current);
-          FieldRegistry.updateCaretPosition(fieldId, pos);
-        } catch (_e) { }
-      }
-
-      // Always reset so the next inactive→active transition is detected
       wasActiveRef.current = false;
 
       if (
@@ -140,7 +147,33 @@ export const useFieldFocus = ({
         innerRef.current.blur();
       }
     }
-  }, [isActive, blurOnInactive, innerRef, cursorRef, fieldId]);
+  }, [isActive, blurOnInactive, innerRef, cursorRef, fieldId, isEditing]);
+
+  // Caret restore on editing transition (not-editing → editing)
+  useEffect(() => {
+    if (isEditing && !wasEditingRef.current && innerRef.current && fieldId) {
+      wasEditingRef.current = true;
+
+      const savedPosition = FieldRegistry.getField(fieldId)?.state.caretPosition ?? null;
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (innerRef.current) {
+            try {
+              if (savedPosition !== null) {
+                setCaretPosition(innerRef.current, savedPosition);
+              } else {
+                const textLength = innerRef.current.innerText.length;
+                setCaretPosition(innerRef.current, textLength);
+              }
+            } catch (_e) { }
+          }
+        });
+      });
+    } else if (!isEditing) {
+      wasEditingRef.current = false;
+    }
+  }, [isEditing, fieldId, innerRef]);
 };
 
 /**

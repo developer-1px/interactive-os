@@ -36,6 +36,9 @@ export const OS_FIELD_CANCEL = os.defineCommand(
             queueMicrotask(() => os.dispatch(command));
         }
 
+        // Read latest caret position from FieldRegistry
+        const caretPos = FieldRegistry.getField(editingId)?.state.caretPosition;
+
         return {
             state: produce(ctx.state, (draft) => {
                 const z = draft.os.focus.zones[activeZoneId];
@@ -44,6 +47,10 @@ export const OS_FIELD_CANCEL = os.defineCommand(
                     z.focusedItemId = editingId;
                     z.lastFocusedId = editingId;
                     z.editingItemId = null;
+                    // Save caret position (visible in Inspector)
+                    if (caretPos != null) {
+                        z.caretPositions[editingId] = caretPos;
+                    }
                 }
             }) as typeof ctx.state,
         };
