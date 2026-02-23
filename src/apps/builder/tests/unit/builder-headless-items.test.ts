@@ -8,7 +8,7 @@
  * getItems()가 root blocks만 반환하는지, navigate가 동작하는지 검증.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { BuilderApp } from "@apps/builder/app";
 import { createPage } from "@os/defineApp.page";
 import type { AppPage } from "@os/defineApp.types";

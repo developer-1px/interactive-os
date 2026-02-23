@@ -51,16 +51,6 @@ export function gotoList(focusedItemId?: string | null) {
 /** Helper: goto sidebar zone */
 export function gotoSidebar(focusedItemId?: string | null) {
     const ids = page.state.data.categoryOrder;
-    page.goto("sidebar", {
-        focusedItemId: focusedItemId ?? ids[0] ?? null,
-        config: {
-            select: {
-                followFocus: true,
-                mode: "single",
-                disallowEmpty: false,
-                range: false,
-                toggle: false,
-            },
-        },
-    });
+    // Config comes from role preset (listbox) + bind options — no manual override needed
+    page.goto("sidebar", { focusedItemId: focusedItemId ?? ids[0] ?? null });
 }

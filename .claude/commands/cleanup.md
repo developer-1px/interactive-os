@@ -14,7 +14,6 @@ description: 코드 정리, lazy 주석 제거, dead code 제거 후 /verify로 
     - Resolve these by implementing the missing logic or removing unnecessary markers.
 
 2. **Unused & Orphan Cleanup**
-    - // turbo
     - Run `npx knip` to detect unused exports, unused dependencies, and orphan files.
     - Review the output and remove or re-export any genuinely unused items.
     - If a reported item is intentionally used (e.g. side-effect imports, global registrations), add it to `knip.json` ignoreExports or entry config.
