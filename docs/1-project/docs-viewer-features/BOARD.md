@@ -2,14 +2,21 @@
 
 ## Now
 
+- [ ] **T8**: ZoneCursor meta 보강 + DocsSidebar Todo 패턴 전환
+  - Discussion: `discussions/2026-0223-2100-navtree-interaction-design.md`
+  - 근본 원인: ZoneCursor에 isExpandable 등 meta 미전달 → 앱이 문자열 guard 우회
+  - [ ] T8.1: `ZoneCursor`에 meta 추가 (isExpandable, isDisabled, treeLevel)
+  - [ ] T8.2: `buildZoneCursor`에서 ZoneRegistry 읽어 meta 주입
+  - [ ] T8.3: DocsApp state 추가 (activePath)
+  - [ ] T8.4: `selectDoc` 커맨드 정의 (app.ts)
+  - [ ] T8.5: bind()에 onAction/onSelect 연결 (Todo 패턴)
+  - [ ] T8.6: DocsSidebar handleAction/handleSelect 제거
+
 - [ ] **T7**: Tree Click-to-Activate + ExpandTrigger primitive
-  - Discussion: `discussions/2026-0223-2004-tree-click-activate.md`
-  - [x] T7.1: `activate.onClick` 옵션 — OS ClickListener에서 Click → `OS_ACTIVATE` dispatch
-  - [x] T7.2: `OS_ACTIVATE` auto-expand — 이미 구현됨 (expandable item 자동 OS_EXPAND)
-  - [ ] T7.3: `ExpandTrigger` 프리미티브 — OS가 셰브론 렌더 + 클릭 핸들 + 회전 처리 (후속)
-  - [x] T7.4: DocsViewer 적용 — `activate.onClick: true` + `followFocus: true` + `onAction` 통합
-  - [x] T7.5: 기존 잔해 제거 — 수동 `OS_EXPAND` dispatch, `onSelect` 폴더 분기 삭제
-  - [x] T7.6: /verify — tsc ✅ + vitest 919 GREEN ✅ (브라우저 검증 대기)
+  - [x] T7.1~T7.6: Click-to-Activate 구현 완료
+  - [x] T7.7: treeitem expandable 판정 수정 (role → getExpandableItems 기반)
+  - [x] T7.8: Navigation Tree 통합 테스트 (12 cases, 934 GREEN)
+  - [ ] T7.3: `ExpandTrigger` 프리미티브 (후속)
 
 - [ ] **T5**: OS sidebar tree navigation (브라우저 검증 잔여)
   - [ ] Step 16: /verify — 브라우저 검증
