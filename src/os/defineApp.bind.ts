@@ -43,6 +43,7 @@ export function createBoundComponents<S>(
     getItems?: () => string[];
     getExpandableItems?: () => Set<string>;
     getTreeLevels?: () => Map<string, number>;
+    onReorder?: (info: { itemId: string; overItemId: string; position: "before" | "after" }) => void;
   },
 ): BoundComponents<S> {
   const { appId, zoneName, useComputed } = bindConfig;
@@ -75,6 +76,7 @@ export function createBoundComponents<S>(
       getItems: config.getItems,
       getExpandableItems: config.getExpandableItems,
       getTreeLevels: config.getTreeLevels,
+      onReorder: config.onReorder,
     };
 
     // Keybindings registration

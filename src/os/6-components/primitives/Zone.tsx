@@ -120,6 +120,8 @@ export interface ZoneProps
   getExpandableItems?: () => Set<string>;
   /** Tree level accessor */
   getTreeLevels?: () => Map<string, number>;
+  /** Drag reorder callback — invoked when an item is drag-dropped to a new position */
+  onReorder?: (info: { itemId: string; overItemId: string; position: "before" | "after" }) => void;
   /** Children */
   children: ReactNode;
 }
@@ -208,6 +210,7 @@ export function Zone({
   getItems,
   getExpandableItems,
   getTreeLevels,
+  onReorder,
   children,
   className,
   style,
@@ -275,6 +278,7 @@ export function Zone({
         {...(getItems !== undefined ? { getItems } : {})}
         {...(getExpandableItems !== undefined ? { getExpandableItems } : {})}
         {...(getTreeLevels !== undefined ? { getTreeLevels } : {})}
+        {...(onReorder !== undefined ? { onReorder } : {})}
       >
         <ZoneContainer
           zoneId={zoneId}

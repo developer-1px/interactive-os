@@ -32,6 +32,7 @@ import { OS_SELECTION_CLEAR } from "@/os/3-commands/selection/selection";
 import { OS_TOAST_SHOW } from "@/os/3-commands/toast/toast";
 
 import { defineApp } from "@/os/defineApp";
+import { os } from "@/os/kernel";
 
 /** Collision-free random ID */
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -213,6 +214,31 @@ export const bulkToggleCompleted = listCollection.command(
 
 // Zone binding — auto-wired CRUD + clipboard + app-specific handlers
 const listBindings = listCollection.collectionBindings();
+
+// DnD reorder — moves item to new position in todoOrder
+const reorderTodo = listCollection.command(
+  "reorderTodo",
+  (ctx, payload: { itemId: string; overItemId: string; position: "before" | "after" }) => ({
+    state: produce(ctx.state, (draft) => {
+      const { itemId, overItemId, position } = payload;
+      const order = draft.data.todoOrder;
+      const fromIndex = order.indexOf(itemId);
+      if (fromIndex === -1) return;
+
+      // Remove from current position
+      order.splice(fromIndex, 1);
+
+      // Find target position
+      let toIndex = order.indexOf(overItemId);
+      if (toIndex === -1) return;
+      if (position === "after") toIndex += 1;
+
+      // Insert at new position
+      order.splice(toIndex, 0, itemId);
+    }),
+  }),
+);
+
 export const TodoListUI = listCollection.bind({
   role: "listbox",
   options: { dismiss: { escape: "deselect" } },
@@ -225,6 +251,9 @@ export const TodoListUI = listCollection.bind({
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   keybindings: [...listBindings.keybindings],
+  onReorder: (info) => {
+    os.dispatch(reorderTodo(info));
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════

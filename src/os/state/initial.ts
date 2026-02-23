@@ -33,4 +33,11 @@ export const initialOSState: OSState = {
   toasts: {
     stack: [],
   },
+  drag: {
+    isDragging: false,
+    zoneId: null,
+    dragItemId: null,
+    overItemId: null,
+    overPosition: null,
+  },
 };

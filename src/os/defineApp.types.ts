@@ -86,6 +86,7 @@ export interface ZoneBindings {
   getItems?: () => string[];
   getExpandableItems?: () => Set<string>;
   getTreeLevels?: () => Map<string, number>;
+  onReorder?: (info: { itemId: string; overItemId: string; position: "before" | "after" }) => void;
 }
 
 export interface FieldBindings {

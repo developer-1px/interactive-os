@@ -131,6 +131,7 @@ export function getRecentFiles(
   docsMeta: Record<string, { mtime: number }>,
   limit = 7,
 ): RecentDocItem[] {
+  if (!allFiles) return [];
   return allFiles
     .filter((f) => docsMeta[f.path] != null)
     .map((f) => ({ ...f, mtime: docsMeta[f.path].mtime }))
@@ -172,6 +173,7 @@ export function isFavorite(path: string): boolean {
 
 /** Get favorite DocItems from allFiles */
 export function getFavoriteFiles(allFiles: DocItem[]): DocItem[] {
+  if (!allFiles) return [];
   const favs = new Set(getFavorites());
   return allFiles.filter((f) => favs.has(f.path));
 }

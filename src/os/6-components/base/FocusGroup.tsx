@@ -195,6 +195,9 @@ export interface FocusGroupProps
   /** Tree level accessor — returns map of item ID → level */
   getTreeLevels?: () => Map<string, number>;
 
+  /** Drag reorder callback — invoked by OS_DRAG_END when an item is dropped */
+  onReorder?: (info: { itemId: string; overItemId: string; position: "before" | "after" }) => void;
+
   /** Children */
   children: ReactNode;
 
@@ -250,6 +253,7 @@ function buildZoneEntry(
     getItems?: (() => string[]) | undefined;
     getExpandableItems?: (() => Set<string>) | undefined;
     getTreeLevels?: (() => Map<string, number>) | undefined;
+    onReorder?: ((info: { itemId: string; overItemId: string; position: "before" | "after" }) => void) | undefined;
   },
 ): ZoneEntry {
   const entry: ZoneEntry = {
@@ -274,6 +278,7 @@ function buildZoneEntry(
   if (props.getItems !== undefined) entry.getItems = props.getItems;
   if (props.getExpandableItems !== undefined) entry.getExpandableItems = props.getExpandableItems;
   if (props.getTreeLevels !== undefined) entry.getTreeLevels = props.getTreeLevels;
+  if (props.onReorder !== undefined) entry.onReorder = props.onReorder;
   return entry;
 }
 
@@ -307,6 +312,7 @@ export function FocusGroup({
   getItems: _getItems,
   getExpandableItems: _getExpandableItems,
   getTreeLevels: _getTreeLevels,
+  onReorder: _onReorder,
   children,
   className,
   style,
@@ -382,6 +388,7 @@ export function FocusGroup({
           getItems: _getItems,
           getExpandableItems: _getExpandableItems,
           getTreeLevels: _getTreeLevels,
+          onReorder: _onReorder,
         }),
       );
     }
@@ -410,6 +417,7 @@ export function FocusGroup({
     _getItems,
     _getExpandableItems,
     _getTreeLevels,
+    _onReorder,
   ]);
 
   // --- AutoFocus: focus first item on mount when config.project.autoFocus ---

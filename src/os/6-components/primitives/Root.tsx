@@ -11,6 +11,7 @@
  */
 
 import { ClipboardListener } from "@os/1-listeners/clipboard/ClipboardListener";
+import { DragListener } from "@os/1-listeners/drag/DragListener";
 import { FocusListener } from "@os/1-listeners/focus/FocusListener";
 import { InputListener } from "@os/1-listeners/input/InputListener";
 import { KeyboardListener } from "@os/1-listeners/keyboard/KeyboardListener";
@@ -37,6 +38,7 @@ export function Root({ children }: RootProps) {
       <FocusListener />
       <ClipboardListener />
       <InputListener />
+      <DragListener />
       {children}
     </>
   );
