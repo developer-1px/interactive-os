@@ -160,3 +160,52 @@ export function formatRelativeTime(mtime: number, now = Date.now()): string {
     day: "numeric",
   });
 }
+
+// --------------- Table of Contents ---------------
+
+export interface TocHeading {
+  depth: number; // 1-6
+  text: string;
+  slug: string;
+}
+
+/** Convert heading text to URL-friendly slug */
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s가-힣-]/g, "") // keep alphanumeric, spaces, hyphens, Korean
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+/**
+ * Extract headings (h1-h4) from raw markdown content.
+ * Skips headings inside code blocks (``` ... ```).
+ */
+export function extractHeadings(content: string): TocHeading[] {
+  const headings: TocHeading[] = [];
+  const lines = content.split("\n");
+  let inCodeBlock = false;
+
+  for (const line of lines) {
+    if (line.trimStart().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+
+    const match = line.match(/^(#{1,4})\s+(.+)$/);
+    if (match) {
+      const depth = match[1].length;
+      const text = match[2]
+        .replace(/\*\*/g, "")   // strip bold
+        .replace(/\*/g, "")     // strip italic
+        .replace(/`/g, "")      // strip inline code
+        .trim();
+      headings.push({ depth, text, slug: slugify(text) });
+    }
+  }
+
+  return headings;
+}

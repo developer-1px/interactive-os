@@ -20,6 +20,7 @@ import {
 } from "./docsUtils";
 import { type ExternalFolderSource, openExternalFolder } from "./fsAccessUtils";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import { TableOfContents } from "./TableOfContents";
 
 /** Parse hash: returns { source: "docs" | "ext", path?, folderName? } */
 function parseHash(): {
@@ -261,89 +262,92 @@ export function DocsViewer() {
                 </button>
               </div>
             ) : (
-              <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
-                {/* Document Metadata Header */}
-                <div className="flex items-center gap-2 mb-10 border-b border-slate-50 pb-6">
-                  {isExternal && (
-                    <>
-                      <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                        {externalSource.name}
-                      </span>
-                      <span className="text-slate-300">/</span>
-                    </>
-                  )}
-                  {activePath?.split("/").map((part, i, arr) => (
-                    <div key={part} className="flex items-center gap-2">
-                      {i > 0 && <span className="text-slate-300">/</span>}
+              <div className="flex gap-10 w-full">
+                <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full min-w-0">
+                  {/* Document Metadata Header */}
+                  <div className="flex items-center gap-2 mb-10 border-b border-slate-50 pb-6">
+                    {isExternal && (
+                      <>
+                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                          {externalSource.name}
+                        </span>
+                        <span className="text-slate-300">/</span>
+                      </>
+                    )}
+                    {activePath?.split("/").map((part, i, arr) => (
+                      <div key={part} className="flex items-center gap-2">
+                        {i > 0 && <span className="text-slate-300">/</span>}
+                        <span
+                          className={clsx(
+                            "text-sm font-medium",
+                            i === arr.length - 1
+                              ? "text-slate-900"
+                              : "text-slate-400",
+                          )}
+                        >
+                          {cleanLabel(part)}
+                        </span>
+                      </div>
+                    ))}
+
+                    {/* Modification date */}
+                    {activePath && docsMeta[activePath] && (
                       <span
-                        className={clsx(
-                          "text-sm font-medium",
-                          i === arr.length - 1
-                            ? "text-slate-900"
-                            : "text-slate-400",
-                        )}
+                        className="ml-auto flex items-center gap-1 text-xs text-slate-400 tabular-nums shrink-0"
+                        title={new Date(docsMeta[activePath].mtime).toLocaleString()}
                       >
-                        {cleanLabel(part)}
+                        <Clock size={11} className="text-slate-300" />
+                        {formatRelativeTime(docsMeta[activePath].mtime)}
                       </span>
-                    </div>
-                  ))}
+                    )}
+                  </div>
 
-                  {/* Modification date */}
-                  {activePath && docsMeta[activePath] && (
-                    <span
-                      className="ml-auto flex items-center gap-1 text-xs text-slate-400 tabular-nums shrink-0"
-                      title={new Date(docsMeta[activePath].mtime).toLocaleString()}
-                    >
-                      <Clock size={11} className="text-slate-300" />
-                      {formatRelativeTime(docsMeta[activePath].mtime)}
-                    </span>
-                  )}
-                </div>
+                  <MarkdownRenderer content={content} />
 
-                <MarkdownRenderer content={content} />
+                  {/* Navigation Buttons */}
+                  <div className="mt-20 pt-8 border-t border-slate-100 flex items-center justify-between gap-4 max-w-3xl">
+                    {prevFile ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSelect(prevFile.path)}
+                        className="group flex flex-col items-start gap-1"
+                      >
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
+                          <ChevronLeft size={12} strokeWidth={3} />
+                          Previous
+                        </span>
+                        <span className="text-base font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
+                          {cleanLabel(prevFile.name)}
+                        </span>
+                      </button>
+                    ) : (
+                      <div />
+                    )}
 
-                {/* Navigation Buttons */}
-                <div className="mt-20 pt-8 border-t border-slate-100 flex items-center justify-between gap-4 max-w-3xl">
-                  {prevFile ? (
-                    <button
-                      type="button"
-                      onClick={() => handleSelect(prevFile.path)}
-                      className="group flex flex-col items-start gap-1"
-                    >
-                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
-                        <ChevronLeft size={12} strokeWidth={3} />
-                        Previous
-                      </span>
-                      <span className="text-base font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
-                        {cleanLabel(prevFile.name)}
-                      </span>
-                    </button>
-                  ) : (
-                    <div />
-                  )}
+                    {nextFile ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSelect(nextFile.path)}
+                        className="group flex flex-col items-end gap-1 text-right"
+                      >
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
+                          Next
+                          <ChevronRight size={12} strokeWidth={3} />
+                        </span>
+                        <span className="text-base font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
+                          {cleanLabel(nextFile.name)}
+                        </span>
+                      </button>
+                    ) : (
+                      <div />
+                    )}
+                  </div>
 
-                  {nextFile ? (
-                    <button
-                      type="button"
-                      onClick={() => handleSelect(nextFile.path)}
-                      className="group flex flex-col items-end gap-1 text-right"
-                    >
-                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
-                        Next
-                        <ChevronRight size={12} strokeWidth={3} />
-                      </span>
-                      <span className="text-base font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
-                        {cleanLabel(nextFile.name)}
-                      </span>
-                    </button>
-                  ) : (
-                    <div />
-                  )}
-                </div>
-
-                {/* Footer Spacer */}
-                <div className="h-40" />
-              </article>
+                  {/* Footer Spacer */}
+                  <div className="h-40" />
+                </article>
+                <TableOfContents content={content} />
+              </div>
             )}
           </div>
         </div>

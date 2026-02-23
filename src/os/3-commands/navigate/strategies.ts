@@ -182,25 +182,17 @@ registerNavigationStrategy("corner", resolveCorner, { needsDOMRects: true });
 // Resolver Facade
 // ═══════════════════════════════════════════════════════════════════
 
-function resolveStrategyEntry(orientation: string): StrategyEntry | undefined {
-  return strategies.get(orientation);
-}
-
 /** Query whether the current orientation's strategy requires DOM rects. */
 export function strategyNeedsDOMRects(orientation: string): boolean {
-  return resolveStrategyEntry(orientation)?.needsDOMRects ?? false;
+  return strategies.get(orientation)?.needsDOMRects ?? false;
 }
 
 export function resolveWithStrategy(
   orientation: string,
   ...args: Parameters<NavigationStrategy>
 ): NavigateResult {
-  const entry = resolveStrategyEntry(orientation);
-
-  if (entry) {
-    return entry.fn(...args);
-  }
-
+  const entry = strategies.get(orientation);
+  if (entry) return entry.fn(...args);
   return { targetId: args[0], stickyX: null, stickyY: null };
 }
 

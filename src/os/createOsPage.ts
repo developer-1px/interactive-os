@@ -313,9 +313,14 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     // ── goto — high-level zone setup ──
     function goto(zoneId: string, opts?: GotoOptions) {
         if (opts?.items) setItems(opts.items);
-        if (opts?.config) setConfig({ ...DEFAULT_CONFIG, ...opts.config });
 
+        // Apply role preset first, then override with opts.config
         const role = opts?.role ?? ZoneRegistry.get(zoneId)?.role;
+        if (role) {
+            mockConfig.current = resolveRole(role);
+        }
+        if (opts?.config) setConfig(opts.config);
+
         ZoneRegistry.register(zoneId, {
             ...(role ? { role } : {}),
             config: mockConfig.current,

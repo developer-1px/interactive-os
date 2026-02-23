@@ -13,7 +13,6 @@ import {
     confirmDeleteTodo,
     undoCommand,
 } from "@apps/todo/app";
-import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { setupTodoPage, page, addTodos, gotoList } from "./todo-helpers";
 
