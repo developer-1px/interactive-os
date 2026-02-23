@@ -6,6 +6,11 @@
   - [x] Step 2: /discussion
   - [x] Step 7: /blueprint
   - [x] Step 8: /naming (useExpanded)
+  - [x] Step 10: /solve — Zone/Item 변환, isExpanded 인프라
+  - [ ] Step 16: /verify — 브라우저 검증
+
+- [ ] **T6**: Reader zone + section navigation — Space/Shift+Space로 섹션 순차 탐색
+  - [x] Step 2: /discussion
   - [ ] Step 10: /solve
 
 ## Next

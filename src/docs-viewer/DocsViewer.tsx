@@ -63,6 +63,48 @@ export function DocsViewer() {
   const externalRef = useRef(externalSource);
   externalRef.current = externalSource;
 
+  // --- Section navigation: Space/Shift+Space → next/prev heading ---
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== " " && e.key !== "Space") return;
+      // Don't intercept Space when sidebar tree is focused
+      if ((e.target as HTMLElement)?.closest("[data-focus-group]")) return;
+
+      e.preventDefault();
+      const headings = Array.from(
+        container.querySelectorAll<HTMLElement>("h1, h2, h3, h4, h5, h6"),
+      );
+      if (headings.length === 0) return;
+
+      const scrollTop = container.scrollTop;
+      const offset = 20; // threshold to consider "past" a heading
+
+      if (e.shiftKey) {
+        // Previous heading
+        for (let i = headings.length - 1; i >= 0; i--) {
+          if (headings[i].offsetTop < scrollTop - offset) {
+            headings[i].scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+        }
+      } else {
+        // Next heading
+        for (const heading of headings) {
+          if (heading.offsetTop > scrollTop + offset) {
+            heading.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [content]); // re-attach when content changes
+
   const isExternal = externalSource != null;
 
   // Built-in docs tree (always available)

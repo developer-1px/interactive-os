@@ -23,3 +23,13 @@ const sidebarZone = DocsApp.createZone("docs-sidebar");
 export const DocsSidebarUI = sidebarZone.bind({
     role: "tree",
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Reader Zone — section-based content navigation
+// ═══════════════════════════════════════════════════════════════════
+
+const readerZone = DocsApp.createZone("docs-reader");
+
+export const DocsReaderUI = readerZone.bind({
+    role: "feed",
+});

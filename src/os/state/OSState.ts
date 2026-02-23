@@ -22,6 +22,19 @@ export interface ToastEntry {
   createdAt: number;
 }
 
+export interface DragState {
+  /** Whether a drag operation is in progress */
+  isDragging: boolean;
+  /** Zone where the drag is happening */
+  zoneId: string | null;
+  /** ID of the item being dragged */
+  dragItemId: string | null;
+  /** ID of the item currently being hovered over */
+  overItemId: string | null;
+  /** Drop position relative to overItemId */
+  overPosition: "before" | "after" | null;
+}
+
 export interface OSState {
   focus: {
     /** The ID of the currently active zone */
@@ -39,6 +52,8 @@ export interface OSState {
     /** Active toast stack (bottom = oldest, top = newest) */
     stack: ToastEntry[];
   };
+  /** Drag-and-drop state for reorder operations */
+  drag: DragState;
 }
 
 export interface ZoneState {
