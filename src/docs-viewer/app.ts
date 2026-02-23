@@ -43,8 +43,20 @@ const PREV_SECTION = readerZone.command(
 
 export const DocsReaderUI = readerZone.bind({
     role: "feed",
-    keybindings: [
-        { key: "Space", command: () => NEXT_SECTION() },
-        { key: "Shift+Space", command: () => PREV_SECTION() },
-    ],
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Fallback Middleware — catches Space when no zone handles it
+// ═══════════════════════════════════════════════════════════════════
+
+import { os } from "@/os/kernel";
+
+os.use({
+    id: "docs-section-nav",
+    fallback(event: Event): ReturnType<NonNullable<Parameters<typeof os.use>[0]["fallback"]>> {
+        if (!(event instanceof KeyboardEvent)) return null;
+        if (event.key === " " && !event.shiftKey) return NEXT_SECTION();
+        if (event.key === " " && event.shiftKey) return PREV_SECTION();
+        return null;
+    },
 });

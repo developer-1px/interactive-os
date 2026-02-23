@@ -12,6 +12,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import docsMeta from "virtual:docs-meta";
 import { DocsSidebar } from "./DocsSidebar";
 import { os } from "@/os/kernel";
+
+// Side-effect: register docs-viewer commands on kernel
+import "./app";
 import {
   buildDocTree,
   cleanLabel,
