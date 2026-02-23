@@ -17,10 +17,13 @@ export const OS_PASTE = os.defineCommand("OS_PASTE", (ctx) => () => {
     if (!entry?.onPaste) return;
 
     // Paste: cursor with focusId (paste target). Empty focusId = append at end.
-    const cursor = buildZoneCursor(zone) ?? {
+    const cursor = buildZoneCursor(zone, activeZoneId) ?? {
         focusId: "",
         selection: [],
         anchor: null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
     };
 
     return { dispatch: entry.onPaste(cursor) };

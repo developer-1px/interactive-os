@@ -1,6 +1,7 @@
 import type { OSState, ZoneState } from "./OSState";
 
 export const initialZoneState: ZoneState = {
+  zoneId: "",
   // Cursor
   focusedItemId: null,
   lastFocusedId: null,

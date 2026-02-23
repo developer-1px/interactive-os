@@ -26,6 +26,12 @@ export interface ZoneCursor {
   selection: string[];
   /** Selection anchor (starting point of range selection) */
   anchor: string | null;
+  /** Whether the focused item is expandable (has children in tree) */
+  isExpandable: boolean;
+  /** Whether the focused item is disabled */
+  isDisabled: boolean;
+  /** Tree nesting level (1-based), undefined if not a tree */
+  treeLevel: number | undefined;
 }
 
 /** Zone callback: receives cursor, returns command(s) for OS to dispatch */

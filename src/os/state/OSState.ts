@@ -57,6 +57,9 @@ export interface OSState {
 }
 
 export interface ZoneState {
+  /** Zone ID — self-identifying for functions that receive ZoneState without key context */
+  zoneId: string;
+
   // Cursor Slice
   focusedItemId: string | null;
   lastFocusedId: string | null;

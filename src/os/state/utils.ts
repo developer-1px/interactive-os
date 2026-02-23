@@ -10,8 +10,7 @@ import type { OSState, ZoneState } from "./OSState";
  */
 export function ensureZone(draft: OSState, zoneId: string): ZoneState {
   if (!draft.focus.zones[zoneId]) {
-    // Clone initial state to avoid shared reference mutations if not using immer correctly (though immer handles it)
-    draft.focus.zones[zoneId] = { ...initialZoneState };
+    draft.focus.zones[zoneId] = { ...initialZoneState, zoneId };
   }
   return draft.focus.zones[zoneId];
 }
