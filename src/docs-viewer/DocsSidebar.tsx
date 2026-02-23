@@ -337,6 +337,7 @@ export function DocsSidebar({
         <DocsSidebarUI.Zone
           className="flex flex-col"
           onAction={handleAction}
+          onSelect={handleAction}
         >
           {items.map((item) => (
             <TreeItem

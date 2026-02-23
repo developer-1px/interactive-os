@@ -108,7 +108,13 @@ export interface KeybindingEntry<S> {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface BoundComponents<S> {
-  Zone: React.FC<{ id?: string; className?: string; children?: ReactNode }>;
+  Zone: React.FC<{
+    id?: string;
+    className?: string;
+    children?: ReactNode;
+    onAction?: (cursor: { focusId: string; selection: string[] }) => void;
+    onSelect?: (cursor: { focusId: string; selection: string[] }) => void;
+  }>;
   Item: React.FC<{
     id: string | number;
     className?: string;

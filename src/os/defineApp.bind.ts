@@ -55,28 +55,29 @@ export function createBoundComponents<S>(
     "aria-label"?: string;
   }> = ({ className, children, ...rest }) => {
     // Zone ID is always auto-injected from bind() — not developer-specified
+    // JSX props (...rest) provide base callbacks; config overrides only when defined.
     const zoneProps: any = {
-      ...rest,
       id: zoneName,
       className,
       role: config.role,
-      onCheck: config.onCheck,
-      onAction: config.onAction,
-      onSelect: config.onSelect,
-      onDelete: config.onDelete,
-      onCopy: config.onCopy,
-      onCut: config.onCut,
-      onPaste: config.onPaste,
-      onMoveUp: config.onMoveUp,
-      onMoveDown: config.onMoveDown,
-      onUndo: config.onUndo,
-      onRedo: config.onRedo,
       options: config.options,
       itemFilter: config.itemFilter,
       getItems: config.getItems,
       getExpandableItems: config.getExpandableItems,
       getTreeLevels: config.getTreeLevels,
       onReorder: config.onReorder,
+      ...rest,
+      ...(config.onCheck ? { onCheck: config.onCheck } : {}),
+      ...(config.onAction ? { onAction: config.onAction } : {}),
+      ...(config.onSelect ? { onSelect: config.onSelect } : {}),
+      ...(config.onDelete ? { onDelete: config.onDelete } : {}),
+      ...(config.onCopy ? { onCopy: config.onCopy } : {}),
+      ...(config.onCut ? { onCut: config.onCut } : {}),
+      ...(config.onPaste ? { onPaste: config.onPaste } : {}),
+      ...(config.onMoveUp ? { onMoveUp: config.onMoveUp } : {}),
+      ...(config.onMoveDown ? { onMoveDown: config.onMoveDown } : {}),
+      ...(config.onUndo ? { onUndo: config.onUndo } : {}),
+      ...(config.onRedo ? { onRedo: config.onRedo } : {}),
     };
 
     // Keybindings registration
