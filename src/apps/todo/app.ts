@@ -259,6 +259,7 @@ export const TodoSidebarUI = sidebarCollection.bind({
   onSelect: (cursor) => selectCategory({ id: cursor.focusId }),
   onMoveUp: sidebarBindings.onMoveUp,
   onMoveDown: sidebarBindings.onMoveDown,
+  getItems: sidebarBindings.getItems,
   options: {
     select: { followFocus: true },
   },

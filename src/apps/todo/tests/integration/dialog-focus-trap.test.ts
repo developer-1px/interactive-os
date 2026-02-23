@@ -231,17 +231,19 @@ describe("Dialog Duplicate Zone Fix — Red→Green Proof", () => {
         page.dispatch(OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }));
 
         // 4. Register dialog zone with alertdialog config (what Trigger.Portal does)
+        //    Dialog zones are ephemeral — provide getItems explicitly for headless DI
+        const dialogItems = ["cancel-btn", "confirm-btn"];
         const dialogConfig = resolveRole("alertdialog");
         ZoneRegistry.register("todo-delete-dialog", {
             role: "alertdialog",
             config: dialogConfig,
             element: null,
             parentId: null,
+            getItems: () => dialogItems,
         });
 
         page.dispatch(OS_STACK_PUSH());
         page.goto("todo-delete-dialog", {
-            items: ["cancel-btn", "confirm-btn"],
             focusedItemId: "cancel-btn",
         });
 

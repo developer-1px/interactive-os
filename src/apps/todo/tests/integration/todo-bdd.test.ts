@@ -1,76 +1,23 @@
 /**
- * Todo BDD Integration — keyboard-and-mouse.md 시나리오
+ * Todo BDD Integration — §1 List Zone + §ARIA
  *
- * BDD spec (docs/6-products/todo/spec/keyboard-and-mouse.md)을
- * createPage(TodoApp, ListView) 기반 headless e2e test로 구현.
+ * Split: §5 Sidebar → todo-sidebar.test.ts
  *
- * Headless E2E: 모든 테스트가 ListView를 renderToString으로 렌더.
- * state 검증 후 projection 검증(query)으로 변환 경계를 모두 커버.
+ * BDD spec (docs/6-products/todo/spec/keyboard-and-mouse.md)
+ * createPage(TodoApp, ListView) 기반 headless e2e test.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-    TodoApp,
-    addTodo,
     cancelDeleteTodo,
     confirmDeleteTodo,
     undoCommand,
 } from "@apps/todo/app";
-import { ListView } from "@apps/todo/widgets/ListView";
-import { createPage } from "@os/defineApp.page";
-import type { AppPage } from "@os/defineApp.types";
 import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 import { selectVisibleTodoIds } from "@apps/todo/selectors";
+import { setupTodoPage, page, addTodos, gotoList } from "./todo-helpers";
 
-type TodoState = ReturnType<typeof TodoApp.create>["state"];
-type Page = AppPage<TodoState>;
-
-let page: Page;
-
-let now = 1000;
-
-beforeEach(() => {
-    vi.spyOn(Date, "now").mockImplementation(() => ++now);
-    _resetClipboardStore();
-    page = createPage(TodoApp, ListView);
-});
-
-afterEach(() => {
-    page.cleanup();
-});
-
-/** Helper: add N todos and return their NEW IDs only */
-function addTodos(...texts: string[]): string[] {
-    const before = new Set(page.state.data.todoOrder);
-    for (const text of texts) {
-        page.dispatch(addTodo({ text }));
-    }
-    return page.state.data.todoOrder.filter((id) => !before.has(id));
-}
-
-/** Helper: goto list zone with current todo items */
-function gotoList(focusedItemId?: string | null) {
-    const ids = page.state.data.todoOrder;
-    page.goto("list", { items: ids, focusedItemId: focusedItemId ?? ids[0] ?? null });
-}
-
-/** Helper: goto sidebar zone */
-function gotoSidebar(focusedItemId?: string | null) {
-    const ids = page.state.data.categoryOrder;
-    page.goto("sidebar", {
-        items: ids,
-        focusedItemId: focusedItemId ?? ids[0] ?? null,
-        config: {
-            select: {
-                followFocus: true,
-                mode: "single",
-                disallowEmpty: false,
-                range: false,
-                toggle: false,
-            },
-        },
-    });
-}
+setupTodoPage();
 
 // ═══════════════════════════════════════════════════════════════════
 // §1.1 List Zone — 키보드 네비게이션
@@ -468,75 +415,7 @@ describe("§1.5 List: 마우스 인터랙션", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// §5 Sidebar Zone — 키보드 네비게이션
-// ═══════════════════════════════════════════════════════════════════
-
-describe("§5 Sidebar: 키보드 네비게이션", () => {
-    it("ArrowDown — 카테고리 간 이동", () => {
-        gotoSidebar();
-        const cats = page.state.data.categoryOrder;
-        const first = cats[0]!;
-        const second = cats[1]!;
-
-        expect(page.focusedItemId()).toBe(first);
-
-        page.keyboard.press("ArrowDown");
-
-        expect(page.focusedItemId()).toBe(second);
-    });
-
-    it("ArrowUp — 카테고리 위로", () => {
-        const cats = page.state.data.categoryOrder;
-        gotoSidebar(cats[1]);
-
-        page.keyboard.press("ArrowUp");
-
-        expect(page.focusedItemId()).toBe(cats[0]);
-    });
-
-    it("followFocus=true — 네비게이션이 선택도 변경", () => {
-        gotoSidebar();
-        const cats = page.state.data.categoryOrder;
-
-        page.keyboard.press("ArrowDown");
-
-        const focused = page.focusedItemId();
-        expect(focused).toBe(cats[1]);
-        expect(page.selection()).toContain(cats[1]);
-    });
-
-    it("Cmd+ArrowUp — 카테고리 순서 위로", () => {
-        gotoSidebar();
-        const cats = [...page.state.data.categoryOrder];
-        // Focus on second category
-        page.keyboard.press("ArrowDown");
-        expect(page.focusedItemId()).toBe(cats[1]);
-
-        page.keyboard.press("Meta+ArrowUp");
-
-        const newOrder = page.state.data.categoryOrder;
-        expect(newOrder[0]).toBe(cats[1]);
-        expect(newOrder[1]).toBe(cats[0]);
-    });
-
-    it("Cmd+ArrowDown — 카테고리 순서 아래로", () => {
-        gotoSidebar();
-        const cats = [...page.state.data.categoryOrder];
-        // Focus on second category
-        page.keyboard.press("ArrowDown");
-        expect(page.focusedItemId()).toBe(cats[1]);
-
-        page.keyboard.press("Meta+ArrowDown");
-
-        const newOrder = page.state.data.categoryOrder;
-        expect(newOrder[1]).toBe(cats[2]);
-        // cats[1] moved down
-        expect(newOrder[2]).toBe(cats[1]);
-    });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// §ARIA: 속성 검증
+// §ARIA: 속성 검증 (kept here — uses list zone)
 // ═══════════════════════════════════════════════════════════════════
 
 describe("§ARIA: 리스트 속성", () => {

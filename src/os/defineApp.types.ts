@@ -166,9 +166,8 @@ export interface TestInstance<S> {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface AppPage<S> {
-  /** Navigate to a zone (like page.goto). Sets active zone + items. */
+  /** Navigate to a zone (like page.goto). Sets active zone + focused item. */
   goto(zoneName: string, opts?: {
-    items?: string[];
     focusedItemId?: string | null;
     config?: Partial<import("@os/schemas/focus/config/FocusGroupConfig").FocusGroupConfig>;
   }): void;

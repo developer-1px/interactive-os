@@ -54,11 +54,6 @@ export function createAppPage<S>(
     zoneBindingEntries: Map<string, ZoneBindingEntry>,
     Component?: FC,
 ): AppPage<S> {
-    // ── Mock items for headless context (fallback only) ──
-    // NOTE: For zones with getItems accessor (e.g. createCollectionZone),
-    // commands use getItems() directly and mockItems is IGNORED.
-    // mockItems is only used for legacy DOM-only zones without getItems.
-    const mockItems: string[] = [];
     /** Track keybinding unregister so cleanup() works correctly */
     let unregisterKeybindings: (() => void) | null = null;
 
@@ -67,14 +62,13 @@ export function createAppPage<S>(
         const zoneId = os.getState().os.focus.activeZoneId;
         const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
 
-        // Headless priority:
-        //   1. getItems() — state-derived (createCollectionZone, automatic)
-        //   2. itemFilter on mockItems — legacy manual override
+        // Headless: getItems() is the single path (state-derived).
+        // Zones must register getItems via bind({ getItems }).
         if (entry?.getItems) {
             const items = entry.getItems();
             return entry.itemFilter ? entry.itemFilter(items) : items;
         }
-        return entry?.itemFilter ? entry.itemFilter(mockItems) : mockItems;
+        return [];
     });
     os.defineContext("dom-rects", () => new Map<string, DOMRect>());
     os.defineContext("dom-expandable-items", () => new Set<string>());
@@ -92,14 +86,13 @@ export function createAppPage<S>(
             if (!zoneEntry) continue;
             const zoneState = state.os.focus.zones[zoneId];
             const entry = zoneEntry.config?.navigate?.entry ?? "first";
-            // In headless, items come from mockItems (only for active zone)
-            // For non-active zones, use lastFocusedId as fallback
-            const isActive = state.os.focus.activeZoneId === zoneId;
-            const items = isActive ? mockItems : [];
+            // Items from getItems accessor (single path)
+            const items = zoneEntry.getItems?.() ?? [];
+            const filtered = zoneEntry.itemFilter ? zoneEntry.itemFilter(items) : items;
             entries.push({
                 zoneId,
-                firstItemId: items[0] ?? zoneState?.lastFocusedId ?? null,
-                lastItemId: items[items.length - 1] ?? zoneState?.lastFocusedId ?? null,
+                firstItemId: filtered[0] ?? zoneState?.lastFocusedId ?? null,
+                lastItemId: filtered[filtered.length - 1] ?? zoneState?.lastFocusedId ?? null,
                 entry,
                 selectedItemId: zoneState?.selection?.[0] ?? null,
                 lastFocusedId: zoneState?.lastFocusedId ?? null,
@@ -116,20 +109,11 @@ export function createAppPage<S>(
 
     // ── goto ──
     function goto(zoneName: string, opts?: {
-        /** @deprecated For zones with getItems accessor, this is ignored.
-         *  Only effective for legacy DOM-only zones without getItems. */
-        items?: string[];
         focusedItemId?: string | null;
         config?: Partial<FocusGroupConfig>;
     }) {
         // Use zoneName directly — matches FocusGroup's id in React.
         // Preview sandbox is isolated per-app, so prefix is unnecessary.
-
-        // Set mock items (fallback for zones without getItems accessor)
-        if (opts?.items) {
-            mockItems.length = 0;
-            mockItems.push(...opts.items);
-        }
 
         // Register zone in ZoneRegistry with app callbacks
         const bindingEntry = zoneBindingEntries.get(zoneName);
@@ -220,7 +204,6 @@ export function createAppPage<S>(
                 ...os.getState(),
                 os: { ...initialAppState.os },
             });
-            mockItems.length = 0;
         },
 
         cleanup() {
