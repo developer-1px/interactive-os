@@ -126,6 +126,41 @@ interface DiffGroup {
 
 const ARRAY_INDEX_RE = /^(.+)\[(\d+)\]$/;
 
+// ─── Consecutive Event Grouping ───
+
+type DisplayEntry =
+  | { kind: "single"; tx: Transaction; filteredIndex: number }
+  | { kind: "group"; representative: Transaction; count: number; txs: Transaction[]; filteredIndex: number };
+
+/** Group consecutive transactions with the same command type into collapsed entries */
+function groupConsecutive(txs: Transaction[]): DisplayEntry[] {
+  if (txs.length === 0) return [];
+  const entries: DisplayEntry[] = [];
+  let i = 0;
+  while (i < txs.length) {
+    const current = txs[i]!;
+    const cmdType = current.command?.type ?? "NO_COMMAND";
+    let j = i + 1;
+    while (j < txs.length && (txs[j]!.command?.type ?? "NO_COMMAND") === cmdType) {
+      j++;
+    }
+    const runLength = j - i;
+    if (runLength >= 2) {
+      entries.push({
+        kind: "group",
+        representative: txs[j - 1]!, // last one (most recent state)
+        count: runLength,
+        txs: txs.slice(i, j),
+        filteredIndex: i,
+      });
+    } else {
+      entries.push({ kind: "single", tx: current, filteredIndex: i });
+    }
+    i = j;
+  }
+  return entries;
+}
+
 /** Groups diffs that share the same base path (e.g. todoOrder[4], todoOrder[5]) */
 function groupDiffs(
   diffs: Array<{ path: string; from?: unknown; to?: unknown }>,
@@ -247,8 +282,16 @@ export function UnifiedInspector({
     return result;
   }, [transactions, disabledGroups, searchQuery]);
 
-  const latestTxId =
-    filteredTx.length > 0 ? filteredTx[filteredTx.length - 1]?.id : undefined;
+  // Group consecutive identical commands into collapsed entries
+  const displayEntries = useMemo(
+    () => groupConsecutive(filteredTx),
+    [filteredTx],
+  );
+
+  const lastEntry = displayEntries.length > 0 ? displayEntries[displayEntries.length - 1] : undefined;
+  const latestTxId = lastEntry
+    ? lastEntry.kind === "single" ? lastEntry.tx.id : lastEntry.representative.id
+    : undefined;
   const expandedIds = new Set(manualToggles);
 
   // Auto-expand latest only if user hasn't manually collapsed it & no active search
@@ -397,11 +440,10 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                    active
-                      ? "bg-[#1e293b] text-white border-[#1e293b]"
-                      : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                  }`}
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
+                    ? "bg-[#1e293b] text-white border-[#1e293b]"
+                    : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                    }`}
                 >
                   {group}
                 </button>
@@ -467,13 +509,40 @@ export function UnifiedInspector({
             onToggle={() => setTraceOpen(!traceOpen)}
             count={filteredTx.length}
           >
-            {filteredTx.length === 0 ? (
+            {displayEntries.length === 0 ? (
               <div className="p-4 text-center text-[#999] italic text-[10px]">
                 {searchQuery ? "No match." : "No events yet."}
               </div>
             ) : (
-              filteredTx.map((tx, i) => {
-                const prevTx = i > 0 ? filteredTx[i - 1] : undefined;
+              displayEntries.map((entry, i) => {
+                if (entry.kind === "group") {
+                  const { representative, count, filteredIndex } = entry;
+                  const firstTx = entry.txs[0]!;
+                  const prevEntry = i > 0 ? displayEntries[i - 1] : undefined;
+                  const prevTx = prevEntry
+                    ? prevEntry.kind === "single" ? prevEntry.tx : prevEntry.representative
+                    : undefined;
+                  const timeDeltaMs = prevTx
+                    ? representative.timestamp - prevTx.timestamp
+                    : 0;
+                  const totalDurationMs = representative.timestamp - firstTx.timestamp;
+                  return (
+                    <CollapsedGroup
+                      key={`group-${representative.id}`}
+                      representative={representative}
+                      count={count}
+                      index={filteredIndex + 1}
+                      dataIndex={filteredIndex}
+                      timeDeltaMs={timeDeltaMs}
+                      totalDurationMs={totalDurationMs}
+                    />
+                  );
+                }
+                const { tx, filteredIndex } = entry;
+                const prevEntry = i > 0 ? displayEntries[i - 1] : undefined;
+                const prevTx = prevEntry
+                  ? prevEntry.kind === "single" ? prevEntry.tx : prevEntry.representative
+                  : undefined;
                 const timeDeltaMs = prevTx
                   ? tx.timestamp - prevTx.timestamp
                   : 0;
@@ -481,10 +550,10 @@ export function UnifiedInspector({
                   <TimelineNode
                     key={tx.id}
                     tx={tx}
-                    index={i + 1}
+                    index={filteredIndex + 1}
                     expanded={expandedIds.has(tx.id)}
                     onToggle={() => toggle(tx.id)}
-                    dataIndex={i}
+                    dataIndex={filteredIndex}
                     timeDeltaMs={timeDeltaMs}
                   />
                 );
@@ -529,6 +598,94 @@ export function UnifiedInspector({
     </div>
   );
 }
+
+// ─── Collapsed Group (consecutive identical commands) ───
+
+function CollapsedGroup({
+  representative,
+  count,
+  index,
+  dataIndex,
+  timeDeltaMs,
+  totalDurationMs,
+}: {
+  representative: Transaction;
+  count: number;
+  index: number;
+  dataIndex: number;
+  timeDeltaMs: number;
+  totalDurationMs: number;
+}) {
+  const signal = inferSignal(representative);
+  const { trigger, command } = signal;
+
+  const icon =
+    trigger.kind === "MOUSE" ? (
+      trigger.raw === "Click" ? (
+        <MousePointerClick
+          size={12}
+          className="text-[#94a3b8]"
+          strokeWidth={2.5}
+        />
+      ) : (
+        <MousePointer2 size={12} className="text-[#94a3b8]" strokeWidth={2.5} />
+      )
+    ) : trigger.kind === "OS_FOCUS" ? (
+      <Eye size={12} className="text-[#94a3b8]" strokeWidth={2.5} />
+    ) : (
+      <Keyboard size={12} className="text-[#94a3b8]" strokeWidth={2.5} />
+    );
+
+  const deltaColorClass =
+    timeDeltaMs > 500
+      ? "text-[#ef4444]"
+      : timeDeltaMs > 100
+        ? "text-[#f59e0b]"
+        : "text-[#94a3b8]";
+
+  const cmdType = command.type !== "NO_COMMAND" ? command.type : trigger.raw;
+
+  return (
+    <div
+      data-tx-index={dataIndex}
+      className="flex items-center gap-1.5 px-2 py-1 border-b border-[#eee] opacity-40 hover:opacity-70 transition-opacity"
+    >
+      {/* Icon */}
+      <div className="w-4 h-4 flex items-center justify-center shrink-0">
+        {icon}
+      </div>
+
+      {/* # */}
+      <span className="font-mono text-[8px] text-[#b0b0b0] shrink-0 w-3 text-right">
+        {index}
+      </span>
+
+      {/* Command name */}
+      <span className="font-semibold text-[10px] text-[#94a3b8] tracking-tight">
+        {cmdType}
+      </span>
+
+      {/* ×N badge */}
+      <span className="px-1.5 py-px rounded-full bg-[#f1f5f9] text-[#64748b] text-[8.5px] font-bold border border-[#e2e8f0] tabular-nums">
+        ×{count}
+      </span>
+
+      {/* Duration */}
+      {totalDurationMs > 0 && (
+        <span className="text-[8px] font-mono text-[#b0b0b0]">
+          {totalDurationMs}ms
+        </span>
+      )}
+
+      {/* Delta */}
+      <span className={`ml-auto text-[8px] font-mono ${deltaColorClass}`}>
+        +{timeDeltaMs}ms
+      </span>
+    </div>
+  );
+}
+
+// ─── Single Transaction Entry ───
 
 function TimelineNode({
   tx,
