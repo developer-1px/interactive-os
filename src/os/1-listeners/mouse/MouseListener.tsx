@@ -10,6 +10,7 @@
 
 import { useEffect } from "react";
 import { os } from "../../kernel";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { sensorGuard } from "../../lib/loopGuard";
 import {
   findFocusableItem,
@@ -52,6 +53,7 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
           labelTargetGroupId: fieldTarget.groupId,
           hasAriaExpanded: false,
           itemRole: null,
+          activateOnClick: false,
         };
       }
     }
@@ -78,10 +80,15 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
       labelTargetGroupId: null,
       hasAriaExpanded: false,
       itemRole: null,
+      activateOnClick: false,
     };
   }
   const focusTarget = resolveFocusTarget(item);
   if (!focusTarget) return null;
+
+  // Read zone config for activate.onClick
+  const zoneEntry = ZoneRegistry.get(focusTarget.groupId);
+  const activateOnClick = zoneEntry?.config?.activate?.onClick ?? false;
 
   return {
     targetItemId: focusTarget.itemId,
@@ -95,6 +102,7 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
     labelTargetGroupId: null,
     hasAriaExpanded: item.hasAttribute("aria-expanded"),
     itemRole: item.getAttribute("role"),
+    activateOnClick,
   };
 }
 

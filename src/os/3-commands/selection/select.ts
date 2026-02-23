@@ -7,12 +7,11 @@
  */
 
 import { produce } from "immer";
-import { DOM_EXPANDABLE_ITEMS, DOM_ITEMS, ZONE_CONFIG } from "../../2-contexts";
+import { DOM_ITEMS, ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
-import { OS_EXPAND } from "../expand";
 
 interface SelectPayload {
   targetId?: string;

@@ -66,10 +66,13 @@ export const DEFAULT_SELECT: SelectConfig = {
 
 export interface ActivateConfig {
   mode: "manual" | "automatic";
+  /** When true, clicking an item dispatches OS_ACTIVATE (Navigation Tree pattern). */
+  onClick: boolean;
 }
 
 export const DEFAULT_ACTIVATE: ActivateConfig = {
   mode: "manual",
+  onClick: false,
 };
 
 // ── Dismiss ──

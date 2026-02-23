@@ -2,8 +2,6 @@ import clsx from "clsx";
 import { ChevronDown, ChevronRight, Clock, FileText, Star } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import docsMeta from "virtual:docs-meta";
-import { os } from "@/os/kernel";
-import { OS_EXPAND } from "@os/3-commands";
 import { DocsSidebarUI } from "./app";
 import {
   cleanLabel,
@@ -287,16 +285,12 @@ export function DocsSidebar({
     setFavVersion((v) => v + 1);
   }, []);
 
-  // onAction/onSelect callback: click or Enter on an Item
+  // onAction callback: Enter or Click (activate.onClick) on an Item
+  // Folders are auto-handled by OS (OS_ACTIVATE → OS_EXPAND)
   const handleAction = useCallback(
     (cursor: { focusId: string }) => {
       const id = cursor.focusId;
-      if (id.startsWith("folder:")) {
-        // Folder item — toggle expand/collapse
-        os.dispatch(OS_EXPAND({ action: "toggle", itemId: id }));
-        return;
-      }
-      // File item — navigate
+      if (id.startsWith("folder:")) return; // OS handles expand
       onSelect(id);
     },
     [onSelect],
@@ -342,7 +336,6 @@ export function DocsSidebar({
         <DocsSidebarUI.Zone
           className="flex flex-col"
           onAction={handleAction}
-          onSelect={handleAction}
         >
           {items.map((item) => (
             <TreeItem

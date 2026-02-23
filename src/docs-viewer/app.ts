@@ -24,6 +24,7 @@ export const DocsSidebarUI = sidebarZone.bind({
     role: "tree",
     options: {
         select: { followFocus: true },
+        activate: { onClick: true },
     },
 });
 
