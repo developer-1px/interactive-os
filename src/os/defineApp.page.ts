@@ -63,10 +63,17 @@ export function createAppPage<S>(
     let unregisterKeybindings: (() => void) | null = null;
 
     // Override DOM contexts for headless (no DOM, no React)
-    // These are fallbacks — commands prefer getItems() accessor when available.
     os.defineContext("dom-items", () => {
         const zoneId = os.getState().os.focus.activeZoneId;
         const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
+
+        // Headless priority:
+        //   1. getItems() — state-derived (createCollectionZone, automatic)
+        //   2. itemFilter on mockItems — legacy manual override
+        if (entry?.getItems) {
+            const items = entry.getItems();
+            return entry.itemFilter ? entry.itemFilter(items) : items;
+        }
         return entry?.itemFilter ? entry.itemFilter(mockItems) : mockItems;
     });
     os.defineContext("dom-rects", () => new Map<string, DOMRect>());

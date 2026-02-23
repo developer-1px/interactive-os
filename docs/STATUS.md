@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-22 14:57
+> Last updated: 2026-02-23 13:21
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**kernel-items** — DOM_ITEMS를 kernel state로 전환. Zone이 자식을 알아 stale focus 자동 복구.
+**headless-items** — DOM_ITEMS DI 정합성. commands는 inject only. provider가 환경(browser/headless+React/pure headless)에 따라 해석. Builder canvas ArrowDown 복구.
 
 ---
 
@@ -17,6 +17,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| headless-items | Scaffold 완료, T1 시작 | 02-23 | 🔥 Focus |
 | kernel-items | Discussion 완료, Scaffold | 02-22 | 🔥 Focus |
 | os-collection | T1-T7 Done (patches + undo/redo) | 02-22 | ✅ Done |
 | projection-checkpoint | T1-T4 Done | 02-21 | ✅ Done |

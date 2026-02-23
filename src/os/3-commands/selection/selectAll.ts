@@ -18,10 +18,8 @@ export const OS_SELECT_ALL = os.defineCommand(
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 
-    // Accessor-first: prefer state-derived getItems, fall back to DOM_ITEMS
-    const zoneEntry = ZoneRegistry.get(activeZoneId);
-    const rawItems = zoneEntry?.getItems?.() ?? ctx.inject(DOM_ITEMS);
-    const items: string[] = zoneEntry?.itemFilter ? zoneEntry.itemFilter(rawItems) : rawItems;
+    // DOM_ITEMS provider decides the source (browser/headless+React/pure headless)
+    const items: string[] = ctx.inject(DOM_ITEMS);
     if (items.length === 0) return;
 
     return {

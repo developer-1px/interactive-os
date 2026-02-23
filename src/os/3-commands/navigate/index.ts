@@ -42,9 +42,11 @@ export const OS_NAVIGATE = os.defineCommand(
 
     const zoneEntry = ZoneRegistry.get(activeZoneId);
 
-    // Prefer state-derived getItems, fall back to DOM_ITEMS (legacy)
-    const rawItems = zoneEntry?.getItems?.() ?? ctx.inject(DOM_ITEMS);
-    const items: string[] = zoneEntry?.itemFilter ? zoneEntry.itemFilter(rawItems) : rawItems;
+    // DOM_ITEMS provider decides the source:
+    //   browser:        querySelectorAll (rendered truth)
+    //   headless+React: renderToString → parse data-item-id
+    //   pure headless:  getItems() fallback
+    const items: string[] = ctx.inject(DOM_ITEMS);
     const itemRects: Map<string, DOMRect> = ctx.inject(DOM_RECTS);
     const config = ctx.inject(ZONE_CONFIG);
 

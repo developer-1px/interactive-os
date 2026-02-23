@@ -37,10 +37,10 @@ export const OS_SELECT = os.defineCommand(
     // W3C APG: Space toggles selection, Enter activates.
     // Ensure we process selection rather than expanding, as expansion belongs in OS_ACTIVATE.
 
-    // Accessor-first: prefer state-derived getItems, fall back to DOM_ITEMS
+    // DOM_ITEMS provider decides the source (browser/headless+React/pure headless)
+    const items: string[] = ctx.inject(DOM_ITEMS);
+    // zoneEntry still needed for onSelect callback
     const zoneEntry = ZoneRegistry.get(activeZoneId);
-    const rawItems = zoneEntry?.getItems?.() ?? ctx.inject(DOM_ITEMS);
-    const items: string[] = zoneEntry?.itemFilter ? zoneEntry.itemFilter(rawItems) : rawItems;
     const mode = payload.mode ?? "single";
 
     const result = {

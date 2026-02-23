@@ -88,22 +88,27 @@ export const DOM_ITEMS = os.defineContext("dom-items", (): string[] => {
   const entry = ZoneRegistry.get(zoneId);
   if (!entry) return [];
 
-  // Prefer state-derived accessor (headless-compatible)
+  // Browser: DOM querySelectorAll is the authoritative source (rendered truth).
+  // Captures filter, conditional render, virtualization — React's actual output.
+  if (entry.element) {
+    const items: string[] = [];
+    const els = entry.element.querySelectorAll("[data-item-id]");
+    for (const el of els) {
+      if (el.closest("[data-focus-group]") !== entry.element) continue;
+      const id = el.getAttribute("data-item-id");
+      if (id) items.push(id);
+    }
+    return entry.itemFilter ? entry.itemFilter(items) : items;
+  }
+
+  // Headless fallback: state-derived accessor (pure headless, no DOM).
+  // Used when createPage() has no Component, or in unit tests.
   if (entry.getItems) {
     const items = entry.getItems();
     return entry.itemFilter ? entry.itemFilter(items) : items;
   }
 
-  // Fallback: DOM query (legacy, browser-only)
-  if (!entry.element) return [];
-  const items: string[] = [];
-  const els = entry.element.querySelectorAll("[data-item-id]");
-  for (const el of els) {
-    if (el.closest("[data-focus-group]") !== entry.element) continue;
-    const id = el.getAttribute("data-item-id");
-    if (id) items.push(id);
-  }
-  return entry.itemFilter ? entry.itemFilter(items) : items;
+  return [];
 });
 
 // ═══════════════════════════════════════════════════════════════════
