@@ -2,7 +2,8 @@
 
 ## Now
 
-- [x] **T8**: ZoneCursor meta 보강 + DocsSidebar Todo 패턴 전환 ✅
+- [x] **T8**: ZoneCursor meta 보강 + DocsSidebar Todo 패턴 전환 🔥 FIRED
+  - 해고 보고서: `docs/0-inbox/fired-2026-02-23-2155.md`
   - Discussion: `discussions/2026-0223-2100-navtree-interaction-design.md`
   - 근본 원인: ZoneCursor에 isExpandable 등 meta 미전달 → 앱이 문자열 guard 우회
   - [x] T8.1: `ZoneCursor`에 meta 추가 (isExpandable, isDisabled, treeLevel) ✅
@@ -12,18 +13,24 @@
   - [x] T8.5: bind()에 onAction/onSelect 연결 (Todo 패턴) ✅
   - [x] T8.6: Zone handler props 제거 + DocsSidebar 핸들러 제거 ✅
 
-- [ ] **T7**: Tree Click-to-Activate + ExpandTrigger primitive
-  - [x] T7.1~T7.6: Click-to-Activate 구현 완료
-  - [x] T7.7: treeitem expandable 판정 수정 (role → getExpandableItems 기반)
-  - [x] T7.8: Navigation Tree 통합 테스트 (12 cases, 934 GREEN)
-  - [ ] T7.3: `ExpandTrigger` 프리미티브 (후속)
+- [x] **T7**: Tree Click-to-Activate + ExpandTrigger primitive ✅ (ExpandTrigger → item-expand-primitives로 분리 완료)
 
-- [ ] **T5**: OS sidebar tree navigation (브라우저 검증 잔여)
-  - [ ] Step 16: /verify — 브라우저 검증
+- [x] **T9**: 새로고침 시 URL 기반 초기 선택 버그 ✅
+  - 원인: `activePath: null` 초기값 → `allFiles` effect가 첫 번째 항목 선택
+  - 해결: `parseHashToPath()` 순수 함수 추출 → `getInitialPath()`로 초기 state 동기 파생
+  - `DocsViewer.tsx` hash init effect 제거 (중복)
+  - 5 cases RED→GREEN (953/953 전체 GREEN)
 
-- [ ] **T6**: Reader zone + section navigation — Space/Shift+Space로 섹션 순차 탐색
-  - [x] Step 2: /discussion
-  - [ ] Ste/p 10: /solve
+- [ ] **T10**: Tree 폴더 클릭 expand 토글 🔥 FIRED
+  - 해고 보고서: `docs/0-inbox/fired-2026-02-24-0137.md`
+
+- [x] **T5**: OS sidebar tree navigation ✅
+  - APG tree.apg.test: 23 cases GREEN (nav, expansion, selection, click, attrs)
+
+- [x] **T6**: Reader zone + section navigation ✅
+  - docs-scroll.test: 8 cases GREEN (heading snapping, boundaries, stale zone)
+  - `os.use({ fallback })` 제거 → `readerZone.bind({ keybindings })` OS 패턴 전환
+  - Space/Shift+Space는 reader zone active 시에만 동작 (Zone 스코프)
 
 ## Next
 

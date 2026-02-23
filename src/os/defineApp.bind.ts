@@ -54,6 +54,7 @@ export function createBoundComponents<S>(
     className?: string;
     children?: ReactNode;
     "aria-label"?: string;
+    getExpandableItems?: () => Set<string>;
   }> = ({ className, children, ...rest }) => {
     // Zone ID is always auto-injected from bind() — not developer-specified
     // JSX props (...rest) provide base callbacks; config overrides only when defined.

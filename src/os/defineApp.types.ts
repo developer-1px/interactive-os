@@ -112,6 +112,8 @@ export interface BoundComponents<S> {
     id?: string;
     className?: string;
     children?: ReactNode;
+    /** Data: which items are expandable (have children). Not behavior. */
+    getExpandableItems?: () => Set<string>;
   }>;
   Item: React.FC<{
     id: string | number;

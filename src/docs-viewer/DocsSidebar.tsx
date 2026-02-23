@@ -1,36 +1,42 @@
+import { Item } from "@os/6-components/primitives/Item";
+import { useFlatTree } from "@os/5-hooks/useFlatTree";
 import clsx from "clsx";
+
 import { ChevronDown, ChevronRight, Clock, FileText, Star } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import docsMeta from "virtual:docs-meta";
-import { DocsSidebarUI } from "./app";
+import { DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
 import {
   cleanLabel,
   type DocItem,
+  type FlatTreeNode,
+  flattenVisibleTree,
   formatRelativeTime,
   getFavoriteFiles,
   getRecentFiles,
   toggleFavorite,
 } from "./docsUtils";
 
+/** DocsSidebar flatten: level 0 folders = section headers */
+const flattenDocTree = (items: DocItem[], expanded: string[]) =>
+  flattenVisibleTree(items, expanded, 0, { sectionLevel: 0 });
+
 export interface DocsSidebarProps {
   items: DocItem[];
   allFiles: DocItem[];
   activePath: string | undefined;
-  onSelect: (path: string) => void;
   className?: string;
   header?: React.ReactNode;
 }
 
-// --------------- Recent Section ---------------
+// --------------- Recent Section (OS-managed) ---------------
 
 function RecentSection({
   allFiles,
   activePath,
-  onSelect,
 }: {
   allFiles: DocItem[];
   activePath: string | undefined;
-  onSelect: (path: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const recentFiles = useMemo(
@@ -57,61 +63,62 @@ function RecentSection({
       </button>
 
       {isOpen && (
-        <div className="mt-1 flex flex-col">
+        <DocsRecentUI.Zone className="mt-1 flex flex-col">
           {recentFiles.map((file) => {
             const isActive = file.path === activePath;
             return (
-              <button
-                type="button"
-                key={file.path}
-                onClick={() => onSelect(file.path)}
-                className={clsx(
-                  "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
-                  "text-left w-full group/recent",
-                  isActive
-                    ? "bg-blue-50 text-blue-700 font-medium"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
+              <DocsRecentUI.Item key={file.path} id={file.path}>
+                {({ isFocused }) => (
+                  <div
+                    className={clsx(
+                      "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
+                      "text-left w-full group/recent cursor-pointer",
+                      isActive
+                        ? "bg-blue-50 text-blue-700 font-medium"
+                        : isFocused
+                          ? "bg-indigo-50 text-indigo-700"
+                          : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
+                    )}
+                    style={{ paddingLeft: "20px" }}
+                  >
+                    <FileText
+                      size={12}
+                      className={clsx(
+                        "shrink-0",
+                        isActive ? "text-blue-400" : "text-slate-300",
+                      )}
+                    />
+                    <span className="truncate flex-1">
+                      {cleanLabel(file.name)}
+                    </span>
+                    <span
+                      className={clsx(
+                        "text-[9px] tabular-nums shrink-0",
+                        isActive ? "text-blue-400" : "text-slate-300",
+                      )}
+                    >
+                      {formatRelativeTime(file.mtime)}
+                    </span>
+                  </div>
                 )}
-                style={{ paddingLeft: "20px" }}
-              >
-                <FileText
-                  size={12}
-                  className={clsx(
-                    "shrink-0",
-                    isActive ? "text-blue-400" : "text-slate-300",
-                  )}
-                />
-                <span className="truncate flex-1">
-                  {cleanLabel(file.name)}
-                </span>
-                <span
-                  className={clsx(
-                    "text-[9px] tabular-nums shrink-0",
-                    isActive ? "text-blue-400" : "text-slate-300",
-                  )}
-                >
-                  {formatRelativeTime(file.mtime)}
-                </span>
-              </button>
+              </DocsRecentUI.Item>
             );
           })}
-        </div>
+        </DocsRecentUI.Zone>
       )}
     </div>
   );
 }
 
-// --------------- Favorites Section ---------------
+// --------------- Favorites Section (OS-managed) ---------------
 
 function FavoritesSection({
   allFiles,
   activePath,
-  onSelect,
   favVersion,
 }: {
   allFiles: DocItem[];
   activePath: string | undefined;
-  onSelect: (path: string) => void;
   favVersion: number;
 }) {
   const favoriteFiles = useMemo(
@@ -130,126 +137,87 @@ function FavoritesSection({
           Pinned
         </span>
       </div>
-      <div className="mt-1 flex flex-col">
+      <DocsFavoritesUI.Zone className="mt-1 flex flex-col">
         {favoriteFiles.map((file) => {
           const isActive = file.path === activePath;
           return (
-            <button
-              type="button"
-              key={file.path}
-              onClick={() => onSelect(file.path)}
-              className={clsx(
-                "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
-                "text-left w-full",
-                isActive
-                  ? "bg-amber-50 text-amber-800 font-medium"
-                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
+            <DocsFavoritesUI.Item key={file.path} id={file.path}>
+              {({ isFocused }) => (
+                <div
+                  className={clsx(
+                    "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
+                    "text-left w-full cursor-pointer",
+                    isActive
+                      ? "bg-amber-50 text-amber-800 font-medium"
+                      : isFocused
+                        ? "bg-indigo-50 text-indigo-700"
+                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
+                  )}
+                  style={{ paddingLeft: "20px" }}
+                >
+                  <Star
+                    size={11}
+                    className={clsx(
+                      "shrink-0",
+                      isActive ? "text-amber-400 fill-amber-400" : "text-slate-300 fill-slate-300",
+                    )}
+                  />
+                  <span className="truncate flex-1">
+                    {cleanLabel(file.name)}
+                  </span>
+                </div>
               )}
-              style={{ paddingLeft: "20px" }}
-            >
-              <Star
-                size={11}
-                className={clsx(
-                  "shrink-0",
-                  isActive ? "text-amber-400 fill-amber-400" : "text-slate-300 fill-slate-300",
-                )}
-              />
-              <span className="truncate flex-1">
-                {cleanLabel(file.name)}
-              </span>
-            </button>
+            </DocsFavoritesUI.Item>
           );
         })}
-      </div>
+      </DocsFavoritesUI.Zone>
     </div>
   );
 }
 
-// --------------- Tree Item (OS-managed) ---------------
+// --------------- Flat Tree Node Renderers ---------------
 
-const TreeItem = ({
-  item,
-  level = 0,
-  index,
-  activePath,
-}: {
-  item: DocItem;
-  level?: number;
-  index?: number | undefined;
-  activePath: string | undefined;
-}) => {
-  // Folder render
-  if (item.type === "folder") {
-    if (level === 0) {
-      return (
-        <div className="mb-6">
-          <h3 className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-            {cleanLabel(item.name)}
-          </h3>
-          <div className="flex flex-col">
-            {item.children?.map((child, i) => (
-              <TreeItem
-                key={child.path}
-                item={child}
-                level={level + 1}
-                index={child.type === "file" ? i + 1 : undefined}
-                activePath={activePath}
-              />
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    // Nested folder — OS-managed expand/collapse via Item
-    return (
-      <DocsSidebarUI.Item id={`folder:${item.path}`}>
-        {({ isFocused, isExpanded }) => (
-          <div className="flex flex-col select-none">
-            <div
-              className={clsx(
-                "flex items-center gap-1.5 px-3 py-1 text-[13px] rounded-md transition-colors cursor-pointer",
-                "text-left w-full truncate",
-                isFocused
-                  ? "bg-indigo-50 text-indigo-700"
-                  : "text-slate-600 hover:bg-slate-100",
-              )}
-              style={{ paddingLeft: `${level * 12 + 12}px` }}
-            >
-              <span className={clsx("text-slate-400 transition-transform", isExpanded && "rotate-90")}>
-                <ChevronRight size={14} />
-              </span>
-              <span className="truncate font-medium">{cleanLabel(item.name)}</span>
-            </div>
-            {isExpanded && (
-              <div className="flex flex-col">
-                {item.children?.map((child, i) => (
-                  <TreeItem
-                    key={child.path}
-                    item={child}
-                    level={level + 1}
-                    index={child.type === "file" ? i + 1 : undefined}
-                    activePath={activePath}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </DocsSidebarUI.Item>
-    );
-  }
-
-  // File render — OS Item
-  const isActive = item.path === activePath;
-  const label =
-    index != null
-      ? `${index}. ${cleanLabel(item.name)}`
-      : cleanLabel(item.name);
-
+function SectionHeader({ node }: { node: FlatTreeNode }) {
   return (
-    <DocsSidebarUI.Item id={item.path}>
-      {({ isFocused }) => (
+    <div className="mb-1 mt-4 first:mt-0">
+      <h3 className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+        {cleanLabel(node.name)}
+      </h3>
+    </div>
+  );
+}
+
+function FolderRow({ node }: { node: FlatTreeNode }) {
+  return (
+    <DocsSidebarUI.Item id={node.id}>
+      {({ isFocused, isExpanded }: { isFocused: boolean; isExpanded: boolean }) => (
+        <div
+          className={clsx(
+            "flex items-center gap-1.5 px-3 py-1 text-[13px] rounded-md transition-colors cursor-pointer",
+            "text-left w-full truncate",
+            isFocused
+              ? "bg-indigo-50 text-indigo-700"
+              : "text-slate-600 hover:bg-slate-100",
+          )}
+          style={{ paddingLeft: `${node.level * 12 + 12}px` }}
+        >
+          <Item.ExpandTrigger>
+            <span className={clsx("text-slate-400 transition-transform", isExpanded && "rotate-90")}>
+              <ChevronRight size={14} />
+            </span>
+          </Item.ExpandTrigger>
+          <span className="truncate font-medium">{cleanLabel(node.name)}</span>
+        </div>
+      )}
+    </DocsSidebarUI.Item>
+  );
+}
+
+function FileRow({ node, activePath }: { node: FlatTreeNode; activePath: string | undefined }) {
+  const isActive = node.path === activePath;
+  return (
+    <DocsSidebarUI.Item id={node.id}>
+      {({ isFocused }: { isFocused: boolean }) => (
         <div
           className={clsx(
             "flex items-center gap-1.5 px-3 py-1 text-[12.5px] rounded-md transition-all duration-200 border border-transparent",
@@ -260,30 +228,28 @@ const TreeItem = ({
                 ? "bg-indigo-50 text-indigo-700"
                 : "text-slate-500 hover:text-slate-900 hover:bg-slate-50",
           )}
-          style={{ paddingLeft: `${level * 12 + 12}px` }}
+          style={{ paddingLeft: `${node.level * 12 + 12}px` }}
         >
           <span className="w-[14px] flex justify-center opacity-50" />
-          <span className="truncate">{label}</span>
+          <span className="truncate">{cleanLabel(node.name)}</span>
         </div>
       )}
     </DocsSidebarUI.Item>
   );
-};
+}
+
+// --------------- DocsSidebar ---------------
 
 export function DocsSidebar({
   items,
   allFiles,
   activePath,
-  onSelect,
   className,
   header,
 }: DocsSidebarProps) {
-  const [favVersion, setFavVersion] = useState(0);
+  const [favVersion] = useState(0);
 
-  const handleToggleFavorite = useCallback((path: string) => {
-    toggleFavorite(path);
-    setFavVersion((v) => v + 1);
-  }, []);
+  const visibleNodes = useFlatTree("docs-sidebar", items, flattenDocTree);
 
   return (
     <div
@@ -306,30 +272,33 @@ export function DocsSidebar({
       )}
 
       <div className="flex-1 overflow-y-auto px-2 pb-10 custom-scrollbar">
-        {/* Favorites Section — pinned docs */}
+        {/* Favorites Section — OS Zone */}
         <FavoritesSection
           allFiles={allFiles}
           activePath={activePath}
-          onSelect={onSelect}
           favVersion={favVersion}
         />
 
-        {/* Recent Section — cross-folder, mtime-sorted */}
+        {/* Recent Section — OS Zone */}
         <RecentSection
           allFiles={allFiles}
           activePath={activePath}
-          onSelect={onSelect}
         />
 
-        {/* Folder Tree — OS Zone (behavior from bind(), no handler props) */}
+        {/* Folder Tree — Flat rendering from OS state */}
         <DocsSidebarUI.Zone className="flex flex-col">
-          {items.map((item) => (
-            <TreeItem
-              key={item.path}
-              item={item}
-              activePath={activePath}
-            />
-          ))}
+          {visibleNodes.map((node) => {
+            // Section header (level 0 folder) — not an OS item
+            if (node.type === "folder" && node.level === 0) {
+              return <SectionHeader key={node.id} node={node} />;
+            }
+            // Expandable folder (level 1+) — OS item
+            if (node.type === "folder") {
+              return <FolderRow key={node.id} node={node} />;
+            }
+            // File — OS item
+            return <FileRow key={node.id} node={node} activePath={activePath} />;
+          })}
         </DocsSidebarUI.Zone>
       </div>
     </div>
@@ -338,4 +307,3 @@ export function DocsSidebar({
 
 export { type DocsSidebarProps };
 export { toggleFavorite as _toggleFavorite };
-

@@ -82,6 +82,78 @@ export function flattenTree(items: DocItem[]): DocItem[] {
   return flat;
 }
 
+// --------------- Flat Tree (ARIA APG Tree View Pattern) ---------------
+
+/** A single node in the flattened visible tree */
+export interface FlatTreeNode {
+  id: string;
+  name: string;
+  path: string;
+  level: number;
+  type: "folder" | "file";
+  expandable: boolean;
+}
+
+export interface FlattenTreeOptions {
+  /**
+   * Folders at this level become section headers (always expanded, not OS items).
+   * Set to -1 (default) for VS Code-style — all folders are expandable.
+   * Set to 0 for docs-viewer style — top-level folders are section headers.
+   */
+  sectionLevel?: number;
+}
+
+/**
+ * Transform nested DocItem[] → flat visible list.
+ *
+ * Pure function: tree data + OS expanded state → flat list.
+ * Collapsed folders' children are excluded from the result.
+ */
+export function flattenVisibleTree(
+  items: DocItem[],
+  expandedItems: string[],
+  level = 0,
+  options: FlattenTreeOptions = {},
+): FlatTreeNode[] {
+  const sectionLevel = options.sectionLevel ?? -1;
+  const result: FlatTreeNode[] = [];
+
+  for (const item of items) {
+    if (item.type === "folder") {
+      const id = `folder:${item.path}`;
+      const hasChildren = !!item.children?.length;
+      const isSection = level === sectionLevel;
+
+      result.push({
+        id,
+        name: item.name,
+        path: item.path,
+        level,
+        type: "folder",
+        expandable: isSection ? false : hasChildren,
+      });
+
+      // Section headers always show children; expandable folders respect OS state
+      if (hasChildren && item.children) {
+        if (isSection || expandedItems.includes(id)) {
+          result.push(...flattenVisibleTree(item.children, expandedItems, level + 1, options));
+        }
+      }
+    } else {
+      result.push({
+        id: item.path,
+        name: item.name,
+        path: item.path,
+        level,
+        type: "file",
+        expandable: false,
+      });
+    }
+  }
+
+  return result;
+}
+
 /** Recursively extract text content from React node trees */
 export function extractText(node: unknown): string {
   if (node == null) return "";

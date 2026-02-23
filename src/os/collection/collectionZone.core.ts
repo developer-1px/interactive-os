@@ -18,6 +18,8 @@ export interface ItemOps<S, T extends { id: string }> {
   swapItems: (draft: S, idA: string, idB: string) => void;
   /** Insert item after a given index in draft */
   insertAfter: (draft: S, index: number, item: T) => void;
+  /** Optional: get siblings of an item (for tree-aware move). When present, makeMoveCommand uses this instead of flat getItems for neighbor lookup. */
+  getSiblings?: (state: S, id: string) => T[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -214,3 +216,137 @@ export function fromEntities<S, T extends { id: string }>(
     },
   };
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// fromNormalized — Tree-aware Entity+Order preset
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * fromNormalized — Adapter for entity-map + adjacency-list order.
+ *
+ * Unlike fromEntities (flat string[]), this handles
+ * Record<string, string[]> where "" = root items and
+ * parentId = children of that parent.
+ *
+ * Produces tree-aware ItemOps:
+ *  - getItems: DFS flattening
+ *  - removeItem: recursive children deletion
+ *  - swapItems: same-parent sibling swap
+ *  - insertAfter: parent-aware insertion
+ */
+export function fromNormalized<S, T extends { id: string }>(
+  entitiesAccessor: (state: S) => Record<string, T>,
+  orderAccessor: (state: S) => Record<string, string[]>,
+): { _ops: ItemOps<S, T> } {
+
+  /** Find parent key for a given id */
+  function findParent(order: Record<string, string[]>, id: string): string | undefined {
+    for (const [parentId, children] of Object.entries(order)) {
+      if (children.includes(id)) return parentId;
+    }
+    return undefined;
+  }
+
+  /** DFS flatten: root → children recursively */
+  function dfs(order: Record<string, string[]>, parentId: string): string[] {
+    const result: string[] = [];
+    for (const id of order[parentId] ?? []) {
+      result.push(id);
+      result.push(...dfs(order, id));
+    }
+    return result;
+  }
+
+  /** Collect id + all descendants */
+  function collectDescendants(order: Record<string, string[]>, id: string): Set<string> {
+    const set = new Set<string>();
+    const walk = (targetId: string) => {
+      set.add(targetId);
+      for (const childId of order[targetId] ?? []) walk(childId);
+    };
+    walk(id);
+    return set;
+  }
+
+  return {
+    _ops: {
+      getItems: (state) => {
+        const entities = entitiesAccessor(state);
+        const order = orderAccessor(state);
+        return dfs(order, "")
+          .map((id) => entities[id]!)
+          .filter(Boolean);
+      },
+
+      removeItem: (draft, id) => {
+        const entities = entitiesAccessor(draft);
+        const order = orderAccessor(draft);
+        const toRemove = collectDescendants(order, id);
+
+        // Remove from entities
+        for (const rid of toRemove) delete entities[rid];
+
+        // Remove children lists for removed parents
+        for (const rid of toRemove) delete order[rid];
+
+        // Remove from parent's children
+        for (const children of Object.values(order)) {
+          const idx = children.indexOf(id);
+          if (idx !== -1) { children.splice(idx, 1); break; }
+        }
+      },
+
+      swapItems: (draft, idA, idB) => {
+        const order = orderAccessor(draft);
+        // Find parent that contains both (must be same parent for sibling swap)
+        const parentA = findParent(order, idA);
+        const parentB = findParent(order, idB);
+        if (parentA == null || parentA !== parentB) return;
+
+        const siblings = order[parentA]!;
+        const iA = siblings.indexOf(idA);
+        const iB = siblings.indexOf(idB);
+        if (iA !== -1 && iB !== -1) {
+          [siblings[iA], siblings[iB]] = [siblings[iB]!, siblings[iA]!];
+        }
+      },
+
+      insertAfter: (draft, index, item) => {
+        const entities = entitiesAccessor(draft);
+        const order = orderAccessor(draft);
+        entities[item.id] = item;
+
+        // Find the item at 'index' in DFS order to determine parent
+        const allItems = dfs(order, "");
+        const afterId = allItems[index];
+        if (afterId == null) {
+          // Append to root
+          (order[""] ??= []).push(item.id);
+          return;
+        }
+
+        const parent = findParent(order, afterId);
+        if (parent == null) {
+          // afterId not found, append to root
+          (order[""] ??= []).push(item.id);
+          return;
+        }
+
+        const siblings = order[parent]!;
+        const afterIdx = siblings.indexOf(afterId);
+        siblings.splice(afterIdx + 1, 0, item.id);
+      },
+
+      getSiblings: (state, id) => {
+        const entities = entitiesAccessor(state);
+        const order = orderAccessor(state);
+        const parent = findParent(order, id);
+        if (parent == null) return [];
+        return (order[parent] ?? [])
+          .map((sid) => entities[sid]!)
+          .filter(Boolean);
+      },
+    },
+  };
+}
+

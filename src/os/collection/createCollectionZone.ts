@@ -39,7 +39,7 @@ export type {
   CollectionZoneHandle,
   EntityCollectionConfig,
 } from "@/os/collection/collectionZone.core";
-export { fromEntities } from "@/os/collection/collectionZone.core";
+export { fromEntities, fromNormalized } from "@/os/collection/collectionZone.core";
 
 // ═══════════════════════════════════════════════════════════════════
 // Internal clipboard store
@@ -174,6 +174,22 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     return zone.command(
       `${zoneName}:${name}`,
       (ctx: { readonly state: S }, payload: { id: string }) => {
+        // Tree-aware path: getSiblings returns same-parent items
+        if (ops.getSiblings) {
+          const siblings = ops.getSiblings(ctx.state, payload.id);
+          const idx = siblings.findIndex((item) => item.id === payload.id);
+          if (idx === -1) return { state: ctx.state };
+          const neighborIdx = idx + dir;
+          if (neighborIdx < 0 || neighborIdx >= siblings.length)
+            return { state: ctx.state };
+          return {
+            state: produce(ctx.state, (draft) => {
+              ops.swapItems(draft as S, payload.id, siblings[neighborIdx]!.id);
+            }),
+          };
+        }
+
+        // Flat path: getItems returns all items in order
         const allItems = ops.getItems(ctx.state);
         const rootIdx = allItems.findIndex((item) => item.id === payload.id);
 

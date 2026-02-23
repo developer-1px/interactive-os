@@ -1,27 +1,61 @@
 /**
  * resolveClick — Unit Tests
  *
- * Tests the pure click event resolution logic (activate.onClick).
- * Separate from resolveMouse (mousedown) — click is a distinct event.
+ * Tree interaction model:
+ *   - New item click (clicked ≠ focused) → no-op (mousedown handled focus+select)
+ *   - Re-click on already-focused item → OS_ACTIVATE
+ *   - aria-current="page" → OS_ACTIVATE immediately
  */
 
 import { resolveClick } from "@os/1-listeners/mouse/resolveClick";
 import { describe, expect, test } from "vitest";
 
 describe("resolveClick", () => {
-    test("activateOnClick + focused item → OS_ACTIVATE dispatched", () => {
-        const result = resolveClick({ activateOnClick: true, focusedItemId: "item-1" });
+    test("re-click on already-focused item → OS_ACTIVATE", () => {
+        const result = resolveClick({
+            activateOnClick: true,
+            clickedItemId: "item-1",
+            focusedItemId: "item-1",
+        });
         expect(result.commands).toHaveLength(1);
         expect(result.commands[0]!.type).toBe("OS_ACTIVATE");
     });
 
-    test("activateOnClick + no focused item → no commands", () => {
-        const result = resolveClick({ activateOnClick: true, focusedItemId: null });
+    test("new item click (clicked ≠ focused) → no-op (mousedown already handled)", () => {
+        const result = resolveClick({
+            activateOnClick: true,
+            clickedItemId: "item-2",
+            focusedItemId: "item-1",
+        });
+        expect(result.commands).toHaveLength(0);
+    });
+
+    test("aria-current=page → OS_ACTIVATE immediately (even if different from focused)", () => {
+        const result = resolveClick({
+            activateOnClick: true,
+            clickedItemId: "item-2",
+            focusedItemId: "item-1",
+            isCurrentPage: true,
+        });
+        expect(result.commands).toHaveLength(1);
+        expect(result.commands[0]!.type).toBe("OS_ACTIVATE");
+    });
+
+    test("activateOnClick + no clickedItemId → no commands", () => {
+        const result = resolveClick({
+            activateOnClick: true,
+            clickedItemId: null,
+            focusedItemId: "item-1",
+        });
         expect(result.commands).toHaveLength(0);
     });
 
     test("no activateOnClick → no commands", () => {
-        const result = resolveClick({ activateOnClick: false, focusedItemId: "item-1" });
+        const result = resolveClick({
+            activateOnClick: false,
+            clickedItemId: "item-1",
+            focusedItemId: "item-1",
+        });
         expect(result.commands).toHaveLength(0);
     });
 });

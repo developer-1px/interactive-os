@@ -1,7 +1,39 @@
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { OS_CHECK } from "@os/3-commands/interaction/check";
+import { OS_EXPAND } from "@os/3-commands/expand";
+import { OS_FOCUS } from "@os/3-commands/focus";
 import { os } from "@os/kernel.ts";
-import { forwardRef, isValidElement, type ReactNode, useMemo } from "react";
+import {
+  cloneElement,
+  createContext,
+  forwardRef,
+  isValidElement,
+  useContext,
+  type ReactNode,
+  useMemo,
+} from "react";
+
+// ═══════════════════════════════════════════════════════════════════
+// ItemContext — parent Item identity for compound sub-components
+// ═══════════════════════════════════════════════════════════════════
+
+interface ItemContextValue {
+  zoneId: string;
+  itemId: string;
+}
+
+const ItemContext = createContext<ItemContextValue | null>(null);
+
+function useItemContext() {
+  const ctx = useContext(ItemContext);
+  if (!ctx) {
+    throw new Error(
+      "Item.ExpandTrigger / Item.CheckTrigger must be used inside an <Item>",
+    );
+  }
+  return ctx;
+}
 
 // --- Types ---
 interface ItemState {
@@ -28,7 +60,7 @@ export interface ItemProps
   selected?: boolean;
 }
 
-export const Item = forwardRef<HTMLElement, ItemProps>(
+const ItemBase = forwardRef<HTMLElement, ItemProps>(
   (
     {
       id,
@@ -90,25 +122,122 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
       typeof children === "function" ? children(itemState) : children;
 
     return (
-      <FocusItem
-        id={stringId}
-        ref={ref}
-        asChild={
-          asChild ||
-          (typeof children === "function" &&
-            isValidElement(resolvedChildren) &&
-            typeof resolvedChildren.type === "string")
-        }
-        {...(className !== undefined ? { className } : {})}
-        data-selected={isSelected ? "true" : undefined}
-        _isFocusedHint={isFocused}
-        _isActiveHint={isActive}
-        {...(rest as any)}
-      >
-        {resolvedChildren}
-      </FocusItem>
+      <ItemContext.Provider value={{ zoneId, itemId: stringId }}>
+        <FocusItem
+          id={stringId}
+          ref={ref}
+          asChild={
+            asChild ||
+            (typeof children === "function" &&
+              isValidElement(resolvedChildren) &&
+              typeof resolvedChildren.type === "string")
+          }
+          {...(className !== undefined ? { className } : {})}
+          data-selected={isSelected ? "true" : undefined}
+          _isFocusedHint={isFocused}
+          _isActiveHint={isActive}
+          {...(rest as any)}
+        >
+          {resolvedChildren}
+        </FocusItem>
+      </ItemContext.Provider>
     );
   },
 );
 
-Item.displayName = "Item";
+ItemBase.displayName = "Item";
+
+// ═══════════════════════════════════════════════════════════════════
+// Item.ExpandTrigger — sub-region click toggles parent Item's expand state
+// Use case: arrow icon click ≠ label click (e.g. file manager tree)
+// DocsSidebar uses whole-item click (OS_ACTIVATE → OS_EXPAND) instead.
+// ═══════════════════════════════════════════════════════════════════
+
+interface ExpandTriggerProps {
+  children: ReactNode;
+  asChild?: boolean;
+  className?: string;
+}
+
+function ItemExpandTrigger({ children, asChild, className }: ExpandTriggerProps) {
+  const { zoneId, itemId } = useItemContext();
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent Item's onAction from firing
+    os.dispatch(OS_FOCUS({ zoneId, itemId, skipSelection: true }));
+    os.dispatch(OS_EXPAND({ itemId, zoneId }));
+  };
+
+  if (asChild && isValidElement(children)) {
+    const child = children as React.ReactElement<any>;
+    const mergedProps = {
+      "data-expand-trigger": true,
+      onClick: (e: React.MouseEvent) => {
+        child.props.onClick?.(e);
+        handleClick(e);
+      },
+      className: [child.props.className, className].filter(Boolean).join(" ") || undefined,
+    };
+    return cloneElement(child, mergedProps);
+  }
+
+  return (
+    <div data-expand-trigger className={className} onClick={handleClick}>
+      {children}
+    </div>
+  );
+}
+
+ItemExpandTrigger.displayName = "Item.ExpandTrigger";
+
+// ═══════════════════════════════════════════════════════════════════
+// Item.CheckTrigger — click dispatches OS_CHECK for parent Item
+// ═══════════════════════════════════════════════════════════════════
+
+interface CheckTriggerProps {
+  children: ReactNode;
+  asChild?: boolean;
+  className?: string;
+}
+
+function ItemCheckTrigger({ children, asChild, className }: CheckTriggerProps) {
+  const { zoneId, itemId } = useItemContext();
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    os.dispatch(OS_FOCUS({ zoneId, itemId, skipSelection: true }));
+    os.dispatch(OS_CHECK({ targetId: itemId }));
+  };
+
+  if (asChild && isValidElement(children)) {
+    const child = children as React.ReactElement<any>;
+    return cloneElement(child, {
+      "data-check-trigger": true,
+      onClick: (e: React.MouseEvent) => {
+        child.props.onClick?.(e);
+        handleClick(e);
+      },
+      className: [child.props.className, className].filter(Boolean).join(" ") || undefined,
+    });
+  }
+
+  return (
+    <div data-check-trigger className={className} onClick={handleClick}>
+      {children}
+    </div>
+  );
+}
+
+ItemCheckTrigger.displayName = "Item.CheckTrigger";
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+// Namespace merge
+// ═══════════════════════════════════════════════════════════════════
+
+export const Item = Object.assign(ItemBase, {
+  ExpandTrigger: ItemExpandTrigger,
+  CheckTrigger: ItemCheckTrigger,
+});
+

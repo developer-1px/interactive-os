@@ -5,6 +5,7 @@
  * Uses TodoList.triggers for mouse actions — headless-first, no raw OS imports.
  */
 
+import { Item } from "@os/6-components/primitives/Item";
 import { TodoApp, TodoEdit, TodoList } from "@apps/todo/app";
 import { useDragState } from "@os/5-hooks/useDragState";
 import {
@@ -80,7 +81,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
           </div>
 
           {/* Checkbox Trigger */}
-          <TodoList.triggers.ToggleTodo payload={{ id: todo.id }}>
+          <Item.CheckTrigger asChild>
             <div
               className={`
                             w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
@@ -96,7 +97,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
                 strokeWidth={3}
               />
             </div>
-          </TodoList.triggers.ToggleTodo>
+          </Item.CheckTrigger>
 
           {/* Content Area */}
           <div className="flex-1 min-w-0 pt-0.5">

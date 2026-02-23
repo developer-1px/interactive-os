@@ -3,7 +3,7 @@
 > 모든 동작 계약을 이 문서 하나로 관리한다.
 > 코드는 이 문서를 따르고, 테스트는 이 문서를 검증한다.
 >
-> Last verified: 2026-02-23
+> Last verified: 2026-02-24
 
 ---
 
@@ -371,9 +371,79 @@
 | `data-focused` | `visualFocused` | CSS 스타일링용 |
 | `data-selected` | `isSelected` | CSS 스타일링용 |
 
+### 9.3 Item — Compound Component
+
+> `src/os/6-components/primitives/Item.tsx`
+
+`Item`은 `FocusItem`의 선언적 래퍼이자 compound component의 루트.
+`ItemContext`를 통해 sub-component에 `{ zoneId, itemId }`를 자동 전달한다.
+
+#### ItemContext
+
+`Item` 렌더링 시 `ItemContext.Provider`로 children을 감싼다.
+`useItemContext()`는 `Item` 외부에서 사용 시 에러를 throw한다.
+
+#### Item.ExpandTrigger
+
+| 속성 | 설명 |
+|------|------|
+| `asChild` | child element에 클릭 핸들러 merge (cloneElement) |
+| `data-expand-trigger` | DOM 투사 (Component 투사 — 관습 아님) |
+| 클릭 동작 | `OS_FOCUS(itemId) + OS_EXPAND({ itemId })` dispatch, `onAction` 억제 |
+| Context 요구 | `Item` 내부에서만 사용 가능 |
+
+#### Item.ExpandContent
+
+| 속성 | 설명 |
+|------|------|
+| 조건 렌더 | parent Item `isExpanded === true`일 때만 children 렌더 |
+| collapsed | `null` 반환 (React unmount) |
+| Context 요구 | `Item` 내부에서만 사용 가능 |
+
+#### Item.CheckTrigger
+
+| 속성 | 설명 |
+|------|------|
+| `asChild` | child element에 클릭 핸들러 merge |
+| `data-check-trigger` | DOM 투사 |
+| 클릭 동작 | `OS_FOCUS(itemId) + OS_CHECK({ targetId: itemId })` dispatch, `onAction` 억제 |
+| Context 요구 | `Item` 내부에서만 사용 가능 |
+
+#### Namespace Merge 패턴
+
+```ts
+export const Item = Object.assign(ItemBase, {
+  ExpandTrigger: ItemExpandTrigger,
+  ExpandContent: ItemExpandContent,
+  CheckTrigger: ItemCheckTrigger,
+});
+```
+
+`Trigger.Dismiss`, `Trigger.Portal`과 동일한 패턴.
+
+#### 네이밍 규칙: `[Primitive].[Intent][Role]`
+
+| 예시 | Primitive | Intent | Role |
+|------|-----------|--------|------|
+| `Item.ExpandTrigger` | Item | Expand | Trigger |
+| `Item.ExpandContent` | Item | Expand | Content |
+| `Item.CheckTrigger` | Item | Check | Trigger |
+| `Trigger.Dismiss` | Trigger | Dismiss | (implicit) |
+
 ---
 
-## 10. Middleware
+### 9.4 resolveMouse — Trigger 옵션 확장
+
+`simulateClick(id, opts)` 및 `MouseInput`의 trigger 플래그:
+
+| 옵션 | MouseInput 필드 | 동작 |
+|------|----------------|------|
+| `expandTrigger: true` | `isExpandTrigger` | `OS_FOCUS + OS_EXPAND`, onAction 억제 |
+| `checkTrigger: true` | `isCheckTrigger` | `OS_FOCUS + OS_CHECK`, onAction 억제 |
+| (없음) | — | 기존 동작: focus + select + (activate if clickable) |
+
+---
+
 
 | Middleware | Trigger | Behavior | Status |
 |-----------|---------|----------|--------|

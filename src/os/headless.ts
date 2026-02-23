@@ -225,6 +225,7 @@ export function simulateClick(
         itemRole: childRole ?? null,
     };
 
+
     const result = resolveMouse(input);
     dispatchResult(kernel, result);
 

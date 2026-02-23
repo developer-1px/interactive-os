@@ -147,18 +147,28 @@ export function MouseListener() {
       const target = (e as MouseEvent).target as HTMLElement;
       if (!target || target.closest("[data-inspector]")) return;
 
+      // ExpandTrigger / CheckTrigger handle their own dispatch —
+      // skip OS_ACTIVATE to avoid double-toggle.
+      if (target.closest("[data-expand-trigger]") || target.closest("[data-check-trigger]")) return;
+
       const state = os.getState();
       const { activeZoneId } = state.os.focus;
       if (!activeZoneId) return;
 
       const zone = state.os.focus.zones[activeZoneId];
-
       const entry = ZoneRegistry.get(activeZoneId);
       const activateOnClick = entry?.config?.activate?.onClick ?? false;
 
+      // Sense clicked item from DOM
+      const clickedEl = findFocusableItem(target);
+      const clickedItemId = clickedEl?.getAttribute("data-item-id") ?? null;
+      const isCurrentPage = clickedEl?.getAttribute("aria-current") === "page";
+
       const result = resolveClick({
         activateOnClick,
+        clickedItemId,
         focusedItemId: zone?.focusedItemId ?? null,
+        isCurrentPage,
       });
 
       if (result.commands.length > 0) {

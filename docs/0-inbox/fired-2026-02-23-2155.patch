@@ -1,0 +1,552 @@
+diff --git a/docs/STATUS.md b/docs/STATUS.md
+index f03cf0b..e5f14a7 100644
+--- a/docs/STATUS.md
++++ b/docs/STATUS.md
+@@ -9,7 +9,7 @@
+ 
+ ## 🔥 Active Focus
+ 
+-**dnd-poc** — TodoList reorder PoC. Pointer Events + 커널 커맨드로 Zone 합성점 DnD 검증.
++**docs-sidebar-os** — Docs Sidebar를 OS Best Practice로 재구축. Recent/Favorites/Tree 3 Zone 독립 OS화.
+ 
+ ---
+ 
+@@ -33,8 +33,9 @@
+ | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
+ | docs-viewer-features | T8 ZoneCursor meta + Todo패턴 전환 | 02-23 | 🔥 Focus |
+ | zone-focusgroup-separation | All Done (T2+T3+T4+T6) | 02-23 | ✅ Done |
+-| dnd-poc | Scaffold, T1~T4 등록 | 02-23 | 🔥 Focus |
++| dnd-poc | T1~T4 Done | 02-23 | ✅ Done |
+ | bdd-tdd-gate | T1~T4 Done (워크플로우 4개 수정) | 02-23 | ✅ Done |
++| docs-sidebar-os | Scaffold, T1~T4 등록 | 02-23 | 🔥 Focus |
+ 
+ ---
+ 
+diff --git a/src/docs-viewer/DocsSidebar.tsx b/src/docs-viewer/DocsSidebar.tsx
+index 26f47a7..4974986 100644
+--- a/src/docs-viewer/DocsSidebar.tsx
++++ b/src/docs-viewer/DocsSidebar.tsx
+@@ -2,7 +2,7 @@ import clsx from "clsx";
+ import { ChevronDown, ChevronRight, Clock, FileText, Star } from "lucide-react";
+ import { useCallback, useMemo, useState } from "react";
+ import docsMeta from "virtual:docs-meta";
+-import { DocsSidebarUI } from "./app";
++import { DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
+ import {
+   cleanLabel,
+   type DocItem,
+@@ -16,21 +16,18 @@ export interface DocsSidebarProps {
+   items: DocItem[];
+   allFiles: DocItem[];
+   activePath: string | undefined;
+-  onSelect: (path: string) => void;
+   className?: string;
+   header?: React.ReactNode;
+ }
+ 
+-// --------------- Recent Section ---------------
++// --------------- Recent Section (OS-managed) ---------------
+ 
+ function RecentSection({
+   allFiles,
+   activePath,
+-  onSelect,
+ }: {
+   allFiles: DocItem[];
+   activePath: string | undefined;
+-  onSelect: (path: string) => void;
+ }) {
+   const [isOpen, setIsOpen] = useState(true);
+   const recentFiles = useMemo(
+@@ -57,61 +54,62 @@ function RecentSection({
+       </button>
+ 
+       {isOpen && (
+-        <div className="mt-1 flex flex-col">
++        <DocsRecentUI.Zone className="mt-1 flex flex-col">
+           {recentFiles.map((file) => {
+             const isActive = file.path === activePath;
+             return (
+-              <button
+-                type="button"
+-                key={file.path}
+-                onClick={() => onSelect(file.path)}
+-                className={clsx(
+-                  "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
+-                  "text-left w-full group/recent",
+-                  isActive
+-                    ? "bg-blue-50 text-blue-700 font-medium"
+-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
++              <DocsRecentUI.Item key={file.path} id={file.path}>
++                {({ isFocused }) => (
++                  <div
++                    className={clsx(
++                      "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
++                      "text-left w-full group/recent cursor-pointer",
++                      isActive
++                        ? "bg-blue-50 text-blue-700 font-medium"
++                        : isFocused
++                          ? "bg-indigo-50 text-indigo-700"
++                          : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
++                    )}
++                    style={{ paddingLeft: "20px" }}
++                  >
++                    <FileText
++                      size={12}
++                      className={clsx(
++                        "shrink-0",
++                        isActive ? "text-blue-400" : "text-slate-300",
++                      )}
++                    />
++                    <span className="truncate flex-1">
++                      {cleanLabel(file.name)}
++                    </span>
++                    <span
++                      className={clsx(
++                        "text-[9px] tabular-nums shrink-0",
++                        isActive ? "text-blue-400" : "text-slate-300",
++                      )}
++                    >
++                      {formatRelativeTime(file.mtime)}
++                    </span>
++                  </div>
+                 )}
+-                style={{ paddingLeft: "20px" }}
+-              >
+-                <FileText
+-                  size={12}
+-                  className={clsx(
+-                    "shrink-0",
+-                    isActive ? "text-blue-400" : "text-slate-300",
+-                  )}
+-                />
+-                <span className="truncate flex-1">
+-                  {cleanLabel(file.name)}
+-                </span>
+-                <span
+-                  className={clsx(
+-                    "text-[9px] tabular-nums shrink-0",
+-                    isActive ? "text-blue-400" : "text-slate-300",
+-                  )}
+-                >
+-                  {formatRelativeTime(file.mtime)}
+-                </span>
+-              </button>
++              </DocsRecentUI.Item>
+             );
+           })}
+-        </div>
++        </DocsRecentUI.Zone>
+       )}
+     </div>
+   );
+ }
+ 
+-// --------------- Favorites Section ---------------
++// --------------- Favorites Section (OS-managed) ---------------
+ 
+ function FavoritesSection({
+   allFiles,
+   activePath,
+-  onSelect,
+   favVersion,
+ }: {
+   allFiles: DocItem[];
+   activePath: string | undefined;
+-  onSelect: (path: string) => void;
+   favVersion: number;
+ }) {
+   const favoriteFiles = useMemo(
+@@ -130,37 +128,40 @@ function FavoritesSection({
+           Pinned
+         </span>
+       </div>
+-      <div className="mt-1 flex flex-col">
++      <DocsFavoritesUI.Zone className="mt-1 flex flex-col">
+         {favoriteFiles.map((file) => {
+           const isActive = file.path === activePath;
+           return (
+-            <button
+-              type="button"
+-              key={file.path}
+-              onClick={() => onSelect(file.path)}
+-              className={clsx(
+-                "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
+-                "text-left w-full",
+-                isActive
+-                  ? "bg-amber-50 text-amber-800 font-medium"
+-                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
++            <DocsFavoritesUI.Item key={file.path} id={file.path}>
++              {({ isFocused }) => (
++                <div
++                  className={clsx(
++                    "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
++                    "text-left w-full cursor-pointer",
++                    isActive
++                      ? "bg-amber-50 text-amber-800 font-medium"
++                      : isFocused
++                        ? "bg-indigo-50 text-indigo-700"
++                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
++                  )}
++                  style={{ paddingLeft: "20px" }}
++                >
++                  <Star
++                    size={11}
++                    className={clsx(
++                      "shrink-0",
++                      isActive ? "text-amber-400 fill-amber-400" : "text-slate-300 fill-slate-300",
++                    )}
++                  />
++                  <span className="truncate flex-1">
++                    {cleanLabel(file.name)}
++                  </span>
++                </div>
+               )}
+-              style={{ paddingLeft: "20px" }}
+-            >
+-              <Star
+-                size={11}
+-                className={clsx(
+-                  "shrink-0",
+-                  isActive ? "text-amber-400 fill-amber-400" : "text-slate-300 fill-slate-300",
+-                )}
+-              />
+-              <span className="truncate flex-1">
+-                {cleanLabel(file.name)}
+-              </span>
+-            </button>
++            </DocsFavoritesUI.Item>
+           );
+         })}
+-      </div>
++      </DocsFavoritesUI.Zone>
+     </div>
+   );
+ }
+@@ -274,7 +275,6 @@ export function DocsSidebar({
+   items,
+   allFiles,
+   activePath,
+-  onSelect,
+   className,
+   header,
+ }: DocsSidebarProps) {
+@@ -285,6 +285,21 @@ export function DocsSidebar({
+     setFavVersion((v) => v + 1);
+   }, []);
+ 
++  // Data: which items are expandable (folders with children)
++  const getExpandableItems = useCallback(() => {
++    const set = new Set<string>();
++    const collect = (list: DocItem[]) => {
++      for (const item of list) {
++        if (item.type === "folder" && item.children) {
++          set.add(`folder:${item.path}`);
++          collect(item.children);
++        }
++      }
++    };
++    collect(items);
++    return set;
++  }, [items]);
++
+   return (
+     <div
+       className={clsx(
+@@ -306,23 +321,24 @@ export function DocsSidebar({
+       )}
+ 
+       <div className="flex-1 overflow-y-auto px-2 pb-10 custom-scrollbar">
+-        {/* Favorites Section — pinned docs */}
++        {/* Favorites Section — OS Zone */}
+         <FavoritesSection
+           allFiles={allFiles}
+           activePath={activePath}
+-          onSelect={onSelect}
+           favVersion={favVersion}
+         />
+ 
+-        {/* Recent Section — cross-folder, mtime-sorted */}
++        {/* Recent Section — OS Zone */}
+         <RecentSection
+           allFiles={allFiles}
+           activePath={activePath}
+-          onSelect={onSelect}
+         />
+ 
+-        {/* Folder Tree — OS Zone (behavior from bind(), no handler props) */}
+-        <DocsSidebarUI.Zone className="flex flex-col">
++        {/* Folder Tree — OS Zone */}
++        <DocsSidebarUI.Zone
++          className="flex flex-col"
++          getExpandableItems={getExpandableItems}
++        >
+           {items.map((item) => (
+             <TreeItem
+               key={item.path}
+@@ -338,4 +354,3 @@ export function DocsSidebar({
+ 
+ export { type DocsSidebarProps };
+ export { toggleFavorite as _toggleFavorite };
+-
+diff --git a/src/docs-viewer/DocsViewer.tsx b/src/docs-viewer/DocsViewer.tsx
+index 632d414..d7366c2 100644
+--- a/src/docs-viewer/DocsViewer.tsx
++++ b/src/docs-viewer/DocsViewer.tsx
+@@ -15,6 +15,7 @@ import { os } from "@/os/kernel";
+ 
+ // Side-effect: register docs-viewer commands on kernel
+ import "./app";
++import { DocsApp, selectDoc, resetDoc } from "./app";
+ import {
+   buildDocTree,
+   cleanLabel,
+@@ -55,7 +56,8 @@ function parseHash(): {
+ }
+ 
+ export function DocsViewer() {
+-  const [activePath, setActivePath] = useState<string | undefined>(undefined);
++  // activePath — Single Source of Truth from DocsApp state
++  const activePath = DocsApp.useComputed((s) => s.activePath) ?? undefined;
+   const [content, setContent] = useState<string>("");
+   const [error, setError] = useState<string | null>(null);
+   const [externalSource, setExternalSource] =
+@@ -157,34 +159,38 @@ export function DocsViewer() {
+     history.replaceState(null, "", hash);
+   }, []);
+ 
+-  // --- Select a file (sidebar click, prev/next) ---
++  // --- Select a file via OS command ---
+   const handleSelect = useCallback(
+     (path: string) => {
+-      const ext = externalRef.current;
+-      if (ext) {
+-        setHash(`#ext:${ext.name}/${path}`);
+-      } else {
+-        setHash(`#/${path}`);
+-      }
+-      setActivePath(path);
+-      loadContent(path, ext);
+-      // Scroll content area to top on document switch
+-      if (contentRef.current) {
+-        contentRef.current.scrollTop = 0;
+-      }
++      os.dispatch(selectDoc({ id: path }));
+     },
+-    [loadContent, setHash],
++    [],
+   );
+ 
++  // --- React to activePath changes (content load + hash sync) ---
++  useEffect(() => {
++    if (!activePath) return;
++    const ext = externalRef.current;
++    if (ext) {
++      setHash(`#ext:${ext.name}/${activePath}`);
++    } else {
++      setHash(`#/${activePath}`);
++    }
++    loadContent(activePath, ext);
++    // Scroll content area to top on document switch
++    if (contentRef.current) {
++      contentRef.current.scrollTop = 0;
++    }
++  }, [activePath, loadContent, setHash]);
++
+   // Initialize from hash on mount
+   useEffect(() => {
+     const parsed = parseHash();
+     if (parsed.source === "docs" && parsed.path) {
+-      setActivePath(parsed.path);
+-      loadContent(parsed.path, null);
++      os.dispatch(selectDoc({ id: parsed.path }));
+     }
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [loadContent]);
++  }, []);
+ 
+   // Sync hash → state on browser back/forward (popstate only)
+   useEffect(() => {
+@@ -193,28 +199,24 @@ export function DocsViewer() {
+       const ext = externalRef.current;
+       if (parsed.source === "docs") {
+         if (ext) setExternalSource(null);
+-        setActivePath(parsed.path);
+-        if (parsed.path) loadContent(parsed.path, null);
++        if (parsed.path) os.dispatch(selectDoc({ id: parsed.path }));
+       } else if (parsed.source === "ext" && ext) {
+-        setActivePath(parsed.path);
+-        if (parsed.path) loadContent(parsed.path, ext);
++        if (parsed.path) os.dispatch(selectDoc({ id: parsed.path }));
+       }
+     };
+     window.addEventListener("popstate", onPopState);
+     return () => window.removeEventListener("popstate", onPopState);
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [loadContent]);
++  }, []);
+ 
+   // Auto-select first file when tree changes and no active path
+   useEffect(() => {
+     if (!activePath && allFiles.length > 0) {
+       const first = allFiles[0];
+       if (first) {
+-        handleSelect(first.path);
++        os.dispatch(selectDoc({ id: first.path }));
+       }
+     }
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [allFiles, activePath, handleSelect]);
++  }, [allFiles, activePath]);
+ 
+   // --- Folder open / close ---
+   const handleOpenFolder = async () => {
+@@ -223,7 +225,7 @@ export function DocsViewer() {
+ 
+     setExternalSource(result);
+     externalRef.current = result;
+-    setActivePath(undefined);
++    os.dispatch(resetDoc());
+     setContent("");
+     setError(null);
+     // Auto-select will fire via the allFiles effect
+@@ -232,7 +234,7 @@ export function DocsViewer() {
+   const handleCloseFolder = () => {
+     setExternalSource(null);
+     externalRef.current = null;
+-    setActivePath(undefined);
++    os.dispatch(resetDoc());
+     setContent("");
+     setError(null);
+     setHash("#");
+@@ -281,7 +283,6 @@ export function DocsViewer() {
+         items={docTree}
+         allFiles={allFiles}
+         activePath={activePath}
+-        onSelect={handleSelect}
+         header={sidebarHeader}
+       />
+ 
+diff --git a/src/docs-viewer/app.ts b/src/docs-viewer/app.ts
+index d45c105..eafb495 100644
+--- a/src/docs-viewer/app.ts
++++ b/src/docs-viewer/app.ts
+@@ -1,9 +1,15 @@
+ /**
+  * DocsViewer App — defineApp for ZIFT primitives.
+  *
+- * State: activePath — the shown document.
+- * Sidebar navigation commands modify activePath.
+- * DocsViewer reads activePath via useComputed.
++ * Structure:
++ *   DocsApp (defineApp)
++ *     ├── State: activePath
++ *     ├── Commands: selectDoc (app-level, shared by all zones)
++ *     ├── Zones:
++ *     │   ├── docs-favorites — pinned files (listbox)
++ *     │   ├── docs-recent    — recent files (listbox)
++ *     │   ├── docs-sidebar   — folder tree (tree)
++ *     │   └── docs-reader    — section navigation (feed)
+  */
+ 
+ import { produce } from "immer";
+@@ -22,15 +28,13 @@ export const DocsApp = defineApp<DocsState>("docs-viewer", {
+ });
+ 
+ // ═══════════════════════════════════════════════════════════════════
+-// Sidebar Zone — tree navigation
++// App-level Command — shared by all sidebar zones
+ // ═══════════════════════════════════════════════════════════════════
+ 
+-const sidebarZone = DocsApp.createZone("docs-sidebar");
+-
+-/** SELECT_DOC — sets activePath. Expandable items are skipped via cursor.isExpandable. */
+-export const selectDoc = sidebarZone.command(
++/** SELECT_DOC — sets activePath. Shared by Recent, Favorites, and Tree zones. */
++export const selectDoc = DocsApp.command(
+     "SELECT_DOC",
+-    (ctx, payload: { id: string; isExpandable: boolean }) => {
++    (ctx, payload: { id: string; isExpandable?: boolean }) => {
+         if (payload.isExpandable) return { state: ctx.state };
+         return {
+             state: produce(ctx.state, (draft) => {
+@@ -40,6 +44,54 @@ export const selectDoc = sidebarZone.command(
+     },
+ );
+ 
++/** RESET_DOC — clears activePath (e.g. when switching folder source). */
++export const resetDoc = DocsApp.command(
++    "RESET_DOC",
++    (ctx) => ({
++        state: produce(ctx.state, (draft) => {
++            draft.activePath = null;
++        }),
++    }),
++);
++
++// ═══════════════════════════════════════════════════════════════════
++// Favorites Zone — pinned files
++// ═══════════════════════════════════════════════════════════════════
++
++const favoritesZone = DocsApp.createZone("docs-favorites");
++
++export const DocsFavoritesUI = favoritesZone.bind({
++    role: "listbox",
++    onAction: (cursor) => selectDoc({ id: cursor.focusId }),
++    onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
++    options: {
++        select: { followFocus: true },
++        activate: { onClick: true },
++    },
++});
++
++// ═══════════════════════════════════════════════════════════════════
++// Recent Zone — recently modified files
++// ═══════════════════════════════════════════════════════════════════
++
++const recentZone = DocsApp.createZone("docs-recent");
++
++export const DocsRecentUI = recentZone.bind({
++    role: "listbox",
++    onAction: (cursor) => selectDoc({ id: cursor.focusId }),
++    onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
++    options: {
++        select: { followFocus: true },
++        activate: { onClick: true },
++    },
++});
++
++// ═══════════════════════════════════════════════════════════════════
++// Sidebar Zone — tree navigation (existing)
++// ═══════════════════════════════════════════════════════════════════
++
++const sidebarZone = DocsApp.createZone("docs-sidebar");
++
+ export const DocsSidebarUI = sidebarZone.bind({
+     role: "tree",
+     onAction: (cursor) => selectDoc({ id: cursor.focusId, isExpandable: cursor.isExpandable }),
+diff --git a/src/os/defineApp.bind.ts b/src/os/defineApp.bind.ts
+index db2aaa4..78c28f7 100644
+--- a/src/os/defineApp.bind.ts
++++ b/src/os/defineApp.bind.ts
+@@ -54,6 +54,7 @@ export function createBoundComponents<S>(
+     className?: string;
+     children?: ReactNode;
+     "aria-label"?: string;
++    getExpandableItems?: () => Set<string>;
+   }> = ({ className, children, ...rest }) => {
+     // Zone ID is always auto-injected from bind() — not developer-specified
+     // JSX props (...rest) provide base callbacks; config overrides only when defined.
+diff --git a/src/os/defineApp.types.ts b/src/os/defineApp.types.ts
+index f5e93e5..9fa68bb 100644
+--- a/src/os/defineApp.types.ts
++++ b/src/os/defineApp.types.ts
+@@ -112,6 +112,8 @@ export interface BoundComponents<S> {
+     id?: string;
+     className?: string;
+     children?: ReactNode;
++    /** Data: which items are expandable (have children). Not behavior. */
++    getExpandableItems?: () => Set<string>;
+   }>;
+   Item: React.FC<{
+     id: string | number;

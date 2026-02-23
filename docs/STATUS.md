@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-23 20:51
+> Last updated: 2026-02-24 02:48
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**dnd-poc** — TodoList reorder PoC. Pointer Events + 커널 커맨드로 Zone 합성점 DnD 검증.
+**normalized-collection** — OS 데이터 모델을 `{ entities, order }` 정규화 포맷으로 통일. Heavy.
 
 ---
 
@@ -33,8 +33,11 @@
 | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
 | docs-viewer-features | T8 ZoneCursor meta + Todo패턴 전환 | 02-23 | 🔥 Focus |
 | zone-focusgroup-separation | All Done (T2+T3+T4+T6) | 02-23 | ✅ Done |
-| dnd-poc | Scaffold, T1~T4 등록 | 02-23 | 🔥 Focus |
+| dnd-poc | T1~T4 Done | 02-23 | ✅ Done |
 | bdd-tdd-gate | T1~T4 Done (워크플로우 4개 수정) | 02-23 | ✅ Done |
+| docs-sidebar-os | T1~T3 Done + 아카이브 | 02-23 | ✅ Done |
+| item-expand-primitives | T1~T7 Done (948/948 GREEN) | 02-24 | ✅ Archived |
+| normalized-collection | Scaffold 완료, T1~T6 | 02-24 | 🔥 Focus |
 
 ---
 
@@ -43,6 +46,7 @@
 | Project | Completed | Archived |
 |---------|-----------|----------|
 | headless-items | 02-23 | ✅ archive/2026/02/W09 |
+| docs-sidebar-os | 02-23 | ✅ archive/2026/02/W09 |
 | os-page | 02-21 | ❌ T1~T3 완료, T4 skip. AppPage rename ✅ createTestOsKernel 제거 ✅ |
 | field-props-cleanup | 02-21 | ✅ archive/2026/02/W08 |
 | lazy-resolution | 02-21 | ✅ rules.md #15 (Lazy Resolution) | ✅ archive/2026/02/W08 |

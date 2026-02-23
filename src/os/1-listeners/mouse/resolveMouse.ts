@@ -42,8 +42,6 @@ export type SelectMode = "replace" | "toggle" | "range";
 // Pure Resolution
 // ═══════════════════════════════════════════════════════════════════
 
-/** Roles where click should NOT toggle expansion (keyboard-only expand). */
-const KEYBOARD_ONLY_EXPAND_ROLES = new Set(["treeitem", "menuitem"]);
 
 export function resolveSelectMode(input: {
   shiftKey: boolean;
@@ -62,8 +60,11 @@ export function isClickExpandable(
   role: string | null,
 ): boolean {
   if (!hasAriaExpanded) return false;
-  if (!role) return true; // no role → assume clickable
-  return !KEYBOARD_ONLY_EXPAND_ROLES.has(role);
+  // treeitem & menuitem: expand is handled by click event (resolveClick + activateOnClick),
+  // NOT by mousedown. mousedown only does focus+select for immediate visual feedback.
+  // Without this guard, mousedown→expand + click→expand = double toggle = no change.
+  if (role === "treeitem" || role === "menuitem") return false;
+  return true;
 }
 
 export function resolveMouse(input: MouseInput): ResolveResult {

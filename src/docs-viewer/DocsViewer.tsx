@@ -15,6 +15,7 @@ import { os } from "@/os/kernel";
 
 // Side-effect: register docs-viewer commands on kernel
 import "./app";
+import { DocsApp, selectDoc, resetDoc } from "./app";
 import {
   buildDocTree,
   cleanLabel,
@@ -55,7 +56,8 @@ function parseHash(): {
 }
 
 export function DocsViewer() {
-  const [activePath, setActivePath] = useState<string | undefined>(undefined);
+  // activePath — Single Source of Truth from DocsApp state
+  const activePath = DocsApp.useComputed((s) => s.activePath) ?? undefined;
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [externalSource, setExternalSource] =
@@ -157,34 +159,32 @@ export function DocsViewer() {
     history.replaceState(null, "", hash);
   }, []);
 
-  // --- Select a file (sidebar click, prev/next) ---
+  // --- Select a file via OS command ---
   const handleSelect = useCallback(
     (path: string) => {
-      const ext = externalRef.current;
-      if (ext) {
-        setHash(`#ext:${ext.name}/${path}`);
-      } else {
-        setHash(`#/${path}`);
-      }
-      setActivePath(path);
-      loadContent(path, ext);
-      // Scroll content area to top on document switch
-      if (contentRef.current) {
-        contentRef.current.scrollTop = 0;
-      }
+      os.dispatch(selectDoc({ id: path }));
     },
-    [loadContent, setHash],
+    [],
   );
 
-  // Initialize from hash on mount
+  // --- React to activePath changes (content load + hash sync) ---
   useEffect(() => {
-    const parsed = parseHash();
-    if (parsed.source === "docs" && parsed.path) {
-      setActivePath(parsed.path);
-      loadContent(parsed.path, null);
+    if (!activePath) return;
+    const ext = externalRef.current;
+    if (ext) {
+      setHash(`#ext:${ext.name}/${activePath}`);
+    } else {
+      setHash(`#/${activePath}`);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadContent]);
+    loadContent(activePath, ext);
+    // Scroll content area to top on document switch
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  }, [activePath, loadContent, setHash]);
+
+  // Initialize from hash: now handled synchronously in DocsApp initial state (app.ts).
+  // popstate handles browser back/forward navigation only.
 
   // Sync hash → state on browser back/forward (popstate only)
   useEffect(() => {
@@ -193,28 +193,24 @@ export function DocsViewer() {
       const ext = externalRef.current;
       if (parsed.source === "docs") {
         if (ext) setExternalSource(null);
-        setActivePath(parsed.path);
-        if (parsed.path) loadContent(parsed.path, null);
+        if (parsed.path) os.dispatch(selectDoc({ id: parsed.path }));
       } else if (parsed.source === "ext" && ext) {
-        setActivePath(parsed.path);
-        if (parsed.path) loadContent(parsed.path, ext);
+        if (parsed.path) os.dispatch(selectDoc({ id: parsed.path }));
       }
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadContent]);
+  }, []);
 
   // Auto-select first file when tree changes and no active path
   useEffect(() => {
     if (!activePath && allFiles.length > 0) {
       const first = allFiles[0];
       if (first) {
-        handleSelect(first.path);
+        os.dispatch(selectDoc({ id: first.path }));
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allFiles, activePath, handleSelect]);
+  }, [allFiles, activePath]);
 
   // --- Folder open / close ---
   const handleOpenFolder = async () => {
@@ -223,7 +219,7 @@ export function DocsViewer() {
 
     setExternalSource(result);
     externalRef.current = result;
-    setActivePath(undefined);
+    os.dispatch(resetDoc());
     setContent("");
     setError(null);
     // Auto-select will fire via the allFiles effect
@@ -232,7 +228,7 @@ export function DocsViewer() {
   const handleCloseFolder = () => {
     setExternalSource(null);
     externalRef.current = null;
-    setActivePath(undefined);
+    os.dispatch(resetDoc());
     setContent("");
     setError(null);
     setHash("#");
@@ -281,7 +277,6 @@ export function DocsViewer() {
         items={docTree}
         allFiles={allFiles}
         activePath={activePath}
-        onSelect={handleSelect}
         header={sidebarHeader}
       />
 

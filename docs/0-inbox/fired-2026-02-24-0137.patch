@@ -1,0 +1,1354 @@
+diff --git a/.agent/rules.md b/.agent/rules.md
+index bbfa72a..ef32a78 100644
+--- a/.agent/rules.md
++++ b/.agent/rules.md
+@@ -147,3 +147,47 @@
+ | **Complicated** | 선택지가 있지만 분석하면 답이 좁혀진다. | Sense → Analyze → Respond | 아키텍처 선택, API 설계 |
+ | **Complex** | 정답이 없다. 프로젝트 맥락에 따라 다르다. | Probe → Sense → Respond | UX 방향, 추상화 수준 |
+ | **Chaotic** | 긴급. 분석할 시간이 없다. | Act → Sense → Respond | P0 장애, 빌드 불가 |
++
++---
++
++## 부록: Item Compound Component 원칙
++
++> 2026-02-24 확정. ZIFT substrate 레벨 원칙.
++
++### 원칙 1: Sub-action은 컴포넌트로, Convention으로 해결하지 않는다
++
++Item 내부의 영역 클릭(checkbox area, expand arrow)이 특정 의도를 갖는다면,
++`data-*` 속성 관습이 아닌 **별도 컴포넌트**로 의도를 구조화한다.
++
++```
++❌ Convention: <div data-os-check>  ← attribute가 없으면 동작 안 함, 에러 없음
++✅ Structure:  <Item.CheckTrigger>  ← 타입이 강제, Item 밖에서 쓰면 런타임 에러
++```
++
++### 원칙 2: `[Primitive].[Intent][Role]` 네이밍 패턴
++
++| 예시 | Primitive | Intent | Role |
++|------|-----------|--------|------|
++| `Item.ExpandTrigger` | Item | Expand | Trigger |
++| `Item.ExpandContent` | Item | Expand | Content |
++| `Item.CheckTrigger` | Item | Check | Trigger |
++| `Trigger.Dismiss` | Trigger | Dismiss | (implicit) |
++
++- Trigger = 클릭/상호작용 → OS 커맨드 dispatch
++- Content = 상태 기반 조건 렌더
++
++### 원칙 3: ItemContext가 id 전달 의무를 진다
++
++`Item.XxxTrigger` 내부 컴포넌트는 절대 `payload={{ id }}`를 받지 않는다.
++`ItemContext`가 `{ zoneId, itemId }`를 자동으로 전달한다.
++
++```
++❌ <triggers.ToggleTodo payload={{ id: todo.id }}>
++✅ <Item.CheckTrigger>  ← id를 알 필요 없음
++```
++
++### 원칙 4: `Object.assign` namespace merge
++
++`Trigger.Dismiss` 선례를 따른다. 새 sub-component는 `Object.assign(Base, { SubComp })`로 추가.
++별도 export 없이 단일 진입점 유지.
++
+diff --git a/.agent/workflows/doubt.md b/.agent/workflows/doubt.md
+index d5a2b5c..5025724 100644
+--- a/.agent/workflows/doubt.md
++++ b/.agent/workflows/doubt.md
+@@ -14,6 +14,29 @@ description: 모든 것을 의심한다. 쓸모가 있나? 줄일 수 있나? 
+ 모든 것. 코드, 워크플로우, 문서, 프로젝트 구조, 기능, 절차.
+ 호출 시 scope를 지정할 수 있다. 미지정 시 대화 맥락에서 추론한다.
+ 
++### ⛔ Occam Gate — 새 개념 도입 전 필수 통과
++
++> **새 컴포넌트, 플래그, 브랜치, 타입, 파일을 만들기 전에** 반드시 이 3가지를 답한다.
++
++```
++1. 기존 메커니즘으로 해결 가능한가?
++   → Yes → 기존 메커니즘을 수정한다. 새 개념 도입 금지.
++
++2. 새 개념이 없으면 어떻게 되는가?
++   → "그냥 안 된다" → 다음 질문으로
++   → "기존 것이 조금 이상해진다" → 기존 것을 고친다.
++
++3. 이 변경이 시스템의 개념 수를 줄이는가, 늘리는가?
++   → 늘린다 → 정말 필요한지 재검토. "다른 프로젝트에서도 이 개념이 필요한가?"
++```
++
++**사례 (2026-02-24)**:
++- ❌ 잘못된 진단: "폴더 클릭 expand 안 됨 → ExpandTrigger 컴포넌트 + isExpandTrigger 플래그 + checkTrigger 옵션 + 6개 테스트"
++- ✅ 올바른 진단: "`KEYBOARD_ONLY_EXPAND_ROLES`에서 `treeitem` 제거 → 1줄 수정"
++- **교훈**: Occam Gate를 먼저 통과했다면 새 컴포넌트 도입 자체가 차단됐을 것.
++
++---
++
+ ### Step 0: Rule 숙지
+ 
+ - `.agent/rules.md`를 읽는다.
+diff --git a/docs/1-project/docs-viewer-features/BOARD.md b/docs/1-project/docs-viewer-features/BOARD.md
+index 8d362b4..d2e0ba5 100644
+--- a/docs/1-project/docs-viewer-features/BOARD.md
++++ b/docs/1-project/docs-viewer-features/BOARD.md
+@@ -2,7 +2,8 @@
+ 
+ ## Now
+ 
+-- [x] **T8**: ZoneCursor meta 보강 + DocsSidebar Todo 패턴 전환 ✅
++- [x] **T8**: ZoneCursor meta 보강 + DocsSidebar Todo 패턴 전환 🔥 FIRED
++  - 해고 보고서: `docs/0-inbox/fired-2026-02-23-2155.md`
+   - Discussion: `discussions/2026-0223-2100-navtree-interaction-design.md`
+   - 근본 원인: ZoneCursor에 isExpandable 등 meta 미전달 → 앱이 문자열 guard 우회
+   - [x] T8.1: `ZoneCursor`에 meta 추가 (isExpandable, isDisabled, treeLevel) ✅
+@@ -12,18 +13,21 @@
+   - [x] T8.5: bind()에 onAction/onSelect 연결 (Todo 패턴) ✅
+   - [x] T8.6: Zone handler props 제거 + DocsSidebar 핸들러 제거 ✅
+ 
+-- [ ] **T7**: Tree Click-to-Activate + ExpandTrigger primitive
+-  - [x] T7.1~T7.6: Click-to-Activate 구현 완료
+-  - [x] T7.7: treeitem expandable 판정 수정 (role → getExpandableItems 기반)
+-  - [x] T7.8: Navigation Tree 통합 테스트 (12 cases, 934 GREEN)
+-  - [ ] T7.3: `ExpandTrigger` 프리미티브 (후속)
++- [x] **T7**: Tree Click-to-Activate + ExpandTrigger primitive ✅ (ExpandTrigger → item-expand-primitives로 분리 완료)
+ 
+-- [ ] **T5**: OS sidebar tree navigation (브라우저 검증 잔여)
+-  - [ ] Step 16: /verify — 브라우저 검증
++- [x] **T9**: 새로고침 시 URL 기반 초기 선택 버그 ✅
++  - 원인: `activePath: null` 초기값 → `allFiles` effect가 첫 번째 항목 선택
++  - 해결: `parseHashToPath()` 순수 함수 추출 → `getInitialPath()`로 초기 state 동기 파생
++  - `DocsViewer.tsx` hash init effect 제거 (중복)
++  - 5 cases RED→GREEN (953/953 전체 GREEN)
+ 
+-- [ ] **T6**: Reader zone + section navigation — Space/Shift+Space로 섹션 순차 탐색
+-  - [x] Step 2: /discussion
+-  - [ ] Ste/p 10: /solve
++- [x] **T5**: OS sidebar tree navigation ✅
++  - APG tree.apg.test: 23 cases GREEN (nav, expansion, selection, click, attrs)
++
++- [x] **T6**: Reader zone + section navigation ✅
++  - docs-scroll.test: 8 cases GREEN (heading snapping, boundaries, stale zone)
++  - `os.use({ fallback })` 제거 → `readerZone.bind({ keybindings })` OS 패턴 전환
++  - Space/Shift+Space는 reader zone active 시에만 동작 (Zone 스코프)
+ 
+ ## Next
+ 
+diff --git a/docs/STATUS.md b/docs/STATUS.md
+index f03cf0b..239cd61 100644
+--- a/docs/STATUS.md
++++ b/docs/STATUS.md
+@@ -1,6 +1,6 @@
+ # Project Dashboard
+ 
+-> Last updated: 2026-02-23 20:51
++> Last updated: 2026-02-24 01:00
+ >
+ > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
+ > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
+@@ -9,7 +9,7 @@
+ 
+ ## 🔥 Active Focus
+ 
+-**dnd-poc** — TodoList reorder PoC. Pointer Events + 커널 커맨드로 Zone 합성점 DnD 검증.
++**없음** — `item-expand-primitives` 완료 및 아카이브. 다음 프로젝트 대기.
+ 
+ ---
+ 
+@@ -33,8 +33,10 @@
+ | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
+ | docs-viewer-features | T8 ZoneCursor meta + Todo패턴 전환 | 02-23 | 🔥 Focus |
+ | zone-focusgroup-separation | All Done (T2+T3+T4+T6) | 02-23 | ✅ Done |
+-| dnd-poc | Scaffold, T1~T4 등록 | 02-23 | 🔥 Focus |
++| dnd-poc | T1~T4 Done | 02-23 | ✅ Done |
+ | bdd-tdd-gate | T1~T4 Done (워크플로우 4개 수정) | 02-23 | ✅ Done |
++| docs-sidebar-os | T1~T3 Done + 아카이브 | 02-23 | ✅ Done |
++| item-expand-primitives | T1~T7 Done (948/948 GREEN) | 02-24 | ✅ Archived |
+ 
+ ---
+ 
+@@ -43,6 +45,7 @@
+ | Project | Completed | Archived |
+ |---------|-----------|----------|
+ | headless-items | 02-23 | ✅ archive/2026/02/W09 |
++| docs-sidebar-os | 02-23 | ✅ archive/2026/02/W09 |
+ | os-page | 02-21 | ❌ T1~T3 완료, T4 skip. AppPage rename ✅ createTestOsKernel 제거 ✅ |
+ | field-props-cleanup | 02-21 | ✅ archive/2026/02/W08 |
+ | lazy-resolution | 02-21 | ✅ rules.md #15 (Lazy Resolution) | ✅ archive/2026/02/W08 |
+diff --git a/docs/official/os/SPEC.md b/docs/official/os/SPEC.md
+index bba872a..1daeef2 100644
+--- a/docs/official/os/SPEC.md
++++ b/docs/official/os/SPEC.md
+@@ -3,7 +3,7 @@
+ > 모든 동작 계약을 이 문서 하나로 관리한다.
+ > 코드는 이 문서를 따르고, 테스트는 이 문서를 검증한다.
+ >
+-> Last verified: 2026-02-23
++> Last verified: 2026-02-24
+ 
+ ---
+ 
+@@ -371,9 +371,79 @@
+ | `data-focused` | `visualFocused` | CSS 스타일링용 |
+ | `data-selected` | `isSelected` | CSS 스타일링용 |
+ 
++### 9.3 Item — Compound Component
++
++> `src/os/6-components/primitives/Item.tsx`
++
++`Item`은 `FocusItem`의 선언적 래퍼이자 compound component의 루트.
++`ItemContext`를 통해 sub-component에 `{ zoneId, itemId }`를 자동 전달한다.
++
++#### ItemContext
++
++`Item` 렌더링 시 `ItemContext.Provider`로 children을 감싼다.
++`useItemContext()`는 `Item` 외부에서 사용 시 에러를 throw한다.
++
++#### Item.ExpandTrigger
++
++| 속성 | 설명 |
++|------|------|
++| `asChild` | child element에 클릭 핸들러 merge (cloneElement) |
++| `data-expand-trigger` | DOM 투사 (Component 투사 — 관습 아님) |
++| 클릭 동작 | `OS_FOCUS(itemId) + OS_EXPAND({ itemId })` dispatch, `onAction` 억제 |
++| Context 요구 | `Item` 내부에서만 사용 가능 |
++
++#### Item.ExpandContent
++
++| 속성 | 설명 |
++|------|------|
++| 조건 렌더 | parent Item `isExpanded === true`일 때만 children 렌더 |
++| collapsed | `null` 반환 (React unmount) |
++| Context 요구 | `Item` 내부에서만 사용 가능 |
++
++#### Item.CheckTrigger
++
++| 속성 | 설명 |
++|------|------|
++| `asChild` | child element에 클릭 핸들러 merge |
++| `data-check-trigger` | DOM 투사 |
++| 클릭 동작 | `OS_FOCUS(itemId) + OS_CHECK({ targetId: itemId })` dispatch, `onAction` 억제 |
++| Context 요구 | `Item` 내부에서만 사용 가능 |
++
++#### Namespace Merge 패턴
++
++```ts
++export const Item = Object.assign(ItemBase, {
++  ExpandTrigger: ItemExpandTrigger,
++  ExpandContent: ItemExpandContent,
++  CheckTrigger: ItemCheckTrigger,
++});
++```
++
++`Trigger.Dismiss`, `Trigger.Portal`과 동일한 패턴.
++
++#### 네이밍 규칙: `[Primitive].[Intent][Role]`
++
++| 예시 | Primitive | Intent | Role |
++|------|-----------|--------|------|
++| `Item.ExpandTrigger` | Item | Expand | Trigger |
++| `Item.ExpandContent` | Item | Expand | Content |
++| `Item.CheckTrigger` | Item | Check | Trigger |
++| `Trigger.Dismiss` | Trigger | Dismiss | (implicit) |
++
++---
++
++### 9.4 resolveMouse — Trigger 옵션 확장
++
++`simulateClick(id, opts)` 및 `MouseInput`의 trigger 플래그:
++
++| 옵션 | MouseInput 필드 | 동작 |
++|------|----------------|------|
++| `expandTrigger: true` | `isExpandTrigger` | `OS_FOCUS + OS_EXPAND`, onAction 억제 |
++| `checkTrigger: true` | `isCheckTrigger` | `OS_FOCUS + OS_CHECK`, onAction 억제 |
++| (없음) | — | 기존 동작: focus + select + (activate if clickable) |
++
+ ---
+ 
+-## 10. Middleware
+ 
+ | Middleware | Trigger | Behavior | Status |
+ |-----------|---------|----------|--------|
+diff --git a/src/apps/todo/widgets/TaskItem.tsx b/src/apps/todo/widgets/TaskItem.tsx
+index 33beb13..dd5b30d 100644
+--- a/src/apps/todo/widgets/TaskItem.tsx
++++ b/src/apps/todo/widgets/TaskItem.tsx
+@@ -5,6 +5,7 @@
+  * Uses TodoList.triggers for mouse actions — headless-first, no raw OS imports.
+  */
+ 
++import { Item } from "@os/6-components/primitives/Item";
+ import { TodoApp, TodoEdit, TodoList } from "@apps/todo/app";
+ import { useDragState } from "@os/5-hooks/useDragState";
+ import {
+@@ -80,7 +81,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
+           </div>
+ 
+           {/* Checkbox Trigger */}
+-          <TodoList.triggers.ToggleTodo payload={{ id: todo.id }}>
++          <Item.CheckTrigger asChild>
+             <div
+               className={`
+                             w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
+@@ -96,7 +97,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
+                 strokeWidth={3}
+               />
+             </div>
+-          </TodoList.triggers.ToggleTodo>
++          </Item.CheckTrigger>
+ 
+           {/* Content Area */}
+           <div className="flex-1 min-w-0 pt-0.5">
+diff --git a/src/docs-viewer/DocsSidebar.tsx b/src/docs-viewer/DocsSidebar.tsx
+index 26f47a7..c62b42b 100644
+--- a/src/docs-viewer/DocsSidebar.tsx
++++ b/src/docs-viewer/DocsSidebar.tsx
+@@ -1,8 +1,10 @@
++import { Item } from "@os/6-components/primitives/Item";
+ import clsx from "clsx";
++
+ import { ChevronDown, ChevronRight, Clock, FileText, Star } from "lucide-react";
+ import { useCallback, useMemo, useState } from "react";
+ import docsMeta from "virtual:docs-meta";
+-import { DocsSidebarUI } from "./app";
++import { DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
+ import {
+   cleanLabel,
+   type DocItem,
+@@ -16,21 +18,18 @@ export interface DocsSidebarProps {
+   items: DocItem[];
+   allFiles: DocItem[];
+   activePath: string | undefined;
+-  onSelect: (path: string) => void;
+   className?: string;
+   header?: React.ReactNode;
+ }
+ 
+-// --------------- Recent Section ---------------
++// --------------- Recent Section (OS-managed) ---------------
+ 
+ function RecentSection({
+   allFiles,
+   activePath,
+-  onSelect,
+ }: {
+   allFiles: DocItem[];
+   activePath: string | undefined;
+-  onSelect: (path: string) => void;
+ }) {
+   const [isOpen, setIsOpen] = useState(true);
+   const recentFiles = useMemo(
+@@ -57,61 +56,62 @@ function RecentSection({
+       </button>
+ 
+       {isOpen && (
+-        <div className="mt-1 flex flex-col">
++        <DocsRecentUI.Zone className="mt-1 flex flex-col">
+           {recentFiles.map((file) => {
+             const isActive = file.path === activePath;
+             return (
+-              <button
+-                type="button"
+-                key={file.path}
+-                onClick={() => onSelect(file.path)}
+-                className={clsx(
+-                  "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
+-                  "text-left w-full group/recent",
+-                  isActive
+-                    ? "bg-blue-50 text-blue-700 font-medium"
+-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
++              <DocsRecentUI.Item key={file.path} id={file.path}>
++                {({ isFocused }) => (
++                  <div
++                    className={clsx(
++                      "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
++                      "text-left w-full group/recent cursor-pointer",
++                      isActive
++                        ? "bg-blue-50 text-blue-700 font-medium"
++                        : isFocused
++                          ? "bg-indigo-50 text-indigo-700"
++                          : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
++                    )}
++                    style={{ paddingLeft: "20px" }}
++                  >
++                    <FileText
++                      size={12}
++                      className={clsx(
++                        "shrink-0",
++                        isActive ? "text-blue-400" : "text-slate-300",
++                      )}
++                    />
++                    <span className="truncate flex-1">
++                      {cleanLabel(file.name)}
++                    </span>
++                    <span
++                      className={clsx(
++                        "text-[9px] tabular-nums shrink-0",
++                        isActive ? "text-blue-400" : "text-slate-300",
++                      )}
++                    >
++                      {formatRelativeTime(file.mtime)}
++                    </span>
++                  </div>
+                 )}
+-                style={{ paddingLeft: "20px" }}
+-              >
+-                <FileText
+-                  size={12}
+-                  className={clsx(
+-                    "shrink-0",
+-                    isActive ? "text-blue-400" : "text-slate-300",
+-                  )}
+-                />
+-                <span className="truncate flex-1">
+-                  {cleanLabel(file.name)}
+-                </span>
+-                <span
+-                  className={clsx(
+-                    "text-[9px] tabular-nums shrink-0",
+-                    isActive ? "text-blue-400" : "text-slate-300",
+-                  )}
+-                >
+-                  {formatRelativeTime(file.mtime)}
+-                </span>
+-              </button>
++              </DocsRecentUI.Item>
+             );
+           })}
+-        </div>
++        </DocsRecentUI.Zone>
+       )}
+     </div>
+   );
+ }
+ 
+-// --------------- Favorites Section ---------------
++// --------------- Favorites Section (OS-managed) ---------------
+ 
+ function FavoritesSection({
+   allFiles,
+   activePath,
+-  onSelect,
+   favVersion,
+ }: {
+   allFiles: DocItem[];
+   activePath: string | undefined;
+-  onSelect: (path: string) => void;
+   favVersion: number;
+ }) {
+   const favoriteFiles = useMemo(
+@@ -130,37 +130,40 @@ function FavoritesSection({
+           Pinned
+         </span>
+       </div>
+-      <div className="mt-1 flex flex-col">
++      <DocsFavoritesUI.Zone className="mt-1 flex flex-col">
+         {favoriteFiles.map((file) => {
+           const isActive = file.path === activePath;
+           return (
+-            <button
+-              type="button"
+-              key={file.path}
+-              onClick={() => onSelect(file.path)}
+-              className={clsx(
+-                "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
+-                "text-left w-full",
+-                isActive
+-                  ? "bg-amber-50 text-amber-800 font-medium"
+-                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
++            <DocsFavoritesUI.Item key={file.path} id={file.path}>
++              {({ isFocused }) => (
++                <div
++                  className={clsx(
++                    "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
++                    "text-left w-full cursor-pointer",
++                    isActive
++                      ? "bg-amber-50 text-amber-800 font-medium"
++                      : isFocused
++                        ? "bg-indigo-50 text-indigo-700"
++                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
++                  )}
++                  style={{ paddingLeft: "20px" }}
++                >
++                  <Star
++                    size={11}
++                    className={clsx(
++                      "shrink-0",
++                      isActive ? "text-amber-400 fill-amber-400" : "text-slate-300 fill-slate-300",
++                    )}
++                  />
++                  <span className="truncate flex-1">
++                    {cleanLabel(file.name)}
++                  </span>
++                </div>
+               )}
+-              style={{ paddingLeft: "20px" }}
+-            >
+-              <Star
+-                size={11}
+-                className={clsx(
+-                  "shrink-0",
+-                  isActive ? "text-amber-400 fill-amber-400" : "text-slate-300 fill-slate-300",
+-                )}
+-              />
+-              <span className="truncate flex-1">
+-                {cleanLabel(file.name)}
+-              </span>
+-            </button>
++            </DocsFavoritesUI.Item>
+           );
+         })}
+-      </div>
++      </DocsFavoritesUI.Zone>
+     </div>
+   );
+ }
+@@ -201,41 +204,36 @@ const TreeItem = ({
+       );
+     }
+ 
+-    // Nested folder — OS-managed expand/collapse via Item
++    // Nested folder — click handled by OS: treeitem click → OS_ACTIVATE → OS_EXPAND
+     return (
+       <DocsSidebarUI.Item id={`folder:${item.path}`}>
+-        {({ isFocused, isExpanded }) => (
+-          <div className="flex flex-col select-none">
+-            <div
+-              className={clsx(
+-                "flex items-center gap-1.5 px-3 py-1 text-[13px] rounded-md transition-colors cursor-pointer",
+-                "text-left w-full truncate",
+-                isFocused
+-                  ? "bg-indigo-50 text-indigo-700"
+-                  : "text-slate-600 hover:bg-slate-100",
+-              )}
+-              style={{ paddingLeft: `${level * 12 + 12}px` }}
+-            >
+-              <span className={clsx("text-slate-400 transition-transform", isExpanded && "rotate-90")}>
+-                <ChevronRight size={14} />
+-              </span>
+-              <span className="truncate font-medium">{cleanLabel(item.name)}</span>
+-            </div>
+-            {isExpanded && (
+-              <div className="flex flex-col">
+-                {item.children?.map((child, i) => (
+-                  <TreeItem
+-                    key={child.path}
+-                    item={child}
+-                    level={level + 1}
+-                    index={child.type === "file" ? i + 1 : undefined}
+-                    activePath={activePath}
+-                  />
+-                ))}
+-              </div>
+-            )}
++        <div
++          className={clsx(
++            "flex items-center gap-1.5 px-3 py-1 text-[13px] rounded-md transition-colors cursor-pointer",
++            "text-left w-full truncate",
++            "text-slate-600 hover:bg-slate-100",
++            "[data-focused_&]:bg-indigo-50 [data-focused_&]:text-indigo-700",
++          )}
++          style={{ paddingLeft: `${level * 12 + 12}px` }}
++        >
++          <span className="text-slate-400 transition-transform [data-expanded_&]:rotate-90">
++            <ChevronRight size={14} />
++          </span>
++          <span className="truncate font-medium">{cleanLabel(item.name)}</span>
++        </div>
++        <Item.ExpandContent>
++          <div className="flex flex-col">
++            {item.children?.map((child, i) => (
++              <TreeItem
++                key={child.path}
++                item={child}
++                level={level + 1}
++                index={child.type === "file" ? i + 1 : undefined}
++                activePath={activePath}
++              />
++            ))}
+           </div>
+-        )}
++        </Item.ExpandContent>
+       </DocsSidebarUI.Item>
+     );
+   }
+@@ -249,23 +247,19 @@ const TreeItem = ({
+ 
+   return (
+     <DocsSidebarUI.Item id={item.path}>
+-      {({ isFocused }) => (
+-        <div
+-          className={clsx(
+-            "flex items-center gap-1.5 px-3 py-1 text-[12.5px] rounded-md transition-all duration-200 border border-transparent",
+-            "text-left w-full cursor-pointer",
+-            isActive
+-              ? "bg-slate-100 text-slate-900 font-medium"
+-              : isFocused
+-                ? "bg-indigo-50 text-indigo-700"
+-                : "text-slate-500 hover:text-slate-900 hover:bg-slate-50",
+-          )}
+-          style={{ paddingLeft: `${level * 12 + 12}px` }}
+-        >
+-          <span className="w-[14px] flex justify-center opacity-50" />
+-          <span className="truncate">{label}</span>
+-        </div>
+-      )}
++      <div
++        className={clsx(
++          "flex items-center gap-1.5 px-3 py-1 text-[12.5px] rounded-md transition-all duration-200 border border-transparent",
++          "text-left w-full cursor-pointer",
++          isActive
++            ? "bg-slate-100 text-slate-900 font-medium"
++            : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 [data-focused_&]:bg-indigo-50 [data-focused_&]:text-indigo-700",
++        )}
++        style={{ paddingLeft: `${level * 12 + 12}px` }}
++      >
++        <span className="w-[14px] flex justify-center opacity-50" />
++        <span className="truncate">{label}</span>
++      </div>
+     </DocsSidebarUI.Item>
+   );
+ };
+@@ -274,7 +268,6 @@ export function DocsSidebar({
+   items,
+   allFiles,
+   activePath,
+-  onSelect,
+   className,
+   header,
+ }: DocsSidebarProps) {
+@@ -285,6 +278,21 @@ export function DocsSidebar({
+     setFavVersion((v) => v + 1);
+   }, []);
+ 
++  // Data: which items are expandable (folders with children)
++  const getExpandableItems = useCallback(() => {
++    const set = new Set<string>();
++    const collect = (list: DocItem[]) => {
++      for (const item of list) {
++        if (item.type === "folder" && item.children) {
++          set.add(`folder:${item.path}`);
++          collect(item.children);
++        }
++      }
++    };
++    collect(items);
++    return set;
++  }, [items]);
++
+   return (
+     <div
+       className={clsx(
+@@ -306,23 +314,24 @@ export function DocsSidebar({
+       )}
+ 
+       <div className="flex-1 overflow-y-auto px-2 pb-10 custom-scrollbar">
+-        {/* Favorites Section — pinned docs */}
++        {/* Favorites Section — OS Zone */}
+         <FavoritesSection
+           allFiles={allFiles}
+           activePath={activePath}
+-          onSelect={onSelect}
+           favVersion={favVersion}
+         />
+ 
+-        {/* Recent Section — cross-folder, mtime-sorted */}
++        {/* Recent Section — OS Zone */}
+         <RecentSection
+           allFiles={allFiles}
+           activePath={activePath}
+-          onSelect={onSelect}
+         />
+ 
+-        {/* Folder Tree — OS Zone (behavior from bind(), no handler props) */}
+-        <DocsSidebarUI.Zone className="flex flex-col">
++        {/* Folder Tree — OS Zone */}
++        <DocsSidebarUI.Zone
++          className="flex flex-col"
++          getExpandableItems={getExpandableItems}
++        >
+           {items.map((item) => (
+             <TreeItem
+               key={item.path}
+@@ -338,4 +347,3 @@ export function DocsSidebar({
+ 
+ export { type DocsSidebarProps };
+ export { toggleFavorite as _toggleFavorite };
+-
+diff --git a/src/docs-viewer/DocsViewer.tsx b/src/docs-viewer/DocsViewer.tsx
+index 632d414..e3d829c 100644
+--- a/src/docs-viewer/DocsViewer.tsx
++++ b/src/docs-viewer/DocsViewer.tsx
+@@ -15,6 +15,7 @@ import { os } from "@/os/kernel";
+ 
+ // Side-effect: register docs-viewer commands on kernel
+ import "./app";
++import { DocsApp, selectDoc, resetDoc } from "./app";
+ import {
+   buildDocTree,
+   cleanLabel,
+@@ -55,7 +56,8 @@ function parseHash(): {
+ }
+ 
+ export function DocsViewer() {
+-  const [activePath, setActivePath] = useState<string | undefined>(undefined);
++  // activePath — Single Source of Truth from DocsApp state
++  const activePath = DocsApp.useComputed((s) => s.activePath) ?? undefined;
+   const [content, setContent] = useState<string>("");
+   const [error, setError] = useState<string | null>(null);
+   const [externalSource, setExternalSource] =
+@@ -157,34 +159,32 @@ export function DocsViewer() {
+     history.replaceState(null, "", hash);
+   }, []);
+ 
+-  // --- Select a file (sidebar click, prev/next) ---
++  // --- Select a file via OS command ---
+   const handleSelect = useCallback(
+     (path: string) => {
+-      const ext = externalRef.current;
+-      if (ext) {
+-        setHash(`#ext:${ext.name}/${path}`);
+-      } else {
+-        setHash(`#/${path}`);
+-      }
+-      setActivePath(path);
+-      loadContent(path, ext);
+-      // Scroll content area to top on document switch
+-      if (contentRef.current) {
+-        contentRef.current.scrollTop = 0;
+-      }
++      os.dispatch(selectDoc({ id: path }));
+     },
+-    [loadContent, setHash],
++    [],
+   );
+ 
+-  // Initialize from hash on mount
++  // --- React to activePath changes (content load + hash sync) ---
+   useEffect(() => {
+-    const parsed = parseHash();
+-    if (parsed.source === "docs" && parsed.path) {
+-      setActivePath(parsed.path);
+-      loadContent(parsed.path, null);
++    if (!activePath) return;
++    const ext = externalRef.current;
++    if (ext) {
++      setHash(`#ext:${ext.name}/${activePath}`);
++    } else {
++      setHash(`#/${activePath}`);
++    }
++    loadContent(activePath, ext);
++    // Scroll content area to top on document switch
++    if (contentRef.current) {
++      contentRef.current.scrollTop = 0;
+     }
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [loadContent]);
++  }, [activePath, loadContent, setHash]);
++
++  // Initialize from hash: now handled synchronously in DocsApp initial state (app.ts).
++  // popstate handles browser back/forward navigation only.
+ 
+   // Sync hash → state on browser back/forward (popstate only)
+   useEffect(() => {
+@@ -193,28 +193,24 @@ export function DocsViewer() {
+       const ext = externalRef.current;
+       if (parsed.source === "docs") {
+         if (ext) setExternalSource(null);
+-        setActivePath(parsed.path);
+-        if (parsed.path) loadContent(parsed.path, null);
++        if (parsed.path) os.dispatch(selectDoc({ id: parsed.path }));
+       } else if (parsed.source === "ext" && ext) {
+-        setActivePath(parsed.path);
+-        if (parsed.path) loadContent(parsed.path, ext);
++        if (parsed.path) os.dispatch(selectDoc({ id: parsed.path }));
+       }
+     };
+     window.addEventListener("popstate", onPopState);
+     return () => window.removeEventListener("popstate", onPopState);
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [loadContent]);
++  }, []);
+ 
+   // Auto-select first file when tree changes and no active path
+   useEffect(() => {
+     if (!activePath && allFiles.length > 0) {
+       const first = allFiles[0];
+       if (first) {
+-        handleSelect(first.path);
++        os.dispatch(selectDoc({ id: first.path }));
+       }
+     }
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [allFiles, activePath, handleSelect]);
++  }, [allFiles, activePath]);
+ 
+   // --- Folder open / close ---
+   const handleOpenFolder = async () => {
+@@ -223,7 +219,7 @@ export function DocsViewer() {
+ 
+     setExternalSource(result);
+     externalRef.current = result;
+-    setActivePath(undefined);
++    os.dispatch(resetDoc());
+     setContent("");
+     setError(null);
+     // Auto-select will fire via the allFiles effect
+@@ -232,7 +228,7 @@ export function DocsViewer() {
+   const handleCloseFolder = () => {
+     setExternalSource(null);
+     externalRef.current = null;
+-    setActivePath(undefined);
++    os.dispatch(resetDoc());
+     setContent("");
+     setError(null);
+     setHash("#");
+@@ -281,7 +277,6 @@ export function DocsViewer() {
+         items={docTree}
+         allFiles={allFiles}
+         activePath={activePath}
+-        onSelect={handleSelect}
+         header={sidebarHeader}
+       />
+ 
+diff --git a/src/docs-viewer/app.ts b/src/docs-viewer/app.ts
+index d45c105..44829ce 100644
+--- a/src/docs-viewer/app.ts
++++ b/src/docs-viewer/app.ts
+@@ -1,14 +1,47 @@
+ /**
+  * DocsViewer App — defineApp for ZIFT primitives.
+  *
+- * State: activePath — the shown document.
+- * Sidebar navigation commands modify activePath.
+- * DocsViewer reads activePath via useComputed.
++ * Structure:
++ *   DocsApp (defineApp)
++ *     ├── State: activePath
++ *     ├── Commands: selectDoc (app-level, shared by all zones)
++ *     ├── Zones:
++ *     │   ├── docs-favorites — pinned files (listbox)
++ *     │   ├── docs-recent    — recent files (listbox)
++ *     │   ├── docs-sidebar   — folder tree (tree)
++ *     │   └── docs-reader    — section navigation (feed)
+  */
+ 
+ import { produce } from "immer";
+ import { defineApp } from "@/os/defineApp";
+ 
++// ═══════════════════════════════════════════════════════════════════
++// URL Hash Utilities
++// ═══════════════════════════════════════════════════════════════════
++
++/**
++ * Parse a URL hash string and return the docs path, or null.
++ *
++ * Examples:
++ *   "#/docs/inbox/readme.md" → "docs/inbox/readme.md"
++ *   "#docs/inbox/readme.md"  → "docs/inbox/readme.md"
++ *   ""                       → null
++ *   "#"                      → null
++ *   "#ext:folder/file.md"    → null  (external mode — handled separately)
++ */
++export function parseHashToPath(hash: string | null | undefined): string | null {
++    if (!hash) return null;
++    const stripped = hash.replace(/^#\/?/, "");
++    if (!stripped || stripped.startsWith("ext:")) return null;
++    return stripped;
++}
++
++/** Read initial activePath from window.location.hash (SSR-safe). */
++function getInitialPath(): string | null {
++    if (typeof window === "undefined") return null;
++    return parseHashToPath(window.location.hash);
++}
++
+ // ═══════════════════════════════════════════════════════════════════
+ // App State
+ // ═══════════════════════════════════════════════════════════════════
+@@ -18,19 +51,17 @@ interface DocsState {
+ }
+ 
+ export const DocsApp = defineApp<DocsState>("docs-viewer", {
+-    activePath: null,
++    activePath: getInitialPath(),
+ });
+ 
+ // ═══════════════════════════════════════════════════════════════════
+-// Sidebar Zone — tree navigation
++// App-level Command — shared by all sidebar zones
+ // ═══════════════════════════════════════════════════════════════════
+ 
+-const sidebarZone = DocsApp.createZone("docs-sidebar");
+-
+-/** SELECT_DOC — sets activePath. Expandable items are skipped via cursor.isExpandable. */
+-export const selectDoc = sidebarZone.command(
++/** SELECT_DOC — sets activePath. Shared by Recent, Favorites, and Tree zones. */
++export const selectDoc = DocsApp.command(
+     "SELECT_DOC",
+-    (ctx, payload: { id: string; isExpandable: boolean }) => {
++    (ctx, payload: { id: string; isExpandable?: boolean }) => {
+         if (payload.isExpandable) return { state: ctx.state };
+         return {
+             state: produce(ctx.state, (draft) => {
+@@ -40,6 +71,54 @@ export const selectDoc = sidebarZone.command(
+     },
+ );
+ 
++/** RESET_DOC — clears activePath (e.g. when switching folder source). */
++export const resetDoc = DocsApp.command(
++    "RESET_DOC",
++    (ctx) => ({
++        state: produce(ctx.state, (draft) => {
++            draft.activePath = null;
++        }),
++    }),
++);
++
++// ═══════════════════════════════════════════════════════════════════
++// Favorites Zone — pinned files
++// ═══════════════════════════════════════════════════════════════════
++
++const favoritesZone = DocsApp.createZone("docs-favorites");
++
++export const DocsFavoritesUI = favoritesZone.bind({
++    role: "listbox",
++    onAction: (cursor) => selectDoc({ id: cursor.focusId }),
++    onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
++    options: {
++        select: { followFocus: true },
++        activate: { onClick: true },
++    },
++});
++
++// ═══════════════════════════════════════════════════════════════════
++// Recent Zone — recently modified files
++// ═══════════════════════════════════════════════════════════════════
++
++const recentZone = DocsApp.createZone("docs-recent");
++
++export const DocsRecentUI = recentZone.bind({
++    role: "listbox",
++    onAction: (cursor) => selectDoc({ id: cursor.focusId }),
++    onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
++    options: {
++        select: { followFocus: true },
++        activate: { onClick: true },
++    },
++});
++
++// ═══════════════════════════════════════════════════════════════════
++// Sidebar Zone — tree navigation (existing)
++// ═══════════════════════════════════════════════════════════════════
++
++const sidebarZone = DocsApp.createZone("docs-sidebar");
++
+ export const DocsSidebarUI = sidebarZone.bind({
+     role: "tree",
+     onAction: (cursor) => selectDoc({ id: cursor.focusId, isExpandable: cursor.isExpandable }),
+@@ -69,20 +148,10 @@ const PREV_SECTION = readerZone.command(
+ 
+ export const DocsReaderUI = readerZone.bind({
+     role: "feed",
++    keybindings: [
++        { key: " ", command: () => NEXT_SECTION() },
++        { key: "Shift+ ", command: () => PREV_SECTION() },
++    ],
+ });
+ 
+-// ═══════════════════════════════════════════════════════════════════
+-// Fallback Middleware — catches Space when no zone handles it
+-// ═══════════════════════════════════════════════════════════════════
+-
+-import { os } from "@/os/kernel";
+ 
+-os.use({
+-    id: "docs-section-nav",
+-    fallback(event: Event): ReturnType<NonNullable<Parameters<typeof os.use>[0]["fallback"]>> {
+-        if (!(event instanceof KeyboardEvent)) return null;
+-        if (event.key === " " && !event.shiftKey) return NEXT_SECTION();
+-        if (event.key === " " && event.shiftKey) return PREV_SECTION();
+-        return null;
+-    },
+-});
+diff --git a/src/docs-viewer/tests/unit/docs-app.test.ts b/src/docs-viewer/tests/unit/docs-app.test.ts
+index 0a02ffa..44a943b 100644
+--- a/src/docs-viewer/tests/unit/docs-app.test.ts
++++ b/src/docs-viewer/tests/unit/docs-app.test.ts
+@@ -5,10 +5,15 @@
+  * - Sets activePath for non-expandable items (files)
+  * - Skips expandable items (folders) — no state change
+  * - Integrates with bind() onAction/onSelect
++ *
++ * Tests parseHashToPath (T9):
++ * - Extracts docs path from URL hash
++ * - Returns null for ext: hashes or empty hash
++ * Feature: initial-path.feature
+  */
+ 
+ import { describe, expect, it } from "vitest";
+-import { DocsApp, selectDoc } from "../../app";
++import { DocsApp, parseHashToPath, selectDoc } from "../../app";
+ 
+ describe("SELECT_DOC command", () => {
+     it("sets activePath when item is not expandable (file)", () => {
+@@ -38,3 +43,27 @@ describe("SELECT_DOC command", () => {
+         expect(app.state.activePath).toBe("setup.md");
+     });
+ });
++
++describe("parseHashToPath (T9: URL-based initial selection)", () => {
++    it("extracts path from '#/docs/inbox/readme.md'", () => {
++        expect(parseHashToPath("#/docs/inbox/readme.md")).toBe("docs/inbox/readme.md");
++    });
++
++    it("extracts path from '#docs/inbox/readme.md' (no leading slash)", () => {
++        expect(parseHashToPath("#docs/inbox/readme.md")).toBe("docs/inbox/readme.md");
++    });
++
++    it("returns null for empty hash", () => {
++        expect(parseHashToPath("")).toBeNull();
++        expect(parseHashToPath("#")).toBeNull();
++    });
++
++    it("returns null for ext: hash (external folder mode)", () => {
++        expect(parseHashToPath("#ext:my-folder/some/file.md")).toBeNull();
++    });
++
++    it("returns null for undefined/null", () => {
++        expect(parseHashToPath(undefined as any)).toBeNull();
++    });
++});
++
+diff --git a/src/index.css b/src/index.css
+index 70d89d8..35dd799 100644
+--- a/src/index.css
++++ b/src/index.css
+@@ -13,6 +13,13 @@
+   scroll-margin-inline: 5vw;
+ }
+ 
++/* OS manages focus visualization via data-focused / isFocused render prop.
++   Suppress browser's native :focus-visible ring on all FocusItems.
++   (* { outline-width: 0 } is insufficient — :focus-visible specificity wins.) */
++[data-focus-item]:focus-visible {
++  outline: none;
++}
++
+ /* Disable scroll-margin during editing — prevents browser's native
+    focus/caret scroll from adding unwanted offset */
+ [data-item-id][contenteditable="true"] {
+@@ -264,4 +271,4 @@ dialog.os-modal .os-modal-content {
+ 
+ .nav-item[data-tooltip]:hover::before {
+   opacity: 1;
+-}
++}
+\ No newline at end of file
+diff --git a/src/os/1-listeners/mouse/resolveMouse.ts b/src/os/1-listeners/mouse/resolveMouse.ts
+index 5f06a98..53c24ee 100644
+--- a/src/os/1-listeners/mouse/resolveMouse.ts
++++ b/src/os/1-listeners/mouse/resolveMouse.ts
+@@ -42,8 +42,6 @@ export type SelectMode = "replace" | "toggle" | "range";
+ // Pure Resolution
+ // ═══════════════════════════════════════════════════════════════════
+ 
+-/** Roles where click should NOT toggle expansion (keyboard-only expand). */
+-const KEYBOARD_ONLY_EXPAND_ROLES = new Set(["treeitem", "menuitem"]);
+ 
+ export function resolveSelectMode(input: {
+   shiftKey: boolean;
+@@ -62,8 +60,11 @@ export function isClickExpandable(
+   role: string | null,
+ ): boolean {
+   if (!hasAriaExpanded) return false;
+-  if (!role) return true; // no role → assume clickable
+-  return !KEYBOARD_ONLY_EXPAND_ROLES.has(role);
++  // treeitem & menuitem: expand is handled by click event (resolveClick + activateOnClick),
++  // NOT by mousedown. mousedown only does focus+select for immediate visual feedback.
++  // Without this guard, mousedown→expand + click→expand = double toggle = no change.
++  if (role === "treeitem" || role === "menuitem") return false;
++  return true;
+ }
+ 
+ export function resolveMouse(input: MouseInput): ResolveResult {
+diff --git a/src/os/1-listeners/tests/unit/resolveMouse.test.ts b/src/os/1-listeners/tests/unit/resolveMouse.test.ts
+index 94bb20b..2ad7d59 100644
+--- a/src/os/1-listeners/tests/unit/resolveMouse.test.ts
++++ b/src/os/1-listeners/tests/unit/resolveMouse.test.ts
+@@ -120,7 +120,7 @@ describe("isClickExpandable", () => {
+     expect(isClickExpandable(true, "button")).toBe(true);
+   });
+ 
+-  test("aria-expanded + treeitem → false (keyboard-only)", () => {
++  test("aria-expanded + treeitem → false (click event handles expand, not mousedown)", () => {
+     expect(isClickExpandable(true, "treeitem")).toBe(false);
+   });
+ 
+@@ -168,13 +168,20 @@ describe("resolveMouse", () => {
+     expect(activateCmd).toBeDefined();
+   });
+ 
+-  test("treeitem with aria-expanded → shouldExpand false", () => {
++  test("treeitem with aria-expanded → NO OS_ACTIVATE (mousedown skips, click handles it)", () => {
+     const result = resolveMouse(
+       baseInput({ hasAriaExpanded: true, itemRole: "treeitem" }),
+     );
+     expect(result.commands.some((c) => c.type === "OS_ACTIVATE")).toBe(false);
+   });
+ 
++  test("menuitem with aria-expanded → NO OS_ACTIVATE (hover-only expand)", () => {
++    const result = resolveMouse(
++      baseInput({ hasAriaExpanded: true, itemRole: "menuitem" }),
++    );
++    expect(result.commands.some((c) => c.type === "OS_ACTIVATE")).toBe(false);
++  });
++
+   test("label click → label-redirect", () => {
+     const result = resolveMouse(
+       baseInput({
+diff --git a/src/os/6-components/primitives/Item.tsx b/src/os/6-components/primitives/Item.tsx
+index da9e03a..e68c1ec 100644
+--- a/src/os/6-components/primitives/Item.tsx
++++ b/src/os/6-components/primitives/Item.tsx
+@@ -1,7 +1,39 @@
+ import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
+ import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
++import { OS_CHECK } from "@os/3-commands/interaction/check";
++import { OS_EXPAND } from "@os/3-commands/expand";
++import { OS_FOCUS } from "@os/3-commands/focus";
+ import { os } from "@os/kernel.ts";
+-import { forwardRef, isValidElement, type ReactNode, useMemo } from "react";
++import {
++  cloneElement,
++  createContext,
++  forwardRef,
++  isValidElement,
++  useContext,
++  type ReactNode,
++  useMemo,
++} from "react";
++
++// ═══════════════════════════════════════════════════════════════════
++// ItemContext — parent Item identity for compound sub-components
++// ═══════════════════════════════════════════════════════════════════
++
++interface ItemContextValue {
++  zoneId: string;
++  itemId: string;
++}
++
++const ItemContext = createContext<ItemContextValue | null>(null);
++
++function useItemContext() {
++  const ctx = useContext(ItemContext);
++  if (!ctx) {
++    throw new Error(
++      "Item.ExpandTrigger / Item.ExpandContent must be used inside an <Item>",
++    );
++  }
++  return ctx;
++}
+ 
+ // --- Types ---
+ interface ItemState {
+@@ -28,7 +60,7 @@ export interface ItemProps
+   selected?: boolean;
+ }
+ 
+-export const Item = forwardRef<HTMLElement, ItemProps>(
++const ItemBase = forwardRef<HTMLElement, ItemProps>(
+   (
+     {
+       id,
+@@ -90,25 +122,139 @@ export const Item = forwardRef<HTMLElement, ItemProps>(
+       typeof children === "function" ? children(itemState) : children;
+ 
+     return (
+-      <FocusItem
+-        id={stringId}
+-        ref={ref}
+-        asChild={
+-          asChild ||
+-          (typeof children === "function" &&
+-            isValidElement(resolvedChildren) &&
+-            typeof resolvedChildren.type === "string")
+-        }
+-        {...(className !== undefined ? { className } : {})}
+-        data-selected={isSelected ? "true" : undefined}
+-        _isFocusedHint={isFocused}
+-        _isActiveHint={isActive}
+-        {...(rest as any)}
+-      >
+-        {resolvedChildren}
+-      </FocusItem>
++      <ItemContext.Provider value={{ zoneId, itemId: stringId }}>
++        <FocusItem
++          id={stringId}
++          ref={ref}
++          asChild={
++            asChild ||
++            (typeof children === "function" &&
++              isValidElement(resolvedChildren) &&
++              typeof resolvedChildren.type === "string")
++          }
++          {...(className !== undefined ? { className } : {})}
++          data-selected={isSelected ? "true" : undefined}
++          _isFocusedHint={isFocused}
++          _isActiveHint={isActive}
++          {...(rest as any)}
++        >
++          {resolvedChildren}
++        </FocusItem>
++      </ItemContext.Provider>
+     );
+   },
+ );
+ 
+-Item.displayName = "Item";
++ItemBase.displayName = "Item";
++
++// ═══════════════════════════════════════════════════════════════════
++// Item.ExpandTrigger — sub-region click toggles parent Item's expand state
++// Use case: arrow icon click ≠ label click (e.g. file manager tree)
++// DocsSidebar uses whole-item click (OS_ACTIVATE → OS_EXPAND) instead.
++// ═══════════════════════════════════════════════════════════════════
++
++interface ExpandTriggerProps {
++  children: ReactNode;
++  asChild?: boolean;
++  className?: string;
++}
++
++function ItemExpandTrigger({ children, asChild, className }: ExpandTriggerProps) {
++  const { zoneId, itemId } = useItemContext();
++
++  const handleClick = (e: React.MouseEvent) => {
++    e.stopPropagation(); // Prevent Item's onAction from firing
++    os.dispatch(OS_FOCUS({ zoneId, itemId, skipSelection: true }));
++    os.dispatch(OS_EXPAND({ itemId, zoneId }));
++  };
++
++  if (asChild && isValidElement(children)) {
++    const child = children as React.ReactElement<any>;
++    const mergedProps = {
++      "data-expand-trigger": true,
++      onClick: (e: React.MouseEvent) => {
++        child.props.onClick?.(e);
++        handleClick(e);
++      },
++      className: [child.props.className, className].filter(Boolean).join(" ") || undefined,
++    };
++    return cloneElement(child, mergedProps);
++  }
++
++  return (
++    <div data-expand-trigger className={className} onClick={handleClick}>
++      {children}
++    </div>
++  );
++}
++
++ItemExpandTrigger.displayName = "Item.ExpandTrigger";
++
++// ═══════════════════════════════════════════════════════════════════
++// Item.CheckTrigger — click dispatches OS_CHECK for parent Item
++// ═══════════════════════════════════════════════════════════════════
++
++interface CheckTriggerProps {
++  children: ReactNode;
++  asChild?: boolean;
++  className?: string;
++}
++
++function ItemCheckTrigger({ children, asChild, className }: CheckTriggerProps) {
++  const { zoneId, itemId } = useItemContext();
++
++  const handleClick = (e: React.MouseEvent) => {
++    e.stopPropagation();
++    os.dispatch(OS_FOCUS({ zoneId, itemId, skipSelection: true }));
++    os.dispatch(OS_CHECK({ targetId: itemId }));
++  };
++
++  if (asChild && isValidElement(children)) {
++    const child = children as React.ReactElement<any>;
++    return cloneElement(child, {
++      "data-check-trigger": true,
++      onClick: (e: React.MouseEvent) => {
++        child.props.onClick?.(e);
++        handleClick(e);
++      },
++      className: [child.props.className, className].filter(Boolean).join(" ") || undefined,
++    });
++  }
++
++  return (
++    <div data-check-trigger className={className} onClick={handleClick}>
++      {children}
++    </div>
++  );
++}
++
++ItemCheckTrigger.displayName = "Item.CheckTrigger";
++
++// ═══════════════════════════════════════════════════════════════════
++// Item.ExpandContent — renders only when parent Item is expanded
++// ═══════════════════════════════════════════════════════════════════
++
++interface ExpandContentProps {
++  children: ReactNode;
++}
++
++function ItemExpandContent({ children }: ExpandContentProps) {
++  const { zoneId, itemId } = useItemContext();
++  const isExpanded = os.useComputed(
++    (s) => s.os.focus.zones[zoneId]?.expandedItems.includes(itemId) ?? false,
++  );
++  return isExpanded ? <>{children}</> : null;
++}
++
++ItemExpandContent.displayName = "Item.ExpandContent";
++
++// ═══════════════════════════════════════════════════════════════════
++// Namespace merge — Item.ExpandTrigger, Item.ExpandContent
++// ═══════════════════════════════════════════════════════════════════
++
++export const Item = Object.assign(ItemBase, {
++  ExpandTrigger: ItemExpandTrigger,
++  ExpandContent: ItemExpandContent,
++  CheckTrigger: ItemCheckTrigger,
++});
++
+diff --git a/src/os/defineApp.bind.ts b/src/os/defineApp.bind.ts
+index db2aaa4..78c28f7 100644
+--- a/src/os/defineApp.bind.ts
++++ b/src/os/defineApp.bind.ts
+@@ -54,6 +54,7 @@ export function createBoundComponents<S>(
+     className?: string;
+     children?: ReactNode;
+     "aria-label"?: string;
++    getExpandableItems?: () => Set<string>;
+   }> = ({ className, children, ...rest }) => {
+     // Zone ID is always auto-injected from bind() — not developer-specified
+     // JSX props (...rest) provide base callbacks; config overrides only when defined.
+diff --git a/src/os/defineApp.types.ts b/src/os/defineApp.types.ts
+index f5e93e5..9fa68bb 100644
+--- a/src/os/defineApp.types.ts
++++ b/src/os/defineApp.types.ts
+@@ -112,6 +112,8 @@ export interface BoundComponents<S> {
+     id?: string;
+     className?: string;
+     children?: ReactNode;
++    /** Data: which items are expandable (have children). Not behavior. */
++    getExpandableItems?: () => Set<string>;
+   }>;
+   Item: React.FC<{
+     id: string | number;
+diff --git a/src/os/headless.ts b/src/os/headless.ts
+index 14c215b..1820516 100644
+--- a/src/os/headless.ts
++++ b/src/os/headless.ts
+@@ -225,6 +225,7 @@ export function simulateClick(
+         itemRole: childRole ?? null,
+     };
+ 
++
+     const result = resolveMouse(input);
+     dispatchResult(kernel, result);
+ 

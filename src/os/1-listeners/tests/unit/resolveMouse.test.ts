@@ -120,7 +120,7 @@ describe("isClickExpandable", () => {
     expect(isClickExpandable(true, "button")).toBe(true);
   });
 
-  test("aria-expanded + treeitem → false (keyboard-only)", () => {
+  test("aria-expanded + treeitem → false (click event handles expand, not mousedown)", () => {
     expect(isClickExpandable(true, "treeitem")).toBe(false);
   });
 
@@ -168,9 +168,16 @@ describe("resolveMouse", () => {
     expect(activateCmd).toBeDefined();
   });
 
-  test("treeitem with aria-expanded → shouldExpand false", () => {
+  test("treeitem with aria-expanded → NO OS_ACTIVATE (mousedown skips, click handles it)", () => {
     const result = resolveMouse(
       baseInput({ hasAriaExpanded: true, itemRole: "treeitem" }),
+    );
+    expect(result.commands.some((c) => c.type === "OS_ACTIVATE")).toBe(false);
+  });
+
+  test("menuitem with aria-expanded → NO OS_ACTIVATE (hover-only expand)", () => {
+    const result = resolveMouse(
+      baseInput({ hasAriaExpanded: true, itemRole: "menuitem" }),
     );
     expect(result.commands.some((c) => c.type === "OS_ACTIVATE")).toBe(false);
   });
