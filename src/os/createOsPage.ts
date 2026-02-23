@@ -20,7 +20,7 @@ import { createKernel } from "@kernel";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
 import type { AppState } from "@os/kernel";
-import type { ZoneRole } from "@os/registries/roleRegistry";
+import { type ZoneRole, resolveRole } from "@os/registries/roleRegistry";
 import {
     DEFAULT_CONFIG,
     type FocusGroupConfig,
@@ -230,7 +230,19 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     // ── Mock setters (OS-specific) ──
     function setItems(items: string[]) { mockItems.current = items; }
     function setRects(rects: Map<string, DOMRect>) { mockRects.current = rects; }
-    function setConfig(config: Partial<FocusGroupConfig>) { mockConfig.current = { ...DEFAULT_CONFIG, ...config }; }
+    function setConfig(config: Partial<FocusGroupConfig>) {
+        const base = mockConfig.current;
+        mockConfig.current = {
+            ...base,
+            ...config,
+            navigate: { ...base.navigate, ...config.navigate },
+            tab: { ...base.tab, ...config.tab },
+            select: { ...base.select, ...config.select },
+            activate: { ...base.activate, ...config.activate },
+            dismiss: { ...base.dismiss, ...config.dismiss },
+            project: { ...base.project, ...config.project },
+        };
+    }
     function setExpandableItems(items: string[] | Set<string>) { mockExpandableItems.current = items instanceof Set ? items : new Set(items); }
     function setTreeLevels(levels: Record<string, number> | Map<string, number>) { mockTreeLevels.current = levels instanceof Map ? levels : new Map(Object.entries(levels)); }
     function setZoneOrder(zones: any[]) { mockZoneOrder.current = zones; }
@@ -240,9 +252,12 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         role: ZoneRole,
         opts?: { onAction?: ZoneCallback; onCheck?: ZoneCallback; onDelete?: ZoneCallback },
     ) {
+        // Apply role preset to mockConfig — subsequent setConfig() overrides on top
+        const resolved = resolveRole(role);
+        mockConfig.current = resolved;
         ZoneRegistry.register(zoneId, {
             role,
-            config: DEFAULT_CONFIG,
+            config: resolved,
             element: null,
             parentId: null,
             ...(opts?.onAction ? { onAction: opts.onAction } : {}),

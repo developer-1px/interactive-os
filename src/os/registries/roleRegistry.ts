@@ -208,7 +208,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // Spec: grid + tree hybrid, 2D navigation with expand/collapse,
   //       no loop, explicit selection
   treegrid: {
-    navigate: { orientation: "both", loop: false },
+    navigate: { orientation: "both", loop: false, arrowExpand: true },
     select: { mode: "multiple", range: true, toggle: true, followFocus: false },
     activate: { mode: "manual" },
     tab: { behavior: "escape" },
@@ -222,6 +222,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       orientation: "vertical",
       loop: false,
       typeahead: true,
+      arrowExpand: true,
       entry: "selected",
     },
     select: { mode: "single", followFocus: false },

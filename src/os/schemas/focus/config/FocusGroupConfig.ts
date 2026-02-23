@@ -16,6 +16,8 @@ export interface NavigateConfig {
   loop: boolean;
   seamless: boolean;
   typeahead: boolean;
+  /** ArrowRight/Left handle expand/collapse instead of navigation (tree/treegrid) */
+  arrowExpand: boolean;
   entry: NavigateEntry;
   recovery: "next" | "prev" | "nearest";
 }
@@ -25,6 +27,7 @@ export const DEFAULT_NAVIGATE: NavigateConfig = {
   loop: false,
   seamless: false,
   typeahead: false,
+  arrowExpand: false,
   entry: "first",
   recovery: "next",
 };

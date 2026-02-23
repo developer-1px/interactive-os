@@ -62,14 +62,13 @@ export const OS_NAVIGATE = os.defineCommand(
       : new Map();
 
     // W3C Tree Pattern: ArrowRight/ArrowLeft handle expand/collapse
-    // Only applies to tree/treegrid roles — not toolbars or other zones.
-    const isTreeRole =
-      zoneEntry?.role === "tree" || zoneEntry?.role === "treegrid";
+    // Role declares arrowExpand — no hardcoded role check (OCP).
+    const arrowExpand = config.navigate.arrowExpand;
 
     let overrideTargetId: string | null = null;
 
     if (
-      isTreeRole &&
+      arrowExpand &&
       (payload.direction === "right" || payload.direction === "left")
     ) {
       const focusedId = zone.focusedItemId;

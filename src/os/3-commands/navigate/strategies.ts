@@ -172,7 +172,10 @@ function registerNavigationStrategy(
 }
 
 registerNavigationStrategy("linear", resolveLinear, { needsDOMRects: false });
+registerNavigationStrategy("horizontal", resolveLinear, { needsDOMRects: false });
+registerNavigationStrategy("vertical", resolveLinear, { needsDOMRects: false });
 registerNavigationStrategy("spatial", resolveSpatial, { needsDOMRects: true });
+registerNavigationStrategy("both", resolveSpatial, { needsDOMRects: true });
 registerNavigationStrategy("corner", resolveCorner, { needsDOMRects: true });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -180,16 +183,7 @@ registerNavigationStrategy("corner", resolveCorner, { needsDOMRects: true });
 // ═══════════════════════════════════════════════════════════════════
 
 function resolveStrategyEntry(orientation: string): StrategyEntry | undefined {
-  const entry = strategies.get(orientation);
-  if (entry) return entry;
-
-  if (orientation === "horizontal" || orientation === "vertical") {
-    return strategies.get("linear");
-  }
-  if (orientation === "both") return strategies.get("spatial");
-  if (orientation === "corner") return strategies.get("corner");
-
-  return undefined;
+  return strategies.get(orientation);
 }
 
 /** Query whether the current orientation's strategy requires DOM rects. */
