@@ -62,10 +62,8 @@ export function resolveSelectMode(input: {
 export function isClickExpandable(
   hasAriaExpanded: boolean,
   role: string | null,
-  activateOnClick = false,
 ): boolean {
   if (!hasAriaExpanded) return false;
-  if (activateOnClick) return true; // Navigation Tree: click always activates
   if (!role) return true; // no role → assume clickable
   return !KEYBOARD_ONLY_EXPAND_ROLES.has(role);
 }
@@ -128,7 +126,7 @@ export function resolveMouse(input: MouseInput): ResolveResult {
     OS_SELECT({ targetId: input.targetItemId, mode: selectMode }) as any,
   );
 
-  if (isClickExpandable(input.hasAriaExpanded, input.itemRole, input.activateOnClick)) {
+  if (input.activateOnClick || isClickExpandable(input.hasAriaExpanded, input.itemRole)) {
     commands.push(OS_ACTIVATE() as any);
   }
 
