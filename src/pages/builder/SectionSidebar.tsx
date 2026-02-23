@@ -18,7 +18,7 @@ import {
   BuilderSidebarUI,
 } from "@/apps/builder/app";
 import { BLOCK_PRESETS } from "@/apps/builder/presets/blocks";
-import { useFocusExpansion as useExpansion } from "@/os/5-hooks/useFocusExpansion";
+import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
 import { os } from "@/os/kernel";
 
@@ -54,12 +54,12 @@ export function SectionSidebar() {
   );
 }
 
-/** Inner component — must be a child of Zone so useExpansion reads the correct FocusGroupContext */
+/** Inner component — must be a child of Zone so useExpanded reads the correct FocusGroupContext */
 function SidebarContent() {
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);
 
   // OS-provided expansion hook — reads sidebar zone context (not parent)
-  const { isExpanded, toggleExpanded } = useExpansion();
+  const { isExpanded, toggleExpanded } = useExpanded();
 
   const focusedCanvasId = useFocusedItem(CANVAS_ZONE_ID);
 

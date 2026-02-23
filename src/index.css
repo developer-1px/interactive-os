@@ -7,10 +7,16 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scroll margin */
+/* Scroll margin — breathing room for scrollIntoView during navigation */
 [data-item-id] {
   scroll-margin-block: 10vh;
   scroll-margin-inline: 5vw;
+}
+
+/* Disable scroll-margin during editing — prevents browser's native
+   focus/caret scroll from adding unwanted offset */
+[data-item-id][contenteditable="true"] {
+  scroll-margin: 0;
 }
 
 /* BuilderCursor provides visual focus — suppress native ring in canvas only */

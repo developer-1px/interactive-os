@@ -108,7 +108,6 @@ export const FieldTextarea = forwardRef<
       const config: FieldConfig = {
         name,
         mode: "immediate",
-        multiline: true,
         fieldType: "block",
         trigger,
         ...(onCommitRef.current !== undefined

@@ -5,7 +5,10 @@
  */
 
 import { type AnchorHTMLAttributes, forwardRef, type ReactNode } from "react";
+import { useCursorMeta } from "../hooks/useCursorMeta";
 import type { BuilderLevel } from "./Builder";
+
+const CURSOR_META = { tag: "link", color: "#6366f1" } as const;
 
 export interface BuilderLinkProps
   extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "id"> {
@@ -17,6 +20,8 @@ export interface BuilderLinkProps
 
 export const BuilderLink = forwardRef<HTMLAnchorElement, BuilderLinkProps>(
   function BuilderLink({ id, children, className, href = "#", ...rest }, ref) {
+    useCursorMeta(id, CURSOR_META);
+
     return (
       <a
         ref={ref}

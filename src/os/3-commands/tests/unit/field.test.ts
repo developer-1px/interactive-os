@@ -15,6 +15,7 @@ import {
   OS_FIELD_COMMIT,
   OS_FIELD_START_EDIT,
 } from "@os/3-commands/field/field";
+import { FieldRegistry } from "@os/6-components/field/FieldRegistry";
 import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -201,5 +202,63 @@ describe("Field Lifecycle: start → commit / cancel", () => {
     setupFocus("z1", "item-2");
     os.dispatch(OS_FIELD_START_EDIT());
     expect(getZone("z1").editingItemId).toBe("item-2");
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Caret Position — FieldRegistry state contract
+// ═══════════════════════════════════════════════════════════════════
+
+describe("Caret Position (FieldRegistry state contract)", () => {
+  beforeEach(() => {
+    FieldRegistry.register("field-1", { name: "field-1", mode: "deferred" });
+    return () => FieldRegistry.unregister("field-1");
+  });
+
+  it("caretPosition initializes to null", () => {
+    const field = FieldRegistry.getField("field-1");
+    expect(field?.state.caretPosition).toBeNull();
+  });
+
+  it("updateCaretPosition saves position", () => {
+    FieldRegistry.updateCaretPosition("field-1", 5);
+    expect(FieldRegistry.getField("field-1")?.state.caretPosition).toBe(5);
+  });
+
+  it("caretPosition is preserved across edit → commit cycle", () => {
+    setupFocus("z1", "field-1");
+
+    // Enter editing
+    os.dispatch(OS_FIELD_START_EDIT());
+    expect(getZone("z1").editingItemId).toBe("field-1");
+
+    // Simulate: user places caret at position 5 (DOM → state snapshot)
+    FieldRegistry.updateCaretPosition("field-1", 5);
+
+    // Commit
+    os.dispatch(OS_FIELD_COMMIT());
+    expect(getZone("z1").editingItemId).toBeNull();
+
+    // caretPosition must survive commit
+    expect(FieldRegistry.getField("field-1")?.state.caretPosition).toBe(5);
+  });
+
+  it("caretPosition is preserved across edit → cancel cycle", () => {
+    setupFocus("z1", "field-1");
+
+    os.dispatch(OS_FIELD_START_EDIT());
+    FieldRegistry.updateCaretPosition("field-1", 12);
+
+    os.dispatch(OS_FIELD_CANCEL());
+    expect(getZone("z1").editingItemId).toBeNull();
+
+    // caretPosition must survive cancel
+    expect(FieldRegistry.getField("field-1")?.state.caretPosition).toBe(12);
+  });
+
+  it("caretPosition resets on field reset", () => {
+    FieldRegistry.updateCaretPosition("field-1", 7);
+    FieldRegistry.reset("field-1");
+    expect(FieldRegistry.getField("field-1")?.state.caretPosition).toBeNull();
   });
 });

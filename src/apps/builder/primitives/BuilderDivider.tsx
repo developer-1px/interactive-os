@@ -5,7 +5,10 @@
  */
 
 import { forwardRef, type HTMLAttributes } from "react";
+import { useCursorMeta } from "../hooks/useCursorMeta";
 import type { BuilderLevel } from "./Builder";
+
+const CURSOR_META = { tag: "divider", color: "#64748b" } as const;
 
 export type BuilderDividerOrientation = "horizontal" | "vertical";
 
@@ -22,6 +25,8 @@ export const BuilderDivider = forwardRef<HTMLHRElement, BuilderDividerProps>(
     { id, orientation = "horizontal", className, style, ...rest },
     ref,
   ) {
+    useCursorMeta(id, CURSOR_META);
+
     return (
       <hr
         ref={ref}

@@ -27,6 +27,8 @@
 
 import { Item as OSItem } from "@os/6-components/primitives/Item";
 import { forwardRef, type ReactElement } from "react";
+import { useCursorMeta } from "../hooks/useCursorMeta";
+import type { CursorMeta } from "../model/cursorRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -44,12 +46,26 @@ interface BuilderComponentProps {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Cursor metadata per level
+// ═══════════════════════════════════════════════════════════════════
+
+const LEVEL_CURSOR_META: Record<BuilderLevel, CursorMeta> = {
+  section: { tag: "section", color: "#8b5cf6" },
+  group: { tag: "group", color: "#a855f7" },
+  item: { tag: "text", color: "#22c55e" },
+};
+
+// ═══════════════════════════════════════════════════════════════════
 // createBuilderComponent — Factory for Section/Group/Item
 // ═══════════════════════════════════════════════════════════════════
 
 function createBuilderComponent(level: BuilderLevel, displayName: string) {
+  const cursorMeta = LEVEL_CURSOR_META[level];
+
   const Component = forwardRef<HTMLElement, BuilderComponentProps>(
     function BuilderComponent({ id, children }, ref) {
+      useCursorMeta(id, cursorMeta);
+
       return (
         <OSItem
           id={id}

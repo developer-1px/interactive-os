@@ -1,6 +1,6 @@
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
+import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { TestBox } from "../../shared/TestLayout";
 
 export function ExpandTest() {
@@ -62,7 +62,7 @@ export function ExpandTest() {
 }
 
 function TreeItems() {
-  const { isExpanded } = useFocusExpansion();
+  const { isExpanded } = useExpanded();
 
   // Tree data structure
   const treeData = [

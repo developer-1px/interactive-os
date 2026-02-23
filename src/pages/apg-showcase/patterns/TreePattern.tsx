@@ -1,11 +1,11 @@
 import { Icon } from "@/components/Icon";
-import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
+import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { useSelection } from "@/os/5-hooks/useSelection";
 import { FocusGroup } from "@/os/6-components/base/FocusGroup";
 import { FocusItem } from "@/os/6-components/base/FocusItem";
 
 function TreeContent() {
-  const { isExpanded } = useFocusExpansion();
+  const { isExpanded } = useExpanded();
   const selection = useSelection("apg-tree");
   const isSelected = (id: string) => selection.includes(id);
 

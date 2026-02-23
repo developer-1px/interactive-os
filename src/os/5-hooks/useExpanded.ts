@@ -1,5 +1,5 @@
 /**
- * useFocusExpansion - Hook to access expansion state from kernel
+ * useExpanded - Hook to access expansion state from kernel
  *
  * Provides a simple API to check and toggle expansion for tree and accordion items.
  * Uses OS_EXPAND kernel command for mutations, os state for reads.
@@ -14,11 +14,11 @@ import { os } from "@/os/kernel";
 // `?? []` inside a selector creates a new reference per call → referential inequality → re-render loop.
 const EMPTY: readonly string[] = [];
 
-export function useFocusExpansion() {
+export function useExpanded() {
   const ctx = useFocusGroupContext();
 
   if (!ctx) {
-    throw new Error("useFocusExpansion must be used within a FocusGroup");
+    throw new Error("useExpanded must be used within a FocusGroup");
   }
 
   const { zoneId } = ctx;

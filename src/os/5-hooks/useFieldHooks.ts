@@ -1,5 +1,6 @@
 import type { MutableRefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { FieldRegistry } from "../6-components/field/FieldRegistry";
 import { getCaretPosition, setCaretPosition } from "./getCaretPosition";
 
 // --- Types ---
@@ -19,6 +20,8 @@ interface UseFieldFocusProps {
   isActive: boolean;
   blurOnInactive: boolean;
   cursorRef: MutableRefObject<number | null>;
+  /** Field identifier for FieldRegistry caret persistence */
+  fieldId?: string;
 }
 
 // --- Hooks ---
@@ -66,12 +69,20 @@ export const useFieldDOMSync = ({
 
 /**
  * Manages physical focus and blur of the DOM element based on `isActive` state.
+ *
+ * Caret position lifecycle:
+ *   1. active→inactive: save caret via getCaretPosition → FieldRegistry
+ *   2. inactive→active: restore caret from FieldRegistry → setCaretPosition
+ *
+ * This makes caret position a state concern (headless-testable)
+ * rather than a DOM-only concern.
  */
 export const useFieldFocus = ({
   innerRef,
   isActive,
   blurOnInactive,
   cursorRef,
+  fieldId,
 }: UseFieldFocusProps) => {
   // Track previous active state to detect inactive→active transition.
   // setCaretPosition must only run ONCE on initial entry into edit mode,
@@ -89,12 +100,17 @@ export const useFieldFocus = ({
 
       // Restore caret position only on initial entry (inactive→active transition)
       if (isFirstEntry) {
+        // Read saved position from FieldRegistry (state), fallback to cursorRef (legacy)
+        const savedPosition = fieldId
+          ? (FieldRegistry.getField(fieldId)?.state.caretPosition ?? null)
+          : cursorRef.current;
+
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (innerRef.current) {
               try {
-                if (cursorRef.current !== null) {
-                  setCaretPosition(innerRef.current, cursorRef.current);
+                if (savedPosition !== null) {
+                  setCaretPosition(innerRef.current, savedPosition);
                 } else {
                   const textLength = innerRef.current.innerText.length;
                   setCaretPosition(innerRef.current, textLength);
@@ -104,16 +120,27 @@ export const useFieldFocus = ({
           });
         });
       }
-    } else if (
-      !isActive &&
-      blurOnInactive &&
-      innerRef.current &&
-      document.activeElement === innerRef.current
-    ) {
+    } else if (!isActive) {
+      // Save caret position before deactivating (active→inactive transition)
+      if (wasActiveRef.current && innerRef.current && fieldId) {
+        try {
+          const pos = getCaretPosition(innerRef.current);
+          FieldRegistry.updateCaretPosition(fieldId, pos);
+        } catch (_e) { }
+      }
+
+      // Always reset so the next inactive→active transition is detected
       wasActiveRef.current = false;
-      innerRef.current.blur();
+
+      if (
+        blurOnInactive &&
+        innerRef.current &&
+        document.activeElement === innerRef.current
+      ) {
+        innerRef.current.blur();
+      }
     }
-  }, [isActive, blurOnInactive, innerRef, cursorRef]);
+  }, [isActive, blurOnInactive, innerRef, cursorRef, fieldId]);
 };
 
 /**

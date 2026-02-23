@@ -6,7 +6,10 @@
  */
 
 import { forwardRef, type HTMLAttributes } from "react";
+import { useCursorMeta } from "../hooks/useCursorMeta";
 import type { BuilderLevel } from "./Builder";
+
+const CURSOR_META = { tag: "image", color: "#10b981" } as const;
 
 // Re-use the same createBuilderComponent pattern internally
 // but here we render a concrete <img> element instead of Slot
@@ -39,6 +42,8 @@ export const BuilderImage = forwardRef<HTMLImageElement, BuilderImageProps>(
     },
     ref,
   ) {
+    useCursorMeta(id, CURSOR_META);
+
     return (
       <img
         ref={ref}

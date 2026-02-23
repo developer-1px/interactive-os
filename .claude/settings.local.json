@@ -15,7 +15,9 @@
       "Bash(sort:*)",
       "Bash(kill:*)",
       "Bash(git remote:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(npm audit:*)",
+      "Bash(head:*)"
     ]
   }
 }

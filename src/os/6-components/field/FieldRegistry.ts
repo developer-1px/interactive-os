@@ -23,7 +23,6 @@ export interface FieldConfig {
   defaultValue?: string; // Initial value (HTML/RHF standard)
   mode?: "immediate" | "deferred"; // immediate = always editing, deferred = needs Enter to edit
   fieldType?: FieldType; // Key ownership preset (default: "inline")
-  multiline?: boolean;
 
   // -- Commit Architecture --
   onCommit?: FieldCommandFactory; // Field injects { text: currentValue }
@@ -39,6 +38,7 @@ export interface FieldState {
   isDirty: boolean;
   isValid: boolean;
   error: string | null;
+  caretPosition: number | null;
 }
 
 export interface FieldEntry {
@@ -85,12 +85,13 @@ function register(id: string, config: FieldConfig) {
   const newState: FieldState = existing
     ? existing.state
     : {
-        value: defaultValue,
-        defaultValue,
-        isValid: true,
-        isDirty: false,
-        error: null,
-      };
+      value: defaultValue,
+      defaultValue,
+      isValid: true,
+      isDirty: false,
+      error: null,
+      caretPosition: null,
+    };
 
   newFields.set(id, {
     config,
@@ -157,6 +158,7 @@ function reset(id: string) {
       error: null,
       isValid: true,
       isDirty: false,
+      caretPosition: null,
     },
   });
 
@@ -170,6 +172,21 @@ function getField(id: string) {
 
 function getValue(id: string) {
   return state.fields.get(id)?.state.value ?? "";
+}
+
+function updateCaretPosition(id: string, position: number | null) {
+  const newFields = new Map(state.fields);
+  const entry = newFields.get(id);
+  if (!entry) return;
+
+  newFields.set(id, {
+    ...entry,
+    state: { ...entry.state, caretPosition: position },
+  });
+
+  state = { ...state, fields: newFields };
+  // No emit — caret position changes should not trigger re-renders.
+  // It's read synchronously at restore time, not reactively.
 }
 
 // ─── React Hook ───
@@ -189,6 +206,7 @@ export const FieldRegistry = {
   register,
   unregister,
   updateValue,
+  updateCaretPosition,
   setError,
   reset,
   getField,

@@ -1,10 +1,10 @@
 import { Icon } from "@/components/Icon";
-import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
+import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { FocusGroup } from "@/os/6-components/base/FocusGroup";
 import { FocusItem } from "@/os/6-components/base/FocusItem";
 
 export function CompositePattern() {
-  const { isExpanded } = useFocusExpansion();
+  const { isExpanded } = useExpanded();
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">

@@ -9,7 +9,7 @@ import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
-import { useFocusExpansion } from "@/os/5-hooks/useFocusExpansion";
+import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { useSelection } from "@/os/5-hooks/useSelection";
 
 // @ts-expect-error — spec-wrapper plugin transforms at build time
@@ -693,7 +693,7 @@ function AriaCard({
 }
 
 function TreeContent() {
-  const { isExpanded } = useFocusExpansion();
+  const { isExpanded } = useExpanded();
   const selection = useSelection("demo-tree");
   const isSelected = (id: string) => selection.includes(id);
 
@@ -823,7 +823,7 @@ function TreeContent() {
 }
 
 function AccordionContent() {
-  const { isExpanded } = useFocusExpansion();
+  const { isExpanded } = useExpanded();
 
   const items = [
     {

@@ -105,7 +105,6 @@ export const FieldInput = forwardRef<HTMLInputElement, FieldInputProps>(
       const config: FieldConfig = {
         name,
         mode: "immediate",
-        multiline: false,
         fieldType: "inline",
         trigger,
         ...(onCommitRef.current !== undefined

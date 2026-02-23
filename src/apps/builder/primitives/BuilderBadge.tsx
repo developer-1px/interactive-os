@@ -6,7 +6,10 @@
  */
 
 import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
+import { useCursorMeta } from "../hooks/useCursorMeta";
 import type { BuilderLevel } from "./Builder";
+
+const CURSOR_META = { tag: "badge", color: "#ec4899" } as const;
 
 export type BuilderBadgeVariant =
   | "default"
@@ -30,6 +33,8 @@ export const BuilderBadge = forwardRef<HTMLSpanElement, BuilderBadgeProps>(
     { id, variant = "default", children, className, ...rest },
     ref,
   ) {
+    useCursorMeta(id, CURSOR_META);
+
     return (
       <span
         ref={ref}

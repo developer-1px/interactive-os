@@ -1,9 +1,12 @@
 /**
- * BuilderCursor
+ * BuilderCursor — OCP-compliant visual focus cursor.
  *
- * Visual focus cursor for the Builder canvas.
  * Highlights the currently focused item with a colored border
- * that follows keyboard navigation — replaces mouse cursor.
+ * that follows keyboard navigation.
+ *
+ * Color and tag come from CursorRegistry — each primitive
+ * declares its own metadata via useCursorMeta.
+ * This file never changes when new primitives are added.
  *
  * Uses useElementRect for position tracking.
  * Positions are calculated relative to the scroll container,
@@ -14,49 +17,9 @@ import { useRef } from "react";
 import { findItemElement } from "@/os/2-contexts/itemQueries";
 import { useElementRect } from "@/hooks/useElementRect";
 import { os } from "@/os/kernel";
-import { BuilderApp, findBlockInfo, resolveFieldAddress } from "./app";
-import type { Block } from "./app";
+import { cursorRegistry } from "./model/cursorRegistry";
 
-// ── Color by block type ──
-const TYPE_COLORS: Record<string, string> = {
-  hero: "#a855f7",
-  news: "#f59e0b",
-  services: "#3b82f6",
-  "service-card": "#3b82f6",
-  pricing: "#10b981",
-  "pricing-tab": "#10b981",
-  tabs: "#6366f1",
-  tab: "#6366f1",
-  section: "#8b5cf6",
-  footer: "#64748b",
-};
 const DEFAULT_COLOR = "#22c55e";
-
-/**
- * Resolve block metadata for any item ID — block or field.
- *
- * - If itemId matches a block.id directly, use findBlockInfo.
- * - Otherwise, resolve as a field item: find parent block via
- *   resolveFieldAddress, then report depth = parentDepth + 1.
- */
-function resolveItemBlockInfo(
-  blocks: Block[],
-  itemId: string,
-): { type: string; depth: number } | null {
-  // Direct block match
-  const direct = findBlockInfo(blocks, itemId);
-  if (direct) return direct;
-
-  // Field item: resolve parent block
-  const addr = resolveFieldAddress(itemId, blocks);
-  if (!addr) return null;
-
-  const parentInfo = findBlockInfo(blocks, addr.section.id);
-  return {
-    type: parentInfo?.type ?? addr.section.type,
-    depth: (parentInfo?.depth ?? 0) + 1,
-  };
-}
 
 /**
  * Must be placed inside the scroll container.
@@ -78,12 +41,10 @@ export function BuilderCursor() {
     };
   });
 
-  // ── Block metadata from app state (source of truth) ──
-  const blockInfo = BuilderApp.useComputed((s) =>
-    itemId ? resolveItemBlockInfo(s.data.blocks, itemId) : null,
-  );
-  const depth = blockInfo?.depth ?? 0;
-  const itemType = blockInfo?.type ?? "text";
+  // ── Cursor metadata from registry (OCP: no hardcoded types) ──
+  const meta = itemId ? cursorRegistry.get(itemId) : null;
+  const tag = meta?.tag ?? "unknown";
+  const color = meta?.color ?? DEFAULT_COLOR;
 
   // ── DOM element for position tracking ──
   const el = itemId ? findItemElement("canvas", itemId) : null;
@@ -101,11 +62,10 @@ export function BuilderCursor() {
   const animating = now < animatingUntilRef.current;
 
   // ── Derived visual state ──
-  const color = TYPE_COLORS[itemType] ?? DEFAULT_COLOR;
   const dimmed = !isActive;
 
-  // Top-level blocks (depth 0) don't show cursor
-  if (!rect || depth === 0) {
+  // No rect → don't show cursor
+  if (!rect) {
     return (
       <div
         ref={containerRef}
@@ -150,7 +110,7 @@ export function BuilderCursor() {
             : "none",
         }}
       >
-        {/* ID Badge */}
+        {/* Tag Badge */}
         <div
           style={{
             position: "absolute",
@@ -168,7 +128,7 @@ export function BuilderCursor() {
             letterSpacing: "0.02em",
           }}
         >
-          {editing ? `✏️ ${itemType}` : itemType}
+          {editing ? `✏️ ${tag}` : tag}
         </div>
       </div>
     </div>

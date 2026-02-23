@@ -34,7 +34,7 @@ const checkValueEmpty = (value: string | undefined | null): boolean => {
 interface FieldStyleParams {
   isFocused: boolean;
   isEditing: boolean;
-  multiline: boolean;
+  fieldType: FieldType;
   value: string;
   error?: string | null | undefined;
   placeholder?: string | undefined;
@@ -47,7 +47,7 @@ interface FieldStyleParams {
 const getFieldClasses = ({
   isFocused: _isFocused,
   isEditing,
-  multiline,
+  fieldType,
   value,
   error,
   placeholder,
@@ -59,7 +59,8 @@ const getFieldClasses = ({
     ? "before:content-[attr(data-placeholder)] before:text-slate-400 before:opacity-50 before:pointer-events-none before:absolute before:top-0 before:left-0 before:truncate before:w-full before:h-full"
     : "";
 
-  const lineClasses = multiline
+  const isMultiline = fieldType === "block" || fieldType === "editor";
+  const lineClasses = isMultiline
     ? "whitespace-pre-wrap break-words"
     : "whitespace-nowrap overflow-hidden";
 
@@ -141,9 +142,8 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
 
     // --- Derived props (from fieldType / mode) ---
     const fieldType: FieldType = fieldTypeProp ?? "inline";
-    const multiline = fieldType === "block" || fieldType === "editor";
     const blurOnInactive = mode === "deferred";
-    const tag = multiline ? "div" : "span";
+    const tag = "div";
 
     const context = useFocusGroupContext();
     const zoneId = context?.zoneId || "unknown";
@@ -208,7 +208,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       const config: FieldConfig = {
         name,
         mode,
-        multiline,
+
         fieldType,
         trigger,
         resetOnSubmit,
@@ -389,6 +389,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       isActive: shouldHaveDOMFocus,
       blurOnInactive,
       cursorRef,
+      fieldId,
     });
 
     // --- Styling ---
@@ -396,7 +397,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
     const composeProps = getFieldClasses({
       isFocused,
       isEditing: isContentEditable,
-      multiline,
+      fieldType,
       value: localValue,
       error,
       ...(placeholder !== undefined ? { placeholder } : {}),
@@ -407,7 +408,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       contentEditable: isContentEditable,
       suppressContentEditableWarning: true,
       role: "textbox",
-      "aria-multiline": multiline,
+      "aria-multiline": fieldType === "block" || fieldType === "editor",
       tabIndex: 0,
       className: composeProps,
       "data-placeholder": placeholder,

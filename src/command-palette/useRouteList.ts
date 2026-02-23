@@ -14,9 +14,15 @@ export interface RouteEntry {
 }
 
 export function useRouteList(): RouteEntry[] {
-  const router = useRouter();
+  let router: ReturnType<typeof useRouter> | null = null;
+  try {
+    router = useRouter();
+  } catch {
+    // No RouterProvider available (e.g. DocsViewer standalone)
+  }
 
   return useMemo(() => {
+    if (!router) return [];
     const entries: RouteEntry[] = [];
 
     // biome-ignore lint: any needed for internal route tree traversal

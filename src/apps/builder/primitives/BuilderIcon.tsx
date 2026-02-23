@@ -6,7 +6,10 @@
  */
 
 import { type ComponentType, forwardRef, type HTMLAttributes } from "react";
+import { useCursorMeta } from "../hooks/useCursorMeta";
 import type { BuilderLevel } from "./Builder";
+
+const CURSOR_META = { tag: "icon", color: "#f59e0b" } as const;
 
 export interface BuilderIconProps
   extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
@@ -40,6 +43,8 @@ export const BuilderIcon = forwardRef<HTMLDivElement, BuilderIconProps>(
     },
     ref,
   ) {
+    useCursorMeta(id, CURSOR_META);
+
     return (
       <div
         ref={ref}

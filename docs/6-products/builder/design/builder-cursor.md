@@ -11,13 +11,15 @@
 
 **구현**: `findBlockInfo(blocks, itemId)` → `{ type, depth }`
 
-## 2. 커서 색상은 block.type 기준
+## 2. ~~커서 색상은 block.type 기준~~ → 커서 색상은 **content type** 기준 (OCP)
 
-**결정**: 커서 하이라이트 색상은 블록의 `type` 필드로 결정한다. 트리 깊이(depth)나 level 이름이 아님.
+**결정 (v2, 2026-02-23)**: 커서 하이라이트 색상과 태그는 **컨텐츠 타입**(text, icon, button, image, badge, link, divider, tabs)으로 결정한다. 블록 타입(hero, news, services)이 아님.
 
-**근거**: `type`은 블록의 의미를 나타내는 데이터. depth는 구조적 위치일 뿐 의미가 아니다.
+**근거**: 사용자에게 유용한 정보는 "어느 블록에 있는가"가 아니라 "무엇을 다루고 있는가"이다. OCP — 각 프리미티브가 자신의 메타데이터를 선언하고, BuilderCursor는 읽기만 한다. 새 프리미티브 추가 시 BuilderCursor 수정 = 0줄.
 
-**구현**: `TYPE_COLORS[blockInfo.type] ?? DEFAULT_COLOR`
+**구현**: `cursorRegistry.get(itemId)` → `{ tag, color }`. 프리미티브가 `useCursorMeta(id, CURSOR_META)` 훅으로 등록.
+
+**Supersedes**: 이전 결정 (block.type 기준, `TYPE_COLORS` 맵)
 
 ## 3. 기하학(위치/크기)만 DOM에서 읽는다
 

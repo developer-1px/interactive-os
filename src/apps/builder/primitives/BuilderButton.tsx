@@ -6,7 +6,10 @@
  */
 
 import { type ButtonHTMLAttributes, forwardRef, type ReactNode } from "react";
+import { useCursorMeta } from "../hooks/useCursorMeta";
 import type { BuilderLevel } from "./Builder";
+
+const CURSOR_META = { tag: "button", color: "#3b82f6" } as const;
 
 export type BuilderButtonVariant =
   | "primary"
@@ -29,6 +32,8 @@ export const BuilderButton = forwardRef<HTMLButtonElement, BuilderButtonProps>(
     { id, variant = "primary", children, className, type = "button", ...rest },
     ref,
   ) {
+    useCursorMeta(id, CURSOR_META);
+
     return (
       <button
         ref={ref}

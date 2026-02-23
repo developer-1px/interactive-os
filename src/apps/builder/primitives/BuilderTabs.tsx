@@ -22,6 +22,9 @@ import { Item as OSItem } from "@os/6-components/primitives/Item";
 import { Zone } from "@os/6-components/primitives/Zone";
 import { Children, type ReactElement, type ReactNode, useState } from "react";
 import type { Block } from "@/apps/builder/model/appState";
+import { useCursorMeta } from "../hooks/useCursorMeta";
+
+const CURSOR_META = { tag: "tabs", color: "#0ea5e9" } as const;
 
 // ═══════════════════════════════════════════════════════════════════
 // BuilderTabs — Container primitive
@@ -53,6 +56,7 @@ export function BuilderTabs({
   children,
   className,
 }: BuilderTabsProps) {
+  useCursorMeta(id, CURSOR_META);
   const [activeIndex, setActiveIndex] = useState(defaultTab);
 
   // Derive tab labels: block.children takes precedence, then legacy tabs
@@ -93,11 +97,10 @@ export function BuilderTabs({
               className={`
                                 relative px-5 py-3.5 text-base font-semibold transition-colors outline-none
                                 border-b-2 -mb-[1px] whitespace-nowrap
-                                ${
-                                  idx === activeIndex
-                                    ? "border-slate-900 text-slate-900"
-                                    : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-                                }
+                                ${idx === activeIndex
+                  ? "border-slate-900 text-slate-900"
+                  : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
+                }
                                 data-[focused]:ring-2 data-[focused]:ring-slate-400/50 data-[focused]:rounded-t-lg
                                 data-[focused]:z-10
                             `}
