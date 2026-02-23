@@ -1,7 +1,7 @@
 /**
  * OS_COMMANDS — OS 표준 커맨드 ID 상수
  *
- * Antigravity OS가 인식하는 well-known command IDs.
+ * Interactive OS가 인식하는 well-known command IDs.
  * Apps는 이 커맨드들을 구현하여 통합 인터랙션 스트림에 참여한다.
  */
 export const OS_COMMANDS = {

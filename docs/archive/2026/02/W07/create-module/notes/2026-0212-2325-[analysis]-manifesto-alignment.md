@@ -104,7 +104,7 @@
 
 ### Facade 순수성 ❌
 - 앱에서 `OS.*`를 사용하지만, 동시에 `@/os-new/schema/`, `@/os-new/keymaps/`, `@/os-new/appSlice` 등 **6건의 직접 import** 존재
-- Facade(`AntigravityOS.tsx`)가 타입/설정까지 커버하지 못함
+- Facade(`OS.tsx`)가 타입/설정까지 커버하지 못함
 - 선언문에 명시되진 않았지만, P3(단일 문) 정신에 어긋남
 
 ### 레거시 잔재 ❌

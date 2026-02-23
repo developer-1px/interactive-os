@@ -106,7 +106,7 @@ function QuickPickPage() {
         </div>
 
         <div className="text-center text-xs text-gray-400">
-          Powered by Antigravity OS Kernel • virtualFocus Enabled
+          Powered by Interactive OS Kernel • virtualFocus Enabled
         </div>
       </div>
 

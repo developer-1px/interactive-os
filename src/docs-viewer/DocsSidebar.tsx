@@ -1,12 +1,14 @@
 import clsx from "clsx";
-import { ChevronDown, ChevronRight, Clock, FileText } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, ChevronRight, Clock, FileText, Star } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import docsMeta from "virtual:docs-meta";
 import {
   cleanLabel,
   type DocItem,
   formatRelativeTime,
+  getFavoriteFiles,
   getRecentFiles,
+  toggleFavorite,
 } from "./docsUtils";
 
 export interface DocsSidebarProps {
@@ -94,6 +96,70 @@ function RecentSection({
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+// --------------- Favorites Section ---------------
+
+function FavoritesSection({
+  allFiles,
+  activePath,
+  onSelect,
+  favVersion,
+}: {
+  allFiles: DocItem[];
+  activePath: string | undefined;
+  onSelect: (path: string) => void;
+  favVersion: number;
+}) {
+  const favoriteFiles = useMemo(
+    () => getFavoriteFiles(allFiles),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allFiles, favVersion],
+  );
+
+  if (favoriteFiles.length === 0) return null;
+
+  return (
+    <div className="mb-4 pb-3 border-b border-slate-100">
+      <div className="flex items-center gap-1.5 px-3 py-1">
+        <Star size={11} className="text-amber-400 fill-amber-400" />
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-1">
+          Pinned
+        </span>
+      </div>
+      <div className="mt-1 flex flex-col">
+        {favoriteFiles.map((file) => {
+          const isActive = file.path === activePath;
+          return (
+            <button
+              type="button"
+              key={file.path}
+              onClick={() => onSelect(file.path)}
+              className={clsx(
+                "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
+                "text-left w-full",
+                isActive
+                  ? "bg-amber-50 text-amber-800 font-medium"
+                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
+              )}
+              style={{ paddingLeft: "20px" }}
+            >
+              <Star
+                size={11}
+                className={clsx(
+                  "shrink-0",
+                  isActive ? "text-amber-400 fill-amber-400" : "text-slate-300 fill-slate-300",
+                )}
+              />
+              <span className="truncate flex-1">
+                {cleanLabel(file.name)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -223,6 +289,13 @@ export function DocsSidebar({
   className,
   header,
 }: DocsSidebarProps) {
+  const [favVersion, setFavVersion] = useState(0);
+
+  const handleToggleFavorite = useCallback((path: string) => {
+    toggleFavorite(path);
+    setFavVersion((v) => v + 1);
+  }, []);
+
   return (
     <div
       className={clsx(
@@ -244,6 +317,14 @@ export function DocsSidebar({
       )}
 
       <nav className="flex-1 overflow-y-auto px-2 pb-10 custom-scrollbar">
+        {/* Favorites Section — pinned docs */}
+        <FavoritesSection
+          allFiles={allFiles}
+          activePath={activePath}
+          onSelect={onSelect}
+          favVersion={favVersion}
+        />
+
         {/* Recent Section — cross-folder, mtime-sorted */}
         <RecentSection
           allFiles={allFiles}
@@ -264,3 +345,6 @@ export function DocsSidebar({
     </div>
   );
 }
+
+export { type DocsSidebarProps };
+export { toggleFavorite as _toggleFavorite };

@@ -138,6 +138,44 @@ export function getRecentFiles(
     .slice(0, limit);
 }
 
+// --------------- Favorites ---------------
+
+const FAVORITES_KEY = "docs-viewer-favorites";
+
+/** Get pinned doc paths from localStorage */
+export function getFavorites(): string[] {
+  try {
+    const raw = localStorage.getItem(FAVORITES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Toggle a doc path in favorites. Returns new favorites list. */
+export function toggleFavorite(path: string): string[] {
+  const favs = getFavorites();
+  const idx = favs.indexOf(path);
+  if (idx >= 0) {
+    favs.splice(idx, 1);
+  } else {
+    favs.push(path);
+  }
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+  return favs;
+}
+
+/** Check if a path is favorited */
+export function isFavorite(path: string): boolean {
+  return getFavorites().includes(path);
+}
+
+/** Get favorite DocItems from allFiles */
+export function getFavoriteFiles(allFiles: DocItem[]): DocItem[] {
+  const favs = new Set(getFavorites());
+  return allFiles.filter((f) => favs.has(f.path));
+}
+
 /**
  * Formats a timestamp into a human-readable relative time string.
  * e.g. "방금 전", "3분 전", "2시간 전", "어제", "3일 전"

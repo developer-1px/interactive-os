@@ -26,6 +26,12 @@ export default defineConfig({
   cacheDir: "node_modules/.vite-docs",
   resolve: {
     dedupe: ["react", "react-dom"],
+    alias: {
+      "@kernel": "/packages/kernel/src",
+      "@os": "/src/os",
+      "@apps": "/src/apps",
+      "@": "/src",
+    },
   },
   server: {
     port: 4444,

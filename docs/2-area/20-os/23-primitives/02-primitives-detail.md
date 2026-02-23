@@ -1,6 +1,6 @@
 # 코어 프리미티브 (ZIFT)
 
-Antigravity OS의 4가지 핵심 프리미티브: **T**rigger, **F**ield, **I**tem, **Z**one
+Interactive OS의 4가지 핵심 프리미티브: **T**rigger, **F**ield, **I**tem, **Z**one
 
 ---
 

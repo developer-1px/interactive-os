@@ -94,7 +94,7 @@ __root.tsx (RootComponent)
 
 | 구분 | Layout Route (`_minimal.tsx`) | `OS.App` 컴포넌트 |
 |------|------|------|
-| **소속** | TanStack Router (라우팅 레이어) | AntigravityOS (OS 레이어) |
+| **소속** | TanStack Router (라우팅 레이어) | Interactive OS (OS 레이어) |
 | **역할** | URL 매칭 없이 자식 라우트를 감싸는 UI wrapper | 앱 엔진 초기화, 커맨드 등록, 상태 관리 |
 | **담당** | "어떤 라우트들을 하나의 그룹으로 묶을 것인가" | "이 그룹에 어떤 앱 기능(키맵, 커맨드, 포커스)을 부여할 것인가" |
 | **렌더링** | `<Outlet />`으로 자식 라우트를 전달 | `<Zone>`으로 포커스/커맨드 영역을 구성 |

@@ -10,7 +10,7 @@
 | `Zustand` / `useStore` / `create()` | `kernel.subscribe` / `kernel.getState` | 2026-02-13 | 상태관리 전면 교체 |
 | `createCommandStore` | `createKernel` + `defineCommand` | 2026-02-13 | 커널 패키지로 이관 |
 | `CommandRegistry` (class 기반) | `defineCommand` (함수 기반, kernel) | 2026-02-13 | 등록 방식 변경 |
-| `AntigravityLogger` | 커널 내장 로깅 / Inspector | 2026-02-13 | 전용 로거 제거됨 |
+| `Logger` (legacy) | 커널 내장 로깅 / Inspector | 2026-02-13 | 전용 로거 제거됨 |
 | `useEngine` / `useCommandCenter` | `kernel.dispatch` / `useKernel` | 2026-02-13 | 훅 API 변경 |
 | `FocusSync` (컴포넌트) | `FocusListener` (리스너 패턴) | 2026-02-13 | 컴포넌트→리스너 전환 |
 | `Immer` / `produce` | 커널 순수 reducer | 2026-02-13 | 불변성 라이브러리 제거 |
@@ -67,9 +67,9 @@ git show archive/legacy-docs:docs/path/to/file.md
 |-----------|-----------|--------|
 | `docs/3-resource/00-guides/00-developer-usage.md` | Zustand, CommandRegistry, 구 defineCommand API 기반 — kernel 도입으로 전면 무효 | 02-13 |
 | `docs/3-resource/00-guides/01-app-architecture-usage.md` | createCommandStore, useEngine, Immer 기반 — 엔진 레이어 자체 소멸 | 02-13 |
-| `docs/3-resource/00-guides/02-debugging.md` | AntigravityLogger, 구 Inspector 구조 기반 — Inspector 전면 재설계됨 | 02-13 |
+| `docs/3-resource/00-guides/02-debugging.md` | Legacy Logger, 구 Inspector 구조 기반 — Inspector 전면 재설계됨 | 02-13 |
 | `docs/3-resource/02-analysis-reports/2026-02-12-mo-s-co-w-folder-structure-report.md` | `os-new/`, `packages/surface/`, `TestBot shim` 기반 스냅샷 — 모두 소멸 | 02-20 |
-| `docs/3-resource/02-analysis-reports/2026-0212-2204-[report]-onboarding-essential-knowledge.md` | `window.__TESTBOT__`, `os-new/`, `AntigravityOS.tsx` 기반 — 현행 구조와 전면 불일치 | 02-20 |
+| `docs/3-resource/02-analysis-reports/2026-0212-2204-[report]-onboarding-essential-knowledge.md` | `window.__TESTBOT__`, `os-new/`, legacy OS facade 기반 — 현행 구조와 전면 불일치 | 02-20 |
 | `docs/3-resource/02-analysis-reports/2026-0212-2138-[report]-divide-workflow-retro.md` | `TestBot` API 기반 회고 — TestBot 소멸로 무효 | 02-20 |
 | `docs/3-resource/04-architecture/2026-02-12-1200-os-structure.md` | `os-new/` 폴더 구조 확정 기록 — 결론 적용 완료, 여행 기록 가치 소멸 | 02-20 |
 | `docs/3-resource/04-architecture/2026-0213-2215-headless-zone.md` | `Widget`, `packages/surface/`, `OS.Zone` 기반 — defineApp/ZIFT로 진화 완료 | 02-20 |

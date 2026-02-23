@@ -98,7 +98,7 @@ knip 기반 dead code 분석 결과와 `src/os/` (legacy) ↔ `src/os-new/` 교�
 #### 즉시 제거 가능 (os/ legacy, 사용처 0)
 
 ```
-src/os/features/AntigravityOS.tsx: Root, App, Zone, Item, Field, Trigger
+src/os/features/OS.tsx: Root, App, Zone, Item, Field, Trigger
 src/os/features/command/definitions/osCommands.ts: OS_COMMANDS
 src/os/features/command/store/CommandTelemetryStore.ts: CommandTelemetryStore
 src/os/features/command/ui/CommandContext.tsx: useDispatch, useAppState, useRegistry

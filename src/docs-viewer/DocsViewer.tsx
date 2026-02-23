@@ -5,6 +5,7 @@ import {
   Clock,
   FileText,
   FolderOpen,
+  Star,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -16,7 +17,9 @@ import {
   docsModules,
   flattenTree,
   formatRelativeTime,
+  isFavorite,
   loadDocContent,
+  toggleFavorite,
 } from "./docsUtils";
 import { type ExternalFolderSource, openExternalFolder } from "./fsAccessUtils";
 import { MarkdownRenderer } from "./MarkdownRenderer";
@@ -53,6 +56,7 @@ export function DocsViewer() {
   const [error, setError] = useState<string | null>(null);
   const [externalSource, setExternalSource] =
     useState<ExternalFolderSource | null>(null);
+  const [favVersion, setFavVersion] = useState(0);
 
   // Use ref so event handlers always see the latest external source
   const contentRef = useRef<HTMLDivElement>(null);
@@ -229,6 +233,7 @@ export function DocsViewer() {
     <div className="flex h-screen w-full bg-white text-slate-900 overflow-hidden font-sans selection:bg-indigo-100 selection:text-indigo-900">
       {/* Sidebar */}
       <DocsSidebar
+        key={favVersion}
         items={docTree}
         allFiles={allFiles}
         activePath={activePath}
@@ -290,16 +295,39 @@ export function DocsViewer() {
                       </div>
                     ))}
 
-                    {/* Modification date */}
-                    {activePath && docsMeta[activePath] && (
-                      <span
-                        className="ml-auto flex items-center gap-1 text-xs text-slate-400 tabular-nums shrink-0"
-                        title={new Date(docsMeta[activePath].mtime).toLocaleString()}
-                      >
-                        <Clock size={11} className="text-slate-300" />
-                        {formatRelativeTime(docsMeta[activePath].mtime)}
-                      </span>
-                    )}
+                    {/* Modification date + Pin */}
+                    <div className="ml-auto flex items-center gap-2 shrink-0">
+                      {activePath && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            toggleFavorite(activePath);
+                            setFavVersion((v) => v + 1);
+                          }}
+                          className={clsx(
+                            "p-1 rounded-md transition-colors",
+                            isFavorite(activePath)
+                              ? "text-amber-400 hover:text-amber-500"
+                              : "text-slate-300 hover:text-slate-400",
+                          )}
+                          title={isFavorite(activePath) ? "Unpin" : "Pin to sidebar"}
+                        >
+                          <Star
+                            size={13}
+                            className={isFavorite(activePath) ? "fill-amber-400" : ""}
+                          />
+                        </button>
+                      )}
+                      {activePath && docsMeta[activePath] && (
+                        <span
+                          className="flex items-center gap-1 text-xs text-slate-400 tabular-nums"
+                          title={new Date(docsMeta[activePath].mtime).toLocaleString()}
+                        >
+                          <Clock size={11} className="text-slate-300" />
+                          {formatRelativeTime(docsMeta[activePath].mtime)}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <MarkdownRenderer content={content} />

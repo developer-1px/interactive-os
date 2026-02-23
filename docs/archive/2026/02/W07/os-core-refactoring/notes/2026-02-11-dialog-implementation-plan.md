@@ -117,7 +117,7 @@ Radix 인터페이스의 thin wrapper:
 </Dialog>
 ```
 
-### [MODIFY] [AntigravityOS.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/AntigravityOS.tsx)
+### [MODIFY] [OS.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/OS.tsx)
 
 `Dialog` export 추가. `Modal`은 deprecated annotation.
 

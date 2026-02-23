@@ -1,7 +1,7 @@
 # OS Folder Structure Refactor: As-Is vs To-Be Report
 
 > **작성일:** 2026-02-10  
-> **작성자:** Antigravity  
+> **작성자:** AI  
 > **태그:** refactoring, architecture, os-new, documentation
 
 ---

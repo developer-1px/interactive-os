@@ -28,15 +28,41 @@ os.defineEffect("focus", (itemId: string) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// Scroll Effect — Scroll element into view
+// Scroll Effect — Scroll element into view (only when needed)
+//
+// scrollIntoView({ block: "nearest" }) can still cause micro-scroll
+// in nested scroll containers with padding (e.g., Builder canvas
+// with pt-14/pb-8). We check actual visibility first.
 // ═══════════════════════════════════════════════════════════════════
+
+/** Find the nearest scrollable ancestor of an element. */
+function findScrollParent(el: HTMLElement): HTMLElement | null {
+  let current = el.parentElement;
+  while (current) {
+    const { overflowY } = getComputedStyle(current);
+    if (overflowY === "auto" || overflowY === "scroll") return current;
+    current = current.parentElement;
+  }
+  return null;
+}
+
+/** Check if element is fully visible within its scroll container. */
+function isFullyVisible(el: HTMLElement, container: HTMLElement): boolean {
+  const er = el.getBoundingClientRect();
+  const cr = container.getBoundingClientRect();
+  return er.top >= cr.top && er.bottom <= cr.bottom
+    && er.left >= cr.left && er.right <= cr.right;
+}
 
 os.defineEffect("scroll", (itemId: string) => {
   const zoneId = os.getState().os.focus.activeZoneId;
   const el = findItemElement(zoneId, itemId);
-  if (el) {
-    el.scrollIntoView({ block: "nearest", inline: "nearest" });
-  }
+  if (!el) return;
+
+  const scrollParent = findScrollParent(el);
+  if (scrollParent && isFullyVisible(el, scrollParent)) return;
+
+  el.scrollIntoView({ block: "nearest", inline: "nearest" });
 });
 
 // ═══════════════════════════════════════════════════════════════════

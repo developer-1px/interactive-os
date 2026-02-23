@@ -2,7 +2,7 @@
 # Discussion: useComputed vs Zustand Selector
 
 **Date**: 2026-02-20
-**Participants**: User, AI (Antigravity)
+**Participants**: User, AI
 **Topic**: React `useSyncExternalStore` crash causes and comparison with Zustand selectors.
 
 ## Journey

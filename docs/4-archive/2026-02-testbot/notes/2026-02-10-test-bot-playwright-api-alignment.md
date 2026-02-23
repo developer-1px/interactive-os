@@ -4,11 +4,11 @@
 
 ### 배경
 
-TestBot은 원래 **LLM 자가검증 도구**로 탄생했다. Antigravity(브라우저 에이전트)가 코드 변경 후 브라우저를 열고 직접 눈으로 확인하는 대신, 테스트 코드를 실행해서 더 빠르게 검증하도록 만든 것이다. `window.__TEST__` 등으로 접근하면 e2e보다 쉽게 결과를 가져올 수 있었기 때문이다.
+TestBot은 원래 **LLM 자가검증 도구**로 탄생했다. 브라우저 에이전트가 코드 변경 후 브라우저를 열고 직접 눈으로 확인하는 대신, 테스트 코드를 실행해서 더 빠르게 검증하도록 만든 것이다. `window.__TEST__` 등으로 접근하면 e2e보다 쉽게 결과를 가져올 수 있었기 때문이다.
 
 ### 문제
 
-1. **Antigravity**는 TestBot을 돌릴 수 있지만, 매번 브라우저를 열어 시각적으로 확인하고 있다 (비효율적)
+1. **브라우저 에이전트**는 TestBot을 돌릴 수 있지만, 매번 브라우저를 열어 시각적으로 확인하고 있다 (비효율적)
 2. **Claude Code**(터미널 전용 에이전트)는 브라우저가 없어서 TestBot 테스트를 아예 돌리지 못한다
 3. 테스트 코드가 TestBot 전용 API로 작성되어 있어서 **다른 러너에서 재사용 불가능**하다
 
@@ -18,7 +18,7 @@ TestBot은 원래 **LLM 자가검증 도구**로 탄생했다. Antigravity(브�
 
 | 맥락 | 러너 | 용도 |
 |------|------|------|
-| Antigravity 자가검증 | `npx playwright test` (터미널) | 코드 변경 후 빠른 pass/fail 확인 |
+| 에이전트 자가검증 | `npx playwright test` (터미널) | 코드 변경 후 빠른 pass/fail 확인 |
 | Claude Code 자가검증 | `npx playwright test` (터미널) | 코드 변경 후 빠른 pass/fail 확인 |
 | 사용자 시연 | TestBot (브라우저 내) | 커서 애니메이션 + 시각 피드백으로 라이브 데모 |
 
@@ -31,7 +31,7 @@ TestBot은 원래 **LLM 자가검증 도구**로 탄생했다. Antigravity(브�
 테스트 코드 (TestBot 전용 API)
 └── TestBot 러너만 실행 가능
     └── 브라우저에서만 동작
-        └── Antigravity만 접근 가능
+        └── 브라우저 에이전트만 접근 가능
             └── Claude Code는 자가검증 불가 ❌
 ```
 
@@ -39,7 +39,7 @@ TestBot은 원래 **LLM 자가검증 도구**로 탄생했다. Antigravity(브�
 
 ```
 공유 테스트 코드 (Playwright API 표면)
-├── Playwright 러너  →  Antigravity / Claude Code (터미널, 자동화)
+├── Playwright 러너  →  에이전트 / Claude Code (터미널, 자동화)
 └── TestBot 러너     →  사용자 데모 (브라우저, 시각 커서)
 ```
 

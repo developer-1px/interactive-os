@@ -73,31 +73,44 @@ export const useFieldFocus = ({
   blurOnInactive,
   cursorRef,
 }: UseFieldFocusProps) => {
+  // Track previous active state to detect inactive→active transition.
+  // setCaretPosition must only run ONCE on initial entry into edit mode,
+  // not on every re-render while active (which causes addRange → browser auto-scroll).
+  const wasActiveRef = useRef(false);
+
   useEffect(() => {
     if (isActive && innerRef.current) {
+      const isFirstEntry = !wasActiveRef.current;
+      wasActiveRef.current = true;
+
       if (document.activeElement !== innerRef.current) {
         innerRef.current.focus({ preventScroll: true });
       }
-      requestAnimationFrame(() => {
+
+      // Restore caret position only on initial entry (inactive→active transition)
+      if (isFirstEntry) {
         requestAnimationFrame(() => {
-          if (innerRef.current) {
-            try {
-              if (cursorRef.current !== null) {
-                setCaretPosition(innerRef.current, cursorRef.current);
-              } else {
-                const textLength = innerRef.current.innerText.length;
-                setCaretPosition(innerRef.current, textLength);
-              }
-            } catch (_e) {}
-          }
+          requestAnimationFrame(() => {
+            if (innerRef.current) {
+              try {
+                if (cursorRef.current !== null) {
+                  setCaretPosition(innerRef.current, cursorRef.current);
+                } else {
+                  const textLength = innerRef.current.innerText.length;
+                  setCaretPosition(innerRef.current, textLength);
+                }
+              } catch (_e) { }
+            }
+          });
         });
-      });
+      }
     } else if (
       !isActive &&
       blurOnInactive &&
       innerRef.current &&
       document.activeElement === innerRef.current
     ) {
+      wasActiveRef.current = false;
       innerRef.current.blur();
     }
   }, [isActive, blurOnInactive, innerRef, cursorRef]);

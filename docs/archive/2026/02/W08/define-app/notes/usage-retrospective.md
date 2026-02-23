@@ -60,7 +60,7 @@ import { CopyTodo, CutTodo, PasteTodo } from "@apps/todo/features/commands/clipb
 import { RedoCommand, UndoCommand } from "@apps/todo/features/commands/history";
 import { AddTodo, DeleteTodo, MoveItemDown, MoveItemUp, StartEdit, SyncDraft, ToggleTodo } from "@apps/todo/features/commands/list";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { OS } from "@os/AntigravityOS";
+import { OS } from "@os/OS";
 import { todoSlice } from "@apps/todo/app";
 import { Plus} from "lucide-react";
 ```
@@ -76,7 +76,7 @@ import { Plus} from "lucide-react";
 // ListViewV2.tsx — v2: 4개 import 문, 도메인 import는 TodoModule 하나
 import { TodoModule } from "@apps/todo/module";
 import { TaskItemV2 } from "@apps/todo/widgets-v2/TaskItemV2";
-import { OS } from "@os/AntigravityOS";
+import { OS } from "@os/OS";
 import { Plus } from "lucide-react";
 ```
 

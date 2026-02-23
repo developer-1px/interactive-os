@@ -4,7 +4,7 @@
 
 ## 1. 개요
 
-**ZIFT**는 Antigravity Interaction OS의 고수준 **Facade Pattern**으로, 복잡한 포커스 시스템을 4개의 직관적인 시맨틱 컴포넌트로 추상화합니다.
+**ZIFT**는 Interaction OS의 고수준 **Facade Pattern**으로, 복잡한 포커스 시스템을 4개의 직관적인 시맨틱 컴포넌트로 추상화합니다.
 
 ```
 Zone → 영역(Jurisdiction)

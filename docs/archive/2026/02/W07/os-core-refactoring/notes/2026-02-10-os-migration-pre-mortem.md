@@ -26,7 +26,7 @@ Pre-mortem은 **프로젝트가 실패했다고 가정하고, 그 원인을 역�
 
 **증거 (현재 코드):**
 ```
-os/features/AntigravityOS.tsx     → os-new/core/logic 사용
+os/features/OS.tsx     → os-new/core/logic 사용
 os/app/export/primitives/Zone.tsx → os-new/primitives/FocusGroup 사용
 os/app/export/primitives/*.tsx    → os-new/store, os-new/schema 다수 참조
 apps/todo/                        → os-new/lib, os-new/core 참조

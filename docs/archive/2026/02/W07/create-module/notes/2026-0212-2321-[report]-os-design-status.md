@@ -83,7 +83,7 @@
 | state/ (3 파일) | ✅ 초기 상태 |
 | appSlice.ts (11KB) | ✅ 앱 상태 슬라이스 등록 |
 
-#### Facade (AntigravityOS.tsx)
+#### Facade (OS.tsx)
 
 ```
 OS.Root, OS.Zone, OS.Item, OS.Field, OS.Trigger, OS.Modal, OS.Dialog, OS.Kbd
