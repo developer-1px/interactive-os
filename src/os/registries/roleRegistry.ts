@@ -93,7 +93,8 @@ const CHECKED_ROLES = new Set([
 ]);
 
 /** Roles where items can be expanded/collapsed */
-const EXPANDABLE_ROLES = new Set(["treeitem", "menuitem"]);
+/** Roles that are ALWAYS expandable (inherent to the role). treeitem is NOT here — expandability depends on children. */
+const EXPANDABLE_ROLES = new Set(["menuitem"]);
 
 /** Get the default child role for a Zone role */
 export function getChildRole(zoneRole?: ZoneRole | string): string {

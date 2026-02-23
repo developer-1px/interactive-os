@@ -127,6 +127,7 @@ export function TreePattern() {
         select={{ mode: "multiple", range: true }}
         aria-multiselectable="true"
         aria-label="Example Tree"
+        getExpandableItems={() => new Set(["node-1", "node-2"])}
       >
         <TreeContent />
       </FocusGroup>

@@ -243,7 +243,18 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
             project: { ...base.project, ...config.project },
         };
     }
-    function setExpandableItems(items: string[] | Set<string>) { mockExpandableItems.current = items instanceof Set ? items : new Set(items); }
+    function setExpandableItems(items: string[] | Set<string>) {
+        const set = items instanceof Set ? items : new Set(items);
+        mockExpandableItems.current = set;
+        // Also register in ZoneRegistry so headless computeAttrs and FocusItem can detect expandability
+        const zoneId = kernel.getState().os.focus.activeZoneId;
+        if (zoneId) {
+            const entry = ZoneRegistry.get(zoneId);
+            if (entry) {
+                ZoneRegistry.register(zoneId, { ...entry, getExpandableItems: () => set });
+            }
+        }
+    }
     function setTreeLevels(levels: Record<string, number> | Map<string, number>) { mockTreeLevels.current = levels instanceof Map ? levels : new Map(Object.entries(levels)); }
     function setZoneOrder(zones: any[]) { mockZoneOrder.current = zones; }
 
@@ -275,6 +286,8 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
             parentId: null,
             // Preserve existing getItems if explicitly registered
             ...(existingEntry?.getItems ? { getItems: existingEntry.getItems } : {}),
+            // Sync expandableItems from mockExpandableItems
+            ...(mockExpandableItems.current.size > 0 ? { getExpandableItems: () => mockExpandableItems.current } : {}),
             // Preserve other existing callbacks
             ...(existingEntry?.onAction ? { onAction: existingEntry.onAction } : {}),
             ...(existingEntry?.onCheck ? { onCheck: existingEntry.onCheck } : {}),

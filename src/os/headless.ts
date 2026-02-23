@@ -207,7 +207,9 @@ export function simulateClick(
 
     const entry = ZoneRegistry.get(zoneId);
     const childRole = entry?.role ? getChildRole(entry.role) : undefined;
-    const expandable = childRole ? isExpandableRole(childRole) : false;
+    const roleExpandable = childRole ? isExpandableRole(childRole) : false;
+    const zoneExpandable = entry?.getExpandableItems?.().has(itemId) ?? false;
+    const expandable = roleExpandable || zoneExpandable;
 
     const input: MouseInput = {
         targetItemId: itemId,
@@ -255,7 +257,9 @@ export function computeAttrs(
     const z = s.os.focus.zones[id];
     const entry = ZoneRegistry.get(id);
     const childRole = entry?.role ? getChildRole(entry.role) : undefined;
-    const expandable = childRole ? isExpandableRole(childRole) : false;
+    const roleExpandable = childRole ? isExpandableRole(childRole) : false;
+    const zoneExpandable = entry?.getExpandableItems?.().has(itemId) ?? false;
+    const expandable = roleExpandable || zoneExpandable;
     const useChecked = childRole ? isCheckedRole(childRole) : false;
 
     const isFocused = z?.focusedItemId === itemId;

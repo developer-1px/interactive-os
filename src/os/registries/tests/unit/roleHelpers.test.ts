@@ -62,7 +62,7 @@ describe("isCheckedRole", () => {
 });
 
 describe("isExpandableRole", () => {
-  it.each(["treeitem", "menuitem"])('"%s" → true', (role) => {
+  it.each(["menuitem"])('"%s" → true', (role) => {
     expect(isExpandableRole(role)).toBe(true);
   });
 
@@ -72,6 +72,7 @@ describe("isExpandableRole", () => {
     "tab",
     "button",
     "gridcell",
+    "treeitem", // treeitem expandability depends on children, not role
   ])('"%s" → false', (role) => {
     expect(isExpandableRole(role)).toBe(false);
   });

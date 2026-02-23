@@ -114,6 +114,7 @@ export interface BoundComponents<S> {
     children?: ReactNode;
     onAction?: (cursor: { focusId: string; selection: string[] }) => void;
     onSelect?: (cursor: { focusId: string; selection: string[] }) => void;
+    getExpandableItems?: () => Set<string>;
   }>;
   Item: React.FC<{
     id: string | number;

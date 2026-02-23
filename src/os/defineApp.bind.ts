@@ -50,9 +50,13 @@ export function createBoundComponents<S>(
 
   // ── Zone component ──
   const ZoneComponent: React.FC<{
+    id?: string;
     className?: string;
     children?: ReactNode;
     "aria-label"?: string;
+    onAction?: (cursor: { focusId: string; selection: string[] }) => void;
+    onSelect?: (cursor: { focusId: string; selection: string[] }) => void;
+    getExpandableItems?: () => Set<string>;
   }> = ({ className, children, ...rest }) => {
     // Zone ID is always auto-injected from bind() — not developer-specified
     // JSX props (...rest) provide base callbacks; config overrides only when defined.

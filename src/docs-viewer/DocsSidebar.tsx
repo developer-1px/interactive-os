@@ -296,6 +296,21 @@ export function DocsSidebar({
     [onSelect],
   );
 
+  // Expandable items: only folders are expandable (not files)
+  const getExpandableItems = useCallback(() => {
+    const set = new Set<string>();
+    const collect = (list: DocItem[]) => {
+      for (const item of list) {
+        if (item.type === "folder" && item.children) {
+          set.add(`folder:${item.path}`);
+          collect(item.children);
+        }
+      }
+    };
+    collect(items);
+    return set;
+  }, [items]);
+
   return (
     <div
       className={clsx(
@@ -336,6 +351,7 @@ export function DocsSidebar({
         <DocsSidebarUI.Zone
           className="flex flex-col"
           onAction={handleAction}
+          getExpandableItems={getExpandableItems}
         >
           {items.map((item) => (
             <TreeItem

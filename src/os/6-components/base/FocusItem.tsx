@@ -198,7 +198,11 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     // Auto-resolve child role from parent Zone role (e.g., listbox → option)
     const effectiveRole = role || getChildRole(zoneRole);
     const useChecked = isCheckedRole(effectiveRole);
-    const expandable = isExpandableRole(effectiveRole);
+    // Expandable: role-based (menuitem) OR registered in zone's expandableItems
+    const roleExpandable = isExpandableRole(effectiveRole);
+    const zoneEntry = ZoneRegistry.get(zoneId);
+    const zoneExpandable = zoneEntry?.getExpandableItems?.().has(id) ?? false;
+    const expandable = roleExpandable || zoneExpandable;
 
     // --- Prop Consolidation ---
     const { tabIndex: propTabIndex, ...otherRest } = rest;
