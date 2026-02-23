@@ -11,7 +11,10 @@
   - `FOCUS_GROUP_INIT` → `OS_ZONE_INIT` 리네이밍 + 별도 파일 추출
   - Zone이 zoneId 생성 (`zone-N`), OS_ZONE_INIT dispatch, ZoneContext 제공
   - FocusGroup은 Zone 안에서 ZoneContext 안 뿌림, 독립 사용 시만 fallback
-- [ ] T4: FocusGroup.tsx headless 전환 — div 제거, ARIA props 반환
+- [x] T4: FocusGroup.tsx headless 전환 ✅ (919 tests green)
+  - `headless` + `containerRef` props added to FocusGroup
+  - Zone renders container div, FocusGroup provides context + effects only
+  - Standalone FocusGroup (aria-showcase) unchanged — backward compat
 - [ ] T5: ZoneEntry 슬롯 구조 변경 + 커맨드 접근 경로 수정
 - [x] T6: data attribute 변경 — `data-focus-group` → `data-zone` ✅ (22곳, 919 tests green)
 - [ ] T7: 앱 마이그레이션 (Todo, Builder, DocsViewer)

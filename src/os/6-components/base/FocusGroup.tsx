@@ -203,6 +203,14 @@ export interface FocusGroupProps
 
   /** Container style */
   style?: React.CSSProperties;
+
+  /** When true, FocusGroup renders no DOM — only context + effects.
+   *  The parent (Zone) is responsible for rendering the container element. */
+  headless?: boolean;
+
+  /** External ref to the container element (used when headless=true).
+   *  Zone passes this so FocusGroup can register with ZoneRegistry and run autoFocus. */
+  containerRef?: React.RefObject<HTMLElement>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -302,6 +310,8 @@ export function FocusGroup({
   children,
   className,
   style,
+  headless = false,
+  containerRef: externalContainerRef,
   ...rest
 }: FocusGroupProps) {
   // --- Stable ID ---
@@ -337,7 +347,8 @@ export function FocusGroup({
   const parentId = parentContext?.zoneId || null;
 
   // --- Container Ref ---
-  const containerRef = useRef<HTMLDivElement>(null);
+  const internalRef = useRef<HTMLDivElement>(null);
+  const containerRef = (externalContainerRef ?? internalRef) as React.RefObject<HTMLDivElement>;
 
   // --- Init kernel state (render-time, idempotent) ---
   // OS_ZONE_INIT is a no-op if zone already exists.
@@ -461,11 +472,32 @@ export function FocusGroup({
   const parentZoneCtx = useContext(ZoneContext);
   const needsZoneContext = !parentZoneCtx || parentZoneCtx.zoneId !== groupId;
 
+  // Headless mode: no DOM, just context + effects.
+  // Zone handles rendering the container element and applying props.
+  if (headless) {
+    const headlessContent = (
+      <FocusContext.Provider value={focusContextValue}>
+        {children}
+      </FocusContext.Provider>
+    );
+
+    if (needsZoneContext) {
+      return (
+        <ZoneContext.Provider value={zoneContextValue}>
+          {headlessContent}
+        </ZoneContext.Provider>
+      );
+    }
+
+    return headlessContent;
+  }
+
+  // Standard mode: FocusGroup renders its own container div.
   const content = (
     <FocusContext.Provider value={focusContextValue}>
       {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is dynamic (listbox/toolbar/grid) */}
       <div
-        ref={containerRef}
+        ref={internalRef}
         id={groupId}
         data-zone={groupId}
         aria-current={isActive ? "true" : undefined}

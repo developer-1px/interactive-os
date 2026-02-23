@@ -1,46 +1,44 @@
 /**
- * Zone — OS interaction jurisdiction.
+ * Zone — OS interaction jurisdiction (composition point).
  *
- * The composition point for all OS capabilities (Focus, DnD, Resize, ...).
  * Zone owns:
- *   - Zone ID generation
+ *   - Zone ID generation (zone-N)
  *   - ZoneState initialization (OS_ZONE_INIT)
- *   - ZoneRegistry registration
  *   - ZoneContext (zoneId, scope)
+ *   - Container element rendering (the div that receives all OS props)
  *   - App callback routing (onCopy, onDelete, onUndo, ...)
  *
- * Zone delegates APG composite widget behavior to FocusGroup (headless capability).
+ * Zone delegates APG composite widget behavior to FocusGroup (headless).
+ * FocusGroup runs in headless mode: no DOM, only context + effects.
+ * Zone renders the container div and applies zone-level + focus-level props.
  *
- * Future capabilities (DnD, Resize) will be additional headless children of Zone,
- * composed in the same pattern as FocusGroup.
+ * Future capabilities (DnD, Resize) will be additional headless children,
+ * composed in the same ZoneContext without extra DOM nesting.
  */
 
 import { type BaseCommand, defineScope, type ScopeToken } from "@kernel";
-import type { ZoneCallback, ZoneEntry } from "@os/2-contexts/zoneRegistry";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
 import { OS_ZONE_INIT } from "@os/3-commands/focus";
 import {
   FocusGroup,
+  useFocusContext,
   type ZoneContextValue,
-  useZoneContext as _useZoneContext,
 } from "@os/6-components/base/FocusGroup.tsx";
 import type { ZoneRole } from "@os/registries/roleRegistry.ts";
 import { os } from "@os/kernel.ts";
 import type {
   ActivateConfig,
   DismissConfig,
-  FocusGroupConfig,
   NavigateConfig,
   ProjectConfig,
   SelectConfig,
   TabConfig,
 } from "@os/schemas";
 import {
-  createContext,
   type ComponentProps,
+  createContext,
   type ReactNode,
   useContext,
-  useLayoutEffect,
   useMemo,
   useRef,
 } from "react";
@@ -127,6 +125,66 @@ export interface ZoneProps
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Zone Container — renders the div with merged zone + focus props
+// ═══════════════════════════════════════════════════════════════════
+
+function ZoneContainer({
+  zoneId,
+  isActive,
+  containerRef,
+  children,
+  className,
+  style,
+  role,
+  ...rest
+}: {
+  zoneId: string;
+  isActive: boolean;
+  containerRef: React.RefObject<HTMLElement>;
+  children: ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  role?: ZoneRole;
+} & Omit<
+  ComponentProps<"div">,
+  "id" | "role" | "onSelect" | "onCopy" | "onCut" | "onPaste" | "onCheck"
+>) {
+  // Read focus config from FocusContext (populated by headless FocusGroup)
+  const focusCtx = useFocusContext();
+  const config = focusCtx?.config;
+  const effectiveRole = focusCtx?.role ?? role;
+  const orientation = config?.navigate.orientation;
+
+  return (
+    // biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is dynamic (listbox/toolbar/grid)
+    <div
+      ref={containerRef as React.RefObject<HTMLDivElement>}
+      id={zoneId}
+      data-zone={zoneId}
+      aria-current={isActive ? "true" : undefined}
+      aria-orientation={
+        orientation === "horizontal"
+          ? "horizontal"
+          : orientation === "vertical"
+            ? "vertical"
+            : undefined
+      }
+      aria-multiselectable={
+        config?.select.mode === "multiple" || undefined
+      }
+      role={effectiveRole || "group"}
+      tabIndex={-1}
+      className={className || undefined}
+      data-orientation={orientation}
+      style={{ outline: "none", ...style }}
+      {...rest}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Zone Component
 // ═══════════════════════════════════════════════════════════════════
 
@@ -153,7 +211,7 @@ export function Zone({
   children,
   className,
   style,
-  ...props
+  ...rest
 }: ZoneProps) {
   // ─── Zone ID (stable, auto-generated if not provided) ───
   const zoneId = useMemo(() => id || generateZoneId(), [id]);
@@ -172,12 +230,20 @@ export function Zone({
     [zoneId, scope],
   );
 
-  // ─── Render: Zone provides context, delegates to FocusGroup ───
+  // ─── Container ref (shared between Zone container and FocusGroup) ───
+  const containerRef = useRef<HTMLElement>(null);
+
+  // ─── Is Active ───
+  const isActive = os.useComputed((s) => s.os.focus.activeZoneId === zoneId);
+
+  // ─── Render: Zone provides context, delegates to headless FocusGroup ───
   return (
     <ZoneContext.Provider value={zoneContextValue}>
       <FocusGroup
         id={zoneId}
         scope={scope}
+        headless
+        containerRef={containerRef}
         {...(role !== undefined ? { role } : {})}
         {...(options?.navigate !== undefined
           ? { navigate: options.navigate }
@@ -209,11 +275,18 @@ export function Zone({
         {...(getItems !== undefined ? { getItems } : {})}
         {...(getExpandableItems !== undefined ? { getExpandableItems } : {})}
         {...(getTreeLevels !== undefined ? { getTreeLevels } : {})}
-        {...(className !== undefined ? { className } : {})}
-        {...(style !== undefined ? { style } : {})}
-        {...props}
       >
-        {children}
+        <ZoneContainer
+          zoneId={zoneId}
+          isActive={isActive}
+          containerRef={containerRef}
+          role={role}
+          className={className}
+          style={style}
+          {...rest}
+        >
+          {children}
+        </ZoneContainer>
       </FocusGroup>
     </ZoneContext.Provider>
   );
