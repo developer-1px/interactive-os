@@ -4,12 +4,12 @@
 
 - [ ] **T7**: Tree Click-to-Activate + ExpandTrigger primitive
   - Discussion: `discussions/2026-0223-2004-tree-click-activate.md`
-  - [ ] T7.1: `activate.onClick` 옵션 — OS ClickListener에서 Click → `OS_ACTIVATE` dispatch
-  - [ ] T7.2: `OS_ACTIVATE` auto-expand — expandable item에서 자동 `OS_EXPAND(toggle)`
-  - [ ] T7.3: `ExpandTrigger` 프리미티브 — OS가 셰브론 렌더 + 클릭 핸들 + 회전 처리
-  - [ ] T7.4: DocsViewer 적용 — `activate.onClick: true` + `followFocus: true` + `onAction` 통합
-  - [ ] T7.5: 기존 잔해 제거 — 수동 `OS_EXPAND` dispatch, `onSelect` 폴더 분기 삭제
-  - [ ] T7.6: /verify — tsc + vitest + 브라우저 검증
+  - [x] T7.1: `activate.onClick` 옵션 — OS ClickListener에서 Click → `OS_ACTIVATE` dispatch
+  - [x] T7.2: `OS_ACTIVATE` auto-expand — 이미 구현됨 (expandable item 자동 OS_EXPAND)
+  - [ ] T7.3: `ExpandTrigger` 프리미티브 — OS가 셰브론 렌더 + 클릭 핸들 + 회전 처리 (후속)
+  - [x] T7.4: DocsViewer 적용 — `activate.onClick: true` + `followFocus: true` + `onAction` 통합
+  - [x] T7.5: 기존 잔해 제거 — 수동 `OS_EXPAND` dispatch, `onSelect` 폴더 분기 삭제
+  - [x] T7.6: /verify — tsc ✅ + vitest 919 GREEN ✅ (브라우저 검증 대기)
 
 - [ ] **T5**: OS sidebar tree navigation (브라우저 검증 잔여)
   - [ ] Step 16: /verify — 브라우저 검증
