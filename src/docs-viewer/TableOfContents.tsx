@@ -69,16 +69,12 @@ export function TableOfContents({ content, className }: TableOfContentsProps) {
     return (
         <nav
             className={clsx(
-                "sticky top-8 max-h-[calc(100vh-4rem)] overflow-y-auto",
-                "w-56 shrink-0 hidden xl:block",
+                "fixed right-8 top-[7rem] max-h-[calc(100vh-8rem)] overflow-y-auto",
+                "w-36 hidden xl:block",
                 className,
             )}
         >
-            <div className="flex items-center gap-1.5 mb-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                <List size={12} />
-                목차
-            </div>
-            <ul className="space-y-0.5 border-l border-slate-100">
+            <ul className="space-y-px border-l border-slate-200/40">
                 {headings.map((heading) => (
                     <TocItem
                         key={heading.slug}
@@ -112,19 +108,16 @@ function TocItem({
                 type="button"
                 onClick={() => onClick(heading.slug)}
                 className={clsx(
-                    "block w-full text-left text-[12px] leading-snug py-1 transition-all duration-200",
-                    "hover:text-indigo-600",
-                    indent === 0 && "pl-3 font-semibold",
-                    indent === 1 && "pl-6 font-medium",
-                    indent === 2 && "pl-9 font-normal",
-                    indent >= 3 && "pl-12 font-normal",
+                    "block w-full text-left text-[10px] leading-tight py-0.5 truncate transition-colors duration-150",
+                    indent === 0 && "pl-2 font-medium",
+                    indent === 1 && "pl-4",
+                    indent >= 2 && "pl-6",
                     isActive
-                        ? "text-indigo-600 border-l-2 border-indigo-500 -ml-px"
+                        ? "text-indigo-500 border-l border-indigo-400 -ml-px"
                         : "text-slate-400 hover:text-slate-600",
                 )}
-                title={heading.text}
             >
-                <span className="line-clamp-2">{heading.text}</span>
+                {heading.text}
             </button>
         </li>
     );

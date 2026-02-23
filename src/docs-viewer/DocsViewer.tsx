@@ -240,9 +240,9 @@ export function DocsViewer() {
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">
         <div
           ref={contentRef}
-          className="flex-1 overflow-y-auto relative z-10 custom-scrollbar pt-6"
+          className="flex-1 overflow-y-auto relative z-10 custom-scrollbar"
         >
-          <div className="px-12 py-12 lg:px-16 w-full max-w-5xl mx-auto">
+          <div className="px-12 pt-5 pb-12 lg:px-16 w-full max-w-5xl mx-auto">
             {error ? (
               <div className="flex flex-col items-center justify-center py-40 text-slate-300">
                 <FileText
@@ -262,8 +262,8 @@ export function DocsViewer() {
                 </button>
               </div>
             ) : (
-              <div className="flex gap-10 w-full">
-                <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full min-w-0">
+              <>
+                <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
                   {/* Document Metadata Header */}
                   <div className="flex items-center gap-2 mb-10 border-b border-slate-50 pb-6">
                     {isExternal && (
@@ -305,18 +305,18 @@ export function DocsViewer() {
                   <MarkdownRenderer content={content} />
 
                   {/* Navigation Buttons */}
-                  <div className="mt-20 pt-8 border-t border-slate-100 flex items-center justify-between gap-4 max-w-3xl">
+                  <div className="mt-20 pt-8 border-t border-slate-100 grid grid-cols-2 gap-4 max-w-3xl">
                     {prevFile ? (
                       <button
                         type="button"
                         onClick={() => handleSelect(prevFile.path)}
-                        className="group flex flex-col items-start gap-1"
+                        className="group flex flex-col items-start gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
                       >
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
+                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
                           <ChevronLeft size={12} strokeWidth={3} />
                           Previous
                         </span>
-                        <span className="text-base font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
+                        <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-left">
                           {cleanLabel(prevFile.name)}
                         </span>
                       </button>
@@ -328,13 +328,13 @@ export function DocsViewer() {
                       <button
                         type="button"
                         onClick={() => handleSelect(nextFile.path)}
-                        className="group flex flex-col items-end gap-1 text-right"
+                        className="group flex flex-col items-end gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
                       >
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
+                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
                           Next
                           <ChevronRight size={12} strokeWidth={3} />
                         </span>
-                        <span className="text-base font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
+                        <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-right">
                           {cleanLabel(nextFile.name)}
                         </span>
                       </button>
@@ -347,7 +347,7 @@ export function DocsViewer() {
                   <div className="h-40" />
                 </article>
                 <TableOfContents content={content} />
-              </div>
+              </>
             )}
           </div>
         </div>

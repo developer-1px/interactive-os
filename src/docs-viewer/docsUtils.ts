@@ -9,7 +9,7 @@ export interface DocItem {
 /** Strip date/time/type prefix and clean up display labels */
 export function cleanLabel(label: string) {
   return label
-    .replace(/^\d{4}-\d{4}-\d{4}-\[[a-z]+\]-/, "") // Strip YYYY-MMDD-HHmm-[type]- prefix
+    .replace(/^\d{4}-\d{4}-\d{4}-(\[[a-z]+\]-)?/, "") // Strip YYYY-MMDD-HHmm-[type]- prefix (tag optional)
     .replace(/^\d{4}-\d{2}-\d{2}[_-](\d{4}[_-])?/, "") // Strip legacy YYYY-MM-DD_HHMM_ prefix
     .replace(/^0+(\d)/, "$1") // Strip zero-padding: 00 → 0, 01 → 1
     .replace(/[-_]/g, " ") // Replace dashes/underscores with spaces

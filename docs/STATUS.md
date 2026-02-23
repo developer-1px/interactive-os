@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-23 14:07
+> Last updated: 2026-02-23 14:29
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -23,6 +23,7 @@
 | projection-checkpoint | T1-T4 Done | 02-21 | ✅ Done |
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
+| cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-22 | 🟢 Active |
 | testbot-v2 | Superseded by Replay | 02-21 | 🔴 Superseded |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |

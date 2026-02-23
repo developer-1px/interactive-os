@@ -45,7 +45,7 @@ function RecentSection({
         className="flex items-center gap-1.5 px-3 py-1 w-full text-left group"
       >
         <Clock size={12} className="text-blue-400" />
-        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex-1">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-1">
           Recent
         </span>
         <span className="text-slate-300 transition-transform">
@@ -63,7 +63,7 @@ function RecentSection({
                 key={file.path}
                 onClick={() => onSelect(file.path)}
                 className={clsx(
-                  "flex items-center gap-2 px-3 py-1.5 text-[13px] rounded-md transition-all duration-150",
+                  "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
                   "text-left w-full group/recent",
                   isActive
                     ? "bg-blue-50 text-blue-700 font-medium"
@@ -83,7 +83,7 @@ function RecentSection({
                 </span>
                 <span
                   className={clsx(
-                    "text-[10px] tabular-nums shrink-0",
+                    "text-[9px] tabular-nums shrink-0",
                     isActive ? "text-blue-400" : "text-slate-300",
                   )}
                 >
@@ -136,7 +136,7 @@ const SidebarItem = ({
     if (level === 0) {
       return (
         <div className="mb-6">
-          <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+          <h3 className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
             {cleanLabel(item.name)}
           </h3>
           <div className="flex flex-col">
@@ -161,7 +161,7 @@ const SidebarItem = ({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={clsx(
-            "flex items-center gap-1.5 px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded-md transition-colors",
+            "flex items-center gap-1.5 px-3 py-1 text-[13px] text-slate-600 hover:bg-slate-100 rounded-md transition-colors",
             "text-left w-full truncate",
           )}
           style={{ paddingLeft: `${level * 12 + 12}px` }}
@@ -201,7 +201,7 @@ const SidebarItem = ({
       type="button"
       onClick={() => onSelect(item.path)}
       className={clsx(
-        "flex items-center gap-1.5 px-3 py-1 text-[13.5px] rounded-md transition-all duration-200 border border-transparent",
+        "flex items-center gap-1.5 px-3 py-1 text-[12.5px] rounded-md transition-all duration-200 border border-transparent",
         "text-left w-full",
         isActive
           ? "bg-slate-100 text-slate-900 font-medium"
@@ -237,7 +237,7 @@ export function DocsSidebar({
           <div className="p-1 bg-white border border-slate-200 rounded-md shadow-sm">
             <FileText size={14} className="text-slate-700" />
           </div>
-          <span className="font-semibold text-slate-700 text-sm tracking-tight">
+          <span className="font-semibold text-slate-700 text-[13px] tracking-tight">
             Handbook
           </span>
         </div>
