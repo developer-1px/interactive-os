@@ -17,7 +17,7 @@ export function getZoneItems(zoneId: string): string[] {
   const items: string[] = [];
   const els = entry.element.querySelectorAll("[data-item-id]");
   for (const el of els) {
-    if (el.closest("[data-focus-group]") !== entry.element) continue;
+    if (el.closest("[data-zone]") !== entry.element) continue;
     const id = el.getAttribute("data-item-id");
     if (id) items.push(id);
   }

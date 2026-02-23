@@ -36,7 +36,7 @@ const ZONE_ID = "test-canvas";
 function buildTestDOM(): HTMLDivElement {
   const container = document.createElement("div");
   container.id = ZONE_ID;
-  container.setAttribute("data-focus-group", ZONE_ID);
+  container.setAttribute("data-zone", ZONE_ID);
 
   const s1 = document.createElement("div");
   s1.setAttribute("data-item-id", "s1");

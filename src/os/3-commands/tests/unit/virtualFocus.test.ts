@@ -35,7 +35,7 @@ function resetState() {
  */
 function createZoneElement(zoneId: string, items: string[]): HTMLElement {
   const container = document.createElement("div");
-  container.setAttribute("data-focus-group", zoneId);
+  container.setAttribute("data-zone", zoneId);
   for (const itemId of items) {
     const el = document.createElement("div");
     el.setAttribute("data-item-id", itemId);
@@ -87,7 +87,7 @@ function registerVirtualZone(id: string, items: string[]) {
 
 function cleanup() {
   // Remove all zone elements from DOM
-  document.querySelectorAll("[data-focus-group]").forEach((el) => el.remove());
+  document.querySelectorAll("[data-zone]").forEach((el) => el.remove());
 }
 
 // ═══════════════════════════════════════════════════════════════════

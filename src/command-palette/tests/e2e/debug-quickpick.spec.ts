@@ -21,9 +21,9 @@ test("debug quickpick zone state", async ({ page }) => {
 
   // Check zone structure
   const zoneInfo = await page.evaluate(() => {
-    const zones = document.querySelectorAll("[data-focus-group]");
+    const zones = document.querySelectorAll("[data-zone]");
     return Array.from(zones).map((z) => ({
-      id: z.getAttribute("data-focus-group"),
+      id: z.getAttribute("data-zone"),
       role: z.getAttribute("role"),
       itemCount: z.querySelectorAll("[data-item-id]").length,
       ariaCurrent: z.getAttribute("aria-current"),
@@ -54,7 +54,7 @@ test("debug quickpick zone state", async ({ page }) => {
   const kernelFocus = await page.evaluate(() => {
     const state = document.querySelectorAll('[aria-current="true"]');
     return Array.from(state).map((el) => ({
-      id: el.getAttribute("data-focus-group") || el.id,
+      id: el.getAttribute("data-zone") || el.id,
       role: el.getAttribute("role"),
     }));
   });

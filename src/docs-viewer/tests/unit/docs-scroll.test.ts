@@ -258,7 +258,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
     // Create a zone element in DOM but with no [data-item-id] children
     const zoneEl = document.createElement("div");
     zoneEl.id = "empty-zone";
-    zoneEl.setAttribute("data-focus-group", "empty-zone");
+    zoneEl.setAttribute("data-zone", "empty-zone");
     document.body.appendChild(zoneEl);
 
     os.setState((prev) => ({
@@ -280,7 +280,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
     // Create a zone with actual focusable items
     const zoneEl = document.createElement("div");
     zoneEl.id = "real-zone";
-    zoneEl.setAttribute("data-focus-group", "real-zone");
+    zoneEl.setAttribute("data-zone", "real-zone");
     const item = document.createElement("div");
     item.setAttribute("data-item-id", "item-1");
     zoneEl.appendChild(item);

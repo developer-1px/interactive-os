@@ -13,7 +13,7 @@
  * No Zustand, no FocusData, no global mutable state.
  */
 import { type BaseCommand, defineScope, type ScopeToken } from "@kernel";
-import { produce } from "immer";
+
 import {
   type ComponentProps,
   createContext,
@@ -38,13 +38,48 @@ import type {
   SelectConfig,
   TabConfig,
 } from "../../schemas";
+import { DEFAULT_CONFIG } from "../../schemas";
 
-import { initialZoneState } from "../../state/initial.ts";
+
+import { OS_ZONE_INIT } from "../../3-commands/focus";
 
 // ═══════════════════════════════════════════════════════════════════
-// Context (same shape as ZoneContextValue)
+// ZoneContext — Zone-level identity (consumed by all capabilities)
 // ═══════════════════════════════════════════════════════════════════
 
+export interface ZoneContextValue {
+  zoneId: string;
+  scope: ScopeToken;
+}
+
+const ZoneContext = createContext<ZoneContextValue | null>(null);
+
+/** Read zone-level identity (zoneId, scope). Usable by any capability. */
+export function useZoneContext() {
+  return useContext(ZoneContext);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FocusContext — Focus capability (consumed by FocusItem, etc.)
+// ═══════════════════════════════════════════════════════════════════
+
+export interface FocusContextValue {
+  config: FocusGroupConfig;
+  role?: ZoneRole;
+}
+
+const FocusContext = createContext<FocusContextValue | null>(null);
+
+/** Read focus capability config (FocusGroupConfig, role). */
+export function useFocusContext() {
+  return useContext(FocusContext);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Legacy: FocusGroupContext (backward-compatible composite)
+// ═══════════════════════════════════════════════════════════════════
+
+/** @deprecated Use useZoneContext() + useFocusContext() instead. */
 export interface FocusGroupContextValue {
   zoneId: string;
   config: FocusGroupConfig;
@@ -52,10 +87,20 @@ export interface FocusGroupContextValue {
   scope: ScopeToken;
 }
 
-const FocusGroupContext = createContext<FocusGroupContextValue | null>(null);
-
-export function useFocusGroupContext() {
-  return useContext(FocusGroupContext);
+/**
+ * @deprecated Use useZoneContext() + useFocusContext() instead.
+ * Backward-compatible composite that merges both contexts.
+ */
+export function useFocusGroupContext(): FocusGroupContextValue | null {
+  const zone = useContext(ZoneContext);
+  const focus = useContext(FocusContext);
+  if (!zone) return null;
+  return {
+    zoneId: zone.zoneId,
+    scope: zone.scope,
+    config: focus?.config ?? DEFAULT_CONFIG,
+    ...(focus?.role !== undefined ? { zoneRole: focus.role } : {}),
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -170,20 +215,10 @@ function generateGroupId() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Init command (module-scoped, lightweight)
+// Init helper — dispatches OS_ZONE_INIT if no parent Zone provides context.
+// When used inside <Zone>, Zone already dispatches OS_ZONE_INIT.
+// When used standalone, FocusGroup must init itself.
 // ═══════════════════════════════════════════════════════════════════
-
-const INIT_ZONE = os.defineCommand(
-  "FOCUS_GROUP_INIT",
-  (ctx) => (zoneId: string) => {
-    if (ctx.state.os.focus.zones[zoneId]) return; // already init
-    return {
-      state: produce(ctx.state, (draft) => {
-        draft.os.focus.zones[zoneId] = { ...initialZoneState };
-      }),
-    };
-  },
-);
 
 function buildZoneEntry(
   config: FocusGroupConfig,
@@ -298,17 +333,18 @@ export function FocusGroup({
   }, [role, navigate, tab, select, activate, dismiss, project]);
 
   // --- Parent Context ---
-  const parentContext = useContext(FocusGroupContext);
+  const parentContext = useContext(ZoneContext);
   const parentId = parentContext?.zoneId || null;
 
   // --- Container Ref ---
   const containerRef = useRef<HTMLDivElement>(null);
 
   // --- Init kernel state (render-time, idempotent) ---
-  // Runs during render so it works in both browser AND renderToString.
-  // INIT_ZONE is a no-op if zone already exists: `if (zones[zoneId]) return;`
+  // OS_ZONE_INIT is a no-op if zone already exists.
+  // When used inside <Zone>, Zone dispatches this first.
+  // When used standalone (rare), FocusGroup dispatches as fallback.
   useMemo(() => {
-    os.dispatch(INIT_ZONE(groupId));
+    os.dispatch(OS_ZONE_INIT(groupId));
   }, [groupId]);
 
   // --- Register in ZoneRegistry (DOM required) ---
@@ -402,28 +438,36 @@ export function FocusGroup({
   // --- Is Active ---
   const isActive = os.useComputed((s) => s.os.focus.activeZoneId === groupId);
 
-  // --- Context Value ---
-  const contextValue = useMemo<FocusGroupContextValue>(
+  // --- Context Values (separated) ---
+  const zoneContextValue = useMemo<ZoneContextValue>(
+    () => ({ zoneId: groupId, scope }),
+    [groupId, scope],
+  );
+
+  const focusContextValue = useMemo<FocusContextValue>(
     () => ({
-      zoneId: groupId,
       config,
-      ...(role !== undefined ? { zoneRole: role } : {}),
-      scope,
+      ...(role !== undefined ? { role } : {}),
     }),
-    [groupId, config, role, scope],
+    [config, role],
   );
 
   // --- Orientation (data attribute for external styling) ---
   const orientation = config.navigate.orientation;
 
   // --- Render ---
-  return (
-    <FocusGroupContext.Provider value={contextValue}>
+  // If inside a <Zone>, ZoneContext is already provided by Zone.
+  // If standalone, FocusGroup provides its own ZoneContext.
+  const parentZoneCtx = useContext(ZoneContext);
+  const needsZoneContext = !parentZoneCtx || parentZoneCtx.zoneId !== groupId;
+
+  const content = (
+    <FocusContext.Provider value={focusContextValue}>
       {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is dynamic (listbox/toolbar/grid) */}
       <div
         ref={containerRef}
         id={groupId}
-        data-focus-group={groupId}
+        data-zone={groupId}
         aria-current={isActive ? "true" : undefined}
         aria-orientation={
           config.navigate.orientation === "horizontal"
@@ -442,8 +486,18 @@ export function FocusGroup({
       >
         {children}
       </div>
-    </FocusGroupContext.Provider>
+    </FocusContext.Provider>
   );
+
+  if (needsZoneContext) {
+    return (
+      <ZoneContext.Provider value={zoneContextValue}>
+        {content}
+      </ZoneContext.Provider>
+    );
+  }
+
+  return content;
 }
 
 FocusGroup.displayName = "FocusGroup";

@@ -62,8 +62,8 @@ function senseMouseDown(e: MouseEvent): MouseInput | null {
   const item = findFocusableItem(target);
   if (!item) {
     // Zone-only click: no item, but zone exists → activate zone
-    const zoneEl = target.closest("[data-focus-group]") as HTMLElement | null;
-    const zoneId = zoneEl?.getAttribute("data-focus-group");
+    const zoneEl = target.closest("[data-zone]") as HTMLElement | null;
+    const zoneId = zoneEl?.getAttribute("data-zone");
     if (!zoneId) return null;
 
     return {
@@ -116,17 +116,17 @@ export function MouseListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-                meta: {
-                  ...result.meta,
-                  pipeline: {
-                    sensed: input,
-                    resolved: {
-                      preventDefault: result.preventDefault,
-                      fallback: result.fallback,
-                    },
+              meta: {
+                ...result.meta,
+                pipeline: {
+                  sensed: input,
+                  resolved: {
+                    preventDefault: result.preventDefault,
+                    fallback: result.fallback,
                   },
                 },
-              }
+              },
+            }
             : undefined;
           os.dispatch(cmd, opts);
         }

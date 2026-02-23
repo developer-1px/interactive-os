@@ -1,24 +1,73 @@
 /**
- * Zone - Facade for FocusGroup
+ * Zone — OS interaction jurisdiction.
  *
- * Provides a simplified wrapper for FocusGroup.
- * Configuration is primarily determined by the `role` prop.
- * Use `options` for advanced per-instance overrides when needed.
+ * The composition point for all OS capabilities (Focus, DnD, Resize, ...).
+ * Zone owns:
+ *   - Zone ID generation
+ *   - ZoneState initialization (OS_ZONE_INIT)
+ *   - ZoneRegistry registration
+ *   - ZoneContext (zoneId, scope)
+ *   - App callback routing (onCopy, onDelete, onUndo, ...)
+ *
+ * Zone delegates APG composite widget behavior to FocusGroup (headless capability).
+ *
+ * Future capabilities (DnD, Resize) will be additional headless children of Zone,
+ * composed in the same pattern as FocusGroup.
  */
 
-import type { BaseCommand } from "@kernel";
-import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { type BaseCommand, defineScope, type ScopeToken } from "@kernel";
+import type { ZoneCallback, ZoneEntry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { OS_ZONE_INIT } from "@os/3-commands/focus";
+import {
+  FocusGroup,
+  type ZoneContextValue,
+  useZoneContext as _useZoneContext,
+} from "@os/6-components/base/FocusGroup.tsx";
 import type { ZoneRole } from "@os/registries/roleRegistry.ts";
+import { os } from "@os/kernel.ts";
 import type {
   ActivateConfig,
   DismissConfig,
+  FocusGroupConfig,
   NavigateConfig,
   ProjectConfig,
   SelectConfig,
   TabConfig,
 } from "@os/schemas";
-import type { ComponentProps, ReactNode } from "react";
+import {
+  createContext,
+  type ComponentProps,
+  type ReactNode,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from "react";
+
+// ═══════════════════════════════════════════════════════════════════
+// Zone Context (provided by Zone, consumed by all capabilities)
+// ═══════════════════════════════════════════════════════════════════
+
+const ZoneContext = createContext<ZoneContextValue | null>(null);
+
+/** Read zone-level identity (zoneId, scope). Usable by any capability or app code. */
+export function useZoneContext() {
+  return useContext(ZoneContext);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Zone ID Generator
+// ═══════════════════════════════════════════════════════════════════
+
+let zoneIdCounter = 0;
+function generateZoneId() {
+  return `zone-${++zoneIdCounter}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Zone Props
+// ═══════════════════════════════════════════════════════════════════
 
 /** Advanced configuration overrides - use sparingly, prefer role presets */
 export interface ZoneOptions {
@@ -30,7 +79,6 @@ export interface ZoneOptions {
   project?: Partial<ProjectConfig>;
 }
 
-// Zone only exposes role-based configuration - no manual config overrides
 export interface ZoneProps
   extends Omit<
     ComponentProps<"div">,
@@ -78,6 +126,10 @@ export interface ZoneProps
   children: ReactNode;
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// Zone Component
+// ═══════════════════════════════════════════════════════════════════
+
 export function Zone({
   id,
   role,
@@ -103,44 +155,69 @@ export function Zone({
   style,
   ...props
 }: ZoneProps) {
+  // ─── Zone ID (stable, auto-generated if not provided) ───
+  const zoneId = useMemo(() => id || generateZoneId(), [id]);
+
+  // ─── Scope (defaults to zoneId) ───
+  const scope = useMemo(() => defineScope(zoneId), [zoneId]);
+
+  // ─── Init kernel state (render-time, idempotent, SSR-safe) ───
+  useMemo(() => {
+    os.dispatch(OS_ZONE_INIT(zoneId));
+  }, [zoneId]);
+
+  // ─── ZoneContext value ───
+  const zoneContextValue = useMemo<ZoneContextValue>(
+    () => ({ zoneId, scope }),
+    [zoneId, scope],
+  );
+
+  // ─── Render: Zone provides context, delegates to FocusGroup ───
   return (
-    <FocusGroup
-      {...(id !== undefined ? { id } : {})}
-      {...(role !== undefined ? { role } : {})}
-      {...(options?.navigate !== undefined
-        ? { navigate: options.navigate }
-        : {})}
-      {...(options?.tab !== undefined ? { tab: options.tab } : {})}
-      {...(options?.select !== undefined ? { select: options.select } : {})}
-      {...(options?.activate !== undefined
-        ? { activate: options.activate }
-        : {})}
-      {...(options?.dismiss !== undefined ? { dismiss: options.dismiss } : {})}
-      {...(options?.project !== undefined ? { project: options.project } : {})}
-      {...(onAction !== undefined ? { onAction } : {})}
-      {...(onSelect !== undefined ? { onSelect } : {})}
-      {...(onCheck !== undefined ? { onCheck } : {})}
-      {...(onCopy !== undefined ? { onCopy } : {})}
-      {...(onCut !== undefined ? { onCut } : {})}
-      {...(onPaste !== undefined ? { onPaste } : {})}
-      {...(onDelete !== undefined ? { onDelete } : {})}
-      {...(onMoveUp !== undefined ? { onMoveUp } : {})}
-      {...(onMoveDown !== undefined ? { onMoveDown } : {})}
-      {...(onUndo !== undefined ? { onUndo } : {})}
-      {...(onRedo !== undefined ? { onRedo } : {})}
-      {...(onDismiss !== undefined ? { onDismiss } : {})}
-      {...(itemFilter !== undefined ? { itemFilter } : {})}
-      {...(getItems !== undefined ? { getItems } : {})}
-      {...(getExpandableItems !== undefined ? { getExpandableItems } : {})}
-      {...(getTreeLevels !== undefined ? { getTreeLevels } : {})}
-      {...(className !== undefined ? { className } : {})}
-      {...(style !== undefined ? { style } : {})}
-      {...props}
-    >
-      {children}
-    </FocusGroup>
+    <ZoneContext.Provider value={zoneContextValue}>
+      <FocusGroup
+        id={zoneId}
+        scope={scope}
+        {...(role !== undefined ? { role } : {})}
+        {...(options?.navigate !== undefined
+          ? { navigate: options.navigate }
+          : {})}
+        {...(options?.tab !== undefined ? { tab: options.tab } : {})}
+        {...(options?.select !== undefined ? { select: options.select } : {})}
+        {...(options?.activate !== undefined
+          ? { activate: options.activate }
+          : {})}
+        {...(options?.dismiss !== undefined
+          ? { dismiss: options.dismiss }
+          : {})}
+        {...(options?.project !== undefined
+          ? { project: options.project }
+          : {})}
+        {...(onAction !== undefined ? { onAction } : {})}
+        {...(onSelect !== undefined ? { onSelect } : {})}
+        {...(onCheck !== undefined ? { onCheck } : {})}
+        {...(onCopy !== undefined ? { onCopy } : {})}
+        {...(onCut !== undefined ? { onCut } : {})}
+        {...(onPaste !== undefined ? { onPaste } : {})}
+        {...(onDelete !== undefined ? { onDelete } : {})}
+        {...(onMoveUp !== undefined ? { onMoveUp } : {})}
+        {...(onMoveDown !== undefined ? { onMoveDown } : {})}
+        {...(onUndo !== undefined ? { onUndo } : {})}
+        {...(onRedo !== undefined ? { onRedo } : {})}
+        {...(onDismiss !== undefined ? { onDismiss } : {})}
+        {...(itemFilter !== undefined ? { itemFilter } : {})}
+        {...(getItems !== undefined ? { getItems } : {})}
+        {...(getExpandableItems !== undefined ? { getExpandableItems } : {})}
+        {...(getTreeLevels !== undefined ? { getTreeLevels } : {})}
+        {...(className !== undefined ? { className } : {})}
+        {...(style !== undefined ? { style } : {})}
+        {...props}
+      >
+        {children}
+      </FocusGroup>
+    </ZoneContext.Provider>
   );
 }
 
 // Re-export context hooks for convenience
-export { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
+export { useFocusGroupContext, useFocusContext } from "@os/6-components/base/FocusGroup.tsx";

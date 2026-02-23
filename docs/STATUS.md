@@ -24,7 +24,7 @@
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
 | cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
-| caret-restore | T1 Red 테스트 작성 중 | 02-23 | 🟢 Active |
+| caret-restore | All Done — 브라우저 확인 완료 | 02-23 | ✅ Done |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-22 | 🟢 Active |
 | testbot-v2 | Superseded by Replay | 02-21 | 🔴 Superseded |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |

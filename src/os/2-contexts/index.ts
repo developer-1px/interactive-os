@@ -37,7 +37,7 @@ export const DOM_EXPANDABLE_ITEMS = os.defineContext(
     const expandableIds = new Set<string>();
     const els = entry.element.querySelectorAll("[data-item-id][aria-expanded]");
     for (const el of els) {
-      if (el.closest("[data-focus-group]") !== entry.element) continue;
+      if (el.closest("[data-zone]") !== entry.element) continue;
       const id = el.getAttribute("data-item-id");
       if (id) expandableIds.add(id);
     }
@@ -66,7 +66,7 @@ export const DOM_TREE_LEVELS = os.defineContext(
     const levels = new Map<string, number>();
     const els = entry.element.querySelectorAll("[data-item-id]");
     for (const el of els) {
-      if (el.closest("[data-focus-group]") !== entry.element) continue;
+      if (el.closest("[data-zone]") !== entry.element) continue;
       const id = el.getAttribute("data-item-id");
       if (id) {
         const levelStr = el.getAttribute("aria-level");
@@ -94,7 +94,7 @@ export const DOM_ITEMS = os.defineContext("dom-items", (): string[] => {
     const items: string[] = [];
     const els = entry.element.querySelectorAll("[data-item-id]");
     for (const el of els) {
-      if (el.closest("[data-focus-group]") !== entry.element) continue;
+      if (el.closest("[data-zone]") !== entry.element) continue;
       const id = el.getAttribute("data-item-id");
       if (id) items.push(id);
     }
@@ -128,7 +128,7 @@ export const DOM_RECTS = os.defineContext(
     const els = entry.element.querySelectorAll("[data-item-id]");
     for (const el of els) {
       // Only include items that DIRECTLY belong to this zone
-      if (el.closest("[data-focus-group]") !== entry.element) continue;
+      if (el.closest("[data-zone]") !== entry.element) continue;
       const id = el.getAttribute("data-item-id");
       if (id) rects.set(id, el.getBoundingClientRect());
     }
@@ -214,7 +214,7 @@ export const DOM_ZONE_ORDER = os.defineContext(
         const allItems = zoneEntry.element.querySelectorAll("[data-item-id]");
         const ownItems: Element[] = [];
         for (const item of allItems) {
-          if (item.closest("[data-focus-group]") === zoneEntry.element) {
+          if (item.closest("[data-zone]") === zoneEntry.element) {
             ownItems.push(item);
           }
         }
@@ -231,15 +231,15 @@ export const DOM_ZONE_ORDER = os.defineContext(
 
     // Catch any DOM zones not in registry (shouldn't happen, but safety net)
     if (typeof document !== "undefined") {
-      const els = document.querySelectorAll("[data-focus-group]");
+      const els = document.querySelectorAll("[data-zone]");
       for (const el of els) {
-        const zoneId = el.getAttribute("data-focus-group");
+        const zoneId = el.getAttribute("data-zone");
         if (!zoneId || processedIds.has(zoneId)) continue;
 
         const allItems = el.querySelectorAll("[data-item-id]");
         const ownItems: Element[] = [];
         for (const item of allItems) {
-          if (item.closest("[data-focus-group]") === el) {
+          if (item.closest("[data-zone]") === el) {
             ownItems.push(item);
           }
         }

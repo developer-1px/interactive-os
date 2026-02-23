@@ -32,8 +32,8 @@ export function resolveFocusTarget(
   const itemEl = findFocusableItem(target);
   if (!itemEl?.id) return null;
 
-  const zoneEl = itemEl.closest("[data-focus-group]") as HTMLElement | null;
-  const groupId = zoneEl?.getAttribute("data-focus-group") ?? null;
+  const zoneEl = itemEl.closest("[data-zone]") as HTMLElement | null;
+  const groupId = zoneEl?.getAttribute("data-zone") ?? null;
   if (!groupId) return null;
 
   return { itemId: itemEl.id, groupId };
