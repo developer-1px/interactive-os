@@ -11,6 +11,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import docsMeta from "virtual:docs-meta";
 import { DocsSidebar } from "./DocsSidebar";
+import { os } from "@/os/kernel";
 import {
   buildDocTree,
   cleanLabel,
@@ -63,27 +64,21 @@ export function DocsViewer() {
   const externalRef = useRef(externalSource);
   externalRef.current = externalSource;
 
-  // --- Section navigation: Space/Shift+Space → next/prev heading ---
+  // --- Section navigation via OS commands (DOCS_NEXT_SECTION / DOCS_PREV_SECTION) ---
   useEffect(() => {
     const container = contentRef.current;
     if (!container) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== " " && e.key !== "Space") return;
-      // Don't intercept Space when sidebar tree is focused
-      if ((e.target as HTMLElement)?.closest("[data-focus-group]")) return;
-
-      e.preventDefault();
+    const scrollToHeading = (direction: "next" | "prev") => {
       const headings = Array.from(
         container.querySelectorAll<HTMLElement>("h1, h2, h3, h4, h5, h6"),
       );
       if (headings.length === 0) return;
 
       const scrollTop = container.scrollTop;
-      const offset = 20; // threshold to consider "past" a heading
+      const offset = 20;
 
-      if (e.shiftKey) {
-        // Previous heading
+      if (direction === "prev") {
         for (let i = headings.length - 1; i >= 0; i--) {
           if (headings[i].offsetTop < scrollTop - offset) {
             headings[i].scrollIntoView({ behavior: "smooth", block: "start" });
@@ -91,7 +86,6 @@ export function DocsViewer() {
           }
         }
       } else {
-        // Next heading
         for (const heading of headings) {
           if (heading.offsetTop > scrollTop + offset) {
             heading.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -101,8 +95,13 @@ export function DocsViewer() {
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    // Subscribe to kernel — observe DOCS_NEXT/PREV_SECTION commands
+    return os.subscribe(() => {
+      const tx = os.inspector.getLastTransaction();
+      if (!tx) return;
+      if (tx.command.type === "DOCS_NEXT_SECTION") scrollToHeading("next");
+      if (tx.command.type === "DOCS_PREV_SECTION") scrollToHeading("prev");
+    });
   }, [content]); // re-attach when content changes
 
   const isExternal = externalSource != null;

@@ -75,7 +75,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
       >
         <div className="flex items-start gap-3 flex-1 min-w-0">
           {/* Drag Handle */}
-          <div className="mt-1 -ml-1 text-slate-300 cursor-grab active:cursor-grabbing transition-opacity opacity-0 group-hover:opacity-100">
+          <div data-drag-handle className="mt-1 -ml-1 text-slate-300 cursor-grab active:cursor-grabbing transition-opacity opacity-0 group-hover:opacity-100">
             <GripVertical size={16} />
           </div>
 

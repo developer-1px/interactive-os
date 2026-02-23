@@ -61,12 +61,14 @@ export function DragListener() {
         function onPointerDown(e: PointerEvent) {
             // Only left mouse button
             if (e.button !== 0) return;
-            const info = findItemAndZone(e.target);
-            if (!info) return;
 
-            // Don't start drag on interactive elements
+            // Only start drag from drag handles
             const target = e.target as HTMLElement;
-            if (target.closest("input, textarea, button, [contenteditable]")) return;
+            const handle = target.closest("[data-drag-handle]") as HTMLElement | null;
+            if (!handle) return;
+
+            const info = findItemAndZone(handle);
+            if (!info) return;
 
             dragRef.current = {
                 startX: e.clientX,

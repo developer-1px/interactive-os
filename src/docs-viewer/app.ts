@@ -30,6 +30,21 @@ export const DocsSidebarUI = sidebarZone.bind({
 
 const readerZone = DocsApp.createZone("docs-reader");
 
+// Commands: stateless — no state change, scroll effect handled by component
+const NEXT_SECTION = readerZone.command(
+    "DOCS_NEXT_SECTION",
+    () => undefined,
+);
+
+const PREV_SECTION = readerZone.command(
+    "DOCS_PREV_SECTION",
+    () => undefined,
+);
+
 export const DocsReaderUI = readerZone.bind({
     role: "feed",
+    keybindings: [
+        { key: "Space", command: () => NEXT_SECTION() },
+        { key: "Shift+Space", command: () => PREV_SECTION() },
+    ],
 });
