@@ -2,17 +2,20 @@ import clsx from "clsx";
 import {
   ChevronLeft,
   ChevronRight,
+  Clock,
   FileText,
   FolderOpen,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import docsMeta from "virtual:docs-meta";
 import { DocsSidebar } from "./DocsSidebar";
 import {
   buildDocTree,
   cleanLabel,
   docsModules,
   flattenTree,
+  formatRelativeTime,
   loadDocContent,
 } from "./docsUtils";
 import { type ExternalFolderSource, openExternalFolder } from "./fsAccessUtils";
@@ -284,6 +287,17 @@ export function DocsViewer() {
                       </span>
                     </div>
                   ))}
+
+                  {/* Modification date */}
+                  {activePath && docsMeta[activePath] && (
+                    <span
+                      className="ml-auto flex items-center gap-1 text-xs text-slate-400 tabular-nums shrink-0"
+                      title={new Date(docsMeta[activePath].mtime).toLocaleString()}
+                    >
+                      <Clock size={11} className="text-slate-300" />
+                      {formatRelativeTime(docsMeta[activePath].mtime)}
+                    </span>
+                  )}
                 </div>
 
                 <MarkdownRenderer content={content} />

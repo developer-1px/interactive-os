@@ -28,6 +28,7 @@
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
 | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
+| docs-viewer-features | T1 날짜 메타데이터 UI | 02-23 | 🟢 Active |
 
 ---
 

@@ -68,12 +68,22 @@ export function KernelPanel({ kernel }: { kernel?: AnyKernel }) {
 // ─── Transaction Log ───
 
 function TransactionLog({ kernel }: { kernel: AnyKernel }) {
-  const [version, refresh] = useState(0);
+  const [txCount, setTxCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
-  // Subscribe to state changes so transactions update reactively
-  kernel.useComputed((s: any) => s);
+  // Poll transaction count via rAF — catches commands with no state change.
+  // useComputed only triggers on state changes, missing no-op commands.
+  useEffect(() => {
+    let raf: number;
+    const check = () => {
+      const count = kernel.inspector.getTransactions().length;
+      setTxCount((prev) => (prev !== count ? count : prev));
+      raf = requestAnimationFrame(check);
+    };
+    raf = requestAnimationFrame(check);
+    return () => cancelAnimationFrame(raf);
+  }, [kernel]);
 
   const txs: any[] = kernel.inspector.getTransactions();
 
@@ -82,11 +92,11 @@ function TransactionLog({ kernel }: { kernel: AnyKernel }) {
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [txs.length, version]);
+  }, [txs.length, txCount]);
 
   const handleClear = () => {
     kernel.inspector.clearTransactions();
-    refresh((n) => n + 1);
+    setTxCount(0);
   };
 
   const handleCopy = async () => {
