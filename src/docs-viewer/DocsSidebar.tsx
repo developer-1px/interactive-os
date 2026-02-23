@@ -285,42 +285,6 @@ export function DocsSidebar({
     setFavVersion((v) => v + 1);
   }, []);
 
-  // onAction callback: Enter or Click on an Item
-  // OS auto-handles expandable items (OS_ACTIVATE → OS_EXPAND)
-  // cursor.isExpandable provided by OS — no string convention needed
-  const handleAction = useCallback(
-    (cursor: { focusId: string; isExpandable: boolean }) => {
-      if (cursor.isExpandable) return;
-      onSelect(cursor.focusId);
-    },
-    [onSelect],
-  );
-
-  // onSelect callback: Arrow key with followFocus → preview file
-  // Expandable items (folders) skipped — no document load
-  const handleSelect = useCallback(
-    (cursor: { focusId: string; isExpandable: boolean }) => {
-      if (cursor.isExpandable) return;
-      onSelect(cursor.focusId);
-    },
-    [onSelect],
-  );
-
-  // Expandable items: only folders are expandable (not files)
-  const getExpandableItems = useCallback(() => {
-    const set = new Set<string>();
-    const collect = (list: DocItem[]) => {
-      for (const item of list) {
-        if (item.type === "folder" && item.children) {
-          set.add(`folder:${item.path}`);
-          collect(item.children);
-        }
-      }
-    };
-    collect(items);
-    return set;
-  }, [items]);
-
   return (
     <div
       className={clsx(
@@ -357,13 +321,8 @@ export function DocsSidebar({
           onSelect={onSelect}
         />
 
-        {/* Folder Tree — OS Zone */}
-        <DocsSidebarUI.Zone
-          className="flex flex-col"
-          onAction={handleAction}
-          onSelect={handleSelect}
-          getExpandableItems={getExpandableItems}
-        >
+        {/* Folder Tree — OS Zone (behavior from bind(), no handler props) */}
+        <DocsSidebarUI.Zone className="flex flex-col">
           {items.map((item) => (
             <TreeItem
               key={item.path}

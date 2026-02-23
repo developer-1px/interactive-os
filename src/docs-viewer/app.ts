@@ -1,18 +1,25 @@
 /**
- * DocsViewer App — minimal defineApp for ZIFT primitives.
+ * DocsViewer App — defineApp for ZIFT primitives.
  *
- * State is intentionally empty. The purpose is to get public
- * Zone/Item/Trigger primitives for the sidebar tree.
- * State can be added later without changing any JSX.
+ * State: activePath — the shown document.
+ * Sidebar navigation commands modify activePath.
+ * DocsViewer reads activePath via useComputed.
  */
 
+import { produce } from "immer";
 import { defineApp } from "@/os/defineApp";
 
 // ═══════════════════════════════════════════════════════════════════
-// App
+// App State
 // ═══════════════════════════════════════════════════════════════════
 
-export const DocsApp = defineApp<Record<string, never>>("docs-viewer", {});
+interface DocsState {
+    activePath: string | null;
+}
+
+export const DocsApp = defineApp<DocsState>("docs-viewer", {
+    activePath: null,
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // Sidebar Zone — tree navigation
@@ -20,8 +27,23 @@ export const DocsApp = defineApp<Record<string, never>>("docs-viewer", {});
 
 const sidebarZone = DocsApp.createZone("docs-sidebar");
 
+/** SELECT_DOC — sets activePath. Expandable items are skipped via cursor.isExpandable. */
+export const selectDoc = sidebarZone.command(
+    "SELECT_DOC",
+    (ctx, payload: { id: string; isExpandable: boolean }) => {
+        if (payload.isExpandable) return { state: ctx.state };
+        return {
+            state: produce(ctx.state, (draft) => {
+                draft.activePath = payload.id;
+            }),
+        };
+    },
+);
+
 export const DocsSidebarUI = sidebarZone.bind({
     role: "tree",
+    onAction: (cursor) => selectDoc({ id: cursor.focusId, isExpandable: cursor.isExpandable }),
+    onSelect: (cursor) => selectDoc({ id: cursor.focusId, isExpandable: cursor.isExpandable }),
     options: {
         select: { followFocus: true },
         activate: { onClick: true },
