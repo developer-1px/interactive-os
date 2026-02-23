@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import inspectorBabelPlugin from "./vite-plugins/babel-inspector";
 import { inspectorPlugin } from "./vite-plugins/inspector";
+import { docsMetaPlugin } from "./src/docs-viewer/vite-plugin-docs-meta";
 import { specWrapperPlugin } from "./vite-plugins/spec-wrapper";
 
 // https://vite.dev/config/
@@ -18,6 +19,7 @@ export default defineConfig({
     }),
     tailwindcss(),
     inspectorPlugin(),
+    docsMetaPlugin(),
   ],
   optimizeDeps: {
     esbuildOptions: {

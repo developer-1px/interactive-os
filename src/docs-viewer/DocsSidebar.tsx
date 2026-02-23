@@ -1,14 +1,101 @@
 import clsx from "clsx";
-import { ChevronDown, ChevronRight, FileText } from "lucide-react";
-import { useEffect, useState } from "react";
-import { cleanLabel, type DocItem } from "./docsUtils";
+import { ChevronDown, ChevronRight, Clock, FileText } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import docsMeta from "virtual:docs-meta";
+import {
+  cleanLabel,
+  type DocItem,
+  formatRelativeTime,
+  getRecentFiles,
+} from "./docsUtils";
 
 export interface DocsSidebarProps {
   items: DocItem[];
+  allFiles: DocItem[];
   activePath: string | undefined;
   onSelect: (path: string) => void;
   className?: string;
   header?: React.ReactNode;
+}
+
+// --------------- Recent Section ---------------
+
+function RecentSection({
+  allFiles,
+  activePath,
+  onSelect,
+}: {
+  allFiles: DocItem[];
+  activePath: string | undefined;
+  onSelect: (path: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(true);
+  const recentFiles = useMemo(
+    () => getRecentFiles(allFiles, docsMeta, 7),
+    [allFiles],
+  );
+
+  if (recentFiles.length === 0) return null;
+
+  return (
+    <div className="mb-4 pb-3 border-b border-slate-100">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-1.5 px-3 py-1 w-full text-left group"
+      >
+        <Clock size={12} className="text-blue-400" />
+        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex-1">
+          Recent
+        </span>
+        <span className="text-slate-300 transition-transform">
+          {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        </span>
+      </button>
+
+      {isOpen && (
+        <div className="mt-1 flex flex-col">
+          {recentFiles.map((file) => {
+            const isActive = file.path === activePath;
+            return (
+              <button
+                type="button"
+                key={file.path}
+                onClick={() => onSelect(file.path)}
+                className={clsx(
+                  "flex items-center gap-2 px-3 py-1.5 text-[13px] rounded-md transition-all duration-150",
+                  "text-left w-full group/recent",
+                  isActive
+                    ? "bg-blue-50 text-blue-700 font-medium"
+                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
+                )}
+                style={{ paddingLeft: "20px" }}
+              >
+                <FileText
+                  size={12}
+                  className={clsx(
+                    "shrink-0",
+                    isActive ? "text-blue-400" : "text-slate-300",
+                  )}
+                />
+                <span className="truncate flex-1">
+                  {cleanLabel(file.name)}
+                </span>
+                <span
+                  className={clsx(
+                    "text-[10px] tabular-nums shrink-0",
+                    isActive ? "text-blue-400" : "text-slate-300",
+                  )}
+                >
+                  {formatRelativeTime(file.mtime)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 
 const SidebarItem = ({
@@ -130,6 +217,7 @@ const SidebarItem = ({
 
 export function DocsSidebar({
   items,
+  allFiles,
   activePath,
   onSelect,
   className,
@@ -156,6 +244,14 @@ export function DocsSidebar({
       )}
 
       <nav className="flex-1 overflow-y-auto px-2 pb-10 custom-scrollbar">
+        {/* Recent Section — cross-folder, mtime-sorted */}
+        <RecentSection
+          allFiles={allFiles}
+          activePath={activePath}
+          onSelect={onSelect}
+        />
+
+        {/* Folder Tree */}
         {items.map((item) => (
           <SidebarItem
             key={item.path}

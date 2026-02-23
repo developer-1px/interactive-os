@@ -226,6 +226,7 @@ export function DocsViewer() {
       {/* Sidebar */}
       <DocsSidebar
         items={docTree}
+        allFiles={allFiles}
         activePath={activePath}
         onSelect={handleSelect}
         header={sidebarHeader}

@@ -1,11 +1,13 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { docsMetaPlugin } from "./src/docs-viewer/vite-plugin-docs-meta";
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    docsMetaPlugin(),
     // Rewrite "/" to "/docs.html" so it's the default page
     {
       name: "docs-html-fallback",

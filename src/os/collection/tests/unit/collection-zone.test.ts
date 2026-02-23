@@ -520,3 +520,29 @@ describe("createCollectionZone — clipboard (OS-managed)", () => {
     });
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Tests: getItems — filtered collection returns only visible items
+// ═══════════════════════════════════════════════════════════════════
+
+describe("createCollectionZone — filtered getItems", () => {
+  let app: ReturnType<typeof EntityApp.create>;
+
+  beforeEach(() => {
+    app = EntityApp.create({ withOS: true });
+  });
+
+  it("getItems returns only items matching the active filter", () => {
+    // selectedCategoryId = "work" → only a, c should be visible
+    const bindings = filteredList.collectionBindings();
+    const items = bindings.getItems();
+    // Should only contain work items (a, c), not personal items (b, d)
+    expect(items).toEqual(["a", "c"]);
+  });
+
+  it("unfiltered getItems returns all items", () => {
+    const bindings = entityList.collectionBindings();
+    const items = bindings.getItems();
+    expect(items).toEqual(["a", "b", "c", "d"]);
+  });
+});

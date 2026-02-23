@@ -13,3 +13,8 @@ declare module "*.spec.ts" {
   const content: any;
   export default content;
 }
+
+declare module "virtual:docs-meta" {
+  const meta: Record<string, { mtime: number }>;
+  export default meta;
+}

@@ -113,3 +113,50 @@ export async function loadDocContent(path: string): Promise<string> {
   if (!loader) throw new Error("Document not found");
   return (await loader()) as string;
 }
+
+// --------------- Recent Files ---------------
+
+export interface RecentDocItem extends DocItem {
+  mtime: number;
+}
+
+/**
+ * Returns the most recently modified files by joining the file list with mtime metadata.
+ * @param allFiles  Flat list of all doc files
+ * @param docsMeta  mtime map from virtual:docs-meta
+ * @param limit     Max items to return (default: 7)
+ */
+export function getRecentFiles(
+  allFiles: DocItem[],
+  docsMeta: Record<string, { mtime: number }>,
+  limit = 7,
+): RecentDocItem[] {
+  return allFiles
+    .filter((f) => docsMeta[f.path] != null)
+    .map((f) => ({ ...f, mtime: docsMeta[f.path].mtime }))
+    .sort((a, b) => b.mtime - a.mtime)
+    .slice(0, limit);
+}
+
+/**
+ * Formats a timestamp into a human-readable relative time string.
+ * e.g. "방금 전", "3분 전", "2시간 전", "어제", "3일 전"
+ */
+export function formatRelativeTime(mtime: number, now = Date.now()): string {
+  const diff = now - mtime;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (seconds < 60) return "방금 전";
+  if (minutes < 60) return `${minutes}분 전`;
+  if (hours < 24) return `${hours}시간 전`;
+  if (days === 1) return "어제";
+  if (days < 7) return `${days}일 전`;
+
+  return new Date(mtime).toLocaleDateString("ko-KR", {
+    month: "short",
+    day: "numeric",
+  });
+}

@@ -17,6 +17,7 @@ import {
     TodoApp,
     addTodo,
 } from "@apps/todo/app";
+import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { createPage } from "@os/defineApp.page";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -80,7 +81,8 @@ describe("AppPage: Navigation", () => {
         page.dispatch(addTodo({ text: "Beta" }));
         page.dispatch(addTodo({ text: "Charlie" }));
 
-        const ids = page.state.data.todoOrder;
+        // Use visible (filtered) IDs — getItems applies config.filter
+        const ids = selectVisibleTodoIds(page.state);
         page.goto("list", { items: ids, focusedItemId: ids[0] ?? null });
 
         page.keyboard.press("ArrowDown");
@@ -94,7 +96,7 @@ describe("AppPage: Navigation", () => {
         page.dispatch(addTodo({ text: "Alpha" }));
         page.dispatch(addTodo({ text: "Beta" }));
 
-        const ids = page.state.data.todoOrder;
+        const ids = selectVisibleTodoIds(page.state);
         page.goto("list", { items: ids, focusedItemId: ids[0] ?? null });
 
         // Focused item has tabIndex 0
@@ -115,7 +117,7 @@ describe("AppPage: Click", () => {
         page.dispatch(addTodo({ text: "Alpha" }));
         page.dispatch(addTodo({ text: "Beta" }));
 
-        const ids = page.state.data.todoOrder;
+        const ids = selectVisibleTodoIds(page.state);
         page.goto("list", { items: ids, focusedItemId: ids[0] ?? null });
 
         page.click(ids[1]!);
@@ -134,10 +136,10 @@ describe("AppPage: Full Stack Integration", () => {
         const page = createPage(TodoApp);
 
         page.dispatch(addTodo({ text: "Toggle me" }));
-        const ids = page.state.data.todoOrder;
-        const id = ids[0]!;
+        const ids = selectVisibleTodoIds(page.state);
+        const id = ids[ids.length - 1]!; // last added
 
-        page.goto("list", { items: ids, focusedItemId: id ?? null });
+        page.goto("list", { items: ids, focusedItemId: id });
 
         // Space → onCheck → toggleTodo
         page.keyboard.press("Space");
@@ -149,10 +151,10 @@ describe("AppPage: Full Stack Integration", () => {
         const page = createPage(TodoApp);
 
         page.dispatch(addTodo({ text: "Edit me" }));
-        const ids = page.state.data.todoOrder;
-        const id = ids[0]!;
+        const ids = selectVisibleTodoIds(page.state);
+        const id = ids[ids.length - 1]!;
 
-        page.goto("list", { items: ids, focusedItemId: id ?? null });
+        page.goto("list", { items: ids, focusedItemId: id });
 
         // Enter → onAction → startEdit
         page.keyboard.press("Enter");
@@ -164,10 +166,10 @@ describe("AppPage: Full Stack Integration", () => {
         const page = createPage(TodoApp);
 
         page.dispatch(addTodo({ text: "Delete me" }));
-        const ids = page.state.data.todoOrder;
-        const id = ids[0]!;
+        const ids = selectVisibleTodoIds(page.state);
+        const id = ids[ids.length - 1]!;
 
-        page.goto("list", { items: ids, focusedItemId: id ?? null });
+        page.goto("list", { items: ids, focusedItemId: id });
 
         // Delete → onDelete → requestDeleteTodo
         page.keyboard.press("Delete");

@@ -566,7 +566,11 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       getItems: () => {
         const appState = os.getState().apps[(app as any).__appId] as S;
         if (!appState) return [];
-        return ops.getItems(appState).map((item) => toItemId(item.id));
+        const allItems = ops.getItems(appState);
+        const visible = config.filter
+          ? allItems.filter(config.filter(appState))
+          : allItems;
+        return visible.map((item) => toItemId(item.id));
       },
     };
   }
