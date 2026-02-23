@@ -13,6 +13,14 @@ description: 3-Level(Unit/Integration/E2E) 테스트 코드 작성 가이드. /t
    사용자의 요청이나 변경 사항의 성격에 따라 테스트 레벨을 결정한다.
    **비율 원칙**: Unit ▶ **Integration ▶▶▶** E2E ▶ — Kernel+OS 통합이 대부분을 커버.
 
+   - **Level 0: BDD Scenarios (Gherkin)**
+     - 대상: 코드 작성 전 시나리오 사고
+     - 형식: `.feature` 파일 (Gherkin — Feature / Scenario / Given-When-Then)
+     - 위치: `{slice}/tests/features/{feature-name}.feature`
+     - 목적: 테스트 코드의 입력이자 게이트. ⛔ `.feature` 없이 테스트 코드 작성 금지.
+     - 적용 기준: "이 Goal에 Scenario를 쓸 수 있는가?" — Yes면 작성, No면 스킵.
+     - 검증: `.feature`의 Scenario 수 = `.test.ts`의 `it()` 수 (1:1 매핑)
+
    - **Level 1: Unit (Handler)**
      - 대상: 개별 Command Handler의 로직 검증
      - 런타임: **Vitest + Headless Kernel**
@@ -31,6 +39,7 @@ description: 3-Level(Unit/Integration/E2E) 테스트 코드 작성 가이드. /t
 
 2. **Level 1: Unit (Handler) 작성 가이드**
    - 위치: `{slice}/tests/unit/[handler].test.ts` (슬라이스 안에 co-locate)
+   - 선행: Level 0 `.feature` 존재 확인 (적용 대상일 경우)
    - 패턴:
      ```ts
      import { describe, it, expect } from "vitest";
@@ -54,6 +63,7 @@ description: 3-Level(Unit/Integration/E2E) 테스트 코드 작성 가이드. /t
    - 대상 B: **Seam** — 모듈 경계(React ↔ vanilla store, listener ↔ registry)의 계약 검증
    - 런타임: **Vitest + Headless Kernel** (DOM 불필요)
    - 위치: `{slice}/tests/integration/[scenario].test.ts`
+   - 선행: Level 0 `.feature` 존재 확인 (적용 대상일 경우)
    - 목적: 각 부품이 합성(compose)될 때 올바른지 검증
 
    **Seam이란?** 두 모듈이 만나는 경계. 각 모듈의 유닛 테스트가 통과해도, 경계에서 계약이 깨질 수 있다.

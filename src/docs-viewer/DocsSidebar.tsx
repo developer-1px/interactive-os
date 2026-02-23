@@ -296,6 +296,17 @@ export function DocsSidebar({
     [onSelect],
   );
 
+  // onSelect callback: Arrow key with followFocus → preview file
+  // Folders are skipped (arrow to folder = focus only, no document load)
+  const handleSelect = useCallback(
+    (cursor: { focusId: string }) => {
+      const id = cursor.focusId;
+      if (id.startsWith("folder:")) return;
+      onSelect(id);
+    },
+    [onSelect],
+  );
+
   // Expandable items: only folders are expandable (not files)
   const getExpandableItems = useCallback(() => {
     const set = new Set<string>();
@@ -351,6 +362,7 @@ export function DocsSidebar({
         <DocsSidebarUI.Zone
           className="flex flex-col"
           onAction={handleAction}
+          onSelect={handleSelect}
           getExpandableItems={getExpandableItems}
         >
           {items.map((item) => (

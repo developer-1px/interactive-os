@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-23 18:29
+> Last updated: 2026-02-23 20:51
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -34,6 +34,7 @@
 | docs-viewer-features | T7 Tree Click-to-Activate + ExpandTrigger | 02-23 | 🔥 Focus |
 | zone-focusgroup-separation | All Done (T2+T3+T4+T6) | 02-23 | ✅ Done |
 | dnd-poc | Scaffold, T1~T4 등록 | 02-23 | 🔥 Focus |
+| bdd-tdd-gate | T1~T4 Done (워크플로우 4개 수정) | 02-23 | ✅ Done |
 
 ---
 
@@ -84,7 +85,7 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 1 |
-| Active Projects (total) | 6 (3 Active + 3 Paused) |
+| Active Projects (total) | 7 (4 Active + 3 Paused) |
 | Completed (archived) | 23+ |
 | Inbox items | 1 |
 | Backlog items | 5 |

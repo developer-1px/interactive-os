@@ -39,12 +39,16 @@ D4. Plan — 문서로 적는다. 머릿속 계획은 계획이 아니다.
 ```
 
 ```
-D5. Red      → 근본 원인을 직접 검증하는 실패 테스트. 별도 파일.
-D6. Green    → 계획대로 수정. 계획에서 벗어나면 D4로.
+D5. Feature  → 재현 시나리오를 .feature 파일(Gherkin)로 작성.
+              위치: {slice}/tests/features/{bug-slug}.feature
+              ⛔ .feature 없이 테스트 코드 작성 금지.
+D6. Red      → .feature의 각 Scenario를 it()로 인코딩. vitest → 🔴 FAIL.
+              근본 원인을 직접 검증하는 실패 테스트. 별도 파일.
+D7. Green    → 계획대로 수정. 계획에서 벗어나면 D4로.
 ```
 
 ```
-D7. Verify
+D8. Verify
     ├─ /doubt: shim인가? 다른 환경도? 기존 메커니즘?
     ├─ /review: 네이밍, 구조, rules.md
     ├─ Revert-Red: 수정 되돌렸을 때 테스트 다시 실패하는가? (논리적 확인)
@@ -52,5 +56,5 @@ D7. Verify
 ```
 
 ```
-D8. Close    → 이슈 [Closed] + 해결 요약. 구조적 원인이면 /rules 추가.
+D9. Close    → 이슈 [Closed] + 해결 요약. 구조적 원인이면 /rules 추가.
 ```

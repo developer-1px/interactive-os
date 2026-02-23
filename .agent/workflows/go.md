@@ -51,8 +51,10 @@ STATUS.md는 새 세션에서의 fallback일 뿐이다.
 │  7. /blueprint    — 실행 설계도              │
 │  8. /naming       — 이름 설계                │
 ├─ 만들기 ────────────────────────────────────┤
-│  9. /tdd          — 테스트 먼저              │
-│ 10. /solve        — 구현 (divide & conquer)  │
+│  9. /tdd          — .feature → Red 테스트     │
+│     ⛔ Gate: .feature 없으면 테스트 코드 금지  │
+│     ⛔ Gate: Red 없으면 구현 코드 금지         │
+│ 10. /solve        — Green 구현               │
 │ 11. /refactor     — 패턴 전환                │
 ├─ 다듬기 ────────────────────────────────────┤
 │ 12. /review       — 코드 리뷰               │
