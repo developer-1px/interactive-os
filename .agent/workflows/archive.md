@@ -30,6 +30,11 @@ description: 프로젝트 완료 시 지식을 official/rules로 환류하고, �
 
 ### 프로세스
 
+#### 0. `/retrospect` 필수 게이트
+
+⛔ **회고 없이 아카이브 금지.** `/retrospect`를 먼저 실행하여 KPT(Keep/Problem/Try)를 기록한다.
+이미 이 세션에서 `/retrospect`를 실행했으면 skip.
+
 #### 1. 프로젝트 식별
 
 대상 프로젝트의 `BOARD.md`를 읽어 완료 상태를 확인한다.

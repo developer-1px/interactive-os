@@ -9,7 +9,8 @@
  *   BuilderApp (defineApp)
  *     └── Zones:
  *         ├── sidebar — collection CRUD + clipboard
- *         └── canvas — grid (updateField)
+ *         ├── canvas — grid (updateField)
+ *         └── panel — accordion tree (properties form)
  */
 
 import { produce } from "immer";
@@ -24,10 +25,9 @@ import {
   type Block,
   type BuilderState,
   INITIAL_STATE,
-  type PropertyType,
   findBlockInfo,
 } from "./model/appState";
-export type { Block, BuilderState, PropertyType };
+export type { Block, BuilderState };
 export { INITIAL_STATE, findBlockInfo };
 
 /** Read current builder state from kernel. */
@@ -56,7 +56,6 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 // Sidebar Zone — Collection Zone Facade
 // ═══════════════════════════════════════════════════════════════════
 
-import { OS_EXPAND } from "@/os/3-commands/expand/index";
 import { createCollectionZone } from "@/os/collection/createCollectionZone";
 
 /** Recursively clone a block tree, assigning new IDs to all descendants. */
@@ -165,14 +164,25 @@ export const BuilderSidebarUI = sidebarCollection.bind({
   onRedo: redoCommand(),
   options: {
     navigate: { orientation: "vertical" },
-    select: { mode: "single", followFocus: true },
     tab: { behavior: "flow" },
   },
   keybindings: [
     ...collectionBindings.keybindings,
-    { key: "ArrowLeft", command: () => OS_EXPAND({ action: "collapse" }) },
-    { key: "ArrowRight", command: () => OS_EXPAND({ action: "expand" }) },
   ],
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Panel Zone — Accordion tree (properties form keyboard navigation)
+// ═══════════════════════════════════════════════════════════════════
+
+const panelZone = BuilderApp.createZone("panel");
+
+export const BuilderPanelUI = panelZone.bind({
+  role: "tree",
+  options: {
+    navigate: { orientation: "vertical", typeahead: false },
+    tab: { behavior: "flow" },
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════

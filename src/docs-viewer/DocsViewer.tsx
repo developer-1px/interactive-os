@@ -19,7 +19,9 @@ import { DocsApp, selectDoc, resetDoc } from "./app";
 import {
   buildDocTree,
   cleanLabel,
+  type DocItem,
   docsModules,
+  findFolder,
   flattenTree,
   formatRelativeTime,
   isFavorite,
@@ -53,6 +55,98 @@ function parseHash(): {
   }
 
   return { source: "docs", path: hash };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FolderIndexView — shows direct children of a folder
+// ═══════════════════════════════════════════════════════════════════
+
+/** Loads and renders markdown content for a single file inline. */
+function InlineDocContent({ path }: { path: string }) {
+  const [md, setMd] = useState("");
+  useEffect(() => {
+    loadDocContent(path).then(setMd).catch(() => setMd(""));
+  }, [path]);
+  if (!md) return null;
+  return <MarkdownRenderer content={md} />;
+}
+
+/** Folder index page — list of direct children + inline content if ≤3. */
+function FolderIndexView({
+  folder,
+  onSelect,
+}: {
+  folder: DocItem;
+  onSelect: (path: string) => void;
+}) {
+  const children = folder.children ?? [];
+  const showInlineContent = children.length <= 4;
+
+  return (
+    <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
+      {/* Folder Header */}
+      <div className="flex items-center gap-3 mb-8 pb-6 border-b border-slate-100">
+        <div className="p-2 bg-indigo-50 rounded-lg">
+          <FolderOpen size={20} className="text-indigo-500" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+            {cleanLabel(folder.name)}
+          </h1>
+          <p className="text-xs text-slate-400 mt-0.5">
+            {children.length}개 항목
+          </p>
+        </div>
+      </div>
+
+      {/* Children List */}
+      <div className="flex flex-col gap-3">
+        {children.map((child) => (
+          <div key={child.path}>
+            <button
+              type="button"
+              onClick={() =>
+                onSelect(
+                  child.type === "folder"
+                    ? `folder:${child.path}`
+                    : child.path,
+                )
+              }
+              className={clsx(
+                "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all",
+                "hover:border-indigo-200 hover:bg-indigo-50/30 hover:shadow-sm",
+                "border-slate-200 bg-white",
+              )}
+            >
+              {child.type === "folder" ? (
+                <FolderOpen size={16} className="text-indigo-400 shrink-0" />
+              ) : (
+                <FileText size={16} className="text-slate-400 shrink-0" />
+              )}
+              <span className="text-sm font-medium text-slate-700 truncate">
+                {cleanLabel(child.name)}
+              </span>
+              {child.type === "folder" && child.children && (
+                <span className="ml-auto text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full shrink-0">
+                  {child.children.length}
+                </span>
+              )}
+            </button>
+
+            {/* Inline content for files when ≤3 direct children */}
+            {showInlineContent && child.type === "file" && (
+              <div className="mt-2 ml-4 pl-4">
+                <InlineDocContent path={child.path} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Footer Spacer */}
+      <div className="h-40" />
+    </article>
+  );
 }
 
 export function DocsViewer() {
@@ -167,6 +261,14 @@ export function DocsViewer() {
     [],
   );
 
+  // --- Derived: is current path a folder? ---
+  const isFolderView = activePath?.startsWith("folder:") ?? false;
+  const folderPath = isFolderView ? activePath!.slice("folder:".length) : null;
+  const folderNode = useMemo(
+    () => (folderPath ? findFolder(docTree, folderPath) : null),
+    [folderPath, docTree],
+  );
+
   // --- React to activePath changes (content load + hash sync) ---
   useEffect(() => {
     if (!activePath) return;
@@ -176,7 +278,13 @@ export function DocsViewer() {
     } else {
       setHash(`#/${activePath}`);
     }
-    loadContent(activePath, ext);
+    // Skip content loading for folder paths — FolderIndexView handles its own data
+    if (!activePath.startsWith("folder:")) {
+      loadContent(activePath, ext);
+    } else {
+      setContent("");
+      setError(null);
+    }
     // Scroll content area to top on document switch
     if (contentRef.current) {
       contentRef.current.scrollTop = 0;
@@ -305,6 +413,11 @@ export function DocsViewer() {
                   Return to Home
                 </button>
               </div>
+            ) : isFolderView && folderNode ? (
+              <FolderIndexView
+                folder={folderNode}
+                onSelect={handleSelect}
+              />
             ) : (
               <>
                 <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">

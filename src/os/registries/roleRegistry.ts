@@ -226,8 +226,8 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       arrowExpand: true,
       entry: "selected",
     },
-    select: { mode: "single", followFocus: false },
-    activate: { mode: "manual" },
+    select: { mode: "single", followFocus: true },
+    activate: { mode: "manual", onClick: true },
     tab: { behavior: "escape" },
   },
 

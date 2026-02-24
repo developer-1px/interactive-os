@@ -1,15 +1,19 @@
 /**
  * resolveKeyboard — Pure keyboard event resolution
  *
- * Translates sensed keyboard data into an action.
- * No DOM access. No side effects. Pure function.
+ * ZIFT Responder Chain: Field → Item → Zone → OS Global
  *
- * W3C UI Events Module: Keyboard Events (§3.5)
+ * Each layer gets a chance to handle the key in priority order.
+ * The first layer that returns a command wins.
+ *
+ * No DOM access. No side effects. Pure function.
  */
 
 import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
 import { OS_CHECK } from "@os/3-commands";
 import { Keybindings } from "@os/keymaps/keybindings";
+import { resolveFieldKey } from "@os/keymaps/resolveFieldKey";
+import { resolveItemKey } from "@os/keymaps/resolveItemKey";
 import type { ResolveResult } from "../shared";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -26,9 +30,16 @@ export interface KeyboardInput {
   isInspector: boolean;
   isCombobox: boolean;
 
+  // ─── Field layer ───
+  /** FieldRegistry id of the currently editing field, or null */
+  editingFieldId: string | null;
+
+  // ─── Item layer ───
   /** Role of the closest [data-item-id] element, e.g. "checkbox", "switch" */
   focusedItemRole: string | null;
   focusedItemId: string | null;
+  /** Whether the focused item is expanded (for treeitem) */
+  focusedItemExpanded: boolean | null;
 
   /** Whether the active zone has onCheck registered */
   activeZoneHasCheck: boolean;
@@ -68,13 +79,65 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
     elementId: input.elementId,
   };
 
-  // Space on checkbox/switch → CHECK override (W3C APG)
-  if (input.canonicalKey === "Space" && !input.isEditing) {
-    const checkResult = resolveCheck(input, meta);
-    if (checkResult) return checkResult;
+  // ═══════════════════════════════════════════════════════════════
+  // ZIFT Responder Chain: Field → Item → Zone → Global
+  // ═══════════════════════════════════════════════════════════════
+
+  // Layer 1: Field — editing field owns Enter/Escape per fieldType
+  if (input.editingFieldId) {
+    const fieldCmd = resolveFieldKey(input.editingFieldId, input.canonicalKey);
+    if (fieldCmd) {
+      return {
+        commands: [fieldCmd],
+        meta,
+        preventDefault: true,
+        fallback: false,
+      };
+    }
+    // Field is editing but didn't claim this key.
+    // If the field is active (owns this key for text editing), stop here.
+    if (input.isFieldActive) {
+      return { commands: [], meta: null, preventDefault: false, fallback: false };
+    }
   }
 
-  // Resolve keybinding with dual context
+  // Layer 2: Item — role-specific keys (treeitem expand, checkbox check)
+  if (!input.isEditing && input.focusedItemId) {
+    const itemCmd = resolveItemKey(
+      input.focusedItemRole,
+      input.canonicalKey,
+      {
+        itemId: input.focusedItemId,
+        expanded: input.focusedItemExpanded ?? undefined,
+      },
+    );
+    if (itemCmd) {
+      return {
+        commands: [itemCmd],
+        meta: { ...meta, elementId: input.focusedItemId },
+        preventDefault: true,
+        fallback: false,
+      };
+    }
+  }
+
+  // Item fallback: Zone has onCheck registered → Space = CHECK (app semantics)
+  // This works with activeZoneFocusedItemId even when DOM focusedItemId is null
+  if (
+    !input.isEditing &&
+    input.canonicalKey === "Space" &&
+    input.activeZoneHasCheck &&
+    input.activeZoneFocusedItemId
+  ) {
+    return {
+      commands: [OS_CHECK({ targetId: input.activeZoneFocusedItemId })],
+      meta: { ...meta, elementId: input.activeZoneFocusedItemId },
+      preventDefault: true,
+      fallback: false,
+    };
+  }
+
+  // Layer 3+4: Zone + Global — Keybindings registry
   const binding = Keybindings.resolve(input.canonicalKey, {
     isEditing: input.isEditing,
     isFieldActive: input.isFieldActive,
@@ -108,39 +171,4 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
     preventDefault: true,
     fallback: false,
   };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// CHECK Resolution (Space on checkbox/switch)
-// ═══════════════════════════════════════════════════════════════════
-
-function resolveCheck(
-  input: KeyboardInput,
-  meta: InputMeta,
-): ResolveResult | null {
-  // Case 1: Explicit checkbox/switch role → always CHECK
-  if (
-    (input.focusedItemRole === "checkbox" ||
-      input.focusedItemRole === "switch") &&
-    input.focusedItemId
-  ) {
-    return {
-      commands: [OS_CHECK({ targetId: input.focusedItemId })],
-      meta: { ...meta, elementId: input.focusedItemId },
-      preventDefault: true,
-      fallback: false,
-    };
-  }
-
-  // Case 2: Active zone has onCheck registered → CHECK (app semantics)
-  if (input.activeZoneHasCheck && input.activeZoneFocusedItemId) {
-    return {
-      commands: [OS_CHECK({ targetId: input.activeZoneFocusedItemId })],
-      meta: { ...meta, elementId: input.activeZoneFocusedItemId },
-      preventDefault: true,
-      fallback: false,
-    };
-  }
-
-  return null;
 }

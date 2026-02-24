@@ -25,6 +25,23 @@ import { os } from "@/os/kernel";
 const CANVAS_ZONE_ID = "canvas";
 
 export function SectionSidebar() {
+  const blocks = BuilderApp.useComputed((s) => s.data.blocks);
+
+  // Compute which items are expandable (have children)
+  const getExpandableItems = () => {
+    const expandable = new Set<string>();
+    function traverse(bs: Block[]) {
+      for (const b of bs) {
+        if (b.children && b.children.length > 0) {
+          expandable.add(b.id);
+          traverse(b.children);
+        }
+      }
+    }
+    traverse(blocks);
+    return expandable;
+  };
+
   return (
     <div className="w-56 shrink-0 bg-slate-50 border-r border-slate-200 flex flex-col overflow-visible select-none relative">
       {/* ── Sidebar Header: Logo + Page + Add ── */}
@@ -43,10 +60,11 @@ export function SectionSidebar() {
         <AddBlockButton />
       </div>
 
-      {/* ── Block Tree (Zone) ── */}
+      {/* ── Block Tree (Zone) — OS auto-provides expand/collapse for tree role ── */}
       <BuilderSidebarUI.Zone
         className="flex-1 flex flex-col py-3 overflow-y-auto"
         aria-label="Sections"
+        getExpandableItems={getExpandableItems}
       >
         <SidebarContent />
       </BuilderSidebarUI.Zone>
@@ -59,7 +77,7 @@ function SidebarContent() {
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);
 
   // OS-provided expansion hook — reads sidebar zone context (not parent)
-  const { isExpanded, toggleExpanded } = useExpanded();
+  const { isExpanded } = useExpanded();
 
   const focusedCanvasId = useFocusedItem(CANVAS_ZONE_ID);
 
@@ -113,7 +131,6 @@ function SidebarContent() {
                     ${isCanvasActive ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-200/50 text-slate-500"}
                   `}
                   style={{ paddingLeft: `${indent}px` }}
-                  onClick={() => toggleExpanded(itemId)}
                 >
                   <button
                     type="button"

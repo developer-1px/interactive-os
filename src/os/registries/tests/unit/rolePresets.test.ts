@@ -156,7 +156,7 @@ const specTable: SpecRow[] = [
     typeahead: true,
     entry: "selected",
     selectMode: "single",
-    followFocus: false,
+    followFocus: true,
     tab: "escape",
     activate: "manual",
     dismissEsc: D.dismissEsc,

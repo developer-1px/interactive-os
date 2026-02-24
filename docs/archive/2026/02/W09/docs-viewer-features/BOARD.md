@@ -2,6 +2,16 @@
 
 ## Now
 
+- [x] **T11**: 폴더 클릭 시 인덱스 페이지 표시 — tsc 0 | 983 tests (0 fail) | 3 tests updated ✅
+  - Discussion: `discussions/2026-0224-1150-folder-index-page.md`
+  - 폴더 클릭 → 메인 영역에 직계 자식(1-depth) 목록 표시
+  - 직계 자식 ≤3개 → 파일 마크다운 본문 인라인 표시
+  - 직계 자식 >3개 → 목록만 (클릭하여 이동)
+  - [x] T11.1: `selectDoc` expandable 가드 제거 (activePath에 folder ID 허용) ✅
+  - [x] T11.2: `findFolder` 유틸 추가 (docsUtils.ts) ✅
+  - [x] T11.3: `DocsViewer.tsx` 폴더 감지 + FolderIndexView 렌더링 ✅
+  - [x] T11.4: ≤3개 파일 인라인 마크다운 표시 ✅
+
 - [x] **T8**: ZoneCursor meta 보강 + DocsSidebar Todo 패턴 전환 🔥 FIRED
   - 해고 보고서: `docs/0-inbox/fired-2026-02-23-2155.md`
   - Discussion: `discussions/2026-0223-2100-navtree-interaction-design.md`

@@ -85,15 +85,21 @@ export const Keybindings = {
     // Falls back to isEditing for backward compatibility.
     const fieldActive = context.isFieldActive ?? context.isEditing;
 
-    // Priority: context-specific bindings first, then universal
-    for (const b of list) {
-      // "editing" bindings fire when the element is an editing element (mode-based)
-      if (b.when === "editing" && context.isEditing) return b;
-      // "navigating" bindings fire when the field does NOT consume this key
-      if (b.when === "navigating" && !fieldActive) return b;
+    // Pass 1: "editing" — highest priority when isEditing + field delegates this key
+    if (context.isEditing && !fieldActive) {
+      for (const b of list) {
+        if (b.when === "editing") return b;
+      }
     }
 
-    // Fallback: universal (no `when`)
+    // Pass 2: "navigating" — field does NOT consume this key
+    if (!fieldActive) {
+      for (const b of list) {
+        if (b.when === "navigating") return b;
+      }
+    }
+
+    // Pass 3: universal (no `when`) — always active
     for (const b of list) {
       if (!b.when) return b;
     }

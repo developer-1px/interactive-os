@@ -23,6 +23,10 @@ import {
     resolveMouse,
 } from "@os/1-listeners/mouse/resolveMouse";
 import {
+    type ClickInput,
+    resolveClick,
+} from "@os/1-listeners/mouse/resolveClick";
+import {
     getChildRole,
     isCheckedRole,
     isExpandableRole,
@@ -211,7 +215,8 @@ export function simulateClick(
     const zoneExpandable = entry?.getExpandableItems?.().has(itemId) ?? false;
     const expandable = roleExpandable || zoneExpandable;
 
-    const input: MouseInput = {
+    // Phase 1: mousedown — focus + select (immediate visual feedback)
+    const mouseInput: MouseInput = {
         targetItemId: itemId,
         targetGroupId: zoneId,
         shiftKey: opts?.shift ?? false,
@@ -225,9 +230,21 @@ export function simulateClick(
         itemRole: childRole ?? null,
     };
 
+    const mouseResult = resolveMouse(mouseInput);
+    dispatchResult(kernel, mouseResult);
 
-    const result = resolveMouse(input);
-    dispatchResult(kernel, result);
+    // Phase 2: click — activate (expand toggle for tree, action for others)
+    const activateOnClick = entry?.config?.activate?.onClick ?? false;
+    const focusedAfterMousedown = readFocusedItemId(kernel, zoneId);
+
+    const clickInput: ClickInput = {
+        activateOnClick,
+        clickedItemId: itemId,
+        focusedItemId: focusedAfterMousedown,
+    };
+
+    const clickResult = resolveClick(clickInput);
+    dispatchResult(kernel, clickResult);
 
     if (_observer && before) {
         _observer({

@@ -1,5 +1,6 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { useState } from "react";
+import { HighlightContext } from "./builder/PropertiesPanel";
 import {
   BuilderApp,
   BuilderCanvasUI,
@@ -35,6 +36,7 @@ import {
 export default function BuilderPage() {
   usePlaywrightSpecs("builder", [runBuilderSpec]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
 
   const getViewportStyle = () => {
     switch (viewport) {
@@ -48,41 +50,43 @@ export default function BuilderPage() {
   };
 
   return (
-    <div className="flex-1 h-full flex bg-slate-100 overflow-hidden">
-      {/* Section Sidebar (PPT-style) */}
-      <SectionSidebar />
+    <HighlightContext.Provider value={{ highlightedItemId, setHighlightedItemId }}>
+      <div className="flex-1 h-full flex bg-slate-100 overflow-hidden">
+        {/* Section Sidebar (PPT-style) */}
+        <SectionSidebar />
 
-      {/* Canvas wrapper — relative container for floating toolbar */}
-      <div className="flex-1 relative overflow-hidden">
-        {/* Floating Toolbar — OUTSIDE Zone to avoid OS event interception */}
-        <EditorToolbar
-          currentViewport={viewport}
-          onViewportChange={setViewport}
-        />
+        {/* Canvas wrapper — relative container for floating toolbar */}
+        <div className="flex-1 relative overflow-hidden">
+          {/* Floating Toolbar — OUTSIDE Zone to avoid OS event interception */}
+          <EditorToolbar
+            currentViewport={viewport}
+            onViewportChange={setViewport}
+          />
 
-        {/* Canvas Area — behavior declared in app.ts bind() */}
-        <BuilderCanvasUI.Zone className="absolute inset-0 overflow-y-auto custom-scrollbar bg-slate-100/50">
-          {/* Builder Cursor — visual focus indicator inside scroll container */}
-          <BuilderCursor />
+          {/* Canvas Area — behavior declared in app.ts bind() */}
+          <BuilderCanvasUI.Zone className="absolute inset-0 overflow-y-auto custom-scrollbar bg-slate-100/50">
+            {/* Builder Cursor — visual focus indicator inside scroll container */}
+            <BuilderCursor />
 
-          {/* Page Being Edited - Centered Canvas */}
-          <div className="min-h-full flex justify-center pt-14 pb-8 px-4 transition-all duration-300 ease-in-out">
-            <div
-              className="transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col shadow-2xl ring-1 ring-slate-900/5 bg-white shrink-0 origin-top"
-              style={getViewportStyle()}
-            >
-              {/* Content Container — dynamic from state */}
-              <div className="flex-1 bg-white relative group/canvas">
-                <SectionRenderer />
+            {/* Page Being Edited - Centered Canvas */}
+            <div className="min-h-full flex justify-center pt-14 pb-8 px-4 transition-all duration-300 ease-in-out">
+              <div
+                className="transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col shadow-2xl ring-1 ring-slate-900/5 bg-white shrink-0 origin-top"
+                style={getViewportStyle()}
+              >
+                {/* Content Container — dynamic from state */}
+                <div className="flex-1 bg-white relative group/canvas">
+                  <SectionRenderer />
+                </div>
               </div>
             </div>
-          </div>
-        </BuilderCanvasUI.Zone>
-      </div>
+          </BuilderCanvasUI.Zone>
+        </div>
 
-      {/* Properties Panel (Fixed Right) — reads state from BuilderApp */}
-      <PropertiesPanel />
-    </div>
+        {/* Properties Panel (Fixed Right) — reads state from BuilderApp */}
+        <PropertiesPanel />
+      </div>
+    </HighlightContext.Provider>
   );
 }
 

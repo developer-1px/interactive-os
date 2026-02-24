@@ -49,6 +49,29 @@
 
 ## ⏳ Done
 
+- [x] T17: OS tree role auto expand/collapse — 수동 배선 제거 (02-24) — tsc 0 | 980 tests | build OK ✅
+  - **발견**: OS tree role preset에 이미 `arrowExpand: true` 존재. `OS_ACTIVATE`도 expandable items에 자동 toggle.
+  - **실제 원인**: `getExpandableItems` 미제공 → OS가 어떤 item이 expandable인지 몰랐음
+  - T17-1/2: OS에 이미 구현됨 (arrowExpand + OS_ACTIVATE). `getExpandableItems` Zone prop 추가로 활성화.
+  - T17-3: sidebar/panel 수동 keybinding (`ArrowLeft/Right → OS_EXPAND`) 제거. OS가 자동 제공.
+  - T17-4: sidebar/panel 수동 `onClick → toggleExpanded` 제거. OS `OS_ACTIVATE` 가 처리.
+  - Discussion: [os-tree-auto-expand](discussions/2026-0224-1034-os-tree-auto-expand.md)
+
+- [x] T16: Panel 고도화 — OS Accordion + 양방향 Highlight + 스크롤 안정화 (02-24) — tsc 0 | 980 tests | build OK ✅
+  - T16-1: Accordion 헤더 → OS Zone/Item (`BuilderPanelUI` zone, `useExpanded`, Arrow/Enter 키보드)
+  - T16-2: Panel field focus → Canvas highlight 양방향 동기화 (`HighlightContext`, dashed indigo cursor)
+  - T16-3: Auto-scroll = section 헤더 단위 (`headerRefs` + `scrollIntoView({ block: "nearest" })`)
+  - Discussion: [panel-enhancements](discussions/2026-0224-1017-panel-enhancements.md)
+
+- [x] T15: PropertiesPanel → Accordion Form 전환 (02-24) — tsc 0 | 980 tests | build OK ✅
+  - AccordionSection 공용 컴포넌트 (열림/닫힘, chevron)
+  - blocks.map() → Accordion 구조 전환
+  - Block.fields 기반 generic FieldInput (multiline 자동 감지)
+  - Nested Accordion for children blocks (Services cards, Tab children)
+  - Page Meta 하드코딩 (slug, description, keywords)
+  - Canvas sync: focusedItem → auto-expand + scrollIntoView
+  - Discussion: [panel-accordion-form](discussions/2026-0224-1003-panel-accordion-form.md)
+
 - [x] T14: 블록 추가 UI + 프리셋 시스템 (02-21)
   - Block/Page Preset 데이터 + 사이드바 팝오버 + PagePresetPicker
 - [x] T11-b: Deep clone fix — Copy/paste children ID 재생성

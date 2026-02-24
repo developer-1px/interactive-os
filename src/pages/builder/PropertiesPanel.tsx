@@ -1,677 +1,575 @@
 import {
-  Bookmark,
-  Columns,
+  ChevronDown,
+  ChevronRight,
   Eye,
-  Image as ImageIcon,
+  FileText,
+  Globe,
   Layout,
-  Link as LinkIcon,
-  Minus,
-  MousePointer2,
-  Square,
-  Type,
 } from "lucide-react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   BuilderApp,
-  type PropertyType,
+  BuilderPanelUI,
   renameSectionLabel,
-  resolveFieldAddress,
   updateField,
-  updateFieldByDomId,
-  useFieldByDomId,
 } from "@/apps/builder/app";
 import type { Block } from "@/apps/builder/model/appState";
-import { getItemAttribute } from "@/os/2-contexts/itemQueries";
+import { getPropertyDef } from "@/apps/builder/model/blockSchemas";
+import { getWidget } from "./widgets/PropertyWidgets";
+import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
 import { os } from "@/os/kernel";
 
 const CANVAS_ZONE_ID = "canvas";
+const PANEL_ZONE_ID = "panel";
 
-/**
- * Non-null property type for resolved elements.
- * Falls back to "text" for items without explicit data-builder-type.
- */
-type ResolvedPropertyType = NonNullable<PropertyType>;
+// ═══════════════════════════════════════════════════════════════════
+// Panel Highlight Context — panel field focus → canvas highlight
+//
+// Separate from OS focus: edit stays in each context,
+// only visual highlight syncs bidirectionally.
+// ═══════════════════════════════════════════════════════════════════
 
-/**
- * Resolve the parent block + field key for a focused DOM item.
- * The focusedId is the DOM element id. resolveFieldAddress parses it
- * into { section (the owning Block), field (the field key) }.
- */
-function useResolvedField(focusedId: string) {
-  return BuilderApp.useComputed((s) => {
-    const addr = resolveFieldAddress(focusedId, s.data.blocks);
-    if (!addr) return null;
-    return {
-      block: addr.section,
-      fieldKey: addr.field,
-    };
-  });
+const HighlightContext = createContext<{
+  highlightedItemId: string | null;
+  setHighlightedItemId: (id: string | null) => void;
+}>({
+  highlightedItemId: null,
+  setHighlightedItemId: () => { },
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// PropertiesPanel — Page Configuration Form (Accordion)
+//
+// T15: blocks[] → AccordionSection per block
+// T16-1: OS Zone/Item for accordion keyboard navigation
+// T16-2: Panel field focus → Canvas highlight (bidirectional sync)
+// T16-3: Auto-scroll = section header unit only
+// ═══════════════════════════════════════════════════════════════════
+
+export function PropertiesPanel() {
+  const blocks = BuilderApp.useComputed((s) => s.data.blocks);
+  const focusedCanvasId = useFocusedItem(CANVAS_ZONE_ID);
+
+  // All blocks are expandable accordion sections
+  const getExpandableItems = useCallback(() => {
+    const expandable = new Set<string>();
+    function traverse(bs: Block[]) {
+      for (const b of bs) {
+        expandable.add(b.id);
+        if (b.children) traverse(b.children);
+      }
+    }
+    traverse(blocks);
+    return expandable;
+  }, [blocks]);
+
+  // ── Panel highlight: field focus → canvas highlight ──
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
+
+  // ── Section header refs for scroll ──
+  const headerRefs = useRef<Record<string, HTMLElement | null>>({});
+
+  // ── Canvas sync: auto-expand + scroll to section HEADER on canvas focus ──
+  useEffect(() => {
+    if (!focusedCanvasId) return;
+
+    // Find the block that owns this focused item
+    const ownerBlockId = resolveOwnerBlockId(focusedCanvasId, blocks);
+    if (!ownerBlockId) return;
+
+    // Expand ancestors via OS_EXPAND
+    const ancestors = resolveAncestorIds(ownerBlockId, blocks);
+    for (const id of ancestors) {
+      os.dispatch({ type: "OS_EXPAND", payload: { itemId: id, zoneId: PANEL_ZONE_ID, action: "expand" } });
+    }
+
+    // T16-3: Scroll to SECTION HEADER only (not to individual fields)
+    requestAnimationFrame(() => {
+      const headerEl = headerRefs.current[ownerBlockId];
+      if (headerEl) {
+        headerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
+  }, [focusedCanvasId, blocks]);
+
+  const setHeaderRef = useCallback(
+    (id: string) => (el: HTMLElement | null) => {
+      headerRefs.current[id] = el;
+    },
+    [],
+  );
+
+  return (
+    <HighlightContext.Provider value={{ highlightedItemId, setHighlightedItemId }}>
+      <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col shadow-xl z-20">
+        <PanelActionBar />
+
+        {/* Scrollable Form */}
+        <div className="flex-1 overflow-y-scroll custom-scrollbar">
+          {/* ── Page Meta (hardcoded, always visible) ── */}
+          <PageMetaSection />
+
+          {/* ── Block Accordion Tree (OS Zone) — OS auto-provides expand/collapse ── */}
+          <BuilderPanelUI.Zone
+            className="flex flex-col"
+            aria-label="Block Properties"
+            getExpandableItems={getExpandableItems}
+          >
+            <PanelContent
+              blocks={blocks}
+              focusedCanvasId={focusedCanvasId}
+              setHeaderRef={setHeaderRef}
+            />
+          </BuilderPanelUI.Zone>
+        </div>
+      </div>
+    </HighlightContext.Provider>
+  );
 }
 
-/**
- * PropertiesPanel
- *
- * Visual CMS / Web Builder - Right Sidebar
- * Reads selected element and field data from BuilderApp state.
- * Writes field changes via updateFieldByDomId / updateField.
- */
-export function PropertiesPanel() {
-  const focusedId = useFocusedItem(CANVAS_ZONE_ID);
-  const rawType = focusedId
-    ? (getItemAttribute(
-      CANVAS_ZONE_ID,
-      focusedId,
-      "data-builder-type",
-    ) as PropertyType)
-    : null;
+/** Inner component — child of Zone so useExpanded reads correct context */
+function PanelContent({
+  blocks,
+  focusedCanvasId,
+  setHeaderRef,
+}: {
+  blocks: Block[];
+  focusedCanvasId: string | null;
+  setHeaderRef: (id: string) => (el: HTMLElement | null) => void;
+}) {
+  const { isExpanded } = useExpanded();
 
-  // Normalize: null/undefined → "text" (plain Field.Editable with no data-builder-type)
-  const selectedType: ResolvedPropertyType | null = focusedId
-    ? (rawType ?? "text")
-    : null;
+  return (
+    <>
+      {blocks.map((block) => (
+        <BlockAccordionSection
+          key={block.id}
+          block={block}
+          depth={0}
+          focusedCanvasId={focusedCanvasId}
+          isExpanded={isExpanded}
+          setHeaderRef={setHeaderRef}
+        />
+      ))}
+    </>
+  );
+}
 
-  if (!focusedId || !selectedType) {
-    return (
-      <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col">
-        <PanelActionBar />
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-slate-400">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-            <Layout size={32} />
+// ═══════════════════════════════════════════════════════════════════
+// BlockAccordionSection — OS Item + Accordion + Fields Form
+// ═══════════════════════════════════════════════════════════════════
+
+function BlockAccordionSection({
+  block,
+  depth,
+  focusedCanvasId,
+  isExpanded,
+  setHeaderRef,
+}: {
+  block: Block;
+  depth: number;
+  focusedCanvasId: string | null;
+  isExpanded: (id: string) => boolean;
+  setHeaderRef: (id: string) => (el: HTMLElement | null) => void;
+}) {
+  const expanded = isExpanded(block.id);
+  const isActive = focusedCanvasId?.startsWith(block.id) ?? false;
+  const isRoot = depth === 0;
+
+  return (
+    <>
+      <BuilderPanelUI.Item
+        id={block.id}
+        className="outline-none group focus:outline-none"
+      >
+        {/* ── Section Header — chevron on RIGHT for keyline preservation ── */}
+        <div
+          ref={setHeaderRef(block.id)}
+          className={`
+            w-full flex items-center justify-between px-4 cursor-pointer
+            transition-colors
+            group-focus:ring-2 group-focus:ring-inset group-focus:ring-indigo-500/40
+            ${isRoot
+              ? `py-2.5 border-t border-slate-200 ${isActive ? "bg-indigo-50" : "bg-slate-50/80"}`
+              : `py-2 ${isActive ? "bg-indigo-50/50" : "hover:bg-slate-50"}`
+            }
+          `}
+          style={{ paddingLeft: `${16 + depth * 16}px` }}
+        >
+          {/* Left: Icon + Label + Badge */}
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`shrink-0 ${isActive ? "text-indigo-500" : "text-slate-400"}`}>
+              <Layout size={isRoot ? 14 : 12} />
+            </span>
+            <span
+              className={`
+                truncate
+                ${isRoot ? "text-[12px] font-bold" : "text-[11px] font-semibold"}
+                ${isActive ? "text-indigo-700" : "text-slate-700"}
+              `}
+            >
+              {block.label}
+            </span>
+            <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-slate-100 text-slate-400 uppercase tracking-wider shrink-0">
+              {block.type}
+            </span>
           </div>
-          <p className="text-sm font-medium">Select an element to edit</p>
+
+          {/* Right: Chevron — does not affect left keyline */}
+          <span className={`shrink-0 ml-2 transition-transform duration-200 ${isActive ? "text-indigo-400" : "text-slate-300"}`}>
+            {expanded ? (
+              <ChevronDown size={14} />
+            ) : (
+              <ChevronRight size={14} />
+            )}
+          </span>
         </div>
+      </BuilderPanelUI.Item>
+
+      {/* ── Content (outside Item — clicks here don't trigger OS_ACTIVATE) ── */}
+      {expanded && (
+        <div className={isRoot ? "bg-white" : "bg-white/50"} onKeyDown={(e) => e.stopPropagation()}>
+          <BlockFieldsForm block={block} isExpanded={isExpanded} setHeaderRef={setHeaderRef} focusedCanvasId={focusedCanvasId} />
+        </div>
+      )}
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BlockFieldsForm — Generic field editor for a block's fields
+// ═══════════════════════════════════════════════════════════════════
+
+function BlockFieldsForm({ block, isExpanded, setHeaderRef, focusedCanvasId }: {
+  block: Block;
+  isExpanded: (id: string) => boolean;
+  setHeaderRef: (id: string) => (el: HTMLElement | null) => void;
+  focusedCanvasId: string | null;
+}) {
+  const fields = BuilderApp.useComputed(
+    (s) => {
+      function find(blocks: Block[]): Block | null {
+        for (const b of blocks) {
+          if (b.id === block.id) return b;
+          if (b.children) {
+            const r = find(b.children);
+            if (r) return r;
+          }
+        }
+        return null;
+      }
+      return find(s.data.blocks)?.fields ?? {};
+    },
+  ) as unknown as Record<string, string>;
+
+  const entries = Object.entries(fields);
+  const hasContent = entries.length > 0 || (block.children && block.children.length > 0);
+
+  if (!hasContent) {
+    return (
+      <div className="px-4 py-3 text-[11px] text-slate-400 italic">
+        No editable fields
       </div>
     );
   }
 
   return (
-    <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col shadow-xl z-20">
-      <PanelActionBar />
-      {/* Header Title */}
-      <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-2 bg-white">
-        <div className="p-1.5 bg-slate-100 rounded text-slate-500">
-          {getIconForType(selectedType)}
-        </div>
-        <div>
-          <h2 className="font-semibold text-slate-800 text-sm capitalize">
-            {selectedType} Properties
-          </h2>
-          <p className="text-[10px] text-slate-400 font-medium truncate max-w-[180px]">
-            {focusedId}
-          </p>
-        </div>
-      </div>
-
-      {/* Form Content */}
-      <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
-        {selectedType === "text" && <TextProperties fieldName={focusedId} />}
-        {selectedType === "image" && <ImageProperties fieldName={focusedId} />}
-        {selectedType === "icon" && <IconProperties fieldName={focusedId} />}
-        {selectedType === "link" && <LinkProperties fieldName={focusedId} />}
-        {selectedType === "button" && (
-          <ButtonProperties fieldName={focusedId} />
-        )}
-        {selectedType === "badge" && <BadgeProperties fieldName={focusedId} />}
-        {selectedType === "section" && (
-          <SectionProperties fieldName={focusedId} />
-        )}
-        {selectedType === "divider" && (
-          <DividerProperties fieldName={focusedId} />
-        )}
-        {selectedType === "tabs" && <TabsProperties fieldName={focusedId} />}
-      </div>
-    </div>
-  );
-}
-
-function getIconForType(type: ResolvedPropertyType) {
-  switch (type) {
-    case "text":
-      return <Type size={16} />;
-    case "image":
-      return <ImageIcon size={16} />;
-    case "icon":
-      return <Square size={16} />;
-    case "link":
-      return <LinkIcon size={16} />;
-    case "button":
-      return <MousePointer2 size={16} />;
-    case "badge":
-      return <Bookmark size={16} />;
-    case "section":
-      return <Layout size={16} />;
-    case "divider":
-      return <Minus size={16} />;
-    case "tabs":
-      return <Columns size={16} />;
-    default:
-      return <Type size={16} />;
-  }
-}
-
-/* -------------------------------------------------------------------------------------------------
- * Live-Bound Forms — reads/writes BuilderApp state
- * ------------------------------------------------------------------------------------------------- */
-
-function TextProperties({ fieldName }: { fieldName: string }) {
-  const value = useFieldByDomId(fieldName);
-
-  return (
-    <div className="space-y-6">
-      <FormGroup label="Content">
-        <textarea
-          className="w-full p-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 min-h-[80px] resize-y"
-          value={value}
-          onChange={(e) =>
-            os.dispatch(
-              updateFieldByDomId({ domId: fieldName, value: e.target.value }),
-            )
-          }
-        />
-        <p className="text-[10px] text-slate-400 mt-1.5">
-          Edit the text content. Changes apply to canvas in real-time.
-        </p>
-      </FormGroup>
-    </div>
-  );
-}
-
-function ImageProperties({ fieldName }: { fieldName: string }) {
-  const resolved = useResolvedField(fieldName);
-  const block = resolved?.block ?? null;
-  const fieldKey = resolved?.fieldKey ?? "";
-
-  // Image fields in the block
-  const src = block?.fields[fieldKey] ?? "";
-  const altKey = fieldKey.replace(/-?img$/, "") + "-alt";
-  const alt = block?.fields[altKey] ?? "";
-
-  const dispatchField = (key: string, value: string) => {
-    if (!block) return;
-    os.dispatch(updateField({ sectionId: block.id, field: key, value }));
-  };
-
-  return (
-    <div className="space-y-6">
-      <FormGroup label="Preview">
-        <div className="aspect-video bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center mb-3 overflow-hidden relative group">
-          {src ? (
-            <img
-              src={src}
-              alt={alt || "Preview"}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="text-slate-300 text-sm">No image</div>
-          )}
-        </div>
-      </FormGroup>
-
-      <FormGroup label="Source">
-        <LiveInput
-          label="Image URL"
-          value={src}
-          onChange={(v) => dispatchField(fieldKey, v)}
-          placeholder="https://..."
-        />
-        <div className="mt-3">
-          <LiveInput
-            label="Alt Text"
-            value={alt}
-            onChange={(v) => dispatchField(altKey, v)}
-            placeholder="Describe the image"
-          />
-          <p className="text-[10px] text-slate-400 mt-1">
-            Important for accessibility and SEO.
-          </p>
-        </div>
-      </FormGroup>
-    </div>
-  );
-}
-
-function IconProperties({ fieldName }: { fieldName: string }) {
-  const resolved = useResolvedField(fieldName);
-  const block = resolved?.block ?? null;
-  const fieldKey = resolved?.fieldKey ?? "";
-
-  // Icon data lives in the owning block's fields.
-  // For service cards: Block.fields["icon"] = "Server"
-  // For standalone icons: the fieldKey IS the icon field key
-  // We detect which fields exist in the block
-  const iconFieldKey = block?.fields["icon"] !== undefined ? "icon" : fieldKey;
-  const currentIcon = block?.fields[iconFieldKey] ?? "";
-
-  // Try common label field patterns
-  const labelFieldKey =
-    block?.fields["label"] !== undefined
-      ? "label"
-      : block?.fields[`${fieldKey}-label`] !== undefined
-        ? `${fieldKey}-label`
-        : null;
-  const currentLabel = labelFieldKey
-    ? (block?.fields[labelFieldKey] ?? "")
-    : "";
-
-  const ICON_OPTIONS = [
-    "ArrowRight",
-    "Check",
-    "Star",
-    "Heart",
-    "Mail",
-    "Phone",
-    "Globe",
-    "Shield",
-    "Server",
-    "Database",
-    "Brain",
-    "Layers",
-    "Box",
-    "Cpu",
-  ];
-
-  const dispatchField = (key: string, value: string) => {
-    if (!block) return;
-    os.dispatch(updateField({ sectionId: block.id, field: key, value }));
-  };
-
-  return (
-    <div className="space-y-6">
-      <FormGroup label="Icon Selection">
-        <div className="grid grid-cols-4 gap-2 mb-2">
-          {ICON_OPTIONS.map((name) => (
-            <button
-              type="button"
-              key={name}
-              className={`aspect-square rounded-md border flex items-center justify-center cursor-pointer hover:bg-slate-50 text-xs ${currentIcon === name
-                  ? "border-violet-500 bg-violet-50 text-violet-600"
-                  : "border-slate-200 text-slate-400"
-                }`}
-              onClick={() => dispatchField(iconFieldKey, name)}
-              title={name}
-            >
-              {name.slice(0, 2)}
-            </button>
-          ))}
-        </div>
-        <LiveInput
-          label="Icon Name"
-          value={currentIcon}
-          onChange={(v) => dispatchField(iconFieldKey, v)}
-          placeholder="Search icon..."
-        />
-      </FormGroup>
-
-      {/* Block info */}
-      <FormGroup label="Context">
-        <div className="text-xs text-slate-500 space-y-1">
-          <div className="flex justify-between">
-            <span className="text-slate-400">Block</span>
-            <span className="font-mono">{block?.id ?? "—"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Field</span>
-            <span className="font-mono">{iconFieldKey}</span>
-          </div>
-        </div>
-      </FormGroup>
-
-      {labelFieldKey && (
-        <FormGroup label="Accessibility">
-          <LiveInput
-            label="Label"
-            value={currentLabel}
-            onChange={(v) => dispatchField(labelFieldKey, v)}
-            placeholder="Leave empty if decorative"
-          />
-        </FormGroup>
-      )}
-    </div>
-  );
-}
-
-function LinkProperties({ fieldName }: { fieldName: string }) {
-  const value = useFieldByDomId(fieldName);
-  const resolved = useResolvedField(fieldName);
-  const block = resolved?.block ?? null;
-  const fieldKey = resolved?.fieldKey ?? "";
-
-  // Derive href field key: "link" → "link-href", "all" → "all-href"
-  const hrefFieldKey = `${fieldKey}-href`;
-  const hrefValue = block?.fields[hrefFieldKey] ?? "";
-
-  const dispatchField = (key: string, value: string) => {
-    if (!block) return;
-    os.dispatch(updateField({ sectionId: block.id, field: key, value }));
-  };
-
-  return (
-    <div className="space-y-6">
-      <FormGroup label="Link Text">
-        <textarea
-          className="w-full p-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 min-h-[40px] resize-y"
-          value={value}
-          onChange={(e) =>
-            os.dispatch(
-              updateFieldByDomId({ domId: fieldName, value: e.target.value }),
-            )
-          }
-        />
-      </FormGroup>
-
-      <FormGroup label="URL">
-        <LiveInput
-          label="Href"
-          value={hrefValue}
-          onChange={(v) => dispatchField(hrefFieldKey, v)}
-          placeholder="https://..."
-        />
-        <p className="text-[10px] text-slate-400 mt-1.5">
-          The link destination URL. Leave empty for # anchor.
-        </p>
-      </FormGroup>
-
-      <FormGroup label="Context">
-        <div className="text-xs text-slate-500 space-y-1">
-          <div className="flex justify-between">
-            <span className="text-slate-400">Block</span>
-            <span className="font-mono">{block?.id ?? "—"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Field</span>
-            <span className="font-mono">{fieldKey || "—"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Type</span>
-            <span className="font-mono">{block?.type ?? "—"}</span>
-          </div>
-        </div>
-      </FormGroup>
-    </div>
-  );
-}
-
-function ButtonProperties({ fieldName }: { fieldName: string }) {
-  const value = useFieldByDomId(fieldName);
-  const resolved = useResolvedField(fieldName);
-  const block = resolved?.block ?? null;
-  const fieldKey = resolved?.fieldKey ?? "";
-
-  // Read current variant from DOM attribute
-  const currentVariant =
-    getItemAttribute(CANVAS_ZONE_ID, fieldName, "data-variant") ?? "primary";
-
-  // Derive href field key for button links
-  const hrefFieldKey = `${fieldKey}-href`;
-  const hrefValue = block?.fields[hrefFieldKey] ?? "";
-
-  const VARIANT_OPTIONS: { value: string; label: string; preview: string }[] = [
-    { value: "primary", label: "Primary", preview: "bg-slate-900 text-white" },
-    {
-      value: "secondary",
-      label: "Secondary",
-      preview: "bg-slate-100 text-slate-900",
-    },
-    {
-      value: "ghost",
-      label: "Ghost",
-      preview: "bg-transparent text-slate-600 border border-slate-200",
-    },
-    {
-      value: "outline",
-      label: "Outline",
-      preview: "bg-transparent text-slate-900 border-2 border-slate-900",
-    },
-  ];
-
-  const dispatchField = (key: string, value: string) => {
-    if (!block) return;
-    os.dispatch(updateField({ sectionId: block.id, field: key, value }));
-  };
-
-  return (
-    <div className="space-y-6">
-      <FormGroup label="Button Label">
+    <div className="px-4 py-3 space-y-2.5">
+      {/* Section label (editable) */}
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+          Section Name
+        </label>
         <input
           type="text"
-          className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
-          value={value}
+          className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 font-medium text-slate-700"
+          value={block.label}
           onChange={(e) =>
             os.dispatch(
-              updateFieldByDomId({ domId: fieldName, value: e.target.value }),
+              renameSectionLabel({ id: block.id, label: e.target.value }),
             )
           }
         />
-      </FormGroup>
+      </div>
 
-      <FormGroup label="Variant">
-        <div className="grid grid-cols-2 gap-2">
-          {VARIANT_OPTIONS.map((opt) => (
-            <button
-              type="button"
-              key={opt.value}
-              className={`px-3 py-2 rounded-md text-xs font-bold transition-all ${currentVariant === opt.value
-                  ? "ring-2 ring-violet-500 ring-offset-1"
-                  : "hover:bg-slate-50"
-                }`}
-              onClick={() => dispatchField(`${fieldKey}-variant`, opt.value)}
-            >
-              <div className={`w-full h-5 rounded mb-1.5 ${opt.preview}`} />
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </FormGroup>
+      {/* Divider */}
+      <div className="border-t border-slate-100 my-1" />
 
-      <FormGroup label="Action URL">
-        <LiveInput
-          label="Href"
-          value={hrefValue}
-          onChange={(v) => dispatchField(hrefFieldKey, v)}
-          placeholder="https://..."
+      {/* Fields */}
+      {entries.map(([key, val]) => (
+        <FieldInput
+          key={key}
+          blockId={block.id}
+          blockType={block.type}
+          fieldKey={key}
+          value={val}
         />
-        <p className="text-[10px] text-slate-400 mt-1.5">
-          URL to navigate when clicked. Leave empty for no action.
-        </p>
-      </FormGroup>
+      ))}
 
-      <FormGroup label="Context">
-        <div className="text-xs text-slate-500 space-y-1">
-          <div className="flex justify-between">
-            <span className="text-slate-400">Block</span>
-            <span className="font-mono">{block?.id ?? "—"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Field</span>
-            <span className="font-mono">{fieldKey || "—"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Type</span>
-            <span className="font-mono">{block?.type ?? "—"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Variant</span>
-            <span className="font-mono">{currentVariant}</span>
-          </div>
-        </div>
-      </FormGroup>
-    </div>
-  );
-}
-
-function BadgeProperties({ fieldName }: { fieldName: string }) {
-  const value = useFieldByDomId(fieldName);
-  const resolved = useResolvedField(fieldName);
-  const block = resolved?.block ?? null;
-
-  return (
-    <div className="space-y-6">
-      <FormGroup label="Badge Text">
-        <input
-          type="text"
-          className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
-          value={value}
-          onChange={(e) =>
-            os.dispatch(
-              updateFieldByDomId({ domId: fieldName, value: e.target.value }),
-            )
-          }
-        />
-        <p className="text-[10px] text-slate-400 mt-1.5">
-          Short label text, typically uppercase.
-        </p>
-      </FormGroup>
-
-      <FormGroup label="Context">
-        <div className="text-xs text-slate-500 space-y-1">
-          <div className="flex justify-between">
-            <span className="text-slate-400">Block</span>
-            <span className="font-mono">{block?.id ?? "—"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Type</span>
-            <span className="font-mono">{block?.type ?? "—"}</span>
-          </div>
-        </div>
-      </FormGroup>
-    </div>
-  );
-}
-
-function SectionProperties({ fieldName }: { fieldName: string }) {
-  const sectionLabel = BuilderApp.useComputed(
-    (s) =>
-      s.data.blocks.find((sec) => sec.id === fieldName)?.label ?? fieldName,
-  );
-
-  // Get all editable fields for this section
-  const sectionFields = BuilderApp.useComputed(
-    (s) => s.data.blocks.find((b) => b.id === fieldName)?.fields ?? {},
-  ) as unknown as Record<string, string>;
-
-  const fieldEntries = Object.entries(sectionFields);
-
-  return (
-    <div className="space-y-6">
-      <FormGroup label="Section Identity">
-        <LiveInput
-          label="Section Name"
-          value={sectionLabel as string}
-          onChange={(v) =>
-            os.dispatch(renameSectionLabel({ id: fieldName, label: v }))
-          }
-        />
-        <div className="mt-3">
-          <ReadOnlyField label="ID (Anchor)" value={fieldName} />
-          <p className="text-[10px] text-slate-400 mt-1">
-            Used for anchor links (e.g. #{fieldName}).
-          </p>
-        </div>
-      </FormGroup>
-
-      {fieldEntries.length > 0 && (
-        <FormGroup label={`Fields (${fieldEntries.length})`}>
-          <div className="space-y-2.5">
-            {fieldEntries.map(([key, val]) => (
-              <LiveInput
-                key={key}
-                label={key}
-                value={val}
-                onChange={(v) =>
-                  os.dispatch(
-                    updateField({ sectionId: fieldName, field: key, value: v }),
-                  )
-                }
+      {/* Children as inline card fields — same label pattern */}
+      {block.children && block.children.length > 0 && (
+        <>
+          <div className="border-t border-slate-100 my-1" />
+          <label className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+            Items ({block.children.length})
+          </label>
+          <div className="space-y-1.5">
+            {block.children.map((child, i) => (
+              <ChildCardField
+                key={child.id}
+                child={child}
+                index={i}
+                isExpanded={isExpanded}
+                setHeaderRef={setHeaderRef}
+                focusedCanvasId={focusedCanvasId}
               />
             ))}
           </div>
-        </FormGroup>
+        </>
       )}
     </div>
   );
 }
 
-function DividerProperties({ fieldName }: { fieldName: string }) {
-  return (
-    <div className="space-y-6">
-      <FormGroup label="Divider">
-        <p className="text-sm text-slate-500">
-          Visual separator element. No editable properties.
-        </p>
-      </FormGroup>
+// ═══════════════════════════════════════════════════════════════════
+// ChildCardField — Inline expandable card within parent form
+// Same label style as regular fields, compact preview as widget
+// ═══════════════════════════════════════════════════════════════════
 
-      <FormGroup label="Element Info">
-        <ReadOnlyField label="DOM ID" value={fieldName} />
-      </FormGroup>
-    </div>
-  );
-}
+function ChildCardField({
+  child,
+  index,
+  isExpanded,
+  setHeaderRef,
+  focusedCanvasId,
+}: {
+  child: Block;
+  index: number;
+  isExpanded: (id: string) => boolean;
+  setHeaderRef: (id: string) => (el: HTMLElement | null) => void;
+  focusedCanvasId: string | null;
+}) {
+  const expanded = isExpanded(child.id);
+  const isActive = focusedCanvasId?.startsWith(child.id) ?? false;
 
-function TabsProperties({ fieldName }: { fieldName: string }) {
-  const resolved = useResolvedField(fieldName);
-  const block = resolved?.block ?? null;
-
-  // Find the tabs container block
-  const tabsBlock = BuilderApp.useComputed((s) => {
-    function find(blocks: Block[]): Block | null {
-      for (const b of blocks) {
-        if (b.id === fieldName) return b;
-        if (b.children) {
-          const r = find(b.children);
-          if (r) return r;
-        }
-      }
-      return null;
-    }
-    return find(s.data.blocks);
-  });
-
-  const children = tabsBlock?.children ?? [];
+  // Use item-title field if available, otherwise label
+  const title = child.fields?.["item-title"] || child.label;
+  const badge = child.fields?.["badge"];
 
   return (
-    <div className="space-y-6">
-      <FormGroup label="Tab Container">
-        <div className="text-xs text-slate-500 space-y-1">
-          <div className="flex justify-between">
-            <span className="text-slate-400">Tabs</span>
-            <span className="font-mono">{children.length}</span>
-          </div>
-          {children.map((child, i) => (
-            <div key={child.id} className="flex justify-between">
-              <span className="text-slate-400">Tab {i + 1}</span>
-              <span className="font-mono truncate ml-2">{child.label}</span>
-            </div>
-          ))}
-        </div>
-      </FormGroup>
-
-      {block && (
-        <FormGroup label="Context">
-          <div className="text-xs text-slate-500 space-y-1">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Block</span>
-              <span className="font-mono">{block.id}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Type</span>
-              <span className="font-mono">{block.type}</span>
-            </div>
-            {block.accept && (
-              <div className="flex justify-between">
-                <span className="text-slate-400">Accepts</span>
-                <span className="font-mono">{block.accept.join(", ")}</span>
-              </div>
+    <>
+      <BuilderPanelUI.Item id={child.id} className="outline-none group focus:outline-none">
+        {/* Card preview row — clickable, same keyline as form labels */}
+        <div
+          ref={setHeaderRef(child.id)}
+          className={`
+            flex items-center justify-between px-2 py-2 rounded-md cursor-pointer
+            border transition-colors
+            group-focus:ring-2 group-focus:ring-indigo-500/40
+            ${isActive
+              ? "border-indigo-200 bg-indigo-50/50"
+              : expanded
+                ? "border-slate-200 bg-slate-50/50"
+                : "border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50"
+            }
+          `}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[10px] text-slate-400 font-mono w-4 shrink-0">{index + 1}</span>
+            <span className={`text-[12px] truncate ${isActive ? "text-indigo-700 font-semibold" : "text-slate-700 font-medium"}`}>
+              {title}
+            </span>
+            {badge && (
+              <span className="px-1 py-0.5 text-[8px] font-bold rounded bg-indigo-100 text-indigo-500 uppercase tracking-wider shrink-0">
+                {badge}
+              </span>
             )}
           </div>
-        </FormGroup>
+          <span className={`shrink-0 ml-1 ${isActive ? "text-indigo-400" : "text-slate-300"}`}>
+            {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          </span>
+        </div>
+      </BuilderPanelUI.Item>
+
+      {/* Expanded: inline form fields (outside Item) */}
+      {expanded && (
+        <div className="pl-6 pr-1 py-2 space-y-2" onKeyDown={(e) => e.stopPropagation()}>
+          {Object.entries(child.fields ?? {}).map(([key, val]) => (
+            <FieldInput
+              key={key}
+              blockId={child.id}
+              blockType={child.type}
+              fieldKey={key}
+              value={val as string}
+            />
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FieldInput — Schema-driven field editor (OCP)
+// Reads PropertyDef from Block Schema → dispatches to Widget Registry.
+// No if/else branching. New type = new widget, nothing changes here.
+// ═══════════════════════════════════════════════════════════════════
+
+function FieldInput({
+  blockId,
+  blockType,
+  fieldKey,
+  value,
+}: {
+  blockId: string;
+  blockType: string;
+  fieldKey: string;
+  value: string;
+}) {
+  const { setHighlightedItemId } = useContext(HighlightContext);
+
+  const handleChange = (newValue: string) => {
+    os.dispatch(
+      updateField({ sectionId: blockId, field: fieldKey, value: newValue }),
+    );
+  };
+
+  const domItemId = `${blockId}-${fieldKey}`;
+  const handleFocus = () => setHighlightedItemId(domItemId);
+  const handleBlur = () => setHighlightedItemId(null);
+
+  // Schema-driven: block type + field key → property definition
+  const def = getPropertyDef(blockType, fieldKey);
+  const Widget = getWidget(def.type);
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] text-slate-500 font-medium tracking-wide">
+        {def.label}
+      </label>
+      <Widget
+        value={value}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        def={def}
+      />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PageMetaSection — Hardcoded top section (slug, description, keywords)
+// ═══════════════════════════════════════════════════════════════════
+
+function PageMetaSection() {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div>
+      {/* Header — same pattern as block section headers */}
+      <button
+        type="button"
+        className="w-full flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors border-t border-slate-200 bg-slate-50/80 hover:bg-slate-100/60"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-slate-400 shrink-0">
+            <FileText size={14} />
+          </span>
+          <span className="text-[12px] font-bold text-slate-700">
+            Page Settings
+          </span>
+          <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-slate-100 text-slate-400 uppercase tracking-wider shrink-0">
+            SEO
+          </span>
+        </div>
+        <span className="shrink-0 ml-2 text-slate-300">
+          {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        </span>
+      </button>
+
+      {/* Meta Fields */}
+      {expanded && (
+        <div className="px-4 py-3 space-y-2.5 bg-white">
+          <MetaInput label="Page Title" placeholder="Landing Page" defaultValue="AI 시대를 위한 가장 완벽한 플랫폼" />
+          <MetaInput label="Slug" placeholder="/landing" defaultValue="/landing" icon={<Globe size={12} />} />
+          <MetaTextarea
+            label="Meta Description"
+            placeholder="A brief description of the page for search engines..."
+            defaultValue="네이버클라우드의 기술력으로 완성된 하이퍼스케일 AI 스튜디오를 경험하세요."
+          />
+          <MetaInput label="Keywords" placeholder="cloud, AI, platform" defaultValue="cloud, AI, platform, naver" />
+        </div>
       )}
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------------------------------
- * Panel Action Bar — integrated from EditorToolbar right pill
- * ------------------------------------------------------------------------------------------------- */
+function MetaInput({
+  label,
+  placeholder,
+  defaultValue,
+  icon,
+}: {
+  label: string;
+  placeholder?: string;
+  defaultValue?: string;
+  icon?: React.ReactNode;
+}) {
+  const [value, setValue] = useState(defaultValue ?? "");
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
+        {label}
+      </label>
+      <div className="relative">
+        {icon && (
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400">
+            {icon}
+          </span>
+        )}
+        <input
+          type="text"
+          className={`w-full py-1.5 text-[13px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 text-slate-700 ${icon ? "pl-7 pr-2" : "px-2"}`}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={placeholder}
+        />
+      </div>
+    </div>
+  );
+}
+
+function MetaTextarea({
+  label,
+  placeholder,
+  defaultValue,
+}: {
+  label: string;
+  placeholder?: string;
+  defaultValue?: string;
+}) {
+  const [value, setValue] = useState(defaultValue ?? "");
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
+        {label}
+      </label>
+      <textarea
+        className="w-full px-2 py-1.5 text-[13px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 min-h-[48px] resize-y text-slate-700 leading-relaxed"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PanelActionBar — Preview + Publish buttons
+// ═══════════════════════════════════════════════════════════════════
 
 function PanelActionBar() {
   return (
@@ -693,64 +591,63 @@ function PanelActionBar() {
   );
 }
 
-/* -------------------------------------------------------------------------------------------------
- * UI Primitives (Local)
- * ------------------------------------------------------------------------------------------------- */
+// ═══════════════════════════════════════════════════════════════════
+// Helpers — Resolve block ownership from focusedId
+// ═══════════════════════════════════════════════════════════════════
 
-function FormGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2.5">
-        {label}
-      </h3>
-      {children}
-    </div>
-  );
+/**
+ * Resolve which top-level (or child) block "owns" a given focusedId.
+ */
+function resolveOwnerBlockId(
+  focusedId: string,
+  blocks: Block[],
+): string | null {
+  for (const block of blocks) {
+    if (block.id === focusedId) return block.id;
+    if (block.children) {
+      const childResult = resolveOwnerBlockId(focusedId, block.children);
+      if (childResult) return childResult;
+    }
+  }
+  const allBlocks = flattenAllBlocks(blocks);
+  const sorted = allBlocks
+    .filter((b) => focusedId.startsWith(b.id))
+    .sort((a, b) => b.id.length - a.id.length);
+  return sorted[0]?.id ?? null;
 }
 
-function LiveInput({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-xs text-slate-600 font-medium">{label}</label>
-      <input
-        type="text"
-        className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-      />
-    </div>
-  );
+/**
+ * Resolve all ancestor block IDs for a given block ID.
+ */
+function resolveAncestorIds(blockId: string, blocks: Block[]): string[] {
+  const result: string[] = [];
+  function traverse(list: Block[], path: string[]): boolean {
+    for (const block of list) {
+      if (block.id === blockId) {
+        result.push(...path, block.id);
+        return true;
+      }
+      if (block.children) {
+        if (traverse(block.children, [...path, block.id])) return true;
+      }
+    }
+    return false;
+  }
+  traverse(blocks, []);
+  return result;
 }
 
-function ReadOnlyField({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-xs text-slate-600 font-medium">{label}</label>
-      <input
-        type="text"
-        className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-500"
-        value={value}
-        readOnly
-      />
-    </div>
-  );
+function flattenAllBlocks(blocks: Block[]): Block[] {
+  const result: Block[] = [];
+  for (const b of blocks) {
+    result.push(b);
+    if (b.children) result.push(...flattenAllBlocks(b.children));
+  }
+  return result;
 }
 
-export type { PropertyType };
+// ═══════════════════════════════════════════════════════════════════
+// Exports
+// ═══════════════════════════════════════════════════════════════════
+
+export { HighlightContext };

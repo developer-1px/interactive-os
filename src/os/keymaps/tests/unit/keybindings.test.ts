@@ -96,23 +96,40 @@ describe("Keybinding Resolution", () => {
   // ─── Editing Context ──────────────────────────────────────
 
   describe("when editing (isEditing: true)", () => {
-    const ctx = { isEditing: true };
-
-    it("Enter → OS_FIELD_COMMIT (not OS_ACTIVATE)", () => {
+    // Enter/Escape during editing: Field-layer (resolveFieldKey) handles these
+    // BEFORE Keybindings.resolve is called. At the Keybindings level,
+    // navigating bindings still match (OS_ACTIVATE, OS_ESCAPE) when field
+    // doesn't own the key. This is safe because resolveKeyboard's ZIFT chain
+    // prevents reaching this layer when Field has already claimed the key.
+    it("Enter → OS_ACTIVATE (navigating binding fires when field delegates)", () => {
+      const ctx = { isEditing: true, isFieldActive: false };
       const result = Keybindings.resolve("Enter", ctx);
       expect(result).not.toBeNull();
-      expect((result?.command as any)?.type).toBe("OS_FIELD_COMMIT");
-      expect((result?.command as any)?.type).not.toBe("OS_ACTIVATE");
+      expect((result?.command as any)?.type).toBe("OS_ACTIVATE");
     });
 
-    it("Escape → OS_FIELD_CANCEL (not OS_ESCAPE)", () => {
+    it("Escape → OS_ESCAPE (navigating binding fires when field delegates)", () => {
+      const ctx = { isEditing: true, isFieldActive: false };
       const result = Keybindings.resolve("Escape", ctx);
       expect(result).not.toBeNull();
-      expect((result?.command as any)?.type).toBe("OS_FIELD_CANCEL");
-      expect((result?.command as any)?.type).not.toBe("OS_ESCAPE");
+      expect((result?.command as any)?.type).toBe("OS_ESCAPE");
+    });
+
+    // Field owns the key (e.g., unregistered textarea, or block field with Enter = newline)
+    it("Enter → null when field owns Enter (e.g. unregistered textarea)", () => {
+      const ctx = { isEditing: true, isFieldActive: true };
+      const result = Keybindings.resolve("Enter", ctx);
+      expect(result).toBeNull();
+    });
+
+    it("Escape → null when field owns Escape", () => {
+      const ctx = { isEditing: true, isFieldActive: true };
+      const result = Keybindings.resolve("Escape", ctx);
+      expect(result).toBeNull();
     });
 
     it("Space does NOT resolve to OS_SELECT", () => {
+      const ctx = { isEditing: true };
       const result = Keybindings.resolve("Space", ctx);
       // Should be null since Space only has navigating binding
       if (result) {
@@ -121,6 +138,7 @@ describe("Keybinding Resolution", () => {
     });
 
     it("Backspace does NOT resolve to OS_DELETE", () => {
+      const ctx = { isEditing: true };
       const result = Keybindings.resolve("Backspace", ctx);
       if (result) {
         expect((result.command as any).type).not.toBe("OS_DELETE");

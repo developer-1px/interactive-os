@@ -82,6 +82,18 @@ export function flattenTree(items: DocItem[]): DocItem[] {
   return flat;
 }
 
+/** Find a folder node by its path in the tree (recursive). Returns null if not found. */
+export function findFolder(items: DocItem[], folderPath: string): DocItem | null {
+  for (const item of items) {
+    if (item.type === "folder" && item.path === folderPath) return item;
+    if (item.children) {
+      const found = findFolder(item.children, folderPath);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 // --------------- Flat Tree (ARIA APG Tree View Pattern) ---------------
 
 /** A single node in the flattened visible tree */

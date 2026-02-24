@@ -2,8 +2,8 @@
  * DocsViewer App — Unit Tests
  *
  * Tests the SELECT_DOC command:
- * - Sets activePath for non-expandable items (files)
- * - Skips expandable items (folders) — no state change
+ * - Sets activePath for file items
+ * - Sets activePath for folder items (folder index view)
  * - Integrates with bind() onAction/onSelect
  *
  * Tests parseHashToPath (T9):
@@ -16,30 +16,30 @@ import { describe, expect, it } from "vitest";
 import { DocsApp, parseHashToPath, selectDoc } from "../../app";
 
 describe("SELECT_DOC command", () => {
-    it("sets activePath when item is not expandable (file)", () => {
+    it("sets activePath for file selection", () => {
         const app = DocsApp.create();
         expect(app.state.activePath).toBeNull();
 
-        app.dispatch(selectDoc({ id: "getting-started.md", isExpandable: false }));
+        app.dispatch(selectDoc({ id: "getting-started.md" }));
         expect(app.state.activePath).toBe("getting-started.md");
     });
 
-    it("does NOT change activePath when item is expandable (folder)", () => {
+    it("sets activePath for folder selection (folder index view)", () => {
         const app = DocsApp.create();
-        app.dispatch(selectDoc({ id: "getting-started.md", isExpandable: false }));
+        app.dispatch(selectDoc({ id: "getting-started.md" }));
         expect(app.state.activePath).toBe("getting-started.md");
 
-        app.dispatch(selectDoc({ id: "folder:api", isExpandable: true }));
-        expect(app.state.activePath).toBe("getting-started.md"); // unchanged
+        app.dispatch(selectDoc({ id: "folder:api" }));
+        expect(app.state.activePath).toBe("folder:api");
     });
 
-    it("updates activePath on subsequent file selections", () => {
+    it("updates activePath on subsequent selections", () => {
         const app = DocsApp.create();
 
-        app.dispatch(selectDoc({ id: "intro.md", isExpandable: false }));
+        app.dispatch(selectDoc({ id: "intro.md" }));
         expect(app.state.activePath).toBe("intro.md");
 
-        app.dispatch(selectDoc({ id: "setup.md", isExpandable: false }));
+        app.dispatch(selectDoc({ id: "setup.md" }));
         expect(app.state.activePath).toBe("setup.md");
     });
 });

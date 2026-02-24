@@ -242,6 +242,36 @@ describe("APG Tree: Click interaction", () => {
 
     expect(t.focusedItemId()).toBe("child-1a");
   });
+
+  it("click on expandable item: toggles expand (APG handleClick)", () => {
+    const t = treeFactory("section-1");
+    expect(t.zone()?.expandedItems).not.toContain("section-1");
+
+    // Click on focused expandable item → should expand
+    t.click("section-1");
+    expect(t.zone()?.expandedItems).toContain("section-1");
+
+    // Click again → should collapse
+    t.click("section-1");
+    expect(t.zone()?.expandedItems).not.toContain("section-1");
+  });
+
+  it("click on non-focused expandable item: focuses + expands", () => {
+    const t = treeFactory("section-1");
+
+    // Click on a different expandable item
+    t.click("section-2");
+    expect(t.focusedItemId()).toBe("section-2");
+    expect(t.zone()?.expandedItems).toContain("section-2");
+  });
+
+  it("click on leaf: focuses, does NOT expand", () => {
+    const t = treeFactory("section-1");
+
+    t.click("leaf-1");
+    expect(t.focusedItemId()).toBe("leaf-1");
+    expect(t.zone()?.expandedItems).not.toContain("leaf-1");
+  });
 });
 
 // ═══════════════════════════════════════════════════

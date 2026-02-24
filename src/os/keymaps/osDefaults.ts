@@ -9,10 +9,6 @@
 
 import { OS_ESCAPE } from "@os/3-commands/dismiss";
 import {
-  OS_FIELD_CANCEL,
-  OS_FIELD_COMMIT,
-} from "@os/3-commands/field/field";
-import {
   OS_ACTIVATE,
   OS_DELETE,
   OS_MOVE_DOWN,
@@ -142,18 +138,16 @@ Keybindings.registerAll([
 // ═══════════════════════════════════════════════════════════════════
 // Field Editing
 // ═══════════════════════════════════════════════════════════════════
-// Enter (editing) → commit and exit editing mode
-// Escape (editing) → cancel and exit editing mode
-// F2 (navigating) → start editing (standard OS pattern, avoids Enter conflict with OS_ACTIVATE)
+// Enter/Escape during editing: handled by Field-layer keybindings
+// (resolveFieldKey.ts) — NOT registered here.
+// F2 (navigating) → start editing (standard OS pattern)
 
 Keybindings.registerAll([
-  { key: "Enter", command: OS_FIELD_COMMIT(), when: "editing" },
-  { key: "Escape", command: OS_FIELD_CANCEL(), when: "editing" },
-  { key: "F2", command: OS_ACTIVATE(), when: "navigating" }, // F2 triggers onAction (standard OS pattern for edit activation)
+  { key: "F2", command: OS_ACTIVATE(), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
 // Expansion
 // ═══════════════════════════════════════════════════════════════════
-// ArrowRight/ArrowLeft expand/collapse is handled inline by OS_NAVIGATE
-// (W3C tree pattern). No separate keybindings needed.
+// ArrowRight/ArrowLeft expand/collapse: handled by Item-layer keybindings
+// (resolveItemKey.ts) — NOT registered here.

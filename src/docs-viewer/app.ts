@@ -82,14 +82,11 @@ export const DocsApp = defineApp<DocsState>("docs-viewer", {
 /** SELECT_DOC — sets activePath. Shared by Recent, Favorites, and Tree zones. */
 export const selectDoc = DocsApp.command(
     "SELECT_DOC",
-    (ctx, payload: { id: string; isExpandable?: boolean }) => {
-        if (payload.isExpandable) return { state: ctx.state };
-        return {
-            state: produce(ctx.state, (draft) => {
-                draft.activePath = payload.id;
-            }),
-        };
-    },
+    (ctx, payload: { id: string }) => ({
+        state: produce(ctx.state, (draft) => {
+            draft.activePath = payload.id;
+        }),
+    }),
 );
 
 /** RESET_DOC — clears activePath (e.g. when switching folder source). */
@@ -142,13 +139,9 @@ const sidebarZone = DocsApp.createZone("docs-sidebar");
 
 export const DocsSidebarUI = sidebarZone.bind({
     role: "tree",
-    onAction: (cursor) => selectDoc({ id: cursor.focusId, isExpandable: cursor.isExpandable }),
-    onSelect: (cursor) => selectDoc({ id: cursor.focusId, isExpandable: cursor.isExpandable }),
+    onAction: (cursor) => selectDoc({ id: cursor.focusId }),
+    onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
     getExpandableItems: () => expandableIds,
-    options: {
-        select: { followFocus: true },
-        activate: { onClick: true },
-    },
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -171,8 +164,8 @@ const PREV_SECTION = readerZone.command(
 export const DocsReaderUI = readerZone.bind({
     role: "feed",
     keybindings: [
-        { key: " ", command: () => NEXT_SECTION() },
-        { key: "Shift+ ", command: () => PREV_SECTION() },
+        { key: "Space", command: () => NEXT_SECTION() },
+        { key: "Shift+Space", command: () => PREV_SECTION() },
     ],
 });
 
