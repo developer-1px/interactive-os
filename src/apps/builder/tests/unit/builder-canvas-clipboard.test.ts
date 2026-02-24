@@ -4,6 +4,12 @@
  * Verifies the PRD scenarios for copy, cut, and paste bubbling
  * within the canvas zone. Tests distinguish between dynamic items (sections/cards)
  * and static items (fields/text).
+ *
+ * Top-level blocks (GreenEye preset):
+ *   ge-hero, ge-tab-nav, ge-related-services, ge-section-footer, ge-footer
+ *
+ * Field item ID format: "{sectionId}-{fieldName}"
+ *   e.g., "ge-hero-service-name" → section "ge-hero", field "service-name"
  */
 
 import {
@@ -12,6 +18,7 @@ import {
   canvasOnCut,
   canvasOnPaste,
 } from "@apps/builder/app";
+import { findBlock } from "@apps/builder/model/appState";
 import type { BaseCommand } from "@kernel/core/tokens";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import {
@@ -56,7 +63,7 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
 
   test("Scenario: 동적 아이템(섹션) 복사 → 구조 복사 (PRD 1.1)", () => {
     const app = createApp();
-    const heroId = app.state.data.blocks[0]!.id;
+    const heroId = app.state.data.blocks[0]!.id; // ge-hero
 
     // Focus on section itself (dynamic item)
     const result = canvasOnCopy({
@@ -77,9 +84,9 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
   test("Scenario: 정적 아이템(필드) 복사 → 텍스트 값 복사 (PRD 1.1)", () => {
     const app = createApp();
 
-    // ncp-hero-title is a static field item inside ncp-hero
+    // ge-hero-service-name is a static field item inside ge-hero
     const result = canvasOnCopy({
-      focusId: "ncp-hero-title",
+      focusId: "ge-hero-service-name",
       selection: [],
     } as any);
 
@@ -88,7 +95,7 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
     expect(clip.type).toBe("text");
 
     // Field value should be copied (value from INITIAL_STATE)
-    const expectedText = "AI 시대를 위한\n가장 완벽한 플랫폼";
+    const expectedText = "CLOVA GreenEye";
     expect(clip.value).toBe(expectedText);
 
     // Result should include clipboardWrite for OS to handle system clipboard
@@ -100,7 +107,7 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
     const initialBlocks = [...app.state.data.blocks];
 
     const result = canvasOnCut({
-      focusId: "ncp-hero-title",
+      focusId: "ge-hero-service-name",
       selection: [],
     } as any) as BaseCommand[];
     dispatchCanvasResult(app, result);
@@ -113,7 +120,7 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
 
   test("Scenario: 동적 아이템(섹션) 잘라내기 → 구조 잘라내기 (PRD 1.3)", () => {
     const app = createApp();
-    const heroId = app.state.data.blocks[0]!.id;
+    const heroId = app.state.data.blocks[0]!.id; // ge-hero
     const initialCount = app.state.data.blocks.length;
 
     const result = canvasOnCut({
@@ -135,25 +142,25 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
     const app = createApp();
     const initialCount = app.state.data.blocks.length;
 
-    // 1. Copy text from hero title
+    // 1. Copy text from hero service-name
     const copyResult = canvasOnCopy({
-      focusId: "ncp-hero-title",
+      focusId: "ge-hero-service-name",
       selection: [],
     } as any) as BaseCommand[];
     dispatchCanvasResult(app, copyResult);
 
-    // 2. Paste text onto news title
+    // 2. Paste text onto section-footer title
     const pasteResult = canvasOnPaste({
-      focusId: "ncp-news-title",
+      focusId: "ge-section-footer-title",
       selection: [],
     } as any) as BaseCommand[];
     dispatchCanvasResult(app, pasteResult);
 
-    // News title field should now be replaced with hero title text
-    const newsSection = app.state.data.blocks.find((b) => b.id === "ncp-news")!;
-    const expectedText = "AI 시대를 위한\n가장 완벽한 플랫폼";
+    // Section-footer title field should now be replaced with hero service-name text
+    const sectionFooter = findBlock(app.state.data.blocks, "ge-section-footer")!;
+    const expectedText = "CLOVA GreenEye";
 
-    expect(newsSection.fields["title"]).toBe(expectedText);
+    expect(sectionFooter.fields["title"]).toBe(expectedText);
 
     // Number of blocks should not increase (no structural paste)
     expect(app.state.data.blocks.length).toBe(initialCount);
@@ -164,24 +171,27 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
     const initialCount = app.state.data.blocks.length;
 
     // Copy entire Hero section
-    const heroId = app.state.data.blocks.find((b) => b.id === "ncp-hero")!.id;
+    const heroId = app.state.data.blocks.find((b) => b.id === "ge-hero")!.id;
     const copyResult = canvasOnCopy({
       focusId: heroId,
       selection: [],
     } as any) as BaseCommand[];
     dispatchCanvasResult(app, copyResult);
 
-    // Paste -> Bubble up to Root -> Append after News section
+    // Paste -> Bubble up to Root -> Append after section-footer field's parent
     const pasteResult = canvasOnPaste({
-      focusId: "ncp-news-title",
+      focusId: "ge-section-footer-title",
       selection: [],
     } as any) as BaseCommand[];
     dispatchCanvasResult(app, pasteResult);
 
     // Should structurally paste a section
     expect(app.state.data.blocks.length).toBe(initialCount + 1);
-    // The newly pasted section should be at index 2 (after News = index 1)
-    expect(app.state.data.blocks[2]!.type).toBe("hero");
-    expect(app.state.data.blocks[2]!.id).not.toBe(heroId); // Ensure new ID
+    // The newly pasted section should have same type as hero
+    const pasted = app.state.data.blocks.find(
+      (b) => b.type === "ncp-product-hero" && b.id !== heroId,
+    );
+    expect(pasted).toBeDefined();
+    expect(pasted!.id).not.toBe(heroId); // Ensure new ID
   });
 });

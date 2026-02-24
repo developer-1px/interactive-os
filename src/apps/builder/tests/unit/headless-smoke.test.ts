@@ -34,18 +34,18 @@ describe("Browser path 시뮬레이션", () => {
     const blocks = () => builderState().data.blocks;
 
     // Step 1: Copy via bindings (브라우저 경로)
-    const copyCmd = bindings.onCopy({ focusId: "ncp-hero", selection: [] });
+    const copyCmd = bindings.onCopy({ focusId: "ge-hero", selection: [] });
     os.dispatch(copyCmd);
 
     const clip = readClipboard() as any;
     expect(clip).toBeTruthy();
 
     // Step 2: Paste 1회 via bindings
-    const paste1 = bindings.onPaste({ focusId: "ncp-hero", selection: [] });
+    const paste1 = bindings.onPaste({ focusId: "ge-hero", selection: [] });
     os.dispatch(paste1);
 
     const afterPaste1 = blocks();
-    expect(afterPaste1.length).toBe(7);
+    expect(afterPaste1.length).toBe(6);
 
     // 새로 추가된 아이템의 ID (ncp-hero 다음 위치)
     const newItemId = afterPaste1[1]!.id;
@@ -55,7 +55,7 @@ describe("Browser path 시뮬레이션", () => {
     os.dispatch(paste2);
 
     const afterPaste2 = blocks();
-    expect(afterPaste2.length).toBe(8);
+    expect(afterPaste2.length).toBe(7);
   });
 
   it("extractId 동작 확인", () => {
@@ -63,13 +63,13 @@ describe("Browser path 시뮬레이션", () => {
 
     // sidebar- prefix가 붙은 경우
     const cmd1 = bindings.onPaste({
-      focusId: "sidebar-ncp-hero",
+      focusId: "sidebar-ge-hero",
       selection: [],
     });
     expect(cmd1).toBeTruthy();
 
     // prefix 없는 경우
-    const cmd2 = bindings.onPaste({ focusId: "ncp-hero", selection: [] });
+    const cmd2 = bindings.onPaste({ focusId: "ge-hero", selection: [] });
     expect(cmd2).toBeTruthy();
 
     // 동적 ID (paste 후 생성된 것)

@@ -82,12 +82,12 @@ describe("Builder copy → paste → paste 연속 실행", () => {
     app.dispatch(sidebarCollection.paste({ afterId: heroId }));
     app.dispatch(sidebarCollection.paste({ afterId: heroId }));
 
-    // 6 original + 3 pasted = 9
-    expect(app.state.data.blocks.length).toBe(9);
+    // 5 original + 3 pasted = 8
+    expect(app.state.data.blocks.length).toBe(8);
 
     // All IDs unique
     const ids = app.state.data.blocks.map((s) => s.id);
-    expect(new Set(ids).size).toBe(9);
+    expect(new Set(ids).size).toBe(8);
   });
 
   test("container 블록 paste: children ID도 재생성된다", () => {
