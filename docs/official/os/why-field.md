@@ -65,22 +65,45 @@ FIELD_CANCEL      →  변경 취소 → 원래 값 복원 → 탐색 모드 복
 
 앱은 `onFieldCommit(id, value)` 콜백만 선언한다. 생명주기는 OS가 관리한다.
 
-### 3.2 Key Ownership Model — 위임(Delegation)
+### 3.2 ZIFT Responder Chain — 계층 우선순위
 
-편집 모드에서 키 소유권은 **"OS가 기본 소유, 필드에 위임"** 모델을 따른다:
+키보드 이벤트는 **Field → Item → Zone → OS Global** 순서로 순회한다:
 
-| 키 | 탐색 모드 | 편집 모드 |
-|----|----------|----------|
-| `ArrowUp/Down` | OS Navigate | OS Navigate (편집 필드는 단일 행) |
-| `ArrowLeft/Right` | OS Navigate | **Field** (커서 이동) |
-| `Space` | OS Select | **Field** (공백 입력) |
-| `Enter` | OS Activate | **Field** → FIELD_COMMIT |
-| `Escape` | OS Escape | **Field** → FIELD_CANCEL |
-| `Tab` | OS Tab | OS Tab (영역 탈출) |
+```
+keyboard event
+  └─ Layer 1: Field   resolveFieldKey(editingFieldId, key)
+  └─ Layer 2: Item    resolveItemKey(focusedItemRole, key)
+  └─ Layer 3: Zone    Keybindings.resolve("navigating")
+  └─ Layer 4: Global  Keybindings.resolve(universal)
+```
 
-키보드 리스너(`KeyboardListener`)는 `isFieldActive` 플래그로 이 전환을 감지한다.
+가장 구체적인 레이어가 먼저 처리하고, 처리하지 않으면 다음 레이어로 넘긴다.
 
-### 3.3 포커스 연속성
+### 3.3 Field-layer 키맵 (resolveFieldKey)
+
+`fieldType`별로 Field가 OS 커맨드를 발동시키는 키:
+
+| key | inline | tokens | block | editor |
+|-----|--------|--------|-------|--------|
+| `Enter` | **COMMIT** | **COMMIT** | — (줄바꿈) | — (줄바꿈) |
+| `Escape` | **CANCEL** | **CANCEL** | **CANCEL** | **CANCEL** |
+
+`—`인 경우 Field가 키를 흡수하되 OS 커맨드는 발동하지 않는다 (브라우저 기본 동작).
+
+### 3.4 Zone Pass-through (fieldKeyOwnership)
+
+편집 중에도 Zone 레이어가 처리할 수 있는 키 (`isFieldActive = false`):
+
+| key | inline | tokens | block | editor |
+|-----|--------|--------|-------|--------|
+| `Tab / Shift+Tab` | ✅ | ✅ | ✅ | — |
+| `ArrowUp / ArrowDown` | ✅ | ✅ | — | — |
+
+나머지 키(ArrowLeft/Right, Space, 문자 등)는 Field가 흡수한다.
+
+**미등록 요소(plain textarea)**: 등록되지 않은 Native input은 모든 키를 흡수한다. OS는 절대 개입하지 않는다.
+
+### 3.5 포커스 연속성
 
 편집이 끝나면(커밋이든 취소든) 포커스는 **편집하던 아이템으로 복귀**한다. 사용자는 편집 후 바로 다음 아이템으로 방향키 이동할 수 있다.
 
@@ -88,13 +111,15 @@ FIELD_CANCEL      →  변경 취소 → 원래 값 복원 → 탐색 모드 복
 
 ## References
 
-- Field 구현: `os/3-commands/field/field.ts`
-- Key Ownership: `os/keymaps/fieldKeyOwnership.ts`
+- ZIFT Responder Chain: `os/1-listeners/keyboard/resolveKeyboard.ts`
+- Field-layer keybindings: `os/keymaps/resolveFieldKey.ts`
+- Item-layer keybindings: `os/keymaps/resolveItemKey.ts`
+- Zone pass-through: `os/keymaps/fieldKeyOwnership.ts`
+- Field lifecycle: `os/3-commands/field/`
 - SPEC §3.7: Field Command Contract
-- Unit Tests: `field.test.ts` (14 cases)
 
 ---
 
 ## Status of This Document
 
-Working Draft. 구현 완료되었으며 키 소유권 모델이 안정화된 후 CR로 승격 예정.
+Canonical Reference (2026-02-24). ZIFT Responder Chain 구현 완료.

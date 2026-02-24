@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-24 13:30
+> Last updated: 2026-02-24 13:53
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-**zift-keyboard-resolve** — resolveKeyboard에 ZIFT 계층 순회(Field→Item→Zone→OS) 추가. Heavy.
+**builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
 
 **go-redesign** — `/go` 4-Phase 재설계 + OS 런북 작성. Heavy.
 
@@ -21,13 +21,12 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| zift-keyboard-resolve | Scaffold, T1~T6 | 02-24 | 🔥 Focus |
+| builder-v2 | T15-T17 Done (Panel Accordion + OS tree auto-expand) | 02-24 | 🔥 Focus |
 | go-redesign | Scaffold 완료, T1~T3 | 02-24 | 🔥 Focus |
 | normalized-collection | Scaffold 완료, T1~T6 | 02-24 | 🔥 Focus |
 | cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-22 | 🟢 Active |
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
-| builder-v2 | T15-T17 Done (Panel Accordion + OS tree auto-expand) | 02-24 | 🟢 Active |
 | builder-property-schema | Scaffold, T1~T5 | 02-24 | 🟢 Active |
 | tree-click-defaults | Scaffold, T1~T3 | 02-24 | 🟢 Active |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
@@ -41,6 +40,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| zift-keyboard-resolve | 02-24 | ✅ archive/2026/02/W09 — official/os/why-field.md 갱신 |
 | docs-viewer-features | 02-24 | ✅ archive/2026/02/W09 |
 | item-expand-primitives | 02-24 | ✅ archive/2026/02/W09 |
 | bdd-tdd-gate | 02-23 | ✅ archive/2026/02/W09 |
