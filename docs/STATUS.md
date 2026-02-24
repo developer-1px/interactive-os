@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-24 02:48
+> Last updated: 2026-02-24 10:35
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -8,6 +8,8 @@
 ---
 
 ## 🔥 Active Focus
+
+**go-redesign** — `/go` 4-Phase 재설계 + OS 런북 작성. Heavy.
 
 **normalized-collection** — OS 데이터 모델을 `{ entities, order }` 정규화 포맷으로 통일. Heavy.
 
@@ -17,27 +19,17 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| headless-items | ✅ Done (T1-T6 + OCP) | 02-23 | ✅ Done |
-| kernel-items | Discussion 완료, Scaffold | 02-22 | 🔥 Focus |
-| os-collection | T1-T7 Done (patches + undo/redo) | 02-22 | ✅ Done |
-| projection-checkpoint | T1-T4 Done | 02-21 | ✅ Done |
-| replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
-| builder-v2 | T13 Container Block 범용화 | 02-21 | 🟢 Active |
+| go-redesign | Scaffold 완료, T1~T3 | 02-24 | 🔥 Focus |
+| normalized-collection | Scaffold 완료, T1~T6 | 02-24 | 🔥 Focus |
+| docs-viewer-features | T8 ZoneCursor meta + Todo패턴 전환 | 02-23 | 🔥 Focus |
 | cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
-| caret-restore | All Done — 브라우저 확인 완료 | 02-23 | ✅ Done |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-22 | 🟢 Active |
-| testbot-v2 | Superseded by Replay | 02-21 | 🔴 Superseded |
+| replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
+| builder-v2 | T15 Panel Accordion Form | 02-24 | 🟢 Active |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
 | defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
-| docs-viewer-features | T8 ZoneCursor meta + Todo패턴 전환 | 02-23 | 🔥 Focus |
-| zone-focusgroup-separation | All Done (T2+T3+T4+T6) | 02-23 | ✅ Done |
-| dnd-poc | T1~T4 Done | 02-23 | ✅ Done |
-| bdd-tdd-gate | T1~T4 Done (워크플로우 4개 수정) | 02-23 | ✅ Done |
-| docs-sidebar-os | T1~T3 Done + 아카이브 | 02-23 | ✅ Done |
-| item-expand-primitives | T1~T7 Done (948/948 GREEN) | 02-24 | ✅ Archived |
-| normalized-collection | Scaffold 완료, T1~T6 | 02-24 | 🔥 Focus |
 
 ---
 
@@ -45,20 +37,26 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| item-expand-primitives | 02-24 | ✅ archive/2026/02/W09 |
+| bdd-tdd-gate | 02-23 | ✅ archive/2026/02/W09 |
+| zone-focusgroup-separation | 02-23 | ✅ archive/2026/02/W09 |
+| dnd-poc | 02-23 | ✅ archive/2026/02/W09 |
+| caret-restore | 02-23 | ✅ archive/2026/02/W09 |
 | headless-items | 02-23 | ✅ archive/2026/02/W09 |
 | docs-sidebar-os | 02-23 | ✅ archive/2026/02/W09 |
-| os-page | 02-21 | ❌ T1~T3 완료, T4 skip. AppPage rename ✅ createTestOsKernel 제거 ✅ |
+| testbot-v2 | 02-23 | ✅ archive/2026/02/W09 (Superseded by Replay) |
+| os-page | 02-21 | ✅ archive/2026/02/W09 |
+| define-query | 02-21 | ✅ archive/2026/02/W09 |
+| builder-usage-cleanup | 02-21 | ✅ archive/2026/02/W09 |
+| apg-testing-rebalance | 02-21 | ✅ archive/2026/02/W09 |
+| field-compound | 02-20 | ✅ archive/2026/02/W09 |
+| philosophy-hygiene | 02-20 | ✅ archive/2026/02/W09 |
+| inspector-redesign | 02-20 | ✅ archive/2026/02/W09 |
 | field-props-cleanup | 02-21 | ✅ archive/2026/02/W08 |
-| lazy-resolution | 02-21 | ✅ rules.md #15 (Lazy Resolution) | ✅ archive/2026/02/W08 |
-| query-adoption | 02-21 | ✅ 6-products/builder/design/builder-cursor.md | ✅ archive/2026/02/W08 |
-| define-query | 02-21 | ❌ T1/T2/T5 완료 (defineQuery, useQuery, bridge) |
-| builder-usage-cleanup | 02-21 | ❌ T1~T6 완료 |
-| apg-testing-rebalance | 02-21 | ❌ T1~T3 완료 |
-| field-compound | 02-20 | ❌ T1~T4 완료 |
-| apg-contract-testing | 02-20 | ✅ Layer A 완료 (58 APG tests, 4 patterns) |
-| inspector-redesign | 02-20 | ✅ archive/2026/02/W08/inspector-redesign |
-| command-type-unification | 02-20 | ✅ 4-archive/2026-02-command-type-unification (자연 해소) |
-| philosophy-hygiene | 02-20 | ✅ 4-archive/2026-02-philosophy-hygiene (예정) |
+| lazy-resolution | 02-21 | ✅ archive/2026/02/W08 |
+| query-adoption | 02-21 | ✅ archive/2026/02/W08 |
+| apg-contract-testing | 02-20 | ✅ archive/2026/02/W08 |
+| command-type-unification | 02-20 | ✅ 4-archive/2026-02-command-type-unification |
 | collection-clipboard | 02-20 | ✅ 4-archive/2026-02-collection-clipboard |
 | apg-axis-audit | 02-20 | ✅ 4-archive/2026-02-apg-axis-audit |
 | docs-topology | 02-20 | ✅ 4-archive/2026-02-docs-topology |
@@ -78,9 +76,9 @@
 
 ## 📥 Inbox
 
-- `docs/0-inbox/2026-0222-1937-analysis-json-crud-clipboard-undo-status.md` (JSON CRUD, Clipboard, Undo/Redo 현황 분석)
-  - Related Project: `os-collection`, `todo-dogfooding`
-  - Suggested Action: 추가 인프라 구축 생략 후 응용 기능(Builder 맵핑, DnD 등)으로 진행
+- `docs/0-inbox/2026-0224-0320-[report]-why-interaction-os.md` (왜 Interaction OS를 만드는가 — 프로젝트 철학 아티클)
+  - Related Project: 전체
+  - Suggested Action: README 또는 외부 소개 자료로 발전
 
 ---
 
@@ -88,16 +86,21 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 1 |
-| Active Projects (total) | 7 (4 Active + 3 Paused) |
-| Completed (archived) | 23+ |
+| Active Focus | 3 |
+| Active Projects (total) | 11 (6 Active + 3 Focus + 2 Paused) |
+| Completed (archived) | 35 |
 | Inbox items | 1 |
-| Backlog items | 5 |
+| Backlog items | 8 |
 | Open issues | 0 |
 
 ---
 
-## 📝 Recent Changes (2026-02-21)
+## 📝 Recent Changes (2026-02-24)
+
+- 🧹 `/para`: Inbox 10건→1건, 1-project/ 9개 폴더 아카이브 (bdd-tdd-gate, caret-restore, dnd-poc, zone-focusgroup-separation, testbot-v2, accessor-first-cleanup, on-select, philosophy-hygiene, inspector-redesign). Completed ❌ 5건 → ✅. Resource 루트 파일 2건 → 하위 카테고리 이동. Stale 프로젝트 6건 유지.
+
+<details>
+<summary>📝 Previous Changes (2026-02-21)</summary>
 
 - 🆕 `projection-checkpoint` Light 프로젝트 생성 — Discussion에서 발견: state 정확해도 투영(DOM) 깨지는 배선 버그는 headless에서 감지 불가. `createPage(Component)` + `renderToString`로 projection checkpoint 추가. LLM 자율 개발 가드레일.
 - 🐛 `defineApp.trigger.ts` — Dialog 미렌더 버그 수정. `createCompoundTrigger`가 `Dialog.Content`를 래핑해 reference identity 깨짐. 1줄 수정.
@@ -127,8 +130,10 @@
 - 🔍 `/doubt docs/`: 완료 프로젝트 4개 → 4-archive/, testbot 보류 → 4-archive/2026-02-testbot, docs-dashboard → 5-backlog/
 - 🔍 `/doubt workflow 문서 타입`: README.md/KPI/retrospect/daily-log 제거 대상 확정, /project 최소 패키지 = BOARD.md + discussions/ 만
 
+</details>
+
 <details>
-<summary>📝 Previous Changes (2026-02-19)</summary>
+<summary>📝 Changes (2026-02-19)</summary>
 
 - ✅ `builder-v2` T8: Collection Zone Facade 완료 — `createCollectionZone` + `fromArray`/`fromEntities`. Builder sidebar 120줄→55줄. Facade 경계 발견: 단순 CRUD+ordering = facade, 필터/clipboard/포커스 = 앱 책임.
 - 🆕 `philosophy-hygiene` 프로젝트 생성 — /review + /redteam 분석 결과 기반. useComputed 성능 위반 10건, ESLint 규칙 추가, deprecated API 정리.
