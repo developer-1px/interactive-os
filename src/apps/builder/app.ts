@@ -21,6 +21,7 @@ import {
 import { defineApp } from "@/os/defineApp";
 import { os } from "@/os/kernel";
 import { history } from "@/os/modules/history";
+import { deleteToast } from "@/os/modules/deleteToast";
 import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
 import {
   type Block,
@@ -41,7 +42,7 @@ function getBuilderState(): BuilderState {
 // ═══════════════════════════════════════════════════════════════════
 
 export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE, {
-  modules: [history()],
+  modules: [history(), deleteToast()],
 });
 
 // ═══════════════════════════════════════════════════════════════════
