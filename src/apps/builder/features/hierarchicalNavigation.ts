@@ -97,6 +97,7 @@ export function createDrillDown(zoneId: string) {
     }
 
     // At section/group: find first descendant at next level
+    // If no child at next level, try deeper levels (section → item when no group)
     const childLevel = getChildLevel(level);
     if (!childLevel) return [];
 
@@ -106,9 +107,26 @@ export function createDrillDown(zoneId: string) {
       "data-level",
       childLevel,
     );
-    if (!childId) return [];
 
-    return OS_FOCUS({ zoneId, itemId: childId });
+    if (childId) {
+      return OS_FOCUS({ zoneId, itemId: childId });
+    }
+
+    // Fallback: skip intermediate levels (e.g., section → item when no group)
+    const grandchildLevel = getChildLevel(childLevel);
+    if (grandchildLevel) {
+      const grandchildId = getFirstDescendantWithAttribute(
+        zoneId,
+        cursor.focusId,
+        "data-level",
+        grandchildLevel,
+      );
+      if (grandchildId) {
+        return OS_FOCUS({ zoneId, itemId: grandchildId });
+      }
+    }
+
+    return [];
   };
 }
 
@@ -154,4 +172,42 @@ export function createDrillUp(zoneId: string) {
 
     return OS_FOCUS({ zoneId, itemId: parentId });
   };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Typing Entry — printable chars trigger drill-down (edit mode)
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Create keybindings that let printable characters trigger drillDown.
+ *
+ * When the user is in "selected" state (navigating, not editing) and types
+ * a printable character, this triggers the same drillDown callback that
+ * Enter uses — at item level it dispatches FIELD_START_EDIT.
+ *
+ * This matches the Figma/Google Slides pattern where typing on a selected
+ * text element starts editing and appends the typed character.
+ *
+ * Only registers a-z, A-Z, 0-9 to avoid conflicts with OS default keybindings
+ * (Space, Enter, Escape, Arrow keys, etc.)
+ */
+export function createTypingEntryKeybindings(
+  zoneId: string,
+): { key: string; command: (cursor: ZoneCursor) => BaseCommand | BaseCommand[] }[] {
+  const drillDown = createDrillDown(zoneId);
+  const keys: string[] = [];
+
+  // a-z
+  for (let i = 65; i <= 90; i++) {
+    keys.push(String.fromCharCode(i).toLowerCase());
+  }
+  // 0-9
+  for (let i = 0; i <= 9; i++) {
+    keys.push(String(i));
+  }
+
+  return keys.map((key) => ({
+    key,
+    command: drillDown,
+  }));
 }

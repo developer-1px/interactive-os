@@ -74,232 +74,218 @@ export interface BuilderState {
 export const INITIAL_STATE: BuilderState = {
   data: {
     blocks: [
+      // ─── 1. Hero + Deprecated 배너 + 탭 네비게이션 ──────────────────
       {
-        id: "ncp-hero",
-        label: "Hero",
-        type: "hero",
+        id: "ge-hero",
+        label: "Product Hero",
+        type: "ncp-product-hero",
         fields: {
-          title: "AI 시대를 위한\n가장 완벽한 플랫폼",
-          sub: "네이버클라우드의 기술력으로 완성된\n하이퍼스케일 AI 스튜디오를 경험하세요.",
-          brand: "NAVER CLOUD",
-          cta: "무료로 시작하기",
-          "nav-login": "로그인",
-          "nav-signup": "회원가입",
-          "portal-title": "Global Scale",
-          "portal-subtitle": "Hyper-connected infrastructure",
+          "service-name": "CLOVA GreenEye",
+          "service-desc":
+            "이미지를 판독하여 유해 콘텐츠를 탐지하는 서비스",
+          "cta-primary": "이용 문의",
+          "cta-secondary": "요금 계산",
+          "breadcrumb-1": "서비스",
+          "breadcrumb-2": "AI Services",
+          tabs: "개요,상세 기능,요금,리소스,FAQ",
+          deprecated: "true",
+          "badge-text": "Deprecated",
+          "notice-title": "CLOVA GreenEye 서비스 종료 안내",
+          "notice-desc":
+            "CLOVA GreenEye 서비스가 2026년 4월 23일 종료됩니다. 2026년 1월 22일부터 신규 신청이 제한되오니 자세한 내용은 공지사항을 참고해주세요.",
         },
       },
+
+      // ─── 2. 공지사항 배너 ────────────────────────────────────────────
       {
-        id: "ncp-news",
-        label: "News",
-        type: "news",
+        id: "ge-notice",
+        label: "공지사항",
+        type: "ncp-notice",
         fields: {
-          title: "네이버클라우드의\n새로운 소식",
-          all: "전체 뉴스 보기",
-          "item-1-title": "Cloud DB for Cache\nRedis 호환성 강화",
-          "item-1-desc":
-            "Valkey 기반의 인메모리 캐시 서비스를 이제 클라우드에서 만나보세요.",
-          "item-1-date": "2024.03.15",
-          "item-2-title": "하이퍼클로바X\n기업용 솔루션 공개",
-          "item-2-date": "2024.03.10",
-          "item-3-title": "AI RUSH 2024\n개발자 컨퍼런스",
-          "item-3-date": "2024.03.01",
+          label: "공지사항",
+          text: "CLOVA GreenEye 서비스가 2026년 4월 23일 종료됩니다. 2026년 1월 22일부터 신규 신청이 제한되오니 자세한 내용은 공지사항을 확인해주시기 바랍니다.",
         },
       },
+
+      // ─── 3. 서비스 특징 ─────────────────────────────────────────────
       {
-        id: "ncp-services",
-        label: "Services",
-        type: "services",
+        id: "ge-features",
+        label: "서비스 특징",
+        type: "ncp-feature-cards",
         fields: {
-          category: "Service Category",
-          title: "비즈니스에 최적화된\n클라우드 서비스",
+          "section-title": "서비스 특징",
+          subtitle: "AI 학습 기반의 유해 이미지 탐지 자동화",
         },
-        accept: ["service-card"],
         children: [
           {
-            id: "ncp-services-service-card-1",
-            type: "service-card",
-            label: "Service Card",
+            id: "ge-card-1",
+            type: "ncp-feature-card",
+            label: "뛰어난 정확도",
             fields: {
-              "item-title": "Server",
-              "item-desc":
-                "고성능 클라우드 서버 인프라를 \n몇 번의 클릭으로 구축하세요.",
-              icon: "Server",
-              color: "text-blue-600 bg-blue-50",
-              badge: "UPDATED",
+              "card-title": "뛰어난 정확도",
+              "card-desc":
+                "네이버에 축적된 수백만 장의 이미지를 AI로 꾸준히 학습하고 최신화한 데이터를 기반으로 이미지를 판독합니다. 판독한 이미지는 99.5%의 정확도로 정상, 음란, 성인, 선정 4가지 등급으로 분류할 수 있습니다.",
             },
           },
           {
-            id: "ncp-services-service-card-2",
-            type: "service-card",
-            label: "Service Card",
+            id: "ge-card-2",
+            type: "ncp-feature-card",
+            label: "콘텐츠 품질 향상",
             fields: {
-              "item-title": "Cloud DB for Cache",
-              "item-desc": "Valkey 기반의 완전 관리형 \n인메모리 캐시 서비스.",
-              icon: "Database",
-              color: "text-purple-600 bg-purple-50",
-              badge: "NEW",
+              "card-title": "콘텐츠 품질 향상",
+              "card-desc":
+                "유해 콘텐츠 탐지 및 검열을 자동화하여 손쉽게 건전한 인터넷 이용 환경을 조성할 수 있습니다.",
             },
           },
           {
-            id: "ncp-services-service-card-3",
-            type: "service-card",
-            label: "Service Card",
+            id: "ge-card-3",
+            type: "ncp-feature-card",
+            label: "안정적 서비스 제공",
             fields: {
-              "item-title": "CLOVA Speech",
-              "item-desc":
-                "비즈니스 환경에 특화된 \n최고 수준의 음성 인식 기술.",
-              icon: "Brain",
-              color: "text-green-600 bg-green-50",
-              badge: "",
-            },
-          },
-          {
-            id: "ncp-services-service-card-4",
-            type: "service-card",
-            label: "Service Card",
-            fields: {
-              "item-title": "Data Stream",
-              "item-desc":
-                "대용량 데이터의 실시간 수집과 \n처리를 위한 파이프라인.",
-              icon: "Layers",
-              color: "text-orange-600 bg-orange-50",
-              badge: "",
-            },
-          },
-          {
-            id: "ncp-services-service-card-5",
-            type: "service-card",
-            label: "Service Card",
-            fields: {
-              "item-title": "Global CDN",
-              "item-desc": "전 세계 사용자에게 빠르고 \n안정적인 콘텐츠 전송.",
-              icon: "Globe",
-              color: "text-cyan-600 bg-cyan-50",
-              badge: "",
-            },
-          },
-          {
-            id: "ncp-services-service-card-6",
-            type: "service-card",
-            label: "Service Card",
-            fields: {
-              "item-title": "Kubernetes",
-              "item-desc":
-                "컨테이너화된 애플리케이션의 \n자동화된 배포 및 관리.",
-              icon: "Box",
-              color: "text-indigo-600 bg-indigo-50",
-              badge: "",
+              "card-title": "안정적 서비스 제공",
+              "card-desc":
+                "콘텐츠 탐지 자동화로 관리자가 콘텐츠를 일일이 검수하는 수작업을 최소화하고 검수 인력의 공백을 줄일 수 있어 안정적인 콘텐츠를 실시간으로 제공할 수 있습니다.",
             },
           },
         ],
       },
+
+      // ─── 3. 섹션 푸터 CTA ──────────────────────────────────────────
       {
-        id: "ncp-pricing",
-        label: "Pricing Section",
+        id: "ge-section-footer",
+        label: "섹션 푸터",
+        type: "ncp-section-footer",
+        fields: {
+          title: "이미지를 판독하여 유해 콘텐츠를 탐지하는 서비스",
+          "cta-primary": "이용 문의",
+          "cta-secondary": "요금 계산",
+          "bg-image": "https://portal.gcdn.ntruss.com/image/Database_1720489901543.png",
+        },
+      },
+
+      // ─── 4. 활용 사례 ───────────────────────────────────────────────
+      {
+        id: "ge-usecase",
+        label: "활용 사례",
+        type: "ncp-feature-cards",
+        fields: {
+          "section-title": "활용 사례",
+          subtitle: "구현 시나리오 예시",
+        },
+        children: [
+          {
+            id: "ge-usecase-card-1",
+            type: "ncp-feature-card",
+            label: "유해 이미지 탐지",
+            fields: {
+              "card-title": "유해 이미지 탐지 및 등급 분류",
+              "card-desc":
+                "인터넷 및 모바일 환경에 등록되어 전송된 모든 콘텐츠를 이미지 단위로 검사하고 유해 콘텐츠 등급에 따라 검사 결괏값을 반환합니다. 사용자가 실제 구현할 때는 원하는 정책에 따른 방식으로 구현할 수 있습니다.",
+            },
+          },
+        ],
+      },
+
+      // ─── 4. 상세 기능 ───────────────────────────────────────────────
+      {
+        id: "ge-detail",
+        label: "상세 기능",
+        type: "ncp-feature-cards",
+        fields: {
+          "section-title": "상세 기능",
+          subtitle: "유해 콘텐츠 등급 분류 기준",
+        },
+        children: [
+          {
+            id: "ge-detail-card-1",
+            type: "ncp-feature-card",
+            label: "정상",
+            fields: {
+              "card-title": "정상 (Green)",
+              "card-desc":
+                "방송통신심의위원회 기준 일반 사용자에게 무해한 이미지입니다.",
+            },
+          },
+          {
+            id: "ge-detail-card-2",
+            type: "ncp-feature-card",
+            label: "선정",
+            fields: {
+              "card-title": "선정 (Yellow)",
+              "card-desc":
+                "노출이 있으나 성인 수준에는 이르지 않는 이미지입니다.",
+            },
+          },
+          {
+            id: "ge-detail-card-3",
+            type: "ncp-feature-card",
+            label: "성인",
+            fields: {
+              "card-title": "성인 (Orange)",
+              "card-desc":
+                "성인만 이용할 수 있는 수준의 콘텐츠를 포함한 이미지입니다.",
+            },
+          },
+          {
+            id: "ge-detail-card-4",
+            type: "ncp-feature-card",
+            label: "음란",
+            fields: {
+              "card-title": "음란 (Red)",
+              "card-desc":
+                "방송통신심의위원회 기준 음란물에 해당하는 이미지입니다. 서비스 내 게시 불가 수준입니다.",
+            },
+          },
+        ],
+      },
+
+      // ─── 5. 요금 ───────────────────────────────────────────────────
+      {
+        id: "ge-pricing",
+        label: "요금",
         type: "pricing",
         fields: {
-          badge: "PRICING",
-          "m-starter-cta": "Get Started",
-          "m-pro-cta": "Start Free Trial",
-          "m-ent-cta": "Contact Sales",
-          "a-starter-cta": "Get Started",
-          "a-pro-cta": "Start Free Trial",
-          "a-ent-cta": "Contact Sales",
-          title: "Simple, transparent pricing",
-          sub: "Choose the plan that fits your needs",
+          title: "요금",
+          sub: "CLOVA GreenEye는 네이버 클라우드 플랫폼 콘솔에서 서비스 이용을 신청할 수 있으며 승인된 사용만 서비스 사용할 수 있습니다.\n이용 신청에 앞서 [이용 문의하기]를 클릭하여 이용 문의를 접수하고 담당 영업팀으로부터 이용 신청 관련 안내를 받아 이용 신청을 해주십시오.",
+          cta: "이용 문의하기",
+          tier1: "협의에 의한 별도 요금",
+          tier2: "",
+          tier3: "",
         },
-        children: [
-          {
-            id: "ncp-pricing-monthly",
-            label: "Monthly Plans",
-            type: "pricing-tab",
-            fields: {},
-          },
-          {
-            id: "ncp-pricing-annual",
-            label: "Annual Plans",
-            type: "pricing-tab",
-            fields: {},
-          },
-        ],
       },
+
+      // ─── 6. 리소스 ─────────────────────────────────────────────────
       {
-        id: "tab-container-1",
-        label: "Tab Container",
-        type: "tabs",
+        id: "ge-resources",
+        label: "리소스",
+        type: "ncp-feature-cards",
         fields: {
-          title: "Features Overview",
+          "section-title": "리소스",
+          subtitle: "사용 가이드",
         },
-        accept: ["tab"],
         children: [
           {
-            id: "tab-1-overview",
-            label: "Overview",
-            type: "tab",
-            fields: {},
-            accept: ["section"],
-            children: [
-              {
-                id: "tab-1-overview-s1",
-                label: "Platform Overview",
-                type: "section",
-                fields: {
-                  heading: "Platform Overview",
-                  description:
-                    "Everything you need to build, deploy, and scale your applications.",
-                },
-              },
-            ],
-          },
-          {
-            id: "tab-1-details",
-            label: "Details",
-            type: "tab",
-            fields: {},
-            accept: ["section"],
-            children: [
-              {
-                id: "tab-1-details-s1",
-                label: "Technical Details",
-                type: "section",
-                fields: {
-                  heading: "Technical Details",
-                  description:
-                    "Built on proven infrastructure with 99.99% uptime guarantee.",
-                },
-              },
-            ],
-          },
-          {
-            id: "tab-1-faq",
-            label: "FAQ",
-            type: "tab",
-            fields: {},
-            accept: ["section"],
-            children: [
-              {
-                id: "tab-1-faq-s1",
-                label: "FAQ Content",
-                type: "section",
-                fields: {
-                  heading: "Frequently Asked Questions",
-                  description:
-                    "Find answers to common questions about our platform.",
-                },
-              },
-            ],
+            id: "ge-res-card-1",
+            type: "ncp-feature-card",
+            label: "사용 가이드",
+            fields: {
+              "card-title": "CLOVA GreenEye 개요",
+              "card-desc":
+                "CLOVA GreenEye 서비스의 개요, 사용 방법, API 레퍼런스를 확인할 수 있는 가이드 문서입니다.",
+            },
           },
         ],
       },
+
+      // ─── 7. 푸터 ───────────────────────────────────────────────────
       {
-        id: "ncp-footer",
+        id: "ge-footer",
         label: "Footer",
         type: "footer",
         fields: {
-          brand: "NAVER CLOUD",
-          desc: "네이버클라우드는 기업의 비즈니스 혁신을 위한\n최적의 클라우드 서비스를 제공합니다.",
-          copyright: `© ${new Date().getFullYear()} NAVER Cloud Corp. All rights reserved.`,
+          brand: "NAVER Cloud Platform",
+          desc: "대한민국 No.1 클라우드 플랫폼",
+          copyright: `© ${new Date().getFullYear()} NAVER Cloud Corp. All Rights Reserved.`,
         },
       },
     ],

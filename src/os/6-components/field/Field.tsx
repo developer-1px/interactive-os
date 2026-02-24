@@ -4,6 +4,7 @@ import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
+import { OS_FIELD_COMMIT } from "@os/3-commands/field/commit";
 
 import type { HTMLAttributes } from "react";
 import {
@@ -316,6 +317,20 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       const exitedEditing = wasEditableRef.current && !isContentEditable;
       wasEditableRef.current = isContentEditable;
 
+      // Auto-commit: only for EDIT→SELECT path.
+      // When editing ends, check WHO ended it:
+      //   - editingItemId === fieldId → EDIT→SELECT (focus moved to non-Field item)
+      //     This field must commit its value and clear editingItemId.
+      //   - editingItemId === other → EDIT→EDIT (OS_FIELD_START_EDIT already committed)
+      //   - editingItemId === null → Escape (OS_FIELD_COMMIT already handled)
+      if (exitedEditing && mode === "deferred") {
+        const currentEditingId = os.getState().os.focus.zones[zoneId]?.editingItemId;
+        if (currentEditingId === fieldId) {
+          handleCommit(FieldRegistry.getValue(fieldId));
+          os.dispatch(OS_FIELD_COMMIT());
+        }
+      }
+
       if (innerRef.current && !isContentEditable) {
         if (mode === "deferred") {
           // Deferred: revert to app's value prop (cancel/blur = discard changes)
@@ -364,7 +379,9 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
         // Matches KeyboardListener's guard: e.isComposing || e.keyCode === 229
         if (e.isComposing || e.keyCode === 229) return;
 
-        if (e.key === "Enter" && !e.shiftKey) {
+        // Enter = commit only for inline fields (single-line).
+        // For block/editor: let browser default (newline) through.
+        if (e.key === "Enter" && !e.shiftKey && fieldType === "inline") {
           e.preventDefault();
           e.stopPropagation();
           if (trigger === "enter") {
@@ -406,12 +423,13 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
     });
 
     const baseProps = {
-      contentEditable: isContentEditable,
+      contentEditable: isContentEditable ? "plaintext-only" : false,
       suppressContentEditableWarning: true,
       role: "textbox",
       "aria-multiline": fieldType === "block" || fieldType === "editor",
       tabIndex: 0,
       className: composeProps,
+      style: { cursor: isContentEditable ? "text" : "default" },
       "data-placeholder": placeholder,
       "data-mode": mode,
       // Error state for styling/accessibility

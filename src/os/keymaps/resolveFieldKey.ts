@@ -35,23 +35,23 @@ type FieldKeymap = Record<string, () => BaseCommand>;
 
 const INLINE_KEYMAP: FieldKeymap = {
     Enter: () => OS_FIELD_COMMIT(),
-    Escape: () => OS_FIELD_CANCEL(),
+    Escape: () => OS_FIELD_COMMIT(),
 };
 
 const TOKENS_KEYMAP: FieldKeymap = {
     Enter: () => OS_FIELD_COMMIT(),
-    Escape: () => OS_FIELD_CANCEL(),
+    Escape: () => OS_FIELD_COMMIT(),
 };
 
 const BLOCK_KEYMAP: FieldKeymap = {
     // Enter → NOT here (field owns = newline)
-    Escape: () => OS_FIELD_CANCEL(),
+    Escape: () => OS_FIELD_COMMIT(),
 };
 
 const EDITOR_KEYMAP: FieldKeymap = {
     // Enter → NOT here (field owns = newline)
     // Tab → NOT here (field owns = indent)
-    Escape: () => OS_FIELD_CANCEL(),
+    Escape: () => OS_FIELD_COMMIT(),
 };
 
 const FIELD_KEYMAPS: Record<FieldType, FieldKeymap> = {

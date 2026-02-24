@@ -226,6 +226,7 @@ import {
   createCanvasItemFilter,
   createDrillDown,
   createDrillUp,
+  createTypingEntryKeybindings,
 } from "@/apps/builder/features/hierarchicalNavigation";
 
 /**
@@ -422,11 +423,14 @@ export const BuilderCanvasUI = canvasCollection.bind({
   options: {
     navigate: { orientation: "corner" },
     tab: { behavior: "trap" },
+    activate: { onClick: true, reClickOnly: true },
+    dismiss: { escape: "deselect" },
   },
   itemFilter: createCanvasItemFilter(CANVAS_ZONE_ID),
   keybindings: [
     { key: "\\", command: createDrillUp(CANVAS_ZONE_ID) },
     ...canvasBindings.keybindings,
+    ...createTypingEntryKeybindings(CANVAS_ZONE_ID),
   ],
 });
 

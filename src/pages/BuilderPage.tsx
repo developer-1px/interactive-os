@@ -13,10 +13,14 @@ import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
 import { os } from "@/os/kernel";
 import {
   EditorToolbar,
+  NCPFeatureCardsBlock,
   NCPFooterBlock,
   NCPHeroBlock,
   NCPNewsBlock,
+  NCPNoticeBlock,
   NCPPricingBlock,
+  NCPProductHeroBlock,
+  NCPSectionFooterBlock,
   NCPServicesBlock,
   PropertiesPanel,
   SectionSidebar,
@@ -97,8 +101,12 @@ const BLOCK_COMPONENTS: Record<string, React.FC<{ id: string }>> = {
   news: NCPNewsBlock,
   services: NCPServicesBlock,
   pricing: NCPPricingBlock,
-  tabs: TabContainerBlock, // generic tab container — data-driven from Block.children
+  tabs: TabContainerBlock,
   footer: NCPFooterBlock,
+  "ncp-product-hero": NCPProductHeroBlock,
+  "ncp-feature-cards": NCPFeatureCardsBlock,
+  "ncp-notice": NCPNoticeBlock,
+  "ncp-section-footer": NCPSectionFooterBlock,
 };
 
 function SectionRenderer() {

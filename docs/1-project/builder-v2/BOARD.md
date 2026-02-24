@@ -5,6 +5,7 @@
 
 ## 🔴 Now
 
+- ~~T18~~ → **독립 프로젝트로 분리**: [`content-edit-mode`](../content-edit-mode/BOARD.md)
 
 - [ ] T13: Tab Container → 범용 Container Block (PoC)
   - [ ] `Block.accept?: string[]` 필드 추가 — Container가 받을 수 있는 하위 블록 타입 제한

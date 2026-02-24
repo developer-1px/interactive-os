@@ -108,6 +108,42 @@ export const blockSchemas: Record<string, BlockSchema> = {
         desc: { type: "multiline", label: "Description" },
         copyright: { type: "text", label: "Copyright" },
     },
+
+    "ncp-product-hero": {
+        "service-name": { type: "text", label: "서비스명" },
+        "service-desc": { type: "multiline", label: "서비스 설명" },
+        "cta-primary": { type: "button", label: "기본 CTA" },
+        "cta-secondary": { type: "button", label: "보조 CTA" },
+        "breadcrumb-1": { type: "text", label: "브레드크럼 1" },
+        "breadcrumb-2": { type: "text", label: "브레드크럼 2" },
+        "tabs": { type: "text", label: "탭 목록 (쉼표 구분)" },
+        "deprecated": { type: "text", label: "Deprecated (true/false)" },
+        "badge-text": { type: "text", label: "배지 텍스트" },
+        "notice-title": { type: "text", label: "공지 제목" },
+        "notice-desc": { type: "multiline", label: "공지 내용" },
+    },
+
+    "ncp-feature-cards": {
+        "section-title": { type: "text", label: "섹션 제목" },
+        "subtitle": { type: "multiline", label: "서브타이틀" },
+    },
+
+    "ncp-feature-card": {
+        "card-title": { type: "text", label: "카드 제목" },
+        "card-desc": { type: "multiline", label: "카드 설명" },
+    },
+
+    "ncp-notice": {
+        label: { type: "text", label: "배너 라벨" },
+        text: { type: "multiline", label: "공지 내용" },
+    },
+
+    "ncp-section-footer": {
+        title: { type: "multiline", label: "타이틀" },
+        "cta-primary": { type: "button", label: "CTA 1" },
+        "cta-secondary": { type: "button", label: "CTA 2" },
+        "bg-image": { type: "image", label: "배경 이미지 URL" },
+    },
 };
 
 // ═══════════════════════════════════════════════════════════════════

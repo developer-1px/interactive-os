@@ -3,6 +3,7 @@ import {
   Hand,
   Monitor,
   MousePointer2,
+  Pencil,
   Redo2,
   Smartphone,
   Square,
@@ -83,6 +84,48 @@ export function EditorToolbar({
             label="Mobile"
           />
         </div>
+
+        <Divider />
+
+        {/* Mode Indicator */}
+        <ModeIndicator />
+      </div>
+    </div>
+  );
+}
+
+// ── Mode Indicator ──
+function ModeIndicator() {
+  const editingItemId = os.useComputed(
+    (s) => s.os.focus.zones["canvas"]?.editingItemId ?? null,
+  );
+  const focusedItemId = os.useComputed(
+    (s) => s.os.focus.zones["canvas"]?.focusedItemId ?? null,
+  );
+
+  const isEditing = editingItemId !== null;
+  const isSelected = !isEditing && focusedItemId !== null;
+
+  return (
+    <div className="flex items-center gap-1 px-1.5">
+      <div
+        className={`
+          flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all duration-200
+          ${isEditing
+            ? "bg-blue-50 text-blue-600 ring-1 ring-blue-200"
+            : isSelected
+              ? "bg-violet-50 text-violet-600 ring-1 ring-violet-200"
+              : "text-slate-400"
+          }
+        `}
+      >
+        {isEditing ? (
+          <><Pencil size={12} /> Edit</>
+        ) : isSelected ? (
+          <><MousePointer2 size={12} /> Select</>
+        ) : (
+          <><Eye size={12} /> View</>
+        )}
       </div>
     </div>
   );

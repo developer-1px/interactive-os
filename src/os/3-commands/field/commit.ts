@@ -73,9 +73,14 @@ export const OS_FIELD_COMMIT = os.defineCommand(
                     const z = draft.os.focus.zones[activeZoneId];
                     if (z) {
                         z.editingItemId = null;
-                        // Restore focus to the item that was being edited
-                        z.focusedItemId = editingId;
-                        z.lastFocusedId = editingId;
+                        // Only restore focusedItemId if it hasn't already moved
+                        // (e.g., Escape commits while focus stays on the editing item).
+                        // If focusedItemId already changed (click on different item → blur-commit),
+                        // don't overwrite — the new focus is intentional.
+                        if (z.focusedItemId === editingId || z.focusedItemId === null) {
+                            z.focusedItemId = editingId;
+                            z.lastFocusedId = editingId;
+                        }
                         // Save caret position (visible in Inspector)
                         if (caretPos != null) {
                             z.caretPositions[editingId] = caretPos;

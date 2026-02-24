@@ -1,9 +1,13 @@
 /**
  * OS_FIELD_START_EDIT — Enter editing mode on the focused item.
  *
- * Sets ZoneState.editingItemId = focusedItemId.
- * Seeds FieldRegistry.caretPosition from ZoneState.caretPositions if available.
- * No-op if already editing the same item or no focused item.
+ * Handles three scenarios:
+ *   1. No previous edit → simply set editingItemId
+ *   2. Same item → no-op
+ *   3. Different item → commit previous value + save caret + set new editingItemId
+ *
+ * The previous field's app commit (onCommit factory) is dispatched here
+ * so the transition is atomic: editingItemId goes A → B, never through null.
  */
 
 import { produce } from "immer";
@@ -22,19 +26,38 @@ export const OS_FIELD_START_EDIT = os.defineCommand(
         // Already editing this item — no-op
         if (zone.editingItemId === zone.focusedItemId) return;
 
-        const itemId = zone.focusedItemId;
+        const newItemId = zone.focusedItemId;
+        const prevEditingId = zone.editingItemId;
 
-        // Seed FieldRegistry with saved caret position from ZoneState
-        const savedCaret = zone.caretPositions[itemId];
+        // Commit previous field's value via app's onCommit factory
+        if (prevEditingId) {
+            const prevField = FieldRegistry.getField(prevEditingId);
+            if (prevField?.config.onCommit) {
+                const text = prevField.state.value;
+                const appCommand = prevField.config.onCommit({ text });
+                queueMicrotask(() => os.dispatch(appCommand));
+            }
+        }
+
+        // Seed FieldRegistry with saved caret position for the new item
+        const savedCaret = zone.caretPositions[newItemId];
         if (savedCaret != null) {
-            FieldRegistry.updateCaretPosition(itemId, savedCaret);
+            FieldRegistry.updateCaretPosition(newItemId, savedCaret);
         }
 
         return {
             state: produce(ctx.state, (draft) => {
                 const z = draft.os.focus.zones[activeZoneId];
                 if (z) {
-                    z.editingItemId = z.focusedItemId;
+                    // Save previous item's caret position
+                    if (prevEditingId) {
+                        const prevCaret = FieldRegistry.getField(prevEditingId)?.state.caretPosition;
+                        if (prevCaret != null) {
+                            z.caretPositions[prevEditingId] = prevCaret;
+                        }
+                    }
+                    // Atomic transition: A → B (never null)
+                    z.editingItemId = newItemId;
                 }
             }) as typeof ctx.state,
         };

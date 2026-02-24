@@ -216,6 +216,9 @@ export function simulateClick(
     const expandable = roleExpandable || zoneExpandable;
 
     // Phase 1: mousedown — focus + select (immediate visual feedback)
+    // Capture pre-mousedown focusedItemId for correct re-click detection
+    const preMousedownFocusedItemId = readFocusedItemId(kernel, zoneId);
+
     const mouseInput: MouseInput = {
         targetItemId: itemId,
         targetGroupId: zoneId,
@@ -235,12 +238,16 @@ export function simulateClick(
 
     // Phase 2: click — activate (expand toggle for tree, action for others)
     const activateOnClick = entry?.config?.activate?.onClick ?? false;
-    const focusedAfterMousedown = readFocusedItemId(kernel, zoneId);
+    const reClickOnly = entry?.config?.activate?.reClickOnly ?? false;
 
     const clickInput: ClickInput = {
         activateOnClick,
         clickedItemId: itemId,
-        focusedItemId: focusedAfterMousedown,
+        // reClickOnly: compare against pre-mousedown state (builder pattern)
+        // else: compare against post-mousedown state (tree pattern — every click activates)
+        focusedItemId: reClickOnly
+            ? preMousedownFocusedItemId
+            : readFocusedItemId(kernel, zoneId),
     };
 
     const clickResult = resolveClick(clickInput);

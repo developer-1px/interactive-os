@@ -21,7 +21,8 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| builder-v2 | T15-T17 Done (Panel Accordion + OS tree auto-expand) | 02-24 | 🔥 Focus |
+| builder-v2 | T18 → content-edit-mode 분리 | 02-24 | 🔥 Focus |
+| content-edit-mode | T1~T4 Done, T5~T7 FSM v3 원자 전이 | 02-24 | 🟢 Active |
 | go-redesign | Scaffold 완료, T1~T3 | 02-24 | 🔥 Focus |
 | normalized-collection | Scaffold 완료, T1~T6 | 02-24 | 🔥 Focus |
 | cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
@@ -92,7 +93,7 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 3 |
-| Active Projects (total) | 11 (6 Active + 3 Focus + 2 Paused) |
+| Active Projects (total) | 12 (7 Active + 3 Focus + 2 Paused) |
 | Completed (archived) | 36 |
 | Inbox items | 1 |
 | Backlog items | 9 |

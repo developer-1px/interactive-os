@@ -68,11 +68,19 @@ export interface ActivateConfig {
   mode: "manual" | "automatic";
   /** When true, clicking an item dispatches OS_ACTIVATE (Navigation Tree pattern). */
   onClick: boolean;
+  /**
+   * When true, OS_ACTIVATE only fires on re-click (clicking an already-focused item).
+   * First clicks only focus+select without activating.
+   * This enables the Figma/Slides "Select-then-Edit" pattern.
+   * Default: false (activate on every click, tree pattern).
+   */
+  reClickOnly: boolean;
 }
 
 export const DEFAULT_ACTIVATE: ActivateConfig = {
   mode: "manual",
   onClick: false,
+  reClickOnly: false,
 };
 
 // ── Dismiss ──
