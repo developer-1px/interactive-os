@@ -5,7 +5,28 @@
 
 ## 🔴 Now
 
+- [ ] T20: When Router Extension — `when`을 `WhenPredicate`(함수형)로 확장
+  - Discussion: 2026-0224 "OS 파이프라인 검증 표 → when 확장" session
+  - 결정 테이블: `notes/2026-0224-decision-table-when-router.md`
+  - 🔴 Red: `tests/integration/when-router-decision-table.test.ts` — 6 FAIL / 5 PASS
+  - [ ] T20-1: `@/os/when` 모듈 생성 (`itemAttr`, `not`, `and` 팩토리)
+  - [ ] T20-2: `Keybindings.resolve`에서 `WhenPredicate` 평가 지원
+  - [ ] T20-3: `bind()` onAction이 `{ command, when }[]` 배열 수용
+  - [ ] T20-4: Builder canvas `drillDown`/`drillUp` → 단일 커맨드 + when 분리
+  - 🐛 발견: ESC는 drillUp 안 되는데 \는 됨 — 오고 있는 Keybinding 우선순위 버그
+
+- [x] T21: forceDeselect → zone 비활성화 — tsc 0 | +4 tests | regression 0 ✅
+  - Discussion: `discussions/2026-0224-2048-force-deselect-zone.md`
+  - `escape.ts` L47-49: `force:true` → `activeZoneId=null` (3줄)
+
 - ~~T18~~ → **독립 프로젝트로 분리**: [`content-edit-mode`](../content-edit-mode/BOARD.md)
+
+- [x] T19: Builder Interaction Spec — 3상태(Deselected/Selected/Editing) + 1규칙(drill up, 부모 없으면 탈출) — 🔴→🟢 +16 tests ✅
+  - Discussion: [builder-interaction-spec](discussions/2026-0224-1739-builder-interaction-spec.md)
+  - [x] T19-1: `createDrillUp` — section(부모 없음)에서 `return []` → `OS_ESCAPE()` 반환 — 🔴→🟢 +9 tests ✅
+  - [x] T19-2: ESC를 drillUp keybinding으로 통합 — `dismiss: "none"` + `{ key: "Escape", command: createDrillUp }` ✅
+  - [x] T19-3: Deselected 상태 — focusedItemId=null 시 커서 숨김 + 키보드 무반응 = T19-1에서 자동 충족 ✅
+  - [x] T19-4: 마우스 Edit 유지 — resolveClick에 wasEditing 조건 추가 — 🔴→🟢 +7 tests | 454 pass ✅
 
 - [ ] T13: Tab Container → 범용 Container Block (PoC)
   - [ ] `Block.accept?: string[]` 필드 추가 — Container가 받을 수 있는 하위 블록 타입 제한

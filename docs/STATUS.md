@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-25 00:11
+> Last updated: 2026-02-25 00:27
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,6 @@
 
 ## 🔥 Active Focus
 
-**app-modules** — AppModule 인터페이스 도입, history/persistence 모듈화, deleteToast 신규. Heavy.
 
 **builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
 
@@ -23,7 +22,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| app-modules | Scaffold, T1~T8, Red 🔴 | 02-25 | 🔥 Focus |
+
 | builder-v2 | T18 → content-edit-mode 분리 | 02-24 | 🔥 Focus |
 | content-edit-mode | T1~T4 Done, T5~T7 FSM v3 원자 전이 | 02-24 | 🟢 Active |
 | dev-pipeline | T0 Done (/red /green 생성), T1~T3 | 02-24 | 🟢 Active |
@@ -46,6 +45,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| app-modules | 02-25 | ✅ archive/2026/02/W09 — T1~T8 Done, 13 tests, Builder+Todo 마이그레이션 |
 | zift-keyboard-resolve | 02-24 | ✅ archive/2026/02/W09 — official/os/why-field.md 갱신 |
 | docs-viewer-features | 02-24 | ✅ archive/2026/02/W09 |
 | item-expand-primitives | 02-24 | ✅ archive/2026/02/W09 |
