@@ -10,8 +10,8 @@
  * - Event handling is done by FocusListener
  */
 
-import { os } from "@os/kernel.ts";
 import type { BaseCommand } from "@kernel";
+import { os } from "@os/kernel.ts";
 import {
   cloneElement,
   forwardRef,

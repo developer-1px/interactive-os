@@ -44,7 +44,10 @@ export const OS_ACTIVATE = os.defineCommand(
     }
 
     // Item-level callback: Trigger's onActivate registered via FocusItem
-    const itemCb = ZoneRegistry.getItemCallback(activeZoneId, zone.focusedItemId);
+    const itemCb = ZoneRegistry.getItemCallback(
+      activeZoneId,
+      zone.focusedItemId,
+    );
     if (itemCb?.onActivate) {
       return { dispatch: itemCb.onActivate };
     }

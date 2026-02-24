@@ -5,6 +5,10 @@
  * - "deselect": Clear current selection
  * - "close": Blur/close the zone
  * - "none": No action
+ *
+ * The `force` payload overrides dismiss config — always deselects.
+ * Used by app keybindings (e.g., drillUp terminal case) that need
+ * guaranteed deselect regardless of zone dismiss setting.
  */
 
 import { produce } from "immer";
@@ -15,7 +19,7 @@ import { ensureZone } from "../../state/utils";
 export const OS_ESCAPE = os.defineCommand(
   "OS_ESCAPE",
   [],
-  (ctx) => () => {
+  (ctx) => (payload?: { force?: boolean }) => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 
@@ -26,31 +30,42 @@ export const OS_ESCAPE = os.defineCommand(
     if (!zoneEntry) return;
 
     const config = zoneEntry.config;
+    const dismissMode = payload?.force ? "deselect" : config.dismiss?.escape;
 
-    switch (config.dismiss?.escape) {
+    switch (dismissMode) {
       case "deselect": {
-        if (zone.selection.length === 0) return;
+        if (zone.selection.length === 0 && !zone.focusedItemId) return;
         return {
           state: produce(ctx.state, (draft) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.selection = [];
             z.selectionAnchor = null;
+            z.focusedItemId = null;
+            // force deselect → deactivate zone (Figma pattern: ESC→Arrow no-op)
+            if (payload?.force) {
+              draft.os.focus.activeZoneId = null;
+            }
           }) as typeof ctx.state,
         };
       }
       case "close": {
-        // Dispatch onDismiss command if registered on this zone
         const dismissCommand = zoneEntry?.onDismiss;
 
         return {
           state: produce(ctx.state, (draft) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.focusedItemId = null;
-            // Clear active zone so components can detect dismiss
             draft.os.focus.activeZoneId = null;
           }) as typeof ctx.state,
           ...(dismissCommand ? { dispatch: dismissCommand } : {}),
         };
+      }
+      case "callback": {
+        // Delegate to zone's onDismiss callback (e.g., drillUp).
+        // The callback returns BaseCommand(s) that OS_ESCAPE dispatches.
+        const callback = zoneEntry?.onDismiss;
+        if (!callback) return;
+        return { dispatch: callback };
       }
       default:
         return;

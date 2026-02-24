@@ -10,8 +10,8 @@
  * Unique: 4-directional spatial nav, 2D boundary clamping
  */
 
-import { describe, expect, it } from "vitest";
 import { createOsPage } from "@os/createOsPage";
+import { describe, expect, it } from "vitest";
 import { assertHomeEnd } from "./helpers/contracts";
 
 // ─── 3×3 Grid Layout ───

@@ -14,8 +14,8 @@
  * which are already pressKey-based.
  */
 
-import { describe } from "vitest";
 import { createOsPage } from "@os/createOsPage";
+import { describe } from "vitest";
 import {
   assertBoundaryClamp,
   assertEscapeClose,

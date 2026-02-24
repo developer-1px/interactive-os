@@ -50,8 +50,12 @@ function findScrollParent(el: HTMLElement): HTMLElement | null {
 function isFullyVisible(el: HTMLElement, container: HTMLElement): boolean {
   const er = el.getBoundingClientRect();
   const cr = container.getBoundingClientRect();
-  return er.top >= cr.top && er.bottom <= cr.bottom
-    && er.left >= cr.left && er.right <= cr.right;
+  return (
+    er.top >= cr.top &&
+    er.bottom <= cr.bottom &&
+    er.left >= cr.left &&
+    er.right <= cr.right
+  );
 }
 
 os.defineEffect("scroll", (itemId: string) => {

@@ -9,7 +9,7 @@
 
 import { produce } from "immer";
 import { os } from "../../kernel";
-import { applyFocusPush, applyFocusPop } from "./focusStackOps";
+import { applyFocusPop, applyFocusPush } from "./focusStackOps";
 
 // ═══════════════════════════════════════════════════════════════════
 // PUSH
@@ -42,4 +42,3 @@ export const OS_STACK_POP = os.defineCommand("OS_STACK_POP", (ctx) => () => {
     }),
   };
 });
-

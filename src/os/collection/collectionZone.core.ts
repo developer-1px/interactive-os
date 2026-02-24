@@ -238,9 +238,11 @@ export function fromNormalized<S, T extends { id: string }>(
   entitiesAccessor: (state: S) => Record<string, T>,
   orderAccessor: (state: S) => Record<string, string[]>,
 ): { _ops: ItemOps<S, T> } {
-
   /** Find parent key for a given id */
-  function findParent(order: Record<string, string[]>, id: string): string | undefined {
+  function findParent(
+    order: Record<string, string[]>,
+    id: string,
+  ): string | undefined {
     for (const [parentId, children] of Object.entries(order)) {
       if (children.includes(id)) return parentId;
     }
@@ -258,7 +260,10 @@ export function fromNormalized<S, T extends { id: string }>(
   }
 
   /** Collect id + all descendants */
-  function collectDescendants(order: Record<string, string[]>, id: string): Set<string> {
+  function collectDescendants(
+    order: Record<string, string[]>,
+    id: string,
+  ): Set<string> {
     const set = new Set<string>();
     const walk = (targetId: string) => {
       set.add(targetId);
@@ -292,7 +297,10 @@ export function fromNormalized<S, T extends { id: string }>(
         // Remove from parent's children
         for (const children of Object.values(order)) {
           const idx = children.indexOf(id);
-          if (idx !== -1) { children.splice(idx, 1); break; }
+          if (idx !== -1) {
+            children.splice(idx, 1);
+            break;
+          }
         }
       },
 
@@ -349,4 +357,3 @@ export function fromNormalized<S, T extends { id: string }>(
     },
   };
 }
-

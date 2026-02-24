@@ -12,24 +12,24 @@
  */
 
 export interface CursorMeta {
-    /** Content type tag displayed in the cursor badge (e.g. "icon", "button") */
-    readonly tag: string;
-    /** Cursor highlight color (hex) */
-    readonly color: string;
+  /** Content type tag displayed in the cursor badge (e.g. "icon", "button") */
+  readonly tag: string;
+  /** Cursor highlight color (hex) */
+  readonly color: string;
 }
 
 const registry = new Map<string, CursorMeta>();
 
 export const cursorRegistry = {
-    get(itemId: string): CursorMeta | null {
-        return registry.get(itemId) ?? null;
-    },
+  get(itemId: string): CursorMeta | null {
+    return registry.get(itemId) ?? null;
+  },
 
-    set(itemId: string, meta: CursorMeta): void {
-        registry.set(itemId, meta);
-    },
+  set(itemId: string, meta: CursorMeta): void {
+    registry.set(itemId, meta);
+  },
 
-    delete(itemId: string): void {
-        registry.delete(itemId);
-    },
+  delete(itemId: string): void {
+    registry.delete(itemId);
+  },
 } as const;

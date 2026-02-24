@@ -5,14 +5,11 @@
  * Each test file imports these helpers + the section-specific tests.
  */
 
-import { beforeEach, afterEach, vi } from "vitest";
-import {
-    TodoApp,
-    addTodo,
-} from "@apps/todo/app";
+import { addTodo, TodoApp } from "@apps/todo/app";
 import { ListView } from "@apps/todo/widgets/ListView";
 import { createPage } from "@os/defineApp.page";
 import type { AppPage } from "@os/defineApp.types";
+import { afterEach, beforeEach, vi } from "vitest";
 import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];
@@ -22,35 +19,35 @@ export let page: TodoPage;
 let now = 1000;
 
 export function setupTodoPage() {
-    beforeEach(() => {
-        vi.spyOn(Date, "now").mockImplementation(() => ++now);
-        _resetClipboardStore();
-        page = createPage(TodoApp, ListView);
-    });
+  beforeEach(() => {
+    vi.spyOn(Date, "now").mockImplementation(() => ++now);
+    _resetClipboardStore();
+    page = createPage(TodoApp, ListView);
+  });
 
-    afterEach(() => {
-        page.cleanup();
-    });
+  afterEach(() => {
+    page.cleanup();
+  });
 }
 
 /** Helper: add N todos and return their NEW IDs only */
 export function addTodos(...texts: string[]): string[] {
-    const before = new Set(page.state.data.todoOrder);
-    for (const text of texts) {
-        page.dispatch(addTodo({ text }));
-    }
-    return page.state.data.todoOrder.filter((id) => !before.has(id));
+  const before = new Set(page.state.data.todoOrder);
+  for (const text of texts) {
+    page.dispatch(addTodo({ text }));
+  }
+  return page.state.data.todoOrder.filter((id) => !before.has(id));
 }
 
 /** Helper: goto list zone */
 export function gotoList(focusedItemId?: string | null) {
-    const ids = page.state.data.todoOrder;
-    page.goto("list", { focusedItemId: focusedItemId ?? ids[0] ?? null });
+  const ids = page.state.data.todoOrder;
+  page.goto("list", { focusedItemId: focusedItemId ?? ids[0] ?? null });
 }
 
 /** Helper: goto sidebar zone */
 export function gotoSidebar(focusedItemId?: string | null) {
-    const ids = page.state.data.categoryOrder;
-    // Config comes from role preset (listbox) + bind options — no manual override needed
-    page.goto("sidebar", { focusedItemId: focusedItemId ?? ids[0] ?? null });
+  const ids = page.state.data.categoryOrder;
+  // Config comes from role preset (listbox) + bind options — no manual override needed
+  page.goto("sidebar", { focusedItemId: focusedItemId ?? ids[0] ?? null });
 }

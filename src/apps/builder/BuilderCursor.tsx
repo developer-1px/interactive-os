@@ -17,11 +17,11 @@
  */
 
 import { useContext, useRef } from "react";
-import { findItemElement } from "@/os/2-contexts/itemQueries";
 import { useElementRect } from "@/hooks/useElementRect";
+import { findItemElement } from "@/os/2-contexts/itemQueries";
 import { os } from "@/os/kernel";
-import { cursorRegistry } from "./model/cursorRegistry";
 import { HighlightContext } from "@/pages/builder/PropertiesPanel";
+import { cursorRegistry } from "./model/cursorRegistry";
 
 const DEFAULT_COLOR = "#22c55e";
 const HIGHLIGHT_COLOR = "#6366f1"; // indigo-500 for panel highlight
@@ -40,7 +40,7 @@ export function BuilderCursor() {
     const zoneId = "canvas";
     const zoneState = s.os.focus.zones[zoneId];
     return {
-      itemId: zoneState?.lastFocusedId ?? null,
+      itemId: zoneState?.focusedItemId ?? null,
       isActive: s.os.focus.activeZoneId === zoneId,
       editing: (zoneState?.editingItemId ?? null) !== null,
     };
@@ -80,9 +80,7 @@ export function BuilderCursor() {
 
   // Show panel highlight only when it differs from OS focus
   const showPanelHighlight =
-    highlightRect &&
-    highlightedItemId &&
-    highlightedItemId !== itemId;
+    highlightRect && highlightedItemId && highlightedItemId !== itemId;
 
   return (
     <div
@@ -103,13 +101,9 @@ export function BuilderCursor() {
             left: rect.left - pad,
             width: rect.width + pad * 2,
             height: rect.height + pad * 2,
-            border: editing
-              ? "2px solid #3b82f6"
-              : `2px solid ${color}`,
+            border: editing ? "2px solid #3b82f6" : `2px solid ${color}`,
             borderRadius: 4,
-            background: editing
-              ? "rgba(59, 130, 246, 0.04)"
-              : `${color}10`,
+            background: editing ? "rgba(59, 130, 246, 0.04)" : `${color}10`,
             boxShadow: editing
               ? "0 0 0 1px rgba(59, 130, 246, 0.3), 0 0 12px 2px rgba(59, 130, 246, 0.15)"
               : `0 0 0 1px ${color}30`,

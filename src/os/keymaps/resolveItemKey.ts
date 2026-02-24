@@ -12,26 +12,22 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { OS_CHECK } from "@os/3-commands";
-import { OS_EXPAND } from "@os/3-commands";
+import { OS_CHECK, OS_EXPAND } from "@os/3-commands";
 
 // ═══════════════════════════════════════════════════════════════════
 // Item Context
 // ═══════════════════════════════════════════════════════════════════
 
 export interface ItemKeyContext {
-    itemId: string;
-    expanded?: boolean;
+  itemId: string;
+  expanded?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // Item-layer keybindings per role
 // ═══════════════════════════════════════════════════════════════════
 
-type ItemKeyResolver = (
-    key: string,
-    ctx: ItemKeyContext,
-) => BaseCommand | null;
+type ItemKeyResolver = (key: string, ctx: ItemKeyContext) => BaseCommand | null;
 
 /**
  * treeitem: ArrowRight/Left → expand/collapse (W3C APG Tree Pattern)
@@ -42,29 +38,29 @@ type ItemKeyResolver = (
  * - ArrowLeft on collapsed → null (navigate to parent — Zone)
  */
 const resolveTreeItem: ItemKeyResolver = (key, ctx) => {
-    if (key === "ArrowRight" && ctx.expanded === false) {
-        return OS_EXPAND({ action: "expand", itemId: ctx.itemId });
-    }
-    if (key === "ArrowLeft" && ctx.expanded === true) {
-        return OS_EXPAND({ action: "collapse", itemId: ctx.itemId });
-    }
-    return null;
+  if (key === "ArrowRight" && ctx.expanded === false) {
+    return OS_EXPAND({ action: "expand", itemId: ctx.itemId });
+  }
+  if (key === "ArrowLeft" && ctx.expanded === true) {
+    return OS_EXPAND({ action: "collapse", itemId: ctx.itemId });
+  }
+  return null;
 };
 
 /**
  * checkbox / switch: Space → CHECK (W3C APG Checkbox Pattern)
  */
 const resolveCheckable: ItemKeyResolver = (key, ctx) => {
-    if (key === "Space") {
-        return OS_CHECK({ targetId: ctx.itemId });
-    }
-    return null;
+  if (key === "Space") {
+    return OS_CHECK({ targetId: ctx.itemId });
+  }
+  return null;
 };
 
 const ITEM_RESOLVERS: Record<string, ItemKeyResolver> = {
-    treeitem: resolveTreeItem,
-    checkbox: resolveCheckable,
-    switch: resolveCheckable,
+  treeitem: resolveTreeItem,
+  checkbox: resolveCheckable,
+  switch: resolveCheckable,
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -80,14 +76,14 @@ const ITEM_RESOLVERS: Record<string, ItemKeyResolver> = {
  * @returns BaseCommand if the item layer handles this key, null otherwise
  */
 export function resolveItemKey(
-    role: string | null,
-    canonicalKey: string,
-    ctx: ItemKeyContext,
+  role: string | null,
+  canonicalKey: string,
+  ctx: ItemKeyContext,
 ): BaseCommand | null {
-    if (!role) return null;
+  if (!role) return null;
 
-    const resolver = ITEM_RESOLVERS[role];
-    if (!resolver) return null;
+  const resolver = ITEM_RESOLVERS[role];
+  if (!resolver) return null;
 
-    return resolver(canonicalKey, ctx);
+  return resolver(canonicalKey, ctx);
 }

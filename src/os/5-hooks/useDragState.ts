@@ -11,13 +11,15 @@ import type { DragState } from "@os/state/OSState";
 /** Read the global drag state */
 export function useDragState(): DragState;
 /** Read drag state filtered to a specific zone */
-export function useDragState(zoneId: string): DragState & { isActiveZone: boolean };
+export function useDragState(
+  zoneId: string,
+): DragState & { isActiveZone: boolean };
 export function useDragState(zoneId?: string) {
-    return os.useComputed((s) => {
-        const drag = s.os.drag;
-        if (zoneId) {
-            return { ...drag, isActiveZone: drag.zoneId === zoneId };
-        }
-        return drag;
-    });
+  return os.useComputed((s) => {
+    const drag = s.os.drag;
+    if (zoneId) {
+      return { ...drag, isActiveZone: drag.zoneId === zoneId };
+    }
+    return drag;
+  });
 }

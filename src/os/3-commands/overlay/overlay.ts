@@ -14,7 +14,7 @@
 import { produce } from "immer";
 import { os } from "../../kernel";
 import type { OverlayEntry } from "../../state/OSState";
-import { applyFocusPush, applyFocusPop } from "../focus/focusStackOps";
+import { applyFocusPop, applyFocusPush } from "../focus/focusStackOps";
 
 // ═══════════════════════════════════════════════════════════════════
 // OPEN
@@ -74,4 +74,3 @@ export const OS_OVERLAY_CLOSE = os.defineCommand(
     };
   },
 );
-

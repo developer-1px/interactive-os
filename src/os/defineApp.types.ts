@@ -16,10 +16,10 @@ import type React from "react";
 import type { ReactNode } from "react";
 import type { ZodSchema } from "zod";
 import type { ZoneCallback } from "./2-contexts/zoneRegistry";
-import type { ZoneRole } from "./registries/roleRegistry";
-import type { FieldCommandFactory } from "./schemas/command/BaseCommand";
 import type { FieldMode } from "./6-components/field/Field";
 import type { FieldType } from "./6-components/field/FieldRegistry";
+import type { ZoneRole } from "./registries/roleRegistry";
+import type { FieldCommandFactory } from "./schemas/command/BaseCommand";
 
 // ═══════════════════════════════════════════════════════════════════
 // Brand Symbols
@@ -53,9 +53,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-    state: S;
-    dispatch?: BaseCommand | BaseCommand[] | undefined;
-  }
+      state: S;
+      dispatch?: BaseCommand | BaseCommand[] | undefined;
+    }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -86,7 +86,11 @@ export interface ZoneBindings {
   getItems?: () => string[];
   getExpandableItems?: () => Set<string>;
   getTreeLevels?: () => Map<string, number>;
-  onReorder?: (info: { itemId: string; overItemId: string; position: "before" | "after" }) => void;
+  onReorder?: (info: {
+    itemId: string;
+    overItemId: string;
+    position: "before" | "after";
+  }) => void;
 }
 
 export interface FieldBindings {
@@ -118,7 +122,14 @@ export interface BoundComponents<S> {
   Item: React.FC<{
     id: string | number;
     className?: string;
-    children?: ReactNode | ((state: { isFocused: boolean; isSelected: boolean; isExpanded: boolean; isAnchor?: boolean }) => ReactNode);
+    children?:
+      | ReactNode
+      | ((state: {
+          isFocused: boolean;
+          isSelected: boolean;
+          isExpanded: boolean;
+          isAnchor?: boolean;
+        }) => ReactNode);
     asChild?: boolean;
   }>;
   Field: React.FC<{
@@ -174,10 +185,15 @@ export interface TestInstance<S> {
 
 export interface AppPage<S> {
   /** Navigate to a zone (like page.goto). Sets active zone + focused item. */
-  goto(zoneName: string, opts?: {
-    focusedItemId?: string | null;
-    config?: Partial<import("@os/schemas/focus/config/FocusGroupConfig").FocusGroupConfig>;
-  }): void;
+  goto(
+    zoneName: string,
+    opts?: {
+      focusedItemId?: string | null;
+      config?: Partial<
+        import("@os/schemas/focus/config/FocusGroupConfig").FocusGroupConfig
+      >;
+    },
+  ): void;
 
   /** Keyboard input — Playwright page.keyboard.press() isomorphic. */
   keyboard: {
@@ -185,7 +201,10 @@ export interface AppPage<S> {
   };
 
   /** Click an item by ID — Playwright page.click() isomorphic. */
-  click(itemId: string, opts?: { shift?: boolean; meta?: boolean; ctrl?: boolean; zoneId?: string }): void;
+  click(
+    itemId: string,
+    opts?: { shift?: boolean; meta?: boolean; ctrl?: boolean; zoneId?: string },
+  ): void;
 
   /** Get computed ARIA attributes for an item (headless DOM projection). */
   attrs(itemId: string, zoneId?: string): import("./defineApp.page").ItemAttrs;
@@ -237,8 +256,8 @@ export interface AppHandle<S> {
     factory: CommandFactory<string, P>,
   ): React.FC<
     P extends void
-    ? { children: ReactNode; payload?: never }
-    : { children: ReactNode; payload: P }
+      ? { children: ReactNode; payload?: never }
+      : { children: ReactNode; payload: P }
   >;
   createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;
@@ -250,11 +269,12 @@ export interface AppHandle<S> {
     overrides?: Partial<S> | { history?: boolean; withOS?: boolean },
   ): TestInstance<S>;
 
-
   // ── Internal (for OS-level createPage) ────────────────────────────
   /** @internal App ID for OS-level createPage. */
   readonly __appId: string;
   /** @internal Zone binding entries for OS-level createPage. */
-  readonly __zoneBindings: Map<string, import('./defineApp.page').ZoneBindingEntry>;
+  readonly __zoneBindings: Map<
+    string,
+    import("./defineApp.page").ZoneBindingEntry
+  >;
 }
-

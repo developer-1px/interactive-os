@@ -29,4 +29,3 @@ export function buildZoneCursor(
     treeLevel: entry?.getTreeLevels?.().get(focusId),
   };
 }
-

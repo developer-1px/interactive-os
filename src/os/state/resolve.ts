@@ -22,28 +22,28 @@
  * @returns            - Resolved ID, or null if unresolvable
  */
 export function resolveItemId(
-    storedId: string | null,
-    items: readonly string[],
-    lastIndex?: number,
+  storedId: string | null,
+  items: readonly string[],
+  lastIndex?: number,
 ): string | null {
-    // Null focus = no focus
-    if (storedId === null) return null;
+  // Null focus = no focus
+  if (storedId === null) return null;
 
-    // Empty list = nothing to resolve to
-    if (items.length === 0) return null;
+  // Empty list = nothing to resolve to
+  if (items.length === 0) return null;
 
-    // Happy path: ID still exists
-    if (items.includes(storedId)) return storedId;
+  // Happy path: ID still exists
+  if (items.includes(storedId)) return storedId;
 
-    // Stale reference: resolve to nearest neighbor
-    if (lastIndex !== undefined) {
-        // Clamp to valid range
-        const idx = Math.min(lastIndex, items.length - 1);
-        return items[idx] ?? items[items.length - 1] ?? null;
-    }
+  // Stale reference: resolve to nearest neighbor
+  if (lastIndex !== undefined) {
+    // Clamp to valid range
+    const idx = Math.min(lastIndex, items.length - 1);
+    return items[idx] ?? items[items.length - 1] ?? null;
+  }
 
-    // No index hint: fall back to first item
-    return items[0] ?? null;
+  // No index hint: fall back to first item
+  return items[0] ?? null;
 }
 
 /**
@@ -51,10 +51,10 @@ export function resolveItemId(
  * Simply filters to items that still exist — preserves original order.
  */
 export function resolveSelection(
-    selection: readonly string[],
-    items: readonly string[],
+  selection: readonly string[],
+  items: readonly string[],
 ): string[] {
-    if (selection.length === 0 || items.length === 0) return [];
-    const itemSet = new Set(items);
-    return selection.filter((id) => itemSet.has(id));
+  if (selection.length === 0 || items.length === 0) return [];
+  const itemSet = new Set(items);
+  return selection.filter((id) => itemSet.has(id));
 }

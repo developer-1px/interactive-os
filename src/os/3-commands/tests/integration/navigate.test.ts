@@ -12,8 +12,8 @@
  *   - Shift+Arrow extends selection range
  */
 
-import { describe, expect, it } from "vitest";
 import { createOsPage } from "@os/createOsPage";
+import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // Basic Navigation

@@ -12,11 +12,7 @@
 import { ChevronDown, ChevronRight, Layers, Plus, X } from "lucide-react";
 import { useState } from "react";
 import type { Block } from "@/apps/builder/app";
-import {
-  addBlock,
-  BuilderApp,
-  BuilderSidebarUI,
-} from "@/apps/builder/app";
+import { addBlock, BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
 import { BLOCK_PRESETS } from "@/apps/builder/presets/blocks";
 import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
@@ -146,10 +142,11 @@ function SidebarContent() {
                   <span
                     className={`
                     truncate
-                    ${node.depth === 0
+                    ${
+                      node.depth === 0
                         ? "text-[11px] font-bold uppercase tracking-widest"
                         : "text-[11px] font-semibold tracking-wide"
-                      }
+                    }
                   `}
                   >
                     {node.block.label}
@@ -176,9 +173,10 @@ function SidebarContent() {
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
                   group-aria-selected:bg-indigo-50 group-aria-selected:border-indigo-200 group-aria-selected:shadow-sm
                   ${depthBg}
-                  ${isCanvasActive
-                    ? "bg-white shadow-sm border-slate-200/60"
-                    : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
+                  ${
+                    isCanvasActive
+                      ? "bg-white shadow-sm border-slate-200/60"
+                      : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
                   }
                 `}
                 style={{ paddingLeft: `${indent}px` }}
@@ -203,10 +201,11 @@ function SidebarContent() {
                   className={`
                   w-10 h-7 rounded border shrink-0 flex items-center justify-center
                   ml-1
-                  ${isCanvasActive
+                  ${
+                    isCanvasActive
                       ? "bg-indigo-50 border-indigo-100"
                       : "bg-slate-100 border-slate-200 group-hover:bg-white"
-                    }
+                  }
                 `}
                 >
                   <div className="flex flex-col gap-0.5 w-6">
@@ -292,9 +291,10 @@ function AddBlockButton() {
         onClick={() => setOpen(!open)}
         className={`
           w-6 h-6 flex items-center justify-center rounded-md transition-colors shrink-0
-          ${open
-            ? "bg-indigo-100 text-indigo-600"
-            : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
+          ${
+            open
+              ? "bg-indigo-100 text-indigo-600"
+              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
           }
         `}
         title="블록 추가"
@@ -307,9 +307,7 @@ function AddBlockButton() {
         <div className="absolute left-full top-0 bottom-0 w-64 bg-white border-r border-slate-200 shadow-xl z-[100] flex flex-col">
           {/* Panel header */}
           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between shrink-0">
-            <span className="text-xs font-bold text-slate-800">
-              블록 추가
-            </span>
+            <span className="text-xs font-bold text-slate-800">블록 추가</span>
             <button
               type="button"
               onClick={() => setOpen(false)}

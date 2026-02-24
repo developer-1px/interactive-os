@@ -97,11 +97,13 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
 
     os.dispatch(OS_DELETE());
 
-    expect(receivedCursor).toHaveBeenCalledWith(expect.objectContaining({
-      focusId: "item-1",
-      selection: [],
-      anchor: null,
-    }));
+    expect(receivedCursor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        focusId: "item-1",
+        selection: [],
+        anchor: null,
+      }),
+    );
   });
 
   it("onDelete receives ZoneCursor with selection when items are selected", () => {
@@ -122,11 +124,13 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
 
     os.dispatch(OS_DELETE());
 
-    expect(receivedCursor).toHaveBeenCalledWith(expect.objectContaining({
-      focusId: "item-3",
-      selection: ["item-1", "item-2", "item-3"],
-      anchor: "item-1",
-    }));
+    expect(receivedCursor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        focusId: "item-3",
+        selection: ["item-1", "item-2", "item-3"],
+        anchor: "item-1",
+      }),
+    );
   });
 
   it("onAction receives ZoneCursor", () => {
@@ -142,11 +146,13 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
 
     os.dispatch(OS_ACTIVATE());
 
-    expect(receivedCursor).toHaveBeenCalledWith(expect.objectContaining({
-      focusId: "item-1",
-      selection: [],
-      anchor: null,
-    }));
+    expect(receivedCursor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        focusId: "item-1",
+        selection: [],
+        anchor: null,
+      }),
+    );
   });
 
   it("onCheck receives ZoneCursor", () => {
@@ -162,11 +168,13 @@ describe("FR1: ZoneCursor — callbacks receive cursor with focusId + selection 
 
     os.dispatch(OS_CHECK({ targetId: "item-1" }));
 
-    expect(receivedCursor).toHaveBeenCalledWith(expect.objectContaining({
-      focusId: "item-1",
-      selection: [],
-      anchor: null,
-    }));
+    expect(receivedCursor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        focusId: "item-1",
+        selection: [],
+        anchor: null,
+      }),
+    );
   });
 });
 

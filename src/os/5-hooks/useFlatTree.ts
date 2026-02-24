@@ -16,12 +16,15 @@ import { useMemo } from "react";
 const EMPTY: readonly string[] = [];
 
 export function useFlatTree<TItem, TNode>(
-    zoneId: string,
-    items: TItem[],
-    flatten: (items: TItem[], expandedItems: string[]) => TNode[],
+  zoneId: string,
+  items: TItem[],
+  flatten: (items: TItem[], expandedItems: string[]) => TNode[],
 ): TNode[] {
-    const expandedItems = os.useComputed(
-        (s) => s.os.focus.zones[zoneId]?.expandedItems ?? (EMPTY as string[]),
-    );
-    return useMemo(() => flatten(items, expandedItems), [items, expandedItems, flatten]);
+  const expandedItems = os.useComputed(
+    (s) => s.os.focus.zones[zoneId]?.expandedItems ?? (EMPTY as string[]),
+  );
+  return useMemo(
+    () => flatten(items, expandedItems),
+    [items, expandedItems, flatten],
+  );
 }

@@ -4,10 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * Rect measured relative to a container, accounting for scroll.
  */
 export interface ElementRect {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
+  top: number;
+  left: number;
+  width: number;
+  height: number;
 }
 
 /**
@@ -24,91 +24,91 @@ export interface ElementRect {
  *   // { top: 120, left: 30, width: 200, height: 48 }
  */
 export function useElementRect(
-    element: HTMLElement | null,
-    container?: HTMLElement | null,
+  element: HTMLElement | null,
+  container?: HTMLElement | null,
 ): ElementRect | null {
-    const [rect, setRect] = useState<ElementRect | null>(null);
+  const [rect, setRect] = useState<ElementRect | null>(null);
 
-    const measure = useCallback(() => {
-        if (!element) {
-            setRect((prev) => (prev !== null ? null : prev));
-            return;
-        }
+  const measure = useCallback(() => {
+    if (!element) {
+      setRect((prev) => (prev !== null ? null : prev));
+      return;
+    }
 
-        const elRect = element.getBoundingClientRect();
+    const elRect = element.getBoundingClientRect();
 
-        if (elRect.width === 0 && elRect.height === 0) {
-            setRect((prev) => (prev !== null ? null : prev));
-            return;
-        }
+    if (elRect.width === 0 && elRect.height === 0) {
+      setRect((prev) => (prev !== null ? null : prev));
+      return;
+    }
 
-        if (container) {
-            const cRect = container.getBoundingClientRect();
-            const next: ElementRect = {
-                top: elRect.top - cRect.top + container.scrollTop,
-                left: elRect.left - cRect.left + container.scrollLeft,
-                width: elRect.width,
-                height: elRect.height,
-            };
-            setRect((prev) =>
-                prev &&
-                    prev.top === next.top &&
-                    prev.left === next.left &&
-                    prev.width === next.width &&
-                    prev.height === next.height
-                    ? prev
-                    : next,
-            );
-        } else {
-            const next: ElementRect = {
-                top: elRect.top,
-                left: elRect.left,
-                width: elRect.width,
-                height: elRect.height,
-            };
-            setRect((prev) =>
-                prev &&
-                    prev.top === next.top &&
-                    prev.left === next.left &&
-                    prev.width === next.width &&
-                    prev.height === next.height
-                    ? prev
-                    : next,
-            );
-        }
-    }, [element, container]);
+    if (container) {
+      const cRect = container.getBoundingClientRect();
+      const next: ElementRect = {
+        top: elRect.top - cRect.top + container.scrollTop,
+        left: elRect.left - cRect.left + container.scrollLeft,
+        width: elRect.width,
+        height: elRect.height,
+      };
+      setRect((prev) =>
+        prev &&
+        prev.top === next.top &&
+        prev.left === next.left &&
+        prev.width === next.width &&
+        prev.height === next.height
+          ? prev
+          : next,
+      );
+    } else {
+      const next: ElementRect = {
+        top: elRect.top,
+        left: elRect.left,
+        width: elRect.width,
+        height: elRect.height,
+      };
+      setRect((prev) =>
+        prev &&
+        prev.top === next.top &&
+        prev.left === next.left &&
+        prev.width === next.width &&
+        prev.height === next.height
+          ? prev
+          : next,
+      );
+    }
+  }, [element, container]);
 
-    useEffect(() => {
-        if (!element) {
-            setRect(null);
-            return;
-        }
+  useEffect(() => {
+    if (!element) {
+      setRect(null);
+      return;
+    }
 
-        const ro = new ResizeObserver(measure);
-        ro.observe(element);
-        if (container) ro.observe(container);
+    const ro = new ResizeObserver(measure);
+    ro.observe(element);
+    if (container) ro.observe(container);
 
-        // MutationObserver for layout shifts (class/style changes on siblings)
-        let mo: MutationObserver | null = null;
-        const observeTarget = container ?? element.parentElement;
-        if (observeTarget) {
-            mo = new MutationObserver(measure);
-            mo.observe(observeTarget, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ["class", "style"],
-            });
-        }
+    // MutationObserver for layout shifts (class/style changes on siblings)
+    let mo: MutationObserver | null = null;
+    const observeTarget = container ?? element.parentElement;
+    if (observeTarget) {
+      mo = new MutationObserver(measure);
+      mo.observe(observeTarget, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class", "style"],
+      });
+    }
 
-        // Initial measure
-        measure();
+    // Initial measure
+    measure();
 
-        return () => {
-            ro.disconnect();
-            mo?.disconnect();
-        };
-    }, [element, container, measure]);
+    return () => {
+      ro.disconnect();
+      mo?.disconnect();
+    };
+  }, [element, container, measure]);
 
-    return rect;
+  return rect;
 }

@@ -186,11 +186,12 @@ export const BLOCK_PRESETS: BlockPreset[] = [
         "cta-secondary": "요금 계산",
         "breadcrumb-1": "서비스",
         "breadcrumb-2": "AI Services",
-        "tabs": "개요,상세 기능,요금,리소스,FAQ",
-        "deprecated": "true",
+        tabs: "개요,상세 기능,요금,리소스,FAQ",
+        deprecated: "true",
         "badge-text": "Deprecated",
         "notice-title": "CLOVA GreenEye 서비스 종료 안내",
-        "notice-desc": "CLOVA GreenEye 서비스가 2026년 4월 23일 종료됩니다. 2026년 1월 22일부터 신규 신청이 제한되오니 자세한 내용은 공지사항을 참고해주세요.",
+        "notice-desc":
+          "CLOVA GreenEye 서비스가 2026년 4월 23일 종료됩니다. 2026년 1월 22일부터 신규 신청이 제한되오니 자세한 내용은 공지사항을 참고해주세요.",
       },
     },
   },
@@ -205,7 +206,7 @@ export const BLOCK_PRESETS: BlockPreset[] = [
       type: "ncp-feature-cards",
       fields: {
         "section-title": "서비스 특징",
-        "subtitle": "AI 학습 기반의 유해 이미지 탐지 자동화",
+        subtitle: "AI 학습 기반의 유해 이미지 탐지 자동화",
       },
       accept: ["ncp-feature-card"],
       children: [
@@ -215,7 +216,8 @@ export const BLOCK_PRESETS: BlockPreset[] = [
           label: "Feature Card",
           fields: {
             "card-title": "뛰어난 정확도",
-            "card-desc": "네이버에 축적된 수백만 장의 이미지를 AI로 꾸준히 학습하고 최신화한 데이터를 기반으로 이미지를 판독합니다. 판독한 이미지는 99.5%의 정확도로 정상, 음란, 성인, 선정 4가지 등급으로 분류할 수 있습니다.",
+            "card-desc":
+              "네이버에 축적된 수백만 장의 이미지를 AI로 꾸준히 학습하고 최신화한 데이터를 기반으로 이미지를 판독합니다. 판독한 이미지는 99.5%의 정확도로 정상, 음란, 성인, 선정 4가지 등급으로 분류할 수 있습니다.",
           },
         },
         {
@@ -224,7 +226,8 @@ export const BLOCK_PRESETS: BlockPreset[] = [
           label: "Feature Card",
           fields: {
             "card-title": "콘텐츠 품질 향상",
-            "card-desc": "유해 콘텐츠 탐지 및 검열을 자동화하여 손쉽게 건전한 인터넷 이용 환경을 조성할 수 있습니다.",
+            "card-desc":
+              "유해 콘텐츠 탐지 및 검열을 자동화하여 손쉽게 건전한 인터넷 이용 환경을 조성할 수 있습니다.",
           },
         },
         {
@@ -233,7 +236,8 @@ export const BLOCK_PRESETS: BlockPreset[] = [
           label: "Feature Card",
           fields: {
             "card-title": "안정적 서비스 제공",
-            "card-desc": "콘텐츠 탐지 자동화로 관리자가 콘텐츠를 일일이 검수하는 수작업을 최소화하고 검수 인력의 공백을 줄일 수 있어 안정적인 콘텐츠를 실시간으로 제공할 수 있습니다.",
+            "card-desc":
+              "콘텐츠 탐지 자동화로 관리자가 콘텐츠를 일일이 검수하는 수작업을 최소화하고 검수 인력의 공백을 줄일 수 있어 안정적인 콘텐츠를 실시간으로 제공할 수 있습니다.",
           },
         },
       ],

@@ -9,8 +9,8 @@
  * Data-driven: derives tab labels from Block.children[].label.
  * Supports both legacy `tabs: string[]` prop AND new `block: Block` prop.
  *
- * State: Active tab is local React state (runtime concern).
- *        Published pages bind active tab to URL hash.
+ * State: Active tab is **OS selection** (tablist role, single select, followFocus).
+ *        No useState, no onClick — OS manages tab activation.
  *
  * ZIFT mapping:
  *   Builder.Tabs      → wrapper div with builder annotations
@@ -18,9 +18,10 @@
  *   Tab panels        → conditionally rendered children
  */
 
+import { useSelection } from "@os/5-hooks/useSelection";
 import { Item as OSItem } from "@os/6-components/primitives/Item";
 import { Zone } from "@os/6-components/primitives/Zone";
-import { Children, type ReactElement, type ReactNode, useState } from "react";
+import { Children, type ReactElement, type ReactNode } from "react";
 import type { Block } from "@/apps/builder/model/appState";
 import { useCursorMeta } from "../hooks/useCursorMeta";
 
@@ -57,12 +58,21 @@ export function BuilderTabs({
   className,
 }: BuilderTabsProps) {
   useCursorMeta(id, CURSOR_META);
-  const [activeIndex, setActiveIndex] = useState(defaultTab);
+
+  const tablistId = `${id}-tablist`;
 
   // Derive tab labels: block.children takes precedence, then legacy tabs
   const tabLabels: string[] = block?.children
     ? block.children.map((c) => c.label)
     : (legacyTabs ?? []);
+
+  // Active tab from OS selection (tablist role: single select, followFocus)
+  const selection = useSelection(tablistId);
+  const selectedTabId = selection[0] ?? `${id}-tab-${defaultTab}`;
+  const activeIndex = tabLabels.findIndex(
+    (_, idx) => `${id}-tab-${idx}` === selectedTabId,
+  );
+  const safeActiveIndex = activeIndex >= 0 ? activeIndex : defaultTab;
 
   const panels = Children.toArray(children) as ReactElement[];
 
@@ -73,9 +83,9 @@ export function BuilderTabs({
       data-builder-type="tabs"
       className={className}
     >
-      {/* Tab List — horizontal navigation */}
+      {/* Tab List — horizontal navigation, OS manages selection */}
       <Zone
-        id={`${id}-tablist`}
+        id={tablistId}
         role="tablist"
         className="flex flex-wrap items-center gap-2 border-b border-slate-200"
         options={{
@@ -83,34 +93,37 @@ export function BuilderTabs({
           tab: { behavior: "flow" },
         }}
       >
-        {tabLabels.map((label, idx) => (
-          <OSItem
-            key={`${id}-tab-${idx}`}
-            id={`${id}-tab-${idx}`}
-            aria-selected={idx === activeIndex}
-            aria-controls={`${id}-panel-${idx}`}
-            asChild
-          >
-            <button
-              type="button"
-              role="tab"
-              className={`
-                                relative px-5 py-3.5 text-base font-semibold transition-colors outline-none
-                                border-b-2 -mb-[1px] whitespace-nowrap
-                                ${idx === activeIndex
-                  ? "border-slate-900 text-slate-900"
-                  : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-                }
-                                data-[focused]:ring-2 data-[focused]:ring-slate-400/50 data-[focused]:rounded-t-lg
-                                data-[focused]:z-10
-                            `}
-              onClick={() => setActiveIndex(idx)}
-              tabIndex={-1}
+        {tabLabels.map((label, idx) => {
+          const tabId = `${id}-tab-${idx}`;
+          const isActive = idx === safeActiveIndex;
+          return (
+            <OSItem
+              key={tabId}
+              id={tabId}
+              aria-controls={`${id}-panel-${idx}`}
+              asChild
             >
-              {label}
-            </button>
-          </OSItem>
-        ))}
+              <button
+                type="button"
+                role="tab"
+                className={`
+                  relative px-5 py-3.5 text-base font-semibold transition-colors outline-none
+                  border-b-2 -mb-[1px] whitespace-nowrap
+                  ${
+                    isActive
+                      ? "border-slate-900 text-slate-900"
+                      : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
+                  }
+                  data-[focused]:ring-2 data-[focused]:ring-slate-400/50 data-[focused]:rounded-t-lg
+                  data-[focused]:z-10
+                `}
+                tabIndex={-1}
+              >
+                {label}
+              </button>
+            </OSItem>
+          );
+        })}
       </Zone>
 
       {/* Tab Panels — only active panel rendered */}
@@ -120,9 +133,9 @@ export function BuilderTabs({
           id={`${id}-panel-${idx}`}
           role="tabpanel"
           aria-labelledby={`${id}-tab-${idx}`}
-          hidden={idx !== activeIndex}
+          hidden={idx !== safeActiveIndex}
         >
-          {idx === activeIndex ? panel : null}
+          {idx === safeActiveIndex ? panel : null}
         </div>
       ))}
     </div>

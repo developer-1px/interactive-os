@@ -128,9 +128,13 @@ export function createHistoryMiddleware(
       // Capture focus BEFORE command execution (for focus restoration on undo)
       const osState = (ctx.state as AppState).os;
       const activeZoneId = osState?.focus?.activeZoneId;
-      const activeZone = activeZoneId ? osState.focus.zones[activeZoneId] : null;
+      const activeZone = activeZoneId
+        ? osState.focus.zones[activeZoneId]
+        : null;
       const focusedItemId = activeZone?.focusedItemId ?? null;
-      const activeZoneSelection = activeZone?.selection ? [...activeZone.selection] : undefined;
+      const activeZoneSelection = activeZone?.selection
+        ? [...activeZone.selection]
+        : undefined;
 
       // Capture app state BEFORE command
       const appState = (ctx.state as AppState).apps[appId];
@@ -210,69 +214,69 @@ export function createHistoryMiddleware(
       // but keep its original snapshot, so undo jumps to pre-burst state.
       const NOISE_WINDOW_MS = 500;
 
-      const [updatedAppState] =
-        produceWithPatches(
-          effectsState,
-          (draft: Record<string, unknown>) => {
-            if (!draft["history"]) {
-              draft["history"] = { past: [], future: [] };
+      const [updatedAppState] = produceWithPatches(
+        effectsState,
+        (draft: Record<string, unknown>) => {
+          if (!draft["history"]) {
+            draft["history"] = { past: [], future: [] };
+          }
+
+          const history = draft["history"] as {
+            past: HistoryEntry[];
+            future: HistoryEntry[];
+          };
+
+          const lastEntry = history.past.at(-1);
+          const isSameType = lastEntry?.command.type === commandType;
+          const isRecent =
+            lastEntry && now - lastEntry.timestamp < NOISE_WINDOW_MS;
+          const isNotGrouped = !getActiveGroupId();
+
+          // Check if payloads target the same identity (e.g., same domId/id)
+          const lastPayload = lastEntry?.command.payload as
+            | Record<string, unknown>
+            | undefined;
+          const currPayload = ctx.command.payload as
+            | Record<string, unknown>
+            | undefined;
+          const identityKey = currPayload?.["domId"] ?? currPayload?.["id"];
+          const lastIdentityKey = lastPayload?.["domId"] ?? lastPayload?.["id"];
+          const isSameTarget =
+            identityKey !== undefined && identityKey === lastIdentityKey;
+
+          if (isSameType && isRecent && isNotGrouped && isSameTarget) {
+            // Coalesce: update payload + timestamp, keep original snapshot
+            lastEntry!.command.payload = ctx.command.payload;
+            lastEntry!.timestamp = now;
+          } else {
+            // Normal push
+            history.past.push({
+              command: {
+                type: commandType,
+                payload: ctx.command.payload,
+              },
+              timestamp: now,
+              snapshot: prevWithoutHistory,
+              patches: dataPatches.length > 0 ? dataPatches : undefined,
+              inversePatches:
+                dataInversePatches.length > 0 ? dataInversePatches : undefined,
+              focusedItemId: previousFocusId,
+              activeZoneId: ctx.injected["_historyZoneId"] as string | null,
+              activeZoneSelection: ctx.injected["_historySelection"] as
+                | string[]
+                | undefined,
+              groupId: getActiveGroupId() ?? undefined,
+            });
+
+            if (history.past.length > HISTORY_LIMIT) {
+              history.past.shift();
             }
+          }
 
-            const history = draft["history"] as {
-              past: HistoryEntry[];
-              future: HistoryEntry[];
-            };
-
-
-            const lastEntry = history.past.at(-1);
-            const isSameType = lastEntry?.command.type === commandType;
-            const isRecent =
-              lastEntry && now - lastEntry.timestamp < NOISE_WINDOW_MS;
-            const isNotGrouped = !getActiveGroupId();
-
-            // Check if payloads target the same identity (e.g., same domId/id)
-            const lastPayload = lastEntry?.command.payload as
-              | Record<string, unknown>
-              | undefined;
-            const currPayload = ctx.command.payload as
-              | Record<string, unknown>
-              | undefined;
-            const identityKey = currPayload?.["domId"] ?? currPayload?.["id"];
-            const lastIdentityKey =
-              lastPayload?.["domId"] ?? lastPayload?.["id"];
-            const isSameTarget =
-              identityKey !== undefined && identityKey === lastIdentityKey;
-
-            if (isSameType && isRecent && isNotGrouped && isSameTarget) {
-              // Coalesce: update payload + timestamp, keep original snapshot
-              lastEntry!.command.payload = ctx.command.payload;
-              lastEntry!.timestamp = now;
-            } else {
-              // Normal push
-              history.past.push({
-                command: {
-                  type: commandType,
-                  payload: ctx.command.payload,
-                },
-                timestamp: now,
-                snapshot: prevWithoutHistory,
-                patches: dataPatches.length > 0 ? dataPatches : undefined,
-                inversePatches: dataInversePatches.length > 0 ? dataInversePatches : undefined,
-                focusedItemId: previousFocusId,
-                activeZoneId: ctx.injected["_historyZoneId"] as string | null,
-                activeZoneSelection: ctx.injected["_historySelection"] as string[] | undefined,
-                groupId: getActiveGroupId() ?? undefined,
-              });
-
-              if (history.past.length > HISTORY_LIMIT) {
-                history.past.shift();
-              }
-            }
-
-            // New action → clear redo future
-            history.future = [];
-          },
-        );
+          // New action → clear redo future
+          history.future = [];
+        },
+      );
 
       // Write the history-augmented state back to effects.state
       // so the kernel applies it via executeEffects

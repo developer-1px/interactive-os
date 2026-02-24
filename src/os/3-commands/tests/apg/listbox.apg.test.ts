@@ -10,8 +10,8 @@
  * Unique: followFocus on/off, Shift+Arrow range, horizontal variant
  */
 
-import { describe, expect, it } from "vitest";
 import { createOsPage } from "@os/createOsPage";
+import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
   assertFollowFocus,
@@ -55,14 +55,24 @@ const MULTI_SELECT = {
 
 function singleSelect(focusedItem = "apple") {
   const page = createOsPage();
-  page.goto("listbox", { items: ITEMS, config: SINGLE_SELECT, role: "listbox", focusedItemId: focusedItem });
+  page.goto("listbox", {
+    items: ITEMS,
+    config: SINGLE_SELECT,
+    role: "listbox",
+    focusedItemId: focusedItem,
+  });
   page.dispatch(page.OS_SELECT({ targetId: focusedItem, mode: "replace" }));
   return page;
 }
 
 function multiSelect(focusedItem = "apple") {
   const page = createOsPage();
-  page.goto("listbox", { items: ITEMS, config: MULTI_SELECT, role: "listbox", focusedItemId: focusedItem });
+  page.goto("listbox", {
+    items: ITEMS,
+    config: MULTI_SELECT,
+    role: "listbox",
+    focusedItemId: focusedItem,
+  });
   return page;
 }
 
@@ -199,7 +209,12 @@ describe("APG Listbox: Multi-Select", () => {
 describe("APG Listbox: Focus Initialization", () => {
   it("single-select, no selection: focus goes to first option", () => {
     const page = createOsPage();
-    page.goto("listbox", { items: ITEMS, config: SINGLE_SELECT, role: "listbox", focusedItemId: null });
+    page.goto("listbox", {
+      items: ITEMS,
+      config: SINGLE_SELECT,
+      role: "listbox",
+      focusedItemId: null,
+    });
     page.keyboard.press("ArrowDown");
     expect(page.focusedItemId()).toBe("apple");
     expect(page.attrs("apple").tabIndex).toBe(0);
@@ -207,7 +222,12 @@ describe("APG Listbox: Focus Initialization", () => {
 
   it("multi-select, no selection: focus first, no auto-select", () => {
     const page = createOsPage();
-    page.goto("listbox", { items: ITEMS, config: MULTI_SELECT, role: "listbox", focusedItemId: null });
+    page.goto("listbox", {
+      items: ITEMS,
+      config: MULTI_SELECT,
+      role: "listbox",
+      focusedItemId: null,
+    });
     page.keyboard.press("ArrowDown");
     expect(page.focusedItemId()).toBe("apple");
     expect(page.attrs("apple").tabIndex).toBe(0);
@@ -224,7 +244,10 @@ describe("APG Listbox: Horizontal Orientation", () => {
     const page = createOsPage();
     page.goto("listbox", {
       items: ITEMS,
-      config: { navigate: { ...SINGLE_SELECT.navigate, orientation: "horizontal" }, select: SINGLE_SELECT.select },
+      config: {
+        navigate: { ...SINGLE_SELECT.navigate, orientation: "horizontal" },
+        select: SINGLE_SELECT.select,
+      },
       role: "listbox",
       focusedItemId: focusedItem,
     });
@@ -261,7 +284,11 @@ describe("APG Listbox: RadioGroup Variant", () => {
     page.goto("radiogroup", {
       items: ["radio-sm", "radio-md", "radio-lg"],
       config: {
-        navigate: { ...SINGLE_SELECT.navigate, loop: true, entry: "selected" as const },
+        navigate: {
+          ...SINGLE_SELECT.navigate,
+          loop: true,
+          entry: "selected" as const,
+        },
         select: { ...SINGLE_SELECT.select, disallowEmpty: true },
       },
       role: "listbox",

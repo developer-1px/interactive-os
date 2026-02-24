@@ -12,8 +12,8 @@
  *   Assert: attrs() → tabIndex, aria-selected, data-focused (ARIA contract)
  */
 
-import { expect, it } from "vitest";
 import type { OsPage } from "@os/createOsPage";
+import { expect, it } from "vitest";
 
 type Factory = () => OsPage;
 

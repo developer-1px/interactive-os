@@ -83,7 +83,10 @@ export function flattenTree(items: DocItem[]): DocItem[] {
 }
 
 /** Find a folder node by its path in the tree (recursive). Returns null if not found. */
-export function findFolder(items: DocItem[], folderPath: string): DocItem | null {
+export function findFolder(
+  items: DocItem[],
+  folderPath: string,
+): DocItem | null {
   for (const item of items) {
     if (item.type === "folder" && item.path === folderPath) return item;
     if (item.children) {
@@ -148,7 +151,14 @@ export function flattenVisibleTree(
       // Section headers always show children; expandable folders respect OS state
       if (hasChildren && item.children) {
         if (isSection || expandedItems.includes(id)) {
-          result.push(...flattenVisibleTree(item.children, expandedItems, level + 1, options));
+          result.push(
+            ...flattenVisibleTree(
+              item.children,
+              expandedItems,
+              level + 1,
+              options,
+            ),
+          );
         }
       }
     } else {
@@ -323,9 +333,9 @@ export function extractHeadings(content: string): TocHeading[] {
     if (match) {
       const depth = match[1].length;
       const text = match[2]
-        .replace(/\*\*/g, "")   // strip bold
-        .replace(/\*/g, "")     // strip italic
-        .replace(/`/g, "")      // strip inline code
+        .replace(/\*\*/g, "") // strip bold
+        .replace(/\*/g, "") // strip italic
+        .replace(/`/g, "") // strip inline code
         .trim();
       headings.push({ depth, text, slug: slugify(text) });
     }

@@ -10,8 +10,8 @@
  *   keyboard.press → resolveKeyboard → command → state → attrs
  */
 
-import { describe, expect, it } from "vitest";
 import { createOsPage } from "@os/createOsPage";
+import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
   assertHomeEnd,

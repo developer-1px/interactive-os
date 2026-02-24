@@ -9,22 +9,22 @@ import { os } from "../../kernel";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 export const OS_PASTE = os.defineCommand("OS_PASTE", (ctx) => () => {
-    const { activeZoneId } = ctx.state.os.focus;
-    if (!activeZoneId) return;
+  const { activeZoneId } = ctx.state.os.focus;
+  if (!activeZoneId) return;
 
-    const zone = ctx.state.os.focus.zones[activeZoneId];
-    const entry = ZoneRegistry.get(activeZoneId);
-    if (!entry?.onPaste) return;
+  const zone = ctx.state.os.focus.zones[activeZoneId];
+  const entry = ZoneRegistry.get(activeZoneId);
+  if (!entry?.onPaste) return;
 
-    // Paste: cursor with focusId (paste target). Empty focusId = append at end.
-    const cursor = buildZoneCursor(zone, activeZoneId) ?? {
-        focusId: "",
-        selection: [],
-        anchor: null,
-        isExpandable: false,
-        isDisabled: false,
-        treeLevel: undefined,
-    };
+  // Paste: cursor with focusId (paste target). Empty focusId = append at end.
+  const cursor = buildZoneCursor(zone, activeZoneId) ?? {
+    focusId: "",
+    selection: [],
+    anchor: null,
+    isExpandable: false,
+    isDisabled: false,
+    treeLevel: undefined,
+  };
 
-    return { dispatch: entry.onPaste(cursor) };
+  return { dispatch: entry.onPaste(cursor) };
 });

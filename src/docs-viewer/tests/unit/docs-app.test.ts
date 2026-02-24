@@ -16,54 +16,57 @@ import { describe, expect, it } from "vitest";
 import { DocsApp, parseHashToPath, selectDoc } from "../../app";
 
 describe("SELECT_DOC command", () => {
-    it("sets activePath for file selection", () => {
-        const app = DocsApp.create();
-        expect(app.state.activePath).toBeNull();
+  it("sets activePath for file selection", () => {
+    const app = DocsApp.create();
+    expect(app.state.activePath).toBeNull();
 
-        app.dispatch(selectDoc({ id: "getting-started.md" }));
-        expect(app.state.activePath).toBe("getting-started.md");
-    });
+    app.dispatch(selectDoc({ id: "getting-started.md" }));
+    expect(app.state.activePath).toBe("getting-started.md");
+  });
 
-    it("sets activePath for folder selection (folder index view)", () => {
-        const app = DocsApp.create();
-        app.dispatch(selectDoc({ id: "getting-started.md" }));
-        expect(app.state.activePath).toBe("getting-started.md");
+  it("sets activePath for folder selection (folder index view)", () => {
+    const app = DocsApp.create();
+    app.dispatch(selectDoc({ id: "getting-started.md" }));
+    expect(app.state.activePath).toBe("getting-started.md");
 
-        app.dispatch(selectDoc({ id: "folder:api" }));
-        expect(app.state.activePath).toBe("folder:api");
-    });
+    app.dispatch(selectDoc({ id: "folder:api" }));
+    expect(app.state.activePath).toBe("folder:api");
+  });
 
-    it("updates activePath on subsequent selections", () => {
-        const app = DocsApp.create();
+  it("updates activePath on subsequent selections", () => {
+    const app = DocsApp.create();
 
-        app.dispatch(selectDoc({ id: "intro.md" }));
-        expect(app.state.activePath).toBe("intro.md");
+    app.dispatch(selectDoc({ id: "intro.md" }));
+    expect(app.state.activePath).toBe("intro.md");
 
-        app.dispatch(selectDoc({ id: "setup.md" }));
-        expect(app.state.activePath).toBe("setup.md");
-    });
+    app.dispatch(selectDoc({ id: "setup.md" }));
+    expect(app.state.activePath).toBe("setup.md");
+  });
 });
 
 describe("parseHashToPath (T9: URL-based initial selection)", () => {
-    it("extracts path from '#/docs/inbox/readme.md'", () => {
-        expect(parseHashToPath("#/docs/inbox/readme.md")).toBe("docs/inbox/readme.md");
-    });
+  it("extracts path from '#/docs/inbox/readme.md'", () => {
+    expect(parseHashToPath("#/docs/inbox/readme.md")).toBe(
+      "docs/inbox/readme.md",
+    );
+  });
 
-    it("extracts path from '#docs/inbox/readme.md' (no leading slash)", () => {
-        expect(parseHashToPath("#docs/inbox/readme.md")).toBe("docs/inbox/readme.md");
-    });
+  it("extracts path from '#docs/inbox/readme.md' (no leading slash)", () => {
+    expect(parseHashToPath("#docs/inbox/readme.md")).toBe(
+      "docs/inbox/readme.md",
+    );
+  });
 
-    it("returns null for empty hash", () => {
-        expect(parseHashToPath("")).toBeNull();
-        expect(parseHashToPath("#")).toBeNull();
-    });
+  it("returns null for empty hash", () => {
+    expect(parseHashToPath("")).toBeNull();
+    expect(parseHashToPath("#")).toBeNull();
+  });
 
-    it("returns null for ext: hash (external folder mode)", () => {
-        expect(parseHashToPath("#ext:my-folder/some/file.md")).toBeNull();
-    });
+  it("returns null for ext: hash (external folder mode)", () => {
+    expect(parseHashToPath("#ext:my-folder/some/file.md")).toBeNull();
+  });
 
-    it("returns null for undefined/null", () => {
-        expect(parseHashToPath(undefined as any)).toBeNull();
-    });
+  it("returns null for undefined/null", () => {
+    expect(parseHashToPath(undefined as any)).toBeNull();
+  });
 });
-

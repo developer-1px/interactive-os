@@ -10,136 +10,140 @@ import { describe, expect, it } from "vitest";
 import { withRecording } from "../../features/withRecording";
 
 describe("withRecording", () => {
-    function setup() {
-        const page = createOsPage();
-        page.goto("list", { items: ["a", "b", "c"], role: "listbox", focusedItemId: "a" });
-
-        // withRecording expects pressKey — adapt from keyboard.press
-        const recordable = {
-            pressKey: (key: string) => page.keyboard.press(key),
-            click: (itemId: string, opts?: any) => page.click(itemId, opts),
-            attrs: (itemId: string, zoneId?: string) => page.attrs(itemId, zoneId),
-            focusedItemId: (zoneId?: string) => page.focusedItemId(zoneId),
-        };
-
-        return withRecording(recordable, "test-file.test.ts");
-    }
-
-    it("records pressKey with before/after focus", () => {
-        const t = setup();
-
-        t.pressKey("ArrowDown");
-
-        const steps = t.getSteps();
-        expect(steps).toHaveLength(1);
-        expect(steps[0]).toMatchObject({
-            type: "pressKey",
-            key: "ArrowDown",
-            focusedBefore: "a",
-            focusedAfter: "b",
-        });
+  function setup() {
+    const page = createOsPage();
+    page.goto("list", {
+      items: ["a", "b", "c"],
+      role: "listbox",
+      focusedItemId: "a",
     });
 
-    it("records click with focusedAfter", () => {
-        const t = setup();
+    // withRecording expects pressKey — adapt from keyboard.press
+    const recordable = {
+      pressKey: (key: string) => page.keyboard.press(key),
+      click: (itemId: string, opts?: any) => page.click(itemId, opts),
+      attrs: (itemId: string, zoneId?: string) => page.attrs(itemId, zoneId),
+      focusedItemId: (zoneId?: string) => page.focusedItemId(zoneId),
+    };
 
-        t.click("c");
+    return withRecording(recordable, "test-file.test.ts");
+  }
 
-        const steps = t.getSteps();
-        expect(steps).toHaveLength(1);
-        expect(steps[0]).toMatchObject({
-            type: "click",
-            itemId: "c",
-        });
+  it("records pressKey with before/after focus", () => {
+    const t = setup();
+
+    t.pressKey("ArrowDown");
+
+    const steps = t.getSteps();
+    expect(steps).toHaveLength(1);
+    expect(steps[0]).toMatchObject({
+      type: "pressKey",
+      key: "ArrowDown",
+      focusedBefore: "a",
+      focusedAfter: "b",
+    });
+  });
+
+  it("records click with focusedAfter", () => {
+    const t = setup();
+
+    t.click("c");
+
+    const steps = t.getSteps();
+    expect(steps).toHaveLength(1);
+    expect(steps[0]).toMatchObject({
+      type: "click",
+      itemId: "c",
+    });
+  });
+
+  it("records attrs with result", () => {
+    const t = setup();
+
+    const result = t.attrs("a");
+
+    const steps = t.getSteps();
+    expect(steps).toHaveLength(1);
+    expect(steps[0]).toMatchObject({
+      type: "attrs",
+      itemId: "a",
+      result: expect.objectContaining({ tabIndex: 0 }),
+    });
+    // attrs still returns the correct value
+    expect(result.tabIndex).toBe(0);
+  });
+
+  it("does not affect kernel behavior", () => {
+    const t = setup();
+
+    // Same behavior as non-recorded kernel
+    t.pressKey("ArrowDown");
+    expect(t.focusedItemId()).toBe("b");
+
+    t.pressKey("ArrowDown");
+    expect(t.focusedItemId()).toBe("c");
+  });
+
+  it("records multiple steps in order", () => {
+    const t = setup();
+
+    t.pressKey("ArrowDown");
+    t.pressKey("ArrowDown");
+    t.click("a");
+    t.attrs("a");
+
+    const steps = t.getSteps();
+    expect(steps).toHaveLength(4);
+    expect(steps.map((s) => s.type)).toEqual([
+      "pressKey",
+      "pressKey",
+      "click",
+      "attrs",
+    ]);
+  });
+
+  it("clearSteps resets recording", () => {
+    const t = setup();
+
+    t.pressKey("ArrowDown");
+    expect(t.getSteps()).toHaveLength(1);
+
+    t.clearSteps();
+    expect(t.getSteps()).toHaveLength(0);
+  });
+
+  it("getRecording returns full metadata", () => {
+    const t = setup();
+
+    t.recordLifecycle({
+      type: "test:start",
+      name: "test1",
+      timestamp: 0,
+    });
+    t.pressKey("ArrowDown");
+    t.recordLifecycle({
+      type: "test:end",
+      name: "test1",
+      status: "pass",
+      duration: 1,
+      timestamp: 1,
     });
 
-    it("records attrs with result", () => {
-        const t = setup();
+    const recording = t.getRecording();
+    expect(recording.file).toBe("test-file.test.ts");
+    expect(recording.summary.passed).toBe(1);
+    expect(recording.summary.failed).toBe(0);
+    expect(recording.steps).toHaveLength(3);
+  });
 
-        const result = t.attrs("a");
+  it("timestamps are relative to recording start", () => {
+    const t = setup();
 
-        const steps = t.getSteps();
-        expect(steps).toHaveLength(1);
-        expect(steps[0]).toMatchObject({
-            type: "attrs",
-            itemId: "a",
-            result: expect.objectContaining({ tabIndex: 0 }),
-        });
-        // attrs still returns the correct value
-        expect(result.tabIndex).toBe(0);
-    });
+    t.pressKey("ArrowDown");
 
-    it("does not affect kernel behavior", () => {
-        const t = setup();
-
-        // Same behavior as non-recorded kernel
-        t.pressKey("ArrowDown");
-        expect(t.focusedItemId()).toBe("b");
-
-        t.pressKey("ArrowDown");
-        expect(t.focusedItemId()).toBe("c");
-    });
-
-    it("records multiple steps in order", () => {
-        const t = setup();
-
-        t.pressKey("ArrowDown");
-        t.pressKey("ArrowDown");
-        t.click("a");
-        t.attrs("a");
-
-        const steps = t.getSteps();
-        expect(steps).toHaveLength(4);
-        expect(steps.map((s) => s.type)).toEqual([
-            "pressKey",
-            "pressKey",
-            "click",
-            "attrs",
-        ]);
-    });
-
-    it("clearSteps resets recording", () => {
-        const t = setup();
-
-        t.pressKey("ArrowDown");
-        expect(t.getSteps()).toHaveLength(1);
-
-        t.clearSteps();
-        expect(t.getSteps()).toHaveLength(0);
-    });
-
-    it("getRecording returns full metadata", () => {
-        const t = setup();
-
-        t.recordLifecycle({
-            type: "test:start",
-            name: "test1",
-            timestamp: 0,
-        });
-        t.pressKey("ArrowDown");
-        t.recordLifecycle({
-            type: "test:end",
-            name: "test1",
-            status: "pass",
-            duration: 1,
-            timestamp: 1,
-        });
-
-        const recording = t.getRecording();
-        expect(recording.file).toBe("test-file.test.ts");
-        expect(recording.summary.passed).toBe(1);
-        expect(recording.summary.failed).toBe(0);
-        expect(recording.steps).toHaveLength(3);
-    });
-
-    it("timestamps are relative to recording start", () => {
-        const t = setup();
-
-        t.pressKey("ArrowDown");
-
-        const steps = t.getSteps();
-        const step = steps[0]!;
-        expect(step.timestamp).toBeGreaterThanOrEqual(0);
-        expect(step.timestamp).toBeLessThan(1000); // should be near-instant
-    });
+    const steps = t.getSteps();
+    const step = steps[0]!;
+    expect(step.timestamp).toBeGreaterThanOrEqual(0);
+    expect(step.timestamp).toBeLessThan(1000); // should be near-instant
+  });
 });

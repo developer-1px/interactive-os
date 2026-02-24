@@ -1,51 +1,114 @@
 ---
 description: 실행 없이 Cynefin 분해 보고서만 작성한다. /solve의 입력을 만든다.
 ---
-## /divide — 분해 기반 문제 해결
 
-> **이론적 기반**: Cynefin Framework (Dave Snowden) — `rules.md` 참조
+## /divide — Technical Spike · MECE Issue Tree
 
-### 원칙
+> **What**: Cynefin-guided Technical Spike (XP) that produces a MECE Issue Tree decomposed to Work Package level (WBS).
+> **Output**: Issue Tree where every leaf node is Clear + Hypothesis Statement per leaf.
+> **Constraint**: No code changes. No user interaction mid-process. Minimum 3 iterations.
+
+### Theoretical Basis
+
+| Framework | Source | Role in /divide |
+|-----------|--------|----------------|
+| **Cynefin** | Dave Snowden | Domain assessment per node (Clear / Complicated / Complex) |
+| **WBS Decomposition** | PMI PMBOK | Decompose until every leaf is a Work Package |
+| **MECE** | McKinsey | Decomposition dimension must be Mutually Exclusive, Collectively Exhaustive |
+| **Issue Tree** | Strategy Consulting | Recursive branching structure for problem decomposition |
+| **Spike** | Extreme Programming | Deliverable is knowledge, not code |
+| **Empiricism** | Scrum | Every assessment must be evidence-based — no speculation |
+
+### Procedure
 
 ```
-Clear/Complicated → 단위 테스트로 증명 → 실행
-Complex            → 나눠 (모듈 / 책임 / 레이어)
-Chaotic            → 즉시 봉쇄 → 사후 분석
-나눠도 모르겠음     → 사용자에게 질문
+begin spike:
+  queue ← [initial problem as root node]
+  iteration ← 0
+
+  while (queue has Complicated or Complex nodes) {
+
+    node ← select node with max uncertainty (triage)
+
+    // — Cynefin Domain Assessment —
+    match classify(node):
+
+      case Complex:
+        // Probe–Sense–Respond (Cynefin PSR)
+        probe   → view_file_outline to map structure
+        sense   → choose MECE decomposition dimension
+                   (module / responsibility / layer / state)
+        respond → branch Issue Tree → enqueue child nodes
+
+      case Complicated:
+        // Sense–Analyze–Respond (Cynefin SAR)
+        sense   → grep_search to trace code paths
+        analyze → view_file to confirm logic
+        respond → reclassify as Clear, record Hypothesis Statement (1 sentence)
+
+      case Clear:
+        // Verify — view_code_item to validate hypothesis
+        record Hypothesis Statement + code location as evidence
+
+    iteration++
+  }
+
+  // Progressive Elaboration gate
+  if (iteration < 3) {
+    // Verification iteration: re-validate Clear nodes against code
+    continue loop
+  }
+
+end spike → deliver report
 ```
 
-나눌 수 없을 때까지 나누면, 결국 정답이 보인다.
+### Code Investigation Protocol
 
-### 절차
+**Evidence-based assessment — no speculation.** Every iteration must include reading actual code.
 
-1. **대상 분석** — 실패 테스트, 버그, 구현 과제를 식별
-2. **증거 수집 전략 결정** — 가장 빠른 피드백 루프를 선택한다
-   - 순수함수 → 단위 테스트 (가장 빠름)
-   - 상태 전이 → 커맨드 단위 테스트
-   - 통합 흐름 → E2E + console.log
-   - ❌ 브라우저 수동 클릭은 최후의 수단
-3. **Cynefin 도메인 판단** (코드를 수정하기 **전에** 판단한다)
-   - **Clear** (자명한 해법) → 4단계로
-   - **Complicated** (분석하면 답이 좁혀짐) → 4단계로 (트레이드오프 기록)
-   - **Complex** (정답 없음) → 5단계로
-   - **Chaotic** (긴급, P0) → 즉시 봉쇄 조치 후 4단계로
-4. **단위 테스트 → 실행** — 정답인 것은 나눠서 가장 작은 단위부터 테스트로 증명한다
-   - 순수함수: 입력 → 출력 테스트
-   - Registry/Lookup: 등록 키 vs 조회 키 테스트
-   - 상태 전이: before → command → after 테스트
-   - 통과 확인 → 다음 레이어로 올라간다
-   - E2E는 마지막 통합 확인용
-5. **분해** — 정답 없는 것은 모듈, 책임, 레이어 등 어떤 축이든 나눈다
-   - 나눈 조각을 다시 3단계로 돌린다 (재귀)
-6. **모르겠으면 질문** — 사용자에게 구체적으로 묻는다. 다 하려고 하지 않는다.
-7. **보고서 작성** — 최종 산출물. 뭘 나눴고, 뭘 실행했고, 뭐가 남았는지.
-   - `docs/0-inbox/YYYY-MMDD-HHmm-[report]-divide-{topic}.md` 에 저장
+| Cynefin Domain | Cynefin Cycle | Tool | Goal |
+|----------------|---------------|------|------|
+| Complex | Probe–Sense–Respond | `view_file_outline` | Choose MECE dimension → branch |
+| Complicated | Sense–Analyze–Respond | `grep_search` → `view_file` | Reclassify as Clear |
+| Clear | Verify | `view_code_item` | Validate Hypothesis Statement |
 
-### 핵심
+### Report Output
 
-- 코드를 다 고치는 게 목적이 아니라, **분석 보고서를 쓰는 게 목적**
-- Clear/Complicated는 **단위 테스트로 증명하고** 고민 없이 실행
-- Complex는 코드로 해결하려 하지 말고 나누거나 질문
-- 코드 수정 전에 Cynefin 도메인 판단 — 수정 중에 판단하면 이미 늦다
-- **도메인 재분류**: 수정 중 Complex가 Clear로 밝혀지면, 보고서를 업데이트하고 바로 실행
-- **통합 버그 전략**: 복잡한 통합 버그는 1개를 깊이 추적하면 나머지의 패턴이 보인다. 첫 버그 해결 후 나머지를 재분류
+**저장 경로**: `docs/1-project/[project-name]/REPORT.md`
+- BOARD.md가 있는 프로젝트 폴더와 같은 레벨에 생성한다.
+- 이미 REPORT.md가 존재하면 덮어쓴다 (최신 분석이 우선).
+- 프로젝트 폴더를 특정할 수 없으면 사용자에게 한 번만 확인한다.
+
+### Report Format (Issue Tree)
+
+```markdown
+## /divide Report — [Topic]
+
+### Iteration Log
+
+| # | Node | Before | After | Cynefin Cycle | Action |
+|---|------|--------|-------|---------------|--------|
+| 1 | [node] | Complex | → 3 children | PSR | MECE split by [dimension] |
+| 2 | [child] | Complicated | Clear | SAR | Found [what] in [file] |
+| 3 | [child] | Clear | Clear (verified) | Verify | Confirmed at [file:line] |
+
+### Issue Tree (Final)
+
+| Leaf Node (Work Package) | Hypothesis Statement | Evidence (code location) |
+|--------------------------|---------------------|------------------------|
+| A | ... | `path/to/file.ts:L42` |
+| B | ... | `path/to/file.ts:L100` |
+
+### Residual Uncertainty
+
+- (none, or list remaining unknowns)
+```
+
+### Definition of Done
+
+- [ ] Every leaf node is Clear (Work Package level)
+- [ ] Minimum 3 iterations completed (Progressive Elaboration)
+- [ ] Every iteration includes code reading (Evidence recorded)
+- [ ] MECE validation: leaf nodes collectively exhaust the problem
+- [ ] No user interaction during spike (Spike principle)
+- [ ] Report saved to `docs/1-project/[project-name]/REPORT.md`

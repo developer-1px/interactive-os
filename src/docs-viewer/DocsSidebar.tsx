@@ -1,10 +1,9 @@
-import { Item } from "@os/6-components/primitives/Item";
+import docsMeta from "virtual:docs-meta";
 import { useFlatTree } from "@os/5-hooks/useFlatTree";
+import { Item } from "@os/6-components/primitives/Item";
 import clsx from "clsx";
-
 import { ChevronDown, ChevronRight, Clock, FileText, Star } from "lucide-react";
 import { useMemo, useState } from "react";
-import docsMeta from "virtual:docs-meta";
 import { DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
 import {
   cleanLabel,
@@ -159,7 +158,9 @@ function FavoritesSection({
                     size={11}
                     className={clsx(
                       "shrink-0",
-                      isActive ? "text-amber-400 fill-amber-400" : "text-slate-300 fill-slate-300",
+                      isActive
+                        ? "text-amber-400 fill-amber-400"
+                        : "text-slate-300 fill-slate-300",
                     )}
                   />
                   <span className="truncate flex-1">
@@ -190,7 +191,13 @@ function SectionHeader({ node }: { node: FlatTreeNode }) {
 function FolderRow({ node }: { node: FlatTreeNode }) {
   return (
     <DocsSidebarUI.Item id={node.id}>
-      {({ isFocused, isExpanded }: { isFocused: boolean; isExpanded: boolean }) => (
+      {({
+        isFocused,
+        isExpanded,
+      }: {
+        isFocused: boolean;
+        isExpanded: boolean;
+      }) => (
         <div
           className={clsx(
             "flex items-center gap-1.5 px-3 py-1 text-[13px] rounded-md transition-colors cursor-pointer",
@@ -202,7 +209,12 @@ function FolderRow({ node }: { node: FlatTreeNode }) {
           style={{ paddingLeft: `${node.level * 12 + 12}px` }}
         >
           <Item.ExpandTrigger>
-            <span className={clsx("text-slate-400 transition-transform", isExpanded && "rotate-90")}>
+            <span
+              className={clsx(
+                "text-slate-400 transition-transform",
+                isExpanded && "rotate-90",
+              )}
+            >
               <ChevronRight size={14} />
             </span>
           </Item.ExpandTrigger>
@@ -213,7 +225,13 @@ function FolderRow({ node }: { node: FlatTreeNode }) {
   );
 }
 
-function FileRow({ node, activePath }: { node: FlatTreeNode; activePath: string | undefined }) {
+function FileRow({
+  node,
+  activePath,
+}: {
+  node: FlatTreeNode;
+  activePath: string | undefined;
+}) {
   const isActive = node.path === activePath;
   return (
     <DocsSidebarUI.Item id={node.id}>
@@ -280,10 +298,7 @@ export function DocsSidebar({
         />
 
         {/* Recent Section — OS Zone */}
-        <RecentSection
-          allFiles={allFiles}
-          activePath={activePath}
-        />
+        <RecentSection allFiles={allFiles} activePath={activePath} />
 
         {/* Folder Tree — Flat rendering from OS state */}
         <DocsSidebarUI.Zone className="flex flex-col">
@@ -297,7 +312,9 @@ export function DocsSidebar({
               return <FolderRow key={node.id} node={node} />;
             }
             // File — OS item
-            return <FileRow key={node.id} node={node} activePath={activePath} />;
+            return (
+              <FileRow key={node.id} node={node} activePath={activePath} />
+            );
           })}
         </DocsSidebarUI.Zone>
       </div>
@@ -305,5 +322,5 @@ export function DocsSidebar({
   );
 }
 
-export { type DocsSidebarProps };
+export type { DocsSidebarProps };
 export { toggleFavorite as _toggleFavorite };

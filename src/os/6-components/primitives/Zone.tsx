@@ -24,8 +24,8 @@ import {
   useFocusContext,
   type ZoneContextValue,
 } from "@os/6-components/base/FocusGroup.tsx";
-import type { ZoneRole } from "@os/registries/roleRegistry.ts";
 import { os } from "@os/kernel.ts";
+import type { ZoneRole } from "@os/registries/roleRegistry.ts";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -121,7 +121,11 @@ export interface ZoneProps
   /** Tree level accessor */
   getTreeLevels?: () => Map<string, number>;
   /** Drag reorder callback — invoked when an item is drag-dropped to a new position */
-  onReorder?: (info: { itemId: string; overItemId: string; position: "before" | "after" }) => void;
+  onReorder?: (info: {
+    itemId: string;
+    overItemId: string;
+    position: "before" | "after";
+  }) => void;
   /** Children */
   children: ReactNode;
 }
@@ -171,9 +175,7 @@ function ZoneContainer({
             ? "vertical"
             : undefined
       }
-      aria-multiselectable={
-        config?.select.mode === "multiple" || undefined
-      }
+      aria-multiselectable={config?.select.mode === "multiple" || undefined}
       role={effectiveRole || "group"}
       tabIndex={-1}
       className={className || undefined}
@@ -297,4 +299,7 @@ export function Zone({
 }
 
 // Re-export context hooks for convenience
-export { useFocusGroupContext, useFocusContext } from "@os/6-components/base/FocusGroup.tsx";
+export {
+  useFocusContext,
+  useFocusGroupContext,
+} from "@os/6-components/base/FocusGroup.tsx";

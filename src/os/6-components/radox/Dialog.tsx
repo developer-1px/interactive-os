@@ -29,7 +29,6 @@ import {
 } from "react";
 import { Trigger } from "../primitives/Trigger.tsx";
 
-
 // ═══════════════════════════════════════════════════════════════════
 // Dialog.Root (default export = Dialog)
 // ═══════════════════════════════════════════════════════════════════

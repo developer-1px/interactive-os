@@ -26,11 +26,12 @@ import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
 import {
   type Block,
   type BuilderState,
+  findBlock,
   findBlockInfo,
   INITIAL_STATE,
 } from "./model/appState";
 export type { Block, BuilderState };
-export { INITIAL_STATE, findBlockInfo };
+export { INITIAL_STATE, findBlock, findBlockInfo };
 
 /** Read current builder state from kernel. */
 function getBuilderState(): BuilderState {
@@ -464,7 +465,7 @@ export function createFieldCommit(
  */
 export function useSectionFields(sectionId: string): Record<string, string> {
   return BuilderApp.useComputed(
-    (s) => s.data.blocks.find((b) => b.id === sectionId)?.fields ?? {},
+    (s) => findBlock(s.data.blocks, sectionId)?.fields ?? {},
   ) as unknown as Record<string, string>;
 }
 

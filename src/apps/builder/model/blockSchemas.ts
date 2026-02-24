@@ -17,14 +17,14 @@ import type { PrimitiveType } from "./primitives";
 // ═══════════════════════════════════════════════════════════════════
 
 export interface PropertyDef {
-    /** Primitive type — determines encode/decode + widget */
-    readonly type: PrimitiveType;
-    /** Display label in properties panel */
-    readonly label: string;
-    /** Placeholder text for empty fields */
-    readonly placeholder?: string;
-    /** Options for select type */
-    readonly options?: readonly string[];
+  /** Primitive type — determines encode/decode + widget */
+  readonly type: PrimitiveType;
+  /** Display label in properties panel */
+  readonly label: string;
+  /** Placeholder text for empty fields */
+  readonly placeholder?: string;
+  /** Options for select type */
+  readonly options?: readonly string[];
 }
 
 /** Schema for a block type: field key → property definition */
@@ -38,112 +38,112 @@ export type BlockSchema = Record<string, PropertyDef>;
 // ═══════════════════════════════════════════════════════════════════
 
 export const blockSchemas: Record<string, BlockSchema> = {
-    hero: {
-        title: { type: "multiline", label: "Title" },
-        sub: { type: "multiline", label: "Subtitle" },
-        brand: { type: "text", label: "Brand" },
-        cta: { type: "button", label: "CTA Button" },
-        "nav-login": { type: "button", label: "Login Button" },
-        "nav-signup": { type: "button", label: "Signup Button" },
-        "portal-title": { type: "text", label: "Portal Title" },
-        "portal-subtitle": { type: "text", label: "Portal Subtitle" },
-    },
+  hero: {
+    title: { type: "multiline", label: "Title" },
+    sub: { type: "multiline", label: "Subtitle" },
+    brand: { type: "text", label: "Brand" },
+    cta: { type: "button", label: "CTA Button" },
+    "nav-login": { type: "button", label: "Login Button" },
+    "nav-signup": { type: "button", label: "Signup Button" },
+    "portal-title": { type: "text", label: "Portal Title" },
+    "portal-subtitle": { type: "text", label: "Portal Subtitle" },
+  },
 
-    news: {
-        title: { type: "multiline", label: "Section Title" },
-        all: { type: "button", label: "View All Link" },
-        "item-1-title": { type: "multiline", label: "Item 1 Title" },
-        "item-1-desc": { type: "multiline", label: "Item 1 Description" },
-        "item-1-date": { type: "date", label: "Item 1 Date" },
-        "item-2-title": { type: "multiline", label: "Item 2 Title" },
-        "item-2-date": { type: "date", label: "Item 2 Date" },
-        "item-3-title": { type: "multiline", label: "Item 3 Title" },
-        "item-3-date": { type: "date", label: "Item 3 Date" },
-    },
+  news: {
+    title: { type: "multiline", label: "Section Title" },
+    all: { type: "button", label: "View All Link" },
+    "item-1-title": { type: "multiline", label: "Item 1 Title" },
+    "item-1-desc": { type: "multiline", label: "Item 1 Description" },
+    "item-1-date": { type: "date", label: "Item 1 Date" },
+    "item-2-title": { type: "multiline", label: "Item 2 Title" },
+    "item-2-date": { type: "date", label: "Item 2 Date" },
+    "item-3-title": { type: "multiline", label: "Item 3 Title" },
+    "item-3-date": { type: "date", label: "Item 3 Date" },
+  },
 
-    services: {
-        category: { type: "text", label: "Category" },
-        title: { type: "multiline", label: "Section Title" },
-    },
+  services: {
+    category: { type: "text", label: "Category" },
+    title: { type: "multiline", label: "Section Title" },
+  },
 
-    "service-card": {
-        "item-title": { type: "text", label: "Title" },
-        "item-desc": { type: "multiline", label: "Description" },
-        icon: { type: "icon", label: "Icon" },
-        color: { type: "color", label: "Theme Color" },
-        badge: { type: "badge", label: "Badge" },
-    },
+  "service-card": {
+    "item-title": { type: "text", label: "Title" },
+    "item-desc": { type: "multiline", label: "Description" },
+    icon: { type: "icon", label: "Icon" },
+    color: { type: "color", label: "Theme Color" },
+    badge: { type: "badge", label: "Badge" },
+  },
 
-    pricing: {
-        badge: { type: "badge", label: "Section Badge" },
-        title: { type: "text", label: "Title" },
-        sub: { type: "text", label: "Subtitle" },
-        "m-starter-cta": { type: "button", label: "Monthly Starter CTA" },
-        "m-pro-cta": { type: "button", label: "Monthly Pro CTA" },
-        "m-ent-cta": { type: "button", label: "Monthly Enterprise CTA" },
-        "a-starter-cta": { type: "button", label: "Annual Starter CTA" },
-        "a-pro-cta": { type: "button", label: "Annual Pro CTA" },
-        "a-ent-cta": { type: "button", label: "Annual Enterprise CTA" },
-    },
+  pricing: {
+    badge: { type: "badge", label: "Section Badge" },
+    title: { type: "text", label: "Title" },
+    sub: { type: "text", label: "Subtitle" },
+    "m-starter-cta": { type: "button", label: "Monthly Starter CTA" },
+    "m-pro-cta": { type: "button", label: "Monthly Pro CTA" },
+    "m-ent-cta": { type: "button", label: "Monthly Enterprise CTA" },
+    "a-starter-cta": { type: "button", label: "Annual Starter CTA" },
+    "a-pro-cta": { type: "button", label: "Annual Pro CTA" },
+    "a-ent-cta": { type: "button", label: "Annual Enterprise CTA" },
+  },
 
-    "pricing-tab": {
-        // No editable fields — tab container only
-    },
+  "pricing-tab": {
+    // No editable fields — tab container only
+  },
 
-    tabs: {
-        title: { type: "text", label: "Container Title" },
-    },
+  tabs: {
+    title: { type: "text", label: "Container Title" },
+  },
 
-    tab: {
-        // Structural only — no editable fields
-    },
+  tab: {
+    // Structural only — no editable fields
+  },
 
-    section: {
-        heading: { type: "text", label: "Heading" },
-        description: { type: "multiline", label: "Description" },
-    },
+  section: {
+    heading: { type: "text", label: "Heading" },
+    description: { type: "multiline", label: "Description" },
+  },
 
-    footer: {
-        brand: { type: "text", label: "Brand" },
-        desc: { type: "multiline", label: "Description" },
-        copyright: { type: "text", label: "Copyright" },
-    },
+  footer: {
+    brand: { type: "text", label: "Brand" },
+    desc: { type: "multiline", label: "Description" },
+    copyright: { type: "text", label: "Copyright" },
+  },
 
-    "ncp-product-hero": {
-        "service-name": { type: "text", label: "서비스명" },
-        "service-desc": { type: "multiline", label: "서비스 설명" },
-        "cta-primary": { type: "button", label: "기본 CTA" },
-        "cta-secondary": { type: "button", label: "보조 CTA" },
-        "breadcrumb-1": { type: "text", label: "브레드크럼 1" },
-        "breadcrumb-2": { type: "text", label: "브레드크럼 2" },
-        "tabs": { type: "text", label: "탭 목록 (쉼표 구분)" },
-        "deprecated": { type: "text", label: "Deprecated (true/false)" },
-        "badge-text": { type: "text", label: "배지 텍스트" },
-        "notice-title": { type: "text", label: "공지 제목" },
-        "notice-desc": { type: "multiline", label: "공지 내용" },
-    },
+  "ncp-product-hero": {
+    "service-name": { type: "text", label: "서비스명" },
+    "service-desc": { type: "multiline", label: "서비스 설명" },
+    "cta-primary": { type: "button", label: "기본 CTA" },
+    "cta-secondary": { type: "button", label: "보조 CTA" },
+    "breadcrumb-1": { type: "text", label: "브레드크럼 1" },
+    "breadcrumb-2": { type: "text", label: "브레드크럼 2" },
+    tabs: { type: "text", label: "탭 목록 (쉼표 구분)" },
+    deprecated: { type: "text", label: "Deprecated (true/false)" },
+    "badge-text": { type: "text", label: "배지 텍스트" },
+    "notice-title": { type: "text", label: "공지 제목" },
+    "notice-desc": { type: "multiline", label: "공지 내용" },
+  },
 
-    "ncp-feature-cards": {
-        "section-title": { type: "text", label: "섹션 제목" },
-        "subtitle": { type: "multiline", label: "서브타이틀" },
-    },
+  "ncp-feature-cards": {
+    "section-title": { type: "text", label: "섹션 제목" },
+    subtitle: { type: "multiline", label: "서브타이틀" },
+  },
 
-    "ncp-feature-card": {
-        "card-title": { type: "text", label: "카드 제목" },
-        "card-desc": { type: "multiline", label: "카드 설명" },
-    },
+  "ncp-feature-card": {
+    "card-title": { type: "text", label: "카드 제목" },
+    "card-desc": { type: "multiline", label: "카드 설명" },
+  },
 
-    "ncp-notice": {
-        label: { type: "text", label: "배너 라벨" },
-        text: { type: "multiline", label: "공지 내용" },
-    },
+  "ncp-notice": {
+    label: { type: "text", label: "배너 라벨" },
+    text: { type: "multiline", label: "공지 내용" },
+  },
 
-    "ncp-section-footer": {
-        title: { type: "multiline", label: "타이틀" },
-        "cta-primary": { type: "button", label: "CTA 1" },
-        "cta-secondary": { type: "button", label: "CTA 2" },
-        "bg-image": { type: "image", label: "배경 이미지 URL" },
-    },
+  "ncp-section-footer": {
+    title: { type: "multiline", label: "타이틀" },
+    "cta-primary": { type: "button", label: "CTA 1" },
+    "cta-secondary": { type: "button", label: "CTA 2" },
+    "bg-image": { type: "image", label: "배경 이미지 URL" },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -154,21 +154,29 @@ export const blockSchemas: Record<string, BlockSchema> = {
  * Get schema for a block type. Returns empty schema for unknown types.
  */
 export function getBlockSchema(blockType: string): BlockSchema {
-    return blockSchemas[blockType] ?? {};
+  return blockSchemas[blockType] ?? {};
 }
 
 /**
  * Get property definition for a specific field in a block type.
  * Falls back to "text" for unregistered fields.
  */
-export function getPropertyDef(blockType: string, fieldKey: string): PropertyDef {
-    return blockSchemas[blockType]?.[fieldKey] ?? { type: "text", label: formatLabel(fieldKey) };
+export function getPropertyDef(
+  blockType: string,
+  fieldKey: string,
+): PropertyDef {
+  return (
+    blockSchemas[blockType]?.[fieldKey] ?? {
+      type: "text",
+      label: formatLabel(fieldKey),
+    }
+  );
 }
 
 /** Format field key to display label: "item-1-title" → "Item 1 Title" */
 function formatLabel(key: string): string {
-    return key
-        .split(/[-_]/)
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
+  return key
+    .split(/[-_]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }

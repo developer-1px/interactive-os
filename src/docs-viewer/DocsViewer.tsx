@@ -1,3 +1,4 @@
+import docsMeta from "virtual:docs-meta";
 import clsx from "clsx";
 import {
   ChevronLeft,
@@ -9,13 +10,12 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import docsMeta from "virtual:docs-meta";
-import { DocsSidebar } from "./DocsSidebar";
 import { os } from "@/os/kernel";
+import { DocsSidebar } from "./DocsSidebar";
 
 // Side-effect: register docs-viewer commands on kernel
 import "./app";
-import { DocsApp, selectDoc, resetDoc } from "./app";
+import { DocsApp, resetDoc, selectDoc } from "./app";
 import {
   buildDocTree,
   cleanLabel,
@@ -65,7 +65,9 @@ function parseHash(): {
 function InlineDocContent({ path }: { path: string }) {
   const [md, setMd] = useState("");
   useEffect(() => {
-    loadDocContent(path).then(setMd).catch(() => setMd(""));
+    loadDocContent(path)
+      .then(setMd)
+      .catch(() => setMd(""));
   }, [path]);
   if (!md) return null;
   return <MarkdownRenderer content={md} />;
@@ -107,9 +109,7 @@ function FolderIndexView({
               type="button"
               onClick={() =>
                 onSelect(
-                  child.type === "folder"
-                    ? `folder:${child.path}`
-                    : child.path,
+                  child.type === "folder" ? `folder:${child.path}` : child.path,
                 )
               }
               className={clsx(
@@ -254,12 +254,9 @@ export function DocsViewer() {
   }, []);
 
   // --- Select a file via OS command ---
-  const handleSelect = useCallback(
-    (path: string) => {
-      os.dispatch(selectDoc({ id: path }));
-    },
-    [],
-  );
+  const handleSelect = useCallback((path: string) => {
+    os.dispatch(selectDoc({ id: path }));
+  }, []);
 
   // --- Derived: is current path a folder? ---
   const isFolderView = activePath?.startsWith("folder:") ?? false;
@@ -414,10 +411,7 @@ export function DocsViewer() {
                 </button>
               </div>
             ) : isFolderView && folderNode ? (
-              <FolderIndexView
-                folder={folderNode}
-                onSelect={handleSelect}
-              />
+              <FolderIndexView folder={folderNode} onSelect={handleSelect} />
             ) : (
               <>
                 <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
@@ -462,18 +456,24 @@ export function DocsViewer() {
                               ? "text-amber-400 hover:text-amber-500"
                               : "text-slate-300 hover:text-slate-400",
                           )}
-                          title={isFavorite(activePath) ? "Unpin" : "Pin to sidebar"}
+                          title={
+                            isFavorite(activePath) ? "Unpin" : "Pin to sidebar"
+                          }
                         >
                           <Star
                             size={13}
-                            className={isFavorite(activePath) ? "fill-amber-400" : ""}
+                            className={
+                              isFavorite(activePath) ? "fill-amber-400" : ""
+                            }
                           />
                         </button>
                       )}
                       {activePath && docsMeta[activePath] && (
                         <span
                           className="flex items-center gap-1 text-xs text-slate-400 tabular-nums"
-                          title={new Date(docsMeta[activePath].mtime).toLocaleString()}
+                          title={new Date(
+                            docsMeta[activePath].mtime,
+                          ).toLocaleString()}
                         >
                           <Clock size={11} className="text-slate-300" />
                           {formatRelativeTime(docsMeta[activePath].mtime)}

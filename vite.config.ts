@@ -2,9 +2,9 @@ import tailwindcss from "@tailwindcss/vite";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { docsMetaPlugin } from "./src/docs-viewer/vite-plugin-docs-meta";
 import inspectorBabelPlugin from "./vite-plugins/babel-inspector";
 import { inspectorPlugin } from "./vite-plugins/inspector";
-import { docsMetaPlugin } from "./src/docs-viewer/vite-plugin-docs-meta";
 import { specWrapperPlugin } from "./vite-plugins/spec-wrapper";
 
 // https://vite.dev/config/
@@ -43,7 +43,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@playwright/test": "/src/inspector/testbot/playwright/index.ts",
-      "vitest": "/src/inspector/testbot/vitest/index.ts",
+      vitest: "/src/inspector/testbot/vitest/index.ts",
       "@inspector": "/src/inspector",
       "@kernel": "/packages/kernel/src",
       "@os": "/src/os",

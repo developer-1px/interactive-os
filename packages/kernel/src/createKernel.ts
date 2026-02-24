@@ -822,10 +822,7 @@ export function createKernel<S>(initialState: S) {
       const nextValue = resolveQuery<T>(id);
 
       // Output stability: shallow compare to prevent unnecessary re-renders
-      if (
-        cacheRef.current &&
-        shallow(cacheRef.current.value, nextValue)
-      ) {
+      if (cacheRef.current && shallow(cacheRef.current.value, nextValue)) {
         cacheRef.current.state = currentState;
         return cacheRef.current.value;
       }

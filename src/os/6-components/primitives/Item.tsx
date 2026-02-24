@@ -1,16 +1,16 @@
-import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import { OS_CHECK } from "@os/3-commands/interaction/check";
 import { OS_EXPAND } from "@os/3-commands/expand";
 import { OS_FOCUS } from "@os/3-commands/focus";
+import { OS_CHECK } from "@os/3-commands/interaction/check";
+import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
+import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import {
   cloneElement,
   createContext,
   forwardRef,
   isValidElement,
-  useContext,
   type ReactNode,
+  useContext,
   useMemo,
 } from "react";
 
@@ -95,7 +95,8 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(
 
     // Expanded from kernel state
     const isExpanded = os.useComputed(
-      (s) => s.os.focus.zones[zoneId]?.expandedItems.includes(stringId) ?? false,
+      (s) =>
+        s.os.focus.zones[zoneId]?.expandedItems.includes(stringId) ?? false,
     );
 
     // Anchor: focused but zone is inactive (retained focus)
@@ -159,7 +160,11 @@ interface ExpandTriggerProps {
   className?: string;
 }
 
-function ItemExpandTrigger({ children, asChild, className }: ExpandTriggerProps) {
+function ItemExpandTrigger({
+  children,
+  asChild,
+  className,
+}: ExpandTriggerProps) {
   const { zoneId, itemId } = useItemContext();
 
   const handleClick = (e: React.MouseEvent) => {
@@ -176,7 +181,9 @@ function ItemExpandTrigger({ children, asChild, className }: ExpandTriggerProps)
         child.props.onClick?.(e);
         handleClick(e);
       },
-      className: [child.props.className, className].filter(Boolean).join(" ") || undefined,
+      className:
+        [child.props.className, className].filter(Boolean).join(" ") ||
+        undefined,
     };
     return cloneElement(child, mergedProps);
   }
@@ -217,7 +224,9 @@ function ItemCheckTrigger({ children, asChild, className }: CheckTriggerProps) {
         child.props.onClick?.(e);
         handleClick(e);
       },
-      className: [child.props.className, className].filter(Boolean).join(" ") || undefined,
+      className:
+        [child.props.className, className].filter(Boolean).join(" ") ||
+        undefined,
     });
   }
 
@@ -230,8 +239,6 @@ function ItemCheckTrigger({ children, asChild, className }: CheckTriggerProps) {
 
 ItemCheckTrigger.displayName = "Item.CheckTrigger";
 
-
-
 // ═══════════════════════════════════════════════════════════════════
 // Namespace merge
 // ═══════════════════════════════════════════════════════════════════
@@ -240,4 +247,3 @@ export const Item = Object.assign(ItemBase, {
   ExpandTrigger: ItemExpandTrigger,
   CheckTrigger: ItemCheckTrigger,
 });
-

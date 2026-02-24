@@ -24,14 +24,14 @@ const docTree = buildDocTree(Object.keys(docsModules));
 
 /** Collect all folder IDs that have children (expandable). Static, tree-derived. */
 function collectExpandableIds(items: DocItem[]): Set<string> {
-    const set = new Set<string>();
-    for (const item of items) {
-        if (item.type === "folder" && item.children?.length) {
-            set.add(`folder:${item.path}`);
-            collectExpandableIds(item.children).forEach((id) => set.add(id));
-        }
+  const set = new Set<string>();
+  for (const item of items) {
+    if (item.type === "folder" && item.children?.length) {
+      set.add(`folder:${item.path}`);
+      collectExpandableIds(item.children).forEach((id) => set.add(id));
     }
-    return set;
+  }
+  return set;
 }
 
 const expandableIds = collectExpandableIds(docTree);
@@ -50,17 +50,19 @@ const expandableIds = collectExpandableIds(docTree);
  *   "#"                      → null
  *   "#ext:folder/file.md"    → null  (external mode — handled separately)
  */
-export function parseHashToPath(hash: string | null | undefined): string | null {
-    if (!hash) return null;
-    const stripped = hash.replace(/^#\/?/, "");
-    if (!stripped || stripped.startsWith("ext:")) return null;
-    return stripped;
+export function parseHashToPath(
+  hash: string | null | undefined,
+): string | null {
+  if (!hash) return null;
+  const stripped = hash.replace(/^#\/?/, "");
+  if (!stripped || stripped.startsWith("ext:")) return null;
+  return stripped;
 }
 
 /** Read initial activePath from window.location.hash (SSR-safe). */
 function getInitialPath(): string | null {
-    if (typeof window === "undefined") return null;
-    return parseHashToPath(window.location.hash);
+  if (typeof window === "undefined") return null;
+  return parseHashToPath(window.location.hash);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -68,11 +70,11 @@ function getInitialPath(): string | null {
 // ═══════════════════════════════════════════════════════════════════
 
 interface DocsState {
-    activePath: string | null;
+  activePath: string | null;
 }
 
 export const DocsApp = defineApp<DocsState>("docs-viewer", {
-    activePath: getInitialPath(),
+  activePath: getInitialPath(),
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -81,23 +83,20 @@ export const DocsApp = defineApp<DocsState>("docs-viewer", {
 
 /** SELECT_DOC — sets activePath. Shared by Recent, Favorites, and Tree zones. */
 export const selectDoc = DocsApp.command(
-    "SELECT_DOC",
-    (ctx, payload: { id: string }) => ({
-        state: produce(ctx.state, (draft) => {
-            draft.activePath = payload.id;
-        }),
+  "SELECT_DOC",
+  (ctx, payload: { id: string }) => ({
+    state: produce(ctx.state, (draft) => {
+      draft.activePath = payload.id;
     }),
+  }),
 );
 
 /** RESET_DOC — clears activePath (e.g. when switching folder source). */
-export const resetDoc = DocsApp.command(
-    "RESET_DOC",
-    (ctx) => ({
-        state: produce(ctx.state, (draft) => {
-            draft.activePath = null;
-        }),
-    }),
-);
+export const resetDoc = DocsApp.command("RESET_DOC", (ctx) => ({
+  state: produce(ctx.state, (draft) => {
+    draft.activePath = null;
+  }),
+}));
 
 // ═══════════════════════════════════════════════════════════════════
 // Favorites Zone — pinned files
@@ -106,13 +105,13 @@ export const resetDoc = DocsApp.command(
 const favoritesZone = DocsApp.createZone("docs-favorites");
 
 export const DocsFavoritesUI = favoritesZone.bind({
-    role: "listbox",
-    onAction: (cursor) => selectDoc({ id: cursor.focusId }),
-    onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
-    options: {
-        select: { followFocus: true },
-        activate: { onClick: true },
-    },
+  role: "listbox",
+  onAction: (cursor) => selectDoc({ id: cursor.focusId }),
+  onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
+  options: {
+    select: { followFocus: true },
+    activate: { onClick: true },
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -122,13 +121,13 @@ export const DocsFavoritesUI = favoritesZone.bind({
 const recentZone = DocsApp.createZone("docs-recent");
 
 export const DocsRecentUI = recentZone.bind({
-    role: "listbox",
-    onAction: (cursor) => selectDoc({ id: cursor.focusId }),
-    onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
-    options: {
-        select: { followFocus: true },
-        activate: { onClick: true },
-    },
+  role: "listbox",
+  onAction: (cursor) => selectDoc({ id: cursor.focusId }),
+  onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
+  options: {
+    select: { followFocus: true },
+    activate: { onClick: true },
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -138,10 +137,10 @@ export const DocsRecentUI = recentZone.bind({
 const sidebarZone = DocsApp.createZone("docs-sidebar");
 
 export const DocsSidebarUI = sidebarZone.bind({
-    role: "tree",
-    onAction: (cursor) => selectDoc({ id: cursor.focusId }),
-    onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
-    getExpandableItems: () => expandableIds,
+  role: "tree",
+  onAction: (cursor) => selectDoc({ id: cursor.focusId }),
+  onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
+  getExpandableItems: () => expandableIds,
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -151,22 +150,14 @@ export const DocsSidebarUI = sidebarZone.bind({
 const readerZone = DocsApp.createZone("docs-reader");
 
 // Commands: stateless — no state change, scroll effect handled by component
-const NEXT_SECTION = readerZone.command(
-    "DOCS_NEXT_SECTION",
-    () => undefined,
-);
+const NEXT_SECTION = readerZone.command("DOCS_NEXT_SECTION", () => undefined);
 
-const PREV_SECTION = readerZone.command(
-    "DOCS_PREV_SECTION",
-    () => undefined,
-);
+const PREV_SECTION = readerZone.command("DOCS_PREV_SECTION", () => undefined);
 
 export const DocsReaderUI = readerZone.bind({
-    role: "feed",
-    keybindings: [
-        { key: "Space", command: () => NEXT_SECTION() },
-        { key: "Shift+Space", command: () => PREV_SECTION() },
-    ],
+  role: "feed",
+  keybindings: [
+    { key: "Space", command: () => NEXT_SECTION() },
+    { key: "Shift+Space", command: () => PREV_SECTION() },
+  ],
 });
-
-

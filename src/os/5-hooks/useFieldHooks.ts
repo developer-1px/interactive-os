@@ -106,11 +106,12 @@ export const useFieldFocus = ({
       try {
         const pos = getCaretPosition(el);
         FieldRegistry.updateCaretPosition(fieldId, pos);
-      } catch (_e) { }
+      } catch (_e) {}
     };
 
     document.addEventListener("selectionchange", onSelectionChange);
-    return () => document.removeEventListener("selectionchange", onSelectionChange);
+    return () =>
+      document.removeEventListener("selectionchange", onSelectionChange);
   }, [isEditing, fieldId, innerRef]);
 
   // Focus/blur management (triggered by isActive = isFocused)
@@ -131,7 +132,7 @@ export const useFieldFocus = ({
               try {
                 const textLength = innerRef.current.innerText.length;
                 setCaretPosition(innerRef.current, textLength);
-              } catch (_e) { }
+              } catch (_e) {}
             }
           });
         });
@@ -154,7 +155,8 @@ export const useFieldFocus = ({
     if (isEditing && !wasEditingRef.current && innerRef.current && fieldId) {
       wasEditingRef.current = true;
 
-      const savedPosition = FieldRegistry.getField(fieldId)?.state.caretPosition ?? null;
+      const savedPosition =
+        FieldRegistry.getField(fieldId)?.state.caretPosition ?? null;
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -166,7 +168,7 @@ export const useFieldFocus = ({
                 const textLength = innerRef.current.innerText.length;
                 setCaretPosition(innerRef.current, textLength);
               }
-            } catch (_e) { }
+            } catch (_e) {}
           }
         });
       });

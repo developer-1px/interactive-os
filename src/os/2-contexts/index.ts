@@ -197,7 +197,9 @@ export const DOM_ZONE_ORDER = os.defineContext(
       // Use getItems accessor if available (headless-compatible)
       const items = zoneEntry.getItems?.();
       if (items) {
-        const filtered = zoneEntry.itemFilter ? zoneEntry.itemFilter(items) : items;
+        const filtered = zoneEntry.itemFilter
+          ? zoneEntry.itemFilter(items)
+          : items;
         zones.push({
           zoneId,
           firstItemId: filtered[0] ?? null,
@@ -221,7 +223,8 @@ export const DOM_ZONE_ORDER = os.defineContext(
         zones.push({
           zoneId,
           firstItemId: ownItems[0]?.getAttribute("data-item-id") ?? null,
-          lastItemId: ownItems[ownItems.length - 1]?.getAttribute("data-item-id") ?? null,
+          lastItemId:
+            ownItems[ownItems.length - 1]?.getAttribute("data-item-id") ?? null,
           entry,
           selectedItemId: zoneState?.selection?.[0] ?? null,
           lastFocusedId: zoneState?.lastFocusedId ?? null,
@@ -251,7 +254,8 @@ export const DOM_ZONE_ORDER = os.defineContext(
         zones.push({
           zoneId,
           firstItemId: ownItems[0]?.getAttribute("data-item-id") ?? null,
-          lastItemId: ownItems[ownItems.length - 1]?.getAttribute("data-item-id") ?? null,
+          lastItemId:
+            ownItems[ownItems.length - 1]?.getAttribute("data-item-id") ?? null,
           entry,
           selectedItemId: zoneState?.selection?.[0] ?? null,
           lastFocusedId: zoneState?.lastFocusedId ?? null,

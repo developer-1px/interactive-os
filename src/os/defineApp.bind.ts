@@ -43,7 +43,11 @@ export function createBoundComponents<S>(
     getItems?: () => string[];
     getExpandableItems?: () => Set<string>;
     getTreeLevels?: () => Map<string, number>;
-    onReorder?: (info: { itemId: string; overItemId: string; position: "before" | "after" }) => void;
+    onReorder?: (info: {
+      itemId: string;
+      overItemId: string;
+      position: "before" | "after";
+    }) => void;
   },
 ): BoundComponents<S> {
   const { appId, zoneName, useComputed } = bindConfig;

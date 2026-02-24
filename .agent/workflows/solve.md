@@ -2,87 +2,97 @@
 description: Complex 항목을 자율적으로 해결하는 4단계 래더. /go에서 호출된다.
 ---
 
-## /solve — Divide & Conquer 재귀 래더
+## /solve — Divide & Conquer Decision Ladder
 
-### 원칙
+> **What**: A 4-step Decision Ladder that autonomously resolves Complex items through decomposition, analysis, and integrative thinking.
+> **Escalation**: Only when options are Mutually Exclusive AND Irreversible.
+> **Test-first**: Assertion without evidence violates Empiricism — no execution without a test.
 
-> Complex를 만나면 멈추지 말고 **풀어봐라**.
-> 탈출 기준은 "모르겠다"가 아니라 **"배타적이고 비가역적이다"**이다.
-> 대부분의 Complex는 나누거나 의도를 추합하면 Complicated로 내려간다.
-> 실행할 때는 **테스트가 먼저**다. 테스트 없는 실행은 증명 없는 주장이다.
+> **Classification**: Leaf workflow. Does not call other workflows. Recurses internally.
 
-> **분류**: 리프. 다른 워크플로우를 호출하지 않는다. 내부적으로 재귀한다.
+### Theoretical Basis
 
-### 래더 (순서대로 시도)
+| Framework | Source | Role in /solve |
+|-----------|--------|---------------|
+| **Cynefin** | Dave Snowden | Domain assessment per item |
+| **RCA / 5 Whys** | Toyota / Lean | Root cause identification before any fix |
+| **TDD (Red-Green)** | XP / Kent Beck | Every Clear/Complicated item is executed test-first |
+| **Decision Matrix** | PMBOK | Structured options evaluation with trade-offs |
+| **Integrative Thinking** | Roger Martin | Synthesize opposing intents into a third option |
+| **Problem Reframing** | Design Thinking | When all options are complex, reframe the problem |
+| **Escalation** | ITIL / PM | Report to user only when autonomous resolution is impossible |
 
-#### Step 1: Root Cause Analysis (RCA) 및 Cynefin 판단
+### Decision Ladder (execute in order)
 
-- ⚠️ **금지사항**: 어떤 경우에도 코드를 먼저 수정하지 마라.
-- 코드를 만지기 전, 화면에 반드시 다음 형태의 **[RCA & Cynefin 분석표]**를 마크다운으로 출력한다.
+#### Step 1: Root Cause Analysis & Cynefin Assessment
+
+- ⚠️ **Gate**: No code changes before assessment is complete.
+- Before touching code, output the following **RCA & Cynefin Assessment** in markdown:
 
 ```markdown
-### 🔍 RCA & Cynefin 분석표
-- **현상 (Symptom)**: [무엇이 깨졌나/무엇을 해야 하나]
-- **근본 원인 (Root Cause)**: [왜 발생했는가 (5 Whys)]
-- **Cynefin 도메인**: [Clear / Complicated / Complex / Chaotic]
-- **증빙 (Evidence)**: [로그, 스택 트레이스, 관련 파일/라인 등]
+### 🔍 RCA & Cynefin Assessment
+- **Symptom**: [what is broken / what needs to be done]
+- **Root Cause**: [why it happened — apply 5 Whys]
+- **Cynefin Domain**: [Clear / Complicated / Complex / Chaotic]
+- **Evidence**: [logs, stack traces, relevant file:line references]
 ```
 
-- RCA 분석표를 출력한 **이후에만** 툴(tool)을 사용하여 코드를 수정한다.
-- 분석 결과가 **Complex**라면 조각을 나누고 `/divide` 워크플로우로 전환하여 분해한다.
-- 분석 결과가 **Clear/Complicated**라면 아래의 **실행 프로토콜**로 즉시 실행한다.
+- Only after the assessment is output may tools be used to modify code.
+- If assessed as **Complex** → decompose and delegate to `/divide` workflow.
+- If assessed as **Clear / Complicated** → execute via **TDD Execution Protocol** below.
 
-##### 실행 프로토콜 (Clear/Complicated 조각)
+##### TDD Execution Protocol (Clear / Complicated items)
 
 ```
-1. 테스트 먼저 작성 (🔴 Red)
-   - 해당 조각의 기대 동작을 테스트로 선언한다.
-   - PRD가 있으면 AC에서 파생, 없으면 조각 자체가 스펙.
-   - 테스트가 불필요한 경우 (타입 수정, 문서, 설정 변경 등) → 스킵 가능.
-     스킵 시 근거를 기록한다.
+1. Red — Write test first
+   - Declare the expected behavior as a test.
+   - Derive from PRD Acceptance Criteria if available; otherwise the item itself is the spec.
+   - Skip criteria: type-only changes, documentation, config changes.
+     Record rationale when skipping.
 
-2. 최소 구현 (🟢 Green)
-   - 테스트를 통과시키는 최소한의 코드만 작성한다.
-   - 단, 우회로(workaround)나 로직 복제는 허용하지 않는다. 새로 추가하는 코드가 SRP를 지키는지 확인하라.
+2. Green — Minimal implementation
+   - Write the minimum code to pass the test.
+   - No workarounds or logic duplication. Verify SRP compliance.
 
-3. 통과 확인
-   - 작성한 테스트 + 기존 테스트 모두 통과하는지 확인한다.
-   - 실패 시 수정하되, 실패 상황을 복잡성 증가나 Chaotic으로 오판하여 우회로를 만들지 마라. 통과할 때까지 다음으로 넘어가지 않는다.
+3. Verify — All tests pass
+   - Run new test + existing test suite.
+   - On failure: fix in place. Do not misclassify failure as increased complexity.
+     Do not proceed until green.
 ```
 
-#### Step 2: 선택지 평가
+#### Step 2: Options Analysis (Decision Matrix)
 
-- 남은 Complex에 대해 선택지(A, B, C...)를 나열한다.
-- 각 선택지의 trade-off를 평가한다.
-- ⚠️ **복잡도 가드**: 모든 선택지가 복잡하면, 문제를 잘못 보고 있을 가능성이 높다. 선택지 평가를 멈추고 **문제 정의 자체에 5 Whys**를 돌려라. 인과 사슬의 끝에서 더 단순한 해법이 보일 수 있다.
-- **압도적인 하나**가 있으면 → 선택하고 **실행 프로토콜**로 실행. 근거를 기록.
-- **이미 알려진 해법**(best practice, 프로젝트 선례)이 있으면 → 적용.
-- 하나를 선택할 수 있으면 → **해결. 루프 종료.**
+- For remaining Complex items, enumerate options (A, B, C...).
+- Evaluate each option's trade-offs using a Decision Matrix.
+- ⚠️ **Complexity Guard — Problem Reframing**: If ALL options appear complex, the problem is likely misframed. Stop evaluating options and apply **5 Whys to the problem definition itself**. A simpler solution may emerge at the end of the causal chain.
+- If one option has **overwhelming advantage** → select and execute via TDD Protocol. Record rationale.
+- If a **known solution** exists (best practice, project precedent) → apply it.
+- If a single option can be selected → **Resolved. Exit ladder.**
 
-#### Step 3: 의도 추합 (Synthesis)
+#### Step 3: Integrative Thinking (Synthesis)
 
-- 대립하는 선택지들의 **의도(Why)**를 각각 추출한다.
-- "A가 원하는 것"과 "B가 원하는 것"을 동시에 만족하는 **제3의 방법(C)**을 탐색한다.
-- C가 발견되면 → **실행 프로토콜**로 실행. **해결. 루프 종료.**
-- C를 찾지 못하면 → Step 4로.
+- Extract the **intent (Why)** behind each opposing option.
+- Search for a **third option (C)** that satisfies the intents of both A and B simultaneously.
+- If C is found → execute via TDD Protocol. **Resolved. Exit ladder.**
+- If C is not found → proceed to Step 4.
 
-#### Step 4: 탈출 — 사용자에게 질문
+#### Step 4: Escalation — Report to User
 
-- 여기까지 왔다면, 선택지들이 다음 조건을 **모두** 만족한다:
-  - ❌ 분해 불가 (더 이상 나눌 수 없다)
-  - ❌ 압도적 우위 없음 (trade-off가 균형)
-  - ❌ 의도 추합 불가 (선택지가 배타적)
-  - ❌ 비가역적 (되돌릴 수 없다)
-- 이 경우에만 사용자에게 보고하고 멈춘다.
-- 보고 형식:
+- Reaching this step means all options satisfy ALL of the following:
+  - ❌ Cannot be decomposed further
+  - ❌ No overwhelming advantage (trade-offs are balanced)
+  - ❌ Integrative Thinking failed (options are Mutually Exclusive)
+  - ❌ Irreversible (cannot be undone)
+- Only in this case: report to user and halt.
+- Report format:
   ```
-  ### /solve 실패 — 의사결정 필요
-  **항목**: [무엇]
-  **시도한 것**:
-  - Step 1: [나눈 결과]
-  - Step 2: [선택지 평가 결과]
-  - Step 3: [의도 추합 시도 결과]
-  **남은 선택지**:
-  | 선택지 | 의도 | 비가역성 | 트레이드오프 |
-  **왜 묻는가**: [배타적 + 비가역적인 이유]
+  ### /solve Escalation — Decision Required
+  **Item**: [what]
+  **Attempted**:
+  - Step 1: [RCA & decomposition result]
+  - Step 2: [Options Analysis result]
+  - Step 3: [Integrative Thinking attempt result]
+  **Remaining Options**:
+  | Option | Intent | Irreversibility | Trade-off |
+  **Why escalating**: [Mutually Exclusive + Irreversible — rationale]
   ```

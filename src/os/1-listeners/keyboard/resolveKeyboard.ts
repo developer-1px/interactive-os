@@ -97,20 +97,21 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
     // Field is editing but didn't claim this key.
     // If the field is active (owns this key for text editing), stop here.
     if (input.isFieldActive) {
-      return { commands: [], meta: null, preventDefault: false, fallback: false };
+      return {
+        commands: [],
+        meta: null,
+        preventDefault: false,
+        fallback: false,
+      };
     }
   }
 
   // Layer 2: Item — role-specific keys (treeitem expand, checkbox check)
   if (!input.isEditing && input.focusedItemId) {
-    const itemCmd = resolveItemKey(
-      input.focusedItemRole,
-      input.canonicalKey,
-      {
-        itemId: input.focusedItemId,
-        expanded: input.focusedItemExpanded ?? undefined,
-      },
-    );
+    const itemCmd = resolveItemKey(input.focusedItemRole, input.canonicalKey, {
+      itemId: input.focusedItemId,
+      expanded: input.focusedItemExpanded ?? undefined,
+    });
     if (itemCmd) {
       return {
         commands: [itemCmd],

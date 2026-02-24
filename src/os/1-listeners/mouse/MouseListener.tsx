@@ -11,8 +11,10 @@
  */
 
 import { useEffect } from "react";
-import { os } from "../../kernel";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { OS_FIELD_START_EDIT } from "../../3-commands/field/startEdit";
+import { FieldRegistry } from "../../6-components/field/FieldRegistry";
+import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
 import {
   findFocusableItem,
@@ -21,8 +23,6 @@ import {
 } from "../shared";
 import { resolveClick } from "./resolveClick";
 import { type MouseInput, resolveMouse } from "./resolveMouse";
-import { OS_FIELD_START_EDIT } from "../../3-commands/field/startEdit";
-import { FieldRegistry } from "../../6-components/field/FieldRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Sense: DOM → MouseInput
@@ -112,13 +112,19 @@ interface ClickSense {
   clickedEl: HTMLElement | null;
   clickedItemId: string | null;
   activeZoneId: string;
-  zone: ReturnType<typeof os.getState>["os"]["focus"]["zones"][string] | undefined;
+  zone:
+    | ReturnType<typeof os.getState>["os"]["focus"]["zones"][string]
+    | undefined;
   entry: ReturnType<typeof ZoneRegistry.get>;
 }
 
 function senseClick(target: HTMLElement): ClickSense | null {
   if (target.closest("[data-inspector]")) return null;
-  if (target.closest("[data-expand-trigger]") || target.closest("[data-check-trigger]")) return null;
+  if (
+    target.closest("[data-expand-trigger]") ||
+    target.closest("[data-check-trigger]")
+  )
+    return null;
 
   const state = os.getState();
   const { activeZoneId } = state.os.focus;
@@ -215,10 +221,10 @@ export function MouseListener() {
       const focusState = os.getState().os.focus;
       const activeZoneId = focusState.activeZoneId;
       preClickFocusedItemId = activeZoneId
-        ? focusState.zones[activeZoneId]?.focusedItemId ?? null
+        ? (focusState.zones[activeZoneId]?.focusedItemId ?? null)
         : null;
       const editingItemId = activeZoneId
-        ? focusState.zones[activeZoneId]?.editingItemId ?? null
+        ? (focusState.zones[activeZoneId]?.editingItemId ?? null)
         : null;
       lastMouseDownX = me.clientX;
       lastMouseDownY = me.clientY;
@@ -233,17 +239,17 @@ export function MouseListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-              meta: {
-                ...result.meta,
-                pipeline: {
-                  sensed: input,
-                  resolved: {
-                    preventDefault: result.preventDefault,
-                    fallback: result.fallback,
+                meta: {
+                  ...result.meta,
+                  pipeline: {
+                    sensed: input,
+                    resolved: {
+                      preventDefault: result.preventDefault,
+                      fallback: result.fallback,
+                    },
                   },
                 },
-              },
-            }
+              }
             : undefined;
           os.dispatch(cmd, opts);
         }
@@ -257,7 +263,13 @@ export function MouseListener() {
           FieldRegistry.getField(clickedItemId)
         ) {
           os.dispatch(OS_FIELD_START_EDIT(), {
-            meta: { input: { type: "MOUSE", key: "mousedown", elementId: clickedItemId } },
+            meta: {
+              input: {
+                type: "MOUSE",
+                key: "mousedown",
+                elementId: clickedItemId,
+              },
+            },
           });
           // Seed caret offset from click position (overrides ZoneState seed)
           seedCaretFromPoint(lastMouseDownX, lastMouseDownY, clickedItemId);

@@ -1,6 +1,5 @@
 import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { useState } from "react";
-import { HighlightContext } from "./builder/PropertiesPanel";
 import {
   BuilderApp,
   BuilderCanvasUI,
@@ -20,13 +19,16 @@ import {
   NCPNoticeBlock,
   NCPPricingBlock,
   NCPProductHeroBlock,
+  NCPRelatedServicesBlock,
   NCPSectionFooterBlock,
   NCPServicesBlock,
+  NCPTabNavBlock,
   PropertiesPanel,
   SectionSidebar,
   TabContainerBlock,
   type ViewportMode,
 } from "./builder";
+import { HighlightContext } from "./builder/PropertiesPanel";
 
 /**
  * BuilderPage
@@ -40,7 +42,14 @@ import {
 export default function BuilderPage() {
   usePlaywrightSpecs("builder", [runBuilderSpec]);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
-  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(
+    null,
+  );
+
+  const editingItemId = os.useComputed(
+    (s) => s.os.focus.zones["canvas"]?.editingItemId ?? null,
+  );
+  const canvasMode = editingItemId ? "edit" : "select";
 
   const getViewportStyle = () => {
     switch (viewport) {
@@ -54,7 +63,9 @@ export default function BuilderPage() {
   };
 
   return (
-    <HighlightContext.Provider value={{ highlightedItemId, setHighlightedItemId }}>
+    <HighlightContext.Provider
+      value={{ highlightedItemId, setHighlightedItemId }}
+    >
       <div className="flex-1 h-full flex bg-slate-100 overflow-hidden">
         {/* Section Sidebar (PPT-style) */}
         <SectionSidebar />
@@ -68,7 +79,10 @@ export default function BuilderPage() {
           />
 
           {/* Canvas Area — behavior declared in app.ts bind() */}
-          <BuilderCanvasUI.Zone className="absolute inset-0 overflow-y-auto custom-scrollbar bg-slate-100/50">
+          <BuilderCanvasUI.Zone
+            className="absolute inset-0 overflow-y-auto custom-scrollbar bg-slate-100/50"
+            data-canvas-mode={canvasMode}
+          >
             {/* Builder Cursor — visual focus indicator inside scroll container */}
             <BuilderCursor />
 
@@ -107,6 +121,8 @@ const BLOCK_COMPONENTS: Record<string, React.FC<{ id: string }>> = {
   "ncp-feature-cards": NCPFeatureCardsBlock,
   "ncp-notice": NCPNoticeBlock,
   "ncp-section-footer": NCPSectionFooterBlock,
+  "ncp-related-services": NCPRelatedServicesBlock,
+  "ncp-tab-nav": NCPTabNavBlock,
 };
 
 function SectionRenderer() {

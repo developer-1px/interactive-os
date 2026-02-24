@@ -173,7 +173,8 @@ export function createUndoRedoCommands<S extends WithHistory>(
           };
 
           // Store patches for re-undo
-          if (entry.inversePatches) pastEntry.inversePatches = entry.inversePatches;
+          if (entry.inversePatches)
+            pastEntry.inversePatches = entry.inversePatches;
           if (entry.patches) pastEntry.patches = entry.patches;
 
           draft.history.past.push(pastEntry);

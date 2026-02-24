@@ -42,14 +42,13 @@ export const PAGE_PRESETS: PagePreset[] = [
         type: "ncp-product-hero",
         fields: {
           "service-name": "CLOVA GreenEye",
-          "service-desc":
-            "이미지를 판독하여 유해 콘텐츠를 탐지하는 서비스",
+          "service-desc": "이미지를 판독하여 유해 콘텐츠를 탐지하는 서비스",
           "cta-primary": "이용 문의",
           "cta-secondary": "요금 계산",
           "breadcrumb-1": "서비스",
           "breadcrumb-2": "AI Services",
-          "tabs": "개요,상세 기능,요금,리소스,FAQ",
-          "deprecated": "true",
+          tabs: "개요,상세 기능,요금,리소스,FAQ",
+          deprecated: "true",
           "badge-text": "Deprecated",
           "notice-title": "CLOVA GreenEye 서비스 종료 안내",
           "notice-desc":
@@ -75,7 +74,7 @@ export const PAGE_PRESETS: PagePreset[] = [
         type: "ncp-feature-cards",
         fields: {
           "section-title": "서비스 특징",
-          "subtitle": "AI 학습 기반의 유해 이미지 탐지 자동화",
+          subtitle: "AI 학습 기반의 유해 이미지 탐지 자동화",
         },
         children: [
           {
@@ -118,7 +117,7 @@ export const PAGE_PRESETS: PagePreset[] = [
         type: "ncp-feature-cards",
         fields: {
           "section-title": "활용 사례",
-          "subtitle": "구현 시나리오 예시",
+          subtitle: "구현 시나리오 예시",
         },
         children: [
           {
@@ -141,7 +140,7 @@ export const PAGE_PRESETS: PagePreset[] = [
         type: "ncp-feature-cards",
         fields: {
           "section-title": "상세 기능",
-          "subtitle": "유해 콘텐츠 등급 분류 기준",
+          subtitle: "유해 콘텐츠 등급 분류 기준",
         },
         children: [
           {
@@ -194,8 +193,7 @@ export const PAGE_PRESETS: PagePreset[] = [
         type: "pricing",
         fields: {
           title: "요금",
-          sub:
-            "CLOVA GreenEye는 네이버 클라우드 플랫폼 콘솔에서 서비스 이용을 신청할 수 있으며 승인된 사용만 서비스 사용할 수 있습니다.\n이용 신청에 앞서 [이용 문의하기]를 클릭하여 이용 문의를 접수하고 담당 영업팀으로부터 이용 신청 관련 안내를 받아 이용 신청을 해주십시오.",
+          sub: "CLOVA GreenEye는 네이버 클라우드 플랫폼 콘솔에서 서비스 이용을 신청할 수 있으며 승인된 사용만 서비스 사용할 수 있습니다.\n이용 신청에 앞서 [이용 문의하기]를 클릭하여 이용 문의를 접수하고 담당 영업팀으로부터 이용 신청 관련 안내를 받아 이용 신청을 해주십시오.",
           cta: "이용 문의하기",
           tier1: "협의에 의한 별도 요금",
           tier2: "",
@@ -210,7 +208,7 @@ export const PAGE_PRESETS: PagePreset[] = [
         type: "ncp-feature-cards",
         fields: {
           "section-title": "리소스",
-          "subtitle": "사용 가이드",
+          subtitle: "사용 가이드",
         },
         children: [
           {

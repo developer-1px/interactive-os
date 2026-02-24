@@ -18,8 +18,15 @@ export function createSimpleTrigger(
   appId: string,
   command: BaseCommand,
 ): React.FC<{ children: ReactNode }> {
-  const SimpleTrigger: React.FC<{ children: ReactNode }> = ({ children, ...rest }) => {
-    return React.createElement(Trigger, { onActivate: command, children, ...rest });
+  const SimpleTrigger: React.FC<{ children: ReactNode }> = ({
+    children,
+    ...rest
+  }) => {
+    return React.createElement(Trigger, {
+      onActivate: command,
+      children,
+      ...rest,
+    });
   };
   SimpleTrigger.displayName = `${appId}.Trigger`;
   return SimpleTrigger;
@@ -91,7 +98,11 @@ export function createCompoundTrigger(
   const dialogId = config.id ?? `${appId}-dialog-${Date.now()}`;
 
   const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) =>
-    React.createElement(Dialog, { id: dialogId, ...(config.role !== undefined ? { role: config.role } : {}), children });
+    React.createElement(Dialog, {
+      id: dialogId,
+      ...(config.role !== undefined ? { role: config.role } : {}),
+      children,
+    });
   RootComponent.displayName = `${appId}.Dialog`;
 
   const TriggerComponent: React.FC<{
@@ -99,11 +110,11 @@ export function createCompoundTrigger(
     className?: string;
     asChild?: boolean;
   }> = ({ children, className, asChild }) =>
-      React.createElement(Dialog.Trigger, {
-        ...(className !== undefined ? { className } : {}),
-        ...(asChild !== undefined ? { asChild } : {}),
-        children,
-      });
+    React.createElement(Dialog.Trigger, {
+      ...(className !== undefined ? { className } : {}),
+      ...(asChild !== undefined ? { asChild } : {}),
+      children,
+    });
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
   // Dialog.Content must be used directly — DialogRoot identifies children by
@@ -124,7 +135,7 @@ export function createCompoundTrigger(
     children: ReactNode;
     className?: string;
   }> = ({ children, className, ...rest }) =>
-      React.createElement(Dialog.Close, { className, children, ...rest });
+    React.createElement(Dialog.Close, { className, children, ...rest });
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{

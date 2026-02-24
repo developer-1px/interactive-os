@@ -47,7 +47,8 @@ export function specWrapperPlugin(): Plugin {
       const e2eIndex = id.indexOf("e2e/");
       const apgIndex = id.indexOf("tests/apg/");
       const bddIndex = id.indexOf("tests/integration/");
-      const cutIndex = bddIndex >= 0 ? bddIndex : apgIndex >= 0 ? apgIndex : e2eIndex;
+      const cutIndex =
+        bddIndex >= 0 ? bddIndex : apgIndex >= 0 ? apgIndex : e2eIndex;
       const relativePath = cutIndex >= 0 ? id.slice(cutIndex) : id;
 
       const lines = code.split("\n");

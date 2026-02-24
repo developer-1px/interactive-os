@@ -83,7 +83,9 @@ test.describe("Builder Inline Editing & Panel Sync", () => {
   // T3: 패널 Accordion — 캔버스 선택 시 블록 자동 펼침
   // ═══════════════════════════════════════════════════════════════
 
-  test("캔버스 선택 → 패널에서 해당 블록 Accordion이 펼침", async ({ page }) => {
+  test("캔버스 선택 → 패널에서 해당 블록 Accordion이 펼침", async ({
+    page,
+  }) => {
     // Hero 아이템 클릭 후, Panel의 Hero accordion section이 펼쳐져야 함
     const panel = page.locator(".w-80");
 
@@ -92,15 +94,23 @@ test.describe("Builder Inline Editing & Panel Sync", () => {
     await expect(heroSection).toBeVisible();
 
     // Hero block's fields should be visible (auto-expanded because focused)
-    const titleInput = panel.locator("label:has-text('Title') + input, label:has-text('Title') + textarea").first();
+    const titleInput = panel
+      .locator(
+        "label:has-text('Title') + input, label:has-text('Title') + textarea",
+      )
+      .first();
     await expect(titleInput).toBeVisible();
   });
 
   test("패널 필드 수정 → 캔버스에 실시간 반영", async ({ page }) => {
     // Wait for Hero section to auto-expand after click
     const panel = page.locator(".w-80");
-    const titleInput = panel.locator("label:has-text('Title')").first()
-      .locator("..").locator("textarea, input").first();
+    const titleInput = panel
+      .locator("label:has-text('Title')")
+      .first()
+      .locator("..")
+      .locator("textarea, input")
+      .first();
     await expect(titleInput).toBeVisible();
 
     await titleInput.fill("패널에서 수정된 제목");
@@ -131,8 +141,12 @@ test.describe("Builder Inline Editing & Panel Sync", () => {
   test("패널 수정 후 다른 요소로 이동 → 값이 유지", async ({ page }) => {
     // Wait for Hero fields
     const panel = page.locator(".w-80");
-    const titleInput = panel.locator("label:has-text('Title')").first()
-      .locator("..").locator("textarea, input").first();
+    const titleInput = panel
+      .locator("label:has-text('Title')")
+      .first()
+      .locator("..")
+      .locator("textarea, input")
+      .first();
     await expect(titleInput).toBeVisible();
 
     await titleInput.fill("Persistent Title");
@@ -164,8 +178,12 @@ test.describe("Builder Inline Editing & Panel Sync", () => {
     const panel = page.locator(".w-80");
 
     // Hero 제목 수정 (패널)
-    const heroTitleInput = panel.locator("label:has-text('Title')").first()
-      .locator("..").locator("textarea, input").first();
+    const heroTitleInput = panel
+      .locator("label:has-text('Title')")
+      .first()
+      .locator("..")
+      .locator("textarea, input")
+      .first();
     await expect(heroTitleInput).toBeVisible();
     await heroTitleInput.fill("Modified Hero Title");
     await expect(page.locator("#ncp-hero-title")).toContainText(
@@ -176,8 +194,12 @@ test.describe("Builder Inline Editing & Panel Sync", () => {
     await page.locator("#ncp-news-title").click();
 
     // News 섹션이 자동 펼침
-    const newsFields = panel.locator("label:has-text('Title')").first()
-      .locator("..").locator("textarea, input").first();
+    const newsFields = panel
+      .locator("label:has-text('Title')")
+      .first()
+      .locator("..")
+      .locator("textarea, input")
+      .first();
     await expect(newsFields).toBeVisible();
 
     // News 제목 수정

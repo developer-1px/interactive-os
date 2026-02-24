@@ -1,10 +1,10 @@
 import type { BaseCommand } from "@kernel";
+import { OS_FIELD_COMMIT } from "@os/3-commands/field/commit";
 import { useFieldFocus } from "@os/5-hooks/useFieldHooks.ts";
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
-import { OS_FIELD_COMMIT } from "@os/3-commands/field/commit";
 
 import type { HTMLAttributes } from "react";
 import {
@@ -269,8 +269,6 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       setIsParentEditing(editingEl?.contains(innerRef.current) ?? false);
     }, [parentEditingCandidate]);
 
-
-
     const isContentEditable =
       mode === "deferred"
         ? (isFocused && isEditingThisField) || isParentEditing
@@ -324,7 +322,8 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       //   - editingItemId === other → EDIT→EDIT (OS_FIELD_START_EDIT already committed)
       //   - editingItemId === null → Escape (OS_FIELD_COMMIT already handled)
       if (exitedEditing && mode === "deferred") {
-        const currentEditingId = os.getState().os.focus.zones[zoneId]?.editingItemId;
+        const currentEditingId =
+          os.getState().os.focus.zones[zoneId]?.editingItemId;
         if (currentEditingId === fieldId) {
           handleCommit(FieldRegistry.getValue(fieldId));
           os.dispatch(OS_FIELD_COMMIT());
@@ -429,7 +428,6 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       "aria-multiline": fieldType === "block" || fieldType === "editor",
       tabIndex: 0,
       className: composeProps,
-      style: { cursor: isContentEditable ? "text" : "default" },
       "data-placeholder": placeholder,
       "data-mode": mode,
       // Error state for styling/accessibility

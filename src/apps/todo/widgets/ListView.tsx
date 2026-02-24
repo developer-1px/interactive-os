@@ -7,10 +7,17 @@
 import { TodoApp, TodoDraft, TodoList, TodoSearch } from "@apps/todo/app";
 import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { Field } from "@os/6-components/field/Field";
 import { useSelection } from "@os/5-hooks/useSelection";
-import { os } from "@/os/kernel";
-import { AlertTriangle, CheckCheck, Plus, Search, Trash2, X } from "lucide-react";
+import { Field } from "@os/6-components/field/Field";
+import { Trigger } from "@os/6-components/primitives/Trigger";
+import {
+  AlertTriangle,
+  CheckCheck,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react";
 
 export function ListView() {
   const visibleTodoIds = TodoApp.useComputed(selectVisibleTodoIds);
@@ -37,7 +44,10 @@ export function ListView() {
 
           {/* Search Bar */}
           <Field.Label className="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border transition-all bg-slate-50/80 border-slate-200 hover:border-slate-300 has-[[data-focused=true]]:border-indigo-400 has-[[data-focused=true]]:bg-white has-[[data-focused=true]]:ring-2 has-[[data-focused=true]]:ring-indigo-400/20 has-[[data-focused=true]]:shadow-sm mb-4">
-            <Search size={15} className="text-slate-400 shrink-0 group-has-[[data-focused=true]]:text-indigo-500 transition-colors" />
+            <Search
+              size={15}
+              className="text-slate-400 shrink-0 group-has-[[data-focused=true]]:text-indigo-500 transition-colors"
+            />
             <TodoSearch.Field
               name="SEARCH"
               value={searchQuery}
@@ -45,13 +55,14 @@ export function ListView() {
               placeholder="Search tasks... (Cmd+F)"
             />
             {searchQuery && (
-              <button
-                type="button"
-                className="p-0.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-                onClick={() => os.dispatch(TodoSearch.commands.clearSearch())}
-              >
-                <X size={14} />
-              </button>
+              <Trigger onActivate={TodoSearch.commands.clearSearch()}>
+                <button
+                  type="button"
+                  className="p-0.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </Trigger>
             )}
           </Field.Label>
 
@@ -108,30 +119,32 @@ export function ListView() {
             {selection.length} selected
           </span>
           <div className="w-px h-5 bg-slate-700" />
-          <button
-            type="button"
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-red-300 hover:text-white hover:bg-red-500/20 rounded-lg transition-colors"
-            onClick={() =>
-              os.dispatch(
-                TodoList.commands.requestDeleteTodo({ ids: [...selection] }),
-              )
-            }
+          <Trigger
+            onActivate={TodoList.commands.requestDeleteTodo({
+              ids: [...selection],
+            })}
           >
-            <Trash2 size={13} />
-            Delete
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-300 hover:text-white hover:bg-emerald-500/20 rounded-lg transition-colors"
-            onClick={() =>
-              os.dispatch(
-                TodoList.commands.bulkToggleCompleted({ ids: [...selection] }),
-              )
-            }
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-red-300 hover:text-white hover:bg-red-500/20 rounded-lg transition-colors"
+            >
+              <Trash2 size={13} />
+              Delete
+            </button>
+          </Trigger>
+          <Trigger
+            onActivate={TodoList.commands.bulkToggleCompleted({
+              ids: [...selection],
+            })}
           >
-            <CheckCheck size={13} />
-            Complete
-          </button>
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-300 hover:text-white hover:bg-emerald-500/20 rounded-lg transition-colors"
+            >
+              <CheckCheck size={13} />
+              Complete
+            </button>
+          </Trigger>
         </div>
       )}
 
@@ -156,7 +169,10 @@ export function ListView() {
 
           <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
             {/* cancelDeleteTodo is dispatched to clear pending IDs, OS_OVERLAY_CLOSE happens via Dialog.Close implicitly if not prevented */}
-            <DeleteDialog.Dismiss className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors font-medium cursor-pointer" onActivate={TodoList.commands.cancelDeleteTodo()}>
+            <DeleteDialog.Dismiss
+              className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors font-medium cursor-pointer"
+              onActivate={TodoList.commands.cancelDeleteTodo()}
+            >
               Cancel
             </DeleteDialog.Dismiss>
             {/* Confirm uses the command defined in createTrigger config */}

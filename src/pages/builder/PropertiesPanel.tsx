@@ -6,7 +6,14 @@ import {
   Globe,
   Layout,
 } from "lucide-react";
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   BuilderApp,
   BuilderPanelUI,
@@ -15,10 +22,10 @@ import {
 } from "@/apps/builder/app";
 import type { Block } from "@/apps/builder/model/appState";
 import { getPropertyDef } from "@/apps/builder/model/blockSchemas";
-import { getWidget } from "./widgets/PropertyWidgets";
 import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
 import { os } from "@/os/kernel";
+import { getWidget } from "./widgets/PropertyWidgets";
 
 const CANVAS_ZONE_ID = "canvas";
 const PANEL_ZONE_ID = "panel";
@@ -35,7 +42,7 @@ const HighlightContext = createContext<{
   setHighlightedItemId: (id: string | null) => void;
 }>({
   highlightedItemId: null,
-  setHighlightedItemId: () => { },
+  setHighlightedItemId: () => {},
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -65,7 +72,9 @@ export function PropertiesPanel() {
   }, [blocks]);
 
   // ── Panel highlight: field focus → canvas highlight ──
-  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(
+    null,
+  );
 
   // ── Section header refs for scroll ──
   const headerRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -81,7 +90,10 @@ export function PropertiesPanel() {
     // Expand ancestors via OS_EXPAND
     const ancestors = resolveAncestorIds(ownerBlockId, blocks);
     for (const id of ancestors) {
-      os.dispatch({ type: "OS_EXPAND", payload: { itemId: id, zoneId: PANEL_ZONE_ID, action: "expand" } });
+      os.dispatch({
+        type: "OS_EXPAND",
+        payload: { itemId: id, zoneId: PANEL_ZONE_ID, action: "expand" },
+      });
     }
 
     // T16-3: Scroll to SECTION HEADER only (not to individual fields)
@@ -101,7 +113,9 @@ export function PropertiesPanel() {
   );
 
   return (
-    <HighlightContext.Provider value={{ highlightedItemId, setHighlightedItemId }}>
+    <HighlightContext.Provider
+      value={{ highlightedItemId, setHighlightedItemId }}
+    >
       <div className="w-80 border-l border-slate-200 bg-white h-full flex flex-col shadow-xl z-20">
         <PanelActionBar />
 
@@ -190,16 +204,19 @@ function BlockAccordionSection({
             w-full flex items-center justify-between px-4 cursor-pointer
             transition-colors
             group-focus:ring-2 group-focus:ring-inset group-focus:ring-indigo-500/40
-            ${isRoot
-              ? `py-2.5 border-t border-slate-200 ${isActive ? "bg-indigo-50" : "bg-slate-50/80"}`
-              : `py-2 ${isActive ? "bg-indigo-50/50" : "hover:bg-slate-50"}`
+            ${
+              isRoot
+                ? `py-2.5 border-t border-slate-200 ${isActive ? "bg-indigo-50" : "bg-slate-50/80"}`
+                : `py-2 ${isActive ? "bg-indigo-50/50" : "hover:bg-slate-50"}`
             }
           `}
           style={{ paddingLeft: `${16 + depth * 16}px` }}
         >
           {/* Left: Icon + Label + Badge */}
           <div className="flex items-center gap-2 min-w-0">
-            <span className={`shrink-0 ${isActive ? "text-indigo-500" : "text-slate-400"}`}>
+            <span
+              className={`shrink-0 ${isActive ? "text-indigo-500" : "text-slate-400"}`}
+            >
               <Layout size={isRoot ? 14 : 12} />
             </span>
             <span
@@ -217,20 +234,26 @@ function BlockAccordionSection({
           </div>
 
           {/* Right: Chevron — does not affect left keyline */}
-          <span className={`shrink-0 ml-2 transition-transform duration-200 ${isActive ? "text-indigo-400" : "text-slate-300"}`}>
-            {expanded ? (
-              <ChevronDown size={14} />
-            ) : (
-              <ChevronRight size={14} />
-            )}
+          <span
+            className={`shrink-0 ml-2 transition-transform duration-200 ${isActive ? "text-indigo-400" : "text-slate-300"}`}
+          >
+            {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </span>
         </div>
       </BuilderPanelUI.Item>
 
       {/* ── Content (outside Item — clicks here don't trigger OS_ACTIVATE) ── */}
       {expanded && (
-        <div className={isRoot ? "bg-white" : "bg-white/50"} onKeyDown={(e) => e.stopPropagation()}>
-          <BlockFieldsForm block={block} isExpanded={isExpanded} setHeaderRef={setHeaderRef} focusedCanvasId={focusedCanvasId} />
+        <div
+          className={isRoot ? "bg-white" : "bg-white/50"}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <BlockFieldsForm
+            block={block}
+            isExpanded={isExpanded}
+            setHeaderRef={setHeaderRef}
+            focusedCanvasId={focusedCanvasId}
+          />
         </div>
       )}
     </>
@@ -241,30 +264,34 @@ function BlockAccordionSection({
 // BlockFieldsForm — Generic field editor for a block's fields
 // ═══════════════════════════════════════════════════════════════════
 
-function BlockFieldsForm({ block, isExpanded, setHeaderRef, focusedCanvasId }: {
+function BlockFieldsForm({
+  block,
+  isExpanded,
+  setHeaderRef,
+  focusedCanvasId,
+}: {
   block: Block;
   isExpanded: (id: string) => boolean;
   setHeaderRef: (id: string) => (el: HTMLElement | null) => void;
   focusedCanvasId: string | null;
 }) {
-  const fields = BuilderApp.useComputed(
-    (s) => {
-      function find(blocks: Block[]): Block | null {
-        for (const b of blocks) {
-          if (b.id === block.id) return b;
-          if (b.children) {
-            const r = find(b.children);
-            if (r) return r;
-          }
+  const fields = BuilderApp.useComputed((s) => {
+    function find(blocks: Block[]): Block | null {
+      for (const b of blocks) {
+        if (b.id === block.id) return b;
+        if (b.children) {
+          const r = find(b.children);
+          if (r) return r;
         }
-        return null;
       }
-      return find(s.data.blocks)?.fields ?? {};
-    },
-  ) as unknown as Record<string, string>;
+      return null;
+    }
+    return find(s.data.blocks)?.fields ?? {};
+  }) as unknown as Record<string, string>;
 
   const entries = Object.entries(fields);
-  const hasContent = entries.length > 0 || (block.children && block.children.length > 0);
+  const hasContent =
+    entries.length > 0 || (block.children && block.children.length > 0);
 
   if (!hasContent) {
     return (
@@ -359,7 +386,10 @@ function ChildCardField({
 
   return (
     <>
-      <BuilderPanelUI.Item id={child.id} className="outline-none group focus:outline-none">
+      <BuilderPanelUI.Item
+        id={child.id}
+        className="outline-none group focus:outline-none"
+      >
         {/* Card preview row — clickable, same keyline as form labels */}
         <div
           ref={setHeaderRef(child.id)}
@@ -367,17 +397,22 @@ function ChildCardField({
             flex items-center justify-between px-2 py-2 rounded-md cursor-pointer
             border transition-colors
             group-focus:ring-2 group-focus:ring-indigo-500/40
-            ${isActive
-              ? "border-indigo-200 bg-indigo-50/50"
-              : expanded
-                ? "border-slate-200 bg-slate-50/50"
-                : "border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50"
+            ${
+              isActive
+                ? "border-indigo-200 bg-indigo-50/50"
+                : expanded
+                  ? "border-slate-200 bg-slate-50/50"
+                  : "border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50"
             }
           `}
         >
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[10px] text-slate-400 font-mono w-4 shrink-0">{index + 1}</span>
-            <span className={`text-[12px] truncate ${isActive ? "text-indigo-700 font-semibold" : "text-slate-700 font-medium"}`}>
+            <span className="text-[10px] text-slate-400 font-mono w-4 shrink-0">
+              {index + 1}
+            </span>
+            <span
+              className={`text-[12px] truncate ${isActive ? "text-indigo-700 font-semibold" : "text-slate-700 font-medium"}`}
+            >
               {title}
             </span>
             {badge && (
@@ -386,7 +421,9 @@ function ChildCardField({
               </span>
             )}
           </div>
-          <span className={`shrink-0 ml-1 ${isActive ? "text-indigo-400" : "text-slate-300"}`}>
+          <span
+            className={`shrink-0 ml-1 ${isActive ? "text-indigo-400" : "text-slate-300"}`}
+          >
             {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
           </span>
         </div>
@@ -394,7 +431,10 @@ function ChildCardField({
 
       {/* Expanded: inline form fields (outside Item) */}
       {expanded && (
-        <div className="pl-6 pr-1 py-2 space-y-2" onKeyDown={(e) => e.stopPropagation()}>
+        <div
+          className="pl-6 pr-1 py-2 space-y-2"
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           {Object.entries(child.fields ?? {}).map(([key, val]) => (
             <FieldInput
               key={key}
@@ -493,14 +533,27 @@ function PageMetaSection() {
       {/* Meta Fields */}
       {expanded && (
         <div className="px-4 py-3 space-y-2.5 bg-white">
-          <MetaInput label="Page Title" placeholder="Landing Page" defaultValue="AI 시대를 위한 가장 완벽한 플랫폼" />
-          <MetaInput label="Slug" placeholder="/landing" defaultValue="/landing" icon={<Globe size={12} />} />
+          <MetaInput
+            label="Page Title"
+            placeholder="Landing Page"
+            defaultValue="AI 시대를 위한 가장 완벽한 플랫폼"
+          />
+          <MetaInput
+            label="Slug"
+            placeholder="/landing"
+            defaultValue="/landing"
+            icon={<Globe size={12} />}
+          />
           <MetaTextarea
             label="Meta Description"
             placeholder="A brief description of the page for search engines..."
             defaultValue="네이버클라우드의 기술력으로 완성된 하이퍼스케일 AI 스튜디오를 경험하세요."
           />
-          <MetaInput label="Keywords" placeholder="cloud, AI, platform" defaultValue="cloud, AI, platform, naver" />
+          <MetaInput
+            label="Keywords"
+            placeholder="cloud, AI, platform"
+            defaultValue="cloud, AI, platform, naver"
+          />
         </div>
       )}
     </div>

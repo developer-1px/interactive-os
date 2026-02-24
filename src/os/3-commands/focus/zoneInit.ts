@@ -11,13 +11,13 @@ import { initialZoneState } from "../../state/initial";
  * Runs in useMemo (render-time) for SSR compatibility.
  */
 export const OS_ZONE_INIT = os.defineCommand(
-    "OS_ZONE_INIT",
-    (ctx) => (zoneId: string) => {
-        if (ctx.state.os.focus.zones[zoneId]) return; // already init
-        return {
-            state: produce(ctx.state, (draft) => {
-                draft.os.focus.zones[zoneId] = { ...initialZoneState };
-            }),
-        };
-    },
+  "OS_ZONE_INIT",
+  (ctx) => (zoneId: string) => {
+    if (ctx.state.os.focus.zones[zoneId]) return; // already init
+    return {
+      state: produce(ctx.state, (draft) => {
+        draft.os.focus.zones[zoneId] = { ...initialZoneState };
+      }),
+    };
+  },
 );

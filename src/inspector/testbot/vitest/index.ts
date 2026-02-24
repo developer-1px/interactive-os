@@ -11,11 +11,7 @@
  * expect is powered by @vitest/expect (full chai-based matcher set).
  */
 
-import {
-  chai,
-  JestChaiExpect,
-  JestAsymmetricMatchers,
-} from "@vitest/expect";
+import { chai, JestAsymmetricMatchers, JestChaiExpect } from "@vitest/expect";
 import { pushBeforeEach, pushDescribe, pushTest } from "../playwright/registry";
 
 // ── expect (full vitest-compatible) ──────────────────────────────
@@ -30,7 +26,7 @@ export function describe(name: string, fn: () => void) {
   pushDescribe(name, fn);
 }
 
-describe.skip = () => { };
+describe.skip = () => {};
 describe.only = (name: string, fn: () => void) => {
   pushDescribe(name, fn);
 };
@@ -43,7 +39,7 @@ export function it(name: string, fn: Function) {
 
 export const test = it;
 
-it.skip = () => { };
+it.skip = () => {};
 it.only = (name: string, fn: Function) => {
   pushTest(name, fn);
 };

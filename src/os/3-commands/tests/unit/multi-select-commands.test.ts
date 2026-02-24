@@ -94,11 +94,13 @@ describe("OS_DELETE with multi-selection", () => {
 
     // Callback called exactly ONCE with full cursor
     expect(onDelete).toHaveBeenCalledTimes(1);
-    expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({
-      focusId: "item-3",
-      selection: ["item-1", "item-2", "item-3"],
-      anchor: "item-1",
-    }));
+    expect(onDelete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        focusId: "item-3",
+        selection: ["item-1", "item-2", "item-3"],
+        anchor: "item-1",
+      }),
+    );
   });
 
   it("dispatches all commands returned by callback", () => {
@@ -148,11 +150,13 @@ describe("OS_DELETE with multi-selection", () => {
 
     os.dispatch(OS_DELETE());
 
-    expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({
-      focusId: "item-1",
-      selection: [],
-      anchor: null,
-    }));
+    expect(onDelete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        focusId: "item-1",
+        selection: [],
+        anchor: null,
+      }),
+    );
   });
 
   it("preserves selection after multi-delete — app decides when to clear", () => {

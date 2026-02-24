@@ -12,8 +12,8 @@
  *   - Click on item: OS_FOCUS → OS_SELECT (replace/toggle/range)
  */
 
-import { describe, expect, it } from "vitest";
 import { createOsPage } from "@os/createOsPage";
+import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // Focus (Mouse Click Simulation)

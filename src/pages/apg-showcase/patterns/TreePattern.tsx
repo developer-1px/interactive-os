@@ -4,28 +4,46 @@
  * All folders are expandable. No section headers.
  * Data-driven: tree structure in data, flat rendering in DOM.
  */
-import { Icon } from "@/components/Icon";
-import { useFlatTree } from "@/os/5-hooks/useFlatTree";
-import { defineApp } from "@/os/defineApp";
+
 import { Item } from "@os/6-components/primitives/Item";
 import clsx from "clsx";
+import { Icon } from "@/components/Icon";
 import type { DocItem, FlatTreeNode } from "@/docs-viewer/docsUtils";
 import { flattenVisibleTree } from "@/docs-viewer/docsUtils";
+import { useFlatTree } from "@/os/5-hooks/useFlatTree";
+import { defineApp } from "@/os/defineApp";
 
 // ── Static tree data (VS Code-style file explorer) ──
 
 const fileTree: DocItem[] = [
   {
-    name: "src", path: "src", type: "folder", children: [
+    name: "src",
+    path: "src",
+    type: "folder",
+    children: [
       {
-        name: "components", path: "src/components", type: "folder", children: [
-          { name: "Button.tsx", path: "src/components/Button.tsx", type: "file" },
-          { name: "Dialog.tsx", path: "src/components/Dialog.tsx", type: "file" },
+        name: "components",
+        path: "src/components",
+        type: "folder",
+        children: [
+          {
+            name: "Button.tsx",
+            path: "src/components/Button.tsx",
+            type: "file",
+          },
+          {
+            name: "Dialog.tsx",
+            path: "src/components/Dialog.tsx",
+            type: "file",
+          },
           { name: "Input.tsx", path: "src/components/Input.tsx", type: "file" },
         ],
       },
       {
-        name: "hooks", path: "src/hooks", type: "folder", children: [
+        name: "hooks",
+        path: "src/hooks",
+        type: "folder",
+        children: [
           { name: "useAuth.ts", path: "src/hooks/useAuth.ts", type: "file" },
           { name: "useTheme.ts", path: "src/hooks/useTheme.ts", type: "file" },
         ],
@@ -35,7 +53,10 @@ const fileTree: DocItem[] = [
     ],
   },
   {
-    name: "docs", path: "docs", type: "folder", children: [
+    name: "docs",
+    path: "docs",
+    type: "folder",
+    children: [
       { name: "README.md", path: "docs/README.md", type: "file" },
       { name: "CHANGELOG.md", path: "docs/CHANGELOG.md", type: "file" },
     ],
@@ -94,13 +115,17 @@ function TreeRow({ node }: { node: FlatTreeNode }) {
   if (node.type === "folder") {
     return (
       <ExplorerUI.Item id={node.id}>
-        {({ isFocused, isExpanded }: { isFocused: boolean; isExpanded: boolean }) => (
+        {({
+          isFocused,
+          isExpanded,
+        }: {
+          isFocused: boolean;
+          isExpanded: boolean;
+        }) => (
           <div
             className={clsx(
               "flex items-center gap-1.5 py-0.5 rounded text-[13px] cursor-pointer",
-              isFocused
-                ? "bg-blue-100 text-blue-900"
-                : "hover:bg-gray-100",
+              isFocused ? "bg-blue-100 text-blue-900" : "hover:bg-gray-100",
             )}
             style={{ paddingLeft: `${node.level * 16 + 8}px` }}
           >
@@ -125,14 +150,16 @@ function TreeRow({ node }: { node: FlatTreeNode }) {
         <div
           className={clsx(
             "flex items-center gap-1.5 py-0.5 rounded text-[13px] cursor-pointer",
-            isFocused
-              ? "bg-blue-100 text-blue-900"
-              : "hover:bg-gray-100",
+            isFocused ? "bg-blue-100 text-blue-900" : "hover:bg-gray-100",
           )}
           style={{ paddingLeft: `${node.level * 16 + 8}px` }}
         >
           <span className="w-[14px]" />
-          <Icon name={fileIcon(node.name)} size={16} className={iconColor(node.name) + " shrink-0"} />
+          <Icon
+            name={fileIcon(node.name)}
+            size={16}
+            className={iconColor(node.name) + " shrink-0"}
+          />
           <span className="truncate">{node.name}</span>
         </div>
       )}
@@ -142,14 +169,22 @@ function TreeRow({ node }: { node: FlatTreeNode }) {
 
 export function TreePattern() {
   // VS Code style: no sectionLevel, all folders are expandable
-  const visibleNodes = useFlatTree("apg-explorer", fileTree, flattenVisibleTree);
+  const visibleNodes = useFlatTree(
+    "apg-explorer",
+    fileTree,
+    flattenVisibleTree,
+  );
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-      <h3 className="text-lg font-semibold mb-2">VS Code-style File Explorer</h3>
+      <h3 className="text-lg font-semibold mb-2">
+        VS Code-style File Explorer
+      </h3>
       <p className="text-sm text-gray-500 mb-4">
-        Flat tree rendering. <kbd>↑↓</kbd> navigate, <kbd>←→</kbd> expand/collapse,
-        <kbd>Enter</kbd> or click to toggle folders. Data-driven — no recursive components.
+        Flat tree rendering. <kbd>↑↓</kbd> navigate, <kbd>←→</kbd>{" "}
+        expand/collapse,
+        <kbd>Enter</kbd> or click to toggle folders. Data-driven — no recursive
+        components.
       </p>
 
       <ExplorerUI.Zone className="flex flex-col" aria-label="File Explorer">

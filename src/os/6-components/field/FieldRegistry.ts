@@ -85,13 +85,13 @@ function register(id: string, config: FieldConfig) {
   const newState: FieldState = existing
     ? existing.state
     : {
-      value: defaultValue,
-      defaultValue,
-      isValid: true,
-      isDirty: false,
-      error: null,
-      caretPosition: null,
-    };
+        value: defaultValue,
+        defaultValue,
+        isValid: true,
+        isDirty: false,
+        error: null,
+        caretPosition: null,
+      };
 
   newFields.set(id, {
     config,

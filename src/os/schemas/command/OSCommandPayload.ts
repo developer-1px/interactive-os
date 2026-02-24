@@ -33,9 +33,9 @@ export type OSCommandUnion =
   | { type: typeof OS_COMMANDS.OS_ACTIVATE; payload?: OSActivatePayload }
   | { type: typeof OS_COMMANDS.OS_ESCAPE; payload?: undefined }
   | {
-    type: typeof OS_COMMANDS.OS_FIELD_START_EDIT;
-    payload?: { fieldId?: string };
-  }
+      type: typeof OS_COMMANDS.OS_FIELD_START_EDIT;
+      payload?: { fieldId?: string };
+    }
   | { type: typeof OS_COMMANDS.OS_FIELD_COMMIT; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.OS_FIELD_CANCEL; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.UNDO; payload?: undefined }

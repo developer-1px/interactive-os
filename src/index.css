@@ -22,8 +22,19 @@
 
 /* Disable scroll-margin during editing — prevents browser's native
    focus/caret scroll from adding unwanted offset */
-[data-item-id][contenteditable="true"] {
+[data-item-id][contenteditable="plaintext-only"] {
   scroll-margin: 0;
+}
+
+/* Builder canvas: cursor style per mode.
+   SELECT mode = default (pointer), EDIT mode = ALL text fields show i-beam.
+   data-canvas-mode is set on the Zone wrapper by BuilderPage. */
+[data-canvas-mode="select"] [data-mode="deferred"] {
+  cursor: default;
+}
+
+[data-canvas-mode="edit"] [data-mode="deferred"] {
+  cursor: text;
 }
 
 /* BuilderCursor provides visual focus — suppress native ring in canvas only */

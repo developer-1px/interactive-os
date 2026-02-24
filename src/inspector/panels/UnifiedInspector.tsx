@@ -130,7 +130,13 @@ const ARRAY_INDEX_RE = /^(.+)\[(\d+)\]$/;
 
 type DisplayEntry =
   | { kind: "single"; tx: Transaction; filteredIndex: number }
-  | { kind: "group"; representative: Transaction; count: number; txs: Transaction[]; filteredIndex: number };
+  | {
+      kind: "group";
+      representative: Transaction;
+      count: number;
+      txs: Transaction[];
+      filteredIndex: number;
+    };
 
 /** Group consecutive transactions with the same command type into collapsed entries */
 function groupConsecutive(txs: Transaction[]): DisplayEntry[] {
@@ -141,7 +147,10 @@ function groupConsecutive(txs: Transaction[]): DisplayEntry[] {
     const current = txs[i]!;
     const cmdType = current.command?.type ?? "NO_COMMAND";
     let j = i + 1;
-    while (j < txs.length && (txs[j]!.command?.type ?? "NO_COMMAND") === cmdType) {
+    while (
+      j < txs.length &&
+      (txs[j]!.command?.type ?? "NO_COMMAND") === cmdType
+    ) {
       j++;
     }
     const runLength = j - i;
@@ -288,9 +297,14 @@ export function UnifiedInspector({
     [filteredTx],
   );
 
-  const lastEntry = displayEntries.length > 0 ? displayEntries[displayEntries.length - 1] : undefined;
+  const lastEntry =
+    displayEntries.length > 0
+      ? displayEntries[displayEntries.length - 1]
+      : undefined;
   const latestTxId = lastEntry
-    ? lastEntry.kind === "single" ? lastEntry.tx.id : lastEntry.representative.id
+    ? lastEntry.kind === "single"
+      ? lastEntry.tx.id
+      : lastEntry.representative.id
     : undefined;
   const expandedIds = new Set(manualToggles);
 
@@ -440,10 +454,11 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
-                    ? "bg-[#1e293b] text-white border-[#1e293b]"
-                    : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                    }`}
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
+                    active
+                      ? "bg-[#1e293b] text-white border-[#1e293b]"
+                      : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                  }`}
                 >
                   {group}
                 </button>
@@ -520,12 +535,15 @@ export function UnifiedInspector({
                   const firstTx = entry.txs[0]!;
                   const prevEntry = i > 0 ? displayEntries[i - 1] : undefined;
                   const prevTx = prevEntry
-                    ? prevEntry.kind === "single" ? prevEntry.tx : prevEntry.representative
+                    ? prevEntry.kind === "single"
+                      ? prevEntry.tx
+                      : prevEntry.representative
                     : undefined;
                   const timeDeltaMs = prevTx
                     ? representative.timestamp - prevTx.timestamp
                     : 0;
-                  const totalDurationMs = representative.timestamp - firstTx.timestamp;
+                  const totalDurationMs =
+                    representative.timestamp - firstTx.timestamp;
                   return (
                     <CollapsedGroup
                       key={`group-${representative.id}`}
@@ -541,7 +559,9 @@ export function UnifiedInspector({
                 const { tx, filteredIndex } = entry;
                 const prevEntry = i > 0 ? displayEntries[i - 1] : undefined;
                 const prevTx = prevEntry
-                  ? prevEntry.kind === "single" ? prevEntry.tx : prevEntry.representative
+                  ? prevEntry.kind === "single"
+                    ? prevEntry.tx
+                    : prevEntry.representative
                   : undefined;
                 const timeDeltaMs = prevTx
                   ? tx.timestamp - prevTx.timestamp

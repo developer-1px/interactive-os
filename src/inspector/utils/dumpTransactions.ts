@@ -17,9 +17,9 @@ import type { Transaction } from "@kernel/core/transaction";
 import { inferSignal } from "./inferSignal";
 
 interface InspectorProvider {
-    inspector: {
-        getTransactions(): readonly Transaction[];
-    };
+  inspector: {
+    getTransactions(): readonly Transaction[];
+  };
 }
 
 /**
@@ -29,36 +29,36 @@ interface InspectorProvider {
  * @param label  - Section label for the log block
  */
 export function dumpTransactions(
-    kernel: InspectorProvider,
-    label: string,
+  kernel: InspectorProvider,
+  label: string,
 ): void {
-    const txs = kernel.inspector.getTransactions();
-    const lines: string[] = [];
+  const txs = kernel.inspector.getTransactions();
+  const lines: string[] = [];
 
-    lines.push("");
-    lines.push(`══════ ${label} ══════`);
-    lines.push(`Total transactions: ${txs.length}`);
+  lines.push("");
+  lines.push(`══════ ${label} ══════`);
+  lines.push(`Total transactions: ${txs.length}`);
 
-    for (const tx of txs) {
-        const signal = inferSignal(tx);
-        const diffStr =
-            signal.diff.length > 0
-                ? signal.diff
-                    .map(
-                        (d) =>
-                            `    ${d.path}: ${JSON.stringify(d.from)} → ${JSON.stringify(d.to)}`,
-                    )
-                    .join("\n")
-                : "    (no state change)";
+  for (const tx of txs) {
+    const signal = inferSignal(tx);
+    const diffStr =
+      signal.diff.length > 0
+        ? signal.diff
+            .map(
+              (d) =>
+                `    ${d.path}: ${JSON.stringify(d.from)} → ${JSON.stringify(d.to)}`,
+            )
+            .join("\n")
+        : "    (no state change)";
 
-        lines.push(
-            `  [${signal.type}] ${signal.trigger.kind} "${signal.trigger.raw}" → ${signal.command.type} (scope: ${signal.group})`,
-        );
-        lines.push(diffStr);
-    }
+    lines.push(
+      `  [${signal.type}] ${signal.trigger.kind} "${signal.trigger.raw}" → ${signal.command.type} (scope: ${signal.group})`,
+    );
+    lines.push(diffStr);
+  }
 
-    lines.push(`══════ END ══════`);
-    lines.push("");
+  lines.push(`══════ END ══════`);
+  lines.push("");
 
-    console.log(lines.join("\n"));
+  console.log(lines.join("\n"));
 }

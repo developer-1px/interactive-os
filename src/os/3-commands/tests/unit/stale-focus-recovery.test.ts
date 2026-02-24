@@ -11,124 +11,127 @@
  * Related: PRD kernel-items FR2, Discussion 2026-0222-2031
  */
 
-import { beforeEach, describe, expect, it } from "vitest";
-import { createOsPage } from "@os/createOsPage";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { createOsPage } from "@os/createOsPage";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Focus Stack — Stale Focus Recovery", () => {
-    let t: ReturnType<typeof createOsPage>;
+  let t: ReturnType<typeof createOsPage>;
 
-    beforeEach(() => {
-        t = createOsPage();
+  beforeEach(() => {
+    t = createOsPage();
+  });
+
+  it("overlay pop restores focus to stored item when it still exists", () => {
+    const items = { current: ["a", "b", "c", "d"] };
+    t.setItems(items.current);
+    t.setActiveZone("list", "b");
+
+    // Register getItems on list zone
+    const listEntry = ZoneRegistry.get("list")!;
+    ZoneRegistry.register("list", {
+      ...listEntry,
+      getItems: () => items.current,
     });
 
-    it("overlay pop restores focus to stored item when it still exists", () => {
-        const items = { current: ["a", "b", "c", "d"] };
-        t.setItems(items.current);
-        t.setActiveZone("list", "b");
+    // Overlay open → focus stack push
+    t.dispatch(t.OS_STACK_PUSH({}));
+    t.setActiveZone("dialog", "ok-btn");
+    t.setItems(["ok-btn", "cancel-btn"]);
 
-        // Register getItems on list zone
-        const listEntry = ZoneRegistry.get("list")!;
-        ZoneRegistry.register("list", { ...listEntry, getItems: () => items.current });
+    // Overlay close → focus stack pop (item "b" still exists)
+    t.setItems(items.current);
+    t.dispatch(t.OS_STACK_POP({}));
 
-        // Overlay open → focus stack push
-        t.dispatch(t.OS_STACK_PUSH({}));
-        t.setActiveZone("dialog", "ok-btn");
-        t.setItems(["ok-btn", "cancel-btn"]);
+    expect(t.focusedItemId()).toBe("b"); // restored correctly
+    expect(t.activeZoneId()).toBe("list");
+  });
 
-        // Overlay close → focus stack pop (item "b" still exists)
-        t.setItems(items.current);
-        t.dispatch(t.OS_STACK_POP({}));
+  it("overlay pop resolves to next neighbor when stored item is deleted", () => {
+    t.setItems(["a", "b", "c", "d"]);
+    t.setActiveZone("list", "b");
 
-        expect(t.focusedItemId()).toBe("b"); // restored correctly
-        expect(t.activeZoneId()).toBe("list");
+    // Overlay open → focus stack push (items still contain "b", index=1)
+    t.dispatch(t.OS_STACK_PUSH({}));
+    t.setActiveZone("dialog", "ok-btn");
+
+    // App deletes "b" during dialog — update items for the list zone
+    const listEntry = ZoneRegistry.get("list")!;
+    ZoneRegistry.register("list", {
+      ...listEntry,
+      getItems: () => ["a", "c", "d"], // "b" removed
     });
 
-    it("overlay pop resolves to next neighbor when stored item is deleted", () => {
-        t.setItems(["a", "b", "c", "d"]);
-        t.setActiveZone("list", "b");
+    // Overlay close → focus stack pop
+    t.setItems(["a", "c", "d"]);
+    t.dispatch(t.OS_STACK_POP({}));
 
-        // Overlay open → focus stack push (items still contain "b", index=1)
-        t.dispatch(t.OS_STACK_PUSH({}));
-        t.setActiveZone("dialog", "ok-btn");
+    // Focus should resolve to "c" (next neighbor at index 1), not "b"
+    expect(t.focusedItemId()).toBe("c");
+    expect(t.activeZoneId()).toBe("list");
+  });
 
-        // App deletes "b" during dialog — update items for the list zone
-        const listEntry = ZoneRegistry.get("list")!;
-        ZoneRegistry.register("list", {
-            ...listEntry,
-            getItems: () => ["a", "c", "d"], // "b" removed
-        });
+  it("overlay pop resolves to prev neighbor when deleted item was last", () => {
+    t.setItems(["a", "b", "c"]);
+    t.setActiveZone("list", "c");
 
-        // Overlay close → focus stack pop
-        t.setItems(["a", "c", "d"]);
-        t.dispatch(t.OS_STACK_POP({}));
+    // Overlay open (items contain "c", index=2)
+    t.dispatch(t.OS_STACK_PUSH({}));
+    t.setActiveZone("dialog", "ok-btn");
 
-        // Focus should resolve to "c" (next neighbor at index 1), not "b"
-        expect(t.focusedItemId()).toBe("c");
-        expect(t.activeZoneId()).toBe("list");
+    // Delete "c" (last item)
+    const listEntry = ZoneRegistry.get("list")!;
+    ZoneRegistry.register("list", {
+      ...listEntry,
+      getItems: () => ["a", "b"], // "c" deleted
     });
 
-    it("overlay pop resolves to prev neighbor when deleted item was last", () => {
-        t.setItems(["a", "b", "c"]);
-        t.setActiveZone("list", "c");
+    t.setItems(["a", "b"]);
+    t.dispatch(t.OS_STACK_POP({}));
 
-        // Overlay open (items contain "c", index=2)
-        t.dispatch(t.OS_STACK_PUSH({}));
-        t.setActiveZone("dialog", "ok-btn");
+    // index=2, items=["a","b"] → clamped to index 1 → "b"
+    expect(t.focusedItemId()).toBe("b");
+  });
 
-        // Delete "c" (last item)
-        const listEntry = ZoneRegistry.get("list")!;
-        ZoneRegistry.register("list", {
-            ...listEntry,
-            getItems: () => ["a", "b"], // "c" deleted
-        });
+  it("overlay pop clears focus when all items are deleted", () => {
+    const items = { current: ["a"] as string[] };
+    t.setItems(items.current);
+    t.setActiveZone("list", "a");
 
-        t.setItems(["a", "b"]);
-        t.dispatch(t.OS_STACK_POP({}));
-
-        // index=2, items=["a","b"] → clamped to index 1 → "b"
-        expect(t.focusedItemId()).toBe("b");
+    const zoneEntry = ZoneRegistry.get("list")!;
+    ZoneRegistry.register("list", {
+      ...zoneEntry,
+      getItems: () => items.current,
     });
 
-    it("overlay pop clears focus when all items are deleted", () => {
-        const items = { current: ["a"] as string[] };
-        t.setItems(items.current);
-        t.setActiveZone("list", "a");
+    t.dispatch(t.OS_STACK_PUSH({}));
+    t.setActiveZone("dialog", "ok-btn");
 
-        const zoneEntry = ZoneRegistry.get("list")!;
-        ZoneRegistry.register("list", {
-            ...zoneEntry,
-            getItems: () => items.current,
-        });
+    // Delete all items during dialog
+    items.current = [];
+    t.setItems([]);
+    t.dispatch(t.OS_STACK_POP({}));
 
-        t.dispatch(t.OS_STACK_PUSH({}));
-        t.setActiveZone("dialog", "ok-btn");
+    expect(t.focusedItemId()).toBeNull();
+  });
 
-        // Delete all items during dialog
-        items.current = [];
-        t.setItems([]);
-        t.dispatch(t.OS_STACK_POP({}));
+  it("no getItems registered: falls back to existing behavior (no resolve)", () => {
+    t.setItems(["a", "b", "c"]);
+    t.setActiveZone("list", "b");
 
-        expect(t.focusedItemId()).toBeNull();
+    // Remove getItems to simulate legacy zone (no item awareness)
+    const entry = ZoneRegistry.get("list")!;
+    ZoneRegistry.register("list", {
+      ...entry,
+      getItems: undefined,
     });
 
-    it("no getItems registered: falls back to existing behavior (no resolve)", () => {
-        t.setItems(["a", "b", "c"]);
-        t.setActiveZone("list", "b");
+    t.dispatch(t.OS_STACK_PUSH({}));
+    t.setActiveZone("dialog", "ok-btn");
 
-        // Remove getItems to simulate legacy zone (no item awareness)
-        const entry = ZoneRegistry.get("list")!;
-        ZoneRegistry.register("list", {
-            ...entry,
-            getItems: undefined,
-        });
+    t.dispatch(t.OS_STACK_POP({}));
 
-        t.dispatch(t.OS_STACK_PUSH({}));
-        t.setActiveZone("dialog", "ok-btn");
-
-        t.dispatch(t.OS_STACK_POP({}));
-
-        // Still restores "b" even if it might be stale (legacy)
-        expect(t.focusedItemId()).toBe("b");
-    });
+    // Still restores "b" even if it might be stale (legacy)
+    expect(t.focusedItemId()).toBe("b");
+  });
 });

@@ -1,9 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./docs-viewer.css";
-import { DocsViewer } from "./DocsViewer";
 import { Root } from "@os/6-components/primitives/Root";
 import { CommandPalette } from "@/command-palette/CommandPalette";
+import { DocsViewer } from "./DocsViewer";
 
 // OS plugin registrations (side-effect imports)
 import "@/command-palette/register";

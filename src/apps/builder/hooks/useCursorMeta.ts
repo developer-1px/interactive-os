@@ -17,10 +17,10 @@ import { useEffect } from "react";
 import { type CursorMeta, cursorRegistry } from "../model/cursorRegistry";
 
 export function useCursorMeta(itemId: string, meta: CursorMeta): void {
-    useEffect(() => {
-        cursorRegistry.set(itemId, meta);
-        return () => {
-            cursorRegistry.delete(itemId);
-        };
-    }, [itemId, meta]);
+  useEffect(() => {
+    cursorRegistry.set(itemId, meta);
+    return () => {
+      cursorRegistry.delete(itemId);
+    };
+  }, [itemId, meta]);
 }

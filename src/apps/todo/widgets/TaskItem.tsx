@@ -5,9 +5,9 @@
  * Uses TodoList.triggers for mouse actions — headless-first, no raw OS imports.
  */
 
-import { Item } from "@os/6-components/primitives/Item";
 import { TodoApp, TodoEdit, TodoList } from "@apps/todo/app";
 import { useDragState } from "@os/5-hooks/useDragState";
+import { Item } from "@os/6-components/primitives/Item";
 import {
   ArrowDown,
   ArrowUp,
@@ -47,7 +47,10 @@ export function TaskItem({ todoId }: TaskItemProps) {
   // DnD visual state
   const dragState = useDragState("list");
   const isDragging = dragState.isDragging && dragState.dragItemId === todoId;
-  const isDropTarget = dragState.isDragging && dragState.overItemId === todoId && dragState.dragItemId !== todoId;
+  const isDropTarget =
+    dragState.isDragging &&
+    dragState.overItemId === todoId &&
+    dragState.dragItemId !== todoId;
   const dropPosition = isDropTarget ? dragState.overPosition : null;
 
   return (
@@ -62,10 +65,11 @@ export function TaskItem({ todoId }: TaskItemProps) {
         id={String(todo.id)}
         className={`
                 group relative flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-200
-                ${isCompleted
-            ? "bg-slate-50/50 border-transparent opacity-60 hover:opacity-100"
-            : "bg-white border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"
-          }
+                ${
+                  isCompleted
+                    ? "bg-slate-50/50 border-transparent opacity-60 hover:opacity-100"
+                    : "bg-white border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"
+                }
                 outline-none
                 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400 data-[focused=true]:border-indigo-300 data-[focused=true]:z-10
                 data-[anchor=true]:ring-1 data-[anchor=true]:ring-slate-200 data-[anchor=true]:z-10
@@ -76,7 +80,10 @@ export function TaskItem({ todoId }: TaskItemProps) {
       >
         <div className="flex items-start gap-3 flex-1 min-w-0">
           {/* Drag Handle */}
-          <div data-drag-handle className="mt-1 -ml-1 text-slate-300 cursor-grab active:cursor-grabbing transition-opacity opacity-0 group-hover:opacity-100">
+          <div
+            data-drag-handle
+            className="mt-1 -ml-1 text-slate-300 cursor-grab active:cursor-grabbing transition-opacity opacity-0 group-hover:opacity-100"
+          >
             <GripVertical size={16} />
           </div>
 
@@ -85,10 +92,11 @@ export function TaskItem({ todoId }: TaskItemProps) {
             <div
               className={`
                             w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
-                            ${isCompleted
-                  ? "bg-indigo-600 border-indigo-600 scale-100"
-                  : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
-                }
+                            ${
+                              isCompleted
+                                ? "bg-indigo-600 border-indigo-600 scale-100"
+                                : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
+                            }
                         `}
             >
               <Check
@@ -105,10 +113,11 @@ export function TaskItem({ todoId }: TaskItemProps) {
               <TaskItemEditor todoId={todoId} />
             ) : (
               <span
-                className={`block text-[15px] leading-relaxed transition-all select-none ${isCompleted
-                  ? "text-slate-400 line-through decoration-slate-300"
-                  : "text-slate-700 font-medium"
-                  }`}
+                className={`block text-[15px] leading-relaxed transition-all select-none ${
+                  isCompleted
+                    ? "text-slate-400 line-through decoration-slate-300"
+                    : "text-slate-700 font-medium"
+                }`}
               >
                 {todo.text}
               </span>

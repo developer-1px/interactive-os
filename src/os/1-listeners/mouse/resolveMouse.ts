@@ -42,7 +42,6 @@ export type SelectMode = "replace" | "toggle" | "range";
 // Pure Resolution
 // ═══════════════════════════════════════════════════════════════════
 
-
 export function resolveSelectMode(input: {
   shiftKey: boolean;
   metaKey: boolean;

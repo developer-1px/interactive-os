@@ -10,46 +10,42 @@
  * The implementation (defineApp.page.ts) does not exist yet.
  */
 
-import { describe, expect, it } from "vitest";
-
 // ── Todo App imports ──
-import {
-    TodoApp,
-    addTodo,
-} from "@apps/todo/app";
+import { addTodo, TodoApp } from "@apps/todo/app";
 import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { createPage } from "@os/defineApp.page";
+import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // S1: Page creation + basic structure
 // ═══════════════════════════════════════════════════════════════════
 
 describe("AppPage: Factory", () => {
-    it("createPage returns a AppPage with keyboard, click, attrs, goto", () => {
-        const page = createPage(TodoApp);
+  it("createPage returns a AppPage with keyboard, click, attrs, goto", () => {
+    const page = createPage(TodoApp);
 
-        expect(page).toBeDefined();
-        expect(page.keyboard).toBeDefined();
-        expect(typeof page.keyboard.press).toBe("function");
-        expect(typeof page.click).toBe("function");
-        expect(typeof page.attrs).toBe("function");
-        expect(typeof page.goto).toBe("function");
-        expect(typeof page.focusedItemId).toBe("function");
-        expect(typeof page.selection).toBe("function");
-        expect(page.state).toBeDefined();
-    });
+    expect(page).toBeDefined();
+    expect(page.keyboard).toBeDefined();
+    expect(typeof page.keyboard.press).toBe("function");
+    expect(typeof page.click).toBe("function");
+    expect(typeof page.attrs).toBe("function");
+    expect(typeof page.goto).toBe("function");
+    expect(typeof page.focusedItemId).toBe("function");
+    expect(typeof page.selection).toBe("function");
+    expect(page.state).toBeDefined();
+  });
 
-    it("createPage uses preview sandbox — dispatch writes to preview, not production", () => {
-        const page = createPage(TodoApp);
-        const initialCount = Object.keys(page.state.data.todos).length;
+  it("createPage uses preview sandbox — dispatch writes to preview, not production", () => {
+    const page = createPage(TodoApp);
+    const initialCount = Object.keys(page.state.data.todos).length;
 
-        page.dispatch(addTodo({ text: "Preview only" }));
+    page.dispatch(addTodo({ text: "Preview only" }));
 
-        expect(Object.keys(page.state.data.todos).length).toBe(initialCount + 1);
+    expect(Object.keys(page.state.data.todos).length).toBe(initialCount + 1);
 
-        // After cleanup, preview is cleared and production state is restored
-        page.cleanup();
-    });
+    // After cleanup, preview is cleared and production state is restored
+    page.cleanup();
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -57,53 +53,53 @@ describe("AppPage: Factory", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("AppPage: Navigation", () => {
-    it("goto activates a zone and sets items", () => {
-        const page = createPage(TodoApp);
+  it("goto activates a zone and sets items", () => {
+    const page = createPage(TodoApp);
 
-        // Add some todos to get IDs
-        page.dispatch(addTodo({ text: "Alpha" }));
-        page.dispatch(addTodo({ text: "Beta" }));
-        page.dispatch(addTodo({ text: "Charlie" }));
+    // Add some todos to get IDs
+    page.dispatch(addTodo({ text: "Alpha" }));
+    page.dispatch(addTodo({ text: "Beta" }));
+    page.dispatch(addTodo({ text: "Charlie" }));
 
-        const ids = page.state.data.todoOrder;
+    const ids = page.state.data.todoOrder;
 
-        // Navigate to the list zone
-        page.goto("list");
+    // Navigate to the list zone
+    page.goto("list");
 
-        // Zone should be active
-        expect(page.activeZoneId()).toBe("list");
-    });
+    // Zone should be active
+    expect(page.activeZoneId()).toBe("list");
+  });
 
-    it("keyboard.press ArrowDown navigates focus", () => {
-        const page = createPage(TodoApp);
+  it("keyboard.press ArrowDown navigates focus", () => {
+    const page = createPage(TodoApp);
 
-        page.dispatch(addTodo({ text: "Alpha" }));
-        page.dispatch(addTodo({ text: "Beta" }));
-        page.dispatch(addTodo({ text: "Charlie" }));
+    page.dispatch(addTodo({ text: "Alpha" }));
+    page.dispatch(addTodo({ text: "Beta" }));
+    page.dispatch(addTodo({ text: "Charlie" }));
 
-        // Use visible (filtered) IDs — getItems applies config.filter
-        const ids = selectVisibleTodoIds(page.state);
-        page.goto("list", { focusedItemId: ids[0] ?? null });
+    // Use visible (filtered) IDs — getItems applies config.filter
+    const ids = selectVisibleTodoIds(page.state);
+    page.goto("list", { focusedItemId: ids[0] ?? null });
 
-        page.keyboard.press("ArrowDown");
+    page.keyboard.press("ArrowDown");
 
-        expect(page.focusedItemId()).toBe(ids[1]);
-    });
+    expect(page.focusedItemId()).toBe(ids[1]);
+  });
 
-    it("attrs returns correct ARIA attributes", () => {
-        const page = createPage(TodoApp);
+  it("attrs returns correct ARIA attributes", () => {
+    const page = createPage(TodoApp);
 
-        page.dispatch(addTodo({ text: "Alpha" }));
-        page.dispatch(addTodo({ text: "Beta" }));
+    page.dispatch(addTodo({ text: "Alpha" }));
+    page.dispatch(addTodo({ text: "Beta" }));
 
-        const ids = selectVisibleTodoIds(page.state);
-        page.goto("list", { focusedItemId: ids[0] ?? null });
+    const ids = selectVisibleTodoIds(page.state);
+    page.goto("list", { focusedItemId: ids[0] ?? null });
 
-        // Focused item has tabIndex 0
-        expect(page.attrs(ids[0]!).tabIndex).toBe(0);
-        // Non-focused item has tabIndex -1
-        expect(page.attrs(ids[1]!).tabIndex).toBe(-1);
-    });
+    // Focused item has tabIndex 0
+    expect(page.attrs(ids[0]!).tabIndex).toBe(0);
+    // Non-focused item has tabIndex -1
+    expect(page.attrs(ids[1]!).tabIndex).toBe(-1);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -111,20 +107,20 @@ describe("AppPage: Navigation", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("AppPage: Click", () => {
-    it("click focuses and selects an item", () => {
-        const page = createPage(TodoApp);
+  it("click focuses and selects an item", () => {
+    const page = createPage(TodoApp);
 
-        page.dispatch(addTodo({ text: "Alpha" }));
-        page.dispatch(addTodo({ text: "Beta" }));
+    page.dispatch(addTodo({ text: "Alpha" }));
+    page.dispatch(addTodo({ text: "Beta" }));
 
-        const ids = selectVisibleTodoIds(page.state);
-        page.goto("list", { focusedItemId: ids[0] ?? null });
+    const ids = selectVisibleTodoIds(page.state);
+    page.goto("list", { focusedItemId: ids[0] ?? null });
 
-        page.click(ids[1]!);
+    page.click(ids[1]!);
 
-        expect(page.focusedItemId()).toBe(ids[1]);
-        expect(page.attrs(ids[1]!)["aria-selected"]).toBe(true);
-    });
+    expect(page.focusedItemId()).toBe(ids[1]);
+    expect(page.attrs(ids[1]!)["aria-selected"]).toBe(true);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -132,48 +128,48 @@ describe("AppPage: Click", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("AppPage: Full Stack Integration", () => {
-    it("Space toggles todo completed (onCheck)", () => {
-        const page = createPage(TodoApp);
+  it("Space toggles todo completed (onCheck)", () => {
+    const page = createPage(TodoApp);
 
-        page.dispatch(addTodo({ text: "Toggle me" }));
-        const ids = selectVisibleTodoIds(page.state);
-        const id = ids[ids.length - 1]!; // last added
+    page.dispatch(addTodo({ text: "Toggle me" }));
+    const ids = selectVisibleTodoIds(page.state);
+    const id = ids[ids.length - 1]!; // last added
 
-        page.goto("list", { focusedItemId: id });
+    page.goto("list", { focusedItemId: id });
 
-        // Space → onCheck → toggleTodo
-        page.keyboard.press("Space");
+    // Space → onCheck → toggleTodo
+    page.keyboard.press("Space");
 
-        expect(page.state.data.todos[id]?.completed).toBe(true);
-    });
+    expect(page.state.data.todos[id]?.completed).toBe(true);
+  });
 
-    it("Enter starts edit (onAction)", () => {
-        const page = createPage(TodoApp);
+  it("Enter starts edit (onAction)", () => {
+    const page = createPage(TodoApp);
 
-        page.dispatch(addTodo({ text: "Edit me" }));
-        const ids = selectVisibleTodoIds(page.state);
-        const id = ids[ids.length - 1]!;
+    page.dispatch(addTodo({ text: "Edit me" }));
+    const ids = selectVisibleTodoIds(page.state);
+    const id = ids[ids.length - 1]!;
 
-        page.goto("list", { focusedItemId: id });
+    page.goto("list", { focusedItemId: id });
 
-        // Enter → onAction → startEdit
-        page.keyboard.press("Enter");
+    // Enter → onAction → startEdit
+    page.keyboard.press("Enter");
 
-        expect(page.state.ui.editingId).toBe(id);
-    });
+    expect(page.state.ui.editingId).toBe(id);
+  });
 
-    it("Delete requests delete (onDelete)", () => {
-        const page = createPage(TodoApp);
+  it("Delete requests delete (onDelete)", () => {
+    const page = createPage(TodoApp);
 
-        page.dispatch(addTodo({ text: "Delete me" }));
-        const ids = selectVisibleTodoIds(page.state);
-        const id = ids[ids.length - 1]!;
+    page.dispatch(addTodo({ text: "Delete me" }));
+    const ids = selectVisibleTodoIds(page.state);
+    const id = ids[ids.length - 1]!;
 
-        page.goto("list", { focusedItemId: id });
+    page.goto("list", { focusedItemId: id });
 
-        // Delete → onDelete → requestDeleteTodo
-        page.keyboard.press("Delete");
+    // Delete → onDelete → requestDeleteTodo
+    page.keyboard.press("Delete");
 
-        expect(page.state.ui.pendingDeleteIds).toContain(id);
-    });
+    expect(page.state.ui.pendingDeleteIds).toContain(id);
+  });
 });

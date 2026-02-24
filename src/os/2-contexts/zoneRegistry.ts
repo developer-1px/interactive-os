@@ -84,7 +84,11 @@ export interface ZoneEntry {
   /** Tree level accessor — returns map of item ID → nesting level (1-based) */
   getTreeLevels?: () => Map<string, number>;
   /** Drag reorder callback — invoked by OS_DRAG_END when an item is dropped */
-  onReorder?: (info: { itemId: string; overItemId: string; position: "before" | "after" }) => void;
+  onReorder?: (info: {
+    itemId: string;
+    overItemId: string;
+    position: "before" | "after";
+  }) => void;
 }
 
 const registry = new Map<string, ZoneEntry>();
@@ -154,7 +158,11 @@ export const ZoneRegistry = {
 
   // ─── Per-item callbacks (e.g. Trigger.onActivate) ───
 
-  setItemCallback(zoneId: string, itemId: string, callbacks: ItemCallbacks): void {
+  setItemCallback(
+    zoneId: string,
+    itemId: string,
+    callbacks: ItemCallbacks,
+  ): void {
     let zone = itemCallbacks.get(zoneId);
     if (!zone) {
       zone = new Map();
@@ -173,4 +181,3 @@ export const ZoneRegistry = {
 };
 
 const EMPTY_SET: ReadonlySet<string> = new Set();
-

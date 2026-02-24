@@ -85,23 +85,27 @@ export const Keybindings = {
     // Falls back to isEditing for backward compatibility.
     const fieldActive = context.isFieldActive ?? context.isEditing;
 
+    // Later-wins: iterate in reverse so app bindings shadow OS defaults.
+    // OS defaults are registered first (osDefaults.ts), app bindings later
+    // (defineApp.bind.ts). Reverse iteration ensures app takes priority.
+
     // Pass 1: "editing" — highest priority when isEditing + field delegates this key
     if (context.isEditing && !fieldActive) {
-      for (const b of list) {
-        if (b.when === "editing") return b;
+      for (let i = list.length - 1; i >= 0; i--) {
+        if (list[i]!.when === "editing") return list[i]!;
       }
     }
 
     // Pass 2: "navigating" — field does NOT consume this key
     if (!fieldActive) {
-      for (const b of list) {
-        if (b.when === "navigating") return b;
+      for (let i = list.length - 1; i >= 0; i--) {
+        if (list[i]!.when === "navigating") return list[i]!;
       }
     }
 
     // Pass 3: universal (no `when`) — always active
-    for (const b of list) {
-      if (!b.when) return b;
+    for (let i = list.length - 1; i >= 0; i--) {
+      if (!list[i]!.when) return list[i]!;
     }
 
     return null;

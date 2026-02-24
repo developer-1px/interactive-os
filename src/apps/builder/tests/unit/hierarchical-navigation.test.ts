@@ -202,16 +202,27 @@ describe("hierarchicalNavigation — OS item queries", () => {
       }
     });
 
-    it("returns empty when on a section (top level)", () => {
-      expect(drillUp({ focusId: "s1", selection: [], anchor: null })).toEqual(
-        [],
-      );
+    it("returns OS_ESCAPE when on a section (top level — no parent → escape)", () => {
+      const result = drillUp({ focusId: "s1", selection: [], anchor: null });
+      if (!Array.isArray(result)) {
+        expect(result.type).toBe("OS_ESCAPE");
+      } else {
+        // Should not be an empty array anymore
+        expect(result.length).toBeGreaterThan(0);
+      }
     });
 
-    it("returns empty for unknown elements", () => {
-      expect(
-        drillUp({ focusId: "nonexistent", selection: [], anchor: null }),
-      ).toEqual([]);
+    it("returns OS_ESCAPE for unknown elements (no level → no parent → escape)", () => {
+      const result = drillUp({
+        focusId: "nonexistent",
+        selection: [],
+        anchor: null,
+      });
+      if (!Array.isArray(result)) {
+        expect(result.type).toBe("OS_ESCAPE");
+      } else {
+        expect(result.length).toBeGreaterThan(0);
+      }
     });
   });
 });

@@ -21,6 +21,7 @@ import {
   getItemAttribute,
 } from "@/os/2-contexts/itemQueries";
 import type { ZoneCursor } from "@/os/2-contexts/zoneRegistry";
+import { OS_ESCAPE } from "@/os/3-commands/dismiss/escape";
 import { OS_FIELD_START_EDIT } from "@/os/3-commands/field/field";
 import { OS_FOCUS } from "@/os/3-commands/focus/focus";
 import { getFocusedItem } from "@/os/5-hooks/useFocusedItem";
@@ -146,7 +147,7 @@ export function createDrillUp(zoneId: string) {
       cursor.focusId,
       "data-level",
     ) as BuilderLevel | null;
-    if (!level || level === "section") return []; // Already at top
+    if (!level || level === "section") return OS_ESCAPE({ force: true }); // No parent → force deselect
 
     const parentLevel = getParentLevel(level);
     if (!parentLevel) return [];
@@ -191,9 +192,10 @@ export function createDrillUp(zoneId: string) {
  * Only registers a-z, A-Z, 0-9 to avoid conflicts with OS default keybindings
  * (Space, Enter, Escape, Arrow keys, etc.)
  */
-export function createTypingEntryKeybindings(
-  zoneId: string,
-): { key: string; command: (cursor: ZoneCursor) => BaseCommand | BaseCommand[] }[] {
+export function createTypingEntryKeybindings(zoneId: string): {
+  key: string;
+  command: (cursor: ZoneCursor) => BaseCommand | BaseCommand[];
+}[] {
   const drillDown = createDrillDown(zoneId);
   const keys: string[] = [];
 

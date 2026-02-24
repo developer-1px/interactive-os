@@ -392,7 +392,12 @@ function TriggerDismiss({
 
   return (
     <FocusItem id={itemId} asChild onActivate={activateCmd}>
-      <button type="button" onClick={handleClick} className={className} {...rest}>
+      <button
+        type="button"
+        onClick={handleClick}
+        className={className}
+        {...rest}
+      >
         {children}
       </button>
     </FocusItem>

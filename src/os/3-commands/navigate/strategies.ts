@@ -172,7 +172,9 @@ function registerNavigationStrategy(
 }
 
 registerNavigationStrategy("linear", resolveLinear, { needsDOMRects: false });
-registerNavigationStrategy("horizontal", resolveLinear, { needsDOMRects: false });
+registerNavigationStrategy("horizontal", resolveLinear, {
+  needsDOMRects: false,
+});
 registerNavigationStrategy("vertical", resolveLinear, { needsDOMRects: false });
 registerNavigationStrategy("spatial", resolveSpatial, { needsDOMRects: true });
 registerNavigationStrategy("both", resolveSpatial, { needsDOMRects: true });
@@ -195,4 +197,3 @@ export function resolveWithStrategy(
   if (entry) return entry.fn(...args);
   return { targetId: args[0], stickyX: null, stickyY: null };
 }
-

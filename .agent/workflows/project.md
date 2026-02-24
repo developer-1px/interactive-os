@@ -35,6 +35,13 @@ description: Discussion 결론을 프로젝트로 전환한다. scaffold 후 `/g
 
    Heavy는 상세 설계를 `prd.md`에 위임.
 
+6. **⭐ Red 테스트 작성** — `.agent/workflows/red.md`를 `view_file`로 읽고 실행한다.
+
+   > **프로젝트의 완료는 BOARD.md가 아니라 Red 테스트다.**
+   > BOARD.md만 있으면 기획서. Red 테스트가 있어야 프로젝트.
+
+   **⛔ Gate: Red 테스트 (🔴 FAIL) 없이 `/go` 진입 금지.**
+
 ### BOARD.md 표준 포맷
 
 ```markdown
@@ -64,6 +71,8 @@ Risks: [Rebuttal에서 온 위험/단점]
 **DoD (Definition of Done)**: Done 항목에는 반드시 증빙을 포함한다.
 증빙 없이 `✅`만 찍는 것은 금지.
 
+**프로젝트 초기화 DoD**: BOARD.md + Red 테스트 (🔴 FAIL). 둘 다 있어야 `/go` 진입 가능.
+
 | 증빙 패턴 | 예시 |
 |-----------|------|
 | 코드 변경 | `tsc 0 | +13 tests | build OK` |
@@ -89,8 +98,9 @@ docs/1-project/[name]/
 
 Default: Light. 필요 시 escalate.
 
-규모 판정은 `/go` Phase 2 깊이에 영향한다:
-- **Heavy**: Phase 2 전체 필수 (divide + blueprint + naming + tdd + reflect)
-- **Light**: /divide만 필수, 나머지 선택
+초기화 완료 확인:
+- [ ] BOARD.md 존재
+- [ ] `.test.ts` 파일 존재 (Red 테스트)
+- [ ] `vitest run` 실행 → 🔴 FAIL 확인
 
-초기화 완료 → `/go` Phase 1(숙지) 자동 진입.
+위 3개 모두 충족 → `/go` 자동 진입.

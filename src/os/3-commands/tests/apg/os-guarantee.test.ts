@@ -16,9 +16,9 @@
  * These tests verify that the kernel state preserves original IDs correctly.
  */
 
+import { createOsPage } from "@os/createOsPage";
 import { describe, expect, it } from "vitest";
 import { resolveItemId, resolveSelection } from "../../../state/resolve";
-import { createOsPage } from "@os/createOsPage";
 
 // ─── Config ───
 

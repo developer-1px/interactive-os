@@ -26,7 +26,12 @@ import {
 } from "react";
 import type { ZoneCallback, ZoneEntry } from "../../2-contexts/zoneRegistry.ts";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry.ts";
-import { OS_FOCUS, OS_STACK_POP, OS_STACK_PUSH } from "../../3-commands/focus";
+import {
+  OS_FOCUS,
+  OS_STACK_POP,
+  OS_STACK_PUSH,
+  OS_ZONE_INIT,
+} from "../../3-commands/focus";
 import { os } from "../../kernel.ts";
 import { resolveRole, type ZoneRole } from "../../registries/roleRegistry.ts";
 import type {
@@ -39,9 +44,6 @@ import type {
   TabConfig,
 } from "../../schemas";
 import { DEFAULT_CONFIG } from "../../schemas";
-
-
-import { OS_ZONE_INIT } from "../../3-commands/focus";
 
 // ═══════════════════════════════════════════════════════════════════
 // ZoneContext — Zone-level identity (consumed by all capabilities)
@@ -196,7 +198,11 @@ export interface FocusGroupProps
   getTreeLevels?: () => Map<string, number>;
 
   /** Drag reorder callback — invoked by OS_DRAG_END when an item is dropped */
-  onReorder?: (info: { itemId: string; overItemId: string; position: "before" | "after" }) => void;
+  onReorder?: (info: {
+    itemId: string;
+    overItemId: string;
+    position: "before" | "after";
+  }) => void;
 
   /** Children */
   children: ReactNode;
@@ -253,7 +259,13 @@ function buildZoneEntry(
     getItems?: (() => string[]) | undefined;
     getExpandableItems?: (() => Set<string>) | undefined;
     getTreeLevels?: (() => Map<string, number>) | undefined;
-    onReorder?: ((info: { itemId: string; overItemId: string; position: "before" | "after" }) => void) | undefined;
+    onReorder?:
+      | ((info: {
+          itemId: string;
+          overItemId: string;
+          position: "before" | "after";
+        }) => void)
+      | undefined;
   },
 ): ZoneEntry {
   const entry: ZoneEntry = {
@@ -276,8 +288,10 @@ function buildZoneEntry(
   if (props.onRedo !== undefined) entry.onRedo = props.onRedo;
   if (props.itemFilter !== undefined) entry.itemFilter = props.itemFilter;
   if (props.getItems !== undefined) entry.getItems = props.getItems;
-  if (props.getExpandableItems !== undefined) entry.getExpandableItems = props.getExpandableItems;
-  if (props.getTreeLevels !== undefined) entry.getTreeLevels = props.getTreeLevels;
+  if (props.getExpandableItems !== undefined)
+    entry.getExpandableItems = props.getExpandableItems;
+  if (props.getTreeLevels !== undefined)
+    entry.getTreeLevels = props.getTreeLevels;
   if (props.onReorder !== undefined) entry.onReorder = props.onReorder;
   return entry;
 }
@@ -354,7 +368,8 @@ export function FocusGroup({
 
   // --- Container Ref ---
   const internalRef = useRef<HTMLDivElement>(null);
-  const containerRef = (externalContainerRef ?? internalRef) as React.RefObject<HTMLDivElement>;
+  const containerRef = (externalContainerRef ??
+    internalRef) as React.RefObject<HTMLDivElement>;
 
   // --- Init kernel state (render-time, idempotent) ---
   // OS_ZONE_INIT is a no-op if zone already exists.

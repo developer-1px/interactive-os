@@ -8,9 +8,8 @@
 import type { BaseCommand } from "@kernel/core/tokens";
 import { produce } from "immer";
 import { OS_FOCUS } from "@/os/3-commands/focus/focus";
-import { OS_SELECTION_CLEAR } from "@/os/3-commands/selection/selection";
 import { resolveItemFallback } from "@/os/3-commands/focus/focusStackOps";
-import { os } from "@/os/kernel";
+import { OS_SELECTION_CLEAR } from "@/os/3-commands/selection/selection";
 import {
   type ArrayCollectionConfig,
   autoDeepClone,
@@ -30,6 +29,7 @@ import {
   removeFromTree,
 } from "@/os/collection/treeUtils";
 import type { AppHandle } from "@/os/defineApp.types";
+import { os } from "@/os/kernel";
 
 // Re-export types for consumers
 export type {
@@ -39,7 +39,10 @@ export type {
   CollectionZoneHandle,
   EntityCollectionConfig,
 } from "@/os/collection/collectionZone.core";
-export { fromEntities, fromNormalized } from "@/os/collection/collectionZone.core";
+export {
+  fromEntities,
+  fromNormalized,
+} from "@/os/collection/collectionZone.core";
 
 // ═══════════════════════════════════════════════════════════════════
 // Internal clipboard store
@@ -112,14 +115,22 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         .map((item) => toItemId(item.id))
         .filter((id) => !excludeIds?.includes(id) || id === toItemId(targetId));
       const idx = visibleIds.indexOf(toItemId(targetId));
-      const remaining = visibleIds.filter((id) => id !== toItemId(targetId) && !excludeIds?.includes(id));
-      const resolved = resolveItemFallback(toItemId(targetId), remaining, { index: idx });
-      return resolved ? OS_FOCUS({ zoneId: zoneName, itemId: resolved }) : undefined;
+      const remaining = visibleIds.filter(
+        (id) => id !== toItemId(targetId) && !excludeIds?.includes(id),
+      );
+      const resolved = resolveItemFallback(toItemId(targetId), remaining, {
+        index: idx,
+      });
+      return resolved
+        ? OS_FOCUS({ zoneId: zoneName, itemId: resolved })
+        : undefined;
     }
     // Nested: next sibling → prev sibling → parent
     const parent = findParentOf(allItems as any[], targetId);
     if (parent?.children) {
-      const idx = parent.children.findIndex((c: { id: string }) => c.id === targetId);
+      const idx = parent.children.findIndex(
+        (c: { id: string }) => c.id === targetId,
+      );
       const neighbor = parent.children[idx + 1] ?? parent.children[idx - 1];
       const targetItemId = neighbor?.id ?? parent.id;
       return OS_FOCUS({ zoneId: zoneName, itemId: toItemId(targetItemId) });
@@ -130,18 +141,18 @@ export function createCollectionZone<S, T extends { id: string } = any>(
   // ── add ── (auto-generated from create factory)
   const add = config.create
     ? zone.command(
-      `${zoneName}:add`,
-      (ctx: { readonly state: S }, payload: any) => {
-        const newItem = config.create!(payload, ctx.state);
-        if (!newItem) return { state: ctx.state };
-        return {
-          state: produce(ctx.state, (draft) => {
-            const items = ops.getItems(ctx.state);
-            ops.insertAfter(draft as S, items.length - 1, newItem);
-          }),
-        };
-      },
-    )
+        `${zoneName}:add`,
+        (ctx: { readonly state: S }, payload: any) => {
+          const newItem = config.create!(payload, ctx.state);
+          if (!newItem) return { state: ctx.state };
+          return {
+            state: produce(ctx.state, (draft) => {
+              const items = ops.getItems(ctx.state);
+              ops.insertAfter(draft as S, items.length - 1, newItem);
+            }),
+          };
+        },
+      )
     : undefined;
 
   // ── remove ── (tree-aware)
@@ -330,9 +341,10 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
       // Focus recovery: reuse resolveItemFallback
       const focusId = payload.focusId;
-      const focusCmd = focusId && payload.ids.includes(focusId)
-        ? computeDeleteFocus(items, focusId, ctx.state, payload.ids)
-        : undefined;
+      const focusCmd =
+        focusId && payload.ids.includes(focusId)
+          ? computeDeleteFocus(items, focusId, ctx.state, payload.ids)
+          : undefined;
 
       const cloned = found.map((t) => ({ ...t }));
 
@@ -551,7 +563,9 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
     return {
       onDelete: guarded((cursor) => {
-        const cmds: BaseCommand[] = idsFromCursor(cursor).map((id) => remove({ id }));
+        const cmds: BaseCommand[] = idsFromCursor(cursor).map((id) =>
+          remove({ id }),
+        );
         if (cursor.selection.length > 0) {
           cmds.push(OS_SELECTION_CLEAR({ zoneId: zoneName }));
         }
