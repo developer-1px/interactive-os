@@ -23,35 +23,39 @@ const DEFAULT_DURATION = 4000;
 // ═══════════════════════════════════════════════════════════════════
 
 interface ToastShowPayload {
-    message: string;
-    actionLabel?: string;
-    actionCommand?: ToastEntry["actionCommand"];
-    /** Auto-dismiss ms. 0 = manual only. Default: 4000 */
-    duration?: number;
+  message: string;
+  actionLabel?: string;
+  actionCommand?: ToastEntry["actionCommand"];
+  /** Auto-dismiss ms. 0 = manual only. Default: 4000 */
+  duration?: number;
 }
 
-export const OS_TOAST_SHOW = os.defineCommand(
-    "OS_TOAST_SHOW",
-    (ctx) => (payload: ToastShowPayload) => {
-        const entry: ToastEntry = {
-            id: uid(),
-            message: payload.message,
-            actionLabel: payload.actionLabel,
-            actionCommand: payload.actionCommand,
-            duration: payload.duration ?? DEFAULT_DURATION,
-            createdAt: Date.now(),
-        };
+/** Raw handler — exported for test kernel registration */
+export const toastShowHandler =
+  (ctx: { readonly state: any }) => (payload: ToastShowPayload) => {
+    const entry: ToastEntry = {
+      id: uid(),
+      message: payload.message,
+      actionLabel: payload.actionLabel,
+      actionCommand: payload.actionCommand,
+      duration: payload.duration ?? DEFAULT_DURATION,
+      createdAt: Date.now(),
+    };
 
-        return {
-            state: produce(ctx.state, (draft) => {
-                // Cap at 5 toasts — remove oldest if full
-                if (draft.os.toasts.stack.length >= 5) {
-                    draft.os.toasts.stack.shift();
-                }
-                draft.os.toasts.stack.push(entry);
-            }),
-        };
-    },
+    return {
+      state: produce(ctx.state, (draft: any) => {
+        // Cap at 5 toasts — remove oldest if full
+        if (draft.os.toasts.stack.length >= 5) {
+          draft.os.toasts.stack.shift();
+        }
+        draft.os.toasts.stack.push(entry);
+      }),
+    };
+  };
+
+export const OS_TOAST_SHOW = os.defineCommand(
+  "OS_TOAST_SHOW",
+  toastShowHandler as any,
 );
 
 // ═══════════════════════════════════════════════════════════════════
@@ -59,24 +63,24 @@ export const OS_TOAST_SHOW = os.defineCommand(
 // ═══════════════════════════════════════════════════════════════════
 
 interface ToastDismissPayload {
-    id?: string;
+  id?: string;
 }
 
 export const OS_TOAST_DISMISS = os.defineCommand(
-    "OS_TOAST_DISMISS",
-    (ctx) => (payload: ToastDismissPayload) => {
-        const { stack } = ctx.state.os.toasts;
-        if (stack.length === 0) return;
+  "OS_TOAST_DISMISS",
+  (ctx) => (payload: ToastDismissPayload) => {
+    const { stack } = ctx.state.os.toasts;
+    if (stack.length === 0) return;
 
-        const targetId = payload.id ?? stack[0]?.id;
-        if (!targetId) return;
+    const targetId = payload.id ?? stack[0]?.id;
+    if (!targetId) return;
 
-        return {
-            state: produce(ctx.state, (draft) => {
-                draft.os.toasts.stack = draft.os.toasts.stack.filter(
-                    (e) => e.id !== targetId,
-                );
-            }),
-        };
-    },
+    return {
+      state: produce(ctx.state, (draft) => {
+        draft.os.toasts.stack = draft.os.toasts.stack.filter(
+          (e) => e.id !== targetId,
+        );
+      }),
+    };
+  },
 );

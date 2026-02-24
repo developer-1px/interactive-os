@@ -51,12 +51,12 @@ import {
   type KeybindingEntry,
   type Selector,
   type TestInstance,
-
   type ZoneBindings,
   type ZoneHandle,
 } from "./defineApp.types";
 
 import { createHistoryMiddleware } from "./middlewares/historyKernelMiddleware";
+import type { AppModule } from "./modules/types";
 
 // ═══════════════════════════════════════════════════════════════════
 // Brand Type Factories (cast isolated here)
@@ -94,14 +94,19 @@ export function defineApp<S>(
   options?: {
     history?: boolean;
     persistence?: { key: string; debounceMs?: number };
+    modules?: AppModule[];
   },
 ): AppHandle<S> {
   // ── Production: register on singleton kernel ──
-  const enableHistory = options?.history ?? false;
+  const modules = options?.modules ?? [];
+  // Backward compat: history/persistence boolean config still works
+  const enableHistory =
+    options?.history ?? modules.some((m) => m.id === "history");
   const slice = registerAppSlice<S>(appId, {
     initialState,
     ...(enableHistory ? { history: true } : {}),
     ...(options?.persistence ? { persistence: options.persistence } : {}),
+    modules,
   });
 
   // ── Registries ──
@@ -115,11 +120,14 @@ export function defineApp<S>(
   >();
 
   // For AppPage: track zone bindings (onAction, onDelete, etc.)
-  const zoneBindingEntries = new Map<string, {
-    role: import("./registries/roleRegistry").ZoneRole;
-    bindings: ZoneBindings;
-    keybindings?: import("./defineApp.types").KeybindingEntry<S>[];
-  }>();
+  const zoneBindingEntries = new Map<
+    string,
+    {
+      role: import("./registries/roleRegistry").ZoneRole;
+      bindings: ZoneBindings;
+      keybindings?: import("./defineApp.types").KeybindingEntry<S>[];
+    }
+  >();
 
   // ── condition ──
 
@@ -207,6 +215,17 @@ export function defineApp<S>(
       zoneGroup.use(historyMw);
     }
 
+    // Install modules on zone scope (scoped middleware)
+    for (const mod of modules) {
+      // Skip history module — already handled above with dedicated logic
+      if (mod.id === "history") continue;
+      const mws = mod.install({ appId, scope });
+      const mwArr = Array.isArray(mws) ? mws : [mws];
+      for (const mw of mwArr) {
+        zoneGroup.use(mw);
+      }
+    }
+
     const zone: ZoneHandle<S> = {
       command<T extends string, P = void>(
         type: T,
@@ -248,10 +267,10 @@ export function defineApp<S>(
   // ── create (test instance) ──
 
   function create(
-    overrides?: Partial<S> | { history?: boolean },
+    overrides?: Partial<S> | { history?: boolean; withOS?: boolean },
   ): TestInstance<S> {
     return createTestInstance(
-      { appId, initialState, flatHandlerRegistry },
+      { appId, initialState, flatHandlerRegistry, modules },
       overrides,
     );
   }
@@ -305,8 +324,8 @@ export function defineApp<S>(
         factory: CommandFactory<string, P>,
       ): React.FC<
         P extends void
-        ? { children: ReactNode; payload?: never }
-        : { children: ReactNode; payload: P }
+          ? { children: ReactNode; payload?: never }
+          : { children: ReactNode; payload: P }
       >;
       /* Command Overload: Returns simple component */
       (
@@ -335,6 +354,9 @@ export function defineApp<S>(
 
     // ── Internal (for OS-level createPage) ──
     __appId: appId,
-    __zoneBindings: zoneBindingEntries as Map<string, import("./defineApp.page").ZoneBindingEntry>,
+    __zoneBindings: zoneBindingEntries as Map<
+      string,
+      import("./defineApp.page").ZoneBindingEntry
+    >,
   };
 }

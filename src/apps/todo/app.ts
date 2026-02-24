@@ -27,12 +27,16 @@ import {
 import { produce } from "immer";
 import { z } from "zod";
 import { OS_FIELD_START_EDIT } from "@/os/3-commands/field/field";
-import { OS_OVERLAY_OPEN, OS_OVERLAY_CLOSE } from "@/os/3-commands/overlay/overlay";
+import {
+  OS_OVERLAY_CLOSE,
+  OS_OVERLAY_OPEN,
+} from "@/os/3-commands/overlay/overlay";
 import { OS_SELECTION_CLEAR } from "@/os/3-commands/selection/selection";
 import { OS_TOAST_SHOW } from "@/os/3-commands/toast/toast";
 
 import { defineApp } from "@/os/defineApp";
 import { os } from "@/os/kernel";
+import { history } from "@/os/modules/history";
 
 /** Collision-free random ID */
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -42,7 +46,7 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 // ═══════════════════════════════════════════════════════════════════
 
 export const TodoApp = defineApp<AppState>("todo-v5", INITIAL_STATE, {
-  history: true,
+  modules: [history()],
 });
 
 // Undo / Redo — generic factory
@@ -148,12 +152,14 @@ export const requestDeleteTodo = listCollection.command(
     state: produce(ctx.state, (draft) => {
       draft.ui.pendingDeleteIds = payload.ids;
     }),
-    dispatch: Object.keys(ctx.state.data.todos).some((id) => payload.ids.includes(id))
+    dispatch: Object.keys(ctx.state.data.todos).some((id) =>
+      payload.ids.includes(id),
+    )
       ? [
-        // Close first to clear any stale overlay from HMR or interrupted flow
-        OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
-        OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
-      ]
+          // Close first to clear any stale overlay from HMR or interrupted flow
+          OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+          OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
+        ]
       : undefined,
   }),
 );
@@ -218,7 +224,14 @@ const listBindings = listCollection.collectionBindings();
 // DnD reorder — moves item to new position in todoOrder
 const reorderTodo = listCollection.command(
   "reorderTodo",
-  (ctx, payload: { itemId: string; overItemId: string; position: "before" | "after" }) => ({
+  (
+    ctx,
+    payload: {
+      itemId: string;
+      overItemId: string;
+      position: "before" | "after";
+    },
+  ) => ({
     state: produce(ctx.state, (draft) => {
       const { itemId, overItemId, position } = payload;
       const order = draft.data.todoOrder;
@@ -245,9 +258,10 @@ export const TodoListUI = listCollection.bind({
   onCheck: (cursor) => toggleTodo({ id: cursor.focusId }),
   onAction: (cursor) => startEdit({ id: cursor.focusId }),
   ...listBindings,
-  onDelete: (cursor) => requestDeleteTodo({
-    ids: cursor.selection.length > 0 ? cursor.selection : [cursor.focusId]
-  }),
+  onDelete: (cursor) =>
+    requestDeleteTodo({
+      ids: cursor.selection.length > 0 ? cursor.selection : [cursor.focusId],
+    }),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
   keybindings: [...listBindings.keybindings],
@@ -372,14 +386,11 @@ export const setSearchQuery = searchZone.command(
   }),
 );
 
-export const clearSearch = searchZone.command(
-  "clearSearch",
-  (ctx) => ({
-    state: produce(ctx.state, (draft) => {
-      draft.ui.searchQuery = "";
-    }),
+export const clearSearch = searchZone.command("clearSearch", (ctx) => ({
+  state: produce(ctx.state, (draft) => {
+    draft.ui.searchQuery = "";
   }),
-);
+}));
 
 export const TodoSearchUI = searchZone.bind({
   role: "textbox",

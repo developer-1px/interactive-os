@@ -20,12 +20,13 @@ import {
 } from "@/os/collection/pasteBubbling";
 import { defineApp } from "@/os/defineApp";
 import { os } from "@/os/kernel";
+import { history } from "@/os/modules/history";
 import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
 import {
   type Block,
   type BuilderState,
-  INITIAL_STATE,
   findBlockInfo,
+  INITIAL_STATE,
 } from "./model/appState";
 export type { Block, BuilderState };
 export { INITIAL_STATE, findBlockInfo };
@@ -40,7 +41,7 @@ function getBuilderState(): BuilderState {
 // ═══════════════════════════════════════════════════════════════════
 
 export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE, {
-  history: true,
+  modules: [history()],
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -166,9 +167,7 @@ export const BuilderSidebarUI = sidebarCollection.bind({
     navigate: { orientation: "vertical" },
     tab: { behavior: "flow" },
   },
-  keybindings: [
-    ...collectionBindings.keybindings,
-  ],
+  keybindings: [...collectionBindings.keybindings],
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -424,11 +423,12 @@ export const BuilderCanvasUI = canvasCollection.bind({
     navigate: { orientation: "corner" },
     tab: { behavior: "trap" },
     activate: { onClick: true, reClickOnly: true },
-    dismiss: { escape: "deselect" },
+    dismiss: { escape: "none" },
   },
   itemFilter: createCanvasItemFilter(CANVAS_ZONE_ID),
   keybindings: [
     { key: "\\", command: createDrillUp(CANVAS_ZONE_ID) },
+    { key: "Escape", command: createDrillUp(CANVAS_ZONE_ID) },
     ...canvasBindings.keybindings,
     ...createTypingEntryKeybindings(CANVAS_ZONE_ID),
   ],

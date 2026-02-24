@@ -34,6 +34,7 @@ import { defineScope } from "@kernel";
 import type { Middleware, ScopeToken } from "@kernel/core/tokens";
 import { type AppState, initialAppState, os } from "@os/kernel";
 import { createHistoryMiddleware } from "@/os/middlewares/historyKernelMiddleware";
+import type { AppModule } from "@/os/modules/types";
 
 // ═══════════════════════════════════════════════════════════════════
 // Slice Registry (for resetAllAppSlices)
@@ -54,6 +55,8 @@ export interface AppSliceConfig<S> {
   };
   /** Enable undo/redo history recording. App state must have a `history` field. */
   history?: boolean;
+  /** App modules to install */
+  modules?: AppModule[];
 }
 
 export interface AppSliceHandle<S> {
@@ -123,6 +126,17 @@ export function registerAppSlice<S>(
   // 6. History middleware (if configured)
   if (config.history) {
     os.use(createHistoryMiddleware(appId, scope));
+  }
+
+  // 7. App modules (if configured)
+  for (const mod of config.modules ?? []) {
+    // Skip history module on app scope — already handled above
+    if (mod.id === "history") continue;
+    const mws = mod.install({ appId, scope });
+    const mwArr = Array.isArray(mws) ? mws : [mws];
+    for (const mw of mwArr) {
+      os.use(mw);
+    }
   }
 
   const handle: AppSliceHandle<S> = {

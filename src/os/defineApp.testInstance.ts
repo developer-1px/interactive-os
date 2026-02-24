@@ -9,6 +9,7 @@ import { createKernel, defineScope } from "@kernel";
 import type { BaseCommand } from "@kernel/core/tokens";
 import { type AppState, initialAppState } from "@os/kernel";
 import { focusHandler } from "./3-commands/focus/focus";
+import { toastShowHandler } from "./3-commands/toast/toast";
 import type {
   Condition,
   FlatHandler,
@@ -20,6 +21,7 @@ import {
   createHistoryMiddleware,
   endTransaction,
 } from "./middlewares/historyKernelMiddleware";
+import type { AppModule } from "./modules/types";
 
 // ═══════════════════════════════════════════════════════════════════
 // TestInstance Config (injected by defineApp)
@@ -32,6 +34,8 @@ export interface CreateTestConfig<S> {
     string,
     { handler: FlatHandler<S, any>; when?: Condition<S> }
   >;
+  /** App modules to install on test kernel */
+  modules?: AppModule[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -58,8 +62,8 @@ export function createTestInstance<S>(
   const stateOverrides =
     enableHistory || enableOS
       ? (({ history: _h, withOS: _w, ...rest }) => rest)(
-        rawOverrides as Record<string, unknown>,
-      )
+          rawOverrides as Record<string, unknown>,
+        )
       : rawOverrides;
 
   const testState =
@@ -70,13 +74,13 @@ export function createTestInstance<S>(
   const testKernel = createKernel<AppState | TestAppState>(
     enableOS
       ? {
-        ...initialAppState,
-        apps: { [appId]: testState },
-      }
+          ...initialAppState,
+          apps: { [appId]: testState },
+        }
       : {
-        os: {} as Record<string, never>,
-        apps: { [appId]: testState },
-      },
+          os: {} as Record<string, never>,
+          apps: { [appId]: testState },
+        },
   );
 
   const testScope = defineScope(appId);
@@ -97,6 +101,17 @@ export function createTestInstance<S>(
     testKernel.use(historyMw);
   }
 
+  // Install app modules on test kernel
+  for (const mod of config.modules ?? []) {
+    // Skip history module — already handled above
+    if (mod.id === "history") continue;
+    const mws = mod.install({ appId, scope: testScope });
+    const mwArr = Array.isArray(mws) ? mws : [mws];
+    for (const mw of mwArr) {
+      testKernel.use(mw);
+    }
+  }
+
   // Re-register all commands on test kernel
   for (const [type, entry] of flatHandlerRegistry) {
     const kernelHandler = (ctx: { readonly state: S }) => (payload: any) => {
@@ -104,7 +119,10 @@ export function createTestInstance<S>(
       if (result?.dispatch) {
         // Normalize nested dispatches to the test scope
         if (Array.isArray(result.dispatch)) {
-          result.dispatch = result.dispatch.map(cmd => ({ ...cmd, scope: [testScope] }));
+          result.dispatch = result.dispatch.map((cmd) => ({
+            ...cmd,
+            scope: [testScope],
+          }));
         } else {
           result.dispatch = { ...result.dispatch, scope: [testScope] };
         }
@@ -123,9 +141,11 @@ export function createTestInstance<S>(
     );
   }
 
-  // Register OS commands (OS_FOCUS) on test kernel
+  // Register OS commands (OS_FOCUS, OS_TOAST_SHOW) on test kernel
   // Required for integration tests that rely on focus/selection persistence
+  // and toast notifications from modules
   testKernel.defineCommand("OS_FOCUS", focusHandler as any);
+  testKernel.defineCommand("OS_TOAST_SHOW", toastShowHandler as any);
 
   return {
     get state() {

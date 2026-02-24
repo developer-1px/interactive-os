@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-24 13:53
+> Last updated: 2026-02-25 00:11
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -8,6 +8,8 @@
 ---
 
 ## 🔥 Active Focus
+
+**app-modules** — AppModule 인터페이스 도입, history/persistence 모듈화, deleteToast 신규. Heavy.
 
 **builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
 
@@ -21,12 +23,15 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| app-modules | Scaffold, T1~T8, Red 🔴 | 02-25 | 🔥 Focus |
 | builder-v2 | T18 → content-edit-mode 분리 | 02-24 | 🔥 Focus |
 | content-edit-mode | T1~T4 Done, T5~T7 FSM v3 원자 전이 | 02-24 | 🟢 Active |
-| go-redesign | Scaffold 완료, T1~T3 | 02-24 | 🔥 Focus |
+| dev-pipeline | T0 Done (/red /green 생성), T1~T3 | 02-24 | 🟢 Active |
+| go-redesign | T1~T3 Done → Superseded by dev-pipeline | 02-24 | 🟡 Paused |
 | normalized-collection | Scaffold 완료, T1~T6 | 02-24 | 🔥 Focus |
 | cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-22 | 🟢 Active |
+| tab-state | Scaffold, /audit에서 발견. T1 Red 대기 | 02-24 | 🟢 Active |
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-property-schema | Scaffold, T1~T5 | 02-24 | 🟢 Active |
 | tree-click-defaults | Scaffold, T1~T3 | 02-24 | 🟢 Active |
@@ -82,6 +87,15 @@
 
 ## 📥 Inbox
 
+- `docs/0-inbox/2026-0224-1944-[proposal]-when-router-extension.md` (when 라우터 확장 — 함수형 WhenPredicate + itemAttr, keybindings = 결정 테이블)
+  - Related Project: dev-pipeline (OS 코어 변경)
+  - Suggested Action: `/project`로 전환하여 구현 시작
+- `docs/0-inbox/2026-0224-1927-[analysis]-builder-canvas-decision-table.md` (빌더 캔버스 결정 테이블 — 입력 4종 × 조건 5축 = 41분기, 경합 지점 4개)
+  - Related Project: builder-v2
+  - Suggested Action: when 확장 완료 후 빌더 리팩토링에 적용
+- `docs/0-inbox/2026-0224-1921-[proposal]-pipeline-verification-table.md` (파이프라인 검증 표 — OS 파이프라인 6열 = 테스트 표 스키마, Todo 앱 51개 시나리오 전수 열거)
+  - Related Project: dev-pipeline
+  - Suggested Action: `/discussion` 결론 후 dev-pipeline에 통합, 워크플로우 Step으로 전환
 - `docs/0-inbox/2026-0224-0320-[report]-why-interaction-os.md` (왜 Interaction OS를 만드는가 — 프로젝트 철학 아티클)
   - Related Project: 전체
   - Suggested Action: README 또는 외부 소개 자료로 발전
@@ -92,18 +106,25 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 3 |
-| Active Projects (total) | 12 (7 Active + 3 Focus + 2 Paused) |
+| Active Focus | 4 |
+| Active Projects (total) | 13 (7 Active + 4 Focus + 2 Paused) |
 | Completed (archived) | 36 |
-| Inbox items | 1 |
+| Inbox items | 4 |
 | Backlog items | 9 |
 | Open issues | 0 |
 
 ---
 
-## 📝 Recent Changes (2026-02-24)
+## 📝 Recent Changes (2026-02-25)
+
+- 🆕 `app-modules` Heavy 프로젝트 생성 — Discussion에서 발견: "삭제 시 undo 토스트" → OS App Module System으로 발전. `defineApp({ modules: [history(), persistence(), deleteToast()] })` 배열 기반 모듈 설치. ESLint/Vite plugin 모델. 기존 history/persistence boolean config → 모듈로 리팩토링.
+
+<details>
+<summary>📝 Previous Changes (2026-02-24)</summary>
 
 - 🧹 `/para`: Inbox 10건→1건, 1-project/ 9개 폴더 아카이브 (bdd-tdd-gate, caret-restore, dnd-poc, zone-focusgroup-separation, testbot-v2, accessor-first-cleanup, on-select, philosophy-hygiene, inspector-redesign). Completed ❌ 5건 → ✅. Resource 루트 파일 2건 → 하위 카테고리 이동. Stale 프로젝트 6건 유지.
+
+</details>
 
 <details>
 <summary>📝 Previous Changes (2026-02-21)</summary>
