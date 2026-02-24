@@ -38,14 +38,17 @@ Risks:
   - resolveCheck 하드코딩 제거 (Item layer로 흡수)
   - senseKeyboard에 editingFieldId, focusedItemExpanded 추가
 - [x] T4: osDefaults 정리 — when:"editing" Enter/Escape 제거 — tsc 0 | 785 tests ✅
-- [ ] T5: fieldKeyOwnership 정리 — delegation → layer keybindings
-- [ ] T6: 회귀 테스트 — todo/docs-viewer/builder 키보드 보장
-  - todo: enter/escape/tab/arrows
-  - docs-viewer: tree navigation
-  - builder: panel form + canvas editing
+- [x] T5: fieldKeyOwnership 정리 — delegation→zone pass-through 재명칭 + 문서화 ✅
+- [x] T6: 회귀 테스트 — 95 files / 1038 tests green | tsc 0 ✅
 
 ## ⏳ Done
 
+- [x] T1: Field-layer keybindings — `resolveFieldKey()` +16 tests ✅
+- [x] T2: Item-layer keybindings — `resolveItemKey()` +12 tests ✅
+- [x] T3: resolveKeyboard ZIFT 순회 — Field→Item→Zone→Global ✅
+- [x] T4: osDefaults 정리 — when:"editing" Enter/Escape 제거 ✅
+- [x] T5: fieldKeyOwnership 정리 ✅
+- [x] T6: 회귀 테스트 — 95 files / 1038 tests | tsc 0 ✅
 
 ## Unresolved
 

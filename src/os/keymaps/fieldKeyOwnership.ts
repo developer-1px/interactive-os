@@ -1,37 +1,43 @@
 /**
- * Field Key Ownership — Per-key delegation table for field type presets.
+ * Field Key Ownership — Zone pass-through keys per FieldType.
  *
- * Principle: When a field is editing, it OWNS all keys by default.
- * Fields explicitly DELEGATE specific navigation keys to the OS.
+ * ZIFT Keyboard Responder Chain:
+ *   Field → Item → Zone → OS Global
  *
- * This is the inverse of "consumption": instead of listing what fields block,
- * we list what fields release to OS for navigation/actions.
+ * When a field is active (editing), it absorbs all keys by default.
+ * Some keys are explicitly "passed through" to the Zone/OS layer —
+ * navigation keys that should still work while editing.
  *
- * Why delegation (not consumption)?
- *   Text input keys (Space, letters, numbers, punctuation) must NEVER be
- *   intercepted by OS navigating bindings during editing. The delegation model
- *   ensures only explicitly listed navigation keys can pass through to OS.
+ * Design: "allowlist" model
+ *   Only keys explicitly listed in ZONE_PASSTHROUGH_KEYS can pass
+ *   from an active Field to the Zone layer. Everything else is absorbed.
  *
- * Keys always handled by the field (never delegated):
- *   - Letter/number/symbol/Space → text input
- *   - ArrowLeft, ArrowRight → cursor movement within text
- *   - Home, End (without Meta) → cursor jump within text
+ * Keys always absorbed by Field (never pass through):
+ *   - Letters/numbers/symbols → text input
+ *   - ArrowLeft, ArrowRight → cursor movement
+ *   - Home, End (without Meta) → cursor jump
  *   - Backspace, Delete → character deletion
- *   - Meta+Z, Meta+A, Meta+C/X/V → native browser behavior
+ *   - Enter, Escape → handled by Field-layer (resolveFieldKey.ts)
+ *   - Meta+Z/A/C/X/V → native browser behavior
  *
- * The table only contains keys that HAVE OS keybindings and should pass through:
+ * Keys that pass through to Zone (navigation):
+ *   - Tab / Shift+Tab → zone escape (all field types, except editor)
+ *   - ArrowUp / ArrowDown → item navigation (inline/tokens only)
  */
 
 import type { FieldType } from "../6-components/field/FieldRegistry";
 import { FieldRegistry } from "../6-components/field/FieldRegistry";
 
 /**
- * Keys that each field type DELEGATES to the OS during editing.
+ * Keys each FieldType allows to pass through to the Zone/OS layer during editing.
  *
- * If a canonical key is in this set → the OS can handle it (isFieldActive = false).
- * If NOT in the set → the field owns it (isFieldActive = true, OS skips it).
+ * If a key IS in this set → Zone layer can handle it (isFieldActive = false).
+ * If NOT in this set → field absorbs it (isFieldActive = true, Zone skips).
+ *
+ * Note: Enter/Escape are NOT here — they are handled exclusively by
+ * resolveFieldKey.ts at the Field layer. They never reach Zone/OS.
  */
-const INLINE_DELEGATES = new Set([
+const INLINE_ZONE_PASSTHROUGH = new Set([
   "Tab",
   "Shift+Tab",
   "ArrowUp",
@@ -40,45 +46,46 @@ const INLINE_DELEGATES = new Set([
   "Shift+ArrowDown",
 ]);
 
-const FIELD_DELEGATES_TO_OS: Record<FieldType, Set<string>> = {
+const ZONE_PASSTHROUGH_KEYS: Record<FieldType, Set<string>> = {
   // inline: single-line input (draft, search, rename)
-  // Delegates: Tab (zone escape), ↑↓ (item navigation)
-  inline: INLINE_DELEGATES,
+  // Passes: Tab (zone escape), ↑↓ (item navigation)
+  inline: INLINE_ZONE_PASSTHROUGH,
 
   // tokens: chip/tag input (email recipients, tags)
-  // Same delegation as inline; Backspace∅→OS is handled separately when implemented
-  tokens: INLINE_DELEGATES,
+  tokens: INLINE_ZONE_PASSTHROUGH,
 
   // block: multi-line text (comment, description, chat)
-  // Delegates Tab only (arrows move cursor between lines)
+  // ↑↓ moves cursor between lines → absorbed. Only Tab passes.
   block: new Set(["Tab", "Shift+Tab"]),
 
   // editor: code editor, rich text
-  // Delegates nothing — editor handles Tab (indent) and ↑↓ (cursor)
+  // Tab = indent. ↑↓ = cursor. Nothing passes.
   editor: new Set([]),
 };
 
 /**
- * Check if a specific key is delegated to the OS by the active field type.
+ * Check if a key should pass through from an active Field to the Zone layer.
  *
- * @param canonicalKey - The canonical key string (e.g., "Tab", "ArrowDown")
- * @param fieldType - The field type preset (defaults to "inline")
- * @returns true if the key is delegated to OS (isFieldActive = false)
+ * @param canonicalKey - e.g., "Tab", "ArrowDown"
+ * @param fieldType - Field type preset (defaults to "inline")
+ * @returns true if the key passes through to Zone (isFieldActive = false)
  */
 export function isKeyDelegatedToOS(
   canonicalKey: string,
   fieldType: FieldType = "inline",
 ): boolean {
-  return FIELD_DELEGATES_TO_OS[fieldType].has(canonicalKey);
+  return ZONE_PASSTHROUGH_KEYS[fieldType].has(canonicalKey);
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Shared helpers — single source of truth for KeyboardListener + macFallback
+// Shared helpers — used by KeyboardListener + macFallbackMiddleware
 // ═══════════════════════════════════════════════════════════════════
 
 /**
- * Check if the target element is an editable element.
- * Fallback for elements NOT registered in FieldRegistry.
+ * Check if the target element is an editing element (DOM fallback).
+ *
+ * Used for elements NOT registered in FieldRegistry (e.g., plain textarea).
+ * Unregistered elements absorb ALL keys — OS never intercepts.
  */
 export function isEditingElement(target: HTMLElement): boolean {
   return (
@@ -89,11 +96,17 @@ export function isEditingElement(target: HTMLElement): boolean {
 }
 
 /**
- * Resolve whether the field actively owns a specific key (isFieldActive).
+ * Resolve whether a Field absorbs a specific key (isFieldActive).
  *
- * Returns true = field owns this key (OS should NOT handle)
- * Returns false = field delegates this key to OS (OS can handle)
- * Fallback: unregistered native inputs own all keys.
+ * Process:
+ *  1. If target element is registered in FieldRegistry:
+ *     → use ZONE_PASSTHROUGH_KEYS for the field's type
+ *  2. If NOT registered (plain textarea, native input):
+ *     → treat as "owns all keys" (returns true, Zone blocked)
+ *
+ * Returns:
+ *   true  = Field absorbs this key → Zone/OS skips it
+ *   false = Key passes through to Zone/OS
  */
 export function resolveIsEditingForKey(
   target: HTMLElement,
@@ -107,5 +120,6 @@ export function resolveIsEditingForKey(
       return !isKeyDelegatedToOS(canonicalKey, fieldType);
     }
   }
+  // Unregistered element: absorbs all keys
   return isEditingElement(target);
 }
