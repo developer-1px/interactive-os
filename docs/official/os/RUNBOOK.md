@@ -230,12 +230,43 @@ test("Enter activates item", () => {
 
 ---
 
-## 상세 참조
+## 더 깊이 알고 싶을 때
 
-| 주제 | 문서 |
+> 아래는 **읽으라는 게 아니다.** 필요한 상황에서 찾아가는 지도다.
+
+### OS 동작 계약
+
+| 상황 | 참조 |
 |------|------|
-| 전체 커맨드/키맵/Role Preset | `docs/official/os/SPEC.md` |
-| 커널 API | `docs/official/kernel/01~09` |
-| 벤치마크 앱 코드 | `src/apps/todo/app.ts` |
-| ZIFT 프리미티브 상세 | `docs/2-area/20-os/23-primitives/` |
-| LLM 친화 설계 | `docs/2-area/20-os/23-primitives/03-llm-friendly-design.md` |
+| Role별 키보드 동작이 궁금할 때 | `docs/official/os/SPEC.md` §7 Role Preset Matrix |
+| 커맨드 목록/페이로드 확인 | `docs/official/os/SPEC.md` §3 Commands |
+| 키맵(어떤 키 → 어떤 커맨드) 확인 | `docs/official/os/SPEC.md` §6 Keymap |
+| Focus/Selection/Expand 상태 구조 | `docs/official/os/SPEC.md` §2 State |
+| OS가 왜 이 기능을 직접 하는지 | `docs/official/os/why-*.md` (focus, navigation, clipboard 등) |
+
+### 커널 API
+
+| 상황 | 참조 |
+|------|------|
+| createKernel, defineCommand 기초 | `docs/official/kernel/01-getting-started.md` |
+| Command, Effect, Scope 개념 | `docs/official/kernel/02-core-concepts.md` |
+| 미들웨어 작성법 | `docs/official/kernel/06-middleware.md` |
+| 테스트 패턴 (격리, 트랜잭션 어설션) | `docs/official/kernel/08-patterns.md` |
+
+### 앱 구현 패턴
+
+| 상황 | 참조 |
+|------|------|
+| CRUD/Clipboard/Ordering 전체 패턴 | `src/apps/todo/app.ts` (벤치마크) |
+| Tree 네비게이션, 계층 구조 | `src/apps/builder/app.ts` + `src/docs-viewer/app.ts` |
+| Dialog/Menu/Overlay 패턴 | `docs/2-area/20-os/23-primitives/02-primitives-detail.md` |
+| LLM이 잘 쓰는 API 설계 원칙 | `docs/2-area/20-os/23-primitives/03-llm-friendly-design.md` |
+
+### 테스트
+
+| 상황 | 참조 |
+|------|------|
+| createOsPage 전체 API | `src/os/createOsPage.ts` (OsPage interface) |
+| APG 계약 테스트 사례 | `src/os/3-commands/tests/apg/*.apg.test.ts` |
+| 앱 통합 테스트 사례 | `src/apps/todo/tests/` |
+
