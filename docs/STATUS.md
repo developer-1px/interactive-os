@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-25 00:27
+> Last updated: 2026-02-25 00:58
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -16,6 +16,8 @@
 
 **normalized-collection** — OS 데이터 모델을 `{ entities, order }` 정규화 포맷으로 통일. Heavy.
 
+**ocp-violations** — OCP 위반 5건 수정: Block Registry 통합, Inspector 레지스트리, QuickPick 파이프라인. Light.
+
 ---
 
 ## 📋 All Active Projects
@@ -28,6 +30,7 @@
 | dev-pipeline | T0 Done (/red /green 생성), T1~T3 | 02-24 | 🟢 Active |
 | go-redesign | T1~T3 Done → Superseded by dev-pipeline | 02-24 | 🟡 Paused |
 | normalized-collection | Scaffold 완료, T1~T6 | 02-24 | 🔥 Focus |
+| ocp-violations | T1~T4 Red 🔴 | 02-25 | 🟢 Active |
 | cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-22 | 🟢 Active |
 | tab-state | Scaffold, /audit에서 발견. T1 Red 대기 | 02-24 | 🟢 Active |

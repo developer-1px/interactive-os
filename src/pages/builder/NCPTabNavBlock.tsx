@@ -21,15 +21,7 @@ import { Builder } from "@/apps/builder/primitives/Builder";
  * 활성 탭은 OS selection으로 관리.
  */
 
-// Block type → component 매핑 (탭 패널 내부 렌더링용)
-// 현재는 ncp-feature-cards만 지원, 확장 시 import 추가
-import { NCPFeatureCardsBlock } from "./NCPFeatureCardsBlock";
-import { NCPNoticeBlock } from "./NCPNoticeBlock";
-
-const TAB_PANEL_RENDERERS: Record<string, React.FC<{ id: string }>> = {
-    "ncp-feature-cards": NCPFeatureCardsBlock,
-    "ncp-notice": NCPNoticeBlock,
-};
+import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 
 export function NCPTabNavBlock({ id }: { id: string }) {
     const fid = (local: string) => `${id}-${local}`;
@@ -95,7 +87,7 @@ export function NCPTabNavBlock({ id }: { id: string }) {
                 {panelSections.length > 0 && (
                     <div id={`${id}-panel-${safeActiveIndex}`} role="tabpanel">
                         {panelSections.map((section) => {
-                            const Renderer = TAB_PANEL_RENDERERS[section.type];
+                            const Renderer = BLOCK_REGISTRY[section.type];
                             if (Renderer) return <Renderer key={section.id} id={section.id} />;
                             // fallback: 기본 텍스트
                             return (

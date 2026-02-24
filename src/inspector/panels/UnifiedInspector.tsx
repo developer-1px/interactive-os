@@ -131,12 +131,12 @@ const ARRAY_INDEX_RE = /^(.+)\[(\d+)\]$/;
 type DisplayEntry =
   | { kind: "single"; tx: Transaction; filteredIndex: number }
   | {
-      kind: "group";
-      representative: Transaction;
-      count: number;
-      txs: Transaction[];
-      filteredIndex: number;
-    };
+    kind: "group";
+    representative: Transaction;
+    count: number;
+    txs: Transaction[];
+    filteredIndex: number;
+  };
 
 /** Group consecutive transactions with the same command type into collapsed entries */
 function groupConsecutive(txs: Transaction[]): DisplayEntry[] {
@@ -454,11 +454,10 @@ export function UnifiedInspector({
                   key={group}
                   type="button"
                   onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                    active
+                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
                       ? "bg-[#1e293b] text-white border-[#1e293b]"
                       : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                  }`}
+                    }`}
                 >
                   {group}
                 </button>
@@ -1074,33 +1073,14 @@ function DiffValue({
   const lines = str.split("\n");
   const isLarge = lines.length > 7 || str.length > 150;
 
-  let prefix = "";
-  let surfaceClass = "";
-  let textClass = "";
+  const DIFF_STYLES: Record<typeof type, { prefix: string; surfaceClass: string; textClass: string }> = {
+    removed: { prefix: "-", surfaceClass: "bg-[#fef2f2]", textClass: "text-[#991b1b]" },
+    added: { prefix: "+", surfaceClass: "bg-[#f0fdf4]", textClass: "text-[#166534]" },
+    "changed-from": { prefix: "", surfaceClass: "bg-[#f8fafc]", textClass: "text-[#64748b] line-through" },
+    "changed-to": { prefix: "→", surfaceClass: "bg-[#e2e8f0]/50", textClass: "text-[#0f172a] font-medium" },
+  };
 
-  // Surfaces (Backgrounds) specifically for the diff payloads
-  switch (type) {
-    case "removed":
-      prefix = "-";
-      surfaceClass = "bg-[#fef2f2]";
-      textClass = "text-[#991b1b]";
-      break;
-    case "added":
-      prefix = "+";
-      surfaceClass = "bg-[#f0fdf4]";
-      textClass = "text-[#166534]";
-      break;
-    case "changed-from":
-      prefix = "";
-      surfaceClass = "bg-[#f8fafc]";
-      textClass = "text-[#64748b] line-through";
-      break;
-    case "changed-to":
-      prefix = "→";
-      surfaceClass = "bg-[#e2e8f0]/50";
-      textClass = "text-[#0f172a] font-medium";
-      break;
-  }
+  const { prefix, surfaceClass, textClass } = DIFF_STYLES[type];
 
   const prefixNode = (
     <span className="inline-block w-5 shrink-0 text-center font-bold text-black/20 select-none">

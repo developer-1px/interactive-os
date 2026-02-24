@@ -5,6 +5,7 @@ import {
   BuilderCanvasUI,
   loadPagePreset,
 } from "@/apps/builder/app";
+import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 import { BuilderCursor } from "@/apps/builder/BuilderCursor";
 import { PAGE_PRESETS } from "@/apps/builder/presets/pages";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
@@ -12,20 +13,8 @@ import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
 import { os } from "@/os/kernel";
 import {
   EditorToolbar,
-  NCPFeatureCardsBlock,
-  NCPFooterBlock,
-  NCPHeroBlock,
-  NCPNewsBlock,
-  NCPNoticeBlock,
-  NCPPricingBlock,
-  NCPProductHeroBlock,
-  NCPRelatedServicesBlock,
-  NCPSectionFooterBlock,
-  NCPServicesBlock,
-  NCPTabNavBlock,
   PropertiesPanel,
   SectionSidebar,
-  TabContainerBlock,
   type ViewportMode,
 } from "./builder";
 import { HighlightContext } from "./builder/PropertiesPanel";
@@ -108,22 +97,7 @@ export default function BuilderPage() {
   );
 }
 
-// ─── Section Renderer — maps section.type → block component ───
 
-const BLOCK_COMPONENTS: Record<string, React.FC<{ id: string }>> = {
-  hero: NCPHeroBlock,
-  news: NCPNewsBlock,
-  services: NCPServicesBlock,
-  pricing: NCPPricingBlock,
-  tabs: TabContainerBlock,
-  footer: NCPFooterBlock,
-  "ncp-product-hero": NCPProductHeroBlock,
-  "ncp-feature-cards": NCPFeatureCardsBlock,
-  "ncp-notice": NCPNoticeBlock,
-  "ncp-section-footer": NCPSectionFooterBlock,
-  "ncp-related-services": NCPRelatedServicesBlock,
-  "ncp-tab-nav": NCPTabNavBlock,
-};
 
 function SectionRenderer() {
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);
@@ -135,7 +109,7 @@ function SectionRenderer() {
   return (
     <>
       {blocks.map((block) => {
-        const Component = BLOCK_COMPONENTS[block.type];
+        const Component = BLOCK_REGISTRY[block.type];
         return Component ? <Component key={block.id} id={block.id} /> : null;
       })}
     </>

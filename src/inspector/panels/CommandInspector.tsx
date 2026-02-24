@@ -57,29 +57,26 @@ export function CommandInspector() {
     };
   }, []);
 
+  const TAB_PANELS: Record<string, React.ReactNode> = {
+    ELEMENT: <ElementPanel />,
+    REGISTRY: (
+      <div className="flex-1 flex flex-col overflow-hidden bg-white">
+        <KeyMonitor rawKeys={rawKeys} />
+        <RegistryMonitor historyCount={historyCount} />
+      </div>
+    ),
+    STATE: <InspectorAdapter />,
+    TESTBOT: <TestBotPanel />,
+    REPLAY: <BddReplayPanel />,
+  };
+
   const renderContent = () => {
-    switch (activeTab) {
-      case "ELEMENT":
-        return <ElementPanel />;
-      case "REGISTRY":
-        return (
-          <div className="flex-1 flex flex-col overflow-hidden bg-white">
-            <KeyMonitor rawKeys={rawKeys} />
-            <RegistryMonitor historyCount={historyCount} />
-          </div>
-        );
-      case "STATE":
-        return <InspectorAdapter />;
-      case "TESTBOT":
-        return <TestBotPanel />;
-      case "REPLAY":
-        return <BddReplayPanel />;
-      default: {
-        const dynamicPanel = InspectorRegistry.getPanel(activeTab);
-        if (dynamicPanel) return <>{dynamicPanel.content}</>;
-        return null;
-      }
-    }
+    const panel = TAB_PANELS[activeTab];
+    if (panel) return panel;
+    // Dynamic panels from InspectorRegistry
+    const dynamicPanel = InspectorRegistry.getPanel(activeTab);
+    if (dynamicPanel) return <>{dynamicPanel.content}</>;
+    return null;
   };
 
   return (

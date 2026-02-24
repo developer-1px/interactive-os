@@ -290,34 +290,48 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
     }
   }, [filteredItems, zoneId, handleClose, onSelect]);
 
-  // ── Navigate from input → virtual zone ──
-  // NOTE: KeyboardListener skips role="combobox" inputs entirely,
-  //       so QuickPick is responsible for dispatching kernel commands.
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Tab" || (e.key === "ArrowRight" && completion)) {
-        // Accept typeahead
+  // ── Key action map — combobox dispatches directly to kernel ──
+  // NOTE: KeyboardListener skips role="combobox", so QuickPick
+  //       dispatches navigation commands itself. The map avoids
+  //       if/else-if e.key branching (OCP).
+  const keyActions = useMemo(() => {
+    const actions: Record<string, (e: React.KeyboardEvent) => void> = {
+      Tab: (e) => {
         e.preventDefault();
+        if (completion) setQuery((q) => q + completion);
+      },
+      ArrowRight: (e) => {
         if (completion) {
+          e.preventDefault();
           setQuery((q) => q + completion);
         }
-      } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        // Direct kernel dispatch — virtualFocus keeps DOM focus on input
+      },
+      ArrowDown: (e) => {
         e.preventDefault();
-        os.dispatch(
-          OS_NAVIGATE({
-            direction: e.key === "ArrowDown" ? "down" : "up",
-          }),
-        );
-      } else if (e.key === "Enter") {
+        os.dispatch(OS_NAVIGATE({ direction: "down" }));
+      },
+      ArrowUp: (e) => {
+        e.preventDefault();
+        os.dispatch(OS_NAVIGATE({ direction: "up" }));
+      },
+      Enter: (e) => {
         e.preventDefault();
         handleAction();
-      } else if (e.key === "Escape") {
+      },
+      Escape: (e) => {
         e.preventDefault();
         handleClose();
-      }
+      },
+    };
+    return actions;
+  }, [completion, handleAction, handleClose]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      const action = keyActions[e.key];
+      if (action) action(e);
     },
-    [completion, handleAction, handleClose],
+    [keyActions],
   );
 
   if (!isOpen) return null;
@@ -393,28 +407,28 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
           >
             {filteredItems.length === 0
               ? (renderEmpty?.(query) ?? (
-                  <div className="py-8 text-center text-sm text-zinc-500">
-                    No results found
-                  </div>
-                ))
+                <div className="py-8 text-center text-sm text-zinc-500">
+                  No results found
+                </div>
+              ))
               : filteredItems.map((item) => (
-                  <Item key={item.id} id={item.id}>
-                    {({ isFocused, isSelected }) =>
-                      renderItem ? (
-                        renderItem(item, { isFocused, isSelected, query })
-                      ) : (
-                        <DefaultQuickPickRow
-                          item={item}
-                          isFocused={isFocused}
-                          onClick={() => {
-                            handleClose();
-                            onSelect(item);
-                          }}
-                        />
-                      )
-                    }
-                  </Item>
-                ))}
+                <Item key={item.id} id={item.id}>
+                  {({ isFocused, isSelected }) =>
+                    renderItem ? (
+                      renderItem(item, { isFocused, isSelected, query })
+                    ) : (
+                      <DefaultQuickPickRow
+                        item={item}
+                        isFocused={isFocused}
+                        onClick={() => {
+                          handleClose();
+                          onSelect(item);
+                        }}
+                      />
+                    )
+                  }
+                </Item>
+              ))}
           </Zone>
 
           {/* Footer */}
@@ -487,9 +501,6 @@ function DefaultQuickPickRow({
         ${isFocused ? "bg-zinc-100 text-zinc-950" : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-800"}
       `}
       onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") onClick();
-      }}
     >
       {item.icon && <span className="text-base opacity-70">{item.icon}</span>}
       <span className="flex-1 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
@@ -497,9 +508,8 @@ function DefaultQuickPickRow({
       </span>
       {item.description && (
         <span
-          className={`text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right ${
-            isFocused ? "text-zinc-500" : "text-zinc-400"
-          }`}
+          className={`text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[40%] text-right ${isFocused ? "text-zinc-500" : "text-zinc-400"
+            }`}
         >
           {item.description}
         </span>
