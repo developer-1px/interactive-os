@@ -45,23 +45,11 @@ export const OS_FIELD_COMMIT = os.defineCommand(
       }
     }
 
-    // Bridge: dispatch app's onCommit command
+    // Bridge: dispatch app's onCommit command via kernel dispatch key (synchronous)
     const commitFactory = fieldEntry?.config.onCommit;
-    if (commitFactory) {
-      // Read from FieldRegistry — InputListener keeps value in sync with DOM.
-      const text = fieldEntry!.state.value;
-      const appCommand = commitFactory({ text });
-      queueMicrotask(() => os.dispatch(appCommand));
-
-      // Clear field for immediate-mode (e.g., DRAFT) — delegate to effect
-      if (!editingId) {
-        const fieldName = fieldEntry!.config.name;
-        queueMicrotask(() => {
-          clearFieldDOM(fieldName);
-          FieldRegistry.updateValue(fieldName, "");
-        });
-      }
-    }
+    const appCommand = commitFactory
+      ? commitFactory({ text: fieldEntry!.state.value })
+      : null;
 
     // Only clear editingItemId if we were in deferred editing mode
     if (editingId) {
@@ -87,7 +75,20 @@ export const OS_FIELD_COMMIT = os.defineCommand(
             }
           }
         }) as typeof ctx.state,
+        ...(appCommand ? { dispatch: appCommand } : {}),
       };
+    }
+
+    // Immediate mode: dispatch app command + reset field
+    if (appCommand) {
+      const fieldName = fieldEntry!.config.name;
+      // Synchronous field reset (works in both browser and headless)
+      FieldRegistry.updateValue(fieldName, "");
+      // DOM cleanup only in browser
+      if (typeof document !== "undefined") {
+        queueMicrotask(() => clearFieldDOM(fieldName));
+      }
+      return { dispatch: appCommand };
     }
   },
 );

@@ -34,7 +34,13 @@ import {
 import "@os/keymaps/osDefaults";
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import type { AppPage, KeybindingEntry, ZoneBindings } from "./defineApp.types";
+import type {
+  AppPage,
+  FieldBindings,
+  KeybindingEntry,
+  ZoneBindings,
+} from "./defineApp.types";
+import { FieldRegistry } from "./6-components/field/FieldRegistry";
 import type { ZoneRole } from "./registries/roleRegistry";
 import { resolveRole } from "./registries/roleRegistry";
 
@@ -46,6 +52,7 @@ export interface ZoneBindingEntry {
   role: ZoneRole;
   bindings: ZoneBindings;
   keybindings?: KeybindingEntry<any>[];
+  field?: FieldBindings;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -106,6 +113,9 @@ export function createAppPage<S>(
     }
     return entries;
   });
+
+  // Override browser-only effects for headless (no navigator.clipboard)
+  os.defineEffect("clipboardWrite", () => {});
 
   // ── Enter preview sandbox ──
   os.enterPreview({
@@ -171,6 +181,25 @@ export function createAppPage<S>(
       );
     }
 
+    // Register field in FieldRegistry (mirrors what Field.tsx does at mount time)
+    const field = bindingEntry?.field;
+    if (field?.fieldName) {
+      FieldRegistry.register(field.fieldName, {
+        name: field.fieldName,
+        onCommit: field.onCommit,
+        trigger: field.trigger,
+        schema: field.schema,
+        resetOnSubmit: field.resetOnSubmit,
+        mode: "immediate",
+        fieldType: "inline",
+      });
+      // Store fieldId on ZoneEntry for headless field detection
+      const zoneEntry = ZoneRegistry.get(zoneName);
+      if (zoneEntry) {
+        zoneEntry.fieldId = field.fieldName;
+      }
+    }
+
     // Set active zone + focused item via setState on preview layer
     const focusedId = opts?.focusedItemId ?? null;
     os.setState((s: AppState) =>
@@ -188,6 +217,14 @@ export function createAppPage<S>(
     keyboard: {
       press(key: string) {
         simulateKeyPress(os, key);
+      },
+      type(text: string) {
+        const activeZone = readActiveZoneId(os);
+        if (!activeZone) return;
+        const zoneEntry = ZoneRegistry.get(activeZone);
+        if (zoneEntry?.fieldId) {
+          FieldRegistry.updateValue(zoneEntry.fieldId, text);
+        }
       },
     },
 

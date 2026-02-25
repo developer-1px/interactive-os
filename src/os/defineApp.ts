@@ -252,6 +252,7 @@ export function defineApp<S>(
           role: config.role,
           bindings: config,
           keybindings: config.keybindings ?? [],
+          field: config.field,
         });
 
         return createBoundComponents(

@@ -94,6 +94,8 @@ export interface ZoneBindings {
 }
 
 export interface FieldBindings {
+  /** Field name — used as FieldRegistry ID. Must match <Field name="..."> prop. */
+  fieldName?: string;
   onCommit?: FieldCommandFactory;
   trigger?: "change" | "blur" | "enter";
   schema?: ZodSchema;
@@ -195,9 +197,11 @@ export interface AppPage<S> {
     },
   ): void;
 
-  /** Keyboard input — Playwright page.keyboard.press() isomorphic. */
+  /** Keyboard input — Playwright page.keyboard isomorphic. */
   keyboard: {
     press(key: string): void;
+    /** Type text into the active field — Playwright page.keyboard.type() isomorphic. */
+    type(text: string): void;
   };
 
   /** Click an item by ID — Playwright page.click() isomorphic. */

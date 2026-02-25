@@ -167,17 +167,25 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
   const entry = activeZoneId ? ZoneRegistry.get(activeZoneId) : undefined;
   const childRole = entry?.role ? getChildRole(entry.role) : undefined;
 
+  // Field detection: zone has a registered field → set editingFieldId for ZIFT Field layer
+  const editingFieldId = entry?.fieldId ?? null;
+
   const input: KeyboardInput = {
     canonicalKey: key,
     key,
-    isEditing: false,
+    isEditing: !!editingFieldId,
     isFieldActive: false,
     isComposing: false,
     isDefaultPrevented: false,
     isInspector: false,
     isCombobox: false,
+    editingFieldId,
     focusedItemRole: childRole ?? null,
     focusedItemId: zone?.focusedItemId ?? null,
+    focusedItemExpanded:
+      zone?.focusedItemId && zone?.expandedItems
+        ? zone.expandedItems.includes(zone.focusedItemId)
+        : null,
     activeZoneHasCheck: !!entry?.onCheck,
     activeZoneFocusedItemId: zone?.focusedItemId ?? null,
     elementId: zone?.focusedItemId ?? undefined,

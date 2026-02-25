@@ -75,6 +75,7 @@ export function ListView() {
               <TodoDraft.Field
                 name="DRAFT"
                 value={draft}
+                fieldType="inline"
                 className="flex-1 bg-transparent outline-none text-slate-700 text-[15px] font-medium placeholder:text-slate-400"
                 placeholder="Add a new task..."
               />

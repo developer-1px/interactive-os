@@ -43,6 +43,8 @@ export interface ZoneEntry {
   element?: HTMLElement | null;
   role?: ZoneRole;
   parentId: string | null;
+  /** FieldRegistry ID — set by headless goto() for field-aware zones */
+  fieldId?: string | null;
   /** Command dispatched on ESC when dismiss.escape is "close" */
   onDismiss?: BaseCommand;
   /**

@@ -319,6 +319,7 @@ export const addTodo = listCollection.add!;
 export const TodoDraftUI = draftZone.bind({
   role: "textbox",
   field: {
+    fieldName: "DRAFT",
     onCommit: addTodo,
     trigger: "enter",
     resetOnSubmit: true,
