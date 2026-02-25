@@ -18,6 +18,7 @@ import {
   undoCommand,
 } from "@/apps/builder/app";
 import { os } from "@/os/kernel";
+import { LocaleSwitcher } from "@/apps/builder/LocaleSwitcher";
 
 export type ViewportMode = "desktop" | "tablet" | "mobile";
 
@@ -89,6 +90,13 @@ export function EditorToolbar({
 
         {/* Mode Indicator */}
         <ModeIndicator />
+
+        <Divider />
+
+        {/* Locale Switcher */}
+        <div className="px-0.5">
+          <LocaleSwitcher />
+        </div>
       </div>
     </div>
   );
@@ -111,12 +119,11 @@ function ModeIndicator() {
       <div
         className={`
           flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all duration-200
-          ${
-            isEditing
-              ? "bg-blue-50 text-blue-600 ring-1 ring-blue-200"
-              : isSelected
-                ? "bg-violet-50 text-violet-600 ring-1 ring-violet-200"
-                : "text-slate-400"
+          ${isEditing
+            ? "bg-blue-50 text-blue-600 ring-1 ring-blue-200"
+            : isSelected
+              ? "bg-violet-50 text-violet-600 ring-1 ring-violet-200"
+              : "text-slate-400"
           }
         `}
       >
@@ -162,12 +169,11 @@ function ToolButton({
       className={`
         w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150
         ${disabled ? "text-slate-300 cursor-not-allowed" : ""}
-        ${
-          active
-            ? "bg-slate-800 text-white shadow-sm"
-            : disabled
-              ? ""
-              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/80"
+        ${active
+          ? "bg-slate-800 text-white shadow-sm"
+          : disabled
+            ? ""
+            : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/80"
         }
       `}
     >
@@ -193,10 +199,9 @@ function DeviceButton({
       onClick={onClick}
       className={`
         flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150
-        ${
-          active
-            ? "bg-slate-800 text-white shadow-sm"
-            : "text-slate-400 hover:text-slate-600 hover:bg-slate-100/80"
+        ${active
+          ? "bg-slate-800 text-white shadow-sm"
+          : "text-slate-400 hover:text-slate-600 hover:bg-slate-100/80"
         }
       `}
     >

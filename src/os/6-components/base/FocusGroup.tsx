@@ -202,7 +202,7 @@ export interface FocusGroupProps
     itemId: string;
     overItemId: string;
     position: "before" | "after";
-  }) => void;
+  }) => BaseCommand | BaseCommand[];
 
   /** Children */
   children: ReactNode;
@@ -260,12 +260,12 @@ function buildZoneEntry(
     getExpandableItems?: (() => Set<string>) | undefined;
     getTreeLevels?: (() => Map<string, number>) | undefined;
     onReorder?:
-      | ((info: {
-          itemId: string;
-          overItemId: string;
-          position: "before" | "after";
-        }) => void)
-      | undefined;
+    | ((info: {
+      itemId: string;
+      overItemId: string;
+      position: "before" | "after";
+    }) => BaseCommand | BaseCommand[])
+    | undefined;
   },
 ): ZoneEntry {
   const entry: ZoneEntry = {

@@ -42,7 +42,7 @@ description: 잘못된 의사결정에서 출발하여, 전문가(사용자)의 
   |----------|----------|
   | 원칙/신념 | `.agent/rules.md` |
   | 절차/프로세스 | `.agent/workflows/*.md` |
-  | 구체적 판단 사례 (판례) | `.agent/precedents/*.md` |
+  | 구체적 판단 사례 (판례) | `.agent/knowledge/precedents/*.md` |
   | 도메인 지식 | `docs/` 또는 `official/` |
 
 - 기록 위치와 내용을 사용자에게 보고한다.

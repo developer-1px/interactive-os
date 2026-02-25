@@ -1,6 +1,7 @@
 import { Field } from "@os/6-components/field/Field";
 import { X } from "lucide-react";
-import { createFieldCommit, useSectionFields } from "@/apps/builder/app";
+import { createFieldCommit } from "@/apps/builder/app";
+import { useLocalizedSectionFields } from "@/apps/builder/locale";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 /**
@@ -16,7 +17,7 @@ import { Builder } from "@/apps/builder/primitives/Builder";
  */
 export function NCPNoticeBlock({ id }: { id: string }) {
   const fid = (local: string) => `${id}-${local}`;
-  const fields = useSectionFields(id);
+  const fields = useLocalizedSectionFields(id);
 
   return (
     <Builder.Section asChild id={id}>

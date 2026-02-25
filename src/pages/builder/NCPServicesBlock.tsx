@@ -13,14 +13,14 @@ import {
 import {
   BuilderApp,
   createFieldCommit,
-  useSectionFields,
 } from "@/apps/builder/app";
+import { useLocalizedSectionFields } from "@/apps/builder/locale";
 import type { Block, BuilderState } from "@/apps/builder/model/appState";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 export function NCPServicesBlock({ id }: { id: string }) {
   const fid = (local: string) => `${id}-${local}`;
-  const fields = useSectionFields(id);
+  const fields = useLocalizedSectionFields(id);
 
   const tabs = [
     { icon: Star, label: "Featured", active: true },

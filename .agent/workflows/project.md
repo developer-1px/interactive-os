@@ -18,7 +18,7 @@ description: Discussion 결론을 프로젝트로 전환한다. scaffold 후 `/g
 ### 초기화
 
 0. **Discussion 판정** — 미완료 시 `/discussion` 진입. 완료 후 재진입.
-1. **규모 판정** — Heavy / Light 결정.
+1. **규모 판정** — Heavy / Light / Meta 결정.
 2. **문서 수집** — `docs/0-inbox/`, `docs/5-backlog/`, `docs/4-archive/` 탐색 → `discussions/`, `notes/`로 이동.
 3. **Scaffold** — `docs/1-project/[name]/` 표준 구조 생성.
 4. **등록** — `docs/STATUS.md`에 프로젝트 추가.
@@ -33,14 +33,12 @@ description: Discussion 결론을 프로젝트로 전환한다. scaffold 후 `/g
    | ❓ Open Gap | → | **Unresolved** |
    | ⚖️ Qualifier | → | 규모 판정 입력 |
 
-   Heavy는 상세 설계를 `prd.md`에 위임.
+   Heavy는 상세 설계를 `spec.md`에 위임.
 
-6. **⭐ Red 테스트 작성** — `.agent/workflows/red.md`를 `view_file`로 읽고 실행한다.
+6. **스토리 선택** (stories.md가 있는 경우) — BOARD.md의 Now 태스크에 관련 US-ID를 매핑한다.
 
-   > **프로젝트의 완료는 BOARD.md가 아니라 Red 테스트다.**
-   > BOARD.md만 있으면 기획서. Red 테스트가 있어야 프로젝트.
-
-   **⛔ Gate: Red 테스트 (🔴 FAIL) 없이 `/go` 진입 금지.**
+   > **`/project`는 scaffold까지만 한다. Red 테스트는 `/go`가 라우팅한다.**
+   > BOARD.md + spec.md 준비가 끝나면 `/go` 진입.
 
 ### BOARD.md 표준 포맷
 
@@ -71,7 +69,9 @@ Risks: [Rebuttal에서 온 위험/단점]
 **DoD (Definition of Done)**: Done 항목에는 반드시 증빙을 포함한다.
 증빙 없이 `✅`만 찍는 것은 금지.
 
-**프로젝트 초기화 DoD**: BOARD.md + Red 테스트 (🔴 FAIL). 둘 다 있어야 `/go` 진입 가능.
+**프로젝트 초기화 DoD**:
+- Heavy / Light: BOARD.md 존재. `/go` 진입 시 G2(spec)→G3(red) 순서로 자동 라우팅.
+- Meta: BOARD.md만으로 `/go` 진입 가능. 코드 테스트 불필요.
 
 | 증빙 패턴 | 예시 |
 |-----------|------|
@@ -84,23 +84,27 @@ Risks: [Rebuttal에서 온 위험/단점]
 ```
 docs/1-project/[name]/
   BOARD.md           ← Context + Now/Done/Unresolved/Ideas (필수)
-  prd.md             ← PRD (Heavy 필수)
+  spec.md            ← Functional Spec (Heavy 필수, /go G2에서 작성)
   discussions/
   notes/
 ```
 
 ### 규모 판정
 
-| 규모 | 기준 | 필수 |
-|------|------|------|
-| **Heavy** | 아키텍처 변경, 새 primitive | BOARD + PRD |
-| **Light** | 기능, 리팩토링, 버그 | BOARD |
+| 규모 | 기준 | 필수 | Red 테스트 |
+|------|------|------|----------|
+| **Heavy** | 아키텍처 변경, 새 primitive | BOARD + spec.md | ✅ 필수 (→ /go G2→G3) |
+| **Light** | 기능, 리팩토링, 버그 | BOARD | ✅ 필수 |
+| **Meta** | 워크플로우, 템플릿, 문서, 분석 | BOARD | ❌ 불필요 |
 
-Default: Light. 필요 시 escalate.
+Default: Light. 코드 산출물 없으면 Meta. 필요 시 escalate.
 
-초기화 완료 확인:
+초기화 완료 확인 (Heavy / Light):
 - [ ] BOARD.md 존재
-- [ ] `.test.ts` 파일 존재 (Red 테스트)
-- [ ] `vitest run` 실행 → 🔴 FAIL 확인
+- [ ] Now 태스크에 관련 스토리 매핑 (stories.md 있는 경우)
 
-위 3개 모두 충족 → `/go` 자동 진입.
+초기화 완료 확인 (Meta):
+- [ ] BOARD.md 존재
+- [ ] 산출물 경로 명시 (워크플로우, 문서 등)
+
+위 충족 → `/go` 자동 진입.

@@ -2,8 +2,8 @@ import { Field } from "@os/6-components/field/Field";
 import {
     BuilderApp,
     createFieldCommit,
-    useSectionFields,
 } from "@/apps/builder/app";
+import { useLocalizedSectionFields } from "@/apps/builder/locale";
 import type { Block, BuilderState } from "@/apps/builder/model/appState";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
@@ -18,7 +18,7 @@ import { Builder } from "@/apps/builder/primitives/Builder";
  */
 export function NCPRelatedServicesBlock({ id }: { id: string }) {
     const fid = (local: string) => `${id}-${local}`;
-    const fields = useSectionFields(id);
+    const fields = useLocalizedSectionFields(id);
 
     const block: Block | undefined = BuilderApp.useComputed((s: BuilderState) =>
         s.data.blocks.find((b: Block) => b.id === id),
@@ -92,7 +92,7 @@ export function NCPRelatedServicesBlock({ id }: { id: string }) {
                                         </h4>
 
                                         {/* 카드 설명 */}
-                                        <p className="m-0 text-[18px] font-normal leading-[150%] text-[#707070] line-clamp-4">
+                                        <div className="m-0 text-[18px] font-normal leading-[150%] text-[#707070] line-clamp-4">
                                             <Builder.Item asChild id={`${card.id}-card-desc`}>
                                                 <Field.Editable
                                                     name={`${card.id}-card-desc`}
@@ -103,7 +103,7 @@ export function NCPRelatedServicesBlock({ id }: { id: string }) {
                                                     className="block data-[focused=true]:bg-slate-200/50 data-[focused=true]:ring-1 data-[focused=true]:ring-slate-400 rounded px-1 -mx-1"
                                                 />
                                             </Builder.Item>
-                                        </p>
+                                        </div>
 
                                         {/* 화살표 아이콘 */}
                                         <div className="absolute bottom-[30px] right-[30px] text-[#ccc] text-xl">

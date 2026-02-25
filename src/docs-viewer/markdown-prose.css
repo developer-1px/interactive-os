@@ -1,0 +1,322 @@
+/* ═══════════════════════════════════════════════════════════════════
+ * IntelliJ Markdown Preview — Custom CSS
+ * Antigravity Docs 스타일 기반 (slate + indigo)
+ *
+ * 적용: Settings → Languages & Frameworks → Markdown → Custom CSS
+ *       "Load from" 옵션으로 이 파일 경로 지정
+ *
+ * ⚠ IntelliJ 주의사항:
+ *   - 기본 스타일시트 specificity가 높아서 !important 필수
+ *   - 코드 블록 syntax highlight 색상은 IDE 테마에서 inline style로
+ *     주입되므로, CSS로 토큰별 색상 제어 불가 (배경/폰트/패딩만 가능)
+ *   - 코드 블록 텍스트 색상도 IDE가 강제하므로 연하게 보일 수 있음
+ * ═══════════════════════════════════════════════════════════════════ */
+
+body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+    color: #1a1a1a !important;
+    background-color: #fdfdfd !important;
+    max-width: 860px !important;
+    margin: 0 auto !important;
+    padding: 32px 24px !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.015em !important;
+}
+
+/* ── Headings ─────────────────────────────────────────────────────── */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #0f172a !important;
+    /* slate-900 */
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+    line-height: 1.25 !important;
+}
+
+h1 {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    margin-top: 0.5em !important;
+    margin-bottom: 1em !important;
+    padding-bottom: 0.5em !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    /* slate-200 */
+}
+
+h2 {
+    font-size: 20px !important;
+    margin-top: 2em !important;
+    margin-bottom: 0.75em !important;
+    padding-bottom: 0.4em !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    /* slate-100 */
+}
+
+h3 {
+    font-size: 17px !important;
+    color: #1e293b !important;
+    /* slate-800 */
+    margin-top: 1.75em !important;
+    margin-bottom: 0.6em !important;
+}
+
+h4 {
+    font-size: 15px !important;
+    color: #1e293b !important;
+    margin-top: 1.5em !important;
+    margin-bottom: 0.5em !important;
+}
+
+h5,
+h6 {
+    font-size: 14px !important;
+    color: #334155 !important;
+    /* slate-700 */
+    margin-top: 1.25em !important;
+    margin-bottom: 0.4em !important;
+}
+
+/* ── Body Text ────────────────────────────────────────────────────── */
+
+p {
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+    font-weight: 400 !important;
+    color: #475569 !important;
+    /* slate-600 */
+    margin-bottom: 0.85em !important;
+}
+
+strong {
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    /* slate-900 */
+}
+
+/* ── Links ────────────────────────────────────────────────────────── */
+
+a {
+    color: #4f46e5 !important;
+    /* indigo-600 */
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    border-bottom: 1px solid #c7d2fe !important;
+    /* indigo-200 */
+}
+
+a:hover {
+    color: #4338ca !important;
+    /* indigo-700 */
+    border-bottom-color: #6366f1 !important;
+}
+
+/* ── Lists ────────────────────────────────────────────────────────── */
+
+ul,
+ol {
+    padding-left: 1.5em !important;
+    margin-bottom: 1em !important;
+    color: #475569 !important;
+    /* slate-600 */
+    font-size: 14px !important;
+}
+
+ul {
+    list-style-type: disc !important;
+}
+
+ol {
+    list-style-type: decimal !important;
+}
+
+li {
+    padding-left: 0.35em !important;
+    margin-bottom: 0.3em !important;
+}
+
+li::marker {
+    color: #818cf8 !important;
+    /* indigo-400 */
+}
+
+/* ── Inline Code ──────────────────────────────────────────────────── */
+
+code {
+    background-color: #f1f5f9 !important;
+    /* slate-100 */
+    color: #4f46e5 !important;
+    /* indigo-600 */
+    padding: 1px 6px !important;
+    border-radius: 4px !important;
+    font-size: 0.85em !important;
+    font-family: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace !important;
+    font-weight: 500 !important;
+    border: 1px solid #e2e8f0 !important;
+    /* slate-200 */
+}
+
+/* ── Code Block ───────────────────────────────────────────────────── *
+ * 주의: 코드 블록 내부 토큰 색상은 IDE 테마 inline style로 주입됨.
+ * 여기서는 배경·폰트·패딩·보더만 제어 가능.
+ * 코드가 연하게 보이면 IDE Settings → Editor → Color Scheme → 
+ * Language Defaults 에서 기본 텍스트 색상을 조정해야 함.
+ * ──────────────────────────────────────────────────────────────────── */
+
+pre {
+    background-color: #fbfcfd !important;
+    border: 1px solid #e2e8f0 !important;
+    /* slate-200 */
+    border-radius: 10px !important;
+    padding: 18px 20px !important;
+    overflow-x: auto !important;
+    margin: 1.5em 0 !important;
+}
+
+pre code {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    font-size: 12px !important;
+    font-family: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace !important;
+    font-weight: 400 !important;
+    color: #334155 !important;
+    /* slate-700 */
+    line-height: 1.6 !important;
+}
+
+/* IDE가 inline style로 색상을 밀어넣으므로,
+   최소한 기본 텍스트 색상만이라도 보정 시도 */
+pre code span {
+    /* 필요 시 아래 주석 해제 — IDE 테마 색상을 완전히 무시함 */
+    /* color: #334155 !important; */
+}
+
+/* ── Blockquote ───────────────────────────────────────────────────── */
+
+blockquote {
+    border-left: 4px solid #6366f1 !important;
+    /* indigo-500 */
+    padding: 0.75em 1.25em !important;
+    margin: 1.25em 0 !important;
+    background-color: #f8fafc !important;
+    /* slate-50 */
+    color: #334155 !important;
+    /* slate-700 */
+    font-style: italic !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    border-radius: 0 10px 10px 0 !important;
+}
+
+blockquote p {
+    color: #334155 !important;
+    margin-bottom: 0.4em !important;
+}
+
+blockquote p:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* ── Horizontal Rule ──────────────────────────────────────────────── */
+
+hr {
+    border: none !important;
+    border-top: 1px solid #f1f5f9 !important;
+    /* slate-100 */
+    margin: 2em 0 !important;
+}
+
+/* ── Table ────────────────────────────────────────────────────────── */
+
+table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 12px !important;
+    margin: 1.5em 0 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+thead {
+    background-color: #f8fafc !important;
+    /* slate-50 */
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+th {
+    padding: 10px 14px !important;
+    text-align: left !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    /* slate-900 */
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-size: 10px !important;
+}
+
+td {
+    padding: 10px 14px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #475569 !important;
+    /* slate-600 */
+}
+
+tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* ── Images ───────────────────────────────────────────────────────── */
+
+img {
+    max-width: 100% !important;
+    border-radius: 8px !important;
+    margin: 1em 0 !important;
+}
+
+/* ── Checkbox (Task List) ─────────────────────────────────────────── */
+
+input[type="checkbox"] {
+    margin-right: 0.5em !important;
+    accent-color: #6366f1 !important;
+    /* indigo-500 */
+}
+
+/* ── Details / Summary ────────────────────────────────────────────── */
+
+details {
+    margin: 1em 0 !important;
+    padding: 0.5em 1em !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    background-color: #f8fafc !important;
+}
+
+summary {
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    padding: 0.25em 0 !important;
+}
+
+details[open] summary {
+    margin-bottom: 0.75em !important;
+}
+
+/* ── Selection ────────────────────────────────────────────────────── */
+
+::selection {
+    background-color: #e0e7ff !important;
+    /* indigo-100 */
+    color: #312e81 !important;
+    /* indigo-900 */
+}

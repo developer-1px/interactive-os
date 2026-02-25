@@ -12,6 +12,13 @@ description: 패턴 A를 패턴 B로 전환하는 리팩토링 파이프라인. 
 
 ---
 
+### Step 0: REFACTORBOOK 숙지
+
+`.agent/knowledge/refactor.md`를 읽는다.
+- §1 리팩토링 원칙
+- §2 자주 하는 실수
+- §3 선례
+
 ### Step 1: 코드 정리
 
 - 중복 제거, 패턴 일반화

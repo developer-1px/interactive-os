@@ -1,3 +1,4 @@
+import "./docs-viewer.css";
 import docsMeta from "virtual:docs-meta";
 import clsx from "clsx";
 import {
@@ -15,7 +16,7 @@ import { DocsSidebar } from "./DocsSidebar";
 
 // Side-effect: register docs-viewer commands on kernel
 import "./app";
-import { DocsApp, resetDoc, selectDoc } from "./app";
+import { DocsApp, DocsReaderUI, resetDoc, selectDoc } from "./app";
 import {
   buildDocTree,
   cleanLabel,
@@ -70,7 +71,7 @@ function InlineDocContent({ path }: { path: string }) {
       .catch(() => setMd(""));
   }, [path]);
   if (!md) return null;
-  return <MarkdownRenderer content={md} />;
+  return <MarkdownRenderer content={md} inline />;
 }
 
 /** Folder index page — list of direct children + inline content if ≤3. */
@@ -387,150 +388,152 @@ export function DocsViewer() {
 
       {/* Main Content */}
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">
-        <div
-          ref={contentRef}
-          className="flex-1 overflow-y-auto relative z-10 custom-scrollbar"
-        >
-          <div className="px-12 pt-5 pb-12 lg:px-16 w-full max-w-5xl mx-auto">
-            {error ? (
-              <div className="flex flex-col items-center justify-center py-40 text-slate-300">
-                <FileText
-                  size={64}
-                  strokeWidth={1}
-                  className="mb-6 opacity-20"
-                />
-                <p className="text-xl font-medium text-slate-400">{error}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (allFiles[0]) handleSelect(allFiles[0].path);
-                  }}
-                  className="mt-8 px-6 py-2 bg-slate-100 text-slate-600 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors shadow-sm"
-                >
-                  Return to Home
-                </button>
-              </div>
-            ) : isFolderView && folderNode ? (
-              <FolderIndexView folder={folderNode} onSelect={handleSelect} />
-            ) : (
-              <>
-                <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
-                  {/* Document Metadata Header */}
-                  <div className="flex items-center gap-2 mb-10 border-b border-slate-50 pb-6">
-                    {isExternal && (
-                      <>
-                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                          {externalSource.name}
-                        </span>
-                        <span className="text-slate-300">/</span>
-                      </>
-                    )}
-                    {activePath?.split("/").map((part, i, arr) => (
-                      <div key={part} className="flex items-center gap-2">
-                        {i > 0 && <span className="text-slate-300">/</span>}
-                        <span
-                          className={clsx(
-                            "text-sm font-medium",
-                            i === arr.length - 1
-                              ? "text-slate-900"
-                              : "text-slate-400",
-                          )}
-                        >
-                          {cleanLabel(part)}
-                        </span>
-                      </div>
-                    ))}
+        <DocsReaderUI.Zone className="flex-1 flex flex-col overflow-hidden">
+          <div
+            ref={contentRef}
+            className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 custom-scrollbar"
+          >
+            <div className="pt-5 pb-12 px-8 w-full">
+              {error ? (
+                <div className="flex flex-col items-center justify-center py-40 text-slate-300">
+                  <FileText
+                    size={64}
+                    strokeWidth={1}
+                    className="mb-6 opacity-20"
+                  />
+                  <p className="text-xl font-medium text-slate-400">{error}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (allFiles[0]) handleSelect(allFiles[0].path);
+                    }}
+                    className="mt-8 px-6 py-2 bg-slate-100 text-slate-600 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors shadow-sm"
+                  >
+                    Return to Home
+                  </button>
+                </div>
+              ) : isFolderView && folderNode ? (
+                <FolderIndexView folder={folderNode} onSelect={handleSelect} />
+              ) : (
+                <>
+                  <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
+                    {/* Document Metadata Header */}
+                    <div className="flex items-center gap-2 mb-10 border-b border-slate-50 pb-6 max-w-4xl mx-auto">
+                      {isExternal && (
+                        <>
+                          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                            {externalSource.name}
+                          </span>
+                          <span className="text-slate-300">/</span>
+                        </>
+                      )}
+                      {activePath?.split("/").map((part, i, arr) => (
+                        <div key={part} className="flex items-center gap-2">
+                          {i > 0 && <span className="text-slate-300">/</span>}
+                          <span
+                            className={clsx(
+                              "text-sm font-medium",
+                              i === arr.length - 1
+                                ? "text-slate-900"
+                                : "text-slate-400",
+                            )}
+                          >
+                            {cleanLabel(part)}
+                          </span>
+                        </div>
+                      ))}
 
-                    {/* Modification date + Pin */}
-                    <div className="ml-auto flex items-center gap-2 shrink-0">
-                      {activePath && (
+                      {/* Modification date + Pin */}
+                      <div className="ml-auto flex items-center gap-2 shrink-0">
+                        {activePath && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              toggleFavorite(activePath);
+                              setFavVersion((v) => v + 1);
+                            }}
+                            className={clsx(
+                              "p-1 rounded-md transition-colors",
+                              isFavorite(activePath)
+                                ? "text-amber-400 hover:text-amber-500"
+                                : "text-slate-300 hover:text-slate-400",
+                            )}
+                            title={
+                              isFavorite(activePath) ? "Unpin" : "Pin to sidebar"
+                            }
+                          >
+                            <Star
+                              size={13}
+                              className={
+                                isFavorite(activePath) ? "fill-amber-400" : ""
+                              }
+                            />
+                          </button>
+                        )}
+                        {activePath && docsMeta[activePath] && (
+                          <span
+                            className="flex items-center gap-1 text-xs text-slate-400 tabular-nums"
+                            title={new Date(
+                              docsMeta[activePath].mtime,
+                            ).toLocaleString()}
+                          >
+                            <Clock size={11} className="text-slate-300" />
+                            {formatRelativeTime(docsMeta[activePath].mtime)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <MarkdownRenderer content={content} />
+
+                    {/* Navigation Buttons */}
+                    <div className="mt-20 pt-8 border-t border-slate-100 grid grid-cols-2 gap-4 max-w-4xl mx-auto">
+                      {prevFile ? (
                         <button
                           type="button"
-                          onClick={() => {
-                            toggleFavorite(activePath);
-                            setFavVersion((v) => v + 1);
-                          }}
-                          className={clsx(
-                            "p-1 rounded-md transition-colors",
-                            isFavorite(activePath)
-                              ? "text-amber-400 hover:text-amber-500"
-                              : "text-slate-300 hover:text-slate-400",
-                          )}
-                          title={
-                            isFavorite(activePath) ? "Unpin" : "Pin to sidebar"
-                          }
+                          onClick={() => handleSelect(prevFile.path)}
+                          className="group flex flex-col items-start gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
                         >
-                          <Star
-                            size={13}
-                            className={
-                              isFavorite(activePath) ? "fill-amber-400" : ""
-                            }
-                          />
+                          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
+                            <ChevronLeft size={12} strokeWidth={3} />
+                            Previous
+                          </span>
+                          <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-left">
+                            {cleanLabel(prevFile.name)}
+                          </span>
                         </button>
+                      ) : (
+                        <div />
                       )}
-                      {activePath && docsMeta[activePath] && (
-                        <span
-                          className="flex items-center gap-1 text-xs text-slate-400 tabular-nums"
-                          title={new Date(
-                            docsMeta[activePath].mtime,
-                          ).toLocaleString()}
+
+                      {nextFile ? (
+                        <button
+                          type="button"
+                          onClick={() => handleSelect(nextFile.path)}
+                          className="group flex flex-col items-end gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
                         >
-                          <Clock size={11} className="text-slate-300" />
-                          {formatRelativeTime(docsMeta[activePath].mtime)}
-                        </span>
+                          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
+                            Next
+                            <ChevronRight size={12} strokeWidth={3} />
+                          </span>
+                          <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-right">
+                            {cleanLabel(nextFile.name)}
+                          </span>
+                        </button>
+                      ) : (
+                        <div />
                       )}
                     </div>
-                  </div>
 
-                  <MarkdownRenderer content={content} />
-
-                  {/* Navigation Buttons */}
-                  <div className="mt-20 pt-8 border-t border-slate-100 grid grid-cols-2 gap-4 max-w-3xl">
-                    {prevFile ? (
-                      <button
-                        type="button"
-                        onClick={() => handleSelect(prevFile.path)}
-                        className="group flex flex-col items-start gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
-                      >
-                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
-                          <ChevronLeft size={12} strokeWidth={3} />
-                          Previous
-                        </span>
-                        <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-left">
-                          {cleanLabel(prevFile.name)}
-                        </span>
-                      </button>
-                    ) : (
-                      <div />
-                    )}
-
-                    {nextFile ? (
-                      <button
-                        type="button"
-                        onClick={() => handleSelect(nextFile.path)}
-                        className="group flex flex-col items-end gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
-                      >
-                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
-                          Next
-                          <ChevronRight size={12} strokeWidth={3} />
-                        </span>
-                        <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-right">
-                          {cleanLabel(nextFile.name)}
-                        </span>
-                      </button>
-                    ) : (
-                      <div />
-                    )}
-                  </div>
-
-                  {/* Footer Spacer */}
-                  <div className="h-40" />
-                </article>
-                <TableOfContents content={content} />
-              </>
-            )}
+                    {/* Footer Spacer */}
+                    <div className="h-40" />
+                  </article>
+                  <TableOfContents content={content} />
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </DocsReaderUI.Zone>
       </div>
     </div>
   );

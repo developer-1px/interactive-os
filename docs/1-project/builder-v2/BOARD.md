@@ -56,7 +56,12 @@
   - [x] SectionProperties: 모든 fields 일괄 편집 UI 추가
   - [x] tsc clean, 57 tests pass
 
-- [ ] T5: 블록 드래그 정렬 UI
+- [x] T5: 블록 드래그 정렬 UI — tsc 0 | +4 tests | audit 0건 → 브라우저에서 3건 OS gap 발견 → 수정 완료 ✅
+  - US-004 → spec → red(4 FAIL) → green(4 PASS) → bind(onReorder) → audit(0건)
+  - **OS gap 3건 발견 (파이프라인 통과 후)**: OG-002 onReorder void, OG-003 Listener 충돌, OG-004 drag-handle convention
+  - OG-002 즉시 수정 (선언형 전환), OG-003/004 백로그 등록
+  - 회고: `notes/2026-0226-0814-[analysis]-dnd-retrospect.md`
+  - `model/reorderBlocks.ts` + `app.ts` reorderBlockCommand + sidebarCollection.onReorder
 
 ## 📋 Backlog
 

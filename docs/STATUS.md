@@ -12,7 +12,6 @@
 
 **builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
 
-**go-redesign** — `/go` 4-Phase 재설계 + OS 런북 작성. Heavy.
 
 **normalized-collection** — OS 데이터 모델을 `{ entities, order }` 정규화 포맷으로 통일. Heavy.
 
@@ -23,10 +22,9 @@
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
 
-| builder-v2 | T18 → content-edit-mode 분리 | 02-24 | 🔥 Focus |
+| builder-v2 | T5 DnD Done, OS gap 회고 완료 | 02-26 | 🔥 Focus |
 | content-edit-mode | T1~T4 Done, T5~T7 FSM v3 원자 전이 | 02-24 | 🟢 Active |
 | dev-pipeline | T0 Done (/red /green 생성), T1~T3 | 02-24 | 🟢 Active |
-| go-redesign | T1~T3 Done → Superseded by dev-pipeline | 02-24 | 🟡 Paused |
 | normalized-collection | Scaffold 완료, T1~T6 | 02-24 | 🔥 Focus |
 | cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
 | todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-22 | 🟢 Active |
@@ -34,6 +32,7 @@
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-property-schema | Scaffold, T1~T5 | 02-24 | 🟢 Active |
 | tree-click-defaults | Scaffold, T1~T3 | 02-24 | 🟢 Active |
+| builder-i18n | Scaffold, T1~T4 (US-001) | 02-25 | 🟢 Active |
 | focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
 | os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
 | builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
@@ -45,6 +44,9 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| go-redesign | 02-25 | ✅ archive/2026/02/W09 — /go 4-Phase 재설계 + RUNBOOK.md 186줄 + /project 조정 |
+| field-headless-input | 02-25 | ✅ archive/2026/02/W09 — T1~T6 Done, 13 tests, official/os/why-field.md 갱신 |
+| decision-table-contract | 02-25 | ✅ archive/2026/02/W09 — Meta. 8열 결정 테이블 표준 + /red 워크플로우 통합. 템플릿+갭분석 완료 |
 | ocp-violations | 02-25 | ✅ archive/2026/02/W09 — T1~T4 Done, +6 tests, blockRegistry 통합 |
 | app-modules | 02-25 | ✅ archive/2026/02/W09 — T1~T8 Done, 13 tests, Builder+Todo 마이그레이션 |
 | zift-keyboard-resolve | 02-24 | ✅ archive/2026/02/W09 — official/os/why-field.md 갱신 |
@@ -88,6 +90,18 @@
 
 ## 📥 Inbox
 
+- `docs/0-inbox/2026-0225-1728-[proposal]-tobe-workflow-flowchart.md` (TOBE 워크플로우 흐름도 — 전체 순서·분기·Gate, /discussion 6갈래 + /go G2 신규 분기 + SRP 매핑)
+  - Related Project: dev-pipeline
+  - Suggested Action: ASIS/TOBE proposal과 함께 `/project`로 전환
+- `docs/0-inbox/2026-0225-1724-[proposal]-product-pipeline-asis-tobe.md` (Product Pipeline ASIS→TOBE — 6개 MECE 변경: /stories 신설, /prd→/spec, DT 이관, /project 축소, /red 분리, Product 구조 표준화)
+  - Related Project: dev-pipeline
+  - Suggested Action: `/project`로 전환하여 Phase 1부터 실행
+- `docs/0-inbox/2026-0225-1714-[research]-user-story-format-sample.md` (User Story 표준 포맷 — Connextra+AC+INVEST, Visual CMS 샘플 US-001~003)
+  - Related Project: 6-products/builder (Visual CMS)
+  - Suggested Action: `/stories` 워크플로우 설계의 산출물 포맷 기준으로 사용
+- `docs/0-inbox/2026-0225-1635-[analysis]-srp-full-audit.md` (SRP 전수 조사 — 7축×8레이어, V5 다중책임 6건 🔴, V1 하이재킹 2건 🔴, V6 DOM 0건 🎉)
+  - Related Project: 전체 (OS 코어 구조)
+  - Suggested Action: `/discussion`으로 Top 5 위험 파일 분리 방향 논의 → `/project` or `/refactor`
 - `docs/0-inbox/2026-0224-1944-[proposal]-when-router-extension.md` (when 라우터 확장 — 함수형 WhenPredicate + itemAttr, keybindings = 결정 테이블)
   - Related Project: dev-pipeline (OS 코어 변경)
   - Suggested Action: `/project`로 전환하여 구현 시작
@@ -107,16 +121,22 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 4 |
-| Active Projects (total) | 13 (7 Active + 4 Focus + 2 Paused) |
-| Completed (archived) | 36 |
-| Inbox items | 4 |
+| Active Focus | 3 |
+| Active Projects (total) | 11 (6 Active + 3 Focus + 2 Paused) |
+| Completed (archived) | 39 |
+| Inbox items | 5 |
 | Backlog items | 9 |
 | Open issues | 0 |
 
 ---
 
 ## 📝 Recent Changes (2026-02-25)
+
+- ✅ `field-headless-input` Heavy 프로젝트 완료 — AppPage에 `keyboard.type()`/`fill()` 추가, Field Enter를 OS ZIFT 파이프라인으로 올림. OS_FIELD_COMMIT 동기 dispatch (kernel return key). 13 new tests (4 pipeline proof + 9 user journey). ListView `fieldType="inline"` 버그 수정. `clipboardWrite` headless no-op.
+
+- 🐛 `docs-viewer-missing-wiring` **Closed** — Inspector(Cmd+D) + Space 키 미동작. vite.docs.config.ts에 inspector 플러그인 누락 + DocsReaderUI.Zone 미렌더링 + NEXT/PREV_SECTION 미export. 3건 LLM 연결 누락 수정.
+
+- ✅ `decision-table-contract` **완료** (Meta) — 8열 결정 테이블 표준 확정. `/red` Step 1 재정렬(A~F), 완료 기준 MECE 5항목, Todo 갭분석(23/23 매핑, Home/End/F2 누락 발견). `/go` Meta 분기 추가. → archive/2026/02/W09
 
 - 🆕 `app-modules` Heavy 프로젝트 생성 — Discussion에서 발견: "삭제 시 undo 토스트" → OS App Module System으로 발전. `defineApp({ modules: [history(), persistence(), deleteToast()] })` 배열 기반 모듈 설치. ESLint/Vite plugin 모델. 기존 history/persistence boolean config → 모듈로 리팩토링.
 

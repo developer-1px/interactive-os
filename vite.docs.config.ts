@@ -2,11 +2,18 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { docsMetaPlugin } from "./src/docs-viewer/vite-plugin-docs-meta";
+import inspectorBabelPlugin from "./vite-plugins/babel-inspector";
+import { inspectorPlugin } from "./vite-plugins/inspector";
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [inspectorBabelPlugin],
+      },
+    }),
     tailwindcss(),
+    inspectorPlugin(),
     docsMetaPlugin(),
     // Rewrite "/" to "/docs.html" so it's the default page
     {

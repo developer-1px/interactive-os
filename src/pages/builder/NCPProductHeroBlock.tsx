@@ -1,5 +1,6 @@
 import { Field } from "@os/6-components/field/Field";
-import { createFieldCommit, useSectionFields } from "@/apps/builder/app";
+import { createFieldCommit } from "@/apps/builder/app";
+import { useLocalizedSectionFields } from "@/apps/builder/locale";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
 /**
@@ -10,7 +11,7 @@ import { Builder } from "@/apps/builder/primitives/Builder";
  */
 export function NCPProductHeroBlock({ id }: { id: string }) {
   const fid = (local: string) => `${id}-${local}`;
-  const fields = useSectionFields(id);
+  const fields = useLocalizedSectionFields(id);
 
   const isDeprecated = fields["deprecated"] === "true";
 

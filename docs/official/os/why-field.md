@@ -109,6 +109,32 @@ keyboard event
 
 ---
 
+## 4. Headless — "Same test code, different runtime"
+
+### 4.1 Field 입력의 headless 경로
+
+AppPage는 Playwright Page 동형 인터페이스를 제공한다. Field 입력도 동일한 API로 테스트할 수 있다:
+
+```
+page.keyboard.type("text")   →  FieldRegistry.updateValue(fieldId, text)
+page.keyboard.press("Enter") →  resolveKeyboard → ZIFT Field layer → OS_FIELD_COMMIT
+```
+
+`goto(zoneName)`이 Field를 자동 등록하므로, headless 테스트는 브라우저와 동일한 경로를 탄다.
+
+### 4.2 OS_FIELD_COMMIT 동기 dispatch
+
+`OS_FIELD_COMMIT`은 앱의 `onCommit` 커맨드를 kernel의 `{ dispatch }` return key로 동기 실행한다.
+`queueMicrotask` 대신 같은 flush cycle 안에서 처리되므로, headless 테스트에서 즉시 상태 변경을 확인할 수 있다.
+
+### 4.3 headless goto()의 Field 등록
+
+`goto(zoneName)` 호출 시 zone에 field 바인딩이 있으면:
+1. `FieldRegistry.register(fieldName, config)` — 브라우저의 Field mount와 동등
+2. `ZoneEntry.fieldId = fieldName` — ZIFT Field layer가 `editingFieldId`를 감지하는 경로
+
+---
+
 ## References
 
 - ZIFT Responder Chain: `os/1-listeners/keyboard/resolveKeyboard.ts`
@@ -122,4 +148,4 @@ keyboard event
 
 ## Status of This Document
 
-Canonical Reference (2026-02-24). ZIFT Responder Chain 구현 완료.
+Canonical Reference (2026-02-25). ZIFT Responder Chain + Headless Field Input 구현 완료.

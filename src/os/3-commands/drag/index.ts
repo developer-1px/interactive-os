@@ -90,11 +90,15 @@ export const OS_DRAG_END = os.defineCommand("OS_DRAG_END", (ctx) => () => {
   ) {
     const entry = ZoneRegistry.get(zoneId);
     if (entry?.onReorder) {
-      entry.onReorder({
+      const cmds = entry.onReorder({
         itemId: dragItemId,
         overItemId,
         position: overPosition,
       });
+      const cmdList = Array.isArray(cmds) ? cmds : [cmds];
+      for (const cmd of cmdList) {
+        os.dispatch(cmd);
+      }
     }
   }
 

@@ -37,11 +37,16 @@ BOARD.md와 테스트 파일 상태를 보고 **하나의 워크플로우**로 �
 | # | 판별 | 라우팅 | 행동 |
 |---|------|--------|------|
 | 1 | BOARD.md 없음 | → `/project` | 프로젝트 초기화 |
-| 2 | Now 태스크에 Red 테스트 없음 | → `/red` | `.agent/workflows/red.md`를 `view_file`로 읽고 실행 |
-| 3 | Red 테스트 FAIL 있음 | → `/green` | `.agent/workflows/green.md`를 `view_file`로 읽고 실행 |
-| 4 | 모든 테스트 PASS | → `/refactor` | `.agent/workflows/refactor.md`를 `view_file`로 읽고 실행 |
-| 5 | 다음 Now 태스크 있음 | → #2로 루프 | 다음 태스크의 Red 테스트 확인 |
-| 6 | 모든 Now Done | → 회고 | `/retrospect` → `/archive` |
+| 1.5 | **Meta 프로젝트** + Now 태스크 있음 | → 직접 실행 | Red/Green 스킵. 태스크를 순서대로 수행 |
+| 2 | Now 태스크에 spec.md 없음 (Heavy/Light) | → `/spec` | `.agent/workflows/spec.md`를 `view_file`로 읽고 실행 |
+| 3 | Now 태스크에 Red 테스트 없음 | → `/red` | `.agent/workflows/red.md`를 `view_file`로 읽고 실행 |
+| 4 | Red 테스트 FAIL 있음 | → `/green` | `.agent/workflows/green.md`를 `view_file`로 읽고 실행. **green 완료 = /verify 통과** |
+| 4.5 | Green PASS + Zone 태스크 + UI 미연결 | → `/bind` | `.agent/workflows/bind.md`를 `view_file`로 읽고 실행. **bind 완료 = /verify 통과** |
+| 4.7 | `/bind` 완료 후 `/audit` 미실행 | → `/audit` | `.agent/workflows/audit.md`를 `view_file`로 읽고 실행 |
+| 4.8 | `/audit` 결격 (🔴 LLM 실수) | → 근본 원인 단계 | 진단표 기준으로 `/stories` / `/spec` / `/red` / `/bind` 중 해당 단계로 루프백 |
+| 5 | 모든 테스트 PASS + UI 연결 + audit PASS | → `/refactor` | `.agent/workflows/refactor.md`를 `view_file`로 읽고 실행 |
+| 6 | 다음 Now 태스크 있음 | → #2로 루프 | 다음 태스크의 spec/Red 확인 |
+| 7 | 모든 Now Done | → 회고 | `/retrospect` → `/archive` |
 
 ### 상태 확인 방법
 

@@ -17,7 +17,13 @@
       "Bash(git remote:*)",
       "Bash(git:*)",
       "Bash(npm audit:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(grep  ❯ :*)",
+      "Bash(grep FAIL:*)",
+      "Bash(npx vitest:*)",
+      "Bash(git commit:*)",
+      "Bash(python3:*)"
     ]
   }
 }

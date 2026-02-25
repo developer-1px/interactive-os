@@ -3,8 +3,8 @@ import {
   BuilderApp,
   createFieldCommit,
   findBlock,
-  useSectionFields,
 } from "@/apps/builder/app";
+import { useLocalizedSectionFields } from "@/apps/builder/locale";
 import type { Block, BuilderState } from "@/apps/builder/model/appState";
 import { Builder } from "@/apps/builder/primitives/Builder";
 
@@ -21,7 +21,7 @@ import { Builder } from "@/apps/builder/primitives/Builder";
  */
 export function NCPFeatureCardsBlock({ id }: { id: string }) {
   const fid = (local: string) => `${id}-${local}`;
-  const fields = useSectionFields(id);
+  const fields = useLocalizedSectionFields(id);
 
   const block: Block | undefined = BuilderApp.useComputed((s: BuilderState) =>
     findBlock(s.data.blocks, id),
@@ -93,7 +93,7 @@ export function NCPFeatureCardsBlock({ id }: { id: string }) {
                     </h4>
 
                     {/* 카드 설명 */}
-                    <p className="m-0 text-[18px] font-normal leading-[150%]">
+                    <div className="m-0 text-[18px] font-normal leading-[150%]">
                       <Builder.Item asChild id={`${card.id}-card-desc`}>
                         <Field.Editable
                           name={`${card.id}-card-desc`}
@@ -104,7 +104,7 @@ export function NCPFeatureCardsBlock({ id }: { id: string }) {
                           className="block text-[#707070] data-[focused=true]:bg-slate-200/50 data-[focused=true]:ring-1 data-[focused=true]:ring-slate-400 rounded px-1 -mx-1"
                         />
                       </Builder.Item>
-                    </p>
+                    </div>
 
                     {/* 원본: 카드 하단 링크 자리 (h-[1px] w-[24px] 밑줄) */}
                     <div className="absolute bottom-[30px] left-[30px]">

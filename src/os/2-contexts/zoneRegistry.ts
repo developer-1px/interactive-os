@@ -90,7 +90,7 @@ export interface ZoneEntry {
     itemId: string;
     overItemId: string;
     position: "before" | "after";
-  }) => void;
+  }) => BaseCommand | BaseCommand[];
 }
 
 const registry = new Map<string, ZoneEntry>();

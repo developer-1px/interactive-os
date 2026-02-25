@@ -32,6 +32,7 @@ import {
 } from "./model/appState";
 export type { Block, BuilderState };
 export { INITIAL_STATE, findBlock, findBlockInfo };
+import { reorderBlocks } from "./model/reorderBlocks";
 
 /** Read current builder state from kernel. */
 function getBuilderState(): BuilderState {
@@ -157,6 +158,18 @@ export const loadPagePreset = sidebarCollection.command(
   },
 );
 
+/** Reorder blocks by drag-and-drop (DT #4, #5) */
+export const reorderBlockCommand = sidebarCollection.command(
+  "reorderBlock",
+  (ctx, payload: { itemId: string; overItemId: string; position: "before" | "after" }) => {
+    return {
+      state: produce(ctx.state, (draft) => {
+        draft.data.blocks = reorderBlocks(draft.data.blocks, payload);
+      }),
+    };
+  },
+);
+
 // Bind with auto-wired CRUD + custom options
 const collectionBindings = sidebarCollection.collectionBindings();
 
@@ -165,6 +178,7 @@ export const BuilderSidebarUI = sidebarCollection.bind({
   ...collectionBindings,
   onUndo: undoCommand(),
   onRedo: redoCommand(),
+  onReorder: (info) => reorderBlockCommand(info),
   options: {
     navigate: { orientation: "vertical" },
     tab: { behavior: "flow" },
@@ -300,20 +314,10 @@ function buildCanvasCollections(): CollectionNode[] {
 function resolveCanvasCopyTarget(focusId: string): string | null {
   const blocks = getBuilderState().data.blocks;
 
-  // Direct match: focused on a root block
-  if (blocks.some((b) => b.id === focusId)) return focusId;
+  // Any block in the tree (recursive) → return its id directly
+  if (findBlock(blocks, focusId)) return focusId;
 
-  // Check if it's a child of a container block (dynamic collection item)
-  for (const block of blocks) {
-    if (block.children?.some((c) => c.id === focusId)) return focusId;
-    if (block.children) {
-      for (const child of block.children) {
-        if (child.children?.some((gc) => gc.id === focusId)) return focusId;
-      }
-    }
-  }
-
-  // Static item (e.g., ncp-hero-title): bubble to parent section
+  // Static field item (e.g., ncp-hero-title): bubble to parent block
   const addr = resolveFieldAddress(focusId, blocks);
   return addr?.section.id ?? null;
 }
@@ -323,19 +327,9 @@ function resolveCanvasCopyTarget(focusId: string): string | null {
  * vs a static field item (title, icon, etc.)
  */
 function isDynamicItem(focusId: string): boolean {
-  const blocks = getBuilderState().data.blocks;
-  // Root block
-  if (blocks.some((b) => b.id === focusId)) return true;
-  // Child of container
-  for (const block of blocks) {
-    if (block.children?.some((c) => c.id === focusId)) return true;
-    if (block.children) {
-      for (const child of block.children) {
-        if (child.children?.some((gc) => gc.id === focusId)) return true;
-      }
-    }
-  }
-  return false;
+  // Any block that exists in the block tree is a dynamic item.
+  // Uses findBlock (recursive) — handles arbitrary nesting depth.
+  return !!findBlock(getBuilderState().data.blocks, focusId);
 }
 
 /** Read field text value for a static item (e.g., "ncp-hero-title" → field value) */

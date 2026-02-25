@@ -2,6 +2,7 @@ import clsx from "clsx";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
+import rehypeRaw from "rehype-raw";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { extractText, slugify } from "./docsUtils";
@@ -147,7 +148,7 @@ const MarkdownComponents: Record<string, React.FC<Record<string, unknown>>> = {
   },
   table: (props) => (
     <div className="my-8 overflow-x-auto max-w-4xl border border-slate-200 rounded-lg">
-      <table className="w-full border-collapse text-[13px]" {...props} />
+      <table className="w-full border-collapse text-[12px]" {...props} />
     </div>
   ),
   thead: (props) => (
@@ -168,12 +169,15 @@ const MarkdownComponents: Record<string, React.FC<Record<string, unknown>>> = {
 };
 
 /** Shared markdown renderer with all plugins and styled components */
-export function MarkdownRenderer({ content }: { content: string }) {
+export function MarkdownRenderer({
+  content,
+  inline,
+}: { content: string; inline?: boolean }) {
   return (
-    <div className="docs-content max-w-3xl">
+    <div className={inline ? "docs-content max-w-4xl" : "docs-content max-w-4xl mx-auto"}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
-        rehypePlugins={[[rehypeHighlight, { ignoredLanguages: ["mermaid"] }]]}
+        rehypePlugins={[rehypeRaw, [rehypeHighlight, { ignoredLanguages: ["mermaid"] }]]}
         components={MarkdownComponents}
       >
         {content}
