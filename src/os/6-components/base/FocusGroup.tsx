@@ -19,7 +19,7 @@ import {
   createContext,
   type ReactNode,
   useContext,
-  useEffect,
+
   useLayoutEffect,
   useMemo,
   useRef,
@@ -441,26 +441,56 @@ export function FocusGroup({
       const existing = ZoneRegistry.get(groupId);
       if (existing) {
         const el = containerRef.current;
+
+        // Build DOM-scanning getItems closure if no explicit prop
+        const autoGetItems = !existing.getItems
+          ? () => {
+            const items: string[] = [];
+            const els = el.querySelectorAll("[data-item-id]");
+            for (const child of els) {
+              if (child.closest("[data-zone]") !== el) continue;
+              const id = child.getAttribute("data-item-id");
+              if (id) items.push(id);
+            }
+            return items;
+          }
+          : undefined;
+
+        // Build DOM-scanning getLabels closure for typeahead
+        const autoGetLabels = !existing.getLabels
+          ? () => {
+            const labels = new Map<string, string>();
+            const els = el.querySelectorAll<HTMLElement>("[data-item-id]");
+            for (const child of els) {
+              if (child.closest("[data-zone]") !== el) continue;
+              const id = child.getAttribute("data-item-id");
+              if (id) {
+                const label =
+                  child.getAttribute("aria-label") ||
+                  child.textContent ||
+                  "";
+                labels.set(id, label.trim());
+              }
+            }
+            return labels;
+          }
+          : undefined;
+
         ZoneRegistry.register(groupId, {
           ...existing,
           element: el,
-          // Auto-register DOM-scanning getItems when no explicit getItems prop.
-          // DOM scan lives in the view layer (6-components), not in 2-contexts.
-          ...(!existing.getItems
-            ? {
-              getItems: () => {
-                const items: string[] = [];
-                const els = el.querySelectorAll("[data-item-id]");
-                for (const child of els) {
-                  if (child.closest("[data-zone]") !== el) continue;
-                  const id = child.getAttribute("data-item-id");
-                  if (id) items.push(id);
-                }
-                return items;
-              },
-            }
-            : {}),
+          ...(autoGetItems ? { getItems: autoGetItems } : {}),
+          ...(autoGetLabels ? { getLabels: autoGetLabels } : {}),
         });
+
+        // AutoFocus (browser path): when no explicit getItems prop,
+        // the headless useMemo path couldn't fire. Now that we have
+        // DOM-scanning getItems, dispatch autoFocus here.
+        if (config.project.autoFocus && autoGetItems) {
+          const items = autoGetItems();
+          const firstItemId = items[0] ?? null;
+          os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: firstItemId }));
+        }
       }
     }
 
@@ -479,31 +509,6 @@ export function FocusGroup({
     const items = _getItems();
     const firstItemId = items[0] ?? null;
     os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: firstItemId }));
-  }, [groupId, config.project.autoFocus, _getItems]);
-
-  // --- AutoFocus (DOM fallback): querySelector when getItems is absent ---
-  useEffect(() => {
-    if (!config.project.autoFocus) return;
-    if (_getItems) return; // Already handled by headless path above
-    if (!containerRef.current) return;
-
-    // Wait one frame for children to render
-    const raf = requestAnimationFrame(() => {
-      if (!containerRef.current) return;
-      const firstItem =
-        containerRef.current?.querySelector<HTMLElement>("[data-focus-item]");
-      if (firstItem) {
-        const itemId = firstItem.getAttribute("data-item-id") || firstItem.id;
-        if (itemId) {
-          os.dispatch(OS_FOCUS({ zoneId: groupId, itemId }));
-        }
-      } else {
-        // No focusable items (e.g., dialog with only buttons, not FocusItems).
-        // Still activate the zone to transfer activeZoneId.
-        os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: null }));
-      }
-    });
-    return () => cancelAnimationFrame(raf);
   }, [groupId, config.project.autoFocus, _getItems]);
 
   // --- Auto Focus Stack for dialog/alertdialog ---

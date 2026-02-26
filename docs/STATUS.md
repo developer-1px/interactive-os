@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-27 02:21
+> Last updated: 2026-02-27 02:31
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -48,6 +48,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| headless-purity | 02-27 | ✅ archive/2026/02/W09 — AutoFocus DOM fallback 제거(useEffect→Phase 2), getLabels push model. FocusGroup useEffect import 삭제 |
 | headless-item-discovery | 02-27 | ✅ archive/2026/02/W09 — 2-contexts DOM 0%. querySelectorAll을 FocusGroup(뷰)로 이동. getItems() push-only. T1~T10, +6 tests, regression 0, 기존 8건 개선 |
 | normalized-collection | 02-26 | ✅ archive/2026/02/W09 — NormalizedCollection 타입+helpers, tree-aware ops, view transforms. T1~T7. 109 tests GREEN |
 | unified-pointer-listener | 02-26 | ✅ archive/2026/02/W09 — Mouse+Drag→PointerListener 통합. OG-003 해결. +13 tests, 456줄 삭제, Gesture FSM |
@@ -112,7 +113,7 @@
 |--------|-------|
 | Active Focus | 3 |
 | Active Projects (total) | 14 (11 Active + 3 Focus) |
-| Completed (archived) | 45 |
+| Completed (archived) | 46 |
 | Inbox items | 2 |
 | Backlog items | 15 |
 | Open issues | 0 |
@@ -121,6 +122,7 @@
 
 ## 📝 Recent Changes (2026-02-27)
 
+- ✅ `headless-purity` Light 프로젝트 완료 — AutoFocus DOM fallback(useEffect+rAF+querySelector) 제거→Phase 2 통합. getLabels accessor 추가→typeahead headless 가능. FocusGroup useEffect import 삭제. regression 0. → archive/2026/02/W09
 - ✅ `headless-item-discovery` Heavy 프로젝트 완료 — 2-contexts DOM 0%. querySelectorAll 6곳→1곳(DOM_RECTS, 후속). DOM 스캔을 FocusGroup.useLayoutEffect(뷰)로 이동. getItems() push-only. createOsPage.goto() 자동등록. T1~T10, +6 tests, regression 0, 기존 failures 21→13(8건 개선). → archive/2026/02/W09
 - ✅ `headless-zone-registry` Heavy 프로젝트 완료 — FocusGroup Zone 등록 Phase 1(논리, useMemo)/Phase 2(물리, useLayoutEffect) 분리. autoFocus getItems() headless 경로 추가. T1~T3 완료, T4-T6 scope out. +7 tests, 0 regression. → archive/2026/02/W09
 

@@ -91,6 +91,8 @@ export interface ZoneEntry {
     overItemId: string;
     position: "before" | "after";
   }) => BaseCommand | BaseCommand[];
+  /** Label accessor — returns map of item ID → display label for typeahead */
+  getLabels?: () => Map<string, string>;
 }
 
 const registry = new Map<string, ZoneEntry>();
