@@ -23,6 +23,7 @@ import {
   opsFromAccessor,
 } from "@/os/collection/collectionZone.core";
 import {
+  type TreeNode,
   findInTree,
   findParentOf,
   insertChild,
@@ -82,7 +83,7 @@ export function readClipboard(): unknown | null {
 // createCollectionZone
 // ═══════════════════════════════════════════════════════════════════
 
-export function createCollectionZone<S, T extends { id: string } = any>(
+export function createCollectionZone<S, T extends { id: string } = { id: string }>(
   app: AppHandle<S>,
   zoneName: string,
   config: CollectionConfig<S, T>,
@@ -126,7 +127,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         : undefined;
     }
     // Nested: next sibling → prev sibling → parent
-    const parent = findParentOf(allItems as any[], targetId);
+    const parent = findParentOf(allItems as TreeNode[], targetId);
     if (parent?.children) {
       const idx = parent.children.findIndex(
         (c: { id: string }) => c.id === targetId,
@@ -141,18 +142,18 @@ export function createCollectionZone<S, T extends { id: string } = any>(
   // ── add ── (auto-generated from create factory)
   const add = config.create
     ? zone.command(
-        `${zoneName}:add`,
-        (ctx: { readonly state: S }, payload: any) => {
-          const newItem = config.create!(payload, ctx.state);
-          if (!newItem) return { state: ctx.state };
-          return {
-            state: produce(ctx.state, (draft) => {
-              const items = ops.getItems(ctx.state);
-              ops.insertAfter(draft as S, items.length - 1, newItem);
-            }),
-          };
-        },
-      )
+      `${zoneName}:add`,
+      (ctx: { readonly state: S }, payload: unknown) => {
+        const newItem = config.create!(payload, ctx.state);
+        if (!newItem) return { state: ctx.state };
+        return {
+          state: produce(ctx.state, (draft) => {
+            const items = ops.getItems(ctx.state);
+            ops.insertAfter(draft as S, items.length - 1, newItem);
+          }),
+        };
+      },
+    )
     : undefined;
 
   // ── remove ── (tree-aware)
@@ -161,7 +162,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     (ctx: { readonly state: S }, payload: { id: string }) => {
       const allItems = ops.getItems(ctx.state);
       const isRoot = allItems.some((item) => item.id === payload.id);
-      const isNested = !isRoot && !!findInTree(allItems as any[], payload.id);
+      const isNested = !isRoot && !!findInTree(allItems as TreeNode[], payload.id);
       if (!isRoot && !isNested) return { state: ctx.state };
 
       // Focus recovery via resolveItemFallback (single path for all deletion)
@@ -172,7 +173,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           if (isRoot) {
             ops.removeItem(draft as S, payload.id);
           } else {
-            removeFromTree(ops.getItems(draft as S) as any[], payload.id);
+            removeFromTree(ops.getItems(draft as S) as TreeNode[], payload.id);
           }
         }),
         dispatch: focusCmd,
@@ -219,7 +220,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           };
         }
 
-        const parent = findParentOf(allItems as any[], payload.id);
+        const parent = findParentOf(allItems as TreeNode[], payload.id);
         if (!parent?.children) return { state: ctx.state };
         const idx = parent.children.findIndex(
           (c: { id: string }) => c.id === payload.id,
@@ -231,7 +232,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         return {
           state: produce(ctx.state, (draft) => {
             const draftParent = findInTree(
-              ops.getItems(draft as S) as any[],
+              ops.getItems(draft as S) as TreeNode[],
               parent.id,
             );
             if (draftParent?.children) {
@@ -269,7 +270,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       }
 
       // Nested duplicate: clone within parent's children
-      const original = findInTree(items as any[], payload.id) as T | undefined;
+      const original = findInTree(items as TreeNode[], payload.id) as T | undefined;
       if (!original) return { state: ctx.state };
 
       const newId = uid();
@@ -279,10 +280,10 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
       return {
         state: produce(ctx.state, (draft) => {
-          const draftItems = ops.getItems(draft as S) as any[];
+          const draftItems = ops.getItems(draft as S) as TreeNode[];
           const parent = findParentOf(draftItems, payload.id);
           if (parent) {
-            insertChild(draftItems, parent.id, cloned as any, payload.id);
+            insertChild(draftItems, parent.id, cloned as TreeNode, payload.id);
           }
         }),
       };
@@ -298,7 +299,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         .map(
           (id) =>
             items.find((item) => item.id === id) ??
-            (findInTree(items as any[], id) as T | undefined),
+            (findInTree(items as TreeNode[], id) as T | undefined),
         )
         .filter((t): t is T => Boolean(t));
       if (found.length === 0) return { state: ctx.state };
@@ -334,7 +335,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         .map(
           (id) =>
             items.find((item) => item.id === id) ??
-            (findInTree(items as any[], id) as T | undefined),
+            (findInTree(items as TreeNode[], id) as T | undefined),
         )
         .filter((t): t is T => Boolean(t));
       if (found.length === 0) return { state: ctx.state };
@@ -359,7 +360,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
             if (isRoot) {
               ops.removeItem(draft as S, id);
             } else {
-              removeFromTree(draftItems as any[], id);
+              removeFromTree(draftItems as TreeNode[], id);
             }
           }
         }),
@@ -402,9 +403,9 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         // Tree-aware paste: check if target node has `accept` for clipboard item type
         const targetId = payload.afterId;
         const targetNode = targetId
-          ? findInTree(readItems as any[], targetId)
+          ? findInTree(readItems as TreeNode[], targetId)
           : undefined;
-        const targetAccept = (targetNode as any)?.accept as
+        const targetAccept = (targetNode as Record<string, unknown> | undefined)?.["accept"] as
           | string[]
           | undefined;
 
@@ -422,7 +423,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           }
           pastedIds.push(newItem.id);
 
-          const itemType = (source as any).type as string | undefined;
+          const itemType = (source as Record<string, unknown>)["type"] as string | undefined;
           const afterSibling = lastInsertedId ?? targetId;
 
           if (
@@ -433,9 +434,9 @@ export function createCollectionZone<S, T extends { id: string } = any>(
           ) {
             // Case 1: Target accepts this type → insert as child of target
             insertChild(
-              draftItems as any[],
+              draftItems as TreeNode[],
               targetId,
-              newItem as any,
+              newItem as TreeNode,
               lastInsertedId,
             );
           } else if (
@@ -443,12 +444,12 @@ export function createCollectionZone<S, T extends { id: string } = any>(
             readItems.findIndex((item) => item.id === targetId) === -1
           ) {
             // Case 2: Target is a nested node (not in root) → insert as sibling within parent
-            const parentNode = findParentOf(draftItems as any[], targetId);
+            const parentNode = findParentOf(draftItems as TreeNode[], targetId);
             if (parentNode) {
               insertChild(
-                draftItems as any[],
+                draftItems as TreeNode[],
                 parentNode.id,
-                newItem as any,
+                newItem as TreeNode,
                 afterSibling,
               );
             } else {
@@ -494,20 +495,20 @@ export function createCollectionZone<S, T extends { id: string } = any>(
       payload: { id: string; toParentId?: string; afterId?: string },
     ) => {
       const items = ops.getItems(ctx.state);
-      const node = findInTree(items as any[], payload.id) as T | undefined;
+      const node = findInTree(items as TreeNode[], payload.id) as T | undefined;
       if (!node) return { state: ctx.state };
 
       // Validate accept constraint if moving into a parent
       if (payload.toParentId) {
         const targetParent = findInTree(
-          items as any[],
+          items as TreeNode[],
           payload.toParentId,
-        ) as any;
-        if (targetParent?.accept && !(node as any).type)
+        ) as (TreeNode & Record<string, unknown>) | undefined;
+        if (targetParent?.["accept"] && !(node as Record<string, unknown>)["type"])
           return { state: ctx.state };
         if (
-          targetParent?.accept &&
-          !targetParent.accept.includes((node as any).type)
+          targetParent?.["accept"] &&
+          !(targetParent["accept"] as string[]).includes((node as Record<string, unknown>)["type"] as string)
         ) {
           return { state: ctx.state };
         }
@@ -515,7 +516,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
 
       return {
         state: produce(ctx.state, (draft) => {
-          const draftItems = ops.getItems(draft as S) as any[];
+          const draftItems = ops.getItems(draft as S) as TreeNode[];
           // 1. Remove from current position
           removeFromTree(draftItems, payload.id);
           // 2. Insert at new position
@@ -523,13 +524,13 @@ export function createCollectionZone<S, T extends { id: string } = any>(
             insertChild(
               draftItems,
               payload.toParentId,
-              node as any,
+              node as TreeNode,
               payload.afterId,
             );
           } else if (payload.afterId) {
             // Insert as root sibling after afterId
             const idx = draftItems.findIndex(
-              (i: any) => i.id === payload.afterId,
+              (i: TreeNode) => i.id === payload.afterId,
             );
             if (idx !== -1) {
               draftItems.splice(idx + 1, 0, node);
@@ -553,8 +554,9 @@ export function createCollectionZone<S, T extends { id: string } = any>(
     guard?: (cursor: { focusId: string; selection: string[] }) => boolean;
   }): CollectionBindingsResult {
     const guard = options?.guard;
-    const guarded = <F extends (cursor: any) => any>(fn: F): F =>
-      guard ? (((cursor: any) => (guard(cursor) ? fn(cursor) : [])) as F) : fn;
+    type CursorArg = { focusId: string; selection: string[] };
+    const guarded = <F extends (cursor: CursorArg) => BaseCommand | BaseCommand[]>(fn: F): F =>
+      guard ? (((cursor: CursorArg) => (guard(cursor) ? fn(cursor) : [])) as F) : fn;
 
     const idsFromCursor = (cursor: { focusId: string; selection: string[] }) =>
       cursor.selection.length > 0
@@ -594,7 +596,7 @@ export function createCollectionZone<S, T extends { id: string } = any>(
         },
       ],
       getItems: () => {
-        const appState = os.getState().apps[(app as any).__appId] as S;
+        const appState = os.getState().apps[app.__appId] as S;
         if (!appState) return [];
         const allItems = ops.getItems(appState);
         const visible = config.filter

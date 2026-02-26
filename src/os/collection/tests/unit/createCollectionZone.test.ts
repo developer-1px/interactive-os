@@ -48,16 +48,17 @@ describe("createCollectionZone", () => {
     const zone = createCollectionZone(mockApp, "test", config);
     const bindings = zone.collectionBindings();
 
-    const result = bindings.onCopy({ focusId: "B", selection: ["A", "B"] });
+    const result = bindings.onCopy({ focusId: "B", selection: ["A", "B"] }) as unknown as Record<string, unknown>;
 
     expect(result).toBeDefined();
     // Copy does not modify app state
-    expect(result.state).toBe(mockState);
+    expect(result["state"]).toBe(mockState);
     // No OS_CLIPBOARD_SET dispatch — _clipboardStore is single source of truth
     // clipboardWrite should have text for native clipboard
-    expect(result.clipboardWrite).toBeDefined();
-    expect(result.clipboardWrite.text).toContain("Item A");
-    expect(result.clipboardWrite.text).toContain("Item B");
+    const cw = result["clipboardWrite"] as Record<string, unknown>;
+    expect(cw).toBeDefined();
+    expect(cw["text"]).toContain("Item A");
+    expect(cw["text"]).toContain("Item B");
 
     // readClipboard should reflect what was copied
     const preview = zone.readClipboard() as { id: string };
@@ -70,11 +71,11 @@ describe("createCollectionZone", () => {
     const zone = createCollectionZone(mockApp, "test", config);
     const bindings = zone.collectionBindings();
 
-    const result = bindings.onCopy({ focusId: "B", selection: [] });
+    const result = bindings.onCopy({ focusId: "B", selection: [] }) as unknown as Record<string, unknown>;
 
     expect(result).toBeDefined();
-    expect(result.state).toBe(mockState);
-    expect(result.clipboardWrite.text).toBe("Item B");
+    expect(result["state"]).toBe(mockState);
+    expect((result["clipboardWrite"] as Record<string, unknown>)["text"]).toBe("Item B");
 
     // readClipboard should return the single copied item
     const preview = zone.readClipboard() as { id: string };

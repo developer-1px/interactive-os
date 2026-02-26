@@ -95,11 +95,12 @@ const listCollection = createCollectionZone(TodoApp, "list", {
     (s: AppState) => s.data.todos,
     (s: AppState) => s.data.todoOrder,
   ),
-  create: (payload: { text: string }, state: AppState): Todo | null => {
-    if (!payload.text?.trim()) return null;
+  create: (payload: unknown, state: AppState): Todo | null => {
+    const { text } = payload as { text: string };
+    if (!text?.trim()) return null;
     return {
       id: uid(),
-      text: payload.text.trim(),
+      text: text.trim(),
       completed: false,
       categoryId: state.ui.selectedCategoryId,
     };
@@ -156,10 +157,10 @@ export const requestDeleteTodo = listCollection.command(
       payload.ids.includes(id),
     )
       ? [
-          // Close first to clear any stale overlay from HMR or interrupted flow
-          OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
-          OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
-        ]
+        // Close first to clear any stale overlay from HMR or interrupted flow
+        OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+        OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
+      ]
       : undefined,
   }),
 );

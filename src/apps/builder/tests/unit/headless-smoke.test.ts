@@ -35,14 +35,16 @@ describe("Browser path 시뮬레이션", () => {
 
     // Step 1: Copy via bindings (브라우저 경로)
     const copyCmd = bindings.onCopy({ focusId: "ge-hero", selection: [] });
-    os.dispatch(copyCmd);
+    const cmds = Array.isArray(copyCmd) ? copyCmd : [copyCmd];
+    cmds.forEach(c => os.dispatch(c));
 
     const clip = readClipboard() as any;
     expect(clip).toBeTruthy();
 
     // Step 2: Paste 1회 via bindings
     const paste1 = bindings.onPaste({ focusId: "ge-hero", selection: [] });
-    os.dispatch(paste1);
+    const cmds1 = Array.isArray(paste1) ? paste1 : [paste1];
+    cmds1.forEach(c => os.dispatch(c));
 
     const afterPaste1 = blocks();
     expect(afterPaste1.length).toBe(6);
@@ -52,7 +54,8 @@ describe("Browser path 시뮬레이션", () => {
 
     // Step 3: Paste 2회 (focusId = 새 아이템, 브라우저처럼)
     const paste2 = bindings.onPaste({ focusId: newItemId, selection: [] });
-    os.dispatch(paste2);
+    const cmds2 = Array.isArray(paste2) ? paste2 : [paste2];
+    cmds2.forEach(c => os.dispatch(c));
 
     const afterPaste2 = blocks();
     expect(afterPaste2.length).toBe(7);

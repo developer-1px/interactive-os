@@ -2,7 +2,7 @@
  * collectionZone.core — Types, config, ops, and utilities for createCollectionZone.
  */
 
-import type { CommandFactory } from "@kernel/core/tokens";
+import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import type { ZoneHandle } from "@/os/defineApp.types";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -31,7 +31,7 @@ interface SharedCollectionConfig<S, T extends { id: string }> {
   generateId?: () => string;
   onClone?: (original: T, newId: string) => T;
   /** Factory to create a new entity. Return null to reject (no-op). */
-  create?: (payload: any, state: S) => T | null;
+  create?: (payload: unknown, state: S) => T | null;
   /** Optional visibility filter for moveUp/moveDown. Items not matching are skipped. */
   filter?: (state: S) => (item: T) => boolean;
   /** Serialize item to text for native clipboard. Default: item.label ?? item.text ?? item.id */
@@ -54,7 +54,7 @@ export interface EntityCollectionConfig<S, T extends { id: string }>
   _ops: ItemOps<S, T>;
 }
 
-export type CollectionConfig<S, T extends { id: string } = any> =
+export type CollectionConfig<S, T extends { id: string } = { id: string }> =
   | ArrayCollectionConfig<S, T>
   | EntityCollectionConfig<S, T>;
 
@@ -66,7 +66,7 @@ export interface CollectionZoneHandle<S> extends ZoneHandle<S> {
   /** Canonical zone ID — use for <Zone id={}> in DOM. Single source of truth. */
   readonly zoneId: string;
   /** Add a new entity using the create factory. Only available if `create` is configured. */
-  add: CommandFactory<string, any> | undefined;
+  add: CommandFactory<string, unknown> | undefined;
   remove: CommandFactory<string, { id: string }>;
   moveUp: CommandFactory<string, { id: string }>;
   moveDown: CommandFactory<string, { id: string }>;
@@ -95,15 +95,15 @@ export interface CollectionBindingsOptions {
 }
 
 export interface CollectionBindingsResult {
-  onDelete: (cursor: { focusId: string; selection: string[] }) => any;
-  onMoveUp: (cursor: { focusId: string; selection: string[] }) => any;
-  onMoveDown: (cursor: { focusId: string; selection: string[] }) => any;
-  onCopy: (cursor: { focusId: string; selection: string[] }) => any;
-  onCut: (cursor: { focusId: string; selection: string[] }) => any;
-  onPaste: (cursor: { focusId: string; selection: string[] }) => any;
+  onDelete: (cursor: { focusId: string; selection: string[] }) => BaseCommand | BaseCommand[];
+  onMoveUp: (cursor: { focusId: string; selection: string[] }) => BaseCommand | BaseCommand[];
+  onMoveDown: (cursor: { focusId: string; selection: string[] }) => BaseCommand | BaseCommand[];
+  onCopy: (cursor: { focusId: string; selection: string[] }) => BaseCommand | BaseCommand[];
+  onCut: (cursor: { focusId: string; selection: string[] }) => BaseCommand | BaseCommand[];
+  onPaste: (cursor: { focusId: string; selection: string[] }) => BaseCommand | BaseCommand[];
   keybindings: Array<{
     key: string;
-    command: (cursor: { focusId: string; selection: string[] }) => any;
+    command: (cursor: { focusId: string; selection: string[] }) => BaseCommand | BaseCommand[];
   }>;
   /** Item accessor — returns ordered item IDs for stale focus recovery */
   getItems: () => string[];
@@ -150,8 +150,8 @@ export function opsFromAccessor<S, T extends { id: string }>(
 export const defaultGenerateId = () => Math.random().toString(36).slice(2, 10);
 
 /** Default text serializer: tries label, text, then id. */
-export function defaultToText(item: any): string {
-  return item.label ?? item.text ?? item.id ?? "";
+export function defaultToText(item: Record<string, unknown>): string {
+  return (item["label"] ?? item["text"] ?? item["id"] ?? "") as string;
 }
 
 /** Auto deep clone: recursively regenerate IDs for items with children. */
@@ -160,13 +160,13 @@ export function autoDeepClone<T extends { id: string }>(
   newId: string,
   uid: () => string,
 ): T {
-  const cloned: any = { ...item, id: newId };
+  const cloned: Record<string, unknown> = { ...item, id: newId };
   if (Object.hasOwn(item, "fields")) {
-    cloned.fields = { ...(item as any).fields };
+    cloned["fields"] = { ...(item as Record<string, unknown>)["fields"] as Record<string, unknown> };
   }
-  if (Array.isArray((item as any).children)) {
-    cloned.children = (item as any).children.map((child: any) =>
-      autoDeepClone(child, uid(), uid),
+  if (Array.isArray((item as Record<string, unknown>)["children"])) {
+    cloned["children"] = ((item as Record<string, unknown>)["children"] as Array<{ id: string }>).map((child) =>
+      autoDeepClone(child as T, uid(), uid),
     );
   }
   return cloned as T;
