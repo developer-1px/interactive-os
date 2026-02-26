@@ -157,7 +157,10 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
     dispatchCanvasResult(app, pasteResult);
 
     // Section-footer title field should now be replaced with hero service-name text
-    const sectionFooter = findBlock(app.state.data.blocks, "ge-section-footer")!;
+    const sectionFooter = findBlock(
+      app.state.data.blocks,
+      "ge-section-footer",
+    )!;
     const expectedText = "CLOVA GreenEye";
 
     expect(sectionFooter.fields["title"]).toBe(expectedText);

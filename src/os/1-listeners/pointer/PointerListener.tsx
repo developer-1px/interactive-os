@@ -15,21 +15,21 @@
  */
 
 import { useEffect } from "react";
+import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import {
   OS_DRAG_END,
   OS_DRAG_OVER,
   OS_DRAG_START,
 } from "../../3-commands/drag";
+import { OS_ESCAPE } from "../../3-commands/dismiss/escape";
 import { OS_FIELD_START_EDIT } from "../../3-commands/field/startEdit";
 import { FieldRegistry } from "../../6-components/field/FieldRegistry";
 import { os } from "../../kernel";
+import { resolveClick } from "../mouse/resolveClick";
 import { resolveMouse } from "../mouse/resolveMouse";
 import { findFocusableItem, setDispatching } from "../shared";
 import {
   getDropPosition,
-  handleSelectModeClick,
-  seedCaretFromPoint,
-  senseClick,
   senseMouseDown,
 } from "../shared/senseMouse";
 import {
@@ -85,7 +85,18 @@ export function PointerListener() {
 
       // Immediate focus+select (mousedown equivalent)
       const mouseInput = senseMouseDown(target, e);
-      if (!mouseInput) return;
+      if (!mouseInput) {
+        // ── outsideClick dismiss ──
+        // Click landed outside any zone/item. If the active zone
+        // has dismiss.outsideClick === "close", dispatch OS_ESCAPE.
+        if (activeZoneId) {
+          const zoneEntry = ZoneRegistry.get(activeZoneId);
+          if (zoneEntry?.config.dismiss.outsideClick === "close") {
+            os.dispatch(OS_ESCAPE());
+          }
+        }
+        return;
+      }
 
       const editingItemId = activeZoneId
         ? (focusState.zones[activeZoneId]?.editingItemId ?? null)
@@ -97,17 +108,17 @@ export function PointerListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-                meta: {
-                  ...result.meta,
-                  pipeline: {
-                    sensed: mouseInput,
-                    resolved: {
-                      preventDefault: result.preventDefault,
-                      fallback: result.fallback,
-                    },
+              meta: {
+                ...result.meta,
+                pipeline: {
+                  sensed: mouseInput,
+                  resolved: {
+                    preventDefault: result.preventDefault,
+                    fallback: result.fallback,
                   },
                 },
-              }
+              },
+            }
             : undefined;
           os.dispatch(cmd, opts);
         }
@@ -129,7 +140,24 @@ export function PointerListener() {
               },
             },
           });
-          seedCaretFromPoint(lastPointerDownX, lastPointerDownY, clickedItemId);
+          // Inline seedCaretFromPoint — DOM side effect, not sense
+          const caretRange = document.caretRangeFromPoint(
+            lastPointerDownX,
+            lastPointerDownY,
+          );
+          if (caretRange) {
+            const fieldEl = document.getElementById(clickedItemId);
+            if (fieldEl) {
+              const preCaretRange = document.createRange();
+              preCaretRange.selectNodeContents(fieldEl);
+              preCaretRange.setEnd(
+                caretRange.startContainer,
+                caretRange.startOffset,
+              );
+              const offset = preCaretRange.toString().length;
+              FieldRegistry.updateCaretPosition(clickedItemId, offset);
+            }
+          }
         }
 
         setDispatching(false);
@@ -169,9 +197,9 @@ export function PointerListener() {
         os.dispatch(
           drop
             ? OS_DRAG_OVER({
-                overItemId: drop.overItemId,
-                position: drop.position,
-              })
+              overItemId: drop.overItemId,
+              position: drop.position,
+            })
             : OS_DRAG_OVER({ overItemId: null, position: null }),
         );
       }
@@ -185,8 +213,57 @@ export function PointerListener() {
       if (result.gesture === "CLICK") {
         const target = pointerDownTarget ?? (e.target as HTMLElement);
         if (target) {
-          const sense = senseClick(target);
-          if (sense) handleSelectModeClick(sense, preClickFocusedItemId);
+          // Skip inspector, expand-trigger, check-trigger
+          if (
+            target.closest("[data-inspector]") ||
+            target.closest("[data-expand-trigger]") ||
+            target.closest("[data-check-trigger]")
+          ) {
+            // no-op
+          } else {
+            const state = os.getState();
+            const { activeZoneId } = state.os.focus;
+
+            if (activeZoneId) {
+              const clickedEl = findFocusableItem(target);
+              const clickedItemId =
+                clickedEl?.getAttribute("data-item-id") ?? null;
+              const zone = state.os.focus.zones[activeZoneId];
+              const entry = ZoneRegistry.get(activeZoneId);
+
+              const activateOnClick =
+                entry?.config?.activate?.onClick ?? false;
+              const isCurrentPage =
+                clickedEl?.getAttribute("aria-current") === "page";
+              const reClickOnly =
+                entry?.config?.activate?.reClickOnly ?? false;
+
+              const clickResult = resolveClick({
+                activateOnClick,
+                clickedItemId,
+                focusedItemId: reClickOnly
+                  ? preClickFocusedItemId
+                  : (zone?.focusedItemId ?? null),
+                isCurrentPage,
+              });
+
+              if (clickResult.commands.length > 0) {
+                setDispatching(true);
+                for (const cmd of clickResult.commands) {
+                  const opts = clickResult.meta
+                    ? {
+                      meta: {
+                        ...clickResult.meta,
+                        pipeline: { sensed: {}, resolved: {} },
+                      },
+                    }
+                    : undefined;
+                  os.dispatch(cmd, opts);
+                }
+                setDispatching(false);
+              }
+            }
+          }
         }
       } else if (result.gesture === "DRAG_END") {
         os.dispatch(OS_DRAG_END());

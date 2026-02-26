@@ -7,20 +7,103 @@
  * Used by: PointerListener (and headless simulateClick)
  */
 
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import { FieldRegistry } from "../../6-components/field/FieldRegistry";
 import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
-import { resolveClick } from "../mouse/resolveClick";
 import type { MouseInput } from "../mouse/resolveMouse";
 import {
   findFocusableItem,
   resolveFocusTarget,
-  setDispatching,
 } from "../shared";
 
 // ═══════════════════════════════════════════════════════════════════
-// Sense: DOM → MouseInput
+// Pure Interface: MouseDownSense
+// ═══════════════════════════════════════════════════════════════════
+
+export interface MouseDownSense {
+  isInspector: boolean;
+  // Label path
+  isLabel: boolean;
+  labelTargetItemId: string | null;
+  labelTargetGroupId: string | null;
+  // Normal item path
+  itemId: string | null;
+  groupId: string | null;
+  hasAriaExpanded: boolean;
+  itemRole: string | null;
+  // Zone-only path
+  zoneId: string | null;
+  // Modifiers
+  shiftKey: boolean;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  altKey: boolean;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Extract: MouseDownSense → MouseInput
+// ═══════════════════════════════════════════════════════════════════
+
+export function extractMouseInput(input: MouseDownSense): MouseInput | null {
+  // Guard: inspector
+  if (input.isInspector) return null;
+
+  // Label path
+  if (input.isLabel) {
+    if (!input.labelTargetItemId) return null;
+    return {
+      targetItemId: null,
+      targetGroupId: null,
+      shiftKey: input.shiftKey,
+      metaKey: input.metaKey,
+      ctrlKey: input.ctrlKey,
+      altKey: input.altKey,
+      isLabel: true,
+      labelTargetItemId: input.labelTargetItemId,
+      labelTargetGroupId: input.labelTargetGroupId,
+      hasAriaExpanded: false,
+      itemRole: null,
+    };
+  }
+
+  // Normal item path
+  if (input.itemId) {
+    return {
+      targetItemId: input.itemId,
+      targetGroupId: input.groupId,
+      shiftKey: input.shiftKey,
+      metaKey: input.metaKey,
+      ctrlKey: input.ctrlKey,
+      altKey: input.altKey,
+      isLabel: false,
+      labelTargetItemId: null,
+      labelTargetGroupId: null,
+      hasAriaExpanded: input.hasAriaExpanded,
+      itemRole: input.itemRole,
+    };
+  }
+
+  // Zone-only path
+  if (input.zoneId) {
+    return {
+      targetItemId: null,
+      targetGroupId: input.zoneId,
+      shiftKey: input.shiftKey,
+      metaKey: input.metaKey,
+      ctrlKey: input.ctrlKey,
+      altKey: input.altKey,
+      isLabel: false,
+      labelTargetItemId: null,
+      labelTargetGroupId: null,
+      hasAriaExpanded: false,
+      itemRole: null,
+    };
+  }
+
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DOM Adapter: reads DOM → MouseDownSense → extractMouseInput
 // ═══════════════════════════════════════════════════════════════════
 
 export function senseMouseDown(
@@ -28,13 +111,19 @@ export function senseMouseDown(
   e: { shiftKey: boolean; metaKey: boolean; ctrlKey: boolean; altKey: boolean },
 ): MouseInput | null {
   if (!target) return null;
+  if (!sensorGuard.check()) return null;
 
-  // Guard: inspector, loop guard
-  if (target.closest("[data-inspector]") || !sensorGuard.check()) return null;
+  // Read DOM → build MouseDownSense
+  const isInspector = !!target.closest("[data-inspector]");
 
-  // Label detection
+  // Label detection (DOM reading)
   const label = target.closest("[data-label]") as HTMLElement | null;
+  let isLabel = false;
+  let labelTargetItemId: string | null = null;
+  let labelTargetGroupId: string | null = null;
+
   if (label) {
+    isLabel = true;
     const targetId = label.getAttribute("data-for");
     const targetField = targetId
       ? document.getElementById(targetId)
@@ -43,176 +132,100 @@ export function senseMouseDown(
     if (targetField) {
       const fieldTarget = resolveFocusTarget(targetField);
       if (fieldTarget) {
-        return {
-          targetItemId: null,
-          targetGroupId: null,
-          shiftKey: e.shiftKey,
-          metaKey: e.metaKey,
-          ctrlKey: e.ctrlKey,
-          altKey: e.altKey,
-          isLabel: true,
-          labelTargetItemId: fieldTarget.itemId,
-          labelTargetGroupId: fieldTarget.groupId,
-          hasAriaExpanded: false,
-          itemRole: null,
-        };
+        labelTargetItemId = fieldTarget.itemId;
+        labelTargetGroupId = fieldTarget.groupId;
       }
     }
-    return null;
   }
 
-  // Normal item detection
-  const item = findFocusableItem(target);
-  if (!item) {
-    // Zone-only click: no item, but zone exists → activate zone
-    const zoneEl = target.closest("[data-zone]") as HTMLElement | null;
-    const zoneId = zoneEl?.getAttribute("data-zone");
-    if (!zoneId) return null;
+  // Item detection (DOM reading)
+  const item = !isLabel ? findFocusableItem(target) : null;
+  let itemId: string | null = null;
+  let groupId: string | null = null;
+  let hasAriaExpanded = false;
+  let itemRole: string | null = null;
 
-    return {
-      targetItemId: null,
-      targetGroupId: zoneId,
-      shiftKey: e.shiftKey,
-      metaKey: e.metaKey,
-      ctrlKey: e.ctrlKey,
-      altKey: e.altKey,
-      isLabel: false,
-      labelTargetItemId: null,
-      labelTargetGroupId: null,
-      hasAriaExpanded: false,
-      itemRole: null,
-    };
+  if (item) {
+    const focusTarget = resolveFocusTarget(item);
+    if (focusTarget) {
+      itemId = focusTarget.itemId;
+      groupId = focusTarget.groupId;
+    }
+    hasAriaExpanded = item.hasAttribute("aria-expanded");
+    itemRole = item.getAttribute("role");
   }
-  const focusTarget = resolveFocusTarget(item);
-  if (!focusTarget) return null;
 
-  return {
-    targetItemId: focusTarget.itemId,
-    targetGroupId: focusTarget.groupId,
+  // Zone detection (DOM reading)
+  const zoneEl = !isLabel && !item
+    ? (target.closest("[data-zone]") as HTMLElement | null)
+    : null;
+  const zoneId = zoneEl?.getAttribute("data-zone") ?? null;
+
+  return extractMouseInput({
+    isInspector,
+    isLabel,
+    labelTargetItemId,
+    labelTargetGroupId,
+    itemId,
+    groupId,
+    hasAriaExpanded,
+    itemRole,
+    zoneId,
     shiftKey: e.shiftKey,
     metaKey: e.metaKey,
     ctrlKey: e.ctrlKey,
     altKey: e.altKey,
-    isLabel: false,
-    labelTargetItemId: null,
-    labelTargetGroupId: null,
-    hasAriaExpanded: item.hasAttribute("aria-expanded"),
-    itemRole: item.getAttribute("role"),
-  };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Click Sense: DOM → ClickSense
-// ═══════════════════════════════════════════════════════════════════
-
-export interface ClickSense {
-  clickedEl: HTMLElement | null;
-  clickedItemId: string | null;
-  activeZoneId: string;
-  zone:
-    | ReturnType<typeof os.getState>["os"]["focus"]["zones"][string]
-    | undefined;
-  entry: ReturnType<typeof ZoneRegistry.get>;
-}
-
-export function senseClick(target: HTMLElement): ClickSense | null {
-  if (target.closest("[data-inspector]")) return null;
-  if (
-    target.closest("[data-expand-trigger]") ||
-    target.closest("[data-check-trigger]")
-  )
-    return null;
-
-  const state = os.getState();
-  const { activeZoneId } = state.os.focus;
-  if (!activeZoneId) return null;
-
-  const clickedEl = findFocusableItem(target);
-  return {
-    clickedEl,
-    clickedItemId: clickedEl?.getAttribute("data-item-id") ?? null,
-    activeZoneId,
-    zone: state.os.focus.zones[activeZoneId],
-    entry: ZoneRegistry.get(activeZoneId),
-  };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Caret Seeding: click coordinates → FieldRegistry offset
-// ═══════════════════════════════════════════════════════════════════
-
-export function seedCaretFromPoint(x: number, y: number, fieldId: string) {
-  const range = document.caretRangeFromPoint(x, y);
-  if (!range) return;
-
-  const el = document.getElementById(fieldId);
-  if (!el) return;
-
-  const preCaretRange = document.createRange();
-  preCaretRange.selectNodeContents(el);
-  preCaretRange.setEnd(range.startContainer, range.startOffset);
-  const offset = preCaretRange.toString().length;
-
-  FieldRegistry.updateCaretPosition(fieldId, offset);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Click Mode Handler: resolveClick → dispatch
-// ═══════════════════════════════════════════════════════════════════
-
-export function handleSelectModeClick(
-  sense: ClickSense,
-  preClickFocusedItemId: string | null,
-) {
-  const { entry, clickedEl, clickedItemId, zone } = sense;
-
-  const activateOnClick = entry?.config?.activate?.onClick ?? false;
-  const isCurrentPage = clickedEl?.getAttribute("aria-current") === "page";
-  const reClickOnly = entry?.config?.activate?.reClickOnly ?? false;
-
-  const result = resolveClick({
-    activateOnClick,
-    clickedItemId,
-    focusedItemId: reClickOnly
-      ? preClickFocusedItemId
-      : (zone?.focusedItemId ?? null),
-    isCurrentPage,
   });
-
-  if (result.commands.length > 0) {
-    setDispatching(true);
-    for (const cmd of result.commands) {
-      const opts = result.meta
-        ? { meta: { ...result.meta, pipeline: { sensed: {}, resolved: {} } } }
-        : undefined;
-      os.dispatch(cmd, opts);
-    }
-    setDispatching(false);
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Drag: Drop Position Detection
+// Pure Interface: DropSenseInput
+// ═══════════════════════════════════════════════════════════════════
+
+export interface DropSenseInput {
+  clientY: number;
+  items: Array<{ itemId: string; top: number; bottom: number }>;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Extract: DropSenseInput → Drop result
+// ═══════════════════════════════════════════════════════════════════
+
+export function extractDropPosition(
+  input: DropSenseInput,
+): { overItemId: string; position: "before" | "after" } | null {
+  for (const item of input.items) {
+    if (input.clientY >= item.top && input.clientY <= item.bottom) {
+      const mid = item.top + (item.bottom - item.top) / 2;
+      return {
+        overItemId: item.itemId,
+        position: input.clientY < mid ? "before" : "after",
+      };
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DOM Adapter: reads DOM → DropSenseInput → extractDropPosition
 // ═══════════════════════════════════════════════════════════════════
 
 export function getDropPosition(
   e: { clientY: number },
   zoneEl: HTMLElement,
 ): { overItemId: string; position: "before" | "after" } | null {
-  const items = zoneEl.querySelectorAll("[data-item-id]");
-  for (const item of items) {
-    if (item.closest("[data-zone]") !== zoneEl) continue;
-    const rect = item.getBoundingClientRect();
-    if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
-      const mid = rect.top + rect.height / 2;
-      const itemId =
-        item.getAttribute("data-item-id") || (item as HTMLElement).id;
-      if (!itemId) continue;
-      return {
-        overItemId: itemId,
-        position: e.clientY < mid ? "before" : "after",
-      };
-    }
+  const nodeList = zoneEl.querySelectorAll("[data-item-id]");
+  const items: DropSenseInput["items"] = [];
+
+  for (const node of nodeList) {
+    if (node.closest("[data-zone]") !== zoneEl) continue;
+    const rect = node.getBoundingClientRect();
+    const itemId =
+      node.getAttribute("data-item-id") || (node as HTMLElement).id;
+    if (!itemId) continue;
+    items.push({ itemId, top: rect.top, bottom: rect.bottom });
   }
-  return null;
+
+  return extractDropPosition({ clientY: e.clientY, items });
 }
+

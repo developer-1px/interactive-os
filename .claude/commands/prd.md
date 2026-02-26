@@ -1,6 +1,11 @@
 ---
 description: 프로젝트의 진실의 원천(Single Source of Truth for WHAT). 기능 요구사항, 상태, 엣지 케이스를 정의한다. 테스트와 코드는 이 문서에서 파생된다.
 ---
+---
+
+> ⚠️ **DEPRECATED** — 이 워크플로우는 `/spec`으로 대체되었습니다.
+> Decision Table이 `/spec`에 통합되었고, 이름은 `/prd` → `/spec`으로 변경되었습니다.
+> 새 워크플로우: `.agent/workflows/spec.md`
 
 ## Why — 이 workflow가 존재하는 이유
 

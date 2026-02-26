@@ -459,7 +459,9 @@ export function DocsViewer() {
                                 : "text-slate-300 hover:text-slate-400",
                             )}
                             title={
-                              isFavorite(activePath) ? "Unpin" : "Pin to sidebar"
+                              isFavorite(activePath)
+                                ? "Unpin"
+                                : "Pin to sidebar"
                             }
                           >
                             <Star

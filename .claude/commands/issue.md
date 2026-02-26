@@ -21,6 +21,8 @@ description: 이슈를 자율적으로 분석→계획→수정→검증→재�
 D1. 등록     → docs/1-project/0-issue/YYYY-MM-DD_<slug>.md
 D2. Triage   → P0(빌드불가) / P1(기능불가) / P2(대안존재) / P3(cosmetic)
 D3. Diagnose → 코드 수정 없이 원인 분석. 관련 문서(PRD, Status) 먼저.
+              Inspector 로그가 있으면: Diff: None + Effects: dispatch 패턴 = 커맨드가 실행됐으나 state 무변화 = 버그 증거.
+              Inspector 없으면: 재현 시나리오를 직접 실행하여 Diff 흐름을 추적한다.
 ```
 
 ```
@@ -39,12 +41,22 @@ D4. Plan — 문서로 적는다. 머릿속 계획은 계획이 아니다.
 ```
 
 ```
-D5. Red      → 근본 원인을 직접 검증하는 실패 테스트. 별도 파일.
-D6. Green    → 계획대로 수정. 계획에서 벗어나면 D4로.
+D5. Red Table → 버그 케이스를 해당 기능의 결정 테이블에 누락 행으로 추가한다.
+               위치: docs/6-products/{app}/spec/{feature}.md
+               형식: 9열 결정 테이블 (S/Zone/Given/When/Intent/Condition/Command/Effect/Then)
+               규칙:
+                 - Given에 버그를 유발한 조건을 명시한다. (예: depth=3+, nesting=deeply-nested, selection=multi)
+                 - 추가된 행의 S 열 = 🔴 (Red 테스트 작성 예정)
+                 - 추가된 행 옆에 🆕 마크로 이번 이슈에서 추가됨을 표시한다.
+               ⛔ 표 없이 테스트 코드 작성 금지.
+D6. Red Test  → D5에서 추가된 행(🔴)만 it()로 인코딩한다. vitest → 🔴 FAIL.
+               근본 원인을 직접 검증하는 실패 테스트. 기존 통과 테스트는 건드리지 않는다.
+               ⛔ 기존 it()를 수정하거나 삭제하지 않는다.
+D7. Green    → 계획대로 수정. 완료 후 D5에서 추가한 행의 S 열을 🟢로 업데이트. 계획에서 벗어나면 D4로.
 ```
 
 ```
-D7. Verify
+D8. Verify
     ├─ /doubt: shim인가? 다른 환경도? 기존 메커니즘?
     ├─ /review: 네이밍, 구조, rules.md
     ├─ Revert-Red: 수정 되돌렸을 때 테스트 다시 실패하는가? (논리적 확인)
@@ -52,5 +64,5 @@ D7. Verify
 ```
 
 ```
-D8. Close    → 이슈 [Closed] + 해결 요약. 구조적 원인이면 /rules 추가.
+D9. Close    → 이슈 [Closed] + 해결 요약. 구조적 원인이면 /rules 추가.
 ```

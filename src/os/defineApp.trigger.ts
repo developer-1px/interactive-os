@@ -7,7 +7,7 @@
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import { Trigger } from "@os/6-components/primitives/Trigger";
-import { Dialog } from "@os/6-components/radox/Dialog";
+import { Dialog } from "@os/6-components/radix/Dialog";
 import React, { type ReactNode } from "react";
 
 // ═══════════════════════════════════════════════════════════════════

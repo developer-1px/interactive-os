@@ -10,10 +10,7 @@ import {
   Server,
   Star,
 } from "lucide-react";
-import {
-  BuilderApp,
-  createFieldCommit,
-} from "@/apps/builder/app";
+import { BuilderApp, createFieldCommit } from "@/apps/builder/app";
 import { useLocalizedSectionFields } from "@/apps/builder/locale";
 import type { Block, BuilderState } from "@/apps/builder/model/appState";
 import { Builder } from "@/apps/builder/primitives/Builder";

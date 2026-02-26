@@ -13,8 +13,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { page, setupTodoPage } from "./todo-helpers";
 import { FieldRegistry } from "@/os/6-components/field/FieldRegistry";
+import { page, setupTodoPage } from "./todo-helpers";
 
 setupTodoPage();
 

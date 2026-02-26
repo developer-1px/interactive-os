@@ -10,42 +10,42 @@ import type { Block } from "./appState";
  * 단, 같은 배열(같은 부모) 안에서만 이동 가능.
  */
 export function reorderBlocks(
-    blocks: Block[],
-    info: { itemId: string; overItemId: string; position: "before" | "after" },
+  blocks: Block[],
+  info: { itemId: string; overItemId: string; position: "before" | "after" },
 ): Block[] {
-    const { itemId, overItemId, position } = info;
+  const { itemId, overItemId, position } = info;
 
-    // 같은 위치에 드롭 → 변경 없음 (DT #6)
-    if (itemId === overItemId) return blocks;
+  // 같은 위치에 드롭 → 변경 없음 (DT #6)
+  if (itemId === overItemId) return blocks;
 
-    // 이 레벨에서 둘 다 찾을 수 있는지 확인
-    const dragIndex = blocks.findIndex((b) => b.id === itemId);
-    const targetExists = blocks.some((b) => b.id === overItemId);
+  // 이 레벨에서 둘 다 찾을 수 있는지 확인
+  const dragIndex = blocks.findIndex((b) => b.id === itemId);
+  const targetExists = blocks.some((b) => b.id === overItemId);
 
-    if (dragIndex !== -1 && targetExists) {
-        // 같은 레벨에 둘 다 있음 → 이 레벨에서 reorder
-        const dragItem = blocks[dragIndex]!;
-        const without = blocks.filter((_, i) => i !== dragIndex);
-        const targetIndex = without.findIndex((b) => b.id === overItemId);
-        if (targetIndex === -1) return blocks;
+  if (dragIndex !== -1 && targetExists) {
+    // 같은 레벨에 둘 다 있음 → 이 레벨에서 reorder
+    const dragItem = blocks[dragIndex]!;
+    const without = blocks.filter((_, i) => i !== dragIndex);
+    const targetIndex = without.findIndex((b) => b.id === overItemId);
+    if (targetIndex === -1) return blocks;
 
-        const insertIndex = position === "before" ? targetIndex : targetIndex + 1;
-        const result = [...without];
-        result.splice(insertIndex, 0, dragItem);
-        return result;
+    const insertIndex = position === "before" ? targetIndex : targetIndex + 1;
+    const result = [...without];
+    result.splice(insertIndex, 0, dragItem);
+    return result;
+  }
+
+  // 이 레벨에 없으면 → children을 재귀 탐색
+  let changed = false;
+  const result = blocks.map((block) => {
+    if (!block.children || block.children.length === 0) return block;
+    const newChildren = reorderBlocks(block.children, info);
+    if (newChildren !== block.children) {
+      changed = true;
+      return { ...block, children: newChildren };
     }
+    return block;
+  });
 
-    // 이 레벨에 없으면 → children을 재귀 탐색
-    let changed = false;
-    const result = blocks.map((block) => {
-        if (!block.children || block.children.length === 0) return block;
-        const newChildren = reorderBlocks(block.children, info);
-        if (newChildren !== block.children) {
-            changed = true;
-            return { ...block, children: newChildren };
-        }
-        return block;
-    });
-
-    return changed ? result : blocks;
+  return changed ? result : blocks;
 }

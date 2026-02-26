@@ -1,9 +1,5 @@
 import { Field } from "@os/6-components/field/Field";
-import {
-  BuilderApp,
-  createFieldCommit,
-  findBlock,
-} from "@/apps/builder/app";
+import { BuilderApp, createFieldCommit, findBlock } from "@/apps/builder/app";
 import { useLocalizedSectionFields } from "@/apps/builder/locale";
 import type { Block, BuilderState } from "@/apps/builder/model/appState";
 import { Builder } from "@/apps/builder/primitives/Builder";

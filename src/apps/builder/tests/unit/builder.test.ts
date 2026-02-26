@@ -9,11 +9,7 @@
  *   Nested blocks (inside tabs): ge-notice, ge-features, ge-detail, ge-usecase, ge-resources
  */
 
-import {
-  BuilderApp,
-  INITIAL_STATE,
-  updateField,
-} from "@apps/builder/app";
+import { BuilderApp, INITIAL_STATE, updateField } from "@apps/builder/app";
 import { findBlock } from "@apps/builder/model/appState";
 import { describe, expect, test } from "vitest";
 
@@ -140,7 +136,11 @@ describe("BuilderApp (v5 native)", () => {
     test("reset은 초기 상태로 복원한다", () => {
       const app = createApp();
       app.dispatch(
-        updateField({ sectionId: "ge-hero", field: "service-name", value: "변경됨" }),
+        updateField({
+          sectionId: "ge-hero",
+          field: "service-name",
+          value: "변경됨",
+        }),
       );
 
       app.reset();
@@ -195,13 +195,15 @@ describe("BuilderApp (v5 native)", () => {
 
     test("updateField는 해당 섹션의 필드만 변경한다", () => {
       const app = createApp();
-      const originalFooterBrand = findBlock(
-        app.state.data.blocks,
-        "ge-footer",
-      )!.fields["brand"];
+      const originalFooterBrand = findBlock(app.state.data.blocks, "ge-footer")!
+        .fields["brand"];
 
       app.dispatch(
-        updateField({ sectionId: "ge-hero", field: "service-name", value: "변경됨" }),
+        updateField({
+          sectionId: "ge-hero",
+          field: "service-name",
+          value: "변경됨",
+        }),
       );
 
       // Hero changed

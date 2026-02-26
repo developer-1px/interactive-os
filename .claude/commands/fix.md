@@ -2,7 +2,6 @@
 description: LLM 산출물의 well-formedness를 intent-preserving하게 보장하는 품질 게이트.
 ---
 
-
 ## /fix — Well-formedness 검증 & 정정
 
 > **목적**: LLM이 "완료"라고 했지만 실제로 돌아가지 않는 malformed code를 고친다.

@@ -260,12 +260,12 @@ function buildZoneEntry(
     getExpandableItems?: (() => Set<string>) | undefined;
     getTreeLevels?: (() => Map<string, number>) | undefined;
     onReorder?:
-    | ((info: {
-      itemId: string;
-      overItemId: string;
-      position: "before" | "after";
-    }) => BaseCommand | BaseCommand[])
-    | undefined;
+      | ((info: {
+          itemId: string;
+          overItemId: string;
+          position: "before" | "after";
+        }) => BaseCommand | BaseCommand[])
+      | undefined;
   },
 ): ZoneEntry {
   const entry: ZoneEntry = {

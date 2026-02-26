@@ -172,12 +172,22 @@ const MarkdownComponents: Record<string, React.FC<Record<string, unknown>>> = {
 export function MarkdownRenderer({
   content,
   inline,
-}: { content: string; inline?: boolean }) {
+}: {
+  content: string;
+  inline?: boolean;
+}) {
   return (
-    <div className={inline ? "docs-content max-w-4xl" : "docs-content max-w-4xl mx-auto"}>
+    <div
+      className={
+        inline ? "docs-content max-w-4xl" : "docs-content max-w-4xl mx-auto"
+      }
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
-        rehypePlugins={[rehypeRaw, [rehypeHighlight, { ignoredLanguages: ["mermaid"] }]]}
+        rehypePlugins={[
+          rehypeRaw,
+          [rehypeHighlight, { ignoredLanguages: ["mermaid"] }],
+        ]}
         components={MarkdownComponents}
       >
         {content}

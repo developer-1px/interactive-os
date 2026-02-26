@@ -145,19 +145,25 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
 
   // ── Overlay focus trap ──
   // In browser: <dialog>.showModal() natively traps keyboard events.
-  // In headless: we guard manually. Only ESC is allowed when overlay is open.
+  // In headless: we guard manually.
+  // - If activeZone is inside the overlay (e.g. menu zone) → allow keyboard
+  // - If activeZone is outside the overlay → block all except ESC
   const overlayStack = kernel.getState().os.overlays?.stack ?? [];
   if (overlayStack.length > 0 && key !== "Escape") {
-    if (_observer && before) {
-      _observer({
-        type: "press",
-        label: `${key} (blocked: overlay)`,
-        stateBefore: before,
-        stateAfter: before,
-        timestamp: performance.now(),
-      });
+    const activeZoneId = readActiveZoneId(kernel);
+    const isInsideOverlay = overlayStack.some((e: any) => e.id === activeZoneId);
+    if (!isInsideOverlay) {
+      if (_observer && before) {
+        _observer({
+          type: "press",
+          label: `${key} (blocked: overlay)`,
+          stateBefore: before,
+          stateAfter: before,
+          timestamp: performance.now(),
+        });
+      }
+      return;
     }
-    return;
   }
 
   const activeZoneId = readActiveZoneId(kernel);
@@ -191,10 +197,10 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
     elementId: zone?.focusedItemId ?? undefined,
     cursor: zone?.focusedItemId
       ? {
-          focusId: zone.focusedItemId,
-          selection: zone.selection ?? [],
-          anchor: zone.selectionAnchor ?? null,
-        }
+        focusId: zone.focusedItemId,
+        selection: zone.selection ?? [],
+        anchor: zone.selectionAnchor ?? null,
+      }
       : null,
   };
 
@@ -224,8 +230,31 @@ export function simulateClick(
   const before = _observer
     ? JSON.parse(JSON.stringify(kernel.getState().os))
     : null;
-  const zoneId = opts?.zoneId ?? readActiveZoneId(kernel);
-  if (!zoneId) return;
+
+  // Zone resolution: explicit > item search > active zone
+  const zoneId =
+    opts?.zoneId ??
+    ZoneRegistry.findZoneByItemId(itemId) ??
+    readActiveZoneId(kernel);
+
+  if (!zoneId) {
+    // Standalone item (e.g. Trigger with id but not in any zone)
+    // → dispatch onActivate directly if registered
+    const cb = ZoneRegistry.findItemCallback(itemId);
+    if (cb?.onActivate) {
+      kernel.dispatch(cb.onActivate);
+      if (_observer && before) {
+        _observer({
+          type: "click",
+          label: itemId,
+          stateBefore: before,
+          stateAfter: JSON.parse(JSON.stringify(kernel.getState().os)),
+          timestamp: performance.now(),
+        });
+      }
+    }
+    return;
+  }
 
   const entry = ZoneRegistry.get(zoneId);
   const childRole = entry?.role ? getChildRole(entry.role) : undefined;

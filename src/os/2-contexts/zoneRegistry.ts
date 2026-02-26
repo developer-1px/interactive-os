@@ -180,6 +180,24 @@ export const ZoneRegistry = {
   getItemCallback(zoneId: string, itemId: string): ItemCallbacks | undefined {
     return itemCallbacks.get(zoneId)?.get(itemId);
   },
+
+  /** Find which zone contains this item (searches all zones) */
+  findZoneByItemId(itemId: string): string | null {
+    for (const [zoneId, entry] of registry) {
+      const items = entry.getItems?.();
+      if (items?.includes(itemId)) return zoneId;
+    }
+    return null;
+  },
+
+  /** Find item callback across all zones (zone-independent lookup) */
+  findItemCallback(itemId: string): ItemCallbacks | undefined {
+    for (const [, zoneCallbacks] of itemCallbacks) {
+      const cb = zoneCallbacks.get(itemId);
+      if (cb) return cb;
+    }
+    return undefined;
+  },
 };
 
 const EMPTY_SET: ReadonlySet<string> = new Set();

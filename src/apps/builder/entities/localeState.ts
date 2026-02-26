@@ -6,31 +6,34 @@
  */
 
 export interface LocaleState {
-    currentLocale: string;
-    availableLocales: string[];
-    dropdownOpen: boolean;
+  currentLocale: string;
+  availableLocales: string[];
+  dropdownOpen: boolean;
 }
 
-export function createLocaleState(defaultLocale: string, locales: string[]): LocaleState {
-    return {
-        currentLocale: defaultLocale,
-        availableLocales: locales,
-        dropdownOpen: false,
-    };
+export function createLocaleState(
+  defaultLocale: string,
+  locales: string[],
+): LocaleState {
+  return {
+    currentLocale: defaultLocale,
+    availableLocales: locales,
+    dropdownOpen: false,
+  };
 }
 
 export function openDropdown(state: LocaleState): LocaleState {
-    return { ...state, dropdownOpen: true };
+  return { ...state, dropdownOpen: true };
 }
 
 export function closeDropdown(state: LocaleState): LocaleState {
-    return { ...state, dropdownOpen: false };
+  return { ...state, dropdownOpen: false };
 }
 
 export function setLocale(state: LocaleState, locale: string): LocaleState {
-    return {
-        ...state,
-        currentLocale: locale,
-        dropdownOpen: false, // 선택 시 닫힘
-    };
+  return {
+    ...state,
+    currentLocale: locale,
+    dropdownOpen: false, // 선택 시 닫힘
+  };
 }

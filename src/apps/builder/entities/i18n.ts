@@ -8,15 +8,15 @@
 export type LocalizedField = Record<string, string>;
 
 export interface ResolveOptions {
-    field: string | LocalizedField;
-    locale: string;
-    defaultLocale: string;
+  field: string | LocalizedField;
+  locale: string;
+  defaultLocale: string;
 }
 
 export function resolveFieldValue({ field, locale }: ResolveOptions): string {
-    // 하위 호환: 단일 string
-    if (typeof field === "string") return field;
+  // 하위 호환: 단일 string
+  if (typeof field === "string") return field;
 
-    // 다국어: locale에 해당하는 값, 없으면 빈 문자열
-    return field[locale] ?? "";
+  // 다국어: locale에 해당하는 값, 없으면 빈 문자열
+  return field[locale] ?? "";
 }

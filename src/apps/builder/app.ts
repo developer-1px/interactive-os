@@ -20,8 +20,8 @@ import {
 } from "@/os/collection/pasteBubbling";
 import { defineApp } from "@/os/defineApp";
 import { os } from "@/os/kernel";
-import { history } from "@/os/modules/history";
 import { deleteToast } from "@/os/modules/deleteToast";
+import { history } from "@/os/modules/history";
 import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
 import {
   type Block,
@@ -32,6 +32,7 @@ import {
 } from "./model/appState";
 export type { Block, BuilderState };
 export { INITIAL_STATE, findBlock, findBlockInfo };
+
 import { reorderBlocks } from "./model/reorderBlocks";
 
 /** Read current builder state from kernel. */
@@ -161,7 +162,14 @@ export const loadPagePreset = sidebarCollection.command(
 /** Reorder blocks by drag-and-drop (DT #4, #5) */
 export const reorderBlockCommand = sidebarCollection.command(
   "reorderBlock",
-  (ctx, payload: { itemId: string; overItemId: string; position: "before" | "after" }) => {
+  (
+    ctx,
+    payload: {
+      itemId: string;
+      overItemId: string;
+      position: "before" | "after";
+    },
+  ) => {
     return {
       state: produce(ctx.state, (draft) => {
         draft.data.blocks = reorderBlocks(draft.data.blocks, payload);

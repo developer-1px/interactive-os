@@ -53,7 +53,10 @@ export function findBlockInfo(
 }
 
 /** Find a block by id anywhere in the tree (recursive). */
-export function findBlock(blocks: Block[], targetId: string): Block | undefined {
+export function findBlock(
+  blocks: Block[],
+  targetId: string,
+): Block | undefined {
   for (const block of blocks) {
     if (block.id === targetId) return block;
     if (block.children) {
@@ -96,7 +99,8 @@ export const INITIAL_STATE: BuilderState = {
           "service-name:en": "CLOVA GreenEye",
           "service-name:ja": "CLOVA グリーンアイ",
           "service-desc": "이미지를 판독하여 유해 콘텐츠를 탐지하는 서비스",
-          "service-desc:en": "A service that detects harmful content by analyzing images.",
+          "service-desc:en":
+            "A service that detects harmful content by analyzing images.",
           "service-desc:ja": "画像を解析して有害なコンテンツを検出するサービス",
           "cta-primary": "이용 문의",
           "cta-primary:en": "Contact Us",
@@ -200,7 +204,8 @@ export const INITIAL_STATE: BuilderState = {
                     label: "정상",
                     fields: {
                       "card-title": "정상 (Green)",
-                      "card-desc": "방송통신심의위원회 기준 일반 사용자에게 무해한 이미지입니다.",
+                      "card-desc":
+                        "방송통신심의위원회 기준 일반 사용자에게 무해한 이미지입니다.",
                     },
                   },
                   {
@@ -209,7 +214,8 @@ export const INITIAL_STATE: BuilderState = {
                     label: "선정",
                     fields: {
                       "card-title": "선정 (Yellow)",
-                      "card-desc": "노출이 있으나 성인 수준에는 이르지 않는 이미지입니다.",
+                      "card-desc":
+                        "노출이 있으나 성인 수준에는 이르지 않는 이미지입니다.",
                     },
                   },
                   {
@@ -218,7 +224,8 @@ export const INITIAL_STATE: BuilderState = {
                     label: "성인",
                     fields: {
                       "card-title": "성인 (Orange)",
-                      "card-desc": "성인만 이용할 수 있는 수준의 콘텐츠를 포함한 이미지입니다.",
+                      "card-desc":
+                        "성인만 이용할 수 있는 수준의 콘텐츠를 포함한 이미지입니다.",
                     },
                   },
                   {
@@ -227,7 +234,8 @@ export const INITIAL_STATE: BuilderState = {
                     label: "음란",
                     fields: {
                       "card-title": "음란 (Red)",
-                      "card-desc": "방송통신심의위원회 기준 음란물에 해당하는 이미지입니다. 서비스 내 게시 불가 수준입니다.",
+                      "card-desc":
+                        "방송통신심의위원회 기준 음란물에 해당하는 이미지입니다. 서비스 내 게시 불가 수준입니다.",
                     },
                   },
                 ],
@@ -329,7 +337,8 @@ export const INITIAL_STATE: BuilderState = {
             label: "Block Storage",
             fields: {
               "card-title": "Block Storage",
-              "card-desc": "빠르게 생성하여 사용하고 반납하는 효율적인 스토리지",
+              "card-desc":
+                "빠르게 생성하여 사용하고 반납하는 효율적인 스토리지",
               category: "Storage",
             },
           },

@@ -34,13 +34,13 @@ import {
 import "@os/keymaps/osDefaults";
 
 import type { BaseCommand } from "@kernel/core/tokens";
+import { FieldRegistry } from "./6-components/field/FieldRegistry";
 import type {
   AppPage,
   FieldBindings,
   KeybindingEntry,
   ZoneBindings,
 } from "./defineApp.types";
-import { FieldRegistry } from "./6-components/field/FieldRegistry";
 import type { ZoneRole } from "./registries/roleRegistry";
 import { resolveRole } from "./registries/roleRegistry";
 

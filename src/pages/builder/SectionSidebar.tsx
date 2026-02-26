@@ -87,7 +87,6 @@ function SidebarContent() {
   // Flatten tree for sidebar display — each node gets a depth
   const flatNodes = getFlatNodes(blocks, isExpanded);
 
-
   return (
     <>
       <div className="px-4 pb-2 flex items-center justify-between">
@@ -106,7 +105,8 @@ function SidebarContent() {
             focusedCanvasId?.startsWith(node.block.id) ?? false;
           const itemExpanded = isExpanded(itemId);
           const isBeingDragged = dragItemId === itemId;
-          const isDropBefore = overItemId === itemId && overPosition === "before";
+          const isDropBefore =
+            overItemId === itemId && overPosition === "before";
           const isDropAfter = overItemId === itemId && overPosition === "after";
 
           // Depth-based indent: 8px base + 16px per level
@@ -128,7 +128,9 @@ function SidebarContent() {
                 id={node.block.id}
                 className={`outline-none group focus:outline-none relative ${isBeingDragged ? "opacity-30" : ""}`}
               >
-                {isDropBefore && <div className="absolute top-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full z-10" />}
+                {isDropBefore && (
+                  <div className="absolute top-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full z-10" />
+                )}
                 <div
                   data-drag-handle
                   className={`
@@ -155,10 +157,11 @@ function SidebarContent() {
                   <span
                     className={`
                     truncate
-                    ${node.depth === 0
+                    ${
+                      node.depth === 0
                         ? "text-[11px] font-bold uppercase tracking-widest"
                         : "text-[11px] font-semibold tracking-wide"
-                      }
+                    }
                   `}
                   >
                     {node.block.label}
@@ -167,7 +170,9 @@ function SidebarContent() {
                     {node.block.type}
                   </span>
                 </div>
-                {isDropAfter && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full z-10" />}
+                {isDropAfter && (
+                  <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full z-10" />
+                )}
               </BuilderSidebarUI.Item>
             );
           }
@@ -179,7 +184,9 @@ function SidebarContent() {
               id={node.block.id}
               className={`outline-none group focus:outline-none relative ${isBeingDragged ? "opacity-30" : ""}`}
             >
-              {isDropBefore && <div className="absolute top-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full z-10" />}
+              {isDropBefore && (
+                <div className="absolute top-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full z-10" />
+              )}
               <div
                 className={`
                   relative flex items-center gap-2 py-2 pr-3 rounded-lg cursor-pointer
@@ -187,9 +194,10 @@ function SidebarContent() {
                   group-focus:ring-2 group-focus:ring-indigo-500/50 group-focus:border-indigo-400
                   group-aria-selected:bg-indigo-50 group-aria-selected:border-indigo-200 group-aria-selected:shadow-sm
                   ${depthBg}
-                  ${isCanvasActive
-                    ? "bg-white shadow-sm border-slate-200/60"
-                    : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
+                  ${
+                    isCanvasActive
+                      ? "bg-white shadow-sm border-slate-200/60"
+                      : "hover:bg-white/60 hover:border-slate-200/50 text-slate-600 hover:text-slate-800"
                   }
                 `}
                 style={{ paddingLeft: `${indent}px` }}
@@ -215,10 +223,11 @@ function SidebarContent() {
                   className={`
                   w-10 h-7 rounded border shrink-0 flex items-center justify-center
                   ml-1 cursor-grab active:cursor-grabbing
-                  ${isCanvasActive
+                  ${
+                    isCanvasActive
                       ? "bg-indigo-50 border-indigo-100"
                       : "bg-slate-100 border-slate-200 group-hover:bg-white"
-                    }
+                  }
                 `}
                 >
                   <div className="flex flex-col gap-0.5 w-6">
@@ -246,7 +255,9 @@ function SidebarContent() {
                   </span>
                 </div>
               </div>
-              {isDropAfter && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full z-10" />}
+              {isDropAfter && (
+                <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full z-10" />
+              )}
             </BuilderSidebarUI.Item>
           );
         })}
@@ -305,9 +316,10 @@ function AddBlockButton() {
         onClick={() => setOpen(!open)}
         className={`
           w-6 h-6 flex items-center justify-center rounded-md transition-colors shrink-0
-          ${open
-            ? "bg-indigo-100 text-indigo-600"
-            : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
+          ${
+            open
+              ? "bg-indigo-100 text-indigo-600"
+              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
           }
         `}
         title="블록 추가"

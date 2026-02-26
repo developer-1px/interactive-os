@@ -22,13 +22,17 @@ import {
 import { beforeEach, describe, expect, it } from "vitest";
 import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 import { findInTree } from "@/os/collection/treeUtils";
+import { TREE_TEST_BLOCKS } from "../fixtures/treeTestBlocks";
 
 describe("tree-aware collection operations", () => {
   let app: ReturnType<typeof BuilderApp.create>;
 
   beforeEach(() => {
     _resetClipboardStore();
-    app = BuilderApp.create({ withOS: true });
+    app = BuilderApp.create({
+      withOS: true,
+      data: { blocks: structuredClone(TREE_TEST_BLOCKS) },
+    } as any);
   });
 
   // ═══════════════════════════════════════════════════════════════

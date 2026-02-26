@@ -116,14 +116,22 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       [externalOverlayId],
     );
 
+    // Overlay open command — registered as onActivate on FocusItem
+    // so headless simulateClick → OS_ACTIVATE → onActivate → OS_OVERLAY_OPEN
+    const overlayOpenCmd =
+      overlayRole && overlayId
+        ? OS_OVERLAY_OPEN({ id: overlayId, type: overlayRole })
+        : null;
+
     const handleClick = (e: ReactMouseEvent) => {
       if (!allowPropagation) {
         e.stopPropagation();
       }
 
-      // If overlay role is set, open the overlay
-      if (overlayRole && overlayId) {
-        os.dispatch(OS_OVERLAY_OPEN({ id: overlayId, type: overlayRole }));
+      // Browser path: dispatch overlay open on click
+      // (headless uses FocusItem.onActivate instead — both paths are valid)
+      if (overlayOpenCmd) {
+        os.dispatch(overlayOpenCmd);
       }
 
       // Also dispatch onActivate command if provided
@@ -174,10 +182,20 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
 
     // ── Merge into child element ──────────────────────────────────
     // Trigger *is* a FocusItem if an ID is provided.
+    // When overlay role is set, register OS_OVERLAY_OPEN as onActivate
+    // → headless simulateClick → OS_ACTIVATE → onActivate → overlay opens
     if (id) {
+      // Merge overlay command with user's onActivate
+      const activateCmd = overlayOpenCmd ?? onActivate ?? undefined;
       return (
         <>
-          <FocusItem id={id} asChild={true} ref={ref} {...(baseProps as any)}>
+          <FocusItem
+            id={id}
+            asChild={true}
+            ref={ref}
+            onActivate={activateCmd}
+            {...(baseProps as any)}
+          >
             {isValidElement(triggerContent) ? (
               triggerContent
             ) : (

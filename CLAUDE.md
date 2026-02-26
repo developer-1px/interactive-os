@@ -117,7 +117,7 @@
 |------|----------|------|
 | **Apps** | **FSD** (Feature-Sliced Design) | `app.ts` → `widgets/` → `features/` → `entities/` → `shared/` |
 | **OS** | **파이프라인** (번호 접두사) | `1-listeners/` → … → `6-components/` |
-| **Docs** | **토폴로지** | `official/` (살아있는 문서) + `archive/` (죽은 문서) + `2-area/` (인큐베이터) |
+| **Docs** | **토폴로지** | `official/` (공식 기술 문서) + `2-area/` (실천 지혜) + `3-resource/` (외부 지식) + `archive/` (죽은 문서) |
 
 ### 문서 토폴로지 — 살아있는 문서 vs 죽은 문서
 
@@ -126,9 +126,10 @@
 
 | 계층 | 역할 | 규칙 |
 |------|------|------|
-| `official/` | 공식 지식의 인지 지도 | 개념 단위, 덮어쓰기, 날짜 없음, 소스코드 토폴로지와 **양방향 동형** |
-| `CLAUDE.md` | 헌법 | 강제 노출 경로, 매 세션 읽힘, 시점 독립 원칙만 |
-| `2-area/` | 인큐베이터 | official로 아직 졸업 못 한 지식 (meta, cross-cutting) |
+| `official/` | 공식 기술 문서 — 퍼블리싱용 | 개념 단위, 덮어쓰기, 날짜 없음, 소스코드 토폴로지와 **양방향 동형** |
+| `CLAUDE.md` | 헌법 — "하라" | 강제 노출 경로, 매 세션 읽힘, 시점 독립 원칙만 |
+| `2-area/praxis/` | 실천 지혜 — "왜 이렇게 하게 됐는가" | Living Document, 회고·discussion·판단교정에서 축적, 계속 갱신 |
+| `3-resource/` | 외부 지식 — "세상에 이런 게 있다" | 불변 참고문헌 (W3C spec, 프레임워크 정의 등) |
 | `archive/YYYY/MM/WNN/` | 매장 | 분류 없이 주차별 flat, 정리 비용 0 |
 
 - **개발 중 문서**(BOARD, discussions, devnote)는 에이전트의 세션 간 작업 기억으로 필수 — 생산량을 줄이지 않는다.

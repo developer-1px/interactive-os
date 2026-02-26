@@ -1,7 +1,7 @@
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { Item } from "@os/6-components/primitives/Item.tsx";
-import { Dialog } from "@os/6-components/radox/Dialog.tsx";
+import { Dialog } from "@os/6-components/radix/Dialog.tsx";
 import { useRef } from "react";
 import { TestBox } from "../../shared/TestLayout";
 

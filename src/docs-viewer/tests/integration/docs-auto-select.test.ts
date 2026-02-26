@@ -8,44 +8,52 @@
  */
 
 import { createOsPage, type OsPage } from "@os/createOsPage";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  onTestFailed,
+  vi,
+} from "vitest";
 import { DocsApp, selectDoc } from "@/docs-viewer/app";
-import { afterEach, beforeEach, describe, expect, it, vi, onTestFailed } from "vitest";
 
 describe("T7: DocsViewer — auto-select via selectDoc command", () => {
-    let page: OsPage;
+  let page: OsPage;
 
-    beforeEach(() => {
-        page = createOsPage();
-        page.goto("docs-auto-select", {
-            role: "list",
-            items: ["docs/first.md", "docs/second.md"],
-        });
-
-        // Register selectDoc on test kernel
-        page.kernel.register(selectDoc);
-
-        onTestFailed(() => page.dumpDiagnostics());
+  beforeEach(() => {
+    page = createOsPage();
+    page.goto("docs-auto-select", {
+      role: "list",
+      items: ["docs/first.md", "docs/second.md"],
     });
 
-    afterEach(() => {
-        page.cleanup();
-    });
+    // Register selectDoc on test kernel
+    page.kernel.register(selectDoc);
 
-    it("#1 selectDoc command dispatches successfully", () => {
-        page.kernel.dispatch(selectDoc({ id: "docs/first.md" }));
+    onTestFailed(() => page.dumpDiagnostics());
+  });
 
-        const lastTx = page.kernel.inspector.getLastTransaction();
-        expect(lastTx).not.toBeNull();
-        expect(lastTx!.command.type).toBe("SELECT_DOC");
-    });
+  afterEach(() => {
+    page.cleanup();
+  });
 
-    it("#2 selectDoc changes docsViewer activePath in state", () => {
-        page.kernel.dispatch(selectDoc({ id: "docs/first.md" }));
+  it("#1 selectDoc command dispatches successfully", () => {
+    page.kernel.dispatch(selectDoc({ id: "docs/first.md" }));
 
-        const lastTx = page.kernel.inspector.getLastTransaction();
-        const stateAfter = (lastTx as any)?.stateAfter;
+    const lastTx = page.kernel.inspector.getLastTransaction();
+    expect(lastTx).not.toBeNull();
+    expect(lastTx!.command.type).toBe("SELECT_DOC");
+  });
 
-        // The state should contain the docs-viewer app slice with activePath set
-        expect(stateAfter).toBeDefined();
-    });
+  it("#2 selectDoc changes docsViewer activePath in state", () => {
+    page.kernel.dispatch(selectDoc({ id: "docs/first.md" }));
+
+    const lastTx = page.kernel.inspector.getLastTransaction();
+    const stateAfter = (lastTx as any)?.stateAfter;
+
+    // The state should contain the docs-viewer app slice with activePath set
+    expect(stateAfter).toBeDefined();
+  });
 });

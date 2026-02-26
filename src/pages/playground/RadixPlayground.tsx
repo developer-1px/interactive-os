@@ -11,7 +11,7 @@ import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
 import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { Item } from "@os/6-components/primitives/Item.tsx";
-import { Dialog } from "@os/6-components/radox/Dialog.tsx";
+import { Dialog } from "@os/6-components/radix/Dialog.tsx";
 
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runDialogSpec from "./tests/e2e/dialog.spec.ts";

@@ -9,8 +9,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { gotoList, page, setupTodoPage } from "./todo-helpers";
 import { FieldRegistry } from "@/os/6-components/field/FieldRegistry";
+import { gotoList, page, setupTodoPage } from "./todo-helpers";
 
 setupTodoPage();
 

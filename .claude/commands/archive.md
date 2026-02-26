@@ -12,7 +12,7 @@ description: 프로젝트 완료 시 지식을 official/rules로 환류하고, �
 ```
 살아있는 문서 (덮어쓰기, 지형 기반):
   official/          ← 공식 지식의 인지 지도 (소스코드 토폴로지와 동형)
-  CLAUDE.md    ← 헌법 (강제 노출, 매 세션 읽힘)
+  .agent/rules.md    ← 헌법 (강제 노출, 매 세션 읽힘)
 
 성숙 중인 문서 (인큐베이터):
   2-area/            ← official로 아직 졸업 못 한 것 (meta, cross-cutting)
@@ -29,6 +29,11 @@ description: 프로젝트 완료 시 지식을 official/rules로 환류하고, �
 `/archive`의 역할: **프로젝트의 지식을 official/rules로 추출 → 나머지는 archive/주차에 매장.**
 
 ### 프로세스
+
+#### 0. `/retrospect` 필수 게이트
+
+⛔ **회고 없이 아카이브 금지.** `/retrospect`를 먼저 실행하여 KPT(Keep/Problem/Try)를 기록한다.
+이미 이 세션에서 `/retrospect`를 실행했으면 skip.
 
 #### 1. 프로젝트 식별
 
@@ -71,7 +76,7 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 
 **a) official 갱신 (살아있는 문서)**
 - 프로젝트에서 확정된 스펙/동작이 있으면 → `official/` 해당 섹션 **덮어쓰기**
-- 새 원칙이 발견됐으면 → `CLAUDE.md`에 추가
+- 새 원칙이 발견됐으면 → `.agent/rules.md`에 추가
   - ⚠️ **Abstraction Gate**: 구체적 구현(변수명, 커맨드명)이 아닌 **판단 기준/원칙**으로 추상화.
     LLM이 이미 아는 전문 용어로 대체한다. "다른 프로젝트에서도 통하는가?" 테스트.
 - 핵심: official은 **개념 단위**로 존재, 날짜 없음, 코드 토폴로지와 동형
@@ -131,7 +136,7 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📘 official 갱신: N개
    - official/os/SPEC.md (갱신)
-   - CLAUDE.md (원칙 추가)
+   - .agent/rules.md (원칙 추가)
 📝 Area 잔류: N개
    - 2-area/80-cross-cutting/... (인큐베이터)
 📦 Archive 매장: N개

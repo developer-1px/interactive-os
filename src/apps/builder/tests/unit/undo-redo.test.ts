@@ -70,15 +70,23 @@ describe("builder undo/redo", () => {
     const original = hero.fields["service-name"];
 
     app.dispatch(
-      updateField({ sectionId: "ge-hero", field: "service-name", value: "Changed!" }),
+      updateField({
+        sectionId: "ge-hero",
+        field: "service-name",
+        value: "Changed!",
+      }),
     );
     expect(
-      app.state.data.blocks.find((b) => b.id === "ge-hero")!.fields["service-name"],
+      app.state.data.blocks.find((b) => b.id === "ge-hero")!.fields[
+        "service-name"
+      ],
     ).toBe("Changed!");
 
     app.dispatch(undoCommand());
     expect(
-      app.state.data.blocks.find((b) => b.id === "ge-hero")!.fields["service-name"],
+      app.state.data.blocks.find((b) => b.id === "ge-hero")!.fields[
+        "service-name"
+      ],
     ).toBe(original);
   });
 
@@ -101,7 +109,11 @@ describe("builder undo/redo", () => {
 
     // New action clears redo stack
     app.dispatch(
-      updateField({ sectionId: "ge-hero", field: "service-name", value: "New" }),
+      updateField({
+        sectionId: "ge-hero",
+        field: "service-name",
+        value: "New",
+      }),
     );
     expect(app.evaluate(canRedo)).toBe(false);
   });

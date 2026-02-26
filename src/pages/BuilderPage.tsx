@@ -5,8 +5,8 @@ import {
   BuilderCanvasUI,
   loadPagePreset,
 } from "@/apps/builder/app";
-import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 import { BuilderCursor } from "@/apps/builder/BuilderCursor";
+import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 import { PAGE_PRESETS } from "@/apps/builder/presets/pages";
 // @ts-expect-error — spec-wrapper plugin transforms at build time
 import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
@@ -96,8 +96,6 @@ export default function BuilderPage() {
     </HighlightContext.Provider>
   );
 }
-
-
 
 function SectionRenderer() {
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);

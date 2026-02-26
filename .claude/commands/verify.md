@@ -2,7 +2,6 @@
 description: 검증 게이트. tsc, lint, unit, e2e, build를 순차 실행하여 코드 안정성을 확인한다.
 ---
 
-
 ## /verify — 검증 게이트
 
 > **목적**: 코드 변경 후 시스템 안정성을 확인하는 기계적 게이트.
@@ -32,11 +31,18 @@ npx vitest run 2>&1 | tail -30
 - all pass → 다음 게이트
 - fail → 실패한 테스트 목록을 보고하고 멈춘다
 
-#### Gate 4: E2E Smoke (해당 시)
-```bash
-npx playwright test --grep @smoke 2>&1 | tail -30
-```
-- smoke가 없거나 E2E 설정이 없으면 스킵
+#### Gate 4: Bind Smoke (해당 시)
+
+> "연결했다"와 "연결이 동작한다"는 다른 증명이다.
+
+이번 변경에서 새로 bind된 OS 프리미티브가 있으면:
+
+1. **경로 나열**: bind에서 연결한 콜백 → 커맨드 → OS dispatch 경로를 나열
+2. **Headless 검증**: OS 커맨드를 dispatch하여 상태 변경 확인 (vitest 또는 인라인)
+3. **브라우저 확인** (headless 불가 시): dev server에서 기능 실행 + 콘솔 에러 확인
+4. **headless 불가 사유** → OS gap 후보로 기록 (`/audit`에서 분류)
+
+bind 변경이 없으면 스킵.
 
 #### Gate 5: Build
 ```bash

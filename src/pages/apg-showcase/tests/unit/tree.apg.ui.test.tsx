@@ -4,7 +4,7 @@ import { produce } from "immer";
 import { act } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { KeyboardListener } from "@/os/1-listeners/keyboard/KeyboardListener";
-import { MouseListener } from "@/os/1-listeners/mouse/MouseListener";
+import { PointerListener } from "@/os/1-listeners/pointer/PointerListener";
 import { OS_FOCUS } from "@/os/3-commands/focus";
 import { os } from "@/os/kernel";
 import { TreePattern } from "../../patterns/TreePattern";
@@ -101,7 +101,7 @@ describe("TreePattern (APG Showcase) - E2E", () => {
     render(
       <>
         <KeyboardListener />
-        <MouseListener />
+        <PointerListener />
         <TreePattern />
       </>,
     );

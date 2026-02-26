@@ -63,6 +63,7 @@
 4. **증명 없는 통과는 통과가 아니다.** 빌드가 됐다는 건 안 깨졌다는 증거가 아니다. 자동화된 검증만 증거다. → `/fix`
 5. **빌드 통과 ≠ 런타임 정상.** `vite build`(Rollup)와 dev 서버(esbuild)는 모듈 해석이 다르다. type erasure, export 처리 차이로 빌드는 통과해도 브라우저에서 깨질 수 있다. E2E Smoke가 진짜 검증이다. → `/verify`
 6. **안 쓰는 테스트는 정리한다.** 죽은 테스트는 거짓 안전감을 준다. 동작하지 않는 증명은 증명이 아니다. → `/cleanup`, `/review`
+7. **테스트 도구는 대상에 따라 다르다.** `createOsPage()` = OS 커널 계약 테스트 (APG, navigation, dismiss). `createPage(App)` = 앱 통합 테스트 (Builder, Todo). 앱 기능을 `createOsPage`로 테스트하면 커널만 검증되어 브라우저 동작을 보증하지 못한다 (거짓 GREEN). 앱 통합 테스트에서 `dispatch()` 직접 호출 금지 — `click()`, `keyboard.press()`만 허용. → `/red`
 7. **`as any`는 해결이 아니라 부채다.** 타입 에러를 `as any`로 억제하면 에러 카운트는 줄지만 cast 카운트가 늘고, 나중에 다시 되돌려야 한다. 타입 에러에 대한 올바른 분류: ① 진짜 수정 (타입을 맞춘다) ② skip (프로덕션 타입 설계 변경이 필요하다 → 지금은 안 건든다). `as any`로 메우는 ③번 선택지는 없다.
 8. **리팩토링은 측정 가능한 지표가 단조 개선될 때만 한다.** cast 수, import 수, 의존 방향 수, 코드 줄 수 — 하나 이상이 strictly 개선되고, 나머지가 악화되지 않아야 한다. 등가 교환이면 하지 않는다. → `/doubt`
 9. **OS 코드는 DOM을 직접 조작하지 않는다.** `document.querySelector`, `.click()`, `.focus()` 등의 직접 DOM 접근은 3-commands뿐 아니라 **OS 전체**(6-components 포함)에서 금지. 기존 메커니즘으로 해결할 수 없으면 **우회하지 말고 새 메커니즘을 설계**한다. "기존 기능이 없다 → DOM 직접 접근"은 금지 분기. "기존 기능이 없다 → OS 기능 추가"가 올바른 분기. DOM 데이터가 필요하면 `ctx.inject()`나 kernel state를 사용한다. ESLint `pipeline/no-dom-in-commands`가 commands 레이어를 자동 차단한다.
@@ -120,6 +121,20 @@
 | **Apps** | **FSD** (Feature-Sliced Design) | `app.ts` → `widgets/` → `features/` → `entities/` → `shared/` |
 | **OS** | **파이프라인** (번호 접두사) | `1-listeners/` → … → `6-components/` |
 | **Docs** | **토폴로지** | `official/` (살아있는 문서) + `archive/` (죽은 문서) + `2-area/` (인큐베이터) |
+
+### 파이프라인 동사 — 1-listeners 법
+
+> **하나의 동사 = 하나의 경계.** 동사가 겹치면 에이전트가 "이 함수는 어느 단계?"를 추론해야 한다.
+
+| 동사 | 경계 | 입력 → 출력 | 순수 | 예시 |
+|------|------|------------|------|------|
+| `sense` | DOM → SenseData | `HTMLElement, Event` → `MouseDownSense` | ❌ (DOM 읽기) | `senseMouseDown()` |
+| `extract` | SenseData → ResolveInput | `MouseDownSense` → `MouseInput` | ✅ | `extractMouseInput()` |
+| `resolve` | ResolveInput → Commands | `MouseInput` → `ResolveResult` | ✅ | `resolveMouse()` |
+| `dispatch` | Commands → SideEffect | `ResolveResult` → `os.dispatch()` | ❌ (부수효과) | Listener 내부 |
+
+- `sense`와 `extract`는 복잡도가 낮으면 하나로 합칠 수 있다 (예: `senseKeyboard` → 직접 `KeyboardInput` 반환).
+- `resolve`는 **반드시** input→command 판단에만 사용한다. sense→input 변환에 `resolve`를 쓰지 않는다.
 
 ### 문서 토폴로지 — 살아있는 문서 vs 죽은 문서
 

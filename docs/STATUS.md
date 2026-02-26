@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-25 01:11
+> Last updated: 2026-02-26 16:17
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -12,8 +12,7 @@
 
 **builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
 
-
-**normalized-collection** — OS 데이터 모델을 `{ entities, order }` 정규화 포맷으로 통일. Heavy.
+**dropdown-dismiss** — OG-001 해소. outsideClick 런타임 + LocaleSwitcher 리팩토링. Light.
 
 ---
 
@@ -23,20 +22,19 @@
 |---------|-------|---------------|--------|
 
 | builder-v2 | T5 DnD Done, OS gap 회고 완료 | 02-26 | 🔥 Focus |
+| dropdown-dismiss | Scaffold, T1~T3 | 02-26 | 🔥 Focus |
+| unified-pointer-listener | ✅ T1~T6 Done, audit+doubt 통과 | 02-26 | ✅ Completed |
+| sense-purity | ✅ T1~T7 Done, audit+doubt+retrospect 완료 | 02-26 | ✅ Completed |
 | content-edit-mode | T1~T4 Done, T5~T7 FSM v3 원자 전이 | 02-24 | 🟢 Active |
 | dev-pipeline | T0 Done (/red /green 생성), T1~T3 | 02-24 | 🟢 Active |
-| normalized-collection | Scaffold 완료, T1~T6 | 02-24 | 🔥 Focus |
+| normalized-collection | ✅ T1~T7 Done, audit+doubt 통과 | 02-26 | ✅ Completed |
 | cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
-| todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast) | 02-22 | 🟢 Active |
+| todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast). ⚠️ 1-project/ 폴더 없음, re-scaffold 필요 | 02-22 | 🟢 Active |
 | tab-state | Scaffold, /audit에서 발견. T1 Red 대기 | 02-24 | 🟢 Active |
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-property-schema | Scaffold, T1~T5 | 02-24 | 🟢 Active |
 | tree-click-defaults | Scaffold, T1~T3 | 02-24 | 🟢 Active |
 | builder-i18n | Scaffold, T1~T4 (US-001) | 02-25 | 🟢 Active |
-| focus-single-path | T1 이중 경로 통합 설계 | 02-21 | 🟢 Active |
-| os-api-rename | T1 kernel→os rename | 02-20 | 🟢 Active |
-| builder-clipboard | T1 사이드바 clipboard | 02-20 | 🟡 Paused |
-| defineapp-unification | T1 타입 안전화 | 02-20 | 🟡 Paused |
 
 ---
 
@@ -44,6 +42,10 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| normalized-collection | 02-26 | ✅ archive/2026/02/W09 — NormalizedCollection 타입+helpers, tree-aware ops, view transforms. T1~T7. 109 tests GREEN |
+| unified-pointer-listener | 02-26 | ✅ archive/2026/02/W09 — Mouse+Drag→PointerListener 통합. OG-003 해결. +13 tests, 456줄 삭제, Gesture FSM |
+| sense-purity | 02-26 | ✅ archive/2026/02/W09 — T1~T7 Done. sense→extract→resolve 동사 법 제정, +13 tests, MouseListener+DragListener 삭제, rules.md 환류 |
+| area-praxis | 02-26 | ✅ archive/2026/02/W09 — Meta. 2-area/ 재정립 (인큐베이터→실천지혜). 21파일 분배 + 4 Living Documents + docs 전수검사 17파일 mv |
 | go-redesign | 02-25 | ✅ archive/2026/02/W09 — /go 4-Phase 재설계 + RUNBOOK.md 186줄 + /project 조정 |
 | field-headless-input | 02-25 | ✅ archive/2026/02/W09 — T1~T6 Done, 13 tests, official/os/why-field.md 갱신 |
 | decision-table-contract | 02-25 | ✅ archive/2026/02/W09 — Meta. 8열 결정 테이블 표준 + /red 워크플로우 통합. 템플릿+갭분석 완료 |
@@ -90,12 +92,9 @@
 
 ## 📥 Inbox
 
-- `docs/0-inbox/2026-0225-1728-[proposal]-tobe-workflow-flowchart.md` (TOBE 워크플로우 흐름도 — 전체 순서·분기·Gate, /discussion 6갈래 + /go G2 신규 분기 + SRP 매핑)
-  - Related Project: dev-pipeline
-  - Suggested Action: ASIS/TOBE proposal과 함께 `/project`로 전환
-- `docs/0-inbox/2026-0225-1724-[proposal]-product-pipeline-asis-tobe.md` (Product Pipeline ASIS→TOBE — 6개 MECE 변경: /stories 신설, /prd→/spec, DT 이관, /project 축소, /red 분리, Product 구조 표준화)
-  - Related Project: dev-pipeline
-  - Suggested Action: `/project`로 전환하여 Phase 1부터 실행
+- `docs/0-inbox/2026-0226-1800-[analysis]-working-methodology-redteam.md` ("우리가 일하는 방식" Red Team/Blue Team — 12건 공격, 3건 🔴 인정, 4건 🟡 부분, 5건 🟢 방어)
+  - Related Project: 전체 (메타-워크플로우)
+  - Suggested Action: RT-02(규칙 복제), RT-09(루프 종료), RT-11(/self 미구현) 즉시 개선 → `/discussion` or `/project`
 - `docs/0-inbox/2026-0225-1714-[research]-user-story-format-sample.md` (User Story 표준 포맷 — Connextra+AC+INVEST, Visual CMS 샘플 US-001~003)
   - Related Project: 6-products/builder (Visual CMS)
   - Suggested Action: `/stories` 워크플로우 설계의 산출물 포맷 기준으로 사용
@@ -111,9 +110,6 @@
 - `docs/0-inbox/2026-0224-1921-[proposal]-pipeline-verification-table.md` (파이프라인 검증 표 — OS 파이프라인 6열 = 테스트 표 스키마, Todo 앱 51개 시나리오 전수 열거)
   - Related Project: dev-pipeline
   - Suggested Action: `/discussion` 결론 후 dev-pipeline에 통합, 워크플로우 Step으로 전환
-- `docs/0-inbox/2026-0224-0320-[report]-why-interaction-os.md` (왜 Interaction OS를 만드는가 — 프로젝트 철학 아티클)
-  - Related Project: 전체
-  - Suggested Action: README 또는 외부 소개 자료로 발전
 
 ---
 
@@ -121,16 +117,22 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 3 |
-| Active Projects (total) | 11 (6 Active + 3 Focus + 2 Paused) |
-| Completed (archived) | 39 |
-| Inbox items | 5 |
-| Backlog items | 9 |
+| Active Focus | 2 |
+| Active Projects (total) | 10 (7 Active + 2 Focus + 1 Paused) |
+| Completed (archived) | 43 |
+| Inbox items | 6 |
+| Backlog items | 12 |
 | Open issues | 0 |
 
 ---
 
-## 📝 Recent Changes (2026-02-25)
+## 📝 Recent Changes (2026-02-26)
+
+- ✅ `sense-purity` Light 프로젝트 완료 — sense 함수 순수화. T1~T7 (워크플로우 갱신, DOM 인라인, extractMouseInput/extractDropPosition 순수화, senseClick 삭제, MouseListener+DragListener 450줄 삭제, 파이프라인 동사 법 제정). +13 tests (58→71). audit OG-006/007 발견. rules.md `sense→extract→resolve` 법 추가.
+- ✅ `area-praxis` Meta 프로젝트 완료 — 2-area/ 재정립 (인큐베이터→실천지혜). 21파일 분배 (official 14, resource 1, archive 3, keep 3). 4 Living Documents 생성 (26개 교훈). docs 전수검사 17파일 mv. CLAUDE.md 토폴로지 갱신.
+
+<details>
+<summary>📝 Previous Changes (2026-02-25)</summary>
 
 - ✅ `field-headless-input` Heavy 프로젝트 완료 — AppPage에 `keyboard.type()`/`fill()` 추가, Field Enter를 OS ZIFT 파이프라인으로 올림. OS_FIELD_COMMIT 동기 dispatch (kernel return key). 13 new tests (4 pipeline proof + 9 user journey). ListView `fieldType="inline"` 버그 수정. `clipboardWrite` headless no-op.
 
@@ -139,6 +141,8 @@
 - ✅ `decision-table-contract` **완료** (Meta) — 8열 결정 테이블 표준 확정. `/red` Step 1 재정렬(A~F), 완료 기준 MECE 5항목, Todo 갭분석(23/23 매핑, Home/End/F2 누락 발견). `/go` Meta 분기 추가. → archive/2026/02/W09
 
 - 🆕 `app-modules` Heavy 프로젝트 생성 — Discussion에서 발견: "삭제 시 undo 토스트" → OS App Module System으로 발전. `defineApp({ modules: [history(), persistence(), deleteToast()] })` 배열 기반 모듈 설치. ESLint/Vite plugin 모델. 기존 history/persistence boolean config → 모듈로 리팩토링.
+
+</details>
 
 <details>
 <summary>📝 Previous Changes (2026-02-24)</summary>

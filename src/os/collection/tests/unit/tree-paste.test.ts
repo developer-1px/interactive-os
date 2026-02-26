@@ -12,13 +12,17 @@ import type { Block } from "@apps/builder/model/appState";
 import { beforeEach, describe, expect, it } from "vitest";
 import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
 import { findInTree } from "@/os/collection/treeUtils";
+import { TREE_TEST_BLOCKS } from "../fixtures/treeTestBlocks";
 
 describe("tree-aware paste", () => {
   let app: ReturnType<typeof BuilderApp.create>;
 
   beforeEach(() => {
     _resetClipboardStore();
-    app = BuilderApp.create({ withOS: true });
+    app = BuilderApp.create({
+      withOS: true,
+      data: { blocks: structuredClone(TREE_TEST_BLOCKS) },
+    } as any);
   });
 
   function blocks(): Block[] {
@@ -69,8 +73,8 @@ describe("tree-aware paste", () => {
     // Should be a new top-level block after ncp-news
     const topIds = app.state.data.blocks.map((b) => b.id);
     expect(topIds.length).toBe(7); // 6 original + 1 pasted
-    // Pasted after ncp-news (index 1), so it's at index 2
-    expect(app.state.data.blocks[2]!.type).toBe("hero");
+    // Pasted after ncp-news (index 2), so it's at index 3
+    expect(app.state.data.blocks[3]!.type).toBe("hero");
   });
 
   it("accept mismatch: section pasted on tabs container goes as sibling", () => {

@@ -12,36 +12,36 @@ import { createOsPage, type OsPage } from "@os/createOsPage";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("T2: Auto-diagnostics on test failure", () => {
-    let page: OsPage;
-    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => { });
+  let page: OsPage;
+  const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    beforeEach(() => {
-        consoleSpy.mockClear();
-        page = createOsPage();
-        page.goto("test-zone", { role: "list", focusedItemId: null });
-    });
+  beforeEach(() => {
+    consoleSpy.mockClear();
+    page = createOsPage();
+    page.goto("test-zone", { role: "list", focusedItemId: null });
+  });
 
-    afterEach(() => {
-        page.cleanup();
-    });
+  afterEach(() => {
+    page.cleanup();
+  });
 
-    it("#1 page.dumpDiagnostics() outputs transaction log", () => {
-        // Dispatch a command to create a transaction
-        page.keyboard.press("ArrowDown");
+  it("#1 page.dumpDiagnostics() outputs transaction log", () => {
+    // Dispatch a command to create a transaction
+    page.keyboard.press("ArrowDown");
 
-        // Manual call — this is what onTestFailed would call
-        page.dumpDiagnostics();
+    // Manual call — this is what onTestFailed would call
+    page.dumpDiagnostics();
 
-        expect(consoleSpy).toHaveBeenCalled();
-        const output = consoleSpy.mock.calls.map((c) => c.join(" ")).join("\n");
-        expect(output).toContain("OS_NAVIGATE");
-    });
+    expect(consoleSpy).toHaveBeenCalled();
+    const output = consoleSpy.mock.calls.map((c) => c.join(" ")).join("\n");
+    expect(output).toContain("OS_NAVIGATE");
+  });
 
-    it("#2 dumpDiagnostics includes scope chain", () => {
-        page.keyboard.press("ArrowDown");
-        page.dumpDiagnostics();
+  it("#2 dumpDiagnostics includes scope chain", () => {
+    page.keyboard.press("ArrowDown");
+    page.dumpDiagnostics();
 
-        const output = consoleSpy.mock.calls.map((c) => c.join(" ")).join("\n");
-        expect(output).toMatch(/scope/i);
-    });
+    const output = consoleSpy.mock.calls.map((c) => c.join(" ")).join("\n");
+    expect(output).toMatch(/scope/i);
+  });
 });

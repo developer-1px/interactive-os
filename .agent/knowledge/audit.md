@@ -49,14 +49,17 @@
 
 | ID | 패턴 | 상태 | 발견일 |
 |----|------|------|--------|
-| OG-001 | Dropdown (listbox) Zone — 열기/닫기/Escape/Arrow/backdrop 통합 | 🟡 미해결 | 2026-02-25 |
+| OG-001 | Dropdown (listbox) Zone — 열기/닫기/Escape/Arrow/backdrop 통합 | ✅ 해결 (dropdown-dismiss: Trigger+Portal 패턴. 새 프리미티브 불필요) | 2026-02-25 |
 | OG-002 | `onReorder: void` — 명령형 시그니처. 다른 콜백은 선언형(BaseCommand 리턴) | ✅ 해결 | 2026-02-26 |
-| OG-003 | MouseListener + DragListener 충돌 — 같은 물리 제스처를 경쟁 처리 | 🟡 미해결 | 2026-02-26 |
+| OG-003 | MouseListener + DragListener 충돌 — 같은 물리 제스처를 경쟁 처리 | ✅ 해결 (unified-pointer-listener) | 2026-02-26 |
 | OG-004 | `data-drag-handle` DOM convention — OS가 자동 주입하지 않음. 앱이 수동 부착 | 🟡 미해결 | 2026-02-26 |
 | OG-005 | 커서 메타 등록 — 앱이 useEffect로 수동 mount/unmount 동기화. OS 미들웨어/ZoneRegistry 확장 필요 | 🟡 미해결 | 2026-02-26 |
+| OG-006 | drag cursor/userSelect — PointerListener가 document.body.style 직접 조작. OS가 drag 상태에 따라 자동 관리해야 | 🟡 미해결 | 2026-02-26 |
+| OG-007 | zone element lookup — Listener가 `document.querySelector("[data-zone=...]")`로 zone DOM 탐색. ZoneRegistry에 element ref 제공 필요 | 🟡 미해결 | 2026-02-26 |
 
 > **주의**: OG-001 관련 패턴(드롭다운 onClick)은 OS 갭이므로 🔴로 분류하지 않는다.
 > **주의**: OG-003, OG-004 관련 패턴은 OS 갭이므로 🔴로 분류하지 않는다.
+> **주의**: OG-006, OG-007 관련 패턴은 OS 갭이므로 🔴로 분류하지 않는다.
 
 ---
 
@@ -69,6 +72,8 @@
 | `window.addEventListener` (OS 진입점) | OS 커널이 브라우저 이벤트를 받는 유일한 진입점 | `src/os/kernel.ts` |
 | 외부 라이브러리 ref/callback | 써드파티 API 요구사항 | leaflet, chart.js 등 |
 | `document.getElementById` (포커스 복구) | 브라우저 포커스 API 직접 호출 | 모달 dismiss 후 복구 |
+| `document.caretRangeFromPoint` (caret seeding) | 브라우저 caret API 직접 사용 필수 | PointerListener seedCaretFromPoint |
+| sense 함수 내 DOM 읽기 | sense 어댑터의 정당한 책임 — DOM→순수데이터 변환 | `senseMouse.ts` querySelector, getElementById |
 
 ---
 
@@ -96,6 +101,9 @@
 | DnD onReorder void | zone 콜백 명령형 시그니처 | 🟡 OS 갭 (OG-002) → ✅ 수정 | void 콜백은 앱이 os.dispatch 직접 호출 강제. 선언형으로 수정 | 2026-02-26 |
 | DnD BuilderApp.dispatch | 존재하지 않는 메소드 호출 | 🔴 LLM 실수 (OG-002 기인) | OS gap이 LLM 실수를 유발한 사례 | 2026-02-26 |
 | DnD e.preventDefault 충돌 | Listener 간 side-effect | 🟡 OS 갭 (OG-003) | Mouse+Drag 분리 구조의 한계 | 2026-02-26 |
+| DragListener.tsx dead code | 삭제 누락 | 🔴 LLM 실수 | PointerListener 대체 후 T6에서 MouseListener만 삭제, DragListener 누락 | 2026-02-26 |
+| PointerListener body.style | drag cursor/userSelect 직접 조작 | 🟡 OS 갭 (OG-006) | OS가 drag 상태를 시각화하는 메커니즘 부재 | 2026-02-26 |
+| PointerListener querySelector("[data-zone]") | zone element DOM 탐색 | 🟡 OS 갭 (OG-007) | ZoneRegistry에 element ref API 부재 | 2026-02-26 |
 
 ---
 
