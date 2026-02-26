@@ -82,7 +82,7 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
   });
 
   test("Scenario: 정적 아이템(필드) 복사 → 텍스트 값 복사 (PRD 1.1)", () => {
-    const app = createApp();
+    createApp();
 
     // ge-hero-service-name is a static field item inside ge-hero
     const result = canvasOnCopy({

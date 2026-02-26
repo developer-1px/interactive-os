@@ -526,10 +526,8 @@ describe("createCollectionZone — clipboard (OS-managed)", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("createCollectionZone — filtered getItems", () => {
-  let app: ReturnType<typeof EntityApp.create>;
-
   beforeEach(() => {
-    app = EntityApp.create({ withOS: true });
+    EntityApp.create({ withOS: true });
   });
 
   it("getItems returns only items matching the active filter", () => {

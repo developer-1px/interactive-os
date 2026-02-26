@@ -61,7 +61,7 @@ describe("AppPage: Navigation", () => {
     page.dispatch(addTodo({ text: "Beta" }));
     page.dispatch(addTodo({ text: "Charlie" }));
 
-    const _ids = page.state.data.todoOrder;
+
 
     // Navigate to the list zone
     page.goto("list");
@@ -78,7 +78,7 @@ describe("AppPage: Navigation", () => {
     page.dispatch(addTodo({ text: "Charlie" }));
 
     // Use visible (filtered) IDs — getItems applies config.filter
-    const _ids = selectVisibleTodoIds(page.state);
+    const ids = selectVisibleTodoIds(page.state);
     page.goto("list", { focusedItemId: ids[0] ?? null });
 
     page.keyboard.press("ArrowDown");
@@ -92,7 +92,7 @@ describe("AppPage: Navigation", () => {
     page.dispatch(addTodo({ text: "Alpha" }));
     page.dispatch(addTodo({ text: "Beta" }));
 
-    const _ids = selectVisibleTodoIds(page.state);
+    const ids = selectVisibleTodoIds(page.state);
     page.goto("list", { focusedItemId: ids[0] ?? null });
 
     // Focused item has tabIndex 0
@@ -113,7 +113,7 @@ describe("AppPage: Click", () => {
     page.dispatch(addTodo({ text: "Alpha" }));
     page.dispatch(addTodo({ text: "Beta" }));
 
-    const _ids = selectVisibleTodoIds(page.state);
+    const ids = selectVisibleTodoIds(page.state);
     page.goto("list", { focusedItemId: ids[0] ?? null });
 
     page.click(ids[1]!);
@@ -132,7 +132,7 @@ describe("AppPage: Full Stack Integration", () => {
     const page = createPage(TodoApp);
 
     page.dispatch(addTodo({ text: "Toggle me" }));
-    const _ids = selectVisibleTodoIds(page.state);
+    const ids = selectVisibleTodoIds(page.state);
     const id = ids[ids.length - 1]!; // last added
 
     page.goto("list", { focusedItemId: id });
@@ -147,7 +147,7 @@ describe("AppPage: Full Stack Integration", () => {
     const page = createPage(TodoApp);
 
     page.dispatch(addTodo({ text: "Edit me" }));
-    const _ids = selectVisibleTodoIds(page.state);
+    const ids = selectVisibleTodoIds(page.state);
     const id = ids[ids.length - 1]!;
 
     page.goto("list", { focusedItemId: id });
@@ -162,7 +162,7 @@ describe("AppPage: Full Stack Integration", () => {
     const page = createPage(TodoApp);
 
     page.dispatch(addTodo({ text: "Delete me" }));
-    const _ids = selectVisibleTodoIds(page.state);
+    const ids = selectVisibleTodoIds(page.state);
     const id = ids[ids.length - 1]!;
 
     page.goto("list", { focusedItemId: id });

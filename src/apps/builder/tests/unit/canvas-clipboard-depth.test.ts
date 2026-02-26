@@ -71,7 +71,7 @@ describe("Canvas clipboard: deeply-nested block (C3🆕 / V3🆕)", () => {
       (c) =>
         c &&
         app.dispatch(
-          c as ReturnType<typeof canvasOnCopy> extends infer R ? any : any,
+          c as any,
         ),
     );
 

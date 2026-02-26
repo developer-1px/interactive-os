@@ -4,22 +4,16 @@ import { useElementRect } from "@/hooks/useElementRect";
 
 // ── Mock ResizeObserver & MutationObserver ──
 
-let _roCallback: ResizeObserverCallback;
-let _moCallback: MutationCallback;
 
 class MockResizeObserver {
-  constructor(cb: ResizeObserverCallback) {
-    _roCallback = cb;
-  }
+  constructor(_cb: ResizeObserverCallback) { }
   observe = vi.fn();
   unobserve = vi.fn();
   disconnect = vi.fn();
 }
 
 class MockMutationObserver {
-  constructor(cb: MutationCallback) {
-    _moCallback = cb;
-  }
+  constructor(_cb: MutationCallback) { }
   observe = vi.fn();
   disconnect = vi.fn();
 }
