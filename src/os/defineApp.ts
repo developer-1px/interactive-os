@@ -114,6 +114,7 @@ export function defineApp<S>(
   const selectorNames = new Set<string>();
 
   // For test instance: track all flat handlers + when guards
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous handler storage requires any for contravariant P
   const flatHandlerRegistry = new Map<
     string,
     { handler: FlatHandler<S, any>; when?: Condition<S> }
@@ -301,13 +302,13 @@ export function defineApp<S>(
       commandOrConfig:
         | BaseCommand
         | CompoundTriggerConfig
-        | CommandFactory<any, any>,
+        | CommandFactory<string, unknown>,
     ) => {
       // ── CommandFactory (Dynamic Trigger) ──
       if (typeof commandOrConfig === "function") {
         return createDynamicTrigger(
           appId,
-          commandOrConfig as CommandFactory<any, any>,
+          commandOrConfig as CommandFactory<string, unknown>,
         );
       }
       // ── Simple trigger (BaseCommand has .type) ──
