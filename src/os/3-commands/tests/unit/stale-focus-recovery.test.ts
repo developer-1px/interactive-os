@@ -35,13 +35,13 @@ describe("Focus Stack — Stale Focus Recovery", () => {
     });
 
     // Overlay open → focus stack push
-    t.dispatch(t.OS_STACK_PUSH({}));
+    t.dispatch(t.OS_STACK_PUSH());
     t.setActiveZone("dialog", "ok-btn");
     t.setItems(["ok-btn", "cancel-btn"]);
 
     // Overlay close → focus stack pop (item "b" still exists)
     t.setItems(items.current);
-    t.dispatch(t.OS_STACK_POP({}));
+    t.dispatch(t.OS_STACK_POP());
 
     expect(t.focusedItemId()).toBe("b"); // restored correctly
     expect(t.activeZoneId()).toBe("list");
@@ -52,7 +52,7 @@ describe("Focus Stack — Stale Focus Recovery", () => {
     t.setActiveZone("list", "b");
 
     // Overlay open → focus stack push (items still contain "b", index=1)
-    t.dispatch(t.OS_STACK_PUSH({}));
+    t.dispatch(t.OS_STACK_PUSH());
     t.setActiveZone("dialog", "ok-btn");
 
     // App deletes "b" during dialog — update items for the list zone
@@ -64,7 +64,7 @@ describe("Focus Stack — Stale Focus Recovery", () => {
 
     // Overlay close → focus stack pop
     t.setItems(["a", "c", "d"]);
-    t.dispatch(t.OS_STACK_POP({}));
+    t.dispatch(t.OS_STACK_POP());
 
     // Focus should resolve to "c" (next neighbor at index 1), not "b"
     expect(t.focusedItemId()).toBe("c");
@@ -76,7 +76,7 @@ describe("Focus Stack — Stale Focus Recovery", () => {
     t.setActiveZone("list", "c");
 
     // Overlay open (items contain "c", index=2)
-    t.dispatch(t.OS_STACK_PUSH({}));
+    t.dispatch(t.OS_STACK_PUSH());
     t.setActiveZone("dialog", "ok-btn");
 
     // Delete "c" (last item)
@@ -87,7 +87,7 @@ describe("Focus Stack — Stale Focus Recovery", () => {
     });
 
     t.setItems(["a", "b"]);
-    t.dispatch(t.OS_STACK_POP({}));
+    t.dispatch(t.OS_STACK_POP());
 
     // index=2, items=["a","b"] → clamped to index 1 → "b"
     expect(t.focusedItemId()).toBe("b");
@@ -104,13 +104,13 @@ describe("Focus Stack — Stale Focus Recovery", () => {
       getItems: () => items.current,
     });
 
-    t.dispatch(t.OS_STACK_PUSH({}));
+    t.dispatch(t.OS_STACK_PUSH());
     t.setActiveZone("dialog", "ok-btn");
 
     // Delete all items during dialog
     items.current = [];
     t.setItems([]);
-    t.dispatch(t.OS_STACK_POP({}));
+    t.dispatch(t.OS_STACK_POP());
 
     expect(t.focusedItemId()).toBeNull();
   });
@@ -120,16 +120,13 @@ describe("Focus Stack — Stale Focus Recovery", () => {
     t.setActiveZone("list", "b");
 
     // Remove getItems to simulate legacy zone (no item awareness)
-    const entry = ZoneRegistry.get("list")!;
-    ZoneRegistry.register("list", {
-      ...entry,
-      getItems: undefined,
-    });
+    const { getItems: _, ...rest } = ZoneRegistry.get("list")!;
+    ZoneRegistry.register("list", rest);
 
-    t.dispatch(t.OS_STACK_PUSH({}));
+    t.dispatch(t.OS_STACK_PUSH());
     t.setActiveZone("dialog", "ok-btn");
 
-    t.dispatch(t.OS_STACK_POP({}));
+    t.dispatch(t.OS_STACK_POP());
 
     // Still restores "b" even if it might be stale (legacy)
     expect(t.focusedItemId()).toBe("b");

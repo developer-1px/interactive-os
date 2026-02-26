@@ -228,7 +228,7 @@ export function getRecentFiles(
   if (!allFiles) return [];
   return allFiles
     .filter((f) => docsMeta[f.path] != null)
-    .map((f) => ({ ...f, mtime: docsMeta[f.path].mtime }))
+    .map((f) => ({ ...f, mtime: docsMeta[f.path]!.mtime }))
     .sort((a, b) => b.mtime - a.mtime)
     .slice(0, limit);
 }
@@ -331,8 +331,8 @@ export function extractHeadings(content: string): TocHeading[] {
 
     const match = line.match(/^(#{1,4})\s+(.+)$/);
     if (match) {
-      const depth = match[1].length;
-      const text = match[2]
+      const depth = match[1]!.length;
+      const text = match[2]!
         .replace(/\*\*/g, "") // strip bold
         .replace(/\*/g, "") // strip italic
         .replace(/`/g, "") // strip inline code

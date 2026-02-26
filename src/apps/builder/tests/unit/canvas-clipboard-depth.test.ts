@@ -30,6 +30,7 @@ const makeCursor = (focusId: string) => ({
   anchor: null as string | null,
   isExpandable: false,
   isDisabled: false,
+  treeLevel: undefined as number | undefined,
 });
 
 describe("Canvas clipboard: deeply-nested block (C3🆕 / V3🆕)", () => {

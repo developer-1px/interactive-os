@@ -115,6 +115,7 @@ describe("OS_NAVIGATE — Boundary Behavior", () => {
         seamless: false,
         typeahead: false,
         entry: "first",
+        arrowExpand: false,
         recovery: "next",
       },
     });
@@ -135,6 +136,7 @@ describe("OS_NAVIGATE — Boundary Behavior", () => {
         seamless: false,
         typeahead: false,
         entry: "first",
+        arrowExpand: false,
         recovery: "next",
       },
     });
@@ -155,6 +157,7 @@ describe("OS_NAVIGATE — Boundary Behavior", () => {
         seamless: false,
         typeahead: false,
         entry: "first",
+        arrowExpand: false,
         recovery: "next",
       },
     });
@@ -175,6 +178,7 @@ describe("OS_NAVIGATE — Boundary Behavior", () => {
         seamless: false,
         typeahead: false,
         entry: "first",
+        arrowExpand: false,
         recovery: "next",
       },
     });
@@ -352,6 +356,7 @@ describe("OS_NAVIGATE — followFocus", () => {
         seamless: false,
         typeahead: false,
         entry: "first",
+        arrowExpand: false,
         recovery: "next",
       },
       select: {
@@ -534,6 +539,7 @@ describe("OS_NAVIGATE — Orientation", () => {
         seamless: false,
         typeahead: false,
         entry: "first",
+        arrowExpand: false,
         recovery: "next",
       },
     });
@@ -556,6 +562,7 @@ describe("OS_NAVIGATE — Orientation", () => {
         seamless: false,
         typeahead: false,
         entry: "first",
+        arrowExpand: false,
         recovery: "next",
       },
     });
@@ -578,6 +585,7 @@ describe("OS_NAVIGATE — Orientation", () => {
         seamless: false,
         typeahead: false,
         entry: "first",
+        arrowExpand: false,
         recovery: "next",
       },
     });
@@ -606,6 +614,7 @@ describe("OS_NAVIGATE — Entry (no current focus)", () => {
         seamless: false,
         typeahead: false,
         entry: "first",
+        arrowExpand: false,
         recovery: "next",
       },
     });

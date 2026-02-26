@@ -56,8 +56,8 @@ describe("T19 Integration: ESC through full keyboard pipeline", () => {
     page.goto(ZONE_ID, {
       items: ["s1", "g1", "i1"],
       config: {
-        activate: { onClick: true, reClickOnly: true },
-        dismiss: { escape: "none" },
+        activate: { mode: "manual", onClick: true, reClickOnly: true },
+        dismiss: { escape: "none", outsideClick: "none" },
       },
       onAction: createDrillDown(ZONE_ID),
     });
@@ -65,8 +65,8 @@ describe("T19 Integration: ESC through full keyboard pipeline", () => {
     // Re-register with element + itemFilter (goto doesn't set these)
     ZoneRegistry.register(ZONE_ID, {
       config: {
-        activate: { onClick: true, reClickOnly: true },
-        dismiss: { escape: "none" },
+        activate: { mode: "manual", onClick: true, reClickOnly: true },
+        dismiss: { escape: "none", outsideClick: "none" },
       } as any,
       element: container,
       parentId: null,

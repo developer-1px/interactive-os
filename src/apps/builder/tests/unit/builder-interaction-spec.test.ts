@@ -106,7 +106,7 @@ describe("T19: Builder Interaction Spec — 3 States + 1 Rule", () => {
       // 기대: focusedItemId를 null로 만드는 커맨드 반환
       expect(result).not.toEqual([]);
 
-      const cmd = Array.isArray(result) ? result[0] : result;
+      const cmd = (Array.isArray(result) ? result[0] : result)!;
       expect(cmd).toBeDefined();
       // deselect 커맨드는 focusedItemId를 null로 만들어야 한다
       expect(cmd.type).toBeDefined();
@@ -122,7 +122,7 @@ describe("T19: Builder Interaction Spec — 3 States + 1 Rule", () => {
         treeLevel: undefined,
       });
       expect(result).not.toEqual([]);
-      const cmd = Array.isArray(result) ? result[0] : result;
+      const cmd = (Array.isArray(result) ? result[0] : result)!;
       expect(cmd.type).toContain("OS_FOCUS");
     });
 
@@ -136,7 +136,7 @@ describe("T19: Builder Interaction Spec — 3 States + 1 Rule", () => {
         treeLevel: undefined,
       });
       expect(result).not.toEqual([]);
-      const cmd = Array.isArray(result) ? result[0] : result;
+      const cmd = (Array.isArray(result) ? result[0] : result)!;
       expect(cmd.type).toContain("OS_FOCUS");
     });
   });
@@ -158,7 +158,7 @@ describe("T19: Builder Interaction Spec — 3 States + 1 Rule", () => {
         isDisabled: false,
         treeLevel: undefined,
       });
-      const cmd = Array.isArray(result) ? result[0] : result;
+      const cmd = (Array.isArray(result) ? result[0] : result)!;
       expect(cmd.type).toContain("OS_FOCUS");
     });
 
@@ -193,11 +193,11 @@ describe("T19: Builder Interaction Spec — 3 States + 1 Rule", () => {
 
       // deselect 커맨드가 발행되면
       // focusedItemId가 null이 되어야 커서가 숨겨지고 키보드가 무반응이 됨
-      const cmd = Array.isArray(result) ? result[0] : result;
+      const cmd = (Array.isArray(result) ? result[0] : result)!;
       expect(cmd).toBeDefined();
       // OS_FOCUS with null itemId, or a dedicated deselect command
       if (cmd.type?.includes("FOCUS")) {
-        expect(cmd.payload?.itemId).toBeNull();
+        expect((cmd as any).payload?.itemId).toBeNull();
       }
     });
   });
@@ -217,7 +217,7 @@ describe("T19: Builder Interaction Spec — 3 States + 1 Rule", () => {
         treeLevel: undefined,
       });
       expect(result).not.toEqual([]);
-      const cmd = Array.isArray(result) ? result[0] : result;
+      const cmd = (Array.isArray(result) ? result[0] : result)!;
       expect(cmd.type).toContain("OS_FOCUS");
     });
 
@@ -231,7 +231,7 @@ describe("T19: Builder Interaction Spec — 3 States + 1 Rule", () => {
         treeLevel: undefined,
       });
       expect(result).not.toEqual([]);
-      const cmd = Array.isArray(result) ? result[0] : result;
+      const cmd = (Array.isArray(result) ? result[0] : result)!;
       expect(cmd.type).toContain("OS_FOCUS");
     });
 
@@ -244,7 +244,7 @@ describe("T19: Builder Interaction Spec — 3 States + 1 Rule", () => {
         isDisabled: false,
         treeLevel: undefined,
       });
-      const cmd = Array.isArray(result) ? result[0] : result;
+      const cmd = (Array.isArray(result) ? result[0] : result)!;
       expect(cmd.type).toContain("FIELD");
     });
   });

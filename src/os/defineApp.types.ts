@@ -204,6 +204,7 @@ export interface AppPage<S> {
   goto(
     zoneName: string,
     opts?: {
+      items?: string[];
       focusedItemId?: string | null;
       config?: Partial<
         import("@os/schemas/focus/config/FocusGroupConfig").FocusGroupConfig

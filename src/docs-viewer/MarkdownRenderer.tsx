@@ -17,28 +17,28 @@ function headingId(children: unknown): string {
 const MarkdownComponents: Record<string, React.FC<Record<string, unknown>>> = {
   h1: (props) => (
     <h1
-      id={headingId(props.children)}
+      id={headingId(props["children"])}
       className="text-3xl font-extrabold tracking-tight mb-6 mt-4 text-slate-900 leading-[1.2] max-w-2xl scroll-mt-6"
       {...props}
     />
   ),
   h2: (props) => (
     <h2
-      id={headingId(props.children)}
+      id={headingId(props["children"])}
       className="text-xl font-bold text-slate-850 mt-10 mb-5 tracking-tight border-b border-slate-100 pb-2.5 max-w-2xl scroll-mt-6"
       {...props}
     />
   ),
   h3: (props) => (
     <h3
-      id={headingId(props.children)}
+      id={headingId(props["children"])}
       className="text-lg font-bold text-slate-800 mt-8 mb-3.5 tracking-tight max-w-2xl scroll-mt-6"
       {...props}
     />
   ),
   h4: (props) => (
     <h4
-      id={headingId(props.children)}
+      id={headingId(props["children"])}
       className="text-[15px] font-bold text-slate-800 mt-6 mb-3 tracking-tight max-w-2xl scroll-mt-6"
       {...props}
     />

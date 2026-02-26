@@ -180,8 +180,8 @@ export function DocsViewer() {
 
       if (direction === "prev") {
         for (let i = headings.length - 1; i >= 0; i--) {
-          if (headings[i].offsetTop < scrollTop - offset) {
-            headings[i].scrollIntoView({ behavior: "smooth", block: "start" });
+          if (headings[i]!.offsetTop < scrollTop - offset) {
+            headings[i]!.scrollIntoView({ behavior: "smooth", block: "start" });
             return;
           }
         }

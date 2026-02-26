@@ -1,6 +1,6 @@
 import type { WritableDraft } from "immer";
 import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
-import type { AppState } from "../../state/appState";
+import type { AppState } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 
 // ═══════════════════════════════════════════════════════════════════

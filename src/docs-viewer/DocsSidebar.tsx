@@ -322,5 +322,4 @@ export function DocsSidebar({
   );
 }
 
-export type { DocsSidebarProps };
 export { toggleFavorite as _toggleFavorite };

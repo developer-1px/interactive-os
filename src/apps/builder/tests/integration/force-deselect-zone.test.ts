@@ -51,16 +51,16 @@ describe("T21: forceDeselect → zone deactivation", () => {
     page.goto(ZONE_ID, {
       items: ["s1", "s2"],
       config: {
-        activate: { onClick: true, reClickOnly: true },
-        dismiss: { escape: "none" },
+        activate: { mode: "manual", onClick: true, reClickOnly: true },
+        dismiss: { escape: "none", outsideClick: "none" },
       },
       onAction: createDrillDown(ZONE_ID),
     });
 
     ZoneRegistry.register(ZONE_ID, {
       config: {
-        activate: { onClick: true, reClickOnly: true },
-        dismiss: { escape: "none" },
+        activate: { mode: "manual", onClick: true, reClickOnly: true },
+        dismiss: { escape: "none", outsideClick: "none" },
       } as any,
       element: container,
       parentId: null,
