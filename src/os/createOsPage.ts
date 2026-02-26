@@ -88,6 +88,8 @@ export interface OsPage {
   activeZoneId(): string | null;
   dispatch(cmd: any, opts?: any): void;
   cleanup(): void;
+  /** Dump debug diagnostics (no-op placeholder for test compat) */
+  dumpDiagnostics(): void;
 
   // ── OS-specific advanced helpers ──
   setItems(items: string[]): void;
@@ -160,8 +162,8 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   const mockZoneOrder = { current: [] as any[] };
 
   // ── No-op effects ──
-  kernel.defineEffect("focus", () => {});
-  kernel.defineEffect("scroll", () => {});
+  kernel.defineEffect("focus", () => { });
+  kernel.defineEffect("scroll", () => { });
 
   // ── Mock contexts (accessor-first, mock-fallback) ──
   kernel.defineContext("dom-items", () => {
@@ -439,6 +441,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     },
     dispatch,
     cleanup,
+    dumpDiagnostics() { /* no-op placeholder */ },
 
     // OS-specific
     setItems,
