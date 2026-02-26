@@ -164,7 +164,9 @@ export function createKernel<S>(initialState: S) {
   ): QueryToken<Id, T> {
     queryProviders.set(id, {
       provider: provider as (state: S) => unknown,
-      invalidateOn: options?.invalidateOn,
+      ...(options?.invalidateOn !== undefined
+        ? { invalidateOn: options.invalidateOn }
+        : {}),
       cachedState: null,
       cachedValue: undefined,
       invalidated: false,

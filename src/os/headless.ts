@@ -200,6 +200,9 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
         focusId: zone.focusedItemId,
         selection: zone.selection ?? [],
         anchor: zone.selectionAnchor ?? null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
       }
       : null,
   };

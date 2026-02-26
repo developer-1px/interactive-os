@@ -257,15 +257,21 @@ export function createHistoryMiddleware(
               },
               timestamp: now,
               snapshot: prevWithoutHistory,
-              patches: dataPatches.length > 0 ? dataPatches : undefined,
-              inversePatches:
-                dataInversePatches.length > 0 ? dataInversePatches : undefined,
+              ...(dataPatches.length > 0 ? { patches: dataPatches } : {}),
+              ...(dataInversePatches.length > 0
+                ? { inversePatches: dataInversePatches }
+                : {}),
               focusedItemId: previousFocusId,
               activeZoneId: ctx.injected["_historyZoneId"] as string | null,
-              activeZoneSelection: ctx.injected["_historySelection"] as
-                | string[]
-                | undefined,
-              groupId: getActiveGroupId() ?? undefined,
+              ...(ctx.injected["_historySelection"] !== undefined
+                ? {
+                    activeZoneSelection: ctx.injected["_historySelection"] as
+                      | string[],
+                  }
+                : {}),
+              ...(getActiveGroupId() !== undefined
+                ? { groupId: getActiveGroupId()! }
+                : {}),
             });
 
             if (history.past.length > HISTORY_LIMIT) {

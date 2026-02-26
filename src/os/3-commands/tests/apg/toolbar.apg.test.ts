@@ -34,6 +34,7 @@ const TOOLBAR_CONFIG = {
     typeahead: false,
     entry: "restore" as const,
     recovery: "next" as const,
+    arrowExpand: false,
   },
   select: {
     mode: "none" as const,

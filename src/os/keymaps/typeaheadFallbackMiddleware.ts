@@ -76,6 +76,7 @@ export const typeaheadFallbackMiddleware: Middleware = {
     const currentId = zone?.focusedItemId ?? null;
 
     // Read items and labels from DOM
+    if (!entry.element) return null;
     const { items, labels } = getItemsAndLabels(entry.element);
     if (items.length === 0) return null;
 

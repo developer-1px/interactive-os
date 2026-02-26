@@ -110,7 +110,9 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
   if (!input.isEditing && input.focusedItemId) {
     const itemCmd = resolveItemKey(input.focusedItemRole, input.canonicalKey, {
       itemId: input.focusedItemId,
-      expanded: input.focusedItemExpanded ?? undefined,
+      ...(input.focusedItemExpanded != null
+        ? { expanded: input.focusedItemExpanded }
+        : {}),
     });
     if (itemCmd) {
       return {

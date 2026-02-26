@@ -36,8 +36,12 @@ export const toastShowHandler =
     const entry: ToastEntry = {
       id: uid(),
       message: payload.message,
-      actionLabel: payload.actionLabel,
-      actionCommand: payload.actionCommand,
+      ...(payload.actionLabel !== undefined
+        ? { actionLabel: payload.actionLabel }
+        : {}),
+      ...(payload.actionCommand !== undefined
+        ? { actionCommand: payload.actionCommand }
+        : {}),
       duration: payload.duration ?? DEFAULT_DURATION,
       createdAt: Date.now(),
     };

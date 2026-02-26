@@ -88,14 +88,14 @@ export function ToastContainer() {
           <Toast
             toast={toast}
             onDismiss={() => os.dispatch(OS_TOAST_DISMISS({ id: toast.id }))}
-            onAction={
-              toast.actionCommand
-                ? () => {
+            {...(toast.actionCommand
+              ? {
+                  onAction: () => {
                     os.dispatch(toast.actionCommand as any);
                     os.dispatch(OS_TOAST_DISMISS({ id: toast.id }));
-                  }
-                : undefined
-            }
+                  },
+                }
+              : {})}
           />
         </div>
       ))}

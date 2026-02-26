@@ -117,6 +117,7 @@ describe("OS_NAVIGATE — Boundary Behavior", () => {
         entry: "first",
         arrowExpand: false,
         recovery: "next",
+        arrowExpand: false,
       },
     });
     t.setActiveZone("list", "c");
@@ -138,6 +139,7 @@ describe("OS_NAVIGATE — Boundary Behavior", () => {
         entry: "first",
         arrowExpand: false,
         recovery: "next",
+        arrowExpand: false,
       },
     });
     t.setActiveZone("list", "a");
@@ -159,6 +161,7 @@ describe("OS_NAVIGATE — Boundary Behavior", () => {
         entry: "first",
         arrowExpand: false,
         recovery: "next",
+        arrowExpand: false,
       },
     });
     t.setActiveZone("list", "c");
@@ -180,6 +183,7 @@ describe("OS_NAVIGATE — Boundary Behavior", () => {
         entry: "first",
         arrowExpand: false,
         recovery: "next",
+        arrowExpand: false,
       },
     });
     t.setActiveZone("list", "a");
@@ -358,6 +362,7 @@ describe("OS_NAVIGATE — followFocus", () => {
         entry: "first",
         arrowExpand: false,
         recovery: "next",
+        arrowExpand: false,
       },
       select: {
         mode: "single",
@@ -541,6 +546,7 @@ describe("OS_NAVIGATE — Orientation", () => {
         entry: "first",
         arrowExpand: false,
         recovery: "next",
+        arrowExpand: false,
       },
     });
     t.setActiveZone("list", "b");
@@ -564,6 +570,7 @@ describe("OS_NAVIGATE — Orientation", () => {
         entry: "first",
         arrowExpand: false,
         recovery: "next",
+        arrowExpand: false,
       },
     });
     t.setActiveZone("list", "b");
@@ -587,6 +594,7 @@ describe("OS_NAVIGATE — Orientation", () => {
         entry: "first",
         arrowExpand: false,
         recovery: "next",
+        arrowExpand: false,
       },
     });
     t.setActiveZone("list", "a");
@@ -616,6 +624,7 @@ describe("OS_NAVIGATE — Entry (no current focus)", () => {
         entry: "first",
         arrowExpand: false,
         recovery: "next",
+        arrowExpand: false,
       },
     });
     t.setActiveZone("list", null);
@@ -636,6 +645,7 @@ describe("OS_NAVIGATE — Entry (no current focus)", () => {
         typeahead: false,
         entry: "last",
         recovery: "next",
+        arrowExpand: false,
       },
     });
     t.setActiveZone("list", null);

@@ -31,6 +31,7 @@ const defaultConfig: NavigateConfig = {
   typeahead: false,
   entry: "first",
   recovery: "next",
+        arrowExpand: false,
 };
 
 // ═══════════════════════════════════════════════════════════════════

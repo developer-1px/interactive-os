@@ -87,6 +87,9 @@ function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
           focusId: zone.focusedItemId,
           selection: zone.selection ?? [],
           anchor: zone.selectionAnchor ?? null,
+          isExpandable: false,
+          isDisabled: false,
+          treeLevel: undefined,
         }
       : null,
   };

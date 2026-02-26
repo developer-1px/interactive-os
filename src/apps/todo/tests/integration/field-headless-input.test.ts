@@ -28,7 +28,6 @@ describe("Feature: Draft field → Enter → todo created (headless full pipelin
     page.goto("draft");
 
     // When: type text through AppPage API
-    // @ts-expect-error keyboard.type() does not exist yet on AppPage
     page.keyboard.type("Buy milk");
 
     // Then: FieldRegistry has the value
@@ -82,7 +81,6 @@ describe("Feature: Draft field → Enter → todo created (headless full pipelin
     const beforeCount = page.state.data.todoOrder.length;
 
     // When: type text then press Enter (full user flow)
-    // @ts-expect-error keyboard.type() does not exist yet on AppPage
     page.keyboard.type("Buy milk");
     page.keyboard.press("Enter");
 

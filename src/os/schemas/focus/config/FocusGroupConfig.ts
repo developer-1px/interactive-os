@@ -86,7 +86,7 @@ export const DEFAULT_ACTIVATE: ActivateConfig = {
 // ── Dismiss ──
 
 export interface DismissConfig {
-  escape: "close" | "deselect" | "none";
+  escape: "close" | "deselect" | "callback" | "none";
   outsideClick: "close" | "none";
 }
 
