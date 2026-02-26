@@ -72,18 +72,22 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(
     // Subscribe to booleans, not raw IDs — avoids re-render of all items
     // when focus moves from one item to another.
     const isFocused = os.useComputed(
-      (s) => (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === stringId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (s: any) => (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === stringId,
     );
-    const isActive = os.useComputed((s) => s.os.focus.activeZoneId === zoneId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const isActive = os.useComputed((s: any) => s.os.focus.activeZoneId === zoneId);
 
     // Selection from kernel state
     const isStoreSelected = os.useComputed(
-      (s) => s.os.focus.zones[zoneId]?.selection.includes(stringId) ?? false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (s: any) => s.os.focus.zones[zoneId]?.selection.includes(stringId) ?? false,
     );
 
     // Expanded from kernel state
     const isExpanded = os.useComputed(
-      (s) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (s: any) =>
         s.os.focus.zones[zoneId]?.expandedItems.includes(stringId) ?? false,
     );
 

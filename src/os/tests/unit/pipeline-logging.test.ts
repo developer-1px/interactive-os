@@ -19,7 +19,7 @@ describe("T3: OS pipeline debug logging", () => {
   let debugSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    debugSpy = vi.spyOn(console, "debug").mockImplementation(() => { });
     page = createOsPage();
     page.goto("test-zone", {
       role: "list",
@@ -36,8 +36,8 @@ describe("T3: OS pipeline debug logging", () => {
   it("#1 keyboard press produces a keybinding debug log", () => {
     page.keyboard.press("ArrowDown");
 
-    const logs = debugSpy.mock.calls.map((c) => c.join(" "));
-    const keybindLog = logs.find((msg) => msg.includes("[keybind]"));
+    const logs = debugSpy.mock.calls.map((c: unknown[]) => c.join(" "));
+    const keybindLog = logs.find((msg: string) => msg.includes("[keybind]"));
     expect(keybindLog).toBeDefined();
     expect(keybindLog).toContain("ArrowDown");
   });
@@ -46,20 +46,20 @@ describe("T3: OS pipeline debug logging", () => {
   it("#2 command dispatch produces a dispatch debug log", () => {
     page.keyboard.press("ArrowDown");
 
-    const logs = debugSpy.mock.calls.map((c) => c.join(" "));
-    const dispatchLog = logs.find((msg) => msg.includes("[dispatch]"));
+    const logs = debugSpy.mock.calls.map((c: unknown[]) => c.join(" "));
+    const dispatchLog = logs.find((msg: string) => msg.includes("[dispatch]"));
     expect(dispatchLog).toBeDefined();
     expect(dispatchLog).toContain("OS_NAVIGATE");
   });
 
   // ── Focus change ─────────────────────────────────────────────
   it("#3 focus change produces a focus info log", () => {
-    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => { });
 
     page.keyboard.press("ArrowDown");
 
-    const logs = infoSpy.mock.calls.map((c) => c.join(" "));
-    const focusLog = logs.find((msg) => msg.includes("[focus]"));
+    const logs = infoSpy.mock.calls.map((c: unknown[]) => c.join(" "));
+    const focusLog = logs.find((msg: string) => msg.includes("[focus]"));
     expect(focusLog).toBeDefined();
 
     infoSpy.mockRestore();
