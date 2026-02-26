@@ -7,7 +7,22 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
-type AnyKernel = any;
+/** Transaction record from kernel inspector */
+interface Transaction {
+  id: string;
+  meta?: Record<string, unknown>;
+  command?: { type: string; payload?: Record<string, unknown> };
+  changes?: Array<{ path: string; before: unknown; after: unknown }>;
+}
+
+/** Minimal kernel inspector interface */
+interface KernelWithInspector {
+  inspector: {
+    getTransactions(): Transaction[];
+    clearTransactions(): void;
+  };
+  subscribe: (cb: () => void) => () => void;
+}
 
 // ─── Format helpers ───
 
@@ -37,19 +52,20 @@ function formatDiff(
 }
 
 /** Format a single transaction as a debug line */
-function formatTxLine(tx: any): string {
+function formatTxLine(tx: Transaction): string {
   const event = formatEvent(tx.meta);
   const cmd = tx.command?.type ?? "?";
   const payload = tx.command?.payload
     ? ` ${JSON.stringify(tx.command.payload)}`
     : "";
-  const diff = formatDiff(tx.changes);
+  const diff = formatDiff(tx.changes ?? []);
   return `[${event}] ${cmd}${payload}\n  ${diff}`;
 }
 
 // ─── Main Panel ───
 
-export function KernelPanel({ kernel }: { kernel?: AnyKernel }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- kernel type varies across callers
+export function KernelPanel({ kernel }: { kernel?: any }) {
   if (!kernel) {
     return (
       <div className="flex-1 flex items-center justify-center text-[11px] text-[#aaa] italic">
@@ -67,7 +83,7 @@ export function KernelPanel({ kernel }: { kernel?: AnyKernel }) {
 
 // ─── Transaction Log ───
 
-function TransactionLog({ kernel }: { kernel: AnyKernel }) {
+function TransactionLog({ kernel }: { kernel: KernelWithInspector }) {
   const [version, refresh] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
@@ -76,7 +92,7 @@ function TransactionLog({ kernel }: { kernel: AnyKernel }) {
   const getSnapshot = () => kernel.inspector.getTransactions().length;
   useSyncExternalStore(kernel.subscribe, getSnapshot, getSnapshot);
 
-  const txs: any[] = kernel.inspector.getTransactions();
+  const txs: Transaction[] = kernel.inspector.getTransactions();
 
   // Auto-scroll to bottom on new transactions
   // biome-ignore lint/correctness/useExhaustiveDependencies: txs.length is intentional trigger
@@ -91,7 +107,7 @@ function TransactionLog({ kernel }: { kernel: AnyKernel }) {
   };
 
   const handleCopy = async () => {
-    const lines = txs.map((tx: any, i: number) => `#${i} ${formatTxLine(tx)}`);
+    const lines = txs.map((tx: Transaction, i: number) => `#${i} ${formatTxLine(tx)}`);
     const text = lines.join("\n\n");
     try {
       await navigator.clipboard.writeText(text);
@@ -149,7 +165,7 @@ function TransactionLog({ kernel }: { kernel: AnyKernel }) {
           ref={scrollRef}
           className="flex-1 overflow-y-auto flex flex-col gap-px"
         >
-          {txs.map((tx: any, i: number) => (
+          {txs.map((tx: Transaction, i: number) => (
             <TxEntry key={tx.id} tx={tx} index={i} />
           ))}
         </div>
@@ -160,11 +176,11 @@ function TransactionLog({ kernel }: { kernel: AnyKernel }) {
 
 // ─── Single Transaction Entry ───
 
-function TxEntry({ tx, index }: { tx: any; index: number }) {
+function TxEntry({ tx, index }: { tx: Transaction; index: number }) {
   const event = formatEvent(tx.meta);
   const cmd = tx.command?.type ?? "?";
   const payload = tx.command?.payload;
-  const changes: any[] = tx.changes ?? [];
+  const changes: Transaction["changes"] = tx.changes ?? [];
   const hasChanges = changes.length > 0;
 
   return (
@@ -191,7 +207,7 @@ function TxEntry({ tx, index }: { tx: any; index: number }) {
       {/* Diff */}
       {hasChanges && (
         <div className="mt-0.5 pl-[22px] flex flex-col gap-px">
-          {changes.map((c: any, j: number) => (
+          {changes.map((c, j: number) => (
             <div key={j} className="text-[10px]">
               <span className="text-[#999]">{c.path}</span>
               <span className="text-[#c62828] ml-1">

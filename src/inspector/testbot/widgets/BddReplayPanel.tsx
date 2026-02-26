@@ -90,12 +90,13 @@ function executeRegistryTests(sourceFile: string): TestResult[] {
           duration: performance.now() - start,
           records,
         });
-      } catch (e: any) {
+      } catch (e: unknown) {
+        const err = e instanceof Error ? e.message : String(e);
         results.push({
           suite: suiteName,
           name: entry.name,
           status: "fail",
-          error: e?.message || String(e),
+          error: err,
           duration: performance.now() - start,
           records,
         });
@@ -134,18 +135,19 @@ export function BddReplayPanel() {
     const start = performance.now();
     try {
       const mod = await selectedFile.loader();
-      if (mod && typeof (mod as any).default === "function") {
-        (mod as any).default();
+      if (mod && typeof (mod as Record<string, unknown>)["default"] === "function") {
+        (mod as Record<string, unknown> & { default: () => void }).default();
       }
       const testResults = executeRegistryTests(selectedFile.path);
       setResults(testResults);
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const err = e instanceof Error ? e.message : String(e);
       setResults([
         {
           suite: "Error",
           name: "Import failed",
           status: "fail",
-          error: e?.message || String(e),
+          error: err,
           duration: 0,
           records: [],
         },
@@ -228,8 +230,8 @@ export function BddReplayPanel() {
               type="button"
               onClick={() => setReplayIdx(i)}
               className={`w-full flex items-center gap-2 px-3 py-1 text-left text-xs border-l-2 transition-colors ${i === replayIdx
-                  ? "bg-indigo-50 border-indigo-500 text-indigo-900"
-                  : "border-transparent hover:bg-stone-50 text-stone-600"
+                ? "bg-indigo-50 border-indigo-500 text-indigo-900"
+                : "border-transparent hover:bg-stone-50 text-stone-600"
                 }`}
             >
               {rec.type === "press" ? (
@@ -336,8 +338,8 @@ export function BddReplayPanel() {
                   setReplayIdx(0);
                 }}
                 className={`w-full flex items-center gap-2 px-2 py-1 rounded text-xs text-left transition-colors ${t.status === "fail"
-                    ? "bg-red-50 hover:bg-red-100"
-                    : "hover:bg-stone-50"
+                  ? "bg-red-50 hover:bg-red-100"
+                  : "hover:bg-stone-50"
                   }`}
               >
                 {t.status === "pass" ? (
@@ -382,9 +384,19 @@ export function BddReplayPanel() {
 
 // ── Simple State Diff ──
 
+/** Minimal shape for state diff operations */
+interface FocusSnapshot {
+  activeZoneId?: string | null;
+  zones?: Record<string, { focusedItemId?: string | null; selection?: string[] }>;
+}
+
+interface DiffableState {
+  focus?: FocusSnapshot;
+}
+
 function StateDiff({ before, after }: { before: unknown; after: unknown }) {
-  const b = before as any;
-  const a = after as any;
+  const b = before as DiffableState | null;
+  const a = after as DiffableState | null;
 
   if (!b || !a)
     return <div className="text-[10px] text-stone-400">No state data</div>;
