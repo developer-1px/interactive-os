@@ -24,13 +24,24 @@ import type { AppHandle, Condition } from "./defineApp.types";
  */
 interface WithHistory {
   history: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    past: any[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    future: any[];
+    past: unknown[];
+    future: unknown[];
   };
   data: unknown;
   ui?: unknown;
+}
+
+/** Internal shape shared by past/future history entries (structural typing) */
+interface HistoryEntry {
+  command?: { type: string };
+  timestamp?: number;
+  groupId?: string;
+  snapshot?: Record<string, unknown>;
+  patches?: unknown[];
+  inversePatches?: unknown[];
+  focusedItemId?: string;
+  activeZoneId?: string;
+  activeZoneSelection?: string[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -44,7 +55,7 @@ export function createUndoRedoCommands<S extends WithHistory>(
 
   /** Restore data/ui from snapshot into draft (legacy fallback) */
   function restoreSnapshot(
-    draft: any,
+    draft: WithHistory,
     snap: Record<string, unknown> | undefined,
   ) {
     if (!snap) return;
@@ -53,7 +64,7 @@ export function createUndoRedoCommands<S extends WithHistory>(
   }
 
   /** Build OS_FOCUS dispatch command from captured history entry */
-  function buildFocusDispatch(entry: any): BaseCommand | undefined {
+  function buildFocusDispatch(entry: HistoryEntry): BaseCommand | undefined {
     const focusTarget = entry.focusedItemId
       ? String(entry.focusedItemId)
       : undefined;
@@ -91,7 +102,7 @@ export function createUndoRedoCommands<S extends WithHistory>(
   const undoCommand = app.command(
     "undo",
     (ctx) => {
-      const past = ctx.state.history.past;
+      const past = ctx.state.history.past as HistoryEntry[];
       const lastEntry = past.at(-1)!;
       const groupId = lastEntry.groupId;
 
@@ -107,12 +118,12 @@ export function createUndoRedoCommands<S extends WithHistory>(
 
       // Prefer patch-based undo, fall back to snapshot
       const targetEntry = past[past.length - entriesToPop]!;
-      const hasPatches = targetEntry.inversePatches?.length > 0;
+      const hasPatches = (targetEntry.inversePatches?.length ?? 0) > 0;
 
       return {
         state: produce(ctx.state, (draft) => {
           // Save current state to future for redo
-          const futureEntry: any = {
+          const futureEntry: HistoryEntry = {
             command: { type: "UNDO_SNAPSHOT" },
             timestamp: Date.now(),
             snapshot: snapshotCurrent(ctx.state),
@@ -120,8 +131,8 @@ export function createUndoRedoCommands<S extends WithHistory>(
           if (groupId) futureEntry.groupId = groupId;
 
           // Collect patches from all popped entries for redo
-          const poppedPatches: any[] = [];
-          const poppedInversePatches: any[] = [];
+          const poppedPatches: unknown[] = [];
+          const poppedInversePatches: unknown[] = [];
           for (let i = 0; i < entriesToPop; i++) {
             const entry = past[past.length - 1 - i];
             if (entry?.patches) poppedPatches.unshift(...entry.patches);
@@ -132,7 +143,7 @@ export function createUndoRedoCommands<S extends WithHistory>(
           if (poppedInversePatches.length > 0)
             futureEntry.inversePatches = poppedInversePatches;
 
-          draft.history.future.push(futureEntry);
+          draft.history.future.push(futureEntry as unknown);
 
           for (let i = 0; i < entriesToPop; i++) {
             draft.history.past.pop();
@@ -142,10 +153,10 @@ export function createUndoRedoCommands<S extends WithHistory>(
             // Patch-based undo: apply inverse patches
             const restored = applyPatches(
               snapshotCurrent(ctx.state),
-              targetEntry.inversePatches,
+              targetEntry.inversePatches as Parameters<typeof applyPatches>[1],
             );
-            if (restored["data"]) draft.data = restored["data"] as any;
-            if (restored["ui"]) draft.ui = restored["ui"] as any;
+            if (restored["data"]) draft.data = restored["data"];
+            if (restored["ui"]) draft.ui = restored["ui"];
           } else {
             // Legacy: snapshot-based restore
             restoreSnapshot(draft, targetEntry.snapshot);
@@ -160,13 +171,13 @@ export function createUndoRedoCommands<S extends WithHistory>(
   const redoCommand = app.command(
     "redo",
     (ctx) => {
-      const entry = ctx.state.history.future.at(-1)!;
-      const hasPatches = entry.patches?.length > 0;
+      const entry = ctx.state.history.future.at(-1) as HistoryEntry;
+      const hasPatches = (entry.patches?.length ?? 0) > 0;
 
       return {
         state: produce(ctx.state, (draft) => {
           draft.history.future.pop();
-          const pastEntry: any = {
+          const pastEntry: HistoryEntry = {
             command: { type: "REDO_SNAPSHOT" },
             timestamp: Date.now(),
             snapshot: snapshotCurrent(ctx.state),
@@ -177,16 +188,16 @@ export function createUndoRedoCommands<S extends WithHistory>(
             pastEntry.inversePatches = entry.inversePatches;
           if (entry.patches) pastEntry.patches = entry.patches;
 
-          draft.history.past.push(pastEntry);
+          draft.history.past.push(pastEntry as unknown);
 
           if (hasPatches) {
             // Patch-based redo: apply forward patches
             const restored = applyPatches(
               snapshotCurrent(ctx.state),
-              entry.patches,
+              entry.patches as Parameters<typeof applyPatches>[1],
             );
-            if (restored["data"]) draft.data = restored["data"] as any;
-            if (restored["ui"]) draft.ui = restored["ui"] as any;
+            if (restored["data"]) draft.data = restored["data"];
+            if (restored["ui"]) draft.ui = restored["ui"];
           } else {
             // Legacy: snapshot-based restore
             restoreSnapshot(draft, entry.snapshot);
