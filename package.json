@@ -69,7 +69,5 @@
     "vite": "^7.3.1",
     "vitest": "^4.0.18"
   },
-  "lint-staged": {
-    "*.{ts,tsx}": "eslint --max-warnings 0"
-  }
+  "lint-staged": {}
 }

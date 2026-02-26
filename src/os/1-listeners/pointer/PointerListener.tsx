@@ -21,6 +21,9 @@ import {
   OS_DRAG_OVER,
   OS_DRAG_START,
 } from "../../3-commands/drag";
+import { OS_EXPAND } from "../../3-commands/expand";
+import { OS_CHECK } from "../../3-commands/interaction/check";
+import { OS_FOCUS } from "../../3-commands";
 import { OS_ESCAPE } from "../../3-commands/dismiss/escape";
 import { OS_FIELD_START_EDIT } from "../../3-commands/field/startEdit";
 import { FieldRegistry } from "../../6-components/field/FieldRegistry";
@@ -213,13 +216,25 @@ export function PointerListener() {
       if (result.gesture === "CLICK") {
         const target = pointerDownTarget ?? (e.target as HTMLElement);
         if (target) {
-          // Skip inspector, expand-trigger, check-trigger
-          if (
-            target.closest("[data-inspector]") ||
-            target.closest("[data-expand-trigger]") ||
-            target.closest("[data-check-trigger]")
-          ) {
+          // Inspector: skip entirely
+          if (target.closest("[data-inspector]")) {
             // no-op
+          } else if (target.closest("[data-expand-trigger]") || target.closest("[data-check-trigger]")) {
+            // Sub-item triggers: OS handles expand/check via pipeline
+            const state = os.getState();
+            const { activeZoneId } = state.os.focus;
+            if (activeZoneId) {
+              const itemEl = findFocusableItem(target);
+              const itemId = itemEl?.getAttribute("data-item-id") ?? null;
+              if (itemId) {
+                os.dispatch(OS_FOCUS({ zoneId: activeZoneId, itemId, skipSelection: true }));
+                if (target.closest("[data-expand-trigger]")) {
+                  os.dispatch(OS_EXPAND({ itemId, zoneId: activeZoneId }));
+                } else {
+                  os.dispatch(OS_CHECK({ targetId: itemId }));
+                }
+              }
+            }
           } else {
             const state = os.getState();
             const { activeZoneId } = state.os.focus;

@@ -55,6 +55,13 @@
 | `archive/2026/02/W09/todo-dogfooding/` | `1-project/todo-dogfooding/` | 프로젝트 완료 — Todo 앱 독푸딩 완료 |
 | `archive/2026/02/W09/01-naming-convention.md` | `2-area/80-cross-cutting/82-standards/01-naming-convention.md` | 🪦 superseded — `os-new/`, Zustand, Sensor/Intent 패턴 전면 소멸 |
 | `archive/2026/02/W09/08-focus-recovery.md` | `2-area/20-os/22-focus/08-focus-recovery.md` | 🪦 superseded — FocusSync, resolveRecovery 소멸. 현행: resolveItemFallback in focusStackOps.ts |
+| `archive/2026/02/W09/2026-0226-unified-pointer-listener.md` | `5-backlog/` | 🪦 superseded — unified-pointer-listener 프로젝트 완료+아카이브 |
+| `archive/2026/02/W09/2026-0226-dnd-pipeline-gap-retrospect.md` | `5-backlog/` | 🪦 superseded — sense-purity에서 onReorder 계약 통일 완료 |
+| `archive/2026/02/W09/2026-0213-2350-unified-inspector.md` | `5-backlog/` | 🪦 superseded — inspector-redesign 완료 |
+| `archive/2026/02/W09/2026-0215-0910-inspector-port-separation.md` | `5-backlog/` | 🪦 superseded — inspector-redesign Port/Adapter 구현 완료 |
+| `archive/2026/02/W09/2026-0226-ghost-projects.md` | `5-backlog/` | 조치 완료 — STATUS.md 반영됨. 역사 기록 |
+| `archive/2026/02/W09/2026-0218-0025-solve-workflow.md` | `11-discussions/` | 🪦 superseded — /solve 워크플로우 생성 완료 |
+| `archive/2026/02/W09/2026-0218-1037-area-source-mirroring.md` | `11-discussions/` | 🪦 superseded — Area 소스 미러링 적용 완료 |
 
 ### 심층 보관 (`archive/legacy-docs` 브랜치 — git으로만 접근)
 

@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-26 16:17
+> Last updated: 2026-02-26 20:14
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,6 +9,7 @@
 
 ## 🔥 Active Focus
 
+**code-hygiene** — 540 eslint errors + 20 test failures → 0. husky 강제 검증. Light.
 
 **builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
 
@@ -23,18 +24,20 @@
 
 | builder-v2 | T5 DnD Done, OS gap 회고 완료 | 02-26 | 🔥 Focus |
 | dropdown-dismiss | Scaffold, T1~T3 | 02-26 | 🔥 Focus |
-| unified-pointer-listener | ✅ T1~T6 Done, audit+doubt 통과 | 02-26 | ✅ Completed |
-| sense-purity | ✅ T1~T7 Done, audit+doubt+retrospect 완료 | 02-26 | ✅ Completed |
+| trigger-listener-gap | Push model 설계 | 02-26 | 🟢 Active |
+| test-reliability | 거짓 GREEN 방지 plan | 02-26 | 🟢 Active |
 | content-edit-mode | T1~T4 Done, T5~T7 FSM v3 원자 전이 | 02-24 | 🟢 Active |
 | dev-pipeline | T0 Done (/red /green 생성), T1~T3 | 02-24 | 🟢 Active |
-| normalized-collection | ✅ T1~T7 Done, audit+doubt 통과 | 02-26 | ✅ Completed |
 | cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
-| todo-dogfooding | T1~T4 Done (Dialog, Search, Bulk, Toast). ⚠️ 1-project/ 폴더 없음, re-scaffold 필요 | 02-22 | 🟢 Active |
+| todo-dogfooding | T1~T4 Done. ⚠️ 1-project/ 폴더 없음, re-scaffold 필요 | 02-22 | 🟢 Active |
 | tab-state | Scaffold, /audit에서 발견. T1 Red 대기 | 02-24 | 🟢 Active |
 | replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
 | builder-property-schema | Scaffold, T1~T5 | 02-24 | 🟢 Active |
 | tree-click-defaults | Scaffold, T1~T3 | 02-24 | 🟢 Active |
 | builder-i18n | Scaffold, T1~T4 (US-001) | 02-25 | 🟢 Active |
+| test-observability | Scaffold | 02-26 | 🟢 Active |
+| docs-section-nav | Scaffold | 02-24 | 🟢 Active |
+| docs-subgrid-table | Scaffold | 02-24 | 🟢 Active |
 
 ---
 
@@ -92,24 +95,7 @@
 
 ## 📥 Inbox
 
-- `docs/0-inbox/2026-0226-1800-[analysis]-working-methodology-redteam.md` ("우리가 일하는 방식" Red Team/Blue Team — 12건 공격, 3건 🔴 인정, 4건 🟡 부분, 5건 🟢 방어)
-  - Related Project: 전체 (메타-워크플로우)
-  - Suggested Action: RT-02(규칙 복제), RT-09(루프 종료), RT-11(/self 미구현) 즉시 개선 → `/discussion` or `/project`
-- `docs/0-inbox/2026-0225-1714-[research]-user-story-format-sample.md` (User Story 표준 포맷 — Connextra+AC+INVEST, Visual CMS 샘플 US-001~003)
-  - Related Project: 6-products/builder (Visual CMS)
-  - Suggested Action: `/stories` 워크플로우 설계의 산출물 포맷 기준으로 사용
-- `docs/0-inbox/2026-0225-1635-[analysis]-srp-full-audit.md` (SRP 전수 조사 — 7축×8레이어, V5 다중책임 6건 🔴, V1 하이재킹 2건 🔴, V6 DOM 0건 🎉)
-  - Related Project: 전체 (OS 코어 구조)
-  - Suggested Action: `/discussion`으로 Top 5 위험 파일 분리 방향 논의 → `/project` or `/refactor`
-- `docs/0-inbox/2026-0224-1944-[proposal]-when-router-extension.md` (when 라우터 확장 — 함수형 WhenPredicate + itemAttr, keybindings = 결정 테이블)
-  - Related Project: dev-pipeline (OS 코어 변경)
-  - Suggested Action: `/project`로 전환하여 구현 시작
-- `docs/0-inbox/2026-0224-1927-[analysis]-builder-canvas-decision-table.md` (빌더 캔버스 결정 테이블 — 입력 4종 × 조건 5축 = 41분기, 경합 지점 4개)
-  - Related Project: builder-v2
-  - Suggested Action: when 확장 완료 후 빌더 리팩토링에 적용
-- `docs/0-inbox/2026-0224-1921-[proposal]-pipeline-verification-table.md` (파이프라인 검증 표 — OS 파이프라인 6열 = 테스트 표 스키마, Todo 앱 51개 시나리오 전수 열거)
-  - Related Project: dev-pipeline
-  - Suggested Action: `/discussion` 결론 후 dev-pipeline에 통합, 워크플로우 Step으로 전환
+(비어 있음)
 
 ---
 
@@ -118,16 +104,19 @@
 | Metric | Count |
 |--------|-------|
 | Active Focus | 2 |
-| Active Projects (total) | 10 (7 Active + 2 Focus + 1 Paused) |
+| Active Projects (total) | 16 (13 Active + 2 Focus + 1 re-scaffold) |
 | Completed (archived) | 43 |
-| Inbox items | 6 |
-| Backlog items | 12 |
+| Inbox items | 0 |
+| Backlog items | 15 |
 | Open issues | 0 |
 
 ---
 
 ## 📝 Recent Changes (2026-02-26)
 
+- 🪦 `/retire`: 7건 아카이브 (backlog 5 + 11-discussions 2). Inspector 2건·PointerListener·DnD retrospect·ghost-projects·solve discussion·area-mirroring discussion. MIGRATION_MAP 갱신. Backlog 20→15.
+- 🧹 `/para`: Inbox 10건→0건 (3→archive, 4→project notes, 2→backlog, 1→resource). Active 테이블에서 Completed 3건 제거. 고아 프로젝트 5건 등록 (trigger-listener-gap, test-reliability, test-observability, docs-section-nav, docs-subgrid-table).
+- 🔍 `/doubt`: −37파일 (decisions/ 17→archive, 3-resource/ 10→archive, workflows 하위폴더 6 삭제, 유령 프로젝트 4→backlog). 3-resource/ 번호 접두사 9개 제거. CLAUDE.md official/ 토폴로지 갱신.
 - ✅ `sense-purity` Light 프로젝트 완료 — sense 함수 순수화. T1~T7 (워크플로우 갱신, DOM 인라인, extractMouseInput/extractDropPosition 순수화, senseClick 삭제, MouseListener+DragListener 450줄 삭제, 파이프라인 동사 법 제정). +13 tests (58→71). audit OG-006/007 발견. rules.md `sense→extract→resolve` 법 추가.
 - ✅ `area-praxis` Meta 프로젝트 완료 — 2-area/ 재정립 (인큐베이터→실천지혜). 21파일 분배 (official 14, resource 1, archive 3, keep 3). 4 Living Documents 생성 (26개 교훈). docs 전수검사 17파일 mv. CLAUDE.md 토폴로지 갱신.
 

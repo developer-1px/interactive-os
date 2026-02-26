@@ -32,44 +32,85 @@ Then:
 - spec.md 존재 + Decision Table 있음 → **Step 2로 진행**
 - spec.md 없음 → ⛔ **`/spec` 실행 지시. `/red` 중단.**
 
+> **Self-enforcing**: 테스트 파일 상단에 `@spec` 링크를 작성한다.
+> 링크가 가리키는 파일이 없으면 spec이 없다는 뜻 → `/spec` 실행.
+
 ---
 
 ### Step 2: 테스트 코드 작성
 
-> ⚠️ **강제 패턴**: 모든 테스트는 아래 구조를 따른다.
+> ⚠️ **2-tier 강제 패턴**: 테스트 대상에 따라 도구가 다르다.
+
+#### Tier 1: OS 커널 테스트 (APG, navigation, dismiss)
+
+> OS 자체의 커맨드 파이프라인을 검증. 앱 코드 없이 커널만 테스트.
 
 ```ts
+/**
+ * @spec docs/1-project/[name]/spec.md
+ */
 import { createOsPage, type OsPage } from "@os/createOsPage";
 
 describe("Feature: [태스크명]", () => {
   let page: OsPage;
 
   beforeEach(() => {
-    container = buildTestDOM();
     page = createOsPage();
-    page.goto(ZONE_ID, { items, config, onAction, ... });
+    page.goto(ZONE_ID, { items, role, config });
   });
 
-  // 결정 테이블의 각 행 → it() 1개
-
-  it("#N [물리적입력] at [OS조건+App조건] → [결과]", () => {
-    // Given
-    page.dispatch(page.OS_FOCUS({ zoneId, itemId: "s1" }));
-
-    // When — 물리적 입력만
-    page.keyboard.press("Enter");
-
-    // Then — 관찰 가능한 결과만
-    expect(page.focusedItemId()).toBe("g1");
+  it("#N [입력] → [결과]", () => {
+    page.keyboard.press("ArrowDown");
+    expect(page.focusedItemId()).toBe("item-2");
   });
 });
 ```
 
-**금지 목록**:
+#### Tier 2: 앱 통합 테스트 (Builder, Todo 등)
+
+> 실제 앱의 bind 경로를 검증. **dispatch 금지. click/press만 허용.**
+> **2번째 인자(UI Component) 필수.** Component 없으면 React 렌더 없음 = UI 결합 미검증.
+
+```ts
+/**
+ * @spec docs/1-project/[name]/spec.md
+ */
+import { createPage } from "@os/defineApp.page";
+import { BuilderApp } from "@apps/builder/app";
+import { BuilderUI } from "@apps/builder/BuilderUI"; // 실제 UI 컴포넌트
+
+describe("Feature: [태스크명]", () => {
+  let page: AppPage<BuilderState>;
+
+  beforeEach(() => {
+    page = createPage(BuilderApp, BuilderUI); // ← 2nd arg 필수
+    page.goto("zone-name");
+  });
+
+  it("#N [사용자 행동] → [결과]", () => {
+    page.click("trigger-id");
+    page.keyboard.press("ArrowDown");
+    expect(page.focusedItemId()).toBe("item-2");
+  });
+});
+```
+
+#### 도구 선택 기준
+
+| 질문 | 예 → | 아니오 → |
+|------|------|----------|
+| 앱의 Zone/bind/keybinding을 검증하는가? | **Tier 2** `createPage(App)` | **Tier 1** `createOsPage()` |
+
+#### 공통 금지 목록
+
+- ❌ `dispatch()` 직접 호출 (Tier 2에서 절대 금지. Tier 1에서도 가급적 회피)
 - ❌ 내부 함수 직접 호출 (`Keybindings.resolve()`, `createDrillDown()`, `resolveMouse()`)
 - ❌ `node:fs`, 동적 `import()`로 모듈 존재 테스트
 - ❌ 커맨드 팩토리 직접 호출 후 반환값 검사
-- ✅ `page.keyboard.press()` → `page.focusedItemId()` / `page.osState` / `page.computeAttrs()`
+- ✅ `page.click()`, `page.keyboard.press()` → `page.focusedItemId()` / `page.state` / `page.attrs()`
+
+> **⚠️ 거짓 GREEN 경고**: `createOsPage`로 앱 기능을 테스트하면 커널만 검증됨.
+> 브라우저에서 동작하지 않아도 테스트가 통과할 수 있다. (선례: dropdown-dismiss)
 
 ### Step 3: 🔴 FAIL 확인
 

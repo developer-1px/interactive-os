@@ -14,6 +14,7 @@
  */
 
 import { produce } from "immer";
+import { OS_OVERLAY_OPEN } from "@/os/3-commands/overlay/overlay";
 import {
   type CollectionNode,
   findAcceptingCollection,
@@ -192,6 +193,12 @@ export const BuilderSidebarUI = sidebarCollection.bind({
     tab: { behavior: "flow" },
   },
   keybindings: [...collectionBindings.keybindings],
+  triggers: [
+    {
+      id: "locale-switcher-trigger",
+      onActivate: OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
+    },
+  ],
 });
 
 // ═══════════════════════════════════════════════════════════════════

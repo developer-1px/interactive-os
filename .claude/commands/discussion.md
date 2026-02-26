@@ -45,26 +45,17 @@ description: Toulmin 기반 Expert Consulting. 숨겨진 Intent를 추출하고 
    | **🚀 Next** | Cynefin 게이트 + 논의 성격으로 예측한 다음 워크플로우 (아래 규칙 참조) |
    | **❓ Complex Gap** | 질문 (Complex일 때만) |
 
-4. **🚀 Next 판정 규칙** — Cynefin은 "준비됐나"의 게이트, 행선지는 "논의가 뭐였나"로 결정:
+4. **🚀 Next 판정 규칙** — Cynefin이 게이트:
 
-   **Gate (Cynefin)**:
    | Cynefin | 의미 | Next 행동 |
    |---------|------|-----------|
    | 🔴 **Complex** | 아직 수렴 안 됨 | `→ 계속 /discussion` (Gap 질문 계속) |
-   | 🟡 **Complicated** | 방향은 잡힘, 스코프 분해 필요 | `→ /project` |
-   | 🟢 **Clear** | 어디로 갈지 안다 | → `/plan` (MECE 점검표) → `/go` |
+   | 🟡 **Complicated** | 방향은 잡힘, 분해 필요 | `→ /divide` (Clear까지 분해) |
+   | 🟢 **Clear** | 뭘 할지 안다 | `→ /go` (파이프라인 자율 실행) |
 
-   **Clear일 때 — 논의 성격별 라우팅**:
-   | 논의 성격 | Next | 예시 |
-   |----------|------|------|
-   | 기존 프로젝트에 태스크 추가 | `→ /plan → /go` | "이 기능 추가하면 됨" |
-   | 새 프로젝트 필요 | `→ /project` | "새로 스코프 잡아야 함" |
-   | 유저 스토리 발견 | `→ /stories` | "이건 Product 레벨 스토리" |
-   | 긴급 수정 | `→ /plan → /go` | "지금 바로 고쳐야 함" |
-   | 참고 자료 | `→ /resource` | "나중에 읽어볼 것" |
-   | 아이디어 보관 | `→ /backlog` | "언젠가 할 것" |
+   > **/discussion의 exit은 항상 `/go`다.** `/go`가 `/plan` → 라우팅(`/project`·`/issue` 등) → 실행까지 자동 처리한다.
 
-   **표시 형식**: `| 🚀 Next | 🟢 Clear → /issue (기존 프로젝트 버그 수정) |`
+   **표시 형식**: `| 🚀 Next | 🟢 Clear → /go |`
 
 5. **Expert Toolkit** — 매 턴 적절한 기법을 선택하여 전문가 수준의 지적 기여를 더한다:
 

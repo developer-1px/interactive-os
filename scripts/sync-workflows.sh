@@ -23,6 +23,7 @@ DRY=false
 added=0
 updated=0
 unchanged=0
+removed=0
 skipped_names=()
 
 # 임시 디렉토리
@@ -61,10 +62,28 @@ while IFS= read -r src_file; do
   fi
 done < <(find "$SRC" -name '*.md' -type f | sort)
 
+# .claude/commands/ 에만 있고 .agent/workflows/ 에 없는 파일 제거
+# (workflows에서 삭제된 파일을 commands에서도 삭제)
+src_names="$tmp/_src_names"
+find "$SRC" -name '*.md' -type f -exec basename {} \; | sort -u > "$src_names"
+
+for dst_file in "$DST"/*.md; do
+  [[ -f "$dst_file" ]] || continue
+  filename="$(basename "$dst_file")"
+  if ! grep -qxF "$filename" "$src_names"; then
+    echo "  REMOVE  $filename"
+    if [[ "$DRY" == false ]]; then
+      rm "$dst_file"
+    fi
+    ((removed++))
+  fi
+done
+
 echo ""
 echo "--- sync summary ---"
 echo "  added:     $added"
 echo "  updated:   $updated"
+echo "  removed:   $removed"
 echo "  unchanged: $unchanged"
 
 if [[ "$DRY" == true ]]; then

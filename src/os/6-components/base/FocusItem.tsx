@@ -175,23 +175,11 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
       }
     }, [isActiveFocused, isVirtualFocus]);
 
-    // --- Sync disabled prop → registry (declaration, not action) ---
-    useLayoutEffect(() => {
-      if (!disabled) return;
-      ZoneRegistry.setDisabled(zoneId, id, true);
-      return () => {
-        ZoneRegistry.setDisabled(zoneId, id, false);
-      };
-    }, [zoneId, id, disabled]);
+    // disabled sync: removed — no consumers pass disabled prop to FocusItem.
+    // When needed, use push model (zone.bind) like onActivate.
 
-    // --- Sync onActivate → ZoneRegistry (per-item callback) ---
-    useLayoutEffect(() => {
-      if (!onActivate) return;
-      ZoneRegistry.setItemCallback(zoneId, id, { onActivate });
-      return () => {
-        ZoneRegistry.clearItemCallback(zoneId, id);
-      };
-    }, [zoneId, id, onActivate]);
+    // onActivate registration: handled by push model (zone.bind triggers → goto).
+    // FocusItem no longer registers callbacks via useLayoutEffect.
 
     const isAnchor = isFocused && !isGroupActive;
 

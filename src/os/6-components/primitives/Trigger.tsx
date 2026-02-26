@@ -106,7 +106,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     },
     ref,
   ) => {
-    const dispatch = customDispatch || ((cmd: BaseCommand) => os.dispatch(cmd));
+    // dispatch removed — OS pipeline handles all commands via PointerListener
 
     // Use explicit overlayId if provided, otherwise auto-generate
     // biome-ignore lint/correctness/useExhaustiveDependencies: overlayRole intentionally excluded — ID must be stable
@@ -128,16 +128,9 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         e.stopPropagation();
       }
 
-      // Browser path: dispatch overlay open on click
-      // (headless uses FocusItem.onActivate instead — both paths are valid)
-      if (overlayOpenCmd) {
-        os.dispatch(overlayOpenCmd);
-      }
-
-      // Also dispatch onActivate command if provided
-      if (onActivate) {
-        dispatch(onActivate);
-      }
+      // OS_OVERLAY_OPEN is dispatched via OS pipeline:
+      // PointerListener → resolveClick → OS_ACTIVATE → onActivate(=overlayOpenCmd)
+      // No direct dispatch needed here.
 
       onClick?.(e as ReactMouseEvent<HTMLElement>);
     };

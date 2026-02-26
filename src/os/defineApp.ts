@@ -253,6 +253,7 @@ export function defineApp<S>(
           bindings: config,
           keybindings: config.keybindings ?? [],
           field: config.field,
+          triggers: config.triggers,
         });
 
         return createBoundComponents(
@@ -325,8 +326,8 @@ export function defineApp<S>(
         factory: CommandFactory<string, P>,
       ): React.FC<
         P extends void
-          ? { children: ReactNode; payload?: never }
-          : { children: ReactNode; payload: P }
+        ? { children: ReactNode; payload?: never }
+        : { children: ReactNode; payload: P }
       >;
       /* Command Overload: Returns simple component */
       (

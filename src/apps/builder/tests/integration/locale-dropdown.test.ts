@@ -13,7 +13,6 @@ import { BuilderApp } from "@apps/builder/app";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import {
     OS_OVERLAY_CLOSE,
-    OS_OVERLAY_OPEN,
 } from "@os/3-commands/overlay/overlay";
 import { resolveRole } from "@os/registries/roleRegistry";
 import { createPage } from "@os/defineApp.page";
@@ -35,12 +34,9 @@ let page: Page;
 beforeEach(() => {
     page = createPage(BuilderApp);
 
-    // -- Setup: Register trigger's onActivate callback --
-    // In browser: FocusItem mount → Zone context → ZoneRegistry.setItemCallback
-    // In headless: no React lifecycle, so we register manually
-    ZoneRegistry.setItemCallback("sidebar", "locale-switcher-trigger", {
-        onActivate: OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
-    });
+    // Push model: goto("sidebar") auto-registers trigger callbacks
+    // from sidebar.bind({ triggers: [...] }) — no manual setup needed!
+    page.goto("sidebar");
 
     // -- Setup: Register menu zone --
     // In browser: Trigger.Portal → Zone mount → ZoneRegistry.register

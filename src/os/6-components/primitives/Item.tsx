@@ -1,6 +1,3 @@
-import { OS_EXPAND } from "@os/3-commands/expand";
-import { OS_FOCUS } from "@os/3-commands/focus";
-import { OS_CHECK } from "@os/3-commands/interaction/check";
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
@@ -167,20 +164,13 @@ function ItemExpandTrigger({
 }: ExpandTriggerProps) {
   const { zoneId, itemId } = useItemContext();
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent Item's onAction from firing
-    os.dispatch(OS_FOCUS({ zoneId, itemId, skipSelection: true }));
-    os.dispatch(OS_EXPAND({ itemId, zoneId }));
-  };
+  // PointerListener handles click → OS_EXPAND via data-expand-trigger attribute.
+  // No React onClick needed.
 
   if (asChild && isValidElement(children)) {
     const child = children as React.ReactElement<any>;
     const mergedProps = {
       "data-expand-trigger": true,
-      onClick: (e: React.MouseEvent) => {
-        child.props.onClick?.(e);
-        handleClick(e);
-      },
       className:
         [child.props.className, className].filter(Boolean).join(" ") ||
         undefined,
@@ -189,7 +179,7 @@ function ItemExpandTrigger({
   }
 
   return (
-    <div data-expand-trigger className={className} onClick={handleClick}>
+    <div data-expand-trigger className={className}>
       {children}
     </div>
   );
@@ -198,7 +188,7 @@ function ItemExpandTrigger({
 ItemExpandTrigger.displayName = "Item.ExpandTrigger";
 
 // ═══════════════════════════════════════════════════════════════════
-// Item.CheckTrigger — click dispatches OS_CHECK for parent Item
+// Item.CheckTrigger — PointerListener dispatches OS_CHECK for parent Item
 // ═══════════════════════════════════════════════════════════════════
 
 interface CheckTriggerProps {
@@ -208,22 +198,13 @@ interface CheckTriggerProps {
 }
 
 function ItemCheckTrigger({ children, asChild, className }: CheckTriggerProps) {
-  const { zoneId, itemId } = useItemContext();
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    os.dispatch(OS_FOCUS({ zoneId, itemId, skipSelection: true }));
-    os.dispatch(OS_CHECK({ targetId: itemId }));
-  };
+  // PointerListener handles click → OS_CHECK via data-check-trigger attribute.
+  // No React onClick needed.
 
   if (asChild && isValidElement(children)) {
     const child = children as React.ReactElement<any>;
     return cloneElement(child, {
       "data-check-trigger": true,
-      onClick: (e: React.MouseEvent) => {
-        child.props.onClick?.(e);
-        handleClick(e);
-      },
       className:
         [child.props.className, className].filter(Boolean).join(" ") ||
         undefined,
@@ -231,7 +212,7 @@ function ItemCheckTrigger({ children, asChild, className }: CheckTriggerProps) {
   }
 
   return (
-    <div data-check-trigger className={className} onClick={handleClick}>
+    <div data-check-trigger className={className}>
       {children}
     </div>
   );

@@ -53,9 +53,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-      state: S;
-      dispatch?: BaseCommand | BaseCommand[] | undefined;
-    }
+    state: S;
+    dispatch?: BaseCommand | BaseCommand[] | undefined;
+  }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -67,6 +67,18 @@ export type FlatHandler<S, P> = (
 // ═══════════════════════════════════════════════════════════════════
 // Zone Bindings
 // ═══════════════════════════════════════════════════════════════════
+
+/**
+ * TriggerBinding — declarative item-level callback registration.
+ * Push model: declared in zone.bind(), auto-registered by goto().
+ * Replaces FocusItem useLayoutEffect pull model.
+ */
+export interface TriggerBinding {
+  /** Item ID (must match FocusItem/Trigger id prop) */
+  id: string;
+  /** Command to dispatch on activation (Enter key or click) */
+  onActivate: BaseCommand;
+}
 
 export interface ZoneBindings {
   role: ZoneRole;
@@ -91,6 +103,8 @@ export interface ZoneBindings {
     overItemId: string;
     position: "before" | "after";
   }) => void;
+  /** Declarative item-level callbacks — push model for headless */
+  triggers?: TriggerBinding[];
 }
 
 export interface FieldBindings {
@@ -125,13 +139,13 @@ export interface BoundComponents<S> {
     id: string | number;
     className?: string;
     children?:
-      | ReactNode
-      | ((state: {
-          isFocused: boolean;
-          isSelected: boolean;
-          isExpanded: boolean;
-          isAnchor?: boolean;
-        }) => ReactNode);
+    | ReactNode
+    | ((state: {
+      isFocused: boolean;
+      isSelected: boolean;
+      isExpanded: boolean;
+      isAnchor?: boolean;
+    }) => ReactNode);
     asChild?: boolean;
   }>;
   Field: React.FC<{
@@ -260,8 +274,8 @@ export interface AppHandle<S> {
     factory: CommandFactory<string, P>,
   ): React.FC<
     P extends void
-      ? { children: ReactNode; payload?: never }
-      : { children: ReactNode; payload: P }
+    ? { children: ReactNode; payload?: never }
+    : { children: ReactNode; payload: P }
   >;
   createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;

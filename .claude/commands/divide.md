@@ -1,114 +1,114 @@
 ---
-description: 실행 없이 Cynefin 분해 보고서만 작성한다. /solve의 입력을 만든다.
+description: Goal에서 역추적하여 Work Package를 도출한다. /solve의 입력을 만든다.
 ---
 
-## /divide — Technical Spike · MECE Issue Tree
+## /divide — Goal-Driven Backward Chaining Spike
 
-> **What**: Cynefin-guided Technical Spike (XP) that produces a MECE Issue Tree decomposed to Work Package level (WBS).
-> **Output**: Issue Tree where every leaf node is Clear + Hypothesis Statement per leaf.
-> **Constraint**: No code changes. No user interaction mid-process. Minimum 3 iterations.
+> **What**: 목표에서 역추적하여 미충족 전제조건을 재귀적으로 분해.
+> **Output**: 모든 leaf가 ✅(충족) 또는 🔨(Work Package)인 전제조건 트리.
+> **Constraint**: 코드 변경 없음. 최소 3 iteration. 모든 판정에 코드 증거.
 
 ### Theoretical Basis
 
-| Framework | Source | Role in /divide |
-|-----------|--------|----------------|
-| **Cynefin** | Dave Snowden | Domain assessment per node (Clear / Complicated / Complex) |
-| **WBS Decomposition** | PMI PMBOK | Decompose until every leaf is a Work Package |
-| **MECE** | McKinsey | Decomposition dimension must be Mutually Exclusive, Collectively Exhaustive |
-| **Issue Tree** | Strategy Consulting | Recursive branching structure for problem decomposition |
-| **Spike** | Extreme Programming | Deliverable is knowledge, not code |
-| **Empiricism** | Scrum | Every assessment must be evidence-based — no speculation |
+| Framework | Source | Role |
+|-----------|--------|------|
+| **Backward Chaining** | AI/Logic Programming | Goal → 전제조건 역추론 |
+| **Problem Framing** | Optimization Theory | Constraints / Variables / Objective 구분 |
+| **Empiricism** | Scrum | 모든 판정은 코드 증거 기반 |
+
+### Step 0: Problem Framing
+
+Goal, Constraints, Variables를 정의한다.
+
+1. **먼저 스스로 추론한다**:
+   - BOARD.md, discussion, 대화 맥락, 코드를 읽고 3요소를 추론
+   - 각 항목에 **확신도**를 표기: 🟢 확실 / 🟡 추정 / 🔴 모름
+
+2. **추론한 전제로 Procedure를 끝까지 실행한다** (중간에 멈추지 않음)
+
+3. **Report 완성 후** 🟡/🔴 항목이 있으면 결과와 함께 확인:
+   "이 전제로 분해했습니다. 🟡 항목이 맞는지 확인해주세요."
 
 ### Procedure
 
 ```
 begin spike:
-  queue ← [initial problem as root node]
-  iteration ← 0
+  goal ← Objective (Step 0에서 확정)
 
-  while (queue has Complicated or Complex nodes) {
+  function solve(subgoal, depth):
 
-    node ← select node with max uncertainty (triage)
+    // 1. 이미 충족인가?
+    evidence ← grep_search / view_file로 코드 확인
+    if subgoal is satisfied:
+      return ✅ Clear
 
-    // — Cynefin Domain Assessment —
-    match classify(node):
+    // 2. 이게 되려면 뭐가 필요한가? (역추론)
+    preconditions ← "이 subgoal이 충족되려면?" 분해
+    // 각 precondition은 MECE
 
-      case Complex:
-        // Probe–Sense–Respond (Cynefin PSR)
-        probe   → view_file_outline to map structure
-        sense   → choose MECE decomposition dimension
-                   (module / responsibility / layer / state)
-        respond → branch Issue Tree → enqueue child nodes
+    // 3. constraints 위반 체크
+    for each precondition:
+      if precondition violates Constraints:
+        flag ⚠️ conflict → 대안 탐색
 
-      case Complicated:
-        // Sense–Analyze–Respond (Cynefin SAR)
-        sense   → grep_search to trace code paths
-        analyze → view_file to confirm logic
-        respond → reclassify as Clear, record Hypothesis Statement (1 sentence)
+    // 4. 각 precondition을 재귀
+    for each precondition:
+      solve(precondition, depth + 1)
 
-      case Clear:
-        // Verify — view_code_item to validate hypothesis
-        record Hypothesis Statement + code location as evidence
+    // leaf: 더 분해할 수 없고 미충족 → Work Package
+    return 🔨 Work Package
 
-    iteration++
-  }
-
-  // Progressive Elaboration gate
-  if (iteration < 3) {
-    // Verification iteration: re-validate Clear nodes against code
-    continue loop
-  }
-
+  solve(goal, 0)
 end spike → deliver report
 ```
 
 ### Code Investigation Protocol
 
-**Evidence-based assessment — no speculation.** Every iteration must include reading actual code.
+| 판정 | Tool | 목적 |
+|------|------|------|
+| 충족 여부 | `grep_search` → `view_file` | subgoal이 이미 코드에 존재하는가? |
+| 전제조건 도출 | `view_file_outline` | 구조를 보고 역추론 |
+| 증거 확정 | `view_code_item` | 충족/미충족 근거 |
 
-| Cynefin Domain | Cynefin Cycle | Tool | Goal |
-|----------------|---------------|------|------|
-| Complex | Probe–Sense–Respond | `view_file_outline` | Choose MECE dimension → branch |
-| Complicated | Sense–Analyze–Respond | `grep_search` → `view_file` | Reclassify as Clear |
-| Clear | Verify | `view_code_item` | Validate Hypothesis Statement |
-
-### Report Output
-
-**저장 경로**: `docs/1-project/[project-name]/REPORT.md`
-- BOARD.md가 있는 프로젝트 폴더와 같은 레벨에 생성한다.
-- 이미 REPORT.md가 존재하면 덮어쓴다 (최신 분석이 우선).
-- 프로젝트 폴더를 특정할 수 없으면 사용자에게 한 번만 확인한다.
-
-### Report Format (Issue Tree)
+### Report Format
 
 ```markdown
-## /divide Report — [Topic]
+## /divide Report — [Goal 1문장]
 
-### Iteration Log
+### Problem Frame
 
-| # | Node | Before | After | Cynefin Cycle | Action |
-|---|------|--------|-------|---------------|--------|
-| 1 | [node] | Complex | → 3 children | PSR | MECE split by [dimension] |
-| 2 | [child] | Complicated | Clear | SAR | Found [what] in [file] |
-| 3 | [child] | Clear | Clear (verified) | Verify | Confirmed at [file:line] |
+| | 내용 |
+|---|------|
+| **Objective** | ... |
+| **Constraints** | ... |
+| **Variables** | ... |
 
-### Issue Tree (Final)
+### Backward Chain
 
-| Leaf Node (Work Package) | Hypothesis Statement | Evidence (code location) |
-|--------------------------|---------------------|------------------------|
-| A | ... | `path/to/file.ts:L42` |
-| B | ... | `path/to/file.ts:L100` |
+| Depth | Subgoal | 충족? | Evidence | 미충족 시 전제조건 |
+|-------|---------|-------|----------|--------------------|
+| 0 | [goal] | ❌ | — | → A, B |
+| 1 | A | ✅ | `file:L42` | — |
+| 1 | B | ❌ | — | → B1, B2 |
+| 2 | B1 | ✅ | `file:L100` | — |
+| 2 | B2 | ❌ | — | 🔨 Work Package |
+
+### Work Packages
+
+| WP | Subgoal | 왜 필요한가 (chain) | Evidence |
+|----|---------|-------------------|----------|
+| B2 | ... | Goal ← B ← B2 | `file:L200` |
 
 ### Residual Uncertainty
 
-- (none, or list remaining unknowns)
+- (none, or list)
 ```
 
 ### Definition of Done
 
-- [ ] Every leaf node is Clear (Work Package level)
-- [ ] Minimum 3 iterations completed (Progressive Elaboration)
-- [ ] Every iteration includes code reading (Evidence recorded)
-- [ ] MECE validation: leaf nodes collectively exhaust the problem
-- [ ] No user interaction during spike (Spike principle)
-- [ ] Report saved to `docs/1-project/[project-name]/REPORT.md`
+- [ ] Problem Frame 3요소 확정 (Objective, Constraints, Variables)
+- [ ] 모든 leaf가 ✅ 또는 🔨
+- [ ] 최소 depth 3 도달
+- [ ] 모든 판정에 코드 증거
+- [ ] Constraints 위반 없음 (또는 ⚠️ flagged)
+- [ ] Report 저장: `docs/1-project/[project-name]/REPORT.md`

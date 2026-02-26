@@ -53,6 +53,7 @@ export interface ZoneBindingEntry {
   bindings: ZoneBindings;
   keybindings?: KeybindingEntry<any>[];
   field?: FieldBindings;
+  triggers?: import("./defineApp.types").TriggerBinding[];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -115,7 +116,7 @@ export function createAppPage<S>(
   });
 
   // Override browser-only effects for headless (no navigator.clipboard)
-  os.defineEffect("clipboardWrite", () => {});
+  os.defineEffect("clipboardWrite", () => { });
 
   // ── Enter preview sandbox ──
   os.enterPreview({
@@ -165,6 +166,16 @@ export function createAppPage<S>(
           ? { getTreeLevels: bindings.getTreeLevels }
           : {}),
       });
+
+      // Push model: auto-register item-level callbacks from triggers
+      // (replaces FocusItem useLayoutEffect pull model for headless)
+      if (bindingEntry.triggers) {
+        for (const trigger of bindingEntry.triggers) {
+          ZoneRegistry.setItemCallback(zoneName, trigger.id, {
+            onActivate: trigger.onActivate,
+          });
+        }
+      }
     }
 
     // Register zone keybindings in the global Keybindings registry
