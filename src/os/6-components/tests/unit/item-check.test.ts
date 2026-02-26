@@ -20,7 +20,7 @@ function listFactory(focusedItem = "todo-1") {
   const onAction = vi.fn();
   const page = createOsPage();
   page.setItems(LIST_ITEMS);
-  page.setRole("todo-list", "list", { onCheck, onAction });
+  page.setRole("todo-list", "listbox", { onCheck, onAction });
   page.setConfig({
     navigate: {
       orientation: "vertical",

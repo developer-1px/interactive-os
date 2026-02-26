@@ -37,6 +37,7 @@ describe("T6: DocsViewer — navigation via OS selectDoc command", () => {
       items: ["docs/readme.md", "docs/guide.md", "docs/api.md"],
       onAction: (cursor) => {
         selectSpy(cursor.focusId);
+        return [];
       },
     });
 

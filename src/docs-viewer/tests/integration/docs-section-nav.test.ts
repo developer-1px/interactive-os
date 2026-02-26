@@ -52,7 +52,7 @@ describe("T1 Integration: Space/Shift+Space through full keyboard pipeline", () 
 
     // Register scrollSection effect in the zone scope
     scrollSectionSpy = vi.fn();
-    zoneGroup.defineEffect("scrollSection", scrollSectionSpy);
+    zoneGroup.defineEffect("scrollSection", scrollSectionSpy as (value: any) => void);
 
     // Register app keybindings (same as defineApp.bind.ts useEffect)
     unregisterKeybindings = Keybindings.registerAll([

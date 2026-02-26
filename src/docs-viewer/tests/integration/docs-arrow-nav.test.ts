@@ -48,7 +48,7 @@ describe("T2: Arrow navigation triggers DOCS_NEXT/PREV_SECTION", () => {
     }));
 
     scrollSectionSpy = vi.fn();
-    zoneGroup.defineEffect("scrollSection", scrollSectionSpy);
+    zoneGroup.defineEffect("scrollSection", scrollSectionSpy as (value: any) => void);
 
     // Middleware: intercept OS_NAVIGATE → dispatch DOCS command
     // Uses `dispatch` effect to dispatch a new command with correct scope,

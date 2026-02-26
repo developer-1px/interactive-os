@@ -168,20 +168,30 @@ DialogContent.displayName = "Dialog.Content";
 // Dialog.Close
 // ═══════════════════════════════════════════════════════════════════
 
-export interface DialogCloseProps
-  extends React.HTMLAttributes<HTMLButtonElement> {
+export interface DialogCloseProps {
   /** Optional command to dispatch before closing */
   onActivate?: BaseCommand;
   /** Button content */
   children: ReactNode;
+  /** Optional className */
+  className?: string;
+  /** Optional id */
+  id?: string;
 }
 
 /**
  * Dialog.Close — closes the nearest dialog.
  * Internally: Trigger.Dismiss
  */
-function DialogClose({ children, ...props }: DialogCloseProps) {
-  return <Trigger.Dismiss {...props}>{children}</Trigger.Dismiss>;
+function DialogClose({ children, onActivate, ...rest }: DialogCloseProps) {
+  return (
+    <Trigger.Dismiss
+      {...(onActivate !== undefined ? { onActivate } : {})}
+      {...rest}
+    >
+      {children}
+    </Trigger.Dismiss>
+  );
 }
 
 DialogClose.displayName = "Dialog.Close";

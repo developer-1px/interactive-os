@@ -30,7 +30,7 @@ interface WithHistory {
     future: any[];
   };
   data: unknown;
-  ui: unknown;
+  ui?: unknown;
 }
 
 // ═══════════════════════════════════════════════════════════════════

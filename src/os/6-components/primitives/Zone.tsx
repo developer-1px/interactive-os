@@ -126,7 +126,7 @@ export interface ZoneProps
     itemId: string;
     overItemId: string;
     position: "before" | "after";
-  }) => void;
+  }) => BaseCommand | BaseCommand[];
   /** Children */
   children: ReactNode;
 }

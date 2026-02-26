@@ -32,6 +32,7 @@ describe("T5: DocsDashboard — selectDoc via OS command", () => {
       items: ["0-inbox/note1.md", "0-inbox/note2.md"],
       onAction: (cursor) => {
         selectDocSpy(cursor.focusId);
+        return [];
       },
     });
 

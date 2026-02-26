@@ -52,6 +52,7 @@ import {
   FileCode,
   FileCog,
   FileImage,
+  FileJson,
   FileText,
   FlaskConical,
   // File/Folder icons
@@ -145,6 +146,7 @@ export const icons = {
   "file-code": FileCode,
   "file-cog": FileCog,
   "file-image": FileImage,
+  "file-json": FileJson,
 
   // Navigation
   "chevron-right": ChevronRight,
