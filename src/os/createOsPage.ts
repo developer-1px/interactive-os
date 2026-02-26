@@ -106,6 +106,8 @@ export interface OsPage {
   // ── OS-specific advanced helpers ──
   setItems(items: string[]): void;
   setRects(rects: Map<string, DOMRect>): void;
+  /** Generate grid rects for 2D spatial navigation testing */
+  setGrid(opts: { cols: number; itemWidth?: number; itemHeight?: number; gap?: number }): void;
   setConfig(config: Partial<FocusGroupConfig>): void;
   setRole(
     zoneId: string,
@@ -267,6 +269,16 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     mockItems.current = items;
   }
   function setRects(rects: Map<string, DOMRect>) {
+    mockRects.current = rects;
+  }
+  function setGrid(opts: { cols: number; itemWidth?: number; itemHeight?: number; gap?: number }) {
+    const { cols, itemWidth = 100, itemHeight = 40, gap = 0 } = opts;
+    const rects = new Map<string, DOMRect>();
+    mockItems.current.forEach((id, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      rects.set(id, new DOMRect(col * (itemWidth + gap), row * (itemHeight + gap), itemWidth, itemHeight));
+    });
     mockRects.current = rects;
   }
   function setConfig(config: Partial<FocusGroupConfig>) {
@@ -460,6 +472,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     // OS-specific
     setItems,
     setRects,
+    setGrid,
     setConfig,
     setRole,
     setExpandableItems,
