@@ -6,6 +6,7 @@
  */
 
 import type {
+  ElementQuery,
   KeyModifiers,
   Selector,
   TestActions,
@@ -16,6 +17,9 @@ import {
   getUniqueSelector,
   resolveElement,
 } from "../features/actions/selectors";
+
+/** Internal extension: ElementQuery with scoped parent CSS for child search */
+type ScopedSelector = ElementQuery & { _parentCSS?: string };
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
@@ -51,7 +55,7 @@ function resolveToCSS(selector: Selector): string | null {
   if (typeof selector === "string") return selector;
 
   // Scoped search: _parentCSS constrains to children of parent element
-  const parentCSS = (selector as any)._parentCSS as string | undefined;
+  const parentCSS = (selector as ScopedSelector)._parentCSS as string | undefined;
   const scope = parentCSS ? document.querySelector(parentCSS) : document;
 
   if (!scope) return null;
@@ -115,14 +119,14 @@ export interface Page {
   locator(selector: string): Locator;
   getByRole(role: string, options?: { name?: string }): Locator;
   getByText(text: string): Locator;
-  on(event: string, handler: (...args: any[]) => void): void;
+  on(event: string, handler: (...args: unknown[]) => void): void;
   waitForSelector(
     selector: string,
     options?: { timeout?: number },
   ): Promise<void>;
   waitForFunction(
-    fn: (...args: any[]) => any,
-    arg?: any,
+    fn: (...args: unknown[]) => unknown,
+    arg?: unknown,
     options?: { timeout?: number },
   ): Promise<void>;
   keyboard: {
@@ -163,7 +167,7 @@ export class ShimPage implements Page {
   }
 
   // No-op: browser-side TestBot doesn't need Playwright event hooks
-  on(_event: string, _handler: (...args: any[]) => void) {
+  on(_event: string, _handler: (...args: unknown[]) => void) {
     // Silently ignore page.on("pageerror") / page.on("console") etc.
   }
 
@@ -182,8 +186,8 @@ export class ShimPage implements Page {
 
   // No-op: content is already rendered in-browser
   async waitForFunction(
-    _fn: (...args: any[]) => any,
-    _arg?: any,
+    _fn: (...args: unknown[]) => unknown,
+    _arg?: unknown,
     _options?: { timeout?: number },
   ) {
     // Silently ignore — TestBot doesn't need to wait for render
@@ -299,7 +303,7 @@ export class ShimLocator implements Locator {
     const parentCSS = typeof this.selector === "string" ? this.selector : null;
     if (parentCSS) {
       // Use a virtual selector that resolveToCSS will handle at action time
-      return new ShimLocator(this.t, { text, _parentCSS: parentCSS } as any);
+      return new ShimLocator(this.t, { text, _parentCSS: parentCSS } as ScopedSelector);
     }
     return new ShimLocator(this.t, { text });
   }
@@ -314,7 +318,7 @@ export class ShimLocator implements Locator {
         role,
         name: options?.name,
         _parentCSS: parentCSS,
-      } as any);
+      } as ScopedSelector);
     }
     return new ShimLocator(this.t, { role, ...options });
   }
@@ -330,7 +334,7 @@ export class ShimLocator implements Locator {
       return findAllByText(this.selector.text);
     }
     if ("role" in this.selector && this.selector.role) {
-      const parentCSS = (this.selector as any)._parentCSS as string | undefined;
+      const parentCSS = (this.selector as ScopedSelector)._parentCSS as string | undefined;
       const scope = parentCSS ? document.querySelector(parentCSS) : document;
       if (!scope) return [];
       const results: Element[] = [];
@@ -397,7 +401,7 @@ export class ShimLocator implements Locator {
 // Duck-type check: ShimLocator has both `selector` and `t` properties.
 // We avoid `instanceof` because Vite HMR can create duplicate module
 // instances, causing `instanceof ShimLocator` to fail across boundaries.
-const isLocator = (v: any): v is ShimLocator =>
+const isLocator = (v: unknown): v is ShimLocator =>
   v != null && typeof v === "object" && "selector" in v && "t" in v;
 
 /**
@@ -427,7 +431,7 @@ async function resolveWithRetry(
   }
 }
 
-export const expect = (locatorOrPage: Locator | Page | any) => {
+export const expect = (locatorOrPage: Locator | Page | unknown) => {
   // If passed a Locator (duck-typed)
   if (isLocator(locatorOrPage)) {
     const selector = locatorOrPage.selector;
@@ -435,7 +439,7 @@ export const expect = (locatorOrPage: Locator | Page | any) => {
 
     return {
       resolves: {
-        toBe: () => {}, // stub
+        toBe: () => { }, // stub
       },
       toBeFocused: async () => {
         const css = await resolveWithRetry(selector);
@@ -505,20 +509,20 @@ export const expect = (locatorOrPage: Locator | Page | any) => {
   }
 
   // Primitive expect: expect(value).toBe / toBeLessThan / toBeGreaterThan
-  const primitiveValue = locatorOrPage as any;
+  const primitiveValue = locatorOrPage as unknown;
   return {
-    toBe: (expected: any) => {
+    toBe: (expected: unknown) => {
       if (primitiveValue !== expected)
         throw new Error(`Expected ${expected}, got ${primitiveValue}`);
     },
     toBeLessThan: (expected: number) => {
-      if (!(primitiveValue < expected))
+      if (!((primitiveValue as number) < expected))
         throw new Error(
           `Expected ${primitiveValue} to be less than ${expected}`,
         );
     },
     toBeGreaterThan: (expected: number) => {
-      if (!(primitiveValue > expected))
+      if (!((primitiveValue as number) > expected))
         throw new Error(
           `Expected ${primitiveValue} to be greater than ${expected}`,
         );
