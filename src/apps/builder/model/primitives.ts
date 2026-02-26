@@ -212,11 +212,15 @@ export function decode(type: PrimitiveType, raw: string): PrimitiveValue {
     case "button": {
       const parsed = tryParseJSON(raw);
       if (parsed) {
+        const action = parsed["action"];
+        const href = parsed["href"];
         return {
           type: "button",
-          text: parsed.text ?? raw,
-          href: parsed.href,
-          action: parsed.action,
+          text: parsed["text"] ?? raw,
+          ...(href !== undefined ? { href } : {}),
+          ...(action === "link" || action === "scroll" || action === "modal" || action === "submit"
+            ? { action }
+            : {}),
         };
       }
       // Fallback: raw string is the button text (backward compat with PoC data)
@@ -226,11 +230,12 @@ export function decode(type: PrimitiveType, raw: string): PrimitiveValue {
     case "link": {
       const parsed = tryParseJSON(raw);
       if (parsed) {
+        const target = parsed["target"];
         return {
           type: "link",
-          text: parsed.text ?? "",
-          href: parsed.href ?? "",
-          target: parsed.target,
+          text: parsed["text"] ?? "",
+          href: parsed["href"] ?? "",
+          ...(target === "_blank" || target === "_self" ? { target } : {}),
         };
       }
       return { type: "link", text: raw, href: "" };
@@ -239,7 +244,9 @@ export function decode(type: PrimitiveType, raw: string): PrimitiveValue {
     case "image": {
       const parsed = tryParseJSON(raw);
       if (parsed) {
-        return { type: "image", src: parsed.src ?? raw, alt: parsed.alt };
+        const src = parsed["src"] ?? raw;
+        const alt = parsed["alt"];
+        return { type: "image", src, ...(alt !== undefined ? { alt } : {}) };
       }
       return { type: "image", src: raw };
     }
