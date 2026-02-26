@@ -46,7 +46,7 @@ function navTreeFactory(focusedItem = "folder:docs") {
       typeahead: false,
       entry: "first",
       recovery: "next",
-        arrowExpand: false,
+      arrowExpand: false,
     },
     select: {
       mode: "single",
@@ -56,7 +56,9 @@ function navTreeFactory(focusedItem = "folder:docs") {
       toggle: false,
     },
     activate: {
+      mode: "manual",
       onClick: true,
+      reClickOnly: false,
     },
   });
   page.setActiveZone("nav-tree", focusedItem);

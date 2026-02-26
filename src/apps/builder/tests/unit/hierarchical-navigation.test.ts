@@ -217,6 +217,9 @@ describe("hierarchicalNavigation — OS item queries", () => {
         focusId: "nonexistent",
         selection: [],
         anchor: null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
       });
       if (!Array.isArray(result)) {
         expect(result.type).toBe("OS_ESCAPE");

@@ -77,11 +77,9 @@ export function LocaleSwitcher() {
               <FocusItem key={code} id={`locale-option-${code}`} asChild>
                 <Trigger.Dismiss
                   id={`locale-option-${code}`}
-                  onActivate={
-                    !isActive
-                      ? setLocaleCommand({ locale: code })
-                      : undefined
-                  }
+                  {...(!isActive
+                    ? { onActivate: setLocaleCommand({ locale: code }) }
+                    : {})}
                 >
                   <li
                     role="option"

@@ -33,7 +33,7 @@ describe("T6: DocsViewer — navigation via OS selectDoc command", () => {
 
     // Folder index zone
     page.goto("docs-folder-index", {
-      role: "list",
+      role: "listbox",
       items: ["docs/readme.md", "docs/guide.md", "docs/api.md"],
       onAction: (cursor) => {
         selectSpy(cursor.focusId);

@@ -28,7 +28,7 @@ describe("T5: DocsDashboard — selectDoc via OS command", () => {
   beforeEach(() => {
     page = createOsPage();
     page.goto("docs-dashboard-inbox", {
-      role: "list",
+      role: "listbox",
       items: ["0-inbox/note1.md", "0-inbox/note2.md"],
       onAction: (cursor) => {
         selectDocSpy(cursor.focusId);

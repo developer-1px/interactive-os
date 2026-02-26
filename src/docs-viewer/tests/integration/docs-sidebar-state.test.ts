@@ -26,7 +26,7 @@ describe("T4: DocsSidebar — isOpen via OS command (not useState)", () => {
   beforeEach(() => {
     page = createOsPage();
     page.goto("docs-sidebar-recent", {
-      role: "list",
+      role: "listbox",
       items: ["recent-1", "recent-2", "recent-3"],
     });
 

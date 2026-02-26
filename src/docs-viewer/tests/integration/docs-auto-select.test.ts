@@ -24,7 +24,7 @@ describe("T7: DocsViewer — auto-select via selectDoc command", () => {
   beforeEach(() => {
     page = createOsPage();
     page.goto("docs-auto-select", {
-      role: "list",
+      role: "listbox",
       items: ["docs/first.md", "docs/second.md"],
     });
 

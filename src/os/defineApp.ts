@@ -126,6 +126,8 @@ export function defineApp<S>(
       role: import("./registries/roleRegistry").ZoneRole;
       bindings: ZoneBindings;
       keybindings?: import("./defineApp.types").KeybindingEntry<S>[];
+      field?: import("./defineApp.types").FieldBindings;
+      triggers?: import("./defineApp.types").TriggerBinding[];
     }
   >();
 
