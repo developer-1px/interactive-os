@@ -267,7 +267,7 @@ export function recordAssert(
     type: "assert",
     label,
     passed,
-    error,
+    ...(error !== undefined ? { error } : {}),
     snapshot: JSON.parse(JSON.stringify(os.getState())),
     timestamp: Date.now(),
   });

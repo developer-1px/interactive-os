@@ -70,13 +70,14 @@ export function withRecording<T extends RecordableKernel>(
     originalPressKey(key);
     const focusedAfter = kernel.focusedItemId();
 
+    const snapshot = captureSnapshot();
     steps.push({
       type: "pressKey",
       key,
       focusedBefore,
       focusedAfter,
       timestamp: Date.now() - startedAt,
-      snapshot: captureSnapshot(),
+      ...(snapshot !== undefined ? { snapshot } : {}),
     });
   }
 
@@ -88,12 +89,13 @@ export function withRecording<T extends RecordableKernel>(
     originalClick(itemId, opts);
     const focusedAfter = kernel.focusedItemId();
 
+    const snapshot = captureSnapshot();
     steps.push({
       type: "click",
       itemId,
       focusedAfter,
       timestamp: Date.now() - startedAt,
-      snapshot: captureSnapshot(),
+      ...(snapshot !== undefined ? { snapshot } : {}),
     });
   }
 
@@ -104,12 +106,13 @@ export function withRecording<T extends RecordableKernel>(
   function attrs(itemId: string, zoneId?: string): ItemAttrs {
     const result = originalAttrs(itemId, zoneId);
 
+    const snapshot = captureSnapshot();
     steps.push({
       type: "attrs",
       itemId,
       result: result as unknown as Record<string, unknown>,
       timestamp: Date.now() - startedAt,
-      snapshot: captureSnapshot(),
+      ...(snapshot !== undefined ? { snapshot } : {}),
     });
 
     return result;

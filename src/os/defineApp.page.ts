@@ -197,10 +197,12 @@ export function createAppPage<S>(
     if (field?.fieldName) {
       FieldRegistry.register(field.fieldName, {
         name: field.fieldName,
-        onCommit: field.onCommit,
-        trigger: field.trigger,
-        schema: field.schema,
-        resetOnSubmit: field.resetOnSubmit,
+        ...(field.onCommit !== undefined ? { onCommit: field.onCommit } : {}),
+        ...(field.trigger !== undefined ? { trigger: field.trigger } : {}),
+        ...(field.schema !== undefined ? { schema: field.schema } : {}),
+        ...(field.resetOnSubmit !== undefined
+          ? { resetOnSubmit: field.resetOnSubmit }
+          : {}),
         mode: "immediate",
         fieldType: "inline",
       });

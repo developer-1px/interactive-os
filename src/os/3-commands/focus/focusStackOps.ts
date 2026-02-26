@@ -61,7 +61,7 @@ export function applyFocusPush(
   draft.os.focus.focusStack.push({
     zoneId: activeZoneId ?? "",
     itemId: currentItemId,
-    index,
+    ...(index !== undefined ? { index } : {}),
     ...(opts?.triggeredBy !== undefined
       ? { triggeredBy: opts.triggeredBy }
       : {}),
@@ -99,7 +99,7 @@ export function applyFocusPop(draft: WritableDraft<AppState>): boolean {
       // Stale: item was deleted during overlay/stack session
       // Use entry.index as hint for neighbor resolution
       const resolved = resolveItemFallback(entry.itemId, items, {
-        index: entry.index,
+        ...(entry.index !== undefined ? { index: entry.index } : {}),
       });
       zone.focusedItemId = resolved;
       zone.lastFocusedId = resolved;

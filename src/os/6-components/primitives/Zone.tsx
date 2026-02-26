@@ -287,9 +287,9 @@ export function Zone({
           zoneId={zoneId}
           isActive={isActive}
           containerRef={containerRef}
-          role={role}
-          className={className}
-          style={style}
+          {...(role !== undefined ? { role } : {})}
+          {...(className !== undefined ? { className } : {})}
+          {...(style !== undefined ? { style } : {})}
           {...rest}
         >
           {children}

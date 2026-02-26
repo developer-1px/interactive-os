@@ -47,6 +47,7 @@ export function NCPPricingBlock({ id }: { id: string }) {
 
           <Builder.Item asChild id={`${id}-title`}>
             <Field.Editable
+              name={`${id}-title`}
               onCommit={createFieldCommit(id, "title")}
               value={fields["title"] || "Simple, transparent pricing"}
               mode="deferred"
@@ -59,6 +60,7 @@ export function NCPPricingBlock({ id }: { id: string }) {
 
           <Builder.Item asChild id={`${id}-sub`}>
             <Field.Editable
+              name={`${id}-sub`}
               onCommit={createFieldCommit(id, "sub")}
               value={fields["sub"] || "Choose the plan that fits your needs"}
               mode="deferred"
@@ -127,51 +129,51 @@ function PricingTabContent({
   const prefix = isAnnual ? "a" : "m";
   const defaults = isAnnual
     ? [
-        {
-          name: "Starter",
-          price: "$290",
-          period: "/yr",
-          desc: "Save 17% with annual",
-          cta: "Get Started",
-        },
-        {
-          name: "Professional",
-          price: "$790",
-          period: "/yr",
-          desc: "Save 17% with annual",
-          cta: "Start Free Trial",
-        },
-        {
-          name: "Enterprise",
-          price: "$1,990",
-          period: "/yr",
-          desc: "Save 17% with annual",
-          cta: "Contact Sales",
-        },
-      ]
+      {
+        name: "Starter",
+        price: "$290",
+        period: "/yr",
+        desc: "Save 17% with annual",
+        cta: "Get Started",
+      },
+      {
+        name: "Professional",
+        price: "$790",
+        period: "/yr",
+        desc: "Save 17% with annual",
+        cta: "Start Free Trial",
+      },
+      {
+        name: "Enterprise",
+        price: "$1,990",
+        period: "/yr",
+        desc: "Save 17% with annual",
+        cta: "Contact Sales",
+      },
+    ]
     : [
-        {
-          name: "Starter",
-          price: "$29",
-          period: "/mo",
-          desc: "Perfect for small teams",
-          cta: "Get Started",
-        },
-        {
-          name: "Professional",
-          price: "$79",
-          period: "/mo",
-          desc: "For growing businesses",
-          cta: "Start Free Trial",
-        },
-        {
-          name: "Enterprise",
-          price: "$199",
-          period: "/mo",
-          desc: "For large organizations",
-          cta: "Contact Sales",
-        },
-      ];
+      {
+        name: "Starter",
+        price: "$29",
+        period: "/mo",
+        desc: "Perfect for small teams",
+        cta: "Get Started",
+      },
+      {
+        name: "Professional",
+        price: "$79",
+        period: "/mo",
+        desc: "For growing businesses",
+        cta: "Start Free Trial",
+      },
+      {
+        name: "Enterprise",
+        price: "$199",
+        period: "/mo",
+        desc: "For large organizations",
+        cta: "Contact Sales",
+      },
+    ];
 
   return (
     <div className="grid grid-cols-3 gap-6 mt-8">
@@ -225,15 +227,15 @@ function PricingCard({
     <div
       className={`
         rounded-3xl p-8 flex flex-col transition-all duration-300
-        ${
-          highlight
-            ? "bg-slate-900 text-white shadow-2xl ring-1 ring-slate-800 scale-[1.03]"
-            : "bg-white text-slate-900 shadow-lg border border-slate-200 hover:shadow-xl hover:-translate-y-1"
+        ${highlight
+          ? "bg-slate-900 text-white shadow-2xl ring-1 ring-slate-800 scale-[1.03]"
+          : "bg-white text-slate-900 shadow-lg border border-slate-200 hover:shadow-xl hover:-translate-y-1"
         }
       `}
     >
       <Builder.Item asChild id={`${id}-name`}>
         <Field.Editable
+          name={`${id}-${prefix}-name`}
           onCommit={createFieldCommit(
             id.split("-").slice(0, -2).join("-"),
             `${prefix}-name`,
@@ -252,6 +254,7 @@ function PricingCard({
       <div className="flex items-baseline mb-4">
         <Builder.Item asChild id={`${id}-price`}>
           <Field.Editable
+            name={`${id}-${prefix}-price`}
             onCommit={createFieldCommit(
               id.split("-").slice(0, -2).join("-"),
               `${prefix}-price`,
@@ -273,6 +276,7 @@ function PricingCard({
 
       <Builder.Item asChild id={`${id}-desc`}>
         <Field.Editable
+          name={`${id}-${prefix}-desc`}
           onCommit={createFieldCommit(
             id.split("-").slice(0, -2).join("-"),
             `${prefix}-desc`,
@@ -295,11 +299,10 @@ function PricingCard({
             variant="primary"
             className={`
                   w-full py-4 px-6 rounded-full text-base font-bold transition-all duration-300
-                  ${
-                    highlight
-                      ? "bg-[#03C75A] text-white hover:bg-[#02b350] hover:shadow-lg hover:shadow-green-500/20"
-                      : "bg-slate-100 text-slate-900 hover:bg-slate-200 border border-slate-200"
-                  }
+                  ${highlight
+                ? "bg-[#03C75A] text-white hover:bg-[#02b350] hover:shadow-lg hover:shadow-green-500/20"
+                : "bg-slate-100 text-slate-900 hover:bg-slate-200 border border-slate-200"
+              }
                   data-[focused=true]:ring-4 data-[focused=true]:ring-violet-400
                 `}
           >
