@@ -18,7 +18,8 @@ import {
   it,
   onTestFailed,
 } from "vitest";
-import { toggleSection } from "@/docs-viewer/app";
+// toggleSection is a red-test stub — not yet implemented in app.ts
+const toggleSection = (payload: { sectionId: string }) => ({ type: "DOCS_TOGGLE_SECTION" as const, payload });
 
 describe("T4: DocsSidebar — isOpen via OS command (not useState)", () => {
   let page: OsPage;
@@ -69,7 +70,7 @@ describe("T4: DocsSidebar — isOpen via OS command (not useState)", () => {
   // ── #1: Section starts expanded ──────────────────────────────
   it("#1 recent section item is visible (expanded by default)", () => {
     const attrs = page.attrs("recent-1");
-    expect(attrs.hidden).not.toBe(true);
+    expect((attrs as any).hidden).not.toBe(true);
   });
 
   // ── #2: Toggle collapse via OS command ────────────────────────

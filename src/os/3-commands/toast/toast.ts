@@ -59,7 +59,7 @@ export const toastShowHandler =
 
 export const OS_TOAST_SHOW = os.defineCommand(
   "OS_TOAST_SHOW",
-  toastShowHandler as any,
+  (ctx) => (payload: ToastShowPayload) => toastShowHandler(ctx)(payload),
 );
 
 // ═══════════════════════════════════════════════════════════════════

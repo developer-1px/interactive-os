@@ -254,8 +254,8 @@ export function defineApp<S>(
           role: config.role,
           bindings: config,
           keybindings: config.keybindings ?? [],
-          field: config.field,
-          triggers: config.triggers,
+          ...(config.field !== undefined ? { field: config.field } : {}),
+          ...(config.triggers !== undefined ? { triggers: config.triggers } : {}),
         });
 
         return createBoundComponents(

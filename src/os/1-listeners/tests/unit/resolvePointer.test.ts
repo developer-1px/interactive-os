@@ -187,8 +187,10 @@ describe("resolvePointerUp", () => {
     const result = resolvePointerUp(state);
     expect(result.gesture).toBe("CLICK");
     expect(result.state.phase).toBe("IDLE");
-    expect(result.itemId).toBe("item-1");
-    expect(result.zoneId).toBe("zone-1");
+    if (result.gesture === "CLICK") {
+      expect(result.itemId).toBe("item-1");
+      expect(result.zoneId).toBe("zone-1");
+    }
   });
 
   test("DRAG → pointerup → DRAG_END gesture result", () => {
