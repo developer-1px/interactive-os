@@ -17,6 +17,7 @@
  */
 
 import { createKernel } from "@kernel";
+import type { BaseCommand, ScopeToken } from "@kernel/core/tokens";
 import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 // ── Shared headless interaction functions ──
@@ -36,6 +37,7 @@ import {
   type FocusGroupConfig,
 } from "@os/schemas/focus/config/FocusGroupConfig";
 import { initialOSState } from "@os/state/initial";
+import type { ZoneState } from "@os/state/OSState";
 import { ensureZone } from "@os/state/utils";
 import { produce } from "immer";
 
@@ -74,6 +76,16 @@ export interface GotoOptions {
   onDelete?: ZoneCallback;
 }
 
+/** Zone order entry — describes a zone's position and key items for tab navigation */
+interface ZoneOrderEntry {
+  zoneId: string;
+  firstItemId: string | null;
+  lastItemId: string | null;
+  entry: string;
+  selectedItemId: string | null;
+  lastFocusedId: string | null;
+}
+
 export interface OsPage {
   // ── AppPage-compatible interface ──
   keyboard: { press(key: string): void };
@@ -86,7 +98,7 @@ export interface OsPage {
   focusedItemId(zoneId?: string): string | null;
   selection(zoneId?: string): string[];
   activeZoneId(): string | null;
-  dispatch(cmd: any, opts?: any): void;
+  dispatch(cmd: BaseCommand, opts?: { scope?: ScopeToken[]; meta?: Record<string, unknown> }): void;
   cleanup(): void;
   /** Dump debug diagnostics (no-op placeholder for test compat) */
   dumpDiagnostics(): void;
@@ -116,9 +128,9 @@ export interface OsPage {
       parentId: string | null;
     }>,
   ): void;
-  zone(zoneId?: string): any;
+  zone(zoneId?: string): ZoneState | undefined;
   state(): AppState;
-  setZoneOrder(zones: any[]): void;
+  setZoneOrder(zones: ZoneOrderEntry[]): void;
 
   // ── Direct kernel access ──
   readonly kernel: ReturnType<typeof createKernel<AppState>>;
@@ -159,7 +171,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   const mockConfig = { current: { ...DEFAULT_CONFIG } as FocusGroupConfig };
   const mockExpandableItems = { current: new Set<string>() };
   const mockTreeLevels = { current: new Map<string, number>() };
-  const mockZoneOrder = { current: [] as any[] };
+  const mockZoneOrder = { current: [] as ZoneOrderEntry[] };
 
   // ── No-op effects ──
   kernel.defineEffect("focus", () => { });
@@ -289,7 +301,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     mockTreeLevels.current =
       levels instanceof Map ? levels : new Map(Object.entries(levels));
   }
-  function setZoneOrder(zones: any[]) {
+  function setZoneOrder(zones: ZoneOrderEntry[]) {
     mockZoneOrder.current = zones;
   }
 

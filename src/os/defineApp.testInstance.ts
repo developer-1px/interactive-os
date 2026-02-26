@@ -32,6 +32,7 @@ export interface CreateTestConfig<S> {
   initialState: S;
   flatHandlerRegistry: Map<
     string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous handler storage (contravariant P)
     { handler: FlatHandler<S, any>; when?: Condition<S> }
   >;
   /** App modules to install on test kernel */
@@ -62,8 +63,8 @@ export function createTestInstance<S>(
   const stateOverrides =
     enableHistory || enableOS
       ? (({ history: _h, withOS: _w, ...rest }) => rest)(
-          rawOverrides as Record<string, unknown>,
-        )
+        rawOverrides as Record<string, unknown>,
+      )
       : rawOverrides;
 
   const testState =
@@ -74,13 +75,13 @@ export function createTestInstance<S>(
   const testKernel = createKernel<AppState | TestAppState>(
     enableOS
       ? {
-          ...initialAppState,
-          apps: { [appId]: testState },
-        }
+        ...initialAppState,
+        apps: { [appId]: testState },
+      }
       : {
-          os: {} as Record<string, never>,
-          apps: { [appId]: testState },
-        },
+        os: {} as Record<string, never>,
+        apps: { [appId]: testState },
+      },
   );
 
   const testScope = defineScope(appId);
@@ -114,6 +115,7 @@ export function createTestInstance<S>(
 
   // Re-register all commands on test kernel
   for (const [type, entry] of flatHandlerRegistry) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic handler wrapper
     const kernelHandler = (ctx: { readonly state: S }) => (payload: any) => {
       const result = entry.handler(ctx, payload);
       if (result?.dispatch) {
@@ -136,7 +138,9 @@ export function createTestInstance<S>(
 
     testGroup.defineCommand(
       type,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- kernel boundary type erasure
       kernelHandler as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- kernel boundary type erasure
       whenGuard ? ({ when: whenGuard.when } as any) : undefined,
     );
   }
@@ -144,7 +148,9 @@ export function createTestInstance<S>(
   // Register OS commands (OS_FOCUS, OS_TOAST_SHOW) on test kernel
   // Required for integration tests that rely on focus/selection persistence
   // and toast notifications from modules
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- kernel boundary: OS handler ↔ app handler mismatch
   testKernel.defineCommand("OS_FOCUS", focusHandler as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- kernel boundary
   testKernel.defineCommand("OS_TOAST_SHOW", toastShowHandler as any);
 
   return {

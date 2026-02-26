@@ -12,6 +12,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 import { OS_ACTIVATE, OS_FOCUS, OS_SELECT } from "@os/3-commands";
+import type { BaseCommand } from "@kernel/core/tokens";
 import type { ResolveResult } from "../shared";
 
 export interface MouseInput {
@@ -83,7 +84,7 @@ export function resolveMouse(input: MouseInput): ResolveResult {
         OS_FOCUS({
           zoneId: input.labelTargetGroupId,
           itemId: input.labelTargetItemId,
-        }) as any,
+        }) as BaseCommand,
       ],
       meta,
       preventDefault: true,
@@ -95,7 +96,7 @@ export function resolveMouse(input: MouseInput): ResolveResult {
   if (!input.targetItemId && input.targetGroupId) {
     return {
       commands: [
-        OS_FOCUS({ zoneId: input.targetGroupId, itemId: null }) as any,
+        OS_FOCUS({ zoneId: input.targetGroupId, itemId: null }) as BaseCommand,
       ],
       meta,
       preventDefault: false,
@@ -116,16 +117,16 @@ export function resolveMouse(input: MouseInput): ResolveResult {
       zoneId: input.targetGroupId,
       itemId: input.targetItemId,
       skipSelection: true,
-    }) as any,
+    }) as BaseCommand,
   );
 
   const selectMode = resolveSelectMode(input);
   commands.push(
-    OS_SELECT({ targetId: input.targetItemId, mode: selectMode }) as any,
+    OS_SELECT({ targetId: input.targetItemId, mode: selectMode }) as BaseCommand,
   );
 
   if (isClickExpandable(input.hasAriaExpanded, input.itemRole)) {
-    commands.push(OS_ACTIVATE() as any);
+    commands.push(OS_ACTIVATE() as BaseCommand);
   }
 
   const preventDefault = selectMode === "range" || selectMode === "toggle";

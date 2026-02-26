@@ -151,6 +151,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       // Reference identity is the only reliable way to identify compound sub-components.
       // `as any` is acceptable: ReactElement.type is `string | JSXElementConstructor<any>`
       // but function identity comparison is runtime-safe and won't break under minification.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ReactElement.type returns string | JSXElementConstructor<any>
       if (isValidElement(child) && (child.type as any) === TriggerPortal) {
         portalElement = child as ReactElement<TriggerPortalProps>;
       } else {
@@ -166,6 +167,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       overlayRole && overlayId && portalElement ? (
         <OverlayContext.Provider value={{ overlayId }}>
           {cloneElement(portalElement, {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- portal props spread
             ...(portalElement.props as any),
             _overlayId: overlayId,
             _overlayType: overlayRole,
@@ -187,6 +189,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
             asChild={true}
             ref={ref}
             onActivate={activateCmd}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- baseProps spread into Item
             {...(baseProps as any)}
           >
             {isValidElement(triggerContent) ? (
@@ -202,6 +205,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
 
     // Default: merge click handler into child element (asChild-by-default)
     if (isValidElement(triggerContent)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cloneElement requires any for generic child props
       const child = triggerContent as ReactElement<any>;
       return (
         <>
@@ -327,6 +331,7 @@ function TriggerPortal({
         aria-label={title}
         aria-describedby={description ? `${overlayId}-desc` : undefined}
       >
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- zone role union mismatch */}
         <Zone
           id={overlayId}
           role={zoneRole as any}

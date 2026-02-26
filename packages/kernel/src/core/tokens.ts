@@ -94,9 +94,9 @@ type Prettify<T> = { [K in keyof T]: T[K] } & {};
  * → `{ NOW: number; USER: User }`
  */
 export type InjectResult<T extends ContextToken[]> = Prettify<{
-  [K in T[number] as K["__id"]]: K extends ContextToken<string, infer V>
-    ? V
-    : never;
+  [K in T[number]as K["__id"]]: K extends ContextToken<string, infer V>
+  ? V
+  : never;
 }>;
 
 /** Context passed to command handlers. state + injected values. */
@@ -122,9 +122,10 @@ export type InjectableContext<S> = {
 // ─── Internal Types (merged from internal-types.ts) ───
 
 /** Internal command handler (curried: ctx → payload → effects) */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- kernel-internal: bridges typed app handlers to generic dispatch
 export type InternalCommandHandler = (ctx: any) => (payload?: any) => any;
 
-/** Internal effect handler (untyped) */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- kernel-internal: untyped effect value
 export type InternalEffectHandler = (value: any) => void;
 
 /** Middleware context (used by middleware hooks) */

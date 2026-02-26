@@ -580,6 +580,7 @@ export function createKernel<S>(initialState: S) {
         handlerOrTokens: InternalCommandHandler | ContextToken[],
         handlerArg?: InternalCommandHandler,
         optionsArg?: { when?: (state: unknown) => boolean },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- type-erased factory return
       ): CommandFactory<string, any> => {
         // Support 3-argument form: (type, tokens, handler)
         let handler: InternalCommandHandler;
@@ -626,6 +627,7 @@ export function createKernel<S>(initialState: S) {
                 scope !== (GLOBAL as string)
                   ? [scope as ScopeToken]
                   : undefined,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- type-erased command
             }) as Command<string, any>,
           {
             commandType: type,
@@ -635,6 +637,7 @@ export function createKernel<S>(initialState: S) {
           },
         );
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- type-erased factory
         return factory as CommandFactory<string, any>;
       }) as {
         // No payload
