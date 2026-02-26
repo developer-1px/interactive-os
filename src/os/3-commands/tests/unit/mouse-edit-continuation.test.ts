@@ -39,7 +39,7 @@ describe("T19-4 WP1: resolveClick with wasEditing", () => {
     // 현재: clickedItemId ≠ focusedItemId → noOp (commands=[])
     // 기대: wasEditing=true이면 OS_ACTIVATE 발행
     expect(result.commands.length).toBeGreaterThan(0);
-    expect(result.commands[0].type).toBe("OS_ACTIVATE");
+    expect(result.commands[0]!.type).toBe("OS_ACTIVATE");
   });
 
   it("editing 아닐 때 다른 item 클릭 → noOp (기존 동작 유지)", () => {
@@ -66,7 +66,7 @@ describe("T19-4 WP1: resolveClick with wasEditing", () => {
 
     // 기존 동작: re-click → OS_ACTIVATE
     expect(result.commands.length).toBeGreaterThan(0);
-    expect(result.commands[0].type).toBe("OS_ACTIVATE");
+    expect(result.commands[0]!.type).toBe("OS_ACTIVATE");
   });
 
   it("wasEditing=true but activateOnClick=false → noOp", () => {

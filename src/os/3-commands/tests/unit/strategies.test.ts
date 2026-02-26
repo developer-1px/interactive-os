@@ -20,6 +20,7 @@ function cfg(overrides: Partial<NavigateConfig> = {}): NavigateConfig {
     entry: "first",
     typeahead: false,
     recovery: "next",
+    arrowExpand: false,
     ...overrides,
   };
 }

@@ -22,7 +22,7 @@ describe("T3: OS pipeline debug logging", () => {
     debugSpy = vi.spyOn(console, "debug").mockImplementation(() => { });
     page = createOsPage();
     page.goto("test-zone", {
-      role: "list",
+      role: "listbox",
       items: ["a", "b", "c"],
     });
   });

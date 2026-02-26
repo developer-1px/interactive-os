@@ -35,7 +35,7 @@ export function NCPTabNavBlock({ id }: { id: string }) {
 
   // OS selection으로 active 탭 관리
   const selection = useSelection(tablistId);
-  const firstTabId = tabs.length > 0 ? tabs[0].id : fid("tab-0");
+  const firstTabId = tabs.length > 0 ? tabs[0]!.id : fid("tab-0");
   const selectedTabId = selection[0] ?? firstTabId;
   const activeIndex = tabs.findIndex((t) => t.id === selectedTabId);
   const safeActiveIndex = activeIndex >= 0 ? activeIndex : 0;
@@ -70,10 +70,9 @@ export function NCPTabNavBlock({ id }: { id: string }) {
                       text-[15px] font-semibold leading-normal outline-none
                       transition-[color,background-color,border-color,text-decoration-color,fill,stroke,box-shadow]
                       data-[focused]:ring-2 data-[focused]:ring-inset data-[focused]:ring-[#117ce9]
-                      ${
-                        isActive
-                          ? "bg-[#222222] text-white"
-                          : "bg-[unset] text-[#222222] hover:bg-[#e7e7e7]"
+                      ${isActive
+                        ? "bg-[#222222] text-white"
+                        : "bg-[unset] text-[#222222] hover:bg-[#e7e7e7]"
                       }`}
                   >
                     {tab.label}

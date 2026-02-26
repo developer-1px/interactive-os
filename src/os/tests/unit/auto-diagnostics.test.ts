@@ -18,7 +18,7 @@ describe("T2: Auto-diagnostics on test failure", () => {
   beforeEach(() => {
     consoleSpy.mockClear();
     page = createOsPage();
-    page.goto("test-zone", { role: "list", focusedItemId: null });
+    page.goto("test-zone", { role: "listbox", focusedItemId: null });
   });
 
   afterEach(() => {

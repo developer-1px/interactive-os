@@ -50,7 +50,7 @@ describe("OS_CHECK: Keyboard pipeline (Space)", () => {
     page.keyboard.press("Space");
 
     expect(onCheck).toHaveBeenCalled();
-    const cursor = onCheck.mock.calls[0][0];
+    const cursor = onCheck.mock.calls[0]![0];
     expect(cursor.focusId).toBe("todo-1");
   });
 
@@ -60,7 +60,7 @@ describe("OS_CHECK: Keyboard pipeline (Space)", () => {
     page.keyboard.press("Space");
 
     expect(onCheck).toHaveBeenCalled();
-    expect(onCheck.mock.calls[0][0].focusId).toBe("todo-2");
+    expect(onCheck.mock.calls[0]![0].focusId).toBe("todo-2");
   });
 
   it("Space does NOT dispatch onAction", () => {
@@ -86,6 +86,6 @@ describe("OS_CHECK: Keyboard pipeline (Space)", () => {
     page.keyboard.press("ArrowDown"); // → todo-2
     page.keyboard.press("Space");
 
-    expect(onCheck.mock.calls[0][0].focusId).toBe("todo-2");
+    expect(onCheck.mock.calls[0]![0].focusId).toBe("todo-2");
   });
 });
