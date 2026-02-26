@@ -357,7 +357,7 @@ function getStaticItemTextValue(focusId: string): string | null {
 
 export const canvasOnCopy = (
   cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor,
-) => {
+): import("@kernel").BaseCommand | import("@kernel").BaseCommand[] => {
   if (isDynamicItem(cursor.focusId)) {
     // Dynamic item → structural copy (section/card/tab)
     return canvasCollection.copy({ ids: [cursor.focusId] });
@@ -366,7 +366,6 @@ export const canvasOnCopy = (
   const text = getStaticItemTextValue(cursor.focusId);
   if (text) {
     canvasCollection.copyText(text);
-    return { clipboardWrite: { text } };
   }
   return [];
 };
@@ -427,7 +426,7 @@ export const BuilderCanvasUI = canvasCollection.bind({
   onRedo: redoCommand(),
   ...canvasBindings,
   // Override: static text copy/cut/paste support
-  onCopy: canvasOnCopy as any,
+  onCopy: canvasOnCopy,
   onCut: canvasOnCut,
   onPaste: canvasOnPaste,
   options: {

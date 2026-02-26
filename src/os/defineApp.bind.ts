@@ -119,13 +119,12 @@ export function createBoundComponents<S>(
     }) => ReactNode);
     asChild?: boolean;
   }> = ({ id, className, children, asChild }) => {
-    return React.createElement(
-      Item as any,
-      { id: String(id), className, asChild } as React.ComponentProps<
-        typeof Item
-      >,
-      children as ReactNode,
-    );
+    return React.createElement(Item, {
+      id: String(id),
+      className,
+      asChild,
+      children,
+    } as React.ComponentProps<typeof Item>);
   };
   ItemComponent.displayName = `${appId}.${zoneName}.Item`;
 

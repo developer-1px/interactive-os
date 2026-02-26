@@ -47,6 +47,7 @@ export interface ItemAttrs {
   "aria-expanded"?: boolean;
   "aria-disabled"?: boolean;
   "data-focused"?: true | undefined;
+  hidden?: boolean;
 }
 
 /** Minimal kernel interface needed by headless interaction functions */

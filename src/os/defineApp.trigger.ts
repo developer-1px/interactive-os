@@ -139,27 +139,28 @@ export function createCompoundTrigger(
     children: ReactNode;
     className?: string;
     onActivate?: BaseCommand;
-  }> = ({ children, className, onActivate, ...rest }) =>
-      React.createElement(Dialog.Close as any, {
-        className,
-        ...(onActivate !== undefined ? { onActivate } : {}),
-        children,
-        ...rest,
-      });
+  }> = ({ children, className, onActivate }) => {
+    const props: import("./6-components/radix/Dialog").DialogCloseProps = {
+      children,
+      ...(className !== undefined ? { className } : {}),
+      ...(onActivate !== undefined ? { onActivate } : {}),
+    };
+    return React.createElement(Dialog.Close, props);
+  };
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{
     children: ReactNode;
     className?: string;
-  }> = ({ children, className, ...rest }) => {
+  }> = ({ children, className }) => {
     const confirmCmd = config.confirm;
-    return React.createElement(Dialog.Close as any, {
-      className,
-      onActivate: confirmCmd as any,
-      id: `${dialogId}-confirm`,
+    const props: import("./6-components/radix/Dialog").DialogCloseProps = {
       children,
-      ...rest,
-    });
+      ...(className !== undefined ? { className } : {}),
+      ...(confirmCmd !== undefined ? { onActivate: confirmCmd } : {}),
+      id: `${dialogId}-confirm`,
+    };
+    return React.createElement(Dialog.Close, props);
   };
   ConfirmComponent.displayName = `${appId}.Dialog.Confirm`;
 

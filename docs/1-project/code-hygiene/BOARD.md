@@ -11,7 +11,6 @@ Before: 226 tsc errors, 540 eslint errors, 20 test failures, git hook 무력
 After: 0 errors 전부, pre-commit(tsc -b) + pre-push(vitest) 강제
 
 ## Now
-- [ ] T1: tsc -b 에러 226건 해소 (pre-commit gate 활성화 전제조건)
 - [ ] T2: eslint `no-explicit-any` ~340건 해소
 - [ ] T3: eslint 기타 에러 ~200건 해소 (react-refresh, ban-ts-comment, Function type 등)
 - [ ] T4: test failures 20건 수정
@@ -21,5 +20,6 @@ After: 0 errors 전부, pre-commit(tsc -b) + pre-push(vitest) 강제
 - [ ] T8: /go workflow에 commit 단계 추가 (/green → git commit, /red → git commit --no-verify)
 
 ## Done
+- [x] T1: tsc -b 에러 226건 해소 — tsc 0 | 8 commits | 226→0 ✅
 
 ## Unresolved

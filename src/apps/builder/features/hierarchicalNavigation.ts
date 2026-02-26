@@ -147,7 +147,7 @@ export function createDrillUp(zoneId: string) {
       cursor.focusId,
       "data-level",
     ) as BuilderLevel | null;
-    if (!level || level === "section") return (OS_ESCAPE as any)({ force: true }); // No parent → force deselect
+    if (!level || level === "section") return OS_ESCAPE({ force: true }); // No parent → force deselect
 
     const parentLevel = getParentLevel(level);
     if (!parentLevel) return [];
