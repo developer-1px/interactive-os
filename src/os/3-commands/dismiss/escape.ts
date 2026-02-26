@@ -19,7 +19,7 @@ import { ensureZone } from "../../state/utils";
 export const OS_ESCAPE = os.defineCommand(
   "OS_ESCAPE",
   [],
-  (ctx) => (payload?: { force?: boolean }) => {
+  (ctx) => (payload: { force?: boolean }) => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 

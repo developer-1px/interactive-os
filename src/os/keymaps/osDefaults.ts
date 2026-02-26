@@ -89,7 +89,7 @@ Keybindings.registerAll([
 
 Keybindings.registerAll([
   { key: "Enter", command: OS_ACTIVATE(), when: "navigating" },
-  { key: "Escape", command: OS_ESCAPE(), when: "navigating" },
+  { key: "Escape", command: OS_ESCAPE({}), when: "navigating" },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════

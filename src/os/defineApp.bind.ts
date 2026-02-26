@@ -110,21 +110,21 @@ export function createBoundComponents<S>(
     id: string | number;
     className?: string;
     children?:
-      | ReactNode
-      | ((state: {
-          isFocused: boolean;
-          isSelected: boolean;
-          isExpanded: boolean;
-          isAnchor?: boolean;
-        }) => ReactNode);
+    | ReactNode
+    | ((state: {
+      isFocused: boolean;
+      isSelected: boolean;
+      isExpanded: boolean;
+      isAnchor?: boolean;
+    }) => ReactNode);
     asChild?: boolean;
   }> = ({ id, className, children, asChild }) => {
     return React.createElement(
-      Item,
+      Item as any,
       { id: String(id), className, asChild } as React.ComponentProps<
         typeof Item
       >,
-      children,
+      children as ReactNode,
     );
   };
   ItemComponent.displayName = `${appId}.${zoneName}.Item`;

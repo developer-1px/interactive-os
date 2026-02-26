@@ -87,7 +87,11 @@ export interface CompoundTriggerComponents {
     className?: string;
     zoneClassName?: string;
   }>;
-  Dismiss: React.FC<{ children: ReactNode; className?: string }>;
+  Dismiss: React.FC<{
+    children: ReactNode;
+    className?: string;
+    onActivate?: BaseCommand;
+  }>;
   Confirm: React.FC<{ children: ReactNode; className?: string }>;
 }
 
@@ -110,11 +114,11 @@ export function createCompoundTrigger(
     className?: string;
     asChild?: boolean;
   }> = ({ children, className, asChild }) =>
-    React.createElement(Dialog.Trigger, {
-      ...(className !== undefined ? { className } : {}),
-      ...(asChild !== undefined ? { asChild } : {}),
-      children,
-    });
+      React.createElement(Dialog.Trigger, {
+        ...(className !== undefined ? { className } : {}),
+        ...(asChild !== undefined ? { asChild } : {}),
+        children,
+      });
   TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
 
   // Dialog.Content must be used directly — DialogRoot identifies children by
@@ -134,8 +138,14 @@ export function createCompoundTrigger(
   const DismissComponent: React.FC<{
     children: ReactNode;
     className?: string;
-  }> = ({ children, className, ...rest }) =>
-    React.createElement(Dialog.Close, { className, children, ...rest });
+    onActivate?: BaseCommand;
+  }> = ({ children, className, onActivate, ...rest }) =>
+      React.createElement(Dialog.Close as any, {
+        className,
+        ...(onActivate !== undefined ? { onActivate } : {}),
+        children,
+        ...rest,
+      });
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
 
   const ConfirmComponent: React.FC<{
@@ -143,7 +153,7 @@ export function createCompoundTrigger(
     className?: string;
   }> = ({ children, className, ...rest }) => {
     const confirmCmd = config.confirm;
-    return React.createElement(Dialog.Close, {
+    return React.createElement(Dialog.Close as any, {
       className,
       onActivate: confirmCmd as any,
       id: `${dialogId}-confirm`,

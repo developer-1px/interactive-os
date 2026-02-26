@@ -95,7 +95,7 @@ export function PointerListener() {
         if (activeZoneId) {
           const zoneEntry = ZoneRegistry.get(activeZoneId);
           if (zoneEntry?.config.dismiss.outsideClick === "close") {
-            os.dispatch(OS_ESCAPE());
+            os.dispatch(OS_ESCAPE({}));
           }
         }
         return;

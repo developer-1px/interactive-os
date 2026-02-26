@@ -427,7 +427,7 @@ export const BuilderCanvasUI = canvasCollection.bind({
   onRedo: redoCommand(),
   ...canvasBindings,
   // Override: static text copy/cut/paste support
-  onCopy: canvasOnCopy,
+  onCopy: canvasOnCopy as any,
   onCut: canvasOnCut,
   onPaste: canvasOnPaste,
   options: {
