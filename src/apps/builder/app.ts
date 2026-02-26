@@ -66,7 +66,7 @@ import { createCollectionZone } from "@/os/collection/createCollectionZone";
 
 /** Recursively clone a block tree, assigning new IDs to all descendants. */
 function deepCloneBlock(block: Block, newId: string): Block {
-  const cloned: Block = {
+  const cloned = {
     ...block,
     id: newId,
     fields: { ...block.fields },
@@ -233,19 +233,9 @@ export const updateField = canvasCollection.command(
   "updateField",
   (ctx, payload: { sectionId: string; field: string; value: string }) => ({
     state: produce(ctx.state, (draft) => {
-      let target: Block | null = null;
-      function traverse(blocks: Block[]) {
-        for (const b of blocks) {
-          if (b.id === payload.sectionId) {
-            target = b as Block;
-            return;
-          }
-          if (b.children) traverse(b.children);
-        }
-      }
-      traverse(draft.data.blocks as Block[]);
+      const target = findBlock(draft.data.blocks, payload.sectionId);
       if (target) {
-        (target as Block).fields[payload.field] = payload.value;
+        target.fields[payload.field] = payload.value;
       }
     }),
   }),
@@ -268,7 +258,7 @@ import {
  */
 
 /** Build collection hierarchy from current block tree for paste bubbling. */
-function buildCanvasCollections(): CollectionNode[] {
+function buildCanvasCollections() {
   const blocks = getBuilderState().data.blocks;
 
   const nodes: CollectionNode[] = [
@@ -326,7 +316,7 @@ function buildCanvasCollections(): CollectionNode[] {
  * Resolve which block to copy/cut from the canvas focus.
  * Walks up from the focused item to the nearest dynamic collection item.
  */
-function resolveCanvasCopyTarget(focusId: string): string | null {
+function resolveCanvasCopyTarget(focusId: string) {
   const blocks = getBuilderState().data.blocks;
 
   // Any block in the tree (recursive) → return its id directly
@@ -341,14 +331,14 @@ function resolveCanvasCopyTarget(focusId: string): string | null {
  * Check if focusId is a dynamic collection item (section/card/tab)
  * vs a static field item (title, icon, etc.)
  */
-function isDynamicItem(focusId: string): boolean {
+function isDynamicItem(focusId: string) {
   // Any block that exists in the block tree is a dynamic item.
   // Uses findBlock (recursive) — handles arbitrary nesting depth.
   return !!findBlock(getBuilderState().data.blocks, focusId);
 }
 
 /** Read field text value for a static item (e.g., "ncp-hero-title" → field value) */
-function getStaticItemTextValue(focusId: string): string | null {
+function getStaticItemTextValue(focusId: string) {
   const blocks = getBuilderState().data.blocks;
   const addr = resolveFieldAddress(focusId, blocks);
   if (!addr) return null;
@@ -471,10 +461,11 @@ export function createFieldCommit(
  *   const fields = useSectionFields("ncp-hero");
  *   // fields.title, fields.sub, fields.brand ...
  */
-export function useSectionFields(sectionId: string): Record<string, string> {
+export function useSectionFields(sectionId: string) {
   return BuilderApp.useComputed(
-    (s) => findBlock(s.data.blocks, sectionId)?.fields ?? {},
-  ) as unknown as Record<string, string>;
+    (s): Record<string, string> =>
+      findBlock(s.data.blocks, sectionId)?.fields ?? {},
+  );
 }
 
 /**
@@ -512,12 +503,12 @@ export function resolveFieldAddress(
  * useFieldByDomId — Read a field value using its DOM element id.
  * Used by PropertiesPanel where fieldName = DOM id.
  */
-export function useFieldByDomId(domId: string): string {
+export function useFieldByDomId(domId: string) {
   return BuilderApp.useComputed((s) => {
     const addr = resolveFieldAddress(domId, s.data.blocks);
     if (!addr) return "";
     return addr.section.fields[addr.field] ?? "";
-  }) as unknown as string;
+  });
 }
 
 /**
@@ -532,19 +523,9 @@ export const updateFieldByDomId = canvasCollection.command(
     if (!addr) return undefined;
     return {
       state: produce(ctx.state, (draft) => {
-        let target: Block | null = null;
-        function traverse(blocks: Block[]) {
-          for (const b of blocks) {
-            if (b.id === addr!.section.id) {
-              target = b as Block;
-              return;
-            }
-            if (b.children) traverse(b.children);
-          }
-        }
-        traverse(draft.data.blocks as Block[]);
+        const target = findBlock(draft.data.blocks, addr.section.id);
         if (target) {
-          (target as Block).fields[addr.field] = payload.value;
+          target.fields[addr.field] = payload.value;
         }
       }),
     };

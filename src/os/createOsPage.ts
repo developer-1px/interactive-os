@@ -397,6 +397,8 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
       config: mockConfig.current,
       element: null,
       parentId: null,
+      // Push model: auto-register getItems from mock items
+      getItems: () => mockItems.current,
       ...(opts?.onAction ? { onAction: opts.onAction } : {}),
       ...(opts?.onCheck ? { onCheck: opts.onCheck } : {}),
       ...(opts?.onDelete ? { onDelete: opts.onDelete } : {}),

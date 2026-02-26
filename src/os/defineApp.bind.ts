@@ -62,6 +62,7 @@ export function createBoundComponents<S>(
   }> = ({ className, children, ...rest }) => {
     // Zone ID is always auto-injected from bind() — not developer-specified
     // JSX props (...rest) provide base callbacks; config overrides only when defined.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic zone props from config
     const zoneProps: any = {
       id: zoneName,
       className,

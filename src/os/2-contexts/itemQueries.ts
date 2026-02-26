@@ -12,17 +12,15 @@ import { ZoneRegistry } from "./zoneRegistry";
  */
 export function getZoneItems(zoneId: string): string[] {
   const entry = ZoneRegistry.get(zoneId);
-  if (!entry?.element) return [];
+  if (!entry) return [];
 
-  const items: string[] = [];
-  const els = entry.element.querySelectorAll("[data-item-id]");
-  for (const el of els) {
-    if (el.closest("[data-zone]") !== entry.element) continue;
-    const id = el.getAttribute("data-item-id");
-    if (id) items.push(id);
+  // Push model: use getItems() accessor (headless-compatible)
+  if (entry.getItems) {
+    const items = entry.getItems();
+    return entry.itemFilter ? entry.itemFilter(items) : items;
   }
 
-  return entry.itemFilter ? entry.itemFilter(items) : items;
+  return [];
 }
 
 // ═══════════════════════════════════════════════════════════════════

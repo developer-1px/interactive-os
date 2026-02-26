@@ -75,11 +75,13 @@ interface HistoryEntry {
   focusedItemId?: string | number;
 }
 
+export interface BuilderStateData {
+  /** Block tree — top-level blocks, each may contain children */
+  blocks: Block[];
+}
+
 export interface BuilderState {
-  data: {
-    /** Block tree — top-level blocks, each may contain children */
-    blocks: Block[];
-  };
+  data: BuilderStateData;
   history: {
     past: HistoryEntry[];
     future: HistoryEntry[];

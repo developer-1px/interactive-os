@@ -29,6 +29,8 @@
 |------|------|------|------|
 | localeState.ts | 순수함수(createLocaleState/openDropdown/closeDropdown/setLocale) + OS 커맨드(locale.ts) 분리 | 레이어 명확히 | 2026-02-25 |
 | useLocalizedSectionFields | `field:locale` 키 패턴으로 하위호환 구현 | INITIAL_STATE 마이그레이션 비용 0 | 2026-02-25 |
+| FocusGroup headless 등록 | `useMemo`에서 ZoneRegistry.register(element=null) + `useLayoutEffect`에서 element만 바인딩. `renderToString`으로 headless 증명 | Phase 1(논리)/Phase 2(물리) 분리 | 2026-02-27 |
+| DOM 스캔 위치 이동 | DOM querySelectorAll을 2-contexts(커널)에서 제거하고 FocusGroup.useLayoutEffect(뷰)로 이동. getItems closure 자동 등록. "제거가 아니라 이동" | DOM 의존의 문제는 존재가 아니라 위치 | 2026-02-27 |
 
 ---
 

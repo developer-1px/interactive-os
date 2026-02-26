@@ -187,7 +187,8 @@ export interface ZoneHandle<S> {
 
 export interface TestInstance<S> {
   readonly state: S;
-  readonly runtime: any; // Exposed for integration tests (typed as any to avoid circular dep with @kernel/core)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- avoid circular dep with @kernel/core
+  readonly runtime: any;
   dispatch(command: BaseCommand): boolean;
   reset(): void;
   evaluate(condition: Condition<S>): boolean;

@@ -8,6 +8,7 @@ export function useOS(): OS {
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
     const platform =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- userAgentData not in Navigator type yet
       (window.navigator as any)?.userAgentData?.platform ||
       window.navigator.platform;
     const macos = /Mac|iPhone|iPod|iPad/i.test(platform);

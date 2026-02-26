@@ -9,7 +9,7 @@ import type { BaseCommand } from "@kernel/core/tokens";
 
 export interface ResolveResult {
   commands: BaseCommand[];
-  meta: Record<string, any> | null;
+  meta: Record<string, unknown> | null;
   preventDefault: boolean;
   fallback: boolean;
 }

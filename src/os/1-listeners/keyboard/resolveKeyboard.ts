@@ -52,7 +52,7 @@ export interface KeyboardInput {
   cursor: ZoneCursor | null;
 }
 
-interface InputMeta {
+interface InputMeta extends Record<string, unknown> {
   type: "KEYBOARD";
   key: string;
   code: string;

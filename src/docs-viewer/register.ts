@@ -143,7 +143,7 @@ const docsNavigateMiddleware: Middleware = {
         ...ctx,
         command: DOCS_SCROLL_PAGE({
           direction: direction === "right" ? "forward" : "backward",
-        }) as any,
+        }) as unknown as MiddlewareContext["command"],
       };
     }
 

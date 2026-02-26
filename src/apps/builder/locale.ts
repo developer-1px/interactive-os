@@ -25,12 +25,7 @@ declare module "./model/appState" {
 
 // locale 상태에서 읽는 헬퍼
 function getLocaleState(s: BuilderState) {
-  return (s.data as Record<string, unknown>)["locale"] as
-    | {
-      currentLocale: string;
-      availableLocales: string[];
-    }
-    | undefined;
+  return s.data.locale;
 }
 
 const DEFAULT_LOCALE = {
@@ -44,12 +39,9 @@ export const setLocaleCommand = BuilderApp.command(
   "setLocale",
   (ctx, payload: { locale: string }) => ({
     state: produce(ctx.state, (draft) => {
-      const data = draft.data as Record<string, unknown>;
-      const locale = (data["locale"] as typeof DEFAULT_LOCALE) ?? {
-        ...DEFAULT_LOCALE,
-      };
+      const locale = draft.data.locale ?? { ...DEFAULT_LOCALE };
       locale.currentLocale = payload.locale;
-      data["locale"] = locale;
+      draft.data.locale = locale;
     }),
   }),
 );
@@ -58,15 +50,12 @@ export const addLocaleCommand = BuilderApp.command(
   "addLocale",
   (ctx, payload: { locale: string }) => ({
     state: produce(ctx.state, (draft) => {
-      const data = draft.data as Record<string, unknown>;
-      const locale = (data["locale"] as typeof DEFAULT_LOCALE) ?? {
-        ...DEFAULT_LOCALE,
-      };
+      const locale = draft.data.locale ?? { ...DEFAULT_LOCALE };
       if (!locale.availableLocales.includes(payload.locale)) {
         locale.availableLocales.push(payload.locale);
       }
       locale.currentLocale = payload.locale;
-      data["locale"] = locale;
+      draft.data.locale = locale;
     }),
   }),
 );
@@ -74,7 +63,7 @@ export const addLocaleCommand = BuilderApp.command(
 export function useLocaleState() {
   return BuilderApp.useComputed((s) => {
     return getLocaleState(s) ?? DEFAULT_LOCALE;
-  }) as typeof DEFAULT_LOCALE;
+  });
 }
 
 /**
@@ -82,16 +71,14 @@ export function useLocaleState() {
  */
 import { findBlock } from "./model/appState";
 
-export function useLocalizedSectionFields(
-  sectionId: string,
-): Record<string, string> {
+export function useLocalizedSectionFields(sectionId: string) {
   const { currentLocale } = useLocaleState();
 
-  return BuilderApp.useComputed((s) => {
+  return BuilderApp.useComputed((s): Record<string, string> => {
     const block = findBlock(s.data.blocks, sectionId);
-    if (!block) return {} as Record<string, string>;
+    if (!block) return {};
 
-    const raw = block.fields as Record<string, string>;
+    const raw = block.fields;
 
     const resolved: Record<string, string> = {};
     for (const key of Object.keys(raw)) {
@@ -100,5 +87,5 @@ export function useLocalizedSectionFields(
       resolved[key] = localized !== undefined ? localized : (raw[key] ?? "");
     }
     return resolved;
-  }) as Record<string, string>;
+  });
 }

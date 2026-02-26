@@ -16,7 +16,7 @@
  */
 
 import { INITIAL_STATE } from "@apps/todo/features/todo-details/persistence";
-import type { AppState, Category, Todo } from "@apps/todo/model/appState";
+import type { AppState, Todo } from "@apps/todo/model/appState";
 import {
   selectCategories,
   selectEditingTodo,
@@ -95,7 +95,7 @@ const listCollection = createCollectionZone(TodoApp, "list", {
     (s: AppState) => s.data.todos,
     (s: AppState) => s.data.todoOrder,
   ),
-  create: (payload: unknown, state: AppState): Todo | null => {
+  create: (payload, state) => {
     const { text } = payload as { text: string };
     if (!text?.trim()) return null;
     return {
@@ -105,10 +105,10 @@ const listCollection = createCollectionZone(TodoApp, "list", {
       categoryId: state.ui.selectedCategoryId,
     };
   },
-  filter: (state: AppState) => (item: Todo) =>
+  filter: (state) => (item) =>
     item.categoryId === state.ui.selectedCategoryId,
-  text: (item: Todo) => item.text,
-  onPaste: (item: Todo, state: AppState) => ({
+  text: (item) => item.text,
+  onPaste: (item, state) => ({
     ...item,
     categoryId: state.ui.selectedCategoryId,
   }),
@@ -280,7 +280,7 @@ const sidebarCollection = createCollectionZone(TodoApp, "sidebar", {
     (s: AppState) => s.data.categories,
     (s: AppState) => s.data.categoryOrder,
   ),
-  text: (item: Category) => item.text,
+  text: (item) => item.text,
 });
 
 export const selectCategory = sidebarCollection.command(
@@ -342,7 +342,7 @@ export const updateTodoText = editZone.command(
   (ctx, payload: { text: string }) => ({
     state: produce(ctx.state, (draft) => {
       if (!ctx.state.ui.editingId) return;
-      const id = ctx.state.ui.editingId as string;
+      const id = ctx.state.ui.editingId;
       if (draft.data.todos[id]) {
         // Must use payload.text directly. No fallback.
         if (payload.text) {

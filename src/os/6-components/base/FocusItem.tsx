@@ -226,6 +226,7 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     // --- Ref Handling ---
     const childElement =
       asChild && isValidElement(children)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cloneElement requires any for generic props
         ? (children as ReactElement<any>)
         : null;
     const combinedRef = useMemo(

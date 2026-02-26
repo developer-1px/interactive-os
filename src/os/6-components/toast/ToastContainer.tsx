@@ -14,6 +14,7 @@
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { OS_TOAST_DISMISS } from "@/os/3-commands/toast/toast";
+import type { BaseCommand } from "@kernel/core/tokens";
 import { os } from "@/os/kernel";
 import type { ToastEntry } from "@/os/state/OSState";
 
@@ -90,11 +91,11 @@ export function ToastContainer() {
             onDismiss={() => os.dispatch(OS_TOAST_DISMISS({ id: toast.id }))}
             {...(toast.actionCommand
               ? {
-                  onAction: () => {
-                    os.dispatch(toast.actionCommand as any);
-                    os.dispatch(OS_TOAST_DISMISS({ id: toast.id }));
-                  },
-                }
+                onAction: () => {
+                  os.dispatch(toast.actionCommand as BaseCommand);
+                  os.dispatch(OS_TOAST_DISMISS({ id: toast.id }));
+                },
+              }
               : {})}
           />
         </div>

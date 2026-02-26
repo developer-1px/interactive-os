@@ -50,6 +50,7 @@ function registerVirtualZone(id: string, items: string[]) {
   const element = createZoneElement(id, items);
 
   // Register zone with DEFAULT_CONFIG + virtualFocus: true override
+  // Push model: getItems() provides item list (DOM_ITEMS no longer scans DOM)
   ZoneRegistry.register(id, {
     config: {
       ...DEFAULT_CONFIG,
@@ -57,6 +58,7 @@ function registerVirtualZone(id: string, items: string[]) {
     },
     element,
     parentId: null,
+    getItems: () => items,
   });
 
   // Set initial state — zone is active + first item focused

@@ -8,7 +8,6 @@
  */
 
 import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@/os/3-commands";
-import type { BaseCommand } from "@kernel/core/tokens";
 import { os } from "@/os/kernel";
 import { Keybindings } from "@/os/keymaps/keybindings";
 
@@ -23,7 +22,7 @@ export const TOGGLE_COMMAND_PALETTE = os.defineCommand(
 
     if (isOpen) {
       return {
-        dispatch: OS_OVERLAY_CLOSE({ id: "command-palette" }) as BaseCommand,
+        dispatch: OS_OVERLAY_CLOSE({ id: "command-palette" }),
       };
     }
 
@@ -31,7 +30,7 @@ export const TOGGLE_COMMAND_PALETTE = os.defineCommand(
       dispatch: OS_OVERLAY_OPEN({
         id: "command-palette",
         type: "dialog",
-      }) as BaseCommand,
+      }),
     };
   },
 );
@@ -67,7 +66,7 @@ if (typeof window !== "undefined") {
           OS_OVERLAY_OPEN({
             id: "command-palette",
             type: "dialog",
-          }) as BaseCommand,
+          }),
         );
       }
     } else {

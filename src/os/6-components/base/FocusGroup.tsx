@@ -239,7 +239,7 @@ function generateGroupId() {
 
 function buildZoneEntry(
   config: FocusGroupConfig,
-  element: HTMLDivElement,
+  element: HTMLDivElement | null,
   props: {
     role?: ZoneRole | undefined;
     parentId: string | null;
@@ -379,38 +379,35 @@ export function FocusGroup({
     os.dispatch(OS_ZONE_INIT(groupId));
   }, [groupId]);
 
-  // --- Register in ZoneRegistry (DOM required) ---
-  useLayoutEffect(() => {
-    if (containerRef.current) {
-      ZoneRegistry.register(
-        groupId,
-        buildZoneEntry(config, containerRef.current, {
-          role,
-          parentId,
-          onDismiss,
-          onAction: _onAction,
-          onSelect: _onSelect,
-          onCheck: _onCheck,
-          onDelete: _onDelete,
-          onMoveUp: _onMoveUp,
-          onMoveDown: _onMoveDown,
-          onCopy: _onCopy,
-          onCut: _onCut,
-          onPaste: _onPaste,
-          onUndo: _onUndo,
-          onRedo: _onRedo,
-          itemFilter: _itemFilter,
-          getItems: _getItems,
-          getExpandableItems: _getExpandableItems,
-          getTreeLevels: _getTreeLevels,
-          onReorder: _onReorder,
-        }),
-      );
-    }
-
-    return () => {
-      ZoneRegistry.unregister(groupId);
-    };
+  // --- Phase 1: Logical registration (render-time, headless-safe) ---
+  // Config + callbacks are registered at render-time with element=null.
+  // This allows headless environments (Vitest, SSR) to access zone config
+  // without DOM. Element is bound lazily in Phase 2.
+  useMemo(() => {
+    ZoneRegistry.register(
+      groupId,
+      buildZoneEntry(config, null, {
+        role,
+        parentId,
+        onDismiss,
+        onAction: _onAction,
+        onSelect: _onSelect,
+        onCheck: _onCheck,
+        onDelete: _onDelete,
+        onMoveUp: _onMoveUp,
+        onMoveDown: _onMoveDown,
+        onCopy: _onCopy,
+        onCut: _onCut,
+        onPaste: _onPaste,
+        onUndo: _onUndo,
+        onRedo: _onRedo,
+        itemFilter: _itemFilter,
+        getItems: _getItems,
+        getExpandableItems: _getExpandableItems,
+        getTreeLevels: _getTreeLevels,
+        onReorder: _onReorder,
+      }),
+    );
   }, [
     groupId,
     config,
@@ -435,9 +432,59 @@ export function FocusGroup({
     _onReorder,
   ]);
 
-  // --- AutoFocus: focus first item on mount when config.project.autoFocus ---
+  // --- Phase 2: DOM element binding (browser-only, lazy) ---
+  // When DOM exists, bind the element to the already-registered zone entry.
+  // Also auto-register a DOM-scanning getItems when no explicit getItems prop.
+  // This moves DOM scanning from 2-contexts (kernel, headless) to 6-components (view).
+  useLayoutEffect(() => {
+    if (containerRef.current) {
+      const existing = ZoneRegistry.get(groupId);
+      if (existing) {
+        const el = containerRef.current;
+        ZoneRegistry.register(groupId, {
+          ...existing,
+          element: el,
+          // Auto-register DOM-scanning getItems when no explicit getItems prop.
+          // DOM scan lives in the view layer (6-components), not in 2-contexts.
+          ...(!existing.getItems
+            ? {
+              getItems: () => {
+                const items: string[] = [];
+                const els = el.querySelectorAll("[data-item-id]");
+                for (const child of els) {
+                  if (child.closest("[data-zone]") !== el) continue;
+                  const id = child.getAttribute("data-item-id");
+                  if (id) items.push(id);
+                }
+                return items;
+              },
+            }
+            : {}),
+        });
+      }
+    }
+
+    return () => {
+      ZoneRegistry.unregister(groupId);
+    };
+  }, [groupId]);
+
+  // --- AutoFocus (headless path): getItems() available → render-time dispatch ---
+  // When getItems is provided, we can determine the first item without DOM.
+  // This enables autoFocus in headless environments (Vitest renderToString, SSR).
+  useMemo(() => {
+    if (!config.project.autoFocus) return;
+    if (!_getItems) return; // No headless path without getItems
+
+    const items = _getItems();
+    const firstItemId = items[0] ?? null;
+    os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: firstItemId }));
+  }, [groupId, config.project.autoFocus, _getItems]);
+
+  // --- AutoFocus (DOM fallback): querySelector when getItems is absent ---
   useEffect(() => {
     if (!config.project.autoFocus) return;
+    if (_getItems) return; // Already handled by headless path above
     if (!containerRef.current) return;
 
     // Wait one frame for children to render
@@ -457,7 +504,7 @@ export function FocusGroup({
       }
     });
     return () => cancelAnimationFrame(raf);
-  }, [groupId, config.project.autoFocus]);
+  }, [groupId, config.project.autoFocus, _getItems]);
 
   // --- Auto Focus Stack for dialog/alertdialog ---
   // When autoFocus is true, push focus stack on mount and pop on unmount

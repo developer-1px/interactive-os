@@ -136,9 +136,8 @@ function TestRow({ test }: { test: ReportTest }) {
   return (
     <div>
       <div
-        className={`flex items-center gap-2 py-1 px-3 text-[11px] hover:bg-slate-50 transition-colors ${
-          test.status === "fail" ? "cursor-pointer" : ""
-        }`}
+        className={`flex items-center gap-2 py-1 px-3 text-[11px] hover:bg-slate-50 transition-colors ${test.status === "fail" ? "cursor-pointer" : ""
+          }`}
         onClick={() => test.error && setShowError(!showError)}
       >
         <StatusIcon status={test.status} />
@@ -213,9 +212,8 @@ function FileBlock({ file }: { file: ReportFile }) {
 
   return (
     <div
-      className={`bg-white rounded-lg border shadow-sm overflow-hidden transition-all ${
-        hasFails ? "border-red-200 ring-1 ring-red-50" : "border-slate-200"
-      }`}
+      className={`bg-white rounded-lg border shadow-sm overflow-hidden transition-all ${hasFails ? "border-red-200 ring-1 ring-red-50" : "border-slate-200"
+        }`}
     >
       {/* File Header */}
       <div
@@ -288,8 +286,8 @@ export function TestBotV2Panel() {
       }
       const data = (await res.json()) as TestBotReport;
       setReport(data);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }

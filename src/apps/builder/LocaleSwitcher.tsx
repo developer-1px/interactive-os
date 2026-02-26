@@ -20,7 +20,7 @@ import {
 } from "./locale";
 
 // 지원 언어 목록
-const SUPPORTED_LOCALES: { code: string; label: string }[] = [
+const SUPPORTED_LOCALES = [
   { code: "ko", label: "한국어" },
   { code: "en", label: "English" },
   { code: "ja", label: "日本語" },

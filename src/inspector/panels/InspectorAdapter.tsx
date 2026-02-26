@@ -24,6 +24,7 @@ export function InspectorAdapter() {
   return (
     <UnifiedInspector
       transactions={[...transactions]}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- inspector store state mismatch
       storeState={storeState as any}
       onClear={() => {
         os.inspector.clearTransactions();

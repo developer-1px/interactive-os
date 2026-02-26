@@ -275,7 +275,7 @@ function BlockFieldsForm({
   setHeaderRef: (id: string) => (el: HTMLElement | null) => void;
   focusedCanvasId: string | null;
 }) {
-  const fields = BuilderApp.useComputed((s) => {
+  const fields = BuilderApp.useComputed((s): Record<string, string> => {
     function find(blocks: Block[]): Block | null {
       for (const b of blocks) {
         if (b.id === block.id) return b;
@@ -287,7 +287,7 @@ function BlockFieldsForm({
       return null;
     }
     return find(s.data.blocks)?.fields ?? {};
-  }) as unknown as Record<string, string>;
+  });
 
   const entries = Object.entries(fields);
   const hasContent =

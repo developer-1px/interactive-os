@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-26 21:30
+> Last updated: 2026-02-27 02:21
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -8,6 +8,8 @@
 ---
 
 ## 🔥 Active Focus
+
+
 
 **code-hygiene** — 540 eslint errors + 20 test failures → 0. husky 강제 검증. Light.
 
@@ -21,6 +23,7 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+
 
 | builder-v2 | T5 DnD Done, OS gap 회고 완료 | 02-26 | 🔥 Focus |
 | dropdown-dismiss | Scaffold, T1~T3 | 02-26 | 🔥 Focus |
@@ -45,6 +48,7 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| headless-item-discovery | 02-27 | ✅ archive/2026/02/W09 — 2-contexts DOM 0%. querySelectorAll을 FocusGroup(뷰)로 이동. getItems() push-only. T1~T10, +6 tests, regression 0, 기존 8건 개선 |
 | normalized-collection | 02-26 | ✅ archive/2026/02/W09 — NormalizedCollection 타입+helpers, tree-aware ops, view transforms. T1~T7. 109 tests GREEN |
 | unified-pointer-listener | 02-26 | ✅ archive/2026/02/W09 — Mouse+Drag→PointerListener 통합. OG-003 해결. +13 tests, 456줄 삭제, Gesture FSM |
 | sense-purity | 02-26 | ✅ archive/2026/02/W09 — T1~T7 Done. sense→extract→resolve 동사 법 제정, +13 tests, MouseListener+DragListener 삭제, rules.md 환류 |
@@ -106,22 +110,30 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 2 |
-| Active Projects (total) | 16 (13 Active + 2 Focus + 1 re-scaffold) |
-| Completed (archived) | 43 |
+| Active Focus | 3 |
+| Active Projects (total) | 14 (11 Active + 3 Focus) |
+| Completed (archived) | 45 |
 | Inbox items | 2 |
 | Backlog items | 15 |
 | Open issues | 0 |
 
 ---
 
-## 📝 Recent Changes (2026-02-26)
+## 📝 Recent Changes (2026-02-27)
+
+- ✅ `headless-item-discovery` Heavy 프로젝트 완료 — 2-contexts DOM 0%. querySelectorAll 6곳→1곳(DOM_RECTS, 후속). DOM 스캔을 FocusGroup.useLayoutEffect(뷰)로 이동. getItems() push-only. createOsPage.goto() 자동등록. T1~T10, +6 tests, regression 0, 기존 failures 21→13(8건 개선). → archive/2026/02/W09
+- ✅ `headless-zone-registry` Heavy 프로젝트 완료 — FocusGroup Zone 등록 Phase 1(논리, useMemo)/Phase 2(물리, useLayoutEffect) 분리. autoFocus getItems() headless 경로 추가. T1~T3 완료, T4-T6 scope out. +7 tests, 0 regression. → archive/2026/02/W09
+
+<details>
+<summary>📝 Previous Changes (2026-02-26)</summary>
 
 - 🪦 `/retire`: 7건 아카이브 (backlog 5 + 11-discussions 2). Inspector 2건·PointerListener·DnD retrospect·ghost-projects·solve discussion·area-mirroring discussion. MIGRATION_MAP 갱신. Backlog 20→15.
 - 🧹 `/para`: Inbox 10건→0건 (3→archive, 4→project notes, 2→backlog, 1→resource). Active 테이블에서 Completed 3건 제거. 고아 프로젝트 5건 등록 (trigger-listener-gap, test-reliability, test-observability, docs-section-nav, docs-subgrid-table).
 - 🔍 `/doubt`: −37파일 (decisions/ 17→archive, 3-resource/ 10→archive, workflows 하위폴더 6 삭제, 유령 프로젝트 4→backlog). 3-resource/ 번호 접두사 9개 제거. CLAUDE.md official/ 토폴로지 갱신.
 - ✅ `sense-purity` Light 프로젝트 완료 — sense 함수 순수화. T1~T7 (워크플로우 갱신, DOM 인라인, extractMouseInput/extractDropPosition 순수화, senseClick 삭제, MouseListener+DragListener 450줄 삭제, 파이프라인 동사 법 제정). +13 tests (58→71). audit OG-006/007 발견. rules.md `sense→extract→resolve` 법 추가.
 - ✅ `area-praxis` Meta 프로젝트 완료 — 2-area/ 재정립 (인큐베이터→실천지혜). 21파일 분배 (official 14, resource 1, archive 3, keep 3). 4 Living Documents 생성 (26개 교훈). docs 전수검사 17파일 mv. CLAUDE.md 토폴로지 갱신.
+
+</details>
 
 <details>
 <summary>📝 Previous Changes (2026-02-25)</summary>

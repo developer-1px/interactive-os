@@ -51,6 +51,7 @@ import { resolveRole } from "./registries/roleRegistry";
 export interface ZoneBindingEntry {
   role: ZoneRole;
   bindings: ZoneBindings;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic keybinding entries
   keybindings?: KeybindingEntry<any>[];
   field?: FieldBindings;
   triggers?: import("./defineApp.types").TriggerBinding[];

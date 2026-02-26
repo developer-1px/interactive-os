@@ -44,6 +44,7 @@ export const Label = forwardRef<HTMLDivElement, LabelProps>(
     };
 
     if (asChild && isValidElement(children)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cloneElement
       const child = children as ReactElement<any>;
       return cloneElement(child, {
         ...baseProps,

@@ -29,19 +29,10 @@ export const DOM_EXPANDABLE_ITEMS = os.defineContext(
     const entry = ZoneRegistry.get(zoneId);
     if (!entry) return new Set();
 
-    // Prefer state-derived accessor (headless-compatible)
+    // Push model: use accessor (headless-compatible)
     if (entry.getExpandableItems) return entry.getExpandableItems();
 
-    // Fallback: DOM query (legacy, browser-only)
-    if (!entry.element) return new Set();
-    const expandableIds = new Set<string>();
-    const els = entry.element.querySelectorAll("[data-item-id][aria-expanded]");
-    for (const el of els) {
-      if (el.closest("[data-zone]") !== entry.element) continue;
-      const id = el.getAttribute("data-item-id");
-      if (id) expandableIds.add(id);
-    }
-    return expandableIds;
+    return new Set();
   },
 );
 
@@ -58,22 +49,10 @@ export const DOM_TREE_LEVELS = os.defineContext(
     const entry = ZoneRegistry.get(zoneId);
     if (!entry) return new Map();
 
-    // Prefer state-derived accessor (headless-compatible)
+    // Push model: use accessor (headless-compatible)
     if (entry.getTreeLevels) return entry.getTreeLevels();
 
-    // Fallback: DOM query (legacy, browser-only)
-    if (!entry.element) return new Map();
-    const levels = new Map<string, number>();
-    const els = entry.element.querySelectorAll("[data-item-id]");
-    for (const el of els) {
-      if (el.closest("[data-zone]") !== entry.element) continue;
-      const id = el.getAttribute("data-item-id");
-      if (id) {
-        const levelStr = el.getAttribute("aria-level");
-        levels.set(id, levelStr ? parseInt(levelStr, 10) : 1);
-      }
-    }
-    return levels;
+    return new Map();
   },
 );
 
@@ -88,21 +67,8 @@ export const DOM_ITEMS = os.defineContext("dom-items", (): string[] => {
   const entry = ZoneRegistry.get(zoneId);
   if (!entry) return [];
 
-  // Browser: DOM querySelectorAll is the authoritative source (rendered truth).
-  // Captures filter, conditional render, virtualization — React's actual output.
-  if (entry.element) {
-    const items: string[] = [];
-    const els = entry.element.querySelectorAll("[data-item-id]");
-    for (const el of els) {
-      if (el.closest("[data-zone]") !== entry.element) continue;
-      const id = el.getAttribute("data-item-id");
-      if (id) items.push(id);
-    }
-    return entry.itemFilter ? entry.itemFilter(items) : items;
-  }
-
-  // Headless fallback: state-derived accessor (pure headless, no DOM).
-  // Used when createPage() has no Component, or in unit tests.
+  // Push model: getItems() accessor is the sole source (headless-compatible).
+  // Browser zones must provide getItems() via FocusGroup or defineApp.page.
   if (entry.getItems) {
     const items = entry.getItems();
     return entry.itemFilter ? entry.itemFilter(items) : items;
@@ -181,20 +147,17 @@ export const DOM_ZONE_ORDER = os.defineContext(
     const state = os.getState();
     const zones: ZoneOrderEntry[] = [];
 
-    // Strategy: use registry order + getItems accessors when available.
-    // Fall back to DOM querySelectorAll for zones without getItems.
+    // Push model: registry order + getItems() accessors only.
+    // Zones without getItems() are skipped (they have no discoverable items).
     const registeredZoneIds = ZoneRegistry.orderedKeys();
-    const processedIds = new Set<string>();
 
     for (const zoneId of registeredZoneIds) {
-      processedIds.add(zoneId);
       const zoneEntry = ZoneRegistry.get(zoneId);
       if (!zoneEntry) continue;
 
       const zoneState = state.os.focus.zones[zoneId];
       const entry = zoneEntry.config?.navigate?.entry ?? "first";
 
-      // Use getItems accessor if available (headless-compatible)
       const items = zoneEntry.getItems?.();
       if (items) {
         const filtered = zoneEntry.itemFilter
@@ -204,58 +167,6 @@ export const DOM_ZONE_ORDER = os.defineContext(
           zoneId,
           firstItemId: filtered[0] ?? null,
           lastItemId: filtered[filtered.length - 1] ?? null,
-          entry,
-          selectedItemId: zoneState?.selection?.[0] ?? null,
-          lastFocusedId: zoneState?.lastFocusedId ?? null,
-        });
-        continue;
-      }
-
-      // Fallback: DOM query (browser-only)
-      if (zoneEntry.element) {
-        const allItems = zoneEntry.element.querySelectorAll("[data-item-id]");
-        const ownItems: Element[] = [];
-        for (const item of allItems) {
-          if (item.closest("[data-zone]") === zoneEntry.element) {
-            ownItems.push(item);
-          }
-        }
-        zones.push({
-          zoneId,
-          firstItemId: ownItems[0]?.getAttribute("data-item-id") ?? null,
-          lastItemId:
-            ownItems[ownItems.length - 1]?.getAttribute("data-item-id") ?? null,
-          entry,
-          selectedItemId: zoneState?.selection?.[0] ?? null,
-          lastFocusedId: zoneState?.lastFocusedId ?? null,
-        });
-      }
-    }
-
-    // Catch any DOM zones not in registry (shouldn't happen, but safety net)
-    if (typeof document !== "undefined") {
-      const els = document.querySelectorAll("[data-zone]");
-      for (const el of els) {
-        const zoneId = el.getAttribute("data-zone");
-        if (!zoneId || processedIds.has(zoneId)) continue;
-
-        const allItems = el.querySelectorAll("[data-item-id]");
-        const ownItems: Element[] = [];
-        for (const item of allItems) {
-          if (item.closest("[data-zone]") === el) {
-            ownItems.push(item);
-          }
-        }
-
-        const zoneState = state.os.focus.zones[zoneId];
-        const zoneEntry = ZoneRegistry.get(zoneId);
-        const entry = zoneEntry?.config?.navigate?.entry ?? "first";
-
-        zones.push({
-          zoneId,
-          firstItemId: ownItems[0]?.getAttribute("data-item-id") ?? null,
-          lastItemId:
-            ownItems[ownItems.length - 1]?.getAttribute("data-item-id") ?? null,
           entry,
           selectedItemId: zoneState?.selection?.[0] ?? null,
           lastFocusedId: zoneState?.lastFocusedId ?? null,

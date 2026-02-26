@@ -451,6 +451,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
         (ref as React.MutableRefObject<HTMLElement | null>).current = node;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- baseProps spread
     return (
       <FocusItem
         id={fieldId}
