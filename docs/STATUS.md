@@ -95,7 +95,10 @@
 
 ## 📥 Inbox
 
-(비어 있음)
+| File | Topic | Related Project | Suggested Action |
+|------|-------|-----------------|------------------|
+| `2026-0226-2021-[proposal]-verification-level-up.md` | 검증 부족 영역 11건 식별 | code-hygiene | → `1-project/code-hygiene/notes/` |
+| `2026-0226-2130-[proposal]-verification-hardening-roadmap.md` | 검증 고도화 4-Phase 로드맵 | code-hygiene | → `1-project/code-hygiene/notes/` |
 
 ---
 
@@ -106,7 +109,7 @@
 | Active Focus | 2 |
 | Active Projects (total) | 16 (13 Active + 2 Focus + 1 re-scaffold) |
 | Completed (archived) | 43 |
-| Inbox items | 0 |
+| Inbox items | 2 |
 | Backlog items | 15 |
 | Open issues | 0 |
 

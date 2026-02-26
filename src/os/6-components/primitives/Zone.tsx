@@ -16,6 +16,8 @@
  * composed in the same ZoneContext without extra DOM nesting.
  */
 
+import type { BaseCommand } from "@kernel/core/tokens";
+import { defineScope } from "@kernel";
 import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
 import { OS_ZONE_INIT } from "@os/3-commands/focus";
 import {
@@ -145,7 +147,7 @@ function ZoneContainer({
 }: {
   zoneId: string;
   isActive: boolean;
-  containerRef: React.RefObject<HTMLElement>;
+  containerRef: React.RefObject<HTMLElement | null>;
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -235,7 +237,7 @@ export function Zone({
   );
 
   // ─── Container ref (shared between Zone container and FocusGroup) ───
-  const containerRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLElement | null>(null);
 
   // ─── Is Active ───
   const isActive = os.useComputed((s) => s.os.focus.activeZoneId === zoneId);

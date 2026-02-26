@@ -219,7 +219,7 @@ export interface FocusGroupProps
 
   /** External ref to the container element (used when headless=true).
    *  Zone passes this so FocusGroup can register with ZoneRegistry and run autoFocus. */
-  containerRef?: React.RefObject<HTMLElement>;
+  containerRef?: React.RefObject<HTMLElement | null>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -260,12 +260,12 @@ function buildZoneEntry(
     getExpandableItems?: (() => Set<string>) | undefined;
     getTreeLevels?: (() => Map<string, number>) | undefined;
     onReorder?:
-      | ((info: {
-          itemId: string;
-          overItemId: string;
-          position: "before" | "after";
-        }) => BaseCommand | BaseCommand[])
-      | undefined;
+    | ((info: {
+      itemId: string;
+      overItemId: string;
+      position: "before" | "after";
+    }) => BaseCommand | BaseCommand[])
+    | undefined;
   },
 ): ZoneEntry {
   const entry: ZoneEntry = {
