@@ -7,7 +7,6 @@
 
 import { produce } from "immer";
 import { DOM_ITEMS } from "../../2-contexts";
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 

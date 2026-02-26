@@ -8,7 +8,6 @@
  * Browser: createVisualTestKit (real DOM, visual feedback, preview sandbox)
  */
 
-import type { AppState } from "@/os/kernel";
 import { os } from "@/os/kernel";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -140,7 +139,7 @@ const STEP_DELAY = 300;
 
 export function createVisualTestKit(): VisualTestKit {
   const steps: VisualStep[] = [];
-  let active = false;
+  let __active = false;
 
   function snapshot(): unknown {
     return JSON.parse(JSON.stringify(os.getState()));
@@ -148,7 +147,7 @@ export function createVisualTestKit(): VisualTestKit {
 
   function enter() {
     os.enterPreview(os.getState() as any);
-    active = true;
+    _active = true;
     steps.length = 0;
     steps.push({
       type: "setup",
@@ -160,7 +159,7 @@ export function createVisualTestKit(): VisualTestKit {
 
   function exit() {
     os.exitPreview();
-    active = false;
+    _active = false;
     cleanupBadge();
   }
 

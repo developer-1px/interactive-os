@@ -15,7 +15,6 @@
  */
 
 import { createOsPage } from "@os/createOsPage";
-import { describe, expect, it, vi } from "vitest";
 
 // ─── Configs ───
 

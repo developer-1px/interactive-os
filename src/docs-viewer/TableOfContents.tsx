@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { List } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { extractHeadings, type TocHeading } from "./docsUtils";
 

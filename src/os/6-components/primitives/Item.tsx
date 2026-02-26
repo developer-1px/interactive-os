@@ -1,13 +1,12 @@
 import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
-import { os } from "@os/kernel.ts";
 import {
   cloneElement,
   createContext,
   forwardRef,
   isValidElement,
   type ReactNode,
-  useContext,
+
   useMemo,
 } from "react";
 
@@ -22,15 +21,7 @@ interface ItemContextValue {
 
 const ItemContext = createContext<ItemContextValue | null>(null);
 
-function useItemContext() {
-  const ctx = useContext(ItemContext);
-  if (!ctx) {
-    throw new Error(
-      "Item.ExpandTrigger / Item.CheckTrigger must be used inside an <Item>",
-    );
-  }
-  return ctx;
-}
+
 
 // --- Types ---
 interface ItemState {
@@ -162,7 +153,7 @@ function ItemExpandTrigger({
   asChild,
   className,
 }: ExpandTriggerProps) {
-  const { zoneId, itemId } = useItemContext();
+
 
   // PointerListener handles click → OS_EXPAND via data-expand-trigger attribute.
   // No React onClick needed.

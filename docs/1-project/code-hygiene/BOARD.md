@@ -5,23 +5,20 @@
 
 ## Context
 
-Claim: 모든 lint error/warning + test failure를 0으로 만들고, husky로 자동 검증 강제.
+Claim: tsc + eslint error 0, test failure 0, husky 자동 검증 강제.
 
-Before: 540 eslint errors, 20 test failures, git hook 없음 — AI가 /verify 안 돌려도 commit 가능
-After: 0 eslint errors, 0 test failures, pre-commit(tsc+eslint) + pre-push(vitest) 강제
-
-Risks: 기존 any 타입 340건 → 한번에 다 잡으면 regression 위험
+Before: 226 tsc errors, 540 eslint errors, 20 test failures, git hook 무력
+After: 0 errors 전부, pre-commit(tsc -b) + pre-push(vitest) 강제
 
 ## Now
-- [ ] T1: eslint `no-explicit-any` 340건 해소 (점진적, 모듈별)
-- [ ] T2: eslint `react-refresh/only-export-components` 40건 해소
-- [ ] T3: eslint `ban-ts-comment` 10건 해소 (설명 추가)
-- [ ] T4: eslint `Function` type 24건 → 구체적 타입으로
-- [ ] T5: react strict mode warnings 33건 해소
-- [ ] T6: test failures 20건 수정
-- [ ] T7: husky pre-commit (tsc --noEmit + eslint --max-warnings 0) 설정
-- [ ] T8: husky pre-push (vitest run) 설정
-- [ ] T9: /go workflow에 commit 단계 추가 (/green 완료 → git commit)
+- [ ] T1: tsc -b 에러 226건 해소 (pre-commit gate 활성화 전제조건)
+- [ ] T2: eslint `no-explicit-any` ~340건 해소
+- [ ] T3: eslint 기타 에러 ~200건 해소 (react-refresh, ban-ts-comment, Function type 등)
+- [ ] T4: test failures 20건 수정
+- [ ] T5: husky pre-commit (tsc -b --noEmit) 활성화 — T1 완료 후
+- [ ] T6: husky pre-push (vitest run) 추가 — T4 완료 후
+- [ ] T7: lint-staged (eslint --max-warnings 0) 활성화 — T2+T3 완료 후
+- [ ] T8: /go workflow에 commit 단계 추가 (/green → git commit, /red → git commit --no-verify)
 
 ## Done
 

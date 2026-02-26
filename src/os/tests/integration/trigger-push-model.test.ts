@@ -12,7 +12,6 @@
 
 import { BuilderApp } from "@apps/builder/app";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { OS_OVERLAY_OPEN } from "@os/3-commands/overlay/overlay";
 import { createPage } from "@os/defineApp.page";
 import type { AppPage } from "@os/defineApp.types";
 import type { BuilderState } from "@apps/builder/model/appState";

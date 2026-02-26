@@ -7,7 +7,6 @@
  * Used by: PointerListener (and headless simulateClick)
  */
 
-import { os } from "../../kernel";
 import { sensorGuard } from "../../lib/loopGuard";
 import type { MouseInput } from "../mouse/resolveMouse";
 import {

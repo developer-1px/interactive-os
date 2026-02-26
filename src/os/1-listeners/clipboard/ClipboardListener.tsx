@@ -42,7 +42,7 @@ function canZoneHandle(callback: "onCopy" | "onCut" | "onPaste"): boolean {
 
 export function ClipboardListener() {
   useEffect(() => {
-    const handleCopy = (e: Event) => {
+    const handleCopy = (_e: Event) => {
       const result = resolveClipboard({
         event: "copy",
         isInputActive: isInputActive(),

@@ -9,8 +9,7 @@
  * open/close, keyboard, backdrop 전부 OS가 관리 (OG-001).
  */
 
-import React from "react";
-import { os } from "@/os/kernel";
+
 import { FocusItem } from "@/os/6-components/base/FocusItem";
 import { Trigger } from "@/os/6-components/primitives/Trigger";
 import { resolveFieldValue } from "./entities/i18n";

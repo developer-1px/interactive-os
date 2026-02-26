@@ -12,7 +12,6 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { OS_FIELD_CANCEL } from "@os/3-commands/field/cancel";
 import { OS_FIELD_COMMIT } from "@os/3-commands/field/commit";
 import {
   FieldRegistry,

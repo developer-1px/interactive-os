@@ -18,7 +18,6 @@ import {
   MousePointer2,
   Play,
   RotateCcw,
-  Square,
   XCircle,
 } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -228,11 +227,10 @@ export function BddReplayPanel() {
               key={i}
               type="button"
               onClick={() => setReplayIdx(i)}
-              className={`w-full flex items-center gap-2 px-3 py-1 text-left text-xs border-l-2 transition-colors ${
-                i === replayIdx
+              className={`w-full flex items-center gap-2 px-3 py-1 text-left text-xs border-l-2 transition-colors ${i === replayIdx
                   ? "bg-indigo-50 border-indigo-500 text-indigo-900"
                   : "border-transparent hover:bg-stone-50 text-stone-600"
-              }`}
+                }`}
             >
               {rec.type === "press" ? (
                 <Keyboard size={12} className="text-blue-500 flex-shrink-0" />
@@ -337,11 +335,10 @@ export function BddReplayPanel() {
                   setSelectedTest(t);
                   setReplayIdx(0);
                 }}
-                className={`w-full flex items-center gap-2 px-2 py-1 rounded text-xs text-left transition-colors ${
-                  t.status === "fail"
+                className={`w-full flex items-center gap-2 px-2 py-1 rounded text-xs text-left transition-colors ${t.status === "fail"
                     ? "bg-red-50 hover:bg-red-100"
                     : "hover:bg-stone-50"
-                }`}
+                  }`}
               >
                 {t.status === "pass" ? (
                   <CheckCircle2

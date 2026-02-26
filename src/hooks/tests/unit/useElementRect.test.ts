@@ -1,15 +1,15 @@
-import { act, renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useElementRect } from "@/hooks/useElementRect";
 
 // ── Mock ResizeObserver & MutationObserver ──
 
-let roCallback: ResizeObserverCallback;
-let moCallback: MutationCallback;
+let _roCallback: ResizeObserverCallback;
+let _moCallback: MutationCallback;
 
 class MockResizeObserver {
   constructor(cb: ResizeObserverCallback) {
-    roCallback = cb;
+    _roCallback = cb;
   }
   observe = vi.fn();
   unobserve = vi.fn();
@@ -18,7 +18,7 @@ class MockResizeObserver {
 
 class MockMutationObserver {
   constructor(cb: MutationCallback) {
-    moCallback = cb;
+    _moCallback = cb;
   }
   observe = vi.fn();
   disconnect = vi.fn();
@@ -55,7 +55,7 @@ function makeDOMRect(
     y: top,
     bottom: top + height,
     right: left + width,
-    toJSON() {},
+    toJSON() { },
   } as DOMRect;
 }
 

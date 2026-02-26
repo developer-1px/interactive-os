@@ -16,7 +16,6 @@
  * composed in the same ZoneContext without extra DOM nesting.
  */
 
-import { type BaseCommand, defineScope, type ScopeToken } from "@kernel";
 import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
 import { OS_ZONE_INIT } from "@os/3-commands/focus";
 import {

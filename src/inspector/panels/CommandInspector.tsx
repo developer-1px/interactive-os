@@ -8,7 +8,6 @@ import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import {
   BddReplayPanel,
   TestBotPanel,
-  TestBotV2Panel,
 } from "@inspector/testbot";
 
 import { useEffect, useState } from "react";

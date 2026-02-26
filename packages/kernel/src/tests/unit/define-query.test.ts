@@ -234,7 +234,7 @@ describe("query → context bridge", () => {
     const { kernel } = setup();
 
     // Define query — should also register as context
-    const FOCUSED_QUERY = kernel.defineQuery(
+    const _FOCUSED_QUERY = kernel.defineQuery(
       "bridge-test",
       (state: TestState) => state.focusedItemId,
     );

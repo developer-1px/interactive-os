@@ -13,9 +13,7 @@
  * Note: Uses onTestFailed + dumpDiagnostics
  */
 
-import { defineScope } from "@kernel";
 import { createOsPage, type OsPage } from "@os/createOsPage";
-import { produce } from "immer";
 import {
   afterEach,
   beforeEach,

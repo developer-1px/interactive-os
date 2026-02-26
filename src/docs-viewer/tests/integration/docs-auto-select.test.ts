@@ -15,9 +15,8 @@ import {
   expect,
   it,
   onTestFailed,
-  vi,
 } from "vitest";
-import { DocsApp, selectDoc } from "@/docs-viewer/app";
+import { selectDoc } from "@/docs-viewer/app";
 
 describe("T7: DocsViewer — auto-select via selectDoc command", () => {
   let page: OsPage;

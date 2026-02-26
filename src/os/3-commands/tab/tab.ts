@@ -12,7 +12,6 @@
 
 import { produce } from "immer";
 import { DOM_ITEMS, DOM_ZONE_ORDER, ZONE_CONFIG } from "../../2-contexts";
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";
 import { resolveTab } from "./resolveTab";
