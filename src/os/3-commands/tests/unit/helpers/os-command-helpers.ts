@@ -5,7 +5,9 @@
 
 import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import type { BaseCommand } from "@kernel/core/tokens";
 import { os } from "@os/kernel";
+import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, vi } from "vitest";
 
@@ -33,17 +35,17 @@ export function setupFocus(zoneId: string, focusedItemId: string) {
 export function registerZone(
   id: string,
   callbacks: Partial<{
-    onCheck: (cursor: ZoneCursor) => any;
-    onAction: (cursor: ZoneCursor) => any;
-    onDelete: (cursor: ZoneCursor) => any;
-    onMoveUp: (cursor: ZoneCursor) => any;
-    onMoveDown: (cursor: ZoneCursor) => any;
-    onUndo: any;
-    onRedo: any;
+    onCheck: (cursor: ZoneCursor) => BaseCommand | BaseCommand[];
+    onAction: (cursor: ZoneCursor) => BaseCommand | BaseCommand[];
+    onDelete: (cursor: ZoneCursor) => BaseCommand | BaseCommand[];
+    onMoveUp: (cursor: ZoneCursor) => BaseCommand | BaseCommand[];
+    onMoveDown: (cursor: ZoneCursor) => BaseCommand | BaseCommand[];
+    onUndo: BaseCommand;
+    onRedo: BaseCommand;
   }>,
 ) {
   ZoneRegistry.register(id, {
-    config: {} as any,
+    config: DEFAULT_CONFIG,
     element: document.createElement("div"),
     parentId: null,
     ...callbacks,
