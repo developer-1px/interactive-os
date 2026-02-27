@@ -35,6 +35,9 @@ Risks: headless-purity에서 "DOM scan을 view layer로" 결정을 뒤집음. Zo
 - [ ] V1: e2e 25개 GREEN 복구 확인 (T-slim-1 완료 후)
 - [ ] V2: vitest에서 e2e와 동등한 attrs 검증 가능 확인 (WP2+WP3 완료 후)
 
+### Phase 3: 경험 → 규칙 환류
+- [ ] T-slim-7: TSX Adapter Contract를 rules.md에 공식 추가 — Phase 1 완료 후 경험을 바탕으로 정교화
+
 ## Done
 - [x] WP4: e2e JSON reporter + summary script — `playwright.config.ts` dual reporter + `scripts/e2e-summary.mjs` ✅
 
