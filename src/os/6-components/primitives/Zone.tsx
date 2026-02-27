@@ -3,13 +3,14 @@
  *
  * Zone owns:
  *   - Zone ID generation (zone-N)
- *   - ZoneState initialization (OS_ZONE_INIT)
+ *   - ZoneEntry registration (ZoneRegistry)
+ *   - Lifecycle effects (OS_ZONE_INIT, bindElement, autoFocus, Stack)
  *   - ZoneContext (zoneId, scope)
  *   - Container element rendering (the div that receives all OS props)
  *   - App callback routing (onCopy, onDelete, onUndo, ...)
  *
- * Zone delegates APG composite widget behavior to FocusGroup (headless).
- * FocusGroup runs in headless mode: no DOM, only context + effects.
+ * Zone delegates config resolution and context provision to FocusGroup (headless).
+ * FocusGroup runs in headless mode: no DOM, no registration, only context.
  * Zone renders the container div and applies zone-level + focus-level props.
  *
  * Future capabilities (DnD, Resize) will be additional headless children,
@@ -19,14 +20,17 @@
 import type { BaseCommand } from "@kernel/core/tokens";
 import { defineScope } from "@kernel";
 import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
-import { OS_ZONE_INIT } from "@os/3-commands/focus";
 import {
   FocusGroup,
   useFocusContext,
   type ZoneContextValue,
 } from "@os/6-components/base/FocusGroup.tsx";
+import {
+  useZoneLifecycle,
+  type ZoneCallbacks,
+} from "@os/6-components/base/useZoneLifecycle.ts";
 import { os } from "@os/kernel.ts";
-import type { ZoneRole } from "@os/registries/roleRegistry.ts";
+import { resolveRole, type ZoneRole } from "@os/registries/roleRegistry.ts";
 import type {
   ActivateConfig,
   DismissConfig,
@@ -40,7 +44,6 @@ import {
   createContext,
   type ReactNode,
   useContext,
-  useLayoutEffect,
   useMemo,
   useRef,
 } from "react";
@@ -226,11 +229,55 @@ export function Zone({
   // ─── Scope (defaults to zoneId) ───
   const scope = useMemo(() => defineScope(zoneId), [zoneId]);
 
-  // ─── Init kernel state (commit-phase, idempotent) ───
-  // Moved from useMemo to useLayoutEffect to prevent dispatch-during-render loops.
-  useLayoutEffect(() => {
-    os.dispatch(OS_ZONE_INIT(zoneId));
-  }, [zoneId]);
+  // ─── Config (resolved from role + options) ───
+  const config = useMemo(() => {
+    const overrides: {
+      navigate?: Partial<NavigateConfig>;
+      tab?: Partial<TabConfig>;
+      select?: Partial<SelectConfig>;
+      activate?: Partial<ActivateConfig>;
+      dismiss?: Partial<DismissConfig>;
+      project?: Partial<ProjectConfig>;
+    } = {};
+    if (options?.navigate !== undefined) overrides.navigate = options.navigate;
+    if (options?.tab !== undefined) overrides.tab = options.tab;
+    if (options?.select !== undefined) overrides.select = options.select;
+    if (options?.activate !== undefined) overrides.activate = options.activate;
+    if (options?.dismiss !== undefined) overrides.dismiss = options.dismiss;
+    if (options?.project !== undefined) overrides.project = options.project;
+    return resolveRole(role, overrides);
+  }, [role, options]);
+
+  // ─── Callbacks bag ───
+  const callbacks = useMemo<ZoneCallbacks>(
+    () => ({
+      onAction,
+      onSelect,
+      onCheck,
+      onDelete,
+      onMoveUp,
+      onMoveDown,
+      onCopy,
+      onCut,
+      onPaste,
+      onUndo,
+      onRedo,
+      onDismiss,
+      itemFilter,
+      getItems,
+      getExpandableItems,
+      getTreeLevels,
+      onReorder,
+    }),
+    // biome-ignore lint/correctness/useExhaustiveDependencies: callbacks are captured in ref inside hook
+    [],
+  );
+
+  // ─── Container ref ───
+  const containerRef = useRef<HTMLElement | null>(null);
+
+  // ─── Registration + Lifecycle (the hook does everything) ───
+  useZoneLifecycle(zoneId, config, role, null, containerRef, callbacks);
 
   // ─── ZoneContext value ───
   const zoneContextValue = useMemo<ZoneContextValue>(
@@ -238,13 +285,10 @@ export function Zone({
     [zoneId, scope],
   );
 
-  // ─── Container ref (shared between Zone container and FocusGroup) ───
-  const containerRef = useRef<HTMLElement | null>(null);
-
   // ─── Is Active ───
   const isActive = os.useComputed((s) => s.os.focus.activeZoneId === zoneId);
 
-  // ─── Render: Zone provides context, delegates to headless FocusGroup ───
+  // ─── Render: Zone provides context, delegates config to headless FocusGroup ───
   return (
     <ZoneContext.Provider value={zoneContextValue}>
       <FocusGroup
@@ -252,38 +296,8 @@ export function Zone({
         scope={scope}
         headless
         containerRef={containerRef}
-        {...(role !== undefined ? { role } : {})}
-        {...(options?.navigate !== undefined
-          ? { navigate: options.navigate }
-          : {})}
-        {...(options?.tab !== undefined ? { tab: options.tab } : {})}
-        {...(options?.select !== undefined ? { select: options.select } : {})}
-        {...(options?.activate !== undefined
-          ? { activate: options.activate }
-          : {})}
-        {...(options?.dismiss !== undefined
-          ? { dismiss: options.dismiss }
-          : {})}
-        {...(options?.project !== undefined
-          ? { project: options.project }
-          : {})}
-        {...(onAction !== undefined ? { onAction } : {})}
-        {...(onSelect !== undefined ? { onSelect } : {})}
-        {...(onCheck !== undefined ? { onCheck } : {})}
-        {...(onCopy !== undefined ? { onCopy } : {})}
-        {...(onCut !== undefined ? { onCut } : {})}
-        {...(onPaste !== undefined ? { onPaste } : {})}
-        {...(onDelete !== undefined ? { onDelete } : {})}
-        {...(onMoveUp !== undefined ? { onMoveUp } : {})}
-        {...(onMoveDown !== undefined ? { onMoveDown } : {})}
-        {...(onUndo !== undefined ? { onUndo } : {})}
-        {...(onRedo !== undefined ? { onRedo } : {})}
-        {...(onDismiss !== undefined ? { onDismiss } : {})}
-        {...(itemFilter !== undefined ? { itemFilter } : {})}
-        {...(getItems !== undefined ? { getItems } : {})}
-        {...(getExpandableItems !== undefined ? { getExpandableItems } : {})}
-        {...(getTreeLevels !== undefined ? { getTreeLevels } : {})}
-        {...(onReorder !== undefined ? { onReorder } : {})}
+        config={config}
+        role={role}
       >
         <ZoneContainer
           zoneId={zoneId}
