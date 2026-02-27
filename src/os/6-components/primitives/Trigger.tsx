@@ -128,9 +128,11 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         e.stopPropagation();
       }
 
-      // OS_OVERLAY_OPEN is dispatched via OS pipeline:
-      // PointerListener → resolveClick → OS_ACTIVATE → onActivate(=overlayOpenCmd)
-      // No direct dispatch needed here.
+      // When Trigger has an id → FocusItem → PointerListener → OS_ACTIVATE → onActivate
+      // When Trigger has NO id → no FocusItem → must dispatch overlay open directly
+      if (!id && overlayOpenCmd) {
+        os.dispatch(overlayOpenCmd);
+      }
 
       onClick?.(e as ReactMouseEvent<HTMLElement>);
     };

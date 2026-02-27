@@ -945,8 +945,8 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
-    // Space → collapse
-    await page.keyboard.press("Space");
+    // Enter → collapse (in our OS: Enter = activate = expand toggle)
+    await page.keyboard.press("Enter");
     await expect(page.locator("#tree-parent-2")).toHaveAttribute(
       "aria-expanded",
       "false",
