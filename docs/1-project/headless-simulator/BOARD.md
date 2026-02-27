@@ -6,29 +6,34 @@ Claim: Vitest에서 Playwright 수준 검증을 달성한다. DOM → OS VDOM �
 
 Why: e2e(Playwright)는 LLM이 테스트를 지속 관리하기에 불편. vitest만으로는 FE에서 거짓 GREEN이 너무 많다.
 
-Evidence: headless-item-discovery 리팩토링 후 vitest "0 regression" 판정 → Playwright 25/29 FAIL. Phase 1/2 라이프사이클 불일치를 headless에서 원리적 감지 불가.
+Evidence: headless-item-discovery 리팩토링 후 vitest "0 regression" 판정 → Playwright 25/29 FAIL.
 
 Before → After:
-- Before: createOsPage는 커맨드 로직만 검증. React 렌더/투영 축은 미검증. Playwright만 잡는 버그 존재 (거짓 GREEN).
-- After: OS TestPage가 State → Projection(VDOM)을 순수 계산. DOM 없이 attrs(aria-current, tabIndex, aria-selected 등) 검증 가능. vitest만으로 Playwright와 동등한 검증 달성.
-
-Risks: FocusItem attrs 로직 복잡도(role 추론, expandable 결정). 추출 시 FocusItem과의 중복 관리. DOM 레이어 "얇게 뜨기"의 범위 결정.
+- Before: createOsPage는 커맨드 로직만 검증. 투영 축(aria-current 등) 미검증. Playwright만 잡는 버그 존재.
+- After: OS TestPage가 State → Projection(VDOM)을 순수 계산. vitest만으로 Playwright 동등 검증. e2e는 VDOM→DOM smoke만.
 
 ## Now
-- [ ] T1: 깨진 e2e 25개 분류 — 어떤 종류의 검증인지 (attrs, navigation, focus stack 등) 분석
-- [ ] T2: 현재 createOsPage.attrs()와 FocusItem의 attrs 계산 비교 — 갭 분석
-- [ ] T3: Phase 1/2 라이프사이클 불일치 수정 (e2e GREEN 복구가 선행 조건)
+
+### Phase 0: e2e GREEN 복구 (선행 조건)
+- [ ] WP1: Phase 1/2 라이프사이클 수정 — Phase 1(useMemo) 재실행 시 Phase 2(useLayoutEffect)의 getItems/getLabels 보존. **이것만 수정하면 e2e 25개 GREEN 복구.**
+
+### Phase 1: headless attrs 갭 메우기
+- [ ] WP2: computeAttrs에 aria-current 추가 — `isActiveFocused = isFocused && isActiveZone` 순수 함수화
+- [ ] WP3: page.isFocused(itemId) API — toBeFocused() 4개 테스트의 headless 대체
+
+### Phase 2: DX / 인프라
+- [ ] WP4: e2e 결과 JSON 저장 — `--reporter=json` → LLM이 결과만 읽기. 매번 37초 대기 제거
 
 ## Done
 
 ## Unresolved
-- OS VDOM의 구체적 형태?
-- FocusItem attrs 순수 함수 추출 범위?
-- DOM 레이어를 "얇게 뜨는" 기준선?
-- TestPage와 createOsPage, createPage의 관계 재정의?
+- WP1 수정 방법: Phase 1이 기존 getItems 보존 vs Phase 1/2 합치기?
+- computeAttrs ↔ FocusItem 동형성 보장 방법? (단일 원천 필요)
+- 다른 e2e spec(aria-showcase, todo, builder)도 같은 패턴으로 깨져 있는지?
 
 ## Ideas
 - `os.project()` — 전체 zone/item의 expected attrs를 계산하는 순수 함수
-- `page.expectAttrs("item-id", { "aria-current": true })` — createOsPage 확장
+- computeAttrs를 FocusItem이 소비하게 → attrs 계산 단일 원천
+- Playwright e2e는 "VDOM→DOM 동형성" smoke test로 역할 축소
 - `setGrid()` 패턴을 attrs projection에도 적용
-- Playwright e2e는 "VDOM→DOM 동형성" 검증으로 역할 축소 (smoke test)
+- e2e 결과 파일 기반 읽기 (LLM DX 개선)
