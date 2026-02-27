@@ -493,8 +493,7 @@ export function FocusGroup({
 
     // 4. AutoFocus
     if (config.project.autoFocus) {
-      const registered = ZoneRegistry.get(groupId);
-      const items = registered?.getItems?.() ?? [];
+      const items = ZoneRegistry.resolveItems(groupId);
       const firstItemId = items[0] ?? null;
       os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: firstItemId }));
     }
