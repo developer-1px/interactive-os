@@ -32,6 +32,18 @@ export const DOM_EXPANDABLE_ITEMS = os.defineContext(
     // Push model: use accessor (headless-compatible)
     if (entry.getExpandableItems) return entry.getExpandableItems();
 
+    // Lazy fallback: DOM scan via bound element
+    if (entry.element) {
+      const expandableIds = new Set<string>();
+      const els = entry.element.querySelectorAll("[data-item-id][aria-expanded]");
+      for (const el of els) {
+        if (el.closest("[data-zone]") !== entry.element) continue;
+        const id = el.getAttribute("data-item-id");
+        if (id) expandableIds.add(id);
+      }
+      return expandableIds;
+    }
+
     return new Set();
   },
 );
@@ -51,6 +63,21 @@ export const DOM_TREE_LEVELS = os.defineContext(
 
     // Push model: use accessor (headless-compatible)
     if (entry.getTreeLevels) return entry.getTreeLevels();
+
+    // Lazy fallback: DOM scan via bound element
+    if (entry.element) {
+      const levels = new Map<string, number>();
+      const els = entry.element.querySelectorAll("[data-item-id]");
+      for (const el of els) {
+        if (el.closest("[data-zone]") !== entry.element) continue;
+        const id = el.getAttribute("data-item-id");
+        if (id) {
+          const levelStr = el.getAttribute("aria-level");
+          levels.set(id, levelStr ? parseInt(levelStr, 10) : 1);
+        }
+      }
+      return levels;
+    }
 
     return new Map();
   },

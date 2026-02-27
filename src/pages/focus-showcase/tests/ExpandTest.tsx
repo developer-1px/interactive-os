@@ -49,6 +49,9 @@ export function ExpandTest() {
           id="tree-widget"
           role="tree"
           navigate={{ orientation: "vertical" }}
+          getExpandableItems={() =>
+            new Set(["tree-parent-1", "tree-parent-2"])
+          }
           className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200"
         >
           <TreeItems />
