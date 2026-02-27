@@ -874,14 +874,21 @@ test.describe("Focus Showcase", () => {
   test("Expand: Tree Toggle — expand/collapse via arrows and Enter/Space", async ({
     page,
   }) => {
-    // Parent 1: starts collapsed
+    // Parent 1: click activates and expands (tree activate = toggle expand)
     await page.locator("#tree-parent-1").click();
+    await expect(page.locator("#tree-parent-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    // ArrowLeft → collapse first
+    await page.keyboard.press("ArrowLeft");
     await expect(page.locator("#tree-parent-1")).toHaveAttribute(
       "aria-expanded",
       "false",
     );
 
-    // ArrowRight → expand
+    // ArrowRight → expand again
     await page.keyboard.press("ArrowRight");
     await expect(page.locator("#tree-parent-1")).toHaveAttribute(
       "aria-expanded",
@@ -965,8 +972,15 @@ test.describe("Focus Showcase", () => {
   test("Expand: collapsed parent — ArrowDown skips hidden children", async ({
     page,
   }) => {
-    // Parent 1: collapsed, children hidden
+    // Parent 1: click activates and expands (tree activate = toggle)
     await page.locator("#tree-parent-1").click();
+    await expect(page.locator("#tree-parent-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    // Collapse first to test skip
+    await page.keyboard.press("ArrowLeft");
     await expect(page.locator("#tree-parent-1")).toHaveAttribute(
       "aria-expanded",
       "false",
@@ -979,9 +993,9 @@ test.describe("Focus Showcase", () => {
       "true",
     );
 
-    // Expand parent-1 and verify children become navigable
+    // Navigate back to parent-1 and expand
     await page.locator("#tree-parent-1").click();
-    await page.keyboard.press("ArrowRight");
+    // Click toggles again → now expanded
     await expect(page.locator("#tree-parent-1")).toHaveAttribute(
       "aria-expanded",
       "true",
