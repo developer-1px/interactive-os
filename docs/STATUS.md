@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-27 02:31
+> Last updated: 2026-02-27 10:24
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -9,7 +9,7 @@
 
 ## 🔥 Active Focus
 
-
+**headless-simulator** — Vitest에서 Playwright 수준 검증 달성. DOM → OS VDOM. 거짓 GREEN 근절. Heavy.
 
 **code-hygiene** — 540 eslint errors + 20 test failures → 0. husky 강제 검증. Light.
 
@@ -25,6 +25,7 @@
 |---------|-------|---------------|--------|
 
 
+| headless-simulator | Scaffold, T1~T3 | 02-27 | 🔥 Focus |
 | builder-v2 | T5 DnD Done, OS gap 회고 완료 | 02-26 | 🔥 Focus |
 | dropdown-dismiss | Scaffold, T1~T3 | 02-26 | 🔥 Focus |
 | trigger-listener-gap | Push model 설계 | 02-26 | 🟢 Active |
@@ -102,6 +103,7 @@
 
 | File | Topic | Related Project | Suggested Action |
 |------|-------|-----------------|------------------|
+| `2026-0227-1024-[analysis]-headless-simulator-vision.md` | Vitest에서 Playwright 수준 검증. 거짓 GREEN 근절 | headless-simulator | → `1-project/headless-simulator/notes/` |
 | `2026-0226-2021-[proposal]-verification-level-up.md` | 검증 부족 영역 11건 식별 | code-hygiene | → `1-project/code-hygiene/notes/` |
 | `2026-0226-2130-[proposal]-verification-hardening-roadmap.md` | 검증 고도화 4-Phase 로드맵 | code-hygiene | → `1-project/code-hygiene/notes/` |
 
@@ -111,10 +113,10 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 3 |
-| Active Projects (total) | 14 (11 Active + 3 Focus) |
+| Active Focus | 4 |
+| Active Projects (total) | 15 (11 Active + 4 Focus) |
 | Completed (archived) | 46 |
-| Inbox items | 2 |
+| Inbox items | 3 |
 | Backlog items | 15 |
 | Open issues | 0 |
 
