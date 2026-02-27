@@ -40,6 +40,7 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from "react";
@@ -225,8 +226,9 @@ export function Zone({
   // ─── Scope (defaults to zoneId) ───
   const scope = useMemo(() => defineScope(zoneId), [zoneId]);
 
-  // ─── Init kernel state (render-time, idempotent, SSR-safe) ───
-  useMemo(() => {
+  // ─── Init kernel state (commit-phase, idempotent) ───
+  // Moved from useMemo to useLayoutEffect to prevent dispatch-during-render loops.
+  useLayoutEffect(() => {
     os.dispatch(OS_ZONE_INIT(zoneId));
   }, [zoneId]);
 

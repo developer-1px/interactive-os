@@ -371,116 +371,99 @@ export function FocusGroup({
   const containerRef = (externalContainerRef ??
     internalRef) as React.RefObject<HTMLDivElement>;
 
-  // --- Init kernel state (render-time, idempotent) ---
-  // OS_ZONE_INIT is a no-op if zone already exists.
-  // When used inside <Zone>, Zone dispatches this first.
-  // When used standalone (rare), FocusGroup dispatches as fallback.
-  useMemo(() => {
-    os.dispatch(OS_ZONE_INIT(groupId));
-  }, [groupId]);
+  // --- Refs for callbacks (avoid deps churn in the unified effect) ---
+  const callbacksRef = useRef({
+    onAction: _onAction,
+    onSelect: _onSelect,
+    onCheck: _onCheck,
+    onDelete: _onDelete,
+    onMoveUp: _onMoveUp,
+    onMoveDown: _onMoveDown,
+    onCopy: _onCopy,
+    onCut: _onCut,
+    onPaste: _onPaste,
+    onUndo: _onUndo,
+    onRedo: _onRedo,
+    onReorder: _onReorder,
+    onDismiss,
+    itemFilter: _itemFilter,
+    getItems: _getItems,
+    getExpandableItems: _getExpandableItems,
+    getTreeLevels: _getTreeLevels,
+  });
+  callbacksRef.current = {
+    onAction: _onAction,
+    onSelect: _onSelect,
+    onCheck: _onCheck,
+    onDelete: _onDelete,
+    onMoveUp: _onMoveUp,
+    onMoveDown: _onMoveDown,
+    onCopy: _onCopy,
+    onCut: _onCut,
+    onPaste: _onPaste,
+    onUndo: _onUndo,
+    onRedo: _onRedo,
+    onReorder: _onReorder,
+    onDismiss,
+    itemFilter: _itemFilter,
+    getItems: _getItems,
+    getExpandableItems: _getExpandableItems,
+    getTreeLevels: _getTreeLevels,
+  };
 
-  // --- Phase 1: Logical registration (render-time, headless-safe) ---
-  // Config + callbacks are registered at render-time with element=null.
-  // This allows headless environments (Vitest, SSR) to access zone config
-  // without DOM. Element is bound lazily in Phase 2.
-  //
-  // CRITICAL: When Phase 1 re-executes (config/callback change), we must
-  // preserve Phase 2's DOM bindings (element, auto getItems/getLabels).
-  // Otherwise the re-register overwrites them with null → navigation breaks.
+  // --- Logical registration (render-time, headless-safe) ---
+  // ZoneRegistry.register is a pure Map.set — no re-render triggered.
+  // Safe in useMemo. This enables renderToString (headless) to access zone config.
   useMemo(() => {
-    const existing = ZoneRegistry.get(groupId);
-    const newEntry = buildZoneEntry(config, null, {
+    const cb = callbacksRef.current;
+    const entry = buildZoneEntry(config, null, {
       role,
       parentId,
-      onDismiss,
-      onAction: _onAction,
-      onSelect: _onSelect,
-      onCheck: _onCheck,
-      onDelete: _onDelete,
-      onMoveUp: _onMoveUp,
-      onMoveDown: _onMoveDown,
-      onCopy: _onCopy,
-      onCut: _onCut,
-      onPaste: _onPaste,
-      onUndo: _onUndo,
-      onRedo: _onRedo,
-      itemFilter: _itemFilter,
-      getItems: _getItems,
-      getExpandableItems: _getExpandableItems,
-      getTreeLevels: _getTreeLevels,
-      onReorder: _onReorder,
+      onDismiss: cb.onDismiss,
+      onAction: cb.onAction,
+      onSelect: cb.onSelect,
+      onCheck: cb.onCheck,
+      onDelete: cb.onDelete,
+      onMoveUp: cb.onMoveUp,
+      onMoveDown: cb.onMoveDown,
+      onCopy: cb.onCopy,
+      onCut: cb.onCut,
+      onPaste: cb.onPaste,
+      onUndo: cb.onUndo,
+      onRedo: cb.onRedo,
+      itemFilter: cb.itemFilter,
+      getItems: cb.getItems,
+      getExpandableItems: cb.getExpandableItems,
+      getTreeLevels: cb.getTreeLevels,
+      onReorder: cb.onReorder,
     });
+    ZoneRegistry.register(groupId, entry);
+  }, [groupId, config, role, parentId]);
 
-    // Preserve Phase 2 DOM bindings if they exist
-    if (existing?.element) {
-      newEntry.element = existing.element;
-    }
-    // Preserve auto-generated getItems/getLabels from bindElement
-    // (only when no explicit prop — explicit prop takes priority)
-    if (!_getItems && existing?.getItems) {
-      newEntry.getItems = existing.getItems;
-    }
-    if (existing?.getLabels && !newEntry.getLabels) {
-      newEntry.getLabels = existing.getLabels;
-    }
-
-    ZoneRegistry.register(groupId, newEntry);
-  }, [
-    groupId,
-    config,
-    role,
-    parentId,
-    onDismiss,
-    _onAction,
-    _onSelect,
-    _onCheck,
-    _onDelete,
-    _onMoveUp,
-    _onMoveDown,
-    _onCopy,
-    _onCut,
-    _onPaste,
-    _onUndo,
-    _onRedo,
-    _itemFilter,
-    _getItems,
-    _getExpandableItems,
-    _getTreeLevels,
-    _onReorder,
-  ]);
-
-  // --- Phase 2: DOM element binding (browser-only) ---
-  // Thin adapter: just pass ref to OS. DOM scanning is OS's responsibility.
+  // --- Commit phase: dispatch + DOM binding (safe from render loops) ---
+  // All os.dispatch() calls MUST be in useLayoutEffect, NOT useMemo.
+  // useMemo dispatch → state change → re-render → useMemo → dispatch → ∞
   useLayoutEffect(() => {
+    // 1. Init kernel state (idempotent — no-op if zone already exists)
+    os.dispatch(OS_ZONE_INIT(groupId));
+
+    // 2. Bind DOM element — auto-creates getItems/getLabels if not explicit
     if (containerRef.current) {
       ZoneRegistry.bindElement(groupId, containerRef.current);
+    }
 
-      // AutoFocus (browser path): when no explicit getItems prop,
-      // DOM-scanning getItems is now available via bindElement.
-      if (config.project.autoFocus && !_getItems) {
-        const entry = ZoneRegistry.get(groupId);
-        const items = entry?.getItems?.() ?? [];
-        const firstItemId = items[0] ?? null;
-        os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: firstItemId }));
-      }
+    // 3. AutoFocus
+    if (config.project.autoFocus) {
+      const registered = ZoneRegistry.get(groupId);
+      const items = registered?.getItems?.() ?? [];
+      const firstItemId = items[0] ?? null;
+      os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: firstItemId }));
     }
 
     return () => {
       ZoneRegistry.unregister(groupId);
     };
-  }, [groupId]);
-
-  // --- AutoFocus (headless path): getItems() available → render-time dispatch ---
-  // When getItems is provided, we can determine the first item without DOM.
-  // This enables autoFocus in headless environments (Vitest renderToString, SSR).
-  useMemo(() => {
-    if (!config.project.autoFocus) return;
-    if (!_getItems) return; // No headless path without getItems
-
-    const items = _getItems();
-    const firstItemId = items[0] ?? null;
-    os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: firstItemId }));
-  }, [groupId, config.project.autoFocus, _getItems]);
+  }, [groupId, config, role, parentId]);
 
   // --- Auto Focus Stack for dialog/alertdialog ---
   // When autoFocus is true, push focus stack on mount and pop on unmount
