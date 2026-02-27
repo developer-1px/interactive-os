@@ -432,65 +432,19 @@ export function FocusGroup({
     _onReorder,
   ]);
 
-  // --- Phase 2: DOM element binding (browser-only, lazy) ---
-  // When DOM exists, bind the element to the already-registered zone entry.
-  // Also auto-register a DOM-scanning getItems when no explicit getItems prop.
-  // This moves DOM scanning from 2-contexts (kernel, headless) to 6-components (view).
+  // --- Phase 2: DOM element binding (browser-only) ---
+  // Thin adapter: just pass ref to OS. DOM scanning is OS's responsibility.
   useLayoutEffect(() => {
     if (containerRef.current) {
-      const existing = ZoneRegistry.get(groupId);
-      if (existing) {
-        const el = containerRef.current;
+      ZoneRegistry.bindElement(groupId, containerRef.current);
 
-        // Build DOM-scanning getItems closure if no explicit prop
-        const autoGetItems = !existing.getItems
-          ? () => {
-            const items: string[] = [];
-            const els = el.querySelectorAll("[data-item-id]");
-            for (const child of els) {
-              if (child.closest("[data-zone]") !== el) continue;
-              const id = child.getAttribute("data-item-id");
-              if (id) items.push(id);
-            }
-            return items;
-          }
-          : undefined;
-
-        // Build DOM-scanning getLabels closure for typeahead
-        const autoGetLabels = !existing.getLabels
-          ? () => {
-            const labels = new Map<string, string>();
-            const els = el.querySelectorAll<HTMLElement>("[data-item-id]");
-            for (const child of els) {
-              if (child.closest("[data-zone]") !== el) continue;
-              const id = child.getAttribute("data-item-id");
-              if (id) {
-                const label =
-                  child.getAttribute("aria-label") ||
-                  child.textContent ||
-                  "";
-                labels.set(id, label.trim());
-              }
-            }
-            return labels;
-          }
-          : undefined;
-
-        ZoneRegistry.register(groupId, {
-          ...existing,
-          element: el,
-          ...(autoGetItems ? { getItems: autoGetItems } : {}),
-          ...(autoGetLabels ? { getLabels: autoGetLabels } : {}),
-        });
-
-        // AutoFocus (browser path): when no explicit getItems prop,
-        // the headless useMemo path couldn't fire. Now that we have
-        // DOM-scanning getItems, dispatch autoFocus here.
-        if (config.project.autoFocus && autoGetItems) {
-          const items = autoGetItems();
-          const firstItemId = items[0] ?? null;
-          os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: firstItemId }));
-        }
+      // AutoFocus (browser path): when no explicit getItems prop,
+      // DOM-scanning getItems is now available via bindElement.
+      if (config.project.autoFocus && !_getItems) {
+        const entry = ZoneRegistry.get(groupId);
+        const items = entry?.getItems?.() ?? [];
+        const firstItemId = items[0] ?? null;
+        os.dispatch(OS_FOCUS({ zoneId: groupId, itemId: firstItemId }));
       }
     }
 

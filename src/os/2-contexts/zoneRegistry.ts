@@ -183,6 +183,58 @@ export const ZoneRegistry = {
     return itemCallbacks.get(zoneId)?.get(itemId);
   },
 
+  /**
+   * Bind a DOM element to a registered zone.
+   *
+   * When the zone has no explicit getItems/getLabels, auto-creates
+   * DOM-scanning closures. This moves DOM discovery strategy from
+   * the React layer (FocusGroup Phase 2) into OS ownership.
+   *
+   * Called by FocusGroup useLayoutEffect — the only DOM touch point.
+   */
+  bindElement(id: string, element: HTMLElement): void {
+    const entry = registry.get(id);
+    if (!entry) return;
+
+    const patch: Partial<ZoneEntry> = { element };
+
+    // Auto-register DOM-scanning getItems when no explicit accessor
+    if (!entry.getItems) {
+      patch.getItems = () => {
+        const items: string[] = [];
+        const els = element.querySelectorAll("[data-item-id]");
+        for (const child of els) {
+          if (child.closest("[data-zone]") !== element) continue;
+          const itemId = child.getAttribute("data-item-id");
+          if (itemId) items.push(itemId);
+        }
+        return items;
+      };
+    }
+
+    // Auto-register DOM-scanning getLabels for typeahead
+    if (!entry.getLabels) {
+      patch.getLabels = () => {
+        const labels = new Map<string, string>();
+        const els = element.querySelectorAll<HTMLElement>("[data-item-id]");
+        for (const child of els) {
+          if (child.closest("[data-zone]") !== element) continue;
+          const itemId = child.getAttribute("data-item-id");
+          if (itemId) {
+            const label =
+              child.getAttribute("aria-label") ||
+              child.textContent ||
+              "";
+            labels.set(itemId, label.trim());
+          }
+        }
+        return labels;
+      };
+    }
+
+    registry.set(id, { ...entry, ...patch });
+  },
+
   /** Find which zone contains this item (searches all zones) */
   findZoneByItemId(itemId: string): string | null {
     for (const [zoneId, entry] of registry) {
