@@ -7,7 +7,10 @@ export default defineConfig({
   forbidOnly: !!process.env["CI"],
   retries: process.env["CI"] ? 2 : 0,
   ...(process.env["CI"] ? { workers: 1 } : {}),
-  reporter: "list",
+  reporter: [
+    ["list"],
+    ["json", { outputFile: "test-results/e2e-results.json" }],
+  ],
   use: {
     baseURL: "http://localhost:5555",
     trace: "on-first-retry",
