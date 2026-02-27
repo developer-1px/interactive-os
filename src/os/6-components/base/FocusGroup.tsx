@@ -453,16 +453,45 @@ export function FocusGroup({
   // --- Commit phase: dispatch + DOM binding (safe from render loops) ---
   // All os.dispatch() calls MUST be in useLayoutEffect, NOT useMemo.
   // useMemo dispatch → state change → re-render → useMemo → dispatch → ∞
+  //
+  // StrictMode: cleanup→remount means unregister→re-register.
+  // Must re-create entry if cleanup wiped it.
   useLayoutEffect(() => {
     // 1. Init kernel state (idempotent — no-op if zone already exists)
     os.dispatch(OS_ZONE_INIT(groupId));
 
-    // 2. Bind DOM element — auto-creates getItems/getLabels if not explicit
+    // 2. Ensure entry exists (may have been wiped by StrictMode cleanup)
+    if (!ZoneRegistry.has(groupId)) {
+      const cb = callbacksRef.current;
+      ZoneRegistry.register(groupId, buildZoneEntry(config, null, {
+        role,
+        parentId,
+        onDismiss: cb.onDismiss,
+        onAction: cb.onAction,
+        onSelect: cb.onSelect,
+        onCheck: cb.onCheck,
+        onDelete: cb.onDelete,
+        onMoveUp: cb.onMoveUp,
+        onMoveDown: cb.onMoveDown,
+        onCopy: cb.onCopy,
+        onCut: cb.onCut,
+        onPaste: cb.onPaste,
+        onUndo: cb.onUndo,
+        onRedo: cb.onRedo,
+        itemFilter: cb.itemFilter,
+        getItems: cb.getItems,
+        getExpandableItems: cb.getExpandableItems,
+        getTreeLevels: cb.getTreeLevels,
+        onReorder: cb.onReorder,
+      }));
+    }
+
+    // 3. Bind DOM element — auto-creates getItems/getLabels if not explicit
     if (containerRef.current) {
       ZoneRegistry.bindElement(groupId, containerRef.current);
     }
 
-    // 3. AutoFocus
+    // 4. AutoFocus
     if (config.project.autoFocus) {
       const registered = ZoneRegistry.get(groupId);
       const items = registered?.getItems?.() ?? [];
