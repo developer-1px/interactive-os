@@ -383,31 +383,48 @@ export function FocusGroup({
   // Config + callbacks are registered at render-time with element=null.
   // This allows headless environments (Vitest, SSR) to access zone config
   // without DOM. Element is bound lazily in Phase 2.
+  //
+  // CRITICAL: When Phase 1 re-executes (config/callback change), we must
+  // preserve Phase 2's DOM bindings (element, auto getItems/getLabels).
+  // Otherwise the re-register overwrites them with null → navigation breaks.
   useMemo(() => {
-    ZoneRegistry.register(
-      groupId,
-      buildZoneEntry(config, null, {
-        role,
-        parentId,
-        onDismiss,
-        onAction: _onAction,
-        onSelect: _onSelect,
-        onCheck: _onCheck,
-        onDelete: _onDelete,
-        onMoveUp: _onMoveUp,
-        onMoveDown: _onMoveDown,
-        onCopy: _onCopy,
-        onCut: _onCut,
-        onPaste: _onPaste,
-        onUndo: _onUndo,
-        onRedo: _onRedo,
-        itemFilter: _itemFilter,
-        getItems: _getItems,
-        getExpandableItems: _getExpandableItems,
-        getTreeLevels: _getTreeLevels,
-        onReorder: _onReorder,
-      }),
-    );
+    const existing = ZoneRegistry.get(groupId);
+    const newEntry = buildZoneEntry(config, null, {
+      role,
+      parentId,
+      onDismiss,
+      onAction: _onAction,
+      onSelect: _onSelect,
+      onCheck: _onCheck,
+      onDelete: _onDelete,
+      onMoveUp: _onMoveUp,
+      onMoveDown: _onMoveDown,
+      onCopy: _onCopy,
+      onCut: _onCut,
+      onPaste: _onPaste,
+      onUndo: _onUndo,
+      onRedo: _onRedo,
+      itemFilter: _itemFilter,
+      getItems: _getItems,
+      getExpandableItems: _getExpandableItems,
+      getTreeLevels: _getTreeLevels,
+      onReorder: _onReorder,
+    });
+
+    // Preserve Phase 2 DOM bindings if they exist
+    if (existing?.element) {
+      newEntry.element = existing.element;
+    }
+    // Preserve auto-generated getItems/getLabels from bindElement
+    // (only when no explicit prop — explicit prop takes priority)
+    if (!_getItems && existing?.getItems) {
+      newEntry.getItems = existing.getItems;
+    }
+    if (existing?.getLabels && !newEntry.getLabels) {
+      newEntry.getLabels = existing.getLabels;
+    }
+
+    ZoneRegistry.register(groupId, newEntry);
   }, [
     groupId,
     config,
