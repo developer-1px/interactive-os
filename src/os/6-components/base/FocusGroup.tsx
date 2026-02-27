@@ -414,7 +414,11 @@ export function FocusGroup({
   // --- Logical registration (render-time, headless-safe) ---
   // ZoneRegistry.register is a pure Map.set — no re-render triggered.
   // Safe in useMemo. This enables renderToString (headless) to access zone config.
+  //
+  // CRITICAL: Preserve DOM bindings from bindElement (useLayoutEffect).
+  // Without this, re-execution wipes auto-generated getItems/getLabels/element.
   useMemo(() => {
+    const existing = ZoneRegistry.get(groupId);
     const cb = callbacksRef.current;
     const entry = buildZoneEntry(config, null, {
       role,
@@ -437,6 +441,12 @@ export function FocusGroup({
       getTreeLevels: cb.getTreeLevels,
       onReorder: cb.onReorder,
     });
+
+    // Preserve DOM bindings from bindElement
+    if (existing?.element) entry.element = existing.element;
+    if (!cb.getItems && existing?.getItems) entry.getItems = existing.getItems;
+    if (!entry.getLabels && existing?.getLabels) entry.getLabels = existing.getLabels;
+
     ZoneRegistry.register(groupId, entry);
   }, [groupId, config, role, parentId]);
 

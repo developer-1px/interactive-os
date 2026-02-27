@@ -64,17 +64,11 @@ export const DOM_ITEMS = os.defineContext("dom-items", (): string[] => {
   const zoneId = os.getState().os.focus.activeZoneId;
   if (!zoneId) return [];
 
+  // resolveItems: getItems() → element DOM scan → empty array.
+  // Resilient to Phase 1 useMemo wiping auto-generated getItems.
+  const items = ZoneRegistry.resolveItems(zoneId);
   const entry = ZoneRegistry.get(zoneId);
-  if (!entry) return [];
-
-  // Push model: getItems() accessor is the sole source (headless-compatible).
-  // Browser zones must provide getItems() via FocusGroup or defineApp.page.
-  if (entry.getItems) {
-    const items = entry.getItems();
-    return entry.itemFilter ? entry.itemFilter(items) : items;
-  }
-
-  return [];
+  return entry?.itemFilter ? entry.itemFilter(items) : items;
 });
 
 // ═══════════════════════════════════════════════════════════════════

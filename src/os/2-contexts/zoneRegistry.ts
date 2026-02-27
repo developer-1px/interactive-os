@@ -252,6 +252,62 @@ export const ZoneRegistry = {
     }
     return undefined;
   },
+
+  /**
+   * Resolve ordered item IDs for a zone.
+   *
+   * Priority: getItems() > element DOM scan > empty array.
+   * Lazy fallback: even if getItems was wiped by Phase 1 re-registration,
+   * the element DOM scan always works as long as the element is bound.
+   */
+  resolveItems(id: string): string[] {
+    const entry = registry.get(id);
+    if (!entry) return [];
+
+    // Explicit or auto-generated getItems → use it
+    if (entry.getItems) return entry.getItems();
+
+    // Lazy fallback: DOM scan via bound element
+    if (entry.element) {
+      const items: string[] = [];
+      const els = entry.element.querySelectorAll("[data-item-id]");
+      for (const child of els) {
+        if (child.closest("[data-zone]") !== entry.element) continue;
+        const itemId = child.getAttribute("data-item-id");
+        if (itemId) items.push(itemId);
+      }
+      return items;
+    }
+
+    return [];
+  },
+
+  /**
+   * Resolve labels map for a zone (for typeahead).
+   * Priority: getLabels() > element DOM scan > empty map.
+   */
+  resolveLabels(id: string): Map<string, string> {
+    const entry = registry.get(id);
+    if (!entry) return new Map();
+
+    if (entry.getLabels) return entry.getLabels();
+
+    if (entry.element) {
+      const labels = new Map<string, string>();
+      const els = entry.element.querySelectorAll<HTMLElement>("[data-item-id]");
+      for (const child of els) {
+        if (child.closest("[data-zone]") !== entry.element) continue;
+        const itemId = child.getAttribute("data-item-id");
+        if (itemId) {
+          const label = child.getAttribute("aria-label") || child.textContent || "";
+          labels.set(itemId, label.trim());
+        }
+      }
+      return labels;
+    }
+
+    return new Map();
+  },
 };
 
 const EMPTY_SET: ReadonlySet<string> = new Set();

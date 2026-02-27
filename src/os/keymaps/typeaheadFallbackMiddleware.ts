@@ -75,23 +75,11 @@ export const typeaheadFallbackMiddleware: Middleware = {
     const zone = osState.zones?.[zoneId];
     const currentId = zone?.focusedItemId ?? null;
 
-    // Read items and labels — push model first, DOM fallback
-    let items: string[];
-    let labels: Map<string, string>;
-
-    if (entry.getLabels) {
-      // Push model: headless-compatible
-      labels = entry.getLabels();
-      items = entry.getItems?.() ?? [...labels.keys()];
-    } else if (entry.element) {
-      // DOM fallback: browser-only
-      const result = getItemsAndLabels(entry.element);
-      items = result.items;
-      labels = result.labels;
-    } else {
-      return null;
-    }
-    if (items.length === 0) return null;
+    // Read items and labels via resolveItems/resolveLabels
+    // (resilient to Phase 1 useMemo wiping auto-generated closures)
+    const labels = ZoneRegistry.resolveLabels(zoneId);
+    const items = ZoneRegistry.resolveItems(zoneId);
+    if (items.length === 0 && labels.size === 0) return null;
 
     // Resolve typeahead
     const targetId = resolveTypeahead(currentId, event.key, items, labels);
