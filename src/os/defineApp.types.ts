@@ -250,6 +250,9 @@ export interface AppPage<S> {
   /** Clean up zone registrations. */
   cleanup(): void;
 
+  /** Playwright-style locator: query any element by ID (Zone or Item). */
+  locator(elementId: string): import("@os/createOsPage").OsLocator;
+
   // ── Projection Checkpoint (optional — requires Component) ────────
 
   /** Check if search string exists in rendered HTML (renderToString). */

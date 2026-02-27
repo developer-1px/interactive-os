@@ -1,7 +1,7 @@
 import type { BaseCommand } from "@kernel";
 import { OS_FIELD_COMMIT } from "@os/3-commands/field/commit";
 import { useFieldFocus } from "@os/5-hooks/useFieldHooks.ts";
-import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
+import { useZoneContext } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
@@ -146,7 +146,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
     const blurOnInactive = mode === "deferred";
     const tag = "div";
 
-    const context = useFocusGroupContext();
+    const context = useZoneContext();
     const zoneId = context?.zoneId || "unknown";
 
     const innerRef = useRef<HTMLElement>(null);

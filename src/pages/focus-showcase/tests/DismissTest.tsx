@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -47,12 +47,10 @@ export function DismissTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Escape = Deselect
           </div>
-          <FocusGroup
+          <Zone
             id="dis-esc"
             role="listbox"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "single" }}
-            dismiss={{ escape: "deselect" }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "single" }, dismiss: { escape: "deselect" } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Item 1", "Item 2"].map((item) => (
@@ -65,7 +63,7 @@ export function DismissTest() {
                 {item}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
           <div className="text-[10px] text-gray-500">
             Select an item, then press Escape to deselect.
           </div>
@@ -76,11 +74,10 @@ export function DismissTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Escape = Close (Menu)
           </div>
-          <FocusGroup
+          <Zone
             id="dis-close"
             role="menu"
-            navigate={{ orientation: "vertical" }}
-            dismiss={{ escape: "close" }}
+            options={{ navigate: { orientation: "vertical" }, dismiss: { escape: "close" } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Menu Item A", "Menu Item B"].map((item) => (
@@ -93,7 +90,7 @@ export function DismissTest() {
                 {item}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
           <div className="text-[10px] text-gray-500">
             Press Escape to trigger onDismiss (console).
           </div>
@@ -104,12 +101,10 @@ export function DismissTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Outside Click = Close
           </div>
-          <FocusGroup
+          <Zone
             id="dis-outside"
             role="listbox"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "single" }}
-            dismiss={{ outsideClick: "close" }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "single" }, dismiss: { outsideClick: "close" } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Outside 1", "Outside 2"].map((item) => (
@@ -122,7 +117,7 @@ export function DismissTest() {
                 {item}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
           <div className="text-[10px] text-gray-500">
             Select an item, then click outside to dismiss.
           </div>

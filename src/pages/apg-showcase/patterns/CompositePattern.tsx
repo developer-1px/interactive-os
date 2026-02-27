@@ -1,6 +1,6 @@
 import { Icon } from "@/components/Icon";
 import { useExpanded } from "@/os/5-hooks/useExpanded";
-import { FocusGroup } from "@/os/6-components/base/FocusGroup";
+import { Zone } from "@/os/6-components/primitives/Zone";
 import { FocusItem } from "@/os/6-components/base/FocusItem";
 
 export function CompositePattern() {
@@ -16,10 +16,10 @@ export function CompositePattern() {
 
       {/* A simple composite: Toolbar that owns a dropdown menu */}
       <div className="relative w-fit">
-        <FocusGroup
+        <Zone
           id="apg-composite-toolbar"
           role="toolbar"
-          navigate={{ orientation: "horizontal" }}
+          options={{ navigate: { orientation: "horizontal" } }}
           className="flex border border-gray-300 rounded p-1 bg-gray-50"
         >
           <FocusItem
@@ -40,14 +40,13 @@ export function CompositePattern() {
             <span>Options</span>
             <Icon name="chevron-down" size={14} />
           </FocusItem>
-        </FocusGroup>
+        </Zone>
 
         {isExpanded("comp-btn-menu") && (
-          <FocusGroup
+          <Zone
             id="apg-composite-menu"
             role="menu"
-            navigate={{ orientation: "vertical" }}
-            dismiss={{ escape: "close" }}
+            options={{ navigate: { orientation: "vertical" }, dismiss: { escape: "close" } }}
             className="absolute top-full mt-1 left-0 w-48 bg-white border border-gray-200 rounded shadow-lg py-1 z-50"
           >
             <FocusItem
@@ -64,7 +63,7 @@ export function CompositePattern() {
             >
               Logout
             </FocusItem>
-          </FocusGroup>
+          </Zone>
         )}
       </div>
     </div>

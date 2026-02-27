@@ -23,10 +23,12 @@ import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 // ── Shared headless interaction functions ──
 import {
   computeAttrs,
+  type ElementAttrs,
   type ItemAttrs,
   readActiveZoneId,
   readFocusedItemId,
   readSelection,
+  resolveElement,
   simulateClick,
   simulateKeyPress,
 } from "@os/headless";
@@ -86,6 +88,25 @@ interface ZoneOrderEntry {
   lastFocusedId: string | null;
 }
 
+/**
+ * Playwright-compatible Locator — headless equivalent.
+ *
+ * Playwright:  await expect(page.locator("#id")).toHaveAttribute("aria-current", "true")
+ * OS Headless: expect(page.locator("id")).toHaveAttribute("aria-current", "true")
+ */
+export interface OsLocator {
+  /** Get a single attribute value (Playwright: .getAttribute()) */
+  getAttribute(name: string): string | number | boolean | undefined;
+  /** Click this element */
+  click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
+  /** Assert: has attribute with value (Playwright: expect(loc).toHaveAttribute()) */
+  toHaveAttribute(name: string, value: string | boolean): boolean;
+  /** Assert: element is focused (Playwright: expect(loc).toBeFocused()) */
+  toBeFocused(): boolean;
+  /** Raw attrs for direct access */
+  readonly attrs: ElementAttrs;
+}
+
 export interface OsPage {
   // ── AppPage-compatible interface ──
   keyboard: { press(key: string): void };
@@ -99,6 +120,8 @@ export interface OsPage {
   selection(zoneId?: string): string[];
   activeZoneId(): string | null;
   dispatch(cmd: BaseCommand, opts?: { scope?: ScopeToken[]; meta?: Record<string, unknown> }): void;
+  /** Playwright-style locator: query any element by ID. */
+  locator(elementId: string): OsLocator;
   cleanup(): void;
   /** Dump debug diagnostics (no-op placeholder for test compat) */
   dumpDiagnostics(): void;
@@ -466,6 +489,28 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
       return readActiveZoneId(kernel);
     },
     dispatch,
+    locator(elementId: string): OsLocator {
+      return {
+        get attrs() { return resolveElement(kernel, elementId); },
+        getAttribute(name: string) {
+          return resolveElement(kernel, elementId)[name];
+        },
+        click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }) {
+          const mods = opts?.modifiers ?? [];
+          simulateClick(kernel, elementId, {
+            meta: mods.includes("Meta"),
+            shift: mods.includes("Shift"),
+            ctrl: mods.includes("Control"),
+          });
+        },
+        toHaveAttribute(name: string, value: string | boolean) {
+          return resolveElement(kernel, elementId)[name] === value;
+        },
+        toBeFocused() {
+          return readFocusedItemId(kernel) === elementId;
+        },
+      };
+    },
     cleanup,
     dumpDiagnostics() { /* no-op placeholder */ },
 

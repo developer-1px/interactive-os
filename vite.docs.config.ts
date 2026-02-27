@@ -34,6 +34,7 @@ export default defineConfig({
   resolve: {
     dedupe: ["react", "react-dom"],
     alias: {
+      "@inspector": "/src/inspector",
       "@kernel": "/packages/kernel/src",
       "@os": "/src/os",
       "@apps": "/src/apps",

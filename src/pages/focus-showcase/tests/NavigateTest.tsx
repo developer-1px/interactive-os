@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -42,10 +42,10 @@ export function NavigateTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Vertical + Loop
           </div>
-          <FocusGroup
+          <Zone
             id="nav-list"
             role="listbox"
-            navigate={{ orientation: "vertical", loop: true }}
+            options={{ navigate: { orientation: "vertical", loop: true } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Apple", "Banana", "Cherry"].map((fruit) => (
@@ -58,7 +58,7 @@ export function NavigateTest() {
                 {fruit}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </div>
 
         {/* Horizontal Toolbar (No Loop) */}
@@ -66,10 +66,10 @@ export function NavigateTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Horizontal (Clamped)
           </div>
-          <FocusGroup
+          <Zone
             id="nav-toolbar"
             role="toolbar"
-            navigate={{ orientation: "horizontal", loop: false }}
+            options={{ navigate: { orientation: "horizontal", loop: false } }}
             className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Bold", "Italic", "Underline"].map((action) => (
@@ -82,7 +82,7 @@ export function NavigateTest() {
                 {action[0]}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </div>
 
         {/* Grid 2D */}
@@ -90,10 +90,10 @@ export function NavigateTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Spatial 2D Grid
           </div>
-          <FocusGroup
+          <Zone
             id="nav-grid"
             role="grid"
-            navigate={{ orientation: "both" }}
+            options={{ navigate: { orientation: "both" } }}
             className="grid grid-cols-3 bg-gray-50 p-2 rounded border border-gray-200 gap-2"
           >
             {Array.from({ length: 9 }, (_, i) => (
@@ -106,7 +106,7 @@ export function NavigateTest() {
                 {i}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </div>
 
         {/* Seamless Cross-Zone */}
@@ -115,10 +115,10 @@ export function NavigateTest() {
             Seamless Cross-Zone
           </div>
           <div className="flex gap-2">
-            <FocusGroup
+            <Zone
               id="nav-seamless-a"
               role="toolbar"
-              navigate={{ orientation: "horizontal", seamless: true }}
+              options={{ navigate: { orientation: "horizontal", seamless: true } }}
               className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1"
             >
               {["A1", "A2"].map((item) => (
@@ -131,11 +131,11 @@ export function NavigateTest() {
                   {item}
                 </FocusItem>
               ))}
-            </FocusGroup>
-            <FocusGroup
+            </Zone>
+            <Zone
               id="nav-seamless-b"
               role="toolbar"
-              navigate={{ orientation: "horizontal", seamless: true }}
+              options={{ navigate: { orientation: "horizontal", seamless: true } }}
               className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1"
             >
               {["B1", "B2"].map((item) => (
@@ -148,7 +148,7 @@ export function NavigateTest() {
                   {item}
                 </FocusItem>
               ))}
-            </FocusGroup>
+            </Zone>
           </div>
           <div className="text-[10px] text-gray-500">
             Arrow Right from A2 → B1 (cross-zone)

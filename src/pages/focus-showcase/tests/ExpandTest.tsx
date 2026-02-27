@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { TestBox } from "../../shared/TestLayout";
@@ -45,17 +45,17 @@ export function ExpandTest() {
         <div className="text-[10px] font-mono text-gray-500 uppercase">
           Tree Widget
         </div>
-        <FocusGroup
+        <Zone
           id="tree-widget"
           role="tree"
-          navigate={{ orientation: "vertical" }}
+          options={{ navigate: { orientation: "vertical" } }}
           getExpandableItems={() =>
             new Set(["tree-parent-1", "tree-parent-2"])
           }
           className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200"
         >
           <TreeItems />
-        </FocusGroup>
+        </Zone>
         <div className="text-[10px] text-gray-500">
           Use Arrow keys to expand/collapse.
         </div>

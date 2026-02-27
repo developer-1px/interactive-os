@@ -28,7 +28,8 @@ import {
   isCheckedRole,
   isExpandableRole,
 } from "../../registries/roleRegistry.ts";
-import { useFocusGroupContext } from "./FocusGroup.tsx";
+import { DEFAULT_CONFIG } from "../../schemas";
+import { useZoneContext } from "../primitives/Zone.tsx";
 
 // ═══════════════════════════════════════════════════════════════════
 // Props
@@ -65,7 +66,7 @@ export interface FocusItemProps
 
   /**
    * Pre-computed hints from parent Item — avoids double kernel subscription.
-   * When provided, FocusItem skips its own useComputed for these values.
+   * When parent Item provides hints, FocusItem skips its own useComputed for these values.
    */
   _isFocusedHint?: boolean;
   _isActiveHint?: boolean;
@@ -118,13 +119,13 @@ export const FocusItem = forwardRef<HTMLElement, FocusItemProps>(
     },
     ref,
   ) {
-    const ctx = useFocusGroupContext();
+    const ctx = useZoneContext();
 
     if (!ctx) {
-      throw new Error("FocusItem must be used within a FocusGroup");
+      throw new Error("FocusItem must be used within a Zone");
     }
 
-    const { zoneId, zoneRole, config } = ctx;
+    const { zoneId, role: zoneRole, config = DEFAULT_CONFIG } = ctx;
 
     // --- Derived: is this group selectable? ---
     const isSelectableGroup = config.select.mode !== "none";

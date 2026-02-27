@@ -9,7 +9,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
+import { useZoneContext } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
@@ -67,7 +67,7 @@ export const FieldTextarea = forwardRef<
     ref,
   ) => {
     const trigger: FieldTrigger = triggerProp ?? "blur";
-    const context = useFocusGroupContext();
+    const context = useZoneContext();
     const zoneId = context?.zoneId || "unknown";
 
     const innerRef = useRef<HTMLTextAreaElement>(null);

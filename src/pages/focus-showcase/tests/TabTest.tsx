@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -42,11 +42,10 @@ export function TabTest() {
             Escape (Default)
           </div>
           <div className="p-4 bg-gray-50 rounded border border-gray-200">
-            <FocusGroup
+            <Zone
               id="tab-escape"
               role="listbox"
-              navigate={{ orientation: "vertical" }}
-              tab={{ behavior: "escape" }}
+              options={{ navigate: { orientation: "vertical" }, tab: { behavior: "escape" } }}
               className="flex flex-col gap-1 w-32"
             >
               {["Option A", "Option B", "Option C"].map((item, i) => (
@@ -59,7 +58,7 @@ export function TabTest() {
                   {item}
                 </FocusItem>
               ))}
-            </FocusGroup>
+            </Zone>
             <div className="mt-2 text-[10px] text-gray-500">
               Tab exits zone immediately.
             </div>
@@ -72,11 +71,10 @@ export function TabTest() {
             Trap (Menu/Modal)
           </div>
           <div className="p-4 bg-gray-50 rounded border border-gray-200">
-            <FocusGroup
+            <Zone
               id="tab-trap"
               role="menu"
-              navigate={{ orientation: "vertical", loop: true }}
-              tab={{ behavior: "trap" }}
+              options={{ navigate: { orientation: "vertical", loop: true }, tab: { behavior: "trap" } }}
               className="flex flex-col gap-1 w-32"
             >
               {["New", "Open", "Save"].map((item, i) => (
@@ -89,7 +87,7 @@ export function TabTest() {
                   {item}
                 </FocusItem>
               ))}
-            </FocusGroup>
+            </Zone>
             <div className="mt-2 text-[10px] text-gray-500">
               Tab cycles within this list.
             </div>
@@ -102,11 +100,10 @@ export function TabTest() {
             Flow (Form/Toolbar)
           </div>
           <div className="p-4 bg-gray-50 rounded border border-gray-200">
-            <FocusGroup
+            <Zone
               id="tab-flow"
               role="toolbar"
-              navigate={{ orientation: "horizontal" }}
-              tab={{ behavior: "flow" }}
+              options={{ navigate: { orientation: "horizontal" }, tab: { behavior: "flow" } }}
               className="flex gap-2"
             >
               {["Back", "Fresh", "Next"].map((item, i) => (
@@ -119,7 +116,7 @@ export function TabTest() {
                   {item}
                 </FocusItem>
               ))}
-            </FocusGroup>
+            </Zone>
             <div className="mt-2 text-[10px] text-gray-500">
               Tab moves to next item.
             </div>

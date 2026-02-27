@@ -26,6 +26,7 @@ import {
   readActiveZoneId,
   readFocusedItemId,
   readSelection,
+  resolveElement,
   simulateClick,
   simulateKeyPress,
 } from "./headless";
@@ -309,6 +310,29 @@ export function createAppPage<S>(
         );
       }
       return renderToString(createElement(Component));
+    },
+
+    locator(elementId: string) {
+      return {
+        get attrs() { return resolveElement(os, elementId); },
+        getAttribute(name: string) {
+          return resolveElement(os, elementId)[name];
+        },
+        click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }) {
+          const mods = opts?.modifiers ?? [];
+          simulateClick(os, elementId, {
+            meta: mods.includes("Meta"),
+            shift: mods.includes("Shift"),
+            ctrl: mods.includes("Control"),
+          });
+        },
+        toHaveAttribute(name: string, value: string | boolean) {
+          return resolveElement(os, elementId)[name] === value;
+        },
+        toBeFocused() {
+          return readFocusedItemId(os) === elementId;
+        },
+      };
     },
   };
 }

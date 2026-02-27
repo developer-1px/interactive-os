@@ -1,4 +1,4 @@
-import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
+
 import { useState } from "react";
 import {
   BuilderApp,
@@ -8,8 +8,7 @@ import {
 import { BuilderCursor } from "@/apps/builder/BuilderCursor";
 import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 import { PAGE_PRESETS } from "@/apps/builder/presets/pages";
-// @ts-expect-error — spec-wrapper plugin transforms at build time
-import runBuilderSpec from "@/apps/builder/tests/e2e/builder-spatial.spec.ts";
+
 import { os } from "@/os/kernel";
 import {
   EditorToolbar,
@@ -29,7 +28,7 @@ import { HighlightContext } from "./builder/PropertiesPanel";
  * PropertiesPanel reads focused item type directly via OS item queries.
  */
 export default function BuilderPage() {
-  usePlaywrightSpecs("builder", [runBuilderSpec]);
+
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(
     null,

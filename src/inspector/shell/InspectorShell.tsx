@@ -1,8 +1,6 @@
 import { CommandInspector } from "@inspector/panels/CommandInspector";
 import { InspectorActivityBar } from "@inspector/shell/InspectorActivityBar";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
-import { CursorOverlay } from "@inspector/testbot/widgets/CursorOverlay";
-import { StampOverlay } from "@inspector/testbot/widgets/StampOverlay";
 import { useCallback, useRef, useState } from "react";
 
 const MIN_WIDTH = 260;
@@ -68,12 +66,6 @@ export function InspectorShell() {
 
       {/* Always Visible Activity Bar */}
       <InspectorActivityBar />
-
-      {/* Position-tracked PASS/FAIL stamps (portal to body) */}
-      <StampOverlay />
-
-      {/* TestBot virtual cursor (portal to body) */}
-      <CursorOverlay />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -46,11 +46,10 @@ export function AutofocusTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Auto Focus on Mount
           </div>
-          <FocusGroup
+          <Zone
             id="af-auto"
             role="listbox"
-            navigate={{ orientation: "vertical" }}
-            project={{ autoFocus: true }}
+            options={{ navigate: { orientation: "vertical" }, project: { autoFocus: true } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Auto 1", "Auto 2"].map((item) => (
@@ -63,7 +62,7 @@ export function AutofocusTest() {
                 {item}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </div>
 
         {/* Restore */}
@@ -71,10 +70,10 @@ export function AutofocusTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Entry Restore (Memory)
           </div>
-          <FocusGroup
+          <Zone
             id="af-restore"
             role="listbox"
-            navigate={{ orientation: "vertical", entry: "restore" }}
+            options={{ navigate: { orientation: "vertical", entry: "restore" } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Memory 1", "Memory 2", "Memory 3"].map((item) => (
@@ -87,7 +86,7 @@ export function AutofocusTest() {
                 {item}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
           <div className="text-[10px] text-gray-500">
             Select item, click away, then click back to Restore.
           </div>
@@ -98,10 +97,10 @@ export function AutofocusTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Entry Last
           </div>
-          <FocusGroup
+          <Zone
             id="af-last"
             role="listbox"
-            navigate={{ orientation: "vertical", entry: "last" }}
+            options={{ navigate: { orientation: "vertical", entry: "last" } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Top", "Middle", "Bottom"].map((item) => (
@@ -114,7 +113,7 @@ export function AutofocusTest() {
                 {item}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
           <div className="text-[10px] text-gray-500">
             Entry focuses Bottom item.
           </div>

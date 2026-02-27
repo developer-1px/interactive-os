@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -34,12 +34,10 @@ export function ActivateTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Automatic (Tabs/Preview)
           </div>
-          <FocusGroup
+          <Zone
             id="act-auto"
             role="listbox"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "single", followFocus: true }}
-            activate={{ mode: "automatic" }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "single", followFocus: true }, activate: { mode: "automatic" } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Preview A", "Preview B"].map((item) => (
@@ -52,7 +50,7 @@ export function ActivateTest() {
                 {item}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
           <div className="text-[10px] text-gray-500">
             Focusing triggers activation immediately.
           </div>
@@ -63,11 +61,10 @@ export function ActivateTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Manual (Standard List)
           </div>
-          <FocusGroup
+          <Zone
             id="act-manual"
             role="listbox"
-            navigate={{ orientation: "vertical" }}
-            activate={{ mode: "manual" }}
+            options={{ navigate: { orientation: "vertical" }, activate: { mode: "manual" } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["File 1", "File 2"].map((item) => (
@@ -80,7 +77,7 @@ export function ActivateTest() {
                 {item}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
           <div className="text-[10px] text-gray-500">
             Press Enter or Double Click to activate.
           </div>

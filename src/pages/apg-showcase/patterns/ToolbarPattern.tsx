@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
-import { FocusGroup } from "@/os/6-components/base/FocusGroup";
+import { Zone } from "@/os/6-components/primitives/Zone";
 import { FocusItem } from "@/os/6-components/base/FocusItem";
 
 export function ToolbarPattern() {
@@ -20,11 +20,10 @@ export function ToolbarPattern() {
         to move.
       </p>
 
-      <FocusGroup
+      <Zone
         id="apg-toolbar"
         role="toolbar"
-        navigate={{ orientation: "horizontal", loop: true }}
-        tab={{ behavior: "trap" }}
+        options={{ navigate: { orientation: "horizontal", loop: true }, tab: { behavior: "trap" } }}
         aria-label="Text Formatting"
         className="flex items-center gap-1 p-1 bg-gray-100 border border-gray-200 rounded shadow-sm w-fit"
       >
@@ -84,7 +83,7 @@ export function ToolbarPattern() {
         >
           <Icon name="file-image" size={16} />
         </FocusItem>
-      </FocusGroup>
+      </Zone>
     </div>
   );
 }

@@ -7,17 +7,16 @@
  *  3. Dialog with actions
  */
 
-import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { Item } from "@os/6-components/primitives/Item.tsx";
 import { Dialog } from "@os/6-components/radix/Dialog.tsx";
 
-// @ts-expect-error — spec-wrapper plugin transforms at build time
-import runDialogSpec from "./tests/e2e/dialog.spec.ts";
+
 
 export function RadixPlayground() {
-  usePlaywrightSpecs("radix-e2e", [runDialogSpec]);
+
 
   return (
     <div className="min-h-screen bg-slate-50 p-8">
@@ -41,10 +40,10 @@ export function RadixPlayground() {
             Focus restores automatically.
           </p>
 
-          <FocusGroup
+          <Zone
             id="radix-base"
             role="listbox"
-            navigate={{ orientation: "horizontal" }}
+            options={{ navigate: { orientation: "horizontal" } }}
             className="flex gap-2"
           >
             <FocusItem
@@ -102,7 +101,7 @@ export function RadixPlayground() {
                 </div>
               </Dialog.Content>
             </Dialog>
-          </FocusGroup>
+          </Zone>
         </section>
 
         {/* ─── Demo 2: Nested Dialogs ─── */}

@@ -1,5 +1,5 @@
 import { useSelection } from "@/os/5-hooks/useSelection";
-import { FocusGroup } from "@/os/6-components/base/FocusGroup";
+import { Zone } from "@/os/6-components/primitives/Zone";
 import { FocusItem } from "@/os/6-components/base/FocusItem";
 
 export function GridPattern() {
@@ -13,11 +13,10 @@ export function GridPattern() {
         ranges.
       </p>
 
-      <FocusGroup
+      <Zone
         id="apg-grid"
         role="grid"
-        navigate={{ orientation: "both" }}
-        select={{ mode: "multiple", range: true }}
+        options={{ navigate: { orientation: "both" }, select: { mode: "multiple", range: true } }}
         aria-multiselectable="true"
         aria-label="Interactive Data Grid"
         className="grid grid-cols-5 gap-0 border-l border-t border-gray-200"
@@ -47,7 +46,7 @@ export function GridPattern() {
             </FocusItem>
           );
         })}
-      </FocusGroup>
+      </Zone>
     </div>
   );
 }

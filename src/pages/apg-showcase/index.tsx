@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
-import { FocusGroup } from "@/os/6-components/base/FocusGroup";
+import { Zone } from "@/os/6-components/primitives/Zone";
 import { FocusItem } from "@/os/6-components/base/FocusItem";
 import { Root } from "@/os/6-components/primitives/Root";
 import { CompositePattern } from "./patterns/CompositePattern";
@@ -35,10 +35,10 @@ export default function ApgShowcasePage() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-2">
-            <FocusGroup
+            <Zone
               id="apg-sidebar"
               role="tablist"
-              navigate={{ orientation: "vertical" }}
+              options={{ navigate: { orientation: "vertical" } }}
               className="flex flex-col gap-1"
             >
               {Object.entries(PATTERNS).map(([key, { name }]) => (
@@ -58,7 +58,7 @@ export default function ApgShowcasePage() {
                   {name}
                 </FocusItem>
               ))}
-            </FocusGroup>
+            </Zone>
           </div>
         </div>
 

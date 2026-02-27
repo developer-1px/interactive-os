@@ -1,5 +1,5 @@
 import { os } from "@os/kernel.ts";
-import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
+import { useZoneContext } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import {
   cloneElement,
@@ -66,7 +66,7 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(
     const stringId = String(id);
 
     // --- Context Access ---
-    const context = useFocusGroupContext();
+    const context = useZoneContext();
     const zoneId = context?.zoneId || "unknown";
 
     // --- State (Kernel Direct) ---

@@ -5,7 +5,7 @@
  * Uses OS_EXPAND kernel command for mutations, os state for reads.
  */
 
-import { useFocusGroupContext } from "@os/6-components/base/FocusGroup.tsx";
+import { useZoneContext } from "@os/6-components/primitives/Zone.tsx";
 import { useCallback } from "react";
 import { OS_EXPAND } from "@/os/3-commands/expand";
 import { os } from "@/os/kernel";
@@ -15,10 +15,10 @@ import { os } from "@/os/kernel";
 const EMPTY: readonly string[] = [];
 
 export function useExpanded() {
-  const ctx = useFocusGroupContext();
+  const ctx = useZoneContext();
 
   if (!ctx) {
-    throw new Error("useExpanded must be used within a FocusGroup");
+    throw new Error("useExpanded must be used within a Zone");
   }
 
   const { zoneId } = ctx;

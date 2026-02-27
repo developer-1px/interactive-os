@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { Item } from "@os/6-components/primitives/Item.tsx";
 import { Dialog } from "@os/6-components/radix/Dialog.tsx";
@@ -49,11 +49,10 @@ export function FocusStackTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Base Zone
           </div>
-          <FocusGroup
+          <Zone
             id="fs-base"
             role="listbox"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "single" }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "single" } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Button 1", "Button 2", "Button 3"].map((item, i) => (
@@ -130,7 +129,7 @@ export function FocusStackTest() {
                 )}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </div>
 
         {/* Scroll Sync Test */}
@@ -142,10 +141,10 @@ export function FocusStackTest() {
             ref={scrollContainerRef}
             className="h-24 overflow-y-auto border border-gray-200 rounded bg-gray-50"
           >
-            <FocusGroup
+            <Zone
               id="fs-scroll"
               role="listbox"
-              navigate={{ orientation: "vertical" }}
+              options={{ navigate: { orientation: "vertical" } }}
               className="flex flex-col p-1 gap-0.5"
             >
               {scrollItems.map((item, i) => (
@@ -158,7 +157,7 @@ export function FocusStackTest() {
                   {item}
                 </FocusItem>
               ))}
-            </FocusGroup>
+            </Zone>
           </div>
           <div className="text-[10px] text-gray-500">
             Navigate to bottom items to test scroll sync.

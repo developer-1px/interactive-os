@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FocusGroup } from "@/os/6-components/base/FocusGroup";
+import { Zone } from "@/os/6-components/primitives/Zone";
 import { FocusItem } from "@/os/6-components/base/FocusItem";
 
 export function MenuPattern() {
@@ -23,10 +23,10 @@ export function MenuPattern() {
       </p>
 
       {/* Menubar */}
-      <FocusGroup
+      <Zone
         id="apg-menubar"
         role="menubar"
-        navigate={{ orientation: "horizontal", loop: true }}
+        options={{ navigate: { orientation: "horizontal", loop: true } }}
         className="flex bg-gray-100 rounded-t-md border border-gray-200 border-b-0 w-64 p-1"
       >
         {["File", "Edit", "View"].map((item) => (
@@ -42,13 +42,13 @@ export function MenuPattern() {
             {item}
           </FocusItem>
         ))}
-      </FocusGroup>
+      </Zone>
 
       {/* Dropdown Menu (simulated as always open for preview) */}
-      <FocusGroup
+      <Zone
         id="apg-menu"
         role="menu"
-        navigate={{ orientation: "vertical", loop: true }}
+        options={{ navigate: { orientation: "vertical", loop: true } }}
         onCheck={(c) => {
           if (c.focusId?.startsWith("check-"))
             toggleCheck(c.focusId.replace("check-", ""));
@@ -139,7 +139,7 @@ export function MenuPattern() {
             </FocusItem>
           );
         })}
-      </FocusGroup>
+      </Zone>
     </div>
   );
 }

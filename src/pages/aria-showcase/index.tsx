@@ -3,8 +3,8 @@
  * Demonstrates standard ARIA patterns using FocusGroup facade.
  */
 
-import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { os } from "@os/kernel.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -12,40 +12,7 @@ import { Icon } from "@/components/Icon";
 import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { useSelection } from "@/os/5-hooks/useSelection";
 
-// @ts-expect-error — spec-wrapper plugin transforms at build time
-import runComplexPatterns from "./tests/e2e/complex-patterns.spec.ts";
-// @ts-expect-error
-import runDisclosure from "./tests/e2e/disclosure.spec.ts";
-// @ts-expect-error
-import runGrid from "./tests/e2e/grid.spec.ts";
-// @ts-expect-error
-import runListbox from "./tests/e2e/listbox.spec.ts";
-// @ts-expect-error
-import runMenu from "./tests/e2e/menu.spec.ts";
-// @ts-expect-error
-import runRadiogroup from "./tests/e2e/radiogroup.spec.ts";
-// @ts-expect-error
-import runTabs from "./tests/e2e/tabs.spec.ts";
-// @ts-expect-error
-import runToolbar from "./tests/e2e/toolbar.spec.ts";
-// @ts-expect-error
-import runTree from "./tests/e2e/tree.spec.ts";
-
-const ARIA_SPECS = [
-  runTabs,
-  runMenu,
-  runDisclosure,
-  runGrid,
-  runListbox,
-  runRadiogroup,
-  runToolbar,
-  runTree,
-  runComplexPatterns,
-];
-
 export function AriaShowcasePage() {
-  usePlaywrightSpecs("aria-showcase", ARIA_SPECS);
-
   return <AriaShowcaseContent />;
 }
 
@@ -101,10 +68,10 @@ function AriaShowcaseContent() {
                 */}
         <AriaCard title="Tabs" ariaRole="tablist">
           <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <FocusGroup
+            <Zone
               id="demo-tablist"
               role="tablist"
-              navigate={{ orientation: "horizontal", loop: true }}
+              options={{ navigate: { orientation: "horizontal", loop: true } }}
               aria-label="Account settings"
               className="flex bg-gray-100 border-b border-gray-200"
             >
@@ -151,7 +118,7 @@ function AriaShowcaseContent() {
               >
                 Disabled
               </FocusItem>
-            </FocusGroup>
+            </Zone>
             <div
               id="panel-account"
               role="tabpanel"
@@ -174,10 +141,10 @@ function AriaShowcaseContent() {
                     - aria-disabled: Disabled menu items
                 */}
         <AriaCard title="Menu" ariaRole="menu">
-          <FocusGroup
+          <Zone
             id="demo-menu"
             role="menu"
-            navigate={{ orientation: "vertical", loop: true }}
+            options={{ navigate: { orientation: "vertical", loop: true } }}
             onCheck={(c) => {
               if (c.focusId) toggleMenuCheck(c.focusId);
               return [];
@@ -252,7 +219,7 @@ function AriaShowcaseContent() {
             >
               Unavailable
             </FocusItem>
-          </FocusGroup>
+          </Zone>
         </AriaCard>
 
         {/* 3. Listbox */}
@@ -262,11 +229,10 @@ function AriaShowcaseContent() {
                     Here we use focus as selection for simple lists, but let's add multi-select visual later if needed.
                 */}
         <AriaCard title="Listbox" ariaRole="listbox">
-          <FocusGroup
+          <Zone
             id="demo-listbox"
             role="listbox"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "single", followFocus: true }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "single", followFocus: true } }}
             aria-label="Select a user"
             className="w-full bg-white border border-gray-200 rounded-lg shadow-sm max-h-48 overflow-y-auto"
           >
@@ -291,16 +257,15 @@ function AriaShowcaseContent() {
                 {name}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </AriaCard>
 
         {/* 4. Radiogroup */}
         <AriaCard title="Radio Group" ariaRole="radiogroup">
-          <FocusGroup
+          <Zone
             id="demo-radiogroup"
             role="radiogroup"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "single", followFocus: true, disallowEmpty: true }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "single", followFocus: true, disallowEmpty: true } }}
             aria-labelledby="radio-label"
             className="space-y-2"
           >
@@ -341,7 +306,7 @@ function AriaShowcaseContent() {
                 </span>
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </AriaCard>
 
         {/* 5. Toolbar */}
@@ -350,10 +315,10 @@ function AriaShowcaseContent() {
                     - aria-pressed: Toggle button state
                 */}
         <AriaCard title="Toolbar" ariaRole="toolbar">
-          <FocusGroup
+          <Zone
             id="demo-toolbar"
             role="toolbar"
-            navigate={{ orientation: "horizontal", loop: true }}
+            options={{ navigate: { orientation: "horizontal", loop: true } }}
             aria-label="Text formatting"
             className="flex gap-1 p-2 bg-gray-100 rounded-lg border border-gray-200"
           >
@@ -394,7 +359,7 @@ function AriaShowcaseContent() {
             >
               D
             </FocusItem>
-          </FocusGroup>
+          </Zone>
         </AriaCard>
 
         {/* 6. Grid */}
@@ -403,11 +368,10 @@ function AriaShowcaseContent() {
                     - aria-selected: Cell selection
                 */}
         <AriaCard title="Grid" ariaRole="grid">
-          <FocusGroup
+          <Zone
             id="demo-grid"
             role="grid"
-            navigate={{ orientation: "both" }}
-            select={{ mode: "multiple", range: true }}
+            options={{ navigate: { orientation: "both" }, select: { mode: "multiple", range: true } }}
             aria-label="Calendar"
             className="grid grid-cols-4 gap-1 p-2 bg-gray-100 rounded-lg border border-gray-200"
           >
@@ -430,7 +394,7 @@ function AriaShowcaseContent() {
                 {i + 1}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </AriaCard>
 
         {/* 7. Tree */}
@@ -439,25 +403,24 @@ function AriaShowcaseContent() {
                     - aria-expanded: Expand/collapse nodes (store-driven)
                 */}
         <AriaCard title="Tree (Store-Driven)" ariaRole="tree">
-          <FocusGroup
+          <Zone
             id="demo-tree"
             role="tree"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "multiple", range: true }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "multiple", range: true } }}
             aria-multiselectable="true"
             aria-label="File explorer"
             className="w-full bg-white border border-gray-200 rounded-lg p-2"
           >
             <TreeContent />
-          </FocusGroup>
+          </Zone>
         </AriaCard>
 
         {/* 8. Menubar */}
         <AriaCard title="Menubar" ariaRole="menubar">
-          <FocusGroup
+          <Zone
             id="demo-menubar"
             role="menubar"
-            navigate={{ orientation: "horizontal" }}
+            options={{ navigate: { orientation: "horizontal" } }}
             aria-label="Application menu"
             className="flex bg-gray-800 text-white rounded-lg overflow-hidden"
           >
@@ -476,7 +439,7 @@ function AriaShowcaseContent() {
                 {item}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </AriaCard>
 
         {/* 9. Combobox */}
@@ -487,9 +450,9 @@ function AriaShowcaseContent() {
                 */}
         <AriaCard title="Combobox" ariaRole="combobox">
           <div className="relative">
-            <FocusGroup
+            <Zone
               id="combo-wrapper"
-              navigate={{ orientation: "vertical" }}
+              options={{ navigate: { orientation: "vertical" } }}
               className="w-full"
             >
               <FocusItem
@@ -503,11 +466,10 @@ function AriaShowcaseContent() {
                 className={`
                                   w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
                                   flex items-center gap-2 transition-all
-                                  ${
-                                    isComboInvalid
-                                      ? "border-red-300 bg-red-50 text-red-700"
-                                      : "border-gray-200 hover:border-gray-300"
-                                  }
+                                  ${isComboInvalid
+                    ? "border-red-300 bg-red-50 text-red-700"
+                    : "border-gray-200 hover:border-gray-300"
+                  }
                                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
                                   aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
                               `}
@@ -526,7 +488,7 @@ function AriaShowcaseContent() {
                   className={isComboInvalid ? "text-red-400" : "text-gray-400"}
                 />
               </FocusItem>
-            </FocusGroup>
+            </Zone>
 
             <div className="flex items-center gap-2 mt-3">
               <label className="text-xs text-gray-500 flex items-center gap-1.5 cursor-pointer">
@@ -542,10 +504,10 @@ function AriaShowcaseContent() {
             </div>
 
             {isComboOpen && (
-              <FocusGroup
+              <Zone
                 id="combo-listbox"
                 role="listbox"
-                navigate={{ orientation: "vertical" }}
+                options={{ navigate: { orientation: "vertical" } }}
                 aria-label="Suggestions"
                 className="absolute z-50 top-12 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-44 overflow-y-auto py-1"
               >
@@ -569,21 +531,21 @@ function AriaShowcaseContent() {
                     <span>{fruit.name}</span>
                   </FocusItem>
                 ))}
-              </FocusGroup>
+              </Zone>
             )}
           </div>
         </AriaCard>
 
         {/* 10. Accordion */}
         <AriaCard title="Accordion" ariaRole="accordion">
-          <FocusGroup
+          <Zone
             id="demo-accordion"
-            navigate={{ orientation: "vertical" }}
+            options={{ navigate: { orientation: "vertical" } }}
             aria-label="FAQ"
             className="w-full bg-white border border-gray-200 rounded-lg overflow-hidden"
           >
             <AccordionContent />
-          </FocusGroup>
+          </Zone>
         </AriaCard>
 
         {/* 11. Dialog */}
@@ -611,10 +573,10 @@ function AriaShowcaseContent() {
 
         {/* 14. Feed */}
         <AriaCard title="Feed" ariaRole="feed">
-          <FocusGroup
+          <Zone
             id="demo-feed"
             role="feed"
-            navigate={{ orientation: "vertical" }}
+            options={{ navigate: { orientation: "vertical" } }}
             aria-label="Recent updates"
             className="space-y-2"
           >
@@ -663,7 +625,7 @@ function AriaShowcaseContent() {
                 <p className="text-sm text-gray-600 pl-8">{post.text}</p>
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </AriaCard>
       </div>
     </div>
@@ -904,7 +866,7 @@ function DisclosureContent() {
 
   return (
     <div className="w-full">
-      <FocusGroup id="demo-disclosure" aria-label="Disclosure">
+      <Zone id="demo-disclosure" aria-label="Disclosure">
         <FocusItem
           id="disclosure-trigger"
           as="button"
@@ -927,7 +889,7 @@ function DisclosureContent() {
             className="text-gray-400"
           />
         </FocusItem>
-      </FocusGroup>
+      </Zone>
       {isOpen && (
         <div
           id="disclosure-panel"
@@ -994,7 +956,7 @@ function DialogDemo({
       </button>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <FocusGroup
+          <Zone
             id="demo-dialog"
             role="dialog"
             aria-label="Example dialog"
@@ -1031,7 +993,7 @@ function DialogDemo({
                 Close Dialog
               </FocusItem>
             </div>
-          </FocusGroup>
+          </Zone>
         </div>
       )}
     </>
@@ -1085,7 +1047,7 @@ function AlertDialogDemo({
       </button>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <FocusGroup
+          <Zone
             id="demo-alertdialog"
             role="alertdialog"
             aria-label="Confirm deletion"
@@ -1127,7 +1089,7 @@ function AlertDialogDemo({
                 </FocusItem>
               </div>
             </div>
-          </FocusGroup>
+          </Zone>
         </div>
       )}
     </>

@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -52,11 +52,10 @@ export function SelectTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Multi-Select + Toggle + Range
           </div>
-          <FocusGroup
+          <Zone
             id="sel-range"
             role="grid"
-            navigate={{ orientation: "horizontal" }}
-            select={{ mode: "multiple", toggle: true, range: true }}
+            options={{ navigate: { orientation: "horizontal" }, select: { mode: "multiple", toggle: true, range: true } }}
             className="grid grid-cols-4 bg-gray-50 p-2 rounded border border-gray-200 gap-2"
           >
             {Array.from({ length: 4 }, (_, i) => (
@@ -69,7 +68,7 @@ export function SelectTest() {
                 {i}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
           <div className="text-[10px] text-gray-500">
             Try Ctrl+Click or Shift+Click
           </div>
@@ -80,11 +79,10 @@ export function SelectTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Single + Toggle
           </div>
-          <FocusGroup
+          <Zone
             id="sel-toggle"
             role="listbox"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "single", toggle: true }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "single", toggle: true } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Option 1", "Option 2"].map((opt, i) => (
@@ -97,7 +95,7 @@ export function SelectTest() {
                 {opt}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </div>
 
         {/* Follow Focus (Radio) */}
@@ -105,11 +103,10 @@ export function SelectTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Follow Focus (Radio)
           </div>
-          <FocusGroup
+          <Zone
             id="sel-radio"
             role="radiogroup"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "single", followFocus: true, disallowEmpty: true }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "single", followFocus: true, disallowEmpty: true } }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["A", "B"].map((opt) => (
@@ -127,7 +124,7 @@ export function SelectTest() {
                 </span>
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </div>
       </div>
     </TestBox>

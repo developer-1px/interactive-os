@@ -6,14 +6,12 @@
  * globally in __root.tsx, so this page just provides context + trigger.
  */
 
-import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
-// @ts-expect-error — spec-wrapper plugin transforms at build time
-import runCommandPaletteSpec from "@/command-palette/tests/e2e/command-palette.spec.ts";
+
 import { OS_OVERLAY_OPEN } from "@/os/3-commands";
 import { os } from "@/os/kernel";
 
 export default function CommandPalettePage() {
-  usePlaywrightSpecs("command-palette", [runCommandPaletteSpec]);
+
 
   const openPalette = () => {
     os.dispatch(OS_OVERLAY_OPEN({ id: "command-palette", type: "dialog" }));

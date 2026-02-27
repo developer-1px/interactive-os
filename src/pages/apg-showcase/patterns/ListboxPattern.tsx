@@ -1,5 +1,5 @@
 import { useSelection } from "@/os/5-hooks/useSelection";
-import { FocusGroup } from "@/os/6-components/base/FocusGroup";
+import { Zone } from "@/os/6-components/primitives/Zone";
 import { FocusItem } from "@/os/6-components/base/FocusItem";
 
 const OPTIONS = [
@@ -23,11 +23,10 @@ export function ListboxPattern() {
       <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-2">Single Select Listbox</h3>
 
-        <FocusGroup
+        <Zone
           id="apg-listbox-single"
           role="listbox"
-          navigate={{ orientation: "vertical" }}
-          select={{ mode: "single", followFocus: true }}
+          options={{ navigate: { orientation: "vertical" }, select: { mode: "single", followFocus: true } }}
           aria-label="Choose a fruit"
           className="border border-gray-300 rounded overflow-hidden max-h-64 overflow-y-auto"
         >
@@ -49,18 +48,17 @@ export function ListboxPattern() {
               </FocusItem>
             );
           })}
-        </FocusGroup>
+        </Zone>
       </div>
 
       {/* Multi Select */}
       <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-2">Multi Select Listbox</h3>
 
-        <FocusGroup
+        <Zone
           id="apg-listbox-multi"
           role="listbox"
-          navigate={{ orientation: "vertical" }}
-          select={{ mode: "multiple", range: true }}
+          options={{ navigate: { orientation: "vertical" }, select: { mode: "multiple", range: true } }}
           aria-multiselectable="true"
           aria-label="Choose multiple fruits"
           className="border border-gray-300 rounded overflow-hidden max-h-64 overflow-y-auto"
@@ -85,7 +83,7 @@ export function ListboxPattern() {
               </FocusItem>
             );
           })}
-        </FocusGroup>
+        </Zone>
       </div>
     </div>
   );

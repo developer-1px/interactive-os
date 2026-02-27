@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -39,10 +39,10 @@ export function AriaFacadeTest() {
             Tabs Pattern
           </div>
           <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <FocusGroup
+            <Zone
               id="aria-tablist"
               role="tablist"
-              navigate={{ orientation: "horizontal" }}
+              options={{ navigate: { orientation: "horizontal" } }}
               className="flex bg-gray-50 border-b border-gray-200"
             >
               <FocusItem
@@ -72,7 +72,7 @@ export function AriaFacadeTest() {
               >
                 Billing
               </FocusItem>
-            </FocusGroup>
+            </Zone>
             <div className="p-4 bg-white">
               <div
                 id="panel-1"
@@ -90,10 +90,10 @@ export function AriaFacadeTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Radio Group
           </div>
-          <FocusGroup
+          <Zone
             id="aria-radiogroup"
             role="radiogroup"
-            navigate={{ orientation: "vertical" }}
+            options={{ navigate: { orientation: "vertical" } }}
             className="flex flex-col gap-2 p-3 bg-gray-50 rounded border border-gray-200"
             aria-labelledby="radio-label"
           >
@@ -127,7 +127,7 @@ export function AriaFacadeTest() {
                 );
               },
             )}
-          </FocusGroup>
+          </Zone>
         </div>
 
         {/* 3. Listbox (Complex) */}
@@ -135,10 +135,10 @@ export function AriaFacadeTest() {
           <div className="text-[10px] font-mono text-gray-500 uppercase">
             Detailed Listbox
           </div>
-          <FocusGroup
+          <Zone
             id="aria-listbox"
             role="listbox"
-            navigate={{ orientation: "vertical", loop: true }}
+            options={{ navigate: { orientation: "vertical", loop: true } }}
             className="flex flex-col bg-white border border-gray-200 rounded shadow-sm max-h-40 overflow-y-auto"
             aria-label="User Selection"
           >
@@ -157,7 +157,7 @@ export function AriaFacadeTest() {
                 <span className="text-xs text-gray-500">{user.role}</span>
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </div>
       </div>
     </TestBox>

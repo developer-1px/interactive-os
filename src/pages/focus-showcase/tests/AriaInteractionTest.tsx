@@ -1,4 +1,4 @@
-import { FocusGroup } from "@os/6-components/base/FocusGroup.tsx";
+import { Zone } from "@os/6-components/primitives/Zone.tsx";
 import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { Field } from "@os/6-components/field/Field.tsx";
 import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
@@ -62,11 +62,10 @@ export function AriaInteractionTest() {
           <div className="text-[10px] font-mono text-gray-500 mb-2 uppercase">
             Selection (Listbox)
           </div>
-          <FocusGroup
+          <Zone
             id="test-select-group"
             role="listbox"
-            navigate={{ orientation: "vertical" }}
-            select={{ mode: "single" }}
+            options={{ navigate: { orientation: "vertical" }, select: { mode: "single" } }}
             className="flex flex-col gap-1"
           >
             {["Item 1", "Item 2", "Item 3"].map((text, i) => (
@@ -79,7 +78,7 @@ export function AriaInteractionTest() {
                 {text}
               </FocusItem>
             ))}
-          </FocusGroup>
+          </Zone>
         </div>
 
         {/* 3. Field Section */}

@@ -8,9 +8,13 @@
  *   - createOsPage (OS-only integration tests)
  *   - defineApp.page.ts (Full Stack AppPage)
  *   - withRecording (TestBot replay engine)
+ *   - LLM simulation (browser-free Zone creation & interaction)
  *
  * All functions are pure — they read kernel state and ZoneRegistry,
  * then call resolveKeyboard/resolveMouse → dispatch.
+ *
+ * Zone lifecycle (registerHeadlessZone / unregisterHeadlessZone)
+ * uses pure functions from zoneLogic.ts — no React, no DOM.
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
@@ -27,12 +31,21 @@ import {
   resolveMouse,
 } from "@os/1-listeners/mouse/resolveMouse";
 import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import {
+  buildZoneEntry,
+  computeContainerProps,
+  createZoneConfig,
+  generateZoneId,
+  type ZoneCallbacks,
+} from "@os/2-contexts/zoneLogic";
 import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
+import { OS_ZONE_INIT } from "@os/3-commands/focus";
 import type { AppState } from "@os/kernel";
 import {
   getChildRole,
   isCheckedRole,
   isExpandableRole,
+  type ZoneRole,
 } from "@os/registries/roleRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -46,9 +59,16 @@ export interface ItemAttrs {
   "aria-checked"?: boolean;
   "aria-expanded"?: boolean;
   "aria-disabled"?: boolean;
+  "aria-current"?: "true" | undefined;
   "data-focused"?: true | undefined;
   hidden?: boolean;
 }
+
+/**
+ * Unified element attributes — works for both Zone containers and Items.
+ * resolveElement() returns this type: one function, one type, any element ID.
+ */
+export type ElementAttrs = Record<string, string | number | boolean | undefined>;
 
 /** Minimal kernel interface needed by headless interaction functions */
 export interface HeadlessKernel {
@@ -368,7 +388,59 @@ export function computeAttrs(
     result["aria-disabled"] = true;
   }
 
+  // aria-current on focused item (matches what FocusItem renders in the browser)
+  if (isFocused && isActiveZone) {
+    result["aria-current"] = "true" as const;
+  }
+
   return result;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// resolveElement — Playwright locator equivalent.
+//
+// Given an element ID, returns ALL DOM attributes regardless of
+// whether it's a Zone container or a FocusItem.
+//
+// Playwright: page.locator("#id").getAttribute("aria-current")
+// Headless:   resolveElement(kernel, "id")["aria-current"]
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Resolve all DOM attributes for any element by ID.
+ *
+ * - If ID matches a registered Zone → container props (role, aria-orientation, ...)
+ * - If ID matches an Item within a Zone → item attrs (tabIndex, aria-selected, ...)
+ * - If ID not found → empty object
+ *
+ * This is the headless equivalent of Playwright's `page.locator("#id")`.
+ */
+export function resolveElement(
+  kernel: HeadlessKernel,
+  elementId: string,
+): ElementAttrs {
+  // Check if it's a Zone container
+  const entry = ZoneRegistry.get(elementId);
+  if (entry) {
+    const s = kernel.getState();
+    const isActive = s.os.focus.activeZoneId === elementId;
+    const config = entry.config ?? { navigate: {}, tab: {}, select: { mode: "none" }, activate: {}, dismiss: {}, project: {} } as any;
+    return computeContainerProps(elementId, config, isActive, entry.role) as unknown as ElementAttrs;
+  }
+
+  // Check if it's an Item within any Zone
+  const ownerZoneId = ZoneRegistry.findZoneByItemId(elementId);
+  if (ownerZoneId) {
+    return computeAttrs(kernel, elementId, ownerZoneId) as unknown as ElementAttrs;
+  }
+
+  // Fallback: try active zone
+  const activeZoneId = readActiveZoneId(kernel);
+  if (activeZoneId) {
+    return computeAttrs(kernel, elementId, activeZoneId) as unknown as ElementAttrs;
+  }
+
+  return {};
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -385,4 +457,64 @@ function dispatchResult(
       kernel.dispatch(cmd, opts);
     }
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Headless Zone Lifecycle — browser-free Zone creation & management
+//
+// These functions allow LLMs and test runners to create and manage
+// Zones purely in memory, without React components or DOM.
+// ═══════════════════════════════════════════════════════════════════
+
+export interface HeadlessZoneOptions {
+  /** Zone ID (auto-generated if not provided) */
+  id?: string;
+  /** ARIA role preset */
+  role?: ZoneRole;
+  /** Ordered item IDs in this zone */
+  items?: string[];
+  /** Parent zone ID (for nested zones) */
+  parentId?: string | null;
+  /** Zone callbacks (onAction, onSelect, etc.) */
+  callbacks?: ZoneCallbacks;
+}
+
+/**
+ * Register a Zone in headless mode — no React, no DOM.
+ *
+ * Creates a fully functional Zone entry in ZoneRegistry and
+ * initializes kernel state via OS_ZONE_INIT. The zone is
+ * immediately available for simulateKeyPress/simulateClick.
+ *
+ * @returns The zone ID (auto-generated or provided)
+ */
+export function registerHeadlessZone(
+  kernel: HeadlessKernel,
+  options: HeadlessZoneOptions = {},
+): string {
+  const zoneId = options.id ?? generateZoneId();
+  const config = createZoneConfig(options.role);
+  const items = options.items;
+
+  const entry = buildZoneEntry(
+    config,
+    options.role,
+    options.parentId ?? null,
+    {
+      ...options.callbacks,
+      ...(items ? { getItems: () => items } : {}),
+    },
+  );
+
+  ZoneRegistry.register(zoneId, entry);
+  kernel.dispatch(OS_ZONE_INIT(zoneId));
+
+  return zoneId;
+}
+
+/**
+ * Unregister a headless Zone — cleanup from ZoneRegistry.
+ */
+export function unregisterHeadlessZone(zoneId: string): void {
+  ZoneRegistry.unregister(zoneId);
 }

@@ -7,13 +7,8 @@
 
 import { KernelPanel } from "@inspector/panels/KernelPanel.tsx";
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
-import { usePlaywrightSpecs } from "@inspector/testbot/playwright/loader";
-import { registerGotoReset } from "@inspector/testbot/playwright/shim";
 import { createKernel, type Transaction } from "@kernel";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-
-// @ts-expect-error — spec-wrapper plugin transforms at build time
-import runKernelLabSpec from "./tests/e2e/kernel-lab.spec.ts";
 
 // ─── State Schema ───
 
@@ -323,17 +318,9 @@ function TransactionPanel() {
 // ─── Main Page ───
 
 export default function KernelLabPage() {
-  const resetKey = usePlaywrightSpecs("kernel-lab", [runKernelLabSpec]);
-
-  // Reset state only — registries stay intact (idempotent, Strict Mode safe)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey is intentional trigger
+  // Reset state on mount
   useEffect(() => {
     resetKernelLab();
-  }, [resetKey]);
-
-  // Register goto reset for TestBot test isolation
-  useEffect(() => {
-    return registerGotoReset(resetKernelLab);
   }, []);
 
   // Register Kernel Inspector Panel
