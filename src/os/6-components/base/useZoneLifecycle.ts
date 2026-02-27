@@ -30,6 +30,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // Zone Callbacks — all entry-level callbacks collected as one bag
+// OCP: add a field here → automatically flows to ZoneEntry.
 // ═══════════════════════════════════════════════════════════════════
 
 export interface ZoneCallbacks {
@@ -57,6 +58,42 @@ export interface ZoneCallbacks {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Entry Builder — single source of truth for ZoneEntry construction.
+// OCP-safe: new ZoneCallbacks fields flow through spread automatically.
+// ═══════════════════════════════════════════════════════════════════
+
+function buildEntry(
+    config: FocusGroupConfig,
+    role: ZoneRole | undefined,
+    parentId: string | null,
+    callbacks: ZoneCallbacks,
+    existing?: ZoneEntry,
+): ZoneEntry {
+    // Strip undefined values from callbacks so they don't overwrite existing bindings
+    const defined: Partial<ZoneCallbacks> = {};
+    for (const [k, v] of Object.entries(callbacks)) {
+        if (v !== undefined) (defined as Record<string, unknown>)[k] = v;
+    }
+
+    const entry: ZoneEntry = {
+        config,
+        element: null,
+        parentId,
+        ...defined,
+        ...(role !== undefined ? { role } : {}),
+    };
+
+    // Preserve DOM bindings from bindElement (may have been set in previous lifecycle)
+    if (existing?.element) entry.element = existing.element;
+    if (!callbacks.getItems && existing?.getItems)
+        entry.getItems = existing.getItems;
+    if (!entry.getLabels && existing?.getLabels)
+        entry.getLabels = existing.getLabels;
+
+    return entry;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Hook
 // ═══════════════════════════════════════════════════════════════════
 
@@ -73,45 +110,12 @@ export function useZoneLifecycle(
     callbacksRef.current = callbacks;
 
     // --- Phase 1: Logical registration (render-time, headless-safe) ---
-    // ZoneRegistry.register is a pure Map.set — no re-render triggered.
-    // CRITICAL: Preserve DOM bindings from bindElement (useLayoutEffect).
     useMemo(() => {
         const existing = ZoneRegistry.get(zoneId);
-        const cb = callbacksRef.current;
-
-        const entry: ZoneEntry = {
-            config,
-            element: null,
-            parentId,
-        };
-        if (role !== undefined) entry.role = role;
-        if (cb.onDismiss !== undefined) entry.onDismiss = cb.onDismiss;
-        if (cb.onAction !== undefined) entry.onAction = cb.onAction;
-        if (cb.onSelect !== undefined) entry.onSelect = cb.onSelect;
-        if (cb.onCheck !== undefined) entry.onCheck = cb.onCheck;
-        if (cb.onDelete !== undefined) entry.onDelete = cb.onDelete;
-        if (cb.onMoveUp !== undefined) entry.onMoveUp = cb.onMoveUp;
-        if (cb.onMoveDown !== undefined) entry.onMoveDown = cb.onMoveDown;
-        if (cb.onCopy !== undefined) entry.onCopy = cb.onCopy;
-        if (cb.onCut !== undefined) entry.onCut = cb.onCut;
-        if (cb.onPaste !== undefined) entry.onPaste = cb.onPaste;
-        if (cb.onUndo !== undefined) entry.onUndo = cb.onUndo;
-        if (cb.onRedo !== undefined) entry.onRedo = cb.onRedo;
-        if (cb.itemFilter !== undefined) entry.itemFilter = cb.itemFilter;
-        if (cb.getItems !== undefined) entry.getItems = cb.getItems;
-        if (cb.getExpandableItems !== undefined)
-            entry.getExpandableItems = cb.getExpandableItems;
-        if (cb.getTreeLevels !== undefined)
-            entry.getTreeLevels = cb.getTreeLevels;
-        if (cb.onReorder !== undefined) entry.onReorder = cb.onReorder;
-
-        // Preserve DOM bindings from bindElement
-        if (existing?.element) entry.element = existing.element;
-        if (!cb.getItems && existing?.getItems) entry.getItems = existing.getItems;
-        if (!entry.getLabels && existing?.getLabels)
-            entry.getLabels = existing.getLabels;
-
-        ZoneRegistry.register(zoneId, entry);
+        ZoneRegistry.register(
+            zoneId,
+            buildEntry(config, role, parentId, callbacksRef.current, existing),
+        );
     }, [zoneId, config, role, parentId]);
 
     // --- Phase 2: Commit-phase (dispatch + DOM binding) ---
@@ -119,31 +123,12 @@ export function useZoneLifecycle(
         // 1. Init kernel state (idempotent)
         os.dispatch(OS_ZONE_INIT(zoneId));
 
-        // 2. Ensure entry exists (StrictMode cleanup→remount safety)
+        // 2. StrictMode safety — re-register if cleanup wiped the entry
         if (!ZoneRegistry.has(zoneId)) {
-            const cb = callbacksRef.current;
-            const entry: ZoneEntry = { config, element: null, parentId };
-            if (role !== undefined) entry.role = role;
-            if (cb.onDismiss !== undefined) entry.onDismiss = cb.onDismiss;
-            if (cb.onAction !== undefined) entry.onAction = cb.onAction;
-            if (cb.onSelect !== undefined) entry.onSelect = cb.onSelect;
-            if (cb.onCheck !== undefined) entry.onCheck = cb.onCheck;
-            if (cb.onDelete !== undefined) entry.onDelete = cb.onDelete;
-            if (cb.onMoveUp !== undefined) entry.onMoveUp = cb.onMoveUp;
-            if (cb.onMoveDown !== undefined) entry.onMoveDown = cb.onMoveDown;
-            if (cb.onCopy !== undefined) entry.onCopy = cb.onCopy;
-            if (cb.onCut !== undefined) entry.onCut = cb.onCut;
-            if (cb.onPaste !== undefined) entry.onPaste = cb.onPaste;
-            if (cb.onUndo !== undefined) entry.onUndo = cb.onUndo;
-            if (cb.onRedo !== undefined) entry.onRedo = cb.onRedo;
-            if (cb.itemFilter !== undefined) entry.itemFilter = cb.itemFilter;
-            if (cb.getItems !== undefined) entry.getItems = cb.getItems;
-            if (cb.getExpandableItems !== undefined)
-                entry.getExpandableItems = cb.getExpandableItems;
-            if (cb.getTreeLevels !== undefined)
-                entry.getTreeLevels = cb.getTreeLevels;
-            if (cb.onReorder !== undefined) entry.onReorder = cb.onReorder;
-            ZoneRegistry.register(zoneId, entry);
+            ZoneRegistry.register(
+                zoneId,
+                buildEntry(config, role, parentId, callbacksRef.current),
+            );
         }
 
         // 3. Bind DOM element → auto-creates getItems/getLabels if not explicit
