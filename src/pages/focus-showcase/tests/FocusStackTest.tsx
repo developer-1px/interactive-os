@@ -1,5 +1,4 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { Item } from "@os/6-components/primitives/Item.tsx";
 import { Dialog } from "@os/6-components/radix/Dialog.tsx";
 import { useRef } from "react";
@@ -56,7 +55,7 @@ export function FocusStackTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Button 1", "Button 2", "Button 3"].map((item, i) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`fs-base-${i + 1}`}
                 role="option"
@@ -127,7 +126,7 @@ export function FocusStackTest() {
                     </Dialog.Content>
                   </Dialog>
                 )}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </div>
@@ -148,14 +147,14 @@ export function FocusStackTest() {
               className="flex flex-col p-1 gap-0.5"
             >
               {scrollItems.map((item, i) => (
-                <FocusItem
+                <Item
                   key={item}
                   id={`fs-scroll-${i + 1}`}
                   role="option"
                   className="px-2 py-1 rounded hover:bg-gray-100 aria-[current=true]:bg-emerald-100 aria-[current=true]:text-emerald-700 text-xs shrink-0"
                 >
                   {item}
-                </FocusItem>
+                </Item>
               ))}
             </Zone>
           </div>

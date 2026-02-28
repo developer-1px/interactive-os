@@ -275,7 +275,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       single or multiple panels open
   accordion: {
     navigate: { orientation: "vertical", loop: false },
-    activate: { mode: "manual" },
+    activate: { mode: "manual", onClick: true },
     tab: { behavior: "escape" },
   },
 

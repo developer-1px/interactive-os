@@ -433,6 +433,11 @@ export function createKernel<S>(initialState: S) {
     // 7. Execute effects (pass handlerScope for state lens merging)
     if (result) {
       executeEffects(result, path, handlerScope);
+    } else if (handlerScope === "unknown") {
+      // No handler found in any scope → warn (like unknown effects)
+      logger.warn(
+        `[kernel] No handler for "${cmd.type}" in scope chain [${path.join(" → ")}]`,
+      );
     }
 
     const stateAfter = getState();

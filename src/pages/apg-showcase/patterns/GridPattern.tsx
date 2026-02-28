@@ -1,6 +1,6 @@
 import { useSelection } from "@/os/5-hooks/useSelection";
 import { Zone } from "@/os/6-components/primitives/Zone";
-import { FocusItem } from "@/os/6-components/base/FocusItem";
+import { Item } from "@/os/6-components/primitives/Item";
 
 export function GridPattern() {
   const selection = useSelection("apg-grid");
@@ -28,7 +28,7 @@ export function GridPattern() {
           const isSelected = selection.includes(id);
 
           return (
-            <FocusItem
+            <Item
               key={id}
               id={id}
               role="gridcell"
@@ -43,7 +43,7 @@ export function GridPattern() {
               "
             >
               {row},{col}
-            </FocusItem>
+            </Item>
           );
         })}
       </Zone>

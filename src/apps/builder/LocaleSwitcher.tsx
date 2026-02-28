@@ -10,7 +10,7 @@
  */
 
 
-import { FocusItem } from "@/os/6-components/base/FocusItem";
+import { Item } from "@/os/6-components/primitives/Item";
 import { Trigger } from "@/os/6-components/primitives/Trigger";
 import { resolveFieldValue } from "./entities/i18n";
 import {
@@ -74,7 +74,7 @@ export function LocaleSwitcher() {
               SUPPORTED_LOCALES.find((l) => l.code === code)?.label ?? code;
             const isActive = code === currentLocale;
             return (
-              <FocusItem key={code} id={`locale-option-${code}`} asChild>
+              <Item key={code} id={`locale-option-${code}`} asChild>
                 <Trigger.Dismiss
                   id={`locale-option-${code}`}
                   {...(!isActive
@@ -100,7 +100,7 @@ export function LocaleSwitcher() {
                     {isActive && <span style={{ fontSize: 11 }}>✓</span>}
                   </li>
                 </Trigger.Dismiss>
-              </FocusItem>
+              </Item>
             );
           })}
 
@@ -111,7 +111,7 @@ export function LocaleSwitcher() {
                 style={{ borderTop: "1px solid #e2e8f0", margin: "4px 0" }}
               />
               {unaddedLocales.map((l) => (
-                <FocusItem key={l.code} id={`locale-add-${l.code}`} asChild>
+                <Item key={l.code} id={`locale-add-${l.code}`} asChild>
                   <Trigger.Dismiss
                     id={`locale-add-${l.code}`}
                     onActivate={addLocaleCommand({ locale: l.code })}
@@ -129,7 +129,7 @@ export function LocaleSwitcher() {
                       + {l.label} 추가
                     </li>
                   </Trigger.Dismiss>
-                </FocusItem>
+                </Item>
               ))}
             </>
           )}

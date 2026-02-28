@@ -1,5 +1,5 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -78,7 +78,7 @@ function TreeItems() {
     <>
       {treeData.map((item) => (
         <div key={item.id} className="flex flex-col">
-          <FocusItem
+          <Item
             id={item.id}
             role="treeitem"
             className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-sky-100 aria-[current=true]:text-sky-700 text-sm flex items-center gap-2 group"
@@ -93,12 +93,12 @@ function TreeItems() {
               </span>
             )}
             <span>{item.label}</span>
-          </FocusItem>
+          </Item>
           {/* Children - shown when expanded */}
           {item.children.length > 0 && isExpanded(item.id) && (
             <div className="ml-6">
               {item.children.map((childId, childIdx) => (
-                <FocusItem
+                <Item
                   key={childId}
                   id={`tree-child-${treeData.indexOf(item) + 1}-${childIdx + 1}`}
                   role="treeitem"
@@ -106,7 +106,7 @@ function TreeItems() {
                 >
                   <span className="text-gray-300">└</span>
                   <span>{childId}</span>
-                </FocusItem>
+                </Item>
               ))}
             </div>
           )}

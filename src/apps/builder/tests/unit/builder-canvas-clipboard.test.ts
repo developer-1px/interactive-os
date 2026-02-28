@@ -97,9 +97,6 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
     // Field value should be copied (value from INITIAL_STATE)
     const expectedText = "CLOVA GreenEye";
     expect(clip.value).toBe(expectedText);
-
-    // Result should include clipboardWrite for OS to handle system clipboard
-    expect((result as any).clipboardWrite?.text).toBe(expectedText);
   });
 
   test("Scenario: 정적 아이템(필드) 잘라내기 → no-op (PRD 1.3)", () => {

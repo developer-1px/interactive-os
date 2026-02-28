@@ -158,6 +158,55 @@ export const radiogroupScript: TestScript = {
 };
 
 // ═══════════════════════════════════════════════════════════════════
+// ARIA Accordion
+// ═══════════════════════════════════════════════════════════════════
+
+export const accordionScript: TestScript = {
+    name: "Accordion — Enter/Space Expand + Arrow Nav",
+    async run(page, expect = defaultExpect) {
+        // Click first header to focus
+        await page.locator("#acc-personal").click();
+        await expect(page.locator("#acc-personal")).toBeFocused();
+
+        // Enter expands the panel
+        await page.keyboard.press("Enter");
+        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+
+        // Enter again collapses
+        await page.keyboard.press("Enter");
+        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "false");
+
+        // Space also expands
+        await page.keyboard.press(" ");
+        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+
+        // ArrowDown moves to next header
+        await page.keyboard.press("ArrowDown");
+        await expect(page.locator("#acc-billing")).toBeFocused();
+
+        // ArrowDown to last
+        await page.keyboard.press("ArrowDown");
+        await expect(page.locator("#acc-shipping")).toBeFocused();
+
+        // Boundary clamp — can't go past last
+        await page.keyboard.press("ArrowDown");
+        await expect(page.locator("#acc-shipping")).toBeFocused();
+
+        // ArrowUp back
+        await page.keyboard.press("ArrowUp");
+        await expect(page.locator("#acc-billing")).toBeFocused();
+
+        // Home → first
+        await page.keyboard.press("Home");
+        await expect(page.locator("#acc-personal")).toBeFocused();
+
+        // End → last
+        await page.keyboard.press("End");
+        await expect(page.locator("#acc-shipping")).toBeFocused();
+    },
+};
+
+// ═══════════════════════════════════════════════════════════════════
 // All scripts — convenient bundle
 // ═══════════════════════════════════════════════════════════════════
 
@@ -166,4 +215,5 @@ export const allAriaScripts: TestScript[] = [
     toolbarScript,
     gridScript,
     radiogroupScript,
+    accordionScript,
 ];

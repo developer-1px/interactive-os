@@ -92,6 +92,28 @@ describe("resolveItemKey (Item-layer keybindings)", () => {
   });
 
   // ═══════════════════════════════════════
+  // button role (W3C APG Button Pattern)
+  // ═══════════════════════════════════════
+
+  describe("button", () => {
+    it("Space → OS_ACTIVATE", () => {
+      const result = resolveItemKey("button", "Space", { itemId: "btn-1" });
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe("OS_ACTIVATE");
+    });
+
+    it("Enter → null (OS global handles Enter)", () => {
+      const result = resolveItemKey("button", "Enter", { itemId: "btn-1" });
+      expect(result).toBeNull();
+    });
+
+    it("ArrowDown → null (Zone navigation)", () => {
+      const result = resolveItemKey("button", "ArrowDown", { itemId: "btn-1" });
+      expect(result).toBeNull();
+    });
+  });
+
+  // ═══════════════════════════════════════
   // Other roles (no item-specific keys)
   // ═══════════════════════════════════════
 

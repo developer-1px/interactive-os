@@ -1,0 +1,322 @@
+/* ═══════════════════════════════════════════════════════════════
+   CursorOverlay — original design
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Container ─────────────────────────────────────────────────── */
+.testbot-cursor {
+  position: fixed;
+  z-index: 2147483647;
+  pointer-events: none;
+  width: 24px;
+  height: 24px;
+  transition:
+    left 0.1s cubic-bezier(0.25, 1, 0.5, 1),
+    top 0.1s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: left, top;
+}
+
+/* ── Cursor Geometry ──────────────────────────────────────────── */
+.testbot-cursor-svg {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.1s ease-out;
+  transform-origin: center;
+}
+
+.testbot-cursor.clicking .testbot-cursor-svg {
+  transform: scale(0.92);
+}
+
+/* ── Spotlight ────────────────────────────────────────────────── */
+.testbot-spotlight {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle,
+      rgba(0, 122, 255, 0.3) 0%,
+      rgba(0, 122, 255, 0) 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: -1;
+  mix-blend-mode: multiply;
+}
+
+/* ── Ripple Effect ────────────────────────────────────────────── */
+.testbot-ripple {
+  position: fixed;
+  z-index: 2147483645;
+  pointer-events: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 122, 255, 0.6);
+  transform: translate(-50%, -50%) scale(0.5);
+  animation: testbot-ripple-expand 0.4s ease-out forwards;
+}
+
+@keyframes testbot-ripple-expand {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* ── Key Badge (physical keycap design) ─────────────────────────── */
+.testbot-key-badge {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2147483647;
+  pointer-events: none;
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+}
+
+.testbot-key-badge.fading {
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px);
+}
+
+/* Individual keycap chip */
+.testbot-keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-bottom: 4px solid #94a3b8;
+  border-radius: 7px;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  animation: testbot-keycap-pop 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.testbot-keycap-plus {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  padding: 0 2px;
+  user-select: none;
+}
+
+@keyframes testbot-keycap-pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── Bubble Tray ──────────────────────────────────────────────── */
+.testbot-bubble-tray {
+  position: absolute;
+  left: 20px;
+  top: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.testbot-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform-origin: top left;
+  animation: testbot-bubble-fadein 0.2s ease-out forwards;
+}
+
+.testbot-bubble.variant-click {
+  color: #007aff;
+  font-weight: 600;
+}
+
+.testbot-bubble.variant-success {
+  color: #34c759;
+}
+
+.testbot-bubble.variant-error {
+  color: #ff3b30;
+}
+
+/* Keycap variant (transparent bubble, keycap chips inside) */
+.testbot-bubble.variant-key {
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 2px 0;
+  gap: 3px;
+}
+
+/* Mini keycap inside cursor bubble tray */
+.testbot-cursor-keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 20px;
+  padding: 0 5px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-bottom: 3px solid #94a3b8;
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+.testbot-cursor-keycap-plus {
+  font-size: 8px;
+  font-weight: 700;
+  color: #94a3b8;
+  padding: 0 1px;
+}
+
+.testbot-bubble.fading {
+  animation: testbot-bubble-fadeout 0.2s ease-in forwards;
+}
+
+@keyframes testbot-bubble-fadein {
+  from {
+    transform: translateY(2px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes testbot-bubble-fadeout {
+  to {
+    transform: translateY(-2px);
+    opacity: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   StampOverlay — original design
+   ═══════════════════════════════════════════════════════════════ */
+
+.testbot-stamp {
+  position: fixed;
+  z-index: 2147483640;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  border: 2px solid;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
+  transform-origin: center center;
+  animation: testbot-stamp-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  translate: -50% -50%;
+}
+
+.testbot-stamp.pass {
+  color: #1a7f37;
+  background: #dafbe1;
+  border-color: #2da44e;
+}
+
+.testbot-stamp.fail {
+  color: #d1242f;
+  background: #ffebe9;
+  border-color: #cf222e;
+  z-index: 2147483641;
+}
+
+.testbot-stamp.fading {
+  animation: testbot-stamp-fadeout 1s ease-in forwards;
+}
+
+@keyframes testbot-stamp-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rotation, -3deg));
+  }
+}
+
+@keyframes testbot-stamp-fadeout {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rotation, -3deg));
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.9) rotate(var(--rotation, -3deg));
+  }
+}
+
+/* ── Popover API reset (top layer) ───────────────────────── */
+.testbot-cursor[popover],
+.testbot-key-badge[popover] {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: visible;
+  inset: unset;
+}
+
+.testbot-stamp[popover] {
+  margin: 0;
+  background: transparent;
+  overflow: visible;
+  inset: unset;
+}

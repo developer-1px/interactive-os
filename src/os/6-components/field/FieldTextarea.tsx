@@ -9,8 +9,9 @@
  */
 
 import type { BaseCommand } from "@kernel";
+import { buildFieldConfig, validateField } from "@os/2-contexts/fieldLogic.ts";
 import { useZoneContext } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { os } from "@os/kernel.ts";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
 import {
@@ -22,7 +23,6 @@ import {
 } from "react";
 import type { ZodSchema } from "zod";
 import {
-  type FieldConfig,
   FieldRegistry,
   type FieldTrigger,
   useFieldRegistry,
@@ -86,14 +86,10 @@ export const FieldTextarea = forwardRef<
         const commitCmd = onCommitRef.current;
         if (!commitCmd) return;
 
-        if (schemaRef.current) {
-          const result = schemaRef.current.safeParse(currentValue);
-          if (!result.success) {
-            const errorMessage =
-              result.error.issues[0]?.message ?? "Validation failed";
-            FieldRegistry.setError(name, errorMessage);
-            return;
-          }
+        const validation = validateField(currentValue, schemaRef.current);
+        if (!validation.valid) {
+          FieldRegistry.setError(name, validation.error!);
+          return;
         }
 
         FieldRegistry.setError(name, null);
@@ -103,21 +99,17 @@ export const FieldTextarea = forwardRef<
       [name],
     );
 
-    // --- Registry Registration ---
+    // --- Registry Registration (pure config build) ---
     useEffect(() => {
-      const config: FieldConfig = {
+      const config = buildFieldConfig({
         name,
         mode: "immediate",
         fieldType: "block",
         trigger,
-        ...(onCommitRef.current !== undefined
-          ? { onCommit: onCommitRef.current }
-          : {}),
-        ...(schema !== undefined ? { schema } : {}),
-        ...(onCancelRef.current !== undefined
-          ? { onCancel: onCancelRef.current }
-          : {}),
-      };
+        onCommit: onCommitRef.current,
+        schema,
+        onCancel: onCancelRef.current,
+      });
 
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
@@ -185,7 +177,7 @@ export const FieldTextarea = forwardRef<
     const localValue = registryValueRef.current ?? value;
 
     return (
-      <FocusItem id={name} as="span">
+      <Item id={name} as="span">
         <textarea
           ref={setRef}
           value={localValue}
@@ -198,7 +190,7 @@ export const FieldTextarea = forwardRef<
           className={className}
           {...rest}
         />
-      </FocusItem>
+      </Item>
     );
   },
 );

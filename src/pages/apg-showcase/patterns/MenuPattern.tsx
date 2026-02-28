@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Zone } from "@/os/6-components/primitives/Zone";
-import { FocusItem } from "@/os/6-components/base/FocusItem";
+import { Item } from "@/os/6-components/primitives/Item";
 
 export function MenuPattern() {
   const [checks, setChecks] = useState<Record<string, boolean>>({
@@ -30,7 +30,7 @@ export function MenuPattern() {
         className="flex bg-gray-100 rounded-t-md border border-gray-200 border-b-0 w-64 p-1"
       >
         {["File", "Edit", "View"].map((item) => (
-          <FocusItem
+          <Item
             key={item}
             id={`mb-${item.toLowerCase()}`}
             role="menuitem"
@@ -40,7 +40,7 @@ export function MenuPattern() {
             "
           >
             {item}
-          </FocusItem>
+          </Item>
         ))}
       </Zone>
 
@@ -65,27 +65,27 @@ export function MenuPattern() {
         }}
         className="w-64 bg-white border border-gray-200 rounded-b-md shadow-md py-1"
       >
-        <FocusItem
+        <Item
           id="cmd-new"
           role="menuitem"
           className="px-4 py-1.5 text-sm hover:bg-gray-50 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none"
         >
           New Window
-        </FocusItem>
-        <FocusItem
+        </Item>
+        <Item
           id="cmd-open"
           role="menuitem"
           className="px-4 py-1.5 text-sm hover:bg-gray-50 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none"
         >
           Open File...
-        </FocusItem>
+        </Item>
 
         <div role="separator" className="my-1 border-t border-gray-100" />
 
         <div className="px-3 py-1 text-xs font-bold text-gray-400 uppercase tracking-wider">
           Show
         </div>
-        <FocusItem
+        <Item
           id="check-ruler"
           role="menuitemcheckbox"
           aria-checked={!!checks["ruler"]}
@@ -98,8 +98,8 @@ export function MenuPattern() {
           <span className="text-indigo-600 opacity-0 group-aria-checked:opacity-100">
             ✓
           </span>
-        </FocusItem>
-        <FocusItem
+        </Item>
+        <Item
           id="check-grid"
           role="menuitemcheckbox"
           aria-checked={!!checks["grid"]}
@@ -112,7 +112,7 @@ export function MenuPattern() {
           <span className="text-indigo-600 opacity-0 group-aria-checked:opacity-100">
             ✓
           </span>
-        </FocusItem>
+        </Item>
 
         <div role="separator" className="my-1 border-t border-gray-100" />
 
@@ -122,7 +122,7 @@ export function MenuPattern() {
         {["Left", "Center", "Right"].map((align) => {
           const val = align.toLowerCase();
           return (
-            <FocusItem
+            <Item
               key={val}
               id={`radio-${val}`}
               role="menuitemradio"
@@ -136,7 +136,7 @@ export function MenuPattern() {
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 opacity-0 group-aria-checked:opacity-100" />
               </div>
               <span>{align}</span>
-            </FocusItem>
+            </Item>
           );
         })}
       </Zone>

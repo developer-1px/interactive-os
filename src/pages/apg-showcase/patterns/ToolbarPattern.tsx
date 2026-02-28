@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Zone } from "@/os/6-components/primitives/Zone";
-import { FocusItem } from "@/os/6-components/base/FocusItem";
+import { Item } from "@/os/6-components/primitives/Item";
 
 export function ToolbarPattern() {
   const [activeTools, setActiveTools] = useState<Record<string, boolean>>({
@@ -32,7 +32,7 @@ export function ToolbarPattern() {
           { id: "italic", icon: "italic" as const, label: "Italic" },
           { id: "underline", icon: "underline" as const, label: "Underline" },
         ].map((tool) => (
-          <FocusItem
+          <Item
             key={tool.id}
             id={`tool-${tool.id}`}
             role="button"
@@ -51,12 +51,12 @@ export function ToolbarPattern() {
             <span className="font-bold font-serif">
               {tool.id[0]?.toUpperCase()}
             </span>
-          </FocusItem>
+          </Item>
         ))}
 
         <div className="w-px h-6 bg-gray-300 mx-1" />
 
-        <FocusItem
+        <Item
           id="btn-link"
           role="button"
           as="button"
@@ -68,9 +68,9 @@ export function ToolbarPattern() {
           "
         >
           <Icon name="link" size={16} />
-        </FocusItem>
+        </Item>
 
-        <FocusItem
+        <Item
           id="btn-image"
           role="button"
           as="button"
@@ -82,7 +82,7 @@ export function ToolbarPattern() {
           "
         >
           <Icon name="file-image" size={16} />
-        </FocusItem>
+        </Item>
       </Zone>
     </div>
   );

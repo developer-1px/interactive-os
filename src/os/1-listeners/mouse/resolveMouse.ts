@@ -60,10 +60,10 @@ export function isClickExpandable(
   role: string | null,
 ): boolean {
   if (!hasAriaExpanded) return false;
-  // treeitem & menuitem: expand is handled by click event (resolveClick + activateOnClick),
+  // treeitem, menuitem, button: expand is handled by click event (resolveClick + activateOnClick),
   // NOT by mousedown. mousedown only does focus+select for immediate visual feedback.
   // Without this guard, mousedown→expand + click→expand = double toggle = no change.
-  if (role === "treeitem" || role === "menuitem") return false;
+  if (role === "treeitem" || role === "menuitem" || role === "button") return false;
   return true;
 }
 

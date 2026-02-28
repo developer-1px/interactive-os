@@ -33,15 +33,16 @@ export const OS_ESCAPE = os.defineCommand(
 
     switch (dismissMode) {
       case "deselect": {
-        if (zone.selection.length === 0 && !zone.focusedItemId) return;
+        if (zone.selection.length === 0 && !payload?.force) return;
         return {
           state: produce(ctx.state, (draft) => {
             const z = ensureZone(draft.os, activeZoneId);
             z.selection = [];
             z.selectionAnchor = null;
-            z.focusedItemId = null;
-            // force deselect → deactivate zone (Figma pattern: ESC→Arrow no-op)
+            // Only clear focus on force deselect (zone deactivation).
+            // Normal Escape keeps focus on current item.
             if (payload?.force) {
+              z.focusedItemId = null;
               draft.os.focus.activeZoneId = null;
             }
           }) as typeof ctx.state,

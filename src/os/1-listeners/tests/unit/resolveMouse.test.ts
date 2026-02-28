@@ -116,8 +116,8 @@ describe("isClickExpandable", () => {
     expect(isClickExpandable(true, null)).toBe(true);
   });
 
-  test("aria-expanded + button role → true", () => {
-    expect(isClickExpandable(true, "button")).toBe(true);
+  test("aria-expanded + button role → false (defers to click event)", () => {
+    expect(isClickExpandable(true, "button")).toBe(false);
   });
 
   test("aria-expanded + treeitem → false (click event handles expand, not mousedown)", () => {
@@ -159,13 +159,12 @@ describe("resolveMouse", () => {
     expect(result.preventDefault).toBe(true);
   });
 
-  test("expandable button → shouldExpand true", () => {
+  test("expandable button → NO OS_ACTIVATE on mousedown (defers to click)", () => {
     const result = resolveMouse(
       baseInput({ hasAriaExpanded: true, itemRole: "button" }),
     );
-    expect(result.commands).toHaveLength(3);
-    const activateCmd = result.commands.find((c) => c.type === "OS_ACTIVATE");
-    expect(activateCmd).toBeDefined();
+    expect(result.commands).toHaveLength(2);
+    expect(result.commands.some((c) => c.type === "OS_ACTIVATE")).toBe(false);
   });
 
   test("treeitem with aria-expanded → NO OS_ACTIVATE (mousedown skips, click handles it)", () => {

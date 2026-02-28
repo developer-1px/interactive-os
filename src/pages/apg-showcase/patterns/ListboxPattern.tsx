@@ -1,6 +1,6 @@
 import { useSelection } from "@/os/5-hooks/useSelection";
 import { Zone } from "@/os/6-components/primitives/Zone";
-import { FocusItem } from "@/os/6-components/base/FocusItem";
+import { Item } from "@/os/6-components/primitives/Item";
 
 const OPTIONS = [
   "Apple",
@@ -33,7 +33,7 @@ export function ListboxPattern() {
           {OPTIONS.map((opt) => {
             const id = `s-opt-${opt}`;
             return (
-              <FocusItem
+              <Item
                 key={id}
                 id={id}
                 role="option"
@@ -45,7 +45,7 @@ export function ListboxPattern() {
                 "
               >
                 {opt}
-              </FocusItem>
+              </Item>
             );
           })}
         </Zone>
@@ -67,7 +67,7 @@ export function ListboxPattern() {
             const id = `m-opt-${opt}`;
             const selected = multiSelection.includes(id);
             return (
-              <FocusItem
+              <Item
                 key={id}
                 id={id}
                 role="option"
@@ -80,7 +80,7 @@ export function ListboxPattern() {
               >
                 <span>{opt}</span>
                 {selected && <span>✓</span>}
-              </FocusItem>
+              </Item>
             );
           })}
         </Zone>

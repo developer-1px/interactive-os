@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Zone } from "@/os/6-components/primitives/Zone";
-import { FocusItem } from "@/os/6-components/base/FocusItem";
+import { Item } from "@/os/6-components/primitives/Item";
 import { Root } from "@/os/6-components/primitives/Root";
+import { TestBotRegistry, accordionScript } from "@os/testing";
+import { AccordionPattern } from "./patterns/AccordionPattern";
 import { CompositePattern } from "./patterns/CompositePattern";
 import { GridPattern } from "./patterns/GridPattern";
 import { ListboxPattern } from "./patterns/ListboxPattern";
@@ -11,6 +13,7 @@ import { ToolbarPattern } from "./patterns/ToolbarPattern";
 import { TreePattern } from "./patterns/TreePattern";
 
 const PATTERNS: Record<string, { name: string; component: React.FC }> = {
+  accordion: { name: "Accordion", component: AccordionPattern },
   tree: { name: "Tree", component: TreePattern },
   menu: { name: "Menu", component: MenuPattern },
   grid: { name: "Grid", component: GridPattern },
@@ -20,7 +23,12 @@ const PATTERNS: Record<string, { name: string; component: React.FC }> = {
 };
 
 export default function ApgShowcasePage() {
-  const [activePattern, setActivePattern] = useState<string>("tree");
+  const [activePattern, setActivePattern] = useState<string>("accordion");
+
+  // Register APG test scripts with TestBot on mount
+  useEffect(() => {
+    return TestBotRegistry.register([accordionScript]);
+  }, []);
 
   const ActiveComponent = PATTERNS[activePattern]?.component;
 
@@ -42,7 +50,7 @@ export default function ApgShowcasePage() {
               className="flex flex-col gap-1"
             >
               {Object.entries(PATTERNS).map(([key, { name }]) => (
-                <FocusItem
+                <Item
                   key={key}
                   id={`tab-${key}`}
                   role="tab"
@@ -56,7 +64,7 @@ export default function ApgShowcasePage() {
                 "
                 >
                   {name}
-                </FocusItem>
+                </Item>
               ))}
             </Zone>
           </div>

@@ -12,7 +12,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { OS_CHECK, OS_EXPAND } from "@os/3-commands";
+import { OS_ACTIVATE, OS_CHECK, OS_EXPAND, OS_SELECT } from "@os/3-commands";
 
 // ═══════════════════════════════════════════════════════════════════
 // Item Context
@@ -57,10 +57,36 @@ const resolveCheckable: ItemKeyResolver = (key, ctx) => {
   return null;
 };
 
+/**
+ * radio / menuitemradio: Space → SELECT (W3C APG Radio Group Pattern)
+ * Checks the focused radio. In radiogroup, selection = checked state.
+ */
+const resolveRadio: ItemKeyResolver = (key, ctx) => {
+  if (key === "Space") {
+    return OS_SELECT({ mode: "replace", targetId: ctx.itemId });
+  }
+  return null;
+};
+
+/**
+ * button: Space → ACTIVATE (W3C APG Button Pattern)
+ * Enter is already handled by the OS global keybinding.
+ * Space must also activate — accordion headers, disclosure triggers, etc.
+ */
+const resolveButton: ItemKeyResolver = (key) => {
+  if (key === "Space") {
+    return OS_ACTIVATE();
+  }
+  return null;
+};
+
 const ITEM_RESOLVERS: Record<string, ItemKeyResolver> = {
   treeitem: resolveTreeItem,
   checkbox: resolveCheckable,
   switch: resolveCheckable,
+  radio: resolveRadio,
+  menuitemradio: resolveRadio,
+  button: resolveButton,
 };
 
 // ═══════════════════════════════════════════════════════════════════

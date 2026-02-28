@@ -8,12 +8,12 @@ interface TestBoxProps {
 }
 
 export function TestBox({ title, children, description, spec }: TestBoxProps) {
-  const [showDocs, setShowDocs] = useState(true);
+  const [showDocs, setShowDocs] = useState(false);
 
   return (
     <div className="border rounded-lg overflow-hidden flex flex-col bg-white shadow-sm border-gray-200">
       {/* Header */}
-      <div className="bg-gray-50 p-2 flex items-center justify-between border-b border-gray-100">
+      <div className="bg-gray-50 px-2 py-1.5 flex items-center justify-between border-b border-gray-100">
         <div className="flex items-center gap-2">
           <h3 className="font-bold text-xs text-gray-700 uppercase tracking-wider">
             {title}
@@ -28,11 +28,10 @@ export function TestBox({ title, children, description, spec }: TestBoxProps) {
           <button
             type="button"
             onClick={() => setShowDocs(!showDocs)}
-            className={`text-[10px] px-2 py-0.5 rounded border ${
-              showDocs
-                ? "text-gray-700 border-gray-300 bg-gray-100"
-                : "border-transparent text-gray-400"
-            }`}
+            className={`text-[10px] px-2 py-0.5 rounded border ${showDocs
+              ? "text-gray-700 border-gray-300 bg-gray-100"
+              : "border-transparent text-gray-400"
+              }`}
           >
             Docs
           </button>
@@ -41,13 +40,13 @@ export function TestBox({ title, children, description, spec }: TestBoxProps) {
 
       {/* Documentation / Description */}
       {showDocs && description && (
-        <div className="px-4 py-3 bg-gray-50/80 border-b border-gray-100 text-gray-600 text-xs leading-relaxed">
+        <div className="px-3 py-2 bg-gray-50/80 border-b border-gray-100 text-gray-600 text-xs leading-relaxed">
           {description}
         </div>
       )}
 
       {/* Test Content */}
-      <div className="p-4 bg-white relative flex-1 min-h-[120px]">
+      <div className="p-3 bg-white relative flex-1 min-h-[80px]">
         {children}
       </div>
     </div>
@@ -56,7 +55,10 @@ export function TestBox({ title, children, description, spec }: TestBoxProps) {
 
 export function TestGrid({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    <div
+      className="gap-3 p-3"
+      style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}
+    >
       {children}
     </div>
   );

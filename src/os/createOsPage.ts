@@ -512,7 +512,25 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
       };
     },
     cleanup,
-    dumpDiagnostics() { /* no-op placeholder */ },
+    dumpDiagnostics() {
+      const txs = kernel.inspector.getTransactions();
+      if (txs.length === 0) {
+        console.log("[diagnostics] No transactions recorded.");
+        return;
+      }
+      console.log(`[diagnostics] ${txs.length} transaction(s):`);
+      for (const tx of txs) {
+        const scope = tx.bubblePath?.join(" → ") ?? "unknown";
+        console.log(
+          `  [${tx.id}] ${tx.command.type} | scope: ${scope} | handler: ${tx.handlerScope}`,
+        );
+        if (tx.changes && tx.changes.length > 0) {
+          for (const change of tx.changes) {
+            console.log(`    Δ ${change.path}: ${JSON.stringify(change.from)} → ${JSON.stringify(change.to)}`);
+          }
+        }
+      }
+    },
 
     // OS-specific
     setItems,

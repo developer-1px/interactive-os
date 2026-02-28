@@ -1,68 +1,53 @@
+import { useEffect } from "react";
 import { InspectorStore } from "@inspector/stores/InspectorStore";
+import { TestBotRegistry } from "@os/testing";
+import { focusShowcaseScripts } from "./focusScripts";
 import { TestGrid } from "../shared/TestLayout";
 import { ActivateTest } from "./tests/ActivateTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";
 import { AriaInteractionTest } from "./tests/AriaInteractionTest";
 import { AutofocusTest } from "./tests/AutofocusTest";
+import { DisabledTest } from "./tests/DisabledTest";
 import { DismissTest } from "./tests/DismissTest";
 import { ExpandTest } from "./tests/ExpandTest";
-
 import { FocusStackTest } from "./tests/FocusStackTest";
 import { NavigateTest } from "./tests/NavigateTest";
+import { RadiogroupTest } from "./tests/RadiogroupTest";
 import { SelectTest } from "./tests/SelectTest";
 import { TabTest } from "./tests/TabTest";
+import { TablistTest } from "./tests/TablistTest";
+import { TypeaheadTest } from "./tests/TypeaheadTest";
 
-// ═══════════════════════════════════════════════════════════════════
-// Section Header — groups related test boxes visually
-// ═══════════════════════════════════════════════════════════════════
-function SectionHeader({
-  spec,
-  title,
-  count,
-}: {
-  spec: string;
-  title: string;
-  count: number;
-}) {
-  return (
-    <div className="col-span-full flex items-center gap-3 pt-2">
-      <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200">
-        {spec}
-      </span>
-      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-        {title}
-      </span>
-      <span className="text-[10px] text-gray-400">
-        {count} {count === 1 ? "test box" : "test boxes"}
-      </span>
-      <div className="flex-1 h-px bg-gray-200" />
-    </div>
-  );
-}
 
 export function FocusShowcasePage() {
+  // Register focus-showcase scripts with TestBot on mount
+  useEffect(() => {
+    return TestBotRegistry.register(focusShowcaseScripts);
+  }, []);
+
   const runAllTests = () => {
     InspectorStore.setOpen(true);
     InspectorStore.setPanelExpanded(true);
+    InspectorStore.setActiveTab("TESTBOT");
   };
 
+
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 p-4">
-      <header className="mb-2 px-4 flex items-center justify-between">
+    <div className="min-h-screen text-gray-900 p-2">
+      <header className="mb-1 px-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Focus Strategy Audit
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            SPEC §3–§9 coverage · 29 E2E tests · Ordered by specification
-            section
+            Full APG coverage · Ordered by specification section
           </p>
         </div>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={runAllTests}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40"
           >
             ▶ Run All Tests
           </button>
@@ -70,34 +55,33 @@ export function FocusShowcasePage() {
       </header>
 
       <TestGrid>
-        {/* ═══ §3.2 Entry & Navigate ═══ */}
-        <SectionHeader spec="§3.2" title="Entry & Navigation" count={2} />
+        {/* §3.2 Entry & Navigate */}
         <AutofocusTest />
         <NavigateTest />
+        <TypeaheadTest />
+        <DisabledTest />
 
-        {/* ═══ §3.4 Selection ═══ */}
-        <SectionHeader spec="§3.4" title="Selection" count={1} />
-        <SelectTest />
-
-        {/* ═══ §3.3 Tab ═══ */}
-        <SectionHeader spec="§3.3" title="Tab Behavior" count={1} />
+        {/* §3.3 Tab */}
         <TabTest />
 
-        {/* ═══ §3.5 Interaction ═══ */}
-        <SectionHeader spec="§3.5" title="Interaction" count={2} />
+        {/* §3.4 Selection */}
+        <SelectTest />
+        <RadiogroupTest />
+
+        {/* §3.5 Interaction */}
         <ActivateTest />
         <DismissTest />
 
-        {/* ═══ §3.7 Expand ═══ */}
-        <SectionHeader spec="§3.7" title="Expand / Collapse" count={1} />
+        {/* §3.6 Tablist */}
+        <TablistTest />
+
+        {/* §3.7 Expand */}
         <ExpandTest />
 
-        {/* ═══ §3.1 Focus Stack ═══ */}
-        <SectionHeader spec="§3.1" title="Focus Stack" count={1} />
+        {/* §3.1 Focus Stack */}
         <FocusStackTest />
 
-        {/* ═══ §9 ARIA Verification ═══ */}
-        <SectionHeader spec="§9" title="ARIA Verification" count={2} />
+        {/* §9 ARIA Verification */}
         <AriaFacadeTest />
         <AriaInteractionTest />
       </TestGrid>

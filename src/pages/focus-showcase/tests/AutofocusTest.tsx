@@ -1,5 +1,5 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function AutofocusTest() {
@@ -53,14 +53,14 @@ export function AutofocusTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Auto 1", "Auto 2"].map((item) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`af-auto-${item.split(" ")[1]}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-fuchsia-100 aria-[current=true]:text-fuchsia-700 text-sm border border-transparent aria-[current=true]:border-fuchsia-300"
               >
                 {item}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </div>
@@ -77,14 +77,14 @@ export function AutofocusTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Memory 1", "Memory 2", "Memory 3"].map((item) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`af-restore-${item.split(" ")[1]}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-teal-100 aria-[current=true]:text-teal-700 text-sm border border-transparent aria-[current=true]:border-teal-300"
               >
                 {item}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
           <div className="text-[10px] text-gray-500">
@@ -104,14 +104,14 @@ export function AutofocusTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Top", "Middle", "Bottom"].map((item) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`af-last-${item.toLowerCase()}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-orange-100 aria-[current=true]:text-orange-700 text-sm border border-transparent aria-[current=true]:border-orange-300"
               >
                 {item}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
           <div className="text-[10px] text-gray-500">

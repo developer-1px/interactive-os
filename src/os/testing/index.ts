@@ -17,6 +17,8 @@
 
 export type { Page, Locator, LocatorAssertions } from "./types";
 export { createHeadlessPage, type HeadlessPage } from "./createHeadlessPage";
-export { createBrowserPage, type BrowserPage, type BrowserPageOptions, type BrowserStep } from "./createBrowserPage";
+export { createBrowserPage, resetFocusState, type BrowserPage, type BrowserPageOptions, type BrowserStep } from "./createBrowserPage";
 export { expect } from "./expect";
-export { type TestScript, allAriaScripts, listboxScript, toolbarScript, gridScript, radiogroupScript } from "./scripts";
+export { type TestScript, allAriaScripts, listboxScript, toolbarScript, gridScript, radiogroupScript, accordionScript } from "./scripts";
+export { TestBotRegistry } from "./TestBotRegistry";
+

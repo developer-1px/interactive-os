@@ -1,140 +1,180 @@
+/**
+ * Item — DOM Adapter.
+ *
+ * computeItem() is the Single Source of Truth (headless.ts).
+ * This component only does what requires a DOM:
+ *   ① useComputed bitmask — trigger React re-render
+ *   ② computeItem() — get attrs + state from headless
+ *   ③ .focus() — DOM API
+ *   ④ Render — JSX
+ */
+
+import { computeItem, type ItemState } from "@os/headless/compute";
 import { os } from "@os/kernel.ts";
-import { useZoneContext } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import {
   cloneElement,
-  createContext,
   forwardRef,
   isValidElement,
+  type ReactElement,
   type ReactNode,
-
+  useLayoutEffect,
   useMemo,
+  useRef,
 } from "react";
+import { DEFAULT_CONFIG } from "../../schemas";
+import { useZoneContext } from "./Zone.tsx";
+
+// Re-export for consumers
+export type { ItemState } from "@os/headless/compute";
 
 // ═══════════════════════════════════════════════════════════════════
-// ItemContext — parent Item identity for compound sub-components
+// Props — what the DOM consumer provides
 // ═══════════════════════════════════════════════════════════════════
-
-interface ItemContextValue {
-  zoneId: string;
-  itemId: string;
-}
-
-const ItemContext = createContext<ItemContextValue | null>(null);
-
-
-
-// --- Types ---
-interface ItemState {
-  isFocused: boolean;
-  isSelected: boolean;
-  isExpanded: boolean;
-  isAnchor?: boolean;
-}
 
 export interface ItemProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "id" | "children"> {
+  extends Omit<
+    React.HTMLAttributes<HTMLElement>,
+    "id" | "children" | "className" | "style" | "role"
+  > {
   id: string | number;
-
-  // Data Binding
-  payload?: unknown;
-  index?: number;
-
-  // Visuals (Polymorphic)
+  disabled?: boolean;
   children: ReactNode | ((state: ItemState) => ReactNode);
-  asChild?: boolean;
   className?: string;
-
-  // Overrides
+  style?: React.CSSProperties;
+  as?: "div" | "li" | "button" | "a" | "span";
+  asChild?: boolean;
+  role?: string;
+  onActivate?: import("@kernel").BaseCommand | undefined;
   selected?: boolean;
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// Ref utils
+// ═══════════════════════════════════════════════════════════════════
+
+function setRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
+  if (typeof ref === "function") {
+    ref(value);
+  } else if (ref !== null && ref !== undefined) {
+    (ref as React.MutableRefObject<T | null>).current = value;
+  }
+}
+
+function composeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
+  return (node: T | null) => refs.forEach((r) => setRef(r, node));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Component — DOM-only adapter
+// ═══════════════════════════════════════════════════════════════════
+
 const ItemBase = forwardRef<HTMLElement, ItemProps>(
-  (
+  function Item(
     {
       id,
+      disabled,
+      selected,
+      role,
       children,
-      asChild,
       className,
-      payload,
-      index = 0,
-      selected = false,
+      style,
+      as: Element = "div",
+      asChild = false,
+      onActivate,
       ...rest
     },
     ref,
-  ) => {
+  ) {
     const stringId = String(id);
+    const ctx = useZoneContext();
+    if (!ctx) throw new Error("Item must be used within a Zone");
+    const { zoneId, config = DEFAULT_CONFIG } = ctx;
 
-    // --- Context Access ---
-    const context = useZoneContext();
-    const zoneId = context?.zoneId || "unknown";
+    // ① Re-render trigger (bitmask → primitive → stable ===)
+    os.useComputed((s) => {
+      const z = s.os.focus.zones[zoneId];
+      return (
+        (z?.focusedItemId === stringId ? 1 : 0) |
+        (s.os.focus.activeZoneId === zoneId ? 2 : 0) |
+        (z?.selection.includes(stringId) ? 4 : 0) |
+        (z?.expandedItems.includes(stringId) ? 8 : 0)
+      );
+    });
 
-    // --- State (Kernel Direct) ---
-    // Subscribe to booleans, not raw IDs — avoids re-render of all items
-    // when focus moves from one item to another.
-    const isFocused = os.useComputed(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (s: any) => (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === stringId,
+    // ② Single Source of Truth
+    const { attrs, state } = computeItem(os, stringId, zoneId, {
+      disabled,
+      selected,
+      role,
+    });
+
+    // ③ DOM focus effect
+    const internalRef = useRef<HTMLElement>(null);
+    useLayoutEffect(() => {
+      if (config.project.virtualFocus) return;
+      if (state.isActiveFocused && internalRef.current) {
+        if (document.activeElement !== internalRef.current) {
+          internalRef.current.focus({ preventScroll: true });
+        }
+      }
+    }, [state.isActiveFocused, config.project.virtualFocus]);
+
+    // ④ Render
+    const resolved: ReactNode =
+      typeof children === "function" ? children(state) : children;
+
+    const domProps = {
+      ...attrs,
+      className: className || undefined,
+      style: style || undefined,
+      ...rest,
+    };
+
+    // asChild / auto-asChild
+    const childEl =
+      asChild && isValidElement(resolved)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? (resolved as ReactElement<any>)
+        : null;
+
+    const autoAsChild =
+      !asChild &&
+      typeof children === "function" &&
+      isValidElement(resolved) &&
+      typeof resolved.type === "string";
+
+    const mergeEl = childEl
+      ? childEl
+      : autoAsChild
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? (resolved as ReactElement<any>)
+        : null;
+
+    const combinedRef = useMemo(
+      () =>
+        composeRefs(
+          ref,
+          internalRef,
+          (mergeEl as ReactElement & { ref?: React.Ref<HTMLElement> })?.ref,
+        ),
+      [ref, mergeEl],
     );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const isActive = os.useComputed((s: any) => s.os.focus.activeZoneId === zoneId);
 
-    // Selection from kernel state
-    const isStoreSelected = os.useComputed(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (s: any) => s.os.focus.zones[zoneId]?.selection.includes(stringId) ?? false,
-    );
-
-    // Expanded from kernel state
-    const isExpanded = os.useComputed(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (s: any) =>
-        s.os.focus.zones[zoneId]?.expandedItems.includes(stringId) ?? false,
-    );
-
-    // Anchor: focused but zone is inactive (retained focus)
-    const isAnchor = isFocused && !isActive;
-
-    // Combined selection: prop OR store
-    const isSelected = selected || isStoreSelected;
-
-    // State for Render Props
-    // isFocused is always true when this item is the zone's focused item,
-    // regardless of whether the zone is active. Use isAnchor to distinguish.
-    const itemState: ItemState = useMemo(
-      () => ({
-        isFocused,
-        isSelected,
-        isExpanded,
-        isAnchor,
-      }),
-      [isFocused, isSelected, isExpanded, isAnchor],
-    );
-
-    // Resolve Children
-    const resolvedChildren: ReactNode =
-      typeof children === "function" ? children(itemState) : children;
+    if (mergeEl) {
+      return cloneElement(mergeEl, {
+        ...domProps,
+        ref: combinedRef,
+        className: [mergeEl.props.className, className]
+          .filter(Boolean)
+          .join(" ") || undefined,
+        style: { ...mergeEl.props.style, ...style },
+      });
+    }
 
     return (
-      <ItemContext.Provider value={{ zoneId, itemId: stringId }}>
-        <FocusItem
-          id={stringId}
-          ref={ref}
-          asChild={
-            asChild ||
-            (typeof children === "function" &&
-              isValidElement(resolvedChildren) &&
-              typeof resolvedChildren.type === "string")
-          }
-          {...(className !== undefined ? { className } : {})}
-          data-selected={isSelected ? "true" : undefined}
-          _isFocusedHint={isFocused}
-          _isActiveHint={isActive}
-          {...(rest as any)}
-        >
-          {resolvedChildren}
-        </FocusItem>
-      </ItemContext.Provider>
+      <Element ref={combinedRef} {...domProps}>
+        {resolved}
+      </Element>
     );
   },
 );
@@ -142,38 +182,28 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(
 ItemBase.displayName = "Item";
 
 // ═══════════════════════════════════════════════════════════════════
-// Item.ExpandTrigger — sub-region click toggles parent Item's expand state
-// Use case: arrow icon click ≠ label click (e.g. file manager tree)
-// DocsSidebar uses whole-item click (OS_ACTIVATE → OS_EXPAND) instead.
+// Sub-components
 // ═══════════════════════════════════════════════════════════════════
-
-interface ExpandTriggerProps {
-  children: ReactNode;
-  asChild?: boolean;
-  className?: string;
-}
 
 function ItemExpandTrigger({
   children,
   asChild,
   className,
-}: ExpandTriggerProps) {
-
-
-  // PointerListener handles click → OS_EXPAND via data-expand-trigger attribute.
-  // No React onClick needed.
-
+}: {
+  children: ReactNode;
+  asChild?: boolean;
+  className?: string;
+}) {
   if (asChild && isValidElement(children)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const child = children as React.ReactElement<any>;
-    const mergedProps = {
+    return cloneElement(child, {
       "data-expand-trigger": true,
       className:
         [child.props.className, className].filter(Boolean).join(" ") ||
         undefined,
-    };
-    return cloneElement(child, mergedProps);
+    });
   }
-
   return (
     <div data-expand-trigger className={className}>
       {children}
@@ -181,23 +211,17 @@ function ItemExpandTrigger({
   );
 }
 
-ItemExpandTrigger.displayName = "Item.ExpandTrigger";
-
-// ═══════════════════════════════════════════════════════════════════
-// Item.CheckTrigger — PointerListener dispatches OS_CHECK for parent Item
-// ═══════════════════════════════════════════════════════════════════
-
-interface CheckTriggerProps {
+function ItemCheckTrigger({
+  children,
+  asChild,
+  className,
+}: {
   children: ReactNode;
   asChild?: boolean;
   className?: string;
-}
-
-function ItemCheckTrigger({ children, asChild, className }: CheckTriggerProps) {
-  // PointerListener handles click → OS_CHECK via data-check-trigger attribute.
-  // No React onClick needed.
-
+}) {
   if (asChild && isValidElement(children)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const child = children as React.ReactElement<any>;
     return cloneElement(child, {
       "data-check-trigger": true,
@@ -206,15 +230,12 @@ function ItemCheckTrigger({ children, asChild, className }: CheckTriggerProps) {
         undefined,
     });
   }
-
   return (
     <div data-check-trigger className={className}>
       {children}
     </div>
   );
 }
-
-ItemCheckTrigger.displayName = "Item.CheckTrigger";
 
 // ═══════════════════════════════════════════════════════════════════
 // Namespace merge

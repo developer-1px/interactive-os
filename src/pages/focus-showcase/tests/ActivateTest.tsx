@@ -1,5 +1,5 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function ActivateTest() {
@@ -41,14 +41,14 @@ export function ActivateTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Preview A", "Preview B"].map((item) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`act-auto-${item.split(" ")[1]?.toLowerCase()}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-rose-100 aria-[current=true]:text-rose-700 text-sm border border-transparent aria-[current=true]:border-rose-300"
               >
                 {item}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
           <div className="text-[10px] text-gray-500">
@@ -68,14 +68,14 @@ export function ActivateTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["File 1", "File 2"].map((item) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`act-manual-${item.split(" ")[1]}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-blue-100 aria-[current=true]:text-blue-700 text-sm border border-transparent aria-[current=true]:border-blue-300"
               >
                 {item}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
           <div className="text-[10px] text-gray-500">

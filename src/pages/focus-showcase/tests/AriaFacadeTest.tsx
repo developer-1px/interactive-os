@@ -1,5 +1,5 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function AriaFacadeTest() {
@@ -45,7 +45,7 @@ export function AriaFacadeTest() {
               options={{ navigate: { orientation: "horizontal" } }}
               className="flex bg-gray-50 border-b border-gray-200"
             >
-              <FocusItem
+              <Item
                 id="aria-tab-1"
                 role="tab"
                 aria-selected="true"
@@ -53,8 +53,8 @@ export function AriaFacadeTest() {
                 className="px-4 py-2 text-sm font-medium text-gray-700 border-b-2 border-blue-500 bg-white"
               >
                 Account
-              </FocusItem>
-              <FocusItem
+              </Item>
+              <Item
                 id="aria-tab-2"
                 role="tab"
                 aria-selected="false"
@@ -62,8 +62,8 @@ export function AriaFacadeTest() {
                 className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 aria-[current=true]:bg-gray-100"
               >
                 Password
-              </FocusItem>
-              <FocusItem
+              </Item>
+              <Item
                 id="aria-tab-3"
                 role="tab"
                 aria-selected="false"
@@ -71,7 +71,7 @@ export function AriaFacadeTest() {
                 className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 aria-[current=true]:bg-gray-100"
               >
                 Billing
-              </FocusItem>
+              </Item>
             </Zone>
             <div className="p-4 bg-white">
               <div
@@ -108,7 +108,7 @@ export function AriaFacadeTest() {
                 const suffix = ["a", "b", "c"][i];
                 const isChecked = i === 1; // Simulate 'Direct messages only' as checked
                 return (
-                  <FocusItem
+                  <Item
                     key={suffix}
                     id={`aria-radio-${suffix}`}
                     role="radio"
@@ -123,7 +123,7 @@ export function AriaFacadeTest() {
                       )}
                     </div>
                     <span className="text-sm text-gray-700">{opt}</span>
-                  </FocusItem>
+                  </Item>
                 );
               },
             )}
@@ -147,7 +147,7 @@ export function AriaFacadeTest() {
               { name: "Arlene Mccoy", role: "Member" },
               { name: "Devon Webb", role: "Guest" },
             ].map((user, i) => (
-              <FocusItem
+              <Item
                 key={user.name}
                 id={`aria-user-${i}`}
                 role="option"
@@ -155,7 +155,7 @@ export function AriaFacadeTest() {
               >
                 <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-xs text-gray-500">{user.role}</span>
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </div>

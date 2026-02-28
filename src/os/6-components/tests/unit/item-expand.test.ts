@@ -67,8 +67,8 @@ describe("Tree Expand: mousedown vs click", () => {
     expect(result.commands).toHaveLength(0);
   });
 
-  it("button role treeitem difference — button expands on mousedown", () => {
-    expect(isClickExpandable(true, "button")).toBe(true);
+  it("button/treeitem/menuitem — all defer expand to click event, not mousedown", () => {
+    expect(isClickExpandable(true, "button")).toBe(false);
     expect(isClickExpandable(true, "treeitem")).toBe(false);
     expect(isClickExpandable(true, "menuitem")).toBe(false);
   });

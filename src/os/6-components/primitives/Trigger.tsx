@@ -18,7 +18,7 @@ import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
 } from "@os/3-commands/overlay/overlay";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { Zone } from "@os/6-components/primitives/Zone";
 import { os } from "@os/kernel.ts";
 import type { OverlayEntry } from "@os/state/OSState.ts";
@@ -116,7 +116,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       [externalOverlayId],
     );
 
-    // Overlay open command — registered as onActivate on FocusItem
+    // Overlay open command — registered as onActivate on Item
     // so headless simulateClick → OS_ACTIVATE → onActivate → OS_OVERLAY_OPEN
     const overlayOpenCmd =
       overlayRole && overlayId
@@ -128,8 +128,8 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         e.stopPropagation();
       }
 
-      // When Trigger has an id → FocusItem → PointerListener → OS_ACTIVATE → onActivate
-      // When Trigger has NO id → no FocusItem → must dispatch overlay open directly
+      // When Trigger has an id → Item → PointerListener → OS_ACTIVATE → onActivate
+      // When Trigger has NO id → no Item → must dispatch overlay open directly
       if (!id && overlayOpenCmd) {
         os.dispatch(overlayOpenCmd);
       }
@@ -178,7 +178,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       ) : null;
 
     // ── Merge into child element ──────────────────────────────────
-    // Trigger *is* a FocusItem if an ID is provided.
+    // Trigger *is* a Item if an ID is provided.
     // When overlay role is set, register OS_OVERLAY_OPEN as onActivate
     // → headless simulateClick → OS_ACTIVATE → onActivate → overlay opens
     if (id) {
@@ -186,7 +186,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       const activateCmd = overlayOpenCmd ?? onActivate ?? undefined;
       return (
         <>
-          <FocusItem
+          <Item
             id={id}
             asChild={true}
             ref={ref}
@@ -199,7 +199,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
             ) : (
               <span>{triggerContent}</span>
             )}
-          </FocusItem>
+          </Item>
           {portalWithContext}
         </>
       );
@@ -400,7 +400,7 @@ function TriggerDismiss({
 
   const itemId = id ?? `${overlayCtx?.overlayId ?? "dialog"}-dismiss`;
 
-  // Build the dismiss command for FocusItem → ZoneRegistry → OS_ACTIVATE(Enter)
+  // Build the dismiss command for Item → ZoneRegistry → OS_ACTIVATE(Enter)
   // When overlay exists, Enter should close it (same as click).
   const dismissCmd = overlayCtx
     ? OS_OVERLAY_CLOSE({ id: overlayCtx.overlayId })
@@ -409,7 +409,7 @@ function TriggerDismiss({
   const activateCmd = onActivate ?? dismissCmd;
 
   return (
-    <FocusItem id={itemId} asChild onActivate={activateCmd}>
+    <Item id={itemId} asChild onActivate={activateCmd}>
       <button
         type="button"
         onClick={handleClick}
@@ -418,7 +418,7 @@ function TriggerDismiss({
       >
         {children}
       </button>
-    </FocusItem>
+    </Item>
   );
 }
 

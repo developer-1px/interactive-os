@@ -115,9 +115,10 @@ describe("TreePattern (APG Showcase) - E2E", () => {
       await new Promise((r) => setTimeout(r, 50));
     });
 
-    // Shift+click on docs
+    // Shift+pointer on docs — full pointer sequence
     await act(async () => {
-      fireEvent.mouseDown(docsNode, { shiftKey: true });
+      fireEvent.pointerDown(docsNode, { shiftKey: true, clientX: 100, clientY: 100 });
+      fireEvent.pointerUp(docsNode, { shiftKey: true, clientX: 100, clientY: 100 });
       await new Promise((r) => setTimeout(r, 50));
     });
 

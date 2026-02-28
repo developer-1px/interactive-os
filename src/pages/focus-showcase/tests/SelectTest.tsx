@@ -1,5 +1,5 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function SelectTest() {
@@ -59,14 +59,14 @@ export function SelectTest() {
             className="grid grid-cols-4 bg-gray-50 p-2 rounded border border-gray-200 gap-2"
           >
             {Array.from({ length: 4 }, (_, i) => (
-              <FocusItem
+              <Item
                 key={i}
                 id={`sel-range-${i}`}
                 role="gridcell"
                 className="aspect-square flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 aria-[selected=true]:bg-emerald-100 aria-[selected=true]:text-emerald-700 aria-[selected=true]:ring-1 ring-emerald-400 data-[focused=true]:ring-2 data-[focused=true]:ring-blue-500 data-[focused=true]:ring-offset-1 data-[focused=true]:z-10 text-xs cursor-pointer"
               >
                 {i}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
           <div className="text-[10px] text-gray-500">
@@ -86,14 +86,14 @@ export function SelectTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Option 1", "Option 2"].map((opt, i) => (
-              <FocusItem
+              <Item
                 key={opt}
                 id={`sel-toggle-${i}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[selected=true]:bg-amber-100 aria-[selected=true]:text-amber-700 data-[focused=true]:ring-2 data-[focused=true]:ring-blue-500 data-[focused=true]:ring-inset text-sm border border-transparent aria-[selected=true]:border-amber-300"
               >
                 {opt}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </div>
@@ -110,7 +110,7 @@ export function SelectTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["A", "B"].map((opt) => (
-              <FocusItem
+              <Item
                 key={opt}
                 id={`sel-radio-${opt.toLowerCase()}`}
                 role="radio"
@@ -122,7 +122,7 @@ export function SelectTest() {
                 <span className="text-sm text-gray-600 group-aria-[selected=true]:text-rose-600">
                   {opt}
                 </span>
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </div>

@@ -10,7 +10,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import {
     createBrowserPage,
     expect,
@@ -182,9 +182,9 @@ export function TestBotPoc() {
                                 { id: "lb-date", label: "🌴 Date" },
                                 { id: "lb-elderberry", label: "🫐 Elderberry" },
                             ].map((item) => (
-                                <FocusItem key={item.id} id={item.id} className={ITEM_CLS}>
+                                <Item key={item.id} id={item.id} className={ITEM_CLS}>
                                     {item.label}
-                                </FocusItem>
+                                </Item>
                             ))}
                         </Zone>
                     </div>
@@ -207,9 +207,9 @@ export function TestBotPoc() {
                                 { id: "tb-underline", label: "U" },
                                 { id: "tb-link", label: "🔗" },
                             ].map((item) => (
-                                <FocusItem key={item.id} id={item.id} className={TOOL_CLS}>
+                                <Item key={item.id} id={item.id} className={TOOL_CLS}>
                                     {item.label}
-                                </FocusItem>
+                                </Item>
                             ))}
                         </Zone>
                     </div>
@@ -230,9 +230,9 @@ export function TestBotPoc() {
                             className="grid grid-cols-4 gap-2"
                         >
                             {Array.from({ length: 4 }, (_, i) => (
-                                <FocusItem key={i} id={`gr-cell-${i}`} role="gridcell" className={CELL_CLS}>
+                                <Item key={i} id={`gr-cell-${i}`} role="gridcell" className={CELL_CLS}>
                                     {i}
-                                </FocusItem>
+                                </Item>
                             ))}
                         </Zone>
                         <p className="text-[10px] text-slate-600 mt-2">⌘+Click toggle · Shift+Click range</p>
@@ -258,9 +258,9 @@ export function TestBotPoc() {
                                 { id: "rg-md", label: "Medium" },
                                 { id: "rg-lg", label: "Large" },
                             ].map((item) => (
-                                <FocusItem key={item.id} id={item.id} className={RADIO_CLS}>
+                                <Item key={item.id} id={item.id} className={RADIO_CLS}>
                                     {item.label}
-                                </FocusItem>
+                                </Item>
                             ))}
                         </Zone>
                     </div>

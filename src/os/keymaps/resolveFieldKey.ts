@@ -12,6 +12,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
+import { OS_FIELD_CANCEL } from "@os/3-commands/field/cancel";
 import { OS_FIELD_COMMIT } from "@os/3-commands/field/commit";
 import {
   FieldRegistry,
@@ -37,23 +38,23 @@ type FieldKeymap = Record<string, () => BaseCommand>;
 
 const INLINE_KEYMAP: FieldKeymap = {
   Enter: () => OS_FIELD_COMMIT(),
-  Escape: () => OS_FIELD_COMMIT(),
+  Escape: () => OS_FIELD_CANCEL(),
 };
 
 const TOKENS_KEYMAP: FieldKeymap = {
   Enter: () => OS_FIELD_COMMIT(),
-  Escape: () => OS_FIELD_COMMIT(),
+  Escape: () => OS_FIELD_CANCEL(),
 };
 
 const BLOCK_KEYMAP: FieldKeymap = {
   // Enter → NOT here (field owns = newline)
-  Escape: () => OS_FIELD_COMMIT(),
+  Escape: () => OS_FIELD_CANCEL(),
 };
 
 const EDITOR_KEYMAP: FieldKeymap = {
   // Enter → NOT here (field owns = newline)
   // Tab → NOT here (field owns = indent)
-  Escape: () => OS_FIELD_COMMIT(),
+  Escape: () => OS_FIELD_CANCEL(),
 };
 
 const FIELD_KEYMAPS: Record<FieldType, FieldKeymap> = {

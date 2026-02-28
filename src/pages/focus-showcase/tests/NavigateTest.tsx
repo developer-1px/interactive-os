@@ -1,5 +1,5 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function NavigateTest() {
@@ -49,14 +49,14 @@ export function NavigateTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Apple", "Banana", "Cherry"].map((fruit) => (
-              <FocusItem
+              <Item
                 key={fruit}
                 id={`nav-${fruit.toLowerCase()}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-blue-100 aria-[current=true]:text-blue-700 aria-[current=true]:border-l-2 border-blue-500 text-sm border-l-2 border-transparent"
               >
                 {fruit}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </div>
@@ -73,14 +73,14 @@ export function NavigateTest() {
             className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Bold", "Italic", "Underline"].map((action) => (
-              <FocusItem
+              <Item
                 key={action}
                 id={`nav-${action.toLowerCase()}`}
                 role="button"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-purple-100 aria-[current=true]:text-purple-700 text-sm border border-transparent aria-[current=true]:border-purple-300"
               >
                 {action[0]}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </div>
@@ -97,14 +97,14 @@ export function NavigateTest() {
             className="grid grid-cols-3 bg-gray-50 p-2 rounded border border-gray-200 gap-2"
           >
             {Array.from({ length: 9 }, (_, i) => (
-              <FocusItem
+              <Item
                 key={i}
                 id={`nav-cell-${i}`}
                 role="gridcell"
                 className="aspect-square flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 aria-[current=true]:bg-emerald-100 aria-[current=true]:text-emerald-700 aria-[current=true]:ring-1 ring-emerald-400 text-xs cursor-pointer"
               >
                 {i}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </div>
@@ -122,14 +122,14 @@ export function NavigateTest() {
               className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1"
             >
               {["A1", "A2"].map((item) => (
-                <FocusItem
+                <Item
                   key={item}
                   id={`nav-sm-${item.toLowerCase()}`}
                   role="button"
                   className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-rose-100 aria-[current=true]:text-rose-700 text-sm border border-transparent aria-[current=true]:border-rose-300"
                 >
                   {item}
-                </FocusItem>
+                </Item>
               ))}
             </Zone>
             <Zone
@@ -139,14 +139,14 @@ export function NavigateTest() {
               className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1"
             >
               {["B1", "B2"].map((item) => (
-                <FocusItem
+                <Item
                   key={item}
                   id={`nav-sm-${item.toLowerCase()}`}
                   role="button"
                   className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-cyan-100 aria-[current=true]:text-cyan-700 text-sm border border-transparent aria-[current=true]:border-cyan-300"
                 >
                   {item}
-                </FocusItem>
+                </Item>
               ))}
             </Zone>
           </div>

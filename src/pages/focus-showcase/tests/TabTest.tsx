@@ -1,5 +1,5 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function TabTest() {
@@ -49,14 +49,14 @@ export function TabTest() {
               className="flex flex-col gap-1 w-32"
             >
               {["Option A", "Option B", "Option C"].map((item, i) => (
-                <FocusItem
+                <Item
                   key={item}
                   id={`tab-escape-${i}`}
                   role="option"
                   className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-amber-100 aria-[current=true]:text-amber-700 text-sm border border-transparent aria-[current=true]:border-amber-300"
                 >
                   {item}
-                </FocusItem>
+                </Item>
               ))}
             </Zone>
             <div className="mt-2 text-[10px] text-gray-500">
@@ -78,14 +78,14 @@ export function TabTest() {
               className="flex flex-col gap-1 w-32"
             >
               {["New", "Open", "Save"].map((item, i) => (
-                <FocusItem
+                <Item
                   key={item}
                   id={`tab-trap-${i}`}
                   role="menuitem"
                   className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-indigo-100 aria-[current=true]:text-indigo-700 text-sm border border-transparent aria-[current=true]:border-indigo-300"
                 >
                   {item}
-                </FocusItem>
+                </Item>
               ))}
             </Zone>
             <div className="mt-2 text-[10px] text-gray-500">
@@ -107,14 +107,14 @@ export function TabTest() {
               className="flex gap-2"
             >
               {["Back", "Fresh", "Next"].map((item, i) => (
-                <FocusItem
+                <Item
                   key={item}
                   id={`tab-flow-${i}`}
                   role="button"
                   className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-teal-100 aria-[current=true]:text-teal-700 text-sm border border-transparent aria-[current=true]:border-teal-300"
                 >
                   {item}
-                </FocusItem>
+                </Item>
               ))}
             </Zone>
             <div className="mt-2 text-[10px] text-gray-500">

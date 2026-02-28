@@ -65,7 +65,7 @@ export function getParent<T extends { id: string }>(
 }
 
 /** All entity ids (unordered). */
-export function allIds<T extends { id: string }>(
+export function getAllIds<T extends { id: string }>(
   c: NormalizedCollection<T>,
 ): string[] {
   return Object.keys(c.entities);

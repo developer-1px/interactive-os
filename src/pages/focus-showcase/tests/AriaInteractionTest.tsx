@@ -1,5 +1,5 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { Field } from "@os/6-components/field/Field.tsx";
 import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
 import { useState } from "react";
@@ -69,14 +69,14 @@ export function AriaInteractionTest() {
             className="flex flex-col gap-1"
           >
             {["Item 1", "Item 2", "Item 3"].map((text, i) => (
-              <FocusItem
+              <Item
                 key={i}
                 id={`test-select-${i + 1}`}
                 role="option"
                 className="px-2 py-1 bg-white border border-gray-200 rounded text-sm cursor-pointer aria-[selected=true]:bg-blue-50 aria-[selected=true]:border-blue-300 aria-[current=true]:ring-1 ring-blue-400"
               >
                 {text}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </div>

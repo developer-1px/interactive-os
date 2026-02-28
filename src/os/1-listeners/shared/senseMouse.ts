@@ -7,7 +7,6 @@
  * Used by: PointerListener (and headless simulateClick)
  */
 
-import { sensorGuard } from "../../lib/loopGuard";
 import type { MouseInput } from "../mouse/resolveMouse";
 import {
   findFocusableItem,
@@ -110,7 +109,6 @@ export function senseMouseDown(
   e: { shiftKey: boolean; metaKey: boolean; ctrlKey: boolean; altKey: boolean },
 ): MouseInput | null {
   if (!target) return null;
-  if (!sensorGuard.check()) return null;
 
   // Read DOM → build MouseDownSense
   const isInspector = !!target.closest("[data-inspector]");

@@ -262,6 +262,7 @@ export function PointerListener() {
                 isCurrentPage,
               });
 
+
               if (clickResult.commands.length > 0) {
                 setDispatching(true);
                 for (const cmd of clickResult.commands) {

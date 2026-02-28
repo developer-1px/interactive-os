@@ -8,7 +8,7 @@
  */
 
 import {
-  allIds,
+  getAllIds,
   createCollection,
   getChildren,
   getParent,
@@ -76,11 +76,11 @@ describe("NormalizedCollection: queries", () => {
     expect(getParent(tree, "grandchild")).toBe("child1");
   });
 
-  it("allIds returns every entity id", () => {
-    const ids = allIds(flatFixture());
+  it("getAllIds returns every entity id", () => {
+    const ids = getAllIds(flatFixture());
     expect(ids.sort()).toEqual(["a", "b", "c"]);
 
-    const treeIds = allIds(treeFixture());
+    const treeIds = getAllIds(treeFixture());
     expect(treeIds.sort()).toEqual(["child1", "child2", "grandchild", "root"]);
   });
 });

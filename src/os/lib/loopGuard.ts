@@ -37,7 +37,7 @@ export function createReentrantGuard(name: string, maxDepth: number = 8) {
           warned = true;
           console.error(
             `[LoopGuard] ⛔ "${name}" exceeded max reentrant depth (${maxDepth}). ` +
-              `This is likely an infinite loop. Current depth: ${depth}. Breaking out.`,
+            `This is likely an infinite loop. Current depth: ${depth}. Breaking out.`,
           );
           // Log stack trace for debugging
           console.trace(`[LoopGuard] "${name}" stack trace:`);
@@ -67,75 +67,3 @@ export function createReentrantGuard(name: string, maxDepth: number = 8) {
   };
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frequency Guard (Rate Limiting per Frame)
-// ═══════════════════════════════════════════════════════════════════
-
-/**
- * Limits how many times a function can be called within a single animation frame.
- * Prevents rapid-fire state updates that cause the browser to freeze.
- *
- * Usage:
- *   const guard = createFrequencyGuard("focusSensor", 50);
- *   function handleEvent(e) {
- *     if (!guard.check()) return; // rate limited
- *     ...
- *   }
- */
-export function createFrequencyGuard(name: string, maxPerFrame: number = 50) {
-  let count = 0;
-  let frameId: number | null = null;
-  let warned = false;
-
-  function resetOnNextFrame() {
-    if (frameId === null) {
-      frameId = requestAnimationFrame(() => {
-        count = 0;
-        frameId = null;
-        warned = false;
-      });
-    }
-  }
-
-  return {
-    /** Check if the call is within limits. Returns false if rate limited. */
-    check(): boolean {
-      count++;
-      resetOnNextFrame();
-
-      if (count > maxPerFrame) {
-        if (!warned) {
-          warned = true;
-          console.error(
-            `[LoopGuard] ⛔ "${name}" exceeded ${maxPerFrame} calls/frame. ` +
-              `Likely an infinite loop. Throttling until next frame.`,
-          );
-        }
-        return false;
-      }
-      return true;
-    },
-
-    /** Get call count in current frame (for debugging). */
-    getCount(): number {
-      return count;
-    },
-
-    /** Reset (for testing). */
-    reset(): void {
-      count = 0;
-      warned = false;
-      if (frameId !== null) {
-        cancelAnimationFrame(frameId);
-        frameId = null;
-      }
-    },
-  };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Pre-built Guards (Singleton instances for OS systems)
-// ═══════════════════════════════════════════════════════════════════
-
-/** Guard for focus sensor events — prevents event storm */
-export const sensorGuard = createFrequencyGuard("focus.sensor", 200);

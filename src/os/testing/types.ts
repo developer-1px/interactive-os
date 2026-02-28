@@ -35,6 +35,9 @@ export interface LocatorAssertions {
 
     /** Assert: element is focused. */
     toBeFocused(): Promise<void>;
+
+    /** Negated assertions (Playwright-compatible). */
+    not: LocatorAssertions;
 }
 
 // ═══════════════════════════════════════════════════════════════════

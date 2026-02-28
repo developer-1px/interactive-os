@@ -1,8 +1,12 @@
 import type { BaseCommand } from "@kernel";
+import {
+  buildFieldConfig,
+  validateField,
+} from "@os/2-contexts/fieldLogic.ts";
 import { OS_FIELD_COMMIT } from "@os/3-commands/field/commit";
-import { useFieldFocus } from "@os/5-hooks/useFieldHooks.ts";
+import { useFieldFocus } from "@os/5-hooks/useField.ts";
 import { useZoneContext } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { os } from "@os/kernel.ts";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
 
@@ -28,11 +32,11 @@ import { Label } from "./Label";
 /**
  * Checks if the value is effectively empty for placeholder display.
  */
-const checkValueEmpty = (value: string | undefined | null): boolean => {
+export const checkValueEmpty = (value: string | undefined | null): boolean => {
   return !value || value === "\n";
 };
 
-interface FieldStyleParams {
+export interface FieldStyleParams {
   isFocused: boolean;
   isEditing: boolean;
   fieldType: FieldType;
@@ -65,10 +69,6 @@ const getFieldClasses = ({
     ? "whitespace-pre-wrap break-words"
     : "whitespace-nowrap overflow-hidden";
 
-  // --- State Visual Distinction ---
-  // Error: Red ring (overrides editing blue)
-  // Editing: Blue ring + blue tint background
-  // Focused: Default focus ring
   let stateClasses = "";
   if (error) {
     stateClasses = "ring-2 ring-red-500 bg-red-500/10 rounded-sm";
@@ -88,7 +88,7 @@ export interface EditableProps
   > {
   /** Current text value */
   value: string;
-  /** Unique identifier — FieldRegistry key + FocusItem ID */
+  /** Unique identifier — FieldRegistry key + Item ID */
   name: string;
   placeholder?: string;
   /** Keyboard ownership preset (default: "inline") */
@@ -171,29 +171,19 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
         const commitCmd = onCommitRef.current;
         if (!commitCmd) return;
 
-        // 1. Validate
-        if (schemaRef.current) {
-          const result = schemaRef.current.safeParse(currentValue);
-          if (!result.success) {
-            const errorMessage =
-              result.error.issues[0]?.message ?? "Validation failed";
-            FieldRegistry.setError(fieldId, errorMessage);
-            return; // Block Commit
-          }
+        // 1. Validate (pure function)
+        const validation = validateField(currentValue, schemaRef.current);
+        if (!validation.valid) {
+          FieldRegistry.setError(fieldId, validation.error!);
+          return;
         }
 
-        // 2. Clear Error (if any)
+        // 2. Clear Error + Dispatch
         FieldRegistry.setError(fieldId, null);
-
-        // 3. Dispatch (Inject Payload)
-        // The factory expects { text: string }, we inject it.
-        // We assume defineApp has wrapped the handler to accept this payload.
-        // But wait, we need to DISPATCH the command.
-        // FieldCommandFactory returns a Command object.
         const command = commitCmd({ text: currentValue });
         os.dispatch(command);
 
-        // 4. Reset (if configured)
+        // 3. Reset (if configured)
         if (resetOnSubmit) {
           FieldRegistry.reset(fieldId);
         }
@@ -204,27 +194,22 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
     // Stable wrappers for Registry (Config)
     // We wrap these so Registry can call them if needed, but mostly Field handles logic internally now.
 
-    // --- Registry Registration ---
+    // --- Registry Registration (pure config build) ---
     useEffect(() => {
-      const config: FieldConfig = {
+      const config = buildFieldConfig({
         name,
         mode,
-
         fieldType,
         trigger,
         resetOnSubmit,
-        ...(onCommitRef.current !== undefined
-          ? { onCommit: onCommitRef.current }
-          : {}),
-        ...(schema !== undefined ? { schema } : {}),
-        ...(onCancelRef.current !== undefined
-          ? { onCancel: onCancelRef.current }
-          : {}),
-      };
+        onCommit: onCommitRef.current,
+        schema,
+        onCancel: onCancelRef.current,
+      });
 
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
-    }, [name, mode, fieldType, trigger, resetOnSubmit, schema]); // Re-register on config change
+    }, [name, mode, fieldType, trigger, resetOnSubmit, schema]);
 
     // --- State Subscription ---
     // Subscribe to primitive values to avoid unnecessary re-renders on object reference changes.
@@ -453,7 +438,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- baseProps spread
     return (
-      <FocusItem
+      <Item
         id={fieldId}
         as={tag}
         ref={setInnerRef}

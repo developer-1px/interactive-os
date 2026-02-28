@@ -26,22 +26,22 @@ export type OSCommandUnion =
   | { type: typeof OS_COMMANDS.OS_NAVIGATE; payload: OSNavigatePayload }
   | { type: typeof OS_COMMANDS.OS_FOCUS; payload: OSFocusPayload }
   | { type: typeof OS_COMMANDS.OS_TAB; payload?: undefined }
-  | { type: typeof OS_COMMANDS.TAB_PREV; payload?: undefined }
+  | { type: typeof OS_COMMANDS.OS_TAB_PREV; payload?: undefined }
   | { type: typeof OS_COMMANDS.OS_SELECT; payload?: OSSelectPayload }
-  | { type: typeof OS_COMMANDS.SELECT_ALL; payload?: undefined }
-  | { type: typeof OS_COMMANDS.DESELECT_ALL; payload?: undefined }
+  | { type: typeof OS_COMMANDS.OS_SELECT_ALL; payload?: undefined }
+  | { type: typeof OS_COMMANDS.OS_DESELECT_ALL; payload?: undefined }
   | { type: typeof OS_COMMANDS.OS_ACTIVATE; payload?: OSActivatePayload }
   | { type: typeof OS_COMMANDS.OS_ESCAPE; payload?: undefined }
   | {
-      type: typeof OS_COMMANDS.OS_FIELD_START_EDIT;
-      payload?: { fieldId?: string };
-    }
+    type: typeof OS_COMMANDS.OS_FIELD_START_EDIT;
+    payload?: { fieldId?: string };
+  }
   | { type: typeof OS_COMMANDS.OS_FIELD_COMMIT; payload?: { fieldId?: string } }
   | { type: typeof OS_COMMANDS.OS_FIELD_CANCEL; payload?: { fieldId?: string } }
-  | { type: typeof OS_COMMANDS.UNDO; payload?: undefined }
-  | { type: typeof OS_COMMANDS.REDO; payload?: undefined }
-  | { type: typeof OS_COMMANDS.COPY; payload?: undefined }
-  | { type: typeof OS_COMMANDS.CUT; payload?: undefined }
-  | { type: typeof OS_COMMANDS.PASTE; payload?: undefined }
-  | { type: typeof OS_COMMANDS.DELETE; payload?: undefined }
-  | { type: typeof OS_COMMANDS.TOGGLE_INSPECTOR; payload?: undefined };
+  | { type: typeof OS_COMMANDS.OS_UNDO; payload?: undefined }
+  | { type: typeof OS_COMMANDS.OS_REDO; payload?: undefined }
+  | { type: typeof OS_COMMANDS.OS_COPY; payload?: undefined }
+  | { type: typeof OS_COMMANDS.OS_CUT; payload?: undefined }
+  | { type: typeof OS_COMMANDS.OS_PASTE; payload?: undefined }
+  | { type: typeof OS_COMMANDS.OS_DELETE; payload?: undefined }
+  | { type: typeof OS_COMMANDS.OS_TOGGLE_INSPECTOR; payload?: undefined };

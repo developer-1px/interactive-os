@@ -5,7 +5,7 @@
 
 
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { os } from "@os/kernel.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
@@ -75,7 +75,7 @@ function AriaShowcaseContent() {
               aria-label="Account settings"
               className="flex bg-gray-100 border-b border-gray-200"
             >
-              <FocusItem
+              <Item
                 id="tab-account"
                 role="tab"
                 as="button"
@@ -89,8 +89,8 @@ function AriaShowcaseContent() {
                                 "
               >
                 Account
-              </FocusItem>
-              <FocusItem
+              </Item>
+              <Item
                 id="tab-security"
                 role="tab"
                 as="button"
@@ -104,8 +104,8 @@ function AriaShowcaseContent() {
                                 "
               >
                 Security
-              </FocusItem>
-              <FocusItem
+              </Item>
+              <Item
                 id="tab-disabled"
                 role="tab"
                 aria-disabled="true"
@@ -117,7 +117,7 @@ function AriaShowcaseContent() {
                                 "
               >
                 Disabled
-              </FocusItem>
+              </Item>
             </Zone>
             <div
               id="panel-account"
@@ -156,24 +156,24 @@ function AriaShowcaseContent() {
             aria-label="File actions"
             className="w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1"
           >
-            <FocusItem
+            <Item
               id="menu-new"
               role="menuitem"
               className="px-4 py-2 text-sm hover:bg-gray-100 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none"
             >
               New File
-            </FocusItem>
-            <FocusItem
+            </Item>
+            <Item
               id="menu-open"
               role="menuitem"
               className="px-4 py-2 text-sm hover:bg-gray-100 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none"
             >
               Open...
-            </FocusItem>
+            </Item>
 
             <div role="separator" className="my-1 border-t border-gray-200" />
 
-            <FocusItem
+            <Item
               id="menu-ruler"
               role="menuitemcheckbox"
               as="button"
@@ -189,8 +189,8 @@ function AriaShowcaseContent() {
               <span className="text-indigo-600 opacity-0 group-aria-checked:opacity-100 transition-opacity">
                 ✓
               </span>
-            </FocusItem>
-            <FocusItem
+            </Item>
+            <Item
               id="menu-grid"
               role="menuitemcheckbox"
               as="button"
@@ -206,11 +206,11 @@ function AriaShowcaseContent() {
               <span className="text-indigo-600 opacity-0 group-aria-checked:opacity-100 transition-opacity">
                 ✓
               </span>
-            </FocusItem>
+            </Item>
 
             <div role="separator" className="my-1 border-t border-gray-200" />
 
-            <FocusItem
+            <Item
               id="menu-disabled"
               role="menuitem"
               disabled
@@ -218,7 +218,7 @@ function AriaShowcaseContent() {
               className="px-4 py-2 text-sm text-gray-300 aria-disabled:cursor-not-allowed data-[focused=true]:bg-gray-50 data-[focused=true]:outline-none"
             >
               Unavailable
-            </FocusItem>
+            </Item>
           </Zone>
         </AriaCard>
 
@@ -243,7 +243,7 @@ function AriaShowcaseContent() {
               "Tom Cook",
               "Tanya Fox",
             ].map((name, i) => (
-              <FocusItem
+              <Item
                 key={name}
                 id={`user-${i}`}
                 role="option"
@@ -255,7 +255,7 @@ function AriaShowcaseContent() {
                                 "
               >
                 {name}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </AriaCard>
@@ -280,7 +280,7 @@ function AriaShowcaseContent() {
               { id: "mentions", label: "Mentions only" },
               { id: "none", label: "None" },
             ].map((opt) => (
-              <FocusItem
+              <Item
                 key={opt.id}
                 id={`radio-${opt.id}`}
                 role="radio"
@@ -304,7 +304,7 @@ function AriaShowcaseContent() {
                 <span className="text-sm group-aria-checked:font-medium group-aria-checked:text-indigo-700">
                   {opt.label}
                 </span>
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </AriaCard>
@@ -328,7 +328,7 @@ function AriaShowcaseContent() {
               { id: "underline", label: "U", title: "Underline, togglable" },
               { id: "strike", label: "S", title: "Strikethrough, togglable" },
             ].map((btn) => (
-              <FocusItem
+              <Item
                 key={btn.id}
                 id={`tool-${btn.id}`}
                 role="button"
@@ -344,10 +344,10 @@ function AriaShowcaseContent() {
                                 "
               >
                 {btn.label}
-              </FocusItem>
+              </Item>
             ))}
             <div className="w-px bg-gray-300 mx-1" />
-            <FocusItem
+            <Item
               id="tool-disabled"
               role="button"
               aria-disabled="true"
@@ -358,7 +358,7 @@ function AriaShowcaseContent() {
                             "
             >
               D
-            </FocusItem>
+            </Item>
           </Zone>
         </AriaCard>
 
@@ -376,7 +376,7 @@ function AriaShowcaseContent() {
             className="grid grid-cols-4 gap-1 p-2 bg-gray-100 rounded-lg border border-gray-200"
           >
             {Array.from({ length: 12 }, (_, i) => (
-              <FocusItem
+              <Item
                 key={i}
                 id={`cell-${i}`}
                 role="gridcell"
@@ -392,7 +392,7 @@ function AriaShowcaseContent() {
                                 "
               >
                 {i + 1}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </AriaCard>
@@ -425,7 +425,7 @@ function AriaShowcaseContent() {
             className="flex bg-gray-800 text-white rounded-lg overflow-hidden"
           >
             {["File", "Edit", "View", "Help"].map((item) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`menubar-${item.toLowerCase()}`}
                 role="menuitem"
@@ -437,7 +437,7 @@ function AriaShowcaseContent() {
                                 "
               >
                 {item}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </AriaCard>
@@ -455,7 +455,7 @@ function AriaShowcaseContent() {
               options={{ navigate: { orientation: "vertical" } }}
               className="w-full"
             >
-              <FocusItem
+              <Item
                 id="combo-trigger"
                 role="combobox"
                 aria-expanded={isComboOpen}
@@ -487,7 +487,7 @@ function AriaShowcaseContent() {
                   size={16}
                   className={isComboInvalid ? "text-red-400" : "text-gray-400"}
                 />
-              </FocusItem>
+              </Item>
             </Zone>
 
             <div className="flex items-center gap-2 mt-3">
@@ -517,7 +517,7 @@ function AriaShowcaseContent() {
                   { name: "Cherry", icon: "🍒" },
                   { name: "Date", icon: "🌴" },
                 ].map((fruit, i) => (
-                  <FocusItem
+                  <Item
                     key={fruit.name}
                     id={`combo-opt-${i}`}
                     role="option"
@@ -529,7 +529,7 @@ function AriaShowcaseContent() {
                   >
                     <span className="text-base">{fruit.icon}</span>
                     <span>{fruit.name}</span>
-                  </FocusItem>
+                  </Item>
                 ))}
               </Zone>
             )}
@@ -600,7 +600,7 @@ function AriaShowcaseContent() {
                 text: "Added ARIA role presets for all composite widgets.",
               },
             ].map((post) => (
-              <FocusItem
+              <Item
                 key={post.id}
                 id={post.id}
                 role="article"
@@ -623,7 +623,7 @@ function AriaShowcaseContent() {
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 pl-8">{post.text}</p>
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
         </AriaCard>
@@ -661,7 +661,7 @@ function TreeContent() {
 
   return (
     <>
-      <FocusItem
+      <Item
         id="tree-src"
         role="treeitem"
         aria-level={1}
@@ -683,11 +683,11 @@ function TreeContent() {
           className="text-amber-500 flex-shrink-0"
         />
         <span>src</span>
-      </FocusItem>
+      </Item>
 
       {isExpanded("tree-src") && (
         <>
-          <FocusItem
+          <Item
             id="tree-components"
             role="treeitem"
             aria-level={2}
@@ -702,8 +702,8 @@ function TreeContent() {
               className="text-amber-500 flex-shrink-0"
             />
             <span>components</span>
-          </FocusItem>
-          <FocusItem
+          </Item>
+          <Item
             id="tree-app"
             role="treeitem"
             aria-level={2}
@@ -718,8 +718,8 @@ function TreeContent() {
               className="text-blue-500 flex-shrink-0"
             />
             <span>App.tsx</span>
-          </FocusItem>
-          <FocusItem
+          </Item>
+          <Item
             id="tree-index"
             role="treeitem"
             aria-level={2}
@@ -734,11 +734,11 @@ function TreeContent() {
               className="text-blue-500 flex-shrink-0"
             />
             <span>index.tsx</span>
-          </FocusItem>
+          </Item>
         </>
       )}
 
-      <FocusItem
+      <Item
         id="tree-public"
         role="treeitem"
         aria-level={1}
@@ -760,10 +760,10 @@ function TreeContent() {
           className="text-amber-500 flex-shrink-0"
         />
         <span>public</span>
-      </FocusItem>
+      </Item>
 
       {isExpanded("tree-public") && (
-        <FocusItem
+        <Item
           id="tree-favicon"
           role="treeitem"
           aria-level={2}
@@ -778,7 +778,7 @@ function TreeContent() {
             className="text-green-500 flex-shrink-0"
           />
           <span>favicon.ico</span>
-        </FocusItem>
+        </Item>
       )}
     </>
   );
@@ -818,7 +818,7 @@ function AccordionContent() {
     <div className="divide-y divide-gray-100">
       {items.map((item) => (
         <div key={item.id}>
-          <FocusItem
+          <Item
             id={item.id}
             as="button"
             role="button"
@@ -841,7 +841,7 @@ function AccordionContent() {
               size={16}
               className="text-gray-400 flex-shrink-0"
             />
-          </FocusItem>
+          </Item>
           {isExpanded(item.id) && (
             <div
               id={`${item.id}-panel`}
@@ -867,7 +867,7 @@ function DisclosureContent() {
   return (
     <div className="w-full">
       <Zone id="demo-disclosure" aria-label="Disclosure">
-        <FocusItem
+        <Item
           id="disclosure-trigger"
           as="button"
           role="button"
@@ -888,7 +888,7 @@ function DisclosureContent() {
             size={16}
             className="text-gray-400"
           />
-        </FocusItem>
+        </Item>
       </Zone>
       {isOpen && (
         <div
@@ -970,28 +970,28 @@ function DialogDemo({
               </p>
             </div>
             <div className="p-5 space-y-2">
-              <FocusItem
+              <Item
                 id="dialog-btn-1"
                 as="button"
                 className="w-full px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400"
               >
                 Focusable Item 1
-              </FocusItem>
-              <FocusItem
+              </Item>
+              <Item
                 id="dialog-btn-2"
                 as="button"
                 className="w-full px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400"
               >
                 Focusable Item 2
-              </FocusItem>
-              <FocusItem
+              </Item>
+              <Item
                 id="dialog-btn-close"
                 as="button"
                 onClick={handleClose}
                 className="w-full px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-300 data-[focused=true]:ring-offset-1"
               >
                 Close Dialog
-              </FocusItem>
+              </Item>
             </div>
           </Zone>
         </div>
@@ -1071,22 +1071,22 @@ function AlertDialogDemo({
                 removed.
               </p>
               <div className="flex gap-2">
-                <FocusItem
+                <Item
                   id="alert-cancel"
                   as="button"
                   onClick={handleClose}
                   className="flex-1 px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-gray-400"
                 >
                   Cancel
-                </FocusItem>
-                <FocusItem
+                </Item>
+                <Item
                   id="alert-confirm"
                   as="button"
                   onClick={handleClose}
                   className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 data-[focused=true]:ring-2 data-[focused=true]:ring-red-300 data-[focused=true]:ring-offset-1"
                 >
                   Delete
-                </FocusItem>
+                </Item>
               </div>
             </div>
           </Zone>

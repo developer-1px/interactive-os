@@ -22,7 +22,7 @@ describe("History: Noise Filtering for rapid field updates", () => {
     // Simulate typing "hello" — 5 rapid updateFieldByDomId commands
     for (const char of ["h", "he", "hel", "hell", "hello"]) {
       app.dispatch(
-        updateFieldByDomId({ domId: "ncp-hero-title", value: char }),
+        updateFieldByDomId({ domId: "ge-hero-service-name", value: char }),
       );
     }
 
@@ -35,21 +35,21 @@ describe("History: Noise Filtering for rapid field updates", () => {
 
   it("undo after coalesced typing should restore to pre-typing state", () => {
     const app = createApp();
-    const originalTitle = app.state.data.blocks[0]!.fields["title"];
+    const originalTitle = app.state.data.blocks[0]!.fields["service-name"];
 
     // Type several characters
     for (const char of ["X", "XY", "XYZ"]) {
       app.dispatch(
-        updateFieldByDomId({ domId: "ncp-hero-title", value: char }),
+        updateFieldByDomId({ domId: "ge-hero-service-name", value: char }),
       );
     }
 
     // Field should be "XYZ" now
-    expect(app.state.data.blocks[0]!.fields["title"]).toBe("XYZ");
+    expect(app.state.data.blocks[0]!.fields["service-name"]).toBe("XYZ");
 
     // Single undo should restore original
     app.dispatch(undoCommand());
 
-    expect(app.state.data.blocks[0]!.fields["title"]).toBe(originalTitle);
+    expect(app.state.data.blocks[0]!.fields["service-name"]).toBe(originalTitle);
   });
 });

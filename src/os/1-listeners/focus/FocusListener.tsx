@@ -15,7 +15,6 @@
 import { OS_SYNC_FOCUS } from "@os/3-commands";
 import { useEffect } from "react";
 import { os } from "../../kernel";
-import { sensorGuard } from "../../lib/loopGuard";
 import {
   findFocusableItem,
   isDispatching,
@@ -36,7 +35,7 @@ export function FocusListener() {
     // FocusIn → OS_SYNC_FOCUS
     const senseFocusIn = (e: Event) => {
       const target = e.target as HTMLElement;
-      if (target.closest("[data-inspector]") || !sensorGuard.check()) return;
+      if (target.closest("[data-inspector]")) return;
 
       // Re-entrance guard: prevents focusin from kernel's el.focus() effect
       if (isDispatching()) return;

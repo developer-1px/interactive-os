@@ -1,5 +1,5 @@
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
+import { Item } from "@os/6-components/primitives/Item.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function DismissTest() {
@@ -54,14 +54,14 @@ export function DismissTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Item 1", "Item 2"].map((item) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`dis-esc-${item.split(" ")[1]}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[selected=true]:bg-indigo-100 aria-[selected=true]:text-indigo-700 text-sm border border-transparent aria-[selected=true]:border-indigo-300"
               >
                 {item}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
           <div className="text-[10px] text-gray-500">
@@ -81,14 +81,14 @@ export function DismissTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Menu Item A", "Menu Item B"].map((item) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`dis-close-${item.split(" ")[2]}`}
                 role="menuitem"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[current=true]:bg-violet-100 aria-[current=true]:text-violet-700 text-sm border border-transparent aria-[current=true]:border-violet-300"
               >
                 {item}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
           <div className="text-[10px] text-gray-500">
@@ -108,14 +108,14 @@ export function DismissTest() {
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Outside 1", "Outside 2"].map((item) => (
-              <FocusItem
+              <Item
                 key={item}
                 id={`dis-out-${item.split(" ")[1]}`}
                 role="option"
                 className="px-3 py-1.5 rounded hover:bg-gray-100 aria-[selected=true]:bg-amber-100 aria-[selected=true]:text-amber-700 text-sm border border-transparent aria-[selected=true]:border-amber-300"
               >
                 {item}
-              </FocusItem>
+              </Item>
             ))}
           </Zone>
           <div className="text-[10px] text-gray-500">

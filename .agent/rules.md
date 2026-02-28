@@ -1,169 +1,164 @@
 # Interactive OS 선언문
 
-> 코딩은 에이전트가 한다.
-> 개발자의 역할은 에이전트의 시행착오 비용을 줄이는 것이다.
-> 에이전트가 개발하기 더 좋은 환경을 만들고, 에이전트가 만든 코드를 검증하기 쉬운 환경을 만든다.
+## Why — 이 규칙이 존재하는 이유
 
-## Goal — 우리가 이루려는 것
+너는 이 프로젝트의 코드를 작성하는 에이전트다.
+너의 코드는 인간이 한 줄씩 리뷰하지 않는다.
 
-> **왜 이 OS가 존재하는가.**
-> 웹은 앱이 아니다. 브라우저는 문서를 위해 만들어졌다. 브라우저의 기본 focus, selection, undo, keyboard navigation은 앱 수준에 부족하다.
-> 웹은 눈이 없다. 앞으로 개발은 LLM이 한다. LLM이 개발하려면 시스템을 관찰할 수 있어야 한다. 브라우저는 그 관찰 수단을 제공하지 않는다.
-> 이 OS는 이 두 가지를 해결한다: **앱 수준의 상호작용**과 **LLM이 개발할 수 있는 관찰 가능한 환경**.
-> 브라우저에 위임하면 둘 다 잃는다. 브라우저에 떨어지는 입력은 OS의 실패다.
+너는 매 세션 컨텍스트가 리셋된다.
+이전 세션에서 어떤 패턴을 썼는지 기억하지 못한다.
+그래서 같은 문제를 다른 방식으로 풀게 되고,
+동작하지만 일관성 없는 코드가 쌓인다.
+인간은 그 코드를 전부 읽을 수 없다.
 
-1. **에이전트의 시행착오 비용을 줄인다.** 더 좋은 개발 환경을 만들고, 만들어진 코드를 검증하기 쉬운 환경을 만든다.
-2. **웹 앱에 OS의 질서를 부여한다.** 포커스, 네비게이션, 접근성 — 개별 앱이 각자 구현하는 게 아니라, 시스템이 보장한다.
-3. **접근성은 기능이 아니라 인프라다.** 앱이 "추가"하는 것이 아니라 OS가 "보장"하는 것이다.
-4. **100% 타입.** 타입은 문서가 아니라 가드레일이다. 가드레일이 없으면 에이전트가 추락한다. **Make Illegal States Unrepresentable** (Yaron Minsky) — 잘못된 상태를 타입으로 표현 자체를 불가능하게 만든다. `as unknown as` 캐스팅이 필요한 API는 타입이 현실을 반영하지 못하고 있다는 신호다.
-5. **100% 관찰 가능.** 시스템의 모든 행동이 기록되어야 신뢰할 수 있다. 보이지 않는 것은 고칠 수 없다. LLM에게 눈을 준다.
-6. **학습 비용을 0으로 만든다.** 이미 아는 것으로 새것을 표현한다. 에이전트와 인간 모두. **Principle of Least Astonishment (POLA)** — 이전 앱에서 배운 패턴이 다음 앱에서도 동일하게 동작해야 한다. 놀라움은 학습 비용이다.
-7. **앱은 의도를 선언하고, OS가 실행을 보장한다.** 앱 코드에 useState, useEffect, onClick이 0줄인 세계. **Hollywood Principle** (Martin Fowler) — "Don't call us, we'll call you." 앱은 OS에게 무엇을 원하는지 선언하고, 어떻게 실행할지는 OS가 결정한다.
-8. **OS는 행동을 제공하고, 형태는 앱이 결정한다.** 행동이 형태에 종속되면 보편성을 잃는다.
-9. **하나의 앱이 아니라 플랫폼을 만든다.** 어떤 앱이든 이 OS 위에서 동작할 수 있다.
-10. **이 OS 위에서 이 OS를 만든다.** 구축이 곧 증명이다. 이론이 아니라 동작하는 코드로 비전을 증명한다.
+이 OS의 구조는 이 문제를 해결한다.
+구조를 따르면 너의 세션 간 일관성 부족이 문제가 되지 않는다.
+구조가 올바른 방향으로 강제하기 때문이다.
 
-## Project — 우리가 믿는 것
-
-1. **해결 = 엔트로피 감소. 동작하는 것은 해결이 아니다.** 변경 후 시스템의 고유 패턴 수가 늘었으면 그것은 해결이 아니라 악화다. 기존 메커니즘을 재사용하거나, 여러 특수 사례를 하나의 범용 메커니즘으로 대체해야 해결이다. 체크: "이 변경이 시스템에 새로운 유일한 패턴을 추가하는가?" 추가한다면 부채다. `eslint-disable`, `as any`, `document.querySelector` — 전부 엔트로피 증가의 냄새다. 해법이 시스템을 더 복잡하게 만드는 방향이면, **"풀 수 없다"가 아니라 "아직 올바른 추상화를 못 찾았다"**이다. 멈추고 보고한다. 같은 문제를 푸는 선택지가 여럿이면, 개체(concept)가 적은 쪽이 정답이다. **Occam's Razor** + **Convention over Configuration** (DHH).
-2. **로직이 먼저, 뷰는 바인딩이다.** 상태→조건→커맨드→뷰 바인딩 순서로 하향 정의한다. 뷰가 로직을 가져다 쓰는 것이 아니라, 로직이 뷰에 바인딩되는 것이다. **Hexagonal Architecture / Ports & Adapters** (Alistair Cockburn) — 코어(로직)가 먼저 존재하고, 어댑터(뷰)는 코어에 연결될 뿐이다. 코어는 어댑터 없이도 테스트 가능해야 한다 (Headless).
-3. **도메인은 도메인답게, UI는 UI답게, 경계에 순수 함수.** 도메인 자료구조(`DocItem[]`, `TodoEntity[]`, API 응답)는 도메인 논리(DB, API, 비즈니스 규칙)가 결정한다. UI 컴포넌트(Zone/Item)는 정규화된 포맷(`id`, `role`, `level`, `state`)만 이해한다. 도메인 데이터를 UI에 붙일 때는 **경계의 순수 함수(Transform)**로 UI 포맷에 맞춰 변환한다. 도메인을 UI에 맞추거나 UI를 도메인에 맞추는 것 모두 금지 — 양쪽 독립성을 Transform이 보장한다. 이 구조에서 같은 도메인 데이터를 Tree, List, Kanban, Grid 어떤 View로든 볼 수 있고, CRUD·DnD·Clipboard·Undo는 View에 무관하게 동일하다. **CQRS Read Model** — Write(도메인)와 Read(UI)를 분리하고, Read Model(Transform)은 여러 개 공존할 수 있다.
-4. **앱은 페이지의 모음이 아니라, 운영체제다.** 사용자의 모든 의도는 커맨드로 표현되고, 커맨드는 시스템 어디서든 동일하게 동작한다.
-5. **번역기는 번역만 한다.** 입력을 커맨드로 바꾸는 자와, 커맨드를 실행하는 자는 서로를 모른다. **Single Responsibility Principle** (Robert C. Martin) — 변경의 이유가 하나여야 한다. 입력 해석이 변해도 실행은 변하지 않고, 실행이 변해도 입력 해석은 변하지 않는다.
-6. **모든 변경은 하나의 문을 통과한다.** 상태 변경의 경로가 둘이면, 버그의 경로도 둘이다. **Command-Query Separation** (Bertrand Meyer) — 상태를 바꾸는 행위(Command)와 상태를 읽는 행위(Query)를 분리한다. 하나의 함수가 읽기와 쓰기를 동시에 하면 부작용을 추적할 수 없다.
-7. **편의보다 명시적.** 예외가 없어야 에이전트가 제로 추론으로 작동한다. "상황에 따라 달라"는 매번 추론이 필요하고, "무조건 이 구조"는 제로 추론이다. 이 원칙은 코드 구조뿐 아니라 **워크플로우의 판단 분기**에도 적용된다. "프리미엄", "깊이 있는", "공격적으로"처럼 주관적 형용사로 기준을 정의하면, 매번 해석이 달라진다. 판단에는 체크리스트, 숫자, 분류 기준 등 **검증 가능한 기준**이 있어야 한다. **Pit of Success** (Rico Mariani) — API는 올바른 사용법으로 "떨어지게" 설계한다. 같은 목적을 달성하는 경로가 여럿 열려 있으면, 에이전트는 매번 어느 길이 맞는지 판단해야 한다. 좋은 API는 잘못 쓰기가 더 어렵다.
-8. **모든 산출물은 부채다.** 코드, 문서, 워크플로우 — 존재하는 것은 정당화되어야 한다. 만들면 유지 비용이 생기고, 현실과 불일치하면 결함이 된다. 미래를 위한 추측은 현재의 복잡성이다.
-9. **이름은 법이다.** 하나의 개념에 하나의 이름. grep 한 번이면 모든 연결이 보여야 한다. **Ubiquitous Language** (Eric Evans, DDD) — 코드, 문서, 대화에서 같은 개념을 같은 이름으로 부른다. 이름의 번역 비용이 0이어야 한다.
-10. **표준은 행동 스펙이다. 구현 방법이 아니다.** W3C/APG가 정의한 행동은 따르되, 구현은 OS가 자체 메커니즘으로 제공한다. "브라우저가 이미 하니까 위임"은 OS의 존재 이유를 부정한다. 표준: "Enter로 button이 활성화된다" → OS가 Enter→action→command 파이프라인으로 이 행동을 보장한다. 브라우저에 돌려보내지 않는다.
-11. **불확실하면 나누고, 나눠도 모르면 묻는다.** 정답이 보이면 증명하고 실행한다. 안 보이면 더 작게 나눈다. 그래도 안 보이면 혼자 끙끙대지 말고 묻는다.
-12. **강제할 것은 워크플로우에, 참고할 것은 문서에.** Rule은 soft, Workflow Step은 hard. 반드시 지켜야 할 것은 Step으로 박는다.
-13. **OS gap 발견 시 feature를 중단하고 OS 개선을 먼저 한다.** 모든 프로젝트의 목적은 앱의 완성이 아니라 OS의 완성이다. "브라우저에서 직접 확인해야 했다" = OS 추상화가 부족했다. feature는 Blocked로 분류하고, OS 개선 태스크를 먼저 실행한다. 판정 기준: "앱이 `os.dispatch`를 콜백 내에서 직접 호출해야 하면 OS gap."
-
-## Working — 우리가 일하는 방식
-
-1. **코드를 고치기 전에 Cynefin 도메인을 판단한다.** Clear/Complicated면 증명하고 실행, Complex면 나누거나 묻는다, Chaotic면 봉쇄 후 분석한다. (도메인 분류 기준은 부록 참조) → `/divide`, `/discussion`
-2. **분석은 코드 수정보다 가치 있다.** "왜 깨졌는지"를 모르면 또 깨진다. "뭘 고쳤다"보다 "왜 깨졌는지 알아냈다"가 더 큰 산출물이다. → `/diagnose`, `/reflect`
-3. **다 하려고 하지 않는다.** 스코프가 넓으면 에이전트가 헤맨다. 하나를 끝내고 다음으로 넘어간다. → `/divide`, `/project`, `/poc`
-4. **모르면 묻는다. 추측으로 구현하지 않는다.** 잘못된 방향으로 100줄 쓰는 것보다 질문 하나가 낫다. 의사결정이 필요하면 보고하고 멈춘다. → `/discussion`, `/inbox`
-5. **Clear가 보이면 증명하고 실행한다.** 묻는 것과 미루는 것은 다르다. Clear를 Complex인 척 질문하면 시간을 낭비하고 신뢰를 잃는다. → `/go`, `/fix`
-6. **가장 빠른 피드백부터 잡는다.** 느린 루프는 시행착오 비용을 배가시킨다. 순수함수 → 커맨드 → E2E 순서로 검증한다. → `/test`, `/fix`
-7. **깨진 것을 보면 지나치지 않는다.** 환경의 질이 에이전트의 생산성을 결정한다. 발견한 문제는 지금 안 고쳐도 기록한다. → `/inbox`, `/review`, `/cleanup`
-8. **작게 커밋하고, 자주 증명한다.** 거대한 한 방은 실패 시 되돌리기 어렵다. 증명된 작은 단계의 연속으로 전진한다. → `/cleanup`
-9. **사용자의 대안 가설이 나오면 방어 전에 조사한다.** 기존 결론을 지키려는 확증 편향이 가장 비싼 실수를 만든다. 사용자가 "이거 아냐?"라고 물으면, "아닙니다, 이미 방어되어 있습니다"가 아니라 "확인해보겠습니다"가 먼저다. 검색 한 번이면 되는 것을 기존 결론에 묶여 놓친다.
-10. **해법이 엔트로피를 늘리면 멈추고 보고한다.** → Project #1 참조. 해결이 아니라 악화다.
-11. **복제본을 동기화하려는 순간이 "왜 복제본이 있는가?"를 물어야 하는 순간이다.** 이상한 것을 이상하다고 느끼지 못하는 것이 근본 실패다. 루틴 작업으로 보이는 것이 구조적 결함의 증상일 수 있다.
-12. **두 번 만들지 않을 생각으로 결정한다.** "일단 이렇게 하고 나중에 고치자"는 두 번째 기회가 오지 않을 때 기술 부채가 된다. 구조적 결함을 발견하면 즉시 고친다. OS 코드는 앱 위에서 돌아가는 인프라이므로, 한 번 잘못되면 모든 앱이 잘못된다. 사례: followFocus를 FOCUS에 중복 추가 후 "백로그에 등록"하려 했으나, 즉시 공유 유틸로 추출하는 것이 정답이었다.
-13. **기억과 행위(Verb)가 아닌 산출물(Noun)로 증명한다.** LLM은 규칙을 읽어도 goal fixation으로 건너뛴다. 분석, 판단, 평가는 LLM의 머릿속에서 일어나는 암묵적 행위다. 암묵적 행위는 기만이며 인정되지 않는다. 코드를 수정하기 전에 반드시 'Cynefin 분류표', 'RCA(초기원인분석) 리포트' 같은 명시적 **텍스트 구조물**을 먼저 화면에 출력해야 한다. 선 산출물, 후 코드 수정. 각 단계의 산출물(설계 문서, 체크리스트, 표)이 다음 단계의 입력이 되도록 하여, 산출물 없이는 다음 단계로 갈 수 없게 한다. 문서나 분석표가 없으면 코드를 수정할 자격이 없다. → `/issue` D4, `/go` 모든 단계 통과, `/solve` RCA 강제
-
-## 검증 — 우리가 증명하는 방식
-
-1. **테스트가 먼저다.** 코드를 쓰기 전에 테스트를 쓴다. 테스트가 스펙이고, 통과가 증명이다. → `/tdd`
-2. **이 OS 위에서 이 OS를 테스트한다.** 외부 도구에 전적으로 의존하는 것은 "우리 OS는 실제로 쓸 수 없다"고 고백하는 것이다. `@testing-library/react`는 사용하지 않는다 — testing-library가 필요하다는 것은 OS의 테스트 API가 부족하다는 증거다. OS가 자체적으로 Playwright 수준의 검증을 vitest에서 제공해야 한다. → `/test`
-3. **E2E는 블랙박스다.** 내부 로직을 전혀 모르는 상태에서 검증해야 진짜 테스트다. → `/test`
-4. **증명 없는 통과는 통과가 아니다.** 빌드가 됐다는 건 안 깨졌다는 증거가 아니다. 자동화된 검증만 증거다. → `/fix`
-5. **빌드 통과 ≠ 런타임 정상.** `vite build`(Rollup)와 dev 서버(esbuild)는 모듈 해석이 다르다. type erasure, export 처리 차이로 빌드는 통과해도 브라우저에서 깨질 수 있다. E2E Smoke가 진짜 검증이다. → `/verify`
-6. **안 쓰는 테스트는 정리한다.** 죽은 테스트는 거짓 안전감을 준다. 동작하지 않는 증명은 증명이 아니다. → `/cleanup`, `/review`
-7. **테스트 도구는 대상에 따라 다르다.** `createOsPage()` = OS 커널 계약 테스트 (APG, navigation, dismiss). `createPage(App)` = 앱 통합 테스트 (Builder, Todo). 앱 기능을 `createOsPage`로 테스트하면 커널만 검증되어 브라우저 동작을 보증하지 못한다 (거짓 GREEN). 앱 통합 테스트에서 `dispatch()` 직접 호출 금지 — `click()`, `keyboard.press()`만 허용. → `/red`
-7. **`as any`는 해결이 아니라 부채다.** 타입 에러를 `as any`로 억제하면 에러 카운트는 줄지만 cast 카운트가 늘고, 나중에 다시 되돌려야 한다. 타입 에러에 대한 올바른 분류: ① 진짜 수정 (타입을 맞춘다) ② skip (프로덕션 타입 설계 변경이 필요하다 → 지금은 안 건든다). `as any`로 메우는 ③번 선택지는 없다.
-8. **리팩토링은 측정 가능한 지표가 단조 개선될 때만 한다.** cast 수, import 수, 의존 방향 수, 코드 줄 수 — 하나 이상이 strictly 개선되고, 나머지가 악화되지 않아야 한다. 등가 교환이면 하지 않는다. → `/doubt`
-9. **OS 코드는 DOM을 직접 조작하지 않는다.** `document.querySelector`, `.click()`, `.focus()` 등의 직접 DOM 접근은 3-commands뿐 아니라 **OS 전체**(6-components 포함)에서 금지. 기존 메커니즘으로 해결할 수 없으면 **우회하지 말고 새 메커니즘을 설계**한다. "기존 기능이 없다 → DOM 직접 접근"은 금지 분기. "기존 기능이 없다 → OS 기능 추가"가 올바른 분기. DOM 데이터가 필요하면 `ctx.inject()`나 kernel state를 사용한다. ESLint `pipeline/no-dom-in-commands`가 commands 레이어를 자동 차단한다.
-10. **Focus/Keyboard 동작은 APG가 스펙이다.** 구현 전에 [APG](https://www.w3.org/WAI/ARIA/apg/) 해당 패턴을 읽는다. 직감으로 구현하고 나중에 APG를 확인하는 것은 금지. 순서: ① APG 패턴 읽기 → ② 요구사항을 테스트로 인코딩 → ③ 테스트를 통과하는 코드 작성. "그럴 것 같은" 동작이 아니라 "스펙이 요구하는" 동작을 구현한다.
-11. **상태는 변경 주체에 따라 배치한다.** 유저 액션(click, key)으로 바뀌는 상호작용 상태(focus, selection, expanded) → kernel state. 앱 로직으로 결정되는 선언 상태(disabled, role, config) → ZoneRegistry. "일관성을 위해 같은 곳에"가 아니라 "누가 바꾸는가"가 배치 기준이다.
-12. **상태 변경은 신호(Signal)와 소음(Noise)으로 분리된다.** 빈번한 OS 이벤트(포커스, 키보드) 자체는 상태 변이를 일으키지 않는 한 소음이다. 디버깅, 로깅, AI에게 제공하는 콘텍스트는 언제나 유의미한 상태 변경(STATE_MUTATION)을 우선 노출해야 한다.
-13. **커맨드(Command)는 암묵적 프록시가 되어서는 안 된다.** A 커맨드(`OS_SELECT`) 내부에서 편의를 위해 B 커맨드(`OS_EXPAND`)로 흐름을 하이재킹(Hijacking)하면 단일 책임 원칙(SRP)이 깨진다. 짬뽕 로직을 보호하는 맹목적인 테스트는 부채다. 기능을 변경할 때 기존 테스트가 이런 결함을 "정상"으로 통과시키고 있지 않은지 의심해야 한다.
-14. **알려진 상호작용은 전수 열거 후 구현한다 (Spec-First, Enumerate-All).** Clipboard, Drag-and-Drop, Tree Navigation 등 30년간 확립된 플랫폼 상호작용을 구현할 때, **구현 전에 모든 케이스를 나열**한다. macOS, Windows, Figma 등 기존 플랫폼에서 해당 상호작용의 전체 동작 표를 먼저 작성하고, 그 표의 모든 행을 테스트로 인코딩한 뒤, 코드를 작성한다. 순서: ① 플랫폼 선례에서 케이스 전수 열거 → ② 각 케이스를 테스트로 선언 → ③ 코드 작성. **한 케이스만 구현하고 "동작하네"로 넘어가는 것은 금지.** 사용자가 나머지 케이스를 발견하게 만드는 것은 구현이 아니라 미완성이다. 사례: Tree Clipboard — `paste(container)` → child 삽입, `paste(nested leaf)` → 같은 부모 안 다음 형제 삽입, `paste(root node)` → root 형제 삽입. 세 케이스를 한 번에 설계해야 한다.
-15. **참조는 쓸 때 보존하고, 읽을 때 해석한다 (Lazy Resolution).** 삭제·이동 시 참조 ID를 즉시 교체(Write-time Recovery)하면 원본이 영구 파괴되어 되돌리기(undo) 시 복귀 불가. 원본 참조를 불변으로 보존하고, 소비 시점에 현재 컬렉션 기준으로 해석(Read-time Resolution)하면 undo/redo가 자동으로 원래 위치를 복원한다. 복구 전용 상태·커맨드를 별도로 두지 않고, 순수함수 하나(`resolve(storedId, currentItems)`)로 대체한다.
-16. **변환 경계마다 독립된 실패 축이 있다.** 입력→커맨드, 커맨드→상태, 상태→화면 — 각 경계는 독립적으로 깨질 수 있다. 한 축의 정확성을 증명해도 다른 축은 증명되지 않는다. 상태가 맞다고 화면이 맞는 것이 아니고, 화면이 맞다고 상태가 맞는 것이 아니다. 테스트가 어느 축을 검증하는지 명시하고, 빠진 축이 있으면 의식적으로 감수하거나 추가한다.
-17. **"완료"는 Red→Green 증명이다.** 수정 전에 버그를 재현하는 Red 테스트를 먼저 쓰고, 수정 후 Green이 되는 것이 "완료"의 유일한 정의다. 기존 테스트가 깨지지 않았다는 것은 "regression 없음"이지 "수정 완료"가 아니다. 증명 없이 수정만 했으면 "현황 보고"로 종료한다. 이 OS는 `createPage`로 컴포넌트 렌더링을 포함한 headless 재현이 가능하도록 설계되어 있다. "브라우저에서 확인해주세요"는 "우리 OS로는 검증할 수 없다"는 고백이다.
-
-## 성능 — 우리가 지키는 규칙
-
-1. **애니메이션은 과정을 보여줘야 한다. 과정을 가리는 애니메이션은 잘못된 애니메이션이다.** Repeatable한 빠른 이동(커서, 포커스)에 opacity·색상 transition을 걸면, 이동 중 상태가 보이지 않는 순간이 생겨 오히려 과정을 가린다. 이런 요소에는 transition 없이 즉시 반영한다.
-2. **외부 스토어 구독값을 `useEffect` deps에 넣는 동시에 effect body에서 그 스토어를 변이(mutate)하지 않는다.** 이 패턴은 `구독 변경 → effect 재실행 → mutate → emit → 구독 변경 → ...` 무한 루프를 만든다 (`Maximum update depth exceeded`). **수정 패턴**: 구독값을 `ref`에 저장하고 렌더마다 갱신하되, deps에는 포함하지 않는다.
+이 규칙들은 너의 한계를 보완하기 위해 존재한다.
 
 
-## 네이밍 — 이름은 법이다
+## How — 두 가지 원칙
 
-> "표준이 있으면 발명하지 않는다" (Rule #7). 파일 케이스는 확장자가 법이고, 폴더는 업계 관행이 법이다.
+### 1. Pit of Success — 잘못 만들기가 더 어려운 구조
 
-### 파일 케이스
+이 프로젝트의 모든 모듈은 "올바르게 만드는 것이 기본값"이 되도록 설계되어 있다.
 
-| 역할 | 케이스 | 예시 |
-|------|--------|------|
-| React 컴포넌트 | `PascalCase.tsx` | `QuickPick.tsx`, `Zone.tsx` |
-| 타입/스키마/Store/Registry | `PascalCase.ts` | `FocusState.ts`, `InspectorStore.ts` |
-| 함수/유틸/로직 | `camelCase.ts` | `focusFinder.ts`, `loopGuard.ts` |
-| 커맨드 핸들러 | `camelCase(동사).ts` | `activate.ts`, `escape.ts` |
-| 앱 정의 | `app.ts` (고정) | — |
-| 앱 등록 | `register.ts` (고정) | — |
-| barrel export | `index.ts` (고정) | — |
-| 모듈 분해 | `module.concern.ts` | `defineApp.bind.ts` (defineApp에만 적용) |
-| 단위 테스트 | `kebab-case.test.ts` | `navigate.test.ts` |
-| E2E 테스트 | `kebab-case.spec.ts` | `todo.spec.ts` |
-| CSS | `kebab-case.css` | `docs-viewer.css` |
-| 시스템 메타 문서 | `UPPER_CASE.md` | `STATUS.md`, `BOARD.md` |
-| 분석/보고 문서 | `YYYY-MMDD-HHmm-[type]-slug.md` | — |
+- 기존 메커니즘이 있으면 그것을 사용한다. 새로 만들지 않는다.
+- 같은 문제를 푸는 선택지가 여럿이면, 이 프로젝트에서는 하나만 열려 있다. 그 하나를 찾아서 따른다.
+- 새로운 고유 패턴이 필요하다면, 아직 올바른 추상화를 못 찾았다는 신호다. 멈추고 보고한다.
+- `eslint-disable`, `as any`, `document.querySelector` — 구조를 우회하는 코드는 금지다.
 
-### 폴더 네이밍
+너의 자유도가 줄어드는 것이 아니다.
+줄어든 자유도 안에서 뭘 해도 올바르게 되는 것이다.
 
-| 규칙 | 기준 | 예시 |
-|------|------|------|
-| 업계 관행 이름 | 표준 그대로 (단수) | `lib/`, `ui/`, `config/`, `model/`, `state/` |
-| 컬렉션 폴더 | 복수형 | `widgets/`, `primitives/`, `stores/`, `keymaps/` |
-| 테스트 | `tests/` → `unit/`, `e2e/` | 고정 구조 |
-| 순서가 의미인 곳 | `N-name/` (번호 접두사) | `1-listeners/`, `0-inbox/` |
-| 앱/모듈/프로젝트 | kebab-case | `todo/`, `builder-mvp/` |
+### 2. 100% Observable — Pit of Success의 필연적 결과
 
-### 구조 어휘 — 세 세계
+구조가 제약되어 있으면, 모든 과정이 기록되고 테스트 가능하다.
 
-| 영역 | 어휘 체계 | 근거 |
-|------|----------|------|
-| **Apps** | **FSD** (Feature-Sliced Design) | `app.ts` → `widgets/` → `features/` → `entities/` → `shared/` |
-| **OS** | **파이프라인** (번호 접두사) | `1-listeners/` → … → `6-components/` |
-| **Docs** | **토폴로지** | `official/` (살아있는 문서) + `archive/` (죽은 문서) + `2-area/` (인큐베이터) |
+- **에이전트(너)는 TestPage로 DOM 없이 검증한다.** 브라우저를 열 필요가 없다.
+  테스트가 DOM 없이 동작하지 않으면, OS의 추상화가 부족하다는 신호다.
+- **인간은 시각화(TestBot, Inspector)로 검증한다.** 코드를 읽을 필요가 없다.
+  테스트 과정이 시각화되어, 행동을 보고 잘했다/못했다를 판단한다.
+- **"브라우저에서 확인해주세요"는 금지다.** 그것은 이 OS로는 검증할 수 없다는 고백이다.
 
-### 파이프라인 동사 — 1-listeners 법
+테스트는 코드를 수정하기 전에 쓴다(TDD).
+테스트가 스펙이고, 통과가 증명이다.
 
-> **하나의 동사 = 하나의 경계.** 동사가 겹치면 에이전트가 "이 함수는 어느 단계?"를 추론해야 한다.
 
-| 동사 | 경계 | 입력 → 출력 | 순수 | 예시 |
-|------|------|------------|------|------|
-| `sense` | DOM → SenseData | `HTMLElement, Event` → `MouseDownSense` | ❌ (DOM 읽기) | `senseMouseDown()` |
-| `extract` | SenseData → ResolveInput | `MouseDownSense` → `MouseInput` | ✅ | `extractMouseInput()` |
-| `resolve` | ResolveInput → Commands | `MouseInput` → `ResolveResult` | ✅ | `resolveMouse()` |
-| `dispatch` | Commands → SideEffect | `ResolveResult` → `os.dispatch()` | ❌ (부수효과) | Listener 내부 |
+## What — 우리가 만드는 것
 
-- `sense`와 `extract`는 복잡도가 낮으면 하나로 합칠 수 있다 (예: `senseKeyboard` → 직접 `KeyboardInput` 반환).
-- `resolve`는 **반드시** input→command 판단에만 사용한다. sense→input 변환에 `resolve`를 쓰지 않는다.
+Interactive OS는 웹 애플리케이션을 위한 **상호작용 인프라**다.
 
-### 문서 토폴로지 — 살아있는 문서 vs 죽은 문서
+데스크탑에 AppKit이 있고, 모바일에 UIKit이 있다. 웹에는 없었다.
+Interactive OS가 그 자리를 채운다.
 
-> 문서의 노화 축은 "시점 의존 vs 시점 독립"이다. 소스코드 토폴로지에 기반한 문서는 안 늙는다.
-> **소스는 문서처럼, 문서는 소스처럼.** 소스의 폴더 경계가 문서의 단위를 결정하고, 문서의 개념 경계가 소스의 폴더를 결정한다. 한쪽이 변하면 다른 쪽도 맞춘다.
+앱 개발자(또는 에이전트)는 "이 영역은 리스트다"라고 **선언**하면,
+OS가 나머지를 **보장**한다:
+방향키 탐색, Tab 이동, Enter 활성화, 스크린 리더, 선택, 삭제, 복사 — 전부.
 
-| 계층 | 역할 | 규칙 |
-|------|------|------|
-| `official/` | 공식 지식의 인지 지도 | 개념 단위, 덮어쓰기, 날짜 없음, 소스코드 토폴로지와 **양방향 동형** |
-| `.agent/rules.md` | 헌법 | 강제 노출 경로, 매 세션 읽힘, 시점 독립 원칙만 |
-| `2-area/` | 인큐베이터 | official로 아직 졸업 못 한 지식 (meta, cross-cutting) |
-| `archive/YYYY/MM/WNN/` | 매장 | 분류 없이 주차별 flat, 정리 비용 0 |
+**모든 모듈이 Pit of Success다.** 각 모듈이 하나의 관심사를 제약한다:
 
-- **개발 중 문서**(BOARD, discussions, devnote)는 에이전트의 세션 간 작업 기억으로 필수 — 생산량을 줄이지 않는다.
-- **작업 완료 시** `/archive` 워크플로우로 환류: official 추출 + archive/주차 매장.
+| 모듈 | Pit of Success |
+|------|---------------|
+| **Kernel** | 모든 상태 변경은 커맨드(데이터)로, 하나의 경로를 통과한다 |
+| **Pipeline** | 입력→해석→실행→투영. 6단계. 각 단계는 하나의 책임만 진다 |
+| **ZIFT** | Zone, Item, Field, Trigger — 4개 개념으로 모든 UI를 선언한다 |
+| **ARIA** | role을 선언하면 접근성이 보장된다 |
+| **Collection** | 데이터 구조가 정규화된다. 트리, 리스트, 그리드 — 하나의 구조 |
+| **History** | Undo/Redo가 미들웨어로 자동 제공된다 |
+| **Keybindings** | 키보드 단축키가 시스템 수준으로 통합된다 |
+| **headless/** | OS의 두뇌. ARIA·속성 계산(`computeItem`)을 DOM 컴포넌트와 테스트가 같은 함수로 호출한다. "Zero Drift" — headless 테스트가 통과하면 DOM도 동일하게 동작한다 |
+| **defineApp()** | 앱 정의의 유일한 진입점. 상태·커맨드·Zone·바인딩·테스트가 이 하나를 통과한다. 앱 수준 Pit of Success |
+| **App Modules** | `history()`, `persistence()` 등 기능을 플러그인으로 설치한다. 구현 없이 선언으로 해결 |
+| **Command Scoping** | 커맨드가 앱 단위로 격리된다. 여러 앱이 같은 OS 위에서 충돌 없이 공존하는 메커니즘 |
+| **TestPage** | DOM 없이 전체 상호작용을 검증한다. Playwright와 동형 API (`locator`, `press`, `click`, `attrs`) |
+
+이 구조 안에서 코드를 쓰면, 올바르게 만들어지는 것이 기본값이다.
+이 구조를 우회하면, 인간이 검수할 수 없는 코드가 된다.
+
+> **핵심**: `headless/compute.ts`가 OS의 두뇌이고, DOM 컴포넌트는 그 투영이다.
+> 테스트가 headless에서 통과하면 DOM도 동일하게 동작한다. 브라우저 없이 품질이 증명된다.
 
 
 ---
 
 ## 부록: Cynefin 의사결정 프레임워크
 
-> Dave Snowden. 모든 판단 분기에서 이 도메인 분류를 사용한다. `/divide`, `/go`, `/inbox` 등에서 참조.
+> 코드를 고치기 전에 도메인을 판단한다.
 
-| 도메인 | 판단 기준 | 전략 | 예시 |
-|--------|----------|------|------|
-| **Clear** | 정답이 있다. 업계 표준, 자명한 해법. | Sense → Categorize → Respond | import 누락, 오타 교정 |
-| **Complicated** | 선택지가 있지만 분석하면 답이 좁혀진다. | Sense → Analyze → Respond | 아키텍처 선택, API 설계 |
-| **Complex** | 정답이 없다. 프로젝트 맥락에 따라 다르다. | Probe → Sense → Respond | UX 방향, 추상화 수준 |
-| **Chaotic** | 긴급. 분석할 시간이 없다. | Act → Sense → Respond | P0 장애, 빌드 불가 |
+| 도메인 | 판단 기준 | 전략 |
+|--------|----------|------|
+| **Clear** | 정답이 있다. 기존 패턴이 있다. | 즉시 실행 |
+| **Complicated** | 선택지가 있지만 분석하면 좁혀진다. | 분석 후 실행 |
+| **Complex** | 정답이 없다. 맥락에 따라 다르다. | 멈추고 묻는다 |
+| **Chaotic** | 긴급. 분석할 시간이 없다. | 봉쇄 후 분석 |
+
+모르면 묻는다. 추측으로 구현하지 않는다.
+잘못된 방향으로 100줄 쓰는 것보다 질문 하나가 낫다.
+
+> **정확성**: 수치(개수, 파일수, 오류수)를 보고하기 전에 반드시 실제 파일을 `view_file`이나 `grep`으로 확인한다.
+> 이전 세션 summary나 컨텍스트에서 수치를 추론하면 틀린다. 직접 확인이 유일한 정답이다.
 
 
+---
 
+## 참조 — 필요할 때 여기를 본다
+
+이 섹션의 지식은 매 세션 기억할 필요 없다.
+해당 상황이 발생했을 때 찾아서 읽는다.
+
+### 설계 판단이 필요할 때
+
+| 상황 | 참조 |
+|------|------|
+| 새 패턴을 만들어야 할 것 같을 때 | `.agent/knowledge/design-principles.md` |
+| 아키텍처 선택지가 여럿일 때 | `.agent/knowledge/design-principles.md` |
+| 상태를 어디에 배치할지 모를 때 | `.agent/knowledge/design-principles.md` |
+
+### 코드를 작성할 때
+
+| 상황 | 참조 |
+|------|------|
+| 파일/폴더 이름을 지을 때 | `.agent/knowledge/naming-conventions.md` |
+| 함수 이름 동사를 선택할 때 (resolve? compute? get?) | `.agent/knowledge/naming.md` → 동사 Dictionary |
+| 타입 이름 접미사를 선택할 때 (Entry? Result? Handle?) | `.agent/knowledge/naming.md` → 접미사 Dictionary |
+| 도메인 개념이 무엇인지 확인할 때 (Zone? Item? Cursor?) | `.agent/knowledge/domain-glossary.md` |
+| 성능 관련 패턴이 필요할 때 | `.agent/knowledge/coding-rules.md` |
+| 1-listeners에서 함수를 작성할 때 | `.agent/knowledge/naming.md` → 파이프라인 동사 |
+
+### 테스트를 작성할 때
+
+| 상황 | 참조 |
+|------|------|
+| 어떤 테스트 도구를 쓸지 판단할 때 | `.agent/knowledge/verification-standards.md` |
+| APG 패턴을 구현할 때 | `.agent/knowledge/verification-standards.md` |
+| 리팩토링 가치를 판단할 때 | `.agent/knowledge/verification-standards.md` |
+
+### 작업 방식이 불확실할 때
+
+| 상황 | 참조 |
+|------|------|
+| 스코프가 너무 클 때 | `.agent/knowledge/working-standards.md` |
+| 사용자 가설과 내 판단이 다를 때 | `.agent/knowledge/working-standards.md` |
+| OS gap을 발견했을 때 | `.agent/knowledge/working-standards.md` |
+
+### OS 아키텍처를 이해해야 할 때
+
+| 상황 | 참조 |
+|------|------|
+| Interactive OS의 전체 비전 | `docs/official/VISION.md` |
+| 커널 구조와 API | `docs/official/kernel/` |
+| OS 레이어별 가이드 | `docs/official/os/` |
+| ZIFT 스펙 | KI: `ZIFT Standard Specification` |
+| 포커스 시스템 | KI: `Antigravity Interaction OS Architecture` |
+
+### 워크플로우를 실행할 때
+
+| 상황 | 참조 |
+|------|------|
+| TDD 사이클 (Red/Green) | `.agent/knowledge/red.md`, `.agent/knowledge/green.md` |
+| UI 바인딩 | `.agent/knowledge/bind.md` |
+| 감사/리뷰 | `.agent/knowledge/audit.md` |
+| 리팩토링 | `.agent/knowledge/refactor.md` |
+| BDD 스펙 작성 | `.agent/knowledge/spec.md` |

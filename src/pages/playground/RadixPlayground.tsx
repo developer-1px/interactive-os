@@ -9,7 +9,6 @@
 
 
 import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { FocusItem } from "@os/6-components/base/FocusItem.tsx";
 import { Item } from "@os/6-components/primitives/Item.tsx";
 import { Dialog } from "@os/6-components/radix/Dialog.tsx";
 
@@ -46,20 +45,20 @@ export function RadixPlayground() {
             options={{ navigate: { orientation: "horizontal" } }}
             className="flex gap-2"
           >
-            <FocusItem
+            <Item
               id="radix-item-1"
               role="option"
               className="px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 aria-[current=true]:bg-indigo-50 aria-[current=true]:border-indigo-300 aria-[current=true]:text-indigo-700 text-sm transition-colors"
             >
               Item 1
-            </FocusItem>
-            <FocusItem
+            </Item>
+            <Item
               id="radix-item-2"
               role="option"
               className="px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 aria-[current=true]:bg-indigo-50 aria-[current=true]:border-indigo-300 aria-[current=true]:text-indigo-700 text-sm transition-colors"
             >
               Item 2
-            </FocusItem>
+            </Item>
 
             <Dialog>
               <Dialog.Trigger>

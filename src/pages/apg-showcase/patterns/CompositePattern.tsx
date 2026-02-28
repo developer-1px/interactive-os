@@ -1,7 +1,7 @@
 import { Icon } from "@/components/Icon";
 import { useExpanded } from "@/os/5-hooks/useExpanded";
 import { Zone } from "@/os/6-components/primitives/Zone";
-import { FocusItem } from "@/os/6-components/base/FocusItem";
+import { Item } from "@/os/6-components/primitives/Item";
 
 export function CompositePattern() {
   const { isExpanded } = useExpanded();
@@ -22,15 +22,15 @@ export function CompositePattern() {
           options={{ navigate: { orientation: "horizontal" } }}
           className="flex border border-gray-300 rounded p-1 bg-gray-50"
         >
-          <FocusItem
+          <Item
             id="comp-btn-1"
             role="button"
             className="px-3 py-1.5 rounded hover:bg-gray-200 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400 cursor-pointer"
           >
             Action
-          </FocusItem>
+          </Item>
 
-          <FocusItem
+          <Item
             id="comp-btn-menu"
             role="button"
             aria-haspopup="menu"
@@ -39,7 +39,7 @@ export function CompositePattern() {
           >
             <span>Options</span>
             <Icon name="chevron-down" size={14} />
-          </FocusItem>
+          </Item>
         </Zone>
 
         {isExpanded("comp-btn-menu") && (
@@ -49,20 +49,20 @@ export function CompositePattern() {
             options={{ navigate: { orientation: "vertical" }, dismiss: { escape: "close" } }}
             className="absolute top-full mt-1 left-0 w-48 bg-white border border-gray-200 rounded shadow-lg py-1 z-50"
           >
-            <FocusItem
+            <Item
               id="comp-menu-1"
               role="menuitem"
               className="px-4 py-2 hover:bg-gray-100 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none cursor-pointer"
             >
               Settings
-            </FocusItem>
-            <FocusItem
+            </Item>
+            <Item
               id="comp-menu-2"
               role="menuitem"
               className="px-4 py-2 hover:bg-gray-100 data-[focused=true]:bg-indigo-50 data-[focused=true]:outline-none cursor-pointer"
             >
               Logout
-            </FocusItem>
+            </Item>
           </Zone>
         )}
       </div>

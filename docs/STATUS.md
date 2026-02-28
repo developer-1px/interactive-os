@@ -103,6 +103,7 @@
 
 | File | Topic | Related Project | Suggested Action |
 |------|-------|-----------------|------------------|
+| `2026-0228-1949-[proposal]-item-descriptor-unification.md` | N-getter→1-accessor. ItemDescriptor 단일 정규화. 3축 발견 (Enumeration/Capability/Topology) | (cross-cutting OS core) | → `1-project/` 신규 or 5-backlog/ |
 | `2026-0227-1024-[analysis]-headless-simulator-vision.md` | Vitest에서 Playwright 수준 검증. 거짓 GREEN 근절 | headless-simulator | → `1-project/headless-simulator/notes/` |
 | `2026-0227-1044-[research]-workflow-methodology-mapping.md` | 40+ 워크플로우 × 30+ 전문 방법론 MECE 매핑 | meta (cross-cutting) | → `2-area/praxis/` or keep inbox |
 | `2026-0226-2021-[proposal]-verification-level-up.md` | 검증 부족 영역 11건 식별 | code-hygiene | → `1-project/code-hygiene/notes/` |

@@ -1,20 +1,20 @@
 /**
- * Inspector Keybinding Registration
+ * Inspector Registration
  *
- * Registers TOGGLE_INSPECTOR command and Meta+I keybinding
- * through the OS keybinding system. Inspector uses the OS as
- * infrastructure but owns its own registration — a plugin model.
+ * 1. TOGGLE_INSPECTOR command + Meta+I keybinding
+ * 2. TestBot panel — ARIA test runner embedded in Inspector
  *
  * Side-effect import: `import "@inspector/register"`
  */
 
+import React from "react";
 import { os } from "@/os/kernel";
 import { Keybindings } from "@/os/keymaps/keybindings";
 import { InspectorStore } from "./stores/InspectorStore";
+import { InspectorRegistry } from "./stores/InspectorRegistry";
+import { TestBotPanel } from "./panels/TestBotPanel";
 
 // ── Command ──────────────────────────────────────────────────────
-// Pure side-effect command: toggles the Inspector store.
-// No kernel state mutation needed.
 
 export const TOGGLE_INSPECTOR = os.defineCommand(
   "TOGGLE_INSPECTOR",
@@ -25,9 +25,18 @@ export const TOGGLE_INSPECTOR = os.defineCommand(
 );
 
 // ── Keybinding ───────────────────────────────────────────────────
-// No `when` → always active, regardless of editing/navigating state.
 
 Keybindings.register({
   key: "Meta+I",
   command: TOGGLE_INSPECTOR(),
 });
+
+// ── TestBot Panel ────────────────────────────────────────────────
+// Registers as a dynamic panel in the Inspector Activity Bar.
+// Lifetime: session (never unregistered).
+
+InspectorRegistry.register(
+  "TESTBOT",
+  "TestBot",
+  React.createElement(TestBotPanel),
+);

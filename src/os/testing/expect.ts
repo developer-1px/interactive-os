@@ -22,33 +22,42 @@ import type { Locator, LocatorAssertions } from "./types";
  *   await expect(page.locator("apple")).toBeFocused();
  */
 export function expect(locator: Locator): LocatorAssertions {
-    // The locator itself knows how to resolve assertions.
-    // We delegate to the engine-specific implementation.
     const assertable = locator as Locator & {
-        _toHaveAttribute?: (name: string, value: string | RegExp) => Promise<void>;
-        _toBeFocused?: () => Promise<void>;
+        _toHaveAttribute?: (name: string, value: string | RegExp, negated?: boolean) => Promise<void>;
+        _toBeFocused?: (negated?: boolean) => Promise<void>;
     };
 
-    return {
-        async toHaveAttribute(name: string, value: string | RegExp) {
-            if (assertable._toHaveAttribute) {
-                return assertable._toHaveAttribute(name, value);
-            }
-            // Fallback: use getAttribute
-            const actual = await locator.getAttribute(name);
-            const expected = typeof value === "string" ? value : undefined;
-            if (actual !== expected) {
-                throw new Error(
-                    `Expected [${name}] to be "${expected}" but got "${actual}"`,
-                );
-            }
-        },
+    function createAssertions(negated: boolean): LocatorAssertions {
+        const assertions: LocatorAssertions = {
+            async toHaveAttribute(name: string, value: string | RegExp) {
+                if (assertable._toHaveAttribute) {
+                    return assertable._toHaveAttribute(name, value, negated);
+                }
+                // Fallback: use getAttribute
+                const actual = await locator.getAttribute(name);
+                const expected = typeof value === "string" ? value : undefined;
+                const matches = actual === expected;
+                const passed = negated ? !matches : matches;
+                if (!passed) {
+                    throw new Error(negated
+                        ? `Expected [${name}] NOT to be "${expected}" but it was`
+                        : `Expected [${name}] to be "${expected}" but got "${actual}"`);
+                }
+            },
 
-        async toBeFocused() {
-            if (assertable._toBeFocused) {
-                return assertable._toBeFocused();
-            }
-            throw new Error("toBeFocused() not implemented by this engine");
-        },
-    };
+            async toBeFocused() {
+                if (assertable._toBeFocused) {
+                    return assertable._toBeFocused(negated);
+                }
+                throw new Error("toBeFocused() not implemented by this engine");
+            },
+
+            get not(): LocatorAssertions {
+                return createAssertions(!negated);
+            },
+        };
+        return assertions;
+    }
+
+    return createAssertions(false);
 }
