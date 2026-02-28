@@ -46,3 +46,5 @@ export {
 } from "./selection";
 // Tab
 export { OS_TAB } from "./tab";
+// Value
+export { OS_VALUE_CHANGE } from "./value";

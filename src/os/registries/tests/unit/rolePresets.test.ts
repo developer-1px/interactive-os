@@ -23,7 +23,7 @@ interface SpecRow {
   entry: "first" | "last" | "restore" | "selected";
   selectMode: "none" | "single" | "multiple";
   followFocus: boolean;
-  tab: "trap" | "escape" | "flow";
+  tab: "trap" | "escape" | "flow" | "native";
   activate: "manual" | "automatic";
   dismissEsc: "close" | "deselect" | "none";
   autoFocus: boolean;
@@ -222,7 +222,7 @@ const specTable: SpecRow[] = [
     entry: D.entry,
     selectMode: D.selectMode,
     followFocus: D.followFocus,
-    tab: "escape",
+    tab: "native",
     activate: "manual",
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,

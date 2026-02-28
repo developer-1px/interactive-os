@@ -9,7 +9,9 @@ import { Field } from "@os/6-components/field/Field";
 import { Item } from "@os/6-components/primitives/Item";
 import type { ZoneOptions } from "@os/6-components/primitives/Zone";
 import { Zone } from "@os/6-components/primitives/Zone";
+import { useZoneContext } from "@os/6-components/primitives/Zone";
 import { Keybindings as KeybindingsRegistry } from "@os/keymaps/keybindings";
+import { os } from "@os/kernel";
 import React, { type ReactNode } from "react";
 import type {
   BoundComponents,
@@ -119,7 +121,14 @@ export function createBoundComponents<S>(
       isAnchor?: boolean;
     }) => ReactNode);
     asChild?: boolean;
-  }> = ({ id, className, children, asChild }) => {
+  }> & {
+    Region: React.FC<{
+      for: string;
+      id?: string;
+      className?: string;
+      children?: ReactNode;
+    }>;
+  } = ({ id, className, children, asChild }) => {
     return React.createElement(Item, {
       id: String(id),
       className,
@@ -128,6 +137,33 @@ export function createBoundComponents<S>(
     } as React.ComponentProps<typeof Item>);
   };
   ItemComponent.displayName = `${appId}.${zoneName}.Item`;
+
+  // ── Item.Region — passive projection of Item's expanded state ──
+  const RegionComponent: React.FC<{
+    for: string;
+    id?: string;
+    className?: string;
+    children?: ReactNode;
+  }> = ({ for: itemId, id, className, children }) => {
+    const ctx = useZoneContext();
+    const zoneId = ctx?.zoneId ?? zoneName;
+
+    const isExpanded = os.useComputed(
+      (s) => s.os.focus.zones[zoneId]?.expandedItems.includes(itemId) ?? false,
+    );
+
+    if (!isExpanded) return null;
+
+    return React.createElement("div", {
+      id: id ?? `panel-${itemId}`,
+      role: "region",
+      "aria-labelledby": itemId,
+      className,
+      children,
+    });
+  };
+  RegionComponent.displayName = `${appId}.${zoneName}.Item.Region`;
+  ItemComponent.Region = RegionComponent;
 
   // ── Field component ──
   const FieldComponent: React.FC<{
@@ -166,7 +202,7 @@ export function createBoundComponents<S>(
 
   return {
     Zone: ZoneComponent,
-    Item: ItemComponent,
+    Item: ItemComponent as BoundComponents<S>["Item"],
     Field: FieldComponent,
     When: WhenComponent,
   };

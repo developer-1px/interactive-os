@@ -18,6 +18,7 @@ import type {
   ProjectConfig,
   SelectConfig,
   TabConfig,
+  ValueConfig,
 } from "../schemas";
 import {
   DEFAULT_ACTIVATE,
@@ -28,6 +29,7 @@ import {
   DEFAULT_PROJECT,
   DEFAULT_SELECT,
   DEFAULT_TAB,
+  DEFAULT_VALUE,
 } from "../schemas";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -62,6 +64,8 @@ export type ZoneRole =
   | "feed"
   | "accordion"
   | "disclosure"
+  // Value patterns
+  | "slider"
   // Custom (non-ARIA)
   | "builderBlock"
   | "application"
@@ -85,6 +89,7 @@ const childRoleMap: Partial<Record<ZoneRole, string>> = {
   combobox: "option",
   feed: "article",
   accordion: "button",
+  slider: "slider",
 };
 
 /** Roles where items should use `aria-checked` instead of `aria-selected` */
@@ -289,7 +294,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
     navigate: { orientation: "vertical", loop: false },
     activate: { mode: "manual", onClick: true },
     expand: { mode: "all" },
-    tab: { behavior: "escape" },
+    tab: { behavior: "native" },
   },
 
   // ─── Disclosure (ARIA: single expand/collapse) ───
@@ -317,6 +322,16 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   textbox: {
     tab: { behavior: "flow" },
   },
+
+  // ─── Slider (ARIA APG: Slider Pattern) ───
+  // Spec: Arrow keys adjust value (not navigation), Home/End jump to min/max,
+  //       PageUp/PageDown adjust by large step, single focusable element
+  slider: {
+    navigate: { orientation: "vertical", loop: false },
+    select: { mode: "none" },
+    tab: { behavior: "escape" },
+    value: { mode: "continuous", min: 0, max: 100, step: 1, largeStep: 10 },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -334,6 +349,7 @@ export function resolveRole(
     project?: Partial<ProjectConfig>;
     expand?: Partial<ExpandConfig>;
     check?: Partial<CheckConfig>;
+    value?: Partial<ValueConfig>;
   } = {},
 ): FocusGroupConfig {
   const basePreset = role ? rolePresets[role as ZoneRole] || {} : {};
@@ -374,6 +390,11 @@ export function resolveRole(
       ...DEFAULT_CHECK,
       ...basePreset.check,
       ...(overrides.check ?? {}),
+    },
+    value: {
+      ...DEFAULT_VALUE,
+      ...basePreset.value,
+      ...(overrides.value ?? {}),
     },
   };
 }

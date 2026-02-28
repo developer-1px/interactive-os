@@ -97,7 +97,9 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(
         (z?.focusedItemId === stringId ? 1 : 0) |
         (s.os.focus.activeZoneId === zoneId ? 2 : 0) |
         (z?.selection.includes(stringId) ? 4 : 0) |
-        (z?.expandedItems.includes(stringId) ? 8 : 0)
+        (z?.expandedItems.includes(stringId) ? 8 : 0) |
+        // Value axis: encode valueNow into upper bits for re-render trigger
+        ((z?.valueNow?.[stringId] ?? 0) * 65536)
       );
     });
 

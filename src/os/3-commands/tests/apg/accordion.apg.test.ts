@@ -213,4 +213,47 @@ describe("APG Accordion: Click interaction", () => {
     t.click("acc-personal");
     expect(t.zone()?.expandedItems).not.toContain("acc-personal");
   });
+
+  it("click on unfocused header: focuses AND expands it (W3C APG)", () => {
+    const t = accordionFactory("acc-personal");
+    // acc-billing is NOT focused yet
+    expect(t.focusedItemId()).toBe("acc-personal");
+
+    // Single click on unfocused header → should focus + expand
+    t.click("acc-billing");
+    expect(t.focusedItemId()).toBe("acc-billing");
+    expect(t.zone()?.expandedItems).toContain("acc-billing");
+  });
+
+  it("click headers independently: multiple panels open", () => {
+    const t = accordionFactory("acc-personal");
+
+    // Click first header → expand
+    t.click("acc-personal");
+    expect(t.zone()?.expandedItems).toContain("acc-personal");
+
+    // Click second header → also expand (multi-open)
+    t.click("acc-billing");
+    expect(t.zone()?.expandedItems).toContain("acc-personal");
+    expect(t.zone()?.expandedItems).toContain("acc-billing");
+
+    // Click first header again → collapse only first
+    t.click("acc-personal");
+    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
+    expect(t.zone()?.expandedItems).toContain("acc-billing");
+  });
+
+  it("click expands on first click, not re-click only", () => {
+    // This test verifies the W3C APG accordion behavior:
+    // clicking a header should ALWAYS toggle expand, even on first click
+    const t = accordionFactory("acc-personal");
+
+    // Click unfocused header → should expand on first click
+    t.click("acc-shipping");
+    expect(t.zone()?.expandedItems).toContain("acc-shipping");
+
+    // Click it again (now focused) → should collapse
+    t.click("acc-shipping");
+    expect(t.zone()?.expandedItems).not.toContain("acc-shipping");
+  });
 });

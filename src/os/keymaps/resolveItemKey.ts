@@ -12,7 +12,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { OS_ACTIVATE, OS_CHECK, OS_EXPAND, OS_SELECT } from "@os/3-commands";
+import { OS_ACTIVATE, OS_CHECK, OS_EXPAND, OS_SELECT, OS_VALUE_CHANGE } from "@os/3-commands";
 
 // ═══════════════════════════════════════════════════════════════════
 // Item Context
@@ -80,6 +80,33 @@ const resolveButton: ItemKeyResolver = (key) => {
   return null;
 };
 
+/**
+ * slider: Arrow keys / Home / End / PageUp / PageDown → VALUE_CHANGE
+ * (W3C APG Slider Pattern)
+ *
+ * All directional keys adjust value instead of navigation.
+ */
+const resolveSlider: ItemKeyResolver = (key) => {
+  switch (key) {
+    case "ArrowRight":
+    case "ArrowUp":
+      return OS_VALUE_CHANGE({ action: "increment" });
+    case "ArrowLeft":
+    case "ArrowDown":
+      return OS_VALUE_CHANGE({ action: "decrement" });
+    case "PageUp":
+      return OS_VALUE_CHANGE({ action: "incrementLarge" });
+    case "PageDown":
+      return OS_VALUE_CHANGE({ action: "decrementLarge" });
+    case "Home":
+      return OS_VALUE_CHANGE({ action: "setMin" });
+    case "End":
+      return OS_VALUE_CHANGE({ action: "setMax" });
+    default:
+      return null;
+  }
+};
+
 const ITEM_RESOLVERS: Record<string, ItemKeyResolver> = {
   treeitem: resolveTreeItem,
   checkbox: resolveCheckable,
@@ -87,6 +114,7 @@ const ITEM_RESOLVERS: Record<string, ItemKeyResolver> = {
   radio: resolveRadio,
   menuitemradio: resolveRadio,
   button: resolveButton,
+  slider: resolveSlider,
 };
 
 // ═══════════════════════════════════════════════════════════════════

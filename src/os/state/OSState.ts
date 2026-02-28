@@ -79,4 +79,8 @@ export interface ZoneState {
 
   // Expansion Slice
   expandedItems: string[];
+
+  // Value Slice (slider, spinbutton, separator)
+  /** Per-item current values for value-axis widgets (itemId → number) */
+  valueNow: Record<string, number>;
 }

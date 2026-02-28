@@ -35,7 +35,10 @@ export const DEFAULT_NAVIGATE: NavigateConfig = {
 // ── Tab ──
 
 export interface TabConfig {
-  behavior: "trap" | "escape" | "flow";
+  /** "trap" = cycle within zone, "escape" = jump to next zone,
+   *  "flow" = navigate items then escape at boundary,
+   *  "native" = OS does not intercept — browser default Tab order */
+  behavior: "trap" | "escape" | "flow" | "native";
   restoreFocus: boolean;
 }
 
@@ -137,6 +140,32 @@ export const DEFAULT_CHECK: CheckConfig = {
   mode: "none",
 };
 
+// ── Value (aria-valuenow/min/max — slider, spinbutton, separator) ──
+
+export interface ValueConfig {
+  /**
+   * "continuous" — item has a numeric value within a range (slider, spinbutton)
+   * "none"       — no value axis (default for all other roles)
+   */
+  mode: "continuous" | "none";
+  /** Minimum allowed value (aria-valuemin) */
+  min: number;
+  /** Maximum allowed value (aria-valuemax) */
+  max: number;
+  /** Step increment for Arrow keys */
+  step: number;
+  /** Large step increment for PageUp/PageDown */
+  largeStep: number;
+}
+
+export const DEFAULT_VALUE: ValueConfig = {
+  mode: "none",
+  min: 0,
+  max: 100,
+  step: 1,
+  largeStep: 10,
+};
+
 // ── Composed ──
 
 export interface FocusGroupConfig {
@@ -148,6 +177,7 @@ export interface FocusGroupConfig {
   project: ProjectConfig;
   expand: ExpandConfig;
   check: CheckConfig;
+  value: ValueConfig;
 }
 
 export const DEFAULT_CONFIG: FocusGroupConfig = {
@@ -159,4 +189,5 @@ export const DEFAULT_CONFIG: FocusGroupConfig = {
   project: DEFAULT_PROJECT,
   expand: DEFAULT_EXPAND,
   check: DEFAULT_CHECK,
+  value: DEFAULT_VALUE,
 };

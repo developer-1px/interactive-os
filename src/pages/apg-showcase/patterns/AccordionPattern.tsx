@@ -61,39 +61,33 @@ const SECTIONS: AccordionSection[] = [
 
 const AccordionApp = defineApp<Record<string, never>>("apg-accordion-app", {});
 const accordionZone = AccordionApp.createZone("apg-accordion");
-const AccordionUI = accordionZone.bind({
-  role: "accordion",
-  // expand.mode: "all" is automatic from role preset
-  // → no getExpandableItems needed
-});
+const AccordionUI = accordionZone.bind({ role: "accordion" });
 
 // ─── Accordion Row ───
 // Zero render-prop. Zero JS state.
 // OS → data-focused, aria-expanded → CSS reads them.
-
 function AccordionRow({ section }: { section: AccordionSection }) {
   return (
-    <AccordionUI.Item
-      id={section.id}
-      aria-controls={`panel-${section.id}`}
-      className="group cursor-pointer select-none data-[focused=true]:ring-2 data-[focused=true]:ring-inset data-[focused=true]:ring-indigo-400"
-    >
-      {/* Header */}
-      <div className="w-full px-6 py-4 flex items-center justify-between text-sm text-gray-900 transition-colors hover:bg-indigo-50 group-data-[focused=true]:bg-indigo-50">
-        <span className="font-medium">{section.title}</span>
-        <Icon
-          name="chevron-down"
-          size={16}
-          className="text-gray-400 flex-shrink-0 transition-transform group-aria-expanded:rotate-180"
-        />
-      </div>
+    <div>
+      {/* Header — this IS the Item. Only this triggers expand. */}
+      <AccordionUI.Item
+        id={section.id}
+        className="group w-full cursor-pointer select-none data-[focused=true]:ring-2 data-[focused=true]:ring-inset data-[focused=true]:ring-indigo-400"
+      >
+        <div className="w-full px-6 py-4 flex items-center justify-between text-sm text-gray-900 transition-colors hover:bg-indigo-50 group-data-[focused=true]:bg-indigo-50">
+          <span className="font-medium">{section.title}</span>
+          <Icon
+            name="chevron-down"
+            size={16}
+            className="text-gray-400 flex-shrink-0 transition-transform group-aria-expanded:rotate-180"
+          />
+        </div>
+      </AccordionUI.Item>
 
-      {/* Panel — hidden by default, shown when aria-expanded on parent Item */}
-      <div
-        id={`panel-${section.id}`}
-        role="region"
-        aria-labelledby={section.id}
-        className="hidden group-aria-expanded:block px-6 pb-5 pt-2 border-t border-gray-100"
+      {/* Panel — OS-driven visibility via Item.Region */}
+      <AccordionUI.Item.Region
+        for={section.id}
+        className="px-6 pb-5 pt-2 border-t border-gray-100"
       >
         <fieldset className="border-0 m-0 p-0 space-y-3">
           {section.fields.map((field) => (
@@ -114,8 +108,8 @@ function AccordionRow({ section }: { section: AccordionSection }) {
             </div>
           ))}
         </fieldset>
-      </div>
-    </AccordionUI.Item>
+      </AccordionUI.Item.Region>
+    </div>
   );
 }
 

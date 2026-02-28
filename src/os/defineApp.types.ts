@@ -147,7 +147,15 @@ export interface BoundComponents<S> {
       isAnchor?: boolean;
     }) => ReactNode);
     asChild?: boolean;
-  }>;
+  }> & {
+    /** Passive projection of Item's expanded state — auto-manages role="region" + aria-labelledby */
+    Region: React.FC<{
+      for: string;
+      id?: string;
+      className?: string;
+      children?: ReactNode;
+    }>;
+  };
   Field: React.FC<{
     name: string;
     value?: string;

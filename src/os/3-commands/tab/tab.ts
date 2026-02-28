@@ -33,6 +33,10 @@ export const OS_TAB = os.defineCommand(
     // DOM_ITEMS provider decides the source (browser/headless+React/pure headless)
     const items: string[] = ctx.inject(DOM_ITEMS);
     const config = ctx.inject(ZONE_CONFIG);
+
+    // "native" → OS does not manage Tab — browser default order
+    if (config.tab.behavior === "native") return;
+
     const zoneOrder = ctx.inject(DOM_ZONE_ORDER);
     const direction = payload.direction ?? "forward";
 

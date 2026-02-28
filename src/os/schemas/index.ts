@@ -43,6 +43,8 @@ export type { SelectConfig } from "./focus/config/FocusSelectConfig.ts";
 export { DEFAULT_SELECT } from "./focus/config/FocusSelectConfig.ts";
 export type { TabConfig } from "./focus/config/FocusTabConfig.ts";
 export { DEFAULT_TAB } from "./focus/config/FocusTabConfig.ts";
+export type { ValueConfig } from "./focus/config/FocusValueConfig.ts";
+export { DEFAULT_VALUE } from "./focus/config/FocusValueConfig.ts";
 // ── Focus domain ──
 export type {
   Direction,

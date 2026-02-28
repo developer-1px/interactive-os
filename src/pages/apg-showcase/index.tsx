@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Zone } from "@/os/6-components/primitives/Zone";
 import { Item } from "@/os/6-components/primitives/Item";
-import { Root } from "@/os/6-components/primitives/Root";
 import { TestBotRegistry, accordionScript } from "@os/testing";
 import { AccordionPattern } from "./patterns/AccordionPattern";
 import { CompositePattern } from "./patterns/CompositePattern";
 import { GridPattern } from "./patterns/GridPattern";
 import { ListboxPattern } from "./patterns/ListboxPattern";
 import { MenuPattern } from "./patterns/MenuPattern";
+import { SliderPattern } from "./patterns/SliderPattern";
 import { ToolbarPattern } from "./patterns/ToolbarPattern";
 import { TreePattern } from "./patterns/TreePattern";
 
@@ -19,6 +19,7 @@ const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   grid: { name: "Grid", component: GridPattern },
   listbox: { name: "Listbox", component: ListboxPattern },
   toolbar: { name: "Toolbar", component: ToolbarPattern },
+  slider: { name: "Slider", component: SliderPattern },
   composite: { name: "Composite", component: CompositePattern },
 };
 
@@ -33,7 +34,7 @@ export default function ApgShowcasePage() {
   const ActiveComponent = PATTERNS[activePattern]?.component;
 
   return (
-    <Root>
+    <>
       <div className="flex bg-gray-50 h-screen overflow-hidden text-gray-900">
         {/* Sidebar */}
         <div className="w-64 border-r border-gray-200 bg-white flex flex-col">
@@ -88,6 +89,6 @@ export default function ApgShowcasePage() {
           </main>
         </div>
       </div>
-    </Root>
+    </>
   );
 }

@@ -133,21 +133,37 @@ describe("AccordionPattern (DOM Rendering)", () => {
     });
 
     // ═══════════════════════════════════════════════════
-    // Panel visibility (CSS-driven via aria-expanded)
+    // Panel visibility (Item.Region — OS-driven)
     // ═══════════════════════════════════════════════════
 
-    it("panel region is not visible when collapsed", () => {
+    it("panel region is not in DOM when collapsed", () => {
         render(<AccordionPattern />);
 
+        // Item.Region returns null when collapsed — panel not in DOM
         const panel = document.getElementById("panel-acc-personal");
-        expect(panel).toBeTruthy();
-        // Panel exists but should be hidden by CSS (hidden class)
-        expect(panel!.classList.contains("hidden") || panel!.closest("[aria-expanded='false']")).toBeTruthy();
+        expect(panel).toBeNull();
     });
 
-    it("panel region has role=region and aria-labelledby", () => {
-        render(<AccordionPattern />);
+    it("expanded panel has role=region and aria-labelledby", async () => {
+        const user = userEvent.setup();
 
+        render(
+            <>
+                <KeyboardListener />
+                <AccordionPattern />
+            </>,
+        );
+
+        // Focus and expand the first header
+        const el = document.getElementById("acc-personal")!;
+        el.focus();
+        os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
+        await new Promise((r) => setTimeout(r, 50));
+
+        await user.keyboard("{Enter}");
+        await new Promise((r) => setTimeout(r, 100));
+
+        // Now the panel should be in the DOM
         const panel = document.getElementById("panel-acc-personal");
         expect(panel).toBeTruthy();
         expect(panel!.getAttribute("role")).toBe("region");

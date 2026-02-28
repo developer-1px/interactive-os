@@ -6,7 +6,7 @@
  */
 
 export type TabDirection = "forward" | "backward";
-export type TabBehavior = "trap" | "flow" | "escape";
+export type TabBehavior = "trap" | "flow" | "escape" | "native";
 
 export interface ZoneOrderEntry {
   zoneId: string;

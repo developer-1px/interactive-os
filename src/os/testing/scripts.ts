@@ -22,6 +22,10 @@ import { expect as defaultExpect } from "./expect";
 export type ExpectLocator = (locator: any) => {
     toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
     toBeFocused(): Promise<void>;
+    not: {
+        toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
+        toBeFocused(): Promise<void>;
+    };
 };
 
 export interface TestScript {
@@ -162,11 +166,44 @@ export const radiogroupScript: TestScript = {
 // ═══════════════════════════════════════════════════════════════════
 
 export const accordionScript: TestScript = {
-    name: "Accordion — Enter/Space Expand + Arrow Nav",
+    name: "Accordion — Click Expand + Enter/Space + Arrow Nav",
     async run(page, expect = defaultExpect) {
-        // Click first header to focus
+        // ═══════════════════════════════════════════════════
+        // 1. Click → Expand (THE RED TEST)
+        // ═══════════════════════════════════════════════════
+
+        // Click first header → should focus AND expand
         await page.locator("#acc-personal").click();
         await expect(page.locator("#acc-personal")).toBeFocused();
+        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+
+        // Click again → collapse
+        await page.locator("#acc-personal").click();
+        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "false");
+
+        // Click a DIFFERENT header → should focus AND expand it
+        await page.locator("#acc-billing").click();
+        await expect(page.locator("#acc-billing")).toBeFocused();
+        await expect(page.locator("#acc-billing")).toHaveAttribute("aria-expanded", "true");
+
+        // Click billing again → collapse
+        await page.locator("#acc-billing").click();
+        await expect(page.locator("#acc-billing")).toHaveAttribute("aria-expanded", "false");
+
+        // ═══════════════════════════════════════════════════
+        // 2. Keyboard: Enter/Space expand
+        // ═══════════════════════════════════════════════════
+
+        // Click to focus first header
+        await page.locator("#acc-personal").click();
+        await expect(page.locator("#acc-personal")).toBeFocused();
+
+        // Collapse first (click toggled it)
+        const expanded = await page.locator("#acc-personal").getAttribute("aria-expanded");
+        if (expanded === "true") {
+            await page.keyboard.press("Enter");
+        }
+        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "false");
 
         // Enter expands the panel
         await page.keyboard.press("Enter");
@@ -179,6 +216,10 @@ export const accordionScript: TestScript = {
         // Space also expands
         await page.keyboard.press(" ");
         await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+
+        // ═══════════════════════════════════════════════════
+        // 3. Arrow navigation
+        // ═══════════════════════════════════════════════════
 
         // ArrowDown moves to next header
         await page.keyboard.press("ArrowDown");
@@ -203,6 +244,39 @@ export const accordionScript: TestScript = {
         // End → last
         await page.keyboard.press("End");
         await expect(page.locator("#acc-shipping")).toBeFocused();
+
+        // ═══════════════════════════════════════════════════
+        // 4. Panel content click must NOT toggle (W3C APG)
+        // ═══════════════════════════════════════════════════
+
+        // Ensure personal is expanded first
+        await page.locator("#acc-personal").click();
+        const state4 = await page.locator("#acc-personal").getAttribute("aria-expanded");
+        if (state4 !== "true") {
+            // Was collapsed by click; click again to expand
+            await page.locator("#acc-personal").click();
+        }
+        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+
+        // Click on the panel content area — must NOT collapse
+        await page.locator("#panel-acc-personal").click();
+        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+
+        // ═══════════════════════════════════════════════════
+        // 5. Tab follows page flow (W3C APG)
+        //    "all focusable elements in the accordion
+        //     are included in the page Tab sequence"
+        // ═══════════════════════════════════════════════════
+
+        // Focus personal header (already expanded from section 4)
+        await page.locator("#acc-personal").click();
+        await expect(page.locator("#acc-personal")).toBeFocused();
+
+        // Tab should NOT escape — it should move to next focusable
+        // (could be panel inputs or next header)
+        await page.keyboard.press("Tab");
+        // acc-personal should no longer be focused (Tab moved away)
+        await expect(page.locator("#acc-personal")).not.toBeFocused();
     },
 };
 

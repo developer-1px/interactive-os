@@ -63,6 +63,7 @@ import { OS_NAVIGATE as prodNAVIGATE } from "@os/3-commands/navigate";
 import { OS_SELECT as prodOS_SELECT } from "@os/3-commands/selection/select";
 import { OS_SELECTION_CLEAR as prodSELECTION_CLEAR } from "@os/3-commands/selection/selection";
 import { OS_TAB as prodOS_TAB } from "@os/3-commands/tab/tab";
+import { OS_VALUE_CHANGE as prodVALUE_CHANGE } from "@os/3-commands/value";
 
 // ═══════════════════════════════════════════════════════════════════
 // OsPage Interface
@@ -151,6 +152,7 @@ export interface OsPage {
   ): void;
   setExpandableItems(items: string[] | Set<string>): void;
   setTreeLevels(levels: Record<string, number> | Map<string, number>): void;
+  setValueNow(itemId: string, value: number): void;
   setActiveZone(zoneId: string, focusedItemId: string | null): void;
   initZone(
     zoneId: string,
@@ -183,6 +185,7 @@ export interface OsPage {
   OS_ACTIVATE: typeof prodACTIVATE;
   OS_CHECK: typeof prodCHECK;
   OS_DELETE: typeof prodDELETE;
+  OS_VALUE_CHANGE: typeof prodVALUE_CHANGE;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -207,8 +210,8 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   const mockZoneOrder = { current: [] as ZoneOrderEntry[] };
 
   // ── No-op effects ──
-  kernel.defineEffect("focus", () => {});
-  kernel.defineEffect("scroll", () => {});
+  kernel.defineEffect("focus", () => { });
+  kernel.defineEffect("scroll", () => { });
 
   // ── Mock contexts (accessor-first, mock-fallback) ──
   kernel.defineContext("dom-items", () => {
@@ -296,6 +299,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   const OS_ACTIVATE_CMD = kernel.register(prodACTIVATE);
   const OS_CHECK_CMD = kernel.register(prodCHECK);
   const OS_DELETE_CMD = kernel.register(prodDELETE);
+  const OS_VALUE_CHANGE_CMD = kernel.register(prodVALUE_CHANGE);
 
   // ── Dispatch ──
   const dispatch = kernel.dispatch.bind(kernel);
@@ -343,6 +347,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
       project: { ...base.project, ...config.project },
       expand: { ...base.expand, ...config.expand },
       check: { ...base.check, ...config.check },
+      value: { ...base.value, ...config.value },
     };
   }
   function setExpandableItems(items: string[] | Set<string>) {
@@ -363,6 +368,16 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   function setTreeLevels(levels: Record<string, number> | Map<string, number>) {
     mockTreeLevels.current =
       levels instanceof Map ? levels : new Map(Object.entries(levels));
+  }
+  function setValueNow(itemId: string, value: number) {
+    kernel.setState((s: AppState) =>
+      produce(s, (draft) => {
+        const zoneId = draft.os.focus.activeZoneId;
+        if (!zoneId) return;
+        const z = ensureZone(draft.os, zoneId);
+        z.valueNow[itemId] = value;
+      }),
+    );
   }
   function setZoneOrder(zones: ZoneOrderEntry[]) {
     mockZoneOrder.current = zones;
@@ -572,6 +587,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     setRole,
     setExpandableItems,
     setTreeLevels,
+    setValueNow,
     setActiveZone,
     initZone,
     setZoneOrder,
@@ -601,6 +617,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     OS_ACTIVATE: OS_ACTIVATE_CMD,
     OS_CHECK: OS_CHECK_CMD,
     OS_DELETE: OS_DELETE_CMD,
+    OS_VALUE_CHANGE: OS_VALUE_CHANGE_CMD,
   };
 }
 

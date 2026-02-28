@@ -54,6 +54,7 @@ interface QuickResult {
     name: string;
     passed: boolean;
     steps: { action: string; detail: string; passed: boolean; error?: string }[];
+    consoleLogs: string[];
 }
 
 async function quickRunScripts(scripts: TestScript[]): Promise<QuickResult[]> {
@@ -61,10 +62,27 @@ async function quickRunScripts(scripts: TestScript[]): Promise<QuickResult[]> {
 
     for (const script of scripts) {
         const steps: BrowserStep[] = [];
+        const consoleLogs: string[] = [];
         const page = createBrowserPage(document.body, {
             headless: true,
             onStep: (step) => steps.push(step),
         });
+
+        // Intercept console during script execution
+        const origDebug = console.debug;
+        const origLog = console.log;
+        const origWarn = console.warn;
+        const origError = console.error;
+        const intercept = (level: string) => (...args: unknown[]) => {
+            const msg = args.map((a) =>
+                typeof a === "object" ? JSON.stringify(a) : String(a)
+            ).join(" ");
+            consoleLogs.push(`[${level}] ${msg}`);
+        };
+        console.debug = intercept("debug") as typeof console.debug;
+        console.log = intercept("log") as typeof console.log;
+        console.warn = intercept("warn") as typeof console.warn;
+        console.error = intercept("error") as typeof console.error;
 
         let passed = true;
         try {
@@ -79,6 +97,12 @@ async function quickRunScripts(scripts: TestScript[]): Promise<QuickResult[]> {
                 error: String(e),
                 timestamp: 0,
             });
+        } finally {
+            // Restore console
+            console.debug = origDebug;
+            console.log = origLog;
+            console.warn = origWarn;
+            console.error = origError;
         }
 
         page.hideCursor();
@@ -91,6 +115,7 @@ async function quickRunScripts(scripts: TestScript[]): Promise<QuickResult[]> {
                 passed: s.result === "pass",
                 ...(s.error ? { error: s.error } : {}),
             })),
+            consoleLogs,
         });
     }
 
@@ -118,6 +143,14 @@ function printQuickResults(results: QuickResult[]) {
                     console.log(`     💥 [${step.action}] ${step.detail}`);
                     if (step.error) console.log(`        → ${step.error}`);
                 }
+            }
+        }
+
+        // Print collected console logs
+        if (r.consoleLogs.length > 0) {
+            console.log(`     📋 Console (${r.consoleLogs.length} entries):`);
+            for (const log of r.consoleLogs) {
+                console.log(`        ${log}`);
             }
         }
     }

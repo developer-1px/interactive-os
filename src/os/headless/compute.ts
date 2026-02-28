@@ -113,6 +113,7 @@ export function computeItem(
 
   if (expandable) {
     attrs["aria-expanded"] = isExpanded;
+    attrs["aria-controls"] = `panel-${itemId}`;
   }
 
   if (isDisabled) {
@@ -123,9 +124,29 @@ export function computeItem(
     attrs["aria-current"] = "true" as const;
   }
 
+  // ── Value axis (aria-valuenow/min/max) — config-driven ──
+  const valueMode = entry?.config?.value?.mode ?? "none";
+  const currentValue =
+    valueMode === "continuous"
+      ? (z?.valueNow?.[itemId] ?? entry!.config!.value!.min)
+      : undefined;
+  if (valueMode === "continuous") {
+    const valueConfig = entry!.config!.value!;
+    attrs["aria-valuenow"] = currentValue;
+    attrs["aria-valuemin"] = valueConfig.min;
+    attrs["aria-valuemax"] = valueConfig.max;
+  }
+
   return {
     attrs,
-    state: { isFocused, isActiveFocused, isAnchor, isSelected, isExpanded },
+    state: {
+      isFocused,
+      isActiveFocused,
+      isAnchor,
+      isSelected,
+      isExpanded,
+      valueNow: currentValue,
+    },
   };
 }
 

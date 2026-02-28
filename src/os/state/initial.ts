@@ -20,6 +20,9 @@ export const initialZoneState: ZoneState = {
 
   // Expansion
   expandedItems: [],
+
+  // Value
+  valueNow: {},
 };
 
 export const initialOSState: OSState = {

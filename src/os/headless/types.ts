@@ -27,6 +27,9 @@ export interface ItemAttrs {
     "aria-expanded"?: boolean;
     "aria-disabled"?: boolean;
     "aria-current"?: "true" | undefined;
+    "aria-valuenow"?: number;
+    "aria-valuemin"?: number;
+    "aria-valuemax"?: number;
     "data-focused"?: true | undefined;
     "data-anchor"?: true | undefined;
     "data-selected"?: true | undefined;
@@ -48,6 +51,7 @@ export interface ItemState {
     isAnchor: boolean;
     isSelected: boolean;
     isExpanded: boolean;
+    valueNow: number | undefined;
 }
 
 export interface ItemResult {
