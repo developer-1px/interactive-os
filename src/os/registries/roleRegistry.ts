@@ -10,7 +10,9 @@
 
 import type {
   ActivateConfig,
+  CheckConfig,
   DismissConfig,
+  ExpandConfig,
   FocusGroupConfig,
   NavigateConfig,
   ProjectConfig,
@@ -19,7 +21,9 @@ import type {
 } from "../schemas";
 import {
   DEFAULT_ACTIVATE,
+  DEFAULT_CHECK,
   DEFAULT_DISMISS,
+  DEFAULT_EXPAND,
   DEFAULT_NAVIGATE,
   DEFAULT_PROJECT,
   DEFAULT_SELECT,
@@ -142,6 +146,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       entry: "selected",
     },
     select: { mode: "single", followFocus: true },
+    check: { mode: "select" },
     tab: { behavior: "escape" },
   },
 
@@ -174,6 +179,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   radiogroup: {
     navigate: { orientation: "vertical", loop: true, entry: "selected" },
     select: { mode: "single", followFocus: true, disallowEmpty: true },
+    check: { mode: "check" },
     tab: { behavior: "escape" },
   },
 
@@ -183,6 +189,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   tablist: {
     navigate: { orientation: "horizontal", loop: true, entry: "selected" },
     select: { mode: "single", followFocus: true, disallowEmpty: true },
+    check: { mode: "select" },
     activate: { mode: "automatic" },
     tab: { behavior: "escape" },
   },
@@ -202,6 +209,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   grid: {
     navigate: { orientation: "both", loop: false },
     select: { mode: "multiple", range: true, toggle: true, followFocus: false },
+    check: { mode: "select" },
     tab: { behavior: "escape" },
   },
 
@@ -211,7 +219,9 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   treegrid: {
     navigate: { orientation: "both", loop: false, arrowExpand: true },
     select: { mode: "multiple", range: true, toggle: true, followFocus: false },
+    check: { mode: "select" },
     activate: { mode: "manual" },
+    expand: { mode: "explicit" },
     tab: { behavior: "escape" },
   },
 
@@ -227,7 +237,9 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       entry: "selected",
     },
     select: { mode: "single", followFocus: true },
+    check: { mode: "select" },
     activate: { mode: "manual", onClick: true },
+    expand: { mode: "explicit" },
     tab: { behavior: "escape" },
   },
 
@@ -276,6 +288,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   accordion: {
     navigate: { orientation: "vertical", loop: false },
     activate: { mode: "manual", onClick: true },
+    expand: { mode: "all" },
     tab: { behavior: "escape" },
   },
 
@@ -284,6 +297,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       no navigation within — just a toggle trigger
   disclosure: {
     activate: { mode: "manual" },
+    expand: { mode: "all" },
     tab: { behavior: "flow" },
   },
 
@@ -318,6 +332,8 @@ export function resolveRole(
     activate?: Partial<ActivateConfig>;
     dismiss?: Partial<DismissConfig>;
     project?: Partial<ProjectConfig>;
+    expand?: Partial<ExpandConfig>;
+    check?: Partial<CheckConfig>;
   } = {},
 ): FocusGroupConfig {
   const basePreset = role ? rolePresets[role as ZoneRole] || {} : {};
@@ -348,6 +364,16 @@ export function resolveRole(
       ...DEFAULT_PROJECT,
       ...basePreset.project,
       ...(overrides.project ?? {}),
+    },
+    expand: {
+      ...DEFAULT_EXPAND,
+      ...basePreset.expand,
+      ...(overrides.expand ?? {}),
+    },
+    check: {
+      ...DEFAULT_CHECK,
+      ...basePreset.check,
+      ...(overrides.check ?? {}),
     },
   };
 }

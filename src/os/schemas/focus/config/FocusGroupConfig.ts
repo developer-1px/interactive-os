@@ -1,8 +1,8 @@
 /**
  * FocusGroupConfig — Unified zone behavior configuration.
  *
- * All sub-configs (Navigate, Tab, Select, Activate, Dismiss, Project)
- * are defined here in a single file. Each maps 1:1 to a W3C APG concern.
+ * All 8 sub-configs map 1:1 to a W3C APG concern:
+ *   Navigate, Tab, Select, Activate, Dismiss, Project, Expand, Check.
  */
 
 import type { Orientation } from "../FocusDirection.ts";
@@ -107,6 +107,36 @@ export const DEFAULT_PROJECT: ProjectConfig = {
   autoFocus: false,
 };
 
+// ── Expand (aria-expanded) ──
+
+export interface ExpandConfig {
+  /**
+   * "all"      — every item is expandable (accordion, disclosure)
+   * "explicit" — only items in getExpandableItems (tree, menu)
+   * "none"     — no expansion (listbox, toolbar)
+   */
+  mode: "all" | "explicit" | "none";
+}
+
+export const DEFAULT_EXPAND: ExpandConfig = {
+  mode: "none",
+};
+
+// ── Check (aria-checked vs aria-selected) ──
+
+export interface CheckConfig {
+  /**
+   * "check"  — items use aria-checked (checkbox, radio, switch)
+   * "select" — items use aria-selected (option, tab, gridcell)
+   * "none"   — neither (no selectable state)
+   */
+  mode: "check" | "select" | "none";
+}
+
+export const DEFAULT_CHECK: CheckConfig = {
+  mode: "none",
+};
+
 // ── Composed ──
 
 export interface FocusGroupConfig {
@@ -116,6 +146,8 @@ export interface FocusGroupConfig {
   activate: ActivateConfig;
   dismiss: DismissConfig;
   project: ProjectConfig;
+  expand: ExpandConfig;
+  check: CheckConfig;
 }
 
 export const DEFAULT_CONFIG: FocusGroupConfig = {
@@ -125,4 +157,6 @@ export const DEFAULT_CONFIG: FocusGroupConfig = {
   activate: DEFAULT_ACTIVATE,
   dismiss: DEFAULT_DISMISS,
   project: DEFAULT_PROJECT,
+  expand: DEFAULT_EXPAND,
+  check: DEFAULT_CHECK,
 };

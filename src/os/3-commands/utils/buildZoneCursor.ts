@@ -20,11 +20,20 @@ export function buildZoneCursor(
   const { zoneId, focusedItemId: focusId } = zone;
   const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
 
+  // Expand axis — config-driven
+  const expandMode = entry?.config?.expand?.mode ?? "none";
+  const isExpandable =
+    expandMode === "all"
+      ? true
+      : expandMode === "explicit"
+        ? (entry?.getExpandableItems?.().has(focusId) ?? false)
+        : false;
+
   return {
     focusId,
     selection: zone.selection ?? [],
     anchor: zone.selectionAnchor ?? null,
-    isExpandable: entry?.getExpandableItems?.().has(focusId) ?? false,
+    isExpandable,
     isDisabled: zoneId ? ZoneRegistry.isDisabled(zoneId, focusId) : false,
     treeLevel: entry?.getTreeLevels?.().get(focusId),
   };

@@ -119,7 +119,10 @@ export interface OsPage {
   focusedItemId(zoneId?: string): string | null;
   selection(zoneId?: string): string[];
   activeZoneId(): string | null;
-  dispatch(cmd: BaseCommand, opts?: { scope?: ScopeToken[]; meta?: Record<string, unknown> }): void;
+  dispatch(
+    cmd: BaseCommand,
+    opts?: { scope?: ScopeToken[]; meta?: Record<string, unknown> },
+  ): void;
   /** Playwright-style locator: query any element by ID. */
   locator(elementId: string): OsLocator;
   cleanup(): void;
@@ -130,7 +133,12 @@ export interface OsPage {
   setItems(items: string[]): void;
   setRects(rects: Map<string, DOMRect>): void;
   /** Generate grid rects for 2D spatial navigation testing */
-  setGrid(opts: { cols: number; itemWidth?: number; itemHeight?: number; gap?: number }): void;
+  setGrid(opts: {
+    cols: number;
+    itemWidth?: number;
+    itemHeight?: number;
+    gap?: number;
+  }): void;
   setConfig(config: Partial<FocusGroupConfig>): void;
   setRole(
     zoneId: string,
@@ -199,8 +207,8 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   const mockZoneOrder = { current: [] as ZoneOrderEntry[] };
 
   // ── No-op effects ──
-  kernel.defineEffect("focus", () => { });
-  kernel.defineEffect("scroll", () => { });
+  kernel.defineEffect("focus", () => {});
+  kernel.defineEffect("scroll", () => {});
 
   // ── Mock contexts (accessor-first, mock-fallback) ──
   kernel.defineContext("dom-items", () => {
@@ -236,6 +244,11 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   kernel.defineContext("dom-expandable-items", () => {
     const zoneId = kernel.getState().os.focus.activeZoneId;
     const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
+    const expandMode = entry?.config?.expand?.mode ?? "none";
+    if (expandMode === "none") return new Set<string>();
+    if (expandMode === "all")
+      return { has: () => true, size: Infinity } as unknown as Set<string>;
+    // "explicit" — use accessor or mock
     return entry?.getExpandableItems?.() ?? mockExpandableItems.current;
   });
   kernel.defineContext("dom-tree-levels", () => {
@@ -294,13 +307,26 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   function setRects(rects: Map<string, DOMRect>) {
     mockRects.current = rects;
   }
-  function setGrid(opts: { cols: number; itemWidth?: number; itemHeight?: number; gap?: number }) {
+  function setGrid(opts: {
+    cols: number;
+    itemWidth?: number;
+    itemHeight?: number;
+    gap?: number;
+  }) {
     const { cols, itemWidth = 100, itemHeight = 40, gap = 0 } = opts;
     const rects = new Map<string, DOMRect>();
     mockItems.current.forEach((id, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      rects.set(id, new DOMRect(col * (itemWidth + gap), row * (itemHeight + gap), itemWidth, itemHeight));
+      rects.set(
+        id,
+        new DOMRect(
+          col * (itemWidth + gap),
+          row * (itemHeight + gap),
+          itemWidth,
+          itemHeight,
+        ),
+      );
     });
     mockRects.current = rects;
   }
@@ -315,6 +341,8 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
       activate: { ...base.activate, ...config.activate },
       dismiss: { ...base.dismiss, ...config.dismiss },
       project: { ...base.project, ...config.project },
+      expand: { ...base.expand, ...config.expand },
+      check: { ...base.check, ...config.check },
     };
   }
   function setExpandableItems(items: string[] | Set<string>) {
@@ -491,7 +519,9 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     dispatch,
     locator(elementId: string): OsLocator {
       return {
-        get attrs() { return resolveElement(kernel, elementId); },
+        get attrs() {
+          return resolveElement(kernel, elementId);
+        },
         getAttribute(name: string) {
           return resolveElement(kernel, elementId)[name];
         },
@@ -526,7 +556,9 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         );
         if (tx.changes && tx.changes.length > 0) {
           for (const change of tx.changes) {
-            console.log(`    Δ ${change.path}: ${JSON.stringify(change.from)} → ${JSON.stringify(change.to)}`);
+            console.log(
+              `    Δ ${change.path}: ${JSON.stringify(change.from)} → ${JSON.stringify(change.to)}`,
+            );
           }
         }
       }

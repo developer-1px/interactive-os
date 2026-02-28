@@ -5,21 +5,17 @@
  * Used by Item.tsx (DOM adapter) and headless tests.
  */
 
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
 import { computeContainerProps } from "@os/2-contexts/zoneLogic";
-import {
-    getChildRole,
-    isCheckedRole,
-    isExpandableRole,
-} from "@os/registries/roleRegistry";
+import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { getChildRole } from "@os/registries/roleRegistry";
+import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 
 import type {
-    ElementAttrs,
-    HeadlessKernel,
-    ItemAttrs,
-    ItemOverrides,
-    ItemResult,
-    ItemState,
+  ElementAttrs,
+  HeadlessKernel,
+  ItemAttrs,
+  ItemOverrides,
+  ItemResult,
 } from "./types";
 
 // Re-export types that consumers need
@@ -30,26 +26,26 @@ export type { ItemState } from "./types";
 // ═══════════════════════════════════════════════════════════════════
 
 export function readActiveZoneId(kernel: HeadlessKernel): string | null {
-    return kernel.getState().os.focus.activeZoneId;
+  return kernel.getState().os.focus.activeZoneId;
 }
 
 function readZone(kernel: HeadlessKernel, zoneId?: string) {
-    const id = zoneId ?? readActiveZoneId(kernel);
-    return id ? kernel.getState().os.focus.zones[id] : undefined;
+  const id = zoneId ?? readActiveZoneId(kernel);
+  return id ? kernel.getState().os.focus.zones[id] : undefined;
 }
 
 export function readFocusedItemId(
-    kernel: HeadlessKernel,
-    zoneId?: string,
+  kernel: HeadlessKernel,
+  zoneId?: string,
 ): string | null {
-    return readZone(kernel, zoneId)?.focusedItemId ?? null;
+  return readZone(kernel, zoneId)?.focusedItemId ?? null;
 }
 
 export function readSelection(
-    kernel: HeadlessKernel,
-    zoneId?: string,
+  kernel: HeadlessKernel,
+  zoneId?: string,
 ): string[] {
-    return readZone(kernel, zoneId)?.selection ?? [];
+  return readZone(kernel, zoneId)?.selection ?? [];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -60,79 +56,90 @@ export function readSelection(
 // ═══════════════════════════════════════════════════════════════════
 
 export function computeItem(
-    kernel: HeadlessKernel,
-    itemId: string,
-    zoneId: string,
-    overrides?: ItemOverrides,
+  kernel: HeadlessKernel,
+  itemId: string,
+  zoneId: string,
+  overrides?: ItemOverrides,
 ): ItemResult {
-    const s = kernel.getState();
-    const z = s.os.focus.zones[zoneId];
-    const entry = ZoneRegistry.get(zoneId);
+  const s = kernel.getState();
+  const z = s.os.focus.zones[zoneId];
+  const entry = ZoneRegistry.get(zoneId);
 
-    const childRole =
-        overrides?.role || (entry?.role ? getChildRole(entry.role) : undefined);
-    const roleExpandable = childRole ? isExpandableRole(childRole) : false;
-    const zoneExpandable = entry?.getExpandableItems?.().has(itemId) ?? false;
-    const expandable = roleExpandable || zoneExpandable;
-    const useChecked = childRole ? isCheckedRole(childRole) : false;
-    const isSelectableGroup = entry?.config.select.mode !== "none";
+  const childRole =
+    overrides?.role || (entry?.role ? getChildRole(entry.role) : undefined);
 
-    const isFocused = z?.focusedItemId === itemId;
-    const isActiveZone = s.os.focus.activeZoneId === zoneId;
-    const isStoreSelected = z?.selection.includes(itemId) ?? false;
-    const isExpanded = z?.expandedItems.includes(itemId) ?? false;
-    const isDisabled = overrides?.disabled || ZoneRegistry.isDisabled(zoneId, itemId);
-    const isActiveFocused = isFocused && isActiveZone;
-    const isAnchor = isFocused && !isActiveZone;
-    const isSelected = overrides?.selected || isStoreSelected;
+  // ── Expand axis (aria-expanded) — config-driven ──
+  const expandMode = entry?.config?.expand?.mode ?? "none";
+  const expandable =
+    expandMode === "all"
+      ? true
+      : expandMode === "explicit"
+        ? (entry?.getExpandableItems?.().has(itemId) ?? false)
+        : false;
 
-    const attrs: ItemAttrs = {
-        id: itemId,
-        role: childRole,
-        tabIndex: isFocused ? 0 : -1,
-        "data-focus-item": true,
-        "data-item-id": itemId,
-        "data-focused": isActiveFocused || undefined,
-        "data-anchor": isAnchor || undefined,
-        "data-selected": isSelected || undefined,
-        "data-expanded": isExpanded || undefined,
-    };
+  // ── Check axis (aria-checked vs aria-selected) — config-driven ──
+  const checkMode = entry?.config?.check?.mode ?? "none";
+  const useChecked = checkMode === "check";
+  const isSelectableGroup = entry?.config.select.mode !== "none";
 
-    if (useChecked) {
-        attrs["aria-checked"] = isSelectableGroup ? isSelected : undefined;
-    } else {
-        attrs["aria-selected"] = isSelectableGroup ? isSelected : undefined;
-    }
+  const isFocused = z?.focusedItemId === itemId;
+  const isActiveZone = s.os.focus.activeZoneId === zoneId;
+  const isStoreSelected = z?.selection.includes(itemId) ?? false;
+  const isExpanded = z?.expandedItems.includes(itemId) ?? false;
+  const isDisabled =
+    overrides?.disabled || ZoneRegistry.isDisabled(zoneId, itemId);
+  const isActiveFocused = isFocused && isActiveZone;
+  const isAnchor = isFocused && !isActiveZone;
+  const isSelected = overrides?.selected || isStoreSelected;
 
-    if (expandable) {
-        attrs["aria-expanded"] = isExpanded;
-    }
+  const attrs: ItemAttrs = {
+    id: itemId,
+    role: childRole,
+    tabIndex: isFocused ? 0 : -1,
+    "data-focus-item": true,
+    "data-item-id": itemId,
+    "data-focused": isActiveFocused || undefined,
+    "data-anchor": isAnchor || undefined,
+    "data-selected": isSelected || undefined,
+    "data-expanded": isExpanded || undefined,
+  };
 
-    if (isDisabled) {
-        attrs["aria-disabled"] = true;
-    }
+  if (useChecked) {
+    attrs["aria-checked"] = isSelectableGroup ? isSelected : undefined;
+  } else if (isSelectableGroup) {
+    // check.mode "select" or "none" with active selection → aria-selected
+    attrs["aria-selected"] = isSelected;
+  }
 
-    if (isActiveFocused) {
-        attrs["aria-current"] = "true" as const;
-    }
+  if (expandable) {
+    attrs["aria-expanded"] = isExpanded;
+  }
 
-    return {
-        attrs,
-        state: { isFocused, isActiveFocused, isAnchor, isSelected, isExpanded },
-    };
+  if (isDisabled) {
+    attrs["aria-disabled"] = true;
+  }
+
+  if (isActiveFocused) {
+    attrs["aria-current"] = "true" as const;
+  }
+
+  return {
+    attrs,
+    state: { isFocused, isActiveFocused, isAnchor, isSelected, isExpanded },
+  };
 }
 
 /** Backward-compatible wrapper — returns attrs only. */
 export function computeAttrs(
-    kernel: HeadlessKernel,
-    itemId: string,
-    zoneId?: string,
+  kernel: HeadlessKernel,
+  itemId: string,
+  zoneId?: string,
 ): ItemAttrs {
-    const id = zoneId ?? readActiveZoneId(kernel);
-    if (!id) {
-        return { id: itemId, role: undefined, tabIndex: -1 };
-    }
-    return computeItem(kernel, itemId, id).attrs;
+  const id = zoneId ?? readActiveZoneId(kernel);
+  if (!id) {
+    return { id: itemId, role: undefined, tabIndex: -1 };
+  }
+  return computeItem(kernel, itemId, id).attrs;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -152,29 +159,42 @@ export function computeAttrs(
  * This is the headless equivalent of Playwright's `page.locator("#id")`.
  */
 export function resolveElement(
-    kernel: HeadlessKernel,
-    elementId: string,
+  kernel: HeadlessKernel,
+  elementId: string,
 ): ElementAttrs {
-    // Check if it's a Zone container
-    const entry = ZoneRegistry.get(elementId);
-    if (entry) {
-        const s = kernel.getState();
-        const isActive = s.os.focus.activeZoneId === elementId;
-        const config = entry.config ?? { navigate: {}, tab: {}, select: { mode: "none" }, activate: {}, dismiss: {}, project: {} } as any;
-        return computeContainerProps(elementId, config, isActive, entry.role) as unknown as ElementAttrs;
-    }
+  // Check if it's a Zone container
+  const entry = ZoneRegistry.get(elementId);
+  if (entry) {
+    const s = kernel.getState();
+    const isActive = s.os.focus.activeZoneId === elementId;
+    const config = entry.config ?? DEFAULT_CONFIG;
+    return computeContainerProps(
+      elementId,
+      config,
+      isActive,
+      entry.role,
+    ) as unknown as ElementAttrs;
+  }
 
-    // Check if it's an Item within any Zone
-    const ownerZoneId = ZoneRegistry.findZoneByItemId(elementId);
-    if (ownerZoneId) {
-        return computeAttrs(kernel, elementId, ownerZoneId) as unknown as ElementAttrs;
-    }
+  // Check if it's an Item within any Zone
+  const ownerZoneId = ZoneRegistry.findZoneByItemId(elementId);
+  if (ownerZoneId) {
+    return computeAttrs(
+      kernel,
+      elementId,
+      ownerZoneId,
+    ) as unknown as ElementAttrs;
+  }
 
-    // Fallback: try active zone
-    const activeZoneId = readActiveZoneId(kernel);
-    if (activeZoneId) {
-        return computeAttrs(kernel, elementId, activeZoneId) as unknown as ElementAttrs;
-    }
+  // Fallback: try active zone
+  const activeZoneId = readActiveZoneId(kernel);
+  if (activeZoneId) {
+    return computeAttrs(
+      kernel,
+      elementId,
+      activeZoneId,
+    ) as unknown as ElementAttrs;
+  }
 
-    return {};
+  return {};
 }

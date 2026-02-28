@@ -21,13 +21,15 @@ import { defineScope, type ScopeToken } from "@kernel";
 import type { ZoneRole } from "../registries/roleRegistry.ts";
 import { resolveRole } from "../registries/roleRegistry.ts";
 import type {
-    ActivateConfig,
-    DismissConfig,
-    FocusGroupConfig,
-    NavigateConfig,
-    ProjectConfig,
-    SelectConfig,
-    TabConfig,
+  ActivateConfig,
+  CheckConfig,
+  DismissConfig,
+  ExpandConfig,
+  FocusGroupConfig,
+  NavigateConfig,
+  ProjectConfig,
+  SelectConfig,
+  TabConfig,
 } from "../schemas";
 import type { ZoneCallback, ZoneEntry } from "./zoneRegistry.ts";
 
@@ -39,12 +41,12 @@ let zoneIdCounter = 0;
 
 /** Generate a unique zone ID. Pure counter — no DOM, no React. */
 export function generateZoneId(): string {
-    return `zone-${++zoneIdCounter}`;
+  return `zone-${++zoneIdCounter}`;
 }
 
 /** Generate a unique focus-group ID (for standalone FocusGroup). */
 export function generateGroupId(): string {
-    return `focus-group-${++zoneIdCounter}`;
+  return `focus-group-${++zoneIdCounter}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -53,12 +55,14 @@ export function generateGroupId(): string {
 
 /** Advanced configuration overrides — use sparingly, prefer role presets */
 export interface ZoneOptions {
-    navigate?: Partial<NavigateConfig> | undefined;
-    tab?: Partial<TabConfig> | undefined;
-    select?: Partial<SelectConfig> | undefined;
-    activate?: Partial<ActivateConfig> | undefined;
-    dismiss?: Partial<DismissConfig> | undefined;
-    project?: Partial<ProjectConfig> | undefined;
+  navigate?: Partial<NavigateConfig> | undefined;
+  tab?: Partial<TabConfig> | undefined;
+  select?: Partial<SelectConfig> | undefined;
+  activate?: Partial<ActivateConfig> | undefined;
+  dismiss?: Partial<DismissConfig> | undefined;
+  project?: Partial<ProjectConfig> | undefined;
+  expand?: Partial<ExpandConfig> | undefined;
+  check?: Partial<CheckConfig> | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -72,24 +76,28 @@ export interface ZoneOptions {
  * in Zone.tsx and FocusGroup.tsx.
  */
 export function createZoneConfig(
-    role?: ZoneRole | string,
-    options?: ZoneOptions,
+  role?: ZoneRole | string,
+  options?: ZoneOptions,
 ): FocusGroupConfig {
-    const overrides: {
-        navigate?: Partial<NavigateConfig>;
-        tab?: Partial<TabConfig>;
-        select?: Partial<SelectConfig>;
-        activate?: Partial<ActivateConfig>;
-        dismiss?: Partial<DismissConfig>;
-        project?: Partial<ProjectConfig>;
-    } = {};
-    if (options?.navigate !== undefined) overrides.navigate = options.navigate;
-    if (options?.tab !== undefined) overrides.tab = options.tab;
-    if (options?.select !== undefined) overrides.select = options.select;
-    if (options?.activate !== undefined) overrides.activate = options.activate;
-    if (options?.dismiss !== undefined) overrides.dismiss = options.dismiss;
-    if (options?.project !== undefined) overrides.project = options.project;
-    return resolveRole(role, overrides);
+  const overrides: {
+    navigate?: Partial<NavigateConfig>;
+    tab?: Partial<TabConfig>;
+    select?: Partial<SelectConfig>;
+    activate?: Partial<ActivateConfig>;
+    dismiss?: Partial<DismissConfig>;
+    project?: Partial<ProjectConfig>;
+    expand?: Partial<ExpandConfig>;
+    check?: Partial<CheckConfig>;
+  } = {};
+  if (options?.navigate !== undefined) overrides.navigate = options.navigate;
+  if (options?.tab !== undefined) overrides.tab = options.tab;
+  if (options?.select !== undefined) overrides.select = options.select;
+  if (options?.activate !== undefined) overrides.activate = options.activate;
+  if (options?.dismiss !== undefined) overrides.dismiss = options.dismiss;
+  if (options?.project !== undefined) overrides.project = options.project;
+  if (options?.expand !== undefined) overrides.expand = options.expand;
+  if (options?.check !== undefined) overrides.check = options.check;
+  return resolveRole(role, overrides);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -98,27 +106,29 @@ export function createZoneConfig(
 // ═══════════════════════════════════════════════════════════════════
 
 export interface ZoneCallbacks {
-    onAction?: ZoneCallback | undefined;
-    onSelect?: ZoneCallback | undefined;
-    onCheck?: ZoneCallback | undefined;
-    onDelete?: ZoneCallback | undefined;
-    onMoveUp?: ZoneCallback | undefined;
-    onMoveDown?: ZoneCallback | undefined;
-    onCopy?: ZoneCallback | undefined;
-    onCut?: ZoneCallback | undefined;
-    onPaste?: ZoneCallback | undefined;
-    onUndo?: BaseCommand | undefined;
-    onRedo?: BaseCommand | undefined;
-    onDismiss?: BaseCommand | undefined;
-    itemFilter?: ((items: string[]) => string[]) | undefined;
-    getItems?: (() => string[]) | undefined;
-    getExpandableItems?: (() => Set<string>) | undefined;
-    getTreeLevels?: (() => Map<string, number>) | undefined;
-    onReorder?: ((info: {
+  onAction?: ZoneCallback | undefined;
+  onSelect?: ZoneCallback | undefined;
+  onCheck?: ZoneCallback | undefined;
+  onDelete?: ZoneCallback | undefined;
+  onMoveUp?: ZoneCallback | undefined;
+  onMoveDown?: ZoneCallback | undefined;
+  onCopy?: ZoneCallback | undefined;
+  onCut?: ZoneCallback | undefined;
+  onPaste?: ZoneCallback | undefined;
+  onUndo?: BaseCommand | undefined;
+  onRedo?: BaseCommand | undefined;
+  onDismiss?: BaseCommand | undefined;
+  itemFilter?: ((items: string[]) => string[]) | undefined;
+  getItems?: (() => string[]) | undefined;
+  getExpandableItems?: (() => Set<string>) | undefined;
+  getTreeLevels?: (() => Map<string, number>) | undefined;
+  onReorder?:
+    | ((info: {
         itemId: string;
         overItemId: string;
         position: "before" | "after";
-    }) => BaseCommand | BaseCommand[]) | undefined;
+      }) => BaseCommand | BaseCommand[])
+    | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -133,35 +143,35 @@ export interface ZoneCallbacks {
  * Used by useZoneLifecycle (React) and headless zone registration.
  */
 export function buildZoneEntry(
-    config: FocusGroupConfig,
-    role: ZoneRole | undefined,
-    parentId: string | null,
-    callbacks: ZoneCallbacks,
-    existing?: ZoneEntry,
+  config: FocusGroupConfig,
+  role: ZoneRole | undefined,
+  parentId: string | null,
+  callbacks: ZoneCallbacks,
+  existing?: ZoneEntry,
 ): ZoneEntry {
-    // Strip undefined values — only defined callbacks flow into entry.
-    // Cast is safe: the loop above guarantees no undefined values remain.
-    const defined: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(callbacks)) {
-        if (v !== undefined) defined[k] = v;
-    }
+  // Strip undefined values — only defined callbacks flow into entry.
+  // Cast is safe: the loop above guarantees no undefined values remain.
+  const defined: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(callbacks)) {
+    if (v !== undefined) defined[k] = v;
+  }
 
-    const entry: ZoneEntry = {
-        config,
-        element: null,
-        parentId,
-        ...(defined as Partial<ZoneEntry>),
-        ...(role !== undefined ? { role } : {}),
-    };
+  const entry: ZoneEntry = {
+    config,
+    element: null,
+    parentId,
+    ...(defined as Partial<ZoneEntry>),
+    ...(role !== undefined ? { role } : {}),
+  };
 
-    // Preserve DOM bindings from bindElement (may have been set in previous lifecycle)
-    if (existing?.element) entry.element = existing.element;
-    if (!callbacks.getItems && existing?.getItems)
-        entry.getItems = existing.getItems;
-    if (!entry.getLabels && existing?.getLabels)
-        entry.getLabels = existing.getLabels;
+  // Preserve DOM bindings from bindElement (may have been set in previous lifecycle)
+  if (existing?.element) entry.element = existing.element;
+  if (!callbacks.getItems && existing?.getItems)
+    entry.getItems = existing.getItems;
+  if (!entry.getLabels && existing?.getLabels)
+    entry.getLabels = existing.getLabels;
 
-    return entry;
+  return entry;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -170,14 +180,14 @@ export function buildZoneEntry(
 
 /** All props to spread onto a Zone/FocusGroup container div. */
 export interface ContainerProps {
-    id: string;
-    role: string;
-    tabIndex: -1;
-    "data-zone": string;
-    "data-orientation": string | undefined;
-    "aria-current": "true" | undefined;
-    "aria-orientation": "horizontal" | "vertical" | undefined;
-    "aria-multiselectable": true | undefined;
+  id: string;
+  role: string;
+  tabIndex: -1;
+  "data-zone": string;
+  "data-orientation": string | undefined;
+  "aria-current": "true" | undefined;
+  "aria-orientation": "horizontal" | "vertical" | undefined;
+  "aria-multiselectable": true | undefined;
 }
 
 /**
@@ -187,28 +197,27 @@ export interface ContainerProps {
  * Result is spread directly onto the container div: `<div {...computeContainerProps(...)} />`
  */
 export function computeContainerProps(
-    zoneId: string,
-    config: FocusGroupConfig,
-    isActive: boolean,
-    fallbackRole?: ZoneRole | string,
+  zoneId: string,
+  config: FocusGroupConfig,
+  isActive: boolean,
+  fallbackRole?: ZoneRole | string,
 ): ContainerProps {
-    const orientation = config.navigate.orientation;
-    return {
-        id: zoneId,
-        role: (fallbackRole as string) || "group",
-        tabIndex: -1 as const,
-        "data-zone": zoneId,
-        "data-orientation": orientation,
-        "aria-current": isActive ? "true" as const : undefined,
-        "aria-orientation":
-            orientation === "horizontal"
-                ? ("horizontal" as const)
-                : orientation === "vertical"
-                    ? ("vertical" as const)
-                    : undefined,
-        "aria-multiselectable":
-            config.select.mode === "multiple" || undefined,
-    };
+  const orientation = config.navigate.orientation;
+  return {
+    id: zoneId,
+    role: (fallbackRole as string) || "group",
+    tabIndex: -1 as const,
+    "data-zone": zoneId,
+    "data-orientation": orientation,
+    "aria-current": isActive ? ("true" as const) : undefined,
+    "aria-orientation":
+      orientation === "horizontal"
+        ? ("horizontal" as const)
+        : orientation === "vertical"
+          ? ("vertical" as const)
+          : undefined,
+    "aria-multiselectable": config.select.mode === "multiple" || undefined,
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -216,10 +225,10 @@ export function computeContainerProps(
 // ═══════════════════════════════════════════════════════════════════
 
 export interface ZoneContextValue {
-    zoneId: string;
-    scope: ScopeToken;
-    config: FocusGroupConfig;
-    role?: ZoneRole | undefined;
+  zoneId: string;
+  scope: ScopeToken;
+  config: FocusGroupConfig;
+  role?: ZoneRole | undefined;
 }
 
 /**
@@ -227,14 +236,14 @@ export interface ZoneContextValue {
  * Pure function — no React.
  */
 export function createZoneContext(
-    zoneId: string,
-    config: FocusGroupConfig,
-    role?: ZoneRole,
+  zoneId: string,
+  config: FocusGroupConfig,
+  role?: ZoneRole,
 ): ZoneContextValue {
-    return {
-        zoneId,
-        scope: defineScope(zoneId),
-        config,
-        ...(role !== undefined ? { role } : {}),
-    };
+  return {
+    zoneId,
+    scope: defineScope(zoneId),
+    config,
+    ...(role !== undefined ? { role } : {}),
+  };
 }

@@ -29,13 +29,26 @@ export const DOM_EXPANDABLE_ITEMS = os.defineContext(
     const entry = ZoneRegistry.get(zoneId);
     if (!entry) return new Set();
 
-    // Push model: use accessor (headless-compatible)
+    // Config-driven expand axis
+    const expandMode = entry.config?.expand?.mode ?? "none";
+
+    if (expandMode === "none") return new Set();
+
+    if (expandMode === "all") {
+      // All items are expandable — return a universal set
+      // that always returns true for .has() checks
+      return { has: () => true, size: Infinity } as unknown as Set<string>;
+    }
+
+    // expandMode === "explicit" — use accessor or DOM scan
     if (entry.getExpandableItems) return entry.getExpandableItems();
 
     // Lazy fallback: DOM scan via bound element
     if (entry.element) {
       const expandableIds = new Set<string>();
-      const els = entry.element.querySelectorAll("[data-item-id][aria-expanded]");
+      const els = entry.element.querySelectorAll(
+        "[data-item-id][aria-expanded]",
+      );
       for (const el of els) {
         if (el.closest("[data-zone]") !== entry.element) continue;
         const id = el.getAttribute("data-item-id");
