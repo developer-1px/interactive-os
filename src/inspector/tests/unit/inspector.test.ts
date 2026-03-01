@@ -4,7 +4,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { createPage, type AppPage } from "@os/defineApp.page";
 import type { Transaction } from "@kernel/core/transaction";
-import { InspectorApp, updateSearchQuery, selectFilteredTransactions, INSPECTOR_SCROLL_TO_BOTTOM, setScrollState, type InspectorState } from "../../app";
+import { InspectorApp, updateSearchQuery, selectFilteredTransactions, INSPECTOR_SCROLL_TO_BOTTOM, setScrollState, INSPECTOR_SET_HIGHLIGHT, type InspectorState } from "../../app";
 
 // Note: To properly test React integration, we need the UI component.
 // But we might simulate it with a headless page if we just test the App definition.
@@ -149,6 +149,31 @@ describe("Feature: Inspector Dogfooding T3 (명시적 OS_SCROLL 커맨드 구축
             page.click("scrollToBottomBtn");
 
             expect((page.state as any).isUserScrolled).toBe(false);
+        });
+    });
+});
+
+describe("Feature: Inspector Dogfooding T4 (HighlightOverlay 투영 시스템 OS 연동)", () => {
+    let page: AppPage<InspectorState>;
+
+    beforeEach(() => {
+        page = createPage(InspectorApp);
+    });
+
+    describe("Scenario: 엘리먼트 Hover 시 하이라이트 상태 설정", () => {
+        it("INSPECTOR_SET_HIGHLIGHT 커맨드가 id와 함께 dispatch되면 상태가 업데이트된다", () => {
+            page.dispatch(INSPECTOR_SET_HIGHLIGHT({ id: "foo" }));
+            expect((page.state as any).highlightedNodeId).toBe("foo");
+        });
+    });
+
+    describe("Scenario: Hover 해제 시 하이라이트 상태 해제", () => {
+        it("INSPECTOR_SET_HIGHLIGHT 커맨드가 null과 함께 dispatch되면 상태가 초기화된다", () => {
+            page.dispatch(INSPECTOR_SET_HIGHLIGHT({ id: "foo" }));
+            expect((page.state as any).highlightedNodeId).toBe("foo");
+
+            page.dispatch(INSPECTOR_SET_HIGHLIGHT({ id: null }));
+            expect((page.state as any).highlightedNodeId).toBeNull();
         });
     });
 });

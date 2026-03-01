@@ -48,10 +48,22 @@ const resolveTreeItem: ItemKeyResolver = (key, ctx) => {
 };
 
 /**
- * checkbox / switch: Space → CHECK (W3C APG Checkbox Pattern)
+ * checkbox: Space → CHECK (W3C APG Checkbox Pattern)
+ * Enter falls through to Zone-level OS_ACTIVATE.
  */
-const resolveCheckable: ItemKeyResolver = (key, ctx) => {
+const resolveCheckbox: ItemKeyResolver = (key, ctx) => {
   if (key === "Space") {
+    return OS_CHECK({ targetId: ctx.itemId });
+  }
+  return null;
+};
+
+/**
+ * switch: Space/Enter → CHECK (W3C APG Switch Pattern)
+ * Both Space and Enter toggle the checked state per W3C APG spec.
+ */
+const resolveSwitch: ItemKeyResolver = (key, ctx) => {
+  if (key === "Space" || key === "Enter") {
     return OS_CHECK({ targetId: ctx.itemId });
   }
   return null;
@@ -109,8 +121,8 @@ const resolveSlider: ItemKeyResolver = (key) => {
 
 const ITEM_RESOLVERS: Record<string, ItemKeyResolver> = {
   treeitem: resolveTreeItem,
-  checkbox: resolveCheckable,
-  switch: resolveCheckable,
+  checkbox: resolveCheckbox,
+  switch: resolveSwitch,
   radio: resolveRadio,
   menuitemradio: resolveRadio,
   button: resolveButton,

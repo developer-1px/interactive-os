@@ -89,6 +89,12 @@ describe("resolveItemKey (Item-layer keybindings)", () => {
       expect(result).not.toBeNull();
       expect(result!.type).toBe("OS_CHECK");
     });
+
+    it("Enter → OS_CHECK (W3C APG Switch: both Space and Enter toggle)", () => {
+      const result = resolveItemKey("switch", "Enter", { itemId: "sw-1" });
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe("OS_CHECK");
+    });
   });
 
   // ═══════════════════════════════════════

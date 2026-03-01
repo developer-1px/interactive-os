@@ -31,6 +31,12 @@ export const OS_SELECT = os.defineCommand(
     const targetId = payload.targetId ?? zone.focusedItemId;
     if (!targetId) return;
 
+    // Guard: select.mode="none" → selection is not a concern for this zone.
+    // Skip to prevent mousedown replace-select from interfering with
+    // toggle-based patterns (switch, checkbox via OS_CHECK).
+    const zoneConfig = ctx.inject(ZONE_CONFIG);
+    if (zoneConfig.select.mode === "none") return;
+
     // APG: disabled items cannot be selected
     if (ZoneRegistry.isDisabled(activeZoneId, targetId)) return;
 

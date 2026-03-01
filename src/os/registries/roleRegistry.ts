@@ -66,6 +66,8 @@ export type ZoneRole =
   | "disclosure"
   // Value patterns
   | "slider"
+  // Toggle patterns
+  | "switch"
   // Custom (non-ARIA)
   | "builderBlock"
   | "application"
@@ -90,6 +92,7 @@ const childRoleMap: Partial<Record<ZoneRole, string>> = {
   feed: "article",
   accordion: "button",
   slider: "slider",
+  switch: "switch",
 };
 
 /** Roles where items should use `aria-checked` instead of `aria-selected` */
@@ -331,6 +334,18 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
     select: { mode: "none" },
     tab: { behavior: "escape" },
     value: { mode: "continuous", min: 0, max: 100, step: 1, largeStep: 10 },
+  },
+
+  // ─── Switch (ARIA APG: Switch Pattern) ───
+  // Spec: on/off toggle, Enter/Space toggles aria-checked,
+  //       single focusable element, click also toggles.
+  //       select.mode="none" so mousedown doesn't interfere with toggle;
+  //       onCheck (Space/Enter) and onAction (click) handle toggling.
+  switch: {
+    select: { mode: "none" },
+    check: { mode: "check" },
+    activate: { mode: "manual", onClick: true },
+    tab: { behavior: "escape" },
   },
 };
 

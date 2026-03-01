@@ -25,7 +25,8 @@
       "Bash(git commit:*)",
       "Bash(python3:*)",
       "Bash(find:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(do echo:*)"
     ]
   }
 }

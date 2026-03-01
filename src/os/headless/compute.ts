@@ -105,7 +105,9 @@ export function computeItem(
   };
 
   if (useChecked) {
-    attrs["aria-checked"] = isSelectableGroup ? isSelected : undefined;
+    // check.mode="check" → always output aria-checked (switch, checkbox, radio)
+    // Works for both selectable groups (radiogroup) and standalone toggles (switch)
+    attrs["aria-checked"] = isSelected;
   } else if (isSelectableGroup) {
     // check.mode "select" or "none" with active selection → aria-selected
     attrs["aria-selected"] = isSelected;

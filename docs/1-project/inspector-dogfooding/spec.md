@@ -140,5 +140,40 @@ Scenario: 맨 아래로 수동 스크롤
 |------|------|--------|----------|
 | `isUserScrolled` | 사용자가 수동으로 위로 스크롤했는지 여부 | `false` | 스크롤 이벤트 핸들러 또는 `scrollToBottom` 호출 시 갱신 |
 
-### 7.3 범위 밖 (Out of Scope)
 - 전역 `OS_SCROLL` 패러다임 완벽 구축보다는, Inspector App 내에서의 Command 기반 스크롤 제어 증명에 초점을 맞춘다.
+
+## 8. T4: 임시 시각적 하이라이트 레이어 투영 (`HighlightOverlay`)
+
+### 8.1 하이라이트 투영 상태 연동
+
+**Story**: 개발자로서, UnifiedInspector에서 특정 트랜잭션의 Trigger나 노드에 마우스를 올렸을 때 대상 엘리먼트가 하이라이트되는 동작이, 직접적인 DOM 조작(imperative mutation)이 아닌 OS 상태 패러다임을 통해 투영(projection)되기를 원한다. 그래야 ZIFT 아키텍처의 단방향 데이터 흐름 원칙을 준수하고, UI 구성요소들이 순수 투영기로 동작할 수 있기 때문이다.
+
+**Use Case — 주 흐름:**
+1. UnifiedInspector 엘리먼트에 마우스가 Hover된다 (`onMouseEnter`).
+2. 해당 이벤트에서 뷰가 DOM을 조작하는 대신 `INSPECTOR_SET_HIGHLIGHT` 커맨드를 dispatch한다.
+3. App Store는 `highlightedElementId` 상태를 업데이트한다.
+4. 독립적인 `<HighlightOverlay />` 컴포넌트(튜영기)가 이 상태를 구독하고, 대상 엘리먼트의 좌표(혹은 Data Attribute)를 기반으로 시각적 하이라이트를 렌더링한다.
+5. 마우스가 영역을 벗어나면 (`onMouseLeave`) `null` 값으로 커맨드를 다시 dispatch하여 하이라이트를 해제한다.
+
+**Scenarios:**
+
+Scenario: 엘리먼트 Hover 시 하이라이트 상태 설정
+  Given UnifiedInspector가 렌더링되어 있다
+  When 사용자가 트랜잭션 Trigger(예: `elementId`가 "foo"인 노드)에 마우스를 올린다
+  Then `INSPECTOR_SET_HIGHLIGHT` 커맨드가 `document.querySelector`용 id("foo")와 함께 dispatch된다
+  And App Store의 `highlightedNodeId` 상태가 "foo"로 변경된다
+
+Scenario: Hover 해제 시 하이라이트 상태 해제
+  Given `highlightedNodeId`가 "foo"로 설정되어 있다
+  When 사용자가 해당 Trigger에서 마우스를 벗어난다 (`onMouseLeave`)
+  Then `INSPECTOR_SET_HIGHLIGHT` 커맨드가 `null` (혹은 `undefined`)과 함께 dispatch된다
+  And App Store의 `highlightedNodeId` 상태가 초기화된다
+
+### 8.2 상태 인벤토리 (T4 추가)
+
+| 상태 | 설명 | 초기값 | 변경 경로 |
+|------|------|--------|----------|
+| `highlightedNodeId` | 현재 하이라이트되어야 할 대상 엘리먼트의 ID 또는 식별자 | `null` | `INSPECTOR_SET_HIGHLIGHT` 커맨드 |
+
+### 8.3 범위 밖 (Out of Scope)
+- 하이라이트 오버레이의 극단적인 성능 최적화(ResizeObserver를 통한 실시간 트래킹 등)보다, 명령-상태-투영의 순방향 데이터 흐름을 확립하는 데 초점을 맞춘다.

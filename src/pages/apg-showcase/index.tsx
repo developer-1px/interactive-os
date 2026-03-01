@@ -10,6 +10,7 @@ import { GridPattern } from "./patterns/GridPattern";
 import { ListboxPattern } from "./patterns/ListboxPattern";
 import { MenuPattern } from "./patterns/MenuPattern";
 import { SliderPattern } from "./patterns/SliderPattern";
+import { SwitchPattern } from "./patterns/SwitchPattern";
 import { ToolbarPattern } from "./patterns/ToolbarPattern";
 import { TreePattern } from "./patterns/TreePattern";
 
@@ -22,6 +23,7 @@ const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   listbox: { name: "Listbox", component: ListboxPattern },
   toolbar: { name: "Toolbar", component: ToolbarPattern },
   slider: { name: "Slider", component: SliderPattern },
+  switch: { name: "Switch", component: SwitchPattern },
   composite: { name: "Composite", component: CompositePattern },
 };
 

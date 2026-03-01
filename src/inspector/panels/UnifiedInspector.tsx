@@ -34,7 +34,9 @@ import {
   selectFilteredTransactions,
   setScrollState,
   toggleGroup,
+  INSPECTOR_SET_HIGHLIGHT,
 } from "../app";
+import { HighlightOverlay } from "./HighlightOverlay";
 import { inferSignal } from "../utils/inferSignal";
 import { os } from "@os/kernel";
 
@@ -212,31 +214,6 @@ function groupDiffs(
   return groups;
 }
 
-// ─── Highlighting ───
-
-function highlightElement(id: string | undefined, active: boolean) {
-  if (!id) return;
-  const el =
-    document.querySelector(`[data-id="${id}"]`) ||
-    document.querySelector(`[data-zone-id="${id}"]`) ||
-    document.getElementById(id);
-
-  if (el && el instanceof HTMLElement) {
-    if (active) {
-      el.dataset["inspectorHighlight"] = "true";
-      el.style.outline = "2px solid #f06595";
-      el.style.outlineOffset = "2px";
-      el.style.boxShadow = "0 0 0 4px rgba(240, 101, 149, 0.3)";
-      el.style.transition = "all 0.2s";
-    } else {
-      delete el.dataset["inspectorHighlight"];
-      el.style.outline = "";
-      el.style.outlineOffset = "";
-      el.style.boxShadow = "";
-    }
-  }
-}
-
 // ─── Component ───
 
 export function UnifiedInspector({
@@ -394,6 +371,7 @@ export function UnifiedInspector({
 
   return (
     <div className="flex flex-col w-full h-full bg-white text-[#333] font-sans text-[10px]">
+      <HighlightOverlay />
       <div className="flex flex-col border-b border-[#e0e0e0] bg-white z-20 shrink-0 sticky top-0">
         {/* Top Header Row */}
         <div className="h-7 px-2 flex items-center justify-between">
@@ -787,8 +765,8 @@ function TimelineNode({
               <span
                 className="px-1 py-0.5 rounded text-[#c2255c] text-[8.5px] font-mono bg-[#fff0f6] border border-[#ffdeeb] cursor-help break-all leading-none"
                 title={`Element: ${trigger.elementId}`}
-                onMouseEnter={() => highlightElement(trigger.elementId, true)}
-                onMouseLeave={() => highlightElement(trigger.elementId, false)}
+                onMouseEnter={() => trigger.elementId && os.dispatch(INSPECTOR_SET_HIGHLIGHT({ id: trigger.elementId }))}
+                onMouseLeave={() => trigger.elementId && os.dispatch(INSPECTOR_SET_HIGHLIGHT({ id: null }))}
                 onClick={(e) => e.stopPropagation()}
               >
                 {trigger.elementId}

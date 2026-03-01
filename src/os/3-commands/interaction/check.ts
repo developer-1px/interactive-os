@@ -1,15 +1,18 @@
 /**
  * OS_CHECK Command — Toggle aria-checked state (kernel version)
  *
- * Maps to aria-checked. Triggered by Space on checkbox/switch roles,
+ * Maps to aria-checked. Triggered by Space/Enter on checkbox/switch roles,
  * or by click on checkbox elements.
  *
  * If the zone has onCheck registered, passes ZoneCursor to the callback.
+ * If no onCheck and check.mode="check": built-in toggle (selection toggle).
  */
 
+import { produce } from "immer";
 import { ZONE_CONFIG } from "../../2-contexts";
 import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { os } from "../../kernel";
+import { ensureZone } from "../../state/utils";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 interface CheckPayload {
@@ -40,6 +43,20 @@ export const OS_CHECK = os.defineCommand(
       };
     }
 
-    // No onCheck registered — no-op
+    // Built-in toggle: when check.mode="check" (switch, checkbox),
+    // toggle the item in selection directly. No callback needed.
+    const checkMode = entry?.config?.check?.mode ?? "none";
+    if (checkMode === "check") {
+      return {
+        state: produce(ctx.state, (draft) => {
+          const z = ensureZone(draft.os, activeZoneId);
+          if (z.selection.includes(targetId)) {
+            z.selection = z.selection.filter((id: string) => id !== targetId);
+          } else {
+            z.selection.push(targetId);
+          }
+        }),
+      };
+    }
   },
 );
