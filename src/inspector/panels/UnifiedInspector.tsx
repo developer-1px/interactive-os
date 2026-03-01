@@ -26,11 +26,13 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   clearSearchQuery,
+  INSPECTOR_SCROLL_TO_BOTTOM,
   InspectorApp,
   InspectorFiltersUI,
   InspectorSearchUI,
   type InspectorState,
   selectFilteredTransactions,
+  setScrollState,
   toggleGroup,
 } from "../app";
 import { inferSignal } from "../utils/inferSignal";
@@ -252,6 +254,12 @@ export function UnifiedInspector({
   const searchQuery = InspectorApp.useComputed(
     (s: InspectorState) => s.searchQuery,
   );
+  const isUserScrolled = InspectorApp.useComputed(
+    (s: InspectorState) => s.isUserScrolled,
+  );
+  const scrollTick = InspectorApp.useComputed(
+    (s: InspectorState) => s.scrollTick,
+  );
   const filteredTx = InspectorApp.useComputed((s) => selectFilteredTransactions(s, transactions));
   const [manualToggles, setManualToggles] = useState<Set<number>>(new Set());
   const [traceOpen, setTraceOpen] = useState(true);
@@ -300,8 +308,8 @@ export function UnifiedInspector({
 
   // ── Discord/Slack-style auto-scroll ──
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isUserScrolled, setIsUserScrolled] = useState(false);
   const prevLatestId = useRef<number | undefined>(undefined);
+  const prevScrollTick = useRef(0);
   const isProgrammaticScroll = useRef(false);
 
   const isAtBottom = useCallback(() => {
@@ -320,7 +328,9 @@ export function UnifiedInspector({
     } else {
       el.scrollTop = el.scrollHeight;
     }
-    setIsUserScrolled(false);
+
+    // ZIFT Handler triggers DOM manipulation directly when observed state (scrollTick) changes.
+    // The state `isUserScrolled` is updated in the app using the scroll command.
     requestAnimationFrame(() => {
       isProgrammaticScroll.current = false;
     });
@@ -329,37 +339,34 @@ export function UnifiedInspector({
   const handleScroll = useCallback(() => {
     // Ignore scroll events caused by our own programmatic scrolling
     if (isProgrammaticScroll.current) return;
-    setIsUserScrolled(!isAtBottom());
-  }, [isAtBottom]);
+    const UserScrolled = !isAtBottom();
+    if (isUserScrolled !== UserScrolled) {
+      os.dispatch(setScrollState({ isUserScrolled: !!UserScrolled }));
+    }
+  }, [isAtBottom, isUserScrolled]);
 
-  // Auto-scroll when a NEW transaction arrives (not on filter change)
+  // React to OS_SCROLL commands via scrollTick change
+  useEffect(() => {
+    if (scrollTick > prevScrollTick.current) {
+      prevScrollTick.current = scrollTick;
+      // Double rAF: first waits for React commit, second waits for layout
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scrollToBottom();
+        });
+      });
+    }
+  }, [scrollTick, scrollToBottom]);
+
+  // Auto-scroll logic: Dispatch OS_SCROLL command when new transaction arrives
   useEffect(() => {
     if (latestTxId === undefined || latestTxId === prevLatestId.current) return;
     prevLatestId.current = latestTxId;
 
-    if (isUserScrolled || searchQuery) return;
-
-    // Double rAF: first waits for React commit, second waits for layout
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const el = scrollRef.current;
-        if (!el) return;
-        isProgrammaticScroll.current = true;
-        // Scroll last node to the TOP of the viewport so it's fully visible
-        const lastNode = el.querySelector(
-          `[data-tx-index="${filteredTx.length - 1}"]`,
-        );
-        if (lastNode) {
-          lastNode.scrollIntoView({ block: "start", behavior: "auto" });
-        } else {
-          el.scrollTop = el.scrollHeight;
-        }
-        requestAnimationFrame(() => {
-          isProgrammaticScroll.current = false;
-        });
-      });
-    });
-  }, [latestTxId, isUserScrolled, searchQuery, filteredTx.length]);
+    if (!isUserScrolled && !searchQuery) {
+      os.dispatch(INSPECTOR_SCROLL_TO_BOTTOM());
+    }
+  }, [latestTxId, isUserScrolled, searchQuery]);
 
   const toggle = (id: number) => {
     setManualToggles((prev) => {
@@ -596,7 +603,7 @@ export function UnifiedInspector({
         {isUserScrolled && (
           <button
             type="button"
-            onClick={scrollToBottom}
+            onClick={() => os.dispatch(INSPECTOR_SCROLL_TO_BOTTOM())}
             className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#334155] text-white text-[9px] font-semibold hover:bg-[#1e293b] cursor-pointer border-none"
           >
             <ChevronDown size={10} />

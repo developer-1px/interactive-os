@@ -18,7 +18,7 @@ import { TestBotPanel } from "./panels/TestBotPanel";
 
 export const TOGGLE_INSPECTOR = os.defineCommand(
   "TOGGLE_INSPECTOR",
-  (_ctx) => () => {
+  () => () => {
     InspectorStore.toggle();
     return undefined;
   },

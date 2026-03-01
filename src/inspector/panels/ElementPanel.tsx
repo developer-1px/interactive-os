@@ -185,9 +185,9 @@ function Row({
   children: React.ReactNode;
 }) {
   return (
-    <div style={S.row}>
+    <div style={S.row as React.CSSProperties}>
       <span style={S.label}>{label}</span>
-      <span style={S.value as any}>{children}</span>
+      <span style={S.value as React.CSSProperties}>{children}</span>
     </div>
   );
 }
@@ -217,14 +217,15 @@ function PropValue({ value }: { value: unknown }) {
     );
   }
   if (typeof value === "object") {
+    let str = "";
     try {
-      const str = JSON.stringify(value);
-      if (str.length > 60)
-        return <span style={S.propValue}>{str.slice(0, 57)}…</span>;
-      return <span style={S.propValue}>{str}</span>;
+      str = JSON.stringify(value);
     } catch {
       return <span style={S.propValue}>[Object]</span>;
     }
+    if (str.length > 60)
+      return <span style={S.propValue}>{str.slice(0, 57)}…</span>;
+    return <span style={S.propValue}>{str}</span>;
   }
   return <span style={S.propValue}>{String(value)}</span>;
 }
@@ -238,17 +239,17 @@ function BoxModelDiagram({
   const { paddingTop, paddingRight, paddingBottom, paddingLeft } = boxModel;
   const contentW = Math.round(
     boxModel.width -
-      paddingLeft -
-      paddingRight -
-      boxModel.borderLeft -
-      boxModel.borderRight,
+    paddingLeft -
+    paddingRight -
+    boxModel.borderLeft -
+    boxModel.borderRight,
   );
   const contentH = Math.round(
     boxModel.height -
-      paddingTop -
-      paddingBottom -
-      boxModel.borderTop -
-      boxModel.borderBottom,
+    paddingTop -
+    paddingBottom -
+    boxModel.borderTop -
+    boxModel.borderBottom,
   );
 
   const cellStyle = (bg: string): React.CSSProperties => ({
@@ -452,7 +453,7 @@ export function ElementPanel() {
   }
 
   return (
-    <div style={S.panel as any}>
+    <div style={S.panel as React.CSSProperties}>
       {/* ── Section 1: DOM (Compact) ── */}
       <div style={S.section}>
         <div style={S.sectionHeader} onClick={() => toggleSection("dom")}>
@@ -522,7 +523,7 @@ export function ElementPanel() {
 
             {/* Row 2: Layout Metrics (Display | Size | Radius | Gap) */}
             <div
-              style={{ ...(S.row as any), borderBottom: "none", color: "#666" }}
+              style={{ ...(S.row as React.CSSProperties), borderBottom: "none", color: "#666" }}
             >
               <div
                 style={{

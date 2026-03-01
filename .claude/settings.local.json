@@ -24,7 +24,8 @@
       "Bash(npx vitest:*)",
       "Bash(git commit:*)",
       "Bash(python3:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(node:*)"
     ]
   }
 }

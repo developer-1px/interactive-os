@@ -227,7 +227,7 @@ function getFiberProps(el: HTMLElement): FiberPropsEntry[] {
                 : "ReactNode";
         } else if (typeof v === "function") {
           sanitized[k] = `ƒ ${v.name || "anonymous"}()`;
-        } else if (v && typeof v === "object" && "$$typeof" in (v as any)) {
+        } else if (v && typeof v === "object" && "$$typeof" in (v as Record<string, unknown>)) {
           sanitized[k] = "ReactElement";
         } else {
           sanitized[k] = v;

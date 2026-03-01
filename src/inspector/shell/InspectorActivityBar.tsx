@@ -7,7 +7,6 @@ export function InspectorActivityBar() {
   const activeTab = useInspectorStore((s) => s.activeTab);
   const setActiveTab = useInspectorStore((s) => s.setActiveTab);
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const dynamicPanels = useSyncExternalStore(
     (cb) => InspectorRegistry.subscribe(cb),
     () => InspectorRegistry.getPanels(),
@@ -39,8 +38,8 @@ export function InspectorActivityBar() {
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
           className={`w-6 h-6 mb-1 rounded flex items-center justify-center transition-all ${activeTab === tab.id
-              ? "bg-white text-[#007acc] shadow-sm border border-[#e0e0e0]"
-              : "text-[#999] hover:text-[#666] hover:bg-white/50"
+            ? "bg-white text-[#007acc] shadow-sm border border-[#e0e0e0]"
+            : "text-[#999] hover:text-[#666] hover:bg-white/50"
             }`}
           title={tab.label}
         >

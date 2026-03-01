@@ -8,11 +8,15 @@ enableMapSet();
 export interface InspectorState {
     searchQuery: string;
     disabledGroups: Set<string>;
+    isUserScrolled: boolean;
+    scrollTick: number;
 }
 
 const INITIAL_STATE: InspectorState = {
     searchQuery: "",
     disabledGroups: new Set(),
+    isUserScrolled: false,
+    scrollTick: 0,
 };
 
 export const InspectorApp = defineApp<InspectorState>("inspector", INITIAL_STATE);
@@ -79,6 +83,30 @@ export const InspectorFiltersUI = filtersZone.bind({
 export const InspectorFilters = {
     ...InspectorFiltersUI,
 };
+
+// ─── Scroll Zone ───
+const scrollZone = InspectorApp.createZone("inspector-scroll");
+
+export const INSPECTOR_SCROLL_TO_BOTTOM = scrollZone.command("INSPECTOR_SCROLL_TO_BOTTOM", (ctx) => ({
+    state: produce(ctx.state, (draft) => {
+        draft.isUserScrolled = false;
+        draft.scrollTick++;
+    }),
+}));
+
+export const setScrollState = scrollZone.command("setScrollState", (ctx, payload: { isUserScrolled: boolean }) => ({
+    state: produce(ctx.state, (draft) => {
+        draft.isUserScrolled = payload.isUserScrolled;
+    }),
+}));
+
+export const InspectorScrollUI = scrollZone.bind({
+    role: "toolbar", // using a generic role
+    options: { activate: { onClick: true } },
+    triggers: [
+        { id: "scrollToBottomBtn", onActivate: INSPECTOR_SCROLL_TO_BOTTOM() },
+    ],
+});
 
 export function selectFilteredTransactions(
     state: InspectorState,

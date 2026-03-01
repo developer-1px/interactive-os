@@ -102,3 +102,43 @@ Scenario: 비활성화 그룹에 따른 트랜잭션 필터링
 ### 6.3 범위 밖 (Out of Scope)
 - T2에서는 필터링 최적화/캐싱 로직을 극한으로 튜닝하지 않는다. (순수 함수나 selector로 분리하는 구조적 decoupling에 집중)
 - 새로운 종류의 필터를 추가하지 않는다. (기존 로직 유지)
+
+## 7. T3: 명시적 `OS_SCROLL` 커맨드 구축
+
+### 7.1 스크롤 상태 연동 (Auto Scroll)
+
+**Story**: 개발자로서, 새 트랜잭션 수신 시 자동으로 맨 아래로 스크롤되는 동작이 React의 `useEffect` 생명주기에 숨겨져 있지 않고, 명시적인 OS Command(`OS_SCROLL` 또는 App Command)로 통제되기를 원한다. 조건부 스크롤(사용자가 위로 스크롤 중일 때는 멈춤 등)의 판단 책임은 App이 지고, View는 오직 내려오는 Command에 따라 물리적 DOM 스크롤만 수행해야 한다.
+
+**Use Case — 주 흐름:**
+1. OS로부터 새로운 트랜잭션이 App Store로 들어온다.
+2. App 로직이 현재 사용자의 스크롤 상태(`isUserScrolled`)와 검색어 상태(`searchQuery`)를 평가한다.
+3. 자동 스크롤 조건에 부합하면 `OS_SCROLL` (또는 `INSPECTOR_SCROLL_TO_BOTTOM`) 커맨드를 dispatch한다.
+4. UI 렌더러 측의 ZIFT Handler가 해당 커맨드를 수신하여 물리적 DOM API(`scrollIntoView` 등)를 실행한다.
+
+**Scenarios:**
+
+Scenario: 새 트랜잭션 수신 시 자동 스크롤
+  Given 사용자가 위로 스크롤하지 않았고(`isUserScrolled == false`), 검색어가 없는 상태이다
+  When 새 트랜잭션이 App Store에 추가된다
+  Then App은 `INSPECTOR_SCROLL_TO_BOTTOM` 커맨드를 dispatch한다
+  And View 레이어의 핸들러가 이를 감지하여 목록의 맨 마지막 요소로 스크롤한다
+
+Scenario: 사용자가 위로 스크롤 중일 때 자동 스크롤 방지
+  Given 사용자가 목록을 위로 스크롤하여 `isUserScrolled == true` 상태이다
+  When 새 트랜잭션이 App Store에 추가된다
+  Then App은 커맨드를 dispatch하지 않는다 (자동 스크롤 중지)
+
+Scenario: 맨 아래로 수동 스크롤
+  Given 사용자가 목록을 위로 스크롤한 상태이다
+  When 사용자가 "맨 아래로" 버튼을 클릭한다
+  Then `INSPECTOR_SCROLL_TO_BOTTOM` 커맨드가 dispatch된다
+  And View가 맨 아래로 스크롤되며, `isUserScrolled` 상태가 `false`로 리셋된다
+
+### 7.2 상태 인벤토리 (T3 추가)
+
+| 상태 | 설명 | 초기값 | 변경 경로 |
+|------|------|--------|----------|
+| `isUserScrolled` | 사용자가 수동으로 위로 스크롤했는지 여부 | `false` | 스크롤 이벤트 핸들러 또는 `scrollToBottom` 호출 시 갱신 |
+
+### 7.3 범위 밖 (Out of Scope)
+- 전역 `OS_SCROLL` 패러다임 완벽 구축보다는, Inspector App 내에서의 Command 기반 스크롤 제어 증명에 초점을 맞춘다.

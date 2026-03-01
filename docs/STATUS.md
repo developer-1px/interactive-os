@@ -9,6 +9,8 @@
 
 ## 🔥 Active Focus
 
+**apg-developer-agent** — Claude Code 커스텀 에이전트 POC. OS 네이티브 APG 패턴 개발자. Meta.
+
 **headless-simulator** — Vitest에서 Playwright 수준 검증 달성. DOM → OS VDOM. 거짓 GREEN 근절. Heavy.
 
 **code-hygiene** — 540 eslint errors + 20 test failures → 0. husky 강제 검증. Light.
@@ -25,6 +27,7 @@
 |---------|-------|---------------|--------|
 
 
+| apg-developer-agent | Scaffold, T1~T2 | 03-01 | 🔥 Focus |
 | headless-simulator | Scaffold, T1~T3 | 02-27 | 🔥 Focus |
 | builder-v2 | T5 DnD Done, OS gap 회고 완료 | 02-26 | 🔥 Focus |
 | dropdown-dismiss | Scaffold, T1~T3 | 02-26 | 🔥 Focus |
@@ -116,8 +119,8 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 4 |
-| Active Projects (total) | 15 (11 Active + 4 Focus) |
+| Active Focus | 5 |
+| Active Projects (total) | 16 (11 Active + 5 Focus) |
 | Completed (archived) | 46 |
 | Inbox items | 5 |
 | Backlog items | 15 |
