@@ -9,7 +9,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { FieldRegistry } from "@/os/6-components/field/FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { gotoList, page, setupTodoPage } from "./todo-helpers";
 
 setupTodoPage();

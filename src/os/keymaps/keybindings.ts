@@ -11,7 +11,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import type { ZoneCallback } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCallback } from "@os/registries/zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types

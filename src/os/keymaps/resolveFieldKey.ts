@@ -17,7 +17,7 @@ import { OS_FIELD_COMMIT } from "@os/3-commands/field/commit";
 import {
   FieldRegistry,
   type FieldType,
-} from "@os/6-components/field/FieldRegistry";
+} from "@os/registries/fieldRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Field-layer keybindings per fieldType

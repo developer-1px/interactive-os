@@ -6,7 +6,7 @@
  */
 
 import { computeContainerProps } from "@os/2-contexts/zoneLogic";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { getChildRole } from "@os/registries/roleRegistry";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 

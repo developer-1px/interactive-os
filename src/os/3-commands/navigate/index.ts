@@ -16,7 +16,7 @@ import {
   DOM_TREE_LEVELS,
   ZONE_CONFIG,
 } from "../../2-contexts";
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { os } from "../../kernel";
 import { applyFollowFocus, ensureZone } from "../../state/utils";
 import { OS_EXPAND } from "../expand";

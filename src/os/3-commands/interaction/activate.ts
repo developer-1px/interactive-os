@@ -8,7 +8,7 @@
  */
 
 import { DOM_EXPANDABLE_ITEMS } from "../../2-contexts";
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { os } from "../../kernel";
 import { OS_EXPAND } from "../expand";
 import { buildZoneCursor } from "../utils/buildZoneCursor";

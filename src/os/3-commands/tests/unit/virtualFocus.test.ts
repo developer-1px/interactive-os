@@ -10,7 +10,7 @@
  * DOM focus is handled by FocusItem.useLayoutEffect (state → render → DOM focus).
  */
 
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { OS_FOCUS } from "@os/3-commands/focus";
 import { OS_NAVIGATE } from "@os/3-commands/navigate";
 import { os } from "@os/kernel";

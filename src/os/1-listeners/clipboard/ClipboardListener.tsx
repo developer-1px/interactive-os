@@ -7,7 +7,7 @@
  */
 
 import { useEffect } from "react";
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import {
   OS_COPY,
   OS_CUT,

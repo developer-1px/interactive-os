@@ -6,7 +6,7 @@
  * Feature: zift-keyboard-resolve.feature Scenarios 1-6
  */
 
-import { FieldRegistry } from "@os/6-components/field/FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { resolveFieldKey } from "@os/keymaps/resolveFieldKey";
 import { beforeEach, describe, expect, it } from "vitest";
 

@@ -12,7 +12,7 @@
  * Tabs variant: same axis + followFocus (automatic activation)
  */
 
-import { createOsPage } from "@os/createOsPage";
+import { createOsPage } from "@os/defineApp.page";
 import { describe, expect, it } from "vitest";
 import {
   assertHomeEnd,

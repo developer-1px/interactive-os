@@ -173,7 +173,7 @@ export function createBoundComponents<S>(
     className?: string;
     autoFocus?: boolean;
     mode?: import("@os/6-components/field/Field").FieldMode;
-    fieldType?: import("@os/6-components/field/FieldRegistry").FieldType;
+    fieldType?: import("@os/registries/fieldRegistry").FieldType;
   }> = (props) => {
     const fieldConfig = config.field;
 

@@ -18,8 +18,8 @@
 
 import type { BaseCommand } from "@kernel";
 import { defineScope, type ScopeToken } from "@kernel";
-import type { ZoneRole } from "../registries/roleRegistry.ts";
-import { resolveRole } from "../registries/roleRegistry.ts";
+import type { ZoneRole } from "@os/registries/roleRegistry";
+import { resolveRole } from "@os/registries/roleRegistry";
 import type {
   ActivateConfig,
   CheckConfig,
@@ -31,7 +31,7 @@ import type {
   SelectConfig,
   TabConfig,
 } from "../schemas";
-import type { ZoneCallback, ZoneEntry } from "./zoneRegistry.ts";
+import type { ZoneCallback, ZoneEntry } from "@os/registries/zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Zone ID Generator
@@ -123,12 +123,12 @@ export interface ZoneCallbacks {
   getExpandableItems?: (() => Set<string>) | undefined;
   getTreeLevels?: (() => Map<string, number>) | undefined;
   onReorder?:
-    | ((info: {
-        itemId: string;
-        overItemId: string;
-        position: "before" | "after";
-      }) => BaseCommand | BaseCommand[])
-    | undefined;
+  | ((info: {
+    itemId: string;
+    overItemId: string;
+    position: "before" | "after";
+  }) => BaseCommand | BaseCommand[])
+  | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════

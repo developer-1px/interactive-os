@@ -15,7 +15,7 @@ import {
   OS_FIELD_COMMIT,
   OS_FIELD_START_EDIT,
 } from "@os/3-commands/field/field";
-import { FieldRegistry } from "@os/6-components/field/FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";
 import { beforeEach, describe, expect, it, vi } from "vitest";

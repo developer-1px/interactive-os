@@ -11,7 +11,7 @@
  */
 
 import { BuilderApp } from "@apps/builder/app";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { createPage } from "@os/defineApp.page";
 import type { AppPage } from "@os/defineApp.types";
 import type { BuilderState } from "@apps/builder/model/appState";

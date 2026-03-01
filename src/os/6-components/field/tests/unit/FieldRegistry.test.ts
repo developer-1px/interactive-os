@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { FieldRegistry } from "../../FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 
 describe("FieldRegistry", () => {
   test("should register and unregister fields", () => {

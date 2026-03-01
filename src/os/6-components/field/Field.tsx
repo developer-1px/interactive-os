@@ -26,7 +26,7 @@ import {
   type FieldTrigger,
   type FieldType,
   useFieldRegistry,
-} from "./FieldRegistry";
+} from "@os/registries/fieldRegistry";
 import { Label } from "./Label";
 
 /**

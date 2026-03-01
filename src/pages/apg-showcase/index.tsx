@@ -4,6 +4,7 @@ import { Zone } from "@/os/6-components/primitives/Zone";
 import { Item } from "@/os/6-components/primitives/Item";
 import { TestBotRegistry, accordionScript } from "@os/testing";
 import { AccordionPattern } from "./patterns/AccordionPattern";
+import { AlertPattern } from "./patterns/AlertPattern";
 import { CompositePattern } from "./patterns/CompositePattern";
 import { GridPattern } from "./patterns/GridPattern";
 import { ListboxPattern } from "./patterns/ListboxPattern";
@@ -14,6 +15,7 @@ import { TreePattern } from "./patterns/TreePattern";
 
 const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   accordion: { name: "Accordion", component: AccordionPattern },
+  alert: { name: "Alert", component: AlertPattern },
   tree: { name: "Tree", component: TreePattern },
   menu: { name: "Menu", component: MenuPattern },
   grid: { name: "Grid", component: GridPattern },

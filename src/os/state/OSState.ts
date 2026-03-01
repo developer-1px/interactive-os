@@ -7,18 +7,23 @@ export interface OverlayEntry {
   type: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip";
 }
 
-export interface ToastEntry {
-  /** Unique toast ID */
+/** Notification types: toast (polite, auto-dismiss) vs alert (assertive, persistent) */
+export type NotificationType = "toast" | "alert";
+
+export interface NotificationEntry {
+  /** Unique notification ID */
   id: string;
+  /** Notification type — determines role and auto-dismiss behavior */
+  type: NotificationType;
   /** Message to display */
   message: string;
   /** Optional action label (e.g. "Undo") */
   actionLabel?: string;
   /** Optional command to dispatch when action is clicked */
   actionCommand?: { type: string; payload?: unknown; scope?: string[] };
-  /** Duration in ms before auto-dismiss (0 = manual only) */
+  /** Duration in ms before auto-dismiss (0 = manual only). Default: 4000 for toast, 0 for alert */
   duration: number;
-  /** Timestamp when toast was created */
+  /** Timestamp when notification was created */
   createdAt: number;
 }
 
@@ -48,9 +53,9 @@ export interface OSState {
     /** Stack of open overlays (top = most recent) */
     stack: OverlayEntry[];
   };
-  toasts: {
-    /** Active toast stack (bottom = oldest, top = newest) */
-    stack: ToastEntry[];
+  notifications: {
+    /** Active notification stack (bottom = oldest, top = newest) */
+    stack: NotificationEntry[];
   };
   /** Drag-and-drop state for reorder operations */
   drag: DragState;

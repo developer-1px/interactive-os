@@ -4,7 +4,7 @@
  * Passes ZoneCursor to the app callback. Clears selection after cut.
  */
 
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { os } from "../../kernel";
 import { OS_SELECTION_CLEAR } from "../selection/clear";
 import { buildZoneCursor } from "../utils/buildZoneCursor";

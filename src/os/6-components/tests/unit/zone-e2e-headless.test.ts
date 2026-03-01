@@ -15,7 +15,7 @@
  */
 
 import { describe, test, expect } from "vitest";
-import { createOsPage } from "@os/createOsPage";
+import { createOsPage } from "@os/defineApp.page";
 
 describe("Zone E2E → Headless (Playwright interface)", () => {
 

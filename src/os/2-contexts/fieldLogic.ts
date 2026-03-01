@@ -8,8 +8,8 @@
 import type { BaseCommand } from "@kernel";
 import type { FieldCommandFactory } from "@os/schemas/command/BaseCommand.ts";
 import type { ZodSchema } from "zod";
-import type { FieldConfig, FieldTrigger, FieldType } from "./FieldRegistry";
-
+import type { FieldConfig, FieldTrigger, FieldType } from "@os/registries/fieldRegistry";
+import type { ZoneEntry } from "@os/registries/zoneRegistry";
 // ═══════════════════════════════════════════════════════════════════
 // Validation
 // ═══════════════════════════════════════════════════════════════════

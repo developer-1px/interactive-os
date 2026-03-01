@@ -4,7 +4,7 @@
  * Tests the AppModule interface and module composition:
  * - history() module replaces `history: true` config
  * - persistence() module replaces `persistence: {}` config
- * - deleteToast() module: destructive action → OS_TOAST_SHOW with Undo
+ * - deleteToast() module: destructive action → OS_NOTIFY with Undo
  * - Modules are installable/removable: array inclusion = ON, exclusion = OFF
  *
  * 🔴 RED: These tests define the target API. Implementation does not exist yet.
@@ -199,7 +199,7 @@ describe("T4: deleteToast() module", () => {
     // Get OS toast stack
     const getToasts = () => {
       const fullState = app.runtime.getState();
-      return (fullState as any).os?.toasts?.stack ?? [];
+      return (fullState as any).os?.notifications?.stack ?? [];
     };
 
     expect(getToasts()).toHaveLength(0);
@@ -233,7 +233,7 @@ describe("T4: deleteToast() module", () => {
 
     const getToasts = () => {
       const fullState = app.runtime.getState();
-      return (fullState as any).os?.toasts?.stack ?? [];
+      return (fullState as any).os?.notifications?.stack ?? [];
     };
 
     app.dispatch(removeItem({ id: "a" }));
@@ -267,7 +267,7 @@ describe("T4: deleteToast() module", () => {
     expect(app.state.data.items).toHaveLength(2);
 
     // Get the toast's action command and dispatch it → should undo
-    const toasts = (app.runtime.getState() as any).os?.toasts?.stack ?? [];
+    const toasts = (app.runtime.getState() as any).os?.notifications?.stack ?? [];
     const undoCmd = toasts[0]?.actionCommand;
     expect(undoCmd).toBeDefined();
 

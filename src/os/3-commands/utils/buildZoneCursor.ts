@@ -8,8 +8,8 @@
  * isExpandable, isDisabled, treeLevel.
  */
 
-import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCursor } from "@os/registries/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import type { ZoneState } from "@os/state/OSState";
 
 export function buildZoneCursor(

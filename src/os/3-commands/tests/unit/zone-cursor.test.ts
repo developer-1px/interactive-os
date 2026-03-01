@@ -9,7 +9,7 @@
 
 import { GLOBAL } from "@kernel";
 import type { Command, ScopeToken } from "@kernel/core/tokens";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { OS_COPY } from "@os/3-commands/clipboard/clipboard";
 import { OS_ACTIVATE } from "@os/3-commands/interaction/activate";
 import { OS_CHECK } from "@os/3-commands/interaction/check";

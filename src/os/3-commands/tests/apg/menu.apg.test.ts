@@ -13,7 +13,7 @@
  * which are already pressKey-based. No unique dispatch calls needed.
  */
 
-import { createOsPage } from "@os/createOsPage";
+import { createOsPage } from "@os/defineApp.page";
 import { describe } from "vitest";
 import {
   assertBoundaryClamp,

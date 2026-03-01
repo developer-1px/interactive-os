@@ -15,7 +15,7 @@
  *   - useZoneContext() — { zoneId, scope, config, role }
  */
 
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry.ts";
+import { ZoneRegistry } from "@os/registries/zoneRegistry.ts";
 import {
   buildZoneEntry,
   computeContainerProps,

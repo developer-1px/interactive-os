@@ -8,7 +8,7 @@
  * and the FieldRegistry + kernel command system.
  */
 
-import { FieldRegistry } from "@os/6-components/field/FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { useEffect } from "react";
 
 export function InputListener() {

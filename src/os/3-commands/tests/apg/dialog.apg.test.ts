@@ -10,7 +10,7 @@
  * Unique: focus trap (Tab cycling), STACK restore, nested LIFO
  */
 
-import { createOsPage } from "@os/createOsPage";
+import { createOsPage } from "@os/defineApp.page";
 import { describe, expect, it } from "vitest";
 import { assertEscapeClose, assertTabTrap } from "./helpers/contracts";
 

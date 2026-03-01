@@ -8,7 +8,7 @@
  * then clears selection.
  */
 
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { os } from "../../kernel";
 import {
   beginTransaction,

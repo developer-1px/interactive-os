@@ -9,7 +9,7 @@ import { createKernel, defineScope } from "@kernel";
 import type { BaseCommand } from "@kernel/core/tokens";
 import { type AppState, initialAppState } from "@os/kernel";
 import { focusHandler } from "./3-commands/focus/focus";
-import { toastShowHandler } from "./3-commands/toast/toast";
+import { notifyHandler } from "./3-commands/toast/toast";
 import type {
   Condition,
   FlatHandler,
@@ -145,13 +145,13 @@ export function createTestInstance<S>(
     );
   }
 
-  // Register OS commands (OS_FOCUS, OS_TOAST_SHOW) on test kernel
+  // Register OS commands (OS_FOCUS, OS_NOTIFY) on test kernel
   // Required for integration tests that rely on focus/selection persistence
-  // and toast notifications from modules
+  // and toast/alert notifications from modules
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- kernel boundary: OS handler ↔ app handler mismatch
   testKernel.defineCommand("OS_FOCUS", focusHandler as any);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- kernel boundary
-  testKernel.defineCommand("OS_TOAST_SHOW", toastShowHandler as any);
+  testKernel.defineCommand("OS_NOTIFY", notifyHandler as any);
 
   return {
     get state() {

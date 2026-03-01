@@ -24,7 +24,7 @@ import {
   generateZoneId,
   type ZoneCallbacks,
 } from "@os/2-contexts/zoneLogic";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
 import { OS_ZONE_INIT } from "@os/3-commands/focus";
 import { getChildRole, type ZoneRole } from "@os/registries/roleRegistry";

@@ -23,7 +23,7 @@
  * Config: slider role, value axis with min/max/step/now
  */
 
-import { createOsPage } from "@os/createOsPage";
+import { createOsPage } from "@os/defineApp.page";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───

@@ -1,6 +1,6 @@
 import type { MutableRefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { FieldRegistry } from "../6-components/field/FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { getCaretPosition, setCaretPosition } from "./getCaretPosition";
 
 // --- Types ---

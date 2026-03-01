@@ -9,7 +9,7 @@
  * Uses the headless kernel — no DOM, no React, no browser.
  */
 
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,

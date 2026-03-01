@@ -7,8 +7,8 @@
 
 import { GLOBAL } from "@kernel";
 import type { Command, ScopeToken } from "@kernel/core/tokens";
-import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCursor } from "@os/registries/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { OS_COPY, OS_CUT } from "@os/3-commands/clipboard/clipboard";
 import { OS_DELETE } from "@os/3-commands/interaction/delete";
 import { os } from "@os/kernel";

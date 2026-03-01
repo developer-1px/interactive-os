@@ -10,7 +10,7 @@
  * All should 🔴 FAIL initially — that's the point.
  */
 
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {

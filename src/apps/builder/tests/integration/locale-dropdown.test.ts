@@ -10,7 +10,7 @@
  */
 
 import { BuilderApp } from "@apps/builder/app";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import {
     OS_OVERLAY_CLOSE,
 } from "@os/3-commands/overlay/overlay";

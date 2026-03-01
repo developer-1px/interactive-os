@@ -15,9 +15,9 @@ import type {
 import type React from "react";
 import type { ReactNode } from "react";
 import type { ZodSchema } from "zod";
-import type { ZoneCallback } from "./2-contexts/zoneRegistry";
+import type { ZoneCallback } from "./@os/registries/zoneRegistry";
 import type { FieldMode } from "./6-components/field/Field";
-import type { FieldType } from "./6-components/field/FieldRegistry";
+import type { FieldType } from "./@os/registries/fieldRegistry";
 import type { ZoneRole } from "./registries/roleRegistry";
 import type { FieldCommandFactory } from "./schemas/command/BaseCommand";
 
@@ -249,6 +249,9 @@ export interface AppPage<S> {
   /** App state (direct access — bonus over Playwright). */
   readonly state: S;
 
+  /** @internal OS Kernel instance (for OS-level testing only). */
+  readonly kernel: import("@kernel").Kernel<any>;
+
   /** Dispatch a command directly (for setup, not interaction). */
   dispatch(command: BaseCommand): boolean;
 
@@ -259,7 +262,7 @@ export interface AppPage<S> {
   cleanup(): void;
 
   /** Playwright-style locator: query any element by ID (Zone or Item). */
-  locator(elementId: string): import("@os/createOsPage").OsLocator;
+  locator(elementId: string): import("@os/defineApp.page").OsLocator;
 
   // ── Projection Checkpoint (optional — requires Component) ────────
 

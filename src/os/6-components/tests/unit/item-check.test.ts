@@ -10,7 +10,7 @@
  * Feature: item-check.feature
  */
 
-import { createOsPage } from "@os/createOsPage";
+import { createOsPage } from "@os/defineApp.page";
 import { describe, expect, it, vi } from "vitest";
 
 const LIST_ITEMS = ["todo-1", "todo-2", "todo-3"];

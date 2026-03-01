@@ -129,9 +129,15 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       }
 
       // When Trigger has an id → Item → PointerListener → OS_ACTIVATE → onActivate
-      // When Trigger has NO id → no Item → must dispatch overlay open directly
-      if (!id && overlayOpenCmd) {
-        os.dispatch(overlayOpenCmd);
+      // When Trigger has NO id → no Item → must dispatch directly
+      if (!id) {
+        if (overlayOpenCmd) {
+          os.dispatch(overlayOpenCmd);
+        }
+        if (onActivate) {
+          const dispatch = customDispatch ?? os.dispatch;
+          dispatch(onActivate);
+        }
       }
 
       onClick?.(e as ReactMouseEvent<HTMLElement>);

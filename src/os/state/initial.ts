@@ -34,7 +34,7 @@ export const initialOSState: OSState = {
   overlays: {
     stack: [],
   },
-  toasts: {
+  notifications: {
     stack: [],
   },
   drag: {

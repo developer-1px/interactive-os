@@ -1,40 +1,48 @@
 /**
- * OS Toast Commands — Toast Notification Stack
+ * OS Notification Commands — Unified Notification Stack
  *
- * Manages ephemeral toast notifications via kernel state.
- * Toasts auto-dismiss after a configurable duration.
+ * Manages toast and alert notifications via kernel state.
+ * - type: "toast" → role="status", aria-live="polite", auto-dismiss (default 4000ms)
+ * - type: "alert" → role="alert", aria-live="assertive", persistent (duration=0)
  *
  * Commands:
- *   OS_TOAST_SHOW(message, opts?)  → Push toast onto stack
- *   OS_TOAST_DISMISS(id?)          → Remove specific toast or pop oldest
+ *   OS_NOTIFY(message, opts?)     → Push notification onto stack
+ *   OS_NOTIFY_DISMISS(id?)        → Remove specific notification or pop oldest
  */
 
 import { produce } from "immer";
 import { os } from "../../kernel";
-import type { ToastEntry } from "../../state/OSState";
+import type { NotificationEntry, NotificationType } from "../../state/OSState";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-// Default auto-dismiss duration
-const DEFAULT_DURATION = 4000;
+// Default durations per type
+const DEFAULT_DURATION: Record<NotificationType, number> = {
+  toast: 4000,
+  alert: 0, // persistent — no auto-dismiss
+};
 
 // ═══════════════════════════════════════════════════════════════════
 // SHOW
 // ═══════════════════════════════════════════════════════════════════
 
-interface ToastShowPayload {
+interface NotifyPayload {
   message: string;
+  /** Notification type. Default: "toast" */
+  type?: NotificationType;
   actionLabel?: string;
-  actionCommand?: ToastEntry["actionCommand"];
-  /** Auto-dismiss ms. 0 = manual only. Default: 4000 */
+  actionCommand?: NotificationEntry["actionCommand"];
+  /** Auto-dismiss ms. 0 = manual only. Default: 4000 (toast) / 0 (alert) */
   duration?: number;
 }
 
 /** Raw handler — exported for test kernel registration */
-export const toastShowHandler =
-  (ctx: { readonly state: any }) => (payload: ToastShowPayload) => {
-    const entry: ToastEntry = {
+export const notifyHandler =
+  (ctx: { readonly state: any }) => (payload: NotifyPayload) => {
+    const type = payload.type ?? "toast";
+    const entry: NotificationEntry = {
       id: uid(),
+      type,
       message: payload.message,
       ...(payload.actionLabel !== undefined
         ? { actionLabel: payload.actionLabel }
@@ -42,38 +50,38 @@ export const toastShowHandler =
       ...(payload.actionCommand !== undefined
         ? { actionCommand: payload.actionCommand }
         : {}),
-      duration: payload.duration ?? DEFAULT_DURATION,
+      duration: payload.duration ?? DEFAULT_DURATION[type],
       createdAt: Date.now(),
     };
 
     return {
       state: produce(ctx.state, (draft: any) => {
-        // Cap at 5 toasts — remove oldest if full
-        if (draft.os.toasts.stack.length >= 5) {
-          draft.os.toasts.stack.shift();
+        // Cap at 5 notifications — remove oldest if full
+        if (draft.os.notifications.stack.length >= 5) {
+          draft.os.notifications.stack.shift();
         }
-        draft.os.toasts.stack.push(entry);
+        draft.os.notifications.stack.push(entry);
       }),
     };
   };
 
-export const OS_TOAST_SHOW = os.defineCommand(
-  "OS_TOAST_SHOW",
-  (ctx) => (payload: ToastShowPayload) => toastShowHandler(ctx)(payload),
+export const OS_NOTIFY = os.defineCommand(
+  "OS_NOTIFY",
+  (ctx) => (payload: NotifyPayload) => notifyHandler(ctx)(payload),
 );
 
 // ═══════════════════════════════════════════════════════════════════
 // DISMISS
 // ═══════════════════════════════════════════════════════════════════
 
-interface ToastDismissPayload {
+interface NotifyDismissPayload {
   id?: string;
 }
 
-export const OS_TOAST_DISMISS = os.defineCommand(
-  "OS_TOAST_DISMISS",
-  (ctx) => (payload: ToastDismissPayload) => {
-    const { stack } = ctx.state.os.toasts;
+export const OS_NOTIFY_DISMISS = os.defineCommand(
+  "OS_NOTIFY_DISMISS",
+  (ctx) => (payload: NotifyDismissPayload) => {
+    const { stack } = ctx.state.os.notifications;
     if (stack.length === 0) return;
 
     const targetId = payload.id ?? stack[0]?.id;
@@ -81,7 +89,7 @@ export const OS_TOAST_DISMISS = os.defineCommand(
 
     return {
       state: produce(ctx.state, (draft) => {
-        draft.os.toasts.stack = draft.os.toasts.stack.filter(
+        draft.os.notifications.stack = draft.os.notifications.stack.filter(
           (e) => e.id !== targetId,
         );
       }),

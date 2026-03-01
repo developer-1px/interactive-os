@@ -24,7 +24,17 @@ import {
   Search,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  clearSearchQuery,
+  InspectorApp,
+  InspectorFiltersUI,
+  InspectorSearchUI,
+  type InspectorState,
+  selectFilteredTransactions,
+  toggleGroup,
+} from "../app";
 import { inferSignal } from "../utils/inferSignal";
+import { os } from "@os/kernel";
 
 // ─── Helpers ───
 
@@ -131,12 +141,12 @@ const ARRAY_INDEX_RE = /^(.+)\[(\d+)\]$/;
 type DisplayEntry =
   | { kind: "single"; tx: Transaction; filteredIndex: number }
   | {
-      kind: "group";
-      representative: Transaction;
-      count: number;
-      txs: Transaction[];
-      filteredIndex: number;
-    };
+    kind: "group";
+    representative: Transaction;
+    count: number;
+    txs: Transaction[];
+    filteredIndex: number;
+  };
 
 /** Group consecutive transactions with the same command type into collapsed entries */
 function groupConsecutive(txs: Transaction[]): DisplayEntry[] {
@@ -236,8 +246,13 @@ export function UnifiedInspector({
   storeState?: Record<string, unknown>;
   onClear?: () => void;
 }) {
-  const [disabledGroups, setDisabledGroups] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState("");
+  const disabledGroups = InspectorApp.useComputed(
+    (s: InspectorState) => s.disabledGroups,
+  );
+  const searchQuery = InspectorApp.useComputed(
+    (s: InspectorState) => s.searchQuery,
+  );
+  const filteredTx = InspectorApp.useComputed((s) => selectFilteredTransactions(s, transactions));
   const [manualToggles, setManualToggles] = useState<Set<number>>(new Set());
   const [traceOpen, setTraceOpen] = useState(true);
   const [storeOpen, setStoreOpen] = useState(false);
@@ -251,45 +266,11 @@ export function UnifiedInspector({
     return Array.from(groups).sort();
   }, [transactions]);
 
-  const toggleGroup = (group: string) => {
-    setDisabledGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(group)) {
-        next.delete(group);
-      } else {
-        next.add(group);
-      }
-      return next;
-    });
+  const handleToggleGroup = (group: string) => {
+    os.dispatch(toggleGroup({ group }));
   };
 
-  // Compute filtered view based on group toggles and search
-  const filteredTx = useMemo(() => {
-    let result = transactions;
-
-    if (disabledGroups.size > 0) {
-      result = result.filter(
-        (tx) => !disabledGroups.has(inferSignal(tx).group),
-      );
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter((tx) => {
-        const signal = inferSignal(tx);
-        if (signal.command.type.toLowerCase().includes(q)) return true;
-        if (signal.trigger.raw.toLowerCase().includes(q)) return true;
-        if (signal.trigger.elementId?.toLowerCase().includes(q)) return true;
-        if (signal.effects.some((e) => e.toLowerCase().includes(q)))
-          return true;
-        if (signal.diff.some((d) => d.path.toLowerCase().includes(q)))
-          return true;
-        return false;
-      });
-    }
-
-    return result;
-  }, [transactions, disabledGroups, searchQuery]);
+  // --- End of Component State ---
 
   // Group consecutive identical commands into collapsed entries
   const displayEntries = useMemo(
@@ -433,8 +414,8 @@ export function UnifiedInspector({
                 onClick={() => {
                   onClear();
                   setManualToggles(new Set());
-                  setSearchQuery("");
-                  setDisabledGroups(new Set());
+                  os.dispatch(clearSearchQuery());
+                  // TODO: add command for clearDisabledGroups if needed
                 }}
                 className="px-1.5 py-0.5 rounded text-[8px] font-bold text-[#999] hover:text-[#ef4444] hover:bg-[#fef2f2] cursor-pointer border border-[#e5e5e5]"
               >
@@ -446,49 +427,57 @@ export function UnifiedInspector({
 
         {/* Group Filter Pills — dynamically discovered from kernel scopes */}
         {allGroups.length > 0 && (
-          <div className="flex items-center gap-1 px-2 py-1 border-t border-[#f0f0f0] bg-[#fafafa] overflow-x-auto">
+          <InspectorFiltersUI.Zone className="flex items-center gap-1 px-2 py-1 border-t border-[#f0f0f0] bg-[#fafafa] overflow-x-auto">
             {allGroups.map((group) => {
               const active = !disabledGroups.has(group);
               return (
-                <button
+                <InspectorFiltersUI.Item
                   key={group}
-                  type="button"
-                  onClick={() => toggleGroup(group)}
-                  className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                    active
-                      ? "bg-[#1e293b] text-white border-[#1e293b]"
-                      : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                  }`}
+                  id={`groupBtn-${group}`}
+                  asChild
                 >
-                  {group}
-                </button>
+                  {() => (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleGroup(group)}
+                      className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
+                        ? "bg-[#1e293b] text-white border-[#1e293b]"
+                        : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                        }`}
+                    >
+                      {group}
+                    </button>
+                  )}
+                </InspectorFiltersUI.Item>
               );
             })}
-          </div>
+          </InspectorFiltersUI.Zone>
         )}
 
         {/* Search & Actions Row */}
-        <div className="h-6 border-t border-[#f0f0f0] bg-[#fafafa] flex items-center px-1.5 gap-1">
+        <InspectorSearchUI.Zone className="h-6 border-t border-[#f0f0f0] bg-[#fafafa] flex items-center px-1.5 gap-1">
           <div className="flex-1 relative">
             <Search
               size={9}
-              className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[#b0b0b0]"
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[#b0b0b0] z-10"
             />
-            <input
-              type="text"
-              placeholder="Filter..."
+            <InspectorSearchUI.Field
+              name="search-input"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter..."
               className="w-full text-[9px] bg-white border border-[#e0e0e0] focus:border-[#3b82f6] rounded pl-5 pr-4 py-0.5 outline-none text-[#334155] placeholder:text-[#ccc]"
             />
             {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[#b0b0b0] hover:text-[#ef4444] text-[8px] leading-none"
-              >
-                ✕
-              </button>
+              <InspectorSearchUI.Item id="clearBtn" asChild>
+                {() => (
+                  <button
+                    type="button"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[#b0b0b0] hover:text-[#ef4444] text-[8px] leading-none z-10"
+                  >
+                    ✕
+                  </button>
+                )}
+              </InspectorSearchUI.Item>
             )}
           </div>
           <button
@@ -502,18 +491,18 @@ export function UnifiedInspector({
           <button
             type="button"
             onClick={collapseAll}
-            className="p-0.5 text-[#b0b0b0] hover:text-[#333] rounded"
+            className="p-0.5 text-[#b0b0b0] hover:text-[#333] rounded z-10 relative"
             title="Collapse All"
           >
             <ListMinus size={11} />
           </button>
-        </div>
+        </InspectorSearchUI.Zone>
       </div>
 
       <div className="relative flex-1 overflow-hidden">
         <div
           ref={scrollRef}
-          onScroll={handleScroll}
+          onScroll={() => handleScroll()}
           className="h-full overflow-y-auto"
         >
           {/* ── Trace Log Section ── */}
@@ -1046,7 +1035,7 @@ function AriaSnapshot({ elementId }: { elementId: string }) {
 
   // Filter out nulls for cleaner display
   const filtered = Object.fromEntries(
-    Object.entries(snapshot).filter(([_, v]) => v !== null),
+    Object.entries(snapshot).filter(([, v]) => v !== null),
   );
   if (Object.keys(filtered).length === 0)
     return (

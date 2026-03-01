@@ -4,7 +4,7 @@
  * Passes ZoneCursor to the active zone's onMoveUp/onMoveDown callbacks.
  */
 
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { os } from "../../kernel";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 

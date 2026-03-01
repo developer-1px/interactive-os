@@ -10,7 +10,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import type { ZoneRole } from "../registries/roleRegistry";
+import type { ZoneRole } from "./roleRegistry";
 import type { FocusGroupConfig } from "../schemas/focus/config/FocusGroupConfig";
 
 /**

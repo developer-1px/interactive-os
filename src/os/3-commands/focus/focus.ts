@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { os } from "../../kernel";
 import { applyFollowFocus, ensureZone } from "../../state/utils";
 

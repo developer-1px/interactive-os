@@ -11,7 +11,7 @@
  */
 
 import { produce } from "immer";
-import { FieldRegistry } from "../../6-components/field/FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { os } from "../../kernel";
 
 export const OS_FIELD_START_EDIT = os.defineCommand(

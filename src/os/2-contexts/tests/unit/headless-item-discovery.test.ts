@@ -13,7 +13,7 @@
  */
 
 import { afterEach, describe, expect, it } from "vitest";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import {
     DOM_ITEMS,
     DOM_ZONE_ORDER,

@@ -4,7 +4,7 @@
  * Passes ZoneCursor to the app callback with focusId as paste target.
  */
 
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { os } from "../../kernel";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 

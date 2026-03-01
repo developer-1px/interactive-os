@@ -8,7 +8,7 @@
  */
 
 import { defineScope } from "@kernel";
-import { createOsPage, type OsPage } from "@os/createOsPage";
+import { createOsPage, type OsPage } from "@os/defineApp.page";
 import { produce } from "immer";
 import {
   afterEach,

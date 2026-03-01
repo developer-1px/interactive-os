@@ -5,9 +5,9 @@
  * OS_NAVIGATE only traverses items that pass the filter.
  */
 
-import { createOsPage } from "@os/createOsPage";
+import { createOsPage } from "@os/defineApp.page";
 import { beforeEach, describe, expect, it } from "vitest";
-import { ZoneRegistry } from "../../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { DEFAULT_CONFIG } from "../../../schemas/focus/config/FocusGroupConfig";
 
 describe("itemFilter — dynamic item filtering", () => {

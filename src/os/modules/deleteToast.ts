@@ -2,7 +2,7 @@
  * deleteToast() — App Module for undo toast on destructive actions.
  *
  * When a collection `:remove` command is dispatched, this middleware
- * adds an OS_TOAST_SHOW dispatch to the effects, showing an "Undo" button.
+ * adds an OS_NOTIFY dispatch to the effects, showing an "Undo" button.
  *
  * Requires: history() module installed (for undo command availability).
  *
@@ -59,9 +59,9 @@ function createDeleteToastMiddleware(
 
       const message = opts?.message?.(1) ?? "삭제됨";
 
-      // Build OS_TOAST_SHOW command
+      // Build OS_NOTIFY command
       const toastCommand: BaseCommand = {
-        type: "OS_TOAST_SHOW",
+        type: "OS_NOTIFY",
         payload: {
           message,
           actionLabel,

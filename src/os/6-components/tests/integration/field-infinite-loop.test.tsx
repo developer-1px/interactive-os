@@ -12,7 +12,7 @@
 import {
   FieldRegistry,
   useFieldRegistry,
-} from "@os/6-components/field/FieldRegistry";
+} from "@os/registries/fieldRegistry";
 import { act, renderHook } from "@testing-library/react";
 import { useEffect, useRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

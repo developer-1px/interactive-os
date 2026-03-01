@@ -2,8 +2,8 @@
  * Clipboard OS Command Integration Test (ZoneCursor pattern)
  */
 
-import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCursor } from "@os/registries/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { OS_COPY, OS_CUT, OS_PASTE } from "@os/3-commands/clipboard/clipboard";
 import { os } from "@os/kernel";
 import { initialZoneState } from "@os/state/initial";

@@ -9,7 +9,7 @@
  * Tier 1: OS 커널 아키텍처 테스트
  */
 
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { Zone } from "@os/6-components/primitives/Zone";
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";

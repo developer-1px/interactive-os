@@ -56,6 +56,7 @@
 | OG-005 | 커서 메타 등록 — 앱이 useEffect로 수동 mount/unmount 동기화. OS 미들웨어/ZoneRegistry 확장 필요 | 🟡 미해결 | 2026-02-26 |
 | OG-006 | drag cursor/userSelect — PointerListener가 document.body.style 직접 조작. OS가 drag 상태에 따라 자동 관리해야 | 🟡 미해결 | 2026-02-26 |
 | OG-007 | zone element lookup — Listener가 `document.querySelector("[data-zone=...]")`로 zone DOM 탐색. ZoneRegistry에 element ref 제공 필요 | 🟡 미해결 | 2026-02-26 |
+| OG-008 | `role="alert"` 자동화 — Alert 프리미티브 부재. 앱이 `role="alert"` 수동 부착 필요. OS에서 live region을 자동 관리하는 메커니즘 없음 | 🟡 미해결 | 2026-02-28 |
 
 > **주의**: OG-001 관련 패턴(드롭다운 onClick)은 OS 갭이므로 🔴로 분류하지 않는다.
 > **주의**: OG-003, OG-004 관련 패턴은 OS 갭이므로 🔴로 분류하지 않는다.
@@ -104,6 +105,11 @@
 | DragListener.tsx dead code | 삭제 누락 | 🔴 LLM 실수 | PointerListener 대체 후 T6에서 MouseListener만 삭제, DragListener 누락 | 2026-02-26 |
 | PointerListener body.style | drag cursor/userSelect 직접 조작 | 🟡 OS 갭 (OG-006) | OS가 drag 상태를 시각화하는 메커니즘 부재 | 2026-02-26 |
 | PointerListener querySelector("[data-zone]") | zone element DOM 탐색 | 🟡 OS 갭 (OG-007) | ZoneRegistry에 element ref API 부재 | 2026-02-26 |
+| Accordion aria-controls 수동 | 앱이 `aria-controls={...}` 수동 부착 | ✅ 해결 | computeItem이 expand axis일 때 `aria-controls="panel-{id}"` 자동 설정 | 2026-02-28 |
+| Accordion panel DOM 구조 | Item 안에 패널 포함 → 패널 클릭이 토글 | ✅ 해결 | Item.Region 컴파운드 컴포넌트로 분리. 패널은 OS state 구독 투영 | 2026-02-28 |
+| Accordion tab escape | Tab이 zone 탈출 (표준 위반) | ✅ 해결 | `tab.behavior="native"` 추가. 브라우저 기본 Tab 순서 허용 | 2026-02-28 |
+| AlertPattern useState/onClick | raw React 패턴 사용 | 🔴 LLM 실수 → ✅ 수정 | defineApp + createTrigger로 교체 | 2026-02-28 |
+| AlertPattern role="alert" 수동 | OS에 alert 프리미티브 없음 | 🟡 OS 갭 (OG-008) | live region 자동 관리 메커니즘 부재 | 2026-02-28 |
 
 ---
 

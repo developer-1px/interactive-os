@@ -1,7 +1,7 @@
 import { InspectorShell } from "@inspector/shell/InspectorShell";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { Root } from "@os/6-components/primitives/Root";
-import { ToastContainer } from "@os/6-components/toast/ToastContainer";
+import { NotificationContainer } from "@os/6-components/toast/ToastContainer";
 import {
   createRootRoute,
   Link,
@@ -14,10 +14,10 @@ import { GlobalNav } from "@/components/GlobalNav";
 
 const TanStackRouterDevtools = import.meta.env.DEV
   ? React.lazy(() =>
-      import("@tanstack/router-devtools").then((m) => ({
-        default: m.TanStackRouterDevtools,
-      })),
-    )
+    import("@tanstack/router-devtools").then((m) => ({
+      default: m.TanStackRouterDevtools,
+    })),
+  )
   : () => null;
 
 // Plugin registrations (side-effect imports)
@@ -85,8 +85,8 @@ function RootComponent() {
         {/* Command Palette (⌘K) */}
         <CommandPalette />
 
-        {/* OS Toast Notifications */}
-        <ToastContainer />
+        {/* OS Notifications */}
+        <NotificationContainer />
 
         <TanStackRouterDevtools />
       </div>

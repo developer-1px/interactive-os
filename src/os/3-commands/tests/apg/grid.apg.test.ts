@@ -10,7 +10,7 @@
  * Unique: 4-directional spatial nav, 2D boundary clamping
  */
 
-import { createOsPage } from "@os/createOsPage";
+import { createOsPage } from "@os/defineApp.page";
 import { describe, expect, it } from "vitest";
 import { assertHomeEnd } from "./helpers/contracts";
 

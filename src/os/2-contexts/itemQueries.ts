@@ -1,4 +1,4 @@
-import { ZoneRegistry } from "./zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // getZoneItems — Read ordered item IDs from DOM (same logic as DOM_ITEMS)

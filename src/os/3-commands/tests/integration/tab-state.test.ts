@@ -11,7 +11,7 @@
  * Full Path: page.keyboard.press / page.click → page.attrs()["aria-selected"]
  */
 
-import { createOsPage, type OsPage } from "@os/createOsPage";
+import { createOsPage, type OsPage } from "@os/defineApp.page";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const ZONE_ID = "tablist-test";

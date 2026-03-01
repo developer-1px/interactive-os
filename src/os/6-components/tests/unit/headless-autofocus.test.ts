@@ -10,7 +10,7 @@
  */
 
 import { afterEach, describe, expect, it } from "vitest";
-import { createOsPage, type OsPage } from "@os/createOsPage";
+import { createOsPage, type OsPage } from "@os/defineApp.page";
 
 // ═══════════════════════════════════════════════════════════════════
 // Tests — autoFocus via createOsPage (headless OS API)

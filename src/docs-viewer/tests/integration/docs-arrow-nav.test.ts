@@ -11,7 +11,7 @@
  */
 
 import { defineScope } from "@kernel";
-import { createOsPage, type OsPage } from "@os/createOsPage";
+import { createOsPage, type OsPage } from "@os/defineApp.page";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NEXT_SECTION, PREV_SECTION } from "@/docs-viewer/app";
 

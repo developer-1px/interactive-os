@@ -12,7 +12,7 @@
  *   - Shift+Arrow extends selection range
  */
 
-import { createOsPage } from "@os/createOsPage";
+import { createOsPage } from "@os/defineApp.page";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

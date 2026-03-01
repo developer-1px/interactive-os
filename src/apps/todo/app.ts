@@ -32,7 +32,7 @@ import {
   OS_OVERLAY_OPEN,
 } from "@/os/3-commands/overlay/overlay";
 import { OS_SELECTION_CLEAR } from "@/os/3-commands/selection/selection";
-import { OS_TOAST_SHOW } from "@/os/3-commands/toast/toast";
+import { OS_NOTIFY } from "@/os/3-commands/toast/toast";
 
 import { defineApp } from "@/os/defineApp";
 import { os } from "@/os/kernel";
@@ -183,7 +183,7 @@ export const confirmDeleteTodo = listCollection.command(
       dispatch: [
         OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
         OS_SELECTION_CLEAR({ zoneId: "list" }),
-        OS_TOAST_SHOW({
+        OS_NOTIFY({
           message: `${ids.length} task${ids.length > 1 ? "s" : ""} deleted`,
           actionLabel: "Undo",
           actionCommand: undoCommand(),
@@ -428,7 +428,7 @@ export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => {
         listCollection.removeFromDraft(draft, id);
       });
     }),
-    dispatch: OS_TOAST_SHOW({
+    dispatch: OS_NOTIFY({
       message: `${completedIds.length} completed task${completedIds.length > 1 ? "s" : ""} cleared`,
       actionLabel: "Undo",
       actionCommand: undoCommand(),

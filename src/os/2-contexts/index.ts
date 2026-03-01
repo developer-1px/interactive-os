@@ -14,7 +14,7 @@ import { os } from "../kernel";
 import type { FocusGroupConfig } from "../schemas/focus/config/FocusGroupConfig";
 import { DEFAULT_CONFIG } from "../schemas/focus/config/FocusGroupConfig";
 import type { NavigateEntry } from "../schemas/focus/config/FocusNavigateConfig";
-import { ZoneRegistry } from "./zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // DOM_EXPANDABLE_ITEMS — Set of item IDs that have aria-expanded attribute

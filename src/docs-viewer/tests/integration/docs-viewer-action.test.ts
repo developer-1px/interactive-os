@@ -13,7 +13,7 @@
  * Note: Uses onTestFailed + dumpDiagnostics
  */
 
-import { createOsPage, type OsPage } from "@os/createOsPage";
+import { createOsPage, type OsPage } from "@os/defineApp.page";
 import {
   afterEach,
   beforeEach,

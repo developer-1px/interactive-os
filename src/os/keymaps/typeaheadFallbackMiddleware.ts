@@ -13,7 +13,7 @@
  */
 
 import type { BaseCommand, Middleware } from "@kernel";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { OS_FOCUS } from "@os/3-commands/focus/focus";
 import { resolveTypeahead } from "@os/3-commands/navigate/typeahead";
 import { os } from "@os/kernel";

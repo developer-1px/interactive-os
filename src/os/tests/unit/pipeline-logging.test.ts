@@ -11,7 +11,7 @@
  * 🔴 RED: OS pipeline currently produces no debug logs.
  */
 
-import { createOsPage, type OsPage } from "@os/createOsPage";
+import { createOsPage, type OsPage } from "@os/defineApp.page";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("T3: OS pipeline debug logging", () => {

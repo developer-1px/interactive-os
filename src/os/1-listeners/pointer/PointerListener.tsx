@@ -15,7 +15,7 @@
  */
 
 import { useEffect } from "react";
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import {
   OS_DRAG_END,
   OS_DRAG_OVER,
@@ -26,7 +26,7 @@ import { OS_CHECK } from "../../3-commands/interaction/check";
 import { OS_FOCUS } from "../../3-commands";
 import { OS_ESCAPE } from "../../3-commands/dismiss/escape";
 import { OS_FIELD_START_EDIT } from "../../3-commands/field/startEdit";
-import { FieldRegistry } from "../../6-components/field/FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { os } from "../../kernel";
 import { resolveClick } from "../mouse/resolveClick";
 import { resolveMouse } from "../mouse/resolveMouse";

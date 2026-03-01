@@ -108,6 +108,7 @@
 | `2026-0227-1044-[research]-workflow-methodology-mapping.md` | 40+ 워크플로우 × 30+ 전문 방법론 MECE 매핑 | meta (cross-cutting) | → `2-area/praxis/` or keep inbox |
 | `2026-0226-2021-[proposal]-verification-level-up.md` | 검증 부족 영역 11건 식별 | code-hygiene | → `1-project/code-hygiene/notes/` |
 | `2026-0226-2130-[proposal]-verification-hardening-roadmap.md` | 검증 고도화 4-Phase 로드맵 | code-hygiene | → `1-project/code-hygiene/notes/` |
+| `2026-0301-1631-[analysis]-loc-over-500-audit.md` | 500라인 초과 파일 전수 조사 및 리팩토링 검토 | code-hygiene | → `1-project/code-hygiene/notes/` |
 
 ---
 
@@ -118,7 +119,7 @@
 | Active Focus | 4 |
 | Active Projects (total) | 15 (11 Active + 4 Focus) |
 | Completed (archived) | 46 |
-| Inbox items | 4 |
+| Inbox items | 5 |
 | Backlog items | 15 |
 | Open issues | 0 |
 

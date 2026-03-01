@@ -9,7 +9,7 @@
  * No DOM access. No side effects. Pure function.
  */
 
-import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCursor } from "@os/registries/zoneRegistry";
 import { OS_CHECK } from "@os/3-commands";
 import { Keybindings } from "@os/keymaps/keybindings";
 import { resolveFieldKey } from "@os/keymaps/resolveFieldKey";

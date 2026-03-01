@@ -15,7 +15,7 @@
  *   3. unregister→register cycle resets localValue (by design)
  */
 
-import { FieldRegistry } from "@os/6-components/field/FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { beforeEach, describe, expect, it } from "vitest";
 
 describe("FieldRegistry seam: register/unregister lifecycle", () => {

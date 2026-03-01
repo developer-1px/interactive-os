@@ -25,8 +25,8 @@
  *   - ArrowUp / ArrowDown → item navigation (inline/tokens only)
  */
 
-import type { FieldType } from "../6-components/field/FieldRegistry";
-import { FieldRegistry } from "../6-components/field/FieldRegistry";
+import type { FieldType } from "@os/registries/fieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 
 /**
  * Keys each FieldType allows to pass through to the Zone/OS layer during editing.

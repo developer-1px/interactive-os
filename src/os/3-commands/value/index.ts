@@ -5,7 +5,7 @@
  * respecting the zone's value config (min/max/step/largeStep).
  */
 
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { produce } from "immer";
 import { os } from "../../kernel";
 import { ensureZone } from "../../state/utils";

@@ -5,7 +5,7 @@
  * Unlike OS_DELETE, undo operates on the zone level (not per-item).
  */
 
-import { ZoneRegistry } from "../../2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import { os } from "../../kernel";
 
 export const OS_UNDO = os.defineCommand("OS_UNDO", (ctx) => () => {

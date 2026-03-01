@@ -26,7 +26,7 @@ import {
   FieldRegistry,
   type FieldTrigger,
   useFieldRegistry,
-} from "./FieldRegistry";
+} from "@os/registries/fieldRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Props

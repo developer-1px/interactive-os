@@ -3,8 +3,8 @@
  * Sets up kernel state and ZoneRegistry mocks.
  */
 
-import type { ZoneCursor } from "@os/2-contexts/zoneRegistry";
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import type { ZoneCursor } from "@os/registries/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import type { BaseCommand } from "@kernel/core/tokens";
 import { os } from "@os/kernel";
 import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";

@@ -1,0 +1,104 @@
+# Spec — inspector-dogfooding
+
+> 한 줄 요약: UnifiedInspector의 React Local State를 OS Store와 Command 기반 뷰 투영 아키텍처로 100% 마이그레이션한다.
+
+## 1. 개요
+현재 T1 진행 중: App 수준의 Store 모델링 및 검색/토글 필드 연동
+
+## 2. 기능 요구사항 (Functional Requirements)
+
+### 2.1 검색 필터링 상태 연동 (Search Field)
+
+**Story**: 개발자로서, 인스펙터 검색창에 텍스트를 입력하면 OS의 파이프라인(Command)을 거쳐 App Store의 검색어 상태가 갱신되어야 한다. 그래야 로컬 `useState` 없이 OS의 단방향 데이터 흐름을 탈 수 있기 때문이다.
+
+**Use Case — 주 흐름:**
+1. 사용자가 검색창(Textbox Field)에 타이핑한다.
+2. `OS_UPDATE_FIELD` 커맨드가 발급된다.
+3. App Store의 `inspectorSearchQuery` 상태가 업데이트된다.
+4. View가 새로운 Store 상태를 구독하여 리렌더링된다.
+
+**Scenarios:**
+
+Scenario: 검색어 입력 시 Store 갱신
+  Given 인스펙터 검색창 Field가 렌더링되어 있다
+  When 사용자가 검색창에 "click" 텍스트를 입력한다
+  Then `OS_UPDATE_FIELD` 커맨드가 dispatch된다
+  And App Store의 `searchQuery`가 "click"으로 변경된다
+
+Scenario: 검색창 지우기 (Clear)
+  Given 검색어 "click"이 입력되어 있다
+  When 사용자가 검색창 안의 X 버튼을 클릭하여 지운다
+  Then `OS_UPDATE_FIELD` 커맨드가 dispatch되어 검색어가 빈 문자열 `""`로 변경된다
+
+### 2.2 패널 그룹 필터 칩 토글 (Group Filter)
+
+**Story**: 개발자로서, 인스펙터 그룹 필터 버튼을 클릭하면 커스텀 앱 커맨드를 통해 App Store의 비활성화된 그룹 목록이 갱신되어야 한다.
+
+**Use Case — 주 흐름:**
+1. 사용자가 상단의 그룹 태그 버튼(예: "kernel")을 클릭한다.
+2. `INSPECTOR_TOGGLE_GROUP` 커맨드가 발급된다.
+3. App Store의 `disabledGroups`에 "kernel"이 추가되거나 제거된다.
+
+**Scenarios:**
+
+Scenario: 활성화된 그룹 토글 (비활성화)
+  Given "kernel" 그룹이 활성화 상태(disabledGroups에 없음)이다
+  When "kernel" 그룹 버튼을 클릭한다
+  Then App Store의 `disabledGroups` 세트에 "kernel"이 추가된다
+
+Scenario: 비활성화된 그룹 토글 (재활성화)
+  Given "kernel" 그룹이 비활성화 상태(disabledGroups에 있음)이다
+  When "kernel" 그룹 버튼을 클릭한다
+  Then App Store의 `disabledGroups` 세트에서 "kernel"이 제거된다
+
+## 3. 상태 인벤토리 (State Inventory)
+
+| 상태 | 설명 | 초기값 | 변경 경로 |
+|------|------|--------|----------|
+| `searchQuery` | 검색 필터 문자열 | `""` | `OS_UPDATE_FIELD` |
+| `disabledGroups` | 비활성화된 트랜잭션 그룹 Set | `new Set()` | `INSPECTOR_TOGGLE_GROUP` |
+
+## 4. 범위 밖 (Out of Scope)
+- T1에서는 검색어와 필터 토글에 따른 "실제 트랜잭션 필터링 및 그룹핑(파생 상태) 연산 재작성"은 수행하지 않는다. (T2의 책임)
+- T1에서는 **React `useState`를 걷어내고 App Store 연결 기반 마련 + 검색 및 토글 UI의 트리거를 Command Dispatch로 교체하는 것**까지만 증명한다.
+
+## 5. Decision Table (T1 인터랙션 매핑)
+
+| Zone | When (Action) | Command Dispatch | State Transition |
+|------|---------------|------------------|------------------|
+| `inspector-search` | `keyboard.type` | `OS_UPDATE_FIELD` | `searchQuery = payload.value` |
+| `inspector-search` | `click(clearBtn)` | `OS_UPDATE_FIELD` | `searchQuery = ""` |
+| `inspector-filters` | `click(groupBtn)` | `INSPECTOR_TOGGLE_GROUP` | `disabledGroups.toggle(groupName)` |
+
+## 6. T2: 파생 데이터 연산 분리 (FilteredTx)
+
+### 6.1 파생 상태 (Selector) 연동
+
+**Story**: 개발자로서, 필터링된 트랜잭션 목록(`filteredTx`)을 컴포넌트 내부 렌더링 사이클이 아닌 분리된 함수로 취급하길 원한다. 그래야 뷰 레이어가 렌더링에만 집중하고, 복잡한 필터 연산을 뷰에서 덜어내어 도메인 레이어(App)로 이전할 수 있기 때문이다.
+
+**Use Case — 주 흐름:**
+1. OS 파이프라인(검색어 변경, 그룹 토글, 새 트랜잭션 수신)이 작동하여 App/OS State가 변경되거나 트랜잭션이 추가된다.
+2. `filterTransactions(transactions, disabledGroups, searchQuery)` 같은 순수 함수나 파생 상태가 재계산된다.
+3. `UnifiedInspector`는 이 결과물만 활용하여 렌더링한다.
+
+**Scenarios (Given/When/Then):**
+
+Scenario: 검색어에 따른 트랜잭션 필터링
+  Given 트랜잭션 데이터가 존재하고 App Store 검색어 상태가 "dispatch"이다
+  When 필터링 로직을 통과시킨다
+  Then "dispatch" 문자열을 속성이나 타입에 포함하는 트랜잭션만 포함된 배열이 반환된다
+
+Scenario: 비활성화 그룹에 따른 트랜잭션 필터링
+  Given App Store의 `disabledGroups`에 "kernel"이 들어 있다
+  When 필터링 로직을 통과시킨다
+  Then `.group === "kernel"`인 트랜잭션이 제외된 배열이 반환된다
+
+### 6.2 상태 인벤토리 (T2 추가)
+
+| 상태 연산 | 설명 | 의존성 |
+|-----------|------|--------|
+| `filteredTx` | 검색어 및 그룹 필터가 적용된 트랜잭션 배열 | `transactions` (from OS), `searchQuery`, `disabledGroups` (from App) |
+
+### 6.3 범위 밖 (Out of Scope)
+- T2에서는 필터링 최적화/캐싱 로직을 극한으로 튜닝하지 않는다. (순수 함수나 selector로 분리하는 구조적 decoupling에 집중)
+- 새로운 종류의 필터를 추가하지 않는다. (기존 로직 유지)

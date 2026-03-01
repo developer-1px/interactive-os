@@ -7,7 +7,7 @@
  * Test verifies the command exists and works correctly via app.ts.
  */
 
-import { createOsPage, type OsPage } from "@os/createOsPage";
+import { createOsPage, type OsPage } from "@os/defineApp.page";
 import {
   afterEach,
   beforeEach,

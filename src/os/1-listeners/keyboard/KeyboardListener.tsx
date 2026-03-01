@@ -6,7 +6,7 @@
  * W3C UI Events Module: Keyboard Events (§3.5)
  */
 
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import {
   isEditingElement,
   resolveIsEditingForKey,

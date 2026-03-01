@@ -8,7 +8,7 @@
 
 import { produce } from "immer";
 import { clearFieldDOM } from "../../4-effects/index";
-import { FieldRegistry } from "../../6-components/field/FieldRegistry";
+import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { os } from "../../kernel";
 
 export const OS_FIELD_COMMIT = os.defineCommand(

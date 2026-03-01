@@ -9,8 +9,8 @@
  *   Full Path: page.keyboard.press → page.focusedItemId / page.osState
  */
 
-import { ZoneRegistry } from "@os/2-contexts/zoneRegistry";
-import { createOsPage, type OsPage } from "@os/createOsPage";
+import { ZoneRegistry } from "@os/registries/zoneRegistry";
+import { createOsPage, type OsPage } from "@os/defineApp.page";
 import { Keybindings } from "@os/keymaps/keybindings";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
