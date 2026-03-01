@@ -10,7 +10,6 @@ export interface InspectorState {
     disabledGroups: Set<string>;
     isUserScrolled: boolean;
     scrollTick: number;
-    highlightedNodeId: string | null;
 }
 
 const INITIAL_STATE: InspectorState = {
@@ -18,7 +17,6 @@ const INITIAL_STATE: InspectorState = {
     disabledGroups: new Set(),
     isUserScrolled: false,
     scrollTick: 0,
-    highlightedNodeId: null,
 };
 
 export const InspectorApp = defineApp<InspectorState>("inspector", INITIAL_STATE);
@@ -109,15 +107,6 @@ export const InspectorScrollUI = scrollZone.bind({
         { id: "scrollToBottomBtn", onActivate: INSPECTOR_SCROLL_TO_BOTTOM() },
     ],
 });
-
-// ─── Highlight Zone ───
-const highlightZone = InspectorApp.createZone("inspector-highlight");
-
-export const INSPECTOR_SET_HIGHLIGHT = highlightZone.command("INSPECTOR_SET_HIGHLIGHT", (ctx, payload: { id: string | null }) => ({
-    state: produce(ctx.state, (draft) => {
-        draft.highlightedNodeId = payload.id;
-    }),
-}));
 
 export function selectFilteredTransactions(
     state: InspectorState,

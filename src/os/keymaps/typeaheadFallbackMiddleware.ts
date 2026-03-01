@@ -22,7 +22,7 @@ import { isEditingElement } from "@os/keymaps/fieldKeyOwnership";
 /**
  * Get ordered item IDs and their labels from DOM for a zone element.
  */
-function getItemsAndLabels(zoneEl: HTMLElement): {
+export function getItemsAndLabels(zoneEl: HTMLElement): {
   items: string[];
   labels: Map<string, string>;
 } {

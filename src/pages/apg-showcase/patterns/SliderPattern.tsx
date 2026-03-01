@@ -69,7 +69,6 @@ const sliderZone = SliderApp.createZone("apg-slider-zone");
 const SliderUI = sliderZone.bind({
     role: "slider",
     options: {
-        value: { mode: "continuous", min: 0, max: 255, step: 1, largeStep: 10 },
         navigate: { orientation: "vertical" },
     },
 });
@@ -123,7 +122,7 @@ function SliderRow({ slider }: { slider: SliderDef }) {
                 "hover:bg-gray-50",
             )}
         >
-            {({ valueNow }: { valueNow: number | undefined }) => {
+            {({ valueNow }: { valueNow?: number }) => {
                 const value = valueNow ?? slider.initial;
                 return (
                     <>

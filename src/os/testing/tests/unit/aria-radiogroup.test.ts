@@ -28,8 +28,8 @@ describe("ARIA Radiogroup", () => {
                 items: RADIOS,
                 role: "listbox",
                 config: {
-                    navigate: { loop: true },
-                    select: { followFocus: true, disallowEmpty: true },
+                    navigate: { loop: true, orientation: "vertical", seamless: false, typeahead: true, arrowExpand: false, homeEnd: "jump" },
+                    select: { mode: "single", followFocus: true, disallowEmpty: true, range: false, toggle: false },
                 },
             });
             await page.locator("radio-sm").click();
@@ -52,8 +52,8 @@ describe("ARIA Radiogroup", () => {
                 role: "listbox",
                 focusedItemId: "radio-md",
                 config: {
-                    navigate: { loop: true },
-                    select: { followFocus: true, disallowEmpty: true },
+                    navigate: { loop: true, orientation: "vertical", seamless: false, typeahead: true, arrowExpand: false, homeEnd: "jump" },
+                    select: { mode: "single", followFocus: true, disallowEmpty: true, range: false, toggle: false },
                 },
             });
             await page.locator("radio-md").click();
@@ -78,8 +78,8 @@ describe("ARIA Radiogroup", () => {
                 role: "listbox",
                 focusedItemId: "radio-lg",
                 config: {
-                    navigate: { loop: true },
-                    select: { followFocus: true, disallowEmpty: true },
+                    navigate: { loop: true, orientation: "vertical", seamless: false, typeahead: true, arrowExpand: false, homeEnd: "jump" },
+                    select: { mode: "single", followFocus: true, disallowEmpty: true, range: false, toggle: false },
                 },
             });
             await page.locator("radio-lg").click();
@@ -97,8 +97,8 @@ describe("ARIA Radiogroup", () => {
                 items: RADIOS,
                 role: "listbox",
                 config: {
-                    navigate: { loop: true },
-                    select: { followFocus: true, disallowEmpty: true },
+                    navigate: { loop: true, orientation: "vertical", seamless: false, typeahead: true, arrowExpand: false, homeEnd: "jump" },
+                    select: { mode: "single", followFocus: true, disallowEmpty: true, range: false, toggle: false },
                 },
             });
             await page.locator("radio-sm").click();

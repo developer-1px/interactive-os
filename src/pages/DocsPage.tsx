@@ -64,7 +64,7 @@ export default function DocsPage() {
   return (
     <div className="flex h-full w-full bg-white text-slate-900 overflow-hidden font-sans selection:bg-indigo-100 selection:text-indigo-900">
       {/* Sidebar */}
-      <DocsSidebar items={docTree} activePath={splat} onSelect={handleSelect} />
+      <DocsSidebar items={docTree} activePath={splat} />
 
       {/* Main Content */}
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">

@@ -229,7 +229,7 @@ describe("ARIA Listbox", () => {
             page.goto("listbox", { items: ITEMS, role: "listbox" });
 
             const role = await page.locator("listbox").getAttribute("role");
-            expect(role === "listbox");
+            expect(role).toBe("listbox");
         });
 
         it("focused item has aria-current=true", async () => {
@@ -246,7 +246,7 @@ describe("ARIA Listbox", () => {
             page.goto("listbox", { items: ITEMS, role: "listbox" });
 
             const role = await page.locator("apple").getAttribute("role");
-            expect(role === "option");
+            expect(role).toBe("option");
         });
     });
 });

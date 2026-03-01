@@ -341,7 +341,7 @@ export default function KernelLabPage() {
   ) as DemoState;
 
   return (
-    <div key={resetKey} style={pageStyle}>
+    <div key="kernel-lab-root" style={pageStyle}>
       <div style={headerStyle}>
         <h1 style={titleStyle}>⚛️ Kernel Lab</h1>
         <p style={subtitleStyle}>

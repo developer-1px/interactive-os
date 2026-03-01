@@ -9,210 +9,51 @@
  */
 
 import type { Transaction } from "@kernel/core/transaction";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   ChevronDown,
-  ChevronRight,
-  ClipboardCopy,
-  Eye,
-  Keyboard,
-  Layers,
   ListMinus,
   ListTree,
-  MousePointer2,
-  MousePointerClick,
   Package,
   Search,
+  Layers,
+  ClipboardCopy,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   clearSearchQuery,
-  INSPECTOR_SCROLL_TO_BOTTOM,
   InspectorApp,
   InspectorFiltersUI,
+  InspectorScrollUI,
   InspectorSearchUI,
   type InspectorState,
   selectFilteredTransactions,
   setScrollState,
   toggleGroup,
-  INSPECTOR_SET_HIGHLIGHT,
 } from "../app";
-import { HighlightOverlay } from "./HighlightOverlay";
-import { inferSignal } from "../utils/inferSignal";
 import { os } from "@os/kernel";
+import { Trigger } from "@os/6-components/primitives/Trigger";
+import { copyAllToClipboard } from "../utils/inspectorFormatters";
+import { CollapsibleSection } from "./components/CollapsibleSection";
+import { TransactionList } from "./components/TransactionList";
+import { inferSignal } from "../utils/inferSignal";
 
-// ─── Helpers ───
+function highlightElement(id: string, active: boolean) {
+  const el = document.getElementById(id);
+  if (!el) return;
 
-function formatTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString("en-US", {
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    fractionalSecondDigits: 3,
-  });
-}
-
-function copyToClipboard(text: string) {
-  navigator.clipboard.writeText(text).catch((err) => {
-    console.error("Failed to copy context: ", err);
-  });
-}
-
-function copyAllToClipboard(transactions: Transaction[]) {
-  const lines = transactions.map((tx) => {
-    const signal = inferSignal(tx);
-    return formatAiContext(tx, signal);
-  });
-  const text = lines.join("\n\n---\n\n");
-  copyToClipboard(text);
-}
-
-/** Truncate large JSON values for LLM readability */
-function truncateValue(value: unknown, path: string): string {
-  // History snapshots are noise — summarize
-  if (/history\.(past|future)\[\d+\]$/.test(path)) {
-    return "[history entry]";
+  if (active) {
+    el.style.outline = "2px solid #f06595";
+    el.style.outlineOffset = "2px";
+    el.dataset["inspectorHighlight"] = "true";
+  } else {
+    el.style.outline = "";
+    el.style.outlineOffset = "";
+    delete el.dataset["inspectorHighlight"];
   }
-  if (/\.snapshot$/.test(path) || /\.snapshot\./.test(path)) {
-    return "[snapshot]";
-  }
-  if (value === undefined) return "undefined";
-  if (value === null) return "null";
-  const json = JSON.stringify(value);
-  if (!json) return "undefined";
-  if (json.length > 200) {
-    return json.slice(0, 120) + "…[truncated, " + json.length + " chars]";
-  }
-  return json;
 }
 
-function formatAiContext(
-  tx: Transaction,
-  signal: ReturnType<typeof inferSignal>,
-): string {
-  const trigger = `**Action**: ${signal.trigger.kind} (Raw: ${signal.trigger.raw}${signal.trigger.elementId ? `, Element: ${signal.trigger.elementId}` : ""})`;
-  const command = `**Command**: \`${signal.command.type}\``;
-  const payload = `**Payload**: \`${truncateValue(signal.command.payload, "payload")}\``;
 
-  let diffStr = "**Diff**: None";
-  if (signal.diff.length > 0) {
-    // Filter out noisy history snapshot diffs entirely
-    const meaningful = signal.diff.filter(
-      (d) =>
-        !/history\.(past|future)\[\d+\]\.(snapshot|timestamp)/.test(d.path),
-    );
-    if (meaningful.length > 0) {
-      diffStr =
-        "**Diff**:\n" +
-        meaningful
-          .map(
-            (d) =>
-              `  - \`${d.path}\`: \`${truncateValue(d.from, d.path)}\` -> \`${truncateValue(d.to, d.path)}\``,
-          )
-          .join("\n");
-    } else {
-      diffStr = "**Diff**: [history only]";
-    }
-  }
 
-  let effectStr = "";
-  if (signal.effects.length > 0) {
-    effectStr =
-      `\n**Effects**: \n` +
-      signal.effects.map((e) => `  - \`${e}\``).join("\n");
-  }
-
-  return `**[Inspector Captured Event - ${formatTime(tx.timestamp)}]**\n- ${trigger}\n- ${command}\n- ${payload}\n${diffStr}${effectStr}`;
-}
-
-// ─── Array-Index Diff Grouping ───
-
-interface DiffEntry {
-  index?: string;
-  from?: unknown;
-  to?: unknown;
-}
-
-interface DiffGroup {
-  basePath: string;
-  entries: DiffEntry[];
-}
-
-const ARRAY_INDEX_RE = /^(.+)\[(\d+)\]$/;
-
-// ─── Consecutive Event Grouping ───
-
-type DisplayEntry =
-  | { kind: "single"; tx: Transaction; filteredIndex: number }
-  | {
-    kind: "group";
-    representative: Transaction;
-    count: number;
-    txs: Transaction[];
-    filteredIndex: number;
-  };
-
-/** Group consecutive transactions with the same command type into collapsed entries */
-function groupConsecutive(txs: Transaction[]): DisplayEntry[] {
-  if (txs.length === 0) return [];
-  const entries: DisplayEntry[] = [];
-  let i = 0;
-  while (i < txs.length) {
-    const current = txs[i]!;
-    const cmdType = current.command?.type ?? "NO_COMMAND";
-    let j = i + 1;
-    while (
-      j < txs.length &&
-      (txs[j]!.command?.type ?? "NO_COMMAND") === cmdType
-    ) {
-      j++;
-    }
-    const runLength = j - i;
-    if (runLength >= 2) {
-      entries.push({
-        kind: "group",
-        representative: txs[j - 1]!, // last one (most recent state)
-        count: runLength,
-        txs: txs.slice(i, j),
-        filteredIndex: i,
-      });
-    } else {
-      entries.push({ kind: "single", tx: current, filteredIndex: i });
-    }
-    i = j;
-  }
-  return entries;
-}
-
-/** Groups diffs that share the same base path (e.g. todoOrder[4], todoOrder[5]) */
-function groupDiffs(
-  diffs: Array<{ path: string; from?: unknown; to?: unknown }>,
-): DiffGroup[] {
-  const groups: DiffGroup[] = [];
-  const groupMap = new Map<string, DiffGroup>();
-
-  for (const d of diffs) {
-    const m = ARRAY_INDEX_RE.exec(d.path);
-    if (m) {
-      const basePath = m[1]!;
-      const index = m[2]!;
-      let group = groupMap.get(basePath);
-      if (!group) {
-        group = { basePath, entries: [] };
-        groupMap.set(basePath, group);
-        groups.push(group);
-      }
-      group.entries.push({ index, from: d.from, to: d.to });
-    } else {
-      groups.push({
-        basePath: d.path,
-        entries: [{ from: d.from, to: d.to }],
-      });
-    }
-  }
-
-  return groups;
-}
 
 // ─── Component ───
 
@@ -238,9 +79,9 @@ export function UnifiedInspector({
     (s: InspectorState) => s.scrollTick,
   );
   const filteredTx = InspectorApp.useComputed((s) => selectFilteredTransactions(s, transactions));
-  const [manualToggles, setManualToggles] = useState<Set<number>>(new Set());
   const [traceOpen, setTraceOpen] = useState(true);
   const [storeOpen, setStoreOpen] = useState(false);
+  const [manualToggles, setManualToggles] = useState<Set<string>>(new Set());
 
   // Discover all groups from the actual transactions (kernel is source of truth)
   const allGroups = useMemo(() => {
@@ -257,20 +98,8 @@ export function UnifiedInspector({
 
   // --- End of Component State ---
 
-  // Group consecutive identical commands into collapsed entries
-  const displayEntries = useMemo(
-    () => groupConsecutive(filteredTx),
-    [filteredTx],
-  );
-
-  const lastEntry =
-    displayEntries.length > 0
-      ? displayEntries[displayEntries.length - 1]
-      : undefined;
-  const latestTxId = lastEntry
-    ? lastEntry.kind === "single"
-      ? lastEntry.tx.id
-      : lastEntry.representative.id
+  const latestTxId = filteredTx.length > 0
+    ? String(filteredTx[filteredTx.length - 1]!.id)
     : undefined;
   const expandedIds = new Set(manualToggles);
 
@@ -285,7 +114,7 @@ export function UnifiedInspector({
 
   // ── Discord/Slack-style auto-scroll ──
   const scrollRef = useRef<HTMLDivElement>(null);
-  const prevLatestId = useRef<number | undefined>(undefined);
+  const prevLatestId = useRef<string | undefined>(undefined);
   const prevScrollTick = useRef(0);
   const isProgrammaticScroll = useRef(false);
 
@@ -335,43 +164,40 @@ export function UnifiedInspector({
     }
   }, [scrollTick, scrollToBottom]);
 
-  // Auto-scroll logic: Dispatch OS_SCROLL command when new transaction arrives
+  // Auto-scroll logic: scroll directly when new transaction arrives.
+  // NOTE: Must NOT dispatch a command here — dispatching creates a new kernel
+  // transaction, which changes latestTxId, re-triggering this effect → ∞ loop.
   useEffect(() => {
     if (latestTxId === undefined || latestTxId === prevLatestId.current) return;
     prevLatestId.current = latestTxId;
 
     if (!isUserScrolled && !searchQuery) {
-      os.dispatch(INSPECTOR_SCROLL_TO_BOTTOM());
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scrollToBottom();
+        });
+      });
     }
-  }, [latestTxId, isUserScrolled, searchQuery]);
-
-  const toggle = (id: number) => {
-    setManualToggles((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
+  }, [latestTxId, isUserScrolled, searchQuery, scrollToBottom]);
 
   const expandAll = () => {
-    const all = new Set(filteredTx.map((t) => t.id));
+    const all = new Set(filteredTx.map((t) => String(t.id)));
     setManualToggles(all);
   };
 
   const collapseAll = () => {
     // If we collapse all, we also add the very latest to manualToggles so it doesn't auto-expand
-    const next = new Set<number>();
+    const next = new Set<string>();
     if (latestTxId !== undefined) next.add(latestTxId);
     setManualToggles(next);
   };
 
+  const handleHighlight = (id: string, active: boolean) => {
+    highlightElement(id, active);
+  };
+
   return (
     <div className="flex flex-col w-full h-full bg-white text-[#333] font-sans text-[10px]">
-      <HighlightOverlay />
       <div className="flex flex-col border-b border-[#e0e0e0] bg-white z-20 shrink-0 sticky top-0">
         {/* Top Header Row */}
         <div className="h-7 px-2 flex items-center justify-between">
@@ -487,73 +313,21 @@ export function UnifiedInspector({
       <div className="relative flex-1 overflow-hidden">
         <div
           ref={scrollRef}
-          onScroll={() => handleScroll()}
+          onScroll={handleScroll}
           className="h-full overflow-y-auto"
         >
           {/* ── Trace Log Section ── */}
-          <CollapsibleSection
-            title="Trace Log"
-            icon={<Layers size={9} />}
-            open={traceOpen}
-            onToggle={() => setTraceOpen(!traceOpen)}
-            count={filteredTx.length}
-          >
-            {displayEntries.length === 0 ? (
-              <div className="p-4 text-center text-[#999] italic text-[10px]">
-                {searchQuery ? "No match." : "No events yet."}
-              </div>
-            ) : (
-              displayEntries.map((entry, i) => {
-                if (entry.kind === "group") {
-                  const { representative, count, filteredIndex } = entry;
-                  const firstTx = entry.txs[0]!;
-                  const prevEntry = i > 0 ? displayEntries[i - 1] : undefined;
-                  const prevTx = prevEntry
-                    ? prevEntry.kind === "single"
-                      ? prevEntry.tx
-                      : prevEntry.representative
-                    : undefined;
-                  const timeDeltaMs = prevTx
-                    ? representative.timestamp - prevTx.timestamp
-                    : 0;
-                  const totalDurationMs =
-                    representative.timestamp - firstTx.timestamp;
-                  return (
-                    <CollapsedGroup
-                      key={`group-${representative.id}`}
-                      representative={representative}
-                      count={count}
-                      index={filteredIndex + 1}
-                      dataIndex={filteredIndex}
-                      timeDeltaMs={timeDeltaMs}
-                      totalDurationMs={totalDurationMs}
-                    />
-                  );
-                }
-                const { tx, filteredIndex } = entry;
-                const prevEntry = i > 0 ? displayEntries[i - 1] : undefined;
-                const prevTx = prevEntry
-                  ? prevEntry.kind === "single"
-                    ? prevEntry.tx
-                    : prevEntry.representative
-                  : undefined;
-                const timeDeltaMs = prevTx
-                  ? tx.timestamp - prevTx.timestamp
-                  : 0;
-                return (
-                  <TimelineNode
-                    key={tx.id}
-                    tx={tx}
-                    index={filteredIndex + 1}
-                    expanded={expandedIds.has(tx.id)}
-                    onToggle={() => toggle(tx.id)}
-                    dataIndex={filteredIndex}
-                    timeDeltaMs={timeDeltaMs}
-                  />
-                );
-              })
-            )}
-          </CollapsibleSection>
+          <TransactionList
+            filteredTx={filteredTx.map((tx, idx) => ({ tx, index: idx }))}
+            searchQuery={searchQuery}
+            expandedTxs={expandedIds}
+            setExpandedTxs={setManualToggles}
+            traceOpen={traceOpen}
+            setTraceOpen={setTraceOpen}
+            scrollRef={scrollRef as React.RefObject<HTMLDivElement>}
+            handleScroll={handleScroll}
+            highlightElement={handleHighlight}
+          />
 
           {/* ── Store State Section ── */}
           {storeState && (
@@ -579,541 +353,21 @@ export function UnifiedInspector({
 
         {/* Jump to latest */}
         {isUserScrolled && (
-          <button
-            type="button"
-            onClick={() => os.dispatch(INSPECTOR_SCROLL_TO_BOTTOM())}
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#334155] text-white text-[9px] font-semibold hover:bg-[#1e293b] cursor-pointer border-none"
-          >
-            <ChevronDown size={10} />
-            Latest
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── Collapsed Group (consecutive identical commands) ───
-
-function CollapsedGroup({
-  representative,
-  count,
-  index,
-  dataIndex,
-  timeDeltaMs,
-  totalDurationMs,
-}: {
-  representative: Transaction;
-  count: number;
-  index: number;
-  dataIndex: number;
-  timeDeltaMs: number;
-  totalDurationMs: number;
-}) {
-  const signal = inferSignal(representative);
-  const { trigger, command } = signal;
-
-  const icon =
-    trigger.kind === "MOUSE" ? (
-      trigger.raw === "Click" ? (
-        <MousePointerClick
-          size={12}
-          className="text-[#94a3b8]"
-          strokeWidth={2.5}
-        />
-      ) : (
-        <MousePointer2 size={12} className="text-[#94a3b8]" strokeWidth={2.5} />
-      )
-    ) : trigger.kind === "OS_FOCUS" ? (
-      <Eye size={12} className="text-[#94a3b8]" strokeWidth={2.5} />
-    ) : (
-      <Keyboard size={12} className="text-[#94a3b8]" strokeWidth={2.5} />
-    );
-
-  const deltaColorClass =
-    timeDeltaMs > 500
-      ? "text-[#ef4444]"
-      : timeDeltaMs > 100
-        ? "text-[#f59e0b]"
-        : "text-[#94a3b8]";
-
-  const cmdType = command.type !== "NO_COMMAND" ? command.type : trigger.raw;
-
-  return (
-    <div
-      data-tx-index={dataIndex}
-      className="flex items-center gap-1.5 px-2 py-1 border-b border-[#eee] opacity-40 hover:opacity-70 transition-opacity"
-    >
-      {/* Icon */}
-      <div className="w-4 h-4 flex items-center justify-center shrink-0">
-        {icon}
-      </div>
-
-      {/* # */}
-      <span className="font-mono text-[8px] text-[#b0b0b0] shrink-0 w-3 text-right">
-        {index}
-      </span>
-
-      {/* Command name */}
-      <span className="font-semibold text-[10px] text-[#94a3b8] tracking-tight">
-        {cmdType}
-      </span>
-
-      {/* ×N badge */}
-      <span className="px-1.5 py-px rounded-full bg-[#f1f5f9] text-[#64748b] text-[8.5px] font-bold border border-[#e2e8f0] tabular-nums">
-        ×{count}
-      </span>
-
-      {/* Duration */}
-      {totalDurationMs > 0 && (
-        <span className="text-[8px] font-mono text-[#b0b0b0]">
-          {totalDurationMs}ms
-        </span>
-      )}
-
-      {/* Delta */}
-      <span className={`ml-auto text-[8px] font-mono ${deltaColorClass}`}>
-        +{timeDeltaMs}ms
-      </span>
-    </div>
-  );
-}
-
-// ─── Single Transaction Entry ───
-
-function TimelineNode({
-  tx,
-  index,
-  expanded,
-  onToggle,
-  dataIndex,
-  timeDeltaMs,
-}: {
-  tx: Transaction;
-  index: number;
-  expanded: boolean;
-  onToggle: () => void;
-  dataIndex: number;
-  timeDeltaMs: number;
-}) {
-  const signal = inferSignal(tx);
-  const { type, trigger, command, diff, effects } = signal;
-
-  const isNoOp = type === "NO_OP";
-  const opacityClass = isNoOp ? "opacity-50 hover:opacity-100" : "";
-
-  const icon =
-    trigger.kind === "MOUSE" ? (
-      trigger.raw === "Click" ? (
-        <MousePointerClick
-          size={12}
-          className="text-[#3b82f6]"
-          strokeWidth={2.5}
-        />
-      ) : (
-        <MousePointer2 size={12} className="text-[#3b82f6]" strokeWidth={2.5} />
-      )
-    ) : trigger.kind === "OS_FOCUS" ? (
-      <Eye size={12} className="text-[#10b981]" strokeWidth={2.5} />
-    ) : (
-      <Keyboard size={12} className="text-[#f59e0b]" strokeWidth={2.5} />
-    );
-
-  // Styling delta times based on performance thresholds
-  const deltaColorClass =
-    timeDeltaMs > 500
-      ? "text-[#ef4444]"
-      : timeDeltaMs > 100
-        ? "text-[#f59e0b]"
-        : "text-[#94a3b8]";
-
-  // Hide command badge if it's the exact same string as the trigger
-  const showCommandBadge =
-    command.type !== "NO_COMMAND" && command.type !== trigger.raw;
-
-  return (
-    <div
-      data-tx-index={dataIndex}
-      className={`flex flex-col border-b border-[#eee] transition-opacity ${opacityClass} ${expanded ? "bg-[#f8fafc]" : "hover:bg-[#fafafa]"}`}
-    >
-      <div className="flex items-start w-full">
-        <button
-          type="button"
-          onClick={onToggle}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") onToggle();
-          }}
-          className="flex-1 flex items-start gap-1.5 px-2 py-1.5 cursor-pointer bg-transparent border-none text-left min-w-0"
-        >
-          {/* Icon */}
-          <div className="w-4 h-4 flex items-center justify-center shrink-0 mt-px">
-            {icon}
-          </div>
-
-          {/* # */}
-          <span className="font-mono text-[8px] text-[#94a3b8] shrink-0 mt-0.5 w-3 text-right">
-            {index}
-          </span>
-
-          {/* Trigger + Element + Command */}
-          <div className="flex-1 flex flex-wrap items-center gap-1.5 min-w-0 pr-1">
-            <span className="font-semibold text-[10px] text-[#1e293b] break-all leading-snug tracking-tight">
-              {trigger.raw || "Unknown"}
-            </span>
-
-            {trigger.elementId && (
-              <span
-                className="px-1 py-0.5 rounded text-[#c2255c] text-[8.5px] font-mono bg-[#fff0f6] border border-[#ffdeeb] cursor-help break-all leading-none"
-                title={`Element: ${trigger.elementId}`}
-                onMouseEnter={() => trigger.elementId && os.dispatch(INSPECTOR_SET_HIGHLIGHT({ id: trigger.elementId }))}
-                onMouseLeave={() => trigger.elementId && os.dispatch(INSPECTOR_SET_HIGHLIGHT({ id: null }))}
-                onClick={(e) => e.stopPropagation()}
+          <InspectorScrollUI.Zone>
+            <Trigger id="scrollToBottomBtn">
+              <button
+                type="button"
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#334155] text-white text-[9px] font-semibold hover:bg-[#1e293b] cursor-pointer border-none"
               >
-                {trigger.elementId}
-              </span>
-            )}
-
-            {showCommandBadge && (
-              <span className="px-1 py-0.5 rounded bg-[#eff6ff] text-[#2563eb] text-[8.5px] font-semibold border border-[#bfdbfe] break-all leading-none shadow-sm">
-                {command.type}
-              </span>
-            )}
-          </div>
-
-          <span className="ml-auto flex items-center gap-1.5 shrink-0">
-            <span className={`text-[8px] font-mono ${deltaColorClass}`}>
-              +{timeDeltaMs}ms
-            </span>
-            <span className="text-[8px] text-[#ccc] font-mono tabular-nums hidden sm:inline">
-              {formatTime(tx.timestamp).split(".")[0]}
-            </span>
-          </span>
-        </button>
-
-        {/* Copy for AI */}
-        {expanded && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              copyToClipboard(formatAiContext(tx, signal));
-            }}
-            title="Copy for AI"
-            className="shrink-0 mr-1.5 p-1 rounded text-[#b0b0b0] hover:bg-[#e0e7ff] hover:text-[#4f46e5] cursor-pointer bg-transparent border-none"
-          >
-            <ClipboardCopy size={11} />
-          </button>
+                <ChevronDown size={10} />
+                Latest
+              </button>
+            </Trigger>
+          </InspectorScrollUI.Zone>
         )}
       </div>
-
-      {/* Expanded Details */}
-      {expanded && (
-        <div className="flex flex-col gap-1.5 pl-6 pr-2 pb-2">
-          {/* ── Pipeline: Sensed & Resolved ── */}
-          {signal.pipeline && (
-            <div className="flex flex-col gap-1 mt-0.5">
-              {!!signal.pipeline.sensed && (
-                <div className="flex flex-col font-mono text-[9.5px]">
-                  <div className="text-[#475569] font-semibold break-all mt-1 mb-1 inline-flex items-center self-start">
-                    DOM SENSE
-                  </div>
-                  <div className="flex flex-col gap-1 ml-1.5 border-l border-[#e2e8f0] pl-2.5">
-                    <div className="flex flex-col gap-[1px] w-full">
-                      <DiffValue
-                        value={signal.pipeline.sensed}
-                        type="changed-from"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-              {!!signal.pipeline.resolved && (
-                <div className="flex flex-col font-mono text-[9.5px]">
-                  <div className="text-[#475569] font-semibold break-all mt-1 mb-1 inline-flex items-center self-start">
-                    PURE RESOLVE
-                  </div>
-                  <div className="flex flex-col gap-1 ml-1.5 border-l border-[#e2e8f0] pl-2.5">
-                    <div className="flex flex-col gap-[1px] w-full">
-                      <DiffValue
-                        value={signal.pipeline.resolved}
-                        type="changed-to"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── FINAL ARIA Snapshot ── */}
-          {trigger.elementId && (
-            <div className="flex flex-col gap-1 mt-0.5">
-              <div className="flex flex-col font-mono text-[9.5px]">
-                <div className="text-[#8b5cf6] font-semibold break-all mt-1 mb-1 inline-flex items-center self-start">
-                  FINAL ARIA
-                </div>
-                <div className="flex flex-col gap-1 ml-1.5 border-l border-[#ede9fe] pl-2.5">
-                  <AriaSnapshot elementId={trigger.elementId} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Diff (primary info) ── */}
-          {diff.length > 0 && (
-            <div className="flex flex-col gap-1 mt-0.5">
-              {groupDiffs(diff).map((group, gi) => (
-                <div
-                  key={`${group.basePath}-${gi}`}
-                  className="flex flex-col font-mono text-[9.5px]"
-                >
-                  {/* Base path label - Spacing & Typography (Context) */}
-                  <div className="text-[#475569] font-semibold break-all mt-1.5 mb-1 inline-flex items-center self-start">
-                    {group.basePath}
-                    {group.entries.length > 1 && (
-                      <span className="text-[#94a3b8] font-normal ml-1.5 text-[8.5px]">
-                        ×{group.entries.length}
-                      </span>
-                    )}
-                  </div>
-                  {/* Entries - Lines (Structural Connection) */}
-                  <div className="flex flex-col gap-1 ml-1.5 border-l border-[#e2e8f0] pl-2.5">
-                    {group.entries.map((entry, ei) => (
-                      <div
-                        key={`${entry.index ?? ei}`}
-                        className="flex flex-col gap-[1px]"
-                      >
-                        {entry.index !== undefined && (
-                          <span className="text-[8.5px] text-[#94a3b8] font-mono leading-none mb-0.5">
-                            [{entry.index}]
-                          </span>
-                        )}
-                        {entry.from !== undefined && entry.to !== undefined ? (
-                          <div className="flex flex-col gap-[1px] w-full">
-                            <DiffValue value={entry.from} type="changed-from" />
-                            <DiffValue value={entry.to} type="changed-to" />
-                          </div>
-                        ) : (
-                          <div className="flex flex-col gap-[1px] w-full">
-                            {entry.from !== undefined && (
-                              <DiffValue value={entry.from} type="removed" />
-                            )}
-                            {entry.to !== undefined && (
-                              <DiffValue value={entry.to} type="added" />
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* ── Effects + Kernel: inline summary ── */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[8px] text-[#94a3b8] font-mono">
-            {effects.length > 0 && (
-              <span title={effects.join(", ")}>fx: {effects.join(", ")}</span>
-            )}
-            {tx.handlerScope && tx.handlerScope !== "unknown" && (
-              <span>scope: {tx.handlerScope}</span>
-            )}
-            {tx.bubblePath?.length > 1 && (
-              <span>path: {tx.bubblePath.join(" › ")}</span>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-// ─── Collapsible Section (top-level panels) ───
 
-function CollapsibleSection({
-  title,
-  icon,
-  open,
-  onToggle,
-  count,
-  children,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  open: boolean;
-  onToggle: () => void;
-  count?: number;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="border-b border-[#e0e0e0]">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="w-full flex items-center gap-1 px-2 py-1 bg-[#f8f8f8] hover:bg-[#f0f0f0] cursor-pointer border-none text-left"
-      >
-        <ChevronRight
-          size={10}
-          className={`text-[#b0b0b0] transition-transform ${open ? "rotate-90" : ""}`}
-        />
-        <span className="text-[#b0b0b0]">{icon}</span>
-        <span className="text-[8px] font-bold uppercase tracking-wider text-[#666]">
-          {title}
-        </span>
-        {count !== undefined && (
-          <span className="text-[8px] text-[#999] font-mono ml-auto">
-            ({count})
-          </span>
-        )}
-      </button>
-      {open && children}
-    </div>
-  );
-}
-
-// ─── Unified Building Blocks ───
-
-function AriaSnapshot({ elementId }: { elementId: string }) {
-  const [snapshot, setSnapshot] = useState<Record<
-    string,
-    string | null
-  > | null>(null);
-
-  useEffect(() => {
-    // Wait for DOM updates to flush after kernel transaction
-    const raf = requestAnimationFrame(() => {
-      // Small timeout to ensure async renders land
-      setTimeout(() => {
-        const el =
-          document.querySelector(`[data-id="${elementId}"]`) ||
-          document.querySelector(`[data-zone-id="${elementId}"]`) ||
-          document.getElementById(elementId);
-
-        if (el) {
-          setSnapshot({
-            role: el.getAttribute("role"),
-            "aria-current": el.getAttribute("aria-current"),
-            "aria-selected": el.getAttribute("aria-selected"),
-            "aria-checked": el.getAttribute("aria-checked"),
-            "aria-expanded": el.getAttribute("aria-expanded"),
-            tabIndex: el.getAttribute("tabIndex"),
-          });
-        } else {
-          setSnapshot({ error: "Element not found" });
-        }
-      }, 0);
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [elementId]);
-
-  if (!snapshot)
-    return (
-      <div className="text-[9px] text-[#94a3b8] italic px-1">Capturing...</div>
-    );
-  if (snapshot["error"])
-    return (
-      <div className="text-[9px] text-[#ef4444] italic px-1">
-        {snapshot["error"]}
-      </div>
-    );
-
-  // Filter out nulls for cleaner display
-  const filtered = Object.fromEntries(
-    Object.entries(snapshot).filter(([, v]) => v !== null),
-  );
-  if (Object.keys(filtered).length === 0)
-    return (
-      <div className="text-[9px] text-[#94a3b8] italic px-1">
-        No ARIA attributes
-      </div>
-    );
-
-  return (
-    <div className="flex flex-col gap-[1px] w-full">
-      <DiffValue value={filtered} type="changed-to" />
-    </div>
-  );
-}
-
-function DiffValue({
-  value,
-  type,
-}: {
-  value: unknown;
-  type: "removed" | "added" | "changed-from" | "changed-to";
-}) {
-  const str =
-    typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
-  const lines = str.split("\n");
-  const isLarge = lines.length > 7 || str.length > 150;
-
-  const DIFF_STYLES: Record<
-    typeof type,
-    { prefix: string; surfaceClass: string; textClass: string }
-  > = {
-    removed: {
-      prefix: "-",
-      surfaceClass: "bg-[#fef2f2]",
-      textClass: "text-[#991b1b]",
-    },
-    added: {
-      prefix: "+",
-      surfaceClass: "bg-[#f0fdf4]",
-      textClass: "text-[#166534]",
-    },
-    "changed-from": {
-      prefix: "",
-      surfaceClass: "bg-[#f8fafc]",
-      textClass: "text-[#64748b] line-through",
-    },
-    "changed-to": {
-      prefix: "→",
-      surfaceClass: "bg-[#e2e8f0]/50",
-      textClass: "text-[#0f172a] font-medium",
-    },
-  };
-
-  const { prefix, surfaceClass, textClass } = DIFF_STYLES[type];
-
-  const prefixNode = (
-    <span className="inline-block w-5 shrink-0 text-center font-bold text-black/20 select-none">
-      {prefix}
-    </span>
-  );
-
-  if (!isLarge) {
-    return (
-      <div
-        className={`py-0.5 px-0.5 rounded-sm whitespace-pre-wrap break-all flex ${surfaceClass} ${textClass}`}
-      >
-        {prefixNode}
-        <span>{str}</span>
-      </div>
-    );
-  }
-
-  const summaryText =
-    typeof value === "object" && value !== null
-      ? Array.isArray(value)
-        ? `Array(${value.length})`
-        : `Object { ... }`
-      : "Long String ...";
-
-  return (
-    <details
-      className={`py-0.5 px-0.5 rounded-sm flex flex-col group ${surfaceClass} ${textClass}`}
-    >
-      <summary className="cursor-pointer outline-none flex items-center select-none list-none text-[9.5px]">
-        <div className="flex items-center w-full opacity-80 hover:opacity-100">
-          {prefixNode}
-          <span className="group-open:hidden italic">{summaryText}</span>
-          <span className="hidden group-open:inline italic">Collapse</span>
-        </div>
-      </summary>
-      <div className="whitespace-pre-wrap break-all text-[9.5px] mt-1 pl-5 pb-1">
-        {str}
-      </div>
-    </details>
-  );
-}

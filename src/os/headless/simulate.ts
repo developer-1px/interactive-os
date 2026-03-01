@@ -136,13 +136,13 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
     elementId: focusedId ?? undefined,
     cursor: focusedId
       ? {
-          focusId: focusedId,
-          selection: zone?.selection ?? [],
-          anchor: zone?.selectionAnchor ?? null,
-          isExpandable: isFocusedExpandable,
-          isDisabled: false,
-          treeLevel: undefined,
-        }
+        focusId: focusedId,
+        selection: zone?.selection ?? [],
+        anchor: zone?.selectionAnchor ?? null,
+        isExpandable: isFocusedExpandable,
+        isDisabled: false,
+        treeLevel: undefined,
+      }
       : null,
   };
 
@@ -151,7 +151,7 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
   // Pipeline logging: keybinding resolution
   if (result.commands.length > 0) {
     console.debug(
-      `[keybind] ${key} → ${result.commands.map((c: Record<string, unknown>) => c.type).join(", ")}`,
+      `[keybind] ${key} → ${result.commands.map((c: any) => c.type).join(", ")}`,
     );
   } else {
     console.debug(`[keybind] ${key} → (no match)`);
@@ -162,7 +162,8 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
   // Pipeline logging: dispatch + focus change
   if (result.commands.length > 0) {
     for (const cmd of result.commands) {
-      console.debug(`[dispatch] ${(cmd as Record<string, unknown>).type}`);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+      console.debug(`[dispatch] ${(cmd as any).type}`);
     }
   }
 

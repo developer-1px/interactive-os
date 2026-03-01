@@ -119,7 +119,7 @@ describe("Playwright-compatible Page interface", () => {
             page.goto("zone", {
                 items: ["a", "b", "c"],
                 role: "grid",
-                config: { select: { mode: "multiple", toggle: true, range: true } },
+                config: { select: { mode: "multiple", toggle: true, range: true, followFocus: false, disallowEmpty: false } },
             });
 
             // Select first item

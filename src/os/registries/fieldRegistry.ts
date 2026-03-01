@@ -1,7 +1,5 @@
-import type { BaseCommand } from "@kernel";
 import { useSyncExternalStore } from "react";
 import type { ZodSchema } from "zod";
-import type { FieldCommandFactory } from "../../schemas/command/BaseCommand.ts";
 
 /**
  * Field Type Presets — Key Ownership Model
@@ -85,13 +83,13 @@ function register(id: string, config: FieldConfig) {
   const newState: FieldState = existing
     ? existing.state
     : {
-        value: defaultValue,
-        defaultValue,
-        isValid: true,
-        isDirty: false,
-        error: null,
-        caretPosition: null,
-      };
+      value: defaultValue,
+      defaultValue,
+      isValid: true,
+      isDirty: false,
+      error: null,
+      caretPosition: null,
+    };
 
   newFields.set(id, {
     config,
