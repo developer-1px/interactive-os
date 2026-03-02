@@ -1,7 +1,7 @@
 import { Icon } from "@/components/Icon";
-import { useExpanded } from "@/os/5-hooks/useExpanded";
-import { Zone } from "@/os/6-components/primitives/Zone";
-import { Item } from "@/os/6-components/primitives/Item";
+import { useExpanded } from "@/os/6-project/accessors/useExpanded";
+import { Item } from "@/os/6-project/Item";
+import { Zone } from "@/os/6-project/Zone";
 
 export function CompositePattern() {
   const { isExpanded } = useExpanded();
@@ -46,7 +46,10 @@ export function CompositePattern() {
           <Zone
             id="apg-composite-menu"
             role="menu"
-            options={{ navigate: { orientation: "vertical" }, dismiss: { escape: "close" } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              dismiss: { escape: "close" },
+            }}
             className="absolute top-full mt-1 left-0 w-48 bg-white border border-gray-200 rounded shadow-lg py-1 z-50"
           >
             <Item

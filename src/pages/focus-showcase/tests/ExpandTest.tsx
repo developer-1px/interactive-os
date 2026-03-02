@@ -1,6 +1,6 @@
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
-import { useExpanded } from "@/os/5-hooks/useExpanded";
+import { Item } from "@os/6-project/Item.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
+import { useExpanded } from "@/os/6-project/accessors/useExpanded";
 import { TestBox } from "../../shared/TestLayout";
 
 export function ExpandTest() {
@@ -49,9 +49,7 @@ export function ExpandTest() {
           id="tree-widget"
           role="tree"
           options={{ navigate: { orientation: "vertical" } }}
-          getExpandableItems={() =>
-            new Set(["tree-parent-1", "tree-parent-2"])
-          }
+          getExpandableItems={() => new Set(["tree-parent-1", "tree-parent-2"])}
           className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200"
         >
           <TreeItems />

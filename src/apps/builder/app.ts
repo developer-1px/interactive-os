@@ -14,16 +14,16 @@
  */
 
 import { produce } from "immer";
-import { OS_OVERLAY_OPEN } from "@/os/3-commands/overlay/overlay";
+import { OS_OVERLAY_OPEN } from "@/os/4-command/overlay/overlay";
+import { defineApp } from "@/os/app/defineApp";
+import { deleteToast } from "@/os/app/modules/deleteToast";
+import { history } from "@/os/app/modules/history";
+import { os } from "@/os/core/engine/kernel";
 import {
   type CollectionNode,
   findAcceptingCollection,
-} from "@/os/collection/pasteBubbling";
-import { defineApp } from "@/os/defineApp";
-import { os } from "@/os/kernel";
-import { deleteToast } from "@/os/modules/deleteToast";
-import { history } from "@/os/modules/history";
-import type { FieldCommandFactory } from "@/os/schemas/command/BaseCommand";
+} from "@/os/core/library/collection/pasteBubbling";
+import type { FieldCommandFactory } from "@/os/core/schema/types/command/BaseCommand";
 import {
   type Block,
   type BuilderState,
@@ -50,10 +50,10 @@ export const BuilderApp = defineApp<BuilderState>("builder", INITIAL_STATE, {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// Undo / Redo — generic factory (defineApp.undoRedo.ts)
+// Undo / Redo — generic factory (defineApp/undoRedo.ts)
 // ═══════════════════════════════════════════════════════════════════
 
-import { createUndoRedoCommands } from "@/os/defineApp.undoRedo";
+import { createUndoRedoCommands } from "@/os/app/defineApp/undoRedo";
 
 export const { canUndo, canRedo, undoCommand, redoCommand } =
   createUndoRedoCommands(BuilderApp);
@@ -62,7 +62,7 @@ export const { canUndo, canRedo, undoCommand, redoCommand } =
 // Sidebar Zone — Collection Zone Facade
 // ═══════════════════════════════════════════════════════════════════
 
-import { createCollectionZone } from "@/os/collection/createCollectionZone";
+import { createCollectionZone } from "@/os/core/library/collection/createCollectionZone";
 
 /** Recursively clone a block tree, assigning new IDs to all descendants. */
 function deepCloneBlock(block: Block, newId: string): Block {
@@ -346,7 +346,7 @@ function getStaticItemTextValue(focusId: string) {
 }
 
 export const canvasOnCopy = (
-  cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor,
+  cursor: import("@/os/3-inject/zoneRegistry").ZoneCursor,
 ): import("@kernel").BaseCommand | import("@kernel").BaseCommand[] => {
   if (isDynamicItem(cursor.focusId)) {
     // Dynamic item → structural copy (section/card/tab)
@@ -361,7 +361,7 @@ export const canvasOnCopy = (
 };
 
 export const canvasOnCut = (
-  cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor,
+  cursor: import("@/os/3-inject/zoneRegistry").ZoneCursor,
 ) => {
   if (!isDynamicItem(cursor.focusId)) {
     // Static item → cut not allowed (PRD 1.3)
@@ -374,7 +374,7 @@ export const canvasOnCut = (
 };
 
 export const canvasOnPaste = (
-  cursor: import("@/os/2-contexts/zoneRegistry").ZoneCursor,
+  cursor: import("@/os/3-inject/zoneRegistry").ZoneCursor,
 ) => {
   const collections = buildCanvasCollections();
   const clipData = canvasCollection.readClipboard();

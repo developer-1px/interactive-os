@@ -1,5 +1,5 @@
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Item } from "@os/6-project/Item.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function ActivateTest() {
@@ -37,7 +37,11 @@ export function ActivateTest() {
           <Zone
             id="act-auto"
             role="listbox"
-            options={{ navigate: { orientation: "vertical" }, select: { mode: "single", followFocus: true }, activate: { mode: "automatic" } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              select: { mode: "single", followFocus: true },
+              activate: { mode: "automatic" },
+            }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Preview A", "Preview B"].map((item) => (
@@ -64,7 +68,10 @@ export function ActivateTest() {
           <Zone
             id="act-manual"
             role="listbox"
-            options={{ navigate: { orientation: "vertical" }, activate: { mode: "manual" } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              activate: { mode: "manual" },
+            }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["File 1", "File 2"].map((item) => (

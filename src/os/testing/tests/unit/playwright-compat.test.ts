@@ -9,127 +9,145 @@
  *   2. Browser  (createBrowserPage, Inspector visual)
  *   3. Playwright E2E (native, no shim needed)
  */
-import { describe, it, expect as vitestExpect, afterEach } from "vitest";
+
 import { createHeadlessPage, expect } from "@os/testing";
+import { afterEach, describe, it, expect as vitestExpect } from "vitest";
 
 describe("Playwright-compatible Page interface", () => {
-    const page = createHeadlessPage();
+  const page = createHeadlessPage();
 
-    afterEach(() => {
-        page.cleanup();
+  afterEach(() => {
+    page.cleanup();
+  });
+
+  // ─── 1. page.locator().click() ────────────────────────────────
+  describe("locator.click", () => {
+    it("click focuses the item", async () => {
+      page.goto("zone", {
+        items: ["apple", "banana", "cherry"],
+        role: "listbox",
+      });
+
+      await page.locator("apple").click();
+      await expect(page.locator("apple")).toBeFocused();
     });
 
-    // ─── 1. page.locator().click() ────────────────────────────────
-    describe("locator.click", () => {
-        it("click focuses the item", async () => {
-            page.goto("zone", { items: ["apple", "banana", "cherry"], role: "listbox" });
+    it("click with # prefix works (Playwright compat)", async () => {
+      page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
 
-            await page.locator("apple").click();
-            await expect(page.locator("apple")).toBeFocused();
-        });
+      await page.locator("#banana").click();
+      await expect(page.locator("#banana")).toBeFocused();
+    });
+  });
 
-        it("click with # prefix works (Playwright compat)", async () => {
-            page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
+  // ─── 2. page.keyboard.press() ─────────────────────────────────
+  describe("keyboard.press", () => {
+    it("ArrowDown navigates to next item", async () => {
+      page.goto("zone", {
+        items: ["apple", "banana", "cherry"],
+        role: "listbox",
+      });
 
-            await page.locator("#banana").click();
-            await expect(page.locator("#banana")).toBeFocused();
-        });
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator("banana")).toBeFocused();
     });
 
-    // ─── 2. page.keyboard.press() ─────────────────────────────────
-    describe("keyboard.press", () => {
-        it("ArrowDown navigates to next item", async () => {
-            page.goto("zone", { items: ["apple", "banana", "cherry"], role: "listbox" });
+    it("ArrowUp navigates to previous item", async () => {
+      page.goto("zone", {
+        items: ["apple", "banana", "cherry"],
+        role: "listbox",
+        focusedItemId: "cherry",
+      });
 
-            await page.keyboard.press("ArrowDown");
-            await expect(page.locator("banana")).toBeFocused();
-        });
+      await page.keyboard.press("ArrowUp");
+      await expect(page.locator("banana")).toBeFocused();
+    });
+  });
 
-        it("ArrowUp navigates to previous item", async () => {
-            page.goto("zone", {
-                items: ["apple", "banana", "cherry"],
-                role: "listbox",
-                focusedItemId: "cherry",
-            });
+  // ─── 3. expect(locator).toHaveAttribute() ─────────────────────
+  describe("toHaveAttribute", () => {
+    it("verifies aria-current on focused item", async () => {
+      page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
 
-            await page.keyboard.press("ArrowUp");
-            await expect(page.locator("banana")).toBeFocused();
-        });
+      await page.locator("apple").click();
+      await expect(page.locator("apple")).toHaveAttribute(
+        "aria-current",
+        "true",
+      );
     });
 
-    // ─── 3. expect(locator).toHaveAttribute() ─────────────────────
-    describe("toHaveAttribute", () => {
-        it("verifies aria-current on focused item", async () => {
-            page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
+    it("throws on attribute mismatch", async () => {
+      page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
 
-            await page.locator("apple").click();
-            await expect(page.locator("apple")).toHaveAttribute("aria-current", "true");
-        });
+      await page.locator("apple").click();
+      await vitestExpect(
+        expect(page.locator("banana")).toHaveAttribute("aria-current", "true"),
+      ).rejects.toThrow();
+    });
+  });
 
-        it("throws on attribute mismatch", async () => {
-            page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
+  // ─── 4. expect(locator).toBeFocused() ─────────────────────────
+  describe("toBeFocused", () => {
+    it("passes when element is focused", async () => {
+      page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
 
-            await page.locator("apple").click();
-            await vitestExpect(
-                expect(page.locator("banana")).toHaveAttribute("aria-current", "true"),
-            ).rejects.toThrow();
-        });
+      await page.locator("apple").click();
+      await expect(page.locator("apple")).toBeFocused();
     });
 
-    // ─── 4. expect(locator).toBeFocused() ─────────────────────────
-    describe("toBeFocused", () => {
-        it("passes when element is focused", async () => {
-            page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
+    it("throws when element is not focused", async () => {
+      page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
 
-            await page.locator("apple").click();
-            await expect(page.locator("apple")).toBeFocused();
-        });
+      await page.locator("apple").click();
+      await vitestExpect(
+        expect(page.locator("banana")).toBeFocused(),
+      ).rejects.toThrow();
+    });
+  });
 
-        it("throws when element is not focused", async () => {
-            page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
+  // ─── 5. locator.getAttribute() ────────────────────────────────
+  describe("getAttribute", () => {
+    it("returns role attribute", async () => {
+      page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
 
-            await page.locator("apple").click();
-            await vitestExpect(
-                expect(page.locator("banana")).toBeFocused(),
-            ).rejects.toThrow();
-        });
+      const role = await page.locator("zone").getAttribute("role");
+      vitestExpect(role).toBe("listbox");
     });
 
-    // ─── 5. locator.getAttribute() ────────────────────────────────
-    describe("getAttribute", () => {
-        it("returns role attribute", async () => {
-            page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
+    it("returns null for absent attribute", async () => {
+      page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
 
-            const role = await page.locator("zone").getAttribute("role");
-            vitestExpect(role).toBe("listbox");
-        });
-
-        it("returns null for absent attribute", async () => {
-            page.goto("zone", { items: ["apple", "banana"], role: "listbox" });
-
-            const val = await page.locator("apple").getAttribute("aria-current");
-            // Before click, apple has no aria-current (or it may be "true" if auto-focused)
-            vitestExpect(typeof val === "string" || val === null).toBe(true);
-        });
+      const val = await page.locator("apple").getAttribute("aria-current");
+      // Before click, apple has no aria-current (or it may be "true" if auto-focused)
+      vitestExpect(typeof val === "string" || val === null).toBe(true);
     });
+  });
 
-    // ─── 6. Cmd+Click multi-select ────────────────────────────────
-    describe("click with modifiers", () => {
-        it("Cmd+Click toggles selection", async () => {
-            page.goto("zone", {
-                items: ["a", "b", "c"],
-                role: "grid",
-                config: { select: { mode: "multiple", toggle: true, range: true, followFocus: false, disallowEmpty: false } },
-            });
+  // ─── 6. Cmd+Click multi-select ────────────────────────────────
+  describe("click with modifiers", () => {
+    it("Cmd+Click toggles selection", async () => {
+      page.goto("zone", {
+        items: ["a", "b", "c"],
+        role: "grid",
+        config: {
+          select: {
+            mode: "multiple",
+            toggle: true,
+            range: true,
+            followFocus: false,
+            disallowEmpty: false,
+          },
+        },
+      });
 
-            // Select first item
-            await page.locator("a").click({ modifiers: ["Meta"] });
-            await expect(page.locator("a")).toHaveAttribute("aria-selected", "true");
+      // Select first item
+      await page.locator("a").click({ modifiers: ["Meta"] });
+      await expect(page.locator("a")).toHaveAttribute("aria-selected", "true");
 
-            // Select second item (additive)
-            await page.locator("c").click({ modifiers: ["Meta"] });
-            await expect(page.locator("c")).toHaveAttribute("aria-selected", "true");
-            await expect(page.locator("a")).toHaveAttribute("aria-selected", "true");
-        });
+      // Select second item (additive)
+      await page.locator("c").click({ modifiers: ["Meta"] });
+      await expect(page.locator("c")).toHaveAttribute("aria-selected", "true");
+      await expect(page.locator("a")).toHaveAttribute("aria-selected", "true");
     });
+  });
 });

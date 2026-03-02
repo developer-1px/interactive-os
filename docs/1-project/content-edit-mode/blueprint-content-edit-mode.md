@@ -71,8 +71,8 @@ resolveClick (이미 구현)
 **파일 (참조만)**:
 | # | 파일 | 역할 |
 |-|-|-|
-| R1 | `src/os/1-listeners/mouse/resolveClick.ts` | 재클릭 감지 순수 함수 — **이미 구현** |
-| R2 | `src/os/1-listeners/mouse/MouseListener.tsx` | click 이벤트 어댑터 — `activateOnClick` 읽기 |
+| R1 | `src/os/1-listen/mouse/resolveClick.ts` | 재클릭 감지 순수 함수 — **이미 구현** |
+| R2 | `src/os/1-listen/mouse/MouseListener.tsx` | click 이벤트 어댑터 — `activateOnClick` 읽기 |
 | R3 | `src/os/3-commands/interaction/activate.ts` | `OS_ACTIVATE` 커맨드 — `onAction` 호출 체인 |
 | R4 | `src/os/3-commands/field/startEdit.ts` | `OS_FIELD_START_EDIT` — `editingItemId` 설정 |
 | R5 | `src/os/registries/roleRegistry.ts` | grid 프리셋 — `activateOnClick` 기본값 확인 |

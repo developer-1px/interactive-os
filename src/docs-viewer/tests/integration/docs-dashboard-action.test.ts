@@ -10,7 +10,7 @@
  * Note: Uses onTestFailed + dumpDiagnostics (test-observability validation)
  */
 
-import { createOsPage, type OsPage } from "@os/defineApp.page";
+import { createOsPage, type OsPage } from "@os/app/defineApp/page";
 import {
   afterEach,
   beforeEach,

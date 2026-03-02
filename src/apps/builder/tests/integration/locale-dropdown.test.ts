@@ -10,51 +10,49 @@
  */
 
 import { BuilderApp } from "@apps/builder/app";
-import { ZoneRegistry } from "@os/registries/zoneRegistry";
-import {
-    OS_OVERLAY_CLOSE,
-} from "@os/3-commands/overlay/overlay";
-import { resolveRole } from "@os/registries/roleRegistry";
-import { createPage } from "@os/defineApp.page";
-import type { AppPage } from "@os/defineApp.types";
 import type { BuilderState } from "@apps/builder/model/appState";
-import { os } from "@os/kernel";
+import { OS_OVERLAY_CLOSE } from "@os/4-command/overlay/overlay";
+import { createPage } from "@os/app/defineApp/page";
+import type { AppPage } from "@os/app/defineApp/types";
+import { os } from "@os/core/engine/kernel";
+import { resolveRole } from "@os/core/engine/registries/roleRegistry";
+import { ZoneRegistry } from "@os/core/engine/registries/zoneRegistry";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const MENU_ITEMS = [
-    "locale-option-ko",
-    "locale-option-en",
-    "locale-add-ja",
-    "locale-add-zh",
+  "locale-option-ko",
+  "locale-option-en",
+  "locale-add-ja",
+  "locale-add-zh",
 ];
 
 type Page = AppPage<BuilderState>;
 let page: Page;
 
 beforeEach(() => {
-    page = createPage(BuilderApp);
+  page = createPage(BuilderApp);
 
-    // Push model: goto("sidebar") auto-registers trigger callbacks
-    // from sidebar.bind({ triggers: [...] }) — no manual setup needed!
-    page.goto("sidebar");
+  // Push model: goto("sidebar") auto-registers trigger callbacks
+  // from sidebar.bind({ triggers: [...] }) — no manual setup needed!
+  page.goto("sidebar");
 
-    // -- Setup: Register menu zone --
-    // In browser: Trigger.Portal → Zone mount → ZoneRegistry.register
-    // In headless: register the menu zone that will be activated on overlay open
-    const menuConfig = resolveRole("menu");
-    ZoneRegistry.register("locale-menu", {
-        role: "menu",
-        config: menuConfig,
-        element: null,
-        parentId: null,
-        getItems: () => MENU_ITEMS,
-        onDismiss: OS_OVERLAY_CLOSE({ id: "locale-menu" }),
-    });
+  // -- Setup: Register menu zone --
+  // In browser: Trigger.Portal → Zone mount → ZoneRegistry.register
+  // In headless: register the menu zone that will be activated on overlay open
+  const menuConfig = resolveRole("menu");
+  ZoneRegistry.register("locale-menu", {
+    role: "menu",
+    config: menuConfig,
+    element: null,
+    parentId: null,
+    getItems: () => MENU_ITEMS,
+    onDismiss: OS_OVERLAY_CLOSE({ id: "locale-menu" }),
+  });
 });
 
 afterEach(() => {
-    ZoneRegistry.unregister("locale-menu");
-    page.cleanup();
+  ZoneRegistry.unregister("locale-menu");
+  page.cleanup();
 });
 
 /**
@@ -63,34 +61,34 @@ afterEach(() => {
  * In headless: we activate the pre-registered menu zone after click opens overlay
  */
 function openLocaleMenu() {
-    page.click("locale-switcher-trigger");
-    // After overlay opens, activate the menu zone with first item focused
-    page.goto("locale-menu", { focusedItemId: MENU_ITEMS[0]! });
+  page.click("locale-switcher-trigger");
+  // After overlay opens, activate the menu zone with first item focused
+  page.goto("locale-menu", { focusedItemId: MENU_ITEMS[0]! });
 }
 
 describe("T4: LocaleSwitcher — 사용자 행동만으로 검증", () => {
-    // ── 열기 ──
+  // ── 열기 ──
 
-    it("trigger 클릭 → overlay stack에 locale-menu 추가", () => {
-        page.click("locale-switcher-trigger");
-        const stack = os.getState().os.overlays.stack;
-        expect(stack.some((e: any) => e.id === "locale-menu")).toBe(true);
-    });
+  it("trigger 클릭 → overlay stack에 locale-menu 추가", () => {
+    page.click("locale-switcher-trigger");
+    const stack = os.getState().os.overlays.stack;
+    expect(stack.some((e: any) => e.id === "locale-menu")).toBe(true);
+  });
 
-    // ── Navigation ──
+  // ── Navigation ──
 
-    it("menu 열림 → ArrowDown → 다음 item", () => {
-        openLocaleMenu();
-        expect(page.focusedItemId()).toBe("locale-option-ko"); // first item
-        page.keyboard.press("ArrowDown");
-        expect(page.focusedItemId()).toBe("locale-option-en");
-    });
+  it("menu 열림 → ArrowDown → 다음 item", () => {
+    openLocaleMenu();
+    expect(page.focusedItemId()).toBe("locale-option-ko"); // first item
+    page.keyboard.press("ArrowDown");
+    expect(page.focusedItemId()).toBe("locale-option-en");
+  });
 
-    // ── Dismiss ──
+  // ── Dismiss ──
 
-    it("Escape → overlay 닫힘", () => {
-        openLocaleMenu();
-        page.keyboard.press("Escape");
-        expect(os.getState().os.overlays.stack.length).toBe(0);
-    });
+  it("Escape → overlay 닫힘", () => {
+    openLocaleMenu();
+    page.keyboard.press("Escape");
+    expect(os.getState().os.overlays.stack.length).toBe(0);
+  });
 });

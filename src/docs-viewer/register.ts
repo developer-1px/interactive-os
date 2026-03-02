@@ -13,7 +13,7 @@
  */
 
 import type { Middleware, MiddlewareContext } from "@kernel";
-import { os } from "@/os/kernel";
+import { os } from "@/os/core/engine/kernel";
 
 // ── Command ──────────────────────────────────────────────────────
 

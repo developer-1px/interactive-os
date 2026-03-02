@@ -146,8 +146,8 @@ Zone은 자체 div를 렌더하지 않는다. Slot 패턴으로 child의 첫 번
 
 | 파일 | 변경 |
 |------|------|
-| `1-listeners/mouse/MouseListener.tsx` | `data-focus-group` → `data-zone` |
-| `1-listeners/shared.ts` | `data-focus-group` → `data-zone` |
+| `1-listen/mouse/MouseListener.tsx` | `data-focus-group` → `data-zone` |
+| `1-listen/shared.ts` | `data-focus-group` → `data-zone` |
 
 ### 4.6 유지 (변경 안 함)
 
@@ -166,13 +166,13 @@ Zone은 자체 div를 렌더하지 않는다. Slot 패턴으로 child의 첫 번
 | 파일 | 변경 유형 |
 |------|----------|
 | `6-components/base/FocusGroup.tsx` | Zone 책임 추출 → headless 축소 |
-| `6-components/primitives/Zone.tsx` | facade → 진짜 Zone (합성점 + asChild) |
-| `6-components/primitives/Item.tsx` | `useFocusGroupContext` → `useZoneContext` + `useFocusContext` |
+| `6-components/6-project/Zone.tsx` | facade → 진짜 Zone (합성점 + asChild) |
+| `6-components/6-project/Item.tsx` | `useFocusGroupContext` → `useZoneContext` + `useFocusContext` |
 | `6-components/base/FocusItem.tsx` | 동일 |
 | `6-components/field/Field.tsx` | 동일 |
 | `2-contexts/zoneRegistry.ts` | ZoneEntry 슬롯 구조 |
-| `1-listeners/mouse/MouseListener.tsx` | data attribute 변경 |
-| `1-listeners/shared.ts` | data attribute 변경 |
+| `1-listen/mouse/MouseListener.tsx` | data attribute 변경 |
+| `1-listen/shared.ts` | data attribute 변경 |
 | `3-commands/focus/focus.ts` | 필요시 entry.focus.config 접근 |
 
 ### Apps (마이그레이션)

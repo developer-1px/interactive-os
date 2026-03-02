@@ -1,7 +1,7 @@
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
-import { Field } from "@os/6-components/field/Field.tsx";
-import { Trigger } from "@os/6-components/primitives/Trigger.tsx";
+import { Field } from "@os/6-project/field/Field.tsx";
+import { Item } from "@os/6-project/Item.tsx";
+import { Trigger } from "@os/6-project/Trigger.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
 import { useState } from "react";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -65,7 +65,10 @@ export function AriaInteractionTest() {
           <Zone
             id="test-select-group"
             role="listbox"
-            options={{ navigate: { orientation: "vertical" }, select: { mode: "single" } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              select: { mode: "single" },
+            }}
             className="flex flex-col gap-1"
           >
             {["Item 1", "Item 2", "Item 3"].map((text, i) => (

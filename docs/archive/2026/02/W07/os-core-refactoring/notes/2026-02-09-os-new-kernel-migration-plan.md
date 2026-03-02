@@ -129,7 +129,7 @@ src/os-new/
 ├── 4-effect/        (6 files)
 ├── core/            dispatchToZone (5 files)
 ├── lib/             (5 files)
-├── primitives/      FocusGroup, FocusItem, Field (3 files)
+├── 6-project/      FocusGroup, FocusItem, Field (3 files)
 ├── registry/        (1 file)
 ├── schema/          types (23 files)
 └── shared/          (2 files)
@@ -138,7 +138,7 @@ src/os-new/
 **마이그레이션 후 구조 (re-frame 6-Domino):**
 ```
 src/os-new/
-├── 1-listeners/      Event Listeners (DOM event → dispatch)
+├── 1-listen/      Event Listeners (DOM event → dispatch)
 │   ├── keyboard/     KeyboardListener.tsx
 │   ├── clipboard/    ClipboardListener.tsx
 │   └── focus/        FocusSensor.tsx

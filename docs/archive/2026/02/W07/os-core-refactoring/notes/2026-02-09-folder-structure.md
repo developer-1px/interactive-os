@@ -105,7 +105,7 @@ src/os/
 │   ├── middleware.ts                ← 미들웨어 정의
 │   └── route.ts                     ← 커맨드 라우팅 (flat registry + zone bubbling)
 │
-├── primitives/                      ← React 컴포넌트 (UI 프리미티브)
+├── 6-project/                      ← React 컴포넌트 (UI 프리미티브)
 │   ├── FocusGroup.tsx               ← Zone 컨테이너
 │   ├── FocusItem.tsx                ← 포커스 가능 아이템
 │   ├── Field.tsx                    ← 인라인 에디팅 필드
@@ -193,23 +193,23 @@ src/os/
 | `features/keyboard/pipeline/1-sense/KeyboardSensor.tsx` | `1-sensor/keyboard/KeyboardSensor.tsx` |
 | `features/clipboard/ClipboardSensor.tsx` | `1-sensor/clipboard/ClipboardSensor.tsx` |
 | `features/keyboard/pipeline/2-classify/classifyKeyboard.ts` | `1-sensor/keyboard/classify.ts` |
-| `features/focus/pipeline/2-intent/commands/NAVIGATE.ts` | `2-command/navigate/command.ts` |
+| `features/focus/pipeline/2-resolve/commands/NAVIGATE.ts` | `2-command/navigate/command.ts` |
 | `features/focus/pipeline/3-resolve/resolveNavigate.ts` | `2-command/navigate/linear.ts` |
 | `features/focus/pipeline/3-resolve/focusFinder.ts` | `2-command/navigate/spatial.ts` |
 | `features/focus/pipeline/3-resolve/resolveZoneSpatial.ts` | `2-command/navigate/seamless.ts` |
 | `features/focus/pipeline/3-resolve/cornerNav.ts` | `2-command/navigate/corner.ts` |
-| `features/focus/pipeline/2-intent/commands/TAB.ts` | `2-command/tab/command.ts` (trap/escape/flow 분리) |
-| `features/focus/pipeline/2-intent/commands/SELECT.ts` | `2-command/select/command.ts` (single/toggle/range/all 분리) |
-| `features/focus/pipeline/2-intent/commands/ACTIVATE.ts` | `2-command/activate/command.ts` |
-| `features/focus/pipeline/2-intent/commands/FOCUS.ts` | `2-command/focus/command.ts` |
-| `features/focus/pipeline/2-intent/commands/SYNC_FOCUS.ts` | `2-command/focus/sync.ts` |
-| `features/focus/pipeline/2-intent/commands/RECOVER.ts` | `2-command/focus/recover.ts` |
-| `features/focus/pipeline/2-intent/commands/ESCAPE.ts` | `2-command/escape/command.ts` |
-| `features/focus/pipeline/2-intent/commands/TOGGLE.ts` | `2-command/toggle/command.ts` |
-| `features/focus/pipeline/2-intent/commands/DELETE.ts` | `2-command/delete/command.ts` |
+| `features/focus/pipeline/2-resolve/commands/TAB.ts` | `2-command/tab/command.ts` (trap/escape/flow 분리) |
+| `features/focus/pipeline/2-resolve/commands/SELECT.ts` | `2-command/select/command.ts` (single/toggle/range/all 분리) |
+| `features/focus/pipeline/2-resolve/commands/ACTIVATE.ts` | `2-command/activate/command.ts` |
+| `features/focus/pipeline/2-resolve/commands/FOCUS.ts` | `2-command/focus/command.ts` |
+| `features/focus/pipeline/2-resolve/commands/SYNC_FOCUS.ts` | `2-command/focus/sync.ts` |
+| `features/focus/pipeline/2-resolve/commands/RECOVER.ts` | `2-command/focus/recover.ts` |
+| `features/focus/pipeline/2-resolve/commands/ESCAPE.ts` | `2-command/escape/command.ts` |
+| `features/focus/pipeline/2-resolve/commands/TOGGLE.ts` | `2-command/toggle/command.ts` |
+| `features/focus/pipeline/2-resolve/commands/DELETE.ts` | `2-command/delete/command.ts` |
 | `features/clipboard/ClipboardIntent.tsx` | `2-command/clipboard/command.ts` |
 | `features/history/HistoryIntent.tsx` | `2-command/history/command.ts` |
-| `features/focus/pipeline/2-intent/FocusIntent.tsx` | **삭제** (레지스트리로 대체) |
+| `features/focus/pipeline/2-resolve/FocusIntent.tsx` | **삭제** (레지스트리로 대체) |
 | `features/focus/store/focusGroupStore.ts` | `3-store/focusStore.ts` (통합) |
 | `features/focus/lib/focusData.ts` | `3-store/focusStore.ts` (통합) + `registry/zoneData.ts` (config만) |
 | `features/command/store/CommandEngineStore.ts` | `3-store/engineStore.ts` |

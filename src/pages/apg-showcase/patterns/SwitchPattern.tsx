@@ -16,8 +16,8 @@
  *   CSS reads data-focused, aria-checked. No useState, no onClick, no onKeyDown.
  */
 
-import { defineApp } from "@/os/defineApp";
-import { OS_CHECK } from "@os/3-commands/interaction/check";
+import { OS_CHECK } from "@os/4-command/activate/check";
+import { defineApp } from "@/os/app/defineApp";
 
 // ─── Switch Data ───
 
@@ -99,8 +99,8 @@ export function SwitchPattern() {
     <div className="max-w-md">
       <h3 className="text-lg font-semibold mb-3">Switch</h3>
       <p className="text-sm text-gray-500 mb-4">
-        W3C APG Switch Pattern: Toggle on/off settings.{" "}
-        <kbd>Space</kbd> or <kbd>Enter</kbd> toggles. Click also toggles.{" "}
+        W3C APG Switch Pattern: Toggle on/off settings. <kbd>Space</kbd> or{" "}
+        <kbd>Enter</kbd> toggles. Click also toggles.{" "}
         <a
           href="https://www.w3.org/WAI/ARIA/apg/patterns/switch/"
           target="_blank"

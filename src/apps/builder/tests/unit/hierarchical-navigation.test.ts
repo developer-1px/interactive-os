@@ -10,9 +10,9 @@ import {
   getAncestorWithAttribute,
   getFirstDescendantWithAttribute,
   getItemAttribute,
-} from "@os/2-contexts/itemQueries";
-import { ZoneRegistry } from "@os/registries/zoneRegistry";
-import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
+} from "@os/3-inject/itemQueries";
+import { ZoneRegistry } from "@os/core/engine/registries/zoneRegistry";
+import { DEFAULT_CONFIG } from "@os/core/schema/types/focus/config/FocusGroupConfig";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createCanvasItemFilter,
@@ -156,7 +156,14 @@ describe("hierarchicalNavigation — OS item queries", () => {
 
   describe("drillDown", () => {
     it("returns OS_FOCUS to first child group when on a section", () => {
-      const result = drillDown({ focusId: "s1", selection: [], anchor: null, isExpandable: false, isDisabled: false, treeLevel: undefined });
+      const result = drillDown({
+        focusId: "s1",
+        selection: [],
+        anchor: null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
+      });
       expect(result).not.toEqual([]);
       if (!Array.isArray(result)) {
         expect(result.type).toContain("OS_FOCUS");
@@ -164,7 +171,14 @@ describe("hierarchicalNavigation — OS item queries", () => {
     });
 
     it("returns OS_FOCUS to first child item when on a group", () => {
-      const result = drillDown({ focusId: "g1", selection: [], anchor: null, isExpandable: false, isDisabled: false, treeLevel: undefined });
+      const result = drillDown({
+        focusId: "g1",
+        selection: [],
+        anchor: null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
+      });
       expect(result).not.toEqual([]);
       if (!Array.isArray(result)) {
         expect(result.type).toContain("OS_FOCUS");
@@ -172,7 +186,14 @@ describe("hierarchicalNavigation — OS item queries", () => {
     });
 
     it("returns OS_FIELD_START_EDIT when on an item", () => {
-      const result = drillDown({ focusId: "i1", selection: [], anchor: null, isExpandable: false, isDisabled: false, treeLevel: undefined });
+      const result = drillDown({
+        focusId: "i1",
+        selection: [],
+        anchor: null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
+      });
       if (!Array.isArray(result)) {
         expect(result.type).toContain("FIELD");
       }
@@ -180,14 +201,28 @@ describe("hierarchicalNavigation — OS item queries", () => {
 
     it("returns empty for unknown elements", () => {
       expect(
-        drillDown({ focusId: "nonexistent", selection: [], anchor: null, isExpandable: false, isDisabled: false, treeLevel: undefined }),
+        drillDown({
+          focusId: "nonexistent",
+          selection: [],
+          anchor: null,
+          isExpandable: false,
+          isDisabled: false,
+          treeLevel: undefined,
+        }),
       ).toEqual([]);
     });
   });
 
   describe("drillUp", () => {
     it("returns OS_FOCUS to parent section when on a group", () => {
-      const result = drillUp({ focusId: "g1", selection: [], anchor: null, isExpandable: false, isDisabled: false, treeLevel: undefined });
+      const result = drillUp({
+        focusId: "g1",
+        selection: [],
+        anchor: null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
+      });
       expect(result).not.toEqual([]);
       if (!Array.isArray(result)) {
         expect(result.type).toContain("OS_FOCUS");
@@ -195,7 +230,14 @@ describe("hierarchicalNavigation — OS item queries", () => {
     });
 
     it("returns OS_FOCUS to parent group when on an item", () => {
-      const result = drillUp({ focusId: "i1", selection: [], anchor: null, isExpandable: false, isDisabled: false, treeLevel: undefined });
+      const result = drillUp({
+        focusId: "i1",
+        selection: [],
+        anchor: null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
+      });
       expect(result).not.toEqual([]);
       if (!Array.isArray(result)) {
         expect(result.type).toContain("OS_FOCUS");
@@ -203,7 +245,14 @@ describe("hierarchicalNavigation — OS item queries", () => {
     });
 
     it("returns OS_ESCAPE when on a section (top level — no parent → escape)", () => {
-      const result = drillUp({ focusId: "s1", selection: [], anchor: null, isExpandable: false, isDisabled: false, treeLevel: undefined });
+      const result = drillUp({
+        focusId: "s1",
+        selection: [],
+        anchor: null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
+      });
       if (!Array.isArray(result)) {
         expect(result.type).toBe("OS_ESCAPE");
       } else {

@@ -11,9 +11,9 @@
  * 🔴 This test MUST go through simulateKeyPress (headless keyboard pipeline).
  */
 
-import { ZoneRegistry } from "@os/registries/zoneRegistry";
-import { createOsPage, type OsPage } from "@os/defineApp.page";
-import { Keybindings } from "@os/keymaps/keybindings";
+import { Keybindings } from "@os/2-resolve/keybindings";
+import { createOsPage, type OsPage } from "@os/app/defineApp/page";
+import { ZoneRegistry } from "@os/core/engine/registries/zoneRegistry";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createCanvasItemFilter,
@@ -74,7 +74,7 @@ describe("T19 Integration: ESC through full keyboard pipeline", () => {
       onAction: createDrillDown(ZONE_ID),
     });
 
-    // Register builder keybindings (same as defineApp.bind.ts L92-96)
+    // Register builder keybindings (same as defineApp/bind.ts L92-96)
     unregisterKeybindings = Keybindings.registerAll([
       { key: "\\", command: createDrillUp(ZONE_ID), when: "navigating" },
       { key: "Escape", command: createDrillUp(ZONE_ID), when: "navigating" },

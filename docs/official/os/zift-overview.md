@@ -2,7 +2,7 @@
 
 Interaction OS는 DOM과 커맨드 엔진 사이의 인터페이스 역할을 하는 4개의 "소버린 프리미티브(Sovereign Primitives)" — ZIFT — 위에 구축됩니다.
 
-> **구현 위치**: `src/os/features/focus/primitives/` (FocusGroup, FocusItem)
+> **구현 위치**: `src/os/features/focus/6-project/` (FocusGroup, FocusItem)
 
 ## 1. `<Zone />` (관할권)
 포커스와 키바인딩을 위한 공간적 컨텍스트를 정의합니다. 한 번에 하나의 Zone만 "활성(Active)" 상태입니다.

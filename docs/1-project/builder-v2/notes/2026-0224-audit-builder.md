@@ -18,10 +18,10 @@
 
 | # | 파일:줄 | 위반 패턴 | 분류 | 사유 |
 |---|---------|----------|------|------|
-| 1 | `primitives/BuilderTabs.tsx:60` | `useState(defaultTab)` | 🟡 OS 갭 | OS에 Tab 활성 상태 관리 API 없음 |
+| 1 | `6-project/BuilderTabs.tsx:60` | `useState(defaultTab)` | 🟡 OS 갭 | OS에 Tab 활성 상태 관리 API 없음 |
 | 2 | `hooks/useCursorMeta.ts:20` | `useEffect` | ⚪ 정당한 예외 | React mount/unmount lifecycle → 레지스트리 동기화 |
-| 3 | `primitives/BuilderTabs.tsx:108` | `onClick={() => setActiveIndex(idx)}` | 🟡 OS 갭 | #1과 동일 원인. tablist activate가 OS 경로 없음 |
-| 4 | `primitives/BuilderImage.tsx:28` | `onChangeSrc` (prop 타입 정의) | ⚪ 정당한 예외 | 타입 정의일 뿐, 실제 핸들러 등록 아님 |
+| 3 | `6-project/BuilderTabs.tsx:108` | `onClick={() => setActiveIndex(idx)}` | 🟡 OS 갭 | #1과 동일 원인. tablist activate가 OS 경로 없음 |
+| 4 | `6-project/BuilderImage.tsx:28` | `onChangeSrc` (prop 타입 정의) | ⚪ 정당한 예외 | 타입 정의일 뿐, 실제 핸들러 등록 아님 |
 
 ## 지표
 

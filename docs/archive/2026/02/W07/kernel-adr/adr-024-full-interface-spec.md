@@ -1119,7 +1119,7 @@ function useFocusGroupStoreInstance(groupId: string): ZustandStore<ZoneState>;
 ### 6.1 FocusGroup
 
 ```typescript
-/* os-new/primitives/FocusGroup.tsx */
+/* os-new/6-project/FocusGroup.tsx */
 interface FocusGroupProps extends Omit<ComponentProps<"div">,
   "id" | "role" | "style" | "className" |
   "onSelect" | "onCopy" | "onCut" | "onPaste" | "onToggle"
@@ -1163,7 +1163,7 @@ function useFocusGroupStore(): ZustandStore<ZoneState>;
 ### 6.2 FocusItem
 
 ```typescript
-/* os-new/primitives/FocusItem.tsx */
+/* os-new/6-project/FocusItem.tsx */
 interface FocusItemProps {
   id: string;
   disabled?: boolean;
@@ -1188,7 +1188,7 @@ const FocusItem: React.ForwardRefExoticComponent<
 ### 7.1 Zone
 
 ```typescript
-/* os/app/export/primitives/Zone.tsx */
+/* os/app/export/6-project/Zone.tsx */
 
 interface ZoneOptions {
   navigate?: Partial<NavigateConfig>;
@@ -1244,7 +1244,7 @@ function Zone(props: ZoneProps): JSX.Element;
 ### 7.2 Item
 
 ```typescript
-/* os/app/export/primitives/Item.tsx */
+/* os/app/export/6-project/Item.tsx */
 
 interface ItemState {
   isFocused: boolean;
@@ -1270,7 +1270,7 @@ const Item: React.ForwardRefExoticComponent<
 ### 7.3 Field
 
 ```typescript
-/* os/app/export/primitives/Field.tsx */
+/* os/app/export/6-project/Field.tsx */
 
 type FieldMode = "immediate" | "deferred";
 
@@ -1342,7 +1342,7 @@ type FieldCommandFactory<P extends { text: string } = { text: string }> =
 ### 7.5 Trigger
 
 ```typescript
-/* os/app/export/primitives/Trigger.tsx */
+/* os/app/export/6-project/Trigger.tsx */
 interface TriggerProps<T extends Command> extends HTMLAttributes<HTMLButtonElement> {
   id?: string;
   onPress: T;
@@ -1360,7 +1360,7 @@ const Trigger: React.ForwardRefExoticComponent<
 ### 7.6 Label
 
 ```typescript
-/* os/app/export/primitives/Label.tsx */
+/* os/app/export/6-project/Label.tsx */
 interface LabelProps extends HTMLAttributes<HTMLDivElement> {
   for?: string;
   asChild?: boolean;

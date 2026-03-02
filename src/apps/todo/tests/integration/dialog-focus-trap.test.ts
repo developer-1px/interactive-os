@@ -12,19 +12,18 @@
 
 import { addTodo, confirmDeleteTodo, TodoApp } from "@apps/todo/app";
 import { ListView } from "@apps/todo/widgets/ListView";
-import { ZoneRegistry } from "@os/registries/zoneRegistry";
-import { OS_FOCUS } from "@os/3-commands/focus/focus";
-import { OS_STACK_PUSH } from "@os/3-commands/focus/stack";
+import { OS_FOCUS } from "@os/4-command/focus/focus";
+import { OS_STACK_PUSH } from "@os/4-command/focus/stack";
 import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
-} from "@os/3-commands/overlay/overlay";
-import { createOsPage } from "@os/defineApp.page";
-import { createPage } from "@os/defineApp.page";
-import type { AppPage } from "@os/defineApp.types";
-import { resolveRole } from "@os/registries/roleRegistry";
+} from "@os/4-command/overlay/overlay";
+import { createOsPage, createPage } from "@os/app/defineApp/page";
+import type { AppPage } from "@os/app/defineApp/types";
+import { resolveRole } from "@os/core/engine/registries/roleRegistry";
+import { ZoneRegistry } from "@os/core/engine/registries/zoneRegistry";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { os } from "@/os/kernel";
+import { os } from "@/os/core/engine/kernel";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];
 type Page = AppPage<TodoState>;

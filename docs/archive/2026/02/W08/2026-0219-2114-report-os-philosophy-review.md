@@ -35,7 +35,7 @@
 - `resolveRole()`로 프리셋 + 오버라이드 병합. 앱은 `role="listbox"`만 선언하면 됨.
 
 #### 6. OS 파이프라인 구조 — 🟢 우수
-- `1-listeners/` → `2-contexts/` → `3-commands/` → `4-effects/` → `5-hooks/` → `6-components/` 번호 접두사 파이프라인.
+- `1-listen/` → `2-contexts/` → `3-commands/` → `4-effects/` → `5-hooks/` → `6-components/` 번호 접두사 파이프라인.
 - 각 레이어의 책임이 명확히 분리됨.
 
 #### 7. Dogfooding — 🟢 우수
@@ -164,7 +164,7 @@
 ### 🔄 진화적 약점
 
 #### R6. `pages/` 레이어의 정체성 위기
-- `pages/builder/*.tsx`에 15개 이상의 UI 블록 파일이 있으나, `apps/builder/`에는 `app.ts`, `features/`, `primitives/` 구조.
+- `pages/builder/*.tsx`에 15개 이상의 UI 블록 파일이 있으나, `apps/builder/`에는 `app.ts`, `features/`, `6-project/` 구조.
 - FSD(Feature-Sliced Design) 원칙에 따르면 블록 컴포넌트는 `widgets/` 하위여야 하나, `pages/` 루트에 혼재.
 - **공격**: 앱이 성장하면 pages/builder/ 안에 100개 이상의 파일이 쌓이며, "어디까지가 OS, 어디까지가 앱"의 경계가 무너짐.
 

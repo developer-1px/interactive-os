@@ -1,6 +1,6 @@
-import { useSelection } from "@/os/5-hooks/useSelection";
-import { Zone } from "@/os/6-components/primitives/Zone";
-import { Item } from "@/os/6-components/primitives/Item";
+import { useSelection } from "@/os/6-project/accessors/useSelection";
+import { Item } from "@/os/6-project/Item";
+import { Zone } from "@/os/6-project/Zone";
 
 export function GridPattern() {
   const selection = useSelection("apg-grid");
@@ -16,7 +16,10 @@ export function GridPattern() {
       <Zone
         id="apg-grid"
         role="grid"
-        options={{ navigate: { orientation: "both" }, select: { mode: "multiple", range: true } }}
+        options={{
+          navigate: { orientation: "both" },
+          select: { mode: "multiple", range: true },
+        }}
         aria-multiselectable="true"
         aria-label="Interactive Data Grid"
         className="grid grid-cols-5 gap-0 border-l border-t border-gray-200"

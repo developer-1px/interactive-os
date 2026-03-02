@@ -1,6 +1,6 @@
-import { useSelection } from "@os/5-hooks/useSelection";
-import { Item as OSItem } from "@os/6-components/primitives/Item";
-import { Zone } from "@os/6-components/primitives/Zone";
+import { useSelection } from "@os/6-project/accessors/useSelection";
+import { Item as OSItem } from "@os/6-project/Item";
+import { Zone } from "@os/6-project/Zone";
 import { BuilderApp } from "@/apps/builder/app";
 import type { Block, BuilderState } from "@/apps/builder/model/appState";
 import { Builder } from "@/apps/builder/primitives/Builder";
@@ -70,9 +70,10 @@ export function NCPTabNavBlock({ id }: { id: string }) {
                       text-[15px] font-semibold leading-normal outline-none
                       transition-[color,background-color,border-color,text-decoration-color,fill,stroke,box-shadow]
                       data-[focused]:ring-2 data-[focused]:ring-inset data-[focused]:ring-[#117ce9]
-                      ${isActive
-                        ? "bg-[#222222] text-white"
-                        : "bg-[unset] text-[#222222] hover:bg-[#e7e7e7]"
+                      ${
+                        isActive
+                          ? "bg-[#222222] text-white"
+                          : "bg-[unset] text-[#222222] hover:bg-[#e7e7e7]"
                       }`}
                   >
                     {tab.label}

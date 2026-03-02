@@ -38,7 +38,7 @@
 | 문서 | 파이프라인 | 소스 | 설명 |
 |---|---|---|---|
 | [Why Focus](./os/why-focus.md) | ① Spatial | `focus/` | Zone 단위 포커스 추적, 복원, 복구 |
-| [Why Command](./os/why-command.md) | ② Input | `keymaps/`, `1-listeners/` | 입력과 행동의 분리, Keybinding Table |
+| [Why Command](./os/why-command.md) | ② Input | `keymaps/`, `1-listen/` | 입력과 행동의 분리, Keybinding Table |
 | [Why Navigation](./os/why-navigation.md) | ③ Behavior | `navigate/` | 방향키 내비게이션 (1D, 2D, spatial) |
 | [Why Selection](./os/why-selection.md) | ③ Behavior | `selection/` | 단일/다중/범위 선택 상태 머신 |
 | [Why Tab](./os/why-tab.md) | ③ Behavior | `tab/` | 영역 간 Tab 이동 (trap/flow/escape) |

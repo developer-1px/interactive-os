@@ -4,16 +4,15 @@ import { useElementRect } from "@/hooks/useElementRect";
 
 // ── Mock ResizeObserver & MutationObserver ──
 
-
 class MockResizeObserver {
-  constructor(_cb: ResizeObserverCallback) { }
+  constructor(_cb: ResizeObserverCallback) {}
   observe = vi.fn();
   unobserve = vi.fn();
   disconnect = vi.fn();
 }
 
 class MockMutationObserver {
-  constructor(_cb: MutationCallback) { }
+  constructor(_cb: MutationCallback) {}
   observe = vi.fn();
   disconnect = vi.fn();
 }
@@ -49,7 +48,7 @@ function makeDOMRect(
     y: top,
     bottom: top + height,
     right: left + width,
-    toJSON() { },
+    toJSON() {},
   } as DOMRect;
 }
 

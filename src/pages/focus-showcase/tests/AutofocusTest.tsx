@@ -1,5 +1,5 @@
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Item } from "@os/6-project/Item.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function AutofocusTest() {
@@ -49,7 +49,10 @@ export function AutofocusTest() {
           <Zone
             id="af-auto"
             role="listbox"
-            options={{ navigate: { orientation: "vertical" }, project: { autoFocus: true } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              project: { autoFocus: true },
+            }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Auto 1", "Auto 2"].map((item) => (
@@ -73,7 +76,9 @@ export function AutofocusTest() {
           <Zone
             id="af-restore"
             role="listbox"
-            options={{ navigate: { orientation: "vertical", entry: "restore" } }}
+            options={{
+              navigate: { orientation: "vertical", entry: "restore" },
+            }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Memory 1", "Memory 2", "Memory 3"].map((item) => (

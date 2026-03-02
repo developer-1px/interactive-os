@@ -1,5 +1,5 @@
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Item } from "@os/6-project/Item.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function DismissTest() {
@@ -50,7 +50,11 @@ export function DismissTest() {
           <Zone
             id="dis-esc"
             role="listbox"
-            options={{ navigate: { orientation: "vertical" }, select: { mode: "single" }, dismiss: { escape: "deselect" } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              select: { mode: "single" },
+              dismiss: { escape: "deselect" },
+            }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Item 1", "Item 2"].map((item) => (
@@ -77,7 +81,10 @@ export function DismissTest() {
           <Zone
             id="dis-close"
             role="menu"
-            options={{ navigate: { orientation: "vertical" }, dismiss: { escape: "close" } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              dismiss: { escape: "close" },
+            }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Menu Item A", "Menu Item B"].map((item) => (
@@ -104,7 +111,11 @@ export function DismissTest() {
           <Zone
             id="dis-outside"
             role="listbox"
-            options={{ navigate: { orientation: "vertical" }, select: { mode: "single" }, dismiss: { outsideClick: "close" } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              select: { mode: "single" },
+              dismiss: { outsideClick: "close" },
+            }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Outside 1", "Outside 2"].map((item) => (

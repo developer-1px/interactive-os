@@ -8,10 +8,10 @@
 
 import { addTodo, TodoApp } from "@apps/todo/app";
 import { dumpTransactions } from "@inspector/utils/dumpTransactions";
-import { createPage } from "@os/defineApp.page";
-import type { AppPage } from "@os/defineApp.types";
+import { createPage } from "@os/app/defineApp/page";
+import type { AppPage } from "@os/app/defineApp/types";
 import { afterEach, beforeEach, describe, it, vi } from "vitest";
-import { os } from "@/os/kernel";
+import { os } from "@/os/core/engine/kernel";
 import TodoPage from "@/pages/TodoPage";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];

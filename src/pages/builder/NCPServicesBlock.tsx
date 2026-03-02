@@ -1,4 +1,4 @@
-import { Field } from "@os/6-components/field/Field";
+import { Field } from "@os/6-project/field/Field";
 import {
   ArrowRight,
   Box,

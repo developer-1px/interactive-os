@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   BuilderApp,
@@ -9,7 +8,7 @@ import { BuilderCursor } from "@/apps/builder/BuilderCursor";
 import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 import { PAGE_PRESETS } from "@/apps/builder/presets/pages";
 
-import { os } from "@/os/kernel";
+import { os } from "@/os/core/engine/kernel";
 import {
   EditorToolbar,
   PropertiesPanel,
@@ -28,7 +27,6 @@ import { HighlightContext } from "./builder/PropertiesPanel";
  * PropertiesPanel reads focused item type directly via OS item queries.
  */
 export default function BuilderPage() {
-
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(
     null,

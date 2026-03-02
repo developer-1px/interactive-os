@@ -11,7 +11,7 @@
  */
 
 import { defineScope } from "@kernel";
-import { createOsPage, type OsPage } from "@os/defineApp.page";
+import { createOsPage, type OsPage } from "@os/app/defineApp/page";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NEXT_SECTION, PREV_SECTION } from "@/docs-viewer/app";
 
@@ -48,7 +48,10 @@ describe("T2: Arrow navigation triggers DOCS_NEXT/PREV_SECTION", () => {
     }));
 
     scrollSectionSpy = vi.fn();
-    zoneGroup.defineEffect("scrollSection", scrollSectionSpy as (value: any) => void);
+    zoneGroup.defineEffect(
+      "scrollSection",
+      scrollSectionSpy as (value: any) => void,
+    );
 
     // Middleware: intercept OS_NAVIGATE → dispatch DOCS command
     // Uses `dispatch` effect to dispatch a new command with correct scope,

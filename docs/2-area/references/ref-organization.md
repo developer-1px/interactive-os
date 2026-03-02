@@ -50,7 +50,7 @@
 
 **출처**: Feature-Sliced Design (feature-sliced.design, 러시아 프론트엔드 커뮤니티에서 시작, 2018~)
 
-**우리의 용법**: Apps 계층의 어휘 체계. OS 코드는 자체 파이프라인(번호 접두사: `1-listeners/` → ... → `6-components/`), 문서는 토폴로지(`official/` + `2-area/` + `3-resource/` + `archive/`), 그리고 앱 코드는 FSD를 따른다.
+**우리의 용법**: Apps 계층의 어휘 체계. OS 코드는 자체 파이프라인(번호 접두사: `1-listen/` → ... → `6-components/`), 문서는 토폴로지(`official/` + `2-area/` + `3-resource/` + `archive/`), 그리고 앱 코드는 FSD를 따른다.
 
 ```
 app.ts         ← 앱 정의 (상태, 커맨드, Zone 바인딩)

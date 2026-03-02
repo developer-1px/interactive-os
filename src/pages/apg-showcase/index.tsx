@@ -1,8 +1,8 @@
+import { accordionScript, TestBotRegistry } from "@os/testing";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
-import { Zone } from "@/os/6-components/primitives/Zone";
-import { Item } from "@/os/6-components/primitives/Item";
-import { TestBotRegistry, accordionScript } from "@os/testing";
+import { Item } from "@/os/6-project/Item";
+import { Zone } from "@/os/6-project/Zone";
 import { AccordionPattern } from "./patterns/AccordionPattern";
 import { AlertPattern } from "./patterns/AlertPattern";
 import { CompositePattern } from "./patterns/CompositePattern";
@@ -11,12 +11,14 @@ import { ListboxPattern } from "./patterns/ListboxPattern";
 import { MenuPattern } from "./patterns/MenuPattern";
 import { SliderPattern } from "./patterns/SliderPattern";
 import { SwitchPattern } from "./patterns/SwitchPattern";
+import { TabsPattern } from "./patterns/TabsPattern";
 import { ToolbarPattern } from "./patterns/ToolbarPattern";
 import { TreePattern } from "./patterns/TreePattern";
 
 const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   accordion: { name: "Accordion", component: AccordionPattern },
   alert: { name: "Alert", component: AlertPattern },
+  tabs: { name: "Tabs", component: TabsPattern },
   tree: { name: "Tree", component: TreePattern },
   menu: { name: "Menu", component: MenuPattern },
   grid: { name: "Grid", component: GridPattern },

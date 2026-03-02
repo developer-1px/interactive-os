@@ -25,7 +25,7 @@
 ❌ DECISION    — 조건 분기/비즈니스 결정
 ```
 
-## 1-listeners (4 파일, 614줄) — 별도 카테고리
+## 1-listen (4 파일, 614줄) — 별도 카테고리
 
 Listener는 adapter가 아니라 **OS ↔ Browser Event bridge**. DOM 이벤트를 OS 커맨드로 변환하는 것이 정당한 역할.
 

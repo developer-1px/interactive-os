@@ -11,15 +11,15 @@
 
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
-import { OS_OVERLAY_CLOSE } from "@/os/3-commands";
-import { useOverlay } from "@/os/5-hooks/useOverlay";
-import { Kbd } from "@/os/6-components/Kbd";
+import { OS_OVERLAY_CLOSE } from "@/os/4-command";
+import { useOverlay } from "@/os/6-project/accessors/useOverlay";
+import { os } from "@/os/core/engine/kernel";
+import { Kbd } from "@/os/core/adapter/widgets/Kbd";
 import {
   QuickPick,
   type QuickPickItem,
   type QuickPickRenderState,
-} from "@/os/6-components/quickpick/QuickPick";
-import { os } from "@/os/kernel";
+} from "@/os/core/adapter/widgets/quickpick/QuickPick";
 import { type FuzzyMatchResult, fuzzyMatch } from "./fuzzyMatch";
 import { useDocsList } from "./useDocsList";
 import { useRouteList } from "./useRouteList";

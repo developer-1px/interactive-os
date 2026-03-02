@@ -9,16 +9,18 @@
  */
 
 import type { Transaction } from "@kernel/core/transaction";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { Trigger } from "@os/6-project/Trigger";
+import { os } from "@os/core/engine/kernel";
 import {
   ChevronDown,
+  ClipboardCopy,
+  Layers,
   ListMinus,
   ListTree,
   Package,
   Search,
-  Layers,
-  ClipboardCopy,
 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   clearSearchQuery,
   InspectorApp,
@@ -30,12 +32,10 @@ import {
   setScrollState,
   toggleGroup,
 } from "../app";
-import { os } from "@os/kernel";
-import { Trigger } from "@os/6-components/primitives/Trigger";
+import { inferSignal } from "../utils/inferSignal";
 import { copyAllToClipboard } from "../utils/inspectorFormatters";
 import { CollapsibleSection } from "./components/CollapsibleSection";
 import { TransactionList } from "./components/TransactionList";
-import { inferSignal } from "../utils/inferSignal";
 
 function highlightElement(id: string, active: boolean) {
   const el = document.getElementById(id);
@@ -51,9 +51,6 @@ function highlightElement(id: string, active: boolean) {
     delete el.dataset["inspectorHighlight"];
   }
 }
-
-
-
 
 // ─── Component ───
 
@@ -78,7 +75,9 @@ export function UnifiedInspector({
   const scrollTick = InspectorApp.useComputed(
     (s: InspectorState) => s.scrollTick,
   );
-  const filteredTx = InspectorApp.useComputed((s) => selectFilteredTransactions(s, transactions));
+  const filteredTx = InspectorApp.useComputed((s) =>
+    selectFilteredTransactions(s, transactions),
+  );
   const [traceOpen, setTraceOpen] = useState(true);
   const [storeOpen, setStoreOpen] = useState(false);
   const [manualToggles, setManualToggles] = useState<Set<string>>(new Set());
@@ -98,9 +97,10 @@ export function UnifiedInspector({
 
   // --- End of Component State ---
 
-  const latestTxId = filteredTx.length > 0
-    ? String(filteredTx[filteredTx.length - 1]!.id)
-    : undefined;
+  const latestTxId =
+    filteredTx.length > 0
+      ? String(filteredTx[filteredTx.length - 1]!.id)
+      : undefined;
   const expandedIds = new Set(manualToggles);
 
   // Auto-expand latest only if user hasn't manually collapsed it & no active search
@@ -251,10 +251,11 @@ export function UnifiedInspector({
                     <button
                       type="button"
                       onClick={() => handleToggleGroup(group)}
-                      className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
-                        ? "bg-[#1e293b] text-white border-[#1e293b]"
-                        : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
-                        }`}
+                      className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
+                        active
+                          ? "bg-[#1e293b] text-white border-[#1e293b]"
+                          : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                      }`}
                     >
                       {group}
                     </button>
@@ -369,5 +370,3 @@ export function UnifiedInspector({
     </div>
   );
 }
-
-

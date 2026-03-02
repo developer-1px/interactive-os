@@ -107,7 +107,9 @@ function TransactionLog({ kernel }: { kernel: KernelWithInspector }) {
   };
 
   const handleCopy = async () => {
-    const lines = txs.map((tx: Transaction, i: number) => `#${i} ${formatTxLine(tx)}`);
+    const lines = txs.map(
+      (tx: Transaction, i: number) => `#${i} ${formatTxLine(tx)}`,
+    );
     const text = lines.join("\n\n");
     try {
       await navigator.clipboard.writeText(text);

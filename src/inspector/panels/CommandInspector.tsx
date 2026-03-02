@@ -7,7 +7,7 @@ import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 
 import { useEffect, useState } from "react";
-import { os } from "@/os/kernel";
+import { os } from "@/os/core/engine/kernel";
 
 // --- Main Component ---
 

@@ -34,9 +34,9 @@
 | 규칙 | 기준 | 예시 |
 |------|------|------|
 | 업계 관행 이름 | 표준 그대로 (단수) | `lib/`, `ui/`, `config/`, `model/`, `state/` |
-| 컬렉션 폴더 | 복수형 | `widgets/`, `primitives/`, `stores/`, `keymaps/` |
+| 컬렉션 폴더 | 복수형 | `widgets/`, `6-project/`, `stores/`, `keymaps/` |
 | 테스트 | `tests/` → `unit/`, `e2e/` | 고정 구조 |
-| 순서가 의미인 곳 | `N-name/` (번호 접두사) | `1-listeners/`, `0-inbox/` |
+| 순서가 의미인 곳 | `N-name/` (번호 접두사) | `1-listen/`, `0-inbox/` |
 | 앱/모듈/프로젝트 | kebab-case | `todo/`, `builder-mvp/` |
 
 ## 구조 어휘 — 세 세계
@@ -44,10 +44,10 @@
 | 영역 | 어휘 체계 | 근거 |
 |------|----------|------|
 | **Apps** | **FSD** (Feature-Sliced Design) | `app.ts` → `widgets/` → `features/` → `entities/` → `shared/` |
-| **OS** | **파이프라인** (번호 접두사) | `1-listeners/` → … → `6-components/` |
+| **OS** | **파이프라인** (번호 접두사) | `1-listen/` → … → `6-components/` |
 | **Docs** | **토폴로지** | `official/` (살아있는 문서) + `archive/` (죽은 문서) + `2-area/` (인큐베이터) |
 
-## 파이프라인 동사 — 1-listeners 법
+## 파이프라인 동사 — 1-listen 법
 
 > **하나의 동사 = 하나의 경계.** 동사가 겹치면 에이전트가 "이 함수는 어느 단계?"를 추론해야 한다.
 

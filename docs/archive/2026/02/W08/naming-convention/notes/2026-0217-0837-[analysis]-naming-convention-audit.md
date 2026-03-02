@@ -71,7 +71,7 @@
 |-----------|------|------|---------------|
 | `widgets/` | **복수** | 뷰 컴포넌트 모음 | `model/` (단수) — 같은 앱 내 |
 | `features/` | **복수** | 기능 단위 모음 | `tests/` (복수) — 일관 |
-| `primitives/` | **복수** | 빌딩 블록 모음 | 같은 레벨에 단수 없음 — 일관 |
+| `6-project/` | **복수** | 빌딩 블록 모음 | 같은 레벨에 단수 없음 — 일관 |
 | `stores/` | **복수** | 스토어 모음 | `panels/` (복수) — 일관 |
 | `keymaps/` | **복수** | 키맵 정의 모음 | `middleware/` (단수), `registry/` (단수), `schema/` (단수) |
 | `model/` | **단수** | 도메인 모델 | `widgets/` (복수) — **불일치** |
@@ -83,7 +83,7 @@
 
 | 위치 | 패턴 | 의도 |
 |------|------|------|
-| `src/os/` | `1-listeners/`, `2-contexts/`, `3-commands/`, `4-effects/`, `5-hooks/`, `6-components/` | **파이프라인 실행 순서**를 파일시스템에 인코딩 |
+| `src/os/` | `1-listen/`, `2-contexts/`, `3-commands/`, `4-effects/`, `5-hooks/`, `6-components/` | **파이프라인 실행 순서**를 파일시스템에 인코딩 |
 | `docs/` | `0-inbox/`, `1-project/`, `2-area/`, `3-resource/`, `4-archive/`, `5-backlog/` | **PARA 분류 체계**의 우선순위 인코딩 |
 | 기타 모든 곳 | 번호 접두사 없음 | — |
 
@@ -162,7 +162,7 @@
 14. 도메인 모듈 폴더        → kebab-case (단수)     (navigate/, selection/, clipboard/)
 15. 테스트 폴더            → tests/ → unit/, e2e/  (복수, 고정)
 16. 뷰 컬렉션 폴더         → ??? (widgets? primitives? components?)
-17. 순서 의미 폴더          → N-name/ (번호 접두사)  (1-listeners/, 0-inbox/)
+17. 순서 의미 폴더          → N-name/ (번호 접두사)  (1-listen/, 0-inbox/)
 18. docs 프로젝트           → kebab-case            (builder-mvp/, os-prd/)
 
 === 문서 규칙 ===
@@ -181,7 +181,7 @@
 
 현재 혼재:
 - 단수: `model/`, `schema/`, `middleware/`, `registry/`
-- 복수: `widgets/`, `primitives/`, `keymaps/`, `stores/`, `panels/`
+- 복수: `widgets/`, `6-project/`, `keymaps/`, `stores/`, `panels/`
 
 **선택지**:
 - A) **전부 단수로 통일** — Go 언어 스타일. `widget/`, `keymap/`, `store/`. 심플.
@@ -189,11 +189,11 @@
 - C) **역할 기준** — "도메인 모듈"은 단수, "아이템 컬렉션"은 복수. 매번 판단 필요.
 - D) **현재 상태 유지** — 이미 정착된 것을 바꾸는 비용 > 일관성 이득.
 
-### Q2. `widgets/` vs `components/` vs `primitives/` — 뷰 계층 어휘
+### Q2. `widgets/` vs `components/` vs `6-project/` — 뷰 계층 어휘
 
 현재 프로젝트에 3종의 "뷰 컨테이너" 이름이 공존:
 - `widgets/` — 앱별 뷰 (todo의 `ListView.tsx`, `TaskItem.tsx`)
-- `primitives/` — OS 레벨 빌딩 블록 (`Zone.tsx`, `Item.tsx`, `Field.tsx`)
+- `6-project/` — OS 레벨 빌딩 블록 (`Zone.tsx`, `Item.tsx`, `Field.tsx`)
 - `components/` — 글로벌 공통 (`GlobalNav.tsx`)
 
 이 3계층이 의도적인가? 아니면 하나로 통일하고 싶은가?
@@ -208,7 +208,7 @@
 
 ### Q5. 번호 접두사의 적용 범위
 
-현재 OS 파이프라인(`1-listeners/` ~ `6-components/`)과 docs PARA에서만 사용.
+현재 OS 파이프라인(`1-listen/` ~ `6-components/`)과 docs PARA에서만 사용.
 - 이 패턴을 **순서가 의미인 모든 곳**에 확대할 것인가?
 - 아니면 현재 범위로 동결할 것인가?
 
@@ -244,4 +244,4 @@
 
 ---
 
-**한줄요약**: 파일 케이스(PascalCase/camelCase/kebab-case)는 확장자별로 이미 잘 수렴해 있으나, 폴더 단수/복수, 뷰 계층 어휘(widgets/primitives/components), dot.notation 범위 등 5개 열린 질문에 대한 의사결정이 필요하다.
+**한줄요약**: 파일 케이스(PascalCase/camelCase/kebab-case)는 확장자별로 이미 잘 수렴해 있으나, 폴더 단수/복수, 뷰 계층 어휘(widgets/6-project/components), dot.notation 범위 등 5개 열린 질문에 대한 의사결정이 필요하다.

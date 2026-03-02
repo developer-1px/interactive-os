@@ -67,7 +67,7 @@ mkdir -p src/os/schema
       "@os/store/*": ["./src/os/3-store/*"],
       "@os/effect/*": ["./src/os/4-effect/*"],
       "@os/core/*": ["./src/os/core/*"],
-      "@os/primitives/*": ["./src/os/primitives/*"],
+      "@os/6-project/*": ["./src/os/6-project/*"],
       "@os/registry/*": ["./src/os/registry/*"],
       // 기존 유지
       "@os/features/*": ["./src/os/features/*"],
@@ -167,7 +167,7 @@ export { flow } from "./flow";
 #### Step 1.2: 기존 경로에 re-export 추가 (호환성 유지)
 
 ```typescript
-// src/os/features/focus/pipeline/2-intent/commands/TAB.ts
+// src/os/features/focus/pipeline/2-resolve/commands/TAB.ts
 // DEPRECATED: 새 경로는 @os/command/tab
 export { TAB } from "@os/command/tab";
 ```
@@ -175,7 +175,7 @@ export { TAB } from "@os/command/tab";
 #### Step 1.3: FocusIntent에서 새 경로로 import 변경
 
 ```typescript
-// src/os/features/focus/pipeline/2-intent/FocusIntent.tsx
+// src/os/features/focus/pipeline/2-resolve/FocusIntent.tsx
 - import { TAB } from "./commands/TAB";
 + import { TAB } from "@os/command/tab";
 ```
@@ -278,7 +278,7 @@ export { findBestCandidate, getWeightedDistance } from "./focusFinder";
 #### Step 2.3: Re-export 추가
 
 ```typescript
-// src/os/features/focus/pipeline/2-intent/commands/NAVIGATE.ts
+// src/os/features/focus/pipeline/2-resolve/commands/NAVIGATE.ts
 export { NAVIGATE } from "@os/command/navigate";
 ```
 
@@ -429,7 +429,7 @@ export const FocusData = {
 #### Step 4.4: FocusItem 리렌더링 최적화
 
 ```typescript
-// primitives/FocusItem.tsx
+// 6-project/FocusItem.tsx
 const { groupId } = useFocusGroupContext();
 
 // Zone별 selector로 정확한 구독
@@ -477,14 +477,14 @@ middleware/                                   → core/middleware.ts
 
 #### Primitives 이동
 ```
-features/focus/primitives/ → primitives/
+features/focus/6-project/ → 6-project/
 ```
 
 ### Re-export 유지
 
 ```typescript
-// features/focus/primitives/FocusGroup.tsx
-export { FocusGroup } from "@os/primitives/FocusGroup";
+// features/focus/6-project/FocusGroup.tsx
+export { FocusGroup } from "@os/6-project/FocusGroup";
 ```
 
 ---
@@ -501,7 +501,7 @@ Re-export 제거, 레거시 폴더 삭제, import 경로 일괄 변경
 ```bash
 # 정규식 find-replace (VSCode)
 # 예: FocusGroup import
-features/focus/primitives/FocusGroup → @os/primitives/FocusGroup
+features/focus/6-project/FocusGroup → @os/6-project/FocusGroup
 
 # 수백 개 파일 일괄 변경
 ```
@@ -509,7 +509,7 @@ features/focus/primitives/FocusGroup → @os/primitives/FocusGroup
 #### Step 6.2: Re-export 파일 삭제
 
 ```bash
-rm -rf src/os/features/focus/pipeline/2-intent/commands/
+rm -rf src/os/features/focus/pipeline/2-resolve/commands/
 rm -rf src/os/features/focus/pipeline/3-resolve/
 # ...
 ```

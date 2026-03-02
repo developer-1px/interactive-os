@@ -24,7 +24,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
-} from "@/os/collection/createCollectionZone";
+} from "@/os/core/library/collection/createCollectionZone";
 
 // Mock navigator.clipboard
 const mockWriteText = vi.fn(() => Promise.resolve());

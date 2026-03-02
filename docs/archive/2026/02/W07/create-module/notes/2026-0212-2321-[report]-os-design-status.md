@@ -37,7 +37,7 @@
 
 ### Layer 2: OS (`src/os-new/`)
 
-#### 프리미티브 (6-components/primitives/)
+#### 프리미티브 (6-components/6-project/)
 
 | 컴포넌트 | 크기 | 상태 |
 |----------|------|------|
@@ -50,7 +50,7 @@
 | Modal / Dialog | radox/ | ✅ 오버레이 패턴 |
 | Kbd | 1.4KB | ✅ 키보드 단축키 표시 |
 
-#### Listeners (1-listeners/)
+#### Listeners (1-listen/)
 
 | 리스너 | 크기 | 역할 |
 |--------|------|------|

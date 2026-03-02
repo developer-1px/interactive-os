@@ -1,5 +1,5 @@
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Item } from "@os/6-project/Item.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function TabTest() {
@@ -45,7 +45,10 @@ export function TabTest() {
             <Zone
               id="tab-escape"
               role="listbox"
-              options={{ navigate: { orientation: "vertical" }, tab: { behavior: "escape" } }}
+              options={{
+                navigate: { orientation: "vertical" },
+                tab: { behavior: "escape" },
+              }}
               className="flex flex-col gap-1 w-32"
             >
               {["Option A", "Option B", "Option C"].map((item, i) => (
@@ -74,7 +77,10 @@ export function TabTest() {
             <Zone
               id="tab-trap"
               role="menu"
-              options={{ navigate: { orientation: "vertical", loop: true }, tab: { behavior: "trap" } }}
+              options={{
+                navigate: { orientation: "vertical", loop: true },
+                tab: { behavior: "trap" },
+              }}
               className="flex flex-col gap-1 w-32"
             >
               {["New", "Open", "Save"].map((item, i) => (
@@ -103,7 +109,10 @@ export function TabTest() {
             <Zone
               id="tab-flow"
               role="toolbar"
-              options={{ navigate: { orientation: "horizontal" }, tab: { behavior: "flow" } }}
+              options={{
+                navigate: { orientation: "horizontal" },
+                tab: { behavior: "flow" },
+              }}
               className="flex gap-2"
             >
               {["Back", "Fresh", "Next"].map((item, i) => (

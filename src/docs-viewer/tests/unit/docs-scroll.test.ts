@@ -4,9 +4,9 @@
  * Tests the docs-navigate-redirect middleware and heading-based navigation.
  */
 
-import { OS_NAVIGATE } from "@os/3-commands/navigate";
+import { OS_NAVIGATE } from "@os/4-command/navigate";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { os } from "@/os/kernel";
+import { os } from "@/os/core/engine/kernel";
 
 // Side-effect: register DOCS_SCROLL_PAGE command + middleware
 import "@/docs-viewer/register";

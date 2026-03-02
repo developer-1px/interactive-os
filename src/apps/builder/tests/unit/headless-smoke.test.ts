@@ -8,13 +8,13 @@
 import { sidebarCollection } from "@apps/builder/app";
 import type { BuilderState } from "@apps/builder/model/appState";
 import { INITIAL_STATE } from "@apps/builder/model/appState";
-import type { AppState } from "@os/kernel";
-import { initialAppState, os } from "@os/kernel";
+import type { AppState } from "@os/core/engine/kernel";
+import { initialAppState, os } from "@os/core/engine/kernel";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
-} from "@/os/collection/createCollectionZone";
+} from "@/os/core/library/collection/createCollectionZone";
 
 function builderState(): BuilderState {
   return (os.getState() as AppState).apps["builder"] as BuilderState;
@@ -36,7 +36,7 @@ describe("Browser path 시뮬레이션", () => {
     // Step 1: Copy via bindings (브라우저 경로)
     const copyCmd = bindings.onCopy({ focusId: "ge-hero", selection: [] });
     const cmds = Array.isArray(copyCmd) ? copyCmd : [copyCmd];
-    cmds.forEach(c => os.dispatch(c));
+    cmds.forEach((c) => os.dispatch(c));
 
     const clip = readClipboard() as any;
     expect(clip).toBeTruthy();
@@ -44,7 +44,7 @@ describe("Browser path 시뮬레이션", () => {
     // Step 2: Paste 1회 via bindings
     const paste1 = bindings.onPaste({ focusId: "ge-hero", selection: [] });
     const cmds1 = Array.isArray(paste1) ? paste1 : [paste1];
-    cmds1.forEach(c => os.dispatch(c));
+    cmds1.forEach((c) => os.dispatch(c));
 
     const afterPaste1 = blocks();
     expect(afterPaste1.length).toBe(6);
@@ -55,7 +55,7 @@ describe("Browser path 시뮬레이션", () => {
     // Step 3: Paste 2회 (focusId = 새 아이템, 브라우저처럼)
     const paste2 = bindings.onPaste({ focusId: newItemId, selection: [] });
     const cmds2 = Array.isArray(paste2) ? paste2 : [paste2];
-    cmds2.forEach(c => os.dispatch(c));
+    cmds2.forEach((c) => os.dispatch(c));
 
     const afterPaste2 = blocks();
     expect(afterPaste2.length).toBe(7);

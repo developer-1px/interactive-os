@@ -36,7 +36,7 @@
 - Inspector STATE 탭에서 실시간 관찰
 
 ### G7. 구조가 문서를 대체한다 ✅
-- `os-new/` 디렉토리가 곧 아키텍처 문서: `1-listeners → 2-contexts → 3-commands → 4-effects → 5-hooks → 6-components`
+- `os-new/` 디렉토리가 곧 아키텍처 문서: `1-listen → 2-contexts → 3-commands → 4-effects → 5-hooks → 6-components`
 - 번호가 파이프라인 순서
 
 ### G8. AI가 강해질수록 시스템도 강해진다 ✅

@@ -88,7 +88,7 @@ src/routes/__root.tsx:39 — TS4111: Property 'isAppShell' must be accessed with
 **현재**: `FieldRegistry.ts`가 Zustand `create()`로 독립 스토어 운영.
 
 ```typescript
-// src/os-new/6-components/primitives/FieldRegistry.ts:1
+// src/os-new/6-components/6-project/FieldRegistry.ts:1
 import { create } from "zustand";
 ```
 

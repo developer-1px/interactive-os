@@ -45,6 +45,6 @@ const rect = os.useQuery(FOCUSED_RECT);
 
 ## Out of Scope
 
-- OS 1-listeners의 DOM API (센서 = 정당)
+- OS 1-listen의 DOM API (센서 = 정당)
 - OS 2-contexts의 DOM API (cofx provider = 정당)
 - docs-viewer (독립 모듈, 격리됨)

@@ -1,6 +1,6 @@
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
-import { Dialog } from "@os/6-components/radix/Dialog.tsx";
+import { Item } from "@os/6-project/Item.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
+import { Dialog } from "@os/core/adapter/widgets/radix/Dialog.tsx";
 import { useRef } from "react";
 import { TestBox } from "../../shared/TestLayout";
 
@@ -51,7 +51,10 @@ export function FocusStackTest() {
           <Zone
             id="fs-base"
             role="listbox"
-            options={{ navigate: { orientation: "vertical" }, select: { mode: "single" } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              select: { mode: "single" },
+            }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
             {["Button 1", "Button 2", "Button 3"].map((item, i) => (

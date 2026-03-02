@@ -13,8 +13,8 @@
 
 import { BuilderApp } from "@apps/builder/app";
 import type { BuilderState } from "@apps/builder/model/appState";
-import { createPage } from "@os/defineApp.page";
-import type { AppPage } from "@os/defineApp.types";
+import { createPage } from "@os/app/defineApp/page";
+import type { AppPage } from "@os/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 type Page = AppPage<BuilderState>;

@@ -1,5 +1,5 @@
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Item } from "@os/6-project/Item.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function AriaFacadeTest() {

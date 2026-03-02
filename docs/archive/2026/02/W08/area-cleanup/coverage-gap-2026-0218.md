@@ -48,8 +48,8 @@
 
 | 범위 | Lines | 이유 | 상태 |
 |:-----|:-----:|:-----|:----:|
-| `6-components/primitives/FieldRegistry.ts` | — | vanilla store lifecycle (register/unregister/updateValue) | ✅ 8 tests |
-| `6-components/primitives/Field.tsx` ↔ FieldRegistry | — | useEffect deps → re-registration → localValue 리셋 | ✅ seam test로 커버 |
+| `6-components/6-project/FieldRegistry.ts` | — | vanilla store lifecycle (register/unregister/updateValue) | ✅ 8 tests |
+| `6-components/6-project/Field.tsx` ↔ FieldRegistry | — | useEffect deps → re-registration → localValue 리셋 | ✅ seam test로 커버 |
 | `6-components/**/*.tsx` (나머지) | <11% | 순수 React 렌더링 — E2E 유지 | — |
 
 > **교훈 (2026-02-19)**: `6-components`를 일괄 "E2E 영역"으로 분류한 것이 잘못이었다.
@@ -60,7 +60,7 @@
 
 | 범위 | Lines | Branch |
 |:-----|:-----:|:------:|
-| `1-listeners/resolve*.ts` | 94-100% | 92-100% |
+| `1-listen/resolve*.ts` | 94-100% | 92-100% |
 | `navigate/cornerNav.ts` | 97% | 91% |
 | `navigate/focusFinder.ts` | 95% | 95% |
 | `navigate/entry.ts` | 95% | 76% |

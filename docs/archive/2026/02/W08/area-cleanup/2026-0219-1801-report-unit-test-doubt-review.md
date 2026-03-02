@@ -11,12 +11,12 @@
 
 | 모듈 | 소스 파일 | 유닛 테스트 | 통합 테스트 | 커버리지 판정 |
 |------|:---------:|:----------:|:----------:|:----------:|
-| **1-listeners/keyboard** | `resolveKeyboard.ts` | ✅ `resolveKeyboard.test.ts` | — | 🟢 |
-| **1-listeners/mouse** | `resolveMouse.ts` | ✅ `resolveMouse.test.ts` | — | 🟢 |
-| **1-listeners/clipboard** | `resolveClipboard.ts` | ✅ `resolveClipboard.test.ts` | — | 🟢 |
-| **1-listeners/focus** | `FocusListener.tsx` | ❌ | — | 🔴 |
-| **1-listeners/input** | `InputListener.tsx` | ❌ | — | 🔴 |
-| **1-listeners** | `shared.ts` | ❌ | — | 🟡 |
+| **1-listen/keyboard** | `resolveKeyboard.ts` | ✅ `resolveKeyboard.test.ts` | — | 🟢 |
+| **1-listen/mouse** | `resolveMouse.ts` | ✅ `resolveMouse.test.ts` | — | 🟢 |
+| **1-listen/clipboard** | `resolveClipboard.ts` | ✅ `resolveClipboard.test.ts` | — | 🟢 |
+| **1-listen/focus** | `FocusListener.tsx` | ❌ | — | 🔴 |
+| **1-listen/input** | `InputListener.tsx` | ❌ | — | 🔴 |
+| **1-listen** | `shared.ts` | ❌ | — | 🟡 |
 | **2-contexts** | `index.ts`, `zoneRegistry.ts` | ✅ `zoneRegistry.test.ts` | — | 🟢 |
 | **3-commands/navigate** | 7 파일 (`focusFinder`, `cornerNav`, `strategies`, `typeahead` 등) | ✅ 각각 있음 | ✅ `navigate.test.ts` | 🟢 |
 | **3-commands/focus** | `focus.ts`, `recover.ts`, `stack.ts`, `syncFocus.ts` | ✅ 각각 있음 | ✅ `focus.test.ts` | 🟢 |
@@ -133,7 +133,7 @@
 |:----:|------|------|
 | `[Praise]` | **3-commands/** | 12개 하위 모듈 중 11개 유닛 테스트 보유. 통합 테스트 3개. 커맨드 레이어 커버리지 우수. |
 | `[Praise]` | **keymaps/** | 6개 소스 중 4개 테스트. 키바인딩 해석 로직 잘 보호됨. |
-| `[Praise]` | **1-listeners/resolve\*** | 3대 리졸버 모두 유닛 테스트 보유. 입력 파이프라인 변환 로직 검증됨. |
+| `[Praise]` | **1-listen/resolve\*** | 3대 리졸버 모두 유닛 테스트 보유. 입력 파이프라인 변환 로직 검증됨. |
 
 ---
 
@@ -182,7 +182,7 @@
 
 | 대상 | 비고 |
 |------|------|
-| `6-components/primitives/` | E2E에서 간접 커버 중. 로직 추출 후 유닛 테스트 |
+| `6-components/6-project/` | E2E에서 간접 커버 중. 로직 추출 후 유닛 테스트 |
 | `6-components/base/` | FocusGroup/FocusItem 이벤트 로직 |
 | `6-components/radox/` | Dialog/Modal 상태 머신 |
 

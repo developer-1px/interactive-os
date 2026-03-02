@@ -16,7 +16,7 @@ describe("T1: Kernel warns on unhandled command", () => {
   let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => { });
+    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -30,7 +30,9 @@ describe("T1: Kernel warns on unhandled command", () => {
 
     expect(warnSpy).toHaveBeenCalled();
     const calls = warnSpy.mock.calls.map((c: unknown[]) => c.join(" "));
-    expect(calls.some((msg: string) => msg.includes("NONEXISTENT_COMMAND"))).toBe(true);
+    expect(
+      calls.some((msg: string) => msg.includes("NONEXISTENT_COMMAND")),
+    ).toBe(true);
   });
 
   it("#2 warning includes the scope chain that was searched", () => {

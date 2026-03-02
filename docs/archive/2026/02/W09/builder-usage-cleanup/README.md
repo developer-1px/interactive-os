@@ -23,7 +23,7 @@
 - `src/apps/builder/` — app.ts, model/appState.ts, FocusDebugOverlay.tsx
 - `src/pages/builder/` — BuilderPage.tsx, PropertiesPanel.tsx, EditorToolbar.tsx
 - `src/os/collection/` — createCollectionZone Facade 확장
-- `src/os/1-listeners/clipboard/` — ClipboardListener 정리
+- `src/os/1-listen/clipboard/` — ClipboardListener 정리
 
 ## 관련 문서
 

@@ -12,9 +12,9 @@
  * Full Path: press("Escape") → press("ArrowUp") → focusedItemId still null
  */
 
-import { ZoneRegistry } from "@os/registries/zoneRegistry";
-import { createOsPage, type OsPage } from "@os/defineApp.page";
-import { Keybindings } from "@os/keymaps/keybindings";
+import { Keybindings } from "@os/2-resolve/keybindings";
+import { createOsPage, type OsPage } from "@os/app/defineApp/page";
+import { ZoneRegistry } from "@os/core/engine/registries/zoneRegistry";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createCanvasItemFilter,

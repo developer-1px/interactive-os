@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
-import { Zone } from "@/os/6-components/primitives/Zone";
-import { Item } from "@/os/6-components/primitives/Item";
+import { Item } from "@/os/6-project/Item";
+import { Zone } from "@/os/6-project/Zone";
 
 export function ToolbarPattern() {
   const [activeTools, setActiveTools] = useState<Record<string, boolean>>({
@@ -23,7 +23,10 @@ export function ToolbarPattern() {
       <Zone
         id="apg-toolbar"
         role="toolbar"
-        options={{ navigate: { orientation: "horizontal", loop: true }, tab: { behavior: "trap" } }}
+        options={{
+          navigate: { orientation: "horizontal", loop: true },
+          tab: { behavior: "trap" },
+        }}
         aria-label="Text Formatting"
         className="flex items-center gap-1 p-1 bg-gray-100 border border-gray-200 rounded shadow-sm w-fit"
       >

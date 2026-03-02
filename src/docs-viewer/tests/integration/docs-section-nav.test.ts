@@ -12,8 +12,8 @@
  */
 
 import { defineScope } from "@kernel";
-import { createOsPage, type OsPage } from "@os/defineApp.page";
-import { Keybindings } from "@os/keymaps/keybindings";
+import { Keybindings } from "@os/2-resolve/keybindings";
+import { createOsPage, type OsPage } from "@os/app/defineApp/page";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NEXT_SECTION, PREV_SECTION } from "@/docs-viewer/app";
 
@@ -52,9 +52,12 @@ describe("T1 Integration: Space/Shift+Space through full keyboard pipeline", () 
 
     // Register scrollSection effect in the zone scope
     scrollSectionSpy = vi.fn();
-    zoneGroup.defineEffect("scrollSection", scrollSectionSpy as (value: any) => void);
+    zoneGroup.defineEffect(
+      "scrollSection",
+      scrollSectionSpy as (value: any) => void,
+    );
 
-    // Register app keybindings (same as defineApp.bind.ts useEffect)
+    // Register app keybindings (same as defineApp/bind.ts useEffect)
     unregisterKeybindings = Keybindings.registerAll([
       { key: "Space", command: NEXT_SECTION(), when: "navigating" },
       { key: "Shift+Space", command: PREV_SECTION(), when: "navigating" },

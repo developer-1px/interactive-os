@@ -142,7 +142,7 @@ return copy({ ids: [cursor.focusId] }); // createCollectionZone이 처리
 ## References
 
 - Clipboard 구현: `os/3-commands/clipboard/clipboard.ts`
-- ClipboardListener: `os/1-listeners/clipboard/ClipboardListener.tsx`
+- ClipboardListener: `os/1-listen/clipboard/ClipboardListener.tsx`
 - Collection Clipboard: `os/collection/createCollectionZone.ts`
 - Public API: `getClipboardPreview()`, `setTextClipboard()`
 - Unit Tests: `clipboard-commands.test.ts`, `builder-canvas-clipboard.test.ts`

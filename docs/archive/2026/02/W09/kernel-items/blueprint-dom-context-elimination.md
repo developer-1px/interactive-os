@@ -92,7 +92,7 @@ ZoneEntry.getTreeLevels?: () => Map<string, number>
 - `collection/createCollectionZone.ts` — remove, cut command
 - `3-commands/focus/focusStackOps.ts` — resolveItemFallback (✅ 완료)
 - `6-components/base/FocusGroup.tsx` — Zone 등록
-- `6-components/primitives/Zone.tsx` — Zone facade
+- `6-components/6-project/Zone.tsx` — Zone facade
 - `defineApp.bind.ts` — createBoundComponents
 - `defineApp.page.ts` — createAppPage (headless)
 - `createOsPage.ts` — OS-level headless

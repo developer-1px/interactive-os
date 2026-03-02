@@ -9,7 +9,7 @@
 | [Field.tsx](file:///Users/user/Desktop/interactive-os/src/os/6-components/field/Field.tsx) | UI 프리미티브 (contentEditable) |
 | [FieldRegistry.ts](file:///Users/user/Desktop/interactive-os/src/os/6-components/field/FieldRegistry.ts) | Vanilla store — Field 상태 관리 |
 | [field.ts](file:///Users/user/Desktop/interactive-os/src/os/3-commands/field/field.ts) | FIELD_START_EDIT / COMMIT / CANCEL 커맨드 |
-| [InputListener.tsx](file:///Users/user/Desktop/interactive-os/src/os/1-listeners/input/InputListener.tsx) | 글로벌 DOM input → FieldRegistry 동기화 |
+| [InputListener.tsx](file:///Users/user/Desktop/interactive-os/src/os/1-listen/input/InputListener.tsx) | 글로벌 DOM input → FieldRegistry 동기화 |
 | [useFieldHooks.ts](file:///Users/user/Desktop/interactive-os/src/os/5-hooks/useFieldHooks.ts) | Field DOM sync / focus hooks |
 | [fieldKeyOwnership.ts](file:///Users/user/Desktop/interactive-os/src/os/keymaps/fieldKeyOwnership.ts) | FieldType별 키 위임 테이블 |
 | [defineApp.bind.ts](file:///Users/user/Desktop/interactive-os/src/os/defineApp.bind.ts) | Zone → Field 바인딩 팩토리 |
@@ -44,7 +44,7 @@ Tests: 7 failed | 17 passed (24)
 | 위치 | 참조 | 실제 필드명 |
 |------|------|------------|
 | [field.ts:88](file:///Users/user/Desktop/interactive-os/src/os/3-commands/field/field.ts#L88) | `fieldEntry.state.localValue` | `value` |
-| [InputListener.tsx:4](file:///Users/user/Desktop/interactive-os/src/os/1-listeners/input/InputListener.tsx#L4) | 주석에 `localValue` 언급 | — |
+| [InputListener.tsx:4](file:///Users/user/Desktop/interactive-os/src/os/1-listen/input/InputListener.tsx#L4) | 주석에 `localValue` 언급 | — |
 | [field-registry.test.ts](file:///Users/user/Desktop/interactive-os/src/os/6-components/tests/integration/field-registry.test.ts) | 전체에서 `state.localValue` 사용 | `value` |
 
 **원인**: `FieldRegistry` 리팩토링 시 `localValue` → `value`로 이름을 변경했으나, 소비자 코드가 갱신되지 않음.
@@ -157,7 +157,7 @@ Line 301-312에 개발 중 사고 과정이 주석으로 남아 있음:
 
 ```mermaid
 graph TD
-    subgraph "1-listeners"
+    subgraph "1-listen"
         IL["InputListener.tsx"]
     end
 

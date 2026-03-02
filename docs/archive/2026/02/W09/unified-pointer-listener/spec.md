@@ -173,7 +173,7 @@ Scenario S4-3: root에서 단일 마운트
 ## 3. 파일 구조
 
 ```
-1-listeners/
+1-listen/
   pointer/
     PointerListener.tsx      ← 어댑터 (sense: DOM → PointerInput)
     resolvePointer.ts        ← 순수 (translate: PointerInput → ResolveResult)

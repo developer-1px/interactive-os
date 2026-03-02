@@ -28,8 +28,8 @@ Builder는 NCP 데모 페이지를 위한 **응용 레이어** 컴포넌트(7개
 - `Builder.tsx`, `BuilderBadge.tsx`, `BuilderButton.tsx`
 - `BuilderDivider.tsx`, `BuilderIcon.tsx`, `BuilderImage.tsx`, `BuilderLink.tsx`
 
-**현재 위치:** `src/os/app/export/primitives/`  
-**이동 대상:** `src/apps/builder/primitives/`
+**현재 위치:** `src/os/app/export/6-project/`  
+**이동 대상:** `src/apps/builder/6-project/`
 
 **Consumer (7곳):**
 - `pages/BuilderPage.tsx`, `pages/builder/NCP*.tsx` (4개), `pages/builder/PropertiesPanel.tsx`
@@ -42,11 +42,11 @@ Zustand per-zone store → Kernel 단일 State로 전환.
 **제거 대상:**
 - `os-new/store/focusGroupStore.ts` + `slices/` (4파일)
 - `os-new/store/FieldRegistry.ts`
-- `os-new/primitives/FocusGroup.tsx`, `FocusItem.tsx`
+- `os-new/6-project/FocusGroup.tsx`, `FocusItem.tsx`
 
-**의존 관계:** `primitives/FocusGroup.tsx` → `store/focusGroupStore.ts` (유일한 참조)
+**의존 관계:** `6-project/FocusGroup.tsx` → `store/focusGroupStore.ts` (유일한 참조)
 
-**전략:** `@deprecated` 마킹 → Consumer(focus-showcase 등)를 Zone/Item으로 전환 → store/ 및 primitives/ 삭제 (별도 PR)
+**전략:** `@deprecated` 마킹 → Consumer(focus-showcase 등)를 Zone/Item으로 전환 → store/ 및 6-project/ 삭제 (별도 PR)
 
 ### Phase C: Inspector / TestBot → OS 대등 분리
 

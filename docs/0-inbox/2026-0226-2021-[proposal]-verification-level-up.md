@@ -57,7 +57,7 @@
 
 #### P1. 아키텍처 경계 강제 ⭐ 최우선
 
-**현상**: OS 파이프라인 `1-listeners → 2-contexts → 3-commands → 4-effects → 5-hooks → 6-components`의 방향성이 린트로 강제되지 않음. `no-dom-in-commands`가 3-commands만 보호.
+**현상**: OS 파이프라인 `1-listen → 2-contexts → 3-commands → 4-effects → 5-hooks → 6-components`의 방향성이 린트로 강제되지 않음. `no-dom-in-commands`가 3-commands만 보호.
 
 **위험**: 에이전트가 역방향 import를 생성해도 잡히지 않음. 앱↔앱 간 import도 무방비.
 
@@ -74,7 +74,7 @@
 # OS 레이어 방향성 (숫자가 큰 쪽 → 작은 쪽만 허용)
 6-components → 5-hooks ✅
 6-components → 3-commands ❌ (역방향)
-3-commands → 1-listeners ❌ (역방향)
+3-commands → 1-listen ❌ (역방향)
 
 # 앱 격리
 apps/builder → apps/todo ❌

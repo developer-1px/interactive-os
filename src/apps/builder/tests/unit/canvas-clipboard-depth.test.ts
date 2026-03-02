@@ -17,7 +17,7 @@ import { describe, expect, test } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
-} from "@/os/collection/createCollectionZone";
+} from "@/os/core/library/collection/createCollectionZone";
 
 /** Recursively count all blocks in tree */
 function countBlocks(blocks: Block[]): number {
@@ -68,13 +68,7 @@ describe("Canvas clipboard: deeply-nested block (C3🆕 / V3🆕)", () => {
 
     // Command를 dispatch해야 clipboard store가 갱신됨
     const cmds = Array.isArray(copyResult) ? copyResult : [copyResult];
-    cmds.forEach(
-      (c) =>
-        c &&
-        app.dispatch(
-          c as any,
-        ),
-    );
+    cmds.forEach((c) => c && app.dispatch(c as any));
 
     const clip = readClipboard() as { id?: string } | null;
     expect(clip).not.toBeNull();

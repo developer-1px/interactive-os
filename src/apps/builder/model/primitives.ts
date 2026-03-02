@@ -218,7 +218,10 @@ export function decode(type: PrimitiveType, raw: string): PrimitiveValue {
           type: "button",
           text: parsed["text"] ?? raw,
           ...(href !== undefined ? { href } : {}),
-          ...(action === "link" || action === "scroll" || action === "modal" || action === "submit"
+          ...(action === "link" ||
+          action === "scroll" ||
+          action === "modal" ||
+          action === "submit"
             ? { action }
             : {}),
         };

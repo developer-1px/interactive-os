@@ -7,10 +7,10 @@
 
 import { addTodo, TodoApp } from "@apps/todo/app";
 import { ListView } from "@apps/todo/widgets/ListView";
-import { createPage } from "@os/defineApp.page";
-import type { AppPage } from "@os/defineApp.types";
+import { createPage } from "@os/app/defineApp/page";
+import type { AppPage } from "@os/app/defineApp/types";
 import { afterEach, beforeEach, vi } from "vitest";
-import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
+import { _resetClipboardStore } from "@/os/core/library/collection/createCollectionZone";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];
 export type TodoPage = AppPage<TodoState>;

@@ -19,13 +19,13 @@ import {
   getAncestorWithAttribute,
   getFirstDescendantWithAttribute,
   getItemAttribute,
-} from "@/os/2-contexts/itemQueries";
-import type { ZoneCursor } from "@/os/2-contexts/zoneRegistry";
-import { OS_ESCAPE } from "@/os/3-commands/dismiss/escape";
-import { OS_FIELD_START_EDIT } from "@/os/3-commands/field/field";
-import { OS_FOCUS } from "@/os/3-commands/focus/focus";
-import { getFocusedItem } from "@/os/5-hooks/useFocusedItem";
-import type { BuilderLevel } from "../primitives/Builder";
+} from "@/os/3-inject/itemQueries";
+import type { ZoneCursor } from "@/os/3-inject/zoneRegistry";
+import { OS_ESCAPE } from "@/os/4-command/dismiss/escape";
+import { OS_FIELD_START_EDIT } from "@/os/4-command/field/field";
+import { OS_FOCUS } from "@/os/4-command/focus/focus";
+import { getFocusedItem } from "@/os/6-project/accessors/useFocusedItem";
+import type { BuilderLevel } from "../6-project/Builder";
 
 // ═══════════════════════════════════════════════════════════════════
 // Level Hierarchy

@@ -1,4 +1,4 @@
-import { Field } from "@os/6-components/field/Field";
+import { Field } from "@os/6-project/field/Field";
 import { createFieldCommit } from "@/apps/builder/app";
 import { useLocalizedSectionFields } from "@/apps/builder/locale";
 import { Builder } from "@/apps/builder/primitives/Builder";

@@ -21,7 +21,7 @@ Builder MVP E2E 테스트에서 `data-editing` 속성이 `null`인데 `contented
 ```
 
 `isEditing`은 `FieldRegistry.fields[id].state.isEditing`에서 온다.
-FieldRegistry는 `src/os/6-components/primitives/FieldRegistry.ts`에 있는 **vanilla store** (React 외부).
+FieldRegistry는 `src/os/6-components/6-project/FieldRegistry.ts`에 있는 **vanilla store** (React 외부).
 
 ### 그러면 contentEditable은?
 
@@ -99,7 +99,7 @@ src/os/  ← OS 레이어: focus, navigation, field, keybindings
   ├── 3-commands/field/  ← FIELD_START_EDIT/COMMIT/CANCEL ← 여기  
   ├── 3-commands/navigate/  ← editingItemId = null on nav ← 여기
   ├── keymaps/  ← F2, Enter(editing), Escape bindings ← 여기
-  └── 6-components/primitives/
+  └── 6-components/6-project/
       ├── Field.tsx  ← contentEditable, data-editing 렌더링
       └── FieldRegistry.ts  ← 죽은 isEditing 상태
 ```

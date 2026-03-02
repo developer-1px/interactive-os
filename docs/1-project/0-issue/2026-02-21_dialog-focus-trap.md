@@ -25,5 +25,5 @@
 
 ## 관련 코드
 - `src/apps/todo/widgets/ListView.tsx` — DeleteDialog
-- `src/os/6-components/primitives/Trigger.tsx` — Trigger.Portal
+- `src/os/6-components/6-project/Trigger.tsx` — Trigger.Portal
 - `src/os/6-components/base/FocusGroup.tsx` — autoFocus, STACK_PUSH

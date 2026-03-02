@@ -9,6 +9,10 @@
 
 ## 🔥 Active Focus
 
+**zift-usage-spec** — ZIFT 보편 모델 설계. Zone+from/to+with[] + NormalizedStore. 코드 수정 없는 설계 완성. Meta.
+
+**zift-field-generalization** — Field를 Entity Property 소유자로 일반화. FieldType에 boolean/number 추가. Phase 1. Heavy.
+
 **apg-developer-agent** — Claude Code 커스텀 에이전트 POC. OS 네이티브 APG 패턴 개발자. Meta.
 
 **headless-simulator** — Vitest에서 Playwright 수준 검증 달성. DOM → OS VDOM. 거짓 GREEN 근절. Heavy.
@@ -27,6 +31,8 @@
 |---------|-------|---------------|--------|
 
 
+| zift-usage-spec | Scaffold, T1~T6 | 03-01 | 🔥 Focus |
+| zift-field-generalization | Scaffold, T1~T6 | 03-01 | 🔥 Focus |
 | apg-developer-agent | Scaffold, T1~T2 | 03-01 | 🔥 Focus |
 | headless-simulator | Scaffold, T1~T3 | 02-27 | 🔥 Focus |
 | builder-v2 | T5 DnD Done, OS gap 회고 완료 | 02-26 | 🔥 Focus |
@@ -45,6 +51,7 @@
 | test-observability | Scaffold | 02-26 | 🟢 Active |
 | docs-section-nav | Scaffold | 02-24 | 🟢 Active |
 | docs-subgrid-table | Scaffold | 02-24 | 🟢 Active |
+| pipeline-folder-restructure | Scaffold, T1~T4 | 03-01 | 🟢 Active |
 
 ---
 
@@ -119,20 +126,27 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 5 |
-| Active Projects (total) | 16 (11 Active + 5 Focus) |
+| Active Focus | 7 |
+| Active Projects (total) | 18 (11 Active + 7 Focus) |
 | Completed (archived) | 46 |
-| Inbox items | 5 |
+| Inbox items | 6 |
 | Backlog items | 15 |
 | Open issues | 0 |
 
 ---
 
-## 📝 Recent Changes (2026-02-27)
+## 📝 Recent Changes (2026-03-01)
+
+- 🆕 `zift-usage-spec` Meta 프로젝트 생성 — /discussion에서 ZIFT 근본 회의감 발굴. Zone=유일한 Facade + from/to + with[] 모듈 패턴 + NormalizedStore 보편 정규화. 컨셉맵 18개 영역 정리. `/usage` 워크플로우 신설. 설계 완성이 목표.
+
+<details>
+<summary>📝 Previous Changes (2026-02-27)</summary>
 
 - ✅ `headless-purity` Light 프로젝트 완료 — AutoFocus DOM fallback(useEffect+rAF+querySelector) 제거→Phase 2 통합. getLabels accessor 추가→typeahead headless 가능. FocusGroup useEffect import 삭제. regression 0. → archive/2026/02/W09
 - ✅ `headless-item-discovery` Heavy 프로젝트 완료 — 2-contexts DOM 0%. querySelectorAll 6곳→1곳(DOM_RECTS, 후속). DOM 스캔을 FocusGroup.useLayoutEffect(뷰)로 이동. getItems() push-only. createOsPage.goto() 자동등록. T1~T10, +6 tests, regression 0, 기존 failures 21→13(8건 개선). → archive/2026/02/W09
 - ✅ `headless-zone-registry` Heavy 프로젝트 완료 — FocusGroup Zone 등록 Phase 1(논리, useMemo)/Phase 2(물리, useLayoutEffect) 분리. autoFocus getItems() headless 경로 추가. T1~T3 완료, T4-T6 scope out. +7 tests, 0 regression. → archive/2026/02/W09
+
+</details>
 
 <details>
 <summary>📝 Previous Changes (2026-02-26)</summary>

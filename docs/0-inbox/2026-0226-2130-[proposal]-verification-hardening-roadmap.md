@@ -134,7 +134,7 @@ npx lint-staged
 {
   settings: {
     "boundaries/elements": [
-      { type: "listeners",  pattern: "src/os/1-listeners/**" },
+      { type: "listeners",  pattern: "src/os/1-listen/**" },
       { type: "contexts",   pattern: "src/os/2-contexts/**" },
       { type: "commands",   pattern: "src/os/3-commands/**" },
       { type: "effects",    pattern: "src/os/4-effects/**" },
@@ -166,7 +166,7 @@ npx lint-staged
 
 **보호 범위**:
 - ✅ `6-components → 3-commands` 역방향 import 차단
-- ✅ `3-commands → 1-listeners` 역방향 import 차단
+- ✅ `3-commands → 1-listen` 역방향 import 차단
 - ✅ `apps/builder → apps/todo` 앱 간 import 차단
 - ✅ `src/os/* → src/apps/*` OS→앱 import 차단
 

@@ -29,9 +29,9 @@ The following matrix defines the behavior of click interactions with modifier ke
 
 ## Implementation Implementation
 
-- **Handler:** `src/os/1-listeners/mouse/MouseListener.tsx`
-- **Logic:** `src/os/1-listeners/mouse/resolveMouse.ts`
-- **Tests:** `src/os/1-listeners/tests/unit/resolveMouse.test.ts`
+- **Handler:** `src/os/1-listen/mouse/MouseListener.tsx`
+- **Logic:** `src/os/1-listen/mouse/resolveMouse.ts`
+- **Tests:** `src/os/1-listen/tests/unit/resolveMouse.test.ts`
 
 ### Notes on Alt Key
 The `Alt` key is explicitly detected (`altKey: true`) in the input stream but currently resolves to `replace` mode to avoid conflicting with browser or OS defaults unless a specific domain requirement overrides it.

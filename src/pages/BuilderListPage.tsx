@@ -1,7 +1,7 @@
-import { Item } from "@os/6-components/primitives/Item";
+import { Item } from "@os/6-project/Item";
 
-import { Trigger } from "@os/6-components/primitives/Trigger";
-import { Zone } from "@os/6-components/primitives/Zone";
+import { Trigger } from "@os/6-project/Trigger";
+import { Zone } from "@os/6-project/Zone";
 import {
   FileCode,
   Filter,

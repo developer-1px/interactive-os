@@ -11,283 +11,283 @@ import userEvent from "@testing-library/user-event";
 import { produce } from "immer";
 import { act } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { KeyboardListener } from "@/os/1-listeners/keyboard/KeyboardListener";
-import { PointerListener } from "@/os/1-listeners/pointer/PointerListener";
-import { OS_FOCUS } from "@/os/3-commands/focus";
-import { os } from "@/os/kernel";
+import { KeyboardListener } from "@/os/1-listen/keyboard/KeyboardListener";
+import { PointerListener } from "@/os/1-listen/pointer/PointerListener";
+import { OS_FOCUS } from "@/os/4-command/focus";
+import { os } from "@/os/core/engine/kernel";
 import { AccordionPattern } from "../../patterns/AccordionPattern";
 
 describe("AccordionPattern (DOM Rendering)", () => {
-    beforeEach(() => {
-        os.setState((state) =>
-            produce(state, (draft) => {
-                draft.os.focus.zones = {};
-                draft.os.focus.activeZoneId = null;
-            }),
-        );
+  beforeEach(() => {
+    os.setState((state) =>
+      produce(state, (draft) => {
+        draft.os.focus.zones = {};
+        draft.os.focus.activeZoneId = null;
+      }),
+    );
+  });
+
+  // ═══════════════════════════════════════════════════
+  // Basic rendering
+  // ═══════════════════════════════════════════════════
+
+  it("renders all 3 accordion headers", () => {
+    render(<AccordionPattern />);
+
+    expect(screen.getByText("Personal Information")).toBeTruthy();
+    expect(screen.getByText("Billing Address")).toBeTruthy();
+    expect(screen.getByText("Shipping Address")).toBeTruthy();
+  });
+
+  it("headers have role=button from OS computeItem", () => {
+    render(<AccordionPattern />);
+
+    const buttons = screen.getAllByRole("button");
+    expect(buttons.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("all headers have aria-expanded=false initially", () => {
+    render(<AccordionPattern />);
+
+    const el = document.getElementById("acc-personal");
+    expect(el).toBeTruthy();
+    expect(el!.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  // ═══════════════════════════════════════════════════
+  // Keyboard: Enter toggles expand
+  // ═══════════════════════════════════════════════════
+
+  it("Enter on focused header: aria-expanded becomes true", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <KeyboardListener />
+        <AccordionPattern />
+      </>,
+    );
+
+    // Focus the first header
+    const el = document.getElementById("acc-personal")!;
+    el.focus();
+    os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
+    await new Promise((r) => setTimeout(r, 50));
+
+    // Press Enter
+    await user.keyboard("{Enter}");
+    await new Promise((r) => setTimeout(r, 100));
+
+    expect(el.getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("Enter again: aria-expanded becomes false (toggle)", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <KeyboardListener />
+        <AccordionPattern />
+      </>,
+    );
+
+    const el = document.getElementById("acc-personal")!;
+    el.focus();
+    os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
+    await new Promise((r) => setTimeout(r, 50));
+
+    // Expand
+    await user.keyboard("{Enter}");
+    await new Promise((r) => setTimeout(r, 100));
+    expect(el.getAttribute("aria-expanded")).toBe("true");
+
+    // Collapse
+    await user.keyboard("{Enter}");
+    await new Promise((r) => setTimeout(r, 100));
+    expect(el.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  // ═══════════════════════════════════════════════════
+  // Keyboard: Space toggles expand
+  // ═══════════════════════════════════════════════════
+
+  it("Space on focused header: aria-expanded becomes true", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <KeyboardListener />
+        <AccordionPattern />
+      </>,
+    );
+
+    const el = document.getElementById("acc-personal")!;
+    el.focus();
+    os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
+    await new Promise((r) => setTimeout(r, 50));
+
+    await user.keyboard(" ");
+    await new Promise((r) => setTimeout(r, 100));
+
+    expect(el.getAttribute("aria-expanded")).toBe("true");
+  });
+
+  // ═══════════════════════════════════════════════════
+  // Panel visibility (Item.Region — OS-driven)
+  // ═══════════════════════════════════════════════════
+
+  it("panel region is not in DOM when collapsed", () => {
+    render(<AccordionPattern />);
+
+    // Item.Region returns null when collapsed — panel not in DOM
+    const panel = document.getElementById("panel-acc-personal");
+    expect(panel).toBeNull();
+  });
+
+  it("expanded panel has role=region and aria-labelledby", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <KeyboardListener />
+        <AccordionPattern />
+      </>,
+    );
+
+    // Focus and expand the first header
+    const el = document.getElementById("acc-personal")!;
+    el.focus();
+    os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
+    await new Promise((r) => setTimeout(r, 50));
+
+    await user.keyboard("{Enter}");
+    await new Promise((r) => setTimeout(r, 100));
+
+    // Now the panel should be in the DOM
+    const panel = document.getElementById("panel-acc-personal");
+    expect(panel).toBeTruthy();
+    expect(panel!.getAttribute("role")).toBe("region");
+    expect(panel!.getAttribute("aria-labelledby")).toBe("acc-personal");
+  });
+
+  // ═══════════════════════════════════════════════════
+  // Click: toggles expand
+  // ═══════════════════════════════════════════════════
+
+  it("click on header: focuses and expands", async () => {
+    render(
+      <>
+        <KeyboardListener />
+        <PointerListener />
+        <AccordionPattern />
+      </>,
+    );
+
+    const el = document.getElementById("acc-personal")!;
+
+    // Simulate full pointer sequence (pointerdown + pointerup)
+    await act(async () => {
+      fireEvent.pointerDown(el, { clientX: 100, clientY: 100 });
+      fireEvent.pointerUp(el, { clientX: 100, clientY: 100 });
+      await new Promise((r) => setTimeout(r, 100));
     });
 
-    // ═══════════════════════════════════════════════════
-    // Basic rendering
-    // ═══════════════════════════════════════════════════
+    // Should be focused
+    expect(el.getAttribute("data-focused")).toBe("true");
 
-    it("renders all 3 accordion headers", () => {
-        render(<AccordionPattern />);
+    // Should be expanded (activate on click)
+    expect(el.getAttribute("aria-expanded")).toBe("true");
+  });
 
-        expect(screen.getByText("Personal Information")).toBeTruthy();
-        expect(screen.getByText("Billing Address")).toBeTruthy();
-        expect(screen.getByText("Shipping Address")).toBeTruthy();
+  it("click on already-expanded header: collapses it", async () => {
+    render(
+      <>
+        <KeyboardListener />
+        <PointerListener />
+        <AccordionPattern />
+      </>,
+    );
+
+    const el = document.getElementById("acc-personal")!;
+
+    // First click — expand
+    await act(async () => {
+      fireEvent.pointerDown(el, { clientX: 100, clientY: 100 });
+      fireEvent.pointerUp(el, { clientX: 100, clientY: 100 });
+      await new Promise((r) => setTimeout(r, 100));
+    });
+    expect(el.getAttribute("aria-expanded")).toBe("true");
+
+    // Second click — collapse
+    await act(async () => {
+      fireEvent.pointerDown(el, { clientX: 100, clientY: 100 });
+      fireEvent.pointerUp(el, { clientX: 100, clientY: 100 });
+      await new Promise((r) => setTimeout(r, 100));
+    });
+    expect(el.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("click on a DIFFERENT header: focuses AND expands it", async () => {
+    render(
+      <>
+        <KeyboardListener />
+        <PointerListener />
+        <AccordionPattern />
+      </>,
+    );
+
+    const personal = document.getElementById("acc-personal")!;
+    const billing = document.getElementById("acc-billing")!;
+
+    // Click personal first
+    await act(async () => {
+      fireEvent.pointerDown(personal, { clientX: 100, clientY: 100 });
+      fireEvent.pointerUp(personal, { clientX: 100, clientY: 100 });
+      await new Promise((r) => setTimeout(r, 100));
+    });
+    expect(personal.getAttribute("aria-expanded")).toBe("true");
+
+    // Now click billing (NEW, unfocused header) — should ALSO expand
+    await act(async () => {
+      fireEvent.pointerDown(billing, { clientX: 200, clientY: 200 });
+      fireEvent.pointerUp(billing, { clientX: 200, clientY: 200 });
+      await new Promise((r) => setTimeout(r, 100));
     });
 
-    it("headers have role=button from OS computeItem", () => {
-        render(<AccordionPattern />);
+    expect(billing.getAttribute("data-focused")).toBe("true");
+    // THIS is the key test: does clicking a NEW header expand it?
+    expect(billing.getAttribute("aria-expanded")).toBe("true");
+  });
 
-        const buttons = screen.getAllByRole("button");
-        expect(buttons.length).toBeGreaterThanOrEqual(3);
-    });
+  // ═══════════════════════════════════════════════════
+  // Arrow navigation
+  // ═══════════════════════════════════════════════════
 
-    it("all headers have aria-expanded=false initially", () => {
-        render(<AccordionPattern />);
+  it("ArrowDown moves focus to next header without expanding", async () => {
+    const user = userEvent.setup();
 
-        const el = document.getElementById("acc-personal");
-        expect(el).toBeTruthy();
-        expect(el!.getAttribute("aria-expanded")).toBe("false");
-    });
+    render(
+      <>
+        <KeyboardListener />
+        <AccordionPattern />
+      </>,
+    );
 
-    // ═══════════════════════════════════════════════════
-    // Keyboard: Enter toggles expand
-    // ═══════════════════════════════════════════════════
+    const personal = document.getElementById("acc-personal")!;
+    const billing = document.getElementById("acc-billing")!;
 
-    it("Enter on focused header: aria-expanded becomes true", async () => {
-        const user = userEvent.setup();
+    personal.focus();
+    os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
+    await new Promise((r) => setTimeout(r, 50));
 
-        render(
-            <>
-                <KeyboardListener />
-                <AccordionPattern />
-            </>,
-        );
+    await user.keyboard("{ArrowDown}");
+    await new Promise((r) => setTimeout(r, 100));
 
-        // Focus the first header
-        const el = document.getElementById("acc-personal")!;
-        el.focus();
-        os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
-        await new Promise((r) => setTimeout(r, 50));
-
-        // Press Enter
-        await user.keyboard("{Enter}");
-        await new Promise((r) => setTimeout(r, 100));
-
-        expect(el.getAttribute("aria-expanded")).toBe("true");
-    });
-
-    it("Enter again: aria-expanded becomes false (toggle)", async () => {
-        const user = userEvent.setup();
-
-        render(
-            <>
-                <KeyboardListener />
-                <AccordionPattern />
-            </>,
-        );
-
-        const el = document.getElementById("acc-personal")!;
-        el.focus();
-        os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
-        await new Promise((r) => setTimeout(r, 50));
-
-        // Expand
-        await user.keyboard("{Enter}");
-        await new Promise((r) => setTimeout(r, 100));
-        expect(el.getAttribute("aria-expanded")).toBe("true");
-
-        // Collapse
-        await user.keyboard("{Enter}");
-        await new Promise((r) => setTimeout(r, 100));
-        expect(el.getAttribute("aria-expanded")).toBe("false");
-    });
-
-    // ═══════════════════════════════════════════════════
-    // Keyboard: Space toggles expand
-    // ═══════════════════════════════════════════════════
-
-    it("Space on focused header: aria-expanded becomes true", async () => {
-        const user = userEvent.setup();
-
-        render(
-            <>
-                <KeyboardListener />
-                <AccordionPattern />
-            </>,
-        );
-
-        const el = document.getElementById("acc-personal")!;
-        el.focus();
-        os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
-        await new Promise((r) => setTimeout(r, 50));
-
-        await user.keyboard(" ");
-        await new Promise((r) => setTimeout(r, 100));
-
-        expect(el.getAttribute("aria-expanded")).toBe("true");
-    });
-
-    // ═══════════════════════════════════════════════════
-    // Panel visibility (Item.Region — OS-driven)
-    // ═══════════════════════════════════════════════════
-
-    it("panel region is not in DOM when collapsed", () => {
-        render(<AccordionPattern />);
-
-        // Item.Region returns null when collapsed — panel not in DOM
-        const panel = document.getElementById("panel-acc-personal");
-        expect(panel).toBeNull();
-    });
-
-    it("expanded panel has role=region and aria-labelledby", async () => {
-        const user = userEvent.setup();
-
-        render(
-            <>
-                <KeyboardListener />
-                <AccordionPattern />
-            </>,
-        );
-
-        // Focus and expand the first header
-        const el = document.getElementById("acc-personal")!;
-        el.focus();
-        os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
-        await new Promise((r) => setTimeout(r, 50));
-
-        await user.keyboard("{Enter}");
-        await new Promise((r) => setTimeout(r, 100));
-
-        // Now the panel should be in the DOM
-        const panel = document.getElementById("panel-acc-personal");
-        expect(panel).toBeTruthy();
-        expect(panel!.getAttribute("role")).toBe("region");
-        expect(panel!.getAttribute("aria-labelledby")).toBe("acc-personal");
-    });
-
-    // ═══════════════════════════════════════════════════
-    // Click: toggles expand
-    // ═══════════════════════════════════════════════════
-
-    it("click on header: focuses and expands", async () => {
-        render(
-            <>
-                <KeyboardListener />
-                <PointerListener />
-                <AccordionPattern />
-            </>,
-        );
-
-        const el = document.getElementById("acc-personal")!;
-
-        // Simulate full pointer sequence (pointerdown + pointerup)
-        await act(async () => {
-            fireEvent.pointerDown(el, { clientX: 100, clientY: 100 });
-            fireEvent.pointerUp(el, { clientX: 100, clientY: 100 });
-            await new Promise((r) => setTimeout(r, 100));
-        });
-
-        // Should be focused
-        expect(el.getAttribute("data-focused")).toBe("true");
-
-        // Should be expanded (activate on click)
-        expect(el.getAttribute("aria-expanded")).toBe("true");
-    });
-
-    it("click on already-expanded header: collapses it", async () => {
-        render(
-            <>
-                <KeyboardListener />
-                <PointerListener />
-                <AccordionPattern />
-            </>,
-        );
-
-        const el = document.getElementById("acc-personal")!;
-
-        // First click — expand
-        await act(async () => {
-            fireEvent.pointerDown(el, { clientX: 100, clientY: 100 });
-            fireEvent.pointerUp(el, { clientX: 100, clientY: 100 });
-            await new Promise((r) => setTimeout(r, 100));
-        });
-        expect(el.getAttribute("aria-expanded")).toBe("true");
-
-        // Second click — collapse
-        await act(async () => {
-            fireEvent.pointerDown(el, { clientX: 100, clientY: 100 });
-            fireEvent.pointerUp(el, { clientX: 100, clientY: 100 });
-            await new Promise((r) => setTimeout(r, 100));
-        });
-        expect(el.getAttribute("aria-expanded")).toBe("false");
-    });
-
-    it("click on a DIFFERENT header: focuses AND expands it", async () => {
-        render(
-            <>
-                <KeyboardListener />
-                <PointerListener />
-                <AccordionPattern />
-            </>,
-        );
-
-        const personal = document.getElementById("acc-personal")!;
-        const billing = document.getElementById("acc-billing")!;
-
-        // Click personal first
-        await act(async () => {
-            fireEvent.pointerDown(personal, { clientX: 100, clientY: 100 });
-            fireEvent.pointerUp(personal, { clientX: 100, clientY: 100 });
-            await new Promise((r) => setTimeout(r, 100));
-        });
-        expect(personal.getAttribute("aria-expanded")).toBe("true");
-
-        // Now click billing (NEW, unfocused header) — should ALSO expand
-        await act(async () => {
-            fireEvent.pointerDown(billing, { clientX: 200, clientY: 200 });
-            fireEvent.pointerUp(billing, { clientX: 200, clientY: 200 });
-            await new Promise((r) => setTimeout(r, 100));
-        });
-
-        expect(billing.getAttribute("data-focused")).toBe("true");
-        // THIS is the key test: does clicking a NEW header expand it?
-        expect(billing.getAttribute("aria-expanded")).toBe("true");
-    });
-
-    // ═══════════════════════════════════════════════════
-    // Arrow navigation
-    // ═══════════════════════════════════════════════════
-
-    it("ArrowDown moves focus to next header without expanding", async () => {
-        const user = userEvent.setup();
-
-        render(
-            <>
-                <KeyboardListener />
-                <AccordionPattern />
-            </>,
-        );
-
-        const personal = document.getElementById("acc-personal")!;
-        const billing = document.getElementById("acc-billing")!;
-
-        personal.focus();
-        os.dispatch(OS_FOCUS({ zoneId: "apg-accordion", itemId: "acc-personal" }));
-        await new Promise((r) => setTimeout(r, 50));
-
-        await user.keyboard("{ArrowDown}");
-        await new Promise((r) => setTimeout(r, 100));
-
-        // Focus moved
-        expect(billing.getAttribute("data-focused")).toBe("true");
-        // Should NOT have expanded personal
-        expect(personal.getAttribute("aria-expanded")).toBe("false");
-        // Should NOT have expanded billing
-        expect(billing.getAttribute("aria-expanded")).toBe("false");
-    });
+    // Focus moved
+    expect(billing.getAttribute("data-focused")).toBe("true");
+    // Should NOT have expanded personal
+    expect(personal.getAttribute("aria-expanded")).toBe("false");
+    // Should NOT have expanded billing
+    expect(billing.getAttribute("aria-expanded")).toBe("false");
+  });
 });

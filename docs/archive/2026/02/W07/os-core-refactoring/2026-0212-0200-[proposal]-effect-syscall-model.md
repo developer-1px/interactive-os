@@ -320,8 +320,8 @@ const TODO_ADD = todoGroup.defineCommand(
 
 | 파일 | 변경 |
 |---|---|
-| `1-listeners/clipboard/dispatchToZone.ts` | **삭제** |
-| `1-listeners/clipboard/ClipboardSensor.tsx` | `OS_COPY/CUT/PASTE` dispatch로 교체 |
+| `1-listen/clipboard/dispatchToZone.ts` | **삭제** |
+| `1-listen/clipboard/ClipboardSensor.tsx` | `OS_COPY/CUT/PASTE` dispatch로 교체 |
 | `2-contexts/zoneRegistry.ts` → `ZoneEntry` | `onCopy/onCut/onPaste` 타입을 `BaseCommand`로 강화 (`any` 제거) |
 | `apps/todo/tests/TodoBot.tsx` | `dispatchToZone` 임포트 → `OS_COPY/CUT/PASTE` 사용 |
 

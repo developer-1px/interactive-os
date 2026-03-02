@@ -1,8 +1,8 @@
-import { useEffect } from "react";
 import { InspectorStore } from "@inspector/stores/InspectorStore";
 import { TestBotRegistry } from "@os/testing";
-import { focusShowcaseScripts } from "./focusScripts";
+import { useEffect } from "react";
 import { TestGrid } from "../shared/TestLayout";
+import { focusShowcaseScripts } from "./focusScripts";
 import { ActivateTest } from "./tests/ActivateTest";
 import { AriaFacadeTest } from "./tests/AriaFacadeTest";
 import { AriaInteractionTest } from "./tests/AriaInteractionTest";
@@ -14,10 +14,9 @@ import { FocusStackTest } from "./tests/FocusStackTest";
 import { NavigateTest } from "./tests/NavigateTest";
 import { RadiogroupTest } from "./tests/RadiogroupTest";
 import { SelectTest } from "./tests/SelectTest";
-import { TabTest } from "./tests/TabTest";
 import { TablistTest } from "./tests/TablistTest";
+import { TabTest } from "./tests/TabTest";
 import { TypeaheadTest } from "./tests/TypeaheadTest";
-
 
 export function FocusShowcasePage() {
   // Register focus-showcase scripts with TestBot on mount
@@ -30,7 +29,6 @@ export function FocusShowcasePage() {
     InspectorStore.setPanelExpanded(true);
     InspectorStore.setActiveTab("TESTBOT");
   };
-
 
   return (
     <div className="min-h-screen text-gray-900 p-2">

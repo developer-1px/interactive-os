@@ -121,7 +121,7 @@ OS 레이어(`src/os/`)의 코드 현황을 **구조, 규모, 타입 안전성, 
 ### 5.1 아키텍처 계층 준수 ✅
 
 ```
-1-listeners → keymaps → 3-commands → 4-effects
+1-listen → keymaps → 3-commands → 4-effects
      ↑                       ↓
 6-components ← 2-contexts ← state/schema
 ```

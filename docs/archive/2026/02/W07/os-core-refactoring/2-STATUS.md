@@ -17,7 +17,7 @@
 
 | 계층 | 상태 | 상세 |
 |------|------|------|
-| 1-listeners | ✅ | Keyboard, Clipboard, Focus, History — 모두 마이그레이션 완료 |
+| 1-listen | ✅ | Keyboard, Clipboard, Focus, History — 모두 마이그레이션 완료 |
 | 2-contexts | ✅ | DOM_ITEMS, DOM_RECTS, ZONE_CONFIG, ZoneRegistry |
 | 3-commands | ⚠️ | NAVIGATE, ACTIVATE, ESCAPE, TAB, SELECT 등 Kernel 등록 완료. FIELD_*, DELETE, TOGGLE은 Pipeline only |
 | 4-effects | ✅ | FOCUS, SCROLL, BLUR, CLICK — Kernel defineEffect 전환 완료 |
@@ -62,7 +62,7 @@
 | 블로커 | 영향 |
 |--------|------|
 | **Builder* 유지 여부 결정** — 6개 Builder 컴포넌트가 NCP 데모 전용 | `os/` 삭제 시점 |
-| **Zustand(3-store) 제거 시점** — `primitives/FocusGroup.tsx`가 의존 | 이중 상태 관리 |
+| **Zustand(3-store) 제거 시점** — `6-project/FocusGroup.tsx`가 의존 | 이중 상태 관리 |
 | **양방향 의존** — `os/` ↔ `os-new/` 교차 import ~47곳 | 마이그레이션 완료 조건 |
 | **데드라인 미설정** — 점진적 마이그레이션의 최대 리스크 | 전체 프로젝트 |
 

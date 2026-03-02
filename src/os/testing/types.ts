@@ -18,11 +18,11 @@
 // ═══════════════════════════════════════════════════════════════════
 
 export interface Locator {
-    /** Click this element. Playwright-identical signature. */
-    click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): Promise<void>;
+  /** Click this element. Playwright-identical signature. */
+  click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): Promise<void>;
 
-    /** Get a single attribute value. */
-    getAttribute(name: string): Promise<string | null>;
+  /** Get a single attribute value. */
+  getAttribute(name: string): Promise<string | null>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -30,14 +30,14 @@ export interface Locator {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface LocatorAssertions {
-    /** Assert: has attribute with value. */
-    toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
+  /** Assert: has attribute with value. */
+  toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
 
-    /** Assert: element is focused. */
-    toBeFocused(): Promise<void>;
+  /** Assert: element is focused. */
+  toBeFocused(): Promise<void>;
 
-    /** Negated assertions (Playwright-compatible). */
-    not: LocatorAssertions;
+  /** Negated assertions (Playwright-compatible). */
+  not: LocatorAssertions;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -45,11 +45,11 @@ export interface LocatorAssertions {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface Page {
-    /** Create a locator for an element. Uses item ID (headless/browser) or CSS selector (Playwright). */
-    locator(selector: string): Locator;
+  /** Create a locator for an element. Uses item ID (headless/browser) or CSS selector (Playwright). */
+  locator(selector: string): Locator;
 
-    /** Keyboard actions. */
-    keyboard: {
-        press(key: string): Promise<void>;
-    };
+  /** Keyboard actions. */
+  keyboard: {
+    press(key: string): Promise<void>;
+  };
 }

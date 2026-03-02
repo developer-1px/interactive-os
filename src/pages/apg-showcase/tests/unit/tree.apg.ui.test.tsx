@@ -3,10 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { produce } from "immer";
 import { act } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { KeyboardListener } from "@/os/1-listeners/keyboard/KeyboardListener";
-import { PointerListener } from "@/os/1-listeners/pointer/PointerListener";
-import { OS_FOCUS } from "@/os/3-commands/focus";
-import { os } from "@/os/kernel";
+import { KeyboardListener } from "@/os/1-listen/keyboard/KeyboardListener";
+import { PointerListener } from "@/os/1-listen/pointer/PointerListener";
+import { OS_FOCUS } from "@/os/4-command/focus";
+import { os } from "@/os/core/engine/kernel";
 import { TreePattern } from "../../patterns/TreePattern";
 
 /**
@@ -117,8 +117,16 @@ describe("TreePattern (APG Showcase) - E2E", () => {
 
     // Shift+pointer on docs — full pointer sequence
     await act(async () => {
-      fireEvent.pointerDown(docsNode, { shiftKey: true, clientX: 100, clientY: 100 });
-      fireEvent.pointerUp(docsNode, { shiftKey: true, clientX: 100, clientY: 100 });
+      fireEvent.pointerDown(docsNode, {
+        shiftKey: true,
+        clientX: 100,
+        clientY: 100,
+      });
+      fireEvent.pointerUp(docsNode, {
+        shiftKey: true,
+        clientX: 100,
+        clientY: 100,
+      });
       await new Promise((r) => setTimeout(r, 50));
     });
 

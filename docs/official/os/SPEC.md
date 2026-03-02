@@ -373,7 +373,7 @@
 
 ### 9.3 Item — Compound Component
 
-> `src/os/6-components/primitives/Item.tsx`
+> `src/os/6-components/6-project/Item.tsx`
 
 `Item`은 `FocusItem`의 선언적 래퍼이자 compound component의 루트.
 `ItemContext`를 통해 sub-component에 `{ zoneId, itemId }`를 자동 전달한다.

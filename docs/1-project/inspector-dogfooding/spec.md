@@ -177,3 +177,26 @@ Scenario: Hover 해제 시 하이라이트 상태 해제
 
 ### 8.3 범위 밖 (Out of Scope)
 - 하이라이트 오버레이의 극단적인 성능 최적화(ResizeObserver를 통한 실시간 트래킹 등)보다, 명령-상태-투영의 순방향 데이터 흐름을 확립하는 데 초점을 맞춘다.
+
+## 9. T5: 다중 투영기 컴포넌트 아키텍처 (UnifiedInspector 분할)
+
+### 9.1 거대 View 분할 및 단일 책임 할당
+
+**Story**: OS 개발자로서, `UnifiedInspector`의 1100줄이 넘는 방대한 렌더링 스코프를 `TransactionList`, `TransactionItem`, `TransactionProperties` 등의 순수한 투영 부품으로 분할하기를 원한다. 그래야 상태 변화(`isUserScrolled`, `searchQuery` 등) 시에 전체 뷰가 리렌더링되는 성능 저하를 막고, 각 UI 컴포넌트가 ZIFT 원칙에 따른 수동형 투영기(Passive Projector) 역할에만 집중할 수 있기 때문이다.
+
+**Use Case — 주 흐름:**
+1. 아키텍처 수준의 구조 조정(refactoring)이므로 사용자가 직접 체감하는 새로운 기능은 없다.
+2. 시스템은 수신된 트랜잭션, Store 상태, 필터 조건 등을 하위 컴포넌트 렌더링에 필요한 최소한의 props로만 전달한다.
+3. DOM 요소 탐색이나 이벤트 브릿징을 수행하던 거대 useEffect / useState 스니펫이 각자의 책임을 가지는 하위 단위로 격리된다.
+
+**Scenarios (Given/When/Then):**
+
+Scenario: 컴포넌트 분할 구조의 정상 렌더링 (Regression 방지)
+  Given T1~T4까지의 기능(검색, 필터, 스크롤링, 하이라이트)이 작동하는 App 상태가 존재한다
+  When 분할된 `UnifiedInspector` 컴포넌트가 마운트된다
+  Then 분할 이전과 완전히 동일한 UI(검색바, 트랜잭션 리스트, 상태 섹션)가 렌더링된다
+  And 모든 Interaction(토글, 스크롤, 클립보드 복사) 커맨드가 그대로 동작한다
+
+### 9.2 범위 밖 (Out of Scope)
+- 새로운 기능 추가 및 UI/UX의 시각적 변경 (100% Structural Refactoring)
+- OS Kernel 내부의 커맨드 파이프라인 수정

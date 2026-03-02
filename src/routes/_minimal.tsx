@@ -1,4 +1,4 @@
-import { Zone } from "@os/6-components/primitives/Zone";
+import { Zone } from "@os/6-project/Zone";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_minimal")({

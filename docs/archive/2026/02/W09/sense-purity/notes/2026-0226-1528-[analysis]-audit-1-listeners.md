@@ -1,4 +1,4 @@
-# audit: sense-purity 1-listeners
+# audit: sense-purity 1-listen
 
 ## 지표
 

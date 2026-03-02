@@ -18,7 +18,7 @@
 | 8 | `2-contexts/itemQueries.ts:getItemAttribute` (L77-87) | `entry.element.querySelector → getAttribute` | DOM 전용 (effect/sense 성격). 유지. headless에서는 null. 또는 ZoneRegistry에 attribute map push | Clear | — | — | — |
 | 9 | `2-contexts/itemQueries.ts:getFirstDescendantWithAttribute` (L100-119) | `querySelector` 순수 DOM | DOM 전용 (구조 쿼리). 유지 또는 tree 구조를 push (getTreeLevels와 연계) | Clear | →#3 | — | — |
 | 10 | `2-contexts/itemQueries.ts:getAncestorWithAttribute` (L128-149) | `parentElement` 순수 DOM | DOM 전용 (구조 쿼리). 유지 또는 tree parent를 push | Clear | →#3 | — | — |
-| 11 | `keymaps/typeaheadFallbackMiddleware.ts:getItemsAndLabels` (L25-42) | `zoneEl.querySelectorAll("[data-item-id]") + el.textContent` | ZoneRegistry에 `getLabels()` accessor 추가. 또는 DOM fallback 유지 (1-listeners 성격) | Clear | — | typeahead 테스트 유지 | label 미제공 시 typeahead 불가 |
+| 11 | `keymaps/typeaheadFallbackMiddleware.ts:getItemsAndLabels` (L25-42) | `zoneEl.querySelectorAll("[data-item-id]") + el.textContent` | ZoneRegistry에 `getLabels()` accessor 추가. 또는 DOM fallback 유지 (1-listen 성격) | Clear | — | typeahead 테스트 유지 | label 미제공 시 typeahead 불가 |
 | 12 | `6-components/base/FocusGroup.tsx:autoFocus DOM fallback` (L467-489) | `getItems` 없으면 `querySelector("[data-focus-item]")` | DOM fallback 제거. getItems 필수화 시 자연 해소 | Clear | →#1 | T2 headless-autofocus 3 tests 유지 | getItems 없는 autoFocus Zone |
 
 ## MECE 점검

@@ -1,5 +1,5 @@
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
+import { Item } from "@os/6-project/Item.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
 import { TestBox } from "../../shared/TestLayout";
 
 export function NavigateTest() {
@@ -118,7 +118,9 @@ export function NavigateTest() {
             <Zone
               id="nav-seamless-a"
               role="toolbar"
-              options={{ navigate: { orientation: "horizontal", seamless: true } }}
+              options={{
+                navigate: { orientation: "horizontal", seamless: true },
+              }}
               className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1"
             >
               {["A1", "A2"].map((item) => (
@@ -135,7 +137,9 @@ export function NavigateTest() {
             <Zone
               id="nav-seamless-b"
               role="toolbar"
-              options={{ navigate: { orientation: "horizontal", seamless: true } }}
+              options={{
+                navigate: { orientation: "horizontal", seamless: true },
+              }}
               className="flex bg-gray-50 p-2 rounded border border-gray-200 gap-1"
             >
               {["B1", "B2"].map((item) => (

@@ -1,4 +1,4 @@
-# `1-listeners/` 응집도 리팩토링 제안서
+# `1-listen/` 응집도 리팩토링 제안서
 
 | 항목 | 내용 |
 |---|---|
@@ -10,7 +10,7 @@
 ## 1. 현재 상태 (AS-IS)
 
 ```
-1-listeners/
+1-listen/
 ├── ClipboardListener.tsx    # ✅ Listener (60줄)
 ├── KeyboardListener.tsx     # ✅ Listener (73줄)
 ├── FocusListener.tsx        # ✅ Listener (213줄)
@@ -23,7 +23,7 @@
 
 | # | 문제 | 영향받는 파일 |
 |---|---|---|
-| 1 | **유틸리티 혼재** — `loopGuard`는 시스템 전역 방어 유틸인데 `1-listeners/`에 있음 | `loopGuard.ts` |
+| 1 | **유틸리티 혼재** — `loopGuard`는 시스템 전역 방어 유틸인데 `1-listen/`에 있음 | `loopGuard.ts` |
 | 2 | **타입 누출** — `getCanonicalKey.ts`에 `KeymapConfig` interface가 정의됨 (keymaps 소관) | `getCanonicalKey.ts` |
 | 3 | **Private 유틸 미분리** — `focusDOMQueries.ts`는 FocusListener 전용이지만 export되어 있음 | `focusDOMQueries.ts` |
 | 4 | **import 경로 불일치** — ClipboardListener는 `@/os-new/kernel` 사용, 나머지는 `../kernel` 사용 | 전체 |
@@ -33,7 +33,7 @@
 ## 2. 제안 (TO-BE)
 
 ```
-1-listeners/
+1-listen/
 ├── ClipboardListener.tsx      # 유지 (이미 정리 완료)
 ├── KeyboardListener.tsx       # 유지 (import 경로 통일만)
 ├── FocusListener.tsx          # 유지 (focusDOMQueries 흡수)
@@ -42,11 +42,11 @@
 keymaps/
 ├── keybindings.ts             # 기존
 ├── osDefaults.ts              # 기존
-├── getCanonicalKey.ts         # ← 1-listeners에서 이동
+├── getCanonicalKey.ts         # ← 1-listen에서 이동
 └── KeymapConfig.ts            # ← getCanonicalKey에서 분리 (또는 getCanonicalKey 내 유지)
 
 lib/                           # (또는 middleware/)
-└── loopGuard.ts               # ← 1-listeners에서 이동
+└── loopGuard.ts               # ← 1-listen에서 이동
 ```
 
 ### 변경 상세
@@ -93,7 +93,7 @@ lib/                           # (또는 middleware/)
 | `focusDOMQueries` 흡수/정리 | 1파일 | 쉬움 |
 | import 경로 통일 | 3파일 | 쉬움 |
 
-**리팩토링 후 `1-listeners/`에 남는 파일**: ClipboardListener, KeyboardListener, FocusListener — **순수 Listener만 3개**. "Listener = 번역기" 원칙에 부합.
+**리팩토링 후 `1-listen/`에 남는 파일**: ClipboardListener, KeyboardListener, FocusListener — **순수 Listener만 3개**. "Listener = 번역기" 원칙에 부합.
 
 ---
 
@@ -106,4 +106,4 @@ lib/                           # (또는 middleware/)
 
 ## 한줄요약
 
-> `1-listeners/`에 섞여 있는 유틸 3개(loopGuard, getCanonicalKey, focusDOMQueries)를 각각 적절한 곳으로 이동시켜, 폴더에 순수 Listener 3개만 남기는 응집도 리팩토링.
+> `1-listen/`에 섞여 있는 유틸 3개(loopGuard, getCanonicalKey, focusDOMQueries)를 각각 적절한 곳으로 이동시켜, 폴더에 순수 Listener 3개만 남기는 응집도 리팩토링.

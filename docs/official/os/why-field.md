@@ -137,7 +137,7 @@ page.keyboard.press("Enter") →  resolveKeyboard → ZIFT Field layer → OS_FI
 
 ## References
 
-- ZIFT Responder Chain: `os/1-listeners/keyboard/resolveKeyboard.ts`
+- ZIFT Responder Chain: `os/1-listen/keyboard/resolveKeyboard.ts`
 - Field-layer keybindings: `os/keymaps/resolveFieldKey.ts`
 - Item-layer keybindings: `os/keymaps/resolveItemKey.ts`
 - Zone pass-through: `os/keymaps/fieldKeyOwnership.ts`

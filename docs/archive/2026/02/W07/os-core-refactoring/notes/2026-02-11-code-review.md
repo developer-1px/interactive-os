@@ -28,7 +28,7 @@
 
 | 파일 | 라인 | 현재 |
 |---|---|---|
-| [FocusGroup.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/primitives/FocusGroup.tsx#L133) | 133 | `onDismiss?: () => void` |
+| [FocusGroup.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/6-project/FocusGroup.tsx#L133) | 133 | `onDismiss?: () => void` |
 | [Zone.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/6-components/Zone.tsx#L63) | 63 | `onDismiss?: () => void` |
 
 **문제**: 다른 모든 인터랙션 prop (`onAction`, `onSelect`, `onCopy` 등)은 `BaseCommand`인데, `onDismiss`만 유일하게 콜백. DOM element에 `__onDismiss` ref를 몰래 붙이는 해킹도 동반.
@@ -53,7 +53,7 @@
 
 | 파일 | 라인 | 현재 |
 |---|---|---|
-| [FocusGroup.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/primitives/FocusGroup.tsx#L292) | 292 | `(el as any).__onDismiss = onDismissRef` |
+| [FocusGroup.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/6-project/FocusGroup.tsx#L292) | 292 | `(el as any).__onDismiss = onDismissRef` |
 | [escape.ts](file:///Users/user/Desktop/interactive-os/src/os-new/3-commands/escape.ts#L41) | 41 | `const dismissRef = (zoneEl as any)?.__onDismiss` |
 
 **문제**: DOM element에 private property를 몰래 붙이는 패턴. `as any` 필수, 타입 안전성 0, LLM이 이해 불가능한 자체 발명 프로토콜.
@@ -119,7 +119,7 @@
 |---|---|
 | [select.ts](file:///Users/user/Desktop/interactive-os/src/os-new/3-commands/select.ts#L37) | 37 |
 | [activate.ts](file:///Users/user/Desktop/interactive-os/src/os-new/3-commands/activate.ts#L23) | 23 |
-| [FocusSensor.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/1-listeners/focus/FocusSensor.tsx#L90-L101) | 90-101 |
+| [FocusSensor.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/1-listen/focus/FocusSensor.tsx#L90-L101) | 90-101 |
 
 **문제**: 커맨드 간 dispatch 시 `as any` 필수 — 커맨드 타입 시스템이 cross-command dispatch를 지원하지 못함.
 
@@ -201,9 +201,9 @@
 
 ---
 
-### I2. `1-listeners/` — `addEventListener` 사용
+### I2. `1-listen/` — `addEventListener` 사용
 
-**OK**: `1-listeners/`는 규칙상 "Listener = DOM → 커널 번역기"이므로 `addEventListener`는 이 레이어에서만 허용. spike 폴더의 사용은 레거시이므로 마이그레이션 시 정리.
+**OK**: `1-listen/`는 규칙상 "Listener = DOM → 커널 번역기"이므로 `addEventListener`는 이 레이어에서만 허용. spike 폴더의 사용은 레거시이므로 마이그레이션 시 정리.
 
 ---
 

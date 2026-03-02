@@ -25,7 +25,7 @@
  *   </Builder.Section>
  */
 
-import { Item as OSItem } from "@os/6-components/primitives/Item";
+import { Item as OSItem } from "@os/6-project/Item";
 import { forwardRef, type ReactElement } from "react";
 import { useCursorMeta } from "../hooks/useCursorMeta";
 import type { CursorMeta } from "../model/cursorRegistry";

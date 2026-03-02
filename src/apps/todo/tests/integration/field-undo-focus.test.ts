@@ -12,9 +12,9 @@
 
 import { produce } from "immer";
 import { beforeEach, describe, expect, it } from "vitest";
-import { OS_FIELD_CANCEL, OS_FIELD_COMMIT } from "@/os/3-commands/field/field";
-import { _resetClipboardStore } from "@/os/collection/createCollectionZone";
-import { os } from "@/os/kernel";
+import { OS_FIELD_CANCEL, OS_FIELD_COMMIT } from "@/os/4-command/field/field";
+import { os } from "@/os/core/engine/kernel";
+import { _resetClipboardStore } from "@/os/core/library/collection/createCollectionZone";
 
 /** Set up OS state: activeZoneId + zone focus + editingItemId */
 function setupZone(

@@ -9,13 +9,13 @@
  * Uses the headless kernel — no DOM, no React, no browser.
  */
 
-import { ZoneRegistry } from "@os/registries/zoneRegistry";
 import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
-} from "@os/3-commands/overlay/overlay";
-import { os } from "@os/kernel";
-import { initialZoneState } from "@os/state/initial";
+} from "@os/4-command/overlay/overlay";
+import { os } from "@os/core/engine/kernel";
+import { ZoneRegistry } from "@os/core/engine/registries/zoneRegistry";
+import { initialZoneState } from "@os/core/schema/state/initial";
 import { beforeEach, describe, expect, it } from "vitest";
 
 // ═════════════════════════════════════════════════════════════════════

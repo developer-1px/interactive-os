@@ -95,8 +95,8 @@ graph TD
 | 소비자 | import 대상 |
 |---|---|
 | `keymaps/osDefaults.ts` | ACTIVATE, ESCAPE, FIELD_*, NAVIGATE, SELECT, TAB |
-| `1-listeners/FocusListener` | EXPAND, FOCUS, RECOVER, SELECT, SYNC_FOCUS |
-| `1-listeners/ClipboardListener` | OS_COPY, OS_CUT, OS_PASTE |
+| `1-listen/FocusListener` | EXPAND, FOCUS, RECOVER, SELECT, SYNC_FOCUS |
+| `1-listen/ClipboardListener` | OS_COPY, OS_CUT, OS_PASTE |
 | `6-components/FocusGroup` | FOCUS, STACK_POP, STACK_PUSH |
 | `6-components/Trigger` | OVERLAY_OPEN, OVERLAY_CLOSE |
 | `6-components/Dialog` | OVERLAY_CLOSE |

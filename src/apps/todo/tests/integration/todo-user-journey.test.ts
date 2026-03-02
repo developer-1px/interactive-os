@@ -8,8 +8,8 @@
  * This verifies the complete input→command→state→view pipeline.
  */
 
+import { FieldRegistry } from "@os/core/engine/registries/fieldRegistry";
 import { describe, expect, it } from "vitest";
-import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { gotoList, page, setupTodoPage } from "./todo-helpers";
 
 setupTodoPage();

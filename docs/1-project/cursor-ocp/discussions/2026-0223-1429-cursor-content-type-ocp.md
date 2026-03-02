@@ -4,7 +4,7 @@
 
 **🧑 사용자**: builderCursor의 태그와 색상의 종류라고 하는건 블록의 종류가 아니라 Text Icon Section Image Button등 컨텐츠의 종류야
 
-**🤖 AI**: 현재 `TYPE_COLORS`가 블록 타입(hero, news…)으로 분류하고 있지만, `PropertyType`이 이미 컨텐츠 분류 체계를 정의하고 있고, `primitives/` 구조가 이를 물리적으로 증명. 각 필드 아이템이 자신의 PropertyType을 어떻게 선언해야 하는지?
+**🤖 AI**: 현재 `TYPE_COLORS`가 블록 타입(hero, news…)으로 분류하고 있지만, `PropertyType`이 이미 컨텐츠 분류 체계를 정의하고 있고, `6-project/` 구조가 이를 물리적으로 증명. 각 필드 아이템이 자신의 PropertyType을 어떻게 선언해야 하는지?
 
 ---
 
@@ -46,7 +46,7 @@ BuilderCursor의 색상/태그를 **컨텐츠 타입 기반**으로 전환하되
 
 1. **W1**: 커서 = "지금 무엇을 다루고 있는가" 표시. 블록 타입이 아니라 컨텐츠 타입.
 2. **W2**: `PropertyType`이 이미 컨텐츠 분류 체계를 정의.
-3. **W3**: `primitives/` 구조가 이 분류를 물리적으로 증명.
+3. **W3**: `6-project/` 구조가 이 분류를 물리적으로 증명.
 4. **W4**: OCP = 선언하는 쪽이 메타 소유, 소비자는 읽기만.
 5. **W5**: Hollywood Principle — 프리미티브 → Cursor 방향.
 6. **W6**: 관할권: Builder 내부 문제, OS 확장 불필요.

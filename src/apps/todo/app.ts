@@ -26,17 +26,17 @@ import {
 } from "@apps/todo/selectors";
 import { produce } from "immer";
 import { z } from "zod";
-import { OS_FIELD_START_EDIT } from "@/os/3-commands/field/field";
+import { OS_FIELD_START_EDIT } from "@/os/4-command/field/field";
 import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
-} from "@/os/3-commands/overlay/overlay";
-import { OS_SELECTION_CLEAR } from "@/os/3-commands/selection/selection";
-import { OS_NOTIFY } from "@/os/3-commands/toast/toast";
+} from "@/os/4-command/overlay/overlay";
+import { OS_SELECTION_CLEAR } from "@/os/4-command/selection/selection";
+import { OS_NOTIFY } from "@/os/4-command/toast/toast";
 
-import { defineApp } from "@/os/defineApp";
-import { os } from "@/os/kernel";
-import { history } from "@/os/modules/history";
+import { defineApp } from "@/os/app/defineApp";
+import { history } from "@/os/app/modules/history";
+import { os } from "@/os/core/engine/kernel";
 
 /** Collision-free random ID */
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -50,7 +50,7 @@ export const TodoApp = defineApp<AppState>("todo-v5", INITIAL_STATE, {
 });
 
 // Undo / Redo — generic factory
-import { createUndoRedoCommands } from "@/os/defineApp.undoRedo";
+import { createUndoRedoCommands } from "@/os/app/defineApp/undoRedo";
 
 export const { canUndo, canRedo, undoCommand, redoCommand } =
   createUndoRedoCommands(TodoApp);
@@ -88,7 +88,7 @@ export const todosByCategory = TodoApp.selector(
 import {
   createCollectionZone,
   fromEntities,
-} from "@/os/collection/createCollectionZone";
+} from "@/os/core/library/collection/createCollectionZone";
 
 const listCollection = createCollectionZone(TodoApp, "list", {
   ...fromEntities(
@@ -105,8 +105,7 @@ const listCollection = createCollectionZone(TodoApp, "list", {
       categoryId: state.ui.selectedCategoryId,
     };
   },
-  filter: (state) => (item) =>
-    item.categoryId === state.ui.selectedCategoryId,
+  filter: (state) => (item) => item.categoryId === state.ui.selectedCategoryId,
   text: (item) => item.text,
   onPaste: (item, state) => ({
     ...item,
@@ -157,10 +156,10 @@ export const requestDeleteTodo = listCollection.command(
       payload.ids.includes(id),
     )
       ? [
-        // Close first to clear any stale overlay from HMR or interrupted flow
-        OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
-        OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
-      ]
+          // Close first to clear any stale overlay from HMR or interrupted flow
+          OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+          OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
+        ]
       : undefined,
   }),
 );

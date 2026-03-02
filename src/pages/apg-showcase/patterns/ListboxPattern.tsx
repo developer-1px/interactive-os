@@ -1,6 +1,6 @@
-import { useSelection } from "@/os/5-hooks/useSelection";
-import { Zone } from "@/os/6-components/primitives/Zone";
-import { Item } from "@/os/6-components/primitives/Item";
+import { useSelection } from "@/os/6-project/accessors/useSelection";
+import { Item } from "@/os/6-project/Item";
+import { Zone } from "@/os/6-project/Zone";
 
 const OPTIONS = [
   "Apple",
@@ -26,7 +26,10 @@ export function ListboxPattern() {
         <Zone
           id="apg-listbox-single"
           role="listbox"
-          options={{ navigate: { orientation: "vertical" }, select: { mode: "single", followFocus: true } }}
+          options={{
+            navigate: { orientation: "vertical" },
+            select: { mode: "single", followFocus: true },
+          }}
           aria-label="Choose a fruit"
           className="border border-gray-300 rounded overflow-hidden max-h-64 overflow-y-auto"
         >
@@ -58,7 +61,10 @@ export function ListboxPattern() {
         <Zone
           id="apg-listbox-multi"
           role="listbox"
-          options={{ navigate: { orientation: "vertical" }, select: { mode: "multiple", range: true } }}
+          options={{
+            navigate: { orientation: "vertical" },
+            select: { mode: "multiple", range: true },
+          }}
           aria-multiselectable="true"
           aria-label="Choose multiple fruits"
           className="border border-gray-300 rounded overflow-hidden max-h-64 overflow-y-auto"

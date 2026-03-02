@@ -3,14 +3,13 @@
  * Demonstrates standard ARIA patterns using FocusGroup facade.
  */
 
-
-import { Zone } from "@os/6-components/primitives/Zone.tsx";
-import { Item } from "@os/6-components/primitives/Item.tsx";
-import { os } from "@os/kernel.ts";
+import { Item } from "@os/6-project/Item.tsx";
+import { Zone } from "@os/6-project/Zone.tsx";
+import { os } from "@os/core/engine/kernel.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
-import { useExpanded } from "@/os/5-hooks/useExpanded";
-import { useSelection } from "@/os/5-hooks/useSelection";
+import { useExpanded } from "@/os/6-project/accessors/useExpanded";
+import { useSelection } from "@/os/6-project/accessors/useSelection";
 
 export function AriaShowcasePage() {
   return <AriaShowcaseContent />;
@@ -232,7 +231,10 @@ function AriaShowcaseContent() {
           <Zone
             id="demo-listbox"
             role="listbox"
-            options={{ navigate: { orientation: "vertical" }, select: { mode: "single", followFocus: true } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              select: { mode: "single", followFocus: true },
+            }}
             aria-label="Select a user"
             className="w-full bg-white border border-gray-200 rounded-lg shadow-sm max-h-48 overflow-y-auto"
           >
@@ -265,7 +267,14 @@ function AriaShowcaseContent() {
           <Zone
             id="demo-radiogroup"
             role="radiogroup"
-            options={{ navigate: { orientation: "vertical" }, select: { mode: "single", followFocus: true, disallowEmpty: true } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              select: {
+                mode: "single",
+                followFocus: true,
+                disallowEmpty: true,
+              },
+            }}
             aria-labelledby="radio-label"
             className="space-y-2"
           >
@@ -371,7 +380,10 @@ function AriaShowcaseContent() {
           <Zone
             id="demo-grid"
             role="grid"
-            options={{ navigate: { orientation: "both" }, select: { mode: "multiple", range: true } }}
+            options={{
+              navigate: { orientation: "both" },
+              select: { mode: "multiple", range: true },
+            }}
             aria-label="Calendar"
             className="grid grid-cols-4 gap-1 p-2 bg-gray-100 rounded-lg border border-gray-200"
           >
@@ -406,7 +418,10 @@ function AriaShowcaseContent() {
           <Zone
             id="demo-tree"
             role="tree"
-            options={{ navigate: { orientation: "vertical" }, select: { mode: "multiple", range: true } }}
+            options={{
+              navigate: { orientation: "vertical" },
+              select: { mode: "multiple", range: true },
+            }}
             aria-multiselectable="true"
             aria-label="File explorer"
             className="w-full bg-white border border-gray-200 rounded-lg p-2"
@@ -466,10 +481,11 @@ function AriaShowcaseContent() {
                 className={`
                                   w-full px-3 py-2.5 border rounded-lg text-sm bg-white cursor-pointer
                                   flex items-center gap-2 transition-all
-                                  ${isComboInvalid
-                    ? "border-red-300 bg-red-50 text-red-700"
-                    : "border-gray-200 hover:border-gray-300"
-                  }
+                                  ${
+                                    isComboInvalid
+                                      ? "border-red-300 bg-red-50 text-red-700"
+                                      : "border-gray-200 hover:border-gray-300"
+                                  }
                                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-200 data-[focused=true]:border-indigo-400
                                   aria-[invalid=true]:data-[focused=true]:ring-red-200 aria-[invalid=true]:data-[focused=true]:border-red-400
                               `}

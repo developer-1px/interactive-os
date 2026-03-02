@@ -2,13 +2,13 @@
 last-reviewed: 2026-02-18
 ---
 
-# Discussion: 1-listeners Sense/Translate 분리
+# Discussion: 1-listen Sense/Translate 분리
 
 ## Journey
 
 **🧑 사용자**: OS의 커버리지 특히 DOM과 연결된 1-listener의 커버리지가 높아지도록 코드를 만들려면 어떻게 하면 좋을지 분석해봐
 
-**🤖 AI**: 1-listeners의 3개 파일(FocusListener, KeyboardListener, ClipboardListener)을 분석한 결과, DOM 감지(Sense) + 판단(Translate) 두 책임이 하나의 useEffect 콜백에 혼재되어 있다. 이미 프로젝트에서 `tab.ts`/`resolveTab.ts` 패턴으로 검증된 분리를 적용하면 된다. 단, ClipboardListener처럼 판단이 2줄뿐인 파일에도 추출의 ROI가 있는가?
+**🤖 AI**: 1-listen의 3개 파일(FocusListener, KeyboardListener, ClipboardListener)을 분석한 결과, DOM 감지(Sense) + 판단(Translate) 두 책임이 하나의 useEffect 콜백에 혼재되어 있다. 이미 프로젝트에서 `tab.ts`/`resolveTab.ts` 패턴으로 검증된 분리를 적용하면 된다. 단, ClipboardListener처럼 판단이 2줄뿐인 파일에도 추출의 ROI가 있는가?
 
 ---
 
@@ -43,10 +43,10 @@ last-reviewed: 2026-02-18
 ## Conclusion
 
 ### Why
-프로젝트의 존재 이유는 "최대한 순수함수화하여 DOM 개입을 줄이면서 표현력을 늘리는 것". 1-listeners는 이 원칙이 아직 적용되지 않은 마지막 영역.
+프로젝트의 존재 이유는 "최대한 순수함수화하여 DOM 개입을 줄이면서 표현력을 늘리는 것". 1-listen는 이 원칙이 아직 적용되지 않은 마지막 영역.
 
 ### Intent
-1-listeners에 Hexagonal Architecture(Ports & Adapters)를 적용하여, DOM 어댑터(Sense)와 순수 판단 함수(Translate)를 분리하고, W3C UI Events 모듈 기준으로 폴더링한다.
+1-listen에 Hexagonal Architecture(Ports & Adapters)를 적용하여, DOM 어댑터(Sense)와 순수 판단 함수(Translate)를 분리하고, W3C UI Events 모듈 기준으로 폴더링한다.
 
 ### Warrants
 - W1. 검증된 패턴: `tab.ts`/`resolveTab.ts`, `escape.ts`/`resolveEscape.ts`
@@ -62,7 +62,7 @@ last-reviewed: 2026-02-18
 ### 확정된 구조
 
 ```
-1-listeners/
+1-listen/
   ├── keyboard/
   │   ├── KeyboardListener.tsx    ← 어댑터 (sense)
   │   └── resolveKeyboard.ts      ← 순수 (translate)

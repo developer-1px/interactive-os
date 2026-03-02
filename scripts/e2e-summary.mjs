@@ -20,42 +20,42 @@ let failed = 0;
 const failures = [];
 
 for (const suite of raw.suites ?? []) {
-    walkSuite(suite, []);
+  walkSuite(suite, []);
 }
 
 function walkSuite(suite, path) {
-    const current = [...path, suite.title].filter(Boolean);
-    for (const spec of suite.specs ?? []) {
-        for (const test of spec.tests ?? []) {
-            for (const result of test.results ?? []) {
-                const title = [...current, spec.title].filter(Boolean).join(" › ");
-                if (result.status === "passed") {
-                    passed++;
-                } else {
-                    failed++;
-                    const errMsg = result.error?.message?.split("\n")[0] ?? "unknown";
-                    failures.push({ title, status: result.status, error: errMsg });
-                }
-            }
+  const current = [...path, suite.title].filter(Boolean);
+  for (const spec of suite.specs ?? []) {
+    for (const test of spec.tests ?? []) {
+      for (const result of test.results ?? []) {
+        const title = [...current, spec.title].filter(Boolean).join(" › ");
+        if (result.status === "passed") {
+          passed++;
+        } else {
+          failed++;
+          const errMsg = result.error?.message?.split("\n")[0] ?? "unknown";
+          failures.push({ title, status: result.status, error: errMsg });
         }
+      }
     }
-    for (const child of suite.suites ?? []) {
-        walkSuite(child, current);
-    }
+  }
+  for (const child of suite.suites ?? []) {
+    walkSuite(child, current);
+  }
 }
 
 console.log(`\n📊 E2E Summary: ${passed} passed, ${failed} failed\n`);
 
 if (failures.length > 0) {
-    console.log("❌ Failures:");
-    for (const f of failures) {
-        console.log(`  ${f.status.toUpperCase()} │ ${f.title}`);
-        console.log(`       └─ ${f.error.slice(0, 120)}`);
-    }
+  console.log("❌ Failures:");
+  for (const f of failures) {
+    console.log(`  ${f.status.toUpperCase()} │ ${f.title}`);
+    console.log(`       └─ ${f.error.slice(0, 120)}`);
+  }
 }
 
 if (failures.length === 0) {
-    console.log("✅ All tests passed!");
+  console.log("✅ All tests passed!");
 }
 
 console.log("");

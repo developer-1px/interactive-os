@@ -10,7 +10,7 @@
  */
 
 import { Icon } from "@/components/Icon";
-import { defineApp } from "@/os/defineApp";
+import { defineApp } from "@/os/app/defineApp";
 
 // ─── Section Data ───
 

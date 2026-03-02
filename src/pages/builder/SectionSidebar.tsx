@@ -14,9 +14,9 @@ import { useState } from "react";
 import type { Block } from "@/apps/builder/app";
 import { addBlock, BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
 import { BLOCK_PRESETS } from "@/apps/builder/presets/blocks";
-import { useExpanded } from "@/os/5-hooks/useExpanded";
-import { useFocusedItem } from "@/os/5-hooks/useFocusedItem";
-import { os } from "@/os/kernel";
+import { useExpanded } from "@/os/6-project/accessors/useExpanded";
+import { useFocusedItem } from "@/os/6-project/accessors/useFocusedItem";
+import { os } from "@/os/core/engine/kernel";
 
 const CANVAS_ZONE_ID = "canvas";
 

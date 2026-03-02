@@ -71,7 +71,7 @@ OS가 나머지를 **보장**한다:
 |------|---------------|
 | **Kernel** | 모든 상태 변경은 커맨드(데이터)로, 하나의 경로를 통과한다 |
 | **Pipeline** | 입력→해석→실행→투영. 6단계. 각 단계는 하나의 책임만 진다 |
-| **ZIFT** | Zone, Item, Field, Trigger — 4개 개념으로 모든 UI를 선언한다 |
+| **ZIFT** | Zone(영역), Item(데이터), Field(prop), Trigger(액션) — ARIA 53개 속성과 동형인 4개 개념으로 모든 UI를 선언한다 |
 | **ARIA** | role을 선언하면 접근성이 보장된다 |
 | **Collection** | 데이터 구조가 정규화된다. 트리, 리스트, 그리드 — 하나의 구조 |
 | **History** | Undo/Redo가 미들웨어로 자동 제공된다 |
@@ -121,8 +121,10 @@ OS가 나머지를 **보장**한다:
 | 상황 | 참조 |
 |------|------|
 | 새 패턴을 만들어야 할 것 같을 때 | `.agent/knowledge/design-principles.md` |
+| 새 패턴이 ZIFT 중 무엇인지 판단할 때 | `.agent/knowledge/domain-glossary.md` → ZIFT × ARIA 매핑 |
 | 아키텍처 선택지가 여럿일 때 | `.agent/knowledge/design-principles.md` |
 | 상태를 어디에 배치할지 모를 때 | `.agent/knowledge/design-principles.md` |
+| 폴더/파일 위치를 판단할 때 | `.agent/knowledge/folder-structure.md` → 4-Lens Stack |
 
 ### 코드를 작성할 때
 
@@ -133,7 +135,7 @@ OS가 나머지를 **보장**한다:
 | 타입 이름 접미사를 선택할 때 (Entry? Result? Handle?) | `.agent/knowledge/naming.md` → 접미사 Dictionary |
 | 도메인 개념이 무엇인지 확인할 때 (Zone? Item? Cursor?) | `.agent/knowledge/domain-glossary.md` |
 | 성능 관련 패턴이 필요할 때 | `.agent/knowledge/coding-rules.md` |
-| 1-listeners에서 함수를 작성할 때 | `.agent/knowledge/naming.md` → 파이프라인 동사 |
+| 1-listen에서 함수를 작성할 때 | `.agent/knowledge/naming.md` → 파이프라인 동사 |
 
 ### 테스트를 작성할 때
 

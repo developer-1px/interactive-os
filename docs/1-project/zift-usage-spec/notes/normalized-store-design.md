@@ -1,0 +1,1 @@
+../../../2-area/praxis/normalized-store-design.md

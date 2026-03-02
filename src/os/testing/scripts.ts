@@ -11,8 +11,9 @@
  *   - Headless/Browser: import { expect } from "@os/testing"
  *   - Playwright E2E:   import { expect } from "@playwright/test"
  */
-import type { Page } from "./types";
+
 import { expect as defaultExpect } from "./expect";
+import type { Page } from "./types";
 
 // ═══════════════════════════════════════════════════════════════════
 // Script type — each test suite is a named script
@@ -20,17 +21,17 @@ import { expect as defaultExpect } from "./expect";
 
 /** Minimal expect interface — compatible with both our wrapper and Playwright's */
 export type ExpectLocator = (locator: any) => {
+  toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
+  toBeFocused(): Promise<void>;
+  not: {
     toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
     toBeFocused(): Promise<void>;
-    not: {
-        toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
-        toBeFocused(): Promise<void>;
-    };
+  };
 };
 
 export interface TestScript {
-    name: string;
-    run: (page: Page, expect: ExpectLocator) => Promise<void>;
+  name: string;
+  run: (page: Page, expect: ExpectLocator) => Promise<void>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -38,39 +39,45 @@ export interface TestScript {
 // ═══════════════════════════════════════════════════════════════════
 
 export const listboxScript: TestScript = {
-    name: "Listbox — Vertical Nav + Selection",
-    async run(page, expect = defaultExpect) {
-        // Click focuses and selects
-        await page.locator("#lb-apple").click();
-        await expect(page.locator("#lb-apple")).toBeFocused();
-        await expect(page.locator("#lb-apple")).toHaveAttribute("aria-current", "true");
+  name: "Listbox — Vertical Nav + Selection",
+  async run(page, expect = defaultExpect) {
+    // Click focuses and selects
+    await page.locator("#lb-apple").click();
+    await expect(page.locator("#lb-apple")).toBeFocused();
+    await expect(page.locator("#lb-apple")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
 
-        // ArrowDown navigates + followFocus selects
-        await page.keyboard.press("ArrowDown");
-        await expect(page.locator("#lb-banana")).toBeFocused();
-        await expect(page.locator("#lb-banana")).toHaveAttribute("aria-current", "true");
+    // ArrowDown navigates + followFocus selects
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#lb-banana")).toBeFocused();
+    await expect(page.locator("#lb-banana")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
 
-        await page.keyboard.press("ArrowDown");
-        await expect(page.locator("#lb-cherry")).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#lb-cherry")).toBeFocused();
 
-        // ArrowUp reverses
-        await page.keyboard.press("ArrowUp");
-        await expect(page.locator("#lb-banana")).toBeFocused();
+    // ArrowUp reverses
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("#lb-banana")).toBeFocused();
 
-        // Boundary clamp — go to top, can't go higher
-        await page.keyboard.press("ArrowUp");
-        await expect(page.locator("#lb-apple")).toBeFocused();
-        await page.keyboard.press("ArrowUp");
-        await expect(page.locator("#lb-apple")).toBeFocused();
+    // Boundary clamp — go to top, can't go higher
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("#lb-apple")).toBeFocused();
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("#lb-apple")).toBeFocused();
 
-        // End → last item
-        await page.keyboard.press("End");
-        await expect(page.locator("#lb-elderberry")).toBeFocused();
+    // End → last item
+    await page.keyboard.press("End");
+    await expect(page.locator("#lb-elderberry")).toBeFocused();
 
-        // Home → first item
-        await page.keyboard.press("Home");
-        await expect(page.locator("#lb-apple")).toBeFocused();
-    },
+    // Home → first item
+    await page.keyboard.press("Home");
+    await expect(page.locator("#lb-apple")).toBeFocused();
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -78,34 +85,34 @@ export const listboxScript: TestScript = {
 // ═══════════════════════════════════════════════════════════════════
 
 export const toolbarScript: TestScript = {
-    name: "Toolbar — Horizontal Nav + Loop",
-    async run(page, expect = defaultExpect) {
-        // Click focuses
-        await page.locator("#tb-bold").click();
-        await expect(page.locator("#tb-bold")).toBeFocused();
+  name: "Toolbar — Horizontal Nav + Loop",
+  async run(page, expect = defaultExpect) {
+    // Click focuses
+    await page.locator("#tb-bold").click();
+    await expect(page.locator("#tb-bold")).toBeFocused();
 
-        // ArrowRight navigates horizontally
-        await page.keyboard.press("ArrowRight");
-        await expect(page.locator("#tb-italic")).toBeFocused();
+    // ArrowRight navigates horizontally
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#tb-italic")).toBeFocused();
 
-        await page.keyboard.press("ArrowRight");
-        await expect(page.locator("#tb-underline")).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#tb-underline")).toBeFocused();
 
-        await page.keyboard.press("ArrowRight");
-        await expect(page.locator("#tb-link")).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#tb-link")).toBeFocused();
 
-        // Loop: ArrowRight at last wraps to first
-        await page.keyboard.press("ArrowRight");
-        await expect(page.locator("#tb-bold")).toBeFocused();
+    // Loop: ArrowRight at last wraps to first
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#tb-bold")).toBeFocused();
 
-        // Loop: ArrowLeft at first wraps to last
-        await page.keyboard.press("ArrowLeft");
-        await expect(page.locator("#tb-link")).toBeFocused();
+    // Loop: ArrowLeft at first wraps to last
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("#tb-link")).toBeFocused();
 
-        // Orthogonal arrow ignored
-        await page.keyboard.press("ArrowDown");
-        await expect(page.locator("#tb-link")).toBeFocused();
-    },
+    // Orthogonal arrow ignored
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#tb-link")).toBeFocused();
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -113,22 +120,37 @@ export const toolbarScript: TestScript = {
 // ═══════════════════════════════════════════════════════════════════
 
 export const gridScript: TestScript = {
-    name: "Grid — Cmd+Click Multi-Select",
-    async run(page, expect = defaultExpect) {
-        // Click selects
-        await page.locator("#gr-cell-0").click();
-        await expect(page.locator("#gr-cell-0")).toHaveAttribute("aria-selected", "true");
+  name: "Grid — Cmd+Click Multi-Select",
+  async run(page, expect = defaultExpect) {
+    // Click selects
+    await page.locator("#gr-cell-0").click();
+    await expect(page.locator("#gr-cell-0")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
-        // Cmd+Click adds selection
-        await page.locator("#gr-cell-2").click({ modifiers: ["Meta"] });
-        await expect(page.locator("#gr-cell-2")).toHaveAttribute("aria-selected", "true");
-        await expect(page.locator("#gr-cell-0")).toHaveAttribute("aria-selected", "true");
+    // Cmd+Click adds selection
+    await page.locator("#gr-cell-2").click({ modifiers: ["Meta"] });
+    await expect(page.locator("#gr-cell-2")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#gr-cell-0")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
-        // Cmd+Click toggles off
-        await page.locator("#gr-cell-0").click({ modifiers: ["Meta"] });
-        await expect(page.locator("#gr-cell-0")).toHaveAttribute("aria-selected", "false");
-        await expect(page.locator("#gr-cell-2")).toHaveAttribute("aria-selected", "true");
-    },
+    // Cmd+Click toggles off
+    await page.locator("#gr-cell-0").click({ modifiers: ["Meta"] });
+    await expect(page.locator("#gr-cell-0")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
+    await expect(page.locator("#gr-cell-2")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -136,29 +158,44 @@ export const gridScript: TestScript = {
 // ═══════════════════════════════════════════════════════════════════
 
 export const radiogroupScript: TestScript = {
-    name: "Radiogroup — Loop + Auto-Select",
-    async run(page, expect = defaultExpect) {
-        // Click selects first radio
-        await page.locator("#rg-sm").click();
-        await expect(page.locator("#rg-sm")).toBeFocused();
-        await expect(page.locator("#rg-sm")).toHaveAttribute("aria-selected", "true");
+  name: "Radiogroup — Loop + Auto-Select",
+  async run(page, expect = defaultExpect) {
+    // Click selects first radio
+    await page.locator("#rg-sm").click();
+    await expect(page.locator("#rg-sm")).toBeFocused();
+    await expect(page.locator("#rg-sm")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
-        // ArrowDown auto-selects next
-        await page.keyboard.press("ArrowDown");
-        await expect(page.locator("#rg-md")).toBeFocused();
-        await expect(page.locator("#rg-md")).toHaveAttribute("aria-selected", "true");
-        await expect(page.locator("#rg-sm")).toHaveAttribute("aria-selected", "false");
+    // ArrowDown auto-selects next
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#rg-md")).toBeFocused();
+    await expect(page.locator("#rg-md")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#rg-sm")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
 
-        // ArrowDown to last
-        await page.keyboard.press("ArrowDown");
-        await expect(page.locator("#rg-lg")).toBeFocused();
-        await expect(page.locator("#rg-lg")).toHaveAttribute("aria-selected", "true");
+    // ArrowDown to last
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#rg-lg")).toBeFocused();
+    await expect(page.locator("#rg-lg")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
-        // Loop: ArrowDown at last wraps to first
-        await page.keyboard.press("ArrowDown");
-        await expect(page.locator("#rg-sm")).toBeFocused();
-        await expect(page.locator("#rg-sm")).toHaveAttribute("aria-selected", "true");
-    },
+    // Loop: ArrowDown at last wraps to first
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#rg-sm")).toBeFocused();
+    await expect(page.locator("#rg-sm")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -166,118 +203,152 @@ export const radiogroupScript: TestScript = {
 // ═══════════════════════════════════════════════════════════════════
 
 export const accordionScript: TestScript = {
-    name: "Accordion — Click Expand + Enter/Space + Arrow Nav",
-    async run(page, expect = defaultExpect) {
-        // ═══════════════════════════════════════════════════
-        // 1. Click → Expand (THE RED TEST)
-        // ═══════════════════════════════════════════════════
+  name: "Accordion — Click Expand + Enter/Space + Arrow Nav",
+  async run(page, expect = defaultExpect) {
+    // ═══════════════════════════════════════════════════
+    // 1. Click → Expand (THE RED TEST)
+    // ═══════════════════════════════════════════════════
 
-        // Click first header → should focus AND expand
-        await page.locator("#acc-personal").click();
-        await expect(page.locator("#acc-personal")).toBeFocused();
-        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+    // Click first header → should focus AND expand
+    await page.locator("#acc-personal").click();
+    await expect(page.locator("#acc-personal")).toBeFocused();
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
-        // Click again → collapse
-        await page.locator("#acc-personal").click();
-        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "false");
+    // Click again → collapse
+    await page.locator("#acc-personal").click();
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
-        // Click a DIFFERENT header → should focus AND expand it
-        await page.locator("#acc-billing").click();
-        await expect(page.locator("#acc-billing")).toBeFocused();
-        await expect(page.locator("#acc-billing")).toHaveAttribute("aria-expanded", "true");
+    // Click a DIFFERENT header → should focus AND expand it
+    await page.locator("#acc-billing").click();
+    await expect(page.locator("#acc-billing")).toBeFocused();
+    await expect(page.locator("#acc-billing")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
-        // Click billing again → collapse
-        await page.locator("#acc-billing").click();
-        await expect(page.locator("#acc-billing")).toHaveAttribute("aria-expanded", "false");
+    // Click billing again → collapse
+    await page.locator("#acc-billing").click();
+    await expect(page.locator("#acc-billing")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
-        // ═══════════════════════════════════════════════════
-        // 2. Keyboard: Enter/Space expand
-        // ═══════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════
+    // 2. Keyboard: Enter/Space expand
+    // ═══════════════════════════════════════════════════
 
-        // Click to focus first header
-        await page.locator("#acc-personal").click();
-        await expect(page.locator("#acc-personal")).toBeFocused();
+    // Click to focus first header
+    await page.locator("#acc-personal").click();
+    await expect(page.locator("#acc-personal")).toBeFocused();
 
-        // Collapse first (click toggled it)
-        const expanded = await page.locator("#acc-personal").getAttribute("aria-expanded");
-        if (expanded === "true") {
-            await page.keyboard.press("Enter");
-        }
-        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "false");
+    // Collapse first (click toggled it)
+    const expanded = await page
+      .locator("#acc-personal")
+      .getAttribute("aria-expanded");
+    if (expanded === "true") {
+      await page.keyboard.press("Enter");
+    }
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
-        // Enter expands the panel
-        await page.keyboard.press("Enter");
-        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+    // Enter expands the panel
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
-        // Enter again collapses
-        await page.keyboard.press("Enter");
-        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "false");
+    // Enter again collapses
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
-        // Space also expands
-        await page.keyboard.press(" ");
-        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+    // Space also expands
+    await page.keyboard.press(" ");
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
-        // ═══════════════════════════════════════════════════
-        // 3. Arrow navigation
-        // ═══════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════
+    // 3. Arrow navigation
+    // ═══════════════════════════════════════════════════
 
-        // ArrowDown moves to next header
-        await page.keyboard.press("ArrowDown");
-        await expect(page.locator("#acc-billing")).toBeFocused();
+    // ArrowDown moves to next header
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#acc-billing")).toBeFocused();
 
-        // ArrowDown to last
-        await page.keyboard.press("ArrowDown");
-        await expect(page.locator("#acc-shipping")).toBeFocused();
+    // ArrowDown to last
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#acc-shipping")).toBeFocused();
 
-        // Boundary clamp — can't go past last
-        await page.keyboard.press("ArrowDown");
-        await expect(page.locator("#acc-shipping")).toBeFocused();
+    // Boundary clamp — can't go past last
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#acc-shipping")).toBeFocused();
 
-        // ArrowUp back
-        await page.keyboard.press("ArrowUp");
-        await expect(page.locator("#acc-billing")).toBeFocused();
+    // ArrowUp back
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("#acc-billing")).toBeFocused();
 
-        // Home → first
-        await page.keyboard.press("Home");
-        await expect(page.locator("#acc-personal")).toBeFocused();
+    // Home → first
+    await page.keyboard.press("Home");
+    await expect(page.locator("#acc-personal")).toBeFocused();
 
-        // End → last
-        await page.keyboard.press("End");
-        await expect(page.locator("#acc-shipping")).toBeFocused();
+    // End → last
+    await page.keyboard.press("End");
+    await expect(page.locator("#acc-shipping")).toBeFocused();
 
-        // ═══════════════════════════════════════════════════
-        // 4. Panel content click must NOT toggle (W3C APG)
-        // ═══════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════
+    // 4. Panel content click must NOT toggle (W3C APG)
+    // ═══════════════════════════════════════════════════
 
-        // Ensure personal is expanded first
-        await page.locator("#acc-personal").click();
-        const state4 = await page.locator("#acc-personal").getAttribute("aria-expanded");
-        if (state4 !== "true") {
-            // Was collapsed by click; click again to expand
-            await page.locator("#acc-personal").click();
-        }
-        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+    // Ensure personal is expanded first
+    await page.locator("#acc-personal").click();
+    const state4 = await page
+      .locator("#acc-personal")
+      .getAttribute("aria-expanded");
+    if (state4 !== "true") {
+      // Was collapsed by click; click again to expand
+      await page.locator("#acc-personal").click();
+    }
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
-        // Click on the panel content area — must NOT collapse
-        await page.locator("#panel-acc-personal").click();
-        await expect(page.locator("#acc-personal")).toHaveAttribute("aria-expanded", "true");
+    // Click on the panel content area — must NOT collapse
+    await page.locator("#panel-acc-personal").click();
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
-        // ═══════════════════════════════════════════════════
-        // 5. Tab follows page flow (W3C APG)
-        //    "all focusable elements in the accordion
-        //     are included in the page Tab sequence"
-        // ═══════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════
+    // 5. Tab follows page flow (W3C APG)
+    //    "all focusable elements in the accordion
+    //     are included in the page Tab sequence"
+    // ═══════════════════════════════════════════════════
 
-        // Focus personal header (already expanded from section 4)
-        await page.locator("#acc-personal").click();
-        await expect(page.locator("#acc-personal")).toBeFocused();
+    // Focus personal header (already expanded from section 4)
+    await page.locator("#acc-personal").click();
+    await expect(page.locator("#acc-personal")).toBeFocused();
 
-        // Tab should NOT escape — it should move to next focusable
-        // (could be panel inputs or next header)
-        await page.keyboard.press("Tab");
-        // acc-personal should no longer be focused (Tab moved away)
-        await expect(page.locator("#acc-personal")).not.toBeFocused();
-    },
+    // Tab should NOT escape — it should move to next focusable
+    // (could be panel inputs or next header)
+    await page.keyboard.press("Tab");
+    // acc-personal should no longer be focused (Tab moved away)
+    await expect(page.locator("#acc-personal")).not.toBeFocused();
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -285,9 +356,9 @@ export const accordionScript: TestScript = {
 // ═══════════════════════════════════════════════════════════════════
 
 export const allAriaScripts: TestScript[] = [
-    listboxScript,
-    toolbarScript,
-    gridScript,
-    radiogroupScript,
-    accordionScript,
+  listboxScript,
+  toolbarScript,
+  gridScript,
+  radiogroupScript,
+  accordionScript,
 ];

@@ -7,7 +7,7 @@
  *   3. scrollSection effect registered on the zone
  */
 
-import { Keybindings } from "@os/keymaps/keybindings";
+import { Keybindings } from "@os/2-resolve/keybindings";
 import { describe, expect, it } from "vitest";
 import { DocsReaderUI, NEXT_SECTION, PREV_SECTION } from "@/docs-viewer/app";
 

@@ -27,7 +27,7 @@
 └──────────────────────┬──────────────────────────────────────────┘
                        ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│  L1. KeyboardListener              (1-listeners)                │
+│  L1. KeyboardListener              (1-listen)                │
 │  ─────────────────────────────────────────────────               │
 │  KeyboardEvent → isEditing 판단 → canonical key 생성             │
 │  Input:  KeyboardEvent                                          │
@@ -292,7 +292,7 @@ test("ACTIVATE dispatches onAction when Zone has it", () => {
 
 | 항목 | 내용 |
 |------|------|
-| **파일** | `1-listeners/KeyboardListener.tsx` |
+| **파일** | `1-listen/KeyboardListener.tsx` |
 | **테스트 방식** | Vitest + jsdom / React Testing Library |
 | **DOM 필요** | ✅ |
 | **검증 포인트** | isEditing 판단, canonical key 생성, dispatch 호출 |

@@ -9,15 +9,10 @@
  * open/close, keyboard, backdrop 전부 OS가 관리 (OG-001).
  */
 
-
-import { Item } from "@/os/6-components/primitives/Item";
-import { Trigger } from "@/os/6-components/primitives/Trigger";
+import { Item } from "@/os/6-project/Item";
+import { Trigger } from "@/os/6-project/Trigger";
 import { resolveFieldValue } from "./entities/i18n";
-import {
-  addLocaleCommand,
-  setLocaleCommand,
-  useLocaleState,
-} from "./locale";
+import { addLocaleCommand, setLocaleCommand, useLocaleState } from "./locale";
 
 // 지원 언어 목록
 const SUPPORTED_LOCALES = [
@@ -107,9 +102,7 @@ export function LocaleSwitcher() {
           {/* 구분선 + 언어 추가 */}
           {unaddedLocales.length > 0 && (
             <>
-              <li
-                style={{ borderTop: "1px solid #e2e8f0", margin: "4px 0" }}
-              />
+              <li style={{ borderTop: "1px solid #e2e8f0", margin: "4px 0" }} />
               {unaddedLocales.map((l) => (
                 <Item key={l.code} id={`locale-add-${l.code}`} asChild>
                   <Trigger.Dismiss

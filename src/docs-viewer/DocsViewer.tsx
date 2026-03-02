@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { os } from "@/os/kernel";
+import { os } from "@/os/core/engine/kernel";
 import { DocsSidebar } from "./DocsSidebar";
 
 // Side-effect: register docs-viewer commands on kernel

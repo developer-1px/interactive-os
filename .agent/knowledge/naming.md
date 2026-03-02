@@ -148,7 +148,7 @@
 
 ---
 
-## 4. Listener 내부 파이프라인 동사 (1-listeners 전용)
+## 4. Listener 내부 파이프라인 동사 (1-listen 전용)
 
 ```
 DOM Event → sense → extract → resolve → dispatch

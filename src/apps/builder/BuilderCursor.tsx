@@ -18,8 +18,8 @@
 
 import { useContext, useRef } from "react";
 import { useElementRect } from "@/hooks/useElementRect";
-import { findItemElement } from "@/os/2-contexts/itemQueries";
-import { os } from "@/os/kernel";
+import { findItemElement } from "@/os/3-inject/itemQueries";
+import { os } from "@/os/core/engine/kernel";
 import { HighlightContext } from "@/pages/builder/PropertiesPanel";
 import { cursorRegistry } from "./model/cursorRegistry";
 

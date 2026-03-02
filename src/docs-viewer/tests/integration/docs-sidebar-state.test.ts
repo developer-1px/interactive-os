@@ -8,7 +8,7 @@
  */
 
 import { defineScope } from "@kernel";
-import { createOsPage, type OsPage } from "@os/defineApp.page";
+import { createOsPage, type OsPage } from "@os/app/defineApp/page";
 import { produce } from "immer";
 import {
   afterEach,
@@ -18,8 +18,12 @@ import {
   it,
   onTestFailed,
 } from "vitest";
+
 // toggleSection is a red-test stub — not yet implemented in app.ts
-const toggleSection = (payload: { sectionId: string }) => ({ type: "DOCS_TOGGLE_SECTION" as const, payload });
+const toggleSection = (payload: { sectionId: string }) => ({
+  type: "DOCS_TOGGLE_SECTION" as const,
+  payload,
+});
 
 describe("T4: DocsSidebar — isOpen via OS command (not useState)", () => {
   let page: OsPage;

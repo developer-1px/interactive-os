@@ -34,13 +34,13 @@
 ```
 src/
 ├── os/          ← 레거시 (마이그레이션 대상)
-│   ├── app/export/primitives/   ← Public: Zone, Item, Field, Trigger, Label
-│   ├── features/focus/primitives/  ← Internal: FocusGroup, FocusItem (레거시)
+│   ├── app/export/6-project/   ← Public: Zone, Item, Field, Trigger, Label
+│   ├── features/focus/6-project/  ← Internal: FocusGroup, FocusItem (레거시)
 │   ├── features/command/        ← CommandEngineStore, createCommandStore
 │   └── middleware/              ← historyMiddleware, navigationMiddleware
 │
 ├── os-new/      ← 신규 (현재 개발 중)
-│   ├── primitives/   ← Internal: FocusGroup, FocusItem (신규)
+│   ├── 6-project/   ← Internal: FocusGroup, FocusItem (신규)
 │   ├── 1-sensor/     ← 키보드/포커스 센서
 │   ├── 2-command/    ← OS 커맨드 (NAVIGATE, ACTIVATE, ...)
 │   ├── 3-store/      ← Zone별 Zustand 스토어
@@ -86,8 +86,8 @@ src/
 |---|---|---|
 | 소비자 | App Developer | OS Developer |
 | 관심사 | 선언적 API, 커맨드 바인딩 | 포커스 메커니즘, ARIA, DOM |
-| 현재 위치 | `os/app/export/primitives/` (레거시 위) | `os-new/primitives/` (신규) |
-| 최종 위치 | 신규 internal 위에 재구축 | `os-new/primitives/` |
+| 현재 위치 | `os/app/export/6-project/` (레거시 위) | `os-new/6-project/` (신규) |
+| 최종 위치 | 신규 internal 위에 재구축 | `os-new/6-project/` |
 | ID 변수명 | `id` (prop) | `groupId` (내부) |
 
 | Public | Internal | 관계 |
@@ -343,11 +343,11 @@ interface ZoneSnapshot {
 
 | 이름 | 현재 위치 | wraps | 역할 |
 |---|---|---|---|
-| `Zone` | `os/app/export/primitives/` | `FocusGroup` | 포커스 영역 facade |
-| `Item` | `os/app/export/primitives/` | `FocusItem` | 포커스 요소 + selection + render props |
-| `Field` | `os/app/export/primitives/` | `FocusItem` | contentEditable 인라인 편집 |
-| `Trigger` | `os/app/export/primitives/` | `FocusItem` | 클릭 → dispatch 버튼 |
-| `Label` | `os/app/export/primitives/` | (없음) | Field 히트 영역 확장 |
+| `Zone` | `os/app/export/6-project/` | `FocusGroup` | 포커스 영역 facade |
+| `Item` | `os/app/export/6-project/` | `FocusItem` | 포커스 요소 + selection + render props |
+| `Field` | `os/app/export/6-project/` | `FocusItem` | contentEditable 인라인 편집 |
+| `Trigger` | `os/app/export/6-project/` | `FocusItem` | 클릭 → dispatch 버튼 |
+| `Label` | `os/app/export/6-project/` | (없음) | Field 히트 영역 확장 |
 
 현재 레거시 `os/`의 FocusGroup/FocusItem 위에 있음.
 최종적으로 신규 `os-new/`의 FocusGroup/FocusItem 위에 재구축.
@@ -356,8 +356,8 @@ interface ZoneSnapshot {
 
 | 이름 | 레거시 위치 | 신규 위치 | 역할 |
 |---|---|---|---|
-| `FocusGroup` | `os/features/focus/primitives/` | `os-new/primitives/` | scope/store/config/DOM 관리 |
-| `FocusItem` | `os/features/focus/primitives/` | `os-new/primitives/` | tabindex/aria/data-focused/DOM 등록 |
+| `FocusGroup` | `os/features/focus/6-project/` | `os-new/6-project/` | scope/store/config/DOM 관리 |
+| `FocusItem` | `os/features/focus/6-project/` | `os-new/6-project/` | tabindex/aria/data-focused/DOM 등록 |
 
 **두 곳에 존재하는 이유:** 레거시 → 신규 마이그레이션 진행 중.
 최종적으로 레거시 삭제, 신규만 남음.

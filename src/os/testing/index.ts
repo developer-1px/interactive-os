@@ -15,10 +15,23 @@
  *   await expect(page.locator("b")).toBeFocused();
  */
 
-export type { Page, Locator, LocatorAssertions } from "./types";
+export {
+  type BrowserPage,
+  type BrowserPageOptions,
+  type BrowserStep,
+  createBrowserPage,
+  resetFocusState,
+} from "./createBrowserPage";
 export { createHeadlessPage, type HeadlessPage } from "./createHeadlessPage";
-export { createBrowserPage, resetFocusState, type BrowserPage, type BrowserPageOptions, type BrowserStep } from "./createBrowserPage";
 export { expect } from "./expect";
-export { type TestScript, allAriaScripts, listboxScript, toolbarScript, gridScript, radiogroupScript, accordionScript } from "./scripts";
+export {
+  accordionScript,
+  allAriaScripts,
+  gridScript,
+  listboxScript,
+  radiogroupScript,
+  type TestScript,
+  toolbarScript,
+} from "./scripts";
 export { TestBotRegistry } from "./TestBotRegistry";
-
+export type { Locator, LocatorAssertions, Page } from "./types";

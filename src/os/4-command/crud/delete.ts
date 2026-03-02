@@ -1,0 +1,41 @@
+/**
+ * OS_DELETE Command — Backspace/Delete key handler
+ *
+ * Constructs a ZoneCursor and passes it to the zone's onDelete callback.
+ * The app decides how to handle single vs multi-select deletion.
+ *
+ * OS wraps the returned command(s) in a transaction for single-undo (⌘Z),
+ * then clears selection.
+ */
+
+import { ZoneRegistry } from "@os/core/engine/registries/zoneRegistry";
+import { os } from "../../core/engine/kernel";
+import {
+  beginTransaction,
+  endTransaction,
+} from "../../core/engine/middlewares/historyKernelMiddleware";
+import { buildZoneCursor } from "../utils/buildZoneCursor";
+
+export const OS_DELETE = os.defineCommand("OS_DELETE", (ctx) => () => {
+  const { activeZoneId } = ctx.state.os.focus;
+  if (!activeZoneId) return;
+
+  const zone = ctx.state.os.focus.zones[activeZoneId];
+  const entry = ZoneRegistry.get(activeZoneId);
+  if (!entry?.onDelete) return;
+
+  const cursor = buildZoneCursor(zone);
+  if (!cursor) return;
+
+  const result = entry.onDelete(cursor);
+  const commands = Array.isArray(result) ? result : [result];
+
+  // OS_DELETE no longer forces OS_SELECTION_CLEAR, allowing apps to delay selection removal for dialogs.
+  // We still wrap the action in a single-undo transaction if there is a multi-selection.
+  if (cursor.selection.length > 0) {
+    beginTransaction();
+    queueMicrotask(endTransaction);
+  }
+
+  return { dispatch: commands };
+});

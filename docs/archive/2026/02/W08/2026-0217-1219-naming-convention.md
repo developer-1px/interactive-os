@@ -91,9 +91,9 @@
 | 규칙 | 기준 | 예시 |
 |------|------|------|
 | 업계 관행이 있는 이름 | 표준 그대로 | `lib/`, `ui/`, `config/`, `model/`, `state/` |
-| 컬렉션 폴더 | 복수형 | `widgets/`, `primitives/`, `stores/`, `panels/`, `keymaps/` |
+| 컬렉션 폴더 | 복수형 | `widgets/`, `6-project/`, `stores/`, `panels/`, `keymaps/` |
 | 테스트 | `tests/` → `unit/`, `e2e/` | 고정 구조 |
-| 순서가 의미인 곳 | `N-name/` (번호 접두사) | `1-listeners/`, `0-inbox/` |
+| 순서가 의미인 곳 | `N-name/` (번호 접두사) | `1-listen/`, `0-inbox/` |
 | 앱/모듈/프로젝트 | kebab-case | `todo/`, `builder-mvp/` |
 
 #### 구조 어휘 — 세 세계
@@ -101,7 +101,7 @@
 | 영역 | 어휘 체계 | 레이어 |
 |------|----------|--------|
 | **Apps** | **FSD** | `app.ts` → `widgets/` → `features/` → `entities/` → `shared/` |
-| **OS** | **파이프라인** (번호) | `1-listeners/` → `2-contexts/` → `3-commands/` → `4-effects/` → `5-hooks/` → `6-components/` |
+| **OS** | **파이프라인** (번호) | `1-listen/` → `2-contexts/` → `3-commands/` → `4-effects/` → `5-hooks/` → `6-components/` |
 | **Docs** | **PARA** (번호) | `0-inbox/` → `1-project/` → `2-area/` → `3-resource/` → `4-archive/` → `5-backlog/` |
 
 #### 즉시 교정 대상

@@ -1,4 +1,4 @@
-# 1-listeners 파이프라인 전수 구조 분석
+# 1-listen 파이프라인 전수 구조 분석
 
 | 원문 | 1-listener의 파이프라인의 개념을 MECE하게 표로 만들어줘 |
 |------|-------|
@@ -8,7 +8,7 @@
 
 ## 1. 개요
 
-1-listeners는 W3C UI Events 스펙 기준으로 폴더링된 DOM 어댑터 계층이다.
+1-listen는 W3C UI Events 스펙 기준으로 폴더링된 DOM 어댑터 계층이다.
 모든 리스너는 **Sense → Resolve → Dispatch** 3단 파이프라인을 따른다:
 - **Sense**: DOM 이벤트에서 순수 데이터 객체를 추출 (어댑터)
 - **Resolve**: 순수 데이터 → 커맨드 결정 (순수 함수, 테스트 가능)
@@ -84,6 +84,6 @@
 2. `drag/DragListener.tsx`를 지금 삭제할 것인가?
 
 > **3줄 요약**
-> 1-listeners는 6개 W3C 모듈 기준으로 Sense→Resolve→Dispatch 파이프라인을 따른다.
+> 1-listen는 6개 W3C 모듈 기준으로 Sense→Resolve→Dispatch 파이프라인을 따른다.
 > sense 분리 수준은 DOM 탐색 복잡도에 비례하며, Mouse(분리 완료), Keyboard(인라인/정당), Focus/Clipboard(인라인/ROI 낮음)로 나뉜다.
 > `senseMouse.ts`의 이름은 Mouse 시맨틱을 감지하므로 정당하며, `resolveMouseDown`↔`resolveMouse` 이름 혼동이 유일한 개선 후보다.

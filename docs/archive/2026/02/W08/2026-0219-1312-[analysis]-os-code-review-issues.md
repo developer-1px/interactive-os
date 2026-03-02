@@ -92,7 +92,7 @@ const combinedRef = useMemo(
 
 ### Issue #4 — `Trigger.tsx:131` — `MouseEvent` 타입 불일치 🟡
 
-**파일**: `src/os/6-components/primitives/Trigger.tsx`
+**파일**: `src/os/6-components/6-project/Trigger.tsx`
 ```typescript
 onClick?.(e as any);
 ```
@@ -111,7 +111,7 @@ onClick?.(e as ReactMouseEvent<HTMLElement>);
 
 ### Issue #5 — `Trigger.tsx:147,162` — `child.type` 비교와 `portalElement.props` 🟡
 
-**파일**: `src/os/6-components/primitives/Trigger.tsx`
+**파일**: `src/os/6-components/6-project/Trigger.tsx`
 ```typescript
 if (isValidElement(child) && (child.type as any) === TriggerPortal) {
   // ...
@@ -140,7 +140,7 @@ if (isValidElement(child) && (child.type as any) === TriggerPortal) {
 
 ### Issue #6 — `Trigger.tsx:210` — span fallback의 ref/props 타입 우회 🟡
 
-**파일**: `src/os/6-components/primitives/Trigger.tsx`
+**파일**: `src/os/6-components/6-project/Trigger.tsx`
 ```typescript
 <span ref={ref as any} {...(baseProps as any)}>
 ```
@@ -158,7 +158,7 @@ if (isValidElement(child) && (child.type as any) === TriggerPortal) {
 
 ### Issue #7 — `Field.tsx:193` — `useComputed`의 string 반환 🟡
 
-**파일**: `src/os/6-components/primitives/Field.tsx`
+**파일**: `src/os/6-components/6-project/Field.tsx`
 ```typescript
 const activedescendantId = kernel.useComputed((s) => {
   if (target !== "virtual" || !controls) return null;

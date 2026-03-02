@@ -38,7 +38,7 @@ import { describe, expect, test, vi } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
-} from "@/os/collection/createCollectionZone";
+} from "@/os/core/library/collection/createCollectionZone";
 
 let now = 1000;
 

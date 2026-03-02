@@ -7,9 +7,9 @@
 import { TodoApp, TodoDraft, TodoList, TodoSearch } from "@apps/todo/app";
 import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
-import { useSelection } from "@os/5-hooks/useSelection";
-import { Field } from "@os/6-components/field/Field";
-import { Trigger } from "@os/6-components/primitives/Trigger";
+import { useSelection } from "@os/6-project/accessors/useSelection";
+import { Field } from "@os/6-project/field/Field";
+import { Trigger } from "@os/6-project/Trigger";
 import {
   AlertTriangle,
   CheckCheck,

@@ -118,9 +118,9 @@ Interactive OS는 모놀리스가 아니다. **각 기능이 독립 모듈**로 
 | **Foundation** | **Kernel** `@frozen` | `packages/kernel/src/createKernel.ts` | 521 tests | — |
 | **① Spatial** | **Focus** | `os/3-commands/focus/` | `navigate.test`, `recover.test`, `sync-focus.test`, `virtualFocus.test` | `focus-showcase.spec` (26) |
 | | **Focus Stack** | `os/3-commands/focus/stack.ts` | `stack.test` | `focus-showcase.spec` |
-| **② Input** | **Keyboard** | `os/1-listeners/KeyboardListener.tsx`, `os/keymaps/` | `keybindings.test`, `command-when.test`, `mac-fallback.test` | all E2E |
-| | **Mouse/FocusIn** | `os/1-listeners/FocusListener.tsx` | `zoneRegistry.test` | all E2E |
-| | **Clipboard (native)** | `os/1-listeners/ClipboardListener.tsx` | `clipboard-commands.test` | `dogfooding.spec` |
+| **② Input** | **Keyboard** | `os/1-listen/KeyboardListener.tsx`, `os/keymaps/` | `keybindings.test`, `command-when.test`, `mac-fallback.test` | all E2E |
+| | **Mouse/FocusIn** | `os/1-listen/FocusListener.tsx` | `zoneRegistry.test` | all E2E |
+| | **Clipboard (native)** | `os/1-listen/ClipboardListener.tsx` | `clipboard-commands.test` | `dogfooding.spec` |
 | **③ Behavior** | **Navigate** | `os/3-commands/navigate/` (7 files: resolve, strategies, entry, focusFinder, cornerNav, typeahead) | `navigate.test` (30+), `typeahead.test` (12) | `focus-showcase.spec`, `grid.spec`, `tree.spec` |
 | | **Tab** | `os/3-commands/interaction/tab.ts`, `resolveTab.ts` | `tab.test` | `focus-showcase.spec` |
 | | **Select** | `os/3-commands/selection/` (select, selectAll, selection) | `multi-select-commands.test`, `os-commands.test` | `focus-showcase.spec`, `listbox.spec` |

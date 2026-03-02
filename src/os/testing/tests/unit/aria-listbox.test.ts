@@ -13,240 +13,241 @@
  *   expect(loc).toHaveAttribute(), expect(loc).toBeFocused(),
  *   locator.getAttribute()
  */
-import { afterEach, describe, it } from "vitest";
+
 import { createHeadlessPage, expect } from "@os/testing";
+import { afterEach, describe, it } from "vitest";
 
 const ITEMS = ["apple", "banana", "cherry", "date", "elderberry"];
 
 describe("ARIA Listbox", () => {
-    const page = createHeadlessPage();
+  const page = createHeadlessPage();
 
-    afterEach(() => {
-        page.cleanup();
+  afterEach(() => {
+    page.cleanup();
+  });
+
+  // ═══════════════════════════════════════════════════
+  // §1 Vertical Navigation
+  // ═══════════════════════════════════════════════════
+
+  describe("Vertical Navigation", () => {
+    it("ArrowDown moves focus to next item", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
+
+      await page.locator("apple").click();
+      await expect(page.locator("apple")).toBeFocused();
+
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator("banana")).toBeFocused();
     });
 
-    // ═══════════════════════════════════════════════════
-    // §1 Vertical Navigation
-    // ═══════════════════════════════════════════════════
+    it("ArrowUp moves focus to previous item", async () => {
+      page.goto("listbox", {
+        items: ITEMS,
+        role: "listbox",
+        focusedItemId: "cherry",
+      });
 
-    describe("Vertical Navigation", () => {
-        it("ArrowDown moves focus to next item", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
-
-            await page.locator("apple").click();
-            await expect(page.locator("apple")).toBeFocused();
-
-            await page.keyboard.press("ArrowDown");
-            await expect(page.locator("banana")).toBeFocused();
-        });
-
-        it("ArrowUp moves focus to previous item", async () => {
-            page.goto("listbox", {
-                items: ITEMS,
-                role: "listbox",
-                focusedItemId: "cherry",
-            });
-
-            await page.keyboard.press("ArrowUp");
-            await expect(page.locator("banana")).toBeFocused();
-        });
-
-        it("sequential traversal: Down × 4, Up × 4", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
-            await page.locator("apple").click();
-
-            await page.keyboard.press("ArrowDown");
-            await expect(page.locator("banana")).toBeFocused();
-
-            await page.keyboard.press("ArrowDown");
-            await expect(page.locator("cherry")).toBeFocused();
-
-            await page.keyboard.press("ArrowDown");
-            await expect(page.locator("date")).toBeFocused();
-
-            await page.keyboard.press("ArrowDown");
-            await expect(page.locator("elderberry")).toBeFocused();
-
-            await page.keyboard.press("ArrowUp");
-            await expect(page.locator("date")).toBeFocused();
-
-            await page.keyboard.press("ArrowUp");
-            await expect(page.locator("cherry")).toBeFocused();
-
-            await page.keyboard.press("ArrowUp");
-            await expect(page.locator("banana")).toBeFocused();
-
-            await page.keyboard.press("ArrowUp");
-            await expect(page.locator("apple")).toBeFocused();
-        });
+      await page.keyboard.press("ArrowUp");
+      await expect(page.locator("banana")).toBeFocused();
     });
 
-    // ═══════════════════════════════════════════════════
-    // §2 Boundary Clamping (no loop)
-    // ═══════════════════════════════════════════════════
+    it("sequential traversal: Down × 4, Up × 4", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
+      await page.locator("apple").click();
 
-    describe("Boundary Clamping", () => {
-        it("ArrowDown at last item: stays", async () => {
-            page.goto("listbox", {
-                items: ITEMS,
-                role: "listbox",
-                focusedItemId: "elderberry",
-            });
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator("banana")).toBeFocused();
 
-            await page.keyboard.press("ArrowDown");
-            await expect(page.locator("elderberry")).toBeFocused();
-        });
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator("cherry")).toBeFocused();
 
-        it("ArrowUp at first item: stays", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
-            await page.locator("apple").click();
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator("date")).toBeFocused();
 
-            await page.keyboard.press("ArrowUp");
-            await expect(page.locator("apple")).toBeFocused();
-        });
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator("elderberry")).toBeFocused();
+
+      await page.keyboard.press("ArrowUp");
+      await expect(page.locator("date")).toBeFocused();
+
+      await page.keyboard.press("ArrowUp");
+      await expect(page.locator("cherry")).toBeFocused();
+
+      await page.keyboard.press("ArrowUp");
+      await expect(page.locator("banana")).toBeFocused();
+
+      await page.keyboard.press("ArrowUp");
+      await expect(page.locator("apple")).toBeFocused();
+    });
+  });
+
+  // ═══════════════════════════════════════════════════
+  // §2 Boundary Clamping (no loop)
+  // ═══════════════════════════════════════════════════
+
+  describe("Boundary Clamping", () => {
+    it("ArrowDown at last item: stays", async () => {
+      page.goto("listbox", {
+        items: ITEMS,
+        role: "listbox",
+        focusedItemId: "elderberry",
+      });
+
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator("elderberry")).toBeFocused();
     });
 
-    // ═══════════════════════════════════════════════════
-    // §3 Home / End
-    // ═══════════════════════════════════════════════════
+    it("ArrowUp at first item: stays", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
+      await page.locator("apple").click();
 
-    describe("Home / End", () => {
-        it("Home moves to first item", async () => {
-            page.goto("listbox", {
-                items: ITEMS,
-                role: "listbox",
-                focusedItemId: "cherry",
-            });
+      await page.keyboard.press("ArrowUp");
+      await expect(page.locator("apple")).toBeFocused();
+    });
+  });
 
-            await page.keyboard.press("Home");
-            await expect(page.locator("apple")).toBeFocused();
-        });
+  // ═══════════════════════════════════════════════════
+  // §3 Home / End
+  // ═══════════════════════════════════════════════════
 
-        it("End moves to last item", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
-            await page.locator("apple").click();
+  describe("Home / End", () => {
+    it("Home moves to first item", async () => {
+      page.goto("listbox", {
+        items: ITEMS,
+        role: "listbox",
+        focusedItemId: "cherry",
+      });
 
-            await page.keyboard.press("End");
-            await expect(page.locator("elderberry")).toBeFocused();
-        });
+      await page.keyboard.press("Home");
+      await expect(page.locator("apple")).toBeFocused();
     });
 
-    // ═══════════════════════════════════════════════════
-    // §4 Click Selection
-    // ═══════════════════════════════════════════════════
+    it("End moves to last item", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
+      await page.locator("apple").click();
 
-    describe("Click Selection", () => {
-        it("click focuses and selects item", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
+      await page.keyboard.press("End");
+      await expect(page.locator("elderberry")).toBeFocused();
+    });
+  });
 
-            await page.locator("apple").click();
-            await expect(page.locator("apple")).toBeFocused();
-            await expect(page.locator("apple")).toHaveAttribute(
-                "aria-selected",
-                "true",
-            );
-        });
+  // ═══════════════════════════════════════════════════
+  // §4 Click Selection
+  // ═══════════════════════════════════════════════════
 
-        it("click another deselects previous", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
+  describe("Click Selection", () => {
+    it("click focuses and selects item", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
 
-            await page.locator("apple").click();
-            await expect(page.locator("apple")).toHaveAttribute(
-                "aria-selected",
-                "true",
-            );
-
-            await page.locator("cherry").click();
-            await expect(page.locator("cherry")).toBeFocused();
-            await expect(page.locator("cherry")).toHaveAttribute(
-                "aria-selected",
-                "true",
-            );
-            await expect(page.locator("apple")).toHaveAttribute(
-                "aria-selected",
-                "false",
-            );
-        });
+      await page.locator("apple").click();
+      await expect(page.locator("apple")).toBeFocused();
+      await expect(page.locator("apple")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
     });
 
-    // ═══════════════════════════════════════════════════
-    // §5 Selection Follows Focus (single-select)
-    // ═══════════════════════════════════════════════════
+    it("click another deselects previous", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
 
-    describe("Selection Follows Focus", () => {
-        it("ArrowDown selects next (followFocus)", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
-            await page.locator("apple").click();
+      await page.locator("apple").click();
+      await expect(page.locator("apple")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
 
-            await page.keyboard.press("ArrowDown");
-            await expect(page.locator("banana")).toBeFocused();
-            await expect(page.locator("banana")).toHaveAttribute(
-                "aria-selected",
-                "true",
-            );
-            await expect(page.locator("apple")).toHaveAttribute(
-                "aria-selected",
-                "false",
-            );
-        });
+      await page.locator("cherry").click();
+      await expect(page.locator("cherry")).toBeFocused();
+      await expect(page.locator("cherry")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      await expect(page.locator("apple")).toHaveAttribute(
+        "aria-selected",
+        "false",
+      );
+    });
+  });
 
-        it("Home selects first", async () => {
-            page.goto("listbox", {
-                items: ITEMS,
-                role: "listbox",
-                focusedItemId: "cherry",
-            });
-            // Manually select cherry first  
-            await page.locator("cherry").click();
+  // ═══════════════════════════════════════════════════
+  // §5 Selection Follows Focus (single-select)
+  // ═══════════════════════════════════════════════════
 
-            await page.keyboard.press("Home");
-            await expect(page.locator("apple")).toBeFocused();
-            await expect(page.locator("apple")).toHaveAttribute(
-                "aria-selected",
-                "true",
-            );
-        });
+  describe("Selection Follows Focus", () => {
+    it("ArrowDown selects next (followFocus)", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
+      await page.locator("apple").click();
 
-        it("End selects last", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
-            await page.locator("apple").click();
-
-            await page.keyboard.press("End");
-            await expect(page.locator("elderberry")).toBeFocused();
-            await expect(page.locator("elderberry")).toHaveAttribute(
-                "aria-selected",
-                "true",
-            );
-        });
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator("banana")).toBeFocused();
+      await expect(page.locator("banana")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      await expect(page.locator("apple")).toHaveAttribute(
+        "aria-selected",
+        "false",
+      );
     });
 
-    // ═══════════════════════════════════════════════════
-    // §6 ARIA Attributes
-    // ═══════════════════════════════════════════════════
+    it("Home selects first", async () => {
+      page.goto("listbox", {
+        items: ITEMS,
+        role: "listbox",
+        focusedItemId: "cherry",
+      });
+      // Manually select cherry first
+      await page.locator("cherry").click();
 
-    describe("ARIA Attributes", () => {
-        it("zone has role=listbox", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
-
-            const role = await page.locator("listbox").getAttribute("role");
-            expect(role).toBe("listbox");
-        });
-
-        it("focused item has aria-current=true", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
-            await page.locator("banana").click();
-
-            await expect(page.locator("banana")).toHaveAttribute(
-                "aria-current",
-                "true",
-            );
-        });
-
-        it("items have role=option", async () => {
-            page.goto("listbox", { items: ITEMS, role: "listbox" });
-
-            const role = await page.locator("apple").getAttribute("role");
-            expect(role).toBe("option");
-        });
+      await page.keyboard.press("Home");
+      await expect(page.locator("apple")).toBeFocused();
+      await expect(page.locator("apple")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
     });
+
+    it("End selects last", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
+      await page.locator("apple").click();
+
+      await page.keyboard.press("End");
+      await expect(page.locator("elderberry")).toBeFocused();
+      await expect(page.locator("elderberry")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+    });
+  });
+
+  // ═══════════════════════════════════════════════════
+  // §6 ARIA Attributes
+  // ═══════════════════════════════════════════════════
+
+  describe("ARIA Attributes", () => {
+    it("zone has role=listbox", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
+
+      const role = await page.locator("listbox").getAttribute("role");
+      expect(role).toBe("listbox");
+    });
+
+    it("focused item has aria-current=true", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
+      await page.locator("banana").click();
+
+      await expect(page.locator("banana")).toHaveAttribute(
+        "aria-current",
+        "true",
+      );
+    });
+
+    it("items have role=option", async () => {
+      page.goto("listbox", { items: ITEMS, role: "listbox" });
+
+      const role = await page.locator("apple").getAttribute("role");
+      expect(role).toBe("option");
+    });
+  });
 });

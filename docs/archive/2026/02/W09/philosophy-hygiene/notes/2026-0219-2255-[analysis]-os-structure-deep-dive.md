@@ -30,7 +30,7 @@ status: draft
 
 ### 2.2. 구조 및 네이밍 (Structure & Naming)
 - **Directory Structure (✅ Pass)**:
-  - `1-listeners`, `2-contexts`, `3-commands` 등 번호 접두어 컨벤션을 통해 레이어의 위계를 명확히 하고 있다.
+  - `1-listen`, `2-contexts`, `3-commands` 등 번호 접두어 컨벤션을 통해 레이어의 위계를 명확히 하고 있다.
 - **Naming Convention (✅ Pass)**:
   - **Commands**: `OVERLAY_OPEN`, `FIELD_COMMIT` 등 `UPPER_SNAKE_CASE` + `VERB_NOUN` 패턴을 준수한다.
   - **Components**: `FocusItem`, `QuickPick` 등 `PascalCase`를 준수한다.
@@ -40,7 +40,7 @@ status: draft
 #### A. Import Path Inconsistency (Code Hygiene)
 `src/os/6-components/quickpick/QuickPick.tsx`에서 모듈 임포트 경로가 혼용되고 있다.
 ```typescript
-import { Item } from "@os/6-components/primitives/Item"; // @os 별칭 사용 (권장)
+import { Item } from "@os/6-components/6-project/Item"; // @os 별칭 사용 (권장)
 import { NAVIGATE } from "@/os/3-commands/navigate";     // @/os 별칭 사용 (일관성 부족)
 ```
 또한, Public API인 배럴 파일(`index.ts`)을 우회하여 하위 모듈을 직접 참조하고 있다.

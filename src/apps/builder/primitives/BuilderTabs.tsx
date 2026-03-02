@@ -18,9 +18,9 @@
  *   Tab panels        → conditionally rendered children
  */
 
-import { useSelection } from "@os/5-hooks/useSelection";
-import { Item as OSItem } from "@os/6-components/primitives/Item";
-import { Zone } from "@os/6-components/primitives/Zone";
+import { useSelection } from "@os/6-project/accessors/useSelection";
+import { Item as OSItem } from "@os/6-project/Item";
+import { Zone } from "@os/6-project/Zone";
 import { Children, type ReactElement, type ReactNode } from "react";
 import type { Block } from "@/apps/builder/model/appState";
 import { useCursorMeta } from "../hooks/useCursorMeta";

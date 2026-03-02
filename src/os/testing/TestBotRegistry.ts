@@ -18,44 +18,44 @@ let snapshot: TestScript[] = [];
 const listeners = new Set<() => void>();
 
 function rebuildSnapshot() {
-    snapshot = [...scripts];
+  snapshot = [...scripts];
 }
 
 function notify() {
-    rebuildSnapshot();
-    for (const fn of listeners) fn();
+  rebuildSnapshot();
+  for (const fn of listeners) fn();
 }
 
 // ─── API ─────────────────────────────────────────────────────────
 
 export const TestBotRegistry = {
-    /**
-     * Register page-specific TestBot scripts.
-     * Returns an `unregister` function — call it on component unmount.
-     */
-    register(pageScripts: TestScript[]): () => void {
-        scripts = pageScripts;
-        notify();
-        return () => {
-            scripts = [];
-            notify();
-        };
-    },
+  /**
+   * Register page-specific TestBot scripts.
+   * Returns an `unregister` function — call it on component unmount.
+   */
+  register(pageScripts: TestScript[]): () => void {
+    scripts = pageScripts;
+    notify();
+    return () => {
+      scripts = [];
+      notify();
+    };
+  },
 
-    /** Snapshot-safe — same reference until scripts change */
-    getScripts(): TestScript[] {
-        return snapshot;
-    },
+  /** Snapshot-safe — same reference until scripts change */
+  getScripts(): TestScript[] {
+    return snapshot;
+  },
 
-    /** Returns true if page scripts are currently registered */
-    hasScripts(): boolean {
-        return snapshot.length > 0;
-    },
+  /** Returns true if page scripts are currently registered */
+  hasScripts(): boolean {
+    return snapshot.length > 0;
+  },
 
-    subscribe(listener: () => void): () => void {
-        listeners.add(listener);
-        return () => {
-            listeners.delete(listener);
-        };
-    },
+  subscribe(listener: () => void): () => void {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  },
 };

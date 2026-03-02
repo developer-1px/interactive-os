@@ -10,8 +10,8 @@
  * All should 🔴 FAIL initially — that's the point.
  */
 
-import { ZoneRegistry } from "@os/registries/zoneRegistry";
-import { DEFAULT_CONFIG } from "@os/schemas/focus/config/FocusGroupConfig";
+import { ZoneRegistry } from "@os/core/engine/registries/zoneRegistry";
+import { DEFAULT_CONFIG } from "@os/core/schema/types/focus/config/FocusGroupConfig";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createCanvasItemFilter,

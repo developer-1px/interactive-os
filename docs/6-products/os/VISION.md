@@ -40,7 +40,7 @@
 
 ```
 Input → Signal → Command → State → View
-  1-listeners  →  keymaps  →  3-commands  →  kernel  →  6-components
+  1-listen  →  keymaps  →  3-commands  →  kernel  →  6-components
 ```
 
 ### defineApp 앱 구축 API

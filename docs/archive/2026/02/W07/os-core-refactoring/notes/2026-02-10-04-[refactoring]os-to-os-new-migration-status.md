@@ -27,10 +27,10 @@ imperative effect execution           kernel.defineEffect → Effects as Data
 | Legacy (`os/`) | New (`os-new/`) | 상태 |
 |---|---|---|
 | `features/keyboard/` (KeyboardIntent, routeKeyboard, routeCommand, routeField) | `1-sensor/keyboard/` (KeyboardSensor, KeyboardIntent, classifyKeyboard, interceptKeyboard) | ✅ 마이그레이션 완료 |
-| `features/focus/pipeline/2-intent/FocusIntent.tsx` | `1-sensor/focus/FocusSensor.tsx` | ✅ 마이그레이션 완료 |
+| `features/focus/pipeline/2-resolve/FocusIntent.tsx` | `1-sensor/focus/FocusSensor.tsx` | ✅ 마이그레이션 완료 |
 | — | `1-sensor/clipboard/ClipboardSensor.tsx` | ✅ 신규 추가 |
 | — | `1-sensor/history/HistoryIntent.tsx` | ✅ 신규 추가 |
-| — | `1-listeners/` (KeyboardListener, keybindings, osDefaults) | ✅ 신규 (Kernel용 리스너) |
+| — | `1-listen/` (KeyboardListener, keybindings, osDefaults) | ✅ 신규 (Kernel용 리스너) |
 
 ### 2.2 Command (커맨드 정의 & 해석)
 
@@ -92,7 +92,7 @@ imperative effect execution           kernel.defineEffect → Effects as Data
 |---|---|---|
 | `features/focus/hooks/useFocusExpansion.ts` | `5-hooks/useExpanded.ts` | ✅ Kernel `useComputed` 기반 |
 | `features/focus/hooks/useFocusRecovery.ts` | — | ❌ 미마이그레이션 |
-| `features/focus/hooks/useIsFocusedGroup.ts` | `primitives/hooks/useIsFocusedGroup.ts` | ✅ 복사됨 |
+| `features/focus/hooks/useIsFocusedGroup.ts` | `6-project/hooks/useIsFocusedGroup.ts` | ✅ 복사됨 |
 | — | `5-hooks/useFocused.ts` | ✅ Kernel `useComputed` 기반 (신규) |
 | — | `5-hooks/useSelected.ts` | ✅ Kernel `useComputed` 기반 (신규) |
 | — | `5-hooks/useActiveZone.ts` | ✅ Kernel `useComputed` 기반 (신규) |
@@ -102,16 +102,16 @@ imperative effect execution           kernel.defineEffect → Effects as Data
 
 | Legacy (`os/`) | New (`os-new/`) | 상태 |
 |---|---|---|
-| `features/focus/primitives/FocusGroup.tsx` | `primitives/FocusGroup.tsx` | ✅ 복사됨 (Zustand 기반) |
-| `features/focus/primitives/FocusItem.tsx` | `primitives/FocusItem.tsx` | ✅ 복사됨 (Zustand 기반) |
-| `app/export/primitives/Zone.tsx` | `6-components/Zone.tsx` | ✅ Kernel 기반 신규 |
-| `app/export/primitives/Item.tsx` | `6-components/Item.tsx` | ✅ Kernel 기반 신규 |
-| `app/export/primitives/App.tsx` | — | ❌ 미마이그레이션 |
-| `app/export/primitives/Builder*.tsx` (6개) | — | ❌ 미마이그레이션 |
-| `app/export/primitives/Field.tsx` | — | ❌ 미마이그레이션 |
-| `app/export/primitives/Label.tsx` | — | ❌ 미마이그레이션 |
-| `app/export/primitives/Root.tsx` | — | ❌ 미마이그레이션 |
-| `app/export/primitives/Trigger.tsx` | — | ❌ 미마이그레이션 |
+| `features/focus/6-project/FocusGroup.tsx` | `6-project/FocusGroup.tsx` | ✅ 복사됨 (Zustand 기반) |
+| `features/focus/6-project/FocusItem.tsx` | `6-project/FocusItem.tsx` | ✅ 복사됨 (Zustand 기반) |
+| `app/export/6-project/Zone.tsx` | `6-components/Zone.tsx` | ✅ Kernel 기반 신규 |
+| `app/export/6-project/Item.tsx` | `6-components/Item.tsx` | ✅ Kernel 기반 신규 |
+| `app/export/6-project/App.tsx` | — | ❌ 미마이그레이션 |
+| `app/export/6-project/Builder*.tsx` (6개) | — | ❌ 미마이그레이션 |
+| `app/export/6-project/Field.tsx` | — | ❌ 미마이그레이션 |
+| `app/export/6-project/Label.tsx` | — | ❌ 미마이그레이션 |
+| `app/export/6-project/Root.tsx` | — | ❌ 미마이그레이션 |
+| `app/export/6-project/Trigger.tsx` | — | ❌ 미마이그레이션 |
 | — | `6-components/ZoneContext.tsx` | ✅ 신규 |
 
 ### 2.8 Schema / Types
@@ -211,9 +211,9 @@ os-new/
 ├── 1-sensor/, 2-command/, 3-store/, 4-effect/   ← Legacy Pipeline (Zustand 직접 조작)
 ├── kernel.ts, 2-contexts/, 3-commands/,
 │   4-effects/, 5-hooks/, 6-components/          ← Kernel Pipeline (dispatch → effects)
-├── primitives/ (FocusGroup, FocusItem)          ← Legacy Primitive (Zustand)
+├── 6-project/ (FocusGroup, FocusItem)          ← Legacy Primitive (Zustand)
 ├── 6-components/ (Zone, Item)                   ← Kernel Primitive (신규)
 └── spike/                                       ← Kernel 검증 데모
 ```
 
-**전환 방향:** Legacy Pipeline → Kernel Pipeline. `3-store/`(Zustand slices)는 Kernel `state`로 흡수. `primitives/`는 `6-components/`로 대체.
+**전환 방향:** Legacy Pipeline → Kernel Pipeline. `3-store/`(Zustand slices)는 Kernel `state`로 흡수. `6-project/`는 `6-components/`로 대체.

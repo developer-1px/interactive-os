@@ -41,10 +41,10 @@
 
 | 용어 | 정의 | 코드 | 비고 |
 |------|------|------|------|
-| **Zone** | 포커스 관리의 최소 독립 영역. "이 영역은 리스트처럼 행동한다" | `Zone` 컴포넌트, `ZoneState` | ZIFT의 Z |
-| **Item** | Zone 안에서 포커스를 받을 수 있는 개별 요소 | `Item` 컴포넌트, `data-focus-item` | ZIFT의 I |
-| **Field** | 텍스트 편집이 가능한 Item (input, contenteditable) | `FieldBindings` | ZIFT의 F |
-| **Trigger** | 활성화(Enter/Click)에 반응하는 Item (button-like) | `Trigger` 컴포넌트 | ZIFT의 T |
+| **Zone** | **영역**. 포커스 관리의 최소 독립 영역. "이 영역은 리스트처럼 행동한다" | `Zone` 컴포넌트, `ZoneState` | ZIFT의 Z |
+| **Item** | **데이터**. Zone 안에서 포커스를 받을 수 있는 개별 요소 | `Item` 컴포넌트, `data-focus-item` | ZIFT의 I |
+| **Field** | **prop 편집**. 값을 편집하는 Item (boolean, number, string, enum) | `FieldBindings` | ZIFT의 F |
+| **Trigger** | **액션**. 활성화(Enter/Click)로 동작을 실행하는 Item | `Trigger` 컴포넌트 | ZIFT의 T |
 | **Focus** | 현재 어떤 아이템에 커서가 있는가 | `focusedItemId` | `activeZoneId` + `focusedItemId` |
 | **Active Zone** | 현재 포커스를 소유하고 있는 Zone | `activeZoneId` | |
 | **Focus Stack** | 오버레이 열릴 때 현재 포커스를 저장하고, 닫힐 때 복원하는 스택 | `FocusStackEntry[]` | dialog/modal 복원에 사용 |
@@ -54,6 +54,9 @@
 **Z**one → **I**tem → **F**ield → **T**rigger
 
 4개 개념으로 모든 UI 상호작용을 선언할 수 있다.
+ZIFT는 WAI-ARIA 1.2의 53개 속성과 **동형(isomorphic)**이다.
+
+**분류 한 줄 규칙**: 영역이면 Zone, 데이터면 Item, prop 편집이면 Field, 액션이면 Trigger.
 
 ```
 ┌─ Zone (listbox) ──────────────────┐
@@ -62,6 +65,21 @@
 │  └────────┘  └────────────────┘  │
 └───────────────────────────────────┘
 ```
+
+### ZIFT × ARIA 매핑
+
+| ZIFT | 한 줄 | 개수 | 대표 ARIA 속성 |
+|------|-------|------|---------------|
+| **Zone** | 영역 | 13 | `aria-orientation`, `aria-multiselectable`, `aria-modal`, `aria-activedescendant`, `aria-live` |
+| **Item** | 데이터 | 21 | `aria-label`, `aria-selected`, `aria-disabled`, `aria-level`, `aria-posinset`, `aria-current` |
+| **Field** | prop | 13 | `aria-checked`, `aria-pressed`, `aria-valuenow/min/max`, `aria-invalid`, `aria-required` |
+| **Trigger** | 액션 | 6 | `aria-expanded`, `aria-haspopup`, `aria-controls`, `aria-keyshortcuts` |
+
+> **패턴 분류법**: 새 APG 패턴을 구현할 때, "이것이 무엇을 하는가?"로 ZIFT 분류를 먼저 한다.
+> - "값을 토글한다" (switch, checkbox, toggle button) → **Field** (prop 편집)
+> - "패널을 펼치고 접는다" (accordion trigger, disclosure) → **Trigger** (액션)
+> - "항목들을 담고 탐색한다" (listbox, menu, tree) → **Zone** (영역)
+> - "정체성·위치·상태를 가진다" (option, treeitem, tab) → **Item** (데이터)
 
 ### Zone 상태 구조
 
@@ -297,7 +315,7 @@ zone.bind({
 
 | 폴더 | 파이프라인 단계 |
 |------|--------------|
-| `src/os/1-listeners/` | ② Input — DOM → Commands |
+| `src/os/1-listen/` | ② Input — DOM → Commands |
 | `src/os/2-contexts/` | ① Spatial — ZoneRegistry, DOM Context |
 | `src/os/3-commands/` | ③ Behavior — 커맨드 핸들러 |
 | `src/os/4-effects/` | ④ Output — focus(), scroll() |

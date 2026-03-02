@@ -364,7 +364,7 @@ Chakra UI 팀이 만든 [Zag.js](https://zagjs.com)는 headless 컴포넌트를 
 |---|---|---|---|---|
 | Kent C. Dodds — "Inversion of Control" | headless 패턴의 원리를 가장 명확히 설명 | [블로그](https://kentcdodds.com/blog/inversion-of-control) | ⭐⭐ | 30분 |
 | React Aria Architecture | 3레이어 아키텍처와 접근성 설계의 교과서 | [공식 문서](https://react-spectrum.adobe.com/react-aria/why.html) | ⭐⭐⭐ | 1시간 |
-| Radix UI Composition | asChild, data-state, compound pattern 실전 | [Radix Docs: Composition](https://www.radix-ui.com/primitives/docs/guides/composition) | ⭐⭐⭐ | 45분 |
+| Radix UI Composition | asChild, data-state, compound pattern 실전 | [Radix Docs: Composition](https://www.radix-ui.com/6-project/docs/guides/composition) | ⭐⭐⭐ | 45분 |
 | Zag.js 소스 코드 | FSM 기반 headless의 내부 동작 | [GitHub: chakra-ui/zag](https://github.com/chakra-ui/zag) | ⭐⭐⭐⭐ | 2시간 |
 | Downshift v9 useCombobox 소스 | render props → hooks 마이그레이션의 실제 | [GitHub: downshift-js](https://github.com/downshift-js/downshift) | ⭐⭐⭐ | 1시간 |
 | "The Evolution of Headless UI" | 업계 트렌드 종합 (shadcn, Radix, Ark) | [LogRocket Blog](https://blog.logrocket.com/guide-headless-ui-components-react/) | ⭐⭐ | 30분 |

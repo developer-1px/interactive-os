@@ -12,8 +12,8 @@
  * Decision table: docs/1-project/field-headless-input/notes/2026-0225-decision-table-draft-input.md
  */
 
+import { FieldRegistry } from "@os/core/engine/registries/fieldRegistry";
 import { describe, expect, it } from "vitest";
-import { FieldRegistry } from "@os/registries/fieldRegistry";
 import { page, setupTodoPage } from "./todo-helpers";
 
 setupTodoPage();

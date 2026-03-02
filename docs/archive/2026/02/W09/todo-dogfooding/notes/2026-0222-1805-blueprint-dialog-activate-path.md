@@ -27,7 +27,7 @@ Trigger의 `onPress` command는 React onClick에만 연결되어 있고, OS(Zone
 
 ## Inputs
 - `src/os/6-components/base/FocusItem.tsx` — inline style 제거, onActivate prop 추가
-- `src/os/6-components/primitives/Trigger.tsx` — onPress→onActivate rename, asChild 사용
+- `src/os/6-components/6-project/Trigger.tsx` — onPress→onActivate rename, asChild 사용
 - `src/os/6-components/radox/Dialog.tsx` — Dialog.Close의 onPress→onActivate
 - `src/os/defineApp.trigger.ts` — CompoundTrigger의 onPress→onActivate
 - `src/os/2-contexts/zoneRegistry.ts` — item-level callback 등록/조회 API

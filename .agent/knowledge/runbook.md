@@ -259,8 +259,8 @@ test("Enter activates item", () => {
 |------|------|
 | CRUD/Clipboard/Ordering 전체 패턴 | `src/apps/todo/app.ts` (벤치마크) |
 | Tree 네비게이션, 계층 구조 | `src/apps/builder/app.ts` + `src/docs-viewer/app.ts` |
-| Dialog/Menu/Overlay 패턴 | `docs/2-area/20-os/23-primitives/02-primitives-detail.md` |
-| LLM이 잘 쓰는 API 설계 원칙 | `docs/2-area/20-os/23-primitives/03-llm-friendly-design.md` |
+| Dialog/Menu/Overlay 패턴 | `docs/2-area/20-os/23-6-project/02-primitives-detail.md` |
+| LLM이 잘 쓰는 API 설계 원칙 | `docs/2-area/20-os/23-6-project/03-llm-friendly-design.md` |
 
 ### 테스트
 

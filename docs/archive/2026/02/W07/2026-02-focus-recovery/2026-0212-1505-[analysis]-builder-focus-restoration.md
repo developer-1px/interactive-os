@@ -49,11 +49,11 @@ graph LR
 
 | 구성 요소 | 파일 | 상태 |
 |-----------|------|------|
-| `OS.Zone` (Facade → FocusGroup) | [Zone.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/6-components/primitives/Zone.tsx) | ✅ 정상 작동 |
-| `Builder.Section/Group/Item` | [Builder.tsx](file:///Users/user/Desktop/interactive-os/src/apps/builder/primitives/Builder.tsx) | ✅ 존재, `useFocusGroupContext()` 사용 |
+| `OS.Zone` (Facade → FocusGroup) | [Zone.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/6-components/6-project/Zone.tsx) | ✅ 정상 작동 |
+| `Builder.Section/Group/Item` | [Builder.tsx](file:///Users/user/Desktop/interactive-os/src/apps/builder/6-project/Builder.tsx) | ✅ 존재, `useFocusGroupContext()` 사용 |
 | 블록 컴포넌트의 Builder 어노테이션 | [NCPHeroBlock.tsx](file:///Users/user/Desktop/interactive-os/src/pages/builder/NCPHeroBlock.tsx) 등 | ✅ 모든 블록이 `Builder.Section`/`Builder.Item` 사용 |
-| `FocusListener` (mouse) | [FocusListener.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/1-listeners/FocusListener.tsx) | ✅ `mousedown` → `FOCUS` + `SELECT` dispatch |
-| `KeyboardListener` (keyboard) | [KeyboardListener.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/1-listeners/KeyboardListener.tsx) | ✅ Arrow → `NAVIGATE` dispatch |
+| `FocusListener` (mouse) | [FocusListener.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/1-listen/FocusListener.tsx) | ✅ `mousedown` → `FOCUS` + `SELECT` dispatch |
+| `KeyboardListener` (keyboard) | [KeyboardListener.tsx](file:///Users/user/Desktop/interactive-os/src/os-new/1-listen/KeyboardListener.tsx) | ✅ Arrow → `NAVIGATE` dispatch |
 | `NAVIGATE` command (cornerNav) | [navigate/index.ts](file:///Users/user/Desktop/interactive-os/src/os-new/3-commands/navigate/index.ts) | ⚠️ `DOM_ITEMS`, `DOM_RECTS` 주입 필요 |
 | `FocusDebugOverlay` | (삭제됨) | ❌ `a3c6bdf`에서 제거 |
 | `PropertiesPanel` selection 연동 | [BuilderPage.tsx](file:///Users/user/Desktop/interactive-os/src/pages/BuilderPage.tsx) | ⚠️ kernel selection과 미연결, `useState`로 하드코딩 |

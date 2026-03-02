@@ -55,7 +55,7 @@
 
 ---
 
-### Layer 2: `1-listeners/` (입력 해석기)
+### Layer 2: `1-listen/` (입력 해석기)
 
 | 파일 | LOC | V1 | V2 | V3 | V4 | V5 | V6 | V7 | 코멘트 |
 |------|:---:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|--------|
@@ -74,9 +74,9 @@
 | `base/FocusGroup.tsx` | 558 | — | — | 🟡 | 🟢 | 🔴 | 🟢 | 🟢 | **V5: 558줄에 Context 정의 3개(Zone, Focus, deprecated Compat) + buildZoneEntry + FocusGroup 컴포넌트.** 최소 3개의 변경 이유(Context 구조, Registry 등록 로직, 렌더링). 가장 큰 OS 컴포넌트 파일. |
 | `field/Field.tsx` | 490 | — | — | 🟡 | 🟡 | 🔴 | 🟢 | 🟡 | **V3: `useState(isParentEditing)` — OS가 관리해야 할 상태를 로컬로 관리.** V5: Registry 등록 + 값 동기화 + auto-commit + 유효성 검증 + 스타일 6가지 관심사. V7: `eslint-disable` 1회. V4: `isParentEditing`은 OS 포커스 상태에서 파생되어야 하는데 `useState`+`useLayoutEffect`로 로컬 관리. |
 | `quickpick/QuickPick.tsx` | 519 | — | — | 🟡 | 🟡 | 🔴 | 🟢 | 🟢 | **V4: `useState(query)` — 검색 쿼리를 OS가 아닌 로컬 상태로 관리.** V5: 필터링 로직 + 렌더링 + 키바인딩 + Zone 등록이 한 파일. OS 철학("앱 코드에 useState 0줄")에 가장 정면으로 위배. |
-| `primitives/Trigger.tsx` | 417 | — | — | 🟢 | 🟢 | 🔴 | 🟢 | 🟡 | **V5: Base Trigger + Portal(Dialog 래핑) + Dismiss가 한 파일에 공존.** 세 가지 컴포넌트의 변경 이유가 독립적(Trigger 클릭, Portal 렌더링, Dismiss 닫기). V7: `eslint-disable` 1회, `as any` 1회(Portal props). |
-| `primitives/Item.tsx` | 249 | — | — | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | **V5: Item + ExpandTrigger + CheckTrigger 서브 컴포넌트.** 관련 컴포넌트이긴 하지만 독립적으로 변경될 수 있음. |
-| `primitives/Zone.tsx` | 305 | — | — | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | **깨끗.** |
+| `6-project/Trigger.tsx` | 417 | — | — | 🟢 | 🟢 | 🔴 | 🟢 | 🟡 | **V5: Base Trigger + Portal(Dialog 래핑) + Dismiss가 한 파일에 공존.** 세 가지 컴포넌트의 변경 이유가 독립적(Trigger 클릭, Portal 렌더링, Dismiss 닫기). V7: `eslint-disable` 1회, `as any` 1회(Portal props). |
+| `6-project/Item.tsx` | 249 | — | — | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | **V5: Item + ExpandTrigger + CheckTrigger 서브 컴포넌트.** 관련 컴포넌트이긴 하지만 독립적으로 변경될 수 있음. |
+| `6-project/Zone.tsx` | 305 | — | — | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | **깨끗.** |
 | `field/FieldInput.tsx` | 209 | — | — | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | **깨끗.** |
 | `field/FieldTextarea.tsx` | 206 | — | — | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | V5: FieldInput과 거의 동일한 구조 — 중복 코드 냄새. 통합 가능한 후보. |
 | `radox/Dialog.tsx` | — | — | — | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | V7: `as any` 1회 (`child.type` 비교), `as unknown as ReactElement` 1회. |

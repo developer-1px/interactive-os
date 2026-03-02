@@ -11,7 +11,7 @@ import { describe, expect, test } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
-} from "@/os/collection/createCollectionZone";
+} from "@/os/core/library/collection/createCollectionZone";
 
 describe("Builder copy → paste → paste 연속 실행", () => {
   function createApp() {

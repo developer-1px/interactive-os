@@ -68,7 +68,7 @@ Trigger.Portal (line 319)
 
 **파일:**
 - `src/os/6-components/radox/Dialog.tsx` — DialogRoot, DialogZone, DialogContent
-- `src/os/6-components/primitives/Trigger.tsx` — TriggerPortal (line 253-343)
+- `src/os/6-components/6-project/Trigger.tsx` — TriggerPortal (line 253-343)
 - `src/os/defineApp.trigger.ts` — createCompoundTrigger
 - `src/os/registries/roleRegistry.ts` — dialog/alertdialog 프리셋    
 - `src/os/3-commands/tab/tab.ts` — OS_TAB (trap 로직)
