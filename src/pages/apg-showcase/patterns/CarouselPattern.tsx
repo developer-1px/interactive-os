@@ -117,10 +117,9 @@ const CarouselUI = carouselZone.bind({
 });
 
 const ToggleRotation = CarouselApp.createTrigger(TOGGLE_ROTATION);
-const StopRotation = CarouselApp.createTrigger({
-  command: SET_ROTATING,
-  payload: { value: false },
-});
+const StopRotation = CarouselApp.createTrigger(
+  SET_ROTATING({ value: false }),
+);
 
 // --- Slide Panel Content ---
 
