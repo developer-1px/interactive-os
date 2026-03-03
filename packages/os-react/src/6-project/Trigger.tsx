@@ -150,7 +150,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       ...rest,
     };
 
-    // Separate Portal children from trigger element children
+    // Separate Portal/Popover children from trigger element children
     const triggerChildren: ReactNode[] = [];
     let portalElement: ReactElement | null = null;
 
@@ -160,7 +160,11 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       // `as any` is acceptable: ReactElement.type is `string | JSXElementConstructor<any>`
       // but function identity comparison is runtime-safe and won't break under minification.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ReactElement.type returns string | JSXElementConstructor<any>
-      if (isValidElement(child) && (child.type as any) === TriggerPortal) {
+      if (
+        isValidElement(child) &&
+        ((child.type as any) === TriggerPortal ||
+          (child.type as any) === TriggerPopover)
+      ) {
         portalElement = child as ReactElement<TriggerPortalProps>;
       } else {
         triggerChildren.push(child);
@@ -431,11 +435,107 @@ function TriggerDismiss({
 TriggerDismiss.displayName = "Trigger.Dismiss";
 
 // ═══════════════════════════════════════════════════════════════════
+// Trigger.Popover — Non-modal popup (dropdown menus, comboboxes)
+//
+// Unlike Trigger.Portal (modal <dialog>), Popover uses conditional
+// rendering without a backdrop. The overlay stack handles open/close
+// state, Escape dismiss, and outside-click detection.
+// ═══════════════════════════════════════════════════════════════════
+
+export interface TriggerPopoverProps {
+  /** Popup content */
+  children: ReactNode;
+  /** Additional className for the popup wrapper */
+  className?: string;
+  /** Zone role for the popup (default: "menu") */
+  zoneRole?: "menu" | "listbox";
+  /** aria-label for the popup zone */
+  "aria-label"?: string;
+  /** aria-labelledby IDREF for the popup zone */
+  "aria-labelledby"?: string;
+
+  // Internal props (injected by parent Trigger)
+  /** @internal */
+  _overlayId?: string;
+  /** @internal */
+  _overlayType?: OverlayEntry["type"];
+}
+
+function TriggerPopover({
+  children,
+  className,
+  zoneRole = "menu",
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
+  _overlayId,
+}: TriggerPopoverProps) {
+  const overlayId = _overlayId ?? "";
+
+  // Subscribe to overlay open state from kernel
+  const isOpen = os.useComputed((s) =>
+    s.os.overlays.stack.some((e) => e.id === overlayId),
+  );
+
+  // Outside click detection: close overlay when clicking outside the popover
+  const popoverRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(e.target as Node)
+      ) {
+        // Check if click was on the trigger itself (toggle behavior)
+        const trigger = document.querySelector(
+          `[data-trigger-id]`,
+        );
+        if (trigger?.contains(e.target as Node)) return;
+
+        os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
+      }
+    };
+
+    // Delay to avoid catching the opening click
+    const timer = setTimeout(() => {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }, 0);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isOpen, overlayId]);
+
+  if (!isOpen) return null;
+
+  return (
+    <OverlayContext.Provider value={{ overlayId }}>
+      <div ref={popoverRef} className={className}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- zone role union mismatch */}
+        <Zone
+          id={overlayId}
+          role={zoneRole as any}
+          onDismiss={OS_OVERLAY_CLOSE({ id: overlayId })}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledby}
+        >
+          {children}
+        </Zone>
+      </div>
+    </OverlayContext.Provider>
+  );
+}
+
+TriggerPopover.displayName = "Trigger.Popover";
+
+// ═══════════════════════════════════════════════════════════════════
 // Namespace merge — attach sub-components to Trigger
 // ═══════════════════════════════════════════════════════════════════
 
 // Use Object.assign since forwardRef returns an object (namespace merge won't work)
 export const Trigger = Object.assign(TriggerBase, {
   Portal: TriggerPortal,
+  Popover: TriggerPopover,
   Dismiss: TriggerDismiss,
 });

@@ -36,6 +36,7 @@
 - [x] Spinbutton (2026-03-03)
 - [x] Disclosure (2026-03-03)
 - [x] Button (2026-03-03)
+- [x] Menu Button (2026-03-04)
 
 ---
 
@@ -286,6 +287,23 @@
 | `End` | `role=spinbutton` | `VALUE_CHANGE` | `action: setMax` | value → max | [Spinbutton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/#keyboard_interaction) | ✅ |
 | `PageUp` | `role=spinbutton` (O) | `VALUE_CHANGE` | `action: incrementLarge` | value + largeStep | [Spinbutton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/#keyboard_interaction) | ✅ |
 | `PageDown` | `role=spinbutton` (O) | `VALUE_CHANGE` | `action: decrementLarge` | value - largeStep | [Spinbutton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/#keyboard_interaction) | ✅ |
+
+### Menu Button
+
+| Input | ARIA Condition | Command | Options | ARIA Effect | APG Source | Status |
+|-------|---------------|---------|---------|-------------|-----------|--------|
+| Click | `button[aria-haspopup]` | `ACTIVATE` → `OS_OVERLAY_OPEN` | `type: menu` | menu 열기 + focus → 첫 menuitem | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ✅ |
+| `Enter` | `button[aria-haspopup]` | `ACTIVATE` → `OS_OVERLAY_OPEN` | `type: menu` | menu 열기 + focus → 첫 menuitem | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ✅ |
+| `Space` | `button[aria-haspopup]` | `ACTIVATE` → `OS_OVERLAY_OPEN` | `type: menu` | menu 열기 + focus → 첫 menuitem | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ✅ |
+| `ArrowDown` | `button[aria-haspopup]` (O) | `ACTIVATE` → `OS_OVERLAY_OPEN` | `type: menu` | menu 열기 + focus → 첫 menuitem | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | 🔲 |
+| `ArrowUp` | `button[aria-haspopup]` (O) | `ACTIVATE` → `OS_OVERLAY_OPEN` | `type: menu` | menu 열기 + focus → 마지막 menuitem | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | 🔲 |
+| `Escape` | `role=menu` (popup) | `DISMISS` | `escape: close` | menu 닫기 + focus → button | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ✅ |
+| `ArrowDown` | `role=menu` | `NAVIGATE` | `direction: down, loop: true` | focus → 다음 menuitem (wrap) | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ✅ |
+| `ArrowUp` | `role=menu` | `NAVIGATE` | `direction: up, loop: true` | focus → 이전 menuitem (wrap) | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ✅ |
+| `Enter` | `role=menuitem` | `ACTIVATE` | — | action 실행 + menu 닫기 + focus → button | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ⚠️ |
+| `Home` | `role=menu` | `NAVIGATE` | `direction: home` | focus → 첫 menuitem | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ⚠️ |
+| `End` | `role=menu` | `NAVIGATE` | `direction: end` | focus → 마지막 menuitem | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ⚠️ |
+| Typeahead | `role=menu` (O) | `NAVIGATE` | `typeahead: char` | focus → 매칭 menuitem | [MenuButton §kbd](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/#keyboard_interaction) | ✅ |
 
 ---
 

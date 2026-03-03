@@ -1,27 +1,26 @@
 /**
  * APG Menu Button Pattern -- Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions/
  *
- * W3C APG Menu Button:
+ * W3C APG Menu Button (element.focus() variant):
  *   - A button that opens a menu popup
- *   - Button: role=button, aria-haspopup="menu", aria-expanded
- *   - Menu: role=menu, vertical navigation, loop, Escape closes
- *   - Enter/Space/Down Arrow on button opens menu
+ *   - Button: native <button>, aria-haspopup="true", aria-expanded, aria-controls
+ *   - Menu: role="menu", aria-labelledby → button, vertical nav, loop, Escape closes
+ *   - Enter/Space on button opens menu (focus → first menuitem)
+ *   - Down Arrow on button opens menu (optional, focus → first menuitem)
  *   - Escape in menu returns focus to button
+ *   - Click on button opens/closes menu
  *
- * ZIFT classification: Trigger (button) + Zone (menu popup)
+ * ZIFT classification: Trigger (button) + Zone (menu popup via Trigger.Popover)
  *
- * OS pattern:
- *   Two zones: toolbar (trigger button) + menu (popup).
- *   Menu zone uses role="menu" with autoFocus + stack push/pop.
- *   The button triggers the menu open via onAction callback.
- *   CSS reads aria-expanded, data-focused, aria-haspopup.
+ * OS pattern: Trigger component with role="menu" auto-dispatches OS_OVERLAY_OPEN.
+ *   Trigger.Popover renders a non-modal Zone (role="menu") when overlay is open.
+ *   No Zone needed for the button — Trigger handles click/Enter/Space.
  */
 
-import { Zone } from "@os-react/6-project/Zone";
+import { Trigger } from "@os-react/6-project/Trigger";
 import { Item } from "@os-react/6-project/Item";
 import { os } from "@os-core/engine/kernel";
-import { OS_FOCUS } from "@os-core/4-command/focus";
 import { Icon } from "@/components/Icon";
 
 /**
@@ -37,21 +36,21 @@ const MENU_ITEMS = [
 /**
  * MenuButtonPattern
  *
- * Demonstrates the W3C APG Menu Button pattern using two OS zones:
- *   1. A toolbar zone containing the trigger button
- *   2. A menu zone (popup) that opens on activation
+ * W3C APG Menu Button using Trigger + Trigger.Popover.
+ * The Trigger handles:
+ *   - Click → OS_OVERLAY_OPEN (menu opens)
+ *   - Enter/Space (via OS_ACTIVATE → onActivate) → menu opens
+ *   - aria-haspopup, aria-expanded managed by the <button>
  *
- * The menu zone uses role="menu" which provides:
- *   - Vertical navigation with loop
- *   - Escape closes (dismiss.escape: "close")
- *   - Tab trapped within menu
- *   - Auto-focus on first item when opened
- *   - Stack push/pop for focus restoration
+ * Trigger.Popover handles:
+ *   - Conditional rendering (no <dialog>)
+ *   - Zone with role="menu" (vertical nav, loop, escape dismiss)
+ *   - Outside click → close
  */
 export function MenuButtonPattern() {
-  // Track menu visibility via OS state
-  const isOpen = os.useComputed(
-    (s) => s.os.focus.activeZoneId === "apg-menu-button-menu",
+  // Track menu visibility via overlay stack
+  const isOpen = os.useComputed((s) =>
+    s.os.overlays.stack.some((e) => e.id === "apg-menu-button-popup"),
   );
 
   return (
@@ -59,8 +58,8 @@ export function MenuButtonPattern() {
       <h3 className="text-lg font-semibold mb-3">Menu Button</h3>
       <p className="text-sm text-gray-500 mb-4">
         W3C APG Menu Button: A button that opens a dropdown menu.{" "}
-        <kbd>Enter</kbd>, <kbd>Space</kbd>, or <kbd>Down Arrow</kbd> opens the
-        menu. <kbd>Escape</kbd> closes it.{" "}
+        <kbd>Enter</kbd>, <kbd>Space</kbd>, or click opens the menu.{" "}
+        <kbd>Escape</kbd> closes it.{" "}
         <a
           href="https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/"
           target="_blank"
@@ -71,7 +70,7 @@ export function MenuButtonPattern() {
         </a>
         {" | "}
         <a
-          href="https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/"
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions/"
           target="_blank"
           rel="noopener noreferrer"
           className="text-indigo-600 hover:text-indigo-800 underline"
@@ -81,32 +80,14 @@ export function MenuButtonPattern() {
       </p>
 
       <div className="relative inline-block">
-        {/* Trigger Button Zone */}
-        <Zone
-          id="apg-menu-button-trigger"
-          role="toolbar"
-          options={{
-            navigate: { orientation: "horizontal" },
-          }}
-          className="inline-flex"
-          onAction={() => {
-            // Open the menu: focus the menu zone's first item
-            // The menu Zone has autoFocus=true + stack push, so
-            // just setting focus to the menu zone is enough.
-            os.dispatch(
-              OS_FOCUS({
-                zoneId: "apg-menu-button-menu",
-                itemId: "action-cut",
-              }),
-            );
-            return [];
-          }}
+        <Trigger
+          id="mb-actions-trigger"
+          role="menu"
+          overlayId="apg-menu-button-popup"
         >
-          <Item
-            id="mb-actions-trigger"
-            role="button"
-            as="button"
-            aria-haspopup="menu"
+          <button
+            type="button"
+            aria-haspopup="true"
             aria-expanded={isOpen}
             className="
               group inline-flex items-center gap-2 px-4 py-2
@@ -121,21 +102,10 @@ export function MenuButtonPattern() {
               size={14}
               className="transition-transform group-aria-expanded:rotate-180"
             />
-          </Item>
-        </Zone>
+          </button>
 
-        {/* Menu Popup Zone -- only rendered when open */}
-        {isOpen && (
-          <Zone
-            id="apg-menu-button-menu"
-            role="menu"
-            options={{
-              navigate: { orientation: "vertical", loop: true },
-              dismiss: { escape: "close" },
-              tab: { behavior: "trap" },
-              project: { autoFocus: true },
-            }}
-            aria-label="Actions"
+          <Trigger.Popover
+            aria-labelledby="mb-actions-trigger"
             className="
               absolute top-full left-0 mt-1 w-48 z-50
               bg-white border border-gray-200 rounded-lg shadow-lg py-1
@@ -163,8 +133,8 @@ export function MenuButtonPattern() {
                 {item.label}
               </Item>
             ))}
-          </Zone>
-        )}
+          </Trigger.Popover>
+        </Trigger>
       </div>
     </div>
   );
