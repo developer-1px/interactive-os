@@ -574,19 +574,13 @@ function TriggerPopover({
       <div
         ref={popoverRef}
         className={className}
-        onClick={(e) => {
-          // W3C APG: clicking a menuitem closes the menu
-          const target = (e.target as HTMLElement).closest("[role=menuitem]");
-          if (target) {
-            os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
-          }
-        }}
       >
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- zone role union mismatch */}
         <Zone
           id={overlayId}
           role={zoneRole as any}
           onDismiss={OS_OVERLAY_CLOSE({ id: overlayId })}
+          onAction={() => OS_OVERLAY_CLOSE({ id: overlayId })}
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledby}
         >
