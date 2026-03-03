@@ -10,7 +10,24 @@ export function GridPattern() {
       <h3 className="text-lg font-semibold mb-2">2D Grid (Multi-Select)</h3>
       <p className="text-sm text-gray-500 mb-6">
         Navigate with <kbd>Arrow Keys</kbd>. Hold <kbd>Shift</kbd> to select
-        ranges.
+        ranges.{" "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/grid/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/grid/examples/data-grids/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
+        </a>
       </p>
 
       <Zone

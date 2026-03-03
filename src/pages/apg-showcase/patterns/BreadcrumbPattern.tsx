@@ -1,6 +1,6 @@
 /**
  * APG Breadcrumb Pattern -- Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/breadcrumb/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/breadcrumb/examples/breadcrumb/
  *
  * W3C APG Breadcrumb spec:
  *   - nav element with aria-label="Breadcrumb"
@@ -61,6 +61,15 @@ export function BreadcrumbPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/breadcrumb/examples/breadcrumb/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

@@ -1,6 +1,6 @@
 /**
  * APG Slider (Multi-Thumb) Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/slider-multithumb/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/slider-multithumb/examples/slider-multithumb/
  *
  * ZIFT Classification: Zone(navigation between thumbs via Tab) + Field(number value per thumb)
  *
@@ -222,6 +222,15 @@ export function SliderMultiThumbPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/slider-multithumb/examples/slider-multithumb/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

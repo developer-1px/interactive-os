@@ -1,6 +1,6 @@
 /**
  * APG Disclosure (Show/Hide) Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-faq/
  *
  * W3C APG Disclosure:
  *   - Button with role="button" toggles visibility of content section
@@ -121,6 +121,15 @@ export function DisclosurePattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec →
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-faq/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

@@ -1,6 +1,6 @@
 /**
  * APG Spinbutton Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/examples/spinbutton-date/
  *
  * ZIFT Classification: Field (number) — same as Slider.
  * OS injects aria-valuenow, aria-valuemin, aria-valuemax, role=spinbutton onto Item.
@@ -209,6 +209,15 @@ export function SpinbuttonPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/examples/spinbutton-date/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

@@ -1,6 +1,6 @@
 /**
  * APG Tabs Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-automatic/
  *
  * W3C APG Example: Danish Composers biographical tabs.
  *
@@ -171,6 +171,15 @@ export function TabsPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec →
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-automatic/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

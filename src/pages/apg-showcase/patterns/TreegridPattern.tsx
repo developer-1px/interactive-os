@@ -287,7 +287,24 @@ export function TreegridPattern() {
       <p className="text-sm text-gray-500 px-4 py-2 border-b border-gray-100">
         <kbd>Up</kbd>/<kbd>Down</kbd> navigate rows.{" "}
         <kbd>Right</kbd>/<kbd>Left</kbd> expand/collapse threads.{" "}
-        <kbd>Space</kbd> to select. <kbd>Shift+Arrow</kbd> for range selection.
+        <kbd>Space</kbd> to select. <kbd>Shift+Arrow</kbd> for range selection.{" "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/examples/treegrid-email-inbox/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
+        </a>
       </p>
 
       {/* Column headers */}

@@ -1,6 +1,6 @@
 /**
  * APG Switch Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/switch/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/switch/examples/switch/
  *
  * W3C APG Switch:
  *   - role="switch" — on/off toggle
@@ -108,6 +108,15 @@ export function SwitchPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec →
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/switch/examples/switch/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

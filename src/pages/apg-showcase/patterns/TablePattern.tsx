@@ -1,6 +1,6 @@
 /**
  * APG Table Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/table/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/table/examples/table/
  *
  * W3C APG Table:
  *   - role="table" on container (or native <table>)
@@ -152,6 +152,15 @@ export function TablePattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/table/examples/table/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

@@ -17,7 +17,24 @@ export function ToolbarPattern() {
       <h3 className="text-lg font-semibold mb-2">Rich Editor Toolbar</h3>
       <p className="text-sm text-gray-500 mb-6">
         Focus trap behaves as a single tab stop. Use <kbd>Arrow Left/Right</kbd>{" "}
-        to move.
+        to move.{" "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/examples/toolbar/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
+        </a>
       </p>
 
       <Zone

@@ -1,6 +1,6 @@
 /**
  * APG Link Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/link/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/link/examples/link/
  *
  * W3C APG Link spec:
  *   - Enter: activates the link
@@ -97,6 +97,15 @@ function LinkPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/link/examples/link/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

@@ -19,7 +19,24 @@ export function MenuPattern() {
       </h3>
       <p className="text-sm text-gray-500 mb-6 w-full text-center">
         Try <kbd>Space</kbd> or <kbd>Enter</kbd> to toggle checkboxes and
-        radios.
+        radios.{" "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/menubar/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/menubar/examples/menubar-navigation/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
+        </a>
       </p>
 
       {/* Menubar */}

@@ -1,6 +1,6 @@
 /**
  * APG Window Splitter Pattern -- Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/examples/window-splitter/
  *
  * W3C APG Window Splitter:
  *   - role="separator" on the focusable splitter element
@@ -160,6 +160,15 @@ export function WindowSplitterPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/examples/window-splitter/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

@@ -1,6 +1,6 @@
 /**
  * APG Tooltip Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/examples/tooltip/
  *
  * W3C APG Tooltip:
  *   - role="tooltip" on the tooltip element
@@ -148,6 +148,15 @@ export function TooltipPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec →
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/examples/tooltip/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

@@ -1,6 +1,6 @@
 /**
  * APG Feed Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/feed/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/feed/examples/feed/
  *
  * W3C APG: Scrollable list of articles with keyboard navigation.
  *   - Page Down / Page Up: move between articles
@@ -167,6 +167,15 @@ export function FeedPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/feed/examples/feed/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

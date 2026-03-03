@@ -1,6 +1,6 @@
 /**
  * APG Menu Button Pattern -- Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/
  *
  * W3C APG Menu Button:
  *   - A button that opens a menu popup
@@ -68,6 +68,15 @@ export function MenuButtonPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

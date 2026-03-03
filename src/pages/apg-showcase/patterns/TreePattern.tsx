@@ -185,7 +185,24 @@ export function TreePattern() {
         Flat tree rendering. <kbd>↑↓</kbd> navigate, <kbd>←→</kbd>{" "}
         expand/collapse,
         <kbd>Enter</kbd> or click to toggle folders. Data-driven — no recursive
-        components.
+        components.{" "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/treeview/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          W3C APG Spec
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/treeview/examples/treeview-navigation/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
+        </a>
       </p>
 
       <ExplorerUI.Zone className="flex flex-col" aria-label="File Explorer">

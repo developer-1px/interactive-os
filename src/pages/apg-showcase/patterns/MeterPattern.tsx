@@ -1,6 +1,6 @@
 /**
  * APG Meter Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/meter/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/meter/examples/meter/
  *
  * W3C APG Meter:
  *   - role="meter" — read-only numeric display within a defined range
@@ -245,6 +245,15 @@ export function MeterPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec →
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/meter/examples/meter/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 

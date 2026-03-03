@@ -1,6 +1,6 @@
 /**
  * APG RadioGroup Pattern — Showcase UI
- * Source: https://www.w3.org/WAI/ARIA/apg/patterns/radio/
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/radio/examples/radio-rating/
  *
  * W3C APG RadioGroup:
  *   - role="radiogroup" container, role="radio" items
@@ -129,6 +129,15 @@ export function RadioGroupPattern() {
           className="text-indigo-600 hover:text-indigo-800 underline"
         >
           W3C APG Spec →
+        </a>
+        {" | "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/radio/examples/radio-rating/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          Example →
         </a>
       </p>
 
