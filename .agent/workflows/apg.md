@@ -216,6 +216,26 @@ source ~/.nvm/nvm.sh && nvm use && npx vitest run tests/apg/ 2>&1 | tail -6
 
 ---
 
+### 병렬 실행 시 Merge-back 프로토콜
+
+> 여러 패턴을 `isolation: "worktree"`로 병렬 실행한 경우, 결과를 main에 합치는 절차.
+
+**Precondition (런칭 전 필수)**:
+```bash
+# main이 remote와 sync인지 확인. 아니면 push 먼저.
+git log --oneline -1 HEAD
+git log --oneline -1 origin/main
+```
+
+**Merge-back 절차**:
+1. **새 파일** (테스트, 패턴 컴포넌트): stash에서 추출 `git show stash@{N}^3:path > path`
+2. **OS core 변경**: stash diff 병합보다 **main에서 에이전트 재실행이 확실**. diff가 단순하면 수동 적용도 가능.
+3. **공유 파일** (`index.tsx` 등): 모든 에이전트가 수정하므로 수동 통합.
+
+**⛔ 금지**: `git stash`를 병렬 worktree에서 사용하지 않는다. stash는 worktree 간 공유되어 cross-contaminate된다. 대신 worktree 브랜치에 commit → rebase를 사용한다.
+
+---
+
 ### 마지막 Step: Knowledge 갱신
 
 새로 발견된 OS 버그나 패턴이 있으면:

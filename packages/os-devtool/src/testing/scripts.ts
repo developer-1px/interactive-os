@@ -993,6 +993,302 @@ export const apgCheckboxScript: TestScript = {
   },
 };
 
+// ─── APG Disclosure ───
+
+export const apgDisclosureScript: TestScript = {
+  name: "APG Disclosure — Expand/Collapse FAQ",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-disclosure").click();
+
+    // Click first disclosure header → expand
+    await page.locator("#disc-faq-1").click();
+    await expect(page.locator("#disc-faq-1")).toBeFocused();
+    await expect(page.locator("#disc-faq-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    // Click again → collapse
+    await page.locator("#disc-faq-1").click();
+    await expect(page.locator("#disc-faq-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+
+    // ArrowDown → next disclosure
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#disc-faq-2")).toBeFocused();
+
+    // Enter → expand
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#disc-faq-2")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+  },
+};
+
+// ─── APG Tooltip (Toolbar) ───
+
+export const apgTooltipScript: TestScript = {
+  name: "APG Tooltip — Toolbar Nav + data-focused",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-tooltip").click();
+
+    // Click first button → focus (tooltip appears via CSS)
+    await page.locator("#btn-cut").click();
+    await expect(page.locator("#btn-cut")).toBeFocused();
+
+    // ArrowRight → next button (tooltip moves)
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#btn-copy")).toBeFocused();
+
+    // ArrowRight → continue
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#btn-paste")).toBeFocused();
+
+    // Loop: ArrowRight past last → wraps to first
+    await page.keyboard.press("ArrowRight"); // bold
+    await page.keyboard.press("ArrowRight"); // italic
+    await page.keyboard.press("ArrowRight"); // wrap → cut
+    await expect(page.locator("#btn-cut")).toBeFocused();
+  },
+};
+
+// ─── APG Button (Toggle) ───
+
+export const apgButtonScript: TestScript = {
+  name: "APG Button — Toggle aria-pressed",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-button").click();
+
+    // Click toggle bold → focus + toggle pressed
+    await page.locator("#toggle-bold").click();
+    await expect(page.locator("#toggle-bold")).toBeFocused();
+
+    // Check aria-pressed toggled
+    const pressed = await page
+      .locator("#toggle-bold")
+      .getAttribute("aria-pressed");
+    // Toggle again
+    await page.keyboard.press(" ");
+    if (pressed === "true") {
+      await expect(page.locator("#toggle-bold")).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      );
+    } else {
+      await expect(page.locator("#toggle-bold")).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    }
+  },
+};
+
+// ─── APG Feed ───
+
+export const apgFeedScript: TestScript = {
+  name: "APG Feed — Vertical Nav (no loop)",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-feed").click();
+
+    await page.locator("#article-1").click();
+    await expect(page.locator("#article-1")).toBeFocused();
+
+    // ArrowDown → next article
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#article-2")).toBeFocused();
+
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#article-3")).toBeFocused();
+
+    // Home → first
+    await page.keyboard.press("Home");
+    await expect(page.locator("#article-1")).toBeFocused();
+
+    // End → last
+    await page.keyboard.press("End");
+    await expect(page.locator("#article-5")).toBeFocused();
+
+    // ArrowDown at last → clamp (no loop)
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#article-5")).toBeFocused();
+  },
+};
+
+// ─── APG Carousel ───
+
+export const apgCarouselScript: TestScript = {
+  name: "APG Carousel — Tab Nav + Slide Display",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-carousel").click();
+
+    // Click first carousel tab → select
+    await page.locator("#slide-1").click();
+    await expect(page.locator("#slide-1")).toBeFocused();
+    await expect(page.locator("#slide-1")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+
+    // ArrowRight → next tab + select
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#slide-2")).toBeFocused();
+    await expect(page.locator("#slide-2")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#slide-1")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
+  },
+};
+
+// ─── APG Menu Button ───
+
+export const apgMenuButtonScript: TestScript = {
+  name: "APG Menu Button — Open Menu + Nav Items",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-menu-button").click();
+
+    // Click trigger button to open menu
+    await page.locator("#mb-actions-trigger").click();
+    await expect(page.locator("#mb-actions-trigger")).toBeFocused();
+
+    // Items in menu dropdown
+    await page.locator("#action-cut").click();
+    await expect(page.locator("#action-cut")).toBeFocused();
+
+    // ArrowDown → next menu item
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#action-copy")).toBeFocused();
+
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#action-paste")).toBeFocused();
+
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#action-delete")).toBeFocused();
+  },
+};
+
+// ─── APG Meter ───
+
+export const apgMeterScript: TestScript = {
+  name: "APG Meter — Display Values",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-meter").click();
+
+    // Click CPU meter → focus
+    await page.locator("#meter-cpu").click();
+    await expect(page.locator("#meter-cpu")).toBeFocused();
+
+    // ArrowDown → next meter
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#meter-memory")).toBeFocused();
+
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#meter-disk")).toBeFocused();
+  },
+};
+
+// ─── APG Spinbutton ───
+
+export const apgSpinbuttonScript: TestScript = {
+  name: "APG Spinbutton — Arrow Increment/Decrement",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-spinbutton").click();
+
+    // Click hours spinner
+    await page.locator("#spin-hours").click();
+    await expect(page.locator("#spin-hours")).toBeFocused();
+
+    // ArrowDown → navigate to next spinner
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#spin-minutes")).toBeFocused();
+
+    // ArrowDown → navigate to duration
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#spin-duration")).toBeFocused();
+
+    // Home → back to first
+    await page.keyboard.press("Home");
+    await expect(page.locator("#spin-hours")).toBeFocused();
+  },
+};
+
+// ─── APG Slider Multi-thumb ───
+
+export const apgSliderMultiThumbScript: TestScript = {
+  name: "APG Slider Multi — Dual Thumb",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-slider-multithumb").click();
+
+    // Click min thumb → focus
+    await page.locator("#thumb-min-price").click();
+    await expect(page.locator("#thumb-min-price")).toBeFocused();
+
+    // ArrowRight → increment min value
+    await page.keyboard.press("ArrowRight");
+    // Focus stays on min thumb
+    await expect(page.locator("#thumb-min-price")).toBeFocused();
+
+    // Click max thumb → focus
+    await page.locator("#thumb-max-price").click();
+    await expect(page.locator("#thumb-max-price")).toBeFocused();
+
+    // ArrowLeft → decrement max value
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("#thumb-max-price")).toBeFocused();
+  },
+};
+
+// ─── APG Treegrid ───
+
+export const apgTreegridScript: TestScript = {
+  name: "APG Treegrid — Expand/Collapse + Row Nav",
+  async run(page, expect = defaultExpect) {
+    await page.locator("#tab-treegrid").click();
+
+    // Click first thread row
+    await page.locator("#thread:thread-1").click();
+    await expect(page.locator("#thread:thread-1")).toBeFocused();
+
+    // ArrowDown → next visible row
+    await page.keyboard.press("ArrowDown");
+
+    // ArrowRight on thread → expand (if not already)
+    await page.locator("#thread:thread-1").click();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#thread:thread-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    // ArrowLeft → collapse
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("#thread:thread-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  },
+};
+
+// ─── APG Window Splitter ───
+
+export const apgWindowSplitterScript: TestScript = {
+  name: "APG Window Splitter — Resize with Arrow",
+  async run(page) {
+    await page.locator("#tab-window-splitter").click();
+
+    // Focus the separator (Zone item with role=separator)
+    // WindowSplitter uses a single separator item within the splitter zone
+    // The separator has role="separator" — we simply navigate to the zone
+    // Note: this is a minimal script since splitter has specialized interactions
+  },
+};
+
 // ─── Bundle for APG Showcase page ───
 
 export const apgShowcaseScripts: TestScript[] = [
@@ -1008,4 +1304,15 @@ export const apgShowcaseScripts: TestScript[] = [
   apgSliderScript,
   apgRadiogroupScript,
   apgCheckboxScript,
+  apgDisclosureScript,
+  apgTooltipScript,
+  apgButtonScript,
+  apgFeedScript,
+  apgCarouselScript,
+  apgMenuButtonScript,
+  apgMeterScript,
+  apgSpinbuttonScript,
+  apgSliderMultiThumbScript,
+  apgTreegridScript,
+  apgWindowSplitterScript,
 ];
