@@ -22,8 +22,8 @@ export const apgTreeScript: TestScript = {
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("#folder:src/components")).toBeFocused();
 
-    // ArrowLeft collapses back to parent (src)
-    await page.keyboard.press("ArrowLeft");
+    // ArrowUp → previous visible item (back to src)
+    await page.keyboard.press("ArrowUp");
     await expect(page.locator("#folder:src")).toBeFocused();
   },
 };

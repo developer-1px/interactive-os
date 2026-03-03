@@ -361,7 +361,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // Spec: activation toggles visibility of associated content,
   //       no navigation within — just a toggle trigger
   disclosure: {
-    activate: { mode: "manual" },
+    activate: { mode: "manual", onClick: true, effect: "toggleExpand" },
     expand: { mode: "all" },
     tab: { behavior: "flow" },
   },
