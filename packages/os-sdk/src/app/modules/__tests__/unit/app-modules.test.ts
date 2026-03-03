@@ -19,7 +19,6 @@ import { describe, expect, it } from "vitest";
 // T1: AppModule interface — type import for reference
 import "@os-sdk/app/modules/types";
 
-import { produce } from "immer";
 // The defineApp that accepts modules: AppModule[]
 import { defineApp } from "@os-sdk/app/defineApp";
 import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
@@ -29,6 +28,7 @@ import { deleteToast } from "@os-sdk/app/modules/deleteToast";
 import { history } from "@os-sdk/app/modules/history";
 // T3: persistence module
 import { persistence } from "@os-sdk/app/modules/persistence";
+import { produce } from "immer";
 
 // ═══════════════════════════════════════════════════════════════════
 // Minimal test app state

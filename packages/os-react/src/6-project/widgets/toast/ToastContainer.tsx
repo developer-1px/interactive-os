@@ -12,11 +12,11 @@
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import { X } from "lucide-react";
-import { useEffect, useRef } from "react";
 import { OS_NOTIFY_DISMISS } from "@os-core/4-command/toast/toast";
 import { os } from "@os-core/engine/kernel";
 import type { NotificationEntry } from "@os-core/schema/state/OSState";
+import { X } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // ARIA config per notification type

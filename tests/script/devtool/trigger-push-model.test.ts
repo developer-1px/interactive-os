@@ -12,10 +12,10 @@
 
 import { BuilderApp } from "@apps/builder/app";
 import type { BuilderState } from "@apps/builder/model/appState";
-import { createPage } from "@os-sdk/app/defineApp/page";
-import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { os } from "@os-core/engine/kernel";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { createPage } from "@os-sdk/app/defineApp/page";
+import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 type Page = AppPage<BuilderState>;

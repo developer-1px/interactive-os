@@ -18,12 +18,12 @@ import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
 } from "@os-core/4-command/overlay/overlay";
-import { createOsPage, createPage } from "@os-sdk/app/defineApp/page";
-import type { AppPage } from "@os-sdk/app/defineApp/types";
+import { os } from "@os-core/engine/kernel";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { createOsPage, createPage } from "@os-sdk/app/defineApp/page";
+import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { os } from "@os-core/engine/kernel";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];
 type Page = AppPage<TodoState>;

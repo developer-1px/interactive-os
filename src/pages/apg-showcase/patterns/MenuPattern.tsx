@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { Item } from "@os-react/6-project/Item";
 import { Zone } from "@os-react/6-project/Zone";
+import { useState } from "react";
 
 export function MenuPattern() {
   const [checks, setChecks] = useState<Record<string, boolean>>({

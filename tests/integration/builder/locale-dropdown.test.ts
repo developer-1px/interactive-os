@@ -12,11 +12,11 @@
 import { BuilderApp } from "@apps/builder/app";
 import type { BuilderState } from "@apps/builder/model/appState";
 import { OS_OVERLAY_CLOSE } from "@os-core/4-command/overlay/overlay";
-import { createPage } from "@os-sdk/app/defineApp/page";
-import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { os } from "@os-core/engine/kernel";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { createPage } from "@os-sdk/app/defineApp/page";
+import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const MENU_ITEMS = [

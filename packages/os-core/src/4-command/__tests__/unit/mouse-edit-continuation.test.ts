@@ -10,7 +10,10 @@
  * 🔴 These tests define EXPECTED behavior BEFORE implementation.
  */
 
-import { type ClickInput, resolveClick } from "@os-core/1-listen/mouse/resolveClick";
+import {
+  type ClickInput,
+  resolveClick,
+} from "@os-core/1-listen/mouse/resolveClick";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

@@ -1,6 +1,9 @@
+import {
+  QuickPick,
+  type QuickPickItem,
+} from "@os-react/6-project/widgets/quickpick/QuickPick";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { QuickPick, type QuickPickItem } from "@os-react/6-project/widgets/quickpick/QuickPick";
 
 export const Route = createFileRoute("/_minimal/playground/quickpick")({
   component: QuickPickPage,

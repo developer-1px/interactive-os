@@ -16,12 +16,9 @@
  * These tests verify that the kernel state preserves original IDs correctly.
  */
 
+import { resolveItemId, resolveSelection } from "@os-core/schema/state/resolve";
 import { createOsPage } from "@os-sdk/app/defineApp/page";
 import { describe, expect, it } from "vitest";
-import {
-  resolveItemId,
-  resolveSelection,
-} from "@os-core/schema/state/resolve";
 
 // ─── Config ───
 

@@ -32,8 +32,8 @@
 
 import { defineScope } from "@kernel";
 import type { Middleware, ScopeToken } from "@kernel/core/tokens";
-import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
 import type { AppModule } from "@os-core/engine/appModule";
+import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
 import { createHistoryMiddleware } from "@os-core/engine/middlewares/historyKernelMiddleware";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -295,16 +295,16 @@ function hydrateState<S>(initialState: S, storageKey: string): S {
       data:
         init["data"] && load["data"]
           ? {
-            ...(init["data"] as Record<string, unknown>),
-            ...(load["data"] as Record<string, unknown>),
-          }
+              ...(init["data"] as Record<string, unknown>),
+              ...(load["data"] as Record<string, unknown>),
+            }
           : load["data"] || init["data"],
       ui:
         init["ui"] && load["ui"]
           ? {
-            ...(init["ui"] as Record<string, unknown>),
-            ...(load["ui"] as Record<string, unknown>),
-          }
+              ...(init["ui"] as Record<string, unknown>),
+              ...(load["ui"] as Record<string, unknown>),
+            }
           : load["ui"] || init["ui"],
     };
   } catch {

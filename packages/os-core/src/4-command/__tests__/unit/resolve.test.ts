@@ -9,10 +9,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import {
-  resolveItemId,
-  resolveSelection,
-} from "../../../schema/state/resolve";
+import { resolveItemId, resolveSelection } from "../../../schema/state/resolve";
 
 describe("resolveItemId", () => {
   // ── Happy path: ID exists ──

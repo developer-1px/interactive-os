@@ -1,3 +1,6 @@
+import { os } from "@os-core/engine/kernel";
+import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
+import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
 import {
   ChevronDown,
   ChevronRight,
@@ -22,9 +25,6 @@ import {
 } from "@/apps/builder/app";
 import type { Block } from "@/apps/builder/model/appState";
 import { getPropertyDef } from "@/apps/builder/model/blockSchemas";
-import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
-import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
-import { os } from "@os-core/engine/kernel";
 import { getWidget } from "./widgets/PropertyWidgets";
 
 const CANVAS_ZONE_ID = "canvas";

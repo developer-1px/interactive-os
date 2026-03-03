@@ -21,10 +21,6 @@ import {
   type SelectConfig,
   type TabConfig,
 } from "@os-core/schema/types/focus/config/FocusGroupConfig";
-import { produce } from "immer";
-import { createElement, type FC } from "react";
-import { renderToString } from "react-dom/server";
-
 import {
   computeAttrs,
   type ElementAttrs,
@@ -36,6 +32,9 @@ import {
   simulateClick,
   simulateKeyPress,
 } from "@os-sdk/library/headless";
+import { produce } from "immer";
+import { createElement, type FC } from "react";
+import { renderToString } from "react-dom/server";
 
 // Ensure OS defaults are registered
 import "@os-core/2-resolve/osDefaults";
@@ -236,7 +235,7 @@ export function createAppPage<S>(
   });
 
   // Override browser-only effects for headless (no navigator.clipboard)
-  os.defineEffect("clipboardWrite", () => { });
+  os.defineEffect("clipboardWrite", () => {});
 
   // ── Enter preview sandbox ──
   os.enterPreview({
@@ -487,8 +486,8 @@ export interface ZoneOrderEntry {
   firstItemId: string | null;
   lastItemId: string | null;
   entry:
-  | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
-  | string;
+    | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
+    | string;
   selectedItemId: string | null;
   lastFocusedId: string | null;
 }
@@ -503,8 +502,8 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   const basePage = createPage(dummyApp);
   const os = basePage.kernel;
 
-  os.defineEffect("focus", () => { });
-  os.defineEffect("scroll", () => { });
+  os.defineEffect("focus", () => {});
+  os.defineEffect("scroll", () => {});
   const mockItems = { current: [] as string[] };
   const mockRects = { current: new Map<string, DOMRect>() };
   const mockConfig = { current: { ...DEFAULT_CONFIG } as FocusGroupConfig };
@@ -749,38 +748,38 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
           ...opts.config,
           ...(opts.config.navigate
             ? {
-              navigate: {
-                ...base.navigate,
-                ...opts.config.navigate,
-              } as import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateConfig,
-            }
+                navigate: {
+                  ...base.navigate,
+                  ...opts.config.navigate,
+                } as import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateConfig,
+              }
             : {}),
           ...(opts.config.tab
             ? { tab: { ...base.tab, ...opts.config.tab } as Partial<TabConfig> }
             : {}),
           ...(opts.config.select
             ? {
-              select: {
-                ...base.select,
-                ...opts.config.select,
-              } as Partial<SelectConfig>,
-            }
+                select: {
+                  ...base.select,
+                  ...opts.config.select,
+                } as Partial<SelectConfig>,
+              }
             : {}),
           ...(opts.config.activate
             ? {
-              activate: {
-                ...base.activate,
-                ...opts.config.activate,
-              } as Partial<ActivateConfig>,
-            }
+                activate: {
+                  ...base.activate,
+                  ...opts.config.activate,
+                } as Partial<ActivateConfig>,
+              }
             : {}),
           ...(opts.config.dismiss
             ? {
-              dismiss: {
-                ...base.dismiss,
-                ...opts.config.dismiss,
-              } as Partial<DismissConfig>,
-            }
+                dismiss: {
+                  ...base.dismiss,
+                  ...opts.config.dismiss,
+                } as Partial<DismissConfig>,
+              }
             : {}),
         } as FocusGroupConfig;
       }
@@ -807,7 +806,10 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         initialSelection = opts.initial.selection;
       } else if (focusedId && mockConfig.current.select?.followFocus) {
         initialSelection = [focusedId];
-      } else if (mockConfig.current.select?.disallowEmpty && opts?.items?.length) {
+      } else if (
+        mockConfig.current.select?.disallowEmpty &&
+        opts?.items?.length
+      ) {
         // disallowEmpty fallback: auto-select first item (replaces OS_INIT_SELECTION)
         initialSelection = [opts.items[0]];
       }

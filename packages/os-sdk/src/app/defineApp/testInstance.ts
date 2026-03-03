@@ -7,9 +7,9 @@
 
 import { createKernel, defineScope } from "@kernel";
 import type { BaseCommand } from "@kernel/core/tokens";
-import { type AppState, initialAppState } from "@os-core/engine/kernel";
 import { focusHandler } from "@os-core/4-command/focus/focus";
 import { notifyHandler } from "@os-core/4-command/toast/toast";
+import { type AppState, initialAppState } from "@os-core/engine/kernel";
 import {
   beginTransaction,
   createHistoryMiddleware,

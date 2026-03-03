@@ -10,23 +10,33 @@ import {
   type KeyboardInput,
   resolveKeyboard,
 } from "@os-core/1-listen/keyboard/resolveKeyboard";
-import { type ClickInput, resolveClick } from "@os-core/1-listen/mouse/resolveClick";
-import { type MouseInput, resolveMouse } from "@os-core/1-listen/mouse/resolveMouse";
+import {
+  type ClickInput,
+  resolveClick,
+} from "@os-core/1-listen/mouse/resolveClick";
+import {
+  type MouseInput,
+  resolveMouse,
+} from "@os-core/1-listen/mouse/resolveMouse";
 import { ROLE_FIELD_TYPE_MAP } from "@os-core/2-resolve/resolveFieldKey";
+import { readActiveZoneId, readFocusedItemId } from "@os-core/3-inject/compute";
 import {
   buildZoneEntry,
   createZoneConfig,
   generateZoneId,
   type ZoneCallbacks,
 } from "@os-core/3-inject/zoneContext";
-import { OS_COPY, OS_CUT, OS_PASTE } from "@os-core/4-command/clipboard/clipboard";
+import {
+  OS_COPY,
+  OS_CUT,
+  OS_PASTE,
+} from "@os-core/4-command/clipboard/clipboard";
 import { OS_ZONE_INIT } from "@os-core/4-command/focus";
 import {
   getChildRole,
   type ZoneRole,
 } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { readActiveZoneId, readFocusedItemId } from "@os-core/3-inject/compute";
 import type { HeadlessKernel, InteractionObserver } from "./headless.types";
 
 // ═══════════════════════════════════════════════════════════════════

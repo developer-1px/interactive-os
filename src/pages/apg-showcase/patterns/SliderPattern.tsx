@@ -11,9 +11,9 @@
 
 import { OS_VALUE_CHANGE } from "@os-core/4-command";
 import { os } from "@os-core/engine/kernel";
+import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
 import { useEffect } from "react";
-import { defineApp } from "@os-sdk/app/defineApp";
 
 // ─── Slider Data ───
 

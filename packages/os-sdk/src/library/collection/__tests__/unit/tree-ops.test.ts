@@ -19,9 +19,9 @@ import {
   moveSectionUp,
   sidebarCollection,
 } from "@apps/builder/app";
-import { beforeEach, describe, expect, it } from "vitest";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { findInTree } from "@os-sdk/library/collection/treeUtils";
+import { beforeEach, describe, expect, it } from "vitest";
 import { TREE_TEST_BLOCKS } from "../fixtures/treeTestBlocks";
 
 describe("tree-aware collection operations", () => {

@@ -52,11 +52,11 @@ export interface GestureState {
 
 export type GestureResult =
   | {
-    gesture: "CLICK";
-    state: GestureState;
-    itemId: string | null;
-    zoneId: string | null;
-  }
+      gesture: "CLICK";
+      state: GestureState;
+      itemId: string | null;
+      zoneId: string | null;
+    }
   | { gesture: "DRAG_END"; state: GestureState }
   | { gesture: "SLIDER_DRAG_END"; state: GestureState }
   | { gesture: "NONE"; state: GestureState };

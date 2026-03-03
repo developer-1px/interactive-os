@@ -12,15 +12,15 @@
  * Full Path: press("Escape") → press("ArrowUp") → focusedItemId still null
  */
 
-import { Keybindings } from "@os-core/2-resolve/keybindings";
-import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createCanvasItemFilter,
   createDrillDown,
   createDrillUp,
 } from "@apps/builder/features/hierarchicalNavigation";
+import { Keybindings } from "@os-core/2-resolve/keybindings";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const ZONE_ID = "builder-canvas";
 

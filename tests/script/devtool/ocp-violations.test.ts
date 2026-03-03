@@ -21,7 +21,7 @@ describe("T1: Block Registry — single source of truth", () => {
   it("blockRegistry.ts file exists", () => {
     expect(
       existsSync("src/apps/builder/blockRegistry.ts") ||
-      existsSync("src/apps/builder/blockRegistry.tsx"),
+        existsSync("src/apps/builder/blockRegistry.tsx"),
     ).toBe(true);
   });
 

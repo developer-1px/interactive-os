@@ -1,9 +1,9 @@
 import type { BaseCommand } from "@kernel";
-import { buildFieldConfig, validateField } from "@os-core/3-inject/fieldContext.ts";
+import {
+  buildFieldConfig,
+  validateField,
+} from "@os-core/3-inject/fieldContext.ts";
 import { OS_FIELD_COMMIT } from "@os-core/4-command/field/commit";
-import { useFieldFocus } from "@os-react/6-project/field/useField.ts";
-import { Item } from "@os-react/6-project/Item.tsx";
-import { useZoneContext } from "@os-react/6-project/Zone.tsx";
 import { os } from "@os-core/engine/kernel.ts";
 import {
   type FieldConfig,
@@ -13,6 +13,9 @@ import {
   useFieldRegistry,
 } from "@os-core/engine/registries/fieldRegistry";
 import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand.ts";
+import { useFieldFocus } from "@os-react/6-project/field/useField.ts";
+import { Item } from "@os-react/6-project/Item.tsx";
+import { useZoneContext } from "@os-react/6-project/Zone.tsx";
 import type { HTMLAttributes } from "react";
 import {
   forwardRef,

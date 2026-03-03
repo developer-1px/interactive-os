@@ -3,20 +3,20 @@ import { TestBotRegistry } from "@os-devtool/testing";
 import { useEffect } from "react";
 import { TestGrid } from "../shared/TestLayout";
 import { focusShowcaseScripts } from "./focusScripts";
-import { ActivateTest } from "./tests/ActivateTest";
-import { AriaFacadeTest } from "./tests/AriaFacadeTest";
-import { AriaInteractionTest } from "./tests/AriaInteractionTest";
-import { AutofocusTest } from "./tests/AutofocusTest";
-import { DisabledTest } from "./tests/DisabledTest";
-import { DismissTest } from "./tests/DismissTest";
-import { ExpandTest } from "./tests/ExpandTest";
-import { FocusStackTest } from "./tests/FocusStackTest";
-import { NavigateTest } from "./tests/NavigateTest";
-import { RadiogroupTest } from "./tests/RadiogroupTest";
-import { SelectTest } from "./tests/SelectTest";
-import { TablistTest } from "./tests/TablistTest";
-import { TabTest } from "./tests/TabTest";
-import { TypeaheadTest } from "./tests/TypeaheadTest";
+import { ActivateTest } from "./__tests__/ActivateTest";
+import { AriaFacadeTest } from "./__tests__/AriaFacadeTest";
+import { AriaInteractionTest } from "./__tests__/AriaInteractionTest";
+import { AutofocusTest } from "./__tests__/AutofocusTest";
+import { DisabledTest } from "./__tests__/DisabledTest";
+import { DismissTest } from "./__tests__/DismissTest";
+import { ExpandTest } from "./__tests__/ExpandTest";
+import { FocusStackTest } from "./__tests__/FocusStackTest";
+import { NavigateTest } from "./__tests__/NavigateTest";
+import { RadiogroupTest } from "./__tests__/RadiogroupTest";
+import { SelectTest } from "./__tests__/SelectTest";
+import { TablistTest } from "./__tests__/TablistTest";
+import { TabTest } from "./__tests__/TabTest";
+import { TypeaheadTest } from "./__tests__/TypeaheadTest";
 
 export function FocusShowcasePage() {
   // Register focus-showcase scripts with TestBot on mount

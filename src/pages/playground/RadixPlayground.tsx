@@ -8,8 +8,8 @@
  */
 
 import { Item } from "@os-react/6-project/Item.tsx";
-import { Zone } from "@os-react/6-project/Zone.tsx";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog.tsx";
+import { Zone } from "@os-react/6-project/Zone.tsx";
 
 export function RadixPlayground() {
   return (

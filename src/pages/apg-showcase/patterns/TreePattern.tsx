@@ -5,13 +5,13 @@
  * Data-driven: tree structure in data, flat rendering in DOM.
  */
 
+import { useFlatTree } from "@os-react/6-project/accessors/useFlatTree";
 import { Item } from "@os-react/6-project/Item";
+import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
 import { Icon } from "@/components/Icon";
 import type { DocItem, FlatTreeNode } from "@/docs-viewer/docsUtils";
 import { flattenVisibleTree } from "@/docs-viewer/docsUtils";
-import { useFlatTree } from "@os-react/6-project/accessors/useFlatTree";
-import { defineApp } from "@os-sdk/app/defineApp";
 
 // ── Static tree data (VS Code-style file explorer) ──
 

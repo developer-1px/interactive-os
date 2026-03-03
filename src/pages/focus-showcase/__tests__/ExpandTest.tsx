@@ -1,6 +1,6 @@
+import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
 import { Item } from "@os-react/6-project/Item.tsx";
 import { Zone } from "@os-react/6-project/Zone.tsx";
-import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
 import { TestBox } from "../../shared/TestLayout";
 
 export function ExpandTest() {

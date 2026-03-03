@@ -368,4 +368,3 @@ describe("APG Tree: Single-Select Negative (MUST NOT)", () => {
     expect(t.selection()).toHaveLength(1);
   });
 });
-

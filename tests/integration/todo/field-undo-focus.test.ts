@@ -10,11 +10,14 @@
  * returning to the item (e.g., "todo_1").
  */
 
-import { produce } from "immer";
-import { beforeEach, describe, expect, it } from "vitest";
-import { OS_FIELD_CANCEL, OS_FIELD_COMMIT } from "@os-core/4-command/field/field";
+import {
+  OS_FIELD_CANCEL,
+  OS_FIELD_COMMIT,
+} from "@os-core/4-command/field/field";
 import { os } from "@os-core/engine/kernel";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
+import { produce } from "immer";
+import { beforeEach, describe, expect, it } from "vitest";
 
 /** Set up OS state: activeZoneId + zone focus + editingItemId */
 function setupZone(

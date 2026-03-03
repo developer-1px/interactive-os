@@ -14,8 +14,8 @@
  *   CSS reads those attributes. No manual state management needed.
  */
 
-import { useState } from "react";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { useState } from "react";
 
 // ─── Tab Data (W3C APG Example: Danish Composers) ───
 
@@ -37,7 +37,7 @@ const TABS: TabDefinition[] = [
       name: "Maria Theresia Ahlefeldt",
       dates: "16 January 1755 – 20 December 1810",
       description:
-        'Maria Theresia Ahlefeldt was a Danish, originally German, composer. She is known as the first female composer in Denmark. Maria Theresia composed music for several ballets, operas, and plays of the royal theatre. She was given good critic as a composer and described as a "virkelig Tonekunstnerinde" (\'a True Artist of Music\').',
+        "Maria Theresia Ahlefeldt was a Danish, originally German, composer. She is known as the first female composer in Denmark. Maria Theresia composed music for several ballets, operas, and plays of the royal theatre. She was given good critic as a composer and described as a \"virkelig Tonekunstnerinde\" ('a True Artist of Music').",
     },
   },
   {
@@ -107,17 +107,14 @@ function TabPanelContent({ tab }: { tab: TabDefinition }) {
 
 // ─── Tab List (reusable for both modes) ───
 
-function TabListSection({
-  UI,
-  label,
-}: {
-  UI: typeof AutoUI;
-  label: string;
-}) {
+function TabListSection({ UI, label }: { UI: typeof AutoUI; label: string }) {
   return (
     <div className="rounded-lg border border-gray-300 overflow-hidden shadow-sm">
       {/* Tab List */}
-      <UI.Zone className="flex border-b border-gray-300 bg-gray-100" aria-label={label}>
+      <UI.Zone
+        className="flex border-b border-gray-300 bg-gray-100"
+        aria-label={label}
+      >
         {TABS.map((tab) => (
           <UI.Item
             key={tab.id}
@@ -189,7 +186,11 @@ export function TabsPattern() {
             onChange={() => setMode("auto")}
             className="accent-indigo-600"
           />
-          <span className={isAuto ? "font-semibold text-indigo-700" : "text-gray-600"}>
+          <span
+            className={
+              isAuto ? "font-semibold text-indigo-700" : "text-gray-600"
+            }
+          >
             Automatic
           </span>
         </label>
@@ -202,7 +203,11 @@ export function TabsPattern() {
             onChange={() => setMode("manual")}
             className="accent-indigo-600"
           />
-          <span className={!isAuto ? "font-semibold text-indigo-700" : "text-gray-600"}>
+          <span
+            className={
+              !isAuto ? "font-semibold text-indigo-700" : "text-gray-600"
+            }
+          >
             Manual
           </span>
         </label>

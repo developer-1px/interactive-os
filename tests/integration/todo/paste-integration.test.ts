@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
-import { createIntegrationTest } from "@os-devtool/testing/__tests__/createIntegrationTest";
 import { addTodo, TodoApp, TodoList } from "@apps/todo/app";
+import { createIntegrationTest } from "@os-devtool/testing/__tests__/createIntegrationTest";
+import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Todo Integration: Paste & Focus (OS Level)", () => {
   let testContext: ReturnType<

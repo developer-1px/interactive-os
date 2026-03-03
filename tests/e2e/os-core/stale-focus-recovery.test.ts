@@ -11,8 +11,8 @@
  * Related: PRD kernel-items FR2, Discussion 2026-0222-2031
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { createOsPage } from "@os-sdk/app/defineApp/page";
 import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Focus Stack — Stale Focus Recovery", () => {

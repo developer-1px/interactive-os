@@ -63,7 +63,12 @@ export function ListboxPattern() {
           role="listbox"
           options={{
             navigate: { orientation: "vertical" },
-            select: { mode: "multiple", range: true, toggle: true, followFocus: false },
+            select: {
+              mode: "multiple",
+              range: true,
+              toggle: true,
+              followFocus: false,
+            },
           }}
           aria-multiselectable="true"
           aria-label="Choose multiple fruits"

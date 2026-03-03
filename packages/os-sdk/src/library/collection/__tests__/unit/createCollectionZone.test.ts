@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import type { AppHandle, ZoneHandle } from "@os-sdk/app/defineApp/types";
+import { describe, expect, it, vi } from "vitest";
 import {
   _resetClipboardStore,
   type CollectionConfig,

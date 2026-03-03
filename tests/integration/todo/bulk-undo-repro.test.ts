@@ -13,10 +13,10 @@ import {
   undoCommand,
 } from "@apps/todo/app";
 import { dumpTransactions } from "@inspector/utils/dumpTransactions";
+import { os } from "@os-core/engine/kernel";
 import { createPage } from "@os-sdk/app/defineApp/page";
 import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { os } from "@os-core/engine/kernel";
 import TodoPage from "@/pages/TodoPage";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];

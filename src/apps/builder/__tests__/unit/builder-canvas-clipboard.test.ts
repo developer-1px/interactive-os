@@ -20,11 +20,11 @@ import {
 } from "@apps/builder/app";
 import { findBlock } from "@apps/builder/model/appState";
 import type { BaseCommand } from "@kernel/core/tokens";
-import { beforeEach, describe, expect, test, vi } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
 } from "@os-sdk/library/collection/createCollectionZone";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock navigator.clipboard
 const mockWriteText = vi.fn(() => Promise.resolve());

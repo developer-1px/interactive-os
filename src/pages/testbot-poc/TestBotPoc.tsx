@@ -8,8 +8,6 @@
  *   3. Playwright E2E (native page)
  */
 
-import { Item } from "@os-react/6-project/Item.tsx";
-import { Zone } from "@os-react/6-project/Zone.tsx";
 import {
   allAriaScripts,
   type BrowserStep,
@@ -17,6 +15,8 @@ import {
   expect,
   type TestScript,
 } from "@os-devtool/testing";
+import { Item } from "@os-react/6-project/Item.tsx";
+import { Zone } from "@os-react/6-project/Zone.tsx";
 import { useCallback, useRef, useState } from "react";
 
 // ═══════════════════════════════════════════════════════════════════

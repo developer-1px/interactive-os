@@ -9,8 +9,8 @@
  */
 
 import type { Transaction } from "@kernel/core/transaction";
-import { Trigger } from "@os-react/6-project/Trigger";
 import { os } from "@os-core/engine/kernel";
+import { Trigger } from "@os-react/6-project/Trigger";
 import {
   ChevronDown,
   ClipboardCopy,

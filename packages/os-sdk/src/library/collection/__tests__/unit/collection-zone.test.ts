@@ -7,7 +7,6 @@
  * Both share the same CRUD API.
  */
 
-import { beforeEach, describe, expect, it } from "vitest";
 import { defineApp } from "@os-sdk/app/defineApp";
 import {
   _resetClipboardStore,
@@ -15,6 +14,7 @@ import {
   fromEntities,
   readClipboard,
 } from "@os-sdk/library/collection/createCollectionZone";
+import { beforeEach, describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // Fixture A: Array-based (Builder)

@@ -6,11 +6,15 @@
  */
 
 import { Keybindings as KeybindingsRegistry } from "@os-core/2-resolve/keybindings";
+import { os } from "@os-core/engine/kernel";
+import {
+  getContentRole,
+  getContentVisibilitySource,
+} from "@os-core/engine/registries/roleRegistry";
 import { Field } from "@os-react/6-project/field/Field";
 import { Item } from "@os-react/6-project/Item";
 import type { ZoneOptions } from "@os-react/6-project/Zone";
 import { useZoneContext, Zone } from "@os-react/6-project/Zone";
-import { os } from "@os-core/engine/kernel";
 import React, { type ReactNode } from "react";
 import type {
   BoundComponents,
@@ -19,10 +23,6 @@ import type {
   KeybindingEntry,
   ZoneBindings,
 } from "./types";
-import {
-  getContentRole,
-  getContentVisibilitySource,
-} from "@os-core/engine/registries/roleRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Bind Config (injected by createZone)
@@ -116,13 +116,13 @@ export function createBoundComponents<S>(
     id: string | number;
     className?: string;
     children?:
-    | ReactNode
-    | ((state: {
-      isFocused: boolean;
-      isSelected: boolean;
-      isExpanded: boolean;
-      isAnchor?: boolean;
-    }) => ReactNode);
+      | ReactNode
+      | ((state: {
+          isFocused: boolean;
+          isSelected: boolean;
+          isExpanded: boolean;
+          isAnchor?: boolean;
+        }) => ReactNode);
     asChild?: boolean;
   }> & {
     Region: React.FC<{

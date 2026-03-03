@@ -13,17 +13,17 @@
  *         └── panel — accordion tree (properties form)
  */
 
-import { produce } from "immer";
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
+import { os } from "@os-core/engine/kernel";
+import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { deleteToast } from "@os-sdk/app/modules/deleteToast";
 import { history } from "@os-sdk/app/modules/history";
-import { os } from "@os-core/engine/kernel";
 import {
   type CollectionNode,
   findAcceptingCollection,
 } from "@os-sdk/library/collection/pasteBubbling";
-import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
+import { produce } from "immer";
 import {
   type Block,
   type BuilderState,

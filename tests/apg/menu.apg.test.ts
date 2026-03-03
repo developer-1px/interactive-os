@@ -25,9 +25,9 @@ import {
   assertEscapeClose,
   assertFocusRestore,
   assertHomeEnd,
+  assertHorizontalNav,
   assertNoSelection,
   assertVerticalNav,
-  assertHorizontalNav,
 } from "./helpers/contracts";
 
 // ─── Menubar Factory ───

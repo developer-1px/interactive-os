@@ -14,16 +14,16 @@ import type { Middleware, ScopeToken } from "@kernel/core/tokens";
 
 /** Context provided to module's install function */
 export interface ModuleInstallContext {
-    /** App ID this module is being installed into */
-    appId: string;
-    /** Kernel scope token for this app */
-    scope: ScopeToken;
+  /** App ID this module is being installed into */
+  appId: string;
+  /** Kernel scope token for this app */
+  scope: ScopeToken;
 }
 
 /** App Module — installable behavior unit */
 export interface AppModule {
-    /** Unique module identifier */
-    id: string;
-    /** Install the module: returns middleware(s) to register on the kernel */
-    install(ctx: ModuleInstallContext): Middleware | Middleware[];
+  /** Unique module identifier */
+  id: string;
+  /** Install the module: returns middleware(s) to register on the kernel */
+  install(ctx: ModuleInstallContext): Middleware | Middleware[];
 }

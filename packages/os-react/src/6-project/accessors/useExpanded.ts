@@ -5,10 +5,10 @@
  * Uses OS_EXPAND kernel command for mutations, os state for reads.
  */
 
-import { useZoneContext } from "@os-react/6-project/Zone.tsx";
-import { useCallback } from "react";
 import { OS_EXPAND } from "@os-core/4-command/expand";
 import { os } from "@os-core/engine/kernel";
+import { useZoneContext } from "@os-react/6-project/Zone.tsx";
+import { useCallback } from "react";
 
 // Stable empty array reference to avoid infinite re-render in useSyncExternalStore.
 // `?? []` inside a selector creates a new reference per call → referential inequality → re-render loop.

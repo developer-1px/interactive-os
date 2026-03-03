@@ -133,21 +133,21 @@ export const OS_NAVIGATE = os.defineCommand(
     // Delegate to existing pure resolver OR use override
     const navResult = overrideTargetId
       ? {
-        targetId: overrideTargetId,
-        stickyX: zone.stickyX,
-        stickyY: zone.stickyY,
-      }
-      : resolveNavigate(
-        zone.focusedItemId,
-        payload.direction,
-        navigableItems,
-        config.navigate,
-        {
+          targetId: overrideTargetId,
           stickyX: zone.stickyX,
           stickyY: zone.stickyY,
-          itemRects,
-        },
-      );
+        }
+      : resolveNavigate(
+          zone.focusedItemId,
+          payload.direction,
+          navigableItems,
+          config.navigate,
+          {
+            stickyX: zone.stickyX,
+            stickyY: zone.stickyY,
+            itemRects,
+          },
+        );
 
     const result = {
       state: produce(ctx.state, (draft) => {
@@ -187,7 +187,11 @@ export const OS_NAVIGATE = os.defineCommand(
         }
 
         // Shift+Arrow on single-select: apply followFocus instead of range
-        if (payload.select === "range" && navResult.targetId && !config.select.range) {
+        if (
+          payload.select === "range" &&
+          navResult.targetId &&
+          !config.select.range
+        ) {
           applyFollowFocus(z, navResult.targetId, config.select);
         }
       }) as typeof ctx.state,

@@ -1,3 +1,4 @@
+import { os } from "@os-core/engine/kernel";
 import {
   Eye,
   Hand,
@@ -18,7 +19,6 @@ import {
   undoCommand,
 } from "@/apps/builder/app";
 import { LocaleSwitcher } from "@/apps/builder/LocaleSwitcher";
-import { os } from "@os-core/engine/kernel";
 
 export type ViewportMode = "desktop" | "tablet" | "mobile";
 

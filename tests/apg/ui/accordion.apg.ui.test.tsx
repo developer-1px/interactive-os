@@ -6,15 +6,15 @@
  * The headless tests verify OS state; this verifies the DOM projection.
  */
 
+import { OS_FOCUS } from "@os-core/4-command/focus";
+import { os } from "@os-core/engine/kernel";
+import { KeyboardListener } from "@os-react/1-listen/keyboard/KeyboardListener";
+import { PointerListener } from "@os-react/1-listen/pointer/PointerListener";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { produce } from "immer";
 import { act } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { KeyboardListener } from "@os-react/1-listen/keyboard/KeyboardListener";
-import { PointerListener } from "@os-react/1-listen/pointer/PointerListener";
-import { OS_FOCUS } from "@os-core/4-command/focus";
-import { os } from "@os-core/engine/kernel";
 import { AccordionPattern } from "@/pages/apg-showcase/patterns/AccordionPattern";
 
 describe("AccordionPattern (DOM Rendering)", () => {

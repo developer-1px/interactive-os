@@ -13,11 +13,11 @@
 
 import type { Block } from "@apps/builder/app";
 import { BuilderApp, canvasOnCopy, canvasOnPaste } from "@apps/builder/app";
-import { describe, expect, test } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
 } from "@os-sdk/library/collection/createCollectionZone";
+import { describe, expect, test } from "vitest";
 
 /** Recursively count all blocks in tree */
 function countBlocks(blocks: Block[]): number {

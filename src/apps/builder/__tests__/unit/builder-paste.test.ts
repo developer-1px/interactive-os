@@ -7,11 +7,11 @@
  */
 
 import { BuilderApp, sidebarCollection } from "@apps/builder/app";
-import { describe, expect, test } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
 } from "@os-sdk/library/collection/createCollectionZone";
+import { describe, expect, test } from "vitest";
 
 describe("Builder copy → paste → paste 연속 실행", () => {
   function createApp() {

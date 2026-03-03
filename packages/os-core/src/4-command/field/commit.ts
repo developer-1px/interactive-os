@@ -6,9 +6,9 @@
  * For immediate-mode fields (no editingItemId), clears the field DOM.
  */
 
+import { clearFieldDOM } from "@os-core/5-effect/index";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import { produce } from "immer";
-import { clearFieldDOM } from "@os-core/5-effect/index";
 import { os } from "../../engine/kernel";
 
 export const OS_FIELD_COMMIT = os.defineCommand(

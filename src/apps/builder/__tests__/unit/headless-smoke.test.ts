@@ -10,11 +10,11 @@ import type { BuilderState } from "@apps/builder/model/appState";
 import { INITIAL_STATE } from "@apps/builder/model/appState";
 import type { AppState } from "@os-core/engine/kernel";
 import { initialAppState, os } from "@os-core/engine/kernel";
-import { beforeEach, describe, expect, it } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
 } from "@os-sdk/library/collection/createCollectionZone";
+import { beforeEach, describe, expect, it } from "vitest";
 
 function builderState(): BuilderState {
   return (os.getState() as AppState).apps["builder"] as BuilderState;

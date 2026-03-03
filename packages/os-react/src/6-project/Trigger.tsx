@@ -18,10 +18,10 @@ import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
 } from "@os-core/4-command/overlay/overlay";
-import { Item } from "@os-react/6-project/Item.tsx";
-import { Zone } from "@os-react/6-project/Zone";
 import { os } from "@os-core/engine/kernel.ts";
 import type { OverlayEntry } from "@os-core/schema/state/OSState.ts";
+import { Item } from "@os-react/6-project/Item.tsx";
+import { Zone } from "@os-react/6-project/Zone";
 import type {
   ReactElement,
   MouseEvent as ReactMouseEvent,

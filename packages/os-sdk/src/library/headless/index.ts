@@ -5,33 +5,30 @@
  * This file maintains backward compatibility for @os-sdk/library/headless imports.
  */
 
+export type { ItemState } from "@os-core/3-inject/compute";
 export {
-  computeItem,
   computeAttrs,
+  computeItem,
   readActiveZoneId,
   readFocusedItemId,
   readSelection,
   resolveElement,
 } from "@os-core/3-inject/compute";
-
-export type { ItemState } from "@os-core/3-inject/compute";
-
-export {
-  setInteractionObserver,
-  simulateKeyPress,
-  simulateClick,
-  registerHeadlessZone,
-  unregisterHeadlessZone,
-} from "@os-core/3-inject/simulate";
-
-export type { HeadlessZoneOptions } from "@os-core/3-inject/simulate";
-
 export type {
+  ElementAttrs,
   HeadlessKernel,
+  InteractionObserver,
+  InteractionRecord,
   ItemAttrs,
   ItemOverrides,
   ItemResult,
-  ElementAttrs,
-  InteractionRecord,
-  InteractionObserver,
 } from "@os-core/3-inject/headless.types";
+
+export type { HeadlessZoneOptions } from "@os-core/3-inject/simulate";
+export {
+  registerHeadlessZone,
+  setInteractionObserver,
+  simulateClick,
+  simulateKeyPress,
+  unregisterHeadlessZone,
+} from "@os-core/3-inject/simulate";

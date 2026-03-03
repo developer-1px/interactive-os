@@ -27,10 +27,10 @@
 
 import { defineScope } from "@kernel";
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
-import type React from "react";
-import type { ReactNode } from "react";
 import { registerAppSlice } from "@os-core/engine/appState";
 import { createHistoryMiddleware } from "@os-core/engine/middlewares/historyKernelMiddleware";
+import type React from "react";
+import type { ReactNode } from "react";
 import type { AppModule } from "../modules/types";
 import { createBoundComponents } from "./bind";
 import { createTestInstance } from "./testInstance";

@@ -5,12 +5,12 @@
  * Record<string, string[]> order (adjacency list).
  */
 
-import { beforeEach, describe, expect, it } from "vitest";
 import { defineApp } from "@os-sdk/app/defineApp";
 import {
   createCollectionZone,
   fromNormalized,
 } from "@os-sdk/library/collection/createCollectionZone";
+import { beforeEach, describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // Fixture: Tree-shaped entity collection

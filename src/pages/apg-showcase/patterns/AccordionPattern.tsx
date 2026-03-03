@@ -9,8 +9,8 @@
  *   CSS reads those attributes. No render-prop, no JS state.
  */
 
-import { Icon } from "@/components/Icon";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { Icon } from "@/components/Icon";
 
 // ─── Section Data ───
 

@@ -9,12 +9,12 @@
  */
 
 import { createKernel } from "@kernel";
+import { resolveTab } from "@os-core/4-command/tab/resolveTab";
 import type { AppState } from "@os-core/engine/kernel";
 import { initialOSState } from "@os-core/schema/state/initial";
 import { ensureZone } from "@os-core/schema/state/utils";
 import { produce } from "immer";
 import { describe, expect, it } from "vitest";
-import { resolveTab } from "@os-core/4-command/tab/resolveTab";
 
 // ═══════════════════════════════════════════════════════════════════
 // Test Kernel Factory — independent instance per test

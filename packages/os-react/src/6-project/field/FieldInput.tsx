@@ -9,9 +9,10 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { buildFieldConfig, validateField } from "@os-core/3-inject/fieldContext.ts";
-import { Item } from "@os-react/6-project/Item.tsx";
-import { useZoneContext } from "@os-react/6-project/Zone.tsx";
+import {
+  buildFieldConfig,
+  validateField,
+} from "@os-core/3-inject/fieldContext.ts";
 import { os } from "@os-core/engine/kernel.ts";
 import {
   FieldRegistry,
@@ -19,6 +20,8 @@ import {
   useFieldRegistry,
 } from "@os-core/engine/registries/fieldRegistry";
 import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand.ts";
+import { Item } from "@os-react/6-project/Item.tsx";
+import { useZoneContext } from "@os-react/6-project/Zone.tsx";
 import {
   forwardRef,
   type InputHTMLAttributes,

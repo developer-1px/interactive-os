@@ -9,8 +9,9 @@
  *   ④ Render — JSX
  */
 
-import { os } from "@os-core/engine/kernel.ts";
 import { computeItem, type ItemState } from "@os-core/3-inject/compute";
+import { os } from "@os-core/engine/kernel.ts";
+import { DEFAULT_CONFIG } from "@os-core/schema/types";
 import {
   cloneElement,
   forwardRef,
@@ -21,7 +22,6 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { DEFAULT_CONFIG } from "@os-core/schema/types";
 import { useZoneContext } from "./Zone.tsx";
 
 // Re-export for consumers

@@ -6,12 +6,11 @@
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import { produce } from "immer";
 import { OS_FOCUS } from "@os-core/4-command/focus/focus";
 import { resolveItemFallback } from "@os-core/4-command/focus/focusStackOps";
 import { OS_SELECTION_CLEAR } from "@os-core/4-command/selection/selection";
-import type { AppHandle } from "@os-sdk/app/defineApp/types";
 import { os } from "@os-core/engine/kernel";
+import type { AppHandle } from "@os-sdk/app/defineApp/types";
 import {
   type ArrayCollectionConfig,
   autoDeepClone,
@@ -31,6 +30,7 @@ import {
   removeFromTree,
   type TreeNode,
 } from "@os-sdk/library/collection/treeUtils";
+import { produce } from "immer";
 
 // Re-export types for consumers
 export type {

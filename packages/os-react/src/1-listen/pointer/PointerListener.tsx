@@ -14,19 +14,14 @@
  * @see resolvePointer.ts — pure gesture recognition logic
  */
 
-import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { useEffect } from "react";
-import { OS_FOCUS } from "@os-core/4-command";
-import { OS_CHECK } from "@os-core/4-command/activate/check";
-import { OS_ESCAPE } from "@os-core/4-command/dismiss/escape";
-import { OS_DRAG_END, OS_DRAG_OVER, OS_DRAG_START } from "@os-core/4-command/drag";
-import { OS_EXPAND } from "@os-core/4-command/expand";
-import { OS_FIELD_START_EDIT } from "@os-core/4-command/field/startEdit";
-import { OS_VALUE_CHANGE } from "@os-core/4-command/valueChange";
-import { os } from "@os-core/engine/kernel";
-import { findFocusableItem, setDispatching } from "@os-core/1-listen/_shared/domQuery";
-import { getDropPosition, senseMouseDown } from "@os-core/1-listen/_shared/senseMouse";
+import {
+  findFocusableItem,
+  setDispatching,
+} from "@os-core/1-listen/_shared/domQuery";
+import {
+  getDropPosition,
+  senseMouseDown,
+} from "@os-core/1-listen/_shared/senseMouse";
 import { resolveClick } from "@os-core/1-listen/mouse/resolveClick";
 import { resolveMouse } from "@os-core/1-listen/mouse/resolveMouse";
 import {
@@ -37,6 +32,21 @@ import {
   resolvePointerUp,
   resolveSliderValue,
 } from "@os-core/1-listen/pointer/resolvePointer";
+import { OS_FOCUS } from "@os-core/4-command";
+import { OS_CHECK } from "@os-core/4-command/activate/check";
+import { OS_ESCAPE } from "@os-core/4-command/dismiss/escape";
+import {
+  OS_DRAG_END,
+  OS_DRAG_OVER,
+  OS_DRAG_START,
+} from "@os-core/4-command/drag";
+import { OS_EXPAND } from "@os-core/4-command/expand";
+import { OS_FIELD_START_EDIT } from "@os-core/4-command/field/startEdit";
+import { OS_VALUE_CHANGE } from "@os-core/4-command/valueChange";
+import { os } from "@os-core/engine/kernel";
+import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { useEffect } from "react";
 
 export function PointerListener() {
   useEffect(() => {
@@ -154,17 +164,17 @@ export function PointerListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-              meta: {
-                ...result.meta,
-                pipeline: {
-                  sensed: mouseInput,
-                  resolved: {
-                    preventDefault: result.preventDefault,
-                    fallback: result.fallback,
+                meta: {
+                  ...result.meta,
+                  pipeline: {
+                    sensed: mouseInput,
+                    resolved: {
+                      preventDefault: result.preventDefault,
+                      fallback: result.fallback,
+                    },
                   },
                 },
-              },
-            }
+              }
             : undefined;
           os.dispatch(cmd, opts);
         }
@@ -275,9 +285,9 @@ export function PointerListener() {
         os.dispatch(
           drop
             ? OS_DRAG_OVER({
-              overItemId: drop.overItemId,
-              position: drop.position,
-            })
+                overItemId: drop.overItemId,
+                position: drop.position,
+              })
             : OS_DRAG_OVER({ overItemId: null, position: null }),
         );
       }
@@ -349,11 +359,11 @@ export function PointerListener() {
                 for (const cmd of clickResult.commands) {
                   const opts = clickResult.meta
                     ? {
-                      meta: {
-                        ...clickResult.meta,
-                        pipeline: { sensed: {}, resolved: {} },
-                      },
-                    }
+                        meta: {
+                          ...clickResult.meta,
+                          pipeline: { sensed: {}, resolved: {} },
+                        },
+                      }
                     : undefined;
                   os.dispatch(cmd, opts);
                 }

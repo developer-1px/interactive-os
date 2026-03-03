@@ -1,6 +1,6 @@
-import type { AppHandle } from "@os-sdk/app/defineApp/types";
 import type { AppState } from "@os-core/engine/kernel";
 import { initialZoneState } from "@os-core/schema/state/initial";
+import type { AppHandle } from "@os-sdk/app/defineApp/types";
 import { produce } from "immer";
 
 /**

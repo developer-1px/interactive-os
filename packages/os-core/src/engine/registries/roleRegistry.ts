@@ -110,15 +110,17 @@ const contentRoleMap: Partial<Record<ZoneRole, string>> = {
 export type ContentVisibilitySource = "expanded" | "selected";
 
 const contentVisibilityMap: Partial<Record<ZoneRole, ContentVisibilitySource>> =
-{
-  tablist: "selected",
-  accordion: "expanded",
-  disclosure: "expanded",
-  tree: "expanded",
-};
+  {
+    tablist: "selected",
+    accordion: "expanded",
+    disclosure: "expanded",
+    tree: "expanded",
+  };
 
 /** Get the ARIA role for Item.Content given a Zone role */
-export function getContentRole(zoneRole?: ZoneRole | string): string | undefined {
+export function getContentRole(
+  zoneRole?: ZoneRole | string,
+): string | undefined {
   return zoneRole ? contentRoleMap[zoneRole as ZoneRole] : undefined;
 }
 

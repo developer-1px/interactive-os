@@ -24,8 +24,6 @@ import {
   selectTodosByCategory,
   selectVisibleTodos,
 } from "@apps/todo/selectors";
-import { produce } from "immer";
-import { z } from "zod";
 import { OS_FIELD_START_EDIT } from "@os-core/4-command/field/field";
 import {
   OS_OVERLAY_CLOSE,
@@ -33,10 +31,11 @@ import {
 } from "@os-core/4-command/overlay/overlay";
 import { OS_SELECTION_CLEAR } from "@os-core/4-command/selection/selection";
 import { OS_NOTIFY } from "@os-core/4-command/toast/toast";
-
+import { os } from "@os-core/engine/kernel";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { history } from "@os-sdk/app/modules/history";
-import { os } from "@os-core/engine/kernel";
+import { produce } from "immer";
+import { z } from "zod";
 
 /** Collision-free random ID */
 const uid = () => Math.random().toString(36).slice(2, 10);

@@ -5,4 +5,7 @@
  * This file re-exports them for backward compatibility.
  */
 
-export type { AppModule, ModuleInstallContext } from "@os-core/engine/appModule";
+export type {
+  AppModule,
+  ModuleInstallContext,
+} from "@os-core/engine/appModule";

@@ -1,3 +1,4 @@
+import { os } from "@os-core/engine/kernel";
 import { useState } from "react";
 import {
   BuilderApp,
@@ -7,8 +8,6 @@ import {
 import { BuilderCursor } from "@/apps/builder/BuilderCursor";
 import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 import { PAGE_PRESETS } from "@/apps/builder/presets/pages";
-
-import { os } from "@os-core/engine/kernel";
 import {
   EditorToolbar,
   PropertiesPanel,

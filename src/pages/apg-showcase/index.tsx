@@ -1,9 +1,9 @@
 import { apgShowcaseScripts, TestBotRegistry } from "@os-devtool/testing";
-import { useEffect } from "react";
-import { useNavigate, useParams } from "@tanstack/react-router";
-import { Icon } from "@/components/Icon";
 import { Item } from "@os-react/6-project/Item";
 import { Zone } from "@os-react/6-project/Zone";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Icon } from "@/components/Icon";
 import { AccordionPattern } from "./patterns/AccordionPattern";
 import { AlertPattern } from "./patterns/AlertPattern";
 import { CompositePattern } from "./patterns/CompositePattern";
@@ -37,9 +37,10 @@ const DEFAULT_PATTERN = "accordion";
 export default function ApgShowcasePage() {
   const params = useParams({ strict: false }) as { pattern?: string };
   const navigate = useNavigate();
-  const activePattern = params.pattern && params.pattern in PATTERNS
-    ? params.pattern
-    : DEFAULT_PATTERN;
+  const activePattern =
+    params.pattern && params.pattern in PATTERNS
+      ? params.pattern
+      : DEFAULT_PATTERN;
 
   // Redirect bare /playground/apg to /playground/apg/accordion
   useEffect(() => {

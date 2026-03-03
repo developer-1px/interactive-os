@@ -5,8 +5,8 @@
  */
 
 import { OS_NAVIGATE } from "@os-core/4-command/navigate";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { os } from "@os-core/engine/kernel";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Side-effect: register DOCS_SCROLL_PAGE command + middleware
 import "@/docs-viewer/register";

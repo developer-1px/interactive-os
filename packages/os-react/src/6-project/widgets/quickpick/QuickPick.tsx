@@ -39,11 +39,11 @@ import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
 } from "@os-core/4-command";
+import { os } from "@os-core/engine/kernel";
 import { Item } from "@os-react/6-project/Item";
-import { Zone } from "@os-react/6-project/Zone";
 import { Kbd } from "@os-react/6-project/widgets/Kbd";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
-import { os } from "@os-core/engine/kernel";
+import { Zone } from "@os-react/6-project/Zone";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 

@@ -6,8 +6,8 @@
  */
 
 import { UnifiedInspector } from "@inspector/panels/UnifiedInspector.tsx";
-import { useState, useSyncExternalStore } from "react";
 import { os } from "@os-core/engine/kernel.ts";
+import { useState, useSyncExternalStore } from "react";
 
 export function InspectorAdapter() {
   // tx-aware snapshot: re-render on ANY dispatch (state change or not).

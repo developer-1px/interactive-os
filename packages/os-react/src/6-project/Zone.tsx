@@ -75,7 +75,7 @@ type DivOmit =
 
 export interface ZoneProps
   extends Omit<ComponentProps<"div">, DivOmit | keyof ZoneCallbacks>,
-  ZoneCallbacks {
+    ZoneCallbacks {
   id?: string;
   role?: ZoneRole;
   options?: ZoneOptions;

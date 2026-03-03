@@ -8,6 +8,8 @@
  */
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
+import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
+import type { FieldMode } from "@os-react/6-project/field/Field";
 import type {
   CompoundTriggerComponents,
   CompoundTriggerConfig,
@@ -15,8 +17,6 @@ import type {
 import type React from "react";
 import type { ReactNode } from "react";
 import type { ZodSchema } from "zod";
-import type { FieldMode } from "@os-react/6-project/field/Field";
-import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
 import type { FieldType } from "./@os-core/engine/registries/fieldRegistry";
 import type { ZoneCallback } from "./@os-core/engine/registries/zoneRegistry";
 import type { ZoneRole } from "./registries/roleRegistry";
@@ -53,9 +53,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-    state: S;
-    dispatch?: BaseCommand | BaseCommand[] | undefined;
-  }
+      state: S;
+      dispatch?: BaseCommand | BaseCommand[] | undefined;
+    }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -139,13 +139,13 @@ export interface BoundComponents<S> {
     id: string | number;
     className?: string;
     children?:
-    | ReactNode
-    | ((state: {
-      isFocused: boolean;
-      isSelected: boolean;
-      isExpanded: boolean;
-      isAnchor?: boolean;
-    }) => ReactNode);
+      | ReactNode
+      | ((state: {
+          isFocused: boolean;
+          isSelected: boolean;
+          isExpanded: boolean;
+          isAnchor?: boolean;
+        }) => ReactNode);
     asChild?: boolean;
   }> & {
     /** Passive projection of Item's visibility state — auto-manages role + aria-labelledby + hidden/mount */
@@ -290,8 +290,8 @@ export interface AppHandle<S> {
     factory: CommandFactory<string, P>,
   ): React.FC<
     P extends void
-    ? { children: ReactNode; payload?: never }
-    : { children: ReactNode; payload: P }
+      ? { children: ReactNode; payload?: never }
+      : { children: ReactNode; payload: P }
   >;
   createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;

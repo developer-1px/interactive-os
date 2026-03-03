@@ -12,14 +12,14 @@
  * (resolveItemId in useFocusedItem) — no MutationObserver needed.
  */
 
-import { OS_SYNC_FOCUS } from "@os-core/4-command";
-import { useEffect } from "react";
-import { os } from "@os-core/engine/kernel";
 import {
   findFocusableItem,
   isDispatching,
   resolveFocusTarget,
 } from "@os-core/1-listen/_shared/domQuery";
+import { OS_SYNC_FOCUS } from "@os-core/4-command";
+import { os } from "@os-core/engine/kernel";
+import { useEffect } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // Component

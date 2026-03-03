@@ -34,11 +34,11 @@ import {
   updateTodoText,
   visibleTodos,
 } from "@apps/todo/app";
-import { describe, expect, test, vi } from "vitest";
 import {
   _resetClipboardStore,
   readClipboard,
 } from "@os-sdk/library/collection/createCollectionZone";
+import { describe, expect, test, vi } from "vitest";
 
 let now = 1000;
 

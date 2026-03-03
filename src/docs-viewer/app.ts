@@ -12,8 +12,8 @@
  *     │   └── docs-reader    — section navigation (feed)
  */
 
-import { produce } from "immer";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { produce } from "immer";
 import { buildDocTree, type DocItem, docsModules } from "./docsUtils";
 
 // ═══════════════════════════════════════════════════════════════════
