@@ -5,32 +5,62 @@ import { useEffect } from "react";
 import { Icon } from "@/components/Icon";
 import { AccordionPattern } from "./patterns/AccordionPattern";
 import { AlertPattern } from "./patterns/AlertPattern";
+import { BreadcrumbPattern } from "./patterns/BreadcrumbPattern";
+import { ButtonPattern } from "./patterns/ButtonPattern";
+import { CarouselPattern } from "./patterns/CarouselPattern";
 import { CheckboxPattern } from "./patterns/CheckboxPattern";
 import { CompositePattern } from "./patterns/CompositePattern";
+import { DisclosurePattern } from "./patterns/DisclosurePattern";
+import { FeedPattern } from "./patterns/FeedPattern";
 import { GridPattern } from "./patterns/GridPattern";
+import { LandmarksPattern } from "./patterns/LandmarksPattern";
+import { LinkPattern } from "./patterns/LinkPattern";
 import { ListboxPattern } from "./patterns/ListboxPattern";
 import { MenuPattern } from "./patterns/MenuPattern";
+import { MenuButtonPattern } from "./patterns/MenuButtonPattern";
+import { MeterPattern } from "./patterns/MeterPattern";
 import { RadioGroupPattern } from "./patterns/RadioGroupPattern";
 import { SliderPattern } from "./patterns/SliderPattern";
+import { SliderMultiThumbPattern } from "./patterns/SliderMultiThumbPattern";
+import { SpinbuttonPattern } from "./patterns/SpinbuttonPattern";
 import { SwitchPattern } from "./patterns/SwitchPattern";
+import { TablePattern } from "./patterns/TablePattern";
 import { TabsPattern } from "./patterns/TabsPattern";
 import { ToolbarPattern } from "./patterns/ToolbarPattern";
+import { TooltipPattern } from "./patterns/TooltipPattern";
 import { TreePattern } from "./patterns/TreePattern";
+import { TreegridPattern } from "./patterns/TreegridPattern";
+import { WindowSplitterPattern } from "./patterns/WindowSplitterPattern";
 
 const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   accordion: { name: "Accordion", component: AccordionPattern },
   alert: { name: "Alert", component: AlertPattern },
+  breadcrumb: { name: "Breadcrumb", component: BreadcrumbPattern },
+  button: { name: "Button", component: ButtonPattern },
+  carousel: { name: "Carousel", component: CarouselPattern },
   checkbox: { name: "Checkbox", component: CheckboxPattern },
   composite: { name: "Composite", component: CompositePattern },
+  disclosure: { name: "Disclosure", component: DisclosurePattern },
+  feed: { name: "Feed", component: FeedPattern },
   grid: { name: "Grid", component: GridPattern },
+  landmarks: { name: "Landmarks", component: LandmarksPattern },
+  link: { name: "Link", component: LinkPattern },
   listbox: { name: "Listbox", component: ListboxPattern },
   menu: { name: "Menu", component: MenuPattern },
+  "menu-button": { name: "Menu Button", component: MenuButtonPattern },
+  meter: { name: "Meter", component: MeterPattern },
   radiogroup: { name: "RadioGroup", component: RadioGroupPattern },
   slider: { name: "Slider", component: SliderPattern },
+  "slider-multithumb": { name: "Slider (Multi)", component: SliderMultiThumbPattern },
+  spinbutton: { name: "Spinbutton", component: SpinbuttonPattern },
   switch: { name: "Switch", component: SwitchPattern },
+  table: { name: "Table", component: TablePattern },
   tabs: { name: "Tabs", component: TabsPattern },
   toolbar: { name: "Toolbar", component: ToolbarPattern },
+  tooltip: { name: "Tooltip", component: TooltipPattern },
   tree: { name: "Tree", component: TreePattern },
+  treegrid: { name: "Treegrid", component: TreegridPattern },
+  "window-splitter": { name: "Window Splitter", component: WindowSplitterPattern },
 };
 
 const DEFAULT_PATTERN = "accordion";
