@@ -116,6 +116,14 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       [externalOverlayId],
     );
 
+    // Internal ref for focus restoration (merged with forwarded ref)
+    const internalRef = useRef<HTMLElement>(null);
+    const mergedRef = (node: HTMLElement | null) => {
+      (internalRef as React.MutableRefObject<HTMLElement | null>).current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+    };
+
     // Overlay open command — registered as onActivate on Item
     // so headless simulateClick → OS_ACTIVATE → onActivate → OS_OVERLAY_OPEN
     const overlayOpenCmd =
@@ -134,6 +142,16 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         ? s.os.overlays.stack.some((e) => e.id === overlayId)
         : false,
     );
+
+    // Focus restoration: when overlay closes, return focus to trigger element.
+    // Matches W3C APG: "Escape closes the menu and sets focus on the menu button."
+    const prevOverlayOpen = useRef(false);
+    useEffect(() => {
+      if (prevOverlayOpen.current && !isOverlayOpen) {
+        internalRef.current?.focus();
+      }
+      prevOverlayOpen.current = isOverlayOpen;
+    }, [isOverlayOpen]);
 
     const overlayAriaProps =
       overlayRole && overlayId
@@ -252,7 +270,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         <>
           {cloneElement(child, {
             ...baseProps,
-            ref,
+            ref: mergedRef,
             className:
               [child.props.className, className].filter(Boolean).join(" ") ||
               undefined,
@@ -270,7 +288,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     return (
       <>
         <span
-          ref={ref as React.Ref<HTMLSpanElement>}
+          ref={mergedRef as React.Ref<HTMLSpanElement>}
           {...(baseProps as React.HTMLAttributes<HTMLSpanElement>)}
         >
           {triggerContent}
