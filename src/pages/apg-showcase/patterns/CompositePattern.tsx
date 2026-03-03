@@ -1,7 +1,7 @@
 import { Icon } from "@/components/Icon";
-import { useExpanded } from "@/os/6-project/accessors/useExpanded";
-import { Item } from "@/os/6-project/Item";
-import { Zone } from "@/os/6-project/Zone";
+import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
+import { Item } from "@os-react/6-project/Item";
+import { Zone } from "@os-react/6-project/Zone";
 
 export function CompositePattern() {
   const { isExpanded } = useExpanded();

@@ -10,7 +10,7 @@
  */
 
 import { Icon } from "@/components/Icon";
-import { defineApp } from "@/os/app/defineApp";
+import { defineApp } from "@os-sdk/app/defineApp";
 
 // ─── Section Data ───
 
@@ -84,8 +84,8 @@ function AccordionRow({ section }: { section: AccordionSection }) {
         </div>
       </AccordionUI.Item>
 
-      {/* Panel — OS-driven visibility via Item.Region */}
-      <AccordionUI.Item.Region
+      {/* Panel — OS-driven visibility via Item.Content */}
+      <AccordionUI.Item.Content
         for={section.id}
         className="px-6 pb-5 pt-2 border-t border-gray-100"
       >
@@ -108,7 +108,7 @@ function AccordionRow({ section }: { section: AccordionSection }) {
             </div>
           ))}
         </fieldset>
-      </AccordionUI.Item.Region>
+      </AccordionUI.Item.Content>
     </div>
   );
 }

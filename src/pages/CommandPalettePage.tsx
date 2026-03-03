@@ -6,8 +6,8 @@
  * globally in __root.tsx, so this page just provides context + trigger.
  */
 
-import { OS_OVERLAY_OPEN } from "@/os/4-command";
-import { os } from "@/os/core/engine/kernel";
+import { OS_OVERLAY_OPEN } from "@os-core/4-command";
+import { os } from "@os-core/engine/kernel";
 
 export default function CommandPalettePage() {
   const openPalette = () => {

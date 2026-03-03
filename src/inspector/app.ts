@@ -1,6 +1,6 @@
 import type { Transaction } from "@kernel/core/transaction";
 import { enableMapSet, produce } from "immer";
-import { defineApp } from "@/os/app/defineApp";
+import { defineApp } from "@os-sdk/app/defineApp";
 import { inferSignal } from "./utils/inferSignal";
 
 enableMapSet();

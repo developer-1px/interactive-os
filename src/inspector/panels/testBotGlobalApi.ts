@@ -14,7 +14,7 @@ import {
   resetFocusState,
   TestBotRegistry,
   type TestScript,
-} from "@os/testing";
+} from "@os-devtool/testing";
 
 // ═══════════════════════════════════════════════════════════════════
 // Internal State Bridge

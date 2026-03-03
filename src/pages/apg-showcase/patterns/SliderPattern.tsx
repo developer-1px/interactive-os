@@ -9,11 +9,11 @@
  *   Arrow keys adjust value via OS_VALUE_CHANGE. CSS reads data-focused.
  */
 
-import { OS_VALUE_CHANGE } from "@os/4-command";
-import { os } from "@os/core/engine/kernel";
+import { OS_VALUE_CHANGE } from "@os-core/4-command";
+import { os } from "@os-core/engine/kernel";
 import clsx from "clsx";
 import { useEffect } from "react";
-import { defineApp } from "@/os/app/defineApp";
+import { defineApp } from "@os-sdk/app/defineApp";
 
 // ─── Slider Data ───
 

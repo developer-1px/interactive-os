@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./docs-viewer.css";
-import { Root } from "@os/1-listen/Root";
+import { Root } from "@os-react/1-listen/Root";
 import { CommandPalette } from "@/command-palette/CommandPalette";
 import { DocsViewer } from "./DocsViewer";
 

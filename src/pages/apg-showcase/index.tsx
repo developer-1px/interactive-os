@@ -1,14 +1,16 @@
-import { accordionScript, TestBotRegistry } from "@os/testing";
-import { useEffect, useState } from "react";
+import { apgShowcaseScripts, TestBotRegistry } from "@os-devtool/testing";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { Icon } from "@/components/Icon";
-import { Item } from "@/os/6-project/Item";
-import { Zone } from "@/os/6-project/Zone";
+import { Item } from "@os-react/6-project/Item";
+import { Zone } from "@os-react/6-project/Zone";
 import { AccordionPattern } from "./patterns/AccordionPattern";
 import { AlertPattern } from "./patterns/AlertPattern";
 import { CompositePattern } from "./patterns/CompositePattern";
 import { GridPattern } from "./patterns/GridPattern";
 import { ListboxPattern } from "./patterns/ListboxPattern";
 import { MenuPattern } from "./patterns/MenuPattern";
+import { RadioGroupPattern } from "./patterns/RadioGroupPattern";
 import { SliderPattern } from "./patterns/SliderPattern";
 import { SwitchPattern } from "./patterns/SwitchPattern";
 import { TabsPattern } from "./patterns/TabsPattern";
@@ -26,15 +28,33 @@ const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   toolbar: { name: "Toolbar", component: ToolbarPattern },
   slider: { name: "Slider", component: SliderPattern },
   switch: { name: "Switch", component: SwitchPattern },
+  radiogroup: { name: "RadioGroup", component: RadioGroupPattern },
   composite: { name: "Composite", component: CompositePattern },
 };
 
-export default function ApgShowcasePage() {
-  const [activePattern, setActivePattern] = useState<string>("accordion");
+const DEFAULT_PATTERN = "accordion";
 
-  // Register APG test scripts with TestBot on mount
+export default function ApgShowcasePage() {
+  const params = useParams({ strict: false }) as { pattern?: string };
+  const navigate = useNavigate();
+  const activePattern = params.pattern && params.pattern in PATTERNS
+    ? params.pattern
+    : DEFAULT_PATTERN;
+
+  // Redirect bare /playground/apg to /playground/apg/accordion
   useEffect(() => {
-    return TestBotRegistry.register([accordionScript]);
+    if (!params.pattern) {
+      navigate({
+        to: "/playground/apg/$pattern",
+        params: { pattern: DEFAULT_PATTERN },
+        replace: true,
+      });
+    }
+  }, [params.pattern, navigate]);
+
+  // Register ALL APG test scripts with TestBot on mount
+  useEffect(() => {
+    return TestBotRegistry.register(apgShowcaseScripts);
   }, []);
 
   const ActiveComponent = PATTERNS[activePattern]?.component;
@@ -63,7 +83,12 @@ export default function ApgShowcasePage() {
                   role="tab"
                   as="button"
                   aria-selected={activePattern === key}
-                  onClick={() => setActivePattern(key)}
+                  onClick={() =>
+                    navigate({
+                      to: "/playground/apg/$pattern",
+                      params: { pattern: key },
+                    })
+                  }
                   className="
                   px-3 py-2 text-sm text-left rounded-md transition-colors
                   hover:bg-gray-50 aria-selected:bg-indigo-50 aria-selected:text-indigo-700

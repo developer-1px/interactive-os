@@ -1,7 +1,7 @@
-import { Item } from "@os/6-project/Item";
+import { Item } from "@os-react/6-project/Item";
 
-import { Trigger } from "@os/6-project/Trigger";
-import { Zone } from "@os/6-project/Zone";
+import { Trigger } from "@os-react/6-project/Trigger";
+import { Zone } from "@os-react/6-project/Zone";
 import {
   FileCode,
   Filter,

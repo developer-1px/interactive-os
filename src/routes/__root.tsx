@@ -1,7 +1,7 @@
 import { InspectorShell } from "@inspector/shell/InspectorShell";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
-import { Root } from "@os/1-listen/Root";
-import { NotificationContainer } from "@os/core/adapter/widgets/toast/ToastContainer";
+import { Root } from "@os-react/1-listen/Root";
+import { NotificationContainer } from "@os-react/6-project/widgets/toast/ToastContainer";
 import {
   createRootRoute,
   Link,

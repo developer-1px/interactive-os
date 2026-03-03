@@ -1,22 +1,22 @@
 /**
  * TestBot POC — Visual Browser ARIA Test Runner
  *
- * Uses shared test scripts from @os/testing/scripts.
+ * Uses shared test scripts from @os-devtool/testing/scripts.
  * Same test code runs in:
  *   1. This browser visual (createBrowserPage)
  *   2. Headless vitest (createHeadlessPage)
  *   3. Playwright E2E (native page)
  */
 
-import { Item } from "@os/6-project/Item.tsx";
-import { Zone } from "@os/6-project/Zone.tsx";
+import { Item } from "@os-react/6-project/Item.tsx";
+import { Zone } from "@os-react/6-project/Zone.tsx";
 import {
   allAriaScripts,
   type BrowserStep,
   createBrowserPage,
   expect,
   type TestScript,
-} from "@os/testing";
+} from "@os-devtool/testing";
 import { useCallback, useRef, useState } from "react";
 
 // ═══════════════════════════════════════════════════════════════════

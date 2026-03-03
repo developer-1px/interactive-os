@@ -8,7 +8,7 @@
  * Editing: Builder Primitives annotate editable parts.
  */
 
-import { Field } from "@os/6-project/field/Field";
+import { Field } from "@os-react/6-project/field/Field";
 import { BuilderApp, createFieldCommit } from "@/apps/builder/app";
 import { useLocalizedSectionFields } from "@/apps/builder/locale";
 import { Builder } from "@/apps/builder/primitives/Builder";

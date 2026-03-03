@@ -1,4 +1,4 @@
-import { Field } from "@os/6-project/field/Field";
+import { Field } from "@os-react/6-project/field/Field";
 import { X } from "lucide-react";
 import { createFieldCommit } from "@/apps/builder/app";
 import { useLocalizedSectionFields } from "@/apps/builder/locale";

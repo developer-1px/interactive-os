@@ -1,0 +1,18 @@
+/**
+ * useSelection — OS hook to read selected items in a zone.
+ *
+ * Encapsulates OS internal state path so apps don't need to know
+ * `s.os.focus.zones[zoneId]?.selection`.
+ *
+ * TODO: Lazy Resolution (resolveSelection) will be integrated here
+ * once Zone provides items list via state registration.
+ */
+
+import { os } from "@os-core/engine/kernel";
+
+// Stable empty array to avoid re-render loops in useSyncExternalStore.
+const EMPTY: readonly string[] = [];
+
+export function useSelection(zoneId: string): readonly string[] {
+  return os.useComputed((s) => s.os.focus.zones[zoneId]?.selection ?? EMPTY);
+}

@@ -7,9 +7,9 @@
  *  3. Dialog with actions
  */
 
-import { Item } from "@os/6-project/Item.tsx";
-import { Zone } from "@os/6-project/Zone.tsx";
-import { Dialog } from "@os/core/adapter/widgets/radix/Dialog.tsx";
+import { Item } from "@os-react/6-project/Item.tsx";
+import { Zone } from "@os-react/6-project/Zone.tsx";
+import { Dialog } from "@os-react/6-project/widgets/radix/Dialog.tsx";
 
 export function RadixPlayground() {
   return (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
-import { Item } from "@/os/6-project/Item";
-import { Zone } from "@/os/6-project/Zone";
+import { Item } from "@os-react/6-project/Item";
+import { Zone } from "@os-react/6-project/Zone";
 
 export function ToolbarPattern() {
   const [activeTools, setActiveTools] = useState<Record<string, boolean>>({

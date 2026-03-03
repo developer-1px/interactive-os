@@ -26,17 +26,17 @@ import {
 } from "@apps/todo/selectors";
 import { produce } from "immer";
 import { z } from "zod";
-import { OS_FIELD_START_EDIT } from "@/os/4-command/field/field";
+import { OS_FIELD_START_EDIT } from "@os-core/4-command/field/field";
 import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
-} from "@/os/4-command/overlay/overlay";
-import { OS_SELECTION_CLEAR } from "@/os/4-command/selection/selection";
-import { OS_NOTIFY } from "@/os/4-command/toast/toast";
+} from "@os-core/4-command/overlay/overlay";
+import { OS_SELECTION_CLEAR } from "@os-core/4-command/selection/selection";
+import { OS_NOTIFY } from "@os-core/4-command/toast/toast";
 
-import { defineApp } from "@/os/app/defineApp";
-import { history } from "@/os/app/modules/history";
-import { os } from "@/os/core/engine/kernel";
+import { defineApp } from "@os-sdk/app/defineApp";
+import { history } from "@os-sdk/app/modules/history";
+import { os } from "@os-core/engine/kernel";
 
 /** Collision-free random ID */
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -50,7 +50,7 @@ export const TodoApp = defineApp<AppState>("todo-v5", INITIAL_STATE, {
 });
 
 // Undo / Redo — generic factory
-import { createUndoRedoCommands } from "@/os/app/defineApp/undoRedo";
+import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
 
 export const { canUndo, canRedo, undoCommand, redoCommand } =
   createUndoRedoCommands(TodoApp);
@@ -88,7 +88,7 @@ export const todosByCategory = TodoApp.selector(
 import {
   createCollectionZone,
   fromEntities,
-} from "@/os/core/library/collection/createCollectionZone";
+} from "@os-sdk/library/collection/createCollectionZone";
 
 const listCollection = createCollectionZone(TodoApp, "list", {
   ...fromEntities(

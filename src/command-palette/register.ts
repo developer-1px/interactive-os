@@ -7,9 +7,9 @@
  * Side-effect import: `import "@/command-palette/register"`
  */
 
-import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@/os/4-command";
-import { os } from "@/os/core/engine/kernel";
-import { Keybindings } from "@/os/2-resolve/keybindings";
+import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-core/4-command";
+import { os } from "@os-core/engine/kernel";
+import { Keybindings } from "@os-core/2-resolve/keybindings";
 
 // ── Command ──────────────────────────────────────────────────────
 

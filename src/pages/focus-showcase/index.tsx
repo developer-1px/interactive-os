@@ -1,5 +1,5 @@
 import { InspectorStore } from "@inspector/stores/InspectorStore";
-import { TestBotRegistry } from "@os/testing";
+import { TestBotRegistry } from "@os-devtool/testing";
 import { useEffect } from "react";
 import { TestGrid } from "../shared/TestLayout";
 import { focusShowcaseScripts } from "./focusScripts";

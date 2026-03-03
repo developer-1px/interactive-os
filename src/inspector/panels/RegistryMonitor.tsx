@@ -2,7 +2,7 @@ import type { RegistrySnapshot } from "@kernel/core/inspectorPort";
 import type { ScopeToken } from "@kernel/core/tokens";
 import { ChevronDown, ChevronRight, Shield } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
-import { os } from "@/os/core/engine/kernel";
+import { os } from "@os-core/engine/kernel";
 
 // ═══════════════════════════════════════════════════════════════════
 // Registry Monitor v5 — Reads directly from os.inspector

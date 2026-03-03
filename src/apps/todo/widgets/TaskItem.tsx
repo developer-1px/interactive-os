@@ -6,8 +6,8 @@
  */
 
 import { TodoApp, TodoEdit, TodoList } from "@apps/todo/app";
-import { useDragState } from "@os/6-project/accessors/useDragState";
-import { Item } from "@os/6-project/Item";
+import { useDragState } from "@os-react/6-project/accessors/useDragState";
+import { Item } from "@os-react/6-project/Item";
 import {
   ArrowDown,
   ArrowUp,

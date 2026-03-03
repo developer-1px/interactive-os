@@ -59,6 +59,8 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| apg-listbox-pattern | 03-02 | ✅ archive/2026/03/W10 — Negative tests 11개 (3 OS 버그 발견). range guard + selectAll guard. APG testbot 6 scripts 탑재 |
+| apg-tabs-pattern | 03-02 | ✅ archive/2026/03/W10 — Item.Content 프리미티브, OS_ACTIVATE select fallback, OS_SELECT mode auto-derive. AUDITBOOK 갱신. /review retire |
 | headless-purity | 02-27 | ✅ archive/2026/02/W09 — AutoFocus DOM fallback 제거(useEffect→Phase 2), getLabels push model. FocusGroup useEffect import 삭제 |
 | headless-item-discovery | 02-27 | ✅ archive/2026/02/W09 — 2-contexts DOM 0%. querySelectorAll을 FocusGroup(뷰)로 이동. getItems() push-only. T1~T10, +6 tests, regression 0, 기존 8건 개선 |
 | normalized-collection | 02-26 | ✅ archive/2026/02/W09 — NormalizedCollection 타입+helpers, tree-aware ops, view transforms. T1~T7. 109 tests GREEN |

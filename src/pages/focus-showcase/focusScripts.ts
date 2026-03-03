@@ -6,7 +6,7 @@
  * Ported 1:1 from focus-showcase.spec.ts.
  */
 
-import type { TestScript } from "@os/testing";
+import type { TestScript } from "@os-devtool/testing";
 
 // ═══════════════════════════════════════════════════════════════════
 // §3.2 ENTRY / AUTOFOCUS  (AutofocusTest)

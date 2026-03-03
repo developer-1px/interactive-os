@@ -4,7 +4,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@kernel": "/packages/kernel/src",
-      "@os": "/src/os",
+      "@os-core": "/packages/os-core/src",
+      "@os-react": "/packages/os-react/src",
+      "@os-sdk": "/packages/os-sdk/src",
+      "@os-devtool": "/packages/os-devtool/src",
       "@apps": "/src/apps",
       "@inspector": "/src/inspector",
       "@": "/src",
@@ -12,15 +15,12 @@ export default defineConfig({
   },
   test: {
     include: [
-      "src/**/tests/unit/**/*.test.ts",
-      "src/**/tests/unit/**/*.test.tsx",
-      "src/**/tests/integration/**/*.test.ts",
-      "src/**/tests/integration/**/*.test.tsx",
-      "src/**/tests/apg/**/*.test.ts",
-      "packages/kernel/src/**/tests/unit/**/*.test.ts",
-      "packages/kernel/src/**/tests/unit/**/*.test.tsx",
-      "packages/kernel/src/**/tests/integration/**/*.test.ts",
-      "packages/kernel/src/**/tests/integration/**/*.test.tsx",
+      "src/**/__tests__/unit/**/*.test.ts",
+      "src/**/__tests__/unit/**/*.test.tsx",
+      "packages/**/__tests__/unit/**/*.test.ts",
+      "packages/**/__tests__/unit/**/*.test.tsx",
+      "tests/**/*.test.ts",
+      "tests/**/*.test.tsx",
     ],
     environment: "jsdom",
     globals: true,

@@ -8,8 +8,8 @@
  */
 
 import React from "react";
-import { os } from "@/os/core/engine/kernel";
-import { Keybindings } from "@/os/2-resolve/keybindings";
+import { os } from "@os-core/engine/kernel";
+import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { TestBotPanel } from "./panels/TestBotPanel";
 import { InspectorRegistry } from "./stores/InspectorRegistry";
 import { InspectorStore } from "./stores/InspectorStore";

@@ -3,13 +3,13 @@
  * Demonstrates standard ARIA patterns using FocusGroup facade.
  */
 
-import { Item } from "@os/6-project/Item.tsx";
-import { Zone } from "@os/6-project/Zone.tsx";
-import { os } from "@os/core/engine/kernel.ts";
+import { Item } from "@os-react/6-project/Item.tsx";
+import { Zone } from "@os-react/6-project/Zone.tsx";
+import { os } from "@os-core/engine/kernel.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
-import { useExpanded } from "@/os/6-project/accessors/useExpanded";
-import { useSelection } from "@/os/6-project/accessors/useSelection";
+import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
+import { useSelection } from "@os-react/6-project/accessors/useSelection";
 
 export function AriaShowcasePage() {
   return <AriaShowcaseContent />;

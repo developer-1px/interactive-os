@@ -9,8 +9,8 @@
  *   • Page mode: when a playground registers scripts via TestBotRegistry
  */
 
-import { Item } from "@os/6-project/Item.tsx";
-import { Zone } from "@os/6-project/Zone.tsx";
+import { Item } from "@os-react/6-project/Item.tsx";
+import { Zone } from "@os-react/6-project/Zone.tsx";
 import {
   AlertTriangle,
   Check,
@@ -41,7 +41,7 @@ import {
   resetFocusState,
   TestBotRegistry,
   type TestScript,
-} from "@os/testing";
+} from "@os-devtool/testing";
 import {
   registerTestBotGlobalApi,
   setActiveScripts,

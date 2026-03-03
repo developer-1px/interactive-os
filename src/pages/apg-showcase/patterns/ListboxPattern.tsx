@@ -1,6 +1,6 @@
-import { useSelection } from "@/os/6-project/accessors/useSelection";
-import { Item } from "@/os/6-project/Item";
-import { Zone } from "@/os/6-project/Zone";
+import { useSelection } from "@os-react/6-project/accessors/useSelection";
+import { Item } from "@os-react/6-project/Item";
+import { Zone } from "@os-react/6-project/Zone";
 
 const OPTIONS = [
   "Apple",
@@ -63,7 +63,7 @@ export function ListboxPattern() {
           role="listbox"
           options={{
             navigate: { orientation: "vertical" },
-            select: { mode: "multiple", range: true },
+            select: { mode: "multiple", range: true, toggle: true, followFocus: false },
           }}
           aria-multiselectable="true"
           aria-label="Choose multiple fruits"

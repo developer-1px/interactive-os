@@ -1,6 +1,6 @@
 import docsMeta from "virtual:docs-meta";
-import { useFlatTree } from "@os/6-project/accessors/useFlatTree";
-import { Item } from "@os/6-project/Item";
+import { useFlatTree } from "@os-react/6-project/accessors/useFlatTree";
+import { Item } from "@os-react/6-project/Item";
 import clsx from "clsx";
 import { ChevronDown, ChevronRight, Clock, FileText, Star } from "lucide-react";
 import { useMemo, useState } from "react";

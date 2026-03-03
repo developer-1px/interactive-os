@@ -13,8 +13,8 @@
  *   visibility via OS commands, instead of `useState` or `onClick`.
  */
 
-import { Trigger } from "@os/6-project/Trigger";
-import { defineApp } from "@/os/app/defineApp";
+import { Trigger } from "@os-react/6-project/Trigger";
+import { defineApp } from "@os-sdk/app/defineApp";
 
 // ─── App State ───
 

@@ -98,7 +98,7 @@
 | 선례 | 패턴 | 판정 | 이유 | 날짜 |
 |------|------|------|------|------|
 | LocaleSwitcher onClick 4건 | 드롭다운 내부 onClick | 🟡 OS 갭 (OG-001) | Dropdown Zone 프리미티브 부재. LLM 실수가 아님 | 2026-02-25 |
-| BuilderTabs useState | 탭 활성 상태 useState | 🟡 OS 갭 (T5) | tablist Zone의 activate→state 경로 미구현 | 2026-02-25 |
+| BuilderTabs useState | 탭 활성 상태 useState | 🟡 OS 갭 (T5) → ✅ 해결 | Item.Content + OS_ACTIVATE selection 경로 구현 | 2026-02-25 |
 | DnD onReorder void | zone 콜백 명령형 시그니처 | 🟡 OS 갭 (OG-002) → ✅ 수정 | void 콜백은 앱이 os.dispatch 직접 호출 강제. 선언형으로 수정 | 2026-02-26 |
 | DnD BuilderApp.dispatch | 존재하지 않는 메소드 호출 | 🔴 LLM 실수 (OG-002 기인) | OS gap이 LLM 실수를 유발한 사례 | 2026-02-26 |
 | DnD e.preventDefault 충돌 | Listener 간 side-effect | 🟡 OS 갭 (OG-003) | Mouse+Drag 분리 구조의 한계 | 2026-02-26 |
@@ -110,6 +110,9 @@
 | Accordion tab escape | Tab이 zone 탈출 (표준 위반) | ✅ 해결 | `tab.behavior="native"` 추가. 브라우저 기본 Tab 순서 허용 | 2026-02-28 |
 | AlertPattern useState/onClick | raw React 패턴 사용 | 🔴 LLM 실수 → ✅ 수정 | defineApp + createTrigger로 교체 | 2026-02-28 |
 | AlertPattern role="alert" 수동 | OS에 alert 프리미티브 없음 | 🟡 OS 갭 (OG-008) | live region 자동 관리 메커니즘 부재 | 2026-02-28 |
+| TabsPattern useState 모드 토글 | `useState("auto"\|"manual")` + `onChange` radio | ⚪ 정당한 예외 | 데모 전환 UI — OS 관할 밖 view-level 상태. 인터랙션 state 아님 | 2026-03-02 |
+| Item.Content visibility | OS가 Zone role 따라 hidden/visible 자동 결정 | ✅ 해결 (신규) | roleRegistry contentVisibilityMap + bind.ts ContentComponent | 2026-03-02 |
+| OS_ACTIVATE selection 경로 | Enter → 선택 가능한 Zone에서 OS_SELECT dispatch | ✅ 해결 (신규) | tablist manual mode Enter 키 활성화 | 2026-03-02 |
 
 ---
 

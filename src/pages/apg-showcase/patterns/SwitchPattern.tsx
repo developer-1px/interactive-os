@@ -16,8 +16,8 @@
  *   CSS reads data-focused, aria-checked. No useState, no onClick, no onKeyDown.
  */
 
-import { OS_CHECK } from "@os/4-command/activate/check";
-import { defineApp } from "@/os/app/defineApp";
+import { OS_CHECK } from "@os-core/4-command/activate/check";
+import { defineApp } from "@os-sdk/app/defineApp";
 
 // ─── Switch Data ───
 

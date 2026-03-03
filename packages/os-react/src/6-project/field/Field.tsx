@@ -1,0 +1,467 @@
+import type { BaseCommand } from "@kernel";
+import { buildFieldConfig, validateField } from "@os-core/3-inject/fieldContext.ts";
+import { OS_FIELD_COMMIT } from "@os-core/4-command/field/commit";
+import { useFieldFocus } from "@os-react/6-project/field/useField.ts";
+import { Item } from "@os-react/6-project/Item.tsx";
+import { useZoneContext } from "@os-react/6-project/Zone.tsx";
+import { os } from "@os-core/engine/kernel.ts";
+import {
+  type FieldConfig,
+  FieldRegistry,
+  type FieldTrigger,
+  type FieldType,
+  useFieldRegistry,
+} from "@os-core/engine/registries/fieldRegistry";
+import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand.ts";
+import type { HTMLAttributes } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import type { ZodSchema } from "zod";
+import { Label } from "./Label";
+
+/**
+ * Checks if the value is effectively empty for placeholder display.
+ */
+export const checkValueEmpty = (value: string | undefined | null): boolean => {
+  return !value || value === "\n";
+};
+
+export interface FieldStyleParams {
+  isFocused: boolean;
+  isEditing: boolean;
+  fieldType: FieldType;
+  value: string;
+  error?: string | null | undefined;
+  placeholder?: string | undefined;
+  customClassName?: string | undefined;
+}
+
+/**
+ * Composes the Tailwind classes for the field.
+ */
+const getFieldClasses = ({
+  isFocused: _isFocused,
+  isEditing,
+  fieldType,
+  value,
+  error,
+  placeholder,
+  customClassName = "",
+}: FieldStyleParams): string => {
+  const isEmpty = checkValueEmpty(value);
+  const shouldShowPlaceholder = placeholder && isEmpty;
+  const placeholderClasses = shouldShowPlaceholder
+    ? "before:content-[attr(data-placeholder)] before:text-slate-400 before:opacity-50 before:pointer-events-none before:absolute before:top-0 before:left-0 before:truncate before:w-full before:h-full"
+    : "";
+
+  const isMultiline = fieldType === "block" || fieldType === "editor";
+  const lineClasses = isMultiline
+    ? "whitespace-pre-wrap break-words"
+    : "whitespace-nowrap overflow-hidden";
+
+  let stateClasses = "";
+  if (error) {
+    stateClasses = "ring-2 ring-red-500 bg-red-500/10 rounded-sm";
+  } else if (isEditing) {
+    stateClasses = "ring-2 ring-blue-500 bg-blue-500/10 rounded-sm";
+  }
+
+  return `${placeholderClasses} ${lineClasses} ${stateClasses} relative min-h-[1lh] ${customClassName}`.trim();
+};
+
+export type FieldMode = "immediate" | "deferred";
+
+export interface EditableProps
+  extends Omit<
+    HTMLAttributes<HTMLElement>,
+    "onChange" | "onBlur" | "onFocus" | "onSubmit"
+  > {
+  /** Current text value */
+  value: string;
+  /** Unique identifier — FieldRegistry key + Item ID */
+  name: string;
+  placeholder?: string;
+  /** Keyboard ownership preset (default: "inline") */
+  fieldType?: FieldType;
+
+  /** Command factory invoked on commit with { text } payload */
+  onCommit?: FieldCommandFactory;
+  /** When to commit: "enter" | "blur" | "change" (default: "enter") */
+  trigger?: FieldTrigger;
+  /** Zod schema for pre-commit validation */
+  schema?: ZodSchema;
+  /** Clear field value after successful commit */
+  resetOnSubmit?: boolean;
+
+  /** Command dispatched on Escape */
+  onCancel?: BaseCommand;
+
+  /** "immediate" = always editable, "deferred" = F2 to enter editing (default: "immediate") */
+  mode?: FieldMode;
+}
+
+/**
+ * Field - Pure Projection Primitive
+ *
+ * A passive text input component that:
+ * - Registers with FieldRegistry for state management
+ * - Subscribes to registry state for rendering
+ * - Validates input against Zod schema (Gatekeeper)
+ * - Dispatches 'onCommit' command with injected payload
+ */
+const FieldBase = forwardRef<HTMLElement, EditableProps>(
+  (
+    {
+      value,
+      name,
+      placeholder,
+
+      onCommit,
+      trigger: triggerProp,
+      schema,
+      resetOnSubmit = false,
+
+      onCancel,
+
+      mode = "immediate",
+      fieldType: fieldTypeProp,
+      ...rest
+    },
+    ref,
+  ) => {
+    const trigger: FieldTrigger = triggerProp ?? "enter";
+
+    // --- Derived props (from fieldType / mode) ---
+    const fieldType: FieldType = fieldTypeProp ?? "block";
+    const blurOnInactive = mode === "deferred";
+    const tag = "div";
+
+    const context = useZoneContext();
+    const zoneId = context?.zoneId || "unknown";
+
+    const innerRef = useRef<HTMLElement>(null);
+    const cursorRef = useRef<number | null>(null);
+
+    // --- Identity ---
+    const fieldId = name;
+
+    // --- Refs for Stabilizing Config ---
+    const onCommitRef = useRef(onCommit);
+    const onCancelRef = useRef(onCancel);
+    const schemaRef = useRef(schema);
+
+    onCommitRef.current = onCommit;
+    onCancelRef.current = onCancel;
+    schemaRef.current = schema;
+
+    // --- Actions ---
+
+    const handleCommit = useCallback(
+      (currentValue: string) => {
+        const commitCmd = onCommitRef.current;
+        if (!commitCmd) return;
+
+        // 1. Validate (pure function)
+        const validation = validateField(currentValue, schemaRef.current);
+        if (!validation.valid) {
+          FieldRegistry.setError(fieldId, validation.error!);
+          return;
+        }
+
+        // 2. Clear Error + Dispatch
+        FieldRegistry.setError(fieldId, null);
+        const command = commitCmd({ text: currentValue });
+        os.dispatch(command);
+
+        // 3. Reset (if configured)
+        if (resetOnSubmit) {
+          FieldRegistry.reset(fieldId);
+        }
+      },
+      [fieldId, resetOnSubmit],
+    );
+
+    // Stable wrappers for Registry (Config)
+    // We wrap these so Registry can call them if needed, but mostly Field handles logic internally now.
+
+    // --- Registry Registration (pure config build) ---
+    useEffect(() => {
+      const config = buildFieldConfig({
+        name,
+        mode,
+        fieldType,
+        trigger,
+        resetOnSubmit,
+        onCommit: onCommitRef.current,
+        schema,
+        onCancel: onCancelRef.current,
+      });
+
+      FieldRegistry.register(name, config);
+      return () => FieldRegistry.unregister(name);
+    }, [name, mode, fieldType, trigger, resetOnSubmit, schema]);
+
+    // --- State Subscription ---
+    // Subscribe to primitive values to avoid unnecessary re-renders on object reference changes.
+    const rawRegistryValue = useFieldRegistry(
+      (s) => s.fields.get(fieldId)?.state.value,
+    );
+    const localValue = rawRegistryValue ?? value;
+    const error = useFieldRegistry((s) => s.fields.get(fieldId)?.state.error);
+
+    // Sync prop value to registry when not actively editing (contentEditable)
+    const isContentEditableRef = useRef(false);
+
+    // --- Focus Computation ---
+    const isFocused = os.useComputed(
+      (s) =>
+        s.os.focus.activeZoneId === zoneId &&
+        (s.os.focus.zones[zoneId]?.focusedItemId ?? null) === fieldId,
+    );
+
+    const isEditingThisField = os.useComputed(
+      (s) => (s.os.focus.zones[zoneId]?.editingItemId ?? null) === fieldId,
+    );
+
+    // isParentEditing: detect when a parent item is editing, making child fields editable.
+    // Uses a pure useComputed for state + useLayoutEffect for DOM ancestry check.
+    const parentEditingCandidate = os.useComputed((s) => {
+      if (s.os.focus.activeZoneId !== zoneId) return null;
+      const zone = s.os.focus.zones[zoneId];
+      if (!zone?.editingItemId) return null;
+      if (zone.focusedItemId !== zone.editingItemId) return null;
+      if (zone.editingItemId === fieldId) return null;
+      return zone.editingItemId;
+    });
+
+    const [isParentEditing, setIsParentEditing] = useState(false);
+    useLayoutEffect(() => {
+      if (!parentEditingCandidate || !innerRef.current) {
+        setIsParentEditing(false);
+        return;
+      }
+      const editingEl = document.getElementById(String(parentEditingCandidate));
+      setIsParentEditing(editingEl?.contains(innerRef.current) ?? false);
+    }, [parentEditingCandidate]);
+
+    const isContentEditable =
+      mode === "deferred"
+        ? (isFocused && isEditingThisField) || isParentEditing
+        : isFocused || isParentEditing;
+    const isActive = isContentEditable;
+    isContentEditableRef.current = isContentEditable;
+
+    // --- DOM Sync & Event Listeners ---
+
+    // Sync prop value to registry when not actively editing.
+    //
+    // ⚠️ CRITICAL: fieldData?.state.value must NOT be in deps.
+    //   If it were, the loop would be:
+    //   updateValue → emit → useFieldRegistry re-render
+    //   → fieldData?.state.value changes → effect re-runs → updateValue → ...
+    //
+    // FIX: use a ref to read the latest registry value without adding it to deps.
+    const registryValueRef = useRef(rawRegistryValue);
+    registryValueRef.current = rawRegistryValue;
+
+    useEffect(() => {
+      if (!isContentEditableRef.current && value !== registryValueRef.current) {
+        FieldRegistry.updateValue(fieldId, value);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value, fieldId]); // registryValueRef intentionally excluded — read via ref above
+
+    // Initial Value
+    const initialValueRef = useRef(value);
+    const hasInitialized = useRef(false);
+    useLayoutEffect(() => {
+      if (innerRef.current && !hasInitialized.current) {
+        innerRef.current.innerText = initialValueRef.current;
+        hasInitialized.current = true;
+      }
+    }, []);
+
+    // Restore value on cancel/exit
+    // - Deferred mode: restore to prop value (cancel semantics)
+    // - Immediate mode: restore to FieldRegistry value (preserve draft)
+    const prevValueRef = useRef(value);
+    const wasEditableRef = useRef(isContentEditable);
+    useLayoutEffect(() => {
+      const exitedEditing = wasEditableRef.current && !isContentEditable;
+      wasEditableRef.current = isContentEditable;
+
+      // Auto-commit: only for EDIT→SELECT path.
+      // When editing ends, check WHO ended it:
+      //   - editingItemId === fieldId → EDIT→SELECT (focus moved to non-Field item)
+      //     This field must commit its value and clear editingItemId.
+      //   - editingItemId === other → EDIT→EDIT (OS_FIELD_START_EDIT already committed)
+      //   - editingItemId === null → Escape (OS_FIELD_COMMIT already handled)
+      if (exitedEditing && mode === "deferred") {
+        const currentEditingId =
+          os.getState().os.focus.zones[zoneId]?.editingItemId;
+        if (currentEditingId === fieldId) {
+          handleCommit(FieldRegistry.getValue(fieldId));
+          os.dispatch(OS_FIELD_COMMIT());
+        }
+      }
+
+      if (innerRef.current && !isContentEditable) {
+        if (mode === "deferred") {
+          // Deferred: revert to app's value prop (cancel/blur = discard changes)
+          if (exitedEditing || prevValueRef.current !== value) {
+            innerRef.current.innerText = value;
+          }
+        } else {
+          // Immediate: preserve FieldRegistry value (draft survives blur)
+          if (exitedEditing) {
+            const registryValue = FieldRegistry.getValue(fieldId);
+            if (registryValue && innerRef.current.innerText !== registryValue) {
+              innerRef.current.innerText = registryValue;
+            }
+          }
+        }
+      }
+      prevValueRef.current = value;
+    }, [value, isContentEditable, mode, fieldId]);
+
+    const shouldHaveDOMFocus = mode === "deferred" ? isFocused : isActive;
+
+    // --- DOM Event Listeners ---
+    // InputListener (global) handles DOM→FieldRegistry sync (data stream).
+    // Field only handles commit triggers (command stream).
+
+    useEffect(() => {
+      const el = innerRef.current;
+      if (!el) return;
+
+      const handleInput = () => {
+        // Trigger: change → commit on every keystroke
+        if (trigger === "change") {
+          handleCommit(FieldRegistry.getValue(fieldId));
+        }
+      };
+
+      const handleBlur = () => {
+        // Trigger: Blur
+        if (trigger === "blur") {
+          handleCommit(FieldRegistry.getValue(fieldId));
+        }
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Skip IME composition (Korean, Japanese, Chinese)
+        // Matches KeyboardListener's guard: e.isComposing || e.keyCode === 229
+        if (e.isComposing || e.keyCode === 229) return;
+
+        // Enter = commit only for inline fields (single-line).
+        // For block/editor: let browser default (newline) through.
+        if (e.key === "Enter" && !e.shiftKey && fieldType === "inline") {
+          e.preventDefault();
+          e.stopPropagation();
+          if (trigger === "enter") {
+            handleCommit(FieldRegistry.getValue(fieldId));
+          }
+        }
+      };
+
+      el.addEventListener("input", handleInput);
+      el.addEventListener("blur", handleBlur);
+      el.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        el.removeEventListener("input", handleInput);
+        el.removeEventListener("blur", handleBlur);
+        el.removeEventListener("keydown", handleKeyDown);
+      };
+    }, [fieldId, trigger, handleCommit]); // Re-bind if config changes
+
+    useFieldFocus({
+      innerRef,
+      isActive: shouldHaveDOMFocus,
+      blurOnInactive,
+      cursorRef,
+      fieldId,
+      isEditing: isContentEditable,
+    });
+
+    // --- Styling ---
+    const { className: customClassName, id: _id, ...otherProps } = rest;
+    const composeProps = getFieldClasses({
+      isFocused,
+      isEditing: isContentEditable,
+      fieldType,
+      value: localValue,
+      error,
+      ...(placeholder !== undefined ? { placeholder } : {}),
+      customClassName,
+    });
+
+    const baseProps = {
+      contentEditable: isContentEditable ? "plaintext-only" : false,
+      suppressContentEditableWarning: true,
+      role: "textbox",
+      "aria-multiline": fieldType === "block" || fieldType === "editor",
+      tabIndex: 0,
+      className: composeProps,
+      "data-placeholder": placeholder,
+      "data-mode": mode,
+      // Error state for styling/accessibility
+      "aria-invalid": !!error,
+      "aria-errormessage": error || undefined,
+      "data-editing":
+        mode === "deferred"
+          ? isContentEditable
+            ? "true"
+            : undefined
+          : undefined,
+      "data-focused": isFocused ? "true" : undefined,
+      children: null,
+      ...otherProps,
+    };
+
+    const setInnerRef = (node: HTMLElement | null) => {
+      innerRef.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref)
+        (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- baseProps spread
+    return (
+      <Item id={fieldId} as={tag} ref={setInnerRef} {...(baseProps as any)} />
+    );
+  },
+);
+
+FieldBase.displayName = "Field.Editable";
+
+/**
+ * Field — Compound namespace for OS-integrated input primitives.
+ *
+ * Field.Editable  — contentEditable inline editing (canvas, rich text, chips/mentions)
+ * Field.Input     — native <input> (form panels, property panels)
+ * Field.Textarea  — native <textarea> (multi-line form inputs)
+ * Field.Label     — <label> for field association
+ */
+const Editable = FieldBase;
+
+import { FieldInput } from "./FieldInput";
+import { FieldTextarea } from "./FieldTextarea";
+
+export const Field = Object.assign(
+  // Field() itself still works as Editable for backward compatibility
+  // TODO: deprecate direct Field() usage — prefer Field.Editable
+  FieldBase,
+  {
+    Editable,
+    Input: FieldInput,
+    Textarea: FieldTextarea,
+    Label,
+  },
+);

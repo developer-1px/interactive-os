@@ -60,8 +60,8 @@ D7. Green    → 계획대로 수정. 완료 후 D5에서 추가한 행의 S 열
 
 ```
 D8. Verify
-    ├─ /doubt: shim인가? 다른 환경도? 기존 메커니즘?
-    ├─ /review: 네이밍, 구조, rules.md
+    ├─ /doubt: shim인가? 불필요한 것은? 기존 메커니즘?
+    ├─ /audit: OS 계약 위반 검사
     ├─ Revert-Red: 수정 되돌렸을 때 테스트 다시 실패하는가? (논리적 확인)
     └─ /verify: tsc + vitest (관련 + 전체)
 ```

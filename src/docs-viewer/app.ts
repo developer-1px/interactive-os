@@ -13,7 +13,7 @@
  */
 
 import { produce } from "immer";
-import { defineApp } from "@/os/app/defineApp";
+import { defineApp } from "@os-sdk/app/defineApp";
 import { buildDocTree, type DocItem, docsModules } from "./docsUtils";
 
 // ═══════════════════════════════════════════════════════════════════
