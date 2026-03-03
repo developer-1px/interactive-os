@@ -163,17 +163,11 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         }
         : {};
 
-    const handleClick = (e: ReactMouseEvent) => {
-      if (!allowPropagation) {
-        e.stopPropagation();
-      }
-
-      // When Trigger has an id → Item → PointerListener → OS_ACTIVATE → onActivate
-      // When Trigger has NO id → no Item → must dispatch directly
+    // Shared activation logic: toggle overlay + dispatch onActivate
+    // Used by both click (mouse) and keydown (Enter/Space)
+    const triggerActivate = () => {
       if (!id) {
         if (overlayOpenCmd && overlayId) {
-          // Toggle: if overlay is already open, close it; if closed, open it.
-          // This matches W3C APG Menu Button behavior (click toggles popup).
           if (isOverlayOpen) {
             os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
           } else {
@@ -185,12 +179,31 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
           dispatch(onActivate);
         }
       }
+    };
 
+    const handleClick = (e: ReactMouseEvent) => {
+      if (!allowPropagation) {
+        e.stopPropagation();
+      }
+      triggerActivate();
       onClick?.(e as ReactMouseEvent<HTMLElement>);
     };
 
+    // OS pipeline intercepts Enter → OS_ACTIVATE before native click fires.
+    // When Trigger has no id (no Item), OS_ACTIVATE is a no-op, so we handle
+    // Enter/Space explicitly to trigger the same activation logic.
+    const handleKeyDown = !id
+      ? (e: React.KeyboardEvent) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          triggerActivate();
+        }
+      }
+      : undefined;
+
     const baseProps = {
       onClick: handleClick,
+      onKeyDown: handleKeyDown,
       className,
       "data-trigger-id": overlayId || id,
       ...overlayAriaProps,
