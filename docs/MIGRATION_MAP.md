@@ -38,30 +38,7 @@
 | `4-archive/2026-02-focus-recovery/` | `1-project/focus-recovery/` | 프로젝트 완료 — FocusSync → FocusListener 전환 완료 |
 | `4-archive/2026-02-todo-v3-migration/` | `1-project/todo-v3-migration/` | 프로젝트 완료 — v3 승격, v1/v2 코드 완전 제거 |
 | `4-archive/2026-02-todo-app/` | `1-project/todo-app/` | 프로젝트 완료 — todo-v3-migration에 흡수 |
-| `archive/2026/02/W09/kernel-items/` | `1-project/kernel-items/` | 프로젝트 완료 — DOM context → accessor-first, focus recovery 자동화, 1:1 파일 분리 |
-| `archive/2026/02/W09/os-api-rename/` | `1-project/os-api-rename/` | 프로젝트 완료 — kernel→os rename, OS_ 접두어 통일, SELECTION_* 통합 |
-| `archive/2026/02/W09/apg-contract-testing/` | `1-project/apg-contract-testing/` | 프로젝트 완료 — APG contract test 체계 구축 |
-| `archive/2026/02/W09/apg-testing-rebalance/` | `1-project/apg-testing-rebalance/` | 프로젝트 완료 — APG 테스트 pressKey/attrs 패턴 전환 |
-| `archive/2026/02/W09/builder-clipboard/` | `1-project/builder-clipboard/` | 프로젝트 완료 — Builder clipboard 통합 |
-| `archive/2026/02/W09/builder-usage-cleanup/` | `1-project/builder-usage-cleanup/` | 프로젝트 완료 — Builder dead code/usage 정리 |
-| `archive/2026/02/W09/define-query/` | `1-project/define-query/` | 프로젝트 완료 — defineQuery API 구현 |
-| `archive/2026/02/W09/defineapp-unification/` | `1-project/defineapp-unification/` | 프로젝트 완료 — defineApp 통합 |
-| `archive/2026/02/W09/field-compound/` | `1-project/field-compound/` | 프로젝트 완료 — Field compound 패턴 구현 |
-| `archive/2026/02/W09/focus-single-path/` | `1-project/focus-single-path/` | 프로젝트 완료 — Focus 단일 경로 통합 |
-| `archive/2026/02/W09/os-collection/` | `1-project/os-collection/` | 프로젝트 완료 — Collection facade 구현 |
-| `archive/2026/02/W09/os-hygiene/` | `1-project/os-hygiene/` | 프로젝트 완료 — OS 코드 위생 정리 |
-| `archive/2026/02/W09/os-page/` | `1-project/os-page/` | 프로젝트 완료 — OS Page 헤드리스 테스트 인프라 |
-| `archive/2026/02/W09/projection-checkpoint/` | `1-project/projection-checkpoint/` | 프로젝트 완료 — Projection 체크포인트 |
-| `archive/2026/02/W09/todo-dogfooding/` | `1-project/todo-dogfooding/` | 프로젝트 완료 — Todo 앱 독푸딩 완료 |
-| `archive/2026/02/W09/01-naming-convention.md` | `2-area/80-cross-cutting/82-standards/01-naming-convention.md` | 🪦 superseded — `os-new/`, Zustand, Sensor/Intent 패턴 전면 소멸 |
-| `archive/2026/02/W09/08-focus-recovery.md` | `2-area/20-os/22-focus/08-focus-recovery.md` | 🪦 superseded — FocusSync, resolveRecovery 소멸. 현행: resolveItemFallback in focusStackOps.ts |
-| `archive/2026/02/W09/2026-0226-unified-pointer-listener.md` | `5-backlog/` | 🪦 superseded — unified-pointer-listener 프로젝트 완료+아카이브 |
-| `archive/2026/02/W09/2026-0226-dnd-pipeline-gap-retrospect.md` | `5-backlog/` | 🪦 superseded — sense-purity에서 onReorder 계약 통일 완료 |
-| `archive/2026/02/W09/2026-0213-2350-unified-inspector.md` | `5-backlog/` | 🪦 superseded — inspector-redesign 완료 |
-| `archive/2026/02/W09/2026-0215-0910-inspector-port-separation.md` | `5-backlog/` | 🪦 superseded — inspector-redesign Port/Adapter 구현 완료 |
-| `archive/2026/02/W09/2026-0226-ghost-projects.md` | `5-backlog/` | 조치 완료 — STATUS.md 반영됨. 역사 기록 |
-| `archive/2026/02/W09/2026-0218-0025-solve-workflow.md` | `11-discussions/` | 🪦 superseded — /solve 워크플로우 생성 완료 |
-| `archive/2026/02/W09/2026-0218-1037-area-source-mirroring.md` | `11-discussions/` | 🪦 superseded — Area 소스 미러링 적용 완료 |
+| ~~`archive/2026/02/W09/` 프로젝트 15개~~ | ~~`1-project/` 각종~~ | → 심층 보관으로 이동 (03-03) |
 | `4-archive/2026-03-docs-section-nav/` | `1-project/docs-section-nav/` | 프로젝트 완료 — T1-T8 전체 완료, DocsReaderUI.Zone + section nav 명령어 구현 |
 | `4-archive/2026-03-test-reliability/` | `1-project/test-reliability/` | 프로젝트 완료 — T1-T4, red.md 2-tier 패턴 정립, @spec 링크 강제 |
 | `4-archive/2026-03-builder-property-schema/` | `1-project/builder-property-schema/` | 프로젝트 완료 — T1-T5, primitives.ts/blockSchemas.ts/PropertyWidgets OCP |
@@ -99,4 +76,7 @@ git show archive/legacy-docs:docs/path/to/file.md
 | `docs/3-resource/09-project-meta/workflow-manual.md` | 워크플로우 연대기 (23개 기준) — 현행 워크플로우 생태계와 불일치, TestBot 포함 | 02-20 |
 | `docs/3-resource/05-reviews/2026-0216-2104-[report]-os-code-review.md` | `src/os/` 코드 리뷰 — `src/os/` 자체가 삭제되어 대상 파일 없음 | 02-20 |
 | `docs/3-resource/09-project-meta/2026-0212-1402-[analysis]-mermaid-rendering-failure.md` | mermaid 렌더링 버그 분석 — `docviewer-mermaid-error` 이슈 닫힘 (02-19), 역사 기록 | 02-20 |
+| `docs/archive/2026/02/W07/` (280+ 파일) | kernel ADR, focus recovery, create-module, command-palette, builder 등 W07 전체 | 03-03 |
+| `docs/archive/2026/02/W08/` (10+ 파일) | area-cleanup, workflow analysis, token-efficiency 등 W08 | 03-03 |
+| `docs/archive/2026/02/W09/` (30+ 파일) | philosophy-hygiene, inspector, naming, focus-recovery, backlog 등 W09 | 03-03 |
 
