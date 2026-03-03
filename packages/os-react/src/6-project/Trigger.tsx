@@ -123,6 +123,28 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         ? OS_OVERLAY_OPEN({ id: overlayId, type: overlayRole })
         : null;
 
+    // ── ARIA Auto-Projection ───────────────────────────────────
+    // When Trigger has an overlay role, automatically project:
+    //   aria-haspopup: "true" (for menu) or the overlay type
+    //   aria-expanded: reactive from overlay stack
+    //   aria-controls: points to overlay Zone ID
+    // Consumer's explicit props override these (spread order).
+    const isOverlayOpen = os.useComputed((s) =>
+      overlayId
+        ? s.os.overlays.stack.some((e) => e.id === overlayId)
+        : false,
+    );
+
+    const overlayAriaProps =
+      overlayRole && overlayId
+        ? {
+          "aria-haspopup":
+            overlayRole === "menu" ? "true" : (overlayRole as string),
+          "aria-expanded": isOverlayOpen,
+          "aria-controls": overlayId,
+        }
+        : {};
+
     const handleClick = (e: ReactMouseEvent) => {
       if (!allowPropagation) {
         e.stopPropagation();
@@ -131,8 +153,14 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       // When Trigger has an id → Item → PointerListener → OS_ACTIVATE → onActivate
       // When Trigger has NO id → no Item → must dispatch directly
       if (!id) {
-        if (overlayOpenCmd) {
-          os.dispatch(overlayOpenCmd);
+        if (overlayOpenCmd && overlayId) {
+          // Toggle: if overlay is already open, close it; if closed, open it.
+          // This matches W3C APG Menu Button behavior (click toggles popup).
+          if (isOverlayOpen) {
+            os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
+          } else {
+            os.dispatch(overlayOpenCmd);
+          }
         }
         if (onActivate) {
           const dispatch = customDispatch ?? os.dispatch;
@@ -147,6 +175,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       onClick: handleClick,
       className,
       "data-trigger-id": id,
+      ...overlayAriaProps,
       ...rest,
     };
 

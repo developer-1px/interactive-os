@@ -20,17 +20,16 @@
 
 import { Trigger } from "@os-react/6-project/Trigger";
 import { Item } from "@os-react/6-project/Item";
-import { os } from "@os-core/engine/kernel";
 import { Icon } from "@/components/Icon";
 
 /**
  * Menu items for the "Actions" dropdown
  */
 const MENU_ITEMS = [
-  { id: "action-cut", label: "Cut", icon: "scissors" as const },
+  { id: "action-cut", label: "Cut", icon: "x" as const },
   { id: "action-copy", label: "Copy", icon: "copy" as const },
   { id: "action-paste", label: "Paste", icon: "clipboard" as const },
-  { id: "action-delete", label: "Delete", icon: "trash-2" as const },
+  { id: "action-delete", label: "Delete", icon: "trash" as const },
 ];
 
 /**
@@ -48,11 +47,6 @@ const MENU_ITEMS = [
  *   - Outside click → close
  */
 export function MenuButtonPattern() {
-  // Track menu visibility via overlay stack
-  const isOpen = os.useComputed((s) =>
-    s.os.overlays.stack.some((e) => e.id === "apg-menu-button-popup"),
-  );
-
   return (
     <div className="max-w-sm">
       <h3 className="text-lg font-semibold mb-3">Menu Button</h3>
@@ -87,8 +81,6 @@ export function MenuButtonPattern() {
           <button
             id="mb-actions-trigger"
             type="button"
-            aria-haspopup="true"
-            aria-expanded={isOpen}
             className="
               group inline-flex items-center gap-2 px-4 py-2
               bg-indigo-600 text-white text-sm font-medium rounded-lg
