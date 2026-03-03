@@ -81,11 +81,11 @@ export function MenuButtonPattern() {
 
       <div className="relative inline-block">
         <Trigger
-          id="mb-actions-trigger"
           role="menu"
           overlayId="apg-menu-button-popup"
         >
           <button
+            id="mb-actions-trigger"
             type="button"
             aria-haspopup="true"
             aria-expanded={isOpen}
@@ -93,7 +93,7 @@ export function MenuButtonPattern() {
               group inline-flex items-center gap-2 px-4 py-2
               bg-indigo-600 text-white text-sm font-medium rounded-lg
               hover:bg-indigo-700 transition-colors
-              data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400 data-[focused=true]:ring-offset-2
+              focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:outline-none
             "
           >
             Actions
