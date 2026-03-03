@@ -27,7 +27,9 @@
       "Bash(find:*)",
       "Bash(node:*)",
       "Bash(do echo:*)",
-      "WebFetch(domain:www.w3.org)"
+      "WebFetch(domain:www.w3.org)",
+      "Bash(cat:*)",
+      "Bash(md5:*)"
     ]
   }
 }

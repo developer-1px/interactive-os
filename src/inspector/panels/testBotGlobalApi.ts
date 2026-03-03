@@ -5,8 +5,11 @@
  *   - Browser DevTools console
  *   - LLM/AI agent integrations
  *   - E2E automation bridges
+ *
+ * State is read from kernel store (TestBotApp.getState()).
  */
 
+import { getTestBotState, type SuiteState } from "@apps/testbot/app";
 import {
   type BrowserStep,
   createBrowserPage,
@@ -17,7 +20,7 @@ import {
 } from "@os-devtool/testing";
 
 // ═══════════════════════════════════════════════════════════════════
-// Internal State Bridge
+// Snapshot Types (for external consumers)
 // ═══════════════════════════════════════════════════════════════════
 
 export interface SuiteSnapshot {
@@ -34,17 +37,38 @@ export interface StepSnapshot {
   error: string | null;
 }
 
-interface ApiState {
-  isRunning: boolean;
-  suites: SuiteSnapshot[];
-  scripts: { name: string }[];
-}
+// ═══════════════════════════════════════════════════════════════════
+// State Access — reads from kernel store
+// ═══════════════════════════════════════════════════════════════════
 
-// Module-level mutable bridge (updated by TestBotPanel)
-let _state: ApiState = { isRunning: false, suites: [], scripts: [] };
+// Module-level action bridges (set by TestBotPanel)
 let _runAll: (() => void) | null = null;
 let _runSuite: ((si: number) => void) | null = null;
-let _activeScripts: TestScript[] = [];
+
+/** Convert kernel state to API snapshot */
+function toSnapshot(suite: SuiteState): SuiteSnapshot {
+  return {
+    name: suite.name,
+    status: suite.status,
+    passed: suite.passed,
+    steps: suite.steps.map((st) => ({
+      action: st.action,
+      detail: st.detail,
+      passed: st.result === "pass",
+      error: st.error ?? null,
+    })),
+  };
+}
+
+/** Read current state from kernel store */
+function getApiState() {
+  const s = getTestBotState();
+  return {
+    isRunning: s.isRunning,
+    suites: s.suites.map(toSnapshot),
+    scripts: TestBotRegistry.getScripts().map((s) => ({ name: s.name })),
+  };
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // Quick Run (headless, no visual effects)
@@ -62,26 +86,24 @@ async function quickRunScripts(scripts: TestScript[]): Promise<QuickResult[]> {
 
   for (const script of scripts) {
     const steps: BrowserStep[] = [];
-    const consoleLogs: string[] = [];
     const page = createBrowserPage(document.body, {
       headless: true,
       onStep: (step) => steps.push(step),
     });
 
-    // Intercept console during script execution
-    const origDebug = console.debug;
-    const origLog = console.log;
-    const origWarn = console.warn;
-    const origError = console.error;
-    const intercept =
-      (level: string) =>
-      (...args: unknown[]) => {
-        const msg = args
-          .map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a)))
-          .join(" ");
-        consoleLogs.push(`[${level}] ${msg}`);
+    // Intercept console for per-suite capture
+    const consoleLogs: string[] = [];
+    const originals = {
+      log: console.log,
+      warn: console.warn,
+      error: console.error,
+    };
+    function intercept(level: string) {
+      return (...args: unknown[]) => {
+        consoleLogs.push(`[${level}] ${args.map(String).join(" ")}`);
+        originals[level as keyof typeof originals]?.(...args);
       };
-    console.debug = intercept("debug") as typeof console.debug;
+    }
     console.log = intercept("log") as typeof console.log;
     console.warn = intercept("warn") as typeof console.warn;
     console.error = intercept("error") as typeof console.error;
@@ -97,17 +119,17 @@ async function quickRunScripts(scripts: TestScript[]): Promise<QuickResult[]> {
         detail: String(e),
         result: "fail",
         error: String(e),
-        timestamp: 0,
+        timestamp: Date.now(),
       });
-    } finally {
-      // Restore console
-      console.debug = origDebug;
-      console.log = origLog;
-      console.warn = origWarn;
-      console.error = origError;
     }
 
+    // Restore console
+    console.log = originals.log;
+    console.warn = originals.warn;
+    console.error = originals.error;
+
     page.hideCursor();
+
     results.push({
       name: script.name,
       passed,
@@ -115,7 +137,7 @@ async function quickRunScripts(scripts: TestScript[]): Promise<QuickResult[]> {
         action: s.action,
         detail: s.detail,
         passed: s.result === "pass",
-        ...(s.error ? { error: s.error } : {}),
+        error: s.error,
       })),
       consoleLogs,
     });
@@ -126,13 +148,10 @@ async function quickRunScripts(scripts: TestScript[]): Promise<QuickResult[]> {
 
 function printQuickResults(results: QuickResult[]) {
   const pass = results.filter((r) => r.passed).length;
-  const fail = results.filter((r) => !r.passed).length;
-  const total = results.length;
+  const fail = results.length - pass;
 
   console.log(
-    `\n🤖 TestBot Quick: ${pass}/${total} passed` +
-      (fail > 0 ? ` · ${fail} failed` : "") +
-      "\n",
+    `\n${fail === 0 ? "✅" : "❌"} TestBot Quick: ${pass}/${results.length} passed`,
   );
 
   for (const r of results) {
@@ -148,7 +167,6 @@ function printQuickResults(results: QuickResult[]) {
       }
     }
 
-    // Print collected console logs
     if (r.consoleLogs.length > 0) {
       console.log(`     📋 Console (${r.consoleLogs.length} entries):`);
       for (const log of r.consoleLogs) {
@@ -163,14 +181,6 @@ function printQuickResults(results: QuickResult[]) {
 // Registration (called by TestBotPanel)
 // ═══════════════════════════════════════════════════════════════════
 
-export function updateTestBotApiState(state: ApiState) {
-  _state = state;
-}
-
-export function setActiveScripts(scripts: TestScript[]) {
-  _activeScripts = scripts;
-}
-
 export function registerTestBotGlobalApi(
   runAll: () => void,
   runSuite: (si: number) => void,
@@ -179,20 +189,16 @@ export function registerTestBotGlobalApi(
   _runSuite = runSuite;
 
   function findSuiteIndex(name: string): number {
-    const idx = _state.suites.findIndex((s) => s.name === name);
+    const state = getApiState();
+    const idx = state.suites.findIndex((s) => s.name === name);
     if (idx < 0) {
-      const available = _state.scripts.map((s) => s.name).join(", ");
+      const available = state.scripts.map((s) => s.name).join(", ");
       throw new Error(`Suite "${name}" not found. Available: ${available}`);
     }
     return idx;
   }
 
-  function getScripts(): TestScript[] {
-    const pageScripts = TestBotRegistry.getScripts();
-    return pageScripts.length > 0 ? pageScripts : _activeScripts;
-  }
-
-  (window as Record<string, unknown>)["__TESTBOT__"] = {
+  (window as Record<string, unknown>).__TESTBOT__ = {
     // ── Visual Run ───────────────────────────────────────────
 
     /** Run all test suites (with visual effects) */
@@ -208,7 +214,7 @@ export function registerTestBotGlobalApi(
 
     /** 🚀 Quick run — no visuals, instant results */
     quickRun: async () => {
-      const scripts = getScripts();
+      const scripts = TestBotRegistry.getScripts();
       if (scripts.length === 0) {
         console.warn("[TestBot] No scripts available");
         return;
@@ -221,7 +227,7 @@ export function registerTestBotGlobalApi(
 
     /** 🚀 Quick run a single suite by name */
     quickRunByName: async (name: string) => {
-      const scripts = getScripts();
+      const scripts = TestBotRegistry.getScripts();
       const script = scripts.find((s) => s.name === name);
       if (!script) {
         console.warn(`[TestBot] Script "${name}" not found`);
@@ -235,11 +241,12 @@ export function registerTestBotGlobalApi(
 
     /** Re-run only previously failed suites */
     rerunFailed: async () => {
-      if (_state.isRunning) {
+      const state = getApiState();
+      if (state.isRunning) {
         console.warn("[TestBot] Already running");
         return;
       }
-      const failedIndices = _state.suites
+      const failedIndices = state.suites
         .map((s, i) => (s.status === "done" && !s.passed ? i : -1))
         .filter((i) => i >= 0);
 
@@ -248,14 +255,14 @@ export function registerTestBotGlobalApi(
         return;
       }
 
-      const names = failedIndices.map((i) => _state.suites[i]?.name).join(", ");
+      const names = failedIndices.map((i) => state.suites[i]?.name).join(", ");
       console.log(`🔄 Re-running ${failedIndices.length} failed: ${names}`);
 
       for (const idx of failedIndices) {
         _runSuite?.(idx);
         await new Promise<void>((resolve) => {
           const check = setInterval(() => {
-            if (!_state.isRunning) {
+            if (!getApiState().isRunning) {
               clearInterval(check);
               resolve();
             }
@@ -267,20 +274,24 @@ export function registerTestBotGlobalApi(
     // ── Query ────────────────────────────────────────────────
 
     /** Structured results (all suites) */
-    getResults: () => ({
-      isRunning: _state.isRunning,
-      summary: {
-        total: _state.suites.length,
-        pass: _state.suites.filter((s) => s.passed).length,
-        fail: _state.suites.filter((s) => s.status === "done" && !s.passed)
-          .length,
-      },
-      suites: _state.suites,
-    }),
+    getResults: () => {
+      const state = getApiState();
+      return {
+        isRunning: state.isRunning,
+        summary: {
+          total: state.suites.length,
+          pass: state.suites.filter((s) => s.passed).length,
+          fail: state.suites.filter((s) => s.status === "done" && !s.passed)
+            .length,
+        },
+        suites: state.suites,
+      };
+    },
 
     /** Only failed suites with first error detail */
     getFailures: () => {
-      const failed = _state.suites.filter(
+      const state = getApiState();
+      const failed = state.suites.filter(
         (s) => s.status === "done" && !s.passed,
       );
       return failed.map((s) => ({
@@ -298,26 +309,27 @@ export function registerTestBotGlobalApi(
       }));
     },
 
-    /** "PASS: N / FAIL: N / TOTAL: N" */
+    /** "PASS: N / FAIL: N / DONE: N / TOTAL: N" */
     summary: () => {
-      const pass = _state.suites.filter((s) => s.passed).length;
-      const fail = _state.suites.filter(
-        (s) => s.status === "done" && !s.passed,
-      ).length;
-      return `PASS: ${pass} / FAIL: ${fail} / TOTAL: ${_state.suites.length}`;
+      const state = getApiState();
+      const done = state.suites.filter((s) => s.status === "done");
+      const pass = done.filter((s) => s.passed).length;
+      const fail = done.filter((s) => !s.passed).length;
+      return `PASS: ${pass} / FAIL: ${fail} / DONE: ${done.length} / TOTAL: ${state.suites.length}`;
     },
 
     /** Currently running? */
-    isRunning: () => _state.isRunning,
+    isRunning: () => getApiState().isRunning,
 
     /** List all script names */
-    listSuites: () => _state.scripts.map((s) => s.name),
+    listSuites: () => getApiState().scripts.map((s) => s.name),
 
     /** Get results as JSON string (for LLM/agent parsing) */
-    getJSON: () =>
-      JSON.stringify(
+    getJSON: () => {
+      const state = getApiState();
+      return JSON.stringify(
         {
-          suites: _state.suites.map((s) => ({
+          suites: state.suites.map((s) => ({
             name: s.name,
             passed: s.passed,
             steps: s.steps.map((st) => ({
@@ -330,7 +342,8 @@ export function registerTestBotGlobalApi(
         },
         null,
         2,
-      ),
+      );
+    },
   };
 
   console.log(
@@ -340,5 +353,5 @@ export function registerTestBotGlobalApi(
 }
 
 export function unregisterTestBotGlobalApi() {
-  delete (window as Record<string, unknown>)["__TESTBOT__"];
+  delete (window as Record<string, unknown>).__TESTBOT__;
 }

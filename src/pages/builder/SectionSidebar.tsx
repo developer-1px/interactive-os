@@ -16,7 +16,15 @@ import { ChevronDown, ChevronRight, Layers, Plus, X } from "lucide-react";
 import { useState } from "react";
 import type { Block } from "@/apps/builder/app";
 import { addBlock, BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
+import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 import { BLOCK_PRESETS } from "@/apps/builder/presets/blocks";
+
+// Extend React types to support the inert attribute universally
+declare module "react" {
+  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+    inert?: string;
+  }
+}
 
 const CANVAS_ZONE_ID = "canvas";
 
@@ -217,35 +225,28 @@ function SidebarContent() {
                   {node.slideIndex}
                 </span>
 
-                {/* Mini Thumbnail — drag handle */}
+                {/* Mini Thumbnail — Live Scaled Render */}
                 <div
                   data-drag-handle
                   className={`
-                  w-10 h-7 rounded border shrink-0 flex items-center justify-center
-                  ml-1 cursor-grab active:cursor-grabbing
+                  w-14 h-9 rounded overflow-hidden border shrink-0 relative
+                  ml-1 cursor-grab active:cursor-grabbing bg-white
                   ${
                     isCanvasActive
-                      ? "bg-indigo-50 border-indigo-100"
-                      : "bg-slate-100 border-slate-200 group-hover:bg-white"
+                      ? "border-indigo-200 ring-2 ring-indigo-500/20"
+                      : "border-slate-200 group-hover:border-indigo-200"
                   }
                 `}
                 >
-                  <div className="flex flex-col gap-0.5 w-6">
-                    <div
-                      className={`h-0.5 rounded-full w-full ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`}
-                    />
-                    <div
-                      className={`h-[2.5px] rounded-full w-2/3 ${isCanvasActive ? "bg-indigo-200" : "bg-slate-200"}`}
-                    />
-                  </div>
+                  <LiveThumbnail block={node.block} />
                 </div>
 
                 {/* Block label */}
-                <div className="flex flex-col min-w-0 flex-1 ml-1">
+                <div className="flex flex-col min-w-0 flex-1 ml-2">
                   <span
                     className={`
-                      text-xs font-medium truncate
-                      ${isCanvasActive ? "text-slate-900" : "text-slate-700"}
+                      text-[11px] font-semibold truncate
+                      ${isCanvasActive ? "text-indigo-900" : "text-slate-700"}
                     `}
                   >
                     {node.block.label}
@@ -263,6 +264,25 @@ function SidebarContent() {
         })}
       </div>
     </>
+  );
+}
+
+// ─── Live Thumbnail Component ───
+function LiveThumbnail({ block }: { block: Block }) {
+  const Component = BLOCK_REGISTRY[block.type];
+  if (!Component) return null;
+
+  return (
+    <div
+      className="absolute top-0 left-0 origin-top-left pointer-events-none select-none"
+      style={{
+        width: "1000px", // Arbitrary large width to force desktop layout rendering
+        transform: "scale(0.056)", // Scale down to fit w-14 (56px) roughly
+      }}
+      inert="" // Prevent all keyboard/screen reader interaction
+    >
+      <Component id={block.id} />
+    </div>
   );
 }
 

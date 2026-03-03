@@ -46,25 +46,33 @@ read_url_content("https://www.w3.org/WAI/ARIA/apg/patterns/{pattern-name}/")
 
 ---
 
-### Step 2: APG Example 확인 (필수)
+### Step 2: APG Example HTML 추출 (필수)
 
-> ⛔ **W3C에서 제공하는 Example을 반드시 확인한다.** 스펙의 텍스트만으로는 모호한 동작이 Example에서 명확해진다.
+> ⛔ **W3C Example의 HTML이 기준 마크업이다.** 스펙 텍스트만 읽고 즉흥으로 구조를 만드는 것은 금지.
+> Example의 DOM 구조(그룹핑, 리스트, aria-labelledby 등)가 Showcase 컴포넌트의 구조를 결정한다.
 
 ```
 read_url_content("https://www.w3.org/WAI/ARIA/apg/patterns/{pattern-name}/examples/{example-name}/")
 ```
 
-Example에서 확인할 것:
-1. 어떤 ARIA 속성이 실제로 투영되는지
-2. 키보드 동작의 실제 결과 (스펙 텍스트의 "optionally" 구현 여부)
-3. Selection model: recommended vs alternative 중 어느 것을 쓰는지
-4. 스펙에 명시되지 않은 edge case 처리
+**반드시 수행할 것**:
+1. Example 페이지의 **HTML Source Code** 섹션을 읽는다
+2. HTML 구조 요소를 **Compliance Matrix에 `H1~Hn` ID로 등록**한다:
+   - `H1`: `role="group"` + `aria-labelledby` 그룹 래핑
+   - `H2`: `<ul>/<li>` 리스트 구조
+   - `H3`: `aria-checked` 초기값
+   - ... 등 Example마다 달라짐
+3. 키보드 동작의 실제 결과 (스펙 텍스트의 "optionally" 구현 여부)
+4. Selection model: recommended vs alternative 중 어느 것을 쓰는지
+5. 스펙에 명시되지 않은 edge case 처리
+
+**Example이 여러 개일 경우**: 모든 Example을 읽고, 각 Example의 HTML 구조를 별도로 추출한다.
 
 ---
 
 ### Step 3: Compliance Matrix 작성
 
-기존 테스트 파일(`{pattern}.apg.test.ts`)과 Step 1의 스펙 항목을 **1:1 매핑**:
+기존 테스트 파일(`{pattern}.apg.test.ts`)과 Step 1-2의 스펙 항목을 **1:1 매핑**:
 
 ```markdown
 | # | W3C Spec Requirement | Status | Test Name |
@@ -72,13 +80,27 @@ Example에서 확인할 것:
 | N1 | Down Arrow: next focusable | ✅ | `assertVerticalNav` |
 | N2 | ArrowRight: closed → expand | ❌ | **MISSING** |
 | R1 | role=treeitem | ✅ | `treeitem role assigned` |
+| H1 | role="group" + aria-labelledby 그룹 래핑 | ❌ | **MISSING** |
+| H2 | ul/li 리스트 구조 | ❌ | **MISSING** |
 ```
 
-분류:
+ID 분류:
+- `N1~Nn`: Navigation
+- `E1~En`: Expansion
+- `S1~Sn`: Selection
+- `A1~An`: Activation
+- `R1~Rn`: ARIA Roles/States/Properties
+- **`H1~Hn`: HTML Structure (Example 기준)**
+- `F1~Fn`: Focus initialization
+- `T1~Tn`: Type-ahead
+- `O1~On`: Optional features
+
+상태 분류:
 - **✅ Covered**: 기존 테스트가 스펙 항목을 검증
 - **❌ MISSING**: 스펙에 있지만 테스트 없음 → **Red 대상**
 - **⚠️ Mismatch**: 테스트가 있지만 스펙과 불일치 → **수정 대상**
 - **🔘 Optional**: 스펙이 "(Optional)"로 표기 → 구현 여부 결정
+- **🔄 OS Auto**: OS가 자동 처리 (Example과 구조 다를 수 있음 — 사유 기재 필수)
 
 ---
 

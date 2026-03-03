@@ -100,6 +100,31 @@ const registryOrder: string[] = []; // Registration order for headless zone orde
 const disabledItems = new Map<string, Set<string>>();
 const itemCallbacks = new Map<string, Map<string, ItemCallbacks>>();
 
+// ─── Zone mount/unmount observer (for TestBotRegistry, etc.) ───
+const listeners = new Set<() => void>();
+let zoneSnapshot: readonly string[] = [];
+let notifyScheduled = false;
+
+function rebuildSnapshot() {
+  zoneSnapshot = [...registry.keys()];
+}
+
+/**
+ * Deferred notification — uses queueMicrotask to avoid triggering
+ * subscriber setState during another component's render phase.
+ * (Zone.tsx calls register() inside useMemo = render phase.)
+ * Deduped: multiple register/unregister in the same microtask = 1 notify.
+ */
+function notifyListeners() {
+  if (notifyScheduled) return;
+  notifyScheduled = true;
+  queueMicrotask(() => {
+    notifyScheduled = false;
+    rebuildSnapshot();
+    for (const fn of listeners) fn();
+  });
+}
+
 /** Per-item callbacks — registered by FocusItem, read by OS commands */
 export interface ItemCallbacks {
   onActivate?: BaseCommand;
@@ -107,16 +132,20 @@ export interface ItemCallbacks {
 
 export const ZoneRegistry = {
   register(id: string, entry: ZoneEntry): void {
-    if (!registry.has(id)) registryOrder.push(id);
+    const isNew = !registry.has(id);
+    if (isNew) registryOrder.push(id);
     registry.set(id, entry);
+    if (isNew) notifyListeners();
   },
 
   unregister(id: string): void {
+    const existed = registry.has(id);
     registry.delete(id);
     const idx = registryOrder.indexOf(id);
     if (idx !== -1) registryOrder.splice(idx, 1);
     disabledItems.delete(id);
     itemCallbacks.delete(id);
+    if (existed) notifyListeners();
   },
 
   get(id: string): ZoneEntry | undefined {
@@ -135,6 +164,22 @@ export const ZoneRegistry = {
   /** Zone IDs in registration order (for headless zone ordering) */
   orderedKeys(): readonly string[] {
     return registryOrder;
+  },
+
+  /**
+   * Subscribe to zone mount/unmount events.
+   * Returns an unsubscribe function. useSyncExternalStore compatible.
+   */
+  subscribe(listener: () => void): () => void {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  },
+
+  /** Snapshot of currently registered zone IDs. Stable reference until zones change. */
+  getSnapshot(): readonly string[] {
+    return zoneSnapshot;
   },
 
   // ─── Per-item disabled state (declaration, not action) ───

@@ -41,6 +41,17 @@
 | 앱이 `os.dispatch`를 onReorder 등 콜백 안에서 직접 호출하는가 | grep → 있으면 OS gap |
 | 콜백에서 리턴한 커맨드를 OS가 실제로 dispatch하는가 | OS command 코드 확인 |
 
+### 1-D. 표준 명세 준수 (Standard Conformance)
+
+> OS가 구현을 보장하는 외부 표준 명세(W3C APG 등)가 있을 경우, 구현이 명세의 Example과 **구조적으로 일치**하는지 검증한다.
+> 이것은 특수 규칙이 아니다. W3C ARIA는 이 OS의 표준 명세 자체이므로, §1 필수 패턴의 연장선이다.
+
+| 검사 항목 | 방법 |
+|----------|------|
+| 명세 Example의 HTML 구조를 따르는가 | Example HTML과 실제 컴포넌트 DOM 비교 |
+| 명세에서 필수로 요구하는 ARIA 속성이 누락되지 않았는가 | Compliance Matrix `H1~Hn` 전수 대조 |
+| 불일치가 있을 경우 정당한 사유(🔄 OS Auto)가 문서화되어 있는가 | 코드 주석 또는 Compliance Matrix에 사유 기재 |
+
 ---
 
 ## 2. 알려진 OS 갭
@@ -113,6 +124,7 @@
 | TabsPattern useState 모드 토글 | `useState("auto"\|"manual")` + `onChange` radio | ⚪ 정당한 예외 | 데모 전환 UI — OS 관할 밖 view-level 상태. 인터랙션 state 아님 | 2026-03-02 |
 | Item.Content visibility | OS가 Zone role 따라 hidden/visible 자동 결정 | ✅ 해결 (신규) | roleRegistry contentVisibilityMap + bind.ts ContentComponent | 2026-03-02 |
 | OS_ACTIVATE selection 경로 | Enter → 선택 가능한 Zone에서 OS_SELECT dispatch | ✅ 해결 (신규) | tablist manual mode Enter 키 활성화 | 2026-03-02 |
+| CheckboxPattern onClick 2건 | raw onClick + useDevDispatch | 🔴 LLM 실수 → ✅ 수정 | onAction + activate.onClick 패턴으로 교체. SwitchPattern 참조 | 2026-03-03 |
 
 ---
 

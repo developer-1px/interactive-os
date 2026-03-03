@@ -71,7 +71,8 @@ export type ZoneRole =
   // Custom (non-ARIA)
   | "builderBlock"
   | "application"
-  | "textbox";
+  | "textbox"
+  | "checkbox";
 
 // ═══════════════════════════════════════════════════════════════════
 // Child Role Mapping (Zone role → default Item role)
@@ -93,6 +94,7 @@ const childRoleMap: Partial<Record<ZoneRole, string>> = {
   accordion: "button",
   slider: "slider",
   switch: "switch",
+  checkbox: "checkbox",
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -381,6 +383,17 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       select.mode="none" so mousedown doesn't interfere with toggle;
   //       onCheck (Space/Enter) and onAction (click) handle toggling.
   switch: {
+    select: { mode: "none" },
+    check: { mode: "check" },
+    activate: { mode: "manual", onClick: true },
+    tab: { behavior: "escape" },
+  },
+
+  // ─── Checkbox (ARIA APG: Checkbox Pattern) ───
+  // Spec: on/off toggle, Space toggles aria-checked, Enter does not.
+  //       single focusable element, click also toggles.
+  //       select.mode="none" so mousedown doesn't interfere with toggle.
+  checkbox: {
     select: { mode: "none" },
     check: { mode: "check" },
     activate: { mode: "manual", onClick: true },

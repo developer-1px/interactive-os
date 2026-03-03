@@ -333,3 +333,16 @@
   overflow: visible;
   inset: unset;
 }
+
+/* ── Step flash animation (TestBotPanel) ────────────────── */
+@keyframes flash-bg {
+  0% {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+.animate-flash {
+  animation: flash-bg 1s ease-out forwards;
+}

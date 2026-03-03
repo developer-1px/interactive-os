@@ -11,8 +11,12 @@
  * Pure function. No DOM access.
  */
 
-import type { BaseCommand } from "@kernel";
-import { OS_ACTIVATE, OS_EXPAND, OS_SELECT } from "@os-core/4-command";
+import {
+  OS_ACTIVATE,
+  OS_CHECK,
+  OS_EXPAND,
+  OS_SELECT,
+} from "@os-core/4-command";
 
 // ═══════════════════════════════════════════════════════════════════
 // Item Context
@@ -74,11 +78,23 @@ const resolveButton: ItemKeyResolver = (key) => {
   return null;
 };
 
+/**
+ * checkbox: Space → CHECK (W3C APG Checkbox Pattern)
+ * Enter must NOT toggle value. Toggle requires Space.
+ */
+const resolveCheckbox: ItemKeyResolver = (key, ctx) => {
+  if (key === "Space") {
+    return OS_CHECK({ targetId: ctx.itemId });
+  }
+  return null;
+};
+
 const ITEM_RESOLVERS: Record<string, ItemKeyResolver> = {
   treeitem: resolveTreeItem,
   radio: resolveRadio,
   menuitemradio: resolveRadio,
   button: resolveButton,
+  checkbox: resolveCheckbox,
 };
 
 // ═══════════════════════════════════════════════════════════════════

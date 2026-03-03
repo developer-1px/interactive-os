@@ -51,7 +51,6 @@ export interface FieldKeyContext {
  */
 export const ROLE_FIELD_TYPE_MAP: Readonly<Record<string, FieldType>> = {
   switch: "boolean",
-  checkbox: "boolean",
   slider: "number",
   radio: "enum",
   option: "enum",

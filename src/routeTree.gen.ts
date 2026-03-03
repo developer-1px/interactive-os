@@ -17,13 +17,7 @@ import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
 import { Route as MinimalBuilderListRouteImport } from './routes/_minimal/builder-list'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
-import { Route as MinimalPlaygroundTestbotRouteImport } from './routes/_minimal/playground.testbot'
-import { Route as MinimalPlaygroundRadixRouteImport } from './routes/_minimal/playground.radix'
-import { Route as MinimalPlaygroundQuickpickRouteImport } from './routes/_minimal/playground.quickpick'
-import { Route as MinimalPlaygroundKernelRouteImport } from './routes/_minimal/playground.kernel'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
-import { Route as MinimalPlaygroundCommandPaletteRouteImport } from './routes/_minimal/playground.command-palette'
-import { Route as MinimalPlaygroundAriaRouteImport } from './routes/_minimal/playground.aria'
 import { Route as MinimalPlaygroundApgRouteImport } from './routes/_minimal/playground.apg'
 import { Route as MinimalPlaygroundApgPatternRouteImport } from './routes/_minimal/playground.apg.$pattern'
 
@@ -65,42 +59,9 @@ const MinimalDocsIndexRoute = MinimalDocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MinimalDocsRoute,
 } as any)
-const MinimalPlaygroundTestbotRoute =
-  MinimalPlaygroundTestbotRouteImport.update({
-    id: '/playground/testbot',
-    path: '/playground/testbot',
-    getParentRoute: () => MinimalRoute,
-  } as any)
-const MinimalPlaygroundRadixRoute = MinimalPlaygroundRadixRouteImport.update({
-  id: '/playground/radix',
-  path: '/playground/radix',
-  getParentRoute: () => MinimalRoute,
-} as any)
-const MinimalPlaygroundQuickpickRoute =
-  MinimalPlaygroundQuickpickRouteImport.update({
-    id: '/playground/quickpick',
-    path: '/playground/quickpick',
-    getParentRoute: () => MinimalRoute,
-  } as any)
-const MinimalPlaygroundKernelRoute = MinimalPlaygroundKernelRouteImport.update({
-  id: '/playground/kernel',
-  path: '/playground/kernel',
-  getParentRoute: () => MinimalRoute,
-} as any)
 const MinimalPlaygroundFocusRoute = MinimalPlaygroundFocusRouteImport.update({
   id: '/playground/focus',
   path: '/playground/focus',
-  getParentRoute: () => MinimalRoute,
-} as any)
-const MinimalPlaygroundCommandPaletteRoute =
-  MinimalPlaygroundCommandPaletteRouteImport.update({
-    id: '/playground/command-palette',
-    path: '/playground/command-palette',
-    getParentRoute: () => MinimalRoute,
-  } as any)
-const MinimalPlaygroundAriaRoute = MinimalPlaygroundAriaRouteImport.update({
-  id: '/playground/aria',
-  path: '/playground/aria',
   getParentRoute: () => MinimalRoute,
 } as any)
 const MinimalPlaygroundApgRoute = MinimalPlaygroundApgRouteImport.update({
@@ -122,13 +83,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof MinimalDocsRouteWithChildren
   '/todo': typeof MinimalTodoRoute
   '/playground/apg': typeof MinimalPlaygroundApgRouteWithChildren
-  '/playground/aria': typeof MinimalPlaygroundAriaRoute
-  '/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
-  '/playground/kernel': typeof MinimalPlaygroundKernelRoute
-  '/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
-  '/playground/radix': typeof MinimalPlaygroundRadixRoute
-  '/playground/testbot': typeof MinimalPlaygroundTestbotRoute
   '/docs/': typeof MinimalDocsIndexRoute
   '/playground/apg/$pattern': typeof MinimalPlaygroundApgPatternRoute
 }
@@ -138,13 +93,7 @@ export interface FileRoutesByTo {
   '/builder-list': typeof MinimalBuilderListRoute
   '/todo': typeof MinimalTodoRoute
   '/playground/apg': typeof MinimalPlaygroundApgRouteWithChildren
-  '/playground/aria': typeof MinimalPlaygroundAriaRoute
-  '/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
-  '/playground/kernel': typeof MinimalPlaygroundKernelRoute
-  '/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
-  '/playground/radix': typeof MinimalPlaygroundRadixRoute
-  '/playground/testbot': typeof MinimalPlaygroundTestbotRoute
   '/docs': typeof MinimalDocsIndexRoute
   '/playground/apg/$pattern': typeof MinimalPlaygroundApgPatternRoute
 }
@@ -158,13 +107,7 @@ export interface FileRoutesById {
   '/_minimal/todo': typeof MinimalTodoRoute
   '/_todo/': typeof TodoIndexRoute
   '/_minimal/playground/apg': typeof MinimalPlaygroundApgRouteWithChildren
-  '/_minimal/playground/aria': typeof MinimalPlaygroundAriaRoute
-  '/_minimal/playground/command-palette': typeof MinimalPlaygroundCommandPaletteRoute
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
-  '/_minimal/playground/kernel': typeof MinimalPlaygroundKernelRoute
-  '/_minimal/playground/quickpick': typeof MinimalPlaygroundQuickpickRoute
-  '/_minimal/playground/radix': typeof MinimalPlaygroundRadixRoute
-  '/_minimal/playground/testbot': typeof MinimalPlaygroundTestbotRoute
   '/_minimal/docs/': typeof MinimalDocsIndexRoute
   '/_minimal/playground/apg/$pattern': typeof MinimalPlaygroundApgPatternRoute
 }
@@ -177,13 +120,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/todo'
     | '/playground/apg'
-    | '/playground/aria'
-    | '/playground/command-palette'
     | '/playground/focus'
-    | '/playground/kernel'
-    | '/playground/quickpick'
-    | '/playground/radix'
-    | '/playground/testbot'
     | '/docs/'
     | '/playground/apg/$pattern'
   fileRoutesByTo: FileRoutesByTo
@@ -193,13 +130,7 @@ export interface FileRouteTypes {
     | '/builder-list'
     | '/todo'
     | '/playground/apg'
-    | '/playground/aria'
-    | '/playground/command-palette'
     | '/playground/focus'
-    | '/playground/kernel'
-    | '/playground/quickpick'
-    | '/playground/radix'
-    | '/playground/testbot'
     | '/docs'
     | '/playground/apg/$pattern'
   id:
@@ -212,13 +143,7 @@ export interface FileRouteTypes {
     | '/_minimal/todo'
     | '/_todo/'
     | '/_minimal/playground/apg'
-    | '/_minimal/playground/aria'
-    | '/_minimal/playground/command-palette'
     | '/_minimal/playground/focus'
-    | '/_minimal/playground/kernel'
-    | '/_minimal/playground/quickpick'
-    | '/_minimal/playground/radix'
-    | '/_minimal/playground/testbot'
     | '/_minimal/docs/'
     | '/_minimal/playground/apg/$pattern'
   fileRoutesById: FileRoutesById
@@ -286,53 +211,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalDocsIndexRouteImport
       parentRoute: typeof MinimalDocsRoute
     }
-    '/_minimal/playground/testbot': {
-      id: '/_minimal/playground/testbot'
-      path: '/playground/testbot'
-      fullPath: '/playground/testbot'
-      preLoaderRoute: typeof MinimalPlaygroundTestbotRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/playground/radix': {
-      id: '/_minimal/playground/radix'
-      path: '/playground/radix'
-      fullPath: '/playground/radix'
-      preLoaderRoute: typeof MinimalPlaygroundRadixRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/playground/quickpick': {
-      id: '/_minimal/playground/quickpick'
-      path: '/playground/quickpick'
-      fullPath: '/playground/quickpick'
-      preLoaderRoute: typeof MinimalPlaygroundQuickpickRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/playground/kernel': {
-      id: '/_minimal/playground/kernel'
-      path: '/playground/kernel'
-      fullPath: '/playground/kernel'
-      preLoaderRoute: typeof MinimalPlaygroundKernelRouteImport
-      parentRoute: typeof MinimalRoute
-    }
     '/_minimal/playground/focus': {
       id: '/_minimal/playground/focus'
       path: '/playground/focus'
       fullPath: '/playground/focus'
       preLoaderRoute: typeof MinimalPlaygroundFocusRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/playground/command-palette': {
-      id: '/_minimal/playground/command-palette'
-      path: '/playground/command-palette'
-      fullPath: '/playground/command-palette'
-      preLoaderRoute: typeof MinimalPlaygroundCommandPaletteRouteImport
-      parentRoute: typeof MinimalRoute
-    }
-    '/_minimal/playground/aria': {
-      id: '/_minimal/playground/aria'
-      path: '/playground/aria'
-      fullPath: '/playground/aria'
-      preLoaderRoute: typeof MinimalPlaygroundAriaRouteImport
       parentRoute: typeof MinimalRoute
     }
     '/_minimal/playground/apg': {
@@ -381,13 +264,7 @@ interface MinimalRouteChildren {
   MinimalDocsRoute: typeof MinimalDocsRouteWithChildren
   MinimalTodoRoute: typeof MinimalTodoRoute
   MinimalPlaygroundApgRoute: typeof MinimalPlaygroundApgRouteWithChildren
-  MinimalPlaygroundAriaRoute: typeof MinimalPlaygroundAriaRoute
-  MinimalPlaygroundCommandPaletteRoute: typeof MinimalPlaygroundCommandPaletteRoute
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
-  MinimalPlaygroundKernelRoute: typeof MinimalPlaygroundKernelRoute
-  MinimalPlaygroundQuickpickRoute: typeof MinimalPlaygroundQuickpickRoute
-  MinimalPlaygroundRadixRoute: typeof MinimalPlaygroundRadixRoute
-  MinimalPlaygroundTestbotRoute: typeof MinimalPlaygroundTestbotRoute
 }
 
 const MinimalRouteChildren: MinimalRouteChildren = {
@@ -396,13 +273,7 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalDocsRoute: MinimalDocsRouteWithChildren,
   MinimalTodoRoute: MinimalTodoRoute,
   MinimalPlaygroundApgRoute: MinimalPlaygroundApgRouteWithChildren,
-  MinimalPlaygroundAriaRoute: MinimalPlaygroundAriaRoute,
-  MinimalPlaygroundCommandPaletteRoute: MinimalPlaygroundCommandPaletteRoute,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,
-  MinimalPlaygroundKernelRoute: MinimalPlaygroundKernelRoute,
-  MinimalPlaygroundQuickpickRoute: MinimalPlaygroundQuickpickRoute,
-  MinimalPlaygroundRadixRoute: MinimalPlaygroundRadixRoute,
-  MinimalPlaygroundTestbotRoute: MinimalPlaygroundTestbotRoute,
 }
 
 const MinimalRouteWithChildren =

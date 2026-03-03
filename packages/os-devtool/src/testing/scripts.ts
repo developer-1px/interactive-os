@@ -20,7 +20,7 @@ import type { Page } from "./types";
 // ═══════════════════════════════════════════════════════════════════
 
 /** Minimal expect interface — compatible with both our wrapper and Playwright's */
-export type ExpectLocator = (locator: any) => {
+export type ExpectLocator = (locator: unknown) => {
   toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
   toBeFocused(): Promise<void>;
   not: {
@@ -31,6 +31,7 @@ export type ExpectLocator = (locator: any) => {
 
 export interface TestScript {
   name: string;
+  group?: string;
   run: (page: Page, expect: ExpectLocator) => Promise<void>;
 }
 
@@ -945,6 +946,53 @@ export const apgRadiogroupScript: TestScript = {
   },
 };
 
+// ─── APG Checkbox ───
+
+export const apgCheckboxScript: TestScript = {
+  name: "APG Checkbox — Space Toggle",
+  async run(page, expect = defaultExpect) {
+    // Navigate to Checkbox pattern via sidebar
+    await page.locator("#tab-checkbox").click();
+
+    // Click to focus and check (OS_ACTIVATE → onAction → OS_CHECK)
+    await page.locator("#cond-lettuce").click();
+    await expect(page.locator("#cond-lettuce")).toBeFocused();
+    await expect(page.locator("#cond-lettuce")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+
+    // Space to toggle off
+    await page.keyboard.press(" ");
+    await expect(page.locator("#cond-lettuce")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+
+    // Enter must NOT toggle (APG requirement)
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#cond-lettuce")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+
+    // Arrow down to next
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#cond-tomato")).toBeFocused();
+    await expect(page.locator("#cond-tomato")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+
+    // Space to toggle on
+    await page.keyboard.press(" ");
+    await expect(page.locator("#cond-tomato")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+  },
+};
+
 // ─── Bundle for APG Showcase page ───
 
 export const apgShowcaseScripts: TestScript[] = [
@@ -959,4 +1007,5 @@ export const apgShowcaseScripts: TestScript[] = [
   apgSwitchScript,
   apgSliderScript,
   apgRadiogroupScript,
+  apgCheckboxScript,
 ];
