@@ -27,7 +27,7 @@ describe("T2: FocusGroup autoFocus headless pathway", () => {
     page.goto("autofocus-test", {
       items: ["item-a", "item-b", "item-c"],
       role: "dialog",
-      config: { project: { autoFocus: true } },
+      config: { project: { autoFocus: true, virtualFocus: false } },
     });
 
     expect(page.activeZoneId()).toBe("autofocus-test");
@@ -40,7 +40,7 @@ describe("T2: FocusGroup autoFocus headless pathway", () => {
     page.goto("autofocus-test", {
       items: [],
       role: "dialog",
-      config: { project: { autoFocus: true } },
+      config: { project: { autoFocus: true, virtualFocus: false } },
     });
 
     expect(page.activeZoneId()).toBe("autofocus-test");
@@ -53,7 +53,7 @@ describe("T2: FocusGroup autoFocus headless pathway", () => {
     page.goto("autofocus-test", {
       items: ["x"],
       role: "dialog",
-      config: { project: { autoFocus: true } },
+      config: { project: { autoFocus: true, virtualFocus: false } },
     });
 
     expect(page.activeZoneId()).toBe("autofocus-test");

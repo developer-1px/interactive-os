@@ -14,7 +14,6 @@
 import {
   OS_ACTIVATE,
   OS_CHECK,
-  OS_EXPAND,
   OS_SELECT,
 } from "@os-core/4-command";
 
@@ -37,23 +36,7 @@ export interface ItemKeyContext {
 
 type ItemKeyResolver = (key: string, ctx: ItemKeyContext) => BaseCommand | null;
 
-/**
- * treeitem: ArrowRight/Left → expand/collapse (W3C APG Tree Pattern)
- *
- * - ArrowRight on collapsed → expand
- * - ArrowLeft on expanded → collapse
- * - ArrowRight on expanded → null (navigate to first child — Zone)
- * - ArrowLeft on collapsed → null (navigate to parent — Zone)
- */
-const resolveTreeItem: ItemKeyResolver = (key, ctx) => {
-  if (key === "ArrowRight" && ctx.expanded === false) {
-    return OS_EXPAND({ action: "expand", itemId: ctx.itemId });
-  }
-  if (key === "ArrowLeft" && ctx.expanded === true) {
-    return OS_EXPAND({ action: "collapse", itemId: ctx.itemId });
-  }
-  return null;
-};
+// treeitem resolver removed — now handled by chain executor in OS_NAVIGATE (T2)
 
 /**
  * radio / menuitemradio: Space → SELECT (W3C APG Radio Group Pattern)
@@ -90,7 +73,7 @@ const resolveCheckbox: ItemKeyResolver = (key, ctx) => {
 };
 
 const ITEM_RESOLVERS: Record<string, ItemKeyResolver> = {
-  treeitem: resolveTreeItem,
+  // treeitem: removed — now handled by chain executor in OS_NAVIGATE (T2)
   radio: resolveRadio,
   menuitemradio: resolveRadio,
   button: resolveButton,

@@ -261,6 +261,9 @@ export interface AppPage<S> {
   /** Clean up zone registrations. */
   cleanup(): void;
 
+  /** Dump OS diagnostics (schema-filtered transactions + zone snapshot). */
+  dumpDiagnostics(): void;
+
   /** Playwright-style locator: query any element by ID (Zone or Item). */
   locator(elementId: string): import("@os-sdk/app/defineApp/page").OsLocator;
 

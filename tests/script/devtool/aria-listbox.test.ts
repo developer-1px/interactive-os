@@ -229,8 +229,7 @@ describe("ARIA Listbox", () => {
     it("zone has role=listbox", async () => {
       page.goto("listbox", { items: ITEMS, role: "listbox" });
 
-      const role = await page.locator("listbox").getAttribute("role");
-      expect(role).toBe("listbox");
+      await expect(page.locator("listbox")).toHaveAttribute("role", "listbox");
     });
 
     it("focused item has aria-current=true", async () => {
@@ -246,8 +245,7 @@ describe("ARIA Listbox", () => {
     it("items have role=option", async () => {
       page.goto("listbox", { items: ITEMS, role: "listbox" });
 
-      const role = await page.locator("apple").getAttribute("role");
-      expect(role).toBe("option");
+      await expect(page.locator("apple")).toHaveAttribute("role", "option");
     });
   });
 });

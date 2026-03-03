@@ -16,10 +16,14 @@ export interface NavigateConfig {
   loop: boolean;
   seamless: boolean;
   typeahead: boolean;
-  /** ArrowRight/Left handle expand/collapse instead of navigation (tree/treegrid) */
-  arrowExpand: boolean;
   entry: NavigateEntry;
   recovery: "next" | "prev" | "nearest";
+  /** Chain fallback for edge/cross-axis navigation (command-config-invariant) */
+  onRight?: string[];
+  onLeft?: string[];
+  onUp?: string[];
+  onDown?: string[];
+  onCrossAxis?: string[];
 }
 
 export const DEFAULT_NAVIGATE: NavigateConfig = {
@@ -27,7 +31,6 @@ export const DEFAULT_NAVIGATE: NavigateConfig = {
   loop: false,
   seamless: false,
   typeahead: false,
-  arrowExpand: false,
   entry: "first",
   recovery: "next",
 };
@@ -55,6 +58,10 @@ export interface SelectConfig {
   disallowEmpty: boolean;
   range: boolean;
   toggle: boolean;
+  /** Selection scope for grid (command-config-invariant) */
+  scope?: "cell" | "column" | "row";
+  /** ARIA attribute: "selected" (aria-selected) or "checked" (aria-checked) */
+  aria?: "selected" | "checked";
 }
 
 export const DEFAULT_SELECT: SelectConfig = {
@@ -78,6 +85,8 @@ export interface ActivateConfig {
    * Default: false (activate on every click, tree pattern).
    */
   reClickOnly: boolean;
+  /** What effect ACTIVATE produces (command-config-invariant) */
+  effect?: "default" | "toggleExpand" | "invokeAndClose" | "selectTab";
 }
 
 export const DEFAULT_ACTIVATE: ActivateConfig = {
@@ -91,6 +100,8 @@ export const DEFAULT_ACTIVATE: ActivateConfig = {
 export interface DismissConfig {
   escape: "close" | "deselect" | "callback" | "none";
   outsideClick: "close" | "none";
+  /** Whether to restore focus to invoker after dismiss (command-config-invariant) */
+  restoreFocus?: boolean;
 }
 
 export const DEFAULT_DISMISS: DismissConfig = {

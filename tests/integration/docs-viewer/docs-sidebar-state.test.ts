@@ -4,20 +4,13 @@
  * DocsSidebar.RecentSection uses `useState(true)` for isOpen.
  * This should be managed through OS state via DOCS_TOGGLE_SECTION command.
  *
- * Note: Uses onTestFailed + dumpDiagnostics (test-observability validation)
+ * Note: Auto-diagnostics registered by createAppPage (onTestFailed)
  */
 
 import { defineScope } from "@kernel";
 import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
 import { produce } from "immer";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  onTestFailed,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 // toggleSection is a red-test stub — not yet implemented in app.ts
 const toggleSection = (payload: { sectionId: string }) => ({
@@ -63,8 +56,6 @@ describe("T4: DocsSidebar — isOpen via OS command (not useState)", () => {
       }),
     );
 
-    // Auto-diagnostics on failure
-    onTestFailed(() => page.dumpDiagnostics());
   });
 
   afterEach(() => {

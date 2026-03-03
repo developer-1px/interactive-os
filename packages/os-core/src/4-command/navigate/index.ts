@@ -61,67 +61,80 @@ export const OS_NAVIGATE = os.defineCommand(
       ? ctx.inject(DOM_RECTS)
       : new Map();
 
-    // W3C Tree Pattern: ArrowRight/ArrowLeft handle expand/collapse
-    // Role declares arrowExpand — no hardcoded role check (OCP).
-    const arrowExpand = config.navigate.arrowExpand;
+    // ── Chain executor: config-driven cross-axis behavior ──
+    // Reads onRight/onLeft/onDown/onUp from NavigateConfig.
+    // Each is a string[] fallback chain of atomic actions.
+    // Falls back to normal linear navigation if no chain defined.
+    const directionChainMap: Record<string, string[] | undefined> = {
+      right: config.navigate.onRight,
+      left: config.navigate.onLeft,
+      up: config.navigate.onUp,
+      down: config.navigate.onDown,
+    };
+    const chain = directionChainMap[payload.direction];
 
     let overrideTargetId: string | null = null;
 
-    if (
-      arrowExpand &&
-      (payload.direction === "right" || payload.direction === "left")
-    ) {
+    if (chain && chain.length > 0) {
       const focusedId = zone.focusedItemId;
       if (focusedId) {
-        const isExpanded = zone.expandedItems.includes(focusedId);
-        // Expandability is determined by DOM projection (aria-expanded presence)
         const expandableItems = ctx.inject(DOM_EXPANDABLE_ITEMS);
         const isExpandable = expandableItems.has(focusedId);
-
-        if (isExpandable) {
-          if (payload.direction === "right" && !isExpanded) {
-            return {
-              dispatch: OS_EXPAND({ action: "expand", itemId: focusedId }),
-            };
-          }
-          if (payload.direction === "left" && isExpanded) {
-            return {
-              dispatch: OS_EXPAND({
-                action: "collapse",
-                itemId: focusedId,
-              }),
-            };
-          }
-        }
-
-        // APG Tree: Hierarchy Jump
+        const isExpanded = zone.expandedItems.includes(focusedId);
         const treeLevels = ctx.inject(DOM_TREE_LEVELS);
 
-        if (payload.direction === "right" && isExpandable && isExpanded) {
-          const idx = items.indexOf(focusedId);
-          const nextId = items[idx + 1];
-          if (nextId) {
-            const currentLevel = treeLevels.get(focusedId) ?? 1;
-            const nextLevel = treeLevels.get(nextId) ?? 1;
-            if (nextLevel > currentLevel) {
-              overrideTargetId = nextId;
+        // Chain trace for transaction log observability
+        const chainTrace: Array<{ action: string; result: string }> = [];
+
+        for (const action of chain) {
+          if (action === "expand" && isExpandable && !isExpanded) {
+            chainTrace.push({ action, result: "resolved" });
+            return {
+              dispatch: OS_EXPAND({ action: "expand", itemId: focusedId }),
+              chainTrace,
+            };
+          }
+          if (action === "collapse" && isExpandable && isExpanded) {
+            chainTrace.push({ action, result: "resolved" });
+            return {
+              dispatch: OS_EXPAND({ action: "collapse", itemId: focusedId }),
+              chainTrace,
+            };
+          }
+          if (action === "enterChild" && isExpandable && isExpanded) {
+            const idx = items.indexOf(focusedId);
+            const nextId = items[idx + 1];
+            if (nextId) {
+              const currentLevel = treeLevels.get(focusedId) ?? 1;
+              const nextLevel = treeLevels.get(nextId) ?? 1;
+              if (nextLevel > currentLevel) {
+                chainTrace.push({ action, result: "resolved" });
+                overrideTargetId = nextId;
+                break;
+              }
             }
           }
-        }
-
-        if (payload.direction === "left" && (!isExpandable || !isExpanded)) {
-          const idx = items.indexOf(focusedId);
-          const currentLevel = treeLevels.get(focusedId) ?? 1;
-          for (let i = idx - 1; i >= 0; i--) {
-            const prevId = items[i];
-            if (!prevId) continue;
-            const prevLevel = treeLevels.get(prevId) ?? 1;
-            if (prevLevel < currentLevel) {
-              overrideTargetId = prevId;
+          if (action === "goParent") {
+            const idx = items.indexOf(focusedId);
+            const currentLevel = treeLevels.get(focusedId) ?? 1;
+            for (let i = idx - 1; i >= 0; i--) {
+              const prevId = items[i];
+              if (!prevId) continue;
+              const prevLevel = treeLevels.get(prevId) ?? 1;
+              if (prevLevel < currentLevel) {
+                overrideTargetId = prevId;
+                break;
+              }
+            }
+            if (overrideTargetId) {
+              chainTrace.push({ action, result: "resolved" });
               break;
             }
           }
+          chainTrace.push({ action, result: "skipped" });
         }
+        // If chain consumed but no action succeeded → noop (return early if no override)
+        if (!overrideTargetId) return { chainTrace };
       }
     }
 
@@ -133,21 +146,21 @@ export const OS_NAVIGATE = os.defineCommand(
     // Delegate to existing pure resolver OR use override
     const navResult = overrideTargetId
       ? {
-          targetId: overrideTargetId,
+        targetId: overrideTargetId,
+        stickyX: zone.stickyX,
+        stickyY: zone.stickyY,
+      }
+      : resolveNavigate(
+        zone.focusedItemId,
+        payload.direction,
+        navigableItems,
+        config.navigate,
+        {
           stickyX: zone.stickyX,
           stickyY: zone.stickyY,
-        }
-      : resolveNavigate(
-          zone.focusedItemId,
-          payload.direction,
-          navigableItems,
-          config.navigate,
-          {
-            stickyX: zone.stickyX,
-            stickyY: zone.stickyY,
-            itemRects,
-          },
-        );
+          itemRects,
+        },
+      );
 
     const result = {
       state: produce(ctx.state, (draft) => {

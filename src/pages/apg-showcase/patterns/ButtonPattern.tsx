@@ -1,0 +1,196 @@
+/**
+ * APG Button Pattern — Showcase UI
+ * Source: https://www.w3.org/WAI/ARIA/apg/patterns/button/
+ *
+ * W3C APG Button Pattern:
+ *   - role="button" — activatable element
+ *   - Enter/Space — activates the button
+ *   - Toggle variant: aria-pressed="true" / "false"
+ *   - aria-disabled="true" when action is unavailable
+ *
+ * ZIFT Classification:
+ *   - Action Button = Trigger (Fire-and-forget command dispatch)
+ *   - Toggle Button = Field (boolean) mapped to aria-pressed via check axis
+ *
+ * OS pattern:
+ *   Action buttons: <Trigger onActivate={CMD()}> — no Zone/Item needed.
+ *   Toggle buttons: Zone+Item with role="toolbar" (child role=button),
+ *     check.mode="check" for toggle. OS computes aria-pressed (not aria-checked)
+ *     for button-role items. CSS reads aria-pressed. No useState, no onClick.
+ */
+
+import { OS_CHECK } from "@os-core/4-command/activate/check";
+import { Trigger } from "@os-react/6-project/Trigger";
+import { defineApp } from "@os-sdk/app/defineApp";
+
+// ═══════════════════════════════════════════════════════════════════
+// Section 1: Action Buttons (Trigger-only — no Zone/Item)
+// ═══════════════════════════════════════════════════════════════════
+
+export const ActionButtonApp = defineApp<{ actionCount: number }>(
+  "apg-action-button",
+  { actionCount: 0 },
+);
+
+const actionCounter = ActionButtonApp.selector(
+  "actionCount",
+  (s) => s.actionCount,
+);
+
+export const PERFORM_ACTION = ActionButtonApp.command("PERFORM_ACTION", (ctx) => ({
+  state: { actionCount: ctx.state.actionCount + 1 },
+}));
+
+function ActionButtonSection() {
+  const count = ActionButtonApp.useComputed(actionCounter);
+
+  return (
+    <div className="space-y-4">
+      <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+        Action Buttons
+      </h4>
+      <p className="text-xs text-gray-500">
+        Activates on <kbd>Enter</kbd>, <kbd>Space</kbd>, or click. Pure Trigger
+        pattern.
+      </p>
+
+      <div className="flex gap-3 items-center">
+        <Trigger onActivate={PERFORM_ACTION()}>
+          <button
+            type="button"
+            className="
+              px-4 py-2 text-sm font-medium rounded-lg
+              bg-indigo-600 text-white
+              hover:bg-indigo-700 active:bg-indigo-800
+              focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2
+              transition-colors
+            "
+          >
+            Print Page
+          </button>
+        </Trigger>
+
+        <Trigger onActivate={PERFORM_ACTION()}>
+          <button
+            type="button"
+            className="
+              px-4 py-2 text-sm font-medium rounded-lg
+              border border-gray-300 text-gray-700 bg-white
+              hover:bg-gray-50 active:bg-gray-100
+              focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2
+              transition-colors
+            "
+          >
+            Save Draft
+          </button>
+        </Trigger>
+
+        <span className="text-xs text-gray-400 ml-2">
+          Actions fired: {count}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Section 2: Toggle Buttons (Zone+Item — Field boolean via check axis)
+// ═══════════════════════════════════════════════════════════════════
+
+interface ToggleDef {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+const TOGGLES: ToggleDef[] = [
+  { id: "toggle-bold", label: "Bold", icon: "B" },
+  { id: "toggle-italic", label: "Italic", icon: "I" },
+  { id: "toggle-underline", label: "Underline", icon: "U" },
+];
+
+export const ToggleApp = defineApp<Record<string, never>>(
+  "apg-toggle-button-app",
+  {},
+);
+const toggleZone = ToggleApp.createZone("apg-toggle-buttons");
+const ToggleUI = toggleZone.bind({
+  role: "toolbar",
+  // click → OS_ACTIVATE → onAction → OS_CHECK (built-in toggle)
+  onAction: (cursor) => OS_CHECK({ targetId: cursor.focusId }),
+  options: {
+    navigate: { orientation: "horizontal", loop: true },
+    check: { mode: "check" },
+    activate: { mode: "manual", onClick: true },
+  },
+});
+
+function ToggleButtonSection() {
+  return (
+    <div className="space-y-4">
+      <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+        Toggle Buttons
+      </h4>
+      <p className="text-xs text-gray-500">
+        <kbd>Enter</kbd>/<kbd>Space</kbd>/click toggles{" "}
+        <code>aria-pressed</code>. Arrow keys navigate. OS manages all state.
+      </p>
+
+      <ToggleUI.Zone
+        className="flex items-center gap-1 p-1 bg-gray-100 border border-gray-200 rounded-lg shadow-sm w-fit"
+        aria-label="Text Formatting"
+      >
+        {TOGGLES.map((toggle) => (
+          <ToggleUI.Item
+            key={toggle.id}
+            id={toggle.id}
+            className="
+              w-9 h-9 flex items-center justify-center rounded text-gray-700
+              cursor-pointer select-none transition-colors
+              hover:bg-gray-200
+              aria-pressed:bg-indigo-600 aria-pressed:text-white aria-pressed:shadow-inner
+              data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400 data-[focused=true]:z-10
+            "
+          >
+            <span
+              className={`text-sm font-bold ${toggle.id === "toggle-italic" ? "italic" : ""}`}
+              aria-hidden="true"
+            >
+              {toggle.icon}
+            </span>
+          </ToggleUI.Item>
+        ))}
+      </ToggleUI.Zone>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Main Pattern Component
+// ═══════════════════════════════════════════════════════════════════
+
+export function ButtonPattern() {
+  return (
+    <div className="max-w-lg">
+      <h3 className="text-lg font-semibold mb-3">Button</h3>
+      <p className="text-sm text-gray-500 mb-6">
+        W3C APG Button Pattern: Action buttons fire commands. Toggle buttons
+        manage boolean state via <code>aria-pressed</code>.{" "}
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/patterns/button/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-800 underline"
+        >
+          W3C APG Spec
+        </a>
+      </p>
+
+      <div className="space-y-8">
+        <ActionButtonSection />
+        <hr className="border-gray-200" />
+        <ToggleButtonSection />
+      </div>
+    </div>
+  );
+}

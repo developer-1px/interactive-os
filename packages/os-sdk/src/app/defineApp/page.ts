@@ -11,6 +11,7 @@
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import type { Transaction } from "@kernel/core/transaction";
 import { ensureZone } from "@os-core/schema/state/utils";
 import {
   type ActivateConfig,
@@ -50,6 +51,103 @@ import type {
   KeybindingEntry,
   ZoneBindings,
 } from "./types";
+
+// ═══════════════════════════════════════════════════════════════════
+// formatDiagnostics — Pure diagnostic formatter
+// ═══════════════════════════════════════════════════════════════════
+
+/** Minimal kernel interface for formatDiagnostics (structural typing) */
+interface DiagnosticKernel {
+  inspector: {
+    getTransactions(): readonly Transaction[];
+  };
+  getState(): AppState;
+}
+
+/**
+ * Pure formatter: returns a human-readable diagnostic string.
+ * No side effects — just reads transactions + zone state.
+ *
+ * Rules:
+ * 1. Filter by last tx's changes paths (Δ none → last 5)
+ * 2. ⚠️ Δ none = command executed, state unchanged (strongest signal)
+ * 3. Zone snapshot = items count + focusedItemId + selection
+ * 4. Target ≤ 15 lines
+ */
+export function formatDiagnostics(kernel: DiagnosticKernel): string {
+  const txs = kernel.inspector.getTransactions();
+  const state = kernel.getState();
+  const lines: string[] = [];
+
+  lines.push("═══ OS Diagnostic ═══");
+
+  if (txs.length === 0) {
+    lines.push("(no transactions)");
+    lines.push("═══════════════════════");
+    return lines.join("\n");
+  }
+
+  const lastTx = txs[txs.length - 1];
+  const lastHasNoChanges = lastTx.changes.length === 0;
+
+  // Last: header
+  lines.push(
+    `Last: ${lastTx.command.type}${lastHasNoChanges ? " ⚠️ Δ none" : ""}`,
+  );
+  lines.push("");
+
+  // Filter relevant transactions
+  let relevantTxs: readonly Transaction[];
+  if (lastHasNoChanges) {
+    relevantTxs = txs.slice(-5);
+  } else {
+    const lastPrefixes = new Set(
+      lastTx.changes.map((c) => c.path.split(".").slice(0, 3).join(".")),
+    );
+    relevantTxs = txs.filter((tx) => {
+      if (tx.changes.length === 0) return true;
+      return tx.changes.some((c) => {
+        const prefix = c.path.split(".").slice(0, 3).join(".");
+        return lastPrefixes.has(prefix);
+      });
+    });
+  }
+
+  // Transaction listing
+  for (const tx of relevantTxs) {
+    const noChanges = tx.changes.length === 0;
+    lines.push(
+      `  #${tx.id} ${tx.command.type}${noChanges ? " ⚠️ Δ none" : ""}`,
+    );
+    if (!noChanges) {
+      for (const change of tx.changes) {
+        lines.push(
+          `    Δ ${change.path}: ${JSON.stringify(change.from)} → ${JSON.stringify(change.to)}`,
+        );
+      }
+    }
+  }
+
+  // Zone snapshot
+  const activeZoneId = state.os.focus.activeZoneId;
+  if (activeZoneId) {
+    const zone = state.os.focus.zones[activeZoneId];
+    if (zone) {
+      const entry = ZoneRegistry.get(activeZoneId);
+      const items = entry?.getItems?.() ?? [];
+      const sel = zone.selection
+        .map((s) => `"${s}"`)
+        .join(", ");
+      lines.push("");
+      lines.push(
+        `Zone "${activeZoneId}": items=${items.length}, focused="${zone.focusedItemId ?? ""}", selection=[${sel}]`,
+      );
+    }
+  }
+
+  lines.push("═══════════════════════");
+  return lines.join("\n");
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // OsPage Interface (Headless OS Simulator)
@@ -235,13 +333,25 @@ export function createAppPage<S>(
   });
 
   // Override browser-only effects for headless (no navigator.clipboard)
-  os.defineEffect("clipboardWrite", () => {});
+  os.defineEffect("clipboardWrite", () => { });
 
   // ── Enter preview sandbox ──
   os.enterPreview({
     ...os.getState(),
     os: { ...initialAppState.os },
   });
+
+  // Auto-register diagnostics on test failure (vitest only)
+  try {
+    const g = globalThis as Record<string, unknown>;
+    if (typeof g.onTestFailed === "function") {
+      (g.onTestFailed as (fn: () => void) => void)(() =>
+        console.log(formatDiagnostics(os)),
+      );
+    }
+  } catch {
+    // Not in vitest or registration failed — silent fallback
+  }
 
   // ── goto ──
   function goto(
@@ -408,6 +518,12 @@ export function createAppPage<S>(
       const zId = readActiveZoneId(os);
       if (zId) ZoneRegistry.unregister(zId);
       os.exitPreview();
+      // Re-enter preview with fresh state — test isolation invariant
+      os.enterPreview(initialAppState);
+    },
+
+    dumpDiagnostics() {
+      console.log(formatDiagnostics(os));
     },
 
     // ── Projection Checkpoint ──────────────────────────────────
@@ -486,8 +602,8 @@ export interface ZoneOrderEntry {
   firstItemId: string | null;
   lastItemId: string | null;
   entry:
-    | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
-    | string;
+  | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
+  | string;
   selectedItemId: string | null;
   lastFocusedId: string | null;
 }
@@ -502,8 +618,8 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   const basePage = createPage(dummyApp);
   const os = basePage.kernel;
 
-  os.defineEffect("focus", () => {});
-  os.defineEffect("scroll", () => {});
+  os.defineEffect("focus", () => { });
+  os.defineEffect("scroll", () => { });
   const mockItems = { current: [] as string[] };
   const mockRects = { current: new Map<string, DOMRect>() };
   const mockConfig = { current: { ...DEFAULT_CONFIG } as FocusGroupConfig };
@@ -583,6 +699,11 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     }
     return mockZoneOrder.current;
   });
+
+  // ── Preview invariant: all test state lives in preview layer ──
+  // enterPreview is idempotent — base kernel state never gets dirty.
+  // cleanup() re-enters with fresh state to reset.
+  os.enterPreview(initialAppState);
 
   if (overrides) {
     os.setState((s: AppState) => ({ ...s, ...overrides }));
@@ -748,38 +869,38 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
           ...opts.config,
           ...(opts.config.navigate
             ? {
-                navigate: {
-                  ...base.navigate,
-                  ...opts.config.navigate,
-                } as import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateConfig,
-              }
+              navigate: {
+                ...base.navigate,
+                ...opts.config.navigate,
+              } as import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateConfig,
+            }
             : {}),
           ...(opts.config.tab
             ? { tab: { ...base.tab, ...opts.config.tab } as Partial<TabConfig> }
             : {}),
           ...(opts.config.select
             ? {
-                select: {
-                  ...base.select,
-                  ...opts.config.select,
-                } as Partial<SelectConfig>,
-              }
+              select: {
+                ...base.select,
+                ...opts.config.select,
+              } as Partial<SelectConfig>,
+            }
             : {}),
           ...(opts.config.activate
             ? {
-                activate: {
-                  ...base.activate,
-                  ...opts.config.activate,
-                } as Partial<ActivateConfig>,
-              }
+              activate: {
+                ...base.activate,
+                ...opts.config.activate,
+              } as Partial<ActivateConfig>,
+            }
             : {}),
           ...(opts.config.dismiss
             ? {
-                dismiss: {
-                  ...base.dismiss,
-                  ...opts.config.dismiss,
-                } as Partial<DismissConfig>,
-              }
+              dismiss: {
+                ...base.dismiss,
+                ...opts.config.dismiss,
+              } as Partial<DismissConfig>,
+            }
             : {}),
         } as FocusGroupConfig;
       }
@@ -791,6 +912,14 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         element: null,
         parentId: null,
         getItems: () => mockItems.current,
+        // Auto-provide getExpandableItems based on expand.mode
+        ...(mockConfig.current.expand?.mode === "explicit"
+          ? {
+            getExpandableItems: () => mockExpandableItems.current.size > 0
+              ? mockExpandableItems.current
+              : new Set(mockItems.current),
+          }
+          : {}),
         ...(opts?.onAction ? { onAction: opts.onAction } : {}),
       }); // Closing brace for ZoneRegistry.register
 
@@ -828,31 +957,20 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
           }),
         );
       }
+
+      // Apply initial expanded state
+      if (opts?.initial?.expanded) {
+        os.setState((s: AppState) =>
+          produce(s, (draft) => {
+            const z = ensureZone(draft.os, zoneId);
+            z.expandedItems = opts.initial!.expanded!;
+          }),
+        );
+      }
     },
 
     // Command Exports
     kernel: os,
-    dumpDiagnostics() {
-      const txs = os.inspector.getTransactions();
-      if (txs.length === 0) {
-        console.log("[diagnostics] No transactions recorded.");
-        return;
-      }
-      console.log(`[diagnostics] ${txs.length} transaction(s):`);
-      for (const tx of txs) {
-        const scope = tx.bubblePath?.join(" → ") ?? "unknown";
-        console.log(
-          `  [${tx.id}] ${tx.command.type} | scope: ${scope} | handler: ${tx.handlerScope}`,
-        );
-        if (tx.changes && tx.changes.length > 0) {
-          for (const change of tx.changes) {
-            console.log(
-              `    Δ ${change.path}: ${JSON.stringify(change.from)} → ${JSON.stringify(change.to)}`,
-            );
-          }
-        }
-      }
-    },
     OS_FOCUS: os.register(prodOS_FOCUS),
     OS_SYNC_FOCUS: os.register(prodSYNC_FOCUS),
     OS_SELECT: os.register(prodOS_SELECT),

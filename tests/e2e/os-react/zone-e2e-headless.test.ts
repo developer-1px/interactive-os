@@ -24,7 +24,7 @@ describe("Zone E2E → Headless (Playwright interface)", () => {
       items: ["nav-apple", "nav-banana", "nav-cherry"],
       role: "listbox",
       config: {
-        navigate: { orientation: "vertical", loop: true, entry: "first" },
+        navigate: { orientation: "vertical", loop: true, entry: "first", seamless: false, typeahead: false, recovery: "next" },
       },
     });
 
@@ -52,7 +52,7 @@ describe("Zone E2E → Headless (Playwright interface)", () => {
       items: ["nav-apple", "nav-banana", "nav-cherry"],
       role: "listbox",
       config: {
-        navigate: { orientation: "vertical", loop: true, entry: "first" },
+        navigate: { orientation: "vertical", loop: true, entry: "first", seamless: false, typeahead: false, recovery: "next" },
       },
     });
 
@@ -104,7 +104,7 @@ describe("Zone E2E → Headless (Playwright interface)", () => {
       items: ["nav-bold", "nav-italic", "nav-underline"],
       role: "toolbar",
       config: {
-        navigate: { orientation: "horizontal", loop: false, entry: "first" },
+        navigate: { orientation: "horizontal", loop: false, entry: "first", seamless: false, typeahead: false, recovery: "next" },
       },
     });
 
@@ -165,7 +165,7 @@ describe("Zone E2E → Headless (Playwright interface)", () => {
     page.goto("sel-zone", {
       items: ["sel-0", "sel-1", "sel-2"],
       role: "listbox",
-      config: { select: { mode: "multiple" } },
+      config: { select: { mode: "multiple", followFocus: false, disallowEmpty: false, range: true, toggle: true } },
     });
 
     page.locator("sel-0").click();

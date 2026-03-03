@@ -15,35 +15,17 @@ describe("resolveItemKey (Item-layer keybindings)", () => {
   // ═══════════════════════════════════════
 
   describe("treeitem", () => {
-    it("ArrowRight (collapsed) → OS_EXPAND", () => {
+    it("ArrowRight → null (chain executor handles this now)", () => {
       const result = resolveItemKey("treeitem", "ArrowRight", {
         expanded: false,
-        itemId: "node-1",
-      });
-      expect(result).not.toBeNull();
-      expect(result!.type).toBe("OS_EXPAND");
-    });
-
-    it("ArrowLeft (expanded) → OS_EXPAND (collapse)", () => {
-      const result = resolveItemKey("treeitem", "ArrowLeft", {
-        expanded: true,
-        itemId: "node-1",
-      });
-      expect(result).not.toBeNull();
-      expect(result!.type).toBe("OS_EXPAND");
-    });
-
-    it("ArrowRight (expanded) → null (navigate to first child — Zone handles)", () => {
-      const result = resolveItemKey("treeitem", "ArrowRight", {
-        expanded: true,
         itemId: "node-1",
       });
       expect(result).toBeNull();
     });
 
-    it("ArrowLeft (collapsed) → null (navigate to parent — Zone handles)", () => {
+    it("ArrowLeft → null (chain executor handles this now)", () => {
       const result = resolveItemKey("treeitem", "ArrowLeft", {
-        expanded: false,
+        expanded: true,
         itemId: "node-1",
       });
       expect(result).toBeNull();
@@ -72,9 +54,10 @@ describe("resolveItemKey (Item-layer keybindings)", () => {
   // ═══════════════════════════════════════
 
   describe("checkbox", () => {
-    it("Space → null (moved to Field layer: boolean)", () => {
+    it("Space → OS_CHECK (checkbox Space triggers check)", () => {
       const result = resolveItemKey("checkbox", "Space", { itemId: "cb-1" });
-      expect(result).toBeNull();
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe("OS_CHECK");
     });
 
     it("Enter → null (Zone activation)", () => {

@@ -29,7 +29,6 @@ function listFactory(focusedItem = "todo-1") {
       typeahead: false,
       entry: "first",
       recovery: "next",
-      arrowExpand: false,
     },
     select: {
       mode: "single",

@@ -27,7 +27,6 @@ const MENU_CONFIG = {
     typeahead: false,
     entry: "first" as const,
     recovery: "next" as const,
-    arrowExpand: false,
   },
   select: {
     mode: "none" as const,

@@ -46,7 +46,6 @@ function navTreeFactory(focusedItem = "folder:docs") {
       typeahead: false,
       entry: "first",
       recovery: "next",
-      arrowExpand: true,
     },
     select: {
       mode: "single",

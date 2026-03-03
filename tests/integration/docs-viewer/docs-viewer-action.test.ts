@@ -10,19 +10,11 @@
  *   - onAction (Enter/re-click) triggers selectDoc
  *   - selectDoc updates activePath in state
  *
- * Note: Uses onTestFailed + dumpDiagnostics
+ * Note: Auto-diagnostics registered by createAppPage (onTestFailed)
  */
 
 import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  onTestFailed,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("T6: DocsViewer — navigation via OS selectDoc command", () => {
   let page: OsPage;
@@ -41,7 +33,6 @@ describe("T6: DocsViewer — navigation via OS selectDoc command", () => {
       },
     });
 
-    onTestFailed(() => page.dumpDiagnostics());
   });
 
   afterEach(() => {

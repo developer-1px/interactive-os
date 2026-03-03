@@ -1,0 +1,13 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { Accessibility } from "lucide-react";
+import AriaShowcasePage from "../../pages/aria-showcase";
+
+export const Route = createFileRoute("/_minimal/playground/aria")({
+  component: AriaShowcasePage,
+  staticData: {
+    title: "ARIA Showcase",
+    icon: Accessibility,
+    location: "global-nav",
+    order: 5,
+  },
+});

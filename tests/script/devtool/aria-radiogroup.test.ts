@@ -34,8 +34,8 @@ describe("ARIA Radiogroup", () => {
             orientation: "vertical",
             seamless: false,
             typeahead: true,
-            arrowExpand: false,
-            homeEnd: "jump",
+            entry: "first",
+            recovery: "next",
           },
           select: {
             mode: "single",
@@ -71,8 +71,8 @@ describe("ARIA Radiogroup", () => {
             orientation: "vertical",
             seamless: false,
             typeahead: true,
-            arrowExpand: false,
-            homeEnd: "jump",
+            entry: "first",
+            recovery: "next",
           },
           select: {
             mode: "single",
@@ -110,8 +110,8 @@ describe("ARIA Radiogroup", () => {
             orientation: "vertical",
             seamless: false,
             typeahead: true,
-            arrowExpand: false,
-            homeEnd: "jump",
+            entry: "first",
+            recovery: "next",
           },
           select: {
             mode: "single",
@@ -142,8 +142,8 @@ describe("ARIA Radiogroup", () => {
             orientation: "vertical",
             seamless: false,
             typeahead: true,
-            arrowExpand: false,
-            homeEnd: "jump",
+            entry: "first",
+            recovery: "next",
           },
           select: {
             mode: "single",

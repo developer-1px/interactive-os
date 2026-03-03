@@ -8,14 +8,7 @@
  */
 
 import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  onTestFailed,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { selectDoc } from "@/docs-viewer/app";
 
 describe("T7: DocsViewer — auto-select via selectDoc command", () => {
@@ -31,7 +24,6 @@ describe("T7: DocsViewer — auto-select via selectDoc command", () => {
     // Register selectDoc on test kernel
     page.kernel.register(selectDoc);
 
-    onTestFailed(() => page.dumpDiagnostics());
   });
 
   afterEach(() => {

@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-02-27 10:24
+> Last updated: 2026-03-04 00:20
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -11,17 +11,11 @@
 
 **zift-usage-spec** — ZIFT 보편 모델 설계. Zone+from/to+with[] + NormalizedStore. 코드 수정 없는 설계 완성. Meta.
 
-**zift-field-generalization** — Field를 Entity Property 소유자로 일반화. FieldType에 boolean/number 추가. Phase 1. Heavy.
-
-**apg-developer-agent** — Claude Code 커스텀 에이전트 POC. OS 네이티브 APG 패턴 개발자. Meta.
-
 **headless-simulator** — Vitest에서 Playwright 수준 검증 달성. DOM → OS VDOM. 거짓 GREEN 근절. Heavy.
 
-**code-hygiene** — 540 eslint errors + 20 test failures → 0. husky 강제 검증. Light.
+**code-hygiene** — eslint errors + test failures → 0. husky 강제 검증. Light.
 
 **builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
-
-**dropdown-dismiss** — OG-001 해소. outsideClick 런타임 + LocaleSwitcher 리팩토링. Light.
 
 ---
 
@@ -29,29 +23,14 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-
-
-| zift-usage-spec | Scaffold, T1~T6 | 03-01 | 🔥 Focus |
-| zift-field-generalization | Scaffold, T1~T6 | 03-01 | 🔥 Focus |
-| apg-developer-agent | Scaffold, T1~T2 | 03-01 | 🔥 Focus |
-| headless-simulator | Scaffold, T1~T3 | 02-27 | 🔥 Focus |
-| builder-v2 | T5 DnD Done, OS gap 회고 완료 | 02-26 | 🔥 Focus |
-| dropdown-dismiss | Scaffold, T1~T3 | 02-26 | 🔥 Focus |
-| trigger-listener-gap | Push model 설계 | 02-26 | 🟢 Active |
-| test-reliability | 거짓 GREEN 방지 plan | 02-26 | 🟢 Active |
-| content-edit-mode | T1~T4 Done, T5~T7 FSM v3 원자 전이 | 02-24 | 🟢 Active |
-| dev-pipeline | T0 Done (/red /green 생성), T1~T3 | 02-24 | 🟢 Active |
-| cursor-ocp | Scaffold 완료, T1~T7 | 02-23 | 🟢 Active |
-| todo-dogfooding | T1~T4 Done. ⚠️ 1-project/ 폴더 없음, re-scaffold 필요 | 02-22 | 🟢 Active |
-| tab-state | Scaffold, /audit에서 발견. T1 Red 대기 | 02-24 | 🟢 Active |
-| replay | T1 headless e2e 완성 | 02-21 | 🟢 Active |
-| builder-property-schema | Scaffold, T1~T5 | 02-24 | 🟢 Active |
-| tree-click-defaults | Scaffold, T1~T3 | 02-24 | 🟢 Active |
-| builder-i18n | Scaffold, T1~T4 (US-001) | 02-25 | 🟢 Active |
-| test-observability | Scaffold | 02-26 | 🟢 Active |
-| docs-section-nav | Scaffold | 02-24 | 🟢 Active |
-| docs-subgrid-table | Scaffold | 02-24 | 🟢 Active |
-| pipeline-folder-restructure | Scaffold, T1~T4 | 03-01 | 🟢 Active |
+| zift-usage-spec | Scaffold, T1~T6 미착수 | 03-01 | 🔥 Focus |
+| headless-simulator | Phase 1 T4~T6 | 02-27 | 🔥 Focus |
+| code-hygiene | T1 ✅, T2~T8 | 03-04 | 🔥 Focus |
+| builder-v2 | T12, T13, T20 | 02-26 | 🔥 Focus |
+| os-restructure | Phase 2 #6-8 | 03-01 | 🟢 Active |
+| test-observability | Scaffold, T1~T4 | 03-03 | 🟢 Active |
+| apg-developer-agent | Scaffold, POC | 03-01 | 🟢 Active |
+| inspector-dogfooding | T1~T4 ✅, T5 | 03-01 | 🟢 Active |
 
 ---
 
@@ -61,6 +40,9 @@
 |---------|-----------|----------|
 | apg-listbox-pattern | 03-02 | ✅ archive/2026/03/W10 — Negative tests 11개 (3 OS 버그 발견). range guard + selectAll guard. APG testbot 6 scripts 탑재 |
 | apg-tabs-pattern | 03-02 | ✅ archive/2026/03/W10 — Item.Content 프리미티브, OS_ACTIVATE select fallback, OS_SELECT mode auto-derive. AUDITBOOK 갱신. /review retire |
+| command-config-invariant | 03-03 | ✅ archive/2026/03/W10 — Command = { intent + chain }. 9→6 commands. resolveItemKey 삭제. arrowExpand dead code 전수 제거 |
+| tab-state | 03-03 | ✅ archive/2026/03/W10 — tablist activate → aria-selected 전환. roleRegistry tablist preset. 6/6 PASS |
+| dev-pipeline | 03-03 | ✅ archive/2026/03/W10 — T0-T14 완료. /red+/green+/audit+/bind+/stories+/spec 워크플로우 체계 확립 |
 | headless-purity | 02-27 | ✅ archive/2026/02/W09 — AutoFocus DOM fallback 제거(useEffect→Phase 2), getLabels push model. FocusGroup useEffect import 삭제 |
 | headless-item-discovery | 02-27 | ✅ archive/2026/02/W09 — 2-contexts DOM 0%. querySelectorAll을 FocusGroup(뷰)로 이동. getItems() push-only. T1~T10, +6 tests, regression 0, 기존 8건 개선 |
 | normalized-collection | 02-26 | ✅ archive/2026/02/W09 — NormalizedCollection 타입+helpers, tree-aware ops, view transforms. T1~T7. 109 tests GREEN |
@@ -128,21 +110,24 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 7 |
-| Active Projects (total) | 18 (11 Active + 7 Focus) |
-| Completed (archived) | 46 |
+| Active Focus | 4 |
+| Active Projects (total) | 8 (4 Active + 4 Focus) |
+| Completed (archived) | 49 |
 | Inbox items | 6 |
 | Backlog items | 15 |
 | Open issues | 0 |
 
 ---
 
-## 📝 Recent Changes (2026-03-01)
+## 📝 Recent Changes (2026-03-04)
 
-- 🆕 `zift-usage-spec` Meta 프로젝트 생성 — /discussion에서 ZIFT 근본 회의감 발굴. Zone=유일한 Facade + from/to + with[] 모듈 패턴 + NormalizedStore 보편 정규화. 컨셉맵 18개 영역 정리. `/usage` 워크플로우 신설. 설계 완성이 목표.
+- ✅ `command-config-invariant` 완료 → archive/2026/03/W10. 9→6 commands, resolveItemKey 삭제, arrowExpand dead code 전수 제거 (23+ 파일, ~37 occurrences)
+- ✅ `tab-state` 완료 → archive/2026/03/W10. tablist preset, 6/6 PASS
+- ✅ `dev-pipeline` 완료 → archive/2026/03/W10. T0-T14 전부 완료
+- 🧹 STATUS.md 전수 조사: 폴더 없는 ghost 엔트리 10건 제거 (18→8 active). tsc dead code 30건 수정
 
 <details>
-<summary>📝 Previous Changes (2026-02-27)</summary>
+<summary>📝 Previous Changes (2026-03-01)</summary>
 
 - ✅ `headless-purity` Light 프로젝트 완료 — AutoFocus DOM fallback(useEffect+rAF+querySelector) 제거→Phase 2 통합. getLabels accessor 추가→typeahead headless 가능. FocusGroup useEffect import 삭제. regression 0. → archive/2026/02/W09
 - ✅ `headless-item-discovery` Heavy 프로젝트 완료 — 2-contexts DOM 0%. querySelectorAll 6곳→1곳(DOM_RECTS, 후속). DOM 스캔을 FocusGroup.useLayoutEffect(뷰)로 이동. getItems() push-only. createOsPage.goto() 자동등록. T1~T10, +6 tests, regression 0, 기존 failures 21→13(8건 개선). → archive/2026/02/W09

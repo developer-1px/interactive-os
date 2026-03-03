@@ -37,11 +37,11 @@ describe("T2: Auto-diagnostics on test failure", () => {
     expect(output).toContain("OS_NAVIGATE");
   });
 
-  it("#2 dumpDiagnostics includes scope chain", () => {
+  it("#2 dumpDiagnostics includes zone snapshot", () => {
     page.keyboard.press("ArrowDown");
     page.dumpDiagnostics();
 
     const output = consoleSpy.mock.calls.map((c) => c.join(" ")).join("\n");
-    expect(output).toMatch(/scope/i);
+    expect(output).toMatch(/Zone "test-zone"/);
   });
 });

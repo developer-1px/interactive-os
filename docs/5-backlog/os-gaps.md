@@ -12,6 +12,7 @@
 |---|--------|-----|------|------|----------|
 | OG-004 | 2026-02-26 | builder | DOM convention | `data-drag-handle` 속성을 앱이 수동 부착. OS가 자동 주입하지 않음. | 앱에서 수동 `data-drag-handle` 부착 |
 | OG-005 | 2026-02-26 | builder | 커서 메타 등록 | `useCursorMeta` hook이 useEffect로 cursorRegistry에 수동 등록/해제. OS에 커서 메타 API 없음. | useEffect + 앱 내부 레지스트리 |
+| OG-009 | 2026-03-03 | os-core | Modifier keybindings | Shift+Arrow, Ctrl+Arrow, Ctrl+Space, Shift+Space 가 osDefaults에 하드코딩. config chain으로 전환 필요. | – |
 
 ## 해결됨
 

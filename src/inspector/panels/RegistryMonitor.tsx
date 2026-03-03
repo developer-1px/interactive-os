@@ -114,18 +114,16 @@ function CommandEntry({
     >
       <div className="flex items-center gap-2 min-w-0">
         <div
-          className={`w-1 h-1 rounded-full flex-shrink-0 transition-colors ${
-            isLastExecuted
+          className={`w-1 h-1 rounded-full flex-shrink-0 transition-colors ${isLastExecuted
               ? "bg-[#007acc] shadow-[0_0_4px_#007acc]"
               : guardEnabled === false
                 ? "bg-[#f48771]"
                 : "bg-[#4ec9b0]"
-          }`}
+            }`}
         />
         <span
-          className={`text-[9px] font-bold tracking-tight truncate leading-none ${
-            isLastExecuted ? "text-[#007acc]" : "text-[#444]"
-          }`}
+          className={`text-[9px] font-bold tracking-tight truncate leading-none ${isLastExecuted ? "text-[#007acc]" : "text-[#444]"
+            }`}
         >
           {type}
         </span>
@@ -205,9 +203,8 @@ function ScopeSection({
           )}
           <div className={`w-1 h-3 rounded-full ${depthColor} opacity-60`} />
           <span
-            className={`text-[8px] font-black tracking-[0.15em] uppercase ${
-              isActive ? "text-[#007acc]" : "text-[#666]"
-            }`}
+            className={`text-[8px] font-black tracking-[0.15em] uppercase ${isActive ? "text-[#007acc]" : "text-[#666]"
+              }`}
           >
             {data.scope as string}
           </span>
@@ -301,11 +298,10 @@ export const RegistryMonitor = memo(
             <button
               type="button"
               onClick={toggleMount}
-              className={`text-[7px] font-mono px-1 py-0.5 rounded border transition-colors ${
-                mountOnly
+              className={`text-[7px] font-mono px-1 py-0.5 rounded border transition-colors ${mountOnly
                   ? "bg-[#007acc]/10 text-[#007acc] border-[#007acc]/30"
                   : "bg-white text-[#999] border-[#e5e5e5] hover:border-[#ccc]"
-              }`}
+                }`}
             >
               {mountOnly ? "mounted" : "all"}
             </button>
@@ -322,6 +318,36 @@ export const RegistryMonitor = memo(
             </span>
           </div>
         </div>
+
+        {/* Chain Trace — shows when last NAVIGATE used chain executor */}
+        {lastTx?.effects?.chainTrace && (
+          <div className="flex items-center gap-1 px-3 py-1 bg-[#f0f7ff] border-b border-[#e0ecf5]">
+            <span className="text-[7px] font-bold text-[#007acc] uppercase tracking-wider mr-1">
+              chain
+            </span>
+            {(
+              lastTx.effects.chainTrace as Array<{
+                action: string;
+                result: string;
+              }>
+            ).map(
+              (
+                step: { action: string; result: string },
+                i: number,
+              ) => (
+                <span
+                  key={`${step.action}-${i}`}
+                  className={`text-[7px] font-mono px-1.5 py-0.5 rounded ${step.result === "resolved"
+                      ? "bg-[#4ec9b0]/15 text-[#4ec9b0] font-bold"
+                      : "bg-[#e5e5e5]/50 text-[#999]"
+                    }`}
+                >
+                  {step.action}
+                </span>
+              ),
+            )}
+          </div>
+        )}
 
         {/* Scope Tree */}
         {filteredTree.map((data) => (

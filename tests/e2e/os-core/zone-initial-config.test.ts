@@ -26,13 +26,17 @@ describe("Zone Initial Config: selection", () => {
           loop: true,
           entry: "selected" as const,
           recovery: "next" as const,
+          seamless: false,
+          typeahead: false,
         },
         select: {
           mode: "single" as const,
           followFocus: true,
           disallowEmpty: true,
+          range: false,
+          toggle: false,
         },
-        tab: { behavior: "escape" as const },
+        tab: { behavior: "escape" as const, restoreFocus: false },
       },
       role: "tablist",
       // NEW: initial config — this is the feature under test

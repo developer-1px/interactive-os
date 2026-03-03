@@ -68,6 +68,18 @@ Keybindings.registerAll([
     command: OS_NAVIGATE({ direction: "up", select: "range" }),
     when: "navigating",
   },
+
+  // APG: Ctrl+Arrow → move focus without changing selection (multiselectable Alt)
+  {
+    key: "Ctrl+ArrowDown",
+    command: OS_NAVIGATE({ direction: "down", select: "none" }),
+    when: "navigating",
+  },
+  {
+    key: "Ctrl+ArrowUp",
+    command: OS_NAVIGATE({ direction: "up", select: "none" }),
+    when: "navigating",
+  },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -99,6 +111,20 @@ Keybindings.registerAll([
 Keybindings.registerAll([
   { key: "Space", command: OS_SELECT({}), when: "navigating" },
   { key: "Meta+A", command: OS_SELECT_ALL(), when: "navigating" },
+
+  // APG: Ctrl+Space → toggle selection on focused item (multiselectable Alt)
+  {
+    key: "Ctrl+Space",
+    command: OS_SELECT({ mode: "toggle" }),
+    when: "navigating",
+  },
+
+  // APG: Shift+Space → range selection from anchor to focused (multiselectable)
+  {
+    key: "Shift+Space",
+    command: OS_SELECT({ mode: "range" }),
+    when: "navigating",
+  },
 ]);
 
 // ═══════════════════════════════════════════════════════════════════

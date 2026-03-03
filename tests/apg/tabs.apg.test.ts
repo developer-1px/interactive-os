@@ -49,7 +49,6 @@ function tabFactory(focusedTab = "tab-html") {
       typeahead: false,
       entry: "selected",
       recovery: "next",
-      arrowExpand: false,
     },
     activate: {
       mode: "automatic",
@@ -59,6 +58,8 @@ function tabFactory(focusedTab = "tab-html") {
       mode: "single",
       followFocus: true,
       disallowEmpty: true,
+      range: false,
+      toggle: false,
     },
   });
   page.setActiveZone("tablist-zone", focusedTab);
@@ -88,7 +89,6 @@ function manualTabFactory(focusedTab = "tab-html") {
       typeahead: false,
       entry: "selected",
       recovery: "next",
-      arrowExpand: false,
     },
     activate: {
       mode: "manual",
@@ -98,6 +98,8 @@ function manualTabFactory(focusedTab = "tab-html") {
       mode: "single",
       followFocus: false,
       disallowEmpty: true,
+      range: false,
+      toggle: false,
     },
   });
   page.setActiveZone("tablist-zone", focusedTab);

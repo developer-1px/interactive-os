@@ -11,6 +11,13 @@ description: 실패하는 테스트를 작성한다. 이 세션의 유일한 산
 > **원칙**: 테스트가 스펙이다. 구현 방법을 모르는 상태에서 **기대 동작만** 기술한다.
 > **예외**: 아키텍처/리팩토링 태스크(인터랙션이 아닌 것)는 Decision Table 없이 Given-When-Then 단위 테스트로 직행한다.
 
+> [!IMPORTANT]
+> **입력 우선 테스트 (Input-First Testing)**
+> 키보드/마우스 입력으로 시작할 수 있는 테스트라면, **반드시 `page.keyboard.press()` 또는 `page.locator().click()`으로 시작**한다.
+> `os.dispatch(OS_COMMAND(...))` 커맨드 직접 호출은 **파이프라인 전체를 검증하지 못하는 나쁜 테스트**다.
+> 커맨드 기반 테스트는 커버리지만 올리고 실제 동작을 보장하지 못한다.
+> Config 데이터 검증(rolePreset 값 확인 등 순수 단위 테스트)만 예외.
+
 ---
 
 ### Step 0: REDBOOK 숫지 + 맥락 파악

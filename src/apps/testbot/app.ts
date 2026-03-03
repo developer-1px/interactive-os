@@ -18,6 +18,7 @@ import {
   TestBotRegistry,
 } from "@os-devtool/testing";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { formatDiagnostics } from "@os-sdk/app/defineApp/page";
 import { produce } from "immer";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -32,6 +33,7 @@ export interface SuiteState {
   status: SuiteStatus;
   passed: boolean;
   steps: BrowserStep[];
+  diagnostics?: string;
 }
 
 export interface TestBotState {
@@ -142,12 +144,23 @@ export const stepRecorded = TestBotApp.command(
 /** Mark suite i as done */
 export const suiteDone = TestBotApp.command(
   "testbot:suiteDone",
-  (ctx, payload: { index: number; passed: boolean; steps: BrowserStep[] }) => ({
+  (
+    ctx,
+    payload: {
+      index: number;
+      passed: boolean;
+      steps: BrowserStep[];
+      diagnostics?: string;
+    },
+  ) => ({
     state: produce(ctx.state, (draft) => {
       if (draft.suites[payload.index]) {
         draft.suites[payload.index].status = "done";
         draft.suites[payload.index].passed = payload.passed;
         draft.suites[payload.index].steps = payload.steps;
+        if (payload.diagnostics) {
+          draft.suites[payload.index].diagnostics = payload.diagnostics;
+        }
       }
     }),
   }),
@@ -204,6 +217,9 @@ export async function executeAll(
   for (let i = 0; i < scripts.length; i++) {
     const script = scripts[i];
 
+    // Clear transaction log before each suite (isolate diagnostics per suite)
+    os.inspector.clearTransactions();
+
     // Suite start
     os.dispatch(suiteStart({ index: i }));
 
@@ -235,8 +251,13 @@ export async function executeAll(
 
     page.hideCursor();
 
+    // Capture diagnostics on failure
+    const diagnostics = !passed ? formatDiagnostics(os) : undefined;
+
     // Suite done
-    os.dispatch(suiteDone({ index: i, passed, steps: [...steps] }));
+    os.dispatch(
+      suiteDone({ index: i, passed, steps: [...steps], diagnostics }),
+    );
   }
 
   // All done
@@ -260,6 +281,7 @@ export async function executeSuite(
   }));
   os.dispatch(startRun({ scripts: scriptMeta }));
   // Override: only mark suite si as running, others stay planned
+  os.inspector.clearTransactions();
   os.dispatch(suiteStart({ index: si }));
 
   const steps: BrowserStep[] = [];
@@ -286,6 +308,10 @@ export async function executeSuite(
   }
 
   page.hideCursor();
-  os.dispatch(suiteDone({ index: si, passed, steps: [...steps] }));
+
+  const diagnostics = !passed ? formatDiagnostics(os) : undefined;
+  os.dispatch(
+    suiteDone({ index: si, passed, steps: [...steps], diagnostics }),
+  );
   os.dispatch(allDone());
 }

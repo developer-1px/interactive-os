@@ -7,19 +7,11 @@
  * For dashboard navigation, first click = immediate action (not re-click).
  * We use selectDoc command dispatched via onAction callback.
  *
- * Note: Uses onTestFailed + dumpDiagnostics (test-observability validation)
+ * Note: Auto-diagnostics registered by createAppPage (onTestFailed)
  */
 
 import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  onTestFailed,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("T5: DocsDashboard — selectDoc via OS command", () => {
   let page: OsPage;
@@ -36,7 +28,6 @@ describe("T5: DocsDashboard — selectDoc via OS command", () => {
       },
     });
 
-    onTestFailed(() => page.dumpDiagnostics());
   });
 
   afterEach(() => {

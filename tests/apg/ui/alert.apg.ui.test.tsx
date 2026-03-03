@@ -19,7 +19,7 @@ import {
 } from "@/pages/apg-showcase/patterns/AlertPattern";
 
 describe("AlertPattern (Headless & Projection)", () => {
-  let page: ReturnType<typeof createPage>;
+  let page: ReturnType<typeof createPage<{ alerts: { id: string }[] }>>;
 
   beforeEach(() => {
     page = createPage(AlertApp, AlertPattern);

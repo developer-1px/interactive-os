@@ -1,11 +1,12 @@
 import { addTodo, TodoApp, TodoList } from "@apps/todo/app";
+import type { AppState } from "@apps/todo/model/appState";
 import { createIntegrationTest } from "@os-devtool/testing/__tests__/createIntegrationTest";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Todo Integration: Paste & Focus (OS Level)", () => {
   let testContext: ReturnType<
-    typeof createIntegrationTest<import("../../model/appState").AppState>
+    typeof createIntegrationTest<AppState>
   >;
 
   beforeEach(() => {

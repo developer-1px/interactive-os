@@ -102,7 +102,6 @@ describe("Tree Expand: keyboard (ArrowRight/Left)", () => {
         typeahead: false,
         entry: "first",
         recovery: "next",
-        arrowExpand: true,
       },
       select: {
         mode: "single",

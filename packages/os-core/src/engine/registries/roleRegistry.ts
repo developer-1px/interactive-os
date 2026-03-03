@@ -112,12 +112,12 @@ const contentRoleMap: Partial<Record<ZoneRole, string>> = {
 export type ContentVisibilitySource = "expanded" | "selected";
 
 const contentVisibilityMap: Partial<Record<ZoneRole, ContentVisibilitySource>> =
-  {
-    tablist: "selected",
-    accordion: "expanded",
-    disclosure: "expanded",
-    tree: "expanded",
-  };
+{
+  tablist: "selected",
+  accordion: "expanded",
+  disclosure: "expanded",
+  tree: "expanded",
+};
 
 /** Get the ARIA role for Item.Content given a Zone role */
 export function getContentRole(
@@ -194,7 +194,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       typeahead: true,
       entry: "selected",
     },
-    select: { mode: "single", followFocus: true },
+    select: { mode: "single", followFocus: true, aria: "selected" },
     check: { mode: "select" },
     tab: { behavior: "escape" },
   },
@@ -204,9 +204,14 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       Enter/Space activates immediately, Escape closes,
   //       focus auto-placed on first item when opened
   menu: {
-    navigate: { orientation: "vertical", loop: true, entry: "first" },
+    navigate: {
+      orientation: "vertical",
+      loop: true,
+      entry: "first",
+      onCrossAxis: ["expandSubmenu"],
+    },
     select: { mode: "none" },
-    activate: { mode: "automatic" },
+    activate: { mode: "automatic", effect: "invokeAndClose" },
     dismiss: { escape: "close" },
     tab: { behavior: "trap" },
     project: { autoFocus: true },
@@ -216,7 +221,12 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // Spec: horizontal, loop, no selection, submenus via arrows,
   //       Tab escapes the menubar
   menubar: {
-    navigate: { orientation: "horizontal", loop: true, entry: "restore" },
+    navigate: {
+      orientation: "horizontal",
+      loop: true,
+      entry: "restore",
+      onDown: ["expandSubmenu"],
+    },
     select: { mode: "none" },
     activate: { mode: "automatic" },
     tab: { behavior: "escape" },
@@ -266,7 +276,12 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // Spec: grid + tree hybrid, 2D navigation with expand/collapse,
   //       no loop, explicit selection
   treegrid: {
-    navigate: { orientation: "both", loop: false, arrowExpand: true },
+    navigate: {
+      orientation: "both",
+      loop: false,
+      onRight: ["expand", "enterChild"],
+      onLeft: ["collapse", "goParent"],
+    },
     select: { mode: "multiple", range: true, toggle: true, followFocus: false },
     check: { mode: "select" },
     activate: { mode: "manual" },
@@ -282,8 +297,9 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       orientation: "vertical",
       loop: false,
       typeahead: true,
-      arrowExpand: true,
       entry: "selected",
+      onRight: ["expand", "enterChild"],
+      onLeft: ["collapse", "goParent"],
     },
     select: { mode: "single", followFocus: true },
     check: { mode: "select" },
@@ -298,7 +314,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   dialog: {
     navigate: { orientation: "vertical", loop: false },
     tab: { behavior: "trap", restoreFocus: true },
-    dismiss: { escape: "close", outsideClick: "close" },
+    dismiss: { escape: "close", outsideClick: "close", restoreFocus: true },
     project: { autoFocus: true },
   },
 
@@ -308,7 +324,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   alertdialog: {
     navigate: { orientation: "vertical", loop: false },
     tab: { behavior: "trap", restoreFocus: true },
-    dismiss: { escape: "close", outsideClick: "none" },
+    dismiss: { escape: "close", outsideClick: "none", restoreFocus: true },
     project: { autoFocus: true },
   },
 
@@ -336,7 +352,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       single or multiple panels open
   accordion: {
     navigate: { orientation: "vertical", loop: false },
-    activate: { mode: "manual", onClick: true },
+    activate: { mode: "manual", onClick: true, effect: "toggleExpand" },
     expand: { mode: "all" },
     tab: { behavior: "native" },
   },

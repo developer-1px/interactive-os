@@ -41,7 +41,6 @@ function accordionFactory(focusedItem = "acc-personal") {
       typeahead: false,
       entry: "first",
       recovery: "next",
-      arrowExpand: false, // APG accordion: arrows navigate, NOT expand
     },
     activate: {
       mode: "manual",

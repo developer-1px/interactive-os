@@ -43,7 +43,6 @@ function treeFactory(focusedItem = "section-1") {
       typeahead: false,
       entry: "first",
       recovery: "next",
-      arrowExpand: true,
     },
     select: {
       mode: "single",
@@ -71,7 +70,6 @@ function multiTreeFactory(focusedItem = "section-1") {
       typeahead: false,
       entry: "first",
       recovery: "next",
-      arrowExpand: true,
     },
     select: {
       mode: "multiple",
