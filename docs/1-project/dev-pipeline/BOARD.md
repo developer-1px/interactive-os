@@ -14,11 +14,11 @@ Risks:
 
 ## Now
 
-- [ ] T5: OS 갭 — Tab 활성 상태 관리. `/audit` builder에서 발견. `BuilderTabs.tsx`가 `useState+onClick`으로 우회.
-  - OS에 tablist activate → active tab 상태 변경 경로 필요
-  - 판정: builder-v2 BOARD에 위임 or OS 프로젝트로 분리?
+(없음)
+
 
 ## Done
+- [x] T5: ✅ tab-state 프로젝트로 분리 완료. roleRegistry tablist preset 구현, 6/6 테스트 PASS (2026-03-03 검증)
 - [x] T14: STORIESBOOK/SPECBOOK/REDBOOK/GREENBOOK/REFACTORBOOK 생성 + 각 워크플로우 Step0(읽기)/마지막(갱신) 추가 ✅
 - [x] T13: `/audit` 근본 원인 진단표 + 루프백 라우팅 + `/go` G4.7/4.8 추가 + `os-gaps.md` 생성 (OG-001 Dropdown) ✅
 - [x] T12: `/bind` 워크플로우 신규 생성 + `/go` G4.5 추가 — Green→UI 연결 단계 명시 ✅

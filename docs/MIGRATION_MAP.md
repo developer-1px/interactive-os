@@ -62,6 +62,19 @@
 | `archive/2026/02/W09/2026-0226-ghost-projects.md` | `5-backlog/` | 조치 완료 — STATUS.md 반영됨. 역사 기록 |
 | `archive/2026/02/W09/2026-0218-0025-solve-workflow.md` | `11-discussions/` | 🪦 superseded — /solve 워크플로우 생성 완료 |
 | `archive/2026/02/W09/2026-0218-1037-area-source-mirroring.md` | `11-discussions/` | 🪦 superseded — Area 소스 미러링 적용 완료 |
+| `4-archive/2026-03-docs-section-nav/` | `1-project/docs-section-nav/` | 프로젝트 완료 — T1-T8 전체 완료, DocsReaderUI.Zone + section nav 명령어 구현 |
+| `4-archive/2026-03-test-reliability/` | `1-project/test-reliability/` | 프로젝트 완료 — T1-T4, red.md 2-tier 패턴 정립, @spec 링크 강제 |
+| `4-archive/2026-03-builder-property-schema/` | `1-project/builder-property-schema/` | 프로젝트 완료 — T1-T5, primitives.ts/blockSchemas.ts/PropertyWidgets OCP |
+| `4-archive/2026-03-content-edit-mode/` | `1-project/content-edit-mode/` | 프로젝트 완료 — T1-T10, 2-state FSM (SELECT/EDIT), plaintext-only 필드 |
+| `4-archive/2026-03-cursor-ocp/` | `1-project/cursor-ocp/` | 프로젝트 완료 — T1-T7, cursorRegistry.ts + useCursorMeta.ts OCP 패턴 |
+| `4-archive/2026-03-tree-click-defaults/` | `1-project/tree-click-defaults/` | 프로젝트 완료 — T1-T3, tree role preset onClick:true + followFocus |
+| `4-archive/2026-03-zift-field-generalization/` | `1-project/zift-field-generalization/` | 프로젝트 완료 — T1-T15, FieldType 9-variant, FieldValue union, resolveFieldKey |
+| `4-archive/2026-03-test-observability/` | `1-project/test-observability/` | 프로젝트 완료 — T1-T13, ZoneRegistry.subscribe, TestBotRegistry zone-reactive, defineApp 전환 |
+| `4-archive/2026-03-apg-developer-agent/` | `1-project/apg-developer-agent/` | 프로젝트 완료 — T1-T2, .claude/agents/apg-developer.md 배포 |
+| `4-archive/2026-03-pipeline-folder-restructure/` | `1-project/pipeline-folder-restructure/` | 프로젝트 완료 — 1-listen~5-effect 레이어 폴더 구조 확정 (현재 packages/os-core/) |
+| `4-archive/2026-03-builder-i18n/` | `1-project/builder-i18n/` | 프로젝트 완료 — T1 locale switch, retrospective 작성 |
+| `4-archive/2026-03-dropdown-dismiss/` | `1-project/dropdown-dismiss/` | 프로젝트 완료 — resolveOutsideClick, simulateClick zone-independent traversal |
+| `4-archive/2026-03-testbot-unification/` | `1-project/testbot-unification/` | 🪦 superseded — test-observability 프로젝트에서 v5 POC 구현 완료 |
 
 ### 심층 보관 (`archive/legacy-docs` 브랜치 — git으로만 접근)
 

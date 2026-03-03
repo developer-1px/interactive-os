@@ -15,11 +15,15 @@ Risks:
 - tablist의 activate가 "탭 전환"인지 "탭 내용 편집"인지 구분 필요
 
 ## Now
-- [ ] T1: tablist activate → aria-selected 전환
-  - 🔴 Red: `src/os/3-commands/tests/integration/tab-state.test.ts` — 5 FAIL / 1 PASS
-  - tablist role에서 activate(Enter/Click) → 해당 탭 `aria-selected=true` + 이전 탭 해제
+
+(없음)
 
 ## Done
+- [x] T1: tablist activate → aria-selected 전환 ✅
+  - roleRegistry `tablist: { select: { mode: "single", followFocus: true, disallowEmpty: true }, activate: { mode: "automatic" } }` 구현
+  - `tests/integration/os/tab-state.test.ts` — 🟢 6/6 PASS (2026-03-03 검증)
+  - `contentVisibilityMap.tablist = "selected"` — tab panel 가시성 OS 관리
+  - BuilderTabs.tsx: `useState+onClick` → OS `tablist` role 전환 완료
 
 ## Unresolved
 - Tab `aria-selected`와 Selection `aria-selected`의 관계 정리 (같은 속성, 다른 의미?)
