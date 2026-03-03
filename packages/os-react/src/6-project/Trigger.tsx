@@ -192,7 +192,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     const baseProps = {
       onClick: handleClick,
       className,
-      "data-trigger-id": id,
+      "data-trigger-id": overlayId || id,
       ...overlayAriaProps,
       ...rest,
     };
@@ -533,9 +533,9 @@ function TriggerPopover({
         popoverRef.current &&
         !popoverRef.current.contains(e.target as Node)
       ) {
-        // Check if click was on the trigger itself (toggle behavior)
+        // Check if click was on the trigger itself (let toggle handle it)
         const trigger = document.querySelector(
-          `[data-trigger-id]`,
+          `[data-trigger-id="${overlayId}"]`,
         );
         if (trigger?.contains(e.target as Node)) return;
 
@@ -558,7 +558,17 @@ function TriggerPopover({
 
   return (
     <OverlayContext.Provider value={{ overlayId }}>
-      <div ref={popoverRef} className={className}>
+      <div
+        ref={popoverRef}
+        className={className}
+        onClick={(e) => {
+          // W3C APG: clicking a menuitem closes the menu
+          const target = (e.target as HTMLElement).closest("[role=menuitem]");
+          if (target) {
+            os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
+          }
+        }}
+      >
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- zone role union mismatch */}
         <Zone
           id={overlayId}
