@@ -5,6 +5,8 @@ export interface OverlayEntry {
   id: string;
   /** Overlay type (determines behavior preset) */
   type: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip";
+  /** Initial focus entry hint: "first" (default) or "last" (ArrowUp) */
+  entry?: "first" | "last";
 }
 
 /** Notification types: toast (polite, auto-dismiss) vs alert (assertive, persistent) */

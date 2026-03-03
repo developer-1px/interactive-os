@@ -5,10 +5,11 @@
  * This file maintains backward compatibility for @os-sdk/library/headless imports.
  */
 
-export type { ItemState } from "@os-core/3-inject/compute";
+export type { ItemState, TriggerAttrs } from "@os-core/3-inject/compute";
 export {
   computeAttrs,
   computeItem,
+  computeTrigger,
   readActiveZoneId,
   readFocusedItemId,
   readSelection,
@@ -22,6 +23,7 @@ export type {
   ItemAttrs,
   ItemOverrides,
   ItemResult,
+  TriggerAttrs as TriggerAttrsType,
 } from "@os-core/3-inject/headless.types";
 
 export type { HeadlessZoneOptions } from "@os-core/3-inject/simulate";

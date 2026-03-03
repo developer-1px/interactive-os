@@ -53,9 +53,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-      state: S;
-      dispatch?: BaseCommand | BaseCommand[] | undefined;
-    }
+    state: S;
+    dispatch?: BaseCommand | BaseCommand[] | undefined;
+  }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -78,6 +78,13 @@ export interface TriggerBinding {
   id: string;
   /** Command to dispatch on activation (Enter key or click) */
   onActivate: BaseCommand;
+  /** Overlay metadata — when set, trigger manages an overlay lifecycle */
+  overlay?: {
+    /** Overlay ID (must match the overlay Zone id) */
+    id: string;
+    /** Overlay type — determines ARIA projection (aria-haspopup value) */
+    type: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip";
+  };
 }
 
 export interface ZoneBindings {
@@ -139,13 +146,13 @@ export interface BoundComponents<S> {
     id: string | number;
     className?: string;
     children?:
-      | ReactNode
-      | ((state: {
-          isFocused: boolean;
-          isSelected: boolean;
-          isExpanded: boolean;
-          isAnchor?: boolean;
-        }) => ReactNode);
+    | ReactNode
+    | ((state: {
+      isFocused: boolean;
+      isSelected: boolean;
+      isExpanded: boolean;
+      isAnchor?: boolean;
+    }) => ReactNode);
     asChild?: boolean;
   }> & {
     /** Passive projection of Item's visibility state — auto-manages role + aria-labelledby + hidden/mount */
@@ -293,8 +300,8 @@ export interface AppHandle<S> {
     factory: CommandFactory<string, P>,
   ): React.FC<
     P extends void
-      ? { children: ReactNode; payload?: never }
-      : { children: ReactNode; payload: P }
+    ? { children: ReactNode; payload?: never }
+    : { children: ReactNode; payload: P }
   >;
   createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;

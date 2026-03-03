@@ -25,6 +25,10 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
   const focusedEl = document.activeElement as HTMLElement | null;
   const itemEl = focusedEl?.closest?.("[data-item-id]") as HTMLElement | null;
 
+  // Trigger layer: detect if focused element is a trigger
+  const triggerIdAttr = focusedEl?.closest?.("[data-trigger-id]")?.getAttribute("data-trigger-id") ?? null;
+  const triggerMeta = triggerIdAttr ? ZoneRegistry.getTriggerOverlay(triggerIdAttr) : null;
+
   // Zone state for CHECK resolution
   const focusState = os.getState().os?.focus;
   const activeZoneId = focusState?.activeZoneId;
@@ -49,6 +53,12 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
     ? (ROLE_FIELD_TYPE_MAP[itemRole] ?? null)
     : null;
 
+  // Overlay stack for trigger open/close detection
+  const overlayStack = os.getState().os?.overlays?.stack ?? [];
+  const isTriggerOverlayOpen = triggerMeta
+    ? overlayStack.some((o: { id: string }) => o.id === triggerMeta.overlayId)
+    : false;
+
   return {
     canonicalKey,
     key: e.key,
@@ -69,6 +79,11 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
     focusedItemExpanded,
     activeZoneHasCheck: !!entry?.onCheck,
     activeZoneFocusedItemId: zone?.focusedItemId ?? null,
+    // ─── Trigger layer ───
+    focusedTriggerId: triggerIdAttr,
+    focusedTriggerRole: triggerMeta?.overlayType ?? null,
+    focusedTriggerOverlayId: triggerMeta?.overlayId ?? null,
+    isTriggerOverlayOpen,
     elementId:
       target.getAttribute("data-id") ??
       target.getAttribute("data-zone-id") ??
@@ -76,13 +91,13 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
       undefined,
     cursor: zone?.focusedItemId
       ? {
-          focusId: zone.focusedItemId,
-          selection: zone.selection ?? [],
-          anchor: zone.selectionAnchor ?? null,
-          isExpandable: false,
-          isDisabled: false,
-          treeLevel: undefined,
-        }
+        focusId: zone.focusedItemId,
+        selection: zone.selection ?? [],
+        anchor: zone.selectionAnchor ?? null,
+        isExpandable: false,
+        isDisabled: false,
+        treeLevel: undefined,
+      }
       : null,
   };
 }

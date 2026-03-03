@@ -164,20 +164,19 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         : {};
 
     // Shared activation logic: toggle overlay + dispatch onActivate
-    // Used by both click (mouse) and keydown (Enter/Space)
+    // Used by click (mouse). Keyboard Enter/Space goes through OS_ACTIVATE pipeline
+    // when id is set (Item path), so this only fires on actual mouse clicks.
     const triggerActivate = () => {
-      if (!id) {
-        if (overlayOpenCmd && overlayId) {
-          if (isOverlayOpen) {
-            os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
-          } else {
-            os.dispatch(overlayOpenCmd);
-          }
+      if (overlayOpenCmd && overlayId) {
+        if (isOverlayOpen) {
+          os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
+        } else {
+          os.dispatch(overlayOpenCmd);
         }
-        if (onActivate) {
-          const dispatch = customDispatch ?? os.dispatch;
-          dispatch(onActivate);
-        }
+      }
+      if (onActivate && !overlayOpenCmd) {
+        const dispatch = customDispatch ?? os.dispatch;
+        dispatch(onActivate);
       }
     };
 
@@ -190,8 +189,8 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     };
 
     // OS pipeline intercepts Enter → OS_ACTIVATE before native click fires.
-    // When Trigger has no id (no Item), OS_ACTIVATE is a no-op, so we handle
-    // Enter/Space explicitly to trigger the same activation logic.
+    // When Trigger has an id (Item), OS_ACTIVATE → onActivate handles keyboard.
+    // When Trigger has no id, we need explicit keydown handling.
     const handleKeyDown = !id
       ? (e: React.KeyboardEvent) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -452,26 +451,11 @@ function TriggerDismiss({
   ...rest
 }: TriggerDismissProps & { id?: string }) {
   const overlayCtx = useOverlayContext();
-  const dispatch = (cmd: BaseCommand) => os.dispatch(cmd);
-
-  const handleClick = (e: ReactMouseEvent) => {
-    e.stopPropagation();
-
-    // Dispatch optional command first
-    if (onActivate) {
-      dispatch(onActivate);
-    }
-
-    // Close the nearest overlay
-    if (overlayCtx) {
-      os.dispatch(OS_OVERLAY_CLOSE({ id: overlayCtx.overlayId }));
-    }
-  };
 
   const itemId = id ?? `${overlayCtx?.overlayId ?? "dialog"}-dismiss`;
 
-  // Build the dismiss command for Item → ZoneRegistry → OS_ACTIVATE(Enter)
-  // When overlay exists, Enter should close it (same as click).
+  // Build the dismiss command for Item → ZoneRegistry → OS_ACTIVATE(Enter/Click)
+  // When overlay exists, activation closes it.
   const dismissCmd = overlayCtx
     ? OS_OVERLAY_CLOSE({ id: overlayCtx.overlayId })
     : undefined;
@@ -480,12 +464,7 @@ function TriggerDismiss({
 
   return (
     <Item id={itemId} asChild onActivate={activateCmd}>
-      <button
-        type="button"
-        onClick={handleClick}
-        className={className}
-        {...rest}
-      >
+      <button type="button" className={className} {...rest}>
         {children}
       </button>
     </Item>
@@ -536,45 +515,19 @@ function TriggerPopover({
     s.os.overlays.stack.some((e) => e.id === overlayId),
   );
 
-  // Outside click detection: close overlay when clicking outside the popover
-  const popoverRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (
-        popoverRef.current &&
-        !popoverRef.current.contains(e.target as Node)
-      ) {
-        // Check if click was on the trigger itself (let toggle handle it)
-        const trigger = document.querySelector(
-          `[data-trigger-id="${overlayId}"]`,
-        );
-        if (trigger?.contains(e.target as Node)) return;
-
-        os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
-      }
-    };
-
-    // Delay to avoid catching the opening click
-    const timer = setTimeout(() => {
-      document.addEventListener("mousedown", handleOutsideClick);
-    }, 0);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, [isOpen, overlayId]);
-
   if (!isOpen) return null;
+
+  // Outside-click dismiss: handled by OS Pipeline
+  //   → menu role has dismiss.outsideClick: "close"
+  //   → PointerListener detects click outside zone → OS_ESCAPE → onDismiss
+  //
+  // Menuitem click-to-close: handled by OS Pipeline
+  //   → menu role has activate.onClick: true
+  //   → click → resolveClick → OS_ACTIVATE → onAction → OS_OVERLAY_CLOSE
 
   return (
     <OverlayContext.Provider value={{ overlayId }}>
-      <div
-        ref={popoverRef}
-        className={className}
-      >
+      <div className={className}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- zone role union mismatch */}
         <Zone
           id={overlayId}

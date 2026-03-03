@@ -23,6 +23,8 @@ import { applyFocusPop, applyFocusPush } from "../focus/focusStackOps";
 interface OverlayOpenPayload {
   id: string;
   type: OverlayEntry["type"];
+  /** Initial focus entry: "first" (default) or "last" (ArrowUp opens menu) */
+  entry?: "first" | "last";
 }
 
 export const OS_OVERLAY_OPEN = os.defineCommand(
@@ -38,6 +40,7 @@ export const OS_OVERLAY_OPEN = os.defineCommand(
         draft.os.overlays.stack.push({
           id: payload.id,
           type: payload.type,
+          ...(payload.entry ? { entry: payload.entry } : {}),
         });
         applyFocusPush(draft);
       }),

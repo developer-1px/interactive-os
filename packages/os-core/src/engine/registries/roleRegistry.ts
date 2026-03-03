@@ -211,8 +211,8 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       onCrossAxis: ["expandSubmenu"],
     },
     select: { mode: "none" },
-    activate: { mode: "automatic", effect: "invokeAndClose" },
-    dismiss: { escape: "close" },
+    activate: { mode: "automatic", effect: "invokeAndClose", onClick: true },
+    dismiss: { escape: "close", outsideClick: "close" },
     tab: { behavior: "trap" },
     project: { autoFocus: true },
   },
@@ -314,6 +314,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   dialog: {
     navigate: { orientation: "vertical", loop: false },
     tab: { behavior: "trap", restoreFocus: true },
+    activate: { onClick: true },
     dismiss: { escape: "close", outsideClick: "close", restoreFocus: true },
     project: { autoFocus: true },
   },
@@ -324,6 +325,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   alertdialog: {
     navigate: { orientation: "vertical", loop: false },
     tab: { behavior: "trap", restoreFocus: true },
+    activate: { onClick: true },
     dismiss: { escape: "close", outsideClick: "none", restoreFocus: true },
     project: { autoFocus: true },
   },

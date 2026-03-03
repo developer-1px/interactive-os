@@ -125,6 +125,9 @@
 | Item.Content visibility | OS가 Zone role 따라 hidden/visible 자동 결정 | ✅ 해결 (신규) | roleRegistry contentVisibilityMap + bind.ts ContentComponent | 2026-03-02 |
 | OS_ACTIVATE selection 경로 | Enter → 선택 가능한 Zone에서 OS_SELECT dispatch | ✅ 해결 (신규) | tablist manual mode Enter 키 활성화 | 2026-03-02 |
 | CheckboxPattern onClick 2건 | raw onClick + useDevDispatch | 🔴 LLM 실수 → ✅ 수정 | onAction + activate.onClick 패턴으로 교체. SwitchPattern 참조 | 2026-03-03 |
+| Popover outside-click 수동 | `document.addEventListener("mousedown")` + `document.querySelector` | 🟡 OS 갭 → ✅ 해결 | `menu` role에 `dismiss.outsideClick: "close"` 추가. PointerListener가 자동 처리 | 2026-03-04 |
+| Popover menuitem onClick 수동 | `onClick` → `os.dispatch(OS_OVERLAY_CLOSE)` | 🟡 OS 갭 → ✅ 해결 | `menu` role에 `activate.onClick: true` 추가. click→OS_ACTIVATE→onAction 경로 | 2026-03-04 |
+| TriggerDismiss 이중 dispatch | `onClick` + `Item.onActivate` 중복 | 🔴 Bind 실수 → ✅ 수정 | handleClick 제거, Item.onActivate 경로에 일임. dialog/alertdialog에 `activate.onClick: true` 추가 | 2026-03-04 |
 
 ---
 

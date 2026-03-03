@@ -27,6 +27,7 @@ Risks:
 - [ ] T4: Field 타입 확장 설계 — string/boolean/number 외 enum/color/date. OS 내장 vs 앱 커스텀 경계
 - [ ] T5: Todo/Kanban Usage Spec — Builder 외 2개 앱으로 보편성 검증
 - [ ] T6: 최종 정리 — official/ 문서 + rules.md 환류
+- [ ] T7: Trigger → 순수 투영 프리미티브 — createTrigger 통일 + computeTrigger headless ARIA + Portal/Popover 분리
 
 ## Done
 

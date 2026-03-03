@@ -75,7 +75,7 @@ type DivOmit =
 
 export interface ZoneProps
   extends Omit<ComponentProps<"div">, DivOmit | keyof ZoneCallbacks>,
-    ZoneCallbacks {
+  ZoneCallbacks {
   id?: string;
   role?: ZoneRole;
   options?: ZoneOptions;
@@ -174,7 +174,11 @@ export function Zone({
 
     if (config.project.autoFocus) {
       const items = ZoneRegistry.resolveItems(zoneId);
-      os.dispatch(OS_FOCUS({ zoneId, itemId: items[0] ?? null }));
+      // APG: ArrowUp on trigger → focus last item. Read from overlay entry hint.
+      const overlayEntry = os.getState().os.overlays.stack.find(e => e.id === zoneId);
+      const focusLast = overlayEntry?.entry === "last";
+      const targetItem = focusLast ? items[items.length - 1] : items[0];
+      os.dispatch(OS_FOCUS({ zoneId, itemId: targetItem ?? null }));
     }
 
     // disallowEmpty: pre-select first item so tab panels are visible.

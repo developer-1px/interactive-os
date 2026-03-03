@@ -6,9 +6,10 @@
  */
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { Trigger } from "@os-react/6-project/Trigger";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
-import React, { type ReactNode } from "react";
+import React, { type ReactNode, useEffect } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // Simple Trigger
@@ -64,7 +65,7 @@ export function createDynamicTrigger<P>(
 export interface CompoundTriggerConfig {
   id?: string;
   confirm?: BaseCommand;
-  role?: "dialog" | "alertdialog";
+  role?: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip" | "listbox";
 }
 
 export interface CompoundTriggerComponents {
@@ -80,6 +81,13 @@ export interface CompoundTriggerComponents {
     description?: string;
     className?: string;
     contentClassName?: string;
+  }>;
+  /** Popover — non-modal overlay (menus, dropdowns). Present when role is menu/listbox/popover. */
+  Popover: React.FC<{
+    children: ReactNode;
+    className?: string;
+    "aria-label"?: string;
+    "aria-labelledby"?: string;
   }>;
   Content: React.FC<{
     children: ReactNode;
@@ -99,27 +107,70 @@ export function createCompoundTrigger(
   appId: string,
   config: CompoundTriggerConfig,
 ): CompoundTriggerComponents {
-  const dialogId = config.id ?? `${appId}-dialog-${Date.now()}`;
+  const overlayId = config.id ?? `${appId}-dialog-${Date.now()}`;
+  const role = config.role ?? "dialog";
 
-  const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) =>
-    React.createElement(Dialog, {
-      id: dialogId,
-      ...(config.role !== undefined ? { role: config.role } : {}),
+  // Route: menu/listbox/popover → Popover pattern, dialog/alertdialog → Dialog pattern
+  const isPopoverRole = role === "menu" || role === "listbox" || role === "popover";
+
+  const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) => {
+    // Register trigger→overlay relationship for headless ARIA
+    useEffect(() => {
+      ZoneRegistry.setTriggerOverlay(overlayId, overlayId, role);
+      return () => ZoneRegistry.clearTriggerOverlay(overlayId);
+    }, []);
+
+    if (isPopoverRole) {
+      // Popover pattern: no Dialog shell needed
+      return React.createElement(React.Fragment, null, children);
+    }
+
+    // Dialog pattern: Dialog shell
+    return React.createElement(Dialog, {
+      id: overlayId,
+      role: role as "dialog" | "alertdialog",
       children,
     });
-  RootComponent.displayName = `${appId}.Dialog`;
+  };
+  RootComponent.displayName = `${appId}.${isPopoverRole ? "Menu" : "Dialog"}`;
 
   const TriggerComponent: React.FC<{
     children: ReactNode;
     className?: string;
     asChild?: boolean;
-  }> = ({ children, className, asChild }) =>
-    React.createElement(Dialog.Trigger, {
+  }> = ({ children, className, asChild }) => {
+    if (isPopoverRole) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ZIFT overlay role union mismatch
+      return React.createElement(Trigger, {
+        id: `${overlayId}-trigger`,
+        role: role as any,
+        overlayId,
+        children,
+        ...(className !== undefined ? { className } : {}),
+      });
+    }
+    return React.createElement(Dialog.Trigger, {
       ...(className !== undefined ? { className } : {}),
       ...(asChild !== undefined ? { asChild } : {}),
       children,
     });
-  TriggerComponent.displayName = `${appId}.Dialog.Trigger`;
+  };
+  TriggerComponent.displayName = `${appId}.${isPopoverRole ? "Menu" : "Dialog"}.Trigger`;
+
+  // PopoverComponent: non-modal overlay for menus/listboxes
+  const PopoverComponent: React.FC<{
+    children: ReactNode;
+    className?: string;
+    "aria-label"?: string;
+    "aria-labelledby"?: string;
+  }> = (props) =>
+      React.createElement(Trigger.Popover, {
+        ...props,
+        _overlayId: overlayId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ZIFT overlay type union
+        _overlayType: role as any,
+      });
+  PopoverComponent.displayName = `${appId}.Menu.Popover`;
 
   // Dialog.Content must be used directly — DialogRoot identifies children by
   // reference identity (child.type === DialogContent). Wrapping in a new
@@ -158,7 +209,7 @@ export function createCompoundTrigger(
       children,
       ...(className !== undefined ? { className } : {}),
       ...(confirmCmd !== undefined ? { onActivate: confirmCmd } : {}),
-      id: `${dialogId}-confirm`,
+      id: `${overlayId}-confirm`,
     };
     return React.createElement(Dialog.Close, props);
   };
@@ -168,6 +219,7 @@ export function createCompoundTrigger(
     Root: RootComponent,
     Trigger: TriggerComponent,
     Portal: PortalComponent,
+    Popover: PopoverComponent,
     Content: ContentComponent,
     Dismiss: DismissComponent,
     Confirm: ConfirmComponent,

@@ -100,6 +100,16 @@ const registryOrder: string[] = []; // Registration order for headless zone orde
 const disabledItems = new Map<string, Set<string>>();
 const itemCallbacks = new Map<string, Map<string, ItemCallbacks>>();
 
+/**
+ * Trigger overlay registry — stores trigger→overlay relationships.
+ * Key: triggerId, Value: { overlayId, overlayType }
+ * Used by computeTrigger() for headless ARIA projection.
+ */
+const triggerOverlays = new Map<
+  string,
+  { overlayId: string; overlayType: string }
+>();
+
 // ─── Zone mount/unmount observer (for TestBotRegistry, etc.) ───
 const listeners = new Set<() => void>();
 let zoneSnapshot: readonly string[] = [];
@@ -294,6 +304,26 @@ export const ZoneRegistry = {
       if (cb) return cb;
     }
     return undefined;
+  },
+
+  // ─── Trigger overlay metadata (for headless ARIA projection) ───
+
+  setTriggerOverlay(
+    triggerId: string,
+    overlayId: string,
+    overlayType: string,
+  ): void {
+    triggerOverlays.set(triggerId, { overlayId, overlayType });
+  },
+
+  clearTriggerOverlay(triggerId: string): void {
+    triggerOverlays.delete(triggerId);
+  },
+
+  getTriggerOverlay(
+    triggerId: string,
+  ): { overlayId: string; overlayType: string } | undefined {
+    return triggerOverlays.get(triggerId);
   },
 
   /**

@@ -60,6 +60,23 @@ export interface ItemResult {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Trigger Types
+// ═══════════════════════════════════════════════════════════════════
+
+/** ARIA attributes for a Trigger that controls an overlay */
+export interface TriggerAttrs {
+  "aria-haspopup":
+  | "dialog"
+  | "menu"
+  | "true"
+  | "listbox"
+  | "tree"
+  | "grid";
+  "aria-expanded": boolean;
+  "aria-controls": string;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Element Types
 // ═══════════════════════════════════════════════════════════════════
 

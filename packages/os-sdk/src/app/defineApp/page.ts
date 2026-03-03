@@ -403,6 +403,14 @@ export function createAppPage<S>(
           ZoneRegistry.setItemCallback(zoneName, trigger.id, {
             onActivate: trigger.onActivate,
           });
+          // Register trigger→overlay relationship for headless ARIA
+          if (trigger.overlay) {
+            ZoneRegistry.setTriggerOverlay(
+              trigger.id,
+              trigger.overlay.id,
+              trigger.overlay.type,
+            );
+          }
         }
       }
     }

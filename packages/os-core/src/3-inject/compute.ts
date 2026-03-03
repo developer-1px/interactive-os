@@ -16,10 +16,11 @@ import type {
   ItemAttrs,
   ItemOverrides,
   ItemResult,
+  TriggerAttrs,
 } from "./headless.types";
 
 // Re-export types that consumers need
-export type { ItemState } from "./headless.types";
+export type { ItemState, TriggerAttrs } from "./headless.types";
 
 // ═══════════════════════════════════════════════════════════════════
 // State Readers
@@ -209,6 +210,62 @@ export function computeAttrs(
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// computeTrigger — Pure projection for overlay trigger ARIA.
+//
+// Parallel to computeItem: state + metadata → ARIA attributes.
+// No React, no DOM. Same function in headless tests and Trigger.tsx.
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Map overlay type to aria-haspopup value.
+ * See WAI-ARIA 1.2 § aria-haspopup.
+ */
+function toAriaHaspopup(
+  overlayType: string,
+): TriggerAttrs["aria-haspopup"] {
+  switch (overlayType) {
+    case "menu":
+      return "menu";
+    case "dialog":
+    case "alertdialog":
+      return "dialog";
+    case "listbox":
+      return "listbox";
+    case "tree":
+      return "tree";
+    case "grid":
+      return "grid";
+    default:
+      return "true";
+  }
+}
+
+/**
+ * Compute ARIA attributes for a trigger that controls an overlay.
+ *
+ * Pure function: (kernel state + trigger metadata) → ARIA attrs.
+ * Returns null if triggerId has no overlay metadata registered.
+ */
+export function computeTrigger(
+  kernel: HeadlessKernel,
+  triggerId: string,
+): TriggerAttrs | null {
+  const meta = ZoneRegistry.getTriggerOverlay(triggerId);
+  if (!meta) return null;
+
+  const s = kernel.getState();
+  const isOpen = s.os.overlays.stack.some(
+    (entry) => entry.id === meta.overlayId,
+  );
+
+  return {
+    "aria-haspopup": toAriaHaspopup(meta.overlayType),
+    "aria-expanded": isOpen,
+    "aria-controls": meta.overlayId,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // resolveElement — Playwright locator equivalent.
 //
 // Given an element ID, returns ALL DOM attributes regardless of
@@ -245,11 +302,19 @@ export function resolveElement(
   // Check if it's an Item within any Zone
   const ownerZoneId = ZoneRegistry.findZoneByItemId(elementId);
   if (ownerZoneId) {
-    return computeAttrs(
+    const itemAttrs = computeAttrs(
       kernel,
       elementId,
       ownerZoneId,
     ) as unknown as ElementAttrs;
+
+    // Merge trigger overlay ARIA if this item is also a trigger
+    const triggerAttrs = computeTrigger(kernel, elementId);
+    if (triggerAttrs) {
+      return { ...itemAttrs, ...triggerAttrs };
+    }
+
+    return itemAttrs;
   }
 
   // Fallback: try active zone

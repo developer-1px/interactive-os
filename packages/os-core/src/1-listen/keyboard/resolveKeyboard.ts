@@ -15,6 +15,7 @@ import {
   resolveFieldKeyByType,
 } from "@os-core/2-resolve/resolveFieldKey";
 import { resolveItemKey } from "@os-core/2-resolve/resolveItemKey";
+import { resolveTriggerKey } from "@os-core/2-resolve/resolveTriggerKey";
 import { OS_CHECK } from "@os-core/4-command";
 import type { FieldType } from "@os-core/engine/registries/fieldRegistry";
 import type { ZoneCursor } from "@os-core/engine/registries/zoneRegistry";
@@ -55,6 +56,16 @@ export interface KeyboardInput {
   /** For building input meta */
   elementId: string | undefined;
 
+  // ─── Trigger layer ───
+  /** data-trigger-id of the focused trigger element, or null */
+  focusedTriggerId: string | null;
+  /** Overlay type of the trigger (e.g., "menu", "dialog"), or null */
+  focusedTriggerRole: string | null;
+  /** Overlay ID controlled by this trigger, or null */
+  focusedTriggerOverlayId: string | null;
+  /** Whether the trigger's overlay is currently open */
+  isTriggerOverlayOpen: boolean;
+
   /** For resolving ZoneCallbacks */
   cursor: ZoneCursor | null;
 }
@@ -87,7 +98,7 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
   };
 
   // ═══════════════════════════════════════════════════════════════
-  // ZIFT Responder Chain: Field → Item → Zone → Global
+  // ZIFT Responder Chain: Field → Trigger → Item → Zone → Global
   // ═══════════════════════════════════════════════════════════════
 
   // Layer 1a: Field — editing text field owns Enter/Escape per fieldType
@@ -133,7 +144,30 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
     }
   }
 
-  // Layer 2: Item — role-specific keys (treeitem expand, checkbox check)
+  // Layer 2: Trigger — trigger-specific keys (menu open, dialog open)
+  // When focused element is a trigger, TriggerConfig decides which keys open the overlay.
+  if (
+    !input.isEditing &&
+    input.focusedTriggerId &&
+    input.focusedTriggerRole &&
+    input.focusedTriggerOverlayId
+  ) {
+    const triggerCmd = resolveTriggerKey(input.canonicalKey, {
+      triggerRole: input.focusedTriggerRole,
+      overlayId: input.focusedTriggerOverlayId,
+      isOverlayOpen: input.isTriggerOverlayOpen,
+    });
+    if (triggerCmd) {
+      return {
+        commands: [triggerCmd],
+        meta: { ...meta, elementId: input.focusedTriggerId },
+        preventDefault: true,
+        fallback: false,
+      };
+    }
+  }
+
+  // Layer 3: Item — role-specific keys (treeitem expand, checkbox check)
   if (!input.isEditing && input.focusedItemId) {
     const itemCmd = resolveItemKey(input.focusedItemRole, input.canonicalKey, {
       itemId: input.focusedItemId,
