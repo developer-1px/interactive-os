@@ -62,10 +62,6 @@ const ZONE_PASSTHROUGH_KEYS: Record<FieldType, Set<string>> = {
   // Tab = indent. ↑↓ = cursor. Nothing passes.
   editor: new Set([]),
 
-  // boolean: switch, checkbox, toggle
-  // Space/Enter = toggle (Field owns). Escape/Tab = zone escape.
-  boolean: new Set(["Escape", "Tab", "Shift+Tab"]),
-
   // number: slider, spinbutton
   // Arrow/Home/End/Page = value adjustment (Field owns). Escape/Tab = zone escape.
   number: new Set(["Escape", "Tab", "Shift+Tab"]),

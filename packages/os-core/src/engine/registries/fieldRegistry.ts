@@ -11,7 +11,6 @@ import type { ZodSchema } from "zod";
  * - tokens:  Tab→OS, ↑↓→OS, Bksp∅→OS     (chips, tags, email recipients)
  * - block:   Tab→OS, ↑↓→Field, Bksp∅→Field (comment, description, chat)
  * - editor:  Tab→Field, ↑↓→Field, Bksp∅→Field (code editor, rich text)
- * - boolean: Space/Enter→Field (switch, checkbox, toggle)
  * - number:  Arrow/Home/End/Page→Field (slider, spinbutton)
  * - enum:    Zone+Item composition — single select (radiogroup, listbox, select)
  * - enum[]:  Zone+Item composition — multi select (checkbox group, multi-select listbox)
@@ -21,7 +20,6 @@ export type FieldType =
   | "tokens"
   | "block"
   | "editor"
-  | "boolean"
   | "number"
   | "enum"
   | "enum[]"
@@ -111,13 +109,13 @@ function register(id: string, config: FieldConfig) {
   const newState: FieldState = existing
     ? existing.state
     : {
-        value: defaultValue,
-        defaultValue,
-        isValid: true,
-        isDirty: false,
-        error: null,
-        caretPosition: null,
-      };
+      value: defaultValue,
+      defaultValue,
+      isValid: true,
+      isDirty: false,
+      error: null,
+      caretPosition: null,
+    };
 
   newFields.set(id, {
     config,

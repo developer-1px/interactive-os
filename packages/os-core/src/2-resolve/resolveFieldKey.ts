@@ -12,7 +12,6 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { OS_CHECK } from "@os-core/4-command/activate/check";
 import { OS_FIELD_CANCEL } from "@os-core/4-command/field/cancel";
 import { OS_FIELD_COMMIT } from "@os-core/4-command/field/commit";
 import { OS_VALUE_CHANGE } from "@os-core/4-command/valueChange";
@@ -81,13 +80,6 @@ const EDITOR_KEYMAP: FieldKeymap = {
   Escape: () => OS_FIELD_CANCEL(),
 };
 
-// ─── boolean: switch, checkbox, toggle ───
-// Space/Enter → OS_CHECK (toggle checked state)
-const BOOLEAN_KEYMAP: FieldKeymap = {
-  Space: (ctx) => OS_CHECK({ targetId: ctx.itemId ?? "" }),
-  Enter: (ctx) => OS_CHECK({ targetId: ctx.itemId ?? "" }),
-};
-
 // ─── number: slider, spinbutton ───
 // Arrow/Home/End/Page → OS_VALUE_CHANGE (adjust value)
 const NUMBER_KEYMAP: FieldKeymap = {
@@ -106,7 +98,6 @@ const FIELD_KEYMAPS: Record<FieldType, FieldKeymap> = {
   tokens: TOKENS_KEYMAP,
   block: BLOCK_KEYMAP,
   editor: EDITOR_KEYMAP,
-  boolean: BOOLEAN_KEYMAP,
   number: NUMBER_KEYMAP,
   // enum/enum[]: Zone+Item composition handles all keys.
   // Empty keymap — Field layer never intercepts. Zone navigation + Item selection.

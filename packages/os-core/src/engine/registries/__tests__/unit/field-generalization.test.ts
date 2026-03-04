@@ -30,17 +30,6 @@ describe("T1: FieldType 확장", () => {
     }
   });
 
-  it("boolean FieldType 등록 가능", () => {
-    // boolean fieldType으로 등록 시 tsc 에러 없이 컴파일되어야 함
-    FieldRegistry.register("dark-mode", {
-      name: "dark-mode",
-      fieldType: "boolean" as any, // 🔴 현재 타입에 "boolean"이 없어서 as any
-    });
-    const entry = FieldRegistry.get().fields.get("dark-mode");
-    expect(entry).toBeDefined();
-    expect(entry!.config.fieldType).toBe("boolean");
-  });
-
   it("number FieldType 등록 가능", () => {
     FieldRegistry.register("volume", {
       name: "volume",
@@ -62,39 +51,7 @@ describe("T1: FieldType 확장", () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// T2: resolveFieldKey 확장 — boolean/number keymaps
-// ═══════════════════════════════════════════════════════════════
-
-describe("T2: resolveFieldKey — boolean keymap", () => {
-  beforeEach(() => {
-    const fields = FieldRegistry.get().fields;
-    for (const id of fields.keys()) {
-      FieldRegistry.unregister(id);
-    }
-    FieldRegistry.register("dark-mode", {
-      name: "dark-mode",
-      fieldType: "boolean" as any,
-    });
-  });
-
-  it("Space → OS_CHECK", () => {
-    const result = resolveFieldKey("dark-mode", "Space");
-    expect(result).not.toBeNull();
-    expect(result!.type).toBe("OS_CHECK");
-  });
-
-  it("Enter → OS_CHECK", () => {
-    const result = resolveFieldKey("dark-mode", "Enter");
-    expect(result).not.toBeNull();
-    expect(result!.type).toBe("OS_CHECK");
-  });
-
-  it("ArrowDown → null (no meaning for boolean)", () => {
-    const result = resolveFieldKey("dark-mode", "ArrowDown");
-    expect(result).toBeNull();
-  });
-});
+// T2 boolean keymap removed: switch/checkbox now use action.commands=[OS_CHECK()]
 
 describe("T2: resolveFieldKey — number keymap", () => {
   beforeEach(() => {
@@ -165,28 +122,7 @@ describe("T2: resolveFieldKey — number keymap", () => {
 // T3 (resolveItemKey 정리) — Phase 2 완료.
 // checkbox/switch/slider → Field layer 이동 (Layer 1b: activeFieldType).
 
-// ═══════════════════════════════════════════════════════════════
-// T5: fieldKeyOwnership — boolean/number passthrough
-// isKeyDelegatedToOS: true=Zone으로 통과(Field 비소유), false=Field가 흡수(소유)
-// ═══════════════════════════════════════════════════════════════
-
-describe("T5: fieldKeyOwnership — boolean/number passthrough", () => {
-  it("boolean Field: Escape → Zone passthrough (delegated)", () => {
-    // 🔴 현재 'boolean' FieldType이 ZONE_PASSTHROUGH_KEYS에 없음
-    const delegated = isKeyDelegatedToOS("Escape", "boolean" as any);
-    expect(delegated).toBe(true); // Escape는 Zone으로 통과
-  });
-
-  it("boolean Field: Space → Field 소유 (not delegated)", () => {
-    const delegated = isKeyDelegatedToOS("Space", "boolean" as any);
-    expect(delegated).toBe(false); // Space는 Field가 흡수 (토글)
-  });
-
-  it("boolean Field: Enter → Field 소유", () => {
-    const delegated = isKeyDelegatedToOS("Enter", "boolean" as any);
-    expect(delegated).toBe(false); // Enter도 Field가 흡수 (토글)
-  });
-
+describe("T5: fieldKeyOwnership — number passthrough", () => {
   it("number Field: Escape → Zone passthrough", () => {
     const delegated = isKeyDelegatedToOS("Escape", "number" as any);
     expect(delegated).toBe(true);
@@ -199,12 +135,12 @@ describe("T5: fieldKeyOwnership — boolean/number passthrough", () => {
 
   it("number Field: ArrowRight → Field 소유 (값 조정)", () => {
     const delegated = isKeyDelegatedToOS("ArrowRight", "number" as any);
-    expect(delegated).toBe(false); // Arrow는 값 조정이므로 Field가 흡수
+    expect(delegated).toBe(false);
   });
 
   it("number Field: Home → Field 소유 (setMin)", () => {
     const delegated = isKeyDelegatedToOS("Home", "number" as any);
-    expect(delegated).toBe(false); // Home은 setMin이므로 Field가 흡수
+    expect(delegated).toBe(false);
   });
 });
 

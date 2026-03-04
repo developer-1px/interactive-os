@@ -73,37 +73,7 @@ describe("resolveKeyboard — guards", () => {
 // CHECK resolution (Space on checkbox/switch)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("resolveKeyboard — Space CHECK via Field Layer 1b", () => {
-  test("Space + checkbox role + activeFieldType=boolean → check", () => {
-    const result = resolveKeyboard(
-      baseInput({
-        canonicalKey: "Space",
-        key: " ",
-        focusedItemRole: "checkbox",
-        focusedItemId: "item-1",
-        activeFieldType: "boolean",
-      }),
-    );
-    expect(result.commands).toHaveLength(1);
-    expect(result.commands[0]!.type).toBe("OS_CHECK");
-    expect((result.commands[0]!.payload as any).targetId).toBe("item-1");
-  });
-
-  test("Space + switch role + activeFieldType=boolean → check", () => {
-    const result = resolveKeyboard(
-      baseInput({
-        canonicalKey: "Space",
-        key: " ",
-        focusedItemRole: "switch",
-        focusedItemId: "toggle-1",
-        activeFieldType: "boolean",
-      }),
-    );
-    expect(result.commands).toHaveLength(1);
-    expect(result.commands[0]!.type).toBe("OS_CHECK");
-    expect((result.commands[0]!.payload as any).targetId).toBe("toggle-1");
-  });
-
+describe("resolveKeyboard — Space CHECK via action.commands", () => {
   test("Space + zone has action.commands=[OS_CHECK] → check via action path", () => {
     const result = resolveKeyboard(
       baseInput({
