@@ -50,7 +50,7 @@ export interface FieldKeyContext {
  * Text Fields (role=textbox) are NOT here — they use editingFieldId lifecycle.
  */
 export const ROLE_FIELD_TYPE_MAP: Readonly<Record<string, FieldType>> = {
-  switch: "boolean",
+  // switch/checkbox: removed — action.commands=[OS_CHECK()] handles Space/Enter via Zone layer
   slider: "number",
   radio: "enum",
   option: "enum",

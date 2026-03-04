@@ -421,7 +421,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   switch: {
     select: { mode: "none" },
     check: { mode: "check", keys: ["Space", "Enter"], onClick: true },
-    action: { commands: [OS_CHECK()] },
+    action: { commands: [OS_CHECK()], keys: ["Space", "Enter"], onClick: true },
     activate: { mode: "manual", onClick: true },
     tab: { behavior: "escape" },
   },
