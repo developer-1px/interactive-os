@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-04 17:35
+> Last updated: 2026-03-05 02:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -13,13 +13,9 @@
 
 **headless-simulator** — Vitest에서 Playwright 수준 검증 달성. DOM → OS VDOM. 거짓 GREEN 근절. Heavy.
 
-**code-hygiene** — eslint errors + test failures → 0. husky 강제 검증. Light.
-
 **builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
 
-**unified-zift-resolver** — ✅ Phase 1 archived. 4개 resolver → 1 chain executor + Layer[] loop. T1-T9 Done.
 
-**workflow-knowledge-separation** — 워크플로우 범용화 + 토픽 기반 지식 체계. Meta.
 
 ---
 
@@ -27,18 +23,15 @@
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
-| action-axis-unification | T1~T6 Done, T7 Unresolved | 03-04 | 🔥 Focus |
-| unified-zift-resolver | Scaffold, T1~T7 미착수 | 03-04 | 🔥 Focus |
-| workflow-knowledge-separation | T1~T4 | 03-04 | 🔥 Focus |
 | zift-usage-spec | Scaffold, T1~T6 미착수 | 03-01 | 🔥 Focus |
 | headless-simulator | Phase 1 T4~T6 | 02-27 | 🔥 Focus |
-| code-hygiene | T1 ✅, T2~T8 | 03-04 | 🔥 Focus |
 | builder-v2 | T12, T13, T20 | 02-26 | 🔥 Focus |
 | builder-v3 | 기획만. 개발 보류 | 03-04 | 🟢 Active |
 | os-restructure | Phase 4 #10 Done | 03-04 | 🟢 Active |
 | test-observability | Scaffold, T1~T4 | 03-03 | 🟢 Active |
 | apg-developer-agent | Scaffold, POC | 03-01 | 🟢 Active |
 | inspector-dogfooding | T1~T4 ✅, T5 | 03-01 | 🟢 Active |
+| selection-unification | Scaffold, plan 미착수 | 03-05 | 🟢 Active |
 
 ---
 
@@ -46,6 +39,13 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| compute-refactor | 03-05 | ✅ archive/2026/03/W10 — seedAriaState 순수 함수, OS_ZONE_INIT seed 중앙화, computeItem 순수 reader화, navigate crash fix. tsc 0 | +32 tests. Unresolved → selection-unification 분리 |
+| action-axis-unification | 03-05 | ✅ archive/2026/03/W10 — ActionConfig+ActivateConfig→inputmap 통합. 25 role presets 전환, 613줄 삭제. official/os/SPEC.md 갱신. T7→OG-010 백로그 |
+| code-hygiene | 03-05 | ✅ archive/2026/03/W10 — T1 tsc 226→0 완료. T2~T8(eslint/test/husky) 미완 매장 |
+| trigger-listener-gap | 03-05 | ✅ archive/2026/03/W10 — 미구현. 마우스 OS_ACTIVATE gap 발견 + Trigger 순수 투영 plan 13행. 코드 변경 0 |
+| docs-subgrid-table | 03-05 | ✅ archive/2026/03/W10 — Light, T1 미착수. CSS subgrid auto-wide table 아이디어 매장 |
+| unified-zift-resolver | 03-05 | ✅ archive/2026/03/W10 — 4개 resolver → 1 chain executor + Layer[] loop. T1-T9 Done. resolveKeyboard 80→15줄, resolveClick 78→49줄. 122/122 PASS |
+| workflow-knowledge-separation | 03-05 | ✅ archive/2026/03/W10 — _middleware.md 패턴 도입, 토픽 기반 지식 3파일, /red·/green·/bind·/audit Slot 패턴, /knowledge 범용 확장 |
 | top-down-enforcement | 03-04 | ✅ archive/2026/03/W10 — `@os-react/internal` barrel 생성, 35개 import 일괄 전환, raw primitive 앱 직접 사용 차단. tsc 0. design-principles #30 |
 | resolve-axis | 03-04 | ✅ archive/2026/03/W10 — CheckConfig.keys/onClick 추가, config 기반 check keymap 우선순위, ButtonPattern onAction 제거. +9 tests, regression 0. design-principles #27-29 |
 | apg-listbox-pattern | 03-02 | ✅ archive/2026/03/W10 — Negative tests 11개 (3 OS 버그 발견). range guard + selectAll guard. APG testbot 6 scripts 탑재 |
@@ -120,16 +120,26 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 5 |
-| Active Projects (total) | 9 (5 Active + 4 Focus) |
-| Completed (archived) | 51 |
+| Active Focus | 2 |
+| Active Projects (total) | 5 (2 Focus + 3 Active) |
+| Completed (archived) | 57 |
 | Inbox items | 6 |
 | Backlog items | 15 |
 | Open issues | 0 |
 
 ---
 
-## 📝 Recent Changes (2026-03-04)
+## 📝 Recent Changes (2026-03-05)
+
+- 📦 `/archive`: `action-axis-unification` → archive/2026/03/W10. ActionConfig+ActivateConfig→inputmap 통합. 25 role presets, 10 files, 613줄 삭제. official/os/SPEC.md role preset table + FocusGroup props + KeyboardListener contract 갱신. T7→OG-010 백로그.
+- 📦 `/archive`: `unified-zift-resolver` → archive/2026/03/W10. 회고 완료. design-principles K5(Layer[] loop) 이미 환류. Unresolved Phase 2 이미 backlog 이관.
+- 📦 `/archive`: `workflow-knowledge-separation` → archive/2026/03/W10. 산출물(이미 적용 완료).
+- 📦 `/archive`: `docs-subgrid-table` → archive/2026/03/W10. Light, T1 미착수. 아이디어 매장.
+- 📦 `/archive`: `trigger-listener-gap` → archive/2026/03/W10. 미구현. 마우스 OS_ACTIVATE gap 발견 + Trigger 순수 투영 plan. 코드 변경 0.
+- 📦 `/archive`: `code-hygiene` → archive/2026/03/W10. T1 tsc 226→0 완료. T2~T8 미완 매장.
+
+<details>
+<summary>📝 Previous Changes (2026-03-04)</summary>
 
 - ✅ `top-down-enforcement` 완료 → archive/2026/03/W10. @os-react/internal barrel 생성, 35개 import 일괄 전환, raw primitive 앱 직접 사용 차단. design-principles #30.
 
@@ -141,6 +151,8 @@
 - ✅ `tab-state` 완료 → archive/2026/03/W10. tablist preset, 6/6 PASS
 - ✅ `dev-pipeline` 완료 → archive/2026/03/W10. T0-T14 전부 완료
 - 🧹 STATUS.md 전수 조사: 폴더 없는 ghost 엔트리 10건 제거 (18→8 active). tsc dead code 30건 수정
+
+</details>
 
 <details>
 <summary>📝 Previous Changes (2026-03-01)</summary>

@@ -80,7 +80,7 @@ export const OS_NAVIGATE = os.defineCommand(
       if (focusedId) {
         const expandableItems = ctx.inject(DOM_EXPANDABLE_ITEMS);
         const isExpandable = expandableItems.has(focusedId);
-        const isExpanded = zone.expandedItems.includes(focusedId);
+        const isExpanded = !!zone.items?.[focusedId]?.["aria-expanded"];
         const treeLevels = ctx.inject(DOM_TREE_LEVELS);
 
         // Chain trace for transaction log observability
@@ -146,21 +146,21 @@ export const OS_NAVIGATE = os.defineCommand(
     // Delegate to existing pure resolver OR use override
     const navResult = overrideTargetId
       ? {
-        targetId: overrideTargetId,
-        stickyX: zone.stickyX,
-        stickyY: zone.stickyY,
-      }
-      : resolveNavigate(
-        zone.focusedItemId,
-        payload.direction,
-        navigableItems,
-        config.navigate,
-        {
+          targetId: overrideTargetId,
           stickyX: zone.stickyX,
           stickyY: zone.stickyY,
-          itemRects,
-        },
-      );
+        }
+      : resolveNavigate(
+          zone.focusedItemId,
+          payload.direction,
+          navigableItems,
+          config.navigate,
+          {
+            stickyX: zone.stickyX,
+            stickyY: zone.stickyY,
+            itemRects,
+          },
+        );
 
     const result = {
       state: produce(ctx.state, (draft) => {
@@ -190,7 +190,17 @@ export const OS_NAVIGATE = os.defineCommand(
           if (anchorIdx !== -1 && targetIdx !== -1) {
             const start = Math.min(anchorIdx, targetIdx);
             const end = Math.max(anchorIdx, targetIdx);
-            z.selection = items.slice(start, end + 1);
+            const rangeIds = items.slice(start, end + 1);
+            // Clear all, then select range
+            for (const id of Object.keys(z.items)) {
+              if (z.items[id]?.["aria-selected"]) {
+                z.items[id] = { ...z.items[id], "aria-selected": false };
+              }
+            }
+            for (const id of rangeIds) {
+              if (!z.items[id]) z.items[id] = {};
+              z.items[id] = { ...z.items[id], "aria-selected": true };
+            }
             z.selectionAnchor = anchor;
           }
         }
@@ -216,13 +226,16 @@ export const OS_NAVIGATE = os.defineCommand(
     // Dispatch onSelect callback if selection changed
     if (zoneEntry?.onSelect && navResult.targetId) {
       const updatedZone = result.state.os.focus.zones[activeZoneId];
-      const prevSelection = zone.selection;
-      const newSelection = updatedZone?.selection;
-      if (
-        newSelection &&
-        (newSelection.length !== prevSelection.length ||
-          newSelection.some((id: string, i: number) => id !== prevSelection[i]))
-      ) {
+      // Compare selection via items map
+      const prevSelected = new Set(
+        Object.keys(zone.items ?? {}).filter((id) => zone.items[id]?.["aria-selected"]),
+      );
+      const newSelected = new Set(
+        Object.keys(updatedZone?.items ?? {}).filter((id) => updatedZone?.items[id]?.["aria-selected"]),
+      );
+      const changed = prevSelected.size !== newSelected.size ||
+        [...prevSelected].some((id) => !newSelected.has(id));
+      if (changed) {
         const cursor = buildZoneCursor(updatedZone);
         if (cursor) {
           return {

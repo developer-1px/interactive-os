@@ -18,34 +18,29 @@ export type {
 export type { OSCommandType } from "./command/OSCommands.ts";
 export { OS_COMMANDS } from "./command/OSCommands.ts";
 // ── Focus config ──
-export type { ActivateConfig } from "./focus/config/FocusActivateConfig.ts";
-export { DEFAULT_ACTIVATE } from "./focus/config/FocusActivateConfig.ts";
-export type { DismissConfig } from "./focus/config/FocusDismissConfig.ts";
-export { DEFAULT_DISMISS } from "./focus/config/FocusDismissConfig.ts";
 export type {
-  ActionConfig,
-  ActionKey,
+  DismissConfig,
   ExpandConfig,
   FocusGroupConfig,
-} from "./focus/config/FocusGroupConfig.ts";
-export {
-  DEFAULT_ACTION,
-  DEFAULT_CONFIG,
-  DEFAULT_EXPAND,
-} from "./focus/config/FocusGroupConfig.ts";
-export type {
+  InputMap,
   NavigateConfig,
   NavigateEntry,
-} from "./focus/config/FocusNavigateConfig.ts";
-export { DEFAULT_NAVIGATE } from "./focus/config/FocusNavigateConfig.ts";
-export type { ProjectConfig } from "./focus/config/FocusProjectConfig.ts";
-export { DEFAULT_PROJECT } from "./focus/config/FocusProjectConfig.ts";
-export type { SelectConfig } from "./focus/config/FocusSelectConfig.ts";
-export { DEFAULT_SELECT } from "./focus/config/FocusSelectConfig.ts";
-export type { TabConfig } from "./focus/config/FocusTabConfig.ts";
-export { DEFAULT_TAB } from "./focus/config/FocusTabConfig.ts";
-export type { ValueConfig } from "./focus/config/FocusValueConfig.ts";
-export { DEFAULT_VALUE } from "./focus/config/FocusValueConfig.ts";
+  ProjectConfig,
+  SelectConfig,
+  TabConfig,
+  ValueConfig,
+} from "./focus/config/FocusGroupConfig.ts";
+export {
+  DEFAULT_CONFIG,
+  DEFAULT_DISMISS,
+  DEFAULT_EXPAND,
+  DEFAULT_INPUTMAP,
+  DEFAULT_NAVIGATE,
+  DEFAULT_PROJECT,
+  DEFAULT_SELECT,
+  DEFAULT_TAB,
+  DEFAULT_VALUE,
+} from "./focus/config/FocusGroupConfig.ts";
 // ── Focus domain ──
 export type {
   Direction,

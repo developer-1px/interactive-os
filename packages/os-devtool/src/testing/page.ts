@@ -8,21 +8,8 @@
  * "Same test code, different runtime."
  */
 
-import { Keybindings } from "@os-core/2-resolve/keybindings";
-import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import type { Transaction } from "@kernel/core/transaction";
-import { ensureZone } from "@os-core/schema/state/utils";
-import {
-  type ActivateConfig,
-  DEFAULT_CONFIG,
-  type DismissConfig,
-  type FocusGroupConfig,
-  type NavigateConfig,
-  type SelectConfig,
-  type TabConfig,
-} from "@os-core/schema/types/focus/config/FocusGroupConfig";
-import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
+import { Keybindings } from "@os-core/2-resolve/keybindings";
 import {
   computeAttrs,
   readActiveZoneId,
@@ -30,10 +17,21 @@ import {
   resolveElement,
 } from "@os-core/3-inject/compute";
 import type { ElementAttrs, ItemAttrs } from "@os-core/3-inject/headless.types";
+import { seedAriaState } from "@os-core/3-inject/seedAriaState";
+import { simulateClick, simulateKeyPress } from "@os-core/3-inject/simulate";
+import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
+import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { ensureZone } from "@os-core/schema/state/utils";
 import {
-  simulateClick,
-  simulateKeyPress,
-} from "@os-core/3-inject/simulate";
+  DEFAULT_CONFIG,
+  type DismissConfig,
+  type FocusGroupConfig,
+  type InputMap,
+  type NavigateConfig,
+  type SelectConfig,
+  type TabConfig,
+} from "@os-core/schema/types/focus/config/FocusGroupConfig";
 import { produce } from "immer";
 import { createElement, type FC } from "react";
 import { renderToString } from "react-dom/server";
@@ -46,10 +44,7 @@ import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
-import type {
-  AppPage,
-  ZoneBindingEntry,
-} from "@os-sdk/app/defineApp/types";
+import type { AppPage, ZoneBindingEntry } from "@os-sdk/app/defineApp/types";
 
 // ═══════════════════════════════════════════════════════════════════
 // formatDiagnostics — Pure diagnostic formatter
@@ -115,9 +110,7 @@ export function formatDiagnostics(kernel: DiagnosticKernel): string {
   // Transaction listing
   for (const tx of relevantTxs) {
     const noChanges = tx.changes.length === 0;
-    lines.push(
-      `  #${tx.id} ${tx.command.type}${noChanges ? " ⚠️ Δ none" : ""}`,
-    );
+    lines.push(`  #${tx.id} ${tx.command.type}${noChanges ? " ⚠️ Δ none" : ""}`);
     if (!noChanges) {
       for (const change of tx.changes) {
         lines.push(
@@ -260,7 +253,6 @@ export interface OsPage {
   OS_VALUE_CHANGE: typeof import("@os-core/4-command/valueChange").OS_VALUE_CHANGE;
 }
 
-
 // ═══════════════════════════════════════════════════════════════════
 // createAppPage — Preview-based, ~50 lines of logic
 // ═══════════════════════════════════════════════════════════════════
@@ -313,9 +305,10 @@ export function createAppPage<S>(
         lastItemId:
           filtered[filtered.length - 1] ?? zoneState?.lastFocusedId ?? null,
         entry,
-        selectedItemId: Object.keys(zoneState?.items ?? {}).find(
-          (id) => zoneState?.items?.[id]?.["aria-selected"]
-        ) ?? null,
+        selectedItemId:
+          Object.keys(zoneState?.items ?? {}).find(
+            (id) => zoneState?.items?.[id]?.["aria-selected"],
+          ) ?? null,
         lastFocusedId: zoneState?.lastFocusedId ?? null,
       });
     }
@@ -483,8 +476,12 @@ export function createAppPage<S>(
     },
     selection(zoneId?: string) {
       return Object.entries(
-        (os.getState().os.focus.zones[zoneId ?? os.getState().os.focus.activeZoneId ?? ""]?.items ?? {})
-      ).filter(([, s]) => s?.["aria-selected"]).map(([id]) => id);
+        os.getState().os.focus.zones[
+          zoneId ?? os.getState().os.focus.activeZoneId ?? ""
+        ]?.items ?? {},
+      )
+        .filter(([, s]) => s?.["aria-selected"])
+        .map(([id]) => id);
     },
     activeZoneId() {
       return readActiveZoneId(os);
@@ -750,11 +747,11 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         navigate: { ...base.navigate, ...config.navigate },
         tab: { ...base.tab, ...config.tab },
         select: { ...base.select, ...config.select },
-        activate: { ...base.activate, ...config.activate },
         dismiss: { ...base.dismiss, ...config.dismiss },
         project: { ...base.project, ...config.project },
         expand: { ...base.expand, ...config.expand },
         value: { ...base.value, ...config.value },
+        inputmap: { ...base.inputmap, ...config.inputmap },
       } as FocusGroupConfig;
     },
     setRole(zoneId, role, opts) {
@@ -807,7 +804,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         parentId: null,
         ...(existingEntry?.getItems
           ? { getItems: existingEntry.getItems }
-          : {}),
+          : { getItems: () => mockItems.current }),
         ...(mockExpandableItems.current.size > 0
           ? { getExpandableItems: () => mockExpandableItems.current }
           : {}),
@@ -819,12 +816,26 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
           ? { onDelete: existingEntry.onDelete }
           : {}),
       });
+
+      // Seed aria-* from config (mirrors OS_ZONE_INIT)
+      const seeded = seedAriaState(mockConfig.current, mockItems.current);
+
       os.setState((s: AppState) =>
         produce(s, (draft) => {
           draft.os.focus.activeZoneId = zoneId;
+
+          // Only seed if zone doesn't exist yet (first creation)
+          const isNew = !draft.os.focus.zones[zoneId];
           const z = ensureZone(draft.os, zoneId);
           z.focusedItemId = focusedItemId;
           if (focusedItemId) z.lastFocusedId = focusedItemId;
+
+          // Apply seed only on first creation
+          if (isNew) {
+            for (const [id, ariaState] of Object.entries(seeded)) {
+              z.items[id] = { ...ariaState };
+            }
+          }
         }),
       );
     },
@@ -864,7 +875,9 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         expandedItems: {
           get() {
             return Object.entries(z.items ?? {})
-              .filter(([, s]) => (s as Record<string, unknown>)?.["aria-expanded"])
+              .filter(
+                ([, s]) => (s as Record<string, unknown>)?.["aria-expanded"],
+              )
               .map(([itemId]) => itemId);
           },
           enumerable: true,
@@ -872,7 +885,9 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         selection: {
           get() {
             return Object.entries(z.items ?? {})
-              .filter(([, s]) => (s as Record<string, unknown>)?.["aria-selected"])
+              .filter(
+                ([, s]) => (s as Record<string, unknown>)?.["aria-selected"],
+              )
               .map(([itemId]) => itemId);
           },
           enumerable: true,
@@ -910,14 +925,6 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
               } as Partial<SelectConfig>,
             }
             : {}),
-          ...(opts.config.activate
-            ? {
-              activate: {
-                ...base.activate,
-                ...opts.config.activate,
-              } as Partial<ActivateConfig>,
-            }
-            : {}),
           ...(opts.config.dismiss
             ? {
               dismiss: {
@@ -943,11 +950,11 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
               },
             }
             : {}),
-          ...(opts.config.action
+          ...(opts.config.inputmap
             ? {
-              action: {
-                ...base.action,
-                ...opts.config.action,
+              inputmap: {
+                ...base.inputmap,
+                ...opts.config.inputmap,
               },
             }
             : {}),
@@ -964,9 +971,10 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         // Auto-provide getExpandableItems based on expand.mode
         ...(mockConfig.current.expand?.mode === "explicit"
           ? {
-            getExpandableItems: () => mockExpandableItems.current.size > 0
-              ? mockExpandableItems.current
-              : new Set(mockItems.current),
+            getExpandableItems: () =>
+              mockExpandableItems.current.size > 0
+                ? mockExpandableItems.current
+                : new Set(mockItems.current),
           }
           : {}),
         ...(opts?.onAction ? { onAction: opts.onAction } : {}),
@@ -997,27 +1005,63 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         config: mockConfig.current,
       } as Parameters<typeof basePage.goto>[1]);
 
-      if (initialSelection) {
-        os.setState((s: AppState) =>
-          produce(s, (draft) => {
-            const z = ensureZone(draft.os, zoneId);
-            for (const id of initialSelection!) {
-              if (!z.items[id]) z.items[id] = {};
-              z.items[id] = { ...z.items[id], "aria-selected": true };
-            }
-            z.selectionAnchor = initialSelection![0] ?? null;
-          }),
-        );
-      }
+      // ── T1+T2: Seed initial aria-* keys based on config ──
+      // This ensures items[id] contains the aria-* keys that this Zone
+      // projects, so computeItem can use `"key" in state` instead of
+      // scanning inputmap/config at projection time.
+      const allItems = opts?.items ?? mockItems.current;
+      const selectMode = mockConfig.current.select?.mode ?? "none";
+      const inputmapValues = mockConfig.current.inputmap
+        ? Object.values(mockConfig.current.inputmap)
+        : [];
+      const hasCheckCmd = inputmapValues.some((cmds) =>
+        cmds.some((c) => c.type === "OS_CHECK"),
+      );
+      const hasPressCmd = inputmapValues.some((cmds) =>
+        cmds.some((c) => c.type === "OS_PRESS"),
+      );
+      const expandMode = mockConfig.current.expand?.mode ?? "none";
+      const hasExpand = expandMode !== "none";
+      const needsAriaSeed =
+        selectMode !== "none" || hasCheckCmd || hasPressCmd || hasExpand;
 
-      // Apply initial expanded state
-      if (opts?.initial?.expanded) {
+      if (needsAriaSeed || initialSelection || opts?.initial?.expanded) {
         os.setState((s: AppState) =>
           produce(s, (draft) => {
             const z = ensureZone(draft.os, zoneId);
-            for (const id of opts.initial!.expanded!) {
+
+            // Seed aria-* false for all items based on config
+            for (const id of allItems) {
               if (!z.items[id]) z.items[id] = {};
-              z.items[id] = { ...z.items[id], "aria-expanded": true };
+              if (selectMode !== "none") {
+                z.items[id] = { ...z.items[id], "aria-selected": false };
+              }
+              if (hasCheckCmd) {
+                z.items[id] = { ...z.items[id], "aria-checked": false };
+              }
+              if (hasPressCmd) {
+                z.items[id] = { ...z.items[id], "aria-pressed": false };
+              }
+              if (hasExpand) {
+                z.items[id] = { ...z.items[id], "aria-expanded": false };
+              }
+            }
+
+            // Apply initial selection (override false → true)
+            if (initialSelection) {
+              for (const id of initialSelection!) {
+                if (!z.items[id]) z.items[id] = {};
+                z.items[id] = { ...z.items[id], "aria-selected": true };
+              }
+              z.selectionAnchor = initialSelection![0] ?? null;
+            }
+
+            // Apply initial expanded state (override false → true)
+            if (opts?.initial?.expanded) {
+              for (const id of opts.initial!.expanded!) {
+                if (!z.items[id]) z.items[id] = {};
+                z.items[id] = { ...z.items[id], "aria-expanded": true };
+              }
             }
           }),
         );

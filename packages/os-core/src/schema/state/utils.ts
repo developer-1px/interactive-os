@@ -10,7 +10,13 @@ import type { OSState, ZoneState } from "./OSState";
  */
 export function ensureZone(draft: OSState, zoneId: string): ZoneState {
   if (!draft.focus.zones[zoneId]) {
-    draft.focus.zones[zoneId] = { ...initialZoneState, zoneId };
+    draft.focus.zones[zoneId] = {
+      ...initialZoneState,
+      zoneId,
+      items: {},
+      caretPositions: {},
+      valueNow: {},
+    };
   }
   return draft.focus.zones[zoneId];
 }

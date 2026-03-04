@@ -6,6 +6,7 @@
  */
 
 import { computeContainerProps } from "@os-core/3-inject/zoneContext";
+import { readActiveZoneId } from "@os-core/3-inject/readState";
 import { getChildRole } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { DEFAULT_CONFIG } from "@os-core/schema/types/focus/config/FocusGroupConfig";
@@ -22,33 +23,13 @@ import type {
 // Re-export types that consumers need
 export type { ItemState, TriggerAttrs } from "./headless.types";
 
-// ═══════════════════════════════════════════════════════════════════
-// State Readers
-// ═══════════════════════════════════════════════════════════════════
-
-export function readActiveZoneId(kernel: HeadlessKernel): string | null {
-  return kernel.getState().os.focus.activeZoneId;
-}
-
-function readZone(kernel: HeadlessKernel, zoneId?: string) {
-  const id = zoneId ?? readActiveZoneId(kernel);
-  return id ? kernel.getState().os.focus.zones[id] : undefined;
-}
-
-export function readFocusedItemId(
-  kernel: HeadlessKernel,
-  zoneId?: string,
-): string | null {
-  return readZone(kernel, zoneId)?.focusedItemId ?? null;
-}
-
-export function readSelected(
-  kernel: HeadlessKernel,
-  itemId: string,
-  zoneId?: string,
-): boolean {
-  return readZone(kernel, zoneId)?.items[itemId]?.["aria-selected"] ?? false;
-}
+// State readers — extracted to readState.ts, re-exported for backward compat
+export {
+  readActiveZoneId,
+  readFocusedItemId,
+  readSelected,
+  readZone,
+} from "./readState";
 
 // ═══════════════════════════════════════════════════════════════════
 // computeItem — Single Source of Truth for item attrs + state.
@@ -71,32 +52,27 @@ export function computeItem(
     overrides?.role || (entry?.role ? getChildRole(entry.role) : undefined);
 
   // ── ARIA item state — read directly from items map ──
-  // Commands wrote aria-* directly. No derivation. DOM is source of truth.
+  // Seeded at Zone init (OS_ZONE_INIT) via seedAriaState().
+  // Commands mutate values. computeItem just projects.
   const ariaItemState = z?.items?.[itemId] ?? {};
-  const isAriaSelected = overrides?.selected ?? ariaItemState["aria-selected"] ?? false;
-  const isAriaChecked = ariaItemState["aria-checked"] ?? false;
-  const isAriaPressed = ariaItemState["aria-pressed"] ?? false;
+  const isAriaSelected =
+    overrides?.selected ?? ariaItemState["aria-selected"] ?? false;
   const isAriaExpanded = ariaItemState["aria-expanded"] ?? false;
 
-  // ── Expand axis — expandable attribute (config-driven) ──
-  const expandable = ZoneRegistry.isExpandable(zoneId, itemId);
-
   // ── Value axis ──
-  const valueMode = entry?.config?.value?.mode ?? "none";
+  const valueConfig = entry?.config?.value;
+  const valueMode = valueConfig?.mode ?? "none";
   const currentValue =
-    valueMode === "continuous"
-      ? (z?.valueNow?.[itemId] ?? entry!.config!.value!.min)
+    valueMode === "continuous" && valueConfig
+      ? (z?.valueNow?.[itemId] ?? valueConfig.min)
       : undefined;
 
   const isFocused = z?.focusedItemId === itemId;
   const isActiveZone = s.os.focus.activeZoneId === zoneId;
-  const isDisabled = overrides?.disabled || ZoneRegistry.isDisabled(zoneId, itemId);
+  const isDisabled =
+    overrides?.disabled || ZoneRegistry.isDisabled(zoneId, itemId);
   const isActiveFocused = isFocused && isActiveZone;
   const isAnchor = isFocused && !isActiveZone;
-
-  const hasSelectRole = (entry?.config?.select?.mode ?? "none") !== "none";
-  const hasCheckCommand = entry?.config?.action?.commands?.some((c) => c.type === "OS_CHECK") ?? false;
-  const hasPressCommand = entry?.config?.action?.commands?.some((c) => c.type === "OS_PRESS") ?? false;
 
   const attrs: ItemAttrs = {
     id: itemId,
@@ -110,26 +86,24 @@ export function computeItem(
     "data-expanded": isAriaExpanded || undefined,
   };
 
-  // ── ARIA: command-driven projection — false must also be present when role is declared ──
-  if (hasSelectRole) attrs["aria-selected"] = isAriaSelected;
-  if (hasCheckCommand || ariaItemState["aria-checked"] !== undefined) {
-    attrs["aria-checked"] = isAriaChecked;
-  }
-  if (hasPressCommand || ariaItemState["aria-pressed"] !== undefined) {
-    attrs["aria-pressed"] = isAriaPressed;
+  // ── ARIA: pure projection from items[id] ──
+  // Items map is seeded at Zone init. Commands mutate values.
+  // computeItem just projects whatever keys exist — no config scanning.
+  if ("aria-selected" in ariaItemState) attrs["aria-selected"] = isAriaSelected;
+  if ("aria-checked" in ariaItemState)
+    attrs["aria-checked"] = ariaItemState["aria-checked"] ?? false;
+  if ("aria-pressed" in ariaItemState)
+    attrs["aria-pressed"] = ariaItemState["aria-pressed"] ?? false;
+  if ("aria-expanded" in ariaItemState) {
+    attrs["aria-expanded"] = isAriaExpanded;
+    attrs["aria-controls"] = `panel-${itemId}`;
   }
 
   // ── Value attrs ──
-  if (valueMode === "continuous" && entry?.config?.value) {
-    attrs["aria-valuenow"] = currentValue;
-    attrs["aria-valuemin"] = entry.config.value.min;
-    attrs["aria-valuemax"] = entry.config.value.max;
-  }
-
-  // ── Expand attrs ──
-  if (expandable) {
-    attrs["aria-expanded"] = isAriaExpanded;
-    attrs["aria-controls"] = `panel-${itemId}`;
+  if (valueMode === "continuous" && valueConfig) {
+    attrs["aria-valuenow"] = currentValue!;
+    attrs["aria-valuemin"] = valueConfig.min;
+    attrs["aria-valuemax"] = valueConfig.max;
   }
 
   if (isDisabled) {
@@ -177,9 +151,7 @@ export function computeAttrs(
  * Map overlay type to aria-haspopup value.
  * See WAI-ARIA 1.2 § aria-haspopup.
  */
-function toAriaHaspopup(
-  overlayType: string,
-): TriggerAttrs["aria-haspopup"] {
+function toAriaHaspopup(overlayType: string): TriggerAttrs["aria-haspopup"] {
   switch (overlayType) {
     case "menu":
       return "menu";
@@ -248,22 +220,13 @@ export function resolveElement(
     const s = kernel.getState();
     const isActive = s.os.focus.activeZoneId === elementId;
     const config = entry.config ?? DEFAULT_CONFIG;
-    return computeContainerProps(
-      elementId,
-      config,
-      isActive,
-      entry.role,
-    ) as unknown as ElementAttrs;
+    return computeContainerProps(elementId, config, isActive, entry.role);
   }
 
   // Check if it's an Item within any Zone
   const ownerZoneId = ZoneRegistry.findZoneByItemId(elementId);
   if (ownerZoneId) {
-    const itemAttrs = computeAttrs(
-      kernel,
-      elementId,
-      ownerZoneId,
-    ) as unknown as ElementAttrs;
+    const itemAttrs = computeAttrs(kernel, elementId, ownerZoneId);
 
     // Merge trigger overlay ARIA if this item is also a trigger
     const triggerAttrs = computeTrigger(kernel, elementId);
@@ -272,16 +235,6 @@ export function resolveElement(
     }
 
     return itemAttrs;
-  }
-
-  // Fallback: try active zone
-  const activeZoneId = readActiveZoneId(kernel);
-  if (activeZoneId) {
-    return computeAttrs(
-      kernel,
-      elementId,
-      activeZoneId,
-    ) as unknown as ElementAttrs;
   }
 
   return {};

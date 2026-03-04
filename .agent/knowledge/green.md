@@ -22,6 +22,9 @@
 | **순수함수 PASS에서 멈춤** | Zone 태스크인데 UI 연결 없이 Done 처리 → 화면 동작 안 함 | /bind까지 가야 완성 |
 | **immer를 순수함수에 사용** | 테스트에서 draft 참조 이슈 | 순수함수 레이어는 spread/Object.assign |
 | **과잉 구현** | 테스트에 없는 edge case까지 미리 구현 → 테스트와 구현 괴리 | 테스트가 요구하는 것만 |
+| **기존 `as any` 통과** | migration 중 기존 코드의 `as any` 캐스트를 "기존이니까 OK"로 넘김 → rules.md 위반이 잔존 | 발견 즉시 수정 대상. "기존 코드"는 면죄부가 아님 |
+| **hot path 배열 할당** | `compute.ts`에 `Object.values().flat()` 넣음 → 매 아이템×매 렌더 GC 압력 | hot path 수정 시 "이 라인이 새 객체/배열을 만드는가?" 자문 |
+| **Immer frozen 공유 객체** | `{ ...initialZoneState }`의 중첩 객체(`items: {}`)가 원본과 같은 참조 → Immer freeze 후 새 key 추가 시 `object is not extensible` 에러 | `ensureZone`에서 `items: {}, caretPositions: {}, valueNow: {}` 등 중첩 객체를 fresh copy로 생성해야 함 |
 
 ## 3. 판정 선례
 
