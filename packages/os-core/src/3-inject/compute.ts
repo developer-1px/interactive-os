@@ -79,13 +79,7 @@ export function computeItem(
   const isAriaExpanded = ariaItemState["aria-expanded"] ?? false;
 
   // ── Expand axis — expandable attribute (config-driven) ──
-  const expandMode = entry?.config?.expand?.mode ?? "none";
-  const expandable =
-    expandMode === "all"
-      ? true
-      : expandMode === "explicit"
-        ? (entry?.getExpandableItems?.().has(itemId) ?? false)
-        : false;
+  const expandable = ZoneRegistry.isExpandable(zoneId, itemId);
 
   // ── Value axis ──
   const valueMode = entry?.config?.value?.mode ?? "none";
@@ -101,8 +95,8 @@ export function computeItem(
   const isAnchor = isFocused && !isActiveZone;
 
   const hasSelectRole = (entry?.config?.select?.mode ?? "none") !== "none";
-  const hasCheckCommand = entry?.config?.action?.commands?.some((c: any) => c.type === "OS_CHECK") ?? false;
-  const hasPressCommand = entry?.config?.action?.commands?.some((c: any) => c.type === "OS_PRESS") ?? false;
+  const hasCheckCommand = entry?.config?.action?.commands?.some((c) => c.type === "OS_CHECK") ?? false;
+  const hasPressCommand = entry?.config?.action?.commands?.some((c) => c.type === "OS_PRESS") ?? false;
 
   const attrs: ItemAttrs = {
     id: itemId,
@@ -114,15 +108,16 @@ export function computeItem(
     "data-anchor": isAnchor || undefined,
     "data-selected": isAriaSelected || undefined,
     "data-expanded": isAriaExpanded || undefined,
-    // ── ARIA: command-driven projection — false must also be present when role is declared ──
-    ...(hasSelectRole ? { "aria-selected": isAriaSelected } : {}),
-    ...((hasCheckCommand || ariaItemState["aria-checked"] !== undefined)
-      ? { "aria-checked": isAriaChecked }
-      : {}),
-    ...((hasPressCommand || ariaItemState["aria-pressed"] !== undefined)
-      ? { "aria-pressed": isAriaPressed }
-      : {}),
   };
+
+  // ── ARIA: command-driven projection — false must also be present when role is declared ──
+  if (hasSelectRole) attrs["aria-selected"] = isAriaSelected;
+  if (hasCheckCommand || ariaItemState["aria-checked"] !== undefined) {
+    attrs["aria-checked"] = isAriaChecked;
+  }
+  if (hasPressCommand || ariaItemState["aria-pressed"] !== undefined) {
+    attrs["aria-pressed"] = isAriaPressed;
+  }
 
   // ── Value attrs ──
   if (valueMode === "continuous" && entry?.config?.value) {

@@ -35,7 +35,7 @@
 | code-hygiene | T1 ✅, T2~T8 | 03-04 | 🔥 Focus |
 | builder-v2 | T12, T13, T20 | 02-26 | 🔥 Focus |
 | builder-v3 | 기획만. 개발 보류 | 03-04 | 🟢 Active |
-| os-restructure | Phase 2 #6-8 | 03-01 | 🟢 Active |
+| os-restructure | Phase 4 #10 Done | 03-04 | 🟢 Active |
 | test-observability | Scaffold, T1~T4 | 03-03 | 🟢 Active |
 | apg-developer-agent | Scaffold, POC | 03-01 | 🟢 Active |
 | inspector-dogfooding | T1~T4 ✅, T5 | 03-01 | 🟢 Active |

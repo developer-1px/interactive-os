@@ -382,6 +382,16 @@ export const ZoneRegistry = {
 
     return new Map();
   },
+
+  /** Check if a specific item is expandable (config-driven). */
+  isExpandable(zoneId: string, itemId: string): boolean {
+    const entry = registry.get(zoneId);
+    if (!entry) return false;
+    const mode = entry.config?.expand?.mode ?? "none";
+    if (mode === "all") return true;
+    if (mode === "explicit") return entry.getExpandableItems?.().has(itemId) ?? false;
+    return false;
+  },
 };
 
 const EMPTY_SET: ReadonlySet<string> = new Set();

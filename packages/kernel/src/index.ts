@@ -27,3 +27,4 @@ export type {
 export { GLOBAL } from "./core/tokens.ts";
 export type { Transaction } from "./core/transaction.ts";
 export { createKernel, defineScope } from "./createKernel.ts";
+export { createReactBindings } from "./createReactBindings.ts";

@@ -82,25 +82,7 @@ export function createZoneConfig(
   role?: ZoneRole | string,
   options?: ZoneOptions,
 ): FocusGroupConfig {
-  const overrides: {
-    navigate?: Partial<NavigateConfig>;
-    tab?: Partial<TabConfig>;
-    select?: Partial<SelectConfig>;
-    activate?: Partial<ActivateConfig>;
-    dismiss?: Partial<DismissConfig>;
-    project?: Partial<ProjectConfig>;
-    expand?: Partial<ExpandConfig>;
-    action?: Partial<ActionConfig>;
-  } = {};
-  if (options?.navigate !== undefined) overrides.navigate = options.navigate;
-  if (options?.tab !== undefined) overrides.tab = options.tab;
-  if (options?.select !== undefined) overrides.select = options.select;
-  if (options?.activate !== undefined) overrides.activate = options.activate;
-  if (options?.dismiss !== undefined) overrides.dismiss = options.dismiss;
-  if (options?.project !== undefined) overrides.project = options.project;
-  if (options?.expand !== undefined) overrides.expand = options.expand;
-  if (options?.action !== undefined) overrides.action = options.action;
-  return resolveRole(role, overrides);
+  return resolveRole(role, options ?? {});
 }
 
 // ═══════════════════════════════════════════════════════════════════

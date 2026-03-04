@@ -43,10 +43,12 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
 
   // Item layer: expanded state
   const focusedItemId = itemEl?.id ?? null;
-  const focusedItemExpanded =
-    focusedItemId && zone?.expandedItems
-      ? zone.expandedItems.includes(focusedItemId)
-      : null;
+  const isFocusedExpandable = focusedItemId && activeZoneId
+    ? ZoneRegistry.isExpandable(activeZoneId, focusedItemId)
+    : false;
+  const focusedItemExpanded = isFocusedExpandable && focusedItemId
+    ? (zone?.items?.[focusedItemId]?.["aria-expanded"] ?? false)
+    : null;
 
   // Role → FieldType mapping for always-active Fields
   const itemRole = itemEl?.getAttribute("role") ?? null;
@@ -96,10 +98,10 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
     cursor: zone?.focusedItemId
       ? {
         focusId: zone.focusedItemId,
-        selection: zone.selection ?? [],
+        selection: Object.entries(zone.items ?? {}).filter(([, s]) => s?.["aria-selected"]).map(([id]) => id),
         anchor: zone.selectionAnchor ?? null,
-        isExpandable: false,
-        isDisabled: false,
+        isExpandable: isFocusedExpandable,
+        isDisabled: focusedItemId && activeZoneId ? ZoneRegistry.isDisabled(activeZoneId, focusedItemId) : false,
         treeLevel: undefined,
       }
       : null,

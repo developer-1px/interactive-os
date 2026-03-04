@@ -14,8 +14,7 @@
  *   kernel.dispatch(INC());
  */
 
-import { useCallback, useRef, useSyncExternalStore } from "react";
-import { shallow } from "./core/shallow.ts";
+
 
 // ─── Logger Adapter ───
 // Kernel-local logger. Defaults to console. No public API surface.
@@ -758,97 +757,7 @@ export function createKernel<S>(initialState: S) {
     [],
   );
 
-  // ─── useComputed (React Hook) ───
 
-  function useComputed<T>(selector: (state: S) => T): T {
-    // We stabilize the selector result using a dual-layer cache strategy.
-    // 1. Input Stability: If state & selector haven't changed, return cached result.
-    // 2. Output Stability: If calculated result is shallow-equal to cached result, return cached result.
-
-    const selectorRef = useRef(selector);
-    // Update ref during render so getSnapshot always has fresh closure
-    selectorRef.current = selector;
-
-    const cacheRef = useRef<{
-      state: S;
-      selection: T;
-      selectorInput: (state: S) => T; // To invalid cache on selector change
-    } | null>(null);
-
-    const getSnapshot = useCallback(() => {
-      const currentState = getState();
-      const currentSelector = selectorRef.current;
-
-      // Layer 1: Input Memoization (Optimistic)
-      if (
-        cacheRef.current &&
-        cacheRef.current.state === currentState &&
-        cacheRef.current.selectorInput === currentSelector
-      ) {
-        return cacheRef.current.selection;
-      }
-
-      // Re-calculate
-      const nextSelection = currentSelector(currentState);
-
-      // Layer 2: Output Memoization (Integrity)
-      if (
-        cacheRef.current &&
-        shallow(cacheRef.current.selection, nextSelection)
-      ) {
-        // Update input cache but keep old output reference
-        cacheRef.current.state = currentState;
-        cacheRef.current.selectorInput = currentSelector;
-        return cacheRef.current.selection;
-      }
-
-      // Update full cache
-      cacheRef.current = {
-        state: currentState,
-        selection: nextSelection,
-        selectorInput: currentSelector,
-      };
-
-      return nextSelection;
-    }, []);
-
-    return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  }
-
-  // ─── useQuery (React Hook) ───
-
-  function useQuery<T>(token: QueryToken<string, T>): T {
-    const tokenRef = useRef(token);
-    tokenRef.current = token;
-
-    const cacheRef = useRef<{
-      state: S;
-      value: T;
-    } | null>(null);
-
-    const getSnapshot = useCallback(() => {
-      const currentState = getState();
-      const id = tokenRef.current.__id;
-
-      // Resolve through the query cache (handles invalidateOn internally)
-      const nextValue = resolveQuery<T>(id);
-
-      // Output stability: shallow compare to prevent unnecessary re-renders
-      if (cacheRef.current && shallow(cacheRef.current.value, nextValue)) {
-        cacheRef.current.state = currentState;
-        return cacheRef.current.value;
-      }
-
-      cacheRef.current = {
-        state: currentState,
-        value: nextValue,
-      };
-
-      return nextValue;
-    }, []);
-
-    return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  }
 
   // ─── Inspector Port (narrow read-only window into kernel internals) ───
 
@@ -929,9 +838,7 @@ export function createKernel<S>(initialState: S) {
       return previewState !== null;
     },
 
-    // React
-    useComputed,
-    useQuery,
+
 
     // Query (fourth primitive)
     defineQuery,

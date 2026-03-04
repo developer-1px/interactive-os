@@ -5,7 +5,7 @@
  * The `os` variable is the public API for all apps.
  */
 
-import { createKernel } from "@kernel";
+import { createKernel, createReactBindings } from "@kernel";
 import { enablePatches } from "immer";
 import { initialOSState } from "../schema/state/initial";
 import type { OSState } from "../schema/state/OSState";
@@ -32,7 +32,8 @@ export const initialAppState: AppState = {
 // OS Instance (powered by createKernel)
 // ═══════════════════════════════════════════════════════════════════
 
-export const os = createKernel<AppState>(initialAppState);
+const _os = createKernel<AppState>(initialAppState);
+export const os = Object.assign(_os, createReactBindings(_os));
 
 // ═══════════════════════════════════════════════════════════════════
 // Dev/Test: Expose OS on window for Playwright E2E

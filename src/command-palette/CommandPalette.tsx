@@ -12,12 +12,12 @@
 import { OS_OVERLAY_CLOSE } from "@os-core/4-command";
 import { os } from "@os-core/engine/kernel";
 import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
-import { Kbd } from "@os-react/6-project/widgets/Kbd";
+import { Kbd } from "@inspector/shell/components/Kbd";
 import {
   QuickPick,
   type QuickPickItem,
   type QuickPickRenderState,
-} from "@os-react/6-project/widgets/quickpick/QuickPick";
+} from "./QuickPick";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { type FuzzyMatchResult, fuzzyMatch } from "./fuzzyMatch";

@@ -46,6 +46,20 @@ const INLINE_ZONE_PASSTHROUGH = new Set([
   "Shift+ArrowDown",
 ]);
 
+const FULL_ZONE_PASSTHROUGH = new Set([
+  "Escape",
+  "Tab",
+  "Shift+Tab",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "Space",
+  "Enter",
+  "Home",
+  "End",
+]);
+
 const ZONE_PASSTHROUGH_KEYS: Record<FieldType, Set<string>> = {
   // inline: single-line input (draft, search, rename)
   // Passes: Tab (zone escape), ↑↓ (item navigation)
@@ -69,53 +83,19 @@ const ZONE_PASSTHROUGH_KEYS: Record<FieldType, Set<string>> = {
   // enum: Zone+Item composition (radiogroup, listbox, select)
   // All keys pass through to Zone — Arrow for navigation, Space for selection.
   // Field layer doesn't intercept; Zone+Item handle everything.
-  enum: new Set([
-    "Escape",
-    "Tab",
-    "Shift+Tab",
-    "ArrowUp",
-    "ArrowDown",
-    "ArrowLeft",
-    "ArrowRight",
-    "Space",
-    "Enter",
-    "Home",
-    "End",
-  ]),
+  enum: FULL_ZONE_PASSTHROUGH,
 
   // enum[]: multi-select Zone+Item composition
-  // Same as enum — all keys pass to Zone for navigation + multi-selection.
+  // Same as enum + Shift+Arrow for range-extend selection.
   "enum[]": new Set([
-    "Escape",
-    "Tab",
-    "Shift+Tab",
-    "ArrowUp",
-    "ArrowDown",
-    "ArrowLeft",
-    "ArrowRight",
-    "Space",
-    "Enter",
-    "Home",
-    "End",
+    ...FULL_ZONE_PASSTHROUGH,
     "Shift+ArrowUp",
     "Shift+ArrowDown",
   ]),
 
   // readonly: observation only (progressbar, meter). No interaction.
   // All keys pass through — Field never intercepts.
-  readonly: new Set([
-    "Escape",
-    "Tab",
-    "Shift+Tab",
-    "ArrowUp",
-    "ArrowDown",
-    "ArrowLeft",
-    "ArrowRight",
-    "Space",
-    "Enter",
-    "Home",
-    "End",
-  ]),
+  readonly: FULL_ZONE_PASSTHROUGH,
 };
 
 /**

@@ -64,11 +64,6 @@ const INLINE_KEYMAP: FieldKeymap = {
   Escape: () => OS_FIELD_CANCEL(),
 };
 
-const TOKENS_KEYMAP: FieldKeymap = {
-  Enter: () => OS_FIELD_COMMIT(),
-  Escape: () => OS_FIELD_CANCEL(),
-};
-
 const BLOCK_KEYMAP: FieldKeymap = {
   // Enter → NOT here (field owns = newline)
   Escape: () => OS_FIELD_CANCEL(),
@@ -95,7 +90,7 @@ const NUMBER_KEYMAP: FieldKeymap = {
 
 const FIELD_KEYMAPS: Record<FieldType, FieldKeymap> = {
   inline: INLINE_KEYMAP,
-  tokens: TOKENS_KEYMAP,
+  tokens: INLINE_KEYMAP,
   block: BLOCK_KEYMAP,
   editor: EDITOR_KEYMAP,
   number: NUMBER_KEYMAP,

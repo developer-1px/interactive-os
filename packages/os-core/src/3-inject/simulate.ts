@@ -26,6 +26,7 @@ import {
   generateZoneId,
   type ZoneCallbacks,
 } from "@os-core/3-inject/zoneContext";
+import { buildZoneCursor } from "@os-core/4-command/utils/buildZoneCursor";
 import {
   OS_COPY,
   OS_CUT,
@@ -121,9 +122,8 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
   const editingFieldId = entry?.fieldId ?? null;
 
   const focusedId = zone?.focusedItemId ?? null;
-  const expandableItems = entry?.getExpandableItems?.() ?? new Set<string>();
-  const isFocusedExpandable = focusedId
-    ? expandableItems.has(focusedId)
+  const isFocusedExpandable = focusedId && activeZoneId
+    ? ZoneRegistry.isExpandable(activeZoneId, focusedId)
     : false;
 
   // Role → FieldType mapping for always-active Fields
@@ -158,16 +158,7 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
     focusedTriggerOverlayId: null,
     isTriggerOverlayOpen: false,
     elementId: focusedId ?? undefined,
-    cursor: focusedId
-      ? {
-        focusId: focusedId,
-        selection: Object.entries(zone?.items ?? {}).filter(([, s]) => s?.["aria-selected"]).map(([id]) => id),
-        anchor: zone?.selectionAnchor ?? null,
-        isExpandable: isFocusedExpandable,
-        isDisabled: false,
-        treeLevel: undefined,
-      }
-      : null,
+    cursor: buildZoneCursor(zone),
   };
 
   const result = resolveKeyboard(input);
@@ -175,7 +166,7 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
   // Pipeline logging: keybinding resolution
   if (result.commands.length > 0) {
     console.debug(
-      `[keybind] ${key} → ${result.commands.map((c: any) => c.type).join(", ")}`,
+      `[keybind] ${key} → ${result.commands.map((c) => c.type).join(", ")}`,
     );
   } else {
     console.debug(`[keybind] ${key} → (no match)`);
@@ -186,8 +177,7 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
   // Pipeline logging: dispatch + focus change
   if (result.commands.length > 0) {
     for (const cmd of result.commands) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-      console.debug(`[dispatch] ${(cmd as any).type}`);
+      console.debug(`[dispatch] ${cmd.type}`);
     }
   }
 
@@ -256,13 +246,7 @@ export function simulateClick(
   const childRole = entry?.role ? getChildRole(entry.role) : undefined;
 
   // Expand axis — config-driven
-  const expandMode = entry?.config?.expand?.mode ?? "none";
-  const expandable =
-    expandMode === "all"
-      ? true
-      : expandMode === "explicit"
-        ? (entry?.getExpandableItems?.().has(itemId) ?? false)
-        : false;
+  const expandable = ZoneRegistry.isExpandable(zoneId, itemId);
 
   const preMousedownFocusedItemId = readFocusedItemId(kernel, zoneId);
   const preMousedownEditingItemId =

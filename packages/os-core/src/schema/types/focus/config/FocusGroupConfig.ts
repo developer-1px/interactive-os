@@ -239,8 +239,6 @@ export interface FocusGroupConfig {
   project: ProjectConfig;
   /** @deprecated → action */
   expand: ExpandConfig;
-  /** @deprecated → action */
-
   value: ValueConfig;
   /** v10: unified action axis. activate/check/expand를 대체. */
   action: ActionConfig;

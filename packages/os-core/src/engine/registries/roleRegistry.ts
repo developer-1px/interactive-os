@@ -490,7 +490,7 @@ export function resolveRole(
       const merged = {
         ...DEFAULT_ACTION,
         ...basePreset.action,
-        ...(overrides.action ? { ...basePreset.action, ...overrides.action } : {}),
+        ...(overrides.action ?? {}),
       } as ActionConfig;
       // Auto-derive keys from first command type if not explicitly set
       if (!merged.keys && merged.commands.length > 0) {
