@@ -47,18 +47,17 @@ describe("T1: NavigateConfig chain fields", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("T1: SelectConfig aria field", () => {
-    it("checkbox has check.keys = ['Space'] (not select.aria)", () => {
+    it("checkbox has action.commands=[OS_CHECK()]", () => {
         const config = resolveRole("checkbox");
-        // checkbox uses check axis, not select axis (select.mode = "none")
         expect(config.select.mode).toBe("none");
-        expect(config.check.keys).toEqual(["Space"]);
+        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
     });
 
-    it("switch has check.keys = ['Space', 'Enter'] (not select.aria)", () => {
+    it("switch has action.keys=['Space','Enter'] and OS_CHECK command", () => {
         const config = resolveRole("switch");
-        // switch uses check axis, not select axis (select.mode = "none")
         expect(config.select.mode).toBe("none");
-        expect(config.check.keys).toEqual(["Space", "Enter"]);
+        expect(config.action.keys).toEqual(["Space", "Enter"]);
+        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
     });
 
     it("listbox has select.aria = 'selected' (default)", () => {
