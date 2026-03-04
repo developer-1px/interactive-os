@@ -20,7 +20,7 @@
  *   - Enter on menuitem → menu closes + focus restore to trigger
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 const MENU_ITEMS = ["action-cut", "action-copy", "action-paste", "action-delete"];

@@ -8,7 +8,7 @@
  * Config는 bind({ initial })로 ZoneState 생성 시 포함.
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

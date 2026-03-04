@@ -22,7 +22,7 @@
  * Config: slider role (value axis), tab.behavior="flow" (Tab between thumbs)
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───

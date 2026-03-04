@@ -18,7 +18,7 @@ import {
   createOsPage,
   type GotoOptions,
   type OsPage,
-} from "@os-sdk/app/defineApp/page";
+} from "./page";
 import type { Locator, LocatorAssertions, Page } from "./types";
 
 // ═══════════════════════════════════════════════════════════════════

@@ -8,7 +8,7 @@
  * 🔴 RED: createOsPage currently has no auto-diagnostics on failure.
  */
 
-import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage, type OsPage } from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("T2: Auto-diagnostics on test failure", () => {

@@ -7,7 +7,7 @@
  * Test verifies the command exists and works correctly via app.ts.
  */
 
-import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage, type OsPage } from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { selectDoc } from "@/docs-viewer/app";
 

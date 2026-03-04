@@ -14,7 +14,7 @@
  *     expect(page.locator("nav-apple").toBeFocused()).toBe(true);
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, test } from "vitest";
 
 describe("Zone E2E → Headless (Playwright interface)", () => {

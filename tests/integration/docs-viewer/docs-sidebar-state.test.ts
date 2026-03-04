@@ -8,7 +8,7 @@
  */
 
 import { defineScope } from "@kernel";
-import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage, type OsPage } from "@os-devtool/testing/page";
 import { produce } from "immer";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 

@@ -20,7 +20,7 @@ import {
   type MouseInput,
   resolveMouse,
 } from "@os-core/1-listen/mouse/resolveMouse";
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it, vi } from "vitest";
 
 function baseInput(overrides: Partial<MouseInput> = {}): MouseInput {

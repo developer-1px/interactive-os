@@ -7,7 +7,7 @@
 
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { DEFAULT_CONFIG } from "@os-core/schema/types/focus/config/FocusGroupConfig";
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
 
 describe("itemFilter — dynamic item filtering", () => {

@@ -9,7 +9,7 @@
 import { addTodo, TodoApp } from "@apps/todo/app";
 import { dumpTransactions } from "@inspector/utils/dumpTransactions";
 import { os } from "@os-core/engine/kernel";
-import { createPage } from "@os-sdk/app/defineApp/page";
+import { createPage } from "@os-devtool/testing/page";
 import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, it, vi } from "vitest";
 import TodoPage from "@/pages/TodoPage";

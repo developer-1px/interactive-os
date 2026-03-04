@@ -27,7 +27,7 @@
  *   - tab: escape (Tab exits tablist)
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertHomeEnd,

@@ -3,7 +3,7 @@
  */
 
 import type { Transaction } from "@kernel/core/transaction";
-import { type AppPage, createPage } from "@os-sdk/app/defineApp/page";
+import { type AppPage, createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   INSPECTOR_SCROLL_TO_BOTTOM,

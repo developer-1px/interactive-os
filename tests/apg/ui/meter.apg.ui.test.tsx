@@ -9,7 +9,7 @@
  */
 
 import { OS_VALUE_CHANGE } from "@os-core/4-command";
-import { createPage } from "@os-sdk/app/defineApp/page";
+import { createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { beforeEach, describe, expect, it } from "vitest";
 

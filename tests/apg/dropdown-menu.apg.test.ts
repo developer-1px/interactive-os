@@ -12,7 +12,7 @@
  * without any app-level open/close commands.
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ── Simulate the LocaleSwitcher dropdown as a menu ──

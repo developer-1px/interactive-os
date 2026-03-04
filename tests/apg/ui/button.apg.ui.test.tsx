@@ -12,7 +12,7 @@
  * @see https://www.w3.org/WAI/ARIA/apg/patterns/button/
  */
 
-import { createPage } from "@os-sdk/app/defineApp/page";
+import { createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   ActionButtonApp,

@@ -10,7 +10,7 @@
  * Unique: aria-checked instead of aria-selected, Space to check
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Configs ───

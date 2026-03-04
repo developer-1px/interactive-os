@@ -14,7 +14,7 @@
  */
 
 import { OS_CHECK } from "@os-core/4-command/activate/check";
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───

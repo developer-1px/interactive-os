@@ -19,7 +19,7 @@
  *   Menu (popup) — vertical, loop, menuitem × 2, checkbox × 2, radio × 3
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertEscapeClose,

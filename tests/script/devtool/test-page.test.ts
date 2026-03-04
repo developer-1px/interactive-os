@@ -13,7 +13,7 @@
 // ── Todo App imports ──
 import { addTodo, TodoApp } from "@apps/todo/app";
 import { selectVisibleTodoIds } from "@apps/todo/selectors";
-import { createPage } from "@os-sdk/app/defineApp/page";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

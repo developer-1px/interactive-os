@@ -23,7 +23,7 @@
  *   C1: Click interaction
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,

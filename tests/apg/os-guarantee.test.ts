@@ -17,7 +17,7 @@
  */
 
 import { resolveItemId, resolveSelection } from "@os-core/schema/state/resolve";
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Config ───

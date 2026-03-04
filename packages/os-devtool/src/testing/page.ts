@@ -25,14 +25,15 @@ import {
 import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
 import {
   computeAttrs,
-  type ElementAttrs,
-  type ItemAttrs,
   readActiveZoneId,
   readFocusedItemId,
   resolveElement,
+} from "@os-core/3-inject/compute";
+import type { ElementAttrs, ItemAttrs } from "@os-core/3-inject/headless.types";
+import {
   simulateClick,
   simulateKeyPress,
-} from "@os-sdk/library/headless";
+} from "@os-core/3-inject/simulate";
 import { produce } from "immer";
 import { createElement, type FC } from "react";
 import { renderToString } from "react-dom/server";
@@ -47,10 +48,8 @@ import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type {
   AppPage,
-  FieldBindings,
-  KeybindingEntry,
-  ZoneBindings,
-} from "./types";
+  ZoneBindingEntry,
+} from "@os-sdk/app/defineApp/types";
 
 // ═══════════════════════════════════════════════════════════════════
 // formatDiagnostics — Pure diagnostic formatter
@@ -261,18 +260,6 @@ export interface OsPage {
   OS_VALUE_CHANGE: typeof import("@os-core/4-command/valueChange").OS_VALUE_CHANGE;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Zone Binding Entry — collected by defineApp.ts at zone.bind() time
-// ═══════════════════════════════════════════════════════════════════
-
-export interface ZoneBindingEntry {
-  role: ZoneRole;
-  bindings: ZoneBindings;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic keybinding entries
-  keybindings?: KeybindingEntry<any>[];
-  field?: FieldBindings;
-  triggers?: import("./types").TriggerBinding[];
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // createAppPage — Preview-based, ~50 lines of logic
@@ -606,8 +593,8 @@ import { OS_SELECT as prodOS_SELECT } from "@os-core/4-command/selection/select"
 import { OS_SELECTION_CLEAR as prodSELECTION_CLEAR } from "@os-core/4-command/selection/selection";
 import { OS_TAB as prodOS_TAB } from "@os-core/4-command/tab/tab";
 import { OS_VALUE_CHANGE as prodVALUE_CHANGE } from "@os-core/4-command/valueChange";
-import { defineApp } from "./index";
-import type { AppHandle } from "./types";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import type { AppHandle } from "@os-sdk/app/defineApp/types";
 
 /** Zone order entry — describes a zone's position and key items for tab navigation */
 export interface ZoneOrderEntry {

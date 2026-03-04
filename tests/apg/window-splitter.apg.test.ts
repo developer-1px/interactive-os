@@ -23,7 +23,7 @@
  */
 
 import { OS_VALUE_CHANGE } from "@os-core/4-command";
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───

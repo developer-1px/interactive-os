@@ -18,7 +18,7 @@
  * Config: flow tab, manual activate with onClick, expand=all
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───

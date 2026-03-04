@@ -12,7 +12,7 @@
  *   - Click on item: OS_FOCUS → OS_SELECT (replace/toggle/range)
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

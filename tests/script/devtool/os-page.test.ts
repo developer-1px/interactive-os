@@ -5,7 +5,7 @@
  * Validates that createOsPage produces identical results.
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 const ITEMS = ["apple", "banana", "cherry", "date", "elderberry"];

@@ -52,6 +52,7 @@ import {
   type KeybindingEntry,
   type Selector,
   type TestInstance,
+  type ZoneBindingEntry,
   type ZoneBindings,
   type ZoneHandle,
 } from "./types";
@@ -329,8 +330,8 @@ export function defineApp<S>(
         factory: CommandFactory<string, P>,
       ): React.FC<
         P extends void
-          ? { children: ReactNode; payload?: never }
-          : { children: ReactNode; payload: P }
+        ? { children: ReactNode; payload?: never }
+        : { children: ReactNode; payload: P }
       >;
       /* Command Overload: Returns simple component */
       (
@@ -361,7 +362,7 @@ export function defineApp<S>(
     __appId: appId,
     __zoneBindings: zoneBindingEntries as Map<
       string,
-      import("./page").ZoneBindingEntry
+      ZoneBindingEntry
     >,
   };
 }

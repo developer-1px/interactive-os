@@ -17,7 +17,7 @@
  *         action.commands=[OS_PRESS()] for toggle.
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Toggle Button Setup ───

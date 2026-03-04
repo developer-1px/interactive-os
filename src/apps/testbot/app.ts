@@ -18,7 +18,7 @@ import {
   TestBotRegistry,
 } from "@os-devtool/testing";
 import { defineApp } from "@os-sdk/app/defineApp";
-import { formatDiagnostics } from "@os-sdk/app/defineApp/page";
+import { formatDiagnostics } from "@os-devtool/testing/page";
 import { produce } from "immer";
 
 // ═══════════════════════════════════════════════════════════════════

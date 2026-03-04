@@ -14,7 +14,7 @@
  *   Config: orientation="both", select.mode="multiple", select.range=true
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── 3×3 Grid Layout ───

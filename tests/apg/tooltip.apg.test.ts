@@ -25,7 +25,7 @@
  * Config: horizontal toolbar with multiple buttons, each having a tooltip
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertHomeEnd,

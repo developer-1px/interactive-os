@@ -7,7 +7,7 @@
 
 import { addTodo, TodoApp } from "@apps/todo/app";
 import { ListView } from "@apps/todo/widgets/ListView";
-import { createPage } from "@os-sdk/app/defineApp/page";
+import { createPage } from "@os-devtool/testing/page";
 import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { afterEach, beforeEach, vi } from "vitest";

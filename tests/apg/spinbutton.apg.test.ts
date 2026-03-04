@@ -28,7 +28,7 @@
  * Config: spinbutton role, value axis with min/max/step/now
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───

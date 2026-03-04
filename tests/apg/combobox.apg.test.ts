@@ -14,7 +14,7 @@
  * which are already pressKey-based.
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { describe } from "vitest";
 import {
   assertBoundaryClamp,

@@ -131,6 +131,19 @@ export interface KeybindingEntry<S> {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Zone Binding Entry — collected by defineApp.ts at zone.bind() time
+// ═══════════════════════════════════════════════════════════════════
+
+export interface ZoneBindingEntry {
+  role: ZoneRole;
+  bindings: ZoneBindings;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic keybinding entries
+  keybindings?: KeybindingEntry<any>[];
+  field?: FieldBindings;
+  triggers?: TriggerBinding[];
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Bound Components (returned by bind)
 // ═══════════════════════════════════════════════════════════════════
 
@@ -242,7 +255,7 @@ export interface AppPage<S> {
   ): void;
 
   /** Get computed ARIA attributes for an item (headless DOM projection). */
-  attrs(itemId: string, zoneId?: string): import("./page").ItemAttrs;
+  attrs(itemId: string, zoneId?: string): import("@os-core/3-inject/headless.types").ItemAttrs;
 
   /** Currently focused item ID. */
   focusedItemId(zoneId?: string): string | null;
@@ -272,7 +285,7 @@ export interface AppPage<S> {
   dumpDiagnostics(): void;
 
   /** Playwright-style locator: query any element by ID (Zone or Item). */
-  locator(elementId: string): import("@os-sdk/app/defineApp/page").OsLocator;
+  locator(elementId: string): import("@os-devtool/testing/page").OsLocator;
 
   // ── Projection Checkpoint (optional — requires Component) ────────
 
@@ -317,5 +330,5 @@ export interface AppHandle<S> {
   /** @internal App ID for OS-level createPage. */
   readonly __appId: string;
   /** @internal Zone binding entries for OS-level createPage. */
-  readonly __zoneBindings: Map<string, import("./page").ZoneBindingEntry>;
+  readonly __zoneBindings: Map<string, ZoneBindingEntry>;
 }

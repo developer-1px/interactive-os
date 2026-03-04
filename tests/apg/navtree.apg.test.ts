@@ -14,7 +14,7 @@
  * Uses createOsPage for full pipeline testing.
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 
 // ─── Configs ───
 

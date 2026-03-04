@@ -19,7 +19,7 @@ import {
 } from "@apps/builder/features/hierarchicalNavigation";
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage, type OsPage } from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const ZONE_ID = "builder-canvas";

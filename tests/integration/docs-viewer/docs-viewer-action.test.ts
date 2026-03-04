@@ -13,7 +13,7 @@
  * Note: Auto-diagnostics registered by createAppPage (onTestFailed)
  */
 
-import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage, type OsPage } from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("T6: DocsViewer — navigation via OS selectDoc command", () => {

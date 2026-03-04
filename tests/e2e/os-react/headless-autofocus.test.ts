@@ -9,7 +9,7 @@
  * Tier 1: OS 커널 아키텍처 테스트
  */
 
-import { createOsPage, type OsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage, type OsPage } from "@os-devtool/testing/page";
 import { afterEach, describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

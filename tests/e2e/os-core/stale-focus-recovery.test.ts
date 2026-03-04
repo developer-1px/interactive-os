@@ -12,7 +12,7 @@
  */
 
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import { createOsPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Focus Stack — Stale Focus Recovery", () => {
