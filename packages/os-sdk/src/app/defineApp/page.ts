@@ -766,7 +766,6 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         dismiss: { ...base.dismiss, ...config.dismiss },
         project: { ...base.project, ...config.project },
         expand: { ...base.expand, ...config.expand },
-        check: { ...base.check, ...config.check },
         value: { ...base.value, ...config.value },
       } as FocusGroupConfig;
     },
@@ -939,14 +938,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
               } as Partial<DismissConfig>,
             }
             : {}),
-          ...(opts.config.check
-            ? {
-              check: {
-                ...base.check,
-                ...opts.config.check,
-              },
-            }
-            : {}),
+
           ...(opts.config.expand
             ? {
               expand: {

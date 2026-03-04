@@ -200,43 +200,6 @@ export const DEFAULT_ACTION: ActionConfig = {
   commands: [],
 };
 
-// ── Check (aria-checked / aria-pressed / aria-selected) — @deprecated, → action ──
-
-export interface CheckConfig {
-  /**
-   * "check"  — items use aria-checked or aria-pressed (depending on `aria`)
-   * "select" — items use aria-selected (option, tab, gridcell)
-   * "none"   — neither (no selectable state)
-   */
-  mode: "check" | "select" | "none";
-  /**
-   * Which ARIA attribute to project when mode is "check".
-   * "checked" → aria-checked (checkbox, radio, switch)
-   * "pressed" → aria-pressed (toggle button)
-   * Default: "checked".
-   * Can be overridden at Item level via ItemOverrides.aria.
-   */
-  aria?: "checked" | "pressed";
-  /**
-   * Which keys trigger OS_CHECK when mode is "check".
-   * Drives config-based key ownership (replaces role hardcoding).
-   * Default: ["Space"].
-   * checkbox: ["Space"], switch: ["Space", "Enter"].
-   */
-  keys?: ("Space" | "Enter")[];
-  /**
-   * Whether Click also triggers OS_CHECK.
-   * Default: false.
-   * checkbox/switch: true (click toggles), button: false.
-   */
-  onClick?: boolean;
-}
-
-export const DEFAULT_CHECK: CheckConfig = {
-  mode: "none",
-  keys: ["Space"],
-  onClick: false,
-};
 
 // ── Value (aria-valuenow/min/max — slider, spinbutton, separator) ──
 
@@ -277,7 +240,7 @@ export interface FocusGroupConfig {
   /** @deprecated → action */
   expand: ExpandConfig;
   /** @deprecated → action */
-  check: CheckConfig;
+
   value: ValueConfig;
   /** v10: unified action axis. activate/check/expand를 대체. */
   action: ActionConfig;
@@ -291,7 +254,6 @@ export const DEFAULT_CONFIG: FocusGroupConfig = {
   dismiss: DEFAULT_DISMISS,
   project: DEFAULT_PROJECT,
   expand: DEFAULT_EXPAND,
-  check: DEFAULT_CHECK,
   value: DEFAULT_VALUE,
   action: DEFAULT_ACTION,
 };

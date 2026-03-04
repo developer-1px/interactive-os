@@ -64,9 +64,9 @@ function actionButtonFactory() {
       return undefined;
     },
   });
-  // activate.onClick: true so click dispatches OS_ACTIVATE → onAction
+  // action.onClick: true so click dispatches OS_ACTIVATE → onAction
   page.setConfig({
-    activate: { mode: "manual", onClick: true },
+    action: { commands: [{ type: "OS_ACTIVATE", payload: {} }], keys: ["Space", "Enter"], onClick: true },
   });
   page.setActiveZone("action-zone", ACTION_BUTTON_ID);
   return page;

@@ -109,6 +109,8 @@ const TOGGLES: ToggleDef[] = [
   { id: "toggle-underline", label: "Underline", icon: "U" },
 ];
 
+import { OS_PRESS } from "@os-core/4-command/activate/press";
+
 export const ToggleApp = defineApp<Record<string, never>>(
   "apg-toggle-button-app",
   {},
@@ -116,11 +118,9 @@ export const ToggleApp = defineApp<Record<string, never>>(
 const toggleZone = ToggleApp.createZone("apg-toggle-buttons");
 const ToggleUI = toggleZone.bind({
   role: "toolbar",
-  // Config-driven: check.keys claims Space/Enter, check.onClick claims Click
-  // → no onAction wiring needed (resolve-axis T5)
   options: {
     navigate: { orientation: "horizontal", loop: true },
-    check: { mode: "check", aria: "pressed", keys: ["Space", "Enter"], onClick: true },
+    action: { commands: [OS_PRESS()], keys: ["Space", "Enter"], onClick: true },
     activate: { mode: "manual", onClick: true },
   },
 });

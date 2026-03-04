@@ -12,7 +12,6 @@ import type {
   ActionConfig,
   ActionKey,
   ActivateConfig,
-  CheckConfig,
   DismissConfig,
   ExpandConfig,
   FocusGroupConfig,
@@ -25,7 +24,6 @@ import type {
 import {
   DEFAULT_ACTION,
   DEFAULT_ACTIVATE,
-  DEFAULT_CHECK,
   DEFAULT_DISMISS,
   DEFAULT_EXPAND,
   DEFAULT_NAVIGATE,
@@ -445,7 +443,6 @@ export function resolveRole(
     dismiss?: Partial<DismissConfig>;
     project?: Partial<ProjectConfig>;
     expand?: Partial<ExpandConfig>;
-    check?: Partial<CheckConfig>;
     value?: Partial<ValueConfig>;
     action?: Partial<ActionConfig>;
   } = {},
@@ -484,11 +481,6 @@ export function resolveRole(
       ...basePreset.expand,
       ...(overrides.expand ?? {}),
     },
-    check: {
-      ...DEFAULT_CHECK,
-      ...basePreset.check,
-      ...(overrides.check ?? {}),
-    },
     value: {
       ...DEFAULT_VALUE,
       ...basePreset.value,
@@ -499,7 +491,7 @@ export function resolveRole(
         ...DEFAULT_ACTION,
         ...basePreset.action,
         ...(overrides.action ? { ...basePreset.action, ...overrides.action } : {}),
-      };
+      } as ActionConfig;
       // Auto-derive keys from first command type if not explicitly set
       if (!merged.keys && merged.commands.length > 0) {
         merged.keys = getDefaultKeysForCommand(merged.commands[0]?.type);

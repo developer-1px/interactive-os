@@ -25,8 +25,8 @@ import type {
   ZoneEntry,
 } from "@os-core/engine/registries/zoneRegistry";
 import type {
+  ActionConfig,
   ActivateConfig,
-  CheckConfig,
   DismissConfig,
   ExpandConfig,
   FocusGroupConfig,
@@ -65,7 +65,7 @@ export interface ZoneOptions {
   dismiss?: Partial<DismissConfig> | undefined;
   project?: Partial<ProjectConfig> | undefined;
   expand?: Partial<ExpandConfig> | undefined;
-  check?: Partial<CheckConfig> | undefined;
+  action?: Partial<ActionConfig> | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -90,7 +90,7 @@ export function createZoneConfig(
     dismiss?: Partial<DismissConfig>;
     project?: Partial<ProjectConfig>;
     expand?: Partial<ExpandConfig>;
-    check?: Partial<CheckConfig>;
+    action?: Partial<ActionConfig>;
   } = {};
   if (options?.navigate !== undefined) overrides.navigate = options.navigate;
   if (options?.tab !== undefined) overrides.tab = options.tab;
@@ -99,7 +99,7 @@ export function createZoneConfig(
   if (options?.dismiss !== undefined) overrides.dismiss = options.dismiss;
   if (options?.project !== undefined) overrides.project = options.project;
   if (options?.expand !== undefined) overrides.expand = options.expand;
-  if (options?.check !== undefined) overrides.check = options.check;
+  if (options?.action !== undefined) overrides.action = options.action;
   return resolveRole(role, overrides);
 }
 
@@ -126,12 +126,12 @@ export interface ZoneCallbacks {
   getExpandableItems?: (() => Set<string>) | undefined;
   getTreeLevels?: (() => Map<string, number>) | undefined;
   onReorder?:
-    | ((info: {
-        itemId: string;
-        overItemId: string;
-        position: "before" | "after";
-      }) => BaseCommand | BaseCommand[])
-    | undefined;
+  | ((info: {
+    itemId: string;
+    overItemId: string;
+    position: "before" | "after";
+  }) => BaseCommand | BaseCommand[])
+  | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
