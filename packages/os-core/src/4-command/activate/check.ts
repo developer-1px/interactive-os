@@ -19,7 +19,7 @@ interface CheckPayload {
 export const OS_CHECK = os.defineCommand(
   "OS_CHECK",
   [ZONE_CONFIG],
-  (ctx) => (payload: CheckPayload) => {
+  (ctx) => (payload?: CheckPayload) => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 

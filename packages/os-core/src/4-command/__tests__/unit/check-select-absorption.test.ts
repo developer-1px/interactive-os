@@ -17,17 +17,17 @@ describe("T4: CHECK (input-based)", () => {
     const page = createHeadlessPage();
     afterEach(() => page.cleanup());
 
-    describe("checkbox/switch preset config", () => {
-        it("checkbox: select.mode = 'none', check.mode = 'check'", () => {
+    describe("checkbox/switch preset config (action.commands)", () => {
+        it("checkbox: select.mode = 'none', action has OS_CHECK", () => {
             const config = resolveRole("checkbox");
             expect(config.select.mode).toBe("none");
-            expect(config.check.mode).toBe("check");
+            expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
         });
 
-        it("switch: select.mode = 'none', check.mode = 'check'", () => {
+        it("switch: select.mode = 'none', action has OS_CHECK", () => {
             const config = resolveRole("switch");
             expect(config.select.mode).toBe("none");
-            expect(config.check.mode).toBe("check");
+            expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
         });
     });
 

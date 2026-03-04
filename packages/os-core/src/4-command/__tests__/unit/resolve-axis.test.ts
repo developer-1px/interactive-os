@@ -22,28 +22,27 @@ afterEach(() => page.cleanup());
 // T1+T2: CheckConfig.keys / CheckConfig.onClick in role presets
 // ═══════════════════════════════════════════════════════════════════
 
-describe("CheckConfig.keys in role presets", () => {
-    it("checkbox preset has keys: ['Space'] and onClick: true", () => {
+describe("action.commands in role presets (replaces check config)", () => {
+    it("checkbox preset has action.commands=[OS_CHECK()]", () => {
         const config = resolveRole("checkbox");
-        expect(config.check.keys).toEqual(["Space"]);
-        expect(config.check.onClick).toBe(true);
+        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
     });
 
-    it("switch preset has keys: ['Space', 'Enter'] and onClick: true", () => {
+    it("switch preset has action.keys=['Space','Enter'] and onClick", () => {
         const config = resolveRole("switch");
-        expect(config.check.keys).toEqual(["Space", "Enter"]);
-        expect(config.check.onClick).toBe(true);
+        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
+        expect(config.action.keys).toEqual(["Space", "Enter"]);
+        expect(config.action.onClick).toBe(true);
     });
 
-    it("radiogroup preset has keys: ['Space']", () => {
+    it("radiogroup preset has action.commands=[OS_CHECK()]", () => {
         const config = resolveRole("radiogroup");
-        expect(config.check.keys).toEqual(["Space"]);
+        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
     });
 
-    it("button preset has NO check.keys (mode is not 'check')", () => {
+    it("button preset has NO OS_CHECK in action.commands", () => {
         const config = resolveRole("button");
-        // button has check.mode = "none", so keys is irrelevant (default)
-        expect(config.check.mode).toBe("none");
+        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(false);
     });
 });
 

@@ -62,13 +62,13 @@ interface OverlayClosePayload {
 
 export const OS_OVERLAY_CLOSE = os.defineCommand(
   "OS_OVERLAY_CLOSE",
-  (ctx) => (payload: OverlayClosePayload) => {
+  (ctx) => (payload?: OverlayClosePayload) => {
     const { stack } = ctx.state.os.overlays;
 
     if (stack.length === 0) return;
 
     // If id provided, remove that specific overlay; else pop top
-    const targetId = payload.id ?? stack[stack.length - 1]?.id;
+    const targetId = payload?.id ?? stack[stack.length - 1]?.id;
     if (!targetId) return;
 
     // Find the entry being closed to check for focus restore

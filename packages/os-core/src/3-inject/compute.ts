@@ -100,7 +100,6 @@ export function computeItem(
   const isActiveFocused = isFocused && isActiveZone;
   const isAnchor = isFocused && !isActiveZone;
 
-  const hasCheckRole = (entry?.config?.check?.mode ?? "none") === "check";
   const hasSelectRole = (entry?.config?.select?.mode ?? "none") !== "none";
   const hasCheckCommand = entry?.config?.action?.commands?.some((c: any) => c.type === "OS_CHECK") ?? false;
   const hasPressCommand = entry?.config?.action?.commands?.some((c: any) => c.type === "OS_PRESS") ?? false;
@@ -117,7 +116,7 @@ export function computeItem(
     "data-expanded": isAriaExpanded || undefined,
     // ── ARIA: command-driven projection — false must also be present when role is declared ──
     ...(hasSelectRole ? { "aria-selected": isAriaSelected } : {}),
-    ...((hasCheckRole || hasCheckCommand || ariaItemState["aria-checked"] !== undefined)
+    ...((hasCheckCommand || ariaItemState["aria-checked"] !== undefined)
       ? { "aria-checked": isAriaChecked }
       : {}),
     ...((hasPressCommand || ariaItemState["aria-pressed"] !== undefined)

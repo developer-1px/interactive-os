@@ -72,17 +72,16 @@ describe("T1: SelectConfig aria field", () => {
 // 3. ActivateConfig effect field / action config (v10)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("T1: ActivateConfig effect field / action config", () => {
-    it("accordion has action.commands = [OS_EXPAND] (v10: action axis replaces effect)", () => {
+describe("T1: action.commands replaces activate.effect", () => {
+    it("accordion has action.commands = [OS_EXPAND]", () => {
         const config = resolveRole("accordion");
-        // v10: activate.effect removed from OS_ACTIVATE handler.
-        // Accordion expand is now driven by action.commands = [OS_EXPAND].
         expect((config.action as any).commands[0]?.type).toBe("OS_EXPAND");
     });
 
-    it("menu has activate.effect = 'invokeAndClose'", () => {
+    it("menu has action.commands = [OS_ACTIVATE, OS_OVERLAY_CLOSE]", () => {
         const config = resolveRole("menu");
-        expect((config.activate as any).effect).toBe("invokeAndClose");
+        expect((config.action as any).commands[0]?.type).toBe("OS_ACTIVATE");
+        expect((config.action as any).commands[1]?.type).toBe("OS_OVERLAY_CLOSE");
     });
 });
 

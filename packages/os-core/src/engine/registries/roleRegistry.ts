@@ -204,7 +204,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       entry: "selected",
     },
     select: { mode: "single", followFocus: true, aria: "selected" },
-    check: { mode: "select" },
     tab: { behavior: "escape" },
   },
 
@@ -249,7 +248,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   radiogroup: {
     navigate: { orientation: "linear-both", loop: true, entry: "selected" },
     select: { mode: "single", followFocus: true, disallowEmpty: true },
-    check: { mode: "check", keys: ["Space"] },
     action: { commands: [OS_CHECK()], keys: ["Space"] },
     tab: { behavior: "escape" },
   },
@@ -260,7 +258,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   tablist: {
     navigate: { orientation: "horizontal", loop: true, entry: "selected" },
     select: { mode: "single", followFocus: true, disallowEmpty: true },
-    check: { mode: "select" },
     activate: { mode: "automatic" },
     tab: { behavior: "escape" },
   },
@@ -282,7 +279,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   grid: {
     navigate: { orientation: "both", loop: false },
     select: { mode: "multiple", range: true, toggle: true, followFocus: false },
-    check: { mode: "select" },
     tab: { behavior: "escape" },
   },
 
@@ -297,7 +293,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       onLeft: ["collapse", "goParent"],
     },
     select: { mode: "multiple", range: true, toggle: true, followFocus: false },
-    check: { mode: "select" },
     activate: { mode: "manual" },
     action: { commands: [OS_EXPAND({ action: "toggle" })], keys: ["Enter"], onClick: true },
     expand: { mode: "explicit" },
@@ -317,7 +312,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       onLeft: ["collapse", "goParent"],
     },
     select: { mode: "single", followFocus: true },
-    check: { mode: "select" },
     activate: { mode: "manual", onClick: true },
     action: { commands: [OS_EXPAND({ action: "toggle" })], keys: ["Enter"], onClick: true },
     expand: { mode: "explicit" },
@@ -420,7 +414,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       onCheck (Space/Enter) and onAction (click) handle toggling.
   switch: {
     select: { mode: "none" },
-    check: { mode: "check", keys: ["Space", "Enter"], onClick: true },
     action: { commands: [OS_CHECK()], keys: ["Space", "Enter"], onClick: true },
     activate: { mode: "manual", onClick: true },
     tab: { behavior: "escape" },
@@ -432,7 +425,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       select.mode="none" so mousedown doesn't interfere with toggle.
   checkbox: {
     select: { mode: "none" },
-    check: { mode: "check", keys: ["Space"], onClick: true },
     action: { commands: [OS_CHECK()] },
     activate: { mode: "manual", onClick: true },
     tab: { behavior: "escape" },
