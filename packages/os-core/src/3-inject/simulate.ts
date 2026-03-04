@@ -147,10 +147,8 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
     focusedItemExpanded: isFocusedExpandable
       ? (zone?.items?.[focusedId!]?.["aria-expanded"] ?? false)
       : null,
-    activeZoneHasCheck: entry?.config?.check?.mode === "check" || !!entry?.onCheck,
-    activeZoneCheckKeys: entry?.config?.check?.keys ?? ["Space"],
     activeZoneFocusedItemId: focusedId,
-    /** v10: action config — action 배열 우선, 없으면 check 레거시 경로 */
+    /** action config — single route for all command-driven keys */
     activeZoneAction: (entry?.config?.action?.commands?.length
       ? entry.config.action
       : null) as ActionConfig | null,

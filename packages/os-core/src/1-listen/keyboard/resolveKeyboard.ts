@@ -47,10 +47,8 @@ export interface KeyboardInput {
   focusedItemId: string | null;
   focusedItemExpanded: boolean | null;
 
-  activeZoneHasCheck: boolean;
-  activeZoneCheckKeys: string[];
   activeZoneFocusedItemId: string | null;
-  /** v10: action config (우선). 없으면 check 레거시 경로 사용. */
+  /** action config — single route for all command-driven keys */
   activeZoneAction: ActionConfig | null;
 
   elementId: string | undefined;

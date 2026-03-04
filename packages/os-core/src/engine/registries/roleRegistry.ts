@@ -220,7 +220,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       onCrossAxis: ["expandSubmenu"],
     },
     select: { mode: "none" },
-    activate: { mode: "automatic", effect: "invokeAndClose", onClick: true },
+    activate: { mode: "automatic", onClick: true },
     action: { commands: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()] },
     dismiss: { escape: "close", outsideClick: "close" },
     tab: { behavior: "trap" },
@@ -370,7 +370,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       single or multiple panels open
   accordion: {
     navigate: { orientation: "vertical", loop: false },
-    activate: { mode: "manual", onClick: true, effect: "toggleExpand" },
+    activate: { mode: "manual", onClick: true },
     action: { commands: [OS_EXPAND({ action: "toggle" })] },
     expand: { mode: "all" },
     tab: { behavior: "native" },
@@ -380,7 +380,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // Spec: activation toggles visibility of associated content,
   //       no navigation within — just a toggle trigger
   disclosure: {
-    activate: { mode: "manual", onClick: true, effect: "toggleExpand" },
+    activate: { mode: "manual", onClick: true },
     action: { commands: [OS_EXPAND({ action: "toggle" })] },
     expand: { mode: "all" },
     tab: { behavior: "flow" },

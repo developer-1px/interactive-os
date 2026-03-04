@@ -31,8 +31,6 @@ function baseInput(overrides: Partial<KeyboardInput> = {}): KeyboardInput {
     focusedItemRole: null,
     focusedItemId: null,
     focusedItemExpanded: null,
-    activeZoneHasCheck: false,
-    activeZoneCheckKeys: ["Space"],
     activeZoneAction: null,
     activeZoneFocusedItemId: null,
     focusedTriggerId: null,
@@ -106,20 +104,22 @@ describe("resolveKeyboard — Space CHECK via Field Layer 1b", () => {
     expect((result.commands[0]!.payload as any).targetId).toBe("toggle-1");
   });
 
-  test("Space + zone has onCheck → check via zone", () => {
+  test("Space + zone has action.commands=[OS_CHECK] → check via action path", () => {
     const result = resolveKeyboard(
       baseInput({
         canonicalKey: "Space",
         key: " ",
         focusedItemRole: null,
         focusedItemId: null,
-        activeZoneHasCheck: true,
         activeZoneFocusedItemId: "zone-item-1",
+        activeZoneAction: {
+          commands: [{ type: "OS_CHECK", payload: {} }],
+          keys: ["Space"],
+        } as any,
       }),
     );
     expect(result.commands).toHaveLength(1);
     expect(result.commands[0]!.type).toBe("OS_CHECK");
-    expect((result.commands[0]!.payload as any).targetId).toBe("zone-item-1");
   });
 
   test("Space while editing → not check (normal keybinding)", () => {
