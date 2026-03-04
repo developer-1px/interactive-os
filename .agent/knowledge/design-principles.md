@@ -61,3 +61,23 @@
     - 값(boolean/number/string/enum)을 편집한다 → **Field**
     - 동작을 실행한다 → **Trigger**
     분류가 구현 방법을 결정한다. Field를 Zone+Item으로 구현하면 추상화 위반이다.
+
+22. **DOM 부수효과는 defineEffect로 처리한다.** (Added: 2026-03-04) Command 실행 결과로 DOM focus 복원 등 물리 조작이 필요하면, command handler가 effect 이름+payload를 리턴하고 `defineEffect`가 동기 실행한다. React lifecycle(`useEffect`/`useLayoutEffect`) 대신 사용하면: (a) 같은 call stack 내 동기 실행 보장, (b) 컴포넌트 코드 0줄, (c) 타이밍 레이스 없음.
+
+23. **ZIFT resolver는 ordered keymap chain이다.** (Added: 2026-03-04) Field·Trigger·Item·Zone 4개의 개별 resolver는 하나의 generic chain executor로 통합된다. 각 layer가 `(input, ctx) → Command | null` 인터페이스를 공유하고, 우선순위는 배열 순서로 보장한다. `when` 가드와 `isFieldActive`는 chain 위치로 자연 대체된다.
+
+24. **Chain 리턴은 이진법: Command(NOOP 포함) = stop, null = pass.** (Added: 2026-03-04) chain에서 커맨드(NOOP 포함)가 리턴되면 체인 실행을 중단한다. null이면 다음 layer로 넘긴다. NOOP = "내가 이 키를 소유하지만 OS action은 없다" (예: block 편집 중 Enter → newline은 브라우저가 처리).
+
+25. **Toggle = [close, open] chain.** (Added: 2026-03-04) 조건문(`isOpen ? close : open`)이 아니라 실행 순서가 toggle을 표현한다. `[OVERLAY_CLOSE, OVERLAY_OPEN]` chain에서 close가 성공(overlay open)하면 stop, 실패(overlay closed)하면 open 실행.
+
+26. **resolveKeyboard = Layer[] first-wins loop.** (Added: 2026-03-04) resolveKeyboard의 본문은 guards + `Layer[]` loop이다. `Layer = (key) → {cmd, elementId} | null`. 각 layer builder(fieldLayer, triggerItemLayer, zoneLayer)가 context를 capture하고, 메커니즘 차이(함수/keymap/registry)는 layer 내부로 캡슐화된다. 메인 함수는 "어떻게 resolve하는지" 알 필요 없다.
+
+27. **action은 축이다, activate/check/open/expand/select는 mode다.** (Added: 2026-03-04) 하나의 물리 입력(Space/Enter/Click)에 동시 활성되는 action은 항상 0개 또는 1개. 상호 배타적이면 직교 축이 아니라 하나의 축의 mode. onClick과 keys는 mode에서 자동 파생 (APG 10패턴 중 전부 keys=onClick).
+
+28. **ZIFT primitive는 2개: Zone(공간) + Item(요소).** (Added: 2026-03-04) Field(편집 lifecycle)와 Trigger(overlay lifecycle)는 Item에 붙는 behavior이지 별도 primitive가 아니다. Trigger = action.mode="open"인 Item. Field = action.mode="none" + field config인 Item. per-item override = action override. 그것뿐.
+
+29. **zone.item() = items map 빌더 + 핸들 반환.** (Added: 2026-03-04) 고정 이종 Zone(toolbar)은 zone.bind()의 items map으로 per-item action 설정. 동적 Zone(listbox)은 role preset으로 해결. zone.item()은 items map에 entry를 추가하면서 타입 안전 핸들을 반환하는 빌더 패턴.
+
+30. **defineApp = Application Context. top-down only, bottom-up 금지.** (Added: 2026-03-04) 모든 Zone/Item/Action은 defineApp()으로부터 top-down으로 생성. Zone/Trigger/Item raw primitive는 public export 금지(internal only). 개발자 API = defineApp → createZone → bind 3단계만. bottom-up 직접 조립은 orphan zone(테스트·인스펙터 누락)을 유발한다.
+
+31. **action = command 배열 직접. enum/mode 이중 관리 불필요.** (Added: 2026-03-04) activate.effect enum("toggleExpand","invokeAndClose","selectTab")과 action.mode enum은 command 배열로 대체. command는 순수 데이터 팩토리(`OS_CHECK() = { type: "OS_CHECK" }`)이므로 역방향 의존성 없음. roleRegistry → command → schema가 단방향. 예: `action: [OS_CHECK()]`, `action: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()]`.

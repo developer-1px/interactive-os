@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-04 00:20
+> Last updated: 2026-03-04 17:35
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, 워크플로우가 갱신한다. git log가 곧 changelog.
@@ -17,16 +17,24 @@
 
 **builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
 
+**unified-zift-resolver** — ✅ Phase 1 archived. 4개 resolver → 1 chain executor + Layer[] loop. T1-T9 Done.
+
+**workflow-knowledge-separation** — 워크플로우 범용화 + 토픽 기반 지식 체계. Meta.
+
 ---
 
 ## 📋 All Active Projects
 
 | Project | Phase | Last Activity | Status |
 |---------|-------|---------------|--------|
+| action-axis-unification | T1~T6 Done, T7 Unresolved | 03-04 | 🔥 Focus |
+| unified-zift-resolver | Scaffold, T1~T7 미착수 | 03-04 | 🔥 Focus |
+| workflow-knowledge-separation | T1~T4 | 03-04 | 🔥 Focus |
 | zift-usage-spec | Scaffold, T1~T6 미착수 | 03-01 | 🔥 Focus |
 | headless-simulator | Phase 1 T4~T6 | 02-27 | 🔥 Focus |
 | code-hygiene | T1 ✅, T2~T8 | 03-04 | 🔥 Focus |
 | builder-v2 | T12, T13, T20 | 02-26 | 🔥 Focus |
+| builder-v3 | 기획만. 개발 보류 | 03-04 | 🟢 Active |
 | os-restructure | Phase 2 #6-8 | 03-01 | 🟢 Active |
 | test-observability | Scaffold, T1~T4 | 03-03 | 🟢 Active |
 | apg-developer-agent | Scaffold, POC | 03-01 | 🟢 Active |
@@ -38,6 +46,8 @@
 
 | Project | Completed | Archived |
 |---------|-----------|----------|
+| top-down-enforcement | 03-04 | ✅ archive/2026/03/W10 — `@os-react/internal` barrel 생성, 35개 import 일괄 전환, raw primitive 앱 직접 사용 차단. tsc 0. design-principles #30 |
+| resolve-axis | 03-04 | ✅ archive/2026/03/W10 — CheckConfig.keys/onClick 추가, config 기반 check keymap 우선순위, ButtonPattern onAction 제거. +9 tests, regression 0. design-principles #27-29 |
 | apg-listbox-pattern | 03-02 | ✅ archive/2026/03/W10 — Negative tests 11개 (3 OS 버그 발견). range guard + selectAll guard. APG testbot 6 scripts 탑재 |
 | apg-tabs-pattern | 03-02 | ✅ archive/2026/03/W10 — Item.Content 프리미티브, OS_ACTIVATE select fallback, OS_SELECT mode auto-derive. AUDITBOOK 갱신. /review retire |
 | command-config-invariant | 03-03 | ✅ archive/2026/03/W10 — Command = { intent + chain }. 9→6 commands. resolveItemKey 삭제. arrowExpand dead code 전수 제거 |
@@ -110,9 +120,9 @@
 
 | Metric | Count |
 |--------|-------|
-| Active Focus | 4 |
-| Active Projects (total) | 8 (4 Active + 4 Focus) |
-| Completed (archived) | 49 |
+| Active Focus | 5 |
+| Active Projects (total) | 9 (5 Active + 4 Focus) |
+| Completed (archived) | 51 |
 | Inbox items | 6 |
 | Backlog items | 15 |
 | Open issues | 0 |
@@ -120,6 +130,12 @@
 ---
 
 ## 📝 Recent Changes (2026-03-04)
+
+- ✅ `top-down-enforcement` 완료 → archive/2026/03/W10. @os-react/internal barrel 생성, 35개 import 일괄 전환, raw primitive 앱 직접 사용 차단. design-principles #30.
+
+- ✅ `resolve-axis` 완료 → archive/2026/03/W10. CheckConfig.keys/onClick, config 기반 check keymap 우선순위, ButtonPattern onAction 수동 배선 제거. +9 tests. design-principles #27-29 (action축=mode, ZIFT primitive=2개, zone.item()빌더). Discussion→action-axis-unification usage-spec 작성.
+
+- 🆕 `unified-zift-resolver` Heavy 프로젝트 생성 — Discussion에서 발견: ZIFT 4개 resolver가 같은 패턴(input→command chain). 1개 generic executor로 통합. design-principles #23-25 추가
 
 - ✅ `command-config-invariant` 완료 → archive/2026/03/W10. 9→6 commands, resolveItemKey 삭제, arrowExpand dead code 전수 제거 (23+ 파일, ~37 occurrences)
 - ✅ `tab-state` 완료 → archive/2026/03/W10. tablist preset, 6/6 PASS

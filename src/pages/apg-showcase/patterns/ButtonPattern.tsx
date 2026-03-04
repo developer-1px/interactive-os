@@ -19,8 +19,8 @@
  *     for button-role items. CSS reads aria-pressed. No useState, no onClick.
  */
 
-import { OS_CHECK } from "@os-core/4-command/activate/check";
-import { Trigger } from "@os-react/6-project/Trigger";
+
+import { Trigger } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -116,11 +116,11 @@ export const ToggleApp = defineApp<Record<string, never>>(
 const toggleZone = ToggleApp.createZone("apg-toggle-buttons");
 const ToggleUI = toggleZone.bind({
   role: "toolbar",
-  // click → OS_ACTIVATE → onAction → OS_CHECK (built-in toggle)
-  onAction: (cursor) => OS_CHECK({ targetId: cursor.focusId }),
+  // Config-driven: check.keys claims Space/Enter, check.onClick claims Click
+  // → no onAction wiring needed (resolve-axis T5)
   options: {
     navigate: { orientation: "horizontal", loop: true },
-    check: { mode: "check" },
+    check: { mode: "check", aria: "pressed", keys: ["Space", "Enter"], onClick: true },
     activate: { mode: "manual", onClick: true },
   },
 });

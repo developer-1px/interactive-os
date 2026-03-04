@@ -20,7 +20,7 @@ description: 자율 실행 에이전트 루프. 보편 사이클을 정의하고
 > 상태를 읽고, 해당하는 워크플로우 파일을 `view_file`로 읽어서 실행한다.
 >
 > **모든 프로젝트의 목적은 앱의 완성이 아니라 OS의 완성이다.**
-> 순수 React(`useState`, `onClick`, `useEffect`)로 완성되면 OS를 안 썼다는 뜻이므로 **실패**다.
+> `contract-checklist.md §Config`의 금지 목록에 해당하는 코드로 완성되면 OS를 안 썼다는 뜻이므로 **실패**다.
 
 ---
 

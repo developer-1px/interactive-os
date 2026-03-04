@@ -9,6 +9,8 @@
  */
 
 import type {
+  ActionConfig,
+  ActionKey,
   ActivateConfig,
   CheckConfig,
   DismissConfig,
@@ -21,6 +23,7 @@ import type {
   ValueConfig,
 } from "../../schema/types";
 import {
+  DEFAULT_ACTION,
   DEFAULT_ACTIVATE,
   DEFAULT_CHECK,
   DEFAULT_DISMISS,
@@ -31,6 +34,12 @@ import {
   DEFAULT_TAB,
   DEFAULT_VALUE,
 } from "../../schema/types";
+import {
+  OS_ACTIVATE,
+  OS_CHECK,
+  OS_EXPAND,
+  OS_OVERLAY_CLOSE,
+} from "@os-core/4-command";
 
 // ═══════════════════════════════════════════════════════════════════
 // Zone Role Type
@@ -212,6 +221,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
     },
     select: { mode: "none" },
     activate: { mode: "automatic", effect: "invokeAndClose", onClick: true },
+    action: { commands: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()] },
     dismiss: { escape: "close", outsideClick: "close" },
     tab: { behavior: "trap" },
     project: { autoFocus: true },
@@ -234,11 +244,13 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
 
   // ─── Radio Group (ARIA APG: Radio Group Pattern) ───
   // Spec: arrows wrap (loop), selection follows focus (selecting = checking),
-  //       cannot be empty once checked, entry to checked radio
+  //       cannot be empty once checked, entry to checked radio.
+  //       radio items use aria-checked → OS_CHECK is the correct command.
   radiogroup: {
     navigate: { orientation: "linear-both", loop: true, entry: "selected" },
     select: { mode: "single", followFocus: true, disallowEmpty: true },
-    check: { mode: "check" },
+    check: { mode: "check", keys: ["Space"] },
+    action: { commands: [OS_CHECK()], keys: ["Space"] },
     tab: { behavior: "escape" },
   },
 
@@ -255,10 +267,12 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
 
   // ─── Toolbar (ARIA APG: Toolbar Pattern) ───
   // Spec: horizontal, optional loop (we enable), no selection,
-  //       Tab re-enters at last focused control
+  //       Tab re-enters at last focused control.
+  //       button items: Space/Enter → OS_ACTIVATE (same as Enter global keybinding).
   toolbar: {
     navigate: { orientation: "horizontal", loop: true, entry: "restore" },
     select: { mode: "none" },
+    action: { commands: [OS_ACTIVATE()], keys: ["Space", "Enter"] },
     tab: { behavior: "escape" },
   },
 
@@ -285,6 +299,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
     select: { mode: "multiple", range: true, toggle: true, followFocus: false },
     check: { mode: "select" },
     activate: { mode: "manual" },
+    action: { commands: [OS_EXPAND({ action: "toggle" })], keys: ["Enter"], onClick: true },
     expand: { mode: "explicit" },
     tab: { behavior: "escape" },
   },
@@ -304,6 +319,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
     select: { mode: "single", followFocus: true },
     check: { mode: "select" },
     activate: { mode: "manual", onClick: true },
+    action: { commands: [OS_EXPAND({ action: "toggle" })], keys: ["Enter"], onClick: true },
     expand: { mode: "explicit" },
     tab: { behavior: "escape" },
   },
@@ -355,6 +371,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   accordion: {
     navigate: { orientation: "vertical", loop: false },
     activate: { mode: "manual", onClick: true, effect: "toggleExpand" },
+    action: { commands: [OS_EXPAND({ action: "toggle" })] },
     expand: { mode: "all" },
     tab: { behavior: "native" },
   },
@@ -364,6 +381,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       no navigation within — just a toggle trigger
   disclosure: {
     activate: { mode: "manual", onClick: true, effect: "toggleExpand" },
+    action: { commands: [OS_EXPAND({ action: "toggle" })] },
     expand: { mode: "all" },
     tab: { behavior: "flow" },
   },
@@ -402,7 +420,8 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       onCheck (Space/Enter) and onAction (click) handle toggling.
   switch: {
     select: { mode: "none" },
-    check: { mode: "check" },
+    check: { mode: "check", keys: ["Space", "Enter"], onClick: true },
+    action: { commands: [OS_CHECK()] },
     activate: { mode: "manual", onClick: true },
     tab: { behavior: "escape" },
   },
@@ -413,7 +432,8 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       select.mode="none" so mousedown doesn't interfere with toggle.
   checkbox: {
     select: { mode: "none" },
-    check: { mode: "check" },
+    check: { mode: "check", keys: ["Space"], onClick: true },
+    action: { commands: [OS_CHECK()] },
     activate: { mode: "manual", onClick: true },
     tab: { behavior: "escape" },
   },
@@ -435,6 +455,7 @@ export function resolveRole(
     expand?: Partial<ExpandConfig>;
     check?: Partial<CheckConfig>;
     value?: Partial<ValueConfig>;
+    action?: Partial<ActionConfig>;
   } = {},
 ): FocusGroupConfig {
   const basePreset = role ? rolePresets[role as ZoneRole] || {} : {};
@@ -481,5 +502,64 @@ export function resolveRole(
       ...basePreset.value,
       ...(overrides.value ?? {}),
     },
+    action: (() => {
+      const merged = {
+        ...DEFAULT_ACTION,
+        ...basePreset.action,
+        ...(overrides.action ? { ...basePreset.action, ...overrides.action } : {}),
+      };
+      // Auto-derive keys from first command type if not explicitly set
+      if (!merged.keys && merged.commands.length > 0) {
+        merged.keys = getDefaultKeysForCommand(merged.commands[0]?.type);
+      }
+      // Auto-derive onClick from first command type if not explicitly set
+      if (merged.onClick === undefined && merged.commands.length > 0) {
+        merged.onClick = getDefaultOnClickForCommand(merged.commands[0]?.type);
+      }
+      return merged;
+    })(),
   };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Action Config Helpers (exported for use across packages)
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Derive default keys from first command type.
+ * Spec: OS_CHECK/OS_PRESS → ["Space"], OS_EXPAND/OS_ACTIVATE → ["Space","Enter"]
+ */
+function getDefaultKeysForCommand(
+  cmdType: string | undefined,
+): ActionKey[] {
+  switch (cmdType) {
+    case "OS_CHECK":
+    case "OS_PRESS":
+      return ["Space"];
+    case "OS_EXPAND":
+    case "OS_ACTIVATE":
+      return ["Space", "Enter"];
+    case "OS_OVERLAY_OPEN":
+      return ["Space", "Enter", "ArrowDown"];
+    default:
+      return [];
+  }
+}
+
+/**
+ * Derive default onClick behavior from action command type.
+ * OS_CHECK/OS_PRESS/OS_EXPAND are toggle commands → click should trigger them.
+ * v10: used by PointerListener and simulate to read action config.
+ */
+export function getDefaultOnClickForCommand(
+  cmdType: string | undefined,
+): boolean {
+  switch (cmdType) {
+    case "OS_CHECK":
+    case "OS_PRESS":
+    case "OS_EXPAND":
+      return true;
+    default:
+      return false;
+  }
 }

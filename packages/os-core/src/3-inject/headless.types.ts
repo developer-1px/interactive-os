@@ -24,6 +24,7 @@ export interface ItemAttrs {
   tabIndex: number;
   "aria-selected"?: boolean | undefined;
   "aria-checked"?: boolean | undefined;
+  "aria-pressed"?: boolean | undefined;
   "aria-expanded"?: boolean;
   "aria-disabled"?: boolean;
   "aria-current"?: "true" | undefined;
@@ -43,6 +44,8 @@ export interface ItemOverrides {
   disabled?: boolean | undefined;
   selected?: boolean | undefined;
   role?: string | undefined;
+  /** Item-level ARIA check attribute override. Bubbles to Zone config if not set. */
+  aria?: "checked" | "pressed" | undefined;
 }
 
 export interface ItemState {

@@ -10,6 +10,8 @@
  * Reference: https://www.w3.org/WAI/ARIA/apg/patterns/
  */
 
+import type { Keymap } from "@os-core/2-resolve/chainResolver";
+import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-core/4-command";
 import {
     type TriggerConfig,
     DEFAULT_TRIGGER_CONFIG,
@@ -134,5 +136,64 @@ export function resolveTriggerRole(
             ...DEFAULT_TRIGGER_CONFIG.aria,
             ...preset.aria,
         },
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Keymap Builders
+// ═══════════════════════════════════════════════════════════════════
+
+interface TriggerKeymapContext {
+    overlayId: string;
+    triggerRole: string;
+    triggerId?: string;
+}
+
+/**
+ * Build a keyboard Keymap from TriggerConfig.
+ * Returns a static Keymap with OS commands baked in.
+ * When overlay is already open, returns empty (Zone owns keyboard).
+ *
+ * @see design-principles.md #23
+ */
+export function buildTriggerKeymap(
+    config: TriggerConfig,
+    ctx: TriggerKeymapContext,
+    isOverlayOpen: boolean,
+): Keymap {
+    if (isOverlayOpen) return {};
+
+    const keymap: Keymap = {};
+    const base = { id: ctx.overlayId, type: ctx.triggerRole, triggerId: ctx.triggerId };
+
+    if (config.open.onActivate) {
+        keymap.Enter = OS_OVERLAY_OPEN(base);
+        keymap.Space = OS_OVERLAY_OPEN(base);
+    }
+    if (config.open.onArrowDown) {
+        keymap.ArrowDown = OS_OVERLAY_OPEN({ ...base, entry: "first" as const });
+    }
+    if (config.open.onArrowUp) {
+        keymap.ArrowUp = OS_OVERLAY_OPEN({ ...base, entry: "last" });
+    }
+
+    return keymap;
+}
+
+/**
+ * Build a click Keymap from TriggerConfig.
+ * Uses [CLOSE, OPEN] chain for toggle semantics.
+ *
+ * @see design-principles.md #25
+ */
+export function buildTriggerClickKeymap(
+    config: TriggerConfig,
+    ctx: TriggerKeymapContext,
+): Keymap {
+    if (!config.open.onClick) return {};
+
+    const base = { id: ctx.overlayId, type: ctx.triggerRole, triggerId: ctx.triggerId };
+    return {
+        Click: [OS_OVERLAY_CLOSE({ id: ctx.overlayId }), OS_OVERLAY_OPEN(base)],
     };
 }

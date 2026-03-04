@@ -9,6 +9,8 @@
 
 import { findFocusableItem, resolveFocusTarget } from "../_shared/domQuery";
 import type { MouseInput } from "../mouse/resolveMouse";
+import { os } from "@os-core/engine/kernel";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Pure Interface: MouseDownSense
@@ -27,6 +29,11 @@ export interface MouseDownSense {
   itemRole: string | null;
   // Zone-only path
   zoneId: string | null;
+  // Trigger path
+  triggerId: string | null;
+  triggerOverlayId: string | null;
+  triggerRole: string | null;
+  isTriggerOverlayOpen: boolean;
   // Modifiers
   shiftKey: boolean;
   metaKey: boolean;
@@ -156,6 +163,23 @@ export function senseMouseDown(
       : null;
   const zoneId = zoneEl?.getAttribute("data-zone") ?? null;
 
+  // Trigger detection (DOM reading)
+  const triggerEl = target.closest("[data-trigger-id]") as HTMLElement | null;
+  const triggerId = triggerEl?.getAttribute("data-trigger-id") ?? null;
+  let triggerOverlayId: string | null = null;
+  let triggerRole: string | null = null;
+  let isTriggerOverlayOpen = false;
+
+  if (triggerId) {
+    const triggerMeta = ZoneRegistry.getTriggerOverlay(triggerId);
+    if (triggerMeta) {
+      triggerOverlayId = triggerMeta.overlayId;
+      triggerRole = triggerMeta.overlayType;
+      const overlayStack = os.getState().os?.overlays?.stack ?? [];
+      isTriggerOverlayOpen = overlayStack.some((o: { id: string }) => o.id === triggerMeta.overlayId);
+    }
+  }
+
   return extractMouseInput({
     isInspector,
     isLabel,
@@ -166,6 +190,10 @@ export function senseMouseDown(
     hasAriaExpanded,
     itemRole,
     zoneId,
+    triggerId,
+    triggerOverlayId,
+    triggerRole,
+    isTriggerOverlayOpen,
     shiftKey: e.shiftKey,
     metaKey: e.metaKey,
     ctrlKey: e.ctrlKey,

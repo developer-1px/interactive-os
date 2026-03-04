@@ -23,11 +23,14 @@ export { DEFAULT_ACTIVATE } from "./focus/config/FocusActivateConfig.ts";
 export type { DismissConfig } from "./focus/config/FocusDismissConfig.ts";
 export { DEFAULT_DISMISS } from "./focus/config/FocusDismissConfig.ts";
 export type {
+  ActionConfig,
+  ActionKey,
   CheckConfig,
   ExpandConfig,
   FocusGroupConfig,
 } from "./focus/config/FocusGroupConfig.ts";
 export {
+  DEFAULT_ACTION,
   DEFAULT_CHECK,
   DEFAULT_CONFIG,
   DEFAULT_EXPAND,

@@ -185,6 +185,11 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
         // 3. Reset (if configured)
         if (resetOnSubmit) {
           FieldRegistry.reset(fieldId);
+          // Sync contentEditable DOM — FieldRegistry.reset() only updates state,
+          // the DOM innerText must be cleared explicitly (same pattern as line 288, 321, 328).
+          if (innerRef.current) {
+            innerRef.current.innerText = "";
+          }
         }
       },
       [fieldId, resetOnSubmit],

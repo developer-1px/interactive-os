@@ -268,6 +268,7 @@ Scenario: 텍스트 입력 후 Enter → 추가
   When "장보기"를 입력하고 Enter를 누른다
   Then todos에 "장보기"가 추가된다
     And draft 필드가 초기화된다 (resetOnSubmit)
+    And contentEditable DOM innerText가 빈 문자열이다 🆕🔴
 
 Scenario: 빈 텍스트로 Enter — 차단
   Given draft 필드가 비어있다

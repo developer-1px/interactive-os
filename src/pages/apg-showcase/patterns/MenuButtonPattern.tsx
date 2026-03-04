@@ -19,7 +19,7 @@
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
-import { Item } from "@os-react/6-project/Item";
+import { Item } from "@os-react/internal";
 import { Icon } from "@/components/Icon";
 
 /**

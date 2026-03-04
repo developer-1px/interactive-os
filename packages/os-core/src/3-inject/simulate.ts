@@ -34,9 +34,11 @@ import {
 import { OS_ZONE_INIT } from "@os-core/4-command/focus";
 import {
   getChildRole,
+  getDefaultOnClickForCommand,
   type ZoneRole,
 } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import type { ActionConfig } from "@os-core/schema/types";
 import type { HeadlessKernel, InteractionObserver } from "./headless.types";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -143,20 +145,30 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
     focusedItemRole: childRole ?? null,
     focusedItemId: focusedId,
     focusedItemExpanded: isFocusedExpandable
-      ? (zone?.expandedItems?.includes(focusedId!) ?? false)
+      ? (zone?.items?.[focusedId!]?.["aria-expanded"] ?? false)
       : null,
-    activeZoneHasCheck: !!entry?.onCheck,
+    activeZoneHasCheck: entry?.config?.check?.mode === "check" || !!entry?.onCheck,
+    activeZoneCheckKeys: entry?.config?.check?.keys ?? ["Space"],
     activeZoneFocusedItemId: focusedId,
+    /** v10: action config — action 배열 우선, 없으면 check 레거시 경로 */
+    activeZoneAction: (entry?.config?.action?.commands?.length
+      ? entry.config.action
+      : null) as ActionConfig | null,
+    // Trigger — headless has no focused trigger
+    focusedTriggerId: null,
+    focusedTriggerRole: null,
+    focusedTriggerOverlayId: null,
+    isTriggerOverlayOpen: false,
     elementId: focusedId ?? undefined,
     cursor: focusedId
       ? {
-          focusId: focusedId,
-          selection: zone?.selection ?? [],
-          anchor: zone?.selectionAnchor ?? null,
-          isExpandable: isFocusedExpandable,
-          isDisabled: false,
-          treeLevel: undefined,
-        }
+        focusId: focusedId,
+        selection: Object.entries(zone?.items ?? {}).filter(([, s]) => s?.["aria-selected"]).map(([id]) => id),
+        anchor: zone?.selectionAnchor ?? null,
+        isExpandable: isFocusedExpandable,
+        isDisabled: false,
+        treeLevel: undefined,
+      }
       : null,
   };
 
@@ -275,7 +287,11 @@ export function simulateClick(
   const mouseResult = resolveMouse(mouseInput);
   dispatchResult(kernel, mouseResult);
 
-  const activateOnClick = entry?.config?.activate?.onClick ?? false;
+  // v10: action.onClick 우선, 없으면 legacy activate.onClick
+  const actionConfig = entry?.config?.action;
+  const activateOnClick = actionConfig?.commands?.length
+    ? (actionConfig.onClick ?? getDefaultOnClickForCommand(actionConfig.commands[0]?.type))
+    : (entry?.config?.activate?.onClick ?? false);
   const reClickOnly = entry?.config?.activate?.reClickOnly ?? false;
 
   const clickInput: ClickInput = {
@@ -285,6 +301,8 @@ export function simulateClick(
       ? preMousedownFocusedItemId
       : readFocusedItemId(kernel, zoneId),
     wasEditing: !!preMousedownEditingItemId,
+    // v10: action config command 우선 — OS_ACTIVATE 대신 직접 command dispatch
+    ...(actionConfig?.commands?.length ? { actionCommand: actionConfig.commands[0] } : {}),
   };
 
   const clickResult = resolveClick(clickInput);

@@ -13,6 +13,7 @@ import { getCanonicalKey } from "@os-core/2-resolve/getCanonicalKey";
 import { ROLE_FIELD_TYPE_MAP } from "@os-core/2-resolve/resolveFieldKey";
 import { os } from "@os-core/engine/kernel";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import type { ActionConfig } from "@os-core/schema/types";
 import type { KeyboardInput } from "./resolveKeyboard";
 
 export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
@@ -77,8 +78,13 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
     focusedItemRole: itemRole,
     focusedItemId,
     focusedItemExpanded,
-    activeZoneHasCheck: !!entry?.onCheck,
+    activeZoneHasCheck: entry?.config?.check?.mode === "check" || !!entry?.onCheck,
+    activeZoneCheckKeys: entry?.config?.check?.keys ?? ["Space"],
     activeZoneFocusedItemId: zone?.focusedItemId ?? null,
+    /** v10: action config — action 배열 우선, 없으면 check 레거시 경로 */
+    activeZoneAction: (entry?.config?.action?.commands?.length
+      ? entry.config.action
+      : null) as ActionConfig | null,
     // ─── Trigger layer ───
     focusedTriggerId: triggerIdAttr,
     focusedTriggerRole: triggerMeta?.overlayType ?? null,

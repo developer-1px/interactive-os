@@ -1,9 +1,9 @@
 /**
  * OS_SELECT Command — aria-selected state management (kernel version)
  *
- * Supports single, toggle, range, and replace modes.
- * After selection changes, dispatches onSelect callback if registered.
+ * Writes items[id]["aria-selected"] directly.
  * For aria-checked toggling, use OS_CHECK instead.
+ * For aria-pressed toggling, use OS_PRESS instead.
  */
 
 import { DOM_ITEMS, ZONE_CONFIG } from "@os-core/3-inject";
@@ -16,6 +16,26 @@ import { buildZoneCursor } from "../utils/buildZoneCursor";
 interface SelectPayload {
   targetId?: string;
   mode?: "single" | "replace" | "toggle" | "range";
+}
+
+/** Helper: set aria-selected for an item */
+function setSelected(z: { items: Record<string, { "aria-selected"?: boolean }> }, id: string, val: boolean) {
+  if (!z.items[id]) z.items[id] = {};
+  z.items[id] = { ...z.items[id], "aria-selected": val };
+}
+
+/** Helper: count currently selected items */
+function countSelected(z: { items: Record<string, { "aria-selected"?: boolean }> }): number {
+  return Object.values(z.items).filter((s) => s?.["aria-selected"]).length;
+}
+
+/** Helper: clear all aria-selected */
+function clearSelected(z: { items: Record<string, { "aria-selected"?: boolean }> }) {
+  for (const id of Object.keys(z.items)) {
+    if (z.items[id]?.["aria-selected"]) {
+      z.items[id] = { ...z.items[id], "aria-selected": false };
+    }
+  }
 }
 
 export const OS_SELECT = os.defineCommand(
@@ -31,35 +51,20 @@ export const OS_SELECT = os.defineCommand(
     const targetId = payload.targetId ?? zone.focusedItemId;
     if (!targetId) return;
 
-    // Guard: select.mode="none" → selection is not a concern for this zone.
-    // Skip to prevent mousedown replace-select from interfering with
-    // toggle-based patterns (switch, checkbox via OS_CHECK).
     const zoneConfig = ctx.inject(ZONE_CONFIG);
     if (zoneConfig.select.mode === "none") return;
 
-    // APG: disabled items cannot be selected
     if (ZoneRegistry.isDisabled(activeZoneId, targetId)) return;
 
-    // W3C APG: Space toggles selection, Enter activates.
-    // Ensure we process selection rather than expanding, as expansion belongs in OS_ACTIVATE.
-
-    // DOM_ITEMS provider decides the source (browser/headless+React/pure headless)
     const items: string[] = ctx.inject(DOM_ITEMS);
-    // zoneEntry still needed for onSelect callback
     const zoneEntry = ZoneRegistry.get(activeZoneId);
-    // Auto-derive mode from zone config when omitted:
-    // - multi-select zones → toggle (toggle individual items)
-    // - single + toggle:true → toggle (tree: Space deselects)
-    // - single (default) → replace (tabs: Space selects, no deselect)
+
     const deriveMode = (): "replace" | "toggle" => {
       if (zoneConfig.select.mode === "multiple") return "toggle";
       if (zoneConfig.select.toggle) return "toggle";
       return "replace";
     };
 
-    // Zone-config-aware mode enforcement:
-    // Payload may request "range" or "toggle" (e.g. Shift+Click, Cmd+Click),
-    // but the zone config is the authority. Downgrade to "replace" if unsupported.
     const enforceMode = (
       requested: "single" | "replace" | "toggle" | "range",
     ): "single" | "replace" | "toggle" | "range" => {
@@ -82,21 +87,19 @@ export const OS_SELECT = os.defineCommand(
         switch (mode) {
           case "single":
           case "replace":
-            z.selection = [targetId];
+            clearSelected(z);
+            setSelected(z, targetId, true);
             z.selectionAnchor = targetId;
             break;
 
           case "toggle": {
-            const isSelected = z.selection.includes(targetId);
+            const isSelected = z.items[targetId]?.["aria-selected"] ?? false;
             if (isSelected) {
-              // Guard: disallowEmpty prevents deselecting the last item
               const disallowEmpty = zoneConfig.select.disallowEmpty ?? false;
-              if (disallowEmpty && z.selection.length <= 1) {
-                break;
-              }
-              z.selection = z.selection.filter((id: string) => id !== targetId);
+              if (disallowEmpty && countSelected(z) <= 1) break;
+              setSelected(z, targetId, false);
             } else {
-              z.selection.push(targetId);
+              setSelected(z, targetId, true);
               z.selectionAnchor = targetId;
             }
             break;
@@ -109,7 +112,10 @@ export const OS_SELECT = os.defineCommand(
             if (anchorIdx !== -1 && targetIdx !== -1) {
               const start = Math.min(anchorIdx, targetIdx);
               const end = Math.max(anchorIdx, targetIdx);
-              z.selection = items.slice(start, end + 1);
+              clearSelected(z);
+              for (const id of items.slice(start, end + 1)) {
+                setSelected(z, id, true);
+              }
               z.selectionAnchor = anchor;
             }
             break;
@@ -118,7 +124,6 @@ export const OS_SELECT = os.defineCommand(
       }) as typeof ctx.state,
     };
 
-    // Dispatch onSelect callback if registered
     if (zoneEntry?.onSelect) {
       const updatedZone = result.state.os.focus.zones[activeZoneId];
       const cursor = buildZoneCursor(updatedZone);

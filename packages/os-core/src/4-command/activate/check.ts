@@ -1,11 +1,8 @@
 /**
  * OS_CHECK Command — Toggle aria-checked state (kernel version)
  *
- * Maps to aria-checked. Triggered by Space/Enter on checkbox/switch roles,
- * or by click on checkbox elements.
- *
- * If the zone has onCheck registered, passes ZoneCursor to the callback.
- * If no onCheck and check.mode="check": built-in toggle (selection toggle).
+ * Always toggles aria-checked. For aria-pressed, use OS_PRESS instead.
+ * Command type IS the ARIA declaration — no config lookup needed.
  */
 
 import { ZONE_CONFIG } from "@os-core/3-inject";
@@ -29,7 +26,7 @@ export const OS_CHECK = os.defineCommand(
     const zone = ctx.state.os.focus.zones[activeZoneId];
     if (!zone) return;
 
-    const targetId = payload.targetId ?? zone.focusedItemId;
+    const targetId = (payload?.targetId) ?? zone.focusedItemId;
     if (!targetId) return;
 
     // Zone callback: pass cursor to onCheck
@@ -37,26 +34,22 @@ export const OS_CHECK = os.defineCommand(
     if (entry?.onCheck) {
       const cursor = buildZoneCursor(zone);
       if (!cursor) return;
-      // Override focusId with targetId (click target may differ from focused item)
       return {
         dispatch: entry.onCheck({ ...cursor, focusId: targetId }),
       };
     }
 
-    // Built-in toggle: when check.mode="check" (switch, checkbox),
-    // toggle the item in selection directly. No callback needed.
-    const checkMode = entry?.config?.check?.mode ?? "none";
-    if (checkMode === "check") {
-      return {
-        state: produce(ctx.state, (draft) => {
-          const z = ensureZone(draft.os, activeZoneId);
-          if (z.selection.includes(targetId)) {
-            z.selection = z.selection.filter((id: string) => id !== targetId);
-          } else {
-            z.selection.push(targetId);
-          }
-        }),
-      };
-    }
+    // Built-in toggle: items[id]["aria-checked"] = !current.
+    // OS_CHECK → aria-checked. OS_PRESS → aria-pressed. No overlap.
+    return {
+      state: produce(ctx.state, (draft) => {
+        const z = ensureZone(draft.os, activeZoneId);
+        if (!z.items[targetId]) z.items[targetId] = {};
+        z.items[targetId] = {
+          ...z.items[targetId],
+          "aria-checked": !(z.items[targetId]?.["aria-checked"] ?? false),
+        };
+      }),
+    };
   },
 );

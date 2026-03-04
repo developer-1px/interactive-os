@@ -85,17 +85,25 @@ Visual CMS는 OS가 제공하는 모든 primitive를 실전에서 검증한다:
 - 블록 드래그 정렬
 - 커서/포커스 리팩토링 (OS primitive 활용)
 
-### 🟡 Next — 콘텐츠 타입 확장
+### 🟡 Next — 콘텐츠 운영 플랫폼 (v3)
 
-- Accordion, Carousel 컨테이너
+> "에디터"에서 "운영 플랫폼"으로의 도약. spec 완비, 개발 보류.
+
+- **Page Lifecycle** — Draft → Published → Archived 상태 전이 (`spec/page-lifecycle.md`)
+- **Page Template & 복제** — 템플릿 갤러리에서 생성, 기존 페이지 deep clone (`spec/page-template.md`)
+- **Content Diff** — Draft vs Published 시각적 비교, 블록 단위 되돌리기 (`spec/content-diff.md`)
+- **Version History** — 배포 이력 타임라인, 롤백, 배포 메모 (`spec/version-history.md`)
+- **Block Library** — 재사용 블록 저장/삽입, Built-in vs Custom (`spec/block-library.md`)
+- **Content Search & Replace** — 페이지 내/전체 검색, 일괄 치환 (`spec/content-search.md`)
+- **Media Library** — 이미지 자산 관리, 업로드, 태그, Alt 텍스트 (`spec/media-library.md`)
+- Accordion, Carousel 컨테이너 (Container 추상 일반화)
 - 콘텐츠 타입 확장 (Video, Map, Code 블록)
-- 반응형 미리보기
-- 변경 이력 비교 (diff)
 
 ### 🔵 Later — 실서비스
 
 - 정적 HTML/JSON 내보내기
 - 외부 페이지 임포트 (기존 HTML → Block Tree 변환)
+- 반응형 미리보기
 - 공식 사이트 self-hosting
 - 테마/스타일 오버라이드 시스템
 

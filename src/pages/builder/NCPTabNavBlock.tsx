@@ -1,6 +1,5 @@
 import { useSelection } from "@os-react/6-project/accessors/useSelection";
-import { Item as OSItem } from "@os-react/6-project/Item";
-import { Zone } from "@os-react/6-project/Zone";
+import { Item as OSItem, Zone } from "@os-react/internal";
 import { BuilderApp } from "@/apps/builder/app";
 import type { Block, BuilderState } from "@/apps/builder/model/appState";
 import { Builder } from "@/apps/builder/primitives/Builder";

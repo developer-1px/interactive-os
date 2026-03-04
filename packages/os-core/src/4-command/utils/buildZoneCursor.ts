@@ -29,9 +29,14 @@ export function buildZoneCursor(
         ? (entry?.getExpandableItems?.().has(focusId) ?? false)
         : false;
 
+  // selection: items where aria-selected=true (in insertion order)
+  const selection = Object.entries(zone.items ?? {})
+    .filter(([, state]) => state?.["aria-selected"])
+    .map(([id]) => id);
+
   return {
     focusId,
-    selection: zone.selection ?? [],
+    selection,
     anchor: zone.selectionAnchor ?? null,
     isExpandable,
     isDisabled: zoneId ? ZoneRegistry.isDisabled(zoneId, focusId) : false,

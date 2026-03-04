@@ -1,28 +1,31 @@
 /**
  * resolveKeyboard — Pure keyboard event resolution
  *
- * ZIFT Responder Chain: Field → Item → Zone → OS Global
+ * ZIFT Responder Chain: Field → Trigger → Item → Zone
+ * Each layer is a function. First claim wins.
  *
- * Each layer gets a chance to handle the key in priority order.
- * The first layer that returns a command wins.
- *
- * No DOM access. No side effects. Pure function.
+ * @see design-principles.md #23 (ordered keymap chain)
+ * @see design-principles.md #24 (binary return: Command/NOOP = stop, null = pass)
  */
 
+import { resolveChain, NOOP, type Keymap } from "@os-core/2-resolve/chainResolver";
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import {
   resolveFieldKey,
   resolveFieldKeyByType,
 } from "@os-core/2-resolve/resolveFieldKey";
-import { resolveItemKey } from "@os-core/2-resolve/resolveItemKey";
-import { resolveTriggerKey } from "@os-core/2-resolve/resolveTriggerKey";
-import { OS_CHECK } from "@os-core/4-command";
+import type { BaseCommand } from "@kernel/core/tokens";
 import type { FieldType } from "@os-core/engine/registries/fieldRegistry";
+import {
+  resolveTriggerRole,
+  buildTriggerKeymap,
+} from "@os-core/engine/registries/triggerRegistry";
 import type { ZoneCursor } from "@os-core/engine/registries/zoneRegistry";
+import type { ActionConfig } from "@os-core/schema/types";
 import type { ResolveResult } from "../_shared/domQuery";
 
 // ═══════════════════════════════════════════════════════════════════
-// Input / Output Types
+// Types
 // ═══════════════════════════════════════════════════════════════════
 
 export interface KeyboardInput {
@@ -36,37 +39,28 @@ export interface KeyboardInput {
   isCombobox: boolean;
 
   // ─── Field layer ───
-  /** FieldRegistry id of the currently editing field, or null */
   editingFieldId: string | null;
-
-  /** Field type for always-active Fields (boolean/number). Set when item has a Field. */
   activeFieldType: FieldType | null;
 
   // ─── Item layer ───
-  /** Role of the closest [data-item-id] element, e.g. "checkbox", "switch" */
   focusedItemRole: string | null;
   focusedItemId: string | null;
-  /** Whether the focused item is expanded (for treeitem) */
   focusedItemExpanded: boolean | null;
 
-  /** Whether the active zone has onCheck registered */
   activeZoneHasCheck: boolean;
+  activeZoneCheckKeys: string[];
   activeZoneFocusedItemId: string | null;
+  /** v10: action config (우선). 없으면 check 레거시 경로 사용. */
+  activeZoneAction: ActionConfig | null;
 
-  /** For building input meta */
   elementId: string | undefined;
 
   // ─── Trigger layer ───
-  /** data-trigger-id of the focused trigger element, or null */
   focusedTriggerId: string | null;
-  /** Overlay type of the trigger (e.g., "menu", "dialog"), or null */
   focusedTriggerRole: string | null;
-  /** Overlay ID controlled by this trigger, or null */
   focusedTriggerOverlayId: string | null;
-  /** Whether the trigger's overlay is currently open */
   isTriggerOverlayOpen: boolean;
 
-  /** For resolving ZoneCallbacks */
   cursor: ZoneCursor | null;
 }
 
@@ -77,18 +71,22 @@ interface InputMeta extends Record<string, unknown> {
   elementId: string | undefined;
 }
 
+/** Layer return: command + which element claimed it */
+interface LayerResult {
+  cmd: BaseCommand;
+  elementId?: string;
+}
+
+/** Layer: (key) → result or null (pass) */
+type Layer = (key: string) => LayerResult | null;
+
 // ═══════════════════════════════════════════════════════════════════
-// Pure Resolution
+// Pure Resolution — Layer[] first-wins loop
 // ═══════════════════════════════════════════════════════════════════
 
 export function resolveKeyboard(input: KeyboardInput): ResolveResult {
-  // Guard: IME, defaultPrevented, inspector, combobox
-  if (input.isDefaultPrevented || input.isComposing) {
-    return { commands: [], meta: null, preventDefault: false, fallback: false };
-  }
-  if (input.isInspector || input.isCombobox) {
-    return { commands: [], meta: null, preventDefault: false, fallback: false };
-  }
+  if (input.isDefaultPrevented || input.isComposing) return EMPTY;
+  if (input.isInspector || input.isCombobox) return EMPTY;
 
   const meta: InputMeta = {
     type: "KEYBOARD",
@@ -97,142 +95,142 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
     elementId: input.elementId,
   };
 
-  // ═══════════════════════════════════════════════════════════════
-  // ZIFT Responder Chain: Field → Trigger → Item → Zone → Global
-  // ═══════════════════════════════════════════════════════════════
+  const layers: (Layer | null)[] = [
+    fieldLayer(input),
+    triggerItemLayer(input),
+    zoneLayer(input),
+  ];
 
-  // Layer 1a: Field — editing text field owns Enter/Escape per fieldType
+  for (const layer of layers) {
+    if (!layer) continue;
+    const result = layer(input.canonicalKey);
+    if (!result) continue;
+    if (result.cmd === NOOP) return EMPTY;
+    return {
+      commands: [result.cmd],
+      meta: { ...meta, elementId: result.elementId },
+      preventDefault: true,
+      fallback: false,
+    };
+  }
+
+  return { commands: [], meta: null, preventDefault: false, fallback: true };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Layer Builders
+// ═══════════════════════════════════════════════════════════════════
+
+/** Layer 1: Field — editing text or always-active (boolean/number) */
+function fieldLayer(input: KeyboardInput): Layer | null {
   if (input.editingFieldId) {
-    const fieldCmd = resolveFieldKey(input.editingFieldId, input.canonicalKey, {
-      itemId: input.focusedItemId ?? undefined,
-    });
-    if (fieldCmd) {
-      return {
-        commands: [fieldCmd],
-        meta: { ...meta, elementId: input.focusedItemId ?? undefined },
-        preventDefault: true,
-        fallback: false,
-      };
-    }
-    // Field is editing but didn't claim this key.
-    // If the field is active (owns this key for text editing), stop here.
-    if (input.isFieldActive) {
-      return {
-        commands: [],
-        meta: null,
-        preventDefault: false,
-        fallback: false,
-      };
-    }
+    return (key) => {
+      const cmd = resolveFieldKey(input.editingFieldId!, key, {
+        itemId: input.focusedItemId ?? undefined,
+      });
+      if (cmd) return { cmd, elementId: input.focusedItemId ?? undefined };
+      // Field absorbs this key → NOOP
+      if (input.isFieldActive) return { cmd: NOOP };
+      return null;
+    };
   }
 
-  // Layer 1b: Field — always-active (boolean/number). No editingFieldId needed.
-  // These Fields are active whenever the item has focus.
-  if (!input.editingFieldId && input.activeFieldType && input.focusedItemId) {
-    const fieldCmd = resolveFieldKeyByType(
-      input.activeFieldType,
-      input.canonicalKey,
-      { itemId: input.focusedItemId },
+  if (input.activeFieldType && input.focusedItemId) {
+    return (key) => {
+      const cmd = resolveFieldKeyByType(input.activeFieldType!, key, {
+        itemId: input.focusedItemId!,
+      });
+      return cmd ? { cmd, elementId: input.focusedItemId! } : null;
+    };
+  }
+
+  return null;
+}
+
+/** Layers 2+3: Trigger > Item — chain executor */
+function triggerItemLayer(input: KeyboardInput): Layer | null {
+  if (input.isEditing) return null;
+
+  const layers: Keymap[] = [];
+  const hasTrigger = input.focusedTriggerId && input.focusedTriggerRole && input.focusedTriggerOverlayId;
+
+  if (hasTrigger) {
+    layers.push(
+      buildTriggerKeymap(resolveTriggerRole(input.focusedTriggerRole!), {
+        overlayId: input.focusedTriggerOverlayId!,
+        triggerRole: input.focusedTriggerRole!,
+        triggerId: input.focusedTriggerId!,
+      }, input.isTriggerOverlayOpen),
     );
-    if (fieldCmd) {
-      return {
-        commands: [fieldCmd],
-        meta: { ...meta, elementId: input.focusedItemId },
-        preventDefault: true,
-        fallback: false,
-      };
+  }
+
+  // Action config keymap (v10) — BEFORE legacy check
+  if (input.activeZoneAction && input.activeZoneFocusedItemId) {
+    const action = input.activeZoneAction;
+    const keys = action.keys ?? [];
+
+    const actionKeymap: Keymap = {};
+
+    for (const k of keys) {
+      if (action.keymap?.[k as keyof typeof action.keymap]) {
+        const overrideCmds = action.keymap[k as keyof typeof action.keymap]!;
+        actionKeymap[k] = overrideCmds[0];
+      } else if (action.commands.length > 0) {
+        actionKeymap[k] = action.commands[0];
+      }
     }
-  }
 
-  // Layer 2: Trigger — trigger-specific keys (menu open, dialog open)
-  // When focused element is a trigger, TriggerConfig decides which keys open the overlay.
-  if (
-    !input.isEditing &&
-    input.focusedTriggerId &&
-    input.focusedTriggerRole &&
-    input.focusedTriggerOverlayId
-  ) {
-    const triggerCmd = resolveTriggerKey(input.canonicalKey, {
-      triggerRole: input.focusedTriggerRole,
-      overlayId: input.focusedTriggerOverlayId,
-      isOverlayOpen: input.isTriggerOverlayOpen,
-    });
-    if (triggerCmd) {
-      return {
-        commands: [triggerCmd],
-        meta: { ...meta, elementId: input.focusedTriggerId },
-        preventDefault: true,
-        fallback: false,
-      };
+    if (action.keymap) {
+      for (const [k, cmds] of Object.entries(action.keymap)) {
+        if (!actionKeymap[k] && cmds && cmds.length > 0) {
+          actionKeymap[k] = cmds[0];
+        }
+      }
     }
+
+    layers.push(actionKeymap);
   }
 
-  // Layer 3: Item — role-specific keys (treeitem expand, checkbox check)
-  if (!input.isEditing && input.focusedItemId) {
-    const itemCmd = resolveItemKey(input.focusedItemRole, input.canonicalKey, {
-      itemId: input.focusedItemId,
-      ...(input.focusedItemExpanded != null
-        ? { expanded: input.focusedItemExpanded }
-        : {}),
-    });
-    if (itemCmd) {
-      return {
-        commands: [itemCmd],
-        meta: { ...meta, elementId: input.focusedItemId },
-        preventDefault: true,
-        fallback: false,
-      };
-    }
-  }
+  if (layers.length === 0) return null;
 
-  // Item fallback: Zone has onCheck registered → Space = CHECK (app semantics)
-  // This works with activeZoneFocusedItemId even when DOM focusedItemId is null
-  if (
-    !input.isEditing &&
-    input.canonicalKey === "Space" &&
-    input.activeZoneHasCheck &&
-    input.activeZoneFocusedItemId
-  ) {
-    return {
-      commands: [OS_CHECK({ targetId: input.activeZoneFocusedItemId })],
-      meta: { ...meta, elementId: input.activeZoneFocusedItemId },
-      preventDefault: true,
-      fallback: false,
-    };
-  }
-
-  // Layer 3+4: Zone + Global — Keybindings registry
-  const binding = Keybindings.resolve(input.canonicalKey, {
-    isEditing: input.isEditing,
-    isFieldActive: input.isFieldActive,
-  });
-
-  if (!binding) {
-    return { commands: [], meta: null, preventDefault: false, fallback: true };
-  }
-
-  if (typeof binding.command === "function") {
-    if (!input.cursor) {
-      return {
-        commands: [],
-        meta: null,
-        preventDefault: false,
-        fallback: false,
-      };
-    }
-    const cmds = binding.command(input.cursor);
-    return {
-      commands: Array.isArray(cmds) ? cmds : [cmds],
-      meta,
-      preventDefault: true,
-      fallback: false,
-    };
-  }
-
-  return {
-    commands: [binding.command],
-    meta,
-    preventDefault: true,
-    fallback: false,
+  return (key) => {
+    const cmd = resolveChain(key, layers);
+    if (!cmd) return null;
+    const elementId = hasTrigger
+      ? input.focusedTriggerId!
+      : input.activeZoneFocusedItemId ?? input.focusedItemId ?? undefined;
+    return { cmd, elementId };
   };
 }
+
+/** Layer 4: Zone + Global — Keybindings registry */
+function zoneLayer(input: KeyboardInput): Layer | null {
+  return (key) => {
+    const binding = Keybindings.resolve(key, {
+      isEditing: input.isEditing,
+      isFieldActive: input.isFieldActive,
+    });
+    if (!binding) return null;
+
+    if (typeof binding.command === "function") {
+      if (!input.cursor) return { cmd: NOOP };
+      const cmds = binding.command(input.cursor);
+      // ZoneCallback returns command(s) — wrap first one
+      const arr = Array.isArray(cmds) ? cmds : [cmds];
+      return arr.length > 0 ? { cmd: arr[0], elementId: input.elementId } : null;
+    }
+
+    return { cmd: binding.command, elementId: input.elementId };
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════════════════════════════
+
+const EMPTY: ResolveResult = {
+  commands: [],
+  meta: null,
+  preventDefault: false,
+  fallback: false,
+};

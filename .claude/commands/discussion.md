@@ -33,6 +33,13 @@ description: Toulmin 기반 Expert Consulting. 숨겨진 Intent를 추출하고 
    - 형식: "**제 판단: [A]. 이유: [근거].** 다르게 보시면 말씀해주세요."
    - 근거 없이 "어떻게 할까요?"만 던지는 것은 전문가의 역할 방기다.
 
+2-3. **새 지식을 발견하면 즉시 누적한다**:
+   - 대화 중 **새로운 원칙·경계·패턴·정의**가 합의되면 **📝 Knowledge**에 즉시 추가한다.
+   - 형식: `K1. [한 줄 요약] (NEW)` — Warrant과 동일한 누적 방식.
+   - Knowledge는 Warrant(논거)과 다르다: Warrant은 "왜 이 Claim이 맞는가"의 근거이고, Knowledge는 "이 대화에서 발견된, 프로젝트에 영구 반영할 지식"이다.
+   - 예시: `K1. 컴포넌트의 합법적 책임 = 렌더링 + show/hide + DOM focus + ARIA binding (NEW)`
+   - **트리거**: 사용자가 명시적으로 확인/동의한 정의·원칙·경계가 Knowledge 후보다. AI의 추론만으로는 추가하지 않는다.
+
 3. **누적 구조** (매 턴 끝에 표시):
 
    | 요소 | 내용 |
@@ -40,6 +47,7 @@ description: Toulmin 기반 Expert Consulting. 숨겨진 Intent를 추출하고 
    | **📌 Current Intent** | 현재 턴의 숨겨진 의도 1문장 |
    | **🎯 Emerging Claim** | 현재까지 수렴된 결론 후보 |
    | **📋 Warrants** | W1. ... / W2. ... ← supports W1 / W3. ... (NEW) |
+   | **📝 Knowledge** | K1. ... / K2. ... (NEW) — 이 대화에서 발견된 영구 지식 |
    | **📎 References** | 이 대화에서 참조된 `docs/` 문서 경로 (누적) |
    | **⚖️ Cynefin** | Clear / Complicated / Complex |
    | **🚀 Next** | Cynefin 게이트 + 논의 성격으로 예측한 다음 워크플로우 (아래 규칙 참조) |
@@ -78,48 +86,35 @@ description: Toulmin 기반 Expert Consulting. 숨겨진 Intent를 추출하고 
 
 ## 종료 시 산출물
 
-종료 시그널을 받으면 **2단계 프로세스**로 1개의 통합 문서를 작성한다:
+**Discussion의 산출물은 "새롭게 알게 된 지식"이다.** 대화 맥락(Journey)이나 논증 구조(Toulmin)는 저장하지 않는다.
 
-### Step 1: 문서 작성
+종료 시그널을 받으면 **2단계 프로세스**를 실행한다:
 
-**Journey** (상단) + **Conclusion** (하단)을 하나의 파일에 직접 작성한다.
+### Step 1: Knowledge 반영 (`/knowledge` 워크플로우 실행)
 
-**Journey 부분**:
-- 대화록 형식. Inflection point(Intent 전환, Claim 수렴) 턴만 선별 압축.
-- `**🧑 사용자**: ...` / `**🤖 AI**: ...` 로 턴 구분. 전환점마다 `---`.
+대화 중 누적된 **📝 Knowledge** 항목을 `/knowledge` 워크플로우에 전달하여 프로젝트에 영구 반영한다.
 
-**Conclusion 부분** — Toulmin 정석 표:
+- `/knowledge`가 보관 위치 판단 → 지식 형태 변환 → 사용자 확인 → 반영 실행을 담당한다.
+- Knowledge가 아직 Complex(미확정)이거나, 구현 후 검증이 필요한 경우는 반영하지 않고 **❓ Open Gap**으로 남긴다.
 
-| Toulmin | 내용 |
-|---------|------|
-| **🎯 Claim** | 합의된 결론 |
-| **📊 Data** | 근거가 된 핵심 사실 |
-| **🔗 Warrant** | Data→Claim의 핵심 논리 |
-| **📚 Backing** | 학문적·산업적 근거, 출처 |
-| **⚖️ Qualifier** | Clear / Complicated / Complex / Chaotic |
-| **⚡ Rebuttal** | 반론·리스크·예외 |
-| **❓ Open Gap** | 미해결 질문 |
+> Knowledge 항목이 없는 경우(순수 탐색적 논의): 이 단계를 건너뛴다.
 
-- **Qualifier = Cynefin** → `🚀 Next` 판정 규칙(핵심 규칙 #4)에 따라 라우팅.
-
-### Step 2: 저장 위치 결정
+### Step 2: 라우팅
 
 1. `docs/STATUS.md`를 읽어 Active Focus를 확인한다.
 2. **6갈래 라우팅** (`🚀 Next` 예측 또는 사용자 슬래시 커맨드):
 
    | 판정 | 슬래시 커맨드 | 행선지 | 조치 |
    |------|-------------|--------|------|
-   | **기존 프로젝트의 Task** | `/go`, `/issue` | `1-project/[name]/BOARD.md` | Now에 태스크 추가, discussion은 `discussions/`에 |
+   | **기존 프로젝트의 Task** | `/go`, `/issue` | `1-project/[name]/BOARD.md` | Now에 태스크 추가 |
    | **기존 프로젝트의 Discussion** | — | `1-project/[name]/discussions/` | BOARD 변경 없음 |
    | **새 프로젝트 생성** | `/project` | `1-project/[new-name]/` | `/project` 워크플로우로 전환 |
    | **Product Story 추가** | `/stories` | `6-products/[name]/stories.md` | 유저 스토리 발견·정리 |
    | **리소스** | `/resource` | `3-resource/[category]/` | 참고 자료로 저장 |
    | **백로그** | `/backlog` | `5-backlog/` | 아이디어 보관 |
 
-3. **파일명**: `YYYY-MMDD-HHmm-{topic-slug}.md`
-
 ### 라우팅 후 조치
 
 - **프로젝트 귀속**: `docs/STATUS.md` Last Activity 갱신.
-- **새 프로젝트**: `/project` 전환. Discussion이 첫 `discussions/` 파일.
+- **새 프로젝트**: `/project` 전환. Discussion의 Knowledge가 프로젝트의 초기 지식이 된다.
 - **백로그/리소스**: STATUS.md 변경 없음.

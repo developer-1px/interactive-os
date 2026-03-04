@@ -1,9 +1,11 @@
 /**
- * @spec docs/1-project/command-config-invariant/spec.md §1.5 (T5)
+ * @spec docs/1-project/action-axis-unification/BOARD.md
  *
- * T5: EXPAND → NAVIGATE 흡수
- * Input-based tests — keyboard.press("Enter") triggers the full pipeline:
- *   key → resolveKeyboard → OS_ACTIVATE → config.activate.effect → OS_EXPAND
+ * T5+: Accordion expand via action config (v10 declarative)
+ * Input-based tests — keyboard.press("Enter"/"Space") triggers the full pipeline:
+ *   key → resolveKeyboard → action config → OS_EXPAND (direct)
+ *
+ * v10: activate.effect path removed. OS_EXPAND is dispatched directly via action axis.
  */
 import { createHeadlessPage } from "@os-devtool/testing/createHeadlessPage";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
@@ -13,9 +15,11 @@ describe("T5: EXPAND → NAVIGATE (input-based)", () => {
     const page = createHeadlessPage();
     afterEach(() => page.cleanup());
 
-    it("accordion has activate.effect = 'toggleExpand'", () => {
+    it("accordion has action.commands = [OS_EXPAND] (v10 declarative)", () => {
         const config = resolveRole("accordion");
-        expect(config.activate.effect).toBe("toggleExpand");
+        // v10: action axis replaces activate.effect
+        expect(config.action.commands[0]?.type).toBe("OS_EXPAND");
+        // Legacy effect field may still exist but is no longer the source of truth
     });
 
     it("Enter on collapsed accordion → expands", async () => {

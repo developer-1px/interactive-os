@@ -1,4 +1,17 @@
 {
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/go-loop.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "WebSearch",
@@ -31,7 +44,10 @@
       "Bash(cat:*)",
       "Bash(md5:*)",
       "Bash(source:*)",
-      "Bash(do:*)"
+      "Bash(do:*)",
+      "WebFetch(domain:www.atcyrus.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(chmod +x:*)"
     ]
   }
 }

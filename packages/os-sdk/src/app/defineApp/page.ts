@@ -28,7 +28,6 @@ import {
   type ItemAttrs,
   readActiveZoneId,
   readFocusedItemId,
-  readSelection,
   resolveElement,
   simulateClick,
   simulateKeyPress,
@@ -135,8 +134,9 @@ export function formatDiagnostics(kernel: DiagnosticKernel): string {
     if (zone) {
       const entry = ZoneRegistry.get(activeZoneId);
       const items = entry?.getItems?.() ?? [];
-      const sel = zone.selection
-        .map((s) => `"${s}"`)
+      const sel = Object.entries(zone.items ?? {})
+        .filter(([, s]) => s?.["aria-selected"])
+        .map(([id]) => `"${id}"`)
         .join(", ");
       lines.push("");
       lines.push(
@@ -325,7 +325,9 @@ export function createAppPage<S>(
         lastItemId:
           filtered[filtered.length - 1] ?? zoneState?.lastFocusedId ?? null,
         entry,
-        selectedItemId: zoneState?.selection?.[0] ?? null,
+        selectedItemId: Object.keys(zoneState?.items ?? {}).find(
+          (id) => zoneState?.items?.[id]?.["aria-selected"]
+        ) ?? null,
         lastFocusedId: zoneState?.lastFocusedId ?? null,
       });
     }
@@ -492,7 +494,9 @@ export function createAppPage<S>(
       return readFocusedItemId(os, zoneId);
     },
     selection(zoneId?: string) {
-      return readSelection(os, zoneId);
+      return Object.entries(
+        (os.getState().os.focus.zones[zoneId ?? os.getState().os.focus.activeZoneId ?? ""]?.items ?? {})
+      ).filter(([, s]) => s?.["aria-selected"]).map(([id]) => id);
     },
     activeZoneId() {
       return readActiveZoneId(os);
@@ -843,7 +847,12 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
           const z = ensureZone(draft.os, zoneId);
           if (opts?.focusedItemId) z.focusedItemId = opts.focusedItemId;
           if (opts?.lastFocusedId) z.lastFocusedId = opts.lastFocusedId;
-          if (opts?.selection) z.selection = opts.selection;
+          if (opts?.selection) {
+            for (const id of opts.selection) {
+              if (!z.items[id]) z.items[id] = {};
+              z.items[id] = { ...z.items[id], "aria-selected": true };
+            }
+          }
         }),
       );
       if (opts?.parentId !== undefined) {
@@ -861,7 +870,27 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
     },
     zone(zoneId) {
       const id = zoneId ?? readActiveZoneId(os);
-      return id ? os.getState().os.focus.zones[id] : undefined;
+      const z = id ? os.getState().os.focus.zones[id] : undefined;
+      if (!z) return undefined;
+      // Computed compatibility getters derived from items map
+      return Object.create(z, {
+        expandedItems: {
+          get() {
+            return Object.entries(z.items ?? {})
+              .filter(([, s]) => (s as Record<string, unknown>)?.["aria-expanded"])
+              .map(([itemId]) => itemId);
+          },
+          enumerable: true,
+        },
+        selection: {
+          get() {
+            return Object.entries(z.items ?? {})
+              .filter(([, s]) => (s as Record<string, unknown>)?.["aria-selected"])
+              .map(([itemId]) => itemId);
+          },
+          enumerable: true,
+        },
+      });
     },
     goto(zoneId: string, opts?: GotoOptions) {
       if (opts?.items) mockItems.current = opts.items;
@@ -908,6 +937,38 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
                 ...base.dismiss,
                 ...opts.config.dismiss,
               } as Partial<DismissConfig>,
+            }
+            : {}),
+          ...(opts.config.check
+            ? {
+              check: {
+                ...base.check,
+                ...opts.config.check,
+              },
+            }
+            : {}),
+          ...(opts.config.expand
+            ? {
+              expand: {
+                ...base.expand,
+                ...opts.config.expand,
+              },
+            }
+            : {}),
+          ...(opts.config.value
+            ? {
+              value: {
+                ...base.value,
+                ...opts.config.value,
+              },
+            }
+            : {}),
+          ...(opts.config.action
+            ? {
+              action: {
+                ...base.action,
+                ...opts.config.action,
+              },
             }
             : {}),
         } as FocusGroupConfig;
@@ -960,7 +1021,10 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         os.setState((s: AppState) =>
           produce(s, (draft) => {
             const z = ensureZone(draft.os, zoneId);
-            z.selection = initialSelection!;
+            for (const id of initialSelection!) {
+              if (!z.items[id]) z.items[id] = {};
+              z.items[id] = { ...z.items[id], "aria-selected": true };
+            }
             z.selectionAnchor = initialSelection![0] ?? null;
           }),
         );
@@ -971,7 +1035,10 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         os.setState((s: AppState) =>
           produce(s, (draft) => {
             const z = ensureZone(draft.os, zoneId);
-            z.expandedItems = opts.initial!.expanded!;
+            for (const id of opts.initial!.expanded!) {
+              if (!z.items[id]) z.items[id] = {};
+              z.items[id] = { ...z.items[id], "aria-expanded": true };
+            }
           }),
         );
       }

@@ -14,12 +14,9 @@ export const initialZoneState: ZoneState = {
   stickyX: null,
   stickyY: null,
 
-  // Selection
-  selection: [],
+  // ARIA Item State (direct mirror of DOM aria-* attributes)
+  items: {},
   selectionAnchor: null,
-
-  // Expansion
-  expandedItems: [],
 
   // Value
   valueNow: {},

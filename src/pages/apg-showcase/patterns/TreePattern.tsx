@@ -6,7 +6,7 @@
  */
 
 import { useFlatTree } from "@os-react/6-project/accessors/useFlatTree";
-import { Item } from "@os-react/6-project/Item";
+import { Item } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
 import { Icon } from "@/components/Icon";

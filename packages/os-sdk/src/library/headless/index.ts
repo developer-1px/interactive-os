@@ -12,7 +12,7 @@ export {
   computeTrigger,
   readActiveZoneId,
   readFocusedItemId,
-  readSelection,
+  readSelected,
   resolveElement,
 } from "@os-core/3-inject/compute";
 export type {

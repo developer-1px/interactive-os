@@ -19,8 +19,7 @@
  */
 
 import { useSelection } from "@os-react/6-project/accessors/useSelection";
-import { Item as OSItem } from "@os-react/6-project/Item";
-import { Zone } from "@os-react/6-project/Zone";
+import { Item as OSItem, Zone } from "@os-react/internal";
 import { Children, type ReactElement, type ReactNode } from "react";
 import type { Block } from "@/apps/builder/model/appState";
 import { useCursorMeta } from "../hooks/useCursorMeta";

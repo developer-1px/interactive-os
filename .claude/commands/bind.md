@@ -11,12 +11,10 @@ description: Green 테스트를 통과한 헤드리스 로직을 UI 컴포넌트
 
 ---
 
-### Step 0: BINDBOOK 숙지 + 맥락 파악
+### Step 0: 지식 로딩 + 맥락 파악
 
-`.agent/knowledge/bind.md`를 읽는다.
-- §1 바인딩 원칙
-- §2 자주 하는 실수
-- §3 바인딩 선례
+> `.agent/knowledge/bind.md`를 읽는다 — §바인딩 원칙, §실수, §선례
+> `.agent/knowledge/contract-checklist.md`를 읽는다 — §Config (필수 OS 패턴, 금지 목록)
 
 Then 맥락 파악:
 
@@ -26,16 +24,9 @@ Then 맥락 파악:
 
 ---
 
-### Step 1: RUNBOOK 숙지
+### Step 1: 앱 패턴 숙지
 
-> **반드시 읽는다.** "아는 대로" 구현하면 OS 패턴을 빗나간다.
-
-```
-.agent/knowledge/runbook.md
-```
-
-- OS로 앱 만드는 법: Zone, Command, Hook 패턴 확인.
-- 연결할 Zone이 이미 존재하는지, 새로 만들어야 하는지 확인.
+> `.agent/knowledge/runbook.md`를 읽는다 — OS로 앱 만드는 법
 
 ---
 

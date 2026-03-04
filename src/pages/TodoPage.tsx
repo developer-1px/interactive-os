@@ -1,6 +1,6 @@
 import { Sidebar } from "@apps/todo/widgets/Sidebar";
 import { TodoPanel } from "@apps/todo/widgets/TodoPanel";
-import { Zone } from "@os-react/6-project/Zone";
+import { Zone } from "@os-react/internal";
 
 export default function TodoPage() {
   return (

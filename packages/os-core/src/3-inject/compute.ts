@@ -42,58 +42,12 @@ export function readFocusedItemId(
   return readZone(kernel, zoneId)?.focusedItemId ?? null;
 }
 
-export function readSelection(
+export function readSelected(
   kernel: HeadlessKernel,
+  itemId: string,
   zoneId?: string,
-): string[] {
-  return readZone(kernel, zoneId)?.selection ?? [];
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// computeFieldAttrs — Internal helper for Field-owned ARIA attributes.
-//
-// Extracts check axis (aria-checked) and value axis (aria-valuenow/min/max)
-// from computeItem. External interface unchanged.
-//
-// Phase 2: May be promoted to external API when createField is implemented.
-// ═══════════════════════════════════════════════════════════════════
-
-interface FieldAttrsInput {
-  checkMode: string;
-  isSelectableGroup: boolean;
-  isSelected: boolean;
-  valueMode: string;
-  valueNow: number | undefined;
-  valueConfig?: { min: number; max: number };
-}
-
-interface FieldAttrsOutput {
-  "aria-checked"?: boolean;
-  "aria-selected"?: boolean;
-  "aria-valuenow"?: number;
-  "aria-valuemin"?: number;
-  "aria-valuemax"?: number;
-}
-
-function computeFieldAttrs(input: FieldAttrsInput): FieldAttrsOutput {
-  const result: FieldAttrsOutput = {};
-
-  // ── Check axis (aria-checked vs aria-selected) ──
-  const useChecked = input.checkMode === "check";
-  if (useChecked) {
-    result["aria-checked"] = input.isSelected;
-  } else if (input.isSelectableGroup) {
-    result["aria-selected"] = input.isSelected;
-  }
-
-  // ── Value axis (aria-valuenow/min/max) ──
-  if (input.valueMode === "continuous" && input.valueConfig) {
-    result["aria-valuenow"] = input.valueNow;
-    result["aria-valuemin"] = input.valueConfig.min;
-    result["aria-valuemax"] = input.valueConfig.max;
-  }
-
-  return result;
+): boolean {
+  return readZone(kernel, zoneId)?.items[itemId]?.["aria-selected"] ?? false;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -116,7 +70,15 @@ export function computeItem(
   const childRole =
     overrides?.role || (entry?.role ? getChildRole(entry.role) : undefined);
 
-  // ── Expand axis (aria-expanded) — config-driven ──
+  // ── ARIA item state — read directly from items map ──
+  // Commands wrote aria-* directly. No derivation. DOM is source of truth.
+  const ariaItemState = z?.items?.[itemId] ?? {};
+  const isAriaSelected = overrides?.selected ?? ariaItemState["aria-selected"] ?? false;
+  const isAriaChecked = ariaItemState["aria-checked"] ?? false;
+  const isAriaPressed = ariaItemState["aria-pressed"] ?? false;
+  const isAriaExpanded = ariaItemState["aria-expanded"] ?? false;
+
+  // ── Expand axis — expandable attribute (config-driven) ──
   const expandMode = entry?.config?.expand?.mode ?? "none";
   const expandable =
     expandMode === "all"
@@ -125,37 +87,21 @@ export function computeItem(
         ? (entry?.getExpandableItems?.().has(itemId) ?? false)
         : false;
 
-  // ── Check + Value axes — delegated to computeFieldAttrs ──
-  const checkMode = entry?.config?.check?.mode ?? "none";
-  const isSelectableGroup = entry?.config.select.mode !== "none";
+  // ── Value axis ──
   const valueMode = entry?.config?.value?.mode ?? "none";
-
-  const isFocused = z?.focusedItemId === itemId;
-  const isActiveZone = s.os.focus.activeZoneId === zoneId;
-  const isStoreSelected = z?.selection.includes(itemId) ?? false;
-  const isExpanded = z?.expandedItems.includes(itemId) ?? false;
-  const isDisabled =
-    overrides?.disabled || ZoneRegistry.isDisabled(zoneId, itemId);
-  const isActiveFocused = isFocused && isActiveZone;
-  const isAnchor = isFocused && !isActiveZone;
-  const isSelected = overrides?.selected || isStoreSelected;
-
   const currentValue =
     valueMode === "continuous"
       ? (z?.valueNow?.[itemId] ?? entry!.config!.value!.min)
       : undefined;
 
-  const fieldAttrs = computeFieldAttrs({
-    checkMode,
-    isSelectableGroup,
-    isSelected,
-    valueMode,
-    valueNow: currentValue,
-    valueConfig:
-      valueMode === "continuous"
-        ? { min: entry!.config!.value!.min, max: entry!.config!.value!.max }
-        : undefined,
-  });
+  const isFocused = z?.focusedItemId === itemId;
+  const isActiveZone = s.os.focus.activeZoneId === zoneId;
+  const isDisabled = overrides?.disabled || ZoneRegistry.isDisabled(zoneId, itemId);
+  const isActiveFocused = isFocused && isActiveZone;
+  const isAnchor = isFocused && !isActiveZone;
+
+  const hasCheckRole = (entry?.config?.check?.mode ?? "none") === "check";
+  const hasSelectRole = (entry?.config?.select?.mode ?? "none") !== "none";
 
   const attrs: ItemAttrs = {
     id: itemId,
@@ -165,13 +111,27 @@ export function computeItem(
     "data-item-id": itemId,
     "data-focused": isActiveFocused || undefined,
     "data-anchor": isAnchor || undefined,
-    "data-selected": isSelected || undefined,
-    "data-expanded": isExpanded || undefined,
-    ...fieldAttrs,
+    "data-selected": isAriaSelected || undefined,
+    "data-expanded": isAriaExpanded || undefined,
+    // ── ARIA: direct reads — false must also be present when role is declared ──
+    ...(hasSelectRole ? { "aria-selected": isAriaSelected } : {}),
+    ...(hasCheckRole ? { "aria-checked": isAriaChecked } : {}),
+    // aria-pressed: present when action.commands contains OS_PRESS OR items[id] has explicit state
+    ...((entry?.config?.action?.commands?.some((c: any) => c.type === "OS_PRESS") || ariaItemState["aria-pressed"] !== undefined)
+      ? { "aria-pressed": isAriaPressed }
+      : {}),
   };
 
+  // ── Value attrs ──
+  if (valueMode === "continuous" && entry?.config?.value) {
+    attrs["aria-valuenow"] = currentValue;
+    attrs["aria-valuemin"] = entry.config.value.min;
+    attrs["aria-valuemax"] = entry.config.value.max;
+  }
+
+  // ── Expand attrs ──
   if (expandable) {
-    attrs["aria-expanded"] = isExpanded;
+    attrs["aria-expanded"] = isAriaExpanded;
     attrs["aria-controls"] = `panel-${itemId}`;
   }
 
@@ -189,8 +149,8 @@ export function computeItem(
       isFocused,
       isActiveFocused,
       isAnchor,
-      isSelected,
-      isExpanded,
+      isSelected: isAriaSelected,
+      isExpanded: isAriaExpanded,
       valueNow: currentValue,
     },
   };

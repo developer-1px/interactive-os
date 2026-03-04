@@ -11,13 +11,12 @@
  *
  * ZIFT Classification:
  *   - Action Button = Trigger (activate on Enter/Space)
- *   - Toggle Button = Field (boolean) mapped to aria-pressed
+ *   - Toggle Button = action.commands=[OS_PRESS()] → aria-pressed
  *
- * Config: toolbar role (child role=button), check.mode="check" for toggle,
- *         onAction callback for action buttons.
+ * Config: toolbar role (child role=button),
+ *         action.commands=[OS_PRESS()] for toggle.
  */
 
-import { OS_CHECK } from "@os-core/4-command/activate/check";
 import { createOsPage } from "@os-sdk/app/defineApp/page";
 import { describe, expect, it } from "vitest";
 
@@ -28,13 +27,14 @@ const TOGGLE_BUTTON_ID = "toggle-mute";
 function toggleButtonFactory() {
   const page = createOsPage();
   page.setItems([TOGGLE_BUTTON_ID]);
-  page.setRole("button-zone", "toolbar", {
-    // click → OS_ACTIVATE → onAction → OS_CHECK (built-in toggle)
-    onAction: (cursor) => OS_CHECK({ targetId: cursor.focusId }),
-  });
-  // Override: check.mode for toggle, activate.onClick for click support
+  page.setRole("button-zone", "toolbar");
+  // Command type IS the ARIA declaration: OS_PRESS → aria-pressed
   page.setConfig({
-    check: { mode: "check" },
+    action: {
+      commands: [{ type: "OS_PRESS" }],
+      keys: ["Space", "Enter"],
+      onClick: true,
+    },
     activate: { mode: "manual", onClick: true },
   });
   page.setActiveZone("button-zone", TOGGLE_BUTTON_ID);

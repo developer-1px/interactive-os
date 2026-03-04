@@ -1,93 +1,78 @@
 /**
- * resolveTriggerKey — Unit tests
+ * buildTriggerKeymap — Unit tests
  *
- * Verifies that the Trigger layer of the ZIFT responder chain
- * correctly resolves keys based on TriggerConfig presets.
+ * Verifies that the Trigger layer keymap builder correctly maps
+ * TriggerConfig presets to keymaps resolved via resolveChain.
  *
  * Pure function tests. No DOM, no React.
+ * Replaces the old resolveTriggerKey tests.
  */
 
 import { describe, expect, it } from "vitest";
+import { resolveChain } from "@os-core/2-resolve/chainResolver";
 import {
-    resolveTriggerKey,
-    type TriggerKeyContext,
-} from "@os-core/2-resolve/resolveTriggerKey";
+    resolveTriggerRole,
+    buildTriggerKeymap,
+} from "@os-core/engine/registries/triggerRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════
 
-function menuTrigger(overrides: Partial<TriggerKeyContext> = {}): TriggerKeyContext {
-    return {
-        triggerRole: "menu",
-        overlayId: "popup-menu",
-        isOverlayOpen: false,
-        ...overrides,
-    };
-}
-
-function dialogTrigger(overrides: Partial<TriggerKeyContext> = {}): TriggerKeyContext {
-    return {
-        triggerRole: "dialog",
-        overlayId: "dialog-1",
-        isOverlayOpen: false,
-        ...overrides,
-    };
-}
-
-function tooltipTrigger(overrides: Partial<TriggerKeyContext> = {}): TriggerKeyContext {
-    return {
-        triggerRole: "tooltip",
-        overlayId: "tooltip-1",
-        isOverlayOpen: false,
-        ...overrides,
-    };
+function resolveKey(key: string, role: string, overlayId = "popup-1", isOpen = false) {
+    const config = resolveTriggerRole(role);
+    const keymap = buildTriggerKeymap(config, {
+        overlayId,
+        triggerRole: role,
+        triggerId: "trigger-1",
+    }, isOpen);
+    return resolveChain(key, [keymap]);
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // Menu Trigger (APG Menu Button Pattern)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("resolveTriggerKey: menu", () => {
+describe("buildTriggerKeymap: menu", () => {
     it("Enter → OS_OVERLAY_OPEN", () => {
-        const cmd = resolveTriggerKey("Enter", menuTrigger());
+        const cmd = resolveKey("Enter", "menu");
         expect(cmd).not.toBeNull();
         expect(cmd!.type).toBe("OS_OVERLAY_OPEN");
     });
 
     it("Space → OS_OVERLAY_OPEN", () => {
-        const cmd = resolveTriggerKey("Space", menuTrigger());
+        const cmd = resolveKey("Space", "menu");
         expect(cmd).not.toBeNull();
         expect(cmd!.type).toBe("OS_OVERLAY_OPEN");
     });
 
     it("ArrowDown → OS_OVERLAY_OPEN", () => {
-        const cmd = resolveTriggerKey("ArrowDown", menuTrigger());
+        const cmd = resolveKey("ArrowDown", "menu");
         expect(cmd).not.toBeNull();
         expect(cmd!.type).toBe("OS_OVERLAY_OPEN");
     });
 
     it("ArrowUp → OS_OVERLAY_OPEN", () => {
-        const cmd = resolveTriggerKey("ArrowUp", menuTrigger());
+        const cmd = resolveKey("ArrowUp", "menu");
         expect(cmd).not.toBeNull();
         expect(cmd!.type).toBe("OS_OVERLAY_OPEN");
     });
 
     it("ArrowLeft → null (not handled)", () => {
-        expect(resolveTriggerKey("ArrowLeft", menuTrigger())).toBeNull();
+        expect(resolveKey("ArrowLeft", "menu")).toBeNull();
     });
 
     it("Tab → null (not handled)", () => {
-        expect(resolveTriggerKey("Tab", menuTrigger())).toBeNull();
+        expect(resolveKey("Tab", "menu")).toBeNull();
     });
 
-    it("when overlay is open → null (overlay Zone handles keys)", () => {
-        expect(resolveTriggerKey("Enter", menuTrigger({ isOverlayOpen: true }))).toBeNull();
-        expect(resolveTriggerKey("ArrowDown", menuTrigger({ isOverlayOpen: true }))).toBeNull();
+    it("when overlay is open → null (empty keymap)", () => {
+        expect(resolveKey("Enter", "menu", "popup-1", true)).toBeNull();
+        expect(resolveKey("ArrowDown", "menu", "popup-1", true)).toBeNull();
     });
 
     it("overlay command carries correct overlayId", () => {
-        const cmd = resolveTriggerKey("Enter", menuTrigger({ overlayId: "my-menu" }));
+        const cmd = resolveKey("Enter", "menu", "my-menu");
         expect(cmd!.payload).toEqual(
             expect.objectContaining({ id: "my-menu" }),
         );
@@ -98,24 +83,24 @@ describe("resolveTriggerKey: menu", () => {
 // Dialog Trigger
 // ═══════════════════════════════════════════════════════════════════
 
-describe("resolveTriggerKey: dialog", () => {
+describe("buildTriggerKeymap: dialog", () => {
     it("Enter → OS_OVERLAY_OPEN", () => {
-        const cmd = resolveTriggerKey("Enter", dialogTrigger());
+        const cmd = resolveKey("Enter", "dialog");
         expect(cmd).not.toBeNull();
         expect(cmd!.type).toBe("OS_OVERLAY_OPEN");
     });
 
     it("Space → OS_OVERLAY_OPEN", () => {
-        const cmd = resolveTriggerKey("Space", dialogTrigger());
+        const cmd = resolveKey("Space", "dialog");
         expect(cmd).not.toBeNull();
     });
 
     it("ArrowDown → null (dialog doesn't open on arrow)", () => {
-        expect(resolveTriggerKey("ArrowDown", dialogTrigger())).toBeNull();
+        expect(resolveKey("ArrowDown", "dialog")).toBeNull();
     });
 
     it("ArrowUp → null (dialog doesn't open on arrow)", () => {
-        expect(resolveTriggerKey("ArrowUp", dialogTrigger())).toBeNull();
+        expect(resolveKey("ArrowUp", "dialog")).toBeNull();
     });
 });
 
@@ -123,16 +108,16 @@ describe("resolveTriggerKey: dialog", () => {
 // Tooltip Trigger
 // ═══════════════════════════════════════════════════════════════════
 
-describe("resolveTriggerKey: tooltip", () => {
+describe("buildTriggerKeymap: tooltip", () => {
     it("Enter → null (tooltip doesn't open on keyboard)", () => {
-        expect(resolveTriggerKey("Enter", tooltipTrigger())).toBeNull();
+        expect(resolveKey("Enter", "tooltip")).toBeNull();
     });
 
     it("Space → null", () => {
-        expect(resolveTriggerKey("Space", tooltipTrigger())).toBeNull();
+        expect(resolveKey("Space", "tooltip")).toBeNull();
     });
 
     it("ArrowDown → null", () => {
-        expect(resolveTriggerKey("ArrowDown", tooltipTrigger())).toBeNull();
+        expect(resolveKey("ArrowDown", "tooltip")).toBeNull();
     });
 });

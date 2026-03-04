@@ -128,6 +128,11 @@
 | Popover outside-click 수동 | `document.addEventListener("mousedown")` + `document.querySelector` | 🟡 OS 갭 → ✅ 해결 | `menu` role에 `dismiss.outsideClick: "close"` 추가. PointerListener가 자동 처리 | 2026-03-04 |
 | Popover menuitem onClick 수동 | `onClick` → `os.dispatch(OS_OVERLAY_CLOSE)` | 🟡 OS 갭 → ✅ 해결 | `menu` role에 `activate.onClick: true` 추가. click→OS_ACTIVATE→onAction 경로 | 2026-03-04 |
 | TriggerDismiss 이중 dispatch | `onClick` + `Item.onActivate` 중복 | 🔴 Bind 실수 → ✅ 수정 | handleClick 제거, Item.onActivate 경로에 일임. dialog/alertdialog에 `activate.onClick: true` 추가 | 2026-03-04 |
+| Trigger dead props (Pure Projection) | `dispatch`/`allowPropagation`/`onClick` destructure 잔존 | 🔴 LLM 실수 → ✅ 수정 | Pipeline 이관 후 behavior 함수 삭제 시 props 정리 누락 | 2026-03-04 |
+| Trigger extractTriggerClickInput | 정의만 하고 미사용 함수 | 🔴 LLM 과잉생산 → ✅ 삭제 | PointerListener가 DOM 직접 읽기로 전환. /doubt에서 발견 | 2026-03-04 |
+| Button toggle aria-checked | computeFieldAttrs가 hardcoded aria-checked 방출 (button은 aria-pressed 필요) | 🟡 OS 갭 → ✅ 해결 | `CheckConfig.aria?: "checked" \| "pressed"` + `CHECK_ATTR_MAP` lookup. Item→Zone 버블링 | 2026-03-04 |
+| TestBot button script aria-checked | TestBot이 aria-checked 검증 (잘못된 속성) | 🔴 LLM 실수 → ✅ 수정 | aria-pressed로 교정 | 2026-03-04 |
+| Field resetOnSubmit DOM sync | `handleCommit`에서 `FieldRegistry.reset()` 후 DOM innerText 미동기화 | ⚪ OS 내부 수정 → ✅ 해결 | 기존 패턴(innerRef.innerText=value) 재사용. 3줄 추가. 이중 commit 경로(Field handleCommit vs OS_FIELD_COMMIT) 구조적 부채 잔존 | 2026-03-04 |
 
 ---
 

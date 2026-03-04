@@ -16,7 +16,6 @@
 import type { BaseCommand } from "@kernel";
 import {
   OS_OVERLAY_CLOSE,
-  OS_OVERLAY_OPEN,
 } from "@os-core/4-command/overlay/overlay";
 import { os } from "@os-core/engine/kernel.ts";
 import type { OverlayEntry } from "@os-core/schema/state/OSState.ts";
@@ -24,7 +23,6 @@ import { Item } from "@os-react/6-project/Item.tsx";
 import { Zone } from "@os-react/6-project/Zone";
 import type {
   ReactElement,
-  MouseEvent as ReactMouseEvent,
   ReactNode,
 } from "react";
 import {
@@ -64,8 +62,6 @@ export interface TriggerProps<T extends BaseCommand>
   id?: string;
   onActivate?: T;
   children: ReactNode;
-  dispatch?: (cmd: T) => void;
-  allowPropagation?: boolean;
 
   /** Overlay role — when set, click opens an overlay */
   role?: OverlayRole;
@@ -96,17 +92,17 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       id,
       onActivate,
       children,
-      dispatch: customDispatch,
-      allowPropagation = false,
       className,
-      onClick,
       role: overlayRole,
       overlayId: externalOverlayId,
       ...rest
     },
     ref,
   ) => {
-    // dispatch removed — OS pipeline handles all commands via PointerListener
+    // Behavior removed — OS Pipeline handles all commands:
+    //   Click toggle → PointerListener → resolveTriggerClick
+    //   Keyboard → KeyboardListener → buildTriggerKeymap → resolveChain
+    //   Focus restore → OS_OVERLAY_CLOSE → triggerFocus effect
 
     // Use explicit overlayId if provided, otherwise auto-generate
     // biome-ignore lint/correctness/useExhaustiveDependencies: overlayRole intentionally excluded — ID must be stable
@@ -116,20 +112,13 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       [externalOverlayId],
     );
 
-    // Internal ref for focus restoration (merged with forwarded ref)
+    // Internal ref (merged with forwarded ref)
     const internalRef = useRef<HTMLElement>(null);
     const mergedRef = (node: HTMLElement | null) => {
       (internalRef as React.MutableRefObject<HTMLElement | null>).current = node;
       if (typeof ref === "function") ref(node);
       else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
     };
-
-    // Overlay open command — registered as onActivate on Item
-    // so headless simulateClick → OS_ACTIVATE → onActivate → OS_OVERLAY_OPEN
-    const overlayOpenCmd =
-      overlayRole && overlayId
-        ? OS_OVERLAY_OPEN({ id: overlayId, type: overlayRole })
-        : null;
 
     // ── ARIA Auto-Projection ───────────────────────────────────
     // When Trigger has an overlay role, automatically project:
@@ -143,15 +132,8 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         : false,
     );
 
-    // Focus restoration: when overlay closes, return focus to trigger element.
-    // Matches W3C APG: "Escape closes the menu and sets focus on the menu button."
-    const prevOverlayOpen = useRef(false);
-    useEffect(() => {
-      if (prevOverlayOpen.current && !isOverlayOpen) {
-        internalRef.current?.focus();
-      }
-      prevOverlayOpen.current = isOverlayOpen;
-    }, [isOverlayOpen]);
+    // Focus restoration: handled by Pipeline's triggerFocus defineEffect.
+    // OS_OVERLAY_CLOSE stores triggerId and triggers focus via effect.
 
     const overlayAriaProps =
       overlayRole && overlayId
@@ -163,46 +145,12 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         }
         : {};
 
-    // Shared activation logic: toggle overlay + dispatch onActivate
-    // Used by click (mouse). Keyboard Enter/Space goes through OS_ACTIVATE pipeline
-    // when id is set (Item path), so this only fires on actual mouse clicks.
-    const triggerActivate = () => {
-      if (overlayOpenCmd && overlayId) {
-        if (isOverlayOpen) {
-          os.dispatch(OS_OVERLAY_CLOSE({ id: overlayId }));
-        } else {
-          os.dispatch(overlayOpenCmd);
-        }
-      }
-      if (onActivate && !overlayOpenCmd) {
-        const dispatch = customDispatch ?? os.dispatch;
-        dispatch(onActivate);
-      }
-    };
-
-    const handleClick = (e: ReactMouseEvent) => {
-      if (!allowPropagation) {
-        e.stopPropagation();
-      }
-      triggerActivate();
-      onClick?.(e as ReactMouseEvent<HTMLElement>);
-    };
-
-    // OS pipeline intercepts Enter → OS_ACTIVATE before native click fires.
-    // When Trigger has an id (Item), OS_ACTIVATE → onActivate handles keyboard.
-    // When Trigger has no id, we need explicit keydown handling.
-    const handleKeyDown = !id
-      ? (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          triggerActivate();
-        }
-      }
-      : undefined;
+    // Pipeline handles all behavior:
+    //   Click toggle → PointerListener → resolveTriggerClick
+    //   Keyboard → KeyboardListener → buildTriggerKeymap → resolveChain
+    //   Focus restore → OS_OVERLAY_CLOSE → triggerFocus effect
 
     const baseProps = {
-      onClick: handleClick,
-      onKeyDown: handleKeyDown,
       className,
       "data-trigger-id": overlayId || id,
       ...overlayAriaProps,
@@ -248,11 +196,9 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
 
     // ── Merge into child element ──────────────────────────────────
     // Trigger *is* a Item if an ID is provided.
-    // When overlay role is set, register OS_OVERLAY_OPEN as onActivate
-    // → headless simulateClick → OS_ACTIVATE → onActivate → overlay opens
+    // Pipeline handles overlay toggle — onActivate is consumer-only
     if (id) {
-      // Merge overlay command with user's onActivate
-      const activateCmd = overlayOpenCmd ?? onActivate ?? undefined;
+      const activateCmd = onActivate ?? undefined;
       return (
         <>
           <Item
@@ -286,10 +232,6 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
             className:
               [child.props.className, className].filter(Boolean).join(" ") ||
               undefined,
-            onClick: (e: ReactMouseEvent) => {
-              child.props.onClick?.(e);
-              handleClick(e);
-            },
           })}
           {portalWithContext}
         </>

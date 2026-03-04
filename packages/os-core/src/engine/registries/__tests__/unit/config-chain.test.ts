@@ -43,18 +43,22 @@ describe("T1: NavigateConfig chain fields", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// 2. SelectConfig aria field
+// 2. Check/Action aria derivation — checkbox, switch, listbox
 // ═══════════════════════════════════════════════════════════════════
 
 describe("T1: SelectConfig aria field", () => {
-    it("checkbox has select.aria = 'checked'", () => {
+    it("checkbox has check.keys = ['Space'] (not select.aria)", () => {
         const config = resolveRole("checkbox");
-        expect((config.select as any).aria).toBe("checked");
+        // checkbox uses check axis, not select axis (select.mode = "none")
+        expect(config.select.mode).toBe("none");
+        expect(config.check.keys).toEqual(["Space"]);
     });
 
-    it("switch has select.aria = 'checked'", () => {
+    it("switch has check.keys = ['Space', 'Enter'] (not select.aria)", () => {
         const config = resolveRole("switch");
-        expect((config.select as any).aria).toBe("checked");
+        // switch uses check axis, not select axis (select.mode = "none")
+        expect(config.select.mode).toBe("none");
+        expect(config.check.keys).toEqual(["Space", "Enter"]);
     });
 
     it("listbox has select.aria = 'selected' (default)", () => {
@@ -63,14 +67,17 @@ describe("T1: SelectConfig aria field", () => {
     });
 });
 
+
 // ═══════════════════════════════════════════════════════════════════
-// 3. ActivateConfig effect field
+// 3. ActivateConfig effect field / action config (v10)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("T1: ActivateConfig effect field", () => {
-    it("accordion has activate.effect = 'toggleExpand'", () => {
+describe("T1: ActivateConfig effect field / action config", () => {
+    it("accordion has action.commands = [OS_EXPAND] (v10: action axis replaces effect)", () => {
         const config = resolveRole("accordion");
-        expect((config.activate as any).effect).toBe("toggleExpand");
+        // v10: activate.effect removed from OS_ACTIVATE handler.
+        // Accordion expand is now driven by action.commands = [OS_EXPAND].
+        expect((config.action as any).commands[0]?.type).toBe("OS_EXPAND");
     });
 
     it("menu has activate.effect = 'invokeAndClose'", () => {

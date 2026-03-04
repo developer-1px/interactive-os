@@ -10,7 +10,7 @@
 
 import type { Transaction } from "@kernel/core/transaction";
 import { os } from "@os-core/engine/kernel";
-import { Trigger } from "@os-react/6-project/Trigger";
+import { Trigger } from "@os-react/internal";
 import {
   ChevronDown,
   ClipboardCopy,

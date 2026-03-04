@@ -1,13 +1,14 @@
 /**
- * OS_EXPAND Command — Expand/collapse tree items (kernel version)
+ * OS_EXPAND Command — Toggle aria-expanded state (kernel version)
  *
- * Reuses the existing pure resolveExpansion function.
+ * Writes items[id]["aria-expanded"] directly — command type IS the declaration.
  */
 
 import { produce } from "immer";
 import { os } from "../../engine/kernel";
+import { ZoneRegistry } from "../../engine/registries/zoneRegistry";
 import { ensureZone } from "../../schema/state/utils";
-import { type ExpandAction, resolveExpansion } from "./resolveExpansion";
+import type { ExpandAction } from "./resolveExpansion";
 
 interface ExpandPayload {
   itemId?: string;
@@ -28,14 +29,28 @@ export const OS_EXPAND = os.defineCommand(
     const targetId = payload.itemId ?? zone.focusedItemId;
     if (!targetId) return;
 
+    // Guard: leaf items (not in expandable set) are silently skipped
+    const expandableItems = ZoneRegistry.get(zoneId)?.getExpandableItems?.();
+    if (expandableItems && !expandableItems.has(targetId)) return;
+
     const action = payload.action ?? "toggle";
-    const result = resolveExpansion(zone.expandedItems, targetId, action);
-    if (!result.changed) return;
+    const currentlyExpanded = zone.items[targetId]?.["aria-expanded"] ?? false;
+
+    let shouldBeExpanded: boolean;
+    switch (action) {
+      case "expand": shouldBeExpanded = true; break;
+      case "collapse": shouldBeExpanded = false; break;
+      default: shouldBeExpanded = !currentlyExpanded; break;
+    }
+
+    // No change needed
+    if (shouldBeExpanded === currentlyExpanded) return;
 
     return {
       state: produce(ctx.state, (draft) => {
         const z = ensureZone(draft.os, zoneId);
-        z.expandedItems = result.expandedItems;
+        if (!z.items[targetId]) z.items[targetId] = {};
+        z.items[targetId] = { ...z.items[targetId], "aria-expanded": shouldBeExpanded };
       }),
     };
   },

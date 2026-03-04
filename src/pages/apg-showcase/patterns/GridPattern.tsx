@@ -1,6 +1,5 @@
 import { useSelection } from "@os-react/6-project/accessors/useSelection";
-import { Item } from "@os-react/6-project/Item";
-import { Zone } from "@os-react/6-project/Zone";
+import { Item, Zone } from "@os-react/internal";
 
 export function GridPattern() {
   const selection = useSelection("apg-grid");

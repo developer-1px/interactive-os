@@ -6,7 +6,7 @@
  */
 
 // Activate
-export { OS_ACTIVATE, OS_CHECK } from "./activate";
+export { OS_ACTIVATE, OS_CHECK, OS_PRESS } from "./activate";
 // Clipboard
 export { OS_COPY, OS_CUT, OS_PASTE } from "./clipboard/clipboard";
 // CRUD

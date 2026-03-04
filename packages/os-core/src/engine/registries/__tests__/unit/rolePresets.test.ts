@@ -17,7 +17,7 @@ import { describe, expect, it } from "vitest";
 
 interface SpecRow {
   role: string;
-  orient: "vertical" | "horizontal" | "both";
+  orient: "vertical" | "horizontal" | "both" | "linear-both";
   loop: boolean;
   typeahead: boolean;
   entry: "first" | "last" | "restore" | "selected";
@@ -86,7 +86,7 @@ const specTable: SpecRow[] = [
   },
   {
     role: "radiogroup",
-    orient: "vertical",
+    orient: "linear-both",
     loop: true,
     typeahead: D.typeahead,
     entry: "selected",

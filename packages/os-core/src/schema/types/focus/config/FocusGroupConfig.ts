@@ -3,8 +3,12 @@
  *
  * All 8 sub-configs map 1:1 to a W3C APG concern:
  *   Navigate, Tab, Select, Activate, Dismiss, Project, Expand, Check.
+ *
+ * v10: action axis 통합. activate/check/expand → action: BaseCommand[] 단일 축.
+ * activate/check/expand는 레거시 — action 축 마이그레이션 완료 후 제거.
  */
 
+import type { BaseCommand } from "@kernel";
 import type { Orientation } from "../FocusDirection.ts";
 
 // ── Navigate ──
@@ -136,19 +140,102 @@ export const DEFAULT_EXPAND: ExpandConfig = {
   mode: "none",
 };
 
-// ── Check (aria-checked vs aria-selected) ──
+// ── Action (unified: activate / check / expand / open) ──
+
+/**
+ * ActionKey — 키보드 트리거 키 목록
+ */
+export type ActionKey = "Space" | "Enter" | "ArrowDown" | "ArrowUp";
+
+/**
+ * ActionConfig — Zone의 Item에 적용되는 선언적 action 설정.
+ *
+ * command 타입이 ARIA 상태를 결정한다:
+ *   OS_CHECK()  → aria-checked  (checkbox, radio, menuitemcheckbox)
+ *   OS_PRESS()  → aria-pressed  (toggle button)
+ *   OS_EXPAND() → aria-expanded (treeitem, accordion)
+ *   OS_SELECT() → aria-selected (option, tab)
+ *   OS_OVERLAY_OPEN() → aria-haspopup + aria-expanded (trigger)
+ *   OS_ACTIVATE() → aria 상태 없음 (pure action)
+ *
+ * aria config는 불필요 — command 타입에서 자동 파생.
+ *
+ * 예시:
+ *   checkbox:      { commands: [OS_CHECK()] }
+ *   toggle_button: { commands: [OS_PRESS()] }
+ *   treeitem:      { commands: [OS_EXPAND({ action: "toggle" })] }
+ *   menuitem:      { commands: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()] }
+ *   menu_button:   {
+ *     commands: [OS_OVERLAY_OPEN({ entry: "first" })],
+ *     keymap: { ArrowUp: [OS_OVERLAY_OPEN({ entry: "last" })] }
+ *   }
+ *
+ * @see design-principles.md #31
+ */
+export interface ActionConfig {
+  /** 기본 action chain — 지정된 keys 전체에 동일하게 dispatch */
+  commands: BaseCommand[];
+  /**
+   * 이 action을 트리거하는 키 목록.
+   * 미지정 시 첫 command 타입에서 자동 파생:
+   *   OS_CHECK/OS_PRESS → ["Space"]
+   *   OS_EXPAND/OS_ACTIVATE → ["Space", "Enter"]
+   *   OS_OVERLAY_OPEN → ["Space", "Enter", "ArrowDown"]
+   */
+  keys?: ActionKey[];
+  /**
+   * per-key command override.
+   * 지정된 키에 대해서는 commands 대신 이 command chain을 dispatch.
+   * 나머지 keys는 commands를 사용.
+   *
+   * 예: ArrowUp → OS_OVERLAY_OPEN({ entry: "last" })
+   *     (다른 키는 entry: "first" commands 사용)
+   */
+  keymap?: Partial<Record<ActionKey, BaseCommand[]>>;
+  /** Click이 이 action을 트리거하는지. 미지정 시 첫 command 타입에서 자동 파생. */
+  onClick?: boolean;
+}
+
+export const DEFAULT_ACTION: ActionConfig = {
+  commands: [],
+};
+
+// ── Check (aria-checked / aria-pressed / aria-selected) — @deprecated, → action ──
 
 export interface CheckConfig {
   /**
-   * "check"  — items use aria-checked (checkbox, radio, switch)
+   * "check"  — items use aria-checked or aria-pressed (depending on `aria`)
    * "select" — items use aria-selected (option, tab, gridcell)
    * "none"   — neither (no selectable state)
    */
   mode: "check" | "select" | "none";
+  /**
+   * Which ARIA attribute to project when mode is "check".
+   * "checked" → aria-checked (checkbox, radio, switch)
+   * "pressed" → aria-pressed (toggle button)
+   * Default: "checked".
+   * Can be overridden at Item level via ItemOverrides.aria.
+   */
+  aria?: "checked" | "pressed";
+  /**
+   * Which keys trigger OS_CHECK when mode is "check".
+   * Drives config-based key ownership (replaces role hardcoding).
+   * Default: ["Space"].
+   * checkbox: ["Space"], switch: ["Space", "Enter"].
+   */
+  keys?: ("Space" | "Enter")[];
+  /**
+   * Whether Click also triggers OS_CHECK.
+   * Default: false.
+   * checkbox/switch: true (click toggles), button: false.
+   */
+  onClick?: boolean;
 }
 
 export const DEFAULT_CHECK: CheckConfig = {
   mode: "none",
+  keys: ["Space"],
+  onClick: false,
 };
 
 // ── Value (aria-valuenow/min/max — slider, spinbutton, separator) ──
@@ -183,12 +270,17 @@ export interface FocusGroupConfig {
   navigate: NavigateConfig;
   tab: TabConfig;
   select: SelectConfig;
+  /** @deprecated → action */
   activate: ActivateConfig;
   dismiss: DismissConfig;
   project: ProjectConfig;
+  /** @deprecated → action */
   expand: ExpandConfig;
+  /** @deprecated → action */
   check: CheckConfig;
   value: ValueConfig;
+  /** v10: unified action axis. activate/check/expand를 대체. */
+  action: ActionConfig;
 }
 
 export const DEFAULT_CONFIG: FocusGroupConfig = {
@@ -201,4 +293,5 @@ export const DEFAULT_CONFIG: FocusGroupConfig = {
   expand: DEFAULT_EXPAND,
   check: DEFAULT_CHECK,
   value: DEFAULT_VALUE,
+  action: DEFAULT_ACTION,
 };

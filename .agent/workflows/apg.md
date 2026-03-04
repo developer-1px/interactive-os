@@ -16,9 +16,11 @@ description: W3C APG 스펙 기반으로 APG 패턴을 구현·검증한다. 스
 
 1. 어떤 APG 패턴을 다룰지 확인한다.
 2. 기존 구현이 있는지 확인:
-   - `src/pages/apg-showcase/patterns/{Pattern}Pattern.tsx` 존재?
-   - `tests/apg/{pattern}.apg.test.ts` 존재?
-   - `packages/os-devtool/src/testing/scripts.ts`에 TestBot 스크립트 존재?
+   - Showcase 패턴 컴포넌트 존재?
+   - APG 테스트 파일 존재?
+   - TestBot 스크립트 존재?
+
+> 프로젝트별 파일 경로는 `.agent/knowledge/testing-tools.md §Config`를 참조한다.
 
 ---
 
@@ -113,7 +115,7 @@ ID 분류:
 **규칙**:
 - 테스트 이름에 **W3C 스펙 원문을 인용**한다
 - 각 `it()` 블록 주석에 **스펙 항목 ID**를 적는다
-- `createOsPage` 사용 (Tier 1 OS 커널 테스트)
+- 테스트 도구는 `.agent/knowledge/testing-tools.md` §Config를 따른다
 - `dispatch()` 최소화 — `keyboard.press()`, `click()` 우선
 
 ```typescript
@@ -236,8 +238,9 @@ git log --oneline -1 origin/main
 
 ---
 
-### 마지막 Step: Knowledge 갱신
+### 마지막 Step: 📝 Knowledge 반영
 
-새로 발견된 OS 버그나 패턴이 있으면:
-- `.agent/knowledge/verification-standards.md` 갱신 (테스트 패턴)
-- `rules.md`에 새 법칙 추가 (있을 경우)
+> `_middleware.md` §3 "종료 시" 규약을 따른다.
+> 새로 발견된 OS 버그나 패턴이 있으면 적절한 토픽 파일에 반영한다.
+>
+> 📝이 비어있으면 스킵.

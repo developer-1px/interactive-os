@@ -9,7 +9,7 @@ import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
 import { useSelection } from "@os-react/6-project/accessors/useSelection";
 import { Field } from "@os-react/6-project/field/Field";
-import { Trigger } from "@os-react/6-project/Trigger";
+import { Trigger } from "@os-react/internal";
 import {
   AlertTriangle,
   CheckCheck,

@@ -12,12 +12,10 @@ description: 패턴 A를 패턴 B로 전환하는 리팩토링 파이프라인. 
 
 ---
 
-### Step 0: REFACTORBOOK 숙지
+### Step 0: 지식 로딩
 
-`.agent/knowledge/refactor.md`를 읽는다.
-- §1 리팩토링 원칙
-- §2 자주 하는 실수
-- §3 선례
+> `.agent/knowledge/refactor.md`를 읽는다 — §Patterns, §Hazards
+> `.agent/knowledge/contract-checklist.md`를 읽는다 — §Config (금지 목록)
 
 ### Step 1: 코드 정리
 
@@ -32,7 +30,7 @@ description: 패턴 A를 패턴 B로 전환하는 리팩토링 파이프라인. 
 
 - 이번 구현이 의도와 맞는지 확인한다.
 - 시스템에 새로운 유일한 패턴을 추가했는가? → 추가했으면 보고 (rules.md #1)
-- OS 패턴을 따랐는가? (useState/onClick/useEffect = 0줄)
+- OS 패턴을 따랐는가? (`contract-checklist.md §Config` 금지 목록 위반 0건)
 - ❌ 실패 → 보고하고 멈춘다.
 
 ### Step 3: OS 계약 감사 → `/audit` 실행

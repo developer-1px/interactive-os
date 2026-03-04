@@ -6,7 +6,7 @@
  *   - focus: where focus goes on open/close
  *   - aria:  what ARIA attributes projected on the trigger element
  *
- * resolveKeyboard uses this via resolveTriggerKey (Field → Trigger → Item → Zone → Global).
+ * resolveKeyboard uses this via buildTriggerKeymap (Field → Trigger → Item → Zone → Global).
  */
 
 // ── Open axis ──

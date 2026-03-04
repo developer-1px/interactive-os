@@ -26,7 +26,7 @@
  *   - Native HTML <table> provides implicit ARIA roles
  */
 
-import { Trigger } from "@os-react/6-project/Trigger";
+import { Trigger } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { Icon } from "@/components/Icon";
 

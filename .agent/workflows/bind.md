@@ -9,16 +9,14 @@ description: Green 테스트를 통과한 헤드리스 로직을 UI 컴포넌트
 > **전제**: `/green` 완료 (헤드리스 테스트 🟢 PASS).
 > **산출물**: 화면에서 동작하는 UI 컴포넌트.
 > **원칙**: Green이 증명한 로직을 화면에 투영한다. 새로운 로직을 추가하지 않는다.
-> **금지**: `useState`, `useEffect`, `onClick` 직접 사용. OS 커맨드를 사용한다.
+> **금지**: `contract-checklist.md §Config`의 금지 목록 참조. OS 커맨드를 사용한다.
 
 ---
 
-### Step 0: BINDBOOK 숙지 + 맥락 파악
+### Step 0: 지식 로딩 + 맥락 파악
 
-`.agent/knowledge/bind.md`를 읽는다.
-- §1 바인딩 원칙
-- §2 자주 하는 실수
-- §3 바인딩 선례
+> `.agent/knowledge/bind.md`를 읽는다 — §바인딩 원칙, §실수, §선례
+> `.agent/knowledge/contract-checklist.md`를 읽는다 — §Config (필수 OS 패턴, 금지 목록)
 
 Then 맥락 파악:
 
@@ -28,16 +26,9 @@ Then 맥락 파악:
 
 ---
 
-### Step 1: RUNBOOK 숙지
+### Step 1: 앱 패턴 숙지
 
-> **반드시 읽는다.** "아는 대로" 구현하면 OS 패턴을 빗나간다.
-
-```
-.agent/knowledge/runbook.md
-```
-
-- OS로 앱 만드는 법: Zone, Command, Hook 패턴 확인.
-- 연결할 Zone이 이미 존재하는지, 새로 만들어야 하는지 확인.
+> `.agent/knowledge/runbook.md`를 읽는다 — OS로 앱 만드는 법
 
 ---
 
@@ -51,15 +42,8 @@ Then 맥락 파악:
 2. **Command** — 사용자 입력(Zone 이벤트)을 OS 커맨드로 dispatch
 3. **Render** — hook 반환값으로 화면을 렌더링
 
-```tsx
-// 예시 패턴
-function MyComponent() {
-  const state = useMyState();                        // ← Green hook
-  return <button onClick={() => os.dispatch(myCommand())}>  // ← Green command
-    {state.value}
-  </button>;
-}
-```
+> 바인딩 코드 예시는 `.agent/knowledge/runbook.md`를 참조한다.
+> Hook → Command → Render 순서를 따른다.
 
 ---
 
@@ -81,5 +65,5 @@ function MyComponent() {
 
 - [ ] spec.md UX Flow의 각 단계가 화면에서 동작
 - [ ] **`/verify` 전 게이트 통과** (tsc 0, unit PASS, bind smoke ✅, build OK)
-- [ ] OS 패턴 준수 (useState/useEffect/onClick 직접 사용 0)
+- [ ] OS 패턴 준수 (`contract-checklist.md §Config` 금지 목록 위반 0건)
 - [ ] regression 없음 (기존 테스트 PASS 유지)

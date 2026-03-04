@@ -7,6 +7,8 @@ export interface OverlayEntry {
   type: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip";
   /** Initial focus entry hint: "first" (default) or "last" (ArrowUp) */
   entry?: "first" | "last";
+  /** data-trigger-id of the trigger that opened this overlay (for focus restore) */
+  triggerId?: string;
 }
 
 /** Notification types: toast (polite, auto-dismiss) vs alert (assertive, persistent) */
@@ -63,6 +65,21 @@ export interface OSState {
   drag: DragState;
 }
 
+
+/**
+ * ARIA item state — stored directly, not derived.
+ *
+ * DOM is the source of truth. Headless mirrors DOM.
+ * Commands write here directly; compute.ts reads directly.
+ * No derivation, no config-driven lookups.
+ */
+export interface AriaItemState {
+  "aria-selected"?: boolean;
+  "aria-checked"?: boolean;
+  "aria-pressed"?: boolean;
+  "aria-expanded"?: boolean;
+}
+
 export interface ZoneState {
   /** Zone ID — self-identifying for functions that receive ZoneState without key context */
   zoneId: string;
@@ -80,12 +97,14 @@ export interface ZoneState {
   stickyX: number | null;
   stickyY: number | null;
 
-  // Selection Slice
-  selection: string[];
-  selectionAnchor: string | null;
+  // ARIA Item State Slice — direct mirror of DOM aria-* attributes.
+  // Commands write to items[id]["aria-*"] directly.
+  // compute.ts reads items[id] directly — no derivation.
+  items: Record<string, AriaItemState>;
 
-  // Expansion Slice
-  expandedItems: string[];
+  // Range selection anchor — needed to know WHERE the anchor is
+  // for Shift+Arrow range selection. Order comes from dom-items inject.
+  selectionAnchor: string | null;
 
   // Value Slice (slider, spinbutton, separator)
   /** Per-item current values for value-axis widgets (itemId → number) */

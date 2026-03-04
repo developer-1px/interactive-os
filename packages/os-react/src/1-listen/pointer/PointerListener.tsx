@@ -24,6 +24,7 @@ import {
 } from "@os-core/1-listen/_shared/senseMouse";
 import { resolveClick } from "@os-core/1-listen/mouse/resolveClick";
 import { resolveMouse } from "@os-core/1-listen/mouse/resolveMouse";
+import { resolveTriggerClick } from "@os-core/1-listen/mouse/resolveTriggerClick";
 import {
   createIdleState,
   type GestureState,
@@ -45,6 +46,7 @@ import { OS_FIELD_START_EDIT } from "@os-core/4-command/field/startEdit";
 import { OS_VALUE_CHANGE } from "@os-core/4-command/valueChange";
 import { os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
+import { getDefaultOnClickForCommand } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { useEffect } from "react";
 
@@ -145,7 +147,9 @@ export function PointerListener() {
         // ── outsideClick dismiss ──
         // Click landed outside any zone/item. If the active zone
         // has dismiss.outsideClick === "close", dispatch OS_ESCAPE.
-        if (activeZoneId) {
+        // But skip if clicking a trigger (trigger handles its own toggle)
+        const isTriggerClick = !!target.closest("[data-trigger-id]");
+        if (activeZoneId && !isTriggerClick) {
           const zoneEntry = ZoneRegistry.get(activeZoneId);
           if (zoneEntry?.config.dismiss.outsideClick === "close") {
             os.dispatch(OS_ESCAPE({}));
@@ -164,17 +168,17 @@ export function PointerListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-                meta: {
-                  ...result.meta,
-                  pipeline: {
-                    sensed: mouseInput,
-                    resolved: {
-                      preventDefault: result.preventDefault,
-                      fallback: result.fallback,
-                    },
+              meta: {
+                ...result.meta,
+                pipeline: {
+                  sensed: mouseInput,
+                  resolved: {
+                    preventDefault: result.preventDefault,
+                    fallback: result.fallback,
                   },
                 },
-              }
+              },
+            }
             : undefined;
           os.dispatch(cmd, opts);
         }
@@ -285,9 +289,9 @@ export function PointerListener() {
         os.dispatch(
           drop
             ? OS_DRAG_OVER({
-                overItemId: drop.overItemId,
-                position: drop.position,
-              })
+              overItemId: drop.overItemId,
+              position: drop.position,
+            })
             : OS_DRAG_OVER({ overItemId: null, position: null }),
         );
       }
@@ -304,6 +308,37 @@ export function PointerListener() {
           // Inspector: skip entirely
           if (target.closest("[data-inspector]")) {
             // no-op
+          }
+          // ── Trigger-first: resolve trigger click before Item ──
+          else if (target.closest("[data-trigger-id]")) {
+            const triggerEl = target.closest("[data-trigger-id]") as HTMLElement;
+            const triggerId = triggerEl.getAttribute("data-trigger-id");
+            if (triggerId) {
+              const triggerMeta = ZoneRegistry.getTriggerOverlay(triggerId);
+              if (triggerMeta) {
+                const overlayStack = os.getState().os.overlays.stack;
+                const isOpen = overlayStack.some((o: { id: string }) => o.id === triggerMeta.overlayId);
+                const triggerCmd = resolveTriggerClick({
+                  triggerId,
+                  triggerRole: triggerMeta.overlayType,
+                  overlayId: triggerMeta.overlayId,
+                  isTriggerOverlayOpen: isOpen,
+                });
+                if (triggerCmd) {
+                  setDispatching(true);
+                  os.dispatch(triggerCmd, {
+                    meta: {
+                      input: {
+                        type: "MOUSE",
+                        key: "click",
+                        elementId: triggerId,
+                      },
+                    },
+                  });
+                  setDispatching(false);
+                }
+              }
+            }
           } else if (
             target.closest("[data-expand-trigger]") ||
             target.closest("[data-check-trigger]")
@@ -340,7 +375,11 @@ export function PointerListener() {
               const zone = state.os.focus.zones[activeZoneId];
               const entry = ZoneRegistry.get(activeZoneId);
 
-              const activateOnClick = entry?.config?.activate?.onClick ?? false;
+              // v10: action config 우선, 없으면 legacy activate.onClick
+              const actionConfig = entry?.config?.action;
+              const activateOnClick = actionConfig?.commands?.length
+                ? (actionConfig.onClick ?? getDefaultOnClickForCommand(actionConfig.commands[0]?.type))
+                : (entry?.config?.activate?.onClick ?? false);
               const isCurrentPage =
                 clickedEl?.getAttribute("aria-current") === "page";
               const reClickOnly = entry?.config?.activate?.reClickOnly ?? false;
@@ -352,6 +391,8 @@ export function PointerListener() {
                   ? preClickFocusedItemId
                   : (zone?.focusedItemId ?? null),
                 isCurrentPage,
+                // v10: action config command 우선 — OS_ACTIVATE 대신 직접 command dispatch
+                ...(actionConfig?.commands?.length ? { actionCommand: actionConfig.commands[0] } : {}),
               });
 
               if (clickResult.commands.length > 0) {
@@ -359,11 +400,11 @@ export function PointerListener() {
                 for (const cmd of clickResult.commands) {
                   const opts = clickResult.meta
                     ? {
-                        meta: {
-                          ...clickResult.meta,
-                          pipeline: { sensed: {}, resolved: {} },
-                        },
-                      }
+                      meta: {
+                        ...clickResult.meta,
+                        pipeline: { sensed: {}, resolved: {} },
+                      },
+                    }
                     : undefined;
                   os.dispatch(cmd, opts);
                 }

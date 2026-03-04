@@ -70,6 +70,25 @@ os.defineEffect("scroll", (itemId: string) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
+// Trigger Focus Effect — Restore focus to trigger after overlay close
+//
+// When an overlay closes and its TriggerConfig has focus.onClose: "restore",
+// OS_OVERLAY_CLOSE returns { triggerFocus: triggerId }. This effect finds
+// the trigger element via data-trigger-id and focuses it.
+//
+// Runs synchronously in the same call stack as dispatch — before React
+// re-renders. The trigger element is guaranteed to be in the DOM at
+// this point (overlay portal is conditionally rendered, not the trigger).
+// ═══════════════════════════════════════════════════════════════════
+
+os.defineEffect("triggerFocus", (triggerId: string) => {
+  const el = document.querySelector(`[data-trigger-id="${triggerId}"]`);
+  if (el instanceof HTMLElement) {
+    el.focus({ preventScroll: true });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
 // Clipboard Write Effect — Write text to native clipboard
 // ═══════════════════════════════════════════════════════════════════
 
