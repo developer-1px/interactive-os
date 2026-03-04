@@ -22,6 +22,7 @@ import {
   type SelectConfig,
   type TabConfig,
 } from "@os-core/schema/types/focus/config/FocusGroupConfig";
+import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
 import {
   computeAttrs,
   type ElementAttrs,
@@ -370,7 +371,7 @@ export function createAppPage<S>(
     const bindingEntry = zoneBindingEntries.get(zoneName);
     if (bindingEntry) {
       const { bindings } = bindingEntry;
-      const overrides = { ...bindings.options, ...opts?.config };
+      const overrides = { ...bindings.options, ...opts?.config } as ZoneOptions;
       const config = resolveRole(bindingEntry.role, overrides);
       ZoneRegistry.register(zoneName, {
         role: bindingEntry.role,

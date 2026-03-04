@@ -76,6 +76,12 @@ export function createKernel<S>(initialState: S) {
     return previewState ?? state;
   }
 
+  function notifyListeners(): void {
+    for (const listener of listeners) {
+      listener();
+    }
+  }
+
   function setState(updater: (prev: S) => S): void {
     if (previewState !== null) {
       // Preview mode: write to preview layer, real state untouched
@@ -83,9 +89,7 @@ export function createKernel<S>(initialState: S) {
     } else {
       state = updater(state);
     }
-    for (const listener of listeners) {
-      listener();
-    }
+    notifyListeners();
   }
 
   function subscribe(listener: Listener): () => void {
@@ -186,7 +190,7 @@ export function createKernel<S>(initialState: S) {
       return undefined as T;
     }
 
-    const currentState = state;
+    const currentState = getState();
 
     // Cache hit: state hasn't changed AND not invalidated by command
     if (entry.cachedState === currentState && !entry.invalidated) {
@@ -354,7 +358,7 @@ export function createKernel<S>(initialState: S) {
       : [GLOBAL as string];
 
     let result: Record<string, unknown> | null = null;
-    let handlerScope = "unknown";
+    let handlerScope: string | null = null;
     let resolvedCommand: Command = cmd;
 
     for (const currentScope of path) {
@@ -431,9 +435,9 @@ export function createKernel<S>(initialState: S) {
     }
 
     // 7. Execute effects (pass handlerScope for state lens merging)
-    if (result) {
+    if (result && handlerScope) {
       executeEffects(result, path, handlerScope);
-    } else if (handlerScope === "unknown") {
+    } else if (handlerScope === null) {
       // No handler found in any scope → warn (like unknown effects)
       logger.warn(
         `[kernel] No handler for "${cmd.type}" in scope chain [${path.join(" → ")}]`,
@@ -445,7 +449,7 @@ export function createKernel<S>(initialState: S) {
     // 8. Record transaction (always — preview mode writes to separate log)
     recordTransaction(
       resolvedCommand,
-      handlerScope,
+      handlerScope ?? "unhandled",
       result,
       stateBefore,
       stateAfter,
@@ -457,9 +461,7 @@ export function createKernel<S>(initialState: S) {
     //    useSyncExternalStore dedup (Object.is) ensures zero re-render cost
     //    for app components. Inspector uses tx-aware snapshot to detect new transactions.
     if (stateBefore === stateAfter) {
-      for (const listener of listeners) {
-        listener();
-      }
+      notifyListeners();
     }
   }
 
@@ -687,7 +689,7 @@ export function createKernel<S>(initialState: S) {
         if (!scopedEffects.has(scope)) {
           scopedEffects.set(scope, new Map());
         }
-        scopedEffects.get(scope)?.set(type, handler as InternalEffectHandler);
+        scopedEffects.get(scope)!.set(type, handler as InternalEffectHandler);
         inspector.invalidateRegistry();
         return type as EffectToken<T, V>;
       },
@@ -916,12 +918,12 @@ export function createKernel<S>(initialState: S) {
     enterPreview(s: S) {
       previewState = s;
       previewTransactions = [];
-      for (const listener of listeners) listener();
+      notifyListeners();
     },
     exitPreview() {
       previewState = null;
       previewTransactions = [];
-      for (const listener of listeners) listener();
+      notifyListeners();
     },
     isPreviewing() {
       return previewState !== null;

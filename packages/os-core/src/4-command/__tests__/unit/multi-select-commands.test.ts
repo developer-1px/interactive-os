@@ -57,6 +57,13 @@ function captureDispatches() {
   return captured;
 }
 
+const BASE_ZONE = {
+  config: {} as any,
+  element: document.createElement("div"),
+  parentId: null,
+  getItems: () => ["item-1", "item-2", "item-3", "item-4"],
+};
+
 beforeEach(() => {
   snapshot = os.getState();
   return () => {
@@ -78,12 +85,7 @@ describe("OS_DELETE with multi-selection", () => {
       cursor.selection.map((id) => ({ type: "mock/delete", payload: { id } })),
     );
 
-    ZoneRegistry.register("testZone", {
-      config: {} as any,
-      element: document.createElement("div"),
-      parentId: null,
-      onDelete,
-    });
+    ZoneRegistry.register("testZone", { ...BASE_ZONE, onDelete });
     setupFocusWithSelection("testZone", "item-3", [
       "item-1",
       "item-2",
@@ -107,9 +109,7 @@ describe("OS_DELETE with multi-selection", () => {
     const captured = captureDispatches();
 
     ZoneRegistry.register("testZone", {
-      config: {} as any,
-      element: document.createElement("div"),
-      parentId: null,
+      ...BASE_ZONE,
       onDelete: (cursor: ZoneCursor) =>
         cursor.selection.map((id) => ({
           type: "mock/delete",
@@ -140,12 +140,7 @@ describe("OS_DELETE with multi-selection", () => {
       payload: { id: cursor.focusId },
     }));
 
-    ZoneRegistry.register("testZone", {
-      config: {} as any,
-      element: document.createElement("div"),
-      parentId: null,
-      onDelete,
-    });
+    ZoneRegistry.register("testZone", { ...BASE_ZONE, onDelete });
     setupFocusWithSelection("testZone", "item-1", []);
 
     os.dispatch(OS_DELETE());
@@ -163,9 +158,7 @@ describe("OS_DELETE with multi-selection", () => {
     // OS_DELETE delegates to onDelete callback — selection clearing is app's responsibility.
     // This allows dialog-based deletion to preserve selection until user confirms.
     ZoneRegistry.register("testZone", {
-      config: {} as any,
-      element: document.createElement("div"),
-      parentId: null,
+      ...BASE_ZONE,
       onDelete: () => ({ type: "mock/delete", payload: {} }),
     });
     setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
@@ -188,12 +181,7 @@ describe("OS_COPY with multi-selection", () => {
       payload: { ids: cursor.selection },
     }));
 
-    ZoneRegistry.register("testZone", {
-      config: {} as any,
-      element: document.createElement("div"),
-      parentId: null,
-      onCopy,
-    });
+    ZoneRegistry.register("testZone", { ...BASE_ZONE, onCopy });
     setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
     os.dispatch(OS_COPY());
@@ -213,12 +201,7 @@ describe("OS_CUT with multi-selection", () => {
       payload: { ids: cursor.selection },
     }));
 
-    ZoneRegistry.register("testZone", {
-      config: {} as any,
-      element: document.createElement("div"),
-      parentId: null,
-      onCut,
-    });
+    ZoneRegistry.register("testZone", { ...BASE_ZONE, onCut });
     setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
 
     os.dispatch(OS_CUT());
@@ -228,9 +211,7 @@ describe("OS_CUT with multi-selection", () => {
 
   it("clears selection after multi-cut", () => {
     ZoneRegistry.register("testZone", {
-      config: {} as any,
-      element: document.createElement("div"),
-      parentId: null,
+      ...BASE_ZONE,
       onCut: () => ({ type: "mock/cut", payload: {} }),
     });
     setupFocusWithSelection("testZone", "item-2", ["item-1", "item-2"]);
