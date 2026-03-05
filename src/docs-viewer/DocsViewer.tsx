@@ -164,12 +164,8 @@ function FolderIndexView({
 }
 
 export function DocsViewer() {
-  // activePath + history — Single Source of Truth from DocsApp state
+  // activePath — Single Source of Truth from DocsApp state
   const activePath = DocsApp.useComputed((s) => s.activePath) ?? undefined;
-  const historyIndex = DocsApp.useComputed((s) => s.historyIndex);
-  const historyLength = DocsApp.useComputed((s) => s.history.length);
-  const canGoBack = historyIndex > 0;
-  const canGoForward = historyIndex < historyLength - 1;
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [externalSource, setExternalSource] =
@@ -411,28 +407,16 @@ export function DocsViewer() {
           <button
             type="button"
             onClick={() => os.dispatch(goBack())}
-            disabled={!canGoBack}
             title="Go back (Alt+←)"
-            className={clsx(
-              "p-1 rounded-md transition-colors",
-              canGoBack
-                ? "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
-                : "text-slate-200 cursor-default",
-            )}
+            className="p-1 rounded-md transition-colors text-slate-500 hover:text-slate-800 hover:bg-slate-100"
           >
             <ArrowLeft size={16} />
           </button>
           <button
             type="button"
             onClick={() => os.dispatch(goForward())}
-            disabled={!canGoForward}
             title="Go forward (Alt+→)"
-            className={clsx(
-              "p-1 rounded-md transition-colors",
-              canGoForward
-                ? "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
-                : "text-slate-200 cursor-default",
-            )}
+            className="p-1 rounded-md transition-colors text-slate-500 hover:text-slate-800 hover:bg-slate-100"
           >
             <ArrowRight size={16} />
           </button>

@@ -72,15 +72,11 @@ function getInitialPath(): string | null {
 
 interface DocsState {
   activePath: string | null;
-  history: string[];
-  historyIndex: number;
   searchOpen: boolean;
 }
 
 export const DocsApp = defineApp<DocsState>("docs-viewer", {
   activePath: getInitialPath(),
-  history: [],
-  historyIndex: -1,
   searchOpen: false,
 });
 
@@ -88,51 +84,32 @@ export const DocsApp = defineApp<DocsState>("docs-viewer", {
 // App-level Command — shared by all sidebar zones
 // ═══════════════════════════════════════════════════════════════════
 
-/** SELECT_DOC — sets activePath + pushes to history. Shared by Recent, Favorites, and Tree zones. */
+/** SELECT_DOC — sets activePath. Router middleware handles URL sync. */
 export const selectDoc = DocsApp.command(
   "SELECT_DOC",
   (ctx, payload: { id: string }) => ({
     state: produce(ctx.state, (draft) => {
       draft.activePath = payload.id;
-      // Truncate forward history if we branched
-      draft.history = draft.history.slice(0, draft.historyIndex + 1);
-      draft.history.push(payload.id);
-      draft.historyIndex = draft.history.length - 1;
     }),
   }),
 );
 
-/** RESET_DOC — clears activePath and history (e.g. when switching folder source). */
+/** RESET_DOC — clears activePath. */
 export const resetDoc = DocsApp.command("RESET_DOC", (ctx) => ({
   state: produce(ctx.state, (draft) => {
     draft.activePath = null;
-    draft.history = [];
-    draft.historyIndex = -1;
   }),
 }));
 
-/** GO_BACK — navigate to previous history entry. */
-export const goBack = DocsApp.command("GO_BACK", (ctx) => {
-  if (ctx.state.historyIndex <= 0) return { state: ctx.state };
-  return {
-    state: produce(ctx.state, (draft) => {
-      draft.historyIndex -= 1;
-      draft.activePath = draft.history[draft.historyIndex]!;
-    }),
-  };
-});
+/** GO_BACK — router middleware delegates to TanStack Router history. */
+export const goBack = DocsApp.command("GO_BACK", (ctx) => ({
+  state: ctx.state,
+}));
 
-/** GO_FORWARD — navigate to next history entry. */
-export const goForward = DocsApp.command("GO_FORWARD", (ctx) => {
-  if (ctx.state.historyIndex >= ctx.state.history.length - 1)
-    return { state: ctx.state };
-  return {
-    state: produce(ctx.state, (draft) => {
-      draft.historyIndex += 1;
-      draft.activePath = draft.history[draft.historyIndex]!;
-    }),
-  };
-});
+/** GO_FORWARD — router middleware delegates to TanStack Router history. */
+export const goForward = DocsApp.command("GO_FORWARD", (ctx) => ({
+  state: ctx.state,
+}));
 
 /** OPEN_SEARCH — opens the docs search overlay. */
 export const openSearch = DocsApp.command("OPEN_SEARCH", (ctx) => ({
