@@ -46,31 +46,6 @@ import { type ExternalFolderSource, openExternalFolder } from "./fsAccessUtils";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { TableOfContents } from "./TableOfContents";
 
-/** Parse hash: returns { source: "docs" | "ext", path?, folderName? } */
-function parseHash(): {
-  source: "docs" | "ext";
-  path?: string;
-  folderName?: string;
-} {
-  const hash = window.location.hash.replace(/^#\/?/, "");
-  if (!hash) return { source: "docs" };
-
-  if (hash.startsWith("ext:")) {
-    const rest = hash.slice(4);
-    const slashIdx = rest.indexOf("/");
-    if (slashIdx === -1) {
-      return { source: "ext", folderName: rest };
-    }
-    return {
-      source: "ext",
-      folderName: rest.slice(0, slashIdx),
-      path: rest.slice(slashIdx + 1),
-    };
-  }
-
-  return { source: "docs", path: hash };
-}
-
 // ═══════════════════════════════════════════════════════════════════
 // FolderIndexView — shows direct children of a folder
 // ═══════════════════════════════════════════════════════════════════
@@ -262,11 +237,6 @@ export function DocsViewer() {
     [],
   );
 
-  // --- Update URL with pushState for browser back/forward ---
-  const setHash = useCallback((hash: string) => {
-    history.pushState(null, "", hash);
-  }, []);
-
   // --- Select a file via OS command ---
   const handleSelect = useCallback((path: string) => {
     os.dispatch(selectDoc({ id: path }));
@@ -281,15 +251,11 @@ export function DocsViewer() {
     [folderPath, docTree],
   );
 
-  // --- React to activePath changes (content load + hash sync) ---
+  // --- React to activePath changes (content load) ---
+  // URL sync is handled by router() middleware — no manual pushState/popstate.
   useEffect(() => {
     if (!activePath) return;
     const ext = externalRef.current;
-    if (ext) {
-      setHash(`#ext:${ext.name}/${activePath}`);
-    } else {
-      setHash(`#/${activePath}`);
-    }
     // Skip content loading for folder paths — FolderIndexView handles its own data
     if (!activePath.startsWith("folder:")) {
       loadContent(activePath, ext);
@@ -301,26 +267,7 @@ export function DocsViewer() {
     if (contentRef.current) {
       contentRef.current.scrollTop = 0;
     }
-  }, [activePath, loadContent, setHash]);
-
-  // Initialize from hash: now handled synchronously in DocsApp initial state (app.ts).
-  // popstate handles browser back/forward navigation only.
-
-  // Sync hash → state on browser back/forward (popstate only)
-  useEffect(() => {
-    const onPopState = () => {
-      const parsed = parseHash();
-      const ext = externalRef.current;
-      if (parsed.source === "docs") {
-        if (ext) setExternalSource(null);
-        if (parsed.path) os.dispatch(selectDoc({ id: parsed.path }));
-      } else if (parsed.source === "ext" && ext) {
-        if (parsed.path) os.dispatch(selectDoc({ id: parsed.path }));
-      }
-    };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, []);
+  }, [activePath, loadContent]);
 
   // Auto-select first file when tree changes and no active path
   useEffect(() => {
@@ -351,7 +298,6 @@ export function DocsViewer() {
     os.dispatch(resetDoc());
     setContent("");
     setError(null);
-    setHash("#");
   };
 
   // Sidebar header with source indicator
