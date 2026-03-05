@@ -18,7 +18,6 @@ import {
   type ZoneOrderEntry,
 } from "@os-core/3-inject/index";
 import { getZoneItems } from "@os-core/3-inject/itemQueries";
-import { OS_ZONE_INIT } from "@os-core/4-command/focus/zoneInit";
 import { initialAppState, os } from "@os-core/engine/kernel";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
@@ -45,7 +44,6 @@ function registerZone(
     itemFilter?: (items: string[]) => string[];
   } = {},
 ) {
-  os.dispatch(OS_ZONE_INIT(zoneId));
   ZoneRegistry.register(zoneId, {
     config: resolveRole("list", {}),
     element: null, // headless — no DOM

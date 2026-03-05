@@ -1,17 +1,4 @@
 {
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/go-loop.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
-  },
   "permissions": {
     "allow": [
       "WebSearch",
@@ -47,7 +34,30 @@
       "Bash(do:*)",
       "WebFetch(domain:www.atcyrus.com)",
       "WebFetch(domain:github.com)",
-      "Bash(chmod +x:*)"
+      "Bash(chmod +x:*)",
+      "Bash(npx biome:*)",
+      "Bash(npx vite:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm test:*)",
+      "Bash(nvm:*)",
+      "Bash(source:*)",
+      "Bash(lsof:*)",
+      "Bash(curl:*)",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/go-loop.sh",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }

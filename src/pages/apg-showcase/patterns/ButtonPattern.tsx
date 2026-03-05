@@ -19,7 +19,6 @@
  *     for button-role items. CSS reads aria-pressed. No useState, no onClick.
  */
 
-
 import { Trigger } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 
@@ -37,9 +36,12 @@ const actionCounter = ActionButtonApp.selector(
   (s) => s.actionCount,
 );
 
-export const PERFORM_ACTION = ActionButtonApp.command("PERFORM_ACTION", (ctx) => ({
-  state: { actionCount: ctx.state.actionCount + 1 },
-}));
+export const PERFORM_ACTION = ActionButtonApp.command(
+  "PERFORM_ACTION",
+  (ctx) => ({
+    state: { actionCount: ctx.state.actionCount + 1 },
+  }),
+);
 
 function ActionButtonSection() {
   const count = ActionButtonApp.useComputed(actionCounter);
@@ -120,8 +122,11 @@ const ToggleUI = toggleZone.bind({
   role: "toolbar",
   options: {
     navigate: { orientation: "horizontal", loop: true },
-    action: { commands: [OS_PRESS()], keys: ["Space", "Enter"], onClick: true },
-    activate: { mode: "manual", onClick: true },
+    inputmap: {
+      Space: [OS_PRESS()],
+      Enter: [OS_PRESS()],
+      click: [OS_PRESS()],
+    },
   },
 });
 

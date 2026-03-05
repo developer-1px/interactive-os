@@ -34,11 +34,36 @@ interface TooltipButtonDef {
 }
 
 const TOOLBAR_BUTTONS: TooltipButtonDef[] = [
-  { id: "btn-cut", label: "Cut", tooltip: "Cut to clipboard (Cmd+X)", icon: "scissors" },
-  { id: "btn-copy", label: "Copy", tooltip: "Copy to clipboard (Cmd+C)", icon: "copy" },
-  { id: "btn-paste", label: "Paste", tooltip: "Paste from clipboard (Cmd+V)", icon: "clipboard" },
-  { id: "btn-bold", label: "Bold", tooltip: "Toggle bold text (Cmd+B)", icon: "bold" },
-  { id: "btn-italic", label: "Italic", tooltip: "Toggle italic text (Cmd+I)", icon: "italic" },
+  {
+    id: "btn-cut",
+    label: "Cut",
+    tooltip: "Cut to clipboard (Cmd+X)",
+    icon: "scissors",
+  },
+  {
+    id: "btn-copy",
+    label: "Copy",
+    tooltip: "Copy to clipboard (Cmd+C)",
+    icon: "copy",
+  },
+  {
+    id: "btn-paste",
+    label: "Paste",
+    tooltip: "Paste from clipboard (Cmd+V)",
+    icon: "clipboard",
+  },
+  {
+    id: "btn-bold",
+    label: "Bold",
+    tooltip: "Toggle bold text (Cmd+B)",
+    icon: "bold",
+  },
+  {
+    id: "btn-italic",
+    label: "Italic",
+    tooltip: "Toggle italic text (Cmd+I)",
+    icon: "italic",
+  },
 ];
 
 // ─── App + Zone (defineApp pattern) ───
@@ -139,8 +164,8 @@ export function TooltipPattern() {
       <h3 className="text-lg font-semibold mb-3">Tooltip</h3>
       <p className="text-sm text-gray-500 mb-4">
         W3C APG Tooltip Pattern: Descriptive text appears when a trigger
-        receives keyboard focus or mouse hover. <kbd>Escape</kbd> dismisses
-        all tooltips. Arrow keys navigate between buttons.{" "}
+        receives keyboard focus or mouse hover. <kbd>Escape</kbd> dismisses all
+        tooltips. Arrow keys navigate between buttons.{" "}
         <a
           href="https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/"
           target="_blank"
@@ -175,7 +200,8 @@ export function TooltipPattern() {
 
         <p className="text-xs text-gray-400 mt-4">
           Focus a button with <kbd>Tab</kbd>, then use arrow keys to navigate.
-          Tooltips appear on focus and hover. Press <kbd>Escape</kbd> to dismiss.
+          Tooltips appear on focus and hover. Press <kbd>Escape</kbd> to
+          dismiss.
         </p>
       </div>
     </div>

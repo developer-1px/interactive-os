@@ -19,18 +19,26 @@ interface SelectPayload {
 }
 
 /** Helper: set aria-selected for an item */
-function setSelected(z: { items: Record<string, { "aria-selected"?: boolean }> }, id: string, val: boolean) {
+function setSelected(
+  z: { items: Record<string, { "aria-selected"?: boolean }> },
+  id: string,
+  val: boolean,
+) {
   if (!z.items[id]) z.items[id] = {};
   z.items[id] = { ...z.items[id], "aria-selected": val };
 }
 
 /** Helper: count currently selected items */
-function countSelected(z: { items: Record<string, { "aria-selected"?: boolean }> }): number {
+function countSelected(z: {
+  items: Record<string, { "aria-selected"?: boolean }>;
+}): number {
   return Object.values(z.items).filter((s) => s?.["aria-selected"]).length;
 }
 
 /** Helper: clear all aria-selected */
-function clearSelected(z: { items: Record<string, { "aria-selected"?: boolean }> }) {
+function clearSelected(z: {
+  items: Record<string, { "aria-selected"?: boolean }>;
+}) {
   for (const id of Object.keys(z.items)) {
     if (z.items[id]?.["aria-selected"]) {
       z.items[id] = { ...z.items[id], "aria-selected": false };

@@ -25,13 +25,8 @@ import {
   type ZoneContextValue,
   type ZoneOptions,
 } from "@os-core/3-inject/zoneContext.ts";
-import {
-  OS_FOCUS,
-  OS_STACK_POP,
-  OS_STACK_PUSH,
-  OS_ZONE_INIT,
-} from "@os-core/4-command/focus";
-import { OS_INIT_SELECTION } from "@os-core/4-command/selection/initSelection";
+
+
 import { os } from "@os-core/engine/kernel.ts";
 import type { ZoneRole } from "@os-core/engine/registries/roleRegistry.ts";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry.ts";
@@ -159,7 +154,6 @@ export function Zone({
   const containerRef = useRef<HTMLElement | null>(null);
 
   useLayoutEffect(() => {
-    os.dispatch(OS_ZONE_INIT(zoneId));
 
     if (!ZoneRegistry.has(zoneId)) {
       ZoneRegistry.register(
@@ -172,41 +166,10 @@ export function Zone({
       ZoneRegistry.bindElement(zoneId, containerRef.current);
     }
 
-    if (config.project.autoFocus) {
-      const items = ZoneRegistry.resolveItems(zoneId);
-      // APG: ArrowUp on trigger → focus last item. Read from overlay entry hint.
-      const overlayEntry = os.getState().os.overlays.stack.find(e => e.id === zoneId);
-      const focusLast = overlayEntry?.entry === "last";
-      const targetItem = focusLast ? items[items.length - 1] : items[0];
-      os.dispatch(OS_FOCUS({ zoneId, itemId: targetItem ?? null }));
-    }
-
-    // disallowEmpty: pre-select first item so tab panels are visible.
-    // Uses OS_INIT_SELECTION (not OS_SELECT) because activeZoneId
-    // doesn't exist yet at init time.
-    if (config.select.disallowEmpty && !config.project.autoFocus) {
-      const zone = os.getState().os.focus.zones[zoneId];
-      if (zone && zone.selection.length === 0) {
-        const items = ZoneRegistry.resolveItems(zoneId);
-        if (items.length > 0) {
-          os.dispatch(OS_INIT_SELECTION({ zoneId, itemId: items[0] }));
-        }
-      }
-    }
-
     return () => {
       ZoneRegistry.unregister(zoneId);
     };
   }, [zoneId, config, role]);
-
-  // ─── Lifecycle: focus stack (dialog/alertdialog) ───
-  useLayoutEffect(() => {
-    if (!config.project.autoFocus) return;
-    os.dispatch(OS_STACK_PUSH());
-    return () => {
-      os.dispatch(OS_STACK_POP());
-    };
-  }, [config.project.autoFocus]);
 
   // ─── Reactive: active zone subscription ───
   const isActive = os.useComputed((s) => s.os.focus.activeZoneId === zoneId);

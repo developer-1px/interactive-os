@@ -17,7 +17,6 @@ import {
   resolveElement,
 } from "@os-core/3-inject/compute";
 import type { ElementAttrs, ItemAttrs } from "@os-core/3-inject/headless.types";
-import { seedAriaState } from "@os-core/3-inject/seedAriaState";
 import { simulateClick, simulateKeyPress } from "@os-core/3-inject/simulate";
 import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
 import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
@@ -817,25 +816,13 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
           : {}),
       });
 
-      // Seed aria-* from config (mirrors OS_ZONE_INIT)
-      const seeded = seedAriaState(mockConfig.current, mockItems.current);
-
       os.setState((s: AppState) =>
         produce(s, (draft) => {
           draft.os.focus.activeZoneId = zoneId;
 
-          // Only seed if zone doesn't exist yet (first creation)
-          const isNew = !draft.os.focus.zones[zoneId];
           const z = ensureZone(draft.os, zoneId);
           z.focusedItemId = focusedItemId;
           if (focusedItemId) z.lastFocusedId = focusedItemId;
-
-          // Apply seed only on first creation
-          if (isNew) {
-            for (const [id, ariaState] of Object.entries(seeded)) {
-              z.items[id] = { ...ariaState };
-            }
-          }
         }),
       );
     },
@@ -1005,58 +992,36 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         config: mockConfig.current,
       } as Parameters<typeof basePage.goto>[1]);
 
-      // ── T1+T2: Seed initial aria-* keys based on config ──
-      // This ensures items[id] contains the aria-* keys that this Zone
-      // projects, so computeItem can use `"key" in state` instead of
-      // scanning inputmap/config at projection time.
-      const allItems = opts?.items ?? mockItems.current;
-      const selectMode = mockConfig.current.select?.mode ?? "none";
-      const inputmapValues = mockConfig.current.inputmap
-        ? Object.values(mockConfig.current.inputmap)
-        : [];
-      const hasCheckCmd = inputmapValues.some((cmds) =>
-        cmds.some((c) => c.type === "OS_CHECK"),
-      );
-      const hasPressCmd = inputmapValues.some((cmds) =>
-        cmds.some((c) => c.type === "OS_PRESS"),
-      );
-      const expandMode = mockConfig.current.expand?.mode ?? "none";
-      const hasExpand = expandMode !== "none";
-      const needsAriaSeed =
-        selectMode !== "none" || hasCheckCmd || hasPressCmd || hasExpand;
+      // Apply initial selection and expanded values (no seed needed —
+      // computeItem derives key existence from config directly)
+      if (initialSelection || opts?.initial?.expanded) {
+        const inputmapValues = mockConfig.current.inputmap
+          ? Object.values(mockConfig.current.inputmap)
+          : [];
+        const hasCheckCmd = inputmapValues.some((cmds) =>
+          cmds.some((c) => c.type === "OS_CHECK"),
+        );
+        const selectMode = mockConfig.current.select?.mode ?? "none";
 
-      if (needsAriaSeed || initialSelection || opts?.initial?.expanded) {
         os.setState((s: AppState) =>
           produce(s, (draft) => {
             const z = ensureZone(draft.os, zoneId);
 
-            // Seed aria-* false for all items based on config
-            for (const id of allItems) {
-              if (!z.items[id]) z.items[id] = {};
-              if (selectMode !== "none") {
-                z.items[id] = { ...z.items[id], "aria-selected": false };
-              }
-              if (hasCheckCmd) {
-                z.items[id] = { ...z.items[id], "aria-checked": false };
-              }
-              if (hasPressCmd) {
-                z.items[id] = { ...z.items[id], "aria-pressed": false };
-              }
-              if (hasExpand) {
-                z.items[id] = { ...z.items[id], "aria-expanded": false };
-              }
-            }
-
-            // Apply initial selection (override false → true)
+            // Apply initial selection (override default false → true)
             if (initialSelection) {
               for (const id of initialSelection!) {
                 if (!z.items[id]) z.items[id] = {};
-                z.items[id] = { ...z.items[id], "aria-selected": true };
+                if (hasCheckCmd) {
+                  z.items[id] = { ...z.items[id], "aria-checked": true };
+                }
+                if (selectMode !== "none") {
+                  z.items[id] = { ...z.items[id], "aria-selected": true };
+                }
               }
               z.selectionAnchor = initialSelection![0] ?? null;
             }
 
-            // Apply initial expanded state (override false → true)
+            // Apply initial expanded state (override default false → true)
             if (opts?.initial?.expanded) {
               for (const id of opts.initial!.expanded!) {
                 if (!z.items[id]) z.items[id] = {};

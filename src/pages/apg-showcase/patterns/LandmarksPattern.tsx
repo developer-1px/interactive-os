@@ -86,7 +86,8 @@ const LANDMARKS: LandmarkDef[] = [
     role: "search",
     htmlElement: "<search>",
     label: "Search",
-    description: "A collection of items that combine to create search functionality.",
+    description:
+      "A collection of items that combine to create search functionality.",
     rules: [
       "Multiple allowed — each must have a unique label",
       "Preferred over 'form' when content is search-related",
@@ -153,7 +154,8 @@ function LandmarkCard({ landmark }: { landmark: LandmarkDef }) {
               role=&quot;{landmark.role}&quot;
             </h4>
             <p className="text-xs text-gray-500 mt-0.5">
-              HTML: <code className="text-indigo-600">{landmark.htmlElement}</code>
+              HTML:{" "}
+              <code className="text-indigo-600">{landmark.htmlElement}</code>
             </p>
           </div>
         </div>
@@ -170,7 +172,10 @@ function LandmarkCard({ landmark }: { landmark: LandmarkDef }) {
           </h5>
           <ul className="space-y-1">
             {landmark.rules.map((rule, idx) => (
-              <li key={idx} className="text-xs text-gray-600 flex items-start gap-1.5">
+              <li
+                key={idx}
+                className="text-xs text-gray-600 flex items-start gap-1.5"
+              >
                 <span className="text-indigo-400 mt-0.5 flex-shrink-0">-</span>
                 <span>{rule}</span>
               </li>
@@ -192,7 +197,8 @@ function LandmarksLiveDemo() {
           Live Demo: Page with Landmarks
         </h4>
         <p className="text-xs text-indigo-600 mt-0.5">
-          Each colored region below is a landmark. Screen readers can jump between them.
+          Each colored region below is a landmark. Screen readers can jump
+          between them.
         </p>
       </div>
 
@@ -218,10 +224,18 @@ function LandmarksLiveDemo() {
           className="px-5 py-2 bg-slate-100 border-b border-slate-200 flex items-center justify-between"
         >
           <div className="flex gap-4">
-            <a href="#" className="text-xs text-indigo-600 hover:underline">Home</a>
-            <a href="#" className="text-xs text-indigo-600 hover:underline">Products</a>
-            <a href="#" className="text-xs text-indigo-600 hover:underline">About</a>
-            <a href="#" className="text-xs text-indigo-600 hover:underline">Contact</a>
+            <a href="#" className="text-xs text-indigo-600 hover:underline">
+              Home
+            </a>
+            <a href="#" className="text-xs text-indigo-600 hover:underline">
+              Products
+            </a>
+            <a href="#" className="text-xs text-indigo-600 hover:underline">
+              About
+            </a>
+            <a href="#" className="text-xs text-indigo-600 hover:underline">
+              Contact
+            </a>
           </div>
           <span className="text-[10px] uppercase tracking-wider text-slate-500 bg-slate-200 px-2 py-0.5 rounded">
             navigation &quot;Primary&quot;
@@ -230,10 +244,7 @@ function LandmarksLiveDemo() {
 
         <div className="flex">
           {/* Main */}
-          <main
-            aria-label="Demo main content"
-            className="flex-1 p-5 space-y-4"
-          >
+          <main aria-label="Demo main content" className="flex-1 p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-gray-900">Welcome</h3>
               <span className="text-[10px] uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
@@ -241,8 +252,9 @@ function LandmarksLiveDemo() {
               </span>
             </div>
             <p className="text-sm text-gray-600">
-              This is the primary content area. It should contain the page&apos;s
-              central purpose. Exactly one <code>main</code> landmark per page.
+              This is the primary content area. It should contain the
+              page&apos;s central purpose. Exactly one <code>main</code>{" "}
+              landmark per page.
             </p>
 
             {/* Search */}
@@ -251,7 +263,10 @@ function LandmarksLiveDemo() {
               className="border border-amber-200 rounded-md p-3 bg-amber-50"
             >
               <div className="flex items-center justify-between mb-2">
-                <label htmlFor="demo-search" className="text-xs font-medium text-amber-800">
+                <label
+                  htmlFor="demo-search"
+                  className="text-xs font-medium text-amber-800"
+                >
                   Search
                 </label>
                 <span className="text-[10px] uppercase tracking-wider text-amber-600 bg-amber-100 px-2 py-0.5 rounded">
@@ -272,7 +287,10 @@ function LandmarksLiveDemo() {
               className="border border-green-200 rounded-md p-3 bg-green-50"
             >
               <div className="flex items-center justify-between mb-2">
-                <h4 id="demo-form-heading" className="text-xs font-medium text-green-800">
+                <h4
+                  id="demo-form-heading"
+                  className="text-xs font-medium text-green-800"
+                >
                   Newsletter Signup
                 </h4>
                 <span className="text-[10px] uppercase tracking-wider text-green-600 bg-green-100 px-2 py-0.5 rounded">
@@ -301,7 +319,10 @@ function LandmarksLiveDemo() {
               className="border border-purple-200 rounded-md p-3 bg-purple-50"
             >
               <div className="flex items-center justify-between mb-2">
-                <h4 id="demo-region-heading" className="text-xs font-medium text-purple-800">
+                <h4
+                  id="demo-region-heading"
+                  className="text-xs font-medium text-purple-800"
+                >
                   Featured Articles
                 </h4>
                 <span className="text-[10px] uppercase tracking-wider text-purple-600 bg-purple-100 px-2 py-0.5 rounded">
@@ -341,9 +362,15 @@ function LandmarksLiveDemo() {
           className="px-5 py-2 bg-slate-100 border-t border-slate-200 flex items-center justify-between"
         >
           <div className="flex gap-4">
-            <a href="#" className="text-xs text-gray-600 hover:underline">Privacy</a>
-            <a href="#" className="text-xs text-gray-600 hover:underline">Terms</a>
-            <a href="#" className="text-xs text-gray-600 hover:underline">Sitemap</a>
+            <a href="#" className="text-xs text-gray-600 hover:underline">
+              Privacy
+            </a>
+            <a href="#" className="text-xs text-gray-600 hover:underline">
+              Terms
+            </a>
+            <a href="#" className="text-xs text-gray-600 hover:underline">
+              Sitemap
+            </a>
           </div>
           <span className="text-[10px] uppercase tracking-wider text-slate-500 bg-slate-200 px-2 py-0.5 rounded">
             navigation &quot;Footer&quot;
@@ -356,7 +383,9 @@ function LandmarksLiveDemo() {
           aria-label="Demo site footer"
           className="px-5 py-3 bg-slate-800 text-slate-400 flex items-center justify-between"
         >
-          <span className="text-xs">&copy; 2026 Acme Corp. All rights reserved.</span>
+          <span className="text-xs">
+            &copy; 2026 Acme Corp. All rights reserved.
+          </span>
           <span className="text-[10px] uppercase tracking-wider text-slate-500 bg-slate-700 px-2 py-0.5 rounded">
             contentinfo
           </span>
@@ -375,7 +404,8 @@ export function LandmarksPattern() {
         <h3 className="text-lg font-semibold mb-1">Landmarks</h3>
         <p className="text-sm text-gray-500 mb-1">
           W3C APG Landmarks Pattern: 8 roles that identify major page sections
-          for assistive technology navigation. Keyboard interaction: Not applicable.{" "}
+          for assistive technology navigation. Keyboard interaction: Not
+          applicable.{" "}
           <a
             href="https://www.w3.org/WAI/ARIA/apg/patterns/landmarks/"
             target="_blank"
@@ -395,8 +425,8 @@ export function LandmarksPattern() {
           </a>
         </p>
         <p className="text-xs text-gray-400">
-          ZIFT classification: None (structural/semantic, no interaction).
-          No defineApp, no createZone, no bind.
+          ZIFT classification: None (structural/semantic, no interaction). No
+          defineApp, no createZone, no bind.
         </p>
       </div>
 

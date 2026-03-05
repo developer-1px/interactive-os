@@ -23,7 +23,6 @@ describe("T7: DocsViewer — auto-select via selectDoc command", () => {
 
     // Register selectDoc on test kernel
     page.kernel.register(selectDoc);
-
   });
 
   afterEach(() => {

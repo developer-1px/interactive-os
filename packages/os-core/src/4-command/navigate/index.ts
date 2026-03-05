@@ -228,12 +228,17 @@ export const OS_NAVIGATE = os.defineCommand(
       const updatedZone = result.state.os.focus.zones[activeZoneId];
       // Compare selection via items map
       const prevSelected = new Set(
-        Object.keys(zone.items ?? {}).filter((id) => zone.items[id]?.["aria-selected"]),
+        Object.keys(zone.items ?? {}).filter(
+          (id) => zone.items[id]?.["aria-selected"],
+        ),
       );
       const newSelected = new Set(
-        Object.keys(updatedZone?.items ?? {}).filter((id) => updatedZone?.items[id]?.["aria-selected"]),
+        Object.keys(updatedZone?.items ?? {}).filter(
+          (id) => updatedZone?.items[id]?.["aria-selected"],
+        ),
       );
-      const changed = prevSelected.size !== newSelected.size ||
+      const changed =
+        prevSelected.size !== newSelected.size ||
         [...prevSelected].some((id) => !newSelected.has(id));
       if (changed) {
         const cursor = buildZoneCursor(updatedZone);

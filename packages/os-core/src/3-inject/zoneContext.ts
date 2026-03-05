@@ -25,8 +25,6 @@ import type {
   ZoneEntry,
 } from "@os-core/engine/registries/zoneRegistry";
 import type {
-  ActionConfig,
-  ActivateConfig,
   DismissConfig,
   ExpandConfig,
   FocusGroupConfig,
@@ -35,6 +33,7 @@ import type {
   SelectConfig,
   TabConfig,
 } from "../schema/types";
+import type { InputMap } from "../schema/types/focus/config/FocusGroupConfig";
 
 // ═══════════════════════════════════════════════════════════════════
 // Zone ID Generator
@@ -61,11 +60,10 @@ export interface ZoneOptions {
   navigate?: Partial<NavigateConfig> | undefined;
   tab?: Partial<TabConfig> | undefined;
   select?: Partial<SelectConfig> | undefined;
-  activate?: Partial<ActivateConfig> | undefined;
   dismiss?: Partial<DismissConfig> | undefined;
   project?: Partial<ProjectConfig> | undefined;
   expand?: Partial<ExpandConfig> | undefined;
-  action?: Partial<ActionConfig> | undefined;
+  inputmap?: InputMap | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -108,12 +106,12 @@ export interface ZoneCallbacks {
   getExpandableItems?: (() => Set<string>) | undefined;
   getTreeLevels?: (() => Map<string, number>) | undefined;
   onReorder?:
-  | ((info: {
-    itemId: string;
-    overItemId: string;
-    position: "before" | "after";
-  }) => BaseCommand | BaseCommand[])
-  | undefined;
+    | ((info: {
+        itemId: string;
+        overItemId: string;
+        position: "before" | "after";
+      }) => BaseCommand | BaseCommand[])
+    | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════

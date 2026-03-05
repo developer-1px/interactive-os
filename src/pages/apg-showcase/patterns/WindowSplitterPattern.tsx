@@ -48,12 +48,11 @@ const INITIAL_VALUE = 50;
 function PrimaryPane() {
   return (
     <div className="p-4 overflow-auto h-full">
-      <h3 className="text-sm font-semibold text-gray-700 mb-2">
-        Primary Pane
-      </h3>
+      <h3 className="text-sm font-semibold text-gray-700 mb-2">Primary Pane</h3>
       <p className="text-sm text-gray-500 leading-relaxed">
         This pane resizes when you adjust the splitter. Use arrow keys to move
-        the splitter in small steps, or press <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Enter</kbd> to
+        the splitter in small steps, or press{" "}
+        <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Enter</kbd> to
         collapse/restore this pane.
       </p>
       <ul className="mt-3 space-y-1 text-sm text-gray-600">

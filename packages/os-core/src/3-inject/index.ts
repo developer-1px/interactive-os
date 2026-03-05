@@ -202,7 +202,10 @@ export const DOM_ZONE_ORDER = os.defineContext(
           firstItemId: filtered[0] ?? null,
           lastItemId: filtered[filtered.length - 1] ?? null,
           entry,
-          selectedItemId: zoneState?.selection?.[0] ?? null,
+          selectedItemId:
+            Object.entries(zoneState?.items ?? {}).find(
+              ([, s]) => s?.["aria-selected"],
+            )?.[0] ?? null,
           lastFocusedId: zoneState?.lastFocusedId ?? null,
         });
       }

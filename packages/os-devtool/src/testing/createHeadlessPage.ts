@@ -14,11 +14,7 @@
  * (goto, setItems, etc.) for test setup.
  */
 
-import {
-  createOsPage,
-  type GotoOptions,
-  type OsPage,
-} from "./page";
+import { createOsPage, type GotoOptions, type OsPage } from "./page";
 import type { Locator, LocatorAssertions, Page } from "./types";
 
 // ═══════════════════════════════════════════════════════════════════

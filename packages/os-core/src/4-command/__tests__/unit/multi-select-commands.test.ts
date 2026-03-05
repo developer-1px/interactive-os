@@ -17,6 +17,25 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 let snapshot: ReturnType<typeof os.getState>;
 
+/** Build items map with aria-selected for the given IDs */
+function buildSelectedItems(
+  ids: string[],
+): Record<string, { "aria-selected"?: boolean }> {
+  const items: Record<string, { "aria-selected"?: boolean }> = {};
+  for (const id of ids) {
+    items[id] = { "aria-selected": true };
+  }
+  return items;
+}
+
+/** Get selected item IDs from zone */
+function getSelection(zoneId: string): string[] {
+  const zone = os.getState().os.focus.zones[zoneId];
+  return Object.entries(zone?.items ?? {})
+    .filter(([, s]) => s?.["aria-selected"])
+    .map(([id]) => id);
+}
+
 function setupFocusWithSelection(
   zoneId: string,
   focusedItemId: string,
@@ -35,7 +54,7 @@ function setupFocusWithSelection(
             ...initialZoneState,
             ...prev.os.focus.zones[zoneId],
             focusedItemId,
-            selection,
+            items: buildSelectedItems(selection),
             selectionAnchor: selection[0] ?? null,
           },
         },
@@ -165,8 +184,7 @@ describe("OS_DELETE with multi-selection", () => {
 
     os.dispatch(OS_DELETE());
 
-    const zone = os.getState().os.focus.zones["testZone"];
-    expect(zone?.selection).toEqual(["item-1", "item-2"]);
+    expect(getSelection("testZone")).toEqual(["item-1", "item-2"]);
   });
 });
 
@@ -218,7 +236,6 @@ describe("OS_CUT with multi-selection", () => {
 
     os.dispatch(OS_CUT());
 
-    const zone = os.getState().os.focus.zones["testZone"];
-    expect(zone?.selection).toEqual([]);
+    expect(getSelection("testZone")).toEqual([]);
   });
 });

@@ -24,6 +24,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 let snapshot: ReturnType<typeof os.getState>;
 
+/** Build items map with aria-selected for the given IDs */
+function buildSelectedItems(
+  ids: string[],
+): Record<string, { "aria-selected"?: boolean }> {
+  const items: Record<string, { "aria-selected"?: boolean }> = {};
+  for (const id of ids) {
+    items[id] = { "aria-selected": true };
+  }
+  return items;
+}
+
 function setupFocusWithSelection(
   zoneId: string,
   focusedItemId: string,
@@ -43,7 +54,7 @@ function setupFocusWithSelection(
             ...initialZoneState,
             ...prev.os.focus.zones[zoneId],
             focusedItemId,
-            selection,
+            items: buildSelectedItems(selection),
             selectionAnchor: anchor,
           },
         },
@@ -284,6 +295,9 @@ describe("FR7: OS_DELETE selection behavior", () => {
 
     const zone = os.getState().os.focus.zones["z1"];
     // Selection preserved — app's onDelete callback is responsible for clearing
-    expect(zone?.selection).toEqual(["item-1", "item-2"]);
+    const selected = Object.entries(zone?.items ?? {})
+      .filter(([, s]) => s?.["aria-selected"])
+      .map(([id]) => id);
+    expect(selected).toEqual(["item-1", "item-2"]);
   });
 });

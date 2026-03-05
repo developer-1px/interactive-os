@@ -31,7 +31,7 @@ function baseInput(overrides: Partial<KeyboardInput> = {}): KeyboardInput {
     focusedItemRole: null,
     focusedItemId: null,
     focusedItemExpanded: null,
-    activeZoneAction: null,
+    activeZoneInputmap: null,
     activeZoneFocusedItemId: null,
     focusedTriggerId: null,
     focusedTriggerRole: null,
@@ -73,8 +73,8 @@ describe("resolveKeyboard — guards", () => {
 // CHECK resolution (Space on checkbox/switch)
 // ═══════════════════════════════════════════════════════════════════
 
-describe("resolveKeyboard — Space CHECK via action.commands", () => {
-  test("Space + zone has action.commands=[OS_CHECK] → check via action path", () => {
+describe("resolveKeyboard — Space CHECK via inputmap", () => {
+  test("Space + zone has inputmap.Space=[OS_CHECK] → check via inputmap", () => {
     const result = resolveKeyboard(
       baseInput({
         canonicalKey: "Space",
@@ -82,9 +82,8 @@ describe("resolveKeyboard — Space CHECK via action.commands", () => {
         focusedItemRole: null,
         focusedItemId: null,
         activeZoneFocusedItemId: "zone-item-1",
-        activeZoneAction: {
-          commands: [{ type: "OS_CHECK", payload: {} }],
-          keys: ["Space"],
+        activeZoneInputmap: {
+          Space: [{ type: "OS_CHECK", payload: {} }],
         } as any,
       }),
     );

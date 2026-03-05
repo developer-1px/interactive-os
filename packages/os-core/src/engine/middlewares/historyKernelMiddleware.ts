@@ -132,8 +132,10 @@ export function createHistoryMiddleware(
         ? osState.focus.zones[activeZoneId]
         : null;
       const focusedItemId = activeZone?.focusedItemId ?? null;
-      const activeZoneSelection = activeZone?.selection
-        ? [...activeZone.selection]
+      const activeZoneSelection = activeZone
+        ? Object.entries(activeZone.items ?? {})
+            .filter(([, s]) => s?.["aria-selected"])
+            .map(([id]) => id)
         : undefined;
 
       // Capture app state BEFORE command

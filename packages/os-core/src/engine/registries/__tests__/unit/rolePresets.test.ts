@@ -24,7 +24,6 @@ interface SpecRow {
   selectMode: "none" | "single" | "multiple";
   followFocus: boolean;
   tab: "trap" | "escape" | "flow" | "native";
-  activate: "manual" | "automatic";
   dismissEsc: "close" | "deselect" | "none";
   autoFocus: boolean;
 }
@@ -38,7 +37,6 @@ const D = {
   selectMode: "none" as const,
   followFocus: false,
   tab: "flow" as const,
-  activate: "manual" as const,
   dismissEsc: "none" as const,
   autoFocus: false,
 };
@@ -54,7 +52,7 @@ const specTable: SpecRow[] = [
     selectMode: "single",
     followFocus: true,
     tab: "escape",
-    activate: D.activate,
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -67,7 +65,7 @@ const specTable: SpecRow[] = [
     selectMode: "none",
     followFocus: D.followFocus,
     tab: "trap",
-    activate: "automatic",
+
     dismissEsc: "close",
     autoFocus: true,
   },
@@ -80,7 +78,7 @@ const specTable: SpecRow[] = [
     selectMode: "none",
     followFocus: D.followFocus,
     tab: "escape",
-    activate: "automatic",
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -93,7 +91,7 @@ const specTable: SpecRow[] = [
     selectMode: "single",
     followFocus: true,
     tab: "escape",
-    activate: D.activate,
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -106,7 +104,7 @@ const specTable: SpecRow[] = [
     selectMode: "single",
     followFocus: true,
     tab: "escape",
-    activate: "automatic",
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -119,7 +117,7 @@ const specTable: SpecRow[] = [
     selectMode: "none",
     followFocus: D.followFocus,
     tab: "escape",
-    activate: D.activate,
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -132,7 +130,7 @@ const specTable: SpecRow[] = [
     selectMode: "multiple",
     followFocus: false,
     tab: "escape",
-    activate: D.activate,
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -145,7 +143,7 @@ const specTable: SpecRow[] = [
     selectMode: "multiple",
     followFocus: false,
     tab: "escape",
-    activate: "manual",
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -158,7 +156,7 @@ const specTable: SpecRow[] = [
     selectMode: "single",
     followFocus: true,
     tab: "escape",
-    activate: "manual",
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -171,7 +169,7 @@ const specTable: SpecRow[] = [
     selectMode: D.selectMode,
     followFocus: D.followFocus,
     tab: "trap",
-    activate: D.activate,
+
     dismissEsc: "close",
     autoFocus: true,
   },
@@ -184,7 +182,7 @@ const specTable: SpecRow[] = [
     selectMode: D.selectMode,
     followFocus: D.followFocus,
     tab: "trap",
-    activate: D.activate,
+
     dismissEsc: "close",
     autoFocus: true,
   },
@@ -197,7 +195,7 @@ const specTable: SpecRow[] = [
     selectMode: "single",
     followFocus: true,
     tab: "escape",
-    activate: D.activate,
+
     dismissEsc: "close",
     autoFocus: D.autoFocus,
   },
@@ -210,7 +208,7 @@ const specTable: SpecRow[] = [
     selectMode: D.selectMode,
     followFocus: D.followFocus,
     tab: "escape",
-    activate: D.activate,
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -223,7 +221,7 @@ const specTable: SpecRow[] = [
     selectMode: D.selectMode,
     followFocus: D.followFocus,
     tab: "native",
-    activate: "manual",
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -236,7 +234,7 @@ const specTable: SpecRow[] = [
     selectMode: D.selectMode,
     followFocus: D.followFocus,
     tab: "flow",
-    activate: "manual",
+
     dismissEsc: D.dismissEsc,
     autoFocus: D.autoFocus,
   },
@@ -259,7 +257,6 @@ describe("Role Presets vs SPEC §7 Table", () => {
     expect(config.select.mode).toBe(row.selectMode);
     expect(config.select.followFocus).toBe(row.followFocus);
     expect(config.tab.behavior).toBe(row.tab);
-    expect(config.activate.mode).toBe(row.activate);
     expect(config.dismiss.escape).toBe(row.dismissEsc);
     expect(config.project.autoFocus).toBe(row.autoFocus);
   });

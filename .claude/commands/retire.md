@@ -55,6 +55,8 @@ git add docs/ && git commit -m "archive: move [name] to 4-archive (project compl
 
 `4-archive/`가 너무 커져서 AI 컨텍스트에 노이즈가 되면:
 
+**⚠️ 사전 가드**: branch 전환이 필요하므로, 먼저 `git status`로 dirty tree를 확인한다. 미커밋 변경이 있으면 **deep archive를 보류**하고 냉장까지만 수행한다. dirty tree에서 branch 전환은 변경 유실 위험이 있다.
+
 ```bash
 # archive 브랜치에 보존
 git checkout archive/legacy-docs

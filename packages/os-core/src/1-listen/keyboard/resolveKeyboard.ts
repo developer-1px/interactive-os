@@ -8,20 +8,24 @@
  * @see design-principles.md #24 (binary return: Command/NOOP = stop, null = pass)
  */
 
-import { resolveChain, NOOP, type Keymap } from "@os-core/2-resolve/chainResolver";
+import type { BaseCommand } from "@kernel/core/tokens";
+import {
+  type Keymap,
+  NOOP,
+  resolveChain,
+} from "@os-core/2-resolve/chainResolver";
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import {
   resolveFieldKey,
   resolveFieldKeyByType,
 } from "@os-core/2-resolve/resolveFieldKey";
-import type { BaseCommand } from "@kernel/core/tokens";
 import type { FieldType } from "@os-core/engine/registries/fieldRegistry";
 import {
-  resolveTriggerRole,
   buildTriggerKeymap,
+  resolveTriggerRole,
 } from "@os-core/engine/registries/triggerRegistry";
 import type { ZoneCursor } from "@os-core/engine/registries/zoneRegistry";
-import type { ActionConfig } from "@os-core/schema/types";
+import type { InputMap } from "@os-core/schema/types/focus/config/FocusGroupConfig";
 import type { ResolveResult } from "../_shared/domQuery";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -48,8 +52,8 @@ export interface KeyboardInput {
   focusedItemExpanded: boolean | null;
 
   activeZoneFocusedItemId: string | null;
-  /** action config — single route for all command-driven keys */
-  activeZoneAction: ActionConfig | null;
+  /** inputmap — APG keyboard interaction table: input → command[] */
+  activeZoneInputmap: InputMap | null;
 
   elementId: string | undefined;
 
@@ -69,9 +73,9 @@ interface InputMeta extends Record<string, unknown> {
   elementId: string | undefined;
 }
 
-/** Layer return: command + which element claimed it */
+/** Layer return: command(s) + which element claimed it */
 interface LayerResult {
-  cmd: BaseCommand;
+  commands: BaseCommand[];
   elementId?: string;
 }
 
@@ -103,9 +107,10 @@ export function resolveKeyboard(input: KeyboardInput): ResolveResult {
     if (!layer) continue;
     const result = layer(input.canonicalKey);
     if (!result) continue;
-    if (result.cmd === NOOP) return EMPTY;
+    if (result.commands.length === 1 && result.commands[0] === NOOP)
+      return EMPTY;
     return {
-      commands: [result.cmd],
+      commands: result.commands,
       meta: { ...meta, elementId: result.elementId },
       preventDefault: true,
       fallback: false,
@@ -126,9 +131,10 @@ function fieldLayer(input: KeyboardInput): Layer | null {
       const cmd = resolveFieldKey(input.editingFieldId!, key, {
         itemId: input.focusedItemId ?? undefined,
       });
-      if (cmd) return { cmd, elementId: input.focusedItemId ?? undefined };
+      if (cmd)
+        return { commands: [cmd], elementId: input.focusedItemId ?? undefined };
       // Field absorbs this key → NOOP
-      if (input.isFieldActive) return { cmd: NOOP };
+      if (input.isFieldActive) return { commands: [NOOP] };
       return null;
     };
   }
@@ -138,7 +144,7 @@ function fieldLayer(input: KeyboardInput): Layer | null {
       const cmd = resolveFieldKeyByType(input.activeFieldType!, key, {
         itemId: input.focusedItemId!,
       });
-      return cmd ? { cmd, elementId: input.focusedItemId! } : null;
+      return cmd ? { commands: [cmd], elementId: input.focusedItemId! } : null;
     };
   }
 
@@ -150,54 +156,75 @@ function triggerItemLayer(input: KeyboardInput): Layer | null {
   if (input.isEditing) return null;
 
   const layers: Keymap[] = [];
-  const hasTrigger = input.focusedTriggerId && input.focusedTriggerRole && input.focusedTriggerOverlayId;
+  const hasTrigger =
+    input.focusedTriggerId &&
+    input.focusedTriggerRole &&
+    input.focusedTriggerOverlayId;
 
   if (hasTrigger) {
     layers.push(
-      buildTriggerKeymap(resolveTriggerRole(input.focusedTriggerRole!), {
-        overlayId: input.focusedTriggerOverlayId!,
-        triggerRole: input.focusedTriggerRole!,
-        triggerId: input.focusedTriggerId!,
-      }, input.isTriggerOverlayOpen),
+      buildTriggerKeymap(
+        resolveTriggerRole(input.focusedTriggerRole!),
+        {
+          overlayId: input.focusedTriggerOverlayId!,
+          triggerRole: input.focusedTriggerRole!,
+          triggerId: input.focusedTriggerId!,
+        },
+        input.isTriggerOverlayOpen,
+      ),
     );
   }
 
-  // Action config keymap (v10) — BEFORE legacy check
-  if (input.activeZoneAction && input.activeZoneFocusedItemId) {
-    const action = input.activeZoneAction;
-    const keys = action.keys ?? [];
+  // inputmap layer — direct key→command[] routing from APG table
+  const inputmap = input.activeZoneInputmap;
+  let hasInputmap = false;
+  if (inputmap && input.activeZoneFocusedItemId) {
+    for (const k in inputmap) {
+      if (!isClickKey(k)) {
+        hasInputmap = true;
+        break;
+      }
+    }
+  }
 
+  if (hasInputmap) {
+    // Build a single-command keymap for the chain resolver (trigger takes priority)
     const actionKeymap: Keymap = {};
-
-    for (const k of keys) {
-      if (action.keymap?.[k as keyof typeof action.keymap]) {
-        const overrideCmds = action.keymap[k as keyof typeof action.keymap]!;
-        actionKeymap[k] = overrideCmds[0];
-      } else if (action.commands.length > 0) {
-        actionKeymap[k] = action.commands[0];
+    for (const k in inputmap) {
+      if (isClickKey(k)) continue;
+      const cmds = inputmap[k];
+      if (cmds && cmds.length > 0) {
+        actionKeymap[k] = cmds[0];
       }
     }
-
-    if (action.keymap) {
-      for (const [k, cmds] of Object.entries(action.keymap)) {
-        if (!actionKeymap[k] && cmds && cmds.length > 0) {
-          actionKeymap[k] = cmds[0];
-        }
-      }
-    }
-
     layers.push(actionKeymap);
   }
 
   if (layers.length === 0) return null;
 
   return (key) => {
+    // Check inputmap first for multi-command support (bypasses chain for full command list)
+    if (hasInputmap && inputmap[key] && inputmap[key].length > 0) {
+      // If trigger layer also has this key, trigger wins (chain priority)
+      if (hasTrigger) {
+        const triggerCmd = resolveChain(key, [layers[0]]);
+        if (triggerCmd) {
+          return { commands: [triggerCmd], elementId: input.focusedTriggerId! };
+        }
+      }
+      // Return full command array from inputmap
+      const elementId =
+        input.activeZoneFocusedItemId ?? input.focusedItemId ?? undefined;
+      return { commands: inputmap[key], elementId };
+    }
+
+    // Fallback to chain resolution (trigger keys, etc.)
     const cmd = resolveChain(key, layers);
     if (!cmd) return null;
     const elementId = hasTrigger
       ? input.focusedTriggerId!
-      : input.activeZoneFocusedItemId ?? input.focusedItemId ?? undefined;
-    return { cmd, elementId };
+      : (input.activeZoneFocusedItemId ?? input.focusedItemId ?? undefined);
+    return { commands: [cmd], elementId };
   };
 }
 
@@ -211,14 +238,15 @@ function zoneLayer(input: KeyboardInput): Layer | null {
     if (!binding) return null;
 
     if (typeof binding.command === "function") {
-      if (!input.cursor) return { cmd: NOOP };
+      if (!input.cursor) return { commands: [NOOP] };
       const cmds = binding.command(input.cursor);
-      // ZoneCallback returns command(s) — wrap first one
       const arr = Array.isArray(cmds) ? cmds : [cmds];
-      return arr.length > 0 ? { cmd: arr[0], elementId: input.elementId } : null;
+      return arr.length > 0
+        ? { commands: arr, elementId: input.elementId }
+        : null;
     }
 
-    return { cmd: binding.command, elementId: input.elementId };
+    return { commands: [binding.command], elementId: input.elementId };
   };
 }
 
@@ -232,3 +260,8 @@ const EMPTY: ResolveResult = {
   preventDefault: false,
   fallback: false,
 };
+
+/** Click entries are handled by PointerListener, not keyboard. */
+function isClickKey(k: string): boolean {
+  return k === "click" || k.includes("+click");
+}

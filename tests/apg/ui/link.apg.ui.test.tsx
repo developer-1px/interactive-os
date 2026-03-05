@@ -60,7 +60,7 @@ describe("LinkPattern (Projection)", () => {
   // Custom Links (role="link") — DOM Projection
   // ═══════════════════════════════════════════════════
 
-  describe("Custom links (role=\"link\")", () => {
+  describe('Custom links (role="link")', () => {
     it("renders span elements with role=link", () => {
       const html = page.html();
       expect(html).toContain('role="link"');

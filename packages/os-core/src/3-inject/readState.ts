@@ -8,25 +8,25 @@
 import type { HeadlessKernel } from "./headless.types";
 
 export function readActiveZoneId(kernel: HeadlessKernel): string | null {
-    return kernel.getState().os.focus.activeZoneId;
+  return kernel.getState().os.focus.activeZoneId;
 }
 
 export function readZone(kernel: HeadlessKernel, zoneId?: string) {
-    const id = zoneId ?? readActiveZoneId(kernel);
-    return id ? kernel.getState().os.focus.zones[id] : undefined;
+  const id = zoneId ?? readActiveZoneId(kernel);
+  return id ? kernel.getState().os.focus.zones[id] : undefined;
 }
 
 export function readFocusedItemId(
-    kernel: HeadlessKernel,
-    zoneId?: string,
+  kernel: HeadlessKernel,
+  zoneId?: string,
 ): string | null {
-    return readZone(kernel, zoneId)?.focusedItemId ?? null;
+  return readZone(kernel, zoneId)?.focusedItemId ?? null;
 }
 
 export function readSelected(
-    kernel: HeadlessKernel,
-    itemId: string,
-    zoneId?: string,
+  kernel: HeadlessKernel,
+  itemId: string,
+  zoneId?: string,
 ): boolean {
-    return readZone(kernel, zoneId)?.items[itemId]?.["aria-selected"] ?? false;
+  return readZone(kernel, zoneId)?.items[itemId]?.["aria-selected"] ?? false;
 }

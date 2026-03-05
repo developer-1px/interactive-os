@@ -17,8 +17,8 @@ import {
   resetFocusState,
   TestBotRegistry,
 } from "@os-devtool/testing";
-import { defineApp } from "@os-sdk/app/defineApp";
 import { formatDiagnostics } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp";
 import { produce } from "immer";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -310,8 +310,6 @@ export async function executeSuite(
   page.hideCursor();
 
   const diagnostics = !passed ? formatDiagnostics(os) : undefined;
-  os.dispatch(
-    suiteDone({ index: si, passed, steps: [...steps], diagnostics }),
-  );
+  os.dispatch(suiteDone({ index: si, passed, steps: [...steps], diagnostics }));
   os.dispatch(allDone());
 }

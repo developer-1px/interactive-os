@@ -28,7 +28,10 @@ export const OS_SELECT_ALL = os.defineCommand(
     return {
       state: produce(ctx.state, (draft) => {
         const zone = ensureZone(draft.os, activeZoneId);
-        zone.selection = [...items];
+        for (const id of items) {
+          if (!zone.items[id]) zone.items[id] = {};
+          zone.items[id] = { ...zone.items[id], "aria-selected": true };
+        }
         zone.selectionAnchor = items[0] ?? null;
       }) as typeof ctx.state,
     };

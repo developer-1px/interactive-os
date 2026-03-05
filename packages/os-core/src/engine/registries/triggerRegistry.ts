@@ -13,8 +13,8 @@
 import type { Keymap } from "@os-core/2-resolve/chainResolver";
 import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-core/4-command";
 import {
-    type TriggerConfig,
-    DEFAULT_TRIGGER_CONFIG,
+  DEFAULT_TRIGGER_CONFIG,
+  type TriggerConfig,
 } from "../../schema/types/focus/config/TriggerConfig";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -22,90 +22,90 @@ import {
 // ═══════════════════════════════════════════════════════════════════
 
 export type TriggerRole =
-    | "menu"
-    | "dialog"
-    | "alertdialog"
-    | "listbox"
-    | "popover"
-    | "tooltip";
+  | "menu"
+  | "dialog"
+  | "alertdialog"
+  | "listbox"
+  | "popover"
+  | "tooltip";
 
 // ═══════════════════════════════════════════════════════════════════
 // Built-in Trigger Presets
 // ═══════════════════════════════════════════════════════════════════
 
 type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
 const triggerPresets: Record<TriggerRole, DeepPartial<TriggerConfig>> = {
-    // ─── Menu Button (APG: Menu Button Pattern) ───
-    // Enter/Space/Click open, ArrowDown/Up also open
-    menu: {
-        open: {
-            onActivate: true,
-            onClick: true,
-            onArrowDown: true,
-            onArrowUp: true,
-        },
-        focus: { onOpen: "first", onClose: "restore" },
-        aria: { haspopup: "true" },
+  // ─── Menu Button (APG: Menu Button Pattern) ───
+  // Enter/Space/Click open, ArrowDown/Up also open
+  menu: {
+    open: {
+      onActivate: true,
+      onClick: true,
+      onArrowDown: true,
+      onArrowUp: true,
     },
+    focus: { onOpen: "first", onClose: "restore" },
+    aria: { haspopup: "true" },
+  },
 
-    // ─── Dialog Trigger (APG: Dialog Pattern) ───
-    // Enter/Space/Click open, arrows do NOT open
-    dialog: {
-        open: {
-            onActivate: true,
-            onClick: true,
-        },
-        focus: { onOpen: "first", onClose: "restore" },
-        aria: { haspopup: "dialog" },
+  // ─── Dialog Trigger (APG: Dialog Pattern) ───
+  // Enter/Space/Click open, arrows do NOT open
+  dialog: {
+    open: {
+      onActivate: true,
+      onClick: true,
     },
+    focus: { onOpen: "first", onClose: "restore" },
+    aria: { haspopup: "dialog" },
+  },
 
-    // ─── Alert Dialog Trigger ───
-    alertdialog: {
-        open: {
-            onActivate: true,
-            onClick: true,
-        },
-        focus: { onOpen: "first", onClose: "restore" },
-        aria: { haspopup: "dialog" },
+  // ─── Alert Dialog Trigger ───
+  alertdialog: {
+    open: {
+      onActivate: true,
+      onClick: true,
     },
+    focus: { onOpen: "first", onClose: "restore" },
+    aria: { haspopup: "dialog" },
+  },
 
-    // ─── Listbox Trigger (APG: Combobox / Select) ───
-    // Enter/Space/Click/ArrowDown open
-    listbox: {
-        open: {
-            onActivate: true,
-            onClick: true,
-            onArrowDown: true,
-            onArrowUp: true,
-        },
-        focus: { onOpen: "first", onClose: "restore" },
-        aria: { haspopup: "listbox" },
+  // ─── Listbox Trigger (APG: Combobox / Select) ───
+  // Enter/Space/Click/ArrowDown open
+  listbox: {
+    open: {
+      onActivate: true,
+      onClick: true,
+      onArrowDown: true,
+      onArrowUp: true,
     },
+    focus: { onOpen: "first", onClose: "restore" },
+    aria: { haspopup: "listbox" },
+  },
 
-    // ─── Popover Trigger ───
-    popover: {
-        open: {
-            onActivate: true,
-            onClick: true,
-        },
-        focus: { onOpen: "first", onClose: "restore" },
-        aria: { haspopup: "true" },
+  // ─── Popover Trigger ───
+  popover: {
+    open: {
+      onActivate: true,
+      onClick: true,
     },
+    focus: { onOpen: "first", onClose: "restore" },
+    aria: { haspopup: "true" },
+  },
 
-    // ─── Tooltip Trigger (APG: Tooltip Pattern) ───
-    // Hover opens, no keyboard open, no focus change
-    tooltip: {
-        open: {
-            onActivate: false,
-            onClick: false,
-            onHover: true,
-        },
-        focus: { onOpen: "none", onClose: "none" },
-        aria: { haspopup: false },
+  // ─── Tooltip Trigger (APG: Tooltip Pattern) ───
+  // Hover opens, no keyboard open, no focus change
+  tooltip: {
+    open: {
+      onActivate: false,
+      onClick: false,
+      onHover: true,
     },
+    focus: { onOpen: "none", onClose: "none" },
+    aria: { haspopup: false },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -117,26 +117,24 @@ const triggerPresets: Record<TriggerRole, DeepPartial<TriggerConfig>> = {
  * Follows the same deep-merge pattern as resolveRole().
  */
 export function resolveTriggerRole(
-    role: TriggerRole | string | undefined,
+  role: TriggerRole | string | undefined,
 ): TriggerConfig {
-    const preset = role
-        ? triggerPresets[role as TriggerRole] ?? {}
-        : {};
+  const preset = role ? (triggerPresets[role as TriggerRole] ?? {}) : {};
 
-    return {
-        open: {
-            ...DEFAULT_TRIGGER_CONFIG.open,
-            ...preset.open,
-        },
-        focus: {
-            ...DEFAULT_TRIGGER_CONFIG.focus,
-            ...preset.focus,
-        },
-        aria: {
-            ...DEFAULT_TRIGGER_CONFIG.aria,
-            ...preset.aria,
-        },
-    };
+  return {
+    open: {
+      ...DEFAULT_TRIGGER_CONFIG.open,
+      ...preset.open,
+    },
+    focus: {
+      ...DEFAULT_TRIGGER_CONFIG.focus,
+      ...preset.focus,
+    },
+    aria: {
+      ...DEFAULT_TRIGGER_CONFIG.aria,
+      ...preset.aria,
+    },
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -144,9 +142,9 @@ export function resolveTriggerRole(
 // ═══════════════════════════════════════════════════════════════════
 
 interface TriggerKeymapContext {
-    overlayId: string;
-    triggerRole: string;
-    triggerId?: string;
+  overlayId: string;
+  triggerRole: string;
+  triggerId?: string;
 }
 
 /**
@@ -157,27 +155,31 @@ interface TriggerKeymapContext {
  * @see design-principles.md #23
  */
 export function buildTriggerKeymap(
-    config: TriggerConfig,
-    ctx: TriggerKeymapContext,
-    isOverlayOpen: boolean,
+  config: TriggerConfig,
+  ctx: TriggerKeymapContext,
+  isOverlayOpen: boolean,
 ): Keymap {
-    if (isOverlayOpen) return {};
+  if (isOverlayOpen) return {};
 
-    const keymap: Keymap = {};
-    const base = { id: ctx.overlayId, type: ctx.triggerRole, triggerId: ctx.triggerId };
+  const keymap: Keymap = {};
+  const base = {
+    id: ctx.overlayId,
+    type: ctx.triggerRole,
+    triggerId: ctx.triggerId,
+  };
 
-    if (config.open.onActivate) {
-        keymap.Enter = OS_OVERLAY_OPEN(base);
-        keymap.Space = OS_OVERLAY_OPEN(base);
-    }
-    if (config.open.onArrowDown) {
-        keymap.ArrowDown = OS_OVERLAY_OPEN({ ...base, entry: "first" as const });
-    }
-    if (config.open.onArrowUp) {
-        keymap.ArrowUp = OS_OVERLAY_OPEN({ ...base, entry: "last" });
-    }
+  if (config.open.onActivate) {
+    keymap.Enter = OS_OVERLAY_OPEN(base);
+    keymap.Space = OS_OVERLAY_OPEN(base);
+  }
+  if (config.open.onArrowDown) {
+    keymap.ArrowDown = OS_OVERLAY_OPEN({ ...base, entry: "first" as const });
+  }
+  if (config.open.onArrowUp) {
+    keymap.ArrowUp = OS_OVERLAY_OPEN({ ...base, entry: "last" });
+  }
 
-    return keymap;
+  return keymap;
 }
 
 /**
@@ -187,13 +189,17 @@ export function buildTriggerKeymap(
  * @see design-principles.md #25
  */
 export function buildTriggerClickKeymap(
-    config: TriggerConfig,
-    ctx: TriggerKeymapContext,
+  config: TriggerConfig,
+  ctx: TriggerKeymapContext,
 ): Keymap {
-    if (!config.open.onClick) return {};
+  if (!config.open.onClick) return {};
 
-    const base = { id: ctx.overlayId, type: ctx.triggerRole, triggerId: ctx.triggerId };
-    return {
-        Click: [OS_OVERLAY_CLOSE({ id: ctx.overlayId }), OS_OVERLAY_OPEN(base)],
-    };
+  const base = {
+    id: ctx.overlayId,
+    type: ctx.triggerRole,
+    triggerId: ctx.triggerId,
+  };
+  return {
+    Click: [OS_OVERLAY_CLOSE({ id: ctx.overlayId }), OS_OVERLAY_OPEN(base)],
+  };
 }

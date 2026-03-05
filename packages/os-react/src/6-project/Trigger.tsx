@@ -14,17 +14,12 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import {
-  OS_OVERLAY_CLOSE,
-} from "@os-core/4-command/overlay/overlay";
+import { OS_OVERLAY_CLOSE } from "@os-core/4-command/overlay/overlay";
 import { os } from "@os-core/engine/kernel.ts";
 import type { OverlayEntry } from "@os-core/schema/state/OSState.ts";
 import { Item } from "@os-react/6-project/Item.tsx";
 import { Zone } from "@os-react/6-project/Zone";
-import type {
-  ReactElement,
-  ReactNode,
-} from "react";
+import type { ReactElement, ReactNode } from "react";
 import {
   cloneElement,
   createContext,
@@ -115,9 +110,11 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     // Internal ref (merged with forwarded ref)
     const internalRef = useRef<HTMLElement>(null);
     const mergedRef = (node: HTMLElement | null) => {
-      (internalRef as React.MutableRefObject<HTMLElement | null>).current = node;
+      (internalRef as React.MutableRefObject<HTMLElement | null>).current =
+        node;
       if (typeof ref === "function") ref(node);
-      else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+      else if (ref)
+        (ref as React.MutableRefObject<HTMLElement | null>).current = node;
     };
 
     // ── ARIA Auto-Projection ───────────────────────────────────
@@ -127,9 +124,7 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     //   aria-controls: points to overlay Zone ID
     // Consumer's explicit props override these (spread order).
     const isOverlayOpen = os.useComputed((s) =>
-      overlayId
-        ? s.os.overlays.stack.some((e) => e.id === overlayId)
-        : false,
+      overlayId ? s.os.overlays.stack.some((e) => e.id === overlayId) : false,
     );
 
     // Focus restoration: handled by Pipeline's triggerFocus defineEffect.
@@ -138,11 +133,11 @@ const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     const overlayAriaProps =
       overlayRole && overlayId
         ? {
-          "aria-haspopup":
-            overlayRole === "menu" ? "true" : (overlayRole as string),
-          "aria-expanded": isOverlayOpen,
-          "aria-controls": overlayId,
-        }
+            "aria-haspopup":
+              overlayRole === "menu" ? "true" : (overlayRole as string),
+            "aria-expanded": isOverlayOpen,
+            "aria-controls": overlayId,
+          }
         : {};
 
     // Pipeline handles all behavior:

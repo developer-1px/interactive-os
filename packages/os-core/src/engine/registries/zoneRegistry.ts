@@ -389,7 +389,8 @@ export const ZoneRegistry = {
     if (!entry) return false;
     const mode = entry.config?.expand?.mode ?? "none";
     if (mode === "all") return true;
-    if (mode === "explicit") return entry.getExpandableItems?.().has(itemId) ?? false;
+    if (mode === "explicit")
+      return entry.getExpandableItems?.().has(itemId) ?? false;
     return false;
   },
 };

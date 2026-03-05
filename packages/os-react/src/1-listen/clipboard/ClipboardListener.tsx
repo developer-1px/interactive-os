@@ -6,6 +6,7 @@
  * W3C UI Events Module: Clipboard Events (§3.7)
  */
 
+import { resolveClipboard } from "@os-core/1-listen/clipboard/resolveClipboard";
 import {
   OS_COPY,
   OS_CUT,
@@ -14,7 +15,6 @@ import {
 import { os } from "@os-core/engine/kernel";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { useEffect } from "react";
-import { resolveClipboard } from "@os-core/1-listen/clipboard/resolveClipboard";
 
 // ═══════════════════════════════════════════════════════════════════
 // Sense: DOM → Data extraction

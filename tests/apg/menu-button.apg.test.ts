@@ -23,7 +23,12 @@
 import { createOsPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
-const MENU_ITEMS = ["action-cut", "action-copy", "action-paste", "action-delete"];
+const MENU_ITEMS = [
+  "action-cut",
+  "action-copy",
+  "action-paste",
+  "action-delete",
+];
 
 function createMenuPage(focusedItem = "action-cut") {
   const page = createOsPage();

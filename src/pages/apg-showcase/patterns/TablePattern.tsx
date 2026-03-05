@@ -191,9 +191,7 @@ export function TablePattern() {
                 className="px-4 py-3 text-left font-semibold text-gray-700"
               >
                 {col.sortable ? (
-                  <Trigger
-                    onActivate={SORT_BY_COLUMN({ column: col.key })}
-                  >
+                  <Trigger onActivate={SORT_BY_COLUMN({ column: col.key })}>
                     <button
                       type="button"
                       className="

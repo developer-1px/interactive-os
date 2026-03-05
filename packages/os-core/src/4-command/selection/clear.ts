@@ -13,7 +13,11 @@ export const OS_SELECTION_CLEAR = os.defineCommand(
   (ctx) => (payload: { zoneId: string }) => ({
     state: produce(ctx.state, (draft) => {
       const zone = ensureZone(draft.os, payload.zoneId);
-      zone.selection = [];
+      for (const id of Object.keys(zone.items)) {
+        if (zone.items[id]?.["aria-selected"]) {
+          zone.items[id] = { ...zone.items[id], "aria-selected": false };
+        }
+      }
       zone.selectionAnchor = null;
     }) as typeof ctx.state,
   }),

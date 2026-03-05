@@ -7,7 +7,7 @@
  * @see design-principles.md #30: defineApp = Application Context. top-down only.
  */
 
-// Raw primitives — internal only
-export { Zone } from "./6-project/Zone";
 export { Item } from "./6-project/Item";
 export { Trigger } from "./6-project/Trigger";
+// Raw primitives — internal only
+export { Zone } from "./6-project/Zone";

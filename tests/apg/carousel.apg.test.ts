@@ -38,7 +38,14 @@ import {
 
 // --- Test Setup ---
 
-const SLIDES = ["slide-1", "slide-2", "slide-3", "slide-4", "slide-5", "slide-6"];
+const SLIDES = [
+  "slide-1",
+  "slide-2",
+  "slide-3",
+  "slide-4",
+  "slide-5",
+  "slide-6",
+];
 
 function carouselFactory(focusedTab = "slide-1") {
   const page = createOsPage();

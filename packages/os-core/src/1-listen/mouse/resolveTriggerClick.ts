@@ -22,14 +22,14 @@ import { resolveTriggerRole } from "@os-core/engine/registries/triggerRegistry";
 // ═══════════════════════════════════════════════════════════════════
 
 export interface TriggerClickInput {
-    /** data-trigger-id of the trigger element */
-    triggerId: string;
-    /** Trigger's overlay role (menu, dialog, etc.) */
-    triggerRole: string;
-    /** Overlay ID controlled by this trigger */
-    overlayId: string;
-    /** Whether the overlay is currently open */
-    isTriggerOverlayOpen: boolean;
+  /** data-trigger-id of the trigger element */
+  triggerId: string;
+  /** Trigger's overlay role (menu, dialog, etc.) */
+  triggerRole: string;
+  /** Overlay ID controlled by this trigger */
+  overlayId: string;
+  /** Whether the overlay is currently open */
+  isTriggerOverlayOpen: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -43,24 +43,29 @@ export interface TriggerClickInput {
  * @returns BaseCommand if the trigger layer handles this click, null otherwise
  */
 export function resolveTriggerClick(
-    input: TriggerClickInput,
+  input: TriggerClickInput,
 ): BaseCommand | null {
-    const config = resolveTriggerRole(input.triggerRole);
+  const config = resolveTriggerRole(input.triggerRole);
 
-    // ── onClick not configured → not a clickable trigger ──
-    if (!config.open.onClick) {
-        return null;
-    }
+  // ── onClick not configured → not a clickable trigger ──
+  if (!config.open.onClick) {
+    return null;
+  }
 
-    // ── Toggle: already open → close ──
-    if (input.isTriggerOverlayOpen) {
-        return OS_OVERLAY_CLOSE({ id: input.overlayId });
-    }
+  // ── Toggle: already open → close ──
+  if (input.isTriggerOverlayOpen) {
+    return OS_OVERLAY_CLOSE({ id: input.overlayId });
+  }
 
-    // ── Closed → open ──
-    return OS_OVERLAY_OPEN({
-        id: input.overlayId,
-        type: input.triggerRole as "menu" | "dialog" | "alertdialog" | "popover" | "tooltip",
-        triggerId: input.triggerId,
-    });
+  // ── Closed → open ──
+  return OS_OVERLAY_OPEN({
+    id: input.overlayId,
+    type: input.triggerRole as
+      | "menu"
+      | "dialog"
+      | "alertdialog"
+      | "popover"
+      | "tooltip",
+    triggerId: input.triggerId,
+  });
 }

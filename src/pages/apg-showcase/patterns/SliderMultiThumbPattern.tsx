@@ -156,9 +156,7 @@ function RangeDisplay({
 }) {
   return (
     <div className="flex items-center justify-between mb-4">
-      <div className="text-sm text-gray-600">
-        Price Range
-      </div>
+      <div className="text-sm text-gray-600">Price Range</div>
       <div className="flex items-center gap-2">
         <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-md text-sm font-mono font-semibold">
           ${minValue}
@@ -211,10 +209,9 @@ export function SliderMultiThumbPattern() {
       </h3>
       <p className="text-sm text-gray-500 mb-4">
         W3C APG Multi-Thumb Slider Pattern: two thumbs on a single rail.{" "}
-        <kbd>Tab</kbd> moves between thumbs.{" "}
-        <kbd>Arrow</kbd> keys adjust value by ${STEP}.{" "}
-        <kbd>PgUp/PgDn</kbd> by ${LARGE_STEP}.{" "}
-        <kbd>Home/End</kbd> to min/max.{" "}
+        <kbd>Tab</kbd> moves between thumbs. <kbd>Arrow</kbd> keys adjust value
+        by ${STEP}. <kbd>PgUp/PgDn</kbd> by ${LARGE_STEP}. <kbd>Home/End</kbd>{" "}
+        to min/max.{" "}
         <a
           href="https://www.w3.org/WAI/ARIA/apg/patterns/slider-multithumb/"
           target="_blank"

@@ -16,50 +16,43 @@ import { os } from "../../engine/kernel";
 import { OS_SELECT } from "../selection/select";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
-export const OS_ACTIVATE = os.defineCommand(
-  "OS_ACTIVATE",
-  [],
-  (ctx) => () => {
-    const { activeZoneId } = ctx.state.os.focus;
-    if (!activeZoneId) return;
+export const OS_ACTIVATE = os.defineCommand("OS_ACTIVATE", [], (ctx) => () => {
+  const { activeZoneId } = ctx.state.os.focus;
+  if (!activeZoneId) return;
 
-    const zone = ctx.state.os.focus.zones[activeZoneId];
-    if (!zone?.focusedItemId) return;
+  const zone = ctx.state.os.focus.zones[activeZoneId];
+  if (!zone?.focusedItemId) return;
 
-    // APG: disabled items cannot be activated
-    if (ZoneRegistry.isDisabled(activeZoneId, zone.focusedItemId)) return;
+  // APG: disabled items cannot be activated
+  if (ZoneRegistry.isDisabled(activeZoneId, zone.focusedItemId)) return;
 
-    // Zone callback: pass cursor to onAction (takes priority over selection)
-    const entry = ZoneRegistry.get(activeZoneId);
-    if (entry?.onAction) {
-      const cursor = buildZoneCursor(zone);
-      if (!cursor) return;
-      const result = entry.onAction(cursor);
-      return { dispatch: result };
-    }
+  // Zone callback: pass cursor to onAction (takes priority over selection)
+  const entry = ZoneRegistry.get(activeZoneId);
+  if (entry?.onAction) {
+    const cursor = buildZoneCursor(zone);
+    if (!cursor) return;
+    const result = entry.onAction(cursor);
+    return { dispatch: result };
+  }
 
-    // Item-level callback: Trigger's onActivate registered via FocusItem
-    const itemCb = ZoneRegistry.getItemCallback(
-      activeZoneId,
-      zone.focusedItemId,
-    );
-    if (itemCb?.onActivate) {
-      return { dispatch: itemCb.onActivate };
-    }
+  // Item-level callback: Trigger's onActivate registered via FocusItem
+  const itemCb = ZoneRegistry.getItemCallback(activeZoneId, zone.focusedItemId);
+  if (itemCb?.onActivate) {
+    return { dispatch: itemCb.onActivate };
+  }
 
-    // W3C Tabs/Listbox Pattern: Enter selects the focused item.
-    // Selectable zones (select.mode is not "none") get OS_SELECT on Enter.
-    if (entry?.config?.select?.mode !== "none") {
-      return {
-        dispatch: OS_SELECT({
-          targetId: zone.focusedItemId,
-        }),
-      };
-    }
-
-    // Fallback: programmatic click
+  // W3C Tabs/Listbox Pattern: Enter selects the focused item.
+  // Selectable zones (select.mode is not "none") get OS_SELECT on Enter.
+  if (entry?.config?.select?.mode !== "none") {
     return {
-      click: zone.focusedItemId,
+      dispatch: OS_SELECT({
+        targetId: zone.focusedItemId,
+      }),
     };
-  },
-);
+  }
+
+  // Fallback: programmatic click
+  return {
+    click: zone.focusedItemId,
+  };
+});

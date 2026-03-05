@@ -4,10 +4,18 @@ import { createIntegrationTest } from "@os-devtool/testing/__tests__/createInteg
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { beforeEach, describe, expect, it } from "vitest";
 
+/** Derive selected item IDs from zone items map */
+function getSelection(
+  zone: { items: Record<string, { "aria-selected"?: boolean }> } | undefined,
+): string[] {
+  if (!zone) return [];
+  return Object.entries(zone.items)
+    .filter(([, s]) => s?.["aria-selected"])
+    .map(([id]) => id);
+}
+
 describe("Todo Integration: Paste & Focus (OS Level)", () => {
-  let testContext: ReturnType<
-    typeof createIntegrationTest<AppState>
-  >;
+  let testContext: ReturnType<typeof createIntegrationTest<AppState>>;
 
   beforeEach(() => {
     _resetClipboardStore();
@@ -46,7 +54,7 @@ describe("Todo Integration: Paste & Focus (OS Level)", () => {
     // 6. Verify OS Selection
     // Re-read OS state too!
     const zoneState = testContext.os.focus.zones["list"]!;
-    expect(zoneState.selection).toEqual([newId]);
+    expect(getSelection(zoneState)).toEqual([newId]);
     expect(zoneState.focusedItemId).toBe(newId);
   });
 
@@ -76,10 +84,11 @@ describe("Todo Integration: Paste & Focus (OS Level)", () => {
 
     // Re-read OS state
     const zoneState = testContext.os.focus.zones["list"]!;
+    const selection = getSelection(zoneState);
 
     // Both pasted items should be selected
-    expect(zoneState.selection).toHaveLength(2);
-    expect(zoneState.selection).toEqual(expect.arrayContaining(pastedIds));
+    expect(selection).toHaveLength(2);
+    expect(selection).toEqual(expect.arrayContaining(pastedIds));
 
     // Focus should be on the last one
     expect(zoneState.focusedItemId).toBe(pastedIds[1]);

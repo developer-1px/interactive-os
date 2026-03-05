@@ -46,7 +46,6 @@ import { OS_FIELD_START_EDIT } from "@os-core/4-command/field/startEdit";
 import { OS_VALUE_CHANGE } from "@os-core/4-command/valueChange";
 import { os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
-import { getDefaultOnClickForCommand } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { useEffect } from "react";
 
@@ -168,17 +167,17 @@ export function PointerListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-              meta: {
-                ...result.meta,
-                pipeline: {
-                  sensed: mouseInput,
-                  resolved: {
-                    preventDefault: result.preventDefault,
-                    fallback: result.fallback,
+                meta: {
+                  ...result.meta,
+                  pipeline: {
+                    sensed: mouseInput,
+                    resolved: {
+                      preventDefault: result.preventDefault,
+                      fallback: result.fallback,
+                    },
                   },
                 },
-              },
-            }
+              }
             : undefined;
           os.dispatch(cmd, opts);
         }
@@ -289,9 +288,9 @@ export function PointerListener() {
         os.dispatch(
           drop
             ? OS_DRAG_OVER({
-              overItemId: drop.overItemId,
-              position: drop.position,
-            })
+                overItemId: drop.overItemId,
+                position: drop.position,
+              })
             : OS_DRAG_OVER({ overItemId: null, position: null }),
         );
       }
@@ -311,13 +310,17 @@ export function PointerListener() {
           }
           // ── Trigger-first: resolve trigger click before Item ──
           else if (target.closest("[data-trigger-id]")) {
-            const triggerEl = target.closest("[data-trigger-id]") as HTMLElement;
+            const triggerEl = target.closest(
+              "[data-trigger-id]",
+            ) as HTMLElement;
             const triggerId = triggerEl.getAttribute("data-trigger-id");
             if (triggerId) {
               const triggerMeta = ZoneRegistry.getTriggerOverlay(triggerId);
               if (triggerMeta) {
                 const overlayStack = os.getState().os.overlays.stack;
-                const isOpen = overlayStack.some((o: { id: string }) => o.id === triggerMeta.overlayId);
+                const isOpen = overlayStack.some(
+                  (o: { id: string }) => o.id === triggerMeta.overlayId,
+                );
                 const triggerCmd = resolveTriggerClick({
                   triggerId,
                   triggerRole: triggerMeta.overlayType,
@@ -375,24 +378,20 @@ export function PointerListener() {
               const zone = state.os.focus.zones[activeZoneId];
               const entry = ZoneRegistry.get(activeZoneId);
 
-              // v10: action config 우선, 없으면 legacy activate.onClick
-              const actionConfig = entry?.config?.action;
-              const activateOnClick = actionConfig?.commands?.length
-                ? (actionConfig.onClick ?? getDefaultOnClickForCommand(actionConfig.commands[0]?.type))
-                : (entry?.config?.activate?.onClick ?? false);
+              // inputmap["click"] — direct click→command routing from APG table
+              const clickCommands = entry?.config?.inputmap?.["click"] ?? [];
+              const activateOnClick = clickCommands.length > 0;
               const isCurrentPage =
                 clickedEl?.getAttribute("aria-current") === "page";
-              const reClickOnly = entry?.config?.activate?.reClickOnly ?? false;
 
               const clickResult = resolveClick({
                 activateOnClick,
                 clickedItemId,
-                focusedItemId: reClickOnly
-                  ? preClickFocusedItemId
-                  : (zone?.focusedItemId ?? null),
+                focusedItemId: zone?.focusedItemId ?? null,
                 isCurrentPage,
-                // v10: action config command 우선 — OS_ACTIVATE 대신 직접 command dispatch
-                ...(actionConfig?.commands?.length ? { actionCommand: actionConfig.commands[0] } : {}),
+                ...(clickCommands.length > 0
+                  ? { actionCommands: clickCommands }
+                  : {}),
               });
 
               if (clickResult.commands.length > 0) {
@@ -400,11 +399,11 @@ export function PointerListener() {
                 for (const cmd of clickResult.commands) {
                   const opts = clickResult.meta
                     ? {
-                      meta: {
-                        ...clickResult.meta,
-                        pipeline: { sensed: {}, resolved: {} },
-                      },
-                    }
+                        meta: {
+                          ...clickResult.meta,
+                          pipeline: { sensed: {}, resolved: {} },
+                        },
+                      }
                     : undefined;
                   os.dispatch(cmd, opts);
                 }

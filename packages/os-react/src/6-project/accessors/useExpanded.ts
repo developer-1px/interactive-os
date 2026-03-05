@@ -1,7 +1,7 @@
 /**
  * useExpanded - Hook to access expansion state from kernel
  *
- * Provides a simple API to check and toggle expansion for tree and accordion items.
+ * Derives expanded items from `items[id]["aria-expanded"]` in zone state.
  * Uses OS_EXPAND kernel command for mutations, os state for reads.
  */
 
@@ -11,7 +11,6 @@ import { useZoneContext } from "@os-react/6-project/Zone.tsx";
 import { useCallback } from "react";
 
 // Stable empty array reference to avoid infinite re-render in useSyncExternalStore.
-// `?? []` inside a selector creates a new reference per call → referential inequality → re-render loop.
 const EMPTY: readonly string[] = [];
 
 export function useExpanded() {
@@ -23,10 +22,16 @@ export function useExpanded() {
 
   const { zoneId } = ctx;
 
-  // Subscribe to expandedItems for reactive use
-  const expandedItems = os.useComputed(
-    (s) => s.os.focus.zones[zoneId]?.expandedItems ?? EMPTY,
-  );
+  // Derive expanded items from aria-expanded in items map
+  const expandedItems = os.useComputed((s) => {
+    const items = s.os.focus.zones[zoneId]?.items;
+    if (!items) return EMPTY;
+    const expanded: string[] = [];
+    for (const id in items) {
+      if (items[id]?.["aria-expanded"]) expanded.push(id);
+    }
+    return expanded.length > 0 ? expanded : EMPTY;
+  });
 
   const toggleExpanded = useCallback(
     (id: string) => {

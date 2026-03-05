@@ -11,11 +11,11 @@
  *   OS_OVERLAY_CLOSE(id?)      → Remove overlay + restore focus
  */
 
+import { resolveTriggerRole } from "@os-core/engine/registries/triggerRegistry";
 import { produce } from "immer";
 import { os } from "../../engine/kernel";
 import type { OverlayEntry } from "../../schema/state/OSState";
 import { applyFocusPop, applyFocusPush } from "../focus/focusStackOps";
-import { resolveTriggerRole } from "@os-core/engine/registries/triggerRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // OPEN
@@ -86,9 +86,7 @@ export const OS_OVERLAY_CLOSE = os.defineCommand(
         );
         applyFocusPop(draft);
       }),
-      ...(shouldRestoreFocus
-        ? { triggerFocus: closedEntry!.triggerId }
-        : {}),
+      ...(shouldRestoreFocus ? { triggerFocus: closedEntry!.triggerId } : {}),
     };
   },
 );

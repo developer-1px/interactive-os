@@ -20,8 +20,8 @@ description: Discussion 결론을 프로젝트로 전환한다. scaffold 후 `/g
 0. **Discussion 판정** — 미완료 시 `/discussion` 진입. 완료 후 재진입.
 1. **규모 판정** — Heavy / Light / Meta 결정.
 2. **문서 수집** — `docs/0-inbox/`, `docs/5-backlog/`, `docs/4-archive/` 탐색 → `discussions/`, `notes/`로 이동.
-3. **Scaffold** — `docs/1-project/[name]/` 표준 구조 생성.
-4. **등록** — `docs/STATUS.md`에 프로젝트 추가.
+3. **Scaffold** — `docs/1-project/[domain]/[name]/` 표준 구조 생성. 도메인은 코드 패키지 기준 (os-core, testing, builder, inspector, apg 등).
+4. **등록** — `/status` 실행으로 대시보드 자동 갱신. STATUS.md를 직접 편집하지 않는다.
 5. **BOARD.md** — Discussion Conclusion(Toulmin)을 Context에 매핑하여 작성:
 
    | Toulmin (Discussion) | → | BOARD Section |

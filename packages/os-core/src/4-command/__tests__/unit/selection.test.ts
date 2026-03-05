@@ -14,6 +14,25 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 let snapshot: ReturnType<typeof os.getState>;
 
+/** Build items map with aria-selected for the given IDs */
+function buildSelectedItems(
+  ids: string[],
+): Record<string, { "aria-selected"?: boolean }> {
+  const items: Record<string, { "aria-selected"?: boolean }> = {};
+  for (const id of ids) {
+    items[id] = { "aria-selected": true };
+  }
+  return items;
+}
+
+/** Get selected item IDs from zone */
+function getSelection(zoneId: string): string[] {
+  const zone = os.getState().os.focus.zones[zoneId];
+  return Object.entries(zone?.items ?? {})
+    .filter(([, s]) => s?.["aria-selected"])
+    .map(([id]) => id);
+}
+
 function setupZone(
   zoneId: string,
   selection: string[] = [],
@@ -31,17 +50,13 @@ function setupZone(
           [zoneId]: {
             ...initialZoneState,
             ...prev.os.focus.zones[zoneId],
-            selection,
+            items: buildSelectedItems(selection),
             selectionAnchor: anchor,
           },
         },
       },
     },
   }));
-}
-
-function getZone(zoneId: string) {
-  return os.getState().os.focus.zones[zoneId];
 }
 
 beforeEach(() => {
@@ -61,8 +76,8 @@ describe("OS_SELECTION_CLEAR", () => {
 
     os.dispatch(OS_SELECTION_CLEAR({ zoneId: "z1" }));
 
-    const zone = getZone("z1");
-    expect(zone?.selection).toEqual([]);
+    const zone = os.getState().os.focus.zones["z1"];
+    expect(getSelection("z1")).toEqual([]);
     expect(zone?.selectionAnchor).toBeNull();
   });
 
@@ -71,8 +86,8 @@ describe("OS_SELECTION_CLEAR", () => {
 
     os.dispatch(OS_SELECTION_CLEAR({ zoneId: "z1" }));
 
-    const zone = getZone("z1");
-    expect(zone?.selection).toEqual([]);
+    const zone = os.getState().os.focus.zones["z1"];
+    expect(getSelection("z1")).toEqual([]);
     expect(zone?.selectionAnchor).toBeNull();
   });
 });

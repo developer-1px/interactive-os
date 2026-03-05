@@ -57,11 +57,10 @@ description: 사용자 요청을 분석하여 정형화된 보고서를 docs/0-i
    - **Important**: Do NOT overwrite existing files unless explicitly instructed.
 
 5. **대시보드 갱신**
-   - 보고서가 `docs/0-inbox/`에 저장된 경우:
-     - `docs/STATUS.md`의 Inbox 섹션에 새 항목을 추가한다.
-     - Related Project와 Suggested Action을 판정하여 기록한다.
    - 보고서가 `docs/1-project/[name]/notes/`에 저장된 경우:
-     - 대시보드의 해당 프로젝트 Last Activity를 갱신한다.
+     - `docs/STATUS.md`의 해당 도메인 테이블에서 프로젝트 Last Activity를 갱신한다.
+   - 보고서가 `docs/0-inbox/`에 저장된 경우:
+     - STATUS.md 변경 없음. Inbox은 `docs/0-inbox/` 폴더가 원본이다.
 
 6. **Notify User**
    - Inform the user that the report has been created and provide the path for review.

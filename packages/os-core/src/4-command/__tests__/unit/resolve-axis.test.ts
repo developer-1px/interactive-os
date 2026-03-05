@@ -11,8 +11,10 @@
  *   OS_PRESS  → aria-pressed
  *   OS_EXPAND → aria-expanded
  */
-import { createHeadlessPage } from "@os-devtool/testing/createHeadlessPage";
+
+import { OS_PRESS } from "@os-core/4-command/activate/press";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
+import { createHeadlessPage } from "@os-devtool/testing/createHeadlessPage";
 import { afterEach, describe, expect, it } from "vitest";
 
 const page = createHeadlessPage();
@@ -22,28 +24,38 @@ afterEach(() => page.cleanup());
 // T1+T2: CheckConfig.keys / CheckConfig.onClick in role presets
 // ═══════════════════════════════════════════════════════════════════
 
-describe("action.commands in role presets (replaces check config)", () => {
-    it("checkbox preset has action.commands=[OS_CHECK()]", () => {
-        const config = resolveRole("checkbox");
-        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
-    });
+describe("inputmap in role presets (replaces action.commands)", () => {
+  it("checkbox preset has inputmap.Space=[OS_CHECK()]", () => {
+    const config = resolveRole("checkbox");
+    expect(config.inputmap.Space).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
+    );
+  });
 
-    it("switch preset has action.keys=['Space','Enter'] and onClick", () => {
-        const config = resolveRole("switch");
-        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
-        expect(config.action.keys).toEqual(["Space", "Enter"]);
-        expect(config.action.onClick).toBe(true);
-    });
+  it("switch preset has inputmap Space+Enter+click → OS_CHECK", () => {
+    const config = resolveRole("switch");
+    expect(config.inputmap.Space).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
+    );
+    expect(config.inputmap.Enter).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
+    );
+    expect(config.inputmap.click).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
+    );
+  });
 
-    it("radiogroup preset has action.commands=[OS_CHECK()]", () => {
-        const config = resolveRole("radiogroup");
-        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
-    });
+  it("radiogroup preset has inputmap.Space=[OS_CHECK()]", () => {
+    const config = resolveRole("radiogroup");
+    expect(config.inputmap.Space).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
+    );
+  });
 
-    it("button preset has NO OS_CHECK in action.commands", () => {
-        const config = resolveRole("button");
-        expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(false);
-    });
+  it("unknown role has empty inputmap", () => {
+    const config = resolveRole("button");
+    expect(Object.keys(config.inputmap)).toHaveLength(0);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -54,43 +66,43 @@ describe("action.commands in role presets (replaces check config)", () => {
 //   OS_CHECK → aria-checked
 // ═══════════════════════════════════════════════════════════════════
 
-describe("Toggle Button (aria-pressed) — action.commands=[OS_PRESS()]", () => {
-    it("Space → toggles aria-pressed via OS_PRESS command", async () => {
-        page.goto("tb-1", {
-            role: "toolbar",
-            items: ["bold"],
-            focusedItemId: "bold",
-            config: {
-                action: {
-                    commands: [{ type: "OS_PRESS" }],
-                    // keys auto-derived: OS_PRESS → ["Space"]
-                },
-            },
-        });
-
-        await page.keyboard.press("Space");
-        await page.locator("#bold").toHaveAttribute("aria-pressed", "true");
-
-        await page.keyboard.press("Space");
-        await page.locator("#bold").toHaveAttribute("aria-pressed", "false");
+describe("Toggle Button (aria-pressed) — inputmap with OS_PRESS", () => {
+  it("Space → toggles aria-pressed via OS_PRESS command", async () => {
+    page.goto("tb-1", {
+      role: "toolbar",
+      items: ["bold"],
+      focusedItemId: "bold",
+      config: {
+        inputmap: {
+          Space: [OS_PRESS()],
+          Enter: [OS_PRESS()],
+        },
+      },
     });
 
-    it("Enter → toggles aria-pressed via OS_PRESS command (explicit keys)", async () => {
-        page.goto("tb-2", {
-            role: "toolbar",
-            items: ["italic"],
-            focusedItemId: "italic",
-            config: {
-                action: {
-                    commands: [{ type: "OS_PRESS" }],
-                    keys: ["Space", "Enter"],
-                },
-            },
-        });
+    await page.keyboard.press("Space");
+    await page.locator("#bold").toHaveAttribute("aria-pressed", "true");
 
-        await page.keyboard.press("Enter");
-        await page.locator("#italic").toHaveAttribute("aria-pressed", "true");
+    await page.keyboard.press("Space");
+    await page.locator("#bold").toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("Enter → toggles aria-pressed via OS_PRESS command", async () => {
+    page.goto("tb-2", {
+      role: "toolbar",
+      items: ["italic"],
+      focusedItemId: "italic",
+      config: {
+        inputmap: {
+          Space: [OS_PRESS()],
+          Enter: [OS_PRESS()],
+        },
+      },
     });
+
+    await page.keyboard.press("Enter");
+    await page.locator("#italic").toHaveAttribute("aria-pressed", "true");
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -98,33 +110,33 @@ describe("Toggle Button (aria-pressed) — action.commands=[OS_PRESS()]", () => 
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Regression — existing check patterns", () => {
-    it("checkbox: Space still toggles aria-checked", async () => {
-        page.goto("reg-cb", {
-            role: "checkbox",
-            items: ["cb-a"],
-            focusedItemId: "cb-a",
-        });
-        await page.keyboard.press("Space");
-        await page.locator("#cb-a").toHaveAttribute("aria-checked", "true");
+  it("checkbox: Space still toggles aria-checked", async () => {
+    page.goto("reg-cb", {
+      role: "checkbox",
+      items: ["cb-a"],
+      focusedItemId: "cb-a",
     });
+    await page.keyboard.press("Space");
+    await page.locator("#cb-a").toHaveAttribute("aria-checked", "true");
+  });
 
-    it("switch: Space still toggles aria-checked", async () => {
-        page.goto("reg-sw", {
-            role: "switch",
-            items: ["sw-a"],
-            focusedItemId: "sw-a",
-        });
-        await page.keyboard.press("Space");
-        await page.locator("#sw-a").toHaveAttribute("aria-checked", "true");
+  it("switch: Space still toggles aria-checked", async () => {
+    page.goto("reg-sw", {
+      role: "switch",
+      items: ["sw-a"],
+      focusedItemId: "sw-a",
     });
+    await page.keyboard.press("Space");
+    await page.locator("#sw-a").toHaveAttribute("aria-checked", "true");
+  });
 
-    it("switch: Enter still toggles aria-checked", async () => {
-        page.goto("reg-sw2", {
-            role: "switch",
-            items: ["sw-b"],
-            focusedItemId: "sw-b",
-        });
-        await page.keyboard.press("Enter");
-        await page.locator("#sw-b").toHaveAttribute("aria-checked", "true");
+  it("switch: Enter still toggles aria-checked", async () => {
+    page.goto("reg-sw2", {
+      role: "switch",
+      items: ["sw-b"],
+      focusedItemId: "sw-b",
     });
+    await page.keyboard.press("Enter");
+    await page.locator("#sw-b").toHaveAttribute("aria-checked", "true");
+  });
 });

@@ -14,8 +14,6 @@
  *   kernel.dispatch(INC());
  */
 
-
-
 // ─── Logger Adapter ───
 // Kernel-local logger. Defaults to console. No public API surface.
 const logger = {
@@ -757,8 +755,6 @@ export function createKernel<S>(initialState: S) {
     [],
   );
 
-
-
   // ─── Inspector Port (narrow read-only window into kernel internals) ───
 
   const introspectionPort: KernelIntrospectionPort<S> = {
@@ -837,8 +833,6 @@ export function createKernel<S>(initialState: S) {
     isPreviewing() {
       return previewState !== null;
     },
-
-
 
     // Query (fourth primitive)
     defineQuery,

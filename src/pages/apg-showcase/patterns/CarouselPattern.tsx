@@ -117,9 +117,7 @@ const CarouselUI = carouselZone.bind({
 });
 
 const ToggleRotation = CarouselApp.createTrigger(TOGGLE_ROTATION);
-const StopRotation = CarouselApp.createTrigger(
-  SET_ROTATING({ value: false }),
-);
+const StopRotation = CarouselApp.createTrigger(SET_ROTATING({ value: false }));
 
 // --- Slide Panel Content ---
 
@@ -145,9 +143,7 @@ function RotationControl() {
       <button
         type="button"
         aria-label={
-          rotating
-            ? "Stop automatic slide show"
-            : "Start automatic slide show"
+          rotating ? "Stop automatic slide show" : "Start automatic slide show"
         }
         className="
           p-2 rounded-full transition-colors
@@ -251,7 +247,10 @@ export function CarouselPattern() {
               for={slide.id}
               className="p-4 focus:outline-none"
             >
-              <div aria-roledescription="slide" aria-label={`${index + 1} of ${SLIDES.length}`}>
+              <div
+                aria-roledescription="slide"
+                aria-label={`${index + 1} of ${SLIDES.length}`}
+              >
                 <SlideContent slide={slide} />
               </div>
             </CarouselUI.Item.Content>

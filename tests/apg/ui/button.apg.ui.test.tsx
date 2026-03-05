@@ -16,9 +16,9 @@ import { createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   ActionButtonApp,
+  ButtonPattern,
   PERFORM_ACTION,
   ToggleApp,
-  ButtonPattern,
 } from "@/pages/apg-showcase/patterns/ButtonPattern";
 
 // ═══════════════════════════════════════════════════════════════════

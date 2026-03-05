@@ -9,9 +9,12 @@
  * @spec docs/1-project/test-observability/notes/2026-0303-2110-plan-auto-diagnostics.md
  */
 
-import { createOsPage, type OsPage } from "@os-devtool/testing/page";
 // formatDiagnostics does not exist yet — this import will be undefined → Red
-import { formatDiagnostics } from "@os-devtool/testing/page";
+import {
+  createOsPage,
+  formatDiagnostics,
+  type OsPage,
+} from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 describe("T1: formatDiagnostics — pure formatter", () => {

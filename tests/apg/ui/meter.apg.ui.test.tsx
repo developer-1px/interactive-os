@@ -15,10 +15,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 // ─── Minimal meter app for testing ───
 
-const MeterTestApp = defineApp<Record<string, never>>(
-  "apg-meter-ui-test",
-  {},
-);
+const MeterTestApp = defineApp<Record<string, never>>("apg-meter-ui-test", {});
 const meterZone = MeterTestApp.createZone("meter-ui-zone");
 const MeterUI = meterZone.bind({
   role: "meter",

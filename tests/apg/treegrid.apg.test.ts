@@ -38,14 +38,7 @@ import {
 // Thread 2: msg-2 (parent), msg-2a (reply)
 // Thread 3: msg-3 (standalone, no children)
 
-const ALL_ROWS = [
-  "msg-1",
-  "msg-1a",
-  "msg-1b",
-  "msg-2",
-  "msg-2a",
-  "msg-3",
-];
+const ALL_ROWS = ["msg-1", "msg-1a", "msg-1b", "msg-2", "msg-2a", "msg-3"];
 
 const EXPANDABLE = ["msg-1", "msg-2"];
 

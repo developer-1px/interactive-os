@@ -210,7 +210,7 @@
 |---------|---------|----------|---------|
 | `DOM_ITEMS` | `string[]` — 아이템 ID 목록 | `ZoneEntry.getItems()` 우선 | NAVIGATE, TAB, SELECT, DELETE 등 |
 | `DOM_RECTS` | `Map<string, DOMRect>` — 아이템 위치 | ❌ (DOM 전용 — geometry) | NAVIGATE (spatial) |
-| `ZONE_CONFIG` | `FocusGroupConfig` — zone 설정 | — | NAVIGATE, TAB, SELECT, ACTIVATE 등 |
+| `ZONE_CONFIG` | `FocusGroupConfig` — zone 설정 | — | navigate, tab, select, dismiss, project, expand, value, inputmap |
 | `DOM_ZONE_ORDER` | `ZoneOrderEntry[]` — zone 순서 | ZoneRegistry 순서 우선 | TAB (cross-zone escape) |
 | `DOM_EXPANDABLE_ITEMS` | `Set<string>` — 확장 가능 아이템 | `ZoneEntry.getExpandableItems()` 우선 | NAVIGATE (tree) |
 | `DOM_TREE_LEVELS` | `Map<string, number>` — 트리 레벨 | `ZoneEntry.getTreeLevels()` 우선 | NAVIGATE (tree) |
@@ -269,7 +269,7 @@
 
 | Key | Condition | Behavior |
 |-----|-----------|----------|
-| `Space` | checkbox/switch role OR zone.onCheck | OS_CHECK (W3C APG override) |
+| `Space` | zone.inputmap has Space entry | inputmap[Space] commands (APG keyboard interaction table) |
 
 ---
 
@@ -277,26 +277,30 @@
 
 > 각 role이 어떤 config를 세팅하는지의 진실의 원천.
 
-| Role | orient | loop | typeahead | entry | select.mode | followFocus | tab | activate | dismiss.esc | autoFocus |
+| Role | orient | loop | typeahead | entry | select.mode | followFocus | tab | inputmap | dismiss.esc | autoFocus |
 |------|--------|------|-----------|-------|------------|------------|-----|----------|------------|-----------|
 | `group` | V | — | — | — | none | — | flow | — | — | — |
 | `listbox` | V | ✗ | ✓ | selected | single | ✓ | escape | — | — | — |
-| `menu` | V | ✓ | — | first | none | — | trap | auto | close | ✓ |
-| `menubar` | H | ✓ | — | restore | none | — | escape | auto | — | — |
-| `radiogroup` | V | ✓ | — | selected | single | ✓ | escape | — | — | — |
-| `tablist` | H | ✓ | — | selected | single | ✓ | escape | auto | — | — |
-| `toolbar` | H | ✓ | — | restore | none | — | escape | — | — | — |
+| `menu` | V | ✓ | — | first | none | — | trap | Space/Enter/click→[ACTIVATE,CLOSE] | close | ✓ |
+| `menubar` | H | ✓ | — | restore | none | — | escape | — | — | — |
+| `radiogroup` | V | ✓ | — | selected | single | ✓ | escape | Space/click→CHECK | — | — |
+| `tablist` | H | ✓ | — | selected | single | ✓ | escape | — | — | — |
+| `toolbar` | H | ✓ | — | restore | none | — | escape | Space/Enter→ACTIVATE | — | — |
 | `grid` | 2D | ✗ | — | — | multiple | ✗ | escape | — | — | — |
-| `treegrid` | 2D | ✗ | — | — | multiple | ✗ | escape | manual | — | — |
-| `tree` | V | ✗ | ✓ | selected | single | ✗ | escape | manual | — | — |
+| `treegrid` | 2D | ✗ | — | — | multiple | ✗ | escape | Enter/click→EXPAND(toggle) | — | — |
+| `tree` | V | ✗ | ✓ | selected | single | ✓ | escape | Enter/click→EXPAND(toggle) | — | — |
 | `dialog` | V | — | — | — | — | — | trap | — | close | ✓ |
 | `alertdialog` | V | — | — | — | — | — | trap | — | close | ✓ |
 | `combobox` | V | ✗ | — | — | single | ✓ | escape | — | close | — |
 | `feed` | V | ✗ | — | — | — | — | escape | — | — | — |
-| `accordion` | V | ✗ | — | — | — | — | escape | manual | — | — |
-| `disclosure` | — | — | — | — | — | — | flow | manual | — | — |
+| `accordion` | V | ✗ | — | — | — | — | native | Space/Enter/click→EXPAND(toggle) | — | — |
+| `disclosure` | — | — | — | — | — | — | flow | Space/Enter/click→EXPAND(toggle) | — | — |
+| `switch` | — | — | — | — | none | — | escape | Space/Enter/click→CHECK | — | — |
+| `checkbox` | — | — | — | — | none | — | escape | Space/click→CHECK | — | — |
+| `slider` | V | ✗ | — | — | none | — | escape | (value axis) | — | — |
 
 **Legend**: V=vertical, H=horizontal, 2D=both, ✓=true, ✗=false, —=default
+**inputmap**: `key→COMMAND` format. Multiple keys share same entry separated by `/`. `—` = empty (uses followFocus or no action).
 
 ---
 
@@ -311,7 +315,7 @@
 | 3 | Combobox input (`role="combobox"`) → 무시 (자체 keydown 처리) |
 | 4 | `getCanonicalKey(e)` → 정규화된 키 문자열 |
 | 5 | `isEditing` + `isFieldActive` 판단 (Key Ownership Model) |
-| 6 | Space + checkbox/switch → `OS_CHECK` 오버라이드 |
+| 6 | `zone.inputmap[key]` 있음 → inputmap commands dispatch (APG table 우선) |
 | 7 | `Keybindings.resolve(key, { isEditing, isFieldActive })` → binding |
 | 8 | binding 없음 → `kernel.resolveFallback(e)` (typeahead 등 middleware) |
 | 9 | binding 있음 → `kernel.dispatch(command)` + `e.preventDefault()` |
@@ -337,7 +341,7 @@
 | `navigate` | `Partial<NavigateConfig>` | — | 네비 오버라이드 |
 | `tab` | `Partial<TabConfig>` | — | Tab 오버라이드 |
 | `select` | `Partial<SelectConfig>` | — | 선택 오버라이드 |
-| `activate` | `Partial<ActivateConfig>` | — | 활성화 오버라이드 |
+| `inputmap` | `InputMap` | — | 입력→커맨드 라우팅 오버라이드 (APG keyboard interaction table) |
 | `dismiss` | `Partial<DismissConfig>` | — | 해제 오버라이드 |
 | `onAction` | `BaseCommand` | — | Enter/Space 시 dispatch |
 | `onDismiss` | `BaseCommand` | — | Escape 시 dispatch |

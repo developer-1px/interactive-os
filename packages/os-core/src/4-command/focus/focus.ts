@@ -40,7 +40,17 @@ export const focusHandler = (ctx: any) => (payload: FocusPayload) => {
         // Selection: explicit override > followFocus
         if (!payload.skipSelection) {
           if (payload.selection) {
-            zone.selection = payload.selection;
+            // Clear existing selection
+            for (const id of Object.keys(zone.items)) {
+              if (zone.items[id]?.["aria-selected"]) {
+                zone.items[id] = { ...zone.items[id], "aria-selected": false };
+              }
+            }
+            // Apply new selection
+            for (const id of payload.selection) {
+              if (!zone.items[id]) zone.items[id] = {};
+              zone.items[id] = { ...zone.items[id], "aria-selected": true };
+            }
             zone.selectionAnchor = itemId;
           } else {
             applyFollowFocus(zone, itemId, zoneEntry?.config?.select);

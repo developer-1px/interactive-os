@@ -7,10 +7,10 @@
  * Used by: PointerListener (and headless simulateClick)
  */
 
-import { findFocusableItem, resolveFocusTarget } from "../_shared/domQuery";
-import type { MouseInput } from "../mouse/resolveMouse";
 import { os } from "@os-core/engine/kernel";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { findFocusableItem, resolveFocusTarget } from "../_shared/domQuery";
+import type { MouseInput } from "../mouse/resolveMouse";
 
 // ═══════════════════════════════════════════════════════════════════
 // Pure Interface: MouseDownSense
@@ -176,7 +176,9 @@ export function senseMouseDown(
       triggerOverlayId = triggerMeta.overlayId;
       triggerRole = triggerMeta.overlayType;
       const overlayStack = os.getState().os?.overlays?.stack ?? [];
-      isTriggerOverlayOpen = overlayStack.some((o: { id: string }) => o.id === triggerMeta.overlayId);
+      isTriggerOverlayOpen = overlayStack.some(
+        (o: { id: string }) => o.id === triggerMeta.overlayId,
+      );
     }
   }
 

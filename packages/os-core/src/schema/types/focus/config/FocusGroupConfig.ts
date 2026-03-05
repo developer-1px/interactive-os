@@ -1,11 +1,14 @@
 /**
  * FocusGroupConfig — Unified zone behavior configuration.
  *
- * All 8 sub-configs map 1:1 to a W3C APG concern:
- *   Navigate, Tab, Select, Activate, Dismiss, Project, Expand, Check.
+ * Structure:
+ *   - 6 command parameter axes: Navigate, Tab, Select, Dismiss, Expand, Value
+ *   - 1 projection axis: Project (autoFocus, virtualFocus)
+ *   - 1 routing table: inputmap (Key/click → Command[])
  *
- * v10: action axis 통합. activate/check/expand → action: BaseCommand[] 단일 축.
- * activate/check/expand는 레거시 — action 축 마이그레이션 완료 후 제거.
+ * inputmap = APG Keyboard Interaction table in code form.
+ * Each key maps an input string to the command(s) it triggers.
+ * role preset provides defaults; user overrides as needed.
  */
 
 import type { BaseCommand } from "@kernel";
@@ -76,29 +79,6 @@ export const DEFAULT_SELECT: SelectConfig = {
   toggle: false,
 };
 
-// ── Activate ──
-
-export interface ActivateConfig {
-  mode: "manual" | "automatic";
-  /** When true, clicking an item dispatches OS_ACTIVATE (Navigation Tree pattern). */
-  onClick: boolean;
-  /**
-   * When true, OS_ACTIVATE only fires on re-click (clicking an already-focused item).
-   * First clicks only focus+select without activating.
-   * This enables the Figma/Slides "Select-then-Edit" pattern.
-   * Default: false (activate on every click, tree pattern).
-   */
-  reClickOnly: boolean;
-  /** What effect ACTIVATE produces (command-config-invariant) */
-  effect?: "default" | "toggleExpand" | "invokeAndClose" | "selectTab";
-}
-
-export const DEFAULT_ACTIVATE: ActivateConfig = {
-  mode: "manual",
-  onClick: false,
-  reClickOnly: false,
-};
-
 // ── Dismiss ──
 
 export interface DismissConfig {
@@ -140,66 +120,30 @@ export const DEFAULT_EXPAND: ExpandConfig = {
   mode: "none",
 };
 
-// ── Action (unified: activate / check / expand / open) ──
+// ── InputMap (APG Keyboard Interaction table) ──
 
 /**
- * ActionKey — 키보드 트리거 키 목록
+ * InputMap — input string → command chain routing table.
+ *
+ * Keys are input identifiers:
+ *   Keyboard: "Space", "Enter", "ArrowDown", etc.
+ *   Mouse: "click", "Shift+click", "Meta+click"
+ *
+ * Values are command chains dispatched when that input fires.
+ * Command type determines ARIA effect:
+ *   OS_CHECK()  → aria-checked
+ *   OS_PRESS()  → aria-pressed
+ *   OS_EXPAND() → aria-expanded
+ *   OS_ACTIVATE() → pure action (no ARIA state)
+ *
+ * Examples:
+ *   checkbox:  { Space: [OS_CHECK()], click: [OS_CHECK()] }
+ *   accordion: { Space: [OS_EXPAND(toggle)], Enter: [OS_EXPAND(toggle)], click: [OS_EXPAND(toggle)] }
+ *   menu:      { Space: [OS_ACTIVATE()], Enter: [OS_ACTIVATE()], click: [OS_ACTIVATE()] }
  */
-export type ActionKey = "Space" | "Enter" | "ArrowDown" | "ArrowUp";
+export type InputMap = { [key: string]: BaseCommand[] };
 
-/**
- * ActionConfig — Zone의 Item에 적용되는 선언적 action 설정.
- *
- * command 타입이 ARIA 상태를 결정한다:
- *   OS_CHECK()  → aria-checked  (checkbox, radio, menuitemcheckbox)
- *   OS_PRESS()  → aria-pressed  (toggle button)
- *   OS_EXPAND() → aria-expanded (treeitem, accordion)
- *   OS_SELECT() → aria-selected (option, tab)
- *   OS_OVERLAY_OPEN() → aria-haspopup + aria-expanded (trigger)
- *   OS_ACTIVATE() → aria 상태 없음 (pure action)
- *
- * aria config는 불필요 — command 타입에서 자동 파생.
- *
- * 예시:
- *   checkbox:      { commands: [OS_CHECK()] }
- *   toggle_button: { commands: [OS_PRESS()] }
- *   treeitem:      { commands: [OS_EXPAND({ action: "toggle" })] }
- *   menuitem:      { commands: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()] }
- *   menu_button:   {
- *     commands: [OS_OVERLAY_OPEN({ entry: "first" })],
- *     keymap: { ArrowUp: [OS_OVERLAY_OPEN({ entry: "last" })] }
- *   }
- *
- * @see design-principles.md #31
- */
-export interface ActionConfig {
-  /** 기본 action chain — 지정된 keys 전체에 동일하게 dispatch */
-  commands: BaseCommand[];
-  /**
-   * 이 action을 트리거하는 키 목록.
-   * 미지정 시 첫 command 타입에서 자동 파생:
-   *   OS_CHECK/OS_PRESS → ["Space"]
-   *   OS_EXPAND/OS_ACTIVATE → ["Space", "Enter"]
-   *   OS_OVERLAY_OPEN → ["Space", "Enter", "ArrowDown"]
-   */
-  keys?: ActionKey[];
-  /**
-   * per-key command override.
-   * 지정된 키에 대해서는 commands 대신 이 command chain을 dispatch.
-   * 나머지 keys는 commands를 사용.
-   *
-   * 예: ArrowUp → OS_OVERLAY_OPEN({ entry: "last" })
-   *     (다른 키는 entry: "first" commands 사용)
-   */
-  keymap?: Partial<Record<ActionKey, BaseCommand[]>>;
-  /** Click이 이 action을 트리거하는지. 미지정 시 첫 command 타입에서 자동 파생. */
-  onClick?: boolean;
-}
-
-export const DEFAULT_ACTION: ActionConfig = {
-  commands: [],
-};
-
+export const DEFAULT_INPUTMAP: InputMap = {};
 
 // ── Value (aria-valuenow/min/max — slider, spinbutton, separator) ──
 
@@ -233,25 +177,21 @@ export interface FocusGroupConfig {
   navigate: NavigateConfig;
   tab: TabConfig;
   select: SelectConfig;
-  /** @deprecated → action */
-  activate: ActivateConfig;
   dismiss: DismissConfig;
   project: ProjectConfig;
-  /** @deprecated → action */
   expand: ExpandConfig;
   value: ValueConfig;
-  /** v10: unified action axis. activate/check/expand를 대체. */
-  action: ActionConfig;
+  /** APG Keyboard Interaction table: input → command[] routing */
+  inputmap: InputMap;
 }
 
 export const DEFAULT_CONFIG: FocusGroupConfig = {
   navigate: DEFAULT_NAVIGATE,
   tab: DEFAULT_TAB,
   select: DEFAULT_SELECT,
-  activate: DEFAULT_ACTIVATE,
   dismiss: DEFAULT_DISMISS,
   project: DEFAULT_PROJECT,
   expand: DEFAULT_EXPAND,
   value: DEFAULT_VALUE,
-  action: DEFAULT_ACTION,
+  inputmap: DEFAULT_INPUTMAP,
 };

@@ -121,9 +121,7 @@ function flattenEmails(
   function walk(list: EmailThread[], level: number) {
     for (const item of list) {
       const id =
-        item.type === "thread"
-          ? `thread:${item.path}`
-          : `msg:${item.path}`;
+        item.type === "thread" ? `thread:${item.path}` : `msg:${item.path}`;
       result.push({
         id,
         name: item.name,
@@ -285,9 +283,9 @@ export function TreegridPattern() {
         Email Inbox (Treegrid)
       </h3>
       <p className="text-sm text-gray-500 px-4 py-2 border-b border-gray-100">
-        <kbd>Up</kbd>/<kbd>Down</kbd> navigate rows.{" "}
-        <kbd>Right</kbd>/<kbd>Left</kbd> expand/collapse threads.{" "}
-        <kbd>Space</kbd> to select. <kbd>Shift+Arrow</kbd> for range selection.{" "}
+        <kbd>Up</kbd>/<kbd>Down</kbd> navigate rows. <kbd>Right</kbd>/
+        <kbd>Left</kbd> expand/collapse threads. <kbd>Space</kbd> to select.{" "}
+        <kbd>Shift+Arrow</kbd> for range selection.{" "}
         <a
           href="https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/"
           target="_blank"

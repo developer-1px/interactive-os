@@ -81,9 +81,7 @@ describe("TooltipPattern (DOM Rendering)", () => {
 
     const el = document.getElementById("btn-cut")!;
     el.focus();
-    os.dispatch(
-      OS_FOCUS({ zoneId: "apg-tooltip-toolbar", itemId: "btn-cut" }),
-    );
+    os.dispatch(OS_FOCUS({ zoneId: "apg-tooltip-toolbar", itemId: "btn-cut" }));
     await new Promise((r) => setTimeout(r, 50));
 
     expect(el.getAttribute("data-focused")).toBe("true");
@@ -100,9 +98,7 @@ describe("TooltipPattern (DOM Rendering)", () => {
     const cut = document.getElementById("btn-cut")!;
     const copy = document.getElementById("btn-copy")!;
     cut.focus();
-    os.dispatch(
-      OS_FOCUS({ zoneId: "apg-tooltip-toolbar", itemId: "btn-cut" }),
-    );
+    os.dispatch(OS_FOCUS({ zoneId: "apg-tooltip-toolbar", itemId: "btn-cut" }));
     await new Promise((r) => setTimeout(r, 50));
 
     expect(cut.getAttribute("data-focused")).toBe("true");
@@ -126,9 +122,7 @@ describe("TooltipPattern (DOM Rendering)", () => {
     const cut = document.getElementById("btn-cut")!;
     const copy = document.getElementById("btn-copy")!;
     cut.focus();
-    os.dispatch(
-      OS_FOCUS({ zoneId: "apg-tooltip-toolbar", itemId: "btn-cut" }),
-    );
+    os.dispatch(OS_FOCUS({ zoneId: "apg-tooltip-toolbar", itemId: "btn-cut" }));
     await new Promise((r) => setTimeout(r, 50));
 
     await user.keyboard("{ArrowRight}");
@@ -154,9 +148,7 @@ describe("TooltipPattern (DOM Rendering)", () => {
 
     const cut = document.getElementById("btn-cut")!;
     cut.focus();
-    os.dispatch(
-      OS_FOCUS({ zoneId: "apg-tooltip-toolbar", itemId: "btn-cut" }),
-    );
+    os.dispatch(OS_FOCUS({ zoneId: "apg-tooltip-toolbar", itemId: "btn-cut" }));
     await new Promise((r) => setTimeout(r, 50));
     expect(cut.getAttribute("data-focused")).toBe("true");
 

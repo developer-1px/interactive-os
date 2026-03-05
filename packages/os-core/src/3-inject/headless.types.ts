@@ -31,6 +31,7 @@ export interface ItemAttrs {
   "aria-valuenow"?: number;
   "aria-valuemin"?: number;
   "aria-valuemax"?: number;
+  "aria-controls"?: string;
   "data-focused"?: true | undefined;
   "data-anchor"?: true | undefined;
   "data-selected"?: true | undefined;
@@ -68,13 +69,7 @@ export interface ItemResult {
 
 /** ARIA attributes for a Trigger that controls an overlay */
 export interface TriggerAttrs {
-  "aria-haspopup":
-  | "dialog"
-  | "menu"
-  | "true"
-  | "listbox"
-  | "tree"
-  | "grid";
+  "aria-haspopup": "dialog" | "menu" | "true" | "listbox" | "tree" | "grid";
   "aria-expanded": boolean;
   "aria-controls": string;
 }

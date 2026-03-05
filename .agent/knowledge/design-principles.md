@@ -81,3 +81,7 @@
 30. **defineApp = Application Context. top-down only, bottom-up 금지.** (Added: 2026-03-04) 모든 Zone/Item/Action은 defineApp()으로부터 top-down으로 생성. Zone/Trigger/Item raw primitive는 public export 금지(internal only). 개발자 API = defineApp → createZone → bind 3단계만. bottom-up 직접 조립은 orphan zone(테스트·인스펙터 누락)을 유발한다.
 
 31. **action = command 배열 직접. enum/mode 이중 관리 불필요.** (Added: 2026-03-04) activate.effect enum("toggleExpand","invokeAndClose","selectTab")과 action.mode enum은 command 배열로 대체. command는 순수 데이터 팩토리(`OS_CHECK() = { type: "OS_CHECK" }`)이므로 역방향 의존성 없음. roleRegistry → command → schema가 단방향. 예: `action: [OS_CHECK()]`, `action: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()]`.
+
+32. **useLayoutEffect는 DOM API 호출 전용. kernel dispatch 금지.** (Added: 2026-03-05) useLayoutEffect의 유일한 정당한 용도: `el.focus()`, `el.innerText = x`, `el.getBoundingClientRect()` 등 DOM API 호출. kernel state mutation(`os.dispatch`)은 DOM 타이밍이 불필요하므로 useLayoutEffect에 넣지 않는다. "mount 시 실행"이 필요한 의도는 `config.initial` 선언형으로 표현한다. 근거: OS_ZONE_INIT 타이밍 버그(2026-03-05) — React bottom-up mount 순서에 의존하면 자식 미등록 시 silent failure. headless에서 별도 시뮬레이션이 필요하면 그것은 DOM 책임이 아니었다는 증거다.
+
+33. **OS_INIT_* command는 잘못된 전제의 산물. Zone state는 bind() 시점에 eager 생성한다.** (Added: 2026-03-05) `OS_ZONE_INIT`, `OS_INIT_SELECTION` 등 "mount 시 state가 없으니 미리 만들어야 한다"는 전제에서 파생된 command. bind() 시점에 zone state를 eager로 생성하면 전제 소멸 → command 불필요. `ensureZone`은 초기화가 아니라 방어 코드(빈 그릇). 의미 있는 초기 상태(selection, focus)는 첫 번째 command(OS_FOCUS의 followFocus)가 자연스럽게 만든다.

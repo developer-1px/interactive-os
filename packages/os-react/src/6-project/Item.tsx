@@ -95,8 +95,10 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(function Item(
     return (
       (z?.focusedItemId === stringId ? 1 : 0) |
       (s.os.focus.activeZoneId === zoneId ? 2 : 0) |
-      (z?.selection.includes(stringId) ? 4 : 0) |
-      (z?.expandedItems.includes(stringId) ? 8 : 0) |
+      (z?.items?.[stringId]?.["aria-selected"] ? 4 : 0) |
+      (z?.items?.[stringId]?.["aria-expanded"] ? 8 : 0) |
+      (z?.items?.[stringId]?.["aria-checked"] ? 16 : 0) |
+      (z?.items?.[stringId]?.["aria-pressed"] ? 32 : 0) |
       // Value axis: encode valueNow into upper bits for re-render trigger
       ((z?.valueNow?.[stringId] ?? 0) * 65536)
     );

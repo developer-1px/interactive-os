@@ -162,11 +162,12 @@ export function createBoundComponents<S>(
 
     const isVisible = os.useComputed((s) => {
       const zone = s.os.focus.zones[zoneId];
-      if (visibilitySource === "selected") {
-        return zone?.selection?.includes(itemId) ?? false;
-      }
       if (!zone) return false;
-      return zone.expandedItems?.includes(itemId) ?? false;
+      const itemState = zone.items?.[itemId];
+      if (visibilitySource === "selected") {
+        return itemState?.["aria-selected"] ?? false;
+      }
+      return itemState?.["aria-expanded"] ?? false;
     });
 
     const panelId = id ?? `panel-${itemId}`;

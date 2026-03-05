@@ -11,10 +11,10 @@
  *
  * ZIFT Classification:
  *   - Action Button = Trigger (activate on Enter/Space)
- *   - Toggle Button = action.commands=[OS_PRESS()] → aria-pressed
+ *   - Toggle Button = inputmap: { Space/Enter/click: [OS_PRESS()] } → aria-pressed
  *
  * Config: toolbar role (child role=button),
- *         action.commands=[OS_PRESS()] for toggle.
+ *         inputmap=[OS_PRESS()] for toggle.
  */
 
 import { createOsPage } from "@os-devtool/testing/page";
@@ -30,12 +30,11 @@ function toggleButtonFactory() {
   page.setRole("button-zone", "toolbar");
   // Command type IS the ARIA declaration: OS_PRESS → aria-pressed
   page.setConfig({
-    action: {
-      commands: [{ type: "OS_PRESS" }],
-      keys: ["Space", "Enter"],
-      onClick: true,
+    inputmap: {
+      Space: [{ type: "OS_PRESS" }],
+      Enter: [{ type: "OS_PRESS" }],
+      click: [{ type: "OS_PRESS" }],
     },
-    activate: { mode: "manual", onClick: true },
   });
   page.setActiveZone("button-zone", TOGGLE_BUTTON_ID);
   return page;
@@ -66,7 +65,11 @@ function actionButtonFactory() {
   });
   // action.onClick: true so click dispatches OS_ACTIVATE → onAction
   page.setConfig({
-    action: { commands: [{ type: "OS_ACTIVATE", payload: {} }], keys: ["Space", "Enter"], onClick: true },
+    inputmap: {
+      Space: [{ type: "OS_ACTIVATE", payload: {} }],
+      Enter: [{ type: "OS_ACTIVATE", payload: {} }],
+      click: [{ type: "OS_ACTIVATE", payload: {} }],
+    },
   });
   page.setActiveZone("action-zone", ACTION_BUTTON_ID);
   return page;

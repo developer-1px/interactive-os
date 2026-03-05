@@ -330,8 +330,8 @@ export function defineApp<S>(
         factory: CommandFactory<string, P>,
       ): React.FC<
         P extends void
-        ? { children: ReactNode; payload?: never }
-        : { children: ReactNode; payload: P }
+          ? { children: ReactNode; payload?: never }
+          : { children: ReactNode; payload: P }
       >;
       /* Command Overload: Returns simple component */
       (
@@ -360,9 +360,6 @@ export function defineApp<S>(
 
     // ── Internal (for OS-level createPage) ──
     __appId: appId,
-    __zoneBindings: zoneBindingEntries as Map<
-      string,
-      ZoneBindingEntry
-    >,
+    __zoneBindings: zoneBindingEntries as Map<string, ZoneBindingEntry>,
   };
 }

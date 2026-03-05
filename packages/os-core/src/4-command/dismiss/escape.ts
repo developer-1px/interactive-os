@@ -16,6 +16,27 @@ import { produce } from "immer";
 import { os } from "../../engine/kernel";
 import { ensureZone } from "../../schema/state/utils";
 
+/** Helper: check if zone has any selected items */
+function hasSelection(zone: {
+  items: Record<string, { "aria-selected"?: boolean }>;
+}): boolean {
+  for (const id in zone.items) {
+    if (zone.items[id]?.["aria-selected"]) return true;
+  }
+  return false;
+}
+
+/** Helper: clear all aria-selected */
+function clearSelected(z: {
+  items: Record<string, { "aria-selected"?: boolean }>;
+}) {
+  for (const id of Object.keys(z.items)) {
+    if (z.items[id]?.["aria-selected"]) {
+      z.items[id] = { ...z.items[id], "aria-selected": false };
+    }
+  }
+}
+
 export const OS_ESCAPE = os.defineCommand(
   "OS_ESCAPE",
   (ctx) => (payload: { force?: boolean }) => {
@@ -33,11 +54,11 @@ export const OS_ESCAPE = os.defineCommand(
 
     switch (dismissMode) {
       case "deselect": {
-        if (zone.selection.length === 0 && !payload?.force) return;
+        if (!hasSelection(zone) && !payload?.force) return;
         return {
           state: produce(ctx.state, (draft) => {
             const z = ensureZone(draft.os, activeZoneId);
-            z.selection = [];
+            clearSelected(z);
             z.selectionAnchor = null;
             // Only clear focus on force deselect (zone deactivation).
             // Normal Escape keeps focus on current item.

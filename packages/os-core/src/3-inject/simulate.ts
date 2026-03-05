@@ -19,27 +19,28 @@ import {
   resolveMouse,
 } from "@os-core/1-listen/mouse/resolveMouse";
 import { ROLE_FIELD_TYPE_MAP } from "@os-core/2-resolve/resolveFieldKey";
-import { readActiveZoneId, readFocusedItemId } from "@os-core/3-inject/compute";
+import {
+  readActiveZoneId,
+  readFocusedItemId,
+  readZone,
+} from "@os-core/3-inject/compute";
 import {
   buildZoneEntry,
   createZoneConfig,
   generateZoneId,
   type ZoneCallbacks,
 } from "@os-core/3-inject/zoneContext";
-import { buildZoneCursor } from "@os-core/4-command/utils/buildZoneCursor";
 import {
   OS_COPY,
   OS_CUT,
   OS_PASTE,
 } from "@os-core/4-command/clipboard/clipboard";
-import { OS_ZONE_INIT } from "@os-core/4-command/focus";
+import { buildZoneCursor } from "@os-core/4-command/utils/buildZoneCursor";
 import {
   getChildRole,
-  getDefaultOnClickForCommand,
   type ZoneRole,
 } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import type { ActionConfig } from "@os-core/schema/types";
 import type { HeadlessKernel, InteractionObserver } from "./headless.types";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -122,9 +123,10 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
   const editingFieldId = entry?.fieldId ?? null;
 
   const focusedId = zone?.focusedItemId ?? null;
-  const isFocusedExpandable = focusedId && activeZoneId
-    ? ZoneRegistry.isExpandable(activeZoneId, focusedId)
-    : false;
+  const isFocusedExpandable =
+    focusedId && activeZoneId
+      ? ZoneRegistry.isExpandable(activeZoneId, focusedId)
+      : false;
 
   // Role → FieldType mapping for always-active Fields
   const activeFieldType = childRole
@@ -148,10 +150,8 @@ export function simulateKeyPress(kernel: HeadlessKernel, key: string): void {
       ? (zone?.items?.[focusedId!]?.["aria-expanded"] ?? false)
       : null,
     activeZoneFocusedItemId: focusedId,
-    /** action config — single route for all command-driven keys */
-    activeZoneAction: (entry?.config?.action?.commands?.length
-      ? entry.config.action
-      : null) as ActionConfig | null,
+    /** inputmap — APG keyboard interaction table: input → command[] */
+    activeZoneInputmap: entry?.config?.inputmap ?? null,
     // Trigger — headless has no focused trigger
     focusedTriggerId: null,
     focusedTriggerRole: null,
@@ -269,22 +269,16 @@ export function simulateClick(
   const mouseResult = resolveMouse(mouseInput);
   dispatchResult(kernel, mouseResult);
 
-  // v10: action.onClick 우선, 없으면 legacy activate.onClick
-  const actionConfig = entry?.config?.action;
-  const activateOnClick = actionConfig?.commands?.length
-    ? (actionConfig.onClick ?? getDefaultOnClickForCommand(actionConfig.commands[0]?.type))
-    : (entry?.config?.activate?.onClick ?? false);
-  const reClickOnly = entry?.config?.activate?.reClickOnly ?? false;
+  // inputmap["click"] — direct click→command routing from APG table
+  const clickCommands = entry?.config?.inputmap?.["click"] ?? [];
+  const activateOnClick = clickCommands.length > 0;
 
   const clickInput: ClickInput = {
     activateOnClick,
     clickedItemId: itemId,
-    focusedItemId: reClickOnly
-      ? preMousedownFocusedItemId
-      : readFocusedItemId(kernel, zoneId),
+    focusedItemId: readFocusedItemId(kernel, zoneId),
     wasEditing: !!preMousedownEditingItemId,
-    // v10: action config command 우선 — OS_ACTIVATE 대신 직접 command dispatch
-    ...(actionConfig?.commands?.length ? { actionCommand: actionConfig.commands[0] } : {}),
+    ...(clickCommands.length > 0 ? { actionCommands: clickCommands } : {}),
   };
 
   const clickResult = resolveClick(clickInput);
@@ -318,15 +312,6 @@ function dispatchResult(
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// readZone (local helper for simulateClick)
-// ═══════════════════════════════════════════════════════════════════
-
-function readZone(kernel: HeadlessKernel, zoneId?: string) {
-  const id = zoneId ?? readActiveZoneId(kernel);
-  return id ? kernel.getState().os.focus.zones[id] : undefined;
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // Headless Zone Lifecycle
 // ═══════════════════════════════════════════════════════════════════
 
@@ -347,13 +332,14 @@ export interface HeadlessZoneOptions {
  * Register a Zone in headless mode — no React, no DOM.
  *
  * Creates a fully functional Zone entry in ZoneRegistry and
- * initializes kernel state via OS_ZONE_INIT. The zone is
+ * Registers in ZoneRegistry only. Kernel state is lazily created
+ * by the first command (e.g., OS_FOCUS) via ensureZone. The zone is
  * immediately available for simulateKeyPress/simulateClick.
  *
  * @returns The zone ID (auto-generated or provided)
  */
 export function registerHeadlessZone(
-  kernel: HeadlessKernel,
+  _kernel: HeadlessKernel,
   options: HeadlessZoneOptions = {},
 ): string {
   const zoneId = options.id ?? generateZoneId();
@@ -366,7 +352,6 @@ export function registerHeadlessZone(
   });
 
   ZoneRegistry.register(zoneId, entry);
-  kernel.dispatch(OS_ZONE_INIT(zoneId));
 
   return zoneId;
 }

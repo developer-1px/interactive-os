@@ -195,13 +195,11 @@ export function SpinbuttonPattern() {
 
   return (
     <div className="max-w-md">
-      <h3 className="text-lg font-semibold mb-3">
-        Spinbutton — Day Planner
-      </h3>
+      <h3 className="text-lg font-semibold mb-3">Spinbutton — Day Planner</h3>
       <p className="text-sm text-gray-500 mb-4">
         W3C APG Spinbutton Pattern: configure meeting time and duration.{" "}
-        <kbd>Up/Down</kbd> adjust by step. <kbd>PgUp/PgDn</kbd> adjust by
-        large step. <kbd>Home/End</kbd> jump to min/max.{" "}
+        <kbd>Up/Down</kbd> adjust by step. <kbd>PgUp/PgDn</kbd> adjust by large
+        step. <kbd>Home/End</kbd> jump to min/max.{" "}
         <a
           href="https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/"
           target="_blank"

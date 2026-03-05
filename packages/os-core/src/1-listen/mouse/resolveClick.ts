@@ -8,8 +8,8 @@
  * No-op when: new item click (mousedown already handled).
  */
 
-import { OS_ACTIVATE } from "@os-core/4-command";
 import type { BaseCommand } from "@kernel/core/tokens";
+import { OS_ACTIVATE } from "@os-core/4-command";
 import type { ResolveResult } from "../_shared/domQuery";
 
 export interface ClickInput {
@@ -18,8 +18,8 @@ export interface ClickInput {
   focusedItemId: string | null;
   isCurrentPage?: boolean;
   wasEditing?: boolean;
-  /** v10: action config command to dispatch instead of OS_ACTIVATE */
-  actionCommand?: BaseCommand;
+  /** inputmap click commands to dispatch instead of OS_ACTIVATE */
+  actionCommands?: BaseCommand[];
 }
 
 const NO_OP: ResolveResult = {
@@ -42,7 +42,7 @@ export function resolveClick(input: ClickInput): ResolveResult {
   if (!shouldActivate) return NO_OP;
 
   return {
-    commands: [(input.actionCommand ?? OS_ACTIVATE()) as any],
+    commands: input.actionCommands ?? [OS_ACTIVATE()],
     meta: {
       input: { type: "MOUSE", key: "click", elementId: input.clickedItemId },
     },

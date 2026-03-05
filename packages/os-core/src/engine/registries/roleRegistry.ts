@@ -8,10 +8,13 @@
  * Reference: https://www.w3.org/WAI/ARIA/apg/patterns/
  */
 
+import {
+  OS_ACTIVATE,
+  OS_CHECK,
+  OS_EXPAND,
+  OS_OVERLAY_CLOSE,
+} from "@os-core/4-command";
 import type {
-  ActionConfig,
-  ActionKey,
-  ActivateConfig,
   DismissConfig,
   ExpandConfig,
   FocusGroupConfig,
@@ -22,8 +25,6 @@ import type {
   ValueConfig,
 } from "../../schema/types";
 import {
-  DEFAULT_ACTION,
-  DEFAULT_ACTIVATE,
   DEFAULT_DISMISS,
   DEFAULT_EXPAND,
   DEFAULT_NAVIGATE,
@@ -32,12 +33,8 @@ import {
   DEFAULT_TAB,
   DEFAULT_VALUE,
 } from "../../schema/types";
-import {
-  OS_ACTIVATE,
-  OS_CHECK,
-  OS_EXPAND,
-  OS_OVERLAY_CLOSE,
-} from "@os-core/4-command";
+import type { InputMap } from "../../schema/types/focus/config/FocusGroupConfig";
+import { DEFAULT_INPUTMAP } from "../../schema/types/focus/config/FocusGroupConfig";
 
 // ═══════════════════════════════════════════════════════════════════
 // Zone Role Type
@@ -119,12 +116,12 @@ const contentRoleMap: Partial<Record<ZoneRole, string>> = {
 export type ContentVisibilitySource = "expanded" | "selected";
 
 const contentVisibilityMap: Partial<Record<ZoneRole, ContentVisibilitySource>> =
-{
-  tablist: "selected",
-  accordion: "expanded",
-  disclosure: "expanded",
-  tree: "expanded",
-};
+  {
+    tablist: "selected",
+    accordion: "expanded",
+    disclosure: "expanded",
+    tree: "expanded",
+  };
 
 /** Get the ARIA role for Item.Content given a Zone role */
 export function getContentRole(
@@ -193,7 +190,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
 
   // ─── Listbox (ARIA APG: Listbox Pattern) ───
   // vertical, no wrap, selection follows focus (single-select),
-  // entry to selected item, typeahead (IME-safe via keyCode 229 guard)
+  // entry to selected item, typeahead. No inputmap (uses followFocus).
   listbox: {
     navigate: {
       orientation: "vertical",
@@ -217,8 +214,11 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       onCrossAxis: ["expandSubmenu"],
     },
     select: { mode: "none" },
-    activate: { mode: "automatic", onClick: true },
-    action: { commands: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()] },
+    inputmap: {
+      Space: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()],
+      Enter: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()],
+      click: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()],
+    },
     dismiss: { escape: "close", outsideClick: "close" },
     tab: { behavior: "trap" },
     project: { autoFocus: true },
@@ -226,7 +226,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
 
   // ─── Menubar (ARIA APG: Menu and Menubar Pattern - horizontal bar) ───
   // Spec: horizontal, loop, no selection, submenus via arrows,
-  //       Tab escapes the menubar
+  //       Tab escapes the menubar. No inputmap (navigation only).
   menubar: {
     navigate: {
       orientation: "horizontal",
@@ -235,7 +235,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       onDown: ["expandSubmenu"],
     },
     select: { mode: "none" },
-    activate: { mode: "automatic" },
     tab: { behavior: "escape" },
   },
 
@@ -246,28 +245,26 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   radiogroup: {
     navigate: { orientation: "linear-both", loop: true, entry: "selected" },
     select: { mode: "single", followFocus: true, disallowEmpty: true },
-    action: { commands: [OS_CHECK()], keys: ["Space"] },
+    inputmap: { Space: [OS_CHECK()], click: [OS_CHECK()] },
     tab: { behavior: "escape" },
   },
 
   // ─── Tablist (ARIA APG: Tabs Pattern) ───
   // Spec: horizontal, loop, selection follows focus (auto-activation),
-  //       cannot be empty, entry to selected/active tab
+  //       cannot be empty. No inputmap (uses followFocus).
   tablist: {
     navigate: { orientation: "horizontal", loop: true, entry: "selected" },
     select: { mode: "single", followFocus: true, disallowEmpty: true },
-    activate: { mode: "automatic" },
     tab: { behavior: "escape" },
   },
 
   // ─── Toolbar (ARIA APG: Toolbar Pattern) ───
   // Spec: horizontal, optional loop (we enable), no selection,
-  //       Tab re-enters at last focused control.
-  //       button items: Space/Enter → OS_ACTIVATE (same as Enter global keybinding).
+  //       button items: Space/Enter → OS_ACTIVATE.
   toolbar: {
     navigate: { orientation: "horizontal", loop: true, entry: "restore" },
     select: { mode: "none" },
-    action: { commands: [OS_ACTIVATE()], keys: ["Space", "Enter"] },
+    inputmap: { Space: [OS_ACTIVATE()], Enter: [OS_ACTIVATE()] },
     tab: { behavior: "escape" },
   },
 
@@ -291,15 +288,17 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       onLeft: ["collapse", "goParent"],
     },
     select: { mode: "multiple", range: true, toggle: true, followFocus: false },
-    activate: { mode: "manual" },
-    action: { commands: [OS_EXPAND({ action: "toggle" })], keys: ["Enter"], onClick: true },
+    inputmap: {
+      Enter: [OS_EXPAND({ action: "toggle" })],
+      click: [OS_EXPAND({ action: "toggle" })],
+    },
     expand: { mode: "explicit" },
     tab: { behavior: "escape" },
   },
 
   // ─── Tree (ARIA APG: Tree View Pattern) ───
-  // vertical, no wrap, selection explicit (Enter/Space),
-  // entry to selected node, typeahead (IME-safe via keyCode 229 guard)
+  // vertical, no wrap, selection follows focus,
+  // entry to selected node, typeahead
   tree: {
     navigate: {
       orientation: "vertical",
@@ -310,19 +309,20 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
       onLeft: ["collapse", "goParent"],
     },
     select: { mode: "single", followFocus: true },
-    activate: { mode: "manual", onClick: true },
-    action: { commands: [OS_EXPAND({ action: "toggle" })], keys: ["Enter"], onClick: true },
+    inputmap: {
+      Enter: [OS_EXPAND({ action: "toggle" })],
+      click: [OS_EXPAND({ action: "toggle" })],
+    },
     expand: { mode: "explicit" },
     tab: { behavior: "escape" },
   },
 
   // ─── Dialog (ARIA APG: Dialog Pattern) ───
   // Spec: focus trap, autoFocus first focusable, Escape closes,
-  //       Tab cycles within dialog
+  //       Tab cycles within dialog. No inputmap.
   dialog: {
     navigate: { orientation: "vertical", loop: false },
     tab: { behavior: "trap", restoreFocus: true },
-    activate: { onClick: true },
     dismiss: { escape: "close", outsideClick: "close", restoreFocus: true },
     project: { autoFocus: true },
   },
@@ -333,7 +333,6 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   alertdialog: {
     navigate: { orientation: "vertical", loop: false },
     tab: { behavior: "trap", restoreFocus: true },
-    activate: { onClick: true },
     dismiss: { escape: "close", outsideClick: "none", restoreFocus: true },
     project: { autoFocus: true },
   },
@@ -350,30 +349,33 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   },
 
   // ─── Feed (ARIA APG: Feed Pattern) ───
-  // Spec: vertical infinite scroll, no wrap, articles are items,
-  //       PageDown/PageUp for pagination
+  // Spec: vertical infinite scroll, no wrap, articles are items
   feed: {
     navigate: { orientation: "vertical", loop: false },
     tab: { behavior: "escape" },
   },
 
   // ─── Accordion (ARIA: disclosure group) ───
-  // Spec: vertical, no wrap, activation toggles expand/collapse,
-  //       single or multiple panels open
+  // Spec: vertical, no wrap, Space/Enter/click toggles expand/collapse
   accordion: {
     navigate: { orientation: "vertical", loop: false },
-    activate: { mode: "manual", onClick: true },
-    action: { commands: [OS_EXPAND({ action: "toggle" })] },
+    inputmap: {
+      Space: [OS_EXPAND({ action: "toggle" })],
+      Enter: [OS_EXPAND({ action: "toggle" })],
+      click: [OS_EXPAND({ action: "toggle" })],
+    },
     expand: { mode: "all" },
     tab: { behavior: "native" },
   },
 
   // ─── Disclosure (ARIA: single expand/collapse) ───
-  // Spec: activation toggles visibility of associated content,
-  //       no navigation within — just a toggle trigger
+  // Spec: Space/Enter/click toggles visibility of associated content
   disclosure: {
-    activate: { mode: "manual", onClick: true },
-    action: { commands: [OS_EXPAND({ action: "toggle" })] },
+    inputmap: {
+      Space: [OS_EXPAND({ action: "toggle" })],
+      Enter: [OS_EXPAND({ action: "toggle" })],
+      click: [OS_EXPAND({ action: "toggle" })],
+    },
     expand: { mode: "all" },
     tab: { behavior: "flow" },
   },
@@ -408,23 +410,22 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // ─── Switch (ARIA APG: Switch Pattern) ───
   // Spec: on/off toggle, Enter/Space toggles aria-checked,
   //       single focusable element, click also toggles.
-  //       select.mode="none" so mousedown doesn't interfere with toggle;
-  //       onCheck (Space/Enter) and onAction (click) handle toggling.
   switch: {
     select: { mode: "none" },
-    action: { commands: [OS_CHECK()], keys: ["Space", "Enter"], onClick: true },
-    activate: { mode: "manual", onClick: true },
+    inputmap: {
+      Space: [OS_CHECK()],
+      Enter: [OS_CHECK()],
+      click: [OS_CHECK()],
+    },
     tab: { behavior: "escape" },
   },
 
   // ─── Checkbox (ARIA APG: Checkbox Pattern) ───
-  // Spec: on/off toggle, Space toggles aria-checked, Enter does not.
-  //       single focusable element, click also toggles.
-  //       select.mode="none" so mousedown doesn't interfere with toggle.
+  // Spec: on/off toggle, Space toggles aria-checked, Enter does NOT.
+  //       click also toggles.
   checkbox: {
     select: { mode: "none" },
-    action: { commands: [OS_CHECK()] },
-    activate: { mode: "manual", onClick: true },
+    inputmap: { Space: [OS_CHECK()], click: [OS_CHECK()] },
     tab: { behavior: "escape" },
   },
 };
@@ -439,12 +440,11 @@ export function resolveRole(
     navigate?: Partial<NavigateConfig>;
     tab?: Partial<TabConfig>;
     select?: Partial<SelectConfig>;
-    activate?: Partial<ActivateConfig>;
     dismiss?: Partial<DismissConfig>;
     project?: Partial<ProjectConfig>;
     expand?: Partial<ExpandConfig>;
     value?: Partial<ValueConfig>;
-    action?: Partial<ActionConfig>;
+    inputmap?: InputMap;
   } = {},
 ): FocusGroupConfig {
   const basePreset = role ? rolePresets[role as ZoneRole] || {} : {};
@@ -460,11 +460,6 @@ export function resolveRole(
       ...DEFAULT_SELECT,
       ...basePreset.select,
       ...(overrides.select ?? {}),
-    },
-    activate: {
-      ...DEFAULT_ACTIVATE,
-      ...basePreset.activate,
-      ...(overrides.activate ?? {}),
     },
     dismiss: {
       ...DEFAULT_DISMISS,
@@ -486,64 +481,10 @@ export function resolveRole(
       ...basePreset.value,
       ...(overrides.value ?? {}),
     },
-    action: (() => {
-      const merged = {
-        ...DEFAULT_ACTION,
-        ...basePreset.action,
-        ...(overrides.action ?? {}),
-      } as ActionConfig;
-      // Auto-derive keys from first command type if not explicitly set
-      if (!merged.keys && merged.commands.length > 0) {
-        merged.keys = getDefaultKeysForCommand(merged.commands[0]?.type);
-      }
-      // Auto-derive onClick from first command type if not explicitly set
-      if (merged.onClick === undefined && merged.commands.length > 0) {
-        merged.onClick = getDefaultOnClickForCommand(merged.commands[0]?.type);
-      }
-      return merged;
-    })(),
+    inputmap: {
+      ...DEFAULT_INPUTMAP,
+      ...(basePreset.inputmap as InputMap | undefined),
+      ...(overrides.inputmap ?? {}),
+    },
   };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Action Config Helpers (exported for use across packages)
-// ═══════════════════════════════════════════════════════════════════
-
-/**
- * Derive default keys from first command type.
- * Spec: OS_CHECK/OS_PRESS → ["Space"], OS_EXPAND/OS_ACTIVATE → ["Space","Enter"]
- */
-function getDefaultKeysForCommand(
-  cmdType: string | undefined,
-): ActionKey[] {
-  switch (cmdType) {
-    case "OS_CHECK":
-    case "OS_PRESS":
-      return ["Space"];
-    case "OS_EXPAND":
-    case "OS_ACTIVATE":
-      return ["Space", "Enter"];
-    case "OS_OVERLAY_OPEN":
-      return ["Space", "Enter", "ArrowDown"];
-    default:
-      return [];
-  }
-}
-
-/**
- * Derive default onClick behavior from action command type.
- * OS_CHECK/OS_PRESS/OS_EXPAND are toggle commands → click should trigger them.
- * v10: used by PointerListener and simulate to read action config.
- */
-export function getDefaultOnClickForCommand(
-  cmdType: string | undefined,
-): boolean {
-  switch (cmdType) {
-    case "OS_CHECK":
-    case "OS_PRESS":
-    case "OS_EXPAND":
-      return true;
-    default:
-      return false;
-  }
 }

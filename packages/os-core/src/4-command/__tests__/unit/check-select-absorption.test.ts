@@ -9,51 +9,56 @@
  * OS_CHECK directly toggles z.selection, which projects as aria-checked.
  * select.mode="none" prevents mousedown from interfering with the toggle.
  */
-import { createHeadlessPage } from "@os-devtool/testing/createHeadlessPage";
+
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
-import { describe, it, expect, afterEach } from "vitest";
+import { createHeadlessPage } from "@os-devtool/testing/createHeadlessPage";
+import { afterEach, describe, expect, it } from "vitest";
 
 describe("T4: CHECK (input-based)", () => {
-    const page = createHeadlessPage();
-    afterEach(() => page.cleanup());
+  const page = createHeadlessPage();
+  afterEach(() => page.cleanup());
 
-    describe("checkbox/switch preset config (action.commands)", () => {
-        it("checkbox: select.mode = 'none', action has OS_CHECK", () => {
-            const config = resolveRole("checkbox");
-            expect(config.select.mode).toBe("none");
-            expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
-        });
-
-        it("switch: select.mode = 'none', action has OS_CHECK", () => {
-            const config = resolveRole("switch");
-            expect(config.select.mode).toBe("none");
-            expect(config.action.commands.some((c: any) => c.type === "OS_CHECK")).toBe(true);
-        });
+  describe("checkbox/switch preset config (inputmap)", () => {
+    it("checkbox: select.mode = 'none', inputmap has OS_CHECK", () => {
+      const config = resolveRole("checkbox");
+      expect(config.select.mode).toBe("none");
+      expect(config.inputmap.Space).toEqual(
+        expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
+      );
     });
 
-    describe("checkbox: Space toggles checked state", () => {
-        it("Space on unchecked → checks", async () => {
-            page.goto("cb-zone", {
-                role: "checkbox",
-                items: ["cb-1"],
-                focusedItemId: "cb-1",
-            });
-
-            await page.keyboard.press("Space");
-            await page.locator("#cb-1").toHaveAttribute("aria-checked", "true");
-        });
-
-        it("Space on checked → unchecks", async () => {
-            page.goto("cb-zone", {
-                role: "checkbox",
-                items: ["cb-1"],
-                focusedItemId: "cb-1",
-                initial: { selection: ["cb-1"] },
-            });
-
-            await page.locator("#cb-1").toHaveAttribute("aria-checked", "true");
-            await page.keyboard.press("Space");
-            await page.locator("#cb-1").toHaveAttribute("aria-checked", "false");
-        });
+    it("switch: select.mode = 'none', inputmap has OS_CHECK", () => {
+      const config = resolveRole("switch");
+      expect(config.select.mode).toBe("none");
+      expect(config.inputmap.Space).toEqual(
+        expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
+      );
     });
+  });
+
+  describe("checkbox: Space toggles checked state", () => {
+    it("Space on unchecked → checks", async () => {
+      page.goto("cb-zone", {
+        role: "checkbox",
+        items: ["cb-1"],
+        focusedItemId: "cb-1",
+      });
+
+      await page.keyboard.press("Space");
+      await page.locator("#cb-1").toHaveAttribute("aria-checked", "true");
+    });
+
+    it("Space on checked → unchecks", async () => {
+      page.goto("cb-zone", {
+        role: "checkbox",
+        items: ["cb-1"],
+        focusedItemId: "cb-1",
+        initial: { selection: ["cb-1"] },
+      });
+
+      await page.locator("#cb-1").toHaveAttribute("aria-checked", "true");
+      await page.keyboard.press("Space");
+      await page.locator("#cb-1").toHaveAttribute("aria-checked", "false");
+    });
+  });
 });

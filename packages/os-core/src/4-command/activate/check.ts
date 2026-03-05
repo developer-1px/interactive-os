@@ -26,7 +26,7 @@ export const OS_CHECK = os.defineCommand(
     const zone = ctx.state.os.focus.zones[activeZoneId];
     if (!zone) return;
 
-    const targetId = (payload?.targetId) ?? zone.focusedItemId;
+    const targetId = payload?.targetId ?? zone.focusedItemId;
     if (!targetId) return;
 
     // Zone callback: pass cursor to onCheck

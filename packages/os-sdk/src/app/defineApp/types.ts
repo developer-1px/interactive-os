@@ -53,9 +53,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-    state: S;
-    dispatch?: BaseCommand | BaseCommand[] | undefined;
-  }
+      state: S;
+      dispatch?: BaseCommand | BaseCommand[] | undefined;
+    }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -159,13 +159,13 @@ export interface BoundComponents<S> {
     id: string | number;
     className?: string;
     children?:
-    | ReactNode
-    | ((state: {
-      isFocused: boolean;
-      isSelected: boolean;
-      isExpanded: boolean;
-      isAnchor?: boolean;
-    }) => ReactNode);
+      | ReactNode
+      | ((state: {
+          isFocused: boolean;
+          isSelected: boolean;
+          isExpanded: boolean;
+          isAnchor?: boolean;
+        }) => ReactNode);
     asChild?: boolean;
   }> & {
     /** Passive projection of Item's visibility state — auto-manages role + aria-labelledby + hidden/mount */
@@ -255,7 +255,10 @@ export interface AppPage<S> {
   ): void;
 
   /** Get computed ARIA attributes for an item (headless DOM projection). */
-  attrs(itemId: string, zoneId?: string): import("@os-core/3-inject/headless.types").ItemAttrs;
+  attrs(
+    itemId: string,
+    zoneId?: string,
+  ): import("@os-core/3-inject/headless.types").ItemAttrs;
 
   /** Currently focused item ID. */
   focusedItemId(zoneId?: string): string | null;
@@ -313,8 +316,8 @@ export interface AppHandle<S> {
     factory: CommandFactory<string, P>,
   ): React.FC<
     P extends void
-    ? { children: ReactNode; payload?: never }
-    : { children: ReactNode; payload: P }
+      ? { children: ReactNode; payload?: never }
+      : { children: ReactNode; payload: P }
   >;
   createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;

@@ -29,8 +29,8 @@
  * Used by Field layer to absorb keys (e.g., Enter in block field = newline).
  */
 export const NOOP: BaseCommand = {
-    type: "NOOP",
-    payload: {},
+  type: "NOOP",
+  payload: {},
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -60,26 +60,26 @@ export type Keymap = Record<string, KeymapValue>;
  * @returns BaseCommand if claimed (including NOOP), null if no layer claimed
  */
 export function resolveChain(
-    input: string,
-    layers: Keymap[],
+  input: string,
+  layers: Keymap[],
 ): BaseCommand | null {
-    for (const layer of layers) {
-        const value = layer[input];
-        if (value === undefined) continue;
+  for (const layer of layers) {
+    const value = layer[input];
+    if (value === undefined) continue;
 
-        // ── Single command (including NOOP) → claim ──
-        if (!Array.isArray(value)) {
-            return value;
-        }
-
-        // ── Command chain → first non-null wins ──
-        for (const cmd of value) {
-            if (cmd !== null) return cmd;
-        }
-
-        // All entries in chain were null → this layer didn't claim
-        // Fall through to next layer
+    // ── Single command (including NOOP) → claim ──
+    if (!Array.isArray(value)) {
+      return value;
     }
 
-    return null;
+    // ── Command chain → first non-null wins ──
+    for (const cmd of value) {
+      if (cmd !== null) return cmd;
+    }
+
+    // All entries in chain were null → this layer didn't claim
+    // Fall through to next layer
+  }
+
+  return null;
 }

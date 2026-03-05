@@ -48,8 +48,8 @@ export function BreadcrumbPattern() {
     <div className="max-w-lg">
       <h3 className="text-lg font-semibold mb-3">Breadcrumb</h3>
       <p className="text-sm text-gray-500 mb-4">
-        W3C APG Example: A breadcrumb trail showing the page hierarchy. The
-        last link indicates the current page via{" "}
+        W3C APG Example: A breadcrumb trail showing the page hierarchy. The last
+        link indicates the current page via{" "}
         <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">
           aria-current=&quot;page&quot;
         </code>

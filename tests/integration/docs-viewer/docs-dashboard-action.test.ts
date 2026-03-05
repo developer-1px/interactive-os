@@ -27,7 +27,6 @@ describe("T5: DocsDashboard — selectDoc via OS command", () => {
         return [];
       },
     });
-
   });
 
   afterEach(() => {

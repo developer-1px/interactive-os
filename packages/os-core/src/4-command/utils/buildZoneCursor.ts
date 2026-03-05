@@ -21,7 +21,9 @@ export function buildZoneCursor(
   const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
 
   // Expand axis — config-driven
-  const isExpandable = zoneId ? ZoneRegistry.isExpandable(zoneId, focusId) : false;
+  const isExpandable = zoneId
+    ? ZoneRegistry.isExpandable(zoneId, focusId)
+    : false;
 
   // selection: items where aria-selected=true (in insertion order)
   const selection = Object.entries(zone.items ?? {})

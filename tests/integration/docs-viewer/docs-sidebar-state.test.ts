@@ -55,7 +55,6 @@ describe("T4: DocsSidebar — isOpen via OS command (not useState)", () => {
         }),
       }),
     );
-
   });
 
   afterEach(() => {

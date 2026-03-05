@@ -20,45 +20,44 @@ import { ensureZone } from "../../schema/state/utils";
 import { buildZoneCursor } from "../utils/buildZoneCursor";
 
 interface PressPayload {
-    targetId?: string;
+  targetId?: string;
 }
 
 export const OS_PRESS = os.defineCommand(
-    "OS_PRESS",
-    [ZONE_CONFIG],
-    (ctx) => (payload?: PressPayload) => {
-        const { activeZoneId } = ctx.state.os.focus;
-        if (!activeZoneId) return;
+  "OS_PRESS",
+  [ZONE_CONFIG],
+  (ctx) => (payload?: PressPayload) => {
+    const { activeZoneId } = ctx.state.os.focus;
+    if (!activeZoneId) return;
 
-        const zone = ctx.state.os.focus.zones[activeZoneId];
-        if (!zone) return;
+    const zone = ctx.state.os.focus.zones[activeZoneId];
+    if (!zone) return;
 
-        const targetId = (payload?.targetId) ?? zone.focusedItemId;
-        if (!targetId) return;
+    const targetId = payload?.targetId ?? zone.focusedItemId;
+    if (!targetId) return;
 
-        // Zone callback: pass cursor to onCheck (reuse same callback slot)
-        const entry = ZoneRegistry.get(activeZoneId);
-        if (entry?.onCheck) {
-            const cursor = buildZoneCursor(zone);
-            if (!cursor) return;
-            return {
-                dispatch: entry.onCheck({ ...cursor, focusId: targetId }),
-            };
-        }
+    // Zone callback: pass cursor to onCheck (reuse same callback slot)
+    const entry = ZoneRegistry.get(activeZoneId);
+    if (entry?.onCheck) {
+      const cursor = buildZoneCursor(zone);
+      if (!cursor) return;
+      return {
+        dispatch: entry.onCheck({ ...cursor, focusId: targetId }),
+      };
+    }
 
-        // Built-in toggle: items[id]["aria-pressed"] = !current.
-        // OS_PRESS being dispatched means the zone declared aria-pressed behavior.
-        // No config check needed — command type IS the declaration.
-        return {
-            state: produce(ctx.state, (draft) => {
-                const z = ensureZone(draft.os, activeZoneId);
-                if (!z.items[targetId]) z.items[targetId] = {};
-                z.items[targetId] = {
-                    ...z.items[targetId],
-                    "aria-pressed": !(z.items[targetId]?.["aria-pressed"] ?? false),
-                };
-            }),
+    // Built-in toggle: items[id]["aria-pressed"] = !current.
+    // OS_PRESS being dispatched means the zone declared aria-pressed behavior.
+    // No config check needed — command type IS the declaration.
+    return {
+      state: produce(ctx.state, (draft) => {
+        const z = ensureZone(draft.os, activeZoneId);
+        if (!z.items[targetId]) z.items[targetId] = {};
+        z.items[targetId] = {
+          ...z.items[targetId],
+          "aria-pressed": !(z.items[targetId]?.["aria-pressed"] ?? false),
         };
-    },
+      }),
+    };
+  },
 );
-

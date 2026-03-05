@@ -1,11 +1,7 @@
 /**
  * useSelection — OS hook to read selected items in a zone.
  *
- * Encapsulates OS internal state path so apps don't need to know
- * `s.os.focus.zones[zoneId]?.selection`.
- *
- * TODO: Lazy Resolution (resolveSelection) will be integrated here
- * once Zone provides items list via state registration.
+ * Derives selection from `items[id]["aria-selected"]` in zone state.
  */
 
 import { os } from "@os-core/engine/kernel";
@@ -14,5 +10,13 @@ import { os } from "@os-core/engine/kernel";
 const EMPTY: readonly string[] = [];
 
 export function useSelection(zoneId: string): readonly string[] {
-  return os.useComputed((s) => s.os.focus.zones[zoneId]?.selection ?? EMPTY);
+  return os.useComputed((s) => {
+    const items = s.os.focus.zones[zoneId]?.items;
+    if (!items) return EMPTY;
+    const selected: string[] = [];
+    for (const id in items) {
+      if (items[id]?.["aria-selected"]) selected.push(id);
+    }
+    return selected.length > 0 ? selected : EMPTY;
+  });
 }

@@ -119,15 +119,8 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 
 #### 5. STATUS.md 갱신
 
-```md
-## ✅ Completed (→ archive 완료)
-| Project | Completed | official 갱신 | Archived |
-|---------|-----------|-------------|----------|
-| [name]  | MM-DD     | ✅ official/os/SPEC.md | ✅ archive/YYYY/MM/WNN |
-```
-
-- official 갱신 컬럼 — 어떤 살아있는 문서가 갱신됐는지 추적
-- Last updated 타임스탬프 갱신
+- `/status` 실행으로 대시보드 자동 갱신. STATUS.md를 직접 편집하지 않는다.
+- 프로젝트 폴더가 `docs/1-project/`에서 사라지면 `/status`가 자동 반영한다.
 
 #### 6. 보고
 

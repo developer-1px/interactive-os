@@ -111,7 +111,8 @@ export function createCompoundTrigger(
   const role = config.role ?? "dialog";
 
   // Route: menu/listbox/popover → Popover pattern, dialog/alertdialog → Dialog pattern
-  const isPopoverRole = role === "menu" || role === "listbox" || role === "popover";
+  const isPopoverRole =
+    role === "menu" || role === "listbox" || role === "popover";
 
   const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) => {
     // Register trigger→overlay relationship for headless ARIA
@@ -164,12 +165,12 @@ export function createCompoundTrigger(
     "aria-label"?: string;
     "aria-labelledby"?: string;
   }> = (props) =>
-      React.createElement(Trigger.Popover, {
-        ...props,
-        _overlayId: overlayId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ZIFT overlay type union
-        _overlayType: role as any,
-      });
+    React.createElement(Trigger.Popover, {
+      ...props,
+      _overlayId: overlayId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ZIFT overlay type union
+      _overlayType: role as any,
+    });
   PopoverComponent.displayName = `${appId}.Menu.Popover`;
 
   // Dialog.Content must be used directly — DialogRoot identifies children by

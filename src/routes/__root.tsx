@@ -1,7 +1,6 @@
 import { InspectorShell } from "@inspector/shell/InspectorShell";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
 import { Root } from "@os-react/1-listen/Root";
-import { NotificationContainer } from "@/widgets/ToastContainer";
 import {
   createRootRoute,
   Link,
@@ -11,13 +10,14 @@ import {
 import React from "react";
 import { CommandPalette } from "@/command-palette/CommandPalette";
 import { GlobalNav } from "@/components/GlobalNav";
+import { NotificationContainer } from "@/widgets/ToastContainer";
 
 const TanStackRouterDevtools = import.meta.env.DEV
   ? React.lazy(() =>
-    import("@tanstack/router-devtools").then((m) => ({
-      default: m.TanStackRouterDevtools,
-    })),
-  )
+      import("@tanstack/router-devtools").then((m) => ({
+        default: m.TanStackRouterDevtools,
+      })),
+    )
   : () => null;
 
 // Plugin registrations (side-effect imports)

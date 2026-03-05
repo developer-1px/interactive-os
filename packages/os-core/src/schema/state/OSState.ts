@@ -65,7 +65,6 @@ export interface OSState {
   drag: DragState;
 }
 
-
 /**
  * ARIA item state — stored directly, not derived.
  *

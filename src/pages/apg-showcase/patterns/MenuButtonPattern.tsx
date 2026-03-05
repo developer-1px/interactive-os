@@ -18,8 +18,8 @@
  *   Trigger is wrapped in a toolbar zone for keyboard focus management.
  */
 
-import { defineApp } from "@os-sdk/app/defineApp";
 import { Item } from "@os-react/internal";
+import { defineApp } from "@os-sdk/app/defineApp";
 import { Icon } from "@/components/Icon";
 
 /**

@@ -21,7 +21,7 @@ describe("T1: Block Registry — single source of truth", () => {
   it("blockRegistry.ts file exists", () => {
     expect(
       existsSync("src/apps/builder/blockRegistry.ts") ||
-      existsSync("src/apps/builder/blockRegistry.tsx"),
+        existsSync("src/apps/builder/blockRegistry.tsx"),
     ).toBe(true);
   });
 
@@ -82,10 +82,7 @@ describe("T3: CommandInspector — tab registry", () => {
 
 describe("T4: QuickPick — no direct e.key branching", () => {
   it("does not handle keyboard events with e.key branching", () => {
-    const src = readFileSync(
-      "src/command-palette/QuickPick.tsx",
-      "utf-8",
-    );
+    const src = readFileSync("src/command-palette/QuickPick.tsx", "utf-8");
 
     // e.key 직접 분기가 없어야 함 — OS 파이프라인 사용
     expect(src).not.toContain("e.key ===");

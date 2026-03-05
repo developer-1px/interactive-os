@@ -12,61 +12,61 @@
 // ── Open axis ──
 
 export interface TriggerOpenConfig {
-    /** OS_ACTIVATE (Enter/Space) → open overlay? */
-    onActivate: boolean;
-    /** Click → toggle overlay? */
-    onClick: boolean;
-    /** OS_NAVIGATE(down) → open overlay? */
-    onArrowDown: boolean;
-    /** OS_NAVIGATE(up) → open overlay? */
-    onArrowUp: boolean;
-    /** Hover → open overlay? (tooltip pattern) */
-    onHover: boolean;
+  /** OS_ACTIVATE (Enter/Space) → open overlay? */
+  onActivate: boolean;
+  /** Click → toggle overlay? */
+  onClick: boolean;
+  /** OS_NAVIGATE(down) → open overlay? */
+  onArrowDown: boolean;
+  /** OS_NAVIGATE(up) → open overlay? */
+  onArrowUp: boolean;
+  /** Hover → open overlay? (tooltip pattern) */
+  onHover: boolean;
 }
 
 export const DEFAULT_TRIGGER_OPEN: TriggerOpenConfig = {
-    onActivate: true,
-    onClick: true,
-    onArrowDown: false,
-    onArrowUp: false,
-    onHover: false,
+  onActivate: true,
+  onClick: true,
+  onArrowDown: false,
+  onArrowUp: false,
+  onHover: false,
 };
 
 // ── Focus axis ──
 
 export interface TriggerFocusConfig {
-    /** Where focus goes when overlay opens */
-    onOpen: "first" | "last" | "none";
-    /** Where focus goes when overlay closes */
-    onClose: "restore" | "none";
+  /** Where focus goes when overlay opens */
+  onOpen: "first" | "last" | "none";
+  /** Where focus goes when overlay closes */
+  onClose: "restore" | "none";
 }
 
 export const DEFAULT_TRIGGER_FOCUS: TriggerFocusConfig = {
-    onOpen: "first",
-    onClose: "restore",
+  onOpen: "first",
+  onClose: "restore",
 };
 
 // ── ARIA axis ──
 
 export interface TriggerAriaConfig {
-    /** aria-haspopup value. false = no projection */
-    haspopup: string | false;
+  /** aria-haspopup value. false = no projection */
+  haspopup: string | false;
 }
 
 export const DEFAULT_TRIGGER_ARIA: TriggerAriaConfig = {
-    haspopup: false,
+  haspopup: false,
 };
 
 // ── Composed ──
 
 export interface TriggerConfig {
-    open: TriggerOpenConfig;
-    focus: TriggerFocusConfig;
-    aria: TriggerAriaConfig;
+  open: TriggerOpenConfig;
+  focus: TriggerFocusConfig;
+  aria: TriggerAriaConfig;
 }
 
 export const DEFAULT_TRIGGER_CONFIG: TriggerConfig = {
-    open: DEFAULT_TRIGGER_OPEN,
-    focus: DEFAULT_TRIGGER_FOCUS,
-    aria: DEFAULT_TRIGGER_ARIA,
+  open: DEFAULT_TRIGGER_OPEN,
+  focus: DEFAULT_TRIGGER_FOCUS,
+  aria: DEFAULT_TRIGGER_ARIA,
 };

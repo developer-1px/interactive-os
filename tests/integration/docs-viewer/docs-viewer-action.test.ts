@@ -32,7 +32,6 @@ describe("T6: DocsViewer — navigation via OS selectDoc command", () => {
         return [];
       },
     });
-
   });
 
   afterEach(() => {

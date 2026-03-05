@@ -38,9 +38,15 @@ export const OS_EXPAND = os.defineCommand(
 
     let shouldBeExpanded: boolean;
     switch (action) {
-      case "expand": shouldBeExpanded = true; break;
-      case "collapse": shouldBeExpanded = false; break;
-      default: shouldBeExpanded = !currentlyExpanded; break;
+      case "expand":
+        shouldBeExpanded = true;
+        break;
+      case "collapse":
+        shouldBeExpanded = false;
+        break;
+      default:
+        shouldBeExpanded = !currentlyExpanded;
+        break;
     }
 
     // No change needed
@@ -50,7 +56,10 @@ export const OS_EXPAND = os.defineCommand(
       state: produce(ctx.state, (draft) => {
         const z = ensureZone(draft.os, zoneId);
         if (!z.items[targetId]) z.items[targetId] = {};
-        z.items[targetId] = { ...z.items[targetId], "aria-expanded": shouldBeExpanded };
+        z.items[targetId] = {
+          ...z.items[targetId],
+          "aria-expanded": shouldBeExpanded,
+        };
       }),
     };
   },

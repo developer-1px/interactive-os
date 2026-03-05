@@ -67,7 +67,7 @@ const CUSTOM_LINKS: LinkDef[] = [
     label: "Settings",
     url: "/settings",
     description:
-      "A span element with role=\"link\" — demonstrates ARIA link on non-anchor.",
+      'A span element with role="link" — demonstrates ARIA link on non-anchor.',
   },
   {
     id: "link-custom-profile",
@@ -89,7 +89,8 @@ function LinkPattern() {
       <p className="text-sm text-gray-500 mb-4">
         W3C APG Link Pattern: <kbd>Enter</kbd> activates the link. Native{" "}
         <code>&lt;a&gt;</code> elements are preferred. For custom elements, use{" "}
-        <code>role=&quot;link&quot;</code> with <code>tabindex=&quot;0&quot;</code>.{" "}
+        <code>role=&quot;link&quot;</code> with{" "}
+        <code>tabindex=&quot;0&quot;</code>.{" "}
         <a
           href="https://www.w3.org/WAI/ARIA/apg/patterns/link/"
           target="_blank"

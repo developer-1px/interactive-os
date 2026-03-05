@@ -40,6 +40,13 @@ touch /tmp/.go-pipeline-active
 - **`stop_hook_active=true`**: 무한루프 방지. Hook이 한 번 잡았는데 또 멈추면 마커를 삭제하고 종료 허용
 - **수동 해제**: `rm /tmp/.go-pipeline-active`로 마커 수동 삭제 가능
 
+### 유효 범위
+
+- **`/auto`의 자율 실행은 단일 context window 내에서만 유효하다.**
+- 세션이 context 소진으로 끊기면, 마커는 살아있지만 context가 리셋된다.
+- 재개 시: 사용자가 `/go`를 다시 호출하면 BOARD.md 기반으로 상태 복원 후 재개.
+- 즉, 세션 간 상태 복원의 실질 메커니즘은 마커가 아니라 **BOARD.md의 Now/Done**.
+
 ### 주의
 
 - `/auto`는 `/discussion` Clear 이후에만 사용한다

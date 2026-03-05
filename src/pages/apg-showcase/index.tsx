@@ -15,20 +15,20 @@ import { GridPattern } from "./patterns/GridPattern";
 import { LandmarksPattern } from "./patterns/LandmarksPattern";
 import { LinkPattern } from "./patterns/LinkPattern";
 import { ListboxPattern } from "./patterns/ListboxPattern";
-import { MenuPattern } from "./patterns/MenuPattern";
 import { MenuButtonPattern } from "./patterns/MenuButtonPattern";
+import { MenuPattern } from "./patterns/MenuPattern";
 import { MeterPattern } from "./patterns/MeterPattern";
 import { RadioGroupPattern } from "./patterns/RadioGroupPattern";
-import { SliderPattern } from "./patterns/SliderPattern";
 import { SliderMultiThumbPattern } from "./patterns/SliderMultiThumbPattern";
+import { SliderPattern } from "./patterns/SliderPattern";
 import { SpinbuttonPattern } from "./patterns/SpinbuttonPattern";
 import { SwitchPattern } from "./patterns/SwitchPattern";
 import { TablePattern } from "./patterns/TablePattern";
 import { TabsPattern } from "./patterns/TabsPattern";
 import { ToolbarPattern } from "./patterns/ToolbarPattern";
 import { TooltipPattern } from "./patterns/TooltipPattern";
-import { TreePattern } from "./patterns/TreePattern";
 import { TreegridPattern } from "./patterns/TreegridPattern";
+import { TreePattern } from "./patterns/TreePattern";
 import { WindowSplitterPattern } from "./patterns/WindowSplitterPattern";
 
 const PATTERNS: Record<string, { name: string; component: React.FC }> = {
@@ -50,7 +50,10 @@ const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   meter: { name: "Meter", component: MeterPattern },
   radiogroup: { name: "RadioGroup", component: RadioGroupPattern },
   slider: { name: "Slider", component: SliderPattern },
-  "slider-multithumb": { name: "Slider (Multi)", component: SliderMultiThumbPattern },
+  "slider-multithumb": {
+    name: "Slider (Multi)",
+    component: SliderMultiThumbPattern,
+  },
   spinbutton: { name: "Spinbutton", component: SpinbuttonPattern },
   switch: { name: "Switch", component: SwitchPattern },
   table: { name: "Table", component: TablePattern },
@@ -59,7 +62,10 @@ const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   tooltip: { name: "Tooltip", component: TooltipPattern },
   tree: { name: "Tree", component: TreePattern },
   treegrid: { name: "Treegrid", component: TreegridPattern },
-  "window-splitter": { name: "Window Splitter", component: WindowSplitterPattern },
+  "window-splitter": {
+    name: "Window Splitter",
+    component: WindowSplitterPattern,
+  },
 };
 
 const DEFAULT_PATTERN = "accordion";

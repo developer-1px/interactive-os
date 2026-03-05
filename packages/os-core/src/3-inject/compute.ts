@@ -5,8 +5,8 @@
  * Used by Item.tsx (DOM adapter) and headless tests.
  */
 
-import { computeContainerProps } from "@os-core/3-inject/zoneContext";
 import { readActiveZoneId } from "@os-core/3-inject/readState";
+import { computeContainerProps } from "@os-core/3-inject/zoneContext";
 import { getChildRole } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { DEFAULT_CONFIG } from "@os-core/schema/types/focus/config/FocusGroupConfig";
@@ -51,9 +51,11 @@ export function computeItem(
   const childRole =
     overrides?.role || (entry?.role ? getChildRole(entry.role) : undefined);
 
-  // ── ARIA item state — read directly from items map ──
-  // Seeded at Zone init (OS_ZONE_INIT) via seedAriaState().
-  // Commands mutate values. computeItem just projects.
+  // ── ARIA item state — read from items map, existence from config ──
+  // Config determines WHICH aria-* keys to project (existence).
+  // Items map stores VALUES (true/false). Commands mutate values.
+  // No seed needed — config is always available via ZoneRegistry.
+  const config = entry?.config;
   const ariaItemState = z?.items?.[itemId] ?? {};
   const isAriaSelected =
     overrides?.selected ?? ariaItemState["aria-selected"] ?? false;
@@ -86,15 +88,30 @@ export function computeItem(
     "data-expanded": isAriaExpanded || undefined,
   };
 
-  // ── ARIA: pure projection from items[id] ──
-  // Items map is seeded at Zone init. Commands mutate values.
-  // computeItem just projects whatever keys exist — no config scanning.
-  if ("aria-selected" in ariaItemState) attrs["aria-selected"] = isAriaSelected;
-  if ("aria-checked" in ariaItemState)
+  // ── ARIA: config-driven projection ──
+  // Config determines which aria-* keys to project.
+  // Values come from items map (mutated by commands), default false.
+  const selectMode = config?.select?.mode ?? "none";
+  if (selectMode !== "none") attrs["aria-selected"] = isAriaSelected;
+
+  // Check/Press: derived from inputmap commands
+  const inputmapValues = config?.inputmap
+    ? Object.values(config.inputmap)
+    : [];
+  const hasCheckCmd = inputmapValues.some((cmds) =>
+    cmds.some((c) => c.type === "OS_CHECK"),
+  );
+  const hasPressCmd = inputmapValues.some((cmds) =>
+    cmds.some((c) => c.type === "OS_PRESS"),
+  );
+  if (hasCheckCmd)
     attrs["aria-checked"] = ariaItemState["aria-checked"] ?? false;
-  if ("aria-pressed" in ariaItemState)
+  if (hasPressCmd)
     attrs["aria-pressed"] = ariaItemState["aria-pressed"] ?? false;
-  if ("aria-expanded" in ariaItemState) {
+
+  // Expand: config-driven
+  const expandMode = config?.expand?.mode ?? "none";
+  if (expandMode !== "none") {
     attrs["aria-expanded"] = isAriaExpanded;
     attrs["aria-controls"] = `panel-${itemId}`;
   }

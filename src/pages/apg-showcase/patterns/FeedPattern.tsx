@@ -179,10 +179,7 @@ export function FeedPattern() {
         </a>
       </p>
 
-      <FeedUI.Zone
-        className="space-y-3"
-        aria-label="Example Feed"
-      >
+      <FeedUI.Zone className="space-y-3" aria-label="Example Feed">
         {ARTICLES.map((article, index) => (
           <ArticleCard
             key={article.id}
@@ -199,7 +196,8 @@ export function FeedPattern() {
           <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-mono">
             Page Down
           </kbd>{" "}
-          / <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-mono">
+          /{" "}
+          <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-mono">
             Page Up
           </kbd>{" "}
           Move between articles
@@ -208,7 +206,8 @@ export function FeedPattern() {
           <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-mono">
             Ctrl+End
           </kbd>{" "}
-          / <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-mono">
+          /{" "}
+          <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-[10px] font-mono">
             Ctrl+Home
           </kbd>{" "}
           Exit feed
