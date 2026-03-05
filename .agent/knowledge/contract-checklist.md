@@ -14,7 +14,13 @@
 ```bash
 # 전수 검색 (1회)
 grep -rnE "useState|useEffect|onClick|onMouseDown|onChange|onKeyDown|onPointerDown|document\.|getElementById|querySelector|addEventListener|os\.dispatch|data-drag-handle" \
-  src/apps/ --include="*.ts" --include="*.tsx" | grep -v "/test"
+  src/ --include="*.ts" --include="*.tsx" | grep -v "/test" | grep -v "__tests__"
+```
+
+```bash
+# Facade 경계 위반 검사 — src/에서 @os-core 직접 import 금지
+grep -rn '@os-core/' src/ --include="*.ts" --include="*.tsx" | grep -v __tests__ | grep -v ".test."
+# 0건이어야 정상. 1건이라도 있으면 🔴 LLM 실수.
 ```
 
 ### 필수 OS 패턴 (§1-A: 앱→OS)
@@ -35,6 +41,7 @@ grep -rnE "useState|useEffect|onClick|onMouseDown|onChange|onKeyDown|onPointerDo
 | Zone 콜백 시그니처 | `(info) => BaseCommand \| BaseCommand[]` (선언형) | `(info) => void` (명령형) |
 | Listener 격리 | 하나의 물리 제스처 → 하나의 Listener | 같은 pointerdown을 Mouse+Drag 각각 처리 |
 | DOM convention 자동화 | OS가 `data-*` 속성 자동 주입 | 앱이 `data-drag-handle` 수동 부착 |
+| **Facade 경계** | `src/`에서 `@os-sdk/os`, `@os-react/*`만 import | `src/`에서 `@os-core/*` 직접 import |
 
 ### 분류 기준
 
@@ -49,6 +56,7 @@ grep -rnE "useState|useEffect|onClick|onMouseDown|onChange|onKeyDown|onPointerDo
 - `useState` → OS state / `useSelection` / `useComputed`
 - `onClick` → `Trigger onActivate` / OS activate
 - `useEffect` → OS hook / kernel middleware
+- `@os-core/*` import in `src/` → `@os-sdk/os`에서 re-export. facade에 없으면 `os.ts`에 추가 후 import 경로 변경
 
 ---
 

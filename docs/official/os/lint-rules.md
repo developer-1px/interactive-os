@@ -21,7 +21,7 @@
 src/apps/**/*.tsx
 ```
 
-`src/os/` 및 미들웨어 레이어는 대상 외 — OS 인프라는 DOM 접근이 정당한 영역.
+`packages/os-core/`, `packages/os-react/` 및 미들웨어 레이어는 대상 외 — OS 인프라는 DOM 접근이 정당한 영역.
 
 ---
 

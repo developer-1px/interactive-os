@@ -1,6 +1,6 @@
 # 아키텍처: 커맨드 시스템 원칙
 
-> **구현 위치**: `src/os/3-commands/`
+> **구현 위치**: `packages/os-core/src/4-command/`
 > **진실의 원천**: [SPEC.md](../SPEC.md) §3 (Command Behavior Table)
 
 ---

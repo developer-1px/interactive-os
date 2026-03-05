@@ -266,7 +266,7 @@ test("Enter activates item", () => {
 
 | 상황 | 참조 |
 |------|------|
-| createOsPage 전체 API | `src/os/createOsPage.ts` (OsPage interface) |
-| APG 계약 테스트 사례 | `src/os/3-commands/tests/apg/*.apg.test.ts` |
+| createOsPage 전체 API | `packages/os-devtool/src/testing/createOsPage.ts` (OsPage interface) |
+| APG 계약 테스트 사례 | `tests/apg/*.apg.test.ts` |
 | 앱 통합 테스트 사례 | `src/apps/todo/tests/` |
 

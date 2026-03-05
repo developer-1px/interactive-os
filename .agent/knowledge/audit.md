@@ -81,7 +81,7 @@
 
 | 패턴 | 이유 | 예시 |
 |------|------|------|
-| `window.addEventListener` (OS 진입점) | OS 커널이 브라우저 이벤트를 받는 유일한 진입점 | `src/os/kernel.ts` |
+| `window.addEventListener` (OS 진입점) | OS 커널이 브라우저 이벤트를 받는 유일한 진입점 | `packages/os-react/src/1-listen/` |
 | 외부 라이브러리 ref/callback | 써드파티 API 요구사항 | leaflet, chart.js 등 |
 | `document.getElementById` (포커스 복구) | 브라우저 포커스 API 직접 호출 | 모달 dismiss 후 복구 |
 | `document.caretRangeFromPoint` (caret seeding) | 브라우저 caret API 직접 사용 필수 | PointerListener seedCaretFromPoint |
@@ -133,6 +133,7 @@
 | Button toggle aria-checked | computeFieldAttrs가 hardcoded aria-checked 방출 (button은 aria-pressed 필요) | 🟡 OS 갭 → ✅ 해결 | `CheckConfig.aria?: "checked" \| "pressed"` + `CHECK_ATTR_MAP` lookup. Item→Zone 버블링 | 2026-03-04 |
 | TestBot button script aria-checked | TestBot이 aria-checked 검증 (잘못된 속성) | 🔴 LLM 실수 → ✅ 수정 | aria-pressed로 교정 | 2026-03-04 |
 | Field resetOnSubmit DOM sync | `handleCommit`에서 `FieldRegistry.reset()` 후 DOM innerText 미동기화 | ⚪ OS 내부 수정 → ✅ 해결 | 기존 패턴(innerRef.innerText=value) 재사용. 3줄 추가. 이중 commit 경로(Field handleCommit vs OS_FIELD_COMMIT) 구조적 부채 잔존 | 2026-03-04 |
+| MeterPattern useEffect+dispatch (시뮬레이션) | setInterval로 OS_VALUE_CHANGE dispatch | ⚪ 정당한 예외 | 외부 데이터 시뮬레이션 (CPU/메모리 변동). 초기값은 value.initial로 선언형 완료. 런타임 업데이트는 앱 책임 | 2026-03-05 |
 
 ---
 

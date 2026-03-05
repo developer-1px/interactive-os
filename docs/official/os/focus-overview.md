@@ -1,6 +1,6 @@
 # 포커스 시스템 개요
 
-> **구현 위치**: `src/os/3-commands/`, `src/os/6-components/base/`, `src/os/registries/`
+> **구현 위치**: `packages/os-core/src/4-command/`, `packages/os-react/src/6-project/`, `packages/os-core/src/engine/registries/`
 > **진실의 원천**: [SPEC.md](../SPEC.md) §2-§9
 
 ---

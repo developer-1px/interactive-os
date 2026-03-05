@@ -1,7 +1,7 @@
 # Field Key Ownership — 키보드 소유권 위임 모델
 
 > Area: 20-os/21-commands
-> Source: src/os/1-listen/KeyboardListener.tsx, src/os/keymaps/fieldKeyOwnership.ts
+> Source: packages/os-react/src/1-listen/keyboard/, packages/os-core/src/2-resolve/fieldKeyOwnership.ts
 > Last synced: 2026-02-18
 > Origin: 4-archive/2026-02/field-key-ownership (프로젝트 완료 후 환류)
 
@@ -44,9 +44,9 @@
 
 | 파일 | 역할 |
 |------|------|
-| `src/os/keymaps/fieldKeyOwnership.ts` | `FIELD_DELEGATES_TO_OS` — 프리셋별 OS 위임 키 allowlist |
-| `src/os/1-listen/KeyboardListener.tsx` | `resolveIsEditingForKey()` — per-key 위임 판단 |
-| `src/os/registries/FieldRegistry.ts` | `FieldConfig.fieldType` — 기본값: `"inline"` |
+| `packages/os-core/src/2-resolve/fieldKeyOwnership.ts` | `FIELD_DELEGATES_TO_OS` — 프리셋별 OS 위임 키 allowlist |
+| `packages/os-core/src/1-listen/keyboard/senseKeyboard.ts` | `resolveIsEditingForKey()` — per-key 위임 판단 |
+| `packages/os-core/src/engine/registries/` | `FieldConfig.fieldType` — 기본값: `"inline"` |
 
 ## 설계 결정 (ADR)
 

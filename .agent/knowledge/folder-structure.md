@@ -4,54 +4,49 @@
 
 ## 로직 트리 (분류 규칙)
 
-새 코드를 `src/os/`에 추가할 때, 아래 질문을 **순서대로** 적용한다:
+새 코드를 OS 패키지에 추가할 때, 아래 질문을 **순서대로** 적용한다:
 
 ```
-Q1. FE 데이터 흐름의 어느 단계에 속하는가?
-    ├── 1 listen     DOMEvent → TypedInput
-    ├── 2 resolve    TypedInput → OSCommand
-    ├── 3 inject     DOM → Context Snapshots
-    ├── 4 command    OSCommand + Context → NextState + Effects
-    ├── 5 effect     Effects → DOM mutations
-    ├── 6 project    NextState → DOM attributes (ZIFT)
-    └── None → Q2로
+Q1. 어느 패키지에 속하는가?
+    ├── os-core      순수 로직 (DOM 무관)
+    ├── os-react     React 바인딩 (Listeners, 컴포넌트)
+    ├── os-sdk       앱 개발 API (defineApp, modules)
+    └── os-devtool   테스트·디버그 도구
 
-Q2. 앱의 선언적 진입점인가? (defineApp 시그니처에 등장)
-    ├── YES → app/ (defineApp + modules)
-    └── NO → Q3로
+Q2. os-core 내 FE 데이터 흐름의 어느 단계인가?
+    ├── 1-listen     DOMEvent → TypedInput
+    ├── 2-resolve    TypedInput → OSCommand
+    ├── 3-inject     DOM → Context Snapshots
+    ├── 4-command    OSCommand + Context → NextState + Effects
+    └── None → Q3로
 
-Q3. 테스트 전용 코드인가?
-    ├── YES → testing/
-    └── NO → core/ → Q4로
-
-Q4. 변경 안정도는? (core 내부)
+Q3. 변경 안정도는? (os-core 인프라)
     ├── Schema    → schema/ (types, state)
     ├── Engine    → engine/ (kernel, registries, middlewares)
-    ├── Library   → library/ (headless, collection)
-    └── Adapter   → adapter/ (widgets)
+    └── Library   → (headless, collection 등)
 ```
 
-Q1~Q4는 모두 **코드 속성에서 기계적으로 답할 수 있는** 질문이다.
+Q1~Q3는 모두 **코드 속성에서 기계적으로 답할 수 있는** 질문이다.
 
 ## 현재 구조
 
 ```
-src/os/ (9 folders)
-├── 1-listen/      Pipeline: Event Capture
-├── 2-resolve/     Pipeline: Intent Resolution
-├── 3-inject/      Pipeline: Context Injection
-├── 4-command/     Pipeline: State Computation
-├── 5-effect/      Pipeline: Side Effects
-├── 6-project/     Pipeline: Declarative Projection (ZIFT)
-├── app/           App Framework
-│   ├── defineApp/
-│   └── modules/
-├── core/          Infrastructure
-│   ├── schema/    (types, state)
-│   ├── engine/    (kernel, appState, registries, middlewares)
-│   ├── library/   (headless, collection)
-│   └── adapter/   (widgets)
-└── testing/       Verification
+packages/
+├── os-core/src/        순수 로직 (4 패키지 중 핵심)
+│   ├── 1-listen/       Pipeline: Event Capture (sense 함수)
+│   ├── 2-resolve/      Pipeline: Intent Resolution
+│   ├── 3-inject/       Pipeline: Context Injection
+│   ├── 4-command/      Pipeline: State Computation
+│   ├── engine/         Infrastructure (registries, middlewares)
+│   └── schema/         Types, State
+├── os-react/src/       React 바인딩
+│   ├── 1-listen/       React Listeners (Keyboard, Pointer, Clipboard)
+│   └── 6-project/      React 컴포넌트 (Zone, Item, Trigger, Field)
+├── os-sdk/src/         앱 개발 API
+│   ├── app/            defineApp, modules
+│   └── library/        collection 등
+└── os-devtool/src/     테스트·디버그
+    └── testing/        createOsPage, createHeadlessPage
 ```
 
 ## 4-Lens Stack (충돌 해소)

@@ -42,7 +42,7 @@
 | 용어 | 정의 | 코드 | 비고 |
 |------|------|------|------|
 | **Zone** | **영역**. 포커스 관리의 최소 독립 영역. "이 영역은 리스트처럼 행동한다" | `Zone` 컴포넌트, `ZoneState` | ZIFT의 Z |
-| **Item** | **데이터**. Zone 안에서 포커스를 받을 수 있는 개별 요소 | `Item` 컴포넌트, `data-focus-item` | ZIFT의 I |
+| **Item** | **데이터**. Zone 안에서 포커스를 받을 수 있는 개별 요소 | `Item` 컴포넌트, `data-item` | ZIFT의 I |
 | **Field** | **prop 편집**. 값을 편집하는 Item (boolean, number, string, enum) | `FieldBindings` | ZIFT의 F |
 | **Trigger** | **액션**. 활성화(Enter/Click)로 동작을 실행하는 Item | `Trigger` 컴포넌트 | ZIFT의 T |
 | **Focus** | 현재 어떤 아이템에 커서가 있는가 | `focusedItemId` | `activeZoneId` + `focusedItemId` |
@@ -85,14 +85,16 @@ ZIFT는 WAI-ARIA 1.2의 53개 속성과 **동형(isomorphic)**이다.
 
 | 필드 | 타입 | 의미 |
 |------|------|------|
+| `zoneId` | `string` | Zone 자기 식별자 |
 | `focusedItemId` | `string \| null` | 현재 포커스된 아이템 |
 | `lastFocusedId` | `string \| null` | zone 재진입 시 복원 대상 |
 | `editingItemId` | `string \| null` | 현재 편집 중인 field |
-| `selection` | `string[]` | 선택된 아이템들 |
+| `items` | `Record<string, AriaItemState>` | 아이템별 ARIA 상태 맵 (selected, checked, pressed, expanded) |
 | `selectionAnchor` | `string \| null` | range 선택의 기준점 |
-| `expandedItems` | `string[]` | 펼쳐진 트리 노드들 |
 | `stickyX` / `stickyY` | `number \| null` | 격자 네비게이션의 위치 기억 |
 | `caretPositions` | `Record<fieldId, number>` | field별 커서 위치 캐시 |
+| `valueNow` | `Record<string, number>` | 값 위젯 현재값 (slider, spinbutton) |
+| `valueRestore` | `Record<string, number>` | separator collapse/restore 값 |
 
 ### ZoneState의 ZoneCursor 변환
 
@@ -102,13 +104,14 @@ ZIFT는 WAI-ARIA 1.2의 53개 속성과 **동형(isomorphic)**이다.
 // OS는 focusedItemId를 안다
 // App은 "어떤 아이템이 무슨 상태인지"가 필요하다
 ZoneCursor {
-  focusId: string         // 현재 포커스
-  selection: string[]      // 선택 목록
-  anchor: string | null    // range 기준
-  isExpandable: boolean    // 펼칠 수 있는가
-  isDisabled: boolean      // 비활성화됐는가
+  focusId: string                // 현재 포커스
+  selection: string[]            // 선택 목록 (items map에서 파생)
+  anchor: string | null          // range 기준
+  isExpandable: boolean          // 펼칠 수 있는가
+  isDisabled: boolean            // 비활성화됐는가
   treeLevel: number | undefined  // 트리 깊이
 }
+// Note: selection은 zone.items에서 "aria-selected"===true인 항목을 추출
 ```
 
 ---
@@ -313,14 +316,20 @@ zone.bind({
 
 ### OS 파일 구조 ↔ 파이프라인 매핑
 
-| 폴더 | 파이프라인 단계 |
-|------|--------------|
-| `src/os/1-listen/` | ② Input — DOM → Commands |
-| `src/os/2-contexts/` | ① Spatial — ZoneRegistry, DOM Context |
-| `src/os/3-commands/` | ③ Behavior — 커맨드 핸들러 |
-| `src/os/4-effects/` | ④ Output — focus(), scroll() |
-| `src/os/5-hooks/` | React 연결 훅 |
-| `src/os/6-components/` | React 컴포넌트 (ZIFT 프리미티브) |
+> 패키지 재구조화 완료 (2026-03). 3개 패키지로 분리.
+
+| 패키지/폴더 | 파이프라인 단계 |
+|------------|--------------|
+| `packages/os-core/src/1-listen/` | ② Input — DOM → Commands |
+| `packages/os-core/src/2-resolve/` | ② Input — Intent Resolution |
+| `packages/os-core/src/3-inject/` | ③ Context Injection |
+| `packages/os-core/src/4-command/` | ④ Behavior — 커맨드 핸들러 |
+| `packages/os-core/src/engine/` | Infrastructure — kernel, registries, middlewares |
+| `packages/os-core/src/schema/` | Schema — types, state |
+| `packages/os-react/src/1-listen/` | React 어댑터 (Listeners) |
+| `packages/os-react/src/6-project/` | React 컴포넌트 (ZIFT 프리미티브) |
+| `packages/os-sdk/src/app/` | App Framework (defineApp, modules) |
+| `packages/os-devtool/src/testing/` | Testing (createOsPage, createHeadlessPage) |
 
 ---
 

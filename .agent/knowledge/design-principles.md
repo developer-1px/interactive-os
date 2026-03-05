@@ -82,6 +82,12 @@
 
 31. **action = command 배열 직접. enum/mode 이중 관리 불필요.** (Added: 2026-03-04) activate.effect enum("toggleExpand","invokeAndClose","selectTab")과 action.mode enum은 command 배열로 대체. command는 순수 데이터 팩토리(`OS_CHECK() = { type: "OS_CHECK" }`)이므로 역방향 의존성 없음. roleRegistry → command → schema가 단방향. 예: `action: [OS_CHECK()]`, `action: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()]`.
 
-32. **useLayoutEffect는 DOM API 호출 전용. kernel dispatch 금지.** (Added: 2026-03-05) useLayoutEffect의 유일한 정당한 용도: `el.focus()`, `el.innerText = x`, `el.getBoundingClientRect()` 등 DOM API 호출. kernel state mutation(`os.dispatch`)은 DOM 타이밍이 불필요하므로 useLayoutEffect에 넣지 않는다. "mount 시 실행"이 필요한 의도는 `config.initial` 선언형으로 표현한다. 근거: OS_ZONE_INIT 타이밍 버그(2026-03-05) — React bottom-up mount 순서에 의존하면 자식 미등록 시 silent failure. headless에서 별도 시뮬레이션이 필요하면 그것은 DOM 책임이 아니었다는 증거다.
+32. **useLayoutEffect는 DOM API 호출 전용. OS→OS init dispatch 금지.** (Added: 2026-03-05, Refined: 2026-03-05) useLayoutEffect의 정당한 용도: (a) DOM API 호출 (`el.focus()`, `el.innerText = x`), (b) **DOM→OS sync** — DOM에만 존재하는 값(contentEditable innerText 등)을 OS로 올리는 dispatch. 이것은 `<input onChange>`와 같은 패턴이다. **금지**: OS가 이미 아는 정보를 mount 타이밍에 다시 kernel로 dispatch하는 것(OS→OS init). 근거: OS_ZONE_INIT 타이밍 버그(2026-03-05). "mount 시 실행"이 필요한 의도는 `config.initial` 선언형으로 표현한다.
 
 33. **OS_INIT_* command는 잘못된 전제의 산물. Zone state는 bind() 시점에 eager 생성한다.** (Added: 2026-03-05) `OS_ZONE_INIT`, `OS_INIT_SELECTION` 등 "mount 시 state가 없으니 미리 만들어야 한다"는 전제에서 파생된 command. bind() 시점에 zone state를 eager로 생성하면 전제 소멸 → command 불필요. `ensureZone`은 초기화가 아니라 방어 코드(빈 그릇). 의미 있는 초기 상태(selection, focus)는 첫 번째 command(OS_FOCUS의 followFocus)가 자연스럽게 만든다.
+
+34. **Key는 Command의 속성이다.** (Added: 2026-03-06) 키바인딩은 별도 배열이 아니라 `command("name", handler, { key: "Meta+K" })`로 커맨드와 co-locate 선언한다. OS 커맨드(ArrowUp→NAVIGATE 등)의 키바인딩은 ARIA 스펙이 결정하므로 osDefaults.ts에 위치. 앱 커맨드의 키바인딩은 개발자가 command() 정의 시 key 옵션으로 선언. Keybindings 레지스트리는 앱에 노출되지 않는 OS 내부 구현(facade에서 export 금지).
+
+35. **OS의 런타임 상태는 인스턴스에 귀속. 모듈 스코프 싱글톤 금지.** (Added: 2026-03-06) 커널은 `createKernel()` 팩토리로 설계되어 테스트마다 fresh instance 생성 가능. 키바인딩 맵 등 런타임 레지스트리도 동일하게 팩토리 패턴(`createKeybindingRegistry()`)이어야 한다. 모듈 스코프 싱글톤은 테스트 간 상태 누수의 구조적 원인. 판단 기준: "이 Map을 테스트마다 fresh로 만들 수 있는가?". 만들 수 없으면 설계 결함.
+
+~~36.~~ (원칙 22와 중복 — 삭제)

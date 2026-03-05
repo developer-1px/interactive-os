@@ -3,7 +3,7 @@
 > 모든 동작 계약을 이 문서 하나로 관리한다.
 > 코드는 이 문서를 따르고, 테스트는 이 문서를 검증한다.
 >
-> Last verified: 2026-02-24
+> Last verified: 2026-03-06
 
 ---
 
@@ -34,15 +34,42 @@
 
 ## 2. State Shape
 
+### 2.1 OSState (top-level)
+
 | Path | Type | Description |
 |------|------|-------------|
 | `os.focus.activeZoneId` | `string \| null` | 현재 활성 zone |
-| `os.focus.zones[id].focusedItemId` | `string \| null` | zone 내 포커스된 아이템 |
-| `os.focus.zones[id].lastFocusedId` | `string \| null` | 마지막 포커스 (restore용) |
-| `os.focus.zones[id].recoveryTargetId` | `string \| null` | 삭제 후 복구 대상 |
-| `os.focus.zones[id].selection` | `string[]` | 선택된 아이템 목록 |
-| `os.focus.zones[id].expandedItems` | `string[]` | 확장된 아이템 목록 |
 | `os.focus.focusStack` | `FocusStackEntry[]` | modal 복원용 스택 |
+| `os.focus.zones[id]` | `ZoneState` | zone별 상태 |
+| `os.overlays.stack` | `OverlayEntry[]` | 열린 오버레이 스택 |
+| `os.notifications.stack` | `NotificationEntry[]` | 알림 스택 |
+| `os.drag` | `DragState` | 드래그 앤 드롭 상태 |
+
+### 2.2 ZoneState
+
+| Path | Type | Description |
+|------|------|-------------|
+| `zone.zoneId` | `string` | Zone 자기 식별자 |
+| `zone.focusedItemId` | `string \| null` | zone 내 포커스된 아이템 |
+| `zone.lastFocusedId` | `string \| null` | 마지막 포커스 (restore용) |
+| `zone.editingItemId` | `string \| null` | 현재 편집 중인 field |
+| `zone.caretPositions` | `Record<string, number>` | field별 커서 위치 캐시 |
+| `zone.stickyX` / `stickyY` | `number \| null` | 격자 네비게이션 위치 기억 |
+| `zone.items` | `Record<string, AriaItemState>` | 아이템별 ARIA 상태 맵 |
+| `zone.selectionAnchor` | `string \| null` | range 선택의 기준점 |
+| `zone.valueNow` | `Record<string, number>` | 값 위젯 현재값 (slider, spinbutton) |
+| `zone.valueRestore` | `Record<string, number>` | separator collapse/restore 값 |
+
+### 2.3 AriaItemState
+
+| Key | Type | 설명 |
+|-----|------|------|
+| `"aria-selected"` | `boolean?` | 선택 상태 (listbox option, tree item 등) |
+| `"aria-checked"` | `boolean?` | 체크 상태 (checkbox, radio, switch) |
+| `"aria-pressed"` | `boolean?` | 눌림 상태 (toggle button) |
+| `"aria-expanded"` | `boolean?` | 확장 상태 (tree node, accordion) |
+
+> **설계 원칙**: Commands가 `items[id]["aria-*"]`에 직접 쓰고, `compute.ts`가 직접 읽는다. 파생 없음.
 
 ---
 
@@ -170,7 +197,7 @@
 
 | Command | Payload | State Change | Effects | Status |
 |---------|---------|-------------|---------|--------|
-| `OS_EXPAND` | `{ targetId, expanded }` | expandedItems에 추가/제거 | — | ✅ |
+| `OS_EXPAND` | `{ targetId, expanded }` | `items[targetId]["aria-expanded"] = expanded` | — | ✅ |
 
 ### 3.8 Field Commands
 
@@ -367,17 +394,18 @@
 |-----------|--------|------|
 | `tabIndex` | `visualFocused` | focused → 0, else → -1 |
 | `aria-current` | `isFocused && isGroupActive` | 시각적 포커스 표시 |
-| `aria-selected` | `selection.includes(id)` | non-checked roles |
-| `aria-checked` | `selection.includes(id)` | radio/checkbox/switch roles |
-| `aria-expanded` | `expandedItems.includes(id)` | treeitem/menuitem roles |
+| `aria-selected` | `items[id]["aria-selected"]` | non-checked roles |
+| `aria-checked` | `items[id]["aria-checked"]` | radio/checkbox/switch roles |
+| `aria-pressed` | `items[id]["aria-pressed"]` | toggle button roles |
+| `aria-expanded` | `items[id]["aria-expanded"]` | treeitem/menuitem roles |
 | `aria-disabled` | `disabled` prop | — |
-| `data-item-id` | `id` prop | Listener/Effect 탐색용 |
+| `data-item` | (boolean marker) | Item 존재 마커 (querySelectorAll 탐색용) |
 | `data-focused` | `visualFocused` | CSS 스타일링용 |
 | `data-selected` | `isSelected` | CSS 스타일링용 |
 
 ### 9.3 Item — Compound Component
 
-> `src/os/6-components/6-project/Item.tsx`
+> `packages/os-react/src/6-project/Item.tsx`
 
 `Item`은 `FocusItem`의 선언적 래퍼이자 compound component의 루트.
 `ItemContext`를 통해 sub-component에 `{ zoneId, itemId }`를 자동 전달한다.
