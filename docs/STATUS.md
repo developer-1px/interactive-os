@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-05 11:00
+> Last updated: 2026-03-05 12:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -40,6 +40,7 @@
 |---------|-------|---------------|
 | 🔥 headless-simulator | Phase 1 T4~T6 | 03-03 |
 | test-observability | Scaffold, T1~T4 | 03-04 |
+| test-cleanup | WP1~4 Done, WP5~10 Backlog | 03-05 |
 | replay | Scaffold, T1 | 02-21 ⚠️ |
 
 ### builder
@@ -48,6 +49,7 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | 🔥 builder-v2 | T12, T13, T20 | 03-02 |
+| ~~docs-browser~~ | ✅ Complete (archived) | 03-05 |
 | builder-v3 | 기획 완료. 개발 보류 | 03-04 |
 
 ### inspector
