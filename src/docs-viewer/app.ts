@@ -12,6 +12,7 @@
  *     │   └── docs-reader    — section navigation (feed)
  */
 
+import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { produce } from "immer";
 import { buildDocTree, type DocItem, docsModules } from "./docsUtils";
@@ -71,30 +72,79 @@ function getInitialPath(): string | null {
 
 interface DocsState {
   activePath: string | null;
+  history: string[];
+  historyIndex: number;
+  searchOpen: boolean;
 }
 
 export const DocsApp = defineApp<DocsState>("docs-viewer", {
   activePath: getInitialPath(),
+  history: [],
+  historyIndex: -1,
+  searchOpen: false,
 });
 
 // ═══════════════════════════════════════════════════════════════════
 // App-level Command — shared by all sidebar zones
 // ═══════════════════════════════════════════════════════════════════
 
-/** SELECT_DOC — sets activePath. Shared by Recent, Favorites, and Tree zones. */
+/** SELECT_DOC — sets activePath + pushes to history. Shared by Recent, Favorites, and Tree zones. */
 export const selectDoc = DocsApp.command(
   "SELECT_DOC",
   (ctx, payload: { id: string }) => ({
     state: produce(ctx.state, (draft) => {
       draft.activePath = payload.id;
+      // Truncate forward history if we branched
+      draft.history = draft.history.slice(0, draft.historyIndex + 1);
+      draft.history.push(payload.id);
+      draft.historyIndex = draft.history.length - 1;
     }),
   }),
 );
 
-/** RESET_DOC — clears activePath (e.g. when switching folder source). */
+/** RESET_DOC — clears activePath and history (e.g. when switching folder source). */
 export const resetDoc = DocsApp.command("RESET_DOC", (ctx) => ({
   state: produce(ctx.state, (draft) => {
     draft.activePath = null;
+    draft.history = [];
+    draft.historyIndex = -1;
+  }),
+}));
+
+/** GO_BACK — navigate to previous history entry. */
+export const goBack = DocsApp.command("GO_BACK", (ctx) => {
+  if (ctx.state.historyIndex <= 0) return { state: ctx.state };
+  return {
+    state: produce(ctx.state, (draft) => {
+      draft.historyIndex -= 1;
+      draft.activePath = draft.history[draft.historyIndex]!;
+    }),
+  };
+});
+
+/** GO_FORWARD — navigate to next history entry. */
+export const goForward = DocsApp.command("GO_FORWARD", (ctx) => {
+  if (ctx.state.historyIndex >= ctx.state.history.length - 1)
+    return { state: ctx.state };
+  return {
+    state: produce(ctx.state, (draft) => {
+      draft.historyIndex += 1;
+      draft.activePath = draft.history[draft.historyIndex]!;
+    }),
+  };
+});
+
+/** OPEN_SEARCH — opens the docs search overlay. */
+export const openSearch = DocsApp.command("OPEN_SEARCH", (ctx) => ({
+  state: produce(ctx.state, (draft) => {
+    draft.searchOpen = true;
+  }),
+}));
+
+/** CLOSE_SEARCH — closes the docs search overlay. */
+export const closeSearch = DocsApp.command("CLOSE_SEARCH", (ctx) => ({
+  state: produce(ctx.state, (draft) => {
+    draft.searchOpen = false;
   }),
 }));
 
@@ -167,3 +217,13 @@ export const DocsReaderUI = readerZone.bind({
     { key: "Shift+Space", command: () => PREV_SECTION() },
   ],
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// App-level Keybindings — always active (not zone-scoped)
+// ═══════════════════════════════════════════════════════════════════
+
+Keybindings.registerAll([
+  { key: "Alt+ArrowLeft", command: goBack() },
+  { key: "Alt+ArrowRight", command: goForward() },
+  { key: "/", command: openSearch(), when: "navigating" },
+]);

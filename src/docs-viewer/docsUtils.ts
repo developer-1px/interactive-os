@@ -295,6 +295,210 @@ export function formatRelativeTime(mtime: number, now = Date.now()): string {
   });
 }
 
+// --------------- STATUS.md Parser ---------------
+
+export interface StatusActiveFocus {
+  domain: string;
+  project: string;
+  description: string;
+  weight: string;
+}
+
+export interface StatusProject {
+  name: string;
+  phase: string;
+  lastActivity: string;
+  isFocus: boolean;
+}
+
+export interface StatusDomain {
+  name: string;
+  description: string;
+  projects: StatusProject[];
+}
+
+export interface StatusMigration {
+  oldPattern: string;
+  newPattern: string;
+  remaining: string;
+}
+
+export interface StatusData {
+  activeFocus: StatusActiveFocus[];
+  domains: StatusDomain[];
+  migrations: StatusMigration[];
+  summary: Map<string, string>;
+}
+
+/** Parse STATUS.md markdown into structured data. */
+export function parseStatusMd(content: string): StatusData {
+  const activeFocus: StatusActiveFocus[] = [];
+  const domains: StatusDomain[] = [];
+  const migrations: StatusMigration[] = [];
+  const summary = new Map<string, string>();
+
+  const lines = content.split("\n");
+  let section = "";
+  let currentDomain: StatusDomain | null = null;
+  let inTable = false;
+  let tableHeaderPassed = false;
+
+  for (const line of lines) {
+    // Detect sections
+    if (line.startsWith("## ") && line.includes("Active Focus")) {
+      section = "focus";
+      inTable = false;
+      continue;
+    }
+    if (line.startsWith("## ") && line.includes("Domains")) {
+      section = "domains";
+      inTable = false;
+      continue;
+    }
+    if (line.startsWith("## ") && line.includes("Active Migrations")) {
+      section = "migrations";
+      inTable = false;
+      tableHeaderPassed = false;
+      continue;
+    }
+    if (line.startsWith("## ") && line.includes("Summary")) {
+      section = "summary";
+      inTable = false;
+      tableHeaderPassed = false;
+      continue;
+    }
+    if (line.startsWith("## ")) {
+      section = "";
+      continue;
+    }
+
+    // Parse Active Focus
+    if (section === "focus" && line.startsWith("**")) {
+      const match = line.match(
+        /^\*\*(\S+)\s*\/\s*(\S+)\*\*\s*—\s*(.+?)\.?\s*(Meta|Heavy|Light)?\s*\.?\s*$/,
+      );
+      if (match) {
+        activeFocus.push({
+          domain: match[1]!,
+          project: match[2]!,
+          description: match[3]!.trim(),
+          weight: match[4] ?? "",
+        });
+      }
+    }
+
+    // Parse Domains
+    if (section === "domains") {
+      if (line.startsWith("### ")) {
+        const domainName = line.replace(/^###\s+/, "").trim();
+        currentDomain = { name: domainName, description: "", projects: [] };
+        domains.push(currentDomain);
+        inTable = false;
+        tableHeaderPassed = false;
+        continue;
+      }
+      if (currentDomain && line.startsWith(">")) {
+        currentDomain.description = line.replace(/^>\s*/, "").trim();
+        continue;
+      }
+      if (currentDomain && line.startsWith("| Project")) {
+        inTable = true;
+        tableHeaderPassed = false;
+        continue;
+      }
+      if (currentDomain && inTable && line.startsWith("|---")) {
+        tableHeaderPassed = true;
+        continue;
+      }
+      if (
+        currentDomain &&
+        inTable &&
+        tableHeaderPassed &&
+        line.startsWith("|")
+      ) {
+        const cells = line
+          .split("|")
+          .map((c) => c.trim())
+          .filter(Boolean);
+        if (cells.length >= 3) {
+          const rawName = cells[0]!;
+          const isFocus = rawName.includes("🔥");
+          const name = rawName.replace(/🔥\s*/, "").trim();
+          currentDomain.projects.push({
+            name,
+            phase: cells[1]!,
+            lastActivity: cells[2]!,
+            isFocus,
+          });
+        }
+        continue;
+      }
+      if (inTable && !line.startsWith("|")) {
+        inTable = false;
+        tableHeaderPassed = false;
+      }
+    }
+
+    // Parse Migrations
+    if (section === "migrations") {
+      if (line.startsWith("| Old Pattern")) {
+        inTable = true;
+        tableHeaderPassed = false;
+        continue;
+      }
+      if (inTable && line.startsWith("|---")) {
+        tableHeaderPassed = true;
+        continue;
+      }
+      if (inTable && tableHeaderPassed && line.startsWith("|")) {
+        const cells = line
+          .split("|")
+          .map((c) => c.trim())
+          .filter(Boolean);
+        if (cells.length >= 3) {
+          migrations.push({
+            oldPattern: cells[0]!,
+            newPattern: cells[1]!,
+            remaining: cells[2]!,
+          });
+        }
+        continue;
+      }
+      if (inTable && !line.startsWith("|")) {
+        inTable = false;
+      }
+    }
+
+    // Parse Summary
+    if (section === "summary") {
+      if (line.startsWith("| Metric")) {
+        inTable = true;
+        tableHeaderPassed = false;
+        continue;
+      }
+      if (inTable && line.startsWith("|---")) {
+        tableHeaderPassed = true;
+        continue;
+      }
+      if (inTable && tableHeaderPassed && line.startsWith("|")) {
+        const cells = line
+          .split("|")
+          .map((c) => c.trim())
+          .filter(Boolean);
+        if (cells.length >= 2) {
+          summary.set(cells[0]!, cells[1]!);
+        }
+        continue;
+      }
+      if (inTable && !line.startsWith("|")) {
+        inTable = false;
+      }
+    }
+  }
+
+  return { activeFocus, domains, migrations, summary };
+}
+
 // --------------- Table of Contents ---------------
 
 export interface TocHeading {

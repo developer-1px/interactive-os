@@ -3,20 +3,33 @@ import docsMeta from "virtual:docs-meta";
 import { os } from "@os-core/engine/kernel";
 import clsx from "clsx";
 import {
+  ArrowLeft,
+  ArrowRight,
   ChevronLeft,
   ChevronRight,
   Clock,
   FileText,
   FolderOpen,
+  Search,
   Star,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DocsSearch } from "./DocsSearch";
 import { DocsSidebar } from "./DocsSidebar";
+import { StatusDashboard } from "./StatusDashboard";
 
 // Side-effect: register docs-viewer commands on kernel
 import "./app";
-import { DocsApp, DocsReaderUI, resetDoc, selectDoc } from "./app";
+import {
+  DocsApp,
+  DocsReaderUI,
+  goBack,
+  goForward,
+  openSearch,
+  resetDoc,
+  selectDoc,
+} from "./app";
 import {
   buildDocTree,
   cleanLabel,
@@ -151,8 +164,12 @@ function FolderIndexView({
 }
 
 export function DocsViewer() {
-  // activePath — Single Source of Truth from DocsApp state
+  // activePath + history — Single Source of Truth from DocsApp state
   const activePath = DocsApp.useComputed((s) => s.activePath) ?? undefined;
+  const historyIndex = DocsApp.useComputed((s) => s.historyIndex);
+  const historyLength = DocsApp.useComputed((s) => s.history.length);
+  const canGoBack = historyIndex > 0;
+  const canGoForward = historyIndex < historyLength - 1;
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [externalSource, setExternalSource] =
@@ -249,9 +266,9 @@ export function DocsViewer() {
     [],
   );
 
-  // --- Update URL without triggering hashchange ---
+  // --- Update URL with pushState for browser back/forward ---
   const setHash = useCallback((hash: string) => {
-    history.replaceState(null, "", hash);
+    history.pushState(null, "", hash);
   }, []);
 
   // --- Select a file via OS command ---
@@ -259,7 +276,8 @@ export function DocsViewer() {
     os.dispatch(selectDoc({ id: path }));
   }, []);
 
-  // --- Derived: is current path a folder? ---
+  // --- Derived: is current path a folder or STATUS? ---
+  const isStatusView = activePath?.endsWith("STATUS") ?? false;
   const isFolderView = activePath?.startsWith("folder:") ?? false;
   const folderPath = isFolderView ? activePath!.slice("folder:".length) : null;
   const folderNode = useMemo(
@@ -388,6 +406,77 @@ export function DocsViewer() {
 
       {/* Main Content */}
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">
+        {/* Navigation Bar */}
+        <div className="flex items-center gap-1 px-4 py-2 border-b border-slate-100 bg-white shrink-0">
+          <button
+            type="button"
+            onClick={() => os.dispatch(goBack())}
+            disabled={!canGoBack}
+            title="Go back (Alt+←)"
+            className={clsx(
+              "p-1 rounded-md transition-colors",
+              canGoBack
+                ? "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                : "text-slate-200 cursor-default",
+            )}
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={() => os.dispatch(goForward())}
+            disabled={!canGoForward}
+            title="Go forward (Alt+→)"
+            className={clsx(
+              "p-1 rounded-md transition-colors",
+              canGoForward
+                ? "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                : "text-slate-200 cursor-default",
+            )}
+          >
+            <ArrowRight size={16} />
+          </button>
+
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-1 ml-2 text-sm min-w-0 overflow-hidden">
+            {activePath?.split("/").map((part, i, arr) => {
+              const segmentPath = arr.slice(0, i + 1).join("/");
+              const isLast = i === arr.length - 1;
+              return (
+                <div
+                  key={segmentPath}
+                  className="flex items-center gap-1 min-w-0"
+                >
+                  {i > 0 && <span className="text-slate-300 shrink-0">/</span>}
+                  {isLast ? (
+                    <span className="font-medium text-slate-900 truncate">
+                      {cleanLabel(part)}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleSelect(`folder:${segmentPath}`)}
+                      className="text-slate-400 hover:text-indigo-600 hover:underline truncate"
+                    >
+                      {cleanLabel(part)}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Search trigger */}
+          <button
+            type="button"
+            onClick={() => os.dispatch(openSearch())}
+            title="Search docs (/)"
+            className="ml-auto p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          >
+            <Search size={14} />
+          </button>
+        </div>
+
         <DocsReaderUI.Zone className="flex-1 flex flex-col overflow-hidden">
           <div
             ref={contentRef}
@@ -414,6 +503,8 @@ export function DocsViewer() {
                 </div>
               ) : isFolderView && folderNode ? (
                 <FolderIndexView folder={folderNode} onSelect={handleSelect} />
+              ) : isStatusView && content ? (
+                <StatusDashboard content={content} />
               ) : (
                 <>
                   <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
@@ -537,6 +628,9 @@ export function DocsViewer() {
           </div>
         </DocsReaderUI.Zone>
       </div>
+
+      {/* Search overlay — controlled by DocsApp.searchOpen */}
+      <DocsSearch allFiles={allFiles} />
     </div>
   );
 }
