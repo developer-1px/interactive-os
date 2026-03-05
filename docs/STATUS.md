@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-05 12:00
+> Last updated: 2026-03-05 14:45
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -16,8 +16,6 @@
 
 **testing / headless-simulator** — Vitest에서 Playwright 수준 검증 달성. DOM → OS VDOM. 거짓 GREEN 근절. Heavy.
 
-**builder / builder-v2** — Panel Accordion + OS tree auto-expand. Heavy.
-
 ---
 
 ## 📋 Domains
@@ -27,11 +25,11 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| 🔥 zift-usage-spec | Scaffold, T1~T6 미착수 | 03-04 |
+| zift-usage-spec | Scaffold, T1~T6 미착수 | 03-04 |
 | selection-unification | Scaffold, plan 미착수 | 03-05 |
-| eliminate-layout-dispatch | Scaffold, T1~T4 | 03-05 |
 | condition-auto-disabled | 기획 중 (BOARD 없음) | new |
-| os-restructure | Phase 4 Done | 03-05 |
+| ~~eliminate-layout-dispatch~~ | ✅ Complete (archived W10) | 03-05 |
+| ~~os-restructure~~ | ✅ Complete (archived W10) | 03-05 |
 
 ### testing
 > `packages/os-devtool/` · `tests/`
@@ -48,9 +46,9 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| 🔥 builder-v2 | T12, T13, T20 | 03-02 |
-| ~~docs-browser~~ | ✅ Complete (archived) | 03-05 |
+| builder-v2 | T12, T13, T20 | 03-02 |
 | builder-v3 | 기획 완료. 개발 보류 | 03-04 |
+| ~~docs-router~~ | ✅ Complete (archived W10) | 03-05 |
 
 ### inspector
 > `src/inspector/`
@@ -74,7 +72,6 @@
 | Old Pattern | New Pattern | Remaining |
 |-------------|-------------|-----------|
 | `zone.selection[]` 배열 | `zone.items[id]["aria-selected"]` map | → selection-unification |
-| `useLayoutEffect` 내 dispatch | `config.initial` 선언적 | → eliminate-layout-dispatch |
 
 ---
 
@@ -83,9 +80,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 5 |
-| Active Projects | 11 |
-| Active Focus | 3 |
+| Active Projects | 8 |
+| Active Focus | 2 |
 | Stale (7d+) | 1 (replay) |
-| Active Migrations | 2 |
-| Inbox | docs/0-inbox/ (7건) |
+| Active Migrations | 1 |
+| Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
