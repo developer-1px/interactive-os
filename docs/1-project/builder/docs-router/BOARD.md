@@ -10,22 +10,21 @@ Before -> After:
 - goBack/goForward가 OS state 조작 -> router 미들웨어가 TanStack Router에 위임
 - DocsPage.tsx (구버전) + DocsViewer.tsx (신버전) 이중 존재 -> DocsViewer.tsx 단일
 
-Risks:
-- TanStack Router API 변경 시 router 모듈 깨짐
-- canGoBack/Forward 파생 상태의 정확한 소스 (브라우저 history API 제약)
-
 ## Now
 
-- [ ] T1: router 인스턴스 분리 — src/router.ts export, main.tsx import (Plan #2)
-- [ ] T2: router() AppModule 생성 — modules/router.ts, after() 정방향 + subscribe 역방향 (Plan #1)
-- [ ] T3: DocsState history/historyIndex 제거 + selectDoc/resetDoc/goBack/goForward 수정 (Plan #3,4,5,6)
-- [ ] T4: defineApp에 router() 모듈 설치 (Plan #7)
-- [ ] T5: DocsViewer.tsx에서 pushState/popstate/setHash/hash-sync 제거 + canGoBack/Forward 전환 (Plan #8,9,10,11)
-- [ ] T6: docs-history.test.ts 갱신 — history[] assert 제거, activePath + keyboard 동작 검증 (Plan #12)
-- [ ] T7: DocsPage.tsx 삭제 + route 파일 정리 (Plan #13)
+(empty — all tasks complete)
 
 ## Done
 
+- [x] T2: router() AppModule 생성 — 74a5df93. 5/5 tests pass
+- [x] T1: router 인스턴스 분리 — fdc31a6c. src/router.ts export
+- [x] T3+T6: DocsState cleanup + test update — 15f4933f. history/historyIndex 제거, 5/5 tests
+- [x] T4: router() 모듈 설치 — a8b0a176. main.tsx에서 os.use()
+- [x] T5: DocsViewer cleanup — 03caa626. pushState/popstate/setHash/parseHash 제거 (-57 lines)
+- [x] T7: DocsPage.tsx 삭제 — 4d430649. (-169 lines)
+
 ## Unresolved
+
+- canGoBack/canGoForward: 브라우저 history API 제약으로 disabled 상태 제거. 항상 enabled.
 
 ## Ideas
