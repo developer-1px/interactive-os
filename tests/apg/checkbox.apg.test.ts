@@ -23,7 +23,7 @@ const CONDIMENT_IDS = [
   "cond-mustard",
   "cond-sprouts",
 ];
-const CHECKBOX_ID = CONDIMENT_IDS[0]; // "cond-lettuce"
+const CHECKBOX_ID = CONDIMENT_IDS[0]!; // "cond-lettuce"
 
 function checkboxFactory() {
   const page = createPage(CheckboxApp);

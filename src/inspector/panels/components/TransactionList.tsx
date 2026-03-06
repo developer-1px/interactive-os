@@ -277,11 +277,11 @@ export function TransactionList({
                   key={tx.id}
                   tx={tx}
                   index={filteredIndex}
-                  expanded={expandedTxs.has(tx.id)}
+                  expanded={expandedTxs.has(String(tx.id))}
                   onToggle={() => {
                     const newSet = new Set(expandedTxs);
-                    if (newSet.has(tx.id)) newSet.delete(tx.id);
-                    else newSet.add(tx.id);
+                    if (newSet.has(String(tx.id))) newSet.delete(String(tx.id));
+                    else newSet.add(String(tx.id));
                     setExpandedTxs(newSet);
                   }}
                   dataIndex={i}

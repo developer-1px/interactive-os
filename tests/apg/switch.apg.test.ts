@@ -23,7 +23,7 @@ import {
 // ─── Test Setup (actual showcase config) ───
 
 const SWITCH_IDS = SWITCHES.map((s) => s.id);
-const SWITCH_ID = SWITCH_IDS[0]; // "switch-notifications"
+const SWITCH_ID = SWITCH_IDS[0]!; // "switch-notifications"
 
 function switchFactory() {
   const page = createPage(SwitchApp);

@@ -36,7 +36,7 @@ export function formatDiagnostics(kernel: DiagnosticKernel): string {
     return lines.join("\n");
   }
 
-  const lastTx = txs[txs.length - 1];
+  const lastTx = txs[txs.length - 1]!;
   const lastHasNoChanges = lastTx.changes.length === 0;
 
   // Last: header

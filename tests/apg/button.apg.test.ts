@@ -25,7 +25,7 @@ import { ToggleApp } from "@/pages/apg-showcase/patterns/ButtonPattern";
 // ─── Toggle Button Setup (actual showcase config) ───
 
 const TOGGLE_ITEMS = ["toggle-bold", "toggle-italic", "toggle-underline"];
-const TOGGLE_BUTTON_ID = TOGGLE_ITEMS[0]; // "toggle-bold"
+const TOGGLE_BUTTON_ID = TOGGLE_ITEMS[0]!; // "toggle-bold"
 
 function toggleButtonFactory() {
   const page = createPage(ToggleApp);

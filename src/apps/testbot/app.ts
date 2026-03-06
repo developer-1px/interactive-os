@@ -124,8 +124,8 @@ export const suiteStart = TestBotApp.command(
     state: produce(ctx.state, (draft) => {
       draft.currentIndex = payload.index;
       if (draft.suites[payload.index]) {
-        draft.suites[payload.index].status = "running";
-        draft.suites[payload.index].steps = [];
+        draft.suites[payload.index]!.status = "running";
+        draft.suites[payload.index]!.steps = [];
       }
     }),
   }),
@@ -137,7 +137,7 @@ export const stepRecorded = TestBotApp.command(
   (ctx, payload: { index: number; steps: BrowserStep[] }) => ({
     state: produce(ctx.state, (draft) => {
       if (draft.suites[payload.index]) {
-        draft.suites[payload.index].steps = payload.steps;
+        draft.suites[payload.index]!.steps = payload.steps;
       }
     }),
   }),
@@ -157,11 +157,11 @@ export const suiteDone = TestBotApp.command(
   ) => ({
     state: produce(ctx.state, (draft) => {
       if (draft.suites[payload.index]) {
-        draft.suites[payload.index].status = "done";
-        draft.suites[payload.index].passed = payload.passed;
-        draft.suites[payload.index].steps = payload.steps;
+        draft.suites[payload.index]!.status = "done";
+        draft.suites[payload.index]!.passed = payload.passed;
+        draft.suites[payload.index]!.steps = payload.steps;
         if (payload.diagnostics) {
-          draft.suites[payload.index].diagnostics = payload.diagnostics;
+          draft.suites[payload.index]!.diagnostics = payload.diagnostics;
         }
       }
     }),
