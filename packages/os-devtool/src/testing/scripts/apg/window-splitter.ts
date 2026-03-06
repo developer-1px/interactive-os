@@ -1,4 +1,3 @@
-import { expect as defaultExpect } from "../../expect";
 import type { TestScript } from "../../types";
 
 export const apgWindowSplitterScript: TestScript = {

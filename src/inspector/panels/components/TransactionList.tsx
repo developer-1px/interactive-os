@@ -1,25 +1,12 @@
 import type { Transaction } from "@kernel/core/transaction";
 import {
-  Copy,
-  Download,
   Eye,
   Keyboard,
   Layers,
-  ListMinus,
-  ListTree,
   MousePointer2,
   MousePointerClick,
-  Search,
-  Settings,
-  Trash2,
 } from "lucide-react";
-import { useState } from "react";
-import { InspectorFiltersUI, InspectorSearchUI } from "../../app";
 import { inferSignal } from "../../utils/inferSignal";
-import {
-  copyAllToClipboard,
-  formatTime,
-} from "../../utils/inspectorFormatters";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { TransactionItem } from "./TransactionItem";
 

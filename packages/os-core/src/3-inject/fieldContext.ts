@@ -11,7 +11,6 @@ import type {
   FieldTrigger,
   FieldType,
 } from "@os-core/engine/registries/fieldRegistry";
-import type { ZoneEntry } from "@os-core/engine/registries/zoneRegistry";
 import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand.ts";
 import type { ZodSchema } from "zod";
 // ═══════════════════════════════════════════════════════════════════

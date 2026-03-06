@@ -100,7 +100,7 @@ const tgCollection = createCollectionZone(TreegridApp, "inbox", {
 
 const bindings = tgCollection.collectionBindings();
 
-const TreegridUI = tgCollection.bind({
+const _TreegridUI = tgCollection.bind({
   role: "treegrid",
   ...bindings,
   onUndo: undoCommand(),

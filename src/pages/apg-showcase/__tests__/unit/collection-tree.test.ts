@@ -73,7 +73,7 @@ const treeCollection = createCollectionZone(TreeApp, "explorer", {
 
 const bindings = treeCollection.collectionBindings();
 
-const TreeUI = treeCollection.bind({
+const _TreeUI = treeCollection.bind({
   role: "tree",
   ...bindings,
   onUndo: undoCommand(),

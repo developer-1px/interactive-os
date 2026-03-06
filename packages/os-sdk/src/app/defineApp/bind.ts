@@ -14,7 +14,7 @@ import {
 import { Field } from "@os-react/6-project/field/Field";
 import { Item } from "@os-react/6-project/Item";
 import type { ZoneOptions } from "@os-react/6-project/Zone";
-import { useZoneContext, Zone } from "@os-react/6-project/Zone";
+import { Zone } from "@os-react/6-project/Zone";
 import React, { type ReactNode } from "react";
 import type {
   BoundComponents,

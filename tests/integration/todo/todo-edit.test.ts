@@ -50,7 +50,7 @@ describe("§2 Edit Zone: keyboard", () => {
   });
 
   it("ArrowDown during edit does not navigate list", () => {
-    const [a, b] = addTodos("First", "Second");
+    const [a, _b] = addTodos("First", "Second");
     gotoList(a);
 
     page.keyboard.press("Enter");

@@ -319,7 +319,7 @@ describe("§1.4 List: keyboard clipboard", () => {
   });
 
   it("Batch Cmd+C with multi-selection", () => {
-    const [a, b] = addTodos("Alpha", "Beta");
+    const [a, _b] = addTodos("Alpha", "Beta");
     gotoList(a);
 
     page.keyboard.press("Shift+ArrowDown");
@@ -334,7 +334,7 @@ describe("§1.4 List: keyboard clipboard", () => {
   });
 
   it("Batch Cmd+V after multi-copy", () => {
-    const [a, b] = addTodos("Alpha", "Beta");
+    const [a, _b] = addTodos("Alpha", "Beta");
     gotoList(a);
 
     page.keyboard.press("Shift+ArrowDown");

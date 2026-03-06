@@ -32,7 +32,7 @@ export const LinkApp = defineApp<{
 
 export const NAVIGATE_LINK = LinkApp.command(
   "NAVIGATE_LINK",
-  (ctx, payload: { url: string }) => ({
+  (_ctx, payload: { url: string }) => ({
     state: { lastNavigatedUrl: payload.url },
   }),
 );

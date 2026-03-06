@@ -258,7 +258,7 @@ export function simulateClick(
   // Expand axis — config-driven
   const expandable = ZoneRegistry.isExpandable(zoneId, itemId);
 
-  const preMousedownFocusedItemId = readFocusedItemId(kernel, zoneId);
+  const _preMousedownFocusedItemId = readFocusedItemId(kernel, zoneId);
   const preMousedownEditingItemId =
     readZone(kernel, zoneId)?.editingItemId ?? null;
 

@@ -241,7 +241,7 @@ export interface TestInstance<S> {
 // AppPage — Playwright Page isomorphic headless interface
 // ═══════════════════════════════════════════════════════════════════
 
-export interface AppPage<S> {
+export interface AppPage<_S> {
   /** Navigate to a zone (headless infra — not available in TestScript run()). Sets active zone + focused item. */
   goto(
     zoneName: string,

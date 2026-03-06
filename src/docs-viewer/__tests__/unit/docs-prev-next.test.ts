@@ -14,7 +14,7 @@
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { type AppPageInternal, createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
-import { DocsApp, resetDoc, selectDoc } from "../../app";
+import { DocsApp, selectDoc } from "../../app";
 
 interface DocsState {
   activePath: string | null;

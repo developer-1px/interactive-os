@@ -1,5 +1,4 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight } from "lucide-react";
 
 export function CollapsibleSection({
   title,

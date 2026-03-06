@@ -15,7 +15,7 @@ import {
   readFocusedItemId,
   resolveElement,
 } from "@os-core/3-inject/compute";
-import type { ElementAttrs, ItemAttrs } from "@os-core/3-inject/headless.types";
+import type { ItemAttrs } from "@os-core/3-inject/headless.types";
 import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
 import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
@@ -24,12 +24,7 @@ import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { ensureZone } from "@os-core/schema/state/utils";
 import {
   DEFAULT_CONFIG,
-  type DismissConfig,
   type FocusGroupConfig,
-  type InputMap,
-  type NavigateConfig,
-  type SelectConfig,
-  type TabConfig,
 } from "@os-core/schema/types/focus/config/FocusGroupConfig";
 import { produce } from "immer";
 import { createElement, type FC } from "react";
@@ -42,7 +37,6 @@ import "@os-core/2-resolve/osDefaults";
 import type { BaseCommand } from "@kernel/core/tokens";
 import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
-import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type {
   AppPageInternal,
   ZoneBindingEntry,

@@ -6,7 +6,6 @@ import {
 import { OS_FIELD_COMMIT } from "@os-core/4-command/field/commit";
 import { os } from "@os-core/engine/kernel.ts";
 import {
-  type FieldConfig,
   FieldRegistry,
   type FieldTrigger,
   type FieldType,

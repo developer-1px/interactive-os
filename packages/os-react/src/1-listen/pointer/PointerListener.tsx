@@ -54,7 +54,7 @@ import { useEffect } from "react";
 export function PointerListener() {
   useEffect(() => {
     let gestureState: GestureState = createIdleState();
-    let preClickFocusedItemId: string | null = null;
+    let _preClickFocusedItemId: string | null = null;
     let lastPointerDownX = 0;
     let lastPointerDownY = 0;
     let pointerDownTarget: HTMLElement | null = null;
@@ -160,7 +160,7 @@ export function PointerListener() {
       // Snapshot pre-click state
       const focusState = os.getState().os.focus;
       const activeZoneId = focusState.activeZoneId;
-      preClickFocusedItemId = activeZoneId
+      _preClickFocusedItemId = activeZoneId
         ? (focusState.zones[activeZoneId]?.focusedItemId ?? null)
         : null;
 

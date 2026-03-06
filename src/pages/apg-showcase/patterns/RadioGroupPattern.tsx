@@ -57,15 +57,6 @@ const DeliveryUI = deliveryZone.bind({ role: "radiogroup" });
 
 // ─── Radio Button Component ───
 
-function RadioButton({ item }: { item: RadioOption }) {
-  return (
-    <div className="flex items-center gap-3 px-4 py-2.5 cursor-pointer">
-      {/* Item wraps the visual radio indicator */}
-      <span className="text-sm text-gray-800">{item.label}</span>
-    </div>
-  );
-}
-
 // ─── Radio Group Section ───
 
 function RadioGroupSection({

@@ -85,7 +85,7 @@ describe("Builder Canvas Clipboard (PRD scenarios)", () => {
     createApp();
 
     // ge-hero-service-name is a static field item inside ge-hero
-    const result = canvasOnCopy({
+    const _result = canvasOnCopy({
       focusId: "ge-hero-service-name",
       selection: [],
     } as any);

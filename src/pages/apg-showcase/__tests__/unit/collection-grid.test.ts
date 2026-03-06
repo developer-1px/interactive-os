@@ -73,7 +73,7 @@ const gridCollection = createCollectionZone(GridApp, "datagrid", {
 
 const bindings = gridCollection.collectionBindings();
 
-const GridUI = gridCollection.bind({
+const _GridUI = gridCollection.bind({
   role: "grid",
   ...bindings,
   onUndo: undoCommand(),

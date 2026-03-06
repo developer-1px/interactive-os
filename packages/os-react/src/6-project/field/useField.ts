@@ -31,7 +31,7 @@ export const useFieldFocus = ({
   innerRef,
   isActive,
   blurOnInactive,
-  cursorRef,
+  cursorRef: _cursorRef,
   fieldId,
   isEditing = false,
 }: UseFieldFocusProps) => {
