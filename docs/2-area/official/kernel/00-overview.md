@@ -86,20 +86,23 @@ TestBot        → direct  → dispatch(ACTIVATE())
 
 ```
 packages/kernel/src/
-├── index.ts              공개 API 내보내기
-├── createKernel.ts       커널 팩토리 — 엔진 전체 (~740 lines)
-├── createInspector.ts    Inspector 구현 (Port/Adapter 패턴)
+├── index.ts                 공개 API 내보내기
+├── createKernel.ts          커널 팩토리 — 엔진 전체 (~850 lines)
+├── createInspector.ts       Inspector 구현 (Port/Adapter 패턴)
+├── createReactBindings.ts   React 훅 (useComputed, useQuery)
 └── core/
-    ├── tokens.ts         타입 정의 (Command, EffectToken, ScopeToken 등)
-    ├── inspectorPort.ts  Inspector 포트 인터페이스 (ISP 준수)
-    └── transaction.ts    StateDiff 계산 (순수 함수)
+    ├── tokens.ts            타입 정의 (Command, EffectToken, ScopeToken, QueryToken 등)
+    ├── inspectorPort.ts     Inspector 포트 인터페이스 (ISP 준수)
+    ├── transaction.ts       StateDiff 계산 (순수 함수)
+    └── shallow.ts           Shallow equality (useComputed/useQuery용)
 ```
 
 파일 구조에 대한 설계 근거는 다음과 같다.
 
 - **`createKernel.ts` 단일 파일**: 커널의 모든 상태가 하나의 클로저 안에 존재해야 하므로, 파일을 분할하면 클로저 간 상태 공유가 필요해져 복잡도가 증가한다.
 - **`createInspector.ts` 분리**: Interface Segregation Principle에 따라 Inspector는 커널 내부에 대한 읽기 전용 좁은 창(narrow window)만 필요하다. 좁은 포트 인터페이스(`inspectorPort.ts`)를 통해 접근하며, 커널 내부 Map에 직접 접근하지 않는다.
-- **`core/` 디렉토리**: 상태를 갖지 않는 파일만 포함한다. `tokens.ts`는 컴파일 타임 전용 브랜드 심볼이며, `transaction.ts`의 `computeChanges()`는 순수 함수다.
+- **`createReactBindings.ts` 분리**: React 의존성을 커널 코어에서 격리한다. `useComputed`와 `useQuery` 훅은 커널의 `getState`, `subscribe`, `resolveQuery`에만 의존한다.
+- **`core/` 디렉토리**: 상태를 갖지 않는 파일만 포함한다. `tokens.ts`는 컴파일 타임 전용 브랜드 심볼이며, `transaction.ts`의 `computeChanges()`와 `shallow.ts`의 `shallow()`는 순수 함수다.
 
 ---
 

@@ -39,11 +39,17 @@ type Kernel<S> = {
   setState: (updater: (prev: S) => S) => void;
   subscribe: (listener: () => void) => () => void;
 
-  // React
-  useComputed: <T>(selector: (state: S) => T) => T;
+  // Query
+  defineQuery: DefineQuery<S>;
+  resolveQuery: <T>(id: string) => T;
 
   // Inspector (Port/Adapter 패턴)
   inspector: KernelInspector;
+
+  // Preview (테스트/인스펙션 전용)
+  enterPreview: (state: S) => void;
+  exitPreview: () => void;
+  isPreviewing: () => boolean;
 
   // Fallback
   resolveFallback: (event: Event) => boolean;
@@ -51,6 +57,9 @@ type Kernel<S> = {
 ```
 
 Kernel 인스턴스 자체가 GLOBAL 스코프의 Group이다. 별도의 "커널 API"와 "그룹 API"를 구분하지 않고 동일한 인터페이스를 사용함으로써 API 표면과 학습 비용을 최소화한다. Inspector는 Port/Adapter 패턴으로 분리하여 개발 도구와 커널 내부 사이에 읽기 전용 인터페이스만 노출한다.
+
+> [!NOTE]
+> `useComputed`와 `useQuery` 훅은 `createKernel()` 반환에 포함되지 않는다. 이 훅들은 `createReactBindings(kernel)`을 통해 별도로 생성된다. OS 레이어의 `appState.ts`가 이를 통합하여 `kernel.useComputed`, `kernel.useQuery` 형태로 재노출한다.
 
 ### 예시
 
@@ -245,9 +254,12 @@ subscribe(listener: () => void): () => void
 
 ## React API
 
+> [!NOTE]
+> 아래 훅들은 `createReactBindings(kernel)`이 반환한다. `createKernel()` 반환 객체에는 포함되지 않는다.
+
 ### useComputed
 
-상태 트리에서 파생된 값을 구독한다. `useSyncExternalStore` 기반이다.
+상태 트리에서 파생된 값을 구독한다. `useSyncExternalStore` 기반이다. 선택된 값에 대해 shallow equality 비교를 수행하여, 동등한 결과에 대한 불필요한 리렌더링을 방지한다.
 
 ```typescript
 useComputed<T>(selector: (state: S) => T): T
@@ -258,6 +270,53 @@ function TodoCount() {
   const count = kernel.useComputed((s) => s.todos.length);
   return <span>{count}</span>;
 }
+```
+
+### useQuery
+
+`defineQuery()`로 등록된 Query를 구독한다. `useSyncExternalStore` 기반이며, Query 캐시의 무효화와 연동한다. shallow equality 비교로 불필요한 리렌더링을 방지한다.
+
+```typescript
+useQuery<T>(token: QueryToken<string, T>): T
+```
+
+```tsx
+const VISIBLE_ITEMS = kernel.defineQuery("VISIBLE_ITEMS", (s) => s.items.filter(...));
+
+function ItemList() {
+  const items = kernel.useQuery(VISIBLE_ITEMS);
+  return <ul>{items.map(...)}</ul>;
+}
+```
+
+---
+
+## Preview API
+
+Preview Layer는 비파괴적 상태 오버라이드를 제공한다. 주로 테스트 인프라(`createOsPage`, `page.ts`)에서 사용되며, 프로덕션 상태를 보존하면서 독립된 상태 공간에서 디스패치를 실행할 수 있다.
+
+### enterPreview
+
+프리뷰 모드에 진입한다. 이후 `getState()`는 프리뷰 상태를 반환하고, `setState()`는 프리뷰 상태에 기록한다. 실제 상태는 보존된다. 프리뷰 모드는 별도의 트랜잭션 로그를 유지한다.
+
+```typescript
+enterPreview(state: S): void
+```
+
+### exitPreview
+
+프리뷰 모드를 종료한다. `getState()`가 실제 상태를 다시 반환한다. 프리뷰 트랜잭션 로그는 폐기된다.
+
+```typescript
+exitPreview(): void
+```
+
+### isPreviewing
+
+현재 프리뷰 모드인지 확인한다.
+
+```typescript
+isPreviewing(): boolean
 ```
 
 ---
@@ -347,6 +406,63 @@ inspector.travelTo(transactionId: number): void
 
 ```typescript
 inspector.clearTransactions(): void
+```
+
+---
+
+## Query API
+
+### defineQuery
+
+상태에서 파생된 값을 캐싱하는 Query 프로바이더를 등록하고 QueryToken을 반환한다.
+
+```typescript
+defineQuery<Id extends string, T>(
+  id: Id,
+  provider: (state: S) => T,
+  options?: { invalidateOn?: string[] },
+): QueryToken<Id, T>
+```
+
+| 매개변수 | 타입 | 설명 |
+|---|---|---|
+| `id` | `string` | Query 식별자 |
+| `provider` | `(state: S) => T` | 상태에서 값을 도출하는 함수 |
+| `options.invalidateOn` | `string[]` | 캐시를 무효화할 커맨드 타입 목록. 생략 시 모든 상태 변경에 재계산 |
+
+`defineQuery()`는 동일한 ID로 Context 프로바이더도 자동 등록한다. 이를 통해 `group({ inject: [queryToken] })`으로 커맨드 핸들러에서 Query 결과에 접근할 수 있다.
+
+### resolveQuery
+
+등록된 Query를 해석하여 캐시된 값을 반환한다.
+
+```typescript
+resolveQuery<T>(id: string): T
+```
+
+캐시 히트 조건:
+- 상태 참조가 이전과 동일하고, 무효화되지 않은 경우
+- `invalidateOn`이 설정되어 있고, 해당 커맨드가 디스패치되지 않은 경우
+
+---
+
+## React Query API
+
+### useQuery
+
+Query를 React 컴포넌트에서 구독한다. `useSyncExternalStore` 기반이며, shallow 비교로 불필요한 리렌더링을 방지한다.
+
+```typescript
+useQuery<T>(token: QueryToken<string, T>): T
+```
+
+```tsx
+const ITEM_COUNT = kernel.defineQuery("ITEM_COUNT", (s) => s.items.length);
+
+function Counter() {
+  const count = kernel.useQuery(ITEM_COUNT);
+  return <span>{count}</span>;
+}
 ```
 
 ---

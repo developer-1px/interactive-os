@@ -1,12 +1,12 @@
 # 핵심 개념
 
-> 커널 애플리케이션을 구성하는 7가지 요소
+> 커널 애플리케이션을 구성하는 8가지 요소
 
 ---
 
 ## 개요
 
-Kernel은 7가지 핵심 개념으로 구성된다. 그 외의 모든 기능은 이들의 조합이다.
+Kernel은 8가지 핵심 개념으로 구성된다. 그 외의 모든 기능은 이들의 조합이다.
 
 ```mermaid
 graph LR
@@ -17,6 +17,7 @@ graph LR
     EffectMap -->|state| Store
     EffectMap -->|custom| Effect
     Context -->|inject| Handler
+    Query -->|derived| Store
     Middleware -->|before/after| Pipeline
 ```
 
@@ -26,6 +27,7 @@ graph LR
 | Effect | 부수 효과 핸들러 | `defineEffect()` |
 | Context | 읽기 전용 데이터 주입 | `defineContext()` + `group({ inject })` |
 | Scope | 커맨드 해석의 네임스페이스 | `defineScope()` + `group({ scope })` |
+| Query | 상태에서 파생된 캐시 가능 값 | `defineQuery()` + `resolveQuery()` |
 | When Guard | 조건부 커맨드 실행 게이트 | `defineCommand(..., { when })` |
 | Middleware | 횡단 관심사 before/after 훅 | `group.use()` |
 | State | 단일 불변 상태 트리 | `createKernel(initialState)` |
@@ -388,6 +390,69 @@ kernel.use({ id: "logger", before: v2 }); // v1이 v2로 교체됨
 ```
 
 id 기반 중복 제거를 통해 HMR 환경에서 모듈이 재실행되어 `kernel.use()`가 다시 호출되더라도 미들웨어가 중복 등록되지 않는다.
+
+---
+
+## Query
+
+Query는 상태에서 파생된 값을 캐싱하여 제공하는 프리미티브다. Context가 외부 데이터를 주입하는 반면, Query는 커널 상태에서 계산된 값을 효율적으로 제공한다.
+
+### 정의
+
+```typescript
+const VISIBLE_ITEMS = kernel.defineQuery(
+  "VISIBLE_ITEMS",
+  (state) => state.items.filter((item) => !item.hidden),
+);
+```
+
+프로바이더는 상태를 인자로 받아 파생 값을 반환한다. 결과는 상태 참조가 변경될 때까지 캐싱된다.
+
+### 해석
+
+```typescript
+const items = kernel.resolveQuery("VISIBLE_ITEMS");
+```
+
+### 선택적 무효화
+
+기본적으로 Query 캐시는 상태 참조가 변경되면 무효화된다. `invalidateOn` 옵션으로 특정 커맨드 타입에 의해서만 무효화되도록 제한할 수 있다.
+
+```typescript
+const ITEM_COUNT = kernel.defineQuery(
+  "ITEM_COUNT",
+  (state) => state.items.length,
+  { invalidateOn: ["ADD_ITEM", "DELETE_ITEM"] },
+);
+// ADD_ITEM, DELETE_ITEM 디스패치 시에만 재계산한다.
+// 다른 커맨드가 상태를 변경해도 캐시를 유지한다.
+```
+
+### Context 브릿지
+
+`defineQuery()`는 동일한 ID로 Context 프로바이더도 자동 등록한다. 따라서 Query는 `inject`를 통해 커맨드 핸들러에서도 접근할 수 있다.
+
+```typescript
+const VISIBLE = kernel.defineQuery("VISIBLE", (s) => s.items.filter(...));
+
+const group = kernel.group({ inject: [VISIBLE] });
+group.defineCommand("CMD", (ctx) => () => {
+  ctx.VISIBLE; // Query 결과에 접근
+});
+```
+
+### React 통합
+
+`useQuery` 훅으로 React 컴포넌트에서 Query를 구독한다.
+
+```typescript
+function ItemCount() {
+  const count = kernel.useQuery(ITEM_COUNT);
+  return <span>{count}</span>;
+}
+```
+
+`useQuery`는 `useSyncExternalStore` 위에 구현되어 있으며, Query 캐시의 무효화와 연동하여 필요한 경우에만 리렌더링한다.
 
 ---
 

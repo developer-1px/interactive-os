@@ -23,6 +23,8 @@
 | When Guard | 커맨드 실행의 선행 조건. `{ when: (state) => boolean }`. guard 실패 시 버블링한다. | precondition, filter |
 | State | 단일 불변 상태 트리 | db, DB, store, OSState |
 | Token | 타입 안전 참조. `define*()`으로만 생성한다. 원시 문자열 사용을 방지한다. | ID, key, tag |
+| Query | `defineQuery()`로 등록된 상태 파생 캐시. 프로바이더가 상태를 받아 값을 도출하고, 상태 참조 또는 `invalidateOn` 기반으로 캐시를 관리한다. Context 브릿지를 통해 `inject`로도 접근 가능하다. | computed, derived, selector |
+| QueryToken | 래퍼 객체 `{ __id, __queryBrand, __phantom? }`. `defineQuery()`의 반환값이다. ContextToken과 호환된다. | query key |
 | Computed | `useComputed(selector)`를 통한 파생 상태 | subscription, selector |
 | State Lens | `{ get, set }` 쌍. 스코프 격리를 위한 상태 슬라이스이다. 자식 스코프가 자동 상속할 수 있다. | reducer, slice |
 | Transaction | 상태 스냅샷을 포함한 커맨드 실행 기록이다. 타임 트래블을 지원한다. | event, log entry |

@@ -60,12 +60,14 @@ A:before → B:before → C:before → [handler] → C:after → B:after → A:a
 
 ```
 1. 스코프 before 미들웨어 (A → B → C)
-2. when guard 평가
-3. 커맨드별 inject 인터셉터 (before)
-4. 핸들러 실행
-5. 커맨드별 inject 인터셉터 (after, 역순)
+2. 핸들러 탐색
+3. when guard 평가
+4. 컨텍스트 주입 (group inject + 커맨드별 inject)
+5. 핸들러 실행
 6. 스코프 after 미들웨어 (C → B → A)
 ```
+
+컨텍스트 주입(4단계)은 별도의 인터셉터가 아니라 `processCommand` 내부에서 직접 수행된다. 주입된 값은 `ctx` 객체에 병합되어 핸들러에 전달된다.
 
 ---
 

@@ -14,7 +14,7 @@
 
 ## 토큰 타입
 
-Kernel은 4가지 토큰 타입을 정의한다. 각 토큰은 서로 다른 TypeScript 기법을 사용하여 컴파일 타임 안전성을 확보한다.
+Kernel은 5가지 토큰 타입을 정의한다. 각 토큰은 서로 다른 TypeScript 기법을 사용하여 컴파일 타임 안전성을 확보한다.
 
 ### EffectToken — 브랜드 문자열
 
@@ -70,6 +70,27 @@ type ContextToken<Id extends string = string, Value = unknown> = {
 
 > [!NOTE]
 > ContextToken이 브랜드 문자열 대신 래퍼 객체를 사용하는 이유는 TypeScript의 mapped type이 브랜드 문자열에서 Value를 추론하지 못하기 때문이다. 객체 형태를 사용해야 `InjectResult<Tokens>`가 `[ContextToken<"NOW", number>, ContextToken<"USER", User>]`에서 `{ NOW: number, USER: User }`를 올바르게 도출할 수 있다.
+
+### QueryToken — 래퍼 객체
+
+```typescript
+type QueryToken<Id extends string = string, Value = unknown> = {
+  readonly __id: Id;
+  readonly __queryBrand: true;
+  readonly __phantom?: Value; // 컴파일 타임 전용
+};
+```
+
+런타임 값은 객체 `{ __id: "VISIBLE_ITEMS", __queryBrand: true }`이다. ContextToken과 유사한 래퍼 형태이며, `__queryBrand`로 ContextToken과 구분된다.
+
+```typescript
+const VISIBLE = kernel.defineQuery("VISIBLE", (s) => s.items.filter(...));
+// typeof VISIBLE = QueryToken<"VISIBLE", Item[]>
+
+kernel.resolveQuery(VISIBLE.__id);  // Item[]
+```
+
+QueryToken은 ContextToken으로도 사용할 수 있다. `defineQuery()`가 동일한 ID로 Context 프로바이더를 자동 등록하기 때문이다.
 
 ### Command — 브랜드 객체
 
