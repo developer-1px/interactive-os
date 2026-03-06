@@ -6,15 +6,22 @@
  *   2. browser visual  — createBrowserPage() (TestBot 패널)
  *   3. Playwright E2E  — native page
  *
- * Page API 6-method subset만 사용:
+ * Page API subset만 사용 — Playwright Strict Subset Rule (K2):
  *   page.locator(id).click(), page.keyboard.press(),
  *   expect(loc).toHaveAttribute(), expect(loc).toBeFocused(),
  *   locator.getAttribute()
- *
- * ⚠ document.querySelector 금지 — headless에서 DOM 없음
  */
 
 import type { TestScript } from "@os-devtool/testing";
+
+// ═══════════════════════════════════════════════════════════════════
+// Auto-discovery metadata — testbot-manifest.ts reads these eagerly
+// ═══════════════════════════════════════════════════════════════════
+
+/** Zone IDs that trigger this file's scripts */
+export const zones = ["docs-sidebar", "docs-recent", "docs-favorites"];
+/** UI group name */
+export const group = "Docs Viewer";
 
 // ═══════════════════════════════════════════════════════════════════
 // Test Fixtures — headless에서도 사용할 고정 아이템 ID
@@ -289,18 +296,14 @@ export const tabNavigationScripts: TestScript[] = [
         name: "§4a Tab: 사이드바에서 Tab → 다른 zone으로 escape",
         group: "Docs Viewer",
         async run(page, expect) {
-            // DOM에서 사이드바 첫 번째 실제 item을 찾는다
-            const sidebarItem = document.querySelector('[data-zone="docs-sidebar"] [data-item]');
-            if (!sidebarItem?.id) throw new Error("No sidebar items found in DOM");
-
-            await page.locator(sidebarItem.id).click();
-            await expect(page.locator(sidebarItem.id)).toBeFocused();
+            await page.locator(SIDEBAR_ITEMS[0]!).click();
+            await expect(page.locator(SIDEBAR_ITEMS[0]!)).toBeFocused();
 
             // Tab → escape behavior → 다음 zone으로 이동해야 함
             await page.keyboard.press("Tab");
 
             // 사이드바 항목이 더 이상 focused가 아니어야 함 (zone이 바뀜)
-            await expect(page.locator(sidebarItem.id)).not.toBeFocused();
+            await expect(page.locator(SIDEBAR_ITEMS[0]!)).not.toBeFocused();
         },
     },
 
@@ -308,15 +311,12 @@ export const tabNavigationScripts: TestScript[] = [
         name: "§4b Tab: 사이드바에서 Shift+Tab → 역방향 zone escape",
         group: "Docs Viewer",
         async run(page, expect) {
-            const sidebarItem = document.querySelector('[data-zone="docs-sidebar"] [data-item]');
-            if (!sidebarItem?.id) throw new Error("No sidebar items found in DOM");
-
-            await page.locator(sidebarItem.id).click();
-            await expect(page.locator(sidebarItem.id)).toBeFocused();
+            await page.locator(SIDEBAR_ITEMS[0]!).click();
+            await expect(page.locator(SIDEBAR_ITEMS[0]!)).toBeFocused();
 
             await page.keyboard.press("Shift+Tab");
 
-            await expect(page.locator(sidebarItem.id)).not.toBeFocused();
+            await expect(page.locator(SIDEBAR_ITEMS[0]!)).not.toBeFocused();
         },
     },
 
@@ -324,15 +324,12 @@ export const tabNavigationScripts: TestScript[] = [
         name: "§4c Tab: 최근 목록에서 Tab → 다른 zone escape",
         group: "Docs Viewer",
         async run(page, expect) {
-            const recentItem = document.querySelector('[data-zone="docs-recent"] [data-item]');
-            if (!recentItem?.id) throw new Error("No recent items found in DOM");
-
-            await page.locator(recentItem.id).click();
-            await expect(page.locator(recentItem.id)).toBeFocused();
+            await page.locator(RECENT_ITEMS[0]!).click();
+            await expect(page.locator(RECENT_ITEMS[0]!)).toBeFocused();
 
             await page.keyboard.press("Tab");
 
-            await expect(page.locator(recentItem.id)).not.toBeFocused();
+            await expect(page.locator(RECENT_ITEMS[0]!)).not.toBeFocused();
         },
     },
 
@@ -340,16 +337,13 @@ export const tabNavigationScripts: TestScript[] = [
         name: "§4d Tab: 사이드바 마지막→Tab→escape",
         group: "Docs Viewer",
         async run(page, expect) {
-            const sidebarItems = document.querySelectorAll('[data-zone="docs-sidebar"] [data-item]');
-            const lastItem = sidebarItems[sidebarItems.length - 1];
-            if (!lastItem?.id) throw new Error("No sidebar items found in DOM");
-
-            await page.locator(lastItem.id).click();
-            await expect(page.locator(lastItem.id)).toBeFocused();
+            const lastId = SIDEBAR_ITEMS[SIDEBAR_ITEMS.length - 1]!;
+            await page.locator(lastId).click();
+            await expect(page.locator(lastId)).toBeFocused();
 
             await page.keyboard.press("Tab");
 
-            await expect(page.locator(lastItem.id)).not.toBeFocused();
+            await expect(page.locator(lastId)).not.toBeFocused();
         },
     },
 ];

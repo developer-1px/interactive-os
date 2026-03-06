@@ -10,13 +10,13 @@
 - K2. **Playwright Strict Subset Rule**: run() 안의 모든 API는 Playwright에 반드시 존재해야 한다
 - K3. **Test Layer Separation**: run() = Playwright subset (interaction), unit test = 제약 없음 (logic), infra = OS API 허용 (setup)
 
+## Done
+
+- [x] T1: types.ts — Page API 정리 (Playwright strict subset 확정) — tsc 0 | 1994 tests ✅
+- [x] T2: types.ts — LocatorAssertions 정리 (비-Playwright 메서드 제거) — tsc 0 | 1994 tests ✅
+- [x] T3: AppPage — dispatch/state를 AppPageInternal로 분리 — tsc 0 | 1994 tests ✅
+
 ## Now
-
-- [ ] T1: types.ts — Page API 정리 (Playwright strict subset 확정)
-- [ ] T2: types.ts — LocatorAssertions 정리 (비-Playwright 메서드 제거)
-- [ ] T3: AppPage — dispatch/state/goto 등 비-Playwright 메서드를 TestScript에서 사용 불가하도록 분리
-
-## Next
 
 - [ ] T4: testbot-docs.ts §4 — document.querySelector 제거 (Playwright 위반)
 - [ ] T5: testbot-builder-arrow.ts — document.querySelector 제거

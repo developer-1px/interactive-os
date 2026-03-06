@@ -12,91 +12,17 @@
  *   Arrow: 같은 레벨 형제 이동 (itemFilter가 data-level로 필터)
  *   Enter: 아래 레벨로 drill down (section→group→item→edit)
  *   \:     위 레벨로 drill up (item→group→section)
+ *
+ * Playwright Strict Subset Rule (K2): document.querySelector 금지.
  */
 
 import type { TestScript } from "@os-devtool/testing";
 
+// Auto-discovery metadata — testbot-manifest.ts reads these eagerly
+export const zones = ["canvas"];
+export const group = "Builder";
+
 export const builderArrowNavScripts: TestScript[] = [
-  // ─── §0: DOM Diagnostics ────────────────────────────────
-  {
-    name: "§0 진단: data-level DOM 속성 덤프",
-    async run(page, expect) {
-      // ge-features 클릭
-      await page.locator("ge-features").click();
-      await expect(page.locator("ge-features")).toBeFocused();
-
-      // DOM에서 data-level 속성 직접 읽기
-      const zoneEl = document.querySelector("[data-zone='canvas']");
-      if (!zoneEl) throw new Error("canvas zone 엘리먼트를 못 찾음!");
-
-      const items = zoneEl.querySelectorAll("[data-item]");
-      const dump: string[] = [];
-      for (const el of items) {
-        const id = el.id;
-        const level = el.getAttribute("data-level");
-        const closestZone = el
-          .closest("[data-zone]")
-          ?.getAttribute("data-zone");
-        dump.push(`${id}: level=${level}, zone=${closestZone}`);
-      }
-
-      // 10개만 보고
-      const summary = dump.slice(0, 15).join("\n");
-      const levelCounts = {
-        section: dump.filter((d) => d.includes("level=section")).length,
-        group: dump.filter((d) => d.includes("level=group")).length,
-        item: dump.filter((d) => d.includes("level=item")).length,
-        null: dump.filter((d) => d.includes("level=null")).length,
-      };
-
-      throw new Error(
-        `DOM 아이템 ${items.length}개 발견\n` +
-          `section=${levelCounts.section}, group=${levelCounts.group}, item=${levelCounts.item}, null=${levelCounts.null}\n` +
-          `---\n${summary}`,
-      );
-    },
-  },
-
-  // ─── §0b: itemFilter 결과 진단 ────────────────────────
-  {
-    name: "§0b 진단: itemFilter 결과 (group 레벨)",
-    async run(page, expect) {
-      // ge-features 클릭 → Enter (drillDown to group)
-      await page.locator("ge-features").click();
-      await page.keyboard.press("Enter");
-      await expect(page.locator("ge-card-1")).toBeFocused();
-
-      // 현재 focusedItemId 확인
-      const zoneEl = document.querySelector("[data-zone='canvas']");
-      if (!zoneEl) throw new Error("canvas zone 엘리먼트를 못 찾음!");
-
-      // ge-card-1의 data-level
-      const card1El = zoneEl.querySelector("#ge-card-1");
-      const card1Level = card1El?.getAttribute("data-level") ?? "(null)";
-      const card1ClosestZone = card1El
-        ?.closest("[data-zone]")
-        ?.getAttribute("data-zone");
-
-      // 같은 level의 아이템 수
-      const allItems = zoneEl.querySelectorAll("[data-item]");
-      const sameLevel: string[] = [];
-      const canvasDirectItems: string[] = [];
-      for (const el of allItems) {
-        const id = el.id ?? "";
-        const level = el.getAttribute("data-level");
-        const zone = el.closest("[data-zone]")?.getAttribute("data-zone");
-        if (zone === "canvas") canvasDirectItems.push(`${id}(${level})`);
-        if (level === card1Level) sameLevel.push(id);
-      }
-
-      throw new Error(
-        `ge-card-1: data-level="${card1Level}", closest-zone="${card1ClosestZone}"\n` +
-          `같은 level(${card1Level}) 아이템: ${sameLevel.length}개 → [${sameLevel.slice(0, 5).join(", ")}]\n` +
-          `canvas 직속 아이템: ${canvasDirectItems.length}개 → [${canvasDirectItems.slice(0, 8).join(", ")}]`,
-      );
-    },
-  },
-
   // ─── Level 1: Section ───────────────────────────────────
   {
     name: "§1 Section: 화살표 ↓ 이동 (ge-hero → ge-notice)",
@@ -147,7 +73,7 @@ export const builderArrowNavScripts: TestScript[] = [
 
   // ─── Drill Up: Group → Section ──────────────────────────
   {
-    name: "§4 DrillUp: \\ 로 group→section (ge-card-1 → ge-features)",
+    name: "§4 DrillUp: \\\\ 로 group→section (ge-card-1 → ge-features)",
     async run(page, expect) {
       await page.locator("ge-features").click();
       await page.keyboard.press("Enter");
@@ -168,57 +94,6 @@ export const builderArrowNavScripts: TestScript[] = [
 
       await page.keyboard.press("Enter");
       await expect(page.locator("ge-card-1-card-title")).toBeFocused();
-    },
-  },
-
-  // ─── §0c: itemFilter 결과 진단 (item 레벨) ─────────────────
-  {
-    name: "§0c 진단: itemFilter 결과 (item 레벨 - ge-card-1-card-title)",
-    async run(page, expect) {
-      await page.locator("ge-features").click();
-      await page.keyboard.press("Enter");
-      await page.keyboard.press("Enter");
-      await expect(page.locator("ge-card-1-card-title")).toBeFocused();
-
-      // 현재 focusedItemId 확인
-      const zoneEl = document.querySelector("[data-zone='canvas']");
-      if (!zoneEl) throw new Error("canvas zone 엘리먼트를 못 찾음!");
-
-      const currentEl = zoneEl.querySelector(
-        "#ge-card-1-card-title",
-      );
-      const currentLevel = currentEl?.getAttribute("data-level") ?? "(null)";
-      const currentClosestZone = currentEl
-        ?.closest("[data-zone]")
-        ?.getAttribute("data-zone");
-
-      const allItems = zoneEl.querySelectorAll("[data-item]");
-      const sameLevel: string[] = [];
-      const rects: string[] = [];
-
-      for (const el of allItems) {
-        const id = el.id ?? "";
-        const level = el.getAttribute("data-level");
-        const zone = el.closest("[data-zone]")?.getAttribute("data-zone");
-
-        // item 레벨이면서 canvas 소속인 것만
-        if (level === currentLevel && zone === "canvas") {
-          sameLevel.push(id);
-          // ge-card-1 에 속한 item들의 rect 비교 위해
-          if (id.startsWith("ge-card-1-card-")) {
-            const r = el.getBoundingClientRect();
-            rects.push(
-              `${id}: top=${Math.round(r.top)}, bottom=${Math.round(r.bottom)}, left=${Math.round(r.left)}, right=${Math.round(r.right)}`,
-            );
-          }
-        }
-      }
-
-      throw new Error(
-        `ge-card-1-card-title: data-level="${currentLevel}", closest-zone="${currentClosestZone}"\n` +
-          `같은 level(${currentLevel}) + canvas 직속 아이템: ${sameLevel.length}개\n` +
-          `-- ge-card-1 소속 아이템 Rects --\n${rects.join("\n")}`,
-      );
     },
   },
 
