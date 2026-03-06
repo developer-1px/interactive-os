@@ -27,7 +27,6 @@
  *   - tab: escape (Tab exits tablist)
  */
 
-import { OS_SELECT } from "@os-core/4-command/selection/select";
 import { createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
@@ -78,7 +77,7 @@ function carouselFactory(focusedTab = "slide-1") {
   const page = createPage(app);
   page.goto("carousel-tabs", { focusedItemId: focusedTab });
   // Auto-activation: pre-select the initially focused tab
-  page.dispatch(OS_SELECT({ targetId: focusedTab, mode: "replace" }));
+  page.click(focusedTab);
   return page;
 }
 

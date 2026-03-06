@@ -13,25 +13,24 @@
  *         onCheck toggles selection (→ aria-checked)
  */
 
-import { OS_CHECK } from "@os-core/4-command/activate/check";
 import { createPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
+import {
+  SwitchApp,
+  SWITCHES,
+} from "@/pages/apg-showcase/patterns/SwitchPattern";
 
-// ─── Test Setup ───
+// ─── Test Setup (actual showcase config) ───
 
-const SWITCH_ID = "notifications-switch";
+const SWITCH_IDS = SWITCHES.map((s) => s.id);
+const SWITCH_ID = SWITCH_IDS[0]; // "switch-notifications"
 
 function switchFactory() {
-  const app = defineApp("test-switch", {});
-  const zone = app.createZone("switch-zone");
-  zone.bind({
-    role: "switch",
-    getItems: () => [SWITCH_ID],
-    onAction: (cursor) => OS_CHECK({ targetId: cursor.focusId }),
+  const page = createPage(SwitchApp);
+  page.goto("apg-switch", {
+    items: SWITCH_IDS,
+    focusedItemId: SWITCH_ID,
   });
-  const page = createPage(app);
-  page.goto("switch-zone", { focusedItemId: SWITCH_ID });
   return page;
 }
 

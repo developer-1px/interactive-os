@@ -64,7 +64,7 @@ const FAQ_ITEMS: FaqItem[] = [
 
 // ─── App + Zone (defineApp pattern) ───
 
-const DisclosureApp = defineApp<Record<string, never>>(
+export const DisclosureApp = defineApp<Record<string, never>>(
   "apg-disclosure-app",
   {},
 );

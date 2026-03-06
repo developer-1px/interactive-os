@@ -17,8 +17,11 @@
  */
 
 import { createPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
+import {
+  AccordionApp,
+  SECTIONS,
+} from "@/pages/apg-showcase/patterns/AccordionPattern";
 import {
   assertBoundaryClamp,
   assertHomeEnd,
@@ -26,36 +29,16 @@ import {
   assertVerticalNav,
 } from "./helpers/contracts";
 
-// ─── Test Setup ───
+// ─── Test Setup (actual showcase config) ───
 
-const HEADERS = ["acc-personal", "acc-billing", "acc-shipping"];
+const HEADERS = SECTIONS.map((s) => s.id);
 
 function accordionFactory(focusedItem = "acc-personal") {
-  const app = defineApp("test-accordion", {});
-  const zone = app.createZone("accordion-zone");
-  zone.bind({
-    role: "accordion",
-    getItems: () => HEADERS,
-    options: {
-      navigate: {
-        orientation: "vertical",
-        loop: false,
-        seamless: false,
-        typeahead: false,
-        entry: "first",
-        recovery: "next",
-      },
-      activate: {
-        mode: "manual",
-        onClick: true, // APG: click on header toggles expand/collapse
-      },
-      expand: {
-        mode: "all", // APG accordion: all headers are expandable
-      },
-    },
+  const page = createPage(AccordionApp);
+  page.goto("apg-accordion", {
+    items: HEADERS,
+    focusedItemId: focusedItem,
   });
-  const page = createPage(app);
-  page.goto("accordion-zone", { focusedItemId: focusedItem });
   return page;
 }
 

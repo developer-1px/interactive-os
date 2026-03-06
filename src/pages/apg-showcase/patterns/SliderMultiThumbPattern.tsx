@@ -41,7 +41,7 @@ const INITIAL_MAX = 300;
 
 // ─── App + Zone (defineApp pattern) ───
 
-const MultiThumbApp = defineApp<Record<string, never>>(
+export const MultiThumbApp = defineApp<Record<string, never>>(
   "apg-slider-multithumb-app",
   {},
 );

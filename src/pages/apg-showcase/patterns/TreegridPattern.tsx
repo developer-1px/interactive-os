@@ -159,7 +159,7 @@ const expandableIds = collectExpandable(EMAILS);
 
 // -- App + Zone --
 
-const TreegridApp = defineApp<Record<string, never>>("apg-treegrid-app", {});
+export const TreegridApp = defineApp<Record<string, never>>("apg-treegrid-app", {});
 const treegridZone = TreegridApp.createZone("apg-treegrid");
 const TreegridUI = treegridZone.bind({
   role: "treegrid",

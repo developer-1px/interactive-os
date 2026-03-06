@@ -27,7 +27,7 @@ interface SwitchDef {
   description: string;
 }
 
-const SWITCHES: SwitchDef[] = [
+export const SWITCHES: SwitchDef[] = [
   {
     id: "switch-notifications",
     label: "Notifications",
@@ -47,7 +47,7 @@ const SWITCHES: SwitchDef[] = [
 
 // ─── App + Zone (defineApp pattern) ───
 
-const SwitchApp = defineApp<Record<string, never>>("apg-switch-app", {});
+export const SwitchApp = defineApp<Record<string, never>>("apg-switch-app", {});
 const switchZone = SwitchApp.createZone("apg-switch");
 const SwitchUI = switchZone.bind({
   role: "switch",

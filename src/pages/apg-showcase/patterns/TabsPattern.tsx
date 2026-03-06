@@ -74,7 +74,7 @@ const TABS: TabDefinition[] = [
 
 // ─── OS App + Zone (Automatic mode) ───
 
-const TabsApp = defineApp("apg-tabs", {});
+export const TabsApp = defineApp("apg-tabs", {});
 
 const autoZone = TabsApp.createZone("tablist-auto");
 const AutoUI = autoZone.bind({

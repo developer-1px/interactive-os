@@ -61,7 +61,7 @@ const SLIDERS: SliderDef[] = [
 
 // ─── App + Zone (defineApp pattern) ───
 
-const SliderApp = defineApp<Record<string, never>>("apg-slider-app", {});
+export const SliderApp = defineApp<Record<string, never>>("apg-slider-app", {});
 
 const sliderZone = SliderApp.createZone("apg-slider-zone");
 const SliderUI = sliderZone.bind({

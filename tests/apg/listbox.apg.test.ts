@@ -10,7 +10,6 @@
  * Unique: followFocus on/off, Shift+Arrow range, horizontal variant
  */
 
-import { OS_SELECT } from "@os-core/4-command/selection/select";
 import { createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
@@ -65,7 +64,7 @@ function singleSelect(focusedItem = "apple") {
   });
   const page = createPage(app);
   page.goto("listbox", { focusedItemId: focusedItem });
-  page.dispatch(OS_SELECT({ targetId: focusedItem, mode: "replace" }));
+  page.click(focusedItem);
   return page;
 }
 
@@ -178,21 +177,17 @@ describe("APG Listbox: Single-Select Negative (MUST NOT)", () => {
     expect(t.selection()).toHaveLength(1);
   });
 
-  it("Shift+Click: MUST NOT create range selection (OS_SELECT mode:range → replace)", () => {
-    // W3C: Shift+Click dispatches OS_SELECT({mode:"range"}).
-    // In single-select (range:false), enforceMode must downgrade to "replace".
+  it("Shift+Click: MUST NOT create range selection (single-select enforces replace)", () => {
     const t = singleSelect("banana");
-    t.dispatch(OS_SELECT({ targetId: "elderberry", mode: "range" }));
+    t.click("elderberry", { shift: true });
     expect(t.selection()).toHaveLength(1);
     expect(t.selection()).toContain("elderberry"); // replaced, not range
     expect(t.selection()).not.toContain("banana"); // old deselected
   });
 
-  it("Cmd+Click: MUST NOT toggle selection (OS_SELECT mode:toggle → replace)", () => {
-    // W3C: Cmd+Click dispatches OS_SELECT({mode:"toggle"}).
-    // In single-select (toggle:false), enforceMode must downgrade to "replace".
+  it("Cmd+Click: MUST NOT toggle selection (single-select enforces replace)", () => {
     const t = singleSelect("banana");
-    t.dispatch(OS_SELECT({ targetId: "cherry", mode: "toggle" }));
+    t.click("cherry", { meta: true });
     expect(t.selection()).toHaveLength(1);
     expect(t.selection()).toContain("cherry");
     expect(t.selection()).not.toContain("banana");
@@ -200,7 +195,7 @@ describe("APG Listbox: Single-Select Negative (MUST NOT)", () => {
 
   it("Cmd+Click on already-selected: MUST NOT deselect (single-select invariant)", () => {
     const t = singleSelect("apple");
-    t.dispatch(OS_SELECT({ targetId: "apple", mode: "toggle" }));
+    t.click("apple", { meta: true });
     // Still selected — replace(self) keeps it
     expect(t.selection()).toContain("apple");
     expect(t.selection()).toHaveLength(1);
@@ -302,7 +297,7 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Down: extends selection range", () => {
     const t = multiSelect("banana");
-    t.dispatch(OS_SELECT({ targetId: "banana", mode: "replace" }));
+    t.click("banana");
     t.keyboard.press("Shift+ArrowDown");
     expect(t.focusedItemId()).toBe("cherry");
     expect(t.attrs("banana")["aria-selected"]).toBe(true);
@@ -311,7 +306,7 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Up: extends selection range backward", () => {
     const t = multiSelect("cherry");
-    t.dispatch(OS_SELECT({ targetId: "cherry", mode: "replace" }));
+    t.click("cherry");
     t.keyboard.press("Shift+ArrowUp");
     expect(t.focusedItemId()).toBe("banana");
     expect(t.attrs("banana")["aria-selected"]).toBe(true);
@@ -320,10 +315,10 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Space: range select from anchor to focused", () => {
     const t = multiSelect("banana");
-    t.dispatch(OS_SELECT({ targetId: "banana", mode: "replace" }));
+    t.click("banana");
     t.keyboard.press("ArrowDown");
     t.keyboard.press("ArrowDown");
-    t.dispatch(OS_SELECT({ targetId: "date", mode: "range" }));
+    t.click("date", { shift: true });
     expect(t.attrs("banana")["aria-selected"]).toBe(true);
     expect(t.attrs("cherry")["aria-selected"]).toBe(true);
     expect(t.attrs("date")["aria-selected"]).toBe(true);
@@ -331,7 +326,7 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Down × 3: progressively extends range", () => {
     const t = multiSelect("apple");
-    t.dispatch(OS_SELECT({ targetId: "apple", mode: "replace" }));
+    t.click("apple");
     t.keyboard.press("Shift+ArrowDown");
     t.keyboard.press("Shift+ArrowDown");
     t.keyboard.press("Shift+ArrowDown");
@@ -344,7 +339,7 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Down then Shift+Up: shrinks range", () => {
     const t = multiSelect("banana");
-    t.dispatch(OS_SELECT({ targetId: "banana", mode: "replace" }));
+    t.click("banana");
     t.keyboard.press("Shift+ArrowDown");
     t.keyboard.press("Shift+ArrowDown");
     expect(t.attrs("banana")["aria-selected"]).toBe(true);
@@ -412,7 +407,7 @@ describe("APG Listbox: Horizontal Orientation", () => {
     });
     const page = createPage(app);
     page.goto("listbox", { focusedItemId: focusedItem });
-    page.dispatch(OS_SELECT({ targetId: focusedItem, mode: "replace" }));
+    page.click(focusedItem);
     return page;
   }
 
@@ -457,7 +452,7 @@ describe("APG Listbox: RadioGroup Variant", () => {
     });
     const page = createPage(app);
     page.goto("radiogroup", { focusedItemId: selected });
-    page.dispatch(OS_SELECT({ targetId: selected, mode: "replace" }));
+    page.click(selected);
     return page;
   }
 

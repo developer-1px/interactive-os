@@ -12,7 +12,6 @@
  * Tabs variant: same axis + followFocus (automatic activation)
  */
 
-import { OS_SELECT } from "@os-core/4-command/selection/select";
 import { createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
@@ -145,7 +144,7 @@ describe("APG Toolbar: Tabs Variant", () => {
     });
     const page = createPage(app);
     page.goto("tablist", { focusedItemId: focusedTab });
-    page.dispatch(OS_SELECT({ targetId: focusedTab, mode: "replace" }));
+    page.click(focusedTab);
     return page;
   }
 

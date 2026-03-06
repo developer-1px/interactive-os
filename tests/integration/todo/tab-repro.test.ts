@@ -7,8 +7,6 @@
  */
 
 import { addTodo, TodoApp } from "@apps/todo/app";
-import { dumpTransactions } from "@inspector/utils/dumpTransactions";
-import { os } from "@os-core/engine/kernel";
 import { createPage } from "@os-devtool/testing/page";
 import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, it, vi } from "vitest";
@@ -57,7 +55,6 @@ describe("Tab Issue — Full Page Reproduction", () => {
     // Go back to sidebar, last item
     page.goto("sidebar", { items: cats, focusedItemId: lastCat });
 
-    os.inspector.clearTransactions();
     console.log(
       `\n[BEFORE] activeZone=${page.activeZoneId()}, focusedItem=${page.focusedItemId()}`,
     );
@@ -68,7 +65,6 @@ describe("Tab Issue — Full Page Reproduction", () => {
     console.log(
       `[AFTER Tab] activeZone=${page.activeZoneId()}, focusedItem=${page.focusedItemId()}`,
     );
-    dumpTransactions(os, "Sidebar last item → Tab");
   });
 
   it("List last item → Tab → should escape to sidebar zone", () => {
@@ -80,7 +76,6 @@ describe("Tab Issue — Full Page Reproduction", () => {
     page.goto("sidebar", { items: cats, focusedItemId: cats[0] ?? null });
     page.goto("list", { items: ids, focusedItemId: lastId });
 
-    os.inspector.clearTransactions();
     console.log(
       `\n[BEFORE] activeZone=${page.activeZoneId()}, focusedItem=${page.focusedItemId()}`,
     );
@@ -91,6 +86,5 @@ describe("Tab Issue — Full Page Reproduction", () => {
     console.log(
       `[AFTER Tab] activeZone=${page.activeZoneId()}, focusedItem=${page.focusedItemId()}`,
     );
-    dumpTransactions(os, "List last item → Tab");
   });
 });

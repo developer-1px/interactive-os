@@ -10,7 +10,6 @@
  * Unique: aria-checked instead of aria-selected, Space to check
  */
 
-import { OS_SELECT } from "@os-core/4-command/selection/select";
 import { createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
@@ -47,7 +46,7 @@ function setup(selected = "radio-sm") {
   });
   const page = createPage(app);
   page.goto("radiogroup", { focusedItemId: selected });
-  page.dispatch(OS_SELECT({ targetId: selected, mode: "replace" }));
+  page.click(selected);
   return page;
 }
 

@@ -90,7 +90,7 @@ interface CarouselState {
 
 // --- defineApp -> createZone -> bind ---
 
-const CarouselApp = defineApp<CarouselState>("apg-carousel-app", {
+export const CarouselApp = defineApp<CarouselState>("apg-carousel-app", {
   isRotating: false,
 });
 

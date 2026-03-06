@@ -25,7 +25,7 @@ import clsx from "clsx";
 
 // --- App + Zone (defineApp pattern) ---
 
-const SplitterApp = defineApp<Record<string, never>>(
+export const SplitterApp = defineApp<Record<string, never>>(
   "apg-window-splitter-app",
   {},
 );

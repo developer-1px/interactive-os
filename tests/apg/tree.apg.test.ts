@@ -10,7 +10,6 @@
  *   keyboard.press → resolveKeyboard → command → state → attrs
  */
 
-import { OS_SELECT } from "@os-core/4-command/selection/select";
 import { createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
@@ -344,27 +343,23 @@ describe("APG Tree: Single-Select Negative (MUST NOT)", () => {
     expect(t.selection().length).toBeLessThanOrEqual(1);
   });
 
-  it("Shift+Click: MUST NOT create range selection (OS_SELECT mode:range → replace)", () => {
+  it("Shift+Click: MUST NOT create range selection (single-select enforces replace)", () => {
     const t = treeFactory("section-1");
-    t.dispatch(OS_SELECT({ targetId: "section-1", mode: "replace" }));
+    t.click("section-1");
     expect(t.selection()).toEqual(["section-1"]);
 
-    // Shift+Click sends mode:range — enforceMode must downgrade
-    t.dispatch(OS_SELECT({ targetId: "leaf-1", mode: "range" }));
+    t.click("leaf-1", { shift: true });
     expect(t.selection()).toHaveLength(1);
     expect(t.selection()).toContain("leaf-1"); // replaced, not range
     expect(t.selection()).not.toContain("section-1");
   });
 
-  it("Cmd+Click: MUST NOT toggle selection (OS_SELECT mode:toggle stays toggle for tree)", () => {
-    // Tree single-select has toggle:true → Cmd+Click toggle is allowed
-    // This is different from Listbox single (toggle:false)
+  it("Cmd+Click: toggle selection (tree single has toggle:true)", () => {
     const t = treeFactory("section-1");
-    t.dispatch(OS_SELECT({ targetId: "section-1", mode: "replace" }));
+    t.click("section-1");
     expect(t.selection()).toEqual(["section-1"]);
 
-    // Cmd+Click sends mode:toggle — tree single has toggle:true, so toggle allowed
-    t.dispatch(OS_SELECT({ targetId: "section-1", mode: "toggle" }));
+    t.click("section-1", { meta: true });
     // toggle:true → deselect is allowed
     expect(t.selection()).not.toContain("section-1");
   });

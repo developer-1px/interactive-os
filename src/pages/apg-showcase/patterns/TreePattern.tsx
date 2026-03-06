@@ -82,7 +82,7 @@ const expandableIds = collectExpandable(fileTree);
 
 // ── App + Zone (defineApp pattern) ──
 
-const TreeApp = defineApp<Record<string, never>>("apg-tree-app", {});
+export const TreeApp = defineApp<Record<string, never>>("apg-tree-app", {});
 const explorerZone = TreeApp.createZone("apg-explorer");
 const ExplorerUI = explorerZone.bind({
   role: "tree",

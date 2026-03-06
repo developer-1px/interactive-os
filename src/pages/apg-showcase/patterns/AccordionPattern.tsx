@@ -20,7 +20,7 @@ interface AccordionSection {
   fields: { label: string; required: boolean; type: string }[];
 }
 
-const SECTIONS: AccordionSection[] = [
+export const SECTIONS: AccordionSection[] = [
   {
     id: "acc-personal",
     title: "Personal Information",
@@ -59,7 +59,7 @@ const SECTIONS: AccordionSection[] = [
 
 // ─── App + Zone (defineApp pattern) ───
 
-const AccordionApp = defineApp<Record<string, never>>("apg-accordion-app", {});
+export const AccordionApp = defineApp<Record<string, never>>("apg-accordion-app", {});
 const accordionZone = AccordionApp.createZone("apg-accordion");
 const AccordionUI = accordionZone.bind({ role: "accordion" });
 

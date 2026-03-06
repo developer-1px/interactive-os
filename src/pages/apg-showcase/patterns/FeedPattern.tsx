@@ -77,7 +77,7 @@ const ARTICLES: FeedArticle[] = [
 
 // ─── App + Zone (defineApp pattern) ───
 
-const FeedApp = defineApp<Record<string, never>>("apg-feed-app", {});
+export const FeedApp = defineApp<Record<string, never>>("apg-feed-app", {});
 const feedZone = FeedApp.createZone("apg-feed");
 const FeedUI = feedZone.bind({ role: "feed" });
 

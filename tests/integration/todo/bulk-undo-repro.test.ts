@@ -12,8 +12,6 @@ import {
   TodoApp,
   undoCommand,
 } from "@apps/todo/app";
-import { dumpTransactions } from "@inspector/utils/dumpTransactions";
-import { os } from "@os-core/engine/kernel";
 import { createPage } from "@os-devtool/testing/page";
 import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -57,8 +55,6 @@ describe("Bulk Delete + Undo — Reproduction", () => {
       focusedItemId: a!,
     });
 
-    os.inspector.clearTransactions();
-
     // Step 1: Request delete for 2 items (bulk)
     console.log(`\n── Step 1: requestDeleteTodo([${a}, ${b}]) ──`);
     page.dispatch(requestDeleteTodo({ ids: [a!, b!] }));
@@ -77,10 +73,7 @@ describe("Bulk Delete + Undo — Reproduction", () => {
     };
     console.log(`[AFTER DELETE] ${JSON.stringify(afterDelete, null, 2)}`);
 
-    dumpTransactions(os, "Delete Phase");
-
     // Step 3: Undo
-    os.inspector.clearTransactions();
     console.log(`\n── Step 3: Undo ──`);
     page.dispatch(undoCommand());
 
@@ -90,8 +83,6 @@ describe("Bulk Delete + Undo — Reproduction", () => {
       todosTexts: Object.values(page.state.data.todos).map((t) => t.text),
     };
     console.log(`[AFTER UNDO] ${JSON.stringify(afterUndo, null, 2)}`);
-
-    dumpTransactions(os, "Undo Phase");
 
     // Assertions: both items should be restored
     console.log(`\n── Verification ──`);

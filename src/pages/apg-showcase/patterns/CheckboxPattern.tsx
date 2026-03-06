@@ -42,7 +42,7 @@ const condimentId = (name: string) => `cond-${name.toLowerCase()}`;
 
 // ─── App + Zone ───
 
-const CheckboxApp = defineApp<Record<string, never>>("apg-checkbox-app", {});
+export const CheckboxApp = defineApp<Record<string, never>>("apg-checkbox-app", {});
 const checkboxZone = CheckboxApp.createZone("apg-checkbox");
 const CheckboxUI = checkboxZone.bind({
   role: "checkbox",
