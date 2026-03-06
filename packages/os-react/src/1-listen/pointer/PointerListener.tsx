@@ -160,7 +160,6 @@ export function PointerListener() {
       const focusState = os.getState().os.focus;
       const activeZoneId = focusState.activeZoneId;
 
-
       // Immediate focus+select (mousedown equivalent)
       const mouseInput = senseMouseDown(target, e);
       if (!mouseInput) {

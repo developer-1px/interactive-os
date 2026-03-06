@@ -69,16 +69,26 @@ describe("T10: Role presets produce correct inputmap", () => {
   it("accordion: Space+Enter → OS_EXPAND(toggle), click → OS_EXPAND(toggle)", () => {
     const config = resolveRole("accordion");
     const expandCmd = expect.objectContaining({ type: "OS_EXPAND" });
-    expect(config.inputmap["Space"]).toEqual(expect.arrayContaining([expandCmd]));
-    expect(config.inputmap["Enter"]).toEqual(expect.arrayContaining([expandCmd]));
-    expect(config.inputmap["click"]).toEqual(expect.arrayContaining([expandCmd]));
+    expect(config.inputmap["Space"]).toEqual(
+      expect.arrayContaining([expandCmd]),
+    );
+    expect(config.inputmap["Enter"]).toEqual(
+      expect.arrayContaining([expandCmd]),
+    );
+    expect(config.inputmap["click"]).toEqual(
+      expect.arrayContaining([expandCmd]),
+    );
   });
 
   it("tree: Enter → OS_EXPAND(toggle), click → OS_EXPAND(toggle)", () => {
     const config = resolveRole("tree");
     const expandCmd = expect.objectContaining({ type: "OS_EXPAND" });
-    expect(config.inputmap["Enter"]).toEqual(expect.arrayContaining([expandCmd]));
-    expect(config.inputmap["click"]).toEqual(expect.arrayContaining([expandCmd]));
+    expect(config.inputmap["Enter"]).toEqual(
+      expect.arrayContaining([expandCmd]),
+    );
+    expect(config.inputmap["click"]).toEqual(
+      expect.arrayContaining([expandCmd]),
+    );
   });
 
   it("menu: Space+Enter → [OS_ACTIVATE, OS_OVERLAY_CLOSE], click → same", () => {
