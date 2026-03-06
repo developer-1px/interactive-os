@@ -21,6 +21,8 @@ description: 자율 실행 에이전트 루프. 보편 사이클을 정의하고
 >
 > **모든 프로젝트의 목적은 앱의 완성이 아니라 OS의 완성이다.**
 > `contract-checklist.md §Config`의 금지 목록에 해당하는 코드로 완성되면 OS를 안 썼다는 뜻이므로 **실패**다.
+>
+> **매 단계 완료 후 commit한다.**
 
 ---
 
@@ -42,18 +44,26 @@ description: 자율 실행 에이전트 루프. 보편 사이클을 정의하고
 |---|------|--------|------|
 | 0 | `/plan` 변환 명세표 없음 (discussion Clear 직후) | → `/plan` | `.agent/workflows/plan.md`를 `view_file`로 읽고 실행. 완료 후 → 재진입 |
 | 1 | BOARD.md 없음 (plan이 새 프로젝트로 라우팅) | → `/project` | `.agent/workflows/project.md`를 `view_file`로 읽고 실행. 완료 후 → 재진입 |
-| 1.5 | **Meta 프로젝트** + Now 태스크 있음 | → 직접 실행 | Red/Green 스킵. 태스크를 순서대로 수행 |
-| 2 | Now 태스크에 spec.md 없음 (Heavy/Light) | → `/spec` | `.agent/workflows/spec.md`를 `view_file`로 읽고 실행 |
-| 3 | Now 태스크에 Red 테스트 없음 | → `/red` | `.agent/workflows/red.md`를 `view_file`로 읽고 실행 |
-| 4 | Red 테스트 FAIL 있음 | → `/green` | `.agent/workflows/green.md`를 `view_file`로 읽고 실행. **green 완료 = /verify 통과** |
-| 4.5 | Green PASS + **App 프로젝트** + Zone 태스크 + UI 미연결 | → `/bind` | `.agent/workflows/bind.md`를 `view_file`로 읽고 실행. **App만 해당. OS 프로젝트는 스킵.** |
-| 5 | 태스크 완료 (테스트 PASS + bind 해당 시 완료) | → `/refactor` | `.agent/workflows/refactor.md`를 `view_file`로 읽고 실행 |
-| 6 | 다음 Now 태스크 있음 | → #2로 루프 | 다음 태스크의 spec/Red 확인 |
-| 7 | 모든 Now Done → `/audit` 미실행 | → `/audit` | **필수 완료 게이트.** 모든 프로젝트에 적용 (Meta/Light/Heavy/OS 무관) |
-| 7.1 | `/audit` 결격 (🔴 LLM 실수) | → 근본 원인 단계 | 진단표 기준으로 `/stories` / `/spec` / `/red` / `/bind` 중 해당 단계로 루프백 |
-| 7.2 | `/audit` 통과 → `/doubt` 미실행 | → `/doubt` | **필수 완료 게이트.** 과잉 산출물 점검 |
-| 7.3 | `/doubt` 통과 → **Unresolved > 0** | → Unresolved → Now 승격 | Unresolved 항목을 Now로 올리고 **#2로 루프**. Unresolved == 0이 될 때까지 archive 금지. |
-| 8 | `/audit` + `/doubt` 통과 + **Unresolved == 0** | → 회고 | `/retrospect` → `/archive` |
+| 2 | **Meta 프로젝트** + Now 태스크 있음 | → 직접 실행 | Red/Green 스킵. 태스크를 순서대로 수행 |
+| 3 | Now 태스크에 spec.md 없음 (Heavy/Light) | → `/spec` | `.agent/workflows/spec.md`를 `view_file`로 읽고 실행 |
+| 4 | Now 태스크에 Red 테스트 없음 | → `/red` | `.agent/workflows/red.md`를 `view_file`로 읽고 실행 |
+| 5 | Red 완료 (테스트 FAIL 존재 + reflect 미실행) | → `/reflect` | `.agent/workflows/reflect.md`를 `view_file`로 읽고 실행. **별도 세션 권장** |
+| 6 | Red 테스트 FAIL 있음 | → `/green` | `.agent/workflows/green.md`를 `view_file`로 읽고 실행. **green 완료 = /verify 통과** |
+| 7 | Green 완료 (테스트 PASS + reflect 미실행) | → `/reflect` | `.agent/workflows/reflect.md`를 `view_file`로 읽고 실행. **별도 세션 권장** |
+| 8 | Green PASS + **App 프로젝트** + Zone 태스크 + UI 미연결 | → `/bind` | `.agent/workflows/bind.md`를 `view_file`로 읽고 실행. **App만 해당. OS 프로젝트는 스킵.** |
+| 9 | 태스크 완료 (테스트 PASS + bind 해당 시 완료) | → `/refactor` | `.agent/workflows/refactor.md`를 `view_file`로 읽고 실행 |
+| 10 | 다음 Now 태스크 있음 | → #3으로 루프 | 다음 태스크의 spec/Red 확인 |
+| 11 | 모든 Now Done → `/audit` 미실행 | → `/audit` | **필수 완료 게이트.** 모든 프로젝트에 적용 (Meta/Light/Heavy/OS 무관) |
+| 12 | `/audit` 결격 (LLM 실수) | → 근본 원인 단계 | 진단표 기준으로 `/stories` / `/spec` / `/red` / `/bind` 중 해당 단계로 루프백 |
+| 13 | `/audit` 통과 → `/doubt` 미실행 | → `/doubt` | **필수 완료 게이트.** 과잉 산출물 점검 |
+| 14 | `/doubt` 통과 → **Unresolved > 0** | → Unresolved → Now 승격 | Unresolved 항목을 Now로 올리고 **#3으로 루프**. Unresolved == 0이 될 때까지 archive 금지. |
+| 15 | `/audit` + `/doubt` 통과 + **Unresolved == 0** | → 회고 | `/retrospect` → `/archive` |
+
+### #5, #7 /reflect 판별 상세
+
+> reflect 실행 여부는 **커밋 이력**으로 판별한다.
+> 직전 단계(red/green)의 커밋이 있고, 그 이후 reflect 커밋이 없으면 → reflect 라우팅.
+> reflect 산출물: 발견 없으면 커밋 메시지에 "reflect: no findings". 발견 있으면 `docs/5-backlog/`에 기록 후 커밋.
 
 ### #0 /plan 게이트 상세
 
