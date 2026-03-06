@@ -24,10 +24,13 @@ description: /go 파이프라인을 자율 모드로 실행한다. Stop Hook이 
 **Step 1**: 마커 활성화
 
 ```bash
-touch /tmp/.go-pipeline-active
+# 세션별 격리: CLAUDE_SESSION_ID가 있으면 사용, 없으면 UUID 생성
+GO_ID="${CLAUDE_SESSION_ID:-$(uuidgen)}"
+echo "$GO_ID" > "/tmp/.go-pipeline-${GO_ID}"
+echo "GO_PIPELINE_ID=$GO_ID"
 ```
 
-위 Bash 명령을 실행한다.
+위 Bash 명령을 실행한다. 출력된 `GO_PIPELINE_ID`를 기억한다 — 이후 마커 삭제 시 사용.
 
 **Step 2**: `/go` 파이프라인 진입
 
@@ -38,7 +41,7 @@ touch /tmp/.go-pipeline-active
 
 - **Ctrl+C**: 사용자가 언제든 중단 가능
 - **`stop_hook_active=true`**: 무한루프 방지. Hook이 한 번 잡았는데 또 멈추면 마커를 삭제하고 종료 허용
-- **수동 해제**: `rm /tmp/.go-pipeline-active`로 마커 수동 삭제 가능
+- **수동 해제**: `rm /tmp/.go-pipeline-*`로 마커 수동 삭제 가능
 
 ### 유효 범위
 
