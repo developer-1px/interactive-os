@@ -97,7 +97,7 @@ const listCollection = createCollectionZone(ListApp, "fruits", {
 
 const bindings = listCollection.collectionBindings();
 
-const _ListUI = listCollection.bind({
+listCollection.bind({
   role: "listbox",
   ...bindings,
   onUndo: undoCommand(),
