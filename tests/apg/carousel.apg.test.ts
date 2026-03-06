@@ -28,7 +28,6 @@
  */
 
 import { createPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
   assertHomeEnd,
@@ -36,8 +35,9 @@ import {
   assertLoop,
   assertOrthogonalIgnored,
 } from "./helpers/contracts";
+import { CarouselApp } from "@/pages/apg-showcase/patterns/CarouselPattern";
 
-// --- Test Setup ---
+// --- Test Setup (actual showcase config) ---
 
 const SLIDES = [
   "slide-1",
@@ -49,33 +49,11 @@ const SLIDES = [
 ];
 
 function carouselFactory(focusedTab = "slide-1") {
-  const app = defineApp("test-carousel", {});
-  const zone = app.createZone("carousel-tabs");
-  zone.bind({
-    role: "tablist",
-    getItems: () => SLIDES,
-    options: {
-      navigate: {
-        orientation: "horizontal",
-        loop: true,
-        seamless: false,
-        typeahead: false,
-        entry: "selected",
-        recovery: "next",
-      },
-      activate: {
-        mode: "automatic",
-        onClick: true,
-      },
-      select: {
-        mode: "single",
-        followFocus: true,
-        disallowEmpty: true,
-      },
-    },
+  const page = createPage(CarouselApp);
+  page.goto("carousel-tabs", {
+    items: SLIDES,
+    focusedItemId: focusedTab,
   });
-  const page = createPage(app);
-  page.goto("carousel-tabs", { focusedItemId: focusedTab });
   // Auto-activation: pre-select the initially focused tab
   page.click(focusedTab);
   return page;

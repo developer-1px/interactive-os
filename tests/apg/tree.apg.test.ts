@@ -6,12 +6,11 @@
  * Unique: ArrowRight/Left expand/collapse, leaf no-expand,
  *         Enter activates (does NOT expand)
  *
- * Uses defineApp+createPage for full pipeline testing:
+ * Uses createPage(TreeApp) for full pipeline testing:
  *   keyboard.press → resolveKeyboard → command → state → attrs
  */
 
 import { createPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -19,48 +18,28 @@ import {
   assertNoSelection,
   assertVerticalNav,
 } from "./helpers/contracts";
+import { TreeApp } from "@/pages/apg-showcase/patterns/TreePattern";
 
-// ─── Configs ───
+// ─── Test Data (showcase uses multi-select tree with expand) ───
 
 const TREE_ITEMS = ["section-1", "child-1a", "child-1b", "section-2", "leaf-1"];
-
-const TREE_NAV_CONFIG = {
-  navigate: {
-    orientation: "vertical" as const,
-    loop: false,
-    seamless: false,
-    typeahead: false,
-    entry: "first" as const,
-    recovery: "next" as const,
-  },
-  select: {
-    mode: "single" as const,
-    followFocus: false,
-    disallowEmpty: false,
-    range: false,
-    toggle: true,
-  },
-};
+const EXPANDABLE = new Set(["section-1", "section-2"]);
+const TREE_LEVELS = new Map([
+  ["section-1", 1],
+  ["child-1a", 2],
+  ["child-1b", 2],
+  ["section-2", 1],
+  ["leaf-1", 2],
+]);
 
 function treeFactory(focusedItem = "section-1") {
-  const app = defineApp("test-tree", {});
-  const zone = app.createZone("tree-zone");
-  zone.bind({
-    role: "tree",
-    getItems: () => TREE_ITEMS,
-    getExpandableItems: () => new Set(["section-1", "section-2"]),
-    getTreeLevels: () =>
-      new Map([
-        ["section-1", 1],
-        ["child-1a", 2],
-        ["child-1b", 2],
-        ["section-2", 1],
-        ["leaf-1", 2],
-      ]),
-    options: TREE_NAV_CONFIG,
+  const page = createPage(TreeApp);
+  page.goto("apg-explorer", {
+    items: TREE_ITEMS,
+    focusedItemId: focusedItem,
+    expandableItems: EXPANDABLE,
+    treeLevels: TREE_LEVELS,
   });
-  const page = createPage(app);
-  page.goto("tree-zone", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -68,35 +47,9 @@ function leafFactory() {
   return treeFactory("leaf-1");
 }
 
+// multiTreeFactory removed — TreeApp already uses multi-select config
 function multiTreeFactory(focusedItem = "section-1") {
-  const app = defineApp("test-tree-multi", {});
-  const zone = app.createZone("tree-zone");
-  zone.bind({
-    role: "tree",
-    getItems: () => TREE_ITEMS,
-    getExpandableItems: () => new Set(["section-1", "section-2"]),
-    getTreeLevels: () =>
-      new Map([
-        ["section-1", 1],
-        ["child-1a", 2],
-        ["child-1b", 2],
-        ["section-2", 1],
-        ["leaf-1", 2],
-      ]),
-    options: {
-      ...TREE_NAV_CONFIG,
-      select: {
-        mode: "multiple" as const,
-        followFocus: false,
-        disallowEmpty: false,
-        range: true,
-        toggle: true,
-      },
-    },
-  });
-  const page = createPage(app);
-  page.goto("tree-zone", { focusedItemId: focusedItem });
-  return page;
+  return treeFactory(focusedItem);
 }
 
 // ═══════════════════════════════════════════════════

@@ -26,40 +26,24 @@
  */
 
 import { createPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
   assertHomeEnd,
   assertHorizontalNav,
   assertNoSelection,
 } from "./helpers/contracts";
+import { TooltipApp } from "@/pages/apg-showcase/patterns/TooltipPattern";
 
-// ─── Test Setup ───
+// ─── Test Setup (actual showcase config) ───
 
 const BUTTONS = ["btn-cut", "btn-copy", "btn-paste", "btn-bold", "btn-italic"];
 
 function tooltipFactory(focusedItem = "btn-cut") {
-  const app = defineApp("test-tooltip", {});
-  const zone = app.createZone("tooltip-toolbar");
-  zone.bind({
-    role: "toolbar",
-    getItems: () => BUTTONS,
-    options: {
-      navigate: {
-        orientation: "horizontal",
-        loop: true,
-        seamless: false,
-        typeahead: false,
-        entry: "restore",
-        recovery: "next",
-      },
-      select: { mode: "none" },
-      dismiss: { escape: "close", outsideClick: "none" },
-      tab: { behavior: "escape" },
-    },
+  const page = createPage(TooltipApp);
+  page.goto("apg-tooltip-toolbar", {
+    items: BUTTONS,
+    focusedItemId: focusedItem,
   });
-  const page = createPage(app);
-  page.goto("tooltip-toolbar", { focusedItemId: focusedItem });
   return page;
 }
 

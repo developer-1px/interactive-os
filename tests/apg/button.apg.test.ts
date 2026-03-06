@@ -20,27 +20,19 @@
 import { createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
+import { ToggleApp } from "@/pages/apg-showcase/patterns/ButtonPattern";
 
-// ─── Toggle Button Setup ───
+// ─── Toggle Button Setup (actual showcase config) ───
 
-const TOGGLE_BUTTON_ID = "toggle-mute";
+const TOGGLE_ITEMS = ["toggle-bold", "toggle-italic", "toggle-underline"];
+const TOGGLE_BUTTON_ID = TOGGLE_ITEMS[0]; // "toggle-bold"
 
 function toggleButtonFactory() {
-  const app = defineApp("test-button-toggle", {});
-  const zone = app.createZone("button-zone");
-  zone.bind({
-    role: "toolbar",
-    getItems: () => [TOGGLE_BUTTON_ID],
-    options: {
-      inputmap: {
-        Space: [{ type: "OS_PRESS" }],
-        Enter: [{ type: "OS_PRESS" }],
-        click: [{ type: "OS_PRESS" }],
-      },
-    } as any,
+  const page = createPage(ToggleApp);
+  page.goto("apg-toggle-buttons", {
+    items: TOGGLE_ITEMS,
+    focusedItemId: TOGGLE_BUTTON_ID,
   });
-  const page = createPage(app);
-  page.goto("button-zone", { focusedItemId: TOGGLE_BUTTON_ID });
   return page;
 }
 

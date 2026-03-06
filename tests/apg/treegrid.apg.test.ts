@@ -24,7 +24,6 @@
  */
 
 import { createPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -32,6 +31,7 @@ import {
   assertNoSelection,
   assertVerticalNav,
 } from "./helpers/contracts";
+import { TreegridApp } from "@/pages/apg-showcase/patterns/TreegridPattern";
 
 // -- Email inbox treegrid data (W3C APG example-inspired) --
 // Flat item list = visible rows only. Parent rows are expandable.
@@ -53,36 +53,13 @@ const TREE_LEVELS = new Map([
 ]);
 
 function treegridFactory(focusedItem = "msg-1") {
-  const app = defineApp("test-treegrid", {});
-  const zone = app.createZone("treegrid-zone");
-  zone.bind({
-    role: "treegrid",
-    getItems: () => ALL_ROWS,
-    getExpandableItems: () => EXPANDABLE,
-    getTreeLevels: () => TREE_LEVELS,
-    options: {
-      navigate: {
-        orientation: "vertical",
-        loop: false,
-        seamless: false,
-        typeahead: false,
-        entry: "first",
-        recovery: "next",
-      },
-      select: {
-        mode: "multiple",
-        followFocus: false,
-        disallowEmpty: false,
-        range: true,
-        toggle: true,
-      },
-      expand: {
-        mode: "explicit",
-      },
-    },
+  const page = createPage(TreegridApp);
+  page.goto("apg-treegrid", {
+    items: ALL_ROWS,
+    focusedItemId: focusedItem,
+    expandableItems: EXPANDABLE,
+    treeLevels: TREE_LEVELS,
   });
-  const page = createPage(app);
-  page.goto("treegrid-zone", { focusedItemId: focusedItem });
   return page;
 }
 

@@ -21,8 +21,8 @@
  */
 
 import { createPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
+import { MenuButtonApp } from "@/pages/apg-showcase/patterns/MenuButtonPattern";
 
 const MENU_ITEMS = [
   "action-cut",
@@ -32,14 +32,11 @@ const MENU_ITEMS = [
 ];
 
 function createMenuPage(focusedItem = "action-cut") {
-  const app = defineApp("test-menu-button", {});
-  const zone = app.createZone("apg-menu-button-popup");
-  zone.bind({
-    role: "menu",
-    getItems: () => MENU_ITEMS,
+  const page = createPage(MenuButtonApp);
+  page.goto("apg-menu-button-popup", {
+    items: MENU_ITEMS,
+    focusedItemId: focusedItem,
   });
-  const page = createPage(app);
-  page.goto("apg-menu-button-popup", { focusedItemId: focusedItem });
   return page;
 }
 

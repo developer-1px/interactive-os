@@ -28,8 +28,9 @@ import {
   assertNoSelection,
   assertVerticalNav,
 } from "./helpers/contracts";
+import { FeedApp } from "@/pages/apg-showcase/patterns/FeedPattern";
 
-// ─── Test Setup ───
+// ─── Test Setup (actual showcase config) ───
 
 const ARTICLES = [
   "article-1",
@@ -40,27 +41,11 @@ const ARTICLES = [
 ];
 
 function feedFactory(focusedItem = "article-1") {
-  const app = defineApp("test-feed", {});
-  const zone = app.createZone("feed-zone");
-  zone.bind({
-    role: "feed",
-    getItems: () => ARTICLES,
-    options: {
-      navigate: {
-        orientation: "vertical",
-        loop: false,
-        seamless: false,
-        typeahead: false,
-        entry: "first",
-        recovery: "next",
-      },
-      select: {
-        mode: "none",
-      },
-    },
+  const page = createPage(FeedApp);
+  page.goto("apg-feed", {
+    items: ARTICLES,
+    focusedItemId: focusedItem,
   });
-  const page = createPage(app);
-  page.goto("feed-zone", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -147,7 +132,7 @@ describe("APG Feed: Control+End / Control+Home (exit feed)", () => {
     const app = defineApp("test-feed-zones", {});
     const before = app.createZone("before-feed");
     before.bind({ getItems: () => ["before-1"] });
-    const feed = app.createZone("feed-zone");
+    const feed = app.createZone("apg-feed");
     feed.bind({
       role: "feed",
       getItems: () => ARTICLES,
@@ -168,10 +153,10 @@ describe("APG Feed: Control+End / Control+Home (exit feed)", () => {
     const page = createPage(app);
     // Register all zones in order
     page.goto("before-feed", { focusedItemId: "before-1" });
-    page.goto("feed-zone", { focusedItemId: focusedItem });
+    page.goto("apg-feed", { focusedItemId: focusedItem });
     page.goto("after-feed", { focusedItemId: "after-1" });
     // Activate feed zone
-    page.goto("feed-zone", { focusedItemId: focusedItem });
+    page.goto("apg-feed", { focusedItemId: focusedItem });
     return page;
   }
 
@@ -224,7 +209,7 @@ describe("APG Feed: DOM Projection (attrs)", () => {
 describe("APG Feed: Tab exits zone", () => {
   it("Tab: exits the feed zone (tab=escape)", () => {
     const app = defineApp("test-feed-tab", {});
-    const feed = app.createZone("feed-zone");
+    const feed = app.createZone("apg-feed");
     feed.bind({
       role: "feed",
       getItems: () => ARTICLES,
@@ -243,10 +228,10 @@ describe("APG Feed: Tab exits zone", () => {
     const next = app.createZone("next-zone");
     next.bind({ getItems: () => ["next-1"] });
     const page = createPage(app);
-    page.goto("feed-zone", { focusedItemId: "article-2" });
+    page.goto("apg-feed", { focusedItemId: "article-2" });
     page.goto("next-zone", { focusedItemId: "next-1" });
     // Activate feed zone
-    page.goto("feed-zone", { focusedItemId: "article-2" });
+    page.goto("apg-feed", { focusedItemId: "article-2" });
 
     page.keyboard.press("Tab");
     // Tab with behavior=escape exits the zone to next zone

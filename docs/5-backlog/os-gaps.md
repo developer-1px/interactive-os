@@ -14,6 +14,8 @@
 | OG-005 | 2026-02-26 | builder | 커서 메타 등록 | `useCursorMeta` hook이 useEffect로 cursorRegistry에 수동 등록/해제. OS에 커서 메타 API 없음. | useEffect + 앱 내부 레지스트리 |
 | OG-009 | 2026-03-03 | os-core | Modifier keybindings | Shift+Arrow, Ctrl+Arrow, Ctrl+Space, Shift+Space 가 osDefaults에 하드코딩. config chain으로 전환 필요. | – |
 | OG-010 | 2026-03-05 | os-core | Trigger → inputmap | TriggerConfig + triggerRegistry의 별도 파이프라인을 inputmap으로 흡수. Trigger 컴포넌트 전면 수정 필요. 별도 프로젝트 스코프. | Trigger는 기존 TriggerConfig 경로 유지 |
+| OG-011 | 2026-03-06 | os-core | Role defaults in headless | Showcase configs rely on role defaults (tablist→horizontal+loop, feed→vertical etc.) but headless pipeline doesn't apply them. 82/116 APG test failures. | 테스트에서 explicit navigate options 사용 |
+| OG-012 | 2026-03-06 | os-core | expandableItems → computeItem | tree/treegrid goto options (expandableItems, treeLevels) not wired to computeItem for aria-expanded projection. 20 APG test failures. | — |
 
 ## 해결됨
 

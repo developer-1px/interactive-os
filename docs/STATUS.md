@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-07T00:37
+> Last updated: 2026-03-07T01:30
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -12,7 +12,7 @@
 
 ## 🔥 Active Focus
 
-**apg-test-fidelity** — headless 테스트를 실제 showcase config로 전환하여 headless ≡ browser 보장
+(없음 — apg-test-fidelity 완료 아카이브됨)
 
 ---
 
@@ -36,6 +36,7 @@
 | lint-zero | T1~T5 Now | 03-06 |
 | test-observability | Scaffold, T1~T4 | 03-05 |
 | replay | Scaffold, T1 | 03-05 |
+| todo-test-modernize | 전면 재편 (57 scenarios) | 03-06 |
 
 ### builder
 > `src/` builder 관련
@@ -51,13 +52,6 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | inspector-dogfooding | T1~T4 ✅, T5 | 03-05 |
-
-### apg
-> `src/pages/apg-showcase/` · `tests/apg/`
-
-| Project | Phase | Last Activity |
-|---------|-------|---------------|
-| apg-test-fidelity | T1~T2 Now | 03-07 |
 
 ### nondeterministic-paradigm
 > 탐색적 연구
@@ -78,9 +72,9 @@
 
 | Metric | Count |
 |--------|-------|
-| Domains | 6 |
-| Active Projects | 9 |
-| Active Focus | 1 |
+| Domains | 5 |
+| Active Projects | 10 |
+| Active Focus | 0 |
 | Stale (7d+) | 0 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
