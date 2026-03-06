@@ -95,7 +95,7 @@ export const useFieldFocus = ({
         innerRef.current.blur();
       }
     }
-  }, [isActive, blurOnInactive, innerRef, cursorRef, fieldId, isEditing]);
+  }, [isActive, blurOnInactive, innerRef, isEditing]);
 
   // Caret restore on editing transition (not-editing → editing)
   useEffect(() => {

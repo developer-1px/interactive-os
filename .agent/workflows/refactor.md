@@ -53,7 +53,7 @@ description: 패턴 A를 패턴 B로 전환하는 리팩토링 파이프라인. 
 ### Step 5: 검증 (verify 인라인)
 
 ```bash
-source ~/.nvm/nvm.sh && nvm use && npx tsc --noEmit
+source ~/.nvm/nvm.sh && nvm use && npx tsc -p tsconfig.app.json --noEmit
 ```
 - 0 errors → 다음
 - errors → 보고하고 멈춘다

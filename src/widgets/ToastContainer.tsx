@@ -41,6 +41,7 @@ function NotificationItem({
 }) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: notification.id resets timer when a new notification replaces the old one
   useEffect(() => {
     if (notification.duration > 0) {
       timerRef.current = setTimeout(onDismiss, notification.duration);

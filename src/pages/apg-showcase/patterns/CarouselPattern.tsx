@@ -252,6 +252,7 @@ export function CarouselPattern() {
               className="p-4 focus:outline-none"
             >
               <div
+                role="group"
                 aria-roledescription="slide"
                 aria-label={`${index + 1} of ${SLIDES.length}`}
               >

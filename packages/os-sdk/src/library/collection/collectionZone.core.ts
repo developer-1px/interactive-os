@@ -357,14 +357,16 @@ export function fromNormalized<S, T extends { id: string }>(
         const afterId = allItems[index];
         if (afterId == null) {
           // Append to root
-          (order[""] ??= []).push(item.id);
+          order[""] ??= [];
+          order[""].push(item.id);
           return;
         }
 
         const parent = findParent(order, afterId);
         if (parent == null) {
           // afterId not found, append to root
-          (order[""] ??= []).push(item.id);
+          order[""] ??= [];
+          order[""].push(item.id);
           return;
         }
 

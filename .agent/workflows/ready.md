@@ -15,7 +15,7 @@ description: 개발 환경이 정상 동작하는지 확인하고, 아니면 복
 | 레벨 | 검증 항목 | 실패 시 |
 |------|----------|---------|
 | 1. 서버 | 모든 대상 서버 HTTP 200 | 좀비 정리 → 재기동 |
-| 2. 타입 | `npx tsc --noEmit` 0 errors | 에러 보고 → 멈춤 |
+| 2. 타입 | `npx tsc -p tsconfig.app.json --noEmit` 0 errors | 에러 보고 → 멈춤 |
 | 3. 렌더 | 홈페이지에 콘텐츠가 렌더되는가 | 에러 보고 → 멈춤 |
 
 ### 대상 서버
@@ -47,7 +47,7 @@ description: 개발 환경이 정상 동작하는지 확인하고, 아니면 복
    - 이후 Step 3(타입 체크)에서 breakage를 잡는다.
 
 3. **타입 체크**
-   - `npx tsc --noEmit`
+   - `npx tsc -p tsconfig.app.json --noEmit`
    - 0 errors가 아니면 에러를 보고하고 **멈춘다**. 타입이 깨진 채로 서버를 띄워봐야 의미 없다.
 
 4. **좀비 프로세스 정리**

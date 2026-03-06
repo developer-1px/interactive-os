@@ -52,14 +52,13 @@ export function LocaleSwitcher() {
 
       {/* Dropdown menu — OS manages open/close, focus, keyboard, backdrop */}
       <Trigger.Portal>
-        <ul
+        <div
           role="listbox"
           aria-label="언어 선택"
           style={{
             minWidth: 160,
             padding: "4px 0",
             margin: 0,
-            listStyle: "none",
           }}
         >
           {/* 등록된 언어 */}
@@ -75,7 +74,7 @@ export function LocaleSwitcher() {
                     ? { onActivate: setLocaleCommand({ locale: code }) }
                     : {})}
                 >
-                  <li
+                  <div
                     role="option"
                     aria-selected={isActive}
                     style={{
@@ -92,7 +91,7 @@ export function LocaleSwitcher() {
                   >
                     {label}
                     {isActive && <span style={{ fontSize: 11 }}>✓</span>}
-                  </li>
+                  </div>
                 </Trigger.Dismiss>
               </Item>
             );
@@ -101,14 +100,16 @@ export function LocaleSwitcher() {
           {/* 구분선 + 언어 추가 */}
           {unaddedLocales.length > 0 && (
             <>
-              <li style={{ borderTop: "1px solid #e2e8f0", margin: "4px 0" }} />
+              <div
+                style={{ borderTop: "1px solid #e2e8f0", margin: "4px 0" }}
+              />
               {unaddedLocales.map((l) => (
                 <Item key={l.code} id={`locale-add-${l.code}`} asChild>
                   <Trigger.Dismiss
                     id={`locale-add-${l.code}`}
                     onActivate={addLocaleCommand({ locale: l.code })}
                   >
-                    <li
+                    <div
                       role="option"
                       aria-selected={false}
                       style={{
@@ -119,13 +120,13 @@ export function LocaleSwitcher() {
                       }}
                     >
                       + {l.label} 추가
-                    </li>
+                    </div>
                   </Trigger.Dismiss>
                 </Item>
               ))}
             </>
           )}
-        </ul>
+        </div>
       </Trigger.Portal>
     </Trigger>
   );

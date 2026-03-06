@@ -336,7 +336,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
         }
       }
       prevValueRef.current = value;
-    }, [value, isContentEditable, mode, fieldId]);
+    }, [value, isContentEditable, mode, fieldId, handleCommit, zoneId]);
 
     const shouldHaveDOMFocus = mode === "deferred" ? isFocused : isActive;
 
@@ -387,7 +387,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
         el.removeEventListener("blur", handleBlur);
         el.removeEventListener("keydown", handleKeyDown);
       };
-    }, [fieldId, trigger, handleCommit]); // Re-bind if config changes
+    }, [fieldId, trigger, handleCommit, fieldType]); // Re-bind if config changes
 
     useFieldFocus({
       innerRef,

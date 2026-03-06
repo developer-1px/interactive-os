@@ -147,6 +147,7 @@ export function DocsViewer() {
   externalRef.current = externalSource;
 
   // --- Section navigation via OS commands (DOCS_NEXT_SECTION / DOCS_PREV_SECTION) ---
+  // biome-ignore lint/correctness/useExhaustiveDependencies: content triggers re-attach when doc changes
   useEffect(() => {
     const container = contentRef.current;
     if (!container) return;

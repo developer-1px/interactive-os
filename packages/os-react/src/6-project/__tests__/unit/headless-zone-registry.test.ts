@@ -36,11 +36,14 @@ describe("T1: Zone Headless Registration", () => {
 
   it("S1: Zone registers in ZoneRegistry at render-time (no DOM)", () => {
     renderToString(
-      createElement(Zone, {
-        id: ZONE_ID,
-        role: "listbox",
-        children: null,
-      }),
+      createElement(
+        Zone,
+        {
+          id: ZONE_ID,
+          role: "listbox",
+        },
+        null,
+      ),
     );
 
     expect(ZoneRegistry.has(ZONE_ID)).toBe(true);
@@ -48,11 +51,14 @@ describe("T1: Zone Headless Registration", () => {
 
   it("S3: config is accessible in headless (renderToString) mode", () => {
     renderToString(
-      createElement(Zone, {
-        id: ZONE_ID,
-        role: "listbox",
-        children: null,
-      }),
+      createElement(
+        Zone,
+        {
+          id: ZONE_ID,
+          role: "listbox",
+        },
+        null,
+      ),
     );
 
     const entry = ZoneRegistry.get(ZONE_ID);
@@ -66,13 +72,16 @@ describe("T1: Zone Headless Registration", () => {
     const onDelete = () => ({ type: "TEST_DELETE" });
 
     renderToString(
-      createElement(Zone, {
-        id: ZONE_ID,
-        role: "listbox",
-        onAction,
-        onDelete,
-        children: null,
-      }),
+      createElement(
+        Zone,
+        {
+          id: ZONE_ID,
+          role: "listbox",
+          onAction,
+          onDelete,
+        },
+        null,
+      ),
     );
 
     const entry = ZoneRegistry.get(ZONE_ID);
@@ -84,22 +93,28 @@ describe("T1: Zone Headless Registration", () => {
 
   it("S5: re-render with different role updates config in registry", () => {
     renderToString(
-      createElement(Zone, {
-        id: ZONE_ID,
-        role: "listbox",
-        children: null,
-      }),
+      createElement(
+        Zone,
+        {
+          id: ZONE_ID,
+          role: "listbox",
+        },
+        null,
+      ),
     );
 
     const firstConfig = ZoneRegistry.get(ZONE_ID)?.config;
     expect(firstConfig).toBeDefined();
 
     renderToString(
-      createElement(Zone, {
-        id: ZONE_ID,
-        role: "toolbar",
-        children: null,
-      }),
+      createElement(
+        Zone,
+        {
+          id: ZONE_ID,
+          role: "toolbar",
+        },
+        null,
+      ),
     );
 
     const secondConfig = ZoneRegistry.get(ZONE_ID)?.config;

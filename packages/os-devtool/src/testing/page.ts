@@ -161,7 +161,7 @@ export function createAppPage<S>(
   });
 
   // Override browser-only effects for headless (no navigator.clipboard)
-  os.defineEffect("clipboardWrite", () => { });
+  os.defineEffect("clipboardWrite", () => {});
 
   // ── Enter preview sandbox ──
   os.enterPreview({

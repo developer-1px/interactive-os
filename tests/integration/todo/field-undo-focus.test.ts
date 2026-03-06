@@ -28,7 +28,8 @@ function setupZone(
   os.setState(
     produce((s: any) => {
       s.os.focus.activeZoneId = zoneId;
-      const z = (s.os.focus.zones[zoneId] ??= {});
+      s.os.focus.zones[zoneId] ??= {};
+      const z = s.os.focus.zones[zoneId];
       z.focusedItemId = itemId;
       z.lastFocusedId = itemId;
       z.editingItemId = opts?.editingItemId ?? null;

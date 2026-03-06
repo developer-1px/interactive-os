@@ -197,7 +197,7 @@ JSON.stringify(results.map(r => ({
 
 ```bash
 # tsc
-npx tsc --noEmit 2>&1 | tail -3
+npx tsc -p tsconfig.app.json --noEmit 2>&1 | tail -3
 
 # headless regression
 source ~/.nvm/nvm.sh && nvm use && npx vitest run tests/apg/ 2>&1 | tail -6

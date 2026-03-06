@@ -61,7 +61,7 @@ export function createReactBindings<S>(kernel: ReactBindingKernel<S>) {
       };
 
       return nextSelection;
-    }, [getState]);
+    }, []);
 
     return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   }
@@ -94,7 +94,7 @@ export function createReactBindings<S>(kernel: ReactBindingKernel<S>) {
       };
 
       return nextValue;
-    }, [getState, resolveQuery]);
+    }, []);
 
     return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   }

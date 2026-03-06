@@ -146,11 +146,11 @@ function createHeadlessEffects(): VisualEffects {
   return {
     STEP_DELAY: 0,
     ANIM_DURATION: 0,
-    moveCursorTo() { },
-    showRipple() { },
-    showKeyBadge() { },
-    showStamp() { },
-    hideCursor() { },
+    moveCursorTo() {},
+    showRipple() {},
+    showKeyBadge() {},
+    showStamp() {},
+    hideCursor() {},
   };
 }
 
@@ -216,7 +216,7 @@ function createVisualEffects(
     for (const entry of trackedStamps) {
       try {
         entry.stampDiv.hidePopover();
-      } catch { }
+      } catch {}
       entry.stampDiv.remove();
     }
     trackedStamps.length = 0;
@@ -318,7 +318,7 @@ function createVisualEffects(
       setTimeout(() => {
         try {
           badge.hidePopover();
-        } catch { }
+        } catch {}
         badge.remove();
       }, STEP_DELAY * 1.5);
 
@@ -372,7 +372,7 @@ function createVisualEffects(
       setTimeout(() => {
         try {
           cursorEl.hidePopover();
-        } catch { }
+        } catch {}
         cursorEl.remove();
       }, 300);
     },
@@ -466,10 +466,10 @@ export function createBrowserPage(
         ...(passed
           ? {}
           : {
-            error: negated
-              ? `Expected NOT ${displayExpected}, but got ${displayActual}`
-              : `Expected ${displayExpected}, got ${displayActual}`,
-          }),
+              error: negated
+                ? `Expected NOT ${displayExpected}, but got ${displayActual}`
+                : `Expected ${displayExpected}, got ${displayActual}`,
+            }),
         timestamp: timestamp(),
       });
       await delay(fx.STEP_DELAY / 2);
