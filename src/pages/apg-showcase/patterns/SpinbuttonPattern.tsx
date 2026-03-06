@@ -27,7 +27,7 @@ interface SpinbuttonDef {
   formatValue?: (v: number) => string;
 }
 
-const SPINBUTTONS: SpinbuttonDef[] = [
+export const SPINBUTTONS: SpinbuttonDef[] = [
   {
     id: "spin-hours",
     label: "Hours",
@@ -70,7 +70,7 @@ const SPINBUTTONS: SpinbuttonDef[] = [
 
 // ─── App + Zone (defineApp pattern) ───
 
-const SpinbuttonApp = defineApp<Record<string, never>>(
+export const SpinbuttonApp = defineApp<Record<string, never>>(
   "apg-spinbutton-app",
   {},
 );

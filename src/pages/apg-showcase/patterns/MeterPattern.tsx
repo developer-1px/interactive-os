@@ -43,7 +43,7 @@ interface MeterDef {
   unit: string;
 }
 
-const METERS: MeterDef[] = [
+export const METERS: MeterDef[] = [
   {
     id: "meter-cpu",
     label: "CPU Usage",
@@ -81,7 +81,7 @@ const METERS: MeterDef[] = [
 
 // ─── App + Zone (defineApp pattern) ───
 
-const MeterApp = defineApp<Record<string, never>>("apg-meter-app", {});
+export const MeterApp = defineApp<Record<string, never>>("apg-meter-app", {});
 
 const meterZone = MeterApp.createZone("apg-meter-zone");
 const MeterUI = meterZone.bind({
