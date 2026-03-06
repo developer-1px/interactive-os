@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-06T24:00
+> Last updated: 2026-03-06T24:30
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -12,9 +12,7 @@
 
 ## 🔥 Active Focus
 
-| Domain | Project | Phase |
-|--------|---------|-------|
-| testing | eliminate-createOsPage | #1-#10 Done, #11-#15 Later (OS gap 대기) |
+(없음 — eliminate-createOsPage 완료, 아카이브됨)
 
 ---
 
@@ -34,7 +32,6 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| eliminate-createOsPage | #1-#10 Done, #11-#15 Later | 03-06 🔥 |
 | headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-06 |
 | lint-zero | T1~T5 Now | 03-06 |
 | test-observability | Scaffold, T1~T4 | 03-05 |
@@ -71,12 +68,7 @@
 
 ## ⚠️ Active Migrations
 
-> 패턴 전환이 진행 중인 항목. 에이전트는 Old 패턴을 사용하지 않는다.
-> 해당 파일을 수정할 때 New 패턴으로 전환한다.
-
-| Old | New | Remaining |
-|-----|-----|-----------|
-| `createOsPage()` | `createHeadlessPage()` / `createPage(app)` | 16파일 (value-based APG 6, builder 3, dispatch 3, createOsPage.ts 자체 등) |
+(없음 — createOsPage 마이그레이션 완료. 잔여 import = 인프라 내부만)
 
 ---
 
@@ -85,9 +77,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 6 |
-| Active Projects | 10 |
-| Active Focus | 1 (eliminate-createOsPage) |
+| Active Projects | 9 |
+| Active Focus | 0 |
 | Stale (7d+) | 0 |
-| Active Migrations | 1 (createOsPage→createHeadlessPage) |
+| Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
