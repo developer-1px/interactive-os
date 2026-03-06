@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-06T24:30
+> Last updated: 2026-03-07T00:37
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -12,7 +12,7 @@
 
 ## 🔥 Active Focus
 
-(없음 — eliminate-createOsPage 완료, 아카이브됨)
+**apg-test-fidelity** — headless 테스트를 실제 showcase config로 전환하여 headless ≡ browser 보장
 
 ---
 
@@ -55,7 +55,9 @@
 ### apg
 > `src/pages/apg-showcase/` · `tests/apg/`
 
-(현재 활성 프로젝트 없음. 15 patterns 구현 완료, OS core 변경 대기)
+| Project | Phase | Last Activity |
+|---------|-------|---------------|
+| apg-test-fidelity | T1~T2 Now | 03-07 |
 
 ### nondeterministic-paradigm
 > 탐색적 연구
@@ -78,7 +80,7 @@
 |--------|-------|
 | Domains | 6 |
 | Active Projects | 9 |
-| Active Focus | 0 |
+| Active Focus | 1 |
 | Stale (7d+) | 0 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
