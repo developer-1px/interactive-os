@@ -5,7 +5,7 @@
  * 🔴 RED: all tests should FAIL until Phase 1 config extension is implemented.
  */
 import { describe, expect, it } from "vitest";
-import { resolveRole } from "../../roleRegistry.ts";
+import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // 1. NavigateConfig chain fields exist in rolePresets
