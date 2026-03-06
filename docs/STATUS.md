@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-06T23:30
+> Last updated: 2026-03-06T24:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,7 +14,7 @@
 
 | Domain | Project | Phase |
 |--------|---------|-------|
-| (없음) | — | — |
+| testing | eliminate-createOsPage | #1-#10 Done, #11-#15 Later (OS gap 대기) |
 
 ---
 
@@ -26,17 +26,19 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | docs-freshness | WP1~WP8 | 03-06 |
-| kernel-docs-sync | — | — |
-| condition-auto-disabled | 기획 중 (BOARD 없음) | new |
+| kernel-docs-sync | — | 03-06 |
+| condition-auto-disabled | 기획 중 (BOARD 없음) | 03-05 |
 
 ### testing
 > `packages/os-devtool/` · `tests/`
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
+| eliminate-createOsPage | #1-#10 Done, #11-#15 Later | 03-06 🔥 |
 | headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-06 |
+| lint-zero | T1~T5 Now | 03-06 |
 | test-observability | Scaffold, T1~T4 | 03-05 |
-| replay | Scaffold, T1 | 02-21 ⚠️ |
+| replay | Scaffold, T1 | 03-05 |
 
 ### builder
 > `src/` builder 관련
@@ -63,7 +65,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| nondeterministic-paradigm | 탐색 중 | new |
+| nondeterministic-paradigm | 탐색 중 | 03-06 |
 
 ---
 
@@ -72,7 +74,9 @@
 > 패턴 전환이 진행 중인 항목. 에이전트는 Old 패턴을 사용하지 않는다.
 > 해당 파일을 수정할 때 New 패턴으로 전환한다.
 
-(현재 진행 중인 마이그레이션 없음)
+| Old | New | Remaining |
+|-----|-----|-----------|
+| `createOsPage()` | `createHeadlessPage()` / `createPage(app)` | 16파일 (value-based APG 6, builder 3, dispatch 3, createOsPage.ts 자체 등) |
 
 ---
 
@@ -81,9 +85,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 6 |
-| Active Projects | 8 |
-| Active Focus | 0 |
-| Stale (7d+) | 1 (replay) |
-| Active Migrations | 0 |
+| Active Projects | 10 |
+| Active Focus | 1 (eliminate-createOsPage) |
+| Stale (7d+) | 0 |
+| Active Migrations | 1 (createOsPage→createHeadlessPage) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |

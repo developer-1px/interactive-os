@@ -26,7 +26,7 @@
    - **처음**: `page.goto("zone", { role, items, config })` — Zone 선언
    - **입력**: `page.keyboard.press()`, `page.locator("#id").click()` — 사용자 입력
    - **끝**: `locator().toBeFocused()`, `locator().toHaveAttribute()` — ARIA 속성 검증
-   - `dispatch()`, `getState()`, `setState()` — OS 내부 우회이므로 테스트 코드에서 금지
+   - `dispatch()`, `getState()`, `setState()` — OS 내부 우회이므로 테스트 코드에서 금지. **예외**: `packages/os-core/src/4-command/__tests__/`의 커맨드 핸들러 단위 테스트에서 dispatch()는 정당 — OS가 자기 커맨드를 단위 테스트하는 것은 Pipeline 우회가 아니다
    - `createOsPage()` — 삭제 대상. `createHeadlessPage()`가 유일한 OS 테스트 팩토리
    - `createPage(app)` = 앱 통합 테스트 (Builder, Todo)
    - **순수 함수 테스트는 page 불필요.** `findBlockInfo`, `parseHashToPath`, `i18n` 등 상태·상호작용이 없는 순수 함수는 직접 호출이 정당하다. OS 내부 함수(`resolve*`, `compute*`)의 직접 테스트는 구현 종속이므로 제거 대상.

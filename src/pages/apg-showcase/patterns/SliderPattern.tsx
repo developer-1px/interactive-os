@@ -11,6 +11,7 @@
 
 import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
+import { useCallback, useEffect, useState } from "react";
 
 // ─── Slider Data ───
 
@@ -115,9 +116,32 @@ function SliderTrack({
   );
 }
 
+// ─── Value Sync (defers setState to after render) ───
+
+function ValueSync({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: number;
+  onChange: (id: string, value: number) => void;
+}) {
+  useEffect(() => {
+    onChange(id, value);
+  }, [id, value, onChange]);
+  return null;
+}
+
 // ─── Individual Slider Row ───
 
-function SliderRow({ slider }: { slider: SliderDef }) {
+function SliderRow({
+  slider,
+  onValueChange,
+}: {
+  slider: SliderDef;
+  onValueChange: (id: string, value: number) => void;
+}) {
   return (
     <SliderUI.Item
       id={slider.id}
@@ -132,6 +156,9 @@ function SliderRow({ slider }: { slider: SliderDef }) {
         const value = valueNow ?? slider.initial;
         return (
           <>
+            {/* Sync value to parent after render */}
+            <ValueSync id={slider.id} value={value} onChange={onValueChange} />
+
             {/* Label */}
             <span
               className={clsx(
@@ -163,18 +190,8 @@ function SliderRow({ slider }: { slider: SliderDef }) {
 
 // ─── Color Preview ───
 
-function ColorPreview() {
-  // Read value state from OS kernel (global state, not app-local)
-  const values = os.useComputed((s) => {
-    const z = s.os.focus.zones["apg-slider-zone"];
-    return {
-      r: z?.valueNow?.["slider-red"] ?? 128,
-      g: z?.valueNow?.["slider-green"] ?? 200,
-      b: z?.valueNow?.["slider-blue"] ?? 64,
-    };
-  });
-
-  const hex = `#${values.r.toString(16).padStart(2, "0")}${values.g.toString(16).padStart(2, "0")}${values.b.toString(16).padStart(2, "0")}`;
+function ColorPreview({ r, g, b }: { r: number; g: number; b: number }) {
+  const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 
   return (
     <div className="flex items-center gap-4">
@@ -187,7 +204,7 @@ function ColorPreview() {
           {hex}
         </div>
         <div className="text-xs text-gray-400 mt-1">
-          rgb({values.r}, {values.g}, {values.b})
+          rgb({r}, {g}, {b})
         </div>
       </div>
     </div>
@@ -197,6 +214,19 @@ function ColorPreview() {
 // ─── Main Component ───
 
 export function SliderPattern() {
+  const [colors, setColors] = useState({
+    "slider-red": 128,
+    "slider-green": 200,
+    "slider-blue": 64,
+  });
+
+  const handleValueChange = useCallback((id: string, value: number) => {
+    setColors((prev) => {
+      if (prev[id as keyof typeof prev] === value) return prev;
+      return { ...prev, [id]: value };
+    });
+  }, []);
+
   return (
     <div className="max-w-md">
       <h3 className="text-lg font-semibold mb-3">Slider — Color Picker</h3>
@@ -224,8 +254,12 @@ export function SliderPattern() {
       </p>
 
       <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-5">
-        {/* Color preview */}
-        <ColorPreview />
+        {/* Color preview — reads from React state, not OS kernel */}
+        <ColorPreview
+          r={colors["slider-red"]}
+          g={colors["slider-green"]}
+          b={colors["slider-blue"]}
+        />
 
         {/* Sliders */}
         <SliderUI.Zone
@@ -233,7 +267,11 @@ export function SliderPattern() {
           aria-label="Color Viewer Sliders"
         >
           {SLIDERS.map((slider) => (
-            <SliderRow key={slider.id} slider={slider} />
+            <SliderRow
+              key={slider.id}
+              slider={slider}
+              onValueChange={handleValueChange}
+            />
           ))}
         </SliderUI.Zone>
 

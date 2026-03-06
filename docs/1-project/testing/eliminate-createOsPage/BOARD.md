@@ -24,7 +24,7 @@
 
 - [ ] #11 value-based APG 테스트 마이그레이션 (meter, slider, spinbutton, grid, window-splitter, slider-multithumb) — OS core value-based 패턴 API 지원 후
 - [ ] #12 builder 통합 테스트 마이그레이션 (3파일) — builderBlock headless 지원 후
-- [ ] #13 format-diagnostics + stale-focus-recovery 마이그레이션 (2파일) — createOsPage setup 대체 필요
+- [ ] #13 format-diagnostics + stale-focus-recovery + strict-api-guard(T5) 마이그레이션 (3파일) — dispatch escape hatch 필요
 - [ ] #14 createOsPage.ts 삭제 — #11~#13 완료 후
 - [ ] #15 page.ts export 정리
 
