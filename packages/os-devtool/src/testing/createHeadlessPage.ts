@@ -61,6 +61,22 @@ function createHeadlessLocator(
     }
   }
 
+  function assertBooleanAttr(
+    getter: () => boolean,
+    label: string,
+    negated: boolean,
+  ) {
+    const raw = getter();
+    const passed = negated ? !raw : raw;
+    if (!passed) {
+      throw new Error(
+        negated
+          ? `Expected ${elementId} NOT to be ${label} but it was`
+          : `Expected ${elementId} to be ${label} but it was not`,
+      );
+    }
+  }
+
   const locator: Locator &
     LocatorAssertions & {
       _toHaveAttribute: (
@@ -88,6 +104,34 @@ function createHeadlessLocator(
       assertFocused(false);
     },
 
+    async toBeSelected() {
+      assertBooleanAttr(() => loc.toBeSelected(), "selected", false);
+    },
+
+    async toBeExpanded() {
+      assertBooleanAttr(() => loc.toBeExpanded(), "expanded", false);
+    },
+
+    async toBeChecked() {
+      assertBooleanAttr(() => loc.toBeChecked(), "checked", false);
+    },
+
+    async toBePressed() {
+      assertBooleanAttr(() => loc.toBePressed(), "pressed", false);
+    },
+
+    async toBeDisabled() {
+      assertBooleanAttr(() => loc.toBeDisabled(), "disabled", false);
+    },
+
+    async toBeEditing() {
+      assertBooleanAttr(() => loc.toBeEditing(), "editing", false);
+    },
+
+    async inputValue() {
+      return loc.inputValue();
+    },
+
     _toHaveAttribute(name: string, value: string | RegExp, negated = false) {
       assertAttribute(name, value, negated);
       return Promise.resolve();
@@ -102,6 +146,18 @@ function createHeadlessLocator(
         toHaveAttribute: async (name: string, value: string | RegExp) =>
           assertAttribute(name, value, true),
         toBeFocused: async () => assertFocused(true),
+        toBeSelected: async () =>
+          assertBooleanAttr(() => loc.toBeSelected(), "selected", true),
+        toBeExpanded: async () =>
+          assertBooleanAttr(() => loc.toBeExpanded(), "expanded", true),
+        toBeChecked: async () =>
+          assertBooleanAttr(() => loc.toBeChecked(), "checked", true),
+        toBePressed: async () =>
+          assertBooleanAttr(() => loc.toBePressed(), "pressed", true),
+        toBeDisabled: async () =>
+          assertBooleanAttr(() => loc.toBeDisabled(), "disabled", true),
+        toBeEditing: async () =>
+          assertBooleanAttr(() => loc.toBeEditing(), "editing", true),
         get not(): LocatorAssertions {
           return locator as LocatorAssertions;
         },

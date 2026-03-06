@@ -35,15 +35,18 @@ describe("T19 Integration: ESC through full keyboard pipeline", () => {
     container.setAttribute("data-zone", ZONE_ID);
 
     const s1 = document.createElement("div");
-    s1.setAttribute("data-item-id", "s1");
+    s1.id = "s1";
+    s1.setAttribute("data-item", "");
     s1.setAttribute("data-level", "section");
 
     const g1 = document.createElement("div");
-    g1.setAttribute("data-item-id", "g1");
+    g1.id = "g1";
+    g1.setAttribute("data-item", "");
     g1.setAttribute("data-level", "group");
 
     const i1 = document.createElement("div");
-    i1.setAttribute("data-item-id", "i1");
+    i1.id = "i1";
+    i1.setAttribute("data-item", "");
     i1.setAttribute("data-level", "item");
 
     g1.appendChild(i1);

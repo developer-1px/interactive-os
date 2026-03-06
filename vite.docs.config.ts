@@ -36,6 +36,10 @@ export default defineConfig({
     alias: {
       "@inspector": "/src/inspector",
       "@kernel": "/packages/kernel/src",
+      "@os-core": "/packages/os-core/src",
+      "@os-react": "/packages/os-react/src",
+      "@os-sdk": "/packages/os-sdk/src",
+      "@os-devtool": "/packages/os-devtool/src",
       "@os": "/src/os",
       "@apps": "/src/apps",
       "@": "/src",

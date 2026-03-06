@@ -10,7 +10,9 @@
  * Unique: aria-checked instead of aria-selected, Space to check
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { OS_SELECT } from "@os-core/4-command/selection/select";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Configs ───
@@ -36,14 +38,16 @@ const RADIOGROUP_CONFIG = {
 };
 
 function setup(selected = "radio-sm") {
-  const page = createOsPage();
-  page.goto("radiogroup", {
-    items: ITEMS,
-    config: RADIOGROUP_CONFIG,
+  const app = defineApp("test-radiogroup", {});
+  const zone = app.createZone("radiogroup");
+  zone.bind({
     role: "radiogroup",
-    focusedItemId: selected,
+    getItems: () => ITEMS,
+    options: RADIOGROUP_CONFIG,
   });
-  page.dispatch(page.OS_SELECT({ targetId: selected, mode: "replace" }));
+  const page = createPage(app);
+  page.goto("radiogroup", { focusedItemId: selected });
+  page.dispatch(OS_SELECT({ targetId: selected, mode: "replace" }));
   return page;
 }
 
@@ -249,7 +253,7 @@ describe("APG Radiogroup: Negative tests (enforceMode)", () => {
   // NEG1: Shift+Click on single-select should NOT range-select
   it("Shift+Click does NOT range-select (single mode)", () => {
     const t = setup("radio-sm");
-    t.click("radio-lg", { modifiers: ["Shift"] });
+    t.click("radio-lg", { shift: true });
     // Should have exactly one checked
     const checked = ITEMS.filter((id) => t.attrs(id)["aria-checked"] === true);
     expect(checked).toHaveLength(1);
@@ -258,7 +262,7 @@ describe("APG Radiogroup: Negative tests (enforceMode)", () => {
   // NEG2: Cmd+Click should NOT deselect (disallowEmpty)
   it("Cmd+Click does NOT deselect last checked (disallowEmpty)", () => {
     const t = setup("radio-sm");
-    t.click("radio-sm", { modifiers: ["Meta"] });
+    t.click("radio-sm", { meta: true });
     // radio-sm should remain checked (cannot toggle off)
     expect(t.attrs("radio-sm")["aria-checked"]).toBe(true);
   });

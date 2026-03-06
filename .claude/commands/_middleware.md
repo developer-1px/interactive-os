@@ -59,7 +59,7 @@ description: 모든 워크플로우에 적용되는 지식 축적 미들웨어. 
    |------------|----------|
    | 프로젝트 전체 불변 원칙 | `.agent/rules.md` |
    | 특정 도메인의 표준·패턴·정의 | `.agent/knowledge/[topic].md` |
-   | OS 공식 스펙 | `docs/official/[topic]/` |
+   | OS 공식 스펙 | `docs/2-area/official/[topic]/` |
 
 2. **기존 토픽 파일에 관련 섹션이 있으면** → 해당 섹션에 추가
 3. **관련 주제가 있지만 섹션이 없으면** → 새 섹션 추가

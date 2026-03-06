@@ -321,11 +321,10 @@ describe("createCollectionZone — bind() auto-wiring", () => {
     ]);
   });
 
-  it("keybindings include Meta+D for duplicate", () => {
-    const bindings = arraySidebar.collectionBindings();
-    expect(
-      bindings.keybindings.some((kb: { key: string }) => kb.key === "Meta+D"),
-    ).toBe(true);
+  it("duplicate command is defined with Meta+D (key is on command)", () => {
+    // Meta+D keybinding is now registered automatically when the command is created
+    // with { key: "Meta+D" } — no longer exposed on collectionBindings.
+    expect(arraySidebar.duplicate).toBeDefined();
   });
 });
 

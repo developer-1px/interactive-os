@@ -9,11 +9,8 @@
  * Example: Day Planner — configure hours, minutes, and duration for a meeting.
  */
 
-import { OS_VALUE_CHANGE } from "@os-core/4-command";
-import { os } from "@os-core/engine/kernel";
 import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
-import { useEffect } from "react";
 
 // ─── Spinbutton Data ───
 
@@ -82,6 +79,11 @@ const SpinUI = spinbuttonZone.bind({
   role: "spinbutton",
   options: {
     navigate: { orientation: "vertical" },
+    value: {
+      initial: Object.fromEntries(
+        SPINBUTTONS.map((s) => [s.id, s.initial]),
+      ),
+    },
   },
 });
 
@@ -179,20 +181,6 @@ function MeetingSummary() {
 // ─── Main Component ───
 
 export function SpinbuttonPattern() {
-  // Initialize spinbutton values on mount
-  useEffect(() => {
-    for (const spinner of SPINBUTTONS) {
-      os.dispatch(
-        OS_VALUE_CHANGE({
-          action: "set",
-          value: spinner.initial,
-          itemId: spinner.id,
-          zoneId: "apg-spinbutton-zone",
-        }),
-      );
-    }
-  }, []);
-
   return (
     <div className="max-w-md">
       <h3 className="text-lg font-semibold mb-3">Spinbutton — Day Planner</h3>

@@ -1,4 +1,4 @@
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import { useState } from "react";
 import {
   BuilderApp,

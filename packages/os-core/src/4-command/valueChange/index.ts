@@ -37,6 +37,26 @@ export const OS_VALUE_CHANGE = os.defineCommand(
     if (!valueConfig || valueConfig.mode === "none") return;
 
     const currentValue = zone.valueNow[targetId] ?? valueConfig.min;
+
+    // ── toggleCollapse: separator Enter key (collapse/restore) ──
+    if (payload.action === "toggleCollapse") {
+      const isAtMin = currentValue === valueConfig.min;
+      return {
+        state: produce(ctx.state, (draft) => {
+          const z = ensureZone(draft.os, zoneId);
+          if (isAtMin) {
+            // Restore to saved value (or stay at min if no saved value)
+            const restoreValue = z.valueRestore[targetId] ?? valueConfig.min;
+            z.valueNow[targetId] = restoreValue;
+          } else {
+            // Collapse: save current value, then set to min
+            z.valueRestore[targetId] = currentValue;
+            z.valueNow[targetId] = valueConfig.min;
+          }
+        }),
+      };
+    }
+
     const result = resolveValueChange(
       currentValue,
       payload.action,

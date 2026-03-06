@@ -32,7 +32,7 @@
  *   H5: 4 condiments: Lettuce, Tomato, Mustard, Sprouts
  */
 
-import { OS_CHECK } from "@os-core/4-command/activate/check";
+import { OS_CHECK } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
 
 // ─── Condiment Data (W3C Example: "Sandwich Condiments") ───

@@ -17,9 +17,17 @@
  * 6 root blocks, 3 tabs, 2 sections = 11 total nodes.
  */
 
-import type { Block } from "@apps/builder/model/appState";
+/** Self-contained tree node type for collection tests (no app dependency). */
+export interface TestTreeNode {
+  id: string;
+  type: string;
+  label: string;
+  fields: Record<string, string>;
+  children?: TestTreeNode[];
+  accept?: string[];
+}
 
-export const TREE_TEST_BLOCKS: Block[] = [
+export const TREE_TEST_BLOCKS: TestTreeNode[] = [
   {
     id: "hero-1",
     type: "hero",

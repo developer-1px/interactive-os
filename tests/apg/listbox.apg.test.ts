@@ -10,7 +10,9 @@
  * Unique: followFocus on/off, Shift+Arrow range, horizontal variant
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
+import { OS_SELECT } from "@os-core/4-command/selection/select";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -54,25 +56,29 @@ const MULTI_SELECT = {
 };
 
 function singleSelect(focusedItem = "apple") {
-  const page = createOsPage();
-  page.goto("listbox", {
-    items: ITEMS,
-    config: SINGLE_SELECT,
+  const app = defineApp("test-listbox", {});
+  const zone = app.createZone("listbox");
+  zone.bind({
     role: "listbox",
-    focusedItemId: focusedItem,
+    getItems: () => ITEMS,
+    options: SINGLE_SELECT,
   });
-  page.dispatch(page.OS_SELECT({ targetId: focusedItem, mode: "replace" }));
+  const page = createPage(app);
+  page.goto("listbox", { focusedItemId: focusedItem });
+  page.dispatch(OS_SELECT({ targetId: focusedItem, mode: "replace" }));
   return page;
 }
 
 function multiSelect(focusedItem = "apple") {
-  const page = createOsPage();
-  page.goto("listbox", {
-    items: ITEMS,
-    config: MULTI_SELECT,
+  const app = defineApp("test-listbox", {});
+  const zone = app.createZone("listbox");
+  zone.bind({
     role: "listbox",
-    focusedItemId: focusedItem,
+    getItems: () => ITEMS,
+    options: MULTI_SELECT,
   });
+  const page = createPage(app);
+  page.goto("listbox", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -176,7 +182,7 @@ describe("APG Listbox: Single-Select Negative (MUST NOT)", () => {
     // W3C: Shift+Click dispatches OS_SELECT({mode:"range"}).
     // In single-select (range:false), enforceMode must downgrade to "replace".
     const t = singleSelect("banana");
-    t.dispatch(t.OS_SELECT({ targetId: "elderberry", mode: "range" }));
+    t.dispatch(OS_SELECT({ targetId: "elderberry", mode: "range" }));
     expect(t.selection()).toHaveLength(1);
     expect(t.selection()).toContain("elderberry"); // replaced, not range
     expect(t.selection()).not.toContain("banana"); // old deselected
@@ -186,7 +192,7 @@ describe("APG Listbox: Single-Select Negative (MUST NOT)", () => {
     // W3C: Cmd+Click dispatches OS_SELECT({mode:"toggle"}).
     // In single-select (toggle:false), enforceMode must downgrade to "replace".
     const t = singleSelect("banana");
-    t.dispatch(t.OS_SELECT({ targetId: "cherry", mode: "toggle" }));
+    t.dispatch(OS_SELECT({ targetId: "cherry", mode: "toggle" }));
     expect(t.selection()).toHaveLength(1);
     expect(t.selection()).toContain("cherry");
     expect(t.selection()).not.toContain("banana");
@@ -194,7 +200,7 @@ describe("APG Listbox: Single-Select Negative (MUST NOT)", () => {
 
   it("Cmd+Click on already-selected: MUST NOT deselect (single-select invariant)", () => {
     const t = singleSelect("apple");
-    t.dispatch(t.OS_SELECT({ targetId: "apple", mode: "toggle" }));
+    t.dispatch(OS_SELECT({ targetId: "apple", mode: "toggle" }));
     // Still selected — replace(self) keeps it
     expect(t.selection()).toContain("apple");
     expect(t.selection()).toHaveLength(1);
@@ -296,7 +302,7 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Down: extends selection range", () => {
     const t = multiSelect("banana");
-    t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "replace" }));
+    t.dispatch(OS_SELECT({ targetId: "banana", mode: "replace" }));
     t.keyboard.press("Shift+ArrowDown");
     expect(t.focusedItemId()).toBe("cherry");
     expect(t.attrs("banana")["aria-selected"]).toBe(true);
@@ -305,7 +311,7 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Up: extends selection range backward", () => {
     const t = multiSelect("cherry");
-    t.dispatch(t.OS_SELECT({ targetId: "cherry", mode: "replace" }));
+    t.dispatch(OS_SELECT({ targetId: "cherry", mode: "replace" }));
     t.keyboard.press("Shift+ArrowUp");
     expect(t.focusedItemId()).toBe("banana");
     expect(t.attrs("banana")["aria-selected"]).toBe(true);
@@ -314,10 +320,10 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Space: range select from anchor to focused", () => {
     const t = multiSelect("banana");
-    t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "replace" }));
+    t.dispatch(OS_SELECT({ targetId: "banana", mode: "replace" }));
     t.keyboard.press("ArrowDown");
     t.keyboard.press("ArrowDown");
-    t.dispatch(t.OS_SELECT({ targetId: "date", mode: "range" }));
+    t.dispatch(OS_SELECT({ targetId: "date", mode: "range" }));
     expect(t.attrs("banana")["aria-selected"]).toBe(true);
     expect(t.attrs("cherry")["aria-selected"]).toBe(true);
     expect(t.attrs("date")["aria-selected"]).toBe(true);
@@ -325,7 +331,7 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Down × 3: progressively extends range", () => {
     const t = multiSelect("apple");
-    t.dispatch(t.OS_SELECT({ targetId: "apple", mode: "replace" }));
+    t.dispatch(OS_SELECT({ targetId: "apple", mode: "replace" }));
     t.keyboard.press("Shift+ArrowDown");
     t.keyboard.press("Shift+ArrowDown");
     t.keyboard.press("Shift+ArrowDown");
@@ -338,7 +344,7 @@ describe("APG Listbox: Multi-Select", () => {
 
   it("Shift+Down then Shift+Up: shrinks range", () => {
     const t = multiSelect("banana");
-    t.dispatch(t.OS_SELECT({ targetId: "banana", mode: "replace" }));
+    t.dispatch(OS_SELECT({ targetId: "banana", mode: "replace" }));
     t.keyboard.press("Shift+ArrowDown");
     t.keyboard.press("Shift+ArrowDown");
     expect(t.attrs("banana")["aria-selected"]).toBe(true);
@@ -357,26 +363,30 @@ describe("APG Listbox: Multi-Select", () => {
 
 describe("APG Listbox: Focus Initialization", () => {
   it("single-select, no selection: focus goes to first option", () => {
-    const page = createOsPage();
-    page.goto("listbox", {
-      items: ITEMS,
-      config: SINGLE_SELECT,
+    const app = defineApp("test-listbox", {});
+    const zone = app.createZone("listbox");
+    zone.bind({
       role: "listbox",
-      focusedItemId: null,
+      getItems: () => ITEMS,
+      options: SINGLE_SELECT,
     });
+    const page = createPage(app);
+    page.goto("listbox", { focusedItemId: null });
     page.keyboard.press("ArrowDown");
     expect(page.focusedItemId()).toBe("apple");
     expect(page.attrs("apple").tabIndex).toBe(0);
   });
 
   it("multi-select, no selection: focus first, no auto-select", () => {
-    const page = createOsPage();
-    page.goto("listbox", {
-      items: ITEMS,
-      config: MULTI_SELECT,
+    const app = defineApp("test-listbox", {});
+    const zone = app.createZone("listbox");
+    zone.bind({
       role: "listbox",
-      focusedItemId: null,
+      getItems: () => ITEMS,
+      options: MULTI_SELECT,
     });
+    const page = createPage(app);
+    page.goto("listbox", { focusedItemId: null });
     page.keyboard.press("ArrowDown");
     expect(page.focusedItemId()).toBe("apple");
     expect(page.attrs("apple").tabIndex).toBe(0);
@@ -390,17 +400,19 @@ describe("APG Listbox: Focus Initialization", () => {
 
 describe("APG Listbox: Horizontal Orientation", () => {
   function horizontal(focusedItem = "apple") {
-    const page = createOsPage();
-    page.goto("listbox", {
-      items: ITEMS,
-      config: {
+    const app = defineApp("test-listbox", {});
+    const zone = app.createZone("listbox");
+    zone.bind({
+      role: "listbox",
+      getItems: () => ITEMS,
+      options: {
         navigate: { ...SINGLE_SELECT.navigate, orientation: "horizontal" },
         select: SINGLE_SELECT.select,
       },
-      role: "listbox",
-      focusedItemId: focusedItem,
     });
-    page.dispatch(page.OS_SELECT({ targetId: focusedItem, mode: "replace" }));
+    const page = createPage(app);
+    page.goto("listbox", { focusedItemId: focusedItem });
+    page.dispatch(OS_SELECT({ targetId: focusedItem, mode: "replace" }));
     return page;
   }
 
@@ -429,10 +441,12 @@ describe("APG Listbox: Horizontal Orientation", () => {
 
 describe("APG Listbox: RadioGroup Variant", () => {
   function radioGroup(selected = "radio-sm") {
-    const page = createOsPage();
-    page.goto("radiogroup", {
-      items: ["radio-sm", "radio-md", "radio-lg"],
-      config: {
+    const app = defineApp("test-listbox", {});
+    const zone = app.createZone("radiogroup");
+    zone.bind({
+      role: "listbox",
+      getItems: () => ["radio-sm", "radio-md", "radio-lg"],
+      options: {
         navigate: {
           ...SINGLE_SELECT.navigate,
           loop: true,
@@ -440,10 +454,10 @@ describe("APG Listbox: RadioGroup Variant", () => {
         },
         select: { ...SINGLE_SELECT.select, disallowEmpty: true },
       },
-      role: "listbox",
-      focusedItemId: selected,
     });
-    page.dispatch(page.OS_SELECT({ targetId: selected, mode: "replace" }));
+    const page = createPage(app);
+    page.goto("radiogroup", { focusedItemId: selected });
+    page.dispatch(OS_SELECT({ targetId: selected, mode: "replace" }));
     return page;
   }
 

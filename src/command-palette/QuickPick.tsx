@@ -39,8 +39,8 @@ import {
   OS_NAVIGATE,
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
-} from "@os-core/4-command";
-import { os } from "@os-core/engine/kernel";
+} from "@os-sdk/os";
+import { os } from "@os-sdk/os";
 import { Item } from "@os-react/6-project/Item";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import { Zone } from "@os-react/6-project/Zone";
@@ -222,9 +222,9 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
       const containerEl = containerRef.current;
       if (containerEl) {
         const firstItem =
-          containerEl.querySelector<HTMLElement>("[data-item-id]");
+          containerEl.querySelector<HTMLElement>("[data-item]");
         if (firstItem) {
-          const itemId = firstItem.getAttribute("data-item-id");
+          const itemId = firstItem.id;
           if (itemId) {
             os.dispatch(OS_FOCUS({ zoneId, itemId }));
           }

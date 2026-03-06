@@ -26,12 +26,12 @@ export function getItemsAndLabels(zoneEl: HTMLElement): {
   items: string[];
   labels: Map<string, string>;
 } {
-  const itemEls = zoneEl.querySelectorAll<HTMLElement>("[data-item-id]");
+  const itemEls = zoneEl.querySelectorAll<HTMLElement>("[data-item]");
   const items: string[] = [];
   const labels = new Map<string, string>();
 
   for (const el of itemEls) {
-    const id = el.dataset["itemId"];
+    const id = el.id;
     if (!id) continue;
     items.push(id);
     const label = el.getAttribute("aria-label") || el.textContent || "";

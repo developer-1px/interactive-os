@@ -6,11 +6,13 @@
  * Unique: ArrowRight/Left expand/collapse, leaf no-expand,
  *         Enter activates (does NOT expand)
  *
- * Uses createOsPage for full pipeline testing:
+ * Uses defineApp+createPage for full pipeline testing:
  *   keyboard.press → resolveKeyboard → command → state → attrs
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { OS_SELECT } from "@os-core/4-command/selection/select";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -23,36 +25,43 @@ import {
 
 const TREE_ITEMS = ["section-1", "child-1a", "child-1b", "section-2", "leaf-1"];
 
+const TREE_NAV_CONFIG = {
+  navigate: {
+    orientation: "vertical" as const,
+    loop: false,
+    seamless: false,
+    typeahead: false,
+    entry: "first" as const,
+    recovery: "next" as const,
+  },
+  select: {
+    mode: "single" as const,
+    followFocus: false,
+    disallowEmpty: false,
+    range: false,
+    toggle: true,
+  },
+};
+
 function treeFactory(focusedItem = "section-1") {
-  const page = createOsPage();
-  page.setItems(TREE_ITEMS);
-  page.setExpandableItems(["section-1", "section-2"]);
-  page.setTreeLevels({
-    "section-1": 1,
-    "child-1a": 2,
-    "child-1b": 2,
-    "section-2": 1,
-    "leaf-1": 2,
+  const app = defineApp("test-tree", {});
+  const zone = app.createZone("tree-zone");
+  zone.bind({
+    role: "tree",
+    getItems: () => TREE_ITEMS,
+    getExpandableItems: () => new Set(["section-1", "section-2"]),
+    getTreeLevels: () =>
+      new Map([
+        ["section-1", 1],
+        ["child-1a", 2],
+        ["child-1b", 2],
+        ["section-2", 1],
+        ["leaf-1", 2],
+      ]),
+    options: TREE_NAV_CONFIG,
   });
-  page.setRole("tree-zone", "tree");
-  page.setConfig({
-    navigate: {
-      orientation: "vertical",
-      loop: false,
-      seamless: false,
-      typeahead: false,
-      entry: "first",
-      recovery: "next",
-    },
-    select: {
-      mode: "single",
-      followFocus: false,
-      disallowEmpty: false,
-      range: false,
-      toggle: true,
-    },
-  });
-  page.setActiveZone("tree-zone", focusedItem);
+  const page = createPage(app);
+  page.goto("tree-zone", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -61,24 +70,33 @@ function leafFactory() {
 }
 
 function multiTreeFactory(focusedItem = "section-1") {
-  const page = treeFactory(focusedItem);
-  page.setConfig({
-    navigate: {
-      orientation: "vertical",
-      loop: false,
-      seamless: false,
-      typeahead: false,
-      entry: "first",
-      recovery: "next",
-    },
-    select: {
-      mode: "multiple",
-      followFocus: false,
-      disallowEmpty: false,
-      range: true,
-      toggle: true,
+  const app = defineApp("test-tree-multi", {});
+  const zone = app.createZone("tree-zone");
+  zone.bind({
+    role: "tree",
+    getItems: () => TREE_ITEMS,
+    getExpandableItems: () => new Set(["section-1", "section-2"]),
+    getTreeLevels: () =>
+      new Map([
+        ["section-1", 1],
+        ["child-1a", 2],
+        ["child-1b", 2],
+        ["section-2", 1],
+        ["leaf-1", 2],
+      ]),
+    options: {
+      ...TREE_NAV_CONFIG,
+      select: {
+        mode: "multiple" as const,
+        followFocus: false,
+        disallowEmpty: false,
+        range: true,
+        toggle: true,
+      },
     },
   });
+  const page = createPage(app);
+  page.goto("tree-zone", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -87,17 +105,17 @@ function multiTreeFactory(focusedItem = "section-1") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Tree: Navigation", () => {
-  assertVerticalNav(treeFactory);
-  assertBoundaryClamp(treeFactory, {
+  assertVerticalNav(treeFactory as any);
+  assertBoundaryClamp(treeFactory as any, {
     firstId: "section-1",
     lastId: "leaf-1",
     axis: "vertical",
   });
-  assertHomeEnd(treeFactory, {
+  assertHomeEnd(treeFactory as any, {
     firstId: "section-1",
     lastId: "leaf-1",
   });
-  assertNoSelection(treeFactory);
+  assertNoSelection(treeFactory as any);
 });
 
 // ═══════════════════════════════════════════════════
@@ -107,22 +125,22 @@ describe("APG Tree: Navigation", () => {
 describe("APG Tree: Expansion (pressKey pipeline)", () => {
   it("ArrowRight on collapsed node: expands (via pressKey)", () => {
     const t = treeFactory("section-1");
-    expect(t.zone()?.expandedItems).not.toContain("section-1");
+    expect(t.attrs("section-1")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("ArrowRight");
 
-    expect(t.zone()?.expandedItems).toContain("section-1");
+    expect(t.attrs("section-1")["aria-expanded"]).toBe(true);
   });
 
   it("ArrowLeft on expanded node: collapses (via pressKey)", () => {
     const t = treeFactory("section-1");
     // First expand
     t.keyboard.press("ArrowRight");
-    expect(t.zone()?.expandedItems).toContain("section-1");
+    expect(t.attrs("section-1")["aria-expanded"]).toBe(true);
 
     // Then collapse
     t.keyboard.press("ArrowLeft");
-    expect(t.zone()?.expandedItems).not.toContain("section-1");
+    expect(t.attrs("section-1")["aria-expanded"]).toBe(false);
   });
 
   it("ArrowRight on leaf: does NOT expand (but does nothing because no children)", () => {
@@ -130,15 +148,15 @@ describe("APG Tree: Expansion (pressKey pipeline)", () => {
 
     t.keyboard.press("ArrowRight");
 
-    // Leaf should never appear in expandedItems
-    expect(t.zone()?.expandedItems).not.toContain("leaf-1");
+    // Leaf should never appear expanded
+    expect(t.attrs("leaf-1")["aria-expanded"]).toBeUndefined();
     expect(t.focusedItemId()).toBe("leaf-1");
   });
 
   it("ArrowRight on an open node: moves focus to the first child node", () => {
     const t = treeFactory("section-1");
     t.keyboard.press("ArrowRight"); // First expand it
-    expect(t.zone()?.expandedItems).toContain("section-1");
+    expect(t.attrs("section-1")["aria-expanded"]).toBe(true);
 
     t.keyboard.press("ArrowRight"); // Press again on open node -> move to child
     expect(t.focusedItemId()).toBe("child-1a");
@@ -177,12 +195,9 @@ describe("APG Tree: Selection (Space key)", () => {
 describe("APG Tree: Activation (Enter key)", () => {
   it("Enter on leaf: does NOT expand (activate only)", () => {
     const t = leafFactory();
-    const beforeExpanded = [...(t.zone()?.expandedItems ?? [])];
-
+    // leaf-1 is not expandable, so aria-expanded should remain undefined
     t.keyboard.press("Enter");
-
-    // expandedItems should not change
-    expect(t.zone()?.expandedItems).toEqual(beforeExpanded);
+    expect(t.attrs("leaf-1")["aria-expanded"]).toBeUndefined();
   });
 
   it("Enter on section: should toggle expand (current behavior)", () => {
@@ -191,7 +206,7 @@ describe("APG Tree: Activation (Enter key)", () => {
     t.keyboard.press("Enter");
 
     // OS_ACTIVATE dispatches OS_EXPAND for expandable roles
-    expect(t.zone()?.expandedItems).toContain("section-1");
+    expect(t.attrs("section-1")["aria-expanded"]).toBe(true);
   });
 });
 
@@ -245,15 +260,15 @@ describe("APG Tree: Click interaction", () => {
 
   it("click on expandable item: toggles expand (APG handleClick)", () => {
     const t = treeFactory("section-1");
-    expect(t.zone()?.expandedItems).not.toContain("section-1");
+    expect(t.attrs("section-1")["aria-expanded"]).toBe(false);
 
     // Click on focused expandable item → should expand
     t.click("section-1");
-    expect(t.zone()?.expandedItems).toContain("section-1");
+    expect(t.attrs("section-1")["aria-expanded"]).toBe(true);
 
     // Click again → should collapse
     t.click("section-1");
-    expect(t.zone()?.expandedItems).not.toContain("section-1");
+    expect(t.attrs("section-1")["aria-expanded"]).toBe(false);
   });
 
   it("click on non-focused expandable item: focuses + expands", () => {
@@ -262,7 +277,7 @@ describe("APG Tree: Click interaction", () => {
     // Click on a different expandable item
     t.click("section-2");
     expect(t.focusedItemId()).toBe("section-2");
-    expect(t.zone()?.expandedItems).toContain("section-2");
+    expect(t.attrs("section-2")["aria-expanded"]).toBe(true);
   });
 
   it("click on leaf: focuses, does NOT expand", () => {
@@ -270,7 +285,7 @@ describe("APG Tree: Click interaction", () => {
 
     t.click("leaf-1");
     expect(t.focusedItemId()).toBe("leaf-1");
-    expect(t.zone()?.expandedItems).not.toContain("leaf-1");
+    expect(t.attrs("leaf-1")["aria-expanded"]).toBeUndefined();
   });
 });
 
@@ -310,7 +325,6 @@ describe("APG Tree: Multi-Selection (Shift+Arrow)", () => {
 
 // ═══════════════════════════════════════════════════
 // Single-Select Tree: Negative Tests (MUST NOT)
-// W3C APG: Single-select tree → no range, no toggle via modifier clicks
 // ═══════════════════════════════════════════════════
 
 describe("APG Tree: Single-Select Negative (MUST NOT)", () => {
@@ -332,11 +346,11 @@ describe("APG Tree: Single-Select Negative (MUST NOT)", () => {
 
   it("Shift+Click: MUST NOT create range selection (OS_SELECT mode:range → replace)", () => {
     const t = treeFactory("section-1");
-    t.dispatch(t.OS_SELECT({ targetId: "section-1", mode: "replace" }));
+    t.dispatch(OS_SELECT({ targetId: "section-1", mode: "replace" }));
     expect(t.selection()).toEqual(["section-1"]);
 
     // Shift+Click sends mode:range — enforceMode must downgrade
-    t.dispatch(t.OS_SELECT({ targetId: "leaf-1", mode: "range" }));
+    t.dispatch(OS_SELECT({ targetId: "leaf-1", mode: "range" }));
     expect(t.selection()).toHaveLength(1);
     expect(t.selection()).toContain("leaf-1"); // replaced, not range
     expect(t.selection()).not.toContain("section-1");
@@ -346,11 +360,11 @@ describe("APG Tree: Single-Select Negative (MUST NOT)", () => {
     // Tree single-select has toggle:true → Cmd+Click toggle is allowed
     // This is different from Listbox single (toggle:false)
     const t = treeFactory("section-1");
-    t.dispatch(t.OS_SELECT({ targetId: "section-1", mode: "replace" }));
+    t.dispatch(OS_SELECT({ targetId: "section-1", mode: "replace" }));
     expect(t.selection()).toEqual(["section-1"]);
 
     // Cmd+Click sends mode:toggle — tree single has toggle:true, so toggle allowed
-    t.dispatch(t.OS_SELECT({ targetId: "section-1", mode: "toggle" }));
+    t.dispatch(OS_SELECT({ targetId: "section-1", mode: "toggle" }));
     // toggle:true → deselect is allowed
     expect(t.selection()).not.toContain("section-1");
   });

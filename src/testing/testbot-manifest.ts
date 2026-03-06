@@ -42,4 +42,10 @@ export const TESTBOT_MANIFEST: ManifestEntry[] = [
         (m) => m.focusShowcaseScripts,
       ),
   },
+  {
+    zones: ["docs-sidebar", "docs-recent", "docs-favorites"],
+    group: "Docs Viewer",
+    load: () =>
+      import("@/docs-viewer/testbot-docs").then((m) => m.docsViewerScripts),
+  },
 ];

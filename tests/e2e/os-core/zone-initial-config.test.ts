@@ -8,7 +8,8 @@
  * Config는 bind({ initial })로 ZoneState 생성 시 포함.
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -17,31 +18,15 @@ import { describe, expect, it } from "vitest";
 
 describe("Zone Initial Config: selection", () => {
   it("bind({ initial: { selection } }) → ZoneState has selection at init", () => {
-    const page = createOsPage();
-    page.goto("test-zone", {
-      items: ["tab-a", "tab-b", "tab-c"],
-      config: {
-        navigate: {
-          orientation: "horizontal" as const,
-          loop: true,
-          entry: "selected" as const,
-          recovery: "next" as const,
-          seamless: false,
-          typeahead: false,
-        },
-        select: {
-          mode: "single" as const,
-          followFocus: true,
-          disallowEmpty: true,
-          range: false,
-          toggle: false,
-        },
-        tab: { behavior: "escape" as const, restoreFocus: false },
-      },
+    const app = defineApp("test-zone-init-1", {});
+    const zone = app.createZone("test-zone");
+    zone.bind({
       role: "tablist",
-      // NEW: initial config — this is the feature under test
-      initial: { selection: ["tab-b"] },
+      getItems: () => ["tab-a", "tab-b", "tab-c"],
     });
+    const page = createPage(app);
+    // NEW: initial config — this is the feature under test
+    page.goto("test-zone", { initial: { selection: ["tab-b"] } });
 
     // Selection should be applied at init time (no dispatch needed)
     expect(page.attrs("tab-b")["aria-selected"]).toBe(true);
@@ -50,13 +35,15 @@ describe("Zone Initial Config: selection", () => {
   });
 
   it("initial.selection overrides disallowEmpty default (first item)", () => {
-    const page = createOsPage();
-    page.goto("test-zone", {
-      items: ["radio-1", "radio-2", "radio-3"],
+    const app = defineApp("test-zone-init-2", {});
+    const zone = app.createZone("test-zone");
+    zone.bind({
       role: "radiogroup",
-      // Specify radio-2, not radio-1 (which disallowEmpty would pick)
-      initial: { selection: ["radio-2"] },
+      getItems: () => ["radio-1", "radio-2", "radio-3"],
     });
+    const page = createPage(app);
+    // Specify radio-2, not radio-1 (which disallowEmpty would pick)
+    page.goto("test-zone", { initial: { selection: ["radio-2"] } });
 
     // radio-2 should be checked, not radio-1
     expect(page.attrs("radio-2")["aria-checked"]).toBe(true);
@@ -70,12 +57,15 @@ describe("Zone Initial Config: selection", () => {
 
 describe("Zone Initial Config: disallowEmpty fallback", () => {
   it("disallowEmpty without initial → first item selected (existing behavior)", () => {
-    const page = createOsPage();
-    page.goto("test-zone", {
-      items: ["tab-a", "tab-b", "tab-c"],
+    const app = defineApp("test-zone-init-3", {});
+    const zone = app.createZone("test-zone");
+    zone.bind({
       role: "tablist",
-      // NO initial specified → disallowEmpty should auto-select first
+      getItems: () => ["tab-a", "tab-b", "tab-c"],
     });
+    const page = createPage(app);
+    // NO initial specified → disallowEmpty should auto-select first
+    page.goto("test-zone", { focusedItemId: "tab-a" });
 
     expect(page.attrs("tab-a")["aria-selected"]).toBe(true);
   });

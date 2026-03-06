@@ -16,7 +16,8 @@
  * (escape so arrows navigate between headers, Tab moves to panel content)
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -30,27 +31,31 @@ import {
 const HEADERS = ["acc-personal", "acc-billing", "acc-shipping"];
 
 function accordionFactory(focusedItem = "acc-personal") {
-  const page = createOsPage();
-  page.setItems(HEADERS);
-  page.setRole("accordion-zone", "accordion");
-  page.setConfig({
-    navigate: {
-      orientation: "vertical",
-      loop: false,
-      seamless: false,
-      typeahead: false,
-      entry: "first",
-      recovery: "next",
-    },
-    activate: {
-      mode: "manual",
-      onClick: true, // APG: click on header toggles expand/collapse
-    },
-    expand: {
-      mode: "all", // APG accordion: all headers are expandable
+  const app = defineApp("test-accordion", {});
+  const zone = app.createZone("accordion-zone");
+  zone.bind({
+    role: "accordion",
+    getItems: () => HEADERS,
+    options: {
+      navigate: {
+        orientation: "vertical",
+        loop: false,
+        seamless: false,
+        typeahead: false,
+        entry: "first",
+        recovery: "next",
+      },
+      activate: {
+        mode: "manual",
+        onClick: true, // APG: click on header toggles expand/collapse
+      },
+      expand: {
+        mode: "all", // APG accordion: all headers are expandable
+      },
     },
   });
-  page.setActiveZone("accordion-zone", focusedItem);
+  const page = createPage(app);
+  page.goto("accordion-zone", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -59,17 +64,17 @@ function accordionFactory(focusedItem = "acc-personal") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Accordion: Navigation", () => {
-  assertVerticalNav(accordionFactory);
-  assertBoundaryClamp(accordionFactory, {
+  assertVerticalNav(accordionFactory as any);
+  assertBoundaryClamp(accordionFactory as any, {
     firstId: "acc-personal",
     lastId: "acc-shipping",
     axis: "vertical",
   });
-  assertHomeEnd(accordionFactory, {
+  assertHomeEnd(accordionFactory as any, {
     firstId: "acc-personal",
     lastId: "acc-shipping",
   });
-  assertNoSelection(accordionFactory);
+  assertNoSelection(accordionFactory as any);
 });
 
 // ═══════════════════════════════════════════════════
@@ -79,53 +84,53 @@ describe("APG Accordion: Navigation", () => {
 describe("APG Accordion: Expand/Collapse (Enter/Space)", () => {
   it("Enter on collapsed header: expands the panel", () => {
     const t = accordionFactory("acc-personal");
-    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("Enter");
 
-    expect(t.zone()?.expandedItems).toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
   });
 
   it("Enter on expanded header: collapses the panel", () => {
     const t = accordionFactory("acc-personal");
     // First expand
     t.keyboard.press("Enter");
-    expect(t.zone()?.expandedItems).toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
     // Then collapse
     t.keyboard.press("Enter");
-    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
   });
 
   it("Space on collapsed header: expands the panel", () => {
     const t = accordionFactory("acc-personal");
-    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("Space");
 
-    expect(t.zone()?.expandedItems).toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
   });
 
   it("Space on expanded header: collapses the panel", () => {
     const t = accordionFactory("acc-personal");
     // First expand
     t.keyboard.press("Space");
-    expect(t.zone()?.expandedItems).toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
     // Then collapse
     t.keyboard.press("Space");
-    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
   });
 
   it("multiple headers can be expanded independently", () => {
     const t = accordionFactory("acc-personal");
     t.keyboard.press("Enter"); // expand personal
-    expect(t.zone()?.expandedItems).toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
     t.keyboard.press("ArrowDown"); // move to billing
     t.keyboard.press("Enter"); // expand billing
-    expect(t.zone()?.expandedItems).toContain("acc-personal");
-    expect(t.zone()?.expandedItems).toContain("acc-billing");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    expect(t.attrs("acc-billing")["aria-expanded"]).toBe(true);
   });
 });
 
@@ -136,13 +141,13 @@ describe("APG Accordion: Expand/Collapse (Enter/Space)", () => {
 describe("APG Accordion: Arrow Navigation (No expand)", () => {
   it("ArrowDown: moves to next header without expanding", () => {
     const t = accordionFactory("acc-personal");
-    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("ArrowDown");
 
     expect(t.focusedItemId()).toBe("acc-billing");
     // Should NOT have expanded personal
-    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
   });
 
   it("ArrowUp: moves to previous header without expanding", () => {
@@ -150,7 +155,10 @@ describe("APG Accordion: Arrow Navigation (No expand)", () => {
     t.keyboard.press("ArrowUp");
 
     expect(t.focusedItemId()).toBe("acc-personal");
-    expect(t.zone()?.expandedItems || []).toHaveLength(0);
+    // No items should be expanded
+    for (const id of HEADERS) {
+      expect(t.attrs(id)["aria-expanded"]).toBe(false);
+    }
   });
 });
 
@@ -202,15 +210,15 @@ describe("APG Accordion: Click interaction", () => {
 
   it("click on focused header: toggles expand", () => {
     const t = accordionFactory("acc-personal");
-    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
 
     // Click on focused expandable item
     t.click("acc-personal");
-    expect(t.zone()?.expandedItems).toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
     // Click again → collapse
     t.click("acc-personal");
-    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
   });
 
   it("click on unfocused header: focuses AND expands it (W3C APG)", () => {
@@ -221,7 +229,7 @@ describe("APG Accordion: Click interaction", () => {
     // Single click on unfocused header → should focus + expand
     t.click("acc-billing");
     expect(t.focusedItemId()).toBe("acc-billing");
-    expect(t.zone()?.expandedItems).toContain("acc-billing");
+    expect(t.attrs("acc-billing")["aria-expanded"]).toBe(true);
   });
 
   it("click headers independently: multiple panels open", () => {
@@ -229,17 +237,17 @@ describe("APG Accordion: Click interaction", () => {
 
     // Click first header → expand
     t.click("acc-personal");
-    expect(t.zone()?.expandedItems).toContain("acc-personal");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
     // Click second header → also expand (multi-open)
     t.click("acc-billing");
-    expect(t.zone()?.expandedItems).toContain("acc-personal");
-    expect(t.zone()?.expandedItems).toContain("acc-billing");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    expect(t.attrs("acc-billing")["aria-expanded"]).toBe(true);
 
     // Click first header again → collapse only first
     t.click("acc-personal");
-    expect(t.zone()?.expandedItems).not.toContain("acc-personal");
-    expect(t.zone()?.expandedItems).toContain("acc-billing");
+    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
+    expect(t.attrs("acc-billing")["aria-expanded"]).toBe(true);
   });
 
   it("click expands on first click, not re-click only", () => {
@@ -249,10 +257,10 @@ describe("APG Accordion: Click interaction", () => {
 
     // Click unfocused header → should expand on first click
     t.click("acc-shipping");
-    expect(t.zone()?.expandedItems).toContain("acc-shipping");
+    expect(t.attrs("acc-shipping")["aria-expanded"]).toBe(true);
 
     // Click it again (now focused) → should collapse
     t.click("acc-shipping");
-    expect(t.zone()?.expandedItems).not.toContain("acc-shipping");
+    expect(t.attrs("acc-shipping")["aria-expanded"]).toBe(false);
   });
 });

@@ -1,15 +1,11 @@
 /**
  * Role Registry Helpers — Unit Tests
  *
- * Tests for getChildRole, isCheckedRole, isExpandableRole helpers.
- * These are small utility functions but they feed into ARIA attribute rendering.
+ * Tests for getChildRole helper.
+ * This utility feeds into ARIA attribute rendering.
  */
 
-import {
-  getChildRole,
-  isCheckedRole,
-  isExpandableRole,
-} from "@os-core/engine/registries/roleRegistry";
+import { getChildRole } from "@os-core/engine/registries/roleRegistry";
 import { describe, expect, it } from "vitest";
 
 describe("getChildRole", () => {
@@ -21,7 +17,7 @@ describe("getChildRole", () => {
     ["tablist", "tab"],
     ["toolbar", "button"],
     ["grid", "gridcell"],
-    ["treegrid", "gridcell"],
+    ["treegrid", "row"],
     ["tree", "treeitem"],
     ["combobox", "option"],
     ["feed", "article"],
@@ -36,44 +32,5 @@ describe("getChildRole", () => {
 
   it("falls back to 'option' for undefined", () => {
     expect(getChildRole(undefined)).toBe("option");
-  });
-});
-
-describe("isCheckedRole", () => {
-  it.each([
-    "radio",
-    "menuitemradio",
-    "menuitemcheckbox",
-    "checkbox",
-    "switch",
-  ])('"%s" → true', (role) => {
-    expect(isCheckedRole(role)).toBe(true);
-  });
-
-  it.each([
-    "option",
-    "menuitem",
-    "tab",
-    "treeitem",
-    "button",
-  ])('"%s" → false', (role) => {
-    expect(isCheckedRole(role)).toBe(false);
-  });
-});
-
-describe("isExpandableRole", () => {
-  it.each(["menuitem"])('"%s" → true', (role) => {
-    expect(isExpandableRole(role)).toBe(true);
-  });
-
-  it.each([
-    "option",
-    "radio",
-    "tab",
-    "button",
-    "gridcell",
-    "treeitem", // treeitem expandability depends on children, not role
-  ])('"%s" → false', (role) => {
-    expect(isExpandableRole(role)).toBe(false);
   });
 });

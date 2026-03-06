@@ -13,7 +13,7 @@ import { expect, test } from "@playwright/test";
  * Architecture notes:
  *   - OS.Field renders as contenteditable div[role="textbox"] with data-placeholder
  *   - DRAFT field is mode="immediate" → always editable when focused
- *   - Todo items are OS.Item with numeric data-item-id
+ *   - Todo items are OS.Item with numeric id + data-item marker
  *   - Edit field has id="EDIT" and mode="deferred"
  */
 
@@ -22,7 +22,7 @@ const LISTVIEW = '[role="listbox"]#list';
 const SIDEBAR = '[role="listbox"]#sidebar';
 
 /** Get any item in listView (excluding DRAFT) */
-const todoItem = (listview: string) => `${listview} [data-item-id]:not(#DRAFT)`;
+const todoItem = (listview: string) => `${listview} [data-item]:not(#DRAFT)`;
 
 /** Get the focused item in listView (excluding DRAFT) */
 const focusedTodoItem = (listview: string) =>
@@ -171,7 +171,7 @@ test.describe("Todo App", () => {
     await page.keyboard.press("Meta+ArrowUp");
 
     // Verify order changed
-    const items = page.locator(`${LISTVIEW} [data-item-id]:not(#DRAFT)`);
+    const items = page.locator(`${LISTVIEW} [data-item]:not(#DRAFT)`);
     const texts = await items.allTextContents();
     const secondIdx = texts.findIndex((t) => t.includes("Second task"));
     const firstIdx = texts.findIndex((t) =>
@@ -275,7 +275,7 @@ test.describe("Todo App", () => {
     await page.keyboard.press("Meta+ArrowDown");
 
     // Verify order: Work should now be first
-    const categories = page.locator(`${SIDEBAR} [data-item-id]`);
+    const categories = page.locator(`${SIDEBAR} [data-item]`);
     const texts = await categories.allTextContents();
     const inboxIdx = texts.findIndex((t) => t.includes("Inbox"));
     const workIdx = texts.findIndex((t) => t.includes("Work"));

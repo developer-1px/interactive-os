@@ -12,9 +12,9 @@
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import { OS_NOTIFY_DISMISS } from "@os-core/4-command/toast/toast";
-import { os } from "@os-core/engine/kernel";
-import type { NotificationEntry } from "@os-core/schema/state/OSState";
+import { OS_NOTIFY_DISMISS } from "@os-sdk/os";
+import { os } from "@os-sdk/os";
+import type { NotificationEntry } from "@os-sdk/os";
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 

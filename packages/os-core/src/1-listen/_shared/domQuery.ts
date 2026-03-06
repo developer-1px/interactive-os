@@ -19,7 +19,7 @@ export interface ResolveResult {
 // ═══════════════════════════════════════════════════════════════════
 
 export const findFocusableItem = (el: HTMLElement) =>
-  el.closest("[data-item-id]") as HTMLElement | null;
+  el.closest("[data-item]") as HTMLElement | null;
 
 export interface FocusTargetInfo {
   itemId: string;

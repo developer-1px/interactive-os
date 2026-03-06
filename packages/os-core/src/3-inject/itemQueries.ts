@@ -1,27 +1,10 @@
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 
-// ═══════════════════════════════════════════════════════════════════
-// getZoneItems — Read ordered item IDs from DOM (same logic as DOM_ITEMS)
-// ═══════════════════════════════════════════════════════════════════
-
-/**
- * Read the ordered item IDs for a zone, directly from the DOM.
- * Same logic as the DOM_ITEMS context provider, but callable from hooks.
- *
- * Used by Lazy Resolution to resolve stale focusedItemId at read-time.
- */
-export function getZoneItems(zoneId: string): string[] {
-  const entry = ZoneRegistry.get(zoneId);
-  if (!entry) return [];
-
-  // Push model: use getItems() accessor (headless-compatible)
-  if (entry.getItems) {
-    const items = entry.getItems();
-    return entry.itemFilter ? entry.itemFilter(items) : items;
-  }
-
-  return [];
-}
+/** Safe CSS.escape — falls back to basic escaping in jsdom (no CSS.escape). */
+const cssEscape =
+  typeof CSS !== "undefined" && CSS.escape
+    ? CSS.escape
+    : (s: string) => s.replace(/([^\w-])/g, "\\$1");
 
 // ═══════════════════════════════════════════════════════════════════
 // findItemElement — Zone-scoped element lookup (single source)
@@ -47,17 +30,25 @@ export function findItemElement(
   // 1. Zone-scoped: look inside the zone container first
   if (zoneEl) {
     const scoped = zoneEl.querySelector<HTMLElement>(
-      `[data-item-id="${itemId}"]`,
+      `#${cssEscape(itemId)}`,
     );
     if (scoped) return scoped;
   }
 
   // 2. Fallback: document-global
-  return (
-    (document.querySelector(
-      `[data-item-id="${itemId}"]`,
-    ) as HTMLElement | null) ?? document.getElementById(itemId)
-  );
+  return document.getElementById(itemId);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// getZoneItems — delegates to ZoneRegistry.resolveItems
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Get ordered item IDs for a zone (headless-safe, no DOM).
+ * Delegates to ZoneRegistry.resolveItems as single source of truth.
+ */
+export function getZoneItems(zoneId: string): string[] {
+  return ZoneRegistry.resolveItems(zoneId);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -80,7 +71,7 @@ export function getItemAttribute(
   const entry = ZoneRegistry.get(zoneId);
   if (!entry?.element) return null;
 
-  const el = entry.element.querySelector(`[data-item-id="${itemId}"]`);
+  const el = entry.element.querySelector(`#${cssEscape(itemId)}`);
   return el?.getAttribute(attribute) ?? null;
 }
 
@@ -104,15 +95,15 @@ export function getFirstDescendantWithAttribute(
   const entry = ZoneRegistry.get(zoneId);
   if (!entry?.element) return null;
 
-  const parentEl = entry.element.querySelector(`[data-item-id="${parentId}"]`);
+  const parentEl = entry.element.querySelector(`#${cssEscape(parentId)}`);
   if (!parentEl) return null;
 
   const descendant = parentEl.querySelector(
-    `[data-item-id][${attribute}="${value}"]`,
+    `[data-item][${attribute}="${value}"]`,
   );
   if (!descendant) return null;
 
-  const id = descendant.getAttribute("data-item-id");
+  const id = descendant.id;
   return id !== parentId ? id : null;
 }
 
@@ -132,14 +123,13 @@ export function getAncestorWithAttribute(
   const entry = ZoneRegistry.get(zoneId);
   if (!entry?.element) return null;
 
-  const el = entry.element.querySelector(`[data-item-id="${itemId}"]`);
+  const el = entry.element.querySelector(`#${cssEscape(itemId)}`);
   if (!el) return null;
 
   let current = el.parentElement;
   while (current && current !== entry.element) {
-    const currentItemId = current.getAttribute("data-item-id");
-    if (currentItemId && current.getAttribute(attribute) === value) {
-      return currentItemId;
+    if (current.id && current.getAttribute(attribute) === value) {
+      return current.id;
     }
     current = current.parentElement;
   }

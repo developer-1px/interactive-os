@@ -36,11 +36,13 @@ describe("T21: forceDeselect → zone deactivation", () => {
     container.setAttribute("data-zone", ZONE_ID);
 
     const s1 = document.createElement("div");
-    s1.setAttribute("data-item-id", "s1");
+    s1.id = "s1";
+    s1.setAttribute("data-item", "");
     s1.setAttribute("data-level", "section");
 
     const s2 = document.createElement("div");
-    s2.setAttribute("data-item-id", "s2");
+    s2.id = "s2";
+    s2.setAttribute("data-item", "");
     s2.setAttribute("data-level", "section");
 
     container.appendChild(s1);

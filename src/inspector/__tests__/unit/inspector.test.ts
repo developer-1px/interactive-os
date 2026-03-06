@@ -5,6 +5,7 @@
 import type { Transaction } from "@kernel/core/transaction";
 import { type AppPage, createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
+import { UnifiedInspector } from "../../panels/UnifiedInspector";
 import {
   INSPECTOR_SCROLL_TO_BOTTOM,
   InspectorApp,
@@ -25,7 +26,7 @@ describe("Feature: Inspector Dogfooding T1 (App Store & Field Binding)", () => {
 
   beforeEach(() => {
     // We expect InspectorApp to define the zones and fields
-    page = createPage(InspectorApp);
+    page = createPage(InspectorApp, UnifiedInspector);
     // Go to the main inspector zone (assumed to be 'inspector-main' or similar)
     // The spec says zone is 'inspector-search' and 'inspector-filters'
     page.goto("inspector-search", { items: ["search-input", "clearBtn"] });
@@ -84,7 +85,7 @@ describe("Feature: Inspector Dogfooding T2 (파생 데이터 연산 분리)", ()
   let page: AppPage<InspectorState>;
 
   beforeEach(() => {
-    page = createPage(InspectorApp);
+    page = createPage(InspectorApp, UnifiedInspector);
   });
 
   // Mock transactions for testing the selector
@@ -132,7 +133,7 @@ describe("Feature: Inspector Dogfooding T3 (명시적 OS_SCROLL 커맨드 구축
   let page: AppPage<InspectorState>;
 
   beforeEach(() => {
-    page = createPage(InspectorApp);
+    page = createPage(InspectorApp, UnifiedInspector);
   });
 
   describe("Scenario: 새 트랜잭션 수신 시 자동 스크롤", () => {

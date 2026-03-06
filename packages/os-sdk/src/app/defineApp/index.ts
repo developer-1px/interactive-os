@@ -27,6 +27,7 @@
 
 import { defineScope } from "@kernel";
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
+import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { registerAppSlice } from "@os-core/engine/appState";
 import { createHistoryMiddleware } from "@os-core/engine/middlewares/historyKernelMiddleware";
 import type React from "react";
@@ -45,6 +46,7 @@ import {
   __conditionBrand,
   __selectorBrand,
   type AppHandle,
+  type AppKeybindingEntry,
   type BoundComponents,
   type Condition,
   type FieldBindings,
@@ -131,6 +133,9 @@ export function defineApp<S>(
     }
   >();
 
+  // For headless: track command-level keybindings (both app + zone)
+  const commandKeybindingEntries: AppKeybindingEntry[] = [];
+
   // ── condition ──
 
   function defineCondition(
@@ -167,13 +172,17 @@ export function defineApp<S>(
   function registerCommand<T extends string, P = void>(
     type: T,
     handler: FlatHandler<S, P>,
-    opts?: { when?: Condition<S> },
+    opts?: { when?: Condition<S> | "editing" | "navigating"; key?: string | string[] },
     group?: typeof slice.group,
   ): CommandFactory<T, P> {
+    // Extract Condition<S> for dispatch guard (ignore string when guards)
+    const conditionWhen =
+      opts?.when && typeof opts.when !== "string" ? opts.when : undefined;
+
     // Track for test instance
     flatHandlerRegistry.set(type, {
       handler,
-      ...(opts?.when ? { when: opts.when } : {}),
+      ...(conditionWhen ? { when: conditionWhen } : {}),
     });
 
     // Wrap flat → curried for kernel (readonly state matches TypedContext)
@@ -182,8 +191,8 @@ export function defineApp<S>(
 
     // Register on kernel group with when guard
     const targetGroup = group ?? slice.group;
-    const whenGuard = opts?.when
-      ? { when: (state: S) => opts.when!.evaluate(state) }
+    const whenGuard = conditionWhen
+      ? { when: (state: S) => conditionWhen.evaluate(state) }
       : undefined;
 
     // defineApp's FlatHandler context `{ readonly state: S }` differs from kernel's
@@ -197,6 +206,18 @@ export function defineApp<S>(
     const factory = (whenGuard
       ? defineCmd(type, kernelHandler, whenGuard)
       : defineCmd(type, kernelHandler)) as unknown as CommandFactory<T, P>;
+
+    // Auto-register keybinding if key is specified
+    if (opts?.key) {
+      const keys = Array.isArray(opts.key) ? opts.key : [opts.key];
+      const keyWhen = typeof opts.when === "string" ? opts.when : undefined;
+      const command = factory() as unknown as import("@kernel/core/tokens").BaseCommand;
+      for (const k of keys) {
+        const entry: AppKeybindingEntry = { key: k, command, ...(keyWhen ? { when: keyWhen } : {}) };
+        commandKeybindingEntries.push(entry);
+        Keybindings.registerAll([entry]);
+      }
+    }
 
     return factory;
   }
@@ -232,9 +253,13 @@ export function defineApp<S>(
       command<T extends string, P = void>(
         type: T,
         handler: FlatHandler<S, P>,
-        opts?: { when?: Condition<S> },
+        opts?: { when?: Condition<S> | "editing" | "navigating"; key?: string | string[] },
       ): CommandFactory<T, P> {
         return registerCommand(type, handler, opts, zoneGroup);
+      },
+
+      defineEffect<V>(type: string, handler: (value: V) => void): void {
+        zoneGroup.defineEffect(type, handler);
       },
 
       createZone(childName: string): ZoneHandle<S> {
@@ -290,9 +315,13 @@ export function defineApp<S>(
     command<T extends string, P = void>(
       type: T,
       handler: FlatHandler<S, P>,
-      opts?: { when?: Condition<S> },
+      opts?: { when?: Condition<S> | "editing" | "navigating"; key?: string | string[] },
     ): CommandFactory<T, P> {
       return registerCommand(type, handler, opts);
+    },
+
+    defineEffect<V>(type: string, handler: (value: V) => void): void {
+      slice.group.defineEffect(type, handler);
     },
 
     createZone(name: string): ZoneHandle<S> {
@@ -330,8 +359,8 @@ export function defineApp<S>(
         factory: CommandFactory<string, P>,
       ): React.FC<
         P extends void
-          ? { children: ReactNode; payload?: never }
-          : { children: ReactNode; payload: P }
+        ? { children: ReactNode; payload?: never }
+        : { children: ReactNode; payload: P }
       >;
       /* Command Overload: Returns simple component */
       (
@@ -358,8 +387,15 @@ export function defineApp<S>(
 
     create,
 
+    keybindings(entries: AppKeybindingEntry[]): void {
+      // Escape hatch for non-command keybindings
+      commandKeybindingEntries.push(...entries);
+      Keybindings.registerAll(entries);
+    },
+
     // ── Internal (for OS-level createPage) ──
     __appId: appId,
     __zoneBindings: zoneBindingEntries as Map<string, ZoneBindingEntry>,
+    __appKeybindings: commandKeybindingEntries,
   };
 }

@@ -111,7 +111,7 @@ const TOGGLES: ToggleDef[] = [
   { id: "toggle-underline", label: "Underline", icon: "U" },
 ];
 
-import { OS_PRESS } from "@os-core/4-command/activate/press";
+import { OS_PRESS } from "@os-sdk/os";
 
 export const ToggleApp = defineApp<Record<string, never>>(
   "apg-toggle-button-app",

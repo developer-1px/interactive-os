@@ -29,10 +29,10 @@ export const builderArrowNavScripts: TestScript[] = [
       const zoneEl = document.querySelector("[data-zone='canvas']");
       if (!zoneEl) throw new Error("canvas zone 엘리먼트를 못 찾음!");
 
-      const items = zoneEl.querySelectorAll("[data-item-id]");
+      const items = zoneEl.querySelectorAll("[data-item]");
       const dump: string[] = [];
       for (const el of items) {
-        const id = el.getAttribute("data-item-id");
+        const id = el.id;
         const level = el.getAttribute("data-level");
         const closestZone = el
           .closest("[data-zone]")
@@ -71,18 +71,18 @@ export const builderArrowNavScripts: TestScript[] = [
       if (!zoneEl) throw new Error("canvas zone 엘리먼트를 못 찾음!");
 
       // ge-card-1의 data-level
-      const card1El = zoneEl.querySelector("[data-item-id='ge-card-1']");
+      const card1El = zoneEl.querySelector("#ge-card-1");
       const card1Level = card1El?.getAttribute("data-level") ?? "(null)";
       const card1ClosestZone = card1El
         ?.closest("[data-zone]")
         ?.getAttribute("data-zone");
 
       // 같은 level의 아이템 수
-      const allItems = zoneEl.querySelectorAll("[data-item-id]");
+      const allItems = zoneEl.querySelectorAll("[data-item]");
       const sameLevel: string[] = [];
       const canvasDirectItems: string[] = [];
       for (const el of allItems) {
-        const id = el.getAttribute("data-item-id") ?? "";
+        const id = el.id ?? "";
         const level = el.getAttribute("data-level");
         const zone = el.closest("[data-zone]")?.getAttribute("data-zone");
         if (zone === "canvas") canvasDirectItems.push(`${id}(${level})`);
@@ -185,19 +185,19 @@ export const builderArrowNavScripts: TestScript[] = [
       if (!zoneEl) throw new Error("canvas zone 엘리먼트를 못 찾음!");
 
       const currentEl = zoneEl.querySelector(
-        "[data-item-id='ge-card-1-card-title']",
+        "#ge-card-1-card-title",
       );
       const currentLevel = currentEl?.getAttribute("data-level") ?? "(null)";
       const currentClosestZone = currentEl
         ?.closest("[data-zone]")
         ?.getAttribute("data-zone");
 
-      const allItems = zoneEl.querySelectorAll("[data-item-id]");
+      const allItems = zoneEl.querySelectorAll("[data-item]");
       const sameLevel: string[] = [];
       const rects: string[] = [];
 
       for (const el of allItems) {
-        const id = el.getAttribute("data-item-id") ?? "";
+        const id = el.id ?? "";
         const level = el.getAttribute("data-level");
         const zone = el.closest("[data-zone]")?.getAttribute("data-zone");
 

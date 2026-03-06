@@ -13,9 +13,9 @@
  *         └── panel — accordion tree (properties form)
  */
 
-import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
-import { os } from "@os-core/engine/kernel";
-import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
+import { OS_OVERLAY_OPEN } from "@os-sdk/os";
+import { os } from "@os-sdk/os";
+import type { FieldCommandFactory } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { deleteToast } from "@os-sdk/app/modules/deleteToast";
 import { history } from "@os-sdk/app/modules/history";
@@ -192,7 +192,6 @@ export const BuilderSidebarUI = sidebarCollection.bind({
     navigate: { orientation: "vertical" },
     tab: { behavior: "flow" },
   },
-  keybindings: [...collectionBindings.keybindings],
   triggers: [
     {
       id: "locale-switcher-trigger",
@@ -346,7 +345,7 @@ function getStaticItemTextValue(focusId: string) {
 }
 
 export const canvasOnCopy = (
-  cursor: import("@os-core/3-inject/zoneRegistry").ZoneCursor,
+  cursor: import("@os-sdk/os").ZoneCursor,
 ): import("@kernel").BaseCommand | import("@kernel").BaseCommand[] => {
   if (isDynamicItem(cursor.focusId)) {
     // Dynamic item → structural copy (section/card/tab)
@@ -361,7 +360,7 @@ export const canvasOnCopy = (
 };
 
 export const canvasOnCut = (
-  cursor: import("@os-core/3-inject/zoneRegistry").ZoneCursor,
+  cursor: import("@os-sdk/os").ZoneCursor,
 ) => {
   if (!isDynamicItem(cursor.focusId)) {
     // Static item → cut not allowed (PRD 1.3)
@@ -374,7 +373,7 @@ export const canvasOnCut = (
 };
 
 export const canvasOnPaste = (
-  cursor: import("@os-core/3-inject/zoneRegistry").ZoneCursor,
+  cursor: import("@os-sdk/os").ZoneCursor,
 ) => {
   const collections = buildCanvasCollections();
   const clipData = canvasCollection.readClipboard();
@@ -429,7 +428,6 @@ export const BuilderCanvasUI = canvasCollection.bind({
   keybindings: [
     { key: "\\", command: createDrillUp(CANVAS_ZONE_ID) },
     { key: "Escape", command: createDrillUp(CANVAS_ZONE_ID) },
-    ...canvasBindings.keybindings,
     ...createTypingEntryKeybindings(CANVAS_ZONE_ID),
   ],
 });

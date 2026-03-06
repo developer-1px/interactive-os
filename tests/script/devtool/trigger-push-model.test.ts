@@ -12,6 +12,7 @@
 
 import { BuilderApp } from "@apps/builder/app";
 import type { BuilderState } from "@apps/builder/model/appState";
+import { BuilderPage } from "@/pages/BuilderPage";
 import { os } from "@os-core/engine/kernel";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { createPage } from "@os-devtool/testing/page";
@@ -22,7 +23,7 @@ type Page = AppPage<BuilderState>;
 let page: Page;
 
 beforeEach(() => {
-  page = createPage(BuilderApp);
+  page = createPage(BuilderApp, BuilderPage);
 });
 
 afterEach(() => {

@@ -87,4 +87,4 @@
 
 **우리의 용법**: `2-area/praxis/`의 존재 이유. 워크플로우(`.agent/workflows/`)는 절차(single-loop: "이렇게 해라"), rules.md는 규칙(single-loop: "이것을 지켜라"), 그러나 "왜 이렇게 하게 됐는가"는 기록되지 않았다. `2-area/praxis/`가 double-loop의 기록: 회고에서 나온 교훈, discussion에서 나온 방법론 발견, LLM 판단 교정에서 나온 암묵지→명시지 전환. `/retrospect`에서 워크플로우를 수정하는 행위 자체가 double-loop learning의 실천.
 
-**참조**: `docs/archive/2026/02/W09/area-praxis-BOARD.md`, `docs/archive/2026/02/W09/2026-0226-area-knowledge-redesign.md`
+**참조**: `docs/4-archive/2026/02/W09/area-praxis-BOARD.md`, `docs/4-archive/2026/02/W09/2026-0226-area-knowledge-redesign.md`

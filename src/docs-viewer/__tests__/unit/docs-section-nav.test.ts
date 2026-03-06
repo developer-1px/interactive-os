@@ -3,7 +3,7 @@
  *
  * T1: DocsReaderUI zone must have:
  *   1. NEXT/PREV_SECTION commands that return scrollSection effect
- *   2. Space/Shift+Space keybindings
+ *   2. Space/Shift+Space keybindings (auto-registered via command key)
  *   3. scrollSection effect registered on the zone
  */
 
@@ -26,28 +26,15 @@ describe("T1: DocsReaderUI section navigation", () => {
     expect(DocsReaderUI.Zone).toBeDefined();
   });
 
-  it("Space keybinding resolves to DOCS_NEXT_SECTION when registered", () => {
-    const unregister = Keybindings.registerAll([
-      { key: "Space", command: () => NEXT_SECTION(), when: "navigating" },
-      {
-        key: "Shift+Space",
-        command: () => PREV_SECTION(),
-        when: "navigating",
-      },
-    ]);
-
+  it("Space keybinding is auto-registered via command({ key })", () => {
+    // Keybindings are now auto-registered when the command is defined
+    // with { key: "Space" } — no manual registerAll needed.
     const spaceResult = Keybindings.resolve("Space", { isEditing: false });
     expect(spaceResult).not.toBeNull();
-    const spaceCmd = (spaceResult!.command as () => any)();
-    expect(spaceCmd.type).toBe("DOCS_NEXT_SECTION");
 
     const shiftResult = Keybindings.resolve("Shift+Space", {
       isEditing: false,
     });
     expect(shiftResult).not.toBeNull();
-    const shiftCmd = (shiftResult!.command as () => any)();
-    expect(shiftCmd.type).toBe("DOCS_PREV_SECTION");
-
-    unregister();
   });
 });

@@ -11,7 +11,8 @@ export type ValueAction =
   | "decrementLarge"
   | "setMin"
   | "setMax"
-  | "set";
+  | "set"
+  | "toggleCollapse";
 
 export interface ValueChangeResult {
   changed: boolean;

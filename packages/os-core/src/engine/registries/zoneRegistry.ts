@@ -100,16 +100,6 @@ const registryOrder: string[] = []; // Registration order for headless zone orde
 const disabledItems = new Map<string, Set<string>>();
 const itemCallbacks = new Map<string, Map<string, ItemCallbacks>>();
 
-/**
- * Trigger overlay registry — stores trigger→overlay relationships.
- * Key: triggerId, Value: { overlayId, overlayType }
- * Used by computeTrigger() for headless ARIA projection.
- */
-const triggerOverlays = new Map<
-  string,
-  { overlayId: string; overlayType: string }
->();
-
 // ─── Zone mount/unmount observer (for TestBotRegistry, etc.) ───
 const listeners = new Set<() => void>();
 let zoneSnapshot: readonly string[] = [];
@@ -174,6 +164,14 @@ export const ZoneRegistry = {
   /** Zone IDs in registration order (for headless zone ordering) */
   orderedKeys(): readonly string[] {
     return registryOrder;
+  },
+
+  /** Clear all registrations (for test isolation) */
+  clearAll(): void {
+    registry.clear();
+    registryOrder.length = 0;
+    disabledItems.clear();
+    itemCallbacks.clear();
   },
 
   /**
@@ -257,10 +255,10 @@ export const ZoneRegistry = {
     if (!entry.getItems) {
       patch.getItems = () => {
         const items: string[] = [];
-        const els = element.querySelectorAll("[data-item-id]");
+        const els = element.querySelectorAll("[data-item]");
         for (const child of els) {
           if (child.closest("[data-zone]") !== element) continue;
-          const itemId = child.getAttribute("data-item-id");
+          const itemId = child.id;
           if (itemId) items.push(itemId);
         }
         return items;
@@ -271,10 +269,10 @@ export const ZoneRegistry = {
     if (!entry.getLabels) {
       patch.getLabels = () => {
         const labels = new Map<string, string>();
-        const els = element.querySelectorAll<HTMLElement>("[data-item-id]");
+        const els = element.querySelectorAll<HTMLElement>("[data-item]");
         for (const child of els) {
           if (child.closest("[data-zone]") !== element) continue;
-          const itemId = child.getAttribute("data-item-id");
+          const itemId = child.id;
           if (itemId) {
             const label =
               child.getAttribute("aria-label") || child.textContent || "";
@@ -306,80 +304,30 @@ export const ZoneRegistry = {
     return undefined;
   },
 
-  // ─── Trigger overlay metadata (for headless ARIA projection) ───
-
-  setTriggerOverlay(
-    triggerId: string,
-    overlayId: string,
-    overlayType: string,
-  ): void {
-    triggerOverlays.set(triggerId, { overlayId, overlayType });
-  },
-
-  clearTriggerOverlay(triggerId: string): void {
-    triggerOverlays.delete(triggerId);
-  },
-
-  getTriggerOverlay(
-    triggerId: string,
-  ): { overlayId: string; overlayType: string } | undefined {
-    return triggerOverlays.get(triggerId);
-  },
-
   /**
    * Resolve ordered item IDs for a zone.
    *
-   * Priority: getItems() > element DOM scan > empty array.
-   * Lazy fallback: even if getItems was wiped by Phase 1 re-registration,
-   * the element DOM scan always works as long as the element is bound.
+   * Single path: getItems() → empty array.
+   * getItems is always provided: either explicitly (headless) or
+   * auto-installed by bindElement (DOM). No fallback needed.
    */
   resolveItems(id: string): string[] {
     const entry = registry.get(id);
     if (!entry) return [];
-
-    // Explicit or auto-generated getItems → use it
     if (entry.getItems) return entry.getItems();
-
-    // Lazy fallback: DOM scan via bound element
-    if (entry.element) {
-      const items: string[] = [];
-      const els = entry.element.querySelectorAll("[data-item-id]");
-      for (const child of els) {
-        if (child.closest("[data-zone]") !== entry.element) continue;
-        const itemId = child.getAttribute("data-item-id");
-        if (itemId) items.push(itemId);
-      }
-      return items;
-    }
-
     return [];
   },
 
   /**
    * Resolve labels map for a zone (for typeahead).
-   * Priority: getLabels() > element DOM scan > empty map.
+   *
+   * Single path: getLabels() → empty map.
+   * getLabels is auto-installed by bindElement when not explicit.
    */
   resolveLabels(id: string): Map<string, string> {
     const entry = registry.get(id);
     if (!entry) return new Map();
-
     if (entry.getLabels) return entry.getLabels();
-
-    if (entry.element) {
-      const labels = new Map<string, string>();
-      const els = entry.element.querySelectorAll<HTMLElement>("[data-item-id]");
-      for (const child of els) {
-        if (child.closest("[data-zone]") !== entry.element) continue;
-        const itemId = child.getAttribute("data-item-id");
-        if (itemId) {
-          const label =
-            child.getAttribute("aria-label") || child.textContent || "";
-          labels.set(itemId, label.trim());
-        }
-      }
-      return labels;
-    }
-
     return new Map();
   },
 

@@ -49,7 +49,7 @@ test.describe("E2E: Command Palette", () => {
     await expect(input).toHaveValue("ho");
 
     // Click on the first result item within the dialog
-    const firstItem = dialog.locator("[data-item-id]").first();
+    const firstItem = dialog.locator("[data-item]").first();
     await firstItem.click();
 
     // Input should still be focused — type more characters
@@ -89,8 +89,8 @@ test.describe("E2E: Command Palette", () => {
   test("ArrowDown moves virtual focus to next item", async ({ page }) => {
     const { dialog, input } = await openPalette(page);
 
-    // Wait for items to appear (use data-item-id to avoid matching inner role="option")
-    const items = dialog.locator("[data-item-id]");
+    // Wait for items to appear (use data-item to avoid matching inner role="option")
+    const items = dialog.locator("[data-item]");
     await expect(items.first()).toBeVisible({ timeout: 3000 });
 
     // autoFocus puts virtual focus on first item (data-focused="true")
@@ -113,7 +113,7 @@ test.describe("E2E: Command Palette", () => {
   test("ArrowUp moves virtual focus to previous item", async ({ page }) => {
     const { dialog, input } = await openPalette(page);
 
-    const items = dialog.locator("[data-item-id]");
+    const items = dialog.locator("[data-item]");
     await expect(items.first()).toBeVisible({ timeout: 3000 });
 
     // autoFocus puts focus on first item. Move down then up.
@@ -131,7 +131,7 @@ test.describe("E2E: Command Palette", () => {
   test("Enter selects focused item and navigates", async ({ page }) => {
     const { dialog, input } = await openPalette(page);
 
-    const items = dialog.locator("[data-item-id]");
+    const items = dialog.locator("[data-item]");
     await expect(items.first()).toBeVisible({ timeout: 3000 });
 
     // autoFocus already focuses first item — Enter to select

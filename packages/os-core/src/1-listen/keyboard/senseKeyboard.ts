@@ -12,6 +12,7 @@ import {
 import { getCanonicalKey } from "@os-core/2-resolve/getCanonicalKey";
 import { ROLE_FIELD_TYPE_MAP } from "@os-core/2-resolve/resolveFieldKey";
 import { os } from "@os-core/engine/kernel";
+import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import type { KeyboardInput } from "./resolveKeyboard";
 
@@ -23,7 +24,7 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
 
   // DOM queries for focus context
   const focusedEl = document.activeElement as HTMLElement | null;
-  const itemEl = focusedEl?.closest?.("[data-item-id]") as HTMLElement | null;
+  const itemEl = focusedEl?.closest?.("[data-item]") as HTMLElement | null;
 
   // Trigger layer: detect if focused element is a trigger
   const triggerIdAttr =
@@ -31,7 +32,7 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
       ?.closest?.("[data-trigger-id]")
       ?.getAttribute("data-trigger-id") ?? null;
   const triggerMeta = triggerIdAttr
-    ? ZoneRegistry.getTriggerOverlay(triggerIdAttr)
+    ? TriggerOverlayRegistry.get(triggerIdAttr)
     : null;
 
   // Zone state for CHECK resolution

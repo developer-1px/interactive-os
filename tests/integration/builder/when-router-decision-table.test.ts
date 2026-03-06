@@ -37,19 +37,23 @@ function buildTestDOM(): HTMLDivElement {
   container.setAttribute("data-zone", ZONE_ID);
 
   const s1 = document.createElement("div");
-  s1.setAttribute("data-item-id", "s1");
+  s1.id = "s1";
+  s1.setAttribute("data-item", "");
   s1.setAttribute("data-level", "section");
 
   const g1 = document.createElement("div");
-  g1.setAttribute("data-item-id", "g1");
+  g1.id = "g1";
+  g1.setAttribute("data-item", "");
   g1.setAttribute("data-level", "group");
 
   const i1 = document.createElement("div");
-  i1.setAttribute("data-item-id", "i1");
+  i1.id = "i1";
+  i1.setAttribute("data-item", "");
   i1.setAttribute("data-level", "item");
 
   const i2 = document.createElement("div");
-  i2.setAttribute("data-item-id", "i2");
+  i2.id = "i2";
+  i2.setAttribute("data-item", "");
   i2.setAttribute("data-level", "item");
 
   g1.appendChild(i1);
@@ -57,7 +61,8 @@ function buildTestDOM(): HTMLDivElement {
   s1.appendChild(g1);
 
   const s2 = document.createElement("div");
-  s2.setAttribute("data-item-id", "s2");
+  s2.id = "s2";
+  s2.setAttribute("data-item", "");
   s2.setAttribute("data-level", "section");
 
   container.appendChild(s1);

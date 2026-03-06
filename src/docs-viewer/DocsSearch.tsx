@@ -5,7 +5,7 @@
  * Controlled by DocsApp.searchOpen state.
  * Fuzzy matches file names from allFiles.
  */
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import clsx from "clsx";
 import { FileText, Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

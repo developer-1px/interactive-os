@@ -53,9 +53,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-      state: S;
-      dispatch?: BaseCommand | BaseCommand[] | undefined;
-    }
+    state: S;
+    dispatch?: BaseCommand | BaseCommand[] | undefined;
+  }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -130,6 +130,13 @@ export interface KeybindingEntry<S> {
   when?: Condition<S>;
 }
 
+/** App-level keybinding — static command, string context guard */
+export interface AppKeybindingEntry {
+  key: string;
+  command: BaseCommand;
+  when?: "editing" | "navigating";
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // Zone Binding Entry — collected by defineApp.ts at zone.bind() time
 // ═══════════════════════════════════════════════════════════════════
@@ -159,13 +166,13 @@ export interface BoundComponents<S> {
     id: string | number;
     className?: string;
     children?:
-      | ReactNode
-      | ((state: {
-          isFocused: boolean;
-          isSelected: boolean;
-          isExpanded: boolean;
-          isAnchor?: boolean;
-        }) => ReactNode);
+    | ReactNode
+    | ((state: {
+      isFocused: boolean;
+      isSelected: boolean;
+      isExpanded: boolean;
+      isAnchor?: boolean;
+    }) => ReactNode);
     asChild?: boolean;
   }> & {
     /** Passive projection of Item's visibility state — auto-manages role + aria-labelledby + hidden/mount */
@@ -196,8 +203,11 @@ export interface ZoneHandle<S> {
   command<T extends string, P = void>(
     type: T,
     handler: FlatHandler<S, P>,
-    options?: { when?: Condition<S> },
+    options?: { when?: Condition<S> | "editing" | "navigating"; key?: string | string[] },
   ): CommandFactory<T, P>;
+
+  /** Register a side-effect handler. Commands return `{ effectName: payload }` to trigger it. */
+  defineEffect<V>(type: string, handler: (value: V) => void): void;
 
   createZone(name: string): ZoneHandle<S>;
 
@@ -309,15 +319,17 @@ export interface AppHandle<S> {
   command<T extends string, P = void>(
     type: T,
     handler: FlatHandler<S, P>,
-    options?: { when?: Condition<S> },
+    options?: { when?: Condition<S> | "editing" | "navigating"; key?: string | string[] },
   ): CommandFactory<T, P>;
+  /** Register a side-effect handler. Commands return `{ effectName: payload }` to trigger it. */
+  defineEffect<V>(type: string, handler: (value: V) => void): void;
   createZone(name: string): ZoneHandle<S>;
   createTrigger<P = void>(
     factory: CommandFactory<string, P>,
   ): React.FC<
     P extends void
-      ? { children: ReactNode; payload?: never }
-      : { children: ReactNode; payload: P }
+    ? { children: ReactNode; payload?: never }
+    : { children: ReactNode; payload: P }
   >;
   createTrigger(command: BaseCommand): React.FC<{
     children: ReactNode;
@@ -329,9 +341,18 @@ export interface AppHandle<S> {
     overrides?: Partial<S> | { history?: boolean; withOS?: boolean },
   ): TestInstance<S>;
 
+  /**
+   * Register app-level keybindings.
+   * Declarative: stores entries on the handle AND registers on Keybindings singleton.
+   * Headless page reads __appKeybindings for lifecycle management.
+   */
+  keybindings(entries: AppKeybindingEntry[]): void;
+
   // ── Internal (for OS-level createPage) ────────────────────────────
   /** @internal App ID for OS-level createPage. */
   readonly __appId: string;
   /** @internal Zone binding entries for OS-level createPage. */
   readonly __zoneBindings: Map<string, ZoneBindingEntry>;
+  /** @internal App-level keybinding entries for headless lifecycle. */
+  readonly __appKeybindings: readonly AppKeybindingEntry[];
 }

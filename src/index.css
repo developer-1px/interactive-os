@@ -8,21 +8,21 @@
 }
 
 /* Scroll margin — breathing room for scrollIntoView during navigation */
-[data-item-id] {
+[data-item] {
   scroll-margin-block: 10vh;
   scroll-margin-inline: 5vw;
 }
 
 /* OS manages focus visualization via data-focused / isFocused render prop.
-   Suppress browser's native :focus-visible ring on all FocusItems.
+   Suppress browser's native :focus-visible ring on all Items.
    (* { outline-width: 0 } is insufficient — :focus-visible specificity wins.) */
-[data-focus-item]:focus-visible {
+[data-item]:focus-visible {
   outline: none;
 }
 
 /* Disable scroll-margin during editing — prevents browser's native
    focus/caret scroll from adding unwanted offset */
-[data-item-id][contenteditable="plaintext-only"] {
+[data-item][contenteditable="plaintext-only"] {
   scroll-margin: 0;
 }
 
@@ -38,8 +38,8 @@
 }
 
 /* BuilderCursor provides visual focus — suppress native ring in canvas only */
-#canvas [data-item-id]:focus,
-#canvas [data-item-id]:focus-visible {
+#canvas [data-item]:focus,
+#canvas [data-item]:focus-visible {
   outline: none !important;
   box-shadow: none;
 }

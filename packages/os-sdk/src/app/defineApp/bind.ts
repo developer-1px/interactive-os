@@ -112,31 +112,34 @@ export function createBoundComponents<S>(
   ZoneComponent.displayName = `${appId}.${zoneName}.Zone`;
 
   // ── Item component ──
-  const ItemComponent: React.FC<{
-    id: string | number;
-    className?: string;
-    children?:
-      | ReactNode
-      | ((state: {
-          isFocused: boolean;
-          isSelected: boolean;
-          isExpanded: boolean;
-          isAnchor?: boolean;
-        }) => ReactNode);
-    asChild?: boolean;
-  }> & {
+  const ItemComponent: React.FC<
+    Omit<React.HTMLAttributes<HTMLElement>, "id" | "children" | "className"> & {
+      id: string | number;
+      className?: string;
+      children?:
+        | ReactNode
+        | ((state: {
+            isFocused: boolean;
+            isSelected: boolean;
+            isExpanded: boolean;
+            isAnchor?: boolean;
+          }) => ReactNode);
+      asChild?: boolean;
+    }
+  > & {
     Region: React.FC<{
       for: string;
       id?: string;
       className?: string;
       children?: ReactNode;
     }>;
-  } = ({ id, className, children, asChild }) => {
+  } = ({ id, className, children, asChild, ...rest }) => {
     return React.createElement(Item, {
       id: String(id),
       className,
       asChild,
       children,
+      ...rest,
     } as React.ComponentProps<typeof Item>);
   };
   ItemComponent.displayName = `${appId}.${zoneName}.Item`;

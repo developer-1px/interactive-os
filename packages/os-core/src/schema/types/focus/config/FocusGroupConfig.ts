@@ -161,6 +161,8 @@ export interface ValueConfig {
   step: number;
   /** Large step increment for PageUp/PageDown */
   largeStep: number;
+  /** Declarative initial values per item — applied atomically at Zone mount */
+  initial?: Record<string, number>;
 }
 
 export const DEFAULT_VALUE: ValueConfig = {

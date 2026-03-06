@@ -12,7 +12,7 @@ import type { Page } from "../../os/testing/types";
  *   - Playwright E2E:    run(playwrightPage, playwrightExpect)  ← this file
  *
  * Bridge: createPlaywrightPage() adapts Playwright's page to match
- * the OS locator convention (data-item-id → CSS selector).
+ * the OS locator convention (id + data-item → CSS selector).
  */
 
 // ─── Script → URL mapping ───
@@ -34,18 +34,18 @@ const PATTERN_URLS: Record<string, string> = {
 /**
  * Adapt Playwright Page to OS TestBot Page interface.
  *
- * Key difference: OS items use `data-item-id` attribute, not native `id`.
- * Browser TestBot's findEl() resolves `id` → `[data-item-id="id"] | #id | [data-zone="id"]`.
- * This adapter applies the same fallback: `#xxx` → `[data-item-id="xxx"], [id="xxx"]`.
+ * Key difference: OS items use `id` attribute + `data-item` marker.
+ * Browser TestBot's findEl() resolves `id` → `#id | [data-zone="id"]`.
+ * This adapter applies the same fallback: `#xxx` → `[id="xxx"], [data-zone="xxx"]`.
  */
 function createPlaywrightPage(page: PlaywrightPage): Page {
   return {
     locator(selector: string) {
       if (selector.startsWith("#")) {
         const id = selector.slice(1);
-        // Same priority as findEl(): data-item-id first, then native id, then data-zone
+        // Same priority as findEl(): native id first, then data-zone
         return page
-          .locator(`[data-item-id="${id}"], [id="${id}"], [data-zone="${id}"]`)
+          .locator(`[id="${id}"], [data-zone="${id}"]`)
           .first();
       }
       return page.locator(selector);

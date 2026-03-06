@@ -12,7 +12,9 @@
  * without any app-level open/close commands.
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ── Simulate the LocaleSwitcher dropdown as a menu ──
@@ -49,19 +51,24 @@ const MENU_CONFIG = {
  * Simulates: user clicks trigger button → menu opens with OS focus on first item
  */
 function openDropdown(focusedItem = "ko") {
-  const page = createOsPage();
+  const app = defineApp("test-dropdown", {});
+  const toolbar = app.createZone("toolbar");
+  toolbar.bind({ getItems: () => ["locale-trigger"] });
+  const menu = app.createZone("locale-menu");
+  menu.bind({
+    getItems: () => LOCALE_ITEMS,
+    options: MENU_CONFIG,
+  });
+  const page = createPage(app);
 
-  // Phase 1: Trigger zone (toolbar with the trigger button)
-  page.setItems(["locale-trigger"]);
-  page.setActiveZone("toolbar", "locale-trigger");
+  // Phase 1: Trigger zone
+  page.goto("toolbar", { focusedItemId: "locale-trigger" });
 
   // Phase 2: Menu opens (stack push to preserve invoker)
-  page.dispatch(page.OS_STACK_PUSH());
+  page.dispatch(OS_STACK_PUSH());
 
   // Phase 3: Menu zone active with items
-  page.setItems(LOCALE_ITEMS);
-  page.setConfig(MENU_CONFIG);
-  page.setActiveZone("locale-menu", focusedItem);
+  page.goto("locale-menu", { focusedItemId: focusedItem });
 
   return page;
 }
@@ -91,12 +98,7 @@ describe("Dropdown-as-Menu: headless proof", () => {
 
   it("Enter on focused item triggers activation (automatic mode)", () => {
     const page = openDropdown("en");
-    // In automatic mode, Enter dispatches OS_ACTIVATE
-    // The zone's onAction callback would handle setLocale
-    // Here we just verify the pipeline doesn't crash and focus is maintained
     page.keyboard.press("Enter");
-    // After activation in a menu, the zone typically closes
-    // (onAction would dispatch close). Without onAction wired, focus stays.
     expect(page.focusedItemId("locale-menu")).toBe("en");
   });
 
@@ -111,7 +113,7 @@ describe("Dropdown-as-Menu: headless proof", () => {
   it("Escape + stack pop restores focus to trigger button", () => {
     const page = openDropdown();
     page.keyboard.press("Escape");
-    page.dispatch(page.OS_STACK_POP());
+    page.dispatch(OS_STACK_POP());
     expect(page.activeZoneId()).toBe("toolbar");
     expect(page.focusedItemId("toolbar")).toBe("locale-trigger");
   });
@@ -128,7 +130,6 @@ describe("Dropdown-as-Menu: headless proof", () => {
   it("Tab does not escape the menu (tab: trap)", () => {
     const page = openDropdown("en");
     page.keyboard.press("Tab");
-    // In trap mode, Tab should NOT leave the zone
     expect(page.activeZoneId()).toBe("locale-menu");
   });
 });

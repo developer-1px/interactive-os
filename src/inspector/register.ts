@@ -7,29 +7,26 @@
  * Side-effect import: `import "@inspector/register"`
  */
 
-import { Keybindings } from "@os-core/2-resolve/keybindings";
-import { os } from "@os-core/engine/kernel";
+import { defineApp } from "@os-sdk/app/defineApp";
 import React from "react";
 import { TestBotPanel } from "./panels/TestBotPanel";
 import { InspectorRegistry } from "./stores/InspectorRegistry";
 import { InspectorStore } from "./stores/InspectorStore";
 
+// ── App ──────────────────────────────────────────────────────────
+
+const InspectorApp = defineApp("inspector", {});
+
 // ── Command ──────────────────────────────────────────────────────
 
-export const TOGGLE_INSPECTOR = os.defineCommand(
+export const TOGGLE_INSPECTOR = InspectorApp.command(
   "TOGGLE_INSPECTOR",
-  () => () => {
+  () => {
     InspectorStore.toggle();
     return undefined;
   },
+  { key: "Meta+I" },
 );
-
-// ── Keybinding ───────────────────────────────────────────────────
-
-Keybindings.register({
-  key: "Meta+I",
-  command: TOGGLE_INSPECTOR(),
-});
 
 // ── TestBot Panel ────────────────────────────────────────────────
 // Registers as a dynamic panel in the Inspector Activity Bar.

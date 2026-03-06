@@ -6,35 +6,32 @@
  *
  * For dashboard navigation, first click = immediate action (not re-click).
  * We use selectDoc command dispatched via onAction callback.
- *
- * Note: Auto-diagnostics registered by createAppPage (onTestFailed)
  */
 
-import { createOsPage, type OsPage } from "@os-devtool/testing/page";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
+import { describe, expect, it, vi } from "vitest";
 
 describe("T5: DocsDashboard — selectDoc via OS command", () => {
-  let page: OsPage;
-  const selectDocSpy = vi.fn();
-
-  beforeEach(() => {
-    page = createOsPage();
-    page.goto("docs-dashboard-inbox", {
+  function createDashboardPage() {
+    const selectDocSpy = vi.fn();
+    const app = defineApp("test-docs-dashboard", {});
+    const zone = app.createZone("docs-dashboard-inbox");
+    zone.bind({
       role: "listbox",
-      items: ["0-inbox/note1.md", "0-inbox/note2.md"],
+      getItems: () => ["0-inbox/note1.md", "0-inbox/note2.md"],
       onAction: (cursor) => {
         selectDocSpy(cursor.focusId);
         return [];
       },
     });
-  });
-
-  afterEach(() => {
-    selectDocSpy.mockClear();
-    page.cleanup();
-  });
+    const page = createPage(app);
+    page.goto("docs-dashboard-inbox", { focusedItemId: "0-inbox/note1.md" });
+    return { page, selectDocSpy };
+  }
 
   it("#1 Enter on focused item dispatches selectDoc", () => {
+    const { page, selectDocSpy } = createDashboardPage();
     page.keyboard.press("Enter");
 
     expect(selectDocSpy).toHaveBeenCalledTimes(1);
@@ -42,6 +39,7 @@ describe("T5: DocsDashboard — selectDoc via OS command", () => {
   });
 
   it("#2 navigating then Enter selects correct item", () => {
+    const { page, selectDocSpy } = createDashboardPage();
     page.keyboard.press("ArrowDown");
     page.keyboard.press("Enter");
 
@@ -49,6 +47,7 @@ describe("T5: DocsDashboard — selectDoc via OS command", () => {
   });
 
   it("#3 click focuses, then Enter activates", () => {
+    const { page, selectDocSpy } = createDashboardPage();
     page.click("0-inbox/note2.md");
     expect(page.focusedItemId()).toBe("0-inbox/note2.md");
 

@@ -1,1 +1,0 @@
-../../../2-area/praxis/concept-map.md

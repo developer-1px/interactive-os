@@ -90,7 +90,6 @@ function displayKey(key: string): string {
 
 function findEl(id: string): Element | null {
   return (
-    document.querySelector(`[data-item-id="${id}"]`) ??
     document.getElementById(id) ??
     document.querySelector(`[data-zone="${id}"]`)
   );
@@ -593,6 +592,33 @@ export function createBrowserPage(
         return assertFocused(false);
       },
 
+      async toBeSelected() {
+        return assertAttribute("aria-selected", "true", false);
+      },
+      async toBeExpanded() {
+        return assertAttribute("aria-expanded", "true", false);
+      },
+      async toBeChecked() {
+        return assertAttribute("aria-checked", "true", false);
+      },
+      async toBePressed() {
+        return assertAttribute("aria-pressed", "true", false);
+      },
+      async toBeDisabled() {
+        return assertAttribute("aria-disabled", "true", false);
+      },
+      async toBeEditing() {
+        return assertAttribute("data-editing", "true", false);
+      },
+
+      async inputValue() {
+        const el = findEl(elementId);
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+          return el.value;
+        }
+        return (el as HTMLElement)?.textContent ?? "";
+      },
+
       // Internal assertion hooks for expect() wrapper (with negation support)
       _toHaveAttribute(name: string, value: string | RegExp, negated = false) {
         return assertAttribute(name, value, negated);
@@ -607,6 +633,12 @@ export function createBrowserPage(
           toHaveAttribute: (name: string, value: string | RegExp) =>
             assertAttribute(name, value, true),
           toBeFocused: () => assertFocused(true),
+          toBeSelected: () => assertAttribute("aria-selected", "true", true),
+          toBeExpanded: () => assertAttribute("aria-expanded", "true", true),
+          toBeChecked: () => assertAttribute("aria-checked", "true", true),
+          toBePressed: () => assertAttribute("aria-pressed", "true", true),
+          toBeDisabled: () => assertAttribute("aria-disabled", "true", true),
+          toBeEditing: () => assertAttribute("data-editing", "true", true),
           get not(): LocatorAssertions {
             return loc as LocatorAssertions;
           },

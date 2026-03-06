@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-05 14:45
+> Last updated: 2026-03-06T05:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -12,9 +12,7 @@
 
 ## 🔥 Active Focus
 
-**os-core / zift-usage-spec** — ZIFT 보편 모델 설계. Zone+from/to+with[] + NormalizedStore. 코드 수정 없는 설계 완성. Meta.
-
-**testing / headless-simulator** — Vitest에서 Playwright 수준 검증 달성. DOM → OS VDOM. 거짓 GREEN 근절. Heavy.
+(없음 — require-component 완료 아카이브됨)
 
 ---
 
@@ -25,20 +23,15 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| zift-usage-spec | Scaffold, T1~T6 미착수 | 03-04 |
-| selection-unification | Scaffold, plan 미착수 | 03-05 |
 | condition-auto-disabled | 기획 중 (BOARD 없음) | new |
-| ~~eliminate-layout-dispatch~~ | ✅ Complete (archived W10) | 03-05 |
-| ~~os-restructure~~ | ✅ Complete (archived W10) | 03-05 |
 
 ### testing
 > `packages/os-devtool/` · `tests/`
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| 🔥 headless-simulator | Phase 1 T4~T6 | 03-03 |
+| headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-06 |
 | test-observability | Scaffold, T1~T4 | 03-04 |
-| test-cleanup | WP1~4 Done, WP5~10 Backlog | 03-05 |
 | replay | Scaffold, T1 | 02-21 ⚠️ |
 
 ### builder
@@ -48,7 +41,6 @@
 |---------|-------|---------------|
 | builder-v2 | T12, T13, T20 | 03-02 |
 | builder-v3 | 기획 완료. 개발 보류 | 03-04 |
-| ~~docs-router~~ | ✅ Complete (archived W10) | 03-05 |
 
 ### inspector
 > `src/inspector/`
@@ -69,9 +61,7 @@
 > 패턴 전환이 진행 중인 항목. 에이전트는 Old 패턴을 사용하지 않는다.
 > 해당 파일을 수정할 때 New 패턴으로 전환한다.
 
-| Old Pattern | New Pattern | Remaining |
-|-------------|-------------|-----------|
-| `zone.selection[]` 배열 | `zone.items[id]["aria-selected"]` map | → selection-unification |
+(현재 진행 중인 마이그레이션 없음)
 
 ---
 
@@ -80,9 +70,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 5 |
-| Active Projects | 8 |
-| Active Focus | 2 |
+| Active Projects | 6 |
+| Active Focus | 0 |
 | Stale (7d+) | 1 (replay) |
-| Active Migrations | 1 |
+| Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |

@@ -64,12 +64,23 @@ done < <(find "$SRC" -name '*.md' -type f | sort)
 
 # .claude/commands/ 에만 있고 .agent/workflows/ 에 없는 파일 제거
 # (workflows에서 삭제된 파일을 commands에서도 삭제)
+# 보호 대상: commands 전용 파일 (workflows에 원본이 없는 파일)
+PROTECTED_FILES=("auto.md")
+
 src_names="$tmp/_src_names"
 find "$SRC" -name '*.md' -type f -exec basename {} \; | sort -u > "$src_names"
 
 for dst_file in "$DST"/*.md; do
   [[ -f "$dst_file" ]] || continue
   filename="$(basename "$dst_file")"
+
+  # 보호 대상은 건너뛴다
+  for protected in "${PROTECTED_FILES[@]}"; do
+    if [[ "$filename" == "$protected" ]]; then
+      continue 2
+    fi
+  done
+
   if ! grep -qxF "$filename" "$src_names"; then
     echo "  REMOVE  $filename"
     if [[ "$DRY" == false ]]; then

@@ -1,8 +1,8 @@
 /**
- * Keybindings — Flat key→command lookup registry.
+ * Keybindings — Key→command resolution registry.
  *
- * OS ships defaults (arrow keys, enter, space, tab, escape).
- * Apps can register/unregister additional bindings at runtime.
+ * Factory-based: each createKeybindingRegistry() returns an independent instance.
+ * Production uses the default instance. Tests can create fresh instances.
  *
  * The registry is context-aware:
  *   - `when: "navigating"` — only active when not editing a Field
@@ -41,85 +41,89 @@ export interface KeyResolveContext {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Registry
+// Registry Interface
 // ═══════════════════════════════════════════════════════════════════
 
-const bindings = new Map<string, KeyBinding[]>();
+export interface KeybindingRegistry {
+  register(binding: KeyBinding): () => void;
+  registerAll(items: KeyBinding[]): () => void;
+  resolve(key: string, context: KeyResolveContext): KeyBinding | null;
+  has(key: string): boolean;
+  clear(): void;
+}
 
-export const Keybindings = {
-  /**
-   * Register a keybinding. Returns an unregister function.
-   */
-  register(binding: KeyBinding): () => void {
-    const list = bindings.get(binding.key) ?? [];
-    list.push(binding);
-    bindings.set(binding.key, list);
+// ═══════════════════════════════════════════════════════════════════
+// Factory
+// ═══════════════════════════════════════════════════════════════════
 
-    return () => {
-      const l = bindings.get(binding.key);
-      if (!l) return;
-      const idx = l.indexOf(binding);
-      if (idx !== -1) l.splice(idx, 1);
-      if (l.length === 0) bindings.delete(binding.key);
-    };
-  },
+export function createKeybindingRegistry(): KeybindingRegistry {
+  const bindings = new Map<string, KeyBinding[]>();
 
-  /**
-   * Register multiple keybindings at once. Returns a single unregister function.
-   */
-  registerAll(items: KeyBinding[]): () => void {
-    const unregisters = items.map((b) => Keybindings.register(b));
-    return () => {
-      for (const fn of unregisters) fn();
-    };
-  },
+  const registry: KeybindingRegistry = {
+    register(binding: KeyBinding): () => void {
+      const list = bindings.get(binding.key) ?? [];
+      list.push(binding);
+      bindings.set(binding.key, list);
 
-  /**
-   * Resolve the best matching binding for a canonical key + context.
-   */
-  resolve(key: string, context: KeyResolveContext): KeyBinding | null {
-    const list = bindings.get(key);
-    if (!list || list.length === 0) return null;
+      return () => {
+        const l = bindings.get(binding.key);
+        if (!l) return;
+        const idx = l.indexOf(binding);
+        if (idx !== -1) l.splice(idx, 1);
+        if (l.length === 0) bindings.delete(binding.key);
+      };
+    },
 
-    // isFieldActive: does the field consume this specific key?
-    // Falls back to isEditing for backward compatibility.
-    const fieldActive = context.isFieldActive ?? context.isEditing;
+    registerAll(items: KeyBinding[]): () => void {
+      const unregisters = items.map((b) => registry.register(b));
+      return () => {
+        for (const fn of unregisters) fn();
+      };
+    },
 
-    // Later-wins: iterate in reverse so app bindings shadow OS defaults.
-    // OS defaults are registered first (osDefaults.ts), app bindings later
-    // (defineApp/bind.ts). Reverse iteration ensures app takes priority.
+    resolve(key: string, context: KeyResolveContext): KeyBinding | null {
+      const list = bindings.get(key);
+      if (!list || list.length === 0) return null;
 
-    // Pass 1: "editing" — highest priority when isEditing + field delegates this key
-    if (context.isEditing && !fieldActive) {
-      for (let i = list.length - 1; i >= 0; i--) {
-        if (list[i]!.when === "editing") return list[i]!;
+      const fieldActive = context.isFieldActive ?? context.isEditing;
+
+      // Later-wins: iterate in reverse so app bindings shadow OS defaults.
+      // Pass 1: "editing" — highest priority when isEditing + field delegates this key
+      if (context.isEditing && !fieldActive) {
+        for (let i = list.length - 1; i >= 0; i--) {
+          if (list[i]!.when === "editing") return list[i]!;
+        }
       }
-    }
 
-    // Pass 2: "navigating" — field does NOT consume this key
-    if (!fieldActive) {
-      for (let i = list.length - 1; i >= 0; i--) {
-        if (list[i]!.when === "navigating") return list[i]!;
+      // Pass 2: "navigating" — field does NOT consume this key
+      if (!fieldActive) {
+        for (let i = list.length - 1; i >= 0; i--) {
+          if (list[i]!.when === "navigating") return list[i]!;
+        }
       }
-    }
 
-    // Pass 3: universal (no `when`) — always active
-    for (let i = list.length - 1; i >= 0; i--) {
-      if (!list[i]!.when) return list[i]!;
-    }
+      // Pass 3: universal (no `when`) — always active
+      for (let i = list.length - 1; i >= 0; i--) {
+        if (!list[i]!.when) return list[i]!;
+      }
 
-    return null;
-  },
+      return null;
+    },
 
-  /**
-   * Check if any keybinding exists for a canonical key.
-   */
-  has(key: string): boolean {
-    return bindings.has(key) && (bindings.get(key)?.length ?? 0) > 0;
-  },
+    has(key: string): boolean {
+      return bindings.has(key) && (bindings.get(key)?.length ?? 0) > 0;
+    },
 
-  /** Clear all bindings (for testing). */
-  clear(): void {
-    bindings.clear();
-  },
-};
+    clear(): void {
+      bindings.clear();
+    },
+  };
+
+  return registry;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Default instance — production singleton (backward compat)
+// ═══════════════════════════════════════════════════════════════════
+
+export const Keybindings = createKeybindingRegistry();

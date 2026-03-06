@@ -20,6 +20,7 @@ export const initialZoneState: ZoneState = {
 
   // Value
   valueNow: {},
+  valueRestore: {},
 };
 
 export const initialOSState: OSState = {

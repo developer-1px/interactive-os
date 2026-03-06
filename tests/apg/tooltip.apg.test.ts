@@ -25,7 +25,8 @@
  * Config: horizontal toolbar with multiple buttons, each having a tooltip
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertHomeEnd,
@@ -38,25 +39,27 @@ import {
 const BUTTONS = ["btn-cut", "btn-copy", "btn-paste", "btn-bold", "btn-italic"];
 
 function tooltipFactory(focusedItem = "btn-cut") {
-  const page = createOsPage();
-  page.setItems(BUTTONS);
-  page.setRole("tooltip-toolbar", "toolbar");
-  page.setConfig({
-    navigate: {
-      orientation: "horizontal",
-      loop: true,
-      seamless: false,
-      typeahead: false,
-      entry: "restore",
-      recovery: "next",
+  const app = defineApp("test-tooltip", {});
+  const zone = app.createZone("tooltip-toolbar");
+  zone.bind({
+    role: "toolbar",
+    getItems: () => BUTTONS,
+    options: {
+      navigate: {
+        orientation: "horizontal",
+        loop: true,
+        seamless: false,
+        typeahead: false,
+        entry: "restore",
+        recovery: "next",
+      },
+      select: { mode: "none" },
+      dismiss: { escape: "close", outsideClick: "none" },
+      tab: { behavior: "escape" },
     },
-    select: { mode: "none" },
-    // APG Tooltip: Escape dismisses tooltip by closing the zone
-    // (removing data-focused from all items, thus hiding tooltips)
-    dismiss: { escape: "close", outsideClick: "none" },
-    tab: { behavior: "escape" },
   });
-  page.setActiveZone("tooltip-toolbar", focusedItem);
+  const page = createPage(app);
+  page.goto("tooltip-toolbar", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -65,12 +68,12 @@ function tooltipFactory(focusedItem = "btn-cut") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Tooltip: Navigation (toolbar context)", () => {
-  assertHorizontalNav(tooltipFactory);
-  assertHomeEnd(tooltipFactory, {
+  assertHorizontalNav(tooltipFactory as any);
+  assertHomeEnd(tooltipFactory as any, {
     firstId: "btn-cut",
     lastId: "btn-italic",
   });
-  assertNoSelection(tooltipFactory);
+  assertNoSelection(tooltipFactory as any);
 });
 
 // ═══════════════════════════════════════════════════

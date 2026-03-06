@@ -16,6 +16,7 @@ import {
   DEFAULT_TRIGGER_CONFIG,
   type TriggerConfig,
 } from "../../schema/types/focus/config/TriggerConfig";
+import type { DeepPartial } from "../../schema/types/utils";
 
 // ═══════════════════════════════════════════════════════════════════
 // Trigger Role Type
@@ -32,10 +33,6 @@ export type TriggerRole =
 // ═══════════════════════════════════════════════════════════════════
 // Built-in Trigger Presets
 // ═══════════════════════════════════════════════════════════════════
-
-type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
 
 const triggerPresets: Record<TriggerRole, DeepPartial<TriggerConfig>> = {
   // ─── Menu Button (APG: Menu Button Pattern) ───
@@ -203,3 +200,36 @@ export function buildTriggerClickKeymap(
     Click: [OS_OVERLAY_CLOSE({ id: ctx.overlayId }), OS_OVERLAY_OPEN(base)],
   };
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// Trigger Overlay Runtime Registry
+//
+// Runtime registry for trigger→overlay relationships.
+// Used by computeTrigger() for headless ARIA projection,
+// and by senseKeyboard/senseMouse for trigger key resolution.
+//
+// Lifecycle: independent of Zone mount/unmount.
+//   - Set by os-sdk/defineApp trigger binding
+//   - Read by 1-listen sense* and 3-inject compute
+// ═══════════════════════════════════════════════════════════════════
+
+const triggerOverlays = new Map<
+  string,
+  { overlayId: string; overlayType: string }
+>();
+
+export const TriggerOverlayRegistry = {
+  set(triggerId: string, overlayId: string, overlayType: string): void {
+    triggerOverlays.set(triggerId, { overlayId, overlayType });
+  },
+
+  clear(triggerId: string): void {
+    triggerOverlays.delete(triggerId);
+  },
+
+  get(
+    triggerId: string,
+  ): { overlayId: string; overlayType: string } | undefined {
+    return triggerOverlays.get(triggerId);
+  },
+};

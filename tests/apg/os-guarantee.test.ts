@@ -1,7 +1,7 @@
 /**
  * OS Guarantees — Data Manipulation State Guarantee Tests
  *
- * Source of Truth: docs/official/os-guarantees.md
+ * Source of Truth: docs/2-area/official/os-guarantees.md
  *
  * Tests that the OS maintains correct focus and selection state
  * after data manipulation operations (delete, clipboard, multi-select).

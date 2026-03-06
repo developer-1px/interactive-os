@@ -19,7 +19,8 @@
  * keybindings that map to OS_NAVIGATE and OS_TAB respectively.
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -39,23 +40,27 @@ const ARTICLES = [
 ];
 
 function feedFactory(focusedItem = "article-1") {
-  const page = createOsPage();
-  page.setItems(ARTICLES);
-  page.setRole("feed-zone", "feed");
-  page.setConfig({
-    navigate: {
-      orientation: "vertical",
-      loop: false,
-      seamless: false,
-      typeahead: false,
-      entry: "first",
-      recovery: "next",
-    },
-    select: {
-      mode: "none",
+  const app = defineApp("test-feed", {});
+  const zone = app.createZone("feed-zone");
+  zone.bind({
+    role: "feed",
+    getItems: () => ARTICLES,
+    options: {
+      navigate: {
+        orientation: "vertical",
+        loop: false,
+        seamless: false,
+        typeahead: false,
+        entry: "first",
+        recovery: "next",
+      },
+      select: {
+        mode: "none",
+      },
     },
   });
-  page.setActiveZone("feed-zone", focusedItem);
+  const page = createPage(app);
+  page.goto("feed-zone", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -64,17 +69,17 @@ function feedFactory(focusedItem = "article-1") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Feed: Navigation (Arrow Keys)", () => {
-  assertVerticalNav(feedFactory);
-  assertBoundaryClamp(feedFactory, {
+  assertVerticalNav(feedFactory as any);
+  assertBoundaryClamp(feedFactory as any, {
     firstId: "article-1",
     lastId: "article-5",
     axis: "vertical",
   });
-  assertHomeEnd(feedFactory, {
+  assertHomeEnd(feedFactory as any, {
     firstId: "article-1",
     lastId: "article-5",
   });
-  assertNoSelection(feedFactory);
+  assertNoSelection(feedFactory as any);
 });
 
 // ═══════════════════════════════════════════════════
@@ -139,34 +144,35 @@ describe("APG Feed: Page Down / Page Up", () => {
 
 describe("APG Feed: Control+End / Control+Home (exit feed)", () => {
   function feedWithZoneOrder(focusedItem = "article-2") {
-    const t = feedFactory(focusedItem);
-    t.setZoneOrder([
-      {
-        zoneId: "before-feed",
-        firstItemId: "before-1",
-        lastItemId: "before-1",
-        entry: "first",
-        selectedItemId: null,
-        lastFocusedId: null,
+    const app = defineApp("test-feed-zones", {});
+    const before = app.createZone("before-feed");
+    before.bind({ getItems: () => ["before-1"] });
+    const feed = app.createZone("feed-zone");
+    feed.bind({
+      role: "feed",
+      getItems: () => ARTICLES,
+      options: {
+        navigate: {
+          orientation: "vertical",
+          loop: false,
+          seamless: false,
+          typeahead: false,
+          entry: "first",
+          recovery: "next",
+        },
+        select: { mode: "none" },
       },
-      {
-        zoneId: "feed-zone",
-        firstItemId: "article-1",
-        lastItemId: "article-5",
-        entry: "first",
-        selectedItemId: null,
-        lastFocusedId: focusedItem,
-      },
-      {
-        zoneId: "after-feed",
-        firstItemId: "after-1",
-        lastItemId: "after-1",
-        entry: "first",
-        selectedItemId: null,
-        lastFocusedId: null,
-      },
-    ]);
-    return t;
+    });
+    const after = app.createZone("after-feed");
+    after.bind({ getItems: () => ["after-1"] });
+    const page = createPage(app);
+    // Register all zones in order
+    page.goto("before-feed", { focusedItemId: "before-1" });
+    page.goto("feed-zone", { focusedItemId: focusedItem });
+    page.goto("after-feed", { focusedItemId: "after-1" });
+    // Activate feed zone
+    page.goto("feed-zone", { focusedItemId: focusedItem });
+    return page;
   }
 
   it("Control+End: exits the feed zone forward", () => {
@@ -217,27 +223,33 @@ describe("APG Feed: DOM Projection (attrs)", () => {
 
 describe("APG Feed: Tab exits zone", () => {
   it("Tab: exits the feed zone (tab=escape)", () => {
-    const t = feedFactory("article-2");
-    t.setZoneOrder([
-      {
-        zoneId: "feed-zone",
-        firstItemId: "article-1",
-        lastItemId: "article-5",
-        entry: "first",
-        selectedItemId: null,
-        lastFocusedId: "article-2",
+    const app = defineApp("test-feed-tab", {});
+    const feed = app.createZone("feed-zone");
+    feed.bind({
+      role: "feed",
+      getItems: () => ARTICLES,
+      options: {
+        navigate: {
+          orientation: "vertical",
+          loop: false,
+          seamless: false,
+          typeahead: false,
+          entry: "first",
+          recovery: "next",
+        },
+        select: { mode: "none" },
       },
-      {
-        zoneId: "next-zone",
-        firstItemId: "next-1",
-        lastItemId: "next-1",
-        entry: "first",
-        selectedItemId: null,
-        lastFocusedId: null,
-      },
-    ]);
-    t.keyboard.press("Tab");
+    });
+    const next = app.createZone("next-zone");
+    next.bind({ getItems: () => ["next-1"] });
+    const page = createPage(app);
+    page.goto("feed-zone", { focusedItemId: "article-2" });
+    page.goto("next-zone", { focusedItemId: "next-1" });
+    // Activate feed zone
+    page.goto("feed-zone", { focusedItemId: "article-2" });
+
+    page.keyboard.press("Tab");
     // Tab with behavior=escape exits the zone to next zone
-    expect(t.activeZoneId()).toBe("next-zone");
+    expect(page.activeZoneId()).toBe("next-zone");
   });
 });

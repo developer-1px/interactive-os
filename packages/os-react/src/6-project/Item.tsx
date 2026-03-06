@@ -129,7 +129,7 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(function Item(
   const domProps = {
     ...attrs,
     className: className || undefined,
-    style: style || undefined,
+    style: { outline: "none", ...style },
     ...rest,
   };
 
@@ -137,7 +137,7 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(function Item(
   const childEl =
     asChild && isValidElement(resolved)
       ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (resolved as ReactElement<any>)
+      (resolved as ReactElement<any>)
       : null;
 
   const autoAsChild =
@@ -150,7 +150,7 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(function Item(
     ? childEl
     : autoAsChild
       ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (resolved as ReactElement<any>)
+      (resolved as ReactElement<any>)
       : null;
 
   const combinedRef = useMemo(

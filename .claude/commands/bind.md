@@ -7,7 +7,7 @@ description: Green 테스트를 통과한 헤드리스 로직을 UI 컴포넌트
 > **전제**: `/green` 완료 (헤드리스 테스트 🟢 PASS).
 > **산출물**: 화면에서 동작하는 UI 컴포넌트.
 > **원칙**: Green이 증명한 로직을 화면에 투영한다. 새로운 로직을 추가하지 않는다.
-> **금지**: `useState`, `useEffect`, `onClick` 직접 사용. OS 커맨드를 사용한다.
+> **금지**: `contract-checklist.md §Config`의 금지 목록 참조. OS 커맨드를 사용한다.
 
 ---
 
@@ -40,15 +40,8 @@ Then 맥락 파악:
 2. **Command** — 사용자 입력(Zone 이벤트)을 OS 커맨드로 dispatch
 3. **Render** — hook 반환값으로 화면을 렌더링
 
-```tsx
-// 예시 패턴
-function MyComponent() {
-  const state = useMyState();                        // ← Green hook
-  return <button onClick={() => os.dispatch(myCommand())}>  // ← Green command
-    {state.value}
-  </button>;
-}
-```
+> 바인딩 코드 예시는 `.agent/knowledge/runbook.md`를 참조한다.
+> Hook → Command → Render 순서를 따른다.
 
 ---
 
@@ -70,5 +63,5 @@ function MyComponent() {
 
 - [ ] spec.md UX Flow의 각 단계가 화면에서 동작
 - [ ] **`/verify` 전 게이트 통과** (tsc 0, unit PASS, bind smoke ✅, build OK)
-- [ ] OS 패턴 준수 (useState/useEffect/onClick 직접 사용 0)
+- [ ] OS 패턴 준수 (`contract-checklist.md §Config` 금지 목록 위반 0건)
 - [ ] regression 없음 (기존 테스트 PASS 유지)

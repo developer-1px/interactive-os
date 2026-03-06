@@ -13,7 +13,10 @@ import {
   OS_CHECK,
   OS_EXPAND,
   OS_OVERLAY_CLOSE,
+  OS_VALUE_CHANGE,
 } from "@os-core/4-command";
+import { OS_NAVIGATE } from "@os-core/4-command/navigate";
+import { OS_TAB } from "@os-core/4-command/tab/tab";
 import type {
   DismissConfig,
   ExpandConfig,
@@ -35,6 +38,7 @@ import {
 } from "../../schema/types";
 import type { InputMap } from "../../schema/types/focus/config/FocusGroupConfig";
 import { DEFAULT_INPUTMAP } from "../../schema/types/focus/config/FocusGroupConfig";
+import type { DeepPartial } from "../../schema/types/utils";
 
 // ═══════════════════════════════════════════════════════════════════
 // Zone Role Type
@@ -70,6 +74,9 @@ export type ZoneRole =
   | "disclosure"
   // Value patterns
   | "slider"
+  | "meter"
+  | "spinbutton"
+  | "separator"
   // Toggle patterns
   | "switch"
   // Custom (non-ARIA)
@@ -91,12 +98,16 @@ const childRoleMap: Partial<Record<ZoneRole, string>> = {
   tablist: "tab",
   toolbar: "button",
   grid: "gridcell",
-  treegrid: "gridcell",
+  treegrid: "row",
   tree: "treeitem",
   combobox: "option",
   feed: "article",
   accordion: "button",
+  disclosure: "button",
   slider: "slider",
+  meter: "meter",
+  spinbutton: "spinbutton",
+  separator: "separator",
   switch: "switch",
   checkbox: "checkbox",
 };
@@ -140,43 +151,12 @@ export function getContentVisibilitySource(
   );
 }
 
-/** Roles where items should use `aria-checked` instead of `aria-selected` */
-const CHECKED_ROLES = new Set([
-  "radio",
-  "menuitemradio",
-  "menuitemcheckbox",
-  "checkbox",
-  "switch",
-]);
-
-/** Roles where items can be expanded/collapsed */
-/** Roles that are ALWAYS expandable (inherent to the role). treeitem is NOT here — expandability depends on children. */
-const EXPANDABLE_ROLES = new Set(["menuitem"]);
-
 /** Get the default child role for a Zone role */
 export function getChildRole(zoneRole?: ZoneRole | string): string {
   return (
     (zoneRole ? childRoleMap[zoneRole as ZoneRole] : undefined) || "option"
   );
 }
-
-/** Check if a role uses aria-checked (vs aria-selected) */
-export function isCheckedRole(role: string): boolean {
-  return CHECKED_ROLES.has(role);
-}
-
-/** Check if a role supports aria-expanded */
-export function isExpandableRole(role: string): boolean {
-  return EXPANDABLE_ROLES.has(role);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Deep Partial Type
-// ═══════════════════════════════════════════════════════════════════
-
-type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
 
 export type RolePreset = DeepPartial<FocusGroupConfig>;
 
@@ -244,7 +224,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       radio items use aria-checked → OS_CHECK is the correct command.
   radiogroup: {
     navigate: { orientation: "linear-both", loop: true, entry: "selected" },
-    select: { mode: "single", followFocus: true, disallowEmpty: true },
+    select: { mode: "single", followFocus: true, disallowEmpty: true, aria: "checked" },
     inputmap: { Space: [OS_CHECK()], click: [OS_CHECK()] },
     tab: { behavior: "escape" },
   },
@@ -282,7 +262,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       no loop, explicit selection
   treegrid: {
     navigate: {
-      orientation: "both",
+      orientation: "vertical",
       loop: false,
       onRight: ["expand", "enterChild"],
       onLeft: ["collapse", "goParent"],
@@ -349,9 +329,18 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   },
 
   // ─── Feed (ARIA APG: Feed Pattern) ───
-  // Spec: vertical infinite scroll, no wrap, articles are items
+  // Spec: vertical infinite scroll, no wrap, articles are items.
+  // PageDown/PageUp = next/prev article (same as ArrowDown/ArrowUp).
+  // Ctrl+End = exit feed forward, Ctrl+Home = exit feed backward.
   feed: {
     navigate: { orientation: "vertical", loop: false },
+    select: { mode: "none" },
+    inputmap: {
+      PageDown: [OS_NAVIGATE({ direction: "down" })],
+      PageUp: [OS_NAVIGATE({ direction: "up" })],
+      "Ctrl+End": [OS_TAB({ direction: "forward" })],
+      "Ctrl+Home": [OS_TAB({ direction: "backward" })],
+    },
     tab: { behavior: "escape" },
   },
 
@@ -395,6 +384,39 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   // ─── Textbox (custom — Field zone, keyboard delegated to contenteditable) ───
   textbox: {
     tab: { behavior: "flow" },
+  },
+
+  // ─── Meter (ARIA APG: Meter Pattern) ───
+  // Spec: read-only numeric display, NO keyboard interaction.
+  // Value axis is continuous for aria-valuenow/min/max projection,
+  // but Field layer uses "readonly" type so arrow keys are ignored.
+  meter: {
+    select: { mode: "none" },
+    tab: { behavior: "escape" },
+    value: { mode: "continuous", min: 0, max: 100, step: 1, largeStep: 10 },
+  },
+
+  // ─── Spinbutton (ARIA APG: Spinbutton Pattern) ───
+  // Spec: Up/Down arrows change value, Home/End jump to min/max,
+  //       PageUp/PageDown adjust by large step. Vertical only.
+  spinbutton: {
+    navigate: { orientation: "vertical", loop: false },
+    select: { mode: "none" },
+    tab: { behavior: "escape" },
+    value: { mode: "continuous", min: 0, max: 100, step: 1, largeStep: 10 },
+  },
+
+  // ─── Separator / Window Splitter (ARIA APG: Window Splitter Pattern) ───
+  // Spec: all four arrow keys adjust value (Up/Right = increment, Down/Left = decrement),
+  //       Home/End jump to min/max, Enter toggles collapse/restore.
+  separator: {
+    navigate: { orientation: "vertical", loop: false },
+    select: { mode: "none" },
+    inputmap: {
+      Enter: [OS_VALUE_CHANGE({ action: "toggleCollapse" })],
+    },
+    tab: { behavior: "escape" },
+    value: { mode: "continuous", min: 0, max: 100, step: 1, largeStep: 10 },
   },
 
   // ─── Slider (ARIA APG: Slider Pattern) ───

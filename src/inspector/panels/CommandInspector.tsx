@@ -5,7 +5,7 @@ import { useInputTelemetry } from "@inspector/panels/LoggedKey.ts";
 import { RegistryMonitor } from "@inspector/panels/RegistryMonitor.tsx";
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import { useEffect, useState } from "react";
 
 // --- Main Component ---

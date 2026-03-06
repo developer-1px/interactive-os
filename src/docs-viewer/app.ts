@@ -12,7 +12,7 @@
  *     │   └── docs-reader    — section navigation (feed)
  */
 
-import { Keybindings } from "@os-core/2-resolve/keybindings";
+
 import { defineApp } from "@os-sdk/app/defineApp";
 import { produce } from "immer";
 import { buildDocTree, type DocItem, docsModules } from "./docsUtils";
@@ -70,7 +70,7 @@ function getInitialPath(): string | null {
 // App State
 // ═══════════════════════════════════════════════════════════════════
 
-interface DocsState {
+export interface DocsState {
   activePath: string | null;
   searchOpen: boolean;
 }
@@ -104,19 +104,19 @@ export const resetDoc = DocsApp.command("RESET_DOC", (ctx) => ({
 /** GO_BACK — router middleware delegates to TanStack Router history. */
 export const goBack = DocsApp.command("GO_BACK", (ctx) => ({
   state: ctx.state,
-}));
+}), { key: "Alt+ArrowLeft" });
 
 /** GO_FORWARD — router middleware delegates to TanStack Router history. */
 export const goForward = DocsApp.command("GO_FORWARD", (ctx) => ({
   state: ctx.state,
-}));
+}), { key: "Alt+ArrowRight" });
 
 /** OPEN_SEARCH — opens the docs search overlay. */
 export const openSearch = DocsApp.command("OPEN_SEARCH", (ctx) => ({
   state: produce(ctx.state, (draft) => {
     draft.searchOpen = true;
   }),
-}));
+}), { key: "/", when: "navigating" });
 
 /** CLOSE_SEARCH — closes the docs search overlay. */
 export const closeSearch = DocsApp.command("CLOSE_SEARCH", (ctx) => ({
@@ -180,27 +180,15 @@ const readerZone = DocsApp.createZone("docs-reader");
 export const NEXT_SECTION = readerZone.command(
   "DOCS_NEXT_SECTION",
   () => undefined,
+  { key: "Space" },
 );
 
 export const PREV_SECTION = readerZone.command(
   "DOCS_PREV_SECTION",
   () => undefined,
+  { key: "Shift+Space" },
 );
 
 export const DocsReaderUI = readerZone.bind({
   role: "feed",
-  keybindings: [
-    { key: "Space", command: () => NEXT_SECTION() },
-    { key: "Shift+Space", command: () => PREV_SECTION() },
-  ],
 });
-
-// ═══════════════════════════════════════════════════════════════════
-// App-level Keybindings — always active (not zone-scoped)
-// ═══════════════════════════════════════════════════════════════════
-
-Keybindings.registerAll([
-  { key: "Alt+ArrowLeft", command: goBack() },
-  { key: "Alt+ArrowRight", command: goForward() },
-  { key: "/", command: openSearch(), when: "navigating" },
-]);

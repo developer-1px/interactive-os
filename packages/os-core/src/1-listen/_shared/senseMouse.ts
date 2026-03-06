@@ -8,7 +8,7 @@
  */
 
 import { os } from "@os-core/engine/kernel";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { findFocusableItem, resolveFocusTarget } from "../_shared/domQuery";
 import type { MouseInput } from "../mouse/resolveMouse";
 
@@ -171,7 +171,7 @@ export function senseMouseDown(
   let isTriggerOverlayOpen = false;
 
   if (triggerId) {
-    const triggerMeta = ZoneRegistry.getTriggerOverlay(triggerId);
+    const triggerMeta = TriggerOverlayRegistry.get(triggerId);
     if (triggerMeta) {
       triggerOverlayId = triggerMeta.overlayId;
       triggerRole = triggerMeta.overlayType;
@@ -239,17 +239,97 @@ export function getDropPosition(
   e: { clientY: number },
   zoneEl: HTMLElement,
 ): { overItemId: string; position: "before" | "after" } | null {
-  const nodeList = zoneEl.querySelectorAll("[data-item-id]");
+  const nodeList = zoneEl.querySelectorAll("[data-item]");
   const items: DropSenseInput["items"] = [];
 
   for (const node of nodeList) {
     if (node.closest("[data-zone]") !== zoneEl) continue;
     const rect = node.getBoundingClientRect();
-    const itemId =
-      node.getAttribute("data-item-id") || (node as HTMLElement).id;
+    const itemId = (node as HTMLElement).id;
     if (!itemId) continue;
     items.push({ itemId, top: rect.top, bottom: rect.bottom });
   }
 
   return extractDropPosition({ clientY: e.clientY, items });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ClickTarget — Discriminated union for pointerup click routing
+// ═══════════════════════════════════════════════════════════════════
+
+export type ClickTarget =
+  | { type: "inspector" }
+  | {
+    type: "trigger";
+    triggerId: string;
+    overlayId: string;
+    overlayType: string;
+    isOpen: boolean;
+  }
+  | { type: "expand"; itemId: string; zoneId: string }
+  | { type: "check"; itemId: string; zoneId: string }
+  | { type: "item"; itemId: string | null; isCurrentPage: boolean }
+  | { type: "none" };
+
+/**
+ * senseClickTarget — DOM → ClickTarget for pointerup click routing.
+ *
+ * Classifies what the user clicked on by reading DOM attributes
+ * and registry/state. Symmetric to senseMouseDown (pointerdown path).
+ *
+ * Pipeline: PointerEvent target → senseClickTarget → resolveClick/resolveTriggerClick → dispatch
+ */
+export function senseClickTarget(target: HTMLElement): ClickTarget {
+  // Inspector: skip entirely
+  if (target.closest("[data-inspector]")) return { type: "inspector" };
+
+  // Trigger: overlay toggle
+  const triggerEl = target.closest("[data-trigger-id]") as HTMLElement;
+  if (triggerEl) {
+    const triggerId = triggerEl.getAttribute("data-trigger-id");
+    if (triggerId) {
+      const triggerMeta = TriggerOverlayRegistry.get(triggerId);
+      if (triggerMeta) {
+        const overlayStack = os.getState().os.overlays.stack;
+        const isOpen = overlayStack.some(
+          (o: { id: string }) => o.id === triggerMeta.overlayId,
+        );
+        return {
+          type: "trigger",
+          triggerId,
+          overlayId: triggerMeta.overlayId,
+          overlayType: triggerMeta.overlayType,
+          isOpen,
+        };
+      }
+    }
+  }
+
+  // Sub-item triggers: expand / check
+  if (
+    target.closest("[data-expand-trigger]") ||
+    target.closest("[data-check-trigger]")
+  ) {
+    const activeZoneId = os.getState().os.focus.activeZoneId;
+    if (!activeZoneId) return { type: "none" };
+    const itemEl = findFocusableItem(target);
+    const itemId = itemEl?.id ?? null;
+    if (!itemId) return { type: "none" };
+    const subType = target.closest("[data-expand-trigger]")
+      ? "expand"
+      : "check";
+    return {
+      type: subType as "expand" | "check",
+      itemId,
+      zoneId: activeZoneId,
+    };
+  }
+
+  // Normal item click
+  const itemEl = findFocusableItem(target);
+  return {
+    type: "item",
+    itemId: itemEl?.id ?? null,
+    isCurrentPage: itemEl?.getAttribute("aria-current") === "page",
+  };
 }

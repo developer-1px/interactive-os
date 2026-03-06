@@ -14,12 +14,14 @@
  * @see resolvePointer.ts — pure gesture recognition logic
  */
 
+import type { BaseCommand } from "@kernel/core/tokens";
 import {
   findFocusableItem,
   setDispatching,
 } from "@os-core/1-listen/_shared/domQuery";
 import {
   getDropPosition,
+  senseClickTarget,
   senseMouseDown,
 } from "@os-core/1-listen/_shared/senseMouse";
 import { resolveClick } from "@os-core/1-listen/mouse/resolveClick";
@@ -59,6 +61,53 @@ export function PointerListener() {
     /** The slider Item element used for rect calculation during drag */
     let sliderEl: HTMLElement | null = null;
 
+    // ── Local Helpers ──────────────────────────────────────────
+
+    /** Dispatch multiple commands within a setDispatching guard. */
+    const dispatchBatch = (commands: BaseCommand[], opts?: any) => {
+      setDispatching(true);
+      for (const cmd of commands) {
+        os.dispatch(cmd, opts);
+      }
+      setDispatching(false);
+    };
+
+    const setDragCursor = () => {
+      document.body.style.cursor = "grabbing";
+      document.body.style.userSelect = "none";
+    };
+
+    const clearDragCursor = () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    /** Read slider config + rect, resolve value, dispatch OS_VALUE_CHANGE. */
+    const dispatchSliderValue = (
+      clientX: number,
+      clientY: number,
+      el: HTMLElement,
+      zoneId: string,
+      itemId: string,
+    ) => {
+      const zoneEntry = ZoneRegistry.get(zoneId);
+      const valueConfig = zoneEntry?.config?.value;
+      if (!valueConfig || valueConfig.mode !== "continuous") return;
+      const rect = el.getBoundingClientRect();
+      const newValue = resolveSliderValue({
+        clientX,
+        clientY,
+        rect,
+        min: valueConfig.min,
+        max: valueConfig.max,
+        step: valueConfig.step,
+        orientation: "horizontal",
+      });
+      os.dispatch(
+        OS_VALUE_CHANGE({ action: "set", value: newValue, itemId, zoneId }),
+      );
+    };
+
     // ── Pointerdown: gesture start + immediate focus/select ──
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
@@ -67,7 +116,7 @@ export function PointerListener() {
       const hasDragHandle = !!target.closest("[data-drag-handle]");
       const itemEl = findFocusableItem(target);
       const zoneEl = target.closest("[data-zone]") as HTMLElement | null;
-      const itemId = itemEl?.getAttribute("data-item-id") ?? itemEl?.id ?? null;
+      const itemId = itemEl?.id ?? null;
       const zoneId = zoneEl?.getAttribute("data-zone") ?? null;
 
       // Detect slider zone
@@ -89,40 +138,15 @@ export function PointerListener() {
       // Slider: immediate drag — set up element ref + styles + first value
       if (gestureState.phase === "SLIDER_DRAG" && itemEl) {
         sliderEl = itemEl;
-        document.body.style.cursor = "grabbing";
-        document.body.style.userSelect = "none";
-
-        // Immediate focus
-        setDispatching(true);
-        os.dispatch(
+        setDragCursor();
+        dispatchBatch([
           OS_FOCUS({
             zoneId: zoneId!,
             itemId: itemId!,
             skipSelection: true,
-          }),
-        );
-
-        // Set value from pointer position
-        const valueConfig = zoneEntry!.config.value;
-        const rect = itemEl.getBoundingClientRect();
-        const newValue = resolveSliderValue({
-          clientX: e.clientX,
-          clientY: e.clientY,
-          rect,
-          min: valueConfig.min,
-          max: valueConfig.max,
-          step: valueConfig.step,
-          orientation: "horizontal",
-        });
-        os.dispatch(
-          OS_VALUE_CHANGE({
-            action: "set",
-            value: newValue,
-            itemId: itemId!,
-            zoneId: zoneId!,
-          }),
-        );
-        setDispatching(false);
+          }) as BaseCommand,
+        ]);
+        dispatchSliderValue(e.clientX, e.clientY, itemEl, zoneId!, itemId!);
         e.preventDefault();
         return;
       }
@@ -144,13 +168,10 @@ export function PointerListener() {
       const mouseInput = senseMouseDown(target, e);
       if (!mouseInput) {
         // ── outsideClick dismiss ──
-        // Click landed outside any zone/item. If the active zone
-        // has dismiss.outsideClick === "close", dispatch OS_ESCAPE.
-        // But skip if clicking a trigger (trigger handles its own toggle)
         const isTriggerClick = !!target.closest("[data-trigger-id]");
         if (activeZoneId && !isTriggerClick) {
-          const zoneEntry = ZoneRegistry.get(activeZoneId);
-          if (zoneEntry?.config.dismiss.outsideClick === "close") {
+          const entry = ZoneRegistry.get(activeZoneId);
+          if (entry?.config.dismiss.outsideClick === "close") {
             os.dispatch(OS_ESCAPE({}));
           }
         }
@@ -167,17 +188,17 @@ export function PointerListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-                meta: {
-                  ...result.meta,
-                  pipeline: {
-                    sensed: mouseInput,
-                    resolved: {
-                      preventDefault: result.preventDefault,
-                      fallback: result.fallback,
-                    },
+              meta: {
+                ...result.meta,
+                pipeline: {
+                  sensed: mouseInput,
+                  resolved: {
+                    preventDefault: result.preventDefault,
+                    fallback: result.fallback,
                   },
                 },
-              }
+              },
+            }
             : undefined;
           os.dispatch(cmd, opts);
         }
@@ -229,31 +250,9 @@ export function PointerListener() {
     const onPointerMove = (e: PointerEvent) => {
       // Slider drag: update value from pointer position
       if (gestureState.phase === "SLIDER_DRAG" && sliderEl) {
-        const zoneId = gestureState.zoneId;
-        const itemId = gestureState.itemId;
+        const { zoneId, itemId } = gestureState;
         if (zoneId && itemId) {
-          const zoneEntry = ZoneRegistry.get(zoneId);
-          const valueConfig = zoneEntry?.config?.value;
-          if (valueConfig && valueConfig.mode === "continuous") {
-            const rect = sliderEl.getBoundingClientRect();
-            const newValue = resolveSliderValue({
-              clientX: e.clientX,
-              clientY: e.clientY,
-              rect,
-              min: valueConfig.min,
-              max: valueConfig.max,
-              step: valueConfig.step,
-              orientation: "horizontal",
-            });
-            os.dispatch(
-              OS_VALUE_CHANGE({
-                action: "set",
-                value: newValue,
-                itemId,
-                zoneId,
-              }),
-            );
-          }
+          dispatchSliderValue(e.clientX, e.clientY, sliderEl, zoneId, itemId);
         }
         e.preventDefault();
         return;
@@ -273,8 +272,7 @@ export function PointerListener() {
             itemId: gestureState.itemId!,
           }),
         );
-        document.body.style.cursor = "grabbing";
-        document.body.style.userSelect = "none";
+        setDragCursor();
       }
 
       // Ongoing DRAG — update hover target
@@ -288,15 +286,15 @@ export function PointerListener() {
         os.dispatch(
           drop
             ? OS_DRAG_OVER({
-                overItemId: drop.overItemId,
-                position: drop.position,
-              })
+              overItemId: drop.overItemId,
+              position: drop.position,
+            })
             : OS_DRAG_OVER({ overItemId: null, position: null }),
         );
       }
     };
 
-    // ── Pointerup: complete gesture ──
+    // ── Pointerup: complete gesture ──────────────────────────────
     const onPointerUp = (e: PointerEvent) => {
       const result = resolvePointerUp(gestureState);
       gestureState = result.state;
@@ -304,122 +302,96 @@ export function PointerListener() {
       if (result.gesture === "CLICK") {
         const target = pointerDownTarget ?? (e.target as HTMLElement);
         if (target) {
-          // Inspector: skip entirely
-          if (target.closest("[data-inspector]")) {
-            // no-op
-          }
-          // ── Trigger-first: resolve trigger click before Item ──
-          else if (target.closest("[data-trigger-id]")) {
-            const triggerEl = target.closest(
-              "[data-trigger-id]",
-            ) as HTMLElement;
-            const triggerId = triggerEl.getAttribute("data-trigger-id");
-            if (triggerId) {
-              const triggerMeta = ZoneRegistry.getTriggerOverlay(triggerId);
-              if (triggerMeta) {
-                const overlayStack = os.getState().os.overlays.stack;
-                const isOpen = overlayStack.some(
-                  (o: { id: string }) => o.id === triggerMeta.overlayId,
-                );
-                const triggerCmd = resolveTriggerClick({
-                  triggerId,
-                  triggerRole: triggerMeta.overlayType,
-                  overlayId: triggerMeta.overlayId,
-                  isTriggerOverlayOpen: isOpen,
-                });
-                if (triggerCmd) {
-                  setDispatching(true);
-                  os.dispatch(triggerCmd, {
-                    meta: {
-                      input: {
-                        type: "MOUSE",
-                        key: "click",
-                        elementId: triggerId,
-                      },
-                    },
-                  });
-                  setDispatching(false);
-                }
-              }
-            }
-          } else if (
-            target.closest("[data-expand-trigger]") ||
-            target.closest("[data-check-trigger]")
-          ) {
-            // Sub-item triggers: OS handles expand/check via pipeline
-            const state = os.getState();
-            const { activeZoneId } = state.os.focus;
-            if (activeZoneId) {
-              const itemEl = findFocusableItem(target);
-              const itemId = itemEl?.getAttribute("data-item-id") ?? null;
-              if (itemId) {
-                os.dispatch(
-                  OS_FOCUS({
-                    zoneId: activeZoneId,
-                    itemId,
-                    skipSelection: true,
-                  }),
-                );
-                if (target.closest("[data-expand-trigger]")) {
-                  os.dispatch(OS_EXPAND({ itemId, zoneId: activeZoneId }));
-                } else {
-                  os.dispatch(OS_CHECK({ targetId: itemId }));
-                }
-              }
-            }
-          } else {
-            const state = os.getState();
-            const { activeZoneId } = state.os.focus;
+          const clickTarget = senseClickTarget(target);
 
-            if (activeZoneId) {
-              const clickedEl = findFocusableItem(target);
-              const clickedItemId =
-                clickedEl?.getAttribute("data-item-id") ?? null;
-              const zone = state.os.focus.zones[activeZoneId];
-              const entry = ZoneRegistry.get(activeZoneId);
+          switch (clickTarget.type) {
+            case "inspector":
+              break;
 
-              // inputmap["click"] — direct click→command routing from APG table
-              const clickCommands = entry?.config?.inputmap?.["click"] ?? [];
-              const activateOnClick = clickCommands.length > 0;
-              const isCurrentPage =
-                clickedEl?.getAttribute("aria-current") === "page";
-
-              const clickResult = resolveClick({
-                activateOnClick,
-                clickedItemId,
-                focusedItemId: zone?.focusedItemId ?? null,
-                isCurrentPage,
-                ...(clickCommands.length > 0
-                  ? { actionCommands: clickCommands }
-                  : {}),
+            case "trigger": {
+              const triggerCmd = resolveTriggerClick({
+                triggerId: clickTarget.triggerId,
+                triggerRole: clickTarget.overlayType,
+                overlayId: clickTarget.overlayId,
+                isTriggerOverlayOpen: clickTarget.isOpen,
               });
+              if (triggerCmd) {
+                dispatchBatch([triggerCmd], {
+                  meta: {
+                    input: {
+                      type: "MOUSE",
+                      key: "click",
+                      elementId: clickTarget.triggerId,
+                    },
+                  },
+                });
+              }
+              break;
+            }
 
-              if (clickResult.commands.length > 0) {
-                setDispatching(true);
-                for (const cmd of clickResult.commands) {
+            case "expand":
+            case "check": {
+              os.dispatch(
+                OS_FOCUS({
+                  zoneId: clickTarget.zoneId,
+                  itemId: clickTarget.itemId,
+                  skipSelection: true,
+                }),
+              );
+              os.dispatch(
+                clickTarget.type === "expand"
+                  ? OS_EXPAND({
+                    itemId: clickTarget.itemId,
+                    zoneId: clickTarget.zoneId,
+                  })
+                  : OS_CHECK({ targetId: clickTarget.itemId }),
+              );
+              break;
+            }
+
+            case "item": {
+              const state = os.getState();
+              const { activeZoneId } = state.os.focus;
+              if (activeZoneId) {
+                const zone = state.os.focus.zones[activeZoneId];
+                const entry = ZoneRegistry.get(activeZoneId);
+                const clickCommands =
+                  entry?.config?.inputmap?.["click"] ?? [];
+
+                const clickResult = resolveClick({
+                  activateOnClick: clickCommands.length > 0,
+                  clickedItemId: clickTarget.itemId,
+                  focusedItemId: zone?.focusedItemId ?? null,
+                  isCurrentPage: clickTarget.isCurrentPage,
+                  ...(clickCommands.length > 0
+                    ? { actionCommands: clickCommands }
+                    : {}),
+                });
+
+                if (clickResult.commands.length > 0) {
                   const opts = clickResult.meta
                     ? {
-                        meta: {
-                          ...clickResult.meta,
-                          pipeline: { sensed: {}, resolved: {} },
-                        },
-                      }
+                      meta: {
+                        ...clickResult.meta,
+                        pipeline: { sensed: {}, resolved: {} },
+                      },
+                    }
                     : undefined;
-                  os.dispatch(cmd, opts);
+                  dispatchBatch(clickResult.commands, opts);
                 }
-                setDispatching(false);
               }
+              break;
             }
+
+            case "none":
+              break;
           }
         }
       } else if (result.gesture === "DRAG_END") {
         os.dispatch(OS_DRAG_END());
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
+        clearDragCursor();
       } else if (result.gesture === "SLIDER_DRAG_END") {
-        // Slider drag complete — clean up styles
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
+        clearDragCursor();
         sliderEl = null;
       }
 

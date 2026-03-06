@@ -1,5 +1,5 @@
 import { defineScope } from "@kernel";
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import { router } from "@os-sdk/app/modules/router";
 import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";

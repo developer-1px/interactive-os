@@ -11,10 +11,12 @@
  *   - Enter on folder → OS_ACTIVATE → OS_EXPAND
  *   - Enter on file → OS_ACTIVATE → onAction
  *
- * Uses createOsPage for full pipeline testing.
+ * Uses defineApp+createPage for full pipeline testing.
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
+import { describe, expect, it } from "vitest";
 
 // ─── Configs ───
 
@@ -27,40 +29,45 @@ const NAV_ITEMS = [
 ];
 
 function navTreeFactory(focusedItem = "folder:docs") {
-  const page = createOsPage();
-  page.setItems(NAV_ITEMS);
-  page.setExpandableItems(["folder:docs", "folder:src"]);
-  page.setTreeLevels({
-    "folder:docs": 1,
-    "file:readme": 2,
-    "file:guide": 2,
-    "folder:src": 1,
-    "file:index": 2,
+  const app = defineApp("test-navtree", {});
+  const zone = app.createZone("nav-tree");
+  zone.bind({
+    role: "tree",
+    getItems: () => NAV_ITEMS,
+    getExpandableItems: () => new Set(["folder:docs", "folder:src"]),
+    getTreeLevels: () =>
+      new Map([
+        ["folder:docs", 1],
+        ["file:readme", 2],
+        ["file:guide", 2],
+        ["folder:src", 1],
+        ["file:index", 2],
+      ]),
+    options: {
+      navigate: {
+        orientation: "vertical",
+        loop: false,
+        seamless: false,
+        typeahead: false,
+        entry: "first",
+        recovery: "next",
+      },
+      select: {
+        mode: "single",
+        followFocus: true,
+        disallowEmpty: false,
+        range: false,
+        toggle: false,
+      },
+      activate: {
+        mode: "manual",
+        onClick: true,
+        reClickOnly: false,
+      },
+    },
   });
-  page.setRole("nav-tree", "tree");
-  page.setConfig({
-    navigate: {
-      orientation: "vertical",
-      loop: false,
-      seamless: false,
-      typeahead: false,
-      entry: "first",
-      recovery: "next",
-    },
-    select: {
-      mode: "single",
-      followFocus: true,
-      disallowEmpty: false,
-      range: false,
-      toggle: false,
-    },
-    activate: {
-      mode: "manual",
-      onClick: true,
-      reClickOnly: false,
-    },
-  });
-  page.setActiveZone("nav-tree", focusedItem);
+  const page = createPage(app);
+  page.goto("nav-tree", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -106,36 +113,36 @@ describe("Navigation Tree: followFocus", () => {
 describe("Navigation Tree: Expansion", () => {
   it("ArrowRight on collapsed folder → expands", () => {
     const t = navTreeFactory("folder:docs");
-    expect(t.zone()?.expandedItems).not.toContain("folder:docs");
+    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("ArrowRight");
-    expect(t.zone()?.expandedItems).toContain("folder:docs");
+    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(true);
   });
 
   it("ArrowLeft on expanded folder → collapses", () => {
     const t = navTreeFactory("folder:docs");
     t.keyboard.press("ArrowRight"); // expand
-    expect(t.zone()?.expandedItems).toContain("folder:docs");
+    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(true);
 
     t.keyboard.press("ArrowLeft"); // collapse
-    expect(t.zone()?.expandedItems).not.toContain("folder:docs");
+    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(false);
   });
 
   it("Enter on folder → toggles expansion (not navigation)", () => {
     const t = navTreeFactory("folder:docs");
 
     t.keyboard.press("Enter");
-    expect(t.zone()?.expandedItems).toContain("folder:docs");
+    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(true);
 
     t.keyboard.press("Enter");
-    expect(t.zone()?.expandedItems).not.toContain("folder:docs");
+    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(false);
   });
 
   it("ArrowRight on file → does NOT expand", () => {
     const t = navTreeFactory("file:readme");
 
     t.keyboard.press("ArrowRight");
-    expect(t.zone()?.expandedItems).not.toContain("file:readme");
+    expect(t.attrs("file:readme")["aria-expanded"]).toBeUndefined();
   });
 });
 
@@ -146,11 +153,10 @@ describe("Navigation Tree: Expansion", () => {
 describe("Navigation Tree: Activation", () => {
   it("Enter on file → does NOT expand (no expandedItems change)", () => {
     const t = navTreeFactory("file:readme");
-    const before = [...(t.zone()?.expandedItems ?? [])];
 
     t.keyboard.press("Enter");
 
-    expect(t.zone()?.expandedItems).toEqual(before);
+    expect(t.attrs("file:readme")["aria-expanded"]).toBeUndefined();
   });
 });
 

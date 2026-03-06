@@ -9,11 +9,8 @@
  *   Arrow keys adjust value via OS_VALUE_CHANGE. CSS reads data-focused.
  */
 
-import { OS_VALUE_CHANGE } from "@os-core/4-command";
-import { os } from "@os-core/engine/kernel";
 import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
-import { useEffect } from "react";
 
 // ─── Slider Data ───
 
@@ -70,6 +67,9 @@ const SliderUI = sliderZone.bind({
   role: "slider",
   options: {
     navigate: { orientation: "vertical" },
+    value: {
+      initial: Object.fromEntries(SLIDERS.map((s) => [s.id, s.initial])),
+    },
   },
 });
 
@@ -197,20 +197,6 @@ function ColorPreview() {
 // ─── Main Component ───
 
 export function SliderPattern() {
-  // Initialize slider values on mount
-  useEffect(() => {
-    for (const slider of SLIDERS) {
-      os.dispatch(
-        OS_VALUE_CHANGE({
-          action: "set",
-          value: slider.initial,
-          itemId: slider.id,
-          zoneId: "apg-slider-zone",
-        }),
-      );
-    }
-  }, []);
-
   return (
     <div className="max-w-md">
       <h3 className="text-lg font-semibold mb-3">Slider — Color Picker</h3>

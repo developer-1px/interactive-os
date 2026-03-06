@@ -1,22 +1,26 @@
 /**
  * Command Palette Registration
  *
- * Registers TOGGLE_COMMAND_PALETTE command and Meta+K keybinding
- * through the OS keybinding system. Follows the Inspector plugin model.
+ * Registers TOGGLE_COMMAND_PALETTE command and Meta+K keybinding.
  *
  * Side-effect import: `import "@/command-palette/register"`
  */
 
-import { Keybindings } from "@os-core/2-resolve/keybindings";
-import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-core/4-command";
-import { os } from "@os-core/engine/kernel";
+import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-sdk/os";
+import { os } from "@os-sdk/os";
+import { defineApp } from "@os-sdk/app/defineApp";
+
+// ── App ──────────────────────────────────────────────────────────
+
+const CommandPaletteApp = defineApp("command-palette", {});
 
 // ── Command ──────────────────────────────────────────────────────
 
-export const TOGGLE_COMMAND_PALETTE = os.defineCommand(
+export const TOGGLE_COMMAND_PALETTE = CommandPaletteApp.command(
   "TOGGLE_COMMAND_PALETTE",
-  (ctx) => () => {
-    const isOpen = ctx.state.os.overlays.stack.some(
+  () => {
+    const state = os.getState();
+    const isOpen = state.os.overlays.stack.some(
       (e) => e.id === "command-palette",
     );
 
@@ -33,14 +37,8 @@ export const TOGGLE_COMMAND_PALETTE = os.defineCommand(
       }),
     };
   },
+  { key: "Meta+K" },
 );
-
-// ── Keybinding ───────────────────────────────────────────────────
-
-Keybindings.register({
-  key: "Meta+K",
-  command: TOGGLE_COMMAND_PALETTE(),
-});
 
 // ── Shift+Shift Double-Tap (IntelliJ "Search Everywhere") ────────
 

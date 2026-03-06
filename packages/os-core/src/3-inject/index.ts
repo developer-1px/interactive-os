@@ -47,11 +47,11 @@ export const DOM_EXPANDABLE_ITEMS = os.defineContext(
     if (entry.element) {
       const expandableIds = new Set<string>();
       const els = entry.element.querySelectorAll(
-        "[data-item-id][aria-expanded]",
+        "[data-item][aria-expanded]",
       );
       for (const el of els) {
         if (el.closest("[data-zone]") !== entry.element) continue;
-        const id = el.getAttribute("data-item-id");
+        const id = el.id;
         if (id) expandableIds.add(id);
       }
       return expandableIds;
@@ -80,10 +80,10 @@ export const DOM_TREE_LEVELS = os.defineContext(
     // Lazy fallback: DOM scan via bound element
     if (entry.element) {
       const levels = new Map<string, number>();
-      const els = entry.element.querySelectorAll("[data-item-id]");
+      const els = entry.element.querySelectorAll("[data-item]");
       for (const el of els) {
         if (el.closest("[data-zone]") !== entry.element) continue;
-        const id = el.getAttribute("data-item-id");
+        const id = el.id;
         if (id) {
           const levelStr = el.getAttribute("aria-level");
           levels.set(id, levelStr ? parseInt(levelStr, 10) : 1);
@@ -125,11 +125,11 @@ export const DOM_RECTS = os.defineContext(
     if (!entry?.element) return new Map();
 
     const rects = new Map<string, DOMRect>();
-    const els = entry.element.querySelectorAll("[data-item-id]");
+    const els = entry.element.querySelectorAll("[data-item]");
     for (const el of els) {
       // Only include items that DIRECTLY belong to this zone
       if (el.closest("[data-zone]") !== entry.element) continue;
-      const id = el.getAttribute("data-item-id");
+      const id = el.id;
       if (id) rects.set(id, el.getBoundingClientRect());
     }
 

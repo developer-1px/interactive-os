@@ -24,7 +24,9 @@
  *   - tab: escape (Tab exits tablist)
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { OS_SELECT } from "@os-core/4-command/selection/select";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertHomeEnd,
@@ -37,34 +39,40 @@ import {
 
 const TABS = ["tab-html", "tab-css", "tab-js"];
 
+const TABS_CONFIG = {
+  navigate: {
+    orientation: "horizontal" as const,
+    loop: true,
+    seamless: false,
+    typeahead: false,
+    entry: "selected" as const,
+    recovery: "next" as const,
+  },
+  activate: {
+    mode: "automatic" as const,
+    onClick: true,
+  },
+  select: {
+    mode: "single" as const,
+    followFocus: true,
+    disallowEmpty: true,
+    range: false,
+    toggle: false,
+  },
+};
+
 function tabFactory(focusedTab = "tab-html") {
-  const page = createOsPage();
-  page.setItems(TABS);
-  page.setRole("tablist-zone", "tablist");
-  page.setConfig({
-    navigate: {
-      orientation: "horizontal",
-      loop: true,
-      seamless: false,
-      typeahead: false,
-      entry: "selected",
-      recovery: "next",
-    },
-    activate: {
-      mode: "automatic",
-      onClick: true,
-    },
-    select: {
-      mode: "single",
-      followFocus: true,
-      disallowEmpty: true,
-      range: false,
-      toggle: false,
-    },
+  const app = defineApp("test-tabs", {});
+  const zone = app.createZone("tablist-zone");
+  zone.bind({
+    role: "tablist",
+    getItems: () => TABS,
+    options: TABS_CONFIG,
   });
-  page.setActiveZone("tablist-zone", focusedTab);
+  const page = createPage(app);
+  page.goto("tablist-zone", { focusedItemId: focusedTab });
   // Auto-activation: pre-select the initially focused tab
-  page.dispatch(page.OS_SELECT({ targetId: focusedTab, mode: "replace" }));
+  page.dispatch(OS_SELECT({ targetId: focusedTab, mode: "replace" }));
   return page;
 }
 
@@ -78,32 +86,29 @@ function tabFactoryAtFirst() {
 
 // ─── Manual-activation variant ───
 function manualTabFactory(focusedTab = "tab-html") {
-  const page = createOsPage();
-  page.setItems(TABS);
-  page.setRole("tablist-zone", "tablist");
-  page.setConfig({
-    navigate: {
-      orientation: "horizontal",
-      loop: true,
-      seamless: false,
-      typeahead: false,
-      entry: "selected",
-      recovery: "next",
-    },
-    activate: {
-      mode: "manual",
-      onClick: true,
-    },
-    select: {
-      mode: "single",
-      followFocus: false,
-      disallowEmpty: true,
-      range: false,
-      toggle: false,
+  const app = defineApp("test-tabs-manual", {});
+  const zone = app.createZone("tablist-zone");
+  zone.bind({
+    role: "tablist",
+    getItems: () => TABS,
+    options: {
+      ...TABS_CONFIG,
+      activate: {
+        mode: "manual" as const,
+        onClick: true,
+      },
+      select: {
+        mode: "single" as const,
+        followFocus: false,
+        disallowEmpty: true,
+        range: false,
+        toggle: false,
+      },
     },
   });
-  page.setActiveZone("tablist-zone", focusedTab);
-  page.dispatch(page.OS_SELECT({ targetId: focusedTab, mode: "replace" }));
+  const page = createPage(app);
+  page.goto("tablist-zone", { focusedItemId: focusedTab });
+  page.dispatch(OS_SELECT({ targetId: focusedTab, mode: "replace" }));
   return page;
 }
 
@@ -112,17 +117,17 @@ function manualTabFactory(focusedTab = "tab-html") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Tabs: Navigation", () => {
-  assertHorizontalNav(tabFactory);
+  assertHorizontalNav(tabFactory as any);
   assertLoop({
     firstId: "tab-html",
     lastId: "tab-js",
     axis: "horizontal",
-    factoryAtLast: tabFactoryAtLast,
-    factoryAtFirst: tabFactoryAtFirst,
+    factoryAtLast: tabFactoryAtLast as any,
+    factoryAtFirst: tabFactoryAtFirst as any,
   });
-  assertHomeEnd(tabFactory, { firstId: "tab-html", lastId: "tab-js" });
+  assertHomeEnd(tabFactory as any, { firstId: "tab-html", lastId: "tab-js" });
   // W3C APG: only horizontal arrow keys apply to tablist
-  assertOrthogonalIgnored(tabFactory, "horizontal");
+  assertOrthogonalIgnored(tabFactory as any, "horizontal");
 });
 
 // ═══════════════════════════════════════════════════

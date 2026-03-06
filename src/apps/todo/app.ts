@@ -24,14 +24,14 @@ import {
   selectTodosByCategory,
   selectVisibleTodos,
 } from "@apps/todo/selectors";
-import { OS_FIELD_START_EDIT } from "@os-core/4-command/field/field";
+import { OS_FIELD_START_EDIT } from "@os-sdk/os";
 import {
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
-} from "@os-core/4-command/overlay/overlay";
-import { OS_SELECTION_CLEAR } from "@os-core/4-command/selection/selection";
-import { OS_NOTIFY } from "@os-core/4-command/toast/toast";
-import { os } from "@os-core/engine/kernel";
+} from "@os-sdk/os";
+import { OS_CHECK, OS_SELECTION_CLEAR } from "@os-sdk/os";
+import { OS_NOTIFY } from "@os-sdk/os";
+import { os } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { history } from "@os-sdk/app/modules/history";
 import { produce } from "immer";
@@ -155,10 +155,10 @@ export const requestDeleteTodo = listCollection.command(
       payload.ids.includes(id),
     )
       ? [
-          // Close first to clear any stale overlay from HMR or interrupted flow
-          OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
-          OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
-        ]
+        // Close first to clear any stale overlay from HMR or interrupted flow
+        OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+        OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
+      ]
       : undefined,
   }),
 );
@@ -253,7 +253,11 @@ const reorderTodo = listCollection.command(
 
 export const TodoListUI = listCollection.bind({
   role: "listbox",
-  options: { dismiss: { escape: "deselect" } },
+  options: {
+    dismiss: { escape: "deselect" },
+    select: { mode: "multiple", range: true, toggle: true, followFocus: false },
+    inputmap: { Space: [OS_CHECK()] },
+  },
   onCheck: (cursor) => toggleTodo({ id: cursor.focusId }),
   onAction: (cursor) => startEdit({ id: cursor.focusId }),
   ...listBindings,
@@ -263,7 +267,6 @@ export const TodoListUI = listCollection.bind({
     }),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
-  keybindings: [...listBindings.keybindings],
   onReorder: (info) => {
     os.dispatch(reorderTodo(info));
   },
@@ -411,7 +414,7 @@ export const toggleView = toolbarZone.command("toggleView", (ctx) => ({
   state: produce(ctx.state, (draft) => {
     draft.ui.viewMode = ctx.state.ui.viewMode === "board" ? "list" : "board";
   }),
-}));
+}), { key: "Meta+Shift+V" });
 
 export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => {
   const completedIds = Object.values(ctx.state.data.todos)
@@ -436,7 +439,6 @@ export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => {
 
 export const TodoToolbarUI = toolbarZone.bind({
   role: "toolbar",
-  keybindings: [{ key: "Meta+Shift+V", command: () => toggleView() }],
 });
 
 // ═══════════════════════════════════════════════════════════════════

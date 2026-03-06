@@ -255,7 +255,7 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
     const el = createScrollContainer();
     addHeading(el, 1, 100);
 
-    // Create a zone element in DOM but with no [data-item-id] children
+    // Create a zone element in DOM but with no [data-item] children
     const zoneEl = document.createElement("div");
     zoneEl.id = "empty-zone";
     zoneEl.setAttribute("data-zone", "empty-zone");
@@ -282,7 +282,8 @@ describe("DOCS_SCROLL_PAGE (stale activeZoneId)", () => {
     zoneEl.id = "real-zone";
     zoneEl.setAttribute("data-zone", "real-zone");
     const item = document.createElement("div");
-    item.setAttribute("data-item-id", "item-1");
+    item.setAttribute("data-item", "");
+    item.id = "item-1";
     zoneEl.appendChild(item);
     document.body.appendChild(zoneEl);
 

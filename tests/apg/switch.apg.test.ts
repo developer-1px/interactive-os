@@ -14,7 +14,8 @@
  */
 
 import { OS_CHECK } from "@os-core/4-command/activate/check";
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───
@@ -22,13 +23,15 @@ import { describe, expect, it } from "vitest";
 const SWITCH_ID = "notifications-switch";
 
 function switchFactory() {
-  const page = createOsPage();
-  page.setItems([SWITCH_ID]);
-  page.setRole("switch-zone", "switch", {
-    // click → OS_ACTIVATE → onAction → OS_CHECK (built-in toggle)
+  const app = defineApp("test-switch", {});
+  const zone = app.createZone("switch-zone");
+  zone.bind({
+    role: "switch",
+    getItems: () => [SWITCH_ID],
     onAction: (cursor) => OS_CHECK({ targetId: cursor.focusId }),
   });
-  page.setActiveZone("switch-zone", SWITCH_ID);
+  const page = createPage(app);
+  page.goto("switch-zone", { focusedItemId: SWITCH_ID });
   return page;
 }
 

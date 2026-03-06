@@ -8,6 +8,7 @@
 import { readActiveZoneId } from "@os-core/3-inject/readState";
 import { computeContainerProps } from "@os-core/3-inject/zoneContext";
 import { getChildRole } from "@os-core/engine/registries/roleRegistry";
+import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { DEFAULT_CONFIG } from "@os-core/schema/types/focus/config/FocusGroupConfig";
 
@@ -80,8 +81,7 @@ export function computeItem(
     id: itemId,
     role: childRole,
     tabIndex: isFocused ? 0 : -1,
-    "data-focus-item": true,
-    "data-item-id": itemId,
+    "data-item": true,
     "data-focused": isActiveFocused || undefined,
     "data-anchor": isAnchor || undefined,
     "data-selected": isAriaSelected || undefined,
@@ -92,19 +92,24 @@ export function computeItem(
   // Config determines which aria-* keys to project.
   // Values come from items map (mutated by commands), default false.
   const selectMode = config?.select?.mode ?? "none";
-  if (selectMode !== "none") attrs["aria-selected"] = isAriaSelected;
+  const selectAria = config?.select?.aria ?? "selected";
+  if (selectMode !== "none") {
+    if (selectAria === "checked") {
+      attrs["aria-checked"] = isAriaSelected;
+    } else {
+      attrs["aria-selected"] = isAriaSelected;
+    }
+  }
 
   // Check/Press: derived from inputmap commands
-  const inputmapValues = config?.inputmap
-    ? Object.values(config.inputmap)
-    : [];
+  const inputmapValues = config?.inputmap ? Object.values(config.inputmap) : [];
   const hasCheckCmd = inputmapValues.some((cmds) =>
     cmds.some((c) => c.type === "OS_CHECK"),
   );
   const hasPressCmd = inputmapValues.some((cmds) =>
     cmds.some((c) => c.type === "OS_PRESS"),
   );
-  if (hasCheckCmd)
+  if (hasCheckCmd && selectAria !== "checked")
     attrs["aria-checked"] = ariaItemState["aria-checked"] ?? false;
   if (hasPressCmd)
     attrs["aria-pressed"] = ariaItemState["aria-pressed"] ?? false;
@@ -112,8 +117,14 @@ export function computeItem(
   // Expand: config-driven
   const expandMode = config?.expand?.mode ?? "none";
   if (expandMode !== "none") {
-    attrs["aria-expanded"] = isAriaExpanded;
-    attrs["aria-controls"] = `panel-${itemId}`;
+    // For "explicit" mode, only project aria-expanded on expandable items
+    const isExpandable =
+      expandMode === "all" ||
+      (entry?.getExpandableItems?.().has(itemId) ?? false);
+    if (isExpandable) {
+      attrs["aria-expanded"] = isAriaExpanded;
+      attrs["aria-controls"] = `panel-${itemId}`;
+    }
   }
 
   // ── Value attrs ──
@@ -129,6 +140,11 @@ export function computeItem(
 
   if (isActiveFocused) {
     attrs["aria-current"] = "true" as const;
+  }
+
+  // Editing state — projected for headless testing (toBeEditing)
+  if (z?.editingItemId === itemId) {
+    attrs["data-editing"] = true;
   }
 
   return {
@@ -196,7 +212,7 @@ export function computeTrigger(
   kernel: HeadlessKernel,
   triggerId: string,
 ): TriggerAttrs | null {
-  const meta = ZoneRegistry.getTriggerOverlay(triggerId);
+  const meta = TriggerOverlayRegistry.get(triggerId);
   if (!meta) return null;
 
   const s = kernel.getState();

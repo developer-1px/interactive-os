@@ -269,7 +269,7 @@ test.describe("Dogfooding: Keyboard-First Scenarios", () => {
     await page.keyboard.press("Meta+ArrowUp");
 
     // Verify Work is now first
-    const categories = page.locator(`${SIDEBAR} [data-item-id]`);
+    const categories = page.locator(`${SIDEBAR} [data-item]`);
     const texts = await categories.allTextContents();
     const workIdx = texts.findIndex((t) => t.includes("Work"));
     const inboxIdx = texts.findIndex((t) => t.includes("Inbox"));

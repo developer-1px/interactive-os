@@ -11,36 +11,34 @@
  * Full Path: page.keyboard.press / page.click → page.attrs()["aria-selected"]
  */
 
-import { createOsPage, type OsPage } from "@os-devtool/testing/page";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
+import { describe, expect, it } from "vitest";
 
 const ZONE_ID = "tablist-test";
 
 describe("tab-state: tablist activate → aria-selected", () => {
-  let page: OsPage;
-
-  beforeEach(() => {
-    page = createOsPage();
-    page.goto(ZONE_ID, {
-      items: ["tab-0", "tab-1", "tab-2"],
+  function createTabPage() {
+    const app = defineApp("test-tab-state", {});
+    const zone = app.createZone(ZONE_ID);
+    zone.bind({
       role: "tablist",
+      getItems: () => ["tab-0", "tab-1", "tab-2"],
     });
-  });
-
-  afterEach(() => {
-    page.cleanup();
-  });
-
-  // ── 1차 분기: Zone=tablist, 물리 입력 → 의도 ──
-  // ── 2차 분기: 없음 (OS가 전부 처리) ──
+    const page = createPage(app);
+    page.goto(ZONE_ID, { focusedItemId: "tab-0" });
+    return page;
+  }
 
   it("#1 첫 번째 탭이 기본 aria-selected=true", () => {
+    const page = createTabPage();
     expect(page.attrs("tab-0")["aria-selected"]).toBe(true);
     expect(page.attrs("tab-1")["aria-selected"]).toBe(false);
     expect(page.attrs("tab-2")["aria-selected"]).toBe(false);
   });
 
   it("#2 ArrowRight → 포커스 이동, aria-selected 변경 없음 (manual activation)", () => {
+    const page = createTabPage();
     page.keyboard.press("ArrowRight");
 
     expect(page.focusedItemId()).toBe("tab-1");
@@ -51,6 +49,7 @@ describe("tab-state: tablist activate → aria-selected", () => {
   });
 
   it("#3 ArrowRight → Enter → 해당 탭 활성화", () => {
+    const page = createTabPage();
     page.keyboard.press("ArrowRight");
 
     expect(page.attrs("tab-0")["aria-selected"]).toBe(false);
@@ -58,6 +57,7 @@ describe("tab-state: tablist activate → aria-selected", () => {
   });
 
   it("#4 Click → 해당 탭 aria-selected=true", () => {
+    const page = createTabPage();
     page.click("tab-2");
 
     expect(page.attrs("tab-0")["aria-selected"]).toBe(false);
@@ -65,6 +65,7 @@ describe("tab-state: tablist activate → aria-selected", () => {
   });
 
   it("#5 연속 이동 → 마지막 탭만 selected (단일 선택)", () => {
+    const page = createTabPage();
     // tab-0 selected → ArrowRight × 2 → tab-2 selected (followFocus)
     page.keyboard.press("ArrowRight");
     page.keyboard.press("ArrowRight");
@@ -75,6 +76,7 @@ describe("tab-state: tablist activate → aria-selected", () => {
   });
 
   it("#6 ArrowRight wraps: tab-2 → tab-0", () => {
+    const page = createTabPage();
     page.keyboard.press("ArrowRight"); // → tab-1
     page.keyboard.press("ArrowRight"); // → tab-2
     page.keyboard.press("ArrowRight"); // → tab-0 (wrap)

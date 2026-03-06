@@ -7,7 +7,7 @@
  * ⚠️ Single page instance per file (kernel singleton constraint).
  * ⚠️ Unique zone IDs per test (cleanup stale state).
  *
- * Ref: docs/official/os/APG_MATRIX.md
+ * Ref: docs/2-area/official/os/APG_MATRIX.md
  */
 import { createHeadlessPage } from "@os-devtool/testing/createHeadlessPage";
 import { afterEach, describe, it } from "vitest";

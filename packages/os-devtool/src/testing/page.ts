@@ -8,7 +8,6 @@
  * "Same test code, different runtime."
  */
 
-import type { Transaction } from "@kernel/core/transaction";
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import {
   computeAttrs,
@@ -17,9 +16,11 @@ import {
   resolveElement,
 } from "@os-core/3-inject/compute";
 import type { ElementAttrs, ItemAttrs } from "@os-core/3-inject/headless.types";
-import { simulateClick, simulateKeyPress } from "@os-core/3-inject/simulate";
+import { simulateClick, simulateKeyPress } from "./simulate";
 import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
 import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
+import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
+import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { ensureZone } from "@os-core/schema/state/utils";
 import {
@@ -39,218 +40,23 @@ import { renderToString } from "react-dom/server";
 import "@os-core/2-resolve/osDefaults";
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type { AppPage, ZoneBindingEntry } from "@os-sdk/app/defineApp/types";
 
-// ═══════════════════════════════════════════════════════════════════
-// formatDiagnostics — Pure diagnostic formatter
-// ═══════════════════════════════════════════════════════════════════
+import { formatDiagnostics } from "./diagnostics";
 
-/** Minimal kernel interface for formatDiagnostics (structural typing) */
-interface DiagnosticKernel {
-  inspector: {
-    getTransactions(): readonly Transaction[];
-  };
-  getState(): AppState;
-}
+export { formatDiagnostics } from "./diagnostics";
 
-/**
- * Pure formatter: returns a human-readable diagnostic string.
- * No side effects — just reads transactions + zone state.
- *
- * Rules:
- * 1. Filter by last tx's changes paths (Δ none → last 5)
- * 2. ⚠️ Δ none = command executed, state unchanged (strongest signal)
- * 3. Zone snapshot = items count + focusedItemId + selection
- * 4. Target ≤ 15 lines
- */
-export function formatDiagnostics(kernel: DiagnosticKernel): string {
-  const txs = kernel.inspector.getTransactions();
-  const state = kernel.getState();
-  const lines: string[] = [];
-
-  lines.push("═══ OS Diagnostic ═══");
-
-  if (txs.length === 0) {
-    lines.push("(no transactions)");
-    lines.push("═══════════════════════");
-    return lines.join("\n");
-  }
-
-  const lastTx = txs[txs.length - 1];
-  const lastHasNoChanges = lastTx.changes.length === 0;
-
-  // Last: header
-  lines.push(
-    `Last: ${lastTx.command.type}${lastHasNoChanges ? " ⚠️ Δ none" : ""}`,
-  );
-  lines.push("");
-
-  // Filter relevant transactions
-  let relevantTxs: readonly Transaction[];
-  if (lastHasNoChanges) {
-    relevantTxs = txs.slice(-5);
-  } else {
-    const lastPrefixes = new Set(
-      lastTx.changes.map((c) => c.path.split(".").slice(0, 3).join(".")),
-    );
-    relevantTxs = txs.filter((tx) => {
-      if (tx.changes.length === 0) return true;
-      return tx.changes.some((c) => {
-        const prefix = c.path.split(".").slice(0, 3).join(".");
-        return lastPrefixes.has(prefix);
-      });
-    });
-  }
-
-  // Transaction listing
-  for (const tx of relevantTxs) {
-    const noChanges = tx.changes.length === 0;
-    lines.push(`  #${tx.id} ${tx.command.type}${noChanges ? " ⚠️ Δ none" : ""}`);
-    if (!noChanges) {
-      for (const change of tx.changes) {
-        lines.push(
-          `    Δ ${change.path}: ${JSON.stringify(change.from)} → ${JSON.stringify(change.to)}`,
-        );
-      }
-    }
-  }
-
-  // Zone snapshot
-  const activeZoneId = state.os.focus.activeZoneId;
-  if (activeZoneId) {
-    const zone = state.os.focus.zones[activeZoneId];
-    if (zone) {
-      const entry = ZoneRegistry.get(activeZoneId);
-      const items = entry?.getItems?.() ?? [];
-      const sel = Object.entries(zone.items ?? {})
-        .filter(([, s]) => s?.["aria-selected"])
-        .map(([id]) => `"${id}"`)
-        .join(", ");
-      lines.push("");
-      lines.push(
-        `Zone "${activeZoneId}": items=${items.length}, focused="${zone.focusedItemId ?? ""}", selection=[${sel}]`,
-      );
-    }
-  }
-
-  lines.push("═══════════════════════");
-  return lines.join("\n");
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// OsPage Interface (Headless OS Simulator)
-// ═══════════════════════════════════════════════════════════════════
-
-export interface GotoOptions {
-  items?: string[];
-  role?: ZoneRole;
-  config?: Partial<FocusGroupConfig>;
-  focusedItemId?: string | null;
-  onAction?: ZoneCallback;
-  onCheck?: ZoneCallback;
-  onDelete?: ZoneCallback;
-  /** Declarative initial state — applied at ZoneState creation, no command needed. */
-  initial?: { selection?: string[]; expanded?: string[] };
-}
-
-export interface OsLocator {
-  getAttribute(name: string): string | number | boolean | undefined;
-  click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
-  toHaveAttribute(name: string, value: string | boolean): boolean;
-  toBeFocused(): boolean;
-  readonly attrs: ElementAttrs;
-}
-
-export interface OsPage {
-  keyboard: { press(key: string): void };
-  click(
-    itemId: string,
-    opts?: { shift?: boolean; meta?: boolean; ctrl?: boolean; zoneId?: string },
-  ): void;
-  attrs(itemId: string, zoneId?: string): ItemAttrs;
-  goto(zoneId: string, opts?: GotoOptions): void;
-  focusedItemId(zoneId?: string): string | null;
-  selection(zoneId?: string): string[];
-  activeZoneId(): string | null;
-  dispatch(
-    cmd: BaseCommand,
-    opts?: {
-      scope?: import("@kernel").ScopeToken[];
-      meta?: Record<string, unknown>;
-    },
-  ): void;
-  locator(elementId: string): OsLocator;
-  cleanup(): void;
-  dumpDiagnostics(): void;
-
-  setItems(items: string[]): void;
-  setRects(rects: Map<string, DOMRect>): void;
-  setGrid(opts: {
-    cols: number;
-    itemWidth?: number;
-    itemHeight?: number;
-    gap?: number;
-  }): void;
-  setConfig(config: Partial<FocusGroupConfig>): void;
-  setRole(
-    zoneId: string,
-    role: ZoneRole,
-    opts?: {
-      onAction?: ZoneCallback;
-      onCheck?: ZoneCallback;
-      onDelete?: ZoneCallback;
-    },
-  ): void;
-  setExpandableItems(items: string[] | Set<string>): void;
-  setTreeLevels(levels: Record<string, number> | Map<string, number>): void;
-  setValueNow(itemId: string, value: number): void;
-  setActiveZone(zoneId: string, focusedItemId: string | null): void;
-  initZone(
-    zoneId: string,
-    opts?: Partial<{
-      focusedItemId: string;
-      lastFocusedId: string;
-      selection: string[];
-      parentId: string | null;
-    }>,
-  ): void;
-  zone(
-    zoneId?: string,
-  ): import("@os-core/schema/state/OSState").ZoneState | undefined;
-  state(): AppState;
-  setZoneOrder(
-    zones: {
-      zoneId: string;
-      firstItemId: string | null;
-      lastItemId: string | null;
-      entry: import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry;
-      selectedItemId: string | null;
-      lastFocusedId: string | null;
-    }[],
-  ): void;
-
-  readonly kernel: ReturnType<typeof import("@kernel").createKernel<AppState>>;
-
-  OS_FOCUS: typeof import("@os-core/4-command/focus/focus").OS_FOCUS;
-  OS_SYNC_FOCUS: typeof import("@os-core/4-command/focus/syncFocus").OS_SYNC_FOCUS;
-  OS_SELECT: typeof import("@os-core/4-command/selection/select").OS_SELECT;
-  OS_NAVIGATE: typeof import("@os-core/4-command/navigate").OS_NAVIGATE;
-  OS_TAB: typeof import("@os-core/4-command/tab/tab").OS_TAB;
-  OS_ESCAPE: typeof import("@os-core/4-command/dismiss/escape").OS_ESCAPE;
-  OS_SELECTION_CLEAR: typeof import("@os-core/4-command/selection/selection").OS_SELECTION_CLEAR;
-  OS_STACK_PUSH: typeof import("@os-core/4-command/focus/stack").OS_STACK_PUSH;
-  OS_STACK_POP: typeof import("@os-core/4-command/focus/stack").OS_STACK_POP;
-  OS_EXPAND: typeof import("@os-core/4-command/expand/index").OS_EXPAND;
-  OS_FIELD_START_EDIT: typeof import("@os-core/4-command/field/field").OS_FIELD_START_EDIT;
-  OS_ACTIVATE: typeof import("@os-core/4-command/activate/activate").OS_ACTIVATE;
-  OS_CHECK: typeof import("@os-core/4-command").OS_CHECK;
-  OS_DELETE: typeof import("@os-core/4-command/crud/delete").OS_DELETE;
-  OS_VALUE_CHANGE: typeof import("@os-core/4-command/valueChange").OS_VALUE_CHANGE;
-}
+export {
+  createOsPage,
+  type GotoOptions,
+  type OsLocator,
+  type OsPage,
+  type ZoneOrderEntry,
+} from "./createOsPage";
+import type { ZoneOrderEntry } from "./createOsPage";
 
 // ═══════════════════════════════════════════════════════════════════
 // createAppPage — Preview-based, ~50 lines of logic
@@ -259,10 +65,33 @@ export interface OsPage {
 export function createAppPage<S>(
   appId: string,
   zoneBindingEntries: Map<string, ZoneBindingEntry>,
-  Component?: FC,
+  Component: FC | null,
+  appKeybindings?: readonly { key: string; command: BaseCommand; when?: "editing" | "navigating" }[],
 ): AppPage<S> {
+  // Clear global registries for test isolation
+  ZoneRegistry.clearAll();
+
+  // Reset preview layer — exit first, then re-enter from base kernel state.
+  // Base state includes app slices from defineApp (registered at import time).
+  // Without this, cleanup()'s enterPreview(initialAppState) wipes app state.
+  if (os.isPreviewing()) os.exitPreview();
+
   /** Track keybinding unregister so cleanup() works correctly */
   let unregisterKeybindings: (() => void) | null = null;
+
+  /** Track app-level keybinding unregister */
+  let unregisterAppKeybindings: (() => void) | null = null;
+
+  // Register app-level keybindings immediately (mirrors production module-load behavior)
+  if (appKeybindings && appKeybindings.length > 0) {
+    unregisterAppKeybindings = Keybindings.registerAll(
+      appKeybindings.map((kb) => ({
+        key: kb.key,
+        command: kb.command,
+        when: kb.when,
+      })),
+    );
+  }
 
   // Override DOM contexts for headless (no DOM, no React)
   os.defineContext("dom-items", () => {
@@ -278,8 +107,18 @@ export function createAppPage<S>(
     return [];
   });
   os.defineContext("dom-rects", () => new Map<string, DOMRect>());
-  os.defineContext("dom-expandable-items", () => new Set<string>());
-  os.defineContext("dom-tree-levels", () => new Map<string, number>());
+  os.defineContext("dom-expandable-items", () => {
+    const zoneId = os.getState().os.focus.activeZoneId;
+    const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
+    if (entry?.getExpandableItems) return entry.getExpandableItems();
+    return new Set<string>();
+  });
+  os.defineContext("dom-tree-levels", () => {
+    const zoneId = os.getState().os.focus.activeZoneId;
+    const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
+    if (entry?.getTreeLevels) return entry.getTreeLevels();
+    return new Map<string, number>();
+  });
   os.defineContext("zone-config", () => {
     const zoneId = os.getState().os.focus.activeZoneId;
     const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
@@ -341,6 +180,7 @@ export function createAppPage<S>(
     opts?: {
       focusedItemId?: string | null;
       config?: Partial<FocusGroupConfig>;
+      initial?: { selection?: string[]; expanded?: string[] };
     },
   ) {
     // Use zoneName directly — matches FocusGroup's id in React.
@@ -387,7 +227,7 @@ export function createAppPage<S>(
           });
           // Register trigger→overlay relationship for headless ARIA
           if (trigger.overlay) {
-            ZoneRegistry.setTriggerOverlay(
+            TriggerOverlayRegistry.set(
               trigger.id,
               trigger.overlay.id,
               trigger.overlay.type,
@@ -434,12 +274,60 @@ export function createAppPage<S>(
 
     // Set active zone + focused item via setState on preview layer
     const focusedId = opts?.focusedItemId ?? null;
+
+    // Resolve zone config for initial state logic
+    const zoneEntry = ZoneRegistry.get(zoneName);
+    const zoneConfig = zoneEntry?.config;
+    const items = zoneEntry?.getItems?.() ?? [];
+
+    // Determine initial selection:
+    // (1) explicit initial.selection, (2) followFocus, (3) disallowEmpty fallback
+    let initialSelection: string[] | undefined;
+    if (opts?.initial?.selection) {
+      initialSelection = opts.initial.selection;
+    } else if (focusedId && zoneConfig?.select?.followFocus) {
+      initialSelection = [focusedId];
+    } else if (zoneConfig?.select?.disallowEmpty && items.length > 0) {
+      initialSelection = [items[0]];
+    }
+
     os.setState((s: AppState) =>
       produce(s, (draft) => {
         draft.os.focus.activeZoneId = zoneName;
         const z = ensureZone(draft.os, zoneName);
         z.focusedItemId = focusedId;
         if (focusedId) z.lastFocusedId = focusedId;
+
+        // Apply initial selection
+        if (initialSelection) {
+          const selectMode = zoneConfig?.select?.mode ?? "none";
+          const inputmapValues = zoneConfig?.inputmap
+            ? Object.values(zoneConfig.inputmap)
+            : [];
+          const hasCheckCmd = inputmapValues.some((cmds: unknown[]) =>
+            cmds.some(
+              (c: unknown) => (c as { type: string }).type === "OS_CHECK",
+            ),
+          );
+          for (const id of initialSelection) {
+            if (!z.items[id]) z.items[id] = {};
+            if (hasCheckCmd) {
+              z.items[id] = { ...z.items[id], "aria-checked": true };
+            }
+            if (selectMode !== "none") {
+              z.items[id] = { ...z.items[id], "aria-selected": true };
+            }
+          }
+          z.selectionAnchor = initialSelection[0] ?? null;
+        }
+
+        // Apply initial expanded state
+        if (opts?.initial?.expanded) {
+          for (const id of opts.initial.expanded) {
+            if (!z.items[id]) z.items[id] = {};
+            z.items[id] = { ...z.items[id], "aria-expanded": true };
+          }
+        }
       }),
     );
   }
@@ -474,13 +362,20 @@ export function createAppPage<S>(
       return readFocusedItemId(os, zoneId);
     },
     selection(zoneId?: string) {
-      return Object.entries(
-        os.getState().os.focus.zones[
-          zoneId ?? os.getState().os.focus.activeZoneId ?? ""
-        ]?.items ?? {},
+      const zId = zoneId ?? os.getState().os.focus.activeZoneId ?? "";
+      const selected = Object.entries(
+        os.getState().os.focus.zones[zId]?.items ?? {},
       )
-        .filter(([, s]) => s?.["aria-selected"])
+        .filter(([, s]) => s?.["aria-selected"] || s?.["aria-checked"])
         .map(([id]) => id);
+      // Sort by zone item list order (not map insertion order)
+      const entry = ZoneRegistry.get(zId);
+      const itemList = entry?.getItems?.() ?? [];
+      if (itemList.length > 0) {
+        const orderMap = new Map(itemList.map((id, i) => [id, i]));
+        selected.sort((a, b) => (orderMap.get(a) ?? 0) - (orderMap.get(b) ?? 0));
+      }
+      return selected;
     },
     activeZoneId() {
       return readActiveZoneId(os);
@@ -511,6 +406,10 @@ export function createAppPage<S>(
         unregisterKeybindings();
         unregisterKeybindings = null;
       }
+      if (unregisterAppKeybindings) {
+        unregisterAppKeybindings();
+        unregisterAppKeybindings = null;
+      }
       const zId = readActiveZoneId(os);
       if (zId) ZoneRegistry.unregister(zId);
       os.exitPreview();
@@ -525,25 +424,17 @@ export function createAppPage<S>(
     // ── Projection Checkpoint ──────────────────────────────────
 
     query(search: string): boolean {
-      if (!Component) {
-        throw new Error(
-          "query() requires a Component. Use createPage(MyComponent) to enable projection checkpoint.",
-        );
-      }
       const html = renderToString(createElement(Component));
       return html.includes(search);
     },
 
     html(): string {
-      if (!Component) {
-        throw new Error(
-          "html() requires a Component. Use createPage(MyComponent) to enable projection checkpoint.",
-        );
-      }
       return renderToString(createElement(Component));
     },
 
-    locator(elementId: string) {
+    locator(selector: string) {
+      // Strip # prefix if present (Playwright uses #id, we use bare id)
+      const elementId = selector.startsWith("#") ? selector.slice(1) : selector;
       return {
         get attrs() {
           return resolveElement(os, elementId);
@@ -565,6 +456,27 @@ export function createAppPage<S>(
         toBeFocused() {
           return readFocusedItemId(os) === elementId;
         },
+        toBeSelected() {
+          return resolveElement(os, elementId)["aria-selected"] === true;
+        },
+        toBeExpanded() {
+          return resolveElement(os, elementId)["aria-expanded"] === true;
+        },
+        toBeChecked() {
+          return resolveElement(os, elementId)["aria-checked"] === true;
+        },
+        toBePressed() {
+          return resolveElement(os, elementId)["aria-pressed"] === true;
+        },
+        toBeDisabled() {
+          return resolveElement(os, elementId)["aria-disabled"] === true;
+        },
+        toBeEditing() {
+          return resolveElement(os, elementId)["data-editing"] === true;
+        },
+        inputValue() {
+          return String(FieldRegistry.getValue(elementId) ?? "");
+        },
       };
     },
   };
@@ -572,499 +484,23 @@ export function createAppPage<S>(
 
 export type { ItemAttrs };
 
-import { OS_CHECK as prodCHECK } from "@os-core/4-command";
-import { OS_ACTIVATE as prodACTIVATE } from "@os-core/4-command/activate/activate";
-import { OS_DELETE as prodDELETE } from "@os-core/4-command/crud/delete";
-import { OS_ESCAPE as prodOS_ESCAPE } from "@os-core/4-command/dismiss/escape";
-import { OS_EXPAND as prodEXPAND } from "@os-core/4-command/expand/index";
-import { OS_FIELD_START_EDIT as prodFIELD_START_EDIT } from "@os-core/4-command/field/field";
-import { OS_FOCUS as prodOS_FOCUS } from "@os-core/4-command/focus/focus";
-import {
-  OS_STACK_POP as prodSTACK_POP,
-  OS_STACK_PUSH as prodSTACK_PUSH,
-} from "@os-core/4-command/focus/stack";
-import { OS_SYNC_FOCUS as prodSYNC_FOCUS } from "@os-core/4-command/focus/syncFocus";
-import { OS_NAVIGATE as prodNAVIGATE } from "@os-core/4-command/navigate";
-import { OS_SELECT as prodOS_SELECT } from "@os-core/4-command/selection/select";
-import { OS_SELECTION_CLEAR as prodSELECTION_CLEAR } from "@os-core/4-command/selection/selection";
-import { OS_TAB as prodOS_TAB } from "@os-core/4-command/tab/tab";
-import { OS_VALUE_CHANGE as prodVALUE_CHANGE } from "@os-core/4-command/valueChange";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
 
-/** Zone order entry — describes a zone's position and key items for tab navigation */
-export interface ZoneOrderEntry {
-  zoneId: string;
-  firstItemId: string | null;
-  lastItemId: string | null;
-  entry:
-  | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
-  | string;
-  selectedItemId: string | null;
-  lastFocusedId: string | null;
-}
-
-/**
- * OS-only isolated Test Runner (Drop-in replacement for createOsPage.ts)
- */
-export function createOsPage(overrides?: Partial<AppState>): OsPage {
-  // Use defineApp to create a generic blank app for scoping
-  const dummyApp = defineApp("__os_test_simulation__", {});
-
-  const basePage = createPage(dummyApp);
-  const os = basePage.kernel;
-
-  os.defineEffect("focus", () => { });
-  os.defineEffect("scroll", () => { });
-  const mockItems = { current: [] as string[] };
-  const mockRects = { current: new Map<string, DOMRect>() };
-  const mockConfig = { current: { ...DEFAULT_CONFIG } as FocusGroupConfig };
-  const mockExpandableItems = { current: new Set<string>() };
-  const mockTreeLevels = { current: new Map<string, number>() };
-  const mockZoneOrder = { current: [] as ZoneOrderEntry[] };
-
-  // ── Override Accessors (Mock priority) ──
-  os.defineContext("dom-items", () => {
-    const zoneId = os.getState().os.focus.activeZoneId;
-    const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
-    if (entry?.getItems) {
-      const items = entry.getItems();
-      return entry.itemFilter ? entry.itemFilter(items) : items;
-    }
-    const items = mockItems.current;
-    return entry?.itemFilter ? entry.itemFilter(items) : items;
-  });
-
-  os.defineContext("dom-rects", () => {
-    const zoneId = os.getState().os.focus.activeZoneId;
-    const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
-    const items =
-      entry?.getItems?.() ??
-      (entry?.itemFilter
-        ? entry.itemFilter(mockItems.current)
-        : mockItems.current);
-    const rects = mockRects.current;
-    if (rects.size > 0) return rects;
-    const auto = new Map<string, DOMRect>();
-    items.forEach((id, i) => {
-      auto.set(id, new DOMRect(0, i * 40, 200, 40));
-    });
-    return auto;
-  });
-
-  os.defineContext("zone-config", () => mockConfig.current);
-
-  os.defineContext("dom-expandable-items", () => {
-    const zoneId = os.getState().os.focus.activeZoneId;
-    const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
-    const expandMode = entry?.config?.expand?.mode ?? "none";
-    if (expandMode === "none") return new Set<string>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AllItems sentinel: expand mode "all" means every item is expandable
-    if (expandMode === "all")
-      return { has: () => true, size: Infinity } as unknown as Set<string>;
-    return entry?.getExpandableItems?.() ?? mockExpandableItems.current;
-  });
-
-  os.defineContext("dom-tree-levels", () => {
-    const zoneId = os.getState().os.focus.activeZoneId;
-    const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
-    return entry?.getTreeLevels?.() ?? mockTreeLevels.current;
-  });
-
-  os.defineContext("dom-zone-order", () => {
-    const registeredKeys = ZoneRegistry.orderedKeys();
-    if (registeredKeys.length > 0 && mockZoneOrder.current.length === 0) {
-      const state = os.getState();
-      return registeredKeys
-        .filter((zId) => ZoneRegistry.has(zId))
-        .map((zId) => {
-          const ze = ZoneRegistry.get(zId)!;
-          const items = ze.getItems?.() ?? mockItems.current;
-          const filtered = ze.itemFilter ? ze.itemFilter(items) : items;
-          const zoneState = state.os.focus.zones[zId];
-          return {
-            zoneId: zId,
-            firstItemId: filtered[0] ?? null,
-            lastItemId: filtered[filtered.length - 1] ?? null,
-            entry: (ze.config?.navigate?.entry ??
-              "first") as import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry,
-            selectedItemId: zoneState?.selection?.[0] ?? null,
-            lastFocusedId: zoneState?.lastFocusedId ?? null,
-          };
-        });
-    }
-    return mockZoneOrder.current;
-  });
-
-  // ── Preview invariant: all test state lives in preview layer ──
-  // enterPreview is idempotent — base kernel state never gets dirty.
-  // cleanup() re-enters with fresh state to reset.
-  os.enterPreview(initialAppState);
-
-  if (overrides) {
-    os.setState((s: AppState) => ({ ...s, ...overrides }));
-  }
-
-  const result: OsPage = {
-    ...basePage,
-
-    // Override state accessor
-    state() {
-      return os.getState();
-    },
-
-    // ── Mock Setters ──
-    setItems(items: string[]) {
-      mockItems.current = items;
-    },
-    setRects(rects: Map<string, DOMRect>) {
-      mockRects.current = rects;
-    },
-    setGrid(opts) {
-      const { cols, itemWidth = 100, itemHeight = 40, gap = 0 } = opts;
-      const rects = new Map<string, DOMRect>();
-      mockItems.current.forEach((id, i) => {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        rects.set(
-          id,
-          new DOMRect(
-            col * (itemWidth + gap),
-            row * (itemHeight + gap),
-            itemWidth,
-            itemHeight,
-          ),
-        );
-      });
-      mockRects.current = rects;
-    },
-    setConfig(config: Partial<FocusGroupConfig>) {
-      const base = mockConfig.current;
-      mockConfig.current = {
-        ...base,
-        ...config,
-        navigate: { ...base.navigate, ...config.navigate },
-        tab: { ...base.tab, ...config.tab },
-        select: { ...base.select, ...config.select },
-        dismiss: { ...base.dismiss, ...config.dismiss },
-        project: { ...base.project, ...config.project },
-        expand: { ...base.expand, ...config.expand },
-        value: { ...base.value, ...config.value },
-        inputmap: { ...base.inputmap, ...config.inputmap },
-      } as FocusGroupConfig;
-    },
-    setRole(zoneId, role, opts) {
-      const resolved = resolveRole(role);
-      mockConfig.current = resolved;
-      ZoneRegistry.register(zoneId, {
-        role,
-        config: resolved,
-        element: null,
-        parentId: null,
-        ...(opts?.onAction ? { onAction: opts.onAction } : {}),
-        ...(opts?.onCheck ? { onCheck: opts.onCheck } : {}),
-        ...(opts?.onDelete ? { onDelete: opts.onDelete } : {}),
-      });
-    },
-    setExpandableItems(items) {
-      const set = items instanceof Set ? items : new Set(items);
-      mockExpandableItems.current = set;
-      const zoneId = os.getState().os.focus.activeZoneId;
-      if (zoneId) {
-        const entry = ZoneRegistry.get(zoneId);
-        if (entry) {
-          ZoneRegistry.register(zoneId, {
-            ...entry,
-            getExpandableItems: () => set,
-          });
-        }
-      }
-    },
-    setTreeLevels(levels) {
-      mockTreeLevels.current =
-        levels instanceof Map ? levels : new Map(Object.entries(levels));
-    },
-    setValueNow(itemId, value) {
-      os.setState((s: AppState) =>
-        produce(s, (draft) => {
-          const zoneId = draft.os.focus.activeZoneId;
-          if (!zoneId) return;
-          const z = ensureZone(draft.os, zoneId);
-          z.valueNow[itemId] = value;
-        }),
-      );
-    },
-    setActiveZone(zoneId, focusedItemId) {
-      const existingEntry = ZoneRegistry.get(zoneId);
-      ZoneRegistry.register(zoneId, {
-        ...(existingEntry?.role ? { role: existingEntry.role } : {}),
-        config: mockConfig.current,
-        element: null,
-        parentId: null,
-        ...(existingEntry?.getItems
-          ? { getItems: existingEntry.getItems }
-          : { getItems: () => mockItems.current }),
-        ...(mockExpandableItems.current.size > 0
-          ? { getExpandableItems: () => mockExpandableItems.current }
-          : {}),
-        ...(existingEntry?.onAction
-          ? { onAction: existingEntry.onAction }
-          : {}),
-        ...(existingEntry?.onCheck ? { onCheck: existingEntry.onCheck } : {}),
-        ...(existingEntry?.onDelete
-          ? { onDelete: existingEntry.onDelete }
-          : {}),
-      });
-
-      os.setState((s: AppState) =>
-        produce(s, (draft) => {
-          draft.os.focus.activeZoneId = zoneId;
-
-          const z = ensureZone(draft.os, zoneId);
-          z.focusedItemId = focusedItemId;
-          if (focusedItemId) z.lastFocusedId = focusedItemId;
-        }),
-      );
-    },
-    initZone(zoneId, opts) {
-      os.setState((s: AppState) =>
-        produce(s, (draft) => {
-          const z = ensureZone(draft.os, zoneId);
-          if (opts?.focusedItemId) z.focusedItemId = opts.focusedItemId;
-          if (opts?.lastFocusedId) z.lastFocusedId = opts.lastFocusedId;
-          if (opts?.selection) {
-            for (const id of opts.selection) {
-              if (!z.items[id]) z.items[id] = {};
-              z.items[id] = { ...z.items[id], "aria-selected": true };
-            }
-          }
-        }),
-      );
-      if (opts?.parentId !== undefined) {
-        const existing = ZoneRegistry.get(zoneId);
-        if (existing) {
-          ZoneRegistry.register(zoneId, {
-            ...existing,
-            parentId: opts.parentId,
-          });
-        }
-      }
-    },
-    setZoneOrder(zones) {
-      mockZoneOrder.current = zones;
-    },
-    zone(zoneId) {
-      const id = zoneId ?? readActiveZoneId(os);
-      const z = id ? os.getState().os.focus.zones[id] : undefined;
-      if (!z) return undefined;
-      // Computed compatibility getters derived from items map
-      return Object.create(z, {
-        expandedItems: {
-          get() {
-            return Object.entries(z.items ?? {})
-              .filter(
-                ([, s]) => (s as Record<string, unknown>)?.["aria-expanded"],
-              )
-              .map(([itemId]) => itemId);
-          },
-          enumerable: true,
-        },
-        selection: {
-          get() {
-            return Object.entries(z.items ?? {})
-              .filter(
-                ([, s]) => (s as Record<string, unknown>)?.["aria-selected"],
-              )
-              .map(([itemId]) => itemId);
-          },
-          enumerable: true,
-        },
-      });
-    },
-    goto(zoneId: string, opts?: GotoOptions) {
-      if (opts?.items) mockItems.current = opts.items;
-
-      const role = opts?.role ?? ZoneRegistry.get(zoneId)?.role;
-      if (role) {
-        mockConfig.current = resolveRole(role);
-      }
-      if (opts?.config) {
-        const base = mockConfig.current;
-        mockConfig.current = {
-          ...base,
-          ...opts.config,
-          ...(opts.config.navigate
-            ? {
-              navigate: {
-                ...base.navigate,
-                ...opts.config.navigate,
-              } as import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateConfig,
-            }
-            : {}),
-          ...(opts.config.tab
-            ? { tab: { ...base.tab, ...opts.config.tab } as Partial<TabConfig> }
-            : {}),
-          ...(opts.config.select
-            ? {
-              select: {
-                ...base.select,
-                ...opts.config.select,
-              } as Partial<SelectConfig>,
-            }
-            : {}),
-          ...(opts.config.dismiss
-            ? {
-              dismiss: {
-                ...base.dismiss,
-                ...opts.config.dismiss,
-              } as Partial<DismissConfig>,
-            }
-            : {}),
-
-          ...(opts.config.expand
-            ? {
-              expand: {
-                ...base.expand,
-                ...opts.config.expand,
-              },
-            }
-            : {}),
-          ...(opts.config.value
-            ? {
-              value: {
-                ...base.value,
-                ...opts.config.value,
-              },
-            }
-            : {}),
-          ...(opts.config.inputmap
-            ? {
-              inputmap: {
-                ...base.inputmap,
-                ...opts.config.inputmap,
-              },
-            }
-            : {}),
-        } as FocusGroupConfig;
-      }
-      const entry = ZoneRegistry.get(zoneId);
-      ZoneRegistry.register(zoneId, {
-        ...(entry || {}),
-        ...(role ? { role } : {}),
-        config: mockConfig.current,
-        element: null,
-        parentId: null,
-        getItems: () => mockItems.current,
-        // Auto-provide getExpandableItems based on expand.mode
-        ...(mockConfig.current.expand?.mode === "explicit"
-          ? {
-            getExpandableItems: () =>
-              mockExpandableItems.current.size > 0
-                ? mockExpandableItems.current
-                : new Set(mockItems.current),
-          }
-          : {}),
-        ...(opts?.onAction ? { onAction: opts.onAction } : {}),
-      }); // Closing brace for ZoneRegistry.register
-
-      const focusedId =
-        opts?.focusedItemId !== undefined
-          ? opts.focusedItemId
-          : (opts?.items?.[0] ?? null);
-
-      let initialSelection: string[] | undefined;
-
-      // Priority: (1) explicit initial.selection, (2) followFocus, (3) disallowEmpty fallback
-      if (opts?.initial?.selection) {
-        initialSelection = opts.initial.selection;
-      } else if (focusedId && mockConfig.current.select?.followFocus) {
-        initialSelection = [focusedId];
-      } else if (
-        mockConfig.current.select?.disallowEmpty &&
-        opts?.items?.length
-      ) {
-        // disallowEmpty fallback: auto-select first item (replaces OS_INIT_SELECTION)
-        initialSelection = [opts.items[0]];
-      }
-
-      basePage.goto(zoneId, {
-        focusedItemId: focusedId ?? undefined,
-        config: mockConfig.current,
-      } as Parameters<typeof basePage.goto>[1]);
-
-      // Apply initial selection and expanded values (no seed needed —
-      // computeItem derives key existence from config directly)
-      if (initialSelection || opts?.initial?.expanded) {
-        const inputmapValues = mockConfig.current.inputmap
-          ? Object.values(mockConfig.current.inputmap)
-          : [];
-        const hasCheckCmd = inputmapValues.some((cmds) =>
-          cmds.some((c) => c.type === "OS_CHECK"),
-        );
-        const selectMode = mockConfig.current.select?.mode ?? "none";
-
-        os.setState((s: AppState) =>
-          produce(s, (draft) => {
-            const z = ensureZone(draft.os, zoneId);
-
-            // Apply initial selection (override default false → true)
-            if (initialSelection) {
-              for (const id of initialSelection!) {
-                if (!z.items[id]) z.items[id] = {};
-                if (hasCheckCmd) {
-                  z.items[id] = { ...z.items[id], "aria-checked": true };
-                }
-                if (selectMode !== "none") {
-                  z.items[id] = { ...z.items[id], "aria-selected": true };
-                }
-              }
-              z.selectionAnchor = initialSelection![0] ?? null;
-            }
-
-            // Apply initial expanded state (override default false → true)
-            if (opts?.initial?.expanded) {
-              for (const id of opts.initial!.expanded!) {
-                if (!z.items[id]) z.items[id] = {};
-                z.items[id] = { ...z.items[id], "aria-expanded": true };
-              }
-            }
-          }),
-        );
-      }
-    },
-
-    // Command Exports
-    kernel: os,
-    OS_FOCUS: os.register(prodOS_FOCUS),
-    OS_SYNC_FOCUS: os.register(prodSYNC_FOCUS),
-    OS_SELECT: os.register(prodOS_SELECT),
-    OS_NAVIGATE: os.register(prodNAVIGATE),
-    OS_TAB: os.register(prodOS_TAB),
-    OS_ESCAPE: os.register(prodOS_ESCAPE),
-    OS_SELECTION_CLEAR: os.register(prodSELECTION_CLEAR),
-    OS_STACK_PUSH: os.register(prodSTACK_PUSH),
-    OS_STACK_POP: os.register(prodSTACK_POP),
-    OS_EXPAND: os.register(prodEXPAND),
-    OS_FIELD_START_EDIT: os.register(prodFIELD_START_EDIT),
-    OS_ACTIVATE: os.register(prodACTIVATE),
-    OS_CHECK: os.register(prodCHECK),
-    OS_DELETE: os.register(prodDELETE),
-    OS_VALUE_CHANGE: os.register(prodVALUE_CHANGE),
-  };
-  return result;
-}
 
 /**
  * Create a Playwright Page-isomorphic headless integration test interface.
  *
  * Usage:
  *   import { createPage } from "@os-sdk/app/defineApp/page";
- *   const page = createPage(TodoApp);              // headless
  *   const page = createPage(TodoApp, ListView);    // headless + projection
+ *   const page = createPage(TodoApp);              // headless only (no UI)
+ *
+ * When Component is provided, locator() verifies elements exist in the
+ * rendered output. Without Component, locator() resolves from OS state only.
  *
  * createPage is an OS capability — it reads app data(appId, zone bindings)
  * from the AppHandle and sets up the headless test environment.
  */
 export function createPage<S>(app: AppHandle<S>, Component?: FC): AppPage<S> {
-  return createAppPage<S>(app.__appId, app.__zoneBindings, Component);
+  return createAppPage<S>(app.__appId, app.__zoneBindings, Component ?? (() => null), app.__appKeybindings);
 }

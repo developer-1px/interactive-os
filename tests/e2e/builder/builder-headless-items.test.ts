@@ -1,7 +1,7 @@
 /**
  * Builder headless-items — DOM_ITEMS via getItems() 검증.
  *
- * Scaffolding-level: createPage(BuilderApp) + goto("canvas") / goto("sidebar")
+ * Scaffolding-level: createPage(BuilderApp, BuilderPage) + goto("canvas") / goto("sidebar")
  * → getItems() 반환값 + ArrowDown navigate + focus 이동 확인.
  *
  * Builder는 tree 구조 (blocks + children) → headless에서
@@ -13,6 +13,7 @@
 
 import { BuilderApp } from "@apps/builder/app";
 import type { BuilderState } from "@apps/builder/model/appState";
+import { BuilderPage } from "@/pages/BuilderPage";
 import { createPage } from "@os-devtool/testing/page";
 import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -21,7 +22,7 @@ type Page = AppPage<BuilderState>;
 let page: Page;
 
 beforeEach(() => {
-  page = createPage(BuilderApp);
+  page = createPage(BuilderApp, BuilderPage);
 });
 
 afterEach(() => {

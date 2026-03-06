@@ -45,7 +45,7 @@ export const OS_NAVIGATE = os.defineCommand(
 
     // DOM_ITEMS provider decides the source:
     //   browser:        querySelectorAll (rendered truth)
-    //   headless+React: renderToString → parse data-item-id
+    //   headless+React: renderToString → parse id + data-item
     //   pure headless:  getItems() fallback
     const items: string[] = ctx.inject(DOM_ITEMS);
     const config = ctx.inject(ZONE_CONFIG);

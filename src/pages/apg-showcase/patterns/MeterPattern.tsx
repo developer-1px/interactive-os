@@ -21,8 +21,8 @@
  * ZIFT Classification: Field (readonly)
  */
 
-import { OS_VALUE_CHANGE } from "@os-core/4-command";
-import { os } from "@os-core/engine/kernel";
+import { OS_VALUE_CHANGE } from "@os-sdk/os";
+import { os } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
@@ -89,6 +89,9 @@ const MeterUI = meterZone.bind({
   role: "meter",
   options: {
     navigate: { orientation: "vertical" },
+    value: {
+      initial: Object.fromEntries(METERS.map((m) => [m.id, m.initial])),
+    },
   },
 });
 
@@ -182,19 +185,7 @@ function useSimulatedValues() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    // Initialize values
-    for (const meter of METERS) {
-      os.dispatch(
-        OS_VALUE_CHANGE({
-          action: "set",
-          value: meter.initial,
-          itemId: meter.id,
-          zoneId: "apg-meter-zone",
-        }),
-      );
-    }
-
-    // Simulate changing values every 3 seconds
+    // Simulate changing values every 3 seconds (app logic — not OS init)
     intervalRef.current = setInterval(() => {
       for (const meter of METERS) {
         const range = meter.max - meter.min;

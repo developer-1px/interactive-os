@@ -30,7 +30,7 @@ function resetState() {
 }
 
 /**
- * Create a real DOM element with data-item-id children,
+ * Create a real DOM element with data-item children,
  * so that DOM_ITEMS context provider can query them.
  */
 function createZoneElement(zoneId: string, items: string[]): HTMLElement {
@@ -38,7 +38,7 @@ function createZoneElement(zoneId: string, items: string[]): HTMLElement {
   container.setAttribute("data-zone", zoneId);
   for (const itemId of items) {
     const el = document.createElement("div");
-    el.setAttribute("data-item-id", itemId);
+    el.setAttribute("data-item", "");
     el.id = itemId;
     container.appendChild(el);
   }

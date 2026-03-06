@@ -17,7 +17,8 @@
  *         inputmap=[OS_PRESS()] for toggle.
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Toggle Button Setup ───
@@ -25,18 +26,21 @@ import { describe, expect, it } from "vitest";
 const TOGGLE_BUTTON_ID = "toggle-mute";
 
 function toggleButtonFactory() {
-  const page = createOsPage();
-  page.setItems([TOGGLE_BUTTON_ID]);
-  page.setRole("button-zone", "toolbar");
-  // Command type IS the ARIA declaration: OS_PRESS → aria-pressed
-  page.setConfig({
-    inputmap: {
-      Space: [{ type: "OS_PRESS" }],
-      Enter: [{ type: "OS_PRESS" }],
-      click: [{ type: "OS_PRESS" }],
-    },
+  const app = defineApp("test-button-toggle", {});
+  const zone = app.createZone("button-zone");
+  zone.bind({
+    role: "toolbar",
+    getItems: () => [TOGGLE_BUTTON_ID],
+    options: {
+      inputmap: {
+        Space: [{ type: "OS_PRESS" }],
+        Enter: [{ type: "OS_PRESS" }],
+        click: [{ type: "OS_PRESS" }],
+      },
+    } as any,
   });
-  page.setActiveZone("button-zone", TOGGLE_BUTTON_ID);
+  const page = createPage(app);
+  page.goto("button-zone", { focusedItemId: TOGGLE_BUTTON_ID });
   return page;
 }
 
@@ -55,23 +59,25 @@ let actionFired = false;
 
 function actionButtonFactory() {
   actionFired = false;
-  const page = createOsPage();
-  page.setItems([ACTION_BUTTON_ID]);
-  page.setRole("action-zone", "toolbar", {
+  const app = defineApp("test-button-action", {});
+  const zone = app.createZone("action-zone");
+  zone.bind({
+    role: "toolbar",
+    getItems: () => [ACTION_BUTTON_ID],
     onAction: () => {
       actionFired = true;
       return undefined;
     },
+    options: {
+      inputmap: {
+        Space: [{ type: "OS_ACTIVATE", payload: {} }],
+        Enter: [{ type: "OS_ACTIVATE", payload: {} }],
+        click: [{ type: "OS_ACTIVATE", payload: {} }],
+      },
+    } as any,
   });
-  // action.onClick: true so click dispatches OS_ACTIVATE → onAction
-  page.setConfig({
-    inputmap: {
-      Space: [{ type: "OS_ACTIVATE", payload: {} }],
-      Enter: [{ type: "OS_ACTIVATE", payload: {} }],
-      click: [{ type: "OS_ACTIVATE", payload: {} }],
-    },
-  });
-  page.setActiveZone("action-zone", ACTION_BUTTON_ID);
+  const page = createPage(app);
+  page.goto("action-zone", { focusedItemId: ACTION_BUTTON_ID });
   return page;
 }
 

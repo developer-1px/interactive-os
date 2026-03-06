@@ -1,5 +1,5 @@
 /**
- * T4: LocaleSwitcher Dropdown — createPage(BuilderApp) 통합 테스트
+ * T4: LocaleSwitcher Dropdown — createPage(BuilderApp, BuilderPage) 통합 테스트
  *
  * @spec (pending — dropdown-dismiss spec 필요)
  *
@@ -11,6 +11,7 @@
 
 import { BuilderApp } from "@apps/builder/app";
 import type { BuilderState } from "@apps/builder/model/appState";
+import { BuilderPage } from "@/pages/BuilderPage";
 import { OS_OVERLAY_CLOSE } from "@os-core/4-command/overlay/overlay";
 import { os } from "@os-core/engine/kernel";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
@@ -30,7 +31,7 @@ type Page = AppPage<BuilderState>;
 let page: Page;
 
 beforeEach(() => {
-  page = createPage(BuilderApp);
+  page = createPage(BuilderApp, BuilderPage);
 
   // Push model: goto("sidebar") auto-registers trigger callbacks
   // from sidebar.bind({ triggers: [...] }) — no manual setup needed!

@@ -110,7 +110,7 @@ describe("Dialog Focus Trap", () => {
     // Simulate what FocusGroup (after fix) does for dialog with autoFocus:
     // 1. STACK_PUSH — saves current zone for later restoration
     page.dispatch(OS_STACK_PUSH());
-    // 2. autoFocus finds no [data-focus-item] → dispatches OS_FOCUS(zoneId, null)
+    // 2. autoFocus finds no [data-item] → dispatches OS_FOCUS(zoneId, null)
     //    This is the fix: previously it did nothing when no item found
     page.dispatch(OS_FOCUS({ zoneId: "todo-delete-dialog", itemId: null }));
 

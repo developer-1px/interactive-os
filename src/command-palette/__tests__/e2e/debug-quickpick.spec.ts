@@ -25,7 +25,7 @@ test("debug quickpick zone state", async ({ page }) => {
     return Array.from(zones).map((z) => ({
       id: z.getAttribute("data-zone"),
       role: z.getAttribute("role"),
-      itemCount: z.querySelectorAll("[data-item-id]").length,
+      itemCount: z.querySelectorAll("[data-item]").length,
       ariaCurrent: z.getAttribute("aria-current"),
     }));
   });
@@ -41,7 +41,7 @@ test("debug quickpick zone state", async ({ page }) => {
     return Array.from(options)
       .slice(0, 5)
       .map((el) => ({
-        id: el.getAttribute("data-item-id") || el.id,
+        id: el.id,
         ariaSelected: el.getAttribute("aria-selected"),
         dataFocused: el.getAttribute("data-focused"),
         text: el.textContent?.substring(0, 30),

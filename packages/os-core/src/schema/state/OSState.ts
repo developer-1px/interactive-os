@@ -108,4 +108,6 @@ export interface ZoneState {
   // Value Slice (slider, spinbutton, separator)
   /** Per-item current values for value-axis widgets (itemId → number) */
   valueNow: Record<string, number>;
+  /** Per-item restore values for separator collapse/restore toggle (itemId → number) */
+  valueRestore: Record<string, number>;
 }

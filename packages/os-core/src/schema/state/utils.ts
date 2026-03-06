@@ -16,6 +16,7 @@ export function ensureZone(draft: OSState, zoneId: string): ZoneState {
       items: {},
       caretPositions: {},
       valueNow: {},
+      valueRestore: {},
     };
   }
   return draft.focus.zones[zoneId];

@@ -10,7 +10,9 @@
  * Unique: focus trap (Tab cycling), STACK restore, nested LIFO
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { assertEscapeClose, assertTabTrap } from "./helpers/contracts";
 
@@ -39,10 +41,14 @@ const DIALOG_CONFIG = {
 };
 
 function createDialog(focusedItem = "close-btn") {
-  const page = createOsPage();
-  page.setItems(DIALOG_ITEMS);
-  page.setConfig(DIALOG_CONFIG);
-  page.setActiveZone("dialog", focusedItem);
+  const app = defineApp("test-dialog", {});
+  const zone = app.createZone("dialog");
+  zone.bind({
+    getItems: () => DIALOG_ITEMS,
+    options: DIALOG_CONFIG,
+  });
+  const page = createPage(app);
+  page.goto("dialog", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -51,11 +57,11 @@ function createDialog(focusedItem = "close-btn") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Dialog: Focus Trap", () => {
-  assertTabTrap(createDialog, {
+  assertTabTrap(createDialog as any, {
     firstId: "close-btn",
     lastId: "save-btn",
-    factoryAtFirst: () => createDialog("close-btn"),
-    factoryAtLast: () => createDialog("save-btn"),
+    factoryAtFirst: (() => createDialog("close-btn")) as any,
+    factoryAtLast: (() => createDialog("save-btn")) as any,
   });
 
   it("Tab cycles through all elements without escaping", () => {
@@ -74,7 +80,7 @@ describe("APG Dialog: Focus Trap", () => {
 });
 
 describe("APG Dialog: Escape", () => {
-  assertEscapeClose(createDialog);
+  assertEscapeClose(createDialog as any);
 });
 
 // ═══════════════════════════════════════════════════
@@ -83,32 +89,38 @@ describe("APG Dialog: Escape", () => {
 
 describe("APG Dialog: Focus Restore", () => {
   it("on close, focus restores to invoker", () => {
-    const page = createOsPage();
-    page.setItems(["new-btn", "edit-btn", "delete-btn"]);
-    page.setActiveZone("toolbar", "edit-btn");
-    page.dispatch(page.OS_STACK_PUSH());
-    page.setItems(DIALOG_ITEMS);
-    page.setConfig(DIALOG_CONFIG);
-    page.setActiveZone("dialog", "close-btn");
+    const app = defineApp("test-dialog-restore", {});
+    const toolbar = app.createZone("toolbar");
+    toolbar.bind({ getItems: () => ["new-btn", "edit-btn", "delete-btn"] });
+    const dialog = app.createZone("dialog");
+    dialog.bind({ getItems: () => DIALOG_ITEMS, options: DIALOG_CONFIG });
+    const page = createPage(app);
+    page.goto("toolbar", { focusedItemId: "edit-btn" });
+    page.dispatch(OS_STACK_PUSH());
+    page.goto("dialog", { focusedItemId: "close-btn" });
     // Close dialog via stack pop (internal OS mechanism)
-    page.dispatch(page.OS_STACK_POP());
+    page.dispatch(OS_STACK_POP());
     expect(page.activeZoneId()).toBe("toolbar");
     expect(page.focusedItemId("toolbar")).toBe("edit-btn");
   });
 
   it("nested dialogs: LIFO focus restore", () => {
-    const page = createOsPage();
-    page.setItems(["btn-1"]);
-    page.setActiveZone("toolbar", "btn-1");
-    page.dispatch(page.OS_STACK_PUSH());
-    page.setItems(["d1-close", "d1-ok"]);
-    page.setActiveZone("dialog-1", "d1-close");
-    page.dispatch(page.OS_STACK_PUSH());
-    page.setItems(["d2-yes", "d2-no"]);
-    page.setActiveZone("dialog-2", "d2-yes");
-    page.dispatch(page.OS_STACK_POP());
+    const app = defineApp("test-dialog-nested", {});
+    const toolbar = app.createZone("toolbar");
+    toolbar.bind({ getItems: () => ["btn-1"] });
+    const d1 = app.createZone("dialog-1");
+    d1.bind({ getItems: () => ["d1-close", "d1-ok"] });
+    const d2 = app.createZone("dialog-2");
+    d2.bind({ getItems: () => ["d2-yes", "d2-no"] });
+    const page = createPage(app);
+    page.goto("toolbar", { focusedItemId: "btn-1" });
+    page.dispatch(OS_STACK_PUSH());
+    page.goto("dialog-1", { focusedItemId: "d1-close" });
+    page.dispatch(OS_STACK_PUSH());
+    page.goto("dialog-2", { focusedItemId: "d2-yes" });
+    page.dispatch(OS_STACK_POP());
     expect(page.activeZoneId()).toBe("dialog-1");
-    page.dispatch(page.OS_STACK_POP());
+    page.dispatch(OS_STACK_POP());
     expect(page.activeZoneId()).toBe("toolbar");
     expect(page.focusedItemId("toolbar")).toBe("btn-1");
   });

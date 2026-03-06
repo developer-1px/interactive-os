@@ -36,8 +36,8 @@ export interface ItemAttrs {
   "data-anchor"?: true | undefined;
   "data-selected"?: true | undefined;
   "data-expanded"?: true | undefined;
-  "data-focus-item"?: true;
-  "data-item-id"?: string;
+  "data-item"?: true;
+  "data-editing"?: true;
   hidden?: boolean;
 }
 

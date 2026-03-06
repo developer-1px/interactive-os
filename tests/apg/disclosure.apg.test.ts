@@ -18,7 +18,8 @@
  * Config: flow tab, manual activate with onClick, expand=all
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───
@@ -26,10 +27,14 @@ import { describe, expect, it } from "vitest";
 const DISCLOSURES = ["disc-faq-1", "disc-faq-2", "disc-faq-3"];
 
 function disclosureFactory(focusedItem = "disc-faq-1") {
-  const page = createOsPage();
-  page.setItems(DISCLOSURES);
-  page.setRole("disclosure-zone", "disclosure");
-  page.setActiveZone("disclosure-zone", focusedItem);
+  const app = defineApp("test-disclosure", {});
+  const zone = app.createZone("disclosure-zone");
+  zone.bind({
+    role: "disclosure",
+    getItems: () => DISCLOSURES,
+  });
+  const page = createPage(app);
+  page.goto("disclosure-zone", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -40,21 +45,21 @@ function disclosureFactory(focusedItem = "disc-faq-1") {
 describe("APG Disclosure: Toggle via Enter", () => {
   it("Enter on collapsed button: expands the content", () => {
     const t = disclosureFactory("disc-faq-1");
-    expect(t.zone()?.expandedItems).not.toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("Enter");
 
-    expect(t.zone()?.expandedItems).toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
   });
 
   it("Enter on expanded button: collapses the content", () => {
     const t = disclosureFactory("disc-faq-1");
     t.keyboard.press("Enter");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
 
     t.keyboard.press("Enter");
 
-    expect(t.zone()?.expandedItems).not.toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
   });
 });
 
@@ -65,21 +70,21 @@ describe("APG Disclosure: Toggle via Enter", () => {
 describe("APG Disclosure: Toggle via Space", () => {
   it("Space on collapsed button: expands the content", () => {
     const t = disclosureFactory("disc-faq-1");
-    expect(t.zone()?.expandedItems).not.toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("Space");
 
-    expect(t.zone()?.expandedItems).toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
   });
 
   it("Space on expanded button: collapses the content", () => {
     const t = disclosureFactory("disc-faq-1");
     t.keyboard.press("Space");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
 
     t.keyboard.press("Space");
 
-    expect(t.zone()?.expandedItems).not.toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
   });
 });
 
@@ -91,15 +96,15 @@ describe("APG Disclosure: Multiple independent sections", () => {
   it("multiple disclosures can be expanded independently", () => {
     const t = disclosureFactory("disc-faq-1");
     t.keyboard.press("Enter"); // expand faq-1
-    expect(t.zone()?.expandedItems).toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
 
     // Move to faq-2 via Tab (flow mode) and expand
     t.keyboard.press("Tab");
     expect(t.focusedItemId()).toBe("disc-faq-2");
     t.keyboard.press("Enter"); // expand faq-2
 
-    expect(t.zone()?.expandedItems).toContain("disc-faq-1");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-2");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
   });
 
   it("collapsing one does not affect others", () => {
@@ -108,16 +113,16 @@ describe("APG Disclosure: Multiple independent sections", () => {
     t.keyboard.press("Enter");
     t.keyboard.press("Tab");
     t.keyboard.press("Enter");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-1");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-2");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
 
     // Collapse faq-1
     t.keyboard.press("Shift+Tab");
     expect(t.focusedItemId()).toBe("disc-faq-1");
     t.keyboard.press("Enter");
 
-    expect(t.zone()?.expandedItems).not.toContain("disc-faq-1");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-2");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
   });
 });
 
@@ -146,13 +151,13 @@ describe("APG Disclosure: Tab navigation (flow mode)", () => {
 
   it("Tab does NOT toggle expand (only navigates)", () => {
     const t = disclosureFactory("disc-faq-1");
-    expect(t.zone()?.expandedItems).not.toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("Tab");
 
     // Tab should move focus, not toggle expand
     expect(t.focusedItemId()).toBe("disc-faq-2");
-    expect(t.zone()?.expandedItems).not.toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
   });
 });
 
@@ -207,16 +212,16 @@ describe("APG Disclosure: Click interaction", () => {
 
     t.click("disc-faq-2");
     expect(t.focusedItemId()).toBe("disc-faq-2");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-2");
+    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
   });
 
   it("click on expanded button: collapses it", () => {
     const t = disclosureFactory("disc-faq-1");
     t.click("disc-faq-1");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
 
     t.click("disc-faq-1");
-    expect(t.zone()?.expandedItems).not.toContain("disc-faq-1");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
   });
 
   it("click does not affect other disclosures", () => {
@@ -225,13 +230,13 @@ describe("APG Disclosure: Click interaction", () => {
     // Expand faq-1 and faq-2
     t.click("disc-faq-1");
     t.click("disc-faq-2");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-1");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-2");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
 
     // Collapse faq-1 only
     t.click("disc-faq-1");
-    expect(t.zone()?.expandedItems).not.toContain("disc-faq-1");
-    expect(t.zone()?.expandedItems).toContain("disc-faq-2");
+    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
   });
 });
 

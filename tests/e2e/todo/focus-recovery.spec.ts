@@ -44,7 +44,6 @@ test.describe
 
       const focusedId = await page.evaluate(
         () =>
-          document.activeElement?.getAttribute("data-item-id") ||
           document.activeElement?.id,
       );
       console.log("Focused ID after delete:", focusedId);

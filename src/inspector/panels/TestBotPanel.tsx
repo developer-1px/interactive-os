@@ -35,7 +35,7 @@ import {
   type SuiteState,
   TestBotApp,
 } from "@apps/testbot/app";
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import type { BrowserStep } from "@os-devtool/testing";
 import { TestBotRegistry } from "@os-devtool/testing";
 import { TESTBOT_MANIFEST } from "@/testing/testbot-manifest";
@@ -158,13 +158,12 @@ function SuiteDetails({
             data-testbot-step-result={
               passed ? "pass" : step.error ? "fail" : "pending"
             }
-            className={`group flex items-center pl-3 pr-2 py-1.5 transition-colors relative ${
-              isActive
+            className={`group flex items-center pl-3 pr-2 py-1.5 transition-colors relative ${isActive
                 ? "bg-blue-50/50"
                 : isPending
                   ? "opacity-50"
                   : "hover:bg-slate-50"
-            } ${isLast && !isPending && !isActive ? "animate-flash" : ""}`}
+              } ${isLast && !isPending && !isActive ? "animate-flash" : ""}`}
           >
             <div className="shrink-0 w-6 flex justify-center mr-2 pt-0.5">
               <StepIcon step={step} isActive={!!isActive} />
@@ -178,8 +177,7 @@ function SuiteDetails({
                   #{i + 1}
                 </span>
                 <span
-                  className={`font-extrabold tracking-tighter uppercase text-[10px] ${
-                    isActive
+                  className={`font-extrabold tracking-tighter uppercase text-[10px] ${isActive
                       ? "text-blue-700"
                       : step.action === "click"
                         ? "text-blue-700 bg-blue-50 px-1 rounded"
@@ -192,20 +190,19 @@ function SuiteDetails({
                                 ? "text-emerald-700"
                                 : "text-red-700"
                             : "text-slate-500"
-                  }`}
+                    }`}
                 >
                   {isAssert ? "Expect" : step.action}
                 </span>
                 <span
-                  className={`inline-flex items-center gap-0.5 flex-wrap ${
-                    isActive
+                  className={`inline-flex items-center gap-0.5 flex-wrap ${isActive
                       ? "text-blue-900"
                       : isPending
                         ? "text-slate-400"
                         : passed
                           ? "text-slate-700"
                           : "text-red-700 font-medium"
-                  }`}
+                    }`}
                 >
                   {step.action === "press" ? (
                     step.detail.split("+").map((key, ki, arr) => (
@@ -256,9 +253,9 @@ function formatLog(suites: SuiteState[], failedOnly = false): string {
 
   const lines: string[] = failedOnly
     ? [
-        `TestBot: ${targets.length} FAIL / ${suites.filter((s) => s.status === "done").length} total`,
-        "",
-      ]
+      `TestBot: ${targets.length} FAIL / ${suites.filter((s) => s.status === "done").length} total`,
+      "",
+    ]
     : [];
 
   for (const suite of targets) {
@@ -553,15 +550,14 @@ export function TestBotPanel() {
                             : "fail"
                           : undefined
                       }
-                      className={`bg-white rounded-lg border shadow-sm transition-all overflow-hidden mb-3 ${
-                        isRunningSuite
+                      className={`bg-white rounded-lg border shadow-sm transition-all overflow-hidden mb-3 ${isRunningSuite
                           ? "border-blue-400 ring-4 ring-blue-50/50 shadow-md scale-[1.02]"
                           : isPending
                             ? "border-slate-200 border-dashed opacity-60"
                             : suite.passed
                               ? "border-slate-200 opacity-80"
                               : "border-red-200 ring-1 ring-red-50"
-                      }`}
+                        }`}
                     >
                       {/* Suite Header */}
                       <div
@@ -627,7 +623,7 @@ export function TestBotPanel() {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-slate-700 truncate">
+                          <p className="text-[11px] font-semibold text-slate-700 line-clamp-2">
                             {suite.name}
                           </p>
                           {!isPending && (

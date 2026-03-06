@@ -1,32 +1,32 @@
 ---
-description: 프로젝트 완료 시 지식을 official/rules로 환류하고, 잔여 산출물은 archive/연도/월/주차로 매장한다.
+description: 프로젝트 완료 시 지식을 2-area/official 및 rules로 환류하고, 잔여 산출물은 4-archive/연도/월/주차로 매장한다.
 ---
 
 ## /archive — 프로젝트 완료 & 지식 환류
 
-> **목적**: 프로젝트 완료 시 지식을 소멸시키지 않고 살아있는 문서(official/rules)로 환류한다.
+> **목적**: 프로젝트 완료 시 지식을 소멸시키지 않고 살아있는 문서(2-area/official, rules)로 환류한다.
 > **원칙**: 단순 이동 금지. 지식을 추출한 후 잔여물만 매장한다.
 
 ### 문서 토폴로지
 
 ```
 살아있는 문서 (덮어쓰기, 지형 기반):
-  official/          ← 공식 지식의 인지 지도 (소스코드 토폴로지와 동형)
+  2-area/official/   ← 공식 지식의 인지 지도 (소스코드 토폴로지와 동형)
   .agent/rules.md    ← 헌법 (강제 노출, 매 세션 읽힘)
 
 성숙 중인 문서 (인큐베이터):
   2-area/            ← official로 아직 졸업 못 한 것 (meta, cross-cutting)
 
 죽은 문서 (매장, 분류 없음):
-  archive/YYYY/MM/WNN/ ← 연도/월/주차로 자동 매장
+  4-archive/YYYY/MM/WNN/ ← 연도/월/주차로 자동 매장
 ```
 
 ### Why
 
-**살아있는 문서**는 소스코드 토폴로지에 기반하여 안 늙는다 (official/, rules.md).
+**살아있는 문서**는 소스코드 토폴로지에 기반하여 안 늙는다 (2-area/official/, rules.md).
 **죽은 문서**는 시점에 바인딩되어 노화한다 — 분류할 필요 없이 시간순으로 매장한다.
 
-`/archive`의 역할: **프로젝트의 지식을 official/rules로 추출 → 나머지는 archive/주차에 매장.**
+`/archive`의 역할: **프로젝트의 지식을 2-area/official 및 rules로 추출 → 나머지는 4-archive/주차에 매장.**
 
 ### 프로세스
 
@@ -67,15 +67,15 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 
 | 판단 기준 | 행선지 | 예시 |
 |-----------|--------|------|
-| **시점 독립 원칙/스펙** | `official/` 갱신 또는 `rules.md` 추가 | 커맨드 동작 스펙, 아키텍처 원칙 |
+| **시점 독립 원칙/스펙** | `2-area/official/` 갱신 또는 `rules.md` 추가 | 커맨드 동작 스펙, 아키텍처 원칙 |
 | **Product에 귀속되는 검증된 결정** | `6-products/[name]/` 에스컬레이션 | 기능 스펙, 디자인 결정, 인터랙션 정의 |
 | **아직 성숙 안 된 지식** | `2-area/` 잔류 (인큐베이터) | 초기 설계, 미확정 패턴 |
-| **그 외 전부** | `archive/YYYY/MM/WNN/` 매장 | BOARD, discussions, 보고서, 분석 |
+| **그 외 전부** | `4-archive/YYYY/MM/WNN/` 매장 | BOARD, discussions, 보고서, 분석 |
 
 구체적 동작:
 
 **a) official 갱신 (살아있는 문서)**
-- 프로젝트에서 확정된 스펙/동작이 있으면 → `official/` 해당 섹션 **덮어쓰기**
+- 프로젝트에서 확정된 스펙/동작이 있으면 → `2-area/official/` 해당 섹션 **덮어쓰기**
 - 새 원칙이 발견됐으면 → `.agent/rules.md`에 추가
   - ⚠️ **Abstraction Gate**: 구체적 구현(변수명, 커맨드명)이 아닌 **판단 기준/원칙**으로 추상화.
     LLM이 이미 아는 전문 용어로 대체한다. "다른 프로젝트에서도 통하는가?" 테스트.
@@ -106,7 +106,7 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 
 **d) Archive 매장 (죽은 문서)**
 - BOARD.md, discussions, 진행 기록, 분석 보고서 — 전부
-- `archive/YYYY/MM/WNN/`에 주차별로 이동 (프로젝트 이름은 폴더 없이 flat)
+- `4-archive/YYYY/MM/WNN/`에 주차별로 이동 (프로젝트 이름은 폴더 없이 flat)
 - 주차 계산: `python3 -c "from datetime import date; d=date.today(); print(f'W{d.isocalendar()[1]:02d}')"`
 
 #### 4. Area 동기화 검증
@@ -128,12 +128,12 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 📊 Archive Report: [project-name]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📘 official 갱신: N개
-   - official/os/SPEC.md (갱신)
+   - 2-area/official/os/SPEC.md (갱신)
    - .agent/rules.md (원칙 추가)
 📝 Area 잔류: N개
    - 2-area/80-cross-cutting/... (인큐베이터)
 📦 Archive 매장: N개
-   - archive/YYYY/MM/WNN/ (주차별 flat)
+   - 4-archive/YYYY/MM/WNN/ (주차별 flat)
 ```
 
 ### `/para`와의 관계

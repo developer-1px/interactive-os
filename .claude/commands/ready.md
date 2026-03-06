@@ -12,16 +12,19 @@ description: 개발 환경이 정상 동작하는지 확인하고, 아니면 복
 
 | 레벨 | 검증 항목 | 실패 시 |
 |------|----------|---------|
-| 1. 서버 | App(5555) + Docs(4444) HTTP 200 | 좀비 정리 → 재기동 |
+| 1. 서버 | 모든 대상 서버 HTTP 200 | 좀비 정리 → 재기동 |
 | 2. 타입 | `npx tsc --noEmit` 0 errors | 에러 보고 → 멈춤 |
-| 3. 렌더 | App 홈페이지에 콘텐츠가 렌더되는가 | 에러 보고 → 멈춤 |
+| 3. 렌더 | 홈페이지에 콘텐츠가 렌더되는가 | 에러 보고 → 멈춤 |
 
 ### 대상 서버
 
-| 서버 | 포트 | 용도 | 시작 명령 |
-|------|------|------|----------|
-| App  | 5555 | 메인 앱 (Vite + TanStack Router) | `npx vite` |
-| Docs | 4444 | 문서 뷰어 (Vite + docs.html) | `npx vite --config vite.docs.config.ts` |
+> 프로젝트별 서버 구성은 `.agent/knowledge/dev-environment.md` §Config를 참조한다.
+> 해당 파일이 없으면 아래 기본값을 사용한다.
+
+| 서버 | 포트 | 시작 명령 |
+|------|------|----------|
+| App | 5555 | `npx vite` |
+| Docs | 4444 | `npx vite --config vite.docs.config.ts` |
 
 ### 절차
 

@@ -187,11 +187,11 @@ function getBoxModel(el: HTMLElement): BoxModelData {
 
 function getOSContext(el: HTMLElement): OSContext | null {
   const zoneEl = el.closest("[data-zone-id]");
-  const itemEl = el.closest("[data-item-id]");
+  const itemEl = el.closest("[data-item]");
   if (!zoneEl && !itemEl) return null;
   return {
     zoneId: zoneEl?.getAttribute("data-zone-id") ?? null,
-    itemId: itemEl?.getAttribute("data-item-id") ?? null,
+    itemId: (itemEl as HTMLElement)?.id ?? null,
   };
 }
 

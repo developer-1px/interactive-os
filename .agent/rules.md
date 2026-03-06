@@ -51,6 +51,9 @@
 
 - **절대 관성대로 코딩하지 마라.** 새로운 컴포넌트나 테스트를 작성하기 전, 반드시 `.agent/knowledge/` 내의 관련 표준(예: `verification-standards.md`)을 먼저 `view_file`로 읽어라.
 - **`any` 무관용.** 타입 충돌이 발생했을 때 `as any`나 `| any`로 회피하지 마라. 소스 코드를 끝까지 추적하여 정확한 타입을 식별하고 파생시켜라.
+- **God Object 관성 금지.** 새 관심사를 기존 파일에 추가하기 전, "이 관심사가 이 파일의 기존 관심사와 동일한 lifecycle을 공유하는가?"를 확인하라. 공유하지 않으면 새 파일을 만든다. "기존 파일에 추가하는 것"이 "새 파일을 만드는 것"보다 항상 인지적 비용이 낮기 때문에, LLM은 단일 파일에 무관한 관심사를 누적시키는 관성이 있다.
+- **Facade 경계 위반 금지.** `src/`(앱 코드)에서 `@os-core/*`를 직접 import하지 마라. 반드시 `@os-sdk/os` 또는 `@os-react/*`를 통해 접근한다. `@os-core`는 OS 내부 구현이고, `@os-sdk`가 앱을 위한 유일한 facade다. facade에 필요한 API가 없으면 `@os-sdk/os.ts`에 re-export를 추가한다.
+- **Dead code 판정 시 검색 범위 = 프로젝트 루트.** `packages/`만 grep하면 `src/`의 사용처를 놓친다. 반드시 프로젝트 루트(`./`)에서 검색한다.
 - **수동적 태도 금지.** 리뷰나 지적을 기다리지 말고, 코드를 수정하기 직전(Tool Call 전)에 이 변경이 Pit of Success와 100% Observable 룰에 부합하는지 스스로 검열하라.
   - **불변 자문**: "이 코드가 동작하는가?"뿐 아니라 "이것이 설계 불변을 유지하는가?"를 묻는다. band-aid(임시 동작)와 correct fix(불변 준수)를 구분한다.
   - **OS 격리 문제**: 진단파일 생성 전에 kernel 소스(`createKernel.ts` 등)를 먼저 읽는다.
@@ -77,7 +80,7 @@ OS가 나머지를 **보장**한다:
 | **ARIA** | role을 선언하면 접근성이 보장된다 |
 | **Collection** | 데이터 구조가 정규화된다. 트리, 리스트, 그리드 — 하나의 구조 |
 | **History** | Undo/Redo가 미들웨어로 자동 제공된다 |
-| **Keybindings** | 키보드 단축키가 시스템 수준으로 통합된다 |
+| **Keybindings** | 키보드 단축키가 command({ key })로 선언되고, OS가 resolve한다 |
 | **headless/** | OS의 두뇌. ARIA·속성 계산(`computeItem`)을 DOM 컴포넌트와 테스트가 같은 함수로 호출한다. "Zero Drift" — headless 테스트가 통과하면 DOM도 동일하게 동작한다 |
 | **defineApp()** | 앱 정의의 유일한 진입점. 상태·커맨드·Zone·바인딩·테스트가 이 하나를 통과한다. 앱 수준 Pit of Success |
 | **App Modules** | `history()`, `persistence()` 등 기능을 플러그인으로 설치한다. 구현 없이 선언으로 해결 |
@@ -124,7 +127,9 @@ OS가 나머지를 **보장**한다:
 |------|------|
 | 새 패턴을 만들어야 할 것 같을 때 | `.agent/knowledge/design-principles.md` |
 | 새 패턴이 ZIFT 중 무엇인지 판단할 때 | `.agent/knowledge/domain-glossary.md` → ZIFT × ARIA 매핑 |
+| Zone의 데이터 모델(from/to/entity/with[])을 설계할 때 | `docs/2-area/official/os/zone-data-model.md` |
 | 아키텍처 선택지가 여럿일 때 | `.agent/knowledge/design-principles.md` |
+| headless와 DOM의 경계를 판단할 때 | `.agent/knowledge/zero-drift.md` |
 | 상태를 어디에 배치할지 모를 때 | `.agent/knowledge/design-principles.md` |
 | 폴더/파일 위치를 판단할 때 | `.agent/knowledge/folder-structure.md` → 4-Lens Stack |
 
@@ -138,6 +143,7 @@ OS가 나머지를 **보장**한다:
 | 도메인 개념이 무엇인지 확인할 때 (Zone? Item? Cursor?) | `.agent/knowledge/domain-glossary.md` |
 | 성능 관련 패턴이 필요할 때 | `.agent/knowledge/coding-rules.md` |
 | 1-listen에서 함수를 작성할 때 | `.agent/knowledge/naming.md` → 파이프라인 동사 |
+| OS 기능을 앱에서 import할 때 | `@os-sdk/os`에서 import. `@os-core/*` 직접 import 금지 |
 
 ### 테스트를 작성할 때
 
@@ -159,9 +165,9 @@ OS가 나머지를 **보장**한다:
 
 | 상황 | 참조 |
 |------|------|
-| Interactive OS의 전체 비전 | `docs/official/VISION.md` |
-| 커널 구조와 API | `docs/official/kernel/` |
-| OS 레이어별 가이드 | `docs/official/os/` |
+| Interactive OS의 전체 비전 | `docs/2-area/official/VISION.md` |
+| 커널 구조와 API | `docs/2-area/official/kernel/` |
+| OS 레이어별 가이드 | `docs/2-area/official/os/` |
 | ZIFT 스펙 | KI: `ZIFT Standard Specification` |
 | 포커스 시스템 | KI: `Antigravity Interaction OS Architecture` |
 

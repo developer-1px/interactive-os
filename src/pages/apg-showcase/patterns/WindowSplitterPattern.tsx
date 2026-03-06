@@ -19,11 +19,9 @@
  *   CSS reads data-focused, aria-valuenow. No useState, no onClick, no onKeyDown.
  */
 
-import { OS_VALUE_CHANGE } from "@os-core/4-command";
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
-import { useEffect } from "react";
 
 // --- App + Zone (defineApp pattern) ---
 
@@ -32,16 +30,22 @@ const SplitterApp = defineApp<Record<string, never>>(
   {},
 );
 
+const SPLITTER_ID = "main-splitter";
+const INITIAL_VALUE = 50;
+
 const splitterZone = SplitterApp.createZone("apg-splitter-zone");
 const SplitterUI = splitterZone.bind({
   role: "separator",
   options: {
-    value: { min: 0, max: 100, step: 1, largeStep: 10 },
+    value: {
+      min: 0,
+      max: 100,
+      step: 1,
+      largeStep: 10,
+      initial: { [SPLITTER_ID]: INITIAL_VALUE },
+    },
   },
 });
-
-const SPLITTER_ID = "main-splitter";
-const INITIAL_VALUE = 50;
 
 // --- Pane Content ---
 
@@ -122,18 +126,6 @@ export function WindowSplitterPattern() {
     const z = s.os.focus.zones["apg-splitter-zone"];
     return z?.valueNow?.[SPLITTER_ID] ?? INITIAL_VALUE;
   });
-
-  // Initialize splitter value on mount
-  useEffect(() => {
-    os.dispatch(
-      OS_VALUE_CHANGE({
-        action: "set",
-        value: INITIAL_VALUE,
-        itemId: SPLITTER_ID,
-        zoneId: "apg-splitter-zone",
-      }),
-    );
-  }, []);
 
   return (
     <div className="max-w-2xl">

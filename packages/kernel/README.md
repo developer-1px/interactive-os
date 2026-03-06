@@ -42,16 +42,16 @@ console.log(kernel.getState()); // { count: 1 }
 
 ## Documentation
 
-📖 **[Full Documentation →](../../docs/official/kernel/00-overview.md)**
+📖 **[Full Documentation →](../../docs/2-area/official/kernel/00-overview.md)**
 
 | Guide | Description |
 |---|---|
-| [Overview](../../docs/official/kernel/00-overview.md) | Architecture and design philosophy |
-| [Getting Started](../../docs/official/kernel/01-getting-started.md) | First kernel in under a minute |
-| [Core Concepts](../../docs/official/kernel/02-core-concepts.md) | Commands, Effects, Context, Scope |
-| [API Reference](../../docs/official/kernel/03-api-reference.md) | Complete API documentation |
-| [Type System](../../docs/official/kernel/05-type-system.md) | Branded tokens and compile-time safety |
-| [Patterns](../../docs/official/kernel/08-patterns.md) | Best practices |
+| [Overview](../../docs/2-area/official/kernel/00-overview.md) | Architecture and design philosophy |
+| [Getting Started](../../docs/2-area/official/kernel/01-getting-started.md) | First kernel in under a minute |
+| [Core Concepts](../../docs/2-area/official/kernel/02-core-concepts.md) | Commands, Effects, Context, Scope |
+| [API Reference](../../docs/2-area/official/kernel/03-api-reference.md) | Complete API documentation |
+| [Type System](../../docs/2-area/official/kernel/05-type-system.md) | Branded tokens and compile-time safety |
+| [Patterns](../../docs/2-area/official/kernel/08-patterns.md) | Best practices |
 
 ## Source
 

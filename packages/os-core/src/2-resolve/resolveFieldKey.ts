@@ -51,6 +51,8 @@ export interface FieldKeyContext {
 export const ROLE_FIELD_TYPE_MAP: Readonly<Record<string, FieldType>> = {
   // switch/checkbox: removed — action.commands=[OS_CHECK()] handles Space/Enter via Zone layer
   slider: "number",
+  spinbutton: "number",
+  separator: "number",
   radio: "enum",
   option: "enum",
   progressbar: "readonly",

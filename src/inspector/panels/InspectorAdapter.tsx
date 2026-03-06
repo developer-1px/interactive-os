@@ -6,7 +6,7 @@
  */
 
 import { UnifiedInspector } from "@inspector/panels/UnifiedInspector.tsx";
-import { os } from "@os-core/engine/kernel.ts";
+import { os } from "@os-sdk/os";
 import { useState, useSyncExternalStore } from "react";
 
 export function InspectorAdapter() {

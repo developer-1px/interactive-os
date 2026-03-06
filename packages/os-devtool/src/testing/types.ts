@@ -23,6 +23,9 @@ export interface Locator {
 
   /** Get a single attribute value. */
   getAttribute(name: string): Promise<string | null>;
+
+  /** Get the input value (contenteditable / input). */
+  inputValue(): Promise<string>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -35,6 +38,24 @@ export interface LocatorAssertions {
 
   /** Assert: element is focused. */
   toBeFocused(): Promise<void>;
+
+  /** Assert: element is selected (aria-selected="true"). */
+  toBeSelected(): Promise<void>;
+
+  /** Assert: element is expanded (aria-expanded="true"). */
+  toBeExpanded(): Promise<void>;
+
+  /** Assert: element is checked (aria-checked="true"). */
+  toBeChecked(): Promise<void>;
+
+  /** Assert: element is pressed (aria-pressed="true"). */
+  toBePressed(): Promise<void>;
+
+  /** Assert: element is disabled (aria-disabled="true"). */
+  toBeDisabled(): Promise<void>;
+
+  /** Assert: element is editing (data-editing="true"). */
+  toBeEditing(): Promise<void>;
 
   /** Negated assertions (Playwright-compatible). */
   not: LocatorAssertions;

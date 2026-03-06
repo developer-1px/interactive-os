@@ -15,11 +15,9 @@
  *   Zone-level min/max applies to all thumbs. App-level visual clamping only.
  */
 
-import { OS_VALUE_CHANGE } from "@os-core/4-command";
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
-import { useEffect } from "react";
 
 // ─── Thumb Data ───
 
@@ -48,16 +46,23 @@ const MultiThumbApp = defineApp<Record<string, never>>(
   {},
 );
 
-const sliderZone = MultiThumbApp.createZone("apg-slider-multithumb-zone");
+const ZONE_ID = "apg-slider-multithumb-zone";
+
+const sliderZone = MultiThumbApp.createZone(ZONE_ID);
 const SliderUI = sliderZone.bind({
-  role: "slider",
+  role: "group",
   options: {
     tab: { behavior: "flow" },
     value: {
+      mode: "continuous",
       min: RANGE_MIN,
       max: RANGE_MAX,
       step: STEP,
       largeStep: LARGE_STEP,
+      initial: {
+        "thumb-min-price": INITIAL_MIN,
+        "thumb-max-price": INITIAL_MAX,
+      },
     },
   },
 });
@@ -106,6 +111,7 @@ function Thumb({
   return (
     <SliderUI.Item
       id={thumb.id}
+      role="slider"
       aria-label={thumb.ariaLabel}
       aria-valuetext={`$${value}`}
       className={clsx(
@@ -173,29 +179,9 @@ function RangeDisplay({
 // ─── Main Component ───
 
 export function SliderMultiThumbPattern() {
-  // Initialize thumb values on mount
-  useEffect(() => {
-    os.dispatch(
-      OS_VALUE_CHANGE({
-        action: "set",
-        value: INITIAL_MIN,
-        itemId: "thumb-min-price",
-        zoneId: "apg-slider-multithumb-zone",
-      }),
-    );
-    os.dispatch(
-      OS_VALUE_CHANGE({
-        action: "set",
-        value: INITIAL_MAX,
-        itemId: "thumb-max-price",
-        zoneId: "apg-slider-multithumb-zone",
-      }),
-    );
-  }, []);
-
   // Read values from OS kernel
   const values = os.useComputed((s) => {
-    const z = s.os.focus.zones["apg-slider-multithumb-zone"];
+    const z = s.os.focus.zones[ZONE_ID];
     return {
       min: z?.valueNow?.["thumb-min-price"] ?? INITIAL_MIN,
       max: z?.valueNow?.["thumb-max-price"] ?? INITIAL_MAX,

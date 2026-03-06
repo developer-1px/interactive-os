@@ -23,7 +23,8 @@
  *   C1: Click interaction
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -40,42 +41,48 @@ import {
 
 const ALL_ROWS = ["msg-1", "msg-1a", "msg-1b", "msg-2", "msg-2a", "msg-3"];
 
-const EXPANDABLE = ["msg-1", "msg-2"];
+const EXPANDABLE = new Set(["msg-1", "msg-2"]);
+
+const TREE_LEVELS = new Map([
+  ["msg-1", 1],
+  ["msg-1a", 2],
+  ["msg-1b", 2],
+  ["msg-2", 1],
+  ["msg-2a", 2],
+  ["msg-3", 1],
+]);
 
 function treegridFactory(focusedItem = "msg-1") {
-  const page = createOsPage();
-  page.setItems(ALL_ROWS);
-  page.setExpandableItems(EXPANDABLE);
-  page.setTreeLevels({
-    "msg-1": 1,
-    "msg-1a": 2,
-    "msg-1b": 2,
-    "msg-2": 1,
-    "msg-2a": 2,
-    "msg-3": 1,
-  });
-  page.setRole("treegrid-zone", "treegrid");
-  page.setConfig({
-    navigate: {
-      orientation: "vertical",
-      loop: false,
-      seamless: false,
-      typeahead: false,
-      entry: "first",
-      recovery: "next",
-    },
-    select: {
-      mode: "multiple",
-      followFocus: false,
-      disallowEmpty: false,
-      range: true,
-      toggle: true,
-    },
-    expand: {
-      mode: "explicit",
+  const app = defineApp("test-treegrid", {});
+  const zone = app.createZone("treegrid-zone");
+  zone.bind({
+    role: "treegrid",
+    getItems: () => ALL_ROWS,
+    getExpandableItems: () => EXPANDABLE,
+    getTreeLevels: () => TREE_LEVELS,
+    options: {
+      navigate: {
+        orientation: "vertical",
+        loop: false,
+        seamless: false,
+        typeahead: false,
+        entry: "first",
+        recovery: "next",
+      },
+      select: {
+        mode: "multiple",
+        followFocus: false,
+        disallowEmpty: false,
+        range: true,
+        toggle: true,
+      },
+      expand: {
+        mode: "explicit",
+      },
     },
   });
-  page.setActiveZone("treegrid-zone", focusedItem);
+  const page = createPage(app);
+  page.goto("treegrid-zone", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -86,17 +93,17 @@ function treegridFactory(focusedItem = "msg-1") {
 // ===============================================
 
 describe("APG Treegrid: Vertical Navigation (N1-N2)", () => {
-  assertVerticalNav(treegridFactory);
-  assertBoundaryClamp(treegridFactory, {
+  assertVerticalNav(treegridFactory as any);
+  assertBoundaryClamp(treegridFactory as any, {
     firstId: "msg-1",
     lastId: "msg-3",
     axis: "vertical",
   });
-  assertHomeEnd(treegridFactory, {
+  assertHomeEnd(treegridFactory as any, {
     firstId: "msg-1",
     lastId: "msg-3",
   });
-  assertNoSelection(treegridFactory);
+  assertNoSelection(treegridFactory as any);
 });
 
 // ===============================================
@@ -108,11 +115,11 @@ describe("APG Treegrid: Vertical Navigation (N1-N2)", () => {
 describe("APG Treegrid: Right Arrow Expand/Navigate (N3-N4)", () => {
   it("N3: Right Arrow on collapsed parent row -- expands", () => {
     const t = treegridFactory("msg-1");
-    expect(t.zone()?.expandedItems).not.toContain("msg-1");
+    expect(t.attrs("msg-1")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("ArrowRight");
 
-    expect(t.zone()?.expandedItems).toContain("msg-1");
+    expect(t.attrs("msg-1")["aria-expanded"]).toBe(true);
     // Focus stays on the parent row after expansion
     expect(t.focusedItemId()).toBe("msg-1");
   });
@@ -120,7 +127,7 @@ describe("APG Treegrid: Right Arrow Expand/Navigate (N3-N4)", () => {
   it("N4: Right Arrow on expanded parent row -- moves to first child", () => {
     const t = treegridFactory("msg-1");
     t.keyboard.press("ArrowRight"); // expand
-    expect(t.zone()?.expandedItems).toContain("msg-1");
+    expect(t.attrs("msg-1")["aria-expanded"]).toBe(true);
 
     t.keyboard.press("ArrowRight"); // navigate to first child
     expect(t.focusedItemId()).toBe("msg-1a");
@@ -132,7 +139,7 @@ describe("APG Treegrid: Right Arrow Expand/Navigate (N3-N4)", () => {
     t.keyboard.press("ArrowRight");
 
     expect(t.focusedItemId()).toBe("msg-3");
-    expect(t.zone()?.expandedItems).not.toContain("msg-3");
+    expect(t.attrs("msg-3")["aria-expanded"]).toBeUndefined();
   });
 });
 
@@ -146,11 +153,11 @@ describe("APG Treegrid: Left Arrow Collapse/Navigate (N5-N6)", () => {
   it("N5: Left Arrow on expanded parent row -- collapses", () => {
     const t = treegridFactory("msg-1");
     t.keyboard.press("ArrowRight"); // expand first
-    expect(t.zone()?.expandedItems).toContain("msg-1");
+    expect(t.attrs("msg-1")["aria-expanded"]).toBe(true);
 
     t.keyboard.press("ArrowLeft");
 
-    expect(t.zone()?.expandedItems).not.toContain("msg-1");
+    expect(t.attrs("msg-1")["aria-expanded"]).toBe(false);
     expect(t.focusedItemId()).toBe("msg-1");
   });
 
@@ -180,30 +187,29 @@ describe("APG Treegrid: Left Arrow Collapse/Navigate (N5-N6)", () => {
 describe("APG Treegrid: Enter toggles expansion (E1)", () => {
   it("Enter on collapsed parent -- expands", () => {
     const t = treegridFactory("msg-1");
-    expect(t.zone()?.expandedItems).not.toContain("msg-1");
+    expect(t.attrs("msg-1")["aria-expanded"]).toBe(false);
 
     t.keyboard.press("Enter");
 
-    expect(t.zone()?.expandedItems).toContain("msg-1");
+    expect(t.attrs("msg-1")["aria-expanded"]).toBe(true);
   });
 
   it("Enter on expanded parent -- collapses", () => {
     const t = treegridFactory("msg-1");
     t.keyboard.press("Enter"); // expand
-    expect(t.zone()?.expandedItems).toContain("msg-1");
+    expect(t.attrs("msg-1")["aria-expanded"]).toBe(true);
 
     t.keyboard.press("Enter"); // collapse
 
-    expect(t.zone()?.expandedItems).not.toContain("msg-1");
+    expect(t.attrs("msg-1")["aria-expanded"]).toBe(false);
   });
 
   it("Enter on leaf -- does NOT expand (no children)", () => {
     const t = treegridFactory("msg-3");
-    const before = [...(t.zone()?.expandedItems ?? [])];
 
     t.keyboard.press("Enter");
 
-    expect(t.zone()?.expandedItems).toEqual(before);
+    expect(t.attrs("msg-3")["aria-expanded"]).toBeUndefined();
   });
 });
 
@@ -312,11 +318,11 @@ describe("APG Treegrid: Click interaction (C1)", () => {
 
   it("click on expandable row -- focuses and toggles expand", () => {
     const t = treegridFactory("msg-1");
-    expect(t.zone()?.expandedItems).not.toContain("msg-2");
+    expect(t.attrs("msg-2")["aria-expanded"]).toBe(false);
 
     t.click("msg-2");
 
     expect(t.focusedItemId()).toBe("msg-2");
-    expect(t.zone()?.expandedItems).toContain("msg-2");
+    expect(t.attrs("msg-2")["aria-expanded"]).toBe(true);
   });
 });

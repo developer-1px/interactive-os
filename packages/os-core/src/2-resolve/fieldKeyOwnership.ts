@@ -147,7 +147,7 @@ export function resolveIsEditingForKey(
   target: HTMLElement,
   canonicalKey: string,
 ): boolean {
-  const fieldId = target.id || target.getAttribute("data-item-id");
+  const fieldId = target.id;
   if (fieldId) {
     const fieldEntry = FieldRegistry.getField(fieldId);
     if (fieldEntry) {

@@ -6,22 +6,26 @@ export const apgDisclosureScript: TestScript = {
   async run(page, expect = defaultExpect) {
     await page.locator("#tab-disclosure").click();
 
-    // Click to focus first disclosure
+    // Click toggles disclosure (click is in inputmap → focus + expand)
     await page.locator("#disc-faq-1").click();
     await expect(page.locator("#disc-faq-1")).toBeFocused();
-
-    // Enter → expand
-    await page.keyboard.press("Enter");
     await expect(page.locator("#disc-faq-1")).toHaveAttribute(
       "aria-expanded",
       "true",
     );
 
-    // Enter again → collapse
+    // Enter → collapse (second toggle)
     await page.keyboard.press("Enter");
     await expect(page.locator("#disc-faq-1")).toHaveAttribute(
       "aria-expanded",
       "false",
+    );
+
+    // Enter → expand again
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#disc-faq-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
     );
 
     // ArrowDown → next disclosure

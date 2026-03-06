@@ -57,11 +57,14 @@ description: Toulmin 기반 Expert Consulting. 숨겨진 Intent를 추출하고 
 
    | Cynefin | 의미 | Next 행동 |
    |---------|------|-----------|
-   | 🔴 **Complex** | 아직 수렴 안 됨 | `→ 계속 /discussion` (Gap 질문 계속) |
+   | 🔴 **Complex — 정보 부족** | Gap 질문에 새 정보 나올 여지 | `→ 계속 /discussion` (Gap 질문 계속) |
+   | 🔴 **Complex — 충돌 불명확** | 뭐가 부딪히는지 모르겠다 | `→ /conflict` (충돌의 양쪽을 진단) |
+   | 🔴 **Complex — 선택 불가** | 사용자가 2안 갈팡질팡 | `→ /blueprint` (AI가 EC로 해소 제안) |
    | 🟡 **Complicated** | 방향은 잡힘, 분해 필요 | `→ /divide` (Clear까지 분해) |
    | 🟢 **Clear** | 뭘 할지 안다 | `→ /go` (파이프라인 자율 실행) |
 
    > **/discussion의 exit은 항상 `/go`다.** `/go`가 `/plan` → 라우팅(`/project`·`/issue` 등) → 실행까지 자동 처리한다.
+   > `/conflict`·`/blueprint`는 **대화 내 탈출 밸브**다. 해소 후 `/discussion`으로 복귀하여 수렴을 이어간다.
 
    **표시 형식**: `| 🚀 Next | 🟢 Clear → /go |`
 

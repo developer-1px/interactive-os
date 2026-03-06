@@ -213,7 +213,6 @@ export const resolveCorner: NavigationStrategy = (
       // If exact match in distinct id, might be overlay.
       // For now, assume containment implies hierarchy.
       if (contains && id !== currentId) {
-        console.warn(`[cornerNav] Excluded by containment: ${id}`);
         continue;
       }
     }
@@ -221,10 +220,6 @@ export const resolveCorner: NavigationStrategy = (
     candidates.push({ id, rect: r });
   }
 
-  console.warn(
-    `[cornerNav] candidates for ${currentId} [${direction}]:`,
-    candidates.map((c) => c.id),
-  );
 
   if (candidates.length <= 1) {
     return { targetId: currentId, stickyX: null, stickyY: null };

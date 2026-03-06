@@ -12,7 +12,9 @@
  * Tabs variant: same axis + followFocus (automatic activation)
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { OS_SELECT } from "@os-core/4-command/selection/select";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   assertHomeEnd,
@@ -46,10 +48,14 @@ const TOOLBAR_CONFIG = {
 };
 
 function createToolbar(focusedItem = "bold-btn") {
-  const page = createOsPage();
-  page.setItems(TOOLBAR_ITEMS);
-  page.setConfig(TOOLBAR_CONFIG);
-  page.setActiveZone("toolbar", focusedItem);
+  const app = defineApp("test-toolbar", {});
+  const zone = app.createZone("toolbar");
+  zone.bind({
+    getItems: () => TOOLBAR_ITEMS,
+    options: TOOLBAR_CONFIG,
+  });
+  const page = createPage(app);
+  page.goto("toolbar", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -58,17 +64,17 @@ function createToolbar(focusedItem = "bold-btn") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Toolbar: Navigation", () => {
-  assertHorizontalNav(createToolbar);
+  assertHorizontalNav(createToolbar as any);
   assertLoop({
     firstId: "bold-btn",
     lastId: "link-btn",
     axis: "horizontal",
-    factoryAtFirst: () => createToolbar("bold-btn"),
-    factoryAtLast: () => createToolbar("link-btn"),
+    factoryAtFirst: (() => createToolbar("bold-btn")) as any,
+    factoryAtLast: (() => createToolbar("link-btn")) as any,
   });
-  assertHomeEnd(createToolbar, { firstId: "bold-btn", lastId: "link-btn" });
-  assertOrthogonalIgnored(createToolbar, "horizontal");
-  assertNoSelection(createToolbar);
+  assertHomeEnd(createToolbar as any, { firstId: "bold-btn", lastId: "link-btn" });
+  assertOrthogonalIgnored(createToolbar as any, "horizontal");
+  assertNoSelection(createToolbar as any);
 });
 
 // ═══════════════════════════════════════════════════
@@ -77,27 +83,23 @@ describe("APG Toolbar: Navigation", () => {
 
 describe("APG Toolbar: Tab Escape", () => {
   it("Tab: moves focus out to next zone", () => {
-    const t = createToolbar("italic-btn");
-    t.setZoneOrder([
-      {
-        zoneId: "toolbar",
-        firstItemId: "bold-btn",
-        lastItemId: "link-btn",
-        entry: "restore",
-        selectedItemId: null,
-        lastFocusedId: "italic-btn",
-      },
-      {
-        zoneId: "editor",
-        firstItemId: "line-1",
-        lastItemId: "line-10",
-        entry: "first",
-        selectedItemId: null,
-        lastFocusedId: null,
-      },
-    ]);
-    t.keyboard.press("Tab");
-    expect(t.activeZoneId()).toBe("editor");
+    const app = defineApp("test-toolbar-escape", {});
+    const toolbar = app.createZone("toolbar");
+    toolbar.bind({
+      getItems: () => TOOLBAR_ITEMS,
+      options: TOOLBAR_CONFIG,
+    });
+    const editor = app.createZone("editor");
+    editor.bind({
+      getItems: () => ["line-1", "line-2", "line-3", "line-4", "line-5", "line-6", "line-7", "line-8", "line-9", "line-10"],
+    });
+    const page = createPage(app);
+    // Register both zones — order determines Tab navigation
+    page.goto("editor", { focusedItemId: "line-1" });
+    page.goto("toolbar", { focusedItemId: "italic-btn" });
+
+    page.keyboard.press("Tab");
+    expect(page.activeZoneId()).toBe("editor");
   });
 });
 
@@ -111,21 +113,25 @@ describe("APG Toolbar: Tabs Variant", () => {
   const TAB_ITEMS = ["tab-general", "tab-security", "tab-advanced"];
 
   function createTabs(focusedTab = "tab-general") {
-    const page = createOsPage();
-    page.setItems(TAB_ITEMS);
-    page.setConfig({
-      ...TOOLBAR_CONFIG,
-      navigate: { ...TOOLBAR_CONFIG.navigate, entry: "first" as const },
-      select: {
-        mode: "single" as const,
-        followFocus: true,
-        disallowEmpty: true,
-        range: false,
-        toggle: false,
+    const app = defineApp("test-toolbar-tabs", {});
+    const zone = app.createZone("tablist");
+    zone.bind({
+      getItems: () => TAB_ITEMS,
+      options: {
+        ...TOOLBAR_CONFIG,
+        navigate: { ...TOOLBAR_CONFIG.navigate, entry: "first" as const },
+        select: {
+          mode: "single" as const,
+          followFocus: true,
+          disallowEmpty: true,
+          range: false,
+          toggle: false,
+        },
       },
     });
-    page.setActiveZone("tablist", focusedTab);
-    page.dispatch(page.OS_SELECT({ targetId: focusedTab, mode: "replace" }));
+    const page = createPage(app);
+    page.goto("tablist", { focusedItemId: focusedTab });
+    page.dispatch(OS_SELECT({ targetId: focusedTab, mode: "replace" }));
     return page;
   }
 

@@ -136,7 +136,7 @@ const specTable: SpecRow[] = [
   },
   {
     role: "treegrid",
-    orient: "both",
+    orient: "vertical",
     loop: false,
     typeahead: D.typeahead,
     entry: D.entry,

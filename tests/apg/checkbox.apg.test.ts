@@ -10,7 +10,8 @@
  *   - Focusable (tabIndex=0 when focused)
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───
@@ -19,13 +20,17 @@ const CHECKBOX_ID = "terms-checkbox";
 const TRI_CHECKBOX_ID = "all-options-checkbox";
 
 function checkboxFactory() {
-  const page = createOsPage();
-  page.setItems([CHECKBOX_ID, TRI_CHECKBOX_ID]);
-  page.setRole("checkbox-zone", "checkbox");
-  page.setConfig({
-    check: { mode: "check" },
+  const app = defineApp("test-checkbox", {});
+  const zone = app.createZone("checkbox-zone");
+  zone.bind({
+    role: "checkbox",
+    getItems: () => [CHECKBOX_ID, TRI_CHECKBOX_ID],
+    options: {
+      check: { mode: "check" },
+    } as any,
   });
-  page.setActiveZone("checkbox-zone", CHECKBOX_ID);
+  const page = createPage(app);
+  page.goto("checkbox-zone", { focusedItemId: CHECKBOX_ID });
   return page;
 }
 

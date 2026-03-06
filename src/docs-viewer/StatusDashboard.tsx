@@ -4,7 +4,7 @@
  * Replaces MarkdownRenderer when activePath points to STATUS.md.
  * Uses parseStatusMd to transform raw markdown → structured data.
  */
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import clsx from "clsx";
 import {
   AlertTriangle,

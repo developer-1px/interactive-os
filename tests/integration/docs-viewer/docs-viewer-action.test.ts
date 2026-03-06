@@ -9,37 +9,32 @@
  * Test verifies that document navigation works via OS commands:
  *   - onAction (Enter/re-click) triggers selectDoc
  *   - selectDoc updates activePath in state
- *
- * Note: Auto-diagnostics registered by createAppPage (onTestFailed)
  */
 
-import { createOsPage, type OsPage } from "@os-devtool/testing/page";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
+import { describe, expect, it, vi } from "vitest";
 
 describe("T6: DocsViewer — navigation via OS selectDoc command", () => {
-  let page: OsPage;
-  const selectSpy = vi.fn();
-
-  beforeEach(() => {
-    page = createOsPage();
-
-    // Folder index zone
-    page.goto("docs-folder-index", {
+  function createFolderPage() {
+    const selectSpy = vi.fn();
+    const app = defineApp("test-docs-viewer", {});
+    const zone = app.createZone("docs-folder-index");
+    zone.bind({
       role: "listbox",
-      items: ["docs/readme.md", "docs/guide.md", "docs/api.md"],
+      getItems: () => ["docs/readme.md", "docs/guide.md", "docs/api.md"],
       onAction: (cursor) => {
         selectSpy(cursor.focusId);
         return [];
       },
     });
-  });
-
-  afterEach(() => {
-    selectSpy.mockClear();
-    page.cleanup();
-  });
+    const page = createPage(app);
+    page.goto("docs-folder-index", { focusedItemId: "docs/readme.md" });
+    return { page, selectSpy };
+  }
 
   it("#1 Enter on folder index item triggers selectDoc", () => {
+    const { page, selectSpy } = createFolderPage();
     page.keyboard.press("Enter");
 
     expect(selectSpy).toHaveBeenCalledTimes(1);
@@ -47,6 +42,7 @@ describe("T6: DocsViewer — navigation via OS selectDoc command", () => {
   });
 
   it("#2 ArrowDown + Enter selects second item", () => {
+    const { page, selectSpy } = createFolderPage();
     page.keyboard.press("ArrowDown");
     page.keyboard.press("Enter");
 
@@ -54,6 +50,7 @@ describe("T6: DocsViewer — navigation via OS selectDoc command", () => {
   });
 
   it("#3 keyboard navigation through entire list", () => {
+    const { page, selectSpy } = createFolderPage();
     page.keyboard.press("ArrowDown");
     page.keyboard.press("ArrowDown");
     expect(page.focusedItemId()).toBe("docs/api.md");

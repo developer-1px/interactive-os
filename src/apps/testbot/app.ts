@@ -9,7 +9,7 @@
  *     └── Runner: executeAll (async effect, dispatches commands)
  */
 
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import type { BrowserStep, TestScript } from "@os-devtool/testing";
 import {
   createBrowserPage,

@@ -1,6 +1,6 @@
 import "./docs-viewer.css";
 import docsMeta from "virtual:docs-meta";
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import clsx from "clsx";
 import {
   ArrowLeft,

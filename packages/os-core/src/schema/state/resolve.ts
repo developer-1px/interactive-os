@@ -1,60 +1,53 @@
 /**
- * Lazy Resolution — resolveItemId / resolveSelection
+ * Lazy Resolution — pure functions for stale ID recovery.
  *
- * Core principle: "저장은 ID만, 해석은 읽을 때"
- *
- * Instead of write-time recovery (OS_RECOVER pre-computing targets),
- * we resolve stale references at read-time:
- *   - If storedId exists in items → return as-is
- *   - If storedId is gone → fallback to nearest neighbor (next > prev)
- *   - If null → null
- *
- * This enables zero-cost undo restoration: undo restores the item,
- * and the stored original ID naturally resolves back to it.
+ * Core rule: "Store IDs as-is, resolve at read-time."
+ *   - storedId present in items → return as-is
+ *   - storedId stale (deleted) → recover to nearest neighbor
+ *   - Undo restores original item → zero-cost: stored ID matches again
  */
 
 /**
- * Resolve a possibly-stale item ID against the current item list.
+ * Resolve a possibly-stale item ID to a valid one.
  *
- * @param storedId     - The persisted focus/selection ID (may be stale)
- * @param items        - Current live item list (ordered)
- * @param lastIndex    - Optional: last known index before deletion (for next > prev)
- * @returns            - Resolved ID, or null if unresolvable
+ * @param storedId  The raw stored ID (may be stale after deletion)
+ * @param items     Current ordered item list
+ * @param lastIndex Optional hint: the index where storedId was before deletion
+ * @returns         A valid item ID, or null if items is empty / storedId is null
  */
 export function resolveItemId(
   storedId: string | null,
-  items: readonly string[],
+  items: string[],
   lastIndex?: number,
 ): string | null {
-  // Null focus = no focus
-  if (storedId === null) return null;
-
-  // Empty list = nothing to resolve to
+  if (storedId == null) return null;
   if (items.length === 0) return null;
 
   // Happy path: ID still exists
   if (items.includes(storedId)) return storedId;
 
-  // Stale reference: resolve to nearest neighbor
-  if (lastIndex !== undefined) {
-    // Clamp to valid range
-    const idx = Math.min(lastIndex, items.length - 1);
-    return items[idx] ?? items[items.length - 1] ?? null;
+  // Stale: resolve to nearest neighbor
+  if (lastIndex != null) {
+    // Try the item at the same index (next neighbor)
+    if (lastIndex < items.length) return items[lastIndex];
+    // Past the end → fall back to last item (previous neighbor)
+    return items[items.length - 1];
   }
 
-  // No index hint: fall back to first item
-  return items[0] ?? null;
+  // No hint → fall back to first item
+  return items[0];
 }
 
 /**
- * Resolve a possibly-stale selection array.
- * Simply filters to items that still exist — preserves original order.
+ * Filter a selection array to only IDs that still exist in items.
+ *
+ * Preserves original selection order.
  */
 export function resolveSelection(
-  selection: readonly string[],
-  items: readonly string[],
+  selectedIds: string[],
+  items: string[],
 ): string[] {
-  if (selection.length === 0 || items.length === 0) return [];
+  if (selectedIds.length === 0 || items.length === 0) return [];
   const itemSet = new Set(items);
-  return selection.filter((id) => itemSet.has(id));
+  return selectedIds.filter((id) => itemSet.has(id));
 }

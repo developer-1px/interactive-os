@@ -14,12 +14,13 @@
  * which are already pressKey-based.
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
-import { describe } from "vitest";
+import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
+import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,
   assertEscapeClose,
-  assertFocusRestore,
   assertFollowFocus,
   assertHomeEnd,
   assertVerticalNav,
@@ -50,13 +51,18 @@ const POPUP_CONFIG = {
 };
 
 function createComboboxPopup(focusedItem = "apple") {
-  const page = createOsPage();
-  page.setItems(["input-field"]);
-  page.setActiveZone("combobox", "input-field");
-  page.dispatch(page.OS_STACK_PUSH());
-  page.setItems(POPUP_ITEMS);
-  page.setConfig(POPUP_CONFIG);
-  page.setActiveZone("popup", focusedItem);
+  const app = defineApp("test-combobox", {});
+  const combobox = app.createZone("combobox");
+  combobox.bind({ getItems: () => ["input-field"] });
+  const popup = app.createZone("popup");
+  popup.bind({
+    getItems: () => POPUP_ITEMS,
+    options: POPUP_CONFIG,
+  });
+  const page = createPage(app);
+  page.goto("combobox", { focusedItemId: "input-field" });
+  page.dispatch(OS_STACK_PUSH());
+  page.goto("popup", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -65,23 +71,27 @@ function createComboboxPopup(focusedItem = "apple") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Combobox: Popup Navigation", () => {
-  assertVerticalNav(createComboboxPopup);
-  assertBoundaryClamp(createComboboxPopup, {
+  assertVerticalNav(createComboboxPopup as any);
+  assertBoundaryClamp(createComboboxPopup as any, {
     firstId: "apple",
     lastId: "elderberry",
     axis: "vertical",
   });
-  assertHomeEnd(createComboboxPopup, {
+  assertHomeEnd(createComboboxPopup as any, {
     firstId: "apple",
     lastId: "elderberry",
   });
-  assertFollowFocus(createComboboxPopup);
+  assertFollowFocus(createComboboxPopup as any);
 });
 
 describe("APG Combobox: Dismiss", () => {
-  assertEscapeClose(createComboboxPopup);
-  assertFocusRestore(createComboboxPopup, {
-    invokerZoneId: "combobox",
-    invokerItemId: "input-field",
+  assertEscapeClose(createComboboxPopup as any);
+
+  it("Escape + stack pop: restores focus to invoker", () => {
+    const t = createComboboxPopup();
+    t.keyboard.press("Escape");
+    t.dispatch(OS_STACK_POP());
+    expect(t.activeZoneId()).toBe("combobox");
+    expect(t.focusedItemId("combobox")).toBe("input-field");
   });
 });

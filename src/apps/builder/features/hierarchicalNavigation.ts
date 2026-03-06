@@ -19,11 +19,11 @@ import {
   getAncestorWithAttribute,
   getFirstDescendantWithAttribute,
   getItemAttribute,
-} from "@os-core/3-inject/itemQueries";
-import type { ZoneCursor } from "@os-core/3-inject/zoneRegistry";
-import { OS_ESCAPE } from "@os-core/4-command/dismiss/escape";
-import { OS_FIELD_START_EDIT } from "@os-core/4-command/field/field";
-import { OS_FOCUS } from "@os-core/4-command/focus/focus";
+} from "@os-sdk/os";
+import type { ZoneCursor } from "@os-sdk/os";
+import { OS_ESCAPE } from "@os-sdk/os";
+import { OS_FIELD_START_EDIT } from "@os-sdk/os";
+import { OS_FOCUS } from "@os-sdk/os";
 import { getFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
 import type { BuilderLevel } from "../6-project/Builder";
 

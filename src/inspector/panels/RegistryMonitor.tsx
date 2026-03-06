@@ -1,6 +1,6 @@
 import type { RegistrySnapshot } from "@kernel/core/inspectorPort";
 import type { ScopeToken } from "@kernel/core/tokens";
-import { os } from "@os-core/engine/kernel";
+import { os } from "@os-sdk/os";
 import { ChevronDown, ChevronRight, Shield } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 

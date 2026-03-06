@@ -6,7 +6,7 @@
  */
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { Trigger } from "@os-react/6-project/Trigger";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import React, { type ReactNode, useEffect } from "react";
@@ -117,8 +117,8 @@ export function createCompoundTrigger(
   const RootComponent: React.FC<{ children: ReactNode }> = ({ children }) => {
     // Register trigger→overlay relationship for headless ARIA
     useEffect(() => {
-      ZoneRegistry.setTriggerOverlay(overlayId, overlayId, role);
-      return () => ZoneRegistry.clearTriggerOverlay(overlayId);
+      TriggerOverlayRegistry.set(overlayId, overlayId, role);
+      return () => TriggerOverlayRegistry.clear(overlayId);
     }, []);
 
     if (isPopoverRole) {

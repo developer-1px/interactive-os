@@ -10,16 +10,29 @@ export const apgSpinbuttonScript: TestScript = {
     await page.locator("#spin-hours").click();
     await expect(page.locator("#spin-hours")).toBeFocused();
 
-    // ArrowDown → navigate to next spinner
+    // ArrowUp → value increases (spinbutton uses arrows for value, not navigation)
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("#spin-hours")).toHaveAttribute(
+      "aria-valuenow",
+      "10",
+    );
+
+    // ArrowDown → value decreases back
     await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#spin-hours")).toHaveAttribute(
+      "aria-valuenow",
+      "9",
+    );
+
+    // Tab → navigate to next spinner (Tab, not Arrow)
+    await page.keyboard.press("Tab");
     await expect(page.locator("#spin-minutes")).toBeFocused();
 
-    // ArrowDown → navigate to duration
-    await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#spin-duration")).toBeFocused();
-
-    // Home → back to first
-    await page.keyboard.press("Home");
-    await expect(page.locator("#spin-hours")).toBeFocused();
+    // ArrowUp on minutes
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("#spin-minutes")).toHaveAttribute(
+      "aria-valuenow",
+      "31",
+    );
   },
 };

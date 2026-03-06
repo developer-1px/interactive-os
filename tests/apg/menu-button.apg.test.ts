@@ -1,5 +1,5 @@
 /**
- * APG Menu Button — Unified Test (Tier 1: headless via createOsPage)
+ * APG Menu Button — Unified Test (Tier 1: headless via createPage)
  *
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/
  *
@@ -20,7 +20,8 @@
  *   - Enter on menuitem → menu closes + focus restore to trigger
  */
 
-import { createOsPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 
 const MENU_ITEMS = [
@@ -31,12 +32,14 @@ const MENU_ITEMS = [
 ];
 
 function createMenuPage(focusedItem = "action-cut") {
-  const page = createOsPage();
-  page.goto("apg-menu-button-popup", {
+  const app = defineApp("test-menu-button", {});
+  const zone = app.createZone("apg-menu-button-popup");
+  zone.bind({
     role: "menu",
-    items: MENU_ITEMS,
-    focusedItemId: focusedItem,
+    getItems: () => MENU_ITEMS,
   });
+  const page = createPage(app);
+  page.goto("apg-menu-button-popup", { focusedItemId: focusedItem });
   return page;
 }
 
