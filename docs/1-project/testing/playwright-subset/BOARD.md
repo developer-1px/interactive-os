@@ -18,9 +18,9 @@
 
 ## Now
 
-- [ ] T4: testbot-docs.ts §4 — document.querySelector 제거 (Playwright 위반)
-- [ ] T5: testbot-builder-arrow.ts — document.querySelector 제거
-- [ ] T6: Auto-discovery manifest — glob import으로 수동 manifest 대체
+- [x] T4: testbot-docs.ts §4 — document.querySelector 제거 — tsc 0 | 1994 tests ✅
+- [x] T5: testbot-builder-arrow.ts — document.querySelector 제거 (§0 진단 삭제) — tsc 0 | 1994 tests ✅
+- [x] T6: Auto-discovery manifest — dual-glob (eager metadata + lazy scripts) — tsc 0 | 1994 tests ✅
 
 ## Later
 
