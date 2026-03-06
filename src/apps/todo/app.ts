@@ -24,16 +24,17 @@ import {
   selectTodosByCategory,
   selectVisibleTodos,
 } from "@apps/todo/selectors";
-import { OS_FIELD_START_EDIT } from "@os-sdk/os";
-import {
-  OS_OVERLAY_CLOSE,
-  OS_OVERLAY_OPEN,
-} from "@os-sdk/os";
-import { OS_CHECK, OS_SELECTION_CLEAR } from "@os-sdk/os";
-import { OS_NOTIFY } from "@os-sdk/os";
-import { os } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { history } from "@os-sdk/app/modules/history";
+import {
+  OS_CHECK,
+  OS_FIELD_START_EDIT,
+  OS_NOTIFY,
+  OS_OVERLAY_CLOSE,
+  OS_OVERLAY_OPEN,
+  OS_SELECTION_CLEAR,
+  os,
+} from "@os-sdk/os";
 import { produce } from "immer";
 import { z } from "zod";
 
@@ -155,10 +156,10 @@ export const requestDeleteTodo = listCollection.command(
       payload.ids.includes(id),
     )
       ? [
-        // Close first to clear any stale overlay from HMR or interrupted flow
-        OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
-        OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
-      ]
+          // Close first to clear any stale overlay from HMR or interrupted flow
+          OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+          OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
+        ]
       : undefined,
   }),
 );
@@ -410,11 +411,15 @@ export const TodoSearchUI = searchZone.bind({
 
 const toolbarZone = TodoApp.createZone("toolbar");
 
-export const toggleView = toolbarZone.command("toggleView", (ctx) => ({
-  state: produce(ctx.state, (draft) => {
-    draft.ui.viewMode = ctx.state.ui.viewMode === "board" ? "list" : "board";
+export const toggleView = toolbarZone.command(
+  "toggleView",
+  (ctx) => ({
+    state: produce(ctx.state, (draft) => {
+      draft.ui.viewMode = ctx.state.ui.viewMode === "board" ? "list" : "board";
+    }),
   }),
-}), { key: "Meta+Shift+V" });
+  { key: "Meta+Shift+V" },
+);
 
 export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => {
   const completedIds = Object.values(ctx.state.data.todos)
@@ -487,7 +492,9 @@ export const TodoSidebar = {
     moveCategoryDown: sidebarCollection.moveDown,
   },
   triggers: {
-    SelectCategory: TodoApp.createTrigger(selectCategory, { id: "select-category" }),
+    SelectCategory: TodoApp.createTrigger(selectCategory, {
+      id: "select-category",
+    }),
   },
 };
 

@@ -5,7 +5,6 @@
 import type { Transaction } from "@kernel/core/transaction";
 import { type AppPage, createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
-import { UnifiedInspector } from "../../panels/UnifiedInspector";
 import {
   INSPECTOR_SCROLL_TO_BOTTOM,
   InspectorApp,
@@ -14,6 +13,7 @@ import {
   setScrollState,
   updateSearchQuery,
 } from "../../app";
+import { UnifiedInspector } from "../../panels/UnifiedInspector";
 
 // Note: To properly test React integration, we need the UI component.
 // But we might simulate it with a headless page if we just test the App definition.
@@ -88,12 +88,35 @@ describe("Feature: Inspector Dogfooding T2 (파생 데이터 연산 분리)", ()
     page = createPage(InspectorApp, UnifiedInspector);
   });
 
-  // Mock transactions for testing the selector
-  const mockTxs = [
-    { id: 1, handlerScope: "kernel", command: { type: "system/init" } },
-    { id: 2, handlerScope: "ui", command: { type: "dispatch" } },
-    { id: 3, handlerScope: "ui", command: { type: "render" } },
-  ] as unknown as Transaction[]; // Mocking partial Transaction objects
+  const baseTx: Omit<Transaction, "id" | "handlerScope" | "command"> = {
+    timestamp: 0,
+    bubblePath: [],
+    effects: null,
+    changes: [],
+    stateBefore: null,
+    stateAfter: null,
+  };
+
+  const mockTxs: Transaction[] = [
+    {
+      ...baseTx,
+      id: 1,
+      handlerScope: "kernel",
+      command: { type: "system/init", payload: undefined },
+    },
+    {
+      ...baseTx,
+      id: 2,
+      handlerScope: "ui",
+      command: { type: "dispatch", payload: undefined },
+    },
+    {
+      ...baseTx,
+      id: 3,
+      handlerScope: "ui",
+      command: { type: "render", payload: undefined },
+    },
+  ];
 
   describe("Scenario: 검색어에 따른 트랜잭션 필터링", () => {
     it("selectFilteredTransactions는 검색어 문자열을 포함하는 트랜잭션만 반환한다", () => {
@@ -122,9 +145,7 @@ describe("Feature: Inspector Dogfooding T2 (파생 데이터 연산 분리)", ()
       page.dispatch(updateSearchQuery({ value: "" })); // Clear the search query to isolate this test
       const filtered = selectFilteredTransactions(page.state, mockTxs);
       expect(filtered.length).toBe(2);
-      expect(filtered.map((t) => (t as unknown as { id: number }).id)).toEqual([
-        2, 3,
-      ]);
+      expect(filtered.map((t) => t.id)).toEqual([2, 3]);
     });
   });
 });
@@ -153,13 +174,13 @@ describe("Feature: Inspector Dogfooding T3 (명시적 OS_SCROLL 커맨드 구축
     it("isUserScrolled를 조작하고 수동 스크롤 트리거 시 상태가 false로 리셋된다", () => {
       // Assume we can set isUserScrolled = true
       page.dispatch(setScrollState({ isUserScrolled: true }));
-      expect((page.state as any).isUserScrolled).toBe(true);
+      expect(page.state.isUserScrolled).toBe(true);
 
       // Assume there's an item to trigger scroll to bottom
       page.goto("inspector-scroll", { items: ["scrollToBottomBtn"] });
       page.click("scrollToBottomBtn");
 
-      expect((page.state as any).isUserScrolled).toBe(false);
+      expect(page.state.isUserScrolled).toBe(false);
     });
   });
 });

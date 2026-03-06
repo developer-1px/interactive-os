@@ -13,9 +13,55 @@ import {
   FieldRegistry,
   useFieldRegistry,
 } from "@os-core/engine/registries/fieldRegistry";
-import { act, renderHook } from "@testing-library/react";
-import { useEffect, useRef } from "react";
+import { act, createElement, useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// ─── Minimal renderHook (no @testing-library) ────────────────────────────────
+
+function renderHook<T, P = undefined>(
+  fn: (props: P) => T,
+  options?: { initialProps: P },
+) {
+  const result = { current: undefined as T };
+  let triggerRerender: ((p: P) => void) | undefined;
+
+  function Wrapper({ hookProps }: { hookProps: P }) {
+    result.current = fn(hookProps);
+    return null;
+  }
+
+  function WrapperWithState() {
+    const [props, setProps] = useState<P>(
+      (options?.initialProps ?? undefined) as P,
+    );
+    triggerRerender = setProps;
+    return createElement(Wrapper, { hookProps: props });
+  }
+
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  act(() => {
+    root.render(createElement(WrapperWithState));
+  });
+
+  return {
+    result,
+    rerender: (newProps: P) => {
+      act(() => {
+        triggerRerender?.(newProps);
+      });
+    },
+    unmount: () => {
+      act(() => {
+        root.unmount();
+      });
+      container.remove();
+    },
+  };
+}
 
 // ─── 수정된 패턴 (Field.tsx 실제 코드와 동일) ───────────────────────────────
 
@@ -57,22 +103,12 @@ afterEach(() => {
 
 describe("Field prop→registry sync: infinite loop guard", () => {
   it("[REGRESSION] jsdom은 브라우저 루프를 재현 못함 — 구조적 문서화", () => {
-    // NOTE: jsdom/vitest에서 useSyncExternalStore는 브라우저 concurrent mode와
-    // 다르게 동작하여 루프가 재현되지 않는다.
-    //
-    // 실제 루프 경로 (브라우저):
-    //   updateValue → emit → re-render → fieldData?.state.value 변경
-    //   → useEffect(deps=[..., fieldData?.state.value]) 재실행 → 루프
-    //
-    // 수정 근거: registryValueRef로 읽어 deps에서 제거하면 effect는
-    // [value, fieldId] 변경 시에만 재실행된다.
     expect(true).toBe(true);
   });
 
   it("[FIX] prop ≠ registry이면 updateValue를 정확히 1번 호출한다", () => {
     const spy = vi.spyOn(FieldRegistry, "updateValue");
 
-    // registry = "" (초기값), prop = "hello" → 불일치 → updateValue 1회
     const { unmount } = renderHook(() =>
       useFixedFieldSync(FIELD_ID, "hello", false),
     );
@@ -116,10 +152,7 @@ describe("Field prop→registry sync: infinite loop guard", () => {
       { initialProps: { value: "first" } },
     );
 
-    act(() => {
-      rerender({ value: "second" });
-    });
-
+    rerender({ value: "second" });
     unmount();
 
     // "first" 1회 + "second" 1회 = 총 2회 (루프 없음)

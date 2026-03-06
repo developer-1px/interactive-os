@@ -122,7 +122,14 @@ export interface CollectionBindingsResult {
   /** Item accessor — returns ordered item IDs for stale focus recovery */
   getItems: () => string[];
   /** Keybindings for collection operations (e.g., Meta+D → duplicate) */
-  keybindings: { key: string; command: (cursor: { focusId: string; selection: string[] }) => BaseCommand | BaseCommand[]; when?: "editing" | "navigating" }[];
+  keybindings: {
+    key: string;
+    command: (cursor: {
+      focusId: string;
+      selection: string[];
+    }) => BaseCommand | BaseCommand[];
+    when?: "editing" | "navigating";
+  }[];
 }
 
 // ═══════════════════════════════════════════════════════════════════

@@ -9,9 +9,9 @@
 
 export {
   Trigger,
-  useOverlayContext,
-  type TriggerProps,
-  type TriggerPortalProps,
-  type TriggerPopoverProps,
   type TriggerDismissProps,
+  type TriggerPopoverProps,
+  type TriggerPortalProps,
+  type TriggerProps,
+  useOverlayContext,
 } from "./trigger/index";

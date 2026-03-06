@@ -8,8 +8,8 @@
  * We use selectDoc command dispatched via onAction callback.
  */
 
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it, vi } from "vitest";
 
 describe("T5: DocsDashboard — selectDoc via OS command", () => {

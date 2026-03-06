@@ -12,6 +12,9 @@
  *   - Playwright E2E:   import { expect } from "@playwright/test"
  */
 
+import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
+import type { FocusGroupConfig } from "@os-core/schema/types/focus/config/FocusGroupConfig";
+
 import { expect as defaultExpect } from "./expect";
 import type { Page } from "./types";
 
@@ -32,7 +35,60 @@ export type ExpectLocator = (locator: unknown) => {
 export interface TestScript {
   name: string;
   group?: string;
-  run: (page: Page, expect: ExpectLocator) => Promise<void>;
+  /** Zone this script targets — used by browser runner to resolve items from ZoneRegistry */
+  zone?: string;
+  run: (page: Page, expect: ExpectLocator, items?: string[]) => Promise<void>;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Scenario type — zone fixture + scripts bundle for auto-runner
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * A TestScenario bundles zone setup with scripts.
+ *
+ * testbot-*.ts files export `scenarios: TestScenario[]` to enable
+ * auto-running in vitest without hand-written boilerplate test files.
+ *
+ * Infra-layer (K3): uses OS concepts (zone, role) — NOT Playwright subset.
+ * run() inside each TestScript remains pure Playwright subset (K2).
+ */
+export interface TestScenario {
+  /** Zone ID to pass to page.goto() */
+  zone: string;
+  /** Item IDs for the zone (static — prefer getItems for real apps) */
+  items?: string[];
+  /** Dynamic item discovery — pure function returning real item IDs from zone bindings */
+  getItems?: () => string[];
+  /** ARIA role for the zone */
+  role: ZoneRole;
+  /** Optional FocusGroupConfig overrides */
+  config?: Partial<FocusGroupConfig>;
+  /** Optional initial state (selection, expanded, values) */
+  initial?: {
+    selection?: string[];
+    expanded?: string[];
+    values?: Record<string, number>;
+  };
+  /** Scripts to run against this zone */
+  scripts: TestScript[];
+}
+
+/**
+ * Extract TestScenario[] from a loaded testbot module.
+ *
+ * Convention: testbot-*.ts files export `scenarios: TestScenario[]`.
+ * The name MUST be "scenarios" — no auto-detection, explicit contract.
+ */
+export function extractScenarios(mod: Record<string, unknown>): TestScenario[] {
+  const scenarios = mod.scenarios;
+  if (Array.isArray(scenarios) && scenarios.length > 0) {
+    const first = scenarios[0] as Record<string, unknown>;
+    if (typeof first.zone === "string" && Array.isArray(first.scripts)) {
+      return scenarios as TestScenario[];
+    }
+  }
+  return [];
 }
 
 // ═══════════════════════════════════════════════════════════════════

@@ -6,9 +6,8 @@
  * Side-effect import: `import "@/command-palette/register"`
  */
 
-import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-sdk/os";
-import { os } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN, os } from "@os-sdk/os";
 
 // ── App ──────────────────────────────────────────────────────────
 

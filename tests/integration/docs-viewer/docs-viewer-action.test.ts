@@ -11,8 +11,8 @@
  *   - selectDoc updates activePath in state
  */
 
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it, vi } from "vitest";
 
 describe("T6: DocsViewer — navigation via OS selectDoc command", () => {

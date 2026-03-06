@@ -76,9 +76,9 @@ export function NCPProductHeroBlock({ id }: { id: string }) {
                           ›
                         </span>
                       )}
-                      <a className="text-sm font-semibold text-white/80 cursor-pointer underline underline-offset-2 hover:text-white">
+                      <span className="text-sm font-semibold text-white/80 cursor-pointer underline underline-offset-2 hover:text-white">
                         {label}
-                      </a>
+                      </span>
                     </li>
                   ))}
                   <li className="flex items-center">

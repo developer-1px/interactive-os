@@ -11,23 +11,34 @@
  * DocsViewer zone 구성에서 올바르게 동작하는지 headless로 검증한다.
  */
 
-import { createPage } from "@os-devtool/testing/page";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { createPage } from "@os-devtool/testing/page";
 import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { DocsApp } from "../../app";
-import {
-    FAVORITE_ITEMS,
-    NAVBAR_ITEMS,
-    READER_ITEMS,
-    RECENT_ITEMS,
-    SIDEBAR_ITEMS,
-} from "../../testbot-docs";
+
+// Tab navigation test fixtures — any IDs work (testing zone-switching mechanics, not real content)
+const NAVBAR_ITEMS = [
+  "docs-btn-back",
+  "docs-btn-forward",
+  "docs-toggle-pin",
+  "docs-btn-search",
+];
+const FAVORITE_ITEMS = ["fav-tab-a", "fav-tab-b"];
+const RECENT_ITEMS = ["recent-tab-a", "recent-tab-b", "recent-tab-c"];
+const SIDEBAR_ITEMS = [
+  "sb-tab-a",
+  "sb-tab-b",
+  "sb-tab-c",
+  "sb-tab-d",
+  "sb-tab-e",
+];
+const READER_ITEMS = ["reader-tab-1", "reader-tab-2"];
 
 interface DocsState {
-    activePath: string | null;
-    searchOpen: boolean;
-    favVersion: number;
+  activePath: string | null;
+  searchOpen: boolean;
+  favVersion: number;
 }
 
 let page: AppPage<DocsState>;
@@ -38,43 +49,43 @@ let page: AppPage<DocsState>;
 
 /** All zone IDs in Tab order with their default items */
 const ZONE_ITEMS: Record<string, string[]> = {
-    "docs-navbar": NAVBAR_ITEMS,
-    "docs-favorites": FAVORITE_ITEMS,
-    "docs-recent": RECENT_ITEMS,
-    "docs-sidebar": SIDEBAR_ITEMS,
-    "docs-reader": READER_ITEMS,
+  "docs-navbar": NAVBAR_ITEMS,
+  "docs-favorites": FAVORITE_ITEMS,
+  "docs-recent": RECENT_ITEMS,
+  "docs-sidebar": SIDEBAR_ITEMS,
+  "docs-reader": READER_ITEMS,
 };
 
 const ALL_ZONES = Object.keys(ZONE_ITEMS);
 
 function setupAllZones(activeZone: string, focusedItemId?: string) {
-    // Register all zones — order determines Tab sequence.
-    // goto() sets activeZoneId, so we call the target zone LAST
-    // to avoid last-writer-wins overriding the intended active zone.
-    for (const zoneId of ALL_ZONES) {
-        if (zoneId === activeZone) continue;
-        page.goto(zoneId, { focusedItemId: null });
-    }
-    // Target zone last → sets activeZoneId correctly
-    page.goto(activeZone, {
-        focusedItemId: focusedItemId ?? ZONE_ITEMS[activeZone]?.[0] ?? null,
-    });
+  // Register all zones — order determines Tab sequence.
+  // goto() sets activeZoneId, so we call the target zone LAST
+  // to avoid last-writer-wins overriding the intended active zone.
+  for (const zoneId of ALL_ZONES) {
+    if (zoneId === activeZone) continue;
+    page.goto(zoneId, { focusedItemId: null });
+  }
+  // Target zone last → sets activeZoneId correctly
+  page.goto(activeZone, {
+    focusedItemId: focusedItemId ?? ZONE_ITEMS[activeZone]?.[0] ?? null,
+  });
 
-    // Inject getItems into ZoneRegistry for headless Tab resolution.
-    // In the browser, DOM_ZONE_ORDER discovers items via DOM queries.
-    // Headless needs getItems() on each zone entry.
-    for (const [zoneId, items] of Object.entries(ZONE_ITEMS)) {
-        const entry = ZoneRegistry.get(zoneId);
-        if (entry) entry.getItems = () => items;
-    }
+  // Inject getItems into ZoneRegistry for headless Tab resolution.
+  // In the browser, DOM_ZONE_ORDER discovers items via DOM queries.
+  // Headless needs getItems() on each zone entry.
+  for (const [zoneId, items] of Object.entries(ZONE_ITEMS)) {
+    const entry = ZoneRegistry.get(zoneId);
+    if (entry) entry.getItems = () => items;
+  }
 }
 
 beforeEach(() => {
-    page = createPage(DocsApp);
+  page = createPage(DocsApp);
 });
 
 afterEach(() => {
-    page.cleanup();
+  page.cleanup();
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -82,33 +93,33 @@ afterEach(() => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("§1 tabIndex Projection", () => {
-    function setupSidebar() {
-        page.goto("docs-sidebar");
-        const entry = ZoneRegistry.get("docs-sidebar");
-        if (entry) entry.getItems = () => SIDEBAR_ITEMS;
-    }
+  function setupSidebar() {
+    page.goto("docs-sidebar");
+    const entry = ZoneRegistry.get("docs-sidebar");
+    if (entry) entry.getItems = () => SIDEBAR_ITEMS;
+  }
 
-    it("focused item has tabIndex=0, others have tabIndex=-1", () => {
-        setupSidebar();
-        page.click(SIDEBAR_ITEMS[0]!);
+  it("focused item has tabIndex=0, others have tabIndex=-1", () => {
+    setupSidebar();
+    page.click(SIDEBAR_ITEMS[0]!);
 
-        // Focused item → tabIndex 0
-        const focusedAttrs = page.attrs(SIDEBAR_ITEMS[0]!);
-        expect(focusedAttrs.tabIndex).toBe(0);
+    // Focused item → tabIndex 0
+    const focusedAttrs = page.attrs(SIDEBAR_ITEMS[0]!);
+    expect(focusedAttrs.tabIndex).toBe(0);
 
-        // Non-focused items → tabIndex -1
-        const otherAttrs = page.attrs(SIDEBAR_ITEMS[1]!);
-        expect(otherAttrs.tabIndex).toBe(-1);
-    });
+    // Non-focused items → tabIndex -1
+    const otherAttrs = page.attrs(SIDEBAR_ITEMS[1]!);
+    expect(otherAttrs.tabIndex).toBe(-1);
+  });
 
-    it("after ArrowDown, tabIndex moves to new focused item", () => {
-        setupSidebar();
-        page.click(SIDEBAR_ITEMS[0]!);
-        page.keyboard.press("ArrowDown");
+  it("after ArrowDown, tabIndex moves to new focused item", () => {
+    setupSidebar();
+    page.click(SIDEBAR_ITEMS[0]!);
+    page.keyboard.press("ArrowDown");
 
-        expect(page.attrs(SIDEBAR_ITEMS[0]!).tabIndex).toBe(-1);
-        expect(page.attrs(SIDEBAR_ITEMS[1]!).tabIndex).toBe(0);
-    });
+    expect(page.attrs(SIDEBAR_ITEMS[0]!).tabIndex).toBe(-1);
+    expect(page.attrs(SIDEBAR_ITEMS[1]!).tabIndex).toBe(0);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -116,58 +127,52 @@ describe("§1 tabIndex Projection", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("§2 Tab — Zone Escape", () => {
-    it("Tab from favorites → should escape to next zone", () => {
-        setupAllZones("docs-favorites", FAVORITE_ITEMS[0]);
+  it("Tab from favorites → should escape to next zone", () => {
+    setupAllZones("docs-favorites", FAVORITE_ITEMS[0]);
 
-        console.log(`[BEFORE] activeZone=${page.activeZoneId()}, focused=${page.focusedItemId()}`);
+    page.keyboard.press("Tab");
 
-        page.keyboard.press("Tab");
+    const afterZone = page.activeZoneId();
+    const afterFocus = page.focusedItemId();
 
-        const afterZone = page.activeZoneId();
-        const afterFocus = page.focusedItemId();
-        console.log(`[AFTER Tab] activeZone=${afterZone}, focused=${afterFocus}`);
+    // Tab should have moved to a different zone
+    expect(afterZone).not.toBe("docs-favorites");
+    // Should have a focused item in the new zone
+    expect(afterFocus).toBeTruthy();
+  });
 
-        // Tab should have moved to a different zone
-        expect(afterZone).not.toBe("docs-favorites");
-        // Should have a focused item in the new zone
-        expect(afterFocus).toBeTruthy();
-    });
+  it("Tab from recent → should escape to next zone", () => {
+    setupAllZones("docs-recent", RECENT_ITEMS[0]);
 
-    it("Tab from recent → should escape to next zone", () => {
-        setupAllZones("docs-recent", RECENT_ITEMS[0]);
+    page.keyboard.press("Tab");
 
-        page.keyboard.press("Tab");
+    const afterZone = page.activeZoneId();
 
-        const afterZone = page.activeZoneId();
-        console.log(`[AFTER Tab from recent] activeZone=${afterZone}, focused=${page.focusedItemId()}`);
+    expect(afterZone).not.toBe("docs-recent");
+    expect(page.focusedItemId()).toBeTruthy();
+  });
 
-        expect(afterZone).not.toBe("docs-recent");
-        expect(page.focusedItemId()).toBeTruthy();
-    });
+  it("Tab from sidebar → should escape to next zone", () => {
+    setupAllZones("docs-sidebar", SIDEBAR_ITEMS[0]);
 
-    it("Tab from sidebar → should escape to next zone", () => {
-        setupAllZones("docs-sidebar", SIDEBAR_ITEMS[0]);
+    page.keyboard.press("Tab");
 
-        page.keyboard.press("Tab");
+    const afterZone = page.activeZoneId();
 
-        const afterZone = page.activeZoneId();
-        console.log(`[AFTER Tab from sidebar] activeZone=${afterZone}, focused=${page.focusedItemId()}`);
+    expect(afterZone).not.toBe("docs-sidebar");
+    expect(page.focusedItemId()).toBeTruthy();
+  });
 
-        expect(afterZone).not.toBe("docs-sidebar");
-        expect(page.focusedItemId()).toBeTruthy();
-    });
+  it("Shift+Tab from sidebar → should escape backward", () => {
+    setupAllZones("docs-sidebar", SIDEBAR_ITEMS[0]);
 
-    it("Shift+Tab from sidebar → should escape backward", () => {
-        setupAllZones("docs-sidebar", SIDEBAR_ITEMS[0]);
+    page.keyboard.press("Shift+Tab");
 
-        page.keyboard.press("Shift+Tab");
+    const afterZone = page.activeZoneId();
 
-        const afterZone = page.activeZoneId();
-        console.log(`[AFTER Shift+Tab from sidebar] activeZone=${afterZone}, focused=${page.focusedItemId()}`);
-
-        expect(afterZone).not.toBe("docs-sidebar");
-        expect(page.focusedItemId()).toBeTruthy();
-    });
+    expect(afterZone).not.toBe("docs-sidebar");
+    expect(page.focusedItemId()).toBeTruthy();
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -175,42 +180,42 @@ describe("§2 Tab — Zone Escape", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("§3 Tab — Full Cycle", () => {
-    it(`Tab ${ALL_ZONES.length}번 → 모든 zone을 순회하고 원래 zone으로 돌아온다`, () => {
-        setupAllZones("docs-navbar", NAVBAR_ITEMS[0]);
+  it(`Tab ${ALL_ZONES.length}번 → 모든 zone을 순회하고 원래 zone으로 돌아온다`, () => {
+    setupAllZones("docs-navbar", NAVBAR_ITEMS[0]);
 
-        const startZone = page.activeZoneId();
-        const visitedZones: string[] = [startZone!];
+    const startZone = page.activeZoneId();
+    const visitedZones: string[] = [startZone!];
 
-        for (let i = 0; i < ALL_ZONES.length; i++) {
-            page.keyboard.press("Tab");
-            const z = page.activeZoneId();
-            visitedZones.push(z!);
-        }
+    for (let i = 0; i < ALL_ZONES.length; i++) {
+      page.keyboard.press("Tab");
+      const z = page.activeZoneId();
+      visitedZones.push(z!);
+    }
 
-        // Should visit all zones
-        const uniqueZones = new Set(visitedZones);
-        expect(uniqueZones.size).toBe(ALL_ZONES.length);
+    // Should visit all zones
+    const uniqueZones = new Set(visitedZones);
+    expect(uniqueZones.size).toBe(ALL_ZONES.length);
 
-        // After N Tabs with N zones, should return to start
-        expect(visitedZones[visitedZones.length - 1]).toBe(startZone);
-    });
+    // After N Tabs with N zones, should return to start
+    expect(visitedZones[visitedZones.length - 1]).toBe(startZone);
+  });
 
-    it(`Shift+Tab ${ALL_ZONES.length}번 → 역방향으로 모든 zone 순회`, () => {
-        setupAllZones("docs-navbar", NAVBAR_ITEMS[0]);
+  it(`Shift+Tab ${ALL_ZONES.length}번 → 역방향으로 모든 zone 순회`, () => {
+    setupAllZones("docs-navbar", NAVBAR_ITEMS[0]);
 
-        const startZone = page.activeZoneId();
-        const visitedZones: string[] = [startZone!];
+    const startZone = page.activeZoneId();
+    const visitedZones: string[] = [startZone!];
 
-        for (let i = 0; i < ALL_ZONES.length; i++) {
-            page.keyboard.press("Shift+Tab");
-            const z = page.activeZoneId();
-            visitedZones.push(z!);
-        }
+    for (let i = 0; i < ALL_ZONES.length; i++) {
+      page.keyboard.press("Shift+Tab");
+      const z = page.activeZoneId();
+      visitedZones.push(z!);
+    }
 
-        const uniqueZones = new Set(visitedZones);
-        expect(uniqueZones.size).toBe(ALL_ZONES.length);
-        expect(visitedZones[visitedZones.length - 1]).toBe(startZone);
-    });
+    const uniqueZones = new Set(visitedZones);
+    expect(uniqueZones.size).toBe(ALL_ZONES.length);
+    expect(visitedZones[visitedZones.length - 1]).toBe(startZone);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -218,20 +223,20 @@ describe("§3 Tab — Full Cycle", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("§4 tabIndex after Tab transition", () => {
-    it("Tab 전환 후 새 zone의 focused item이 tabIndex=0", () => {
-        setupAllZones("docs-favorites", FAVORITE_ITEMS[0]);
+  it("Tab 전환 후 새 zone의 focused item이 tabIndex=0", () => {
+    setupAllZones("docs-favorites", FAVORITE_ITEMS[0]);
 
-        // Before Tab: favorites의 first item이 tabIndex=0
-        expect(page.attrs(FAVORITE_ITEMS[0]!, "docs-favorites").tabIndex).toBe(0);
+    // Before Tab: favorites의 first item이 tabIndex=0
+    expect(page.attrs(FAVORITE_ITEMS[0]!, "docs-favorites").tabIndex).toBe(0);
 
-        page.keyboard.press("Tab");
+    page.keyboard.press("Tab");
 
-        const newZone = page.activeZoneId();
-        const newFocused = page.focusedItemId();
+    const newZone = page.activeZoneId();
+    const newFocused = page.focusedItemId();
 
-        if (newFocused && newZone) {
-            // 새 zone의 focused item → tabIndex 0
-            expect(page.attrs(newFocused, newZone).tabIndex).toBe(0);
-        }
-    });
+    if (newFocused && newZone) {
+      // 새 zone의 focused item → tabIndex 0
+      expect(page.attrs(newFocused, newZone).tabIndex).toBe(0);
+    }
+  });
 });

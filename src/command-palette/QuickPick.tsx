@@ -34,16 +34,16 @@
  */
 
 import { Kbd } from "@inspector/shell/components/Kbd";
+import { Item } from "@os-react/6-project/Item";
+import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
+import { Zone } from "@os-react/6-project/Zone";
 import {
   OS_FOCUS,
   OS_NAVIGATE,
   OS_OVERLAY_CLOSE,
   OS_OVERLAY_OPEN,
+  os,
 } from "@os-sdk/os";
-import { os } from "@os-sdk/os";
-import { Item } from "@os-react/6-project/Item";
-import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
-import { Zone } from "@os-react/6-project/Zone";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -221,8 +221,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
       // This sets activeZoneId so OS_NAVIGATE works correctly.
       const containerEl = containerRef.current;
       if (containerEl) {
-        const firstItem =
-          containerEl.querySelector<HTMLElement>("[data-item]");
+        const firstItem = containerEl.querySelector<HTMLElement>("[data-item]");
         if (firstItem) {
           const itemId = firstItem.id;
           if (itemId) {

@@ -11,7 +11,6 @@
 
 import { BuilderApp } from "@apps/builder/app";
 import type { BuilderState } from "@apps/builder/model/appState";
-import { BuilderPage } from "@/pages/BuilderPage";
 import { OS_OVERLAY_CLOSE } from "@os-core/4-command/overlay/overlay";
 import { os } from "@os-core/engine/kernel";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
@@ -19,6 +18,7 @@ import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { createPage } from "@os-devtool/testing/page";
 import type { AppPage } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { BuilderPage } from "@/pages/BuilderPage";
 
 const MENU_ITEMS = [
   "locale-option-ko",

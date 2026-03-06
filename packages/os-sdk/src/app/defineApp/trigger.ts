@@ -25,7 +25,9 @@ export function createSimpleTrigger(
   options?: TriggerOptions,
 ): React.FC<{ children: ReactNode }> {
   if (!options?.id) {
-    throw new Error("[Trigger] onActivate requires an id. Use createTrigger(command, { id: \"my-id\" })");
+    throw new Error(
+      '[Trigger] onActivate requires an id. Use createTrigger(command, { id: "my-id" })',
+    );
   }
   const SimpleTrigger: React.FC<{ children: ReactNode }> = ({
     children,
@@ -57,7 +59,9 @@ export function createDynamicTrigger<P>(
   options?: TriggerOptions,
 ): React.FC<DynamicTriggerProps<P>> {
   if (!options?.id) {
-    throw new Error("[Trigger] onActivate requires an id. Use createTrigger(factory, { id: \"my-id\" })");
+    throw new Error(
+      '[Trigger] onActivate requires an id. Use createTrigger(factory, { id: "my-id" })',
+    );
   }
   const DynamicTrigger: React.FC<DynamicTriggerProps<P>> = ({
     children,

@@ -63,7 +63,11 @@ export interface ZoneOptions {
   dismiss?: Partial<DismissConfig> | undefined;
   project?: Partial<ProjectConfig> | undefined;
   expand?: Partial<ExpandConfig> | undefined;
-  value?: Partial<import("@os-core/schema/types/focus/config/FocusGroupConfig").ValueConfig> | undefined;
+  value?:
+    | Partial<
+        import("@os-core/schema/types/focus/config/FocusGroupConfig").ValueConfig
+      >
+    | undefined;
   inputmap?: InputMap | undefined;
 }
 

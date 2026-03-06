@@ -220,7 +220,6 @@ export const resolveCorner: NavigationStrategy = (
     candidates.push({ id, rect: r });
   }
 
-
   if (candidates.length <= 1) {
     return { targetId: currentId, stickyX: null, stickyY: null };
   }

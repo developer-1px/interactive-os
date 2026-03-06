@@ -1,10 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./docs-viewer.css";
-import { Root } from "@os-react/1-listen/Root";
-import { CommandPalette } from "@/command-palette/CommandPalette";
 import { InspectorShell } from "@inspector/shell/InspectorShell";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
+import { Root } from "@os-react/1-listen/Root";
+import { CommandPalette } from "@/command-palette/CommandPalette";
 import { DocsViewer } from "./DocsViewer";
 
 // OS plugin registrations (side-effect imports)

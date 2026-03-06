@@ -13,8 +13,8 @@
  */
 
 import { OS_SELECT } from "@os-core/4-command/selection/select";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
   assertHomeEnd,
@@ -72,7 +72,10 @@ describe("APG Toolbar: Navigation", () => {
     factoryAtFirst: (() => createToolbar("bold-btn")) as any,
     factoryAtLast: (() => createToolbar("link-btn")) as any,
   });
-  assertHomeEnd(createToolbar as any, { firstId: "bold-btn", lastId: "link-btn" });
+  assertHomeEnd(createToolbar as any, {
+    firstId: "bold-btn",
+    lastId: "link-btn",
+  });
   assertOrthogonalIgnored(createToolbar as any, "horizontal");
   assertNoSelection(createToolbar as any);
 });
@@ -91,7 +94,18 @@ describe("APG Toolbar: Tab Escape", () => {
     });
     const editor = app.createZone("editor");
     editor.bind({
-      getItems: () => ["line-1", "line-2", "line-3", "line-4", "line-5", "line-6", "line-7", "line-8", "line-9", "line-10"],
+      getItems: () => [
+        "line-1",
+        "line-2",
+        "line-3",
+        "line-4",
+        "line-5",
+        "line-6",
+        "line-7",
+        "line-8",
+        "line-9",
+        "line-10",
+      ],
     });
     const page = createPage(app);
     // Register both zones — order determines Tab navigation

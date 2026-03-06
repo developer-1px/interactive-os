@@ -188,17 +188,17 @@ export function PointerListener() {
         for (const cmd of result.commands) {
           const opts = result.meta
             ? {
-              meta: {
-                ...result.meta,
-                pipeline: {
-                  sensed: mouseInput,
-                  resolved: {
-                    preventDefault: result.preventDefault,
-                    fallback: result.fallback,
+                meta: {
+                  ...result.meta,
+                  pipeline: {
+                    sensed: mouseInput,
+                    resolved: {
+                      preventDefault: result.preventDefault,
+                      fallback: result.fallback,
+                    },
                   },
                 },
-              },
-            }
+              }
             : undefined;
           os.dispatch(cmd, opts);
         }
@@ -286,9 +286,9 @@ export function PointerListener() {
         os.dispatch(
           drop
             ? OS_DRAG_OVER({
-              overItemId: drop.overItemId,
-              position: drop.position,
-            })
+                overItemId: drop.overItemId,
+                position: drop.position,
+              })
             : OS_DRAG_OVER({ overItemId: null, position: null }),
         );
       }
@@ -341,9 +341,9 @@ export function PointerListener() {
               os.dispatch(
                 clickTarget.type === "expand"
                   ? OS_EXPAND({
-                    itemId: clickTarget.itemId,
-                    zoneId: clickTarget.zoneId,
-                  })
+                      itemId: clickTarget.itemId,
+                      zoneId: clickTarget.zoneId,
+                    })
                   : OS_CHECK({ targetId: clickTarget.itemId }),
               );
               break;
@@ -355,8 +355,7 @@ export function PointerListener() {
               if (activeZoneId) {
                 const zone = state.os.focus.zones[activeZoneId];
                 const entry = ZoneRegistry.get(activeZoneId);
-                const clickCommands =
-                  entry?.config?.inputmap?.["click"] ?? [];
+                const clickCommands = entry?.config?.inputmap?.["click"] ?? [];
 
                 const clickResult = resolveClick({
                   activateOnClick: clickCommands.length > 0,
@@ -371,11 +370,11 @@ export function PointerListener() {
                 if (clickResult.commands.length > 0) {
                   const opts = clickResult.meta
                     ? {
-                      meta: {
-                        ...clickResult.meta,
-                        pipeline: { sensed: {}, resolved: {} },
-                      },
-                    }
+                        meta: {
+                          ...clickResult.meta,
+                          pipeline: { sensed: {}, resolved: {} },
+                        },
+                      }
                     : undefined;
                   dispatchBatch(clickResult.commands, opts);
                 }

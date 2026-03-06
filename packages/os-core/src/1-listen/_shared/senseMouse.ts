@@ -260,12 +260,12 @@ export function getDropPosition(
 export type ClickTarget =
   | { type: "inspector" }
   | {
-    type: "trigger";
-    triggerId: string;
-    overlayId: string;
-    overlayType: string;
-    isOpen: boolean;
-  }
+      type: "trigger";
+      triggerId: string;
+      overlayId: string;
+      overlayType: string;
+      isOpen: boolean;
+    }
   | { type: "expand"; itemId: string; zoneId: string }
   | { type: "check"; itemId: string; zoneId: string }
   | { type: "item"; itemId: string | null; isCurrentPage: boolean }

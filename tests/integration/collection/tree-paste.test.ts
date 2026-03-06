@@ -9,10 +9,10 @@
 
 import { BuilderApp, sidebarCollection } from "@apps/builder/app";
 import type { TestTreeNode } from "@os-sdk/library/collection/__tests__/fixtures/treeTestBlocks";
+import { TREE_TEST_BLOCKS } from "@os-sdk/library/collection/__tests__/fixtures/treeTestBlocks";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { findInTree } from "@os-sdk/library/collection/treeUtils";
 import { beforeEach, describe, expect, it } from "vitest";
-import { TREE_TEST_BLOCKS } from "@os-sdk/library/collection/__tests__/fixtures/treeTestBlocks";
 
 describe("tree-aware paste", () => {
   let app: ReturnType<typeof BuilderApp.create>;

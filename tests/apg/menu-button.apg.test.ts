@@ -20,8 +20,8 @@
  *   - Enter on menuitem → menu closes + focus restore to trigger
  */
 
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 
 const MENU_ITEMS = [

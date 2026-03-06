@@ -18,12 +18,17 @@ import {
   type MouseInput,
   resolveMouse,
 } from "@os-core/1-listen/mouse/resolveMouse";
+import { normalizeKeyDefinition } from "@os-core/2-resolve/getCanonicalKey";
 import { ROLE_FIELD_TYPE_MAP } from "@os-core/2-resolve/resolveFieldKey";
 import {
   readActiveZoneId,
   readFocusedItemId,
   readZone,
 } from "@os-core/3-inject/compute";
+import type {
+  HeadlessKernel,
+  InteractionObserver,
+} from "@os-core/3-inject/headless.types";
 import {
   buildZoneEntry,
   createZoneConfig,
@@ -41,8 +46,6 @@ import {
   type ZoneRole,
 } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { normalizeKeyDefinition } from "@os-core/2-resolve/getCanonicalKey";
-import type { HeadlessKernel, InteractionObserver } from "@os-core/3-inject/headless.types";
 
 // ═══════════════════════════════════════════════════════════════════
 // Interaction Observer

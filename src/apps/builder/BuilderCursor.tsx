@@ -16,8 +16,7 @@
  * Uses useElementRect for position tracking.
  */
 
-import { findItemElement } from "@os-sdk/os";
-import { os } from "@os-sdk/os";
+import { findItemElement, os } from "@os-sdk/os";
 import { useContext, useRef } from "react";
 import { useElementRect } from "@/hooks/useElementRect";
 import { HighlightContext } from "@/pages/builder/PropertiesPanel";

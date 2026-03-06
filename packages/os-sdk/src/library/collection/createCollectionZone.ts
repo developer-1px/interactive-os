@@ -145,18 +145,18 @@ export function createCollectionZone<
   // ── add ── (auto-generated from create factory)
   const add = config.create
     ? zone.command(
-      `${zoneName}:add`,
-      (ctx: { readonly state: S }, payload: unknown) => {
-        const newItem = config.create!(payload, ctx.state);
-        if (!newItem) return { state: ctx.state };
-        return {
-          state: produce(ctx.state, (draft) => {
-            const items = ops.getItems(ctx.state);
-            ops.insertAfter(draft as S, items.length - 1, newItem);
-          }),
-        };
-      },
-    )
+        `${zoneName}:add`,
+        (ctx: { readonly state: S }, payload: unknown) => {
+          const newItem = config.create!(payload, ctx.state);
+          if (!newItem) return { state: ctx.state };
+          return {
+            state: produce(ctx.state, (draft) => {
+              const items = ops.getItems(ctx.state);
+              ops.insertAfter(draft as S, items.length - 1, newItem);
+            }),
+          };
+        },
+      )
     : undefined;
 
   // ── remove ── (tree-aware)

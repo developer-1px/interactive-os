@@ -9,16 +9,17 @@
  *     └── Runner: executeAll (async effect, dispatches commands)
  */
 
-import { os } from "@os-sdk/os";
 import type { BrowserStep, TestScript } from "@os-devtool/testing";
 import {
   createBrowserPage,
   expect,
+  getZoneItems,
   resetFocusState,
   TestBotRegistry,
 } from "@os-devtool/testing";
 import { formatDiagnostics } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { os } from "@os-sdk/os";
 import { produce } from "immer";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -237,7 +238,8 @@ export async function executeAll(
     let passed = true;
     try {
       resetFocusState();
-      await script?.run(page, expect);
+      const items = script?.zone ? getZoneItems(script.zone) : [];
+      await script?.run(page, expect, items);
     } catch (e) {
       passed = false;
       steps.push({
@@ -295,7 +297,8 @@ export async function executeSuite(
 
   let passed = true;
   try {
-    await script.run(page, expect);
+    const items = script.zone ? getZoneItems(script.zone) : [];
+    await script.run(page, expect, items);
   } catch (e) {
     passed = false;
     steps.push({

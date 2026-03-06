@@ -21,9 +21,8 @@
  * ZIFT Classification: Field (readonly)
  */
 
-import { OS_VALUE_CHANGE } from "@os-sdk/os";
-import { os } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { OS_VALUE_CHANGE, os } from "@os-sdk/os";
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
 

@@ -19,8 +19,8 @@
  * keybindings that map to OS_NAVIGATE and OS_TAB respectively.
  */
 
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,

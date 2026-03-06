@@ -15,8 +15,8 @@
  *   Zone-level min/max applies to all thumbs. App-level visual clamping only.
  */
 
-import { os } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { os } from "@os-sdk/os";
 import clsx from "clsx";
 
 // ─── Thumb Data ───

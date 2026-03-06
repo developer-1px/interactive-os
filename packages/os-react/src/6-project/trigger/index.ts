@@ -6,10 +6,10 @@
  */
 
 export { useOverlayContext } from "./OverlayContext";
-export type { TriggerPortalProps } from "./TriggerPortal";
-export type { TriggerPopoverProps } from "./TriggerPopover";
-export type { TriggerDismissProps } from "./TriggerDismiss";
 export type { TriggerProps } from "./TriggerBase";
+export type { TriggerDismissProps } from "./TriggerDismiss";
+export type { TriggerPopoverProps } from "./TriggerPopover";
+export type { TriggerPortalProps } from "./TriggerPortal";
 
 import { TriggerBase } from "./TriggerBase";
 import { TriggerDismiss } from "./TriggerDismiss";
@@ -18,7 +18,7 @@ import { TriggerPortal } from "./TriggerPortal";
 
 // Use Object.assign since forwardRef returns an object (namespace merge won't work)
 export const Trigger = Object.assign(TriggerBase, {
-    Portal: TriggerPortal,
-    Popover: TriggerPopover,
-    Dismiss: TriggerDismiss,
+  Portal: TriggerPortal,
+  Popover: TriggerPopover,
+  Dismiss: TriggerDismiss,
 });

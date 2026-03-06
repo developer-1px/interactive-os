@@ -14,11 +14,15 @@
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
+import { os } from "@os-sdk/os";
 import { produce } from "immer";
 import {
   buildDocTree,
   type DocItem,
   docsModules,
+  flattenTree,
+  flattenVisibleTree,
+  getFavoriteFiles,
   toggleFavorite,
 } from "./docsUtils";
 
@@ -41,6 +45,9 @@ function collectExpandableIds(items: DocItem[]): Set<string> {
 }
 
 const expandableIds = collectExpandableIds(docTree);
+
+/** All leaf files in the doc tree (static). Used by favorites getItems. */
+const allFiles = flattenTree(docTree);
 
 // ═══════════════════════════════════════════════════════════════════
 // URL Hash Utilities
@@ -198,6 +205,7 @@ export const DocsFavoritesUI = favoritesZone.bind({
   role: "listbox",
   onAction: (cursor) => selectDoc({ id: cursor.focusId }),
   onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
+  getItems: () => getFavoriteFiles(allFiles).map((f) => f.path),
   options: {
     select: { followFocus: true },
     activate: { onClick: true },
@@ -231,6 +239,19 @@ export const DocsSidebarUI = sidebarZone.bind({
   onAction: (cursor) => selectDoc({ id: cursor.focusId }),
   onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
   getExpandableItems: () => expandableIds,
+  getItems: () => {
+    const zoneItems = os.getState().os.focus.zones["docs-sidebar"]?.items ?? {};
+    const expanded = Object.keys(zoneItems).filter(
+      (id) => zoneItems[id]?.["aria-expanded"],
+    );
+    const nodes = flattenVisibleTree(docTree, expanded, 0, {
+      sectionLevel: 0,
+    });
+    // Section headers (level 0 folders) are not interactive OS items
+    return nodes
+      .filter((n) => !(n.type === "folder" && n.level === 0))
+      .map((n) => n.id);
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════

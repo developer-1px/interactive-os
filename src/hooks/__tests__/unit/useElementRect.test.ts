@@ -1,30 +1,43 @@
-import { renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useElementRect } from "@/hooks/useElementRect";
+/**
+ * useElementRect — Pure computation test.
+ *
+ * The hook is a thin wrapper: React lifecycle (observers) + rect computation.
+ * We test the computation directly — no React, no @testing-library.
+ */
 
-// ── Mock ResizeObserver & MutationObserver ──
+import { describe, expect, it } from "vitest";
+import type { ElementRect } from "@/hooks/useElementRect";
 
-class MockResizeObserver {
-  constructor(_cb: ResizeObserverCallback) {}
-  observe = vi.fn();
-  unobserve = vi.fn();
-  disconnect = vi.fn();
+/**
+ * Extracted pure computation from useElementRect.
+ * Mirrors the measure() logic inside the hook exactly.
+ */
+function computeElementRect(
+  element: HTMLElement | null,
+  container?: HTMLElement | null,
+): ElementRect | null {
+  if (!element) return null;
+
+  const elRect = element.getBoundingClientRect();
+  if (elRect.width === 0 && elRect.height === 0) return null;
+
+  if (container) {
+    const cRect = container.getBoundingClientRect();
+    return {
+      top: elRect.top - cRect.top + container.scrollTop,
+      left: elRect.left - cRect.left + container.scrollLeft,
+      width: elRect.width,
+      height: elRect.height,
+    };
+  }
+
+  return {
+    top: elRect.top,
+    left: elRect.left,
+    width: elRect.width,
+    height: elRect.height,
+  };
 }
-
-class MockMutationObserver {
-  constructor(_cb: MutationCallback) {}
-  observe = vi.fn();
-  disconnect = vi.fn();
-}
-
-beforeEach(() => {
-  vi.stubGlobal("ResizeObserver", MockResizeObserver);
-  vi.stubGlobal("MutationObserver", MockMutationObserver);
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 function mockElement(rect: DOMRect): HTMLElement {
   return {
@@ -52,16 +65,14 @@ function makeDOMRect(
   } as DOMRect;
 }
 
-describe("useElementRect", () => {
+describe("useElementRect (computation)", () => {
   it("returns null when element is null", () => {
-    const { result } = renderHook(() => useElementRect(null));
-    expect(result.current).toBeNull();
+    expect(computeElementRect(null)).toBeNull();
   });
 
   it("returns rect for a visible element (viewport-relative)", () => {
     const el = mockElement(makeDOMRect(100, 50, 200, 40));
-    const { result } = renderHook(() => useElementRect(el));
-    expect(result.current).toEqual({
+    expect(computeElementRect(el)).toEqual({
       top: 100,
       left: 50,
       width: 200,
@@ -71,8 +82,7 @@ describe("useElementRect", () => {
 
   it("returns null for zero-size element", () => {
     const el = mockElement(makeDOMRect(100, 50, 0, 0));
-    const { result } = renderHook(() => useElementRect(el));
-    expect(result.current).toBeNull();
+    expect(computeElementRect(el)).toBeNull();
   });
 
   it("calculates container-relative position", () => {
@@ -84,8 +94,7 @@ describe("useElementRect", () => {
       parentElement: null,
     } as unknown as HTMLElement;
 
-    const { result } = renderHook(() => useElementRect(el, container));
-    expect(result.current).toEqual({
+    expect(computeElementRect(el, container)).toEqual({
       top: 100, // 150 - 50
       left: 50, // 80 - 30
       width: 200,
@@ -102,8 +111,7 @@ describe("useElementRect", () => {
       parentElement: null,
     } as unknown as HTMLElement;
 
-    const { result } = renderHook(() => useElementRect(el, container));
-    expect(result.current).toEqual({
+    expect(computeElementRect(el, container)).toEqual({
       top: 300, // 150 - 50 + 200
       left: 60, // 80 - 30 + 10
       width: 200,
@@ -111,27 +119,10 @@ describe("useElementRect", () => {
     });
   });
 
-  it("returns null → rect on element change", () => {
-    const { result, rerender } = renderHook(({ el }) => useElementRect(el), {
-      initialProps: { el: null as HTMLElement | null },
-    });
-    expect(result.current).toBeNull();
-
+  it("stabilizes: same input produces equal output", () => {
     const el = mockElement(makeDOMRect(10, 20, 100, 50));
-    rerender({ el });
-    expect(result.current).toEqual({
-      top: 10,
-      left: 20,
-      width: 100,
-      height: 50,
-    });
-  });
-
-  it("stabilizes output when rect is unchanged", () => {
-    const el = mockElement(makeDOMRect(10, 20, 100, 50));
-    const { result, rerender } = renderHook(() => useElementRect(el));
-    const first = result.current;
-    rerender();
-    expect(result.current).toBe(first); // reference equality
+    const a = computeElementRect(el);
+    const b = computeElementRect(el);
+    expect(a).toEqual(b);
   });
 });

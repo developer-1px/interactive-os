@@ -27,8 +27,8 @@ import {
 } from "@os-core/3-inject/zoneContext.ts";
 
 import { OS_FOCUS } from "@os-core/4-command/focus/focus.ts";
-import { os } from "@os-core/engine/kernel.ts";
 import type { AppState } from "@os-core/engine/kernel.ts";
+import { os } from "@os-core/engine/kernel.ts";
 import type { ZoneRole } from "@os-core/engine/registries/roleRegistry.ts";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry.ts";
 import { ensureZone } from "@os-core/schema/state/utils.ts";

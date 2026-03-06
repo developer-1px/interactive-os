@@ -11,30 +11,30 @@ import type { ReactNode } from "react";
 import { useOverlayContext } from "./OverlayContext";
 
 export interface TriggerDismissProps
-    extends React.HTMLAttributes<HTMLButtonElement> {
-    /** Optional command to dispatch before closing */
-    onActivate?: BaseCommand;
-    /** Button content */
-    children: ReactNode;
+  extends React.HTMLAttributes<HTMLButtonElement> {
+  /** Optional command to dispatch before closing */
+  onActivate?: BaseCommand;
+  /** Button content */
+  children: ReactNode;
 }
 
 export function TriggerDismiss({
-    children,
-    className,
-    id,
-    ...rest
+  children,
+  className,
+  id,
+  ...rest
 }: TriggerDismissProps & { id?: string }) {
-    const overlayCtx = useOverlayContext();
+  const overlayCtx = useOverlayContext();
 
-    const itemId = id ?? `${overlayCtx?.overlayId ?? "dialog"}-dismiss`;
+  const itemId = id ?? `${overlayCtx?.overlayId ?? "dialog"}-dismiss`;
 
-    return (
-        <Item id={itemId} asChild>
-            <button type="button" className={className} {...rest}>
-                {children}
-            </button>
-        </Item>
-    );
+  return (
+    <Item id={itemId} asChild>
+      <button type="button" className={className} {...rest}>
+        {children}
+      </button>
+    </Item>
+  );
 }
 
 TriggerDismiss.displayName = "Trigger.Dismiss";

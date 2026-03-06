@@ -16,7 +16,6 @@ import {
   resolveElement,
 } from "@os-core/3-inject/compute";
 import type { ElementAttrs, ItemAttrs } from "@os-core/3-inject/headless.types";
-import { simulateClick, simulateKeyPress } from "./simulate";
 import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
 import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
@@ -35,6 +34,7 @@ import {
 import { produce } from "immer";
 import { createElement, type FC } from "react";
 import { renderToString } from "react-dom/server";
+import { simulateClick, simulateKeyPress } from "./simulate";
 
 // Ensure OS defaults are registered
 import "@os-core/2-resolve/osDefaults";
@@ -43,11 +43,12 @@ import type { BaseCommand } from "@kernel/core/tokens";
 import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
-import type { AppPageInternal, ZoneBindingEntry } from "@os-sdk/app/defineApp/types";
+import type {
+  AppPageInternal,
+  ZoneBindingEntry,
+} from "@os-sdk/app/defineApp/types";
 
 import { formatDiagnostics } from "./diagnostics";
-
-export { formatDiagnostics } from "./diagnostics";
 
 export {
   createOsPage,
@@ -56,6 +57,8 @@ export {
   type OsPage,
   type ZoneOrderEntry,
 } from "./createOsPage";
+export { formatDiagnostics } from "./diagnostics";
+
 import type { ZoneOrderEntry } from "./createOsPage";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -66,7 +69,11 @@ export function createAppPage<S>(
   appId: string,
   zoneBindingEntries: Map<string, ZoneBindingEntry>,
   Component: FC | null,
-  appKeybindings?: readonly { key: string; command: BaseCommand; when?: "editing" | "navigating" }[],
+  appKeybindings?: readonly {
+    key: string;
+    command: BaseCommand;
+    when?: "editing" | "navigating";
+  }[],
 ): AppPageInternal<S> {
   // Clear global registries for test isolation
   ZoneRegistry.clearAll();
@@ -340,7 +347,9 @@ export function createAppPage<S>(
 
   function renderHtml(): string {
     if (!Component) {
-      throw new Error("query()/html()/locator() projection requires a Component. Use createPage(app, Component).");
+      throw new Error(
+        "query()/html()/locator() projection requires a Component. Use createPage(app, Component).",
+      );
     }
     if (_htmlCache === null) {
       _htmlCache = renderToString(createElement(Component));
@@ -357,7 +366,7 @@ export function createAppPage<S>(
     const html = renderHtml();
     if (!html.includes(`id="${elementId}"`)) {
       throw new Error(
-        `locator: element "#${elementId}" not found in rendered Component output.`
+        `locator: element "#${elementId}" not found in rendered Component output.`,
       );
     }
   }
@@ -405,7 +414,9 @@ export function createAppPage<S>(
       const itemList = entry?.getItems?.() ?? [];
       if (itemList.length > 0) {
         const orderMap = new Map(itemList.map((id, i) => [id, i]));
-        selected.sort((a, b) => (orderMap.get(a) ?? 0) - (orderMap.get(b) ?? 0));
+        selected.sort(
+          (a, b) => (orderMap.get(a) ?? 0) - (orderMap.get(b) ?? 0),
+        );
       }
       return selected;
     },
@@ -490,23 +501,11 @@ export function createAppPage<S>(
         toBeFocused() {
           return readFocusedItemId(os) === elementId;
         },
-        toBeSelected() {
-          return resolveElement(os, elementId)["aria-selected"] === true;
-        },
-        toBeExpanded() {
-          return resolveElement(os, elementId)["aria-expanded"] === true;
-        },
         toBeChecked() {
           return resolveElement(os, elementId)["aria-checked"] === true;
         },
-        toBePressed() {
-          return resolveElement(os, elementId)["aria-pressed"] === true;
-        },
         toBeDisabled() {
           return resolveElement(os, elementId)["aria-disabled"] === true;
-        },
-        toBeEditing() {
-          return resolveElement(os, elementId)["data-editing"] === true;
         },
         inputValue() {
           return String(FieldRegistry.getValue(elementId) ?? "");
@@ -519,7 +518,6 @@ export function createAppPage<S>(
 export type { ItemAttrs };
 
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
-
 
 /**
  * Create a Playwright Page-isomorphic headless integration test interface.
@@ -535,6 +533,14 @@ import type { AppHandle } from "@os-sdk/app/defineApp/types";
  * createPage is an OS capability — it reads app data(appId, zone bindings)
  * from the AppHandle and sets up the headless test environment.
  */
-export function createPage<S>(app: AppHandle<S>, Component?: FC): AppPageInternal<S> {
-  return createAppPage<S>(app.__appId, app.__zoneBindings, Component ?? null, app.__appKeybindings);
+export function createPage<S>(
+  app: AppHandle<S>,
+  Component?: FC,
+): AppPageInternal<S> {
+  return createAppPage<S>(
+    app.__appId,
+    app.__zoneBindings,
+    Component ?? null,
+    app.__appKeybindings,
+  );
 }

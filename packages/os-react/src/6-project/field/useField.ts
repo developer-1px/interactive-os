@@ -53,7 +53,7 @@ export const useFieldFocus = ({
       try {
         const pos = getCaretPosition(el);
         FieldRegistry.updateCaretPosition(fieldId, pos);
-      } catch (_e) { }
+      } catch (_e) {}
     };
 
     document.addEventListener("selectionchange", onSelectionChange);
@@ -79,7 +79,7 @@ export const useFieldFocus = ({
               try {
                 const textLength = innerRef.current.innerText.length;
                 setCaretPosition(innerRef.current, textLength);
-              } catch (_e) { }
+              } catch (_e) {}
             }
           });
         });
@@ -115,7 +115,7 @@ export const useFieldFocus = ({
                 const textLength = innerRef.current.innerText.length;
                 setCaretPosition(innerRef.current, textLength);
               }
-            } catch (_e) { }
+            } catch (_e) {}
           }
         });
       });

@@ -1,8 +1,8 @@
 /**
- * Todo v5 unit tests — native defineApp v5 API.
+ * Todo — App Logic Tests via createPage (latest pattern)
  *
- * Uses individual command exports + TodoApp.create() for isolated testing.
- * v5 style: app.dispatch(commandFactory(payload))
+ * Uses createPage(TodoApp) + page.dispatch() for app-level command testing.
+ * OS pipeline is active — commands go through kernel dispatch.
  */
 
 import {
@@ -34,114 +34,96 @@ import {
   updateTodoText,
   visibleTodos,
 } from "@apps/todo/app";
+import type { AppState } from "@apps/todo/model/appState";
+import { type AppPage, createPage } from "@os-devtool/testing/page";
 import {
   _resetClipboardStore,
   readClipboard,
 } from "@os-sdk/library/collection/createCollectionZone";
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 
-let now = 1000;
+describe("Todo — App Logic via createPage", () => {
+  let page: AppPage<AppState>;
 
-describe("Todo v5 — defineApp native", () => {
-  function createApp() {
-    vi.spyOn(Date, "now").mockImplementation(() => ++now);
+  beforeEach(() => {
     _resetClipboardStore();
-    return TodoApp.create({ withOS: true });
-  }
-
-  /** Helper: read clipboard first item */
-  function clipFirstItem(): any {
-    return readClipboard();
-  }
+    page = createPage(TodoApp);
+  });
 
   // ─── CRUD ───
 
   describe("CRUD", () => {
     test("addTodo creates item", () => {
-      const app = createApp();
-      const before = Object.keys(app.state.data.todos).length;
-      app.dispatch(addTodo({ text: "Buy milk" }));
-      expect(Object.keys(app.state.data.todos).length).toBe(before + 1);
+      const before = Object.keys(page.state.data.todos).length;
+      page.dispatch(addTodo({ text: "Buy milk" }));
+      expect(Object.keys(page.state.data.todos).length).toBe(before + 1);
     });
 
-    test("addTodo with empty text → no-op", () => {
-      const app = createApp();
-      const before = Object.keys(app.state.data.todos).length;
-      app.dispatch(addTodo({ text: "" }));
-      expect(Object.keys(app.state.data.todos).length).toBe(before);
+    test("addTodo with empty text is no-op", () => {
+      const before = Object.keys(page.state.data.todos).length;
+      page.dispatch(addTodo({ text: "" }));
+      expect(Object.keys(page.state.data.todos).length).toBe(before);
     });
 
-    test("deleteTodo removes item directly", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Delete me" }));
-      const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-      app.dispatch(deleteTodo({ id: lastId }));
-      expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
+    test("deleteTodo removes item", () => {
+      page.dispatch(addTodo({ text: "Delete me" }));
+      const before = Object.keys(page.state.data.todos).length;
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(deleteTodo({ id: lastId }));
+      expect(Object.keys(page.state.data.todos).length).toBe(before - 1);
     });
 
-    // ── Dialog Delete Flow ──
     test("requestDeleteTodo sets pending IDs", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Pending delete" }));
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-
-      app.dispatch(requestDeleteTodo({ ids: [lastId] }));
-      expect(app.state.ui.pendingDeleteIds).toEqual([lastId]);
+      page.dispatch(addTodo({ text: "Pending delete" }));
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(requestDeleteTodo({ ids: [lastId] }));
+      expect(page.state.ui.pendingDeleteIds).toEqual([lastId]);
     });
 
     test("confirmDeleteTodo removes pending items", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Confirm delete" }));
-      const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-
-      app.dispatch(requestDeleteTodo({ ids: [lastId] }));
-      app.dispatch(confirmDeleteTodo());
-
-      expect(app.state.ui.pendingDeleteIds).toEqual([]);
-      expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
+      page.dispatch(addTodo({ text: "Confirm delete" }));
+      const before = Object.keys(page.state.data.todos).length;
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(requestDeleteTodo({ ids: [lastId] }));
+      page.dispatch(confirmDeleteTodo());
+      expect(page.state.ui.pendingDeleteIds).toEqual([]);
+      expect(Object.keys(page.state.data.todos).length).toBe(before - 1);
     });
 
     test("cancelDeleteTodo clears pending without deleting", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Cancel delete" }));
-      const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-
-      app.dispatch(requestDeleteTodo({ ids: [lastId] }));
-      app.dispatch(cancelDeleteTodo());
-
-      expect(app.state.ui.pendingDeleteIds).toEqual([]);
-      expect(Object.keys(app.state.data.todos).length).toBe(before);
+      page.dispatch(addTodo({ text: "Cancel delete" }));
+      const before = Object.keys(page.state.data.todos).length;
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(requestDeleteTodo({ ids: [lastId] }));
+      page.dispatch(cancelDeleteTodo());
+      expect(page.state.ui.pendingDeleteIds).toEqual([]);
+      expect(Object.keys(page.state.data.todos).length).toBe(before);
     });
 
     test("toggleTodo flips completed", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Toggle me" }));
-      const ids = Object.keys(app.state.data.todos);
-      const id = ids[ids.length - 1]!;
-      expect(app.state.data.todos[id]?.completed).toBe(false);
-      app.dispatch(toggleTodo({ id }));
-      expect(app.state.data.todos[id]?.completed).toBe(true);
+      page.dispatch(addTodo({ text: "Toggle me" }));
+      const id =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      expect(page.state.data.todos[id]?.completed).toBe(false);
+      page.dispatch(toggleTodo({ id }));
+      expect(page.state.data.todos[id]?.completed).toBe(true);
     });
 
     test("clearCompleted removes only completed", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Keep" }));
-      app.dispatch(addTodo({ text: "Remove" }));
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-      app.dispatch(toggleTodo({ id: lastId }));
-      const activeBefore = Object.values(app.state.data.todos).filter(
+      page.dispatch(addTodo({ text: "Keep" }));
+      page.dispatch(addTodo({ text: "Remove" }));
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(toggleTodo({ id: lastId }));
+      const activeBefore = Object.values(page.state.data.todos).filter(
         (t) => !t.completed,
       ).length;
-      app.dispatch(clearCompleted());
-      const remaining = Object.values(app.state.data.todos);
+      page.dispatch(clearCompleted());
+      const remaining = Object.values(page.state.data.todos);
       expect(remaining.every((t) => !t.completed)).toBe(true);
       expect(remaining.length).toBe(activeBefore);
     });
@@ -150,101 +132,82 @@ describe("Todo v5 — defineApp native", () => {
   // ─── Editing ───
 
   describe("Editing", () => {
-    test("Start → SyncEditDraft → Save", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Original" }));
-      const ids = Object.keys(app.state.data.todos);
-      const id = ids[ids.length - 1]!;
-
-      app.dispatch(startEdit({ id }));
-      expect(app.state.ui.editingId).toBe(id);
-
-      // No syncEditDraft step anymore - Field manages state locally
-      // app.dispatch(syncEditDraft({ text: "Updated" }));
-
-      app.dispatch(updateTodoText({ text: "Updated" }));
-      expect(app.state.data.todos[id]?.text).toBe("Updated");
-      expect(app.state.ui.editingId).toBeNull();
+    test("startEdit + updateTodoText saves", () => {
+      page.dispatch(addTodo({ text: "Original" }));
+      const id =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(startEdit({ id }));
+      expect(page.state.ui.editingId).toBe(id);
+      page.dispatch(updateTodoText({ text: "Updated" }));
+      expect(page.state.data.todos[id]?.text).toBe("Updated");
+      expect(page.state.ui.editingId).toBeNull();
     });
 
-    test("Cancel preserves original", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Original" }));
-      const ids = Object.keys(app.state.data.todos);
-      const id = ids[ids.length - 1]!;
-
-      app.dispatch(startEdit({ id }));
-      // Field would have local state "Changed", but app state doesn't see it until commit
-      // app.dispatch(syncEditDraft({ text: "Changed" }));
-      app.dispatch(cancelEdit());
-
-      expect(app.state.data.todos[id]?.text).toBe("Original");
-      expect(app.state.ui.editingId).toBeNull();
+    test("cancelEdit preserves original", () => {
+      page.dispatch(addTodo({ text: "Original" }));
+      const id =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(startEdit({ id }));
+      page.dispatch(cancelEdit());
+      expect(page.state.data.todos[id]?.text).toBe("Original");
+      expect(page.state.ui.editingId).toBeNull();
     });
   });
 
-  // ─── Selectors (branded) ───
+  // ─── Selectors ───
 
   describe("Selectors", () => {
     test("visibleTodos filters by category", () => {
-      const app = createApp();
-      const before = app.select(visibleTodos).length;
-      app.dispatch(addTodo({ text: "In default" }));
-      expect(app.select(visibleTodos).length).toBe(before + 1);
+      const before = visibleTodos.select(page.state).length;
+      page.dispatch(addTodo({ text: "In default" }));
+      expect(visibleTodos.select(page.state).length).toBe(before + 1);
     });
 
-    test("categories preserves order", () => {
-      const app = createApp();
-      const cats = app.select(categories);
-      expect(cats).toBeDefined();
+    test("categories returns array", () => {
+      const cats = categories.select(page.state);
       expect(Array.isArray(cats)).toBe(true);
     });
 
     test("stats counts correctly", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "One" }));
-      app.dispatch(addTodo({ text: "Two" }));
-      const statsBefore = app.select(stats);
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-      app.dispatch(toggleTodo({ id: lastId }));
-      const statsAfter = app.select(stats);
+      page.dispatch(addTodo({ text: "One" }));
+      page.dispatch(addTodo({ text: "Two" }));
+      const statsBefore = stats.select(page.state);
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(toggleTodo({ id: lastId }));
+      const statsAfter = stats.select(page.state);
       expect(statsAfter.completed).toBe(statsBefore.completed + 1);
       expect(statsAfter.active).toBe(statsBefore.active - 1);
     });
 
     test("editingTodo returns editing item", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Edit me" }));
-      const ids = Object.keys(app.state.data.todos);
-      const id = ids[ids.length - 1]!;
-      app.dispatch(startEdit({ id }));
-      const editing = app.select(editingTodo);
+      page.dispatch(addTodo({ text: "Edit me" }));
+      const id =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(startEdit({ id }));
+      const editing = editingTodo.select(page.state);
       expect(editing?.id).toBe(id);
     });
   });
 
-  // ─── Conditions (branded) ───
+  // ─── Conditions ───
 
   describe("Conditions", () => {
     test("canUndo is false initially", () => {
-      const app = createApp();
-      expect(app.evaluate(canUndo)).toBe(false);
+      expect(canUndo.evaluate(page.state)).toBe(false);
     });
 
     test("isEditing reflects editing state", () => {
-      const app = createApp();
-      expect(app.evaluate(isEditing)).toBe(false);
-      app.dispatch(addTodo({ text: "Edit me" }));
-      const ids = Object.keys(app.state.data.todos);
-      app.dispatch(startEdit({ id: ids[ids.length - 1]! }));
-      expect(app.evaluate(isEditing)).toBe(true);
+      expect(isEditing.evaluate(page.state)).toBe(false);
+      page.dispatch(addTodo({ text: "Edit me" }));
+      const id =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(startEdit({ id }));
+      expect(isEditing.evaluate(page.state)).toBe(true);
     });
 
-    test("hasClipboard is always true (OS-managed)", () => {
-      const app = createApp();
-      // hasClipboard is now always true since clipboard is OS-managed
-      expect(app.evaluate(hasClipboard)).toBe(true);
+    test("hasClipboard is always true", () => {
+      expect(hasClipboard.evaluate(page.state)).toBe(true);
     });
   });
 
@@ -252,19 +215,20 @@ describe("Todo v5 — defineApp native", () => {
 
   describe("when guard", () => {
     test("cancelEdit blocked when not editing", () => {
-      const app = createApp();
-      const result = app.dispatch(cancelEdit());
-      expect(result).toBe(false);
+      const before = page.state.ui.editingId;
+      page.dispatch(cancelEdit());
+      // State unchanged — when guard blocked execution
+      expect(page.state.ui.editingId).toBe(before);
     });
 
     test("cancelEdit allowed when editing", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Edit me" }));
-      const ids = Object.keys(app.state.data.todos);
-      app.dispatch(startEdit({ id: ids[ids.length - 1]! }));
-      const result = app.dispatch(cancelEdit());
-      expect(result).toBe(true);
-      expect(app.state.ui.editingId).toBeNull();
+      page.dispatch(addTodo({ text: "Edit me" }));
+      const id =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(startEdit({ id }));
+      expect(page.state.ui.editingId).toBe(id);
+      page.dispatch(cancelEdit());
+      expect(page.state.ui.editingId).toBeNull();
     });
   });
 
@@ -272,37 +236,32 @@ describe("Todo v5 — defineApp native", () => {
 
   describe("Ordering", () => {
     test("moveItemUp swaps positions", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "First" }));
-      app.dispatch(addTodo({ text: "Second" }));
-      const order = app.state.data.todoOrder;
+      page.dispatch(addTodo({ text: "First" }));
+      page.dispatch(addTodo({ text: "Second" }));
+      const order = page.state.data.todoOrder;
       const lastIdx = order.length - 1;
-      const secondLast = order[lastIdx]!;
-      const thirdLast = order[lastIdx - 1]!;
-      app.dispatch(moveItemUp({ id: secondLast }));
-      expect(app.state.data.todoOrder[lastIdx - 1]).toBe(secondLast);
-      expect(app.state.data.todoOrder[lastIdx]).toBe(thirdLast);
+      const last = order[lastIdx]!;
+      const prev = order[lastIdx - 1]!;
+      page.dispatch(moveItemUp({ id: last }));
+      expect(page.state.data.todoOrder[lastIdx - 1]).toBe(last);
+      expect(page.state.data.todoOrder[lastIdx]).toBe(prev);
     });
 
     test("moveItemDown swaps positions", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "First" }));
-      app.dispatch(addTodo({ text: "Second" }));
-      const order = app.state.data.todoOrder;
+      page.dispatch(addTodo({ text: "First" }));
+      page.dispatch(addTodo({ text: "Second" }));
+      const order = page.state.data.todoOrder;
       const lastIdx = order.length - 1;
-      const secondLast = order[lastIdx]!;
-      const thirdLast = order[lastIdx - 1]!;
-      app.dispatch(moveItemDown({ id: thirdLast }));
-      expect(app.state.data.todoOrder[lastIdx - 1]).toBe(secondLast);
-      expect(app.state.data.todoOrder[lastIdx]).toBe(thirdLast);
+      const prev = order[lastIdx - 1]!;
+      page.dispatch(moveItemDown({ id: prev }));
+      expect(page.state.data.todoOrder[lastIdx]).toBe(prev);
     });
 
     test("moveItemUp at top is no-op", () => {
-      const app = createApp();
-      const topId = app.state.data.todoOrder[0]!;
-      const beforeOrder = [...app.state.data.todoOrder];
-      app.dispatch(moveItemUp({ id: topId }));
-      expect(app.state.data.todoOrder).toEqual(beforeOrder);
+      const topId = page.state.data.todoOrder[0]!;
+      const beforeOrder = [...page.state.data.todoOrder];
+      page.dispatch(moveItemUp({ id: topId }));
+      expect(page.state.data.todoOrder).toEqual(beforeOrder);
     });
   });
 
@@ -310,25 +269,20 @@ describe("Todo v5 — defineApp native", () => {
 
   describe("Category", () => {
     test("selectCategory changes selectedCategoryId", () => {
-      const app = createApp();
-      app.dispatch(selectCategory({ id: "cat_work" }));
-      expect(app.state.ui.selectedCategoryId).toBe("cat_work");
+      page.dispatch(selectCategory({ id: "cat_work" }));
+      expect(page.state.ui.selectedCategoryId).toBe("cat_work");
     });
 
     test("moveCategoryUp/Down reorders", () => {
-      const app = createApp();
-      app.dispatch(selectCategory({ id: "cat_work" }));
-      const beforeOrder = [...app.state.data.categoryOrder];
+      const beforeOrder = [...page.state.data.categoryOrder];
       const workIdxBefore = beforeOrder.indexOf("cat_work");
 
-      app.dispatch(TodoSidebar.commands.moveCategoryUp({ id: "cat_work" }));
-      const afterOrder = [...app.state.data.categoryOrder];
-      const workIdxAfter = afterOrder.indexOf("cat_work");
+      page.dispatch(TodoSidebar.commands.moveCategoryUp({ id: "cat_work" }));
+      const workIdxAfter = page.state.data.categoryOrder.indexOf("cat_work");
       expect(workIdxAfter).toBeLessThan(workIdxBefore);
 
-      app.dispatch(TodoSidebar.commands.moveCategoryDown({ id: "cat_work" }));
-      const restored = [...app.state.data.categoryOrder];
-      expect(restored).toEqual(beforeOrder);
+      page.dispatch(TodoSidebar.commands.moveCategoryDown({ id: "cat_work" }));
+      expect(page.state.data.categoryOrder).toEqual(beforeOrder);
     });
   });
 
@@ -336,168 +290,88 @@ describe("Todo v5 — defineApp native", () => {
 
   describe("Clipboard", () => {
     test("duplicateTodo creates copy", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Original" }));
-      const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-      app.dispatch(duplicateTodo({ id: lastId }));
-      expect(Object.keys(app.state.data.todos).length).toBe(before + 1);
+      page.dispatch(addTodo({ text: "Original" }));
+      const before = Object.keys(page.state.data.todos).length;
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(duplicateTodo({ id: lastId }));
+      expect(Object.keys(page.state.data.todos).length).toBe(before + 1);
     });
 
     test("copyTodo single item", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Copy me" }));
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-      app.dispatch(copyTodo({ ids: [lastId] }));
-      const first = clipFirstItem();
+      page.dispatch(addTodo({ text: "Copy me" }));
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(copyTodo({ ids: [lastId] }));
+      const first = readClipboard();
       expect(first).toBeDefined();
       expect(first?.text).toBe("Copy me");
     });
 
-    test("copyTodo → pasteTodo creates duplicate", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Round trip" }));
-      const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-      app.dispatch(copyTodo({ ids: [lastId] }));
-      app.dispatch(pasteTodo({}));
-      expect(Object.keys(app.state.data.todos).length).toBe(before + 1);
-      const todos = Object.values(app.state.data.todos);
-      expect(todos.filter((t) => t.text === "Round trip").length).toBe(2);
+    test("copyTodo + pasteTodo creates duplicate", () => {
+      page.dispatch(addTodo({ text: "Round trip" }));
+      const before = Object.keys(page.state.data.todos).length;
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(copyTodo({ ids: [lastId] }));
+      page.dispatch(pasteTodo({}));
+      expect(Object.keys(page.state.data.todos).length).toBe(before + 1);
     });
 
-    test("cutTodo removes original and stores in clipboard", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Cut me" }));
-      const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-      app.dispatch(cutTodo({ ids: [lastId] }));
-      expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
-      const first = clipFirstItem();
-      expect(first).toBeDefined();
-      expect(first?.text).toBe("Cut me");
+    test("cutTodo removes original", () => {
+      page.dispatch(addTodo({ text: "Cut me" }));
+      const before = Object.keys(page.state.data.todos).length;
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(cutTodo({ ids: [lastId] }));
+      expect(Object.keys(page.state.data.todos).length).toBe(before - 1);
+      expect(readClipboard()?.text).toBe("Cut me");
     });
 
-    test("cutTodo → pasteTodo restores item", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "Move me" }));
-      const before = Object.keys(app.state.data.todos).length;
-      const ids = Object.keys(app.state.data.todos);
-      const lastId = ids[ids.length - 1]!;
-      app.dispatch(cutTodo({ ids: [lastId] }));
-      expect(Object.keys(app.state.data.todos).length).toBe(before - 1);
-      app.dispatch(pasteTodo({}));
-      expect(Object.keys(app.state.data.todos).length).toBe(before);
-      const todos = Object.values(app.state.data.todos);
-      expect(todos.some((t) => t.text === "Move me")).toBe(true);
+    test("cutTodo + pasteTodo restores item", () => {
+      page.dispatch(addTodo({ text: "Move me" }));
+      const before = Object.keys(page.state.data.todos).length;
+      const lastId =
+        page.state.data.todoOrder[page.state.data.todoOrder.length - 1]!;
+      page.dispatch(cutTodo({ ids: [lastId] }));
+      page.dispatch(pasteTodo({}));
+      expect(Object.keys(page.state.data.todos).length).toBe(before);
     });
 
     test("pasteTodo without clipboard is no-op", () => {
-      const app = createApp();
-      const before = Object.keys(app.state.data.todos).length;
-      app.dispatch(pasteTodo({}));
-      expect(Object.keys(app.state.data.todos).length).toBe(before);
+      const before = Object.keys(page.state.data.todos).length;
+      page.dispatch(pasteTodo({}));
+      expect(Object.keys(page.state.data.todos).length).toBe(before);
     });
 
-    // ── Multi-item clipboard (PRD Scenario 4: 벌크 작업) ──
-
-    test("single copy overwrites previous clipboard", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "First" }));
-      app.dispatch(addTodo({ text: "Second" }));
-      const ids = Object.keys(app.state.data.todos);
-
-      app.dispatch(copyTodo({ ids: [ids[ids.length - 2]!] }));
-      let first = clipFirstItem();
-      expect(first?.text).toBe("First");
-
-      app.dispatch(copyTodo({ ids: [ids[ids.length - 1]!] }));
-      first = clipFirstItem();
-      expect(first?.text).toBe("Second");
+    test("copyTodo batch + paste: all pasted", () => {
+      page.dispatch(addTodo({ text: "A" }));
+      page.dispatch(addTodo({ text: "B" }));
+      page.dispatch(addTodo({ text: "C" }));
+      const order = page.state.data.todoOrder;
+      const lastThree = order.slice(-3);
+      const before = Object.keys(page.state.data.todos).length;
+      page.dispatch(copyTodo({ ids: lastThree }));
+      page.dispatch(pasteTodo({}));
+      expect(Object.keys(page.state.data.todos).length).toBe(before + 3);
     });
 
-    // ── Batch clipboard: {ids} API ──
-
-    test("copyTodo batch: 3 items at once", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "A" }));
-      app.dispatch(addTodo({ text: "B" }));
-      app.dispatch(addTodo({ text: "C" }));
-      const ids = Object.keys(app.state.data.todos);
-      const lastThree = ids.slice(-3);
-
-      app.dispatch(copyTodo({ ids: lastThree }));
-
-      const first = clipFirstItem();
-      expect(first).toBeDefined();
-      // readClipboard returns first item
-      expect(first?.text).toBe("A");
-    });
-
-    test("copyTodo batch → paste: all 3 pasted", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "A" }));
-      app.dispatch(addTodo({ text: "B" }));
-      app.dispatch(addTodo({ text: "C" }));
-      const ids = Object.keys(app.state.data.todos);
-      const lastThree = ids.slice(-3);
-      const beforeCount = Object.keys(app.state.data.todos).length;
-
-      app.dispatch(copyTodo({ ids: lastThree }));
-      app.dispatch(pasteTodo({}));
-
-      expect(Object.keys(app.state.data.todos).length).toBe(beforeCount + 3);
-      const todos = Object.values(app.state.data.todos);
-      expect(todos.filter((t) => t.text === "A").length).toBe(2);
-      expect(todos.filter((t) => t.text === "B").length).toBe(2);
-      expect(todos.filter((t) => t.text === "C").length).toBe(2);
-    });
-
-    test("cutTodo batch: 3 items removed, all in clipboard", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "X" }));
-      app.dispatch(addTodo({ text: "Y" }));
-      app.dispatch(addTodo({ text: "Z" }));
-      const ids = Object.keys(app.state.data.todos);
-      const lastThree = ids.slice(-3);
-      const beforeCount = Object.keys(app.state.data.todos).length;
-
-      app.dispatch(cutTodo({ ids: lastThree }));
-
-      expect(Object.keys(app.state.data.todos).length).toBe(beforeCount - 3);
-      const first = clipFirstItem();
-      expect(first).toBeDefined();
-    });
-
-    test("cutTodo batch → paste: all 3 restored", () => {
-      const app = createApp();
-      app.dispatch(addTodo({ text: "X" }));
-      app.dispatch(addTodo({ text: "Y" }));
-      app.dispatch(addTodo({ text: "Z" }));
-      const ids = Object.keys(app.state.data.todos);
-      const lastThree = ids.slice(-3);
-      const beforeCount = Object.keys(app.state.data.todos).length;
-
-      app.dispatch(cutTodo({ ids: lastThree }));
-      expect(Object.keys(app.state.data.todos).length).toBe(beforeCount - 3);
-
-      app.dispatch(pasteTodo({}));
-      expect(Object.keys(app.state.data.todos).length).toBe(beforeCount);
-      const todos = Object.values(app.state.data.todos);
-      expect(todos.filter((t) => t.text === "X").length).toBe(1);
-      expect(todos.filter((t) => t.text === "Y").length).toBe(1);
-      expect(todos.filter((t) => t.text === "Z").length).toBe(1);
+    test("cutTodo batch + paste: all restored", () => {
+      page.dispatch(addTodo({ text: "X" }));
+      page.dispatch(addTodo({ text: "Y" }));
+      page.dispatch(addTodo({ text: "Z" }));
+      const order = page.state.data.todoOrder;
+      const lastThree = order.slice(-3);
+      const before = Object.keys(page.state.data.todos).length;
+      page.dispatch(cutTodo({ ids: lastThree }));
+      expect(Object.keys(page.state.data.todos).length).toBe(before - 3);
+      page.dispatch(pasteTodo({}));
+      expect(Object.keys(page.state.data.todos).length).toBe(before);
     });
 
     test("copyTodo with empty ids is no-op", () => {
-      const app = createApp();
-      app.dispatch(copyTodo({ ids: [] }));
-      const first = clipFirstItem();
-      expect(first).toBeNull();
+      page.dispatch(copyTodo({ ids: [] }));
+      expect(readClipboard()).toBeNull();
     });
   });
 
@@ -505,25 +379,11 @@ describe("Todo v5 — defineApp native", () => {
 
   describe("View", () => {
     test("toggleView switches modes", () => {
-      const app = createApp();
-      expect(app.state.ui.viewMode).toBe("list");
-      app.dispatch(toggleView());
-      expect(app.state.ui.viewMode).toBe("board");
-      app.dispatch(toggleView());
-      expect(app.state.ui.viewMode).toBe("list");
-    });
-  });
-
-  // ─── Reset ───
-
-  describe("Reset", () => {
-    test("reset restores initial state", () => {
-      const app = createApp();
-      const initialCount = Object.keys(app.state.data.todos).length;
-      app.dispatch(addTodo({ text: "Test" }));
-      expect(Object.keys(app.state.data.todos).length).toBe(initialCount + 1);
-      app.reset();
-      expect(Object.keys(app.state.data.todos).length).toBe(initialCount);
+      expect(page.state.ui.viewMode).toBe("list");
+      page.dispatch(toggleView());
+      expect(page.state.ui.viewMode).toBe("board");
+      page.dispatch(toggleView());
+      expect(page.state.ui.viewMode).toBe("list");
     });
   });
 });

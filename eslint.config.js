@@ -9,6 +9,24 @@ import pipelinePlugin from "./eslint-plugin-pipeline/index.js";
 export default defineConfig([
   globalIgnores(["dist"]),
   {
+    files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}", "**/vitest.setup.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "warn",
+        {
+          patterns: [
+            {
+              group: ["@testing-library/*"],
+              message:
+                "OS 위에서 OS를 테스트한다. @testing-library 금지 (rules.md #2).",
+            },
+          ],
+        },
+      ],
+      "no-console": "warn",
+    },
+  },
+  {
     files: ["**/*.{ts,tsx}"],
     extends: [
       js.configs.recommended,

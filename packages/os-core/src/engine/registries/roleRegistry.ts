@@ -224,7 +224,12 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       radio items use aria-checked → OS_CHECK is the correct command.
   radiogroup: {
     navigate: { orientation: "linear-both", loop: true, entry: "selected" },
-    select: { mode: "single", followFocus: true, disallowEmpty: true, aria: "checked" },
+    select: {
+      mode: "single",
+      followFocus: true,
+      disallowEmpty: true,
+      aria: "checked",
+    },
     inputmap: { Space: [OS_CHECK()], click: [OS_CHECK()] },
     tab: { behavior: "escape" },
   },
@@ -470,7 +475,9 @@ export function resolveRole(
   } = {},
 ): FocusGroupConfig {
   if (role && !rolePresets[role as ZoneRole]) {
-    console.warn(`[Zone] Unknown role: '${role}'. Using default config. Valid roles: ${Object.keys(rolePresets).join(", ")}`);
+    console.warn(
+      `[Zone] Unknown role: '${role}'. Using default config. Valid roles: ${Object.keys(rolePresets).join(", ")}`,
+    );
   }
   const basePreset = role ? (rolePresets[role as ZoneRole] ?? {}) : {};
 

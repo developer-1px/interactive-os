@@ -15,8 +15,8 @@
  */
 
 import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,

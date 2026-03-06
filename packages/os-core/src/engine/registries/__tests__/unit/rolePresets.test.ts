@@ -277,7 +277,9 @@ describe("resolveRole — override merging", () => {
   it("unknown role warns and falls back to defaults", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const config = resolveRole("unknownrole");
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Unknown role"));
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Unknown role"),
+    );
     expect(config.navigate.orientation).toBe("vertical");
     expect(config.tab.behavior).toBe("flow");
     warnSpy.mockRestore();

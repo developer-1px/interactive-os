@@ -21,11 +21,51 @@
 
 ## 테스트 도구
 
-7. **테스트 도구는 대상에 따라 다르다.**
-   - `createOsPage()` = OS 커널 계약 테스트 (APG, navigation, dismiss)
-   - `createPage(App)` = 앱 통합 테스트 (Builder, Todo)
-   - 앱 기능을 `createOsPage`로 테스트하면 커널만 검증되어 브라우저 동작을 보증하지 못한다 (거짓 GREEN)
-   - 앱 통합 테스트에서 `dispatch()` 직접 호출 금지 — `click()`, `keyboard.press()`만 허용
+7. **OS 테스트의 처음과 끝 = Zone → Input → ARIA.**
+   - OS의 계약 = "Zone을 선언하면 행동을 보장한다". 테스트는 이 계약을 검증한다.
+   - **처음**: `page.goto("zone", { role, items, config })` — Zone 선언
+   - **입력**: `page.keyboard.press()`, `page.locator("#id").click()` — 사용자 입력
+   - **끝**: `locator().toBeFocused()`, `locator().toHaveAttribute()` — ARIA 속성 검증
+   - `dispatch()`, `getState()`, `setState()` — OS 내부 우회이므로 테스트 코드에서 금지
+   - `createOsPage()` — 삭제 대상. `createHeadlessPage()`가 유일한 OS 테스트 팩토리
+   - `createPage(app)` = 앱 통합 테스트 (Builder, Todo)
+   - **순수 함수 테스트는 page 불필요.** `findBlockInfo`, `parseHashToPath`, `i18n` 등 상태·상호작용이 없는 순수 함수는 직접 호출이 정당하다. OS 내부 함수(`resolve*`, `compute*`)의 직접 테스트는 구현 종속이므로 제거 대상.
+   - **위배 시**: dispatch를 쓰면 OS Pipeline(listen→resolve→inject→command→project)을 건너뛰어 "vitest에서 통과하지만 브라우저에서 실패"하는 거짓 GREEN이 된다.
+
+### 앱 테스트 표준 패턴 — TestScript ONE Format
+
+> 앱 통합 테스트의 표준: `testbot-*.ts` + `runScenarios(scenarios)`.
+
+```ts
+// testbot-myapp.ts — "Write once, run anywhere"
+export const zones = ["my-zone"];
+export const group = "MyApp";
+export const scenarios: TestScenario[] = [
+  { zone: "my-zone", items: [...], role: "listbox", scripts: myScripts },
+];
+```
+
+```ts
+// __tests__/unit/myapp-interaction.test.ts — OS-level (zone만, app 없음)
+import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { scenarios } from "../../testbot-myapp";
+runScenarios(scenarios);
+```
+
+```ts
+// __tests__/unit/myapp-interaction.test.ts — App-level (React projection 포함)
+import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { scenarios } from "../../testbot-myapp";
+import { MyApp } from "@apps/myapp/app";
+import { MyView } from "@apps/myapp/MyView";
+runScenarios(scenarios, { app: MyApp, component: MyView });
+```
+
+- `runScenarios(scenarios)` — OS-level: `createHeadlessPage()` + 수동 zone setup
+- `runScenarios(scenarios, { app, component })` — App-level: `createPage(app, component)` + zone bindings 자동 해석
+- **3-engine 호환**: 같은 `run(page, expect, items?)` 함수가 (1) vitest headless, (2) browser TestBot, (3) Playwright E2E에서 동작
+- **모범 사례**: `todo-interaction.test.ts`, `docs-testbot.test.ts`
+- **Playwright Strict Subset (K2)**: `page.locator("#id").click()`, `page.keyboard.press()`, `expect(loc).toHaveAttribute()`, `expect(loc).toBeFocused()` — 이 API만 사용
 
 ## 코드 품질 기준
 

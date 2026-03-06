@@ -41,7 +41,7 @@ const metadata = import.meta.glob<MetadataModule>(
     "../docs-viewer/testbot-*.ts",
     "../pages/**/testbot-*.ts",
   ],
-  { eager: true, import: undefined },
+  { eager: true },
 );
 
 /** Lazy: load full modules (with TestScript[]) only on demand */
@@ -61,7 +61,11 @@ const loaders = import.meta.glob<Record<string, unknown>>(
 function extractScripts(mod: Record<string, unknown>): TestScript[] {
   for (const [key, value] of Object.entries(mod)) {
     if (key === "zones" || key === "group") continue;
-    if (Array.isArray(value) && value.length > 0 && typeof (value[0] as Record<string, unknown>)?.run === "function") {
+    if (
+      Array.isArray(value) &&
+      value.length > 0 &&
+      typeof (value[0] as Record<string, unknown>)?.run === "function"
+    ) {
       return value as TestScript[];
     }
   }
@@ -100,7 +104,9 @@ function buildAutoEntries(): ManifestEntry[] {
     const group = meta.group;
 
     if (!zones || !Array.isArray(zones) || zones.length === 0) {
-      console.warn(`[testbot-manifest] Skipping ${path}: missing 'zones' export`);
+      console.warn(
+        `[testbot-manifest] Skipping ${path}: missing 'zones' export`,
+      );
       continue;
     }
 
@@ -110,7 +116,8 @@ function buildAutoEntries(): ManifestEntry[] {
     entries.push({
       zones,
       group: group ?? path.split("/").slice(-2, -1)[0] ?? "Unknown",
-      load: () => loader().then((mod) => extractScripts(mod as Record<string, unknown>)),
+      load: () =>
+        loader().then((mod) => extractScripts(mod as Record<string, unknown>)),
     });
   }
 

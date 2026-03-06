@@ -134,6 +134,10 @@
 | TestBot button script aria-checked | TestBot이 aria-checked 검증 (잘못된 속성) | 🔴 LLM 실수 → ✅ 수정 | aria-pressed로 교정 | 2026-03-04 |
 | Field resetOnSubmit DOM sync | `handleCommit`에서 `FieldRegistry.reset()` 후 DOM innerText 미동기화 | ⚪ OS 내부 수정 → ✅ 해결 | 기존 패턴(innerRef.innerText=value) 재사용. 3줄 추가. 이중 commit 경로(Field handleCommit vs OS_FIELD_COMMIT) 구조적 부채 잔존 | 2026-03-04 |
 | MeterPattern useEffect+dispatch (시뮬레이션) | setInterval로 OS_VALUE_CHANGE dispatch | ⚪ 정당한 예외 | 외부 데이터 시뮬레이션 (CPU/메모리 변동). 초기값은 value.initial로 선언형 완료. 런타임 업데이트는 앱 책임 | 2026-03-05 |
+| resolveRole("button"/"list") throw 실패 | ZoneRole union에 없지만 유효 ARIA role | ⚪ 정당한 예외 → warn 전환 | "button", "list" 등은 ZoneRole에 없지만 실제 사용 중. throw는 과잉 → console.warn + fallback이 적절 | 2026-03-06 |
+| strict-api-guard 전체 (T1-T5) | OS 앱 API 침묵 실패 → hard error/warn 전환 | ✅ 통과 (0건 위반) | throw는 논리적 불가능에만, warn은 의심스러운 사용에. 2-tier 기준 확립 | 2026-03-06 |
+| TestBot ZoneRegistry facade 위반 | `src/apps/testbot/app.ts`에서 `@os-core/engine/registries/zoneRegistry` 직접 import | 🔴 LLM 실수 → ✅ 수정 | `@os-devtool/testing`에 `getZoneItems()` facade helper 추가. `zoneItems.ts` 생성 | 2026-03-06 |
+| TestScript.run items 3rd param | K2 위반 여부 판단 | ⚪ 정당한 예외 | `items` param은 K3(infra layer) — 데이터 주입이지 DOM 인터랙션 아님. K2 scope는 page/expect만 | 2026-03-06 |
 
 ---
 

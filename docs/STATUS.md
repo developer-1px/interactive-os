@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-06T21:00
+> Last updated: 2026-03-06T23:30
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,7 +14,7 @@
 
 | Domain | Project | Phase |
 |--------|---------|-------|
-| os-core | collection-crud-showcase | T1~T3 Now, T4~T5 Next |
+| (없음) | — | — |
 
 ---
 
@@ -25,8 +25,8 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| collection-crud-showcase | T1~T3 Now, T4~T5 Next | 03-06 🔥 |
 | docs-freshness | WP1~WP8 | 03-06 |
+| kernel-docs-sync | — | — |
 | condition-auto-disabled | 기획 중 (BOARD 없음) | new |
 
 ### testing
@@ -58,7 +58,8 @@
 
 (현재 활성 프로젝트 없음. 15 patterns 구현 완료, OS core 변경 대기)
 
-### meta
+### nondeterministic-paradigm
+> 탐색적 연구
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
@@ -80,8 +81,8 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 6 |
-| Active Projects | 9 |
-| Active Focus | 1 (collection-crud-showcase) |
+| Active Projects | 8 |
+| Active Focus | 0 |
 | Stale (7d+) | 1 (replay) |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |

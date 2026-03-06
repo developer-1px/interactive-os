@@ -40,7 +40,9 @@ export const OS_TAB = os.defineCommand(
     const items: string[] = ctx.inject(DOM_ITEMS);
     const config = ctx.inject(ZONE_CONFIG);
 
-    console.log(`[OS_TAB] 🔍 zone=${activeZoneId}, behavior=${config.tab.behavior}, items=${items.length}, focused=${zone.focusedItemId}`);
+    console.log(
+      `[OS_TAB] 🔍 zone=${activeZoneId}, behavior=${config.tab.behavior}, items=${items.length}, focused=${zone.focusedItemId}`,
+    );
 
     // "native" → OS does not manage Tab — browser default order
     if (config.tab.behavior === "native") return;
@@ -48,7 +50,9 @@ export const OS_TAB = os.defineCommand(
     const zoneOrder = ctx.inject(DOM_ZONE_ORDER);
     const direction = payload.direction ?? "forward";
 
-    console.log(`[OS_TAB] 🗺️ zoneOrder=[${zoneOrder.map((z: { zoneId: string; firstItemId: string | null }) => `${z.zoneId}(first:${z.firstItemId})`).join(", ")}]`);
+    console.log(
+      `[OS_TAB] 🗺️ zoneOrder=[${zoneOrder.map((z: { zoneId: string; firstItemId: string | null }) => `${z.zoneId}(first:${z.firstItemId})`).join(", ")}]`,
+    );
 
     const result = resolveTab(
       zone.focusedItemId,
@@ -59,7 +63,12 @@ export const OS_TAB = os.defineCommand(
       zoneOrder,
     );
 
-    console.log("[OS_TAB]", result ? `✅ ${result.type} → zone=${(result as { zoneId?: string }).zoneId ?? activeZoneId}, item=${result.itemId}` : "❌ resolveTab returned null");
+    console.log(
+      "[OS_TAB]",
+      result
+        ? `✅ ${result.type} → zone=${(result as { zoneId?: string }).zoneId ?? activeZoneId}, item=${result.itemId}`
+        : "❌ resolveTab returned null",
+    );
 
     if (!result) return;
 

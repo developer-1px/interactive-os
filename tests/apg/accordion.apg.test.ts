@@ -16,8 +16,8 @@
  * (escape so arrows navigate between headers, Tab moves to panel content)
  */
 
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
   assertBoundaryClamp,

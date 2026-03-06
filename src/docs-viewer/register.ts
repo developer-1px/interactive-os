@@ -55,8 +55,7 @@ DocsApp.defineEffect<ScrollPagePayload>("scrollPage", (payload) => {
         behavior: "instant",
       });
     } else {
-      const atBottom =
-        el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
       if (atBottom) {
         document
           .querySelector<HTMLAnchorElement>("[data-docs-nav-next]")

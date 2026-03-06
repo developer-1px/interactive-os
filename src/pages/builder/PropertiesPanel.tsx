@@ -1,6 +1,6 @@
-import { os } from "@os-sdk/os";
 import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
+import { os } from "@os-sdk/os";
 import {
   ChevronDown,
   ChevronRight,

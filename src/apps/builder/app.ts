@@ -13,9 +13,6 @@
  *         └── panel — accordion tree (properties form)
  */
 
-import { OS_OVERLAY_OPEN } from "@os-sdk/os";
-import { os } from "@os-sdk/os";
-import type { FieldCommandFactory } from "@os-sdk/os";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { deleteToast } from "@os-sdk/app/modules/deleteToast";
 import { history } from "@os-sdk/app/modules/history";
@@ -23,6 +20,8 @@ import {
   type CollectionNode,
   findAcceptingCollection,
 } from "@os-sdk/library/collection/pasteBubbling";
+import type { FieldCommandFactory } from "@os-sdk/os";
+import { OS_OVERLAY_OPEN, os } from "@os-sdk/os";
 import { produce } from "immer";
 import {
   type Block,
@@ -359,9 +358,7 @@ export const canvasOnCopy = (
   return [];
 };
 
-export const canvasOnCut = (
-  cursor: import("@os-sdk/os").ZoneCursor,
-) => {
+export const canvasOnCut = (cursor: import("@os-sdk/os").ZoneCursor) => {
   if (!isDynamicItem(cursor.focusId)) {
     // Static item → cut not allowed (PRD 1.3)
     return [];
@@ -372,9 +369,7 @@ export const canvasOnCut = (
   });
 };
 
-export const canvasOnPaste = (
-  cursor: import("@os-sdk/os").ZoneCursor,
-) => {
+export const canvasOnPaste = (cursor: import("@os-sdk/os").ZoneCursor) => {
   const collections = buildCanvasCollections();
   const clipData = canvasCollection.readClipboard();
   if (!clipData) return [];

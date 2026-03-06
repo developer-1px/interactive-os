@@ -9,8 +9,8 @@
  * Tier 1: OS 커널 아키텍처 테스트
  */
 
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════

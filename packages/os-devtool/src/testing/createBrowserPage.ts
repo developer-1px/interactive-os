@@ -90,8 +90,7 @@ function displayKey(key: string): string {
 
 function findEl(id: string): Element | null {
   return (
-    document.getElementById(id) ??
-    document.querySelector(`[data-zone="${id}"]`)
+    document.getElementById(id) ?? document.querySelector(`[data-zone="${id}"]`)
   );
 }
 
@@ -147,11 +146,11 @@ function createHeadlessEffects(): VisualEffects {
   return {
     STEP_DELAY: 0,
     ANIM_DURATION: 0,
-    moveCursorTo() {},
-    showRipple() {},
-    showKeyBadge() {},
-    showStamp() {},
-    hideCursor() {},
+    moveCursorTo() { },
+    showRipple() { },
+    showKeyBadge() { },
+    showStamp() { },
+    hideCursor() { },
   };
 }
 
@@ -217,7 +216,7 @@ function createVisualEffects(
     for (const entry of trackedStamps) {
       try {
         entry.stampDiv.hidePopover();
-      } catch {}
+      } catch { }
       entry.stampDiv.remove();
     }
     trackedStamps.length = 0;
@@ -319,7 +318,7 @@ function createVisualEffects(
       setTimeout(() => {
         try {
           badge.hidePopover();
-        } catch {}
+        } catch { }
         badge.remove();
       }, STEP_DELAY * 1.5);
 
@@ -373,7 +372,7 @@ function createVisualEffects(
       setTimeout(() => {
         try {
           cursorEl.hidePopover();
-        } catch {}
+        } catch { }
         cursorEl.remove();
       }, 300);
     },
@@ -467,10 +466,10 @@ export function createBrowserPage(
         ...(passed
           ? {}
           : {
-              error: negated
-                ? `Expected NOT ${displayExpected}, but got ${displayActual}`
-                : `Expected ${displayExpected}, got ${displayActual}`,
-            }),
+            error: negated
+              ? `Expected NOT ${displayExpected}, but got ${displayActual}`
+              : `Expected ${displayExpected}, got ${displayActual}`,
+          }),
         timestamp: timestamp(),
       });
       await delay(fx.STEP_DELAY / 2);
@@ -592,28 +591,19 @@ export function createBrowserPage(
         return assertFocused(false);
       },
 
-      async toBeSelected() {
-        return assertAttribute("aria-selected", "true", false);
-      },
-      async toBeExpanded() {
-        return assertAttribute("aria-expanded", "true", false);
-      },
       async toBeChecked() {
         return assertAttribute("aria-checked", "true", false);
-      },
-      async toBePressed() {
-        return assertAttribute("aria-pressed", "true", false);
       },
       async toBeDisabled() {
         return assertAttribute("aria-disabled", "true", false);
       },
-      async toBeEditing() {
-        return assertAttribute("data-editing", "true", false);
-      },
 
       async inputValue() {
         const el = findEl(elementId);
-        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        if (
+          el instanceof HTMLInputElement ||
+          el instanceof HTMLTextAreaElement
+        ) {
           return el.value;
         }
         return (el as HTMLElement)?.textContent ?? "";
@@ -633,12 +623,8 @@ export function createBrowserPage(
           toHaveAttribute: (name: string, value: string | RegExp) =>
             assertAttribute(name, value, true),
           toBeFocused: () => assertFocused(true),
-          toBeSelected: () => assertAttribute("aria-selected", "true", true),
-          toBeExpanded: () => assertAttribute("aria-expanded", "true", true),
           toBeChecked: () => assertAttribute("aria-checked", "true", true),
-          toBePressed: () => assertAttribute("aria-pressed", "true", true),
           toBeDisabled: () => assertAttribute("aria-disabled", "true", true),
-          toBeEditing: () => assertAttribute("data-editing", "true", true),
           get not(): LocatorAssertions {
             return loc as LocatorAssertions;
           },

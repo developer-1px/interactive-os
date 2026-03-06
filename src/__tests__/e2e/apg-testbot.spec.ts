@@ -44,9 +44,7 @@ function createPlaywrightPage(page: PlaywrightPage): Page {
       if (selector.startsWith("#")) {
         const id = selector.slice(1);
         // Same priority as findEl(): native id first, then data-zone
-        return page
-          .locator(`[id="${id}"], [data-zone="${id}"]`)
-          .first();
+        return page.locator(`[id="${id}"], [data-zone="${id}"]`).first();
       }
       return page.locator(selector);
     },

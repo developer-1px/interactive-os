@@ -80,9 +80,7 @@ const SpinUI = spinbuttonZone.bind({
   options: {
     navigate: { orientation: "vertical" },
     value: {
-      initial: Object.fromEntries(
-        SPINBUTTONS.map((s) => [s.id, s.initial]),
-      ),
+      initial: Object.fromEntries(SPINBUTTONS.map((s) => [s.id, s.initial])),
     },
   },
 });

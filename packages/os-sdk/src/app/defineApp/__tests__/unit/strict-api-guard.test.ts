@@ -132,6 +132,7 @@ describe("T5: OS_ACTIVATE warns for orphan trigger callback", () => {
     const { ZoneRegistry } = await import(
       "@os-core/engine/registries/zoneRegistry"
     );
+    const { OS_FOCUS } = await import("@os-core/4-command/focus/focus");
 
     const page = createOsPage();
     const zoneId = "t5-zone";
@@ -147,15 +148,15 @@ describe("T5: OS_ACTIVATE warns for orphan trigger callback", () => {
       onActivate: { type: "GHOST_CMD" } as any,
     });
 
+    // Force focus to ghost-item via OS_FOCUS (click bypasses OS_ACTIVATE)
+    page.dispatch(OS_FOCUS({ zoneId, itemId: "ghost-item" }));
+
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    // Manually set focus to ghost-item and press Enter
-    page.click("ghost-item");
+    // Enter triggers OS_ACTIVATE which checks zone item membership
     page.keyboard.press("Enter");
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("ghost-item"),
-    );
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("ghost-item"));
     warnSpy.mockRestore();
   });
 });

@@ -40,8 +40,14 @@ export const OS_ACTIVATE = os.defineCommand("OS_ACTIVATE", [], (ctx) => () => {
   if (itemCb?.onActivate) {
     // Warn if trigger has callback but is not in zone's registered items
     const zoneItems = entry?.getItems?.();
-    if (zoneItems && zoneItems.length > 0 && !zoneItems.includes(zone.focusedItemId)) {
-      console.warn(`[OS_ACTIVATE] Trigger '${zone.focusedItemId}' has onActivate callback but is not in zone '${activeZoneId}' items. The trigger may not be reachable by keyboard navigation.`);
+    if (
+      zoneItems &&
+      zoneItems.length > 0 &&
+      !zoneItems.includes(zone.focusedItemId)
+    ) {
+      console.warn(
+        `[OS_ACTIVATE] Trigger '${zone.focusedItemId}' has onActivate callback but is not in zone '${activeZoneId}' items. The trigger may not be reachable by keyboard navigation.`,
+      );
     }
     return { dispatch: itemCb.onActivate };
   }

@@ -42,10 +42,7 @@ test.describe
       // Wait a bit for focus transition
       await page.waitForTimeout(100);
 
-      const focusedId = await page.evaluate(
-        () =>
-          document.activeElement?.id,
-      );
+      const focusedId = await page.evaluate(() => document.activeElement?.id);
       console.log("Focused ID after delete:", focusedId);
 
       // Assert that draft is NOT focused

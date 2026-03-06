@@ -21,8 +21,8 @@
 
 import { OS_CHECK } from "@os-core/4-command/activate/check";
 import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
   assertEscapeClose,
@@ -112,7 +112,10 @@ describe("APG Menubar: Navigation (horizontal, loop)", () => {
 
 describe("APG Menu: Navigation (vertical, loop)", () => {
   assertVerticalNav(createMenu as any);
-  assertHomeEnd(createMenu as any, { firstId: "cmd-new", lastId: "radio-right" });
+  assertHomeEnd(createMenu as any, {
+    firstId: "cmd-new",
+    lastId: "radio-right",
+  });
   assertNoSelection(createMenu as any);
 
   it("N3: Down Arrow at last item wraps to first (loop)", () => {

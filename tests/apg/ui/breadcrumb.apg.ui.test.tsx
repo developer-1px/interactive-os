@@ -21,9 +21,19 @@
  *   The only contract is correct ARIA structure, verified here via DOM rendering.
  */
 
-import { render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { BreadcrumbPattern } from "@/pages/apg-showcase/patterns/BreadcrumbPattern";
+
+function renderHTML(): string {
+  return renderToString(<BreadcrumbPattern />);
+}
+
+/** Minimal DOM parser using jsdom (vitest provides it) */
+function parseHTML(html: string): Document {
+  const parser = new DOMParser();
+  return parser.parseFromString(`<div>${html}</div>`, "text/html");
+}
 
 describe("APG Breadcrumb: Structural ARIA (DOM Rendering)", () => {
   // ═══════════════════════════════════════════════════
@@ -31,11 +41,11 @@ describe("APG Breadcrumb: Structural ARIA (DOM Rendering)", () => {
   // ═══════════════════════════════════════════════════
 
   it("renders a nav element with aria-label='Breadcrumb'", () => {
-    render(<BreadcrumbPattern />);
+    const doc = parseHTML(renderHTML());
 
-    const nav = screen.getByLabelText("Breadcrumb");
+    const nav = doc.querySelector("nav[aria-label='Breadcrumb']");
     expect(nav).toBeTruthy();
-    expect(nav.tagName.toLowerCase()).toBe("nav");
+    expect(nav!.tagName.toLowerCase()).toBe("nav");
   });
 
   // ═══════════════════════════════════════════════════
@@ -43,18 +53,18 @@ describe("APG Breadcrumb: Structural ARIA (DOM Rendering)", () => {
   // ═══════════════════════════════════════════════════
 
   it("contains an ordered list (ol) inside the nav", () => {
-    render(<BreadcrumbPattern />);
+    const doc = parseHTML(renderHTML());
 
-    const nav = screen.getByLabelText("Breadcrumb");
-    const ol = nav.querySelector("ol");
+    const nav = doc.querySelector("nav[aria-label='Breadcrumb']");
+    const ol = nav?.querySelector("ol");
     expect(ol).toBeTruthy();
   });
 
   it("list items contain links", () => {
-    render(<BreadcrumbPattern />);
+    const doc = parseHTML(renderHTML());
 
-    const nav = screen.getByLabelText("Breadcrumb");
-    const links = nav.querySelectorAll("a");
+    const nav = doc.querySelector("nav[aria-label='Breadcrumb']");
+    const links = nav?.querySelectorAll("a") ?? [];
     expect(links.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -63,22 +73,21 @@ describe("APG Breadcrumb: Structural ARIA (DOM Rendering)", () => {
   // ═══════════════════════════════════════════════════
 
   it("last link has aria-current='page'", () => {
-    render(<BreadcrumbPattern />);
+    const doc = parseHTML(renderHTML());
 
-    const nav = screen.getByLabelText("Breadcrumb");
-    const links = nav.querySelectorAll("a");
+    const nav = doc.querySelector("nav[aria-label='Breadcrumb']");
+    const links = nav?.querySelectorAll("a") ?? [];
     const lastLink = links[links.length - 1];
 
-    expect(lastLink.getAttribute("aria-current")).toBe("page");
+    expect(lastLink?.getAttribute("aria-current")).toBe("page");
   });
 
   it("non-last links do NOT have aria-current", () => {
-    render(<BreadcrumbPattern />);
+    const doc = parseHTML(renderHTML());
 
-    const nav = screen.getByLabelText("Breadcrumb");
-    const links = Array.from(nav.querySelectorAll("a"));
+    const nav = doc.querySelector("nav[aria-label='Breadcrumb']");
+    const links = Array.from(nav?.querySelectorAll("a") ?? []);
 
-    // All links except the last should NOT have aria-current
     for (let i = 0; i < links.length - 1; i++) {
       expect(links[i].hasAttribute("aria-current")).toBe(false);
     }
@@ -89,12 +98,11 @@ describe("APG Breadcrumb: Structural ARIA (DOM Rendering)", () => {
   // ═══════════════════════════════════════════════════
 
   it("separators are hidden from accessibility tree (aria-hidden)", () => {
-    render(<BreadcrumbPattern />);
+    const doc = parseHTML(renderHTML());
 
-    const nav = screen.getByLabelText("Breadcrumb");
-    const separators = nav.querySelectorAll("[aria-hidden='true']");
+    const nav = doc.querySelector("nav[aria-label='Breadcrumb']");
+    const separators = nav?.querySelectorAll("[aria-hidden='true']") ?? [];
 
-    // There should be at least one separator (between items)
     expect(separators.length).toBeGreaterThanOrEqual(1);
   });
 });

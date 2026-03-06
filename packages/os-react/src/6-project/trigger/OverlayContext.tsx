@@ -5,11 +5,11 @@
 import { createContext, useContext } from "react";
 
 interface OverlayContextValue {
-    overlayId: string;
+  overlayId: string;
 }
 
 export const OverlayContext = createContext<OverlayContextValue | null>(null);
 
 export function useOverlayContext() {
-    return useContext(OverlayContext);
+  return useContext(OverlayContext);
 }

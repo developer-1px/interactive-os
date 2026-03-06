@@ -11,8 +11,8 @@
  */
 
 import { OS_SELECT } from "@os-core/4-command/selection/select";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { createPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 
 // ─── Configs ───

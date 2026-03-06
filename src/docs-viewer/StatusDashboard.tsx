@@ -44,22 +44,22 @@ export function StatusDashboard({ content }: StatusDashboardProps) {
                   type="button"
                   className="text-left p-4 rounded-xl border border-orange-100 bg-orange-50/50 hover:bg-orange-50 hover:border-orange-200 hover:shadow-md transition-all group"
                 >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
-                    {focus.domain}
-                  </span>
-                  {focus.weight && (
-                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                      {focus.weight}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
+                      {focus.domain}
                     </span>
-                  )}
-                </div>
-                <h3 className="font-semibold text-slate-900 text-sm group-hover:text-orange-700">
-                  {focus.project}
-                </h3>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                  {focus.description}
-                </p>
+                    {focus.weight && (
+                      <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                        {focus.weight}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-semibold text-slate-900 text-sm group-hover:text-orange-700">
+                    {focus.project}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                    {focus.description}
+                  </p>
                 </button>
               </DocsReaderUI.Item>
             ))}
@@ -111,41 +111,41 @@ export function StatusDashboard({ content }: StatusDashboardProps) {
                         asChild
                       >
                         <tr className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors">
-                        <td className="px-4 py-2.5">
-                          <div className="flex items-center gap-2">
-                            {project.isFocus && (
-                              <Flame
-                                size={12}
-                                className="text-orange-500 shrink-0"
-                              />
-                            )}
+                          <td className="px-4 py-2.5">
+                            <div className="flex items-center gap-2">
+                              {project.isFocus && (
+                                <Flame
+                                  size={12}
+                                  className="text-orange-500 shrink-0"
+                                />
+                              )}
+                              <span
+                                className={clsx(
+                                  "font-medium",
+                                  project.isFocus
+                                    ? "text-orange-700"
+                                    : "text-slate-700",
+                                )}
+                              >
+                                {project.name}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2.5 text-slate-500">
+                            {project.phase}
+                          </td>
+                          <td className="px-4 py-2.5">
                             <span
                               className={clsx(
-                                "font-medium",
-                                project.isFocus
-                                  ? "text-orange-700"
-                                  : "text-slate-700",
+                                "text-xs",
+                                project.lastActivity.includes("⚠️")
+                                  ? "text-amber-600 font-medium"
+                                  : "text-slate-400",
                               )}
                             >
-                              {project.name}
+                              {project.lastActivity}
                             </span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2.5 text-slate-500">
-                          {project.phase}
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span
-                            className={clsx(
-                              "text-xs",
-                              project.lastActivity.includes("⚠️")
-                                ? "text-amber-600 font-medium"
-                                : "text-slate-400",
-                            )}
-                          >
-                            {project.lastActivity}
-                          </span>
-                        </td>
+                          </td>
                         </tr>
                       </DocsReaderUI.Item>
                     ))}

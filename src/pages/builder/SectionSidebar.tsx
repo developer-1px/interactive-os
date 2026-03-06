@@ -9,9 +9,9 @@
  * Uses BuilderSidebarUI.Zone + Item from app.ts bind().
  */
 
-import { os } from "@os-sdk/os";
 import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
+import { os } from "@os-sdk/os";
 import { ChevronDown, ChevronRight, Layers, Plus, X } from "lucide-react";
 import { useState } from "react";
 import type { Block } from "@/apps/builder/app";

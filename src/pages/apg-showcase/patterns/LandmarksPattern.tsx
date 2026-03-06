@@ -224,16 +224,16 @@ function LandmarksLiveDemo() {
           className="px-5 py-2 bg-slate-100 border-b border-slate-200 flex items-center justify-between"
         >
           <div className="flex gap-4">
-            <a href="#" className="text-xs text-indigo-600 hover:underline">
+            <a href="#home" className="text-xs text-indigo-600 hover:underline">
               Home
             </a>
-            <a href="#" className="text-xs text-indigo-600 hover:underline">
+            <a href="#products" className="text-xs text-indigo-600 hover:underline">
               Products
             </a>
-            <a href="#" className="text-xs text-indigo-600 hover:underline">
+            <a href="#about" className="text-xs text-indigo-600 hover:underline">
               About
             </a>
-            <a href="#" className="text-xs text-indigo-600 hover:underline">
+            <a href="#contact" className="text-xs text-indigo-600 hover:underline">
               Contact
             </a>
           </div>
@@ -362,13 +362,13 @@ function LandmarksLiveDemo() {
           className="px-5 py-2 bg-slate-100 border-t border-slate-200 flex items-center justify-between"
         >
           <div className="flex gap-4">
-            <a href="#" className="text-xs text-gray-600 hover:underline">
+            <a href="#privacy" className="text-xs text-gray-600 hover:underline">
               Privacy
             </a>
-            <a href="#" className="text-xs text-gray-600 hover:underline">
+            <a href="#terms" className="text-xs text-gray-600 hover:underline">
               Terms
             </a>
-            <a href="#" className="text-xs text-gray-600 hover:underline">
+            <a href="#sitemap" className="text-xs text-gray-600 hover:underline">
               Sitemap
             </a>
           </div>

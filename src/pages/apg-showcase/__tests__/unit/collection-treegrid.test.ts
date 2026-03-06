@@ -14,14 +14,14 @@
  */
 
 import { type AppPage, createPage } from "@os-devtool/testing/page";
-import { beforeEach, describe, expect, it } from "vitest";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
 import { history } from "@os-sdk/app/modules/history";
 import {
-  createCollectionZone,
   _resetClipboardStore,
+  createCollectionZone,
 } from "@os-sdk/library/collection/createCollectionZone";
-import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
+import { beforeEach, describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // Treegrid data — email threads with replies (nested)
@@ -49,8 +49,16 @@ const INITIAL: TreegridState = {
         subject: "Design Review",
         sender: "alice@ex.com",
         children: [
-          { id: "reply-1a", subject: "Re: Design Review", sender: "bob@ex.com" },
-          { id: "reply-1b", subject: "Re: Design Review", sender: "carol@ex.com" },
+          {
+            id: "reply-1a",
+            subject: "Re: Design Review",
+            sender: "bob@ex.com",
+          },
+          {
+            id: "reply-1b",
+            subject: "Re: Design Review",
+            sender: "carol@ex.com",
+          },
         ],
       },
       {
@@ -58,7 +66,11 @@ const INITIAL: TreegridState = {
         subject: "Sprint Planning",
         sender: "dave@ex.com",
         children: [
-          { id: "reply-2a", subject: "Re: Sprint Planning", sender: "eve@ex.com" },
+          {
+            id: "reply-2a",
+            subject: "Re: Sprint Planning",
+            sender: "eve@ex.com",
+          },
         ],
       },
       { id: "msg-3", subject: "Audit Report", sender: "frank@ex.com" },
@@ -71,9 +83,13 @@ const INITIAL: TreegridState = {
 // App definition
 // ═══════════════════════════════════════════════════════════════════
 
-const TreegridApp = defineApp<TreegridState>("collection-treegrid-test", INITIAL, {
-  modules: [history()],
-});
+const TreegridApp = defineApp<TreegridState>(
+  "collection-treegrid-test",
+  INITIAL,
+  {
+    modules: [history()],
+  },
+);
 
 const { undoCommand, redoCommand } = createUndoRedoCommands(TreegridApp);
 

@@ -8,14 +8,14 @@
  */
 
 import { type AppPage, createPage } from "@os-devtool/testing/page";
-import { beforeEach, describe, expect, it } from "vitest";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
 import { history } from "@os-sdk/app/modules/history";
 import {
-  createCollectionZone,
   _resetClipboardStore,
+  createCollectionZone,
 } from "@os-sdk/library/collection/createCollectionZone";
-import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
+import { beforeEach, describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // Tree data — folders with nested files
@@ -48,9 +48,7 @@ const INITIAL: TreeState = {
       {
         id: "folder-b",
         label: "Hooks",
-        children: [
-          { id: "file-3", label: "useAuth.ts" },
-        ],
+        children: [{ id: "file-3", label: "useAuth.ts" }],
       },
       { id: "file-4", label: "index.ts" },
     ],

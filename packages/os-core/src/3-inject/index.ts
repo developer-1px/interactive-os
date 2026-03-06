@@ -46,9 +46,7 @@ export const DOM_EXPANDABLE_ITEMS = os.defineContext(
     // Lazy fallback: DOM scan via bound element
     if (entry.element) {
       const expandableIds = new Set<string>();
-      const els = entry.element.querySelectorAll(
-        "[data-item][aria-expanded]",
-      );
+      const els = entry.element.querySelectorAll("[data-item][aria-expanded]");
       for (const el of els) {
         if (el.closest("[data-zone]") !== entry.element) continue;
         const id = el.id;

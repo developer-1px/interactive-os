@@ -18,8 +18,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { DocsApp, resetDoc } from "../../app";
 
 interface DocsState {
-    activePath: string | null;
-    searchOpen: boolean;
+  activePath: string | null;
+  searchOpen: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -28,46 +28,46 @@ interface DocsState {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Document Selection", () => {
-    let page: AppPage<DocsState>;
+  let page: AppPage<DocsState>;
 
-    beforeEach(() => {
-        page = createPage(DocsApp);
-        page.goto("docs-recent");
-        page.dispatch(resetDoc());
-    });
+  beforeEach(() => {
+    page = createPage(DocsApp);
+    page.goto("docs-recent");
+    page.dispatch(resetDoc());
+  });
 
-    it("starts with no document selected", () => {
-        expect(page.state.activePath).toBeNull();
-    });
+  it("starts with no document selected", () => {
+    expect(page.state.activePath).toBeNull();
+  });
 
-    it("clicking a file selects it as active document", () => {
-        page.click("docs/getting-started.md");
-        expect(page.state.activePath).toBe("docs/getting-started.md");
-    });
+  it("clicking a file selects it as active document", () => {
+    page.click("docs/getting-started.md");
+    expect(page.state.activePath).toBe("docs/getting-started.md");
+  });
 
-    it("clicking another file replaces the active document", () => {
-        page.click("docs/intro.md");
-        page.click("docs/setup.md");
-        expect(page.state.activePath).toBe("docs/setup.md");
-    });
+  it("clicking another file replaces the active document", () => {
+    page.click("docs/intro.md");
+    page.click("docs/setup.md");
+    expect(page.state.activePath).toBe("docs/setup.md");
+  });
 
-    it("clicking a folder shows folder index view", () => {
-        page.click("folder:docs/api");
-        expect(page.state.activePath).toBe("folder:docs/api");
-    });
+  it("clicking a folder shows folder index view", () => {
+    page.click("folder:docs/api");
+    expect(page.state.activePath).toBe("folder:docs/api");
+  });
 
-    it("navigating from folder to file updates active path", () => {
-        page.click("folder:docs/api");
-        page.click("docs/api/endpoints.md");
-        expect(page.state.activePath).toBe("docs/api/endpoints.md");
-    });
+  it("navigating from folder to file updates active path", () => {
+    page.click("folder:docs/api");
+    page.click("docs/api/endpoints.md");
+    expect(page.state.activePath).toBe("docs/api/endpoints.md");
+  });
 
-    it("reset clears the active document", () => {
-        page.click("docs/intro.md");
-        expect(page.state.activePath).not.toBeNull();
-        page.dispatch(resetDoc());
-        expect(page.state.activePath).toBeNull();
-    });
+  it("reset clears the active document", () => {
+    page.click("docs/intro.md");
+    expect(page.state.activePath).not.toBeNull();
+    page.dispatch(resetDoc());
+    expect(page.state.activePath).toBeNull();
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -76,18 +76,18 @@ describe("Feature: Document Selection", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Sidebar Navigation", () => {
-    let page: AppPage<DocsState>;
+  let page: AppPage<DocsState>;
 
-    beforeEach(() => {
-        page = createPage(DocsApp);
-        page.goto("docs-sidebar");
-        page.dispatch(resetDoc());
-    });
+  beforeEach(() => {
+    page = createPage(DocsApp);
+    page.goto("docs-sidebar");
+    page.dispatch(resetDoc());
+  });
 
-    it("clicking an item in sidebar selects the document", () => {
-        page.click("docs/readme.md");
-        expect(page.state.activePath).toBe("docs/readme.md");
-    });
+  it("clicking an item in sidebar selects the document", () => {
+    page.click("docs/readme.md");
+    expect(page.state.activePath).toBe("docs/readme.md");
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -96,27 +96,27 @@ describe("Feature: Sidebar Navigation", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Favorites List", () => {
-    let page: AppPage<DocsState>;
+  let page: AppPage<DocsState>;
 
-    beforeEach(() => {
-        page = createPage(DocsApp);
-        page.goto("docs-favorites");
-        page.dispatch(resetDoc());
-    });
+  beforeEach(() => {
+    page = createPage(DocsApp);
+    page.goto("docs-favorites");
+    page.dispatch(resetDoc());
+  });
 
-    it("clicking a favorite selects the document", () => {
-        page.click("pinned-doc.md");
-        expect(page.state.activePath).toBe("pinned-doc.md");
-    });
+  it("clicking a favorite selects the document", () => {
+    page.click("pinned-doc.md");
+    expect(page.state.activePath).toBe("pinned-doc.md");
+  });
 
-    it("selection follows focus (followFocus: true)", () => {
-        page.click("fav-a");
-        expect(page.selection()).toContain("fav-a");
+  it("selection follows focus (followFocus: true)", () => {
+    page.click("fav-a");
+    expect(page.selection()).toContain("fav-a");
 
-        page.keyboard.press("ArrowDown");
-        const newFocus = page.focusedItemId();
-        expect(page.selection()).toContain(newFocus!);
-    });
+    page.keyboard.press("ArrowDown");
+    const newFocus = page.focusedItemId();
+    expect(page.selection()).toContain(newFocus!);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -125,27 +125,27 @@ describe("Feature: Favorites List", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Recent List", () => {
-    let page: AppPage<DocsState>;
+  let page: AppPage<DocsState>;
 
-    beforeEach(() => {
-        page = createPage(DocsApp);
-        page.goto("docs-recent");
-        page.dispatch(resetDoc());
-    });
+  beforeEach(() => {
+    page = createPage(DocsApp);
+    page.goto("docs-recent");
+    page.dispatch(resetDoc());
+  });
 
-    it("clicking a recent file selects the document", () => {
-        page.click("recent/changelog.md");
-        expect(page.state.activePath).toBe("recent/changelog.md");
-    });
+  it("clicking a recent file selects the document", () => {
+    page.click("recent/changelog.md");
+    expect(page.state.activePath).toBe("recent/changelog.md");
+  });
 
-    it("selection follows focus (followFocus: true)", () => {
-        page.click("recent-a");
-        expect(page.selection()).toContain("recent-a");
+  it("selection follows focus (followFocus: true)", () => {
+    page.click("recent-a");
+    expect(page.selection()).toContain("recent-a");
 
-        page.keyboard.press("ArrowDown");
-        const newFocus = page.focusedItemId();
-        expect(page.selection()).toContain(newFocus!);
-    });
+    page.keyboard.press("ArrowDown");
+    const newFocus = page.focusedItemId();
+    expect(page.selection()).toContain(newFocus!);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -154,22 +154,22 @@ describe("Feature: Recent List", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Search Overlay", () => {
-    let page: AppPage<DocsState>;
+  let page: AppPage<DocsState>;
 
-    beforeEach(() => {
-        page = createPage(DocsApp);
-        page.goto("docs-recent");
-        page.dispatch(resetDoc());
-    });
+  beforeEach(() => {
+    page = createPage(DocsApp);
+    page.goto("docs-recent");
+    page.dispatch(resetDoc());
+  });
 
-    it("search is closed by default", () => {
-        expect(page.state.searchOpen).toBe(false);
-    });
+  it("search is closed by default", () => {
+    expect(page.state.searchOpen).toBe(false);
+  });
 
-    it("/ key opens search overlay", () => {
-        page.keyboard.press("/");
-        expect(page.state.searchOpen).toBe(true);
-    });
+  it("/ key opens search overlay", () => {
+    page.keyboard.press("/");
+    expect(page.state.searchOpen).toBe(true);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -178,27 +178,27 @@ describe("Feature: Search Overlay", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: History Navigation", () => {
-    let page: AppPage<DocsState>;
+  let page: AppPage<DocsState>;
 
-    beforeEach(() => {
-        page = createPage(DocsApp);
-        page.goto("docs-recent");
-        page.dispatch(resetDoc());
-    });
+  beforeEach(() => {
+    page = createPage(DocsApp);
+    page.goto("docs-recent");
+    page.dispatch(resetDoc());
+  });
 
-    it("Alt+ArrowLeft dispatches go back", () => {
-        page.click("docs/a.md");
-        // GO_BACK delegates to router — in headless, state is unchanged
-        page.keyboard.press("Alt+ArrowLeft");
-        expect(page.state.activePath).toBe("docs/a.md");
-    });
+  it("Alt+ArrowLeft dispatches go back", () => {
+    page.click("docs/a.md");
+    // GO_BACK delegates to router — in headless, state is unchanged
+    page.keyboard.press("Alt+ArrowLeft");
+    expect(page.state.activePath).toBe("docs/a.md");
+  });
 
-    it("Alt+ArrowRight dispatches go forward", () => {
-        page.click("docs/a.md");
-        // GO_FORWARD delegates to router — in headless, state is unchanged
-        page.keyboard.press("Alt+ArrowRight");
-        expect(page.state.activePath).toBe("docs/a.md");
-    });
+  it("Alt+ArrowRight dispatches go forward", () => {
+    page.click("docs/a.md");
+    // GO_FORWARD delegates to router — in headless, state is unchanged
+    page.keyboard.press("Alt+ArrowRight");
+    expect(page.state.activePath).toBe("docs/a.md");
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -207,23 +207,23 @@ describe("Feature: History Navigation", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Section Navigation", () => {
-    let page: AppPage<DocsState>;
+  let page: AppPage<DocsState>;
 
-    beforeEach(() => {
-        page = createPage(DocsApp);
-        page.goto("docs-reader");
-        page.dispatch(resetDoc());
-    });
+  beforeEach(() => {
+    page = createPage(DocsApp);
+    page.goto("docs-reader");
+    page.dispatch(resetDoc());
+  });
 
-    it("Space dispatches next section command", () => {
-        // In headless, scroll is a DOM effect — we verify the command dispatches
-        // without error. The scroll itself is tested in docs-scroll.test.ts.
-        page.keyboard.press("Space");
-        // No error = command dispatched successfully
-    });
+  it("Space dispatches next section command", () => {
+    // In headless, scroll is a DOM effect — we verify the command dispatches
+    // without error. The scroll itself is tested in docs-scroll.test.ts.
+    page.keyboard.press("Space");
+    // No error = command dispatched successfully
+  });
 
-    it("Shift+Space dispatches previous section command", () => {
-        page.keyboard.press("Shift+Space");
-        // No error = command dispatched successfully
-    });
+  it("Shift+Space dispatches previous section command", () => {
+    page.keyboard.press("Shift+Space");
+    // No error = command dispatched successfully
+  });
 });

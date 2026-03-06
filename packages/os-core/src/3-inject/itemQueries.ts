@@ -29,9 +29,7 @@ export function findItemElement(
 
   // 1. Zone-scoped: look inside the zone container first
   if (zoneEl) {
-    const scoped = zoneEl.querySelector<HTMLElement>(
-      `#${cssEscape(itemId)}`,
-    );
+    const scoped = zoneEl.querySelector<HTMLElement>(`#${cssEscape(itemId)}`);
     if (scoped) return scoped;
   }
 

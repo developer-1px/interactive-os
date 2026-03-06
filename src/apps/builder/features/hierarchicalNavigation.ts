@@ -15,16 +15,16 @@
  */
 
 import type { BaseCommand } from "@kernel";
+import { getFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
+import type { ZoneCursor } from "@os-sdk/os";
 import {
   getAncestorWithAttribute,
   getFirstDescendantWithAttribute,
   getItemAttribute,
+  OS_ESCAPE,
+  OS_FIELD_START_EDIT,
+  OS_FOCUS,
 } from "@os-sdk/os";
-import type { ZoneCursor } from "@os-sdk/os";
-import { OS_ESCAPE } from "@os-sdk/os";
-import { OS_FIELD_START_EDIT } from "@os-sdk/os";
-import { OS_FOCUS } from "@os-sdk/os";
-import { getFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
 import type { BuilderLevel } from "../6-project/Builder";
 
 // ═══════════════════════════════════════════════════════════════════

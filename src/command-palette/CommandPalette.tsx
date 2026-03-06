@@ -10,9 +10,8 @@
  */
 
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { OS_OVERLAY_CLOSE } from "@os-sdk/os";
-import { os } from "@os-sdk/os";
 import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
+import { OS_OVERLAY_CLOSE, os } from "@os-sdk/os";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { type FuzzyMatchResult, fuzzyMatch } from "./fuzzyMatch";

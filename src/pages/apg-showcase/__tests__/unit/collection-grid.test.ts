@@ -12,15 +12,15 @@
  */
 
 import { type AppPage, createPage } from "@os-devtool/testing/page";
-import { beforeEach, describe, expect, it } from "vitest";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
 import { history } from "@os-sdk/app/modules/history";
 import {
+  _resetClipboardStore,
   createCollectionZone,
   fromEntities,
-  _resetClipboardStore,
 } from "@os-sdk/library/collection/createCollectionZone";
-import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
+import { beforeEach, describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // Grid data — rows with columns
