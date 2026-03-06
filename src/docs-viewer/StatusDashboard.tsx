@@ -4,7 +4,6 @@
  * Replaces MarkdownRenderer when activePath points to STATUS.md.
  * Uses parseStatusMd to transform raw markdown → structured data.
  */
-import { os } from "@os-sdk/os";
 import clsx from "clsx";
 import {
   AlertTriangle,
@@ -15,7 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useMemo } from "react";
-import { selectDoc } from "./app";
+import { DocsReaderUI } from "./app";
 import { parseStatusMd, type StatusData } from "./docsUtils";
 
 interface StatusDashboardProps {
@@ -36,18 +35,15 @@ export function StatusDashboard({ content }: StatusDashboardProps) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {data.activeFocus.map((focus) => (
-              <button
+              <DocsReaderUI.Item
                 key={`${focus.domain}/${focus.project}`}
-                type="button"
-                onClick={() =>
-                  os.dispatch(
-                    selectDoc({
-                      id: `1-project/${focus.domain}/${focus.project}/BOARD`,
-                    }),
-                  )
-                }
-                className="text-left p-4 rounded-xl border border-orange-100 bg-orange-50/50 hover:bg-orange-50 hover:border-orange-200 hover:shadow-md transition-all group"
+                id={`1-project/${focus.domain}/${focus.project}/BOARD`}
+                asChild
               >
+                <button
+                  type="button"
+                  className="text-left p-4 rounded-xl border border-orange-100 bg-orange-50/50 hover:bg-orange-50 hover:border-orange-200 hover:shadow-md transition-all group"
+                >
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
                     {focus.domain}
@@ -64,7 +60,8 @@ export function StatusDashboard({ content }: StatusDashboardProps) {
                 <p className="text-xs text-slate-500 mt-1 line-clamp-2">
                   {focus.description}
                 </p>
-              </button>
+                </button>
+              </DocsReaderUI.Item>
             ))}
           </div>
         </section>
@@ -108,17 +105,12 @@ export function StatusDashboard({ content }: StatusDashboardProps) {
                   </thead>
                   <tbody>
                     {domain.projects.map((project) => (
-                      <tr
+                      <DocsReaderUI.Item
                         key={project.name}
-                        className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors"
-                        onClick={() =>
-                          os.dispatch(
-                            selectDoc({
-                              id: `1-project/${domain.name}/${project.name}/BOARD`,
-                            }),
-                          )
-                        }
+                        id={`1-project/${domain.name}/${project.name}/BOARD`}
+                        asChild
                       >
+                        <tr className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors">
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-2">
                             {project.isFocus && (
@@ -154,7 +146,8 @@ export function StatusDashboard({ content }: StatusDashboardProps) {
                             {project.lastActivity}
                           </span>
                         </td>
-                      </tr>
+                        </tr>
+                      </DocsReaderUI.Item>
                     ))}
                   </tbody>
                 </table>

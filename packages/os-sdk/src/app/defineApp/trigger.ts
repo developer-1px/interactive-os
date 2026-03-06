@@ -15,15 +15,21 @@ import React, { type ReactNode, useEffect } from "react";
 // Simple Trigger
 // ═══════════════════════════════════════════════════════════════════
 
+export interface TriggerOptions {
+  id?: string;
+}
+
 export function createSimpleTrigger(
   appId: string,
   command: BaseCommand,
+  options?: TriggerOptions,
 ): React.FC<{ children: ReactNode }> {
   const SimpleTrigger: React.FC<{ children: ReactNode }> = ({
     children,
     ...rest
   }) => {
     return React.createElement(Trigger, {
+      ...(options?.id ? { id: options.id } : {}),
       onActivate: command,
       children,
       ...rest,
@@ -45,6 +51,7 @@ type DynamicTriggerProps<P> = P extends void
 export function createDynamicTrigger<P>(
   appId: string,
   factory: CommandFactory<string, P>,
+  options?: TriggerOptions,
 ): React.FC<DynamicTriggerProps<P>> {
   const DynamicTrigger: React.FC<DynamicTriggerProps<P>> = ({
     children,
@@ -52,7 +59,12 @@ export function createDynamicTrigger<P>(
     ...rest
   }) => {
     const cmd = factory(payload as P);
-    return React.createElement(Trigger, { onActivate: cmd, children, ...rest });
+    return React.createElement(Trigger, {
+      ...(options?.id ? { id: options.id } : {}),
+      onActivate: cmd,
+      children,
+      ...rest,
+    });
   };
   DynamicTrigger.displayName = `${appId}.DynamicTrigger`;
   return DynamicTrigger;

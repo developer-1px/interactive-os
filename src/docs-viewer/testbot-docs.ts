@@ -36,6 +36,19 @@ export const RECENT_ITEMS = [
 
 export const FAVORITE_ITEMS = ["fav-pinned-a", "fav-pinned-b"];
 
+export const NAVBAR_ITEMS = [
+    "docs-btn-back",
+    "docs-btn-forward",
+    "docs-toggle-pin",
+    "docs-btn-search",
+];
+
+export const READER_ITEMS = [
+    "reader-article-1",
+    "reader-article-2",
+];
+
+
 // ═══════════════════════════════════════════════════════════════════
 // §1 사이드바 트리 — 핵심 탐색
 // ═══════════════════════════════════════════════════════════════════

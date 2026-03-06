@@ -36,6 +36,7 @@
 | **순수함수 PASS에서 멈춤** | Zone 태스크인데 UI 연결 없이 Done 처리 → 화면 동작 안 함 | /bind까지 가야 완성 | Green |
 | **immer를 순수함수에 사용** | 테스트에서 draft 참조 이슈 | 순수함수 레이어는 spread/Object.assign | Green |
 | **과잉 구현** | 테스트에 없는 edge case까지 미리 구현 → 테스트와 구현 괴리 | 테스트가 요구하는 것만 | Green |
+| **standalone trigger click** | `page.click("trigger-id")`가 동작 안 함 → Zone에 속하지 않은 trigger는 findItemCallback에 없음 | beforeEach에서 `ZoneRegistry.setItemCallback("__standalone__", id, { onActivate })` 수동 등록 | Red |
 
 ## Precedents
 

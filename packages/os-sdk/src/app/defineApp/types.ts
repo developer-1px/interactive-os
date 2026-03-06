@@ -326,12 +326,13 @@ export interface AppHandle<S> {
   createZone(name: string): ZoneHandle<S>;
   createTrigger<P = void>(
     factory: CommandFactory<string, P>,
+    options?: { id?: string },
   ): React.FC<
     P extends void
     ? { children: ReactNode; payload?: never }
     : { children: ReactNode; payload: P }
   >;
-  createTrigger(command: BaseCommand): React.FC<{
+  createTrigger(command: BaseCommand, options?: { id?: string }): React.FC<{
     children: ReactNode;
   }>;
   createTrigger(config: CompoundTriggerConfig): CompoundTriggerComponents;

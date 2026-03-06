@@ -330,6 +330,36 @@ export function createAppPage<S>(
         }
       }),
     );
+    invalidateCache();
+  }
+
+  // ── Projection cache ──
+  // When Component is provided, renderToString is cached and invalidated
+  // on state-changing operations (click, press, goto, dispatch).
+  let _htmlCache: string | null = null;
+
+  function renderHtml(): string {
+    if (!Component) {
+      throw new Error("query()/html()/locator() projection requires a Component. Use createPage(app, Component).");
+    }
+    if (_htmlCache === null) {
+      _htmlCache = renderToString(createElement(Component));
+    }
+    return _htmlCache;
+  }
+
+  function invalidateCache() {
+    _htmlCache = null;
+  }
+
+  function assertElementInProjection(elementId: string): void {
+    if (!Component) return; // headless only — no projection check
+    const html = renderHtml();
+    if (!html.includes(`id="${elementId}"`)) {
+      throw new Error(
+        `locator: element "#${elementId}" not found in rendered Component output.`
+      );
+    }
   }
 
   // ── Return AppPage ──
@@ -337,6 +367,7 @@ export function createAppPage<S>(
     keyboard: {
       press(key: string) {
         simulateKeyPress(os, key);
+        invalidateCache();
       },
       type(text: string) {
         const activeZone = readActiveZoneId(os);
@@ -350,6 +381,7 @@ export function createAppPage<S>(
 
     click(itemId: string, opts?) {
       simulateClick(os, itemId, opts);
+      invalidateCache();
     },
 
     attrs(itemId: string, zoneId?: string): ItemAttrs {
@@ -389,6 +421,7 @@ export function createAppPage<S>(
 
     dispatch(command: BaseCommand): boolean {
       os.dispatch(command);
+      invalidateCache();
       return true;
     },
 
@@ -424,17 +457,18 @@ export function createAppPage<S>(
     // ── Projection Checkpoint ──────────────────────────────────
 
     query(search: string): boolean {
-      const html = renderToString(createElement(Component));
-      return html.includes(search);
+      return renderHtml().includes(search);
     },
 
     html(): string {
-      return renderToString(createElement(Component));
+      return renderHtml();
     },
 
     locator(selector: string) {
       // Strip # prefix if present (Playwright uses #id, we use bare id)
       const elementId = selector.startsWith("#") ? selector.slice(1) : selector;
+      // When Component is provided, verify element exists in rendered output
+      assertElementInProjection(elementId);
       return {
         get attrs() {
           return resolveElement(os, elementId);
@@ -502,5 +536,5 @@ import type { AppHandle } from "@os-sdk/app/defineApp/types";
  * from the AppHandle and sets up the headless test environment.
  */
 export function createPage<S>(app: AppHandle<S>, Component?: FC): AppPage<S> {
-  return createAppPage<S>(app.__appId, app.__zoneBindings, Component ?? (() => null), app.__appKeybindings);
+  return createAppPage<S>(app.__appId, app.__zoneBindings, Component ?? null, app.__appKeybindings);
 }

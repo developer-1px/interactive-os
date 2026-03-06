@@ -41,6 +41,7 @@ import {
   createCompoundTrigger,
   createDynamicTrigger,
   createSimpleTrigger,
+  type TriggerOptions,
 } from "./trigger";
 import {
   __conditionBrand,
@@ -172,7 +173,10 @@ export function defineApp<S>(
   function registerCommand<T extends string, P = void>(
     type: T,
     handler: FlatHandler<S, P>,
-    opts?: { when?: Condition<S> | "editing" | "navigating"; key?: string | string[] },
+    opts?: {
+      when?: Condition<S> | "editing" | "navigating";
+      key?: string | string[];
+    },
     group?: typeof slice.group,
   ): CommandFactory<T, P> {
     // Extract Condition<S> for dispatch guard (ignore string when guards)
@@ -211,9 +215,14 @@ export function defineApp<S>(
     if (opts?.key) {
       const keys = Array.isArray(opts.key) ? opts.key : [opts.key];
       const keyWhen = typeof opts.when === "string" ? opts.when : undefined;
-      const command = factory() as unknown as import("@kernel/core/tokens").BaseCommand;
+      const command =
+        factory() as unknown as import("@kernel/core/tokens").BaseCommand;
       for (const k of keys) {
-        const entry: AppKeybindingEntry = { key: k, command, ...(keyWhen ? { when: keyWhen } : {}) };
+        const entry: AppKeybindingEntry = {
+          key: k,
+          command,
+          ...(keyWhen ? { when: keyWhen } : {}),
+        };
         commandKeybindingEntries.push(entry);
         Keybindings.registerAll([entry]);
       }
@@ -253,7 +262,10 @@ export function defineApp<S>(
       command<T extends string, P = void>(
         type: T,
         handler: FlatHandler<S, P>,
-        opts?: { when?: Condition<S> | "editing" | "navigating"; key?: string | string[] },
+        opts?: {
+          when?: Condition<S> | "editing" | "navigating";
+          key?: string | string[];
+        },
       ): CommandFactory<T, P> {
         return registerCommand(type, handler, opts, zoneGroup);
       },
@@ -315,7 +327,10 @@ export function defineApp<S>(
     command<T extends string, P = void>(
       type: T,
       handler: FlatHandler<S, P>,
-      opts?: { when?: Condition<S> | "editing" | "navigating"; key?: string | string[] },
+      opts?: {
+        when?: Condition<S> | "editing" | "navigating";
+        key?: string | string[];
+      },
     ): CommandFactory<T, P> {
       return registerCommand(type, handler, opts);
     },
@@ -333,12 +348,14 @@ export function defineApp<S>(
         | BaseCommand
         | CompoundTriggerConfig
         | CommandFactory<string, unknown>,
+      options?: TriggerOptions,
     ) => {
       // ── CommandFactory (Dynamic Trigger) ──
       if (typeof commandOrConfig === "function") {
         return createDynamicTrigger(
           appId,
           commandOrConfig as CommandFactory<string, unknown>,
+          options,
         );
       }
       // ── Simple trigger (BaseCommand has .type) ──
@@ -346,7 +363,11 @@ export function defineApp<S>(
         commandOrConfig &&
         typeof (commandOrConfig as BaseCommand).type === "string"
       ) {
-        return createSimpleTrigger(appId, commandOrConfig as BaseCommand);
+        return createSimpleTrigger(
+          appId,
+          commandOrConfig as BaseCommand,
+          options,
+        );
       }
       // ── Compound trigger (Dialog pattern) ──
       return createCompoundTrigger(
@@ -357,14 +378,16 @@ export function defineApp<S>(
       /* Factory Overload: Returns component taking typed payload */
       <P = void>(
         factory: CommandFactory<string, P>,
+        options?: TriggerOptions,
       ): React.FC<
         P extends void
-        ? { children: ReactNode; payload?: never }
-        : { children: ReactNode; payload: P }
+          ? { children: ReactNode; payload?: never }
+          : { children: ReactNode; payload: P }
       >;
       /* Command Overload: Returns simple component */
       (
         command: BaseCommand,
+        options?: TriggerOptions,
       ): React.FC<{
         children: ReactNode;
       }>;

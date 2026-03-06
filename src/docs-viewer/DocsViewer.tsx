@@ -23,11 +23,12 @@ import { StatusDashboard } from "./StatusDashboard";
 import "./app";
 import {
   DocsApp,
+  DocsNavbarUI,
   DocsReaderUI,
-  goBack,
-  goForward,
-  openSearch,
+  NextDocTrigger,
+  PrevDocTrigger,
   resetDoc,
+  SelectDocTrigger,
   selectDoc,
 } from "./app";
 import {
@@ -40,7 +41,6 @@ import {
   formatRelativeTime,
   isFavorite,
   loadDocContent,
-  toggleFavorite,
 } from "./docsUtils";
 import { type ExternalFolderSource, openExternalFolder } from "./fsAccessUtils";
 import { MarkdownRenderer } from "./MarkdownRenderer";
@@ -63,13 +63,7 @@ function InlineDocContent({ path }: { path: string }) {
 }
 
 /** Folder index page — list of direct children + inline content if ≤3. */
-function FolderIndexView({
-  folder,
-  onSelect,
-}: {
-  folder: DocItem;
-  onSelect: (path: string) => void;
-}) {
+function FolderIndexView({ folder }: { folder: DocItem }) {
   const children = folder.children ?? [];
   const showInlineContent = children.length <= 4;
 
@@ -90,37 +84,37 @@ function FolderIndexView({
         </div>
       </div>
 
-      {/* Children List */}
+      {/* Children List — V11: Items in docs-reader zone */}
       <div className="flex flex-col gap-3">
         {children.map((child) => (
           <div key={child.path}>
-            <button
-              type="button"
-              onClick={() =>
-                onSelect(
-                  child.type === "folder" ? `folder:${child.path}` : child.path,
-                )
-              }
-              className={clsx(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all",
-                "hover:border-indigo-200 hover:bg-indigo-50/30 hover:shadow-sm",
-                "border-slate-200 bg-white",
-              )}
+            <DocsReaderUI.Item
+              id={child.type === "folder" ? `folder:${child.path}` : child.path}
+              asChild
             >
-              {child.type === "folder" ? (
-                <FolderOpen size={16} className="text-indigo-400 shrink-0" />
-              ) : (
-                <FileText size={16} className="text-slate-400 shrink-0" />
-              )}
-              <span className="text-sm font-medium text-slate-700 truncate">
-                {cleanLabel(child.name)}
-              </span>
-              {child.type === "folder" && child.children && (
-                <span className="ml-auto text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full shrink-0">
-                  {child.children.length}
+              <button
+                type="button"
+                className={clsx(
+                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all",
+                  "hover:border-indigo-200 hover:bg-indigo-50/30 hover:shadow-sm",
+                  "border-slate-200 bg-white",
+                )}
+              >
+                {child.type === "folder" ? (
+                  <FolderOpen size={16} className="text-indigo-400 shrink-0" />
+                ) : (
+                  <FileText size={16} className="text-slate-400 shrink-0" />
+                )}
+                <span className="text-sm font-medium text-slate-700 truncate">
+                  {cleanLabel(child.name)}
                 </span>
-              )}
-            </button>
+                {child.type === "folder" && child.children && (
+                  <span className="ml-auto text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full shrink-0">
+                    {child.children.length}
+                  </span>
+                )}
+              </button>
+            </DocsReaderUI.Item>
 
             {/* Inline content for files when ≤3 direct children */}
             {showInlineContent && child.type === "file" && (
@@ -141,11 +135,11 @@ function FolderIndexView({
 export function DocsViewer() {
   // activePath — Single Source of Truth from DocsApp state
   const activePath = DocsApp.useComputed((s) => s.activePath) ?? undefined;
+  const favVersion = DocsApp.useComputed((s) => s.favVersion);
   const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [externalSource, setExternalSource] =
     useState<ExternalFolderSource | null>(null);
-  const [favVersion, setFavVersion] = useState(0);
 
   // Use ref so event handlers always see the latest external source
   const contentRef = useRef<HTMLDivElement>(null);
@@ -236,11 +230,6 @@ export function DocsViewer() {
     },
     [],
   );
-
-  // --- Select a file via OS command ---
-  const handleSelect = useCallback((path: string) => {
-    os.dispatch(selectDoc({ id: path }));
-  }, []);
 
   // --- Derived: is current path a folder or STATUS? ---
   const isStatusView = activePath?.endsWith("STATUS") ?? false;
@@ -348,24 +337,29 @@ export function DocsViewer() {
 
       {/* Main Content */}
       <div className="flex-1 relative flex flex-col bg-white overflow-hidden">
-        {/* Navigation Bar */}
-        <div className="flex items-center gap-1 px-4 py-2 border-b border-slate-100 bg-white shrink-0">
-          <button
-            type="button"
-            onClick={() => os.dispatch(goBack())}
-            title="Go back (Alt+←)"
-            className="p-1 rounded-md transition-colors text-slate-500 hover:text-slate-800 hover:bg-slate-100"
-          >
-            <ArrowLeft size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={() => os.dispatch(goForward())}
-            title="Go forward (Alt+→)"
-            className="p-1 rounded-md transition-colors text-slate-500 hover:text-slate-800 hover:bg-slate-100"
-          >
-            <ArrowRight size={16} />
-          </button>
+        {/* Navigation Bar — V1-V4: Items in docs-navbar zone */}
+        <DocsNavbarUI.Zone
+          className="flex items-center gap-1 px-4 py-2 border-b border-slate-100 bg-white shrink-0"
+          aria-label="Document navigation"
+        >
+          <DocsNavbarUI.Item id="docs-btn-back" asChild>
+            <button
+              type="button"
+              title="Go back (Alt+←)"
+              className="p-1 rounded-md transition-colors text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+            >
+              <ArrowLeft size={16} />
+            </button>
+          </DocsNavbarUI.Item>
+          <DocsNavbarUI.Item id="docs-btn-forward" asChild>
+            <button
+              type="button"
+              title="Go forward (Alt+→)"
+              className="p-1 rounded-md transition-colors text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+            >
+              <ArrowRight size={16} />
+            </button>
+          </DocsNavbarUI.Item>
 
           {/* Breadcrumb */}
           <div className="flex items-center gap-1 ml-2 text-sm min-w-0 overflow-hidden">
@@ -383,29 +377,55 @@ export function DocsViewer() {
                       {cleanLabel(part)}
                     </span>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleSelect(`folder:${segmentPath}`)}
-                      className="text-slate-400 hover:text-indigo-600 hover:underline truncate"
-                    >
-                      {cleanLabel(part)}
-                    </button>
+                    <DocsNavbarUI.Item id={`bc:${segmentPath}`} asChild>
+                      <button
+                        type="button"
+                        className="text-slate-400 hover:text-indigo-600 hover:underline truncate"
+                      >
+                        {cleanLabel(part)}
+                      </button>
+                    </DocsNavbarUI.Item>
                   )}
                 </div>
               );
             })}
           </div>
 
+          {/* Pin toggle */}
+          {activePath && (
+            <DocsNavbarUI.Item id="docs-toggle-pin" asChild>
+              <button
+                type="button"
+                className={clsx(
+                  "ml-auto p-1.5 rounded-md transition-colors",
+                  isFavorite(activePath)
+                    ? "text-amber-400 hover:text-amber-500"
+                    : "text-slate-300 hover:text-slate-400",
+                )}
+                title={isFavorite(activePath) ? "Unpin" : "Pin to sidebar"}
+              >
+                <Star
+                  size={13}
+                  className={isFavorite(activePath) ? "fill-amber-400" : ""}
+                />
+              </button>
+            </DocsNavbarUI.Item>
+          )}
+
           {/* Search trigger */}
-          <button
-            type="button"
-            onClick={() => os.dispatch(openSearch())}
-            title="Search docs (/)"
-            className="ml-auto p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-          >
-            <Search size={14} />
-          </button>
-        </div>
+          <DocsNavbarUI.Item id="docs-btn-search" asChild>
+            <button
+              type="button"
+              title="Search docs (/)"
+              className={clsx(
+                "p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors",
+                !activePath && "ml-auto",
+              )}
+            >
+              <Search size={14} />
+            </button>
+          </DocsNavbarUI.Item>
+        </DocsNavbarUI.Zone>
 
         <DocsReaderUI.Zone className="flex-1 flex flex-col overflow-hidden">
           <div
@@ -421,18 +441,20 @@ export function DocsViewer() {
                     className="mb-6 opacity-20"
                   />
                   <p className="text-xl font-medium text-slate-400">{error}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (allFiles[0]) handleSelect(allFiles[0].path);
-                    }}
-                    className="mt-8 px-6 py-2 bg-slate-100 text-slate-600 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors shadow-sm"
-                  >
-                    Return to Home
-                  </button>
+                  {/* Return home — error recovery */}
+                  {allFiles[0] && (
+                    <SelectDocTrigger payload={{ id: allFiles[0]!.path }}>
+                      <button
+                        type="button"
+                        className="mt-8 px-6 py-2 bg-slate-100 text-slate-600 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors shadow-sm"
+                      >
+                        Return to Home
+                      </button>
+                    </SelectDocTrigger>
+                  )}
                 </div>
               ) : isFolderView && folderNode ? (
-                <FolderIndexView folder={folderNode} onSelect={handleSelect} />
+                <FolderIndexView folder={folderNode} />
               ) : isStatusView && content ? (
                 <StatusDashboard content={content} />
               ) : (
@@ -464,35 +486,8 @@ export function DocsViewer() {
                         </div>
                       ))}
 
-                      {/* Modification date + Pin */}
+                      {/* Modification date */}
                       <div className="ml-auto flex items-center gap-2 shrink-0">
-                        {activePath && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              toggleFavorite(activePath);
-                              setFavVersion((v) => v + 1);
-                            }}
-                            className={clsx(
-                              "p-1 rounded-md transition-colors",
-                              isFavorite(activePath)
-                                ? "text-amber-400 hover:text-amber-500"
-                                : "text-slate-300 hover:text-slate-400",
-                            )}
-                            title={
-                              isFavorite(activePath)
-                                ? "Unpin"
-                                : "Pin to sidebar"
-                            }
-                          >
-                            <Star
-                              size={13}
-                              className={
-                                isFavorite(activePath) ? "fill-amber-400" : ""
-                              }
-                            />
-                          </button>
-                        )}
                         {activePath && docsMeta[activePath] && (
                           <span
                             className="flex items-center gap-1 text-xs text-slate-400 tabular-nums"
@@ -509,44 +504,43 @@ export function DocsViewer() {
 
                     <MarkdownRenderer content={content} />
 
-                    {/* Navigation Buttons */}
-                    <div className="mt-20 pt-8 border-t border-slate-100 grid grid-cols-2 gap-4 max-w-4xl mx-auto">
+                    {/* Prev/Next Navigation — standalone triggers */}
+                    <nav
+                      className="mt-20 pt-8 border-t border-slate-100 grid grid-cols-2 gap-4 max-w-4xl mx-auto"
+                      aria-label="Document pagination"
+                    >
                       {prevFile ? (
-                        <button
-                          type="button"
-                          onClick={() => handleSelect(prevFile.path)}
-                          className="group flex flex-col items-start gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
-                        >
-                          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
-                            <ChevronLeft size={12} strokeWidth={3} />
-                            Previous
-                          </span>
-                          <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-left">
-                            {cleanLabel(prevFile.name)}
-                          </span>
-                        </button>
+                        <PrevDocTrigger payload={{ id: prevFile.path }}>
+                          <a className="group flex flex-col items-start gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer">
+                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
+                              <ChevronLeft size={12} strokeWidth={3} />
+                              Previous
+                            </span>
+                            <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-left">
+                              {cleanLabel(prevFile.name)}
+                            </span>
+                          </a>
+                        </PrevDocTrigger>
                       ) : (
                         <div />
                       )}
 
                       {nextFile ? (
-                        <button
-                          type="button"
-                          onClick={() => handleSelect(nextFile.path)}
-                          className="group flex flex-col items-end gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
-                        >
-                          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
-                            Next
-                            <ChevronRight size={12} strokeWidth={3} />
-                          </span>
-                          <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-right">
-                            {cleanLabel(nextFile.name)}
-                          </span>
-                        </button>
+                        <NextDocTrigger payload={{ id: nextFile.path }}>
+                          <a className="group flex flex-col items-end gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer">
+                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
+                              Next
+                              <ChevronRight size={12} strokeWidth={3} />
+                            </span>
+                            <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate w-full text-right">
+                              {cleanLabel(nextFile.name)}
+                            </span>
+                          </a>
+                        </NextDocTrigger>
                       ) : (
                         <div />
                       )}
-                    </div>
+                    </nav>
 
                     {/* Footer Spacer */}
                     <div className="h-40" />

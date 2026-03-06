@@ -3,19 +3,24 @@
  *
  * Structure:
  *   DocsApp (defineApp)
- *     ├── State: activePath
- *     ├── Commands: selectDoc (app-level, shared by all zones)
+ *     ├── State: activePath, searchOpen, favVersion
+ *     ├── Commands: selectDoc, goBack, goForward, openSearch, toggleFav
  *     ├── Zones:
+ *     │   ├── docs-navbar    — navigation toolbar (toolbar)
  *     │   ├── docs-favorites — pinned files (listbox)
  *     │   ├── docs-recent    — recent files (listbox)
  *     │   ├── docs-sidebar   — folder tree (tree)
- *     │   └── docs-reader    — section navigation (feed)
+ *     │   └── docs-reader    — content + navigation (feed)
  */
-
 
 import { defineApp } from "@os-sdk/app/defineApp";
 import { produce } from "immer";
-import { buildDocTree, type DocItem, docsModules } from "./docsUtils";
+import {
+  buildDocTree,
+  type DocItem,
+  docsModules,
+  toggleFavorite,
+} from "./docsUtils";
 
 // ═══════════════════════════════════════════════════════════════════
 // Static Tree Data (build-time — computed once at module scope)
@@ -73,11 +78,13 @@ function getInitialPath(): string | null {
 export interface DocsState {
   activePath: string | null;
   searchOpen: boolean;
+  favVersion: number;
 }
 
 export const DocsApp = defineApp<DocsState>("docs-viewer", {
   activePath: getInitialPath(),
   searchOpen: false,
+  favVersion: 0,
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -102,21 +109,33 @@ export const resetDoc = DocsApp.command("RESET_DOC", (ctx) => ({
 }));
 
 /** GO_BACK — router middleware delegates to TanStack Router history. */
-export const goBack = DocsApp.command("GO_BACK", (ctx) => ({
-  state: ctx.state,
-}), { key: "Alt+ArrowLeft" });
+export const goBack = DocsApp.command(
+  "GO_BACK",
+  (ctx) => ({
+    state: ctx.state,
+  }),
+  { key: "Alt+ArrowLeft" },
+);
 
 /** GO_FORWARD — router middleware delegates to TanStack Router history. */
-export const goForward = DocsApp.command("GO_FORWARD", (ctx) => ({
-  state: ctx.state,
-}), { key: "Alt+ArrowRight" });
+export const goForward = DocsApp.command(
+  "GO_FORWARD",
+  (ctx) => ({
+    state: ctx.state,
+  }),
+  { key: "Alt+ArrowRight" },
+);
 
 /** OPEN_SEARCH — opens the docs search overlay. */
-export const openSearch = DocsApp.command("OPEN_SEARCH", (ctx) => ({
-  state: produce(ctx.state, (draft) => {
-    draft.searchOpen = true;
+export const openSearch = DocsApp.command(
+  "OPEN_SEARCH",
+  (ctx) => ({
+    state: produce(ctx.state, (draft) => {
+      draft.searchOpen = true;
+    }),
   }),
-}), { key: "/", when: "navigating" });
+  { key: "/", when: "navigating" },
+);
 
 /** CLOSE_SEARCH — closes the docs search overlay. */
 export const closeSearch = DocsApp.command("CLOSE_SEARCH", (ctx) => ({
@@ -124,6 +143,50 @@ export const closeSearch = DocsApp.command("CLOSE_SEARCH", (ctx) => ({
     draft.searchOpen = false;
   }),
 }));
+
+/** TOGGLE_FAVORITE — toggles pin for activePath, bumps favVersion for re-render. */
+export const toggleFav = DocsApp.command("TOGGLE_FAVORITE", (ctx) => {
+  if (ctx.state.activePath) {
+    toggleFavorite(ctx.state.activePath);
+  }
+  return {
+    state: produce(ctx.state, (draft) => {
+      draft.favVersion += 1;
+    }),
+  };
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Navbar Zone — navigation toolbar (back, forward, breadcrumb, search)
+// ═══════════════════════════════════════════════════════════════════
+
+const navbarZone = DocsApp.createZone("docs-navbar");
+
+export const DocsNavbarUI = navbarZone.bind({
+  role: "toolbar",
+  onAction: (cursor) => {
+    switch (cursor.focusId) {
+      case "docs-btn-back":
+        return goBack();
+      case "docs-btn-forward":
+        return goForward();
+      case "docs-btn-search":
+        return openSearch();
+      case "docs-toggle-pin":
+        return toggleFav();
+      default:
+        // Breadcrumb segments: "bc:{segmentPath}"
+        if (cursor.focusId.startsWith("bc:"))
+          return selectDoc({ id: `folder:${cursor.focusId.slice(3)}` });
+        // Navigation targets (return home, etc.)
+        return selectDoc({ id: cursor.focusId });
+    }
+  },
+  options: {
+    navigate: { orientation: "horizontal" },
+    activate: { onClick: true },
+  },
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // Favorites Zone — pinned files
@@ -191,4 +254,20 @@ export const PREV_SECTION = readerZone.command(
 
 export const DocsReaderUI = readerZone.bind({
   role: "feed",
+  onAction: (cursor) => selectDoc({ id: cursor.focusId }),
+  options: {
+    activate: { onClick: true },
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Triggers — standalone actions (no Zone needed)
+// ═══════════════════════════════════════════════════════════════════
+
+export const SelectDocTrigger = DocsApp.createTrigger(selectDoc);
+export const PrevDocTrigger = DocsApp.createTrigger(selectDoc, {
+  id: "docs-prev",
+});
+export const NextDocTrigger = DocsApp.createTrigger(selectDoc, {
+  id: "docs-next",
 });
