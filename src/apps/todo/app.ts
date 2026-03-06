@@ -466,16 +466,16 @@ export const TodoList = {
     redoCommand,
   },
   triggers: {
-    ToggleTodo: TodoApp.createTrigger(toggleTodo),
-    DeleteTodo: TodoApp.createTrigger(deleteTodo),
+    ToggleTodo: TodoApp.createTrigger(toggleTodo, { id: "toggle-todo" }),
+    DeleteTodo: TodoApp.createTrigger(deleteTodo, { id: "delete-todo" }),
     DeleteDialog: TodoApp.createTrigger({
       id: "todo-delete-dialog",
       confirm: confirmDeleteTodo(),
       role: "alertdialog",
     }),
-    StartEdit: TodoApp.createTrigger(startEdit),
-    MoveItemUp: TodoApp.createTrigger(moveItemUp),
-    MoveItemDown: TodoApp.createTrigger(moveItemDown),
+    StartEdit: TodoApp.createTrigger(startEdit, { id: "start-edit" }),
+    MoveItemUp: TodoApp.createTrigger(moveItemUp, { id: "move-item-up" }),
+    MoveItemDown: TodoApp.createTrigger(moveItemDown, { id: "move-item-down" }),
   },
 };
 
@@ -487,7 +487,7 @@ export const TodoSidebar = {
     moveCategoryDown: sidebarCollection.moveDown,
   },
   triggers: {
-    SelectCategory: TodoApp.createTrigger(selectCategory),
+    SelectCategory: TodoApp.createTrigger(selectCategory, { id: "select-category" }),
   },
 };
 

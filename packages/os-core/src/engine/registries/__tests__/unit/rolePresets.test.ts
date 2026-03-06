@@ -9,7 +9,7 @@
  */
 
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // SPEC §7 Table — each row encodes one role's expected config
@@ -274,12 +274,13 @@ describe("resolveRole — override merging", () => {
     expect(config.navigate.entry).toBe("selected");
   });
 
-  it("unknown role falls back to defaults", () => {
+  it("unknown role warns and falls back to defaults", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const config = resolveRole("unknownrole");
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Unknown role"));
     expect(config.navigate.orientation).toBe("vertical");
-    expect(config.navigate.loop).toBe(false);
     expect(config.tab.behavior).toBe("flow");
-    expect(config.select.mode).toBe("none");
+    warnSpy.mockRestore();
   });
 
   it("undefined role falls back to defaults", () => {

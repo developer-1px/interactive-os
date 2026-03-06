@@ -1,12 +1,11 @@
 /**
  * Trigger.Dismiss — Close the nearest overlay.
  *
- * Uses Item + onActivate to dispatch OS_OVERLAY_CLOSE when
- * activated via Enter/Click.
+ * Renders an Item inside the overlay zone. Activation (Enter/Click)
+ * is handled by the overlay zone's onAction callback via OS pipeline.
  */
 
 import type { BaseCommand } from "@kernel";
-import { OS_OVERLAY_CLOSE } from "@os-core/4-command/overlay/overlay";
 import { Item } from "@os-react/6-project/Item.tsx";
 import type { ReactNode } from "react";
 import { useOverlayContext } from "./OverlayContext";
@@ -20,7 +19,6 @@ export interface TriggerDismissProps
 }
 
 export function TriggerDismiss({
-    onActivate,
     children,
     className,
     id,
@@ -30,16 +28,8 @@ export function TriggerDismiss({
 
     const itemId = id ?? `${overlayCtx?.overlayId ?? "dialog"}-dismiss`;
 
-    // Build the dismiss command for Item → ZoneRegistry → OS_ACTIVATE(Enter/Click)
-    // When overlay exists, activation closes it.
-    const dismissCmd = overlayCtx
-        ? OS_OVERLAY_CLOSE({ id: overlayCtx.overlayId })
-        : undefined;
-    // If onActivate is provided, use it; otherwise use the dismiss command
-    const activateCmd = onActivate ?? dismissCmd;
-
     return (
-        <Item id={itemId} asChild onActivate={activateCmd}>
+        <Item id={itemId} asChild>
             <button type="button" className={className} {...rest}>
                 {children}
             </button>

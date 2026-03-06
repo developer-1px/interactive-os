@@ -33,29 +33,17 @@ export interface Locator {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface LocatorAssertions {
-  /** Assert: has attribute with value. */
+  /** Assert: has attribute with value. @see https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-attribute */
   toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
 
-  /** Assert: element is focused. */
+  /** Assert: element is focused. @see https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-focused */
   toBeFocused(): Promise<void>;
 
-  /** Assert: element is selected (aria-selected="true"). */
-  toBeSelected(): Promise<void>;
-
-  /** Assert: element is expanded (aria-expanded="true"). */
-  toBeExpanded(): Promise<void>;
-
-  /** Assert: element is checked (aria-checked="true"). */
+  /** Assert: element is checked. @see https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-checked */
   toBeChecked(): Promise<void>;
 
-  /** Assert: element is pressed (aria-pressed="true"). */
-  toBePressed(): Promise<void>;
-
-  /** Assert: element is disabled (aria-disabled="true"). */
+  /** Assert: element is disabled. @see https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-disabled */
   toBeDisabled(): Promise<void>;
-
-  /** Assert: element is editing (data-editing="true"). */
-  toBeEditing(): Promise<void>;
 
   /** Negated assertions (Playwright-compatible). */
   not: LocatorAssertions;
@@ -69,8 +57,11 @@ export interface Page {
   /** Create a locator for an element. Uses item ID (headless/browser) or CSS selector (Playwright). */
   locator(selector: string): Locator;
 
-  /** Keyboard actions. */
+  /** Keyboard actions. @see https://playwright.dev/docs/api/class-keyboard */
   keyboard: {
+    /** Press a key. @see https://playwright.dev/docs/api/class-keyboard#keyboard-press */
     press(key: string): Promise<void>;
+    /** Type text. @see https://playwright.dev/docs/api/class-keyboard#keyboard-type */
+    type(text: string): Promise<void>;
   };
 }

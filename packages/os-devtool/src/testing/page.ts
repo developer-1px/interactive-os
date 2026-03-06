@@ -43,7 +43,7 @@ import type { BaseCommand } from "@kernel/core/tokens";
 import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
-import type { AppPage, ZoneBindingEntry } from "@os-sdk/app/defineApp/types";
+import type { AppPageInternal, ZoneBindingEntry } from "@os-sdk/app/defineApp/types";
 
 import { formatDiagnostics } from "./diagnostics";
 
@@ -67,7 +67,7 @@ export function createAppPage<S>(
   zoneBindingEntries: Map<string, ZoneBindingEntry>,
   Component: FC | null,
   appKeybindings?: readonly { key: string; command: BaseCommand; when?: "editing" | "navigating" }[],
-): AppPage<S> {
+): AppPageInternal<S> {
   // Clear global registries for test isolation
   ZoneRegistry.clearAll();
 
@@ -535,6 +535,6 @@ import type { AppHandle } from "@os-sdk/app/defineApp/types";
  * createPage is an OS capability — it reads app data(appId, zone bindings)
  * from the AppHandle and sets up the headless test environment.
  */
-export function createPage<S>(app: AppHandle<S>, Component?: FC): AppPage<S> {
+export function createPage<S>(app: AppHandle<S>, Component?: FC): AppPageInternal<S> {
   return createAppPage<S>(app.__appId, app.__zoneBindings, Component ?? null, app.__appKeybindings);
 }

@@ -469,7 +469,10 @@ export function resolveRole(
     inputmap?: InputMap;
   } = {},
 ): FocusGroupConfig {
-  const basePreset = role ? rolePresets[role as ZoneRole] || {} : {};
+  if (role && !rolePresets[role as ZoneRole]) {
+    console.warn(`[Zone] Unknown role: '${role}'. Using default config. Valid roles: ${Object.keys(rolePresets).join(", ")}`);
+  }
+  const basePreset = role ? (rolePresets[role as ZoneRole] ?? {}) : {};
 
   return {
     navigate: {

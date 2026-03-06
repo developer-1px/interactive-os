@@ -44,7 +44,6 @@ export interface ItemProps
   as?: "div" | "li" | "button" | "a" | "span";
   asChild?: boolean;
   role?: string;
-  onActivate?: import("@kernel").BaseCommand | undefined;
   selected?: boolean;
 }
 
@@ -79,7 +78,6 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(function Item(
     style,
     as: Element = "div",
     asChild = false,
-    onActivate,
     ...rest
   },
   ref,

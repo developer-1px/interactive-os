@@ -195,6 +195,9 @@ function getField(id: string) {
 }
 
 function getValue(id: string): FieldValue {
+  if (!state.fields.has(id)) {
+    console.warn(`[Field] getValue: '${id}' is not registered`);
+  }
   return state.fields.get(id)?.state.value ?? "";
 }
 

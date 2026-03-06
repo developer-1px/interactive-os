@@ -239,7 +239,7 @@ export interface TestInstance<S> {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface AppPage<S> {
-  /** Navigate to a zone (like page.goto). Sets active zone + focused item. */
+  /** Navigate to a zone (headless infra — not available in TestScript run()). Sets active zone + focused item. */
   goto(
     zoneName: string,
     opts?: {
@@ -279,14 +279,8 @@ export interface AppPage<S> {
   /** Active zone ID. */
   activeZoneId(): string | null;
 
-  /** App state (direct access — bonus over Playwright). */
-  readonly state: S;
-
   /** @internal OS Kernel instance (for OS-level testing only). */
   readonly kernel: import("@kernel").Kernel<any>;
-
-  /** Dispatch a command directly (for setup, not interaction). */
-  dispatch(command: BaseCommand): boolean;
 
   /** Reset to initial state. */
   reset(): void;
@@ -307,6 +301,23 @@ export interface AppPage<S> {
 
   /** Get the full rendered HTML string. */
   html(): string;
+}
+
+/**
+ * AppPageInternal — Extended AppPage with unit-test-only capabilities.
+ *
+ * Provides `dispatch` and `state` access for legitimate unit tests
+ * that need to verify internal state or set up data without UI interaction.
+ *
+ * TestScript `run()` MUST NOT use this — only Playwright strict subset.
+ * Unit tests (.test.ts) may use this via type assertion: `page as AppPageInternal<S>`.
+ */
+export interface AppPageInternal<S> extends AppPage<S> {
+  /** App state (direct access — unit test only, not for TestScript). */
+  readonly state: S;
+
+  /** Dispatch a command directly (unit test setup only, not for TestScript). */
+  dispatch(command: BaseCommand): boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════

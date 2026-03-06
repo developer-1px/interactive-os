@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-06T18:30
+> Last updated: 2026-03-06T21:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,8 +14,7 @@
 
 | Domain | Project | Phase |
 |--------|---------|-------|
-| testing | headless-simulator | Phase 7 Done, Phase 1-6 미착수 |
-| os-core | docs-freshness | WP1~WP8 |
+| os-core | collection-crud-showcase | T1~T3 Now, T4~T5 Next |
 
 ---
 
@@ -26,7 +25,8 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| docs-freshness | WP1~WP8 | 03-06 🔥 |
+| collection-crud-showcase | T1~T3 Now, T4~T5 Next | 03-06 🔥 |
+| docs-freshness | WP1~WP8 | 03-06 |
 | condition-auto-disabled | 기획 중 (BOARD 없음) | new |
 
 ### testing
@@ -34,7 +34,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-06 🔥 |
+| headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-06 |
 | test-observability | Scaffold, T1~T4 | 03-05 |
 | replay | Scaffold, T1 | 02-21 ⚠️ |
 
@@ -81,7 +81,7 @@
 |--------|-------|
 | Domains | 6 |
 | Active Projects | 9 |
-| Active Focus | 2 (headless-simulator, docs-freshness) |
+| Active Focus | 1 (collection-crud-showcase) |
 | Stale (7d+) | 1 (replay) |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |

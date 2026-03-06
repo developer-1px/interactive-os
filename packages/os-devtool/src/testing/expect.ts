@@ -58,6 +58,14 @@ export function expect(locator: Locator): LocatorAssertions {
         throw new Error("toBeFocused() not implemented by this engine");
       },
 
+      async toBeChecked() {
+        return assertions.toHaveAttribute("aria-checked", "true");
+      },
+
+      async toBeDisabled() {
+        return assertions.toHaveAttribute("aria-disabled", "true");
+      },
+
       get not(): LocatorAssertions {
         return createAssertions(!negated);
       },

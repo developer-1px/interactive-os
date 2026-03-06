@@ -66,12 +66,8 @@ export interface OsLocator {
     click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
     toHaveAttribute(name: string, value: string | boolean): boolean;
     toBeFocused(): boolean;
-    toBeSelected(): boolean;
-    toBeExpanded(): boolean;
     toBeChecked(): boolean;
-    toBePressed(): boolean;
     toBeDisabled(): boolean;
-    toBeEditing(): boolean;
     inputValue(): string;
     readonly attrs: ElementAttrs;
 }

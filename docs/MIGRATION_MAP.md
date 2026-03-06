@@ -52,6 +52,7 @@
 | `4-archive/2026-03-builder-i18n/` | `1-project/builder-i18n/` | 프로젝트 완료 — T1 locale switch, retrospective 작성 |
 | `4-archive/2026-03-dropdown-dismiss/` | `1-project/dropdown-dismiss/` | 프로젝트 완료 — resolveOutsideClick, simulateClick zone-independent traversal |
 | `4-archive/2026-03-testbot-unification/` | `1-project/testbot-unification/` | 🪦 superseded — test-observability 프로젝트에서 v5 POC 구현 완료 |
+| `4-archive/2026-03-closed-issues/` (12 files) | `5-backlog/issues/` + `0-inbox/` | 닫힌 이슈 7 + 해결 이슈/회고 3 + 완료 계획 2. /retire 일괄 냉장 (03-06) |
 
 ### 심층 보관 (`archive/legacy-docs` 브랜치 — git으로만 접근)
 

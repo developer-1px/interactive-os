@@ -173,14 +173,12 @@ export const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
         // Trigger *is* a Item if an ID is provided.
         // Pipeline handles overlay toggle — onActivate is consumer-only
         if (id) {
-            const activateCmd = onActivate ?? undefined;
             return (
                 <>
                     <Item
                         id={id}
                         asChild={true}
                         ref={ref}
-                        onActivate={activateCmd}
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- baseProps spread into Item
                         {...(baseProps as any)}
                     >

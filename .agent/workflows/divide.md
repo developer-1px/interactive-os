@@ -2,12 +2,6 @@
 description: Goal에서 역추적하여 Work Package를 도출한다. /solve의 입력을 만든다.
 ---
 
-## /divide — Goal-Driven Backward Chaining
-
-> **What**: 목표에서 역추적하여 전체 WP를 **선제적으로 한 번에** 도출.
-> **Output**: WP 테이블 + 실행 순서. BOARD.md에 기록.
-> **Constraint**: 코드 변경 없음. Clear/Complicated는 AI가 확정. Complex만 질문.
-
 ## Step 0: 입력 수집
 
 - `/discussion`의 Emerging Claim + Warrants를 읽는다
@@ -28,7 +22,6 @@ Goal에서 backward chaining으로 **전체 WP를 한 번에** 도출한다:
 - **Complex WP만 Gap 열에 질문을 넣는다** — 사용자 답변 대기
 - WP 크기 = 한 세션(~30분) 이내
 - 의존 순서도 함께 제시: `WP1 → WP2 → (WP3 ∥ WP4) → WP5`
-- 코드 증거가 필요하면 `grep` / `view_file`로 조사 후 판정
 
 ## Step 2: 사용자 응답 (Complex gap만)
 

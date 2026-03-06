@@ -20,9 +20,14 @@ import {
 // Simple triggers — now pass pre-built BaseCommand
 const ToggleViewButton = TodoApp.createTrigger(
   TodoToolbar.commands.toggleView(),
+  { id: "toggle-view" },
 );
-const UndoButton = TodoApp.createTrigger(TodoList.commands.undoCommand());
-const RedoButton = TodoApp.createTrigger(TodoList.commands.redoCommand());
+const UndoButton = TodoApp.createTrigger(TodoList.commands.undoCommand(), {
+  id: "undo",
+});
+const RedoButton = TodoApp.createTrigger(TodoList.commands.redoCommand(), {
+  id: "redo",
+});
 
 export function TodoToolbarView() {
   const isBoard = TodoApp.useComputed((s) => s.ui.viewMode === "board");
