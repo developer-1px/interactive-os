@@ -13,7 +13,6 @@ Risks:
 - vitest/playwright config 변경 시 기존 CI 영향 가능.
 
 ## Now
-- [ ] T9: Phase 5 #35 — focus lab headless 전환
 
 ## Done
 - [x] T1: Phase 5 — 신규 구조 스캐폴딩 (headless/, unit/, infra/) ✅
@@ -28,6 +27,7 @@ Risks:
 - [x] T11: __tests__/ 디렉토리 전수 제거 확인 — 0 remaining (coverage cache cleared) ✅
 
 ## Unresolved
+- [ ] T9: Phase 5 #35 — focus lab headless 전환 (blocked: cross-zone headless 미지원, OS gap)
 
 ## Ideas
 - 커버리지 재구축: `/coverage` 워크플로우로 headless 테스트 채우기

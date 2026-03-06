@@ -21,6 +21,7 @@
 | OG-015 | 2026-03-07 | os-core | Overlay Escape dismiss | Headless Escape on dialog overlay doesn't trigger overlay dismiss/close. Escape routes through parent zone's dismiss handler. | `page.dispatch(cancelDelete())` workaround |
 | OG-016 | 2026-03-07 | os-core | Dialog Tab trap | Headless doesn't support overlay focus trap (Tab cycles within dialog). | TODO in tests |
 | OG-017 | 2026-03-07 | os-core | Dialog Enter confirm | Overlay zone navigation (focus to confirm button + Enter) not supported in headless. | TODO in tests |
+| OG-018 | 2026-03-07 | os-core | Cross-zone headless test | `page.goto()` sets single activeZoneId. Scripts that click items across multiple zones cannot run in headless runScenarios. Focus-showcase 29 scripts blocked. | Browser TestBot only |
 
 ## 해결됨
 
