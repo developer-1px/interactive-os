@@ -14,7 +14,7 @@
 - [x] #3 Git 정리 — 삭제된 6개 APG UI 테스트 이미 커밋됨 ✅
 - [x] #4 @testing-library 잔여 확인 — import 0개, 주석만 존재. 조치 불필요 ✅
 - [x] #5 OS 내부 resolve* 직접 테스트 정리 — 11파일 삭제(-126 tests), 3파일 유지(순수 입력 파서) | 170 files 1809 tests ✅
-- [ ] #6 tests/integration/os/ 마이그레이션 (3파일)
+- [x] #6 tests/integration/os/ 삭제 — navigate, focus, item-filter 3파일(-55 tests). APG 테스트가 커버 | 167 files 1754 tests ✅
 - [ ] #7 tests/apg/ createOsPage 마이그레이션 (8파일)
 - [ ] #8 tests/integration/builder/ 마이그레이션 (3파일)
 - [ ] #9 tests/integration/docs+todo 마이그레이션 (6파일)
