@@ -31,6 +31,8 @@ export {
   gridScript,
   listboxScript,
   radiogroupScript,
+  extractScenarios,
+  type TestScenario,
   type TestScript,
   toolbarScript,
 } from "./scripts";
