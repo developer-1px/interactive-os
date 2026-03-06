@@ -11,26 +11,23 @@
  */
 
 import { createPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
+import {
+  CheckboxApp,
+} from "@/pages/apg-showcase/patterns/CheckboxPattern";
 
-// ─── Test Setup ───
+// ─── Test Setup (actual showcase config) ───
 
-const CHECKBOX_ID = "terms-checkbox";
-const TRI_CHECKBOX_ID = "all-options-checkbox";
+// Condiment IDs match the showcase exactly
+const CONDIMENT_IDS = ["cond-lettuce", "cond-tomato", "cond-mustard", "cond-sprouts"];
+const CHECKBOX_ID = CONDIMENT_IDS[0]; // "cond-lettuce"
 
 function checkboxFactory() {
-  const app = defineApp("test-checkbox", {});
-  const zone = app.createZone("checkbox-zone");
-  zone.bind({
-    role: "checkbox",
-    getItems: () => [CHECKBOX_ID, TRI_CHECKBOX_ID],
-    options: {
-      check: { mode: "check" },
-    } as any,
+  const page = createPage(CheckboxApp);
+  page.goto("apg-checkbox", {
+    items: CONDIMENT_IDS,
+    focusedItemId: CHECKBOX_ID,
   });
-  const page = createPage(app);
-  page.goto("checkbox-zone", { focusedItemId: CHECKBOX_ID });
   return page;
 }
 

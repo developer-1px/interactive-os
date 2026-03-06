@@ -19,22 +19,21 @@
  */
 
 import { createPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
+import {
+  DisclosureApp,
+} from "@/pages/apg-showcase/patterns/DisclosurePattern";
 
-// ─── Test Setup ───
+// ─── Test Setup (actual showcase config) ───
 
 const DISCLOSURES = ["disc-faq-1", "disc-faq-2", "disc-faq-3"];
 
 function disclosureFactory(focusedItem = "disc-faq-1") {
-  const app = defineApp("test-disclosure", {});
-  const zone = app.createZone("disclosure-zone");
-  zone.bind({
-    role: "disclosure",
-    getItems: () => DISCLOSURES,
+  const page = createPage(DisclosureApp);
+  page.goto("apg-disclosure", {
+    items: DISCLOSURES,
+    focusedItemId: focusedItem,
   });
-  const page = createPage(app);
-  page.goto("disclosure-zone", { focusedItemId: focusedItem });
   return page;
 }
 
