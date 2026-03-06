@@ -16,6 +16,11 @@
 | OG-010 | 2026-03-05 | os-core | Trigger → inputmap | TriggerConfig + triggerRegistry의 별도 파이프라인을 inputmap으로 흡수. Trigger 컴포넌트 전면 수정 필요. 별도 프로젝트 스코프. | Trigger는 기존 TriggerConfig 경로 유지 |
 | OG-011 | 2026-03-06 | os-core | Role defaults in headless | Showcase configs rely on role defaults (tablist→horizontal+loop, feed→vertical etc.) but headless pipeline doesn't apply them. 82/116 APG test failures. | 테스트에서 explicit navigate options 사용 |
 | OG-012 | 2026-03-06 | os-core | expandableItems → computeItem | tree/treegrid goto options (expandableItems, treeLevels) not wired to computeItem for aria-expanded projection. 20 APG test failures. | — |
+| OG-013 | 2026-03-07 | os-core | trigger:"change" headless | `trigger:"change"` fields don't auto-commit on headless `keyboard.type()`. DOM onChange fires commit; headless doesn't simulate it. | `page.dispatch(setQuery())` workaround |
+| OG-014 | 2026-03-07 | os-core | Cross-zone editingItemId | `OS_FIELD_START_EDIT` sets editingItemId on active zone (list), not transferred to target zone (edit). `OS_FIELD_CANCEL` needs it. | `page.dispatch(cancelEdit())` workaround |
+| OG-015 | 2026-03-07 | os-core | Overlay Escape dismiss | Headless Escape on dialog overlay doesn't trigger overlay dismiss/close. Escape routes through parent zone's dismiss handler. | `page.dispatch(cancelDelete())` workaround |
+| OG-016 | 2026-03-07 | os-core | Dialog Tab trap | Headless doesn't support overlay focus trap (Tab cycles within dialog). | TODO in tests |
+| OG-017 | 2026-03-07 | os-core | Dialog Enter confirm | Overlay zone navigation (focus to confirm button + Enter) not supported in headless. | TODO in tests |
 
 ## 해결됨
 
