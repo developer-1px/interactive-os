@@ -369,6 +369,7 @@ export const cancelEdit = editZone.command(
 export const TodoEditUI = editZone.bind({
   role: "textbox",
   field: {
+    fieldName: "EDIT",
     onCommit: updateTodoText, // Factory without call
     trigger: "enter",
     onCancel: cancelEdit(), // Command (Result of Factory) matches BaseCommand
@@ -399,6 +400,7 @@ export const clearSearch = searchZone.command("clearSearch", (ctx) => ({
 export const TodoSearchUI = searchZone.bind({
   role: "textbox",
   field: {
+    fieldName: "SEARCH",
     onCommit: setSearchQuery,
     trigger: "change",
     onCancel: clearSearch(),

@@ -1,7 +1,11 @@
-# Spec — Todo CRUD & Interactions
+# Spec — Todo CRUD & Interactions [F/O DEPRECATED]
 
+> **Status**: F/O (Phased Out) — 2026-03-07
+> **Superseded by**: `keyboard-and-mouse.md` (canonical spec, 57 scenarios)
+> **Reason**: Command-level BDD tests replaced by keyboard/mouse input path tests.
+>
 > Source: 테스트 코드 역산 (todo.test.ts, paste-integration.test.ts)
-> Verified: 826 tests pass
+> Verified: 826 tests pass (historical)
 
 ## 1. BDD Scenarios
 

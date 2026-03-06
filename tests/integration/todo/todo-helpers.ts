@@ -1,11 +1,11 @@
 /**
- * Shared test helpers for Todo BDD integration tests.
+ * Shared test helpers for Todo headless integration tests.
  *
- * Provides createTodoPage, addTodos, gotoList, gotoSidebar.
+ * Provides setupTodoPage, addTodos, gotoList, gotoSidebar, gotoDraft, gotoEdit, gotoSearch.
  * Each test file imports these helpers + the section-specific tests.
  */
 
-import { addTodo, TodoApp } from "@apps/todo/app";
+import { addTodo, startEdit, TodoApp } from "@apps/todo/app";
 import { ListView } from "@apps/todo/widgets/ListView";
 import { createPage } from "@os-devtool/testing/page";
 import type { AppPage } from "@os-sdk/app/defineApp/types";
@@ -30,7 +30,7 @@ export function setupTodoPage() {
   });
 }
 
-/** Helper: add N todos and return their NEW IDs only */
+/** Helper: add N todos and return their NEW IDs only (setup dispatch — not under test) */
 export function addTodos(...texts: string[]): string[] {
   const before = new Set(page.state.data.todoOrder);
   for (const text of texts) {
@@ -48,6 +48,21 @@ export function gotoList(focusedItemId?: string | null) {
 /** Helper: goto sidebar zone */
 export function gotoSidebar(focusedItemId?: string | null) {
   const ids = page.state.data.categoryOrder;
-  // Config comes from role preset (listbox) + bind options — no manual override needed
   page.goto("sidebar", { focusedItemId: focusedItemId ?? ids[0] ?? null });
+}
+
+/** Helper: goto draft zone (textbox field) */
+export function gotoDraft() {
+  page.goto("draft");
+}
+
+/** Helper: goto edit zone — sets up editing state for the given item (setup dispatch) */
+export function gotoEdit(itemId: string) {
+  page.dispatch(startEdit({ id: itemId }));
+  page.goto("edit", { focusedItemId: itemId });
+}
+
+/** Helper: goto search zone (textbox field) */
+export function gotoSearch() {
+  page.goto("search");
 }

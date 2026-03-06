@@ -1,8 +1,8 @@
 /**
- * Todo BDD — §5 Sidebar Zone: 키보드 네비게이션
+ * Todo Integration — §5 Sidebar Zone (keyboard-and-mouse.md)
  *
- * Split from todo-bdd.test.ts for maintainability.
- * Uses getItems() for headless DOM_ITEMS — no manual items needed.
+ * Navigation, Enter select, reorder, mouse click.
+ * All interactions via keyboard/mouse only.
  */
 
 import { describe, expect, it } from "vitest";
@@ -10,11 +10,7 @@ import { gotoSidebar, page, setupTodoPage } from "./todo-helpers";
 
 setupTodoPage();
 
-// ═══════════════════════════════════════════════════════════════════
-// §5 Sidebar Zone — 키보드 네비게이션
-// ═══════════════════════════════════════════════════════════════════
-
-describe("§5 Sidebar: 키보드 네비게이션", () => {
+describe("§5 Sidebar: keyboard", () => {
   it("ArrowDown — 카테고리 간 이동", () => {
     gotoSidebar();
     const cats = page.state.data.categoryOrder;
@@ -75,5 +71,27 @@ describe("§5 Sidebar: 키보드 네비게이션", () => {
     expect(newOrder[1]).toBe(cats[2]);
     // cats[1] moved down
     expect(newOrder[2]).toBe(cats[1]);
+  });
+
+  it("Enter selects category (onAction)", () => {
+    gotoSidebar();
+    const cats = page.state.data.categoryOrder;
+
+    page.keyboard.press("ArrowDown");
+    expect(page.focusedItemId()).toBe(cats[1]);
+
+    page.keyboard.press("Enter");
+
+    expect(page.state.ui.selectedCategoryId).toBe(cats[1]);
+  });
+
+  it("Mouse click selects category", () => {
+    gotoSidebar();
+    const cats = page.state.data.categoryOrder;
+
+    page.click(cats[2]!);
+
+    expect(page.focusedItemId()).toBe(cats[2]);
+    expect(page.state.ui.selectedCategoryId).toBe(cats[2]);
   });
 });
