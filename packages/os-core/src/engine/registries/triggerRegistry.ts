@@ -166,14 +166,14 @@ export function buildTriggerKeymap(
   };
 
   if (config.open.onActivate) {
-    keymap.Enter = OS_OVERLAY_OPEN(base);
-    keymap.Space = OS_OVERLAY_OPEN(base);
+    keymap["Enter"] = OS_OVERLAY_OPEN(base);
+    keymap["Space"] = OS_OVERLAY_OPEN(base);
   }
   if (config.open.onArrowDown) {
-    keymap.ArrowDown = OS_OVERLAY_OPEN({ ...base, entry: "first" as const });
+    keymap["ArrowDown"] = OS_OVERLAY_OPEN({ ...base, entry: "first" as const });
   }
   if (config.open.onArrowUp) {
-    keymap.ArrowUp = OS_OVERLAY_OPEN({ ...base, entry: "last" });
+    keymap["ArrowUp"] = OS_OVERLAY_OPEN({ ...base, entry: "last" });
   }
 
   return keymap;

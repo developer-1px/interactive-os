@@ -93,8 +93,8 @@ export function inferSignal(tx: Transaction): InspectorSignal {
       to: c.to,
     })),
     effects: effectKeys,
-    ...((tx.meta as Record<string, unknown>)?.pipeline
-      ? { pipeline: (tx.meta as Record<string, unknown>).pipeline }
+    ...((tx.meta as Record<string, unknown>)?.["pipeline"]
+      ? { pipeline: (tx.meta as Record<string, unknown>)["pipeline"] }
       : {}),
   };
 }

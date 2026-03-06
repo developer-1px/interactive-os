@@ -43,25 +43,25 @@ describe("T9: FocusGroupConfig has inputmap, not action/activate", () => {
 describe("T10: Role presets produce correct inputmap", () => {
   it("checkbox: Space → OS_CHECK, click → OS_CHECK", () => {
     const config = resolveRole("checkbox");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
-    expect(config.inputmap.click).toEqual(
+    expect(config.inputmap["click"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
     // Enter explicitly blocked for checkbox (APG: only Space toggles)
-    expect(config.inputmap.Enter).toEqual([]);
+    expect(config.inputmap["Enter"]).toEqual([]);
   });
 
   it("switch: Space+Enter → OS_CHECK, click → OS_CHECK", () => {
     const config = resolveRole("switch");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
-    expect(config.inputmap.Enter).toEqual(
+    expect(config.inputmap["Enter"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
-    expect(config.inputmap.click).toEqual(
+    expect(config.inputmap["click"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
   });
@@ -69,31 +69,31 @@ describe("T10: Role presets produce correct inputmap", () => {
   it("accordion: Space+Enter → OS_EXPAND(toggle), click → OS_EXPAND(toggle)", () => {
     const config = resolveRole("accordion");
     const expandCmd = expect.objectContaining({ type: "OS_EXPAND" });
-    expect(config.inputmap.Space).toEqual(expect.arrayContaining([expandCmd]));
-    expect(config.inputmap.Enter).toEqual(expect.arrayContaining([expandCmd]));
-    expect(config.inputmap.click).toEqual(expect.arrayContaining([expandCmd]));
+    expect(config.inputmap["Space"]).toEqual(expect.arrayContaining([expandCmd]));
+    expect(config.inputmap["Enter"]).toEqual(expect.arrayContaining([expandCmd]));
+    expect(config.inputmap["click"]).toEqual(expect.arrayContaining([expandCmd]));
   });
 
   it("tree: Enter → OS_EXPAND(toggle), click → OS_EXPAND(toggle)", () => {
     const config = resolveRole("tree");
     const expandCmd = expect.objectContaining({ type: "OS_EXPAND" });
-    expect(config.inputmap.Enter).toEqual(expect.arrayContaining([expandCmd]));
-    expect(config.inputmap.click).toEqual(expect.arrayContaining([expandCmd]));
+    expect(config.inputmap["Enter"]).toEqual(expect.arrayContaining([expandCmd]));
+    expect(config.inputmap["click"]).toEqual(expect.arrayContaining([expandCmd]));
   });
 
   it("menu: Space+Enter → [OS_ACTIVATE, OS_OVERLAY_CLOSE], click → same", () => {
     const config = resolveRole("menu");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ type: "OS_ACTIVATE" }),
       ]),
     );
-    expect(config.inputmap.Enter).toEqual(
+    expect(config.inputmap["Enter"]).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ type: "OS_ACTIVATE" }),
       ]),
     );
-    expect(config.inputmap.click).toEqual(
+    expect(config.inputmap["click"]).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ type: "OS_ACTIVATE" }),
       ]),
@@ -102,12 +102,12 @@ describe("T10: Role presets produce correct inputmap", () => {
 
   it("toolbar: Space+Enter → OS_ACTIVATE", () => {
     const config = resolveRole("toolbar");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ type: "OS_ACTIVATE" }),
       ]),
     );
-    expect(config.inputmap.Enter).toEqual(
+    expect(config.inputmap["Enter"]).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ type: "OS_ACTIVATE" }),
       ]),
@@ -116,7 +116,7 @@ describe("T10: Role presets produce correct inputmap", () => {
 
   it("radiogroup: Space → OS_CHECK", () => {
     const config = resolveRole("radiogroup");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
   });
@@ -147,11 +147,11 @@ describe("T10: inputmap override merging", () => {
       inputmap: { Enter: [{ type: "OS_CHECK" } as any] },
     });
     // Space should still be from preset
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
     // Enter should be from override
-    expect(config.inputmap.Enter).toEqual(
+    expect(config.inputmap["Enter"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
   });
@@ -162,7 +162,7 @@ describe("T10: inputmap override merging", () => {
         Space: [{ type: "OS_SELECT", payload: { mode: "toggle" } } as any],
       },
     });
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_SELECT" })]),
     );
   });

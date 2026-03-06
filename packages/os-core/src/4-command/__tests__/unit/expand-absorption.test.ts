@@ -18,9 +18,9 @@ describe("T5: EXPAND → NAVIGATE (input-based)", () => {
 
   it("accordion has inputmap with OS_EXPAND (inputmap declarative)", () => {
     const config = resolveRole("accordion");
-    expect(config.inputmap.Space?.[0]?.type).toBe("OS_EXPAND");
-    expect(config.inputmap.Enter?.[0]?.type).toBe("OS_EXPAND");
-    expect(config.inputmap.click?.[0]?.type).toBe("OS_EXPAND");
+    expect(config.inputmap["Space"]?.[0]?.type).toBe("OS_EXPAND");
+    expect(config.inputmap["Enter"]?.[0]?.type).toBe("OS_EXPAND");
+    expect(config.inputmap["click"]?.[0]?.type).toBe("OS_EXPAND");
   });
 
   it("Enter on collapsed accordion → expands", async () => {

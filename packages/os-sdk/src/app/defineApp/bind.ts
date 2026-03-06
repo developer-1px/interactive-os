@@ -186,10 +186,10 @@ export function createBoundComponents<S>(
       children,
     };
 
-    if (contentRole) props.role = contentRole;
-    if (useHiddenAttribute) props.hidden = !isVisible;
+    if (contentRole) props["role"] = contentRole;
+    if (useHiddenAttribute) props["hidden"] = !isVisible;
     // tabpanel needs tabindex=0 for Tab key navigation
-    if (contentRole === "tabpanel") props.tabIndex = 0;
+    if (contentRole === "tabpanel") props["tabIndex"] = 0;
 
     return React.createElement("div", props);
   };

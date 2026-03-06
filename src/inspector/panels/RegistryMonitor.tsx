@@ -324,13 +324,13 @@ export const RegistryMonitor = memo(
         </div>
 
         {/* Chain Trace — shows when last NAVIGATE used chain executor */}
-        {lastTx?.effects?.chainTrace && (
+        {lastTx?.effects?.["chainTrace"] && (
           <div className="flex items-center gap-1 px-3 py-1 bg-[#f0f7ff] border-b border-[#e0ecf5]">
             <span className="text-[7px] font-bold text-[#007acc] uppercase tracking-wider mr-1">
               chain
             </span>
             {(
-              lastTx.effects.chainTrace as Array<{
+              lastTx.effects["chainTrace"] as Array<{
                 action: string;
                 result: string;
               }>

@@ -47,7 +47,7 @@ describe("T1: SelectConfig aria field + inputmap", () => {
   it("checkbox has inputmap with OS_CHECK", () => {
     const config = resolveRole("checkbox");
     expect(config.select.mode).toBe("none");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
   });
@@ -55,10 +55,10 @@ describe("T1: SelectConfig aria field + inputmap", () => {
   it("switch has inputmap with Space+Enter → OS_CHECK", () => {
     const config = resolveRole("switch");
     expect(config.select.mode).toBe("none");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
-    expect(config.inputmap.Enter).toEqual(
+    expect(config.inputmap["Enter"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
   });
@@ -76,13 +76,13 @@ describe("T1: SelectConfig aria field + inputmap", () => {
 describe("T1: inputmap replaces action.commands", () => {
   it("accordion has inputmap with OS_EXPAND", () => {
     const config = resolveRole("accordion");
-    expect(config.inputmap.Space?.[0]?.type).toBe("OS_EXPAND");
+    expect(config.inputmap["Space"]?.[0]?.type).toBe("OS_EXPAND");
   });
 
   it("menu has inputmap with [OS_ACTIVATE, OS_OVERLAY_CLOSE]", () => {
     const config = resolveRole("menu");
-    expect(config.inputmap.Space?.[0]?.type).toBe("OS_ACTIVATE");
-    expect(config.inputmap.Space?.[1]?.type).toBe("OS_OVERLAY_CLOSE");
+    expect(config.inputmap["Space"]?.[0]?.type).toBe("OS_ACTIVATE");
+    expect(config.inputmap["Space"]?.[1]?.type).toBe("OS_OVERLAY_CLOSE");
   });
 });
 

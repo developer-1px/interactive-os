@@ -64,7 +64,7 @@ function extractScripts(mod: Record<string, unknown>): TestScript[] {
     if (
       Array.isArray(value) &&
       value.length > 0 &&
-      typeof (value[0] as Record<string, unknown>)?.run === "function"
+      typeof (value[0] as Record<string, unknown>)?.["run"] === "function"
     ) {
       return value as TestScript[];
     }

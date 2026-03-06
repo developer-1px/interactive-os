@@ -58,7 +58,7 @@ export const TestBotApp = defineApp<TestBotState>("testbot", INITIAL_STATE);
 /** Read current TestBot state from kernel store */
 export function getTestBotState(): TestBotState {
   return (os.getState() as { apps: Record<string, unknown> }).apps
-    .testbot as TestBotState;
+    ["testbot"] as TestBotState;
 }
 
 // ═══════════════════════════════════════════════════════════════════

@@ -198,7 +198,7 @@ export function registerTestBotGlobalApi(
     return idx;
   }
 
-  (window as Record<string, unknown>).__TESTBOT__ = {
+  (window as Record<string, unknown>)["__TESTBOT__"] = {
     // ── Visual Run ───────────────────────────────────────────
 
     /** Run all test suites (with visual effects) */
@@ -353,5 +353,5 @@ export function registerTestBotGlobalApi(
 }
 
 export function unregisterTestBotGlobalApi() {
-  delete (window as Record<string, unknown>).__TESTBOT__;
+  delete (window as Record<string, unknown>)["__TESTBOT__"];
 }

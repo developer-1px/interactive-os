@@ -81,10 +81,10 @@ export interface TestScenario {
  * The name MUST be "scenarios" — no auto-detection, explicit contract.
  */
 export function extractScenarios(mod: Record<string, unknown>): TestScenario[] {
-  const scenarios = mod.scenarios;
+  const scenarios = mod["scenarios"];
   if (Array.isArray(scenarios) && scenarios.length > 0) {
     const first = scenarios[0] as Record<string, unknown>;
-    if (typeof first.zone === "string" && Array.isArray(first.scripts)) {
+    if (typeof first["zone"] === "string" && Array.isArray(first["scripts"])) {
       return scenarios as TestScenario[];
     }
   }

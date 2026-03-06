@@ -27,27 +27,27 @@ afterEach(() => page.cleanup());
 describe("inputmap in role presets (replaces action.commands)", () => {
   it("checkbox preset has inputmap.Space=[OS_CHECK()]", () => {
     const config = resolveRole("checkbox");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
   });
 
   it("switch preset has inputmap Space+Enter+click → OS_CHECK", () => {
     const config = resolveRole("switch");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
-    expect(config.inputmap.Enter).toEqual(
+    expect(config.inputmap["Enter"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
-    expect(config.inputmap.click).toEqual(
+    expect(config.inputmap["click"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
   });
 
   it("radiogroup preset has inputmap.Space=[OS_CHECK()]", () => {
     const config = resolveRole("radiogroup");
-    expect(config.inputmap.Space).toEqual(
+    expect(config.inputmap["Space"]).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
   });

@@ -22,7 +22,7 @@ describe("T4: CHECK (input-based)", () => {
     it("checkbox: select.mode = 'none', inputmap has OS_CHECK", () => {
       const config = resolveRole("checkbox");
       expect(config.select.mode).toBe("none");
-      expect(config.inputmap.Space).toEqual(
+      expect(config.inputmap["Space"]).toEqual(
         expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
       );
     });
@@ -30,7 +30,7 @@ describe("T4: CHECK (input-based)", () => {
     it("switch: select.mode = 'none', inputmap has OS_CHECK", () => {
       const config = resolveRole("switch");
       expect(config.select.mode).toBe("none");
-      expect(config.inputmap.Space).toEqual(
+      expect(config.inputmap["Space"]).toEqual(
         expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
       );
     });

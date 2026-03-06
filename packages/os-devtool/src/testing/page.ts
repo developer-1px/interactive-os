@@ -159,8 +159,8 @@ export function createAppPage<S>(
   // Auto-register diagnostics on test failure (vitest only)
   try {
     const g = globalThis as Record<string, unknown>;
-    if (typeof g.onTestFailed === "function") {
-      (g.onTestFailed as (fn: () => void) => void)(() =>
+    if (typeof g["onTestFailed"] === "function") {
+      (g["onTestFailed"] as (fn: () => void) => void)(() =>
         console.log(formatDiagnostics(os)),
       );
     }
