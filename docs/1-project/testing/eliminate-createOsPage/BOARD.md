@@ -17,7 +17,7 @@
 - [x] #6 tests/integration/os/ 삭제 — navigate, focus, item-filter 3파일(-55 tests). APG 테스트가 커버 | 167 files 1754 tests ✅
 - [x] #7 tests/apg/ — os-guarantee 삭제(-15 tests), 6 value-based APG는 Later 이동(OS core 미지원) | 166 files 1739 tests ✅
 - [x] #8 tests/integration/builder/ — Later 이동. builderBlock headless 미지원(OS gap)으로 마이그레이션 불가
-- [ ] #9 tests/integration/docs+todo 마이그레이션 (6파일)
+- [x] #9 tests/integration/docs+todo 삭제 — 4파일(-21 tests). testbot/APG 테스트가 커버 | 162 files 1718 tests ✅
 - [ ] #10 tests/script+e2e 마이그레이션 (5파일)
 
 ## Next
