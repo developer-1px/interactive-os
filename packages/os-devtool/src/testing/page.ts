@@ -181,6 +181,9 @@ export function createAppPage<S>(
       focusedItemId?: string | null;
       config?: Partial<FocusGroupConfig>;
       initial?: { selection?: string[]; expanded?: string[] };
+      items?: string[];
+      expandableItems?: Set<string>;
+      treeLevels?: Map<string, number>;
     },
   ) {
     // Use zoneName directly — matches FocusGroup's id in React.
@@ -209,13 +212,21 @@ export function createAppPage<S>(
         ...(bindings.onRedo ? { onRedo: bindings.onRedo } : {}),
         ...(bindings.onSelect ? { onSelect: bindings.onSelect } : {}),
         ...(bindings.itemFilter ? { itemFilter: bindings.itemFilter } : {}),
-        ...(bindings.getItems ? { getItems: bindings.getItems } : {}),
-        ...(bindings.getExpandableItems
-          ? { getExpandableItems: bindings.getExpandableItems }
-          : {}),
-        ...(bindings.getTreeLevels
-          ? { getTreeLevels: bindings.getTreeLevels }
-          : {}),
+        ...(opts?.items
+          ? { getItems: () => opts.items! }
+          : bindings.getItems
+            ? { getItems: bindings.getItems }
+            : {}),
+        ...(opts?.expandableItems
+          ? { getExpandableItems: () => opts.expandableItems! }
+          : bindings.getExpandableItems
+            ? { getExpandableItems: bindings.getExpandableItems }
+            : {}),
+        ...(opts?.treeLevels
+          ? { getTreeLevels: () => opts.treeLevels! }
+          : bindings.getTreeLevels
+            ? { getTreeLevels: bindings.getTreeLevels }
+            : {}),
       });
 
       // Push model: auto-register item-level callbacks from triggers
