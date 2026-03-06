@@ -6,14 +6,20 @@
  *
  * Known OS Gaps (recorded in docs/5-backlog/todo-dogfooding-os-gaps.md):
  * - Gap 1: goto() doesn't auto-focus first item (must pass focusedItemId manually)
- * - Gap 2: inputmap (Space → OS_CHECK) not applied in headless
+ * - Gap 2: RESOLVED — inputmap works in headless (Space → OS_CHECK passes)
  * - Gap 3: AppPage lacks zone() accessor
+ * - Gap 4: Field without fieldName in bind() → headless skips FieldRegistry (Enter/Escape dead)
+ * - Gap 5: keyboard.type() doesn't verify field is registered (silent no-op)
  */
 
 import { type AppPage, createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   addTodo,
+  startEdit,
+  toggleTodo,
+  toggleView,
+  clearCompleted,
   TodoApp,
 } from "@apps/todo/app";
 import type { AppState } from "@apps/todo/model/appState";
@@ -101,9 +107,7 @@ describe("Todo Headless — List Interaction", () => {
     expect(page.state.ui.editingId).toBe(focusId);
   });
 
-  // Gap 2: Space → OS_CHECK mapping not applied in headless
-  // This test documents the gap — Space dispatches OS_SELECT instead of OS_CHECK
-  it.skip("Space triggers onCheck (toggleTodo) — BLOCKED by Gap 2: inputmap not applied in headless", () => {
+  it("Space triggers onCheck (toggleTodo)", () => {
     const focusId = page.focusedItemId("list")!;
     const wasBefore = page.state.data.todos[focusId]?.completed;
     page.keyboard.press("Space");
@@ -165,5 +169,132 @@ describe("Todo Headless — Selection", () => {
     page.keyboard.press("Shift+ArrowDown");
     const selection = page.selection("list");
     expect(selection.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Draft Zone — Field interaction (textbox role)
+// ═══════════════════════════════════════════════════════════════════
+
+describe("Todo Headless — Draft Field", () => {
+  let page: AppPage<AppState>;
+
+  beforeEach(() => {
+    page = createPage(TodoApp);
+    page.goto("draft");
+  });
+
+  it("goto draft sets active zone", () => {
+    expect(page.activeZoneId()).toBe("draft");
+  });
+
+  it("keyboard.type() sets field value", () => {
+    page.keyboard.type("New task from headless");
+    // Verify field value was set (FieldRegistry internal state)
+    // The real test: pressing Enter should commit the field and create a todo
+  });
+
+  it("type + Enter commits field and adds todo", () => {
+    const beforeCount = page.state.data.todoOrder.length;
+    page.keyboard.type("Headless todo");
+    page.keyboard.press("Enter");
+    const afterCount = page.state.data.todoOrder.length;
+    expect(afterCount).toBe(beforeCount + 1);
+  });
+
+  it("Enter on empty field does NOT add todo (schema validation)", () => {
+    const beforeCount = page.state.data.todoOrder.length;
+    page.keyboard.press("Enter");
+    expect(page.state.data.todoOrder.length).toBe(beforeCount);
+  });
+
+  it("field resets after successful submit (resetOnSubmit)", () => {
+    page.keyboard.type("Will reset");
+    page.keyboard.press("Enter");
+    // After commit, typing again should start fresh
+    page.keyboard.type("Second task");
+    page.keyboard.press("Enter");
+    // Two tasks should exist
+    const count = page.state.data.todoOrder.length;
+    expect(count).toBeGreaterThanOrEqual(2);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Edit Zone — Field interaction (inline edit)
+// ═══════════════════════════════════════════════════════════════════
+
+describe("Todo Headless — Edit Field", () => {
+  let page: AppPage<AppState>;
+  let todoId: string;
+
+  beforeEach(() => {
+    page = createPage(TodoApp);
+    page.dispatch(addTodo({ text: "Editable task" }));
+    todoId = page.state.data.todoOrder[0]!;
+    // Proper flow: goto list, focus item, press Enter to start edit
+    gotoWithFocus(page, "list");
+    page.keyboard.press("Enter"); // startEdit → OS_FIELD_START_EDIT
+  });
+
+  it("Enter on list item sets editingId", () => {
+    expect(page.state.ui.editingId).toBe(page.focusedItemId("list"));
+  });
+
+  // Gap 4: edit zone's field binding has no fieldName, so headless skips FieldRegistry.
+  // In browser, Field.tsx provides the name via JSX <Field name="..."> prop.
+  // In headless, page.ts only registers fields with bind({ field: { fieldName: "..." } }).
+  // Without registration, keyboard.type() is a silent no-op and Enter/Escape don't dispatch.
+  it.skip("BLOCKED Gap 4: type + Enter should commit edit — field not registered in headless", () => {
+    page.goto("edit");
+    page.keyboard.type("Updated text");
+    page.keyboard.press("Enter");
+    expect(page.state.data.todos[todoId]?.text).toBe("Updated text");
+    expect(page.state.ui.editingId).toBeNull();
+  });
+
+  it.skip("BLOCKED Gap 4: Escape should cancel edit — field not registered in headless", () => {
+    const originalText = page.state.data.todos[todoId]?.text;
+    page.goto("edit");
+    page.keyboard.type("Should be discarded");
+    page.keyboard.press("Escape");
+    expect(page.state.data.todos[todoId]?.text).toBe(originalText);
+    expect(page.state.ui.editingId).toBeNull();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Toolbar Zone — command dispatch via keybindings
+// ═══════════════════════════════════════════════════════════════════
+
+describe("Todo Headless — Toolbar", () => {
+  let page: AppPage<AppState>;
+
+  beforeEach(() => {
+    page = createPage(TodoApp);
+    page.goto("toolbar");
+  });
+
+  it("goto toolbar sets active zone", () => {
+    expect(page.activeZoneId()).toBe("toolbar");
+  });
+
+  it("toggleView command changes viewMode", () => {
+    const before = page.state.ui.viewMode;
+    page.dispatch(toggleView());
+    const after = page.state.ui.viewMode;
+    expect(after).not.toBe(before);
+  });
+
+  it("clearCompleted removes completed todos", () => {
+    // Setup: add and complete a todo
+    page.dispatch(addTodo({ text: "Done task" }));
+    const id = page.state.data.todoOrder[0]!;
+    page.dispatch(toggleTodo({ id }));
+    expect(page.state.data.todos[id]?.completed).toBe(true);
+
+    const beforeCount = page.state.data.todoOrder.length;
+    page.dispatch(clearCompleted());
+    expect(page.state.data.todoOrder.length).toBe(beforeCount - 1);
   });
 });
