@@ -156,7 +156,7 @@ describe("APG Tabs: Always-selected (disallowEmpty)", () => {
     expect(t.attrs("tab-andersen")["aria-selected"]).toBe(true);
     t.keyboard.press("ArrowRight");
     expect(t.selection()).toHaveLength(1);
-    expect(t.attrs("tab-lange-muller")["aria-selected"]).toBe(true);
+    expect(t.attrs("tab-fonseca")["aria-selected"]).toBe(true);
   });
 });
 

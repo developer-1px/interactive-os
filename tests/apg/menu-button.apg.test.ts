@@ -36,6 +36,7 @@ function createMenuPage(focusedItem = "action-cut") {
   page.goto("apg-menu-button-popup", {
     items: MENU_ITEMS,
     focusedItemId: focusedItem,
+    role: "menu",
   });
   return page;
 }

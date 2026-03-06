@@ -52,6 +52,18 @@ function multiTreeFactory(focusedItem = "section-1") {
   return treeFactory(focusedItem);
 }
 
+function singleTreeFactory(focusedItem = "section-1") {
+  const page = createPage(TreeApp);
+  page.goto("apg-explorer", {
+    items: TREE_ITEMS,
+    focusedItemId: focusedItem,
+    expandableItems: EXPANDABLE,
+    treeLevels: TREE_LEVELS,
+    config: { select: { mode: "single" } },
+  });
+  return page;
+}
+
 // ═══════════════════════════════════════════════════
 // Shared contracts — navigation
 // ═══════════════════════════════════════════════════
@@ -281,7 +293,7 @@ describe("APG Tree: Multi-Selection (Shift+Arrow)", () => {
 
 describe("APG Tree: Single-Select Negative (MUST NOT)", () => {
   it("Shift+ArrowDown: MUST NOT create range selection", () => {
-    const t = treeFactory("section-1");
+    const t = singleTreeFactory("section-1");
     t.keyboard.press("Space"); // select section-1
     expect(t.selection()).toEqual(["section-1"]);
 
@@ -291,13 +303,13 @@ describe("APG Tree: Single-Select Negative (MUST NOT)", () => {
   });
 
   it("Ctrl+A: MUST NOT select all in single-select tree", () => {
-    const t = treeFactory("section-1");
+    const t = singleTreeFactory("section-1");
     t.keyboard.press("Meta+A");
     expect(t.selection().length).toBeLessThanOrEqual(1);
   });
 
   it("Shift+Click: MUST NOT create range selection (single-select enforces replace)", () => {
-    const t = treeFactory("section-1");
+    const t = singleTreeFactory("section-1");
     t.click("section-1");
     expect(t.selection()).toEqual(["section-1"]);
 

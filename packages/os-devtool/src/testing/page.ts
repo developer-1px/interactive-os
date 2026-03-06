@@ -180,6 +180,7 @@ export function createAppPage<S>(
     opts?: {
       focusedItemId?: string | null;
       config?: Partial<FocusGroupConfig>;
+      role?: ZoneRole;
       initial?: { selection?: string[]; expanded?: string[] };
       items?: string[];
       expandableItems?: Set<string>;
@@ -246,6 +247,22 @@ export function createAppPage<S>(
           }
         }
       }
+    } else if (opts?.role) {
+      // Fallback: unbound zones (e.g., createTrigger overlays) — register from opts
+      const config = resolveRole(opts.role, opts.config ?? {});
+      ZoneRegistry.register(zoneName, {
+        role: opts.role,
+        config,
+        element: null,
+        parentId: null,
+        ...(opts.items ? { getItems: () => opts.items! } : {}),
+        ...(opts.expandableItems
+          ? { getExpandableItems: () => opts.expandableItems! }
+          : {}),
+        ...(opts.treeLevels
+          ? { getTreeLevels: () => opts.treeLevels! }
+          : {}),
+      });
     }
 
     // Register zone keybindings in the global Keybindings registry
@@ -338,6 +355,11 @@ export function createAppPage<S>(
             if (!z.items[id]) z.items[id] = {};
             z.items[id] = { ...z.items[id], "aria-expanded": true };
           }
+        }
+
+        // Apply initial value (meter, spinbutton, slider)
+        if (zoneConfig?.value?.initial) {
+          z.valueNow = { ...zoneConfig.value.initial };
         }
       }),
     );

@@ -49,8 +49,8 @@ describe("T10: Role presets produce correct inputmap", () => {
     expect(config.inputmap.click).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: "OS_CHECK" })]),
     );
-    // Enter should NOT be mapped for checkbox (APG: only Space)
-    expect(config.inputmap.Enter).toBeUndefined();
+    // Enter explicitly blocked for checkbox (APG: only Space toggles)
+    expect(config.inputmap.Enter).toEqual([]);
   });
 
   it("switch: Space+Enter → OS_CHECK, click → OS_CHECK", () => {

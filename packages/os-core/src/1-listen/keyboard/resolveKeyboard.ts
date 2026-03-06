@@ -204,7 +204,11 @@ function triggerItemLayer(input: KeyboardInput): Layer | null {
 
   return (key) => {
     // Check inputmap first for multi-command support (bypasses chain for full command list)
-    if (hasInputmap && inputmap[key] && inputmap[key].length > 0) {
+    if (hasInputmap && key in inputmap) {
+      const cmds = inputmap[key];
+      // Empty array = explicitly blocked key (e.g., checkbox Enter: [])
+      // Return NOOP so the 3-layer loop stops here — prevents zoneLayer fallback
+      if (!cmds || cmds.length === 0) return { commands: [NOOP] };
       // If trigger layer also has this key, trigger wins (chain priority)
       if (hasTrigger) {
         const triggerCmd = resolveChain(key, [layers[0]]);
@@ -215,7 +219,7 @@ function triggerItemLayer(input: KeyboardInput): Layer | null {
       // Return full command array from inputmap
       const elementId =
         input.activeZoneFocusedItemId ?? input.focusedItemId ?? undefined;
-      return { commands: inputmap[key], elementId };
+      return { commands: cmds, elementId };
     }
 
     // Fallback to chain resolution (trigger keys, etc.)

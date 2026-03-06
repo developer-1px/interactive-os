@@ -452,7 +452,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   //       click also toggles.
   checkbox: {
     select: { mode: "none" },
-    inputmap: { Space: [OS_CHECK()], click: [OS_CHECK()] },
+    inputmap: { Space: [OS_CHECK()], click: [OS_CHECK()], Enter: [] },
     tab: { behavior: "escape" },
   },
 };
