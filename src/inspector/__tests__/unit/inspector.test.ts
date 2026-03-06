@@ -3,7 +3,7 @@
  */
 
 import type { Transaction } from "@kernel/core/transaction";
-import { type AppPage, createPage } from "@os-devtool/testing/page";
+import { type AppPageInternal, createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   INSPECTOR_SCROLL_TO_BOTTOM,
@@ -22,7 +22,7 @@ import { UnifiedInspector } from "../../panels/UnifiedInspector";
 // we can use the app definition without mounting the React component.
 
 describe("Feature: Inspector Dogfooding T1 (App Store & Field Binding)", () => {
-  let page: AppPage<InspectorState>;
+  let page: AppPageInternal<InspectorState>;
 
   beforeEach(() => {
     // We expect InspectorApp to define the zones and fields
@@ -82,7 +82,7 @@ describe("Feature: Inspector Dogfooding T1 (App Store & Field Binding)", () => {
 });
 
 describe("Feature: Inspector Dogfooding T2 (파생 데이터 연산 분리)", () => {
-  let page: AppPage<InspectorState>;
+  let page: AppPageInternal<InspectorState>;
 
   beforeEach(() => {
     page = createPage(InspectorApp, UnifiedInspector);
@@ -151,7 +151,7 @@ describe("Feature: Inspector Dogfooding T2 (파생 데이터 연산 분리)", ()
 });
 
 describe("Feature: Inspector Dogfooding T3 (명시적 OS_SCROLL 커맨드 구축)", () => {
-  let page: AppPage<InspectorState>;
+  let page: AppPageInternal<InspectorState>;
 
   beforeEach(() => {
     page = createPage(InspectorApp, UnifiedInspector);

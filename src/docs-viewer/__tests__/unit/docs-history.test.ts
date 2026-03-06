@@ -9,7 +9,7 @@
  * so we only verify activePath changes and command dispatching.
  */
 
-import { type AppPage, createPage } from "@os-devtool/testing/page";
+import { type AppPageInternal, createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
 import { DocsApp, resetDoc } from "../../app";
 
@@ -19,7 +19,7 @@ interface DocsState {
 }
 
 describe("Feature: Document Navigation", () => {
-  let page: AppPage<DocsState>;
+  let page: AppPageInternal<DocsState>;
 
   beforeEach(() => {
     page = createPage(DocsApp);

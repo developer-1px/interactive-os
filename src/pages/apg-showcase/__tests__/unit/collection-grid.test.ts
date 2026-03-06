@@ -11,7 +11,7 @@
  * @spec docs/1-project/os-core/collection-crud-showcase/notes/2026-0306-plan-collection-crud.md
  */
 
-import { type AppPage, createPage } from "@os-devtool/testing/page";
+import { type AppPageInternal, createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
 import { history } from "@os-sdk/app/modules/history";
@@ -89,7 +89,7 @@ const GridUI = gridCollection.bind({
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Collection Grid — Row CRUD via keyboard", () => {
-  let page: AppPage<GridState>;
+  let page: AppPageInternal<GridState>;
 
   beforeEach(() => {
     _resetClipboardStore();
@@ -117,7 +117,7 @@ describe("Collection Grid — Row CRUD via keyboard", () => {
 });
 
 describe("Collection Grid — Clipboard via keyboard", () => {
-  let page: AppPage<GridState>;
+  let page: AppPageInternal<GridState>;
 
   beforeEach(() => {
     _resetClipboardStore();
@@ -143,7 +143,7 @@ describe("Collection Grid — Clipboard via keyboard", () => {
 });
 
 describe("Collection Grid — Undo/Redo via keyboard", () => {
-  let page: AppPage<GridState>;
+  let page: AppPageInternal<GridState>;
 
   beforeEach(() => {
     _resetClipboardStore();

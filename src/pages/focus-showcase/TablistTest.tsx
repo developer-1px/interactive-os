@@ -1,6 +1,6 @@
 import { Item } from "@os-react/6-project/Item.tsx";
 import { Zone } from "@os-react/6-project/Zone.tsx";
-import { TestBox } from "../../shared/TestLayout";
+import { TestBox } from "../shared/TestLayout";
 
 const tabs = [
   { id: "tl-tab-1", label: "Details", panelId: "tl-panel-1" },

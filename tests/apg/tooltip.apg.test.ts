@@ -27,12 +27,12 @@
 
 import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
+import { TooltipApp } from "@/pages/apg-showcase/patterns/TooltipPattern";
 import {
   assertHomeEnd,
   assertHorizontalNav,
   assertNoSelection,
 } from "./helpers/contracts";
-import { TooltipApp } from "@/pages/apg-showcase/patterns/TooltipPattern";
 
 // ─── Test Setup (actual showcase config) ───
 

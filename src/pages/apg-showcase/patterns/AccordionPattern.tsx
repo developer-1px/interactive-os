@@ -59,7 +59,10 @@ export const SECTIONS: AccordionSection[] = [
 
 // ─── App + Zone (defineApp pattern) ───
 
-export const AccordionApp = defineApp<Record<string, never>>("apg-accordion-app", {});
+export const AccordionApp = defineApp<Record<string, never>>(
+  "apg-accordion-app",
+  {},
+);
 const accordionZone = AccordionApp.createZone("apg-accordion");
 const AccordionUI = accordionZone.bind({ role: "accordion" });
 

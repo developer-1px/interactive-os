@@ -81,7 +81,7 @@ export interface OsLocator {
 }
 
 export interface OsPage {
-  keyboard: { press(key: string): void };
+  keyboard: { press(key: string): void; type?(text: string): void };
   click(
     itemId: string,
     opts?: { shift?: boolean; meta?: boolean; ctrl?: boolean; zoneId?: string },

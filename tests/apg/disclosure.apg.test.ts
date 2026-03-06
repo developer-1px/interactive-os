@@ -20,9 +20,7 @@
 
 import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
-import {
-  DisclosureApp,
-} from "@/pages/apg-showcase/patterns/DisclosurePattern";
+import { DisclosureApp } from "@/pages/apg-showcase/patterns/DisclosurePattern";
 
 // ─── Test Setup (actual showcase config) ───
 

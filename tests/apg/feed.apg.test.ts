@@ -22,13 +22,13 @@
 import { createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
+import { FeedApp } from "@/pages/apg-showcase/patterns/FeedPattern";
 import {
   assertBoundaryClamp,
   assertHomeEnd,
   assertNoSelection,
   assertVerticalNav,
 } from "./helpers/contracts";
-import { FeedApp } from "@/pages/apg-showcase/patterns/FeedPattern";
 
 // ─── Test Setup (actual showcase config) ───
 

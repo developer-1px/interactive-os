@@ -8,6 +8,9 @@
  */
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
+import type { FieldType } from "@os-core/engine/registries/fieldRegistry";
+import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
+import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
 import type { FieldMode } from "@os-react/6-project/field/Field";
 import type {
@@ -17,9 +20,6 @@ import type {
 import type React from "react";
 import type { ReactNode } from "react";
 import type { ZodSchema } from "zod";
-import type { FieldType } from "./@os-core/engine/registries/fieldRegistry";
-import type { ZoneCallback } from "./@os-core/engine/registries/zoneRegistry";
-import type { ZoneRole } from "./registries/roleRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Brand Symbols
@@ -295,7 +295,9 @@ export interface AppPage<S> {
   dumpDiagnostics(): void;
 
   /** Playwright-style locator: query any element by ID (Zone or Item). */
-  locator(elementId: string): import("@os-devtool/testing/page").OsLocator;
+  locator(
+    elementId: string,
+  ): import("@os-devtool/testing/createOsPage").OsLocator;
 
   // ── Projection Checkpoint (optional — requires Component) ────────
 

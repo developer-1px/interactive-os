@@ -68,7 +68,10 @@ const TOOLBAR_BUTTONS: TooltipButtonDef[] = [
 
 // ─── App + Zone (defineApp pattern) ───
 
-export const TooltipApp = defineApp<Record<string, never>>("apg-tooltip-app", {});
+export const TooltipApp = defineApp<Record<string, never>>(
+  "apg-tooltip-app",
+  {},
+);
 const tooltipZone = TooltipApp.createZone("apg-tooltip-toolbar");
 const ToolbarUI = tooltipZone.bind({
   role: "toolbar",

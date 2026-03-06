@@ -12,9 +12,7 @@
 
 import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
-import {
-  CrustApp,
-} from "@/pages/apg-showcase/patterns/RadioGroupPattern";
+import { CrustApp } from "@/pages/apg-showcase/patterns/RadioGroupPattern";
 
 // ─── Test Setup (actual showcase config) ───
 

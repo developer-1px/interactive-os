@@ -25,13 +25,13 @@
 
 import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
+import { TreegridApp } from "@/pages/apg-showcase/patterns/TreegridPattern";
 import {
   assertBoundaryClamp,
   assertHomeEnd,
   assertNoSelection,
   assertVerticalNav,
 } from "./helpers/contracts";
-import { TreegridApp } from "@/pages/apg-showcase/patterns/TreegridPattern";
 
 // -- Email inbox treegrid data (W3C APG example-inspired) --
 // Flat item list = visible rows only. Parent rows are expandable.

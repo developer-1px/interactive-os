@@ -29,13 +29,13 @@
 
 import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
+import { CarouselApp } from "@/pages/apg-showcase/patterns/CarouselPattern";
 import {
   assertHomeEnd,
   assertHorizontalNav,
   assertLoop,
   assertOrthogonalIgnored,
 } from "./helpers/contracts";
-import { CarouselApp } from "@/pages/apg-showcase/patterns/CarouselPattern";
 
 // --- Test Setup (actual showcase config) ---
 

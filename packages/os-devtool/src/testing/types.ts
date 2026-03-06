@@ -13,11 +13,13 @@
  * @see https://playwright.dev/docs/api/class-locator
  */
 
+export type { ExpectLocator, TestScenario, TestScript } from "./scripts";
+
 // ═══════════════════════════════════════════════════════════════════
 // Locator — Playwright.Locator subset
 // ═══════════════════════════════════════════════════════════════════
 
-export interface Locator {
+export interface Locator extends LocatorAssertions {
   /** Click this element. Playwright-identical signature. */
   click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): Promise<void>;
 

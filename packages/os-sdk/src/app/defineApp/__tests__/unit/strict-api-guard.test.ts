@@ -124,4 +124,3 @@ describe("T4: FieldRegistry.getValue warns for unregistered field", () => {
     FieldRegistry.unregister("registered-field");
   });
 });
-

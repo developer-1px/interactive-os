@@ -8,7 +8,13 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { addTodos, gotoList, gotoSidebar, page, setupTodoPage } from "./todo-helpers";
+import {
+  addTodos,
+  gotoList,
+  gotoSidebar,
+  page,
+  setupTodoPage,
+} from "./todo-helpers";
 
 setupTodoPage();
 

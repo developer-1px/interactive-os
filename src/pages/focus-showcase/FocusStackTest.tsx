@@ -2,7 +2,7 @@ import { Item } from "@os-react/6-project/Item.tsx";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog.tsx";
 import { Zone } from "@os-react/6-project/Zone.tsx";
 import { useRef } from "react";
-import { TestBox } from "../../shared/TestLayout";
+import { TestBox } from "../shared/TestLayout";
 
 // ═══════════════════════════════════════════════════════════════════
 // Test Component

@@ -19,6 +19,40 @@
 
 6. **안 쓰는 테스트는 정리한다.** 죽은 테스트는 거짓 안전감을 준다.
 
+## 테스트 구조 — 1-Root 5-Tier (Updated: 2026-03-07)
+
+> 테스트 파일은 `tests/`에만 존재한다. `src/`, `packages/`에 `__tests__/` 없음. 예외 없음.
+
+### 위치 규칙
+
+```
+tests/                         ← 유일한 테스트 루트
+├── apg/                       ← W3C APG 계약 테스트 (*.apg.test.ts)
+├── headless/                  ← Headless 상호작용 (createPage + keyboard → ARIA)
+│   ├── os/                    ← OS 수준 통합 (tab, history, focus 등)
+│   └── apps/{app}/            ← 앱별 headless 테스트
+├── unit/                      ← 순수 함수 (OS 불필요, page 불필요)
+│   ├── os-core/               ← resolveTab, rolePresets 등
+│   ├── os-sdk/                ← treeUtils, collection 등
+│   └── apps/{app}/            ← findBlockInfo, i18n 등
+├── infra/                     ← 테스트 인프라 검증 (Playwright compat 등)
+└── e2e/                       ← Playwright E2E (*.spec.ts). 유일한 브라우저.
+```
+
+### 확장자 관습
+
+| 확장자 | 의미 | 실행 환경 |
+|--------|------|----------|
+| `.test.ts` | Headless (vitest) | Node.js |
+| `.apg.test.ts` | APG 계약 (headless) | Node.js |
+| `.spec.ts` | Playwright E2E | 실제 브라우저 |
+
+### Headless 전환 원칙
+
+- **Headless로 전환 가능하면 이동한다. 불가능하면 삭제한다.**
+- `dispatch()` 기반 테스트는 headless 전환 대상이다. `createHeadlessPage()` + `keyboard.press()` → ARIA 검증으로 재작성한다.
+- `__tests__/` 안의 `.tsx` 파일이 반드시 테스트는 아니다 — showcase 컴포넌트가 혼재할 수 있다. 분리 필요.
+
 ## 테스트 도구
 
 7. **OS 테스트의 처음과 끝 = Zone → Input → ARIA.**
@@ -26,10 +60,10 @@
    - **처음**: `page.goto("zone", { role, items, config })` — Zone 선언
    - **입력**: `page.keyboard.press()`, `page.locator("#id").click()` — 사용자 입력
    - **끝**: `locator().toBeFocused()`, `locator().toHaveAttribute()` — ARIA 속성 검증
-   - `dispatch()`, `getState()`, `setState()` — OS 내부 우회이므로 테스트 코드에서 금지. **예외**: `packages/os-core/src/4-command/__tests__/`의 커맨드 핸들러 단위 테스트에서 dispatch()는 정당 — OS가 자기 커맨드를 단위 테스트하는 것은 Pipeline 우회가 아니다
+   - `dispatch()`, `getState()`, `setState()` — OS 내부 우회이므로 테스트 코드에서 금지. 예외 없음.
    - `createOsPage()` — 삭제 대상. `createHeadlessPage()`가 유일한 OS 테스트 팩토리
    - `createPage(app)` = 앱 통합 테스트 (Builder, Todo)
-   - **순수 함수 테스트는 page 불필요.** `findBlockInfo`, `parseHashToPath`, `i18n` 등 상태·상호작용이 없는 순수 함수는 직접 호출이 정당하다. OS 내부 함수(`resolve*`, `compute*`)의 직접 테스트는 구현 종속이므로 제거 대상.
+   - **순수 함수 테스트는 page 불필요.** `findBlockInfo`, `parseHashToPath`, `i18n` 등 상태·상호작용이 없는 순수 함수는 직접 호출이 정당하다. `tests/unit/`에 배치.
    - **위배 시**: dispatch를 쓰면 OS Pipeline(listen→resolve→inject→command→project)을 건너뛰어 "vitest에서 통과하지만 브라우저에서 실패"하는 거짓 GREEN이 된다.
 
 ### 앱 테스트 표준 패턴 — TestScript ONE Format
@@ -46,16 +80,16 @@ export const scenarios: TestScenario[] = [
 ```
 
 ```ts
-// __tests__/unit/myapp-interaction.test.ts — OS-level (zone만, app 없음)
+// tests/headless/apps/myapp/myapp-interaction.test.ts — OS-level (zone만, app 없음)
 import { runScenarios } from "@os-devtool/testing/runScenarios";
-import { scenarios } from "../../testbot-myapp";
+import { scenarios } from "@apps/myapp/testbot-myapp";
 runScenarios(scenarios);
 ```
 
 ```ts
-// __tests__/unit/myapp-interaction.test.ts — App-level (React projection 포함)
+// tests/headless/apps/myapp/myapp-interaction.test.ts — App-level (React projection 포함)
 import { runScenarios } from "@os-devtool/testing/runScenarios";
-import { scenarios } from "../../testbot-myapp";
+import { scenarios } from "@apps/myapp/testbot-myapp";
 import { MyApp } from "@apps/myapp/app";
 import { MyView } from "@apps/myapp/MyView";
 runScenarios(scenarios, { app: MyApp, component: MyView });

@@ -13,7 +13,7 @@
  * NOT APG spec — those are OS-guaranteed.
  */
 
-import { type AppPage, createPage } from "@os-devtool/testing/page";
+import { type AppPageInternal, createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, expect, it } from "vitest";
 import { DocsApp, resetDoc } from "../../app";
 
@@ -28,7 +28,7 @@ interface DocsState {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Document Selection", () => {
-  let page: AppPage<DocsState>;
+  let page: AppPageInternal<DocsState>;
 
   beforeEach(() => {
     page = createPage(DocsApp);
@@ -76,7 +76,7 @@ describe("Feature: Document Selection", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Sidebar Navigation", () => {
-  let page: AppPage<DocsState>;
+  let page: AppPageInternal<DocsState>;
 
   beforeEach(() => {
     page = createPage(DocsApp);
@@ -96,7 +96,7 @@ describe("Feature: Sidebar Navigation", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Favorites List", () => {
-  let page: AppPage<DocsState>;
+  let page: AppPageInternal<DocsState>;
 
   beforeEach(() => {
     page = createPage(DocsApp);
@@ -125,7 +125,7 @@ describe("Feature: Favorites List", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Recent List", () => {
-  let page: AppPage<DocsState>;
+  let page: AppPageInternal<DocsState>;
 
   beforeEach(() => {
     page = createPage(DocsApp);
@@ -154,7 +154,7 @@ describe("Feature: Recent List", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Search Overlay", () => {
-  let page: AppPage<DocsState>;
+  let page: AppPageInternal<DocsState>;
 
   beforeEach(() => {
     page = createPage(DocsApp);
@@ -178,7 +178,7 @@ describe("Feature: Search Overlay", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: History Navigation", () => {
-  let page: AppPage<DocsState>;
+  let page: AppPageInternal<DocsState>;
 
   beforeEach(() => {
     page = createPage(DocsApp);
@@ -207,7 +207,7 @@ describe("Feature: History Navigation", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Feature: Section Navigation", () => {
-  let page: AppPage<DocsState>;
+  let page: AppPageInternal<DocsState>;
 
   beforeEach(() => {
     page = createPage(DocsApp);

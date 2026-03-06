@@ -26,17 +26,22 @@
 
 import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
+import { TabsApp } from "@/pages/apg-showcase/patterns/TabsPattern";
 import {
   assertHomeEnd,
   assertHorizontalNav,
   assertLoop,
   assertOrthogonalIgnored,
 } from "./helpers/contracts";
-import { TabsApp } from "@/pages/apg-showcase/patterns/TabsPattern";
 
 // ─── Test Setup (actual showcase config: Danish Composers) ───
 
-const TABS = ["tab-ahlefeldt", "tab-andersen", "tab-fonseca", "tab-lange-muller"];
+const TABS = [
+  "tab-ahlefeldt",
+  "tab-andersen",
+  "tab-fonseca",
+  "tab-lange-muller",
+];
 
 function tabFactory(focusedTab = "tab-ahlefeldt") {
   const page = createPage(TabsApp);
@@ -81,7 +86,10 @@ describe("APG Tabs: Navigation", () => {
     factoryAtLast: tabFactoryAtLast as any,
     factoryAtFirst: tabFactoryAtFirst as any,
   });
-  assertHomeEnd(tabFactory as any, { firstId: "tab-ahlefeldt", lastId: "tab-lange-muller" });
+  assertHomeEnd(tabFactory as any, {
+    firstId: "tab-ahlefeldt",
+    lastId: "tab-lange-muller",
+  });
   // W3C APG: only horizontal arrow keys apply to tablist
   assertOrthogonalIgnored(tabFactory as any, "horizontal");
 });

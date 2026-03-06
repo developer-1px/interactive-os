@@ -12,14 +12,17 @@
 
 import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
-import {
-  CheckboxApp,
-} from "@/pages/apg-showcase/patterns/CheckboxPattern";
+import { CheckboxApp } from "@/pages/apg-showcase/patterns/CheckboxPattern";
 
 // ─── Test Setup (actual showcase config) ───
 
 // Condiment IDs match the showcase exactly
-const CONDIMENT_IDS = ["cond-lettuce", "cond-tomato", "cond-mustard", "cond-sprouts"];
+const CONDIMENT_IDS = [
+  "cond-lettuce",
+  "cond-tomato",
+  "cond-mustard",
+  "cond-sprouts",
+];
 const CHECKBOX_ID = CONDIMENT_IDS[0]; // "cond-lettuce"
 
 function checkboxFactory() {

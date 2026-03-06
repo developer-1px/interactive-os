@@ -214,11 +214,12 @@ export function createCompoundTrigger(
     className?: string;
     onActivate?: BaseCommand;
   }> = ({ children, className, onActivate }) => {
-    const props: import("./6-project/radix/Dialog").DialogCloseProps = {
-      children,
-      ...(className !== undefined ? { className } : {}),
-      ...(onActivate !== undefined ? { onActivate } : {}),
-    };
+    const props: import("@os-react/6-project/widgets/radix/Dialog").DialogCloseProps =
+      {
+        children,
+        ...(className !== undefined ? { className } : {}),
+        ...(onActivate !== undefined ? { onActivate } : {}),
+      };
     return React.createElement(Dialog.Close, props);
   };
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
@@ -228,12 +229,13 @@ export function createCompoundTrigger(
     className?: string;
   }> = ({ children, className }) => {
     const confirmCmd = config.confirm;
-    const props: import("./6-project/radix/Dialog").DialogCloseProps = {
-      children,
-      ...(className !== undefined ? { className } : {}),
-      ...(confirmCmd !== undefined ? { onActivate: confirmCmd } : {}),
-      id: `${overlayId}-confirm`,
-    };
+    const props: import("@os-react/6-project/widgets/radix/Dialog").DialogCloseProps =
+      {
+        children,
+        ...(className !== undefined ? { className } : {}),
+        ...(confirmCmd !== undefined ? { onActivate: confirmCmd } : {}),
+        id: `${overlayId}-confirm`,
+      };
     return React.createElement(Dialog.Close, props);
   };
   ConfirmComponent.displayName = `${appId}.Dialog.Confirm`;

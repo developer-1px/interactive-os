@@ -259,9 +259,7 @@ export function createAppPage<S>(
         ...(opts.expandableItems
           ? { getExpandableItems: () => opts.expandableItems! }
           : {}),
-        ...(opts.treeLevels
-          ? { getTreeLevels: () => opts.treeLevels! }
-          : {}),
+        ...(opts.treeLevels ? { getTreeLevels: () => opts.treeLevels! } : {}),
       });
     }
 
@@ -542,6 +540,8 @@ export function createAppPage<S>(
 }
 
 export type { ItemAttrs };
+export type { AppPage, AppPageInternal } from "@os-sdk/app/defineApp/types";
+export type { OsPage } from "./createOsPage";
 
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
 

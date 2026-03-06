@@ -10,7 +10,7 @@
  * @see docs/1-project/builder-property-schema/BOARD.md
  */
 
-import type { PrimitiveType } from "./6-project";
+import type { PrimitiveType } from "./primitives";
 
 // ═══════════════════════════════════════════════════════════════════
 // Property Definition — a single field in a block schema

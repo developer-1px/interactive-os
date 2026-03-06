@@ -1,19 +1,19 @@
 import { InspectorStore } from "@inspector/stores/InspectorStore";
 import { TestGrid } from "../shared/TestLayout";
-import { ActivateTest } from "./__tests__/ActivateTest";
-import { AriaFacadeTest } from "./__tests__/AriaFacadeTest";
-import { AriaInteractionTest } from "./__tests__/AriaInteractionTest";
-import { AutofocusTest } from "./__tests__/AutofocusTest";
-import { DisabledTest } from "./__tests__/DisabledTest";
-import { DismissTest } from "./__tests__/DismissTest";
-import { ExpandTest } from "./__tests__/ExpandTest";
-import { FocusStackTest } from "./__tests__/FocusStackTest";
-import { NavigateTest } from "./__tests__/NavigateTest";
-import { RadiogroupTest } from "./__tests__/RadiogroupTest";
-import { SelectTest } from "./__tests__/SelectTest";
-import { TablistTest } from "./__tests__/TablistTest";
-import { TabTest } from "./__tests__/TabTest";
-import { TypeaheadTest } from "./__tests__/TypeaheadTest";
+import { ActivateTest } from "./ActivateTest";
+import { AriaFacadeTest } from "./AriaFacadeTest";
+import { AriaInteractionTest } from "./AriaInteractionTest";
+import { AutofocusTest } from "./AutofocusTest";
+import { DisabledTest } from "./DisabledTest";
+import { DismissTest } from "./DismissTest";
+import { ExpandTest } from "./ExpandTest";
+import { FocusStackTest } from "./FocusStackTest";
+import { NavigateTest } from "./NavigateTest";
+import { RadiogroupTest } from "./RadiogroupTest";
+import { SelectTest } from "./SelectTest";
+import { TablistTest } from "./TablistTest";
+import { TabTest } from "./TabTest";
+import { TypeaheadTest } from "./TypeaheadTest";
 
 export function FocusShowcasePage() {
   const runAllTests = () => {

@@ -7,7 +7,7 @@
  * @spec docs/1-project/os-core/collection-crud-showcase/notes/2026-0306-plan-collection-crud.md
  */
 
-import { type AppPage, createPage } from "@os-devtool/testing/page";
+import { type AppPageInternal, createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
 import { history } from "@os-sdk/app/modules/history";
@@ -112,7 +112,7 @@ const ListUI = listCollection.bind({
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Collection Listbox — CRUD via keyboard", () => {
-  let page: AppPage<ListState>;
+  let page: AppPageInternal<ListState>;
 
   beforeEach(() => {
     _resetClipboardStore();
@@ -159,7 +159,7 @@ describe("Collection Listbox — CRUD via keyboard", () => {
 });
 
 describe("Collection Listbox — Clipboard via keyboard", () => {
-  let page: AppPage<ListState>;
+  let page: AppPageInternal<ListState>;
 
   beforeEach(() => {
     _resetClipboardStore();
@@ -200,7 +200,7 @@ describe("Collection Listbox — Clipboard via keyboard", () => {
 });
 
 describe("Collection Listbox — Undo/Redo via keyboard", () => {
-  let page: AppPage<ListState>;
+  let page: AppPageInternal<ListState>;
 
   beforeEach(() => {
     _resetClipboardStore();

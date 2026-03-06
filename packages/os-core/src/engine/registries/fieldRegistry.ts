@@ -1,3 +1,5 @@
+import type { BaseCommand } from "@kernel/core/tokens";
+import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
 import { useSyncExternalStore } from "react";
 import type { ZodSchema } from "zod";
 

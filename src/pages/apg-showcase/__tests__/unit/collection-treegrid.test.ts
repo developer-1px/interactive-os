@@ -13,7 +13,7 @@
  * @spec docs/1-project/os-core/collection-crud-showcase/notes/2026-0306-plan-collection-crud.md
  */
 
-import { type AppPage, createPage } from "@os-devtool/testing/page";
+import { type AppPageInternal, createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { createUndoRedoCommands } from "@os-sdk/app/defineApp/undoRedo";
 import { history } from "@os-sdk/app/modules/history";
@@ -115,7 +115,7 @@ const TreegridUI = tgCollection.bind({
 // ═══════════════════════════════════════════════════════════════════
 
 describe("Collection Treegrid — Root row CRUD via keyboard", () => {
-  let page: AppPage<TreegridState>;
+  let page: AppPageInternal<TreegridState>;
 
   beforeEach(() => {
     _resetClipboardStore();
@@ -140,7 +140,7 @@ describe("Collection Treegrid — Root row CRUD via keyboard", () => {
 });
 
 describe("Collection Treegrid — Nested reply CRUD via keyboard", () => {
-  let page: AppPage<TreegridState>;
+  let page: AppPageInternal<TreegridState>;
 
   beforeEach(() => {
     _resetClipboardStore();
@@ -166,7 +166,7 @@ describe("Collection Treegrid — Nested reply CRUD via keyboard", () => {
 });
 
 describe("Collection Treegrid — Clipboard via keyboard", () => {
-  let page: AppPage<TreegridState>;
+  let page: AppPageInternal<TreegridState>;
 
   beforeEach(() => {
     _resetClipboardStore();
@@ -197,7 +197,7 @@ describe("Collection Treegrid — Clipboard via keyboard", () => {
 });
 
 describe("Collection Treegrid — Undo/Redo via keyboard", () => {
-  let page: AppPage<TreegridState>;
+  let page: AppPageInternal<TreegridState>;
 
   beforeEach(() => {
     _resetClipboardStore();

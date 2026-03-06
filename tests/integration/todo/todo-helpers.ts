@@ -8,12 +8,12 @@
 import { addTodo, startEdit, TodoApp } from "@apps/todo/app";
 import { ListView } from "@apps/todo/widgets/ListView";
 import { createPage } from "@os-devtool/testing/page";
-import type { AppPage } from "@os-sdk/app/defineApp/types";
+import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { afterEach, beforeEach, vi } from "vitest";
 
 type TodoState = ReturnType<typeof TodoApp.create>["state"];
-export type TodoPage = AppPage<TodoState>;
+export type TodoPage = AppPageInternal<TodoState>;
 
 export let page: TodoPage;
 let now = 1000;

@@ -41,7 +41,10 @@ const PIZZA_DELIVERY: RadioOption[] = [
 
 // ─── Apps + Zones ───
 
-export const CrustApp = defineApp<Record<string, never>>("apg-radiogroup-crust", {});
+export const CrustApp = defineApp<Record<string, never>>(
+  "apg-radiogroup-crust",
+  {},
+);
 const crustZone = CrustApp.createZone("radiogroup-crust");
 const CrustUI = crustZone.bind({ role: "radiogroup" });
 

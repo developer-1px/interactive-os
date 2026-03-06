@@ -126,7 +126,7 @@ export function defineApp<S>(
   const zoneBindingEntries = new Map<
     string,
     {
-      role: import("./registries/roleRegistry").ZoneRole;
+      role: import("@os-core/engine/registries/roleRegistry").ZoneRole;
       bindings: ZoneBindings;
       keybindings?: import("./types").KeybindingEntry<S>[];
       field?: import("./types").FieldBindings;

@@ -25,7 +25,7 @@ import {
   OS_FIELD_START_EDIT,
   OS_FOCUS,
 } from "@os-sdk/os";
-import type { BuilderLevel } from "../6-project/Builder";
+import type { BuilderLevel } from "../primitives/Builder";
 
 // ═══════════════════════════════════════════════════════════════════
 // Level Hierarchy

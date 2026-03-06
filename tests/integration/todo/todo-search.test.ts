@@ -9,9 +9,9 @@
  * (the step that would be automatic in DOM) and keyboard for cancel.
  */
 
-import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
+import { clearSearch, setSearchQuery } from "@apps/todo/app";
 import { selectVisibleTodos } from "@apps/todo/selectors";
-import { setSearchQuery, clearSearch } from "@apps/todo/app";
+import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import { describe, expect, it } from "vitest";
 import { addTodos, gotoSearch, page, setupTodoPage } from "./todo-helpers";
 

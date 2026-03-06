@@ -3,7 +3,7 @@ import { Item } from "@os-react/6-project/Item.tsx";
 import { Trigger } from "@os-react/6-project/Trigger.tsx";
 import { Zone } from "@os-react/6-project/Zone.tsx";
 import { useState } from "react";
-import { TestBox } from "../../shared/TestLayout";
+import { TestBox } from "../shared/TestLayout";
 
 export function AriaInteractionTest() {
   const [actionCount, setActionCount] = useState(0);

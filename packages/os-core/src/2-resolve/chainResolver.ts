@@ -20,6 +20,8 @@
  * @see design-principles.md #23, #24, #25
  */
 
+import type { BaseCommand } from "@kernel/core/tokens";
+
 // ═══════════════════════════════════════════════════════════════════
 // NOOP — chain stopper with no action
 // ═══════════════════════════════════════════════════════════════════

@@ -12,13 +12,13 @@
 
 import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
+import { TreeApp } from "@/pages/apg-showcase/patterns/TreePattern";
 import {
   assertBoundaryClamp,
   assertHomeEnd,
   assertNoSelection,
   assertVerticalNav,
 } from "./helpers/contracts";
-import { TreeApp } from "@/pages/apg-showcase/patterns/TreePattern";
 
 // ─── Test Data (showcase uses multi-select tree with expand) ───
 

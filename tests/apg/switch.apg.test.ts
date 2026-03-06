@@ -16,8 +16,8 @@
 import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
-  SwitchApp,
   SWITCHES,
+  SwitchApp,
 } from "@/pages/apg-showcase/patterns/SwitchPattern";
 
 // ─── Test Setup (actual showcase config) ───
