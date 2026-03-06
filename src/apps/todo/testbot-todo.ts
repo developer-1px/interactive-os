@@ -156,12 +156,13 @@ export const scenarios: TestScenario[] = [
     items: LIST_ITEMS,
     role: "listbox",
     config: {
-      dismiss: { escape: "deselect" },
+      dismiss: { escape: "deselect", outsideClick: "none" },
       select: {
         mode: "multiple",
         range: true,
         toggle: true,
         followFocus: false,
+        disallowEmpty: false,
       },
       inputmap: { Space: [OS_CHECK()] },
     },
@@ -172,7 +173,7 @@ export const scenarios: TestScenario[] = [
     items: SIDEBAR_ITEMS,
     role: "listbox",
     config: {
-      select: { followFocus: true },
+      select: { mode: "single", followFocus: true, disallowEmpty: false, range: false, toggle: false },
     },
     scripts: sidebarScripts,
   },

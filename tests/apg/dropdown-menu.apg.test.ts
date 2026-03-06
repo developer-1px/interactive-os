@@ -53,9 +53,10 @@ const MENU_CONFIG = {
 function openDropdown(focusedItem = "ko") {
   const app = defineApp("test-dropdown", {});
   const toolbar = app.createZone("toolbar");
-  toolbar.bind({ getItems: () => ["locale-trigger"] });
+  toolbar.bind({ role: "toolbar", getItems: () => ["locale-trigger"] });
   const menu = app.createZone("locale-menu");
   menu.bind({
+    role: "menu",
     getItems: () => LOCALE_ITEMS,
     options: MENU_CONFIG,
   });

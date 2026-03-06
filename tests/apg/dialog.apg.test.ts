@@ -44,6 +44,7 @@ function createDialog(focusedItem = "close-btn") {
   const app = defineApp("test-dialog", {});
   const zone = app.createZone("dialog");
   zone.bind({
+    role: "list",
     getItems: () => DIALOG_ITEMS,
     options: DIALOG_CONFIG,
   });
@@ -91,9 +92,9 @@ describe("APG Dialog: Focus Restore", () => {
   it("on close, focus restores to invoker", () => {
     const app = defineApp("test-dialog-restore", {});
     const toolbar = app.createZone("toolbar");
-    toolbar.bind({ getItems: () => ["new-btn", "edit-btn", "delete-btn"] });
+    toolbar.bind({ role: "toolbar", getItems: () => ["new-btn", "edit-btn", "delete-btn"] });
     const dialog = app.createZone("dialog");
-    dialog.bind({ getItems: () => DIALOG_ITEMS, options: DIALOG_CONFIG });
+    dialog.bind({ role: "list", getItems: () => DIALOG_ITEMS, options: DIALOG_CONFIG });
     const page = createPage(app);
     page.goto("toolbar", { focusedItemId: "edit-btn" });
     page.dispatch(OS_STACK_PUSH());
@@ -107,11 +108,11 @@ describe("APG Dialog: Focus Restore", () => {
   it("nested dialogs: LIFO focus restore", () => {
     const app = defineApp("test-dialog-nested", {});
     const toolbar = app.createZone("toolbar");
-    toolbar.bind({ getItems: () => ["btn-1"] });
+    toolbar.bind({ role: "toolbar", getItems: () => ["btn-1"] });
     const d1 = app.createZone("dialog-1");
-    d1.bind({ getItems: () => ["d1-close", "d1-ok"] });
+    d1.bind({ role: "list", getItems: () => ["d1-close", "d1-ok"] });
     const d2 = app.createZone("dialog-2");
-    d2.bind({ getItems: () => ["d2-yes", "d2-no"] });
+    d2.bind({ role: "list", getItems: () => ["d2-yes", "d2-no"] });
     const page = createPage(app);
     page.goto("toolbar", { focusedItemId: "btn-1" });
     page.dispatch(OS_STACK_PUSH());

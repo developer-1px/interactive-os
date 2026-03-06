@@ -58,7 +58,7 @@ function actionButtonFactory() {
     getItems: () => [ACTION_BUTTON_ID],
     onAction: () => {
       actionFired = true;
-      return undefined;
+      return [];
     },
     options: {
       inputmap: {

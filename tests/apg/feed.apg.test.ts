@@ -131,7 +131,7 @@ describe("APG Feed: Control+End / Control+Home (exit feed)", () => {
   function feedWithZoneOrder(focusedItem = "article-2") {
     const app = defineApp("test-feed-zones", {});
     const before = app.createZone("before-feed");
-    before.bind({ getItems: () => ["before-1"] });
+    before.bind({ role: "list", getItems: () => ["before-1"] });
     const feed = app.createZone("apg-feed");
     feed.bind({
       role: "feed",
@@ -149,7 +149,7 @@ describe("APG Feed: Control+End / Control+Home (exit feed)", () => {
       },
     });
     const after = app.createZone("after-feed");
-    after.bind({ getItems: () => ["after-1"] });
+    after.bind({ role: "list", getItems: () => ["after-1"] });
     const page = createPage(app);
     // Register all zones in order
     page.goto("before-feed", { focusedItemId: "before-1" });
@@ -226,7 +226,7 @@ describe("APG Feed: Tab exits zone", () => {
       },
     });
     const next = app.createZone("next-zone");
-    next.bind({ getItems: () => ["next-1"] });
+    next.bind({ role: "list", getItems: () => ["next-1"] });
     const page = createPage(app);
     page.goto("apg-feed", { focusedItemId: "article-2" });
     page.goto("next-zone", { focusedItemId: "next-1" });

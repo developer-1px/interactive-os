@@ -53,9 +53,10 @@ const POPUP_CONFIG = {
 function createComboboxPopup(focusedItem = "apple") {
   const app = defineApp("test-combobox", {});
   const combobox = app.createZone("combobox");
-  combobox.bind({ getItems: () => ["input-field"] });
+  combobox.bind({ role: "listbox", getItems: () => ["input-field"] });
   const popup = app.createZone("popup");
   popup.bind({
+    role: "listbox",
     getItems: () => POPUP_ITEMS,
     options: POPUP_CONFIG,
   });

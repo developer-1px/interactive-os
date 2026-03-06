@@ -50,6 +50,7 @@ function createToolbar(focusedItem = "bold-btn") {
   const app = defineApp("test-toolbar", {});
   const zone = app.createZone("toolbar");
   zone.bind({
+    role: "toolbar",
     getItems: () => TOOLBAR_ITEMS,
     options: TOOLBAR_CONFIG,
   });
@@ -88,11 +89,13 @@ describe("APG Toolbar: Tab Escape", () => {
     const app = defineApp("test-toolbar-escape", {});
     const toolbar = app.createZone("toolbar");
     toolbar.bind({
+      role: "toolbar",
       getItems: () => TOOLBAR_ITEMS,
       options: TOOLBAR_CONFIG,
     });
     const editor = app.createZone("editor");
     editor.bind({
+      role: "list",
       getItems: () => [
         "line-1",
         "line-2",
@@ -129,6 +132,7 @@ describe("APG Toolbar: Tabs Variant", () => {
     const app = defineApp("test-toolbar-tabs", {});
     const zone = app.createZone("tablist");
     zone.bind({
+      role: "toolbar",
       getItems: () => TAB_ITEMS,
       options: {
         ...TOOLBAR_CONFIG,
