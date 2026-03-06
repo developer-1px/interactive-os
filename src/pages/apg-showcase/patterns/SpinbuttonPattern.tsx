@@ -11,6 +11,7 @@
 
 import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
+import { useCallback, useEffect, useState } from "react";
 
 // ─── Spinbutton Data ───
 
@@ -85,9 +86,32 @@ const SpinUI = spinbuttonZone.bind({
   },
 });
 
+// ─── Value Sync (defers setState to after render) ───
+
+function ValueSync({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: number;
+  onChange: (id: string, value: number) => void;
+}) {
+  useEffect(() => {
+    onChange(id, value);
+  }, [id, value, onChange]);
+  return null;
+}
+
 // ─── Individual Spinbutton Row ───
 
-function SpinbuttonRow({ spinner }: { spinner: SpinbuttonDef }) {
+function SpinbuttonRow({
+  spinner,
+  onValueChange,
+}: {
+  spinner: SpinbuttonDef;
+  onValueChange: (id: string, value: number) => void;
+}) {
   return (
     <div className="flex items-center gap-4 px-4 py-3">
       {/* Label */}
@@ -113,9 +137,16 @@ function SpinbuttonRow({ spinner }: { spinner: SpinbuttonDef }) {
             : `${value}`;
 
           return (
-            <span className="text-lg font-mono font-semibold text-gray-800 w-16 text-center tabular-nums">
-              {display}
-            </span>
+            <>
+              <ValueSync
+                id={spinner.id}
+                value={value}
+                onChange={onValueChange}
+              />
+              <span className="text-lg font-mono font-semibold text-gray-800 w-16 text-center tabular-nums">
+                {display}
+              </span>
+            </>
           );
         }}
       </SpinUI.Item>
@@ -128,18 +159,17 @@ function SpinbuttonRow({ spinner }: { spinner: SpinbuttonDef }) {
 
 // ─── Summary Display ───
 
-function MeetingSummary() {
-  const values = os.useComputed((s) => {
-    const z = s.os.focus.zones["apg-spinbutton-zone"];
-    return {
-      hours: z?.valueNow?.["spin-hours"] ?? 9,
-      minutes: z?.valueNow?.["spin-minutes"] ?? 30,
-      duration: z?.valueNow?.["spin-duration"] ?? 60,
-    };
-  });
-
-  const startTime = `${values.hours.toString().padStart(2, "0")}:${values.minutes.toString().padStart(2, "0")}`;
-  const endMinutes = values.hours * 60 + values.minutes + values.duration;
+function MeetingSummary({
+  hours,
+  minutes,
+  duration,
+}: {
+  hours: number;
+  minutes: number;
+  duration: number;
+}) {
+  const startTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  const endMinutes = hours * 60 + minutes + duration;
   const endH = Math.floor(endMinutes / 60) % 24;
   const endM = endMinutes % 60;
   const endTime = `${endH.toString().padStart(2, "0")}:${endM.toString().padStart(2, "0")}`;
@@ -166,9 +196,9 @@ function MeetingSummary() {
           {startTime} - {endTime}
         </div>
         <div className="text-xs text-indigo-500">
-          {values.duration >= 60
-            ? `${Math.floor(values.duration / 60)}h${values.duration % 60 > 0 ? ` ${values.duration % 60}m` : ""}`
-            : `${values.duration} min`}{" "}
+          {duration >= 60
+            ? `${Math.floor(duration / 60)}h${duration % 60 > 0 ? ` ${duration % 60}m` : ""}`
+            : `${duration} min`}{" "}
           meeting
         </div>
       </div>
@@ -179,6 +209,19 @@ function MeetingSummary() {
 // ─── Main Component ───
 
 export function SpinbuttonPattern() {
+  const [values, setValues] = useState({
+    "spin-hours": 9,
+    "spin-minutes": 30,
+    "spin-duration": 60,
+  });
+
+  const handleValueChange = useCallback((id: string, value: number) => {
+    setValues((prev) => {
+      if (prev[id as keyof typeof prev] === value) return prev;
+      return { ...prev, [id]: value };
+    });
+  }, []);
+
   return (
     <div className="max-w-md">
       <h3 className="text-lg font-semibold mb-3">Spinbutton — Day Planner</h3>
@@ -206,8 +249,12 @@ export function SpinbuttonPattern() {
       </p>
 
       <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4">
-        {/* Meeting summary */}
-        <MeetingSummary />
+        {/* Meeting summary — reads from React state, not OS kernel */}
+        <MeetingSummary
+          hours={values["spin-hours"]}
+          minutes={values["spin-minutes"]}
+          duration={values["spin-duration"]}
+        />
 
         {/* Spinbuttons */}
         <SpinUI.Zone
@@ -215,7 +262,11 @@ export function SpinbuttonPattern() {
           aria-label="Meeting Time Spinbuttons"
         >
           {SPINBUTTONS.map((spinner) => (
-            <SpinbuttonRow key={spinner.id} spinner={spinner} />
+            <SpinbuttonRow
+              key={spinner.id}
+              spinner={spinner}
+              onValueChange={handleValueChange}
+            />
           ))}
         </SpinUI.Zone>
 
