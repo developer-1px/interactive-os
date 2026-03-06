@@ -6,16 +6,13 @@
  * Verifies:
  * 1. Role presets produce correct inputmap (Key → Command[])
  * 2. FocusGroupConfig no longer has action/activate fields
- * 3. inputmap-based keyboard routing works end-to-end
- * 4. inputmap-based click routing works end-to-end
+ *
+ * T11/T12 (keyboard/click routing e2e) deleted — covered by APG tests
+ * (checkbox.apg, accordion.apg, switch.apg)
  */
 
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
-import { createOsPage } from "@os-devtool/testing/page";
-import { afterEach, describe, expect, it } from "vitest";
-
-const page = createOsPage();
-afterEach(() => page.cleanup());
+import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // T9: FocusGroupConfig shape — inputmap exists, action/activate removed
@@ -137,80 +134,6 @@ describe("T10: Role presets produce correct inputmap", () => {
   it("dialog: inputmap is empty (no action commands)", () => {
     const config = resolveRole("dialog");
     expect(config.inputmap).toEqual({});
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// T11: Keyboard routing via inputmap (end-to-end)
-// ═══════════════════════════════════════════════════════════════════
-
-describe("T11: inputmap keyboard routing", () => {
-  it("checkbox: Space toggles aria-checked via inputmap", () => {
-    page.goto("cb-zone", {
-      items: ["cb-1"],
-      role: "checkbox",
-      focusedItemId: "cb-1",
-    });
-
-    expect(page.attrs("cb-1")["aria-checked"]).toBe(false);
-    page.keyboard.press("Space");
-    expect(page.attrs("cb-1")["aria-checked"]).toBe(true);
-    page.keyboard.press("Space");
-    expect(page.attrs("cb-1")["aria-checked"]).toBe(false);
-  });
-
-  it("accordion: Enter toggles aria-expanded via inputmap", () => {
-    page.goto("acc-zone", {
-      items: ["acc-1", "acc-2"],
-      role: "accordion",
-      focusedItemId: "acc-1",
-    });
-
-    expect(page.attrs("acc-1")["aria-expanded"]).toBe(false);
-    page.keyboard.press("Enter");
-    expect(page.attrs("acc-1")["aria-expanded"]).toBe(true);
-  });
-
-  it("switch: Enter toggles aria-checked via inputmap (Enter in inputmap)", () => {
-    page.goto("sw-zone", {
-      items: ["sw-1"],
-      role: "switch",
-      focusedItemId: "sw-1",
-    });
-
-    expect(page.attrs("sw-1")["aria-checked"]).toBe(false);
-    page.keyboard.press("Enter");
-    expect(page.attrs("sw-1")["aria-checked"]).toBe(true);
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// T12: Click routing via inputmap
-// ═══════════════════════════════════════════════════════════════════
-
-describe("T12: inputmap click routing", () => {
-  it("checkbox: click toggles aria-checked via inputmap['click']", () => {
-    page.goto("cb-zone-2", {
-      items: ["cb-2"],
-      role: "checkbox",
-      focusedItemId: "cb-2",
-    });
-
-    expect(page.attrs("cb-2")["aria-checked"]).toBe(false);
-    page.click("cb-2");
-    expect(page.attrs("cb-2")["aria-checked"]).toBe(true);
-  });
-
-  it("accordion: click toggles aria-expanded via inputmap['click']", () => {
-    page.goto("acc-zone-2", {
-      items: ["acc-3", "acc-4"],
-      role: "accordion",
-      focusedItemId: "acc-3",
-    });
-
-    expect(page.attrs("acc-3")["aria-expanded"]).toBe(false);
-    page.click("acc-3");
-    expect(page.attrs("acc-3")["aria-expanded"]).toBe(true);
   });
 });
 

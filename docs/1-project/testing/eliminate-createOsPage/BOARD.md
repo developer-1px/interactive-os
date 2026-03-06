@@ -18,12 +18,15 @@
 - [x] #7 tests/apg/ — os-guarantee 삭제(-15 tests), 6 value-based APG는 Later 이동(OS core 미지원) | 166 files 1739 tests ✅
 - [x] #8 tests/integration/builder/ — Later 이동. builderBlock headless 미지원(OS gap)으로 마이그레이션 불가
 - [x] #9 tests/integration/docs+todo 삭제 — 4파일(-21 tests). testbot/APG 테스트가 커버 | 162 files 1718 tests ✅
-- [ ] #10 tests/script+e2e 마이그레이션 (5파일)
+- [x] #10 tests/script+e2e — 4파일 삭제(-17 tests, PoC/createOsPage전용), 2파일 Later 이동 | 158 files 1701 tests ✅
 
-## Next
+## Later
 
-- [ ] #11 createOsPage.ts 삭제
-- [ ] #12 page.ts export 정리
+- [ ] #11 value-based APG 테스트 마이그레이션 (meter, slider, spinbutton, grid, window-splitter, slider-multithumb) — OS core value-based 패턴 API 지원 후
+- [ ] #12 builder 통합 테스트 마이그레이션 (3파일) — builderBlock headless 지원 후
+- [ ] #13 format-diagnostics + stale-focus-recovery 마이그레이션 (2파일) — createOsPage setup 대체 필요
+- [ ] #14 createOsPage.ts 삭제 — #11~#13 완료 후
+- [ ] #15 page.ts export 정리
 
 ## Dropped
 
