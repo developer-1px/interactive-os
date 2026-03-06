@@ -50,13 +50,6 @@ import type {
 
 import { formatDiagnostics } from "./diagnostics";
 
-export {
-  createOsPage,
-  type GotoOptions,
-  type OsLocator,
-  type OsPage,
-  type ZoneOrderEntry,
-} from "./createOsPage";
 export { formatDiagnostics } from "./diagnostics";
 
 import type { ZoneOrderEntry } from "./createOsPage";

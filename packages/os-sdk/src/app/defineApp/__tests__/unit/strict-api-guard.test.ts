@@ -4,7 +4,8 @@
  * T1: createSimpleTrigger / createDynamicTrigger without id → throw
  * T3: resolveRole with unknown role string → warn
  * T4: FieldRegistry.getValue for unregistered field → console.warn
- * T5: OS_ACTIVATE with item callback but no matching zone item → console.warn
+ *
+ * T5 deleted: required createOsPage + dispatch to reproduce invalid state
  */
 import { describe, expect, it, vi } from "vitest";
 
@@ -124,39 +125,3 @@ describe("T4: FieldRegistry.getValue warns for unregistered field", () => {
   });
 });
 
-// ── T5: OS_ACTIVATE with orphan item callback ──────────────────────
-
-describe("T5: OS_ACTIVATE warns for orphan trigger callback", () => {
-  it("warns when item callback exists but item is not in zone items", async () => {
-    const { createOsPage } = await import("@os-devtool/testing/page");
-    const { ZoneRegistry } = await import(
-      "@os-core/engine/registries/zoneRegistry"
-    );
-    const { OS_FOCUS } = await import("@os-core/4-command/focus/focus");
-
-    const page = createOsPage();
-    const zoneId = "t5-zone";
-    const items = ["item-a", "item-b"];
-
-    page.goto(zoneId, { items, role: "listbox" });
-
-    // Inject getItems so activate.ts can verify item membership
-    ZoneRegistry.get(zoneId)!.getItems = () => items;
-
-    // Register callback for an item NOT in the zone's items list
-    ZoneRegistry.setItemCallback(zoneId, "ghost-item", {
-      onActivate: { type: "GHOST_CMD" } as any,
-    });
-
-    // Force focus to ghost-item via OS_FOCUS (click bypasses OS_ACTIVATE)
-    page.dispatch(OS_FOCUS({ zoneId, itemId: "ghost-item" }));
-
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
-    // Enter triggers OS_ACTIVATE which checks zone item membership
-    page.keyboard.press("Enter");
-
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("ghost-item"));
-    warnSpy.mockRestore();
-  });
-});

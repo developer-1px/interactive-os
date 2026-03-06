@@ -14,7 +14,7 @@
  * (goto, setItems, etc.) for test setup.
  */
 
-import { createOsPage, type GotoOptions } from "./page";
+import { createOsPage, type GotoOptions, type OsPage } from "./createOsPage";
 import type { Locator, LocatorAssertions, Page } from "./types";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -168,6 +168,9 @@ export function createHeadlessPage(): HeadlessPage {
     keyboard: {
       async press(key: string) {
         osPage.keyboard.press(key);
+      },
+      async type(text: string) {
+        osPage.keyboard.type?.(text);
       },
     },
 
