@@ -14,7 +14,7 @@
  * (goto, setItems, etc.) for test setup.
  */
 
-import { createOsPage, type GotoOptions, type OsPage } from "./page";
+import { createOsPage, type GotoOptions } from "./page";
 import type { Locator, LocatorAssertions, Page } from "./types";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -177,8 +177,6 @@ export interface HeadlessPage extends Page {
   goto(zoneId: string, opts?: GotoOptions): void;
   /** Cleanup test resources */
   cleanup(): void;
-  /** Access underlying OsPage for OS-specific helpers */
-  readonly os: OsPage;
 }
 
 export function createHeadlessPage(): HeadlessPage {
@@ -204,10 +202,6 @@ export function createHeadlessPage(): HeadlessPage {
 
     cleanup() {
       osPage.cleanup();
-    },
-
-    get os() {
-      return osPage;
     },
   };
 }

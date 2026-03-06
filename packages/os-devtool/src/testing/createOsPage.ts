@@ -57,6 +57,12 @@ export interface GotoOptions {
     onAction?: ZoneCallback;
     onCheck?: ZoneCallback;
     onDelete?: ZoneCallback;
+    /** Tree hierarchy levels — keys are item IDs, values are depth (1-based) */
+    treeLevels?: Record<string, number>;
+    /** Items that can be expanded (tree nodes with children) */
+    expandableItems?: string[];
+    /** Custom DOMRect positions for items (for spatial navigation tests) */
+    rects?: Map<string, DOMRect>;
     /** Declarative initial state — applied at ZoneState creation, no command needed. */
     initial?: { selection?: string[]; expanded?: string[]; values?: Record<string, number> };
 }
@@ -534,7 +540,20 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
                     }
                     : {}),
                 ...(opts?.onAction ? { onAction: opts.onAction } : {}),
+                ...(opts?.onCheck ? { onCheck: opts.onCheck } : {}),
+                ...(opts?.onDelete ? { onDelete: opts.onDelete } : {}),
+                ...(opts?.treeLevels
+                    ? { getTreeLevels: () => new Map(Object.entries(opts.treeLevels!).map(([k, v]) => [k, v])) }
+                    : {}),
+                ...(opts?.expandableItems
+                    ? { getExpandableItems: () => new Set(opts.expandableItems!) }
+                    : {}),
             }); // Closing brace for ZoneRegistry.register
+
+            // Apply custom rects if provided
+            if (opts?.rects) {
+                mockRects.current = opts.rects;
+            }
 
             const focusedId =
                 opts?.focusedItemId !== undefined

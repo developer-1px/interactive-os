@@ -93,8 +93,8 @@ describe("APG Tree View", () => {
       items: ["node-1", "child-1", "leaf-1"],
       focusedItemId: "node-1",
       initial: { expanded: ["node-1"] },
+      treeLevels: { "node-1": 1, "child-1": 2, "leaf-1": 2 },
     });
-    page.os.setTreeLevels({ "node-1": 1, "child-1": 2, "leaf-1": 2 });
     await page.keyboard.press("ArrowRight");
     await page.locator("#child-1").toBeFocused();
   });

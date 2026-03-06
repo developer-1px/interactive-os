@@ -30,9 +30,8 @@ describe("T2: NAVIGATE chain (input-based)", () => {
         items: ["node-1", "child-1", "leaf-1"],
         focusedItemId: "node-1",
         initial: { expanded: ["node-1"] },
+        treeLevels: { "node-1": 1, "child-1": 2, "leaf-1": 2 },
       });
-      // Tree hierarchy is domain data — app supplies levels
-      page.os.setTreeLevels({ "node-1": 1, "child-1": 2, "leaf-1": 2 });
 
       await page.keyboard.press("ArrowRight");
       await page.locator("#child-1").toBeFocused();

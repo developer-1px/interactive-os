@@ -45,26 +45,29 @@ describe("ARIA Grid", () => {
   });
 
   function setupGrid(focusedCell = "r0c0") {
-    page.os.setItems(allCellIds());
-    page.os.setRects(gridRects());
-    page.os.setConfig({
-      navigate: {
-        orientation: "both" as const,
-        loop: false,
-        seamless: false,
-        typeahead: false,
-        entry: "first" as const,
-        recovery: "next" as const,
-      },
-      select: {
-        mode: "single" as const,
-        followFocus: true,
-        disallowEmpty: false,
-        range: false,
-        toggle: false,
+    page.goto("grid", {
+      role: "grid",
+      items: allCellIds(),
+      rects: gridRects(),
+      focusedItemId: focusedCell,
+      config: {
+        navigate: {
+          orientation: "both" as const,
+          loop: false,
+          seamless: false,
+          typeahead: false,
+          entry: "first" as const,
+          recovery: "next" as const,
+        },
+        select: {
+          mode: "single" as const,
+          followFocus: true,
+          disallowEmpty: false,
+          range: false,
+          toggle: false,
+        },
       },
     });
-    page.os.setActiveZone("grid", focusedCell);
   }
 
   // ═══════════════════════════════════════════════════
