@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-07T02:00
+> Last updated: 2026-03-07T08:35
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.

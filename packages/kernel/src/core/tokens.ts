@@ -66,7 +66,13 @@ export interface BaseCommand {
 /** Factory function that creates a typed Command. */
 export type CommandFactory<Type extends string = string, Payload = void> = {
   /** Creates a typed Command object. */
-  (payload: Payload): Command<Type, Payload>;
+  (
+    ...args: [Payload] extends [void]
+      ? []
+      : Partial<Payload & {}> extends Payload
+        ? [payload?: Payload]
+        : [payload: Payload]
+  ): Command<Type, Payload>;
   /** The command type string (for debugging/inspection). */
   readonly commandType: Type;
   /** Alias for commandType — matches FieldCommandFactory interface. */

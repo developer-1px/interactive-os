@@ -62,7 +62,7 @@ interface OverlayClosePayload {
 
 export const OS_OVERLAY_CLOSE = os.defineCommand(
   "OS_OVERLAY_CLOSE",
-  (ctx) => (payload?: OverlayClosePayload) => {
+  (ctx) => (payload: OverlayClosePayload) => {
     const { stack } = ctx.state.os.overlays;
 
     if (stack.length === 0) return;

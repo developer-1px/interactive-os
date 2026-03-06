@@ -16,21 +16,14 @@ import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import type { FocusGroupConfig } from "@os-core/schema/types/focus/config/FocusGroupConfig";
 
 import { expect as defaultExpect } from "./expect";
-import type { Page } from "./types";
+import type { Locator, LocatorAssertions, Page } from "./types";
 
 // ═══════════════════════════════════════════════════════════════════
 // Script type — each test suite is a named script
 // ═══════════════════════════════════════════════════════════════════
 
 /** Minimal expect interface — compatible with both our wrapper and Playwright's */
-export type ExpectLocator = (locator: unknown) => {
-  toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
-  toBeFocused(): Promise<void>;
-  not: {
-    toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
-    toBeFocused(): Promise<void>;
-  };
-};
+export type ExpectLocator = (locator: Locator) => LocatorAssertions;
 
 export interface TestScript {
   name: string;

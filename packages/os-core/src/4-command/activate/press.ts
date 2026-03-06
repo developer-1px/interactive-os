@@ -26,7 +26,7 @@ interface PressPayload {
 export const OS_PRESS = os.defineCommand(
   "OS_PRESS",
   [ZONE_CONFIG],
-  (ctx) => (payload?: PressPayload) => {
+  (ctx) => (payload: PressPayload) => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) return;
 
