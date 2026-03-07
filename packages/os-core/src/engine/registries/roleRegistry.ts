@@ -249,7 +249,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   toolbar: {
     navigate: { orientation: "horizontal", loop: true, entry: "restore" },
     select: { mode: "none" },
-    inputmap: { Space: [OS_ACTIVATE()], Enter: [OS_ACTIVATE()] },
+    inputmap: { Space: [OS_ACTIVATE()], Enter: [OS_ACTIVATE()], click: [OS_ACTIVATE()] },
     tab: { behavior: "escape" },
   },
 

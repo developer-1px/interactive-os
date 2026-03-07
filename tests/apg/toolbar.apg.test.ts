@@ -14,7 +14,7 @@
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   assertHomeEnd,
   assertHorizontalNav,
@@ -83,6 +83,25 @@ describe("APG Toolbar: Navigation", () => {
 // ═══════════════════════════════════════════════════
 // Unique: Tab Escape (pressKey)
 // ═══════════════════════════════════════════════════
+
+describe("APG Toolbar: Click Activate", () => {
+  it("click on toolbar item triggers onAction", () => {
+    const actionSpy = vi.fn();
+    const app = defineApp("test-toolbar-click", {});
+    const zone = app.createZone("toolbar");
+    zone.bind({
+      role: "toolbar",
+      getItems: () => TOOLBAR_ITEMS,
+      options: TOOLBAR_CONFIG,
+      onAction: actionSpy,
+    });
+    const page = createHeadlessPage(app);
+    page.setupZone("toolbar", { focusedItemId: "bold-btn" });
+
+    page.click("bold-btn");
+    expect(actionSpy).toHaveBeenCalled();
+  });
+});
 
 describe("APG Toolbar: Tab Escape", () => {
   it("Tab: moves focus out to next zone", () => {
