@@ -78,7 +78,7 @@ const PATTERNS: Record<
   tabs: { name: "Tabs", component: TabsPattern, status: "dt" },
   toolbar: { name: "Toolbar", component: ToolbarPattern, status: "dt" },
   tooltip: { name: "Tooltip", component: TooltipPattern, status: "dt" },
-  tree: { name: "Tree", component: TreePattern, status: "test" },
+  tree: { name: "Tree", component: TreePattern, status: "dt" },
   treegrid: { name: "Treegrid", component: TreegridPattern, status: "test" },
   "window-splitter": {
     name: "Window Splitter",
