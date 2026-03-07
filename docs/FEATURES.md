@@ -23,9 +23,9 @@
 
 | Category | Browser API | Zone | Item | Field | Trigger | Pattern (ZIFT 밖의 새 차원) |
 |---|---|---|---|---|---|---|
-| **Conquered** | KeyboardEvent | inputmap ✅ | navigation ✅ | editing ✅ | activation ✅ | |
-| | PointerEvent | zone activation ✅ | — | — | click ✅ | |
-| | FocusEvent | active zone ✅ | focus tracking ✅ | — | — | |
+| **Conquered** | KeyboardEvent | inputmap ✅ | navigation ✅ | editing 🔧 ^OG-013 | activation ✅ | |
+| | PointerEvent | zone activation ✅ | hover 📋 | — | click ✅ | |
+| | FocusEvent | active zone 🔧 ^OG-018 | focus tracking ✅ | — | — | |
 | | element.focus() / tabIndex | tab order ✅ | focus sync ✅ | — | — | |
 | | scrollIntoView | — | scroll to focused ✅ | — | — | |
 | | aria-* / role | zone ARIA ✅ | item ARIA ✅ | field ARIA ✅ | — | |
@@ -33,11 +33,11 @@
 | | InputEvent | — | — | value change ✅ | — | |
 | | CompositionEvent | — | — | IME guard ✅ | — | |
 | **Discovered** | ClipboardEvent | paste bubbling ✅ | copied items ✅ | — | Ctrl+C/V ✅ | **Clipboard** (transfer buffer) ✅ |
-| | `<dialog>` / Popover API | overlay zone ✅ | — | — | — | **Overlay** (focus trap, stack, dismiss) ✅ |
+| | `<dialog>` / Popover API | overlay zone 🔧 ^OG-016 | — | — | — | **Overlay** (stack ✅, dismiss 🔧 ^OG-015, trap 🔧 ^OG-016) |
 | | History API / popstate | — | — | — | — | **Routing** (URL ↔ state sync) 🔧 |
 | | localStorage | — | — | — | — | **Persistence** (state ↔ storage sync) ✅ |
-| | *(OS-native)* | — | — | cancel ✅ | — | **History** (undo stack, noise filter) ✅ |
-| **Frontier** | DragEvent | source/target 📋 | dragged item 📋 | — | drag handle 📋 | **DnD** (drop position, visual feedback) 📋 |
+| | *(OS-native)* | — | — | cancel ✅ | — | **History** (undo stack ✅, noise filter ✅) |
+| **Frontier** | DragEvent | source/target 📋 | dragged item 📋 | — | drag handle 📋 | **DnD** (keyboard reorder ✅, visual DnD 📋) |
 | | TouchEvent | touch zone 📋 | — | — | tap/swipe 📋 | **Gesture** (recognition, multi-touch) 📋 |
 | | WheelEvent | scroll zone 📋 | visible item 📋 | — | — | **Viewport** (virtual list, scroll position) 📋 |
 | | scroll / scrollIntoView | scroll zone 📋 | visible item 📋 | — | — | **Viewport** 📋 |
@@ -48,9 +48,9 @@
 | | Selection API | — | — | text range 📋 | — | **TextRange** (text ≠ item selection) 📋 |
 | | Web Audio | — | — | — | — | **Sound** (auditory feedback) 📋 |
 
-**Conquered** 9종 — ZIFT만으로 완전히 추상화됨 (입력 5 + 출력 4)
-**Discovered** 5종 — ZIFT를 관통하며 새 Pattern 차원을 추가
-**Frontier** 10종 — 8개 미발견 개념이 잠들어 있음
+**Conquered** 9종 — ZIFT만으로 추상화 (🔧 3건: OG-013 field change, OG-016 tab trap, OG-018 cross-zone)
+**Discovered** 5종 — ZIFT + Pattern (🔧 3건: OG-015 dismiss, OG-016 trap, Routing)
+**Frontier** 10종 — DnD만 keyboard reorder ✅ 부분 진입, 나머지 8개 미착수
 
 ---
 
