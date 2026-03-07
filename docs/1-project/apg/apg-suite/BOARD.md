@@ -20,10 +20,18 @@
 
 ## Now
 
+(Stage 1 완료. Stage 2는 별도 세션에서 진행)
+
+## Backlog (Stage 2-3)
+
 - [ ] **WP1: APG showcase App export 표준화**
   - 7 patterns need App export: listbox, toolbar, menu, dialog, dropdown-menu, combobox, navtree
   - 나머지 15 patterns: App export 존재 확인 + testConfig 표준화
   - Success: 모든 22 showcase가 defineApp() 기반 App export
+
+- [ ] **WP2: setupZone 제거 + goto(url) 전환**
+  - setupZone 삭제, goto(url) + App mount → zone 자동 등록
+  - WP1 완료 후 착수
 
 ## Done
 
