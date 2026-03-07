@@ -17,9 +17,10 @@
  */
 
 import { createPage } from "@os-devtool/testing/page";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   AccordionApp,
+  AccordionPattern,
   SECTIONS,
 } from "@/pages/apg-showcase/patterns/AccordionPattern";
 import {
@@ -29,16 +30,30 @@ import {
   assertVerticalNav,
 } from "./helpers/contracts";
 
-// ─── Test Setup (actual showcase config) ───
+// ─── Test Setup (goto + click — Playwright isomorphic) ───
 
 const HEADERS = SECTIONS.map((s) => s.id);
 
+let page: ReturnType<typeof createPage>;
+
+beforeEach(() => {
+  page = createPage(AccordionApp, AccordionPattern);
+  page.goto("/");
+});
+
+afterEach(() => {
+  page.cleanup();
+});
+
+/**
+ * accordionFactory — Click to focus (Playwright-isomorphic).
+ *
+ * Unlike setupZone which seeded focus without side effects,
+ * click on an accordion header both focuses AND expands.
+ * Tests must account for this: after factory, the item is expanded.
+ */
 function accordionFactory(focusedItem = "acc-personal") {
-  const page = createPage(AccordionApp);
-  page.setupZone("apg-accordion", {
-    items: HEADERS,
-    focusedItemId: focusedItem,
-  });
+  page.click(focusedItem);
   return page;
 }
 
@@ -65,55 +80,41 @@ describe("APG Accordion: Navigation", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Accordion: Expand/Collapse (Enter/Space)", () => {
-  it("Enter on collapsed header: expands the panel", () => {
-    const t = accordionFactory("acc-personal");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
+  it("Enter toggles expand on focused header", () => {
+    page.click("acc-personal");
+    // click already expanded it
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
-    t.keyboard.press("Enter");
+    // Enter collapses
+    page.keyboard.press("Enter");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(false);
 
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    // Enter expands again
+    page.keyboard.press("Enter");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
   });
 
-  it("Enter on expanded header: collapses the panel", () => {
-    const t = accordionFactory("acc-personal");
-    // First expand
-    t.keyboard.press("Enter");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
+  it("Space toggles expand on focused header", () => {
+    page.click("acc-personal");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
-    // Then collapse
-    t.keyboard.press("Enter");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
-  });
+    // Space collapses
+    page.keyboard.press("Space");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(false);
 
-  it("Space on collapsed header: expands the panel", () => {
-    const t = accordionFactory("acc-personal");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
-
-    t.keyboard.press("Space");
-
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
-  });
-
-  it("Space on expanded header: collapses the panel", () => {
-    const t = accordionFactory("acc-personal");
-    // First expand
-    t.keyboard.press("Space");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
-
-    // Then collapse
-    t.keyboard.press("Space");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
+    // Space expands again
+    page.keyboard.press("Space");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
   });
 
   it("multiple headers can be expanded independently", () => {
-    const t = accordionFactory("acc-personal");
-    t.keyboard.press("Enter"); // expand personal
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    page.click("acc-personal"); // focus + expand personal
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
-    t.keyboard.press("ArrowDown"); // move to billing
-    t.keyboard.press("Enter"); // expand billing
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
-    expect(t.attrs("acc-billing")["aria-expanded"]).toBe(true);
+    page.keyboard.press("ArrowDown"); // move to billing (no expand)
+    page.keyboard.press("Enter"); // expand billing
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    expect(page.attrs("acc-billing")["aria-expanded"]).toBe(true);
   });
 });
 
@@ -122,26 +123,31 @@ describe("APG Accordion: Expand/Collapse (Enter/Space)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Accordion: Arrow Navigation (No expand)", () => {
-  it("ArrowDown: moves to next header without expanding", () => {
-    const t = accordionFactory("acc-personal");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
+  it("ArrowDown: moves to next header without changing expand state", () => {
+    page.click("acc-personal"); // expanded
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
-    t.keyboard.press("ArrowDown");
+    page.keyboard.press("ArrowDown");
 
-    expect(t.focusedItemId()).toBe("acc-billing");
-    // Should NOT have expanded personal
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
+    expect(page.focusedItemId()).toBe("acc-billing");
+    // personal stays expanded (arrow doesn't collapse)
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    // billing was never expanded
+    expect(page.attrs("acc-billing")["aria-expanded"]).toBe(false);
   });
 
   it("ArrowUp: moves to previous header without expanding", () => {
-    const t = accordionFactory("acc-billing");
-    t.keyboard.press("ArrowUp");
+    page.click("acc-personal");
+    // Collapse personal first so we can verify arrow doesn't expand
+    page.keyboard.press("Enter"); // collapse
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(false);
 
-    expect(t.focusedItemId()).toBe("acc-personal");
-    // No items should be expanded
-    for (const id of HEADERS) {
-      expect(t.attrs(id)["aria-expanded"]).toBe(false);
-    }
+    page.keyboard.press("ArrowDown"); // move to billing
+    page.keyboard.press("ArrowUp"); // back to personal
+
+    expect(page.focusedItemId()).toBe("acc-personal");
+    // personal stays collapsed — arrow didn't expand
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(false);
   });
 });
 
@@ -151,32 +157,32 @@ describe("APG Accordion: Arrow Navigation (No expand)", () => {
 
 describe("APG Accordion: DOM Projection (attrs)", () => {
   it("items have role=button (accordion header role)", () => {
-    const t = accordionFactory("acc-personal");
-    expect(t.attrs("acc-personal").role).toBe("button");
+    page.click("acc-personal");
+    expect(page.attrs("acc-personal").role).toBe("button");
   });
 
   it("collapsed header: aria-expanded=false", () => {
-    const t = accordionFactory("acc-personal");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
+    page.click("acc-personal");
+    page.keyboard.press("Enter"); // collapse
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(false);
   });
 
   it("expanded header: aria-expanded=true", () => {
-    const t = accordionFactory("acc-personal");
-    t.keyboard.press("Enter");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    page.click("acc-personal"); // click = focus + expand
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
   });
 
   it("focused header: tabIndex=0, others: tabIndex=-1", () => {
-    const t = accordionFactory("acc-personal");
-    expect(t.attrs("acc-personal").tabIndex).toBe(0);
-    expect(t.attrs("acc-billing").tabIndex).toBe(-1);
-    expect(t.attrs("acc-shipping").tabIndex).toBe(-1);
+    page.click("acc-personal");
+    expect(page.attrs("acc-personal").tabIndex).toBe(0);
+    expect(page.attrs("acc-billing").tabIndex).toBe(-1);
+    expect(page.attrs("acc-shipping").tabIndex).toBe(-1);
   });
 
   it("focused header: data-focused=true", () => {
-    const t = accordionFactory("acc-personal");
-    expect(t.attrs("acc-personal")["data-focused"]).toBe(true);
-    expect(t.attrs("acc-billing")["data-focused"]).toBeUndefined();
+    page.click("acc-personal");
+    expect(page.attrs("acc-personal")["data-focused"]).toBe(true);
+    expect(page.attrs("acc-billing")["data-focused"]).toBeUndefined();
   });
 });
 
@@ -185,65 +191,48 @@ describe("APG Accordion: DOM Projection (attrs)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Accordion: Click interaction", () => {
-  it("click on header: focuses it", () => {
-    const t = accordionFactory("acc-personal");
-    t.click("acc-billing");
-    expect(t.focusedItemId()).toBe("acc-billing");
+  it("click on header: focuses and expands it", () => {
+    page.click("acc-billing");
+    expect(page.focusedItemId()).toBe("acc-billing");
+    expect(page.attrs("acc-billing")["aria-expanded"]).toBe(true);
   });
 
   it("click on focused header: toggles expand", () => {
-    const t = accordionFactory("acc-personal");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
-
-    // Click on focused expandable item
-    t.click("acc-personal");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    page.click("acc-personal"); // focus + expand
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
     // Click again → collapse
-    t.click("acc-personal");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
-  });
+    page.click("acc-personal");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(false);
 
-  it("click on unfocused header: focuses AND expands it (W3C APG)", () => {
-    const t = accordionFactory("acc-personal");
-    // acc-billing is NOT focused yet
-    expect(t.focusedItemId()).toBe("acc-personal");
-
-    // Single click on unfocused header → should focus + expand
-    t.click("acc-billing");
-    expect(t.focusedItemId()).toBe("acc-billing");
-    expect(t.attrs("acc-billing")["aria-expanded"]).toBe(true);
+    // Click again → expand
+    page.click("acc-personal");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
   });
 
   it("click headers independently: multiple panels open", () => {
-    const t = accordionFactory("acc-personal");
-
     // Click first header → expand
-    t.click("acc-personal");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    page.click("acc-personal");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
 
     // Click second header → also expand (multi-open)
-    t.click("acc-billing");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(true);
-    expect(t.attrs("acc-billing")["aria-expanded"]).toBe(true);
+    page.click("acc-billing");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(true);
+    expect(page.attrs("acc-billing")["aria-expanded"]).toBe(true);
 
     // Click first header again → collapse only first
-    t.click("acc-personal");
-    expect(t.attrs("acc-personal")["aria-expanded"]).toBe(false);
-    expect(t.attrs("acc-billing")["aria-expanded"]).toBe(true);
+    page.click("acc-personal");
+    expect(page.attrs("acc-personal")["aria-expanded"]).toBe(false);
+    expect(page.attrs("acc-billing")["aria-expanded"]).toBe(true);
   });
 
   it("click expands on first click, not re-click only", () => {
-    // This test verifies the W3C APG accordion behavior:
-    // clicking a header should ALWAYS toggle expand, even on first click
-    const t = accordionFactory("acc-personal");
+    // W3C APG: clicking a header always toggles expand
+    page.click("acc-shipping");
+    expect(page.attrs("acc-shipping")["aria-expanded"]).toBe(true);
 
-    // Click unfocused header → should expand on first click
-    t.click("acc-shipping");
-    expect(t.attrs("acc-shipping")["aria-expanded"]).toBe(true);
-
-    // Click it again (now focused) → should collapse
-    t.click("acc-shipping");
-    expect(t.attrs("acc-shipping")["aria-expanded"]).toBe(false);
+    // Click again → collapse
+    page.click("acc-shipping");
+    expect(page.attrs("acc-shipping")["aria-expanded"]).toBe(false);
   });
 });

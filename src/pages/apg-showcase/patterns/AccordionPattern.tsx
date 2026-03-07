@@ -64,7 +64,10 @@ export const AccordionApp = defineApp<Record<string, never>>(
   {},
 );
 const accordionZone = AccordionApp.createZone("apg-accordion");
-const AccordionUI = accordionZone.bind({ role: "accordion" });
+const AccordionUI = accordionZone.bind({
+  role: "accordion",
+  getItems: () => SECTIONS.map((s) => s.id),
+});
 
 // ─── Accordion Row ───
 // Zero render-prop. Zero JS state.
