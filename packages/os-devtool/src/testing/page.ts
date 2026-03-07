@@ -51,7 +51,9 @@ interface ZoneOrderEntry {
   zoneId: string;
   firstItemId: string | null;
   lastItemId: string | null;
-  entry: import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry | string;
+  entry:
+    | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
+    | string;
   selectedItemId: string | null;
   lastFocusedId: string | null;
 }
@@ -159,7 +161,7 @@ export function createAppPage<S>(
   });
 
   // Override browser-only effects for headless (no navigator.clipboard)
-  os.defineEffect("clipboardWrite", () => { });
+  os.defineEffect("clipboardWrite", () => {});
 
   // ── Enter preview sandbox ──
   os.enterPreview({
@@ -189,6 +191,12 @@ export function createAppPage<S>(
     for (const [zoneName, bindingEntry] of zoneBindingEntries) {
       registerZoneFromBinding(zoneName, bindingEntry);
     }
+
+    // Seed initial selection/expand for all registered zones
+    for (const [zoneName] of zoneBindingEntries) {
+      seedInitialState(zoneName);
+    }
+
     if (Component) renderHtml();
     invalidateCache();
   }
@@ -209,7 +217,14 @@ export function createAppPage<S>(
     const zoneName = target;
     const bindingEntry = zoneBindingEntries.get(zoneName);
     if (bindingEntry) {
-      registerZoneFromBinding(zoneName, bindingEntry, opts?.config, opts?.items, opts?.expandableItems, opts?.treeLevels);
+      registerZoneFromBinding(
+        zoneName,
+        bindingEntry,
+        opts?.config,
+        opts?.items,
+        opts?.expandableItems,
+        opts?.treeLevels,
+      );
     } else if (opts?.role) {
       const config = resolveRole(opts.role, opts.config ?? {});
       ZoneRegistry.register(zoneName, {
@@ -218,7 +233,9 @@ export function createAppPage<S>(
         element: null,
         parentId: null,
         ...(opts.items ? { getItems: () => opts.items! } : {}),
-        ...(opts.expandableItems ? { getExpandableItems: () => opts.expandableItems! } : {}),
+        ...(opts.expandableItems
+          ? { getExpandableItems: () => opts.expandableItems! }
+          : {}),
         ...(opts.treeLevels ? { getTreeLevels: () => opts.treeLevels! } : {}),
       });
     }
@@ -247,14 +264,20 @@ export function createAppPage<S>(
 
         if (initialSelection) {
           const selectMode = zoneConfig?.select?.mode ?? "none";
-          const inputmapValues = zoneConfig?.inputmap ? Object.values(zoneConfig.inputmap) : [];
+          const inputmapValues = zoneConfig?.inputmap
+            ? Object.values(zoneConfig.inputmap)
+            : [];
           const hasCheckCmd = inputmapValues.some((cmds: unknown[]) =>
-            cmds.some((c: unknown) => (c as { type: string }).type === "OS_CHECK"),
+            cmds.some(
+              (c: unknown) => (c as { type: string }).type === "OS_CHECK",
+            ),
           );
           for (const id of initialSelection) {
             if (!z.items[id]) z.items[id] = {};
-            if (hasCheckCmd) z.items[id] = { ...z.items[id], "aria-checked": true };
-            if (selectMode !== "none") z.items[id] = { ...z.items[id], "aria-selected": true };
+            if (hasCheckCmd)
+              z.items[id] = { ...z.items[id], "aria-checked": true };
+            if (selectMode !== "none")
+              z.items[id] = { ...z.items[id], "aria-selected": true };
           }
           z.selectionAnchor = initialSelection[0] ?? null;
         }
@@ -303,16 +326,34 @@ export function createAppPage<S>(
       ...(bindings.onRedo ? { onRedo: bindings.onRedo } : {}),
       ...(bindings.onSelect ? { onSelect: bindings.onSelect } : {}),
       ...(bindings.itemFilter ? { itemFilter: bindings.itemFilter } : {}),
-      ...(itemsOverride ? { getItems: () => itemsOverride } : bindings.getItems ? { getItems: bindings.getItems } : {}),
-      ...(expandableOverride ? { getExpandableItems: () => expandableOverride } : bindings.getExpandableItems ? { getExpandableItems: bindings.getExpandableItems } : {}),
-      ...(treeLevelsOverride ? { getTreeLevels: () => treeLevelsOverride } : bindings.getTreeLevels ? { getTreeLevels: bindings.getTreeLevels } : {}),
+      ...(itemsOverride
+        ? { getItems: () => itemsOverride }
+        : bindings.getItems
+          ? { getItems: bindings.getItems }
+          : {}),
+      ...(expandableOverride
+        ? { getExpandableItems: () => expandableOverride }
+        : bindings.getExpandableItems
+          ? { getExpandableItems: bindings.getExpandableItems }
+          : {}),
+      ...(treeLevelsOverride
+        ? { getTreeLevels: () => treeLevelsOverride }
+        : bindings.getTreeLevels
+          ? { getTreeLevels: bindings.getTreeLevels }
+          : {}),
     });
 
     if (bindingEntry.triggers) {
       for (const trigger of bindingEntry.triggers) {
-        ZoneRegistry.setItemCallback(zoneName, trigger.id, { onActivate: trigger.onActivate });
+        ZoneRegistry.setItemCallback(zoneName, trigger.id, {
+          onActivate: trigger.onActivate,
+        });
         if (trigger.overlay) {
-          TriggerOverlayRegistry.set(trigger.id, trigger.overlay.id, trigger.overlay.type);
+          TriggerOverlayRegistry.set(
+            trigger.id,
+            trigger.overlay.id,
+            trigger.overlay.type,
+          );
         }
       }
     }
@@ -321,10 +362,17 @@ export function createAppPage<S>(
     const keybindings = bindingEntry.keybindings ?? [];
     if (keybindings.length > 0) {
       const unreg = Keybindings.registerAll(
-        keybindings.map((kb) => ({ key: kb.key, command: kb.command, when: "navigating" as const })),
+        keybindings.map((kb) => ({
+          key: kb.key,
+          command: kb.command,
+          when: "navigating" as const,
+        })),
       );
       const prev = unregisterKeybindings;
-      unregisterKeybindings = () => { unreg(); prev?.(); };
+      unregisterKeybindings = () => {
+        unreg();
+        prev?.();
+      };
     }
 
     // Register field
@@ -335,12 +383,72 @@ export function createAppPage<S>(
         ...(field.onCommit !== undefined ? { onCommit: field.onCommit } : {}),
         ...(field.trigger !== undefined ? { trigger: field.trigger } : {}),
         ...(field.schema !== undefined ? { schema: field.schema } : {}),
-        ...(field.resetOnSubmit !== undefined ? { resetOnSubmit: field.resetOnSubmit } : {}),
+        ...(field.resetOnSubmit !== undefined
+          ? { resetOnSubmit: field.resetOnSubmit }
+          : {}),
         mode: "immediate",
         fieldType: "inline",
       });
       const zoneEntry = ZoneRegistry.get(zoneName);
       if (zoneEntry) zoneEntry.fieldId = field.fieldName;
+    }
+  }
+
+  // ── Seed initial selection/expand for a zone ──
+  function seedInitialState(zoneName: string) {
+    const zoneEntry = ZoneRegistry.get(zoneName);
+    if (!zoneEntry) return;
+    const zoneConfig = zoneEntry.config;
+    const items = zoneEntry.getItems?.() ?? [];
+
+    // Initial selection: explicit initial > disallowEmpty auto-select
+    const selectConfig = zoneConfig?.select;
+    if (selectConfig && selectConfig.mode !== "none" && items.length > 0) {
+      const explicit = selectConfig.initial;
+      const initialIds = explicit
+        ? Array.isArray(explicit)
+          ? explicit
+          : [explicit]
+        : selectConfig.disallowEmpty
+          ? [items[0]!]
+          : [];
+      if (initialIds.length > 0) {
+        const inputmapValues = zoneConfig?.inputmap
+          ? Object.values(zoneConfig.inputmap)
+          : [];
+        const hasCheckCmd = inputmapValues.some((cmds: unknown[]) =>
+          cmds.some(
+            (c: unknown) => (c as { type: string }).type === "OS_CHECK",
+          ),
+        );
+        os.setState((s: AppState) =>
+          produce(s, (draft) => {
+            const z = ensureZone(draft.os, zoneName);
+            for (const id of initialIds) {
+              if (!z.items[id]) z.items[id] = {};
+              if (hasCheckCmd)
+                z.items[id] = { ...z.items[id], "aria-checked": true };
+              if (selectConfig.mode !== "none")
+                z.items[id] = { ...z.items[id], "aria-selected": true };
+            }
+            z.selectionAnchor = initialIds[0] ?? null;
+          }),
+        );
+      }
+    }
+
+    // Initial expand: explicit initial
+    const expandConfig = zoneConfig?.expand;
+    if (expandConfig && expandConfig.mode !== "none" && expandConfig.initial) {
+      os.setState((s: AppState) =>
+        produce(s, (draft) => {
+          const z = ensureZone(draft.os, zoneName);
+          for (const id of expandConfig.initial!) {
+            if (!z.items[id]) z.items[id] = {};
+            z.items[id] = { ...z.items[id], "aria-expanded": true };
+          }
+        }),
+      );
     }
   }
 
@@ -492,8 +600,7 @@ export function createAppPage<S>(
         getAttribute(name: string) {
           const resolved = resolveElement(os, elementId);
           // Normalize HTML attribute names to JS property names (e.g. tabindex → tabIndex)
-          const key =
-            name === "tabindex" ? "tabIndex" : name;
+          const key = name === "tabindex" ? "tabIndex" : name;
           const val = resolved[key];
           // Playwright returns string | null. Coerce boolean to string for compatibility.
           if (val === true) return "true";
@@ -540,11 +647,22 @@ export function createAppPage<S>(
             );
           }
         },
-        _toHaveAttribute(name: string, value: string | RegExp, negated?: boolean) {
+        _toHaveAttribute(
+          name: string,
+          value: string | RegExp,
+          negated?: boolean,
+        ) {
           const attrKey = name === "tabindex" ? "tabIndex" : name;
           const raw = resolveElement(os, elementId)[attrKey];
           // Coerce to string for Playwright compatibility
-          const actual = raw === true ? "true" : raw === false ? "false" : raw == null ? null : String(raw);
+          const actual =
+            raw === true
+              ? "true"
+              : raw === false
+                ? "false"
+                : raw == null
+                  ? null
+                  : String(raw);
           const expected = typeof value === "string" ? value : undefined;
           const matches = actual === expected;
           const passed = negated ? !matches : matches;

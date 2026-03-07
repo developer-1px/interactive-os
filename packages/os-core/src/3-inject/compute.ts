@@ -7,7 +7,10 @@
 
 import { readActiveZoneId } from "@os-core/3-inject/readState";
 import { computeContainerProps } from "@os-core/3-inject/zoneContext";
-import { getChildRole } from "@os-core/engine/registries/roleRegistry";
+import {
+  getChildRole,
+  getContentRole,
+} from "@os-core/engine/registries/roleRegistry";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { DEFAULT_CONFIG } from "@os-core/schema/types/focus/config/FocusGroupConfig";
@@ -123,6 +126,15 @@ export function computeItem(
       (entry?.getExpandableItems?.().has(itemId) ?? false);
     if (isExpandable) {
       attrs["aria-expanded"] = isAriaExpanded;
+      attrs["aria-controls"] = `panel-${itemId}`;
+    }
+  }
+
+  // Content panel: aria-controls for roles with content panels (tablist→tabpanel, etc.)
+  // Only set if not already set by expand block above (avoid double-set for accordion)
+  if (!attrs["aria-controls"]) {
+    const contentRole = getContentRole(entry?.role);
+    if (contentRole) {
       attrs["aria-controls"] = `panel-${itemId}`;
     }
   }

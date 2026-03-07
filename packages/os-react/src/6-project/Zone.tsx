@@ -183,6 +183,63 @@ export function Zone({
       );
     }
 
+    // ─── Declarative initial selection (disallowEmpty / select.initial) ───
+    const selectConfig = config.select;
+    if (selectConfig && selectConfig.mode !== "none") {
+      const zoneEntry = ZoneRegistry.get(zoneId);
+      const items = zoneEntry?.getItems?.() ?? [];
+      const existingZone = os.getState().os.focus.zones[zoneId];
+      const hasSelection =
+        existingZone &&
+        Object.values(existingZone.items).some(
+          (item) => item?.["aria-selected"],
+        );
+      if (!hasSelection && items.length > 0) {
+        const explicit = selectConfig.initial;
+        const initialIds = explicit
+          ? Array.isArray(explicit)
+            ? explicit
+            : [explicit]
+          : selectConfig.disallowEmpty
+            ? [items[0]!]
+            : [];
+        if (initialIds.length > 0) {
+          os.setState((s: AppState) =>
+            produce(s, (draft) => {
+              const z = ensureZone(draft.os, zoneId);
+              for (const id of initialIds) {
+                if (!z.items[id]) z.items[id] = {};
+                z.items[id] = { ...z.items[id], "aria-selected": true };
+              }
+              z.selectionAnchor = initialIds[0] ?? null;
+            }),
+          );
+        }
+      }
+    }
+
+    // ─── Declarative initial expand (expand.initial) ───
+    const expandConfig = config.expand;
+    if (expandConfig && expandConfig.mode !== "none" && expandConfig.initial) {
+      const existingZone = os.getState().os.focus.zones[zoneId];
+      const hasExpanded =
+        existingZone &&
+        Object.values(existingZone.items).some(
+          (item) => item?.["aria-expanded"],
+        );
+      if (!hasExpanded) {
+        os.setState((s: AppState) =>
+          produce(s, (draft) => {
+            const z = ensureZone(draft.os, zoneId);
+            for (const id of expandConfig.initial!) {
+              if (!z.items[id]) z.items[id] = {};
+              z.items[id] = { ...z.items[id], "aria-expanded": true };
+            }
+          }),
+        );
+      }
+    }
+
     // ─── AutoFocus (Zero Drift WP5+6: overlay entry → OS_FOCUS) ───
     if (config.project?.autoFocus) {
       // WP5: Check overlay stack for entry hint ("first" | "last")

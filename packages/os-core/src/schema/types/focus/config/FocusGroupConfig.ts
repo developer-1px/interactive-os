@@ -69,6 +69,8 @@ export interface SelectConfig {
   scope?: "cell" | "column" | "row";
   /** ARIA attribute: "selected" (aria-selected) or "checked" (aria-checked) */
   aria?: "selected" | "checked";
+  /** Declarative initial selection — applied at zone mount. Overrides disallowEmpty auto-select. */
+  initial?: string | string[];
 }
 
 export const DEFAULT_SELECT: SelectConfig = {
@@ -114,6 +116,8 @@ export interface ExpandConfig {
    * "none"     — no expansion (listbox, toolbar)
    */
   mode: "all" | "explicit" | "none";
+  /** Declarative initial expanded items — applied at zone mount. */
+  initial?: string[];
 }
 
 export const DEFAULT_EXPAND: ExpandConfig = {
