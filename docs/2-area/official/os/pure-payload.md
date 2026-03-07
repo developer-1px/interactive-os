@@ -22,7 +22,7 @@ OS가 커맨드를 dispatch하기 직전에 `resolveFocusId()`가 placeholder를
 
 ## 3. 현재 구현
 
-> **구현 위치**: `src/os/3-commands/utils/resolveFocusId.ts`
+> **구현 위치**: `packages/os-core/src/4-command/` (focus resolve 로직이 커맨드 파이프라인에 통합됨)
 
 ```typescript
 const FOCUS_PLACEHOLDER = "OS.FOCUS";

@@ -293,7 +293,7 @@ function ItemList() {
 
 ## Preview API
 
-Preview Layer는 비파괴적 상태 오버라이드를 제공한다. 주로 테스트 인프라(`createOsPage`, `page.ts`)에서 사용되며, 프로덕션 상태를 보존하면서 독립된 상태 공간에서 디스패치를 실행할 수 있다.
+Preview Layer는 비파괴적 상태 오버라이드를 제공한다. 주로 테스트 인프라(`createTestBench`, `createHeadlessPage`)에서 사용되며, 프로덕션 상태를 보존하면서 독립된 상태 공간에서 디스패치를 실행할 수 있다.
 
 ### enterPreview
 

@@ -5,7 +5,7 @@
 
 ## 2. 분석
 
-> **현재 구현**: `src/os/keymaps/` (키보드 파이프라인) 및 `src/os/3-commands/` (커맨드 핸들러)
+> **현재 구현**: `packages/os-core/src/2-resolve/` (키보드 파이프라인) 및 `packages/os-core/src/4-command/` (커맨드 핸들러)
 
 ### 2.1. 논쟁의 핵심: "누가 이벤트를 소유하는가?"
 
