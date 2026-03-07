@@ -18,7 +18,7 @@
 | OG-012 | 2026-03-06 | os-core | ~~expandableItems → computeItem~~ | ✅ 해결: page.ts goto() opts에 items/expandableItems/treeLevels override 추가. 90 tests fixed (108→18). | — |
 | OG-013 | 2026-03-07 | os-core | trigger:"change" headless | `trigger:"change"` fields don't auto-commit on headless `keyboard.type()`. DOM onChange fires commit; headless doesn't simulate it. | `page.dispatch(setQuery())` workaround |
 | OG-014 | 2026-03-07 | os-core | Cross-zone editingItemId | `OS_FIELD_START_EDIT` sets editingItemId on active zone (list), not transferred to target zone (edit). `OS_FIELD_CANCEL` needs it. | `page.dispatch(cancelEdit())` workaround |
-| OG-015 | 2026-03-07 | os-core | Overlay Escape dismiss | Headless Escape on dialog overlay doesn't trigger overlay dismiss/close. Escape routes through parent zone's dismiss handler. | `page.dispatch(cancelDelete())` workaround |
+| OG-015 | 2026-03-07 | os-core | ~~Overlay Escape dismiss~~ | ✅ 해결: OS_ESCAPE에 overlay guard 추가 — overlay stack 비어있지 않으면 OS_OVERLAY_CLOSE 먼저 dispatch. | — |
 | OG-016 | 2026-03-07 | os-core | Dialog Tab trap | Headless doesn't support overlay focus trap (Tab cycles within dialog). | TODO in tests |
 | OG-017 | 2026-03-07 | os-core | Dialog Enter confirm | Overlay zone navigation (focus to confirm button + Enter) not supported in headless. | TODO in tests |
 | OG-018 | 2026-03-07 | os-core | Cross-zone headless test | `page.goto()` sets single activeZoneId. Scripts that click items across multiple zones cannot run in headless runScenarios. Focus-showcase 29 scripts blocked. | Browser TestBot only |
@@ -31,3 +31,4 @@
 |---|--------|--------|------|------|
 | OG-001 | 2026-02-25 | 2026-02-26 | Dropdown Zone | 기존 Trigger+Portal 패턴으로 해결. 새 프리미티브 불필요. outsideClick 런타임 추가. |
 | OG-002 | 2026-02-26 | 2026-02-26 | `onReorder: void` | zone 콜백 명령형 시그니처. 다른 콜백(onAction 등)은 선언형(BaseCommand 리턴). → 선언형으로 수정 완료 |
+| OG-015 | 2026-03-07 | 2026-03-07 | Overlay Escape dismiss | OS_ESCAPE overlay guard + TriggerDismiss onActivate 등록. escape.ts + TriggerDismiss.tsx |
