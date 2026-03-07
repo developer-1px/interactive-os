@@ -52,7 +52,7 @@ const PATTERNS: Record<
   accordion: { name: "Accordion", component: AccordionPattern, status: "dt" },
   alert: { name: "Alert", component: AlertPattern, status: "none" },
   breadcrumb: { name: "Breadcrumb", component: BreadcrumbPattern, status: "none" },
-  button: { name: "Button", component: ButtonPattern, status: "test" },
+  button: { name: "Button", component: ButtonPattern, status: "dt" },
   carousel: { name: "Carousel", component: CarouselPattern, status: "test" },
   checkbox: { name: "Checkbox", component: CheckboxPattern, status: "test" },
   composite: { name: "Composite", component: CompositePattern, status: "none" },
