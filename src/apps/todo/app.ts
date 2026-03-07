@@ -327,10 +327,9 @@ export const TodoDraftUI = draftZone.bind({
     trigger: "enter",
     resetOnSubmit: true,
     schema: z.string().min(1, "Hal is watching"),
-    // Wait, Field checks schema against string value.
-    // Zod schema should be z.string().min(1).
-    // My Field.tsx checks schema.safeParse(currentValue). currentValue is string.
   },
+  onUndo: undoCommand(),
+  onRedo: redoCommand(),
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -370,10 +369,12 @@ export const TodoEditUI = editZone.bind({
   role: "textbox",
   field: {
     fieldName: "EDIT",
-    onCommit: updateTodoText, // Factory without call
+    onCommit: updateTodoText,
     trigger: "enter",
-    onCancel: cancelEdit(), // Command (Result of Factory) matches BaseCommand
+    onCancel: cancelEdit(),
   },
+  onUndo: undoCommand(),
+  onRedo: redoCommand(),
 });
 
 // ═══════════════════════════════════════════════════════════════════
