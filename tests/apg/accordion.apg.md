@@ -3,7 +3,7 @@
 > Pattern: [Accordion](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/)
 > Example: [Accordion Example](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/examples/accordion/)
 >
-> Status: 🟡 21/24 covered · 1 fail (I1) · 3 N/A (K12, K13, A5)
+> Status: 🟢 22/24 covered · 0 fail · 3 N/A (K12, K13, A5)
 
 ## Decision Table
 
@@ -39,7 +39,7 @@
 
 | # | Signal | Setup (Given) | Input (When) | Assert (Then) | Basis | Test |
 |---|--------|---------------|--------------|---------------|-------|------|
-| I1 | 🔴 | page loaded (no interaction) | (assert) | `"#acc-personal" aria-expanded="true"` | Example HTML: first button has `aria-expanded="true"` | `initial state: first section expanded` — **OS gap: ExpandConfig has no `initial` field** |
+| I1 | 🟢 | page loaded (no interaction) | (assert) | `"#acc-personal" aria-expanded="true"` | Example HTML: first button has `aria-expanded="true"` | `initial state: first section expanded` |
 | I2 | 🟢 | page loaded (no interaction) | (assert) | `"#acc-billing" aria-expanded="false"`, `"#acc-shipping" aria-expanded="false"` | Example HTML: other buttons have `aria-expanded="false"`, panels have `hidden` | `initial state: other sections collapsed` |
 
 ### Panel Visibility Sync (from Example JS)
@@ -66,13 +66,12 @@
 ## Coverage
 
 ```
-🟢 20  🔴 1  ➖ 3  total 24
+🟢 21  🔴 0  ➖ 3  total 24
 ```
 
 | Signal | Count | Rows |
 |--------|-------|------|
 | 🟢 | 20 | K1-K11, I2, P1, P2, C1-C3, M1, A1, A2, A3, A4 |
-| 🔴 | 1 | I1 (initial expand — OS gap: ExpandConfig has no `initial` field) |
 | ➖ | 3 | K12 (Tab), K13 (Shift+Tab) — browser default; A5 — React rendering layer |
 
 ## ARIA Attributes

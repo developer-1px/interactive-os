@@ -26,7 +26,6 @@ Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (acc
 
 ## Unresolved
 
-- I1 OS gap: ExpandConfig/SelectConfig has no `initial` field → accordion first section not expanded, tabs first tab not selected on mount
-- A5 OS gap: `aria-controls` only computed for expand mode items. Tablist uses select-based visibility → tab items missing `aria-controls` pointing to tabpanel
+(all resolved — see `initial-state-aria-controls` project)
 
 ## Ideas

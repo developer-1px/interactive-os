@@ -3,7 +3,7 @@
 > Pattern: [Tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/)
 > Example: [Tabs with Manual Activation](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-manual/)
 >
-> Status: 🟢 15/22 covered | 🔴 2 OS gaps
+> Status: 🟢 17/22 covered | 🔴 0 OS gaps
 
 ## Decision Table
 
@@ -42,7 +42,7 @@
 
 | # | Signal | Setup (Given) | Input (When) | Assert (Then) | Basis | Test |
 |---|--------|---------------|--------------|---------------|-------|------|
-| I1 | 🔴 | page loaded (no interaction) | (assert) | `"#tab-ahlefeldt" aria-selected="true"` | Example JS: `this.setSelectedTab(this.firstTab, false)` — first tab selected on init | `initial state: first tab selected` — OS gap: SelectConfig has no `initial` field |
+| I1 | 🟢 | page loaded (no interaction) | (assert) | `"#tab-ahlefeldt" aria-selected="true"` | Example JS: `this.setSelectedTab(this.firstTab, false)` — first tab selected on init | `initial state: first tab selected` |
 | I2 | 🟢 | page loaded (no interaction) | (assert) | `"#tab-andersen" aria-selected="false"`, others false | Example JS: all tabs initialized to `aria-selected="false"` except first | `initial state: other tabs not selected` |
 
 ### Manual-Activation Behavior (from Example JS)
@@ -62,7 +62,7 @@
 | A2 | 🟢 | button (tab) | `tab` | — | "Indicates the element serves as a tab control." | `tab role on items` |
 | A3 | ⬜ | button (selected tab) | — | `aria-selected="true"` | "Indicates the tab is selected and its associated tabpanel is displayed." | (covered by K7-K8, C1) |
 | A4 | 🟢 | button (unselected tab) | — | `aria-selected="false"`, `tabindex="-1"` | "Indicates the tab is not selected. Removes the element from the page Tab sequence." | `unselected tabs: tabindex=-1` |
-| A5 | 🔴 | button (tab) | — | `aria-controls="ID"` | "Refers to the element with role=tabpanel associated with the tab." | `aria-controls points to tabpanel` — OS gap: aria-controls only computed for expand mode |
+| A5 | 🟢 | button (tab) | — | `aria-controls="ID"` | "Refers to the element with role=tabpanel associated with the tab." | `aria-controls points to tabpanel` |
 | A6 | ➖ | div (tabpanel) | `tabpanel` | — | "Indicates the element serves as a container for tab panel content." | N/A — React Item.Content rendering |
 | A7 | ➖ | div (tabpanel) | — | `aria-labelledby="IDREF"` | "Refers to the tab element that controls the panel." | N/A — React Item.Content rendering |
 | A8 | ⬜ | div (tabpanel) | — | `tabindex="0"` | "Puts the tabpanel in the page Tab sequence." | N/A — verify if OS sets this |
@@ -70,15 +70,14 @@
 ## Coverage
 
 ```
-🟢 15  ⬜ 2  ➖ 3  🔴 2  total 22
+🟢 17  ⬜ 2  ➖ 3  🔴 0  total 22
 ```
 
 | Signal | Count | Rows |
 |--------|-------|------|
-| 🟢 | 15 | K1-K8, C1-C2, I2, M1-M2, A2, A4 |
+| 🟢 | 17 | K1-K8, C1-C2, I1-I2, M1-M2, A2, A4-A5 |
 | ⬜ | 2 | A1 (OS auto), A3 (covered by K/C), A8 |
 | ➖ | 3 | K9 (Tab), A6 (tabpanel role), A7 (aria-labelledby) |
-| 🔴 | 2 | I1 (initial selection — OS gap), A5 (aria-controls for tablist — OS gap) |
 
 ## Example Source
 

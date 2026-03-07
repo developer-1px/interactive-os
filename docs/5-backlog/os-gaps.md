@@ -22,8 +22,8 @@
 | OG-016 | 2026-03-07 | os-core | Dialog Tab trap | Headless doesn't support overlay focus trap (Tab cycles within dialog). | TODO in tests |
 | OG-017 | 2026-03-07 | os-core | Dialog Enter confirm | Overlay zone navigation (focus to confirm button + Enter) not supported in headless. | TODO in tests |
 | OG-018 | 2026-03-07 | os-core | Cross-zone headless test | `page.goto()` sets single activeZoneId. Scripts that click items across multiple zones cannot run in headless runScenarios. Focus-showcase 29 scripts blocked. | Browser TestBot only |
-| OG-019 | 2026-03-07 | os-core | Initial selection/expand | `SelectConfig`/`ExpandConfig` has no `initial` field. Accordion first section not expanded, tabs first tab not selected on mount. APG I1 tests fail. | — |
-| OG-020 | 2026-03-07 | os-core | aria-controls for select-based visibility | `aria-controls` only computed in expand block of `computeItem`. Tablist uses select-based visibility (`contentVisibilityMap: "selected"`) → tab items missing `aria-controls` pointing to tabpanel. APG A5 tests fail. | — |
+| OG-019 | 2026-03-07 | os-core | ~~Initial selection/expand~~ | ✅ 해결: SelectConfig.initial + ExpandConfig.initial + disallowEmpty auto-select. Zone.tsx + page.ts goto() 양쪽 seeding. 5 APG I1 tests fixed. | — |
+| OG-020 | 2026-03-07 | os-core | ~~aria-controls for select-based visibility~~ | ✅ 해결: computeItem에 contentRoleMap 기반 aria-controls 블록 추가. expand 블록과 중복 방지. APG A5 tests fixed. | — |
 
 ## 해결됨
 
