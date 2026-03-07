@@ -2,10 +2,9 @@ import { ElementPanel } from "@inspector/panels/ElementPanel.tsx";
 import { InspectorAdapter } from "@inspector/panels/InspectorAdapter.tsx";
 import { KeyMonitor } from "@inspector/panels/KeyMonitor.tsx";
 import { useInputTelemetry } from "@inspector/panels/LoggedKey.ts";
-import { RegistryMonitor } from "@inspector/panels/RegistryMonitor.tsx";
+import { ZiftMonitor } from "@inspector/panels/ZiftMonitor.tsx";
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
-import { os } from "@os-sdk/os";
 import { useEffect, useState } from "react";
 
 // --- Main Component ---
@@ -18,9 +17,6 @@ export function CommandInspector() {
   const [physicalZone, setPhysicalZone] = useState<string | null>("NONE");
   const [isInputActive, setIsInputActive] = useState(false);
 
-  // Telemetry from kernel transactions
-  const transactions = os.inspector.getTransactions();
-  const historyCount = transactions.length;
   const rawKeys = useInputTelemetry((s) => s.logs);
 
   useEffect(() => {
@@ -56,7 +52,7 @@ export function CommandInspector() {
     REGISTRY: (
       <div className="flex-1 flex flex-col overflow-hidden bg-white">
         <KeyMonitor rawKeys={rawKeys} />
-        <RegistryMonitor historyCount={historyCount} />
+        <ZiftMonitor />
       </div>
     ),
     STATE: <InspectorAdapter />,

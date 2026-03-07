@@ -1,6 +1,6 @@
 import { InspectorRegistry } from "@inspector/stores/InspectorRegistry.ts";
 import { useInspectorStore } from "@inspector/stores/InspectorStore";
-import { Cpu, Crosshair, Database, Keyboard } from "lucide-react";
+import { Cpu, Crosshair, Database, LayoutGrid } from "lucide-react";
 import { useSyncExternalStore } from "react";
 
 export function InspectorActivityBar() {
@@ -15,7 +15,7 @@ export function InspectorActivityBar() {
 
   const staticTabs = [
     { id: "ELEMENT", icon: Crosshair, label: "Element" },
-    { id: "REGISTRY", icon: Keyboard, label: "Keymap" },
+    { id: "REGISTRY", icon: LayoutGrid, label: "Structure" },
     { id: "STATE", icon: Database, label: "Inspector" },
   ] as const;
 
