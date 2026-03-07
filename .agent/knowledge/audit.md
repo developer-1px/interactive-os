@@ -84,6 +84,7 @@
 | `window.addEventListener` (OS 진입점) | OS 커널이 브라우저 이벤트를 받는 유일한 진입점 | `packages/os-react/src/1-listen/` |
 | 외부 라이브러리 ref/callback | 써드파티 API 요구사항 | leaflet, chart.js 등 |
 | `document.getElementById` (포커스 복구) | 브라우저 포커스 API 직접 호출 | 모달 dismiss 후 복구 |
+| `@os-core/*` import in `src/inspector/` | Inspector는 devtool — os-devtool과 동일 패턴. facade 경계는 앱 코드(`src/apps/`)에 적용 | ZiftMonitor, ElementPanel |
 | `document.caretRangeFromPoint` (caret seeding) | 브라우저 caret API 직접 사용 필수 | PointerListener seedCaretFromPoint |
 | sense 함수 내 DOM 읽기 | sense 어댑터의 정당한 책임 — DOM→순수데이터 변환 | `senseMouse.ts` querySelector, getElementById |
 
