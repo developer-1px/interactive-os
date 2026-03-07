@@ -28,6 +28,7 @@ import {
   InspectorScrollUI,
   InspectorSearchUI,
   type InspectorState,
+  safeDisabledGroups,
   selectFilteredTransactions,
   setScrollState,
   toggleGroup,
@@ -63,9 +64,7 @@ export function UnifiedInspector({
   storeState?: Record<string, unknown>;
   onClear?: () => void;
 }) {
-  const disabledGroups = InspectorApp.useComputed(
-    (s: InspectorState) => s.disabledGroups,
-  );
+  const disabledGroups = InspectorApp.useComputed(safeDisabledGroups);
   const searchQuery = InspectorApp.useComputed(
     (s: InspectorState) => s.searchQuery,
   );

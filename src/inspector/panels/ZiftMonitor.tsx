@@ -23,7 +23,6 @@ import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegist
 import type { AppState } from "@os-core/engine/kernel";
 import { InspectorZiftUI } from "../app";
 import {
-  ChevronDown,
   ChevronRight,
   Circle,
   CircleDot,
@@ -63,9 +62,14 @@ interface TriggerInfo {
   overlayType: string;
 }
 
-function collectZoneCards(appState: AppState): ZoneCard[] {
+interface FocusSlice {
+  activeZoneId: string | null;
+  zones: AppState["os"]["focus"]["zones"];
+}
+
+function collectZoneCards(focus: FocusSlice): ZoneCard[] {
   const zoneIds = [...ZoneRegistry.keys()];
-  const activeZoneId = appState.os.focus.activeZoneId;
+  const activeZoneId = focus.activeZoneId;
   const fieldState = FieldRegistry.get();
 
   // Get kernel registry for commands per scope
@@ -78,7 +82,7 @@ function collectZoneCards(appState: AppState): ZoneCard[] {
     if (!entry) continue;
 
     const items = ZoneRegistry.resolveItems(id);
-    const zoneState = appState.os.focus.zones[id];
+    const zoneState = focus.zones[id];
 
     // Collect callbacks
     const callbacks = collectCallbacks(entry);
@@ -375,13 +379,13 @@ export const ZiftMonitor = memo(() => {
     ZoneRegistry.getSnapshot,
   );
 
-  // Re-render on kernel state change (focus, etc.)
-  const appState = os.useComputed((s: AppState) => s);
+  // Only subscribe to focus slice (activeZoneId + per-zone state)
+  const focus = os.useComputed((s: AppState) => s.os.focus);
 
   const cards = useMemo(
-    () => collectZoneCards(appState),
+    () => collectZoneCards(focus),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [zoneSnapshot, appState],
+    [zoneSnapshot, focus],
   );
 
   // Summary

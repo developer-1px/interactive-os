@@ -128,6 +128,14 @@ export const InspectorScrollUI = scrollZone.bind({
   ],
 });
 
+export function safeDisabledGroups(
+  s: InspectorState | undefined,
+): Set<string> {
+  return s?.disabledGroups instanceof Set
+    ? s.disabledGroups
+    : new Set<string>();
+}
+
 export function selectFilteredTransactions(
   state: InspectorState | undefined,
   transactions: Transaction[],
@@ -135,10 +143,7 @@ export function selectFilteredTransactions(
   if (!state) return transactions;
   let result = transactions;
 
-  const disabledGroups =
-    state.disabledGroups instanceof Set
-      ? state.disabledGroups
-      : new Set<string>();
+  const disabledGroups = safeDisabledGroups(state);
   if (disabledGroups.size > 0) {
     result = result.filter(
       (tx) => !disabledGroups.has(inferSignal(tx).group),
