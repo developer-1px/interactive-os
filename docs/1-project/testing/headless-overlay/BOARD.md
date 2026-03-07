@@ -29,6 +29,8 @@ Risks:
 
 ## Unresolved
 
-- trigger 없이 직접 OS_OVERLAY_OPEN을 dispatch하는 overlay (rare case) — 현재 스코프 외
+(none)
 
 ## Ideas
+
+- trigger 없이 직접 OS_OVERLAY_OPEN을 dispatch하는 overlay (rare case) — 현재 앱에 사례 없음. 필요 시 별도 프로젝트
