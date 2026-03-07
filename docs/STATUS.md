@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-07T19:30
+> Last updated: 2026-03-07T22:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -28,14 +28,13 @@
 | docs-freshness | WP1~WP8 | 03-06 |
 | kernel-docs-sync | — | 03-06 |
 | keyboard-input-isomorphism | — | 03-07 |
-| condition-auto-disabled | 기획 중 (BOARD 없음) | 03-05 |
 
 ### testing
 > `packages/os-devtool/` · `tests/`
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| **headless-page**/headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-06 |
+| **headless-page**/headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
 | lint-zero | T1~T5 Now | 03-06 |
 | test-observability | Scaffold, T1~T4 | 03-05 |
 | replay | Scaffold, T1 | 03-05 |
@@ -61,7 +60,7 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | apg-suite | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
-| apg-dt-standard | — | 03-07 |
+| apg-dt-standard | 🔥 Focus | 03-07 |
 
 ### nondeterministic-paradigm
 > 탐색적 연구
@@ -85,7 +84,7 @@
 | Domains | 6 |
 | Active Projects | 13 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 0 |
+| Active Focus | 1 (apg-dt-standard) |
 | Stale (7d+) | 0 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
