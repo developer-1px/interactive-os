@@ -97,7 +97,9 @@ docs/1-project/[name]/
 | **Light** | 기능, 리팩토링, 버그 | BOARD | ✅ 필수 |
 | **Meta** | 워크플로우, 템플릿, 문서, 분석 | BOARD | ❌ 불필요 |
 
-Default: Light. 코드 산출물 없으면 Meta. 필요 시 escalate.
+**사용자 행동 규칙**: 산출물에 사용자 상호작용(클릭, 키보드, 포커스 등)이 포함되면 **무조건 Light 이상**. showcase/playground/prototype이라도 행동이 있으면 Red/Green 필수. Meta는 순수 문서/워크플로우/분석만 해당.
+
+Default: Light. 코드 산출물 없으면 Meta. 사용자 행동 있으면 Light. 필요 시 escalate.
 
 초기화 완료 확인 (Heavy / Light):
 - [ ] BOARD.md 존재
