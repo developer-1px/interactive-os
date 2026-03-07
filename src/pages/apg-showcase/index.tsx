@@ -63,7 +63,7 @@ const PATTERNS: Record<
   link: { name: "Link", component: LinkPattern, status: "none" },
   listbox: { name: "Listbox", component: ListboxPattern, status: "dt" },
   menu: { name: "Menu", component: MenuPattern, status: "dt" },
-  "menu-button": { name: "Menu Button", component: MenuButtonPattern, status: "test" },
+  "menu-button": { name: "Menu Button", component: MenuButtonPattern, status: "dt" },
   meter: { name: "Meter", component: MeterPattern, status: "dt" },
   radiogroup: { name: "RadioGroup", component: RadioGroupPattern, status: "dt" },
   slider: { name: "Slider", component: SliderPattern, status: "none" },
