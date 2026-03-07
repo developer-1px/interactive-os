@@ -41,12 +41,9 @@ function clearSelected(z: {
 export const OS_ESCAPE = os.defineCommand(
   "OS_ESCAPE",
   (ctx) => (payload: { force?: boolean }) => {
-    // Overlay guard: if any overlay is open, close the topmost one first.
-    // This ensures Escape always dismisses overlays regardless of autoFocus state.
-    const overlayStack = ctx.state.os.overlays?.stack ?? [];
-    if (overlayStack.length > 0 && !payload?.force) {
-      const topOverlay = overlayStack[overlayStack.length - 1];
-      return { dispatch: OS_OVERLAY_CLOSE({ id: topOverlay!.id }) };
+    // Overlay guard: close topmost overlay before any zone dismiss logic.
+    if (ctx.state.os.overlays?.stack?.length && !payload?.force) {
+      return { dispatch: OS_OVERLAY_CLOSE({}) };
     }
 
     const { activeZoneId } = ctx.state.os.focus;
