@@ -22,52 +22,52 @@
 ### os-core
 > `packages/kernel/` · `packages/os-core/` · `packages/os-react/` · `packages/os-sdk/`
 
-| Epic | Project | Phase | Last Activity |
-|------|---------|-------|---------------|
-| — | docs-freshness | WP1~WP8 | 03-06 |
-| — | kernel-docs-sync | — | 03-06 |
-| — | keyboard-input-isomorphism | — | 03-07 |
-| — | condition-auto-disabled | 기획 중 (BOARD 없음) | 03-05 |
+| Project | Phase | Last Activity |
+|---------|-------|---------------|
+| docs-freshness | WP1~WP8 | 03-06 |
+| kernel-docs-sync | — | 03-06 |
+| keyboard-input-isomorphism | — | 03-07 |
+| condition-auto-disabled | 기획 중 (BOARD 없음) | 03-05 |
 
 ### testing
 > `packages/os-devtool/` · `tests/`
 
-| Epic | Project | Phase | Last Activity |
-|------|---------|-------|---------------|
-| headless-page | headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-06 |
-| — | lint-zero | T1~T5 Now | 03-06 |
-| — | test-observability | Scaffold, T1~T4 | 03-05 |
-| — | replay | Scaffold, T1 | 03-05 |
+| Project | Phase | Last Activity |
+|---------|-------|---------------|
+| **headless-page**/headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-06 |
+| lint-zero | T1~T5 Now | 03-06 |
+| test-observability | Scaffold, T1~T4 | 03-05 |
+| replay | Scaffold, T1 | 03-05 |
 
 ### builder
 > `src/` builder 관련
 
-| Epic | Project | Phase | Last Activity |
-|------|---------|-------|---------------|
-| — | builder-v2 | T12, T13, T20 | 03-05 |
-| — | builder-v3 | 기획 완료. 개발 보류 | 03-05 |
+| Project | Phase | Last Activity |
+|---------|-------|---------------|
+| builder-v2 | T12, T13, T20 | 03-05 |
+| builder-v3 | 기획 완료. 개발 보류 | 03-05 |
 
 ### inspector
 > `src/inspector/`
 
-| Epic | Project | Phase | Last Activity |
-|------|---------|-------|---------------|
-| — | inspector-dogfooding | T1~T4 ✅, T5 | 03-05 |
+| Project | Phase | Last Activity |
+|---------|-------|---------------|
+| inspector-dogfooding | T1~T4 ✅, T5 | 03-05 |
 
 ### apg
 > `tests/apg/` · `src/pages/apg-showcase/` · `packages/os-core/` headless role support
 
-| Epic | Project | Phase | Last Activity |
-|------|---------|-------|---------------|
-| — | apg-suite | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
-| — | apg-dt-standard | — | 03-07 |
+| Project | Phase | Last Activity |
+|---------|-------|---------------|
+| apg-suite | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
+| apg-dt-standard | — | 03-07 |
 
 ### nondeterministic-paradigm
 > 탐색적 연구
 
-| Epic | Project | Phase | Last Activity |
-|------|---------|-------|---------------|
-| — | (domain-level) | 탐색 중 | 03-06 |
+| Project | Phase | Last Activity |
+|---------|-------|---------------|
+| (domain-level) | 탐색 중 | 03-06 |
 
 ---
 
