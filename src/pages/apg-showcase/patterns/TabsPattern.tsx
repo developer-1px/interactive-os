@@ -85,7 +85,9 @@ const AutoUI = autoZone.bind({
   options: { select: { followFocus: true } },
 });
 
-const manualZone = TabsApp.createZone("tablist-manual");
+export const TabsManualApp = defineApp("apg-tabs-manual", {});
+
+const manualZone = TabsManualApp.createZone("tablist-manual");
 const ManualUI = manualZone.bind({
   role: "tablist",
   getItems: () => TAB_IDS,
@@ -153,6 +155,16 @@ function TabListSection({ UI, label }: { UI: typeof AutoUI; label: string }) {
           </UI.Item.Content>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ─── Manual-only Component (for headless testing) ───
+
+export function TabsManualPattern() {
+  return (
+    <div className="max-w-2xl">
+      <TabListSection UI={ManualUI} label="Danish Composers" />
     </div>
   );
 }

@@ -14,8 +14,8 @@ Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (acc
 ## Now
 
 - [x] T4: tabs-auto.apg.md + tabs-auto.apg.test.ts — 15 tests (13 pass, 2 fail: I1+A5 OS gaps) + tabindex getAttribute fix ✅
-- [ ] T5: tabs-manual.apg.md + tabs-manual.apg.test.ts 생성
-- [ ] T6: tabs.apg.test.ts 삭제
+- [x] T5: tabs-manual.apg.md + tabs-manual.apg.test.ts — 17 tests (15 pass, 2 fail: I1+A5 OS gaps) + TabsManualApp isolation ✅
+- [x] T6: tabs.apg.test.ts 삭제 ✅
 
 ## Done
 
