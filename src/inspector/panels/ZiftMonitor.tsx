@@ -4,8 +4,7 @@
  * Shows the current page's Zone/Item/Field/Trigger structure
  * as a collapsible card list. Reads directly from OS registries.
  *
- * State managed via InspectorApp (defineApp pattern).
- * collapsedZones: Set<string> — empty = all expanded.
+ * Expand/collapse via OS accordion pattern (aria-expanded).
  *
  * Data sources:
  * - ZoneRegistry (mounted zones, items, callbacks)
@@ -22,11 +21,7 @@ import {
 } from "@os-core/engine/registries/zoneRegistry";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import type { AppState } from "@os-core/engine/kernel";
-import {
-  InspectorApp,
-  type InspectorState,
-  toggleZoneCollapse,
-} from "../app";
+import { InspectorZiftUI } from "../app";
 import {
   ChevronDown,
   ChevronRight,
@@ -170,35 +165,158 @@ function collectCallbacks(entry: ZoneEntry): string[] {
 // Components
 // ═══════════════════════════════════════════════════════════════════
 
-function ZoneCardView({
-  card,
-  collapsed,
-}: {
-  card: ZoneCard;
-  collapsed: boolean;
-}) {
-  const totalDetail =
-    card.items.length + card.commands.length + card.fields.length;
+function ZoneCardDetail({ card }: { card: ZoneCard }) {
+  return (
+    <div className="bg-white">
+      {/* Items */}
+      {card.items.length > 0 && (
+        <div className="px-3 py-1 border-b border-[#f5f5f5]">
+          <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
+            Items
+          </div>
+          {card.items.map((itemId, idx) => {
+            const isFocused = itemId === card.focusedItemId;
+            const isDisabled = card.disabledItems.has(itemId);
+            return (
+              <div
+                key={`${itemId}-${idx}`}
+                className={`flex items-center gap-1.5 py-px ${
+                  isFocused ? "text-[#007acc]" : "text-[#666]"
+                }`}
+              >
+                {isFocused ? (
+                  <CircleDot size={7} className="text-[#007acc] flex-shrink-0" />
+                ) : isDisabled ? (
+                  <Ban size={7} className="text-[#f48771] flex-shrink-0" />
+                ) : (
+                  <Circle size={7} className="text-[#ccc] flex-shrink-0" />
+                )}
+                <span
+                  className={`text-[8px] font-mono truncate ${
+                    isFocused ? "font-bold" : ""
+                  } ${isDisabled ? "line-through text-[#ccc]" : ""}`}
+                >
+                  {itemId}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
+      {/* Commands */}
+      {card.commands.length > 0 && (
+        <div className="px-3 py-1 border-b border-[#f5f5f5]">
+          <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
+            Commands
+          </div>
+          {card.commands.map((type) => (
+            <div key={type} className="flex items-center gap-1.5 py-px">
+              <div className="w-1 h-1 rounded-full bg-[#4ec9b0] flex-shrink-0" />
+              <span className="text-[8px] font-mono text-[#444] truncate">
+                {type}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Callbacks */}
+      {card.callbacks.length > 0 && (
+        <div className="px-3 py-1 border-b border-[#f5f5f5]">
+          <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
+            Callbacks
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {card.callbacks.map((cb) => (
+              <span
+                key={cb}
+                className="text-[7px] font-mono text-[#ce9178] bg-[#ce9178]/5 px-1 py-0.5 rounded border border-[#ce9178]/20"
+              >
+                {cb}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Fields */}
+      {card.fields.length > 0 && (
+        <div className="px-3 py-1 border-b border-[#f5f5f5]">
+          <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
+            Fields
+          </div>
+          {card.fields.map((field) => (
+            <div
+              key={field.name}
+              className="flex items-center justify-between py-px"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-[8px] font-mono text-[#444] truncate">
+                  {field.name}
+                </span>
+                <span className="text-[6px] font-mono text-[#ccc]">
+                  {field.fieldType}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className="text-[8px] font-mono text-[#666] max-w-[100px] truncate">
+                  {String(field.value)}
+                </span>
+                {field.isDirty && (
+                  <span className="text-[6px] font-bold text-[#dcdcaa]">
+                    dirty
+                  </span>
+                )}
+                {!field.isValid && (
+                  <span className="text-[6px] font-bold text-[#f48771]">
+                    err
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Triggers */}
+      {card.triggers.length > 0 && (
+        <div className="px-3 py-1 border-b border-[#f5f5f5]">
+          <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
+            Triggers
+          </div>
+          {card.triggers.map((t) => (
+            <div
+              key={t.triggerId}
+              className="flex items-center gap-1.5 py-px"
+            >
+              <Link size={7} className="text-[#b0b0b0] flex-shrink-0" />
+              <span className="text-[8px] font-mono text-[#444] truncate">
+                {t.triggerId}
+              </span>
+              <span className="text-[6px] text-[#999]">→</span>
+              <span className="text-[7px] font-mono text-[#007acc]">
+                {t.overlayType}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ZoneCardView({ card }: { card: ZoneCard }) {
   return (
     <section className="border-b border-[#e8e8e8]">
-      {/* Zone Header */}
-      <button
-        type="button"
-        onClick={() => os.dispatch(toggleZoneCollapse({ zoneId: card.id }))}
-        className={`w-full flex items-center justify-between px-3 py-1.5 transition-colors
+      {/* Zone Header — OS accordion Item (click toggles aria-expanded) */}
+      <InspectorZiftUI.Item
+        id={card.id}
+        className={`group w-full flex items-center justify-between px-3 py-1.5 transition-colors cursor-pointer
           ${card.isActiveZone ? "bg-[#007acc]/5" : "bg-[#f8f8f8] hover:bg-[#f0f0f0]"}`}
       >
         <div className="flex items-center gap-2">
-          {totalDetail > 0 ? (
-            collapsed ? (
-              <ChevronRight size={10} className="text-[#999] flex-shrink-0" />
-            ) : (
-              <ChevronDown size={10} className="text-[#999] flex-shrink-0" />
-            )
-          ) : (
-            <span className="w-[10px]" />
-          )}
+          <ChevronRight size={10} className="text-[#999] flex-shrink-0 transition-transform group-aria-expanded:rotate-90" />
           <div
             className={`w-1 h-3 rounded-full opacity-60 ${
               card.isActiveZone ? "bg-[#007acc]" : "bg-[#4ec9b0]"
@@ -235,147 +353,12 @@ function ZoneCardView({
             <Link size={8} className="text-[#b0b0b0]" />
           )}
         </div>
-      </button>
+      </InspectorZiftUI.Item>
 
-      {/* Expanded Detail */}
-      {!collapsed && (
-        <div className="bg-white">
-          {/* Items */}
-          {card.items.length > 0 && (
-            <div className="px-3 py-1 border-b border-[#f5f5f5]">
-              <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
-                Items
-              </div>
-              {card.items.map((itemId, idx) => {
-                const isFocused = itemId === card.focusedItemId;
-                const isDisabled = card.disabledItems.has(itemId);
-                return (
-                  <div
-                    key={`${itemId}-${idx}`}
-                    className={`flex items-center gap-1.5 py-px ${
-                      isFocused ? "text-[#007acc]" : "text-[#666]"
-                    }`}
-                  >
-                    {isFocused ? (
-                      <CircleDot size={7} className="text-[#007acc] flex-shrink-0" />
-                    ) : isDisabled ? (
-                      <Ban size={7} className="text-[#f48771] flex-shrink-0" />
-                    ) : (
-                      <Circle size={7} className="text-[#ccc] flex-shrink-0" />
-                    )}
-                    <span
-                      className={`text-[8px] font-mono truncate ${
-                        isFocused ? "font-bold" : ""
-                      } ${isDisabled ? "line-through text-[#ccc]" : ""}`}
-                    >
-                      {itemId}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Commands */}
-          {card.commands.length > 0 && (
-            <div className="px-3 py-1 border-b border-[#f5f5f5]">
-              <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
-                Commands
-              </div>
-              {card.commands.map((type) => (
-                <div key={type} className="flex items-center gap-1.5 py-px">
-                  <div className="w-1 h-1 rounded-full bg-[#4ec9b0] flex-shrink-0" />
-                  <span className="text-[8px] font-mono text-[#444] truncate">
-                    {type}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Callbacks */}
-          {card.callbacks.length > 0 && (
-            <div className="px-3 py-1 border-b border-[#f5f5f5]">
-              <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
-                Callbacks
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {card.callbacks.map((cb) => (
-                  <span
-                    key={cb}
-                    className="text-[7px] font-mono text-[#ce9178] bg-[#ce9178]/5 px-1 py-0.5 rounded border border-[#ce9178]/20"
-                  >
-                    {cb}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Fields */}
-          {card.fields.length > 0 && (
-            <div className="px-3 py-1 border-b border-[#f5f5f5]">
-              <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
-                Fields
-              </div>
-              {card.fields.map((field) => (
-                <div
-                  key={field.name}
-                  className="flex items-center justify-between py-px"
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-[8px] font-mono text-[#444] truncate">
-                      {field.name}
-                    </span>
-                    <span className="text-[6px] font-mono text-[#ccc]">
-                      {field.fieldType}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <span className="text-[8px] font-mono text-[#666] max-w-[100px] truncate">
-                      {String(field.value)}
-                    </span>
-                    {field.isDirty && (
-                      <span className="text-[6px] font-bold text-[#dcdcaa]">
-                        dirty
-                      </span>
-                    )}
-                    {!field.isValid && (
-                      <span className="text-[6px] font-bold text-[#f48771]">
-                        err
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Triggers */}
-          {card.triggers.length > 0 && (
-            <div className="px-3 py-1 border-b border-[#f5f5f5]">
-              <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
-                Triggers
-              </div>
-              {card.triggers.map((t) => (
-                <div
-                  key={t.triggerId}
-                  className="flex items-center gap-1.5 py-px"
-                >
-                  <Link size={7} className="text-[#b0b0b0] flex-shrink-0" />
-                  <span className="text-[8px] font-mono text-[#444] truncate">
-                    {t.triggerId}
-                  </span>
-                  <span className="text-[6px] text-[#999]">→</span>
-                  <span className="text-[7px] font-mono text-[#007acc]">
-                    {t.overlayType}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Expanded Detail — OS-driven visibility via Item.Content */}
+      <InspectorZiftUI.Item.Content for={card.id}>
+        <ZoneCardDetail card={card} />
+      </InspectorZiftUI.Item.Content>
     </section>
   );
 }
@@ -394,12 +377,6 @@ export const ZiftMonitor = memo(() => {
 
   // Re-render on kernel state change (focus, etc.)
   const appState = os.useComputed((s: AppState) => s);
-
-  // Collapse state from InspectorApp (empty Set = all expanded)
-  const collapsedZones = InspectorApp.useComputed(
-    (s: InspectorState) =>
-      s?.collapsedZones instanceof Set ? s.collapsedZones : new Set<string>(),
-  );
 
   const cards = useMemo(
     () => collectZoneCards(appState),
@@ -437,14 +414,12 @@ export const ZiftMonitor = memo(() => {
         </div>
       </div>
 
-      {/* Zone Cards */}
-      {cards.map((card) => (
-        <ZoneCardView
-          key={card.id}
-          card={card}
-          collapsed={collapsedZones.has(card.id)}
-        />
-      ))}
+      {/* Zone Cards — OS accordion drives expand/collapse */}
+      <InspectorZiftUI.Zone>
+        {cards.map((card) => (
+          <ZoneCardView key={card.id} card={card} />
+        ))}
+      </InspectorZiftUI.Zone>
 
       {cards.length === 0 && (
         <div className="flex-1 flex items-center justify-center text-[8px] text-[#ccc] font-mono uppercase tracking-wider">

@@ -1,4 +1,5 @@
 import type { Transaction } from "@kernel/core/transaction";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_ACTIVATE } from "@os-sdk/os";
 import { enableMapSet, produce } from "immer";
@@ -9,7 +10,6 @@ enableMapSet();
 export interface InspectorState {
   searchQuery: string;
   disabledGroups: Set<string>;
-  collapsedZones: Set<string>;
   isUserScrolled: boolean;
   scrollTick: number;
 }
@@ -17,7 +17,6 @@ export interface InspectorState {
 const INITIAL_STATE: InspectorState = {
   searchQuery: "",
   disabledGroups: new Set(),
-  collapsedZones: new Set(),
   isUserScrolled: false,
   scrollTick: 0,
 };
@@ -116,23 +115,9 @@ export const setScrollState = scrollZone.command(
 // ─── Zift Monitor Zone ───
 const ziftZone = InspectorApp.createZone("inspector-zift");
 
-export const toggleZoneCollapse = ziftZone.command(
-  "toggleZoneCollapse",
-  (ctx, payload: { zoneId: string }) => ({
-    state: produce(ctx.state, (draft) => {
-      if (!draft.collapsedZones) draft.collapsedZones = new Set();
-      if (draft.collapsedZones.has(payload.zoneId)) {
-        draft.collapsedZones.delete(payload.zoneId);
-      } else {
-        draft.collapsedZones.add(payload.zoneId);
-      }
-    }),
-  }),
-);
-
 export const InspectorZiftUI = ziftZone.bind({
-  role: "toolbar",
-  options: { inputmap: { click: [OS_ACTIVATE()] } },
+  role: "accordion",
+  getItems: () => [...ZoneRegistry.keys()],
 });
 
 export const InspectorScrollUI = scrollZone.bind({
