@@ -26,16 +26,21 @@
 | **Conquered** | KeyboardEvent | inputmap ✅ | navigation ✅ | editing ✅ | activation ✅ | |
 | | PointerEvent | zone activation ✅ | — | — | click ✅ | |
 | | FocusEvent | active zone ✅ | focus tracking ✅ | — | — | |
+| | element.focus() / tabIndex | tab order ✅ | focus sync ✅ | — | — | |
+| | scrollIntoView | — | scroll to focused ✅ | — | — | |
+| | aria-* / role | zone ARIA ✅ | item ARIA ✅ | field ARIA ✅ | — | |
+| | data-* attributes | zone wiring ✅ | item wiring ✅ | — | trigger wiring ✅ | |
 | | InputEvent | — | — | value change ✅ | — | |
 | | CompositionEvent | — | — | IME guard ✅ | — | |
 | **Discovered** | ClipboardEvent | paste bubbling ✅ | copied items ✅ | — | Ctrl+C/V ✅ | **Clipboard** (transfer buffer) ✅ |
-| | History API | — | — | — | — | **Routing** (URL ↔ state sync) 🔧 |
+| | `<dialog>` / Popover API | overlay zone ✅ | — | — | — | **Overlay** (focus trap, stack, dismiss) ✅ |
+| | History API / popstate | — | — | — | — | **Routing** (URL ↔ state sync) 🔧 |
 | | localStorage | — | — | — | — | **Persistence** (state ↔ storage sync) ✅ |
-| | setTimeout | — | — | — | — | **History** (undo stack, noise filter) ✅ |
+| | *(OS-native)* | — | — | cancel ✅ | — | **History** (undo stack, noise filter) ✅ |
 | **Frontier** | DragEvent | source/target 📋 | dragged item 📋 | — | drag handle 📋 | **DnD** (drop position, visual feedback) 📋 |
 | | TouchEvent | touch zone 📋 | — | — | tap/swipe 📋 | **Gesture** (recognition, multi-touch) 📋 |
 | | WheelEvent | scroll zone 📋 | visible item 📋 | — | — | **Viewport** (virtual list, scroll position) 📋 |
-| | scroll | scroll zone 📋 | visible item 📋 | — | — | **Viewport** 📋 |
+| | scroll / scrollIntoView | scroll zone 📋 | visible item 📋 | — | — | **Viewport** 📋 |
 | | IntersectionObserver | — | visibility 📋 | — | — | **Viewport** 📋 |
 | | ResizeObserver | zone resize 📋 | — | — | — | **Responsive** (breakpoint, layout rule) 📋 |
 | | matchMedia | — | — | — | — | **Preference** (reduced-motion, dark mode) 📋 |
@@ -43,8 +48,8 @@
 | | Selection API | — | — | text range 📋 | — | **TextRange** (text ≠ item selection) 📋 |
 | | Web Audio | — | — | — | — | **Sound** (auditory feedback) 📋 |
 
-**Conquered** 5종 — ZIFT만으로 완전히 추상화됨
-**Discovered** 4종 — ZIFT를 관통하며 새 Pattern 차원을 추가
+**Conquered** 9종 — ZIFT만으로 완전히 추상화됨 (입력 5 + 출력 4)
+**Discovered** 5종 — ZIFT를 관통하며 새 Pattern 차원을 추가
 **Frontier** 10종 — 8개 미발견 개념이 잠들어 있음
 
 ---
