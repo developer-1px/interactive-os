@@ -13,8 +13,6 @@ Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (acc
 
 ## Now
 
-- [ ] T1: accordion.apg.md 보강 — ARIA(A1-A5) + 초기상태(I1-I2) + 패널동기화(P1-P2) DT 추가
-- [ ] T2: accordion.apg.test.ts — T1의 새 DT 행에 대한 테스트 추가
 - [ ] T3: /apg 워크플로우 재작성 (.claude/commands/apg.md + .agent/workflows/apg.md)
 - [ ] T4: tabs-auto.apg.md + tabs-auto.apg.test.ts 생성
 - [ ] T5: tabs-manual.apg.md + tabs-manual.apg.test.ts 생성
@@ -22,6 +20,11 @@ Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (acc
 
 ## Done
 
+- [x] T1: accordion.apg.md 보강 — I1-I2, P1-P2, A1-A5 Signal+Test 추가. 24행 DT 완성
+- [x] T2: accordion.apg.test.ts — +5 tests (18 total). 17 pass, 1 fail (I1: OS gap) ✅
+
 ## Unresolved
+
+- I1 OS gap: ExpandConfig has no `initial` field → accordion first section not expanded on mount
 
 ## Ideas
