@@ -78,7 +78,7 @@ export interface ZoneEntry {
    * the OS automatically resolves to the nearest neighbor.
    *
    * Registered by createCollectionZone (from ops.getItems) or manually
-   * via createOsPage.setItems.
+   * via createTestBench.setItems.
    */
   getItems?: () => string[];
   /** Expandable item accessor — returns IDs of items that have aria-expanded */

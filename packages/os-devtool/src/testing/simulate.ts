@@ -1,7 +1,7 @@
 /**
  * Headless Simulate — interaction simulation + zone registration.
  *
- * Used by test infrastructure only (createOsPage, defineApp/page).
+ * Used by test infrastructure only (createTestBench, createHeadlessPage).
  * NOT imported by production components.
  */
 
