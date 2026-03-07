@@ -246,12 +246,12 @@ function ZoneCardView({
               <div className="text-[7px] font-bold text-[#b0b0b0] uppercase tracking-[0.15em] mb-0.5">
                 Items
               </div>
-              {card.items.map((itemId) => {
+              {card.items.map((itemId, idx) => {
                 const isFocused = itemId === card.focusedItemId;
                 const isDisabled = card.disabledItems.has(itemId);
                 return (
                   <div
-                    key={itemId}
+                    key={`${itemId}-${idx}`}
                     className={`flex items-center gap-1.5 py-px ${
                       isFocused ? "text-[#007acc]" : "text-[#666]"
                     }`}

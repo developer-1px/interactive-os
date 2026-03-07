@@ -120,6 +120,7 @@ export const toggleZoneCollapse = ziftZone.command(
   "toggleZoneCollapse",
   (ctx, payload: { zoneId: string }) => ({
     state: produce(ctx.state, (draft) => {
+      if (!draft.collapsedZones) draft.collapsedZones = new Set();
       if (draft.collapsedZones.has(payload.zoneId)) {
         draft.collapsedZones.delete(payload.zoneId);
       } else {
