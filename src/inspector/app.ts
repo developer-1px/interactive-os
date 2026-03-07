@@ -116,7 +116,7 @@ export const setScrollState = scrollZone.command(
 const ziftZone = InspectorApp.createZone("inspector-zift");
 
 export const InspectorZiftUI = ziftZone.bind({
-  role: "accordion",
+  role: "disclosure",
   getItems: () => [...ZoneRegistry.keys()],
 });
 

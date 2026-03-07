@@ -13,7 +13,8 @@
  * - os.getState() (focused zone, focused item per zone)
  */
 
-import { os } from "@os-sdk/os";
+import { ensureZone, os } from "@os-sdk/os";
+import { produce } from "immer";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import {
   ZoneRegistry,
@@ -29,7 +30,7 @@ import {
   Ban,
   Link,
 } from "lucide-react";
-import { memo, useMemo, useSyncExternalStore } from "react";
+import { memo, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // Data Collection
@@ -387,6 +388,22 @@ export const ZiftMonitor = memo(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [zoneSnapshot, focus],
   );
+
+  // Expand all zone cards on first mount (disclosure default = collapsed)
+  const didInit = useRef(false);
+  useEffect(() => {
+    if (didInit.current || cards.length === 0) return;
+    didInit.current = true;
+    os.setState((s: AppState) =>
+      produce(s, (draft) => {
+        const z = ensureZone(draft.os, "inspector-zift");
+        for (const card of cards) {
+          if (!z.items[card.id]) z.items[card.id] = {};
+          z.items[card.id]!["aria-expanded"] = true;
+        }
+      }),
+    );
+  }, [cards]);
 
   // Summary
   let totalItems = 0;
