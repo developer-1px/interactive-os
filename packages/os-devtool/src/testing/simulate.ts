@@ -246,9 +246,17 @@ export function simulateClick(
     ? JSON.parse(JSON.stringify(kernel.getState().os))
     : null;
 
-  // Check item callbacks first (triggers have onActivate but are NOT zone items)
+  // Check item callbacks (triggers with onActivate).
+  // If the trigger is also a zone item, fall through to zone handling first
+  // so that activeZoneId + focusedItemId are set before onActivate dispatches
+  // (critical for overlay triggers — focusStack must save the invoker).
   const itemCb = ZoneRegistry.findItemCallback(itemId);
-  if (itemCb?.onActivate) {
+  const triggerZoneId = itemCb?.onActivate
+    ? ZoneRegistry.findZoneByItemId(itemId)
+    : null;
+
+  if (itemCb?.onActivate && !triggerZoneId) {
+    // Standalone trigger (not in any zone) — fast path
     kernel.dispatch(itemCb.onActivate);
     if (_observer && before) {
       _observer({
@@ -311,6 +319,12 @@ export function simulateClick(
 
   const clickResult = resolveClick(clickInput);
   dispatchResult(kernel, clickResult);
+
+  // Dispatch trigger onActivate AFTER zone focus is set
+  // (overlay triggers need invoker saved in focusStack first)
+  if (itemCb?.onActivate && triggerZoneId) {
+    kernel.dispatch(itemCb.onActivate);
+  }
 
   if (_observer && before) {
     _observer({

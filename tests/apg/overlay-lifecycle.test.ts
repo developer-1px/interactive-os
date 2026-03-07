@@ -66,10 +66,10 @@ function createDialogApp() {
 describe("Overlay Lifecycle: trigger click → auto-activate", () => {
   it("clicking trigger activates overlay zone", () => {
     const page = createDialogApp();
-    // Toolbar should be active initially
-    expect(page.activeZoneId()).toBe("toolbar");
+    // goto() does not set activeZoneId — click does
+    expect(page.activeZoneId()).toBeNull();
 
-    // Click trigger → overlay should auto-activate
+    // Click trigger → zone activates (toolbar), then overlay auto-activates (dialog)
     page.click("open-dialog-btn");
     expect(page.activeZoneId()).toBe("dialog");
   });

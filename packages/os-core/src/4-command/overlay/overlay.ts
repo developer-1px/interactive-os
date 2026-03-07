@@ -12,9 +12,11 @@
  */
 
 import { resolveTriggerRole } from "@os-core/engine/registries/triggerRegistry";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { produce } from "immer";
 import { os } from "../../engine/kernel";
 import type { OverlayEntry } from "../../schema/state/OSState";
+import { ensureZone } from "../../schema/state/utils";
 import { applyFocusPop, applyFocusPush } from "../focus/focusStackOps";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -47,6 +49,22 @@ export const OS_OVERLAY_OPEN = os.defineCommand(
           ...(payload.triggerId ? { triggerId: payload.triggerId } : {}),
         });
         applyFocusPush(draft);
+
+        // Auto-activate overlay zone: set activeZoneId + focusedItemId
+        const overlayEntry = ZoneRegistry.get(payload.id);
+        if (overlayEntry) {
+          draft.os.focus.activeZoneId = payload.id;
+          const items = overlayEntry.getItems?.() ?? [];
+          if (items.length > 0) {
+            const targetItem =
+              payload.entry === "last"
+                ? items[items.length - 1]!
+                : items[0]!;
+            const z = ensureZone(draft.os, payload.id);
+            z.focusedItemId = targetItem;
+            z.lastFocusedId = targetItem;
+          }
+        }
       }),
     };
   },
