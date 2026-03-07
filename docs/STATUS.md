@@ -13,8 +13,8 @@
 
 ## 🔥 Active Focus
 
-**apg-dt-standard** — 18개 패턴 DT 표준 전환 (T8-T25)
-→ `docs/1-project/apg/apg-dt-standard/BOARD.md`
+**apg-suite** — WP1-WP2 Backlog
+→ `docs/1-project/apg/apg-suite/BOARD.md`
 
 ---
 
@@ -60,7 +60,7 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | apg-suite | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
-| apg-dt-standard | 🔥 Focus | 03-07 |
+| ~~apg-dt-standard~~ | ✅ Archived (W10) | 03-07 |
 
 ### nondeterministic-paradigm
 > 탐색적 연구
@@ -84,7 +84,7 @@
 | Domains | 6 |
 | Active Projects | 13 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 1 (apg-dt-standard) |
+| Active Focus | 1 (apg-suite) |
 | Stale (7d+) | 0 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
