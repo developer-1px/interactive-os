@@ -178,7 +178,7 @@
 |---------|---------|----------|---------|--------|
 | `OS_ACTIVATE` | `{ targetId }` | onAction 콜백 dispatch | `dispatch: onAction` | ✅ |
 | `OS_CHECK` | `{ targetId }` | onCheck 콜백 dispatch | `dispatch: onCheck` | ✅ |
-| `OS_ESCAPE` | `{}` | dismiss.escape 설정에 따라: close→onDismiss, deselect→selection clear | `dispatch: onDismiss` | ✅ |
+| `OS_ESCAPE` | `{ force? }` | overlay stack 비어있지 않으면 OS_OVERLAY_CLOSE 우선. 이후 dismiss.escape 설정: close→onDismiss, deselect→selection clear | `dispatch: onDismiss` | ✅ |
 | `OS_DELETE` | `{}` | onDelete 콜백 dispatch (선택된 아이템 대상) | `dispatch: onDelete` | ✅ |
 | `OS_MOVE_UP` | `{}` | onMoveUp 콜백 dispatch | `dispatch: onMoveUp` | ✅ |
 | `OS_MOVE_DOWN` | `{}` | onMoveDown 콜백 dispatch | `dispatch: onMoveDown` | ✅ |

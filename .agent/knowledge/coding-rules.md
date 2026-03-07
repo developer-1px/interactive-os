@@ -20,3 +20,7 @@
 5. **Dead code 검색 범위 = 프로젝트 루트**: 사용처를 찾을 때 `packages/`만 grep하면 `src/`의 앱 사용처를 놓친다. 반드시 `./`에서 검색.
 
 6. **순환 의존성 해소**: 두 파일이 서로 import하면, 공유 타입을 `types.ts`로 분리하여 순환을 끊는다. `import type`만의 순환은 런타임 무해하지만, madge가 탐지하므로 가능하면 분리한다.
+
+## Props 위생
+
+7. **`...rest` spread에 콜백 prop이 묻히는 패턴 금지.** `onActivate`, `onChange` 등 콜백성 prop을 destructure하지 않으면 `...rest`가 DOM element에 spread하여 (a) 콜백이 실행되지 않고 (b) invalid HTML attribute 경고가 발생한다. **콜백 prop은 반드시 명시적으로 destructure한다.**
