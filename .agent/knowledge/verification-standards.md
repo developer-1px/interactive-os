@@ -2,6 +2,7 @@
 
 > 이 문서는 rules.md의 "100% Observable" 원칙을 구체화하는 검증 기준이다.
 > 테스트를 작성하거나, 리팩토링 가치를 판단하거나, APG 패턴을 구현할 때 참조한다.
+> 공식 문서: `docs/2-area/official/os/headless-page.md`
 
 ---
 

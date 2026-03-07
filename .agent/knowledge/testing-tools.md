@@ -1,6 +1,7 @@
 # Testing Tools — 테스트 도구 선택 기준과 코드 템플릿
 
 > 테스트를 작성할 때 어떤 도구를 쓸지, 어떤 구조로 쓸지의 기준. 프로젝트별 도구 설정은 §Config에.
+> 공식 문서: `docs/2-area/official/os/headless-page.md`
 
 ---
 
