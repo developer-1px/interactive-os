@@ -9,6 +9,7 @@ enableMapSet();
 export interface InspectorState {
   searchQuery: string;
   disabledGroups: Set<string>;
+  collapsedZones: Set<string>;
   isUserScrolled: boolean;
   scrollTick: number;
 }
@@ -16,6 +17,7 @@ export interface InspectorState {
 const INITIAL_STATE: InspectorState = {
   searchQuery: "",
   disabledGroups: new Set(),
+  collapsedZones: new Set(),
   isUserScrolled: false,
   scrollTick: 0,
 };
@@ -111,6 +113,27 @@ export const setScrollState = scrollZone.command(
   }),
 );
 
+// ─── Zift Monitor Zone ───
+const ziftZone = InspectorApp.createZone("inspector-zift");
+
+export const toggleZoneCollapse = ziftZone.command(
+  "toggleZoneCollapse",
+  (ctx, payload: { zoneId: string }) => ({
+    state: produce(ctx.state, (draft) => {
+      if (draft.collapsedZones.has(payload.zoneId)) {
+        draft.collapsedZones.delete(payload.zoneId);
+      } else {
+        draft.collapsedZones.add(payload.zoneId);
+      }
+    }),
+  }),
+);
+
+export const InspectorZiftUI = ziftZone.bind({
+  role: "toolbar",
+  options: { inputmap: { click: [OS_ACTIVATE()] } },
+});
+
 export const InspectorScrollUI = scrollZone.bind({
   role: "toolbar", // using a generic role
   options: { inputmap: { click: [OS_ACTIVATE()] } },
@@ -120,19 +143,25 @@ export const InspectorScrollUI = scrollZone.bind({
 });
 
 export function selectFilteredTransactions(
-  state: InspectorState,
+  state: InspectorState | undefined,
   transactions: Transaction[],
 ): Transaction[] {
+  if (!state) return transactions;
   let result = transactions;
 
-  if (state.disabledGroups.size > 0) {
+  const disabledGroups =
+    state.disabledGroups instanceof Set
+      ? state.disabledGroups
+      : new Set<string>();
+  if (disabledGroups.size > 0) {
     result = result.filter(
-      (tx) => !state.disabledGroups.has(inferSignal(tx).group),
+      (tx) => !disabledGroups.has(inferSignal(tx).group),
     );
   }
 
-  if (state.searchQuery.trim()) {
-    const q = state.searchQuery.toLowerCase();
+  const query = state.searchQuery ?? "";
+  if (query.trim()) {
+    const q = query.toLowerCase();
     result = result.filter((tx) => {
       const signal = inferSignal(tx);
       if (signal.command.type.toLowerCase().includes(q)) return true;

@@ -4,6 +4,9 @@
  * Shows the current page's Zone/Item/Field/Trigger structure
  * as a collapsible card list. Reads directly from OS registries.
  *
+ * State managed via InspectorApp (defineApp pattern).
+ * collapsedZones: Set<string> — empty = all expanded.
+ *
  * Data sources:
  * - ZoneRegistry (mounted zones, items, callbacks)
  * - FieldRegistry (field entries, values, dirty state)
@@ -20,6 +23,11 @@ import {
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import type { AppState } from "@os-core/engine/kernel";
 import {
+  InspectorApp,
+  type InspectorState,
+  toggleZoneCollapse,
+} from "../app";
+import {
   ChevronDown,
   ChevronRight,
   Circle,
@@ -27,7 +35,7 @@ import {
   Ban,
   Link,
 } from "lucide-react";
-import { memo, useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { memo, useMemo, useSyncExternalStore } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // Data Collection
@@ -99,7 +107,7 @@ function collectZoneCards(appState: AppState): ZoneCard[] {
     }
     // Also check if any field name matches zone id pattern
     for (const [fieldId, fieldEntry] of fieldState.fields) {
-      if (fieldId === entry.fieldId) continue; // already added
+      if (fieldId === entry.fieldId) continue;
       if (fieldId.startsWith(id)) {
         fields.push({
           name: fieldEntry.config.name,
@@ -162,10 +170,13 @@ function collectCallbacks(entry: ZoneEntry): string[] {
 // Components
 // ═══════════════════════════════════════════════════════════════════
 
-function ZoneCardView({ card }: { card: ZoneCard }) {
-  const [collapsed, setCollapsed] = useState(true);
-  const toggle = useCallback(() => setCollapsed((c) => !c), []);
-
+function ZoneCardView({
+  card,
+  collapsed,
+}: {
+  card: ZoneCard;
+  collapsed: boolean;
+}) {
   const totalDetail =
     card.items.length + card.commands.length + card.fields.length;
 
@@ -174,7 +185,7 @@ function ZoneCardView({ card }: { card: ZoneCard }) {
       {/* Zone Header */}
       <button
         type="button"
-        onClick={toggle}
+        onClick={() => os.dispatch(toggleZoneCollapse({ zoneId: card.id }))}
         className={`w-full flex items-center justify-between px-3 py-1.5 transition-colors
           ${card.isActiveZone ? "bg-[#007acc]/5" : "bg-[#f8f8f8] hover:bg-[#f0f0f0]"}`}
       >
@@ -384,6 +395,12 @@ export const ZiftMonitor = memo(() => {
   // Re-render on kernel state change (focus, etc.)
   const appState = os.useComputed((s: AppState) => s);
 
+  // Collapse state from InspectorApp (empty Set = all expanded)
+  const collapsedZones = InspectorApp.useComputed(
+    (s: InspectorState) =>
+      s?.collapsedZones instanceof Set ? s.collapsedZones : new Set<string>(),
+  );
+
   const cards = useMemo(
     () => collectZoneCards(appState),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -422,7 +439,11 @@ export const ZiftMonitor = memo(() => {
 
       {/* Zone Cards */}
       {cards.map((card) => (
-        <ZoneCardView key={card.id} card={card} />
+        <ZoneCardView
+          key={card.id}
+          card={card}
+          collapsed={collapsedZones.has(card.id)}
+        />
       ))}
 
       {cards.length === 0 && (
