@@ -54,7 +54,7 @@ const PATTERNS: Record<
   breadcrumb: { name: "Breadcrumb", component: BreadcrumbPattern, status: "none" },
   button: { name: "Button", component: ButtonPattern, status: "dt" },
   carousel: { name: "Carousel", component: CarouselPattern, status: "test" },
-  checkbox: { name: "Checkbox", component: CheckboxPattern, status: "test" },
+  checkbox: { name: "Checkbox", component: CheckboxPattern, status: "dt" },
   composite: { name: "Composite", component: CompositePattern, status: "none" },
   disclosure: { name: "Disclosure", component: DisclosurePattern, status: "test" },
   feed: { name: "Feed", component: FeedPattern, status: "test" },
