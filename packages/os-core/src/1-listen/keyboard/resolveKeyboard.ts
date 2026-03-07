@@ -47,9 +47,7 @@ export interface KeyboardInput {
   activeFieldType: FieldType | null;
 
   // ─── Item layer ───
-  focusedItemRole: string | null;
   focusedItemId: string | null;
-  focusedItemExpanded: boolean | null;
 
   activeZoneFocusedItemId: string | null;
   /** inputmap — APG keyboard interaction table: input → command[] */

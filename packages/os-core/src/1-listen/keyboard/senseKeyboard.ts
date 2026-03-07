@@ -46,22 +46,19 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
   // Field layer: editing field id (from OS state, not DOM)
   const editingFieldId = zone?.editingItemId ?? null;
 
-  // Item layer: expanded state
+  // Item layer
   const focusedItemId = itemEl?.id ?? null;
   const isFocusedExpandable =
     focusedItemId && activeZoneId
       ? ZoneRegistry.isExpandable(activeZoneId, focusedItemId)
       : false;
-  const focusedItemExpanded =
-    isFocusedExpandable && focusedItemId
-      ? (zone?.items?.[focusedItemId]?.["aria-expanded"] ?? false)
-      : null;
 
   // Role → FieldType mapping for always-active Fields
   const itemRole = itemEl?.getAttribute("role") ?? null;
   const activeFieldType = itemRole
     ? (ROLE_FIELD_TYPE_MAP[itemRole] ?? null)
     : null;
+
 
   // Overlay stack for trigger open/close detection
   const overlayStack = os.getState().os?.overlays?.stack ?? [];
@@ -84,9 +81,7 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
       target.getAttribute("role") === "combobox",
     editingFieldId,
     activeFieldType,
-    focusedItemRole: itemRole,
     focusedItemId,
-    focusedItemExpanded,
     activeZoneFocusedItemId: zone?.focusedItemId ?? null,
     /** inputmap — APG keyboard interaction table: input → command[] */
     activeZoneInputmap: entry?.config?.inputmap ?? null,
@@ -102,18 +97,18 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
       undefined,
     cursor: zone?.focusedItemId
       ? {
-          focusId: zone.focusedItemId,
-          selection: Object.entries(zone.items ?? {})
-            .filter(([, s]) => s?.["aria-selected"])
-            .map(([id]) => id),
-          anchor: zone.selectionAnchor ?? null,
-          isExpandable: isFocusedExpandable,
-          isDisabled:
-            focusedItemId && activeZoneId
-              ? ZoneRegistry.isDisabled(activeZoneId, focusedItemId)
-              : false,
-          treeLevel: undefined,
-        }
+        focusId: zone.focusedItemId,
+        selection: Object.entries(zone.items ?? {})
+          .filter(([, s]) => s?.["aria-selected"])
+          .map(([id]) => id),
+        anchor: zone.selectionAnchor ?? null,
+        isExpandable: isFocusedExpandable,
+        isDisabled:
+          focusedItemId && activeZoneId
+            ? ZoneRegistry.isDisabled(activeZoneId, focusedItemId)
+            : false,
+        treeLevel: undefined,
+      }
       : null,
   };
 }

@@ -19,6 +19,7 @@ import {
   resolveMouse,
 } from "@os-core/1-listen/mouse/resolveMouse";
 import { normalizeKeyDefinition } from "@os-core/2-resolve/getCanonicalKey";
+import { isKeyDelegatedToOS } from "@os-core/2-resolve/fieldKeyOwnership";
 import { ROLE_FIELD_TYPE_MAP } from "@os-core/2-resolve/resolveFieldKey";
 import {
   readActiveZoneId,
@@ -46,6 +47,7 @@ import {
   type ZoneRole,
 } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Interaction Observer
@@ -125,13 +127,12 @@ export function simulateKeyPress(kernel: HeadlessKernel, rawKey: string): void {
   const entry = activeZoneId ? ZoneRegistry.get(activeZoneId) : undefined;
   const childRole = entry?.role ? getChildRole(entry.role) : undefined;
 
-  const editingFieldId = entry?.fieldId ?? null;
+  // Mirror senseKeyboard.ts ground truth:
+  // 1. zone?.editingItemId — OS state set by OS_FIELD_START_EDIT (inline editing)
+  // 2. entry?.fieldId — always-active field (draft, search zones)
+  const editingFieldId = zone?.editingItemId ?? entry?.fieldId ?? null;
 
   const focusedId = zone?.focusedItemId ?? null;
-  const isFocusedExpandable =
-    focusedId && activeZoneId
-      ? ZoneRegistry.isExpandable(activeZoneId, focusedId)
-      : false;
 
   // Role → FieldType mapping for always-active Fields
   const activeFieldType = childRole
@@ -142,18 +143,19 @@ export function simulateKeyPress(kernel: HeadlessKernel, rawKey: string): void {
     canonicalKey: key,
     key,
     isEditing: !!editingFieldId,
-    isFieldActive: false,
+    // Mirror senseKeyboard.ts: resolveIsEditingForKey(target, key)
+    // Pure equivalent: if editing, check if the key is NOT delegated to OS
+    // (i.e., the field absorbs it)
+    isFieldActive: editingFieldId
+      ? !isKeyDelegatedToOS(key, FieldRegistry.getField(editingFieldId)?.config.fieldType ?? "inline")
+      : false,
     isComposing: false,
     isDefaultPrevented: false,
     isInspector: false,
     isCombobox: false,
     editingFieldId,
     activeFieldType,
-    focusedItemRole: childRole ?? null,
     focusedItemId: focusedId,
-    focusedItemExpanded: isFocusedExpandable
-      ? (zone?.items?.[focusedId!]?.["aria-expanded"] ?? false)
-      : null,
     activeZoneFocusedItemId: focusedId,
     /** inputmap — APG keyboard interaction table: input → command[] */
     activeZoneInputmap: entry?.config?.inputmap ?? null,
