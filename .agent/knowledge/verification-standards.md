@@ -63,8 +63,8 @@ tests/                         ← 유일한 테스트 루트
    - **끝**: `locator().toBeFocused()`, `locator().toHaveAttribute()` — ARIA 속성 검증
    - **`page.goto(url)` = Playwright 동형. URL만 받는다.** zone setup은 `page.setupZone()`으로 분리. `goto`에 zoneId를 넘기는 것은 금지.
    - `dispatch()`, `getState()`, `setState()` — OS 내부 우회이므로 테스트 코드에서 금지. 예외 없음.
-   - `createOsPage()` — 삭제 대상. `createHeadlessPage()`가 유일한 OS 테스트 팩토리
-   - `createPage(app)` = 앱 통합 테스트 (Builder, Todo)
+   - `createHeadlessPage()` = OS 테스트 팩토리 (유일)
+   - `createHeadlessPage(app, component)` = 앱 통합 테스트 (Builder, Todo)
    - **순수 함수 테스트는 page 불필요.** `findBlockInfo`, `parseHashToPath`, `i18n` 등 상태·상호작용이 없는 순수 함수는 직접 호출이 정당하다. `tests/unit/`에 배치.
    - **위배 시**: dispatch를 쓰면 OS Pipeline(listen→resolve→inject→command→project)을 건너뛰어 "vitest에서 통과하지만 브라우저에서 실패"하는 거짓 GREEN이 된다.
 

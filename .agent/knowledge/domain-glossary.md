@@ -329,7 +329,7 @@ zone.bind({
 | `packages/os-react/src/1-listen/` | React 어댑터 (Listeners) |
 | `packages/os-react/src/6-project/` | React 컴포넌트 (ZIFT 프리미티브) |
 | `packages/os-sdk/src/app/` | App Framework (defineApp, modules) |
-| `packages/os-devtool/src/testing/` | Testing (createOsPage, createHeadlessPage) |
+| `packages/os-devtool/src/testing/` | Testing (createHeadlessPage, createTestBench) |
 
 ---
 

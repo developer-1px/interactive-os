@@ -171,7 +171,7 @@ TodoApp (defineApp)
 | `onClick` 핸들러 | Zone의 `onAction`, `onCheck`, `onDelete` 콜백 |
 | `document.querySelector` | 커맨드 ctx.inject() 또는 커널 state |
 | `addEventListener("keydown")` | OS KeyboardListener → 커맨드 파이프라인 |
-| Testing Library `render()` | `createOsPage()` headless 테스트 |
+| Testing Library `render()` | `createHeadlessPage()` headless 테스트 |
 
 **판단 기준**: "이것을 순수 React로 만들 수 있는가?"
 - **YES** → OS가 부족하다. OS에 뭘 추가해야 하는지 먼저 고민
@@ -181,47 +181,32 @@ TodoApp (defineApp)
 
 ## 5. Headless 검증 패턴
 
-### createOsPage — OS 전용 headless 테스트
+> 공식 문서: `docs/2-area/official/os/headless-page.md`
+
+### createHeadlessPage — DOM 없는 Playwright 동형 테스트
 
 ```typescript
-import { createOsPage } from "@os/createOsPage";
+import { createHeadlessPage } from "@os-devtool/testing";
 
 test("Arrow Down moves focus", () => {
-  const page = createOsPage();
-  page.goto("my-zone", { items: ["a", "b", "c"], role: "listbox" });
+  const page = createHeadlessPage();
+  page.setupZone("my-zone", { items: ["a", "b", "c"], role: "listbox" });
 
-  page.press("ArrowDown");
+  page.keyboard.press("ArrowDown");
   expect(page.focusedItemId()).toBe("b");
-
-  page.press("ArrowDown");
-  expect(page.focusedItemId()).toBe("c");
 });
 ```
-
-### OsPage API 요약
-
-| 메서드 | 역할 |
-|--------|------|
-| `page.goto(zoneId, opts)` | Zone에 진입. items, role, config 설정 |
-| `page.press(key)` | 키 입력 시뮬레이션 |
-| `page.click(itemId, opts?)` | 클릭 시뮬레이션 (shift/meta/ctrl) |
-| `page.attrs(itemId)` | ARIA 속성 조회 (focused, selected, expanded 등) |
-| `page.focusedItemId()` | 현재 포커스된 아이템 ID |
-| `page.selection()` | 선택된 아이템 목록 |
-| `page.activeZoneId()` | 활성 Zone ID |
-| `page.dispatch(cmd)` | 커맨드 직접 디스패치 |
 
 ### Red→Green 사이클
 
 ```typescript
 // 1. Red — 기대 동작을 먼저 테스트로 작성
 test("Enter activates item", () => {
-  const page = createOsPage();
-  const onAction = vi.fn();
-  page.goto("zone", { items: ["a", "b"], role: "listbox", onAction });
+  const page = createHeadlessPage();
+  page.setupZone("zone", { items: ["a", "b"], role: "listbox" });
 
-  page.press("Enter");
-  expect(onAction).toHaveBeenCalled();  // 🔴 Red
+  page.keyboard.press("Enter");
+  // 🔴 Red — onAction 동작 검증
 });
 
 // 2. Green — OS 커맨드/설정을 구현하여 통과
@@ -259,14 +244,14 @@ test("Enter activates item", () => {
 |------|------|
 | CRUD/Clipboard/Ordering 전체 패턴 | `src/apps/todo/app.ts` (벤치마크) |
 | Tree 네비게이션, 계층 구조 | `src/apps/builder/app.ts` + `src/docs-viewer/app.ts` |
-| Dialog/Menu/Overlay 패턴 | `docs/2-area/20-os/23-6-project/02-primitives-detail.md` |
-| LLM이 잘 쓰는 API 설계 원칙 | `docs/2-area/20-os/23-6-project/03-llm-friendly-design.md` |
+| Dialog/Menu/Overlay 패턴 | `docs/2-area/official/os/SPEC.md` §7 Role Preset Matrix |
+| ZIFT 스펙 | `docs/2-area/official/os/zift-spec.md` |
 
 ### 테스트
 
 | 상황 | 참조 |
 |------|------|
-| createOsPage 전체 API | `packages/os-devtool/src/testing/createOsPage.ts` (OsPage interface) |
+| HeadlessPage 전체 API | `docs/2-area/official/os/headless-page.md` |
 | APG 계약 테스트 사례 | `tests/apg/*.apg.test.ts` |
-| 앱 통합 테스트 사례 | `src/apps/todo/tests/` |
+| 앱 통합 테스트 사례 | `tests/headless/apps/todo/` |
 

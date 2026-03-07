@@ -14,7 +14,7 @@
 
 | 질문 | 예 → | 아니오 → |
 |------|------|----------|
-| 앱의 Zone/bind/keybinding을 검증하는가? | **Tier 2** `createPage(App, UI)` | **Tier 1** `createHeadlessPage()` |
+| 앱의 Zone/bind/keybinding을 검증하는가? | **Tier 2** `createHeadlessPage(App, UI)` | **Tier 1** `createHeadlessPage()` |
 
 ### Tier 1: OS 커널 테스트
 
@@ -50,7 +50,7 @@ describe("Feature: [태스크명]", () => {
 /**
  * @spec docs/1-project/[name]/spec.md
  */
-import { createPage } from "@os/defineApp.page";
+import { createHeadlessPage } from "@os-devtool/testing";
 import { BuilderApp } from "@apps/builder/app";
 import { BuilderUI } from "@apps/builder/BuilderUI";
 
@@ -58,7 +58,7 @@ describe("Feature: [태스크명]", () => {
   let page: AppPage<BuilderState>;
 
   beforeEach(() => {
-    page = createPage(BuilderApp, BuilderUI);
+    page = createHeadlessPage(BuilderApp, BuilderUI);
     page.goto("/builder");  // URL only — Playwright 동형
   });
 
@@ -90,7 +90,7 @@ describe("Feature: [태스크명]", () => {
 
 | 함정 | 결과 | 대응 | 발견일 |
 |------|------|------|--------|
-| **Tier 혼동** | `createOsPage`로 앱 기능 테스트 → 커널만 검증됨 → browser에서 실패 | 도구 선택 기준 표 참조 | 2026-02-25 |
+| **Tier 혼동** | Tier 1(OS-only)로 앱 기능 테스트 → 커널만 검증됨 → browser에서 실패 | 도구 선택 기준 표 참조 | 2026-02-25 |
 
 ## Precedents
 
