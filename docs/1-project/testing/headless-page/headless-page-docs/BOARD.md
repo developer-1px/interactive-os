@@ -16,6 +16,7 @@ Before → After:
 - [x] T1: 공식 문서 작성 — `docs/2-area/official/os/headless-page.md` 생성. Why/What/Architecture/API/Links 포함 ✅
 - [x] T2: inbox 보고서 정리 — `0-inbox/2-[report]` → `notes/2026-0306-[report]-os-testing-architecture-status.md` 이동 ✅
 - [x] T3: knowledge 파일 정합성 — `testing-tools.md`, `verification-standards.md` 모두 공식 문서 link 추가 ✅
+- [x] T4: createOsPage 레거시 퍼지 — 7 knowledge + 1 workflow에서 deprecated 참조 전면 제거. 0 잔여 ✅
 
 ## Unresolved
 
