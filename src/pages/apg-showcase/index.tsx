@@ -31,40 +31,59 @@ import { TreegridPattern } from "./patterns/TreegridPattern";
 import { TreePattern } from "./patterns/TreePattern";
 import { WindowSplitterPattern } from "./patterns/WindowSplitterPattern";
 
-const PATTERNS: Record<string, { name: string; component: React.FC }> = {
-  accordion: { name: "Accordion", component: AccordionPattern },
-  alert: { name: "Alert", component: AlertPattern },
-  breadcrumb: { name: "Breadcrumb", component: BreadcrumbPattern },
-  button: { name: "Button", component: ButtonPattern },
-  carousel: { name: "Carousel", component: CarouselPattern },
-  checkbox: { name: "Checkbox", component: CheckboxPattern },
-  composite: { name: "Composite", component: CompositePattern },
-  disclosure: { name: "Disclosure", component: DisclosurePattern },
-  feed: { name: "Feed", component: FeedPattern },
-  grid: { name: "Grid", component: GridPattern },
-  landmarks: { name: "Landmarks", component: LandmarksPattern },
-  link: { name: "Link", component: LinkPattern },
-  listbox: { name: "Listbox", component: ListboxPattern },
-  menu: { name: "Menu", component: MenuPattern },
-  "menu-button": { name: "Menu Button", component: MenuButtonPattern },
-  meter: { name: "Meter", component: MeterPattern },
-  radiogroup: { name: "RadioGroup", component: RadioGroupPattern },
-  slider: { name: "Slider", component: SliderPattern },
+/**
+ * APG pattern test status:
+ * - "dt"   : DT standard .apg.md exists + headless tests pass
+ * - "test" : .apg.test.ts exists + pass, DT not yet written
+ * - "none" : no headless tests
+ */
+type PatternStatus = "dt" | "test" | "none";
+
+const STATUS_ICON: Record<PatternStatus, string> = {
+  dt: "\u{1F7E2}",
+  test: "\u{1F7E1}",
+  none: "",
+};
+
+const PATTERNS: Record<
+  string,
+  { name: string; component: React.FC; status: PatternStatus }
+> = {
+  accordion: { name: "Accordion", component: AccordionPattern, status: "dt" },
+  alert: { name: "Alert", component: AlertPattern, status: "none" },
+  breadcrumb: { name: "Breadcrumb", component: BreadcrumbPattern, status: "none" },
+  button: { name: "Button", component: ButtonPattern, status: "test" },
+  carousel: { name: "Carousel", component: CarouselPattern, status: "test" },
+  checkbox: { name: "Checkbox", component: CheckboxPattern, status: "test" },
+  composite: { name: "Composite", component: CompositePattern, status: "none" },
+  disclosure: { name: "Disclosure", component: DisclosurePattern, status: "test" },
+  feed: { name: "Feed", component: FeedPattern, status: "test" },
+  grid: { name: "Grid", component: GridPattern, status: "none" },
+  landmarks: { name: "Landmarks", component: LandmarksPattern, status: "none" },
+  link: { name: "Link", component: LinkPattern, status: "none" },
+  listbox: { name: "Listbox", component: ListboxPattern, status: "test" },
+  menu: { name: "Menu", component: MenuPattern, status: "test" },
+  "menu-button": { name: "Menu Button", component: MenuButtonPattern, status: "test" },
+  meter: { name: "Meter", component: MeterPattern, status: "test" },
+  radiogroup: { name: "RadioGroup", component: RadioGroupPattern, status: "test" },
+  slider: { name: "Slider", component: SliderPattern, status: "none" },
   "slider-multithumb": {
     name: "Slider (Multi)",
     component: SliderMultiThumbPattern,
+    status: "none",
   },
-  spinbutton: { name: "Spinbutton", component: SpinbuttonPattern },
-  switch: { name: "Switch", component: SwitchPattern },
-  table: { name: "Table", component: TablePattern },
-  tabs: { name: "Tabs", component: TabsPattern },
-  toolbar: { name: "Toolbar", component: ToolbarPattern },
-  tooltip: { name: "Tooltip", component: TooltipPattern },
-  tree: { name: "Tree", component: TreePattern },
-  treegrid: { name: "Treegrid", component: TreegridPattern },
+  spinbutton: { name: "Spinbutton", component: SpinbuttonPattern, status: "none" },
+  switch: { name: "Switch", component: SwitchPattern, status: "test" },
+  table: { name: "Table", component: TablePattern, status: "none" },
+  tabs: { name: "Tabs", component: TabsPattern, status: "dt" },
+  toolbar: { name: "Toolbar", component: ToolbarPattern, status: "test" },
+  tooltip: { name: "Tooltip", component: TooltipPattern, status: "test" },
+  tree: { name: "Tree", component: TreePattern, status: "test" },
+  treegrid: { name: "Treegrid", component: TreegridPattern, status: "test" },
   "window-splitter": {
     name: "Window Splitter",
     component: WindowSplitterPattern,
+    status: "none",
   },
 };
 
@@ -95,9 +114,15 @@ export default function ApgShowcasePage() {
     <div className="flex bg-gray-50 h-screen overflow-hidden text-gray-900">
       {/* Sidebar */}
       <div className="w-64 border-r border-gray-200 bg-white flex flex-col">
-        <div className="p-4 border-b border-gray-100 flex items-center gap-2">
-          <Icon name="layout" size={20} className="text-indigo-600" />
-          <h1 className="font-bold text-gray-800">APG Suite</h1>
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <Icon name="layout" size={20} className="text-indigo-600" />
+            <h1 className="font-bold text-gray-800">APG Suite</h1>
+          </div>
+          <div className="mt-2 text-[10px] text-gray-400 flex gap-3">
+            <span>{"\u{1F7E2}"} DT</span>
+            <span>{"\u{1F7E1}"} Test</span>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-2">
@@ -107,7 +132,7 @@ export default function ApgShowcasePage() {
             options={{ navigate: { orientation: "vertical" } }}
             className="flex flex-col gap-1"
           >
-            {Object.entries(PATTERNS).map(([key, { name }]) => (
+            {Object.entries(PATTERNS).map(([key, { name, status }]) => (
               <Item
                 key={key}
                 id={`tab-${key}`}
@@ -121,12 +146,15 @@ export default function ApgShowcasePage() {
                   })
                 }
                 className="
-                  px-3 py-2 text-sm text-left rounded-md transition-colors
+                  px-3 py-2 text-sm text-left rounded-md transition-colors flex items-center gap-2
                   hover:bg-gray-50 aria-selected:bg-indigo-50 aria-selected:text-indigo-700
                   data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-300 data-[focused=true]:outline-none
                 "
               >
-                {name}
+                {STATUS_ICON[status] && (
+                  <span className="text-xs leading-none">{STATUS_ICON[status]}</span>
+                )}
+                <span>{name}</span>
               </Item>
             ))}
           </Zone>
