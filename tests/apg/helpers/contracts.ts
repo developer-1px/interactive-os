@@ -12,11 +12,11 @@
  *   Assert: attrs() → tabIndex, aria-selected, data-focused (ARIA contract)
  */
 
-import type { OsPage } from "@os-devtool/testing/page";
+import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { expect, it } from "vitest";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- test helper: accepts any page factory (with or without optional params)
-type Factory = (...args: any[]) => OsPage;
+type Factory = (...args: any[]) => AppPageInternal<any>;
 
 // ─── Axis: Linear Navigation ───
 

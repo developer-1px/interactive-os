@@ -19,7 +19,7 @@
  * keybindings that map to OS_NAVIGATE and OS_TAB respectively.
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import { FeedApp } from "@/pages/apg-showcase/patterns/FeedPattern";
@@ -41,7 +41,7 @@ const ARTICLES = [
 ];
 
 function feedFactory(focusedItem = "article-1") {
-  const page = createPage(FeedApp);
+  const page = createHeadlessPage(FeedApp);
   page.setupZone("apg-feed", {
     items: ARTICLES,
     focusedItemId: focusedItem,
@@ -150,7 +150,7 @@ describe("APG Feed: Control+End / Control+Home (exit feed)", () => {
     });
     const after = app.createZone("after-feed");
     after.bind({ role: "group", getItems: () => ["after-1"] });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     // Register all zones in order
     page.setupZone("before-feed", { focusedItemId: "before-1" });
     page.setupZone("apg-feed", { focusedItemId: focusedItem });
@@ -227,7 +227,7 @@ describe("APG Feed: Tab exits zone", () => {
     });
     const next = app.createZone("next-zone");
     next.bind({ role: "group", getItems: () => ["next-1"] });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("apg-feed", { focusedItemId: "article-2" });
     page.setupZone("next-zone", { focusedItemId: "next-1" });
     // Activate feed zone

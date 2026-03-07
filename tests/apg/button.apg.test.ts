@@ -17,7 +17,7 @@
  *         inputmap=[OS_PRESS()] for toggle.
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import { ToggleApp } from "@/pages/apg-showcase/patterns/ButtonPattern";
@@ -28,7 +28,7 @@ const TOGGLE_ITEMS = ["toggle-bold", "toggle-italic", "toggle-underline"];
 const TOGGLE_BUTTON_ID = TOGGLE_ITEMS[0]!; // "toggle-bold"
 
 function toggleButtonFactory() {
-  const page = createPage(ToggleApp);
+  const page = createHeadlessPage(ToggleApp);
   page.setupZone("apg-toggle-buttons", {
     items: TOGGLE_ITEMS,
     focusedItemId: TOGGLE_BUTTON_ID,
@@ -68,7 +68,7 @@ function actionButtonFactory() {
       },
     } as any,
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
   page.setupZone("action-zone", { focusedItemId: ACTION_BUTTON_ID });
   return page;
 }

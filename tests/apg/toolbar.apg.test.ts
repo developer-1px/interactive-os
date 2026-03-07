@@ -12,7 +12,7 @@
  * Tabs variant: same axis + followFocus (automatic activation)
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
@@ -54,7 +54,7 @@ function createToolbar(focusedItem = "bold-btn") {
     getItems: () => TOOLBAR_ITEMS,
     options: TOOLBAR_CONFIG,
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
   page.setupZone("toolbar", { focusedItemId: focusedItem });
   return page;
 }
@@ -109,7 +109,7 @@ describe("APG Toolbar: Tab Escape", () => {
         "line-10",
       ],
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     // Register both zones — order determines Tab navigation
     page.setupZone("editor", { focusedItemId: "line-1" });
     page.setupZone("toolbar", { focusedItemId: "italic-btn" });
@@ -146,7 +146,7 @@ describe("APG Toolbar: Tabs Variant", () => {
         },
       },
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("tablist", { focusedItemId: focusedTab });
     page.click(focusedTab);
     return page;

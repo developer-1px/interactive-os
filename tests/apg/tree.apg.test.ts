@@ -6,11 +6,11 @@
  * Unique: ArrowRight/Left expand/collapse, leaf no-expand,
  *         Enter activates (does NOT expand)
  *
- * Uses createPage(TreeApp) for full pipeline testing:
+ * Uses createHeadlessPage(TreeApp) for full pipeline testing:
  *   keyboard.press → resolveKeyboard → command → state → attrs
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { TreeApp } from "@/pages/apg-showcase/patterns/TreePattern";
 import {
@@ -33,7 +33,7 @@ const TREE_LEVELS = new Map([
 ]);
 
 function treeFactory(focusedItem = "section-1") {
-  const page = createPage(TreeApp);
+  const page = createHeadlessPage(TreeApp);
   page.setupZone("apg-explorer", {
     items: TREE_ITEMS,
     focusedItemId: focusedItem,
@@ -53,7 +53,7 @@ function multiTreeFactory(focusedItem = "section-1") {
 }
 
 function singleTreeFactory(focusedItem = "section-1") {
-  const page = createPage(TreeApp);
+  const page = createHeadlessPage(TreeApp);
   page.setupZone("apg-explorer", {
     items: TREE_ITEMS,
     focusedItemId: focusedItem,

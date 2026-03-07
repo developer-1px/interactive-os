@@ -21,7 +21,7 @@
 
 import { OS_CHECK } from "@os-core/4-command/activate/check";
 import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
@@ -43,7 +43,7 @@ function createMenubar(focusedItem = "mb-file") {
     role: "menubar",
     getItems: () => MENUBAR_ITEMS,
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
   page.setupZone("menubar", { focusedItemId: focusedItem });
   return page;
 }
@@ -75,7 +75,7 @@ function createMenu(focusedItem = "cmd-new") {
       check: { mode: "check" },
     } as any,
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
   // Setup invoker (menubar parent)
   page.setupZone("menubar", { focusedItemId: "mb-file" });
   // Push stack for popup

@@ -12,7 +12,7 @@
  */
 
 import { TodoApp } from "@apps/todo/app";
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { buildKeyboardInput } from "@os-devtool/testing/simulate";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -22,7 +22,7 @@ type P = AppPageInternal<any>;
 let page: P;
 
 beforeEach(() => {
-    page = createPage(TodoApp, TodoPage);
+    page = createHeadlessPage(TodoApp, TodoPage);
     page.goto("/");
 });
 

@@ -25,7 +25,7 @@
  * Config: horizontal toolbar with multiple buttons, each having a tooltip
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { TooltipApp } from "@/pages/apg-showcase/patterns/TooltipPattern";
 import {
@@ -39,7 +39,7 @@ import {
 const BUTTONS = ["btn-cut", "btn-copy", "btn-paste", "btn-bold", "btn-italic"];
 
 function tooltipFactory(focusedItem = "btn-cut") {
-  const page = createPage(TooltipApp);
+  const page = createHeadlessPage(TooltipApp);
   page.setupZone("apg-tooltip-toolbar", {
     items: BUTTONS,
     focusedItemId: focusedItem,

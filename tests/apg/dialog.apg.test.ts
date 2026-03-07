@@ -11,7 +11,7 @@
  */
 
 import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import { assertEscapeClose, assertTabTrap } from "./helpers/contracts";
@@ -48,7 +48,7 @@ function createDialog(focusedItem = "close-btn") {
     getItems: () => DIALOG_ITEMS,
     options: DIALOG_CONFIG,
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
   page.setupZone("dialog", { focusedItemId: focusedItem });
   return page;
 }
@@ -102,7 +102,7 @@ describe("APG Dialog: Focus Restore", () => {
       getItems: () => DIALOG_ITEMS,
       options: DIALOG_CONFIG,
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("toolbar", { focusedItemId: "edit-btn" });
     page.dispatch(OS_STACK_PUSH());
     page.setupZone("dialog", { focusedItemId: "close-btn" });
@@ -120,7 +120,7 @@ describe("APG Dialog: Focus Restore", () => {
     d1.bind({ role: "group", getItems: () => ["d1-close", "d1-ok"] });
     const d2 = app.createZone("dialog-2");
     d2.bind({ role: "group", getItems: () => ["d2-yes", "d2-no"] });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("toolbar", { focusedItemId: "btn-1" });
     page.dispatch(OS_STACK_PUSH());
     page.setupZone("dialog-1", { focusedItemId: "d1-close" });

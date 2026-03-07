@@ -13,7 +13,7 @@
  *         onCheck toggles selection (→ aria-checked)
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import {
   SWITCHES,
@@ -26,7 +26,7 @@ const SWITCH_IDS = SWITCHES.map((s) => s.id);
 const SWITCH_ID = SWITCH_IDS[0]!; // "switch-notifications"
 
 function switchFactory() {
-  const page = createPage(SwitchApp);
+  const page = createHeadlessPage(SwitchApp);
   page.setupZone("apg-switch", {
     items: SWITCH_IDS,
     focusedItemId: SWITCH_ID,

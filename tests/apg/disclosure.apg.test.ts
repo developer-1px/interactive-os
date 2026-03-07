@@ -18,7 +18,7 @@
  * Config: flow tab, manual activate with onClick, expand=all
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { DisclosureApp } from "@/pages/apg-showcase/patterns/DisclosurePattern";
 
@@ -27,7 +27,7 @@ import { DisclosureApp } from "@/pages/apg-showcase/patterns/DisclosurePattern";
 const DISCLOSURES = ["disc-faq-1", "disc-faq-2", "disc-faq-3"];
 
 function disclosureFactory(focusedItem = "disc-faq-1") {
-  const page = createPage(DisclosureApp);
+  const page = createHeadlessPage(DisclosureApp);
   page.setupZone("apg-disclosure", {
     items: DISCLOSURES,
     focusedItemId: focusedItem,

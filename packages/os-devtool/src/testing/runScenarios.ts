@@ -22,9 +22,9 @@
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
 import type { FC } from "react";
 import { afterEach, describe, it } from "vitest";
-import { createHeadlessPage } from "./createHeadlessPage";
+import { createTestBench } from "@os-devtool/test-bench/createTestBench";
 import { expect } from "./expect";
-import { createPage } from "./page";
+import { createHeadlessPage } from "./page";
 import type { TestScenario } from "./scripts";
 
 interface RunScenariosOptions {
@@ -45,11 +45,11 @@ export function runScenarios(
   }
 }
 
-/** OS-level: createHeadlessPage + manual zone setup */
+/** OS-level: createTestBench + manual zone setup */
 function runOsScenarios(scenarios: TestScenario[]): void {
   for (const scenario of scenarios) {
     describe(scenario.zone, () => {
-      const page = createHeadlessPage();
+      const page = createTestBench();
 
       afterEach(() => {
         page.cleanup();
@@ -87,7 +87,7 @@ function runAppScenarios(
 ): void {
   for (const scenario of scenarios) {
     describe(scenario.zone, () => {
-      const page = createPage(app, component);
+      const page = createHeadlessPage(app, component);
 
       afterEach(() => {
         page.cleanup();

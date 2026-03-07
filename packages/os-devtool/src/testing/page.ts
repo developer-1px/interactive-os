@@ -46,7 +46,15 @@ import { formatDiagnostics } from "./diagnostics";
 
 export { formatDiagnostics } from "./diagnostics";
 
-import type { ZoneOrderEntry } from "./createOsPage";
+/** Zone order entry — describes a zone's position and key items for tab navigation */
+interface ZoneOrderEntry {
+  zoneId: string;
+  firstItemId: string | null;
+  lastItemId: string | null;
+  entry: import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry | string;
+  selectedItemId: string | null;
+  lastFocusedId: string | null;
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // createAppPage — Preview-based, ~50 lines of logic
@@ -550,7 +558,6 @@ export function createAppPage<S>(
 
 export type { ItemAttrs };
 export type { AppPage, AppPageInternal } from "@os-sdk/app/defineApp/types";
-export type { OsPage } from "./createOsPage";
 
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
 
@@ -568,7 +575,7 @@ import type { AppHandle } from "@os-sdk/app/defineApp/types";
  * createPage is an OS capability — it reads app data(appId, zone bindings)
  * from the AppHandle and sets up the headless test environment.
  */
-export function createPage<S>(
+export function createHeadlessPage<S>(
   app: AppHandle<S>,
   Component?: FC,
 ): AppPageInternal<S> {

@@ -11,7 +11,7 @@
  * full registration pipeline, not direct command dispatch.
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 
@@ -27,7 +27,7 @@ describe("T1-S1: tablist disallowEmpty auto-selects first tab", () => {
       role: "tablist",
       getItems: () => ["tab-1", "tab-2", "tab-3"],
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("tab-zone", { focusedItemId: "tab-1" });
 
     expect(page.attrs("tab-1")["aria-selected"]).toBe(true);
@@ -40,7 +40,7 @@ describe("T1-S1: tablist disallowEmpty auto-selects first tab", () => {
       role: "tablist",
       getItems: () => ["tab-1", "tab-2", "tab-3"],
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("tab-zone-2", { focusedItemId: "tab-1" });
 
     expect(page.attrs("tab-2")["aria-selected"]).toBe(false);
@@ -60,7 +60,7 @@ describe("T1-S2: radiogroup disallowEmpty auto-selects first radio", () => {
       role: "radiogroup",
       getItems: () => ["r-1", "r-2"],
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("radio-zone", { focusedItemId: "r-1" });
 
     // radiogroup uses aria-checked, not aria-selected
@@ -80,7 +80,7 @@ describe("T1-S3: listbox (disallowEmpty=false) does NOT auto-select", () => {
       role: "listbox",
       getItems: () => ["opt-1", "opt-2"],
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("list-zone", { focusedItemId: "opt-1" });
 
     expect(page.attrs("opt-2")["aria-selected"]).toBe(false);
@@ -99,7 +99,7 @@ describe("T1-S4: existing selection preserved (no overwrite)", () => {
       role: "tablist",
       getItems: () => ["tab-1", "tab-2"],
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("tab-zone-3", {
       focusedItemId: "tab-1",
       initial: { selection: ["tab-2"] },

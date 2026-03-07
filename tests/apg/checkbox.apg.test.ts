@@ -10,7 +10,7 @@
  *   - Focusable (tabIndex=0 when focused)
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { CheckboxApp } from "@/pages/apg-showcase/patterns/CheckboxPattern";
 
@@ -26,7 +26,7 @@ const CONDIMENT_IDS = [
 const CHECKBOX_ID = CONDIMENT_IDS[0]!; // "cond-lettuce"
 
 function checkboxFactory() {
-  const page = createPage(CheckboxApp);
+  const page = createHeadlessPage(CheckboxApp);
   page.setupZone("apg-checkbox", {
     items: CONDIMENT_IDS,
     focusedItemId: CHECKBOX_ID,

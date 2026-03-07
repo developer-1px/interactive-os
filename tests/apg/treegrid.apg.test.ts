@@ -23,7 +23,7 @@
  *   C1: Click interaction
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { TreegridApp } from "@/pages/apg-showcase/patterns/TreegridPattern";
 import {
@@ -53,7 +53,7 @@ const TREE_LEVELS = new Map([
 ]);
 
 function treegridFactory(focusedItem = "msg-1") {
-  const page = createPage(TreegridApp);
+  const page = createHeadlessPage(TreegridApp);
   page.setupZone("apg-treegrid", {
     items: ALL_ROWS,
     focusedItemId: focusedItem,

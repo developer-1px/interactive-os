@@ -10,7 +10,7 @@
  * Unique: followFocus on/off, Shift+Arrow range, horizontal variant
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
@@ -62,7 +62,7 @@ function singleSelect(focusedItem = "apple") {
     getItems: () => ITEMS,
     options: SINGLE_SELECT,
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
   page.setupZone("listbox", { focusedItemId: focusedItem });
   page.click(focusedItem);
   return page;
@@ -76,7 +76,7 @@ function multiSelect(focusedItem = "apple") {
     getItems: () => ITEMS,
     options: MULTI_SELECT,
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
   page.setupZone("listbox", { focusedItemId: focusedItem });
   return page;
 }
@@ -365,7 +365,7 @@ describe("APG Listbox: Focus Initialization", () => {
       getItems: () => ITEMS,
       options: SINGLE_SELECT,
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("listbox", { focusedItemId: null });
     page.keyboard.press("ArrowDown");
     expect(page.focusedItemId()).toBe("apple");
@@ -380,7 +380,7 @@ describe("APG Listbox: Focus Initialization", () => {
       getItems: () => ITEMS,
       options: MULTI_SELECT,
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("listbox", { focusedItemId: null });
     page.keyboard.press("ArrowDown");
     expect(page.focusedItemId()).toBe("apple");
@@ -405,7 +405,7 @@ describe("APG Listbox: Horizontal Orientation", () => {
         select: SINGLE_SELECT.select,
       },
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("listbox", { focusedItemId: focusedItem });
     page.click(focusedItem);
     return page;
@@ -450,7 +450,7 @@ describe("APG Listbox: RadioGroup Variant", () => {
         select: { ...SINGLE_SELECT.select, disallowEmpty: true },
       },
     });
-    const page = createPage(app);
+    const page = createHeadlessPage(app);
     page.setupZone("radiogroup", { focusedItemId: selected });
     page.click(selected);
     return page;

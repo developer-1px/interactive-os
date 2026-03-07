@@ -14,7 +14,7 @@
  * Uses defineApp+createPage for full pipeline testing.
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 
@@ -61,7 +61,7 @@ function navTreeFactory(focusedItem = "folder:docs") {
       },
     },
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
   page.setupZone("nav-tree", { focusedItemId: focusedItem });
   return page;
 }

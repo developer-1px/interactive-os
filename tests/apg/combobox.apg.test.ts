@@ -15,7 +15,7 @@
  */
 
 import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 import {
@@ -60,7 +60,7 @@ function createComboboxPopup(focusedItem = "apple") {
     getItems: () => POPUP_ITEMS,
     options: POPUP_CONFIG,
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
   page.setupZone("combobox", { focusedItemId: "input-field" });
   page.dispatch(OS_STACK_PUSH());
   page.setupZone("popup", { focusedItemId: focusedItem });

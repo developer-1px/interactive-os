@@ -10,7 +10,7 @@
  * Unique: aria-checked instead of aria-selected, Space to check
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { CrustApp } from "@/pages/apg-showcase/patterns/RadioGroupPattern";
 
@@ -20,7 +20,7 @@ import { CrustApp } from "@/pages/apg-showcase/patterns/RadioGroupPattern";
 const ITEMS = ["radio-regular", "radio-deep", "radio-thin"];
 
 function setup(selected = "radio-regular") {
-  const page = createPage(CrustApp);
+  const page = createHeadlessPage(CrustApp);
   page.setupZone("radiogroup-crust", {
     items: ITEMS,
     focusedItemId: selected,

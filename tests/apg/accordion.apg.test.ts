@@ -16,7 +16,7 @@
  * (escape so arrows navigate between headers, Tab moves to panel content)
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   AccordionApp,
@@ -37,7 +37,7 @@ const HEADERS = SECTIONS.map((s) => s.id);
 let page: ReturnType<typeof createPage>;
 
 beforeEach(() => {
-  page = createPage(AccordionApp, AccordionPattern);
+  page = createHeadlessPage(AccordionApp, AccordionPattern);
   page.goto("/");
 });
 

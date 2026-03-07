@@ -27,7 +27,7 @@
  *   - tab: escape (Tab exits tablist)
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { CarouselApp } from "@/pages/apg-showcase/patterns/CarouselPattern";
 import {
@@ -49,7 +49,7 @@ const SLIDES = [
 ];
 
 function carouselFactory(focusedTab = "slide-1") {
-  const page = createPage(CarouselApp);
+  const page = createHeadlessPage(CarouselApp);
   page.setupZone("carousel-tabs", {
     items: SLIDES,
     focusedItemId: focusedTab,

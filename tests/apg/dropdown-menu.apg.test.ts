@@ -13,7 +13,7 @@
  */
 
 import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, expect, it } from "vitest";
 
@@ -60,7 +60,7 @@ function openDropdown(focusedItem = "ko") {
     getItems: () => LOCALE_ITEMS,
     options: MENU_CONFIG,
   });
-  const page = createPage(app);
+  const page = createHeadlessPage(app);
 
   // Phase 1: Trigger zone
   page.setupZone("toolbar", { focusedItemId: "locale-trigger" });

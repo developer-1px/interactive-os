@@ -22,7 +22,7 @@ export {
   createBrowserPage,
   resetFocusState,
 } from "./createBrowserPage";
-export { createHeadlessPage, type HeadlessPage } from "./createHeadlessPage";
+export { createHeadlessPage } from "./page";
 export { expect } from "./expect";
 export {
   accordionScript,

@@ -24,7 +24,7 @@
  *   - tab: escape (Tab exits tablist)
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { TabsApp } from "@/pages/apg-showcase/patterns/TabsPattern";
 import {
@@ -44,7 +44,7 @@ const TABS = [
 ];
 
 function tabFactory(focusedTab = "tab-ahlefeldt") {
-  const page = createPage(TabsApp);
+  const page = createHeadlessPage(TabsApp);
   page.setupZone("tablist-auto", {
     items: TABS,
     focusedItemId: focusedTab,
@@ -64,7 +64,7 @@ function tabFactoryAtFirst() {
 
 // ─── Manual-activation variant ───
 function manualTabFactory(focusedTab = "tab-ahlefeldt") {
-  const page = createPage(TabsApp);
+  const page = createHeadlessPage(TabsApp);
   page.setupZone("tablist-manual", {
     items: TABS,
     focusedItemId: focusedTab,

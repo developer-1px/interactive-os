@@ -20,7 +20,7 @@
  *   - Enter on menuitem → menu closes + focus restore to trigger
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { MenuButtonApp } from "@/pages/apg-showcase/patterns/MenuButtonPattern";
 
@@ -32,7 +32,7 @@ const MENU_ITEMS = [
 ];
 
 function createMenuPage(focusedItem = "action-cut") {
-  const page = createPage(MenuButtonApp);
+  const page = createHeadlessPage(MenuButtonApp);
   page.setupZone("apg-menu-button-popup", {
     items: MENU_ITEMS,
     focusedItemId: focusedItem,

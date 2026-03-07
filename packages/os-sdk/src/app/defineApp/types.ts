@@ -295,9 +295,16 @@ export interface AppPage<_S> {
   dumpDiagnostics(): void;
 
   /** Playwright-style locator: query any element by ID (Zone or Item). */
-  locator(
-    elementId: string,
-  ): import("@os-devtool/testing/createOsPage").OsLocator;
+  locator(elementId: string): {
+    getAttribute(name: string): string | null;
+    click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
+    toHaveAttribute(name: string, value: string | boolean): boolean;
+    toBeFocused(): boolean;
+    toBeChecked(): boolean;
+    toBeDisabled(): boolean;
+    inputValue(): string;
+    readonly attrs: import("@os-core/3-inject/headless.types").ElementAttrs;
+  };
 
   // ── Projection Checkpoint (optional — requires Component) ────────
 

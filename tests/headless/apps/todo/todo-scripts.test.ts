@@ -2,7 +2,7 @@
  * Todo App — Unified TestScript Runner (Headless)
  *
  * "Write once, run anywhere":
- *   - Headless (vitest): this file — page = createPage(TodoApp, TodoPage)
+ *   - Headless (vitest): this file — page = createHeadlessPage(TodoApp, TodoPage)
  *   - Browser (TestBot):  run(browserPage, ourExpect)
  *   - Playwright E2E:     run(playwrightPage, playwrightExpect)
  *
@@ -12,7 +12,7 @@
 
 import { TodoApp } from "@apps/todo/app";
 import { expect as osExpect } from "@os-devtool/testing/expect";
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { todoScripts } from "@os-devtool/testing/scripts/todo";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
@@ -24,7 +24,7 @@ let page: P;
 
 beforeEach(() => {
     _resetClipboardStore();
-    page = createPage(TodoApp, TodoPage);
+    page = createHeadlessPage(TodoApp, TodoPage);
     page.goto("/"); // Playwright-compatible: registers all zones + renders component
 });
 

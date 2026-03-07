@@ -6,7 +6,7 @@
  * (not a synthetic factory) to ensure headless ≡ browser.
  */
 
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { METERS, MeterApp } from "@/pages/apg-showcase/patterns/MeterPattern";
 
@@ -15,7 +15,7 @@ import { METERS, MeterApp } from "@/pages/apg-showcase/patterns/MeterPattern";
 const METER_IDS = METERS.map((m) => m.id);
 
 function meterFactory(focusedItem = "meter-cpu") {
-  const page = createPage(MeterApp);
+  const page = createHeadlessPage(MeterApp);
   page.setupZone("apg-meter-zone", {
     items: METER_IDS,
     focusedItemId: focusedItem,

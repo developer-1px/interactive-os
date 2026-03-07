@@ -6,7 +6,7 @@
  */
 
 import { TodoApp, confirmDeleteTodo } from "@apps/todo/app";
-import { createPage } from "@os-devtool/testing/page";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -17,7 +17,7 @@ import TodoPage from "../../../../src/pages/TodoPage";
 
 beforeEach(() => {
   _resetClipboardStore();
-  page = createPage(TodoApp, TodoPage);
+  page = createHeadlessPage(TodoApp, TodoPage);
   page.goto("/"); // Playwright-compatible: registers all zones + renders component
 });
 
