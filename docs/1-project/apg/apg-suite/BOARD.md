@@ -29,10 +29,10 @@
 
 - [x] WP0: goto → setupZone 리네임 — API 4파일 + infra 3파일 + APG 22파일 + knowledge 2파일 전수 치환 — tsc 0 | 532 tests 0 fail ✅
   - Plan: `notes/2026-0307-1300-[plan]-goto-to-setupZone.md`
-  - Unexpected: 리네임만으로 331 fail → 0 fail. 원인 미규명 (조사 필요)
+  - Root cause: basePage.goto(zoneId) 이중 등록이 role config를 덮어쓰고 있었음. setupZone은 os.setState 직접 호출로 교체하여 이중 등록 제거
 
 ## Unresolved
 
-- **331 fail → 0 fail 원인**: 순수 리네임(goto→setupZone)이 왜 테스트를 고쳤는지 미규명. 가설: createOsPage의 goto가 basePage.goto를 경유하는 경로가 제거됨?
+- ~~331 fail → 0 fail 원인~~ **규명 완료**: createOsPage.goto가 role-resolved config로 zone 등록 후, basePage.goto(zoneId)를 재호출 → page.ts의 zone path가 role defaults 없이 재등록 → config 덮어씀. setupZone 전환 시 basePage.goto 호출을 os.setState 직접 호출로 교체 → 이중 등록 제거 → 올바른 config 보존.
 - WP1: 7개 showcase App export 미전환
 - Stage 3: setupZone 제거 시점 — WP1 완료 후
