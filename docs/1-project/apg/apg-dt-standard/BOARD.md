@@ -11,9 +11,37 @@ Before → After:
 
 Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (accordion 프로토타입에서 발견된 패턴)
 
+### 태스크 실행 절차 (각 T에 동일 적용)
+
+1. W3C APG 패턴 페이지 + Example 페이지를 WebFetch로 읽는다
+2. 기존 `.apg.test.ts`를 읽어 현재 테스트 커버리지 파악
+3. `{pattern}.apg.md` DT 작성 — W3C 원문 워딩 기반, 각 행 = it() 1:1
+4. 기존 테스트와 DT 행 매핑 → Signal (green/uncovered/na) 부여
+5. `vitest run tests/apg/{pattern}.apg.test.ts` 로 전수 통과 확인
+6. `src/pages/apg-showcase/index.tsx` 해당 패턴 status를 `"dt"`로 변경
+7. BOARD.md에서 해당 T를 Done으로 이동 + 결과 기록
+8. 커밋
+
 ## Now
 
-(empty — all tasks complete)
+- [ ] T8: button.apg.md — DT 표준 전환
+- [ ] T9: switch.apg.md — DT 표준 전환
+- [ ] T10: checkbox.apg.md — DT 표준 전환
+- [ ] T11: disclosure.apg.md — DT 표준 전환
+- [ ] T12: radiogroup.apg.md — DT 표준 전환
+- [ ] T13: meter.apg.md — DT 표준 전환
+- [ ] T14: tooltip.apg.md — DT 표준 전환
+- [ ] T15: toolbar.apg.md — DT 표준 전환
+- [ ] T16: menu.apg.md — DT 표준 전환
+- [ ] T17: menu-button.apg.md — DT 표준 전환
+- [ ] T18: tree.apg.md — DT 표준 전환
+- [ ] T19: treegrid.apg.md — DT 표준 전환
+- [ ] T20: carousel.apg.md — DT 표준 전환
+- [ ] T21: feed.apg.md — DT 표준 전환
+- [ ] T22: combobox.apg.md — DT 표준 전환
+- [ ] T23: dialog.apg.md — DT 표준 전환
+- [ ] T24: dropdown-menu.apg.md — DT 표준 전환
+- [ ] T25: navtree.apg.md — DT 표준 전환
 
 ## Done
 

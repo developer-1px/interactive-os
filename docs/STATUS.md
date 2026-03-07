@@ -13,7 +13,8 @@
 
 ## 🔥 Active Focus
 
-(없음)
+**apg-dt-standard** — 18개 패턴 DT 표준 전환 (T8-T25)
+→ `docs/1-project/apg/apg-dt-standard/BOARD.md`
 
 ---
 
