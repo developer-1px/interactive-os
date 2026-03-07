@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-07T08:35
+> Last updated: 2026-03-07T12:40
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -52,6 +52,13 @@
 |---------|-------|---------------|
 | inspector-dogfooding | T1~T4 ✅, T5 | 03-05 |
 
+### apg
+> `tests/apg/` · `src/pages/apg-showcase/` · `packages/os-core/` headless role support
+
+| Project | Phase | Last Activity |
+|---------|-------|---------------|
+| apg-suite | WP1~WP7 계획 완료, 시작 전 | 03-07 |
+
 ### nondeterministic-paradigm
 > 탐색적 연구
 
@@ -71,8 +78,8 @@
 
 | Metric | Count |
 |--------|-------|
-| Domains | 5 |
-| Active Projects | 9 |
+| Domains | 6 |
+| Active Projects | 10 |
 | Active Focus | 0 |
 | Stale (7d+) | 0 |
 | Active Migrations | 0 |
