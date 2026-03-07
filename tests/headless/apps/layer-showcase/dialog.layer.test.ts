@@ -34,7 +34,8 @@ function createPage() {
 describe("Layer Dialog: Trigger → Open", () => {
   it("click trigger opens dialog and focuses first item", () => {
     const page = createPage();
-    expect(page.activeZoneId()).toBe(TRIGGER_ZONE_ID);
+    // goto registers zones but doesn't auto-activate (Playwright isomorphic)
+    expect(page.activeZoneId()).toBeNull();
 
     page.click(TRIGGER_ID);
     expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
