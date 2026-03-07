@@ -39,6 +39,83 @@ afterEach(() => {
 const expect = osExpect;
 
 // ═══════════════════════════════════════════════════
+// Initial State (from Example HTML — I1, I2)
+// ═══════════════════════════════════════════════════
+
+describe("APG Accordion: Initial State", () => {
+  it("initial state: first section expanded", async () => {
+    // I1: W3C Example HTML has first button aria-expanded="true"
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+  });
+
+  it("initial state: other sections collapsed", async () => {
+    // I2: W3C Example HTML has other buttons aria-expanded="false", panels hidden
+    await expect(page.locator("#acc-billing")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    await expect(page.locator("#acc-shipping")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// Panel Visibility Sync (from Example JS — P1, P2)
+// ═══════════════════════════════════════════════════
+
+describe("APG Accordion: Panel Sync", () => {
+  it("expand: panel becomes visible (aria-controls)", async () => {
+    // P1: When expanded, aria-controls points to panel
+    await page.locator("#acc-billing").click();
+    await expect(page.locator("#acc-billing")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    await expect(page.locator("#acc-billing")).toHaveAttribute(
+      "aria-controls",
+      "panel-acc-billing",
+    );
+  });
+
+  it("collapse: panel becomes hidden", async () => {
+    // P2: Expand then collapse — aria-expanded=false, aria-controls still present
+    await page.locator("#acc-personal").click();
+    await page.locator("#acc-personal").click(); // collapse
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// ARIA Attributes (A3, A5 — static structure)
+// ═══════════════════════════════════════════════════
+
+describe("APG Accordion: ARIA Attributes", () => {
+  it("aria-controls points to panel ID", async () => {
+    // A3: button aria-controls="panel-{id}"
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-controls",
+      "panel-acc-personal",
+    );
+    await expect(page.locator("#acc-billing")).toHaveAttribute(
+      "aria-controls",
+      "panel-acc-billing",
+    );
+    await expect(page.locator("#acc-shipping")).toHaveAttribute(
+      "aria-controls",
+      "panel-acc-shipping",
+    );
+  });
+});
+
+// ═══════════════════════════════════════════════════
 // Click interaction — focus + expand
 // ═══════════════════════════════════════════════════
 

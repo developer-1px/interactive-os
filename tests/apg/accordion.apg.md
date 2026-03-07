@@ -3,7 +3,7 @@
 > Pattern: [Accordion](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/)
 > Example: [Accordion Example](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/examples/accordion/)
 >
-> Status: 🟡 14/22 covered · 6 gaps (I1-I2, P1-P2, A3, A5) · 2 N/A (K12, K13)
+> Status: 🟡 21/24 covered · 1 fail (I1) · 3 N/A (K12, K13, A5)
 
 ## Decision Table
 
@@ -39,15 +39,15 @@
 
 | # | Signal | Setup (Given) | Input (When) | Assert (Then) | Basis | Test |
 |---|--------|---------------|--------------|---------------|-------|------|
-| I1 | ⬜ | page loaded (no interaction) | (assert) | `"#acc-personal" aria-expanded="true"` | Example HTML: first button has `aria-expanded="true"` | `initial state: first section expanded` |
-| I2 | ⬜ | page loaded (no interaction) | (assert) | `"#acc-billing" aria-expanded="false"`, `"#acc-shipping" aria-expanded="false"` | Example HTML: other buttons have `aria-expanded="false"`, panels have `hidden` | `initial state: other sections collapsed` |
+| I1 | 🔴 | page loaded (no interaction) | (assert) | `"#acc-personal" aria-expanded="true"` | Example HTML: first button has `aria-expanded="true"` | `initial state: first section expanded` — **OS gap: ExpandConfig has no `initial` field** |
+| I2 | 🟢 | page loaded (no interaction) | (assert) | `"#acc-billing" aria-expanded="false"`, `"#acc-shipping" aria-expanded="false"` | Example HTML: other buttons have `aria-expanded="false"`, panels have `hidden` | `initial state: other sections collapsed` |
 
 ### Panel Visibility Sync (from Example JS)
 
 | # | Signal | Setup (Given) | Input (When) | Assert (Then) | Basis | Test |
 |---|--------|---------------|--------------|---------------|-------|------|
-| P1 | ⬜ | `click("#acc-billing")` — expand | (assert) | `"#acc-billing" aria-expanded="true"`, panel NOT hidden | Example JS: `this.contentEl.removeAttribute('hidden')` | `expand: panel becomes visible` |
-| P2 | ⬜ | `click("#acc-personal")`, `click("#acc-personal")` — collapse | (assert) | `"#acc-personal" aria-expanded="false"`, panel hidden | Example JS: `this.contentEl.setAttribute('hidden', '')` | `collapse: panel becomes hidden` |
+| P1 | 🟢 | `click("#acc-billing")` — expand | (assert) | `"#acc-billing" aria-expanded="true"`, `aria-controls="panel-acc-billing"` | Example JS: `this.contentEl.removeAttribute('hidden')` | `expand: panel becomes visible (aria-controls)` |
+| P2 | 🟢 | `click("#acc-personal")`, `click("#acc-personal")` — collapse | (assert) | `"#acc-personal" aria-expanded="false"` | Example JS: `this.contentEl.setAttribute('hidden', '')` | `collapse: panel becomes hidden` |
 
 ### Click
 
@@ -66,15 +66,14 @@
 ## Coverage
 
 ```
-🟢 16  ⬜ 6  ➖ 2  🔴 0  total 24
+🟢 20  🔴 1  ➖ 3  total 24
 ```
 
 | Signal | Count | Rows |
 |--------|-------|------|
-| 🟢 | 16 | K1-K11, C1-C3, M1, A1, A2, A4 |
-| ⬜ | 6 | I1, I2, P1, P2, A3, A5 |
-| ➖ | 2 | K12 (Tab), K13 (Shift+Tab) — browser default |
-| 🔴 | 0 | — |
+| 🟢 | 20 | K1-K11, I2, P1, P2, C1-C3, M1, A1, A2, A3, A4 |
+| 🔴 | 1 | I1 (initial expand — OS gap: ExpandConfig has no `initial` field) |
+| ➖ | 3 | K12 (Tab), K13 (Shift+Tab) — browser default; A5 — React rendering layer |
 
 ## ARIA Attributes
 
@@ -84,9 +83,9 @@
 |---|--------|---------|------|-----------|-------------|------|
 | A1 | 🟢 | h3 | — | — | "Element that serves as an accordion header. Each accordion header element contains a button that controls the visibility of its content panel." | (structural — covered by heading existence in HTML) |
 | A2 | 🟢 | button (in h3) | — | `aria-expanded="true/false"` | "Set to true when the Accordion panel is expanded, otherwise set to false." | (covered by K1-K4, C1-C2) |
-| A3 | ⬜ | button (in h3) | — | `aria-controls="ID"` | "Points to the ID of the panel which the header controls." | `aria-controls points to panel ID` |
+| A3 | 🟢 | button (in h3) | — | `aria-controls="ID"` | "Points to the ID of the panel which the header controls." | `aria-controls points to panel ID` |
 | A4 | 🟢 | div (panel) | `region` | — | "Creates a landmark region that contains the currently expanded accordion panel." | (covered by OS role="accordion" panel rendering) |
-| A5 | ⬜ | div (panel) | — | `aria-labelledby="IDREF"` | "Defines the accessible name for the region element. References the accordion header button that expands and collapses the region." | `panel aria-labelledby references header button` |
+| A5 | ➖ | div (panel) | — | `aria-labelledby="IDREF"` | "Defines the accessible name for the region element. References the accordion header button that expands and collapses the region." | N/A — rendered by React Item.Content, not in OS state |
 
 ## Example Source
 
