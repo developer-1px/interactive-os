@@ -35,6 +35,7 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | **headless-page**/headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
+| ~~headless-overlay~~ | ✅ Archived (W10) | 03-08 |
 | lint-zero | T1~T5 Now | 03-06 |
 | test-observability | Scaffold, T1~T4 | 03-05 |
 | replay | Scaffold, T1 | 03-05 |
