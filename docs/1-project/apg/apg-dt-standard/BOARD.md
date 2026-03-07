@@ -13,7 +13,7 @@ Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (acc
 
 ## Now
 
-- [ ] T4: tabs-auto.apg.md + tabs-auto.apg.test.ts 생성
+- [x] T4: tabs-auto.apg.md + tabs-auto.apg.test.ts — 15 tests (13 pass, 2 fail: I1+A5 OS gaps) + tabindex getAttribute fix ✅
 - [ ] T5: tabs-manual.apg.md + tabs-manual.apg.test.ts 생성
 - [ ] T6: tabs.apg.test.ts 삭제
 
@@ -25,6 +25,7 @@ Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (acc
 
 ## Unresolved
 
-- I1 OS gap: ExpandConfig has no `initial` field → accordion first section not expanded on mount
+- I1 OS gap: ExpandConfig/SelectConfig has no `initial` field → accordion first section not expanded, tabs first tab not selected on mount
+- A5 OS gap: `aria-controls` only computed for expand mode items. Tablist uses select-based visibility → tab items missing `aria-controls` pointing to tabpanel
 
 ## Ideas

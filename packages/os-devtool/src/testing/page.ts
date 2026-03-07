@@ -490,7 +490,11 @@ export function createAppPage<S>(
           return resolveElement(os, elementId);
         },
         getAttribute(name: string) {
-          const val = resolveElement(os, elementId)[name];
+          const resolved = resolveElement(os, elementId);
+          // Normalize HTML attribute names to JS property names (e.g. tabindex → tabIndex)
+          const key =
+            name === "tabindex" ? "tabIndex" : name;
+          const val = resolved[key];
           // Playwright returns string | null. Coerce boolean to string for compatibility.
           if (val === true) return "true";
           if (val === false) return "false";
@@ -537,7 +541,8 @@ export function createAppPage<S>(
           }
         },
         _toHaveAttribute(name: string, value: string | RegExp, negated?: boolean) {
-          const raw = resolveElement(os, elementId)[name];
+          const attrKey = name === "tabindex" ? "tabIndex" : name;
+          const raw = resolveElement(os, elementId)[attrKey];
           // Coerce to string for Playwright compatibility
           const actual = raw === true ? "true" : raw === false ? "false" : raw == null ? null : String(raw);
           const expected = typeof value === "string" ? value : undefined;

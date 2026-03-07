@@ -76,15 +76,19 @@ const TABS: TabDefinition[] = [
 
 export const TabsApp = defineApp("apg-tabs", {});
 
+const TAB_IDS = TABS.map((t) => t.id);
+
 const autoZone = TabsApp.createZone("tablist-auto");
 const AutoUI = autoZone.bind({
   role: "tablist",
+  getItems: () => TAB_IDS,
   options: { select: { followFocus: true } },
 });
 
 const manualZone = TabsApp.createZone("tablist-manual");
 const ManualUI = manualZone.bind({
   role: "tablist",
+  getItems: () => TAB_IDS,
   options: { select: { followFocus: false } },
 });
 
