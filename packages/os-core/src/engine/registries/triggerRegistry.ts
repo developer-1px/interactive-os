@@ -12,6 +12,7 @@
 
 import type { Keymap } from "@os-core/2-resolve/chainResolver";
 import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-core/4-command";
+import type { OverlayEntry } from "@os-core/schema/state/OSState";
 import {
   DEFAULT_TRIGGER_CONFIG,
   type TriggerConfig,
@@ -159,11 +160,11 @@ export function buildTriggerKeymap(
   if (isOverlayOpen) return {};
 
   const keymap: Keymap = {};
-  const base = {
+  const base: { id: string; type: OverlayEntry["type"]; triggerId?: string } = {
     id: ctx.overlayId,
-    type: ctx.triggerRole,
-    triggerId: ctx.triggerId,
+    type: ctx.triggerRole as OverlayEntry["type"],
   };
+  if (ctx.triggerId !== undefined) base.triggerId = ctx.triggerId;
 
   if (config.open.onActivate) {
     keymap["Enter"] = OS_OVERLAY_OPEN(base);
@@ -191,13 +192,20 @@ export function buildTriggerClickKeymap(
 ): Keymap {
   if (!config.open.onClick) return {};
 
-  const base = {
+  const clickBase: {
+    id: string;
+    type: OverlayEntry["type"];
+    triggerId?: string;
+  } = {
     id: ctx.overlayId,
-    type: ctx.triggerRole,
-    triggerId: ctx.triggerId,
+    type: ctx.triggerRole as OverlayEntry["type"],
   };
+  if (ctx.triggerId !== undefined) clickBase.triggerId = ctx.triggerId;
   return {
-    Click: [OS_OVERLAY_CLOSE({ id: ctx.overlayId }), OS_OVERLAY_OPEN(base)],
+    Click: [
+      OS_OVERLAY_CLOSE({ id: ctx.overlayId }),
+      OS_OVERLAY_OPEN(clickBase),
+    ],
   };
 }
 

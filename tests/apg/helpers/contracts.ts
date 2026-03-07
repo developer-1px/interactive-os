@@ -15,7 +15,8 @@
 import type { OsPage } from "@os-devtool/testing/page";
 import { expect, it } from "vitest";
 
-type Factory = () => OsPage;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- test helper: accepts any page factory (with or without optional params)
+type Factory = (...args: any[]) => OsPage;
 
 // ─── Axis: Linear Navigation ───
 

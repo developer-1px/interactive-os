@@ -40,7 +40,6 @@ export function ActivateTest() {
             options={{
               navigate: { orientation: "vertical" },
               select: { mode: "single", followFocus: true },
-              activate: { mode: "automatic" },
             }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >
@@ -70,7 +69,6 @@ export function ActivateTest() {
             role="listbox"
             options={{
               navigate: { orientation: "vertical" },
-              activate: { mode: "manual" },
             }}
             className="flex flex-col bg-gray-50 p-2 rounded border border-gray-200 gap-1"
           >

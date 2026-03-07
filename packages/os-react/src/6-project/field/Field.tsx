@@ -1,6 +1,7 @@
 import type { BaseCommand } from "@kernel";
 import {
   buildFieldConfig,
+  type FieldConfigInputs,
   validateField,
 } from "@os-core/3-inject/fieldContext.ts";
 import { OS_FIELD_COMMIT } from "@os-core/4-command/field/commit";
@@ -199,16 +200,19 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
 
     // --- Registry Registration (pure config build) ---
     useEffect(() => {
-      const config = buildFieldConfig({
+      const inputs: FieldConfigInputs = {
         name,
         mode,
         fieldType,
         trigger,
         resetOnSubmit,
-        onCommit: onCommitRef.current,
-        schema,
-        onCancel: onCancelRef.current,
-      });
+      };
+      if (onCommitRef.current !== undefined)
+        inputs.onCommit = onCommitRef.current;
+      if (schema !== undefined) inputs.schema = schema;
+      if (onCancelRef.current !== undefined)
+        inputs.onCancel = onCancelRef.current;
+      const config = buildFieldConfig(inputs);
 
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
@@ -219,7 +223,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
     const rawRegistryValue = useFieldRegistry(
       (s) => s.fields.get(fieldId)?.state.value,
     );
-    const localValue = rawRegistryValue ?? value;
+    const localValue = String(rawRegistryValue ?? value);
     const error = useFieldRegistry((s) => s.fields.get(fieldId)?.state.error);
 
     // Sync prop value to registry when not actively editing (contentEditable)
@@ -313,7 +317,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
         const currentEditingId =
           os.getState().os.focus.zones[zoneId]?.editingItemId;
         if (currentEditingId === fieldId) {
-          handleCommit(FieldRegistry.getValue(fieldId));
+          handleCommit(String(FieldRegistry.getValue(fieldId)));
           os.dispatch(OS_FIELD_COMMIT());
         }
       }
@@ -327,7 +331,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
         } else {
           // Immediate: preserve FieldRegistry value (draft survives blur)
           if (exitedEditing) {
-            const registryValue = FieldRegistry.getValue(fieldId);
+            const registryValue = String(FieldRegistry.getValue(fieldId) ?? "");
             if (registryValue && innerRef.current.innerText !== registryValue) {
               innerRef.current.innerText = registryValue;
             }
@@ -350,14 +354,14 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       const handleInput = () => {
         // Trigger: change → commit on every keystroke
         if (trigger === "change") {
-          handleCommit(FieldRegistry.getValue(fieldId));
+          handleCommit(String(FieldRegistry.getValue(fieldId)));
         }
       };
 
       const handleBlur = () => {
         // Trigger: Blur
         if (trigger === "blur") {
-          handleCommit(FieldRegistry.getValue(fieldId));
+          handleCommit(String(FieldRegistry.getValue(fieldId)));
         }
       };
 
@@ -372,7 +376,7 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
           e.preventDefault();
           e.stopPropagation();
           if (trigger === "enter") {
-            handleCommit(FieldRegistry.getValue(fieldId));
+            handleCommit(String(FieldRegistry.getValue(fieldId)));
           }
         }
       };

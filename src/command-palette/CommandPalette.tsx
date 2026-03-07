@@ -147,32 +147,32 @@ export function CommandPalette() {
       <div className="flex items-center gap-4 px-4 py-2 bg-zinc-50 border-t border-zinc-100 text-[11px] text-zinc-500 select-none">
         <span className="flex items-center gap-1.5">
           <Kbd
-            shortcut="Up"
+            keys={["Up"]}
             className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
           />
           <Kbd
-            shortcut="Down"
+            keys={["Down"]}
             className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
           />
           navigate
         </span>
         <span className="flex items-center gap-1.5">
           <Kbd
-            shortcut="Tab"
+            keys={["Tab"]}
             className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
           />
           complete
         </span>
         <span className="flex items-center gap-1.5">
           <Kbd
-            shortcut="Enter"
+            keys={["Enter"]}
             className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
           />
           go
         </span>
         <span className="flex items-center gap-1.5">
           <Kbd
-            shortcut="Esc"
+            keys={["Esc"]}
             className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
           />
           close
@@ -248,7 +248,7 @@ function PaletteRow({
         `}
       >
         <Kbd
-          shortcut="Enter"
+          keys={["Enter"]}
           className="shrink-0 text-[10px] text-zinc-500 bg-white px-1.5 py-0.5 rounded border border-zinc-200 font-mono shadow-sm"
         />
       </div>

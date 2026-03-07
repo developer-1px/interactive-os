@@ -95,7 +95,7 @@ describe("APG Toolbar: Tab Escape", () => {
     });
     const editor = app.createZone("editor");
     editor.bind({
-      role: "list",
+      role: "group",
       getItems: () => [
         "line-1",
         "line-2",

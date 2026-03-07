@@ -11,6 +11,7 @@
 import type { BaseCommand } from "@kernel";
 import {
   buildFieldConfig,
+  type FieldConfigInputs,
   validateField,
 } from "@os-core/3-inject/fieldContext.ts";
 import { os } from "@os-core/engine/kernel.ts";
@@ -104,15 +105,18 @@ export const FieldTextarea = forwardRef<
 
     // --- Registry Registration (pure config build) ---
     useEffect(() => {
-      const config = buildFieldConfig({
+      const inputs: FieldConfigInputs = {
         name,
         mode: "immediate",
         fieldType: "block",
         trigger,
-        onCommit: onCommitRef.current,
-        schema,
-        onCancel: onCancelRef.current,
-      });
+      };
+      if (onCommitRef.current !== undefined)
+        inputs.onCommit = onCommitRef.current;
+      if (schema !== undefined) inputs.schema = schema;
+      if (onCancelRef.current !== undefined)
+        inputs.onCancel = onCancelRef.current;
+      const config = buildFieldConfig(inputs);
 
       FieldRegistry.register(name, config);
       return () => FieldRegistry.unregister(name);
@@ -120,9 +124,11 @@ export const FieldTextarea = forwardRef<
 
     // --- Sync prop value to registry ---
     const registryValueRef = useRef<string | undefined>(undefined);
-    registryValueRef.current = useFieldRegistry(
+    const rawRegistryValue = useFieldRegistry(
       (s) => s.fields.get(name)?.state.value,
     );
+    registryValueRef.current =
+      rawRegistryValue != null ? String(rawRegistryValue) : undefined;
 
     useEffect(() => {
       if (value !== registryValueRef.current) {
@@ -154,7 +160,7 @@ export const FieldTextarea = forwardRef<
 
     const handleBlur = useCallback(() => {
       if (trigger === "blur") {
-        handleCommit(FieldRegistry.getValue(name));
+        handleCommit(String(FieldRegistry.getValue(name)));
       }
     }, [name, trigger, handleCommit]);
 

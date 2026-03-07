@@ -79,11 +79,14 @@ export function createAppPage<S>(
   // Register app-level keybindings immediately (mirrors production module-load behavior)
   if (appKeybindings && appKeybindings.length > 0) {
     unregisterAppKeybindings = Keybindings.registerAll(
-      appKeybindings.map((kb) => ({
-        key: kb.key,
-        command: kb.command,
-        when: kb.when,
-      })),
+      appKeybindings.map((kb) => {
+        const entry: import("@os-core/2-resolve/keybindings").KeyBinding = {
+          key: kb.key,
+          command: kb.command,
+        };
+        if (kb.when) entry.when = kb.when;
+        return entry;
+      }),
     );
   }
 
@@ -308,7 +311,7 @@ export function createAppPage<S>(
     } else if (focusedId && zoneConfig?.select?.followFocus) {
       initialSelection = [focusedId];
     } else if (zoneConfig?.select?.disallowEmpty && items.length > 0) {
-      initialSelection = [items[0]];
+      initialSelection = [items[0]!];
     }
 
     os.setState((s: AppState) =>

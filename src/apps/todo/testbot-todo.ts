@@ -173,7 +173,13 @@ export const scenarios: TestScenario[] = [
     items: SIDEBAR_ITEMS,
     role: "listbox",
     config: {
-      select: { mode: "single", followFocus: true, disallowEmpty: false, range: false, toggle: false },
+      select: {
+        mode: "single",
+        followFocus: true,
+        disallowEmpty: false,
+        range: false,
+        toggle: false,
+      },
     },
     scripts: sidebarScripts,
   },

@@ -26,12 +26,18 @@ describe("T9: FocusGroupConfig has inputmap, not action/activate", () => {
   });
 
   it("resolveRole config does NOT have action field", () => {
-    const config = resolveRole("checkbox") as Record<string, unknown>;
+    const config = resolveRole("checkbox") as unknown as Record<
+      string,
+      unknown
+    >;
     expect(config).not.toHaveProperty("action");
   });
 
   it("resolveRole config does NOT have activate field", () => {
-    const config = resolveRole("checkbox") as Record<string, unknown>;
+    const config = resolveRole("checkbox") as unknown as Record<
+      string,
+      unknown
+    >;
     expect(config).not.toHaveProperty("activate");
   });
 });

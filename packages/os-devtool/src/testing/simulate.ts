@@ -103,9 +103,7 @@ export function simulateKeyPress(kernel: HeadlessKernel, rawKey: string): void {
   const overlayStack = kernel.getState().os.overlays?.stack ?? [];
   if (overlayStack.length > 0 && key !== "Escape") {
     const activeZoneId = readActiveZoneId(kernel);
-    const isInsideOverlay = overlayStack.some(
-      (e: Record<string, unknown>) => e["id"] === activeZoneId,
-    );
+    const isInsideOverlay = overlayStack.some((e) => e.id === activeZoneId);
     if (!isInsideOverlay) {
       if (_observer && before) {
         _observer({

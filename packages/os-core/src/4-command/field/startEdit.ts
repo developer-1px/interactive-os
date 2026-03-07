@@ -33,7 +33,7 @@ export const OS_FIELD_START_EDIT = os.defineCommand(
     if (prevEditingId) {
       const prevField = FieldRegistry.getField(prevEditingId);
       if (prevField?.config.onCommit) {
-        const text = prevField.state.value;
+        const text = String(prevField.state.value);
         const appCommand = prevField.config.onCommit({ text });
         queueMicrotask(() => os.dispatch(appCommand));
       }

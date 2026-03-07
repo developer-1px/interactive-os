@@ -100,6 +100,8 @@ const FIELD_KEYMAPS: Record<FieldType, FieldKeymap> = {
   // Empty keymap — Field layer never intercepts. Zone navigation + Item selection.
   enum: {},
   "enum[]": {},
+  // boolean: toggle fields — Zone handles Space via inputmap.
+  boolean: {},
   // readonly: observation only (progressbar, meter). No interaction.
   readonly: {},
 };

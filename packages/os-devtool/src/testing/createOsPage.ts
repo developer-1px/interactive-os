@@ -266,7 +266,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
               "first") as import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry,
             selectedItemId:
               Object.entries(zoneState?.items ?? {}).find(
-                ([, s]) => s?.["aria-selected"],
+                ([, s]) => (s as Record<string, unknown>)?.["aria-selected"],
               )?.[0] ?? null,
             lastFocusedId: zoneState?.lastFocusedId ?? null,
           };
@@ -589,7 +589,7 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         opts?.items?.length
       ) {
         // disallowEmpty fallback: auto-select first item (replaces OS_INIT_SELECTION)
-        initialSelection = [opts.items[0]];
+        initialSelection = [opts.items[0]!];
       }
 
       basePage.goto(zoneId, {

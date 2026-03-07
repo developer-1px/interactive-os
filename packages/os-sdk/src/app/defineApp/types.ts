@@ -218,7 +218,8 @@ export interface ZoneHandle<S> {
   bind(
     config: ZoneBindings & {
       field?: FieldBindings;
-      keybindings?: KeybindingEntry<S>[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      keybindings?: { key: string; command: any; when?: unknown }[];
     },
   ): BoundComponents<S>;
 }

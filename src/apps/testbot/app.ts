@@ -259,7 +259,12 @@ export async function executeAll(
 
     // Suite done
     os.dispatch(
-      suiteDone({ index: i, passed, steps: [...steps], diagnostics }),
+      suiteDone({
+        index: i,
+        passed,
+        steps: [...steps],
+        ...(diagnostics !== undefined ? { diagnostics } : {}),
+      }),
     );
   }
 
@@ -314,6 +319,13 @@ export async function executeSuite(
   page.hideCursor();
 
   const diagnostics = !passed ? formatDiagnostics(os) : undefined;
-  os.dispatch(suiteDone({ index: si, passed, steps: [...steps], diagnostics }));
+  os.dispatch(
+    suiteDone({
+      index: si,
+      passed,
+      steps: [...steps],
+      ...(diagnostics !== undefined ? { diagnostics } : {}),
+    }),
+  );
   os.dispatch(allDone());
 }

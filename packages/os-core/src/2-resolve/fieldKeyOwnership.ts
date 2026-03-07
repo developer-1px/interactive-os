@@ -93,6 +93,10 @@ const ZONE_PASSTHROUGH_KEYS: Record<FieldType, Set<string>> = {
     "Shift+ArrowDown",
   ]),
 
+  // boolean: toggle fields (switch, checkbox). Space toggles.
+  // All keys pass through — Zone handles Space via inputmap.
+  boolean: FULL_ZONE_PASSTHROUGH,
+
   // readonly: observation only (progressbar, meter). No interaction.
   // All keys pass through — Field never intercepts.
   readonly: FULL_ZONE_PASSTHROUGH,

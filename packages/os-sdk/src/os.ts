@@ -12,6 +12,7 @@ export {
   getFirstDescendantWithAttribute,
   getItemAttribute,
 } from "@os-core/3-inject/itemQueries";
+export { OS_ACTIVATE } from "@os-core/4-command/activate/activate";
 export { OS_CHECK } from "@os-core/4-command/activate/check";
 export { OS_PRESS } from "@os-core/4-command/activate/press";
 export { OS_ESCAPE } from "@os-core/4-command/dismiss/escape";

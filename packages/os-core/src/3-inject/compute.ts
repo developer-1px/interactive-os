@@ -253,7 +253,12 @@ export function resolveElement(
     const s = kernel.getState();
     const isActive = s.os.focus.activeZoneId === elementId;
     const config = entry.config ?? DEFAULT_CONFIG;
-    return computeContainerProps(elementId, config, isActive, entry.role);
+    return computeContainerProps(
+      elementId,
+      config,
+      isActive,
+      entry.role,
+    ) as unknown as ElementAttrs;
   }
 
   // Check if it's an Item within any Zone
@@ -264,10 +269,10 @@ export function resolveElement(
     // Merge trigger overlay ARIA if this item is also a trigger
     const triggerAttrs = computeTrigger(kernel, elementId);
     if (triggerAttrs) {
-      return { ...itemAttrs, ...triggerAttrs };
+      return { ...itemAttrs, ...triggerAttrs } as unknown as ElementAttrs;
     }
 
-    return itemAttrs;
+    return itemAttrs as unknown as ElementAttrs;
   }
 
   return {};

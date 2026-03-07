@@ -99,7 +99,12 @@ function SliderRail({
 // The bound Item type omits HTML attributes that the underlying Item component supports.
 // Cast to accept role, aria-*, and style props that Item.tsx forwards to the DOM element.
 const ThumbItem = SliderUI.Item as React.FC<
-  React.HTMLAttributes<HTMLElement> & { id: string | number; className?: string; children?: React.ReactNode; asChild?: boolean }
+  React.HTMLAttributes<HTMLElement> & {
+    id: string | number;
+    className?: string;
+    children?: React.ReactNode;
+    asChild?: boolean;
+  }
 >;
 
 function Thumb({

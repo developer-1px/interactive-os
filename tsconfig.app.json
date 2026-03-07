@@ -48,5 +48,5 @@
     "packages/os-devtool/src",
     "tests"
   ],
-  "exclude": ["src/tests/e2e"]
+  "exclude": ["src/tests/e2e", "tests/e2e"]
 }

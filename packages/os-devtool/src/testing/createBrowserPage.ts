@@ -644,6 +644,33 @@ export function createBrowserPage(
     },
 
     keyboard: {
+      async type(text: string) {
+        for (const ch of text) {
+          const target = document.activeElement || document.body;
+          target.dispatchEvent(
+            new KeyboardEvent("keydown", {
+              key: ch,
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
+          target.dispatchEvent(
+            new InputEvent("input", {
+              data: ch,
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
+          target.dispatchEvent(
+            new KeyboardEvent("keyup", {
+              key: ch,
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
+          await delay(10);
+        }
+      },
       async press(combo: string) {
         // Parse "Shift+Tab" → key="Tab", shiftKey=true
         const parts = combo.split("+");

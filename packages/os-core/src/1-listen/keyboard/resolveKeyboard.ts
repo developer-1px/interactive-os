@@ -76,7 +76,7 @@ interface InputMeta extends Record<string, unknown> {
 /** Layer return: command(s) + which element claimed it */
 interface LayerResult {
   commands: BaseCommand[];
-  elementId?: string;
+  elementId?: string | undefined;
 }
 
 /** Layer: (key) → result or null (pass) */
@@ -129,7 +129,7 @@ function fieldLayer(input: KeyboardInput): Layer | null {
   if (input.editingFieldId) {
     return (key) => {
       const cmd = resolveFieldKey(input.editingFieldId!, key, {
-        itemId: input.focusedItemId ?? undefined,
+        ...(input.focusedItemId != null ? { itemId: input.focusedItemId } : {}),
       });
       if (cmd)
         return { commands: [cmd], elementId: input.focusedItemId ?? undefined };
@@ -194,7 +194,7 @@ function triggerItemLayer(input: KeyboardInput): Layer | null {
       if (isClickKey(k)) continue;
       const cmds = inputmap[k];
       if (cmds && cmds.length > 0) {
-        actionKeymap[k] = cmds[0];
+        actionKeymap[k] = cmds[0]!;
       }
     }
     layers.push(actionKeymap);
@@ -204,14 +204,14 @@ function triggerItemLayer(input: KeyboardInput): Layer | null {
 
   return (key) => {
     // Check inputmap first for multi-command support (bypasses chain for full command list)
-    if (hasInputmap && key in inputmap) {
-      const cmds = inputmap[key];
+    if (hasInputmap && key in inputmap!) {
+      const cmds = inputmap![key];
       // Empty array = explicitly blocked key (e.g., checkbox Enter: [])
       // Return NOOP so the 3-layer loop stops here — prevents zoneLayer fallback
       if (!cmds || cmds.length === 0) return { commands: [NOOP] };
       // If trigger layer also has this key, trigger wins (chain priority)
       if (hasTrigger) {
-        const triggerCmd = resolveChain(key, [layers[0]]);
+        const triggerCmd = resolveChain(key, [layers[0]!]);
         if (triggerCmd) {
           return { commands: [triggerCmd], elementId: input.focusedTriggerId! };
         }

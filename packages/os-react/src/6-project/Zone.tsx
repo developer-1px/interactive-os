@@ -195,7 +195,7 @@ export function Zone({
       const items = ZoneRegistry.resolveItems(zoneId);
       if (items.length > 0) {
         const targetItem =
-          entry === "last" ? items[items.length - 1] : items[0];
+          entry === "last" ? items[items.length - 1]! : items[0]!;
         os.dispatch(OS_FOCUS({ zoneId, itemId: targetItem }));
       }
     }

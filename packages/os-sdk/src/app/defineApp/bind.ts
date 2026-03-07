@@ -12,7 +12,7 @@ import {
   getContentVisibilitySource,
 } from "@os-core/engine/registries/roleRegistry";
 import { Field } from "@os-react/6-project/field/Field";
-import { Item } from "@os-react/6-project/Item";
+import { Item, type ItemState } from "@os-react/6-project/Item";
 import type { ZoneOptions } from "@os-react/6-project/Zone";
 import { Zone } from "@os-react/6-project/Zone";
 import React, { type ReactNode } from "react";
@@ -20,7 +20,6 @@ import type {
   BoundComponents,
   Condition,
   FieldBindings,
-  KeybindingEntry,
   ZoneBindings,
 } from "./types";
 
@@ -42,7 +41,8 @@ export function createBoundComponents<S>(
   bindConfig: BindConfig<S>,
   config: ZoneBindings & {
     field?: FieldBindings;
-    keybindings?: KeybindingEntry<S>[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    keybindings?: { key: string; command: any; when?: unknown }[];
     options?: ZoneOptions;
     itemFilter?: (items: string[]) => string[];
     getItems?: () => string[];
@@ -112,28 +112,33 @@ export function createBoundComponents<S>(
   ZoneComponent.displayName = `${appId}.${zoneName}.Zone`;
 
   // ── Item component ──
-  const ItemComponent: React.FC<
+  type ItemComponentType = React.FC<
     Omit<React.HTMLAttributes<HTMLElement>, "id" | "children" | "className"> & {
       id: string | number;
       className?: string;
-      children?:
-        | ReactNode
-        | ((state: {
-            isFocused: boolean;
-            isSelected: boolean;
-            isExpanded: boolean;
-            isAnchor?: boolean;
-          }) => ReactNode);
+      children?: ReactNode | ((state: ItemState) => ReactNode);
       asChild?: boolean;
     }
   > & {
-    Region: React.FC<{
+    Content: React.FC<{
       for: string;
       id?: string;
       className?: string;
       children?: ReactNode;
     }>;
-  } = ({ id, className, children, asChild, ...rest }) => {
+  };
+  const ItemComponent = (({
+    id,
+    className,
+    children,
+    asChild,
+    ...rest
+  }: {
+    id: string | number;
+    className?: string;
+    children?: ReactNode | ((state: ItemState) => ReactNode);
+    asChild?: boolean;
+  } & Record<string, unknown>) => {
     return React.createElement(Item, {
       id: String(id),
       className,
@@ -141,7 +146,7 @@ export function createBoundComponents<S>(
       children,
       ...rest,
     } as React.ComponentProps<typeof Item>);
-  };
+  }) as unknown as ItemComponentType;
   ItemComponent.displayName = `${appId}.${zoneName}.Item`;
 
   // ── Item.Content — passive projection of Item's visibility state ──

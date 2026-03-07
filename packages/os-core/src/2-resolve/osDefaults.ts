@@ -72,12 +72,12 @@ Keybindings.registerAll([
   // APG: Ctrl+Arrow → move focus without changing selection (multiselectable Alt)
   {
     key: "Ctrl+ArrowDown",
-    command: OS_NAVIGATE({ direction: "down", select: "none" }),
+    command: OS_NAVIGATE({ direction: "down" }),
     when: "navigating",
   },
   {
     key: "Ctrl+ArrowUp",
-    command: OS_NAVIGATE({ direction: "up", select: "none" }),
+    command: OS_NAVIGATE({ direction: "up" }),
     when: "navigating",
   },
 ]);

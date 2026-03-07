@@ -1,5 +1,6 @@
 import type { Transaction } from "@kernel/core/transaction";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { OS_ACTIVATE } from "@os-sdk/os";
 import { enableMapSet, produce } from "immer";
 import { inferSignal } from "./utils/inferSignal";
 
@@ -52,7 +53,7 @@ export const InspectorSearchUI = searchZone.bind({
     onCommit: updateSearchQuery,
     trigger: "change",
   },
-  options: { activate: { onClick: true } },
+  options: { inputmap: { click: [OS_ACTIVATE()] } },
   triggers: [{ id: "clearBtn", onActivate: clearSearchQuery() }],
 });
 
@@ -78,7 +79,7 @@ export const toggleGroup = filtersZone.command(
 
 export const InspectorFiltersUI = filtersZone.bind({
   role: "toolbar",
-  options: { activate: { onClick: true } },
+  options: { inputmap: { click: [OS_ACTIVATE()] } },
   triggers: [
     { id: "groupBtn-kernel", onActivate: toggleGroup({ group: "kernel" }) },
   ],
@@ -112,7 +113,7 @@ export const setScrollState = scrollZone.command(
 
 export const InspectorScrollUI = scrollZone.bind({
   role: "toolbar", // using a generic role
-  options: { activate: { onClick: true } },
+  options: { inputmap: { click: [OS_ACTIVATE()] } },
   triggers: [
     { id: "scrollToBottomBtn", onActivate: INSPECTOR_SCROLL_TO_BOTTOM() },
   ],

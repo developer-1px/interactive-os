@@ -52,7 +52,6 @@ import {
   type Condition,
   type FieldBindings,
   type FlatHandler,
-  type KeybindingEntry,
   type Selector,
   type TestInstance,
   type ZoneBindingEntry,
@@ -128,7 +127,8 @@ export function defineApp<S>(
     {
       role: import("@os-core/engine/registries/roleRegistry").ZoneRole;
       bindings: ZoneBindings;
-      keybindings?: import("./types").KeybindingEntry<S>[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      keybindings?: { key: string; command: any; when?: unknown }[];
       field?: import("./types").FieldBindings;
       triggers?: import("./types").TriggerBinding[];
     }
@@ -215,8 +215,9 @@ export function defineApp<S>(
     if (opts?.key) {
       const keys = Array.isArray(opts.key) ? opts.key : [opts.key];
       const keyWhen = typeof opts.when === "string" ? opts.when : undefined;
-      const command =
-        factory() as unknown as import("@kernel/core/tokens").BaseCommand;
+      const command = (
+        factory as unknown as () => unknown
+      )() as import("@kernel/core/tokens").BaseCommand;
       for (const k of keys) {
         const entry: AppKeybindingEntry = {
           key: k,
@@ -281,7 +282,8 @@ export function defineApp<S>(
       bind(
         config: ZoneBindings & {
           field?: FieldBindings;
-          keybindings?: KeybindingEntry<S>[];
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          keybindings?: { key: string; command: any; when?: unknown }[];
           options?: import("@os-react/6-project/Zone").ZoneOptions;
           itemFilter?: (items: string[]) => string[];
         },

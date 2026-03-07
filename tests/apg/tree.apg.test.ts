@@ -59,7 +59,15 @@ function singleTreeFactory(focusedItem = "section-1") {
     focusedItemId: focusedItem,
     expandableItems: EXPANDABLE,
     treeLevels: TREE_LEVELS,
-    config: { select: { mode: "single", followFocus: false, disallowEmpty: false, range: false, toggle: true } },
+    config: {
+      select: {
+        mode: "single",
+        followFocus: false,
+        disallowEmpty: false,
+        range: false,
+        toggle: true,
+      },
+    },
   });
   return page;
 }

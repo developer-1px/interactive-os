@@ -4,8 +4,9 @@
  * T1: Config 타입 확장 — chain fallback fields + rolePresets values
  * 🔴 RED: all tests should FAIL until Phase 1 config extension is implemented.
  */
-import { describe, expect, it } from "vitest";
+
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
+import { describe, expect, it } from "vitest";
 
 // ═══════════════════════════════════════════════════════════════════
 // 1. NavigateConfig chain fields exist in rolePresets

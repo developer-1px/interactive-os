@@ -464,14 +464,14 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
 export function resolveRole(
   role: ZoneRole | string | undefined,
   overrides: {
-    navigate?: Partial<NavigateConfig>;
-    tab?: Partial<TabConfig>;
-    select?: Partial<SelectConfig>;
-    dismiss?: Partial<DismissConfig>;
-    project?: Partial<ProjectConfig>;
-    expand?: Partial<ExpandConfig>;
-    value?: Partial<ValueConfig>;
-    inputmap?: InputMap;
+    navigate?: Partial<NavigateConfig> | undefined;
+    tab?: Partial<TabConfig> | undefined;
+    select?: Partial<SelectConfig> | undefined;
+    dismiss?: Partial<DismissConfig> | undefined;
+    project?: Partial<ProjectConfig> | undefined;
+    expand?: Partial<ExpandConfig> | undefined;
+    value?: Partial<ValueConfig> | undefined;
+    inputmap?: InputMap | undefined;
   } = {},
 ): FocusGroupConfig {
   if (role && !rolePresets[role as ZoneRole]) {

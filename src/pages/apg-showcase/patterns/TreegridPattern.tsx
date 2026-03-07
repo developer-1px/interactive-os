@@ -168,7 +168,6 @@ const TreegridUI = treegridZone.bind({
   role: "treegrid",
   getExpandableItems: () => expandableIds,
   options: {
-    activate: { mode: "manual", onClick: true },
     select: {
       mode: "multiple",
       followFocus: false,

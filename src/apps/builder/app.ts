@@ -21,7 +21,7 @@ import {
   findAcceptingCollection,
 } from "@os-sdk/library/collection/pasteBubbling";
 import type { FieldCommandFactory } from "@os-sdk/os";
-import { OS_OVERLAY_OPEN, os } from "@os-sdk/os";
+import { OS_ACTIVATE, OS_OVERLAY_OPEN, os } from "@os-sdk/os";
 import { produce } from "immer";
 import {
   type Block,
@@ -416,7 +416,7 @@ export const BuilderCanvasUI = canvasCollection.bind({
   options: {
     navigate: { orientation: "corner" },
     tab: { behavior: "trap" },
-    activate: { onClick: true, reClickOnly: true },
+    inputmap: { click: [OS_ACTIVATE()] },
     dismiss: { escape: "none" },
   },
   itemFilter: createCanvasItemFilter(CANVAS_ZONE_ID),

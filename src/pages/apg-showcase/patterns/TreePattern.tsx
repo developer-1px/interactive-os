@@ -88,7 +88,6 @@ const ExplorerUI = explorerZone.bind({
   role: "tree",
   getExpandableItems: () => expandableIds,
   options: {
-    activate: { onClick: true },
     select: { mode: "multiple", followFocus: false, range: true, toggle: true },
   },
 });

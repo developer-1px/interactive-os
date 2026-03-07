@@ -59,11 +59,6 @@ function navTreeFactory(focusedItem = "folder:docs") {
         range: false,
         toggle: false,
       },
-      activate: {
-        mode: "manual",
-        onClick: true,
-        reClickOnly: false,
-      },
     },
   });
   const page = createPage(app);

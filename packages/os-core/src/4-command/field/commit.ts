@@ -48,7 +48,7 @@ export const OS_FIELD_COMMIT = os.defineCommand(
     // Bridge: dispatch app's onCommit command via kernel dispatch key (synchronous)
     const commitFactory = fieldEntry?.config.onCommit;
     const appCommand = commitFactory
-      ? commitFactory({ text: fieldEntry!.state.value })
+      ? commitFactory({ text: String(fieldEntry!.state.value) })
       : null;
 
     // Only clear editingItemId if we were in deferred editing mode

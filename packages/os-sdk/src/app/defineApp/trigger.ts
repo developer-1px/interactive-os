@@ -68,7 +68,9 @@ export function createDynamicTrigger<P>(
     payload,
     ...rest
   }) => {
-    const cmd = factory(payload as P);
+    const cmd = (factory as unknown as (p: P) => ReturnType<typeof factory>)(
+      payload as P,
+    );
     return React.createElement(Trigger, {
       ...(options?.id ? { id: options.id } : {}),
       onActivate: cmd,

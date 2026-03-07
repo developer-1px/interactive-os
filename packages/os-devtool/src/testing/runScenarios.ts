@@ -61,10 +61,18 @@ function runOsScenarios(scenarios: TestScenario[]): void {
           page.goto(scenario.zone, {
             items,
             role: scenario.role,
-            config: scenario.config,
-            initial: scenario.initial,
+            ...(scenario.config !== undefined
+              ? { config: scenario.config }
+              : {}),
+            ...(scenario.initial !== undefined
+              ? { initial: scenario.initial }
+              : {}),
           });
-          await script.run(page, expect, items);
+          await script.run(
+            page as unknown as import("./types").Page,
+            expect,
+            items,
+          );
         });
       }
     });
@@ -90,10 +98,18 @@ function runAppScenarios(
           const items = scenario.getItems?.() ?? scenario.items ?? [];
           page.goto(scenario.zone, {
             items,
-            config: scenario.config,
-            initial: scenario.initial,
+            ...(scenario.config !== undefined
+              ? { config: scenario.config }
+              : {}),
+            ...(scenario.initial !== undefined
+              ? { initial: scenario.initial }
+              : {}),
           });
-          await script.run(page, expect, items);
+          await script.run(
+            page as unknown as import("./types").Page,
+            expect,
+            items,
+          );
         });
       }
     });

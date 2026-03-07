@@ -14,7 +14,7 @@
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
-import { os } from "@os-sdk/os";
+import { OS_ACTIVATE, os } from "@os-sdk/os";
 import { produce } from "immer";
 import {
   buildDocTree,
@@ -191,7 +191,7 @@ export const DocsNavbarUI = navbarZone.bind({
   },
   options: {
     navigate: { orientation: "horizontal" },
-    activate: { onClick: true },
+    inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 
@@ -208,7 +208,7 @@ export const DocsFavoritesUI = favoritesZone.bind({
   getItems: () => getFavoriteFiles(allFiles).map((f) => f.path),
   options: {
     select: { followFocus: true },
-    activate: { onClick: true },
+    inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 
@@ -224,7 +224,7 @@ export const DocsRecentUI = recentZone.bind({
   onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
   options: {
     select: { followFocus: true },
-    activate: { onClick: true },
+    inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 
@@ -277,7 +277,7 @@ export const DocsReaderUI = readerZone.bind({
   role: "feed",
   onAction: (cursor) => selectDoc({ id: cursor.focusId }),
   options: {
-    activate: { onClick: true },
+    inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 

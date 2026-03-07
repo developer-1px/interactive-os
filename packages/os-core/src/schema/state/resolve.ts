@@ -29,13 +29,13 @@ export function resolveItemId(
   // Stale: resolve to nearest neighbor
   if (lastIndex != null) {
     // Try the item at the same index (next neighbor)
-    if (lastIndex < items.length) return items[lastIndex];
+    if (lastIndex < items.length) return items[lastIndex]!;
     // Past the end → fall back to last item (previous neighbor)
-    return items[items.length - 1];
+    return items[items.length - 1]!;
   }
 
   // No hint → fall back to first item
-  return items[0];
+  return items[0]!;
 }
 
 /**

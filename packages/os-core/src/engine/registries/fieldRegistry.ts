@@ -23,6 +23,7 @@ export type FieldType =
   | "block"
   | "editor"
   | "number"
+  | "boolean"
   | "enum"
   | "enum[]"
   | "readonly";
