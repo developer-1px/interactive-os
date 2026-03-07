@@ -25,7 +25,7 @@ Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (acc
 ## Now
 
 - [x] T8: button.apg.md — 20행 DT (18🟢, 2➖). Action+Toggle 양쪽 커버. 18 tests pass ✅
-- [ ] T9: switch.apg.md — DT 표준 전환
+- [x] T9: switch.apg.md — 17행 DT (14🟢, 3➖). 12 tests pass ✅
 - [ ] T10: checkbox.apg.md — DT 표준 전환
 - [ ] T11: disclosure.apg.md — DT 표준 전환
 - [ ] T12: radiogroup.apg.md — DT 표준 전환

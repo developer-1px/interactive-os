@@ -73,7 +73,7 @@ const PATTERNS: Record<
     status: "none",
   },
   spinbutton: { name: "Spinbutton", component: SpinbuttonPattern, status: "none" },
-  switch: { name: "Switch", component: SwitchPattern, status: "test" },
+  switch: { name: "Switch", component: SwitchPattern, status: "dt" },
   table: { name: "Table", component: TablePattern, status: "none" },
   tabs: { name: "Tabs", component: TabsPattern, status: "dt" },
   toolbar: { name: "Toolbar", component: ToolbarPattern, status: "test" },
