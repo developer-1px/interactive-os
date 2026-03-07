@@ -139,7 +139,7 @@ Interactive OS
 │   └── TestInstance — headless 테스트 인스턴스
 │
 └── 18. Verification (검증)
-    ├── TestPage — Playwright 동형 headless API
+    ├── HeadlessPage — Playwright 동형 headless API
     ├── Headless Compute — DOM 없는 속성 계산 (computeItem, computeAttrs)
     ├── Headless Simulate — DOM 없는 상호작용 시뮬레이션
     ├── Spatial Test — 공간 탐색 자동 검증

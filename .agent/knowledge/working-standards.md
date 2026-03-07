@@ -53,7 +53,12 @@
 
 16. **폴더 구조가 SSOT, 대시보드는 투영이다.** `docs/1-project/[domain]/[name]/`가 원본이고, `STATUS.md`는 `/status`가 스캔해서 생성하는 투영이다. STATUS.md를 직접 편집하는 워크플로우는 `/status` 하나뿐이다. (2026-03-05)
 
-17. **프로젝트는 도메인에 귀속된다.** 도메인 = 코드 패키지 기반 상설 범주 (os-core, testing, builder, inspector, apg). 프로젝트 = 도메인 내 마일스톤 크기 작업 단위. 1~2일짜리는 독립 프로젝트가 아니라 기존 프로젝트의 태스크다. (2026-03-05)
+17. **`docs/1-project/`는 3계층 구조다: domain > epic > project.** (2026-03-07)
+    - **domain** (depth 1): 상설 범주. 코드 패키지 기반 (os-core, testing, builder, inspector, apg 등). 느리게 변함.
+    - **epic** (depth 2): 확정된 컨셉. 코드의 canonical name과 동일 (kebab-case). 바뀌지 않음. 예: `headless-page`, `inspector`, `test-bench`.
+    - **project** (depth 3): 일시적 작업 단위. 완료 → archive 대상. BOARD.md가 여기에 있음.
+    - **epic 이름 규칙**: 코드 canonical name의 kebab-case가 유일한 이름이다. FEATURES, concept-map, STATUS.md 모두 이 이름으로 통일한다. 여러 이름으로 부르지 않는다.
+    - 1~2일짜리는 독립 프로젝트가 아니라 기존 프로젝트의 태스크다.
 
 18. **구조 변경 전에 "누가 읽고 쓰는가?"를 먼저 분석한다.** 파일 포맷 변경 시, 해당 파일을 참조하는 워크플로우를 변경 전에 식별한다. 변경 후 파급 조사는 이중 작업을 유발한다. (2026-03-05)
 
