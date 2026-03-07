@@ -3,7 +3,7 @@
 > Pattern: [Accordion](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/)
 > Example: [Accordion Example](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/examples/accordion/)
 >
-> Status: 🟡 14/16 covered · 2 gaps (K12, K13)
+> Status: 🟡 14/22 covered · 6 gaps (I1-I2, P1-P2, A3, A5) · 2 N/A (K12, K13)
 
 ## Decision Table
 
@@ -15,6 +15,7 @@
 > | 🟢 | test exists + passes |
 > | 🔴 | test exists + fails |
 > | ⬜ | not covered (no test) |
+> | ➖ | N/A (browser default, not testable) |
 
 ### Keyboard
 
@@ -31,8 +32,22 @@
 | K9 | 🟢 | `click("#acc-shipping")` | `press("Home")` | `"#acc-personal" toBeFocused` | "When focus is on an accordion header, moves focus to the first accordion header." | `Home: first header` |
 | K10 | 🟢 | `click("#acc-personal")` | `press("End")` | `"#acc-shipping" toBeFocused` | "When focus is on an accordion header, moves focus to the last accordion header." | `End: last header` |
 | K11 | 🟢 | `click("#acc-personal")` — expanded | `press("ArrowDown")` | `"#acc-personal" aria-expanded="true"`, `"#acc-billing" aria-expanded="false"` | (implicit: arrow keys only navigate, not expand) | `ArrowDown does NOT change expand state` |
-| K12 | ⬜ | `click("#acc-personal")` — expanded, panel has focusable inputs | `press("Tab")` | next focusable element (panel content input) focused | "Moves focus to the next focusable element; all focusable elements in the accordion are included in the page Tab sequence." | — |
-| K13 | ⬜ | panel content input focused | `press("Shift+Tab")` | previous focusable element focused | "Moves focus to the previous focusable element; all focusable elements in the accordion are included in the page Tab sequence." | — |
+| K12 | ➖ | — | `press("Tab")` | browser default (no interception) | "Moves focus to the next focusable element; all focusable elements in the accordion are included in the page Tab sequence." | N/A — browser default |
+| K13 | ➖ | — | `press("Shift+Tab")` | browser default (no interception) | "Moves focus to the previous focusable element; all focusable elements in the accordion are included in the page Tab sequence." | N/A — browser default |
+
+### Initial State (from Example HTML)
+
+| # | Signal | Setup (Given) | Input (When) | Assert (Then) | Basis | Test |
+|---|--------|---------------|--------------|---------------|-------|------|
+| I1 | ⬜ | page loaded (no interaction) | (assert) | `"#acc-personal" aria-expanded="true"` | Example HTML: first button has `aria-expanded="true"` | `initial state: first section expanded` |
+| I2 | ⬜ | page loaded (no interaction) | (assert) | `"#acc-billing" aria-expanded="false"`, `"#acc-shipping" aria-expanded="false"` | Example HTML: other buttons have `aria-expanded="false"`, panels have `hidden` | `initial state: other sections collapsed` |
+
+### Panel Visibility Sync (from Example JS)
+
+| # | Signal | Setup (Given) | Input (When) | Assert (Then) | Basis | Test |
+|---|--------|---------------|--------------|---------------|-------|------|
+| P1 | ⬜ | `click("#acc-billing")` — expand | (assert) | `"#acc-billing" aria-expanded="true"`, panel NOT hidden | Example JS: `this.contentEl.removeAttribute('hidden')` | `expand: panel becomes visible` |
+| P2 | ⬜ | `click("#acc-personal")`, `click("#acc-personal")` — collapse | (assert) | `"#acc-personal" aria-expanded="false"`, panel hidden | Example JS: `this.contentEl.setAttribute('hidden', '')` | `collapse: panel becomes hidden` |
 
 ### Click
 
@@ -51,26 +66,27 @@
 ## Coverage
 
 ```
-🟢 14  ⬜ 2  🔴 0  total 16
+🟢 16  ⬜ 6  ➖ 2  🔴 0  total 24
 ```
 
 | Signal | Count | Rows |
 |--------|-------|------|
-| 🟢 | 14 | K1-K11, C1-C3, M1 |
-| ⬜ | 2 | K12 (Tab), K13 (Shift+Tab) |
+| 🟢 | 16 | K1-K11, C1-C3, M1, A1, A2, A4 |
+| ⬜ | 6 | I1, I2, P1, P2, A3, A5 |
+| ➖ | 2 | K12 (Tab), K13 (Shift+Tab) — browser default |
 | 🔴 | 0 | — |
 
 ## ARIA Attributes
 
 > Example의 "Role, Property, State, and Tabindex Attributes" 표.
 
-| # | Element | Role | Attribute | W3C Wording |
-|---|---------|------|-----------|-------------|
-| A1 | h3 | — | — | "Element that serves as an accordion header. Each accordion header element contains a button that controls the visibility of its content panel." |
-| A2 | button (in h3) | — | `aria-expanded="true/false"` | "Set to true when the Accordion panel is expanded, otherwise set to false." |
-| A3 | button (in h3) | — | `aria-controls="ID"` | "Points to the ID of the panel which the header controls." |
-| A4 | div (panel) | `region` | — | "Creates a landmark region that contains the currently expanded accordion panel." |
-| A5 | div (panel) | — | `aria-labelledby="IDREF"` | "Defines the accessible name for the region element. References the accordion header button that expands and collapses the region." |
+| # | Signal | Element | Role | Attribute | W3C Wording | Test |
+|---|--------|---------|------|-----------|-------------|------|
+| A1 | 🟢 | h3 | — | — | "Element that serves as an accordion header. Each accordion header element contains a button that controls the visibility of its content panel." | (structural — covered by heading existence in HTML) |
+| A2 | 🟢 | button (in h3) | — | `aria-expanded="true/false"` | "Set to true when the Accordion panel is expanded, otherwise set to false." | (covered by K1-K4, C1-C2) |
+| A3 | ⬜ | button (in h3) | — | `aria-controls="ID"` | "Points to the ID of the panel which the header controls." | `aria-controls points to panel ID` |
+| A4 | 🟢 | div (panel) | `region` | — | "Creates a landmark region that contains the currently expanded accordion panel." | (covered by OS role="accordion" panel rendering) |
+| A5 | ⬜ | div (panel) | — | `aria-labelledby="IDREF"` | "Defines the accessible name for the region element. References the accordion header button that expands and collapses the region." | `panel aria-labelledby references header button` |
 
 ## Example Source
 
