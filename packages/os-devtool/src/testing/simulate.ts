@@ -73,6 +73,71 @@ function resolveClipboardShim(key: string): BaseCommand | null {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// buildKeyboardInput — extracted for testability (isomorphism contract)
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Build a KeyboardInput from OS state — headless equivalent of senseKeyboard.
+ *
+ * senseKeyboard reads DOM + OS state → KeyboardInput.
+ * buildKeyboardInput reads OS state only → KeyboardInput.
+ *
+ * These two functions must produce identical values for all OS-derived fields.
+ * DOM-only fields (isComposing, isDefaultPrevented, isInspector, isCombobox)
+ * are hardcoded to safe defaults since they have no headless equivalent.
+ *
+ * @see senseKeyboard.ts — browser ground truth
+ * @see zero-drift.md — L4 Sense Isomorphism
+ */
+export function buildKeyboardInput(kernel: HeadlessKernel, key: string): KeyboardInput {
+  const activeZoneId = readActiveZoneId(kernel);
+  const zone = activeZoneId
+    ? kernel.getState().os.focus.zones[activeZoneId]
+    : undefined;
+  const entry = activeZoneId ? ZoneRegistry.get(activeZoneId) : undefined;
+  const childRole = entry?.role ? getChildRole(entry.role) : undefined;
+
+  // Mirror senseKeyboard.ts ground truth:
+  // 1. zone?.editingItemId — OS state set by OS_FIELD_START_EDIT (inline editing)
+  // 2. entry?.fieldId — always-active field (draft, search zones)
+  const editingFieldId = zone?.editingItemId ?? entry?.fieldId ?? null;
+
+  const focusedId = zone?.focusedItemId ?? null;
+
+  // Role → FieldType mapping for always-active Fields
+  const activeFieldType = childRole
+    ? (ROLE_FIELD_TYPE_MAP[childRole] ?? null)
+    : null;
+
+  return {
+    canonicalKey: key,
+    key,
+    isEditing: !!editingFieldId,
+    // Mirror senseKeyboard.ts: resolveIsEditingForKey(target, key)
+    // Pure equivalent: if editing, check if the key is NOT delegated to OS
+    // (i.e., the field absorbs it)
+    isFieldActive: editingFieldId
+      ? !isKeyDelegatedToOS(key, FieldRegistry.getField(editingFieldId)?.config.fieldType ?? "inline")
+      : false,
+    isComposing: false,
+    isDefaultPrevented: false,
+    isInspector: false,
+    isCombobox: false,
+    editingFieldId,
+    activeFieldType,
+    focusedItemId: focusedId,
+    activeZoneFocusedItemId: focusedId,
+    activeZoneInputmap: entry?.config?.inputmap ?? null,
+    focusedTriggerId: null,
+    focusedTriggerRole: null,
+    focusedTriggerOverlayId: null,
+    isTriggerOverlayOpen: false,
+    elementId: focusedId ?? undefined,
+    cursor: buildZoneCursor(zone),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // simulateKeyPress
 // ═══════════════════════════════════════════════════════════════════
 
@@ -120,53 +185,7 @@ export function simulateKeyPress(kernel: HeadlessKernel, rawKey: string): void {
     }
   }
 
-  const activeZoneId = readActiveZoneId(kernel);
-  const zone = activeZoneId
-    ? kernel.getState().os.focus.zones[activeZoneId]
-    : undefined;
-  const entry = activeZoneId ? ZoneRegistry.get(activeZoneId) : undefined;
-  const childRole = entry?.role ? getChildRole(entry.role) : undefined;
-
-  // Mirror senseKeyboard.ts ground truth:
-  // 1. zone?.editingItemId — OS state set by OS_FIELD_START_EDIT (inline editing)
-  // 2. entry?.fieldId — always-active field (draft, search zones)
-  const editingFieldId = zone?.editingItemId ?? entry?.fieldId ?? null;
-
-  const focusedId = zone?.focusedItemId ?? null;
-
-  // Role → FieldType mapping for always-active Fields
-  const activeFieldType = childRole
-    ? (ROLE_FIELD_TYPE_MAP[childRole] ?? null)
-    : null;
-
-  const input: KeyboardInput = {
-    canonicalKey: key,
-    key,
-    isEditing: !!editingFieldId,
-    // Mirror senseKeyboard.ts: resolveIsEditingForKey(target, key)
-    // Pure equivalent: if editing, check if the key is NOT delegated to OS
-    // (i.e., the field absorbs it)
-    isFieldActive: editingFieldId
-      ? !isKeyDelegatedToOS(key, FieldRegistry.getField(editingFieldId)?.config.fieldType ?? "inline")
-      : false,
-    isComposing: false,
-    isDefaultPrevented: false,
-    isInspector: false,
-    isCombobox: false,
-    editingFieldId,
-    activeFieldType,
-    focusedItemId: focusedId,
-    activeZoneFocusedItemId: focusedId,
-    /** inputmap — APG keyboard interaction table: input → command[] */
-    activeZoneInputmap: entry?.config?.inputmap ?? null,
-    // Trigger — headless has no focused trigger
-    focusedTriggerId: null,
-    focusedTriggerRole: null,
-    focusedTriggerOverlayId: null,
-    isTriggerOverlayOpen: false,
-    elementId: focusedId ?? undefined,
-    cursor: buildZoneCursor(zone),
-  };
+  const input = buildKeyboardInput(kernel, key);
 
   const result = resolveKeyboard(input);
 
