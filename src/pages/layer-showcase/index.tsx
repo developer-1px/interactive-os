@@ -2,18 +2,25 @@ import { Item, Zone } from "@os-react/internal";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Icon } from "@/components/Icon";
+import { DialogPattern } from "./patterns/DialogPattern";
+import { AlertDialogPattern } from "./patterns/AlertDialogPattern";
+import { MenuPattern } from "./patterns/MenuPattern";
+import { PopoverPattern } from "./patterns/PopoverPattern";
+import { ListboxDropdownPattern } from "./patterns/ListboxDropdownPattern";
+import { TooltipPattern } from "./patterns/TooltipPattern";
+import { NestedPattern } from "./patterns/NestedPattern";
 
 const PATTERNS: Record<
   string,
-  { name: string; component: React.FC | null }
+  { name: string; component: React.FC }
 > = {
-  dialog: { name: "Dialog", component: null },
-  alertdialog: { name: "AlertDialog", component: null },
-  menu: { name: "Menu", component: null },
-  popover: { name: "Popover", component: null },
-  "listbox-dropdown": { name: "Listbox Dropdown", component: null },
-  tooltip: { name: "Tooltip", component: null },
-  nested: { name: "Nested Overlay", component: null },
+  dialog: { name: "Dialog", component: DialogPattern },
+  alertdialog: { name: "AlertDialog", component: AlertDialogPattern },
+  menu: { name: "Menu", component: MenuPattern },
+  popover: { name: "Popover", component: PopoverPattern },
+  "listbox-dropdown": { name: "Listbox Dropdown", component: ListboxDropdownPattern },
+  tooltip: { name: "Tooltip", component: TooltipPattern },
+  nested: { name: "Nested Overlay", component: NestedPattern },
 };
 
 const DEFAULT_PATTERN = "dialog";
@@ -96,13 +103,7 @@ export default function LayerShowcasePage() {
 
         <main className="flex-1 overflow-auto p-8 flex justify-center items-start">
           <div className="max-w-4xl w-full">
-            {ActiveComponent ? (
-              <ActiveComponent />
-            ) : (
-              <div className="text-gray-400 text-sm">
-                Not implemented yet.
-              </div>
-            )}
+            {ActiveComponent && <ActiveComponent />}
           </div>
         </main>
       </div>
