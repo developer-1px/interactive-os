@@ -1,6 +1,6 @@
 # toolbar role preset: click inputmap 누락
 
-> Status: Open
+> Status: Closed (2026-03-07)
 > Priority: P2 (대안존재 — Space/Enter로 activate 가능)
 > 발견: backlog에서 이관
 
