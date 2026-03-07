@@ -24,24 +24,7 @@ Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (acc
 
 ## Now
 
-- [x] T8: button.apg.md — 20행 DT (18🟢, 2➖). Action+Toggle 양쪽 커버. 18 tests pass ✅
-- [x] T9: switch.apg.md — 17행 DT (14🟢, 3➖). 12 tests pass ✅
-- [x] T10: checkbox.apg.md — 12행 DT (7🟢, 1⬜, 4➖). 7 tests pass ✅
-- [x] T11: disclosure.apg.md — 20행 DT (18🟢, 2➖). Tab flow + independent expand. 19 tests pass ✅
-- [x] T12: radiogroup.apg.md — 22행 DT (18🟢, 4➖). followFocus + disallowEmpty + 4-axis arrow. 20 tests pass ✅
-- [x] T13: meter.apg.md — 14행 DT (9🟢, 5➖). Read-only meter, no value change on arrow. 9 tests pass ✅
-- [x] T14: tooltip.apg.md — 18행 DT (14🟢, 4➖). Toolbar context + data-focused visibility + Escape dismiss. 14 tests pass ✅
-- [x] T15: toolbar.apg.md — 18행 DT (14🟢, 4➖). Horizontal loop + Tab escape + Tabs variant. 12 tests pass ✅
-- [x] T16: menu.apg.md — 30행 DT (24🟢, 6➖). Menubar+Menu, checkbox/radio toggle, Escape+stack. 26 tests pass ✅
-- [x] T17: menu-button.apg.md — 26행 DT (20🟢, 6➖). Vertical menu + focus trap + Escape dismiss. 21 tests pass ✅
-- [x] T18: tree.apg.md — 33행 DT (28🟢, 5➖). Expand/collapse + multi-select + single-select negative. 31 tests pass ✅
-- [x] T19: treegrid.apg.md — 32행 DT (26🟢, 6➖). 2D hierarchical grid + expand/collapse + multi-select. 27 tests pass ✅
-- [x] T20: carousel.apg.md — 28행 DT (21🟢, 7➖). Tabbed variant + auto-activation + disallowEmpty. 26 tests pass ✅
-- [x] T21: feed.apg.md — 24행 DT (18🟢, 6➖). PageDown/Up + Ctrl+End/Home exit + Tab escape. 19 tests pass ✅
-- [x] T22: combobox.apg.md — 19행 DT (12🟢, 7➖). Popup nav + followFocus + Escape+stack restore. 9 tests pass ✅
-- [x] T23: dialog.apg.md — 15행 DT (9🟢, 6➖). Focus trap + Escape + nested LIFO restore. 6 tests pass ✅
-- [x] T24: dropdown-menu.apg.md — 13행 DT (8🟢, 5➖). Locale switcher menu proof. 8 tests pass ✅
-- [x] T25: navtree.apg.md — 16행 DT (12🟢, 4➖). Finder-like + followFocus + expand/collapse. 12 tests pass ✅
+(all tasks complete — ready for /audit)
 
 ## Done
 
@@ -52,6 +35,24 @@ Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (acc
 - [x] T5: tabs-manual.apg.md + tabs-manual.apg.test.ts — 17 tests (15 pass, 2 fail: I1+A5 OS gaps) + TabsManualApp isolation ✅
 - [x] T6: tabs.apg.test.ts 삭제 ✅
 - [x] T7: listbox.apg.md — 40행 DT (34🟢, 2⬜, 4➖). W3C Scrollable+Rearrangeable 양쪽 참조. 40 tests pass ✅
+- [x] T8: button.apg.md — 20행 DT (18🟢, 2➖). 18 tests pass ✅
+- [x] T9: switch.apg.md — 17행 DT (14🟢, 3➖). 12 tests pass ✅
+- [x] T10: checkbox.apg.md — 12행 DT (7🟢, 1⬜, 4➖). 7 tests pass ✅
+- [x] T11: disclosure.apg.md — 20행 DT (18🟢, 2➖). 19 tests pass ✅
+- [x] T12: radiogroup.apg.md — 22행 DT (18🟢, 4➖). 20 tests pass ✅
+- [x] T13: meter.apg.md — 14행 DT (9🟢, 5➖). 9 tests pass ✅
+- [x] T14: tooltip.apg.md — 18행 DT (14🟢, 4➖). 14 tests pass ✅
+- [x] T15: toolbar.apg.md — 18행 DT (14🟢, 4➖). 12 tests pass ✅
+- [x] T16: menu.apg.md — 30행 DT (24🟢, 6➖). 26 tests pass ✅
+- [x] T17: menu-button.apg.md — 26행 DT (20🟢, 6➖). 21 tests pass ✅
+- [x] T18: tree.apg.md — 33행 DT (28🟢, 5➖). 31 tests pass ✅
+- [x] T19: treegrid.apg.md — 32행 DT (26🟢, 6➖). 27 tests pass ✅
+- [x] T20: carousel.apg.md — 28행 DT (21🟢, 7➖). 26 tests pass ✅
+- [x] T21: feed.apg.md — 24행 DT (18🟢, 6➖). 19 tests pass ✅
+- [x] T22: combobox.apg.md — 19행 DT (12🟢, 7➖). 9 tests pass ✅
+- [x] T23: dialog.apg.md — 15행 DT (9🟢, 6➖). 6 tests pass ✅
+- [x] T24: dropdown-menu.apg.md — 13행 DT (8🟢, 5➖). 8 tests pass ✅
+- [x] T25: navtree.apg.md — 16행 DT (12🟢, 4➖). 12 tests pass ✅
 
 ## Unresolved
 
