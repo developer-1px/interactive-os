@@ -61,7 +61,7 @@ const PATTERNS: Record<
   grid: { name: "Grid", component: GridPattern, status: "none" },
   landmarks: { name: "Landmarks", component: LandmarksPattern, status: "none" },
   link: { name: "Link", component: LinkPattern, status: "none" },
-  listbox: { name: "Listbox", component: ListboxPattern, status: "test" },
+  listbox: { name: "Listbox", component: ListboxPattern, status: "dt" },
   menu: { name: "Menu", component: MenuPattern, status: "test" },
   "menu-button": { name: "Menu Button", component: MenuButtonPattern, status: "test" },
   meter: { name: "Meter", component: MeterPattern, status: "test" },
