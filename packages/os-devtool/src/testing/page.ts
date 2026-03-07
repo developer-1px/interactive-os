@@ -17,16 +17,11 @@ import {
 } from "@os-core/3-inject/compute";
 import type { ItemAttrs } from "@os-core/3-inject/headless.types";
 import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
-import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
+import { initialAppState, os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { ensureZone } from "@os-core/schema/state/utils";
-import {
-  DEFAULT_CONFIG,
-  type FocusGroupConfig,
-} from "@os-core/schema/types/focus/config/FocusGroupConfig";
-import { produce } from "immer";
+import { DEFAULT_CONFIG } from "@os-core/schema/types/focus/config/FocusGroupConfig";
 import { createElement, type FC } from "react";
 import { renderToString } from "react-dom/server";
 import { simulateClick, simulateKeyPress } from "./simulate";
@@ -35,7 +30,6 @@ import { simulateClick, simulateKeyPress } from "./simulate";
 import "@os-core/2-resolve/osDefaults";
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import type {
   AppPageInternal,
@@ -151,7 +145,7 @@ export function createAppPage<S>(
   });
 
   // Override browser-only effects for headless (no navigator.clipboard)
-  os.defineEffect("clipboardWrite", () => {});
+  os.defineEffect("clipboardWrite", () => { });
 
   // ── Enter preview sandbox ──
   os.enterPreview({
@@ -171,27 +165,14 @@ export function createAppPage<S>(
     // Not in vitest or registration failed — silent fallback
   }
 
-  // ── goto ──
-  function goto(
-    zoneName: string,
-    opts?: {
-      focusedItemId?: string | null;
-      config?: Partial<FocusGroupConfig>;
-      role?: ZoneRole;
-      initial?: { selection?: string[]; expanded?: string[] };
-      items?: string[];
-      expandableItems?: Set<string>;
-      treeLevels?: Map<string, number>;
-    },
-  ) {
-    // Use zoneName directly — matches FocusGroup's id in React.
-    // Preview sandbox is isolated per-app, so prefix is unnecessary.
-
-    // Register zone in ZoneRegistry with app callbacks
-    const bindingEntry = zoneBindingEntries.get(zoneName);
-    if (bindingEntry) {
+  // ── goto (Playwright-compatible: URL-based, no state seeding) ──
+  function goto(_url: string) {
+    // Register ALL zones from app bindings (equivalent to browser mount).
+    // In the browser, each <Zone> component calls ZoneRegistry.register()
+    // during render. Headless mirrors this by iterating all declared bindings.
+    for (const [zoneName, bindingEntry] of zoneBindingEntries) {
       const { bindings } = bindingEntry;
-      const overrides = { ...bindings.options, ...opts?.config } as ZoneOptions;
+      const overrides = { ...bindings.options } as ZoneOptions;
       const config = resolveRole(bindingEntry.role, overrides);
       ZoneRegistry.register(zoneName, {
         role: bindingEntry.role,
@@ -210,31 +191,23 @@ export function createAppPage<S>(
         ...(bindings.onRedo ? { onRedo: bindings.onRedo } : {}),
         ...(bindings.onSelect ? { onSelect: bindings.onSelect } : {}),
         ...(bindings.itemFilter ? { itemFilter: bindings.itemFilter } : {}),
-        ...(opts?.items
-          ? { getItems: () => opts.items! }
-          : bindings.getItems
-            ? { getItems: bindings.getItems }
-            : {}),
-        ...(opts?.expandableItems
-          ? { getExpandableItems: () => opts.expandableItems! }
-          : bindings.getExpandableItems
-            ? { getExpandableItems: bindings.getExpandableItems }
-            : {}),
-        ...(opts?.treeLevels
-          ? { getTreeLevels: () => opts.treeLevels! }
-          : bindings.getTreeLevels
-            ? { getTreeLevels: bindings.getTreeLevels }
-            : {}),
+        ...(bindings.getItems
+          ? { getItems: bindings.getItems }
+          : {}),
+        ...(bindings.getExpandableItems
+          ? { getExpandableItems: bindings.getExpandableItems }
+          : {}),
+        ...(bindings.getTreeLevels
+          ? { getTreeLevels: bindings.getTreeLevels }
+          : {}),
       });
 
       // Push model: auto-register item-level callbacks from triggers
-      // (replaces FocusItem useLayoutEffect pull model for headless)
       if (bindingEntry.triggers) {
         for (const trigger of bindingEntry.triggers) {
           ZoneRegistry.setItemCallback(zoneName, trigger.id, {
             onActivate: trigger.onActivate,
           });
-          // Register trigger→overlay relationship for headless ARIA
           if (trigger.overlay) {
             TriggerOverlayRegistry.set(
               trigger.id,
@@ -244,120 +217,52 @@ export function createAppPage<S>(
           }
         }
       }
-    } else if (opts?.role) {
-      // Fallback: unbound zones (e.g., createTrigger overlays) — register from opts
-      const config = resolveRole(opts.role, opts.config ?? {});
-      ZoneRegistry.register(zoneName, {
-        role: opts.role,
-        config,
-        element: null,
-        parentId: null,
-        ...(opts.items ? { getItems: () => opts.items! } : {}),
-        ...(opts.expandableItems
-          ? { getExpandableItems: () => opts.expandableItems! }
-          : {}),
-        ...(opts.treeLevels ? { getTreeLevels: () => opts.treeLevels! } : {}),
-      });
-    }
 
-    // Register zone keybindings in the global Keybindings registry
-    // (mirrors what FocusGroup.tsx does at mount time in the browser)
-    if (unregisterKeybindings) unregisterKeybindings();
-    const keybindings = bindingEntry?.keybindings ?? [];
-    if (keybindings.length > 0) {
-      unregisterKeybindings = Keybindings.registerAll(
-        keybindings.map((kb) => ({
-          key: kb.key,
-          command: kb.command,
-          when: "navigating" as const,
-        })),
-      );
-    }
+      // Register zone keybindings
+      const keybindings = bindingEntry.keybindings ?? [];
+      if (keybindings.length > 0) {
+        // Accumulate all zone keybindings (not just last zone)
+        const unreg = Keybindings.registerAll(
+          keybindings.map((kb) => ({
+            key: kb.key,
+            command: kb.command,
+            when: "navigating" as const,
+          })),
+        );
+        // Chain unregister callbacks
+        const prev = unregisterKeybindings;
+        unregisterKeybindings = () => {
+          unreg();
+          prev?.();
+        };
+      }
 
-    // Register field in FieldRegistry (mirrors what Field.tsx does at mount time)
-    const field = bindingEntry?.field;
-    if (field?.fieldName) {
-      FieldRegistry.register(field.fieldName, {
-        name: field.fieldName,
-        ...(field.onCommit !== undefined ? { onCommit: field.onCommit } : {}),
-        ...(field.trigger !== undefined ? { trigger: field.trigger } : {}),
-        ...(field.schema !== undefined ? { schema: field.schema } : {}),
-        ...(field.resetOnSubmit !== undefined
-          ? { resetOnSubmit: field.resetOnSubmit }
-          : {}),
-        mode: "immediate",
-        fieldType: "inline",
-      });
-      // Store fieldId on ZoneEntry for headless field detection
-      const zoneEntry = ZoneRegistry.get(zoneName);
-      if (zoneEntry) {
-        zoneEntry.fieldId = field.fieldName;
+      // Register field in FieldRegistry
+      const field = bindingEntry.field;
+      if (field?.fieldName) {
+        FieldRegistry.register(field.fieldName, {
+          name: field.fieldName,
+          ...(field.onCommit !== undefined ? { onCommit: field.onCommit } : {}),
+          ...(field.trigger !== undefined ? { trigger: field.trigger } : {}),
+          ...(field.schema !== undefined ? { schema: field.schema } : {}),
+          ...(field.resetOnSubmit !== undefined
+            ? { resetOnSubmit: field.resetOnSubmit }
+            : {}),
+          mode: "immediate",
+          fieldType: "inline",
+        });
+        const zoneEntry = ZoneRegistry.get(zoneName);
+        if (zoneEntry) {
+          zoneEntry.fieldId = field.fieldName;
+        }
       }
     }
 
-    // Set active zone + focused item via setState on preview layer
-    const focusedId = opts?.focusedItemId ?? null;
-
-    // Resolve zone config for initial state logic
-    const zoneEntry = ZoneRegistry.get(zoneName);
-    const zoneConfig = zoneEntry?.config;
-    const items = zoneEntry?.getItems?.() ?? [];
-
-    // Determine initial selection:
-    // (1) explicit initial.selection, (2) followFocus, (3) disallowEmpty fallback
-    let initialSelection: string[] | undefined;
-    if (opts?.initial?.selection) {
-      initialSelection = opts.initial.selection;
-    } else if (focusedId && zoneConfig?.select?.followFocus) {
-      initialSelection = [focusedId];
-    } else if (zoneConfig?.select?.disallowEmpty && items.length > 0) {
-      initialSelection = [items[0]!];
+    // Render component tree to simulate browser mount (optional projection)
+    if (Component) {
+      renderHtml();
     }
 
-    os.setState((s: AppState) =>
-      produce(s, (draft) => {
-        draft.os.focus.activeZoneId = zoneName;
-        const z = ensureZone(draft.os, zoneName);
-        z.focusedItemId = focusedId;
-        if (focusedId) z.lastFocusedId = focusedId;
-
-        // Apply initial selection
-        if (initialSelection) {
-          const selectMode = zoneConfig?.select?.mode ?? "none";
-          const inputmapValues = zoneConfig?.inputmap
-            ? Object.values(zoneConfig.inputmap)
-            : [];
-          const hasCheckCmd = inputmapValues.some((cmds: unknown[]) =>
-            cmds.some(
-              (c: unknown) => (c as { type: string }).type === "OS_CHECK",
-            ),
-          );
-          for (const id of initialSelection) {
-            if (!z.items[id]) z.items[id] = {};
-            if (hasCheckCmd) {
-              z.items[id] = { ...z.items[id], "aria-checked": true };
-            }
-            if (selectMode !== "none") {
-              z.items[id] = { ...z.items[id], "aria-selected": true };
-            }
-          }
-          z.selectionAnchor = initialSelection[0] ?? null;
-        }
-
-        // Apply initial expanded state
-        if (opts?.initial?.expanded) {
-          for (const id of opts.initial.expanded) {
-            if (!z.items[id]) z.items[id] = {};
-            z.items[id] = { ...z.items[id], "aria-expanded": true };
-          }
-        }
-
-        // Apply initial value (meter, spinbutton, slider)
-        if (zoneConfig?.value?.initial) {
-          z.valueNow = { ...zoneConfig.value.initial };
-        }
-      }),
-    );
     invalidateCache();
   }
 
@@ -506,7 +411,12 @@ export function createAppPage<S>(
           return resolveElement(os, elementId);
         },
         getAttribute(name: string) {
-          return resolveElement(os, elementId)[name];
+          const val = resolveElement(os, elementId)[name];
+          // Playwright returns string | null. Coerce boolean to string for compatibility.
+          if (val === true) return "true";
+          if (val === false) return "false";
+          if (val === undefined || val === null) return null;
+          return String(val);
         },
         click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }) {
           const mods = opts?.modifiers ?? [];
@@ -530,6 +440,37 @@ export function createAppPage<S>(
         },
         inputValue() {
           return String(FieldRegistry.getValue(elementId) ?? "");
+        },
+
+        // ── Playwright expect() hooks ──
+        // These hooks allow expect(locator).toBeFocused() from expect.ts
+        // to work with this headless locator.
+        _toBeFocused(negated?: boolean) {
+          const focused = readFocusedItemId(os) === elementId;
+          const passed = negated ? !focused : focused;
+          if (!passed) {
+            const actual = readFocusedItemId(os);
+            throw new Error(
+              negated
+                ? `Expected #${elementId} NOT to be focused but it was`
+                : `Expected #${elementId} to be focused but focused is #${actual}`,
+            );
+          }
+        },
+        _toHaveAttribute(name: string, value: string | RegExp, negated?: boolean) {
+          const raw = resolveElement(os, elementId)[name];
+          // Coerce to string for Playwright compatibility
+          const actual = raw === true ? "true" : raw === false ? "false" : raw == null ? null : String(raw);
+          const expected = typeof value === "string" ? value : undefined;
+          const matches = actual === expected;
+          const passed = negated ? !matches : matches;
+          if (!passed) {
+            throw new Error(
+              negated
+                ? `Expected [${name}] NOT to be "${expected}" but it was`
+                : `Expected [${name}] to be "${expected}" but got "${actual}"`,
+            );
+          }
         },
       };
     },

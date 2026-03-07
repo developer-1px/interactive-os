@@ -12,7 +12,7 @@ export default defineConfig({
     ["json", { outputFile: "test-results/e2e-results.json" }],
   ],
   use: {
-    baseURL: "http://localhost:4444",
+    baseURL: "http://localhost:5555",
     trace: "on-first-retry",
     permissions: ["clipboard-read", "clipboard-write"],
   },
@@ -24,7 +24,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "npm run dev",
-    url: "http://localhost:4444",
+    url: "http://localhost:5555",
     reuseExistingServer: !process.env["CI"],
   },
 });

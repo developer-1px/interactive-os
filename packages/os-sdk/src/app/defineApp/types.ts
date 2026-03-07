@@ -53,9 +53,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-      state: S;
-      dispatch?: BaseCommand | BaseCommand[] | undefined;
-    }
+    state: S;
+    dispatch?: BaseCommand | BaseCommand[] | undefined;
+  }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -166,14 +166,14 @@ export interface BoundComponents<S> {
     id: string | number;
     className?: string;
     children?:
-      | ReactNode
-      | ((state: {
-          isFocused: boolean;
-          isSelected: boolean;
-          isExpanded: boolean;
-          isAnchor?: boolean;
-          valueNow?: number;
-        }) => ReactNode);
+    | ReactNode
+    | ((state: {
+      isFocused: boolean;
+      isSelected: boolean;
+      isExpanded: boolean;
+      isAnchor?: boolean;
+      valueNow?: number;
+    }) => ReactNode);
     asChild?: boolean;
   }> & {
     /** Passive projection of Item's visibility state — auto-manages role + aria-labelledby + hidden/mount */
@@ -244,21 +244,14 @@ export interface TestInstance<S> {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface AppPage<_S> {
-  /** Navigate to a zone (headless infra — not available in TestScript run()). Sets active zone + focused item. */
-  goto(
-    zoneName: string,
-    opts?: {
-      items?: string[];
-      focusedItemId?: string | null | undefined;
-      config?: Partial<
-        import("@os-core/schema/types/focus/config/FocusGroupConfig").FocusGroupConfig
-      >;
-      role?: ZoneRole;
-      initial?: { selection?: string[]; expanded?: string[] };
-      expandableItems?: Set<string>;
-      treeLevels?: Map<string, number>;
-    },
-  ): void;
+  /**
+   * Navigate to a URL — Playwright page.goto() isomorphic.
+   *
+   * Headless: registers all app zones from bindings and renders the
+   * component tree (renderToString). No internal state seeding.
+   * Playwright: delegates to native page.goto().
+   */
+  goto(url: string): void;
 
   /** Keyboard input — Playwright page.keyboard isomorphic. */
   keyboard: {
@@ -355,8 +348,8 @@ export interface AppHandle<S> {
     options?: { id?: string },
   ): React.FC<
     P extends void
-      ? { children: ReactNode; payload?: never }
-      : { children: ReactNode; payload: P }
+    ? { children: ReactNode; payload?: never }
+    : { children: ReactNode; payload: P }
   >;
   createTrigger(
     command: BaseCommand,

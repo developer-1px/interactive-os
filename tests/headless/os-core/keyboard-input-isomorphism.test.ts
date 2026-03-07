@@ -16,21 +16,22 @@ import { createPage } from "@os-devtool/testing/page";
 import { buildKeyboardInput } from "@os-devtool/testing/simulate";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import TodoPage from "../../../src/pages/TodoPage";
 
 type P = AppPageInternal<any>;
 let page: P;
 
 beforeEach(() => {
-    page = createPage(TodoApp);
+    page = createPage(TodoApp, TodoPage);
+    page.goto("/");
 });
 
 afterEach(() => {
     page.cleanup();
 });
 
-/** Helper: navigate to list zone and focus first item */
+/** Helper: focus first item in list zone */
 function setupListFocus() {
-    page.goto("list");
     page.locator("#todo_1").click();
 }
 

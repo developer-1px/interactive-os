@@ -289,6 +289,7 @@ export const ZoneRegistry = {
   /** Find which zone contains this item (searches all zones) */
   findZoneByItemId(itemId: string): string | null {
     for (const [zoneId, entry] of registry) {
+      if (entry.fieldId === itemId) return zoneId;
       const items = entry.getItems?.();
       if (items?.includes(itemId)) return zoneId;
     }

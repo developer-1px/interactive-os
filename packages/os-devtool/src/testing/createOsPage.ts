@@ -70,7 +70,7 @@ export interface GotoOptions {
 }
 
 export interface OsLocator {
-  getAttribute(name: string): string | number | boolean | undefined;
+  getAttribute(name: string): string | null;
   click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
   toHaveAttribute(name: string, value: string | boolean): boolean;
   toBeFocused(): boolean;
@@ -167,8 +167,8 @@ export interface ZoneOrderEntry {
   firstItemId: string | null;
   lastItemId: string | null;
   entry:
-    | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
-    | string;
+  | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
+  | string;
   selectedItemId: string | null;
   lastFocusedId: string | null;
 }
@@ -183,8 +183,8 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
   const basePage = createPage(dummyApp);
   const os = basePage.kernel;
 
-  os.defineEffect("focus", () => {});
-  os.defineEffect("scroll", () => {});
+  os.defineEffect("focus", () => { });
+  os.defineEffect("scroll", () => { });
   const mockItems = { current: [] as string[] };
   const mockRects = { current: new Map<string, DOMRect>() };
   const mockConfig = { current: { ...DEFAULT_CONFIG } as FocusGroupConfig };
@@ -482,55 +482,55 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
           ...opts.config,
           ...(opts.config.navigate
             ? {
-                navigate: {
-                  ...base.navigate,
-                  ...opts.config.navigate,
-                } as import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateConfig,
-              }
+              navigate: {
+                ...base.navigate,
+                ...opts.config.navigate,
+              } as import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateConfig,
+            }
             : {}),
           ...(opts.config.tab
             ? { tab: { ...base.tab, ...opts.config.tab } as Partial<TabConfig> }
             : {}),
           ...(opts.config.select
             ? {
-                select: {
-                  ...base.select,
-                  ...opts.config.select,
-                } as Partial<SelectConfig>,
-              }
+              select: {
+                ...base.select,
+                ...opts.config.select,
+              } as Partial<SelectConfig>,
+            }
             : {}),
           ...(opts.config.dismiss
             ? {
-                dismiss: {
-                  ...base.dismiss,
-                  ...opts.config.dismiss,
-                } as Partial<DismissConfig>,
-              }
+              dismiss: {
+                ...base.dismiss,
+                ...opts.config.dismiss,
+              } as Partial<DismissConfig>,
+            }
             : {}),
 
           ...(opts.config.expand
             ? {
-                expand: {
-                  ...base.expand,
-                  ...opts.config.expand,
-                },
-              }
+              expand: {
+                ...base.expand,
+                ...opts.config.expand,
+              },
+            }
             : {}),
           ...(opts.config.value
             ? {
-                value: {
-                  ...base.value,
-                  ...opts.config.value,
-                },
-              }
+              value: {
+                ...base.value,
+                ...opts.config.value,
+              },
+            }
             : {}),
           ...(opts.config.inputmap
             ? {
-                inputmap: {
-                  ...base.inputmap,
-                  ...opts.config.inputmap,
-                },
-              }
+              inputmap: {
+                ...base.inputmap,
+                ...opts.config.inputmap,
+              },
+            }
             : {}),
         } as FocusGroupConfig;
       }
@@ -545,22 +545,22 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         // Auto-provide getExpandableItems based on expand.mode
         ...(mockConfig.current.expand?.mode === "explicit"
           ? {
-              getExpandableItems: () =>
-                mockExpandableItems.current.size > 0
-                  ? mockExpandableItems.current
-                  : new Set(mockItems.current),
-            }
+            getExpandableItems: () =>
+              mockExpandableItems.current.size > 0
+                ? mockExpandableItems.current
+                : new Set(mockItems.current),
+          }
           : {}),
         ...(opts?.onAction ? { onAction: opts.onAction } : {}),
         ...(opts?.onCheck ? { onCheck: opts.onCheck } : {}),
         ...(opts?.onDelete ? { onDelete: opts.onDelete } : {}),
         ...(opts?.treeLevels
           ? {
-              getTreeLevels: () =>
-                new Map(
-                  Object.entries(opts.treeLevels!).map(([k, v]) => [k, v]),
-                ),
-            }
+            getTreeLevels: () =>
+              new Map(
+                Object.entries(opts.treeLevels!).map(([k, v]) => [k, v]),
+              ),
+          }
           : {}),
         ...(opts?.expandableItems
           ? { getExpandableItems: () => new Set(opts.expandableItems!) }
